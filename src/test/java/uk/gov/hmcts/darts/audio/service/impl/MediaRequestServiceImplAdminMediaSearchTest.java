@@ -104,10 +104,15 @@ class MediaRequestServiceImplAdminMediaSearchTest {
     @Test
     void transformedMediaIdNotExist() throws JsonProcessingException {
         Integer transformedMediaId = 1;
-        when(mockTransformedMediaRepository.findById(transformedMediaId))
-            .thenReturn(Optional.empty());
+        List<Integer> hearingIds = List.of();
+        OffsetDateTime startAt = OffsetDateTime.now();
+        OffsetDateTime endAt = OffsetDateTime.now();
 
-        List<AdminMediaSearchResponseItem> response = mediaRequestService.adminMediaSearch(transformedMediaId);
+        when(mockTransformedMediaRepository.findTransformMediaWithStartAndEndDateTimeRange(transformedMediaId,
+                                                                                           hearingIds, startAt, endAt))
+            .thenReturn(List.of());
+
+        List<AdminMediaSearchResponseItem> response = mediaRequestService.adminMediaSearch(transformedMediaId, hearingIds, startAt, endAt);
 
         String responseString = objectMapper.writeValueAsString(response);
         String expectedString = """
@@ -130,7 +135,6 @@ class MediaRequestServiceImplAdminMediaSearchTest {
         transformedMedia.setId(4);
         transformedMedia.setMediaRequest(mediaRequest);
 
-
         MediaEntity mediaEntity = new MediaEntity();
         mediaEntity.setId(5);
         mediaEntity.setChannel(6);
@@ -138,13 +142,17 @@ class MediaRequestServiceImplAdminMediaSearchTest {
         mediaEntity.setEnd(OffsetDateTime.of(2020, 10, 10, 11, 0, 0, 0, ZoneOffset.UTC));
         Integer transformedMediaId = 1;
 
-        when(mockTransformedMediaRepository.findById(transformedMediaId))
-            .thenReturn(Optional.of(transformedMedia));
+        List<Integer> hearingIds = List.of();
+        OffsetDateTime startAt = OffsetDateTime.now();
+        OffsetDateTime endAt = OffsetDateTime.now();
+
+        when(mockTransformedMediaRepository.findTransformMediaWithStartAndEndDateTimeRange(transformedMediaId, hearingIds, startAt, endAt))
+            .thenReturn(List.of(transformedMedia));
         when(mediaRepository.findAllByHearingId(hearing.getId()))
             .thenReturn(List.of(mediaEntity));
 
 
-        List<AdminMediaSearchResponseItem> response = mediaRequestService.adminMediaSearch(transformedMediaId);
+        List<AdminMediaSearchResponseItem> response = mediaRequestService.adminMediaSearch(transformedMediaId, hearingIds, startAt, endAt);
 
         String responseString = objectMapper.writeValueAsString(response);
         String expectedString = """
@@ -203,13 +211,17 @@ class MediaRequestServiceImplAdminMediaSearchTest {
 
         Integer transformedMediaId = 1;
 
-        when(mockTransformedMediaRepository.findById(transformedMediaId))
-            .thenReturn(Optional.of(transformedMedia));
+        List<Integer> hearingIds = List.of();
+        OffsetDateTime startAt = OffsetDateTime.now();
+        OffsetDateTime endAt = OffsetDateTime.now();
+
+        when(mockTransformedMediaRepository.findTransformMediaWithStartAndEndDateTimeRange(transformedMediaId, hearingIds, startAt, endAt))
+            .thenReturn(List.of(transformedMedia));
         when(mediaRepository.findAllByHearingId(hearing.getId()))
             .thenReturn(List.of(mediaEntity, mediaEntity2));
 
 
-        List<AdminMediaSearchResponseItem> response = mediaRequestService.adminMediaSearch(transformedMediaId);
+        List<AdminMediaSearchResponseItem> response = mediaRequestService.adminMediaSearch(transformedMediaId, hearingIds, startAt, endAt);
 
         String responseString = objectMapper.writeValueAsString(response);
         String expectedString = """

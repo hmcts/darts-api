@@ -10,6 +10,7 @@ import uk.gov.hmcts.darts.testutils.RepositoryBase;
 import uk.gov.hmcts.darts.testutils.stubs.MediaRequestStub;
 import uk.gov.hmcts.darts.testutils.stubs.TransformedMediaStub;
 
+import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Locale;
 
@@ -316,5 +317,108 @@ class TransformedMediaRepositoryTest extends RepositoryBase {
             .getCreatedBy().getCreatedDateTime(), generatedMediaEntities.get(1).getCreatedDateTime());
         Assertions.assertEquals(1, transformedMediaEntityList.size());
         Assertions.assertEquals(transformedMediaEntityFind.getId(), transformedMediaEntityList.get(0).getId());
+    }
+
+    @Test
+    void testFindTransformedMediaDateRangeWithTransformedIds() {
+        TransformedMediaEntity expectedMedia = generatedMediaEntities.get(0);
+
+        List<TransformedMediaEntity> transformedMediaEntityList
+            = transformedMediaRepository.findTransformMediaWithStartAndEndDateTimeRange(
+            generatedMediaEntities.get(0).getId(), null, null, null);
+        Assertions.assertEquals(1, transformedMediaEntityList.size());
+        Assertions.assertEquals(expectedMedia.getId(), transformedMediaEntityList.get(0).getId());
+    }
+
+    @Test
+    void testFindTransformedMediaDateRangeWithTransformedIdsAndHearingId() {
+        TransformedMediaEntity expectedMedia = generatedMediaEntities.get(0);
+        Integer hearingId = expectedMedia.getMediaRequest().getHearing().getId();
+
+        List<TransformedMediaEntity> transformedMediaEntityList
+            = transformedMediaRepository.findTransformMediaWithStartAndEndDateTimeRange(
+            generatedMediaEntities.get(0).getId(), List.of(hearingId), null, null);
+        Assertions.assertEquals(1, transformedMediaEntityList.size());
+        Assertions.assertEquals(expectedMedia.getId(), transformedMediaEntityList.get(0).getId());
+    }
+
+    @Test
+    void testFindTransformedMediaDateRangeWithTransformedIdsAndHearingIdAndStartDate() {
+        TransformedMediaEntity expectedMedia = generatedMediaEntities.get(0);
+        Integer hearingId = expectedMedia.getMediaRequest().getHearing().getId();
+        OffsetDateTime startTime = expectedMedia.getMediaRequest().getStartTime();
+
+        List<TransformedMediaEntity> transformedMediaEntityList
+            = transformedMediaRepository.findTransformMediaWithStartAndEndDateTimeRange(
+            generatedMediaEntities.get(0).getId(), List.of(hearingId), startTime, null);
+        Assertions.assertEquals(1, transformedMediaEntityList.size());
+        Assertions.assertEquals(expectedMedia.getId(), transformedMediaEntityList.get(0).getId());
+    }
+
+    @Test
+    void testFindTransformedMediaDateRangeWithTransformedIdsAndHearingIdAndStartDateAndEndDate() {
+        TransformedMediaEntity expectedMedia = generatedMediaEntities.get(0);
+        Integer hearingId = expectedMedia.getMediaRequest().getHearing().getId();
+        OffsetDateTime startTime = expectedMedia.getMediaRequest().getStartTime();
+        OffsetDateTime endTime = expectedMedia.getMediaRequest().getEndTime();
+
+        List<TransformedMediaEntity> transformedMediaEntityList
+            = transformedMediaRepository.findTransformMediaWithStartAndEndDateTimeRange(
+            generatedMediaEntities.get(0).getId(), List.of(hearingId), startTime, endTime);
+        Assertions.assertEquals(1, transformedMediaEntityList.size());
+        Assertions.assertEquals(expectedMedia.getId(), transformedMediaEntityList.get(0).getId());
+    }
+
+    @Test
+    void testFindTransformedMediaDateRangeWithStartDateAndEndDate() {
+        // get all records before record 10 based on the date
+        TransformedMediaEntity expectedMedia = generatedMediaEntities.get(10);
+
+        List<TransformedMediaEntity> transformedMediaEntityList
+            = transformedMediaRepository.findTransformMediaWithStartAndEndDateTimeRange(
+            null, null, expectedMedia.getStartTime(), expectedMedia.getEndTime());
+        Assertions.assertEquals(11, transformedMediaEntityList.size());
+
+        for (int results = 0; results < transformedMediaEntityList.size(); results++) {
+            Integer expectedId = generatedMediaEntities.get(results).getId();
+            Assertions.assertEquals(expectedId, transformedMediaEntityList.get(results).getId());
+        }
+    }
+
+    @Test
+    void testFindTransformedMediaDateRangeWithStartDate() {
+        TransformedMediaEntity expectedMedia = generatedMediaEntities.get(1);
+
+        List<TransformedMediaEntity> transformedMediaEntityList
+            = transformedMediaRepository.findTransformMediaWithStartAndEndDateTimeRange(
+            null, null, expectedMedia.getStartTime(), null);
+
+        Assertions.assertEquals(2, transformedMediaEntityList.size());
+        Assertions.assertEquals(generatedMediaEntities.get(0).getId(), transformedMediaEntityList.get(0).getId());
+        Assertions.assertEquals(expectedMedia.getId(), transformedMediaEntityList.get(1).getId());
+    }
+
+    @Test
+    void testFindTransformedMediaDateRangeWithStartDateAndEndDateAndHearingId() {
+        TransformedMediaEntity expectedMedia = generatedMediaEntities.get(10);
+
+        List<TransformedMediaEntity> transformedMediaEntityList
+            = transformedMediaRepository.findTransformMediaWithStartAndEndDateTimeRange(
+            null, List.of(expectedMedia.getMediaRequest().getHearing().getId()), expectedMedia.getStartTime(), expectedMedia.getEndTime());
+        Assertions.assertEquals(1, transformedMediaEntityList.size());
+        Assertions.assertEquals(expectedMedia.getId(), transformedMediaEntityList.get(0).getId());
+    }
+
+    @Test
+    void testFindTransformedMediaDateRangeWithMultipleHearingIds() {
+        TransformedMediaEntity expectedMedia = generatedMediaEntities.get(10);
+        TransformedMediaEntity expectedMedia1 = generatedMediaEntities.get(11);
+
+        List<TransformedMediaEntity> transformedMediaEntityList
+            = transformedMediaRepository.findTransformMediaWithStartAndEndDateTimeRange(
+            null, List.of(expectedMedia.getMediaRequest().getHearing().getId(), expectedMedia1.getMediaRequest().getHearing().getId()), null, null);
+        Assertions.assertEquals(2, transformedMediaEntityList.size());
+        Assertions.assertEquals(expectedMedia.getId(), transformedMediaEntityList.get(0).getId());
+        Assertions.assertEquals(expectedMedia1.getId(), transformedMediaEntityList.get(1).getId());
     }
 }

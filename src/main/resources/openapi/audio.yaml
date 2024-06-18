@@ -228,7 +228,30 @@ paths:
           schema:
             type: integer
           description: "Return media associated with this transformed_media_id."
-          required: true
+          required: false
+        - in: query
+          name: hearing_ids
+          schema:
+            type: array
+            items:
+              type: integer
+          description: "The hearing ids to search on"
+          required: false
+        - in: query
+          name: start_at
+          schema:
+            type: string
+            format: date-time
+          description: "The start date to search on"
+          required: false
+        - in: query
+          name: end_at
+          schema:
+            type: string
+            format: date-time
+          description: "The end date to search on"
+          required: false
+
       responses:
         '200':
           description: OK

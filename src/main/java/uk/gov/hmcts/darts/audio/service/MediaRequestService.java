@@ -17,6 +17,7 @@ import uk.gov.hmcts.darts.audiorequests.model.SearchTransformedMediaResponse;
 import uk.gov.hmcts.darts.common.entity.TransformedMediaEntity;
 
 import java.io.InputStream;
+import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -64,5 +65,6 @@ public interface MediaRequestService {
 
     MediaHideResponse adminHideOrShowMediaById(Integer mediaId, MediaHideRequest mediaHideRequest);
 
-    List<AdminMediaSearchResponseItem> adminMediaSearch(Integer transformedMediaId);
+    List<AdminMediaSearchResponseItem> adminMediaSearch(Integer transformedMediaId, List<Integer> hearingIds, OffsetDateTime startAt,
+                                                        OffsetDateTime endAt);
 }

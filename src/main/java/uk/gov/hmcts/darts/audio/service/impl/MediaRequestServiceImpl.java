@@ -500,19 +500,28 @@ public class MediaRequestServiceImpl implements MediaRequestService {
     }
 
     @Override
-    public List<AdminMediaSearchResponseItem> adminMediaSearch(Integer transformedMediaId) {
-        Optional<TransformedMediaEntity> transformedMediaOpt = transformedMediaRepository.findById(transformedMediaId);
-        if (transformedMediaOpt.isEmpty()) {
+    public List<AdminMediaSearchResponseItem> adminMediaSearch(Integer transformedMediaId, List<Integer> hearingIds, OffsetDateTime startAt,
+                                                               OffsetDateTime endAt) {
+        List<TransformedMediaEntity> mediaRequestEntities = transformedMediaRepository
+            .findTransformMediaWithStartAndEndDateTimeRange(transformedMediaId, hearingIds, startAt, endAt);
+        if (mediaRequestEntities.isEmpty()) {
             return new ArrayList<>();
         }
-        TransformedMediaEntity transformedMedia = transformedMediaOpt.get();
-        MediaRequestEntity mediaRequest = transformedMedia.getMediaRequest();
-        HearingEntity hearing = mediaRequest.getHearing();
-        List<MediaEntity> mediaList = mediaRepository.findAllByHearingId(hearing.getId());
-        //filter by media that overlap with request
-        List<MediaEntity> filteredMediaList = mediaList.stream().filter(mediaEntity -> mediaEntity.getStart().isBefore(mediaRequest.getEndTime())
-            && mediaEntity.getEnd().isAfter(mediaRequest.getStartTime())).toList();
-        return AdminMediaSearchResponseMapper.createResponseItemList(filteredMediaList, hearing);
+        List<AdminMediaSearchResponseItem> responseItems = new ArrayList<>();
+
+        for (TransformedMediaEntity transformedMedia : mediaRequestEntities) {
+            MediaRequestEntity mediaRequest = transformedMedia.getMediaRequest();
+
+            HearingEntity hearing = mediaRequest.getHearing();
+            List<MediaEntity> mediaList = mediaRepository.findAllByHearingId(hearing.getId());
+            //filter by media that overlap with request
+            List<MediaEntity> filteredMediaList = mediaList.stream().filter(mediaEntity -> mediaEntity.getStart().isBefore(mediaRequest.getEndTime())
+                && mediaEntity.getEnd().isAfter(mediaRequest.getStartTime())).toList();
+
+            responseItems.addAll(AdminMediaSearchResponseMapper.createResponseItemList(filteredMediaList, hearing));
+        }
+
+        return responseItems;
     }
 
     @Override

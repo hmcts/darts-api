@@ -86,4 +86,19 @@ public interface TransformedMediaRepository extends JpaRepository<TransformedMed
                                                       String requestedBy,
                                                       OffsetDateTime requestedAtFrom,
                                                       OffsetDateTime requestedAtTo);
+
+
+    @Query(value = """
+        SELECT tm
+            FROM TransformedMediaEntity tm
+            JOIN tm.mediaRequest media
+            JOIN media.hearing hearing
+        WHERE
+            (:transformedMediaId IS NULL OR (:transformedMediaId IS NOT NULL AND tm.id = :transformedMediaId))
+            AND (:hearingIds IS NULL OR (:hearingIds IS NOT NULL AND media.hearing.id in (:hearingIds)))
+            AND (cast(:endAt as TIMESTAMP) IS NULL OR (media.endTime <= :endAt))
+            AND (cast(:startAt as TIMESTAMP) IS NULL OR (media.startTime >= :startAt))
+           """)
+    List<TransformedMediaEntity> findTransformMediaWithStartAndEndDateTimeRange(Integer transformedMediaId, List<Integer> hearingIds, OffsetDateTime startAt,
+                                                                                OffsetDateTime endAt);
 }

@@ -1,6 +1,6 @@
 package uk.gov.hmcts.darts.audio.controller;
 
-import org.apache.commons.lang3.StringUtils;
+
 import org.junit.jupiter.api.Test;
 import org.skyscreamer.jsonassert.JSONAssert;
 import org.skyscreamer.jsonassert.JSONCompareMode;
@@ -23,7 +23,6 @@ import uk.gov.hmcts.darts.testutils.stubs.UserAccountStub;
 
 import java.time.OffsetDateTime;
 
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -46,41 +45,16 @@ class AudioControllerGetAdminMediasIntTest extends IntegrationBase {
     @Autowired
     TransformedMediaRepository transformedMediaRepository;
 
+    TransformedMediaEntity transformedMedia;
+
+    MediaEntity mediaEntity;
+
     @Test
-    void getMediaIsSuccessful() throws Exception {
+    void getMediaIsSuccessfulWithTransformedMediaId() throws Exception {
 
         // given
-        var user = superAdminUserStub.givenUserIsAuthorised(userIdentity);
-
-        var transformedMedia = createAndSaveTransformedMedia(
-            user,
-            "testOutputFileName",
-            AudioRequestOutputFormat.MP3,
-            1000);
-
-        HearingEntity hearing = transformedMedia.getMediaRequest().getHearing();
-        MediaEntity mediaEntity = dartsDatabase.createMediaEntity(hearing.getCourtroom().getCourthouse().getDisplayName(),
-                                                                  hearing.getCourtroom().getName(),
-                                                                  transformedMedia.getStartTime(),
-                                                                  transformedMedia.getEndTime(),
-                                                                  1);
-        hearing.addMedia(mediaEntity);
-
-        MediaEntity mediaEntityBefore = dartsDatabase.createMediaEntity(hearing.getCourtroom().getCourthouse().getDisplayName(),
-                                                                        hearing.getCourtroom().getName(),
-                                                                        transformedMedia.getStartTime().minusHours(1),
-                                                                        transformedMedia.getStartTime().minusSeconds(1),
-                                                                        1);
-        hearing.addMedia(mediaEntityBefore);
-
-        MediaEntity mediaEntityAfter = dartsDatabase.createMediaEntity(hearing.getCourtroom().getCourthouse().getDisplayName(),
-                                                                       hearing.getCourtroom().getName(),
-                                                                       transformedMedia.getEndTime().plusSeconds(1),
-                                                                       transformedMedia.getEndTime().plusHours(1),
-                                                                       1);
-        hearing.addMedia(mediaEntityAfter);
-
-        dartsDatabase.getHearingRepository().saveAndFlush(hearing);
+        transformedMedia = setupData();
+        mediaEntity = setupMedia(transformedMedia);
 
         // when
         MvcResult mvcResult = mockMvc.perform(get(ENDPOINT_URL)
@@ -90,33 +64,208 @@ class AudioControllerGetAdminMediasIntTest extends IntegrationBase {
 
         // then
         String actualJson = mvcResult.getResponse().getContentAsString();
-        String expectedJson = """
-            [
-               {
-                 "id": 1,
-                 "channel": 1,
-                 "start_at": "2023-06-26T13:00:00Z",
-                 "end_at": "2023-06-26T13:45:00Z",
-                 "hearing": {
-                   "id": 1,
-                   "hearing_date": "2023-06-10"
-                 },
-                 "courthouse": {
-                   "id": 4,
-                   "display_name": "NEWCASTLE"
-                 },
-                 "courtroom": {
-                   "id": 1,
-                   "display_name": "Int Test Courtroom 2"
-                 },
-                 "case": {
-                   "id": 1,
-                   "case_number": "2"
-                 }
-               }
-             ]
-              """;
+        String expectedJson = getExpectedJson(
+                                              mediaEntity.getId(),
+                                              transformedMedia.getMediaRequest().getHearing().getCourtroom().getCourthouse().getId(),
+                                              transformedMedia.getMediaRequest().getHearing().getCourtroom().getId(),
+                                              transformedMedia.getMediaRequest().getHearing().getCourtCase().getId(),
+                                              transformedMedia.getMediaRequest().getHearing().getId());
         JSONAssert.assertEquals(expectedJson, actualJson, JSONCompareMode.NON_EXTENSIBLE);
+    }
+
+    @Test
+    void getMediaIsSuccessfulNoParam() throws Exception {
+
+        // given
+        transformedMedia = setupData();
+        mediaEntity = setupMedia(transformedMedia);
+
+        // when
+        MvcResult mvcResult = mockMvc.perform(get(ENDPOINT_URL))
+            .andExpect(status().isOk())
+            .andReturn();
+
+        // then
+        String actualJson = mvcResult.getResponse().getContentAsString();
+        String expectedJson = getExpectedJson(mediaEntity.getId(),
+                                              transformedMedia.getMediaRequest().getHearing().getCourtroom().getCourthouse().getId(),
+                                              transformedMedia.getMediaRequest().getHearing().getCourtroom().getId(),
+                                              transformedMedia.getMediaRequest().getHearing().getCourtCase().getId(),
+                                              transformedMedia.getMediaRequest().getHearing().getId());
+        JSONAssert.assertEquals(expectedJson, actualJson, JSONCompareMode.NON_EXTENSIBLE);
+    }
+
+    @Test
+    void getMediaIsSuccessfulAllParameters() throws Exception {
+
+        transformedMedia = setupData();
+        mediaEntity = setupMedia(transformedMedia);
+
+        // when
+        MvcResult mvcResult = mockMvc.perform(get(ENDPOINT_URL)
+                                                  .queryParam("transformed_media_id", transformedMedia.getId().toString())
+                                                  .queryParam("hearing_ids", transformedMedia.getMediaRequest()
+                                                      .getHearing().getId() + "," + transformedMedia.getMediaRequest().getHearing().getId())
+                                                  .queryParam("start_at", transformedMedia.getStartTime().toString())
+                                                  .queryParam("end_at", transformedMedia.getEndTime().toString())
+            )
+            .andExpect(status().isOk())
+            .andReturn();
+
+        // then
+        String actualJson = mvcResult.getResponse().getContentAsString();
+        String expectedJson = getExpectedJson(mediaEntity.getId(),
+                                              transformedMedia.getMediaRequest().getHearing().getCourtroom().getCourthouse()
+                                                  .getId(),
+                                              transformedMedia.getMediaRequest().getHearing().getCourtroom().getId(),
+                                              transformedMedia.getMediaRequest().getHearing().getCourtCase().getId(),
+                                              transformedMedia.getMediaRequest().getHearing().getId());
+        JSONAssert.assertEquals(expectedJson, actualJson, JSONCompareMode.NON_EXTENSIBLE);
+    }
+
+    @Test
+    void getMediaIsSuccessfulWithHearingId() throws Exception {
+
+        // given
+        transformedMedia = setupData();
+        mediaEntity = setupMedia(transformedMedia);
+
+        // when
+        MvcResult mvcResult = mockMvc.perform(get(ENDPOINT_URL)
+                                                  .queryParam("hearing_ids",
+                                                              transformedMedia.getMediaRequest()
+                                                                  .getHearing().getId() + "," + transformedMedia.getMediaRequest()
+                                                                  .getHearing().getId())
+            )
+            .andExpect(status().isOk())
+            .andReturn();
+
+        // then
+        String actualJson = mvcResult.getResponse().getContentAsString();
+        String expectedJson = getExpectedJson(mediaEntity.getId(),
+                                              transformedMedia.getMediaRequest().getHearing().getCourtroom().getCourthouse().getId(),
+                                              transformedMedia.getMediaRequest().getHearing().getCourtroom().getId(),
+                                              transformedMedia.getMediaRequest().getHearing().getCourtCase().getId(),
+                                              transformedMedia.getMediaRequest().getHearing().getId());
+        JSONAssert.assertEquals(expectedJson, actualJson, JSONCompareMode.NON_EXTENSIBLE);
+    }
+
+    @Test
+    void getMediaIsSuccessfulWithTransformedMediaIdAndHearing() throws Exception {
+
+        // given
+        transformedMedia = setupData();
+        mediaEntity = setupMedia(transformedMedia);
+
+        // when
+        MvcResult mvcResult = mockMvc.perform(get(ENDPOINT_URL)
+                                                  .queryParam("transformed_media_id", transformedMedia.getId().toString())
+                                                  .queryParam("hearing_ids", transformedMedia.getMediaRequest()
+                                                      .getHearing().getId() + "," + transformedMedia.getMediaRequest().getHearing().getId())
+            )
+            .andExpect(status().isOk())
+            .andReturn();
+
+        // then
+        String actualJson = mvcResult.getResponse().getContentAsString();
+        String expectedJson = getExpectedJson(mediaEntity.getId(),
+                                              transformedMedia.getMediaRequest().getHearing().getCourtroom().getCourthouse().getId(),
+                                              transformedMedia.getMediaRequest().getHearing().getCourtroom().getId(),
+                                              transformedMedia.getMediaRequest().getHearing().getCourtCase().getId(),
+                                              transformedMedia.getMediaRequest().getHearing().getId());
+        JSONAssert.assertEquals(expectedJson, actualJson, JSONCompareMode.NON_EXTENSIBLE);
+    }
+
+    @Test
+    void getMediaIsSuccessfulWithTransformedMediaStartDate() throws Exception {
+
+        // given
+        transformedMedia = setupData();
+        mediaEntity = setupMedia(transformedMedia);
+
+        // when
+        MvcResult mvcResult = mockMvc.perform(get(ENDPOINT_URL)
+                                                  .queryParam("start_at", transformedMedia.getStartTime().toString())
+            )
+            .andExpect(status().isOk())
+            .andReturn();
+
+        // then
+        String actualJson = mvcResult.getResponse().getContentAsString();
+        String expectedJson = getExpectedJson(mediaEntity.getId(),
+                                              transformedMedia.getMediaRequest().getHearing().getCourtroom().getCourthouse().getId(),
+                                              transformedMedia.getMediaRequest().getHearing().getCourtroom().getId(),
+                                              transformedMedia.getMediaRequest().getHearing().getCourtCase().getId(),
+                                              transformedMedia.getMediaRequest().getHearing().getId());
+        JSONAssert.assertEquals(expectedJson, actualJson, JSONCompareMode.NON_EXTENSIBLE);
+    }
+
+    @Test
+    void getMediaIsSuccessfulWithTransformedMediaEndDate() throws Exception {
+
+        // given
+        transformedMedia = setupData();
+        mediaEntity = setupMedia(transformedMedia);
+
+        // when
+        MvcResult mvcResult = mockMvc.perform(get(ENDPOINT_URL)
+                                                  .queryParam("end_at", transformedMedia.getEndTime().toString())
+            )
+            .andExpect(status().isOk())
+            .andReturn();
+
+        // then
+        String actualJson = mvcResult.getResponse().getContentAsString();
+        String expectedJson = getExpectedJson(mediaEntity.getId(),
+                                              transformedMedia.getMediaRequest().getHearing().getCourtroom().getCourthouse().getId(),
+                                              transformedMedia.getMediaRequest().getHearing().getCourtroom().getId(),
+                                              transformedMedia.getMediaRequest().getHearing().getCourtCase().getId(),
+                                              transformedMedia.getMediaRequest().getHearing().getId());
+        JSONAssert.assertEquals(expectedJson, actualJson, JSONCompareMode.NON_EXTENSIBLE);
+    }
+
+    @Test
+    void getMediaIsSuccessfulWithTransformedMediaStartDateAndEndDate() throws Exception {
+
+        // given
+        transformedMedia = setupData();
+        mediaEntity = setupMedia(transformedMedia);
+
+        // when
+        MvcResult mvcResult = mockMvc.perform(get(ENDPOINT_URL)
+                                                  .queryParam("start_at", transformedMedia.getStartTime().toString())
+                                                  .queryParam("end_at", transformedMedia.getEndTime().toString())
+            )
+            .andExpect(status().isOk())
+            .andReturn();
+
+        // then
+        String actualJson = mvcResult.getResponse().getContentAsString();
+        String expectedJson = getExpectedJson(mediaEntity.getId(),
+                                              transformedMedia.getMediaRequest().getHearing().getCourtroom().getCourthouse().getId(),
+                                              transformedMedia.getMediaRequest().getHearing().getCourtroom().getId(),
+                                              transformedMedia.getMediaRequest().getHearing().getCourtCase().getId(),
+                                              transformedMedia.getMediaRequest().getHearing().getId());
+        JSONAssert.assertEquals(expectedJson, actualJson, JSONCompareMode.NON_EXTENSIBLE);
+    }
+
+    @Test
+    void getMediaIsSuccessfulWithTransformedMediaOutsideRange() throws Exception {
+
+        // given
+        transformedMedia = setupData();
+        mediaEntity = setupMedia(transformedMedia);
+
+        // when
+        MvcResult mvcResult = mockMvc.perform(get(ENDPOINT_URL)
+                                                  .queryParam("end_at", transformedMedia.getStartTime().toString())
+            )
+            .andExpect(status().isOk())
+            .andReturn();
+
+        // then
+        String actualJson = mvcResult.getResponse().getContentAsString();
+        JSONAssert.assertEquals("[]", actualJson, JSONCompareMode.NON_EXTENSIBLE);
     }
 
     @Test
@@ -142,25 +291,7 @@ class AudioControllerGetAdminMediasIntTest extends IntegrationBase {
     }
 
     @Test
-    void transformedMediaNotProvided() throws Exception {
-
-        // given
-        superAdminUserStub.givenUserIsAuthorised(userIdentity);
-
-        // when
-        MvcResult mvcResult = mockMvc.perform(get(ENDPOINT_URL)
-            )
-            .andExpect(status().isBadRequest())
-            .andReturn();
-
-        // then
-        String actualJson = mvcResult.getResponse().getContentAsString();
-        assertTrue(StringUtils.contains(actualJson, "Required request parameter 'transformed_media_id' for method parameter type Integer is not present"));
-    }
-
-    @Test
     void wrongPermissions() throws Exception {
-
         // given
         userAccountStub.givenUserIsAuthorisedJudge(userIdentity);
 
@@ -197,6 +328,78 @@ class AudioControllerGetAdminMediasIntTest extends IntegrationBase {
         transformedMediaEntity.setCreatedBy(user);
         transformedMediaEntity.setLastModifiedBy(user);
         return transformedMediaRepository.save(transformedMediaEntity);
+    }
+
+    private TransformedMediaEntity setupData() {
+        var user = superAdminUserStub.givenUserIsAuthorised(userIdentity);
+
+        return createAndSaveTransformedMedia(
+            user,
+            "testOutputFileName",
+            AudioRequestOutputFormat.MP3,
+            1000);
+    }
+
+    private MediaEntity setupMedia(TransformedMediaEntity transformedMedia) {
+        HearingEntity hearing = transformedMedia.getMediaRequest().getHearing();
+        MediaEntity mediaEntity = dartsDatabase.createMediaEntity(hearing.getCourtroom().getCourthouse().getDisplayName(),
+                                                                  hearing.getCourtroom().getName(),
+                                                                  transformedMedia.getStartTime(),
+                                                                  transformedMedia.getEndTime(),
+                                                                  1);
+        hearing.addMedia(mediaEntity);
+
+        MediaEntity mediaEntityBefore = dartsDatabase.createMediaEntity(hearing.getCourtroom().getCourthouse().getDisplayName(),
+                                                                        hearing.getCourtroom().getName(),
+                                                                        transformedMedia.getStartTime().minusHours(1),
+                                                                        transformedMedia.getStartTime().minusSeconds(1),
+                                                                        1);
+        hearing.addMedia(mediaEntityBefore);
+
+        MediaEntity mediaEntityAfter = dartsDatabase.createMediaEntity(hearing.getCourtroom().getCourthouse().getDisplayName(),
+                                                                       hearing.getCourtroom().getName(),
+                                                                       transformedMedia.getEndTime().plusSeconds(1),
+                                                                       transformedMedia.getEndTime().plusHours(1),
+                                                                       1);
+        hearing.addMedia(mediaEntityAfter);
+
+        dartsDatabase.getHearingRepository().saveAndFlush(hearing);
+
+        return mediaEntity;
+    }
+
+    private String getExpectedJson(Integer id, Integer courthouseId, Integer courtroomId, Integer caseId, Integer hearingId) {
+        return """
+            [
+               {
+                 "id": ${ID},
+                 "channel": 1,
+                 "start_at": "2023-06-26T13:00:00Z",
+                 "end_at": "2023-06-26T13:45:00Z",
+                 "hearing": {
+                   "id": ${HEARING_ID},
+                   "hearing_date": "2023-06-10"
+                 },
+                 "courthouse": {
+                   "id": ${COURTHOUSE_ID},
+                   "display_name": "NEWCASTLE"
+                 },
+                 "courtroom": {
+                   "id": ${COURTROOM_ID},
+                   "display_name": "Int Test Courtroom 2"
+                 },
+                 "case": {
+                   "id": ${CASE_ID},
+                   "case_number": "2"
+                 }
+               }
+             ]
+              """
+            .replace("${ID}", id.toString())
+            .replace("${COURTHOUSE_ID}", courthouseId.toString())
+            .replace("${COURTROOM_ID}", courtroomId.toString())
+            .replace("${CASE_ID}", caseId.toString())
+            .replace("${HEARING_ID}", hearingId.toString());
     }
 
 }
