@@ -21,6 +21,6 @@ public class HearingCaseDocument extends CreatedModifiedCaseDocument {
     private List<EventCaseDocument> events;
     private List<MediaRequestCaseDocument> mediaRequests;
     private List<MediaCaseDocument> medias;
-//    private List<TranscriptionEntity> transcriptions;
+//    private List<TranscriptionCaseDocument> transcriptions;
 //    private List<AnnotationEntity> annotations;
 }

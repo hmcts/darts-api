@@ -8,7 +8,7 @@ import java.util.List;
 
 @EqualsAndHashCode(callSuper = true)
 @Data
-public class MediaCaseDocument extends CreatedModifiedCaseDocument {
+public class TranscriptionCaseDocument extends CreatedModifiedCaseDocument {
 
     private final Integer id;
     private final String legacyObjectId;
