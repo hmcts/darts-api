@@ -2,23 +2,21 @@ package uk.gov.hmcts.darts.test.common.data;
 
 import lombok.experimental.UtilityClass;
 import uk.gov.hmcts.darts.common.entity.EventHandlerEntity;
-import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 
 import java.time.OffsetDateTime;
+
+import static uk.gov.hmcts.darts.test.common.data.UserAccountTestData.minimalUserAccount;
 
 @UtilityClass
 @SuppressWarnings({"HideUtilityClassConstructor"})
 public class EventHandlerTestData {
 
     public static EventHandlerEntity someMinimalEventHandler() {
-        var userAccountEntity = new UserAccountEntity();
-        userAccountEntity.setId(0);
-
         var entity = new EventHandlerEntity();
         entity.setType("some-type");
         entity.setEventName("some-desc");
         entity.setCreatedDateTime(OffsetDateTime.now());
-        entity.setCreatedBy(userAccountEntity);
+        entity.setCreatedBy(minimalUserAccount());
         entity.setActive(true);
         entity.setIsReportingRestriction(false);
 

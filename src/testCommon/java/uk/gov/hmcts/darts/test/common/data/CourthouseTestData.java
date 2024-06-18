@@ -2,6 +2,7 @@ package uk.gov.hmcts.darts.test.common.data;
 
 import lombok.experimental.UtilityClass;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
+import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 
 import static org.testcontainers.shaded.org.apache.commons.lang3.RandomStringUtils.random;
 
@@ -14,6 +15,11 @@ public class CourthouseTestData {
         var courtHouse = new CourthouseEntity();
         courtHouse.setCourthouseName("some-courthouse-" + postfix);
         courtHouse.setDisplayName("some-courthouse" + postfix);
+
+        UserAccountEntity defaultUser = new UserAccountEntity();
+        defaultUser.setId(0);
+        courtHouse.setLastModifiedBy(defaultUser);
+        courtHouse.setCreatedBy(defaultUser);
         return courtHouse;
     }
 

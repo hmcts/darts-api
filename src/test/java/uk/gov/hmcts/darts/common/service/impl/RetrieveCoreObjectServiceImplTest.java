@@ -9,6 +9,7 @@ import uk.gov.hmcts.darts.authorisation.api.AuthorisationApi;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
+import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.common.repository.CaseRepository;
 import uk.gov.hmcts.darts.common.repository.CourthouseRepository;
@@ -96,10 +97,13 @@ class RetrieveCoreObjectServiceImplTest {
         mockCourthouse();
         when(courtroomRepository.findByCourthouseNameAndCourtroomName(anyString(), anyString())).thenReturn(
             Optional.empty());
+        UserAccountEntity userAccount = new UserAccountEntity();
+        userAccount.setId(0);
 
         CourtroomEntity response = retrieveCoreObjectServiceImpl.retrieveOrCreateCourtroom(
             COURTHOUSE_1,
-            COURTROOM_1
+            COURTROOM_1,
+            userAccount
         );
 
         assertEquals(COURTROOM_1, response.getName());
@@ -113,9 +117,13 @@ class RetrieveCoreObjectServiceImplTest {
         when(courtroomRepository.findByCourthouseNameAndCourtroomName(anyString(), anyString())).thenReturn(
             Optional.of(courtroom));
 
+        UserAccountEntity userAccount = new UserAccountEntity();
+        userAccount.setId(0);
+
         CourtroomEntity response = retrieveCoreObjectServiceImpl.retrieveOrCreateCourtroom(
             COURTHOUSE_1,
-            COURTROOM_1
+            COURTROOM_1,
+            userAccount
         );
 
         assertEquals(COURTROOM_1, response.getName());

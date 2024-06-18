@@ -6,6 +6,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
+import uk.gov.hmcts.darts.audit.api.AuditApi;
 import uk.gov.hmcts.darts.authorisation.api.AuthorisationApi;
 import uk.gov.hmcts.darts.common.entity.RetentionPolicyTypeEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
@@ -64,6 +65,8 @@ class RetentionGetPolicyTypesServiceImplTest {
     private LivePolicyValidator livePolicyValidator;
     @Mock
     private PolicyHasNoPendingRevisionValidator policyHasNoPendingRevisionValidator;
+    @Mock
+    private AuditApi auditApi;
 
     private RetentionPolicyTypeServiceImpl retentionService;
 
@@ -79,7 +82,8 @@ class RetentionGetPolicyTypesServiceImplTest {
             policyDisplayNameIsUniqueValidator,
             policyStartDateIsFutureValidator,
             livePolicyValidator,
-            policyHasNoPendingRevisionValidator
+            policyHasNoPendingRevisionValidator,
+            auditApi
         );
 
         UserAccountEntity userAccount = new UserAccountEntity();

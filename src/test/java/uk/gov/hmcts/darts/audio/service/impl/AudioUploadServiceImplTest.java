@@ -18,6 +18,7 @@ import uk.gov.hmcts.darts.audio.model.AddAudioMetadataRequest;
 import uk.gov.hmcts.darts.audio.service.AudioOperationService;
 import uk.gov.hmcts.darts.audio.service.AudioTransformationService;
 import uk.gov.hmcts.darts.audio.service.AudioUploadService;
+import uk.gov.hmcts.darts.authorisation.api.AuthorisationApi;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
@@ -26,6 +27,7 @@ import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
 import uk.gov.hmcts.darts.common.entity.ObjectRecordStatusEntity;
+import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.common.repository.CourtLogEventRepository;
 import uk.gov.hmcts.darts.common.repository.ExternalLocationTypeRepository;
@@ -38,6 +40,7 @@ import uk.gov.hmcts.darts.common.service.RetrieveCoreObjectService;
 import uk.gov.hmcts.darts.common.util.FileContentChecksum;
 import uk.gov.hmcts.darts.datamanagement.api.DataManagementApi;
 import uk.gov.hmcts.darts.log.api.LogApi;
+import uk.gov.hmcts.darts.test.common.data.HearingTestData;
 
 import java.io.InputStream;
 import java.security.NoSuchAlgorithmException;
@@ -50,6 +53,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -103,6 +107,8 @@ class AudioUploadServiceImplTest {
     AudioBeingProcessedFromArchiveQuery audioBeingProcessedFromArchiveQuery;
     @Mock
     private LogApi logApi;
+    @Mock
+    private AuthorisationApi authorisationApi;
     private AudioUploadService audioService;
 
     @BeforeEach
@@ -123,7 +129,8 @@ class AudioUploadServiceImplTest {
             courtLogEventRepository,
             audioConfigurationProperties,
             logApi,
-            audioDigest);
+            audioDigest,
+            authorisationApi);
     }
 
     @Test
@@ -136,6 +143,10 @@ class AudioUploadServiceImplTest {
             throw new DartsApiException(FAILED_TO_UPLOAD_AUDIO_FILE, e);
         }
         when(audioDigest.getMessageDigest()).thenReturn(digest);
+
+        UserAccountEntity userAccount = new UserAccountEntity();
+        userAccount.setId(10);
+        when(authorisationApi.getCurrentUser()).thenReturn(userAccount);
 
         // Given
         HearingEntity hearingEntity = new HearingEntity();
@@ -150,7 +161,7 @@ class AudioUploadServiceImplTest {
         CourthouseEntity courthouse = new CourthouseEntity();
         courthouse.setCourthouseName("SWANSEA");
         CourtroomEntity courtroomEntity = new CourtroomEntity(1, "1", courthouse);
-        when(retrieveCoreObjectService.retrieveOrCreateCourtroom("SWANSEA", "1"))
+        when(retrieveCoreObjectService.retrieveOrCreateCourtroom(eq("SWANSEA"), eq("1"), any(UserAccountEntity.class)))
             .thenReturn(courtroomEntity);
 
         OffsetDateTime startedAt = OffsetDateTime.now().minusHours(1);
@@ -209,8 +220,12 @@ class AudioUploadServiceImplTest {
         CourthouseEntity courthouse = new CourthouseEntity();
         courthouse.setCourthouseName("SWANSEA");
         CourtroomEntity courtroomEntity = new CourtroomEntity(1, "1", courthouse);
-        when(retrieveCoreObjectService.retrieveOrCreateCourtroom("SWANSEA", "1"))
+        when(retrieveCoreObjectService.retrieveOrCreateCourtroom(eq("SWANSEA"), eq("1"), any(UserAccountEntity.class)))
             .thenReturn(courtroomEntity);
+
+        UserAccountEntity userAccount = new UserAccountEntity();
+        userAccount.setId(10);
+        when(authorisationApi.getCurrentUser()).thenReturn(userAccount);
 
         OffsetDateTime startedAt = OffsetDateTime.now().minusHours(1);
         OffsetDateTime endedAt = OffsetDateTime.now();
@@ -343,16 +358,66 @@ class AudioUploadServiceImplTest {
         AddAudioMetadataRequest addAudioMetadataRequest = createAddAudioRequest(STARTED_AT, ENDED_AT);
         MediaEntity mediaEntity = createMediaEntity(STARTED_AT, ENDED_AT);
 
-        HearingEntity hearing = new HearingEntity();
+        HearingEntity hearing1 = HearingTestData.createSomeMinimalHearing();
         when(retrieveCoreObjectService.retrieveOrCreateHearing(
             anyString(),
             anyString(),
-            anyString(),
+            eq("1"),
             any(),
             any()
-        )).thenReturn(hearing);
+        )).thenReturn(hearing1);
+
+        HearingEntity hearing2 = HearingTestData.createSomeMinimalHearing();
+        when(retrieveCoreObjectService.retrieveOrCreateHearing(
+            anyString(),
+            anyString(),
+            eq("2"),
+            any(),
+            any()
+        )).thenReturn(hearing2);
+
+        HearingEntity hearing3 = HearingTestData.createSomeMinimalHearing();
+        when(retrieveCoreObjectService.retrieveOrCreateHearing(
+            anyString(),
+            anyString(),
+            eq("3"),
+            any(),
+            any()
+        )).thenReturn(hearing3);
         audioService.linkAudioToHearingInMetadata(addAudioMetadataRequest, null, mediaEntity);
         verify(hearingRepository, times(3)).saveAndFlush(any());
-        assertEquals(3, hearing.getMediaList().size());
+        assertEquals(1, hearing1.getMediaList().size());
+        assertEquals(1, hearing2.getMediaList().size());
+        assertEquals(1, hearing3.getMediaList().size());
+    }
+
+    @Test
+    void linkAudioAndHearingDuplicateCases() {
+        AddAudioMetadataRequest addAudioMetadataRequest = createAddAudioRequest(STARTED_AT, ENDED_AT);
+        addAudioMetadataRequest.setCases(List.of("1", "2", "1"));
+        MediaEntity mediaEntity = createMediaEntity(STARTED_AT, ENDED_AT);
+
+        HearingEntity hearing1 = HearingTestData.createSomeMinimalHearing();
+        when(retrieveCoreObjectService.retrieveOrCreateHearing(
+            anyString(),
+            anyString(),
+            eq("1"),
+            any(),
+            any()
+        )).thenReturn(hearing1);
+
+        HearingEntity hearing2 = HearingTestData.createSomeMinimalHearing();
+        when(retrieveCoreObjectService.retrieveOrCreateHearing(
+            anyString(),
+            anyString(),
+            eq("2"),
+            any(),
+            any()
+        )).thenReturn(hearing2);
+
+        audioService.linkAudioToHearingInMetadata(addAudioMetadataRequest, null, mediaEntity);
+        verify(hearingRepository, times(2)).saveAndFlush(any());
+        assertEquals(1, hearing1.getMediaList().size());
+        assertEquals(1, hearing2.getMediaList().size());
     }
 }

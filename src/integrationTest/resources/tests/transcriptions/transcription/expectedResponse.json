@@ -23,5 +23,7 @@
       "transcription_urgency_id": 1,
       "description": "Standard",
       "priority_order": 999
-  }
+  },
+  "courtroom":"some-courtroom",
+  "transcription_object_id":"legacyObjectId"
 }
