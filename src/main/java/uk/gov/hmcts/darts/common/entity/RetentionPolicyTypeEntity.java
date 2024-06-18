@@ -9,6 +9,9 @@ import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.envers.AuditTable;
+import org.hibernate.envers.Audited;
+import org.hibernate.envers.NotAudited;
 import uk.gov.hmcts.darts.common.entity.base.CreatedModifiedBaseEntity;
 
 import java.time.OffsetDateTime;
@@ -17,6 +20,8 @@ import java.time.OffsetDateTime;
 @Table(name = RetentionPolicyTypeEntity.TABLE_NAME)
 @Getter
 @Setter
+@Audited
+@AuditTable("retention_policy_type_aud")
 public class RetentionPolicyTypeEntity extends CreatedModifiedBaseEntity {
     public static final String ID = "rpt_id";
     public static final String TABLE_NAME = "retention_policy_type";
@@ -48,6 +53,7 @@ public class RetentionPolicyTypeEntity extends CreatedModifiedBaseEntity {
     @Column(name = "description", nullable = false)
     private String description;
 
+    @NotAudited
     @Column(name = "retention_policy_object_id")
     private String retentionPolicyObjectId;
 }
