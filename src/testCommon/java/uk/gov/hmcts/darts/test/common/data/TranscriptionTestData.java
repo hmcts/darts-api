@@ -1,7 +1,6 @@
 package uk.gov.hmcts.darts.test.common.data;
 
 import lombok.experimental.UtilityClass;
-import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionStatusEntity;
@@ -37,12 +36,6 @@ public class TranscriptionTestData {
         transcription.addHearing(hearingEntity);
         transcription.setCourtCases(List.of(hearingEntity.getCourtCase()));
         return transcription;
-    }
-
-    public static TranscriptionEntity someTranscriptionForCase(CourtCaseEntity courtCaseEntity) {
-        var someTranscription = minimalTranscription();
-        someTranscription.addCase(courtCaseEntity);
-        return someTranscription;
     }
 
     public static TranscriptionTypeEntity someTranscriptionType() {
