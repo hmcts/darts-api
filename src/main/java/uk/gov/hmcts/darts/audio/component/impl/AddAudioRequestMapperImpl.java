@@ -7,6 +7,7 @@ import uk.gov.hmcts.darts.audio.model.AddAudioMetadataRequest;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
+import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.service.RetrieveCoreObjectService;
 
 import static uk.gov.hmcts.darts.common.entity.MediaEntity.MEDIA_TYPE_DEFAULT;
@@ -19,7 +20,7 @@ public class AddAudioRequestMapperImpl implements AddAudioRequestMapper {
     private final UserIdentity userIdentity;
 
     @Override
-    public MediaEntity mapToMedia(AddAudioMetadataRequest addAudioMetadataRequest) {
+    public MediaEntity mapToMedia(AddAudioMetadataRequest addAudioMetadataRequest, UserAccountEntity userAccount) {
         MediaEntity media = new MediaEntity();
         media.setStart(addAudioMetadataRequest.getStartedAt());
         media.setEnd(addAudioMetadataRequest.getEndedAt());
@@ -27,7 +28,8 @@ public class AddAudioRequestMapperImpl implements AddAudioRequestMapper {
         media.setTotalChannels(addAudioMetadataRequest.getTotalChannels());
         CourtroomEntity foundCourtroom = retrieveCoreObjectService.retrieveOrCreateCourtroom(
             addAudioMetadataRequest.getCourthouse(),
-            addAudioMetadataRequest.getCourtroom()
+            addAudioMetadataRequest.getCourtroom(),
+            userAccount
         );
         media.setCourtroom(foundCourtroom);
         media.setCaseNumberList(addAudioMetadataRequest.getCases());
