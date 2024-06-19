@@ -279,6 +279,55 @@ paths:
               schema:
                 $ref: '#/components/schemas/AdminMediaResponse'
 
+  /admin/medias/{media_id}/hide:
+    post:
+      tags:
+        - Audio
+      summary: Hides or shows a Media
+      operationId: postAdminHideMediaId
+      parameters:
+        - name: media_id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MediaHideRequest'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MediaHideResponse'
+        '401':
+          description: Unauthorised Error
+        '403':
+          description: Forbidden Error
+          content:
+            application/json+problem:
+              schema:
+                allOf:
+                  - $ref: './problem.yaml'
+        '409':
+          description: Data conflicting
+          content:
+            application/json+problem:
+              schema:
+                allOf:
+                  - $ref: './problem.yaml'
+        '404':
+          description: Not Found Error
+          content:
+            application/json+problem:
+              schema:
+                allOf:
+                  - $ref: './problem.yaml'
+
 ########################################################################################################################
 # COMPONENT DEFINITIONS
 ########################################################################################################################
@@ -348,28 +397,6 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/AdminMediaHearingResponseItem'
-
-    AdminActionResponse:
-      type: object
-      properties:
-        id:
-          $ref: '#/components/schemas/AdminActionId'
-        reason_id:
-          $ref: '#/components/schemas/ReasonId'
-        hidden_by_id:
-          $ref: '#/components/schemas/HiddenById'
-        hidden_at:
-          $ref: '#/components/schemas/HiddenAt'
-        is_marked_for_manual_deletion:
-          $ref: '#/components/schemas/MarkedForManualDeletion'
-        marked_for_manual_deletion_by_id:
-          $ref: '#/components/schemas/MarkedForDeletionById'
-        marked_for_manual_deletion_at:
-          $ref: '#/components/schemas/MarkedForManualDeletionAt'
-        ticket_reference:
-          $ref: '#/components/schemas/TicketReference'
-        comments:
-          $ref: '#/components/schemas/Comments'
 
     AdminMediaCourthouseResponse:
       type: object
@@ -538,6 +565,78 @@ components:
         media_request_id:
           type: integer
 
+    MediaHideRequest:
+      type: object
+      properties:
+        is_hidden:
+          type: boolean
+          default: true
+        admin_action:
+          $ref: '#/components/schemas/AdminActionRequest'
+
+    AdminActionRequest:
+      type: object
+      required:
+        - reason_id
+        - ticket_reference
+        - comments
+      properties:
+        reason_id:
+          type: integer
+        ticket_reference:
+          type: string
+        comments:
+          type: string
+
+    MediaHideResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: 'The media id'
+        is_hidden:
+          type: boolean
+          description: 'The media hidden state'
+        is_deleted:
+          type: boolean
+          description: 'The media deleted state'
+        admin_action:
+          $ref: '#/components/schemas/AdminActionResponse'
+          description: 'The media admin action data when the request was made'
+
+    AdminActionResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: 'The admin action id'
+        reason_id:
+          type: integer
+          description: 'The admin action reason id'
+        hidden_by_id:
+          type: integer
+          description: 'The user that made the entity hidden'
+        hidden_at:
+          type: string
+          format: date-time
+          description: 'The date and time that made the entity hidden'
+        is_marked_for_manual_deletion:
+          type: boolean
+          description: 'The entity was manually marked for deletion'
+        marked_for_manual_deletion_by_id:
+          type: integer
+          description: 'The user that marked the entity for deletion'
+        marked_for_manual_deletion_at:
+          type: string
+          format: date-time
+          description: 'The date and time that the entity was marked for deletion'
+        ticket_reference:
+          type: string
+          description: 'The ticket reference for the admin action'
+        comments:
+          type: string
+          description: 'The comments for the admin action'
+
     ####################################################################################################################
     # PRIMITIVES
     ####################################################################################################################
@@ -698,8 +797,15 @@ components:
         - "AUDIO_107"
         - "AUDIO_108"
         - "AUDIO_109"
+        - "AUDIO_110"
+        - "AUDIO_111"
+        - "AUDIO_112"
+        - "AUDIO_113"
+        - "AUDIO_114"
       x-enum-varnames: [ FAILED_TO_PROCESS_AUDIO_REQUEST, REQUESTED_DATA_CANNOT_BE_LOCATED, MEDIA_NOT_FOUND, FAILED_TO_UPLOAD_AUDIO_FILE,
-                         MISSING_SYSTEM_USER, AUDIO_NOT_PROVIDED, UNEXPECTED_FILE_TYPE, FILE_DURATION_OUT_OF_BOUNDS, FILE_SIZE_OUT_OF_BOUNDS, ADMIN_SEARCH_CRITERIA_NOT_PROVIDED ]
+                         MISSING_SYSTEM_USER, AUDIO_NOT_PROVIDED, UNEXPECTED_FILE_TYPE, FILE_DURATION_OUT_OF_BOUNDS, FILE_SIZE_OUT_OF_BOUNDS,
+                         ADMIN_SEARCH_CRITERIA_NOT_PROVIDED,  MEDIA_ALREADY_HIDDEN, MEDIA_HIDE_ACTION_PAYLOAD_INCORRECT_USAGE,
+                         MEDIA_SHOW_ACTION_PAYLOAD_INCORRECT_USAGE, MEDIA_HIDE_ACTION_REASON_NOT_FOUND, MEDIA_HIDE_ACTION_REASON_MARKED_FOR_DELETION ]
 
     AddAudioTitleErrors:
       type: string
@@ -714,6 +820,13 @@ components:
         - "The duration of the audio exceeds maximum threshold"
         - "The audio metadata size exceeds maximum threshold"
         - "Required request parameter 'transformed_media_id' for method parameter type Integer is not present"
+        - "Media is already hidden"
+        - "Hide media action payload not correct"
+        - "Showing media action payload not correct"
+        - "Hide reason is incorrect"
+        - "Reason has been marked for deletion"
       x-enum-varnames: [ FAILED_TO_PROCESS_AUDIO_REQUEST, REQUESTED_DATA_CANNOT_BE_LOCATED,  MEDIA_NOT_FOUND,
                          FAILED_TO_UPLOAD_AUDIO_FILE, MISSING_SYSTEM_USER, AUDIO_NOT_PROVIDED, UNEXPECTED_FILE_TYPE,
-                         FILE_DURATION_OUT_OF_BOUNDS, FILE_SIZE_OUT_OF_BOUNDS, ADMIN_SEARCH_CRITERIA_NOT_PROVIDED ]
+                         FILE_DURATION_OUT_OF_BOUNDS, FILE_SIZE_OUT_OF_BOUNDS, ADMIN_SEARCH_CRITERIA_NOT_PROVIDED, MEDIA_ALREADY_HIDDEN,
+                         MEDIA_HIDE_ACTION_PAYLOAD_INCORRECT_USAGE, MEDIA_SHOW_ACTION_PAYLOAD_INCORRECT_USAGE,
+                         MEDIA_HIDE_ACTION_REASON_NOT_FOUND, MEDIA_HIDE_ACTION_REASON_MARKED_FOR_DELETION]

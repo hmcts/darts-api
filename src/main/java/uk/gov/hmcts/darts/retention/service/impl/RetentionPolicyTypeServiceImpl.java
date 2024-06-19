@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import uk.gov.hmcts.darts.audit.api.AuditApi;
 import uk.gov.hmcts.darts.authorisation.api.AuthorisationApi;
 import uk.gov.hmcts.darts.common.entity.RetentionPolicyTypeEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
@@ -27,6 +28,9 @@ import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Optional;
 
+import static uk.gov.hmcts.darts.audit.api.AuditActivity.CREATE_RETENTION_POLICY;
+import static uk.gov.hmcts.darts.audit.api.AuditActivity.REVISE_RETENTION_POLICY;
+import static uk.gov.hmcts.darts.retention.auditing.RetentionPolicyUpdateAuditActivityProvider.auditActivitiesFor;
 import static uk.gov.hmcts.darts.retention.exception.RetentionApiError.RETENTION_POLICY_TYPE_ID_NOT_FOUND;
 
 @Service
@@ -46,6 +50,7 @@ public class RetentionPolicyTypeServiceImpl implements RetentionPolicyTypeServic
     private final PolicyStartDateIsFutureValidator policyStartDateIsFutureValidator;
     private final LivePolicyValidator livePolicyValidator;
     private final PolicyHasNoPendingRevisionValidator policyHasNoPendingRevisionValidator;
+    private final AuditApi auditApi;
 
     @Override
     public List<RetentionPolicyType> getRetentionPolicyTypes() {
@@ -81,6 +86,8 @@ public class RetentionPolicyTypeServiceImpl implements RetentionPolicyTypeServic
                 .orElseThrow();
             priorPolicyEntity.setPolicyEnd(adminPostRetentionRequest.getPolicyStartAt());
             retentionPolicyTypeRepository.saveAndFlush(priorPolicyEntity);
+
+            auditApi.record(REVISE_RETENTION_POLICY);
         } else {
             createPolicyTypeValidator.validate(fixedPolicyKey);
         }
@@ -94,6 +101,8 @@ public class RetentionPolicyTypeServiceImpl implements RetentionPolicyTypeServic
 
         RetentionPolicyTypeEntity createdEntity = retentionPolicyTypeRepository.save(newPolicyEntity);
 
+        auditApi.record(CREATE_RETENTION_POLICY);
+
         return retentionPolicyTypeMapper.mapToModel(createdEntity);
     }
 
@@ -104,6 +113,8 @@ public class RetentionPolicyTypeServiceImpl implements RetentionPolicyTypeServic
             .orElseThrow(() -> new DartsApiException(RETENTION_POLICY_TYPE_ID_NOT_FOUND));
 
         livePolicyValidator.validate(targetEntity.getPolicyStart());
+
+        final var auditableActivities = auditActivitiesFor(targetEntity, adminPatchRetentionRequest);
 
         final String suppliedFixedPolicyKey = adminPatchRetentionRequest.getFixedPolicyKey();
         final String originalFixedPolicyKey = targetEntity.getFixedPolicyKey();
@@ -141,6 +152,9 @@ public class RetentionPolicyTypeServiceImpl implements RetentionPolicyTypeServic
         }
 
         RetentionPolicyTypeEntity updatedEntity = retentionPolicyTypeRepository.saveAndFlush(targetEntity);
+
+        auditApi.recordAll(auditableActivities);
+
         return retentionPolicyTypeMapper.mapToModel(updatedEntity);
     }
 

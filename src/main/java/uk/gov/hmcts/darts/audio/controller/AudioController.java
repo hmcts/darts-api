@@ -19,6 +19,8 @@ import uk.gov.hmcts.darts.audio.model.AdminMediaSearchResponseItem;
 import uk.gov.hmcts.darts.audio.model.AudioMetadata;
 import uk.gov.hmcts.darts.audio.model.AudioPreview;
 import uk.gov.hmcts.darts.audio.model.GetTransformedMediaResponse;
+import uk.gov.hmcts.darts.audio.model.MediaHideRequest;
+import uk.gov.hmcts.darts.audio.model.MediaHideResponse;
 import uk.gov.hmcts.darts.audio.service.AdminMediaService;
 import uk.gov.hmcts.darts.audio.service.AudioPreviewService;
 import uk.gov.hmcts.darts.audio.service.AudioService;
@@ -41,6 +43,7 @@ import static uk.gov.hmcts.darts.authorisation.enums.ContextIdEnum.HEARING_ID;
 import static uk.gov.hmcts.darts.authorisation.enums.ContextIdEnum.MEDIA_ID;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.APPROVER;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.JUDGE;
+import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.MID_TIER;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.RCJ_APPEALS;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.REQUESTER;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.SUPER_ADMIN;
@@ -80,6 +83,8 @@ public class AudioController implements AudioApi {
 
     @Override
     @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
+    @Authorisation(contextId = ANY_ENTITY_ID,
+        globalAccessSecurityRoles = {MID_TIER})
     public ResponseEntity<Void> addAudio(MultipartFile file, AddAudioMetadataRequest metadata) {
 
         // validate the payloads
@@ -129,9 +134,16 @@ public class AudioController implements AudioApi {
 
     @Override
     @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
+    @Authorisation(contextId = ANY_ENTITY_ID, globalAccessSecurityRoles = {SUPER_ADMIN})
+    public ResponseEntity<MediaHideResponse> postAdminHideMediaId(Integer mediaId, MediaHideRequest mediaHideRequest) {
+        MediaHideResponse audioResponse = mediaRequestService.adminHideOrShowMediaById(mediaId, mediaHideRequest);
+        return new ResponseEntity<>(audioResponse, HttpStatus.OK);
+    }
+
+    @Override
+    @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
     @Authorisation(contextId = ANY_ENTITY_ID, globalAccessSecurityRoles = {SUPER_USER, SUPER_ADMIN})
     public ResponseEntity<AdminMediaResponse> getAdminMediasById(Integer id) {
         return new ResponseEntity<>(adminMediaService.getMediasById(id), HttpStatus.OK);
     }
-
 }

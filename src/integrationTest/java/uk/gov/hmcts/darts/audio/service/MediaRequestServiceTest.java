@@ -214,7 +214,7 @@ class MediaRequestServiceTest extends IntegrationPerClassBase {
 
     @Test
     void getsMediaRequestById() {
-        var persistedMediaRequest = dartsDatabase.saveWithTransientEntities(minimalRequestData());
+        var persistedMediaRequest = dartsDatabase.saveWithMediaRequestWithTransientEntities(minimalRequestData());
 
         var mediaRequestResponse = mediaRequestService.getMediaRequestById(persistedMediaRequest.getId());
 
