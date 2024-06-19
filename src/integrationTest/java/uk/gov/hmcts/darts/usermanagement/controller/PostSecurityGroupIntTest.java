@@ -72,7 +72,7 @@ class PostSecurityGroupIntTest extends IntegrationBase {
     }
 
     @Test
-    void createSecurityGroupShouldSucceedWhenProvidedWithValidValuesForMinRequiredFields() throws Exception {
+    void createSecurityGroupShouldSucceedAndSetInterpreterFlagFalseForNonTranslationRole() throws Exception {
         superAdminUserStub.givenUserIsAuthorised(userIdentity);
 
         MockHttpServletRequestBuilder request = buildRequest()
@@ -108,6 +108,50 @@ class PostSecurityGroupIntTest extends IntegrationBase {
             assertFalse(createdSecurityGroupEntity.getGlobalAccess());
             assertTrue(createdSecurityGroupEntity.getDisplayState());
             assertEquals("TRANSCRIBER", createdSecurityGroupEntity.getSecurityRoleEntity().getRoleName());
+            assertFalse(createdSecurityGroupEntity.getUseInterpreter());
+
+            return null;
+        });
+    }
+
+    @Test
+    void createSecurityGroupShouldSucceedAndSetInterpreterFlagTrueForTranslationRole() throws Exception {
+        superAdminUserStub.givenUserIsAuthorised(userIdentity);
+
+        MockHttpServletRequestBuilder request = buildRequest()
+            .content("""
+                         {
+                           "name": "ACME",
+                           "display_name": "ACME Transcription Services",
+                           "security_role_id": 5
+                         }
+                           """);
+
+        MvcResult result = mockMvc.perform(request)
+            .andExpect(status().isCreated())
+            .andExpect(jsonPath("$.id").exists())
+            .andExpect(jsonPath("$.name").value("ACME"))
+            .andExpect(jsonPath("$.display_name").value("ACME Transcription Services"))
+            .andExpect(jsonPath("$.description").doesNotExist())
+            .andExpect(jsonPath("$.display_state").value(true))
+            .andExpect(jsonPath("$.global_access").value(false))
+            .andExpect(jsonPath("$.security_role_id").isNumber())
+            .andReturn();
+
+        var id = new JSONObject(result.getResponse().getContentAsString())
+            .getInt("id");
+
+        transactionTemplate.execute(status -> {
+            var createdSecurityGroupEntity = securityGroupRepository.findById(id)
+                .orElseThrow();
+
+            assertEquals("ACME", createdSecurityGroupEntity.getGroupName());
+            assertEquals("ACME Transcription Services", createdSecurityGroupEntity.getDisplayName());
+            assertNull(createdSecurityGroupEntity.getDescription());
+            assertFalse(createdSecurityGroupEntity.getGlobalAccess());
+            assertTrue(createdSecurityGroupEntity.getDisplayState());
+            assertEquals("TRANSLATION_QA", createdSecurityGroupEntity.getSecurityRoleEntity().getRoleName());
+            assertTrue(createdSecurityGroupEntity.getUseInterpreter());
 
             return null;
         });
