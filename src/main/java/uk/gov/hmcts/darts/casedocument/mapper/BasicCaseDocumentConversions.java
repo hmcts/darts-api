@@ -5,10 +5,11 @@ import uk.gov.hmcts.darts.common.entity.AnnotationDocumentEntity;
 import uk.gov.hmcts.darts.common.entity.CaseDocumentEntity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionDocumentEntity;
+import uk.gov.hmcts.darts.common.entity.TranscriptionWorkflowEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 
 @Component
-public class BasicMapper {
+public class BasicCaseDocumentConversions {
 
     Integer convert(UserAccountEntity userAccountEntity) {
         return userAccountEntity.getId();
@@ -28,5 +29,9 @@ public class BasicMapper {
 
     Integer convert(TranscriptionDocumentEntity transcriptionDocumentEntity) {
         return transcriptionDocumentEntity.getId();
+    }
+
+    Integer convert(TranscriptionWorkflowEntity transcriptionWorkflowEntity) {
+        return transcriptionWorkflowEntity.getId();
     }
 }

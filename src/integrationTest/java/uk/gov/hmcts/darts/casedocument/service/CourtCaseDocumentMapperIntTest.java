@@ -32,16 +32,20 @@ class CourtCaseDocumentMapperIntTest extends IntegrationBase {
 
     @Test
     void mapToCourtCaseDocument() {
-
+        // given
         ExternalObjectDirectoryEntity mediaEodEntity = dartsDatabase.getExternalObjectDirectoryStub().createEodWithRandomValues();
         when(eodRepository.findByMedia(any())).thenReturn(List.of(mediaEodEntity));
         ExternalObjectDirectoryEntity transcriptionDocumentEodEntity = dartsDatabase.getExternalObjectDirectoryStub().createEodWithRandomValues();
         when(eodRepository.findByTranscriptionDocumentEntity(any())).thenReturn(List.of(transcriptionDocumentEodEntity));
+        ExternalObjectDirectoryEntity annotationDocumentEodEntity = dartsDatabase.getExternalObjectDirectoryStub().createEodWithRandomValues();
+        when(eodRepository.findByAnnotationDocumentEntity(any())).thenReturn(List.of(annotationDocumentEodEntity));
 
         CourtCaseEntity cc = courtCaseStub.createCourtCaseAndAssociatedEntitiesWithRandomValues();
 
+        // when
         CourtCaseDocument doc = mapper.map(cc);
 
+        // then
         assertAll(
             "Grouped assertions for Case Document top level properties",
             assertIsEqual(doc.getId(), cc.getId()),
@@ -310,6 +314,20 @@ class CourtCaseDocumentMapperIntTest extends IntegrationBase {
             () -> assertThat(doc.getHearings().get(0).getTranscriptions().get(0).getDeletedBy()).isNotNull().isEqualTo(cc.getHearings().get(0).getTranscriptions().get(0).getDeletedBy().getId()),
             () -> assertThat(doc.getHearings().get(0).getTranscriptions().get(0).getDeletedTimestamp()).isNotNull().isEqualTo(cc.getHearings().get(0).getTranscriptions().get(0).getDeletedTimestamp()),
 
+            () -> assertThat(doc.getHearings().get(0).getTranscriptions().get(0).getTranscriptionDocuments().get(0).getId()).isNotNull().isEqualTo(cc.getHearings().get(0).getTranscriptions().get(0).getTranscriptionDocumentEntities().get(0).getId()),
+            () -> assertThat(doc.getHearings().get(0).getTranscriptions().get(0).getTranscriptionDocuments().get(0).getLastModifiedBy()).isNotNull().isEqualTo(cc.getHearings().get(0).getTranscriptions().get(0).getTranscriptionDocumentEntities().get(0).getLastModifiedBy().getId()),
+            () -> assertThat(doc.getHearings().get(0).getTranscriptions().get(0).getTranscriptionDocuments().get(0).getLastModifiedTimestamp()).isNotNull().isEqualTo(cc.getHearings().get(0).getTranscriptions().get(0).getTranscriptionDocumentEntities().get(0).getLastModifiedTimestamp()),
+            () -> assertThat(doc.getHearings().get(0).getTranscriptions().get(0).getTranscriptionDocuments().get(0).getClipId()).isNotNull().isEqualTo(cc.getHearings().get(0).getTranscriptions().get(0).getTranscriptionDocumentEntities().get(0).getClipId()),
+            () -> assertThat(doc.getHearings().get(0).getTranscriptions().get(0).getTranscriptionDocuments().get(0).getFileName()).isNotNull().isEqualTo(cc.getHearings().get(0).getTranscriptions().get(0).getTranscriptionDocumentEntities().get(0).getFileName()),
+            () -> assertThat(doc.getHearings().get(0).getTranscriptions().get(0).getTranscriptionDocuments().get(0).getFileSize()).isNotNull().isEqualTo(cc.getHearings().get(0).getTranscriptions().get(0).getTranscriptionDocumentEntities().get(0).getFileSize()),
+            () -> assertThat(doc.getHearings().get(0).getTranscriptions().get(0).getTranscriptionDocuments().get(0).getFileType()).isNotNull().isEqualTo(cc.getHearings().get(0).getTranscriptions().get(0).getTranscriptionDocumentEntities().get(0).getFileType()),
+            () -> assertThat(doc.getHearings().get(0).getTranscriptions().get(0).getTranscriptionDocuments().get(0).getUploadedBy()).isNotNull().isEqualTo(cc.getHearings().get(0).getTranscriptions().get(0).getTranscriptionDocumentEntities().get(0).getUploadedBy().getId()),
+            () -> assertThat(doc.getHearings().get(0).getTranscriptions().get(0).getTranscriptionDocuments().get(0).getUploadedDateTime()).isNotNull().isEqualTo(cc.getHearings().get(0).getTranscriptions().get(0).getTranscriptionDocumentEntities().get(0).getUploadedDateTime()),
+            () -> assertThat(doc.getHearings().get(0).getTranscriptions().get(0).getTranscriptionDocuments().get(0).getChecksum()).isNotNull().isEqualTo(cc.getHearings().get(0).getTranscriptions().get(0).getTranscriptionDocumentEntities().get(0).getChecksum()),
+            () -> assertThat(doc.getHearings().get(0).getTranscriptions().get(0).getTranscriptionDocuments().get(0).getContentObjectId()).isNotNull().isEqualTo(cc.getHearings().get(0).getTranscriptions().get(0).getTranscriptionDocumentEntities().get(0).getContentObjectId()),
+            () -> assertThat(doc.getHearings().get(0).getTranscriptions().get(0).getTranscriptionDocuments().get(0).isHidden()).isNotNull().isEqualTo(cc.getHearings().get(0).getTranscriptions().get(0).getTranscriptionDocumentEntities().get(0).isHidden()),
+            () -> assertThat(doc.getHearings().get(0).getTranscriptions().get(0).getTranscriptionDocuments().get(0).getRetainUntilTs()).isNotNull().isEqualTo(cc.getHearings().get(0).getTranscriptions().get(0).getTranscriptionDocumentEntities().get(0).getRetainUntilTs()),
+
             () -> assertThat(doc.getHearings().get(0).getTranscriptions().get(0).getTranscriptionDocuments().get(0).getAdminActions().get(0).getId()).isNotNull().isEqualTo(cc.getHearings().get(0).getTranscriptions().get(0).getTranscriptionDocumentEntities().get(0).getAdminActions().get(0).getId()),
             () -> assertThat(doc.getHearings().get(0).getTranscriptions().get(0).getTranscriptionDocuments().get(0).getAdminActions().get(0).getAnnotationDocument()).isNotNull().isEqualTo(cc.getHearings().get(0).getTranscriptions().get(0).getTranscriptionDocumentEntities().get(0).getAdminActions().get(0).getAnnotationDocument().getId()),
             () -> assertThat(doc.getHearings().get(0).getTranscriptions().get(0).getTranscriptionDocuments().get(0).getAdminActions().get(0).getCaseDocument()).isNotNull().isEqualTo(cc.getHearings().get(0).getTranscriptions().get(0).getTranscriptionDocumentEntities().get(0).getAdminActions().get(0).getCaseDocument().getId()),
@@ -359,6 +377,57 @@ class CourtCaseDocumentMapperIntTest extends IntegrationBase {
             () -> assertThat(doc.getHearings().get(0).getTranscriptions().get(0).getTranscriptionComments().get(0).getComment()).isNotNull().isEqualTo(cc.getHearings().get(0).getTranscriptions().get(0).getTranscriptionCommentEntities().get(0).getComment()),
             () -> assertThat(doc.getHearings().get(0).getTranscriptions().get(0).getTranscriptionComments().get(0).getCommentTimestamp()).isNotNull().isEqualTo(cc.getHearings().get(0).getTranscriptions().get(0).getTranscriptionCommentEntities().get(0).getCommentTimestamp()),
             () -> assertThat(doc.getHearings().get(0).getTranscriptions().get(0).getTranscriptionComments().get(0).getAuthorUserId()).isNotNull().isEqualTo(cc.getHearings().get(0).getTranscriptions().get(0).getTranscriptionCommentEntities().get(0).getAuthorUserId())
+        );
+
+        assertAll(
+            "Grouped assertions for Case Document hearings annotations",
+            () -> assertThat(doc.getHearings().get(0).getAnnotations().get(0).getId()).isNotNull().isEqualTo(cc.getHearings().get(0).getAnnotations().get(0).getId()),
+            () -> assertThat(doc.getHearings().get(0).getAnnotations().get(0).getCreatedDateTime()).isNotNull().isEqualTo(cc.getHearings().get(0).getAnnotations().get(0).getCreatedDateTime()),
+            () -> assertThat(doc.getHearings().get(0).getAnnotations().get(0).getLastModifiedDateTime()).isNotNull().isEqualTo(cc.getHearings().get(0).getAnnotations().get(0).getLastModifiedDateTime()),
+            () -> assertThat(doc.getHearings().get(0).getAnnotations().get(0).getCreatedBy()).isNotNull().isEqualTo(cc.getHearings().get(0).getAnnotations().get(0).getCreatedBy().getId()),
+            () -> assertThat(doc.getHearings().get(0).getAnnotations().get(0).getLastModifiedBy()).isNotNull().isEqualTo(cc.getHearings().get(0).getAnnotations().get(0).getLastModifiedBy().getId()),
+            () -> assertThat(doc.getHearings().get(0).getAnnotations().get(0).getLegacyObjectId()).isNotNull().isEqualTo(cc.getHearings().get(0).getAnnotations().get(0).getLegacyObjectId()),
+            () -> assertThat(doc.getHearings().get(0).getAnnotations().get(0).getLegacyVersionLabel()).isNotNull().isEqualTo(cc.getHearings().get(0).getAnnotations().get(0).getLegacyVersionLabel()),
+            () -> assertThat(doc.getHearings().get(0).getAnnotations().get(0).getDeletedBy()).isNotNull().isEqualTo(cc.getHearings().get(0).getAnnotations().get(0).getDeletedBy().getId()),
+            () -> assertThat(doc.getHearings().get(0).getAnnotations().get(0).isDeleted()).isNotNull().isEqualTo(cc.getHearings().get(0).getAnnotations().get(0).isDeleted()),
+            () -> assertThat(doc.getHearings().get(0).getAnnotations().get(0).getDeletedTimestamp()).isNotNull().isEqualTo(cc.getHearings().get(0).getAnnotations().get(0).getDeletedTimestamp()),
+
+            () -> assertThat(doc.getHearings().get(0).getAnnotations().get(0).getAnnotationDocuments().get(0).getId()).isNotNull().isEqualTo(cc.getHearings().get(0).getAnnotations().get(0).getAnnotationDocuments().get(0).getId()),
+            () -> assertThat(doc.getHearings().get(0).getAnnotations().get(0).getAnnotationDocuments().get(0).getLastModifiedBy()).isNotNull().isEqualTo(cc.getHearings().get(0).getAnnotations().get(0).getAnnotationDocuments().get(0).getLastModifiedBy().getId()),
+            () -> assertThat(doc.getHearings().get(0).getAnnotations().get(0).getAnnotationDocuments().get(0).getLastModifiedTimestamp()).isNotNull().isEqualTo(cc.getHearings().get(0).getAnnotations().get(0).getAnnotationDocuments().get(0).getLastModifiedTimestamp()),
+            () -> assertThat(doc.getHearings().get(0).getAnnotations().get(0).getAnnotationDocuments().get(0).getClipId()).isNotNull().isEqualTo(cc.getHearings().get(0).getAnnotations().get(0).getAnnotationDocuments().get(0).getClipId()),
+            () -> assertThat(doc.getHearings().get(0).getAnnotations().get(0).getAnnotationDocuments().get(0).getFileName()).isNotNull().isEqualTo(cc.getHearings().get(0).getAnnotations().get(0).getAnnotationDocuments().get(0).getFileName()),
+            () -> assertThat(doc.getHearings().get(0).getAnnotations().get(0).getAnnotationDocuments().get(0).getFileSize()).isNotNull().isEqualTo(cc.getHearings().get(0).getAnnotations().get(0).getAnnotationDocuments().get(0).getFileSize()),
+            () -> assertThat(doc.getHearings().get(0).getAnnotations().get(0).getAnnotationDocuments().get(0).getFileType()).isNotNull().isEqualTo(cc.getHearings().get(0).getAnnotations().get(0).getAnnotationDocuments().get(0).getFileType()),
+            () -> assertThat(doc.getHearings().get(0).getAnnotations().get(0).getAnnotationDocuments().get(0).getUploadedBy()).isNotNull().isEqualTo(cc.getHearings().get(0).getAnnotations().get(0).getAnnotationDocuments().get(0).getUploadedBy().getId()),
+            () -> assertThat(doc.getHearings().get(0).getAnnotations().get(0).getAnnotationDocuments().get(0).getUploadedDateTime()).isNotNull().isEqualTo(cc.getHearings().get(0).getAnnotations().get(0).getAnnotationDocuments().get(0).getUploadedDateTime()),
+            () -> assertThat(doc.getHearings().get(0).getAnnotations().get(0).getAnnotationDocuments().get(0).getChecksum()).isNotNull().isEqualTo(cc.getHearings().get(0).getAnnotations().get(0).getAnnotationDocuments().get(0).getChecksum()),
+            () -> assertThat(doc.getHearings().get(0).getAnnotations().get(0).getAnnotationDocuments().get(0).getContentObjectId()).isNotNull().isEqualTo(cc.getHearings().get(0).getAnnotations().get(0).getAnnotationDocuments().get(0).getContentObjectId()),
+            () -> assertThat(doc.getHearings().get(0).getAnnotations().get(0).getAnnotationDocuments().get(0).isHidden()).isNotNull().isEqualTo(cc.getHearings().get(0).getAnnotations().get(0).getAnnotationDocuments().get(0).isHidden()),
+            () -> assertThat(doc.getHearings().get(0).getAnnotations().get(0).getAnnotationDocuments().get(0).getRetainUntilTs()).isNotNull().isEqualTo(cc.getHearings().get(0).getAnnotations().get(0).getAnnotationDocuments().get(0).getRetainUntilTs()),
+
+            () -> assertThat(doc.getHearings().get(0).getAnnotations().get(0).getAnnotationDocuments().get(0).getExternalObjectDirectories().get(0).getId()).isNotNull().isEqualTo(annotationDocumentEodEntity.getId()),
+            () -> assertThat(doc.getHearings().get(0).getAnnotations().get(0).getAnnotationDocuments().get(0).getExternalObjectDirectories().get(0).getMedia()).isNotNull().isEqualTo(annotationDocumentEodEntity.getMedia().getId()),
+            () -> assertThat(doc.getHearings().get(0).getAnnotations().get(0).getAnnotationDocuments().get(0).getExternalObjectDirectories().get(0).getTranscriptionDocumentEntity()).isNotNull().isEqualTo(annotationDocumentEodEntity.getTranscriptionDocumentEntity().getId()),
+            () -> assertThat(doc.getHearings().get(0).getAnnotations().get(0).getAnnotationDocuments().get(0).getExternalObjectDirectories().get(0).getAnnotationDocumentEntity()).isNotNull().isEqualTo(annotationDocumentEodEntity.getAnnotationDocumentEntity().getId()),
+            () -> assertThat(doc.getHearings().get(0).getAnnotations().get(0).getAnnotationDocuments().get(0).getExternalObjectDirectories().get(0).getCaseDocument()).isNotNull().isEqualTo(annotationDocumentEodEntity.getCaseDocument().getId()),
+            () -> assertThat(doc.getHearings().get(0).getAnnotations().get(0).getAnnotationDocuments().get(0).getExternalObjectDirectories().get(0).getStatus()).isNotNull().isEqualTo(annotationDocumentEodEntity.getStatus()),
+            () -> assertThat(doc.getHearings().get(0).getAnnotations().get(0).getAnnotationDocuments().get(0).getExternalObjectDirectories().get(0).getExternalLocationType()).isNotNull().isEqualTo(annotationDocumentEodEntity.getExternalLocationType()),
+            () -> assertThat(doc.getHearings().get(0).getAnnotations().get(0).getAnnotationDocuments().get(0).getExternalObjectDirectories().get(0).getExternalLocation()).isNotNull().isEqualTo(annotationDocumentEodEntity.getExternalLocation()),
+            () -> assertThat(doc.getHearings().get(0).getAnnotations().get(0).getAnnotationDocuments().get(0).getExternalObjectDirectories().get(0).getExternalFileId()).isNotNull().isEqualTo(annotationDocumentEodEntity.getExternalFileId()),
+            () -> assertThat(doc.getHearings().get(0).getAnnotations().get(0).getAnnotationDocuments().get(0).getExternalObjectDirectories().get(0).getExternalRecordId()).isNotNull().isEqualTo(annotationDocumentEodEntity.getExternalRecordId()),
+            () -> assertThat(doc.getHearings().get(0).getAnnotations().get(0).getAnnotationDocuments().get(0).getExternalObjectDirectories().get(0).getChecksum()).isNotNull().isEqualTo(annotationDocumentEodEntity.getChecksum()),
+            () -> assertThat(doc.getHearings().get(0).getAnnotations().get(0).getAnnotationDocuments().get(0).getExternalObjectDirectories().get(0).getTransferAttempts()).isNotNull().isEqualTo(annotationDocumentEodEntity.getTransferAttempts()),
+            () -> assertThat(doc.getHearings().get(0).getAnnotations().get(0).getAnnotationDocuments().get(0).getExternalObjectDirectories().get(0).getVerificationAttempts()).isNotNull().isEqualTo(annotationDocumentEodEntity.getVerificationAttempts()),
+            () -> assertThat(doc.getHearings().get(0).getAnnotations().get(0).getAnnotationDocuments().get(0).getExternalObjectDirectories().get(0).getManifestFile()).isNotNull().isEqualTo(annotationDocumentEodEntity.getManifestFile()),
+            () -> assertThat(doc.getHearings().get(0).getAnnotations().get(0).getAnnotationDocuments().get(0).getExternalObjectDirectories().get(0).getEventDateTs()).isNotNull().isEqualTo(annotationDocumentEodEntity.getEventDateTs()),
+            () -> assertThat(doc.getHearings().get(0).getAnnotations().get(0).getAnnotationDocuments().get(0).getExternalObjectDirectories().get(0).getErrorCode()).isNotNull().isEqualTo(annotationDocumentEodEntity.getErrorCode()),
+            () -> assertThat(doc.getHearings().get(0).getAnnotations().get(0).getAnnotationDocuments().get(0).getExternalObjectDirectories().get(0).isResponseCleaned()).isNotNull().isEqualTo(annotationDocumentEodEntity.isResponseCleaned()),
+            () -> assertThat(doc.getHearings().get(0).getAnnotations().get(0).getAnnotationDocuments().get(0).getExternalObjectDirectories().get(0).isUpdateRetention()).isNotNull().isEqualTo(annotationDocumentEodEntity.isUpdateRetention()),
+            () -> assertThat(doc.getHearings().get(0).getAnnotations().get(0).getAnnotationDocuments().get(0).getExternalObjectDirectories().get(0).getCreatedBy()).isNotNull().isEqualTo(annotationDocumentEodEntity.getCreatedBy().getId()),
+            () -> assertThat(doc.getHearings().get(0).getAnnotations().get(0).getAnnotationDocuments().get(0).getExternalObjectDirectories().get(0).getCreatedDateTime()).isNotNull().isEqualTo(annotationDocumentEodEntity.getCreatedDateTime()),
+            () -> assertThat(doc.getHearings().get(0).getAnnotations().get(0).getAnnotationDocuments().get(0).getExternalObjectDirectories().get(0).getLastModifiedBy()).isNotNull().isEqualTo(annotationDocumentEodEntity.getLastModifiedBy().getId()),
+            () -> assertThat(doc.getHearings().get(0).getAnnotations().get(0).getAnnotationDocuments().get(0).getExternalObjectDirectories().get(0).getLastModifiedDateTime()).isNotNull().isEqualTo(annotationDocumentEodEntity.getLastModifiedDateTime())
         );
     }
 

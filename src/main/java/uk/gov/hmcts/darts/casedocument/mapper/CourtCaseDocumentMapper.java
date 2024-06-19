@@ -10,7 +10,7 @@ import uk.gov.hmcts.darts.common.entity.CaseManagementRetentionEntity;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 
-@Mapper(componentModel = "spring", uses = {BasicMapper.class, CaseObjectsCaseDocumentMapper.class})
+@Mapper(componentModel = "spring", uses = {BasicCaseDocumentConversions.class, CaseObjectsCaseDocumentMapper.class})
 public interface CourtCaseDocumentMapper {
 
     @Mappings({
@@ -18,7 +18,6 @@ public interface CourtCaseDocumentMapper {
         @Mapping(source = "prosecutorList", target = "prosecutors"),
         @Mapping(source = "defenceList", target = "defences"),
         @Mapping(source = "caseRetentionEntities", target = "caseRetentions"),
-//        @Mapping(source = "mediaEods", target = "hearings.medias.externalObjectDirectories"),
     })
     CourtCaseDocument map(CourtCaseEntity courtCase);
 
