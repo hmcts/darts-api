@@ -110,19 +110,31 @@ public class CommonTestDataUtil {
         CourthouseEntity courthouse = new CourthouseEntity();
         courthouse.setId(1001);
         courthouse.setCourthouseName(name);
+        courthouse.setDisplayName(name);
         return courthouse;
     }
 
     public CourtroomEntity createCourtroom(CourthouseEntity courthouse, String name) {
         CourtroomEntity courtroom = new CourtroomEntity();
+        courtroom.setId(getStringId(courthouse.getCourthouseName() + name));
         courtroom.setCourthouse(courthouse);
         courtroom.setName(name);
         return courtroom;
     }
 
     public CourtroomEntity createCourtroom(String name) {
-        createCourthouse("SWANSEA");
-        return createCourtroom(createCourthouse("SWANSEA"), name);
+        CourthouseEntity courthouse = createCourthouse("SWANSEA");
+        return createCourtroom(courthouse, name);
+    }
+
+    //gets an ID that is unique-ish to that string. The same string will always produce the same ID.
+    private int getStringId(String input) {
+        int sum = 0;
+        char[] ch = input.toCharArray();
+        for (char c : ch) {
+            sum += c;
+        }
+        return sum;
     }
 
     public CourtCaseEntity createCase(String caseNumber, CourthouseEntity courthouseEntity) {
@@ -250,7 +262,7 @@ public class CommonTestDataUtil {
     }
 
     public List<TranscriptionEntity> createTranscriptionList(HearingEntity hearing, boolean generateStatus, boolean excludeWorkflow) {
-        return createTranscriptionList(hearing, generateStatus, excludeWorkflow, false,null);
+        return createTranscriptionList(hearing, generateStatus, excludeWorkflow, false, null);
     }
 
     public List<TranscriptionEntity> createTranscriptionList(
@@ -258,7 +270,7 @@ public class CommonTestDataUtil {
         boolean generateStatus,
         boolean excludeWorkflow,
         boolean generateRequestor) {
-        return createTranscriptionList(hearing, generateStatus, excludeWorkflow, generateRequestor,null);
+        return createTranscriptionList(hearing, generateStatus, excludeWorkflow, generateRequestor, null);
     }
 
     public List<TranscriptionEntity> createTranscriptionList(
@@ -396,6 +408,20 @@ public class CommonTestDataUtil {
             time = time.plusHours(1);
         }
         return returnList;
+    }
+
+    public void createHearingsForCase(CourtCaseEntity courtCase, int numOfCourtrooms, int numOfHearingsPerCourtroom) {
+        LocalDate startDate = LocalDate.of(2020, 10, 10);
+        List<HearingEntity> hearings = new ArrayList<>();
+        for (int courtroomCounter = 1; courtroomCounter <= numOfCourtrooms; courtroomCounter++) {
+            CourtroomEntity courtroom = createCourtroom("courtroom" + courtroomCounter);
+            for (int hearingCounter = 1; hearingCounter <= numOfHearingsPerCourtroom; hearingCounter++) {
+                HearingEntity hearing = createHearing(courtCase, courtroom, startDate);
+                hearings.add(hearing);
+                startDate = startDate.plusDays(1);
+            }
+        }
+        courtCase.setHearings(hearings);
     }
 
     public AddCaseRequest createAddCaseRequest() {

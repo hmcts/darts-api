@@ -1,6 +1,8 @@
 package uk.gov.hmcts.darts.cases.service;
 
 import uk.gov.hmcts.darts.cases.model.AddCaseRequest;
+import uk.gov.hmcts.darts.cases.model.AdminCasesSearchRequest;
+import uk.gov.hmcts.darts.cases.model.AdminCasesSearchResponseItem;
 import uk.gov.hmcts.darts.cases.model.AdvancedSearchResult;
 import uk.gov.hmcts.darts.cases.model.Annotation;
 import uk.gov.hmcts.darts.cases.model.GetCasesRequest;
@@ -31,4 +33,6 @@ public interface CaseService {
     List<Transcript> getTranscriptsByCaseId(Integer caseId);
 
     List<Annotation> getAnnotations(Integer caseId);
+
+    List<AdminCasesSearchResponseItem> adminCaseSearch(AdminCasesSearchRequest request);
 }
