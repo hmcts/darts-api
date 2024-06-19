@@ -10,6 +10,7 @@ import uk.gov.hmcts.darts.audio.component.AudioMessageDigest;
 import uk.gov.hmcts.darts.audio.config.AudioConfigurationProperties;
 import uk.gov.hmcts.darts.audio.model.AddAudioMetadataRequest;
 import uk.gov.hmcts.darts.audio.service.AudioUploadService;
+import uk.gov.hmcts.darts.authorisation.api.AuthorisationApi;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
@@ -66,6 +67,7 @@ public class AudioUploadServiceImpl implements AudioUploadService {
     private final AudioConfigurationProperties audioConfigurationProperties;
     private final LogApi logApi;
     private final AudioMessageDigest audioDigest;
+    private final AuthorisationApi authorisationApi;
 
     @Override
     @Transactional
@@ -92,10 +94,11 @@ public class AudioUploadServiceImpl implements AudioUploadService {
                 checksum = detailsOption.get().checksum();
             }
 
+            UserAccountEntity currentUser = authorisationApi.getCurrentUser();
             // if we have not found any duplicate audio files to process lets add a new one
             if (audioToVersion.isEmpty()) {
                 List<MediaEntity> audioFileToProcess = new ArrayList<>();
-                MediaEntity newEntity = mapper.mapToMedia(addAudioMetadataRequest);
+                MediaEntity newEntity = mapper.mapToMedia(addAudioMetadataRequest, currentUser);
 
                 audioFileToProcess.add(newEntity);
                 audioToVersion = Optional.of(audioFileToProcess);
@@ -107,7 +110,7 @@ public class AudioUploadServiceImpl implements AudioUploadService {
 
             // version the file upload to the database
             versionUpload(audioToVersion.get(), addAudioMetadataRequest,
-                          externalLocation, checksum, objectRecordStatusEntity);
+                          externalLocation, checksum, objectRecordStatusEntity, currentUser);
         } else {
             log.info("Duplicate audio upload detected with no difference in file size. Returning 200 with no changes ");
             for (MediaEntity entity : identifiedDuplicate) {
@@ -133,19 +136,20 @@ public class AudioUploadServiceImpl implements AudioUploadService {
     private void versionUpload(Collection<MediaEntity> audioToVersion,
                                AddAudioMetadataRequest addAudioMetadataRequest,
                                UUID externalLocation, String checksum,
-                               ObjectRecordStatusEntity objectRecordStatusEntity) {
+                               ObjectRecordStatusEntity objectRecordStatusEntity,
+                               UserAccountEntity userAccount) {
         for (MediaEntity entity : audioToVersion) {
 
             MediaEntity saveEntity = entity;
 
             // if the media already exists in the database then create a new media file
             if (entity.getId() != null) {
-                saveEntity = mapper.mapToMedia(addAudioMetadataRequest);
+                saveEntity = mapper.mapToMedia(addAudioMetadataRequest, userAccount);
 
                 saveEntity.setChronicleId(entity.getChronicleId());
                 saveEntity.setAntecedentId(entity.getId().toString());
 
-                log.info("Uploading version of duplicate filename {} with antecedent media id {}", entity.getMediaFile(), entity.getId().toString());
+                log.info("Uploading new version of duplicate filename {} with antecedent media id {}", entity.getMediaFile(), entity.getId().toString());
             } else {
                 log.info("New file uploaded {} with filename", entity.getMediaFile());
 
@@ -206,7 +210,7 @@ public class AudioUploadServiceImpl implements AudioUploadService {
 
     @SuppressWarnings({"PMD.LooseCoupling"})
     private Collection<MediaEntity> getDuplicateMediaFile(AddAudioMetadataRequest addAudioMetadataRequest) {
-        List<MediaEntity> mediaEntities =  mediaRepository.findMediaByDetails(
+        List<MediaEntity> mediaEntities = mediaRepository.findMediaByDetails(
             addAudioMetadataRequest.getCourthouse(),
             addAudioMetadataRequest.getCourtroom(),
             addAudioMetadataRequest.getChannel(),
@@ -220,7 +224,7 @@ public class AudioUploadServiceImpl implements AudioUploadService {
         // now lets get the lowest level media objects so that they can act as a basis for the antecedent
         Tree<MediaEntityTreeNodeImpl> tree = new Tree<>();
         mediaEntities.stream().forEach(entry ->
-            tree.addNode(new MediaEntityTreeNodeImpl(entry))
+                                           tree.addNode(new MediaEntityTreeNodeImpl(entry))
         );
 
         return tree.getLowestLevelDescendants().stream().map(MediaEntityTreeNodeImpl::getEntity).toList();
@@ -228,7 +232,10 @@ public class AudioUploadServiceImpl implements AudioUploadService {
 
     @Override
     public void linkAudioToHearingInMetadata(AddAudioMetadataRequest addAudioMetadataRequest, MediaEntity mediaToReplace, MediaEntity newMedia) {
-        for (String caseNumber : addAudioMetadataRequest.getCases()) {
+        List<String> casesInMetadata = addAudioMetadataRequest.getCases();
+        //remove duplicate cases as they can appear more than once, e.g. if they broke for lunch.
+        casesInMetadata = casesInMetadata.stream().distinct().toList();
+        for (String caseNumber : casesInMetadata) {
             HearingEntity hearing = retrieveCoreObjectService.retrieveOrCreateHearing(
                 addAudioMetadataRequest.getCourthouse(),
                 addAudioMetadataRequest.getCourtroom(),
@@ -283,10 +290,10 @@ public class AudioUploadServiceImpl implements AudioUploadService {
     }
 
     private void saveExternalObjectDirectory(UUID externalLocation,
-                                                                      String checksum,
-                                                                      UserAccountEntity userAccountEntity,
-                                                                      MediaEntity mediaEntity,
-                                                                      ObjectRecordStatusEntity objectRecordStatusEntity) {
+                                             String checksum,
+                                             UserAccountEntity userAccountEntity,
+                                             MediaEntity mediaEntity,
+                                             ObjectRecordStatusEntity objectRecordStatusEntity) {
         var externalObjectDirectoryEntity = new ExternalObjectDirectoryEntity();
         externalObjectDirectoryEntity.setMedia(mediaEntity);
         externalObjectDirectoryEntity.setStatus(objectRecordStatusEntity);
@@ -299,5 +306,6 @@ public class AudioUploadServiceImpl implements AudioUploadService {
         externalObjectDirectoryRepository.save(externalObjectDirectoryEntity);
     }
 
-    record AudioBlobUploadDetails(UUID uuid, String checksum) {}
+    record AudioBlobUploadDetails(UUID uuid, String checksum) {
+    }
 }

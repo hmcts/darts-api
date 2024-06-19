@@ -5,6 +5,7 @@ import org.apache.commons.collections.CollectionUtils;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
+import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
 import uk.gov.hmcts.darts.common.entity.EventHandlerEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.HearingReportingRestrictionsEntity;
@@ -157,6 +158,12 @@ public class TranscriptionResponseMapper {
         transcriptionResponse.setCourthouse(courtCase.getCourthouse().getCourthouseName());
         transcriptionResponse.setDefendants(courtCase.getDefendantStringList());
         transcriptionResponse.setJudges(courtCase.getJudgeStringList());
+        CourtroomEntity courtroomEntity = transcriptionEntity.getPrimaryOrSecondaryCourtroom();
+
+        if (courtroomEntity != null) {
+            transcriptionResponse.setCourtroom(courtroomEntity.getName());
+        }
+        transcriptionResponse.setTranscriptionObjectId(transcriptionEntity.getLegacyObjectId());
 
         TranscriptionStatusEntity transcriptionStatusEntity = transcriptionEntity.getTranscriptionStatus();
         if (nonNull(transcriptionEntity.getTranscriptionStatus())) {
@@ -250,7 +257,7 @@ public class TranscriptionResponseMapper {
 
     private ReportingRestriction toReportingRestriction(HearingReportingRestrictionsEntity restrictionsEntity) {
         var reportingRestriction = new ReportingRestriction();
-        reportingRestriction.setEventId(restrictionsEntity.getEventId());
+        reportingRestriction.setEventId(restrictionsEntity.getEveId());
         reportingRestriction.setEventName(restrictionsEntity.getEventName());
         reportingRestriction.setEventText(restrictionsEntity.getEventText());
         reportingRestriction.setHearingId(restrictionsEntity.getHearingId());

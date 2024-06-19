@@ -7,6 +7,7 @@ import net.javacrumbs.shedlock.core.LockProvider;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.darts.arm.component.AutomatedTaskProcessorFactory;
 import uk.gov.hmcts.darts.arm.service.ArmRetentionEventDateProcessor;
+import uk.gov.hmcts.darts.arm.service.BatchCleanupArmResponseFilesService;
 import uk.gov.hmcts.darts.arm.service.CleanupArmResponseFilesService;
 import uk.gov.hmcts.darts.audio.deleter.impl.inbound.ExternalInboundDataStoreDeleter;
 import uk.gov.hmcts.darts.audio.deleter.impl.outbound.ExternalOutboundDataStoreDeleter;
@@ -27,6 +28,7 @@ import uk.gov.hmcts.darts.task.runner.impl.AbstractLockableAutomatedTask;
 import uk.gov.hmcts.darts.task.runner.impl.ApplyRetentionAutomatedTask;
 import uk.gov.hmcts.darts.task.runner.impl.ApplyRetentionCaseAssociatedObjectsAutomatedTask;
 import uk.gov.hmcts.darts.task.runner.impl.ArmRetentionEventDateCalculatorAutomatedTask;
+import uk.gov.hmcts.darts.task.runner.impl.BatchCleanupArmResponseFilesAutomatedTask;
 import uk.gov.hmcts.darts.task.runner.impl.CleanupArmResponseFilesAutomatedTask;
 import uk.gov.hmcts.darts.task.runner.impl.CloseOldCasesAutomatedTask;
 import uk.gov.hmcts.darts.task.runner.impl.CloseUnfinishedTranscriptionsAutomatedTask;
@@ -49,25 +51,27 @@ import java.util.List;
 @RequiredArgsConstructor
 public class ManualTaskService {
 
-    private final AutomatedTaskRepository automatedTaskRepository;
-    private final LockProvider lockProvider;
-    private final AutomatedTaskConfigurationProperties automatedTaskConfigurationProperties;
-    private final DailyListProcessor dailyListProcessor;
-    private final OutboundAudioDeleterProcessor outboundAudioDeleterProcessor;
-    private final InboundToUnstructuredProcessor inboundToUnstructuredProcessor;
-    private final UnstructuredAudioDeleterProcessor unstructuredAudioDeleterProcessor;
-    private final TranscriptionsProcessor transcriptionsProcessor;
-    private final InboundAudioDeleterProcessor inboundAudioDeleterProcessor;
-    private final ExternalInboundDataStoreDeleter inboundDataStoreDeleter;
-    private final ExternalUnstructuredDataStoreDeleter unstructuredDataStoreDeleter;
-    private final ExternalOutboundDataStoreDeleter outboundDataStoreDeleter;
-    private final AutomatedTaskProcessorFactory automatedTaskProcessorFactory;
-    private final ApplyRetentionProcessor applyRetentionProcessor;
     private final ApplyRetentionCaseAssociatedObjectsProcessor applyRetentionCaseAssociatedObjectsProcessor;
+    private final ApplyRetentionProcessor applyRetentionProcessor;
+    private final ArmRetentionEventDateProcessor armRetentionEventDateProcessor;
+    private final AutomatedTaskConfigurationProperties automatedTaskConfigurationProperties;
+    private final AutomatedTaskProcessorFactory automatedTaskProcessorFactory;
+    private final AutomatedTaskRepository automatedTaskRepository;
+    private final BatchCleanupArmResponseFilesService batchCleanupArmResponseFilesService;
     private final CleanupArmResponseFilesService cleanupArmResponseFilesService;
     private final CloseOldCasesProcessor closeOldCasesProcessor;
+    private final DailyListProcessor dailyListProcessor;
     private final DailyListService dailyListService;
-    private final ArmRetentionEventDateProcessor armRetentionEventDateProcessor;
+    private final ExternalInboundDataStoreDeleter inboundDataStoreDeleter;
+    private final ExternalOutboundDataStoreDeleter outboundDataStoreDeleter;
+    private final ExternalUnstructuredDataStoreDeleter unstructuredDataStoreDeleter;
+    private final InboundAudioDeleterProcessor inboundAudioDeleterProcessor;
+    private final InboundToUnstructuredProcessor inboundToUnstructuredProcessor;
+    private final OutboundAudioDeleterProcessor outboundAudioDeleterProcessor;
+    private final TranscriptionsProcessor transcriptionsProcessor;
+    private final UnstructuredAudioDeleterProcessor unstructuredAudioDeleterProcessor;
+
+    private final LockProvider lockProvider;
     private final LogApi logApi;
 
     private final List<AbstractLockableAutomatedTask> automatedTasks = new ArrayList<>();
@@ -89,6 +93,7 @@ public class ManualTaskService {
         addCloseOldCasesTaskRegistrar();
         addDailyListHouseKeepingToTaskRegistrar();
         addArmRetentionEventDateCalculatorToTaskRegister();
+        addBatchCleanupArmResponseFilesTaskRegistrar();
     }
 
     public List<AbstractLockableAutomatedTask> getAutomatedTasks() {
@@ -236,6 +241,18 @@ public class ManualTaskService {
             lockProvider,
             automatedTaskConfigurationProperties,
             cleanupArmResponseFilesService,
+            logApi
+        );
+        manualTask.setManualTask();
+        automatedTasks.add(manualTask);
+    }
+
+    private void addBatchCleanupArmResponseFilesTaskRegistrar() {
+        var manualTask = new BatchCleanupArmResponseFilesAutomatedTask(
+            automatedTaskRepository,
+            lockProvider,
+            automatedTaskConfigurationProperties,
+            batchCleanupArmResponseFilesService,
             logApi
         );
         manualTask.setManualTask();

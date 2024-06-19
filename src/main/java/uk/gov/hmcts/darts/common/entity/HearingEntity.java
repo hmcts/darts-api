@@ -96,8 +96,10 @@ public class HearingEntity extends CreatedModifiedBaseEntity {
     private List<AnnotationEntity> annotations = new ArrayList<>();
 
     public void addMedia(MediaEntity mediaEntity) {
-        mediaList.add(mediaEntity);
-        mediaEntity.getHearingList().add(this);
+        if (!mediaList.contains(mediaEntity)) {
+            mediaList.add(mediaEntity);
+            mediaEntity.getHearingList().add(this);
+        }
     }
 
     public void addJudge(JudgeEntity judgeEntity) {

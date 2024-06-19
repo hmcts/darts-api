@@ -60,7 +60,31 @@ public enum AudioApiError implements DartsApiError {
         AddAudioErrorCode.ADMIN_SEARCH_CRITERIA_NOT_PROVIDED.getValue(),
         HttpStatus.BAD_REQUEST,
         AddAudioTitleErrors.ADMIN_SEARCH_CRITERIA_NOT_PROVIDED.toString()
-    );
+    ),
+    MEDIA_ALREADY_HIDDEN(
+        AddAudioErrorCode.MEDIA_ALREADY_HIDDEN.getValue(),
+        HttpStatus.CONFLICT,
+        AddAudioTitleErrors.MEDIA_ALREADY_HIDDEN.getValue()
+    ),
+    MEDIA_HIDE_ACTION_PAYLOAD_INCORRECT_USAGE(
+        AddAudioErrorCode.MEDIA_HIDE_ACTION_PAYLOAD_INCORRECT_USAGE.getValue(),
+        HttpStatus.BAD_REQUEST,
+        AddAudioTitleErrors.MEDIA_HIDE_ACTION_PAYLOAD_INCORRECT_USAGE.getValue()
+    ),
+    MEDIA_SHOW_ACTION_PAYLOAD_INCORRECT_USAGE(
+        AddAudioErrorCode.MEDIA_SHOW_ACTION_PAYLOAD_INCORRECT_USAGE.getValue(),
+        HttpStatus.BAD_REQUEST,
+        AddAudioTitleErrors.MEDIA_SHOW_ACTION_PAYLOAD_INCORRECT_USAGE.getValue()
+    ),
+    MEDIA_HIDE_ACTION_REASON_NOT_FOUND(
+        AddAudioErrorCode.MEDIA_HIDE_ACTION_REASON_NOT_FOUND.getValue(),
+        HttpStatus.BAD_REQUEST,
+        AddAudioErrorCode.MEDIA_HIDE_ACTION_REASON_NOT_FOUND.getValue()
+    ),
+    REASON_IS_MARKED_FOR_DELETION(
+        AddAudioErrorCode.MEDIA_HIDE_ACTION_REASON_MARKED_FOR_DELETION.getValue(),
+        HttpStatus.NOT_IMPLEMENTED,
+        AddAudioErrorCode.MEDIA_HIDE_ACTION_REASON_MARKED_FOR_DELETION.getValue());
 
     private static final String ERROR_TYPE_PREFIX = "AUDIO";
 
