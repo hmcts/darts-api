@@ -45,12 +45,13 @@ public class TranscriptionDocumentStub {
      * Unique case number with unique case number for each transcription record
      * Unique hearing date starting with today with an incrementing day for each transcription record
      * Unique requested date with an incrementing hour for each transcription record
-     * @param count The number of transcription objects that are to be generated
-     * @param hearingCount The number of hearing against the transcription
-     * @param caseCount The number of cases against the transcription
+     *
+     * @param count                 The number of transcription objects that are to be generated
+     * @param hearingCount          The number of hearing against the transcription
+     * @param caseCount             The number of cases against the transcription
      * @param isManualTranscription The manual transcription flag
-     * @param noCourtHouse Ensure we do not have a court house against the transcription i.e. use hearing instead
-     * @param associatedWorkflow Whether a workflow is generated against the transcription
+     * @param noCourtHouse          Ensure we do not have a court house against the transcription i.e. use hearing instead
+     * @param associatedWorkflow    Whether a workflow is generated against the transcription
      * @return The list of generated media entities in chronological order
      */
     @SuppressWarnings("PMD.AvoidInstantiatingObjectsInLoops")
@@ -87,7 +88,7 @@ public class TranscriptionDocumentStub {
             courtroomEntity = courtroomStub.createCourtroomUnlessExists(
                 TranscriptionDocumentSubStringQueryEnum.COURT_HOUSE.getQueryString(Integer.toString(transriptionDocumentCount)),
                 TranscriptionDocumentSubStringQueryEnum.COURT_HOUSE
-                    .getQueryString(UUID.randomUUID() + Integer.toString(transriptionDocumentCount)));
+                    .getQueryString(UUID.randomUUID() + Integer.toString(transriptionDocumentCount)), userAccountRepository.getReferenceById(0));
 
             for (int i = 0; i < caseCount; i++) {
                 caseEntity = courtCaseStub.createAndSaveMinimalCourtCase(TranscriptionDocumentSubStringQueryEnum.COURT_HOUSE.getQueryString(
@@ -97,7 +98,7 @@ public class TranscriptionDocumentStub {
 
             HearingEntity hearingEntity;
             for (int i = 0; i < hearingCount; i++) {
-                 hearingEntity = retrieveCoreObjectService.retrieveOrCreateHearing(
+                hearingEntity = retrieveCoreObjectService.retrieveOrCreateHearing(
                     courtroomEntity.getCourthouse().getCourthouseName(),
                     courtroomEntity.getName(),
                     caseEntityList.get(0).getCaseNumber(),
@@ -139,10 +140,9 @@ public class TranscriptionDocumentStub {
             }
 
             TranscriptionEntity transcriptionEntity = transcriptionStub.createTranscription(hearingEntityList,
-                                                                          caseEntityList,
-                                                                          noCourtHouse ? null : courtroomEntity,
-                                                                          requestedBy, workflowEntities, isManualTranscription);
-
+                                                                                            caseEntityList,
+                                                                                            noCourtHouse ? null : courtroomEntity,
+                                                                                            requestedBy, workflowEntities, isManualTranscription);
 
 
             transcriptionDocumentEntity.setTranscription(transcriptionEntity);

@@ -3,8 +3,10 @@ package uk.gov.hmcts.darts.common.entity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
+import jakarta.persistence.IdClass;
 import lombok.Getter;
 import org.hibernate.annotations.Immutable;
+import uk.gov.hmcts.darts.common.entity.compositeid.HearingReportingRestrictionsId;
 
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
@@ -13,18 +15,20 @@ import java.util.List;
 @Entity(name = HearingReportingRestrictionsEntity.VIEW_NAME)
 @Immutable
 @Getter
+@IdClass(HearingReportingRestrictionsId.class)
 public class HearingReportingRestrictionsEntity {
     public static final String VIEW_NAME = "hearing_reporting_restrictions";
 
+    @Column(name = "eve_id")
     @Id
-    @Column(name = "id")
-    Long id;
+    Integer eveId;
+
+    @Column(name = "hea_id")
+    @Id
+    Integer hearingId;
 
     @Column(name = "cas_id")
     Integer caseId;
-
-    @Column(name = "hea_id")
-    Integer hearingId;
 
     @Column(name = "event_name")
     String eventName;
@@ -38,9 +42,6 @@ public class HearingReportingRestrictionsEntity {
     @Column(name = "active")
     boolean active;
 
-    @Column(name = "eve_id")
-    Integer eventId;
-
     @Column(name = "ctr_id")
     Integer courtroomId;
 
@@ -51,7 +52,7 @@ public class HearingReportingRestrictionsEntity {
     String eventObjectId;
 
     @Column(name = "event_id")
-    Integer mojEventId;
+    Integer eventId;
 
     @Column(name = "event_text")
     String eventText;

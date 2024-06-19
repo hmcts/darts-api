@@ -138,12 +138,12 @@ public class AudioTransformationServiceImpl implements AudioTransformationServic
 
     @Override
     public void handleKedaInvocationForMediaRequests() {
-        var openRequests = mediaRequestService.getOldestMediaRequestByStatus(OPEN);
+        var openRequest = mediaRequestService.getOldestMediaRequestByStatus(OPEN);
 
-        if (openRequests.isEmpty()) {
+        if (openRequest.isEmpty()) {
             log.info("No open requests found for ATS to process.");
         } else {
-            openRequests.ifPresent(openMediaRequests -> processAudioRequest(openMediaRequests.getId()));
+            openRequest.ifPresent(openMediaRequest -> processAudioRequest(openMediaRequest.getId()));
         }
 
         unstructuredDataHelper.waitForAllJobsToFinish();
@@ -164,15 +164,17 @@ public class AudioTransformationServiceImpl implements AudioTransformationServic
 
         try {
             Random random = SecureRandom.getInstanceStrong();
-            Thread.sleep(random.nextInt(500));
+            Thread.sleep(random.nextInt(1000));
+            log.info("About to read Media Request Detail for Media Request Id : {}", requestId);
             mediaRequestEntity = mediaRequestService.getMediaRequestEntityById(requestId);
+            log.info("The Media request {} status is : {}", requestId, mediaRequestEntity.getStatus());
             if (PROCESSING.equals(mediaRequestEntity.getStatus())) {
                 return;
             }
 
             log.info("Starting processing for audio request id: {}", requestId);
             mediaRequestService.updateAudioRequestStatus(mediaRequestEntity, PROCESSING);
-
+            log.info("The Updated Media request {} status is : {}", requestId, mediaRequestEntity.getStatus());
             hearingEntity = mediaRequestEntity.getHearing();
 
             logApi.atsProcessingUpdate(mediaRequestEntity);
@@ -200,6 +202,7 @@ public class AudioTransformationServiceImpl implements AudioTransformationServic
             boolean hasAllMediaBeenCopiedFromInboundStorage = eodService.hasAllMediaBeenCopiedFromInboundStorage(filteredMediaEntities);
 
             if (!hasAllMediaBeenCopiedFromInboundStorage) {
+                log.info("Skipping process for audio request id: {} as not All the media from Inbound has reached Unstructured data store", requestId);
                 mediaRequestService.updateAudioRequestStatus(requestId, OPEN);
                 return;
             }

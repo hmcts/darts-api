@@ -29,6 +29,7 @@ import uk.gov.hmcts.darts.common.entity.AnnotationEntity;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionEntity;
+import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.enums.SecurityRoleEnum;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.common.repository.AnnotationRepository;
@@ -72,7 +73,9 @@ public class CaseServiceImpl implements CaseService {
             request.getCourtroom(),
             request.getDate()
         );
-        createCourtroomIfMissing(hearings, request);
+
+        UserAccountEntity currentUser = authorisationApi.getCurrentUser();
+        createCourtroomIfMissing(hearings, request, currentUser);
 
         return casesMapper.mapToScheduledCases(hearings);
     }
@@ -102,10 +105,10 @@ public class CaseServiceImpl implements CaseService {
         return caseRepository.findById(caseId).orElseThrow(() -> new DartsApiException(CaseApiError.CASE_NOT_FOUND));
     }
 
-    private void createCourtroomIfMissing(List<HearingEntity> hearings, GetCasesRequest request) {
+    private void createCourtroomIfMissing(List<HearingEntity> hearings, GetCasesRequest request, UserAccountEntity userAccount) {
         if (CollectionUtils.isEmpty(hearings)) {
             //find out if courthouse or courtroom are missing.
-            retrieveCoreObjectService.retrieveOrCreateCourtroom(request.getCourthouse(), request.getCourtroom());
+            retrieveCoreObjectService.retrieveOrCreateCourtroom(request.getCourthouse(), request.getCourtroom(), userAccount);
         }
     }
 

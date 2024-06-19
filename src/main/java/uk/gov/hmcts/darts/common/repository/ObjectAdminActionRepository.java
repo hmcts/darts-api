@@ -9,4 +9,6 @@ import java.util.List;
 @Repository
 public interface ObjectAdminActionRepository extends JpaRepository<ObjectAdminActionEntity, Integer> {
     List<ObjectAdminActionEntity> findByTranscriptionDocument_Id(Integer transcriptionDocumentId);
+
+    List<ObjectAdminActionEntity> findByMedia_Id(Integer transcriptionDocumentId);
 }

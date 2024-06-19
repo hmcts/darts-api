@@ -43,7 +43,7 @@ class AudioControllerGetMediaRequestTest extends IntegrationBase {
     @Test
     void allowsSuperAdmin() throws Exception {
         given.anAuthenticatedUserWithGlobalAccessAndRole(SUPER_ADMIN);
-        var persistedMediaRequest = dartsDatabase.saveWithTransientEntities(minimalRequestData());
+        var persistedMediaRequest = dartsDatabase.saveWithMediaRequestWithTransientEntities(minimalRequestData());
 
         mockMvc.perform(
                 get(ENDPOINT + String.valueOf(persistedMediaRequest.getId()))
