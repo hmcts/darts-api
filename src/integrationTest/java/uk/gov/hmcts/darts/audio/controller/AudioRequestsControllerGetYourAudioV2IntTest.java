@@ -201,6 +201,7 @@ class AudioRequestsControllerGetYourAudioV2IntTest extends IntegrationBase {
         String actualJson = mvcResult.getResponse().getContentAsString();
         String expectedJson = """
             {
+              "media_request_details":[],
               "transformed_media_details": [
                 {
                   "media_request_id": 5,
