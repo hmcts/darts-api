@@ -11,6 +11,7 @@ import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionDocumentEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionEntity;
+import uk.gov.hmcts.darts.common.entity.TranscriptionWorkflowEntity;
 import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
 
 import java.util.List;
@@ -27,7 +28,9 @@ public abstract class CaseObjectsCaseDocumentMapper {
     public abstract MediaCaseDocument mapMedia(MediaEntity mediaEntity);
 
     @Mappings({
-        @Mapping(source = "transcriptionDocumentEntities", target = "transcriptionDocuments")
+        @Mapping(source = "transcriptionDocumentEntities", target = "transcriptionDocuments"),
+        @Mapping(source = "transcriptionCommentEntities", target = "transcriptionComments"),
+        @Mapping(source = "transcriptionWorkflowEntities", target = "transcriptionWorkflows")
     })
     public abstract TranscriptionCaseDocument map(TranscriptionEntity transcriptionEntity);
 
@@ -37,4 +40,8 @@ public abstract class CaseObjectsCaseDocumentMapper {
     public abstract TranscriptionCaseDocument.TranscriptionDocumentCaseDocument mapTranscriptionDocument(TranscriptionDocumentEntity transcriptionDocumentEntity);
 
     public abstract List<ExternalObjectDirectoryCaseDocument> mapEods(List<ExternalObjectDirectoryEntity> entities);
+
+    Integer convert(TranscriptionWorkflowEntity entity) {
+        return entity.getId();
+    }
 }

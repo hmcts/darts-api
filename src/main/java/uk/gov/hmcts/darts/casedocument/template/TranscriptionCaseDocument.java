@@ -31,8 +31,8 @@ public class TranscriptionCaseDocument extends CreatedModifiedCaseDocument {
     private final OffsetDateTime deletedTimestamp;
     private final String chronicleId;
     private final String antecedentId;
-//    private final List<TranscriptionCommentEntity> transcriptionCommentEntities;
-//    private final List<TranscriptionWorkflowEntity> transcriptionWorkflowEntities;
+    private final List<TranscriptionCommentCaseDocument> transcriptionComments;
+    private final List<TranscriptionWorkflowCaseDocument> transcriptionWorkflows;
     private final List<TranscriptionDocumentCaseDocument> transcriptionDocuments;
 
     @Data
@@ -55,5 +55,25 @@ public class TranscriptionCaseDocument extends CreatedModifiedCaseDocument {
         private final List<ObjectAdminActionCaseDocument> adminActions;
     }
 
+    @EqualsAndHashCode(callSuper = true)
+    @Data
+    public static class TranscriptionCommentCaseDocument extends CreatedModifiedCaseDocument {
 
+        private final Integer id;
+        private final Integer transcriptionWorkflow;
+        private String legacyTranscriptionObjectId;
+        private String comment;
+        private OffsetDateTime commentTimestamp;
+        private Integer authorUserId;
+    }
+
+    @Data
+    public static class TranscriptionWorkflowCaseDocument {
+
+        private final Integer id;
+        private TranscriptionStatusEntity transcriptionStatus;
+        private Integer workflowActor;
+        private OffsetDateTime workflowTimestamp;
+        private List<TranscriptionCommentCaseDocument> transcriptionComments;
+    }
 }
