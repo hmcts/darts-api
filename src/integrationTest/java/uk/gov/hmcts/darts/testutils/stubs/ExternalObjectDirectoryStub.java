@@ -4,6 +4,7 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.jeasy.random.EasyRandom;
 import org.jeasy.random.EasyRandomParameters;
+import org.jeasy.random.randomizers.range.IntegerRangeRandomizer;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.darts.common.entity.AnnotationDocumentEntity;
 import uk.gov.hmcts.darts.common.entity.CaseDocumentEntity;
@@ -206,6 +207,7 @@ public class ExternalObjectDirectoryStub {
 
     public ExternalObjectDirectoryEntity createEodWithRandomValues() {
         EasyRandomParameters parameters = new EasyRandomParameters()
+            .randomize(Integer.class, new IntegerRangeRandomizer(1, 100))
             .collectionSizeRange(1, 1)
             .overrideDefaultInitialization(true);
 
