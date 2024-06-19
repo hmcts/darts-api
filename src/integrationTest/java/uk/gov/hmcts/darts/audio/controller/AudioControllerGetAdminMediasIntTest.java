@@ -10,6 +10,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import uk.gov.hmcts.darts.audio.enums.AudioRequestOutputFormat;
+import uk.gov.hmcts.darts.audio.exception.AudioApiError;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
@@ -20,9 +21,11 @@ import uk.gov.hmcts.darts.testutils.IntegrationBase;
 import uk.gov.hmcts.darts.testutils.stubs.MediaRequestStub;
 import uk.gov.hmcts.darts.testutils.stubs.SuperAdminUserStub;
 import uk.gov.hmcts.darts.testutils.stubs.UserAccountStub;
+import uk.gov.hmcts.darts.transcriptions.model.Problem;
 
 import java.time.OffsetDateTime;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -96,7 +99,7 @@ class AudioControllerGetAdminMediasIntTest extends IntegrationBase {
     }
 
     @Test
-    void getMediaIsSuccessfulAllParameters() throws Exception {
+    void getMediaIsBadRequestFailureAllParameters() throws Exception {
 
         transformedMedia = setupData();
         mediaEntity = setupMedia(transformedMedia);
@@ -109,18 +112,12 @@ class AudioControllerGetAdminMediasIntTest extends IntegrationBase {
                                                   .queryParam("start_at", transformedMedia.getStartTime().toString())
                                                   .queryParam("end_at", transformedMedia.getEndTime().toString())
             )
-            .andExpect(status().isOk())
+            .andExpect(status().isBadRequest())
             .andReturn();
 
-        // then
-        String actualJson = mvcResult.getResponse().getContentAsString();
-        String expectedJson = getExpectedJson(mediaEntity.getId(),
-                                              transformedMedia.getMediaRequest().getHearing().getCourtroom().getCourthouse()
-                                                  .getId(),
-                                              transformedMedia.getMediaRequest().getHearing().getCourtroom().getId(),
-                                              transformedMedia.getMediaRequest().getHearing().getCourtCase().getId(),
-                                              transformedMedia.getMediaRequest().getHearing().getId());
-        JSONAssert.assertEquals(expectedJson, actualJson, JSONCompareMode.NON_EXTENSIBLE);
+        String content = mvcResult.getResponse().getContentAsString();
+        Problem problemResponse = objectMapper.readValue(content, Problem.class);
+        assertEquals(AudioApiError.ADMIN_SEARCH_CRITERIA_NOT_SUITABLE.getType(), problemResponse.getType());
     }
 
     @Test
@@ -136,32 +133,6 @@ class AudioControllerGetAdminMediasIntTest extends IntegrationBase {
                                                               transformedMedia.getMediaRequest()
                                                                   .getHearing().getId() + "," + transformedMedia.getMediaRequest()
                                                                   .getHearing().getId())
-            )
-            .andExpect(status().isOk())
-            .andReturn();
-
-        // then
-        String actualJson = mvcResult.getResponse().getContentAsString();
-        String expectedJson = getExpectedJson(mediaEntity.getId(),
-                                              transformedMedia.getMediaRequest().getHearing().getCourtroom().getCourthouse().getId(),
-                                              transformedMedia.getMediaRequest().getHearing().getCourtroom().getId(),
-                                              transformedMedia.getMediaRequest().getHearing().getCourtCase().getId(),
-                                              transformedMedia.getMediaRequest().getHearing().getId());
-        JSONAssert.assertEquals(expectedJson, actualJson, JSONCompareMode.NON_EXTENSIBLE);
-    }
-
-    @Test
-    void getMediaIsSuccessfulWithTransformedMediaIdAndHearing() throws Exception {
-
-        // given
-        transformedMedia = setupData();
-        mediaEntity = setupMedia(transformedMedia);
-
-        // when
-        MvcResult mvcResult = mockMvc.perform(get(ENDPOINT_URL)
-                                                  .queryParam("transformed_media_id", transformedMedia.getId().toString())
-                                                  .queryParam("hearing_ids", transformedMedia.getMediaRequest()
-                                                      .getHearing().getId() + "," + transformedMedia.getMediaRequest().getHearing().getId())
             )
             .andExpect(status().isOk())
             .andReturn();

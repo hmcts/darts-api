@@ -26,10 +26,12 @@ import uk.gov.hmcts.darts.audio.model.AdminMediaSearchResponseItem;
 import uk.gov.hmcts.darts.audio.model.EnhancedMediaRequestInfo;
 import uk.gov.hmcts.darts.audio.model.MediaHideRequest;
 import uk.gov.hmcts.darts.audio.model.MediaHideResponse;
+import uk.gov.hmcts.darts.audio.model.MediaSearchData;
 import uk.gov.hmcts.darts.audio.model.TransformedMediaDetailsDto;
 import uk.gov.hmcts.darts.audio.service.MediaRequestService;
 import uk.gov.hmcts.darts.audio.validation.AudioMediaPatchRequestValidator;
 import uk.gov.hmcts.darts.audio.validation.MediaHideOrShowValidator;
+import uk.gov.hmcts.darts.audio.validation.SearchMediaValidator;
 import uk.gov.hmcts.darts.audiorequests.model.AudioNonAccessedResponse;
 import uk.gov.hmcts.darts.audiorequests.model.AudioRequestDetails;
 import uk.gov.hmcts.darts.audiorequests.model.AudioRequestType;
@@ -123,6 +125,7 @@ public class MediaRequestServiceImpl implements MediaRequestService {
 
     private final ObjectHiddenReasonRepository objectHiddenReasonRepository;
 
+    private final SearchMediaValidator searchMediaValidator;
 
     @Override
     public Optional<MediaRequestEntity> getOldestMediaRequestByStatus(MediaRequestStatus status) {
@@ -502,6 +505,9 @@ public class MediaRequestServiceImpl implements MediaRequestService {
     @Override
     public List<AdminMediaSearchResponseItem> adminMediaSearch(Integer transformedMediaId, List<Integer> hearingIds, OffsetDateTime startAt,
                                                                OffsetDateTime endAt) {
+        MediaSearchData searchData = new MediaSearchData(transformedMediaId, hearingIds, startAt, endAt);
+        searchMediaValidator.validate(searchData);
+
         List<TransformedMediaEntity> mediaRequestEntities = transformedMediaRepository
             .findTransformMediaWithStartAndEndDateTimeRange(transformedMediaId, hearingIds, startAt, endAt);
         if (mediaRequestEntities.isEmpty()) {

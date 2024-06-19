@@ -24,6 +24,7 @@ import uk.gov.hmcts.darts.audio.model.AdminMediaSearchResponseItem;
 import uk.gov.hmcts.darts.audio.model.MediaHideRequest;
 import uk.gov.hmcts.darts.audio.model.MediaHideResponse;
 import uk.gov.hmcts.darts.audio.validation.MediaHideOrShowValidator;
+import uk.gov.hmcts.darts.audio.validation.SearchMediaValidator;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
@@ -79,6 +80,10 @@ class MediaRequestServiceImplAdminMediaSearchTest {
     @Mock
     private CurrentTimeHelper currentTimeHelper;
 
+    @Mock
+    private SearchMediaValidator searchMediaValidator;
+
+
     @Captor
     ArgumentCaptor<ObjectAdminActionEntity> objectAdminActionEntityArgumentCaptor;
 
@@ -119,6 +124,7 @@ class MediaRequestServiceImplAdminMediaSearchTest {
             [
              ]""";
         JSONAssert.assertEquals(expectedString, responseString, JSONCompareMode.NON_EXTENSIBLE);
+        verify(searchMediaValidator, times(1)).validate(Mockito.notNull());
     }
 
     @Test
@@ -181,6 +187,7 @@ class MediaRequestServiceImplAdminMediaSearchTest {
                }
              ]""";
         JSONAssert.assertEquals(expectedString, responseString, JSONCompareMode.NON_EXTENSIBLE);
+        verify(searchMediaValidator, times(1)).validate(Mockito.notNull());
     }
 
     @Test
@@ -219,7 +226,6 @@ class MediaRequestServiceImplAdminMediaSearchTest {
             .thenReturn(List.of(transformedMedia));
         when(mediaRepository.findAllByHearingId(hearing.getId()))
             .thenReturn(List.of(mediaEntity, mediaEntity2));
-
 
         List<AdminMediaSearchResponseItem> response = mediaRequestService.adminMediaSearch(transformedMediaId, hearingIds, startAt, endAt);
 
@@ -273,6 +279,8 @@ class MediaRequestServiceImplAdminMediaSearchTest {
             ]""";
         JSONAssert.assertEquals(expectedString,
                                 responseString, JSONCompareMode.NON_EXTENSIBLE);
+
+        verify(searchMediaValidator, times(1)).validate(Mockito.notNull());
     }
 
     @NotNull
