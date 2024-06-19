@@ -36,5 +36,6 @@ public enum AuditActivity {
     REVISE_RETENTION_POLICY(27),
     RUN_JOB_MANUALLY(28),
     ENABLE_DISABLE_JOB(29);
+
     private final Integer id;
 }
