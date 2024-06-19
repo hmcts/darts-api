@@ -8,6 +8,7 @@ import uk.gov.hmcts.darts.casedocument.mapper.CourtCaseDocumentMapper;
 import uk.gov.hmcts.darts.casedocument.template.CourtCaseDocument;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
+import uk.gov.hmcts.darts.common.repository.CaseDocumentRepository;
 import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 import uk.gov.hmcts.darts.testutils.stubs.CourtCaseStub;
@@ -23,6 +24,8 @@ class CourtCaseDocumentMapperIntTest extends IntegrationBase {
 
     @SpyBean
     ExternalObjectDirectoryRepository eodRepository;
+    @SpyBean
+    CaseDocumentRepository caseDocumentRepository;
 
     @Autowired
     CourtCaseStub courtCaseStub;
@@ -39,6 +42,9 @@ class CourtCaseDocumentMapperIntTest extends IntegrationBase {
         when(eodRepository.findByTranscriptionDocumentEntity(any())).thenReturn(List.of(transcriptionDocumentEodEntity));
         ExternalObjectDirectoryEntity annotationDocumentEodEntity = dartsDatabase.getExternalObjectDirectoryStub().createEodWithRandomValues();
         when(eodRepository.findByAnnotationDocumentEntity(any())).thenReturn(List.of(annotationDocumentEodEntity));
+        when(caseDocumentRepository.findByCourtCase(any())).thenReturn(dartsDatabase.getCaseDocumentStub().ra)
+        ExternalObjectDirectoryEntity caseDocumentEodEntity = dartsDatabase.getExternalObjectDirectoryStub().createEodWithRandomValues();
+        when(eodRepository.findByCaseDocument(any())).thenReturn(List.of(caseDocumentEodEntity));
 
         CourtCaseEntity cc = courtCaseStub.createCourtCaseAndAssociatedEntitiesWithRandomValues();
 

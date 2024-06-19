@@ -17,7 +17,9 @@ import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
 
 import java.util.List;
 
-@Mapper(componentModel = "spring", uses = { BasicCaseDocumentConversions.class, ExternalObjectDirectoryRepository.class })
+@Mapper(componentModel = "spring", uses = {
+    BasicCaseDocumentConversions.class, ExternalObjectDirectoryRepository.class
+})
 public abstract class CaseObjectsCaseDocumentMapper {
 
     @Autowired
