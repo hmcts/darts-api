@@ -1,0 +1,36 @@
+[
+  {
+    "case_number": "Case1",
+    "courthouse": {
+      "display_name": "SWANSEA"
+    },
+    "courtrooms": [
+      {
+        "name": "courtroom1"
+      }
+    ],
+    "judges": [
+      "aJudge"
+    ],
+    "defendants": [
+      "aDefendant"
+    ]
+  },
+  {
+    "case_number": "Case9",
+    "courthouse": {
+      "display_name": "LONDON"
+    },
+    "courtrooms": [
+      {
+        "name": "courtroomLondon"
+      }
+    ],
+    "judges": [
+      "Judge3a"
+    ],
+    "defendants": [
+      "aDefendant"
+    ]
+  }
+]
