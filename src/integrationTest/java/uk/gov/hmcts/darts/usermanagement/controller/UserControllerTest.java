@@ -32,6 +32,7 @@ import uk.gov.hmcts.darts.usermanagement.model.UserPatch;
 import uk.gov.hmcts.darts.usermanagement.model.UserWithIdAndTimestamps;
 
 import java.time.OffsetDateTime;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
@@ -39,6 +40,7 @@ import java.util.Set;
 
 import static java.time.OffsetDateTime.now;
 import static java.time.ZoneOffset.UTC;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -130,9 +132,9 @@ class UserControllerTest extends IntegrationBase {
         List<TranscriptionWorkflowEntity> workflowEntityAfter
             = dartsDatabase.getTranscriptionWorkflowRepository().findByTranscriptionOrderByWorkflowTimestampDesc(transcription);
 
-        Assertions.assertEquals(1, rolledBackTranscription.size());
-        Assertions.assertEquals(transcription.getId(), rolledBackTranscription.get(0));
-        Assertions.assertEquals(workflowEntityBefore.size() + 1, workflowEntityAfter.size());
+        assertEquals(1, rolledBackTranscription.size());
+        assertEquals(transcription.getId(), rolledBackTranscription.get(0));
+        assertEquals(workflowEntityBefore.size() + 1, workflowEntityAfter.size());
         Assertions.assertTrue(containsApprovedWorkflow(workflowEntityAfter));
     }
 
@@ -192,9 +194,9 @@ class UserControllerTest extends IntegrationBase {
         List<TranscriptionWorkflowEntity> workflowEntityAfter
             = dartsDatabase.getTranscriptionWorkflowRepository().findByTranscriptionOrderByWorkflowTimestampDesc(transcription);
 
-        Assertions.assertEquals(1, rolledBackTranscription.size());
-        Assertions.assertEquals(transcription.getId(), rolledBackTranscription.get(0));
-        Assertions.assertEquals(workflowEntityBefore.size() + 1, workflowEntityAfter.size());
+        assertEquals(1, rolledBackTranscription.size());
+        assertEquals(transcription.getId(), rolledBackTranscription.get(0));
+        assertEquals(workflowEntityBefore.size() + 1, workflowEntityAfter.size());
         Assertions.assertTrue(containsApprovedWorkflow(workflowEntityAfter));
     }
 
@@ -252,8 +254,8 @@ class UserControllerTest extends IntegrationBase {
         List<TranscriptionWorkflowEntity> workflowEntityAfter
             = dartsDatabase.getTranscriptionWorkflowRepository().findByTranscriptionOrderByWorkflowTimestampDesc(transcription);
 
-        Assertions.assertNull(rolledBackTranscription);
-        Assertions.assertEquals(workflowEntityBefore.size(), workflowEntityAfter.size());
+        assertEquals(Collections.emptyList(), rolledBackTranscription);
+        assertEquals(workflowEntityBefore.size(), workflowEntityAfter.size());
     }
 
     @Test
@@ -297,7 +299,7 @@ class UserControllerTest extends IntegrationBase {
 
         Problem problem = mapper.readValue(mvcResult.getResponse().getContentAsString(),
                                                                            Problem.class);
-        Assertions.assertEquals(AuthorisationError.UNABLE_TO_DEACTIVATE_USER.getErrorTypeNumeric(), problem.getType().toString());
+        assertEquals(AuthorisationError.UNABLE_TO_DEACTIVATE_USER.getErrorTypeNumeric(), problem.getType().toString());
     }
 
     @Test
@@ -325,7 +327,7 @@ class UserControllerTest extends IntegrationBase {
 
         Problem problem = mapper.readValue(mvcResult.getResponse().getContentAsString(),
                                            Problem.class);
-        Assertions.assertEquals(AuthorisationError.USER_NOT_AUTHORISED_TO_USE_PAYLOAD_CONTENT.getErrorTypeNumeric(), problem.getType().toString());
+        assertEquals(AuthorisationError.USER_NOT_AUTHORISED_TO_USE_PAYLOAD_CONTENT.getErrorTypeNumeric(), problem.getType().toString());
     }
 
     @Test
@@ -353,7 +355,7 @@ class UserControllerTest extends IntegrationBase {
 
         Problem problem = mapper.readValue(mvcResult.getResponse().getContentAsString(),
                                            Problem.class);
-        Assertions.assertEquals(AuthorisationError.USER_NOT_AUTHORISED_TO_ACTIVATE_USER.getErrorTypeNumeric(), problem.getType().toString());
+        assertEquals(AuthorisationError.USER_NOT_AUTHORISED_TO_ACTIVATE_USER.getErrorTypeNumeric(), problem.getType().toString());
     }
 
     private boolean containsApprovedWorkflow(List<TranscriptionWorkflowEntity> transcriptionWorkflowEntities) {

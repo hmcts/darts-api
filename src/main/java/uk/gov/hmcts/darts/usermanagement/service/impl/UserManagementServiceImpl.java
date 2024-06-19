@@ -218,7 +218,7 @@ public class UserManagementServiceImpl implements UserManagementService {
     }
 
     private void mapSecurityGroupsToUserEntity(List<Integer> securityGroups, UserAccountEntity userAccountEntity) {
-        if (securityGroups != null) {
+        if (securityGroups != null && !securityGroups.isEmpty()) {
             Set<SecurityGroupEntity> securityGroupEntities = securityGroups.stream()
                 .map(securityGroupRepository::findById)
                 .map(Optional::orElseThrow)
