@@ -10,8 +10,8 @@ import uk.gov.hmcts.darts.common.entity.CaseManagementRetentionEntity;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 
-@Mapper(componentModel = "spring", uses = {BasicMapper.class, MediaCaseDocumentMapper.class})
-public interface CourtCaseDocumentMapper extends CourtCaseMapper {
+@Mapper(componentModel = "spring", uses = {BasicMapper.class, CaseObjectsCaseDocumentMapper.class})
+public interface CourtCaseDocumentMapper {
 
     @Mappings({
         @Mapping(source = "defendantList", target = "defendants"),
@@ -33,9 +33,4 @@ public interface CourtCaseDocumentMapper extends CourtCaseMapper {
         @Mapping(source = "mediaList", target = "medias"),
     })
     HearingCaseDocument map(HearingEntity hearingEntity);
-
-//    @Mappings({
-//        @Mapping(expression = "java(externalObjectDirectoryRepository.findByMedia(mediaEntity))", target = "externalObjectDirectories"),
-//    })
-//    List<MediaCaseDocument> mapListCustom(List<MediaEntity> value);
 }

@@ -5,7 +5,7 @@ import lombok.EqualsAndHashCode;
 
 @Data
 @EqualsAndHashCode(callSuper = true)
-public class ProsecutorCourtCase extends CreatedModifiedCaseDocument {
+public class DefendantCaseDocument extends CreatedModifiedCaseDocument {
 
     private final Integer id;
     private final String name;
