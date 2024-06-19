@@ -24,7 +24,7 @@ public class UserActivateValidator implements Validator<IdRequest<UserPatch>> {
         if (request.getPayload().getActive()) {
             Optional<UserAccountEntity> fndUser = userAccountRepository.findById(request.getId());
 
-            if (fndUser.isPresent()) {
+            if (fndUser.isPresent() && !fndUser.get().isActive()) {
                 UserAccountEntity userAccountEntity = fndUser.get();
                 String emailAddress = userAccountEntity.getEmailAddress();
                 String fullName = userAccountEntity.getUserFullName();

@@ -34,6 +34,21 @@ class UserActivateValidatorTest {
         UserAccountEntity entity = new UserAccountEntity();
         entity.setUserFullName("fullname");
         entity.setEmailAddress("test@hmcts.net");
+        entity.setActive(false);
+
+        UserPatch patch = new UserPatch();
+        patch.setActive(true);
+
+        when(userAccountRepository.findById(userId)).thenReturn(Optional.of(entity));
+        userAuthoriseValidator.validate(new IdRequest<>(patch, userId));
+    }
+
+    @Test
+    void testActivateAlreadyActivatedSoNoValidation() {
+        Integer userId = 200;
+
+        UserAccountEntity entity = new UserAccountEntity();
+        entity.setActive(true);
 
         UserPatch patch = new UserPatch();
         patch.setActive(true);
@@ -48,6 +63,7 @@ class UserActivateValidatorTest {
 
         UserAccountEntity entity = new UserAccountEntity();
         entity.setEmailAddress("test@hmcts.net");
+        entity.setActive(false);
 
         UserPatch patch = new UserPatch();
         patch.setActive(true);
@@ -63,6 +79,7 @@ class UserActivateValidatorTest {
 
         UserAccountEntity entity = new UserAccountEntity();
         entity.setUserFullName("fullname");
+        entity.setActive(false);
 
         UserPatch patch = new UserPatch();
         patch.setActive(true);
@@ -77,6 +94,7 @@ class UserActivateValidatorTest {
         Integer userId = 200;
 
         UserAccountEntity entity = new UserAccountEntity();
+        entity.setActive(false);
 
         UserPatch patch = new UserPatch();
         patch.setActive(true);
