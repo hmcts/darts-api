@@ -181,7 +181,7 @@ class UserManagementServiceImplTest {
 
         UserWithIdAndTimestamps resultList = service.modifyUser(userId, patch);
 
-        assertNull(resultList.getRolledBackTranscriptRequests());
+        assertEquals(Collections.emptyList(), resultList.getRolledBackTranscriptRequests());
         assertEquals(description, resultList.getDescription());
         assertEquals(fullName, resultList.getFullName());
         assertEquals(Arrays.asList(secGroupId), resultList.getSecurityGroupIds());
@@ -224,7 +224,7 @@ class UserManagementServiceImplTest {
 
         UserWithIdAndTimestamps resultList = service.modifyUser(userId, patch);
 
-        assertNull(resultList.getRolledBackTranscriptRequests());
+        assertEquals(Collections.emptyList(), resultList.getRolledBackTranscriptRequests());
         assertEquals(description, resultList.getDescription());
         assertEquals(fullName, resultList.getFullName());
         assertEquals(Arrays.asList(secGroupId), resultList.getSecurityGroupIds());
