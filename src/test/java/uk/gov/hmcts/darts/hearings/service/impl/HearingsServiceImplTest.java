@@ -4,7 +4,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.darts.authorisation.api.AuthorisationApi;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
@@ -28,6 +27,7 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class HearingsServiceImplTest {
@@ -79,11 +79,11 @@ class HearingsServiceImplTest {
         );
 
         EventHandlerEntity eventType = mock(EventHandlerEntity.class);
-        Mockito.when(eventType.getEventName()).thenReturn("TestEvent");
+        when(eventType.getEventName()).thenReturn("TestEvent");
 
         List<EventEntity> event = List.of(
             CommonTestDataUtil.createEventWith("LOG", "Test", hearingEntity, eventType));
-        Mockito.when(eventRepository.findAllByHearingId(hearingEntity.getId())).thenReturn(event);
+        when(eventRepository.findAllByHearingId(hearingEntity.getId())).thenReturn(event);
 
         List<EventResponse> eventResponses = service.getEvents(hearingEntity.getId());
         assertEquals(1, eventResponses.size());
