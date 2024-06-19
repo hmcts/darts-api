@@ -13,10 +13,14 @@ ADD lib/azcopy_linux_amd64_10.24.0.tar.gz /usr/local/bin
 RUN cp -p azcopy*/azcopy /usr/bin
 RUN chmod 777 /usr/bin/azcopy
 
+ADD lib/gandi-intermediate.pem /tmp/gandi-intermediate.pem
+RUN keytool -import -trustcacerts -alias gandi -file /tmp/gandi-intermediate.pem -keystore /usr/local/openjdk-17/lib/security/cacerts -storepass changeit -noprompt
+
  # renovate: datasource=github-releases depName=microsoft/ApplicationInsights-Java
 FROM hmctspublic.azurecr.io/base/java:17-distroless
 COPY --from=build-env /usr/bin/ffmpeg /usr/bin
 COPY --from=build-env /usr/bin/azcopy /usr/bin
+COPY --from=build-env /usr/local/openjdk-17/lib/security/cacerts /usr/local/openjdk-17/lib/security
 
 COPY lib/applicationinsights.json /opt/app/
 COPY build/libs/darts-api.jar /opt/app/
