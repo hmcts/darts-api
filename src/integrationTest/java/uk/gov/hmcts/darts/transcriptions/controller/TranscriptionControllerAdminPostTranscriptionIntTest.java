@@ -43,7 +43,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @AutoConfigureMockMvc
 class TranscriptionControllerAdminPostTranscriptionIntTest extends IntegrationBase {
 
-    private static final String ENDPOINT_URL = "/admin/transcription-document/${TRANSACTION_DOCUMENT_ID}/hide";
+    private static final String ENDPOINT_URL = "/admin/transcription-documents/${TRANSACTION_DOCUMENT_ID}/hide";
 
     @Autowired
     private SuperAdminUserStub superAdminUserStub;
