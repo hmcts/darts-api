@@ -109,7 +109,6 @@ public abstract class EventHandlerBase implements EventHandler {
     protected EventEntity saveEvent(DartsEvent dartsEvent, HearingEntity hearingEntity, EventHandlerEntity eventHandler) {
         var eventEntity = eventEntityFrom(dartsEvent, eventHandler);
         eventEntity.setCourtroom(hearingEntity.getCourtroom());
-        eventRepository.saveAndFlush(eventEntity);
         eventEntity.addHearing(hearingEntity);
         eventRepository.saveAndFlush(eventEntity);
         return eventEntity;
