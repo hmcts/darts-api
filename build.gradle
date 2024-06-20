@@ -317,7 +317,7 @@ repositories {
 
 ext {
   log4JVersion = "2.23.1"
-  tomcatEmbedVersion = "10.1.24"
+  tomcatEmbedVersion = "10.1.25"
 }
 
 ext['snakeyaml.version'] = '2.0'
