@@ -42,7 +42,7 @@ class CourtCaseDocumentMapperIntTest extends IntegrationBase {
         when(eodRepository.findByTranscriptionDocumentEntity(any())).thenReturn(List.of(transcriptionDocumentEodEntity));
         ExternalObjectDirectoryEntity annotationDocumentEodEntity = dartsDatabase.getExternalObjectDirectoryStub().createEodWithRandomValues();
         when(eodRepository.findByAnnotationDocumentEntity(any())).thenReturn(List.of(annotationDocumentEodEntity));
-        when(caseDocumentRepository.findByCourtCase(any())).thenReturn(dartsDatabase.getCaseDocumentStub().ra)
+        when(caseDocumentRepository.findByCourtCase(any())).thenReturn(List.of(dartsDatabase.getCaseDocumentStub().createCaseDocumentWithRandomValues()));
         ExternalObjectDirectoryEntity caseDocumentEodEntity = dartsDatabase.getExternalObjectDirectoryStub().createEodWithRandomValues();
         when(eodRepository.findByCaseDocument(any())).thenReturn(List.of(caseDocumentEodEntity));
 

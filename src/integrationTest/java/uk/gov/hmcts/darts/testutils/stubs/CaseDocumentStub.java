@@ -3,6 +3,9 @@ package uk.gov.hmcts.darts.testutils.stubs;
 import jakarta.transaction.Transactional;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import org.jeasy.random.EasyRandom;
+import org.jeasy.random.EasyRandomParameters;
+import org.jeasy.random.randomizers.range.IntegerRangeRandomizer;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.darts.common.entity.CaseDocumentEntity;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
@@ -48,5 +51,16 @@ public class CaseDocumentStub {
         caseDocumentEntity.setCreatedDateTime(OffsetDateTime.now(UTC));
         caseDocumentEntity.setLastModifiedBy(uploadedBy);
         return caseDocumentEntity;
+    }
+
+    public CaseDocumentEntity createCaseDocumentWithRandomValues() {
+        //TODO move to abstract method
+        EasyRandomParameters parameters = new EasyRandomParameters()
+            .randomize(Integer.class, new IntegerRangeRandomizer(1, 100))
+            .collectionSizeRange(1, 1)
+            .overrideDefaultInitialization(true);
+
+        EasyRandom generator = new EasyRandom(parameters);
+        return generator.nextObject(CaseDocumentEntity.class);
     }
 }
