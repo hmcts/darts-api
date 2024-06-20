@@ -42,8 +42,8 @@ class SecurityRoleFunctionalTest extends FunctionalTest {
                   },
                   {
                     "id": 3,
-                    "role_name": "JUDGE",
-                    "display_name": "Judge",
+                    "role_name": "JUDICIARY",
+                    "display_name": "Judiciary",
                     "display_state": true
                   },
                   {
@@ -68,25 +68,25 @@ class SecurityRoleFunctionalTest extends FunctionalTest {
                     "id": 7,
                     "role_name": "XHIBIT",
                     "display_name": "XHIBIT",
-                    "display_state": true
+                    "display_state": false
                   },
                   {
                     "id": 8,
                     "role_name": "CPP",
                     "display_name": "CPP",
-                    "display_state": true
+                    "display_state": false
                   },
                   {
                     "id": 9,
                     "role_name": "DAR_PC",
                     "display_name": "DAR PC",
-                    "display_state": true
+                    "display_state": false
                   },
                   {
                     "id": 10,
                     "role_name": "MID_TIER",
                     "display_name": "Mid Tier",
-                    "display_state": true
+                    "display_state": false
                   },
                   {
                     "id": 11,
@@ -99,6 +99,12 @@ class SecurityRoleFunctionalTest extends FunctionalTest {
                     "role_name": "SUPER_USER",
                     "display_name": "Super User",
                     "display_state": true
+                  },
+                  {
+                    "id": 13,
+                    "role_name": "DARTS",
+                    "display_name": "DARTS",
+                    "display_state": false
                   }
                 ]
                 """,
