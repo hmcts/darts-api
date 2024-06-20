@@ -3,11 +3,11 @@ package uk.gov.hmcts.darts.audio.mapper;
 import lombok.experimental.UtilityClass;
 import lombok.extern.slf4j.Slf4j;
 import uk.gov.hmcts.darts.audio.model.AdminActionResponse;
-import uk.gov.hmcts.darts.audio.model.AdminMediaSearchResponseCase;
-import uk.gov.hmcts.darts.audio.model.AdminMediaSearchResponseCourthouse;
-import uk.gov.hmcts.darts.audio.model.AdminMediaSearchResponseCourtroom;
-import uk.gov.hmcts.darts.audio.model.AdminMediaSearchResponseHearing;
-import uk.gov.hmcts.darts.audio.model.AdminMediaSearchResponseItem;
+import uk.gov.hmcts.darts.audio.model.GetAdminMediaResponseCase;
+import uk.gov.hmcts.darts.audio.model.GetAdminMediaResponseCourthouse;
+import uk.gov.hmcts.darts.audio.model.GetAdminMediaResponseCourtroom;
+import uk.gov.hmcts.darts.audio.model.GetAdminMediaResponseHearing;
+import uk.gov.hmcts.darts.audio.model.GetAdminMediaResponseItem;
 import uk.gov.hmcts.darts.audio.model.MediaHideResponse;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
@@ -22,18 +22,18 @@ import java.util.List;
 
 @Slf4j
 @UtilityClass
-public class AdminMediaSearchResponseMapper {
+public class GetAdminMediaResponseMapper {
 
-    public List<AdminMediaSearchResponseItem> createResponseItemList(List<MediaEntity> mediaEntities, HearingEntity hearing) {
-        List<AdminMediaSearchResponseItem> responseList = new ArrayList<>();
+    public List<GetAdminMediaResponseItem> createResponseItemList(List<MediaEntity> mediaEntities, HearingEntity hearing) {
+        List<GetAdminMediaResponseItem> responseList = new ArrayList<>();
         for (MediaEntity mediaEntity : mediaEntities) {
             responseList.add(createResponseItem(mediaEntity, hearing));
         }
         return responseList;
     }
 
-    public AdminMediaSearchResponseItem createResponseItem(MediaEntity mediaEntity, HearingEntity hearing) {
-        AdminMediaSearchResponseItem responseItem = new AdminMediaSearchResponseItem();
+    private GetAdminMediaResponseItem createResponseItem(MediaEntity mediaEntity, HearingEntity hearing) {
+        GetAdminMediaResponseItem responseItem = new GetAdminMediaResponseItem();
         responseItem.setId(mediaEntity.getId());
         responseItem.setChannel(mediaEntity.getChannel());
         responseItem.setStartAt(mediaEntity.getStart());
@@ -45,31 +45,31 @@ public class AdminMediaSearchResponseMapper {
         return responseItem;
     }
 
-    private AdminMediaSearchResponseCase createResponseCase(CourtCaseEntity courtCaseEntity) {
-        AdminMediaSearchResponseCase responseCase = new AdminMediaSearchResponseCase();
+    private GetAdminMediaResponseCase createResponseCase(CourtCaseEntity courtCaseEntity) {
+        GetAdminMediaResponseCase responseCase = new GetAdminMediaResponseCase();
         responseCase.setId(courtCaseEntity.getId());
         responseCase.setCaseNumber(courtCaseEntity.getCaseNumber());
         return responseCase;
     }
 
-    private AdminMediaSearchResponseHearing createResponseHearing(HearingEntity hearingEntity) {
-        AdminMediaSearchResponseHearing responseHearing = new AdminMediaSearchResponseHearing();
+    private GetAdminMediaResponseHearing createResponseHearing(HearingEntity hearingEntity) {
+        GetAdminMediaResponseHearing responseHearing = new GetAdminMediaResponseHearing();
         responseHearing.setId(hearingEntity.getId());
         responseHearing.setHearingDate(hearingEntity.getHearingDate());
         return responseHearing;
     }
 
-    private AdminMediaSearchResponseCourthouse createResponseCourthouse(HearingEntity hearingEntity) {
+    private GetAdminMediaResponseCourthouse createResponseCourthouse(HearingEntity hearingEntity) {
         CourthouseEntity courthouse = hearingEntity.getCourtroom().getCourthouse();
-        AdminMediaSearchResponseCourthouse responseCourthouse = new AdminMediaSearchResponseCourthouse();
+        GetAdminMediaResponseCourthouse responseCourthouse = new GetAdminMediaResponseCourthouse();
         responseCourthouse.setId(courthouse.getId());
         responseCourthouse.setDisplayName(courthouse.getDisplayName());
         return responseCourthouse;
     }
 
-    private AdminMediaSearchResponseCourtroom createResponseCourtroom(HearingEntity hearingEntity) {
+    private GetAdminMediaResponseCourtroom createResponseCourtroom(HearingEntity hearingEntity) {
         CourtroomEntity courtroom = hearingEntity.getCourtroom();
-        AdminMediaSearchResponseCourtroom responseCourthouse = new AdminMediaSearchResponseCourtroom();
+        GetAdminMediaResponseCourtroom responseCourthouse = new GetAdminMediaResponseCourtroom();
         responseCourthouse.setId(courtroom.getId());
         responseCourthouse.setDisplayName(courtroom.getName());
         return responseCourthouse;

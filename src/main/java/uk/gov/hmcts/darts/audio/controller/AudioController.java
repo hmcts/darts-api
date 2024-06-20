@@ -15,12 +15,14 @@ import uk.gov.hmcts.darts.audio.http.api.AudioApi;
 import uk.gov.hmcts.darts.audio.mapper.TransformedMediaMapper;
 import uk.gov.hmcts.darts.audio.model.AddAudioMetadataRequest;
 import uk.gov.hmcts.darts.audio.model.AdminMediaResponse;
-import uk.gov.hmcts.darts.audio.model.AdminMediaSearchResponseItem;
 import uk.gov.hmcts.darts.audio.model.AudioMetadata;
 import uk.gov.hmcts.darts.audio.model.AudioPreview;
+import uk.gov.hmcts.darts.audio.model.GetAdminMediaResponseItem;
 import uk.gov.hmcts.darts.audio.model.GetTransformedMediaResponse;
 import uk.gov.hmcts.darts.audio.model.MediaHideRequest;
 import uk.gov.hmcts.darts.audio.model.MediaHideResponse;
+import uk.gov.hmcts.darts.audio.model.PostAdminMediasSearchRequest;
+import uk.gov.hmcts.darts.audio.model.PostAdminMediasSearchResponseItem;
 import uk.gov.hmcts.darts.audio.service.AdminMediaService;
 import uk.gov.hmcts.darts.audio.service.AudioPreviewService;
 import uk.gov.hmcts.darts.audio.service.AudioService;
@@ -129,10 +131,8 @@ public class AudioController implements AudioApi {
     @Override
     @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
     @Authorisation(contextId = ANY_ENTITY_ID, globalAccessSecurityRoles = {SUPER_USER, SUPER_ADMIN})
-    public ResponseEntity<List<AdminMediaSearchResponseItem>> getAdminMedias(Integer transformedMediaId, List<Integer> hearingIds, OffsetDateTime startAt,
-                                                                             OffsetDateTime endAt) {
-
-        List<AdminMediaSearchResponseItem> response = adminMediaService.filterMedias(transformedMediaId, hearingIds, startAt, endAt);
+    public ResponseEntity<List<GetAdminMediaResponseItem>> getAdminMedias(Integer transformedMediaId) {
+        List<GetAdminMediaResponseItem> response = mediaRequestService.adminMediaTransformedMediaSearch(transformedMediaId);
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
@@ -149,5 +149,12 @@ public class AudioController implements AudioApi {
     @Authorisation(contextId = ANY_ENTITY_ID, globalAccessSecurityRoles = {SUPER_USER, SUPER_ADMIN})
     public ResponseEntity<AdminMediaResponse> getAdminMediasById(Integer id) {
         return new ResponseEntity<>(adminMediaService.getMediasById(id), HttpStatus.OK);
+    }
+
+    @Override
+    @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
+    @Authorisation(contextId = ANY_ENTITY_ID, globalAccessSecurityRoles = {SUPER_USER, SUPER_ADMIN})
+    public ResponseEntity<List<PostAdminMediasSearchResponseItem>> adminMediasSearchPost(PostAdminMediasSearchRequest adminMediasSearchRequest) {
+        return AudioApi.super.adminMediasSearchPost(adminMediasSearchRequest);
     }
 }

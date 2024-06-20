@@ -1,4 +1,4 @@
-package uk.gov.hmcts.darts.cases.helper;
+package uk.gov.hmcts.darts.audio.helper;
 
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
@@ -16,14 +16,14 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
-import uk.gov.hmcts.darts.cases.model.AdminCasesSearchRequest;
-import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
-import uk.gov.hmcts.darts.common.entity.CourtCaseEntity_;
+import uk.gov.hmcts.darts.audio.model.PostAdminMediasSearchRequest;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity_;
 import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
 import uk.gov.hmcts.darts.common.entity.CourtroomEntity_;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity_;
+import uk.gov.hmcts.darts.common.entity.MediaEntity;
+import uk.gov.hmcts.darts.common.entity.MediaEntity_;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -31,71 +31,72 @@ import java.util.Locale;
 import java.util.Optional;
 
 @Component
-@SuppressWarnings({"PMD.TooManyMethods"})
 @RequiredArgsConstructor
 @Slf4j
-public class AdminCasesSearchRequestHelper {
+public class PostAdminMediasSearchHelper {
+
     @PersistenceContext
     private final EntityManager entityManager;
 
-    @Value("${darts.cases.admin-search.max-results}")
+    @Value("${darts.audio.admin-search.max-results}")
     private Integer maxResults;
 
-    public List<Integer> getMatchingCaseIds(AdminCasesSearchRequest request) {
+    public List<MediaEntity> getMatchingMedia(PostAdminMediasSearchRequest request) {
         CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
-        CriteriaQuery<Integer> criteriaQuery = criteriaBuilder.createQuery(Integer.class);
-        Root<CourtCaseEntity> caseRoot = criteriaQuery.from(CourtCaseEntity.class);
+        CriteriaQuery<MediaEntity> criteriaQuery = criteriaBuilder.createQuery(MediaEntity.class);
+        Root<MediaEntity> mediaRoot = criteriaQuery.from(MediaEntity.class);
 
-        List<Predicate> predicates = createPredicates(request, criteriaBuilder, caseRoot);
+        List<Predicate> predicates = createPredicates(request, criteriaBuilder, mediaRoot);
         Predicate finalAndPredicate = criteriaBuilder.and(predicates.toArray(new Predicate[0]));
 
-        Path<Integer> namePath = caseRoot.get(CourtCaseEntity_.ID);
+        Path<MediaEntity> namePath = mediaRoot.get(MediaEntity_.ID);
         criteriaQuery.select(namePath).distinct(true);
         criteriaQuery.where(finalAndPredicate);
 
-        TypedQuery<Integer> query = entityManager.createQuery(criteriaQuery);
+        TypedQuery<MediaEntity> query = entityManager.createQuery(criteriaQuery);
         query.setMaxResults(maxResults + 1);
         return query.getResultList();
     }
 
-    private List<Predicate> createPredicates(AdminCasesSearchRequest request,
-                                             CriteriaBuilder criteriaBuilder, Root<CourtCaseEntity> caseRoot) {
+    private List<Predicate> createPredicates(PostAdminMediasSearchRequest request,
+                                             CriteriaBuilder criteriaBuilder, Root<MediaEntity> mediaRoot) {
         List<Predicate> predicates = new ArrayList<>();
 
-        CollectionUtils.addAll(predicates, addCourthouseIdCriteria(caseRoot, request));
-        CollectionUtils.addAll(predicates, addCaseNumberCriteria(criteriaBuilder, caseRoot, request));
-        CollectionUtils.addAll(predicates, addCourtroomNameCriteria(criteriaBuilder, caseRoot, request));
-        CollectionUtils.addAll(predicates, addHearingDateCriteria(criteriaBuilder, caseRoot, request));
+        CollectionUtils.addAll(predicates, addCourthouseIdCriteria(mediaRoot, request));
+        CollectionUtils.addAll(predicates, addCaseNumberCriteria(criteriaBuilder, mediaRoot, request));
+        CollectionUtils.addAll(predicates, addCourtroomNameCriteria(criteriaBuilder, mediaRoot, request));
+        CollectionUtils.addAll(predicates, addDateCriteria(criteriaBuilder, mediaRoot, request));
 
         return predicates;
     }
 
-    private List<Predicate> addCourthouseIdCriteria(Root<CourtCaseEntity> caseRoot, AdminCasesSearchRequest request) {
+    private List<Predicate> addCourthouseIdCriteria(Root<MediaEntity> mediaRoot, PostAdminMediasSearchRequest request) {
         List<Predicate> predicateList = new ArrayList<>();
         if (CollectionUtils.isNotEmpty(request.getCourthouseIds())) {
-            predicateList.add(caseRoot.get(CourtroomEntity_.COURTHOUSE).get(CourthouseEntity_.ID).in(request.getCourthouseIds()));
+            Join<MediaEntity, CourtroomEntity> courtroomJoin = getCourtroomJoin(mediaRoot);
+            predicateList.add(courtroomJoin.get(CourtroomEntity_.courthouse).get(CourthouseEntity_.COURTHOUSE_NAME).in(request.getCourthouseIds()));
         }
         return predicateList;
     }
 
-    private List<Predicate> addCaseNumberCriteria(CriteriaBuilder criteriaBuilder, Root<CourtCaseEntity> caseRoot,
-                                                  AdminCasesSearchRequest request) {
+    private List<Predicate> addCaseNumberCriteria(CriteriaBuilder criteriaBuilder, Root<MediaEntity> mediaRoot,
+                                                  PostAdminMediasSearchRequest request) {
         List<Predicate> predicateList = new ArrayList<>();
         if (StringUtils.isNotBlank(request.getCaseNumber())) {
             predicateList.add(criteriaBuilder.like(
-                criteriaBuilder.upper(caseRoot.get(CourtCaseEntity_.CASE_NUMBER)),
+                criteriaBuilder.upper(mediaRoot.get(MediaEntity_.CASE_NUMBER)),
                 surroundWithPercentagesUpper(request.getCaseNumber())
             ));
         }
         return predicateList;
     }
 
-    private List<Predicate> addCourtroomNameCriteria(CriteriaBuilder criteriaBuilder, Root<CourtCaseEntity> caseRoot,
-                                                     AdminCasesSearchRequest request) {
+    private List<Predicate> addCourtroomNameCriteria(CriteriaBuilder criteriaBuilder, Root<MediaEntity> mediaRoot,
+                                                     PostAdminMediasSearchRequest request) {
         List<Predicate> predicateList = new ArrayList<>();
         if (StringUtils.isNotBlank(request.getCourtroomName())) {
-            Join<CourtCaseEntity, HearingEntity> hearingJoin = joinHearing(caseRoot);
-            Join<HearingEntity, CourtroomEntity> courtroomJoin = joinCourtroom(hearingJoin);
+            Join<MediaEntity, HearingEntity> hearingJoin = joinHearing(mediaRoot);
+            Join<HearingEntity, CourtroomEntity> courtroomJoin = getCourtroomJoin(hearingJoin);
             predicateList.add(criteriaBuilder.like(
                 criteriaBuilder.upper(courtroomJoin.get(CourtroomEntity_.NAME)),
                 surroundWithPercentagesUpper(request.getCourtroomName())
@@ -104,11 +105,11 @@ public class AdminCasesSearchRequestHelper {
         return predicateList;
     }
 
-    private List<Predicate> addHearingDateCriteria(CriteriaBuilder criteriaBuilder, Root<CourtCaseEntity> caseRoot,
-                                                   AdminCasesSearchRequest request) {
+    private List<Predicate> addDateCriteria(CriteriaBuilder criteriaBuilder, Root<MediaEntity> mediaRoot,
+                                            PostAdminMediasSearchRequest request) {
         List<Predicate> predicateList = new ArrayList<>();
         if (request.getHearingStartAt() != null || request.getHearingEndAt() != null) {
-            Join<CourtCaseEntity, HearingEntity> hearingJoin = joinHearing(caseRoot);
+            Join<MediaEntity, HearingEntity> hearingJoin = joinHearing(mediaRoot);
             if (request.getHearingStartAt() != null) {
                 predicateList.add(criteriaBuilder.greaterThanOrEqualTo(
                     hearingJoin.get(HearingEntity_.HEARING_DATE),
@@ -133,16 +134,11 @@ public class AdminCasesSearchRequestHelper {
         return surroundWith + value + surroundWith;
     }
 
-    private Join<HearingEntity, CourtroomEntity> joinCourtroom(Join<CourtCaseEntity, HearingEntity> hearingJoin) {
-        return hearingJoin.join(HearingEntity_.COURTROOM, JoinType.INNER);
-    }
-
     @SuppressWarnings("unchecked")
-    private Join<CourtCaseEntity, HearingEntity> joinHearing(Root<CourtCaseEntity> caseRoot) {
-        Optional<Join<CourtCaseEntity, ?>> foundJoin = caseRoot.getJoins().stream().filter(join -> join.getAttribute().getName().equals(
-            CourtCaseEntity_.HEARINGS)).findAny();
-        return foundJoin.map(join -> (Join<CourtCaseEntity, HearingEntity>) join)
-            .orElseGet(() -> caseRoot.join(CourtCaseEntity_.HEARINGS, JoinType.INNER));
+    private Join<MediaEntity, CourtroomEntity> getCourtroomJoin(Root<MediaEntity> mediaRoot) {
+        Optional<Join<MediaEntity, ?>> foundJoin = mediaRoot.getJoins().stream().filter(join -> join.getAttribute().getName().equals(
+            MediaEntity_.COURTROOM)).findAny();
+        return foundJoin.map(join -> (Join<MediaEntity, CourtroomEntity>) join)
+            .orElseGet(() -> mediaRoot.join(MediaEntity_.COURTROOM, JoinType.INNER));
     }
-
 }
