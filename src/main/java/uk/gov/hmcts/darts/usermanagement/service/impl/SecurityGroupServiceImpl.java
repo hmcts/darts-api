@@ -177,7 +177,7 @@ public class SecurityGroupServiceImpl implements SecurityGroupService {
     private void patchSecurityGroupUsers(SecurityGroupPatch securityGroupPatch, SecurityGroupEntity securityGroupEntity) {
 
         List<Integer> userIds = securityGroupPatch.getUserIds();
-        if (userIds == null || userIds.isEmpty()) {
+        if (userIds == null) {
             return;
         }
 
