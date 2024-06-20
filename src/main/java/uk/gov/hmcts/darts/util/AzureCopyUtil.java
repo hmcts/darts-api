@@ -32,9 +32,6 @@ public class AzureCopyUtil {
             if (exitValue != 0) {
                 String result = new String(p.getInputStream().readAllBytes());
                 log.error("Failed to execute azcopy from source: '{}' to destination '{}'- error exit value. Result: {}", source, destination, result);
-
-                //limiting info included in the exception to avoid potential leak of the source and destination sas tokens
-                //throw new DartsException("Failed to execute azcopy - error exit value");
             }
         } catch (InterruptedException ie) {
             Thread.currentThread().interrupt();
