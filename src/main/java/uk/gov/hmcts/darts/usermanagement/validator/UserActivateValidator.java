@@ -1,7 +1,6 @@
 package uk.gov.hmcts.darts.usermanagement.validator;
 
 import lombok.RequiredArgsConstructor;
-import org.apache.catalina.util.StringUtil;
 import org.apache.tika.utils.StringUtils;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.darts.common.component.validation.Validator;
