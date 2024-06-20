@@ -12,22 +12,22 @@ import java.util.UUID;
 @Data
 public class ExternalObjectDirectoryCaseDocument extends CreatedModifiedCaseDocument {
 
-    private Integer id;
-    private Integer media;
-    private Integer transcriptionDocumentEntity;
-    private Integer annotationDocumentEntity;
-    private Integer caseDocument;
-    private ObjectRecordStatusEntity status;
-    private ExternalLocationTypeEntity externalLocationType;
-    private UUID externalLocation;
-    private String externalFileId;
-    private String externalRecordId;
-    private String checksum;
-    private Integer transferAttempts;
-    private Integer verificationAttempts;
-    private String manifestFile;
-    private OffsetDateTime eventDateTs;
-    private String errorCode;
-    private boolean responseCleaned;
-    private boolean updateRetention;
+    private final Integer id;
+    private final Integer media;
+    private final Integer transcriptionDocumentEntity;
+    private final Integer annotationDocumentEntity;
+    private final Integer caseDocument;
+    private final ObjectRecordStatusEntity status;
+    private final ExternalLocationTypeEntity externalLocationType;
+    private final UUID externalLocation;
+    private final String externalFileId;
+    private final String externalRecordId;
+    private final String checksum;
+    private final Integer transferAttempts;
+    private final Integer verificationAttempts;
+    private final String manifestFile;
+    private final OffsetDateTime eventDateTs;
+    private final String errorCode;
+    private final boolean responseCleaned;
+    private final boolean updateRetention;
 }

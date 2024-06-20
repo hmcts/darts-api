@@ -23,6 +23,7 @@ import java.util.UUID;
 @Service
 @RequiredArgsConstructor
 public class ExternalObjectDirectoryServiceImpl implements ExternalObjectDirectoryService {
+
     private static final int INITIAL_VERIFICATION_ATTEMPTS = 1;
 
     private final ExternalObjectDirectoryRepository eodRepository;

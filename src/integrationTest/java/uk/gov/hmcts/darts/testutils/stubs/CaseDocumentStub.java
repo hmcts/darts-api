@@ -35,7 +35,7 @@ public class CaseDocumentStub {
     public CaseDocumentEntity createAndSaveCaseDocumentEntity(CourtCaseEntity courtCaseEntity) {
         UserAccountEntity testUser = userAccountStub.getIntegrationTestUserAccountEntity();
         CaseDocumentEntity caseDocumentEntity = createCaseDocumentEntity(courtCaseEntity, testUser);
-        caseDocumentEntity = caseDocumentRepository.saveAndFlush(caseDocumentEntity);
+        caseDocumentEntity = caseDocumentRepository.save(caseDocumentEntity);
         return caseDocumentEntity;
     }
 

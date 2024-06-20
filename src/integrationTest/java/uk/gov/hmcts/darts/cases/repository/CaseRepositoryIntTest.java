@@ -3,7 +3,6 @@ package uk.gov.hmcts.darts.cases.repository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
-import uk.gov.hmcts.darts.casedocument.service.CaseDocumentService;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.repository.CaseRepository;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
@@ -21,9 +20,6 @@ class CaseRepositoryIntTest extends IntegrationBase {
 
     @Autowired
     CaseRepository caseRepository;
-
-    @Autowired
-    CaseDocumentService caseDocumentService;
 
     @Test
     void testFindByIsRetentionUpdatedTrueAndRetentionRetriesLessThan() {
@@ -142,27 +138,5 @@ class CaseRepositoryIntTest extends IntegrationBase {
         assertThat(result.get(0).getId()).isEqualTo(matchingCase1.getId());
         assertThat(result.get(1).getId()).isEqualTo(matchingCase2.getId());
         assertThat(result.get(2).getId()).isEqualTo(matchingCase3.getId());
-    }
-
-    @Test
-    void testLoadingOfCourtCase() {
-
-        var courtCaseForCaseDocument = caseStub.createAndSaveCourtCase(courtCase -> {
-            courtCase.setClosed(true);
-            courtCase.setCaseClosedTimestamp(OffsetDateTime.now().minusDays(27));
-        });
-
-         caseRepository.loadCaseForCaseDocument(courtCaseForCaseDocument.getId());
-    }
-
-    @Test
-    void testLoadingOfCourtCaseFindById() {
-
-        var courtCaseForCaseDocument = caseStub.createAndSaveCourtCase(courtCase -> {
-            courtCase.setClosed(true);
-            courtCase.setCaseClosedTimestamp(OffsetDateTime.now().minusDays(27));
-        });
-
-        caseDocumentService.generateCaseDocument(courtCaseForCaseDocument.getId());
     }
 }

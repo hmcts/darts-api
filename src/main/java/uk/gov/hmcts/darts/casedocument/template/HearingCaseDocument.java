@@ -11,16 +11,16 @@ import java.util.List;
 @Data
 public class HearingCaseDocument extends CreatedModifiedCaseDocument {
 
-    private Integer id;
-    private CourtroomCaseDocument courtroom;
-    private LocalDate hearingDate;
-    private LocalTime scheduledStartTime;
-    private Boolean hearingIsActual;
-    private String judgeHearingDate;
-    private List<JudgeCaseDocument> judges;
-    private List<EventCaseDocument> events;
-    private List<MediaRequestCaseDocument> mediaRequests;
-    private List<MediaCaseDocument> medias;
-    private List<TranscriptionCaseDocument> transcriptions;
-    private List<AnnotationCaseDocument> annotations;
+    private final Integer id;
+    private final CourtroomCaseDocument courtroom;
+    private final LocalDate hearingDate;
+    private final LocalTime scheduledStartTime;
+    private final Boolean hearingIsActual;
+    private final String judgeHearingDate;
+    private final List<JudgeCaseDocument> judges;
+    private final List<EventCaseDocument> events;
+    private final List<MediaRequestCaseDocument> mediaRequests;
+    private final List<MediaCaseDocument> medias;
+    private final List<TranscriptionCaseDocument> transcriptions;
+    private final List<AnnotationCaseDocument> annotations;
 }

@@ -2,6 +2,7 @@ package uk.gov.hmcts.darts.casedocument.service.impl;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -14,7 +15,6 @@ import uk.gov.hmcts.darts.casedocument.service.GenerateCaseDocumentSingleCasePro
 import uk.gov.hmcts.darts.casedocument.template.CourtCaseDocument;
 import uk.gov.hmcts.darts.common.entity.CaseDocumentEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
-import uk.gov.hmcts.darts.common.exception.DartsException;
 import uk.gov.hmcts.darts.common.repository.CaseDocumentRepository;
 import uk.gov.hmcts.darts.common.repository.CaseRepository;
 import uk.gov.hmcts.darts.common.util.EodHelper;
@@ -42,31 +42,28 @@ public class GenerateCaseSingleCaseProcessorImpl implements GenerateCaseDocument
     private final FileContentChecksum checksumCalculator;
     private final UserIdentity userIdentity;
 
+    @SneakyThrows
     @Override
     @Transactional
     public void processGenerateCaseDocument(Integer caseId) {
-        try {
-            CourtCaseDocument courtCaseDocument = caseDocumentService.generateCaseDocument(caseId);
-            String caseDocumentJson = objectMapper.writeValueAsString(courtCaseDocument);
-            log.debug("generated case document: {}", caseDocumentJson);
+        CourtCaseDocument courtCaseDocument = caseDocumentService.generateCaseDocument(caseId);
+        String caseDocumentJson = objectMapper.writeValueAsString(courtCaseDocument);
+        log.debug("generated case document: {}", caseDocumentJson);
 
-            UUID externalLocation = dataManagementService.saveBlobData(
-                configuration.getUnstructuredContainerName(),
-                IOUtils.toInputStream(caseDocumentJson, UTF_8)
-            );
+        UUID externalLocation = dataManagementService.saveBlobData(
+            configuration.getUnstructuredContainerName(),
+            IOUtils.toInputStream(caseDocumentJson, UTF_8)
+        );
 
-            var systemUser = userIdentity.getUserAccount();
-            CaseDocumentEntity caseDocumentEntity = createAndSaveCaseDocumentEntity(caseId, caseDocumentJson, externalLocation, systemUser);
-            externalObjectDirectoryService.createAndSaveExternalObjectDirectory(
-                externalLocation,
-                caseDocumentEntity.getChecksum(),
-                systemUser,
-                caseDocumentEntity,
-                EodHelper.unstructuredLocation()
-            );
-        } catch (Exception ex) {
-            throw new DartsException(String.format("Error during generation of case document for court case '%s", caseId), ex);
-        }
+        var systemUser = userIdentity.getUserAccount();
+        CaseDocumentEntity caseDocumentEntity = createAndSaveCaseDocumentEntity(caseId, caseDocumentJson, externalLocation, systemUser);
+        externalObjectDirectoryService.createAndSaveExternalObjectDirectory(
+            externalLocation,
+            caseDocumentEntity.getChecksum(),
+            systemUser,
+            caseDocumentEntity,
+            EodHelper.unstructuredLocation()
+        );
     }
 
     private CaseDocumentEntity createAndSaveCaseDocumentEntity(Integer caseId, String caseDocument, UUID externalLocation, UserAccountEntity user) {

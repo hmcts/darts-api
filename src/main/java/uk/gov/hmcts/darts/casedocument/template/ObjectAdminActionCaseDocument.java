@@ -8,17 +8,17 @@ import java.time.OffsetDateTime;
 @Data
 public class ObjectAdminActionCaseDocument {
 
-    private Integer id;
-    private Integer annotationDocument;
-    private Integer caseDocument;
-    private Integer media;
-    private Integer transcriptionDocument;
-    private ObjectHiddenReasonEntity objectHiddenReason;
-    private Integer hiddenBy;
-    private OffsetDateTime hiddenDateTime;
-    private boolean markedForManualDeletion;
-    private Integer markedForManualDelBy;
-    private OffsetDateTime markedForManualDelDateTime;
-    private String ticketReference;
-    private String comments;
+    private final Integer id;
+    private final Integer annotationDocument;
+    private final Integer caseDocument;
+    private final Integer media;
+    private final Integer transcriptionDocument;
+    private final ObjectHiddenReasonEntity objectHiddenReason;
+    private final Integer hiddenBy;
+    private final OffsetDateTime hiddenDateTime;
+    private final boolean markedForManualDeletion;
+    private final Integer markedForManualDelBy;
+    private final OffsetDateTime markedForManualDelDateTime;
+    private final String ticketReference;
+    private final String comments;
 }

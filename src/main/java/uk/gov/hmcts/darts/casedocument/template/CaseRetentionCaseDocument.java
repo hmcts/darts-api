@@ -23,6 +23,7 @@ public class CaseRetentionCaseDocument extends CreatedModifiedCaseDocument {
     @Data
     @EqualsAndHashCode(callSuper = true)
     public static class RetentionPolicyTypeCaseDocument extends CreatedModifiedCaseDocument {
+
         private final Integer id;
         private final String fixedPolicyKey;
         private final String policyName;
@@ -36,6 +37,7 @@ public class CaseRetentionCaseDocument extends CreatedModifiedCaseDocument {
 
     @Data
     public static class CaseManagementRetentionCaseDocument {
+
         private final Integer id;
         private final RetentionPolicyTypeCaseDocument retentionPolicyType;
         private final EventCaseDocument event;

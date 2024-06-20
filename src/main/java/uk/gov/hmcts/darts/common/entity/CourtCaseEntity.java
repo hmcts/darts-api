@@ -11,9 +11,6 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
-import jakarta.persistence.NamedAttributeNode;
-import jakarta.persistence.NamedEntityGraph;
-import jakarta.persistence.NamedSubgraph;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
@@ -26,26 +23,6 @@ import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
-@NamedEntityGraph(
-    name = "CourtCase.caseDocument",
-    attributeNodes = {
-//        @NamedAttributeNode("deletedBy"),
-//        @NamedAttributeNode("defendantList"),
-        @NamedAttributeNode("prosecutorList")
-//        @NamedAttributeNode(
-//            value = "hearings",
-//            subgraph = "Hearing.caseDocument"
-//        )
-    },
-    subgraphs = {
-        @NamedSubgraph(
-            name="Hearing.caseDocument",
-            attributeNodes = {
-                @NamedAttributeNode("mediaList")
-            }
-        )
-    }
-)
 @Entity
 @Table(name = CourtCaseEntity.TABLE_NAME)
 @SuppressWarnings({"PMD.ShortClassName"})

@@ -11,12 +11,12 @@ import java.time.OffsetDateTime;
 @Data
 public class MediaRequestCaseDocument extends CreatedModifiedCaseDocument {
 
-    private Integer id;
-    private Integer currentOwner;
-    private Integer requestor;
-    private MediaRequestStatus status;
-    private AudioRequestType requestType;
-    private Integer attempts;
-    private OffsetDateTime startTime;
-    private OffsetDateTime endTime;
+    private final Integer id;
+    private final Integer currentOwner;
+    private final Integer requestor;
+    private final MediaRequestStatus status;
+    private final AudioRequestType requestType;
+    private final Integer attempts;
+    private final OffsetDateTime startTime;
+    private final OffsetDateTime endTime;
 }

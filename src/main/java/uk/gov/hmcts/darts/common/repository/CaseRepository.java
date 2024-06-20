@@ -1,8 +1,6 @@
 package uk.gov.hmcts.darts.common.repository;
 
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.jpa.repository.EntityGraph;
-import org.springframework.data.jpa.repository.EntityGraph.EntityGraphType;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
@@ -57,18 +55,4 @@ public interface CaseRepository extends JpaRepository<CourtCaseEntity, Integer> 
             where (cde.courtCase.id = case.id))
         """)
     List<CourtCaseEntity> findCasesNeedingCaseDocumentGenerated(OffsetDateTime caseClosedBeforeTimestamp, Pageable pageable);
-
-//    @EntityGraph(value = "CourtCase.caseDocument", type = EntityGraphType.LOAD)
-//    @Query("""
-//        SELECT case FROM CourtCaseEntity case
-//        WHERE case.id = :courtCaseId
-//        """)
-//    Optional<CourtCaseEntity> findById(Integer courtCaseId);
-
-    @EntityGraph(value = "CourtCase.caseDocument", type = EntityGraphType.LOAD)
-    @Query("""
-        SELECT case FROM CourtCaseEntity case
-        WHERE case.id = :courtCaseId
-        """)
-    Optional<CourtCaseEntity> loadCaseForCaseDocument(Integer courtCaseId);
 }
