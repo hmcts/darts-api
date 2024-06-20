@@ -1,12 +1,16 @@
 package uk.gov.hmcts.darts.task.service;
 
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.test.web.servlet.MockMvc;
+import uk.gov.hmcts.darts.audit.api.AuditActivity;
+import uk.gov.hmcts.darts.common.entity.AuditEntity;
 import uk.gov.hmcts.darts.common.enums.SecurityRoleEnum;
+import uk.gov.hmcts.darts.common.repository.AuditRepository;
 import uk.gov.hmcts.darts.testutils.GivenBuilder;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 
@@ -30,6 +34,9 @@ class AdminRunAutomatedTaskTest extends IntegrationBase {
     @Autowired
     private MockMvc mockMvc;
 
+    @Autowired
+    private AuditRepository auditRepository;
+
     @ParameterizedTest
     @EnumSource(value = SecurityRoleEnum.class, names = {"SUPER_ADMIN"}, mode = Mode.INCLUDE)
     void allowsSuperAdminToRetrieveAllAutomatedTasks(SecurityRoleEnum role) throws Exception {
@@ -39,6 +46,10 @@ class AdminRunAutomatedTaskTest extends IntegrationBase {
                 post(ENDPOINT))
             .andExpect(status().isAccepted())
             .andReturn();
+
+        Assertions.assertEquals(1, auditRepository.findAll().size());
+        AuditEntity auditEntity = auditRepository.findAll().get(0);
+        Assertions.assertEquals(AuditActivity.RUN_JOB_MANUALLY.getId(), auditEntity.getAuditActivity().getId());
     }
 
     @ParameterizedTest

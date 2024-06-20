@@ -21,5 +21,4 @@ public interface AuditRepository extends JpaRepository<AuditEntity, Integer>, Jp
                                                             Integer activityId,
                                                             OffsetDateTime fromDate,
                                                             OffsetDateTime toDate);
-
 }
