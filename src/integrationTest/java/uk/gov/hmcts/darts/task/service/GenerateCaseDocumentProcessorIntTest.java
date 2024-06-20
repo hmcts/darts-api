@@ -4,7 +4,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.SpyBean;
 import uk.gov.hmcts.darts.casedocument.service.GenerateCaseDocumentProcessor;
-import uk.gov.hmcts.darts.casedocument.service.GenerateCaseDocumentSingleCaseDocumentProcessor;
+import uk.gov.hmcts.darts.casedocument.service.GenerateCaseDocumentSingleCaseProcessor;
 import uk.gov.hmcts.darts.casedocument.service.impl.GenerateCaseDocumentBatchProcessorImpl;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
@@ -30,7 +30,7 @@ public class GenerateCaseDocumentProcessorIntTest extends IntegrationBase {
     @SpyBean
     ExternalObjectDirectoryRepository eodRepository;
     @Autowired
-    GenerateCaseDocumentSingleCaseDocumentProcessor singleCaseProcessor;
+    GenerateCaseDocumentSingleCaseProcessor singleCaseProcessor;
     @Autowired
     CurrentTimeHelper currentTimeHelper;
 
