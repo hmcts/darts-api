@@ -1,6 +1,8 @@
 package uk.gov.hmcts.darts.usermanagement.validator;
 
 import lombok.RequiredArgsConstructor;
+import org.apache.catalina.util.StringUtil;
+import org.apache.tika.utils.StringUtils;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.darts.common.component.validation.Validator;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
@@ -21,7 +23,7 @@ public class UserActivateValidator implements Validator<IdRequest<UserPatch>> {
     @Override
     public void validate(IdRequest<UserPatch> request) {
 
-        if (request.getPayload().getActive()) {
+        if (request.getPayload() != null && Boolean.TRUE.equals(request.getPayload().getActive())) {
             Optional<UserAccountEntity> fndUser = userAccountRepository.findById(request.getId());
 
             if (fndUser.isPresent() && !fndUser.get().isActive()) {
@@ -29,7 +31,7 @@ public class UserActivateValidator implements Validator<IdRequest<UserPatch>> {
                 String emailAddress = userAccountEntity.getEmailAddress();
                 String fullName = userAccountEntity.getUserFullName();
 
-                if (emailAddress == null || emailAddress.isEmpty() || fullName == null || fullName.isEmpty()) {
+                if (StringUtils.isBlank(emailAddress) || StringUtils.isBlank(fullName)) {
                     throw new DartsApiException(UserManagementError.USER_ACTIVATION_FULLNAME_OR_EMAIL_VIOLATION);
                 }
             }
