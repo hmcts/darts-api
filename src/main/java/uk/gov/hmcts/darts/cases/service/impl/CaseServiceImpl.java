@@ -160,8 +160,9 @@ public class CaseServiceImpl implements CaseService {
     }
 
     @Override
+    @Transactional
     public List<Transcript> getTranscriptsByCaseId(Integer caseId) {
-        List<TranscriptionEntity> transcriptionEntities = transcriptionRepository.findByCaseIdManualOrLegacy(caseId);
+        List<TranscriptionEntity> transcriptionEntities = transcriptionRepository.findByCaseIdManualOrLegacy(caseId, false);
         return TranscriptionMapper.mapResponse(transcriptionEntities);
     }
 
@@ -171,12 +172,12 @@ public class CaseServiceImpl implements CaseService {
         if (courtCaseEntity.isEmpty()) {
             throw new DartsApiException(CaseApiError.CASE_NOT_FOUND);
         }
-        List<HearingEntity> hearingEntitys = courtCaseEntity.get().getHearings();
+        List<HearingEntity> hearingEntities = courtCaseEntity.get().getHearings();
 
         if (authorisationApi.userHasOneOfRoles(List.of(SecurityRoleEnum.SUPER_ADMIN))) {
             List<AnnotationEntity> annotationsEntities =
                 annotationRepository.findByListOfHearingIds(
-                    hearingEntitys
+                    hearingEntities
                         .stream()
                         .map(HearingEntity::getId)
                         .collect(Collectors.toList()));
@@ -192,7 +193,7 @@ public class CaseServiceImpl implements CaseService {
         } else {
             List<AnnotationEntity> annotationsEntities =
                 annotationRepository.findByListOfHearingIdsAndUser(
-                    hearingEntitys
+                    hearingEntities
                         .stream()
                         .map(HearingEntity::getId)
                         .collect(Collectors.toList()), authorisationApi.getCurrentUser());

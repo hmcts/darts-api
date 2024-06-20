@@ -553,7 +553,7 @@ class TranscriptionServiceImplTest {
         TranscriptionDocumentEntity transcriptionDoc3 = new TranscriptionDocumentEntity();
         transcriptionDoc3.setId(3);
 
-        when(mockTranscriptionRepository.findByCaseIdManualOrLegacy(CASE_ID)).thenReturn(List.of(mockTranscription, mockTranscription2));
+        when(mockTranscriptionRepository.findByCaseIdManualOrLegacy(CASE_ID, true)).thenReturn(List.of(mockTranscription, mockTranscription2));
         when(mockTranscription.getTranscriptionDocumentEntities()).thenReturn(List.of(transcriptionDoc1, transcriptionDoc2));
         when(mockTranscription2.getTranscriptionDocumentEntities()).thenReturn(List.of(transcriptionDoc1, transcriptionDoc3));
 

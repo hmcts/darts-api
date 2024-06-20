@@ -33,9 +33,25 @@ public interface TranscriptionRepository extends RevisionRepository<Transcriptio
         AND (
             tr.is_manual_transcription = true OR tr.transcription_object_id IS NOT NULL
         )
+        AND (
+            :includeHidden = true
+            OR
+            EXISTS (
+                SELECT 1
+                FROM darts.transcription_document trd
+                WHERE trd.tra_id = tr.tra_id
+                AND trd.is_hidden = false
+            )
+            OR
+            NOT EXISTS (
+                SELECT 1
+                FROM darts.transcription_document trd
+                WHERE trd.tra_id = tr.tra_id
+            )
+        )
         """, nativeQuery = true
     )
-    List<TranscriptionEntity> findByCaseIdManualOrLegacy(Integer caseId);
+    List<TranscriptionEntity> findByCaseIdManualOrLegacy(Integer caseId, Boolean includeHidden);
 
     @Query("""
            SELECT te
