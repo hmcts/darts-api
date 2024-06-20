@@ -120,4 +120,5 @@ class SecurityRoleRepositoryTest extends IntegrationBase {
         assertEquals(13, securityPermissionEntities.size());
     }
 
+
 }

@@ -1,5 +1,6 @@
 package uk.gov.hmcts.darts.task.service;
 
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -55,7 +56,6 @@ class OutboundAudioDeleterProcessorTest extends IntegrationBase {
     @MockBean
     private CurrentTimeHelper currentTimeHelper;
 
-
     private UserAccountEntity requestor;
 
     @Autowired
@@ -66,6 +66,16 @@ class OutboundAudioDeleterProcessorTest extends IntegrationBase {
         requestor = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
         //setting clock to 2023-10-27
         when(currentTimeHelper.currentOffsetDateTime()).thenReturn(OffsetDateTime.of(2023, 10, 27, 22, 0, 0, 0, ZoneOffset.UTC));
+    }
+
+    @BeforeEach
+    void setupOpenInView() {
+        openInViewUtil.openEntityManager();
+    }
+
+    @AfterEach
+    void closeOpenInView() {
+        openInViewUtil.closeEntityManager();
     }
 
     @Test

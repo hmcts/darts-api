@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.Set;
 
 import static java.util.stream.Collectors.toSet;
+import static uk.gov.hmcts.darts.common.enums.SecurityGroupEnum.MEDIA_IN_PERPETUITY;
 
 
 @Service
@@ -57,8 +58,10 @@ public class OutboundAudioDeleterProcessorImpl implements OutboundAudioDeleterPr
         } else {
             for (TransformedMediaEntity transformedMedia : transformedMediaList) {
                 try {
-                    List<TransientObjectDirectoryEntity> deleted = singleElementProcessor.markForDeletion(systemUser, transformedMedia);
-                    deletedValues.addAll(deleted);
+                    if (!transformedMedia.isOwnerInSecurityGroup(MEDIA_IN_PERPETUITY)) {
+                        List<TransientObjectDirectoryEntity> deleted = singleElementProcessor.markForDeletion(systemUser, transformedMedia);
+                        deletedValues.addAll(deleted);
+                    }
                 } catch (Exception exception) {
                     log.error("Unable to mark for deletion transformed media {}", transformedMedia.getId(), exception);
                 }
