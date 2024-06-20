@@ -11,6 +11,8 @@ import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.darts.authorisation.annotation.Authorisation;
 import uk.gov.hmcts.darts.cases.http.api.CasesApi;
 import uk.gov.hmcts.darts.cases.model.AddCaseRequest;
+import uk.gov.hmcts.darts.cases.model.AdminCasesSearchRequest;
+import uk.gov.hmcts.darts.cases.model.AdminCasesSearchResponseItem;
 import uk.gov.hmcts.darts.cases.model.AdvancedSearchRequest;
 import uk.gov.hmcts.darts.cases.model.AdvancedSearchResult;
 import uk.gov.hmcts.darts.cases.model.Annotation;
@@ -151,5 +153,13 @@ public class CaseController implements CasesApi {
         globalAccessSecurityRoles = {JUDGE, SUPER_ADMIN})
     public ResponseEntity<List<Annotation>> getYourAnnotationsByCaseId(Integer caseId) {
         return new ResponseEntity<>(caseService.getAnnotations(caseId), HttpStatus.OK);
+    }
+
+    @Override
+    @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
+    @Authorisation(contextId = ANY_ENTITY_ID,
+        globalAccessSecurityRoles = {SUPER_USER, SUPER_ADMIN})
+    public ResponseEntity<List<AdminCasesSearchResponseItem>> adminCasesSearchPost(AdminCasesSearchRequest adminCasesSearchRequest) {
+        return new ResponseEntity<>(caseService.adminCaseSearch(adminCasesSearchRequest), HttpStatus.OK);
     }
 }

@@ -18,14 +18,7 @@ public interface AuditRepository extends JpaRepository<AuditEntity, Integer>, Jp
         AND audit.createdDateTime between :fromDate AND :toDate
         """)
     List<AuditEntity> getAuditEntitiesByCaseAndActivityForDateRange(Integer caseId,
-                                                            Integer activityId,
-                                                            OffsetDateTime fromDate,
-                                                            OffsetDateTime toDate);
-
-    @Query("""
-        SELECT audit FROM AuditEntity audit
-        Where audit.auditActivity.id = :activityId
-        """)
-    List<AuditEntity> getAuditEntitiesByActivityId(Integer activityId);
-
+                                                                    Integer activityId,
+                                                                    OffsetDateTime fromDate,
+                                                                    OffsetDateTime toDate);
 }

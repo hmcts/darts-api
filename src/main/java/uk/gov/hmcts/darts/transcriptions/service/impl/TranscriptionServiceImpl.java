@@ -242,7 +242,7 @@ public class TranscriptionServiceImpl implements TranscriptionService {
             updateTranscription.getWorkflowComment()
         );
 
-        auditApi.recordAll(auditActivityProvider);
+        auditApi.recordAll(auditActivityProvider, transcriptionEntity.getCourtCase());
 
         transcriptionEntity.getTranscriptionWorkflowEntities().add(transcriptionWorkflowEntity);
 

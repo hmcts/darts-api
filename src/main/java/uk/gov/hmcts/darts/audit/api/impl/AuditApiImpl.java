@@ -33,4 +33,10 @@ public class AuditApiImpl implements AuditApi {
             .forEach(auditActivity -> record(auditActivity, authorisationApi.getCurrentUser(), null));
     }
 
+    @Override
+    public void recordAll(AuditActivityProvider auditActivityProvider, CourtCaseEntity courtCase) {
+        auditActivityProvider.getAuditActivities()
+            .forEach(auditActivity -> record(auditActivity, authorisationApi.getCurrentUser(), courtCase));
+    }
+
 }

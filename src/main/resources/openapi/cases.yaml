@@ -336,6 +336,32 @@ paths:
                 title: "The requested case cannot be found"
                 status: 404
 
+  /admin/cases/search:
+    post:
+      tags:
+        - Cases
+      summary: |-
+        Returns a representation of the court_case table which match the supplied search criteria.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AdminCasesSearchRequest'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/AdminCasesSearchResponseItem'
+        '400':
+          description: A required parameter is missing or an invalid datatype or value was provided for property.
+        '500':
+          description: Internal Server Error
+
 components:
   schemas:
     add_case_request:
@@ -601,6 +627,76 @@ components:
           type: string
         transcript_count:
           type: integer
+
+    AdminCasesSearchRequest:
+      type: object
+      properties:
+        courthouse_ids:
+          type: array
+          items:
+            type: integer
+        case_number:
+          type: string
+          example: 1234
+          maxLength: 32
+        courtroom_name:
+          type: string
+          example: "1"
+        hearing_start_at:
+          type: string
+          format: date
+        hearing_end_at:
+          type: string
+          format: date
+
+    AdminCasesSearchResponseItem:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+          description: Unique case identifier, used internally by DARTS.
+        case_number:
+          type: string
+          example: C20220620001
+          description: 'Case Number'
+        courthouse:
+          $ref: '#/components/schemas/CourthouseResponseObject'
+        courtrooms:
+          type: array
+          items:
+            $ref: '#/components/schemas/CourtroomResponseObject'
+        judges:
+          type: array
+          items:
+            $ref: '#/components/schemas/judge'
+        defendants:
+          type: array
+          items:
+            $ref: '#/components/schemas/defendant'
+
+    CourthouseResponseObject:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+          description: the courthouse ID
+        display_name:
+          type: string
+          example: Swansea
+
+    CourtroomResponseObject:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+          description: the courtroom ID
+        name:
+          type: string
+          example: "1"
+
 
     AdvancedSearchRequest:
       type: object
