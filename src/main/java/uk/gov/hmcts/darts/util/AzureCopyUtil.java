@@ -34,7 +34,7 @@ public class AzureCopyUtil {
                 log.error("Failed to execute azcopy from source: '{}' to destination '{}'- error exit value. Result: {}", source, destination, result);
 
                 //limiting info included in the exception to avoid potential leak of the source and destination sas tokens
-//                throw new DartsException("Failed to execute azcopy - error exit value");
+                //throw new DartsException("Failed to execute azcopy - error exit value");
             }
         } catch (InterruptedException ie) {
             Thread.currentThread().interrupt();
