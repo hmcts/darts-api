@@ -9,12 +9,16 @@ import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.envers.AuditTable;
+import org.hibernate.envers.Audited;
 import uk.gov.hmcts.darts.common.entity.base.CreatedModifiedBaseEntity;
 
 @Entity
 @Table(name = AutomatedTaskEntity.TABLE_NAME)
 @Getter
 @Setter
+@Audited
+@AuditTable("automated_task_aud")
 public class AutomatedTaskEntity extends CreatedModifiedBaseEntity {
 
     public static final String TABLE_NAME = "automated_task";
@@ -27,7 +31,6 @@ public class AutomatedTaskEntity extends CreatedModifiedBaseEntity {
     private static final String AUTOMATED_TASK_SEQ = "aut_seq";
     private static final String TASK_ENABLED = "task_enabled";
     private static final String BATCH_SIZE = "batch_size";
-
 
     @Id
     @Column(name = AUTOMATED_TASK_ID)

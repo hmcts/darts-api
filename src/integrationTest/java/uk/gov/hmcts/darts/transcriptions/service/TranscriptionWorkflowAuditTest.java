@@ -50,6 +50,7 @@ class TranscriptionWorkflowAuditTest extends IntegrationBase {
 
         var auditActivity = findAuditActivity("Amend Transcription Workflow", dartsDatabase.findAudits());
         assertThat(auditActivity.getUser().getId()).isEqualTo(userAccountEntity.getId());
+        assertThat(auditActivity.getCourtCase().getId()).isEqualTo(transcriptionRequestDetails.getCaseId());
 
         var transcriptionWorkflowRevisions = dartsDatabase.findTranscriptionWorkflowRevisionsFor(createTranscriptionResponse.getTranscriptionId());
         assertThat(transcriptionWorkflowRevisions.getLatestRevision().getMetadata().getRevisionType()).isEqualTo(INSERT);
