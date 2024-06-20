@@ -29,7 +29,7 @@ import static org.apache.commons.lang3.CharEncoding.UTF_8;
 @Service
 @RequiredArgsConstructor
 @Slf4j
-public class GenerateCaseSingleCaseProcessorImpl implements GenerateCaseDocumentSingleCaseProcessor {
+public class GenerateCaseDocumentSingleCaseProcessorImpl implements GenerateCaseDocumentSingleCaseProcessor {
 
     @Qualifier("caseDocumentObjectMapper")
     private final ObjectMapper objectMapper;
