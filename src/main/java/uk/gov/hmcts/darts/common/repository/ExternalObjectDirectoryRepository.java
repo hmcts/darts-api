@@ -180,9 +180,11 @@ public interface ExternalObjectDirectoryRepository extends JpaRepository<Externa
 
 
     List<ExternalObjectDirectoryEntity> findByMedia(MediaEntity media);
+
     List<ExternalObjectDirectoryEntity> findByTranscriptionDocumentEntity(TranscriptionDocumentEntity transcriptionDocument);
 
     List<ExternalObjectDirectoryEntity> findByAnnotationDocumentEntity(AnnotationDocumentEntity annotationDocument);
+
     List<ExternalObjectDirectoryEntity> findByCaseDocument(CaseDocumentEntity caseDocument);
 
 
