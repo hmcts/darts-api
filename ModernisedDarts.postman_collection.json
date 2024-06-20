@@ -1,10 +1,9 @@
 {
 	"info": {
-		"_postman_id": "7a8bd3ef-7cae-410c-904e-e0066a0c08b9",
+		"_postman_id": "c83ecb2b-3eff-4f2a-b28f-03fee488e5a3",
 		"name": "ModernisedDarts",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
-		"_exporter_id": "15829068",
-		"_collection_link": "https://speeding-resonance-716248.postman.co/workspace/darts-workspace~7b348c54-cda1-41d9-aca3-fe24f04ce206/collection/15829068-7a8bd3ef-7cae-410c-904e-e0066a0c08b9?action=share&source=collection_link&creator=15829068"
+		"_exporter_id": "30362290"
 	},
 	"item": [
 		{
@@ -705,6 +704,47 @@
 							"response": []
 						}
 					]
+				},
+				{
+					"name": "/admin/cases/search",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{global_access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"courthouse_ids\": [\n    0\n  ],\n  \"case_number\": \"1234\",\n  \"courtroom_name\": \"1\",\n  \"hearing_start_at\": \"2024-06-18\",\n  \"hearing_end_at\": \"2024-06-18\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{serverUrl}}/admin/cases/search",
+							"host": [
+								"{{serverUrl}}"
+							],
+							"path": [
+								"admin",
+								"cases",
+								"search"
+							]
+						}
+					},
+					"response": []
 				}
 			]
 		},
@@ -1323,6 +1363,41 @@
 				},
 				{
 					"name": "/hearings/:hearingId/annotations",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{global_access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{serverUrl}}/hearings/:hearingId/annotations",
+							"host": [
+								"{{serverUrl}}"
+							],
+							"path": [
+								"hearings",
+								":hearingId",
+								"annotations"
+							],
+							"variable": [
+								{
+									"key": "hearingId",
+									"value": "11277"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/hearings/:hearingId/annotations Copy",
 					"request": {
 						"auth": {
 							"type": "bearer",
