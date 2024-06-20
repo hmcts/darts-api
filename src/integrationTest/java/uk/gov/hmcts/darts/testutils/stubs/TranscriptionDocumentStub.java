@@ -167,4 +167,20 @@ public class TranscriptionDocumentStub {
         transcriptionStatus.setDisplayName(statusEnum.name());
         return transcriptionStatus;
     }
+
+    public TranscriptionDocumentEntity createTranscriptionDocumentForTranscription(TranscriptionEntity transcriptionEntity) {
+        TranscriptionDocumentEntity transcriptionDocument = new TranscriptionDocumentEntity();
+        transcriptionDocument.setTranscription(transcriptionEntity);
+        transcriptionDocument.setFileName("aFilename");
+        transcriptionDocument.setFileType("aFileType");
+        transcriptionDocument.setFileSize(100);
+        transcriptionDocument.setChecksum("");
+
+        UserAccountEntity userAccount = userAccountRepository.getReferenceById(0);
+        transcriptionDocument.setUploadedBy(userAccount);
+        transcriptionDocument.setLastModifiedBy(userAccount);
+
+        transcriptionDocumentRepository.saveAndFlush(transcriptionDocument);
+        return transcriptionDocument;
+    }
 }

@@ -181,6 +181,7 @@ public class DartsDatabaseStub {
     private final MediaStub mediaStub;
     private final MediaRequestStub mediaRequestStub;
     private final TranscriptionStub transcriptionStub;
+    private final TranscriptionDocumentStub transcriptionDocumentStub;
     private final TransformedMediaStub transformedMediaStub;
     private final UserAccountStub userAccountStub;
 
@@ -379,7 +380,7 @@ public class DartsDatabaseStub {
     }
 
     public MediaEntity createHiddenMediaEntity(String courthouseName, String courtroomName, OffsetDateTime startTime, OffsetDateTime endTime, int channel) {
-        return mediaStub.createHiddenMediaEntity(courthouseName, courtroomName, startTime, endTime, channel,"mp2");
+        return mediaStub.createHiddenMediaEntity(courthouseName, courtroomName, startTime, endTime, channel, "mp2");
     }
 
     public CourtroomEntity findCourtroomBy(String courthouseName, String courtroomName) {
