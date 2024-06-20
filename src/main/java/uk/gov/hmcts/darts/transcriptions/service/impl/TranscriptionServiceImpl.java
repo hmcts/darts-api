@@ -575,7 +575,7 @@ public class TranscriptionServiceImpl implements TranscriptionService {
 
     @Override
     public List<TranscriptionDocumentEntity> getAllCaseTranscriptionDocuments(Integer caseId) {
-        var transcriptions = transcriptionRepository.findByCaseIdManualOrLegacy(caseId);
+        var transcriptions = transcriptionRepository.findByCaseIdManualOrLegacy(caseId, true);
         var uniqueTranscriptionDocuments = new ArrayList<TranscriptionDocumentEntity>();
         for (var transcription : transcriptions) {
             var transcriptionDocuments = transcription.getTranscriptionDocumentEntities();
