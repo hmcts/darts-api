@@ -8,7 +8,7 @@ import java.util.Set;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.APPROVER;
-import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.JUDGE;
+import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.JUDICIARY;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.REQUESTER;
 
 class UserStateRoleTest {
@@ -31,20 +31,20 @@ class UserStateRoleTest {
     @Test
     void shouldEqualsJudgeRole() {
         UserStateRole role = UserStateRole.builder()
-            .roleId(JUDGE.getId())
-            .roleName(JUDGE.toString())
+            .roleId(JUDICIARY.getId())
+            .roleName(JUDICIARY.toString())
             .globalAccess(false)
             .permissions(Collections.emptySet())
             .build();
 
-        assertEquals(role, new UserStateRole(JUDGE.getId(), JUDGE.toString(), false, Collections.emptySet(), Collections.emptySet()));
+        assertEquals(role, new UserStateRole(JUDICIARY.getId(), JUDICIARY.toString(), false, Collections.emptySet(), Collections.emptySet()));
     }
 
     @Test
     void shouldNotEqualsJudgeRole() {
         UserStateRole role = UserStateRole.builder()
-            .roleId(JUDGE.getId())
-            .roleName(JUDGE.toString())
+            .roleId(JUDICIARY.getId())
+            .roleName(JUDICIARY.toString())
             .globalAccess(false)
             .permissions(Collections.emptySet())
             .build();

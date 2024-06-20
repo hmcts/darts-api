@@ -347,7 +347,7 @@ public class UserAccountStub {
 
         Mockito.when(userIdentity.getUserAccount())
             .thenReturn(user);
-        Mockito.when(userIdentity.userHasGlobalAccess(argThat(t -> t.contains(SecurityRoleEnum.JUDGE))))
+        Mockito.when(userIdentity.userHasGlobalAccess(argThat(t -> t.contains(SecurityRoleEnum.JUDICIARY))))
             .thenReturn(true);
 
         return user;

@@ -41,7 +41,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static uk.gov.hmcts.darts.audiorequests.model.AudioRequestType.PLAYBACK;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.STORED;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.APPROVER;
-import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.JUDGE;
+import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.JUDICIARY;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.REQUESTER;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.TRANSCRIBER;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.TRANSLATION_QA;
@@ -103,7 +103,7 @@ class AudioRequestsControllerPlaybackIntTest extends IntegrationBase {
         doNothing().when(mockAuthorisation)
             .authoriseByTransformedMediaId(
                 transformedMediaId,
-                Set.of(JUDGE, REQUESTER, APPROVER, TRANSCRIBER, TRANSLATION_QA)
+                Set.of(JUDICIARY, REQUESTER, APPROVER, TRANSCRIBER, TRANSLATION_QA)
             );
 
         MockHttpServletRequestBuilder requestBuilder = get(ENDPOINT)
@@ -116,7 +116,7 @@ class AudioRequestsControllerPlaybackIntTest extends IntegrationBase {
 
         verify(mockAuthorisation).authoriseByTransformedMediaId(
             transformedMediaId,
-            Set.of(JUDGE, REQUESTER, APPROVER, TRANSCRIBER, TRANSLATION_QA)
+            Set.of(JUDICIARY, REQUESTER, APPROVER, TRANSCRIBER, TRANSLATION_QA)
         );
 
         Integer courtCaseId = mediaRequestEntity.getHearing().getCourtCase().getId();
@@ -154,7 +154,7 @@ class AudioRequestsControllerPlaybackIntTest extends IntegrationBase {
         doNothing().when(mockAuthorisation)
             .authoriseByTransformedMediaId(
                 transformedMediaId,
-                Set.of(JUDGE, REQUESTER, APPROVER, TRANSCRIBER, TRANSLATION_QA)
+                Set.of(JUDICIARY, REQUESTER, APPROVER, TRANSCRIBER, TRANSLATION_QA)
             );
 
         mockMvc.perform(requestBuilder)
@@ -164,7 +164,7 @@ class AudioRequestsControllerPlaybackIntTest extends IntegrationBase {
 
         verify(mockAuthorisation).authoriseByTransformedMediaId(
             transformedMediaId,
-            Set.of(JUDGE, REQUESTER, APPROVER, TRANSCRIBER, TRANSLATION_QA)
+            Set.of(JUDICIARY, REQUESTER, APPROVER, TRANSCRIBER, TRANSLATION_QA)
         );
     }
 
@@ -184,7 +184,7 @@ class AudioRequestsControllerPlaybackIntTest extends IntegrationBase {
         doNothing().when(mockAuthorisation)
             .authoriseByTransformedMediaId(
                 transformedMediaId,
-                Set.of(JUDGE, REQUESTER, APPROVER, TRANSCRIBER, TRANSLATION_QA)
+                Set.of(JUDICIARY, REQUESTER, APPROVER, TRANSCRIBER, TRANSLATION_QA)
             );
 
         mockMvc.perform(requestBuilder)
@@ -194,7 +194,7 @@ class AudioRequestsControllerPlaybackIntTest extends IntegrationBase {
 
         verify(mockAuthorisation).authoriseByTransformedMediaId(
             transformedMediaId,
-            Set.of(JUDGE, REQUESTER, APPROVER, TRANSCRIBER, TRANSLATION_QA)
+            Set.of(JUDICIARY, REQUESTER, APPROVER, TRANSCRIBER, TRANSLATION_QA)
         );
     }
 

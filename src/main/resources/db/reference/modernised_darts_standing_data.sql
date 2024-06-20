@@ -475,16 +475,17 @@ INSERT INTO security_permission (per_id, permission_name) VALUES (23, 'ADD_AUDIO
 
 INSERT INTO security_role (rol_id, role_name, display_name, display_state) VALUES (1, 'APPROVER', 'Approver', true);
 INSERT INTO security_role (rol_id, role_name, display_name, display_state) VALUES (2, 'REQUESTER', 'Requester', true);
-INSERT INTO security_role (rol_id, role_name, display_name, display_state) VALUES (3, 'JUDGE', 'Judge', true);
+INSERT INTO security_role (rol_id, role_name, display_name, display_state) VALUES (3, 'JUDICIARY', 'Judiciary', true);
 INSERT INTO security_role (rol_id, role_name, display_name, display_state) VALUES (4, 'TRANSCRIBER', 'Transcriber', true);
 INSERT INTO security_role (rol_id, role_name, display_name, display_state) VALUES (5, 'TRANSLATION_QA', 'Translation QA', true);
 INSERT INTO security_role (rol_id, role_name, display_name, display_state) VALUES (6, 'RCJ_APPEALS', 'RCJ Appeals', true);
-INSERT INTO security_role (rol_id, role_name, display_name, display_state) VALUES (7, 'XHIBIT', 'XHIBIT', true);
-INSERT INTO security_role (rol_id, role_name, display_name, display_state) VALUES (8, 'CPP', 'CPP', true);
-INSERT INTO security_role (rol_id, role_name, display_name, display_state) VALUES (9, 'DAR_PC', 'DAR PC', true);
-INSERT INTO security_role (rol_id, role_name, display_name, display_state) VALUES (10, 'MID_TIER', 'Mid Tier', true);
+INSERT INTO security_role (rol_id, role_name, display_name, display_state) VALUES (7, 'XHIBIT', 'XHIBIT', false);
+INSERT INTO security_role (rol_id, role_name, display_name, display_state) VALUES (8, 'CPP', 'CPP', false);
+INSERT INTO security_role (rol_id, role_name, display_name, display_state) VALUES (9, 'DAR_PC', 'DAR PC', false);
+INSERT INTO security_role (rol_id, role_name, display_name, display_state) VALUES (10, 'MID_TIER', 'Mid Tier', false);
 INSERT INTO security_role (rol_id, role_name, display_name, display_state) VALUES (11, 'SUPER_ADMIN', 'Super Admin', true);
 INSERT INTO security_role (rol_id, role_name, display_name, display_state) VALUES (12, 'SUPER_USER', 'Super User', true);
+INSERT INTO security_role (rol_id, role_name, display_name, display_state) VALUES (13, 'DARTS', 'DARTS', false);
 
 INSERT INTO security_role_permission_ae (rol_id, per_id) VALUES (1, 2);
 INSERT INTO security_role_permission_ae (rol_id, per_id) VALUES (1, 4);
@@ -586,6 +587,8 @@ INSERT INTO security_group (grp_id, rol_id, group_name, global_access, display_s
 VALUES (nextval('grp_seq'), 11, 'SUPER_ADMIN', true, true, false, 'Super Admin', CURRENT_TIMESTAMP, 0, CURRENT_TIMESTAMP, 0);
 INSERT INTO security_group (grp_id, rol_id, group_name, global_access, display_state, use_interpreter, display_name, created_ts, created_by, last_modified_ts, last_modified_by)
 VALUES (nextval('grp_seq'), 12, 'SUPER_USER', true, true, false, 'Super User', CURRENT_TIMESTAMP, 0, CURRENT_TIMESTAMP, 0);
+INSERT INTO security_group (grp_id, rol_id, group_name, global_access, display_state, use_interpreter, display_name, created_ts, created_by, last_modified_ts, last_modified_by)
+VALUES (nextval('grp_seq'), 13, 'DARTS', true, false, false, 'DARTS', CURRENT_TIMESTAMP, 0, CURRENT_TIMESTAMP, 0);
 
 INSERT INTO transcription_status (trs_id, status_type, display_name) VALUES (1, 'Requested', 'Requested');
 INSERT INTO transcription_status (trs_id, status_type, display_name) VALUES (2, 'Awaiting Authorisation', 'Awaiting Authorisation');

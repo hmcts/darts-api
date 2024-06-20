@@ -25,7 +25,7 @@ import static uk.gov.hmcts.darts.authorisation.constants.AuthorisationConstants.
 import static uk.gov.hmcts.darts.authorisation.enums.ContextIdEnum.ANY_ENTITY_ID;
 import static uk.gov.hmcts.darts.authorisation.enums.ContextIdEnum.CASE_ID;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.APPROVER;
-import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.JUDGE;
+import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.JUDICIARY;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.REQUESTER;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.SUPER_ADMIN;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.SUPER_USER;
@@ -42,8 +42,8 @@ public class RetentionController implements RetentionApi {
 
     @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
     @Authorisation(contextId = CASE_ID,
-        securityRoles = {JUDGE, REQUESTER, APPROVER},
-        globalAccessSecurityRoles = {JUDGE, SUPER_ADMIN, SUPER_USER})
+        securityRoles = {JUDICIARY, REQUESTER, APPROVER},
+        globalAccessSecurityRoles = {JUDICIARY, SUPER_ADMIN, SUPER_USER})
     @Override
     public ResponseEntity<List<GetCaseRetentionsResponse>> retentionsGet(Integer caseId) {
         return new ResponseEntity<>(retentionService.getCaseRetentions(caseId), HttpStatus.OK);
@@ -51,8 +51,8 @@ public class RetentionController implements RetentionApi {
 
     @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
     @Authorisation(contextId = CASE_ID, bodyAuthorisation = true,
-        securityRoles = {JUDGE, REQUESTER, APPROVER, TRANSCRIBER},
-        globalAccessSecurityRoles = {JUDGE, SUPER_ADMIN, SUPER_USER})
+        securityRoles = {JUDICIARY, REQUESTER, APPROVER, TRANSCRIBER},
+        globalAccessSecurityRoles = {JUDICIARY, SUPER_ADMIN, SUPER_USER})
     @Override
     public ResponseEntity<PostRetentionResponse> retentionsPost(Boolean validateOnly,
                                                                 PostRetentionRequest postRetentionRequest) {

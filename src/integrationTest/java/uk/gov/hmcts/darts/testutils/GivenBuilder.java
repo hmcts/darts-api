@@ -13,7 +13,7 @@ import uk.gov.hmcts.darts.testutils.stubs.DartsDatabaseStub;
 import java.util.List;
 import java.util.UUID;
 
-import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.JUDGE;
+import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.JUDICIARY;
 import static uk.gov.hmcts.darts.test.common.data.SecurityGroupTestData.buildGroupForRole;
 import static uk.gov.hmcts.darts.test.common.data.SecurityGroupTestData.buildGroupForRoleAndCourthouse;
 import static uk.gov.hmcts.darts.test.common.data.UserAccountTestData.minimalUserAccount;
@@ -44,7 +44,7 @@ public class GivenBuilder {
         var userEmail = role.name() + "@" + courthouse.getCourthouseName() + ".com";
         anAuthenticatedUserFor(userEmail);
 
-        var securityGroup = buildGroupForRoleAndCourthouse(JUDGE, courthouse);
+        var securityGroup = buildGroupForRoleAndCourthouse(JUDICIARY, courthouse);
 
         var judge = minimalUserAccount();
         judge.setEmailAddress(userEmail);

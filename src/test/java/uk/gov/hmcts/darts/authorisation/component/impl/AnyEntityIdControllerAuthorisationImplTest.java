@@ -29,7 +29,7 @@ import static uk.gov.hmcts.darts.authorisation.enums.ContextIdEnum.ANY_ENTITY_ID
 import static uk.gov.hmcts.darts.authorisation.exception.AuthorisationError.BAD_REQUEST_ANY_ID;
 import static uk.gov.hmcts.darts.authorisation.exception.AuthorisationError.BAD_REQUEST_CASE_ID;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.APPROVER;
-import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.JUDGE;
+import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.JUDICIARY;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.RCJ_APPEALS;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.REQUESTER;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.TRANSCRIBER;
@@ -53,7 +53,7 @@ class AnyEntityIdControllerAuthorisationImplTest {
     @BeforeEach
     void setUp() {
         roles = Set.of(
-            JUDGE,
+            JUDICIARY,
             REQUESTER,
             APPROVER,
             TRANSCRIBER,

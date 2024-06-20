@@ -12,7 +12,7 @@ public enum SecurityRoleEnum {
 
     APPROVER(1),
     REQUESTER(2),
-    JUDGE(3),
+    JUDICIARY(3),
     TRANSCRIBER(4),
     TRANSLATION_QA(5),
     RCJ_APPEALS(6),
@@ -21,7 +21,8 @@ public enum SecurityRoleEnum {
     DAR_PC(9),
     MID_TIER(10),
     SUPER_ADMIN(11),
-    SUPER_USER(12);
+    SUPER_USER(12),
+    DARTS(13);
 
     private final Integer id;
 

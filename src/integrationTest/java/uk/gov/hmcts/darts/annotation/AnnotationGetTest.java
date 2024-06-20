@@ -24,7 +24,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.JUDGE;
+import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.JUDICIARY;
 import static uk.gov.hmcts.darts.test.common.data.AnnotationTestData.minimalAnnotationEntity;
 import static uk.gov.hmcts.darts.test.common.data.HearingTestData.someMinimalHearing;
 
@@ -50,7 +50,7 @@ class AnnotationGetTest extends IntegrationBase {
     @Test
     void shouldThrowHttp404ForValidJudgeAndInvalidAnnotationDocumentEntity() throws Exception {
 
-        AnnotationEntity uae = someAnnotationCreatedBy(given.anAuthenticatedUserWithGlobalAccessAndRole(JUDGE));
+        AnnotationEntity uae = someAnnotationCreatedBy(given.anAuthenticatedUserWithGlobalAccessAndRole(JUDICIARY));
 
         MockHttpServletRequestBuilder requestBuilder = get(ANNOTATION_DOCUMENT_ENDPOINT, uae.getId(), -1);
 
@@ -67,7 +67,7 @@ class AnnotationGetTest extends IntegrationBase {
     @Test
     void shouldDownloadAnnotationDocument() throws Exception {
 
-        var judge = given.anAuthenticatedUserWithGlobalAccessAndRole(JUDGE);
+        var judge = given.anAuthenticatedUserWithGlobalAccessAndRole(JUDICIARY);
 
         when(downloadResponseMetaData.getInputStream()).thenReturn(inputStreamResource);
         when(dataManagementFacade.retrieveFileFromStorage(anyList())).thenReturn(downloadResponseMetaData);

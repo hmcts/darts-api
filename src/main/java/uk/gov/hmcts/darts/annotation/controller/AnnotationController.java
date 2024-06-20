@@ -21,7 +21,7 @@ import static org.springframework.http.HttpHeaders.CONTENT_DISPOSITION;
 import static uk.gov.hmcts.darts.authorisation.constants.AuthorisationConstants.SECURITY_SCHEMES_BEARER_AUTH;
 import static uk.gov.hmcts.darts.authorisation.enums.ContextIdEnum.ANNOTATION_ID;
 import static uk.gov.hmcts.darts.authorisation.enums.ContextIdEnum.HEARING_ID;
-import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.JUDGE;
+import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.JUDICIARY;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.SUPER_ADMIN;
 
 @RestController
@@ -38,8 +38,8 @@ public class AnnotationController implements AnnotationsApi {
     @Authorisation(
         bodyAuthorisation = true,
         contextId = HEARING_ID,
-        securityRoles = {JUDGE},
-        globalAccessSecurityRoles = {JUDGE, SUPER_ADMIN})
+        securityRoles = {JUDICIARY},
+        globalAccessSecurityRoles = {JUDICIARY, SUPER_ADMIN})
     @Override
     public ResponseEntity<PostAnnotationResponse> postAnnotation(MultipartFile file, Annotation annotation) {
         var annotationId = uploadService.upload(file, annotation);
@@ -49,8 +49,8 @@ public class AnnotationController implements AnnotationsApi {
     @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
     @Authorisation(
         contextId = ANNOTATION_ID,
-        securityRoles = {JUDGE},
-        globalAccessSecurityRoles = {JUDGE, SUPER_ADMIN})
+        securityRoles = {JUDICIARY},
+        globalAccessSecurityRoles = {JUDICIARY, SUPER_ADMIN})
     @Override
     public ResponseEntity<Void> deleteAnnotation(Integer annotationId) {
         deleteService.delete(annotationId);
@@ -60,8 +60,8 @@ public class AnnotationController implements AnnotationsApi {
     @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
     @Authorisation(
         contextId = ANNOTATION_ID,
-        securityRoles = {JUDGE},
-        globalAccessSecurityRoles = {JUDGE, SUPER_ADMIN})
+        securityRoles = {JUDICIARY},
+        globalAccessSecurityRoles = {JUDICIARY, SUPER_ADMIN})
     @Override
     public ResponseEntity<Resource> downloadAnnotation(Integer annotationId, Integer annotationDocumentId) {
 

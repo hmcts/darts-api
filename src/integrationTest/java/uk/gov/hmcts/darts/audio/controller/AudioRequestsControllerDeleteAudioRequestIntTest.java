@@ -22,7 +22,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.STORED;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.APPROVER;
-import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.JUDGE;
+import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.JUDICIARY;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.REQUESTER;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.TRANSCRIBER;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.TRANSLATION_QA;
@@ -55,7 +55,7 @@ class AudioRequestsControllerDeleteAudioRequestIntTest extends IntegrationBase {
 
         doNothing().when(authorisation).authoriseByMediaRequestId(
             mediaRequestEntity.getId(),
-            Set.of(JUDGE, REQUESTER, APPROVER, TRANSCRIBER, TRANSLATION_QA)
+            Set.of(JUDICIARY, REQUESTER, APPROVER, TRANSCRIBER, TRANSLATION_QA)
         );
 
         MockHttpServletRequestBuilder requestBuilder = delete(URI.create(
@@ -66,7 +66,7 @@ class AudioRequestsControllerDeleteAudioRequestIntTest extends IntegrationBase {
 
         verify(authorisation).authoriseByMediaRequestId(
             mediaRequestEntity.getId(),
-            Set.of(JUDGE, REQUESTER, APPROVER, TRANSCRIBER, TRANSLATION_QA)
+            Set.of(JUDICIARY, REQUESTER, APPROVER, TRANSCRIBER, TRANSLATION_QA)
         );
     }
 

@@ -25,7 +25,7 @@ import java.util.Set;
 import static org.mockito.Mockito.verify;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.JUDGE;
+import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.JUDICIARY;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.SUPER_ADMIN;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.SUPER_USER;
 
@@ -93,7 +93,7 @@ class RetentionControllerGetByCaseIdTest extends IntegrationBase {
             .andExpect(MockMvcResultMatchers.jsonPath("$[2].comments", Matchers.is("a comment")))
             .andExpect(MockMvcResultMatchers.jsonPath("$[2].status", Matchers.is("c_state")));
 
-        verify(mockUserIdentity).userHasGlobalAccess(Set.of(JUDGE, SUPER_ADMIN, SUPER_USER));
+        verify(mockUserIdentity).userHasGlobalAccess(Set.of(JUDICIARY, SUPER_ADMIN, SUPER_USER));
     }
 
     @Test
@@ -107,7 +107,7 @@ class RetentionControllerGetByCaseIdTest extends IntegrationBase {
         String actualJson = mvcResult.getResponse().getContentAsString();
         JSONAssert.assertEquals("[]", actualJson, JSONCompareMode.NON_EXTENSIBLE);
 
-        verify(mockUserIdentity).userHasGlobalAccess(Set.of(JUDGE, SUPER_ADMIN, SUPER_USER));
+        verify(mockUserIdentity).userHasGlobalAccess(Set.of(JUDICIARY, SUPER_ADMIN, SUPER_USER));
     }
 
 }
