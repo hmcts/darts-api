@@ -25,7 +25,7 @@ public class CaseTestData {
     }
 
     public static CourtCaseEntity createSomeMinimalCase(String caseNumber) {
-        return createSomeMinimalCase(caseNumber,null);
+        return createSomeMinimalCase(caseNumber, null);
     }
 
     public static CourtCaseEntity createSomeMinimalCase(String caseNumber, CourthouseEntity courthouseEntity) {
@@ -80,6 +80,5 @@ public class CaseTestData {
         courtCase.setCourthouse(courthouse);
         return courtCase;
     }
-
 
 }

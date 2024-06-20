@@ -1,0 +1,53 @@
+[
+  {
+    "case_number": "case7",
+    "courthouse": {
+      "display_name": "SWANSEA"
+    },
+    "courtrooms": [
+      {
+        "name": "courtroom1"
+      }
+    ],
+    "judges": [
+      "aJudge"
+    ],
+    "defendants": [
+      "aDefendant"
+    ]
+  },
+  {
+    "case_number": "case8",
+    "courthouse": {
+      "display_name": "SWANSEA"
+    },
+    "courtrooms": [
+      {
+        "name": "courtroom1"
+      }
+    ],
+    "judges": [
+      "aJudge"
+    ],
+    "defendants": [
+      "aDefendant"
+    ]
+  },
+  {
+    "case_number": "case10",
+    "courthouse": {
+      "display_name": "SWANSEA"
+    },
+    "courtrooms": [
+      {
+        "name": "courtroom4"
+      }
+    ],
+    "judges": [
+      "aJudge"
+    ],
+    "defendants": [
+      "aDefendant"
+    ]
+  }
+]

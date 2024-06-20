@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
+import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 import uk.gov.hmcts.darts.common.repository.CaseRepository;
 import uk.gov.hmcts.darts.common.repository.CourthouseRepository;
 import uk.gov.hmcts.darts.test.common.data.CaseTestData;
@@ -29,6 +30,9 @@ public class CourtCaseStub {
     @Autowired
     CourthouseRepository courthouseRepository;
 
+    @Autowired
+    CourthouseStub courthouseStub;
+
     @Transactional
     public CourtCaseEntity createAndSaveMinimalCourtCase() {
 
@@ -37,13 +41,13 @@ public class CourtCaseStub {
     }
 
     @Transactional
-    public CourtCaseEntity createAndSaveMinimalCourtCase(String caseNumber) {
-        return createAndSaveMinimalCourtCase(caseNumber,null);
-    }
-
-    @Transactional
     public CourtCaseEntity createAndSaveMinimalCourtCase(String caseNumber, Integer courthouseId) {
         var courtCase = CaseTestData.createSomeMinimalCase(caseNumber, courthouseRepository.findById(courthouseId).get());
+        return caseRepository.save(courtCase);
+    }
+
+    public CourtCaseEntity createAndSaveMinimalCourtCase(String caseNumber, CourthouseEntity courthouse) {
+        var courtCase = CaseTestData.createSomeMinimalCase(caseNumber, courthouse);
         return caseRepository.save(courtCase);
     }
 
@@ -77,6 +81,18 @@ public class CourtCaseStub {
 
     @Transactional
     public CourtCaseEntity createAndSaveCourtCaseWithHearings() {
-        return createAndSaveCourtCaseWithHearings(courtCase -> { });
+        return createAndSaveCourtCaseWithHearings(courtCase -> {
+        });
     }
+
+    @Transactional
+    public void createCasesWithHearings(int numOfCases, int numOfCourtrooms, int numOfHearingsPerCourtroom) {
+        CourthouseEntity courthouse = courthouseStub.createMinimalCourthouse();
+        for (int caseCounter = 1; caseCounter <= numOfCases; caseCounter++) {
+            CourtCaseEntity courtCase = createAndSaveMinimalCourtCase("caseNumber" + caseCounter, courthouse);
+            hearingStub.createHearingsForCase(courtCase, numOfCourtrooms, numOfHearingsPerCourtroom);
+        }
+    }
+
+
 }

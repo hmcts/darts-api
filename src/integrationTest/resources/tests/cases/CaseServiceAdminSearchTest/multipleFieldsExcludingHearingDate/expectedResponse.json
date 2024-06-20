@@ -1,0 +1,20 @@
+[
+  {
+    "case_number": "Case3",
+    "courthouse": {
+      "display_name": "SWANSEA"
+    },
+    "courtrooms": [
+      {
+        "name": "courtroom1"
+      }
+    ],
+    "judges": [
+      "Judge3a",
+      "aJudge"
+    ],
+    "defendants": [
+      "aDefendant"
+    ]
+  }
+]

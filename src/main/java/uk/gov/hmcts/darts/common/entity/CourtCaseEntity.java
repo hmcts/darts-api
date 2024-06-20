@@ -101,10 +101,10 @@ public class CourtCaseEntity extends CreatedModifiedBaseEntity {
     @Column(name = "deleted_ts")
     private OffsetDateTime deletedTimestamp;
 
-    @OneToMany(mappedBy = COURT_CASE, cascade = CascadeType.PERSIST)
+    @OneToMany(mappedBy = HearingEntity_.COURT_CASE, cascade = CascadeType.PERSIST)
     private List<HearingEntity> hearings = new ArrayList<>();
 
-    @OneToMany(mappedBy = COURT_CASE)
+    @OneToMany(mappedBy = CaseRetentionEntity_.COURT_CASE)
     private List<CaseRetentionEntity> caseRetentionEntities = new ArrayList<>();
 
     @ManyToMany(fetch = FetchType.EAGER)
