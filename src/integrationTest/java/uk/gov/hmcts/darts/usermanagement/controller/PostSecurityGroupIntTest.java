@@ -11,13 +11,12 @@ import org.springframework.data.domain.Sort;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
-import org.springframework.transaction.PlatformTransactionManager;
-import org.springframework.transaction.support.TransactionTemplate;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.SecurityGroupEntity;
 import uk.gov.hmcts.darts.common.entity.SecurityGroupEntity_;
 import uk.gov.hmcts.darts.common.repository.SecurityGroupRepository;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
+import uk.gov.hmcts.darts.testutils.TransactionalAssert;
 import uk.gov.hmcts.darts.testutils.stubs.SuperAdminUserStub;
 
 import java.util.List;
@@ -36,7 +35,7 @@ class PostSecurityGroupIntTest extends IntegrationBase {
     private static final String DESCRIPTION = "A test group";
 
     @Autowired
-    private PlatformTransactionManager transactionManager;
+    private TransactionalAssert transactionalAssert;
 
     @Autowired
     private SecurityGroupRepository securityGroupRepository;
@@ -50,13 +49,10 @@ class PostSecurityGroupIntTest extends IntegrationBase {
     @MockBean
     private UserIdentity userIdentity;
 
-    private TransactionTemplate transactionTemplate;
-
     private int maxSecurityGroupId;
 
     @BeforeEach
     void setUp() {
-        transactionTemplate = new TransactionTemplate(transactionManager);
         List<SecurityGroupEntity> securityGroupEntities = securityGroupRepository.findAll(Sort.by(SecurityGroupEntity_.ID).descending());
         maxSecurityGroupId = securityGroupEntities.get(0).getId();
     }
@@ -98,7 +94,7 @@ class PostSecurityGroupIntTest extends IntegrationBase {
         var id = new JSONObject(result.getResponse().getContentAsString())
             .getInt("id");
 
-        transactionTemplate.execute(status -> {
+        transactionalAssert.inTransaction(() -> {
             var createdSecurityGroupEntity = securityGroupRepository.findById(id)
                 .orElseThrow();
 
@@ -109,8 +105,6 @@ class PostSecurityGroupIntTest extends IntegrationBase {
             assertTrue(createdSecurityGroupEntity.getDisplayState());
             assertEquals("TRANSCRIBER", createdSecurityGroupEntity.getSecurityRoleEntity().getRoleName());
             assertFalse(createdSecurityGroupEntity.getUseInterpreter());
-
-            return null;
         });
     }
 
@@ -141,7 +135,7 @@ class PostSecurityGroupIntTest extends IntegrationBase {
         var id = new JSONObject(result.getResponse().getContentAsString())
             .getInt("id");
 
-        transactionTemplate.execute(status -> {
+        transactionalAssert.inTransaction(() -> {
             var createdSecurityGroupEntity = securityGroupRepository.findById(id)
                 .orElseThrow();
 
@@ -152,8 +146,6 @@ class PostSecurityGroupIntTest extends IntegrationBase {
             assertTrue(createdSecurityGroupEntity.getDisplayState());
             assertEquals("TRANSLATION_QA", createdSecurityGroupEntity.getSecurityRoleEntity().getRoleName());
             assertTrue(createdSecurityGroupEntity.getUseInterpreter());
-
-            return null;
         });
     }
 
@@ -185,7 +177,7 @@ class PostSecurityGroupIntTest extends IntegrationBase {
         var id = new JSONObject(result.getResponse().getContentAsString())
             .getInt("id");
 
-        transactionTemplate.execute(status -> {
+        transactionalAssert.inTransaction(() -> {
             var createdSecurityGroupEntity = securityGroupRepository.findById(id)
                 .orElseThrow();
 
@@ -195,8 +187,6 @@ class PostSecurityGroupIntTest extends IntegrationBase {
             assertFalse(createdSecurityGroupEntity.getGlobalAccess());
             assertTrue(createdSecurityGroupEntity.getDisplayState());
             assertEquals("TRANSCRIBER", createdSecurityGroupEntity.getSecurityRoleEntity().getRoleName());
-
-            return null;
         });
     }
 
