@@ -16,6 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
+import uk.gov.hmcts.darts.common.entity.TranscriptionDocumentEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.util.DateConverterUtil;
@@ -146,5 +147,60 @@ class HearingsControllerGetTranscriptsTest extends IntegrationBase {
             .andReturn();
         String actualResponse = TestUtils.removeTags(TAGS_TO_IGNORE, mvcResult.getResponse().getContentAsString());
         JSONAssert.assertEquals(expected, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
+    }
+
+    @Test
+    void ignoreHiddenTranscripts() throws Exception {
+        HearingEntity hearingEntity = dartsDatabase.getHearingRepository().findAll().get(0);
+
+        //transcription with 0 docs - should be visible
+        TranscriptionEntity transcription = dartsDatabase.getTranscriptionStub().createTranscription(hearingEntity);
+        transcription.setCreatedDateTime(OffsetDateTime.of(2023, 6, 20, 10, 1, 0, 0, ZoneOffset.UTC));
+        transcription.setIsManualTranscription(true);
+        dartsDatabase.save(transcription);
+        createTranscriptionDocs(transcription, List.of());
+
+        //transcription with 3 docs, none hidden - should be visible
+        TranscriptionEntity transcription2 = dartsDatabase.getTranscriptionStub().createTranscription(hearingEntity);
+        transcription2.setCreatedDateTime(OffsetDateTime.of(2023, 6, 20, 10, 2, 0, 0, ZoneOffset.UTC));
+        transcription2.setIsManualTranscription(true);
+        transcription2.setLegacyObjectId(null);
+        dartsDatabase.save(transcription2);
+        createTranscriptionDocs(transcription2, List.of(false, false, false));
+
+        //transcription with 3 docs, 1 hidden - should be visible
+        TranscriptionEntity transcription3 = dartsDatabase.getTranscriptionStub().createTranscription(hearingEntity);
+        transcription3.setCreatedDateTime(OffsetDateTime.of(2023, 6, 20, 10, 3, 0, 0, ZoneOffset.UTC));
+        transcription3.setIsManualTranscription(true);
+        transcription3.setLegacyObjectId("Something");
+        dartsDatabase.save(transcription3);
+        createTranscriptionDocs(transcription3, List.of(false, true, false));
+
+        //transcription with 3 docs, all hidden - should be hidden
+        TranscriptionEntity transcription4 = dartsDatabase.getTranscriptionStub().createTranscription(hearingEntity);
+        transcription4.setCreatedDateTime(OffsetDateTime.of(2023, 6, 20, 10, 4, 0, 0, ZoneOffset.UTC));
+        transcription4.setIsManualTranscription(true);
+        transcription4.setLegacyObjectId("Something");
+        dartsDatabase.save(transcription4);
+        createTranscriptionDocs(transcription4, List.of(true, true, true));
+
+        MockHttpServletRequestBuilder requestBuilder = get(ENDPOINT_URL_HEARINGS, hearingEntity.getId());
+        String expected = TestUtils.removeTags(TAGS_TO_IGNORE, getContentsFromFile(
+            "tests/hearings/HearingsControllerGetTranscriptsTest/ignoreHiddenTranscripts.json"));
+        MvcResult mvcResult = mockMvc.perform(requestBuilder).andExpect(MockMvcResultMatchers.status().isOk())
+            .andReturn();
+        String actualResponse = TestUtils.removeTags(TAGS_TO_IGNORE, mvcResult.getResponse().getContentAsString());
+        JSONAssert.assertEquals(expected, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
+    }
+
+    private void createTranscriptionDocs(TranscriptionEntity transcriptionEntity, List<Boolean> hiddenList) {
+        for (Boolean shouldBeHidden : hiddenList) {
+            TranscriptionDocumentEntity transDoc = dartsDatabase.getTranscriptionDocumentStub().createTranscriptionDocumentForTranscription(
+                transcriptionEntity);
+            transDoc.setHidden(shouldBeHidden);
+            dartsDatabase.getTranscriptionDocumentRepository().save(transDoc);
+        }
+
+
     }
 }
