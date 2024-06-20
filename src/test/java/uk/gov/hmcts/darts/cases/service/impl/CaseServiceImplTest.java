@@ -12,6 +12,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.skyscreamer.jsonassert.JSONAssert;
 import org.skyscreamer.jsonassert.JSONCompareMode;
 import uk.gov.hmcts.darts.authorisation.api.AuthorisationApi;
+import uk.gov.hmcts.darts.cases.helper.AdminCasesSearchRequestHelper;
 import uk.gov.hmcts.darts.cases.helper.AdvancedSearchRequestHelper;
 import uk.gov.hmcts.darts.cases.mapper.CasesAnnotationMapper;
 import uk.gov.hmcts.darts.cases.mapper.CasesMapper;
@@ -89,6 +90,8 @@ class CaseServiceImplTest {
 
     @Mock
     AdvancedSearchRequestHelper advancedSearchRequestHelper;
+    @Mock
+    AdminCasesSearchRequestHelper adminCasesSearchRequestHelper;
 
     @Mock
     TranscriptionRepository transcriptionRepository;
@@ -116,6 +119,7 @@ class CaseServiceImplTest {
             annotationRepository,
             retrieveCoreObjectService,
             advancedSearchRequestHelper,
+            adminCasesSearchRequestHelper,
             transcriptionRepository,
             authorisationApi,
             logApi
@@ -204,7 +208,7 @@ class CaseServiceImplTest {
         UserAccountEntity userAccount = new UserAccountEntity();
         userAccount.setId(10);
         when(authorisationApi.getCurrentUser()).thenReturn(userAccount);
-        
+
         service.getHearings(request);
         verify(retrieveCoreObjectService).retrieveOrCreateCourtroom(eq(SWANSEA), eq("99"), any(UserAccountEntity.class));
         verify(logApi, times(1)).casesRequestedByDarPc(request);

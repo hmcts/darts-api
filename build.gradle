@@ -317,7 +317,7 @@ repositories {
 
 ext {
   log4JVersion = "2.23.1"
-  tomcatEmbedVersion = "10.1.24"
+  tomcatEmbedVersion = "10.1.25"
 }
 
 ext['snakeyaml.version'] = '2.0'
@@ -374,7 +374,7 @@ dependencies {
   implementation group: 'org.springframework.boot', name: 'spring-boot-starter-security'
   implementation group: 'org.springframework.boot', name: 'spring-boot-starter-cache'
   implementation group: 'org.springframework.boot', name: 'spring-boot-starter-data-redis'
-  implementation group: 'org.springframework', name: 'spring-webflux', version: '6.1.9'
+  implementation group: 'org.springframework', name: 'spring-webflux', version: '6.1.10'
 
   implementation group: 'org.springframework.security', name: 'spring-security-oauth2-authorization-server', version: '1.3.1'
 
@@ -431,7 +431,7 @@ dependencies {
   implementation 'org.hibernate:hibernate-spatial:6.5.2.Final'
 
   annotationProcessor 'org.mapstruct:mapstruct-processor:1.5.5.Final'
-  annotationProcessor('org.hibernate.orm:hibernate-jpamodelgen:6.4.6.Final')
+  annotationProcessor('org.hibernate.orm:hibernate-jpamodelgen:6.5.2.Final')
 
   // Added to resolve issue where the default Feign client will silently convert GET requests to POST if the request contains a body
   // Ref: https://github.com/spring-cloud/spring-cloud-openfeign/issues/832
@@ -454,7 +454,7 @@ dependencies {
 
   // https://mvnrepository.com/artifact/org.awaitility/awaitility-proxy
   testImplementation group: 'org.awaitility', name: 'awaitility-proxy', version: '3.1.6'
-  testImplementation 'io.github.hakky54:logcaptor:2.9.2'
+  testImplementation 'io.github.hakky54:logcaptor:2.9.3'
   testImplementation 'org.testcontainers:testcontainers:1.19.8'
 
   compileJava.dependsOn = openApiGenerateTaskList
