@@ -7,7 +7,7 @@ import uk.gov.hmcts.darts.common.entity.MediaEntity;
 public interface AudioUploadService {
     void addAudio(MultipartFile audioFileStream, AddAudioMetadataRequest addAudioMetadataRequest);
 
-    void linkAudioToHearingInMetadata(AddAudioMetadataRequest addAudioMetadataRequest, MediaEntity mediaToReplace, MediaEntity newMedia);
+    void linkAudioToHearingInMetadata(AddAudioMetadataRequest addAudioMetadataRequest, MediaEntity mediaEntity);
 
     void linkAudioToHearingByEvent(AddAudioMetadataRequest addAudioMetadataRequest, MediaEntity savedMedia);
 }

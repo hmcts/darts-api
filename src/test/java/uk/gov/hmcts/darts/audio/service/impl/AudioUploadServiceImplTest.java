@@ -29,10 +29,12 @@ import uk.gov.hmcts.darts.common.entity.MediaEntity;
 import uk.gov.hmcts.darts.common.entity.ObjectRecordStatusEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
+import uk.gov.hmcts.darts.common.helper.MediaLinkedCaseHelper;
 import uk.gov.hmcts.darts.common.repository.CourtLogEventRepository;
 import uk.gov.hmcts.darts.common.repository.ExternalLocationTypeRepository;
 import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
 import uk.gov.hmcts.darts.common.repository.HearingRepository;
+import uk.gov.hmcts.darts.common.repository.MediaLinkedCaseRepository;
 import uk.gov.hmcts.darts.common.repository.MediaRepository;
 import uk.gov.hmcts.darts.common.repository.ObjectRecordStatusRepository;
 import uk.gov.hmcts.darts.common.service.FileOperationService;
@@ -110,16 +112,21 @@ class AudioUploadServiceImplTest {
     @Mock
     private AuthorisationApi authorisationApi;
     private AudioUploadService audioService;
+    @Mock
+    private MediaLinkedCaseHelper mediaLinkedCaseHelper;
+    @Mock
+    private MediaLinkedCaseRepository mediaLinkedCaseRepository;
 
     @BeforeEach
     void setUp() {
-        AddAudioRequestMapper mapper = new AddAudioRequestMapperImpl(retrieveCoreObjectService, userIdentity);
+        AddAudioRequestMapper mapper = new AddAudioRequestMapperImpl(retrieveCoreObjectService, userIdentity, mediaLinkedCaseHelper, mediaRepository);
         FileContentChecksum fileContentChecksum = new FileContentChecksum();
         audioService = new AudioUploadServiceImpl(
             externalObjectDirectoryRepository,
             objectRecordStatusRepository,
             externalLocationTypeRepository,
             mediaRepository,
+            mediaLinkedCaseRepository,
             retrieveCoreObjectService,
             hearingRepository,
             mapper,
@@ -384,7 +391,7 @@ class AudioUploadServiceImplTest {
             any(),
             any()
         )).thenReturn(hearing3);
-        audioService.linkAudioToHearingInMetadata(addAudioMetadataRequest, null, mediaEntity);
+        audioService.linkAudioToHearingInMetadata(addAudioMetadataRequest, mediaEntity);
         verify(hearingRepository, times(3)).saveAndFlush(any());
         assertEquals(1, hearing1.getMediaList().size());
         assertEquals(1, hearing2.getMediaList().size());
@@ -415,7 +422,7 @@ class AudioUploadServiceImplTest {
             any()
         )).thenReturn(hearing2);
 
-        audioService.linkAudioToHearingInMetadata(addAudioMetadataRequest, null, mediaEntity);
+        audioService.linkAudioToHearingInMetadata(addAudioMetadataRequest, mediaEntity);
         verify(hearingRepository, times(2)).saveAndFlush(any());
         assertEquals(1, hearing1.getMediaList().size());
         assertEquals(1, hearing2.getMediaList().size());

@@ -1,0 +1,1 @@
+alter table darts.media drop column case_number;

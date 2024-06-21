@@ -167,12 +167,27 @@ public class RetrieveCoreObjectServiceImpl implements RetrieveCoreObjectService 
 
     }
 
-    private CourtCaseEntity createCase(String courthouseName, String caseNumber, UserAccountEntity userAccount) {
+    @Override
+    public CourtCaseEntity retrieveOrCreateCase(CourthouseEntity courthouse, String caseNumber, UserAccountEntity userAccount) {
+        Optional<CourtCaseEntity> foundCase = caseRepository.findByCaseNumberIgnoreCaseAndCourthouse(
+            caseNumber,
+            courthouse
+        );
 
+        return foundCase.map(entity -> setCourtCaseLastDateModifiedBy(entity, userAccount))
+            .orElseGet(() -> createCase(courthouse, caseNumber, userAccount));
+
+    }
+
+    private CourtCaseEntity createCase(String courthouseName, String caseNumber, UserAccountEntity userAccount) {
         CourthouseEntity foundCourthouse = retrieveCourthouse(courthouseName);
+        return createCase(foundCourthouse, caseNumber, userAccount);
+    }
+
+    private CourtCaseEntity createCase(CourthouseEntity courthouse, String caseNumber, UserAccountEntity userAccount) {
         CourtCaseEntity courtCase = new CourtCaseEntity();
         courtCase.setCaseNumber(caseNumber);
-        courtCase.setCourthouse(foundCourthouse);
+        courtCase.setCourthouse(courthouse);
         courtCase.setClosed(false);
         courtCase.setInterpreterUsed(false);
         courtCase.setCreatedBy(userAccount);

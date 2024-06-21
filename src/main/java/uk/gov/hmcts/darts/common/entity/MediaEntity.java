@@ -58,8 +58,8 @@ public class MediaEntity extends CreatedModifiedBaseEntity {
     @Column(name = "end_ts", nullable = false)
     private OffsetDateTime end;
 
-    @Column(name = "case_number")
-    private List<String> caseNumberList = new ArrayList<>();
+    @OneToMany(mappedBy = MediaLinkedCaseEntity_.MEDIA)
+    private List<MediaLinkedCaseEntity> mediaLinkedCaseList = new ArrayList<>();
 
     @Column(name = "version_label", length = 32)
     private String legacyVersionLabel;
@@ -122,4 +122,11 @@ public class MediaEntity extends CreatedModifiedBaseEntity {
         return io.vavr.collection.List.ofAll(cases).distinctBy(CourtCaseEntity::getId).toJavaList();
     }
 
+    public List<CourtCaseEntity> getCases() {
+        return mediaLinkedCaseList.stream().map(MediaLinkedCaseEntity::getCourtCase).toList();
+    }
+
+    public void removeHearing(HearingEntity hearing) {
+        hearing.getMediaList().remove(this);
+    }
 }

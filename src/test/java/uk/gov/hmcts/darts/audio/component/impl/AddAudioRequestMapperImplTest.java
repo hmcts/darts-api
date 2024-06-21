@@ -13,6 +13,8 @@ import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
+import uk.gov.hmcts.darts.common.helper.MediaLinkedCaseHelper;
+import uk.gov.hmcts.darts.common.repository.MediaRepository;
 import uk.gov.hmcts.darts.common.service.RetrieveCoreObjectService;
 
 import java.time.OffsetDateTime;
@@ -26,6 +28,11 @@ import static org.mockito.Mockito.when;
 class AddAudioRequestMapperImplTest {
     @Mock
     RetrieveCoreObjectService courtroomRepository;
+    @Mock
+    MediaLinkedCaseHelper mediaLinkedCaseHelper;
+
+    @Mock
+    MediaRepository mediaRepository;
 
     @Mock
     UserIdentity userIdentity;
@@ -37,7 +44,7 @@ class AddAudioRequestMapperImplTest {
 
     @BeforeEach
     void setUp() {
-        addAudioRequestMapperImpl = new AddAudioRequestMapperImpl(courtroomRepository, userIdentity);
+        addAudioRequestMapperImpl = new AddAudioRequestMapperImpl(courtroomRepository, userIdentity, mediaLinkedCaseHelper, mediaRepository);
         userAccount = new UserAccountEntity();
         userAccount.setId(0);
     }
@@ -60,7 +67,6 @@ class AddAudioRequestMapperImplTest {
         media.setChannel(1);
         media.setTotalChannels(2);
         media.setCourtroom(courtroomEntity);
-        media.setCaseNumberList(List.of("case1", "case2"));
 
         MediaEntity result = addAudioRequestMapperImpl.mapToMedia(
             new AddAudioMetadataRequest(
@@ -80,7 +86,7 @@ class AddAudioRequestMapperImplTest {
         Assertions.assertEquals(media.getChannel(), result.getChannel());
         Assertions.assertEquals(media.getTotalChannels(), result.getTotalChannels());
         Assertions.assertEquals(media.getCourtroom().getName(), result.getCourtroom().getName());
-        Assertions.assertEquals(media.getCaseNumberList().size(), result.getCaseNumberList().size());
+        Assertions.assertEquals(2, result.getCases().size());
         Assertions.assertEquals(media.getCreatedBy(), userIdentity.getUserAccount());
         Assertions.assertEquals(media.getLastModifiedBy(), userIdentity.getUserAccount());
     }

@@ -113,6 +113,9 @@ public class CourtCaseEntity extends CreatedModifiedBaseEntity {
         inverseJoinColumns = {@JoinColumn(name = "jud_id")})
     private List<JudgeEntity> judges = new ArrayList<>();
 
+    @OneToMany(mappedBy = MediaLinkedCaseEntity_.COURT_CASE)
+    private List<MediaLinkedCaseEntity> mediaLinkedCaseList = new ArrayList<>();
+
     @Column(name = "is_data_anonymised")
     private boolean isDataAnonymised;
 
