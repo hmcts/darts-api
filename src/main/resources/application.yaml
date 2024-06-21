@@ -263,6 +263,7 @@ darts:
       delete:
         timeout: 60
       az-copy-executable: /usr/bin/azcopy
+      az-copy-preserve-access-tier: "--s2s-preserve-access-tier=false"
     search:
       order: "UNSTRUCTURED,DETS,ARM,VODAFONE"
   transcription:
