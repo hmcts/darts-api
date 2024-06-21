@@ -6,6 +6,7 @@ import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import uk.gov.hmcts.darts.arm.service.ExternalObjectDirectoryService;
@@ -59,7 +60,6 @@ public class GenerateCaseDocumentSingleCaseProcessorImpl implements GenerateCase
         CaseDocumentEntity caseDocumentEntity = createAndSaveCaseDocumentEntity(caseId, caseDocumentJson, externalLocation, systemUser);
         externalObjectDirectoryService.createAndSaveExternalObjectDirectory(
             externalLocation,
-            caseDocumentEntity.getChecksum(),
             systemUser,
             caseDocumentEntity,
             EodHelper.unstructuredLocation()
@@ -75,7 +75,7 @@ public class GenerateCaseDocumentSingleCaseProcessorImpl implements GenerateCase
         entity.setFileName(externalLocation.toString());
         entity.setChecksum(checksum);
         entity.setFileSize(fileSize);
-        entity.setFileType("application/json");
+        entity.setFileType(MediaType.APPLICATION_JSON_VALUE);
         entity.setCreatedBy(user);
         entity.setLastModifiedBy(user);
         return caseDocumentRepository.save(entity);

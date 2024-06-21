@@ -6,16 +6,21 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Pageable;
 import uk.gov.hmcts.darts.arm.config.ArmDataManagementConfiguration;
+import uk.gov.hmcts.darts.common.entity.CaseDocumentEntity;
 import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
+import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
 import uk.gov.hmcts.darts.common.service.impl.EodHelperMocks;
 
 import java.util.List;
+import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
@@ -42,6 +47,12 @@ class ExternalObjectDirectoryServiceImplTest {
     MediaEntity media1;
     @Mock
     MediaEntity media2;
+    @Mock
+    UserAccountEntity userAccountEntity;
+    @Mock
+    CaseDocumentEntity caseDocumentEntity;
+    @Captor
+    ArgumentCaptor<ExternalObjectDirectoryEntity> eodCaptor;
 
     private static final EodHelperMocks EOD_HELPER_MOCKS = new EodHelperMocks();
 
@@ -97,4 +108,32 @@ class ExternalObjectDirectoryServiceImplTest {
         );
     }
 
+    @Test
+    void testCreateAndSaveExternalObjectDirectory() {
+        String checksum = "checksum";
+        UUID externalLocation = UUID.randomUUID();
+        when(caseDocumentEntity.getChecksum()).thenReturn(checksum);
+
+        eodService.createAndSaveExternalObjectDirectory(
+            externalLocation,
+            userAccountEntity,
+            caseDocumentEntity,
+            unstructuredLocation()
+        );
+
+        verify(eodRepository).save(eodCaptor.capture());
+        ExternalObjectDirectoryEntity savedEod = eodCaptor.getValue();
+        assertThat(savedEod.getCaseDocument()).isEqualTo(caseDocumentEntity);
+        assertThat(savedEod.getMedia()).isNull();
+        assertThat(savedEod.getTranscriptionDocumentEntity()).isNull();
+        assertThat(savedEod.getAnnotationDocumentEntity()).isNull();
+        assertThat(savedEod.getChecksum()).isEqualTo(checksum);
+        assertThat(savedEod.getExternalLocation()).isEqualTo(externalLocation);
+        assertThat(savedEod.getTransferAttempts()).isNull();
+        assertThat(savedEod.getVerificationAttempts()).isEqualTo(1);
+        assertThat(savedEod.getStatus()).isEqualTo(storedStatus());
+        assertThat(savedEod.getExternalLocationType()).isEqualTo(unstructuredLocation());
+        assertThat(savedEod.getCreatedBy()).isEqualTo(userAccountEntity);
+        assertThat(savedEod.getLastModifiedBy()).isEqualTo(userAccountEntity);
+    }
 }

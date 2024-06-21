@@ -69,7 +69,6 @@ public class ExternalObjectDirectoryServiceImpl implements ExternalObjectDirecto
     @Override
     @Transactional
     public ExternalObjectDirectoryEntity createAndSaveExternalObjectDirectory(UUID externalLocation,
-                                                                              String checksum,
                                                                               UserAccountEntity userAccountEntity,
                                                                               CaseDocumentEntity caseDocumentEntity,
                                                                               ExternalLocationTypeEntity externalLocationType) {
@@ -78,12 +77,11 @@ public class ExternalObjectDirectoryServiceImpl implements ExternalObjectDirecto
         externalObjectDirectoryEntity.setStatus(EodHelper.storedStatus());
         externalObjectDirectoryEntity.setExternalLocationType(externalLocationType);
         externalObjectDirectoryEntity.setExternalLocation(externalLocation);
-        externalObjectDirectoryEntity.setChecksum(checksum);
+        externalObjectDirectoryEntity.setChecksum(caseDocumentEntity.getChecksum());
         externalObjectDirectoryEntity.setVerificationAttempts(INITIAL_VERIFICATION_ATTEMPTS);
         externalObjectDirectoryEntity.setCreatedBy(userAccountEntity);
         externalObjectDirectoryEntity.setLastModifiedBy(userAccountEntity);
-        externalObjectDirectoryEntity = eodRepository.save(externalObjectDirectoryEntity);
-        return externalObjectDirectoryEntity;
+        return eodRepository.save(externalObjectDirectoryEntity);
     }
 
 }
