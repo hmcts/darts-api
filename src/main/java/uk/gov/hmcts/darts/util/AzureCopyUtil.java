@@ -30,7 +30,7 @@ public class AzureCopyUtil {
             log.info("copy of blob completed at {}. Total duration in seconds: {}", endTime, Duration.between(startTime, endTime).getSeconds());
             if (exitValue != 0) {
                 String result = new String(p.getInputStream().readAllBytes());
-                throw new RuntimeException(
+                throw new DartsException(
                     String.format("Failed to execute azcopy from source: '%s' to destination '%s'- error exit value. Command: '%s'. Result: %s",
                                   source,
                                   destination,
