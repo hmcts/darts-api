@@ -68,9 +68,9 @@ public class TranscriptionStub {
     private final ExternalObjectDirectoryRepository externalObjectDirectoryRepository;
     private final ExternalLocationTypeRepository externalLocationTypeRepository;
     private final ObjectRecordStatusRepository objectRecordStatusRepository;
+    private final TranscriptionDocumentRepository transcriptionDocumentRepository;
     private final UserAccountStub userAccountStub;
     private final HearingStub hearingStub;
-    private final TranscriptionDocumentRepository transcriptionDocumentRepository;
 
     public TranscriptionEntity createMinimalTranscription() {
         return createTranscription(hearingStub.createMinimalHearing());
@@ -442,6 +442,26 @@ public class TranscriptionStub {
         return transcriptionRepository.saveAndFlush(transcriptionEntity);
     }
 
+    @Transactional
+    public TranscriptionEntity createAndSaveCompletedTranscriptionWithDocument(UserAccountEntity userAccountEntity,
+                                                                               CourtCaseEntity courtCaseEntity,
+                                                                               HearingEntity hearingEntity,
+                                                                               OffsetDateTime workflowTimestamp,
+                                                                               Boolean hideDocument) {
+        var transcriptionEntity = this.createTranscriptionWithStatus(
+            userAccountEntity,
+            courtCaseEntity,
+            hearingEntity,
+            workflowTimestamp,
+            getTranscriptionStatusByEnum(COMPLETE),
+            null
+        );
+
+        transcriptionEntity = updateTranscriptionWithDocument(transcriptionEntity, userAccountEntity, hideDocument);
+
+        return transcriptionEntity;
+    }
+
     public TranscriptionWorkflowEntity createTranscriptionWorkflowEntity(TranscriptionEntity transcription,
                                                                          UserAccountEntity user,
                                                                          OffsetDateTime workflowTimestamp,
@@ -461,6 +481,26 @@ public class TranscriptionStub {
         var transcriptionWorkflow = createTranscriptionWorkflowEntity(transcription, transcription.getCreatedBy(), workflowTimestamp, transcriptionStatus);
 
         return transcriptionWorkflowRepository.save(transcriptionWorkflow);
+    }
+
+    public TranscriptionEntity updateTranscriptionWithDocument(TranscriptionEntity transcriptionEntity,
+                                                               UserAccountEntity userAccountEntity, Boolean hideDocument) {
+
+        TranscriptionDocumentEntity transcriptionDocumentEntity = new TranscriptionDocumentEntity();
+        transcriptionDocumentEntity.setTranscription(transcriptionEntity);
+        transcriptionDocumentEntity.setFileName("aFilename");
+        transcriptionDocumentEntity.setFileType("aFileType");
+        transcriptionDocumentEntity.setFileSize(100);
+        transcriptionDocumentEntity.setChecksum("");
+        transcriptionDocumentEntity.setHidden(hideDocument);
+        transcriptionDocumentEntity.setUploadedBy(userAccountEntity);
+        transcriptionDocumentEntity.setLastModifiedBy(userAccountEntity);
+        transcriptionDocumentRepository.saveAndFlush(transcriptionDocumentEntity);
+
+        transcriptionEntity.getTranscriptionDocumentEntities().add(transcriptionDocumentEntity);
+        transcriptionRepository.saveAndFlush(transcriptionEntity);
+
+        return transcriptionEntity;
     }
 
     public TranscriptionEntity updateTranscriptionWithDocument(TranscriptionEntity transcriptionEntity,
