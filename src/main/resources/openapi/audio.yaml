@@ -850,7 +850,7 @@ components:
         - "Showing media action payload not correct"
         - "Hide reason is incorrect"
         - "Reason has been marked for deletion"
-        - "The search criteria was incorrect"
+        - "transformed_media_id OR one of hearing_id, start_at or end_at must be provided"
       x-enum-varnames: [ FAILED_TO_PROCESS_AUDIO_REQUEST, REQUESTED_DATA_CANNOT_BE_LOCATED,  MEDIA_NOT_FOUND,
                          FAILED_TO_UPLOAD_AUDIO_FILE, MISSING_SYSTEM_USER, AUDIO_NOT_PROVIDED, UNEXPECTED_FILE_TYPE,
                          FILE_DURATION_OUT_OF_BOUNDS, FILE_SIZE_OUT_OF_BOUNDS, ADMIN_SEARCH_CRITERIA_NOT_PROVIDED, MEDIA_ALREADY_HIDDEN,

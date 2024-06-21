@@ -22,16 +22,13 @@ import uk.gov.hmcts.darts.audio.mapper.AdminMediaSearchResponseMapper;
 import uk.gov.hmcts.darts.audio.mapper.GetTransformedMediaDetailsMapper;
 import uk.gov.hmcts.darts.audio.mapper.MediaRequestDetailsMapper;
 import uk.gov.hmcts.darts.audio.mapper.TransformedMediaMapper;
-import uk.gov.hmcts.darts.audio.model.AdminMediaSearchResponseItem;
 import uk.gov.hmcts.darts.audio.model.EnhancedMediaRequestInfo;
 import uk.gov.hmcts.darts.audio.model.MediaHideRequest;
 import uk.gov.hmcts.darts.audio.model.MediaHideResponse;
-import uk.gov.hmcts.darts.audio.model.MediaSearchData;
 import uk.gov.hmcts.darts.audio.model.TransformedMediaDetailsDto;
 import uk.gov.hmcts.darts.audio.service.MediaRequestService;
 import uk.gov.hmcts.darts.audio.validation.AudioMediaPatchRequestValidator;
 import uk.gov.hmcts.darts.audio.validation.MediaHideOrShowValidator;
-import uk.gov.hmcts.darts.audio.validation.SearchMediaValidator;
 import uk.gov.hmcts.darts.audiorequests.model.AudioNonAccessedResponse;
 import uk.gov.hmcts.darts.audiorequests.model.AudioRequestDetails;
 import uk.gov.hmcts.darts.audiorequests.model.AudioRequestType;
@@ -78,7 +75,6 @@ import java.io.InputStream;
 import java.time.LocalTime;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -124,8 +120,6 @@ public class MediaRequestServiceImpl implements MediaRequestService {
     private final ObjectAdminActionRepository objectAdminActionRepository;
 
     private final ObjectHiddenReasonRepository objectHiddenReasonRepository;
-
-    private final SearchMediaValidator searchMediaValidator;
 
     @Override
     public Optional<MediaRequestEntity> getOldestMediaRequestByStatus(MediaRequestStatus status) {
@@ -500,34 +494,6 @@ public class MediaRequestServiceImpl implements MediaRequestService {
         }
 
         return returnResponse;
-    }
-
-    @Override
-    public List<AdminMediaSearchResponseItem> adminMediaSearch(Integer transformedMediaId, List<Integer> hearingIds, OffsetDateTime startAt,
-                                                               OffsetDateTime endAt) {
-        MediaSearchData searchData = new MediaSearchData(transformedMediaId, hearingIds, startAt, endAt);
-        searchMediaValidator.validate(searchData);
-
-        List<TransformedMediaEntity> mediaRequestEntities = transformedMediaRepository
-            .findTransformMediaWithStartAndEndDateTimeRange(transformedMediaId, hearingIds, startAt, endAt);
-        if (mediaRequestEntities.isEmpty()) {
-            return new ArrayList<>();
-        }
-        List<AdminMediaSearchResponseItem> responseItems = new ArrayList<>();
-
-        for (TransformedMediaEntity transformedMedia : mediaRequestEntities) {
-            MediaRequestEntity mediaRequest = transformedMedia.getMediaRequest();
-
-            HearingEntity hearing = mediaRequest.getHearing();
-            List<MediaEntity> mediaList = mediaRepository.findAllByHearingId(hearing.getId());
-            //filter by media that overlap with request
-            List<MediaEntity> filteredMediaList = mediaList.stream().filter(mediaEntity -> mediaEntity.getStart().isBefore(mediaRequest.getEndTime())
-                && mediaEntity.getEnd().isAfter(mediaRequest.getStartTime())).toList();
-
-            responseItems.addAll(AdminMediaSearchResponseMapper.createResponseItemList(filteredMediaList, hearing));
-        }
-
-        return responseItems;
     }
 
     @Override

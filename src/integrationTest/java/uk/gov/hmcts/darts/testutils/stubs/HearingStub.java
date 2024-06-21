@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
+import uk.gov.hmcts.darts.common.entity.MediaEntity;
 import uk.gov.hmcts.darts.common.service.RetrieveCoreObjectService;
 
 import java.time.LocalDateTime;
@@ -25,6 +26,19 @@ public class HearingStub {
             caseNumber,
             hearingDate,
             userAccountStub.getSystemUserAccountEntity()
+        );
+    }
+
+    public HearingEntity createHearingWithMedia(String courthouseName, String courtroomName, String caseNumber,
+                                       LocalDateTime hearingDate, MediaEntity mediaEntity) {
+        courthouseStub.createCourthouseUnlessExists(courthouseName);
+        return retrieveCoreObjectService.retrieveOrCreateHearingWithMedia(
+            courthouseName,
+            courtroomName,
+            caseNumber,
+            hearingDate,
+            userAccountStub.getSystemUserAccountEntity(),
+            mediaEntity
         );
     }
 
