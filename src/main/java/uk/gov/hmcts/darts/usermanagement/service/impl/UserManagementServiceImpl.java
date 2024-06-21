@@ -29,6 +29,7 @@ import uk.gov.hmcts.darts.usermanagement.service.UserManagementService;
 import uk.gov.hmcts.darts.usermanagement.service.validation.UserAccountExistsValidator;
 import uk.gov.hmcts.darts.usermanagement.service.validation.UserTypeValidator;
 import uk.gov.hmcts.darts.usermanagement.validator.AuthorisedUserPermissionsValidator;
+import uk.gov.hmcts.darts.usermanagement.validator.UserActivateValidator;
 import uk.gov.hmcts.darts.usermanagement.validator.UserDeactivateNotLastInSuperAdminGroupValidator;
 
 import java.time.OffsetDateTime;
@@ -61,6 +62,7 @@ public class UserManagementServiceImpl implements UserManagementService {
     private final UserDeactivateNotLastInSuperAdminGroupValidator userNotLastSuperAdminValidator;
     private final TranscriptionService transcriptionService;
     private final AuditApi auditApi;
+    private final UserActivateValidator authoriseValidator;
 
     @Override
     @Transactional
@@ -99,6 +101,7 @@ public class UserManagementServiceImpl implements UserManagementService {
         userTypeValidator.validate(userId);
         userActivationPermissionsValidator.validate(userPatch);
         userNotLastSuperAdminValidator.validate(new IdRequest<>(userPatch, userId));
+        authoriseValidator.validate(new IdRequest<>(userPatch, userId));
 
         var userAccountEntity = userAccountRepository.findById(userId)
             .orElseThrow(() -> new NoSuchElementException("No value present"));
