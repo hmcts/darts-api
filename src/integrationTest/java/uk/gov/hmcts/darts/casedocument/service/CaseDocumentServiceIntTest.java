@@ -1,9 +1,7 @@
 package uk.gov.hmcts.darts.casedocument.service;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import uk.gov.hmcts.darts.casedocument.template.CourtCaseDocument;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
@@ -19,8 +17,6 @@ import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.util.List;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertAll;
 import static uk.gov.hmcts.darts.test.common.data.CaseTestData.someMinimalCase;
 import static uk.gov.hmcts.darts.test.common.data.CourthouseTestData.createCourthouse;
 import static uk.gov.hmcts.darts.test.common.data.CourtroomTestData.createCourtRoomWithNameAtCourthouse;
@@ -65,18 +61,4 @@ public class CaseDocumentServiceIntTest extends IntegrationBase {
 
         userAccountRepository.save(user);
     }
-
-    @Test
-    void testGenerationOfCaseDocument() {
-
-        CourtCaseDocument document = caseDocumentService.generateCaseDocument(courtCase.getId());
-
-        assertAll(
-            "Grouped assertions of Court Case",
-            () -> assertThat(document.getId()).isNotNull().isEqualTo(courtCase.getId()),
-            () -> assertThat(document.getCreatedBy()).isNotNull().isEqualTo(courtCase.getCreatedBy().getId()),
-            () -> assertThat(document.getCaseNumber()).isNotNull().isEqualTo(courtCase.getCaseNumber())
-        );
-    }
-
 }

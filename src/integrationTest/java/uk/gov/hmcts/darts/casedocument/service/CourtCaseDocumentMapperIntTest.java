@@ -1,11 +1,11 @@
 package uk.gov.hmcts.darts.casedocument.service;
 
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.function.Executable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.SpyBean;
 import uk.gov.hmcts.darts.casedocument.mapper.CourtCaseDocumentMapper;
 import uk.gov.hmcts.darts.casedocument.template.CourtCaseDocument;
+import uk.gov.hmcts.darts.common.entity.CaseDocumentEntity;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.repository.CaseDocumentRepository;
@@ -20,6 +20,7 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
+@SuppressWarnings("checkstyle:linelength")
 class CourtCaseDocumentMapperIntTest extends IntegrationBase {
 
     @SpyBean
@@ -42,20 +43,21 @@ class CourtCaseDocumentMapperIntTest extends IntegrationBase {
         when(eodRepository.findByTranscriptionDocumentEntity(any())).thenReturn(List.of(transcriptionDocumentEodEntity));
         ExternalObjectDirectoryEntity annotationDocumentEodEntity = dartsDatabase.getExternalObjectDirectoryStub().createEodWithRandomValues();
         when(eodRepository.findByAnnotationDocumentEntity(any())).thenReturn(List.of(annotationDocumentEodEntity));
-        when(caseDocumentRepository.findByCourtCase(any())).thenReturn(List.of(dartsDatabase.getCaseDocumentStub().createCaseDocumentWithRandomValues()));
+        CaseDocumentEntity caseDocumentEntity = dartsDatabase.getCaseDocumentStub().createCaseDocumentWithRandomValues();
+        when(caseDocumentRepository.findByCourtCase(any())).thenReturn(List.of(caseDocumentEntity));
         ExternalObjectDirectoryEntity caseDocumentEodEntity = dartsDatabase.getExternalObjectDirectoryStub().createEodWithRandomValues();
         when(eodRepository.findByCaseDocument(any())).thenReturn(List.of(caseDocumentEodEntity));
 
         CourtCaseEntity cc = courtCaseStub.createCourtCaseAndAssociatedEntitiesWithRandomValues();
 
         // when
-        CourtCaseDocument doc = mapper.map(cc);
+        CourtCaseDocument doc = mapper.mapToCaseDocument(cc);
 
         // then
         assertAll(
             "Grouped assertions for Case Document top level properties",
-            assertIsEqual(doc.getId(), cc.getId()),
-            assertIsEqual(doc.getCreatedBy(), cc.getCreatedBy().getId()),
+            () -> assertThat(doc.getId()).isNotNull().isEqualTo(cc.getId()),
+            () -> assertThat(doc.getCreatedBy()).isNotNull().isEqualTo(cc.getCreatedBy().getId()),
             () -> assertThat(doc.getCreatedDateTime()).isNotNull().isEqualTo(cc.getCreatedDateTime()),
             () -> assertThat(doc.getLastModifiedBy()).isNotNull().isEqualTo(cc.getLastModifiedBy().getId()),
             () -> assertThat(doc.getLastModifiedDateTime()).isNotNull().isEqualTo(cc.getLastModifiedDateTime()),
@@ -188,6 +190,40 @@ class CourtCaseDocumentMapperIntTest extends IntegrationBase {
             () -> assertThat(doc.getCaseRetentions().get(0).getCaseManagementRetention().getEvent().getEventType().getHandler()).isNotNull().isEqualTo(cc.getCaseRetentionEntities().get(0).getCaseManagementRetention().getEventEntity().getEventType().getHandler()),
             () -> assertThat(doc.getCaseRetentions().get(0).getCaseManagementRetention().getEvent().getEventType().getActive()).isNotNull().isEqualTo(cc.getCaseRetentionEntities().get(0).getCaseManagementRetention().getEventEntity().getEventType().getActive()),
             () -> assertThat(doc.getCaseRetentions().get(0).getCaseManagementRetention().getEvent().getEventType().getIsReportingRestriction()).isNotNull().isEqualTo(cc.getCaseRetentionEntities().get(0).getCaseManagementRetention().getEventEntity().getEventType().getIsReportingRestriction())
+        );
+
+        assertAll(
+            "Grouped assertions for Case Document case documents",
+            () -> assertThat(doc.getCaseDocuments().get(0).getId()).isNotNull().isEqualTo(caseDocumentEntity.getId()),
+            () -> assertThat(doc.getCaseDocuments().get(0).getFileName()).isNotNull().isEqualTo(caseDocumentEntity.getFileName()),
+            () -> assertThat(doc.getCaseDocuments().get(0).getFileSize()).isNotNull().isEqualTo(caseDocumentEntity.getFileSize()),
+            () -> assertThat(doc.getCaseDocuments().get(0).getFileType()).isNotNull().isEqualTo(caseDocumentEntity.getFileType()),
+            () -> assertThat(doc.getCaseDocuments().get(0).getChecksum()).isNotNull().isEqualTo(caseDocumentEntity.getChecksum()),
+            () -> assertThat(doc.getCaseDocuments().get(0).isHidden()).isNotNull().isEqualTo(caseDocumentEntity.isHidden()),
+            () -> assertThat(doc.getCaseDocuments().get(0).getRetainUntilTs()).isNotNull().isEqualTo(caseDocumentEntity.getRetainUntilTs()),
+
+            () -> assertThat(doc.getCaseDocuments().get(0).getExternalObjectDirectories().get(0).getId()).isNotNull().isEqualTo(caseDocumentEodEntity.getId()),
+            () -> assertThat(doc.getCaseDocuments().get(0).getExternalObjectDirectories().get(0).getMedia()).isNotNull().isEqualTo(caseDocumentEodEntity.getMedia().getId()),
+            () -> assertThat(doc.getCaseDocuments().get(0).getExternalObjectDirectories().get(0).getTranscriptionDocumentEntity()).isNotNull().isEqualTo(caseDocumentEodEntity.getTranscriptionDocumentEntity().getId()),
+            () -> assertThat(doc.getCaseDocuments().get(0).getExternalObjectDirectories().get(0).getAnnotationDocumentEntity()).isNotNull().isEqualTo(caseDocumentEodEntity.getAnnotationDocumentEntity().getId()),
+            () -> assertThat(doc.getCaseDocuments().get(0).getExternalObjectDirectories().get(0).getCaseDocument()).isNotNull().isEqualTo(caseDocumentEodEntity.getCaseDocument().getId()),
+            () -> assertThat(doc.getCaseDocuments().get(0).getExternalObjectDirectories().get(0).getStatus()).isNotNull().isEqualTo(caseDocumentEodEntity.getStatus()),
+            () -> assertThat(doc.getCaseDocuments().get(0).getExternalObjectDirectories().get(0).getExternalLocationType()).isNotNull().isEqualTo(caseDocumentEodEntity.getExternalLocationType()),
+            () -> assertThat(doc.getCaseDocuments().get(0).getExternalObjectDirectories().get(0).getExternalLocation()).isNotNull().isEqualTo(caseDocumentEodEntity.getExternalLocation()),
+            () -> assertThat(doc.getCaseDocuments().get(0).getExternalObjectDirectories().get(0).getExternalFileId()).isNotNull().isEqualTo(caseDocumentEodEntity.getExternalFileId()),
+            () -> assertThat(doc.getCaseDocuments().get(0).getExternalObjectDirectories().get(0).getExternalRecordId()).isNotNull().isEqualTo(caseDocumentEodEntity.getExternalRecordId()),
+            () -> assertThat(doc.getCaseDocuments().get(0).getExternalObjectDirectories().get(0).getChecksum()).isNotNull().isEqualTo(caseDocumentEodEntity.getChecksum()),
+            () -> assertThat(doc.getCaseDocuments().get(0).getExternalObjectDirectories().get(0).getTransferAttempts()).isNotNull().isEqualTo(caseDocumentEodEntity.getTransferAttempts()),
+            () -> assertThat(doc.getCaseDocuments().get(0).getExternalObjectDirectories().get(0).getVerificationAttempts()).isNotNull().isEqualTo(caseDocumentEodEntity.getVerificationAttempts()),
+            () -> assertThat(doc.getCaseDocuments().get(0).getExternalObjectDirectories().get(0).getManifestFile()).isNotNull().isEqualTo(caseDocumentEodEntity.getManifestFile()),
+            () -> assertThat(doc.getCaseDocuments().get(0).getExternalObjectDirectories().get(0).getEventDateTs()).isNotNull().isEqualTo(caseDocumentEodEntity.getEventDateTs()),
+            () -> assertThat(doc.getCaseDocuments().get(0).getExternalObjectDirectories().get(0).getErrorCode()).isNotNull().isEqualTo(caseDocumentEodEntity.getErrorCode()),
+            () -> assertThat(doc.getCaseDocuments().get(0).getExternalObjectDirectories().get(0).isResponseCleaned()).isNotNull().isEqualTo(caseDocumentEodEntity.isResponseCleaned()),
+            () -> assertThat(doc.getCaseDocuments().get(0).getExternalObjectDirectories().get(0).isUpdateRetention()).isNotNull().isEqualTo(caseDocumentEodEntity.isUpdateRetention()),
+            () -> assertThat(doc.getCaseDocuments().get(0).getExternalObjectDirectories().get(0).getCreatedBy()).isNotNull().isEqualTo(caseDocumentEodEntity.getCreatedBy().getId()),
+            () -> assertThat(doc.getCaseDocuments().get(0).getExternalObjectDirectories().get(0).getCreatedDateTime()).isNotNull().isEqualTo(caseDocumentEodEntity.getCreatedDateTime()),
+            () -> assertThat(doc.getCaseDocuments().get(0).getExternalObjectDirectories().get(0).getLastModifiedBy()).isNotNull().isEqualTo(caseDocumentEodEntity.getLastModifiedBy().getId()),
+            () -> assertThat(doc.getCaseDocuments().get(0).getExternalObjectDirectories().get(0).getLastModifiedDateTime()).isNotNull().isEqualTo(caseDocumentEodEntity.getLastModifiedDateTime())
         );
 
         assertAll(
@@ -435,10 +471,6 @@ class CourtCaseDocumentMapperIntTest extends IntegrationBase {
             () -> assertThat(doc.getHearings().get(0).getAnnotations().get(0).getAnnotationDocuments().get(0).getExternalObjectDirectories().get(0).getLastModifiedBy()).isNotNull().isEqualTo(annotationDocumentEodEntity.getLastModifiedBy().getId()),
             () -> assertThat(doc.getHearings().get(0).getAnnotations().get(0).getAnnotationDocuments().get(0).getExternalObjectDirectories().get(0).getLastModifiedDateTime()).isNotNull().isEqualTo(annotationDocumentEodEntity.getLastModifiedDateTime())
         );
-    }
-
-    private static <D, C> Executable assertIsEqual(D value1, C value2) {
-        return () -> assertThat(value1).isNotNull().isEqualTo(value2);
     }
 
 }

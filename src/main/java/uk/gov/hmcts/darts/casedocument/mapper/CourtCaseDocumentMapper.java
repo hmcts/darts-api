@@ -39,26 +39,26 @@ public abstract class CourtCaseDocumentMapper {
         @Mapping(source = "caseRetentionEntities", target = "caseRetentions"),
         @Mapping(expression = "java(mapCaseDocuments(caseDocumentRepository.findByCourtCase(courtCase)))", target = "caseDocuments"),
     })
-    public abstract CourtCaseDocument map(CourtCaseEntity courtCase);
+    public abstract CourtCaseDocument mapToCaseDocument(CourtCaseEntity courtCase);
 
     @Mappings({
         @Mapping(source = "retentionPolicyTypeEntity", target = "retentionPolicyType"),
         @Mapping(source = "eventEntity", target = "event"),
     })
-    public abstract CaseRetentionCaseDocument.CaseManagementRetentionCaseDocument map(CaseManagementRetentionEntity caseManagementRetentionEntity);
+    abstract CaseRetentionCaseDocument.CaseManagementRetentionCaseDocument mapToCaseDocument(CaseManagementRetentionEntity caseManagementRetentionEntity);
 
     @Mappings({
         @Mapping(source = "eventList", target = "events"),
         @Mapping(source = "mediaList", target = "medias"),
     })
-    public abstract HearingCaseDocument map(HearingEntity hearingEntity);
+    abstract HearingCaseDocument mapToCaseDocument(HearingEntity hearingEntity);
 
     public abstract List<CaseDocumentCaseDocument> mapCaseDocuments(List<CaseDocumentEntity> entities);
 
     @Mappings({
         @Mapping(expression = "java(mapCaseDocumentEods(eodRepository.findByCaseDocument(entity)))", target = "externalObjectDirectories"),
     })
-    public abstract CaseDocumentCaseDocument map(CaseDocumentEntity entity);
+    abstract CaseDocumentCaseDocument mapToCaseDocument(CaseDocumentEntity entity);
 
-    public abstract List<ExternalObjectDirectoryCaseDocument> mapCaseDocumentEods(List<ExternalObjectDirectoryEntity> entities);
+    abstract List<ExternalObjectDirectoryCaseDocument> mapCaseDocumentEods(List<ExternalObjectDirectoryEntity> entities);
 }

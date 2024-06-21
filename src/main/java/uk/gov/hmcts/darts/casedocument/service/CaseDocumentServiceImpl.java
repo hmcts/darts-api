@@ -22,6 +22,6 @@ public class CaseDocumentServiceImpl implements CaseDocumentService {
             () -> new DartsException(String.format("court case not found: %s", caseId))
         );
 
-        return caseDocumentMapper.map(courtCase);
+        return caseDocumentMapper.mapToCaseDocument(courtCase);
     }
 }
