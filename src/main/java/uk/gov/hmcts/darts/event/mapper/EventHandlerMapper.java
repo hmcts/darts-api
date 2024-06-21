@@ -9,6 +9,8 @@ import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.event.model.EventMapping;
 import uk.gov.hmcts.darts.event.service.handler.DartsEventNullHandler;
 
+import java.time.OffsetDateTime;
+
 @Component
 @RequiredArgsConstructor
 public class EventHandlerMapper {
@@ -25,7 +27,7 @@ public class EventHandlerMapper {
         eventHandlerEntity.setActive(true);
         UserAccountEntity currentUser = authorisationApi.getCurrentUser();
         eventHandlerEntity.setCreatedBy(currentUser);
-
+        eventHandlerEntity.setCreatedDateTime(OffsetDateTime.now());
         return eventHandlerEntity;
     }
 
