@@ -3,6 +3,8 @@ package uk.gov.hmcts.darts.event.service.impl;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import uk.gov.hmcts.darts.audit.api.AuditActivity;
+import uk.gov.hmcts.darts.audit.api.AuditApi;
 import uk.gov.hmcts.darts.common.entity.EventHandlerEntity;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.common.repository.EventHandlerRepository;
@@ -41,6 +43,8 @@ public class EventMappingServiceImpl implements EventMappingService {
     private final EventHandlerMapper eventHandlerMapper;
     private final EventHandlerEnumerator eventHandlers;
 
+    private final AuditApi auditApi;
+
     @Override
     public EventMapping postEventMapping(EventMapping eventMapping, Boolean isRevision) {
         List<EventHandlerEntity> activeMappings = getActiveMappingsForTypeAndSubtype(eventMapping.getType(), eventMapping.getSubType());
@@ -69,6 +73,7 @@ public class EventMappingServiceImpl implements EventMappingService {
             }
 
             var createdEventHandler = eventHandlerRepository.saveAndFlush(eventHandlerEntity);
+            auditApi.record(AuditActivity.ADDING_EVENT_MAPPING);
 
             return eventHandlerMapper.mapToEventMappingResponse(createdEventHandler);
         }
@@ -77,6 +82,7 @@ public class EventMappingServiceImpl implements EventMappingService {
     private void updatePreviousVersionsToInactive(List<EventHandlerEntity> activeMappings) {
         for (EventHandlerEntity mapping : activeMappings) {
             mapping.setActive(false);
+            auditApi.record(AuditActivity.CHANGE_EVENT_MAPPING);
         }
 
         eventHandlerRepository.saveAllAndFlush(activeMappings);
@@ -168,5 +174,7 @@ public class EventMappingServiceImpl implements EventMappingService {
         }
 
         eventHandlerRepository.delete(eventHandler);
+        auditApi.record(AuditActivity.DELETE_EVENT_MAPPING);
+
     }
 }

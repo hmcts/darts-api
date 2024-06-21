@@ -1,5 +1,6 @@
 package uk.gov.hmcts.darts.event.controller;
 
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
@@ -10,9 +11,13 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
+import uk.gov.hmcts.darts.audit.api.AuditActivity;
+import uk.gov.hmcts.darts.common.entity.AuditEntity;
 import uk.gov.hmcts.darts.common.entity.EventEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.enums.SecurityRoleEnum;
+import uk.gov.hmcts.darts.common.repository.AuditRepository;
+import uk.gov.hmcts.darts.common.repository.EventHandlerRepository;
 import uk.gov.hmcts.darts.testutils.GivenBuilder;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 
@@ -33,12 +38,24 @@ class EventControllerDeleteEventMappingTest extends IntegrationBase {
     @Autowired
     private GivenBuilder given;
 
+    @Autowired
+    private AuditRepository auditRepository;
+
+    @Autowired
+    private EventHandlerRepository eventHandlerRepository;
+
     @Test
     void deleteOk() throws Exception {
         given.anAuthenticatedUserWithGlobalAccessAndRole(SUPER_ADMIN);
         var entity = dartsDatabase.createEventHandlerData("8888");
         MockHttpServletRequestBuilder requestBuilder = delete(EVENT_MAPPINGS_ENDPOINT, entity.getId());
         mockMvc.perform(requestBuilder).andExpect(status().isOk());
+
+        Assertions.assertFalse(eventHandlerRepository.findById(entity.getId()).isPresent());
+        Assertions.assertEquals(1, auditRepository.findAll().size());
+        AuditEntity auditEntity = auditRepository.findAll().get(0);
+        Assertions.assertEquals(AuditActivity.DELETE_EVENT_MAPPING.getId(), auditEntity.getAuditActivity().getId());
+        Assertions.assertFalse(eventHandlerRepository.findRevisions(entity.getId()).isEmpty());
     }
 
     @ParameterizedTest

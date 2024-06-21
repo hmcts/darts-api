@@ -48,7 +48,7 @@ public class GetHearingResponseMapper {
 
     private ReportingRestriction buildReportingRestrictionFrom(HearingReportingRestrictionsEntity restrictionsEntity) {
         var reportingRestriction = new ReportingRestriction();
-        reportingRestriction.setEventId(restrictionsEntity.getEventId());
+        reportingRestriction.setEventId(restrictionsEntity.getEveId());
         reportingRestriction.setEventName(restrictionsEntity.getEventName());
         reportingRestriction.setEventText(restrictionsEntity.getEventText());
         reportingRestriction.setHearingId(restrictionsEntity.getHearingId());

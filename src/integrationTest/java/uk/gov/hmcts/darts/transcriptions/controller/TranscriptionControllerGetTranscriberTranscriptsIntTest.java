@@ -158,7 +158,7 @@ class TranscriptionControllerGetTranscriberTranscriptsIntTest extends Integratio
                 "transcription_type": "Specified Times",
                 "status": "Approved",
                 "requested_ts": "2023-11-23T16:25:55.304517Z",
-                "state_change_ts": "2023-11-23T16:26:20.441633Z",
+                "state_change_ts": "2023-11-23T16:40:00Z",
                 "is_manual": true,
                 "transcription_urgency": {
                   "transcription_urgency_id": 1,
@@ -199,7 +199,7 @@ class TranscriptionControllerGetTranscriberTranscriptsIntTest extends Integratio
                 "transcription_type": "Specified Times",
                 "status": "Approved",
                 "requested_ts": "2023-11-23T16:25:55.304517Z",
-                "state_change_ts": "2023-11-23T16:26:20.441633Z",
+                "state_change_ts": "2023-11-23T16:40:00Z",
                 "is_manual": true
               }
             ]
@@ -272,7 +272,7 @@ class TranscriptionControllerGetTranscriberTranscriptsIntTest extends Integratio
                                 INSERT INTO darts.security_group_courthouse_ae (grp_id, cth_id)
                                 VALUES (-4, -1);
 
-                                -- Transcript Requests: Approved
+                                -- Transcript Requests: Approved (after status rollback from WITH_TRANSCRIBER)
                                 INSERT INTO darts.transcription (tra_id, ctr_id, trt_id, transcription_object_id, requestor, start_ts, end_ts,
                                 created_ts, last_modified_ts, last_modified_by, created_by, tru_id, trs_id, hearing_date,
                                 is_manual_transcription, hide_request_from_requestor)
@@ -286,6 +286,10 @@ class TranscriptionControllerGetTranscriberTranscriptsIntTest extends Integratio
                                 VALUES (42, 41, 2, -10, '2023-11-23 16:25:55.338405+00');
                                 INSERT INTO darts.transcription_workflow (trw_id, tra_id, trs_id, workflow_actor, workflow_ts)
                                 VALUES (43, 41, 3, -10, '2023-11-23 16:26:20.441633+00');
+                                INSERT INTO darts.transcription_workflow (trw_id, tra_id, trs_id, workflow_actor, workflow_ts)
+                                VALUES (44, 41, 5, -10, '2023-11-23 16:30:00.0+00');
+                                INSERT INTO darts.transcription_workflow (trw_id, tra_id, trs_id, workflow_actor, workflow_ts)
+                                VALUES (45, 41, 3, -10, '2023-11-23 16:40:00.0+00');
 
                                 -- Your work > To do: With Transcriber
                                 INSERT INTO darts.transcription (tra_id, ctr_id, trt_id, transcription_object_id, requestor, start_ts, end_ts,

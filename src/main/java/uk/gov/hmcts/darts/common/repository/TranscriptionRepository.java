@@ -33,9 +33,25 @@ public interface TranscriptionRepository extends RevisionRepository<Transcriptio
         AND (
             tr.is_manual_transcription = true OR tr.transcription_object_id IS NOT NULL
         )
+        AND (
+            :includeHidden = true
+            OR
+            EXISTS (
+                SELECT 1
+                FROM darts.transcription_document trd
+                WHERE trd.tra_id = tr.tra_id
+                AND trd.is_hidden = false
+            )
+            OR
+            NOT EXISTS (
+                SELECT 1
+                FROM darts.transcription_document trd
+                WHERE trd.tra_id = tr.tra_id
+            )
+        )
         """, nativeQuery = true
     )
-    List<TranscriptionEntity> findByCaseIdManualOrLegacy(Integer caseId);
+    List<TranscriptionEntity> findByCaseIdManualOrLegacy(Integer caseId, Boolean includeHidden);
 
     @Query("""
            SELECT te
@@ -52,6 +68,8 @@ public interface TranscriptionRepository extends RevisionRepository<Transcriptio
         JOIN t.hearings h
         WHERE h.id = :hearingId
         AND (t.isManualTranscription = true OR t.legacyObjectId IS NOT NULL)
+        AND (EXISTS (select 1 from TranscriptionDocumentEntity transDoc where transDoc.transcription = t and transDoc.isHidden = false)
+        OR NOT EXISTS (select 1 from TranscriptionDocumentEntity transDoc where transDoc.transcription = t))
         ORDER BY t.createdDateTime
         """
     )
@@ -80,30 +98,30 @@ public interface TranscriptionRepository extends RevisionRepository<Transcriptio
     List<TranscriptionEntity> findByIdIn(List<Integer> transcriptionIds);
 
     @Query("""
-            SELECT new uk.gov.hmcts.darts.transcriptions.model.TranscriptionSearchResult(
-                t.id,
-                cc.caseNumber,
-                cth.id,
-                h.hearingDate,
-                t.createdDateTime,
-                ts.id,
-                t.isManualTranscription)
-            FROM TranscriptionEntity t
-            JOIN t.hearings h
-            JOIN h.courtCase cc
-            JOIN h.courtroom cr
-            JOIN cr.courthouse cth
-            JOIN t.transcriptionStatus ts
-            JOIN t.createdBy ua
-            WHERE (:ids IS NULL OR t.id IN :ids)
-                AND (:caseNumber IS NULL OR cc.caseNumber = :caseNumber)
-                AND (cth.displayName ILIKE CONCAT('%', :courthouseDisplayNamePattern, '%') OR :courthouseDisplayNamePattern IS NULL)
-                AND (cast(:hearingDate as LocalDate) IS NULL OR :hearingDate = h.hearingDate)
-                AND (cast(:createdFrom as TIMESTAMP) IS NULL OR t.createdDateTime >= :createdFrom)
-                AND (cast(:createdTo as TIMESTAMP) IS NULL OR t.createdDateTime <= :createdTo)
-                AND (:isManual IS NULL OR t.isManualTranscription = :isManual)
-                AND (ua.userFullName ILIKE CONCAT('%', :requestedBy, '%') OR :requestedBy IS NULL)
-           """)
+         SELECT new uk.gov.hmcts.darts.transcriptions.model.TranscriptionSearchResult(
+             t.id,
+             cc.caseNumber,
+             cth.id,
+             h.hearingDate,
+             t.createdDateTime,
+             ts.id,
+             t.isManualTranscription)
+         FROM TranscriptionEntity t
+         JOIN t.hearings h
+         JOIN h.courtCase cc
+         JOIN h.courtroom cr
+         JOIN cr.courthouse cth
+         JOIN t.transcriptionStatus ts
+         JOIN t.createdBy ua
+         WHERE (:ids IS NULL OR t.id IN :ids)
+             AND (:caseNumber IS NULL OR cc.caseNumber = :caseNumber)
+             AND (cth.displayName ILIKE CONCAT('%', :courthouseDisplayNamePattern, '%') OR :courthouseDisplayNamePattern IS NULL)
+             AND (cast(:hearingDate as LocalDate) IS NULL OR :hearingDate = h.hearingDate)
+             AND (cast(:createdFrom as TIMESTAMP) IS NULL OR t.createdDateTime >= :createdFrom)
+             AND (cast(:createdTo as TIMESTAMP) IS NULL OR t.createdDateTime <= :createdTo)
+             AND (:isManual IS NULL OR t.isManualTranscription = :isManual)
+             AND (ua.userFullName ILIKE CONCAT('%', :requestedBy, '%') OR :requestedBy IS NULL)
+        """)
     List<TranscriptionSearchResult> searchModernisedTranscriptionsFilteringOn(
         List<Integer> ids,
         String caseNumber,
@@ -116,29 +134,29 @@ public interface TranscriptionRepository extends RevisionRepository<Transcriptio
 
 
     @Query("""
-            SELECT new uk.gov.hmcts.darts.transcriptions.model.TranscriptionSearchResult(
-                t.id,
-                cc.caseNumber,
-                cth.id,
-                t.hearingDate,
-                t.createdDateTime,
-                ts.id,
-                t.isManualTranscription)
-            FROM TranscriptionEntity t
-            JOIN t.transcriptionStatus ts
-            JOIN t.createdBy ua
-            LEFT JOIN t.courtroom cr
-            LEFT JOIN t.courtCases cc
-            LEFT JOIN cr.courthouse cth
-            WHERE (:ids IS NULL OR t.id IN :ids)
-                AND (:caseNumber IS NULL OR cc.caseNumber = :caseNumber)
-                AND (cth.displayName ILIKE CONCAT('%', :courthouseDisplayNamePattern, '%') OR :courthouseDisplayNamePattern IS NULL)
-                AND (cast(:hearingDate as LocalDate) IS NULL OR :hearingDate = t.hearingDate)
-                AND (cast(:createdFrom as TIMESTAMP) IS NULL OR t.createdDateTime >= :createdFrom)
-                AND (cast(:createdTo as TIMESTAMP) IS NULL OR t.createdDateTime <= :createdTo)
-                AND (:isManual IS NULL OR t.isManualTranscription = :isManual)
-                AND (ua.userFullName ILIKE CONCAT('%', :requestedBy, '%') OR :requestedBy IS NULL)
-           """)
+         SELECT new uk.gov.hmcts.darts.transcriptions.model.TranscriptionSearchResult(
+             t.id,
+             cc.caseNumber,
+             cth.id,
+             t.hearingDate,
+             t.createdDateTime,
+             ts.id,
+             t.isManualTranscription)
+         FROM TranscriptionEntity t
+         JOIN t.transcriptionStatus ts
+         JOIN t.createdBy ua
+         LEFT JOIN t.courtroom cr
+         LEFT JOIN t.courtCases cc
+         LEFT JOIN cr.courthouse cth
+         WHERE (:ids IS NULL OR t.id IN :ids)
+             AND (:caseNumber IS NULL OR cc.caseNumber = :caseNumber)
+             AND (cth.displayName ILIKE CONCAT('%', :courthouseDisplayNamePattern, '%') OR :courthouseDisplayNamePattern IS NULL)
+             AND (cast(:hearingDate as LocalDate) IS NULL OR :hearingDate = t.hearingDate)
+             AND (cast(:createdFrom as TIMESTAMP) IS NULL OR t.createdDateTime >= :createdFrom)
+             AND (cast(:createdTo as TIMESTAMP) IS NULL OR t.createdDateTime <= :createdTo)
+             AND (:isManual IS NULL OR t.isManualTranscription = :isManual)
+             AND (ua.userFullName ILIKE CONCAT('%', :requestedBy, '%') OR :requestedBy IS NULL)
+        """)
     List<TranscriptionSearchResult> searchMigratedTranscriptionsFilteringOn(
         List<Integer> ids,
         String caseNumber,

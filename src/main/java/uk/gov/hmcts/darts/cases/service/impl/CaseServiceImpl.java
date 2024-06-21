@@ -4,17 +4,22 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.darts.authorisation.api.AuthorisationApi;
 import uk.gov.hmcts.darts.cases.exception.AdvancedSearchNoResultsException;
 import uk.gov.hmcts.darts.cases.exception.CaseApiError;
+import uk.gov.hmcts.darts.cases.helper.AdminCasesSearchRequestHelper;
 import uk.gov.hmcts.darts.cases.helper.AdvancedSearchRequestHelper;
+import uk.gov.hmcts.darts.cases.mapper.AdminCasesSearchResponseMapper;
 import uk.gov.hmcts.darts.cases.mapper.AdvancedSearchResponseMapper;
 import uk.gov.hmcts.darts.cases.mapper.CasesAnnotationMapper;
 import uk.gov.hmcts.darts.cases.mapper.CasesMapper;
 import uk.gov.hmcts.darts.cases.mapper.HearingEntityToCaseHearing;
 import uk.gov.hmcts.darts.cases.mapper.TranscriptionMapper;
 import uk.gov.hmcts.darts.cases.model.AddCaseRequest;
+import uk.gov.hmcts.darts.cases.model.AdminCasesSearchRequest;
+import uk.gov.hmcts.darts.cases.model.AdminCasesSearchResponseItem;
 import uk.gov.hmcts.darts.cases.model.AdvancedSearchResult;
 import uk.gov.hmcts.darts.cases.model.Annotation;
 import uk.gov.hmcts.darts.cases.model.GetCasesRequest;
@@ -59,9 +64,14 @@ public class CaseServiceImpl implements CaseService {
     private final AnnotationRepository annotationRepository;
     private final RetrieveCoreObjectService retrieveCoreObjectService;
     private final AdvancedSearchRequestHelper advancedSearchRequestHelper;
+    private final AdminCasesSearchRequestHelper adminCasesSearchRequestHelper;
     private final TranscriptionRepository transcriptionRepository;
     private final AuthorisationApi authorisationApi;
     private final LogApi logApi;
+
+    @Value("${darts.cases.admin-search.max-results}")
+    private Integer adminSearchMaxResults;
+
 
     @Override
     @Transactional
@@ -150,8 +160,9 @@ public class CaseServiceImpl implements CaseService {
     }
 
     @Override
+    @Transactional
     public List<Transcript> getTranscriptsByCaseId(Integer caseId) {
-        List<TranscriptionEntity> transcriptionEntities = transcriptionRepository.findByCaseIdManualOrLegacy(caseId);
+        List<TranscriptionEntity> transcriptionEntities = transcriptionRepository.findByCaseIdManualOrLegacy(caseId, false);
         return TranscriptionMapper.mapResponse(transcriptionEntities);
     }
 
@@ -161,12 +172,12 @@ public class CaseServiceImpl implements CaseService {
         if (courtCaseEntity.isEmpty()) {
             throw new DartsApiException(CaseApiError.CASE_NOT_FOUND);
         }
-        List<HearingEntity> hearingEntitys = courtCaseEntity.get().getHearings();
+        List<HearingEntity> hearingEntities = courtCaseEntity.get().getHearings();
 
         if (authorisationApi.userHasOneOfRoles(List.of(SecurityRoleEnum.SUPER_ADMIN))) {
             List<AnnotationEntity> annotationsEntities =
                 annotationRepository.findByListOfHearingIds(
-                    hearingEntitys
+                    hearingEntities
                         .stream()
                         .map(HearingEntity::getId)
                         .collect(Collectors.toList()));
@@ -182,7 +193,7 @@ public class CaseServiceImpl implements CaseService {
         } else {
             List<AnnotationEntity> annotationsEntities =
                 annotationRepository.findByListOfHearingIdsAndUser(
-                    hearingEntitys
+                    hearingEntities
                         .stream()
                         .map(HearingEntity::getId)
                         .collect(Collectors.toList()), authorisationApi.getCurrentUser());
@@ -195,5 +206,17 @@ public class CaseServiceImpl implements CaseService {
             }
             return annotations;
         }
+    }
+
+    @Override
+    @Transactional
+    public List<AdminCasesSearchResponseItem> adminCaseSearch(AdminCasesSearchRequest request) {
+        List<Integer> matchingCaseIds = adminCasesSearchRequestHelper.getMatchingCaseIds(request);
+        if (matchingCaseIds.size() > adminSearchMaxResults) {
+            throw new DartsApiException(CaseApiError.TOO_MANY_RESULTS);
+        }
+        List<CourtCaseEntity> matchingCases = caseRepository.findAllById(matchingCaseIds);
+        hearingRepository.findByCaseIds(matchingCaseIds);
+        return AdminCasesSearchResponseMapper.mapResponse(matchingCases);
     }
 }

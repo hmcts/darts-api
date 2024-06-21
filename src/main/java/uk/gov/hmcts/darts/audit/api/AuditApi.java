@@ -10,4 +10,6 @@ public interface AuditApi {
     void record(AuditActivity activity);
 
     void recordAll(AuditActivityProvider auditActivityProvider);
+
+    void recordAll(AuditActivityProvider auditActivityProvider, CourtCaseEntity courtCase);
 }

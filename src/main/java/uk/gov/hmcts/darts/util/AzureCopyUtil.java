@@ -19,19 +19,23 @@ public class AzureCopyUtil {
     public void copy(String source, String destination) {
         try {
             ProcessBuilder builder = new ProcessBuilder();
-            builder.command(config.getAzCopyExecutable(), "copy", source, destination);
+            builder.command(config.getAzCopyExecutable(), "copy", source, destination, config.getAzCopyPreserveAccessTier());
 
             var startTime = Instant.now();
-            log.debug("copy of blob started at {}", startTime);
-
+            log.info("copy of blob started at {}", startTime);
+            builder.redirectErrorStream(true);
             Process p = builder.start();
             int exitValue = p.waitFor();
             var endTime = Instant.now();
-            log.debug("copy of blob completed at {}. Total duration in seconds: {}", endTime, Duration.between(startTime, endTime).getSeconds());
-
+            log.info("copy of blob completed at {}. Total duration in seconds: {}", endTime, Duration.between(startTime, endTime).getSeconds());
             if (exitValue != 0) {
-                //limiting info included in the exception to avoid potential leak of the source and destination sas tokens
-                throw new DartsException("Failed to execute azcopy - error exit value");
+                String result = new String(p.getInputStream().readAllBytes());
+                throw new DartsException(
+                    String.format("Failed to execute azcopy from source: '%s' to destination '%s'- error exit value. Command: '%s'. Result: %s",
+                                  source,
+                                  destination,
+                                  builder.command(),
+                                  result));
             }
         } catch (InterruptedException ie) {
             Thread.currentThread().interrupt();

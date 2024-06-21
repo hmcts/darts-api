@@ -904,7 +904,7 @@ paths:
                 allOf:
                   - $ref: './problem.yaml'
 
-  /admin/transcription-document/{transcription_document_id}/hide:
+  /admin/transcription-documents/{transcription_document_id}/hide:
     post:
       tags:
         - Transcription

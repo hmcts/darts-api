@@ -38,7 +38,7 @@ public class TranscriberTranscriptsQueryImpl implements TranscriberTranscriptsQu
                     tru.tru_id                       as transcription_urgency_id,
                     tru.priority_order               as transcription_urgency_priority_order,
                     requested_trw.workflow_ts        as requested_ts,
-                    approved_trw.workflow_ts         as state_change_ts,
+                    latest_trw.latest_ts             as state_change_ts,
                     tra.is_manual_transcription      as is_manual
                 FROM
                     darts.transcription tra
@@ -94,18 +94,29 @@ public class TranscriberTranscriptsQueryImpl implements TranscriberTranscriptsQu
                     darts.transcription_urgency tru
                 ON
                     tra.tru_id = tru.tru_id
+                
                 INNER JOIN
                     darts.transcription_workflow requested_trw
                 ON
                     tra.tra_id = requested_trw.tra_id
                 AND requested_trw.trs_id = 1
+
                 INNER JOIN
                     darts.transcription_workflow approved_trw
                 ON
                     tra.tra_id = approved_trw.tra_id
-                AND approved_trw.trs_id = 3
-                WHERE
-                    tra.trs_id = 3
+                AND tra.trs_id = 3
+
+                -- Only the latest transcription_workflow for a given transcription represents the current status of that transcription
+                -- Implementation ref: https://dev.mysql.com/doc/refman/8.4/en/example-maximum-column-group-row.html
+                INNER JOIN (
+                    SELECT tra_id, MAX(workflow_ts) as latest_ts
+                    FROM darts.transcription_workflow
+                    GROUP BY tra_id
+                ) latest_trw
+                    ON tra.tra_id = approved_trw.tra_id
+                    AND approved_trw.workflow_ts = latest_trw.latest_ts
+
                 ORDER BY
                     transcription_id desc
                 """,

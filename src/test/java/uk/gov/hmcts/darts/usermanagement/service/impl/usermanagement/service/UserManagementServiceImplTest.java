@@ -29,6 +29,7 @@ import uk.gov.hmcts.darts.usermanagement.service.validation.UserAccountExistsVal
 import uk.gov.hmcts.darts.usermanagement.service.validation.UserEmailValidator;
 import uk.gov.hmcts.darts.usermanagement.service.validation.UserTypeValidator;
 import uk.gov.hmcts.darts.usermanagement.validator.AuthorisedUserPermissionsValidator;
+import uk.gov.hmcts.darts.usermanagement.validator.UserActivateValidator;
 import uk.gov.hmcts.darts.usermanagement.validator.UserDeactivateNotLastInSuperAdminGroupValidator;
 
 import java.io.IOException;
@@ -79,6 +80,9 @@ class UserManagementServiceImplTest {
     @Mock
     AuditApi auditApi;
 
+    @Mock
+    UserActivateValidator userAuthoriseValidator;
+
     @BeforeEach
     void setUp() {
         UserAccountMapper mapper = new UserAccountMapperImpl();
@@ -105,7 +109,8 @@ class UserManagementServiceImplTest {
             enablementValidator,
             deactivateNotLastSuperAdminValidator,
             transcriptionService,
-            auditApi
+            auditApi,
+            userAuthoriseValidator
         );
     }
 
