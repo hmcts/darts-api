@@ -12,26 +12,26 @@ import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 public class BasicCaseDocumentConversions {
 
     Integer convert(UserAccountEntity userAccountEntity) {
-        return userAccountEntity.getId();
+        return userAccountEntity == null ? null : userAccountEntity.getId();
     }
 
     Integer convert(MediaEntity mediaEntity) {
-        return mediaEntity.getId();
+        return mediaEntity == null ? null : mediaEntity.getId();
     }
 
     Integer convert(CaseDocumentEntity caseDocumentEntity) {
-        return caseDocumentEntity.getId();
+        return caseDocumentEntity == null ? null : caseDocumentEntity.getId();
     }
 
     Integer convert(AnnotationDocumentEntity annotationDocumentEntity) {
-        return annotationDocumentEntity.getId();
+        return annotationDocumentEntity == null ? null : annotationDocumentEntity.getId();
     }
 
     Integer convert(TranscriptionDocumentEntity transcriptionDocumentEntity) {
-        return transcriptionDocumentEntity.getId();
+        return transcriptionDocumentEntity == null ? null : transcriptionDocumentEntity.getId();
     }
 
     Integer convert(TranscriptionWorkflowEntity transcriptionWorkflowEntity) {
-        return transcriptionWorkflowEntity.getId();
+        return transcriptionWorkflowEntity == null ? null : transcriptionWorkflowEntity.getId();
     }
 }

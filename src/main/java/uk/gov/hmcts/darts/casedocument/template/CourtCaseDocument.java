@@ -19,8 +19,8 @@ public class CourtCaseDocument extends CreatedModifiedCaseDocument {
     private final Boolean interpreterUsed;
     private final OffsetDateTime caseClosedTimestamp;
     private final boolean retentionUpdated;
-    private final List<DefenceCaseDocument> defendants;
-    private final List<DefenceCaseDocument> prosecutors;
+    private final List<DefendantCaseDocument> defendants;
+    private final List<ProsecutorCaseDocument> prosecutors;
     private final List<DefenceCaseDocument> defences;
     private final boolean deleted;
     private final Integer deletedBy;

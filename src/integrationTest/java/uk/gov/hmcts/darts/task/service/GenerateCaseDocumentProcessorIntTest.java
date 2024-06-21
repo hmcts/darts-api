@@ -3,25 +3,31 @@ package uk.gov.hmcts.darts.task.service;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.SpyBean;
-import uk.gov.hmcts.darts.casedocument.service.GenerateCaseDocumentProcessor;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import uk.gov.hmcts.darts.casedocument.service.GenerateCaseDocumentSingleCaseProcessor;
-import uk.gov.hmcts.darts.casedocument.service.impl.GenerateCaseDocumentBatchProcessorImpl;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
-import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
-import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
+import uk.gov.hmcts.darts.common.entity.MediaEntity;
+import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
+import uk.gov.hmcts.darts.common.repository.AnnotationRepository;
 import uk.gov.hmcts.darts.common.repository.CaseDocumentRepository;
 import uk.gov.hmcts.darts.common.repository.CaseRepository;
 import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
+import uk.gov.hmcts.darts.common.repository.HearingRepository;
+import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 
+import java.time.OffsetDateTime;
 import java.util.List;
-import java.util.Optional;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.Mockito.when;
+import static java.time.ZoneOffset.UTC;
+import static uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum.ARM;
+import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_DROP_ZONE;
 
 public class GenerateCaseDocumentProcessorIntTest extends IntegrationBase {
+
+    private static final OffsetDateTime DT_2025 = OffsetDateTime.of(2025, 1, 1, 1, 0, 0, 0, UTC);
 
     @SpyBean
     CaseRepository caseRepository;
@@ -30,38 +36,49 @@ public class GenerateCaseDocumentProcessorIntTest extends IntegrationBase {
     @SpyBean
     ExternalObjectDirectoryRepository eodRepository;
     @Autowired
-    GenerateCaseDocumentSingleCaseProcessor singleCaseProcessor;
+    UserAccountRepository userAccountRepository;
     @Autowired
-    CurrentTimeHelper currentTimeHelper;
+    AnnotationRepository annotationRepository;
+    @Autowired
+    GenerateCaseDocumentSingleCaseProcessor processor;
+    @Autowired
+    HearingRepository hearingRepository;
 
     @Test
-    public void test() {
+    public void testGenerateCaseDocument() {
+        givenBearerTokenExists("darts.global.user@hmcts.net");
+        UserAccountEntity testUser = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
 
         // given
-        var batchSize = 10;
-        GenerateCaseDocumentProcessor generateCaseDocumentProcessor = new GenerateCaseDocumentBatchProcessorImpl(
-            batchSize, caseRepository, singleCaseProcessor, currentTimeHelper);
+        CourtCaseEntity courtCase = dartsDatabase.getCourtCaseStub().createAndSaveCourtCaseWithHearings(createdCourtCase -> {
+            createdCourtCase.setRetentionUpdated(true);
+            createdCourtCase.setRetentionRetries(1);
+            createdCourtCase.setClosed(true);
+        });
 
-        CourtCaseEntity courtCaseEntity = dartsDatabase.getCourtCaseStub().createCourtCaseAndAssociatedEntitiesWithRandomValues();
-        when(caseRepository.findCasesNeedingCaseDocumentGenerated(any(), any())).thenReturn(List.of(courtCaseEntity));
-        when(caseRepository.findById(anyInt())).thenReturn(Optional.of(courtCaseEntity));
+        List<MediaEntity> medias = dartsDatabase.getMediaStub().createAndSaveSomeMedias();
+        var hearA1 = courtCase.getHearings().get(0);
+        hearA1.addMedia(medias.get(0));
 
-        ExternalObjectDirectoryEntity mediaEodEntity = dartsDatabase.getExternalObjectDirectoryStub().createEodWithRandomValues();
-        when(eodRepository.findByMedia(any())).thenReturn(List.of(mediaEodEntity));
+        hearingRepository.save(hearA1);
+        dartsDatabase.getCaseRetentionStub().createCaseRetentionObject(courtCase, DT_2025);
 
-        ExternalObjectDirectoryEntity transcriptionDocumentEodEntity = dartsDatabase.getExternalObjectDirectoryStub().createEodWithRandomValues();
-        when(eodRepository.findByTranscriptionDocumentEntity(any())).thenReturn(List.of(transcriptionDocumentEodEntity));
+        dartsDatabase.getExternalObjectDirectoryStub().createAndSaveEod(medias.get(0), ARM_DROP_ZONE, ARM, eod -> {});
 
-        ExternalObjectDirectoryEntity annotationDocumentEodEntity = dartsDatabase.getExternalObjectDirectoryStub().createEodWithRandomValues();
-        when(eodRepository.findByAnnotationDocumentEntity(any())).thenReturn(List.of(annotationDocumentEodEntity));
-
-        when(caseDocumentRepository.findByCourtCase(any())).thenReturn(List.of(dartsDatabase.getCaseDocumentStub().createCaseDocumentWithRandomValues()));
-        ExternalObjectDirectoryEntity caseDocumentEodEntity = dartsDatabase.getExternalObjectDirectoryStub().createEodWithRandomValues();
-        when(eodRepository.findByCaseDocument(any())).thenReturn(List.of(caseDocumentEodEntity));
+        var annotation1A = dartsDatabase.getAnnotationStub().createAndSaveAnnotationEntityWith(testUser, "TestAnnotation", hearA1);
+        annotationRepository.save(annotation1A);
 
         // when
-        generateCaseDocumentProcessor.processGenerateCaseDocument();
+        processor.processGenerateCaseDocument(courtCase.getId());
 
+        // then
+    }
 
+    private static void givenBearerTokenExists(String email) {
+        Jwt jwt = Jwt.withTokenValue("test")
+            .header("alg", "RS256")
+            .claim("emails", List.of(email))
+            .build();
+        SecurityContextHolder.getContext().setAuthentication(new JwtAuthenticationToken(jwt));
     }
 }
