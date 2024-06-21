@@ -14,7 +14,7 @@ import uk.gov.hmcts.darts.testutils.IntegrationBase;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
 import static com.github.tomakehurst.wiremock.client.WireMock.equalTo;
-import static com.github.tomakehurst.wiremock.client.WireMock.getRequestedFor;
+import static com.github.tomakehurst.wiremock.client.WireMock.postRequestedFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -45,7 +45,7 @@ class ArmTokenClientIntTest extends IntegrationBase {
     void getTokenShouldSucceedIfServerReturns200Success() {
         // Given
         stubFor(
-            WireMock.get(urlEqualTo(TOKEN_PATH))
+            WireMock.post(urlEqualTo(TOKEN_PATH))
                 .willReturn(
                     aResponse()
                         .withHeader("Content-type", "application/json")
@@ -66,7 +66,7 @@ class ArmTokenClientIntTest extends IntegrationBase {
         ArmTokenResponse token = armTokenClient.getToken(armTokenRequest);
 
         // Then
-        wireMockServer.verify(getRequestedFor(urlEqualTo(TOKEN_PATH))
+        wireMockServer.verify(postRequestedFor(urlEqualTo(TOKEN_PATH))
                                   .withRequestBody(equalTo("grant_type=password&username=some-username&password=some-password")));
 
         assertEquals("some-token", token.getAccessToken());
@@ -78,7 +78,7 @@ class ArmTokenClientIntTest extends IntegrationBase {
     void getTokenShouldThrowExceptionIfServerReturns403Forbidden() {
         // Given
         stubFor(
-            WireMock.get(urlEqualTo(TOKEN_PATH))
+            WireMock.post(urlEqualTo(TOKEN_PATH))
                 .willReturn(
                     aResponse()
                         .withStatus(403)));
@@ -90,7 +90,7 @@ class ArmTokenClientIntTest extends IntegrationBase {
 
         // Then
         assertEquals(
-            "[403 Forbidden] during [GET] to [http://localhost:8080/api/v1/token] [ArmTokenClient#getToken(ArmTokenRequest)]: []",
+            "[403 Forbidden] during [POST] to [http://localhost:8080/api/v1/token] [ArmTokenClient#getToken(ArmTokenRequest)]: []",
             exception.getMessage()
         );
     }

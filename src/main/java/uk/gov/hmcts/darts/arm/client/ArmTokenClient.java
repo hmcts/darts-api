@@ -1,7 +1,6 @@
 package uk.gov.hmcts.darts.arm.client;
 
 import org.springframework.cloud.openfeign.FeignClient;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestHeader;
@@ -21,8 +20,9 @@ import static org.springframework.http.MediaType.TEXT_PLAIN_VALUE;
 )
 public interface ArmTokenClient {
 
-    @GetMapping(value = "${darts.storage.arm-api.token-path}",
-        consumes = TEXT_PLAIN_VALUE)
+    @PostMapping(value = "${darts.storage.arm-api.token-path}",
+        consumes = TEXT_PLAIN_VALUE,
+        produces = APPLICATION_JSON_VALUE)
     ArmTokenResponse getToken(ArmTokenRequest armTokenRequest);
 
     @PostMapping(value = "${darts.storage.arm-api.available-entitlement-profiles-path}",
