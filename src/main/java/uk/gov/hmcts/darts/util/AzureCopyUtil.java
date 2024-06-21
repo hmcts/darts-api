@@ -22,16 +22,20 @@ public class AzureCopyUtil {
             builder.command(config.getAzCopyExecutable(), "copy", source, destination);
 
             var startTime = Instant.now();
-            log.debug("copy of blob started at {}", startTime);
+            log.info("copy of blob started at {}", startTime);
             builder.redirectErrorStream(true);
             Process p = builder.start();
             int exitValue = p.waitFor();
             var endTime = Instant.now();
-            log.debug("copy of blob completed at {}. Total duration in seconds: {}", endTime, Duration.between(startTime, endTime).getSeconds());
-
+            log.info("copy of blob completed at {}. Total duration in seconds: {}", endTime, Duration.between(startTime, endTime).getSeconds());
             if (exitValue != 0) {
                 String result = new String(p.getInputStream().readAllBytes());
-                log.error("Failed to execute azcopy from source: '{}' to destination '{}'- error exit value. Result: {}", source, destination, result);
+                throw new RuntimeException(
+                    String.format("Failed to execute azcopy from source: '%s' to destination '%s'- error exit value. Command: '%s'. Result: %s",
+                                  source,
+                                  destination,
+                                  builder.command(),
+                                  result));
             }
         } catch (InterruptedException ie) {
             Thread.currentThread().interrupt();
