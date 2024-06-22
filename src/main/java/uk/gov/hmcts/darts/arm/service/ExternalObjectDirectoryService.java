@@ -23,8 +23,8 @@ public interface ExternalObjectDirectoryService {
 
     void updateStatus(ObjectRecordStatusEntity newStatus, UserAccountEntity userAccount, List<Integer> idsToUpdate, OffsetDateTime timestamp);
 
-    ExternalObjectDirectoryEntity createAndSaveExternalObjectDirectory(UUID externalLocation,
-                                                                       UserAccountEntity userAccountEntity,
-                                                                       CaseDocumentEntity caseDocumentEntity,
-                                                                       ExternalLocationTypeEntity externalLocationType);
+    ExternalObjectDirectoryEntity createAndSaveCaseDocumentEod(UUID externalLocation,
+                                                               UserAccountEntity userAccountEntity,
+                                                               CaseDocumentEntity caseDocumentEntity,
+                                                               ExternalLocationTypeEntity externalLocationType);
 }

@@ -68,10 +68,10 @@ public class ExternalObjectDirectoryServiceImpl implements ExternalObjectDirecto
 
     @Override
     @Transactional
-    public ExternalObjectDirectoryEntity createAndSaveExternalObjectDirectory(UUID externalLocation,
-                                                                              UserAccountEntity userAccountEntity,
-                                                                              CaseDocumentEntity caseDocumentEntity,
-                                                                              ExternalLocationTypeEntity externalLocationType) {
+    public ExternalObjectDirectoryEntity createAndSaveCaseDocumentEod(UUID externalLocation,
+                                                                      UserAccountEntity userAccountEntity,
+                                                                      CaseDocumentEntity caseDocumentEntity,
+                                                                      ExternalLocationTypeEntity externalLocationType) {
         var externalObjectDirectoryEntity = new ExternalObjectDirectoryEntity();
         externalObjectDirectoryEntity.setCaseDocument(caseDocumentEntity);
         externalObjectDirectoryEntity.setStatus(EodHelper.storedStatus());

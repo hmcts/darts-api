@@ -58,7 +58,7 @@ public class GenerateCaseDocumentSingleCaseProcessorImpl implements GenerateCase
 
         var systemUser = userIdentity.getUserAccount();
         CaseDocumentEntity caseDocumentEntity = createAndSaveCaseDocumentEntity(caseId, caseDocumentJson, externalLocation, systemUser);
-        externalObjectDirectoryService.createAndSaveExternalObjectDirectory(
+        externalObjectDirectoryService.createAndSaveCaseDocumentEod(
             externalLocation,
             systemUser,
             caseDocumentEntity,

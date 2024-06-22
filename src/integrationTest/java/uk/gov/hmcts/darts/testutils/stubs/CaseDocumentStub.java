@@ -54,7 +54,6 @@ public class CaseDocumentStub {
     }
 
     public CaseDocumentEntity createCaseDocumentWithRandomValues() {
-        //TODO move to abstract method
         EasyRandomParameters parameters = new EasyRandomParameters()
             .randomize(Integer.class, new IntegerRangeRandomizer(1, 100))
             .collectionSizeRange(1, 1)

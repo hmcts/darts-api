@@ -109,7 +109,7 @@ class GenerateCaseDocumentSingleCaseProcessorImplTest {
         processor.processGenerateCaseDocument(CASE_ID);
 
         // then
-        verify(externalObjectDirectoryService).createAndSaveExternalObjectDirectory(
+        verify(externalObjectDirectoryService).createAndSaveCaseDocumentEod(
             UNSTRUCTURED_BLOB_UUID,
             user,
             caseDocumentEntity,
