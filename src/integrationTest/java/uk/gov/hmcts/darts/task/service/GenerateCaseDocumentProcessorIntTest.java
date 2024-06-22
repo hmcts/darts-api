@@ -28,7 +28,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum.ARM;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_DROP_ZONE;
 
-public class GenerateCaseDocumentProcessorIntTest extends IntegrationBase {
+class GenerateCaseDocumentProcessorIntTest extends IntegrationBase {
 
     private static final OffsetDateTime DT_2025 = OffsetDateTime.of(2025, 1, 1, 1, 0, 0, 0, UTC);
 
@@ -48,7 +48,7 @@ public class GenerateCaseDocumentProcessorIntTest extends IntegrationBase {
     HearingRepository hearingRepository;
 
     @Test
-    public void testGenerateCaseDocument() {
+    void testGenerateCaseDocument() {
         // given
         givenBearerTokenExists("darts.global.user@hmcts.net");
         UserAccountEntity testUser = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
@@ -66,7 +66,7 @@ public class GenerateCaseDocumentProcessorIntTest extends IntegrationBase {
         hearingRepository.save(hearing);
         dartsDatabase.getCaseRetentionStub().createCaseRetentionObject(courtCase, DT_2025);
 
-        dartsDatabase.getExternalObjectDirectoryStub().createAndSaveEod(medias.get(0), ARM_DROP_ZONE, ARM, eod -> {});
+        dartsDatabase.getExternalObjectDirectoryStub().createAndSaveEod(medias.get(0), ARM_DROP_ZONE, ARM, eod -> { });
 
         var annotation = dartsDatabase.getAnnotationStub().createAndSaveAnnotationEntityWith(testUser, "TestAnnotation", hearing);
         annotationRepository.save(annotation);

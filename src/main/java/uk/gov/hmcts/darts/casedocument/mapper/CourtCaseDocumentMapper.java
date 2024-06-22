@@ -53,12 +53,12 @@ public abstract class CourtCaseDocumentMapper {
     })
     abstract HearingCaseDocument mapToCaseDocument(HearingEntity hearingEntity);
 
-    public abstract List<CaseDocumentCaseDocument> mapCaseDocuments(List<CaseDocumentEntity> entities);
-
     @Mappings({
         @Mapping(expression = "java(mapCaseDocumentEods(eodRepository.findByCaseDocument(entity)))", target = "externalObjectDirectories"),
     })
     abstract CaseDocumentCaseDocument mapToCaseDocument(CaseDocumentEntity entity);
+
+    public abstract List<CaseDocumentCaseDocument> mapCaseDocuments(List<CaseDocumentEntity> entities);
 
     abstract List<ExternalObjectDirectoryCaseDocument> mapCaseDocumentEods(List<ExternalObjectDirectoryEntity> entities);
 }
