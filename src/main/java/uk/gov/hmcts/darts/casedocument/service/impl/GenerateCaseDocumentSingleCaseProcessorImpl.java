@@ -23,6 +23,8 @@ import uk.gov.hmcts.darts.common.util.FileContentChecksum;
 import uk.gov.hmcts.darts.datamanagement.config.DataManagementConfiguration;
 import uk.gov.hmcts.darts.datamanagement.service.DataManagementService;
 
+import java.time.Duration;
+import java.time.Instant;
 import java.util.UUID;
 
 import static org.apache.commons.lang3.CharEncoding.UTF_8;
@@ -47,8 +49,15 @@ public class GenerateCaseDocumentSingleCaseProcessorImpl implements GenerateCase
     @Override
     @Transactional
     public void processGenerateCaseDocument(Integer caseId) {
+        log.info("starting generation of case document json for case id {}", caseId);
+        Instant start = Instant.now();
+
         CourtCaseDocument courtCaseDocument = caseDocumentService.generateCaseDocument(caseId);
         String caseDocumentJson = objectMapper.writeValueAsString(courtCaseDocument);
+
+        Instant finish = Instant.now();
+        long timeElapsed = Duration.between(start, finish).toMillis();
+        log.info("completed generation of case document json for case id {}. Total execution time (ms): {}", caseId, timeElapsed);
         log.debug("generated case document: {}", caseDocumentJson);
 
         UUID externalLocation = dataManagementService.saveBlobData(

@@ -187,8 +187,6 @@ public interface ExternalObjectDirectoryRepository extends JpaRepository<Externa
 
     List<ExternalObjectDirectoryEntity> findByCaseDocument(CaseDocumentEntity caseDocument);
 
-
-
     @Query(
         """
             SELECT COUNT(eod) > 0
