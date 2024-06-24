@@ -18,7 +18,6 @@ import uk.gov.hmcts.darts.audio.model.AddAudioMetadataRequest;
 import uk.gov.hmcts.darts.audio.service.AudioOperationService;
 import uk.gov.hmcts.darts.audio.service.AudioTransformationService;
 import uk.gov.hmcts.darts.audio.service.AudioUploadService;
-import uk.gov.hmcts.darts.authorisation.api.AuthorisationApi;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
@@ -34,7 +33,6 @@ import uk.gov.hmcts.darts.common.repository.CourtLogEventRepository;
 import uk.gov.hmcts.darts.common.repository.ExternalLocationTypeRepository;
 import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
 import uk.gov.hmcts.darts.common.repository.HearingRepository;
-import uk.gov.hmcts.darts.common.repository.MediaLinkedCaseRepository;
 import uk.gov.hmcts.darts.common.repository.MediaRepository;
 import uk.gov.hmcts.darts.common.repository.ObjectRecordStatusRepository;
 import uk.gov.hmcts.darts.common.service.FileOperationService;
@@ -45,6 +43,7 @@ import uk.gov.hmcts.darts.log.api.LogApi;
 import uk.gov.hmcts.darts.test.common.data.HearingTestData;
 
 import java.io.InputStream;
+import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.time.OffsetDateTime;
 import java.util.Arrays;
@@ -109,13 +108,9 @@ class AudioUploadServiceImplTest {
     AudioBeingProcessedFromArchiveQuery audioBeingProcessedFromArchiveQuery;
     @Mock
     private LogApi logApi;
-    @Mock
-    private AuthorisationApi authorisationApi;
     private AudioUploadService audioService;
     @Mock
     private MediaLinkedCaseHelper mediaLinkedCaseHelper;
-    @Mock
-    private MediaLinkedCaseRepository mediaLinkedCaseRepository;
 
     @BeforeEach
     void setUp() {
@@ -126,7 +121,6 @@ class AudioUploadServiceImplTest {
             objectRecordStatusRepository,
             externalLocationTypeRepository,
             mediaRepository,
-            mediaLinkedCaseRepository,
             retrieveCoreObjectService,
             hearingRepository,
             mapper,
@@ -136,16 +130,16 @@ class AudioUploadServiceImplTest {
             courtLogEventRepository,
             audioConfigurationProperties,
             logApi,
-            audioDigest,
-            authorisationApi);
+            audioDigest);
+
     }
 
     @Test
     void addAudio() {
 
-        java.security.MessageDigest digest;
+        MessageDigest digest;
         try {
-            digest = java.security.MessageDigest.getInstance(AudioConfiguration.DEFAULT_ALGORITHM);
+            digest = MessageDigest.getInstance(AudioConfiguration.DEFAULT_ALGORITHM);
         } catch (NoSuchAlgorithmException e) {
             throw new DartsApiException(FAILED_TO_UPLOAD_AUDIO_FILE, e);
         }
@@ -153,7 +147,8 @@ class AudioUploadServiceImplTest {
 
         UserAccountEntity userAccount = new UserAccountEntity();
         userAccount.setId(10);
-        when(authorisationApi.getCurrentUser()).thenReturn(userAccount);
+        when(userIdentity.getUserAccount()).thenReturn(userAccount);
+
 
         // Given
         HearingEntity hearingEntity = new HearingEntity();
@@ -232,7 +227,7 @@ class AudioUploadServiceImplTest {
 
         UserAccountEntity userAccount = new UserAccountEntity();
         userAccount.setId(10);
-        when(authorisationApi.getCurrentUser()).thenReturn(userAccount);
+        when(userIdentity.getUserAccount()).thenReturn(userAccount);
 
         OffsetDateTime startedAt = OffsetDateTime.now().minusHours(1);
         OffsetDateTime endedAt = OffsetDateTime.now();
@@ -402,7 +397,7 @@ class AudioUploadServiceImplTest {
     void linkAudioAndHearingDuplicateCases() {
         AddAudioMetadataRequest addAudioMetadataRequest = createAddAudioRequest(STARTED_AT, ENDED_AT);
         addAudioMetadataRequest.setCases(List.of("1", "2", "1"));
-        MediaEntity mediaEntity = createMediaEntity(STARTED_AT, ENDED_AT);
+        createMediaEntity(STARTED_AT, ENDED_AT);
 
         HearingEntity hearing1 = HearingTestData.createSomeMinimalHearing();
         when(retrieveCoreObjectService.retrieveOrCreateHearing(
@@ -422,7 +417,33 @@ class AudioUploadServiceImplTest {
             any()
         )).thenReturn(hearing2);
 
-        audioService.linkAudioToHearingInMetadata(addAudioMetadataRequest, mediaEntity);
+        CourthouseEntity courthouse = new CourthouseEntity();
+        courthouse.setCourthouseName("SWANSEA");
+        CourtroomEntity courtroomEntity = new CourtroomEntity(1, "1", courthouse);
+        when(retrieveCoreObjectService.retrieveOrCreateCourtroom(eq("SWANSEA"), eq("1"), any(UserAccountEntity.class)))
+            .thenReturn(courtroomEntity);
+
+        UserAccountEntity userAccount = new UserAccountEntity();
+        userAccount.setId(10);
+        when(userIdentity.getUserAccount()).thenReturn(userAccount);
+
+        MessageDigest digest;
+        try {
+            digest = MessageDigest.getInstance(AudioConfiguration.DEFAULT_ALGORITHM);
+        } catch (NoSuchAlgorithmException e) {
+            throw new DartsApiException(FAILED_TO_UPLOAD_AUDIO_FILE, e);
+        }
+        when(audioDigest.getMessageDigest()).thenReturn(digest);
+
+
+        MockMultipartFile audioFile = new MockMultipartFile(
+            "addAudio",
+            "audio_sample.mp2",
+            "audio/mpeg",
+            DUMMY_FILE_CONTENT.getBytes()
+        );
+
+        audioService.addAudio(audioFile, addAudioMetadataRequest);
         verify(hearingRepository, times(2)).saveAndFlush(any());
         assertEquals(1, hearing1.getMediaList().size());
         assertEquals(1, hearing2.getMediaList().size());

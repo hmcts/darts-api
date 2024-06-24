@@ -11,7 +11,6 @@ import uk.gov.hmcts.darts.audio.component.AudioMessageDigest;
 import uk.gov.hmcts.darts.audio.config.AudioConfigurationProperties;
 import uk.gov.hmcts.darts.audio.model.AddAudioMetadataRequest;
 import uk.gov.hmcts.darts.audio.service.AudioUploadService;
-import uk.gov.hmcts.darts.authorisation.api.AuthorisationApi;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
@@ -26,7 +25,6 @@ import uk.gov.hmcts.darts.common.repository.CourtLogEventRepository;
 import uk.gov.hmcts.darts.common.repository.ExternalLocationTypeRepository;
 import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
 import uk.gov.hmcts.darts.common.repository.HearingRepository;
-import uk.gov.hmcts.darts.common.repository.MediaLinkedCaseRepository;
 import uk.gov.hmcts.darts.common.repository.MediaRepository;
 import uk.gov.hmcts.darts.common.repository.ObjectRecordStatusRepository;
 import uk.gov.hmcts.darts.common.service.RetrieveCoreObjectService;
@@ -43,6 +41,7 @@ import java.security.DigestInputStream;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -61,7 +60,6 @@ public class AudioUploadServiceImpl implements AudioUploadService {
     private final ObjectRecordStatusRepository objectRecordStatusRepository;
     private final ExternalLocationTypeRepository externalLocationTypeRepository;
     private final MediaRepository mediaRepository;
-    private final MediaLinkedCaseRepository mediaLinkedCaseRepository;
     private final RetrieveCoreObjectService retrieveCoreObjectService;
     private final HearingRepository hearingRepository;
     private final AddAudioRequestMapper mapper;
@@ -72,7 +70,6 @@ public class AudioUploadServiceImpl implements AudioUploadService {
     private final AudioConfigurationProperties audioConfigurationProperties;
     private final LogApi logApi;
     private final AudioMessageDigest audioDigest;
-    private final AuthorisationApi authorisationApi;
 
     @Override
     @Transactional
@@ -108,7 +105,7 @@ public class AudioUploadServiceImpl implements AudioUploadService {
             checksum = detailsOption.get().checksum();
         }
 
-        UserAccountEntity currentUser = authorisationApi.getCurrentUser();
+        UserAccountEntity currentUser = userIdentity.getUserAccount();
 
         List<MediaEntity> mediaToSupersede = new ArrayList<>();
 
@@ -149,14 +146,14 @@ public class AudioUploadServiceImpl implements AudioUploadService {
         MediaEntity newMediaEntity = mapper.mapToMedia(addAudioMetadataRequest, userAccount);
         newMediaEntity.setChecksum(checksum);
         if (mediaToReplace.isEmpty()) {
-            log.info("New file uploaded {} with filename", newMediaEntity.getMediaFile());
+            log.info("New file uploaded with filename {}", newMediaEntity.getMediaFile());
 
-            newMediaEntity = mediaRepository.save(newMediaEntity);
-            newMediaEntity.setChronicleId(newMediaEntity.getId().toString());
+            mediaRepository.save(newMediaEntity);
+            newMediaEntity.setChronicleId(String.valueOf(newMediaEntity.getId()));
         } else {
-            MediaEntity oldMediaEntity = mediaToReplace.get(0);
+            MediaEntity oldMediaEntity = mediaToReplace.stream().max(Comparator.comparing(MediaEntity::getCreatedDateTime)).get();
             newMediaEntity.setChronicleId(oldMediaEntity.getChronicleId());
-            newMediaEntity.setAntecedentId(oldMediaEntity.getId().toString());
+            newMediaEntity.setAntecedentId(String.valueOf(oldMediaEntity.getId()));
             log.info("Uploading new version of duplicate filename {} with antecedent media id {}", newMediaEntity.getMediaFile(),
                      newMediaEntity.getId().toString());
         }

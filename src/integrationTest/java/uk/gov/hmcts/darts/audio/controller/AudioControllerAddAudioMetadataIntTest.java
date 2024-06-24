@@ -29,6 +29,7 @@ import uk.gov.hmcts.darts.audio.model.Problem;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
+import uk.gov.hmcts.darts.common.entity.MediaLinkedCaseEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.enums.SecurityRoleEnum;
 import uk.gov.hmcts.darts.common.helper.MediaLinkedCaseHelper;
@@ -165,7 +166,8 @@ class AudioControllerAddAudioMetadataIntTest extends IntegrationBase {
             assertEquals(STARTED_AT.plus(maxFileDuration), media.getEnd());
             assertEquals(1, media.getChannel());
             assertEquals(2, media.getTotalChannels());
-            assertEquals(3, media.getCases().size());
+            List<MediaLinkedCaseEntity> mediaLinkedCaseEntities = dartsDatabase.getMediaLinkedCaseRepository().findByMedia(media);
+            assertEquals(3, mediaLinkedCaseEntities.size());
             assertEquals("1", dartsDatabase.getCourtroomRepository().findById(media.getCourtroom().getId()).get().getName());
             assertEquals(media.getId().toString(), media.getChronicleId());
             assertNull(media.getAntecedentId());
@@ -208,7 +210,8 @@ class AudioControllerAddAudioMetadataIntTest extends IntegrationBase {
             assertEquals(STARTED_AT, mediaFirst.getEnd());
             assertEquals(1, mediaFirst.getChannel());
             assertEquals(2, mediaFirst.getTotalChannels());
-            assertEquals(1, mediaFirst.getCases().size());
+            List<MediaLinkedCaseEntity> mediaLinkedCaseEntities = dartsDatabase.getMediaLinkedCaseRepository().findByMedia(mediaFirst);
+            assertEquals(1, mediaLinkedCaseEntities.size());
             assertEquals("1", dartsDatabase.getCourtroomRepository().findById(mediaFirst.getCourtroom().getId()).get().getName());
             assertEquals(mediaFirst.getId().toString(), mediaFirst.getChronicleId());
             assertNull(mediaFirst.getAntecedentId());
@@ -235,7 +238,8 @@ class AudioControllerAddAudioMetadataIntTest extends IntegrationBase {
             assertEquals(STARTED_AT, mediaSecond.getEnd());
             assertEquals(1, mediaSecond.getChannel());
             assertEquals(2, mediaSecond.getTotalChannels());
-            assertEquals(1, mediaSecond.getCases().size());
+            List<MediaLinkedCaseEntity> mediaLinkedCaseEntities = dartsDatabase.getMediaLinkedCaseRepository().findByMedia(mediaSecond);
+            assertEquals(1, mediaLinkedCaseEntities.size());
             assertEquals("1", dartsDatabase.getCourtroomRepository().findById(mediaSecond.getCourtroom().getId()).get().getName());
             assertEquals(mediaSecond.getId().toString(), mediaSecond.getChronicleId());
             assertNull(mediaSecond.getAntecedentId());
@@ -269,7 +273,8 @@ class AudioControllerAddAudioMetadataIntTest extends IntegrationBase {
             assertEquals(STARTED_AT, media.getEnd());
             assertEquals(1, media.getChannel());
             assertEquals(2, media.getTotalChannels());
-            assertEquals(3, media.getCases().size());
+            List<MediaLinkedCaseEntity> mediaLinkedCaseEntities = dartsDatabase.getMediaLinkedCaseRepository().findByMedia(media);
+            assertEquals(3, mediaLinkedCaseEntities.size());
             assertEquals("1", dartsDatabase.getCourtroomRepository().findById(media.getCourtroom().getId()).get().getName());
             assertEquals(media.getId().toString(), media.getChronicleId());
             assertNull(media.getAntecedentId());
@@ -320,7 +325,8 @@ class AudioControllerAddAudioMetadataIntTest extends IntegrationBase {
             assertEquals(STARTED_AT, originalMedia.getEnd());
             assertEquals(1, originalMedia.getChannel());
             assertEquals(2, originalMedia.getTotalChannels());
-            assertEquals(3, originalMedia.getCases().size());
+            List<MediaLinkedCaseEntity> mediaLinkedCaseEntities = dartsDatabase.getMediaLinkedCaseRepository().findByMedia(originalMedia);
+            assertEquals(3, mediaLinkedCaseEntities.size());
             assertEquals("1", dartsDatabase.getCourtroomRepository().findById(originalMedia.getCourtroom().getId()).get().getName());
             assertEquals(originalMedia.getId().toString(), originalMedia.getChronicleId());
             assertNull(originalMedia.getAntecedentId());
@@ -862,7 +868,8 @@ class AudioControllerAddAudioMetadataIntTest extends IntegrationBase {
             assertEquals(STARTED_AT, media.getEnd());
             assertEquals(1, media.getChannel());
             assertEquals(2, media.getTotalChannels());
-            assertEquals(3, media.getCases().size());
+            List<MediaLinkedCaseEntity> mediaLinkedCaseEntities = dartsDatabase.getMediaLinkedCaseRepository().findByMedia(media);
+            assertEquals(3, mediaLinkedCaseEntities.size());
             assertEquals("1", dartsDatabase.getCourtroomRepository().findById(media.getCourtroom().getId()).get().getName());
             assertEquals(expectedChronicleId, media.getChronicleId());
             assertEquals(expectedAntecedantId, media.getAntecedentId());
