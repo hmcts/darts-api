@@ -882,7 +882,8 @@ class ArmResponseFilesProcessorIntTest extends IntegrationBase {
                 OffsetDateTime.parse("2023-09-26T13:45:00Z"),
                 1
             ));
-        savedMedia.setChecksum("C3CCA7021CF79B42F245AF350601C284");
+        String checksum = "C3CCA7021CF79B42F245AF350601C284";
+        savedMedia.setChecksum(checksum);
         dartsDatabase.save(savedMedia);
 
         ExternalObjectDirectoryEntity armEod = dartsDatabase.getExternalObjectDirectoryStub().createExternalObjectDirectory(
@@ -891,7 +892,7 @@ class ArmResponseFilesProcessorIntTest extends IntegrationBase {
             ARM,
             UUID.randomUUID()
         );
-
+        armEod.setChecksum(checksum);
         armEod.setTransferAttempts(1);
         dartsDatabase.save(armEod);
 
@@ -968,6 +969,7 @@ class ArmResponseFilesProcessorIntTest extends IntegrationBase {
             dartsDatabase.getExternalLocationTypeEntity(ARM),
             UUID.randomUUID()
         );
+        armEod.setChecksum(checksum);
         armEod.setTransferAttempts(1);
         dartsDatabase.save(armEod);
 
@@ -1038,6 +1040,7 @@ class ArmResponseFilesProcessorIntTest extends IntegrationBase {
             dartsDatabase.getExternalLocationTypeEntity(ARM),
             UUID.randomUUID()
         );
+        armEod.setChecksum(checksum);
         armEod.setTransferAttempts(1);
         dartsDatabase.save(armEod);
 

@@ -15,11 +15,7 @@ import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.config.ObjectMapperConfig;
 import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
-import uk.gov.hmcts.darts.common.repository.AnnotationDocumentRepository;
-import uk.gov.hmcts.darts.common.repository.CaseDocumentRepository;
 import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
-import uk.gov.hmcts.darts.common.repository.MediaRepository;
-import uk.gov.hmcts.darts.common.repository.TranscriptionDocumentRepository;
 import uk.gov.hmcts.darts.common.service.FileOperationService;
 import uk.gov.hmcts.darts.common.service.impl.EodHelperMocks;
 
@@ -57,15 +53,6 @@ class ArmBatchProcessResponseFilesImplTest {
     @Mock
     private ExternalObjectDirectoryService externalObjectDirectoryService;
     @Mock
-    private MediaRepository mediaRepository;
-    @Mock
-    private TranscriptionDocumentRepository transcriptionDocumentRepository;
-    @Mock
-    private AnnotationDocumentRepository annotationDocumentRepository;
-    @Mock
-    private CaseDocumentRepository caseDocumentRepository;
-
-    @Mock
     private ExternalObjectDirectoryEntity externalObjectDirectoryArmDropZone;
 
     private static final EodHelperMocks EOD_HELPER_MOCKS = new EodHelperMocks();
@@ -89,10 +76,6 @@ class ArmBatchProcessResponseFilesImplTest {
             userIdentity,
             currentTimeHelper,
             externalObjectDirectoryService,
-            mediaRepository,
-            transcriptionDocumentRepository,
-            annotationDocumentRepository,
-            caseDocumentRepository,
             BATCH_SIZE
         );
 

@@ -26,20 +26,12 @@ import uk.gov.hmcts.darts.arm.util.files.CreateRecordFilenameProcessor;
 import uk.gov.hmcts.darts.arm.util.files.InvalidLineFileFilenameProcessor;
 import uk.gov.hmcts.darts.arm.util.files.UploadFileFilenameProcessor;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
-import uk.gov.hmcts.darts.common.entity.AnnotationDocumentEntity;
-import uk.gov.hmcts.darts.common.entity.CaseDocumentEntity;
 import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
-import uk.gov.hmcts.darts.common.entity.MediaEntity;
 import uk.gov.hmcts.darts.common.entity.ObjectRecordStatusEntity;
-import uk.gov.hmcts.darts.common.entity.TranscriptionDocumentEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum;
 import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
-import uk.gov.hmcts.darts.common.repository.AnnotationDocumentRepository;
-import uk.gov.hmcts.darts.common.repository.CaseDocumentRepository;
 import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
-import uk.gov.hmcts.darts.common.repository.MediaRepository;
-import uk.gov.hmcts.darts.common.repository.TranscriptionDocumentRepository;
 import uk.gov.hmcts.darts.common.service.FileOperationService;
 import uk.gov.hmcts.darts.common.util.EodHelper;
 
@@ -79,10 +71,6 @@ public class ArmBatchProcessResponseFilesImpl implements ArmResponseFilesProcess
     private final UserIdentity userIdentity;
     private final CurrentTimeHelper currentTimeHelper;
     private final ExternalObjectDirectoryService externalObjectDirectoryService;
-    private final MediaRepository mediaRepository;
-    private final TranscriptionDocumentRepository transcriptionDocumentRepository;
-    private final AnnotationDocumentRepository annotationDocumentRepository;
-    private final CaseDocumentRepository caseDocumentRepository;
     private final Integer batchSize;
 
     private UserAccountEntity userAccount;
@@ -90,10 +78,7 @@ public class ArmBatchProcessResponseFilesImpl implements ArmResponseFilesProcess
     public ArmBatchProcessResponseFilesImpl(ExternalObjectDirectoryRepository externalObjectDirectoryRepository, ArmDataManagementApi armDataManagementApi,
                                             FileOperationService fileOperationService, ArmDataManagementConfiguration armDataManagementConfiguration,
                                             ObjectMapper objectMapper, UserIdentity userIdentity, CurrentTimeHelper currentTimeHelper,
-                                            ExternalObjectDirectoryService externalObjectDirectoryService, MediaRepository mediaRepository,
-                                            TranscriptionDocumentRepository transcriptionDocumentRepository,
-                                            AnnotationDocumentRepository annotationDocumentRepository, CaseDocumentRepository caseDocumentRepository,
-                                            Integer batchSize) {
+                                            ExternalObjectDirectoryService externalObjectDirectoryService, Integer batchSize) {
         this.externalObjectDirectoryRepository = externalObjectDirectoryRepository;
         this.armDataManagementApi = armDataManagementApi;
         this.fileOperationService = fileOperationService;
@@ -102,10 +87,6 @@ public class ArmBatchProcessResponseFilesImpl implements ArmResponseFilesProcess
         this.userIdentity = userIdentity;
         this.currentTimeHelper = currentTimeHelper;
         this.externalObjectDirectoryService = externalObjectDirectoryService;
-        this.mediaRepository = mediaRepository;
-        this.transcriptionDocumentRepository = transcriptionDocumentRepository;
-        this.annotationDocumentRepository = annotationDocumentRepository;
-        this.caseDocumentRepository = caseDocumentRepository;
         this.batchSize = batchSize;
     }
 
@@ -446,56 +427,12 @@ public class ArmBatchProcessResponseFilesImpl implements ArmResponseFilesProcess
 
     private void processUploadFileDataSuccess(ExternalObjectDirectoryEntity externalObjectDirectory,
                                               ArmResponseUploadFileRecord armResponseUploadFileRecord) {
-        // Validate the upload file checksum against the external object directory tables object Media, TranscriptionDocument, AnnotationDocument
-        // or CaseDocument
-        if (nonNull(externalObjectDirectory.getMedia())) {
-
-            int mediaId = externalObjectDirectory.getMedia().getId();
-            MediaEntity mediaEntity = mediaRepository.findById(mediaId).orElseThrow();
-            if (nonNull(mediaEntity.getChecksum())) {
-                verifyChecksumAndUpdateStatus(armResponseUploadFileRecord, externalObjectDirectory, mediaEntity.getChecksum());
-            } else {
-                log.warn("Unable to verify media checksum for external object {}", externalObjectDirectory.getId());
-                updateExternalObjectDirectoryStatus(externalObjectDirectory, EodHelper.armResponseChecksumVerificationFailedStatus());
-            }
-
-        } else if (nonNull(externalObjectDirectory.getTranscriptionDocumentEntity())) {
-
-            int transcriptionDocumentId = externalObjectDirectory.getTranscriptionDocumentEntity().getId();
-            TranscriptionDocumentEntity transcriptionDocumentEntity = transcriptionDocumentRepository.findById(transcriptionDocumentId).orElseThrow();
-            if (nonNull(transcriptionDocumentEntity.getChecksum())) {
-                verifyChecksumAndUpdateStatus(armResponseUploadFileRecord, externalObjectDirectory, transcriptionDocumentEntity.getChecksum());
-            } else {
-                log.warn("Unable to verify Transcription Document checksum for external object {}", externalObjectDirectory.getId());
-                updateExternalObjectDirectoryStatus(externalObjectDirectory, EodHelper.armResponseChecksumVerificationFailedStatus());
-            }
-
-        } else if (nonNull(externalObjectDirectory.getAnnotationDocumentEntity())) {
-
-            int annotationDocumentId = externalObjectDirectory.getAnnotationDocumentEntity().getId();
-            AnnotationDocumentEntity annotationDocumentEntity = annotationDocumentRepository.findById(annotationDocumentId).orElseThrow();
-            if (nonNull(annotationDocumentEntity.getChecksum())) {
-                verifyChecksumAndUpdateStatus(armResponseUploadFileRecord, externalObjectDirectory, annotationDocumentEntity.getChecksum());
-            } else {
-                log.warn("Unable to verify Annotation Document checksum for external object {}", externalObjectDirectory.getId());
-                updateExternalObjectDirectoryStatus(externalObjectDirectory, EodHelper.armResponseChecksumVerificationFailedStatus());
-            }
-
-        } else if (nonNull(externalObjectDirectory.getCaseDocument())) {
-
-            int caseDocumentId = externalObjectDirectory.getCaseDocument().getId();
-            CaseDocumentEntity caseDocumentEntity = caseDocumentRepository.findById(caseDocumentId).orElseThrow();
-            if (nonNull(caseDocumentEntity.getChecksum())) {
-                verifyChecksumAndUpdateStatus(armResponseUploadFileRecord, externalObjectDirectory, caseDocumentEntity.getChecksum());
-            } else {
-                log.warn("Unable to verify Case Document checksum for external object {}", externalObjectDirectory.getId());
-                updateExternalObjectDirectoryStatus(externalObjectDirectory, EodHelper.armResponseChecksumVerificationFailedStatus());
-            }
-
+        if (externalObjectDirectory.getChecksum() != null) {
+            verifyChecksumAndUpdateStatus(armResponseUploadFileRecord, externalObjectDirectory, externalObjectDirectory.getChecksum());
         } else {
-            updateExternalObjectDirectoryStatus(externalObjectDirectory, EodHelper.armResponseProcessingFailedStatus());
+            log.warn("Unable to verify checksum for external object {}", externalObjectDirectory.getId());
+            updateExternalObjectDirectoryStatus(externalObjectDirectory, EodHelper.armResponseChecksumVerificationFailedStatus());
         }
-
     }
 
     private void verifyChecksumAndUpdateStatus(ArmResponseUploadFileRecord armResponseUploadFileRecord,

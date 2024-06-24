@@ -20,13 +20,13 @@ import uk.gov.hmcts.darts.arm.util.files.InvalidLineFileFilenameProcessor;
 import uk.gov.hmcts.darts.arm.util.files.UploadFileFilenameProcessor;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
-import uk.gov.hmcts.darts.common.entity.MediaEntity;
 import uk.gov.hmcts.darts.common.entity.ObjectRecordStatusEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum;
 import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
 import uk.gov.hmcts.darts.common.repository.ObjectRecordStatusRepository;
 import uk.gov.hmcts.darts.common.service.FileOperationService;
+import uk.gov.hmcts.darts.common.util.EodHelper;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -461,27 +461,11 @@ public class ArmResponseFilesProcessSingleElementImpl implements ArmResponseFile
 
     private void processUploadFileDataSuccess(ArmResponseUploadFileRecord armResponseUploadFileRecord,
                                               ExternalObjectDirectoryEntity externalObjectDirectory) {
-        // Validate the upload file checksum against the external object directory tables object Media, TranscriptionDocument, AnnotationDocument
-        // or Case Document
-        if (nonNull(externalObjectDirectory.getMedia())) {
-            MediaEntity media = externalObjectDirectory.getMedia();
-            if (nonNull(media.getChecksum())) {
-                verifyChecksumAndUpdateStatus(armResponseUploadFileRecord, externalObjectDirectory, media.getChecksum());
-            } else {
-                log.warn("Unable to verify media checksum for external object {}", externalObjectDirectory.getId());
-                updateExternalObjectDirectoryStatus(externalObjectDirectory, armResponseChecksumVerificationFailedStatus);
-            }
-        } else if (nonNull(externalObjectDirectory.getTranscriptionDocumentEntity())) {
-            verifyChecksumAndUpdateStatus(armResponseUploadFileRecord, externalObjectDirectory,
-                                          externalObjectDirectory.getTranscriptionDocumentEntity().getChecksum());
-        } else if (nonNull(externalObjectDirectory.getAnnotationDocumentEntity())) {
-            verifyChecksumAndUpdateStatus(armResponseUploadFileRecord, externalObjectDirectory,
-                                          externalObjectDirectory.getAnnotationDocumentEntity().getChecksum());
-        } else if (nonNull(externalObjectDirectory.getCaseDocument())) {
-            verifyChecksumAndUpdateStatus(armResponseUploadFileRecord, externalObjectDirectory,
-                                          externalObjectDirectory.getCaseDocument().getChecksum());
+        if (externalObjectDirectory.getChecksum() != null) {
+            verifyChecksumAndUpdateStatus(armResponseUploadFileRecord, externalObjectDirectory, externalObjectDirectory.getChecksum());
         } else {
-            updateExternalObjectDirectoryStatus(externalObjectDirectory, armResponseProcessingFailedStatus);
+            log.warn("Unable to verify checksum for external object {}", externalObjectDirectory.getId());
+            updateExternalObjectDirectoryStatus(externalObjectDirectory, EodHelper.armResponseChecksumVerificationFailedStatus());
         }
     }
 

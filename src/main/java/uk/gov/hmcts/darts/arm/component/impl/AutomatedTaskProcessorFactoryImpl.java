@@ -23,14 +23,10 @@ import uk.gov.hmcts.darts.casedocument.service.GenerateCaseDocumentSingleCasePro
 import uk.gov.hmcts.darts.casedocument.service.impl.GenerateCaseDocumentBatchProcessorImpl;
 import uk.gov.hmcts.darts.common.exception.DartsException;
 import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
-import uk.gov.hmcts.darts.common.repository.AnnotationDocumentRepository;
-import uk.gov.hmcts.darts.common.repository.CaseDocumentRepository;
 import uk.gov.hmcts.darts.common.repository.CaseRepository;
 import uk.gov.hmcts.darts.common.repository.ExternalLocationTypeRepository;
 import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
-import uk.gov.hmcts.darts.common.repository.MediaRepository;
 import uk.gov.hmcts.darts.common.repository.ObjectRecordStatusRepository;
-import uk.gov.hmcts.darts.common.repository.TranscriptionDocumentRepository;
 import uk.gov.hmcts.darts.common.service.FileOperationService;
 import uk.gov.hmcts.darts.datamanagement.api.DataManagementApi;
 
@@ -72,10 +68,6 @@ public class AutomatedTaskProcessorFactoryImpl implements AutomatedTaskProcessor
                 userIdentity,
                 currentTimeHelper,
                 eodService,
-                mediaRepository,
-                transcriptionDocumentRepository,
-                annotationDocumentRepository,
-                caseDocumentRepository,
                 batchSize
             );
         }

@@ -26,11 +26,7 @@ import uk.gov.hmcts.darts.common.entity.TranscriptionDocumentEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
-import uk.gov.hmcts.darts.common.repository.AnnotationDocumentRepository;
-import uk.gov.hmcts.darts.common.repository.CaseDocumentRepository;
 import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
-import uk.gov.hmcts.darts.common.repository.MediaRepository;
-import uk.gov.hmcts.darts.common.repository.TranscriptionDocumentRepository;
 import uk.gov.hmcts.darts.common.service.FileOperationService;
 import uk.gov.hmcts.darts.test.common.data.MediaTestData;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
@@ -72,15 +68,6 @@ class ArmBatchProcessResponseFilesIntTest extends IntegrationBase {
     private ExternalObjectDirectoryRepository externalObjectDirectoryRepository;
     @Autowired
     private ExternalObjectDirectoryService externalObjectDirectoryService;
-    @Autowired
-    private MediaRepository mediaRepository;
-    @Autowired
-    private TranscriptionDocumentRepository transcriptionDocumentRepository;
-    @Autowired
-    private AnnotationDocumentRepository annotationDocumentRepository;
-    @Autowired
-    private CaseDocumentRepository caseDocumentRepository;
-
     @MockBean
     private ArmDataManagementApi armDataManagementApi;
     @Autowired
@@ -118,10 +105,6 @@ class ArmBatchProcessResponseFilesIntTest extends IntegrationBase {
             userIdentity,
             currentTimeHelper,
             externalObjectDirectoryService,
-            mediaRepository,
-            transcriptionDocumentRepository,
-            annotationDocumentRepository,
-            caseDocumentRepository,
             BATCH_SIZE
         );
 
@@ -157,12 +140,14 @@ class ArmBatchProcessResponseFilesIntTest extends IntegrationBase {
             media1, ARM_DROP_ZONE, ARM, UUID.randomUUID());
         armEod1.setTransferAttempts(1);
         armEod1.setManifestFile(manifestFile1);
+        armEod1.setChecksum("7017013d05bcc5032e142049081821d6");
         dartsDatabase.save(armEod1);
 
         ExternalObjectDirectoryEntity armEod2 = dartsDatabase.getExternalObjectDirectoryStub().createExternalObjectDirectory(
             media2, ARM_DROP_ZONE, ARM, UUID.randomUUID());
         armEod2.setTransferAttempts(1);
         armEod2.setManifestFile(manifestFile1);
+        armEod2.setChecksum("7017013d05bcc5032e142049081821d6");
         dartsDatabase.save(armEod2);
 
         ExternalObjectDirectoryEntity armEod3 = dartsDatabase.getExternalObjectDirectoryStub().createExternalObjectDirectory(
@@ -780,6 +765,7 @@ class ArmBatchProcessResponseFilesIntTest extends IntegrationBase {
         armEod.setTransferAttempts(1);
         armEod.setTransferAttempts(1);
         armEod.setManifestFile(manifestFile1);
+        armEod.setChecksum(checksum);
         dartsDatabase.save(armEod);
 
         List<String> blobNamesAndPaths = new ArrayList<>();
@@ -963,6 +949,7 @@ class ArmBatchProcessResponseFilesIntTest extends IntegrationBase {
         armEod.setTransferAttempts(1);
         armEod.setTransferAttempts(1);
         armEod.setManifestFile(manifestFile1);
+        armEod.setChecksum(checksum);
         dartsDatabase.save(armEod);
 
         List<String> blobNamesAndPaths = new ArrayList<>();
@@ -1050,6 +1037,7 @@ class ArmBatchProcessResponseFilesIntTest extends IntegrationBase {
         armEod.setTransferAttempts(1);
         armEod.setTransferAttempts(1);
         armEod.setManifestFile(manifestFile1);
+        armEod.setChecksum("xC3CCA7021CF79B42F245AF350601C284");
         dartsDatabase.save(armEod);
 
         List<String> blobNamesAndPaths = new ArrayList<>();
