@@ -89,7 +89,7 @@ public class UserAccountStub {
         String emailAddress = identifier + "@example.com";
         List<UserAccountEntity> userAccounts = userAccountRepository.findByEmailAddressIgnoreCase(emailAddress);
         if (userAccounts.isEmpty()) {
-            return createIntegrationUser(UUID.randomUUID().toString(), identifier, emailAddress);
+            return createIntegrationUser(UUID.randomUUID().toString(), identifier, emailAddress, true);
         }
         return userAccounts.get(0);
     }
@@ -102,16 +102,24 @@ public class UserAccountStub {
         return userAccounts.get(0);
     }
 
+    public UserAccountEntity getIntegrationTestUserAccountEntityInactive(String identifier) {
+        String emailAddress = identifier + "@example.com";
+        List<UserAccountEntity> userAccounts = userAccountRepository.findByEmailAddressIgnoreCase(emailAddress);
+        if (userAccounts.isEmpty()) {
+            return createIntegrationUser(UUID.randomUUID().toString(), identifier, emailAddress, false);
+        }
+        return userAccounts.get(0);
+    }
 
     public UserAccountEntity createIntegrationUser(String guid) {
         return createIntegrationUser(guid, INTEGRATION_TEST_USER_EMAIL);
     }
 
     public UserAccountEntity createIntegrationUser(String guid, String emailAddress) {
-        return createIntegrationUser(guid, INTEGRATION_TEST_USER_EMAIL, emailAddress);
+        return createIntegrationUser(guid, INTEGRATION_TEST_USER_EMAIL, emailAddress, true);
     }
 
-    private UserAccountEntity createIntegrationUser(String guid, String fullName, String emailAddress) {
+    private UserAccountEntity createIntegrationUser(String guid, String fullName, String emailAddress, boolean active) {
         UserAccountEntity systemUser = userAccountRepository.getReferenceById(SYSTEM_USER_ID);
         var newUser = new UserAccountEntity();
         newUser.setUserName(fullName + "Username");
@@ -119,7 +127,7 @@ public class UserAccountStub {
         newUser.setEmailAddress(emailAddress);
         newUser.setCreatedBy(systemUser);
         newUser.setLastModifiedBy(systemUser);
-        newUser.setActive(true);
+        newUser.setActive(active);
         newUser.setAccountGuid(guid);
         newUser.setIsSystemUser(false);
         newUser.setCreatedDateTime(CREATED_DATE_TIME);
@@ -305,6 +313,20 @@ public class UserAccountStub {
         adminGroup = securityGroupRepository.saveAndFlush(adminGroup);
 
         var user = getIntegrationTestUserAccountEntity("adminUserAccount");
+        user.getSecurityGroupEntities().clear();
+        user.getSecurityGroupEntities().add(adminGroup);
+
+        return userAccountRepository.saveAndFlush(user);
+    }
+
+    @Transactional
+    public UserAccountEntity createSuperAdminUserInactive() {
+        var adminGroup = securityGroupRepository.findByGroupNameIgnoreCase("SUPER_ADMIN")
+            .orElseThrow();
+        adminGroup.setGlobalAccess(true);
+        adminGroup = securityGroupRepository.saveAndFlush(adminGroup);
+
+        var user = getIntegrationTestUserAccountEntityInactive("adminUserAccount");
         user.getSecurityGroupEntities().clear();
         user.getSecurityGroupEntities().add(adminGroup);
 
