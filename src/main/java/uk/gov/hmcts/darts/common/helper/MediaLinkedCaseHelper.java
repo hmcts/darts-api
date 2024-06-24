@@ -16,7 +16,8 @@ public class MediaLinkedCaseHelper {
     private final MediaLinkedCaseRepository mediaLinkedCaseRepository;
 
     public void addCase(MediaEntity mediaEntity, CourtCaseEntity courtCase) {
-        List<CourtCaseEntity> linkedCases = mediaEntity.getCases();
+        List<MediaLinkedCaseEntity> mediaLinkedCaseEntities = mediaLinkedCaseRepository.findByMedia(mediaEntity);
+        List<CourtCaseEntity> linkedCases = mediaLinkedCaseEntities.stream().map(MediaLinkedCaseEntity::getCourtCase).toList();
         if (!linkedCases.contains(courtCase)) {
             MediaLinkedCaseEntity mediaLinkedCaseEntity = new MediaLinkedCaseEntity();
             mediaLinkedCaseEntity.setMedia(mediaEntity);

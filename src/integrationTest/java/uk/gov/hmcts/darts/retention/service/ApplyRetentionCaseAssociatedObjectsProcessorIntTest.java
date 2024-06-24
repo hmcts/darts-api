@@ -436,6 +436,7 @@ class ApplyRetentionCaseAssociatedObjectsProcessorIntTest extends IntegrationBas
 
 
     private static MediaEntity reflectionEquals(MediaEntity media) {
-        return refEq(media, "courtroom", "hearingList", "retainUntilTs", "lastModifiedDateTime", "createdDateTime", "adminActionReasons");
+        return refEq(media, "courtroom", "hearingList", "retainUntilTs", "lastModifiedDateTime", "createdDateTime", "adminActionReasons",
+                     "mediaLinkedCaseList");
     }
 }

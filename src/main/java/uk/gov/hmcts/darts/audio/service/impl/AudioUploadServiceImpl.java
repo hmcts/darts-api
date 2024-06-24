@@ -17,6 +17,7 @@ import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
 import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
+import uk.gov.hmcts.darts.common.entity.MediaLinkedCaseEntity;
 import uk.gov.hmcts.darts.common.entity.ObjectRecordStatusEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum;
@@ -25,6 +26,7 @@ import uk.gov.hmcts.darts.common.repository.CourtLogEventRepository;
 import uk.gov.hmcts.darts.common.repository.ExternalLocationTypeRepository;
 import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
 import uk.gov.hmcts.darts.common.repository.HearingRepository;
+import uk.gov.hmcts.darts.common.repository.MediaLinkedCaseRepository;
 import uk.gov.hmcts.darts.common.repository.MediaRepository;
 import uk.gov.hmcts.darts.common.repository.ObjectRecordStatusRepository;
 import uk.gov.hmcts.darts.common.service.RetrieveCoreObjectService;
@@ -43,8 +45,10 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
 import static uk.gov.hmcts.darts.audio.exception.AudioApiError.FAILED_TO_UPLOAD_AUDIO_FILE;
@@ -70,6 +74,7 @@ public class AudioUploadServiceImpl implements AudioUploadService {
     private final AudioConfigurationProperties audioConfigurationProperties;
     private final LogApi logApi;
     private final AudioMessageDigest audioDigest;
+    private final MediaLinkedCaseRepository mediaLinkedCaseRepository;
 
     @Override
     @Transactional
@@ -193,7 +198,16 @@ public class AudioUploadServiceImpl implements AudioUploadService {
     private List<MediaEntity> filterMediaEntitiesWithIdenticalCaseList(List<String> caseNumbersToLookFor, List<MediaEntity> mediaEntities) {
         ArrayList<MediaEntity> resultList = new ArrayList<>();
         for (MediaEntity mediaEntity : mediaEntities) {
-            List<String> mediaCaseNumbers = mediaEntity.getCases().stream().map(CourtCaseEntity::getCaseNumber).toList();
+            List<MediaLinkedCaseEntity> mediaLinkedCaseEntities = mediaLinkedCaseRepository.findByMedia(mediaEntity);
+            List<String> mediaCaseNumbers = mediaLinkedCaseEntities.stream()
+                .map(MediaLinkedCaseEntity::getCourtCase)
+                .filter(Objects::nonNull)
+                .map(CourtCaseEntity::getCaseNumber)
+                .collect(Collectors.toList());
+            mediaCaseNumbers.addAll(mediaLinkedCaseEntities.stream()
+                                        .map(MediaLinkedCaseEntity::getCaseNumber)
+                                        .filter(Objects::nonNull)
+                                        .toList());
             if (caseNumbersToLookFor.size() == mediaCaseNumbers.size() && CollectionUtils.containsAll(mediaCaseNumbers, caseNumbersToLookFor)) {
                 resultList.add(mediaEntity);
             }

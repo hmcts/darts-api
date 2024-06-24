@@ -33,6 +33,7 @@ import uk.gov.hmcts.darts.common.repository.CourtLogEventRepository;
 import uk.gov.hmcts.darts.common.repository.ExternalLocationTypeRepository;
 import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
 import uk.gov.hmcts.darts.common.repository.HearingRepository;
+import uk.gov.hmcts.darts.common.repository.MediaLinkedCaseRepository;
 import uk.gov.hmcts.darts.common.repository.MediaRepository;
 import uk.gov.hmcts.darts.common.repository.ObjectRecordStatusRepository;
 import uk.gov.hmcts.darts.common.service.FileOperationService;
@@ -111,6 +112,8 @@ class AudioUploadServiceImplTest {
     private AudioUploadService audioService;
     @Mock
     private MediaLinkedCaseHelper mediaLinkedCaseHelper;
+    @Mock
+    private MediaLinkedCaseRepository mediaLinkedCaseRepository;
 
     @BeforeEach
     void setUp() {
@@ -130,7 +133,8 @@ class AudioUploadServiceImplTest {
             courtLogEventRepository,
             audioConfigurationProperties,
             logApi,
-            audioDigest);
+            audioDigest,
+            mediaLinkedCaseRepository);
 
     }
 

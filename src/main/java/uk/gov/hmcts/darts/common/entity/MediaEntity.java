@@ -122,10 +122,6 @@ public class MediaEntity extends CreatedModifiedBaseEntity {
         return io.vavr.collection.List.ofAll(cases).distinctBy(CourtCaseEntity::getId).toJavaList();
     }
 
-    public List<CourtCaseEntity> getCases() {
-        return mediaLinkedCaseList.stream().map(MediaLinkedCaseEntity::getCourtCase).toList();
-    }
-
     public void removeHearing(HearingEntity hearing) {
         hearing.getMediaList().remove(this);
     }
