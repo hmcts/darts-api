@@ -105,7 +105,7 @@ public class AudioController implements AudioApi {
         AudioPreview audioPreview = audioPreviewService.getOrCreateAudioPreview(mediaId);
         if (audioPreview.getStatus().equals(FAILED)) {
             log.info("Media with ID {} status FAILED", mediaId);
-            throw new DartsApiException(AudioApiError.MEDIA_NOT_FOUND);
+            throw new DartsApiException(AudioApiError.FAILED_TO_PROCESS_AUDIO_REQUEST);
         }
         if (audioPreview.getStatus().equals(READY)) {
             log.info("Media with ID {} status READY", mediaId);
