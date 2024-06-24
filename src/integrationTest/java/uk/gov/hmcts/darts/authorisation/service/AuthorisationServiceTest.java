@@ -33,7 +33,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.APPROVER;
-import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.JUDGE;
+import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.JUDICIARY;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.REQUESTER;
 
 @TestInstance(Lifecycle.PER_CLASS)
@@ -76,7 +76,7 @@ class AuthorisationServiceTest extends IntegrationBase {
         UserAccountRepository userAccountRepository = dartsDatabase.getUserAccountRepository();
         userAccountRepository.saveAndFlush(judgeUserAccount);
 
-        SecurityGroupEntity globalSecurityGroup = SecurityGroupTestData.buildGroupForRole(JUDGE);
+        SecurityGroupEntity globalSecurityGroup = SecurityGroupTestData.buildGroupForRole(JUDICIARY);
         globalSecurityGroup.setGlobalAccess(true);
         dartsDatabase.getSecurityGroupRepository().saveAndFlush(globalSecurityGroup);
 
@@ -142,7 +142,7 @@ class AuthorisationServiceTest extends IntegrationBase {
         assertEquals(1, judgeUserState.getRoles().size());
 
         UserStateRole judgeRole = judgeUserState.getRoles().iterator().next();
-        assertEquals(JUDGE.getId(), judgeRole.getRoleId());
+        assertEquals(JUDICIARY.getId(), judgeRole.getRoleId());
         assertFalse(judgeRole.getGlobalAccess());
 
         assertTrue(judgeRole.getCourthouseIds().contains(courthouseEntity.getId()));
@@ -166,7 +166,7 @@ class AuthorisationServiceTest extends IntegrationBase {
         assertEquals(1, judgeUserState.getRoles().size());
 
         UserStateRole judgeRole = judgeUserState.getRoles().iterator().next();
-        assertEquals(JUDGE.getId(), judgeRole.getRoleId());
+        assertEquals(JUDICIARY.getId(), judgeRole.getRoleId());
         assertTrue(judgeRole.getGlobalAccess());
 
         assertTrue(judgeRole.getCourthouseIds().isEmpty());

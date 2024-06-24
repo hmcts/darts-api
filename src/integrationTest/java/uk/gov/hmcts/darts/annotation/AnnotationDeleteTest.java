@@ -19,7 +19,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.params.provider.EnumSource.Mode;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.JUDGE;
+import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.JUDICIARY;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.SUPER_ADMIN;
 import static uk.gov.hmcts.darts.test.common.data.AnnotationTestData.minimalAnnotationEntity;
 import static uk.gov.hmcts.darts.test.common.data.CourthouseTestData.someMinimalCourthouse;
@@ -40,7 +40,7 @@ class AnnotationDeleteTest extends IntegrationBase {
 
     @Test
     void judgeWithGlobalAccessCanDeleteTheirOwnAnnotation() throws Exception {
-        var judge = given.anAuthenticatedUserWithGlobalAccessAndRole(JUDGE);
+        var judge = given.anAuthenticatedUserWithGlobalAccessAndRole(JUDICIARY);
         var annotation = someAnnotationNotMarkedForDeletionCreatedBy(judge);
 
         mockMvc.perform(
@@ -57,7 +57,7 @@ class AnnotationDeleteTest extends IntegrationBase {
     @Test
     void judgeWithCourthouseAccessCanDeleteTheirOwnAnnotation() throws Exception {
         var hearing = dartsDatabase.save(createSomeMinimalHearing());
-        var judge = given.anAuthenticatedUserAuthorizedForCourthouse(JUDGE, hearing.getCourtroom().getCourthouse());
+        var judge = given.anAuthenticatedUserAuthorizedForCourthouse(JUDICIARY, hearing.getCourtroom().getCourthouse());
         var annotation = someAnnotationForHearingNotMarkedForDeletionCreatedBy(judge, hearing);
 
         mockMvc.perform(
@@ -70,7 +70,7 @@ class AnnotationDeleteTest extends IntegrationBase {
     void preventsJudgeNotAuthorizedForCourthouseDeletingAnnotationAssociatedWithThatCourthouse() throws Exception {
         var annotationHearing = dartsDatabase.save(createSomeMinimalHearing());
         var someOtherCourthouse = dartsDatabase.save(someMinimalCourthouse());
-        var judge = given.anAuthenticatedUserAuthorizedForCourthouse(JUDGE, someOtherCourthouse);
+        var judge = given.anAuthenticatedUserAuthorizedForCourthouse(JUDICIARY, someOtherCourthouse);
         var annotation = someAnnotationForHearingNotMarkedForDeletionCreatedBy(judge, annotationHearing);
 
         mockMvc.perform(
@@ -81,7 +81,7 @@ class AnnotationDeleteTest extends IntegrationBase {
 
     @Test
     void preventsJudgesFromDeletingAnotherJudgesAnnotations() throws Exception {
-        given.anAuthenticatedUserWithGlobalAccessAndRole(JUDGE);
+        given.anAuthenticatedUserWithGlobalAccessAndRole(JUDICIARY);
         var someOtherJudge = minimalUserAccount();
         var annotation = someAnnotationNotMarkedForDeletionCreatedBy(someOtherJudge);
 
@@ -104,7 +104,7 @@ class AnnotationDeleteTest extends IntegrationBase {
     }
 
     @ParameterizedTest
-    @EnumSource(value = SecurityRoleEnum.class, names = {"SUPER_ADMIN", "JUDGE"}, mode = Mode.EXCLUDE)
+    @EnumSource(value = SecurityRoleEnum.class, names = {"SUPER_ADMIN", "JUDICIARY" }, mode = Mode.EXCLUDE)
     void disallowsDeleteAnnotationByRolesOtherThanSuperAdminAndJudge(SecurityRoleEnum role) throws Exception {
         given.anAuthenticatedUserWithGlobalAccessAndRole(role);
         var someJudge = minimalUserAccount();
