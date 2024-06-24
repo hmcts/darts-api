@@ -193,40 +193,6 @@ class CourtCaseDocumentMapperIntTest extends IntegrationBase {
         );
 
         assertAll(
-            "Grouped assertions for Case Document case documents",
-            () -> assertThat(doc.getCaseDocuments().get(0).getId()).isNotNull().isEqualTo(caseDocumentEntity.getId()),
-            () -> assertThat(doc.getCaseDocuments().get(0).getFileName()).isNotNull().isEqualTo(caseDocumentEntity.getFileName()),
-            () -> assertThat(doc.getCaseDocuments().get(0).getFileSize()).isNotNull().isEqualTo(caseDocumentEntity.getFileSize()),
-            () -> assertThat(doc.getCaseDocuments().get(0).getFileType()).isNotNull().isEqualTo(caseDocumentEntity.getFileType()),
-            () -> assertThat(doc.getCaseDocuments().get(0).getChecksum()).isNotNull().isEqualTo(caseDocumentEntity.getChecksum()),
-            () -> assertThat(doc.getCaseDocuments().get(0).isHidden()).isNotNull().isEqualTo(caseDocumentEntity.isHidden()),
-            () -> assertThat(doc.getCaseDocuments().get(0).getRetainUntilTs()).isNotNull().isEqualTo(caseDocumentEntity.getRetainUntilTs()),
-
-            () -> assertThat(doc.getCaseDocuments().get(0).getExternalObjectDirectories().get(0).getId()).isNotNull().isEqualTo(caseDocumentEodEntity.getId()),
-            () -> assertThat(doc.getCaseDocuments().get(0).getExternalObjectDirectories().get(0).getMedia()).isNotNull().isEqualTo(caseDocumentEodEntity.getMedia().getId()),
-            () -> assertThat(doc.getCaseDocuments().get(0).getExternalObjectDirectories().get(0).getTranscriptionDocumentEntity()).isNotNull().isEqualTo(caseDocumentEodEntity.getTranscriptionDocumentEntity().getId()),
-            () -> assertThat(doc.getCaseDocuments().get(0).getExternalObjectDirectories().get(0).getAnnotationDocumentEntity()).isNotNull().isEqualTo(caseDocumentEodEntity.getAnnotationDocumentEntity().getId()),
-            () -> assertThat(doc.getCaseDocuments().get(0).getExternalObjectDirectories().get(0).getCaseDocument()).isNotNull().isEqualTo(caseDocumentEodEntity.getCaseDocument().getId()),
-            () -> assertThat(doc.getCaseDocuments().get(0).getExternalObjectDirectories().get(0).getStatus()).isNotNull().isEqualTo(caseDocumentEodEntity.getStatus()),
-            () -> assertThat(doc.getCaseDocuments().get(0).getExternalObjectDirectories().get(0).getExternalLocationType()).isNotNull().isEqualTo(caseDocumentEodEntity.getExternalLocationType()),
-            () -> assertThat(doc.getCaseDocuments().get(0).getExternalObjectDirectories().get(0).getExternalLocation()).isNotNull().isEqualTo(caseDocumentEodEntity.getExternalLocation()),
-            () -> assertThat(doc.getCaseDocuments().get(0).getExternalObjectDirectories().get(0).getExternalFileId()).isNotNull().isEqualTo(caseDocumentEodEntity.getExternalFileId()),
-            () -> assertThat(doc.getCaseDocuments().get(0).getExternalObjectDirectories().get(0).getExternalRecordId()).isNotNull().isEqualTo(caseDocumentEodEntity.getExternalRecordId()),
-            () -> assertThat(doc.getCaseDocuments().get(0).getExternalObjectDirectories().get(0).getChecksum()).isNotNull().isEqualTo(caseDocumentEodEntity.getChecksum()),
-            () -> assertThat(doc.getCaseDocuments().get(0).getExternalObjectDirectories().get(0).getTransferAttempts()).isNotNull().isEqualTo(caseDocumentEodEntity.getTransferAttempts()),
-            () -> assertThat(doc.getCaseDocuments().get(0).getExternalObjectDirectories().get(0).getVerificationAttempts()).isNotNull().isEqualTo(caseDocumentEodEntity.getVerificationAttempts()),
-            () -> assertThat(doc.getCaseDocuments().get(0).getExternalObjectDirectories().get(0).getManifestFile()).isNotNull().isEqualTo(caseDocumentEodEntity.getManifestFile()),
-            () -> assertThat(doc.getCaseDocuments().get(0).getExternalObjectDirectories().get(0).getEventDateTs()).isNotNull().isEqualTo(caseDocumentEodEntity.getEventDateTs()),
-            () -> assertThat(doc.getCaseDocuments().get(0).getExternalObjectDirectories().get(0).getErrorCode()).isNotNull().isEqualTo(caseDocumentEodEntity.getErrorCode()),
-            () -> assertThat(doc.getCaseDocuments().get(0).getExternalObjectDirectories().get(0).isResponseCleaned()).isNotNull().isEqualTo(caseDocumentEodEntity.isResponseCleaned()),
-            () -> assertThat(doc.getCaseDocuments().get(0).getExternalObjectDirectories().get(0).isUpdateRetention()).isNotNull().isEqualTo(caseDocumentEodEntity.isUpdateRetention()),
-            () -> assertThat(doc.getCaseDocuments().get(0).getExternalObjectDirectories().get(0).getCreatedBy()).isNotNull().isEqualTo(caseDocumentEodEntity.getCreatedBy().getId()),
-            () -> assertThat(doc.getCaseDocuments().get(0).getExternalObjectDirectories().get(0).getCreatedDateTime()).isNotNull().isEqualTo(caseDocumentEodEntity.getCreatedDateTime()),
-            () -> assertThat(doc.getCaseDocuments().get(0).getExternalObjectDirectories().get(0).getLastModifiedBy()).isNotNull().isEqualTo(caseDocumentEodEntity.getLastModifiedBy().getId()),
-            () -> assertThat(doc.getCaseDocuments().get(0).getExternalObjectDirectories().get(0).getLastModifiedDateTime()).isNotNull().isEqualTo(caseDocumentEodEntity.getLastModifiedDateTime())
-        );
-
-        assertAll(
             "Grouped assertions for Case Document hearings",
             () -> assertThat(doc.getHearings().get(0).getId()).isNotNull().isEqualTo(cc.getHearings().get(0).getId()),
             () -> assertThat(doc.getHearings().get(0).getHearingDate()).isNotNull().isEqualTo(cc.getHearings().get(0).getHearingDate()),

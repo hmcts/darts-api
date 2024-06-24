@@ -31,5 +31,4 @@ public class CourtCaseDocument extends CreatedModifiedCaseDocument {
     private final boolean dataAnonymised;
     private final Integer dataAnonymisedBy;
     private final OffsetDateTime dataAnonymisedTs;
-    private final List<CaseDocumentCaseDocument> caseDocuments;
 }
