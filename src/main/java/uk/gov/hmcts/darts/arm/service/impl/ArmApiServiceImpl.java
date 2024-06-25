@@ -83,6 +83,7 @@ public class ArmApiServiceImpl implements ArmApiService {
 
         if (StringUtils.isNotEmpty(armTokenResponse.getAccessToken())) {
             String bearerToken = String.format("Bearer %s", armTokenResponse.getAccessToken());
+            log.debug("Fetched ARM Bearer Token from /token: {}", bearerToken);
             AvailableEntitlementProfile availableEntitlementProfile = armTokenClient.availableEntitlementProfiles(bearerToken);
             if (!availableEntitlementProfile.isError()) {
                 Optional<String> profileId = availableEntitlementProfile.getProfiles().stream()
