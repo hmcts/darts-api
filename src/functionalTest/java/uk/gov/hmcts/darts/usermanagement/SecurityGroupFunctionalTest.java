@@ -111,8 +111,8 @@ class SecurityGroupFunctionalTest extends FunctionalTest {
         Response response = buildRequestWithExternalGlobalAccessAuth()
             .baseUri(getUri("/admin/security-groups"))
             .contentType(ContentType.JSON)
-            .get()
-            .thenReturn();
+            .get();
+        assertEquals(200, response.getStatusCode());
 
         ObjectMapper objectMapper = new ObjectMapper();
         List<SecurityGroupWithIdAndRoleAndUsers> securityGroupWithIdAndRoles = objectMapper.readValue(response.asString(),
@@ -125,22 +125,24 @@ class SecurityGroupFunctionalTest extends FunctionalTest {
                 .filter(group -> group.getId() == 1
                     || group.getId() >= -6 && group.getId() <= -1
                     || group.getId() >= -17 && group.getId() <= -14
-                    || group.getSecurityRoleId().equals(SecurityRoleEnum.SUPER_USER.getId()))
+                    || group.getSecurityRoleId().equals(SecurityRoleEnum.SUPER_USER.getId())
+                    || group.getSecurityRoleId().equals(SecurityRoleEnum.DARTS.getId()))
                 .sorted(Comparator.comparingInt(SecurityGroupWithIdAndRoleAndUsers::getId).reversed())
                 .toList();
 
-        checkGroup(staticGroups.get(0), "SUPER_USER", true, 12, true, null);
-        checkGroup(staticGroups.get(1), "SUPER_ADMIN", true, 11, true, null);
-        checkGroup(staticGroups.get(2), "hmcts_staff_1", false, 1, true, 1);
-        checkGroup(staticGroups.get(3), "hmcts_staff_2", false, 2, true, 1);
-        checkGroup(staticGroups.get(4), "hmcts_staff_3", false, 3, true, 1);
-        checkGroup(staticGroups.get(5), "hmcts_staff_4", false, 4, true, 1);
-        checkGroup(staticGroups.get(6), "hmcts_staff_5", true, 5, true, 1);
-        checkGroup(staticGroups.get(7), "hmcts_staff_6", true, 6, true, 1);
-        checkGroup(staticGroups.get(8), "Xhibit Group", true, 7, true, 1);
-        checkGroup(staticGroups.get(9), "Cpp Group", true, 8, true, 1);
-        checkGroup(staticGroups.get(10), "Dar Pc Group", true, 9, true, 1);
-        checkGroup(staticGroups.get(11), "Mid Tier Group", true, 10, true, 1);
+        checkGroup(staticGroups.get(0), "DARTS", true, 13, false, null);
+        checkGroup(staticGroups.get(1), "SUPER_USER", true, 12, true, null);
+        checkGroup(staticGroups.get(2), "SUPER_ADMIN", true, 11, true, null);
+        checkGroup(staticGroups.get(3), "hmcts_staff_1", false, 1, true, 1);
+        checkGroup(staticGroups.get(4), "hmcts_staff_2", false, 2, true, 1);
+        checkGroup(staticGroups.get(5), "hmcts_staff_3", false, 3, true, 1);
+        checkGroup(staticGroups.get(6), "hmcts_staff_4", false, 4, true, 1);
+        checkGroup(staticGroups.get(7), "hmcts_staff_5", true, 5, true, 1);
+        checkGroup(staticGroups.get(8), "hmcts_staff_6", true, 6, true, 1);
+        checkGroup(staticGroups.get(9), "Xhibit Group", true, 7, false, 1);
+        checkGroup(staticGroups.get(10), "Cpp Group", true, 8, false, 1);
+        checkGroup(staticGroups.get(11), "Dar Pc Group", true, 9, false, 1);
+        checkGroup(staticGroups.get(12), "Mid Tier Group", true, 10, false, 1);
 
     }
 

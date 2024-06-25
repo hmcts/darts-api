@@ -9,9 +9,9 @@ import uk.gov.hmcts.darts.audio.service.OutboundAudioDeleterProcessorSingleEleme
 import uk.gov.hmcts.darts.common.entity.TransformedMediaEntity;
 import uk.gov.hmcts.darts.common.entity.TransientObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
+import uk.gov.hmcts.darts.common.enums.SecurityGroupEnum;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.common.helper.SystemUserHelper;
-import uk.gov.hmcts.darts.common.repository.ObjectRecordStatusRepository;
 import uk.gov.hmcts.darts.common.repository.TransformedMediaRepository;
 import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
 
@@ -21,7 +21,12 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.darts.common.enums.SecurityGroupEnum.MEDIA_IN_PERPETUITY;
 
 @ExtendWith(MockitoExtension.class)
 class OutboundAudioDeleterProcessorImplTest {
@@ -31,8 +36,6 @@ class OutboundAudioDeleterProcessorImplTest {
     private UserAccountRepository userAccountRepository;
     @Mock
     private UserAccountEntity userAccountEntity;
-    @Mock
-    private ObjectRecordStatusRepository objectRecordStatusRepository;
     @Mock
     private OutboundAudioDeleterProcessorSingleElement singleElementProcessor;
     private OutboundAudioDeleterProcessorImpl outboundAudioDeleterProcessorImpl;
@@ -65,8 +68,11 @@ class OutboundAudioDeleterProcessorImplTest {
     @Test
     void testContinuesProcessingNextIterationOnException() {
         // given
-        List<TransformedMediaEntity> transformedMediaEntities = List.of(new TransformedMediaEntity(), new TransformedMediaEntity());
-        when(transformedMediaRepository.findAllDeletableTransformedMedia(any())).thenReturn(transformedMediaEntities);
+        var transformedMedia1 = someTransformedMediaNotOwnedByUserInGroup(MEDIA_IN_PERPETUITY);
+        var transformedMedia2 = someTransformedMediaNotOwnedByUserInGroup(MEDIA_IN_PERPETUITY);
+
+        when(transformedMediaRepository.findAllDeletableTransformedMedia(any()))
+            .thenReturn(List.of(transformedMedia1, transformedMedia2));
 
         var deletedValues = List.of(new TransientObjectDirectoryEntity());
         when(singleElementProcessor.markForDeletion(any(), any()))
@@ -78,6 +84,38 @@ class OutboundAudioDeleterProcessorImplTest {
 
         // then
         assertThat(result).isEqualTo(deletedValues);
+    }
+
+    @Test
+    void doesntMarkForDeletionWhenCurrentOwnerIsInGroupMediaInPerpetuity() {
+        // given
+        var transformedMediaOwnedByUserInMediaInPerpetuityGroup = someTransformedMediaOwnedByUserInGroup(MEDIA_IN_PERPETUITY);
+        var transformedMediaNotOwnedByUserInMediaInPerpetuityGroup = someTransformedMediaNotOwnedByUserInGroup(MEDIA_IN_PERPETUITY);
+        when(transformedMediaRepository.findAllDeletableTransformedMedia(any()))
+            .thenReturn(List.of(
+                transformedMediaOwnedByUserInMediaInPerpetuityGroup,
+                transformedMediaNotOwnedByUserInMediaInPerpetuityGroup));
+
+        // when
+        outboundAudioDeleterProcessorImpl.markForDeletion();
+
+        // then
+        verify(singleElementProcessor, times(1))
+            .markForDeletion(any(), eq(transformedMediaNotOwnedByUserInMediaInPerpetuityGroup));
+        verify(singleElementProcessor, times(0))
+            .markForDeletion(any(), eq(transformedMediaOwnedByUserInMediaInPerpetuityGroup));
+    }
+
+    private TransformedMediaEntity someTransformedMediaOwnedByUserInGroup(SecurityGroupEnum securityGroupEnum) {
+        var transformedMediaEntity = mock(TransformedMediaEntity.class);
+        when(transformedMediaEntity.isOwnerInSecurityGroup(securityGroupEnum)).thenReturn(true);
+        return transformedMediaEntity;
+    }
+
+    private TransformedMediaEntity someTransformedMediaNotOwnedByUserInGroup(SecurityGroupEnum securityGroupEnum) {
+        var transformedMediaEntity = mock(TransformedMediaEntity.class);
+        when(transformedMediaEntity.isOwnerInSecurityGroup(securityGroupEnum)).thenReturn(false);
+        return transformedMediaEntity;
     }
 }
 

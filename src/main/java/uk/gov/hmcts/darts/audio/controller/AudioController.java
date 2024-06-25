@@ -33,6 +33,7 @@ import uk.gov.hmcts.darts.authorisation.annotation.Authorisation;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
 
+import java.time.OffsetDateTime;
 import java.util.List;
 
 import static uk.gov.hmcts.darts.audio.enums.AudioPreviewStatus.FAILED;
@@ -42,7 +43,8 @@ import static uk.gov.hmcts.darts.authorisation.enums.ContextIdEnum.ANY_ENTITY_ID
 import static uk.gov.hmcts.darts.authorisation.enums.ContextIdEnum.HEARING_ID;
 import static uk.gov.hmcts.darts.authorisation.enums.ContextIdEnum.MEDIA_ID;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.APPROVER;
-import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.JUDGE;
+import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.DARTS;
+import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.JUDICIARY;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.MID_TIER;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.RCJ_APPEALS;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.REQUESTER;
@@ -70,8 +72,8 @@ public class AudioController implements AudioApi {
     @Override
     @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
     @Authorisation(contextId = HEARING_ID,
-        securityRoles = {JUDGE, REQUESTER, APPROVER, TRANSCRIBER, TRANSLATION_QA},
-        globalAccessSecurityRoles = {JUDGE, SUPER_ADMIN, SUPER_USER, RCJ_APPEALS, TRANSLATION_QA})
+        securityRoles = {JUDICIARY, REQUESTER, APPROVER, TRANSCRIBER, TRANSLATION_QA},
+        globalAccessSecurityRoles = {JUDICIARY, SUPER_ADMIN, SUPER_USER, RCJ_APPEALS, TRANSLATION_QA, DARTS})
     public ResponseEntity<List<AudioMetadata>> getAudioMetadata(Integer hearingId) {
         List<MediaEntity> mediaEntities = audioService.getAudioMetadata(hearingId, 1);
         List<AudioMetadata> audioMetadata = audioResponseMapper.mapToAudioMetadata(mediaEntities);
@@ -99,13 +101,13 @@ public class AudioController implements AudioApi {
     @Override
     @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
     @Authorisation(contextId = MEDIA_ID,
-        securityRoles = {JUDGE, REQUESTER, APPROVER, TRANSCRIBER, TRANSLATION_QA},
-        globalAccessSecurityRoles = {JUDGE, SUPER_ADMIN, SUPER_USER, RCJ_APPEALS, TRANSLATION_QA})
+        securityRoles = {JUDICIARY, REQUESTER, APPROVER, TRANSCRIBER, TRANSLATION_QA},
+        globalAccessSecurityRoles = {JUDICIARY, SUPER_ADMIN, SUPER_USER, RCJ_APPEALS, TRANSLATION_QA, DARTS})
     public ResponseEntity<byte[]> preview(Integer mediaId, String httpRangeList) {
         AudioPreview audioPreview = audioPreviewService.getOrCreateAudioPreview(mediaId);
         if (audioPreview.getStatus().equals(FAILED)) {
             log.info("Media with ID {} status FAILED", mediaId);
-            throw new DartsApiException(AudioApiError.MEDIA_NOT_FOUND);
+            throw new DartsApiException(AudioApiError.FAILED_TO_PROCESS_AUDIO_REQUEST);
         }
         if (audioPreview.getStatus().equals(READY)) {
             log.info("Media with ID {} status READY", mediaId);
@@ -127,8 +129,10 @@ public class AudioController implements AudioApi {
     @Override
     @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
     @Authorisation(contextId = ANY_ENTITY_ID, globalAccessSecurityRoles = {SUPER_USER, SUPER_ADMIN})
-    public ResponseEntity<List<AdminMediaSearchResponseItem>> getAdminMedias(Integer transformedMediaId) {
-        List<AdminMediaSearchResponseItem> response = mediaRequestService.adminMediaSearch(transformedMediaId);
+    public ResponseEntity<List<AdminMediaSearchResponseItem>> getAdminMedias(Integer transformedMediaId, List<Integer> hearingIds, OffsetDateTime startAt,
+                                                                             OffsetDateTime endAt) {
+
+        List<AdminMediaSearchResponseItem> response = adminMediaService.filterMedias(transformedMediaId, hearingIds, startAt, endAt);
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 

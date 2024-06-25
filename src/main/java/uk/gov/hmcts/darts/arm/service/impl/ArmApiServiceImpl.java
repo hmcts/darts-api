@@ -82,7 +82,9 @@ public class ArmApiServiceImpl implements ArmApiService {
         ));
 
         if (StringUtils.isNotEmpty(armTokenResponse.getAccessToken())) {
-            AvailableEntitlementProfile availableEntitlementProfile = armTokenClient.availableEntitlementProfiles(armTokenResponse.getAccessToken());
+            String bearerToken = String.format("Bearer %s", armTokenResponse.getAccessToken());
+            log.debug("Fetched ARM Bearer Token from /token: {}", bearerToken);
+            AvailableEntitlementProfile availableEntitlementProfile = armTokenClient.availableEntitlementProfiles(bearerToken);
             if (!availableEntitlementProfile.isError()) {
                 Optional<String> profileId = availableEntitlementProfile.getProfiles().stream()
                     .filter(p -> armApiConfigurationProperties.getArmServiceProfile().equalsIgnoreCase(p.getProfileName()))
@@ -90,7 +92,7 @@ public class ArmApiServiceImpl implements ArmApiService {
                     .findAny();
                 if (profileId.isPresent()) {
                     log.debug("Found DARTS ARM Service Profile Id: {}", profileId.get());
-                    ArmTokenResponse tokenResponse = armTokenClient.selectEntitlementProfile(armTokenResponse.getAccessToken(), profileId.get());
+                    ArmTokenResponse tokenResponse = armTokenClient.selectEntitlementProfile(bearerToken, profileId.get());
                     accessToken = tokenResponse.getAccessToken();
                 }
             }

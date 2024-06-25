@@ -14,7 +14,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.APPROVER;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.CPP;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.DAR_PC;
-import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.JUDGE;
+import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.JUDICIARY;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.MID_TIER;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.RCJ_APPEALS;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.REQUESTER;
@@ -33,7 +33,7 @@ class SecurityRoleRepositoryTest extends IntegrationBase {
     @Test
     void shouldFindAllSecurityRoles() {
         List<SecurityRoleEntity> securityRoleEntityList = securityRoleRepository.findAll();
-        assertEquals(12, securityRoleEntityList.size());
+        assertEquals(14, securityRoleEntityList.size());
     }
 
     @Test
@@ -52,7 +52,7 @@ class SecurityRoleRepositoryTest extends IntegrationBase {
 
     @Test
     void shouldFindAllJudgePermissions() {
-        SecurityRoleEntity judgeRole = securityRoleRepository.findById(JUDGE.getId()).orElseThrow();
+        SecurityRoleEntity judgeRole = securityRoleRepository.findById(JUDICIARY.getId()).orElseThrow();
         final Set<SecurityPermissionEntity> securityPermissionEntities = judgeRole.getSecurityPermissionEntities();
         assertEquals(12, securityPermissionEntities.size());
     }
@@ -119,5 +119,6 @@ class SecurityRoleRepositoryTest extends IntegrationBase {
         final Set<SecurityPermissionEntity> securityPermissionEntities = superUserRole.getSecurityPermissionEntities();
         assertEquals(13, securityPermissionEntities.size());
     }
+
 
 }

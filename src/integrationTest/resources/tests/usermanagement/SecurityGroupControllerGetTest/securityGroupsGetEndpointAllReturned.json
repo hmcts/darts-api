@@ -4,7 +4,7 @@
     "id": -17,
     "security_role_id": 10,
     "global_access": true,
-    "display_state": true,
+    "display_state": false,
     "courthouse_ids": [],
     "name": "Mid Tier Group"
   },
@@ -13,7 +13,7 @@
     "id": -16,
     "security_role_id": 9,
     "global_access": true,
-    "display_state": true,
+    "display_state": false,
     "courthouse_ids": [],
     "name": "Dar Pc Group"
   },
@@ -22,7 +22,7 @@
     "id": -15,
     "security_role_id": 8,
     "global_access": true,
-    "display_state": true,
+    "display_state": false,
     "courthouse_ids": [],
     "name": "Cpp Group"
   },
@@ -31,7 +31,7 @@
     "id": -14,
     "security_role_id": 7,
     "global_access": true,
-    "display_state": true,
+    "display_state": false,
     "courthouse_ids": [],
     "name": "Xhibit Group"
   },
@@ -108,5 +108,24 @@
     "courthouse_ids": [],
     "name": "SUPER_USER",
     "display_name": "Super User"
+  },
+  {
+    "user_ids": [],
+    "id": 3,
+    "security_role_id": 13,
+    "global_access": true,
+    "display_state": false,
+    "courthouse_ids": [],
+    "name": "DARTS",
+    "display_name": "DARTS"
+  },
+  {
+    "user_ids":[],
+    "id": 4,
+    "security_role_id": 14,
+    "global_access": true,
+    "display_state": true,
+    "courthouse_ids": [],
+    "name": "MEDIA_IN_PERPETUITY"
   }
 ]

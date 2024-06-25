@@ -51,11 +51,12 @@ class ArmApiServiceIntTest extends IntegrationBase {
     void setup() {
         armTokenRequest = new ArmTokenRequest("some-username", "some-password", GrantType.PASSWORD.getValue());
         ArmTokenResponse armTokenResponse = getArmTokenResponse();
+        String bearerToken = String.format("Bearer %s", armTokenResponse.getAccessToken());
         when(armTokenClient.getToken(armTokenRequest))
             .thenReturn(armTokenResponse);
-        when(armTokenClient.availableEntitlementProfiles(armTokenResponse.getAccessToken()))
+        when(armTokenClient.availableEntitlementProfiles(bearerToken))
             .thenReturn(getAvailableEntitlementProfile());
-        when(armTokenClient.selectEntitlementProfile(armTokenResponse.getAccessToken(), "some-profile-id"))
+        when(armTokenClient.selectEntitlementProfile(bearerToken, "some-profile-id"))
             .thenReturn(armTokenResponse);
     }
 

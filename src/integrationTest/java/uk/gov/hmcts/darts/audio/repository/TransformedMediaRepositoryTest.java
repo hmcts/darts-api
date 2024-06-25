@@ -317,4 +317,5 @@ class TransformedMediaRepositoryTest extends RepositoryBase {
         Assertions.assertEquals(1, transformedMediaEntityList.size());
         Assertions.assertEquals(transformedMediaEntityFind.getId(), transformedMediaEntityList.get(0).getId());
     }
+
 }
