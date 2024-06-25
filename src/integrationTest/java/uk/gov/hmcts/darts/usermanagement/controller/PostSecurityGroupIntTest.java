@@ -16,7 +16,7 @@ import uk.gov.hmcts.darts.common.entity.SecurityGroupEntity;
 import uk.gov.hmcts.darts.common.entity.SecurityGroupEntity_;
 import uk.gov.hmcts.darts.common.repository.SecurityGroupRepository;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
-import uk.gov.hmcts.darts.testutils.TransactionalAssert;
+import uk.gov.hmcts.darts.testutils.TransactionalUtil;
 import uk.gov.hmcts.darts.testutils.stubs.SuperAdminUserStub;
 
 import java.util.List;
@@ -35,7 +35,7 @@ class PostSecurityGroupIntTest extends IntegrationBase {
     private static final String DESCRIPTION = "A test group";
 
     @Autowired
-    private TransactionalAssert transactionalAssert;
+    private TransactionalUtil transactionalUtil;
 
     @Autowired
     private SecurityGroupRepository securityGroupRepository;
@@ -94,7 +94,7 @@ class PostSecurityGroupIntTest extends IntegrationBase {
         var id = new JSONObject(result.getResponse().getContentAsString())
             .getInt("id");
 
-        transactionalAssert.inTransaction(() -> {
+        transactionalUtil.inTransaction(() -> {
             var createdSecurityGroupEntity = securityGroupRepository.findById(id)
                 .orElseThrow();
 
@@ -135,7 +135,7 @@ class PostSecurityGroupIntTest extends IntegrationBase {
         var id = new JSONObject(result.getResponse().getContentAsString())
             .getInt("id");
 
-        transactionalAssert.inTransaction(() -> {
+        transactionalUtil.inTransaction(() -> {
             var createdSecurityGroupEntity = securityGroupRepository.findById(id)
                 .orElseThrow();
 
@@ -177,7 +177,7 @@ class PostSecurityGroupIntTest extends IntegrationBase {
         var id = new JSONObject(result.getResponse().getContentAsString())
             .getInt("id");
 
-        transactionalAssert.inTransaction(() -> {
+        transactionalUtil.inTransaction(() -> {
             var createdSecurityGroupEntity = securityGroupRepository.findById(id)
                 .orElseThrow();
 

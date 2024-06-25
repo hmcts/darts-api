@@ -24,7 +24,6 @@ import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.SUPER_ADMIN;
 import static uk.gov.hmcts.darts.test.common.data.AnnotationTestData.minimalAnnotationEntity;
 import static uk.gov.hmcts.darts.test.common.data.CourthouseTestData.someMinimalCourthouse;
 import static uk.gov.hmcts.darts.test.common.data.HearingTestData.createSomeMinimalHearing;
-import static uk.gov.hmcts.darts.test.common.data.HearingTestData.someMinimalHearing;
 import static uk.gov.hmcts.darts.test.common.data.UserAccountTestData.minimalUserAccount;
 
 @AutoConfigureMockMvc
@@ -127,7 +126,7 @@ class AnnotationDeleteTest extends IntegrationBase {
     }
 
     private AnnotationEntity someAnnotationNotMarkedForDeletionCreatedBy(UserAccountEntity userAccount) {
-        return someAnnotationForHearingNotMarkedForDeletionCreatedBy(userAccount, someMinimalHearing());
+        return someAnnotationForHearingNotMarkedForDeletionCreatedBy(userAccount, createSomeMinimalHearing());
     }
 
     private AnnotationEntity someAnnotationForHearingNotMarkedForDeletionCreatedBy(UserAccountEntity userAccount, HearingEntity hearing) {

@@ -10,6 +10,8 @@ import java.util.List;
 import java.util.Random;
 
 import static uk.gov.hmcts.darts.event.enums.EventStatus.MODERNISED;
+import static uk.gov.hmcts.darts.test.common.data.CourtroomTestData.someMinimalCourtRoom;
+
 
 @UtilityClass
 @SuppressWarnings({"HideUtilityClassConstructor"})
@@ -25,7 +27,13 @@ public class EventTestData {
     private static final String LOG_ENTRY_EVENT_NAME = "LOG";
 
     public static EventEntity someMinimalEvent() {
-        return new EventEntity();
+        var eventEntity = new EventEntity();
+        eventEntity.setCourtroom(someMinimalCourtRoom());
+        eventEntity.setEventType(createTestEventHandlerEntity("some-event-name"));
+        eventEntity.setTimestamp(OffsetDateTime.now());
+        eventEntity.setIsLogEntry(false);
+        eventEntity.setIsCurrent(true);
+        return eventEntity;
     }
 
     public static EventEntity createEventWith(String eventName, String eventText, HearingEntity hearingEntity, OffsetDateTime eventTime) {
@@ -55,4 +63,11 @@ public class EventTestData {
         return entity;
     }
 
+    public static EventEntity createEventForHearing(HearingEntity hearingEntity) {
+        var eventEntity = someMinimalEvent();
+        eventEntity.getHearingEntities().add(hearingEntity);
+        eventEntity.setCourtroom(hearingEntity.getCourtroom());
+        return eventEntity;
+
+    }
 }

@@ -460,6 +460,52 @@ paths:
                 $ref: './problem.yaml'
 
 
+  /admin/events/search:
+    post:
+      tags:
+        - Event
+      summary: An Endpoint which allows admins to search for events.
+      operationId: adminSearchEvents
+      description: |-
+        This endpoint allows admins to search the events database by providing none | some | all valid search criteria
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AdminEventSearch'
+            examples:
+              example1:
+                summary: Event mapping
+                value:
+                  type: 10100,
+                  sub_type: 1010,
+                  name: My event,
+                  handler: Standard Event Handler,
+                  has_restrictions: true
+
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdminSearchEventResponse'
+
+        '400':
+          description: Too many results
+          content:
+            application/json+problem:
+              schema:
+                $ref: './problem.yaml'
+
+        '500':
+          description: Internal Server Error
+          content:
+            application/json+problem:
+              schema:
+                $ref: './problem.yaml'
+
 components:
   schemas:
 
@@ -609,6 +655,66 @@ components:
 
     EventHandler:
       type: string
+
+    AdminEventSearch:
+      type: object
+      properties:
+        courthouse_ids:
+          type: array
+          items:
+            type: integer
+        case_number:
+          type: string
+        courtroom_name:
+          type: string
+        hearing_start_at:
+          type: string
+          format: date
+          example: "2024-05-09"
+        hearing_end_at:
+          type: string
+          format: date
+          example: "2024-05-09"
+
+    AdminSearchEventResponse:
+      type: object
+      properties:
+        events:
+          type: array
+          items:
+            $ref: '#/components/schemas/AdminSearchEventResponseResult'
+
+    AdminSearchEventResponseResult:
+      type: object
+      properties:
+        id:
+          type: integer
+        created_at:
+          type: string
+          format: date-time
+        name:
+          type: string
+        text:
+          type: string
+        chronicle_id:
+          type: string
+        antecedent_id:
+          type: string
+        courthouse:
+          type: object
+          properties:
+            id:
+              type: integer
+            display_name:
+              type: string
+        courtroom:
+          type: object
+          properties:
+            id:
+              type: integer
+            name:
+              type: string
+
 
     ###################################################################################################################
     # PRIMITIVES
