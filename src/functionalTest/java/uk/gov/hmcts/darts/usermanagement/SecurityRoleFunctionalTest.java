@@ -105,6 +105,12 @@ class SecurityRoleFunctionalTest extends FunctionalTest {
                     "role_name": "DARTS",
                     "display_name": "DARTS",
                     "display_state": false
+                  },
+                  {
+                    "id": 14,
+                    "role_name": "MEDIA_ACCESSOR",
+                    "display_name": "Media Accessor",
+                    "display_state": true
                   }
                 ]
                 """,

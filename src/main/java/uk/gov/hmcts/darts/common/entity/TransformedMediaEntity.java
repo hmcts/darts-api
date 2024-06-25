@@ -20,6 +20,7 @@ import lombok.Setter;
 import uk.gov.hmcts.darts.audio.entity.MediaRequestEntity;
 import uk.gov.hmcts.darts.audio.enums.AudioRequestOutputFormat;
 import uk.gov.hmcts.darts.common.entity.base.CreatedModifiedBaseEntity;
+import uk.gov.hmcts.darts.common.enums.SecurityGroupEnum;
 
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
@@ -70,4 +71,7 @@ public class TransformedMediaEntity extends CreatedModifiedBaseEntity {
     @OneToMany(fetch = FetchType.LAZY, mappedBy = TransientObjectDirectoryEntity_.TRANSFORMED_MEDIA)
     private List<TransientObjectDirectoryEntity> transientObjectDirectoryEntities = new ArrayList<>();
 
+    public boolean isOwnerInSecurityGroup(SecurityGroupEnum securityGroupEnum) {
+        return mediaRequest.getCurrentOwner().isInGroup(securityGroupEnum);
+    }
 }

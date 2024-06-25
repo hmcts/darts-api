@@ -18,6 +18,7 @@ import org.hibernate.envers.AuditTable;
 import org.hibernate.envers.Audited;
 import org.hibernate.envers.NotAudited;
 import uk.gov.hmcts.darts.common.entity.base.CreatedModifiedBaseEntity;
+import uk.gov.hmcts.darts.common.enums.SecurityGroupEnum;
 
 import java.time.OffsetDateTime;
 import java.util.LinkedHashSet;
@@ -84,4 +85,8 @@ public class UserAccountEntity extends CreatedModifiedBaseEntity {
         return active;
     }
 
+    public boolean isInGroup(SecurityGroupEnum securityGroupEnum) {
+        return this.getSecurityGroupEntities().stream()
+            .anyMatch(group -> group.getGroupName().equalsIgnoreCase(securityGroupEnum.name()));
+    }
 }

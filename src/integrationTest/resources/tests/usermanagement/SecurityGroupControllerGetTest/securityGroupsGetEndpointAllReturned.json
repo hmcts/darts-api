@@ -118,5 +118,14 @@
     "courthouse_ids": [],
     "name": "DARTS",
     "display_name": "DARTS"
+  },
+  {
+    "user_ids":[],
+    "id": 4,
+    "security_role_id": 14,
+    "global_access": true,
+    "display_state": true,
+    "courthouse_ids": [],
+    "name": "MEDIA_IN_PERPETUITY"
   }
 ]

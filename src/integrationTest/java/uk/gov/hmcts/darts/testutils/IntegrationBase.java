@@ -27,6 +27,8 @@ public class IntegrationBase {
     }
 
     @Autowired
+    protected OpenInViewUtil openInViewUtil;
+    @Autowired
     protected DartsDatabaseStub dartsDatabase;
     @Autowired
     protected ObjectMapper objectMapper;
