@@ -90,6 +90,7 @@ public class AuthorisationStub {
         mediaRequestEntity.setRequestType(DOWNLOAD);
         mediaRequestEntity.setStartTime(YESTERDAY);
         mediaRequestEntity.setEndTime(YESTERDAY.plusHours(1));
+
         dartsDatabaseStub.save(mediaRequestEntity);
 
         transformedMediaEntity = dartsDatabaseStub.getTransformedMediaStub().createTransformedMediaEntity(mediaRequestEntity);

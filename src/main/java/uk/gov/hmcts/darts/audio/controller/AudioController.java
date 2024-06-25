@@ -33,6 +33,7 @@ import uk.gov.hmcts.darts.authorisation.annotation.Authorisation;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
 
+import java.time.OffsetDateTime;
 import java.util.List;
 
 import static uk.gov.hmcts.darts.audio.enums.AudioPreviewStatus.FAILED;
@@ -127,8 +128,10 @@ public class AudioController implements AudioApi {
     @Override
     @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
     @Authorisation(contextId = ANY_ENTITY_ID, globalAccessSecurityRoles = {SUPER_USER, SUPER_ADMIN})
-    public ResponseEntity<List<AdminMediaSearchResponseItem>> getAdminMedias(Integer transformedMediaId) {
-        List<AdminMediaSearchResponseItem> response = mediaRequestService.adminMediaSearch(transformedMediaId);
+    public ResponseEntity<List<AdminMediaSearchResponseItem>> getAdminMedias(Integer transformedMediaId, List<Integer> hearingIds, OffsetDateTime startAt,
+                                                                             OffsetDateTime endAt) {
+
+        List<AdminMediaSearchResponseItem> response = adminMediaService.filterMedias(transformedMediaId, hearingIds, startAt, endAt);
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
