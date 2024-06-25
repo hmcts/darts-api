@@ -188,7 +188,33 @@ paths:
             application/json+problem:
               schema:
                 $ref: './problem.yaml'
-
+  /admin/hearings/search:
+    post:
+      tags:
+        - Hearings
+      summary: |-
+        Search for hearings
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/HearingsSearchRequest'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/HearingsSearchResponse'
+        '400':
+          description: Bad Request Error
+        '401':
+          description: Unauthorised Error
+        '403':
+          description: Forbidden Error
 
 components:
   schemas:
@@ -253,7 +279,66 @@ components:
           type: string
           example: Record:New Case
 
-
+    HearingsSearchRequest:
+      type: object
+      properties:
+        courthouse_ids:
+          type: array
+          items:
+            type: integer
+        case_number:
+          type: string
+          example: C123
+        courtroom_name:
+          type: string
+          example: some_courthouse
+        hearing_start_at:
+          type: string
+          format: date
+          example: '2023-07-31'
+        hearing_end_at:
+          type: string
+          format: date
+          example: '2023-07-31'
+    HearingsSearchResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+        hearing_date:
+          type: string
+          format: date
+          example: '2023-07-31'
+        case:
+          type: object
+          description: 'The case related details'
+          properties:
+            id:
+              type: integer
+              description: 'The case id'
+            case_number:
+              type: string
+              description: 'The case number'
+        courthouse:
+          type: object
+          description: 'The courthouse related details'
+          properties:
+            id:
+              type: integer
+              description: 'The court house id'
+            display_name:
+              type: string
+              description: 'The court house display name'
+        courtroom:
+          type: object
+          description: 'The courtroom related details'
+          properties:
+            id:
+              type: integer
+              description: 'The court room id'
+            name:
+              type: string
+              description: 'The court room display name'
     HearingAuthorisation403ErrorCode:
       type: string
       enum:
@@ -342,10 +427,12 @@ components:
       type: string
       enum:
         - "HEARING_100"
-      x-enum-varnames: [HEARING_NOT_FOUND]
+        - "HEARING_101"
+      x-enum-varnames: [HEARING_NOT_FOUND, TOO_MANY_RESULTS]
 
     HearingsTitleErrors:
       type: string
       enum:
         - "The requested hearing cannot be found"
-      x-enum-varnames: [HEARING_NOT_FOUND]
+        - "Too many results have been returned. Please change search criteria."
+      x-enum-varnames: [HEARING_NOT_FOUND, TOO_MANY_RESULTS]

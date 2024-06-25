@@ -3,6 +3,7 @@ package uk.gov.hmcts.darts.hearings.exception;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import uk.gov.hmcts.darts.cases.model.CaseTitleErrors;
 import uk.gov.hmcts.darts.common.exception.DartsApiError;
 import uk.gov.hmcts.darts.hearings.model.HearingsErrorCode;
 import uk.gov.hmcts.darts.hearings.model.HearingsTitleErrors;
@@ -10,11 +11,16 @@ import uk.gov.hmcts.darts.hearings.model.HearingsTitleErrors;
 @Getter
 @RequiredArgsConstructor
 public enum HearingApiError implements DartsApiError {
-
     HEARING_NOT_FOUND(
         HearingsErrorCode.HEARING_NOT_FOUND.getValue(),
         HttpStatus.NOT_FOUND,
         HearingsTitleErrors.HEARING_NOT_FOUND.toString()
+    ),
+    TOO_MANY_RESULTS(
+        HearingsErrorCode.TOO_MANY_RESULTS.getValue(),
+        HttpStatus.BAD_REQUEST,
+        CaseTitleErrors.TOO_MANY_RESULTS.toString()
+
     );
 
     private static final String ERROR_TYPE_PREFIX = "HEARING";

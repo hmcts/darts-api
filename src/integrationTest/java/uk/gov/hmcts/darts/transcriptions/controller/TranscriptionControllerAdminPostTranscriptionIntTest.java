@@ -489,4 +489,5 @@ class TranscriptionControllerAdminPostTranscriptionIntTest extends IntegrationBa
         Problem problemResponse = objectMapper.readValue(content, Problem.class);
         assertEquals(TranscriptionApiError.TRANSCRIPTION_DOCUMENT_SHOW_ACTION_PAYLOAD_INCORRECT_USAGE.getType(), problemResponse.getType());
     }
+
 }
