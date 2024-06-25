@@ -1,20 +1,17 @@
 package uk.gov.hmcts.darts.audio.service.impl;
 
 import lombok.RequiredArgsConstructor;
-import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.darts.audio.entity.MediaRequestEntity;
 import uk.gov.hmcts.darts.audio.exception.AudioApiError;
+import uk.gov.hmcts.darts.audio.helper.PostAdminMediasSearchHelper;
 import uk.gov.hmcts.darts.audio.mapper.AdminMediaMapper;
-import uk.gov.hmcts.darts.audio.mapper.AdminMediaSearchResponseMapper;
+import uk.gov.hmcts.darts.audio.mapper.PostAdminMediaSearchResponseMapper;
 import uk.gov.hmcts.darts.audio.model.AdminMediaResponse;
-import uk.gov.hmcts.darts.audio.model.AdminMediaSearchResponseItem;
-import uk.gov.hmcts.darts.audio.model.MediaSearchData;
+import uk.gov.hmcts.darts.audio.model.PostAdminMediasSearchRequest;
+import uk.gov.hmcts.darts.audio.model.PostAdminMediasSearchResponseItem;
 import uk.gov.hmcts.darts.audio.service.AdminMediaService;
-import uk.gov.hmcts.darts.audio.validation.SearchMediaValidator;
-import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
-import uk.gov.hmcts.darts.common.entity.TransformedMediaEntity;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.common.repository.MediaRepository;
 import uk.gov.hmcts.darts.common.repository.TransformedMediaRepository;
@@ -30,6 +27,10 @@ public class AdminMediaServiceImpl implements AdminMediaService {
 
     private final MediaRepository mediaRepository;
     private final AdminMediaMapper adminMediaMapper;
+    private final PostAdminMediasSearchHelper postAdminMediasSearchHelper;
+
+    @Value("${darts.audio.admin-search.max-results}")
+    private Integer adminSearchMaxResults;
     private final SearchMediaValidator searchMediaValidator;
     private final TransformedMediaRepository transformedMediaRepository;
 
@@ -41,7 +42,16 @@ public class AdminMediaServiceImpl implements AdminMediaService {
     }
 
     @Override
-    public List<AdminMediaSearchResponseItem> filterMedias(Integer transformedMediaId, List<Integer> hearingIds, OffsetDateTime startAt,
+    public List<PostAdminMediasSearchResponseItem> performAdminMediasSearchPost(PostAdminMediasSearchRequest adminMediasSearchRequest) {
+        List<MediaEntity> matchingMedia = postAdminMediasSearchHelper.getMatchingMedia(adminMediasSearchRequest);
+        if (matchingMedia.size() > adminSearchMaxResults) {
+            throw new DartsApiException(AudioApiError.TOO_MANY_RESULTS);
+        }
+        return PostAdminMediaSearchResponseMapper.createResponseItemList(matchingMedia);
+    }
+}
+    @Override
+    public List<GetAdminMediaSearchResponseItem> filterMedias(Integer transformedMediaId, List<Integer> hearingIds, OffsetDateTime startAt,
                                                                OffsetDateTime endAt) {
         MediaSearchData searchData = new MediaSearchData(transformedMediaId, hearingIds, startAt, endAt);
         searchMediaValidator.validate(searchData);

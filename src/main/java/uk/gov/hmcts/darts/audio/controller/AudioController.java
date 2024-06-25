@@ -131,10 +131,12 @@ public class AudioController implements AudioApi {
     @Override
     @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
     @Authorisation(contextId = ANY_ENTITY_ID, globalAccessSecurityRoles = {SUPER_USER, SUPER_ADMIN})
-    public ResponseEntity<List<GetAdminMediaResponseItem>> getAdminMedias(Integer transformedMediaId) {
+    public ResponseEntity<List<GetAdminMediaResponseItem>> getAdminMedias(Integer transformedMediaId, List<Integer> hearingIds, OffsetDateTime startAt,
+                                                                          OffsetDateTime endAt) {
         List<GetAdminMediaResponseItem> response = mediaRequestService.adminMediaTransformedMediaSearch(transformedMediaId);
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
+
 
     @Override
     @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
@@ -155,6 +157,6 @@ public class AudioController implements AudioApi {
     @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
     @Authorisation(contextId = ANY_ENTITY_ID, globalAccessSecurityRoles = {SUPER_USER, SUPER_ADMIN})
     public ResponseEntity<List<PostAdminMediasSearchResponseItem>> adminMediasSearchPost(PostAdminMediasSearchRequest adminMediasSearchRequest) {
-        return AudioApi.super.adminMediasSearchPost(adminMediasSearchRequest);
+        return new ResponseEntity<>(adminMediaService.performAdminMediasSearchPost(adminMediasSearchRequest), HttpStatus.OK);
     }
 }

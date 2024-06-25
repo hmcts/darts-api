@@ -15,6 +15,10 @@ public class CourtroomStub {
 
     public CourtroomEntity createCourtroomUnlessExists(String courthouseName, String courtroomName, UserAccountEntity userAccount) {
         CourthouseEntity courthouse = courthouseStub.createCourthouseUnlessExists(courthouseName);
+        return createCourtroomUnlessExists(courthouse, courtroomName, userAccount);
+    }
+
+    public CourtroomEntity createCourtroomUnlessExists(CourthouseEntity courthouse, String courtroomName, UserAccountEntity userAccount) {
         return retrieveCoreObjectService.retrieveOrCreateCourtroom(courthouse, courtroomName, userAccount);
     }
 
