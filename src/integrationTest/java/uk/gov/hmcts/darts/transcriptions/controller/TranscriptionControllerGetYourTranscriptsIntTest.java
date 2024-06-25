@@ -205,4 +205,50 @@ class TranscriptionControllerGetYourTranscriptsIntTest extends IntegrationBase {
             .andExpect(jsonPath("$.approver_transcriptions[0].requested_ts").isString());
     }
 
+    @Test
+    void getYourTranscriptsRequesterShouldNotReturnHidden() throws Exception {
+        var courtCase = authorisationStub.getCourtCaseEntity();
+        var hearing = authorisationStub.getHearingEntity();
+        // create a second transcription with a non-hidden document - should be returned
+        TranscriptionEntity nonHiddenTranscription = transcriptionStub.createAndSaveCompletedTranscriptionWithDocument(
+            authorisationStub.getTestUser(), courtCase, hearing, YESTERDAY, false);
+        // and one with a hidden document - should not be returned
+        transcriptionStub.createAndSaveCompletedTranscriptionWithDocument(authorisationStub.getTestUser(), courtCase, hearing, YESTERDAY, true);
+
+        MockHttpServletRequestBuilder requestBuilder = get(ENDPOINT_URI).header("user_id", testUser.getId());
+
+        mockMvc.perform(requestBuilder)
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.requester_transcriptions", hasSize(2)))
+            .andExpect(jsonPath("$.requester_transcriptions[0].transcription_id", is(nonHiddenTranscription.getId())))
+            .andExpect(jsonPath("$.requester_transcriptions[1].transcription_id", is(transcriptionEntity.getId())))
+            .andExpect(jsonPath("$.approver_transcriptions").isEmpty());
+    }
+
+    @Test
+    void getYourTranscriptsApproverShouldNotReturnHidden() throws Exception {
+        var courtCase = authorisationStub.getCourtCaseEntity();
+        TranscriptionEntity systemUserTranscription =  dartsDatabase.getTranscriptionStub()
+            .createAndSaveAwaitingAuthorisationTranscription(
+                systemUser,
+                courtCase,
+                authorisationStub.getHearingEntity(), now(UTC)
+            );
+        // an "approver" transcription that has a hidden document should not be returned
+        TranscriptionEntity systemUserTranscriptionWithHiddenDoc = dartsDatabase.getTranscriptionStub()
+            .createAndSaveAwaitingAuthorisationTranscription(
+                systemUser,
+                courtCase,
+                authorisationStub.getHearingEntity(), now(UTC)
+            );
+        dartsDatabase.getTranscriptionStub().updateTranscriptionWithDocument(systemUserTranscriptionWithHiddenDoc, systemUser, true);
+
+        MockHttpServletRequestBuilder requestBuilder = get(ENDPOINT_URI).header("user_id", testUser.getId());
+
+        mockMvc.perform(requestBuilder)
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.approver_transcriptions", hasSize(1)))
+            .andExpect(jsonPath("$.approver_transcriptions[0].transcription_id", is(systemUserTranscription.getId())));
+    }
+
 }

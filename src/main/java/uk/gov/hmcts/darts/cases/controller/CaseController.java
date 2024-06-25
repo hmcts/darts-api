@@ -37,7 +37,7 @@ import static uk.gov.hmcts.darts.authorisation.enums.ContextIdEnum.ANY_ENTITY_ID
 import static uk.gov.hmcts.darts.authorisation.enums.ContextIdEnum.CASE_ID;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.APPROVER;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.DAR_PC;
-import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.JUDGE;
+import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.JUDICIARY;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.MID_TIER;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.RCJ_APPEALS;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.REQUESTER;
@@ -119,8 +119,8 @@ public class CaseController implements CasesApi {
     @Override
     @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
     @Authorisation(contextId = CASE_ID,
-        securityRoles = {JUDGE, REQUESTER, APPROVER, TRANSCRIBER, TRANSLATION_QA},
-        globalAccessSecurityRoles = {JUDGE, SUPER_ADMIN, SUPER_USER, RCJ_APPEALS, TRANSLATION_QA})
+        securityRoles = {JUDICIARY, REQUESTER, APPROVER, TRANSCRIBER, TRANSLATION_QA},
+        globalAccessSecurityRoles = {JUDICIARY, SUPER_ADMIN, SUPER_USER, RCJ_APPEALS, TRANSLATION_QA})
     public ResponseEntity<List<Hearing>> casesCaseIdHearingsGet(Integer caseId) {
 
         return new ResponseEntity<>(caseService.getCaseHearings(caseId), HttpStatus.OK);
@@ -129,8 +129,8 @@ public class CaseController implements CasesApi {
     @Override
     @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
     @Authorisation(contextId = CASE_ID,
-        securityRoles = {JUDGE, REQUESTER, APPROVER, TRANSCRIBER, TRANSLATION_QA},
-        globalAccessSecurityRoles = {JUDGE, SUPER_ADMIN, SUPER_USER, RCJ_APPEALS, TRANSLATION_QA})
+        securityRoles = {JUDICIARY, REQUESTER, APPROVER, TRANSCRIBER, TRANSLATION_QA},
+        globalAccessSecurityRoles = {JUDICIARY, SUPER_ADMIN, SUPER_USER, RCJ_APPEALS, TRANSLATION_QA})
     public ResponseEntity<SingleCase> casesCaseIdGet(Integer caseId) {
 
         return new ResponseEntity<>(caseService.getCasesById(caseId), HttpStatus.OK);
@@ -140,8 +140,8 @@ public class CaseController implements CasesApi {
     @Override
     @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
     @Authorisation(contextId = CASE_ID,
-        securityRoles = {JUDGE, REQUESTER, APPROVER, TRANSCRIBER},
-        globalAccessSecurityRoles = {JUDGE, SUPER_ADMIN, SUPER_USER, RCJ_APPEALS})
+        securityRoles = {JUDICIARY, REQUESTER, APPROVER, TRANSCRIBER},
+        globalAccessSecurityRoles = {JUDICIARY, SUPER_ADMIN, SUPER_USER, RCJ_APPEALS})
     public ResponseEntity<List<Transcript>> casesCaseIdTranscriptsGet(Integer caseId) {
         return new ResponseEntity<>(caseService.getTranscriptsByCaseId(caseId), HttpStatus.OK);
     }
@@ -149,8 +149,8 @@ public class CaseController implements CasesApi {
     @Override
     @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
     @Authorisation(contextId = CASE_ID,
-        securityRoles = {JUDGE},
-        globalAccessSecurityRoles = {JUDGE, SUPER_ADMIN})
+        securityRoles = {JUDICIARY},
+        globalAccessSecurityRoles = {JUDICIARY, SUPER_ADMIN})
     public ResponseEntity<List<Annotation>> getYourAnnotationsByCaseId(Integer caseId) {
         return new ResponseEntity<>(caseService.getAnnotations(caseId), HttpStatus.OK);
     }
