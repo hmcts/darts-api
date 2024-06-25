@@ -3,7 +3,6 @@ package uk.gov.hmcts.darts.hearings.exception;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
-import uk.gov.hmcts.darts.cases.model.CaseTitleErrors;
 import uk.gov.hmcts.darts.common.exception.DartsApiError;
 import uk.gov.hmcts.darts.hearings.model.HearingsErrorCode;
 import uk.gov.hmcts.darts.hearings.model.HearingsTitleErrors;
