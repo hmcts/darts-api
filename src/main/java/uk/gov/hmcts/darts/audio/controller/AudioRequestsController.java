@@ -39,6 +39,7 @@ import static uk.gov.hmcts.darts.authorisation.enums.ContextIdEnum.DOWNLOAD_HEAR
 import static uk.gov.hmcts.darts.authorisation.enums.ContextIdEnum.MEDIA_REQUEST_ID;
 import static uk.gov.hmcts.darts.authorisation.enums.ContextIdEnum.TRANSFORMED_MEDIA_ID;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.APPROVER;
+import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.DARTS;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.JUDICIARY;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.RCJ_APPEALS;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.REQUESTER;
@@ -69,7 +70,7 @@ public class AudioRequestsController implements AudioRequestsApi {
     @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
     @Authorisation(contextId = MEDIA_REQUEST_ID,
         securityRoles = {JUDICIARY, REQUESTER, APPROVER, TRANSCRIBER, TRANSLATION_QA},
-        globalAccessSecurityRoles = {JUDICIARY, SUPER_ADMIN, SUPER_USER, RCJ_APPEALS, TRANSLATION_QA})
+        globalAccessSecurityRoles = {JUDICIARY, SUPER_ADMIN, SUPER_USER, RCJ_APPEALS, TRANSLATION_QA, DARTS})
     public ResponseEntity<Void> deleteAudioRequest(Integer mediaRequestId) {
         mediaRequestService.deleteAudioRequest(mediaRequestId);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
@@ -79,7 +80,7 @@ public class AudioRequestsController implements AudioRequestsApi {
     @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
     @Authorisation(contextId = TRANSFORMED_MEDIA_ID,
         securityRoles = {TRANSCRIBER},
-        globalAccessSecurityRoles = {SUPER_ADMIN, SUPER_USER})
+        globalAccessSecurityRoles = {SUPER_ADMIN, SUPER_USER, DARTS})
     public ResponseEntity<Resource> download(Integer transformedMediaId) {
         InputStream audioFileStream = mediaRequestService.download(transformedMediaId);
 
@@ -93,7 +94,7 @@ public class AudioRequestsController implements AudioRequestsApi {
     @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
     @Authorisation(bodyAuthorisation = true, contextId = DOWNLOAD_HEARING_ID_TRANSCRIBER,
         securityRoles = {JUDICIARY, REQUESTER, APPROVER, TRANSCRIBER, TRANSLATION_QA},
-        globalAccessSecurityRoles = {JUDICIARY, SUPER_ADMIN, SUPER_USER, RCJ_APPEALS, TRANSLATION_QA})
+        globalAccessSecurityRoles = {JUDICIARY, SUPER_ADMIN, SUPER_USER, RCJ_APPEALS, TRANSLATION_QA, DARTS})
     public ResponseEntity<AddAudioResponse> addAudioRequest(AudioRequestDetails audioRequestDetails) {
         if (mediaRequestService.isUserDuplicateAudioRequest(audioRequestDetails)) {
             throw new DartsApiException(AudioRequestsApiError.DUPLICATE_MEDIA_REQUEST);
@@ -113,7 +114,7 @@ public class AudioRequestsController implements AudioRequestsApi {
     @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
     @Authorisation(bodyAuthorisation = true, contextId = DOWNLOAD_HEARING_ID_TRANSCRIBER,
         securityRoles = {JUDICIARY, REQUESTER, APPROVER, TRANSCRIBER, TRANSLATION_QA},
-        globalAccessSecurityRoles = {JUDICIARY, SUPER_ADMIN, SUPER_USER, RCJ_APPEALS, TRANSLATION_QA})
+        globalAccessSecurityRoles = {JUDICIARY, SUPER_ADMIN, SUPER_USER, RCJ_APPEALS, TRANSLATION_QA, DARTS})
     public ResponseEntity<AddAudioResponse> addAudioRequestPlayback(AudioRequestDetails audioRequestDetails) {
         audioRequestDetails.setRequestType(AudioRequestType.PLAYBACK);
         return addAudioRequest(audioRequestDetails);
@@ -123,7 +124,7 @@ public class AudioRequestsController implements AudioRequestsApi {
     @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
     @Authorisation(bodyAuthorisation = true, contextId = DOWNLOAD_HEARING_ID_TRANSCRIBER,
         securityRoles = {TRANSCRIBER},
-        globalAccessSecurityRoles = {SUPER_ADMIN, SUPER_USER})
+        globalAccessSecurityRoles = {SUPER_ADMIN, SUPER_USER, DARTS})
     public ResponseEntity<AddAudioResponse> addAudioRequestDownload(AudioRequestDetails audioRequestDetails) {
         audioRequestDetails.setRequestType(AudioRequestType.DOWNLOAD);
         return addAudioRequest(audioRequestDetails);
@@ -134,7 +135,7 @@ public class AudioRequestsController implements AudioRequestsApi {
     @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
     @Authorisation(contextId = TRANSFORMED_MEDIA_ID,
         securityRoles = {JUDICIARY, REQUESTER, APPROVER, TRANSCRIBER, TRANSLATION_QA},
-        globalAccessSecurityRoles = {JUDICIARY, SUPER_ADMIN, SUPER_USER, RCJ_APPEALS, TRANSLATION_QA})
+        globalAccessSecurityRoles = {JUDICIARY, SUPER_ADMIN, SUPER_USER, RCJ_APPEALS, TRANSLATION_QA, DARTS})
     public ResponseEntity<byte[]> playback(Integer transformedMediaId, String httpRangeList) {
         InputStream audioFileStream = mediaRequestService.playback(transformedMediaId);
 
@@ -145,7 +146,7 @@ public class AudioRequestsController implements AudioRequestsApi {
     @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
     @Authorisation(contextId = TRANSFORMED_MEDIA_ID,
         securityRoles = {JUDICIARY, REQUESTER, APPROVER, TRANSCRIBER, TRANSLATION_QA},
-        globalAccessSecurityRoles = {JUDICIARY, SUPER_ADMIN, SUPER_USER, RCJ_APPEALS, TRANSLATION_QA})
+        globalAccessSecurityRoles = {JUDICIARY, SUPER_ADMIN, SUPER_USER, RCJ_APPEALS, TRANSLATION_QA, DARTS})
     public ResponseEntity<Void> updateTransformedMediaLastAccessedTimestamp(Integer transformedMediaId) {
         mediaRequestService.updateTransformedMediaLastAccessedTimestamp(transformedMediaId);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
@@ -155,7 +156,7 @@ public class AudioRequestsController implements AudioRequestsApi {
     @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
     @Authorisation(contextId = TRANSFORMED_MEDIA_ID,
         securityRoles = {JUDICIARY, REQUESTER, APPROVER, TRANSCRIBER, TRANSLATION_QA},
-        globalAccessSecurityRoles = {JUDICIARY, SUPER_ADMIN, SUPER_USER, RCJ_APPEALS, TRANSLATION_QA})
+        globalAccessSecurityRoles = {JUDICIARY, SUPER_ADMIN, SUPER_USER, RCJ_APPEALS, TRANSLATION_QA, DARTS})
     public ResponseEntity<Void> deleteTransformedMedia(Integer transformedMediaId) {
         mediaRequestService.deleteTransformedMedia(transformedMediaId);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);

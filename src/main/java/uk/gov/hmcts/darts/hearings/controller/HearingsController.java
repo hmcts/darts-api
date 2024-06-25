@@ -19,6 +19,7 @@ import java.util.List;
 import static uk.gov.hmcts.darts.authorisation.constants.AuthorisationConstants.SECURITY_SCHEMES_BEARER_AUTH;
 import static uk.gov.hmcts.darts.authorisation.enums.ContextIdEnum.HEARING_ID;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.APPROVER;
+import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.DARTS;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.JUDICIARY;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.RCJ_APPEALS;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.REQUESTER;
@@ -37,7 +38,7 @@ public class HearingsController implements HearingsApi {
     @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
     @Authorisation(contextId = HEARING_ID,
         securityRoles = {JUDICIARY, REQUESTER, APPROVER, TRANSCRIBER, TRANSLATION_QA},
-        globalAccessSecurityRoles = {JUDICIARY, SUPER_ADMIN, SUPER_USER, RCJ_APPEALS, TRANSLATION_QA})
+        globalAccessSecurityRoles = {JUDICIARY, SUPER_ADMIN, SUPER_USER, RCJ_APPEALS, TRANSLATION_QA, DARTS})
     @Override
     public ResponseEntity<GetHearingResponse> getHearing(Integer hearingId) {
         return new ResponseEntity<>(hearingsService.getHearings(hearingId), HttpStatus.OK);
@@ -46,7 +47,7 @@ public class HearingsController implements HearingsApi {
     @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
     @Authorisation(contextId = HEARING_ID,
         securityRoles = {JUDICIARY, REQUESTER, APPROVER, TRANSCRIBER, TRANSLATION_QA},
-        globalAccessSecurityRoles = {JUDICIARY, SUPER_ADMIN, SUPER_USER, RCJ_APPEALS, TRANSLATION_QA})
+        globalAccessSecurityRoles = {JUDICIARY, SUPER_ADMIN, SUPER_USER, RCJ_APPEALS, TRANSLATION_QA, DARTS})
     @Override
     public ResponseEntity<List<EventResponse>> getEvents(Integer hearingId) {
         return new ResponseEntity<>(hearingsService.getEvents(hearingId), HttpStatus.OK);
@@ -56,7 +57,7 @@ public class HearingsController implements HearingsApi {
     @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
     @Authorisation(contextId = HEARING_ID,
         securityRoles = {JUDICIARY, REQUESTER, APPROVER, TRANSCRIBER, RCJ_APPEALS},
-        globalAccessSecurityRoles = {JUDICIARY, SUPER_ADMIN, SUPER_USER, RCJ_APPEALS})
+        globalAccessSecurityRoles = {JUDICIARY, SUPER_ADMIN, SUPER_USER, RCJ_APPEALS, DARTS})
     public ResponseEntity<List<Transcript>> hearingsHearingIdTranscriptsGet(Integer hearingId) {
         return new ResponseEntity<>(hearingsService.getTranscriptsByHearingId(hearingId), HttpStatus.OK);
     }
@@ -65,7 +66,7 @@ public class HearingsController implements HearingsApi {
     @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
     @Authorisation(contextId = HEARING_ID,
         securityRoles = {JUDICIARY},
-        globalAccessSecurityRoles = {JUDICIARY, SUPER_ADMIN})
+        globalAccessSecurityRoles = {JUDICIARY, SUPER_ADMIN, DARTS})
     public ResponseEntity<List<Annotation>> getHearingAnnotations(Integer hearingId) {
         return new ResponseEntity<>(hearingsService.getAnnotationsByHearingId(hearingId), HttpStatus.OK);
     }

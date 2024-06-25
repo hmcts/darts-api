@@ -52,6 +52,7 @@ import static uk.gov.hmcts.darts.authorisation.constants.AuthorisationConstants.
 import static uk.gov.hmcts.darts.authorisation.enums.ContextIdEnum.ANY_ENTITY_ID;
 import static uk.gov.hmcts.darts.authorisation.enums.ContextIdEnum.TRANSCRIPTION_ID;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.APPROVER;
+import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.DARTS;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.JUDICIARY;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.RCJ_APPEALS;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.REQUESTER;
@@ -84,7 +85,7 @@ public class TranscriptionController implements TranscriptionApi {
     @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
     @Authorisation(bodyAuthorisation = true, contextId = ANY_ENTITY_ID,
         securityRoles = {JUDICIARY, REQUESTER, APPROVER},
-        globalAccessSecurityRoles = {JUDICIARY, SUPER_ADMIN, SUPER_USER})
+        globalAccessSecurityRoles = {JUDICIARY, SUPER_ADMIN, SUPER_USER, DARTS})
     public ResponseEntity<RequestTranscriptionResponse> requestTranscription(TranscriptionRequestDetails transcriptionRequestDetails) {
         transcriptionRequestDetailsValidator.validate(transcriptionRequestDetails);
 
@@ -101,7 +102,7 @@ public class TranscriptionController implements TranscriptionApi {
     @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
     @Authorisation(contextId = TRANSCRIPTION_ID,
         securityRoles = {APPROVER, TRANSCRIBER},
-        globalAccessSecurityRoles = {SUPER_ADMIN, SUPER_USER})
+        globalAccessSecurityRoles = {SUPER_ADMIN, SUPER_USER, DARTS})
     public ResponseEntity<UpdateTranscriptionResponse> updateTranscription(Integer transcriptionId,
                                                                            UpdateTranscriptionRequest updateTranscription) {
 
@@ -180,7 +181,7 @@ public class TranscriptionController implements TranscriptionApi {
     @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
     @Authorisation(contextId = TRANSCRIPTION_ID,
         securityRoles = {JUDICIARY, APPROVER, REQUESTER, TRANSCRIBER},
-        globalAccessSecurityRoles = {JUDICIARY, SUPER_ADMIN, SUPER_USER, RCJ_APPEALS})
+        globalAccessSecurityRoles = {JUDICIARY, SUPER_ADMIN, SUPER_USER, RCJ_APPEALS, DARTS})
     public ResponseEntity<GetTranscriptionByIdResponse> getTranscription(Integer transcriptionId) {
         return new ResponseEntity<>(
             transcriptionService.getTranscription(transcriptionId),
