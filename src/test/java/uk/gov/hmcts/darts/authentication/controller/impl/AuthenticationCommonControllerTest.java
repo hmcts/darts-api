@@ -17,6 +17,7 @@ import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.APPROVER;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.REQUESTER;
@@ -53,6 +54,7 @@ class AuthenticationCommonControllerTest {
             .userId(123)
             .userName("UserName")
             .roles(newRoles)
+            .isActive(true)
             .build();
         when(authorisationApi.getAuthorisation(userAccountEntity.getEmailAddress())).thenReturn(Optional.of(userState));
 
@@ -61,5 +63,6 @@ class AuthenticationCommonControllerTest {
 
         assertNotNull(userStateResponse);
         assertEquals("UserName", userStateResponse.getUserName());
+        assertTrue(userStateResponse.getIsActive());
     }
 }

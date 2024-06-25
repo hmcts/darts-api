@@ -42,6 +42,17 @@ public class SuperAdminUserStub {
         return user;
     }
 
+    public UserAccountEntity givenUserIsAuthorisedButInactive(UserIdentity userIdentity) {
+        var user = userAccountStub.createSuperAdminUserInactive();
+
+        Mockito.when(userIdentity.getUserAccount())
+            .thenReturn(user);
+        Mockito.when(userIdentity.userHasGlobalAccess(any()))
+            .thenReturn(true);
+
+        return user;
+    }
+
     public UserAccountEntity givenSystemAdminIsAuthorised(UserIdentity userIdentity) {
         var user = userAccountStub.createSuperAdminUser();
 

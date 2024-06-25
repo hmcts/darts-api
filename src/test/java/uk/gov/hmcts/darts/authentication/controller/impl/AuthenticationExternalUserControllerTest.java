@@ -92,6 +92,7 @@ class AuthenticationExternalUserControllerTest {
         when(authorisationApi.getAuthorisation(anyString())).thenReturn(
             Optional.ofNullable(UserState.builder()
                                     .userId(-1)
+                                    .isActive(true)
                                     .userName("Test User")
                                     .roles(Set.of(UserStateRole.builder()
                                                       .roleId(TRANSCRIBER.getId())

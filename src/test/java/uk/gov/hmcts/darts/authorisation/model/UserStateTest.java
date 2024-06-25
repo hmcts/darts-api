@@ -31,6 +31,7 @@ class UserStateTest {
             .userId(123)
             .userName("UserName")
             .roles(newRoles)
+            .isActive(true)
             .build();
 
         assertEquals(123, userState.getUserId());

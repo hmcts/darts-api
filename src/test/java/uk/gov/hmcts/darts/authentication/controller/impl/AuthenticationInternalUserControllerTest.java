@@ -90,6 +90,7 @@ class AuthenticationInternalUserControllerTest {
             Optional.ofNullable(UserState.builder()
                                     .userId(-1)
                                     .userName("Test User")
+                                    .isActive(true)
                                     .roles(Set.of(UserStateRole.builder()
                                                       .roleId(TRANSCRIBER.getId())
                                                       .roleName(TRANSCRIBER.toString())
