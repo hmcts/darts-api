@@ -19,7 +19,7 @@ public enum HearingApiError implements DartsApiError {
     TOO_MANY_RESULTS(
         HearingsErrorCode.TOO_MANY_RESULTS.getValue(),
         HttpStatus.BAD_REQUEST,
-        CaseTitleErrors.TOO_MANY_RESULTS.toString()
+        HearingsTitleErrors.TOO_MANY_RESULTS.toString()
 
     );
 

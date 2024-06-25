@@ -22,7 +22,6 @@ import uk.gov.hmcts.darts.audio.mapper.AdminMediaSearchResponseMapper;
 import uk.gov.hmcts.darts.audio.mapper.GetTransformedMediaDetailsMapper;
 import uk.gov.hmcts.darts.audio.mapper.MediaRequestDetailsMapper;
 import uk.gov.hmcts.darts.audio.mapper.TransformedMediaMapper;
-import uk.gov.hmcts.darts.audio.model.AdminMediaSearchResponseItem;
 import uk.gov.hmcts.darts.audio.model.EnhancedMediaRequestInfo;
 import uk.gov.hmcts.darts.audio.model.MediaHideRequest;
 import uk.gov.hmcts.darts.audio.model.MediaHideResponse;
@@ -76,7 +75,6 @@ import java.io.InputStream;
 import java.time.LocalTime;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -122,7 +120,6 @@ public class MediaRequestServiceImpl implements MediaRequestService {
     private final ObjectAdminActionRepository objectAdminActionRepository;
 
     private final ObjectHiddenReasonRepository objectHiddenReasonRepository;
-
 
     @Override
     public Optional<MediaRequestEntity> getOldestMediaRequestByStatus(MediaRequestStatus status) {
@@ -497,22 +494,6 @@ public class MediaRequestServiceImpl implements MediaRequestService {
         }
 
         return returnResponse;
-    }
-
-    @Override
-    public List<AdminMediaSearchResponseItem> adminMediaSearch(Integer transformedMediaId) {
-        Optional<TransformedMediaEntity> transformedMediaOpt = transformedMediaRepository.findById(transformedMediaId);
-        if (transformedMediaOpt.isEmpty()) {
-            return new ArrayList<>();
-        }
-        TransformedMediaEntity transformedMedia = transformedMediaOpt.get();
-        MediaRequestEntity mediaRequest = transformedMedia.getMediaRequest();
-        HearingEntity hearing = mediaRequest.getHearing();
-        List<MediaEntity> mediaList = mediaRepository.findAllByHearingId(hearing.getId());
-        //filter by media that overlap with request
-        List<MediaEntity> filteredMediaList = mediaList.stream().filter(mediaEntity -> mediaEntity.getStart().isBefore(mediaRequest.getEndTime())
-            && mediaEntity.getEnd().isAfter(mediaRequest.getStartTime())).toList();
-        return AdminMediaSearchResponseMapper.createResponseItemList(filteredMediaList, hearing);
     }
 
     @Override

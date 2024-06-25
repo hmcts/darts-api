@@ -228,7 +228,30 @@ paths:
           schema:
             type: integer
           description: "Return media associated with this transformed_media_id."
-          required: true
+          required: false
+        - in: query
+          name: hearing_ids
+          schema:
+            type: array
+            items:
+              type: integer
+          description: "The hearing ids to search on"
+          required: false
+        - in: query
+          name: start_at
+          schema:
+            type: string
+            format: date-time
+          description: "The start date to search on"
+          required: false
+        - in: query
+          name: end_at
+          schema:
+            type: string
+            format: date-time
+          description: "The end date to search on"
+          required: false
+
       responses:
         '200':
           description: OK
@@ -802,10 +825,12 @@ components:
         - "AUDIO_112"
         - "AUDIO_113"
         - "AUDIO_114"
+        - "AUDIO_115"
       x-enum-varnames: [ FAILED_TO_PROCESS_AUDIO_REQUEST, REQUESTED_DATA_CANNOT_BE_LOCATED, MEDIA_NOT_FOUND, FAILED_TO_UPLOAD_AUDIO_FILE,
                          MISSING_SYSTEM_USER, AUDIO_NOT_PROVIDED, UNEXPECTED_FILE_TYPE, FILE_DURATION_OUT_OF_BOUNDS, FILE_SIZE_OUT_OF_BOUNDS,
                          ADMIN_SEARCH_CRITERIA_NOT_PROVIDED,  MEDIA_ALREADY_HIDDEN, MEDIA_HIDE_ACTION_PAYLOAD_INCORRECT_USAGE,
-                         MEDIA_SHOW_ACTION_PAYLOAD_INCORRECT_USAGE, MEDIA_HIDE_ACTION_REASON_NOT_FOUND, MEDIA_HIDE_ACTION_REASON_MARKED_FOR_DELETION ]
+                         MEDIA_SHOW_ACTION_PAYLOAD_INCORRECT_USAGE, MEDIA_HIDE_ACTION_REASON_NOT_FOUND,
+                         MEDIA_HIDE_ACTION_REASON_MARKED_FOR_DELETION, ADMIN_SEARCH_CRITERIA_NOT_SUITABLE]
 
     AddAudioTitleErrors:
       type: string
@@ -825,8 +850,10 @@ components:
         - "Showing media action payload not correct"
         - "Hide reason is incorrect"
         - "Reason has been marked for deletion"
+        - "transformed_media_id OR one of hearing_id, start_at or end_at must be provided"
       x-enum-varnames: [ FAILED_TO_PROCESS_AUDIO_REQUEST, REQUESTED_DATA_CANNOT_BE_LOCATED,  MEDIA_NOT_FOUND,
                          FAILED_TO_UPLOAD_AUDIO_FILE, MISSING_SYSTEM_USER, AUDIO_NOT_PROVIDED, UNEXPECTED_FILE_TYPE,
                          FILE_DURATION_OUT_OF_BOUNDS, FILE_SIZE_OUT_OF_BOUNDS, ADMIN_SEARCH_CRITERIA_NOT_PROVIDED, MEDIA_ALREADY_HIDDEN,
                          MEDIA_HIDE_ACTION_PAYLOAD_INCORRECT_USAGE, MEDIA_SHOW_ACTION_PAYLOAD_INCORRECT_USAGE,
-                         MEDIA_HIDE_ACTION_REASON_NOT_FOUND, MEDIA_HIDE_ACTION_REASON_MARKED_FOR_DELETION]
+                         MEDIA_HIDE_ACTION_REASON_NOT_FOUND, MEDIA_HIDE_ACTION_REASON_MARKED_FOR_DELETION,
+                         ADMIN_SEARCH_CRITERIA_NOT_SUITABLE]

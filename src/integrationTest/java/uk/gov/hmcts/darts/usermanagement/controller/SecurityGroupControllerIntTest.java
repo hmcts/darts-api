@@ -166,7 +166,7 @@ class SecurityGroupControllerIntTest extends IntegrationBase {
                     "id":-17,
                     "security_role_id":10,
                     "global_access":true,
-                    "display_state":true,
+                    "display_state":false,
                     "courthouse_ids":[%s],
                     "name":"Mid Tier Group"
                   }
@@ -214,7 +214,7 @@ class SecurityGroupControllerIntTest extends IntegrationBase {
                     "id":-17,
                     "security_role_id":10,
                     "global_access":true,
-                    "display_state":true,
+                    "display_state":false,
                     "courthouse_ids":[%s],
                     "name":"Mid Tier Group"
                   }
@@ -243,7 +243,7 @@ class SecurityGroupControllerIntTest extends IntegrationBase {
                       "id":-17,
                       "security_role_id":10,
                       "global_access":true,
-                      "display_state":true,
+                      "display_state":false,
                       "courthouse_ids":[],
                       "name":"Mid Tier Group"
                     },
@@ -252,7 +252,7 @@ class SecurityGroupControllerIntTest extends IntegrationBase {
                       "id":-16,
                       "security_role_id":9,
                       "global_access":true,
-                      "display_state":true,
+                      "display_state":false,
                       "courthouse_ids":[],
                       "name":"Dar Pc Group"
                       },
@@ -261,7 +261,7 @@ class SecurityGroupControllerIntTest extends IntegrationBase {
                         "id":-15,
                         "security_role_id":8,
                         "global_access":true,
-                        "display_state":true,
+                        "display_state":false,
                         "courthouse_ids":[],
                         "name":"Cpp Group"
                       },
@@ -311,7 +311,7 @@ class SecurityGroupControllerIntTest extends IntegrationBase {
                     "id":-17,
                     "security_role_id":10,
                     "global_access":true,
-                    "display_state":true,
+                    "display_state":false,
                     "courthouse_ids":[],
                     "name":"Mid Tier Group"
                     },
@@ -320,7 +320,7 @@ class SecurityGroupControllerIntTest extends IntegrationBase {
                     "id":-16,
                     "security_role_id":9,
                     "global_access":true,
-                    "display_state":true,
+                    "display_state":false,
                     "courthouse_ids":[],
                     "name":"Dar Pc Group"
                     },
@@ -329,7 +329,7 @@ class SecurityGroupControllerIntTest extends IntegrationBase {
                     "id":-15,
                     "security_role_id":8,
                     "global_access":true,
-                    "display_state":true,
+                    "display_state":false,
                     "courthouse_ids":[],
                     "name":"Cpp Group"
                     },
@@ -399,7 +399,7 @@ class SecurityGroupControllerIntTest extends IntegrationBase {
                           "id":-17,
                           "security_role_id":10,
                           "global_access":true,
-                          "display_state":true,
+                          "display_state":false,
                           "courthouse_ids":[],
                           "name":"Mid Tier Group"
                       },
@@ -408,7 +408,7 @@ class SecurityGroupControllerIntTest extends IntegrationBase {
                           "id":-16,
                           "security_role_id":9,
                           "global_access":true,
-                          "display_state":true,
+                          "display_state":false,
                           "courthouse_ids":[],
                           "name":"Dar Pc Group"
                       },
@@ -417,7 +417,7 @@ class SecurityGroupControllerIntTest extends IntegrationBase {
                           "id":-15,
                           "security_role_id":8,
                           "global_access":true,
-                          "display_state":true,
+                          "display_state":false,
                           "courthouse_ids":[],
                           "name":"Cpp Group"
                       },

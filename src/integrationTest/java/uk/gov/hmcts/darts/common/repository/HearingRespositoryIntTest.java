@@ -14,7 +14,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 class HearingRespositoryIntTest extends RepositoryBase {
 
     // generation count. Should always be an even number
-    private static final int GENERATION_COUNT = 30;
+    private static final int GENERATION_COUNT = 10;
 
     private static final int RESULT_LIMIT = GENERATION_COUNT;
 

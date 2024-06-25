@@ -24,7 +24,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.JUDGE;
+import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.JUDICIARY;
 import static uk.gov.hmcts.darts.test.common.data.HearingTestData.createSomeMinimalHearing;
 
 @AutoConfigureMockMvc
@@ -43,7 +43,7 @@ class AnnotationPostTest extends IntegrationBase {
 
     @Test
     void returnsAnnotationId() throws Exception {
-        given.anAuthenticatedUserWithGlobalAccessAndRole(JUDGE);
+        given.anAuthenticatedUserWithGlobalAccessAndRole(JUDICIARY);
         HearingEntity hearingEntity = createSomeMinimalHearing();
         hearingEntity = dartsDatabase.save(hearingEntity);
 
@@ -71,7 +71,7 @@ class AnnotationPostTest extends IntegrationBase {
 
     @Test
     void allowsJudgeWithGlobalAccessToUploadAnnotations() throws Exception {
-        given.anAuthenticatedUserWithGlobalAccessAndRole(JUDGE);
+        given.anAuthenticatedUserWithGlobalAccessAndRole(JUDICIARY);
         HearingEntity hearingEntity = createSomeMinimalHearing();
         hearingEntity = dartsDatabase.save(hearingEntity);
         mockMvc.perform(
@@ -85,7 +85,7 @@ class AnnotationPostTest extends IntegrationBase {
     @Test
     void allowsJudgeAuthorisedForCourthouseAccessToUploadAnnotations() throws Exception {
         var hearing = dartsDatabase.save(createSomeMinimalHearing());
-        given.anAuthenticatedUserAuthorizedForCourthouse(JUDGE, hearing.getCourtroom().getCourthouse());
+        given.anAuthenticatedUserAuthorizedForCourthouse(JUDICIARY, hearing.getCourtroom().getCourthouse());
 
         mockMvc.perform(
                 multipart(ENDPOINT)
@@ -97,7 +97,7 @@ class AnnotationPostTest extends IntegrationBase {
 
     @Test
     void returns400IfAnnotationDocumentMissing() throws Exception {
-        given.anAuthenticatedUserWithGlobalAccessAndRole(JUDGE);
+        given.anAuthenticatedUserWithGlobalAccessAndRole(JUDICIARY);
 
         mockMvc.perform(
                 multipart(ENDPOINT)
@@ -108,7 +108,7 @@ class AnnotationPostTest extends IntegrationBase {
 
     @Test
     void returns400IfPostBodyMissing() throws Exception {
-        given.anAuthenticatedUserWithGlobalAccessAndRole(JUDGE);
+        given.anAuthenticatedUserWithGlobalAccessAndRole(JUDICIARY);
 
         mockMvc.perform(
                 multipart(ENDPOINT)
@@ -119,7 +119,7 @@ class AnnotationPostTest extends IntegrationBase {
 
     @Test
     void returns400WhenHearingIdIsNull() throws Exception {
-        given.anAuthenticatedUserWithGlobalAccessAndRole(JUDGE);
+        given.anAuthenticatedUserWithGlobalAccessAndRole(JUDICIARY);
 
         mockMvc.perform(
                 multipart(ENDPOINT)

@@ -31,7 +31,8 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.JUDGE;
+import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.DARTS;
+import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.JUDICIARY;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.SUPER_ADMIN;
 
 @Slf4j
@@ -177,7 +178,7 @@ class CaseControllerGetAnnotationsIntTest extends IntegrationBase {
             .andReturn();
 
         verify(mockUserIdentity).getUserAccount();
-        verify(mockUserIdentity).userHasGlobalAccess(Set.of(JUDGE, SUPER_ADMIN));
+        verify(mockUserIdentity).userHasGlobalAccess(Set.of(JUDICIARY, SUPER_ADMIN, DARTS));
         verifyNoMoreInteractions(mockUserIdentity);
     }
 
@@ -203,7 +204,7 @@ class CaseControllerGetAnnotationsIntTest extends IntegrationBase {
             .andReturn();
 
         verify(mockUserIdentity).getUserAccount();
-        verify(mockUserIdentity).userHasGlobalAccess(Set.of(JUDGE, SUPER_ADMIN));
+        verify(mockUserIdentity).userHasGlobalAccess(Set.of(JUDICIARY, SUPER_ADMIN, DARTS));
         verifyNoMoreInteractions(mockUserIdentity);
     }
 

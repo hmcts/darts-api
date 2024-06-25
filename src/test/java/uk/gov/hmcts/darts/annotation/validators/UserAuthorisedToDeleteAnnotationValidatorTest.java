@@ -18,7 +18,7 @@ import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThatNoException;
 import static org.mockito.Mockito.when;
-import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.JUDGE;
+import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.JUDICIARY;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.SUPER_ADMIN;
 
 @ExtendWith(MockitoExtension.class)
@@ -47,7 +47,7 @@ class UserAuthorisedToDeleteAnnotationValidatorTest {
 
     @Test
     void doesntThrowIfUserIsJudgeAndCreatedTheAnnotation() {
-        var judge = userWithRole(JUDGE);
+        var judge = userWithRole(JUDICIARY);
         when(authorisationApi.getCurrentUser()).thenReturn(judge);
         when(annotationRepository.findById(1)).thenReturn(Optional.of(annotationCreatedBy(judge)));
 

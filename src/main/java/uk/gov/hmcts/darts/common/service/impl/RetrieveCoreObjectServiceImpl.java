@@ -11,6 +11,7 @@ import uk.gov.hmcts.darts.common.entity.DefenceEntity;
 import uk.gov.hmcts.darts.common.entity.DefendantEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.JudgeEntity;
+import uk.gov.hmcts.darts.common.entity.MediaEntity;
 import uk.gov.hmcts.darts.common.entity.ProsecutorEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.exception.CommonApiError;
@@ -69,8 +70,33 @@ public class RetrieveCoreObjectServiceImpl implements RetrieveCoreObjectService 
         ));
     }
 
+    @Override
+    public HearingEntity retrieveOrCreateHearingWithMedia(String courthouseName, String courtroomName, String caseNumber,
+                                                          LocalDateTime hearingDate, UserAccountEntity userAccount, MediaEntity mediaEntity) {
+        Optional<HearingEntity> foundHearing = hearingRepository.findHearing(
+            courthouseName,
+            courtroomName,
+            caseNumber,
+            hearingDate.toLocalDate()
+        );
+
+        return foundHearing.map(hearingEntity -> setHearingLastDateModifiedBy(hearingEntity, userAccount)).orElseGet(() -> createHearing(
+            courthouseName,
+            courtroomName,
+            caseNumber,
+            hearingDate,
+            userAccount,
+            mediaEntity
+        ));
+    }
+
     private HearingEntity createHearing(String courthouseName, String courtroomName, String caseNumber, LocalDateTime hearingDate,
                                         UserAccountEntity userAccount) {
+        return createHearing(courthouseName, courtroomName, caseNumber, hearingDate, userAccount, null);
+    }
+
+    private HearingEntity createHearing(String courthouseName, String courtroomName, String caseNumber, LocalDateTime hearingDate,
+                                        UserAccountEntity userAccount, MediaEntity mediaEntity) {
         final CourtCaseEntity courtCase = retrieveOrCreateCase(courthouseName, caseNumber, userAccount);
         final CourtroomEntity courtroom = retrieveOrCreateCourtroom(courtCase.getCourthouse(), courtroomName, userAccount);
         HearingEntity hearing = new HearingEntity();
@@ -83,7 +109,7 @@ public class RetrieveCoreObjectServiceImpl implements RetrieveCoreObjectService 
         hearing.setHearingIsActual(false);
         hearing.setCreatedBy(userAccount);
         hearing.setLastModifiedBy(userAccount);
-
+        hearing.getMediaList().add(mediaEntity);
         hearingRepository.saveAndFlush(hearing);
 
         return hearing;

@@ -7,6 +7,7 @@ import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
+import uk.gov.hmcts.darts.common.entity.MediaEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.repository.HearingSubStringQueryEnum;
 import uk.gov.hmcts.darts.common.repository.TranscriptionDocumentSubStringQueryEnum;
@@ -36,6 +37,25 @@ public class HearingStub {
     public HearingEntity createHearing(String courthouseName, String courtroomName, String caseNumber,
                                        LocalDateTime hearingDate) {
         return hearingStubShare.createHearing(courthouseName, courtroomName, caseNumber, hearingDate, courthouseStub, userAccountStub);
+    }
+
+    public HearingEntity createHearing(CourtCaseEntity courtCase, CourtroomEntity courtroomEntity,
+                                       LocalDateTime hearingDate) {
+        return createHearing(courtCase.getCourthouse().getCourthouseName(), courtroomEntity.getName(), courtCase.getCaseNumber(), hearingDate);
+
+    }
+
+    public HearingEntity createHearingWithMedia(String courthouseName, String courtroomName, String caseNumber,
+                                       LocalDateTime hearingDate, MediaEntity mediaEntity) {
+        courthouseStub.createCourthouseUnlessExists(courthouseName);
+        return retrieveCoreObjectService.retrieveOrCreateHearingWithMedia(
+            courthouseName,
+            courtroomName,
+            caseNumber,
+            hearingDate,
+            userAccountStub.getSystemUserAccountEntity(),
+            mediaEntity
+        );
     }
 
     public HearingEntity createMinimalHearing() {
