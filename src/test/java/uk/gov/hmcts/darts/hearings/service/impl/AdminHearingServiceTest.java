@@ -25,6 +25,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
+@SuppressWarnings("PMD.JUnit5TestShouldBePackagePrivate")
 class AdminHearingServiceTest {
     @Mock
     private HearingRepository hearingRepository;

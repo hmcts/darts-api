@@ -1,10 +1,13 @@
 package uk.gov.hmcts.darts.hearings.mapper;
 
 import org.junit.jupiter.api.Test;
+import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
+import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
+import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.hearings.model.HearingsSearchResponse;
-import uk.gov.hmcts.darts.hearings.service.impl.AdminHearingsServiceTest;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -15,9 +18,9 @@ class AdminHearingSearchResponseMapperTest {
     @Test
     void mapSearchResponse() {
         List<HearingEntity> hearingEntityList = new ArrayList<>();
-        hearingEntityList.add(AdminHearingsServiceTest.setupHearing(1));
-        hearingEntityList.add(AdminHearingsServiceTest.setupHearing(2));
-        hearingEntityList.add(AdminHearingsServiceTest.setupHearing(3));
+        hearingEntityList.add(setupHearing(1));
+        hearingEntityList.add(setupHearing(2));
+        hearingEntityList.add(setupHearing(3));
         List<HearingsSearchResponse> actualResponse = AdminHearingSearchResponseMapper.mapResponse(hearingEntityList);
 
         for (int i = 0; i < hearingEntityList.size(); i++) {
@@ -30,5 +33,35 @@ class AdminHearingSearchResponseMapperTest {
             assertEquals(hearingEntityList.get(i).getCourtCase().getId(), actualResponse.get(i).getCase().getId());
             assertEquals(hearingEntityList.get(i).getCourtCase().getCaseNumber(), actualResponse.get(i).getCase().getCaseNumber());
         }
+    }
+
+
+    public static  HearingEntity setupHearing(Integer id) {
+        return setupHearing(id, id, id, id);
+    }
+
+    public static HearingEntity setupHearing(Integer id, Integer courthouseId, Integer courtroomId, Integer courtcaseId) {
+
+        CourthouseEntity courthouseEntity = new CourthouseEntity();
+        courthouseEntity.setId(courthouseId);
+        courthouseEntity.setDisplayName("Display name " + courthouseId);
+
+        CourtroomEntity courtroomEntity = new CourtroomEntity();
+        courtroomEntity.setId(courtroomId);
+        courtroomEntity.setName("Name " + courtcaseId);
+
+        CourtCaseEntity courtCaseEntity = new CourtCaseEntity();
+        courtCaseEntity.setId(courtcaseId);
+        courtCaseEntity.setCaseNumber("Case number" + courtcaseId);
+
+        HearingEntity hearingEntity = new HearingEntity();
+        hearingEntity.setId(id);
+        hearingEntity.setHearingDate(LocalDate.now());
+        hearingEntity.setCourtCase(courtCaseEntity);
+        hearingEntity.setCourtroom(courtroomEntity);
+
+        courtroomEntity.setCourthouse(courthouseEntity);
+
+        return hearingEntity;
     }
 }
