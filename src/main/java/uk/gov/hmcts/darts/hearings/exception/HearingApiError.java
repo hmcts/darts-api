@@ -10,11 +10,16 @@ import uk.gov.hmcts.darts.hearings.model.HearingsTitleErrors;
 @Getter
 @RequiredArgsConstructor
 public enum HearingApiError implements DartsApiError {
-
     HEARING_NOT_FOUND(
         HearingsErrorCode.HEARING_NOT_FOUND.getValue(),
         HttpStatus.NOT_FOUND,
         HearingsTitleErrors.HEARING_NOT_FOUND.toString()
+    ),
+    TOO_MANY_RESULTS(
+        HearingsErrorCode.TOO_MANY_RESULTS.getValue(),
+        HttpStatus.BAD_REQUEST,
+        HearingsTitleErrors.TOO_MANY_RESULTS.toString()
+
     );
 
     private static final String ERROR_TYPE_PREFIX = "HEARING";

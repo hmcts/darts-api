@@ -53,4 +53,19 @@ public interface HearingRepository extends JpaRepository<HearingEntity, Integer>
 
     @Override
     boolean existsById(Integer id);
+
+    @Query("""
+         SELECT hearing
+         FROM HearingEntity hearing
+         WHERE (:caseNumber IS NULL OR hearing.courtCase.caseNumber ILIKE CONCAT('%', cast(:caseNumber as text), '%'))
+             AND (:courthouseIds IS NULL OR hearing.courtroom.courthouse.id in (:courthouseIds))
+             AND (:courtroomName IS NULL OR hearing.courtroom.name ILIKE CONCAT('%', cast(:courtroomName as text), '%'))
+             AND (cast(:startDate as LocalDate) IS NULL OR hearing.hearingDate >= :startDate)
+             AND (cast(:endDate as LocalDate) IS NULL OR hearing.hearingDate <= :endDate)
+             ORDER BY hearing.id
+             LIMIT :numberOfRecords
+           """)
+    List<HearingEntity> findHearingDetails(List<Integer> courthouseIds, String caseNumber,
+                                           String courtroomName,
+                                           LocalDate startDate, LocalDate endDate, Integer numberOfRecords);
 }

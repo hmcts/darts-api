@@ -11,12 +11,16 @@ import uk.gov.hmcts.darts.hearings.http.api.HearingsApi;
 import uk.gov.hmcts.darts.hearings.model.Annotation;
 import uk.gov.hmcts.darts.hearings.model.EventResponse;
 import uk.gov.hmcts.darts.hearings.model.GetHearingResponse;
+import uk.gov.hmcts.darts.hearings.model.HearingsSearchRequest;
+import uk.gov.hmcts.darts.hearings.model.HearingsSearchResponse;
 import uk.gov.hmcts.darts.hearings.model.Transcript;
+import uk.gov.hmcts.darts.hearings.service.AdminHearingsService;
 import uk.gov.hmcts.darts.hearings.service.HearingsService;
 
 import java.util.List;
 
 import static uk.gov.hmcts.darts.authorisation.constants.AuthorisationConstants.SECURITY_SCHEMES_BEARER_AUTH;
+import static uk.gov.hmcts.darts.authorisation.enums.ContextIdEnum.ANY_ENTITY_ID;
 import static uk.gov.hmcts.darts.authorisation.enums.ContextIdEnum.HEARING_ID;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.APPROVER;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.DARTS;
@@ -34,6 +38,7 @@ import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.TRANSLATION_QA;
 public class HearingsController implements HearingsApi {
 
     private final HearingsService hearingsService;
+    private final AdminHearingsService adminHearingSearch;
 
     @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
     @Authorisation(contextId = HEARING_ID,
@@ -69,5 +74,13 @@ public class HearingsController implements HearingsApi {
         globalAccessSecurityRoles = {JUDICIARY, SUPER_ADMIN, DARTS})
     public ResponseEntity<List<Annotation>> getHearingAnnotations(Integer hearingId) {
         return new ResponseEntity<>(hearingsService.getAnnotationsByHearingId(hearingId), HttpStatus.OK);
+    }
+
+    @Override
+    @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
+    @Authorisation(contextId = ANY_ENTITY_ID,
+        globalAccessSecurityRoles = {SUPER_ADMIN, SUPER_USER})
+    public ResponseEntity<List<HearingsSearchResponse>> adminHearingsSearchPost(HearingsSearchRequest hearingsSearchRequest) {
+        return new ResponseEntity<>(adminHearingSearch.adminHearingSearch(hearingsSearchRequest), HttpStatus.OK);
     }
 }

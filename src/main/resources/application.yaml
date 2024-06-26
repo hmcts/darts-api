@@ -147,6 +147,9 @@ darts:
   cases:
     admin-search:
       max-results: 1000
+  hearings:
+    admin-search:
+      max-results: 1000
   data-management:
     retention-period:
       inbound:

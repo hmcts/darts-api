@@ -34,6 +34,9 @@ spring:
       max-file-size: 1KB
       max-request-size: 10KB #this affects addAudio as well, so needs to handle a 350mb mp2 file
 darts:
+  hearings:
+    admin-search:
+      max-results: 5
   automated-tasks-pod: ${AUTOMATED_TASK_MODE:true}
   api-pod: ${API_MODE:true}
   data-management:

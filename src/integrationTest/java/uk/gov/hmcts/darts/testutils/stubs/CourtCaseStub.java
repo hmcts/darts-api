@@ -22,13 +22,16 @@ public class CourtCaseStub {
     private static final LocalDateTime D_2020_10_2 = LocalDateTime.of(2020, 10, 2, 12, 0, 0);
 
     @Autowired
-    HearingStub hearingStub;
+    HearingStubComposable hearingStub;
 
     @Autowired
     CaseRepository caseRepository;
 
     @Autowired
     CourthouseRepository courthouseRepository;
+
+    @Autowired
+    UserAccountStub userAccountStub;
 
     @Autowired
     CourthouseStub courthouseStub;
@@ -71,9 +74,9 @@ public class CourtCaseStub {
         caseConsumer.accept(courtCase);
 
         var courthouseName = courtCase.getCourthouse().getCourthouseName();
-        var hear1 = hearingStub.createHearing(courthouseName, "testCourtroom", courtCase.getCaseNumber(), D_2020_10_1);
-        var hear2 = hearingStub.createHearing(courthouseName, "testCourtroom2", courtCase.getCaseNumber(), D_2020_10_1);
-        var hear3 = hearingStub.createHearing(courthouseName, "testCourtroom", courtCase.getCaseNumber(), D_2020_10_2);
+        var hear1 = hearingStub.createHearing(courthouseName, "testCourtroom", courtCase.getCaseNumber(), D_2020_10_1, courthouseStub, userAccountStub);
+        var hear2 = hearingStub.createHearing(courthouseName, "testCourtroom2", courtCase.getCaseNumber(), D_2020_10_1, courthouseStub, userAccountStub);
+        var hear3 = hearingStub.createHearing(courthouseName, "testCourtroom", courtCase.getCaseNumber(), D_2020_10_2, courthouseStub, userAccountStub);
         courtCase.getHearings().addAll(List.of(hear1, hear2, hear3));
 
         return caseRepository.save(courtCase);
@@ -90,9 +93,7 @@ public class CourtCaseStub {
         CourthouseEntity courthouse = courthouseStub.createMinimalCourthouse();
         for (int caseCounter = 1; caseCounter <= numOfCases; caseCounter++) {
             CourtCaseEntity courtCase = createAndSaveMinimalCourtCase("caseNumber" + caseCounter, courthouse);
-            hearingStub.createHearingsForCase(courtCase, numOfCourtrooms, numOfHearingsPerCourtroom);
+            hearingStub.createHearingsForCase(courtCase, numOfCourtrooms, numOfHearingsPerCourtroom, courthouseStub, userAccountStub);
         }
     }
-
-
 }
