@@ -2,7 +2,6 @@ package uk.gov.hmcts.darts.audio.service;
 
 import uk.gov.hmcts.darts.audio.entity.MediaRequestEntity;
 import uk.gov.hmcts.darts.audio.enums.MediaRequestStatus;
-import uk.gov.hmcts.darts.audio.model.GetAdminMediaResponseItem;
 import uk.gov.hmcts.darts.audio.model.MediaHideRequest;
 import uk.gov.hmcts.darts.audio.model.MediaHideResponse;
 import uk.gov.hmcts.darts.audiorequests.model.AudioNonAccessedResponse;
@@ -62,6 +61,4 @@ public interface MediaRequestService {
     MediaPatchResponse patchMediaRequest(Integer mediaRequestId, MediaPatchRequest request);
 
     MediaHideResponse adminHideOrShowMediaById(Integer mediaId, MediaHideRequest mediaHideRequest);
-
-    List<GetAdminMediaResponseItem> adminMediaTransformedMediaSearch(Integer transformedMediaId);
 }

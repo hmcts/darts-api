@@ -133,7 +133,8 @@ public class AudioController implements AudioApi {
     @Authorisation(contextId = ANY_ENTITY_ID, globalAccessSecurityRoles = {SUPER_USER, SUPER_ADMIN})
     public ResponseEntity<List<GetAdminMediaResponseItem>> getAdminMedias(Integer transformedMediaId, List<Integer> hearingIds, OffsetDateTime startAt,
                                                                           OffsetDateTime endAt) {
-        List<GetAdminMediaResponseItem> response = mediaRequestService.adminMediaTransformedMediaSearch(transformedMediaId);
+
+        List<GetAdminMediaResponseItem> response = adminMediaService.filterMedias(transformedMediaId, hearingIds, startAt, endAt);
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
