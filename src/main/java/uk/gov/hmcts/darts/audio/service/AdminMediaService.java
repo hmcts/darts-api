@@ -1,7 +1,7 @@
 package uk.gov.hmcts.darts.audio.service;
 
 import uk.gov.hmcts.darts.audio.model.AdminMediaResponse;
-import uk.gov.hmcts.darts.audio.model.AdminMediaSearchResponseItem;
+import uk.gov.hmcts.darts.audio.model.GetAdminMediaResponseItem;
 import uk.gov.hmcts.darts.audio.model.PostAdminMediasSearchRequest;
 import uk.gov.hmcts.darts.audio.model.PostAdminMediasSearchResponseItem;
 
@@ -14,10 +14,10 @@ public interface AdminMediaService {
 
     List<PostAdminMediasSearchResponseItem> performAdminMediasSearchPost(PostAdminMediasSearchRequest adminMediasSearchRequest);
 
-    List<AdminMediaSearchResponseItem> filterMedias(Integer transformedMediaId, List<Integer> hearingIds, OffsetDateTime startAt,
-                                                    OffsetDateTime endAt);
+    List<GetAdminMediaResponseItem> filterMedias(Integer transformedMediaId, List<Integer> hearingIds, OffsetDateTime startAt,
+                                                 OffsetDateTime endAt);
 
-    default List<AdminMediaSearchResponseItem> filterMediasWithTransformedMediaId(Integer transformedMediaId) {
+    default List<GetAdminMediaResponseItem> filterMediasWithTransformedMediaId(Integer transformedMediaId) {
         return filterMedias(transformedMediaId, null, null, null);
     }
 }

@@ -919,11 +919,24 @@ components:
         - "AUDIO_112"
         - "AUDIO_113"
         - "AUDIO_114"
-      x-enum-varnames: [ FAILED_TO_PROCESS_AUDIO_REQUEST, REQUESTED_DATA_CANNOT_BE_LOCATED, MEDIA_NOT_FOUND, FAILED_TO_UPLOAD_AUDIO_FILE,
-                         MISSING_SYSTEM_USER, AUDIO_NOT_PROVIDED, UNEXPECTED_FILE_TYPE, FILE_DURATION_OUT_OF_BOUNDS, FILE_SIZE_OUT_OF_BOUNDS,
-                         ADMIN_SEARCH_CRITERIA_NOT_PROVIDED,  MEDIA_ALREADY_HIDDEN, MEDIA_HIDE_ACTION_PAYLOAD_INCORRECT_USAGE,
-                         MEDIA_SHOW_ACTION_PAYLOAD_INCORRECT_USAGE, MEDIA_HIDE_ACTION_REASON_NOT_FOUND,
-                         MEDIA_HIDE_ACTION_REASON_MARKED_FOR_DELETION, ADMIN_SEARCH_CRITERIA_NOT_SUITABLE,
+        - "AUDIO_115"
+        - "AUDIO_116"
+      x-enum-varnames: [ FAILED_TO_PROCESS_AUDIO_REQUEST,
+                         REQUESTED_DATA_CANNOT_BE_LOCATED,
+                         MEDIA_NOT_FOUND,
+                         FAILED_TO_UPLOAD_AUDIO_FILE,
+                         MISSING_SYSTEM_USER,
+                         AUDIO_NOT_PROVIDED,
+                         UNEXPECTED_FILE_TYPE,
+                         FILE_DURATION_OUT_OF_BOUNDS,
+                         FILE_SIZE_OUT_OF_BOUNDS,
+                         ADMIN_SEARCH_CRITERIA_NOT_PROVIDED,
+                         MEDIA_ALREADY_HIDDEN,
+                         MEDIA_HIDE_ACTION_PAYLOAD_INCORRECT_USAGE,
+                         MEDIA_SHOW_ACTION_PAYLOAD_INCORRECT_USAGE,
+                         MEDIA_HIDE_ACTION_REASON_NOT_FOUND,
+                         MEDIA_HIDE_ACTION_REASON_MARKED_FOR_DELETION,
+                         ADMIN_SEARCH_CRITERIA_NOT_SUITABLE,
                          TOO_MANY_RESULTS ]
 
     AddAudioTitleErrors:
@@ -946,9 +959,20 @@ components:
         - "Reason has been marked for deletion"
         - "transformed_media_id OR one of hearing_id, start_at or end_at must be provided"
         - "Too many results"
-      x-enum-varnames: [ FAILED_TO_PROCESS_AUDIO_REQUEST, REQUESTED_DATA_CANNOT_BE_LOCATED,  MEDIA_NOT_FOUND,
-                         FAILED_TO_UPLOAD_AUDIO_FILE, MISSING_SYSTEM_USER, AUDIO_NOT_PROVIDED, UNEXPECTED_FILE_TYPE,
-                         FILE_DURATION_OUT_OF_BOUNDS, FILE_SIZE_OUT_OF_BOUNDS, ADMIN_SEARCH_CRITERIA_NOT_PROVIDED, MEDIA_ALREADY_HIDDEN,
-                         MEDIA_HIDE_ACTION_PAYLOAD_INCORRECT_USAGE, MEDIA_SHOW_ACTION_PAYLOAD_INCORRECT_USAGE,
-                         MEDIA_HIDE_ACTION_REASON_NOT_FOUND, MEDIA_HIDE_ACTION_REASON_MARKED_FOR_DELETION,
-                         ADMIN_SEARCH_CRITERIA_NOT_SUITABLE, TOO_MANY_RESULTS ]
+      x-enum-varnames: [ FAILED_TO_PROCESS_AUDIO_REQUEST,
+                         REQUESTED_DATA_CANNOT_BE_LOCATED,
+                         MEDIA_NOT_FOUND,
+                         FAILED_TO_UPLOAD_AUDIO_FILE,
+                         MISSING_SYSTEM_USER,
+                         AUDIO_NOT_PROVIDED,
+                         UNEXPECTED_FILE_TYPE,
+                         FILE_DURATION_OUT_OF_BOUNDS,
+                         FILE_SIZE_OUT_OF_BOUNDS,
+                         ADMIN_SEARCH_CRITERIA_NOT_PROVIDED,
+                         MEDIA_ALREADY_HIDDEN,
+                         MEDIA_HIDE_ACTION_PAYLOAD_INCORRECT_USAGE,
+                         MEDIA_SHOW_ACTION_PAYLOAD_INCORRECT_USAGE,
+                         MEDIA_HIDE_ACTION_REASON_NOT_FOUND,
+                         MEDIA_HIDE_ACTION_REASON_MARKED_FOR_DELETION,
+                         ADMIN_SEARCH_CRITERIA_NOT_SUITABLE,
+                         TOO_MANY_RESULTS ]

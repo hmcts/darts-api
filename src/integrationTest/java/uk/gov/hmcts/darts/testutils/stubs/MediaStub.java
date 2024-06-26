@@ -96,6 +96,7 @@ public class MediaStub {
      * Unique case number with unique case number for each  media
      * Unique unique hearing with hearing date starting with today and incrementing by day for each transformed media record
      * Unique media with start date hours decremented for each media and end date hours incremented for each media
+     *
      * @param count The number of  media objects that are to be generated
      * @return The list of generated media in chronological order
      */
@@ -113,7 +114,7 @@ public class MediaStub {
             mediaRepository.save(mediaEntity);
 
             hearingStub.createHearingWithMedia(courtName, courtName,
-                                                              caseNumber, hearingDate, mediaEntity);
+                                               caseNumber, hearingDate, mediaEntity);
 
 
             hoursBefore = hoursBefore.minusHours(1);
@@ -135,7 +136,6 @@ public class MediaStub {
         hearing.addMedia(media);
         hearingRepository.saveAndFlush(hearing);
     }
-}
 
     @Transactional
     public Integer getHearingId(Integer id) {

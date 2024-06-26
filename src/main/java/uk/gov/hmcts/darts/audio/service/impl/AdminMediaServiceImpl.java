@@ -1,17 +1,25 @@
 package uk.gov.hmcts.darts.audio.service.impl;
 
 import lombok.RequiredArgsConstructor;
+import org.apache.commons.collections4.CollectionUtils;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.darts.audio.entity.MediaRequestEntity;
 import uk.gov.hmcts.darts.audio.exception.AudioApiError;
 import uk.gov.hmcts.darts.audio.helper.PostAdminMediasSearchHelper;
 import uk.gov.hmcts.darts.audio.mapper.AdminMediaMapper;
+import uk.gov.hmcts.darts.audio.mapper.GetAdminMediaResponseMapper;
 import uk.gov.hmcts.darts.audio.mapper.PostAdminMediaSearchResponseMapper;
 import uk.gov.hmcts.darts.audio.model.AdminMediaResponse;
+import uk.gov.hmcts.darts.audio.model.GetAdminMediaResponseItem;
+import uk.gov.hmcts.darts.audio.model.MediaSearchData;
 import uk.gov.hmcts.darts.audio.model.PostAdminMediasSearchRequest;
 import uk.gov.hmcts.darts.audio.model.PostAdminMediasSearchResponseItem;
 import uk.gov.hmcts.darts.audio.service.AdminMediaService;
+import uk.gov.hmcts.darts.audio.validation.SearchMediaValidator;
+import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
+import uk.gov.hmcts.darts.common.entity.TransformedMediaEntity;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.common.repository.MediaRepository;
 import uk.gov.hmcts.darts.common.repository.TransformedMediaRepository;
@@ -49,10 +57,10 @@ public class AdminMediaServiceImpl implements AdminMediaService {
         }
         return PostAdminMediaSearchResponseMapper.createResponseItemList(matchingMedia);
     }
-}
+
     @Override
-    public List<GetAdminMediaSearchResponseItem> filterMedias(Integer transformedMediaId, List<Integer> hearingIds, OffsetDateTime startAt,
-                                                               OffsetDateTime endAt) {
+    public List<GetAdminMediaResponseItem> filterMedias(Integer transformedMediaId, List<Integer> hearingIds, OffsetDateTime startAt,
+                                                        OffsetDateTime endAt) {
         MediaSearchData searchData = new MediaSearchData(transformedMediaId, hearingIds, startAt, endAt);
         searchMediaValidator.validate(searchData);
 
@@ -69,23 +77,22 @@ public class AdminMediaServiceImpl implements AdminMediaService {
             List<MediaEntity> mediaList = mediaRepository.findAllByHearingId(hearing.getId());
             List<MediaEntity> filteredMediaList = mediaList.stream().filter(mediaEntity -> mediaEntity.getStart().isBefore(mediaRequest.getEndTime())
                 && mediaEntity.getEnd().isAfter(mediaRequest.getStartTime())).toList();
-            return AdminMediaSearchResponseMapper.createResponseItemList(filteredMediaList, hearing);
+            return GetAdminMediaResponseMapper.createResponseItemList(filteredMediaList, hearing);
         } else {
-            final List<AdminMediaSearchResponseItem> responseMediaItemList = new ArrayList<>();
+            final List<GetAdminMediaResponseItem> responseMediaItemList = new ArrayList<>();
             List<MediaEntity> mediaList = mediaRepository.findMediaByDetails(hearingIds, startAt, endAt);
 
             mediaList.forEach(mediaEntity -> {
-               List<HearingEntity> hearingEntityList = getApplicableMediaHearings(mediaEntity, hearingIds);
+                List<HearingEntity> hearingEntityList = getApplicableMediaHearings(mediaEntity, hearingIds);
 
-               hearingEntityList.forEach(hearing -> {
-                   responseMediaItemList.add(AdminMediaSearchResponseMapper.createResponseItem(mediaEntity, hearing));
-               });
+                hearingEntityList.forEach(hearing -> {
+                    responseMediaItemList.add(GetAdminMediaResponseMapper.createResponseItem(mediaEntity, hearing));
+                });
             });
 
             return responseMediaItemList;
         }
     }
-
 
 
     private List<HearingEntity> getApplicableMediaHearings(MediaEntity mediaEntity, List<Integer> hearingsToMatchOn) {

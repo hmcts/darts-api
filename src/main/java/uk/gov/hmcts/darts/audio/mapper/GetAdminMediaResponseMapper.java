@@ -32,7 +32,7 @@ public class GetAdminMediaResponseMapper {
         return responseList;
     }
 
-    private GetAdminMediaResponseItem createResponseItem(MediaEntity mediaEntity, HearingEntity hearing) {
+    public GetAdminMediaResponseItem createResponseItem(MediaEntity mediaEntity, HearingEntity hearing) {
         GetAdminMediaResponseItem responseItem = new GetAdminMediaResponseItem();
         responseItem.setId(mediaEntity.getId());
         responseItem.setChannel(mediaEntity.getChannel());

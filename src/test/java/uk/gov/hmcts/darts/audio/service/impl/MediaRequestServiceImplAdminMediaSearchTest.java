@@ -1,5 +1,6 @@
 package uk.gov.hmcts.darts.audio.service.impl;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
@@ -17,7 +18,6 @@ import org.skyscreamer.jsonassert.JSONAssert;
 import org.skyscreamer.jsonassert.JSONCompareMode;
 import uk.gov.hmcts.darts.audio.entity.MediaRequestEntity;
 import uk.gov.hmcts.darts.audio.mapper.GetAdminMediaResponseMapper;
-import uk.gov.hmcts.darts.audio.mapper.AdminMediaSearchResponseMapper;
 import uk.gov.hmcts.darts.audio.model.AdminActionRequest;
 import uk.gov.hmcts.darts.audio.model.GetAdminMediaResponseItem;
 import uk.gov.hmcts.darts.audio.model.MediaHideRequest;
@@ -25,9 +25,14 @@ import uk.gov.hmcts.darts.audio.model.MediaHideResponse;
 import uk.gov.hmcts.darts.audio.validation.MediaHideOrShowValidator;
 import uk.gov.hmcts.darts.audio.validation.SearchMediaValidator;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
+import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
+import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
+import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
+import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
 import uk.gov.hmcts.darts.common.entity.ObjectAdminActionEntity;
 import uk.gov.hmcts.darts.common.entity.ObjectHiddenReasonEntity;
+import uk.gov.hmcts.darts.common.entity.TransformedMediaEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
 import uk.gov.hmcts.darts.common.repository.MediaRepository;
@@ -36,6 +41,7 @@ import uk.gov.hmcts.darts.common.repository.ObjectHiddenReasonRepository;
 import uk.gov.hmcts.darts.common.repository.TransformedMediaRepository;
 import uk.gov.hmcts.darts.test.common.TestUtils;
 
+import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.List;
@@ -105,7 +111,7 @@ class MediaRequestServiceImplAdminMediaSearchTest {
         when(mockTransformedMediaRepository.findById(transformedMediaId))
             .thenReturn(Optional.empty());
 
-        List<AdminMediaSearchResponseItem> response = mediaRequestService.adminMediaSearch(transformedMediaId);
+        List<GetAdminMediaResponseItem> response = mediaRequestService.adminMediaTransformedMediaSearch(transformedMediaId);
 
         String responseString = objectMapper.writeValueAsString(response);
         String expectedString = """
@@ -142,7 +148,7 @@ class MediaRequestServiceImplAdminMediaSearchTest {
             .thenReturn(List.of(mediaEntity));
 
 
-        List<AdminMediaSearchResponseItem> response = mediaRequestService.adminMediaSearch(transformedMediaId);
+        List<GetAdminMediaResponseItem> response = mediaRequestService.adminMediaTransformedMediaSearch(transformedMediaId);
 
         String responseString = objectMapper.writeValueAsString(response);
         String expectedString = """
@@ -174,7 +180,7 @@ class MediaRequestServiceImplAdminMediaSearchTest {
     }
 
     @Test
-    void okTwoResponse() throws JsonProcessingException {
+    void okTwoResponse() throws JsonProcessingException, JsonProcessingException {
         HearingEntity hearing = createHearing();
 
         MediaRequestEntity mediaRequest = new MediaRequestEntity();
@@ -207,7 +213,7 @@ class MediaRequestServiceImplAdminMediaSearchTest {
             .thenReturn(List.of(mediaEntity, mediaEntity2));
 
 
-        List<AdminMediaSearchResponseItem> response = mediaRequestService.adminMediaSearch(transformedMediaId);
+        List<GetAdminMediaResponseItem> response = mediaRequestService.adminMediaTransformedMediaSearch(transformedMediaId);
 
         String responseString = objectMapper.writeValueAsString(response);
         String expectedString = """
@@ -261,7 +267,6 @@ class MediaRequestServiceImplAdminMediaSearchTest {
                                 responseString, JSONCompareMode.NON_EXTENSIBLE);
     }
 
-    @NotNull
     private static HearingEntity createHearing() {
         CourthouseEntity courthouse = new CourthouseEntity();
         courthouse.setId(1);
