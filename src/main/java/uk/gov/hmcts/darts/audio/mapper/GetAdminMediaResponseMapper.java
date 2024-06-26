@@ -83,18 +83,18 @@ public class GetAdminMediaResponseMapper {
         response.setIsDeleted(entity.isDeleted());
 
         if (objectAdminActionEntity != null) {
-            AdminActionResponse adminActionResponse = new AdminActionResponse();
-            adminActionResponse.setId(objectAdminActionEntity.getId());
-            adminActionResponse.setReasonId(objectAdminActionEntity.getObjectHiddenReason().getId());
-            adminActionResponse.setHiddenById(objectAdminActionEntity.getHiddenBy().getId());
-            adminActionResponse.setHiddenAt(objectAdminActionEntity.getHiddenDateTime());
-            adminActionResponse.setIsMarkedForManualDeletion(objectAdminActionEntity.isMarkedForManualDeletion());
-            adminActionResponse.setMarkedForManualDeletionById(objectAdminActionEntity.getMarkedForManualDelBy().getId());
-            adminActionResponse.setMarkedForManualDeletionAt(objectAdminActionEntity.getMarkedForManualDelDateTime());
-            adminActionResponse.setTicketReference(objectAdminActionEntity.getTicketReference());
-            adminActionResponse.setComments(objectAdminActionEntity.getComments());
+            AdminActionResponse aaResponse = new AdminActionResponse();
+            aaResponse.setId(objectAdminActionEntity.getId());
+            aaResponse.setReasonId(objectAdminActionEntity.getObjectHiddenReason().getId());
+            aaResponse.setHiddenById(objectAdminActionEntity.getHiddenBy().getId());
+            aaResponse.setHiddenAt(objectAdminActionEntity.getHiddenDateTime());
+            aaResponse.setIsMarkedForManualDeletion(objectAdminActionEntity.isMarkedForManualDeletion());
+            aaResponse.setMarkedForManualDeletionById(objectAdminActionEntity.getMarkedForManualDelBy().getId());
+            aaResponse.setMarkedForManualDeletionAt(objectAdminActionEntity.getMarkedForManualDelDateTime());
+            aaResponse.setTicketReference(objectAdminActionEntity.getTicketReference());
+            aaResponse.setComments(objectAdminActionEntity.getComments());
 
-            response.setAdminAction(adminActionResponse);
+            response.setAdminAction(aaResponse);
         }
 
         return response;
