@@ -1,21 +1,16 @@
 package uk.gov.hmcts.darts.arm.component.impl;
 
 import com.azure.core.util.BinaryData;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.micrometer.common.util.StringUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.text.StringEscapeUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import uk.gov.hmcts.darts.arm.api.ArmDataManagementApi;
 import uk.gov.hmcts.darts.arm.component.ArmResponseFilesProcessSingleElement;
 import uk.gov.hmcts.darts.arm.config.ArmDataManagementConfiguration;
-import uk.gov.hmcts.darts.arm.model.record.UploadNewFileRecord;
 import uk.gov.hmcts.darts.arm.model.record.armresponse.ArmResponseInvalidLineRecord;
 import uk.gov.hmcts.darts.arm.model.record.armresponse.ArmResponseUploadFileRecord;
 import uk.gov.hmcts.darts.arm.util.ArmResponseFilesUtil;
@@ -494,12 +489,9 @@ public class ArmResponseFilesProcessSingleElementImpl implements ArmResponseFile
                                                ExternalObjectDirectoryEntity externalObjectDirectory,
                                                String objectChecksum) {
         if (objectChecksum.equalsIgnoreCase(armResponseUploadFileRecord.getMd5())) {
-            UploadNewFileRecord uploadNewFileRecord = readInputJson(externalObjectDirectory, armResponseUploadFileRecord.getInput());
-            if (nonNull(uploadNewFileRecord)) {
-                externalObjectDirectory.setExternalFileId(uploadNewFileRecord.getFileMetadata().getDzFilename());
-                externalObjectDirectory.setExternalRecordId(uploadNewFileRecord.getRelationId());
-                updateExternalObjectDirectoryStatus(externalObjectDirectory, storedStatus);
-            }
+            externalObjectDirectory.setExternalFileId(armResponseUploadFileRecord.getA360FileId());
+            externalObjectDirectory.setExternalRecordId(armResponseUploadFileRecord.getA360RecordId());
+            updateExternalObjectDirectoryStatus(externalObjectDirectory, storedStatus);
         } else {
             log.warn("External object id {} checksum differs. Arm checksum: {} Object Checksum: {}",
                      externalObjectDirectory.getId(),
@@ -508,26 +500,6 @@ public class ArmResponseFilesProcessSingleElementImpl implements ArmResponseFile
             externalObjectDirectory.setErrorCode(armResponseUploadFileRecord.getErrorStatus());
             updateExternalObjectDirectoryStatus(externalObjectDirectory, armResponseChecksumVerificationFailedStatus);
         }
-    }
-
-    private UploadNewFileRecord readInputJson(ExternalObjectDirectoryEntity externalObjectDirectory, String input) {
-        UploadNewFileRecord uploadNewFileRecord = null;
-        if (StringUtils.isNotEmpty(input)) {
-            String unescapedJson = StringEscapeUtils.unescapeJson(input);
-            try {
-                uploadNewFileRecord = objectMapper.readValue(unescapedJson, UploadNewFileRecord.class);
-            } catch (JsonMappingException e) {
-                log.error("Unable to map the upload record file input field");
-                updateExternalObjectDirectoryStatus(externalObjectDirectory, armResponseProcessingFailedStatus);
-            } catch (JsonProcessingException e) {
-                log.error("Unable to parse the upload record file ");
-                updateExternalObjectDirectoryStatus(externalObjectDirectory, armResponseProcessingFailedStatus);
-            }
-        } else {
-            log.warn("Unable to get the upload record file input field");
-            updateExternalObjectDirectoryStatus(externalObjectDirectory, armResponseProcessingFailedStatus);
-        }
-        return uploadNewFileRecord;
     }
 
     private ObjectRecordStatusEnum updateExternalObjectDirectoryStatusAndVerificationAttempt(ExternalObjectDirectoryEntity externalObjectDirectory,

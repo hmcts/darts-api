@@ -502,12 +502,9 @@ public class ArmBatchProcessResponseFilesImpl implements ArmResponseFilesProcess
                                                ExternalObjectDirectoryEntity externalObjectDirectory,
                                                String objectChecksum) {
         if (objectChecksum.equalsIgnoreCase(armResponseUploadFileRecord.getMd5())) {
-            UploadNewFileRecord uploadNewFileRecord = readInputJson(externalObjectDirectory, armResponseUploadFileRecord.getInput());
-            if (nonNull(uploadNewFileRecord)) {
-                externalObjectDirectory.setExternalFileId(uploadNewFileRecord.getFileMetadata().getDzFilename());
-                externalObjectDirectory.setExternalRecordId(uploadNewFileRecord.getRelationId());
-                updateExternalObjectDirectoryStatus(externalObjectDirectory, EodHelper.storedStatus());
-            }
+            externalObjectDirectory.setExternalFileId(armResponseUploadFileRecord.getA360FileId());
+            externalObjectDirectory.setExternalRecordId(armResponseUploadFileRecord.getA360RecordId());
+            updateExternalObjectDirectoryStatus(externalObjectDirectory, EodHelper.storedStatus());
         } else {
             log.warn("External object id {} checksum differs. Arm checksum: {} Object Checksum: {}",
                      externalObjectDirectory.getId(),
@@ -530,26 +527,6 @@ public class ArmBatchProcessResponseFilesImpl implements ArmResponseFilesProcess
             }
         } else {
             log.warn("Unable to parse the input field upload new file record");
-        }
-        return uploadNewFileRecord;
-    }
-
-    private UploadNewFileRecord readInputJson(ExternalObjectDirectoryEntity externalObjectDirectory, String input) {
-        UploadNewFileRecord uploadNewFileRecord = null;
-        if (StringUtils.isNotEmpty(input)) {
-            String unescapedJson = StringEscapeUtils.unescapeJson(input);
-            try {
-                uploadNewFileRecord = objectMapper.readValue(unescapedJson, UploadNewFileRecord.class);
-            } catch (JsonMappingException e) {
-                log.error("Unable to map the upload record file input field - {}", e.getMessage());
-                updateExternalObjectDirectoryStatus(externalObjectDirectory, EodHelper.armResponseProcessingFailedStatus());
-            } catch (JsonProcessingException e) {
-                log.error("Unable to parse the upload record file - {}", e.getMessage());
-                updateExternalObjectDirectoryStatus(externalObjectDirectory, EodHelper.armResponseProcessingFailedStatus());
-            }
-        } else {
-            log.warn("Unable to get the upload record file input field");
-            updateExternalObjectDirectoryStatus(externalObjectDirectory, EodHelper.armResponseProcessingFailedStatus());
         }
         return uploadNewFileRecord;
     }
