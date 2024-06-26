@@ -75,6 +75,7 @@ public class GetAdminMediaResponseMapper {
         return responseCourthouse;
     }
 
+    @SuppressWarnings("Duplicates")
     public MediaHideResponse mapHideOrShowResponse(MediaEntity entity, ObjectAdminActionEntity objectAdminActionEntity) {
         MediaHideResponse response = new MediaHideResponse();
         response.setId(entity.getId());
