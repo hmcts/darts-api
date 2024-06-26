@@ -15,6 +15,8 @@ public class UploadNewFileRecordMetadata implements ArchiveMetadata {
     private String publisher;
     @JsonProperty("dz_file_name")
     private String dzFilename;
+    @JsonProperty("a360_file_id")
+    private String a360FileId;
     @JsonProperty("file_tag")
     private String fileTag;
 

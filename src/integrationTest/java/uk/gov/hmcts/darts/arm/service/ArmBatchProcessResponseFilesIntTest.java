@@ -826,8 +826,8 @@ class ArmBatchProcessResponseFilesIntTest extends IntegrationBase {
         ExternalObjectDirectoryEntity foundTranscriptionEod = dartsDatabase.getExternalObjectDirectoryRepository()
             .findById(armEod.getId()).orElseThrow();
         assertEquals(STORED.getId(), foundTranscriptionEod.getStatus().getId());
-        assertEquals("A360230516_TestIngestion_1.docx", foundTranscriptionEod.getExternalFileId());
-        assertEquals(String.valueOf(armEod.getId()), foundTranscriptionEod.getExternalRecordId());
+        assertEquals("e7cde7c6-15d7-4c7e-a85d-a468c7ea72b9", foundTranscriptionEod.getExternalFileId());
+        assertEquals("1cf976c7-cedd-703f-ab70-01588bd56d50", foundTranscriptionEod.getExternalRecordId());
         assertTrue(foundTranscriptionEod.isResponseCleaned());
 
         verify(armDataManagementApi).listResponseBlobsUsingMarker(PREFIX, BATCH_SIZE, continuationToken);
@@ -1009,8 +1009,8 @@ class ArmBatchProcessResponseFilesIntTest extends IntegrationBase {
         ExternalObjectDirectoryEntity foundAnnotationEod = dartsDatabase.getExternalObjectDirectoryRepository()
             .findById(armEod.getId()).orElseThrow();
         assertEquals(STORED.getId(), foundAnnotationEod.getStatus().getId());
-        assertEquals("A360230516_TestIngestion_1.docx", foundAnnotationEod.getExternalFileId());
-        assertEquals(String.valueOf(armEod.getId()), foundAnnotationEod.getExternalRecordId());
+        assertEquals("e7cde7c6-15d7-4c7e-a85d-a468c7ea72b9", foundAnnotationEod.getExternalFileId());
+        assertEquals("1cf976c7-cedd-703f-ab70-01588bd56d50", foundAnnotationEod.getExternalRecordId());
         assertTrue(foundAnnotationEod.isResponseCleaned());
 
         verify(armDataManagementApi).listResponseBlobsUsingMarker(PREFIX, BATCH_SIZE, continuationToken);
@@ -1096,8 +1096,8 @@ class ArmBatchProcessResponseFilesIntTest extends IntegrationBase {
         ExternalObjectDirectoryEntity foundAnnotationEod = dartsDatabase.getExternalObjectDirectoryRepository()
             .findById(armEod.getId()).orElseThrow();
         assertEquals(STORED.getId(), foundAnnotationEod.getStatus().getId());
-        assertEquals("A360230516_TestIngestion_1.docx", foundAnnotationEod.getExternalFileId());
-        assertEquals(String.valueOf(armEod.getId()), foundAnnotationEod.getExternalRecordId());
+        assertEquals("e7cde7c6-15d7-4c7e-a85d-a468c7ea72b9", foundAnnotationEod.getExternalFileId());
+        assertEquals("1cf976c7-cedd-703f-ab70-01588bd56d50", foundAnnotationEod.getExternalRecordId());
         assertTrue(foundAnnotationEod.isResponseCleaned());
 
         verify(armDataManagementApi).listResponseBlobsUsingMarker(PREFIX, BATCH_SIZE, continuationToken);

@@ -494,12 +494,9 @@ public class ArmResponseFilesProcessSingleElementImpl implements ArmResponseFile
                                                ExternalObjectDirectoryEntity externalObjectDirectory,
                                                String objectChecksum) {
         if (objectChecksum.equalsIgnoreCase(armResponseUploadFileRecord.getMd5())) {
-            UploadNewFileRecord uploadNewFileRecord = readInputJson(externalObjectDirectory, armResponseUploadFileRecord.getInput());
-            if (nonNull(uploadNewFileRecord)) {
-                externalObjectDirectory.setExternalFileId(uploadNewFileRecord.getFileMetadata().getDzFilename());
-                externalObjectDirectory.setExternalRecordId(uploadNewFileRecord.getRelationId());
-                updateExternalObjectDirectoryStatus(externalObjectDirectory, storedStatus);
-            }
+            externalObjectDirectory.setExternalFileId(armResponseUploadFileRecord.getA360FileId());
+            externalObjectDirectory.setExternalRecordId(armResponseUploadFileRecord.getA360RecordId());
+            updateExternalObjectDirectoryStatus(externalObjectDirectory, storedStatus);
         } else {
             log.warn("External object id {} checksum differs. Arm checksum: {} Object Checksum: {}",
                      externalObjectDirectory.getId(),
@@ -508,26 +505,6 @@ public class ArmResponseFilesProcessSingleElementImpl implements ArmResponseFile
             externalObjectDirectory.setErrorCode(armResponseUploadFileRecord.getErrorStatus());
             updateExternalObjectDirectoryStatus(externalObjectDirectory, armResponseChecksumVerificationFailedStatus);
         }
-    }
-
-    private UploadNewFileRecord readInputJson(ExternalObjectDirectoryEntity externalObjectDirectory, String input) {
-        UploadNewFileRecord uploadNewFileRecord = null;
-        if (StringUtils.isNotEmpty(input)) {
-            String unescapedJson = StringEscapeUtils.unescapeJson(input);
-            try {
-                uploadNewFileRecord = objectMapper.readValue(unescapedJson, UploadNewFileRecord.class);
-            } catch (JsonMappingException e) {
-                log.error("Unable to map the upload record file input field");
-                updateExternalObjectDirectoryStatus(externalObjectDirectory, armResponseProcessingFailedStatus);
-            } catch (JsonProcessingException e) {
-                log.error("Unable to parse the upload record file ");
-                updateExternalObjectDirectoryStatus(externalObjectDirectory, armResponseProcessingFailedStatus);
-            }
-        } else {
-            log.warn("Unable to get the upload record file input field");
-            updateExternalObjectDirectoryStatus(externalObjectDirectory, armResponseProcessingFailedStatus);
-        }
-        return uploadNewFileRecord;
     }
 
     private ObjectRecordStatusEnum updateExternalObjectDirectoryStatusAndVerificationAttempt(ExternalObjectDirectoryEntity externalObjectDirectory,
