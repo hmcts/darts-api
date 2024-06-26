@@ -81,13 +81,13 @@ public class AuthorisationServiceImpl implements AuthorisationService {
                                  GetAuthorisationResult.class,
                                  root.get(UserAccountEntity_.id),
                                  root.get(UserAccountEntity_.userName),
+                                 root.get(UserAccountEntity_.active),
                                  securityGroup.get(SecurityGroupEntity_.globalAccess),
                                  courthouses.get(CourthouseEntity_.id),
                                  securityRole.get(SecurityRoleEntity_.id),
                                  securityRole.get(SecurityRoleEntity_.roleName),
                                  securityPermission.get(SecurityPermissionEntity_.id),
-                                 securityPermission.get(SecurityPermissionEntity_.permissionName),
-                                 root.get(UserAccountEntity_.active))
+                                 securityPermission.get(SecurityPermissionEntity_.permissionName))
         );
 
         ParameterExpression<String> paramEmailAddress = criteriaBuilder.parameter(String.class);
