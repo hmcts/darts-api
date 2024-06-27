@@ -50,9 +50,6 @@ class SetReportingRestrictionEventHandlerTest extends HandlerTestData {
                                     .courtroom(SOME_ROOM)
                                     .dateTime(HEARING_DATE_ODT));
 
-        dartsGateway.verifyReceivedNotificationType(3);
-        dartsGateway.verifyNotificationUrl("http://1.2.3.4/VIQDARNotifyEvent/DARNotifyEvent.asmx", 1);
-
         var persistedCase = dartsDatabase.findByCaseByCaseNumberAndCourtHouseName(
             SOME_CASE_NUMBER,
             SOME_COURTHOUSE
@@ -72,6 +69,9 @@ class SetReportingRestrictionEventHandlerTest extends HandlerTestData {
             "Judge directed on reporting restrictions",
             persistedCase.getReportingRestrictions().getEventName()
         );
+
+        dartsGateway.verifyReceivedNotificationType(3);
+        dartsGateway.verifyNotificationUrl("http://1.2.3.4/VIQDARNotifyEvent/DARNotifyEvent.asmx", 1);
     }
 
     @Test
@@ -88,9 +88,6 @@ class SetReportingRestrictionEventHandlerTest extends HandlerTestData {
                                     .courtroom(SOME_ROOM)
                                     .dateTime(HEARING_DATE_ODT));
 
-        dartsGateway.verifyReceivedNotificationType(3);
-        dartsGateway.verifyNotificationUrl("http://1.2.3.4/VIQDARNotifyEvent/DARNotifyEvent.asmx", 1);
-
         var persistedCase = dartsDatabase.findByCaseByCaseNumberAndCourtHouseName(
             SOME_CASE_NUMBER,
             SOME_COURTHOUSE
@@ -110,6 +107,9 @@ class SetReportingRestrictionEventHandlerTest extends HandlerTestData {
             "Judge directed on reporting restrictions",
             persistedCase.getReportingRestrictions().getEventName()
         );
+
+        dartsGateway.verifyReceivedNotificationType(3);
+        dartsGateway.verifyNotificationUrl("http://1.2.3.4/VIQDARNotifyEvent/DARNotifyEvent.asmx", 1);
     }
 
     @Test
@@ -128,9 +128,6 @@ class SetReportingRestrictionEventHandlerTest extends HandlerTestData {
                                     .courthouse(SOME_COURTHOUSE)
                                     .courtroom(SOME_OTHER_ROOM)
                                     .dateTime(HEARING_DATE_ODT));
-
-        dartsGateway.verifyReceivedNotificationType(3);
-        dartsGateway.verifyNotificationUrl("http://1.2.3.4/VIQDARNotifyEvent/DARNotifyEvent.asmx", 1);
 
         var persistedCase = dartsDatabase.findByCaseByCaseNumberAndCourtHouseName(
             SOME_CASE_NUMBER,
@@ -153,6 +150,9 @@ class SetReportingRestrictionEventHandlerTest extends HandlerTestData {
             "Judge directed on reporting restrictions",
             persistedCase.getReportingRestrictions().getEventName()
         );
+
+        dartsGateway.verifyReceivedNotificationType(3);
+        dartsGateway.verifyNotificationUrl("http://1.2.3.4/VIQDARNotifyEvent/DARNotifyEvent.asmx", 1);
     }
 
     @Test
@@ -169,8 +169,6 @@ class SetReportingRestrictionEventHandlerTest extends HandlerTestData {
                                     .courthouse(SOME_COURTHOUSE)
                                     .courtroom(SOME_ROOM)
                                     .dateTime(HEARING_DATE_ODT));
-
-        dartsGateway.verifyDoesntReceiveDarEvent();
 
         var persistedCase = dartsDatabase.findByCaseByCaseNumberAndCourtHouseName(
             SOME_CASE_NUMBER,
@@ -191,6 +189,8 @@ class SetReportingRestrictionEventHandlerTest extends HandlerTestData {
             "Judge directed on reporting restrictions",
             persistedCase.getReportingRestrictions().getEventName()
         );
+
+        dartsGateway.verifyDoesntReceiveDarEvent();
     }
 
     @Test
@@ -208,9 +208,6 @@ class SetReportingRestrictionEventHandlerTest extends HandlerTestData {
                                     .courtroom(SOME_ROOM)
                                     .dateTime(HEARING_DATE_ODT));
 
-        dartsGateway.verifyReceivedNotificationType(3);
-        dartsGateway.verifyNotificationUrl("http://1.2.3.4/VIQDARNotifyEvent/DARNotifyEvent.asmx", 1);
-
         var hearingsForCase = dartsDatabase.findByCourthouseCourtroomAndDate(
             SOME_COURTHOUSE, SOME_ROOM, HEARING_DATE_ODT.toLocalDate());
 
@@ -225,6 +222,9 @@ class SetReportingRestrictionEventHandlerTest extends HandlerTestData {
         assertThat(hearingsForCase.size()).isEqualTo(1);
         assertThat(hearingsForCase.get(0).getHearingIsActual()).isEqualTo(true);
         assertEquals("Restrictions lifted", persistedCase.getReportingRestrictions().getEventName());
+
+        dartsGateway.verifyReceivedNotificationType(3);
+        dartsGateway.verifyNotificationUrl("http://1.2.3.4/VIQDARNotifyEvent/DARNotifyEvent.asmx", 1);
     }
 
     private DartsEvent someMinimalDartsEvent() {

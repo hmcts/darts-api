@@ -177,8 +177,6 @@ class InterpreterUsedHandlerTest extends HandlerTestData {
                                     .courtroom(SOME_ROOM)
                                     .dateTime(HEARING_DATE_ODT));
 
-        dartsGateway.verifyDoesntReceiveDarEvent();
-
         var persistedCase = dartsDatabase.findByCaseByCaseNumberAndCourtHouseName(
             SOME_CASE_NUMBER,
             SOME_COURTHOUSE
@@ -195,6 +193,8 @@ class InterpreterUsedHandlerTest extends HandlerTestData {
         assertThat(hearingsForCase.get(0).getHearingIsActual()).isEqualTo(true);
 
         assertThat(persistedCase.getInterpreterUsed()).isTrue();
+
+        dartsGateway.verifyDoesntReceiveDarEvent();
     }
 
     private static DartsEvent someMinimalDartsEvent() {
