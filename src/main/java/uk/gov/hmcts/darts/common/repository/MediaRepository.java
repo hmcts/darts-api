@@ -68,5 +68,6 @@ public interface MediaRepository extends JpaRepository<MediaEntity, Integer> {
             AND (cast(:startAt as TIMESTAMP) IS NULL OR (me.start >= :startAt))
            """)
     List<MediaEntity> findMediaByDetails(List<Integer> hearingIds, OffsetDateTime startAt,
+                                         OffsetDateTime endAt);
 
 }
