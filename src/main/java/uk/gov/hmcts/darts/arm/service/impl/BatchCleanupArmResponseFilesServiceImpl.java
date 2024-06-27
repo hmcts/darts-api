@@ -150,7 +150,6 @@ public class BatchCleanupArmResponseFilesServiceImpl implements BatchCleanupArmR
                     if (!responseFileDeletedSuccessfully) {
                         log.warn("Response file {} failed to delete successfully.", associatedFile);
                         successfullyDeletedAssociatedFiles = false;
-                        break;
                     }
                 } catch (Exception e) {
                     log.error("Failure to delete response file {} for EOD {} - {}", associatedFile, eodId, e.getMessage(), e);
