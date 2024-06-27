@@ -157,7 +157,6 @@ class SetReportingRestrictionEventHandlerTest extends HandlerTestData {
 
     @Test
     void givenSetReportingRestrictionEventReceivedAndCaseAndHearingExistAndRoomHasNotChanged_thenDoNotNotifyDar() {
-
         dartsDatabase.givenTheDatabaseContainsCourtCaseWithHearingAndCourthouseWithRoom(
             SOME_CASE_NUMBER,
             SOME_COURTHOUSE,

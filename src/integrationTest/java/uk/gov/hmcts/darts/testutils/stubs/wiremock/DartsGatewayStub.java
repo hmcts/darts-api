@@ -22,6 +22,10 @@ public class DartsGatewayStub {
                         .willReturn(aResponse().withStatus(200).withBody("")));
     }
 
+    public void darNotificationReturnsGatewayTimeoutError() {
+        stubFor(post(urlEqualTo(DAR_NOTIFY_PATH)).willReturn(aResponse().withStatus(504)));
+    }
+
     public void verifyDoesntReceiveDarEvent() {
         wait(1000);
         verify(exactly(0), postRequestedFor(urlEqualTo(DAR_NOTIFY_PATH)));

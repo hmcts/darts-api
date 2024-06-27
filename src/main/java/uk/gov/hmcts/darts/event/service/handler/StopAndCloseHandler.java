@@ -24,7 +24,6 @@ import uk.gov.hmcts.darts.event.model.DartsEventRetentionPolicy;
 import uk.gov.hmcts.darts.event.model.stopandclosehandler.PendingRetention;
 import uk.gov.hmcts.darts.event.service.CaseManagementRetentionService;
 import uk.gov.hmcts.darts.event.service.handler.base.EventHandlerBase;
-import uk.gov.hmcts.darts.event.service.impl.DarNotifyServiceImpl;
 import uk.gov.hmcts.darts.log.api.LogApi;
 import uk.gov.hmcts.darts.retention.api.RetentionApi;
 import uk.gov.hmcts.darts.retention.enums.CaseRetentionStatus;
@@ -43,7 +42,6 @@ import static uk.gov.hmcts.darts.event.enums.DarNotifyType.STOP_RECORDING;
 @Slf4j
 public class StopAndCloseHandler extends EventHandlerBase {
 
-    private final DarNotifyServiceImpl darNotifyService;
     private final CaseRetentionRepository caseRetentionRepository;
     private final RetentionApi retentionApi;
     private final CaseManagementRetentionService caseManagementRetentionService;
@@ -57,14 +55,12 @@ public class StopAndCloseHandler extends EventHandlerBase {
                                HearingRepository hearingRepository,
                                CaseRepository caseRepository,
                                ApplicationEventPublisher eventPublisher,
-                               DarNotifyServiceImpl darNotifyService,
                                CaseRetentionRepository caseRetentionRepository,
                                RetentionApi retentionApi,
                                AuthorisationApi authorisationApi,
                                LogApi logApi,
                                CaseManagementRetentionService caseManagementRetentionService) {
         super(retrieveCoreObjectService, eventRepository, hearingRepository, caseRepository, eventPublisher, authorisationApi, logApi);
-        this.darNotifyService = darNotifyService;
         this.caseRetentionRepository = caseRetentionRepository;
         this.caseManagementRetentionService = caseManagementRetentionService;
         this.retentionApi = retentionApi;
@@ -78,7 +74,7 @@ public class StopAndCloseHandler extends EventHandlerBase {
         var courtCase = hearingAndEvent.getHearingEntity().getCourtCase();
 
         var notifyEvent = new DarNotifyApplicationEvent(this, dartsEvent, STOP_RECORDING, hearingAndEvent.getCourtroomId());
-        darNotifyService.notifyDarPc(notifyEvent);
+        eventPublisher.publishEvent(notifyEvent);
 
         setDefaultPolicyIfNotDefined(dartsEvent);
 

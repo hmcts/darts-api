@@ -60,9 +60,13 @@ public class DarNotifyServiceImpl {
                 .caseNumbers(openCaseNumbers)
                 .build();
 
-
-            dartsGatewayClient.darNotify(darNotifyEvent);
-            log.info("Response from DarNotify for event {} is successful", event.getDartsEvent().getEventId());
+            try {
+                dartsGatewayClient.darNotify(darNotifyEvent);
+                log.info("DarNotify successful: event_id={}, notification_url={}", event.getDartsEvent().getEventId(), notificationUrl);
+            } catch (Exception ex) {
+                log.error("DarNotify failed: event_id={}, notification_url={}", event.getDartsEvent().getEventId(), notificationUrl, ex);
+                throw ex;
+            }
         }
     }
 }
