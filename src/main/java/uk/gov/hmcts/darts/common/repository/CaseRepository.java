@@ -18,6 +18,9 @@ public interface CaseRepository extends JpaRepository<CourtCaseEntity, Integer> 
     Optional<CourtCaseEntity> findByCaseNumberIgnoreCaseAndCourthouse_CourthouseNameIgnoreCase(String caseNumber,
                                                                                                String courthouseName);
 
+    Optional<CourtCaseEntity> findByCaseNumberIgnoreCaseAndCourthouse(String caseNumber,
+                                                                      CourthouseEntity courthouse);
+
     @Query("""
         SELECT case.caseNumber
         FROM CourtCaseEntity case

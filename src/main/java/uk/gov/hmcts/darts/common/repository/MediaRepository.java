@@ -3,6 +3,7 @@ package uk.gov.hmcts.darts.common.repository;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
+import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
 
 import java.time.OffsetDateTime;
@@ -45,23 +46,17 @@ public interface MediaRepository extends JpaRepository<MediaEntity, Integer> {
     @Query("""
            SELECT me
            FROM MediaEntity me
-           JOIN me.courtroom cr
-           JOIN cr.courthouse ch
            WHERE
-           me.courtroom.id = cr.id
-           AND cr.courthouse.id = ch.id
-           AND cr.name= :courtroomName
-           AND ch.courthouseName= :courthouseName
+           me.courtroom = :courtroomEntity
            AND me.channel= :channel
            AND me.mediaFile= :mediaFile
            AND me.start= :startedDateTime
            AND me.end= :endDateTime
            ORDER BY me.start
         """)
-    List<MediaEntity> findMediaByDetails(String courthouseName,
-                                   String courtroomName, Integer channel,
-                                   String mediaFile, OffsetDateTime startedDateTime,
-                                   OffsetDateTime endDateTime);
+    List<MediaEntity> findMediaByDetails(CourtroomEntity courtroomEntity, Integer channel,
+                                         String mediaFile, OffsetDateTime startedDateTime,
+                                         OffsetDateTime endDateTime);
 
     @Query(value = """
         SELECT me
@@ -73,5 +68,6 @@ public interface MediaRepository extends JpaRepository<MediaEntity, Integer> {
             AND (cast(:startAt as TIMESTAMP) IS NULL OR (me.start >= :startAt))
            """)
     List<MediaEntity> findMediaByDetails(List<Integer> hearingIds, OffsetDateTime startAt,
-                                                                                OffsetDateTime endAt);
+                                         OffsetDateTime endAt);
+
 }

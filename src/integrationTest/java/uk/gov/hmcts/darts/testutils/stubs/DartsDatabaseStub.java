@@ -61,6 +61,7 @@ import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
 import uk.gov.hmcts.darts.common.repository.HearingReportingRestrictionsRepository;
 import uk.gov.hmcts.darts.common.repository.HearingRepository;
 import uk.gov.hmcts.darts.common.repository.JudgeRepository;
+import uk.gov.hmcts.darts.common.repository.MediaLinkedCaseRepository;
 import uk.gov.hmcts.darts.common.repository.MediaRepository;
 import uk.gov.hmcts.darts.common.repository.MediaRequestRepository;
 import uk.gov.hmcts.darts.common.repository.NodeRegisterRepository;
@@ -147,6 +148,7 @@ public class DartsDatabaseStub {
     private final ObjectHiddenReasonRepository objectHiddenReasonRepository;
     private final JudgeRepository judgeRepository;
     private final MediaRepository mediaRepository;
+    private final MediaLinkedCaseRepository mediaLinkedCaseRepository;
     private final MediaRequestRepository mediaRequestRepository;
     private final NodeRegisterRepository nodeRegisterRepository;
     private final NotificationRepository notificationRepository;
@@ -213,6 +215,7 @@ public class DartsDatabaseStub {
         eventRepository.deleteAll();
         hearingRepository.deleteAll();
         annotationRepository.deleteAll();
+        mediaLinkedCaseRepository.deleteAll();
         mediaRepository.deleteAll();
         notificationRepository.deleteAll();
         nodeRegisterRepository.deleteAll();

@@ -5,10 +5,16 @@ import org.springframework.stereotype.Component;
 import uk.gov.hmcts.darts.audio.component.AddAudioRequestMapper;
 import uk.gov.hmcts.darts.audio.model.AddAudioMetadataRequest;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
+import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
+import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
+import uk.gov.hmcts.darts.common.helper.MediaLinkedCaseHelper;
+import uk.gov.hmcts.darts.common.repository.MediaRepository;
 import uk.gov.hmcts.darts.common.service.RetrieveCoreObjectService;
+
+import java.util.List;
 
 import static uk.gov.hmcts.darts.common.entity.MediaEntity.MEDIA_TYPE_DEFAULT;
 
@@ -18,6 +24,8 @@ public class AddAudioRequestMapperImpl implements AddAudioRequestMapper {
 
     private final RetrieveCoreObjectService retrieveCoreObjectService;
     private final UserIdentity userIdentity;
+    private final MediaLinkedCaseHelper mediaLinkedCaseHelper;
+    private final MediaRepository mediaRepository;
 
     @Override
     public MediaEntity mapToMedia(AddAudioMetadataRequest addAudioMetadataRequest, UserAccountEntity userAccount) {
@@ -32,7 +40,6 @@ public class AddAudioRequestMapperImpl implements AddAudioRequestMapper {
             userAccount
         );
         media.setCourtroom(foundCourtroom);
-        media.setCaseNumberList(addAudioMetadataRequest.getCases());
         media.setMediaFormat(addAudioMetadataRequest.getFormat());
         media.setFileSize(addAudioMetadataRequest.getFileSize());
         media.setChecksum(addAudioMetadataRequest.getChecksum());
@@ -40,6 +47,22 @@ public class AddAudioRequestMapperImpl implements AddAudioRequestMapper {
         media.setMediaType(MEDIA_TYPE_DEFAULT);
         media.setCreatedBy(userIdentity.getUserAccount());
         media.setLastModifiedBy(userIdentity.getUserAccount());
+
+        mediaRepository.saveAndFlush(media);
+        addCasesToMedia(media, foundCourtroom.getCourthouse(), addAudioMetadataRequest.getCases(), userAccount);
+
         return media;
+    }
+
+    private void addCasesToMedia(MediaEntity media, CourthouseEntity courthouse, List<String> caseNumbers, UserAccountEntity userAccount) {
+        for (String caseNumber : caseNumbers) {
+            CourtCaseEntity courtCase = retrieveCoreObjectService.retrieveOrCreateCase(
+                courthouse,
+                caseNumber,
+                userAccount
+            );
+            mediaLinkedCaseHelper.addCase(media, courtCase);
+        }
+
     }
 }
