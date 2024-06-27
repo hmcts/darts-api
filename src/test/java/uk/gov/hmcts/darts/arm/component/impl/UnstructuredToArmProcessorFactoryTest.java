@@ -19,14 +19,10 @@ import uk.gov.hmcts.darts.arm.service.impl.UnstructuredToArmBatchProcessorImpl;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.casedocument.service.GenerateCaseDocumentSingleCaseProcessor;
 import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
-import uk.gov.hmcts.darts.common.repository.AnnotationDocumentRepository;
-import uk.gov.hmcts.darts.common.repository.CaseDocumentRepository;
 import uk.gov.hmcts.darts.common.repository.CaseRepository;
 import uk.gov.hmcts.darts.common.repository.ExternalLocationTypeRepository;
 import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
-import uk.gov.hmcts.darts.common.repository.MediaRepository;
 import uk.gov.hmcts.darts.common.repository.ObjectRecordStatusRepository;
-import uk.gov.hmcts.darts.common.repository.TranscriptionDocumentRepository;
 import uk.gov.hmcts.darts.common.service.FileOperationService;
 import uk.gov.hmcts.darts.datamanagement.api.DataManagementApi;
 
@@ -64,14 +60,6 @@ class UnstructuredToArmProcessorFactoryTest {
     @Mock
     private CurrentTimeHelper currentTimeHelper;
     @Mock
-    private MediaRepository mediaRepository;
-    @Mock
-    private TranscriptionDocumentRepository transcriptionDocumentRepository;
-    @Mock
-    private AnnotationDocumentRepository annotationDocumentRepository;
-    @Mock
-    private CaseDocumentRepository caseDocumentRepository;
-    @Mock
     private CaseRepository caseRepository;
     @Mock
     private GenerateCaseDocumentSingleCaseProcessor generateCaseDocumentSingleCaseProcessor;
@@ -94,10 +82,6 @@ class UnstructuredToArmProcessorFactoryTest {
                                                   armResponseFilesProcessSingleElement,
                                                   objectMapper,
                                                   currentTimeHelper,
-                                                  mediaRepository,
-                                                  transcriptionDocumentRepository,
-                                                  annotationDocumentRepository,
-                                                  caseDocumentRepository,
                                                   caseRepository,
                                                   generateCaseDocumentSingleCaseProcessor);
 
@@ -123,10 +107,6 @@ class UnstructuredToArmProcessorFactoryTest {
                                                   armResponseFilesProcessSingleElement,
                                                   objectMapper,
                                                   currentTimeHelper,
-                                                  mediaRepository,
-                                                  transcriptionDocumentRepository,
-                                                  annotationDocumentRepository,
-                                                  caseDocumentRepository,
                                                   caseRepository,
                                                   generateCaseDocumentSingleCaseProcessor);
 
@@ -152,10 +132,6 @@ class UnstructuredToArmProcessorFactoryTest {
                                                   armResponseFilesProcessSingleElement,
                                                   objectMapper,
                                                   currentTimeHelper,
-                                                  mediaRepository,
-                                                  transcriptionDocumentRepository,
-                                                  annotationDocumentRepository,
-                                                  caseDocumentRepository,
                                                   caseRepository,
                                                   generateCaseDocumentSingleCaseProcessor);
 
