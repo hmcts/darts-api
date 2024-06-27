@@ -49,10 +49,6 @@ public class AutomatedTaskProcessorFactoryImpl implements AutomatedTaskProcessor
     private final ArmResponseFilesProcessSingleElement armResponseFilesProcessSingleElement;
     private final ObjectMapper objectMapper;
     private final CurrentTimeHelper currentTimeHelper;
-    private final MediaRepository mediaRepository;
-    private final TranscriptionDocumentRepository transcriptionDocumentRepository;
-    private final AnnotationDocumentRepository annotationDocumentRepository;
-    private final CaseDocumentRepository caseDocumentRepository;
     private final CaseRepository caseRepository;
     private final GenerateCaseDocumentSingleCaseProcessor generateCaseDocumentSingleCaseProcessor;
 
