@@ -3,6 +3,7 @@ package uk.gov.hmcts.darts.casedocument.service;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.SpyBean;
+import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.casedocument.mapper.CourtCaseDocumentMapper;
 import uk.gov.hmcts.darts.casedocument.template.CourtCaseDocument;
 import uk.gov.hmcts.darts.common.entity.CaseDocumentEntity;
@@ -27,10 +28,10 @@ class CourtCaseDocumentMapperIntTest extends IntegrationBase {
     ExternalObjectDirectoryRepository eodRepository;
     @SpyBean
     CaseDocumentRepository caseDocumentRepository;
-
     @Autowired
     CourtCaseStub courtCaseStub;
-
+    @Autowired
+    UserIdentity userIdentity;
     @Autowired
     CourtCaseDocumentMapper mapper;
 
@@ -50,6 +51,8 @@ class CourtCaseDocumentMapperIntTest extends IntegrationBase {
 
         CourtCaseEntity cc = courtCaseStub.createCourtCaseAndAssociatedEntitiesWithRandomValues();
 
+        givenBearerTokenExists("darts.global.user@hmcts.net");
+
         // when
         CourtCaseDocument doc = mapper.mapToCaseDocument(cc);
 
@@ -57,9 +60,9 @@ class CourtCaseDocumentMapperIntTest extends IntegrationBase {
         assertAll(
             "Grouped assertions for Case Document top level properties",
             () -> assertThat(doc.getId()).isNotNull().isEqualTo(cc.getId()),
-            () -> assertThat(doc.getCreatedBy()).isNotNull().isEqualTo(cc.getCreatedBy().getId()),
+            () -> assertThat(doc.getCreatedBy()).isNotNull().isEqualTo(userIdentity.getUserAccount().getId()),
             () -> assertThat(doc.getCreatedDateTime()).isNotNull().isEqualTo(cc.getCreatedDateTime()),
-            () -> assertThat(doc.getLastModifiedBy()).isNotNull().isEqualTo(cc.getLastModifiedBy().getId()),
+            () -> assertThat(doc.getLastModifiedBy()).isNotNull().isEqualTo(userIdentity.getUserAccount().getId()),
             () -> assertThat(doc.getLastModifiedDateTime()).isNotNull().isEqualTo(cc.getLastModifiedDateTime()),
             () -> assertThat(doc.getLegacyCaseObjectId()).isNotNull().isEqualTo(cc.getLegacyCaseObjectId()),
             () -> assertThat(doc.getCaseNumber()).isNotNull().isEqualTo(cc.getCaseNumber()),
