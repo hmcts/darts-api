@@ -61,7 +61,7 @@ class CourtCaseDocumentMapperIntTest extends IntegrationBase {
         // then
         assertAll(
             "Grouped assertions for Case Document top level properties",
-            () -> assertThat(doc.getId()).isNotNull().isEqualTo(cc.getId()),
+            () -> assertThat(doc.getCaseId()).isNotNull().isEqualTo(cc.getId()),
             () -> assertThat(doc.getCreatedBy()).isNotNull().isEqualTo(userIdentity.getUserAccount().getId()),
             () -> assertThat(doc.getCreatedDateTime()).isNotNull().isCloseToUtcNow(within(1, SECONDS)),
             () -> assertThat(doc.getLastModifiedBy()).isNotNull().isEqualTo(userIdentity.getUserAccount().getId()),

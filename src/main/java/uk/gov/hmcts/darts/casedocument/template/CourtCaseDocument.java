@@ -10,7 +10,7 @@ import java.util.List;
 @EqualsAndHashCode(callSuper = true)
 public class CourtCaseDocument extends CreatedModifiedCaseDocument {
 
-    private final Integer id;
+    private final Integer caseId;
     private final EventHandlerCaseDocument reportingRestrictions;
     private final String legacyCaseObjectId;
     private final String caseNumber;
