@@ -245,13 +245,15 @@ public interface ExternalObjectDirectoryRepository extends JpaRepository<Externa
             AND eod.lastModifiedDateTime < :lastModifiedBefore
             and eod.manifestFile is not null
             and eod.manifestFile like CONCAT(:manifestFileBatchPrefix, '%')
+            ORDER BY 1
+            LIMIT :batchSize
             """
     )
     List<String> findBatchCleanupManifestFilenames(
         List<ObjectRecordStatusEntity> statuses,
         ExternalLocationTypeEntity locationType,
         boolean responseCleaned,
-        OffsetDateTime lastModifiedBefore, String manifestFileBatchPrefix);
+        OffsetDateTime lastModifiedBefore, String manifestFileBatchPrefix, Integer batchSize);
 
     @Query(
         """

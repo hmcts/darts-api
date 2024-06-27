@@ -37,8 +37,10 @@ public class ArmResponseFileHelper {
             //is a Batch response UI file.
             String armUuidValue = StringUtils.removeEnd(manifestFileName, armBatchCleanupConfiguration.getManifestFileSuffix());
             List<String> matchingInputUploadFiles = armDataManagementApi.listResponseBlobs(armUuidValue);
-            //there should only be 1 matching InputUpload file, but looping through it just in case.
-            if (matchingInputUploadFiles.size() > 1) {
+            if (matchingInputUploadFiles.isEmpty()) {
+                log.error("Cannot find corresponding inputUpload file in ARM for uuid {}.", armUuidValue);
+            } else if (matchingInputUploadFiles.size() > 1) {
+                //there should only be 1 matching InputUpload file, but looping through it just in case.
                 log.warn("Found more than 1 inputUpload file for uuid {}. Continuing anyway.", armUuidValue);
             }
             for (String inputUploadFile : matchingInputUploadFiles) {
