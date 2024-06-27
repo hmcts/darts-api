@@ -48,4 +48,10 @@ public abstract class CaseObjectsCaseDocumentMapper {
     public abstract AnnotationCaseDocument.AnnotationDocumentCaseDocument map(AnnotationDocumentEntity entity);
 
     public abstract List<ExternalObjectDirectoryCaseDocument> mapEods(List<ExternalObjectDirectoryEntity> entities);
+
+    @Mappings({
+        @Mapping(source = "transcriptionDocumentEntity", target = "transcriptionDocument"),
+        @Mapping(source = "annotationDocumentEntity", target = "annotationDocument"),
+    })
+    public abstract ExternalObjectDirectoryCaseDocument mapEod(ExternalObjectDirectoryEntity entity);
 }
