@@ -31,6 +31,8 @@ public abstract class CourtCaseDocumentMapper {
     @Mappings({
         @Mapping(target = "createdBy", qualifiedByName = "retrieveCaseDocumentGenerationUser"),
         @Mapping(target = "lastModifiedBy", qualifiedByName = "retrieveCaseDocumentGenerationUser"),
+        @Mapping(target = "createdDateTime", expression = "java(OffsetDateTime.now())"),
+        @Mapping(target = "lastModifiedDateTime", expression = "java(OffsetDateTime.now())"),
         @Mapping(source = "defendantList", target = "defendants"),
         @Mapping(source = "prosecutorList", target = "prosecutors"),
         @Mapping(source = "defenceList", target = "defences"),

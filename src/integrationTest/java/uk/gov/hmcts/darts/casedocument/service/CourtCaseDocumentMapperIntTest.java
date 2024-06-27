@@ -16,7 +16,9 @@ import uk.gov.hmcts.darts.testutils.stubs.CourtCaseStub;
 
 import java.util.List;
 
+import static java.time.temporal.ChronoUnit.SECONDS;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.within;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
@@ -61,9 +63,9 @@ class CourtCaseDocumentMapperIntTest extends IntegrationBase {
             "Grouped assertions for Case Document top level properties",
             () -> assertThat(doc.getId()).isNotNull().isEqualTo(cc.getId()),
             () -> assertThat(doc.getCreatedBy()).isNotNull().isEqualTo(userIdentity.getUserAccount().getId()),
-            () -> assertThat(doc.getCreatedDateTime()).isNotNull().isEqualTo(cc.getCreatedDateTime()),
+            () -> assertThat(doc.getCreatedDateTime()).isNotNull().isCloseToUtcNow(within(1, SECONDS)),
             () -> assertThat(doc.getLastModifiedBy()).isNotNull().isEqualTo(userIdentity.getUserAccount().getId()),
-            () -> assertThat(doc.getLastModifiedDateTime()).isNotNull().isEqualTo(cc.getLastModifiedDateTime()),
+            () -> assertThat(doc.getLastModifiedDateTime()).isNotNull().isCloseToUtcNow(within(1, SECONDS)),
             () -> assertThat(doc.getLegacyCaseObjectId()).isNotNull().isEqualTo(cc.getLegacyCaseObjectId()),
             () -> assertThat(doc.getCaseNumber()).isNotNull().isEqualTo(cc.getCaseNumber()),
             () -> assertThat(doc.getClosed()).isNotNull().isEqualTo(cc.getClosed()),
