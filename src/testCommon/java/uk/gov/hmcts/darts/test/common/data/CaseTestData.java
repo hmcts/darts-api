@@ -4,6 +4,8 @@ import lombok.experimental.UtilityClass;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 
+import java.util.function.Consumer;
+
 import static org.testcontainers.shaded.org.apache.commons.lang3.RandomStringUtils.random;
 import static uk.gov.hmcts.darts.test.common.data.CourthouseTestData.someMinimalCourthouse;
 import static uk.gov.hmcts.darts.test.common.data.DefenceTestData.createDefenceForCaseWithName;
@@ -53,6 +55,22 @@ public class CaseTestData {
         courtCaseEntity.addProsecutor(createProsecutorForCaseWithName(courtCaseEntity, "aProsecutor"));
         courtCaseEntity.setClosed(false);
         courtCaseEntity.setInterpreterUsed(false);
+        return courtCaseEntity;
+    }
+
+    /**
+     * Creates a CourtCaseEntity. Passes the created case to the client for further customisations
+     */
+    public static CourtCaseEntity someMinimalCase(Consumer<CourtCaseEntity> createdCaseConsumer) {
+        var courtCaseEntity = new CourtCaseEntity();
+        courtCaseEntity.setCaseNumber("case-1");
+        courtCaseEntity.setCourthouse(someMinimalCourthouse());
+        courtCaseEntity.addDefendant(createDefendantForCaseWithName(courtCaseEntity, "aDefendant"));
+        courtCaseEntity.addDefence(createDefenceForCaseWithName(courtCaseEntity, "aDefence"));
+        courtCaseEntity.addProsecutor(createProsecutorForCaseWithName(courtCaseEntity, "aProsecutor"));
+        courtCaseEntity.setClosed(false);
+        courtCaseEntity.setInterpreterUsed(false);
+        createdCaseConsumer.accept(courtCaseEntity);
         return courtCaseEntity;
     }
 

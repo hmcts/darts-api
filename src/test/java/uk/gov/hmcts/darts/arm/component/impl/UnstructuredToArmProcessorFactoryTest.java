@@ -17,9 +17,11 @@ import uk.gov.hmcts.darts.arm.service.impl.ArmBatchProcessResponseFilesImpl;
 import uk.gov.hmcts.darts.arm.service.impl.ArmResponseFilesProcessorImpl;
 import uk.gov.hmcts.darts.arm.service.impl.UnstructuredToArmBatchProcessorImpl;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
+import uk.gov.hmcts.darts.casedocument.service.GenerateCaseDocumentSingleCaseProcessor;
 import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
 import uk.gov.hmcts.darts.common.repository.AnnotationDocumentRepository;
 import uk.gov.hmcts.darts.common.repository.CaseDocumentRepository;
+import uk.gov.hmcts.darts.common.repository.CaseRepository;
 import uk.gov.hmcts.darts.common.repository.ExternalLocationTypeRepository;
 import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
 import uk.gov.hmcts.darts.common.repository.MediaRepository;
@@ -69,6 +71,11 @@ class UnstructuredToArmProcessorFactoryTest {
     private AnnotationDocumentRepository annotationDocumentRepository;
     @Mock
     private CaseDocumentRepository caseDocumentRepository;
+    @Mock
+    private CaseRepository caseRepository;
+    @Mock
+    private GenerateCaseDocumentSingleCaseProcessor generateCaseDocumentSingleCaseProcessor;
+
 
     @Test
     void whenBatchModeTrueBatchProcessorCreated() {
@@ -90,7 +97,9 @@ class UnstructuredToArmProcessorFactoryTest {
                                                   mediaRepository,
                                                   transcriptionDocumentRepository,
                                                   annotationDocumentRepository,
-                                                  caseDocumentRepository);
+                                                  caseDocumentRepository,
+                                                  caseRepository,
+                                                  generateCaseDocumentSingleCaseProcessor);
 
         var unstructuredToArmProcessor = automatedTaskProcessorFactory.createUnstructuredToArmProcessor(10);
 
@@ -117,7 +126,9 @@ class UnstructuredToArmProcessorFactoryTest {
                                                   mediaRepository,
                                                   transcriptionDocumentRepository,
                                                   annotationDocumentRepository,
-                                                  caseDocumentRepository);
+                                                  caseDocumentRepository,
+                                                  caseRepository,
+                                                  generateCaseDocumentSingleCaseProcessor);
 
         var armResponseFilesProcessor = automatedTaskProcessorFactory.createArmResponseFilesProcessor(0);
 
@@ -144,7 +155,9 @@ class UnstructuredToArmProcessorFactoryTest {
                                                   mediaRepository,
                                                   transcriptionDocumentRepository,
                                                   annotationDocumentRepository,
-                                                  caseDocumentRepository);
+                                                  caseDocumentRepository,
+                                                  caseRepository,
+                                                  generateCaseDocumentSingleCaseProcessor);
 
         var armResponseFilesProcessor = automatedTaskProcessorFactory.createArmResponseFilesProcessor(10);
 

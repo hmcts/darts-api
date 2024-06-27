@@ -12,6 +12,7 @@ import java.security.DigestInputStream;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static uk.gov.hmcts.darts.test.common.TestUtils.getFile;
 
@@ -32,7 +33,7 @@ class FileContentChecksumTest {
     }
 
     @Test
-    void calculateFromInputStream() throws NoSuchAlgorithmException, IOException {
+    void calculateFromDigestInputStream() throws NoSuchAlgorithmException, IOException {
         var md5Digest = MessageDigest.getInstance(MD_5);
 
         ByteArrayInputStream testDataInputStream = new ByteArrayInputStream(TEST_DATA);
@@ -42,11 +43,10 @@ class FileContentChecksumTest {
             digestInputStream.readAllBytes();
             assertEquals(EXPECTED_STRING_MD5_CHECKSUM, checksum.calculate(digestInputStream));
         }
-
     }
 
     @Test
-    void calculateFromInputStreamUsingAudioFile() throws IOException, NoSuchAlgorithmException {
+    void calculateFromDigestInputStreamUsingAudioFile() throws IOException, NoSuchAlgorithmException {
         var md5Digest = MessageDigest.getInstance(MD_5);
         File audioFileTest = getFile("Tests/common/util/FileContentChecksum/testAudio.mp2");
         String audioFileChecksum;
@@ -60,7 +60,7 @@ class FileContentChecksumTest {
     }
 
     @Test
-    void calculateFromInputStreamUsingAudioFileFromAzure() throws IOException, NoSuchAlgorithmException {
+    void calculateFromDigestInputStreamUsingAudioFileFromAzure() throws IOException, NoSuchAlgorithmException {
         var md5Digest = MessageDigest.getInstance(MD_5);
         File audioFileTest = getFile("Tests/common/util/FileContentChecksum/001b1423-1f94-4ce7-b3a8-1534eb18eb06");
         String audioFileChecksum;
@@ -71,6 +71,15 @@ class FileContentChecksumTest {
         }
         log.info("audioFileChecksum 2 {}", audioFileChecksum);
         assertEquals(EXPECTED_AZURE_AUDIO_FILE_CHECKSUM, audioFileChecksum);
+    }
+
+    @Test
+    void calculateFromInputStream() {
+        ByteArrayInputStream testDataInputStream = new ByteArrayInputStream(TEST_DATA);
+
+        var calculatedChecksum = checksum.calculate(testDataInputStream);
+
+        assertThat(calculatedChecksum).isEqualTo(EXPECTED_STRING_MD5_CHECKSUM);
     }
 
 }

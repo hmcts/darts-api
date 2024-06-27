@@ -2,6 +2,7 @@ package uk.gov.hmcts.darts.arm.component.impl;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.darts.arm.api.ArmDataManagementApi;
 import uk.gov.hmcts.darts.arm.component.ArchiveRecordFileGenerator;
@@ -17,9 +18,14 @@ import uk.gov.hmcts.darts.arm.service.impl.ArmResponseFilesProcessorImpl;
 import uk.gov.hmcts.darts.arm.service.impl.UnstructuredToArmBatchProcessorImpl;
 import uk.gov.hmcts.darts.arm.service.impl.UnstructuredToArmProcessorImpl;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
+import uk.gov.hmcts.darts.casedocument.service.GenerateCaseDocumentProcessor;
+import uk.gov.hmcts.darts.casedocument.service.GenerateCaseDocumentSingleCaseProcessor;
+import uk.gov.hmcts.darts.casedocument.service.impl.GenerateCaseDocumentBatchProcessorImpl;
+import uk.gov.hmcts.darts.common.exception.DartsException;
 import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
 import uk.gov.hmcts.darts.common.repository.AnnotationDocumentRepository;
 import uk.gov.hmcts.darts.common.repository.CaseDocumentRepository;
+import uk.gov.hmcts.darts.common.repository.CaseRepository;
 import uk.gov.hmcts.darts.common.repository.ExternalLocationTypeRepository;
 import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
 import uk.gov.hmcts.darts.common.repository.MediaRepository;
@@ -30,6 +36,7 @@ import uk.gov.hmcts.darts.datamanagement.api.DataManagementApi;
 
 @Component
 @RequiredArgsConstructor
+@Slf4j
 public class AutomatedTaskProcessorFactoryImpl implements AutomatedTaskProcessorFactory {
 
     private final ExternalObjectDirectoryRepository externalObjectDirectoryRepository;
@@ -50,6 +57,8 @@ public class AutomatedTaskProcessorFactoryImpl implements AutomatedTaskProcessor
     private final TranscriptionDocumentRepository transcriptionDocumentRepository;
     private final AnnotationDocumentRepository annotationDocumentRepository;
     private final CaseDocumentRepository caseDocumentRepository;
+    private final CaseRepository caseRepository;
+    private final GenerateCaseDocumentSingleCaseProcessor generateCaseDocumentSingleCaseProcessor;
 
     @Override
     public ArmResponseFilesProcessor createArmResponseFilesProcessor(int batchSize) {
@@ -110,4 +119,15 @@ public class AutomatedTaskProcessorFactoryImpl implements AutomatedTaskProcessor
             batchSize
         );
     }
+
+    @Override
+    public GenerateCaseDocumentProcessor createGenerateCaseDocumentProcessor(int batchSize) {
+        if (batchSize > 0) {
+            return new GenerateCaseDocumentBatchProcessorImpl(
+                batchSize, caseRepository, generateCaseDocumentSingleCaseProcessor, currentTimeHelper);
+        } else {
+            throw new DartsException(String.format("batch size not supported: '%s'", batchSize));
+        }
+    }
+
 }

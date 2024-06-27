@@ -1,6 +1,9 @@
 package uk.gov.hmcts.darts.testutils.stubs;
 
 import lombok.RequiredArgsConstructor;
+import org.jeasy.random.EasyRandom;
+import org.jeasy.random.EasyRandomParameters;
+import org.jeasy.random.randomizers.range.IntegerRangeRandomizer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -95,5 +98,15 @@ public class CourtCaseStub {
             CourtCaseEntity courtCase = createAndSaveMinimalCourtCase("caseNumber" + caseCounter, courthouse);
             hearingStub.createHearingsForCase(courtCase, numOfCourtrooms, numOfHearingsPerCourtroom, courthouseStub, userAccountStub);
         }
+    }
+
+    public CourtCaseEntity createCourtCaseAndAssociatedEntitiesWithRandomValues() {
+        EasyRandomParameters parameters = new EasyRandomParameters()
+            .randomize(Integer.class, new IntegerRangeRandomizer(1, 100))
+            .collectionSizeRange(1, 1)
+            .overrideDefaultInitialization(true);
+
+        EasyRandom generator = new EasyRandom(parameters);
+        return generator.nextObject(CourtCaseEntity.class);
     }
 }

@@ -269,6 +269,8 @@ darts:
       az-copy-preserve-access-tier: "--s2s-preserve-access-tier=false"
     search:
       order: "UNSTRUCTURED,DETS,ARM,VODAFONE"
+  case-document:
+    generation-days: 28
   transcription:
     allowed-extensions:
       - "docx"

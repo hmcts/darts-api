@@ -173,6 +173,7 @@ public class DartsDatabaseStub {
     private final AuditStub auditStub;
     private final CaseDocumentStub caseDocumentStub;
     private final CaseRetentionStub caseRetentionStub;
+    private final CourtCaseStub courtCaseStub;
     private final CourthouseStub courthouseStub;
     private final CourtroomStub courtroomStub;
     private final EventStub eventStub;

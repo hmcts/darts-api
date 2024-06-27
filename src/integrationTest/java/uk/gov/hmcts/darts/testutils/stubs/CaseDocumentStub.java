@@ -3,6 +3,9 @@ package uk.gov.hmcts.darts.testutils.stubs;
 import jakarta.transaction.Transactional;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import org.jeasy.random.EasyRandom;
+import org.jeasy.random.EasyRandomParameters;
+import org.jeasy.random.randomizers.range.IntegerRangeRandomizer;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.darts.common.entity.CaseDocumentEntity;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
@@ -19,11 +22,20 @@ import static java.time.ZoneOffset.UTC;
 public class CaseDocumentStub {
 
     private final CaseDocumentRepository caseDocumentRepository;
+    private final UserAccountStub userAccountStub;
 
     @Transactional
     public CaseDocumentEntity createAndSaveCaseDocumentEntity(CourtCaseEntity courtCaseEntity, UserAccountEntity uploadedBy) {
         CaseDocumentEntity caseDocumentEntity = createCaseDocumentEntity(courtCaseEntity, uploadedBy);
         caseDocumentEntity = caseDocumentRepository.saveAndFlush(caseDocumentEntity);
+        return caseDocumentEntity;
+    }
+
+    @Transactional
+    public CaseDocumentEntity createAndSaveCaseDocumentEntity(CourtCaseEntity courtCaseEntity) {
+        UserAccountEntity testUser = userAccountStub.getIntegrationTestUserAccountEntity();
+        CaseDocumentEntity caseDocumentEntity = createCaseDocumentEntity(courtCaseEntity, testUser);
+        caseDocumentEntity = caseDocumentRepository.save(caseDocumentEntity);
         return caseDocumentEntity;
     }
 
@@ -39,5 +51,15 @@ public class CaseDocumentStub {
         caseDocumentEntity.setCreatedDateTime(OffsetDateTime.now(UTC));
         caseDocumentEntity.setLastModifiedBy(uploadedBy);
         return caseDocumentEntity;
+    }
+
+    public CaseDocumentEntity createCaseDocumentWithRandomValues() {
+        EasyRandomParameters parameters = new EasyRandomParameters()
+            .randomize(Integer.class, new IntegerRangeRandomizer(1, 100))
+            .collectionSizeRange(1, 1)
+            .overrideDefaultInitialization(true);
+
+        EasyRandom generator = new EasyRandom(parameters);
+        return generator.nextObject(CaseDocumentEntity.class);
     }
 }
