@@ -77,13 +77,13 @@ public class BatchCleanupArmResponseFilesServiceImpl implements BatchCleanupArmR
                 armLocation,
                 false,
                 dateTimeForDeletion,
-                armDataManagementConfiguration.getManifestFilePrefix()
+                armDataManagementConfiguration.getManifestFilePrefix(),
+                batchsize
             );
         if (manifestFilenames.isEmpty()) {
             log.info("Batch Cleanup ARM Response Files - 0 rows returned, so stopping.");
             return;
         }
-        manifestFilenames = manifestFilenames.subList(0, Integer.min(manifestFilenames.size(), batchsize));
 
         if (CollectionUtils.isNotEmpty(manifestFilenames)) {
             int counter = 1;
@@ -139,7 +139,10 @@ public class BatchCleanupArmResponseFilesServiceImpl implements BatchCleanupArmR
         for (EodIdAndAssociatedFilenames eodIdAndAssociatedFilenames : eodIdAndAssociatedFilenamesList) {
             boolean successfullyDeletedAssociatedFiles = true;
             Integer eodId = eodIdAndAssociatedFilenames.getEodId();
-            for (String associatedFile : eodIdAndAssociatedFilenames.getAssociatedFiles()) {
+            List<String> associatedFiles = eodIdAndAssociatedFilenames.getAssociatedFiles();
+            log.info("There are {} response files for EOD {}, linked to inputUpload filename {}", associatedFiles.size(), eodId,
+                     inputUploadFilename);
+            for (String associatedFile : associatedFiles) {
                 try {
                     log.info("About to delete file {} for EOD {}, linked to inputUpload filename {}", associatedFile, eodId,
                              inputUploadFilename);
