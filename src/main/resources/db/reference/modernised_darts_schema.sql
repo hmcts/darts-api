@@ -264,6 +264,23 @@
 --    add cas_id to event_linked_case and media_linked_case
 --    remove case_number from event and media
 --    remove event_name from event, as evh_id is mandatory event_name should be derived from event_handler
+--v70 add default to is_data_anonymised on court_case
+--    make courthouse and case_number nullable on event_linked_case and media_linked_case
+--    amend datatypes of courthouse and case_number on both tables, to match modernised
+--    re-order list of optional FK columns in external_object_directory
+--    add multi-column constraint on same
+--    add similar multi-column constraints to event_linked_case, media_linked_case, object_admin_action, object_retrieval_queue
+--    add 3 unique constraints, one defence, defendant and prosecutor to avoid duplicate names on a case
+--    add case_object_name to case_overflow to support migration from dm_sysobject.object_name
+--    add transcription_object_name to transcription, ditto
+--    move confidence* columns from case_overflow to court_case and prefix with ret
+--    replace requestor string to requested_by on transcription with fk to user_account
+--    add status and is_current to event
+--    add case_type, upload_priority to court_case
+--    remove judge_hearing_date from hearing
+--    remove reference_id from media
+--    add is_migrated to transcription_comment
+--    add default to court_case.is_data_anonymised
 
 -- List of Table Aliases
 -- annotation                  ANN
@@ -559,27 +576,30 @@ CREATE TABLE case_overflow
 ,is_permanent_policy         BOOLEAN
 ,checked_ts                  TIMESTAMP WITH TIME ZONE
 ,corrected_ts                TIMESTAMP WITH TIME ZONE
-,confidence_level            INTEGER
-,confidence_reason           CHARACTER VARYING
 ,c_closed_pre_live           INTEGER
 ,c_case_closed_date_pre_live TIMESTAMP WITH TIME ZONE
 ,audio_folder_object_id      CHARACTER VARYING(16)
+,case_object_name            CHARACTER VARYING(255)                  -- to accommodate dm_sysobject_s.object_name
 ) TABLESPACE darts_tables;
 
 CREATE TABLE court_case
 (cas_id                      INTEGER                       NOT NULL
 ,cth_id                      INTEGER                       NOT NULL
-,evh_id                      INTEGER               -- must map to one of the reporting restriction elements found on event_handler
+,evh_id                      INTEGER                                 -- must map to one of the reporting restriction elements found on event_handler
 ,case_object_id              CHARACTER VARYING(16)
-,case_number                 CHARACTER VARYING             NOT NULL  -- maps to c_case_id in legacy                    
+,case_number                 CHARACTER VARYING             NOT NULL  -- maps to c_case_id in legacy      
+,case_type                   CHARACTER VARYING                       -- maps to c_type in legacy
+,upload_priority             INTEGER                                 -- maps to c_priority in legacy              
 ,case_closed                 BOOLEAN                       NOT NULL
 ,interpreter_used            BOOLEAN                       NOT NULL
 ,case_closed_ts              TIMESTAMP WITH TIME ZONE
 ,is_retention_updated        BOOLEAN                       NOT NULL  -- flag to indicate retention has been updated
 ,retention_retries           INTEGER
-,is_data_anonymised          BOOLEAN                       NOT NULL
+,is_data_anonymised          BOOLEAN                       NOT NULL DEFAULT false
 ,data_anonymised_by          INTEGER
 ,data_anonymised_ts          TIMESTAMP WITH TIME ZONE
+,ret_conf_level              INTEGER
+,ret_conf_reason             CHARACTER VARYING
 ,is_deleted                  BOOLEAN                       NOT NULL DEFAULT false
 ,deleted_by                  INTEGER
 ,deleted_ts                  TIMESTAMP WITH TIME ZONE
@@ -742,6 +762,8 @@ CREATE TABLE event
 ,event_ts                    TIMESTAMP WITH TIME ZONE      NOT NULL
 ,message_id                  CHARACTER VARYING
 ,is_log_entry                BOOLEAN                       NOT NULL  -- needs to be not null to ensure only 2 valid states
+,event_status                CHARACTER VARYING
+,is_current                  BOOLEAN                       NOT NULL
 ,version_label               CHARACTER VARYING(32)
 ,chronicle_id                CHARACTER VARYING(16)                   -- legacy id of the 1.0 version of the event
 ,antecedent_id               CHARACTER VARYING(16)                   -- legacy id of the immediately  preceding event 
@@ -816,8 +838,8 @@ CREATE TABLE event_linked_case
 (elc_id                      INTEGER                       NOT NULL
 ,eve_id                      INTEGER                       NOT NULL     -- unenforced FK to event
 ,cas_id                      INTEGER                                    -- unenforced and optional FK
-,courthouse_name             CHARACTER VARYING(64)         NOT NULL
-,case_number                 CHARACTER VARYING(32)         NOT NULL
+,courthouse_name             CHARACTER VARYING         
+,case_number                 CHARACTER VARYING         
 ) TABLESPACE darts_tables;
 
 COMMENT ON TABLE event_linked_case
@@ -825,10 +847,10 @@ IS 'content is to be populated via migration';
 
 CREATE TABLE external_object_directory
 (eod_id                      INTEGER                       NOT NULL
-,med_id                      INTEGER
-,trd_id                      INTEGER                                 -- FK to transcription_document
 ,ado_id                      INTEGER                                 -- FK to annotation_document
 ,cad_id                      INTEGER                                 -- FK to case_document
+,med_id                      INTEGER                                 -- FK to media
+,trd_id                      INTEGER                                 -- FK to transcription_document
 ,ors_id                      INTEGER                       NOT NULL  -- FK to object_record_status
 ,elt_id                      INTEGER                       NOT NULL  -- FK to external_location_type 
 ,osr_uuid                    CHARACTER VARYING                       -- logical FK to object_state_record
@@ -912,7 +934,6 @@ CREATE TABLE hearing
 ,hearing_date                DATE                          NOT NULL   -- to record only DATE component of hearings, both scheduled and actual
 ,scheduled_start_time        TIME                                     -- to record only TIME component of hearings, while they are scheduled only
 ,hearing_is_actual           BOOLEAN                       NOT NULL   -- TRUE for actual hearings, FALSE for scheduled hearings
-,judge_hearing_date          CHARACTER VARYING
 --,UNIQUE(moj_cas_id,moj_ctr,c_hearing_date)
 ,created_ts                  TIMESTAMP WITH TIME ZONE      NOT NULL
 ,created_by                  INTEGER                       NOT NULL
@@ -930,9 +951,6 @@ COMMENT ON COLUMN hearing.ctr_id
 IS 'foreign key from courtroom';
 
 COMMENT ON COLUMN hearing.hearing_date
-IS 'directly sourced from moj_case_r';
-
-COMMENT ON COLUMN hearing.judge_hearing_date
 IS 'directly sourced from moj_case_r';
 
 CREATE TABLE hearing_annotation_ae
@@ -1010,7 +1028,6 @@ CREATE TABLE media
 ,clip_id                     CHARACTER VARYING(54)
 ,channel                     INTEGER                       NOT NULL -- 1,2,3,4 or rarely 5
 ,total_channels              INTEGER                       NOT NULL --99.9% are "4" in legacy, occasionally 1,2,5 
-,reference_id                CHARACTER VARYING             --all nulls in legacy
 ,start_ts                    TIMESTAMP WITH TIME ZONE      NOT NULL
 ,end_ts                      TIMESTAMP WITH TIME ZONE      NOT NULL
 ,media_file                  CHARACTER VARYING             NOT NULL
@@ -1048,9 +1065,6 @@ IS 'directly sourced from moj_media_s';
 COMMENT ON COLUMN media.total_channels
 IS 'directly sourced from moj_media_s';
 
-COMMENT ON COLUMN media.reference_id
-IS 'directly sourced from moj_media_s';
-
 COMMENT ON COLUMN media.start_ts
 IS 'inherited from moj_case_document_s';
 
@@ -1064,8 +1078,8 @@ CREATE TABLE media_linked_case
 (mlc_id                      INTEGER                       NOT NULL
 ,med_id                      INTEGER                       NOT NULL     -- unenforced FK to media
 ,cas_id                      INTEGER                                    -- unenforced and optional FK
-,courthouse_name             CHARACTER VARYING(64)         NOT NULL
-,case_number                 CHARACTER VARYING(32)         NOT NULL
+,courthouse_name             CHARACTER VARYING
+,case_number                 CHARACTER VARYING
 ) TABLESPACE darts_tables;
 
 COMMENT ON TABLE media_linked_case
@@ -1281,7 +1295,8 @@ CREATE TABLE transcription
 ,tru_id                      INTEGER                                -- remains nullable, as nulls present in source data ( c_urgency)       
 ,trs_id                      INTEGER                                -- to be set according to trigger on transcription_workflow only
 ,transcription_object_id     CHARACTER VARYING(16)                  -- legacy pk from moj_transcription_s.r_object_id
-,requestor                   CHARACTER VARYING                      -- 1055 distinct, from <forname><surname> to <AAANNA>
+,transcription_object_name   CHARACTER VARYING(255)                 -- to accommodate dm_sysobject_s.object_name
+,requested_by                INTEGER                                -- 1055 distinct, from <forname><surname> to <AAANNA>
 ,hearing_date                DATE                                   -- 3k records have time component, but all times are 23:00,so effectively DATE only, will be absolete once moj_hea_id populated
 ,start_ts                    TIMESTAMP WITH TIME ZONE               -- both c_start and c_end have time components
 ,end_ts                      TIMESTAMP WITH TIME ZONE               -- we have 49k rows in legacy moj_transcription_s, 7k have c_end != c_start
@@ -1314,8 +1329,8 @@ IS 'foreign key from transcription_urgency';
 COMMENT ON COLUMN transcription.transcription_object_id
 IS 'internal Documentum primary key from moj_transcription_s';
     
-COMMENT ON COLUMN transcription.requestor
-IS 'directly sourced from moj_transcription_s';
+COMMENT ON COLUMN transcription.requested_by
+IS 'foreign key from user_account, corresponding to moj_transcription_s.c_requestor';
 
 COMMENT ON COLUMN transcription.hearing_date
 IS 'directly sourced from moj_transcription_s';
@@ -1334,9 +1349,11 @@ CREATE TABLE transcription_comment
 ,tra_id                      INTEGER                       NOT NULL
 ,trw_id                      INTEGER
 ,transcription_object_id     CHARACTER VARYING(16)         -- this is a placeholder for moj_transcription_s.r_object_id
+,transcription_object_name   CHARACTER VARYING(255)        -- to accommodate dm_sysobject_s.object_name
 ,transcription_comment       CHARACTER VARYING
 ,comment_ts                  TIMESTAMP WITH TIME ZONE
 ,author                      INTEGER                       -- will need to be FK to user table
+,is_migrated                 BOOLEAN                       NOT NULL default false
 ,created_ts                  TIMESTAMP WITH TIME ZONE      NOT NULL
 ,created_by                  INTEGER                       NOT NULL
 ,last_modified_ts            TIMESTAMP WITH TIME ZONE      NOT NULL
@@ -2118,6 +2135,10 @@ ADD CONSTRAINT transcription_transcription_type_fk
 FOREIGN KEY (trt_id) REFERENCES transcription_type(trt_id);
 
 ALTER TABLE transcription   
+ADD CONSTRAINT transcription_requested_by_fk
+FOREIGN KEY (requested_by) REFERENCES user_account(usr_id);
+
+ALTER TABLE transcription   
 ADD CONSTRAINT transcription_deleted_by_fk
 FOREIGN KEY (deleted_by) REFERENCES user_account(usr_id);
 
@@ -2202,6 +2223,28 @@ ADD CONSTRAINT courtroom_name_ck CHECK (courtroom_name = UPPER(courtroom_name));
 ALTER TABLE external_service_auth_token
 ADD CONSTRAINT token_type_ck CHECK (token_type in (1,2));
 
+-- additional multi-column not null constraints
+
+ALTER TABLE event_linked_case
+ADD CONSTRAINT elc_modern_or_legacy_case_nn
+CHECK ((cas_id is not null) or (courthouse_name is not null and case_number is not null));
+
+ALTER TABLE external_object_directory
+ADD CONSTRAINT eod_one_of_ado_cad_med_trd_nn
+CHECK (ado_id is not null or cad_id is not null or med_id is not null or trd_id is not null);
+
+ALTER TABLE media_linked_case
+ADD CONSTRAINT mlc_modern_or_legacy_case_nn
+CHECK ((cas_id is not null) or (courthouse_name is not null and case_number is not null));
+
+ALTER TABLE object_admin_action
+ADD CONSTRAINT oaa_one_of_ado_cad_med_trd_nn
+CHECK (ado_id is not null or cad_id is not null or med_id is not null or trd_id is not null);
+
+ALTER TABLE object_retrieval_queue
+ADD CONSTRAINT orq_one_of_med_or_trd_nn
+CHECK (med_id is not null or trd_id is not null);
+
 -- additional unique multi-column indexes and constraints
 
 --,UNIQUE (cth_id,courtroom_name)
@@ -2215,6 +2258,15 @@ ALTER TABLE hearing ADD UNIQUE USING INDEX hea_cas_ctr_hd_unq;
 --,UNIQUE(cth_id, case_number)
 CREATE UNIQUE INDEX cas_case_number_cth_id_unq ON court_case(case_number,cth_id) TABLESPACE darts_indexes;
 ALTER TABLE court_case ADD UNIQUE USING INDEX cas_case_number_cth_id_unq;
+
+CREATE UNIQUE INDEX dfc_cas_id_defence_name_unq ON defence(cas_id,defence_name) TABLESPACE darts_indexes;
+ALTER TABLE defence ADD UNIQUE USING INDEX dfc_cas_id_defence_name_unq;
+
+CREATE UNIQUE INDEX dfd_cas_id_defendant_name_unq ON defendant(cas_id,defendant_name) TABLESPACE darts_indexes;
+ALTER TABLE defendant ADD UNIQUE USING INDEX dfd_cas_id_defendant_name_unq;
+
+CREATE UNIQUE INDEX prn_cas_id_prosecutor_name_unq ON prosecutor(cas_id,prosecutor_name) TABLESPACE darts_indexes;
+ALTER TABLE prosecutor ADD UNIQUE USING INDEX prn_cas_id_prosecutor_name_unq;
 
 GRANT SELECT,INSERT,UPDATE,DELETE ON annotation TO darts_user;
 GRANT SELECT,INSERT,UPDATE,DELETE ON audit TO darts_user;
