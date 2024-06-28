@@ -47,7 +47,7 @@ public class ArmRetentionEventDateCalculatorImpl implements ArmRetentionEventDat
                 } else {
                     log.debug("Updating retention date for ARM EOD {} ", externalObjectDirectoryId);
                     UpdateMetadataResponse updateMetadataResponse = armDataManagementApi.updateMetadata(
-                        String.valueOf(externalObjectDirectoryId), armRetentionDate);
+                        externalObjectDirectory.getExternalRecordId(), armRetentionDate);
                     if (updateMetadataResponse.isError()) {
                         log.error("Unable set retention date for ARM EOD {} due to error(s) {}",
                                   externalObjectDirectoryId, StringUtils.join(updateMetadataResponse.getResponseStatusMessages(), ", "));
