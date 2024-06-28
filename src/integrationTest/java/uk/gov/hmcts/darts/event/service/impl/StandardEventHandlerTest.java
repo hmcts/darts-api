@@ -86,6 +86,7 @@ class StandardEventHandlerTest extends HandlerTestData {
         assertThat(hearingsForCase.size()).isEqualTo(1);
         assertThat(hearingsForCase.get(0).getHearingIsActual()).isEqualTo(true);
 
+        dartsGateway.waitForRequestCount(1);
         dartsGateway.verifyReceivedNotificationType(3);
         dartsGateway.verifyNotificationUrl("http://1.2.3.4/VIQDARNotifyEvent/DARNotifyEvent.asmx", 1);
     }
@@ -121,6 +122,7 @@ class StandardEventHandlerTest extends HandlerTestData {
         assertThat(hearingsForCase.size()).isEqualTo(1);
         assertThat(hearingsForCase.get(0).getHearingIsActual()).isEqualTo(true);
 
+        dartsGateway.waitForRequestCount(1);
         dartsGateway.verifyReceivedNotificationType(3);
         dartsGateway.verifyNotificationUrl("http://1.2.3.4/VIQDARNotifyEvent/DARNotifyEvent.asmx", 1);
     }
@@ -160,6 +162,7 @@ class StandardEventHandlerTest extends HandlerTestData {
 
         assertTrue(dartsDatabase.findByCourthouseCourtroomAndDate(SOME_COURTHOUSE, SOME_ROOM, HEARING_DATE_ODT.toLocalDate()).isEmpty());
 
+        dartsGateway.waitForRequestCount(1);
         dartsGateway.verifyReceivedNotificationType(3);
         dartsGateway.verifyNotificationUrl("http://1.2.3.4/VIQDARNotifyEvent/DARNotifyEvent.asmx", 1);
     }

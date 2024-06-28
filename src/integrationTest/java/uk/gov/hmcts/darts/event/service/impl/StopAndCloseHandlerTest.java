@@ -110,6 +110,7 @@ class StopAndCloseHandlerTest extends HandlerTestData {
         assertThat(persistedCase.getClosed()).isTrue();
         assertEquals(HEARING_DATE_ODT, persistedCase.getCaseClosedTimestamp());
 
+        dartsGateway.waitForRequestCount(2);
         dartsGateway.verifyReceivedNotificationType(2);
         dartsGateway.verifyReceivedNotificationType(3);
         dartsGateway.verifyNotificationUrl("http://1.2.3.4/VIQDARNotifyEvent/DARNotifyEvent.asmx", 2);
@@ -142,6 +143,7 @@ class StopAndCloseHandlerTest extends HandlerTestData {
         assertThat(persistedCase.getClosed()).isTrue();
         assertEquals(HEARING_DATE_ODT, persistedCase.getCaseClosedTimestamp());
 
+        dartsGateway.waitForRequestCount(2);
         dartsGateway.verifyReceivedNotificationType(2);
         dartsGateway.verifyReceivedNotificationType(3);
         dartsGateway.verifyNotificationUrl("http://1.2.3.4/VIQDARNotifyEvent/DARNotifyEvent.asmx", 2);
@@ -180,6 +182,7 @@ class StopAndCloseHandlerTest extends HandlerTestData {
         assertThat(persistedCase.getClosed()).isTrue();
         assertEquals(HEARING_DATE_ODT, persistedCase.getCaseClosedTimestamp());
 
+        dartsGateway.waitForRequestCount(2);
         dartsGateway.verifyReceivedNotificationType(2);
         dartsGateway.verifyReceivedNotificationType(3);
         dartsGateway.verifyNotificationUrl("http://1.2.3.4/VIQDARNotifyEvent/DARNotifyEvent.asmx", 2);
@@ -214,6 +217,7 @@ class StopAndCloseHandlerTest extends HandlerTestData {
         assertThat(persistedCase.getClosed()).isTrue();
         assertEquals(HEARING_DATE_ODT, persistedCase.getCaseClosedTimestamp());
 
+        dartsGateway.waitForRequestCount(1);
         dartsGateway.verifyReceivedNotificationType(2);
         dartsGateway.verifyNotificationUrl("http://1.2.3.4/VIQDARNotifyEvent/DARNotifyEvent.asmx", 1);
     }
@@ -241,6 +245,7 @@ class StopAndCloseHandlerTest extends HandlerTestData {
         var persistedEvent = allEvents.get(0);
         assertThat(persistedEvent.getCourtroom().getName()).isEqualTo(SOME_ROOM);
 
+        dartsGateway.waitForRequestCount(1);
         dartsGateway.verifyReceivedNotificationType(2);
         dartsGateway.verifyNotificationUrl("http://1.2.3.4/VIQDARNotifyEvent/DARNotifyEvent.asmx", 1);
     }

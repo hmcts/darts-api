@@ -70,6 +70,7 @@ class SetReportingRestrictionEventHandlerTest extends HandlerTestData {
             persistedCase.getReportingRestrictions().getEventName()
         );
 
+        dartsGateway.waitForRequestCount(1);
         dartsGateway.verifyReceivedNotificationType(3);
         dartsGateway.verifyNotificationUrl("http://1.2.3.4/VIQDARNotifyEvent/DARNotifyEvent.asmx", 1);
     }
@@ -108,6 +109,7 @@ class SetReportingRestrictionEventHandlerTest extends HandlerTestData {
             persistedCase.getReportingRestrictions().getEventName()
         );
 
+        dartsGateway.waitForRequestCount(1);
         dartsGateway.verifyReceivedNotificationType(3);
         dartsGateway.verifyNotificationUrl("http://1.2.3.4/VIQDARNotifyEvent/DARNotifyEvent.asmx", 1);
     }
@@ -151,6 +153,7 @@ class SetReportingRestrictionEventHandlerTest extends HandlerTestData {
             persistedCase.getReportingRestrictions().getEventName()
         );
 
+        dartsGateway.waitForRequestCount(1);
         dartsGateway.verifyReceivedNotificationType(3);
         dartsGateway.verifyNotificationUrl("http://1.2.3.4/VIQDARNotifyEvent/DARNotifyEvent.asmx", 1);
     }
@@ -223,6 +226,7 @@ class SetReportingRestrictionEventHandlerTest extends HandlerTestData {
         assertThat(hearingsForCase.get(0).getHearingIsActual()).isEqualTo(true);
         assertEquals("Restrictions lifted", persistedCase.getReportingRestrictions().getEventName());
 
+        dartsGateway.waitForRequestCount(1);
         dartsGateway.verifyReceivedNotificationType(3);
         dartsGateway.verifyNotificationUrl("http://1.2.3.4/VIQDARNotifyEvent/DARNotifyEvent.asmx", 1);
     }
