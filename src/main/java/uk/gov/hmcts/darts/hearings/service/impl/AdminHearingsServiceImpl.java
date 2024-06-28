@@ -2,6 +2,7 @@ package uk.gov.hmcts.darts.hearings.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
@@ -26,6 +27,10 @@ public class AdminHearingsServiceImpl implements AdminHearingsService {
 
     @Override
     public List<HearingsSearchResponse> adminHearingSearch(HearingsSearchRequest request) {
+        if (CollectionUtils.isEmpty(request.getCourthouseIds())) {
+            request.setCourthouseIds(null);
+        }
+
         List<HearingEntity> hearingEntityList = hearingRepository
             .findHearingDetails(request.getCourthouseIds(), request.getCaseNumber(),
                                 request.getCourtroomName(),
