@@ -46,9 +46,9 @@ class OutboundAudioDeleterProcessorTest extends IntegrationBase {
     public static final LocalDate DATE_27TH_OCTOBER = LocalDate.of(2023, Month.OCTOBER, 27);
     public static final LocalTime LOCAL_TIME = LocalTime.of(13, 1);
     public static final LocalDateTime HEARING_DATE = LocalDateTime.of(2023, 6, 10, 10, 0, 0);
+
     @Autowired
     protected TransientObjectDirectoryStub transientObjectDirectoryStub;
-
 
     @MockBean
     private BankHolidaysService bankHolidaysService;
@@ -66,16 +66,6 @@ class OutboundAudioDeleterProcessorTest extends IntegrationBase {
         requestor = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
         //setting clock to 2023-10-27
         when(currentTimeHelper.currentOffsetDateTime()).thenReturn(OffsetDateTime.of(2023, 10, 27, 22, 0, 0, 0, ZoneOffset.UTC));
-    }
-
-    @BeforeEach
-    void setupOpenInView() {
-        openInViewUtil.openEntityManager();
-    }
-
-    @AfterEach
-    void closeOpenInView() {
-        openInViewUtil.closeEntityManager();
     }
 
     @Test
