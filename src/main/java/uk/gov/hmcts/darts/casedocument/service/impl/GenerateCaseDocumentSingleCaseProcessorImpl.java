@@ -13,7 +13,7 @@ import uk.gov.hmcts.darts.arm.service.ExternalObjectDirectoryService;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.casedocument.service.CaseDocumentService;
 import uk.gov.hmcts.darts.casedocument.service.GenerateCaseDocumentSingleCaseProcessor;
-import uk.gov.hmcts.darts.casedocument.template.CourtCaseDocument;
+import uk.gov.hmcts.darts.casedocument.model.CourtCaseDocument;
 import uk.gov.hmcts.darts.common.entity.CaseDocumentEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.repository.CaseDocumentRepository;
