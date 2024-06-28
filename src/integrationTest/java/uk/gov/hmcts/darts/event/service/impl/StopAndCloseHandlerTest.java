@@ -222,14 +222,14 @@ class StopAndCloseHandlerTest extends HandlerTestData {
         dartsGateway.darNotificationReturnsGatewayTimeoutError();
 
         dartsDatabase.givenTheDatabaseContainsCourtCaseWithHearingAndCourthouseWithRoom(
-            SOME_CASE_NUMBER,
+            SOME_CASE_NUMBER_1,
             SOME_COURTHOUSE,
             SOME_ROOM,
             HEARING_DATE
         );
 
         eventDispatcher.receive(someMinimalDartsEvent()
-                                    .caseNumbers(List.of(SOME_CASE_NUMBER))
+                                    .caseNumbers(List.of(SOME_CASE_NUMBER_1))
                                     .courthouse(SOME_COURTHOUSE)
                                     .courtroom(SOME_ROOM)
                                     .dateTime(HEARING_DATE_ODT));
