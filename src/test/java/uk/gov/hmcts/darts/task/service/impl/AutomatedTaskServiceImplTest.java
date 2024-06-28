@@ -38,7 +38,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -216,7 +215,7 @@ class AutomatedTaskServiceImplTest {
 
     @Test
     @SuppressWarnings("PMD.AvoidThrowingRawExceptionTypes")
-    void failedTask() {
+    void taskFailedToBeStartedMovesToFailedStatus() {
         when(mockAutomatedTaskConfigurationProperties.getSystemUserEmail()).thenReturn("system@darts.test");
 
         var failingAutomatedTask = new AbstractLockableAutomatedTask(
@@ -226,28 +225,25 @@ class AutomatedTaskServiceImplTest {
             logApi) {
             @Override
             protected void runTask() {
-                throw new RuntimeException("Task failed");
-            }
-
-            @Override
-            protected void handleException(Exception exception) {
             }
 
             @Override
             public String getTaskName() {
                 return "FailedTask";
             }
+
+            @Override
+            public String getLastCronExpression() {
+                return "*/7 * * * * *";
+            }
         };
 
-        AutomatedTaskEntity expectedAutomatedTaskEntity = createAutomatedTaskEntity(
-            failingAutomatedTask,
-            "*/7 * * * * *"
-        );
         when(mockAutomatedTaskRepository.findByTaskName(failingAutomatedTask.getTaskName()))
-            .thenReturn(Optional.of(expectedAutomatedTaskEntity));
+            .thenThrow(RuntimeException.class);
 
         failingAutomatedTask.run();
-        verify(logApi, times(1)).taskFailed(any(UUID.class), eq("FailedTask"));
+        verify(logApi).taskFailed(any(UUID.class), eq("FailedTask"));
+        assertEquals(AutomatedTaskStatus.FAILED, failingAutomatedTask.getAutomatedTaskStatus());
     }
 
     @Test

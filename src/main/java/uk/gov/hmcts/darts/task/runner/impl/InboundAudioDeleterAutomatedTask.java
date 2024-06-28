@@ -32,9 +32,4 @@ public class InboundAudioDeleterAutomatedTask extends AbstractLockableAutomatedT
     protected void runTask() {
         inboundAudioDeleterProcessor.markForDeletion();
     }
-
-    @Override
-    protected void handleException(Exception exception) {
-        log.error("Exception: {}", exception.getMessage());
-    }
 }

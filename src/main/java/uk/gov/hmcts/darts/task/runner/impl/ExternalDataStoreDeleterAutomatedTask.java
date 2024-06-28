@@ -45,9 +45,4 @@ public class ExternalDataStoreDeleterAutomatedTask extends AbstractLockableAutom
         unstructuredDeleter.delete();
         outboundDeleter.delete();
     }
-
-    @Override
-    protected void handleException(Exception exception) {
-        log.error("Exception: {}", exception.getMessage());
-    }
 }

@@ -32,9 +32,4 @@ public class BatchCleanupArmResponseFilesAutomatedTask extends AbstractLockableA
         Integer batchSize = getAutomatedTaskBatchSize(taskName);
         batchCleanupArmResponseFilesService.cleanupResponseFiles(batchSize);
     }
-
-    @Override
-    protected void handleException(Exception exception) {
-        log.error("Exception: {}", exception.getMessage());
-    }
 }
