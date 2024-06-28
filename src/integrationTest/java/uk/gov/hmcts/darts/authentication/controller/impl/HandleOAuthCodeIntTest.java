@@ -12,14 +12,12 @@ import com.nimbusds.jose.crypto.RSASSASigner;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
 import lombok.SneakyThrows;
+import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Test;
-import org.skyscreamer.jsonassert.JSONAssert;
-import org.skyscreamer.jsonassert.JSONCompareMode;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import uk.gov.hmcts.darts.authorisation.api.AuthorisationApi;
 import uk.gov.hmcts.darts.authorisation.model.UserState;
@@ -126,22 +124,12 @@ class HandleOAuthCodeIntTest extends IntegrationBase {
         KeyPair keyPair = setTokenStub(Collections.emptyList());
         setKeyStoreStub(keyPair);
 
-        MvcResult response = mockMvc.perform(MockMvcRequestBuilders.post(
+        mockMvc.perform(MockMvcRequestBuilders.post(
                 EXTERNAL_USER_HANDLE_OAUTH_CODE_ENDPOINT_WITH_CODE))
             .andExpect(status().isInternalServerError())
-            .andReturn();
-
-        String actualResponseBody = response.getResponse().getContentAsString();
-
-        String expectedResponseBody = """
-            {
-                "type":"AUTHENTICATION_101",
-                "title":"Failed to validate access token",
-                "status":500
-            }
-            """;
-
-        JSONAssert.assertEquals(expectedResponseBody, actualResponseBody, JSONCompareMode.NON_EXTENSIBLE);
+            .andExpect(jsonPath("$.type", Matchers.is("AUTHENTICATION_101")))
+            .andExpect(jsonPath("$.status", Matchers.is(500)))
+            .andExpect(jsonPath("$.title", Matchers.is("Failed to validate access token")));
 
         verifyNoInteractions(mockAuthorisationApi);
     }
@@ -155,44 +143,24 @@ class HandleOAuthCodeIntTest extends IntegrationBase {
                 )
         );
 
-        MvcResult response = mockMvc.perform(MockMvcRequestBuilders.post(
+       mockMvc.perform(MockMvcRequestBuilders.post(
                 EXTERNAL_USER_HANDLE_OAUTH_CODE_ENDPOINT_WITH_CODE))
             .andExpect(status().isInternalServerError())
-            .andReturn();
-
-        String actualResponseBody = response.getResponse().getContentAsString();
-
-        String expectedResponseBody = """
-            {
-                "type":"AUTHENTICATION_100",
-                "title":"Failed to obtain access token",
-                "status":500
-            }
-            """;
-
-        JSONAssert.assertEquals(expectedResponseBody, actualResponseBody, JSONCompareMode.NON_EXTENSIBLE);
+            .andExpect(jsonPath("$.type", Matchers.is("AUTHENTICATION_100")))
+            .andExpect(jsonPath("$.status", Matchers.is(500)))
+            .andExpect(jsonPath("$.title", Matchers.is("Failed to obtain access token")));
     }
 
     @Test
     void handleOAuthCodeShouldReturnErrorResponseWhenTokenValidationFails() throws Exception {
         setTokenStub(List.of(VALID_EMAIL_VALUE));
 
-        MvcResult response = mockMvc.perform(MockMvcRequestBuilders.post(
+        mockMvc.perform(MockMvcRequestBuilders.post(
                 EXTERNAL_USER_HANDLE_OAUTH_CODE_ENDPOINT_WITH_CODE))
             .andExpect(status().isInternalServerError())
-            .andReturn();
-
-        String actualResponseBody = response.getResponse().getContentAsString();
-
-        String expectedResponseBody = """
-            {
-                "type":"AUTHENTICATION_101",
-                "title":"Failed to validate access token",
-                "status":500
-            }
-            """;
-
-        JSONAssert.assertEquals(expectedResponseBody, actualResponseBody, JSONCompareMode.NON_EXTENSIBLE);
+            .andExpect(jsonPath("$.type", Matchers.is("AUTHENTICATION_101")))
+            .andExpect(jsonPath("$.status", Matchers.is(500)))
+            .andExpect(jsonPath("$.title", Matchers.is("Failed to validate access token")));
     }
 
     /**

@@ -4,12 +4,9 @@ import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
-import org.skyscreamer.jsonassert.JSONAssert;
-import org.skyscreamer.jsonassert.JSONCompareMode;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.enums.SecurityRoleEnum;
@@ -108,22 +105,12 @@ class EventControllerGetEventMappingByIdTest extends IntegrationBase {
 
         MockHttpServletRequestBuilder requestBuilder = get(EVENT_MAPPINGS_ENDPOINT, 1_000_099);
 
-        MvcResult response = mockMvc.perform(requestBuilder)
+        mockMvc.perform(requestBuilder)
             .andExpect(status().isNotFound())
-            .andReturn();
-
-        String actualResponse = response.getResponse().getContentAsString();
-
-        String expectedResponse = """
-            {
-              "type":"EVENT_101",
-              "title": "No event handler mapping found in database",
-              "status": 404,
-              "detail": "No event handler could be found in the database for event handler id: 1000099."
-            }
-            """;
-
-        JSONAssert.assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
+            .andExpect(jsonPath("$.type", Matchers.is("EVENT_101")))
+            .andExpect(jsonPath("$.status", Matchers.is(404)))
+            .andExpect(
+                jsonPath("$.detail", Matchers.is("No event handler could be found in the database for event handler id: 1000099.")))
+            .andExpect(jsonPath("$.title", Matchers.is("No event handler mapping found in database")));
     }
-
 }

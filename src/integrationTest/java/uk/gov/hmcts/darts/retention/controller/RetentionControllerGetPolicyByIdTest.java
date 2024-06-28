@@ -1,5 +1,6 @@
 package uk.gov.hmcts.darts.retention.controller;
 
+import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Test;
 import org.skyscreamer.jsonassert.JSONAssert;
 import org.skyscreamer.jsonassert.JSONCompareMode;
@@ -8,6 +9,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 import uk.gov.hmcts.darts.testutils.stubs.SuperAdminUserStub;
@@ -59,28 +61,11 @@ class RetentionControllerGetPolicyByIdTest extends IntegrationBase {
 
         superAdminUserStub.givenUserIsAuthorised(mockUserIdentity);
 
-        var requestBuilder = get(RETENTION_POLICY_TYPE_URL,45);
+        var requestBuilder = get(RETENTION_POLICY_TYPE_URL, 45);
 
-        MvcResult mvcResult = mockMvc.perform(requestBuilder).andExpect(status().isNotFound()).andReturn();
-
-        String actualJson = mvcResult.getResponse().getContentAsString();
-        String expectedJson = """
-            {
-              "type": "RETENTION_108",
-              "title": "The retention policy type id does not exist.",
-              "status": 404
-            }
-            """;
-
-        JSONAssert.assertEquals(expectedJson, actualJson, JSONCompareMode.NON_EXTENSIBLE);
-
-
+        mockMvc.perform(requestBuilder).andExpect(status().isNotFound())
+            .andExpect(MockMvcResultMatchers.jsonPath("$.type", Matchers.is("RETENTION_108")))
+            .andExpect(MockMvcResultMatchers.jsonPath("$.status", Matchers.is(404)))
+            .andExpect(MockMvcResultMatchers.jsonPath("$.title", Matchers.is("The retention policy type id does not exist.")));
     }
-
-
-
-
-
 }
-
-

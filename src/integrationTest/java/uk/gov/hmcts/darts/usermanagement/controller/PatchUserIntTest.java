@@ -12,7 +12,6 @@ import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.support.TransactionTemplate;
-import org.testcontainers.shaded.com.fasterxml.jackson.databind.ObjectMapper;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.SecurityGroupEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
@@ -236,7 +235,7 @@ class PatchUserIntTest extends IntegrationBase {
         mockMvc.perform(request)
             .andExpect(status().isBadRequest())
             .andExpect(jsonPath("$.title").value("Constraint Violation"))
-            .andExpect(jsonPath("$.violations[*].field", hasItems("fullName")));
+            .andExpect(jsonPath("$.properties.fullName", Matchers.is("size must be between 1 and 256")));
     }
 
     @Test
@@ -460,7 +459,7 @@ class PatchUserIntTest extends IntegrationBase {
 
         MvcResult mvcResult = mockMvc.perform(request).andReturn();
 
-        Problem problem = new ObjectMapper().readValue(mvcResult.getResponse().getContentAsString(), Problem.class);
+        Problem problem = objectMapper.readValue(mvcResult.getResponse().getContentAsString(), Problem.class);
         assertEquals(UserManagementError.USER_NOT_FOUND.getHttpStatus().value(), mvcResult.getResponse().getStatus());
         assertEquals(UserManagementError.USER_NOT_FOUND.getErrorTypeNumeric(), problem.getType().toString());
     }

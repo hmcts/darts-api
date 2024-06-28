@@ -1,8 +1,7 @@
 package uk.gov.hmcts.darts.usermanagement.controller;
 
+import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Test;
-import org.skyscreamer.jsonassert.JSONAssert;
-import org.skyscreamer.jsonassert.JSONCompareMode;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -56,18 +55,11 @@ class UserControllerGetUsersIntTest extends IntegrationBase {
     void usersGetShouldReturnForbiddenError() throws Exception {
         superAdminUserStub.givenUserIsNotAuthorised(mockUserIdentity);
 
-        MvcResult mvcResult = mockMvc.perform(get(ENDPOINT_URL))
+        mockMvc.perform(get(ENDPOINT_URL))
             .andExpect(status().isForbidden())
-            .andReturn();
-
-        String expectedResponse = """
-            {"type":"AUTHORISATION_109","title":"User is not authorised for this endpoint","status":403}
-            """;
-        JSONAssert.assertEquals(
-            expectedResponse,
-            mvcResult.getResponse().getContentAsString(),
-            JSONCompareMode.NON_EXTENSIBLE
-        );
+            .andExpect(jsonPath("$.type", Matchers.is("AUTHORISATION_109")))
+            .andExpect(jsonPath("$.status", Matchers.is(403)))
+            .andExpect(jsonPath("$.title", Matchers.is("User is not authorised for this endpoint")));
 
         verify(mockUserIdentity).userHasGlobalAccess(Set.of(SUPER_ADMIN, SUPER_USER));
         verifyNoMoreInteractions(mockUserIdentity);

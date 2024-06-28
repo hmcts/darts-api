@@ -1,5 +1,6 @@
 package uk.gov.hmcts.darts.transcriptions.controller;
 
+import org.hamcrest.Matchers;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -11,6 +12,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 
 import java.net.URI;
@@ -161,19 +163,11 @@ class TranscriptionControllerGetTranscriptionTranscriberCountsIntTest extends In
                 -20
             );
 
-        final MvcResult mvcResult = mockMvc.perform(requestBuilder)
+        mockMvc.perform(requestBuilder)
             .andExpect(status().isForbidden())
-            .andReturn();
-
-        String actualResponse = mvcResult.getResponse().getContentAsString();
-        String expectedResponse = """
-            {
-                "type":"USER_NOT_TRANSCRIBER_113",
-                "title":"User is not a transcriber user",
-                "status":403
-            }
-            """;
-        JSONAssert.assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
+            .andExpect(MockMvcResultMatchers.jsonPath("$.type", Matchers.is("USER_NOT_TRANSCRIBER_113")))
+            .andExpect(MockMvcResultMatchers.jsonPath("$.status", Matchers.is(403)))
+            .andExpect(MockMvcResultMatchers.jsonPath("$.title", Matchers.is("User is not a transcriber user")));
     }
 
 }

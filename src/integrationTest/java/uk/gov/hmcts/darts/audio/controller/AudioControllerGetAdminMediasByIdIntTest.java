@@ -1,13 +1,11 @@
 package uk.gov.hmcts.darts.audio.controller;
 
+import org.hamcrest.Matchers;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
-import org.skyscreamer.jsonassert.JSONAssert;
-import org.skyscreamer.jsonassert.JSONCompareMode;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.MvcResult;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
 import uk.gov.hmcts.darts.common.entity.ObjectAdminActionEntity;
@@ -132,19 +130,11 @@ class AudioControllerGetAdminMediasByIdIntTest extends IntegrationBase {
         given.anAuthenticatedUserWithGlobalAccessAndRole(role);
 
         // When
-        MvcResult mvcResult = mockMvc.perform(get(ENDPOINT.resolve("123456789")))
+        mockMvc.perform(get(ENDPOINT.resolve("123456789")))
             .andExpect(status().isNotFound())
-            .andReturn();
-
-        // Then
-        var jsonString = mvcResult.getResponse().getContentAsString();
-        JSONAssert.assertEquals("""
-                                    {
-                                      "type": "AUDIO_102",
-                                      "title": "The requested media cannot be found",
-                                      "status": 404
-                                    }
-                                    """, jsonString, JSONCompareMode.STRICT);
+            .andExpect(jsonPath("$.type", Matchers.is("AUDIO_102")))
+            .andExpect(jsonPath("$.status", Matchers.is(404)))
+            .andExpect(jsonPath("$.title", Matchers.is("The requested media cannot be found")));
     }
 
     @ParameterizedTest
@@ -154,19 +144,12 @@ class AudioControllerGetAdminMediasByIdIntTest extends IntegrationBase {
         given.anAuthenticatedUserWithGlobalAccessAndRole(role);
 
         // When
-        MvcResult mvcResult = mockMvc.perform(get(ENDPOINT.resolve("123456789")))
+        mockMvc.perform(get(ENDPOINT.resolve("123456789")))
             .andExpect(status().isForbidden())
-            .andReturn();
+            .andExpect(jsonPath("$.type", Matchers.is("AUTHORISATION_109")))
+            .andExpect(jsonPath("$.status", Matchers.is(403)))
+            .andExpect(jsonPath("$.title", Matchers.is("User is not authorised for this endpoint")));
 
-        // Then
-        var jsonString = mvcResult.getResponse().getContentAsString();
-        JSONAssert.assertEquals("""
-                                    {
-                                      "type": "AUTHORISATION_109",
-                                      "title": "User is not authorised for this endpoint",
-                                      "status": 403
-                                    }
-                                    """, jsonString, JSONCompareMode.STRICT);
     }
 
     private MediaEntity createAndSaveMediaEntity(HearingEntity hearingEntity, UserAccountEntity userAccountEntity) {

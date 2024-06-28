@@ -5,8 +5,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
-import org.skyscreamer.jsonassert.JSONAssert;
-import org.skyscreamer.jsonassert.JSONCompareMode;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -89,17 +87,6 @@ class TranscriptionControllerRequestTranscriptionIntTest extends IntegrationBase
     private CourtCaseEntity courtCase;
     private HearingEntity hearing;
     private UserAccountEntity testUser;
-
-    private static void assertTranscriptionFailed100Error(String actualJson) {
-        String expectedJson = """
-            {
-              "type": "TRANSCRIPTION_100",
-              "title": "Failed to validate transcription request",
-              "status": 400
-            }""";
-
-        JSONAssert.assertEquals(expectedJson, actualJson, JSONCompareMode.NON_EXTENSIBLE);
-    }
 
     @BeforeEach
     void setupData() {
@@ -207,7 +194,7 @@ class TranscriptionControllerRequestTranscriptionIntTest extends IntegrationBase
         mockMvc.perform(requestBuilder)
             .andExpect(status().isConflict())
             .andExpect(jsonPath("$.type", is("TRANSCRIPTION_107")))
-            .andExpect(jsonPath("$.duplicate_transcription_id", is(dupeTranscription.getId())));
+            .andExpect(jsonPath("$.properties.duplicate_transcription_id", is(dupeTranscription.getId())));
     }
 
     @Test
@@ -233,7 +220,7 @@ class TranscriptionControllerRequestTranscriptionIntTest extends IntegrationBase
         mockMvc.perform(requestBuilder)
             .andExpect(status().isConflict())
             .andExpect(jsonPath("$.type", is("TRANSCRIPTION_107")))
-            .andExpect(jsonPath("$.duplicate_transcription_id", is(dupeTranscription.getId())));
+            .andExpect(jsonPath("$.properties.duplicate_transcription_id", is(dupeTranscription.getId())));
     }
 
 
@@ -254,27 +241,15 @@ class TranscriptionControllerRequestTranscriptionIntTest extends IntegrationBase
             .header("Content-Type", "application/json")
             .content(objectMapper.writeValueAsString(transcriptionRequestDetails));
 
-        MvcResult mvcResult = mockMvc.perform(requestBuilder)
+        mockMvc.perform(requestBuilder)
             .andExpect(status().isNotFound())
-            .andReturn();
-
-        String actualJson = mvcResult.getResponse().getContentAsString();
-        assertFailedTranscription110Error(actualJson);
+            .andExpect(jsonPath("$.type", is("TRANSCRIPTION_110")))
+            .andExpect(jsonPath("$.status", is(404)))
+            .andExpect(jsonPath("$.title", is("Transcription could not be requested, no audio")));
 
         assertAudit(0);
     }
 
-
-    private void assertFailedTranscription110Error(String actualJson) {
-        String expectedJson = """
-            {
-              "type": "TRANSCRIPTION_110",
-              "title": "Transcription could not be requested, no audio",
-              "status": 404
-            }
-            """;
-        JSONAssert.assertEquals(expectedJson, actualJson, JSONCompareMode.NON_EXTENSIBLE);
-    }
 
     @Test
     void transcriptionRequestStartTimeOutsideHearing() throws Exception {
@@ -292,12 +267,11 @@ class TranscriptionControllerRequestTranscriptionIntTest extends IntegrationBase
             .header("Content-Type", "application/json")
             .content(objectMapper.writeValueAsString(transcriptionRequestDetails));
 
-        MvcResult mvcResult = mockMvc.perform(requestBuilder)
+        mockMvc.perform(requestBuilder)
             .andExpect(status().isNotFound())
-            .andReturn();
-
-        String actualJson = mvcResult.getResponse().getContentAsString();
-        assertFailedTranscription111Error(actualJson);
+            .andExpect(jsonPath("$.type", is("TRANSCRIPTION_111")))
+            .andExpect(jsonPath("$.status", is(404)))
+            .andExpect(jsonPath("$.title", is("Transcription could not be requested, times outside of hearing times")));
 
         assertAudit(0);
     }
@@ -318,12 +292,11 @@ class TranscriptionControllerRequestTranscriptionIntTest extends IntegrationBase
             .header("Content-Type", "application/json")
             .content(objectMapper.writeValueAsString(transcriptionRequestDetails));
 
-        MvcResult mvcResult = mockMvc.perform(requestBuilder)
+       mockMvc.perform(requestBuilder)
             .andExpect(status().isNotFound())
-            .andReturn();
-
-        String actualJson = mvcResult.getResponse().getContentAsString();
-        assertFailedTranscription111Error(actualJson);
+            .andExpect(jsonPath("$.type", is("TRANSCRIPTION_111")))
+            .andExpect(jsonPath("$.status", is(404)))
+           .andExpect(jsonPath("$.title", is("Transcription could not be requested, times outside of hearing times")));
 
         assertAudit(0);
     }
@@ -388,17 +361,6 @@ class TranscriptionControllerRequestTranscriptionIntTest extends IntegrationBase
         assertAudit(1);
     }
 
-    private void assertFailedTranscription111Error(String actualJson) {
-        String expectedJson = """
-            {
-              "type": "TRANSCRIPTION_111",
-              "title": "Transcription could not be requested, times outside of hearing times",
-              "status": 404
-            }
-            """;
-        JSONAssert.assertEquals(expectedJson, actualJson, JSONCompareMode.NON_EXTENSIBLE);
-    }
-
     @Test
     void transcriptionRequestWithNullDatesAndSentencingRemarksTypeShouldReturnSuccess()
         throws Exception {
@@ -439,26 +401,14 @@ class TranscriptionControllerRequestTranscriptionIntTest extends IntegrationBase
             .header("Content-Type", "application/json")
             .content(objectMapper.writeValueAsString(transcriptionRequestDetails));
 
-        MvcResult mvcResult = mockMvc.perform(requestBuilder)
+        mockMvc.perform(requestBuilder)
             .andExpect(header().string("Content-Type", "application/problem+json"))
             .andExpect(status().isForbidden())
-            .andReturn();
-
-        String actualJson = mvcResult.getResponse().getContentAsString();
-        assertFailedAuthentication107Error(actualJson);
+            .andExpect(jsonPath("$.type", is("AUTHORISATION_107")))
+            .andExpect(jsonPath("$.status", is(403)))
+            .andExpect(jsonPath("$.title", is("Failed to check authorisation")));
 
         assertAudit(0);
-    }
-
-    private void assertFailedAuthentication107Error(String actualJson) {
-        String expectedJson = """
-            {
-              "type": "AUTHORISATION_107",
-              "title": "Failed to check authorisation",
-              "status": 403
-            }
-            """;
-        JSONAssert.assertEquals(expectedJson, actualJson, JSONCompareMode.NON_EXTENSIBLE);
     }
 
     @ParameterizedTest
@@ -477,13 +427,12 @@ class TranscriptionControllerRequestTranscriptionIntTest extends IntegrationBase
             .header("Content-Type", "application/json")
             .content(objectMapper.writeValueAsString(transcriptionRequestDetails));
 
-        MvcResult mvcResult = mockMvc.perform(requestBuilder)
+        mockMvc.perform(requestBuilder)
             .andExpect(header().string("Content-Type", "application/problem+json"))
             .andExpect(status().isBadRequest())
-            .andReturn();
-
-        String actualJson = mvcResult.getResponse().getContentAsString();
-        assertTranscriptionFailed100Error(actualJson);
+            .andExpect(jsonPath("$.type", is("TRANSCRIPTION_100")))
+            .andExpect(jsonPath("$.status", is(400)))
+            .andExpect(jsonPath("$.title", is("Failed to validate transcription request")));
 
         assertAudit(0);
     }
@@ -505,13 +454,12 @@ class TranscriptionControllerRequestTranscriptionIntTest extends IntegrationBase
             .header("Content-Type", "application/json")
             .content(objectMapper.writeValueAsString(transcriptionRequestDetails));
 
-        MvcResult mvcResult = mockMvc.perform(requestBuilder)
+        mockMvc.perform(requestBuilder)
             .andExpect(header().string("Content-Type", "application/problem+json"))
             .andExpect(status().isBadRequest())
-            .andReturn();
-
-        String actualJson = mvcResult.getResponse().getContentAsString();
-        assertTranscriptionFailed100Error(actualJson);
+            .andExpect(jsonPath("$.type", is("TRANSCRIPTION_100")))
+            .andExpect(jsonPath("$.status", is(400)))
+            .andExpect(jsonPath("$.title", is("Failed to validate transcription request")));
 
         assertAudit(0);
     }
@@ -593,38 +541,15 @@ class TranscriptionControllerRequestTranscriptionIntTest extends IntegrationBase
             .header("Content-Type", "application/json")
             .content(objectMapper.writeValueAsString(transcriptionRequestDetails));
 
-        MvcResult mvcResult = mockMvc.perform(requestBuilder)
+        mockMvc.perform(requestBuilder)
             .andExpect(header().string("Content-Type", "application/problem+json"))
             .andExpect(status().isNotFound())
-            .andReturn();
+            .andExpect(jsonPath("$.type", is("HEARING_100")))
+            .andExpect(jsonPath("$.status", is(404)))
+            .andExpect(jsonPath("$.title", is("The requested hearing cannot be found")));
 
-        String actualJson = mvcResult.getResponse().getContentAsString();
-        assertHearingNotFound404Error(actualJson);
 
         assertAudit(0);
-    }
-
-    private void assertHearingNotFound404Error(String actualJson) {
-        String expectedJson = """
-            {
-              "type": "HEARING_100",
-              "title": "The requested hearing cannot be found",
-              "status": 404
-            }
-            """;
-        JSONAssert.assertEquals(expectedJson, actualJson, JSONCompareMode.NON_EXTENSIBLE);
-
-    }
-
-    private void assertCaseNotFound404Error(String actualJson) {
-        String expectedJson = """
-            {
-              "type": "CASE_104",
-              "title": "The requested case cannot be found",
-              "status": 404
-            }
-            """;
-        JSONAssert.assertEquals(expectedJson, actualJson, JSONCompareMode.NON_EXTENSIBLE);
     }
 
     @Test
@@ -641,14 +566,13 @@ class TranscriptionControllerRequestTranscriptionIntTest extends IntegrationBase
             .header("Content-Type", "application/json")
             .content(objectMapper.writeValueAsString(transcriptionRequestDetails));
 
-        MvcResult mvcResult = mockMvc.perform(requestBuilder)
+         mockMvc.perform(requestBuilder)
             .andExpect(header().string("Content-Type", "application/problem+json"))
             .andExpect(status().isNotFound())
-            .andReturn();
+            .andExpect(jsonPath("$.type", is("CASE_104")))
+            .andExpect(jsonPath("$.status", is(404)))
+            .andExpect(jsonPath("$.title", is("The requested case cannot be found")));
 
-        String actualJson = mvcResult.getResponse().getContentAsString();
-
-        assertCaseNotFound404Error(actualJson);
         assertAudit(0);
     }
 

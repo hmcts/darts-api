@@ -2,6 +2,7 @@ package uk.gov.hmcts.darts.audio.controller;
 
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Test;
 import org.skyscreamer.jsonassert.JSONAssert;
 import org.skyscreamer.jsonassert.JSONCompareMode;
@@ -10,6 +11,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import uk.gov.hmcts.darts.audio.enums.AudioRequestOutputFormat;
 import uk.gov.hmcts.darts.audio.exception.AudioApiError;
 import uk.gov.hmcts.darts.audio.model.AdminMediaSearchResponseCase;
@@ -323,17 +325,12 @@ class AudioControllerGetAdminMediasIntTest extends IntegrationBase {
         userAccountStub.givenUserIsAuthorisedJudge(userIdentity);
 
         // when
-        MvcResult mvcResult = mockMvc.perform(get(ENDPOINT_URL)
+        mockMvc.perform(get(ENDPOINT_URL)
                                                   .queryParam("transformed_media_id", "1"))
             .andExpect(status().isForbidden())
-            .andReturn();
-
-        // then
-        String actualJson = mvcResult.getResponse().getContentAsString();
-        String expectedJson = """
-            {"type":"AUTHORISATION_109","title":"User is not authorised for this endpoint","status":403}
-              """;
-        JSONAssert.assertEquals(expectedJson, actualJson, JSONCompareMode.NON_EXTENSIBLE);
+            .andExpect(MockMvcResultMatchers.jsonPath("$.type", Matchers.is("AUTHORISATION_109")))
+            .andExpect(MockMvcResultMatchers.jsonPath("$.status", Matchers.is(403)))
+            .andExpect(MockMvcResultMatchers.jsonPath("$.title", Matchers.is("User is not authorised for this endpoint")));
     }
 
 

@@ -1,17 +1,16 @@
 package uk.gov.hmcts.darts.transcriptions.controller;
 
 import org.apache.commons.io.IOUtils;
+import org.hamcrest.Matchers;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.skyscreamer.jsonassert.JSONAssert;
-import org.skyscreamer.jsonassert.JSONCompareMode;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.transaction.annotation.Transactional;
 import uk.gov.hmcts.darts.audit.api.AuditApi;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
@@ -138,16 +137,11 @@ class TranscriptionControllerDownloadTranscriptIntTest extends IntegrationBase {
                 "application/msword",
                 "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
             );
-        MvcResult mvcResult = mockMvc.perform(requestBuilder)
+       mockMvc.perform(requestBuilder)
             .andExpect(status().isForbidden())
-            .andReturn();
-
-        String actualResponse = mvcResult.getResponse().getContentAsString();
-
-        String expectedResponse = """
-            {"type":"AUTHORISATION_106","title":"Could not obtain user details","status":403}
-            """;
-        JSONAssert.assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
+            .andExpect(MockMvcResultMatchers.jsonPath("$.type", Matchers.is("AUTHORISATION_106")))
+            .andExpect(MockMvcResultMatchers.jsonPath("$.status", Matchers.is(403)))
+            .andExpect(MockMvcResultMatchers.jsonPath("$.title", Matchers.is("Could not obtain user details")));
 
         verifyNoInteractions(mockAuditApi);
     }
@@ -160,16 +154,12 @@ class TranscriptionControllerDownloadTranscriptIntTest extends IntegrationBase {
                 "application/msword",
                 "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
             );
-        MvcResult mvcResult = mockMvc.perform(requestBuilder)
+
+        mockMvc.perform(requestBuilder)
             .andExpect(status().isNotFound())
-            .andReturn();
-
-        String actualResponse = mvcResult.getResponse().getContentAsString();
-
-        String expectedResponse = """
-            {"type":"TRANSCRIPTION_101","title":"The requested transcription cannot be found","status":404}
-            """;
-        JSONAssert.assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
+            .andExpect(MockMvcResultMatchers.jsonPath("$.type", Matchers.is("TRANSCRIPTION_101")))
+            .andExpect(MockMvcResultMatchers.jsonPath("$.status", Matchers.is(404)))
+            .andExpect(MockMvcResultMatchers.jsonPath("$.title", Matchers.is("The requested transcription cannot be found")));
 
         verifyNoInteractions(mockAuditApi);
     }

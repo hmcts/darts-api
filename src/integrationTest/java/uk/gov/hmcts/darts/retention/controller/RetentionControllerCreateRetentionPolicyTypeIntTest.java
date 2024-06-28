@@ -264,10 +264,9 @@ class RetentionControllerCreateRetentionPolicyTypeIntTest extends IntegrationBas
         // Then
         resultActions
             .andExpect(status().isBadRequest())
-            .andExpect(jsonPath("$.type").value("https://zalando.github.io/problem/constraint-violation"))
+            .andExpect(jsonPath("$.type").value("about:blank"))
             .andExpect(jsonPath("$.title").value("Constraint Violation"))
-            .andExpect(jsonPath("$.violations.*.field").value("description"))
-            .andExpect(jsonPath("$.violations.*.message").value("size must be between 0 and 256"));
+            .andExpect(jsonPath("$.properties.description").value("size must be between 0 and 256"));
     }
 
     @Test
@@ -298,10 +297,9 @@ class RetentionControllerCreateRetentionPolicyTypeIntTest extends IntegrationBas
         // Then
         resultActions
             .andExpect(status().isBadRequest())
-            .andExpect(jsonPath("$.type").value("https://zalando.github.io/problem/constraint-violation"))
+            .andExpect(jsonPath("$.type").value("about:blank"))
             .andExpect(jsonPath("$.title").value("Constraint Violation"))
-            .andExpect(jsonPath("$.violations.*.field").value("duration"))
-            .andExpect(jsonPath("$.violations.*.message").value("must match \"^\\d{1,2}Y\\d{1,2}M\\d{1,2}D$\""));
+            .andExpect(jsonPath("$.properties.duration").value("must match \"^\\d{1,2}Y\\d{1,2}M\\d{1,2}D$\""));
     }
 
     @Test
@@ -334,7 +332,7 @@ class RetentionControllerCreateRetentionPolicyTypeIntTest extends IntegrationBas
             .andExpect(status().isBadRequest())
             .andExpect(jsonPath("$.type").value("RETENTION_111"))
             .andExpect(jsonPath("$.title").value("Duration too short"))
-            .andExpect(jsonPath("$.min_allowable_days").value(1));
+            .andExpect(jsonPath("$.properties.min_allowable_days").value(1));
     }
 
     @Test

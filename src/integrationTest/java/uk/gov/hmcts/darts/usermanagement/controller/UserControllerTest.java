@@ -121,10 +121,9 @@ class UserControllerTest extends IntegrationBase {
 
         Assertions.assertFalse(securityGroupStub.isPartOfAnySecurityGroup(fndUserIdentity.get().getId()));
 
-        ObjectMapper mapper = new ObjectMapper();
-        mapper.registerModule(new JavaTimeModule());
+        objectMapper.registerModule(new JavaTimeModule());
 
-        UserWithIdAndTimestamps userWithIdAndTimestamps = mapper.readValue(mvcResult.getResponse().getContentAsString(),
+        UserWithIdAndTimestamps userWithIdAndTimestamps = objectMapper.readValue(mvcResult.getResponse().getContentAsString(),
                                                               UserWithIdAndTimestamps.class);
 
         List<Integer> rolledBackTranscription = userWithIdAndTimestamps.getRolledBackTranscriptRequests();
@@ -183,10 +182,9 @@ class UserControllerTest extends IntegrationBase {
 
         Assertions.assertFalse(securityGroupStub.isPartOfAnySecurityGroup(fndUserIdentity.get().getId()));
 
-        ObjectMapper mapper = new ObjectMapper();
-        mapper.registerModule(new JavaTimeModule());
+        objectMapper.registerModule(new JavaTimeModule());
 
-        UserWithIdAndTimestamps userWithIdAndTimestamps = mapper.readValue(mvcResult.getResponse().getContentAsString(),
+        UserWithIdAndTimestamps userWithIdAndTimestamps = objectMapper.readValue(mvcResult.getResponse().getContentAsString(),
                                                                            UserWithIdAndTimestamps.class);
 
         List<Integer> rolledBackTranscription = userWithIdAndTimestamps.getRolledBackTranscriptRequests();
@@ -247,10 +245,9 @@ class UserControllerTest extends IntegrationBase {
             = dartsDatabase.getUserAccountRepository().findById(userAccountEntity.getId());
         Assertions.assertTrue(fndUserIdentity.isPresent());
 
-        ObjectMapper mapper = new ObjectMapper();
-        mapper.registerModule(new JavaTimeModule());
+        objectMapper.registerModule(new JavaTimeModule());
 
-        UserWithIdAndTimestamps userWithIdAndTimestamps = mapper.readValue(mvcResult.getResponse().getContentAsString(),
+        UserWithIdAndTimestamps userWithIdAndTimestamps = objectMapper.readValue(mvcResult.getResponse().getContentAsString(),
                                                                            UserWithIdAndTimestamps.class);
 
         List<Integer> rolledBackTranscription = userWithIdAndTimestamps.getRolledBackTranscriptRequests();
@@ -446,10 +443,9 @@ class UserControllerTest extends IntegrationBase {
             .andExpect(status().is(AuthorisationError.UNABLE_TO_DEACTIVATE_USER.getHttpStatus().value()))
             .andReturn();
 
-        ObjectMapper mapper = new ObjectMapper();
-        mapper.registerModule(new JavaTimeModule());
+        objectMapper.registerModule(new JavaTimeModule());
 
-        Problem problem = mapper.readValue(mvcResult.getResponse().getContentAsString(),
+        Problem problem = objectMapper.readValue(mvcResult.getResponse().getContentAsString(),
                                                                            Problem.class);
         Assertions.assertEquals(AuthorisationError.UNABLE_TO_DEACTIVATE_USER.getErrorTypeNumeric(), problem.getType().toString());
     }
@@ -474,10 +470,9 @@ class UserControllerTest extends IntegrationBase {
             .andExpect(status().is(AuthorisationError.USER_NOT_AUTHORISED_TO_USE_PAYLOAD_CONTENT.getHttpStatus().value()))
             .andReturn();
 
-        ObjectMapper mapper = new ObjectMapper();
-        mapper.registerModule(new JavaTimeModule());
+        objectMapper.registerModule(new JavaTimeModule());
 
-        Problem problem = mapper.readValue(mvcResult.getResponse().getContentAsString(),
+        Problem problem = objectMapper.readValue(mvcResult.getResponse().getContentAsString(),
                                            Problem.class);
         Assertions.assertEquals(AuthorisationError.USER_NOT_AUTHORISED_TO_USE_PAYLOAD_CONTENT.getErrorTypeNumeric(), problem.getType().toString());
     }
@@ -502,10 +497,9 @@ class UserControllerTest extends IntegrationBase {
             .andExpect(status().is(AuthorisationError.USER_NOT_AUTHORISED_TO_ACTIVATE_USER.getHttpStatus().value()))
             .andReturn();
 
-        ObjectMapper mapper = new ObjectMapper();
-        mapper.registerModule(new JavaTimeModule());
+        objectMapper.registerModule(new JavaTimeModule());
 
-        Problem problem = mapper.readValue(mvcResult.getResponse().getContentAsString(),
+        Problem problem = objectMapper.readValue(mvcResult.getResponse().getContentAsString(),
                                            Problem.class);
         Assertions.assertEquals(AuthorisationError.USER_NOT_AUTHORISED_TO_ACTIVATE_USER.getErrorTypeNumeric(), problem.getType().toString());
     }

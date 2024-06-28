@@ -2,10 +2,9 @@ package uk.gov.hmcts.darts.transcriptions.controller;
 
 import com.jayway.jsonpath.DocumentContext;
 import com.jayway.jsonpath.JsonPath;
+import org.hamcrest.Matchers;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.skyscreamer.jsonassert.JSONAssert;
-import org.skyscreamer.jsonassert.JSONCompareMode;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.web.servlet.MultipartProperties;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -13,6 +12,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.transaction.annotation.Transactional;
 import uk.gov.hmcts.darts.audit.api.AuditApi;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
@@ -137,20 +137,15 @@ class TranscriptionControllerAttachTranscriptIntTest extends IntegrationBase {
             "Test Document (doc)".getBytes()
         );
 
-        final MvcResult mvcResult = mockMvc.perform(
+        mockMvc.perform(
                 multipart(
                     URL_TEMPLATE,
                     transcriptionId
                 ).file(transcript))
             .andExpect(status().isForbidden())
-            .andReturn();
-
-        String actualResponse = mvcResult.getResponse().getContentAsString();
-
-        String expectedResponse = """
-            {"type":"AUTHORISATION_106","title":"Could not obtain user details","status":403}
-            """;
-        JSONAssert.assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
+            .andExpect(MockMvcResultMatchers.jsonPath("$.type", Matchers.is("AUTHORISATION_106")))
+            .andExpect(MockMvcResultMatchers.jsonPath("$.status", Matchers.is(403)))
+            .andExpect(MockMvcResultMatchers.jsonPath("$.title", Matchers.is("Could not obtain user details")));
 
         verifyNoInteractions(mockAuditApi);
     }
@@ -166,20 +161,15 @@ class TranscriptionControllerAttachTranscriptIntTest extends IntegrationBase {
             "Test Document (txt)".getBytes()
         );
 
-        final MvcResult mvcResult = mockMvc.perform(
+        mockMvc.perform(
                 multipart(
                     URL_TEMPLATE,
                     transcriptionId
                 ).file(transcript))
             .andExpect(status().isBadRequest())
-            .andReturn();
-
-        String actualResponse = mvcResult.getResponse().getContentAsString();
-
-        String expectedResponse = """
-            {"type":"TRANSCRIPTION_108","title":"Failed to attach transcript","status":400}
-            """;
-        JSONAssert.assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
+            .andExpect(MockMvcResultMatchers.jsonPath("$.type", Matchers.is("TRANSCRIPTION_108")))
+            .andExpect(MockMvcResultMatchers.jsonPath("$.status", Matchers.is(400)))
+            .andExpect(MockMvcResultMatchers.jsonPath("$.title", Matchers.is("Failed to attach transcript")));
 
         verifyNoInteractions(mockAuditApi);
     }
@@ -196,20 +186,15 @@ class TranscriptionControllerAttachTranscriptIntTest extends IntegrationBase {
             "Test Document exceeding max configured doc size(doc)".getBytes()
         );
 
-        final MvcResult mvcResult = mockMvc.perform(
+       mockMvc.perform(
                 multipart(
                     URL_TEMPLATE,
                     transcriptionId
                 ).file(transcript))
             .andExpect(status().isBadRequest())
-            .andReturn();
-
-        String actualResponse = mvcResult.getResponse().getContentAsString();
-
-        String expectedResponse = """
-            {"type":"TRANSCRIPTION_108","title":"Failed to attach transcript","status":400}
-            """;
-        JSONAssert.assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
+            .andExpect(MockMvcResultMatchers.jsonPath("$.type", Matchers.is("TRANSCRIPTION_108")))
+            .andExpect(MockMvcResultMatchers.jsonPath("$.status", Matchers.is(400)))
+            .andExpect(MockMvcResultMatchers.jsonPath("$.title", Matchers.is("Failed to attach transcript")));
 
         verifyNoInteractions(mockAuditApi);
     }

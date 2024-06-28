@@ -80,7 +80,8 @@ class ExceptionHandlerTest extends IntegrationBase {
             {
                 "type":"TEST_999",
                 "title":"A descriptive title",
-                "status":418
+                "status":418,
+                "instance": "/test"
             }
             """;
 
@@ -104,7 +105,8 @@ class ExceptionHandlerTest extends IntegrationBase {
                 "type":"TEST_999",
                 "title":"A descriptive title",
                 "status":418,
-                "detail":"Some descriptive details"
+                "detail":"Some descriptive details",
+                "instance": "/test"
             }
             """;
 
@@ -124,9 +126,11 @@ class ExceptionHandlerTest extends IntegrationBase {
 
         String expectedResponseBody = """
             {
+                "type":"about:blank",
                 "title":"Internal Server Error",
                 "status":500,
-                "detail":"A runtime exception occurred"
+                "detail":"A runtime exception occurred",
+                "instance": "/test"
             }
             """;
 

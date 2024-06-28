@@ -1,6 +1,7 @@
 package uk.gov.hmcts.darts.hearings.controller;
 
 import lombok.extern.slf4j.Slf4j;
+import org.hamcrest.Matchers;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.skyscreamer.jsonassert.JSONAssert;
@@ -104,14 +105,16 @@ class HearingsGetControllerTest extends IntegrationBase {
         int hearingId = -1;
 
         MockHttpServletRequestBuilder requestBuilder = get(ENDPOINT_URL, hearingId);
-        MvcResult mvcResult = mockMvc.perform(requestBuilder).andExpect(MockMvcResultMatchers.status().isNotFound()).andReturn();
+        MvcResult mvcResult = mockMvc.perform(requestBuilder).andExpect(MockMvcResultMatchers.status().isNotFound())
+            .andReturn();
 
         String actualJson = mvcResult.getResponse().getContentAsString();
         String expectedJson = """
             {
               "type": "HEARING_100",
               "title": "The requested hearing cannot be found",
-              "status": 404
+              "status": 404,
+              "instance": "/hearings/-1"
             }
             """;
 
@@ -137,16 +140,11 @@ class HearingsGetControllerTest extends IntegrationBase {
 
         MockHttpServletRequestBuilder requestBuilder = get(ENDPOINT_URL, hearing.getId());
 
-        MvcResult response = mockMvc.perform(requestBuilder)
+        mockMvc.perform(requestBuilder)
             .andExpect(MockMvcResultMatchers.status().isForbidden())
-            .andReturn();
-
-        String actualResponse = response.getResponse().getContentAsString();
-
-        String expectedResponse = """
-            {"type":"AUTHORISATION_106","title":"Could not obtain user details","status":403}
-            """;
-        JSONAssert.assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
+            .andExpect(MockMvcResultMatchers.jsonPath("$.type", Matchers.is("AUTHORISATION_106")))
+            .andExpect(MockMvcResultMatchers.jsonPath("$.status", Matchers.is(403)))
+            .andExpect(MockMvcResultMatchers.jsonPath("$.title", Matchers.is("Could not obtain user details")));
     }
 
 }

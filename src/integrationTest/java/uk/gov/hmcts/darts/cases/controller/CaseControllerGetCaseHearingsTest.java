@@ -3,13 +3,10 @@ package uk.gov.hmcts.darts.cases.controller;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.skyscreamer.jsonassert.JSONAssert;
-import org.skyscreamer.jsonassert.JSONCompareMode;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.transaction.annotation.Transactional;
@@ -69,14 +66,10 @@ class CaseControllerGetCaseHearingsTest extends IntegrationBase {
 
         MockHttpServletRequestBuilder requestBuilder = get(endpointUrl, hearingEntity.getCourtCase().getId());
 
-        MvcResult response = mockMvc.perform(requestBuilder).andExpect(status().isForbidden()).andReturn();
-
-        String actualResponse = response.getResponse().getContentAsString();
-
-        String expectedResponse = """
-            {"type":"AUTHORISATION_106","title":"Could not obtain user details","status":403}
-            """;
-        JSONAssert.assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
+        mockMvc.perform(requestBuilder)
+            .andExpect(status().isForbidden())
+            .andExpect(MockMvcResultMatchers.jsonPath("$.type", Matchers.is("AUTHORISATION_106")))
+            .andExpect(MockMvcResultMatchers.jsonPath("$.title", Matchers.is("Could not obtain user details")));
     }
 
     @Test

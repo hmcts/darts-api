@@ -178,12 +178,23 @@ class CaseControllerTest extends IntegrationBase {
             .contentType(MediaType.APPLICATION_JSON_VALUE)
             .content(getContentsFromFile(
                 "tests/cases/CaseControllerTest/casesPostEndpoint/requestBodyCaseNumberMissing.json"));
-        MvcResult response = mockMvc.perform(requestBuilder).andExpect(status().isBadRequest()).andReturn();
+        MvcResult response = mockMvc.perform(requestBuilder).andExpect(status().isBadRequest())
+            .andReturn();
 
         String actualResponse = response.getResponse().getContentAsString();
 
-        String expectedResponse = getContentsFromFile(
-            "tests/cases/CaseControllerTest/casesPostEndpoint/expectedResponseCaseNumberMissing_400.json");
+        String expectedResponse = """
+            {
+               "type":"about:blank",
+               "title":"Constraint Violation",
+               "status":400,
+               "detail":"",
+               "instance":"/cases",
+               "properties":{
+                  "caseNumber":"must not be null"
+               }
+            }
+            """;
         assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
     }
 
@@ -197,8 +208,19 @@ class CaseControllerTest extends IntegrationBase {
 
         String actualResponse = response.getResponse().getContentAsString();
 
-        String expectedResponse = getContentsFromFile(
-            "tests/cases/CaseControllerTest/casesPostEndpoint/expectedResponseCourthouseMissing_400.json");
+        String expectedResponse = """
+            {
+               "type":"about:blank",
+               "title":"Constraint Violation",
+               "status":400,
+               "detail":"",
+               "instance":"/cases",
+               "properties":{
+                  "courthouse":"must not be null"
+               }
+            }
+            """;
+
         assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
     }
 

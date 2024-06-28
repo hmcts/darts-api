@@ -1,5 +1,6 @@
 package uk.gov.hmcts.darts.transcriptions.controller;
 
+import org.hamcrest.Matchers;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.skyscreamer.jsonassert.JSONAssert;
@@ -10,6 +11,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
@@ -135,7 +137,8 @@ class TranscriptionControllerGetTranscriptionWorkflowsIntTest extends Integratio
         MvcResult response = mockMvc.perform(requestBuilder).andExpect(status().isBadRequest()).andReturn();
         String actualResponse = response.getResponse().getContentAsString();
         String expectedResponse = """
-            {"title":"Bad Request","status":400,"detail":"Required request parameter 'transcription_id' for method parameter type Integer is not present"}
+            {"type":"about:blank","title":"Bad Request","status":400,"detail":
+            "Required parameter 'transcription_id' is not present.","instance":"/admin/transcription-workflows"}
             """;
 
         JSONAssert.assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
@@ -149,12 +152,9 @@ class TranscriptionControllerGetTranscriptionWorkflowsIntTest extends Integratio
             .queryParam("transcription_id", "-100")
             .queryParam("is_current", "true");
 
-        MvcResult response = mockMvc.perform(requestBuilder).andExpect(status().isForbidden()).andReturn();
-        String actualResponse = response.getResponse().getContentAsString();
-        String expectedResponse = """
-            {"type":"AUTHORISATION_109","title":"User is not authorised for this endpoint","status":403}
-            """;
-
-        JSONAssert.assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
+        mockMvc.perform(requestBuilder).andExpect(status().isForbidden())
+            .andExpect(MockMvcResultMatchers.jsonPath("$.type", Matchers.is("AUTHORISATION_109")))
+            .andExpect(MockMvcResultMatchers.jsonPath("$.status", Matchers.is(403)))
+            .andExpect(MockMvcResultMatchers.jsonPath("$.title", Matchers.is("User is not authorised for this endpoint")));
     }
 }

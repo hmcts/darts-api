@@ -1,11 +1,10 @@
 package uk.gov.hmcts.darts.audio.controller;
 
 import ch.qos.logback.classic.Level;
+import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.skyscreamer.jsonassert.JSONAssert;
-import org.skyscreamer.jsonassert.JSONCompareMode;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -17,6 +16,7 @@ import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.util.unit.DataSize;
@@ -376,7 +376,7 @@ class AudioControllerAddAudioMetadataIntTest extends IntegrationBase {
             Assertions.fail();
         } catch (RestClientException restClientException) {
             String expectedJson = """
-                400 : "{"title":"Bad Request","status":400,"detail":"Maximum upload size exceeded"}"
+                400 : "{"type":"about:blank","title":"Bad Request","status":400,"detail":"Maximum upload size exceeded","instance":"/audios"}"
                 """;
 
             assertEquals(expectedJson.trim(), restClientException.getMessage());
@@ -404,18 +404,15 @@ class AudioControllerAddAudioMetadataIntTest extends IntegrationBase {
             objectMapper.writeValueAsString(addAudioMetadataRequest).getBytes()
         );
 
-        MvcResult mvcResult = mockMvc.perform(
+        mockMvc.perform(
                 multipart(ENDPOINT)
                     .file(audioFile)
                     .file(metadataJson))
             .andExpect(status().isBadRequest())
-            .andReturn();
-
-        String actualJson = mvcResult.getResponse().getContentAsString();
-        String expectedJson = """
-            {"type":"COMMON_100","title":"Provided courthouse does not exist","status":400,"detail":"Courthouse 'TEST' not found."}""";
-
-        JSONAssert.assertEquals(expectedJson, actualJson, JSONCompareMode.NON_EXTENSIBLE);
+            .andExpect(MockMvcResultMatchers.jsonPath("$.type", Matchers.is("COMMON_100")))
+            .andExpect(MockMvcResultMatchers.jsonPath("$.status", Matchers.is(400)))
+            .andExpect(MockMvcResultMatchers.jsonPath("$.detail", Matchers.is("Courthouse 'TEST' not found.")))
+            .andExpect(MockMvcResultMatchers.jsonPath("$.title", Matchers.is("Provided courthouse does not exist")));
     }
 
     @Test
@@ -734,19 +731,14 @@ class AudioControllerAddAudioMetadataIntTest extends IntegrationBase {
             objectMapper.writeValueAsString(addAudioMetadataRequest).getBytes()
         );
 
-        MvcResult mvcResult = mockMvc.perform(
+        mockMvc.perform(
                 multipart(ENDPOINT)
                     .file(audioFile)
                     .file(metadataJson))
             .andExpect(status().isForbidden())
-            .andReturn();
-
-        String actualResponse = mvcResult.getResponse().getContentAsString();
-
-        String expectedResponse = """
-            {"type":"AUTHORISATION_109","title":"User is not authorised for this endpoint","status":403}
-            """;
-        JSONAssert.assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
+            .andExpect(MockMvcResultMatchers.jsonPath("$.type", Matchers.is("AUTHORISATION_109")))
+            .andExpect(MockMvcResultMatchers.jsonPath("$.status", Matchers.is(403)))
+            .andExpect(MockMvcResultMatchers.jsonPath("$.title", Matchers.is("User is not authorised for this endpoint")));
     }
 
     private AddAudioMetadataRequest createAddAudioRequest(OffsetDateTime startedAt,

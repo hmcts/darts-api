@@ -1,11 +1,12 @@
 package uk.gov.hmcts.darts.usermanagement.controller;
 
+import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.MvcResult;
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 import uk.gov.hmcts.darts.common.entity.SecurityGroupEntity;
@@ -16,7 +17,6 @@ import uk.gov.hmcts.darts.testutils.IntegrationBase;
 import uk.gov.hmcts.darts.testutils.stubs.CourthouseStub;
 import uk.gov.hmcts.darts.testutils.stubs.SuperAdminUserStub;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -47,14 +47,12 @@ class GetSecurityGroupsIntTest extends IntegrationBase {
         SecurityGroupEntity securityGroupEntity = SecurityGroupTestData.buildGroupForRoleAndCourthouse(SecurityRoleEnum.APPROVER, courthouseEntity);
         securityGroupRepository.saveAndFlush(securityGroupEntity);
 
-        MvcResult mvcResult = mockMvc.perform(get(ENDPOINT_URL))
+        mockMvc.perform(get(ENDPOINT_URL))
             .andExpect(status().isForbidden())
-            .andReturn();
+            .andExpect(MockMvcResultMatchers.jsonPath("$.type", Matchers.is("AUTHORISATION_109")))
+            .andExpect(MockMvcResultMatchers.jsonPath("$.status", Matchers.is(403)))
+            .andExpect(MockMvcResultMatchers.jsonPath("$.title", Matchers.is("User is not authorised for this endpoint")));
 
-        String expectedResponse = """
-            {"type":"AUTHORISATION_109","title":"User is not authorised for this endpoint","status":403}""";
-
-        assertEquals(expectedResponse, mvcResult.getResponse().getContentAsString());
     }
 
 

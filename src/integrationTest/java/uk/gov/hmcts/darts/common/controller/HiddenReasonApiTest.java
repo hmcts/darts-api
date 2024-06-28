@@ -1,5 +1,6 @@
 package uk.gov.hmcts.darts.common.controller;
 
+import org.hamcrest.Matchers;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.skyscreamer.jsonassert.JSONAssert;
@@ -8,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import uk.gov.hmcts.darts.common.enums.SecurityRoleEnum;
 import uk.gov.hmcts.darts.testutils.GivenBuilder;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
@@ -88,19 +90,11 @@ class HiddenReasonApiTest extends IntegrationBase {
         given.anAuthenticatedUserWithGlobalAccessAndRole(role);
 
         // When
-        MvcResult mvcResult = mockMvc.perform(get(ENDPOINT))
+        mockMvc.perform(get(ENDPOINT))
             .andExpect(status().isForbidden())
-            .andReturn();
-
-        // Then
-        var jsonString = mvcResult.getResponse().getContentAsString();
-        JSONAssert.assertEquals("""
-                                    {
-                                      "type": "AUTHORISATION_109",
-                                      "title": "User is not authorised for this endpoint",
-                                      "status": 403
-                                    }
-                                    """, jsonString, JSONCompareMode.STRICT);
+            .andExpect(MockMvcResultMatchers.jsonPath("$.type", Matchers.is("AUTHORISATION_109")))
+            .andExpect(MockMvcResultMatchers.jsonPath("$.status", Matchers.is(403)))
+            .andExpect(MockMvcResultMatchers.jsonPath("$.title", Matchers.is("User is not authorised for this endpoint")));
     }
 
 }

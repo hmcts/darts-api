@@ -40,7 +40,8 @@ class DailyListPostControllerTest extends IntegrationBase {
     private SuperAdminUserStub superAdminUserStub;
 
     private static String getExpectedResponse() {
-        return "{\"type\":\"DAILYLIST_101\",\"title\":\"Either xml_document or json_document or both needs to be provided.\",\"status\":400}";
+        return "{\"type\":\"DAILYLIST_101\",\"title\":\"Either xml_document " +
+            "or json_document or both needs to be provided.\",\"status\":400,\"instance\":\"/dailylists\"}";
     }
 
     @Test
@@ -111,8 +112,10 @@ class DailyListPostControllerTest extends IntegrationBase {
         String uniqueId = "func-unique-id-" + randomAlphanumeric(7);
         String messageId = "func-unique-id-" + randomAlphanumeric(7);
 
-        final String expectedResponse = "{\"type\":\"DAILYLIST_105\",\"title\":\"Invalid source system. Should be CPP or XHB.\",\"status\":400}";
-        final String jsonPostRequest = getContentsFromFile("tests/DailyListTest/dailyListAddDailyListEndpoint/requestBody.json");
+        final String expectedResponse =
+            "{\"type\":\"DAILYLIST_105\",\"title\":\"Invalid source system. Should be CPP or XHB.\",\"status\":400,\"instance\":\"/dailylists\"}";
+        final String jsonPostRequest =
+            getContentsFromFile("tests/DailyListTest/dailyListAddDailyListEndpoint/requestBody.json");
 
 
         PostDailyListRequest request = new PostDailyListRequest();
@@ -178,7 +181,8 @@ class DailyListPostControllerTest extends IntegrationBase {
         String uniqueId = "func-unique-id-" + randomAlphanumeric(7);
         String messageId = "func-unique-id-" + randomAlphanumeric(7);
 
-        final String expectedResponse = "{\"type\":\"DAILYLIST_105\",\"title\":\"Invalid source system. Should be CPP or XHB.\",\"status\":400}";
+        final String expectedResponse = "{\"type\":\"DAILYLIST_105\",\"title\":\"Invalid " +
+            "source system. Should be CPP or XHB.\",\"status\":400,\"instance\":\"/dailylists\"}";
 
         final String jsonPostRequest = getContentsFromFile("tests/DailyListTest/dailyListAddDailyListEndpoint/requestBody.json");
 
@@ -235,4 +239,3 @@ class DailyListPostControllerTest extends IntegrationBase {
 
     }
 }
-

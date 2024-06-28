@@ -17,6 +17,9 @@ springdoc:
   packagesToScan: uk.gov.hmcts.darts
 
 spring:
+  mvc:
+    problemdetails:
+      enabled: true
   lifecycle:
     timeout-per-shutdown-phase: ${GRACEFUL_SHUTDOWN_TIMEOUT:30s}
   config:

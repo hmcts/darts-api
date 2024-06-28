@@ -1,12 +1,12 @@
 package uk.gov.hmcts.darts.audio.controller;
 
+import org.hamcrest.Matchers;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import uk.gov.hmcts.darts.audio.entity.MediaRequestEntity;
 import uk.gov.hmcts.darts.audiorequests.model.AudioRequestType;
@@ -21,8 +21,6 @@ import java.util.Set;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
-import static org.skyscreamer.jsonassert.JSONAssert.assertEquals;
-import static org.skyscreamer.jsonassert.JSONCompareMode.NON_EXTENSIBLE;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -102,19 +100,11 @@ class AudioRequestsControllerUpdateTransformedMediaLastAccessedTimestampIntTest 
 
         MockHttpServletRequestBuilder requestBuilder = patch(ENDPOINT_URL, transformedMediaId);
 
-        MvcResult mvcResult = mockMvc.perform(requestBuilder)
+        mockMvc.perform(requestBuilder)
             .andExpect(status().isForbidden())
-            .andReturn();
-
-        String actualJson = mvcResult.getResponse().getContentAsString();
-        String expectedJson = """
-            {
-              "type":"AUDIO_REQUESTS_101",
-              "title":"The audio request is not valid for this user",
-              "status":403
-            }""";
-
-        assertEquals(expectedJson, actualJson, NON_EXTENSIBLE);
+            .andExpect(jsonPath("$.type", Matchers.is("AUDIO_REQUESTS_101")))
+            .andExpect(jsonPath("$.status", Matchers.is(403)))
+            .andExpect(jsonPath("$.title", Matchers.is("The audio request is not valid for this user")));
 
         verify(mockAuthorisation).authoriseByTransformedMediaId(
             transformedMediaEntity.getId(),

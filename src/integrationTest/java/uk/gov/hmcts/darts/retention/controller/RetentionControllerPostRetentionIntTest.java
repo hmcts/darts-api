@@ -213,7 +213,7 @@ class RetentionControllerPostRetentionIntTest extends IntegrationBase {
                                    + "' must have a retention date after the last completed automated retention date '2024-01-01'.")
                 ))
                 .andExpect(jsonPath(
-                        "latest_automated_retention_date",
+                        "properties.latest_automated_retention_date",
                         is("2024-01-01")
                 ));
     }
@@ -256,7 +256,7 @@ class RetentionControllerPostRetentionIntTest extends IntegrationBase {
                                    + "' must have a retention date before the maximum retention date '2119-10-10'.")
                 ))
                 .andExpect(jsonPath(
-                        "max_duration",
+                        "properties.max_duration",
                         is("99Y0M0D")
                 ));
     }

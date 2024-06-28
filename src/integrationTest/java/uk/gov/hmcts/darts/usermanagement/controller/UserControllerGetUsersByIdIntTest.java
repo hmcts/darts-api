@@ -2,15 +2,15 @@ package uk.gov.hmcts.darts.usermanagement.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import org.skyscreamer.jsonassert.JSONAssert;
-import org.skyscreamer.jsonassert.JSONCompareMode;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
@@ -79,7 +79,7 @@ class UserControllerGetUsersByIdIntTest extends IntegrationBase {
         MvcResult mvcResult = mockMvc.perform(get(ENDPOINT_URL + userAccountEntity.getId()))
             .andReturn();
 
-        Problem problem = new ObjectMapper().readValue(mvcResult.getResponse().getContentAsString(), Problem.class);
+        Problem problem = objectMapper.readValue(mvcResult.getResponse().getContentAsString(), Problem.class);
 
         Assertions.assertEquals(UserManagementError.USER_NOT_FOUND.getHttpStatus().value(), mvcResult.getResponse().getStatus());
         Assertions.assertEquals(UserManagementError.USER_NOT_FOUND.getErrorTypeNumeric(), problem.getType().toString());
@@ -92,20 +92,11 @@ class UserControllerGetUsersByIdIntTest extends IntegrationBase {
     void usersGetShouldReturnForbiddenError() throws Exception {
         superAdminUserStub.givenUserIsNotAuthorised(mockUserIdentity);
 
-        MvcResult mvcResult = mockMvc.perform(get(ENDPOINT_URL + "1"))
+        mockMvc.perform(get(ENDPOINT_URL + "1"))
             .andExpect(status().isForbidden())
-            .andReturn();
-
-        String expectedResponse = """
-            {"type":"AUTHORISATION_109",
-            "title":"User is not authorised for this endpoint",
-            "status":403}
-            """;
-        JSONAssert.assertEquals(
-            expectedResponse,
-            mvcResult.getResponse().getContentAsString(),
-            JSONCompareMode.NON_EXTENSIBLE
-        );
+            .andExpect(MockMvcResultMatchers.jsonPath("$.type", Matchers.is("AUTHORISATION_109")))
+            .andExpect(MockMvcResultMatchers.jsonPath("$.status", Matchers.is(403)))
+            .andExpect(MockMvcResultMatchers.jsonPath("$.title", Matchers.is("User is not authorised for this endpoint")));
 
         verify(mockUserIdentity).userHasGlobalAccess(Set.of(SUPER_ADMIN, SUPER_USER));
         verifyNoMoreInteractions(mockUserIdentity);
@@ -115,21 +106,12 @@ class UserControllerGetUsersByIdIntTest extends IntegrationBase {
     void usersGetShouldReturnNotFoundError() throws Exception {
         superAdminUserStub.givenUserIsAuthorised(mockUserIdentity);
 
-        MvcResult mvcResult = mockMvc.perform(get(ENDPOINT_URL + "123456"))
+        mockMvc.perform(get(ENDPOINT_URL + "123456"))
             .andExpect(status().isNotFound())
-            .andReturn();
-
-        String expectedResponse = """
-            {"type":"USER_MANAGEMENT_100",
-            "title":"The provided user does not exist",
-            "status":404,
-            "detail":"User id 123456 not found"}
-            """;
-        JSONAssert.assertEquals(
-            expectedResponse,
-            mvcResult.getResponse().getContentAsString(),
-            JSONCompareMode.NON_EXTENSIBLE
-        );
+            .andExpect(MockMvcResultMatchers.jsonPath("$.type", Matchers.is("USER_MANAGEMENT_100")))
+            .andExpect(MockMvcResultMatchers.jsonPath("$.status", Matchers.is(404)))
+            .andExpect(MockMvcResultMatchers.jsonPath("$.detail", Matchers.is("User id 123456 not found")))
+            .andExpect(MockMvcResultMatchers.jsonPath("$.title", Matchers.is("The provided user does not exist")));
 
         verify(mockUserIdentity).userHasGlobalAccess(Set.of(SUPER_ADMIN, SUPER_USER));
         verifyNoMoreInteractions(mockUserIdentity);

@@ -1,5 +1,6 @@
 package uk.gov.hmcts.darts.transcriptions.controller;
 
+import org.hamcrest.Matchers;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.skyscreamer.jsonassert.JSONAssert;
@@ -10,6 +11,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
@@ -259,11 +261,11 @@ class TranscriptionControllerGetTranscriptionTest extends IntegrationBase {
     @Test
     void getTranscriptionNotFound() throws Exception {
         MockHttpServletRequestBuilder requestBuilder = get(ENDPOINT_URL_TRANSCRIPTION, -999);
-        MvcResult response = mockMvc.perform(requestBuilder).andExpect(status().isNotFound()).andReturn();
-        String actualResponse = response.getResponse().getContentAsString();
-        String expectedResponse = getContentsFromFile("tests/transcriptions/transcription/expectedResponseNotFound.json");
-        JSONAssert.assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
-    }
+        mockMvc.perform(requestBuilder).andExpect(status().isNotFound())
+            .andExpect(MockMvcResultMatchers.jsonPath("$.type", Matchers.is("TRANSCRIPTION_101")))
+            .andExpect(MockMvcResultMatchers.jsonPath("$.status", Matchers.is(404)))
+            .andExpect(MockMvcResultMatchers.jsonPath("$.title", Matchers.is("The requested transcription cannot be found")));
+   }
 
     private void addCommentToWorkflow(TranscriptionWorkflowEntity workflowEntity, String comment, UserAccountEntity userAccount) {
         TranscriptionCommentEntity commentEntity = new TranscriptionCommentEntity();

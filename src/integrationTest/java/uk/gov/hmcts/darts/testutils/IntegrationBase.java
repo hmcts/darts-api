@@ -1,5 +1,6 @@
 package uk.gov.hmcts.darts.testutils;
 
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -37,6 +38,8 @@ public class IntegrationBase {
 
     @BeforeEach
     void clearDb() {
+        objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+
         dartsDatabase.clearDatabaseInThisOrder();
     }
 

@@ -1,16 +1,16 @@
 package uk.gov.hmcts.darts.transcriptions.controller;
 
 import com.jayway.jsonpath.JsonPath;
+import org.hamcrest.Matchers;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.skyscreamer.jsonassert.JSONAssert;
-import org.skyscreamer.jsonassert.JSONCompareMode;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.transaction.annotation.Transactional;
 import uk.gov.hmcts.darts.audit.api.AuditApi;
 import uk.gov.hmcts.darts.authorisation.component.Authorisation;
@@ -194,15 +194,12 @@ class TranscriptionControllerUpdateTranscriptionApprovedIntTest extends Integrat
             String.format("/transcriptions/%d", -1)))
             .header("Content-Type", "application/json")
             .content(objectMapper.writeValueAsString(updateTranscription));
-        MvcResult mvcResult = mockMvc.perform(requestBuilder)
+        mockMvc.perform(requestBuilder)
             .andExpect(status().isNotFound())
-            .andReturn();
+            .andExpect(MockMvcResultMatchers.jsonPath("$.type", Matchers.is("TRANSCRIPTION_101")))
+            .andExpect(MockMvcResultMatchers.jsonPath("$.status", Matchers.is(404)))
+            .andExpect(MockMvcResultMatchers.jsonPath("$.title", Matchers.is("The requested transcription cannot be found")));
 
-        String actualJson = mvcResult.getResponse().getContentAsString();
-        String expectedJson = """
-            {"type":"TRANSCRIPTION_101","title":"The requested transcription cannot be found","status":404}
-            """;
-        JSONAssert.assertEquals(expectedJson, actualJson, JSONCompareMode.NON_EXTENSIBLE);
 
         verify(authorisation).authoriseByTranscriptionId(
             -1, Set.of(APPROVER, TRANSCRIBER)
@@ -220,15 +217,11 @@ class TranscriptionControllerUpdateTranscriptionApprovedIntTest extends Integrat
             String.format("/transcriptions/%d", transcriptionId)))
             .header("Content-Type", "application/json")
             .content(objectMapper.writeValueAsString(updateTranscription));
-        MvcResult mvcResult = mockMvc.perform(requestBuilder)
+        mockMvc.perform(requestBuilder)
             .andExpect(status().isConflict())
-            .andReturn();
-
-        String actualJson = mvcResult.getResponse().getContentAsString();
-        String expectedJson = """
-            {"type":"TRANSCRIPTION_105","title":"Transcription workflow action is not permitted","status":409}
-            """;
-        JSONAssert.assertEquals(expectedJson, actualJson, JSONCompareMode.NON_EXTENSIBLE);
+            .andExpect(MockMvcResultMatchers.jsonPath("$.type", Matchers.is("TRANSCRIPTION_105")))
+            .andExpect(MockMvcResultMatchers.jsonPath("$.status", Matchers.is(409)))
+            .andExpect(MockMvcResultMatchers.jsonPath("$.title", Matchers.is("Transcription workflow action is not permitted")));
 
         verify(authorisation).authoriseByTranscriptionId(
             transcriptionId, Set.of(APPROVER, TRANSCRIBER)
@@ -252,17 +245,12 @@ class TranscriptionControllerUpdateTranscriptionApprovedIntTest extends Integrat
             String.format("/transcriptions/%d", transcriptionId)))
             .header("Content-Type", "application/json")
             .content(objectMapper.writeValueAsString(updateTranscription));
-        MvcResult mvcResult = mockMvc.perform(requestBuilder)
+        mockMvc.perform(requestBuilder)
             .andExpect(status().isBadRequest())
-            .andReturn();
-
-
-        String actualJson = mvcResult.getResponse().getContentAsString();
-        String expectedJson = """
-            {"type":"TRANSCRIPTION_114","title":"Transcription requestor cannot approve or reject their own transcription requests.","status":400}
-            """;
-        JSONAssert.assertEquals(expectedJson, actualJson, JSONCompareMode.NON_EXTENSIBLE);
-
+            .andExpect(MockMvcResultMatchers.jsonPath("$.type", Matchers.is("TRANSCRIPTION_114")))
+            .andExpect(MockMvcResultMatchers.jsonPath("$.status", Matchers.is(400)))
+            .andExpect(MockMvcResultMatchers.jsonPath("$.title",
+                                                      Matchers.is("Transcription requestor cannot approve or reject their own transcription requests.")));
     }
 
 }

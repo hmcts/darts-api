@@ -1,5 +1,6 @@
 package uk.gov.hmcts.darts.event.controller;
 
+import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -11,6 +12,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import uk.gov.hmcts.darts.audit.api.AuditActivity;
 import uk.gov.hmcts.darts.common.entity.AuditEntity;
 import uk.gov.hmcts.darts.common.entity.EventEntity;
@@ -64,21 +66,11 @@ class EventControllerDeleteEventMappingTest extends IntegrationBase {
         given.anAuthenticatedUserWithGlobalAccessAndRole(role);
         var entity = dartsDatabase.createEventHandlerData("8888");
         MockHttpServletRequestBuilder requestBuilder = delete(EVENT_MAPPINGS_ENDPOINT, entity.getId());
-        MvcResult response = mockMvc.perform(requestBuilder)
+        mockMvc.perform(requestBuilder)
             .andExpect(status().isForbidden())
-            .andReturn();
-
-        String actualResponse = response.getResponse().getContentAsString();
-
-        String expectedResponse = """
-            {
-              "type": "AUTHORISATION_109",
-              "title": "User is not authorised for this endpoint",
-              "status": 403
-            }
-            """;
-
-        JSONAssert.assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
+            .andExpect(MockMvcResultMatchers.jsonPath("$.type", Matchers.is("AUTHORISATION_109")))
+            .andExpect(MockMvcResultMatchers.jsonPath("$.status", Matchers.is(403)))
+            .andExpect(MockMvcResultMatchers.jsonPath("$.title", Matchers.is("User is not authorised for this endpoint")));
     }
 
     @Test
@@ -88,24 +80,14 @@ class EventControllerDeleteEventMappingTest extends IntegrationBase {
         entity.setActive(false);
         dartsDatabase.save(entity);
         MockHttpServletRequestBuilder requestBuilder = delete(EVENT_MAPPINGS_ENDPOINT, entity.getId());
-        MvcResult response = mockMvc.perform(requestBuilder)
+        mockMvc.perform(requestBuilder)
             .andExpect(status().isConflict())
-            .andReturn();
-
-        String actualResponse = response.getResponse().getContentAsString();
-
-        String expectedResponse = """
-            {
-               "type": "EVENT_105",
-               "title": "The mapping is inactive, so cannot be deleted",
-               "status": 409,
-               "detail": "Event handler mapping %s cannot be deleted because it is inactive."
-            }
-            """.formatted(entity.getId());
-
-        JSONAssert.assertEquals(expectedResponse, actualResponse, JSONCompareMode.STRICT);
+            .andExpect(MockMvcResultMatchers.jsonPath("$.type", Matchers.is("EVENT_105")))
+            .andExpect(MockMvcResultMatchers.jsonPath("$.status", Matchers.is(409)))
+            .andExpect(MockMvcResultMatchers.jsonPath("$.detail", Matchers.is(("Event handler " +
+                "mapping %s cannot be deleted because it is inactive.").formatted(entity.getId()))))
+            .andExpect(MockMvcResultMatchers.jsonPath("$.title", Matchers.is("The mapping is inactive, so cannot be deleted")));
     }
-
 
     @Test
     void mappingHasEvents() throws Exception {
@@ -115,24 +97,13 @@ class EventControllerDeleteEventMappingTest extends IntegrationBase {
         EventEntity event = dartsDatabase.createEvent(hearing);
 
         MockHttpServletRequestBuilder requestBuilder = delete(EVENT_MAPPINGS_ENDPOINT, event.getEventType().getId());
-        MvcResult response = mockMvc.perform(requestBuilder)
+        mockMvc.perform(requestBuilder)
             .andExpect(status().isConflict())
-            .andReturn();
-
-        String actualResponse = response.getResponse().getContentAsString();
-
-        String expectedResponse = """
-            {
-              "type": "EVENT_106",
-              "title": "The mapping has already processed events, so cannot be deleted",
-              "status": 409,
-              "detail": "Event handler mapping 10 already has processed events, so cannot be deleted."
-            }
-            """;
-
-        JSONAssert.assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
+            .andExpect(MockMvcResultMatchers.jsonPath("$.type", Matchers.is("EVENT_106")))
+            .andExpect(MockMvcResultMatchers.jsonPath("$.status", Matchers.is(409)))
+            .andExpect(MockMvcResultMatchers.jsonPath("$.detail", Matchers.is("Event handler mapping 10 already has processed events, so cannot be deleted.")))
+            .andExpect(MockMvcResultMatchers.jsonPath("$.title", Matchers.is("The mapping has already processed events, so cannot be deleted")));
     }
-
 
     @Test
     void mappingDoesNotExist() throws Exception {
@@ -150,7 +121,8 @@ class EventControllerDeleteEventMappingTest extends IntegrationBase {
               "type":"EVENT_101",
               "title": "No event handler mapping found in database",
               "status": 404,
-              "detail": "No event handler could be found in the database for event handler id: -1."
+              "detail": "No event handler could be found in the database for event handler id: -1.",
+              "instance":"/admin/event-mappings/-1"
             }
             """;
 

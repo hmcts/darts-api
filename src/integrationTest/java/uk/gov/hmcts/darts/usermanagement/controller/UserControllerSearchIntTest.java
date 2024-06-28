@@ -1,6 +1,7 @@
 package uk.gov.hmcts.darts.usermanagement.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Test;
 import org.skyscreamer.jsonassert.JSONAssert;
 import org.skyscreamer.jsonassert.JSONCompareMode;
@@ -60,20 +61,13 @@ class UserControllerSearchIntTest extends IntegrationBase {
         UserSearch userSearch = new UserSearch();
         userSearch.setEmailAddress("@example");
 
-        MvcResult mvcResult = mockMvc.perform(post(ENDPOINT_URL)
+        mockMvc.perform(post(ENDPOINT_URL)
                                                   .header("Content-Type", "application/json")
                                                   .content(objectMapper.writeValueAsString(userSearch)))
             .andExpect(status().isForbidden())
-            .andReturn();
-
-        String expectedResponse = """
-            {"type":"AUTHORISATION_109","title":"User is not authorised for this endpoint","status":403}
-            """;
-        JSONAssert.assertEquals(
-            expectedResponse,
-            mvcResult.getResponse().getContentAsString(),
-            JSONCompareMode.NON_EXTENSIBLE
-        );
+            .andExpect(jsonPath("$.type", Matchers.is("AUTHORISATION_109")))
+            .andExpect(jsonPath("$.status", Matchers.is(403)))
+            .andExpect(jsonPath("$.title", Matchers.is("User is not authorised for this endpoint")));
 
         verify(userIdentity).userHasGlobalAccess(Set.of(SUPER_ADMIN, SUPER_USER));
         verifyNoMoreInteractions(userIdentity);
@@ -94,15 +88,14 @@ class UserControllerSearchIntTest extends IntegrationBase {
 
         String expectedResponse = """
             {
-              "violations": [
-                {
-                  "field": "emailAddress",
-                  "message": "size must be between 1 and 256"
-                }
-              ],
-              "type": "https://zalando.github.io/problem/constraint-violation",
-              "status": 400,
-              "title": "Constraint Violation"
+               "type":"about:blank",
+               "title":"Constraint Violation",
+               "status":400,
+               "detail":"",
+               "instance":"/admin/users/search",
+               "properties":{
+                  "emailAddress":"size must be between 1 and 256"
+               }
             }
             """;
         JSONAssert.assertEquals(

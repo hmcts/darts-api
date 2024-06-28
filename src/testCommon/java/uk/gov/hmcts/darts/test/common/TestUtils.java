@@ -12,7 +12,6 @@ import jakarta.xml.bind.JAXBException;
 import org.apache.commons.io.FileUtils;
 import org.skyscreamer.jsonassert.JSONAssert;
 import org.skyscreamer.jsonassert.JSONCompareMode;
-import org.zalando.problem.jackson.ProblemModule;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -57,7 +56,6 @@ public final class TestUtils {
     public static ObjectMapper getObjectMapper() {
         ObjectMapper objectMapper = new ObjectMapper();
         objectMapper.registerModule(new JavaTimeModule());
-        objectMapper.registerModule(new ProblemModule());
 
         objectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
         objectMapper.setSerializationInclusion(JsonInclude.Include.NON_EMPTY);

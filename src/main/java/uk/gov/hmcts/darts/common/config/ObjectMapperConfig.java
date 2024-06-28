@@ -9,7 +9,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 import org.springframework.web.client.RestTemplate;
-import org.zalando.problem.jackson.ProblemModule;
 
 @Configuration
 @Slf4j
@@ -20,7 +19,6 @@ public class ObjectMapperConfig {
     public ObjectMapper objectMapper() {
         ObjectMapper objectMapper = new ObjectMapper();
         objectMapper.registerModule(new JavaTimeModule());
-        objectMapper.registerModule(new ProblemModule());
 
         objectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
 
@@ -33,7 +31,7 @@ public class ObjectMapperConfig {
     public ObjectMapper caseDocumentObjectMapper() {
         ObjectMapper objectMapper = new ObjectMapper();
         objectMapper.registerModule(new JavaTimeModule());
-        objectMapper.registerModule(new ProblemModule());
+
         objectMapper.enable(SerializationFeature.INDENT_OUTPUT);
         objectMapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
         objectMapper.disable(SerializationFeature.FAIL_ON_EMPTY_BEANS);

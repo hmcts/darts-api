@@ -65,11 +65,8 @@ class TranscriptionControllerGetTranscriberTranscriptsIntTest extends Integratio
         String actualResponse = mvcResult.getResponse().getContentAsString();
 
         String expectedResponse = """
-            {
-              "title": "Bad Request",
-              "status": 400,
-              "detail": "Required request header 'user_id' for method parameter type Integer is not present"
-            }
+            {"type":"about:blank","title":"Bad Request","status":400,"detail":
+            "Required header 'user_id' is not present.","instance":"/transcriptions/transcriber-view"}
             """;
         JSONAssert.assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
     }
@@ -88,11 +85,8 @@ class TranscriptionControllerGetTranscriberTranscriptsIntTest extends Integratio
         String actualResponse = mvcResult.getResponse().getContentAsString();
 
         String expectedResponse = """
-            {
-              "title": "Bad Request",
-              "status": 400,
-              "detail": "Required request parameter 'assigned' for method parameter type Boolean is not present"
-            }
+           {"type":"about:blank","title":"Bad Request","status":400,"detail":
+           "Required parameter 'assigned' is not present.","instance":"/transcriptions/transcriber-view"}
             """;
         JSONAssert.assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
     }
