@@ -275,7 +275,7 @@
 --    add transcription_object_name to transcription, ditto
 --    move confidence* columns from case_overflow to court_case and prefix with ret
 --    replace requestor string to requested_by on transcription with fk to user_account
---    add status and is_current to event
+--    add event_status and is_current to event
 --    add case_type, upload_priority to court_case
 --    remove judge_hearing_date from hearing
 --    remove reference_id from media
@@ -762,7 +762,7 @@ CREATE TABLE event
 ,event_ts                    TIMESTAMP WITH TIME ZONE      NOT NULL
 ,message_id                  CHARACTER VARYING
 ,is_log_entry                BOOLEAN                       NOT NULL  -- needs to be not null to ensure only 2 valid states
-,event_status                CHARACTER VARYING
+,event_status                INTEGER
 ,is_current                  BOOLEAN                       NOT NULL
 ,version_label               CHARACTER VARYING(32)
 ,chronicle_id                CHARACTER VARYING(16)                   -- legacy id of the 1.0 version of the event
