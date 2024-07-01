@@ -129,7 +129,7 @@ class HearingsControllerAdminPostTranscriptionIntTest extends IntegrationBase {
     }
 
     @Test
-    void testHearingSearchForAllResultCourthouseEmptyArray() throws Exception {
+    void testHearingSearchForAllResultSWithCourthouseEmptyArray() throws Exception {
         superAdminUserStub.givenUserIsAuthorised(userIdentity);
 
         List<HearingEntity> hearingEntityList = hearingStub.generateHearings(4);
