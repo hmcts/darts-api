@@ -19,7 +19,7 @@ public final class AwaitabilityUtil {
     public static void waitForMaxWithOneSecondPoll(Callable<Boolean> callable, Duration duration) {
         var awaitAlias = random(4);
         await(awaitAlias).atMost(duration)
-            .with().pollInterval(Duration.ofMillis(1))
+            .with().pollInterval(Duration.ofSeconds(1))
             .until(() -> {
                 boolean verified;
                 try {
