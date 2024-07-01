@@ -21,6 +21,7 @@ import uk.gov.hmcts.darts.event.model.CreatedHearingAndEvent;
 import uk.gov.hmcts.darts.event.model.DarNotifyApplicationEvent;
 import uk.gov.hmcts.darts.event.model.DartsEvent;
 import uk.gov.hmcts.darts.event.service.EventHandler;
+import uk.gov.hmcts.darts.event.service.EventPersistenceService;
 import uk.gov.hmcts.darts.log.api.LogApi;
 
 import java.time.LocalDateTime;
@@ -41,36 +42,32 @@ public abstract class EventHandlerBase implements EventHandler {
     protected HearingRepository hearingRepository;
     protected CaseRepository caseRepository;
     protected ApplicationEventPublisher eventPublisher;
-    protected AuthorisationApi authorisationApi;
     private LogApi logApi;
+    private EventPersistenceService eventPersistenceService;
+    private final AuthorisationApi authorisationApi;
+
 
     @Override
     public boolean isHandlerFor(String handlerName) {
         return StringUtils.equals(handlerName, this.getClass().getSimpleName());
     }
 
-    protected EventEntity eventEntityFrom(DartsEvent dartsEvent, EventHandlerEntity eventHandler) {
-        UserAccountEntity currentUser = authorisationApi.getCurrentUser();
-        var event = new EventEntity();
-        event.setLegacyEventId(NumberUtils.createInteger(dartsEvent.getEventId()));
-        event.setTimestamp(dartsEvent.getDateTime());
-        event.setEventText(dartsEvent.getEventText());
-        event.setEventType(eventHandler);
-        event.setMessageId(dartsEvent.getMessageId());
-        event.setIsLogEntry(dartsEvent.getIsMidTier());
-        event.setCreatedBy(currentUser);
-        event.setLastModifiedBy(currentUser);
-        return event;
-    }
-
     protected CreatedHearingAndEvent createHearingAndSaveEvent(DartsEvent dartsEvent, EventHandlerEntity eventHandler) {
+        var currentUser = authorisationApi.getCurrentUser();
+        var courtroomEntity = retrieveCoreObjectService.retrieveOrCreateCourtroom(
+            dartsEvent.getCourthouse(),
+            dartsEvent.getCourtroom(),
+            currentUser);
+
+        var eventEntity = eventPersistenceService.recordEvent(dartsEvent, eventHandler, courtroomEntity);
 
         final var caseNumbers = dartsEvent.getCaseNumbers();
         if (caseNumbers.size() > 1) {
             log.warn(format(MULTIPLE_CASE_NUMBERS, dartsEvent.getEventId(), join(", ", caseNumbers)));
+            // This needs fixing to deal with multiple case numbers https://tools.hmcts.net/jira/browse/DMP-2835
         }
-
         String caseNumber = caseNumbers.get(0);
+
         try {
             LocalDateTime hearingDateTime = DateConverterUtil.toLocalDateTime(dartsEvent.getDateTime());
             HearingEntity hearingEntity = retrieveCoreObjectService.retrieveOrCreateHearing(
@@ -80,13 +77,14 @@ public abstract class EventHandlerBase implements EventHandler {
                 hearingDateTime
             );
 
-            EventEntity eventEntity = saveEvent(dartsEvent, hearingEntity, eventHandler);
+            eventEntity.addHearing(hearingEntity);
+            eventRepository.saveAndFlush(eventEntity);
             setHearingToActive(hearingEntity);
 
             var createdHearingAndEvent = CreatedHearingAndEvent.builder()
                 .hearingEntity(hearingEntity)
                 .isHearingNew(hearingEntity.isNew())
-                .isCourtroomDifferentFromHearing(false)//for now always creating a new one
+                .isCourtroomDifferentFromHearing(false) // for now always creating a new one
                 .eventEntity(eventEntity)
                 .build();
 
@@ -104,14 +102,6 @@ public abstract class EventHandlerBase implements EventHandler {
     private void setHearingToActive(HearingEntity hearingEntity) {
         hearingEntity.setHearingIsActual(true);
         hearingRepository.saveAndFlush(hearingEntity);
-    }
-
-    protected EventEntity saveEvent(DartsEvent dartsEvent, HearingEntity hearingEntity, EventHandlerEntity eventHandler) {
-        var eventEntity = eventEntityFrom(dartsEvent, eventHandler);
-        eventEntity.setCourtroom(hearingEntity.getCourtroom());
-        eventEntity.addHearing(hearingEntity);
-        eventRepository.saveAndFlush(eventEntity);
-        return eventEntity;
     }
 
     private void publishEventIfHearingNewOrCourtroomDifferent(DartsEvent dartsEvent, CreatedHearingAndEvent createdHearingAndEvent) {
