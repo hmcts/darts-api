@@ -4,6 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import net.javacrumbs.shedlock.core.LockProvider;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.scheduling.config.CronTask;
 import org.springframework.scheduling.config.FixedDelayTask;
 import org.springframework.scheduling.config.FixedRateTask;
@@ -24,6 +25,7 @@ import uk.gov.hmcts.darts.cases.service.CloseOldCasesProcessor;
 import uk.gov.hmcts.darts.common.entity.AutomatedTaskEntity;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.common.repository.AutomatedTaskRepository;
+import uk.gov.hmcts.darts.common.repository.CaseRepository;
 import uk.gov.hmcts.darts.dailylist.service.DailyListService;
 import uk.gov.hmcts.darts.datamanagement.service.InboundToUnstructuredProcessor;
 import uk.gov.hmcts.darts.log.api.LogApi;
@@ -57,6 +59,11 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doThrow;
+import static uk.gov.hmcts.darts.task.status.AutomatedTaskStatus.COMPLETED;
+import static uk.gov.hmcts.darts.task.status.AutomatedTaskStatus.FAILED;
+import static uk.gov.hmcts.darts.task.status.AutomatedTaskStatus.NOT_STARTED;
 import static uk.gov.hmcts.darts.test.common.AwaitabilityUtil.waitForMax10SecondsWithOneSecondPoll;
 
 @Slf4j
@@ -107,6 +114,9 @@ class AutomatedTaskServiceTest extends IntegrationPerClassBase {
     @Autowired
     private DailyListService dailyListService;
 
+    @SpyBean
+    private CaseRepository caseRepository;
+
     @Autowired
     private ArmRetentionEventDateProcessor armRetentionEventDateProcessor;
 
@@ -146,6 +156,20 @@ class AutomatedTaskServiceTest extends IntegrationPerClassBase {
     }
 
     @Test
+    void givenSuccessfullyStartedTaskFailsDuringExecutionThenStatusIsSetToFailed() {
+        GenerateCaseDocumentAutomatedTask automatedTask = new GenerateCaseDocumentAutomatedTask(automatedTaskRepository, lockProvider,
+                                                                                        automatedTaskConfigurationProperties, taskProcessorFactory, logApi);
+        doThrow(ArithmeticException.class).when(caseRepository).findCasesNeedingCaseDocumentGenerated(any(), any());
+
+        automatedTaskService.cancelAutomatedTaskAndUpdateCronExpression(automatedTask.getTaskName(), true, "*/7 * * * * *");
+
+        waitForMax10SecondsWithOneSecondPoll(() -> {
+            AutomatedTaskStatus newAutomatedTaskStatus = automatedTaskService.getAutomatedTaskStatus(automatedTask.getTaskName());
+            return newAutomatedTaskStatus == FAILED;
+        });
+    }
+
+    @Test
     void givenAutomatedTaskVerifyStatusBeforeAndAfterRunning() {
         ProcessDailyListAutomatedTask automatedTask = new ProcessDailyListAutomatedTask(automatedTaskRepository, lockProvider,
                                                                                         automatedTaskConfigurationProperties, logApi
@@ -157,7 +181,7 @@ class AutomatedTaskServiceTest extends IntegrationPerClassBase {
 
         // this may have transitioned to complete. Let's check the history to ensure that
         // we started with NOT_STARTED state
-        assertTrue(automatedTask.hasTransitionState(AutomatedTaskStatus.NOT_STARTED));
+        assertTrue(automatedTask.hasTransitionState(NOT_STARTED));
 
         boolean result1 = automatedTaskService.cancelAutomatedTaskAndUpdateCronExpression(
             automatedTask.getTaskName(), true, "*/7 * * * * *");
@@ -165,7 +189,7 @@ class AutomatedTaskServiceTest extends IntegrationPerClassBase {
 
         waitForMax10SecondsWithOneSecondPoll(() -> {
             AutomatedTaskStatus newAutomatedTaskStatus = automatedTaskService.getAutomatedTaskStatus(automatedTask.getTaskName());
-            return AutomatedTaskStatus.COMPLETED.equals(newAutomatedTaskStatus);
+            return COMPLETED.equals(newAutomatedTaskStatus);
         });
 
         boolean result2 = automatedTaskService.cancelAutomatedTaskAndUpdateCronExpression(
@@ -307,7 +331,7 @@ class AutomatedTaskServiceTest extends IntegrationPerClassBase {
 
         waitForMax10SecondsWithOneSecondPoll(() -> {
             AutomatedTaskStatus newAutomatedTaskStatus = automatedTaskService.getAutomatedTaskStatus(automatedTask.getTaskName());
-            return AutomatedTaskStatus.COMPLETED.equals(newAutomatedTaskStatus);
+            return COMPLETED.equals(newAutomatedTaskStatus);
         });
 
         automatedTaskService.updateAutomatedTaskCronExpression(

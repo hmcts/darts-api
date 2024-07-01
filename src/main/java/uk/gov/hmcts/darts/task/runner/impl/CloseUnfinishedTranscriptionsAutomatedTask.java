@@ -34,9 +34,4 @@ public class CloseUnfinishedTranscriptionsAutomatedTask extends AbstractLockable
     protected void runTask() {
         transcriptionsProcessor.closeTranscriptions();
     }
-
-    @Override
-    protected void handleException(Exception exception) {
-        log.error("Error attempting to close transcriptions: {}", exception.getMessage());
-    }
 }

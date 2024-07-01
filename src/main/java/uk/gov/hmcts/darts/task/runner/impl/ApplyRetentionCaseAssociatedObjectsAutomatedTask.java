@@ -34,10 +34,4 @@ public class ApplyRetentionCaseAssociatedObjectsAutomatedTask extends AbstractLo
     protected void runTask() {
         processor.processApplyRetentionToCaseAssociatedObjects();
     }
-
-    @Override
-    protected void handleException(Exception exception) {
-        log.error("Exception: {}", exception.getMessage());
-    }
-
 }

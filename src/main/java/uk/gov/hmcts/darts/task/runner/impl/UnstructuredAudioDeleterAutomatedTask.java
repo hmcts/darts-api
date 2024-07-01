@@ -35,9 +35,4 @@ public class UnstructuredAudioDeleterAutomatedTask extends AbstractLockableAutom
     protected void runTask() {
         unstructuredAudioDeleterProcessor.markForDeletion();
     }
-
-    @Override
-    protected void handleException(Exception exception) {
-        log.error("Exception: {}", exception.getMessage());
-    }
 }
