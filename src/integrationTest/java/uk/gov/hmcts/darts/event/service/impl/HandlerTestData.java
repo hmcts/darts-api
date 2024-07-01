@@ -1,5 +1,11 @@
 package uk.gov.hmcts.darts.event.service.impl;
 
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
+import org.mockito.Mockito;
+import org.mockito.exceptions.verification.TooFewActualInvocations;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import uk.gov.hmcts.darts.event.client.DartsGatewayClient;
 import uk.gov.hmcts.darts.event.enums.DarNotifyType;
 import uk.gov.hmcts.darts.event.model.DarNotifyEvent;
 import uk.gov.hmcts.darts.testutils.IntegrationBaseWithGatewayStub;
@@ -10,8 +16,10 @@ import java.time.ZoneOffset;
 import java.util.List;
 
 import static java.time.OffsetDateTime.now;
+import static org.awaitility.Awaitility.await;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.times;
 
 class HandlerTestData extends IntegrationBaseWithGatewayStub {
 
@@ -27,6 +35,23 @@ class HandlerTestData extends IntegrationBaseWithGatewayStub {
     protected final OffsetDateTime today = now();
 
     protected static final String DAR_NOTIFY_URL = "http://1.2.3.4/VIQDARNotifyEvent/DARNotifyEvent.asmx";
+
+    @MockBean
+    protected DartsGatewayClient dartsGatewayClient;
+
+    @Captor
+    protected ArgumentCaptor<DarNotifyEvent> darNotifyEventArgumentCaptor;
+
+    protected void verifyDarNotificationCount(int count) {
+        await().until(() -> {
+            try {
+                Mockito.verify(dartsGatewayClient, times(count)).darNotify(darNotifyEventArgumentCaptor.capture());
+                return true;
+            }  catch (TooFewActualInvocations ex) {
+                return false;
+            }
+        });
+    }
 
     protected void verifyDarNotification(DarNotifyEvent darNotifyEvent,
                                          DarNotifyType type,

@@ -2,8 +2,6 @@ package uk.gov.hmcts.darts.event.service.impl;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Captor;
 import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -20,7 +18,6 @@ import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
 import uk.gov.hmcts.darts.common.repository.CaseRetentionRepository;
 import uk.gov.hmcts.darts.common.util.DateConverterUtil;
-import uk.gov.hmcts.darts.event.client.DartsGatewayClient;
 import uk.gov.hmcts.darts.event.model.DarNotifyEvent;
 import uk.gov.hmcts.darts.event.model.DartsEvent;
 import uk.gov.hmcts.darts.event.model.DartsEventRetentionPolicy;
@@ -44,7 +41,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.darts.event.enums.DarNotifyType.CASE_UPDATE;
@@ -72,12 +68,6 @@ class StopAndCloseHandlerTest extends HandlerTestData {
 
     @Mock
     private CaseRetentionRepository caseRetentionRepository;
-
-    @MockBean
-    private DartsGatewayClient dartsGatewayClient;
-
-    @Captor
-    private ArgumentCaptor<DarNotifyEvent> darNotifyEventArgumentCaptor;
 
     @BeforeEach
     public void setupStubs() {
@@ -120,7 +110,7 @@ class StopAndCloseHandlerTest extends HandlerTestData {
         assertThat(hearingsForCase.size()).isEqualTo(1);
         assertThat(hearingsForCase.get(0).getHearingIsActual()).isEqualTo(true);
 
-        verify(dartsGatewayClient, times(2)).darNotify(darNotifyEventArgumentCaptor.capture());
+        verifyDarNotificationCount(2);
         verifyDarNotifications(darNotifyEventArgumentCaptor.getAllValues(), List.of(STOP_RECORDING, CASE_UPDATE), SOME_ROOM);
     }
 
@@ -149,7 +139,7 @@ class StopAndCloseHandlerTest extends HandlerTestData {
         assertThat(persistedCase.getClosed()).isTrue();
         assertEquals(HEARING_DATE_ODT, persistedCase.getCaseClosedTimestamp());
 
-        verify(dartsGatewayClient, times(2)).darNotify(darNotifyEventArgumentCaptor.capture());
+        verifyDarNotificationCount(2);
         verifyDarNotifications(darNotifyEventArgumentCaptor.getAllValues(), List.of(STOP_RECORDING, CASE_UPDATE), SOME_ROOM);
     }
 
@@ -184,7 +174,7 @@ class StopAndCloseHandlerTest extends HandlerTestData {
         assertThat(persistedCase.getClosed()).isTrue();
         assertEquals(HEARING_DATE_ODT, persistedCase.getCaseClosedTimestamp());
 
-        verify(dartsGatewayClient, times(2)).darNotify(darNotifyEventArgumentCaptor.capture());
+        verifyDarNotificationCount(2);
         verifyDarNotifications(darNotifyEventArgumentCaptor.getAllValues(), List.of(STOP_RECORDING, CASE_UPDATE), SOME_OTHER_ROOM);
     }
 
@@ -215,7 +205,7 @@ class StopAndCloseHandlerTest extends HandlerTestData {
         assertThat(persistedCase.getClosed()).isTrue();
         assertEquals(HEARING_DATE_ODT, persistedCase.getCaseClosedTimestamp());
 
-        verify(dartsGatewayClient, times(1)).darNotify(darNotifyEventArgumentCaptor.capture());
+        verifyDarNotificationCount(1);
         verifyDarNotification(darNotifyEventArgumentCaptor.getValue(), STOP_RECORDING, SOME_COURTHOUSE, SOME_ROOM);
     }
 
@@ -242,7 +232,7 @@ class StopAndCloseHandlerTest extends HandlerTestData {
         var persistedEvent = allEvents.get(0);
         assertThat(persistedEvent.getCourtroom().getName()).isEqualTo(SOME_ROOM);
 
-        verify(dartsGatewayClient, times(1)).darNotify(darNotifyEventArgumentCaptor.capture());
+        verifyDarNotificationCount(1);
         verifyDarNotification(darNotifyEventArgumentCaptor.getValue(), STOP_RECORDING, SOME_COURTHOUSE, SOME_ROOM);
     }
 
