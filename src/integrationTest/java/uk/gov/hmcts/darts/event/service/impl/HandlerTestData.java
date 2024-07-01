@@ -26,7 +26,7 @@ class HandlerTestData extends IntegrationBaseWithGatewayStub {
 
     protected final OffsetDateTime today = now();
 
-    protected final String DAR_NOTIFY_URL = "http://1.2.3.4/VIQDARNotifyEvent/DARNotifyEvent.asmx";
+    protected static final String DAR_NOTIFY_URL = "http://1.2.3.4/VIQDARNotifyEvent/DARNotifyEvent.asmx";
 
     protected void verifyDarNotification(DarNotifyEvent darNotifyEvent,
                                          DarNotifyType type,
@@ -40,7 +40,9 @@ class HandlerTestData extends IntegrationBaseWithGatewayStub {
 
     protected void verifyDarNotifications(List<DarNotifyEvent> actualNotifications, List<DarNotifyType> expectedTypes, String courtroom) {
         for (DarNotifyType darNotifyType : expectedTypes) {
-            var foundNotification = actualNotifications.stream().filter(notification -> notification.getNotificationType().equals(darNotifyType.getNotificationType())).findFirst();
+            var foundNotification = actualNotifications.stream()
+                .filter(notification -> notification.getNotificationType().equals(darNotifyType.getNotificationType()))
+                .findFirst();
             assertTrue(foundNotification.isPresent());
             verifyDarNotification(foundNotification.get(), darNotifyType, SOME_COURTHOUSE, courtroom);
         }
