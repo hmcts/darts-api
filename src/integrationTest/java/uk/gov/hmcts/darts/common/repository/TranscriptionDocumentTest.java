@@ -12,6 +12,7 @@ import uk.gov.hmcts.darts.testutils.stubs.TranscriptionDocumentStub;
 import uk.gov.hmcts.darts.transcriptions.model.TranscriptionDocumentResult;
 
 import java.time.LocalDate;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
 
@@ -62,11 +63,15 @@ class TranscriptionDocumentTest extends RepositoryBase {
 
         generatedDocumentEntities = transcriptionStub
             .generateTranscriptionEntities(GENERATION_COUNT, 0, 0,
-                                           false, true, false);
+                                           false, true, false)
+            .stream().sorted(Comparator.comparing(TranscriptionDocumentEntity::getId))
+            .toList();
 
         List<TranscriptionDocumentResult> transcriptionDocumentResults
             = transcriptionDocumentRepository.findTranscriptionMedia(null,
-                                                                      null,null,null,null,null, null, null);
+                                                                      null,null,null,null,null, null, null)
+            .stream().sorted(Comparator.comparing(TranscriptionDocumentResult::transcriptionDocumentId))
+            .toList();
 
         Assertions.assertTrue(assertResultEquals(transcriptionDocumentResults.get(0),
                                                  getExpectedResult(generatedDocumentEntities.get(0),

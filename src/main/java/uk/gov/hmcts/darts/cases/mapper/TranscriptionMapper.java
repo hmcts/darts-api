@@ -45,7 +45,7 @@ public class TranscriptionMapper {
         if (transcriptionEntity.getCreatedBy() != null) {
             return transcriptionEntity.getCreatedBy().getUserName();
         } else {
-            return transcriptionEntity.getRequestor();
+            return transcriptionEntity.getRequestedBy().getUserFullName();
         }
     }
 

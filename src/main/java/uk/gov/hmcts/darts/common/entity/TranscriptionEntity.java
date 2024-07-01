@@ -85,8 +85,9 @@ public class TranscriptionEntity extends CreatedModifiedBaseEntity {
     private String legacyObjectId;
 
     @NotAudited
-    @Column(name = "requestor")
-    private String requestor;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "requested_by")
+    private UserAccountEntity requestedBy;
 
     @Column(name = "hearing_date")
     private LocalDate hearingDate;
@@ -141,6 +142,10 @@ public class TranscriptionEntity extends CreatedModifiedBaseEntity {
     @NotAudited
     @OneToMany(mappedBy = TranscriptionDocumentEntity_.TRANSCRIPTION)
     private List<TranscriptionDocumentEntity> transcriptionDocumentEntities = new ArrayList<>();
+
+    @NotAudited
+    @Column(name = "transcription_object_name")
+    private String transcriptionObjectName;
 
     public void addCase(CourtCaseEntity courtCase) {
         if (courtCase != null) {

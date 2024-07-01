@@ -49,9 +49,6 @@ public class MediaEntity extends CreatedModifiedBaseEntity {
     @Column(name = "total_channels", nullable = false)
     private Integer totalChannels;
 
-    @Column(name = "reference_id")
-    private String referenceId;
-
     @Column(name = "start_ts", nullable = false)
     private OffsetDateTime start;
 

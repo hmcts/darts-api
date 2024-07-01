@@ -125,6 +125,18 @@ public class CourtCaseEntity extends CreatedModifiedBaseEntity {
     @Column(name = "data_anonymised_ts")
     private OffsetDateTime dataAnonymisedTs;
 
+    @Column(name = "case_type")
+    private String caseType;
+
+    @Column(name = "upload_priority")
+    private Integer uploadPriority;
+
+    @Column(name = "ret_conf_level")
+    private Integer retConfLevel;
+
+    @Column(name = "ret_conf_reason")
+    private String retConfReason;
+
     public void addDefence(DefenceEntity defence) {
         if (defenceList.stream().noneMatch(defenceEntity -> defenceEntity.getName().equalsIgnoreCase(defence.getName()))) {
             defenceList.add(defence);

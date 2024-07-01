@@ -53,9 +53,6 @@ public class HearingEntity extends CreatedModifiedBaseEntity {
     @Column(name = "hearing_is_actual", nullable = false)
     private Boolean hearingIsActual;
 
-    @Column(name = "judge_hearing_date")
-    private String judgeHearingDate;
-
     @ManyToMany(fetch = FetchType.EAGER, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JoinTable(name = "hearing_judge_ae",
         joinColumns = {@JoinColumn(name = HEA_ID)},

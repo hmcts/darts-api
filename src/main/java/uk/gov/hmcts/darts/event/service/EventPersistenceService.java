@@ -63,6 +63,7 @@ public class EventPersistenceService {
         event.setIsLogEntry(dartsEvent.getIsMidTier());
         event.setCreatedBy(currentUser);
         event.setLastModifiedBy(currentUser);
+        event.setIsCurrent(true);
         return event;
     }
 }
