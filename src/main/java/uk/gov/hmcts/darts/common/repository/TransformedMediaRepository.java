@@ -1,5 +1,6 @@
 package uk.gov.hmcts.darts.common.repository;
 
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
@@ -49,13 +50,14 @@ public interface TransformedMediaRepository extends JpaRepository<TransformedMed
     List<TransformedMediaDetailsDto> findTransformedMediaDetails(Integer userId, boolean expired);
 
 
+    @EntityGraph(attributePaths = {"mediaRequest.currentOwner.securityGroupEntities"})
     @Query("""
         SELECT tm FROM MediaRequestEntity mr, TransformedMediaEntity tm
         JOIN tm.transientObjectDirectoryEntities tod
         WHERE tm.mediaRequest = mr
         AND ((tm.lastAccessed < :createdAtOrLastAccessedDateTime AND mr.status = 'COMPLETED')
              OR (tm.createdDateTime < :createdAtOrLastAccessedDateTime AND  mr.status <> 'PROCESSING' AND tm.lastAccessed IS NULL))
-        AND upper(tod.status.description) <> 'MARKED FOR DELETION' 
+        AND upper(tod.status.description) <> 'MARKED FOR DELETION'
         """)
     List<TransformedMediaEntity> findAllDeletableTransformedMedia(OffsetDateTime createdAtOrLastAccessedDateTime);
 
