@@ -9,6 +9,7 @@ import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.common.repository.CaseRepository;
+import uk.gov.hmcts.darts.event.model.DarNotifyEvent;
 import uk.gov.hmcts.darts.event.model.DartsEvent;
 import uk.gov.hmcts.darts.event.service.EventDispatcher;
 import uk.gov.hmcts.darts.testutils.stubs.NodeRegisterStub;
@@ -18,7 +19,10 @@ import java.util.List;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.darts.event.enums.DarNotifyType.CASE_UPDATE;
 
 class InterpreterUsedHandlerTest extends HandlerTestData {
 
@@ -44,7 +48,7 @@ class InterpreterUsedHandlerTest extends HandlerTestData {
 
         CourtroomEntity courtroom = dartsDatabase.createCourtroomUnlessExists(SOME_COURTHOUSE, SOME_ROOM);
         nodeRegisterStub.setupNodeRegistry(courtroom);
-        dartsGateway.darNotificationReturnsSuccess();
+        doNothing().when(dartsGatewayClient).darNotify(any(DarNotifyEvent.class));
     }
 
     @Test
@@ -66,8 +70,8 @@ class InterpreterUsedHandlerTest extends HandlerTestData {
                                     .courtroom(SOME_ROOM)
                                     .dateTime(HEARING_DATE_ODT));
 
-        dartsGateway.verifyReceivedNotificationType(3);
-        dartsGateway.verifyNotificationUrl("http://1.2.3.4/VIQDARNotifyEvent/DARNotifyEvent.asmx", 1);
+        verifyDarNotificationCount(1);
+        verifyDarNotification(darNotifyEventArgumentCaptor.getValue(), CASE_UPDATE, SOME_COURTHOUSE, SOME_ROOM);
 
         var persistedCase = dartsDatabase.findByCaseByCaseNumberAndCourtHouseName(
             SOME_CASE_NUMBER,
@@ -101,8 +105,8 @@ class InterpreterUsedHandlerTest extends HandlerTestData {
                                     .courtroom(SOME_ROOM)
                                     .dateTime(HEARING_DATE_ODT));
 
-        dartsGateway.verifyReceivedNotificationType(3);
-        dartsGateway.verifyNotificationUrl("http://1.2.3.4/VIQDARNotifyEvent/DARNotifyEvent.asmx", 1);
+        verifyDarNotificationCount(1);
+        verifyDarNotification(darNotifyEventArgumentCaptor.getValue(), CASE_UPDATE, SOME_COURTHOUSE, SOME_ROOM);
 
         var persistedCase = dartsDatabase.findByCaseByCaseNumberAndCourtHouseName(
             SOME_CASE_NUMBER,
@@ -139,8 +143,8 @@ class InterpreterUsedHandlerTest extends HandlerTestData {
                                     .courtroom(SOME_OTHER_ROOM)
                                     .dateTime(HEARING_DATE_ODT));
 
-        dartsGateway.verifyReceivedNotificationType(3);
-        dartsGateway.verifyNotificationUrl("http://1.2.3.4/VIQDARNotifyEvent/DARNotifyEvent.asmx", 1);
+        verifyDarNotificationCount(1);
+        verifyDarNotification(darNotifyEventArgumentCaptor.getValue(), CASE_UPDATE, SOME_COURTHOUSE, SOME_OTHER_ROOM);
 
         var persistedCase = dartsDatabase.findByCaseByCaseNumberAndCourtHouseName(
             SOME_CASE_NUMBER,
@@ -163,7 +167,7 @@ class InterpreterUsedHandlerTest extends HandlerTestData {
     }
 
     @Test
-    void givenInterpreterUsedEventReceivedAndCaseAndHearingExistAndRoomHasNotChanged_thenDoNotNotifyDar() {
+    void givenInterpreterUsedEventReceivedAndCaseAndHearingExistAndRoomHasNotChanged_thenDoNotNotifyDar() throws InterruptedException {
         dartsDatabase.givenTheDatabaseContainsCourtCaseWithHearingAndCourthouseWithRoom(
             SOME_CASE_NUMBER,
             SOME_COURTHOUSE,
@@ -194,7 +198,7 @@ class InterpreterUsedHandlerTest extends HandlerTestData {
 
         assertThat(persistedCase.getInterpreterUsed()).isTrue();
 
-        dartsGateway.verifyDoesntReceiveDarEvent();
+        verifyDarNotificationNotReceived();
     }
 
     private static DartsEvent someMinimalDartsEvent() {

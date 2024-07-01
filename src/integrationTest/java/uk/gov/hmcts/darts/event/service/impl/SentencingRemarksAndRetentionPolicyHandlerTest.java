@@ -11,6 +11,7 @@ import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
 import uk.gov.hmcts.darts.common.entity.EventEntity;
 import uk.gov.hmcts.darts.common.entity.RetentionPolicyTypeEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
+import uk.gov.hmcts.darts.event.model.DarNotifyEvent;
 import uk.gov.hmcts.darts.event.model.DartsEvent;
 import uk.gov.hmcts.darts.event.model.DartsEventRetentionPolicy;
 import uk.gov.hmcts.darts.event.service.EventDispatcher;
@@ -23,8 +24,11 @@ import java.util.List;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.TRANSCRIBER;
+import static uk.gov.hmcts.darts.event.enums.DarNotifyType.CASE_UPDATE;
 import static uk.gov.hmcts.darts.test.common.data.UserAccountTestData.buildUserWithRoleFor;
 import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum.APPROVED;
 import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum.REQUESTED;
@@ -48,7 +52,7 @@ class SentencingRemarksAndRetentionPolicyHandlerTest extends HandlerTestData {
 
         CourtroomEntity courtroom = dartsDatabase.createCourtroomUnlessExists(SOME_COURTHOUSE, SOME_ROOM);
         nodeRegisterStub.setupNodeRegistry(courtroom);
-        dartsGateway.darNotificationReturnsSuccess();
+        doNothing().when(dartsGatewayClient).darNotify(any(DarNotifyEvent.class));
     }
 
     @Test
@@ -66,8 +70,8 @@ class SentencingRemarksAndRetentionPolicyHandlerTest extends HandlerTestData {
         assertThat(hearingsForCase.size()).isEqualTo(1);
         assertThat(hearingsForCase.get(0).getHearingIsActual()).isEqualTo(true);
 
-        dartsGateway.verifyReceivedNotificationType(3);
-        dartsGateway.verifyNotificationUrl("http://1.2.3.4/VIQDARNotifyEvent/DARNotifyEvent.asmx", 1);
+        verifyDarNotificationCount(1);
+        verifyDarNotification(darNotifyEventArgumentCaptor.getValue(), CASE_UPDATE, SOME_COURTHOUSE, SOME_ROOM);
     }
 
     @Test
@@ -87,8 +91,8 @@ class SentencingRemarksAndRetentionPolicyHandlerTest extends HandlerTestData {
         assertThat(hearingsForCase.size()).isEqualTo(1);
         assertThat(hearingsForCase.get(0).getHearingIsActual()).isEqualTo(true);
 
-        dartsGateway.verifyReceivedNotificationType(3);
-        dartsGateway.verifyNotificationUrl("http://1.2.3.4/VIQDARNotifyEvent/DARNotifyEvent.asmx", 1);
+        verifyDarNotificationCount(1);
+        verifyDarNotification(darNotifyEventArgumentCaptor.getValue(), CASE_UPDATE, SOME_COURTHOUSE, SOME_ROOM);
     }
 
 
@@ -114,12 +118,12 @@ class SentencingRemarksAndRetentionPolicyHandlerTest extends HandlerTestData {
 
         assertTrue(dartsDatabase.findByCourthouseCourtroomAndDate(SOME_COURTHOUSE, SOME_ROOM, HEARING_DATE_ODT.toLocalDate()).isEmpty());
 
-        dartsGateway.verifyReceivedNotificationType(3);
-        dartsGateway.verifyNotificationUrl("http://1.2.3.4/VIQDARNotifyEvent/DARNotifyEvent.asmx", 1);
+        verifyDarNotificationCount(1);
+        verifyDarNotification(darNotifyEventArgumentCaptor.getValue(), CASE_UPDATE, SOME_COURTHOUSE, SOME_OTHER_ROOM);
     }
 
     @Test
-    void givenSentencingRemarksAndRetentionPolicyEventReceivedAndCaseAndHearingExistAndRoomHasNotChanged_thenDoNotNotifyDar() {
+    void givenSentencingRemarksAndRetentionPolicyEventReceivedAndCaseAndHearingExistAndRoomHasNotChanged_thenDoNotNotifyDar() throws InterruptedException {
         dartsDatabase.givenTheDatabaseContainsCourtCaseWithHearingAndCourthouseWithRoom(
             SOME_CASE_NUMBER,
             SOME_COURTHOUSE,
@@ -140,7 +144,7 @@ class SentencingRemarksAndRetentionPolicyHandlerTest extends HandlerTestData {
         assertThat(hearingsForCase.size()).isEqualTo(1);
         assertThat(hearingsForCase.get(0).getHearingIsActual()).isEqualTo(true);
 
-        dartsGateway.verifyDoesntReceiveDarEvent();
+        verifyDarNotificationNotReceived();
     }
 
     @Test

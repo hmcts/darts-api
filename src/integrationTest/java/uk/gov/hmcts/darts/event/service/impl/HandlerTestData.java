@@ -19,6 +19,7 @@ import static java.time.OffsetDateTime.now;
 import static org.awaitility.Awaitility.await;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
 
 class HandlerTestData extends IntegrationBaseWithGatewayStub {
@@ -41,6 +42,12 @@ class HandlerTestData extends IntegrationBaseWithGatewayStub {
 
     @Captor
     protected ArgumentCaptor<DarNotifyEvent> darNotifyEventArgumentCaptor;
+
+    @SuppressWarnings("PMD.DoNotUseThreads")
+    protected void verifyDarNotificationNotReceived() throws InterruptedException {
+        Thread.sleep(1000);
+        Mockito.verify(dartsGatewayClient, times(0)).darNotify(any(DarNotifyEvent.class));
+    }
 
     protected void verifyDarNotificationCount(int count) {
         await().until(() -> {

@@ -10,6 +10,7 @@ import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
 import uk.gov.hmcts.darts.common.entity.EventHandlerEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
+import uk.gov.hmcts.darts.event.model.DarNotifyEvent;
 import uk.gov.hmcts.darts.event.model.DartsEvent;
 import uk.gov.hmcts.darts.event.service.EventDispatcher;
 import uk.gov.hmcts.darts.testutils.stubs.NodeRegisterStub;
@@ -21,7 +22,11 @@ import static java.time.OffsetDateTime.now;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.darts.event.enums.DarNotifyType.CASE_UPDATE;
+import static uk.gov.hmcts.darts.event.enums.DarNotifyType.START_RECORDING;
 import static uk.gov.hmcts.darts.test.common.data.CaseTestData.someMinimalCase;
 
 class DarStartHandlerTest extends HandlerTestData {
@@ -48,7 +53,7 @@ class DarStartHandlerTest extends HandlerTestData {
         when(mockUserIdentity.getUserAccount()).thenReturn(testUser);
         CourtroomEntity courtroom = dartsDatabase.createCourtroomUnlessExists(SOME_COURTHOUSE, SOME_ROOM);
         nodeRegisterStub.setupNodeRegistry(courtroom);
-        dartsGateway.darNotificationReturnsSuccess();
+        doNothing().when(dartsGatewayClient).darNotify(any(DarNotifyEvent.class));
     }
 
     @Test
@@ -80,9 +85,8 @@ class DarStartHandlerTest extends HandlerTestData {
         assertThat(hearingsForCase.size()).isEqualTo(1);
         assertThat(hearingsForCase.get(0).getHearingIsActual()).isEqualTo(true);
 
-        dartsGateway.verifyReceivedNotificationType(1);
-        dartsGateway.verifyReceivedNotificationType(3);
-        dartsGateway.verifyNotificationUrl("http://1.2.3.4/VIQDARNotifyEvent/DARNotifyEvent.asmx", 2);
+        verifyDarNotificationCount(2);
+        verifyDarNotifications(darNotifyEventArgumentCaptor.getAllValues(), List.of(START_RECORDING, CASE_UPDATE), SOME_ROOM);
     }
 
     @Test
@@ -106,9 +110,8 @@ class DarStartHandlerTest extends HandlerTestData {
         assertThat(hearingsForCase.size()).isEqualTo(1);
         assertThat(hearingsForCase.get(0).getHearingIsActual()).isEqualTo(true);
 
-        dartsGateway.verifyReceivedNotificationType(1);
-        dartsGateway.verifyReceivedNotificationType(3);
-        dartsGateway.verifyNotificationUrl("http://1.2.3.4/VIQDARNotifyEvent/DARNotifyEvent.asmx", 2);
+        verifyDarNotificationCount(2);
+        verifyDarNotifications(darNotifyEventArgumentCaptor.getAllValues(), List.of(START_RECORDING, CASE_UPDATE), SOME_ROOM);
     }
 
 
@@ -137,10 +140,8 @@ class DarStartHandlerTest extends HandlerTestData {
         assertThat(hearingsForCase.get(0).getHearingIsActual()).isEqualTo(true);
 
         assertTrue(dartsDatabase.findByCourthouseCourtroomAndDate(SOME_COURTHOUSE, SOME_ROOM, HEARING_DATE_ODT.toLocalDate()).isEmpty());
-
-        dartsGateway.verifyReceivedNotificationType(1);
-        dartsGateway.verifyReceivedNotificationType(3);
-        dartsGateway.verifyNotificationUrl("http://1.2.3.4/VIQDARNotifyEvent/DARNotifyEvent.asmx", 2);
+        verifyDarNotificationCount(2);
+        verifyDarNotifications(darNotifyEventArgumentCaptor.getAllValues(), List.of(START_RECORDING, CASE_UPDATE), SOME_OTHER_ROOM);
     }
 
     @Test
@@ -168,15 +169,15 @@ class DarStartHandlerTest extends HandlerTestData {
         assertThat(hearingsForCase.size()).isEqualTo(1);
         assertThat(hearingsForCase.get(0).getHearingIsActual()).isEqualTo(true);
 
-        dartsGateway.verifyReceivedNotificationType(1);
-        dartsGateway.verifyNotificationUrl("http://1.2.3.4/VIQDARNotifyEvent/DARNotifyEvent.asmx", 1);
+        verifyDarNotificationCount(1);
+        verifyDarNotification(darNotifyEventArgumentCaptor.getValue(), START_RECORDING, SOME_COURTHOUSE, SOME_ROOM);
     }
 
     @Test
     /*
     Should not Notify DAR PC when case is closed.
      */
-    void shouldNotNotifyDarStartRecordingForHearingStartedCaseClosed() {
+    void shouldNotNotifyDarStartRecordingForHearingStartedCaseClosed() throws InterruptedException {
         dartsDatabase.createCourtroomUnlessExists(SOME_COURTHOUSE, SOME_ROOM);
 
         List<EventHandlerEntity> eventHandlerEntityList = dartsDatabase.findByHandlerAndActiveTrue(
@@ -200,14 +201,14 @@ class DarStartHandlerTest extends HandlerTestData {
 
         eventDispatcher.receive(dartsEvent);
 
-        dartsGateway.verifyDoesntReceiveDarEvent();
+        verifyDarNotificationNotReceived();
     }
 
     @Test
     /*
     Should not Notify DAR PC when case is closed. Same case number exists at another courthouse.
      */
-    void shouldNotNotifyDarStartRecordingForHearingStartedCaseClosedOtherCourthouse() {
+    void shouldNotNotifyDarStartRecordingForHearingStartedCaseClosedOtherCourthouse() throws InterruptedException {
         dartsDatabase.createCourtroomUnlessExists(SOME_COURTHOUSE, SOME_ROOM);
 
         List<EventHandlerEntity> eventHandlerEntityList = dartsDatabase.findByHandlerAndActiveTrue(
@@ -235,7 +236,7 @@ class DarStartHandlerTest extends HandlerTestData {
 
         eventDispatcher.receive(dartsEvent);
 
-        dartsGateway.verifyDoesntReceiveDarEvent();
+        verifyDarNotificationNotReceived();
     }
 
     private static DartsEvent someMinimalDartsEvent() {
