@@ -115,7 +115,7 @@ class AutomatedTaskServiceTest extends IntegrationPerClassBase {
     private DailyListService dailyListService;
 
     @SpyBean
-    private CaseRepository generateCaseDocumentProcessor;
+    private CaseRepository caseRepository;
 
     @Autowired
     private ArmRetentionEventDateProcessor armRetentionEventDateProcessor;
@@ -159,7 +159,7 @@ class AutomatedTaskServiceTest extends IntegrationPerClassBase {
     void givenSuccessfullyStartedTaskFailsDuringExecutionThenStatusIsSetToFailed() {
         GenerateCaseDocumentAutomatedTask automatedTask = new GenerateCaseDocumentAutomatedTask(automatedTaskRepository, lockProvider,
                                                                                         automatedTaskConfigurationProperties, taskProcessorFactory, logApi);
-        doThrow(ArithmeticException.class).when(generateCaseDocumentProcessor).findCasesNeedingCaseDocumentGenerated(any(), any());
+        doThrow(ArithmeticException.class).when(caseRepository).findCasesNeedingCaseDocumentGenerated(any(), any());
 
         automatedTaskService.cancelAutomatedTaskAndUpdateCronExpression(automatedTask.getTaskName(), true, "*/7 * * * * *");
 
