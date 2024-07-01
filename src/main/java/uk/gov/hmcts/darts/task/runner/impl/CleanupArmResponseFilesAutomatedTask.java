@@ -31,9 +31,4 @@ public class CleanupArmResponseFilesAutomatedTask extends AbstractLockableAutoma
     protected void runTask() {
         cleanupArmResponseFilesService.cleanupResponseFiles();
     }
-
-    @Override
-    protected void handleException(Exception exception) {
-        log.error("Exception: {}", exception.getMessage());
-    }
 }

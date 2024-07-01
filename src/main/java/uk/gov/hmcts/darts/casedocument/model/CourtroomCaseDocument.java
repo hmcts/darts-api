@@ -1,11 +1,11 @@
-package uk.gov.hmcts.darts.casedocument.template;
+package uk.gov.hmcts.darts.casedocument.model;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
-@Data
 @EqualsAndHashCode(callSuper = true)
-public class DefendantCaseDocument extends CreatedModifiedCaseDocument {
+@Data
+public class CourtroomCaseDocument extends CreatedCaseDocument {
 
     private final Integer id;
     private final String name;

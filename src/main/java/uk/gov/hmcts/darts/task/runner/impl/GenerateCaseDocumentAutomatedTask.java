@@ -37,10 +37,4 @@ public class GenerateCaseDocumentAutomatedTask extends AbstractLockableAutomated
         GenerateCaseDocumentProcessor processor = automatedTaskProcessorFactory.createGenerateCaseDocumentProcessor(batchSize);
         processor.processGenerateCaseDocument();
     }
-
-    @Override
-    protected void handleException(Exception exception) {
-        log.error("Exception: {}", exception.getMessage());
-    }
-
 }

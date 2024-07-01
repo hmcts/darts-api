@@ -31,9 +31,4 @@ public class ApplyRetentionAutomatedTask extends AbstractLockableAutomatedTask {
     protected void runTask() {
         applyRetentionProcessor.processApplyRetention();
     }
-
-    @Override
-    protected void handleException(Exception exception) {
-        log.error("Exception: {}", exception.getMessage());
-    }
 }

@@ -32,9 +32,4 @@ public class DailyListAutomatedTask extends AbstractLockableAutomatedTask {
     protected void runTask() {
         dailyListService.runHouseKeeping();
     }
-
-    @Override
-    protected void handleException(Exception exception) {
-        log.error("Error attempting to run daily list housekeeping: {}", exception.getMessage(), exception);
-    }
 }

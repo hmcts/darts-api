@@ -36,10 +36,4 @@ public class UnstructuredToArmAutomatedTask extends AbstractLockableAutomatedTas
         UnstructuredToArmProcessor unstructuredToArmProcessor = automatedTaskProcessorFactory.createUnstructuredToArmProcessor(batchSize);
         unstructuredToArmProcessor.processUnstructuredToArm();
     }
-
-    @SuppressWarnings("java:S4507")
-    @Override
-    protected void handleException(Exception exception) {
-        log.error("{} Exception", getTaskName(), exception);
-    }
 }

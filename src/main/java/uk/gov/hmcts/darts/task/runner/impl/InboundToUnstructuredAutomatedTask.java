@@ -34,10 +34,4 @@ public class InboundToUnstructuredAutomatedTask extends AbstractLockableAutomate
     protected void runTask() {
         inboundToUnstructuredProcessor.processInboundToUnstructured();
     }
-
-    @Override
-    protected void handleException(Exception exception) {
-        log.error("Exception: {}", exception.getMessage());
-    }
-
 }
