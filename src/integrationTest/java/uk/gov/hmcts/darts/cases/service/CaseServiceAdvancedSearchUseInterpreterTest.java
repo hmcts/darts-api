@@ -5,9 +5,6 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.oauth2.jwt.Jwt;
-import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import uk.gov.hmcts.darts.cases.model.AdvancedSearchResult;
 import uk.gov.hmcts.darts.cases.model.GetCasesSearchRequest;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
@@ -263,14 +260,6 @@ class CaseServiceAdvancedSearchUseInterpreterTest extends IntegrationBase {
         // then
         var caseNumbers = resultList.stream().map(AdvancedSearchResult::getCaseNumber).toList();
         assertThat(caseNumbers).containsExactlyInAnyOrder("Case2", "Case4");
-    }
-
-    private static void givenBearerTokenExists(String email) {
-        Jwt jwt = Jwt.withTokenValue("test")
-            .header("alg", "RS256")
-            .claim("emails", List.of(email))
-            .build();
-        SecurityContextHolder.getContext().setAuthentication(new JwtAuthenticationToken(jwt));
     }
 
     private void assignSecurityGroupToUser(UserAccountEntity user, SecurityGroupEntity securityGroup) {

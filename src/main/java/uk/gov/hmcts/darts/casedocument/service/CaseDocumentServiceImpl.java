@@ -4,7 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.darts.casedocument.mapper.CourtCaseDocumentMapper;
-import uk.gov.hmcts.darts.casedocument.template.CourtCaseDocument;
+import uk.gov.hmcts.darts.casedocument.model.CourtCaseDocument;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.exception.DartsException;
 import uk.gov.hmcts.darts.common.repository.CaseRepository;

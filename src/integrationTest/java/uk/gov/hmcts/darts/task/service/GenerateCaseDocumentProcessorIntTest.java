@@ -3,9 +3,6 @@ package uk.gov.hmcts.darts.task.service;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.SpyBean;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.oauth2.jwt.Jwt;
-import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import uk.gov.hmcts.darts.casedocument.service.GenerateCaseDocumentSingleCaseProcessor;
 import uk.gov.hmcts.darts.common.entity.CaseDocumentEntity;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
@@ -84,11 +81,4 @@ class GenerateCaseDocumentProcessorIntTest extends IntegrationBase {
         assertThat(eodCaseDocument.size()).isEqualTo(1);
     }
 
-    private static void givenBearerTokenExists(String email) {
-        Jwt jwt = Jwt.withTokenValue("test")
-            .header("alg", "RS256")
-            .claim("emails", List.of(email))
-            .build();
-        SecurityContextHolder.getContext().setAuthentication(new JwtAuthenticationToken(jwt));
-    }
 }

@@ -4,10 +4,10 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Mappings;
 import org.springframework.beans.factory.annotation.Autowired;
-import uk.gov.hmcts.darts.casedocument.template.AnnotationCaseDocument;
-import uk.gov.hmcts.darts.casedocument.template.ExternalObjectDirectoryCaseDocument;
-import uk.gov.hmcts.darts.casedocument.template.MediaCaseDocument;
-import uk.gov.hmcts.darts.casedocument.template.TranscriptionCaseDocument;
+import uk.gov.hmcts.darts.casedocument.model.AnnotationCaseDocument;
+import uk.gov.hmcts.darts.casedocument.model.ExternalObjectDirectoryCaseDocument;
+import uk.gov.hmcts.darts.casedocument.model.MediaCaseDocument;
+import uk.gov.hmcts.darts.casedocument.model.TranscriptionCaseDocument;
 import uk.gov.hmcts.darts.common.entity.AnnotationDocumentEntity;
 import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
@@ -48,4 +48,10 @@ public abstract class CaseObjectsCaseDocumentMapper {
     public abstract AnnotationCaseDocument.AnnotationDocumentCaseDocument map(AnnotationDocumentEntity entity);
 
     public abstract List<ExternalObjectDirectoryCaseDocument> mapEods(List<ExternalObjectDirectoryEntity> entities);
+
+    @Mappings({
+        @Mapping(source = "transcriptionDocumentEntity", target = "transcriptionDocument"),
+        @Mapping(source = "annotationDocumentEntity", target = "annotationDocument"),
+    })
+    public abstract ExternalObjectDirectoryCaseDocument mapEod(ExternalObjectDirectoryEntity entity);
 }

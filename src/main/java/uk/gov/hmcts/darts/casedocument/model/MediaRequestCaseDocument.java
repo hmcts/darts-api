@@ -1,4 +1,4 @@
-package uk.gov.hmcts.darts.casedocument.template;
+package uk.gov.hmcts.darts.casedocument.model;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;
