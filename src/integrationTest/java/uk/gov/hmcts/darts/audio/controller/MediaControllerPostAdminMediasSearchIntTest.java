@@ -108,7 +108,6 @@ class MediaControllerPostAdminMediasSearchIntTest extends IntegrationBase {
     @BeforeEach
     @SuppressWarnings({"PMD.NcssCount"})
     void setupDate() {
-        List<MediaEntity> mediaToSave = new ArrayList<>();
         OffsetDateTime tenth10am = OffsetDateTime.of(2020, 10, 10, 10, 0, 0, 0, ZoneOffset.UTC);
         OffsetDateTime startTime = tenth10am.plusSeconds(1);
 
