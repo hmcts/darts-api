@@ -12,6 +12,7 @@ import uk.gov.hmcts.darts.common.repository.HearingRepository;
 import uk.gov.hmcts.darts.common.service.RetrieveCoreObjectService;
 import uk.gov.hmcts.darts.event.model.DartsEvent;
 import uk.gov.hmcts.darts.event.service.CaseManagementRetentionService;
+import uk.gov.hmcts.darts.event.service.EventPersistenceService;
 import uk.gov.hmcts.darts.event.service.handler.base.EventHandlerBase;
 import uk.gov.hmcts.darts.log.api.LogApi;
 import uk.gov.hmcts.darts.transcriptions.api.TranscriptionsApi;
@@ -38,10 +39,11 @@ public class SentencingRemarksAndRetentionPolicyHandler extends EventHandlerBase
                                                       CaseRepository caseRepository,
                                                       ApplicationEventPublisher eventPublisher,
                                                       TranscriptionsApi transcriptionsApi,
-                                                      AuthorisationApi authorisationApi,
                                                       LogApi logApi,
-                                                      CaseManagementRetentionService caseManagementRetentionService) {
-        super(retrieveCoreObjectService, eventRepository, hearingRepository, caseRepository, eventPublisher, authorisationApi, logApi);
+                                                      CaseManagementRetentionService caseManagementRetentionService,
+                                                      EventPersistenceService eventPersistenceService,
+                                                      AuthorisationApi authorisationApi) {
+        super(retrieveCoreObjectService, eventRepository, hearingRepository, caseRepository, eventPublisher, logApi, eventPersistenceService, authorisationApi);
         this.transcriptionsApi = transcriptionsApi;
         this.caseManagementRetentionService = caseManagementRetentionService;
     }

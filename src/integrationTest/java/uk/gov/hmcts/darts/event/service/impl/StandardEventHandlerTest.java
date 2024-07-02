@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
+import uk.gov.hmcts.darts.common.entity.EventEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.event.model.DartsEvent;
@@ -91,7 +92,6 @@ class StandardEventHandlerTest extends HandlerTestData {
     }
 
     @Test
-
     void givenStandardEventReceivedAndHearingDoesNotExist_thenNotifyDarUpdate() {
         dartsDatabase.givenTheDatabaseContainsCourtCaseAndCourthouseWithRoom(
             SOME_CASE_NUMBER,
@@ -237,6 +237,36 @@ class StandardEventHandlerTest extends HandlerTestData {
         latch.await(5, TimeUnit.SECONDS);
         assertEquals(1, dartsDatabase.getHearingRepository().findAll().size());
         assertEquals(numberOfThreads, dartsDatabase.getAllEvents().size());
+    }
+
+    @Test
+    void createsAnEventLinkedCaseForEachCaseNumberFromTheDartsEvent() {
+        dartsDatabase.givenTheDatabaseContainsCourtCaseAndCourthouseWithRoom(
+            SOME_CASE_NUMBER,
+            SOME_COURTHOUSE,
+            SOME_ROOM
+        );
+
+        eventDispatcher.receive(someMinimalDartsEvent()
+                                    .caseNumbers(List.of(SOME_CASE_NUMBER, SOME_CASE_NUMBER_2))
+                                    .courthouse(SOME_COURTHOUSE)
+                                    .courtroom(SOME_ROOM)
+                                    .dateTime(HEARING_DATE_ODT));
+
+        var persistedEvents = dartsDatabase.getEventRepository().findAll();
+        var eventLinkedCases = dartsDatabase.getEventLinkedCaseRepository().findAll();
+
+        assertThat(eventLinkedCases)
+            .extracting("courtCase.caseNumber")
+            .containsExactly(SOME_CASE_NUMBER, SOME_CASE_NUMBER_2);
+
+        assertThat(eventLinkedCases)
+            .extracting("event.id")
+            .containsOnly(idFrom(persistedEvents));
+    }
+
+    public Integer idFrom(List<EventEntity> eventEntities) {
+        return eventEntities.get(0).getId();
     }
 }
 
