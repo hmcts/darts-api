@@ -90,7 +90,11 @@ public enum AudioApiError implements DartsApiError {
         AddAudioErrorCode.ADMIN_SEARCH_CRITERIA_NOT_SUITABLE.getValue(),
         HttpStatus.BAD_REQUEST,
         AddAudioTitleErrors.ADMIN_SEARCH_CRITERIA_NOT_SUITABLE.getValue()
-    );
+    ),
+    TOO_MANY_RESULTS(
+        AddAudioErrorCode.TOO_MANY_RESULTS.getValue(),
+        HttpStatus.BAD_REQUEST,
+        AddAudioTitleErrors.TOO_MANY_RESULTS.getValue());
 
     private static final String ERROR_TYPE_PREFIX = "AUDIO";
 

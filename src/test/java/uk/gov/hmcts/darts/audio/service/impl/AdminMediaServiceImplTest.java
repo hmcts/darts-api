@@ -16,8 +16,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.skyscreamer.jsonassert.JSONAssert;
 import org.skyscreamer.jsonassert.JSONCompareMode;
 import uk.gov.hmcts.darts.audio.entity.MediaRequestEntity;
-import uk.gov.hmcts.darts.audio.mapper.AdminMediaSearchResponseMapper;
-import uk.gov.hmcts.darts.audio.model.AdminMediaSearchResponseItem;
+import uk.gov.hmcts.darts.audio.mapper.GetAdminMediaResponseMapper;
+import uk.gov.hmcts.darts.audio.model.GetAdminMediaResponseItem;
 import uk.gov.hmcts.darts.audio.validation.MediaHideOrShowValidator;
 import uk.gov.hmcts.darts.audio.validation.SearchMediaValidator;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
@@ -82,7 +82,7 @@ class AdminMediaServiceImplTest {
 
     private ObjectMapper objectMapper;
 
-    private MockedStatic<AdminMediaSearchResponseMapper> adminMediaSearchResponseMapperMockedStatic;
+    private MockedStatic<GetAdminMediaResponseMapper> adminMediaSearchResponseMapperMockedStatic;
 
     @BeforeEach
     void setUp() {
@@ -96,7 +96,7 @@ class AdminMediaServiceImplTest {
         OffsetDateTime startAt = OffsetDateTime.now();
         OffsetDateTime endAt = OffsetDateTime.now();
 
-        List<AdminMediaSearchResponseItem> response = mediaRequestService.filterMedias(transformedMediaId, hearingIds, startAt, endAt);
+        List<GetAdminMediaResponseItem> response = mediaRequestService.filterMedias(transformedMediaId, hearingIds, startAt, endAt);
 
         String responseString = objectMapper.writeValueAsString(response);
         String expectedString = """
@@ -132,7 +132,7 @@ class AdminMediaServiceImplTest {
         when(mediaRepository.findAllByHearingId(hearing.getId()))
             .thenReturn(List.of(mediaEntity));
 
-        List<AdminMediaSearchResponseItem> response = mediaRequestService.filterMedias(transformedMediaId, null, null, null);
+        List<GetAdminMediaResponseItem> response = mediaRequestService.filterMedias(transformedMediaId, null, null, null);
 
         String responseString = objectMapper.writeValueAsString(response);
         String expectedString = """
@@ -197,7 +197,7 @@ class AdminMediaServiceImplTest {
         when(mediaRepository.findAllByHearingId(hearing.getId()))
             .thenReturn(List.of(mediaEntity, mediaEntity2));
 
-        List<AdminMediaSearchResponseItem> response = mediaRequestService.filterMedias(transformedMediaId, null, null, null);
+        List<GetAdminMediaResponseItem> response = mediaRequestService.filterMedias(transformedMediaId, null, null, null);
 
         String responseString = objectMapper.writeValueAsString(response);
         String expectedString = """
@@ -278,7 +278,7 @@ class AdminMediaServiceImplTest {
         when(mediaRepository.findMediaByDetails(List.of(hearing.getId()), null, null))
             .thenReturn(List.of(mediaEntity));
 
-        List<AdminMediaSearchResponseItem> response = mediaRequestService.filterMedias(null, List.of(hearing.getId()), null, null);
+        List<GetAdminMediaResponseItem> response = mediaRequestService.filterMedias(null, List.of(hearing.getId()), null, null);
 
         String responseString = objectMapper.writeValueAsString(response);
         String expectedString = """
