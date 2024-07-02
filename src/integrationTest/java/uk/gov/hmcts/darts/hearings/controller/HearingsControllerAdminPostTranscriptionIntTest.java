@@ -129,6 +129,38 @@ class HearingsControllerAdminPostTranscriptionIntTest extends IntegrationBase {
     }
 
     @Test
+    void testHearingSearchForAllResultSWithCourthouseEmptyArray() throws Exception {
+        superAdminUserStub.givenUserIsAuthorised(userIdentity);
+
+        List<HearingEntity> hearingEntityList = hearingStub.generateHearings(4);
+
+        HearingsSearchRequest searchRequest = new HearingsSearchRequest();
+        searchRequest.setCourthouseIds(new ArrayList<>());
+
+        // run the test
+        MvcResult mvcResult = mockMvc.perform(post(ENDPOINT_URL)
+                                                  .header("Content-Type", "application/json")
+                                                  .content(objectMapper.writeValueAsString(searchRequest)))
+            .andExpect(status().is2xxSuccessful())
+            .andReturn();
+
+        HearingsSearchResponse[] actualResponse
+            = objectMapper.readValue(mvcResult.getResponse().getContentAsByteArray(), HearingsSearchResponse[].class);
+
+        assertEquals(hearingEntityList.size(), actualResponse.length);
+        for (int i = 0; i < hearingEntityList.size(); i++) {
+            assertEquals(hearingEntityList.get(i).getHearingDate(), actualResponse[i].getHearingDate());
+            assertEquals(hearingEntityList.get(i).getId(), actualResponse[i].getId());
+            assertEquals(hearingEntityList.get(i).getCourtroom().getCourthouse().getId(), actualResponse[i].getCourthouse().getId());
+            assertEquals(hearingEntityList.get(i).getCourtroom().getCourthouse().getDisplayName(), actualResponse[i].getCourthouse().getDisplayName());
+            assertEquals(hearingEntityList.get(i).getCourtroom().getId(), actualResponse[i].getCourtroom().getId());
+            assertEquals(hearingEntityList.get(i).getCourtroom().getName(), actualResponse[i].getCourtroom().getName());
+            assertEquals(hearingEntityList.get(i).getCourtCase().getId(), actualResponse[i].getCase().getId());
+            assertEquals(hearingEntityList.get(i).getCourtCase().getCaseNumber(), actualResponse[i].getCase().getCaseNumber());
+        }
+    }
+
+    @Test
     void testHearingSearchForResultWithCaseNumber() throws Exception {
         superAdminUserStub.givenUserIsAuthorised(userIdentity);
 
