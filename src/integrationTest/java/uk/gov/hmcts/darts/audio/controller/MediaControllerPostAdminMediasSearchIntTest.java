@@ -202,6 +202,48 @@ class MediaControllerPostAdminMediasSearchIntTest extends IntegrationBase {
 
         List<MediaEntity> expectedEntities = List.of(mediaEntity1b, mediaEntity1a, mediaEntity1c);
         assertResponseItems(expectedEntities, mvcResult);
+
+        String actualResponse = TestUtils.removeTags(TAGS_TO_IGNORE, mvcResult.getResponse().getContentAsString());
+        String expectedResponse = """
+            [
+              {
+                "courthouse": {
+                  "display_name": "Courthouse1"
+                },
+                "courtroom": {
+                  "name": "courtroom1"
+                },
+                "start_at": "2020-10-10T10:00:01Z",
+                "end_at": "2020-10-10T11:00:01Z",
+                "channel": 1,
+                "is_hidden": false
+              },
+              {
+                "courthouse": {
+                  "display_name": "Courthouse1"
+                },
+                "courtroom": {
+                  "name": "courtroom1"
+                },
+                "start_at": "2020-10-10T10:00:02Z",
+                "end_at": "2020-10-10T11:00:02Z",
+                "channel": 1,
+                "is_hidden": false
+              },
+              {
+                "courthouse": {
+                  "display_name": "Courthouse1"
+                },
+                "courtroom": {
+                  "name": "courtroom1"
+                },
+                "start_at": "2020-10-10T10:00:03Z",
+                "end_at": "2020-10-10T11:00:03Z",
+                "channel": 1,
+                "is_hidden": false
+              }
+            ]""";
+        JSONAssert.assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
     }
 
     @Test
