@@ -23,8 +23,8 @@ public class AsyncEventsConfig {
     public TaskExecutor taskExecutor() {
         var executor = new ThreadPoolTaskExecutor();
         executor.setCorePoolSize(10);
-        executor.setMaxPoolSize(50);
-        executor.setQueueCapacity(100);
+        executor.setMaxPoolSize(15);
+        executor.setQueueCapacity(20);
         executor.setThreadNamePrefix("Async-");
         executor.initialize();
         return executor;
