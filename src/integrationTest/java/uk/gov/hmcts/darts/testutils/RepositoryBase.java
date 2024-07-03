@@ -17,7 +17,7 @@ public class RepositoryBase {
 
     static {
         PostgreSQLContainer<?> postgres =
-            new PostgreSQLContainer<>(DockerImageName.parse("postgres:15-alpine"));
+            new PostgreSQLContainer<>(DockerImageName.parse("hmctspublic.azurecr.io/imported/bitnami/postgresql:15"));
         postgres = postgres.withDatabaseName("darts");
         postgres.start();
 
