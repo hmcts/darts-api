@@ -82,7 +82,7 @@ spring:
     hikari:
       maximum-pool-size: 50
   jpa:
-#    database: postgresql
+    database: postgresql
     show-sql: false
     hibernate:
       ddl-auto: none
