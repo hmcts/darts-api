@@ -12,6 +12,8 @@ import uk.gov.hmcts.darts.log.service.EventLoggerService;
 
 import java.time.OffsetDateTime;
 
+import static uk.gov.hmcts.darts.util.DateTimeHelper.getDateTimeIsoFormatted;
+
 @Service
 @AllArgsConstructor
 @NoArgsConstructor
@@ -57,12 +59,12 @@ public class EventLoggerServiceImpl implements EventLoggerService {
 
     private void logPollCheck(String messageId, String eventId, EventSource source, OffsetDateTime dateTime) {
         log.info("Event received: message_id={}, event_id={}, source={}, poll_check=true, date_time={}",
-                 messageId, eventId, source, dateTime);
+                 messageId, eventId, source, getDateTimeIsoFormatted(dateTime));
     }
 
     private void logEvent(String messageId, String eventId, String courthouse, String courtroom, EventSource source, OffsetDateTime dateTime) {
         log.info("Event received: message_id={}, event_id={}, courthouse={}, courtroom={}, source={}, date_time={}",
-                 messageId, eventId, courthouse, courtroom, source, dateTime);
+                 messageId, eventId, courthouse, courtroom, source, getDateTimeIsoFormatted(dateTime));
     }
 
     @Override
@@ -72,7 +74,7 @@ public class EventLoggerServiceImpl implements EventLoggerService {
                   event.getEventId(),
                   event.getCourthouse(),
                   event.getCourtroom(),
-                  event.getDateTime());
+                  getDateTimeIsoFormatted(event.getDateTime()));
     }
 
     @Override
@@ -82,6 +84,6 @@ public class EventLoggerServiceImpl implements EventLoggerService {
                   event.getEventId(),
                   event.getCourthouse(),
                   event.getCourtroom(),
-                  event.getDateTime());
+                  getDateTimeIsoFormatted(event.getDateTime()));
     }
 }
