@@ -20,26 +20,26 @@ class MediaRequestRepositoryIntTest extends PostgresIntegrationBase {
     MediaRequestRepository mediaRequestRepository;
 
     @Test
-    void testUpdateAndRetrieveOldestOpenMediaRequestToProcessingIgnoresCompletedMediaRequest() {
+    void testUpdateAndRetrieveMediaRequestToProcessingIgnoresCompletedMediaRequest() {
         mediaRequestStub.createAndSaveMediaRequestEntity(COMPLETED);
         var mediaRequest1 = mediaRequestStub.createAndSaveMediaRequestEntity(OPEN);
         mediaRequestStub.createAndSaveMediaRequestEntity(OPEN);
         mediaRequestStub.createAndSaveMediaRequestEntity(OPEN);
 
-        var updatedMediaRequest = mediaRequestRepository.updateAndRetrieveOldestOpenMediaRequestToProcessing();
+        var updatedMediaRequest = mediaRequestRepository.updateAndRetrieveMediaRequestToProcessing();
 
         assertThat(updatedMediaRequest.getId()).isEqualTo(mediaRequest1.getId());
         assertThat(updatedMediaRequest.getStatus()).isEqualTo(PROCESSING);
     }
 
     @Test
-    void testUpdateAndRetrieveOldestOpenMediaRequestToProcessingReturnsNullIfNoOpenMediaRequests() {
+    void testUpdateAndRetrieveMediaRequestToProcessingReturnsNullIfNoOpenMediaRequests() {
         mediaRequestStub.createAndSaveMediaRequestEntity(COMPLETED);
         mediaRequestStub.createAndSaveMediaRequestEntity(COMPLETED);
         mediaRequestStub.createAndSaveMediaRequestEntity(COMPLETED);
         mediaRequestStub.createAndSaveMediaRequestEntity(COMPLETED);
 
-        var updatedMediaRequest = mediaRequestRepository.updateAndRetrieveOldestOpenMediaRequestToProcessing();
+        var updatedMediaRequest = mediaRequestRepository.updateAndRetrieveMediaRequestToProcessing();
 
         assertThat(updatedMediaRequest).isNull();
     }

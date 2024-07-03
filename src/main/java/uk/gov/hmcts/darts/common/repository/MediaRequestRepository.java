@@ -32,7 +32,7 @@ public interface MediaRequestRepository extends JpaRepository<MediaRequestEntity
           )
         RETURNING *
         """, nativeQuery = true)
-    MediaRequestEntity updateAndRetrieveOldestOpenMediaRequestToProcessing();
+    MediaRequestEntity updateAndRetrieveMediaRequestToProcessing();
 
     @Query("""
         SELECT count(distinct(tm.id)) FROM MediaRequestEntity mr, TransformedMediaEntity tm

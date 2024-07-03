@@ -17,7 +17,7 @@ import uk.gov.hmcts.darts.testutils.stubs.DartsDatabaseStub;
 import java.util.List;
 
 /**
- * Base class for integration tests running with H2 in PostgreSQL compatibility mode
+ * Base class for integration tests running with H2 in PostgreSQL compatibility mode.
  */
 @AutoConfigureWireMock(files = "file:src/integrationTest/resources/wiremock")
 @SpringBootTest
