@@ -1,0 +1,47 @@
+[
+  {
+    "id": 1666,
+    "courthouse": {
+      "id": 1001,
+      "display_name": "SWANSEA"
+    },
+    "courtroom": {
+      "id": 579,
+      "name": "1"
+    },
+    "start_at": "2023-06-20T10:00:00Z",
+    "end_at": "2023-06-20T11:00:00Z",
+    "channel": 1,
+    "is_hidden": false
+  },
+  {
+    "id": 1666,
+    "courthouse": {
+      "id": 1001,
+      "display_name": "SWANSEA"
+    },
+    "courtroom": {
+      "id": 579,
+      "name": "1"
+    },
+    "start_at": "2023-06-20T10:01:00Z",
+    "end_at": "2023-06-20T11:00:00Z",
+    "channel": 1,
+    "is_hidden": false
+  },
+  {
+    "id": 1666,
+    "courthouse": {
+      "id": 1001,
+      "display_name": "SWANSEA"
+    },
+    "courtroom": {
+      "id": 579,
+      "name": "1"
+    },
+    "start_at": "2023-06-20T10:02:00Z",
+    "end_at": "2023-06-20T11:00:00Z",
+    "channel": 1,
+    "is_hidden": false
+  }
+]

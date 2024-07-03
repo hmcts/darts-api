@@ -15,6 +15,7 @@ import uk.gov.hmcts.darts.common.entity.EventEntity;
 import uk.gov.hmcts.darts.common.entity.EventHandlerEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.JudgeEntity;
+import uk.gov.hmcts.darts.common.entity.MediaEntity;
 import uk.gov.hmcts.darts.common.entity.ProsecutorEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionCommentEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionDocumentEntity;
@@ -44,6 +45,8 @@ import static uk.gov.hmcts.darts.test.common.TestUtils.getContentsFromFile;
 @SuppressWarnings({"PMD.GodClass", "PMD.ExcessivePublicCount", "PMD.ExcessiveImports", "PMD.CouplingBetweenObjects"})
 @UtilityClass
 public class CommonTestDataUtil {
+
+    public static final LocalTime TEN_AM = LocalTime.of(10, 0);
 
     public static EventEntity createEventWith(String eventName, String eventText, HearingEntity hearingEntity) {
 
@@ -251,6 +254,24 @@ public class CommonTestDataUtil {
         hearing1.setTranscriptions(createTranscriptionList(hearing1));
         hearing1.addJudges(createJudges(2));
         return hearing1;
+    }
+
+    public MediaEntity createMedia(HearingEntity hearing) {
+        String caseNumber = hearing.getCourtCase().getCaseNumber();
+        MediaEntity mediaEntity = new MediaEntity();
+        OffsetDateTime startTime = OffsetDateTime.of(hearing.getHearingDate(), hearing.getScheduledStartTime(), ZoneOffset.UTC);
+        mediaEntity.setStart(startTime);
+        mediaEntity.setEnd(startTime.plusHours(1));
+        mediaEntity.setChannel(1);
+        mediaEntity.setHearingList(List.of(hearing));
+        mediaEntity.setCourtroom(hearing.getCourtroom());
+        mediaEntity.setId(getStringId("MEDIA_ID" + caseNumber));
+        return mediaEntity;
+    }
+
+    public MediaEntity createMedia(String caseNumber) {
+        HearingEntity hearing = createHearing(caseNumber, TEN_AM);
+        return createMedia(hearing);
     }
 
     public List<TranscriptionEntity> createTranscriptionList(HearingEntity hearing) {

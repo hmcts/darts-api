@@ -47,7 +47,7 @@ class MediaResponseMapperTest {
         objectAdminActionEntity.setMarkedForManualDelDateTime(creationDate);
         objectAdminActionEntity.setObjectHiddenReason(reasonEntity);
 
-        MediaHideResponse response = AdminMediaSearchResponseMapper.mapHideOrShowResponse(mediaEntity, objectAdminActionEntity);
+        MediaHideResponse response = GetAdminMediaResponseMapper.mapHideOrShowResponse(mediaEntity, objectAdminActionEntity);
 
         assertEquals(response.getId(), mediaEntity.getId());
         assertEquals(response.getIsHidden(), mediaEntity.isHidden());
@@ -73,7 +73,7 @@ class MediaResponseMapperTest {
         mediaEntity.setId(mediaId);
         mediaEntity.setHidden(hide);
 
-        MediaHideResponse response = AdminMediaSearchResponseMapper.mapHideOrShowResponse(mediaEntity, null);
+        MediaHideResponse response = GetAdminMediaResponseMapper.mapHideOrShowResponse(mediaEntity, null);
 
         assertEquals(response.getId(), mediaEntity.getId());
         assertEquals(response.getIsHidden(), mediaEntity.isHidden());

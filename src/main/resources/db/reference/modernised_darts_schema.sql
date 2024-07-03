@@ -1349,7 +1349,6 @@ CREATE TABLE transcription_comment
 ,tra_id                      INTEGER                       NOT NULL
 ,trw_id                      INTEGER
 ,transcription_object_id     CHARACTER VARYING(16)         -- this is a placeholder for moj_transcription_s.r_object_id
-,transcription_object_name   CHARACTER VARYING(255)        -- to accommodate dm_sysobject_s.object_name
 ,transcription_comment       CHARACTER VARYING
 ,comment_ts                  TIMESTAMP WITH TIME ZONE
 ,author                      INTEGER                       -- will need to be FK to user table

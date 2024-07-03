@@ -4,10 +4,14 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import uk.gov.hmcts.darts.audio.repository.TransformedMediaSubStringQueryEnum;
+import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
+import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
+import uk.gov.hmcts.darts.common.repository.HearingRepository;
 import uk.gov.hmcts.darts.common.repository.MediaRepository;
 import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
+import uk.gov.hmcts.darts.common.service.RetrieveCoreObjectService;
 
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
@@ -27,6 +31,7 @@ public class MediaStub {
     private static final OffsetDateTime MEDIA_2_START_TIME = OffsetDateTime.parse("2023-01-01T16:00:00Z");
     private static final OffsetDateTime MEDIA_2_END_TIME = MEDIA_2_START_TIME.plusHours(1);
 
+    private final HearingRepository hearingRepository;
     private final MediaRepository mediaRepository;
     private final CourtroomStub courtroomStub;
     private final UserAccountRepository userAccountRepository;
@@ -36,11 +41,23 @@ public class MediaStub {
     private static final String FILE_NAME_PREFIX = "FileName";
 
     private static final String CASE_NUMBER_PREFIX = "CaseNumber";
+    private final RetrieveCoreObjectService retrieveCoreObjectService;
 
     public MediaEntity createMediaEntity(String courthouseName, String courtroomName, OffsetDateTime startTime, OffsetDateTime endTime, int channel,
                                          String mediaType) {
         CourtroomEntity courtroom = courtroomStub.createCourtroomUnlessExists(courthouseName, courtroomName, userAccountRepository.getReferenceById(0));
         return mediaRepository.saveAndFlush(createMediaWith(courtroom, startTime, endTime, channel, mediaType));
+    }
+
+    public MediaEntity createMediaEntity(CourthouseEntity courthouse, String courtroomName, OffsetDateTime startTime, OffsetDateTime endTime, int channel,
+                                         String mediaType) {
+        CourtroomEntity courtroom = courtroomStub.createCourtroomUnlessExists(courthouse, courtroomName, userAccountRepository.getReferenceById(0));
+        return mediaRepository.saveAndFlush(createMediaWith(courtroom, startTime, endTime, channel, mediaType));
+    }
+
+    public MediaEntity createMediaEntity(CourthouseEntity courthouse, String courtroomName, OffsetDateTime startTime, OffsetDateTime endTime, int channel) {
+        CourtroomEntity courtroom = courtroomStub.createCourtroomUnlessExists(courthouse, courtroomName, userAccountRepository.getReferenceById(0));
+        return mediaRepository.saveAndFlush(createMediaWith(courtroom, startTime, endTime, channel, "mp2"));
     }
 
     public MediaEntity createMediaEntity(String courthouseName, String courtroomName, OffsetDateTime startTime, OffsetDateTime endTime, int channel) {
@@ -79,6 +96,7 @@ public class MediaStub {
      * Unique case number with unique case number for each  media
      * Unique unique hearing with hearing date starting with today and incrementing by day for each transformed media record
      * Unique media with start date hours decremented for each media and end date hours incremented for each media
+     *
      * @param count The number of  media objects that are to be generated
      * @return The list of generated media in chronological order
      */
@@ -96,7 +114,7 @@ public class MediaStub {
             mediaRepository.save(mediaEntity);
 
             hearingStub.createHearingWithMedia(courtName, courtName,
-                                                              caseNumber, hearingDate, mediaEntity);
+                                               caseNumber, hearingDate, mediaEntity);
 
 
             hoursBefore = hoursBefore.minusHours(1);
@@ -107,6 +125,16 @@ public class MediaStub {
         }
 
         return retMediaList;
+    }
+
+    public void linkToCase(MediaEntity media, String caseNumber) {
+
+        String courthouseName = media.getCourtroom().getCourthouse().getCourthouseName();
+        String courtroomName = media.getCourtroom().getName();
+        HearingEntity hearing = retrieveCoreObjectService.retrieveOrCreateHearing(courthouseName, courtroomName, caseNumber, media.getStart().toLocalDateTime(),
+                                                                                  userAccountRepository.getReferenceById(0));
+        hearing.addMedia(media);
+        hearingRepository.saveAndFlush(hearing);
     }
 
     @Transactional

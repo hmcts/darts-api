@@ -145,5 +145,4 @@ public class AdminCasesSearchRequestHelper {
             .orElseGet(() -> caseRoot.join(CourtCaseEntity_.HEARINGS, JoinType.INNER));
     }
 
-
 }
