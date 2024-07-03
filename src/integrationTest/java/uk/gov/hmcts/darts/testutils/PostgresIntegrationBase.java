@@ -11,9 +11,12 @@ import uk.gov.hmcts.darts.test.common.LogUtil;
 import uk.gov.hmcts.darts.test.common.MemoryLogAppender;
 import uk.gov.hmcts.darts.testutils.stubs.DartsDatabaseStub;
 
+/**
+ * Base class for integration tests running against a containerized PostgreSQL.
+ */
 @SpringBootTest
 @ActiveProfiles({"intTest", "postgres"})
-public class RepositoryBase {
+public class PostgresIntegrationBase {
 
     static {
         PostgreSQLContainer<?> postgres =

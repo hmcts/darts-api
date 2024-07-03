@@ -6,14 +6,14 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import uk.gov.hmcts.darts.common.entity.TransformedMediaEntity;
 import uk.gov.hmcts.darts.common.repository.TransformedMediaRepository;
-import uk.gov.hmcts.darts.testutils.RepositoryBase;
+import uk.gov.hmcts.darts.testutils.PostgresIntegrationBase;
 import uk.gov.hmcts.darts.testutils.stubs.MediaRequestStub;
 import uk.gov.hmcts.darts.testutils.stubs.TransformedMediaStub;
 
 import java.util.List;
 import java.util.Locale;
 
-class TransformedMediaRepositoryTest extends RepositoryBase {
+class TransformedMediaRepositoryTest extends PostgresIntegrationBase {
 
     @Autowired
     private TransformedMediaStub transformedMediaStub;

@@ -14,7 +14,7 @@ import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.notification.api.NotificationApi;
 import uk.gov.hmcts.darts.notification.entity.NotificationEntity;
 import uk.gov.hmcts.darts.notification.enums.NotificationStatus;
-import uk.gov.hmcts.darts.testutils.RepositoryBase;
+import uk.gov.hmcts.darts.testutils.PostgresIntegrationBase;
 
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
@@ -44,7 +44,7 @@ import static uk.gov.hmcts.darts.notification.NotificationConstants.ParameterMap
 @TestPropertySource(properties = {"darts.audio.transformation.service.audio.file=tests/audio/WithViqHeader/viq0001min.mp2"})
 @Slf4j
 @SuppressWarnings("PMD.JUnit5TestShouldBePackagePrivate")
-class AudioTransformationServiceHandleKedaInvocationForMediaRequestsTest extends RepositoryBase {
+class AudioTransformationServiceHandleKedaInvocationForMediaRequestsTest extends PostgresIntegrationBase {
 
     private static final String EMAIL_ADDRESS = "test@test.com";
     public static final LocalDateTime MOCK_HEARING_DATE = LocalDateTime.of(2023, 5, 1, 10, 0, 0);
