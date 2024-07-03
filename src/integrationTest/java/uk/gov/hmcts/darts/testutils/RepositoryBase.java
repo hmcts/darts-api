@@ -16,8 +16,9 @@ import uk.gov.hmcts.darts.testutils.stubs.DartsDatabaseStub;
 public class RepositoryBase {
 
     static {
+        var dockerImageName = DockerImageName.parse("hmctspublic.azurecr.io/imported/bitnami/postgresql:15");
         PostgreSQLContainer<?> postgres =
-            new PostgreSQLContainer<>(DockerImageName.parse("hmctspublic.azurecr.io/imported/bitnami/postgresql:15"));
+            new PostgreSQLContainer<>(dockerImageName.asCompatibleSubstituteFor("postgres"));
         postgres = postgres.withDatabaseName("darts");
         postgres.start();
 
