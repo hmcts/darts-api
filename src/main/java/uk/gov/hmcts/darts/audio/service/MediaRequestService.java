@@ -40,6 +40,8 @@ public interface MediaRequestService {
 
     Optional<MediaRequestEntity> getOldestMediaRequestByStatus(MediaRequestStatus status);
 
+    Optional<MediaRequestEntity> retrieveMediaRequestForProcessing();
+
     GetAudioRequestResponse getAudioRequests(Integer userId, Boolean expired);
 
     void updateTransformedMediaLastAccessedTimestamp(Integer transformedMediaId);

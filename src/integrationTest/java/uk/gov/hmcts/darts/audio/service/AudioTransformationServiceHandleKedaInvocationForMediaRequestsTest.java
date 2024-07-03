@@ -14,13 +14,14 @@ import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.notification.api.NotificationApi;
 import uk.gov.hmcts.darts.notification.entity.NotificationEntity;
 import uk.gov.hmcts.darts.notification.enums.NotificationStatus;
-import uk.gov.hmcts.darts.testutils.IntegrationBase;
+import uk.gov.hmcts.darts.testutils.RepositoryBase;
 
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -29,6 +30,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.darts.audio.enums.MediaRequestStatus.COMPLETED;
 import static uk.gov.hmcts.darts.audio.enums.MediaRequestStatus.FAILED;
 import static uk.gov.hmcts.darts.audio.enums.MediaRequestStatus.OPEN;
@@ -42,7 +44,7 @@ import static uk.gov.hmcts.darts.notification.NotificationConstants.ParameterMap
 @TestPropertySource(properties = {"darts.audio.transformation.service.audio.file=tests/audio/WithViqHeader/viq0001min.mp2"})
 @Slf4j
 @SuppressWarnings("PMD.JUnit5TestShouldBePackagePrivate")
-class AudioTransformationServiceHandleKedaInvocationForMediaRequestsTest extends IntegrationBase {
+class AudioTransformationServiceHandleKedaInvocationForMediaRequestsTest extends RepositoryBase {
 
     private static final String EMAIL_ADDRESS = "test@test.com";
     public static final LocalDateTime MOCK_HEARING_DATE = LocalDateTime.of(2023, 5, 1, 10, 0, 0);
@@ -88,6 +90,7 @@ class AudioTransformationServiceHandleKedaInvocationForMediaRequestsTest extends
             AudioRequestType.DOWNLOAD,
             userAccountEntity
         );
+        when(mediaRequestService.retrieveMediaRequestForProcessing()).thenReturn(Optional.of(given.getMediaRequestEntity()));
 
         Integer mediaRequestId = given.getMediaRequestEntity().getId();
 
