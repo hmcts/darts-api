@@ -1,5 +1,6 @@
 package uk.gov.hmcts.darts.audio.repository;
 
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import uk.gov.hmcts.darts.common.repository.MediaRequestRepository;
@@ -11,6 +12,7 @@ import static uk.gov.hmcts.darts.audio.enums.MediaRequestStatus.COMPLETED;
 import static uk.gov.hmcts.darts.audio.enums.MediaRequestStatus.OPEN;
 import static uk.gov.hmcts.darts.audio.enums.MediaRequestStatus.PROCESSING;
 
+@Disabled("due to issue with pulling the docker images currently being investigated by platops")
 class MediaRequestRepositoryIntTest extends PostgresIntegrationBase {
 
     @Autowired
