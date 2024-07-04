@@ -122,6 +122,7 @@ public class NotificationServiceImpl implements NotificationService {
             CollectionUtils.addAll(
                 emailAddressList,
                 request.getUserAccountsToEmail().stream()
+                    .filter(UserAccountEntity::isActive)
                     .map(UserAccountEntity::getEmailAddress)
                     .toList()
             );
