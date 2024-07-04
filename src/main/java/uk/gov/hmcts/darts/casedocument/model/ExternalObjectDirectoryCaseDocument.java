@@ -1,4 +1,4 @@
-package uk.gov.hmcts.darts.casedocument.template;
+package uk.gov.hmcts.darts.casedocument.model;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -14,8 +14,8 @@ public class ExternalObjectDirectoryCaseDocument extends CreatedModifiedCaseDocu
 
     private final Integer id;
     private final Integer media;
-    private final Integer transcriptionDocumentEntity;
-    private final Integer annotationDocumentEntity;
+    private final Integer transcriptionDocument;
+    private final Integer annotationDocument;
     private final Integer caseDocument;
     private final ObjectRecordStatusEntity status;
     private final ExternalLocationTypeEntity externalLocationType;

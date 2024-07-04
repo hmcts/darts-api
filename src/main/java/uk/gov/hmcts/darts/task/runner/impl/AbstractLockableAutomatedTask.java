@@ -26,6 +26,12 @@ import javax.validation.constraints.NotNull;
 
 import static java.lang.Boolean.TRUE;
 import static java.util.Objects.nonNull;
+import static uk.gov.hmcts.darts.task.status.AutomatedTaskStatus.COMPLETED;
+import static uk.gov.hmcts.darts.task.status.AutomatedTaskStatus.FAILED;
+import static uk.gov.hmcts.darts.task.status.AutomatedTaskStatus.IN_PROGRESS;
+import static uk.gov.hmcts.darts.task.status.AutomatedTaskStatus.LOCK_FAILED;
+import static uk.gov.hmcts.darts.task.status.AutomatedTaskStatus.NOT_STARTED;
+import static uk.gov.hmcts.darts.task.status.AutomatedTaskStatus.SKIPPED;
 
 
 @Slf4j
@@ -34,7 +40,7 @@ public abstract class AbstractLockableAutomatedTask implements AutomatedTask {
     public static final int DEFAULT_LOCK_AT_MOST_SECONDS = 600;
     public static final int DEFAULT_LOCK_AT_LEAST_SECONDS = 20;
 
-    private AutomatedTaskStatus automatedTaskStatus = AutomatedTaskStatus.NOT_STARTED;
+    private AutomatedTaskStatus automatedTaskStatus = NOT_STARTED;
 
     private String lastCronExpression;
 
@@ -90,20 +96,20 @@ public abstract class AbstractLockableAutomatedTask implements AutomatedTask {
                         logApi.taskStarted(executionId.get(), this.getTaskName());
                         lockingTaskExecutor.executeWithLock(new LockedTask(), getLockConfiguration());
                     } else {
-                        setAutomatedTaskStatus(AutomatedTaskStatus.SKIPPED);
-                        log.warn("Not running task {} now as it has been disabled", getTaskName());
+                        setAutomatedTaskStatus(SKIPPED);
+                        log.warn("Task: {} not running now as it has been disabled", getTaskName());
                     }
                 } else {
-                    setAutomatedTaskStatus(AutomatedTaskStatus.SKIPPED);
-                    log.warn("Not running task {} now as cron expression has been changed in the database from '{}' to '{}'",
+                    setAutomatedTaskStatus(SKIPPED);
+                    log.warn("Task: {} not running now as cron expression has been changed in the database from '{}' to '{}'",
                              getTaskName(), getLastCronExpression(), dbCronExpression
                     );
                 }
             }
         } catch (Exception exception) {
             logApi.taskFailed(executionId.get(), getTaskName());
-            setAutomatedTaskStatus(AutomatedTaskStatus.FAILED);
-            handleException(exception);
+            setAutomatedTaskStatus(FAILED);
+            log.error("Task: {} exception while attempting to start the task", getTaskName(), exception);
         } finally {
             postRunTask();
         }
@@ -143,13 +149,15 @@ public abstract class AbstractLockableAutomatedTask implements AutomatedTask {
     }
 
     protected void setAutomatedTaskStatus(AutomatedTaskStatus automatedTaskStatus) {
-        log.debug("{} changing status from {} to {}", getTaskName(), this.automatedTaskStatus, automatedTaskStatus);
+        log.debug("Task: {} changing status from {} to {}", getTaskName(), this.automatedTaskStatus, automatedTaskStatus);
         this.automatedTaskStatus = automatedTaskStatus;
     }
 
     protected abstract void runTask();
 
-    protected abstract void handleException(Exception exception);
+    protected void handleException(Exception exception) {
+        log.error("Task: {} exception during execution of the task business logic", getTaskName(), exception);
+    }
 
     protected Optional<AutomatedTaskEntity> getAutomatedTaskDetails(String taskName) {
         return automatedTaskRepository.findByTaskName(taskName);
@@ -183,14 +191,14 @@ public abstract class AbstractLockableAutomatedTask implements AutomatedTask {
     private void preRunTask() {
         setupUserAuthentication();
         start = Instant.now();
-        log.info("Task : {} started running at: {}", getTaskName(), LocalDateTime.now());
-        setAutomatedTaskStatus(AutomatedTaskStatus.IN_PROGRESS);
+        log.info("Task: {} potential candidate for execution at: {}", getTaskName(), LocalDateTime.now());
+        setAutomatedTaskStatus(IN_PROGRESS);
     }
 
     private void postRunTask() {
         stopStopwatchAndLogFinished();
-        if (getAutomatedTaskStatus().equals(AutomatedTaskStatus.IN_PROGRESS)) {
-            setAutomatedTaskStatus(AutomatedTaskStatus.COMPLETED);
+        if (getAutomatedTaskStatus().equals(IN_PROGRESS)) {
+            setAutomatedTaskStatus(COMPLETED);
             logApi.taskCompleted(executionId.get(), this.getTaskName());
         }
         executionId.remove();
@@ -199,8 +207,8 @@ public abstract class AbstractLockableAutomatedTask implements AutomatedTask {
     private void stopStopwatchAndLogFinished() {
         Instant finish = Instant.now();
         long timeElapsed = Duration.between(start, finish).toMillis();
-        log.info("Task : {} finished running at: {}", getTaskName(), LocalDateTime.now());
-        log.debug("Task : {} time elapsed: {} ms", getTaskName(), timeElapsed);
+        log.info("Task: {} finished running at: {}", getTaskName(), LocalDateTime.now());
+        log.debug("Task: {} time elapsed: {} ms", getTaskName(), timeElapsed);
     }
 
     class LockedTask implements Runnable {
@@ -209,18 +217,14 @@ public abstract class AbstractLockableAutomatedTask implements AutomatedTask {
             try {
                 LockAssert.assertLocked();
                 runTask();
+            } catch (IllegalStateException exception) {
+                setAutomatedTaskStatus(LOCK_FAILED);
+                log.error("Unable to lock task", exception);
             } catch (Exception exception) {
-                lockedException(exception);
-            }
-        }
-
-        private void lockedException(Exception exception) {
-            setAutomatedTaskStatus(AutomatedTaskStatus.LOCK_FAILED);
-            if (exception instanceof IllegalStateException) {
-                log.error("Unable to lock task {}", exception.getMessage());
-            } else {
+                setAutomatedTaskStatus(FAILED);
                 handleException(exception);
             }
         }
     }
+
 }

@@ -18,7 +18,7 @@ import uk.gov.hmcts.darts.audio.entity.MediaRequestEntity_;
 import uk.gov.hmcts.darts.audio.enums.MediaRequestStatus;
 import uk.gov.hmcts.darts.audio.exception.AudioApiError;
 import uk.gov.hmcts.darts.audio.exception.AudioRequestsApiError;
-import uk.gov.hmcts.darts.audio.mapper.AdminMediaSearchResponseMapper;
+import uk.gov.hmcts.darts.audio.mapper.GetAdminMediaResponseMapper;
 import uk.gov.hmcts.darts.audio.mapper.GetTransformedMediaDetailsMapper;
 import uk.gov.hmcts.darts.audio.mapper.MediaRequestDetailsMapper;
 import uk.gov.hmcts.darts.audio.mapper.TransformedMediaMapper;
@@ -535,11 +535,11 @@ public class MediaRequestServiceImpl implements MediaRequestService {
 
                 objectAdminActionEntity = objectAdminActionRepository.saveAndFlush(objectAdminActionEntity);
 
-                response = AdminMediaSearchResponseMapper.mapHideOrShowResponse(mediaEntity, objectAdminActionEntity);
+                response = GetAdminMediaResponseMapper.mapHideOrShowResponse(mediaEntity, objectAdminActionEntity);
             } else {
                 List<ObjectAdminActionEntity> objectAdminActionEntityLst = objectAdminActionRepository.findByMedia_Id(mediaId);
 
-                response = AdminMediaSearchResponseMapper.mapHideOrShowResponse(mediaEntityOptional.get(), null);
+                response = GetAdminMediaResponseMapper.mapHideOrShowResponse(mediaEntityOptional.get(), null);
 
                 for (ObjectAdminActionEntity objectAdminActionEntity : objectAdminActionEntityLst) {
                     objectAdminActionRepository.deleteById(objectAdminActionEntity.getId());

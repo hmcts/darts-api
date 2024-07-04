@@ -11,6 +11,7 @@ import uk.gov.hmcts.darts.common.repository.EventRepository;
 import uk.gov.hmcts.darts.common.repository.HearingRepository;
 import uk.gov.hmcts.darts.common.service.RetrieveCoreObjectService;
 import uk.gov.hmcts.darts.event.model.DartsEvent;
+import uk.gov.hmcts.darts.event.service.EventPersistenceService;
 import uk.gov.hmcts.darts.event.service.handler.base.EventHandlerBase;
 import uk.gov.hmcts.darts.log.api.LogApi;
 
@@ -25,8 +26,9 @@ public class InterpreterUsedHandler extends EventHandlerBase {
                                   CaseRepository caseRepository,
                                   ApplicationEventPublisher eventPublisher,
                                   AuthorisationApi authorisationApi,
-                                  LogApi logApi) {
-        super(retrieveCoreObjectService, eventRepository, hearingRepository, caseRepository, eventPublisher, authorisationApi, logApi);
+                                  LogApi logApi,
+                                  EventPersistenceService eventPersistenceService) {
+        super(retrieveCoreObjectService, eventRepository, hearingRepository, caseRepository, eventPublisher, logApi, eventPersistenceService, authorisationApi);
     }
 
     @Override

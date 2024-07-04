@@ -35,9 +35,4 @@ public class ProcessArmResponseFilesAutomatedTask extends AbstractLockableAutoma
         ArmResponseFilesProcessor armResponseFilesProcessor = automatedTaskProcessorFactory.createArmResponseFilesProcessor(batchSize);
         armResponseFilesProcessor.processResponseFiles();
     }
-
-    @Override
-    protected void handleException(Exception exception) {
-        log.error("Exception ", exception);
-    }
 }

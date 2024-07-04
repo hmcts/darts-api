@@ -13,7 +13,7 @@ import org.mockito.Mock;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
-import uk.gov.hmcts.darts.audio.mapper.AdminMediaSearchResponseMapper;
+import uk.gov.hmcts.darts.audio.mapper.GetAdminMediaResponseMapper;
 import uk.gov.hmcts.darts.audio.model.AdminActionRequest;
 import uk.gov.hmcts.darts.audio.model.MediaHideRequest;
 import uk.gov.hmcts.darts.audio.model.MediaHideResponse;
@@ -80,7 +80,7 @@ class MediaRequestServiceImplAdminMediaSearchTest {
 
     private ObjectMapper objectMapper;
 
-    private MockedStatic<AdminMediaSearchResponseMapper> adminMediaSearchResponseMapperMockedStatic;
+    private MockedStatic<GetAdminMediaResponseMapper> adminMediaSearchResponseMapperMockedStatic;
 
     @BeforeEach
     void setUp() {
@@ -111,7 +111,7 @@ class MediaRequestServiceImplAdminMediaSearchTest {
         OffsetDateTime testTime = OffsetDateTime.of(2023, 1, 1, 10, 0, 0, 0, ZoneOffset.UTC);
         when(currentTimeHelper.currentOffsetDateTime()).thenReturn(testTime);
 
-        adminMediaSearchResponseMapperMockedStatic = Mockito.mockStatic(AdminMediaSearchResponseMapper.class);
+        adminMediaSearchResponseMapperMockedStatic = Mockito.mockStatic(GetAdminMediaResponseMapper.class);
 
         Integer hideOrShowTranscriptionDocument = 343;
         Integer reasonId = 555;
@@ -141,8 +141,9 @@ class MediaRequestServiceImplAdminMediaSearchTest {
 
         when(objectAdminActionRepository.saveAndFlush(objectAdminActionEntityArgumentCaptor.capture())).thenReturn(objectAdminActionEntity);
 
-        adminMediaSearchResponseMapperMockedStatic.when(() -> AdminMediaSearchResponseMapper.mapHideOrShowResponse(mediaEntity, objectAdminActionEntity))
-                .thenReturn(expectedResponse);
+        adminMediaSearchResponseMapperMockedStatic.when(
+                () -> GetAdminMediaResponseMapper.mapHideOrShowResponse(mediaEntity, objectAdminActionEntity))
+            .thenReturn(expectedResponse);
 
 
         //run the test
@@ -164,7 +165,7 @@ class MediaRequestServiceImplAdminMediaSearchTest {
 
     @Test
     void testMediaShow() {
-        adminMediaSearchResponseMapperMockedStatic = Mockito.mockStatic(AdminMediaSearchResponseMapper.class);
+        adminMediaSearchResponseMapperMockedStatic = Mockito.mockStatic(GetAdminMediaResponseMapper.class);
 
         MediaHideRequest request = new MediaHideRequest();
         request.setIsHidden(false);
@@ -193,7 +194,7 @@ class MediaRequestServiceImplAdminMediaSearchTest {
 
         MediaHideResponse expectedResponse = new MediaHideResponse();
 
-        adminMediaSearchResponseMapperMockedStatic.when(() -> AdminMediaSearchResponseMapper.mapHideOrShowResponse(mediaEntity, null))
+        adminMediaSearchResponseMapperMockedStatic.when(() -> GetAdminMediaResponseMapper.mapHideOrShowResponse(mediaEntity, null))
             .thenReturn(expectedResponse);
 
 

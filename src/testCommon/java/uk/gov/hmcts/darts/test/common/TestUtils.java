@@ -97,8 +97,11 @@ public final class TestUtils {
             JsonNode jsonNode = objectMapper.readTree(input);
             for (String tagToRemove : tagsToRemove) {
                 List<JsonNode> parentNodes = jsonNode.findParents(tagToRemove);
-                for (JsonNode parentNode : parentNodes) {
-                    ((ObjectNode) parentNode).remove(tagToRemove);
+                while (!parentNodes.isEmpty()) {
+                    for (JsonNode parentNode : parentNodes) {
+                        ((ObjectNode) parentNode).remove(tagToRemove);
+                    }
+                    parentNodes = jsonNode.findParents(tagToRemove);
                 }
             }
             return objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(jsonNode);

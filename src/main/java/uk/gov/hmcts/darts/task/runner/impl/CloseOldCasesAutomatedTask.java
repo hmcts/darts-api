@@ -31,9 +31,4 @@ public class CloseOldCasesAutomatedTask extends AbstractLockableAutomatedTask {
     protected void runTask() {
         closeOldCasesProcessor.closeCases();
     }
-
-    @Override
-    protected void handleException(Exception exception) {
-        log.error("Error attempting to close cases: {}", exception.getMessage(), exception);
-    }
 }

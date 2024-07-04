@@ -260,7 +260,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/AdminMediaSearchResponseItem'
+                  $ref: '#/components/schemas/GetAdminMediaResponseItem'
         '400':
           description: Bad Request Error
           content:
@@ -351,12 +351,106 @@ paths:
                 allOf:
                   - $ref: './problem.yaml'
 
+
+  /admin/medias/search:
+    post:
+      tags:
+        - Audio
+      summary: |-
+        Returns a representation of the media table which match the supplied search criteria.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PostAdminMediasSearchRequest'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/PostAdminMediasSearchResponseItem'
+        '400':
+          description: A required parameter is missing or an invalid datatype or value was provided for property.
+        '500':
+          description: Internal Server Error
 ########################################################################################################################
 # COMPONENT DEFINITIONS
 ########################################################################################################################
 
 components:
   schemas:
+    PostAdminMediasSearchRequest:
+      type: object
+      properties:
+        courthouse_ids:
+          type: array
+          items:
+            type: integer
+        case_number:
+          type: string
+          example: 1234
+          maxLength: 32
+        courtroom_name:
+          type: string
+          example: "1"
+        hearing_start_at:
+          type: string
+          format: date
+        hearing_end_at:
+          type: string
+          format: date
+
+    PostAdminMediasSearchResponseItem:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+          description: Unique media identifier, used internally by DARTS.
+        courthouse:
+          $ref: '#/components/schemas/CourthouseResponseObject'
+        courtroom:
+          $ref: '#/components/schemas/CourtroomResponseObject'
+        start_at:
+          type: string
+          format: date-time
+          description: start timestamp
+        end_at:
+          type: string
+          format: date-time
+          description: end timestamp
+        channel:
+          type: integer
+          example: 1
+        is_hidden:
+          type: boolean
+
+    CourthouseResponseObject:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+          description: the courthouse ID
+        display_name:
+          type: string
+          example: Swansea
+
+    CourtroomResponseObject:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+          description: the courtroom ID
+        name:
+          type: string
+          example: "1"
+
     AdminMediaResponse:
       type: object
       properties:
@@ -447,7 +541,7 @@ components:
         case_id:
           $ref: '#/components/schemas/CaseId'
 
-    AdminMediaSearchResponseItem:
+    GetAdminMediaResponseItem:
       type: object
       properties:
         id:
@@ -459,15 +553,15 @@ components:
         end_at:
           $ref: '#/components/schemas/EndAt'
         case:
-          $ref: '#/components/schemas/AdminMediaSearchResponseCase'
+          $ref: '#/components/schemas/GetAdminMediaResponseCase'
         hearing:
-          $ref: '#/components/schemas/AdminMediaSearchResponseHearing'
+          $ref: '#/components/schemas/GetAdminMediaResponseHearing'
         courthouse:
-          $ref: '#/components/schemas/AdminMediaSearchResponseCourthouse'
+          $ref: '#/components/schemas/GetAdminMediaResponseCourthouse'
         courtroom:
-          $ref: '#/components/schemas/AdminMediaSearchResponseCourtroom'
+          $ref: '#/components/schemas/GetAdminMediaResponseCourtroom'
 
-    AdminMediaSearchResponseCase:
+    GetAdminMediaResponseCase:
       type: object
       properties:
         id:
@@ -475,7 +569,7 @@ components:
         case_number:
           type: string
 
-    AdminMediaSearchResponseHearing:
+    GetAdminMediaResponseHearing:
       type: object
       properties:
         id:
@@ -483,7 +577,7 @@ components:
         hearing_date:
           $ref: '#/components/schemas/HearingDate'
 
-    AdminMediaSearchResponseCourthouse:
+    GetAdminMediaResponseCourthouse:
       type: object
       properties:
         id:
@@ -491,7 +585,7 @@ components:
         display_name:
           $ref: '#/components/schemas/CourthouseDisplayName'
 
-    AdminMediaSearchResponseCourtroom:
+    GetAdminMediaResponseCourtroom:
       type: object
       properties:
         id:
@@ -826,11 +920,24 @@ components:
         - "AUDIO_113"
         - "AUDIO_114"
         - "AUDIO_115"
-      x-enum-varnames: [ FAILED_TO_PROCESS_AUDIO_REQUEST, REQUESTED_DATA_CANNOT_BE_LOCATED, MEDIA_NOT_FOUND, FAILED_TO_UPLOAD_AUDIO_FILE,
-                         MISSING_SYSTEM_USER, AUDIO_NOT_PROVIDED, UNEXPECTED_FILE_TYPE, FILE_DURATION_OUT_OF_BOUNDS, FILE_SIZE_OUT_OF_BOUNDS,
-                         ADMIN_SEARCH_CRITERIA_NOT_PROVIDED,  MEDIA_ALREADY_HIDDEN, MEDIA_HIDE_ACTION_PAYLOAD_INCORRECT_USAGE,
-                         MEDIA_SHOW_ACTION_PAYLOAD_INCORRECT_USAGE, MEDIA_HIDE_ACTION_REASON_NOT_FOUND,
-                         MEDIA_HIDE_ACTION_REASON_MARKED_FOR_DELETION, ADMIN_SEARCH_CRITERIA_NOT_SUITABLE]
+        - "AUDIO_116"
+      x-enum-varnames: [ FAILED_TO_PROCESS_AUDIO_REQUEST,
+                         REQUESTED_DATA_CANNOT_BE_LOCATED,
+                         MEDIA_NOT_FOUND,
+                         FAILED_TO_UPLOAD_AUDIO_FILE,
+                         MISSING_SYSTEM_USER,
+                         AUDIO_NOT_PROVIDED,
+                         UNEXPECTED_FILE_TYPE,
+                         FILE_DURATION_OUT_OF_BOUNDS,
+                         FILE_SIZE_OUT_OF_BOUNDS,
+                         ADMIN_SEARCH_CRITERIA_NOT_PROVIDED,
+                         MEDIA_ALREADY_HIDDEN,
+                         MEDIA_HIDE_ACTION_PAYLOAD_INCORRECT_USAGE,
+                         MEDIA_SHOW_ACTION_PAYLOAD_INCORRECT_USAGE,
+                         MEDIA_HIDE_ACTION_REASON_NOT_FOUND,
+                         MEDIA_HIDE_ACTION_REASON_MARKED_FOR_DELETION,
+                         ADMIN_SEARCH_CRITERIA_NOT_SUITABLE,
+                         TOO_MANY_RESULTS ]
 
     AddAudioTitleErrors:
       type: string
@@ -851,9 +958,21 @@ components:
         - "Hide reason is incorrect"
         - "Reason has been marked for deletion"
         - "transformed_media_id OR one of hearing_id, start_at or end_at must be provided"
-      x-enum-varnames: [ FAILED_TO_PROCESS_AUDIO_REQUEST, REQUESTED_DATA_CANNOT_BE_LOCATED,  MEDIA_NOT_FOUND,
-                         FAILED_TO_UPLOAD_AUDIO_FILE, MISSING_SYSTEM_USER, AUDIO_NOT_PROVIDED, UNEXPECTED_FILE_TYPE,
-                         FILE_DURATION_OUT_OF_BOUNDS, FILE_SIZE_OUT_OF_BOUNDS, ADMIN_SEARCH_CRITERIA_NOT_PROVIDED, MEDIA_ALREADY_HIDDEN,
-                         MEDIA_HIDE_ACTION_PAYLOAD_INCORRECT_USAGE, MEDIA_SHOW_ACTION_PAYLOAD_INCORRECT_USAGE,
-                         MEDIA_HIDE_ACTION_REASON_NOT_FOUND, MEDIA_HIDE_ACTION_REASON_MARKED_FOR_DELETION,
-                         ADMIN_SEARCH_CRITERIA_NOT_SUITABLE]
+        - "Too many results"
+      x-enum-varnames: [ FAILED_TO_PROCESS_AUDIO_REQUEST,
+                         REQUESTED_DATA_CANNOT_BE_LOCATED,
+                         MEDIA_NOT_FOUND,
+                         FAILED_TO_UPLOAD_AUDIO_FILE,
+                         MISSING_SYSTEM_USER,
+                         AUDIO_NOT_PROVIDED,
+                         UNEXPECTED_FILE_TYPE,
+                         FILE_DURATION_OUT_OF_BOUNDS,
+                         FILE_SIZE_OUT_OF_BOUNDS,
+                         ADMIN_SEARCH_CRITERIA_NOT_PROVIDED,
+                         MEDIA_ALREADY_HIDDEN,
+                         MEDIA_HIDE_ACTION_PAYLOAD_INCORRECT_USAGE,
+                         MEDIA_SHOW_ACTION_PAYLOAD_INCORRECT_USAGE,
+                         MEDIA_HIDE_ACTION_REASON_NOT_FOUND,
+                         MEDIA_HIDE_ACTION_REASON_MARKED_FOR_DELETION,
+                         ADMIN_SEARCH_CRITERIA_NOT_SUITABLE,
+                         TOO_MANY_RESULTS ]

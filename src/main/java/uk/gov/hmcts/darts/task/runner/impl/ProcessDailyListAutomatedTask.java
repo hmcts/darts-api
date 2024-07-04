@@ -40,18 +40,13 @@ public class ProcessDailyListAutomatedTask extends AbstractLockableAutomatedTask
     }
 
     @Override
-    protected void runTask() {
+    public void runTask() {
         dailyListProcessor.processAllDailyLists();
     }
 
     @Override
-    protected void handleException(Exception exception) {
-        log.error("Exception: {}", exception.getMessage());
-    }
-
-
-    @Override
     protected void setAutomatedTaskStatus(AutomatedTaskStatus automatedTaskStatus) {
+        //TODO remove override of exceptions handling on the various tasks
         super.setAutomatedTaskStatus(automatedTaskStatus);
         trackedStateChanges.add(automatedTaskStatus);
     }

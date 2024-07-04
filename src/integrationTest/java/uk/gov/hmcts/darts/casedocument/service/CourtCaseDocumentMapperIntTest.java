@@ -3,8 +3,9 @@ package uk.gov.hmcts.darts.casedocument.service;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.SpyBean;
+import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.casedocument.mapper.CourtCaseDocumentMapper;
-import uk.gov.hmcts.darts.casedocument.template.CourtCaseDocument;
+import uk.gov.hmcts.darts.casedocument.model.CourtCaseDocument;
 import uk.gov.hmcts.darts.common.entity.CaseDocumentEntity;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
@@ -15,7 +16,9 @@ import uk.gov.hmcts.darts.testutils.stubs.CourtCaseStub;
 
 import java.util.List;
 
+import static java.time.temporal.ChronoUnit.SECONDS;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.within;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
@@ -27,10 +30,10 @@ class CourtCaseDocumentMapperIntTest extends IntegrationBase {
     ExternalObjectDirectoryRepository eodRepository;
     @SpyBean
     CaseDocumentRepository caseDocumentRepository;
-
     @Autowired
     CourtCaseStub courtCaseStub;
-
+    @Autowired
+    UserIdentity userIdentity;
     @Autowired
     CourtCaseDocumentMapper mapper;
 
@@ -50,17 +53,19 @@ class CourtCaseDocumentMapperIntTest extends IntegrationBase {
 
         CourtCaseEntity cc = courtCaseStub.createCourtCaseAndAssociatedEntitiesWithRandomValues();
 
+        givenBearerTokenExists("darts.global.user@hmcts.net");
+
         // when
         CourtCaseDocument doc = mapper.mapToCaseDocument(cc);
 
         // then
         assertAll(
             "Grouped assertions for Case Document top level properties",
-            () -> assertThat(doc.getId()).isNotNull().isEqualTo(cc.getId()),
-            () -> assertThat(doc.getCreatedBy()).isNotNull().isEqualTo(cc.getCreatedBy().getId()),
-            () -> assertThat(doc.getCreatedDateTime()).isNotNull().isEqualTo(cc.getCreatedDateTime()),
-            () -> assertThat(doc.getLastModifiedBy()).isNotNull().isEqualTo(cc.getLastModifiedBy().getId()),
-            () -> assertThat(doc.getLastModifiedDateTime()).isNotNull().isEqualTo(cc.getLastModifiedDateTime()),
+            () -> assertThat(doc.getCaseId()).isNotNull().isEqualTo(cc.getId()),
+            () -> assertThat(doc.getCreatedBy()).isNotNull().isEqualTo(userIdentity.getUserAccount().getId()),
+            () -> assertThat(doc.getCreatedDateTime()).isNotNull().isCloseToUtcNow(within(1, SECONDS)),
+            () -> assertThat(doc.getLastModifiedBy()).isNotNull().isEqualTo(userIdentity.getUserAccount().getId()),
+            () -> assertThat(doc.getLastModifiedDateTime()).isNotNull().isCloseToUtcNow(within(1, SECONDS)),
             () -> assertThat(doc.getLegacyCaseObjectId()).isNotNull().isEqualTo(cc.getLegacyCaseObjectId()),
             () -> assertThat(doc.getCaseNumber()).isNotNull().isEqualTo(cc.getCaseNumber()),
             () -> assertThat(doc.getClosed()).isNotNull().isEqualTo(cc.getClosed()),
@@ -276,8 +281,8 @@ class CourtCaseDocumentMapperIntTest extends IntegrationBase {
 
             () -> assertThat(doc.getHearings().get(0).getMedias().get(0).getExternalObjectDirectories().get(0).getId()).isNotNull().isEqualTo(mediaEodEntity.getId()),
             () -> assertThat(doc.getHearings().get(0).getMedias().get(0).getExternalObjectDirectories().get(0).getMedia()).isNotNull().isEqualTo(mediaEodEntity.getMedia().getId()),
-            () -> assertThat(doc.getHearings().get(0).getMedias().get(0).getExternalObjectDirectories().get(0).getTranscriptionDocumentEntity()).isNotNull().isEqualTo(mediaEodEntity.getTranscriptionDocumentEntity().getId()),
-            () -> assertThat(doc.getHearings().get(0).getMedias().get(0).getExternalObjectDirectories().get(0).getAnnotationDocumentEntity()).isNotNull().isEqualTo(mediaEodEntity.getAnnotationDocumentEntity().getId()),
+            () -> assertThat(doc.getHearings().get(0).getMedias().get(0).getExternalObjectDirectories().get(0).getTranscriptionDocument()).isNotNull().isEqualTo(mediaEodEntity.getTranscriptionDocumentEntity().getId()),
+            () -> assertThat(doc.getHearings().get(0).getMedias().get(0).getExternalObjectDirectories().get(0).getAnnotationDocument()).isNotNull().isEqualTo(mediaEodEntity.getAnnotationDocumentEntity().getId()),
             () -> assertThat(doc.getHearings().get(0).getMedias().get(0).getExternalObjectDirectories().get(0).getCaseDocument()).isNotNull().isEqualTo(mediaEodEntity.getCaseDocument().getId()),
             () -> assertThat(doc.getHearings().get(0).getMedias().get(0).getExternalObjectDirectories().get(0).getStatus()).isNotNull().isEqualTo(mediaEodEntity.getStatus()),
             () -> assertThat(doc.getHearings().get(0).getMedias().get(0).getExternalObjectDirectories().get(0).getExternalLocationType()).isNotNull().isEqualTo(mediaEodEntity.getExternalLocationType()),
@@ -352,8 +357,8 @@ class CourtCaseDocumentMapperIntTest extends IntegrationBase {
 
             () -> assertThat(doc.getHearings().get(0).getTranscriptions().get(0).getTranscriptionDocuments().get(0).getExternalObjectDirectories().get(0).getId()).isNotNull().isEqualTo(transcriptionDocumentEodEntity.getId()),
             () -> assertThat(doc.getHearings().get(0).getTranscriptions().get(0).getTranscriptionDocuments().get(0).getExternalObjectDirectories().get(0).getMedia()).isNotNull().isEqualTo(transcriptionDocumentEodEntity.getMedia().getId()),
-            () -> assertThat(doc.getHearings().get(0).getTranscriptions().get(0).getTranscriptionDocuments().get(0).getExternalObjectDirectories().get(0).getTranscriptionDocumentEntity()).isNotNull().isEqualTo(transcriptionDocumentEodEntity.getTranscriptionDocumentEntity().getId()),
-            () -> assertThat(doc.getHearings().get(0).getTranscriptions().get(0).getTranscriptionDocuments().get(0).getExternalObjectDirectories().get(0).getAnnotationDocumentEntity()).isNotNull().isEqualTo(transcriptionDocumentEodEntity.getAnnotationDocumentEntity().getId()),
+            () -> assertThat(doc.getHearings().get(0).getTranscriptions().get(0).getTranscriptionDocuments().get(0).getExternalObjectDirectories().get(0).getTranscriptionDocument()).isNotNull().isEqualTo(transcriptionDocumentEodEntity.getTranscriptionDocumentEntity().getId()),
+            () -> assertThat(doc.getHearings().get(0).getTranscriptions().get(0).getTranscriptionDocuments().get(0).getExternalObjectDirectories().get(0).getAnnotationDocument()).isNotNull().isEqualTo(transcriptionDocumentEodEntity.getAnnotationDocumentEntity().getId()),
             () -> assertThat(doc.getHearings().get(0).getTranscriptions().get(0).getTranscriptionDocuments().get(0).getExternalObjectDirectories().get(0).getCaseDocument()).isNotNull().isEqualTo(transcriptionDocumentEodEntity.getCaseDocument().getId()),
             () -> assertThat(doc.getHearings().get(0).getTranscriptions().get(0).getTranscriptionDocuments().get(0).getExternalObjectDirectories().get(0).getStatus()).isNotNull().isEqualTo(transcriptionDocumentEodEntity.getStatus()),
             () -> assertThat(doc.getHearings().get(0).getTranscriptions().get(0).getTranscriptionDocuments().get(0).getExternalObjectDirectories().get(0).getExternalLocationType()).isNotNull().isEqualTo(transcriptionDocumentEodEntity.getExternalLocationType()),
@@ -416,8 +421,8 @@ class CourtCaseDocumentMapperIntTest extends IntegrationBase {
 
             () -> assertThat(doc.getHearings().get(0).getAnnotations().get(0).getAnnotationDocuments().get(0).getExternalObjectDirectories().get(0).getId()).isNotNull().isEqualTo(annotationDocumentEodEntity.getId()),
             () -> assertThat(doc.getHearings().get(0).getAnnotations().get(0).getAnnotationDocuments().get(0).getExternalObjectDirectories().get(0).getMedia()).isNotNull().isEqualTo(annotationDocumentEodEntity.getMedia().getId()),
-            () -> assertThat(doc.getHearings().get(0).getAnnotations().get(0).getAnnotationDocuments().get(0).getExternalObjectDirectories().get(0).getTranscriptionDocumentEntity()).isNotNull().isEqualTo(annotationDocumentEodEntity.getTranscriptionDocumentEntity().getId()),
-            () -> assertThat(doc.getHearings().get(0).getAnnotations().get(0).getAnnotationDocuments().get(0).getExternalObjectDirectories().get(0).getAnnotationDocumentEntity()).isNotNull().isEqualTo(annotationDocumentEodEntity.getAnnotationDocumentEntity().getId()),
+            () -> assertThat(doc.getHearings().get(0).getAnnotations().get(0).getAnnotationDocuments().get(0).getExternalObjectDirectories().get(0).getTranscriptionDocument()).isNotNull().isEqualTo(annotationDocumentEodEntity.getTranscriptionDocumentEntity().getId()),
+            () -> assertThat(doc.getHearings().get(0).getAnnotations().get(0).getAnnotationDocuments().get(0).getExternalObjectDirectories().get(0).getAnnotationDocument()).isNotNull().isEqualTo(annotationDocumentEodEntity.getAnnotationDocumentEntity().getId()),
             () -> assertThat(doc.getHearings().get(0).getAnnotations().get(0).getAnnotationDocuments().get(0).getExternalObjectDirectories().get(0).getCaseDocument()).isNotNull().isEqualTo(annotationDocumentEodEntity.getCaseDocument().getId()),
             () -> assertThat(doc.getHearings().get(0).getAnnotations().get(0).getAnnotationDocuments().get(0).getExternalObjectDirectories().get(0).getStatus()).isNotNull().isEqualTo(annotationDocumentEodEntity.getStatus()),
             () -> assertThat(doc.getHearings().get(0).getAnnotations().get(0).getAnnotationDocuments().get(0).getExternalObjectDirectories().get(0).getExternalLocationType()).isNotNull().isEqualTo(annotationDocumentEodEntity.getExternalLocationType()),
