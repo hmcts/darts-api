@@ -14,8 +14,10 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
+import uk.gov.hmcts.darts.audio.exception.AudioApiError;
 import uk.gov.hmcts.darts.audio.model.PostAdminMediasSearchRequest;
 import uk.gov.hmcts.darts.audio.model.PostAdminMediasSearchResponseItem;
+import uk.gov.hmcts.darts.audio.model.Problem;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
@@ -36,6 +38,7 @@ import java.util.List;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -386,16 +389,10 @@ class MediaControllerPostAdminMediasSearchIntTest extends IntegrationBase {
             .andExpect(status().is4xxClientError())
             .andReturn();
 
-        String actualResponse = TestUtils.removeTags(TAGS_TO_IGNORE, mvcResult.getResponse().getContentAsString());
-        String expectedResponse = """
-            {
-              "type": "AUDIO_116",
-              "title": "Too many results",
-              "status": 400
-            }""";
-
-        JSONAssert.assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
-
+        Problem problem = objectMapper.readValue(mvcResult.getResponse().getContentAsString(), Problem.class);
+        assertEquals("AUDIO_116", problem.getType().toString());
+        assertEquals("Too many results", problem.getTitle().toString());
+        assertEquals(400, problem.getStatus());
     }
 
     @Test
@@ -410,16 +407,10 @@ class MediaControllerPostAdminMediasSearchIntTest extends IntegrationBase {
             .andExpect(status().isForbidden())
             .andReturn();
 
-        String actualResponse = TestUtils.removeTags(TAGS_TO_IGNORE, mvcResult.getResponse().getContentAsString());
-        String expectedResponse = """
-            {
-              "type": "AUTHORISATION_109",
-              "title": "User is not authorised for this endpoint",
-              "status": 403
-            }""";
-
-        JSONAssert.assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
-
+        Problem problem = objectMapper.readValue(mvcResult.getResponse().getContentAsString(), Problem.class);
+        assertEquals("AUTHORISATION_109", problem.getType().toString());
+        assertEquals("User is not authorised for this endpoint", problem.getTitle().toString());
+        assertEquals(403, problem.getStatus());
     }
 
 }
