@@ -16,6 +16,7 @@ public interface DartsApiTrait {
     Logger DARTS_API_EXCEPTION_LOGGER = LoggerFactory.getLogger(DartsApiTrait.class);
 
     @ExceptionHandler
+    @SuppressWarnings({ "java:S2259" })
     default ResponseEntity<ProblemDetail> handleDartsApiException(DartsApiException exception, NativeWebRequest request) {
         var error = exception.getError();
 
@@ -33,7 +34,7 @@ public interface DartsApiTrait {
             problemDetail.getProperties().put(stringStringEntry.getKey(), stringStringEntry.getValue());
         }
 
-        return new ResponseEntity<ProblemDetail>(problemDetail, error.getHttpStatus());
+        return new ResponseEntity<>(problemDetail, error.getHttpStatus());
     }
 
 
@@ -44,7 +45,7 @@ public interface DartsApiTrait {
         ProblemDetail problemDetail = ProblemDetail
             .forStatusAndDetail(HttpStatus.INTERNAL_SERVER_ERROR, "A runtime exception occurred");
 
-        return new ResponseEntity<ProblemDetail>(problemDetail, HttpStatus.INTERNAL_SERVER_ERROR);
+        return new ResponseEntity<>(problemDetail, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
 }

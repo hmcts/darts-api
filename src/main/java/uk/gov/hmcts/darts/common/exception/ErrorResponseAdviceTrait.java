@@ -20,6 +20,6 @@ public interface ErrorResponseAdviceTrait {
     default ResponseEntity<ProblemDetail> handleErrorResponseException(ErrorResponse errorResponse,
                                                                        Exception errorResponseAsException, NativeWebRequest request) {
         ProblemDetail body = errorResponse.getBody();
-        return  new ResponseEntity<ProblemDetail>(body, errorResponse.getStatusCode());
+        return  new ResponseEntity<>(body, errorResponse.getStatusCode());
     }
 }

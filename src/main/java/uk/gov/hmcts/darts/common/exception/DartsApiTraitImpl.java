@@ -51,13 +51,15 @@ public class DartsApiTraitImpl extends ResponseEntityExceptionHandler implements
     }
 
     @Override
+    @SuppressWarnings("java:S2259")
     protected ResponseEntity<Object> handleHandlerMethodValidationException(HandlerMethodValidationException ex, HttpHeaders headers, HttpStatusCode status,
                                                                             WebRequest request) {
         return super.handleHandlerMethodValidationException(ex, headers, status, request);
     }
 
     @ExceptionHandler
-    protected ResponseEntity<Object> handleConstraintViolation(ConstraintViolationException ex, NativeWebRequest request) {
+    @SuppressWarnings("java:S1185")
+    protected ResponseEntity<Object> handleConstraintViolationException(ConstraintViolationException ex, NativeWebRequest request) {
         ProblemDetail problemDetail = ProblemDetail.forStatus(HttpStatus.BAD_REQUEST);
         problemDetail.setTitle("Constraint Violation");
         problemDetail.setDetail(ex.getMessage());
@@ -73,7 +75,7 @@ public class DartsApiTraitImpl extends ResponseEntityExceptionHandler implements
             problemDetail.getProperties().put(fieldError.getPropertyPath().toString(), fieldError.getMessage());
         }
 
-        return new ResponseEntity<Object>(problemDetail, HttpStatus.BAD_REQUEST);
+        return new ResponseEntity<>(problemDetail, HttpStatus.BAD_REQUEST);
     }
 
     @Override
@@ -85,7 +87,7 @@ public class DartsApiTraitImpl extends ResponseEntityExceptionHandler implements
         MultiValueMap<String, String> myheaders = new HttpHeaders();
         myheaders.put("Content-Type", List.of("application/json"));
 
-        return new ResponseEntity<Object>(problemDetail, myheaders, HttpStatus.BAD_REQUEST);
+        return new ResponseEntity<>(problemDetail, myheaders, HttpStatus.BAD_REQUEST);
     }
 
     @Override
