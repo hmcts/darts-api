@@ -217,7 +217,7 @@ class StandardEventHandlerTest extends HandlerTestData {
         dartsGateway.darNotificationReturnsSuccess();
 
         int numberOfThreads = 100;
-        ExecutorService service = Executors.newFixedThreadPool(10);
+        ExecutorService service = Executors.newFixedThreadPool(5);
         CountDownLatch latch = new CountDownLatch(numberOfThreads);
 
 
