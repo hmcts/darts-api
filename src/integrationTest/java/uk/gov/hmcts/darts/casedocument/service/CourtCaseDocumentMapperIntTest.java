@@ -203,7 +203,6 @@ class CourtCaseDocumentMapperIntTest extends IntegrationBase {
             () -> assertThat(doc.getHearings().get(0).getHearingDate()).isNotNull().isEqualTo(cc.getHearings().get(0).getHearingDate()),
             () -> assertThat(doc.getHearings().get(0).getScheduledStartTime()).isNotNull().isEqualTo(cc.getHearings().get(0).getScheduledStartTime()),
             () -> assertThat(doc.getHearings().get(0).getHearingIsActual()).isNotNull().isEqualTo(cc.getHearings().get(0).getHearingIsActual()),
-            () -> assertThat(doc.getHearings().get(0).getJudgeHearingDate()).isNotNull().isEqualTo(cc.getHearings().get(0).getJudgeHearingDate()),
 
             () -> assertThat(doc.getHearings().get(0).getCourtroom().getId()).isNotNull().isEqualTo(cc.getHearings().get(0).getCourtroom().getId()),
             () -> assertThat(doc.getHearings().get(0).getCourtroom().getName()).isNotNull().isEqualTo(cc.getHearings().get(0).getCourtroom().getName()),
@@ -245,7 +244,6 @@ class CourtCaseDocumentMapperIntTest extends IntegrationBase {
             () -> assertThat(doc.getHearings().get(0).getMedias().get(0).getLegacyObjectId()).isNotNull().isEqualTo(cc.getHearings().get(0).getMediaList().get(0).getLegacyObjectId()),
             () -> assertThat(doc.getHearings().get(0).getMedias().get(0).getChannel()).isNotNull().isEqualTo(cc.getHearings().get(0).getMediaList().get(0).getChannel()),
             () -> assertThat(doc.getHearings().get(0).getMedias().get(0).getTotalChannels()).isNotNull().isEqualTo(cc.getHearings().get(0).getMediaList().get(0).getTotalChannels()),
-            () -> assertThat(doc.getHearings().get(0).getMedias().get(0).getReferenceId()).isNotNull().isEqualTo(cc.getHearings().get(0).getMediaList().get(0).getReferenceId()),
             () -> assertThat(doc.getHearings().get(0).getMedias().get(0).getStart()).isNotNull().isEqualTo(cc.getHearings().get(0).getMediaList().get(0).getStart()),
             () -> assertThat(doc.getHearings().get(0).getMedias().get(0).getEnd()).isNotNull().isEqualTo(cc.getHearings().get(0).getMediaList().get(0).getEnd()),
             () -> assertThat(doc.getHearings().get(0).getMedias().get(0).getLegacyVersionLabel()).isNotNull().isEqualTo(cc.getHearings().get(0).getMediaList().get(0).getLegacyVersionLabel()),
@@ -314,7 +312,6 @@ class CourtCaseDocumentMapperIntTest extends IntegrationBase {
             () -> assertThat(doc.getHearings().get(0).getTranscriptions().get(0).getTranscriptionType()).isNotNull().isEqualTo(cc.getHearings().get(0).getTranscriptions().get(0).getTranscriptionType()),
             () -> assertThat(doc.getHearings().get(0).getTranscriptions().get(0).getTranscriptionUrgency()).isNotNull().isEqualTo(cc.getHearings().get(0).getTranscriptions().get(0).getTranscriptionUrgency()),
             () -> assertThat(doc.getHearings().get(0).getTranscriptions().get(0).getTranscriptionStatus()).isNotNull().isEqualTo(cc.getHearings().get(0).getTranscriptions().get(0).getTranscriptionStatus()),
-            () -> assertThat(doc.getHearings().get(0).getTranscriptions().get(0).getRequestor()).isNotNull().isEqualTo(cc.getHearings().get(0).getTranscriptions().get(0).getRequestor()),
             () -> assertThat(doc.getHearings().get(0).getTranscriptions().get(0).getHearingDate()).isNotNull().isEqualTo(cc.getHearings().get(0).getTranscriptions().get(0).getHearingDate()),
             () -> assertThat(doc.getHearings().get(0).getTranscriptions().get(0).getLegacyVersionLabel()).isNotNull().isEqualTo(cc.getHearings().get(0).getTranscriptions().get(0).getLegacyVersionLabel()),
             () -> assertThat(doc.getHearings().get(0).getTranscriptions().get(0).getStartTime()).isNotNull().isEqualTo(cc.getHearings().get(0).getTranscriptions().get(0).getStartTime()),

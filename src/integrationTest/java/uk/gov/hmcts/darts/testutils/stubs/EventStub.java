@@ -50,6 +50,7 @@ public class EventStub {
         eventEntity.setLastModifiedDateTime(eventTimestamp);
         eventEntity.setIsLogEntry(false);
         eventEntity.setCourtroom(hearing.getCourtroom());
+        eventEntity.setIsCurrent(true);
         eventRepository.saveAndFlush(eventEntity);
         return eventEntity;
     }
@@ -66,6 +67,7 @@ public class EventStub {
         eventEntity.setLastModifiedDateTime(eventTimestamp);
         eventEntity.setIsLogEntry(false);
         eventEntity.setCourtroom(courtroom);
+        eventEntity.setIsCurrent(true);
         eventRepository.saveAndFlush(eventEntity);
         return eventEntity;
     }

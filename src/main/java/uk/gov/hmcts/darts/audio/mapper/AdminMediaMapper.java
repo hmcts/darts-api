@@ -35,7 +35,6 @@ public interface AdminMediaMapper {
         @Mapping(target = "mediaObjectId", source = "legacyObjectId"),
         @Mapping(target = "contentObjectId", source = "contentObjectId"),
         @Mapping(target = "clipId", source = "clipId"),
-        @Mapping(target = "referenceId", source = "referenceId"),
         @Mapping(target = "checksum", source = "checksum"),
         @Mapping(target = "mediaStatus", source = "mediaStatus"),
         @Mapping(target = "isHidden", source = "hidden"),

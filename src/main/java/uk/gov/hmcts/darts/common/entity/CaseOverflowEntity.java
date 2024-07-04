@@ -64,16 +64,13 @@ public class CaseOverflowEntity {
     @Column(name = "corrected_ts")
     private OffsetDateTime correctedDateTime;
 
-    @Column(name = "confidence_level")
-    private Integer confidenceLevel;
-
-    @Column(name = "confidence_reason")
-    private String confidenceReason;
-
     @Column(name = "c_closed_pre_live")
     private Integer caseClosedPreLive;
 
     @Column(name = "c_case_closed_date_pre_live")
     private OffsetDateTime caseClosedDatePreLive;
+
+    @Column(name = "case_object_name")
+    private String caseObjectName;
 
 }

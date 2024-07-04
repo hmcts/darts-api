@@ -478,8 +478,6 @@ components:
           $ref: '#/components/schemas/ContentObjectId'
         clip_id:
           $ref: '#/components/schemas/ClipId'
-        reference_id:
-          $ref: '#/components/schemas/ReferenceId'
         checksum:
           $ref: '#/components/schemas/Checksum'
         media_status:

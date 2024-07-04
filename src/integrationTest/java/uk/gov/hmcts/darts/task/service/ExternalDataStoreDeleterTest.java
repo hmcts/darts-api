@@ -139,6 +139,7 @@ class ExternalDataStoreDeleterTest extends IntegrationBase {
     @SuppressWarnings("checkstyle:VariableDeclarationUsageDistance")
     @Test
     void deleteMarkedForDeletionDataFromDataStores() {
+        audioBuilder.setupTest();
         Mockito.when(dataManagementFactory.getBlobServiceClient(anyString())).thenReturn(blobServiceClient);
         Mockito.when(dataManagementFactory.getBlobContainerClient(anyString(), eq(blobServiceClient))).thenReturn(blobContainerClient);
         Mockito.when(dataManagementFactory.getBlobClient(any(), any())).thenReturn(blobClient);
@@ -178,6 +179,7 @@ class ExternalDataStoreDeleterTest extends IntegrationBase {
     @SuppressWarnings("checkstyle:VariableDeclarationUsageDistance")
     @Test
     void dontDeleteWhenStatusIsNotMarkedForDeletionDataFromDataStores() {
+        audioBuilder.setupTest();
         Mockito.when(dataManagementFactory.getBlobServiceClient(anyString())).thenReturn(blobServiceClient);
         Mockito.when(dataManagementFactory.getBlobContainerClient(anyString(), eq(blobServiceClient))).thenReturn(blobContainerClient);
         Mockito.when(dataManagementFactory.getBlobClient(any(), any())).thenReturn(blobClient);
