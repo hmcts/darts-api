@@ -14,7 +14,6 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
-import uk.gov.hmcts.darts.audio.exception.AudioApiError;
 import uk.gov.hmcts.darts.audio.model.PostAdminMediasSearchRequest;
 import uk.gov.hmcts.darts.audio.model.PostAdminMediasSearchResponseItem;
 import uk.gov.hmcts.darts.audio.model.Problem;
@@ -391,7 +390,7 @@ class MediaControllerPostAdminMediasSearchIntTest extends IntegrationBase {
 
         Problem problem = objectMapper.readValue(mvcResult.getResponse().getContentAsString(), Problem.class);
         assertEquals("AUDIO_116", problem.getType().toString());
-        assertEquals("Too many results", problem.getTitle().toString());
+        assertEquals("Too many results", problem.getTitle());
         assertEquals(400, problem.getStatus());
     }
 
@@ -409,7 +408,7 @@ class MediaControllerPostAdminMediasSearchIntTest extends IntegrationBase {
 
         Problem problem = objectMapper.readValue(mvcResult.getResponse().getContentAsString(), Problem.class);
         assertEquals("AUTHORISATION_109", problem.getType().toString());
-        assertEquals("User is not authorised for this endpoint", problem.getTitle().toString());
+        assertEquals("User is not authorised for this endpoint", problem.getTitle());
         assertEquals(403, problem.getStatus());
     }
 
