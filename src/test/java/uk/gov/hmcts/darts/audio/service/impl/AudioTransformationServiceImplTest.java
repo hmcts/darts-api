@@ -409,7 +409,7 @@ class AudioTransformationServiceImplTest {
         assertEquals(MOCK_HEARING_DATE_FORMATTED, actual.getTemplateValues().get(HEARING_DATE));
         assertEquals(MOCK_COURTHOUSE_NAME, actual.getTemplateValues().get(COURTHOUSE));
         assertEquals(MOCK_DEFENDANT_LIST, actual.getTemplateValues().get(DEFENDANTS));
-        assertEquals(MOCK_EMAIL, actual.getEmailAddresses());
+        assertEquals(mockUserAccountEntity, actual.getUserAccountsToEmail().get(0));
         assertEquals(actual.getEventId(), NotificationApi.NotificationTemplate.ERROR_PROCESSING_AUDIO.toString());
         assertEquals(MOCK_CASEID, actual.getCaseId());
     }
@@ -507,7 +507,6 @@ class AudioTransformationServiceImplTest {
         when(mockMediaRequestEntity.getEndTime()).thenReturn(endTime);
         when(mockMediaRequestEntity.getRequestor()).thenReturn(mockUserAccountEntity);
         when(mockUserAccountEntity.getId()).thenReturn(1);
-        when(mockUserAccountEntity.getEmailAddress()).thenReturn(MOCK_EMAIL);
         when(mockHearing.getHearingDate()).thenReturn(hearingDate);
         when(mockHearing.getCourtCase()).thenReturn(mockCourtCase);
         when(mockCourtCase.getId()).thenReturn(MOCK_CASEID);

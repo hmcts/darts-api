@@ -260,7 +260,7 @@ class MediaRequestServiceImplTest {
         var saveNotificationToDbRequest = SaveNotificationToDbRequest.builder()
             .eventId(AUDIO_REQUEST_PROCESSING.toString())
             .caseId(1001)
-            .emailAddresses("test@test.com")
+            .userAccountsToEmail(List.of(mockUserAccountEntity))
             .build();
         verify(audioRequestBeingProcessedFromArchiveQuery).getResults(mediaRequestId);
         verify(notificationApi).scheduleNotification(saveNotificationToDbRequest);
@@ -290,7 +290,7 @@ class MediaRequestServiceImplTest {
         var saveNotificationToDbRequest = SaveNotificationToDbRequest.builder()
             .eventId(AUDIO_REQUEST_PROCESSING_ARCHIVE.toString())
             .caseId(1001)
-            .emailAddresses("test@test.com")
+            .userAccountsToEmail(List.of(mockUserAccountEntity))
             .build();
         verify(audioRequestBeingProcessedFromArchiveQuery).getResults(mediaRequestId);
         verify(notificationApi).scheduleNotification(saveNotificationToDbRequest);

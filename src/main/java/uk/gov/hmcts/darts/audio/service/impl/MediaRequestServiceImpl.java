@@ -197,7 +197,7 @@ public class MediaRequestServiceImpl implements MediaRequestService {
             var saveNotificationToDbRequest = SaveNotificationToDbRequest.builder()
                 .eventId(notificationTemplate.toString())
                 .caseId(mediaRequest.getHearing().getCourtCase().getId())
-                .emailAddresses(mediaRequest.getRequestor().getEmailAddress())
+                .userAccountsToEmail(List.of(mediaRequest.getRequestor()))
                 .build();
             notificationApi.scheduleNotification(saveNotificationToDbRequest);
         } catch (Exception e) {
