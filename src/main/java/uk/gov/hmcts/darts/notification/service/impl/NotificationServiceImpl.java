@@ -49,7 +49,7 @@ public class NotificationServiceImpl implements NotificationService {
     private final GovNotifyRequestHelper govNotifyRequestHelper;
     private final LogApi logApi;
     private final boolean notificationsEnabled;
-    private final boolean atsMode;
+    private final boolean automatedTasksMode;
     private final int maxRetry;
 
     public NotificationServiceImpl(
@@ -60,7 +60,7 @@ public class NotificationServiceImpl implements NotificationService {
         GovNotifyRequestHelper govNotifyRequestHelper,
         LogApi logApi,
         @Value("${darts.notification.enabled}") boolean notificationsEnabled,
-        @Value("${darts.automated-tasks-pod}") boolean atsMode,
+        @Value("${darts.automated-tasks-pod}") boolean automatedTasksMode,
         @Value("${darts.notification.max_retry_attempts}") int maxRetry) {
 
         this.notificationRepo = notificationRepo;
@@ -70,7 +70,7 @@ public class NotificationServiceImpl implements NotificationService {
         this.govNotifyRequestHelper = govNotifyRequestHelper;
         this.logApi = logApi;
         this.notificationsEnabled = notificationsEnabled;
-        this.atsMode = atsMode;
+        this.automatedTasksMode = automatedTasksMode;
         this.maxRetry = maxRetry;
     }
 
@@ -147,7 +147,7 @@ public class NotificationServiceImpl implements NotificationService {
         lockAtLeastFor = "PT30S", lockAtMostFor = "PT5M")
     @Scheduled(cron = "${darts.notification.scheduler.cron}")
     public void sendNotificationToGovNotify() {
-        if (notificationsEnabled && !atsMode) {
+        if (notificationsEnabled && !automatedTasksMode) {
             sendNotificationToGovNotifyNow();
         }
     }
