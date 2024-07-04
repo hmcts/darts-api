@@ -9,8 +9,6 @@ import org.hibernate.annotations.Immutable;
 import uk.gov.hmcts.darts.common.entity.compositeid.HearingReportingRestrictionsId;
 
 import java.time.OffsetDateTime;
-import java.util.ArrayList;
-import java.util.List;
 
 @Entity(name = HearingReportingRestrictionsEntity.VIEW_NAME)
 @Immutable
@@ -59,9 +57,6 @@ public class HearingReportingRestrictionsEntity {
 
     @Column(name = "event_ts")
     OffsetDateTime eventDateTime;
-
-    @Column(name = "case_number")
-    private final List<String> caseNumberList = new ArrayList<>();
 
     @Column(name = "version_label")
     String versionLabel;

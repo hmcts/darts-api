@@ -55,6 +55,7 @@ import uk.gov.hmcts.darts.common.repository.DailyListRepository;
 import uk.gov.hmcts.darts.common.repository.DefenceRepository;
 import uk.gov.hmcts.darts.common.repository.DefendantRepository;
 import uk.gov.hmcts.darts.common.repository.EventHandlerRepository;
+import uk.gov.hmcts.darts.common.repository.EventLinkedCaseRepository;
 import uk.gov.hmcts.darts.common.repository.EventRepository;
 import uk.gov.hmcts.darts.common.repository.ExternalLocationTypeRepository;
 import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
@@ -170,6 +171,7 @@ public class DartsDatabaseStub {
     private final RegionRepository regionRepository;
     private final AutomatedTaskRepository automatedTaskRepository;
     private final ObjectAdminActionRepository objectAdminActionRepository;
+    private final EventLinkedCaseRepository eventLinkedCaseRepository;
 
     private final AnnotationStub annotationStub;
     private final AuditStub auditStub;
@@ -239,6 +241,7 @@ public class DartsDatabaseStub {
         annotationRepository.deleteAll();
         transcriptionRepository.deleteAll();
         transcriptionWorkflowRepository.deleteAll();
+        eventLinkedCaseRepository.deleteAll();
     }
 
     public List<EventHandlerEntity> findByHandlerAndActiveTrue(String handlerName) {
