@@ -245,7 +245,7 @@ darts:
       select-entitlement-profile-path: /api/v1/selectEntitlementProfile/{profile_id}
     dets:
       sas-endpoint: ${DETS_SAS_URL_ENDPOINT:}
-      container-name: darts-dets
+      container-name: darts-migration
       temp-blob-workspace: ${user.home}/dets/tempworkspace
     blob:
       client:
