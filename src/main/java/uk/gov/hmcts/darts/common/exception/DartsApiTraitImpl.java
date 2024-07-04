@@ -32,6 +32,7 @@ public class DartsApiTraitImpl extends ResponseEntityExceptionHandler implements
      * exceptions to unique error codes making our whole API consistent
      */
     @Override
+    @SuppressWarnings({ "java:S2259" })
     protected ResponseEntity<Object> handleMethodArgumentNotValid(MethodArgumentNotValidException ex, HttpHeaders headers, HttpStatusCode status,
                                                                   WebRequest request) {
 
@@ -47,7 +48,7 @@ public class DartsApiTraitImpl extends ResponseEntityExceptionHandler implements
             problemDetail.getProperties().put(fieldError.getField(), fieldError.getDefaultMessage());
         }
 
-        return new ResponseEntity<Object>(problemDetail, HttpStatus.BAD_REQUEST);
+        return new ResponseEntity<>(problemDetail, HttpStatus.BAD_REQUEST);
     }
 
     @Override
@@ -58,7 +59,7 @@ public class DartsApiTraitImpl extends ResponseEntityExceptionHandler implements
     }
 
     @ExceptionHandler
-    @SuppressWarnings("java:S1185")
+    @SuppressWarnings({ "java:S2259", "java:S1185" })
     protected ResponseEntity<Object> handleConstraintViolationException(ConstraintViolationException ex, NativeWebRequest request) {
         ProblemDetail problemDetail = ProblemDetail.forStatus(HttpStatus.BAD_REQUEST);
         problemDetail.setTitle("Constraint Violation");
@@ -66,7 +67,7 @@ public class DartsApiTraitImpl extends ResponseEntityExceptionHandler implements
 
         Set<ConstraintViolation<?>> constraintViolationExceptionSet = ex.getConstraintViolations();
 
-        for (ConstraintViolation fieldError : constraintViolationExceptionSet) {
+        for (ConstraintViolation<?> fieldError : constraintViolationExceptionSet) {
 
             if (problemDetail.getProperties() == null) {
                 problemDetail.setProperties(new HashMap<>());
