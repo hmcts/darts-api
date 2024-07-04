@@ -81,7 +81,6 @@ class AudioControllerGetAdminMediasByIdIntTest extends IntegrationBase {
             .andExpect(jsonPath("$.media_object_id").value("object-id-value"))
             .andExpect(jsonPath("$.content_object_id").value("content-id-value"))
             .andExpect(jsonPath("$.clip_id").value("clip-id-value"))
-            .andExpect(jsonPath("$.reference_id").value("reference-id-value"))
             .andExpect(jsonPath("$.checksum").value("7017013d05bcc5032e142049081821d6"))
             .andExpect(jsonPath("$.media_status").value("media-status-value"))
             .andExpect(jsonPath("$.is_hidden").value(true))
@@ -161,7 +160,6 @@ class AudioControllerGetAdminMediasByIdIntTest extends IntegrationBase {
         mediaEntity.setLegacyObjectId("object-id-value");
         mediaEntity.setContentObjectId("content-id-value");
         mediaEntity.setClipId("clip-id-value");
-        mediaEntity.setReferenceId("reference-id-value");
         mediaEntity.setMediaStatus("media-status-value");
         mediaEntity.setHidden(true);
         mediaEntity.setDeleted(true);

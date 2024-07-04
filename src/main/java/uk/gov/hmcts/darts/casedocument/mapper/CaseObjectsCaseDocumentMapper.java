@@ -33,7 +33,8 @@ public abstract class CaseObjectsCaseDocumentMapper {
     @Mappings({
         @Mapping(source = "transcriptionDocumentEntities", target = "transcriptionDocuments"),
         @Mapping(source = "transcriptionCommentEntities", target = "transcriptionComments"),
-        @Mapping(source = "transcriptionWorkflowEntities", target = "transcriptionWorkflows")
+        @Mapping(source = "transcriptionWorkflowEntities", target = "transcriptionWorkflows"),
+        @Mapping(source = "requestedBy.userFullName", target = "requestor")
     })
     public abstract TranscriptionCaseDocument map(TranscriptionEntity entity);
 

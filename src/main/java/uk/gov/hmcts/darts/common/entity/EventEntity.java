@@ -75,6 +75,12 @@ public class EventEntity extends CreatedModifiedBaseEntity {
         inverseJoinColumns = {@JoinColumn(name = "hea_id")})
     private List<HearingEntity> hearingEntities = new ArrayList<>();
 
+    @Column(name = "event_status")
+    private String eventStatus;
+
+    @Column(name = "is_current")
+    private Boolean isCurrent;
+
     public void addHearing(HearingEntity hearingEntity) {
         hearingEntities.add(hearingEntity);
     }

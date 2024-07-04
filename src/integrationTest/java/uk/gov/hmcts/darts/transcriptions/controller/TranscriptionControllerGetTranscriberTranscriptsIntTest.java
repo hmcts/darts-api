@@ -253,9 +253,9 @@ class TranscriptionControllerGetTranscriberTranscriptsIntTest extends Integratio
                                 INSERT INTO darts.court_case (cas_id, cth_id, evh_id, case_object_id, case_number, case_closed, interpreter_used,
                                 case_closed_ts, created_ts, created_by, last_modified_ts, last_modified_by)
                                 VALUES (-1, -1, NULL, NULL, 'T20231009-1', false, false, NULL, NULL, NULL, NULL, NULL);
-                                INSERT INTO darts.hearing (hea_id, cas_id, ctr_id, hearing_date, scheduled_start_time, hearing_is_actual, judge_hearing_date,
+                                INSERT INTO darts.hearing (hea_id, cas_id, ctr_id, hearing_date, scheduled_start_time, hearing_is_actual,
                                 created_ts, created_by, last_modified_ts, last_modified_by)
-                                VALUES (-1, -1, -1, '2023-11-17', NULL, true, NULL, NULL, NULL, NULL, NULL);
+                                VALUES (-1, -1, -1, '2023-11-17', NULL, true, NULL, NULL, NULL, NULL);
 
                                 INSERT INTO darts.user_account (usr_id, dm_user_s_object_id, user_name, user_full_name, user_email_address, description,
                                 is_active, created_ts,
@@ -267,7 +267,7 @@ class TranscriptionControllerGetTranscriberTranscriptsIntTest extends Integratio
                                 VALUES (-4, -1);
 
                                 -- Transcript Requests: Approved (after status rollback from WITH_TRANSCRIBER)
-                                INSERT INTO darts.transcription (tra_id, ctr_id, trt_id, transcription_object_id, requestor, start_ts, end_ts,
+                                INSERT INTO darts.transcription (tra_id, ctr_id, trt_id, transcription_object_id, requested_by, start_ts, end_ts,
                                 created_ts, last_modified_ts, last_modified_by, created_by, tru_id, trs_id, hearing_date,
                                 is_manual_transcription, hide_request_from_requestor)
                                 VALUES (41, NULL, 9, NULL, NULL, '2023-11-23 09:00:00+00', '2023-11-23 09:30:00+00', '2023-11-23 16:25:55.297666+00',
@@ -286,7 +286,7 @@ class TranscriptionControllerGetTranscriberTranscriptsIntTest extends Integratio
                                 VALUES (45, 41, 3, -10, '2023-11-23 16:40:00.0+00');
 
                                 -- Your work > To do: With Transcriber
-                                INSERT INTO darts.transcription (tra_id, ctr_id, trt_id, transcription_object_id, requestor, start_ts, end_ts,
+                                INSERT INTO darts.transcription (tra_id, ctr_id, trt_id, transcription_object_id, requested_by, start_ts, end_ts,
                                 created_ts, last_modified_ts, last_modified_by, created_by, tru_id, trs_id, hearing_date,
                                 is_manual_transcription, hide_request_from_requestor)
                                 VALUES (81, NULL, 9, NULL, NULL, '2023-11-23 09:20:00+00', '2023-11-23 09:30:00+00', '2023-11-23 17:45:14.938855+00',
@@ -303,7 +303,7 @@ class TranscriptionControllerGetTranscriberTranscriptsIntTest extends Integratio
                                 VALUES (102, 81, 5, -10, '2023-11-23 17:45:51.151621+00');
 
                                 -- This transcription would be hidden from Your work > Completed today (transcriber-view?assigned=true)
-                                INSERT INTO darts.transcription (tra_id, ctr_id, trt_id, transcription_object_id, requestor, start_ts, end_ts,
+                                INSERT INTO darts.transcription (tra_id, ctr_id, trt_id, transcription_object_id, requested_by, start_ts, end_ts,
                                 created_ts, last_modified_ts, last_modified_by, created_by, tru_id, trs_id, hearing_date,
                                 is_manual_transcription, hide_request_from_requestor)
                                 VALUES (101, NULL, 9, NULL, NULL, '2023-11-24 09:00:00+00', '2023-11-24 09:30:00+00', '2023-11-24 12:37:00.782036+00',
@@ -322,7 +322,7 @@ class TranscriptionControllerGetTranscriberTranscriptsIntTest extends Integratio
                                 VALUES (141, 101, 6, -10, '2023-11-24 12:53:42.839577+00');
 
                                 -- Your work > Completed today: Complete
-                                INSERT INTO darts.transcription (tra_id, ctr_id, trt_id, transcription_object_id, requestor, start_ts, end_ts,
+                                INSERT INTO darts.transcription (tra_id, ctr_id, trt_id, transcription_object_id, requested_by, start_ts, end_ts,
                                 created_ts, last_modified_ts, last_modified_by, created_by, tru_id, trs_id, hearing_date,
                                 is_manual_transcription, hide_request_from_requestor)
                                 VALUES (121, NULL, 9, NULL, NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, -10, 

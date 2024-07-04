@@ -14,7 +14,6 @@ public class MediaCaseDocument extends CreatedModifiedCaseDocument {
     private final String legacyObjectId;
     private final Integer channel;
     private final Integer totalChannels;
-    private final String referenceId;
     private final OffsetDateTime start;
     private final OffsetDateTime end;
     private final String legacyVersionLabel;

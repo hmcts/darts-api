@@ -16,7 +16,6 @@ public class HearingCaseDocument extends CreatedModifiedCaseDocument {
     private final LocalDate hearingDate;
     private final LocalTime scheduledStartTime;
     private final Boolean hearingIsActual;
-    private final String judgeHearingDate;
     private final List<JudgeCaseDocument> judges;
     private final List<EventCaseDocument> events;
     private final List<MediaRequestCaseDocument> mediaRequests;

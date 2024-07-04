@@ -170,7 +170,7 @@ public interface TranscriptionRepository extends RevisionRepository<Transcriptio
     @Query("""
         SELECT distinct t
         FROM TranscriptionEntity t
-        WHERE t.requestor = str(:userId)
+        WHERE t.requestedBy.id = :userId
         AND ((cast(:onOrAfterCreatedDate as TIMESTAMP)) IS NULL OR t.createdDateTime >= :onOrAfterCreatedDate)
         UNION
         SELECT distinct trans 

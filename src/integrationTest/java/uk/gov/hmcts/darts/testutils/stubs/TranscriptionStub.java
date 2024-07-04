@@ -236,7 +236,7 @@ public class TranscriptionStub {
         }
 
         transcription.setCreatedDateTime(now());
-        transcription.setRequestor(testUser.getId().toString());
+        transcription.setRequestedBy(testUser);
         transcription.setCreatedBy(testUser);
         transcription.setLastModifiedBy(testUser);
         transcription.setIsManualTranscription(true);

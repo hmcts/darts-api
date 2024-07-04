@@ -35,6 +35,7 @@ public class EventTestData {
         event.setTimestamp(eventTime);
         event.setIsLogEntry(LOG_ENTRY_EVENT_NAME.equals(eventName));
         event.setEventType(createTestEventHandlerEntity(eventName));
+        event.setIsCurrent(true);
         return event;
     }
 
