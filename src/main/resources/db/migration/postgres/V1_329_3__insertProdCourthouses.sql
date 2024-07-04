@@ -14,7 +14,7 @@ FOR chouseToBeMigrated IN
 	--"court_case"
 	update darts.court_case set cth_id = chouseToBeMigrated.newId where cth_id = chouseToBeMigrated.oldId;
 	--"courthouse_region_ae"
-	delete from courthouse_region_ae; --repopulating in next script
+	--not needed
 	--"courtroom"
 	update darts.courtroom set cth_id = chouseToBeMigrated.newId where cth_id = chouseToBeMigrated.oldId;
 	--"security_group_courthouse_ae"
