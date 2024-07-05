@@ -25,6 +25,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.darts.event.enums.EventStatus.MODERNISED;
 import static uk.gov.hmcts.darts.test.common.data.CaseTestData.someMinimalCase;
 
 @SuppressWarnings({"PMD.DoNotUseThreads"})
@@ -87,6 +88,7 @@ class StandardEventHandlerTest extends HandlerTestData {
         assertThat(persistedCase.getCourthouse().getCourthouseName()).isEqualTo(SOME_COURTHOUSE);
         assertThat(hearingsForCase.size()).isEqualTo(1);
         assertThat(hearingsForCase.get(0).getHearingIsActual()).isEqualTo(true);
+        assertThat(persistedEvent.getEventStatus()).isEqualTo(MODERNISED.getStatusNumber());
 
         dartsGateway.verifyReceivedNotificationType(3);
         dartsGateway.verifyNotificationUrl("http://1.2.3.4/VIQDARNotifyEvent/DARNotifyEvent.asmx", 1);

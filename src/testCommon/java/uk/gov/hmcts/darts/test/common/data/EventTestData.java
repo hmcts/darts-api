@@ -9,6 +9,8 @@ import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Random;
 
+import static uk.gov.hmcts.darts.event.enums.EventStatus.MODERNISED;
+
 @UtilityClass
 @SuppressWarnings({"HideUtilityClassConstructor"})
 public class EventTestData {
@@ -36,6 +38,7 @@ public class EventTestData {
         event.setIsLogEntry(LOG_ENTRY_EVENT_NAME.equals(eventName));
         event.setEventType(createTestEventHandlerEntity(eventName));
         event.setIsCurrent(true);
+        event.setEventStatus(MODERNISED.getStatusNumber());
         return event;
     }
 
