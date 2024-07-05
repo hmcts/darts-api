@@ -17,7 +17,7 @@ public class RepositoryBase {
 
     static {
         PostgreSQLContainer<?> postgres =
-            new PostgreSQLContainer<>(DockerImageName.parse("hmctspublic.azurecr.io/imported/postgres:15")
+            new PostgreSQLContainer<>(DockerImageName.parse("hmctspublic.azurecr.io/imported/postgresql:15")
                                           .asCompatibleSubstituteFor("postgres"));
         postgres = postgres.withDatabaseName("darts");
         postgres.start();

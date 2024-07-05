@@ -23,13 +23,13 @@ import java.util.List;
 @ActiveProfiles({"intTest", "h2db", "in-memory-caching"})
 public class IntegrationBase {
 
-        static {
-            GenericContainer<?> redis =
-                new GenericContainer<>(DockerImageName.parse("hmctspublic.azurecr.io/imported/redis:7.2.5")).withExposedPorts(6379);
-            redis.start();
-            System.setProperty("spring.data.redis.host", redis.getHost());
-            System.setProperty("spring.data.redis.port", redis.getMappedPort(6379).toString());
-        }
+    static {
+        GenericContainer<?> redis =
+            new GenericContainer<>(DockerImageName.parse("hmctspublic.azurecr.io/imported/redis:7.2.4-alpine")).withExposedPorts(6379);
+        redis.start();
+        System.setProperty("spring.data.redis.host", redis.getHost());
+        System.setProperty("spring.data.redis.port", redis.getMappedPort(6379).toString());
+    }
 
     @Autowired
     protected OpenInViewUtil openInViewUtil;
