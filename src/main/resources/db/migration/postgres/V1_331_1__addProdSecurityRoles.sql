@@ -1,6 +1,3 @@
---ALTER TABLE courthouse DROP CONSTRAINT courthouse_courthouse_name_key;
---DROP INDEX courthouse_name_unique_idx;
-
 DO $$
 DECLARE
 	roleToBeMigrated record;
@@ -9,6 +6,9 @@ DECLARE
 	maxId integer;
 BEGIN
     SELECT last_value into maxId FROM rol_seq;
+    if(maxId<=14) then
+        perform setval('rol_seq', 15, false);
+    end if;
 FOR roleToBeMigrated IN
     SELECT rol_id from security_role where rol_id between 1 and 14
     union
