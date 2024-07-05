@@ -9,6 +9,9 @@ DECLARE
 	maxId integer;
 BEGIN
     SELECT last_value into maxId FROM cth_seq;
+	if(maxId<=151) then
+		perform setval('cth_seq', 152, false);
+	end if;
 FOR chouseToBeMigrated IN
     SELECT cth_id from courthouse where cth_id between 1 and 151
     union
