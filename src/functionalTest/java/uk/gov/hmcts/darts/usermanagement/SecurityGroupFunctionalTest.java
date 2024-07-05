@@ -116,8 +116,8 @@ class SecurityGroupFunctionalTest extends FunctionalTest {
 
         ObjectMapper objectMapper = new ObjectMapper();
         List<SecurityGroupWithIdAndRoleAndUsers> securityGroupWithIdAndRoles = objectMapper.readValue(response.asString(),
-                                                                                              new TypeReference<>() {
-                                                                                              });
+                                                                                                      new TypeReference<>() {
+                                                                                                      });
         assertFalse(securityGroupWithIdAndRoles.isEmpty());
 
         List<SecurityGroupWithIdAndRoleAndUsers> staticGroups =
@@ -133,16 +133,16 @@ class SecurityGroupFunctionalTest extends FunctionalTest {
         checkGroup(staticGroups.get(0), "DARTS", true, 13, false, null);
         checkGroup(staticGroups.get(1), "SUPER_USER", true, 12, true, null);
         checkGroup(staticGroups.get(2), "SUPER_ADMIN", true, 11, true, null);
-        checkGroup(staticGroups.get(3), "hmcts_staff_1", false, 1, true, 1);
-        checkGroup(staticGroups.get(4), "hmcts_staff_2", false, 2, true, 1);
-        checkGroup(staticGroups.get(5), "hmcts_staff_3", false, 3, true, 1);
-        checkGroup(staticGroups.get(6), "hmcts_staff_4", false, 4, true, 1);
-        checkGroup(staticGroups.get(7), "hmcts_staff_5", true, 5, true, 1);
-        checkGroup(staticGroups.get(8), "hmcts_staff_6", true, 6, true, 1);
-        checkGroup(staticGroups.get(9), "Xhibit Group", true, 7, false, 1);
-        checkGroup(staticGroups.get(10), "Cpp Group", true, 8, false, 1);
-        checkGroup(staticGroups.get(11), "Dar Pc Group", true, 9, false, 1);
-        checkGroup(staticGroups.get(12), "Mid Tier Group", true, 10, false, 1);
+        checkGroup(staticGroups.get(3), "hmcts_staff_1", false, 1, true, 127);
+        checkGroup(staticGroups.get(4), "hmcts_staff_2", false, 2, true, 127);
+        checkGroup(staticGroups.get(5), "hmcts_staff_3", false, 3, true, 127);
+        checkGroup(staticGroups.get(6), "hmcts_staff_4", false, 4, true, 127);
+        checkGroup(staticGroups.get(7), "hmcts_staff_5", true, 5, true, 127);
+        checkGroup(staticGroups.get(8), "hmcts_staff_6", true, 6, true, 127);
+        checkGroup(staticGroups.get(9), "Xhibit Group", true, 7, false, 127);
+        checkGroup(staticGroups.get(10), "Cpp Group", true, 8, false, 127);
+        checkGroup(staticGroups.get(11), "Dar Pc Group", true, 9, false, 127);
+        checkGroup(staticGroups.get(12), "Mid Tier Group", true, 10, false, 127);
 
     }
 
