@@ -209,6 +209,7 @@ public class TranscriptionResponseMapper {
         transcriptionResponse.setTranscriptionStartTs(transcriptionEntity.getStartTime());
         transcriptionResponse.setTranscriptionEndTs(transcriptionEntity.getEndTime());
         transcriptionResponse.setIsManual(transcriptionEntity.getIsManualTranscription());
+        transcriptionResponse.setHideRequestFromRequestor(transcriptionEntity.getHideRequestFromRequestor());
 
         mapReportingRestrictions(courtCase, transcriptionResponse);
 
