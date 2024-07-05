@@ -421,6 +421,10 @@ INSERT INTO event_handler (evh_id, event_type, event_sub_type, event_name, handl
 INSERT INTO event_handler (evh_id, event_type, event_sub_type, event_name, handler, created_by, created_ts, active, is_reporting_restriction) VALUES (377, 'LOG', NULL, 'LOG', 'StandardEventHandler', 0, current_timestamp, true, false);
 INSERT into event_handler (evh_id, event_type, event_sub_type, event_name, handler, created_by, created_ts, active, is_reporting_restriction)(VALUES (600, '20937', '10624', '<Sentence remarks filmed>', 'StandardEventHandler', 0, current_timestamp, true, false);
 INSERT into event_handler (evh_id, event_type, event_sub_type, event_name, handler, created_by, created_ts, active, is_reporting_restriction)(VALUES (601, '20937', '10625', '<Sentence remarks not filmed>', 'StandardEventHandler', 0, current_timestamp, true, false);
+INSERT into event_handler (evh_id, event_type, event_sub_type, event_name, handler, created_by, created_ts, active, is_reporting_restriction)(VALUES (602, '0', '0', 'Bench warrant', 'StandardEventHandler', 0, current_timestamp, false, false);
+INSERT into event_handler (evh_id, event_type, event_sub_type, event_name, handler, created_by, created_ts, active, is_reporting_restriction)(VALUES (603, '0', '0', 'Sentencing - Life', 'StandardEventHandler', 0, current_timestamp, false, false);
+INSERT into event_handler (evh_id, event_type, event_sub_type, event_name, handler, created_by, created_ts, active, is_reporting_restriction)(VALUES (604, '40734', NULL, 'Verdict', 'StandardEventHandler', 0, current_timestamp, true, false);
+INSERT into event_handler (evh_id, event_type, event_sub_type, event_name, handler, created_by, created_ts, active, is_reporting_restriction)(VALUES (605, '40735', NULL, 'Verdict', 'StandardEventHandler', 0, current_timestamp, true, false);
 
 INSERT INTO external_location_type (elt_id, elt_description) VALUES (1, 'inbound');
 INSERT INTO external_location_type (elt_id, elt_description) VALUES (2, 'unstructured');
