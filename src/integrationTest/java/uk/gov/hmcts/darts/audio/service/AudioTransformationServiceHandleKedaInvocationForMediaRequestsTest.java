@@ -2,7 +2,6 @@ package uk.gov.hmcts.darts.audio.service;
 
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
@@ -45,7 +44,6 @@ import static uk.gov.hmcts.darts.notification.NotificationConstants.ParameterMap
 @TestPropertySource(properties = {"darts.audio.transformation.service.audio.file=tests/audio/WithViqHeader/viq0001min.mp2"})
 @Slf4j
 @SuppressWarnings("PMD.JUnit5TestShouldBePackagePrivate")
-@Disabled("due to issue with pulling the docker images currently being investigated by platops")
 class AudioTransformationServiceHandleKedaInvocationForMediaRequestsTest extends PostgresIntegrationBase {
 
     private static final String EMAIL_ADDRESS = "test@test.com";
