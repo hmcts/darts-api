@@ -5,6 +5,7 @@ import uk.gov.hmcts.darts.cases.model.AdminCasesSearchRequest;
 import uk.gov.hmcts.darts.cases.model.AdminCasesSearchResponseItem;
 import uk.gov.hmcts.darts.cases.model.AdvancedSearchResult;
 import uk.gov.hmcts.darts.cases.model.Annotation;
+import uk.gov.hmcts.darts.cases.model.Event;
 import uk.gov.hmcts.darts.cases.model.GetCasesRequest;
 import uk.gov.hmcts.darts.cases.model.GetCasesSearchRequest;
 import uk.gov.hmcts.darts.cases.model.Hearing;
@@ -29,6 +30,8 @@ public interface CaseService {
     SingleCase getCasesById(Integer caseId);
 
     CourtCaseEntity getCourtCaseById(Integer caseId);
+
+    List<Event> getEventsByCaseId(Integer caseId);
 
     List<Transcript> getTranscriptsByCaseId(Integer caseId);
 

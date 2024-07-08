@@ -17,6 +17,7 @@ import uk.gov.hmcts.darts.cases.helper.AdvancedSearchRequestHelper;
 import uk.gov.hmcts.darts.cases.mapper.CasesAnnotationMapper;
 import uk.gov.hmcts.darts.cases.mapper.CasesMapper;
 import uk.gov.hmcts.darts.cases.model.AddCaseRequest;
+import uk.gov.hmcts.darts.cases.model.Event;
 import uk.gov.hmcts.darts.cases.model.GetCasesRequest;
 import uk.gov.hmcts.darts.cases.model.Hearing;
 import uk.gov.hmcts.darts.cases.model.PostCaseResponse;
@@ -25,6 +26,7 @@ import uk.gov.hmcts.darts.cases.model.SingleCase;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
+import uk.gov.hmcts.darts.common.entity.EventEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.JudgeEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
@@ -33,6 +35,7 @@ import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.common.repository.AnnotationRepository;
 import uk.gov.hmcts.darts.common.repository.CaseRepository;
 import uk.gov.hmcts.darts.common.repository.CaseRetentionRepository;
+import uk.gov.hmcts.darts.common.repository.EventRepository;
 import uk.gov.hmcts.darts.common.repository.HearingReportingRestrictionsRepository;
 import uk.gov.hmcts.darts.common.repository.HearingRepository;
 import uk.gov.hmcts.darts.common.repository.TranscriptionRepository;
@@ -60,6 +63,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.darts.common.util.CommonTestDataUtil.createEventWith;
 import static uk.gov.hmcts.darts.test.common.TestUtils.getContentsFromFile;
 
 @ExtendWith(MockitoExtension.class)
@@ -77,6 +81,10 @@ class CaseServiceImplTest {
 
     @Mock
     HearingRepository hearingRepository;
+
+    @Mock
+    EventRepository eventRepository;
+
 
     @Mock
     HearingReportingRestrictionsRepository hearingReportingRestrictionsRepository;
@@ -115,6 +123,7 @@ class CaseServiceImplTest {
             mapper,
             annotationMapper,
             hearingRepository,
+            eventRepository,
             caseRepository,
             annotationRepository,
             retrieveCoreObjectService,
@@ -290,6 +299,32 @@ class CaseServiceImplTest {
         assertEquals(existingHearings.get(0).getCourtroom().getName(), caseHearings.get(0).getCourtroom());
         assertEquals(existingHearings.get(0).getHearingDate(), caseHearings.get(0).getDate());
 
+    }
+
+    @Test
+    void testGetEventsByCaseId() throws Exception {
+        CourthouseEntity courthouseEntity = CommonTestDataUtil.createCourthouse(SWANSEA);
+        CourtroomEntity courtroomEntity = CommonTestDataUtil.createCourtroom(courthouseEntity, "1");
+        CourtCaseEntity courtCaseEntity = CommonTestDataUtil.createCase("1");
+        OffsetDateTime hearingDate = OffsetDateTime.parse("2024-07-01T12:00Z");
+
+        HearingEntity hearing = CommonTestDataUtil.createHearing(
+            courtCaseEntity,
+            courtroomEntity,
+            hearingDate.toLocalDate()
+        );
+
+        List<EventEntity> events = Lists.newArrayList(createEventWith("eventName", "event", hearing, hearingDate));
+
+        when(eventRepository.findAllByCaseId(courtCaseEntity.getId())).thenReturn(events);
+
+        List<Event> result = service.getEventsByCaseId(courtCaseEntity.getId());
+
+        String actualResponse = objectMapper.writeValueAsString(result);
+
+        String expectedResponse = getContentsFromFile(
+            "Tests/cases/CaseServiceTest/testGetEventsByCase/expectedResponse.json");
+        JSONAssert.assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
     }
 
     @Test
