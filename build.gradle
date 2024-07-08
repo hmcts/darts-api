@@ -144,6 +144,8 @@ tasks.withType(JavaExec).configureEach {
 tasks.withType(Test).configureEach {
   useJUnitPlatform()
 
+  maxHeapSize = '1G'
+
   testLogging {
     exceptionFormat = 'full'
   }

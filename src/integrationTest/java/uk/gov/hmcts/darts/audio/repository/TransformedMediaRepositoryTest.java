@@ -2,7 +2,6 @@ package uk.gov.hmcts.darts.audio.repository;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import uk.gov.hmcts.darts.common.entity.TransformedMediaEntity;
@@ -14,7 +13,6 @@ import uk.gov.hmcts.darts.testutils.stubs.TransformedMediaStub;
 import java.util.List;
 import java.util.Locale;
 
-@Disabled
 class TransformedMediaRepositoryTest extends RepositoryBase {
 
     @Autowired
