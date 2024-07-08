@@ -127,6 +127,11 @@ public class MediaRequestServiceImpl implements MediaRequestService {
     }
 
     @Override
+    public Optional<MediaRequestEntity> retrieveMediaRequestForProcessing() {
+        return Optional.ofNullable(mediaRequestRepository.updateAndRetrieveMediaRequestToProcessing());
+    }
+
+    @Override
     public AudioNonAccessedResponse countNonAccessedAudioForUser(Integer userId) {
         AudioNonAccessedResponse nonAccessedResponse = new AudioNonAccessedResponse();
         nonAccessedResponse.setCount(mediaRequestRepository.countTransformedEntitiesByRequestorIdAndStatusNotAccessed(userId, COMPLETED));
