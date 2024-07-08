@@ -3,6 +3,7 @@ package uk.gov.hmcts.darts.common.repository;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 import uk.gov.hmcts.darts.audio.entity.MediaRequestEntity;
 import uk.gov.hmcts.darts.audio.enums.MediaRequestStatus;
 import uk.gov.hmcts.darts.audiorequests.model.AudioRequestType;
@@ -17,6 +18,21 @@ import java.util.Optional;
 public interface MediaRequestRepository extends JpaRepository<MediaRequestEntity, Integer> {
 
     Optional<MediaRequestEntity> findTopByStatusOrderByLastModifiedDateTimeAsc(MediaRequestStatus status);
+
+    @Transactional
+    @Query(value = """
+        UPDATE darts.media_request
+        SET request_status = 'PROCESSING'
+        WHERE mer_id IN (
+          SELECT mr2.mer_id
+          FROM darts.media_request mr2
+          WHERE mr2.request_status = 'OPEN'
+          ORDER BY mr2.last_modified_ts ASC
+          LIMIT 1
+          )
+        RETURNING *
+        """, nativeQuery = true)
+    MediaRequestEntity updateAndRetrieveMediaRequestToProcessing();
 
     @Query("""
         SELECT count(distinct(tm.id)) FROM MediaRequestEntity mr, TransformedMediaEntity tm

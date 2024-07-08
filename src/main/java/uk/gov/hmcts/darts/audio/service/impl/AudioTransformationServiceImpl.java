@@ -40,7 +40,6 @@ import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
-import java.security.SecureRandom;
 import java.time.format.DateTimeFormatter;
 import java.util.Collections;
 import java.util.Comparator;
@@ -48,14 +47,12 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Random;
 import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 
 import static uk.gov.hmcts.darts.audio.enums.MediaRequestStatus.FAILED;
 import static uk.gov.hmcts.darts.audio.enums.MediaRequestStatus.OPEN;
-import static uk.gov.hmcts.darts.audio.enums.MediaRequestStatus.PROCESSING;
 import static uk.gov.hmcts.darts.audiorequests.model.AudioRequestType.DOWNLOAD;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.STORED;
 
@@ -138,13 +135,12 @@ public class AudioTransformationServiceImpl implements AudioTransformationServic
 
     @Override
     public void handleKedaInvocationForMediaRequests() {
-        var openRequest = mediaRequestService.getOldestMediaRequestByStatus(OPEN);
+        Optional<MediaRequestEntity> mediaRequest = mediaRequestService.retrieveMediaRequestForProcessing();
 
-        if (openRequest.isEmpty()) {
-            log.info("No open requests found for ATS to process.");
-        } else {
-            openRequest.ifPresent(openMediaRequest -> processAudioRequest(openMediaRequest.getId()));
-        }
+        mediaRequest.ifPresentOrElse(
+            this::processAudioRequest,
+            () -> log.info("No open requests found for ATS to process.")
+        );
 
         unstructuredDataHelper.waitForAllJobsToFinish();
     }
@@ -153,29 +149,16 @@ public class AudioTransformationServiceImpl implements AudioTransformationServic
      * For all audio related to a given AudioRequest, download, transform and upload the processed file to outbound
      * storage.
      *
-     * @param requestId The id of the AudioRequest to be processed.
      */
     @SuppressWarnings({"PMD.AvoidRethrowingException", "PMD.CyclomaticComplexity"})
-    private void processAudioRequest(Integer requestId) {
+    private void processAudioRequest(MediaRequestEntity mediaRequestEntity) {
 
-        MediaRequestEntity mediaRequestEntity = null;
-        HearingEntity hearingEntity = null;
+        Integer requestId = mediaRequestEntity.getId();
+        HearingEntity hearingEntity = mediaRequestEntity.getHearing();
         UUID blobId;
 
         try {
-            Random random = SecureRandom.getInstanceStrong();
-            Thread.sleep(random.nextInt(1000));
-            log.info("About to read Media Request Detail for Media Request Id : {}", requestId);
-            mediaRequestEntity = mediaRequestService.getMediaRequestEntityById(requestId);
-            log.info("The Media request {} status is : {}", requestId, mediaRequestEntity.getStatus());
-            if (PROCESSING.equals(mediaRequestEntity.getStatus())) {
-                return;
-            }
-
-            log.info("Starting processing for audio request id: {}", requestId);
-            mediaRequestService.updateAudioRequestStatus(mediaRequestEntity, PROCESSING);
-            log.info("The Updated Media request {} status is : {}", requestId, mediaRequestEntity.getStatus());
-            hearingEntity = mediaRequestEntity.getHearing();
+            log.info("Starting processing for audio request id: {}. Status: {}", requestId, mediaRequestEntity.getStatus());
 
             logApi.atsProcessingUpdate(mediaRequestEntity);
 
@@ -214,7 +197,6 @@ public class AudioTransformationServiceImpl implements AudioTransformationServic
                 generatedAudioFiles = generateFilesForRequestType(mediaRequestEntity, downloadedMedias);
             } catch (ExecutionException | InterruptedException e) {
                 // For Sonar rule S2142
-                Thread.currentThread().interrupt();
                 throw e;
             }
 
@@ -253,14 +235,13 @@ public class AudioTransformationServiceImpl implements AudioTransformationServic
             log.error("Exception occurred for request id {}.", requestId, e);
             var updatedMediaRequest = mediaRequestService.updateAudioRequestStatus(requestId, FAILED);
 
-            if (mediaRequestEntity != null && hearingEntity != null) {
+            if (hearingEntity != null) {
                 transformedMediaHelper.notifyUser(updatedMediaRequest, hearingEntity.getCourtCase(),
                            NotificationApi.NotificationTemplate.ERROR_PROCESSING_AUDIO.toString()
                 );
             }
 
             logApi.atsProcessingUpdate(updatedMediaRequest);
-            Thread.currentThread().interrupt();
         }
     }
 
