@@ -76,7 +76,8 @@ class CourtlogsFunctionalTest extends FunctionalTest {
                           "func-CASE1001"
                         ],
                         "text": "System : Start Recording : Record: Case Code:0008, New Case"
-                      }""")
+                      }
+                      """)
             .when()
             .baseUri(getUri(ENDPOINT_URL))
             .redirects().follow(false)
@@ -134,7 +135,9 @@ class CourtlogsFunctionalTest extends FunctionalTest {
 
         assertEquals(400, response.statusCode());
         assertThat(response.asPrettyString()).contains(
-            "Required request parameter 'start_date_time' for method parameter type OffsetDateTime is not present");
+            """
+                {"type":"about:blank","title":"Bad Request","status":400,"detail":"Required parameter 'start_date_time' is not present.","instance":"/courtlogs"}
+            """);
 
     }
 
