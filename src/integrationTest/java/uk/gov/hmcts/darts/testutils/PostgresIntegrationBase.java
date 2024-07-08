@@ -5,32 +5,41 @@ import org.junit.jupiter.api.BeforeEach;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.DynamicPropertyRegistry;
+import org.springframework.test.context.DynamicPropertySource;
 import org.testcontainers.containers.PostgreSQLContainer;
-import org.testcontainers.utility.DockerImageName;
 import uk.gov.hmcts.darts.test.common.LogUtil;
 import uk.gov.hmcts.darts.test.common.MemoryLogAppender;
 import uk.gov.hmcts.darts.testutils.stubs.DartsDatabaseStub;
 
 /**
- * Base class for integration tests running against a containerized PostgreSQL.
+ * Base class for integration tests running against a containerized Postgres with Testcontainers.
  */
 @SpringBootTest
-@ActiveProfiles({"intTest", "postgres"})
+@ActiveProfiles({"intTest"})
 public class PostgresIntegrationBase {
-
-    static {
-        PostgreSQLContainer<?> postgres =
-            new PostgreSQLContainer<>(DockerImageName.parse("postgres:15-alpine"));
-        postgres = postgres.withDatabaseName("darts");
-        postgres.start();
-
-        System.setProperty("spring.datasource.port", postgres.getMappedPort(5432).toString());
-    }
 
     @Autowired
     protected DartsDatabaseStub dartsDatabase;
 
     protected MemoryLogAppender logAppender = LogUtil.getMemoryLogger();
+
+    static final PostgreSQLContainer<?> POSTGRES = new PostgreSQLContainer<>(
+        "postgres:15-alpine"
+    ).withDatabaseName("darts");
+
+    @DynamicPropertySource
+    static void configureProperties(DynamicPropertyRegistry registry) {
+
+        registry.add("spring.datasource.url", POSTGRES::getJdbcUrl);
+        registry.add("spring.datasource.username", POSTGRES::getUsername);
+        registry.add("spring.datasource.password", POSTGRES::getPassword);
+    }
+
+    static {
+        // container will be automatically stopped
+        POSTGRES.start();
+    }
 
     @BeforeEach
     void clearDb() {

@@ -4,8 +4,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
-import uk.gov.hmcts.darts.testutils.stubs.HearingStub;
 import uk.gov.hmcts.darts.testutils.PostgresIntegrationBase;
+import uk.gov.hmcts.darts.testutils.stubs.HearingStub;
 
 import java.util.List;
 
