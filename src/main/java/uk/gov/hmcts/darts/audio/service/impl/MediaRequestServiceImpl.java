@@ -322,10 +322,12 @@ public class MediaRequestServiceImpl implements MediaRequestService {
         ));
 
         ParameterExpression<UserAccountEntity> paramRequestor = criteriaBuilder.parameter(UserAccountEntity.class);
+
         criteriaQuery.where(criteriaBuilder.and(
             criteriaBuilder.equal(mediaRequest.get(MediaRequestEntity_.CURRENT_OWNER), paramRequestor),
             expiredPredicate(expired, criteriaBuilder, mediaRequest),
-            mediaRequest.get(MediaRequestEntity_.status).in(List.of(DELETED, COMPLETED)).not()
+            mediaRequest.get(MediaRequestEntity_.status).in(List.of(DELETED, COMPLETED)
+            ).not()
         ));
 
         criteriaQuery.orderBy(List.of(
@@ -333,9 +335,15 @@ public class MediaRequestServiceImpl implements MediaRequestService {
             criteriaBuilder.asc(mediaRequest.get(MediaRequestEntity_.startTime))
         ));
 
-        TypedQuery<EnhancedMediaRequestInfo> query = entityManager.createQuery(criteriaQuery);
 
-        query.setParameter(paramRequestor, userAccountRepository.getReferenceById(userId));
+        UserAccountEntity userAccountEntity = null;
+        List<UserAccountEntity> userAccountEntities = userAccountRepository.findByIdInAndActive(List.of(userId), true);
+        if (!userAccountEntities.isEmpty()) {
+            userAccountEntity = userAccountEntities.get(0);
+        }
+
+        TypedQuery<EnhancedMediaRequestInfo> query = entityManager.createQuery(criteriaQuery);
+        query.setParameter(paramRequestor, userAccountEntity);
 
         return query.getResultList();
     }

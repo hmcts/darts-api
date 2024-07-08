@@ -148,6 +148,7 @@ public class YourTranscriptsQueryImpl implements YourTranscriptsQuery {
                     JOIN darts.security_group_courthouse_ae grc ON grp.grp_id = grc.grp_id
                     WHERE  usr.usr_id = :usr_id
                     AND grp.rol_id = :rol_id
+                    AND usr.is_active = true
                 )
                 JOIN darts.hearing_transcription_ae hearing_transcription ON tra.tra_id = hearing_transcription.tra_id
                 JOIN darts.hearing hea ON hearing_transcription.hea_id = hea.hea_id
@@ -198,6 +199,7 @@ public class YourTranscriptsQueryImpl implements YourTranscriptsQuery {
                     JOIN darts.security_group grp ON gua.grp_id = grp.grp_id
                     JOIN darts.security_group_courthouse_ae grc ON grp.grp_id = grc.grp_id
                     WHERE usr.usr_id = :usr_id
+                    AND usr.is_active = true
                     AND grp.rol_id = :rol_id
                 )
                 JOIN darts.transcription_type trt ON tra.trt_id = trt.trt_id

@@ -54,7 +54,7 @@ class AuthenticationControllerTest extends IntegrationBase {
 
         assertTrue(userState.getIsActive());
         assertEquals(userAccountEntity.getId(), userState.getUserId());
-        assertEquals(userAccountEntity.getUserName(), userState.getUserName());
+        assertEquals(userAccountEntity.getUserFullName(), userState.getUserName());
         assertEquals(1, userState.getRoles().size());
         assertEquals(SecurityRoleEnum.SUPER_ADMIN.getId(), userState.getRoles().iterator().next().getRoleId());
     }
@@ -74,7 +74,7 @@ class AuthenticationControllerTest extends IntegrationBase {
 
         assertFalse(userState.getIsActive());
         assertEquals(userAccountEntity.getId(), userState.getUserId());
-        assertEquals(userAccountEntity.getUserName(), userState.getUserName());
+        assertEquals(userAccountEntity.getUserFullName(), userState.getUserName());
         assertEquals(1, userState.getRoles().size());
         assertEquals(SecurityRoleEnum.SUPER_ADMIN.getId(), userState.getRoles().iterator().next().getRoleId());
     }

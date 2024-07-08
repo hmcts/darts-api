@@ -261,7 +261,7 @@ public class TranscriptionServiceImpl implements TranscriptionService {
 
         TranscriptionStatusEnum desiredTargetTranscriptionStatus = TranscriptionStatusEnum.fromId(updateTranscription.getTranscriptionStatusId());
 
-        if (!allowSelfApprovalOrRejection && getUserAccount().getUserName().equals(transcription.getCreatedBy().getUserName())
+        if (!allowSelfApprovalOrRejection && getUserAccount().getUserFullName().equals(transcription.getCreatedBy().getUserFullName())
             && (desiredTargetTranscriptionStatus.equals(REJECTED) || desiredTargetTranscriptionStatus.equals(APPROVED))) {
             throw new DartsApiException(BAD_REQUEST_TRANSCRIPTION_REQUESTER_IS_SAME_AS_APPROVER);
         }

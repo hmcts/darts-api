@@ -1,6 +1,7 @@
 package uk.gov.hmcts.darts.transcriptions.controller;
 
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.skyscreamer.jsonassert.JSONAssert;
@@ -11,10 +12,13 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
+import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
+import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 
 import java.net.URI;
 
+import static java.lang.Boolean.FALSE;
 import static java.lang.Boolean.TRUE;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -31,6 +35,9 @@ class TranscriptionControllerGetTranscriberTranscriptsWithTranscriberStatusOnlyI
 
     @Autowired
     private JdbcTemplate jdbcTemplate;
+
+    @Autowired
+    private UserAccountRepository userAccountRepository;
 
     @BeforeEach
     @SuppressWarnings({"checkstyle.LineLengthCheck"})
@@ -168,4 +175,47 @@ class TranscriptionControllerGetTranscriberTranscriptsWithTranscriberStatusOnlyI
         JSONAssert.assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
     }
 
+    @Test
+    void givenTranscriberUserAndYourWorkViewRequested_thenReturnAssignedTranscriptionAndDoNotReturnCompletedTranscriptionFromBeforeTodayInactive()
+        throws Exception {
+
+        UserAccountEntity userAccountEntity = userAccountRepository.findById(-10).get();
+        userAccountEntity.setActive(false);
+        userAccountRepository.save(userAccountEntity);
+
+        MockHttpServletRequestBuilder requestBuilder = get(ENDPOINT_URI)
+            .header(
+                USER_ID_HEADER,
+                -10
+            )
+            .queryParam(ASSIGNED_QUERY_PARAM, TRUE.toString());
+
+        final MvcResult mvcResult = mockMvc.perform(requestBuilder)
+            .andReturn();
+
+        String actualResponse = mvcResult.getResponse().getContentAsString();
+        Assertions.assertEquals("[]", actualResponse);
+    }
+
+    @Test
+    void givenTranscriberUserAndYourWorkViewRequested_thenReturnUnassignedTranscriptionAndDoNotReturnCompletedTranscriptionFromBeforeTodayInactive()
+        throws Exception {
+
+        UserAccountEntity userAccountEntity = userAccountRepository.findById(-10).get();
+        userAccountEntity.setActive(false);
+        userAccountRepository.save(userAccountEntity);
+
+        MockHttpServletRequestBuilder requestBuilder = get(ENDPOINT_URI)
+            .header(
+                USER_ID_HEADER,
+                -10
+            )
+            .queryParam(ASSIGNED_QUERY_PARAM, FALSE.toString());
+
+        final MvcResult mvcResult = mockMvc.perform(requestBuilder)
+            .andReturn();
+
+        String actualResponse = mvcResult.getResponse().getContentAsString();
+        Assertions.assertEquals("[]", actualResponse);
+    }
 }

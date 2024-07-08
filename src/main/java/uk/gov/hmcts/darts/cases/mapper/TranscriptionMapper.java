@@ -43,7 +43,7 @@ public class TranscriptionMapper {
 
     private String getRequestedBy(TranscriptionEntity transcriptionEntity) {
         if (transcriptionEntity.getCreatedBy() != null) {
-            return transcriptionEntity.getCreatedBy().getUserName();
+            return transcriptionEntity.getCreatedBy().getUserFullName();
         } else {
             return transcriptionEntity.getRequestedBy().getUserFullName();
         }
