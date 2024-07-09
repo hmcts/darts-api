@@ -57,7 +57,7 @@ public class CaseController implements CasesApi {
 
     private final LogApi logApi;
 
-    @Value("${darts.cases.defendant-name-char-limit: 600}")
+    @Value("${darts.log.cases.defendant-name-char-limit: 600}")
     private int limit;
 
     @Override
