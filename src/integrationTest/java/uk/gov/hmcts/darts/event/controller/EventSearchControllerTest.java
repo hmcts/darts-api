@@ -47,8 +47,8 @@ class EventSearchControllerTest extends IntegrationBase {
 
 
     @ParameterizedTest
-    @EnumSource(value = SecurityRoleEnum.class, names = {"SUPER_ADMIN"}, mode = EnumSource.Mode.EXCLUDE)
-    void forbidsNonSuperAdminUsers(SecurityRoleEnum role) throws Exception {
+    @EnumSource(value = SecurityRoleEnum.class, names = {"SUPER_ADMIN", "SUPER_USER"}, mode = EnumSource.Mode.EXCLUDE)
+    void forbidsNonSuperUsers(SecurityRoleEnum role) throws Exception {
         given.anAuthenticatedUserWithGlobalAccessAndRole(role);
 
         mockMvc.perform(post(EVENT_SEARCH_ENDPOINT)
@@ -58,8 +58,9 @@ class EventSearchControllerTest extends IntegrationBase {
             .andReturn();
     }
 
-    @Test
-    void allowsSuperAdminUser() throws Exception {
+    @ParameterizedTest
+    @EnumSource(value = SecurityRoleEnum.class, names = {"SUPER_ADMIN", "SUPER_USER"}, mode = EnumSource.Mode.INCLUDE)
+    void allowsSuperUsers() throws Exception {
         given.anAuthenticatedUserWithGlobalAccessAndRole(SUPER_ADMIN);
 
         mockMvc.perform(post(EVENT_SEARCH_ENDPOINT)

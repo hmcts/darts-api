@@ -38,6 +38,7 @@ import static uk.gov.hmcts.darts.authorisation.enums.ContextIdEnum.ANY_ENTITY_ID
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.CPP;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.MID_TIER;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.SUPER_ADMIN;
+import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.SUPER_USER;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.XHIBIT;
 
 @Slf4j
@@ -154,7 +155,7 @@ public class EventsController implements EventApi {
     @Override
     @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
     @Authorisation(contextId = ANY_ENTITY_ID,
-        globalAccessSecurityRoles = {SUPER_ADMIN})
+        globalAccessSecurityRoles = {SUPER_ADMIN, SUPER_USER})
     public ResponseEntity<AdminSearchEventResponse> adminSearchEvents(AdminEventSearch adminEventSearch) {
         var adminSearchEventResponse = eventSearchService.searchForEvents(adminEventSearch);
         return new ResponseEntity<>(adminSearchEventResponse, HttpStatus.OK);
