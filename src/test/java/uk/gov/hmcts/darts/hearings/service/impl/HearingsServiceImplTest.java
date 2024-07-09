@@ -82,7 +82,7 @@ class HearingsServiceImplTest {
         when(eventType.getEventName()).thenReturn("TestEvent");
 
         List<EventEntity> event = List.of(
-            CommonTestDataUtil.createEventWith("LOG", "Test", hearingEntity, eventType));
+            CommonTestDataUtil.createEventWith("Test", hearingEntity, eventType));
         when(eventRepository.findAllByHearingId(hearingEntity.getId())).thenReturn(event);
 
         List<EventResponse> eventResponses = service.getEvents(hearingEntity.getId());

@@ -212,6 +212,63 @@ paths:
               schema:
                 $ref: './problem.yaml'
 
+  /cases/{case_id}/events:
+    get:
+      tags:
+        - Cases
+      summary: Allows the retrieval of events for a given case_id
+      description: |-
+        Retrieves all events for a case_id.
+      parameters:
+        - in: path
+          name: case_id
+          schema:
+            type: integer
+          description: "case_id is the internal cas_id of the case."
+          required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/events'
+        '401':
+          description: Unauthorised Error
+        '403':
+          description: Forbidden Error
+          content:
+            application/json+problem:
+              schema:
+                allOf:
+                  - $ref: './problem.yaml'
+                  - type: object
+                    required:
+                      - type
+                    properties:
+                      type:
+                        $ref: '#/components/schemas/CasesAuthorisation403ErrorCode'
+              example:
+                type: "AUTHORISATION_100"
+                title: "User is not authorised for the associated courthouse"
+                status: 403
+        '404':
+          description: Not Found Error
+          content:
+            application/json+problem:
+              schema:
+                $ref: './problem.yaml'
+              example:
+                type: "CASE_104"
+                title: "The requested case cannot be found"
+                status: 404
+        '500':
+          description: Internal Server Error
+          content:
+            application/json+problem:
+              schema:
+                $ref: './problem.yaml'
+
   /cases/{case_id}/transcripts:
     get:
       tags:
@@ -565,6 +622,33 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/judge'
+    events:
+      type: array
+      items:
+        $ref: '#/components/schemas/event'
+    event:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        hearing_id:
+          type: integer
+          example: 2
+        hearing_date:
+          type: string
+          format: date
+          example: 2024-06-20
+        timestamp:
+          type: string
+          format: date-time
+          example: 2024-06-20T10:00:00Z
+        name:
+          type: string
+          example: "Case called on"
+        text:
+          type: string
+          example: "Record:New Case"
     transcripts:
       type: array
       items:
