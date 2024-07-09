@@ -3,6 +3,7 @@ package uk.gov.hmcts.darts.cases.mapper;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.darts.authorisation.api.AuthorisationApi;
 import uk.gov.hmcts.darts.cases.model.AddCaseRequest;
@@ -21,6 +22,7 @@ import uk.gov.hmcts.darts.common.entity.RetentionPolicyTypeEntity;
 import uk.gov.hmcts.darts.common.repository.CaseRetentionRepository;
 import uk.gov.hmcts.darts.common.repository.HearingReportingRestrictionsRepository;
 import uk.gov.hmcts.darts.common.service.RetrieveCoreObjectService;
+import uk.gov.hmcts.darts.log.api.LogApi;
 import uk.gov.hmcts.darts.retention.enums.CaseRetentionStatus;
 
 import java.time.LocalTime;
@@ -43,6 +45,9 @@ public class CasesMapper {
     private final HearingReportingRestrictionsRepository hearingReportingRestrictionsRepository;
     private final CaseRetentionRepository caseRetentionRepository;
     private final AuthorisationApi authorisationApi;
+    private final LogApi logApi;
+    @Value("${darts.log.unallocated-case-regex}")
+    private final String unallocatedCaseRegex;
 
     public List<ScheduledCase> mapToScheduledCases(List<HearingEntity> hearings) {
         return emptyIfNull(hearings).stream().map(this::mapToScheduledCase)
@@ -85,7 +90,11 @@ public class CasesMapper {
     public CourtCaseEntity addDefendantProsecutorDefenderJudge(CourtCaseEntity caseEntity, AddCaseRequest caseRequest) {
 
         emptyIfNull(caseRequest.getDefendants()).forEach(newDefendant -> {
-            caseEntity.addDefendant(createNewDefendant(newDefendant, caseEntity));
+            if (newDefendant.matches(unallocatedCaseRegex)) {
+                logApi.defendantNotAdded(newDefendant, caseEntity.getCaseNumber());
+            } else {
+                caseEntity.addDefendant(createNewDefendant(newDefendant, caseEntity));
+            }
         });
 
         emptyIfNull(caseRequest.getProsecutors()).forEach(newProsecutor -> {

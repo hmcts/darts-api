@@ -118,7 +118,9 @@ class CaseServiceImplTest {
 
     @BeforeEach
     void setUp() {
-        mapper = new CasesMapper(retrieveCoreObjectService, hearingReportingRestrictionsRepository, caseRetentionRepository, authorisationApi);
+        String unallocatedCaseRegex = ".*\\d{8}-\\d{6}.*";
+        mapper = new CasesMapper(retrieveCoreObjectService, hearingReportingRestrictionsRepository, caseRetentionRepository, authorisationApi, logApi,
+                                 unallocatedCaseRegex);
         service = new CaseServiceImpl(
             mapper,
             annotationMapper,

@@ -5,6 +5,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.skyscreamer.jsonassert.JSONAssert;
 import org.skyscreamer.jsonassert.JSONCompareMode;
@@ -22,6 +23,7 @@ import uk.gov.hmcts.darts.common.repository.CaseRetentionRepository;
 import uk.gov.hmcts.darts.common.repository.HearingReportingRestrictionsRepository;
 import uk.gov.hmcts.darts.common.service.RetrieveCoreObjectService;
 import uk.gov.hmcts.darts.common.util.CommonTestDataUtil;
+import uk.gov.hmcts.darts.log.api.LogApi;
 
 import java.io.IOException;
 import java.time.LocalDate;
@@ -51,12 +53,16 @@ class CasesMapperTest {
     private CaseRetentionRepository caseRetentionRepository;
     @Mock
     private AuthorisationApi authorisationApi;
+    @Mock
+    private LogApi logApi;
 
     private CasesMapper caseMapper;
 
     @BeforeEach
     void setUp() {
-        caseMapper = new CasesMapper(retrieveCoreObjectService, hearingReportingRestrictionsRepository, caseRetentionRepository, authorisationApi);
+        String unallocatedCaseRegex = ".*\\d{8}-\\d{6}.*";
+        caseMapper = new CasesMapper(retrieveCoreObjectService, hearingReportingRestrictionsRepository,
+                                     caseRetentionRepository, authorisationApi, logApi, unallocatedCaseRegex);
     }
 
     @Test
@@ -142,6 +148,20 @@ class CasesMapperTest {
         assertEquals(2, scheduledCases.getDefenceList().size());
         assertEquals(2, scheduledCases.getDefendantList().size());
 
+    }
+
+    @Test
+    void testDefendantNameMatchingUnallocatedCaseNumberFormat() {
+        CourtCaseEntity existingCourtCaseEntity = new CourtCaseEntity();
+        existingCourtCaseEntity.setCaseNumber(CASE_NUMBER);
+        AddCaseRequest request = new AddCaseRequest(SWANSEA, CASE_NUMBER);
+        var unallocatedCaseNumber = "U20240603-103622, U20240603-03622";
+        request.setDefendants(new ArrayList<>(List.of(unallocatedCaseNumber, "Mr Defendant")));
+
+        CourtCaseEntity courtCaseEntity = caseMapper.addDefendantProsecutorDefenderJudge(existingCourtCaseEntity, request);
+
+        assertEquals(1, courtCaseEntity.getDefendantList().size());
+        Mockito.verify(logApi, Mockito.times(1)).defendantNotAdded(unallocatedCaseNumber, CASE_NUMBER);
     }
 
     @Test

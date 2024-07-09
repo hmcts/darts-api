@@ -26,6 +26,8 @@ public interface LogApi {
 
     void defendantNameOverflow(AddCaseRequest addCaseRequest);
 
+    void defendantNotAdded(String defendant, String caseNumber);
+
     void casesRequestedByDarPc(GetCasesRequest getCasesRequest);
 
     void scheduleNotification(NotificationEntity notificationEntity, Integer caseId);

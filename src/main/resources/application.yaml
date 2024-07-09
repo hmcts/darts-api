@@ -319,6 +319,7 @@ darts:
         cpp: ${EVENT_LOG_CPP_DAILY_TEST_TEXT:CPP Daily Test}
     cases:
       defendant-name-char-limit: 600
+    unallocated-case-regex: ${UNALLOCATED_CASE_REGEX:.*\d{8}-\d{6}.*}
 dbMigration:
   # When true, the app will run DB migration on startup.
   # Otherwise, it will just check if all migrations have been applied (and fail to start if not).
