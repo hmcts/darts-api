@@ -72,16 +72,16 @@ public class CommonTestDataUtil {
         return event;
     }
 
-    public static EventEntity createEventWith(String eventName, String eventText,
+    public static EventEntity createEventWith(String eventText,
                                               HearingEntity hearingEntity,
                                               EventHandlerEntity eventHandlerEntity) {
 
-        return createEventWith(eventName, eventText, hearingEntity,
+        return createEventWith(eventText, hearingEntity,
                                eventHandlerEntity, createOffsetDateTime("2023-07-01T10:00:00")
         );
     }
 
-    public static EventEntity createEventWith(String eventName, String eventText, HearingEntity hearingEntity,
+    public static EventEntity createEventWith(String eventText, HearingEntity hearingEntity,
                                               EventHandlerEntity eventHandlerEntity, OffsetDateTime eventTimestamp) {
 
         EventEntity event = new EventEntity();
@@ -94,15 +94,6 @@ public class CommonTestDataUtil {
 
         return event;
     }
-
-    public EventHandlerEntity createEventHandlerWith(String eventName, String type, String subType) {
-        EventHandlerEntity eventHandlerEntity = new EventHandlerEntity();
-        eventHandlerEntity.setEventName(eventName);
-        eventHandlerEntity.setType(type);
-        eventHandlerEntity.setSubType(subType);
-        return eventHandlerEntity;
-    }
-
 
     public static OffsetDateTime createOffsetDateTime(String timestamp) {
 

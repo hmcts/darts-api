@@ -15,6 +15,7 @@ import uk.gov.hmcts.darts.cases.mapper.AdminCasesSearchResponseMapper;
 import uk.gov.hmcts.darts.cases.mapper.AdvancedSearchResponseMapper;
 import uk.gov.hmcts.darts.cases.mapper.CasesAnnotationMapper;
 import uk.gov.hmcts.darts.cases.mapper.CasesMapper;
+import uk.gov.hmcts.darts.cases.mapper.EventMapper;
 import uk.gov.hmcts.darts.cases.mapper.HearingEntityToCaseHearing;
 import uk.gov.hmcts.darts.cases.mapper.TranscriptionMapper;
 import uk.gov.hmcts.darts.cases.model.AddCaseRequest;
@@ -22,6 +23,7 @@ import uk.gov.hmcts.darts.cases.model.AdminCasesSearchRequest;
 import uk.gov.hmcts.darts.cases.model.AdminCasesSearchResponseItem;
 import uk.gov.hmcts.darts.cases.model.AdvancedSearchResult;
 import uk.gov.hmcts.darts.cases.model.Annotation;
+import uk.gov.hmcts.darts.cases.model.Event;
 import uk.gov.hmcts.darts.cases.model.GetCasesRequest;
 import uk.gov.hmcts.darts.cases.model.GetCasesSearchRequest;
 import uk.gov.hmcts.darts.cases.model.Hearing;
@@ -32,6 +34,7 @@ import uk.gov.hmcts.darts.cases.model.Transcript;
 import uk.gov.hmcts.darts.cases.service.CaseService;
 import uk.gov.hmcts.darts.common.entity.AnnotationEntity;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
+import uk.gov.hmcts.darts.common.entity.EventEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
@@ -39,6 +42,7 @@ import uk.gov.hmcts.darts.common.enums.SecurityRoleEnum;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.common.repository.AnnotationRepository;
 import uk.gov.hmcts.darts.common.repository.CaseRepository;
+import uk.gov.hmcts.darts.common.repository.EventRepository;
 import uk.gov.hmcts.darts.common.repository.HearingRepository;
 import uk.gov.hmcts.darts.common.repository.TranscriptionRepository;
 import uk.gov.hmcts.darts.common.service.RetrieveCoreObjectService;
@@ -60,6 +64,7 @@ public class CaseServiceImpl implements CaseService {
     private final CasesAnnotationMapper annotationMapper;
 
     private final HearingRepository hearingRepository;
+    private final EventRepository eventRepository;
     private final CaseRepository caseRepository;
     private final AnnotationRepository annotationRepository;
     private final RetrieveCoreObjectService retrieveCoreObjectService;
@@ -157,6 +162,13 @@ public class CaseServiceImpl implements CaseService {
         }
         List<HearingEntity> hearings = hearingRepository.findByCaseIds(caseIds);
         return AdvancedSearchResponseMapper.mapResponse(hearings);
+    }
+
+    @Override
+    @Transactional
+    public List<Event> getEventsByCaseId(Integer caseId) {
+        List<EventEntity> eventEntities = eventRepository.findAllByCaseId(caseId);
+        return EventMapper.mapResponse(eventEntities);
     }
 
     @Override

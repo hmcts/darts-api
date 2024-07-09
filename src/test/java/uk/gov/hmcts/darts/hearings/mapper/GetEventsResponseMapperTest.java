@@ -36,7 +36,7 @@ class GetEventsResponseMapperTest {
         eventType.setEventName("TestName");
 
         HearingEntity hearingEntity = CommonTestDataUtil.createHearing("TEST_1", LocalTime.NOON);
-        EventEntity eventEntity = CommonTestDataUtil.createEventWith("LOG", "Test", hearingEntity, eventType);
+        EventEntity eventEntity = CommonTestDataUtil.createEventWith("Test", hearingEntity, eventType);
 
         List<EventResponse> eventResponses = GetEventsResponseMapper.mapToEvents(List.of(eventEntity));
 

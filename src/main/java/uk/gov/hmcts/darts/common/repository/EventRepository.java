@@ -20,6 +20,16 @@ public interface EventRepository extends JpaRepository<EventEntity, Integer> {
     List<EventEntity> findAllByHearingId(Integer hearingId);
 
     @Query("""
+           SELECT ee
+           FROM EventEntity ee, CourtCaseEntity ce
+           JOIN ee.hearingEntities he
+           WHERE ce.id = :caseId
+           AND he.courtCase = ce
+          ORDER BY he.hearingDate DESC, ee.timestamp DESC
+        """)
+    List<EventEntity> findAllByCaseId(Integer caseId);
+
+    @Query("""
             SELECT EXISTS (
                 SELECT 1
                 FROM EventEntity ee, EventHandlerEntity ehe
