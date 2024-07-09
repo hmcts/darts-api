@@ -10,6 +10,9 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.DynamicPropertyRegistry;
+import org.springframework.test.context.DynamicPropertySource;
+import org.testcontainers.containers.GenericContainer;
 import uk.gov.hmcts.darts.test.common.LogUtil;
 import uk.gov.hmcts.darts.test.common.MemoryLogAppender;
 import uk.gov.hmcts.darts.testutils.stubs.DartsDatabaseStub;
@@ -17,20 +20,12 @@ import uk.gov.hmcts.darts.testutils.stubs.DartsDatabaseStub;
 import java.util.List;
 
 /**
- * Base class for integration tests running with H2 in PostgreSQL compatibility mode.
+ * Base class for integration tests running with H2 in Postgres compatibility mode.
  */
 @AutoConfigureWireMock(files = "file:src/integrationTest/resources/wiremock")
 @SpringBootTest
 @ActiveProfiles({"intTest", "h2db", "in-memory-caching"})
 public class IntegrationBase {
-
-    //    static {
-    //        GenericContainer<?> redis =
-    //            new GenericContainer<>(DockerImageName.parse("redis:7.2.4-alpine")).withExposedPorts(6379);
-    //        redis.start();
-    //        System.setProperty("spring.data.redis.host", redis.getHost());
-    //        System.setProperty("spring.data.redis.port", redis.getMappedPort(6379).toString());
-    //    }
 
     @Autowired
     protected OpenInViewUtil openInViewUtil;
@@ -40,6 +35,22 @@ public class IntegrationBase {
     protected ObjectMapper objectMapper;
 
     protected MemoryLogAppender logAppender = LogUtil.getMemoryLogger();
+
+    private static final GenericContainer<?> REDIS = new GenericContainer<>(
+        "redis:7.2.4-alpine"
+    ).withExposedPorts(6379);
+
+    @DynamicPropertySource
+    static void configureProperties(DynamicPropertyRegistry registry) {
+
+        registry.add("spring.data.redis.host", REDIS::getHost);
+        registry.add("spring.data.redis.port", () -> REDIS.getMappedPort(6379).toString());
+    }
+
+    static {
+        // container will be automatically stopped
+        REDIS.start();
+    }
 
     @BeforeEach
     void clearDb() {

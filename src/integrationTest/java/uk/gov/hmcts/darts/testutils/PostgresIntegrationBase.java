@@ -24,7 +24,7 @@ public class PostgresIntegrationBase {
 
     protected MemoryLogAppender logAppender = LogUtil.getMemoryLogger();
 
-    static final PostgreSQLContainer<?> POSTGRES = new PostgreSQLContainer<>(
+    private static final PostgreSQLContainer<?> POSTGRES = new PostgreSQLContainer<>(
         "postgres:15-alpine"
     ).withDatabaseName("darts");
 

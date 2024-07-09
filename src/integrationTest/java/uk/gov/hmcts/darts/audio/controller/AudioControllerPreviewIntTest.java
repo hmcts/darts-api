@@ -2,7 +2,6 @@ package uk.gov.hmcts.darts.audio.controller;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -76,7 +75,6 @@ class AudioControllerPreviewIntTest extends IntegrationBase {
         }
     }
 
-    @Disabled
     @Test
     void previewWithRangeFromStartShouldReturnSuccess() throws Exception {
 
@@ -94,7 +92,6 @@ class AudioControllerPreviewIntTest extends IntegrationBase {
     }
 
     @Test
-    @Disabled
     void previewWithRangeFromStartWithNoEndShouldReturnSuccess() throws Exception {
 
         MockHttpServletRequestBuilder requestBuilder = get(URI.create(
@@ -111,7 +108,6 @@ class AudioControllerPreviewIntTest extends IntegrationBase {
     }
 
     @Test
-    @Disabled
     void previewWithRangeShouldReturnSuccess() throws Exception {
 
         MockHttpServletRequestBuilder requestBuilder = get(URI.create(
