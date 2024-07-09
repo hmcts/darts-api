@@ -2,20 +2,18 @@ package uk.gov.hmcts.darts.audio.repository;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import uk.gov.hmcts.darts.common.entity.TransformedMediaEntity;
 import uk.gov.hmcts.darts.common.repository.TransformedMediaRepository;
-import uk.gov.hmcts.darts.testutils.RepositoryBase;
+import uk.gov.hmcts.darts.testutils.PostgresIntegrationBase;
 import uk.gov.hmcts.darts.testutils.stubs.MediaRequestStub;
 import uk.gov.hmcts.darts.testutils.stubs.TransformedMediaStub;
 
 import java.util.List;
 import java.util.Locale;
 
-@Disabled
-class TransformedMediaRepositoryTest extends RepositoryBase {
+class TransformedMediaRepositoryTest extends PostgresIntegrationBase {
 
     @Autowired
     private TransformedMediaStub transformedMediaStub;
@@ -50,7 +48,9 @@ class TransformedMediaRepositoryTest extends RepositoryBase {
     @Test
     void testFindTransformedMediaWithId() {
         List<TransformedMediaEntity> transformedMediaEntityList
-            = transformedMediaRepository.findTransformedMedia(generatedMediaEntities.get(0).getId(), null, null, null, null, null, null, null);
+            = transformedMediaRepository.findTransformedMedia(
+                generatedMediaEntities.get(0).getMediaRequest().getId(),
+                null, null, null, null, null, null, null);
         Assertions.assertEquals(1, transformedMediaEntityList.size());
         Assertions.assertEquals(generatedMediaEntities.get(0).getId(), transformedMediaEntityList.size());
     }
@@ -310,7 +310,7 @@ class TransformedMediaRepositoryTest extends RepositoryBase {
     void testFindTransformedMediaWithAllQueryParameters() {
         TransformedMediaEntity transformedMediaEntityFind = generatedMediaEntities.get(1);
         List<TransformedMediaEntity> transformedMediaEntityList
-            = transformedMediaRepository.findTransformedMedia(transformedMediaEntityFind.getId(), transformedMediaEntityFind.getMediaRequest()
+            = transformedMediaRepository.findTransformedMedia(transformedMediaEntityFind.getMediaRequest().getId(), transformedMediaEntityFind.getMediaRequest()
             .getHearing().getCourtCase().getCaseNumber(), transformedMediaEntityFind.getMediaRequest()
             .getHearing().getCourtroom().getCourthouse().getDisplayName(), transformedMediaEntityFind.getMediaRequest()
             .getHearing().getHearingDate(), transformedMediaEntityFind.getMediaRequest()

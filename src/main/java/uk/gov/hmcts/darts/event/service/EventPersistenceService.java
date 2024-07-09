@@ -15,6 +15,8 @@ import uk.gov.hmcts.darts.common.repository.EventRepository;
 import uk.gov.hmcts.darts.common.service.RetrieveCoreObjectService;
 import uk.gov.hmcts.darts.event.model.DartsEvent;
 
+import static uk.gov.hmcts.darts.event.enums.EventStatus.MODERNISED;
+
 @Component
 @RequiredArgsConstructor
 public class EventPersistenceService {
@@ -64,6 +66,7 @@ public class EventPersistenceService {
         event.setCreatedBy(currentUser);
         event.setLastModifiedBy(currentUser);
         event.setIsCurrent(true);
+        event.setEventStatus(MODERNISED.getStatusNumber());
         return event;
     }
 }

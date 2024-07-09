@@ -21,6 +21,7 @@ public class MediaRequestStub {
 
     private final HearingStub hearingStub;
     private final MediaRequestRepository mediaRequestRepository;
+    private final UserAccountStub userAccountStub;
 
     @Transactional
     public MediaRequestEntity createAndLoadMediaRequestEntity(UserAccountEntity requestor,
@@ -54,6 +55,11 @@ public class MediaRequestStub {
     @Transactional
     public MediaRequestEntity createAndSaveMediaRequestEntity(UserAccountEntity requestor) {
         return createAndLoadMediaRequestEntity(requestor, AudioRequestType.DOWNLOAD, MediaRequestStatus.COMPLETED);
+    }
+
+    @Transactional
+    public MediaRequestEntity createAndSaveMediaRequestEntity(MediaRequestStatus status) {
+        return createAndLoadMediaRequestEntity(userAccountStub.getIntegrationTestUserAccountEntity(), AudioRequestType.DOWNLOAD, status);
     }
 
     @Transactional

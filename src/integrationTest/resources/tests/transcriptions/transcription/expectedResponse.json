@@ -25,5 +25,6 @@
       "priority_order": 999
   },
   "courtroom":"some-courtroom",
-  "transcription_object_id":"legacyObjectId"
+  "transcription_object_id":"legacyObjectId",
+  "hide_request_from_requestor": false
 }

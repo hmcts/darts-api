@@ -272,6 +272,18 @@ class TranscriptionResponseMapperTest {
     }
 
     @Test
+    void mapToTranscriptionResponseWithHideFromRequestor() throws Exception {
+        HearingEntity hearing1 = CommonTestDataUtil.createHearing("case1", LocalTime.NOON);
+        List<TranscriptionEntity> transcriptionList = CommonTestDataUtil.createTranscriptionList(hearing1, true, false, true);
+        TranscriptionEntity transcriptionEntity = transcriptionList.get(0);
+        transcriptionEntity.setHideRequestFromRequestor(true);
+
+        GetTranscriptionByIdResponse transcriptionResponse =
+            transcriptionResponseMapper.mapToTranscriptionResponse(transcriptionEntity);
+        assertEquals(true, transcriptionResponse.getHideRequestFromRequestor());
+    }
+
+    @Test
     void mapTransactionEntityToTransactionDetails() {
 
         LocalDate hearingDate = LocalDate.now();

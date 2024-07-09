@@ -20,6 +20,7 @@ import java.util.List;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.anyString;
@@ -188,52 +189,59 @@ class NotificationServiceTest extends IntegrationBase {
     }
 
     @Test
-    void sendNotificationUsingUserAccounts() throws TemplateNotFoundException {
-
-        UserAccountEntity userAccount1 = new UserAccountEntity();
-        userAccount1.setId(10);
-        userAccount1.setEmailAddress("testEmail1@test.com");
-        UserAccountEntity userAccount2 = new UserAccountEntity();
-        userAccount2.setId(11);
-        userAccount2.setEmailAddress("testEmail2@test.com");
+    void sendNotificationUsingUserAccounts() {
+        var userAccountEntities = generateUserAccountEntities();
 
         var caseId = dartsDatabase.save(someMinimalCase()).getId();
         SaveNotificationToDbRequest request = SaveNotificationToDbRequest.builder()
             .eventId("An eventId")
             .caseId(caseId)
-            .userAccountsToEmail(List.of(userAccount1, userAccount2))
+            .userAccountsToEmail(userAccountEntities)
             .build();
         service.scheduleNotification(request);
 
         List<NotificationEntity> resultList = dartsDatabase.getNotificationsForCase(caseId);
         List<String> emailList = resultList.stream().map(NotificationEntity::getEmailAddress).toList();
-        assertTrue(emailList.contains("testEmail1@test.com"));
-        assertTrue(emailList.contains("testEmail2@test.com"));
+        assertTrue(emailList.contains(userAccountEntities.get(0).getEmailAddress()));
+        assertTrue(emailList.contains(userAccountEntities.get(1).getEmailAddress()));
     }
 
     @Test
-    void sendNotificationUsingUserAccountsAnEmails() throws TemplateNotFoundException {
+    void sendNotificationChecksUserAccountActiveStatus() {
+        var userAccountEntities = generateUserAccountEntities();
+        userAccountEntities.get(0).setActive(false);
 
-        UserAccountEntity userAccount1 = new UserAccountEntity();
-        userAccount1.setId(10);
-        userAccount1.setEmailAddress("testEmail1@test.com");
-        UserAccountEntity userAccount2 = new UserAccountEntity();
-        userAccount2.setId(11);
-        userAccount2.setEmailAddress("testEmail2@test.com");
+        var caseId = dartsDatabase.save(someMinimalCase()).getId();
+        SaveNotificationToDbRequest request = SaveNotificationToDbRequest.builder()
+            .eventId("An eventId")
+            .caseId(caseId)
+            .userAccountsToEmail(userAccountEntities)
+            .build();
+        service.scheduleNotification(request);
+
+        List<NotificationEntity> resultList = dartsDatabase.getNotificationsForCase(caseId);
+        List<String> emailList = resultList.stream().map(NotificationEntity::getEmailAddress).toList();
+        assertFalse(emailList.contains(userAccountEntities.get(0).getEmailAddress()));
+        assertTrue(emailList.contains(userAccountEntities.get(1).getEmailAddress()));
+    }
+
+    @Test
+    void sendNotificationUsingUserAccountsAnEmails() {
+        var userAccountEntities = generateUserAccountEntities();
 
         var caseId = dartsDatabase.save(someMinimalCase()).getId();
         SaveNotificationToDbRequest request = SaveNotificationToDbRequest.builder()
             .eventId("An eventId")
             .caseId(caseId)
             .emailAddresses("testEmail3@test.com, testEmail4@test.com")
-            .userAccountsToEmail(List.of(userAccount1, userAccount2))
+            .userAccountsToEmail(userAccountEntities)
             .build();
         service.scheduleNotification(request);
 
         List<NotificationEntity> resultList = dartsDatabase.getNotificationsForCase(caseId);
         List<String> emailList = resultList.stream().map(NotificationEntity::getEmailAddress).toList();
-        assertTrue(emailList.contains("testEmail1@test.com"));
-        assertTrue(emailList.contains("testEmail2@test.com"));
+        assertTrue(emailList.contains(userAccountEntities.get(0).getEmailAddress()));
+        assertTrue(emailList.contains(userAccountEntities.get(1).getEmailAddress()));
         assertTrue(emailList.contains("testEmail3@test.com"));
         assertTrue(emailList.contains("testEmail4@test.com"));
     }
@@ -258,5 +266,17 @@ class NotificationServiceTest extends IntegrationBase {
             .build();
 
         service.scheduleNotification(request);
+    }
+
+    private List<UserAccountEntity> generateUserAccountEntities() {
+        UserAccountEntity userAccount1 = new UserAccountEntity();
+        userAccount1.setId(10);
+        userAccount1.setActive(true);
+        userAccount1.setEmailAddress("testEmail1@test.com");
+        UserAccountEntity userAccount2 = new UserAccountEntity();
+        userAccount2.setId(11);
+        userAccount2.setActive(true);
+        userAccount2.setEmailAddress("testEmail2@test.com");
+        return List.of(userAccount1, userAccount2);
     }
 }

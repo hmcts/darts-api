@@ -1409,6 +1409,9 @@ components:
         transcription_object_id:
           type: string
           example: 1
+        hide_request_from_requestor:
+          type: boolean
+          example: false
     defendant:
       type: string
       example: Joe Bloggs

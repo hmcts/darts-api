@@ -127,6 +127,11 @@ public class MediaRequestServiceImpl implements MediaRequestService {
     }
 
     @Override
+    public Optional<MediaRequestEntity> retrieveMediaRequestForProcessing() {
+        return Optional.ofNullable(mediaRequestRepository.updateAndRetrieveMediaRequestToProcessing());
+    }
+
+    @Override
     public AudioNonAccessedResponse countNonAccessedAudioForUser(Integer userId) {
         AudioNonAccessedResponse nonAccessedResponse = new AudioNonAccessedResponse();
         nonAccessedResponse.setCount(mediaRequestRepository.countTransformedEntitiesByRequestorIdAndStatusNotAccessed(userId, COMPLETED));
@@ -197,7 +202,7 @@ public class MediaRequestServiceImpl implements MediaRequestService {
             var saveNotificationToDbRequest = SaveNotificationToDbRequest.builder()
                 .eventId(notificationTemplate.toString())
                 .caseId(mediaRequest.getHearing().getCourtCase().getId())
-                .emailAddresses(mediaRequest.getRequestor().getEmailAddress())
+                .userAccountsToEmail(List.of(mediaRequest.getRequestor()))
                 .build();
             notificationApi.scheduleNotification(saveNotificationToDbRequest);
         } catch (Exception e) {

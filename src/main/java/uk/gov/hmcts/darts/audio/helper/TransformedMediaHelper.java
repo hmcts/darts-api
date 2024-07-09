@@ -28,6 +28,7 @@ import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
@@ -148,7 +149,7 @@ public class TransformedMediaHelper {
             var saveNotificationToDbRequest = SaveNotificationToDbRequest.builder()
                 .eventId(notificationTemplateName)
                 .caseId(courtCase.getId())
-                .emailAddresses(userAccount.get().getEmailAddress())
+                .userAccountsToEmail(List.of(userAccount.get()))
                 .templateValues(templateParams)
                 .build();
 

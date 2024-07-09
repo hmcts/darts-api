@@ -14,6 +14,8 @@ import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 
+import static uk.gov.hmcts.darts.event.enums.EventStatus.MODERNISED;
+
 @Component
 @RequiredArgsConstructor
 public class EventStub {
@@ -51,6 +53,7 @@ public class EventStub {
         eventEntity.setIsLogEntry(false);
         eventEntity.setCourtroom(hearing.getCourtroom());
         eventEntity.setIsCurrent(true);
+        eventEntity.setEventStatus(MODERNISED.getStatusNumber());
         eventRepository.saveAndFlush(eventEntity);
         return eventEntity;
     }
@@ -68,6 +71,7 @@ public class EventStub {
         eventEntity.setIsLogEntry(false);
         eventEntity.setCourtroom(courtroom);
         eventEntity.setIsCurrent(true);
+        eventEntity.setEventStatus(MODERNISED.getStatusNumber());
         eventRepository.saveAndFlush(eventEntity);
         return eventEntity;
     }

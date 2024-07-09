@@ -12,7 +12,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.darts.audio.entity.MediaRequestEntity;
 import uk.gov.hmcts.darts.audio.enums.AudioRequestOutputFormat;
-import uk.gov.hmcts.darts.audio.enums.MediaRequestStatus;
 import uk.gov.hmcts.darts.audio.helper.TransformedMediaHelper;
 import uk.gov.hmcts.darts.audio.helper.UnstructuredDataHelper;
 import uk.gov.hmcts.darts.audio.model.AudioFileInfo;
@@ -50,11 +49,10 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.darts.audio.enums.MediaRequestStatus.COMPLETED;
+import static uk.gov.hmcts.darts.audio.enums.MediaRequestStatus.PROCESSING;
 import static uk.gov.hmcts.darts.audiorequests.model.AudioRequestType.DOWNLOAD;
 import static uk.gov.hmcts.darts.notification.NotificationConstants.ParameterMapValues.AUDIO_END_TIME;
 import static uk.gov.hmcts.darts.notification.NotificationConstants.ParameterMapValues.AUDIO_START_TIME;
@@ -237,11 +235,9 @@ class AudioTransformationServiceImplTest {
 
     @Test
     void testHandleKedaInvocationForMediaRequestsRequestTypeNull() {
-
         when(mockMediaRequestEntity.getId()).thenReturn(1);
-        when(mockMediaRequestService.getOldestMediaRequestByStatus(MediaRequestStatus.OPEN))
-            .thenReturn(Optional.of(mockMediaRequestEntity));
-        when(mockMediaRequestService.getMediaRequestEntityById(1)).thenReturn(mockMediaRequestEntity);
+        when(mockMediaRequestEntity.getStatus()).thenReturn(PROCESSING);
+        when(mockMediaRequestService.retrieveMediaRequestForProcessing()).thenReturn(Optional.of(mockMediaRequestEntity));
         when(mockMediaRequestEntity.getHearing()).thenReturn(mockHearing);
 
         assertThrows(NullPointerException.class, () -> audioTransformationService.handleKedaInvocationForMediaRequests());
@@ -250,11 +246,10 @@ class AudioTransformationServiceImplTest {
     @Test
     void testHandleKedaInvocationForMediaRequestsCaseNull() {
         when(mockMediaRequestEntity.getId()).thenReturn(1);
-        when(mockMediaRequestService.getOldestMediaRequestByStatus(MediaRequestStatus.OPEN))
-            .thenReturn(Optional.of(mockMediaRequestEntity));
-        when(mockMediaRequestService.getMediaRequestEntityById(1)).thenReturn(mockMediaRequestEntity);
-        when(mockMediaRequestEntity.getHearing()).thenReturn(mockHearing);
+        when(mockMediaRequestEntity.getStatus()).thenReturn(PROCESSING);
         when(mockMediaRequestEntity.getRequestType()).thenReturn(DOWNLOAD);
+        when(mockMediaRequestService.retrieveMediaRequestForProcessing()).thenReturn(Optional.of(mockMediaRequestEntity));
+        when(mockMediaRequestEntity.getHearing()).thenReturn(mockHearing);
 
         assertThrows(NullPointerException.class, () -> audioTransformationService.handleKedaInvocationForMediaRequests());
 
@@ -409,7 +404,7 @@ class AudioTransformationServiceImplTest {
         assertEquals(MOCK_HEARING_DATE_FORMATTED, actual.getTemplateValues().get(HEARING_DATE));
         assertEquals(MOCK_COURTHOUSE_NAME, actual.getTemplateValues().get(COURTHOUSE));
         assertEquals(MOCK_DEFENDANT_LIST, actual.getTemplateValues().get(DEFENDANTS));
-        assertEquals(MOCK_EMAIL, actual.getEmailAddresses());
+        assertEquals(mockUserAccountEntity, actual.getUserAccountsToEmail().get(0));
         assertEquals(actual.getEventId(), NotificationApi.NotificationTemplate.ERROR_PROCESSING_AUDIO.toString());
         assertEquals(MOCK_CASEID, actual.getCaseId());
     }
@@ -507,7 +502,6 @@ class AudioTransformationServiceImplTest {
         when(mockMediaRequestEntity.getEndTime()).thenReturn(endTime);
         when(mockMediaRequestEntity.getRequestor()).thenReturn(mockUserAccountEntity);
         when(mockUserAccountEntity.getId()).thenReturn(1);
-        when(mockUserAccountEntity.getEmailAddress()).thenReturn(MOCK_EMAIL);
         when(mockHearing.getHearingDate()).thenReturn(hearingDate);
         when(mockHearing.getCourtCase()).thenReturn(mockCourtCase);
         when(mockCourtCase.getId()).thenReturn(MOCK_CASEID);
@@ -546,19 +540,6 @@ class AudioTransformationServiceImplTest {
         assertEquals(TEST_FILE_NAME, transformedMediaEntity.getOutputFilename());
         assertEquals(TEST_EXTENSION, transformedMediaEntity.getOutputFormat().getExtension());
         assertEquals(TEST_BINARY_STRING.length(), transformedMediaEntity.getOutputFilesize());
-    }
-
-    @Test
-    void testHandleKedaInvocationForMediaRequestsRequestIsInProgress() {
-        MediaRequestEntity mediaRequestEntity = new MediaRequestEntity();
-        mediaRequestEntity.setStatus(MediaRequestStatus.PROCESSING);
-        when(mockMediaRequestEntity.getId()).thenReturn(1);
-        when(mockMediaRequestService.getOldestMediaRequestByStatus(MediaRequestStatus.OPEN))
-            .thenReturn(Optional.of(mockMediaRequestEntity));
-        when(mockMediaRequestService.getMediaRequestEntityById(1)).thenReturn(mediaRequestEntity);
-        doNothing().when(unstructuredDataHelper).waitForAllJobsToFinish();
-        audioTransformationService.handleKedaInvocationForMediaRequests();
-        verify(mockMediaRequestService, never()).updateAudioRequestStatus(mockMediaRequestEntity, MediaRequestStatus.PROCESSING);
     }
 
 }

@@ -1,19 +1,17 @@
 package uk.gov.hmcts.darts.common.repository;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
-import uk.gov.hmcts.darts.testutils.RepositoryBase;
+import uk.gov.hmcts.darts.testutils.PostgresIntegrationBase;
 import uk.gov.hmcts.darts.testutils.stubs.HearingStub;
 
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-@Disabled
-class HearingRepositoryIntTest extends RepositoryBase {
+class HearingRepositoryIntTest extends PostgresIntegrationBase {
 
     // generation count. Should always be an even number
     private static final int GENERATION_COUNT = 10;
