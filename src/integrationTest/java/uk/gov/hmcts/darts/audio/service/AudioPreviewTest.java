@@ -2,7 +2,6 @@ package uk.gov.hmcts.darts.audio.service;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -25,7 +24,6 @@ import static uk.gov.hmcts.darts.test.common.data.ExternalObjectDirectoryTestDat
 import static uk.gov.hmcts.darts.test.common.data.HearingTestData.createSomeMinimalHearing;
 import static uk.gov.hmcts.darts.test.common.data.MediaTestData.someMinimalMedia;
 
-@Disabled
 @TestPropertySource(properties = {"darts.audio.transformation.service.audio.file=tests/audio/WithViqHeader/viq0001min.mp2"})
 class AudioPreviewTest extends IntegrationBase {
 
