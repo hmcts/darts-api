@@ -21,6 +21,7 @@ import java.util.List;
 
 /**
  * Base class for integration tests running with H2 in Postgres compatibility mode.
+ * This class also starts a containerised Redis instance
  */
 @AutoConfigureWireMock(files = "file:src/integrationTest/resources/wiremock")
 @SpringBootTest
