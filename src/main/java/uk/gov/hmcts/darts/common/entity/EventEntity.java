@@ -42,7 +42,7 @@ public class EventEntity extends CreatedModifiedBaseEntity {
     private EventHandlerEntity eventType;
 
     @Column(name = "event_id")
-    private Integer legacyEventId;
+    private Integer eventId;
 
     @Column(name = "event_text")
     private String eventText;

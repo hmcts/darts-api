@@ -168,7 +168,7 @@ public class CaseServiceImpl implements CaseService {
     @Transactional
     public List<Event> getEventsByCaseId(Integer caseId) {
         List<EventEntity> eventEntities = eventRepository.findAllByCaseId(caseId);
-        return EventMapper.mapResponse(eventEntities);
+        return EventMapper.mapToEvents(eventEntities);
     }
 
     @Override

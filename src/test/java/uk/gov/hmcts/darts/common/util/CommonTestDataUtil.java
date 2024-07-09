@@ -57,19 +57,10 @@ public class CommonTestDataUtil {
 
     public static EventEntity createEventWith(String eventName, String eventText,
                                               HearingEntity hearingEntity, OffsetDateTime eventTimestamp) {
-
         EventHandlerEntity eventType = new EventHandlerEntity();
         eventType.setEventName(eventName);
 
-        EventEntity event = new EventEntity();
-        event.setHearingEntities(List.of(hearingEntity));
-        event.setCourtroom(hearingEntity.getCourtroom());
-        event.setEventType(eventType);
-        event.setEventText(eventText);
-        event.setId(1);
-        event.setTimestamp(eventTimestamp);
-
-        return event;
+        return createEventWith(1, 1, eventText, hearingEntity, eventType, eventTimestamp, null, true);
     }
 
     public static EventEntity createEventWith(String eventText,
@@ -84,13 +75,23 @@ public class CommonTestDataUtil {
     public static EventEntity createEventWith(String eventText, HearingEntity hearingEntity,
                                               EventHandlerEntity eventHandlerEntity, OffsetDateTime eventTimestamp) {
 
+        return createEventWith(1, 1, eventText, hearingEntity, eventHandlerEntity, eventTimestamp, null, true);
+    }
+
+    public static EventEntity createEventWith(int id, Integer eventId, String eventText, HearingEntity hearingEntity,
+                                              EventHandlerEntity eventHandlerEntity, OffsetDateTime eventTimestamp, OffsetDateTime createdDateTime,
+                                              boolean isCurrent) {
+
         EventEntity event = new EventEntity();
         event.setHearingEntities(List.of(hearingEntity));
         event.setCourtroom(hearingEntity.getCourtroom());
         event.setEventText(eventText);
-        event.setId(1);
+        event.setId(id);
+        event.setEventId(eventId);
         event.setTimestamp(eventTimestamp);
         event.setEventType(eventHandlerEntity);
+        event.setCreatedDateTime(createdDateTime);
+        event.setIsCurrent(isCurrent);
 
         return event;
     }
