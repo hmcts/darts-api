@@ -45,7 +45,12 @@ public enum EventError implements DartsApiError {
         EventErrorCode.MAPPING_IN_USE.getValue(),
         HttpStatus.CONFLICT,
         EventTitleErrors.MAPPING_IN_USE.toString()
-    );
+    ),
+    TOO_MANY_SEARCH_RESULTS(
+        EventErrorCode.TOO_MANY_RESULTS.getValue(),
+        HttpStatus.BAD_REQUEST,
+        EventTitleErrors.TOO_MANY_RESULTS.toString()
+    ),;
 
     private static final String ERROR_TYPE_PREFIX = "EVENT";
 

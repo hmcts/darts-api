@@ -8,6 +8,7 @@ import org.junit.jupiter.params.provider.EnumSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.json.BasicJsonTester;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
 import uk.gov.hmcts.darts.common.enums.SecurityRoleEnum;
 import uk.gov.hmcts.darts.event.service.impl.AdminEventsSearchGivensBuilder;
@@ -19,13 +20,14 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.SUPER_ADMIN;
 
+@TestPropertySource(properties = {"darts.events.admin-search.max-results=5"})
 @AutoConfigureMockMvc
 class EventSearchControllerTest extends IntegrationBase {
 
     private static final String EVENT_SEARCH_ENDPOINT = "/admin/events/search";
 
     @Autowired
-    private transient MockMvc mockMvc;
+    private MockMvc mockMvc;
 
     @Autowired
     private GivenBuilder given;
@@ -45,6 +47,21 @@ class EventSearchControllerTest extends IntegrationBase {
         openInViewUtil.closeEntityManager();
     }
 
+    @Test
+    void returnsErrorIfTooManyResults() throws Exception {
+        given.anAuthenticatedUserWithGlobalAccessAndRole(SUPER_ADMIN);
+        eventsGivensBuilder.persistedEvents(6);
+
+        var mvcResult = mockMvc.perform(post(EVENT_SEARCH_ENDPOINT)
+                            .content("{}")
+                            .contentType("application/json"))
+            .andExpect(status().isBadRequest())
+            .andReturn();
+
+        var response = json.from(mvcResult.getResponse().getContentAsString());
+        assertThat(response).extractingJsonPathStringValue("type", "EVENT_107");
+        assertThat(response).extractingJsonPathStringValue("detail", "Number of results exceeded 5 please narrow your search.");
+    }
 
     @ParameterizedTest
     @EnumSource(value = SecurityRoleEnum.class, names = {"SUPER_ADMIN", "SUPER_USER"}, mode = EnumSource.Mode.EXCLUDE)

@@ -1,5 +1,6 @@
 package uk.gov.hmcts.darts.common.repository;
 
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -66,7 +67,7 @@ public interface EventRepository extends JpaRepository<EventEntity, Integer> {
              AND (cast(:hearingStartDate as LocalDate) IS NULL OR h.hearingDate >= :hearingStartDate)
              AND (cast(:hearingEndDate as LocalDate) IS NULL OR h.hearingDate <= :hearingEndDate)
         """)
-    List<EventSearchResult> searchEventsFilteringOn(
+    Page<EventSearchResult> searchEventsFilteringOn(
         List<Integer> courthouseIds,
         String caseNumber,
         String courtroomName,

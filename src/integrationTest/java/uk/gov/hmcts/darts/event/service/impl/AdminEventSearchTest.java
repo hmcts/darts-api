@@ -4,6 +4,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.context.TestPropertySource;
 import uk.gov.hmcts.darts.common.entity.EventEntity;
 import uk.gov.hmcts.darts.event.model.AdminEventSearch;
 import uk.gov.hmcts.darts.event.service.EventSearchService;
@@ -16,6 +17,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static uk.gov.hmcts.darts.test.common.data.CourtroomTestData.someMinimalCourtRoom;
 import static uk.gov.hmcts.darts.test.common.data.HearingTestData.createSomeMinimalHearing;
 
+@TestPropertySource(properties = {"darts.events.admin-search.max-results=5"})
 class AdminEventSearchTest extends IntegrationBase {
 
     @Autowired

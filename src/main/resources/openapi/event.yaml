@@ -757,7 +757,16 @@ components:
         - "EVENT_104"
         - "EVENT_105"
         - "EVENT_106"
-      x-enum-varnames: [ EVENT_DATA_NOT_FOUND, EVENT_HANDLER_NOT_FOUND_IN_DB, DUPLICATE_EVENT_MAPPING, NO_EVENT_MAPPING, INVALID_HANDLER_MAPPING_NAME, MAPPING_INACTIVE, MAPPING_IN_USE ]
+        - "EVENT_107"
+      x-enum-varnames: [
+        EVENT_DATA_NOT_FOUND,
+        EVENT_HANDLER_NOT_FOUND_IN_DB,
+        DUPLICATE_EVENT_MAPPING,
+        NO_EVENT_MAPPING,
+        INVALID_HANDLER_MAPPING_NAME,
+        MAPPING_INACTIVE,
+        MAPPING_IN_USE,
+        TOO_MANY_RESULTS ]
 
     EventTitleErrors:
       type: string
@@ -769,5 +778,14 @@ components:
         - "Handler name does not exist"
         - "The mapping is inactive, so cannot be deleted"
         - "The mapping has already processed events, so cannot be deleted"
-      x-enum-varnames: [ EVENT_DATA_NOT_FOUND, EVENT_HANDLER_NOT_FOUND_IN_DB, DUPLICATE_EVENT_MAPPING, NO_EVENT_MAPPING, INVALID_HANDLER_MAPPING_NAME, MAPPING_INACTIVE, MAPPING_IN_USE ]
+        - "The search resulted in too many results"
+      x-enum-varnames: [
+        EVENT_DATA_NOT_FOUND,
+        EVENT_HANDLER_NOT_FOUND_IN_DB,
+        DUPLICATE_EVENT_MAPPING,
+        NO_EVENT_MAPPING,
+        INVALID_HANDLER_MAPPING_NAME,
+        MAPPING_INACTIVE,
+        MAPPING_IN_USE,
+        TOO_MANY_RESULTS]
 
