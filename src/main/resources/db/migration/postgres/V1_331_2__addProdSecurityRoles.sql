@@ -1,3 +1,5 @@
+update security_role set role_name='REQUESTER' where role_name='REQUESTOR';
+update security_role set role_name='Requester' where role_name='Requestor';
 INSERT INTO security_role(rol_id, role_name, display_name, display_state) VALUES (1,'JUDICIARY','Judiciary',TRUE);
 INSERT INTO security_role(rol_id, role_name, display_name, display_state) VALUES (2,'REQUESTER','Requester',TRUE);
 INSERT INTO security_role(rol_id, role_name, display_name, display_state) VALUES (3,'APPROVER','Approver',TRUE);
