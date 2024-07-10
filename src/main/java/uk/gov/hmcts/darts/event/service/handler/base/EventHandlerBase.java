@@ -50,13 +50,8 @@ public abstract class EventHandlerBase implements EventHandler {
     }
 
     protected CreatedHearingAndEvent createHearingAndSaveEvent(DartsEvent dartsEvent, EventHandlerEntity eventHandler) {
-        var currentUser = authorisationApi.getCurrentUser();
-        var courtroomEntity = retrieveCoreObjectService.retrieveOrCreateCourtroom(
-            dartsEvent.getCourthouse(),
-            dartsEvent.getCourtroom(),
-            currentUser);
 
-        var eventEntity = eventPersistenceService.recordEvent(dartsEvent, eventHandler, courtroomEntity);
+        var eventEntity = eventPersistenceService.recordEvent(dartsEvent, eventHandler);
 
         final var caseNumbers = dartsEvent.getCaseNumbers();
         if (caseNumbers.size() > 1) {
