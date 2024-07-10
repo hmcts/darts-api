@@ -270,7 +270,7 @@ class StandardEventHandlerTest extends HandlerTestData {
     }
 
     @Test
-    void createsAnEventLinkedCaseForWhenCourtroomDoesntExist() {
+    void createsAnEventLinkedCaseWhenCourtroomDoesntExist() {
         dartsDatabase.givenTheDatabaseContainsCourtCaseAndCourthouseWithRoom(
             SOME_CASE_NUMBER,
             SOME_COURTHOUSE,
