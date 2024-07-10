@@ -1,14 +1,12 @@
 package uk.gov.hmcts.darts.event.service.impl;
 
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.TestPropertySource;
 import uk.gov.hmcts.darts.common.entity.EventEntity;
 import uk.gov.hmcts.darts.event.model.AdminEventSearch;
 import uk.gov.hmcts.darts.event.service.EventSearchService;
-import uk.gov.hmcts.darts.testutils.IntegrationBase;
+import uk.gov.hmcts.darts.testutils.IntegrationBaseWithOpenSessionInView;
 
 import java.util.List;
 
@@ -18,23 +16,13 @@ import static uk.gov.hmcts.darts.test.common.data.CourtroomTestData.someMinimalC
 import static uk.gov.hmcts.darts.test.common.data.HearingTestData.createSomeMinimalHearing;
 
 @TestPropertySource(properties = {"darts.events.admin-search.max-results=5"})
-class AdminEventSearchTest extends IntegrationBase {
+class AdminEventSearchTest extends IntegrationBaseWithOpenSessionInView {
 
     @Autowired
     private AdminEventsSearchGivensBuilder given;
 
     @Autowired
     private EventSearchService eventSearchService;
-
-    @BeforeEach
-    void setUp() {
-        openInViewUtil.openEntityManager();
-    }
-
-    @AfterEach
-    void tearDown() {
-        openInViewUtil.closeEntityManager();
-    }
 
     @Test
     void findsEventsByCourtHouseIdOnly() {

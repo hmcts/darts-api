@@ -55,14 +55,12 @@ class TranscriptionsProcessorIntTest extends IntegrationBase {
 
         when(mockUserIdentity.getUserAccount()).thenReturn(systemUser);
 
-        HearingEntity hearingEntity = dartsDatabase.givenTheDatabaseContainsCourtCaseWithHearingAndCourthouseWithRoom(
+        dartsDatabase.givenTheDatabaseContainsCourtCaseWithHearingAndCourthouseWithRoom(
             SOME_CASE_ID,
             SOME_COURTHOUSE,
             SOME_COURTROOM,
             DateConverterUtil.toLocalDateTime(SOME_DATE_TIME)
         );
-
-        hearing = dartsDatabase.save(hearingEntity);
     }
 
     @Test

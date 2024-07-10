@@ -11,6 +11,7 @@ import uk.gov.hmcts.darts.event.service.EventDispatcher;
 import uk.gov.hmcts.darts.event.service.handler.DartsEventNullHandler;
 import uk.gov.hmcts.darts.log.api.LogApi;
 
+import java.util.Arrays;
 import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
@@ -42,7 +43,7 @@ class DartsEventNullHandlerTest extends HandlerTestData {
         dartsDatabase.save(someMinimalCase());
 
         DartsEvent event = someMinimalDartsEvent().courthouse(SOME_ROOM);
-        event.setCaseNumbers(List.of("123"));
+        event.setCaseNumbers(Arrays.asList("123"));
         event.setDateTime(today);
 
         EventDispatcher eventDispatcher = new EventDispatcherImpl(List.of(nullEventHandler), eventHandlerRepository, logApi);

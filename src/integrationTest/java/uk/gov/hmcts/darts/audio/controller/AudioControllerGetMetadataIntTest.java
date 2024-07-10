@@ -12,7 +12,7 @@ import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum;
 import uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum;
-import uk.gov.hmcts.darts.testutils.IntegrationBase;
+import uk.gov.hmcts.darts.testutils.IntegrationBaseWithOpenSessionInView;
 
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
@@ -24,7 +24,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @AutoConfigureMockMvc
 @SuppressWarnings("VariableDeclarationUsageDistance")
-class AudioControllerGetMetadataIntTest extends IntegrationBase {
+class AudioControllerGetMetadataIntTest extends IntegrationBaseWithOpenSessionInView {
 
     private static final String ENDPOINT_URL = "/audio/hearings/{hearing_id}/audios";
     private static final OffsetDateTime MEDIA_START_TIME = OffsetDateTime.parse("2023-01-01T12:00:00Z");
@@ -135,7 +135,7 @@ class AudioControllerGetMetadataIntTest extends IntegrationBase {
         hearingEntity.addMedia(mediaChannel2);
         hearingEntity.addMedia(mediaChannel3);
         hearingEntity.addMedia(mediaChannel4);
-        dartsDatabase.save(hearingEntity);
+        dartsDatabase.saveEntityGraph(hearingEntity);
 
         UserAccountEntity testUser = dartsDatabase.getUserAccountStub()
             .createAuthorisedIntegrationTestUser(hearingEntity.getCourtroom().getCourthouse());

@@ -65,7 +65,7 @@ class EventsControllerPostEventsTest extends IntegrationBase {
         EventHandlerEntity inactiveHandler = getInactiveHandler();
         inactiveHandler.setEventName("Old Description");
 
-        dartsDatabase.saveAllWithTransient(activeHandler, inactiveHandler);
+        dartsDatabase.saveEntityGraphs(activeHandler, inactiveHandler);
 
         CourthouseEntity courthouse = dartsDatabase.createCourthouseUnlessExists("swansea");
 

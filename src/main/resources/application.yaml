@@ -187,6 +187,9 @@ darts:
   dar-pc-notification:
     url-format: http://{0}/VIQDARNotifyEvent/DARNotifyEvent.asmx
   events:
+    duplicates:
+      earliest-removable-event-date: ${MODERNISED_DARTS_START_DATE:2024-07-16}
+      clear-up-window: 2
     admin-search:
       max-results: 1000
   gateway:

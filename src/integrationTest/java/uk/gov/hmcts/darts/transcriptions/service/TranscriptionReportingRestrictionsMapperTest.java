@@ -5,7 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import uk.gov.hmcts.darts.common.entity.EventEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionEntity;
-import uk.gov.hmcts.darts.testutils.IntegrationBase;
+import uk.gov.hmcts.darts.testutils.IntegrationBaseWithOpenSessionInView;
 
 import java.time.OffsetDateTime;
 import java.util.List;
@@ -19,11 +19,12 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static uk.gov.hmcts.darts.test.common.data.CaseTestData.createSomeMinimalCase;
 import static uk.gov.hmcts.darts.test.common.data.EventTestData.REPORTING_RESTRICTIONS_LIFTED_DB_ID;
 import static uk.gov.hmcts.darts.test.common.data.EventTestData.SECTION_11_1981_DB_ID;
+import static uk.gov.hmcts.darts.test.common.data.EventTestData.someMinimalEvent;
 import static uk.gov.hmcts.darts.test.common.data.EventTestData.someReportingRestrictionId;
 import static uk.gov.hmcts.darts.test.common.data.HearingTestData.createSomeMinimalHearing;
 
 @SuppressWarnings("VariableDeclarationUsageDistance")
-class TranscriptionReportingRestrictionsMapperTest extends IntegrationBase {
+class TranscriptionReportingRestrictionsMapperTest extends IntegrationBaseWithOpenSessionInView {
 
     @Autowired
     private TranscriptionService transcriptionService;
@@ -92,16 +93,16 @@ class TranscriptionReportingRestrictionsMapperTest extends IntegrationBase {
 
     @Test
     void includesReportingRestrictionsLifted() {
-        var event1 = dartsDatabase.getEventStub().createDefaultEvent();
+        var event1 = someMinimalEvent();
         event1.setTimestamp(now().minusDays(1));
         var reportingRestriction = dartsDatabase.addHandlerToEvent(event1, someReportingRestrictionId());
 
-        var event2 = dartsDatabase.getEventStub().createDefaultEvent();
+        var event2 = someMinimalEvent();
         event2.setTimestamp(now());
         var reportingRestrictionLifted = dartsDatabase.addHandlerToEvent(event2, REPORTING_RESTRICTIONS_LIFTED_DB_ID);
 
         var hearingEntity = dartsDatabase.saveEventsForHearing(
-            dartsDatabase.getHearingStub().createMinimalHearing(),
+            createSomeMinimalHearing(),
             reportingRestriction,
             reportingRestrictionLifted
         );

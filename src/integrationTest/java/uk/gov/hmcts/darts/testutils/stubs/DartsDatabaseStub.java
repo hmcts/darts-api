@@ -1,6 +1,5 @@
 package uk.gov.hmcts.darts.testutils.stubs;
 
-import jakarta.persistence.Entity;
 import jakarta.persistence.EntityManager;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
@@ -96,7 +95,6 @@ import uk.gov.hmcts.darts.test.common.data.DailyListTestData;
 import uk.gov.hmcts.darts.testutils.TransactionalUtil;
 
 import java.io.IOException;
-import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.time.LocalDate;
@@ -199,6 +197,7 @@ public class DartsDatabaseStub {
     private final EntityManager entityManager;
     private final CurrentTimeHelper currentTimeHelper;
     private final TransactionalUtil transactionalUtil;
+    private final EntityGraphPersistence entityGraphPersistence;
 
     public void clearDatabaseInThisOrder() {
         objectAdminActionRepository.deleteAll();
@@ -466,7 +465,7 @@ public class DartsDatabaseStub {
 
     @Transactional
     public HearingEntity saveEventsForHearing(HearingEntity hearing, EventEntity... eventEntities) {
-        return saveEventsForHearing(hearing, List.of(eventEntities));
+        return saveEventsForHearing(hearing, new ArrayList<>(asList(eventEntities)));
     }
 
     @Transactional
@@ -524,47 +523,17 @@ public class DartsDatabaseStub {
         }
     }
 
-    @SuppressWarnings({"PMD.CognitiveComplexity", "PMD.AvoidAccessibilityAlteration"})
     @Transactional
-    public <T> T saveWithTransientEntities(T entity) {
-        try {
-            // Check and persist transient entities
-            Class<?> clazz = entity.getClass();
-            while (clazz != null) {
-                Field[] fields = clazz.getDeclaredFields();
-                for (Field field : fields) {
-                    field.setAccessible(true);
-                    Object fieldValue = field.get(entity);
-                    if (fieldValue != null && isEntity(fieldValue)) {
-                        // Check if the entity is transient
-                        Method getIdMethod = fieldValue.getClass().getMethod("getId");
-                        Object id = getIdMethod.invoke(fieldValue);
-                        if (id == null || (id instanceof Integer && (Integer) id == 0)) {
-                            // Save the transient entity
-                            entityManager.persist(fieldValue);
-                            entityManager.flush();
-                        }
-                    }
-                }
-                clazz = clazz.getSuperclass();
-            }
-
-            // Proceed with original save logic
-            Method getIdInstanceMethod = entity.getClass().getMethod("getId");
-            Integer id = (Integer) getIdInstanceMethod.invoke(entity);
-            if (id == null) {
-                entityManager.persist(entity);
-                return entity;
-            } else {
-                return entityManager.merge(entity);
-            }
-        } catch (NoSuchMethodException | InvocationTargetException | IllegalAccessException e) {
-            throw new JUnitException("Failed to save entity", e);
-        }
+    public <T> T saveEntityGraph(T entity) {
+        return entityGraphPersistence.persist(entity);
     }
 
-    private boolean isEntity(Object obj) {
-        return obj.getClass().isAnnotationPresent(Entity.class);
+    @Transactional
+    public void saveEntityGraphs(Object... entities) {
+        if (entities == null) {
+            return;
+        }
+        stream(entities).forEach(entityGraphPersistence::persist);
     }
 
     @SneakyThrows
@@ -610,14 +579,6 @@ public class DartsDatabaseStub {
 
     public List<DailyListEntity> saveAll(DailyListEntity... dailyListEntity) {
         return dailyListRepository.saveAll(asList(dailyListEntity));
-    }
-
-    @Transactional
-    public void saveAllWithTransient(Object... entities) {
-        if (entities == null) {
-            return;
-        }
-        stream(entities).forEach(this::saveWithTransientEntities);
     }
 
     @Transactional
@@ -669,15 +630,18 @@ public class DartsDatabaseStub {
     }
 
     private void saveSingleEventForHearing(HearingEntity hearing, EventEntity event) {
-        event.setHearingEntities(List.of(hearingRepository.getReferenceById(hearing.getId())));
-        eventRepository.save(event);
+        var hearings = new ArrayList<HearingEntity>();
+        hearings.add(hearingRepository.getReferenceById(hearing.getId()));
+        event.setHearingEntities(hearings);
+        saveEntityGraph(event);
     }
 
+    @Transactional
     public EventEntity addHandlerToEvent(EventEntity event, int handlerId) {
         var handler = eventHandlerRepository.getReferenceById(handlerId);
         event.setEventType(handler);
         event.setIsLogEntry(false);
-        return eventRepository.save(event);
+        return saveEntityGraph(event);
     }
 
     @Transactional
@@ -834,7 +798,7 @@ public class DartsDatabaseStub {
     @Transactional
     public EventHandlerEntity createEventHandlerData(String subtype) {
         var eventHandler = createEventHandlerWith("DarStartHandler", "99999", subtype);
-        saveWithTransientEntities(eventHandler);
+        saveEntityGraph(eventHandler);
         return eventHandler;
     }
 

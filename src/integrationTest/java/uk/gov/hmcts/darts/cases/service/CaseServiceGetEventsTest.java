@@ -8,7 +8,7 @@ import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.EventEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.util.DateConverterUtil;
-import uk.gov.hmcts.darts.testutils.IntegrationBase;
+import uk.gov.hmcts.darts.testutils.IntegrationBaseWithOpenSessionInView;
 
 import java.time.OffsetDateTime;
 
@@ -16,7 +16,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static uk.gov.hmcts.darts.test.common.data.EventTestData.createEventWith;
 
 @Slf4j
-class CaseServiceGetEventsTest extends IntegrationBase {
+class CaseServiceGetEventsTest extends IntegrationBaseWithOpenSessionInView {
 
     @Autowired
     private CaseService service;
@@ -51,7 +51,7 @@ class CaseServiceGetEventsTest extends IntegrationBase {
         EventEntity event4 = createEventWith("eventName", "event4", hearingEntity2, OffsetDateTime.now());
         EventEntity event5 = createEventWith("eventName", "event5", hearingEntity2, OffsetDateTime.now().minusHours(1));
 
-        dartsDatabase.saveAll(event1, event2, event3, event4, event5);
+        dartsDatabase.saveEntityGraphs(event1, event2, event3, event4, event5);
     }
 
     @Test

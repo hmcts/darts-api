@@ -23,7 +23,7 @@ import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.repository.EventRepository;
 import uk.gov.hmcts.darts.common.util.DateConverterUtil;
 import uk.gov.hmcts.darts.event.model.CourtLogsPostRequestBody;
-import uk.gov.hmcts.darts.testutils.IntegrationBase;
+import uk.gov.hmcts.darts.testutils.IntegrationBaseWithOpenSessionInView;
 
 import java.net.URI;
 import java.time.OffsetDateTime;
@@ -42,7 +42,7 @@ import static uk.gov.hmcts.darts.test.common.data.EventTestData.createEventWith;
 
 @AutoConfigureMockMvc
 @SuppressWarnings({"PMD.ExcessiveImports"})
-class EventsControllerCourtLogsTest extends IntegrationBase {
+class EventsControllerCourtLogsTest extends IntegrationBaseWithOpenSessionInView {
 
     public static final String NEW_CASE = "Case0000001";
     public static final String END_DATE_TIME = "end_date_time";
@@ -74,7 +74,6 @@ class EventsControllerCourtLogsTest extends IntegrationBase {
             SOME_COURTROOM,
             DateConverterUtil.toLocalDateTime(SOME_DATE_TIME)
         );
-
     }
 
     @Test
@@ -174,7 +173,7 @@ class EventsControllerCourtLogsTest extends IntegrationBase {
         HearingEntity hearingEntity = dartsDatabase.getHearingRepository().findAll().get(0);
 
         var event = createEventWith(LOG, "test", hearingEntity, createOffsetDateTime("2023-07-01T10:00:00"));
-        eventRepository.saveAndFlush(event);
+        dartsDatabase.saveEntityGraph(event);
 
         String courthouseName = hearingEntity.getCourtCase().getCourthouse().getCourthouseName();
         String caseNumber = hearingEntity.getCourtCase().getCaseNumber();
@@ -206,10 +205,10 @@ class EventsControllerCourtLogsTest extends IntegrationBase {
         var event3 = createEventWith("Event", "ShouldNotShow", hearingEntity, eventTime);
         var event4 = createEventWith("Event", "ShouldAlsoNotShow", hearingEntity, eventTime);
 
-        eventRepository.saveAndFlush(event);
-        eventRepository.saveAndFlush(event2);
-        eventRepository.saveAndFlush(event3);
-        eventRepository.saveAndFlush(event4);
+        dartsDatabase.saveEntityGraph(event);
+        dartsDatabase.saveEntityGraph(event2);
+        dartsDatabase.saveEntityGraph(event3);
+        dartsDatabase.saveEntityGraph(event4);
 
         String courthouseName = hearingEntity.getCourtCase().getCourthouse().getCourthouseName();
         String caseNumber = hearingEntity.getCourtCase().getCaseNumber();
@@ -246,10 +245,10 @@ class EventsControllerCourtLogsTest extends IntegrationBase {
         var eventHearing = createEventWith(LOG, "eventText", hearingEntity1, eventTime);
         var eventHearing2 = createEventWith(LOG, "eventText2", hearingEntity1, eventTime);
 
-        eventRepository.saveAndFlush(event);
-        eventRepository.saveAndFlush(event2);
-        eventRepository.saveAndFlush(eventHearing);
-        eventRepository.saveAndFlush(eventHearing2);
+        dartsDatabase.saveEntityGraph(event);
+        dartsDatabase.saveEntityGraph(event2);
+        dartsDatabase.saveEntityGraph(eventHearing);
+        dartsDatabase.saveEntityGraph(eventHearing2);
 
         String courthouseName = hearingEntity.getCourtCase().getCourthouse().getCourthouseName();
 

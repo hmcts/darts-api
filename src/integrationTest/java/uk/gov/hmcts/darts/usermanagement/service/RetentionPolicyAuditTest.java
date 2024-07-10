@@ -51,7 +51,7 @@ class RetentionPolicyAuditTest extends IntegrationBase {
         var userAccountEntity = given.anAuthenticatedUserWithGlobalAccessAndRole(SUPER_ADMIN);
         var priorPolicyEntity = minimalRetentionPolicy();
         priorPolicyEntity.setPolicyStart(OffsetDateTime.now().minusWeeks(1));
-        dartsDatabase.saveWithTransientEntities(priorPolicyEntity);
+        dartsDatabase.saveEntityGraph(priorPolicyEntity);
 
         // When
         var adminPostRetentionRevision = adminPostRetentionRequestWithDefaults();
@@ -82,7 +82,7 @@ class RetentionPolicyAuditTest extends IntegrationBase {
         var userAccountEntity = given.anAuthenticatedUserWithGlobalAccessAndRole(SUPER_ADMIN);
         var retentionPolicyType = minimalRetentionPolicy();
         retentionPolicyType.setPolicyStart(OffsetDateTime.now().plusWeeks(1));
-        dartsDatabase.saveWithTransientEntities(retentionPolicyType);
+        dartsDatabase.saveEntityGraph(retentionPolicyType);
 
         // When
         var adminPatchRetentionPolicy = new AdminPatchRetentionRequest().name("some-new-patched-name");

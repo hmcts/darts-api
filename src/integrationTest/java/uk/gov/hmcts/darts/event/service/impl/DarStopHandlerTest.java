@@ -12,6 +12,7 @@ import uk.gov.hmcts.darts.event.model.DartsEvent;
 import uk.gov.hmcts.darts.event.service.EventDispatcher;
 import uk.gov.hmcts.darts.testutils.stubs.NodeRegisterStub;
 
+import java.util.Arrays;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -47,7 +48,7 @@ class DarStopHandlerTest extends HandlerTestData {
     void throwsOnUnknownCourthouse() {
         dartsDatabase.save(someMinimalCase());
         DartsEvent event = someMinimalDartsEvent().courthouse(SOME_ROOM);
-        event.setCaseNumbers(List.of("123"));
+        event.setCaseNumbers(Arrays.asList("123"));
         event.setDateTime(today);
         assertThatThrownBy(() -> eventDispatcher.receive(event))
                 .isInstanceOf(DartsApiException.class);
@@ -56,7 +57,7 @@ class DarStopHandlerTest extends HandlerTestData {
     @Test
     void givenDarStopRecordingEventReceivedAndCourtCaseAndHearingDoesNotExist_thenNotifyDarUpdateAndNotifyDarStopRecording() {
         eventDispatcher.receive(someMinimalDartsEvent()
-                                    .caseNumbers(List.of(SOME_CASE_NUMBER))
+                                    .caseNumbers(Arrays.asList(SOME_CASE_NUMBER))
                                     .courthouse(SOME_COURTHOUSE)
                                     .courtroom(SOME_ROOM)
                                     .dateTime(HEARING_DATE_ODT));
@@ -82,7 +83,7 @@ class DarStopHandlerTest extends HandlerTestData {
         dartsDatabase.givenTheDatabaseContainsCourtCaseAndCourthouseWithRoom(SOME_CASE_NUMBER, SOME_COURTHOUSE, SOME_ROOM);
 
         eventDispatcher.receive(someMinimalDartsEvent()
-                                    .caseNumbers(List.of(SOME_CASE_NUMBER))
+                                    .caseNumbers(Arrays.asList(SOME_CASE_NUMBER))
                                     .courthouse(SOME_COURTHOUSE)
                                     .courtroom(SOME_ROOM)
                                     .dateTime(HEARING_DATE_ODT));

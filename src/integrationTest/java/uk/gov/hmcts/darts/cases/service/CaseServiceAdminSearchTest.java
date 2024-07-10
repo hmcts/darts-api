@@ -14,6 +14,7 @@ import uk.gov.hmcts.darts.cases.model.AdminCasesSearchResponseItem;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
+import uk.gov.hmcts.darts.common.entity.DefendantEntity;
 import uk.gov.hmcts.darts.common.entity.EventEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.JudgeEntity;
@@ -28,7 +29,7 @@ import uk.gov.hmcts.darts.testutils.stubs.CourtCaseStub;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -79,7 +80,9 @@ class CaseServiceAdminSearchTest extends IntegrationBase {
 
         CourtCaseEntity case2 = createCaseAt(swanseaCourthouse);
         case2.setCaseNumber("Case2");
-        case2.setDefendantList(Arrays.asList(createDefendantForCaseWithName(case2, "Defendant2")));
+        var defendantList = new ArrayList<DefendantEntity>();
+        defendantList.add(createDefendantForCaseWithName(case2, "Defendant2"));
+        case2.setDefendantList(defendantList);
 
         CourtCaseEntity case3 = createCaseAt(swanseaCourthouse);
         case3.setCaseNumber("Case3");
@@ -159,20 +162,20 @@ class CaseServiceAdminSearchTest extends IntegrationBase {
         HearingEntity hearing10a = createHearingWithDefaults(case10, courtroom4, LocalDate.of(2023, 10, 23), judge);
 
         dartsDatabase.saveAll(hearing1a, hearing1b, hearing1c,
-                              hearing2a, hearing2b, hearing2c,
-                              hearing3a, hearing3b, hearing3c,
-                              hearing4a, hearing4b, hearing4c,
-                              hearing5a, hearing5b, hearing5c,
-                              hearing6a, hearing6b, hearing6c,
-                              hearing7a, hearing7b,
-                              hearing8,
-                              hearing9,
-                              hearing10a
+                                       hearing2a, hearing2b, hearing2c,
+                                       hearing3a, hearing3b, hearing3c,
+                                       hearing4a, hearing4b, hearing4c,
+                                       hearing5a, hearing5b, hearing5c,
+                                       hearing6a, hearing6b, hearing6c,
+                                       hearing7a, hearing7b,
+                                       hearing8,
+                                       hearing9,
+                                       hearing10a
         );
 
         EventEntity event4a = createEventWith("eventName", "event4a", hearing4a, OffsetDateTime.now());
         EventEntity event5b = createEventWith("eventName", "event5b", hearing5b, OffsetDateTime.now());
-        dartsDatabase.saveAll(event4a, event5b);
+        dartsDatabase.saveEntityGraphs(event4a, event5b);
         user = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
     }
 

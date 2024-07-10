@@ -17,7 +17,7 @@ import uk.gov.hmcts.darts.common.entity.EventEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.util.DateConverterUtil;
-import uk.gov.hmcts.darts.testutils.IntegrationBase;
+import uk.gov.hmcts.darts.testutils.IntegrationBaseWithOpenSessionInView;
 
 import java.time.OffsetDateTime;
 import java.util.List;
@@ -28,7 +28,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static uk.gov.hmcts.darts.test.common.data.EventTestData.SECTION_11_1981_DB_ID;
 
 @AutoConfigureMockMvc
-class CaseControllerGetEventByCaseIdTest extends IntegrationBase {
+class CaseControllerGetEventByCaseIdTest extends IntegrationBaseWithOpenSessionInView {
 
     @Autowired
     private transient MockMvc mockMvc;

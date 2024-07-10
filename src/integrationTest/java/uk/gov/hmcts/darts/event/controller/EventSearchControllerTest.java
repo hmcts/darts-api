@@ -1,7 +1,5 @@
 package uk.gov.hmcts.darts.event.controller;
 
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
@@ -13,7 +11,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import uk.gov.hmcts.darts.common.enums.SecurityRoleEnum;
 import uk.gov.hmcts.darts.event.service.impl.AdminEventsSearchGivensBuilder;
 import uk.gov.hmcts.darts.testutils.GivenBuilder;
-import uk.gov.hmcts.darts.testutils.IntegrationBase;
+import uk.gov.hmcts.darts.testutils.IntegrationBaseWithOpenSessionInView;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -22,7 +20,7 @@ import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.SUPER_ADMIN;
 
 @TestPropertySource(properties = {"darts.events.admin-search.max-results=5"})
 @AutoConfigureMockMvc
-class EventSearchControllerTest extends IntegrationBase {
+class EventSearchControllerTest extends IntegrationBaseWithOpenSessionInView {
 
     private static final String EVENT_SEARCH_ENDPOINT = "/admin/events/search";
 
@@ -36,16 +34,6 @@ class EventSearchControllerTest extends IntegrationBase {
     private AdminEventsSearchGivensBuilder eventsGivensBuilder;
 
     private final BasicJsonTester json = new BasicJsonTester(getClass());
-
-    @BeforeEach
-    void setUp() {
-        openInViewUtil.openEntityManager();
-    }
-
-    @AfterEach
-    void tearDown() {
-        openInViewUtil.closeEntityManager();
-    }
 
     @Test
     void returnsErrorIfTooManyResults() throws Exception {

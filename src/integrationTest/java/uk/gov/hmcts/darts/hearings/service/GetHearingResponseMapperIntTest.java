@@ -8,7 +8,7 @@ import uk.gov.hmcts.darts.common.entity.EventEntity;
 import uk.gov.hmcts.darts.common.entity.EventHandlerEntity;
 import uk.gov.hmcts.darts.hearings.mapper.GetHearingResponseMapper;
 import uk.gov.hmcts.darts.hearings.model.GetHearingResponse;
-import uk.gov.hmcts.darts.testutils.IntegrationBase;
+import uk.gov.hmcts.darts.testutils.IntegrationBaseWithOpenSessionInView;
 
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
@@ -24,10 +24,11 @@ import static uk.gov.hmcts.darts.test.common.data.EventHandlerTestData.someMinim
 import static uk.gov.hmcts.darts.test.common.data.EventTestData.SECTION_11_1981_DB_ID;
 import static uk.gov.hmcts.darts.test.common.data.EventTestData.SECTION_39_1933_DB_ID;
 import static uk.gov.hmcts.darts.test.common.data.EventTestData.SECTION_4_1981_DB_ID;
+import static uk.gov.hmcts.darts.test.common.data.EventTestData.someMinimalEvent;
 import static uk.gov.hmcts.darts.test.common.data.EventTestData.someReportingRestrictionId;
 import static uk.gov.hmcts.darts.test.common.data.HearingTestData.createSomeMinimalHearing;
 
-class GetHearingResponseMapperIntTest extends IntegrationBase {
+class GetHearingResponseMapperIntTest extends IntegrationBaseWithOpenSessionInView {
 
     @Autowired
     GetHearingResponseMapper getHearingResponseMapper;
@@ -109,7 +110,7 @@ class GetHearingResponseMapperIntTest extends IntegrationBase {
         EventHandlerEntity eventHandler = someMinimalEventHandler();
         return rangeClosed(1, quantity)
             .mapToObj(index -> {
-                var event = dartsDatabase.getEventStub().createDefaultEvent();
+                var event = someMinimalEvent();
                 event.setEventType(eventHandler);
                 event.setEventText("some-event-text-" + index);
                 event.setMessageId("some-message-id-" + index);

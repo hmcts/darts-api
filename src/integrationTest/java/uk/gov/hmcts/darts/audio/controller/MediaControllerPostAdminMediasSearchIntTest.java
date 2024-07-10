@@ -3,7 +3,6 @@ package uk.gov.hmcts.darts.audio.controller;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.skyscreamer.jsonassert.JSONAssert;
@@ -23,7 +22,7 @@ import uk.gov.hmcts.darts.common.repository.MediaRepository;
 import uk.gov.hmcts.darts.common.repository.ObjectAdminActionRepository;
 import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
 import uk.gov.hmcts.darts.test.common.TestUtils;
-import uk.gov.hmcts.darts.testutils.IntegrationBase;
+import uk.gov.hmcts.darts.testutils.IntegrationBaseWithOpenSessionInView;
 import uk.gov.hmcts.darts.testutils.stubs.MediaStub;
 import uk.gov.hmcts.darts.testutils.stubs.SuperAdminUserStub;
 
@@ -43,7 +42,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @TestPropertySource(properties = {
     "darts.audio.admin-search.max-results=20"
 })
-class MediaControllerPostAdminMediasSearchIntTest extends IntegrationBase {
+class MediaControllerPostAdminMediasSearchIntTest extends IntegrationBaseWithOpenSessionInView {
 
     private static final String ENDPOINT_URL = "/admin/medias/search";
 
@@ -171,16 +170,6 @@ class MediaControllerPostAdminMediasSearchIntTest extends IntegrationBase {
 
         mediaStub.linkToCase(newMediaEntity, caseNumber);
         return newMediaEntity;
-    }
-
-    @BeforeEach
-    void setupOpenInView() {
-        openInViewUtil.openEntityManager();
-    }
-
-    @AfterEach
-    void closeOpenInView() {
-        openInViewUtil.closeEntityManager();
     }
 
     @Test

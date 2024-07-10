@@ -6,9 +6,11 @@ import uk.gov.hmcts.darts.common.entity.EventHandlerEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 
 import java.time.OffsetDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
+import static java.util.Arrays.asList;
 import static uk.gov.hmcts.darts.event.enums.EventStatus.MODERNISED;
 import static uk.gov.hmcts.darts.test.common.data.CourtroomTestData.someMinimalCourtRoom;
 
@@ -37,9 +39,8 @@ public class EventTestData {
     }
 
     public static EventEntity createEventWith(String eventName, String eventText, HearingEntity hearingEntity, OffsetDateTime eventTime) {
-
         EventEntity event = someMinimalEvent();
-        event.setHearingEntities(List.of(hearingEntity));
+        event.setHearingEntities(new ArrayList<>(asList(hearingEntity)));
         event.setCourtroom(hearingEntity.getCourtroom());
         event.setEventText(eventText);
         event.setTimestamp(eventTime);
@@ -57,9 +58,10 @@ public class EventTestData {
 
     private EventHandlerEntity createTestEventHandlerEntity(String eventName) {
         EventHandlerEntity entity = new EventHandlerEntity();
-        entity.setId(1);
         entity.setEventName(eventName);
-        entity.setType("Eventtype");
+        entity.setType("some-event-type");
+        entity.setIsReportingRestriction(true);
+        entity.setActive(true);
         return entity;
     }
 

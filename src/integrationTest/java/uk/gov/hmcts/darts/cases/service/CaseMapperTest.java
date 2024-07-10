@@ -5,7 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import uk.gov.hmcts.darts.cases.mapper.CasesMapper;
 import uk.gov.hmcts.darts.common.entity.EventEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
-import uk.gov.hmcts.darts.testutils.IntegrationBase;
+import uk.gov.hmcts.darts.testutils.IntegrationBaseWithOpenSessionInView;
 
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
@@ -26,7 +26,7 @@ import static uk.gov.hmcts.darts.test.common.data.EventTestData.someReportingRes
 import static uk.gov.hmcts.darts.test.common.data.HearingTestData.createSomeMinimalHearing;
 
 @SuppressWarnings("VariableDeclarationUsageDistance")
-class CaseMapperTest extends IntegrationBase {
+class CaseMapperTest extends IntegrationBaseWithOpenSessionInView {
 
     @Autowired
     private CasesMapper casesMapper;
