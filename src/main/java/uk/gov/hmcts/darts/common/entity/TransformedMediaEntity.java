@@ -71,7 +71,7 @@ public class TransformedMediaEntity extends CreatedModifiedBaseEntity {
     @OneToMany(fetch = FetchType.LAZY, mappedBy = TransientObjectDirectoryEntity_.TRANSFORMED_MEDIA)
     private List<TransientObjectDirectoryEntity> transientObjectDirectoryEntities = new ArrayList<>();
 
-    public boolean isOwnerInSecurityGroup(SecurityGroupEnum securityGroupEnum) {
+    public boolean isOwnerInSecurityGroup(List<SecurityGroupEnum> securityGroupEnum) {
         return mediaRequest.getCurrentOwner().isInGroup(securityGroupEnum);
     }
 }
