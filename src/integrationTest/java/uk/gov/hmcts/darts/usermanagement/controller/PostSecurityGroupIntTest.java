@@ -311,7 +311,7 @@ class PostSecurityGroupIntTest extends IntegrationBase {
                          {
                            "name": "ACME",
                            "display_name": "ACME Transcription Services",
-                           "security_role_id": 1
+                           "security_role_id": 3
                          }
                            """);
         mockMvc.perform(request)

@@ -36,4 +36,4 @@ update security_group set rol_id=10 where grp_id=3;
 update security_group set rol_id=9 where grp_id=4;
 
 
-delete from security_role where rol_id=999;
+delete from security_role where rol_id=-999;
