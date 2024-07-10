@@ -157,15 +157,46 @@ public class UserAccountStub {
     }
 
     @Transactional
-    public UserAccountEntity createAuthorisedIntegrationTestUser(CourthouseEntity courthouseEntity) {
-        SecurityGroupEntity securityGroupEntity = securityGroupRepository.getReferenceById(-4);
+    public UserAccountEntity createAuthorisedIntegrationTestUser(boolean reuse, String courthouse) {
+        return createAuthorisedIntegrationTestUser(reuse, courthouseStub.createCourthouseUnlessExists(courthouse));
+    }
 
-        if (courthouseEntity != null) {
-            addCourthouseToSecurityGroup(securityGroupEntity, courthouseEntity);
+    @Transactional
+    public UserAccountEntity createAuthorisedIntegrationTestUser(String... courthouses) {
+        CourthouseEntity[] courthouseEntities = new CourthouseEntity[courthouses.length];
+        for (int i = 0; i < courthouses.length; i++) {
+            courthouseEntities[i] = courthouseStub.createCourthouseUnlessExists(courthouses[i]);
         }
-        var testUser = getIntegrationTestUserAccountEntity();
-        testUser.getSecurityGroupEntities().add(securityGroupEntity);
-        testUser = userAccountRepository.saveAndFlush(testUser);
+
+        return createAuthorisedIntegrationTestUser(true, courthouseEntities);
+    }
+
+    @Transactional
+    public UserAccountEntity createAuthorisedIntegrationTestUser(CourthouseEntity... courthouseEntities) {
+        return createReusableAuthorisedIntegrationTestUser(true, courthouseEntities);
+    }
+
+    @Transactional
+    public UserAccountEntity createAuthorisedIntegrationTestUser(boolean reuse, CourthouseEntity... courthouseEntities) {
+        return createReusableAuthorisedIntegrationTestUser(reuse, courthouseEntities);
+    }
+
+    private UserAccountEntity createReusableAuthorisedIntegrationTestUser(boolean reuse,
+                                                                          CourthouseEntity... courthouseEntities) {
+
+        var testUser = reuse ? getIntegrationTestUserAccountEntity() :
+            createIntegrationUser(UUID.randomUUID().toString(), UUID.randomUUID().toString() + "@test.com");
+
+        for (CourthouseEntity courthouseEntity : courthouseEntities) {
+            SecurityGroupEntity securityGroupEntity = securityGroupRepository.getReferenceById(-4);
+
+            if (courthouseEntity != null) {
+                addCourthouseToSecurityGroup(securityGroupEntity, courthouseEntity);
+            }
+            testUser.getSecurityGroupEntities().add(securityGroupEntity);
+            testUser = userAccountRepository.saveAndFlush(testUser);
+        }
+
         return testUser;
     }
 

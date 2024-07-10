@@ -14,6 +14,7 @@ import org.skyscreamer.jsonassert.JSONCompareMode;
 import uk.gov.hmcts.darts.authorisation.api.AuthorisationApi;
 import uk.gov.hmcts.darts.cases.helper.AdminCasesSearchRequestHelper;
 import uk.gov.hmcts.darts.cases.helper.AdvancedSearchRequestHelper;
+import uk.gov.hmcts.darts.cases.mapper.CaseTranscriptionMapper;
 import uk.gov.hmcts.darts.cases.mapper.CasesAnnotationMapper;
 import uk.gov.hmcts.darts.cases.mapper.CasesMapper;
 import uk.gov.hmcts.darts.cases.model.AddCaseRequest;
@@ -116,6 +117,9 @@ class CaseServiceImplTest {
     private LogApi logApi;
     private ObjectMapper objectMapper;
 
+    @Mock
+    private CaseTranscriptionMapper caseTranscriptionMapper;
+
     @BeforeEach
     void setUp() {
         mapper = new CasesMapper(retrieveCoreObjectService, hearingReportingRestrictionsRepository, caseRetentionRepository, authorisationApi);
@@ -131,7 +135,8 @@ class CaseServiceImplTest {
             adminCasesSearchRequestHelper,
             transcriptionRepository,
             authorisationApi,
-            logApi
+            logApi,
+            new CaseTranscriptionMapper()
         );
         this.objectMapper = TestUtils.getObjectMapper();
     }

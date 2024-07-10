@@ -19,6 +19,7 @@ import uk.gov.hmcts.darts.common.repository.HearingRepository;
 import uk.gov.hmcts.darts.common.repository.TranscriptionRepository;
 import uk.gov.hmcts.darts.common.util.CommonTestDataUtil;
 import uk.gov.hmcts.darts.hearings.mapper.GetHearingResponseMapper;
+import uk.gov.hmcts.darts.hearings.mapper.HearingTranscriptionMapper;
 import uk.gov.hmcts.darts.hearings.model.EventResponse;
 
 import java.time.LocalDate;
@@ -61,7 +62,8 @@ class HearingsServiceImplTest {
             transcriptionRepository,
             eventRepository,
             annotationRepository,
-            authorisationApi
+            authorisationApi,
+            new HearingTranscriptionMapper()
         );
     }
 

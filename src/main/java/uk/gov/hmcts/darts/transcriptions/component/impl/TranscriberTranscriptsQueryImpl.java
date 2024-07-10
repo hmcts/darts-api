@@ -225,6 +225,7 @@ public class TranscriberTranscriptsQueryImpl implements TranscriberTranscriptsQu
                         where
                             user_account.usr_id=:usr_id
                             and security_group.rol_id in (:rol_id)
+                            and user_account.is_Active=true
                 """,
             new MapSqlParameterSource(USR_ID, userId)
                 .addValue(ROL_ID, roleId),
