@@ -9,7 +9,7 @@ import uk.gov.hmcts.darts.courthouse.model.CourthousePatch;
 import uk.gov.hmcts.darts.courthouse.service.CourthouseService;
 import uk.gov.hmcts.darts.testutils.GivenBuilder;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
-import uk.gov.hmcts.darts.testutils.TransactionalAssert;
+import uk.gov.hmcts.darts.testutils.TransactionalUtil;
 
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -23,7 +23,7 @@ import static uk.gov.hmcts.darts.test.common.data.RegionTestData.minimalRegion;
 class CourthouseUpdateTest extends IntegrationBase {
 
     @Autowired
-    private TransactionalAssert dbAssert;
+    private TransactionalUtil dbAssert;
 
     @Autowired
     private CourthouseService courthouseService;

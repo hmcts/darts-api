@@ -4,9 +4,9 @@ import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Component;
 
 @Component
-public class TransactionalAssert {
+public class TransactionalUtil {
 
-    @Transactional
+    @Transactional()
     public void inTransaction(Runnable assertion) {
         assertion.run();
     }

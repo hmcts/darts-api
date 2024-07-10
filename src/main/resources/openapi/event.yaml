@@ -460,6 +460,52 @@ paths:
                 $ref: './problem.yaml'
 
 
+  /admin/events/search:
+    post:
+      tags:
+        - Event
+      summary: An Endpoint which allows admins to search for events.
+      operationId: adminSearchEvents
+      description: |-
+        This endpoint allows admins to search the events database by providing none | some | all valid search criteria
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AdminEventSearch'
+            examples:
+              example1:
+                summary: Event mapping
+                value:
+                  type: 10100,
+                  sub_type: 1010,
+                  name: My event,
+                  handler: Standard Event Handler,
+                  has_restrictions: true
+
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdminSearchEventResponse'
+
+        '400':
+          description: Too many results
+          content:
+            application/json+problem:
+              schema:
+                $ref: './problem.yaml'
+
+        '500':
+          description: Internal Server Error
+          content:
+            application/json+problem:
+              schema:
+                $ref: './problem.yaml'
+
 components:
   schemas:
 
@@ -610,6 +656,66 @@ components:
     EventHandler:
       type: string
 
+    AdminEventSearch:
+      type: object
+      properties:
+        courthouse_ids:
+          type: array
+          items:
+            type: integer
+        case_number:
+          type: string
+        courtroom_name:
+          type: string
+        hearing_start_at:
+          type: string
+          format: date
+          example: "2024-05-09"
+        hearing_end_at:
+          type: string
+          format: date
+          example: "2024-05-09"
+
+    AdminSearchEventResponse:
+      type: object
+      properties:
+        events:
+          type: array
+          items:
+            $ref: '#/components/schemas/AdminSearchEventResponseResult'
+
+    AdminSearchEventResponseResult:
+      type: object
+      properties:
+        id:
+          type: integer
+        created_at:
+          type: string
+          format: date-time
+        name:
+          type: string
+        text:
+          type: string
+        chronicle_id:
+          type: string
+        antecedent_id:
+          type: string
+        courthouse:
+          type: object
+          properties:
+            id:
+              type: integer
+            display_name:
+              type: string
+        courtroom:
+          type: object
+          properties:
+            id:
+              type: integer
+            name:
+              type: string
+
+
     ###################################################################################################################
     # PRIMITIVES
     ###################################################################################################################
@@ -651,7 +757,16 @@ components:
         - "EVENT_104"
         - "EVENT_105"
         - "EVENT_106"
-      x-enum-varnames: [ EVENT_DATA_NOT_FOUND, EVENT_HANDLER_NOT_FOUND_IN_DB, DUPLICATE_EVENT_MAPPING, NO_EVENT_MAPPING, INVALID_HANDLER_MAPPING_NAME, MAPPING_INACTIVE, MAPPING_IN_USE ]
+        - "EVENT_107"
+      x-enum-varnames: [
+        EVENT_DATA_NOT_FOUND,
+        EVENT_HANDLER_NOT_FOUND_IN_DB,
+        DUPLICATE_EVENT_MAPPING,
+        NO_EVENT_MAPPING,
+        INVALID_HANDLER_MAPPING_NAME,
+        MAPPING_INACTIVE,
+        MAPPING_IN_USE,
+        TOO_MANY_RESULTS ]
 
     EventTitleErrors:
       type: string
@@ -663,5 +778,14 @@ components:
         - "Handler name does not exist"
         - "The mapping is inactive, so cannot be deleted"
         - "The mapping has already processed events, so cannot be deleted"
-      x-enum-varnames: [ EVENT_DATA_NOT_FOUND, EVENT_HANDLER_NOT_FOUND_IN_DB, DUPLICATE_EVENT_MAPPING, NO_EVENT_MAPPING, INVALID_HANDLER_MAPPING_NAME, MAPPING_INACTIVE, MAPPING_IN_USE ]
+        - "The search resulted in too many results"
+      x-enum-varnames: [
+        EVENT_DATA_NOT_FOUND,
+        EVENT_HANDLER_NOT_FOUND_IN_DB,
+        DUPLICATE_EVENT_MAPPING,
+        NO_EVENT_MAPPING,
+        INVALID_HANDLER_MAPPING_NAME,
+        MAPPING_INACTIVE,
+        MAPPING_IN_USE,
+        TOO_MANY_RESULTS]
 
