@@ -570,6 +570,40 @@ class StopAndCloseHandlerTest extends HandlerTestData {
             .containsOnly(idFrom(persistedEvents));
     }
 
+    @Test
+    void createsAnEventLinkedCaseForStopAndCloseHandlerWhenTheCaseDoesntExist() {
+        dartsDatabase.givenTheDatabaseContainsCourtCaseAndCourthouseWithRoom(
+            SOME_CASE_NUMBER,
+            SOME_COURTHOUSE,
+            SOME_ROOM
+        );
+
+        dartsDatabase.getNodeRegisterRepository().deleteAll();
+        dartsDatabase.getCourtroomRepository()
+            .findByCourthouseNameAndCourtroomName(SOME_COURTHOUSE, SOME_ROOM)
+            .ifPresent(c -> dartsDatabase.getCourtroomRepository().delete(c));
+        dartsDatabase.getCaseRepository().deleteAll();
+
+        eventDispatcher.receive(someMinimalDartsEvent()
+                                    .type("30300")
+                                    .subType(null)
+                                    .caseNumbers(List.of(SOME_CASE_NUMBER, SOME_CASE_NUMBER_2))
+                                    .courthouse(SOME_COURTHOUSE)
+                                    .courtroom(SOME_ROOM)
+                                    .dateTime(HEARING_DATE_ODT));
+
+        var persistedEvents = dartsDatabase.getEventRepository().findAll();
+        var eventLinkedCases = dartsDatabase.getEventLinkedCaseRepository().findAll();
+
+        assertThat(eventLinkedCases)
+            .extracting("courtCase.caseNumber")
+            .containsExactly(SOME_CASE_NUMBER, SOME_CASE_NUMBER_2);
+
+        assertThat(eventLinkedCases)
+            .extracting("event.id")
+            .containsOnly(idFrom(persistedEvents));
+    }
+
     public Integer idFrom(List<EventEntity> eventEntities) {
         return eventEntities.get(0).getId();
     }
