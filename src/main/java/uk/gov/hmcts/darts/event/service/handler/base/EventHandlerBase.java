@@ -4,7 +4,6 @@ import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.context.ApplicationEventPublisher;
-import uk.gov.hmcts.darts.authorisation.api.AuthorisationApi;
 import uk.gov.hmcts.darts.common.entity.EventHandlerEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.exception.CommonApiError;
@@ -41,7 +40,6 @@ public abstract class EventHandlerBase implements EventHandler {
     protected ApplicationEventPublisher eventPublisher;
     private LogApi logApi;
     private EventPersistenceService eventPersistenceService;
-    private final AuthorisationApi authorisationApi;
 
 
     @Override
