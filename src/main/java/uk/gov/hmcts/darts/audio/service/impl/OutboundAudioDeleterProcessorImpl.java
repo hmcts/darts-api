@@ -23,6 +23,8 @@ import java.util.Set;
 
 import static java.util.stream.Collectors.toSet;
 import static uk.gov.hmcts.darts.common.enums.SecurityGroupEnum.MEDIA_IN_PERPETUITY;
+import static uk.gov.hmcts.darts.common.enums.SecurityGroupEnum.SUPER_ADMIN;
+import static uk.gov.hmcts.darts.common.enums.SecurityGroupEnum.SUPER_USER;
 
 
 @Service
@@ -58,7 +60,7 @@ public class OutboundAudioDeleterProcessorImpl implements OutboundAudioDeleterPr
         } else {
             for (TransformedMediaEntity transformedMedia : transformedMediaList) {
                 try {
-                    if (!transformedMedia.isOwnerInSecurityGroup(MEDIA_IN_PERPETUITY)) {
+                    if (isTransformedMediaEligibleForDelete(transformedMedia)) {
                         List<TransientObjectDirectoryEntity> deleted = singleElementProcessor.markForDeletion(systemUser, transformedMedia);
                         deletedValues.addAll(deleted);
                     }
@@ -71,6 +73,10 @@ public class OutboundAudioDeleterProcessorImpl implements OutboundAudioDeleterPr
         }
 
         return deletedValues;
+    }
+
+    private boolean isTransformedMediaEligibleForDelete(TransformedMediaEntity transformedMedia) {
+        return !transformedMedia.isOwnerInSecurityGroup(List.of(MEDIA_IN_PERPETUITY, SUPER_ADMIN, SUPER_USER));
     }
 
     @Override
