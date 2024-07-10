@@ -64,10 +64,10 @@ class HearingsGetEventsFunctionalTest extends FunctionalTest {
         requestBody = String.format(
             """
             {
-              "message_id": "12345",
+              "message_id": "444",
               "type": "1000",
               "sub_type": "1002",
-              "event_id": "12345",
+              "event_id": "98765",
               "courthouse": "%s",
               "courtroom": "%s",
               "case_numbers": [
@@ -77,6 +77,33 @@ class HearingsGetEventsFunctionalTest extends FunctionalTest {
               "date_time": "2023-08-08T14:01:06.085Z"
             }""",
             COURTHOUSE, courtroomName, randomCaseNumber, randomEventText2);
+
+        buildRequestWithExternalGlobalAccessAuth()
+            .contentType(ContentType.JSON)
+            .body(requestBody)
+            .when()
+            .baseUri(getUri(ADD_EVENT_URL))
+            .redirects().follow(false)
+            .post();
+
+
+        String versionedEventText3 = randomAlphanumeric(15);
+        requestBody = String.format(
+            """
+            {
+              "message_id": "888",
+              "type": "1000",
+              "sub_type": "1002",
+              "event_id": "98765",
+              "courthouse": "%s",
+              "courtroom": "%s",
+              "case_numbers": [
+                "%s"
+              ],
+              "event_text": "%s",
+              "date_time": "2023-08-08T14:01:06.085Z"
+            }""",
+            COURTHOUSE, courtroomName, randomCaseNumber, versionedEventText3);
 
         buildRequestWithExternalGlobalAccessAuth()
             .contentType(ContentType.JSON)
@@ -98,7 +125,8 @@ class HearingsGetEventsFunctionalTest extends FunctionalTest {
 
         String responsePrettyString = response.asPrettyString();
         assertThat(responsePrettyString).contains(randomEventText1);
-        assertThat(responsePrettyString).contains(randomEventText2);
+        assertThat(responsePrettyString).doesNotContain(randomEventText2);
+        assertThat(responsePrettyString).contains(versionedEventText3);
     }
 
     private int getHearingIdByCaseNumber(String caseNumber) {

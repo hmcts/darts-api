@@ -57,7 +57,7 @@ public class EventPersistenceService {
 
     private EventEntity eventEntityFrom(DartsEvent dartsEvent, EventHandlerEntity eventHandler, UserAccountEntity currentUser) {
         var event = new EventEntity();
-        event.setLegacyEventId(NumberUtils.createInteger(dartsEvent.getEventId()));
+        event.setEventId(NumberUtils.createInteger(dartsEvent.getEventId()));
         event.setTimestamp(dartsEvent.getDateTime());
         event.setEventText(dartsEvent.getEventText());
         event.setEventType(eventHandler);
