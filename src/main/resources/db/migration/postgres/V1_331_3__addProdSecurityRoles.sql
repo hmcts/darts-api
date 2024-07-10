@@ -7,7 +7,7 @@ DECLARE
 BEGIN
     SELECT last_value into maxId FROM rol_seq;
 FOR roleToBeMigrated IN
-    SELECT sr1.rol_id newId, sr2.rol_id oldId FROM darts.security_role sr1, darts.security_role sr2
+    SELECT sr1.rol_id newId, sr2.rol_id oldId FROM security_role sr1, security_role sr2
     	where upper(sr1.role_name) = upper(sr2.role_name)
         and sr1.rol_id <> sr2.rol_id
     	 and sr1.rol_id between 1 and 14
