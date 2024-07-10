@@ -38,7 +38,7 @@ public class AddAudioMetaDataValidator implements Validator<AddAudioMetadataRequ
 
         log.debug("Validated the court house {} exists", addAudioMetadataRequest.getCourthouse());
 
-        boolean whitelistedContentType = AddAudioFileValidator.isWhiteListedFileType(addAudioMetadataRequest.getFormat(), properties);
+        boolean whitelistedContentType = properties.getAllowedMediaFormats().contains(addAudioMetadataRequest.getFormat());
 
         if (!whitelistedContentType) {
             throw new DartsApiException(AudioApiError.UNEXPECTED_FILE_TYPE);
