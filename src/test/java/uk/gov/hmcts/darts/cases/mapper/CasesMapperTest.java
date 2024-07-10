@@ -31,6 +31,7 @@ import java.time.LocalTime;
 import java.time.Month;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Pattern;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static uk.gov.hmcts.darts.common.util.CommonTestDataUtil.createDefenceList;
@@ -60,7 +61,7 @@ class CasesMapperTest {
 
     @BeforeEach
     void setUp() {
-        String unallocatedCaseRegex = ".*\\d{8}-\\d{6}.*";
+        Pattern unallocatedCaseRegex = Pattern.compile(".*\\d{8}-\\d{6}.*");
         caseMapper = new CasesMapper(retrieveCoreObjectService, hearingReportingRestrictionsRepository,
                                      caseRetentionRepository, authorisationApi, logApi, unallocatedCaseRegex);
     }

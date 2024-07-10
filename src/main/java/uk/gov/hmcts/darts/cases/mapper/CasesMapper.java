@@ -30,6 +30,7 @@ import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.regex.Pattern;
 
 import static java.util.Comparator.comparing;
 import static java.util.stream.Collectors.toList;
@@ -47,7 +48,7 @@ public class CasesMapper {
     private final AuthorisationApi authorisationApi;
     private final LogApi logApi;
     @Value("${darts.log.unallocated-case-regex}")
-    private final String unallocatedCaseRegex;
+    private final Pattern unallocatedCaseRegex;
 
     public List<ScheduledCase> mapToScheduledCases(List<HearingEntity> hearings) {
         return emptyIfNull(hearings).stream().map(this::mapToScheduledCase)
@@ -90,7 +91,7 @@ public class CasesMapper {
     public CourtCaseEntity addDefendantProsecutorDefenderJudge(CourtCaseEntity caseEntity, AddCaseRequest caseRequest) {
 
         emptyIfNull(caseRequest.getDefendants()).forEach(newDefendant -> {
-            if (newDefendant.matches(unallocatedCaseRegex)) {
+            if (unallocatedCaseRegex.matcher(newDefendant).matches()) {
                 logApi.defendantNotAdded(newDefendant, caseEntity.getCaseNumber());
             } else {
                 caseEntity.addDefendant(createNewDefendant(newDefendant, caseEntity));
