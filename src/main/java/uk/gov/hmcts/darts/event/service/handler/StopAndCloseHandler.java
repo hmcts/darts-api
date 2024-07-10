@@ -67,7 +67,7 @@ public class StopAndCloseHandler extends EventHandlerBase {
                                LogApi logApi,
                                CaseManagementRetentionService caseManagementRetentionService,
                                EventPersistenceService eventPersistenceService) {
-        super(retrieveCoreObjectService, eventRepository, hearingRepository, caseRepository, eventPublisher, logApi, eventPersistenceService, authorisationApi);
+        super(retrieveCoreObjectService, eventRepository, hearingRepository, caseRepository, eventPublisher, logApi, eventPersistenceService);
         this.darNotifyService = darNotifyService;
         this.caseRetentionRepository = caseRetentionRepository;
         this.caseManagementRetentionService = caseManagementRetentionService;

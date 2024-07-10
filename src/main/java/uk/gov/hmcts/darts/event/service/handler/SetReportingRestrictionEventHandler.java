@@ -4,7 +4,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import uk.gov.hmcts.darts.authorisation.api.AuthorisationApi;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.EventHandlerEntity;
 import uk.gov.hmcts.darts.common.repository.CaseRepository;
@@ -27,9 +26,8 @@ public class SetReportingRestrictionEventHandler extends EventHandlerBase {
                                                CaseRepository caseRepository,
                                                ApplicationEventPublisher eventPublisher,
                                                LogApi logApi,
-                                               EventPersistenceService eventPersistenceService,
-                                               AuthorisationApi authorisationApi) {
-        super(retrieveCoreObjectService, eventRepository, hearingRepository, caseRepository, eventPublisher, logApi, eventPersistenceService, authorisationApi);
+                                               EventPersistenceService eventPersistenceService) {
+        super(retrieveCoreObjectService, eventRepository, hearingRepository, caseRepository, eventPublisher, logApi, eventPersistenceService);
     }
 
     @Transactional
