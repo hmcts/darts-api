@@ -23,4 +23,9 @@ public class CasesLoggerServiceImpl implements CasesLoggerService {
                  addCaseRequest.getCaseNumber(),
                  addCaseRequest.getCourthouse());
     }
+
+    @Override
+    public void defendantNotAdded(String defendant, String caseNumber) {
+        log.info("Defendant not added to case: defendant={}, case_number={}", defendant, caseNumber);
+    }
 }

@@ -37,7 +37,7 @@ public class HearingTestData {
 
     // Refactor, this isn't a minimal hearing
     public static HearingEntity someMinimalHearing() {
-        return createHearingWithDefaults(null, null, null, null);
+        return createSomeMinimalHearing();
     }
 
     public static HearingEntity createHearingWith(CourtCaseEntity courtCase, CourtroomEntity courtroom, LocalDate hearingDate) {

@@ -1,5 +1,6 @@
 package uk.gov.hmcts.darts.cases.controller;
 
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.skyscreamer.jsonassert.JSONCompareMode;
@@ -12,6 +13,8 @@ import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import org.springframework.transaction.annotation.Transactional;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
+import uk.gov.hmcts.darts.cases.model.AddCaseRequest;
+import uk.gov.hmcts.darts.cases.model.PostCaseResponse;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
@@ -265,10 +268,14 @@ class CaseControllerTest extends IntegrationBase {
 
         MockHttpServletRequestBuilder requestBuilder = post(BASE_PATH)
             .contentType(MediaType.APPLICATION_JSON_VALUE)
-            .content(getContentsFromFile("tests/cases/CaseControllerTest/casesPostEndpoint/requestBodyDefendantNameOverflow.json"));
-        mockMvc.perform(requestBuilder).andExpect(status().isCreated()).andReturn();
+            .content(getContentsFromFile("tests/cases/CaseControllerTest/casesPostEndpoint/requestBodyDefendantNameIssues.json"));
+        MvcResult response = mockMvc.perform(requestBuilder).andExpect(status().isCreated()).andReturn();
 
-        verify(logApi, times(2)).defendantNameOverflow(any());
+        PostCaseResponse postCaseResponse = objectMapper.readValue(response.getResponse().getContentAsString(), PostCaseResponse.class);
+
+        Assertions.assertEquals(2, postCaseResponse.getDefendants().size());
+        verify(logApi, times(2)).defendantNameOverflow(any(AddCaseRequest.class));
+        verify(logApi, times(1)).defendantNotAdded("U20240603-103622, U20240603-03622", "CASE1001");
     }
 
     private void setupExternalMidTierUserForCourthouse(CourthouseEntity courthouse) {

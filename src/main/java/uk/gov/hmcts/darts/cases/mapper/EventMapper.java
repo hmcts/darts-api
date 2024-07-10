@@ -5,20 +5,23 @@ import lombok.extern.slf4j.Slf4j;
 import uk.gov.hmcts.darts.cases.model.Event;
 import uk.gov.hmcts.darts.common.entity.EventEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
+import uk.gov.hmcts.darts.hearings.mapper.GetEventsResponseMapper;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
+
+import static org.apache.commons.collections4.ListUtils.emptyIfNull;
 
 @Slf4j
 @UtilityClass
 public class EventMapper {
 
-    public List<Event> mapResponse(List<EventEntity> eventEntities) {
-        List<Event> response = new ArrayList<>();
-        for (EventEntity eventEntity : eventEntities) {
-            response.add(map(eventEntity));
-        }
-        return response;
+    public List<Event> mapToEvents(List<EventEntity> eventEntities) {
+        List<EventEntity> latestEvents = GetEventsResponseMapper.filterNonLatestEvents(eventEntities);
+
+        return emptyIfNull(latestEvents).stream()
+            .map(EventMapper::map)
+            .collect(Collectors.toList());
     }
 
     private Event map(EventEntity eventEntity) {

@@ -74,6 +74,11 @@ public class LogApiImpl implements LogApi {
     }
 
     @Override
+    public void defendantNotAdded(String defendant, String caseNumber) {
+        casesLoggerService.defendantNotAdded(defendant, caseNumber);
+    }
+
+    @Override
     public void scheduleNotification(NotificationEntity notificationEntity, Integer caseId) {
         notificationLoggerService.scheduleNotification(notificationEntity, caseId);
     }

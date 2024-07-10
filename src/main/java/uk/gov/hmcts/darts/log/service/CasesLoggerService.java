@@ -7,4 +7,6 @@ public interface CasesLoggerService {
     void casesRequestedByDarPc(GetCasesRequest getCasesRequest);
 
     void defendantNameOverflow(AddCaseRequest addCaseRequest);
+
+    void defendantNotAdded(String defendant, String caseNumber);
 }

@@ -10,9 +10,11 @@ import uk.gov.hmcts.darts.common.entity.TranscriptionEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 import uk.gov.hmcts.darts.testutils.stubs.DartsDatabaseStub;
+import uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum;
 import uk.gov.hmcts.darts.transcriptions.model.TranscriberViewSummary;
 
 import java.time.OffsetDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 import static java.time.OffsetDateTime.now;
@@ -67,5 +69,28 @@ class TranscriberTranscriptsQueryImplTest extends IntegrationBase {
                        .filter(t -> t.getTranscriptionId().equals(transcriptionWithHiddenDocument.getId()))
                        .findFirst()
         ).isEmpty();
+    }
+
+    @Test
+    void getTranscriberTranscriptionsWithMultipleWithTranscriberWorkflows() {
+        var yesterday = NOW.minusDays(1);
+        TranscriptionEntity transcriptionEntity = dartsDatabase.getTranscriptionStub().createAndSaveWithTranscriberTranscription(
+            userAccountEntity, courtCaseEntity, hearingEntity, NOW.minusDays(3), false
+        );
+        var backToApproved = dartsDatabase.getTranscriptionStub().createAndSaveTranscriptionWorkflow(
+            transcriptionEntity, NOW.minusDays(2), dartsDatabase.getTranscriptionStub().getTranscriptionStatusByEnum(TranscriptionStatusEnum.APPROVED)
+        );
+        var withTranscriber = dartsDatabase.getTranscriptionStub().createAndSaveTranscriptionWorkflow(
+            transcriptionEntity, yesterday, dartsDatabase.getTranscriptionStub().getTranscriptionStatusByEnum(TranscriptionStatusEnum.WITH_TRANSCRIBER)
+        );
+        transcriptionEntity.getTranscriptionWorkflowEntities()
+            .addAll(List.of(backToApproved, withTranscriber));
+        dartsDatabase.getTranscriptionRepository().saveAndFlush(transcriptionEntity);
+
+        List<TranscriberViewSummary> transcriberTranscriptions = transcriberTranscriptsQuery.getTranscriberTranscriptions(userAccountEntity.getId());
+
+        assertThat(transcriberTranscriptions.size()).isEqualTo(1);
+        var format = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        assertThat(transcriberTranscriptions.get(0).getStateChangeTs().format(format)).isEqualTo(yesterday.format(format));
     }
 }

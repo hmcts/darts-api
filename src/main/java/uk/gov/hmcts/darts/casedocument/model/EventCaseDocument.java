@@ -12,7 +12,7 @@ public class EventCaseDocument extends CreatedModifiedCaseDocument {
     private final Integer id;
     private final String legacyObjectId;
     private final EventHandlerCaseDocument eventType;
-    private final Integer legacyEventId;
+    private final Integer eventId;
     private final String eventText;
     private final OffsetDateTime timestamp;
     private final String legacyVersionLabel;

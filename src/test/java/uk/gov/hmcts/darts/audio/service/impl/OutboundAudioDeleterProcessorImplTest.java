@@ -27,6 +27,8 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.darts.common.enums.SecurityGroupEnum.MEDIA_IN_PERPETUITY;
+import static uk.gov.hmcts.darts.common.enums.SecurityGroupEnum.SUPER_ADMIN;
+import static uk.gov.hmcts.darts.common.enums.SecurityGroupEnum.SUPER_USER;
 
 @ExtendWith(MockitoExtension.class)
 class OutboundAudioDeleterProcessorImplTest {
@@ -68,8 +70,8 @@ class OutboundAudioDeleterProcessorImplTest {
     @Test
     void testContinuesProcessingNextIterationOnException() {
         // given
-        var transformedMedia1 = someTransformedMediaNotOwnedByUserInGroup(MEDIA_IN_PERPETUITY);
-        var transformedMedia2 = someTransformedMediaNotOwnedByUserInGroup(MEDIA_IN_PERPETUITY);
+        var transformedMedia1 = someTransformedMediaNotOwnedByUserInGroup(List.of(MEDIA_IN_PERPETUITY, SUPER_ADMIN, SUPER_USER));
+        var transformedMedia2 = someTransformedMediaNotOwnedByUserInGroup(List.of(MEDIA_IN_PERPETUITY, SUPER_ADMIN, SUPER_USER));
 
         when(transformedMediaRepository.findAllDeletableTransformedMedia(any()))
             .thenReturn(List.of(transformedMedia1, transformedMedia2));
@@ -89,8 +91,10 @@ class OutboundAudioDeleterProcessorImplTest {
     @Test
     void doesntMarkForDeletionWhenCurrentOwnerIsInGroupMediaInPerpetuity() {
         // given
-        var transformedMediaOwnedByUserInMediaInPerpetuityGroup = someTransformedMediaOwnedByUserInGroup(MEDIA_IN_PERPETUITY);
-        var transformedMediaNotOwnedByUserInMediaInPerpetuityGroup = someTransformedMediaNotOwnedByUserInGroup(MEDIA_IN_PERPETUITY);
+        var transformedMediaOwnedByUserInMediaInPerpetuityGroup = someTransformedMediaOwnedByUserInGroup(
+            List.of(MEDIA_IN_PERPETUITY,SUPER_ADMIN, SUPER_USER));
+        var transformedMediaNotOwnedByUserInMediaInPerpetuityGroup = someTransformedMediaNotOwnedByUserInGroup(
+            List.of(MEDIA_IN_PERPETUITY,SUPER_ADMIN, SUPER_USER));
         when(transformedMediaRepository.findAllDeletableTransformedMedia(any()))
             .thenReturn(List.of(
                 transformedMediaOwnedByUserInMediaInPerpetuityGroup,
@@ -106,13 +110,13 @@ class OutboundAudioDeleterProcessorImplTest {
             .markForDeletion(any(), eq(transformedMediaOwnedByUserInMediaInPerpetuityGroup));
     }
 
-    private TransformedMediaEntity someTransformedMediaOwnedByUserInGroup(SecurityGroupEnum securityGroupEnum) {
+    private TransformedMediaEntity someTransformedMediaOwnedByUserInGroup(List<SecurityGroupEnum> securityGroupEnum) {
         var transformedMediaEntity = mock(TransformedMediaEntity.class);
         when(transformedMediaEntity.isOwnerInSecurityGroup(securityGroupEnum)).thenReturn(true);
         return transformedMediaEntity;
     }
 
-    private TransformedMediaEntity someTransformedMediaNotOwnedByUserInGroup(SecurityGroupEnum securityGroupEnum) {
+    private TransformedMediaEntity someTransformedMediaNotOwnedByUserInGroup(List<SecurityGroupEnum> securityGroupEnum) {
         var transformedMediaEntity = mock(TransformedMediaEntity.class);
         when(transformedMediaEntity.isOwnerInSecurityGroup(securityGroupEnum)).thenReturn(false);
         return transformedMediaEntity;

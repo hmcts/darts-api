@@ -210,6 +210,7 @@ def coverageExclusions = [
   '**/uk/gov/hmcts/darts/event/api**',
   '**/uk/gov/hmcts/darts/audiorequests/api**',
   '**/uk/gov/hmcts/darts/casedocument/template**',
+  '**/uk/gov/hmcts/darts/log/api/impl/LogApiImpl.java'
 ]
 
 jacocoTestReport {
@@ -490,7 +491,7 @@ dependencyManagement {
       entry 'netty-transport-native-unix-common'
     }
     //temporary fix for vulnerability https://spring.io/security/cve-2023-34062
-    dependencySet(group: 'io.projectreactor.netty', version: '1.1.20') {
+    dependencySet(group: 'io.projectreactor.netty', version: '1.1.21') {
       entry 'reactor-netty-http'
       entry 'reactor-netty-core'
     }

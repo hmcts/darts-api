@@ -115,9 +115,14 @@ public class TranscriberTranscriptsQueryImpl implements TranscriberTranscriptsQu
                 LEFT JOIN darts.transcription_urgency tru ON tra.tru_id = tru.tru_id
                 JOIN darts.transcription_workflow requested_trw ON tra.tra_id = requested_trw.tra_id
                     AND requested_trw.trs_id = 1
-                JOIN darts.transcription_workflow with_transcriber_trw ON tra.tra_id = with_transcriber_trw.tra_id
-                    AND with_transcriber_trw.trs_id = 5
-                    AND with_transcriber_trw.workflow_actor = :usr_id
+                -- Only the latest "WITH_TRANSCRIBER" transcription_workflow for a given transcription
+                JOIN (
+                    SELECT trw.tra_id, MAX(trw.workflow_ts) as workflow_ts
+                    FROM darts.transcription_workflow trw
+                    WHERE trw.trs_id = 5
+                    AND trw.workflow_actor = :usr_id
+                    GROUP BY tra_id
+                ) with_transcriber_trw ON with_transcriber_trw.tra_id = tra.tra_id
                 WHERE tra.trs_id = 5
                 -- exclude ones with hidden docs - just in case there are any
                 AND (
