@@ -3,7 +3,6 @@ package uk.gov.hmcts.darts.event.service.handler;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
-import uk.gov.hmcts.darts.authorisation.api.AuthorisationApi;
 import uk.gov.hmcts.darts.common.entity.EventHandlerEntity;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.common.repository.CaseRepository;
@@ -41,9 +40,8 @@ public class SentencingRemarksAndRetentionPolicyHandler extends EventHandlerBase
                                                       TranscriptionsApi transcriptionsApi,
                                                       LogApi logApi,
                                                       CaseManagementRetentionService caseManagementRetentionService,
-                                                      EventPersistenceService eventPersistenceService,
-                                                      AuthorisationApi authorisationApi) {
-        super(retrieveCoreObjectService, eventRepository, hearingRepository, caseRepository, eventPublisher, logApi, eventPersistenceService, authorisationApi);
+                                                      EventPersistenceService eventPersistenceService) {
+        super(retrieveCoreObjectService, eventRepository, hearingRepository, caseRepository, eventPublisher, logApi, eventPersistenceService);
         this.transcriptionsApi = transcriptionsApi;
         this.caseManagementRetentionService = caseManagementRetentionService;
     }
