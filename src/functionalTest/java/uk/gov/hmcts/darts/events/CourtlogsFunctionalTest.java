@@ -136,7 +136,8 @@ class CourtlogsFunctionalTest extends FunctionalTest {
         assertEquals(400, response.statusCode());
         assertThat(response.asPrettyString()).contains(
             """
-                {"type":"about:blank","title":"Bad Request","status":400,"detail":"Required parameter 'start_date_time' is not present.","instance":"/courtlogs"}
+                {"type":"about:blank","title":"Bad Request","status":400,"detail":"Required parameter 
+                'start_date_time' is not present.","instance":"/courtlogs"}
             """);
 
     }
