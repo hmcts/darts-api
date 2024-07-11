@@ -295,6 +295,8 @@ darts:
       order: "UNSTRUCTURED,DETS,ARM,VODAFONE"
   case-document:
     generation-days: 28
+    filename-prefix: "CASE_DOCUMENT"
+    file-extension: "json"
   transcription:
     allowed-extensions:
       - "docx"
