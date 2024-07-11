@@ -222,25 +222,28 @@ class StandardEventHandlerTest extends HandlerTestData {
 
         int numberOfThreads = 100;
         ExecutorService service = Executors.newFixedThreadPool(5);
-        CountDownLatch latch = new CountDownLatch(numberOfThreads);
+        try {
+            CountDownLatch latch = new CountDownLatch(numberOfThreads);
 
-
-        for (int i = 0; i < numberOfThreads; i++) {
-            int nanoSec = i * 1000;
-            service.submit(() -> {
-                DartsEvent dartsEvent = someMinimalDartsEvent()
-                    .caseNumbers(List.of("asyncTestCaseNumber"))
-                    .courthouse(SOME_COURTHOUSE)
-                    .courtroom("asyncTestCourtroom")
-                    .dateTime(HEARING_DATE_ODT.withNano(nanoSec))
-                    .eventId(null);
-                eventDispatcher.receive(dartsEvent);
-                latch.countDown();
-            });
+            for (int i = 0; i < numberOfThreads; i++) {
+                int nanoSec = i * 1000;
+                service.submit(() -> {
+                    DartsEvent dartsEvent = someMinimalDartsEvent()
+                        .caseNumbers(List.of("asyncTestCaseNumber"))
+                        .courthouse(SOME_COURTHOUSE)
+                        .courtroom("asyncTestCourtroom")
+                        .dateTime(HEARING_DATE_ODT.withNano(nanoSec))
+                        .eventId(null);
+                    eventDispatcher.receive(dartsEvent);
+                    latch.countDown();
+                });
+            }
+            latch.await(5, TimeUnit.SECONDS);
+            assertEquals(1, dartsDatabase.getHearingRepository().findAll().size());
+            assertEquals(numberOfThreads, dartsDatabase.getAllEvents().size());
+        } finally {
+            service.shutdown();
         }
-        latch.await(5, TimeUnit.SECONDS);
-        assertEquals(1, dartsDatabase.getHearingRepository().findAll().size());
-        assertEquals(numberOfThreads, dartsDatabase.getAllEvents().size());
     }
 
     @Test
