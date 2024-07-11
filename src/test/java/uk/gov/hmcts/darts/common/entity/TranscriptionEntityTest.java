@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 class TranscriptionEntityTest {
 
@@ -55,7 +56,58 @@ class TranscriptionEntityTest {
     @Test
     void testGetCourtCaseNone() {
         var transcription = new TranscriptionEntity();
-        assertEquals(null, transcription.getCourtCase());
+        assertNull(transcription.getCourtCase());
+    }
+
+    @Test
+    void testGetCourtRoomViaHearing() {
+        var courtRoom = new CourtroomEntity();
+        var transcription = new TranscriptionEntity();
+        var hearing = new HearingEntity();
+        hearing.setCourtroom(courtRoom);
+        transcription.setHearings(List.of(hearing));
+        assertEquals(courtRoom, transcription.getCourtroom());
+    }
+
+    @Test
+    void testGetCourtRoomViaHearingMultipleWithSetHearing() {
+        var transcription = new TranscriptionEntity();
+        var courtRoom1 = new CourtroomEntity();
+        var courtRoom2 = new CourtroomEntity();
+        var hearing1 = new HearingEntity();
+        var hearing2 = new HearingEntity();
+        hearing1.setCourtroom(courtRoom1);
+        hearing2.setCourtroom(courtRoom2);
+        transcription.setHearings(List.of(hearing2, hearing1));
+        assertEquals(courtRoom2, transcription.getCourtroom());
+    }
+
+    @Test
+    void testGetCourtRoomViaHearingMultipleWithAddHearing() {
+        var transcription = new TranscriptionEntity();
+        var courtRoom1 = new CourtroomEntity();
+        var courtRoom2 = new CourtroomEntity();
+        var hearing1 = new HearingEntity();
+        var hearing2 = new HearingEntity();
+        hearing1.setCourtroom(courtRoom1);
+        hearing2.setCourtroom(courtRoom2);
+        transcription.addHearing(hearing2);
+        transcription.addHearing(hearing1);
+        assertEquals(courtRoom2, transcription.getCourtroom());
+    }
+
+    @Test
+    void testGetCourtRoomDirect() {
+        var courtRoom = new CourtroomEntity();
+        var transcription = new TranscriptionEntity();
+        transcription.setCourtroom(courtRoom);
+        assertEquals(courtRoom, transcription.getCourtroom());
+    }
+
+    @Test
+    void testGetCourtRoomNone() {
+        var transcription = new TranscriptionEntity();
+        assertNull(transcription.getCourtroom());
     }
 
 }
