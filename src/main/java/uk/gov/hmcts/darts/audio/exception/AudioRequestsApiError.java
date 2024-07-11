@@ -24,7 +24,7 @@ public enum AudioRequestsApiError implements DartsApiError {
     MEDIA_REQUEST_TYPE_IS_INVALID_FOR_ENDPOINT(
         AudioRequestsErrorCode.MEDIA_REQUEST_TYPE_IS_INVALID_FOR_ENDPOINT.getValue(),
         HttpStatus.BAD_REQUEST,
-        AudioRequestsErrorCode.MEDIA_REQUEST_TYPE_IS_INVALID_FOR_ENDPOINT.toString()
+        AudioRequestsTitleErrors.MEDIA_REQUEST_TYPE_IS_INVALID_FOR_ENDPOINT.toString()
     ),
     TRANSFORMED_MEDIA_NOT_FOUND(
         AudioRequestsErrorCode.TRANSFORMED_MEDIA_NOT_FOUND.getValue(),
