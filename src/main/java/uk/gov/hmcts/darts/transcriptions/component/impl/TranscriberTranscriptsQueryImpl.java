@@ -1,12 +1,16 @@
 package uk.gov.hmcts.darts.transcriptions.component.impl;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.darts.transcriptions.component.TranscriberTranscriptsQuery;
 import uk.gov.hmcts.darts.transcriptions.model.TranscriberViewSummary;
 
+import java.time.Duration;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.TRANSCRIBER;
@@ -18,11 +22,21 @@ public class TranscriberTranscriptsQueryImpl implements TranscriberTranscriptsQu
 
     private static final String USR_ID = "usr_id";
     private static final String ROL_ID = "rol_id";
+    private static final String DATE_LIMIT = "date_limit";
+    private static final String MAX_RESULT_SIZE = "max_result_size";
     private final NamedParameterJdbcTemplate jdbcTemplate;
     private final TranscriberViewSummaryRowMapper transcriberViewSummaryRowMapper;
 
+    @Value("${darts.transcription.search.date-limit}")
+    private final Duration dateLimit;
+
+    @Value("${darts.transcription.search.max-result-size}")
+    private final String maxResultSize;
+
     @Override
     public List<TranscriberViewSummary> getTranscriptRequests(Integer userId) {
+
+
         return jdbcTemplate.query(
             """
                 -- Transcript Requests (transcriber-view?assigned=false)
@@ -68,10 +82,15 @@ public class TranscriberTranscriptsQueryImpl implements TranscriberTranscriptsQu
                     FROM darts.transcription_workflow
                     GROUP BY tra_id
                 ) latest_trw ON tra.tra_id = approved_trw.tra_id AND approved_trw.workflow_ts = latest_trw.latest_ts
+                WHERE latest_trw.latest_ts >= :date_limit
                 ORDER BY transcription_id desc
+                LIMIT :max_result_size
                 """,
-            new MapSqlParameterSource(USR_ID, userId)
-                .addValue(ROL_ID, TRANSCRIBER.getId()),
+            new MapSqlParameterSource()
+                .addValue(USR_ID, userId)
+                .addValue(ROL_ID, TRANSCRIBER.getId())
+                .addValue(DATE_LIMIT, getDateToLimitResults())
+                .addValue(MAX_RESULT_SIZE, maxResultSize),
             transcriberViewSummaryRowMapper
         );
     }
@@ -124,6 +143,7 @@ public class TranscriberTranscriptsQueryImpl implements TranscriberTranscriptsQu
                     GROUP BY tra_id
                 ) with_transcriber_trw ON with_transcriber_trw.tra_id = tra.tra_id
                 WHERE tra.trs_id = 5
+                AND requested_trw.workflow_ts >= :date_limit
                 -- exclude ones with hidden docs - just in case there are any
                 AND (
                     EXISTS (
@@ -197,9 +217,13 @@ public class TranscriberTranscriptsQueryImpl implements TranscriberTranscriptsQu
                     )
                 )
                 ORDER BY transcription_id desc
+                LIMIT :max_result_size
                 """,
-            new MapSqlParameterSource("usr_id", userId)
-                .addValue("rol_id", TRANSCRIBER.getId()),
+            new MapSqlParameterSource()
+                .addValue(USR_ID, userId)
+                .addValue(ROL_ID, TRANSCRIBER.getId())
+                .addValue(DATE_LIMIT, getDateToLimitResults())
+                .addValue(MAX_RESULT_SIZE, maxResultSize),
             transcriberViewSummaryRowMapper
         );
     }
@@ -259,5 +283,12 @@ public class TranscriberTranscriptsQueryImpl implements TranscriberTranscriptsQu
         );
     }
 
+    private Date getDateToLimitResults() {
+        Calendar cal = Calendar.getInstance();
+        cal.setTime(Calendar.getInstance().getTime());
+        cal.add(Calendar.DAY_OF_MONTH, - (int) dateLimit.toDays());
+
+        return cal.getTime();
+    }
 
 }

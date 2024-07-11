@@ -28,6 +28,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static uk.gov.hmcts.darts.testutils.DateHelper.convertSqlDateTimeToZonedDateTime;
+import static uk.gov.hmcts.darts.testutils.DateHelper.todaysDateMinusDaysFormattedForSql;
 
 @AutoConfigureMockMvc
 class TranscriptionControllerGetTranscriberTranscriptsIntTest extends IntegrationBase {
@@ -36,6 +38,10 @@ class TranscriptionControllerGetTranscriberTranscriptsIntTest extends Integratio
     private static final String USER_ID_HEADER = "user_id";
     private static final String ASSIGNED_QUERY_PARAM = "assigned";
     private static final String PLACEHOLDER_URGENCY_ID = "$URGENCY";
+    private static final String MINUS_88_DAYS = "$MINUS_88_DAYS";
+    private static final String MINUS_89_DAYS = "$MINUS_89_DAYS";
+    private static final String MINUS_90_DAYS = "$MINUS_90_DAYS";
+
 
     @Autowired
     private MockMvc mockMvc;
@@ -43,9 +49,16 @@ class TranscriptionControllerGetTranscriberTranscriptsIntTest extends Integratio
     @Autowired
     private JdbcTemplate jdbcTemplate;
 
+    String dateMinus88Days;
+    String dateMinus89Days;
+    String dateMinus90Days;
+
     @BeforeEach
     @SuppressWarnings({"checkstyle.LineLengthCheck"})
     void beforeAll() {
+        dateMinus88Days = todaysDateMinusDaysFormattedForSql(88);
+        dateMinus89Days = todaysDateMinusDaysFormattedForSql(89);
+        dateMinus90Days = todaysDateMinusDaysFormattedForSql(90);
         setupDataWithUrgency();
     }
 
@@ -142,6 +155,8 @@ class TranscriptionControllerGetTranscriberTranscriptsIntTest extends Integratio
             )
             .queryParam(ASSIGNED_QUERY_PARAM, FALSE.toString());
 
+        String expectedStateChangeTs = convertSqlDateTimeToZonedDateTime(dateMinus88Days);
+
         final MvcResult mvcResult = mockMvc.perform(requestBuilder)
             .andExpect(status().isOk())
             .andReturn();
@@ -158,7 +173,7 @@ class TranscriptionControllerGetTranscriberTranscriptsIntTest extends Integratio
                 "transcription_type": "Specified Times",
                 "status": "Approved",
                 "requested_ts": "2023-11-23T16:25:55.304517Z",
-                "state_change_ts": "2023-11-23T16:40:00Z",
+                "state_change_ts": ":expectedStateChangeTs",
                 "is_manual": true,
                 "transcription_urgency": {
                   "transcription_urgency_id": 1,
@@ -167,7 +182,7 @@ class TranscriptionControllerGetTranscriberTranscriptsIntTest extends Integratio
                 }
               }
             ]
-            """;
+            """.replace(":expectedStateChangeTs", expectedStateChangeTs);
         JSONAssert.assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
     }
 
@@ -183,6 +198,10 @@ class TranscriptionControllerGetTranscriberTranscriptsIntTest extends Integratio
             )
             .queryParam(ASSIGNED_QUERY_PARAM, FALSE.toString());
 
+        // FIXME: Change this to 89 days after DMP-3574 fixed and remove the 88 day variable.
+        // Using 88 days is only a workaround to get over the issue described in that ticket.
+        String expectedStateChangeTs = convertSqlDateTimeToZonedDateTime(dateMinus88Days);
+
         final MvcResult mvcResult = mockMvc.perform(requestBuilder)
             .andExpect(status().isOk())
             .andReturn();
@@ -199,11 +218,11 @@ class TranscriptionControllerGetTranscriberTranscriptsIntTest extends Integratio
                 "transcription_type": "Specified Times",
                 "status": "Approved",
                 "requested_ts": "2023-11-23T16:25:55.304517Z",
-                "state_change_ts": "2023-11-23T16:40:00Z",
+                "state_change_ts": ":expectedStateChangeTs",
                 "is_manual": true
               }
             ]
-            """;
+            """.replace(":expectedStateChangeTs", expectedStateChangeTs);
         JSONAssert.assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
     }
 
@@ -221,15 +240,19 @@ class TranscriptionControllerGetTranscriberTranscriptsIntTest extends Integratio
             )
             .queryParam(ASSIGNED_QUERY_PARAM, TRUE.toString());
 
+       String expectedStateChangeTs = convertSqlDateTimeToZonedDateTime(dateMinus89Days);
+
         final MvcResult mvcResult = mockMvc.perform(requestBuilder)
             .andExpect(status().isOk())
+            .andExpect(jsonPath("$").isArray())
+            .andExpect(jsonPath("$.length()").value(2))
             .andExpect(jsonPath("$.[*].transcription_id").isArray())
             .andExpect(jsonPath("$.[0].transcription_id").value(121))
             .andExpect(jsonPath("$.[0].status").value("Complete"))
             .andExpect(jsonPath("$.[0].state_change_ts").isNotEmpty())
             .andExpect(jsonPath("$.[1].transcription_id").value(81))
             .andExpect(jsonPath("$.[1].status").value("With Transcriber"))
-            .andExpect(jsonPath("$.[1].state_change_ts").value("2023-11-23T17:45:51.151621Z"))
+            .andExpect(jsonPath("$.[1].state_change_ts").value(expectedStateChangeTs))
             .andReturn();
 
         String actualResponse = mvcResult.getResponse().getContentAsString();
@@ -289,7 +312,18 @@ class TranscriptionControllerGetTranscriberTranscriptsIntTest extends Integratio
                                 INSERT INTO darts.transcription_workflow (trw_id, tra_id, trs_id, workflow_actor, workflow_ts)
                                 VALUES (44, 41, 5, -10, '2023-11-23 16:30:00.0+00');
                                 INSERT INTO darts.transcription_workflow (trw_id, tra_id, trs_id, workflow_actor, workflow_ts)
-                                VALUES (45, 41, 3, -10, '2023-11-23 16:40:00.0+00');
+                                VALUES (45, 41, 3, -10, '$MINUS_88_DAYS');
+                                
+                                -- Add transcript request to test the 90 day requirement
+                                INSERT INTO darts.transcription (tra_id, ctr_id, trt_id, transcription_object_id, requested_by, start_ts, end_ts,
+                                created_ts, last_modified_ts, last_modified_by, created_by, tru_id, trs_id, hearing_date,
+                                is_manual_transcription, hide_request_from_requestor)
+                                VALUES (602, NULL, 9, NULL, NULL, '2023-11-23 09:00:00+00', '2023-11-23 09:30:00+00', '2023-11-23 16:25:55.297666+00',
+                                '2023-11-23 16:26:20.451054+00', -10, -10, $URGENCY, 3, NULL, true, false);
+                                INSERT INTO darts.case_transcription_ae (tra_id, cas_id) VALUES (602,-1);
+                                INSERT INTO darts.hearing_transcription_ae (tra_id, hea_id) VALUES (602,-1);
+                                INSERT INTO darts.transcription_workflow (trw_id, tra_id, trs_id, workflow_actor, workflow_ts)
+                                VALUES (100, 602, 1, -10, '$MINUS_90_DAYS');
 
                                 -- Your work > To do: With Transcriber
                                 INSERT INTO darts.transcription (tra_id, ctr_id, trt_id, transcription_object_id, requested_by, start_ts, end_ts,
@@ -300,14 +334,31 @@ class TranscriptionControllerGetTranscriberTranscriptsIntTest extends Integratio
                                 INSERT INTO darts.case_transcription_ae (tra_id, cas_id) VALUES (81,-1);
                                 INSERT INTO darts.hearing_transcription_ae (tra_id, hea_id) VALUES (81,-1);
                                 INSERT INTO darts.transcription_workflow (trw_id, tra_id, trs_id, workflow_actor, workflow_ts)
-                                VALUES (81, 81, 1, -10, '2023-11-23 17:45:14.940936+00');
+                                VALUES (81, 81, 1, -10, '$MINUS_89_DAYS');
                                 INSERT INTO darts.transcription_workflow (trw_id, tra_id, trs_id, workflow_actor, workflow_ts)
-                                VALUES (82, 81, 2, -10, '2023-11-23 17:45:14.948701+00');
+                                VALUES (82, 81, 2, -10, '$MINUS_89_DAYS');
                                 INSERT INTO darts.transcription_workflow (trw_id, tra_id, trs_id, workflow_actor, workflow_ts)
-                                VALUES (101, 81, 3, -10, '2023-11-23 17:45:27.069655+00');
+                                VALUES (101, 81, 3, -10, '$MINUS_89_DAYS');
                                 INSERT INTO darts.transcription_workflow (trw_id, tra_id, trs_id, workflow_actor, workflow_ts)
-                                VALUES (102, 81, 5, -10, '2023-11-23 17:45:51.151621+00');
-
+                                VALUES (102, 81, 5, -10, '$MINUS_89_DAYS');
+                                
+                                -- Add additional Your work transcription to test the 90 day requirement
+                                INSERT INTO darts.transcription (tra_id, ctr_id, trt_id, transcription_object_id, requested_by, start_ts, end_ts,
+                                created_ts, last_modified_ts, last_modified_by, created_by, tru_id, trs_id, hearing_date,
+                                is_manual_transcription, hide_request_from_requestor)
+                                VALUES (601, NULL, 9, NULL, NULL, '2023-11-23 09:20:00+00', '2024-07-01 09:30:00+00', '2024-07-01 17:45:14.938855+00',
+                                '2024-07-01 17:45:51.1549+00', -10, -10, $URGENCY, 5, NULL, true, false);
+                                INSERT INTO darts.case_transcription_ae (tra_id, cas_id) VALUES (601,-1);
+                                INSERT INTO darts.hearing_transcription_ae (tra_id, hea_id) VALUES (601,-1);
+                                INSERT INTO darts.transcription_workflow (trw_id, tra_id, trs_id, workflow_actor, workflow_ts)
+                                VALUES (103, 601, 1, -10, '$MINUS_90_DAYS');
+                                INSERT INTO darts.transcription_workflow (trw_id, tra_id, trs_id, workflow_actor, workflow_ts)
+                                VALUES (104, 601, 2, -10, '$MINUS_90_DAYS');
+                                INSERT INTO darts.transcription_workflow (trw_id, tra_id, trs_id, workflow_actor, workflow_ts)
+                                VALUES (105, 601, 3, -10, '$MINUS_90_DAYS');
+                                INSERT INTO darts.transcription_workflow (trw_id, tra_id, trs_id, workflow_actor, workflow_ts)
+                                VALUES (106, 601, 5, -10, '$MINUS_90_DAYS');
+                                
                                 -- This transcription would be hidden from Your work > Completed today (transcriber-view?assigned=true)
                                 INSERT INTO darts.transcription (tra_id, ctr_id, trt_id, transcription_object_id, requested_by, start_ts, end_ts,
                                 created_ts, last_modified_ts, last_modified_by, created_by, tru_id, trs_id, hearing_date,
@@ -345,16 +396,20 @@ class TranscriptionControllerGetTranscriberTranscriptsIntTest extends Integratio
                                 VALUES (164, 121, 5, -10, CURRENT_TIMESTAMP);
                                 INSERT INTO darts.transcription_workflow (trw_id, tra_id, trs_id, workflow_actor, workflow_ts)
                                 VALUES (165, 121, 6, -10, CURRENT_TIMESTAMP);
-                                """.replace(PLACEHOLDER_URGENCY_ID, generatedUrgency ? "1" : "NULL"));
+                                """.replace(PLACEHOLDER_URGENCY_ID, generatedUrgency ? "1" : "NULL")
+                                .replace(MINUS_88_DAYS, dateMinus88Days)
+                                .replace(MINUS_89_DAYS, dateMinus89Days)
+                                .replace(MINUS_90_DAYS, dateMinus90Days)
+                            );
     }
 
     private void deleteTranscription() {
         jdbcTemplate.update("""
-                                DELETE FROM darts.case_transcription_ae WHERE tra_id IN (41, 81, 101, 121);
-                                DELETE FROM darts.hearing_transcription_ae WHERE tra_id IN (41, 81, 101, 121);
+                                DELETE FROM darts.case_transcription_ae WHERE tra_id IN (41, 81, 101, 121, 601, 602);
+                                DELETE FROM darts.hearing_transcription_ae WHERE tra_id IN (41, 81, 101, 121, 601, 602);
 
-                                DELETE FROM darts.transcription_workflow WHERE tra_id IN (41, 81, 101, 121);
-                                DELETE FROM darts.transcription WHERE tra_id IN (41, 81, 101, 121);
+                                DELETE FROM darts.transcription_workflow WHERE tra_id IN (41, 81, 101, 121, 601, 602);
+                                DELETE FROM darts.transcription WHERE tra_id IN (41, 81, 101, 121, 601, 602);
 
                                 DELETE FROM darts.security_group_courthouse_ae WHERE grp_id=-4 AND cth_id=-1;
                                 DELETE FROM darts.security_group_user_account_ae WHERE usr_id=-10 AND grp_id=-4;
