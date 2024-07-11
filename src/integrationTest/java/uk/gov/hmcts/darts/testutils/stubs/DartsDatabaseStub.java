@@ -93,6 +93,7 @@ import uk.gov.hmcts.darts.retentions.model.RetentionPolicyType;
 import uk.gov.hmcts.darts.test.common.data.AudioTestData;
 import uk.gov.hmcts.darts.test.common.data.CourthouseTestData;
 import uk.gov.hmcts.darts.test.common.data.DailyListTestData;
+import uk.gov.hmcts.darts.testutils.TransactionalUtil;
 
 import java.io.IOException;
 import java.lang.reflect.Field;
@@ -197,6 +198,7 @@ public class DartsDatabaseStub {
 
     private final EntityManager entityManager;
     private final CurrentTimeHelper currentTimeHelper;
+    private final TransactionalUtil transactionalUtil;
 
     public void clearDatabaseInThisOrder() {
         objectAdminActionRepository.deleteAll();
@@ -446,8 +448,7 @@ public class DartsDatabaseStub {
     public MediaEntity addMediaToHearing(HearingEntity hearing, MediaEntity mediaEntity) {
         hearing.addMedia(mediaEntity);
         mediaEntity.setCourtroom(hearing.getCourtroom());
-        courthouseRepository.saveAndFlush(hearing.getCourtroom().getCourthouse());
-        courtroomRepository.saveAndFlush(hearing.getCourtroom());
+        save(hearing);
         mediaRepository.saveAndFlush(mediaEntity);
         hearingRepository.saveAndFlush(hearing);
         return mediaEntity;
@@ -470,7 +471,7 @@ public class DartsDatabaseStub {
 
     @Transactional
     public HearingEntity saveEventsForHearing(HearingEntity hearing, List<EventEntity> eventEntities) {
-        HearingEntity hearingEntity = hearingRepository.save(hearing);
+        var hearingEntity = save(hearing);
         eventEntities.forEach(event -> saveSingleEventForHearing(hearing, event));
         return hearingEntity;
     }
@@ -483,9 +484,27 @@ public class DartsDatabaseStub {
 
     @Transactional
     public HearingEntity save(HearingEntity hearingEntity) {
-        courthouseRepository.save(hearingEntity.getCourtroom().getCourthouse());
-        courtroomRepository.save(hearingEntity.getCourtroom());
+        save(hearingEntity.getCourtroom().getCourthouse());
+        save(hearingEntity.getCourtroom());
         return hearingRepository.save(hearingEntity);
+    }
+
+    @Transactional
+    public CourthouseEntity save(CourthouseEntity courthouse) {
+        userAccountRepository.save(courthouse.getCreatedBy());
+        return courthouseRepository.save(courthouse);
+    }
+
+    @Transactional
+    public CourtroomEntity save(CourtroomEntity courtroom) {
+        userAccountRepository.save(courtroom.getCreatedBy());
+        return courtroomRepository.save(courtroom);
+    }
+
+    @Transactional
+    public CourtCaseEntity save(CourtCaseEntity courtCase) {
+        save(courtCase.getCourthouse());
+        return caseRepository.save(courtCase);
     }
 
     @Transactional
@@ -584,6 +603,11 @@ public class DartsDatabaseStub {
         userAccountRepository.saveAll(asList(testUsers));
     }
 
+    @Transactional
+    public void saveAll(HearingEntity... hearingEntities) {
+        stream(hearingEntities).forEach(this::save);
+    }
+
     public List<DailyListEntity> saveAll(DailyListEntity... dailyListEntity) {
         return dailyListRepository.saveAll(asList(dailyListEntity));
     }
@@ -660,7 +684,9 @@ public class DartsDatabaseStub {
     public CourtCaseEntity addHandlerToCase(CourtCaseEntity caseEntity, int handlerId) {
         var handler = eventHandlerRepository.findById(handlerId).orElseThrow();
         caseEntity.setReportingRestrictions(handler);
-        return caseRepository.save(caseEntity);
+        caseEntity.getHearings().forEach(this::save);
+        save(caseEntity.getCourthouse());
+        return save(caseEntity);
     }
 
     @Transactional

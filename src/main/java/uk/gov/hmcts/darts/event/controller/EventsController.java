@@ -16,6 +16,8 @@ import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.darts.authorisation.annotation.Authorisation;
 import uk.gov.hmcts.darts.event.component.DartsEventMapper;
 import uk.gov.hmcts.darts.event.http.api.EventApi;
+import uk.gov.hmcts.darts.event.model.AdminEventSearch;
+import uk.gov.hmcts.darts.event.model.AdminSearchEventResponse;
 import uk.gov.hmcts.darts.event.model.CourtLog;
 import uk.gov.hmcts.darts.event.model.CourtLogsPostRequestBody;
 import uk.gov.hmcts.darts.event.model.DartsEvent;
@@ -24,6 +26,7 @@ import uk.gov.hmcts.darts.event.model.EventsResponse;
 import uk.gov.hmcts.darts.event.service.CourtLogsService;
 import uk.gov.hmcts.darts.event.service.EventDispatcher;
 import uk.gov.hmcts.darts.event.service.EventMappingService;
+import uk.gov.hmcts.darts.event.service.EventSearchService;
 import uk.gov.hmcts.darts.event.service.handler.EventHandlerEnumerator;
 
 import java.time.OffsetDateTime;
@@ -35,6 +38,7 @@ import static uk.gov.hmcts.darts.authorisation.enums.ContextIdEnum.ANY_ENTITY_ID
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.CPP;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.MID_TIER;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.SUPER_ADMIN;
+import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.SUPER_USER;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.XHIBIT;
 
 @Slf4j
@@ -50,6 +54,7 @@ public class EventsController implements EventApi {
     private final DartsEventMapper dartsEventMapper;
     private final EventMappingService eventMappingService;
     private final EventHandlerEnumerator eventHandlers;
+    private final EventSearchService eventSearchService;
 
     @Override
     @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
@@ -145,5 +150,14 @@ public class EventsController implements EventApi {
         eventMappingService.deleteEventMapping(eventHandlerId);
 
         return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    @Override
+    @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
+    @Authorisation(contextId = ANY_ENTITY_ID,
+        globalAccessSecurityRoles = {SUPER_ADMIN, SUPER_USER})
+    public ResponseEntity<AdminSearchEventResponse> adminSearchEvents(AdminEventSearch adminEventSearch) {
+        var adminSearchEventResponse = eventSearchService.searchForEvents(adminEventSearch);
+        return new ResponseEntity<>(adminSearchEventResponse, HttpStatus.OK);
     }
 }

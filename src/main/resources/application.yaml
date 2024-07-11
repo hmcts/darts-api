@@ -110,15 +110,31 @@ darts:
   automated-tasks-pod: ${AUTOMATED_TASK_MODE:true}
   api-pod: ${API_MODE:true}
   audio:
+    allowed-media-mime-types:
+      - "audio/mpeg"
+      - "application/octet-stream"
     allowed-media-formats:
       - "mpeg2"
       - "mp2"
-      - "audio/mpeg"
+    allowed-media-extensions:
+      - "mp2"
       - "a00"
       - "a01"
       - "a02"
       - "a03"
-      - "application/octet-stream"
+      - "a04"
+      - "a05"
+      - "a06"
+      - "a07"
+      - "b00"
+      - "b01"
+      - "b02"
+      - "b03"
+      - "b04"
+      - "b05"
+      - "b06"
+      - "b07"
+      - "b08"
     admin-search:
       max-results: 1000
     allowable-audio-gap-duration: 1s
@@ -167,6 +183,9 @@ darts:
       days-to-keep: 30
   dar-pc-notification:
     url-format: http://{0}/VIQDARNotifyEvent/DARNotifyEvent.asmx
+  events:
+    admin-search:
+      max-results: 1000
   gateway:
     url: ${DARTS_GATEWAY_URL:http://localhost:8070}
     events-dar-notify-path: /events/dar-notify
@@ -282,6 +301,9 @@ darts:
       - "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
       - "application/msword"
     max-created-by-duration: 30d
+    search:
+      date-limit: 90d
+      max-result-size: 500
   portal:
     url: ${DARTS_PORTAL_URL:https://darts.staging.apps.hmcts.net}
   automated:
@@ -319,6 +341,7 @@ darts:
         cpp: ${EVENT_LOG_CPP_DAILY_TEST_TEXT:CPP Daily Test}
     cases:
       defendant-name-char-limit: 600
+    unallocated-case-regex: ${UNALLOCATED_CASE_REGEX:.*\d{8}-\d{6}.*}
 dbMigration:
   # When true, the app will run DB migration on startup.
   # Otherwise, it will just check if all migrations have been applied (and fail to start if not).

@@ -269,7 +269,38 @@ class StandardEventHandlerTest extends HandlerTestData {
             .containsOnly(idFrom(persistedEvents));
     }
 
-    public Integer idFrom(List<EventEntity> eventEntities) {
+    @Test
+    void createsAnEventLinkedCaseWhenCourtroomDoesntExist() {
+        dartsDatabase.givenTheDatabaseContainsCourtCaseAndCourthouseWithRoom(
+            SOME_CASE_NUMBER,
+            SOME_COURTHOUSE,
+            SOME_ROOM
+        );
+
+        dartsDatabase.getNodeRegisterRepository().deleteAll();
+        dartsDatabase.getCourtroomRepository()
+            .findByCourthouseNameAndCourtroomName(SOME_COURTHOUSE, SOME_ROOM)
+            .ifPresent(c -> dartsDatabase.getCourtroomRepository().delete(c));
+
+        eventDispatcher.receive(someMinimalDartsEvent()
+                                    .caseNumbers(List.of(SOME_CASE_NUMBER, SOME_CASE_NUMBER_2))
+                                    .courthouse(SOME_COURTHOUSE)
+                                    .courtroom(SOME_ROOM)
+                                    .dateTime(HEARING_DATE_ODT));
+
+        var persistedEvents = dartsDatabase.getEventRepository().findAll();
+        var eventLinkedCases = dartsDatabase.getEventLinkedCaseRepository().findAll();
+
+        assertThat(eventLinkedCases)
+            .extracting("courtCase.caseNumber")
+            .containsExactly(SOME_CASE_NUMBER, SOME_CASE_NUMBER_2);
+
+        assertThat(eventLinkedCases)
+            .extracting("event.id")
+            .containsOnly(idFrom(persistedEvents));
+    }
+
+    private Integer idFrom(List<EventEntity> eventEntities) {
         return eventEntities.get(0).getId();
     }
 }

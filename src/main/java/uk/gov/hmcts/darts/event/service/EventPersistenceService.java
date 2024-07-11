@@ -28,8 +28,12 @@ public class EventPersistenceService {
 
 
     @Transactional(Transactional.TxType.REQUIRES_NEW)
-    public EventEntity recordEvent(DartsEvent dartsEvent, EventHandlerEntity eventHandler, CourtroomEntity courtroomEntity) {
+    public EventEntity recordEvent(DartsEvent dartsEvent, EventHandlerEntity eventHandler) {
         var currentUser = authorisationApi.getCurrentUser();
+        var courtroomEntity = retrieveCoreObjectService.retrieveOrCreateCourtroom(
+            dartsEvent.getCourthouse(),
+            dartsEvent.getCourtroom(),
+            currentUser);
 
         var eventEntity = saveEvent(dartsEvent, courtroomEntity, eventHandler, currentUser);
 
@@ -57,7 +61,7 @@ public class EventPersistenceService {
 
     private EventEntity eventEntityFrom(DartsEvent dartsEvent, EventHandlerEntity eventHandler, UserAccountEntity currentUser) {
         var event = new EventEntity();
-        event.setLegacyEventId(NumberUtils.createInteger(dartsEvent.getEventId()));
+        event.setEventId(NumberUtils.createInteger(dartsEvent.getEventId()));
         event.setTimestamp(dartsEvent.getDateTime());
         event.setEventText(dartsEvent.getEventText());
         event.setEventType(eventHandler);

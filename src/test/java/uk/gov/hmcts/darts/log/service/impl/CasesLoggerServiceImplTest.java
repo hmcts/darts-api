@@ -64,7 +64,7 @@ class CasesLoggerServiceImplTest {
     }
 
     @Test
-    void testAddCase() {
+    void testDefendantNameOverflow() {
         AddCaseRequest addCaseRequest = new AddCaseRequest();
         addCaseRequest.setDefendants(List.of("name ".repeat(121)));
         addCaseRequest.setCourthouse(SOME_COURTHOUSE);
@@ -78,5 +78,15 @@ class CasesLoggerServiceImplTest {
 
         assertEquals(1, logs.size());
         assertEquals(logEntry, logs.get(0));
+    }
+
+    @Test
+    void testDefendantNotAdded() {
+        var defendant = "U20240603-103622, U20240603-03622";
+        casesLoggerService.defendantNotAdded(defendant, SOME_CASE_NUMBER);
+
+        List<String> logs = logCaptor.getInfoLogs();
+        assertEquals(1, logs.size());
+        assertEquals(String.format("Defendant not added to case: defendant=%s, case_number=%s", defendant, SOME_CASE_NUMBER), logs.get(0));
     }
 }

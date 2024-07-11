@@ -10,19 +10,20 @@ import java.util.concurrent.ConcurrentHashMap;
 @RequiredArgsConstructor
 public enum SecurityRoleEnum {
 
-    APPROVER(1),
+    JUDICIARY(1),
     REQUESTER(2),
-    JUDICIARY(3),
+    APPROVER(3),
     TRANSCRIBER(4),
     TRANSLATION_QA(5),
     RCJ_APPEALS(6),
-    XHIBIT(7),
-    CPP(8),
-    DAR_PC(9),
-    MID_TIER(10),
-    SUPER_ADMIN(11),
-    SUPER_USER(12),
-    DARTS(13);
+    SUPER_USER(7),
+    SUPER_ADMIN(8),
+    MEDIA_ACCESSOR(9),
+    DARTS(10),
+    XHIBIT(11),
+    CPP(12),
+    DAR_PC(13),
+    MID_TIER(14);
 
     private final Integer id;
 

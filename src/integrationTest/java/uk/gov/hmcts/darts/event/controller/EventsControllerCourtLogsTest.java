@@ -108,7 +108,7 @@ class EventsControllerCourtLogsTest extends IntegrationBase {
         Assertions.assertEquals(true, persistedEvent.getIsLogEntry());
         Assertions.assertNull(persistedEvent.getMessageId());
 
-        Assertions.assertNull(persistedEvent.getLegacyEventId());
+        Assertions.assertNull(persistedEvent.getEventId());
         Assertions.assertNull(persistedEvent.getLegacyVersionLabel());
     }
 

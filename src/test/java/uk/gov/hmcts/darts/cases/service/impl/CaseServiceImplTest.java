@@ -53,6 +53,7 @@ import java.time.ZoneOffset;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.regex.Pattern;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -122,7 +123,9 @@ class CaseServiceImplTest {
 
     @BeforeEach
     void setUp() {
-        mapper = new CasesMapper(retrieveCoreObjectService, hearingReportingRestrictionsRepository, caseRetentionRepository, authorisationApi);
+        Pattern unallocatedCaseRegex = Pattern.compile(".*\\d{8}-\\d{6}.*");
+        mapper = new CasesMapper(retrieveCoreObjectService, hearingReportingRestrictionsRepository, caseRetentionRepository, authorisationApi, logApi,
+                                 unallocatedCaseRegex);
         service = new CaseServiceImpl(
             mapper,
             annotationMapper,
