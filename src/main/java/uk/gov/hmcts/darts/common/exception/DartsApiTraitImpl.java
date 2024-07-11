@@ -90,10 +90,4 @@ public class DartsApiTraitImpl extends ResponseEntityExceptionHandler implements
 
         return new ResponseEntity<>(problemDetail, myheaders, HttpStatus.BAD_REQUEST);
     }
-
-    @Override
-    protected ResponseEntity<Object> handleMissingServletRequestPart(MissingServletRequestPartException ex, HttpHeaders headers, HttpStatusCode status,
-                                                                     WebRequest request) {
-        return super.handleMissingServletRequestPart(ex, headers, status, request);
-    }
 }
