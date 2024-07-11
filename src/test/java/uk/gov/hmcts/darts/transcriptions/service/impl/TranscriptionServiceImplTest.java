@@ -214,7 +214,7 @@ class TranscriptionServiceImplTest {
         TranscriptionEntity transcriptionEntity = transcriptionEntityArgumentCaptor.getValue();
         assertThat(transcriptionEntity.getHearing()).isNotNull();
         assertThat(transcriptionEntity.getCourtCase()).isNotNull();
-        assertThat(transcriptionEntity.getCourtroom()).isNull();
+        assertThat(transcriptionEntity.getCourtroom()).isEqualTo(mockHearing.getCourtroom());
         assertThat(transcriptionEntity.getHearingDate()).isNull();
         assertThat(transcriptionEntity.getTranscriptionStatus()).isEqualTo(requestedTranscriptionStatus);
         assertThat(transcriptionEntity.getTranscriptionType()).isEqualTo(mockTranscriptionType);
@@ -379,7 +379,7 @@ class TranscriptionServiceImplTest {
         TranscriptionEntity transcriptionEntity = transcriptionEntityArgumentCaptor.getValue();
         assertThat(transcriptionEntity.getHearing()).isNotNull();
         assertThat(transcriptionEntity.getCourtCase()).isNotNull();
-        assertThat(transcriptionEntity.getCourtroom()).isNull();
+        assertThat(transcriptionEntity.getCourtroom()).isEqualTo(mockHearing.getCourtroom());
         assertThat(transcriptionEntity.getHearingDate()).isNull();
         assertThat(transcriptionEntity.getTranscriptionStatus()).isEqualTo(requestedTranscriptionStatus);
         assertThat(transcriptionEntity.getTranscriptionType()).isEqualTo(mockTranscriptionType);
@@ -466,7 +466,7 @@ class TranscriptionServiceImplTest {
         TranscriptionEntity transcriptionEntity = transcriptionEntityArgumentCaptor.getValue();
         assertThat(transcriptionEntity.getHearing()).isNotNull();
         assertThat(transcriptionEntity.getCourtCase()).isNotNull();
-        assertThat(transcriptionEntity.getCourtroom()).isNull();
+        assertThat(transcriptionEntity.getCourtroom()).isEqualTo(mockHearing.getCourtroom());
         assertThat(transcriptionEntity.getHearingDate()).isNull();
         assertThat(transcriptionEntity.getTranscriptionStatus()).isEqualTo(requestedTranscriptionStatus);
         assertThat(transcriptionEntity.getTranscriptionType()).isEqualTo(mockTranscriptionType);
