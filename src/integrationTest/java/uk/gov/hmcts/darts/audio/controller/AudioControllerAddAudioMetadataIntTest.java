@@ -29,6 +29,7 @@ import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.enums.SecurityRoleEnum;
 import uk.gov.hmcts.darts.common.helper.MediaLinkedCaseHelper;
 import uk.gov.hmcts.darts.common.util.DateConverterUtil;
+import uk.gov.hmcts.darts.test.common.DataGenerator;
 import uk.gov.hmcts.darts.test.common.LogUtil;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 import uk.gov.hmcts.darts.testutils.stubs.AuthorisationStub;
@@ -74,10 +75,14 @@ class AudioControllerAddAudioMetadataIntTest extends IntegrationBase {
 
     private static final URI ENDPOINT = URI.create("/audios");
     private static final OffsetDateTime STARTED_AT = OffsetDateTime.of(2024, 10, 10, 10, 0, 0, 0, ZoneOffset.UTC);
-    private static final Path AUDIO_BINARY_PAYLOAD_1 = getPath("tests/audio/testAudio_160kb.mp2");
-    private static final Path AUDIO_BINARY_PAYLOAD_2 = getPath("tests/audio/testAudio_1920kb.mp2");
-    private static final Path AUDIO_BINARY_PAYLOAD_3 = getPath("tests/audio/testAudio_3248kb.mp2");
-    private static final Path AUDIO_BINARY_PAYLOAD_EXCEEDING_MAX_ALLOWABLE_SIZE = getPath("tests/audio/testAudio_5854kb.mp2");
+    private static final Path AUDIO_BINARY_PAYLOAD_1 = DataGenerator.createUniqueFile(DataSize.ofBytes(10),
+                                                                                      DataGenerator.FileType.MP2);
+    private static final Path AUDIO_BINARY_PAYLOAD_2 = DataGenerator.createUniqueFile(DataSize.ofBytes(10),
+                                                                                      DataGenerator.FileType.MP2);
+    private static final Path AUDIO_BINARY_PAYLOAD_3 = DataGenerator.createUniqueFile(DataSize.ofBytes(10),
+                                                                                      DataGenerator.FileType.MP2);
+    private static final Path AUDIO_BINARY_PAYLOAD_EXCEEDING_MAX_ALLOWABLE_SIZE = DataGenerator.createUniqueFile(DataSize.ofMegabytes(5),
+                                                                                                                 DataGenerator.FileType.MP2);
 
     @Value("${darts.audio.max-file-duration}")
     private Duration maxFileDuration;
@@ -131,8 +136,7 @@ class AudioControllerAddAudioMetadataIntTest extends IntegrationBase {
             "file",
             "audio.mp2",
             "audio/mpeg",
-            IOUtils.toByteArray(Files.newInputStream(Path.of(Thread.currentThread().getContextClassLoader()
-                                                                 .getResource("tests/audio/testAudio_5854kb.mp2").getFile())))
+            IOUtils.toByteArray(Files.newInputStream(AUDIO_BINARY_PAYLOAD_1))
         );
 
         MockMultipartFile metadataJson = new MockMultipartFile(
@@ -377,8 +381,7 @@ class AudioControllerAddAudioMetadataIntTest extends IntegrationBase {
             "file",
             "audio.mp2",
             "audio/mpeg",
-            IOUtils.toByteArray(Files.newInputStream(Path.of(Thread.currentThread().getContextClassLoader()
-                                                                 .getResource("tests/audio/testAudio_5854kb.mp2").getFile())))
+            IOUtils.toByteArray(Files.newInputStream(AUDIO_BINARY_PAYLOAD_1))
         );
 
         MockMultipartFile metadataJson = new MockMultipartFile(
@@ -413,8 +416,7 @@ class AudioControllerAddAudioMetadataIntTest extends IntegrationBase {
             "file",
             "audio.mp2",
             "audio/mpeg",
-            IOUtils.toByteArray(Files.newInputStream(Path.of(Thread.currentThread().getContextClassLoader()
-                                                                 .getResource("tests/audio/testAudio_5854kb.mp2").getFile())))
+            IOUtils.toByteArray(Files.newInputStream(AUDIO_BINARY_PAYLOAD_1))
         );
 
         MockMultipartFile metadataJson = new MockMultipartFile(
@@ -482,8 +484,7 @@ class AudioControllerAddAudioMetadataIntTest extends IntegrationBase {
             "file",
             "audio.mp2",
             "audio/mpeg",
-            IOUtils.toByteArray(Files.newInputStream(Path.of(Thread.currentThread().getContextClassLoader()
-                                                                 .getResource("tests/audio/testAudio_5854kb.mp2").getFile())))
+            IOUtils.toByteArray(Files.newInputStream(AUDIO_BINARY_PAYLOAD_EXCEEDING_MAX_ALLOWABLE_SIZE))
         );
 
         MockMultipartFile metadataJson = new MockMultipartFile(
@@ -518,8 +519,7 @@ class AudioControllerAddAudioMetadataIntTest extends IntegrationBase {
             "file",
             "audio.mp2",
             "audio/mpeg",
-            IOUtils.toByteArray(Files.newInputStream(Path.of(Thread.currentThread().getContextClassLoader()
-                                                                 .getResource("tests/audio/testAudio_5854kb.mp2").getFile())))
+            IOUtils.toByteArray(Files.newInputStream(AUDIO_BINARY_PAYLOAD_1))
         ) {
             private int fileSignatureValidationCallCount;
 
@@ -568,8 +568,7 @@ class AudioControllerAddAudioMetadataIntTest extends IntegrationBase {
             "file",
             "audio.mp2",
             "audio/mpeg",
-            IOUtils.toByteArray(Files.newInputStream(Path.of(Thread.currentThread().getContextClassLoader()
-                                                                 .getResource("tests/audio/testAudio_5854kb.mp2").getFile())))
+            IOUtils.toByteArray(Files.newInputStream(AUDIO_BINARY_PAYLOAD_1))
         );
 
         MockMultipartFile metadataJson = new MockMultipartFile(
@@ -603,8 +602,7 @@ class AudioControllerAddAudioMetadataIntTest extends IntegrationBase {
             "file",
             "audio.incorrect",
             "audio/mpeg",
-            IOUtils.toByteArray(Files.newInputStream(Path.of(Thread.currentThread().getContextClassLoader()
-                                                                 .getResource("tests/audio/testAudio_5854kb.mp2").getFile())))
+            IOUtils.toByteArray(Files.newInputStream(AUDIO_BINARY_PAYLOAD_1))
         );
 
         MockMultipartFile metadataJson = new MockMultipartFile(
@@ -638,8 +636,7 @@ class AudioControllerAddAudioMetadataIntTest extends IntegrationBase {
             "file",
             "audio.mp2",
             "audio/mpegincorrect",
-            IOUtils.toByteArray(Files.newInputStream(Path.of(Thread.currentThread().getContextClassLoader()
-                                                                 .getResource("tests/audio/testAudio_5854kb.mp2").getFile())))
+            IOUtils.toByteArray(Files.newInputStream(AUDIO_BINARY_PAYLOAD_1))
         );
 
         MockMultipartFile metadataJson = new MockMultipartFile(
@@ -707,8 +704,7 @@ class AudioControllerAddAudioMetadataIntTest extends IntegrationBase {
             "file",
             "audio.mp2",
             "audio/mpeg",
-            IOUtils.toByteArray(Files.newInputStream(Path.of(Thread.currentThread().getContextClassLoader()
-                                                                 .getResource("tests/audio/testAudio_5854kb.mp2").getFile())))
+            IOUtils.toByteArray(Files.newInputStream(AUDIO_BINARY_PAYLOAD_1))
         );
 
         MockMultipartFile metadataJson = new MockMultipartFile(
@@ -821,9 +817,9 @@ class AudioControllerAddAudioMetadataIntTest extends IntegrationBase {
         );
 
         return mockMvc.perform(
-                multipart(ENDPOINT)
-                    .file(audioFile)
-                    .file(metadataJson));
+            multipart(ENDPOINT)
+                .file(audioFile)
+                .file(metadataJson));
     }
 
     @SuppressWarnings({"PMD.SignatureDeclareThrowsException"})
@@ -873,11 +869,6 @@ class AudioControllerAddAudioMetadataIntTest extends IntegrationBase {
                             Level.INFO_INT)).isEmpty());
 
         return media.getId();
-    }
-
-    public static Path getPath(String location) {
-        return Path.of(Objects.requireNonNull(Thread.currentThread().getContextClassLoader()
-                                                  .getResource(location)).getFile());
     }
 
 }
