@@ -503,7 +503,7 @@ class CourthouseApiTest extends IntegrationBase {
             assertEquals(1, requesterGroups.size());
             SecurityGroupEntity requesterGroup = requesterGroups.get(0);
             assertEquals("INT-TEST_HAVERFORDWEST_REQUESTER", requesterGroup.getGroupName());
-            assertEquals("Haverfordwest Requestor", requesterGroup.getDisplayName());
+            assertEquals("Haverfordwest Requester", requesterGroup.getDisplayName());
 
             verify(mockUserIdentity).userHasGlobalAccess(Set.of(SUPER_ADMIN));
         });
