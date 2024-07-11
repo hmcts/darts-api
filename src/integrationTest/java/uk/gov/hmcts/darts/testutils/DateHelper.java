@@ -20,7 +20,7 @@ public final class DateHelper {
         return zonedDateTime.format(dateTimeFormatter);
     }
 
-    public static String convertSqlDateTimeToZonedDateTime(String dateTimeString) {
+    public static String convertSqlDateTimeToLocalDateTime(String dateTimeString) {
         LocalDateTime localDateTime = LocalDateTime.parse(dateTimeString, dateTimeFormatter);
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss'Z'");
 
