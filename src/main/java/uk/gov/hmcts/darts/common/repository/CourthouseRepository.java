@@ -24,7 +24,8 @@ public interface CourthouseRepository extends RevisionRepository<CourthouseEntit
         JOIN securityGroup.courthouseEntities courthouse
         JOIN securityGroup.securityRoleEntity securityRole
         WHERE (upper(userAccount.emailAddress) = upper(:emailAddress) or
-        userAccount.accountGuid = :guid)
+        userAccount.accountGuid = :guid) 
+        AND userAccount.active = true
         AND securityRole.id IN (:roleIds)
         """)
     List<CourthouseEntity> findAuthorisedCourthousesForEmailAddressOrGuid(String emailAddress, Set<Integer> roleIds, String guid);
