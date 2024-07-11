@@ -110,15 +110,31 @@ darts:
   automated-tasks-pod: ${AUTOMATED_TASK_MODE:true}
   api-pod: ${API_MODE:true}
   audio:
+    allowed-media-mime-types:
+      - "audio/mpeg"
+      - "application/octet-stream"
     allowed-media-formats:
       - "mpeg2"
       - "mp2"
-      - "audio/mpeg"
+    allowed-media-extensions:
+      - "mp2"
       - "a00"
       - "a01"
       - "a02"
       - "a03"
-      - "application/octet-stream"
+      - "a04"
+      - "a05"
+      - "a06"
+      - "a07"
+      - "b00"
+      - "b01"
+      - "b02"
+      - "b03"
+      - "b04"
+      - "b05"
+      - "b06"
+      - "b07"
+      - "b08"
     admin-search:
       max-results: 1000
     allowable-audio-gap-duration: 1s
