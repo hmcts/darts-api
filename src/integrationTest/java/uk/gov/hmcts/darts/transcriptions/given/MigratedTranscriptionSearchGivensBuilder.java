@@ -77,8 +77,8 @@ public class MigratedTranscriptionSearchGivensBuilder extends TranscriptionSearc
         var courtroom = someMinimalCourtRoom();
         dartsDatabase.save(courtroom.getCourthouse());
         dartsDatabase.save(courtroom);
-        transcription.setCourtroom(courtroom);
         transcription.setHearings(new ArrayList<>());
+        transcription.setCourtroom(courtroom);
         dartsDatabase.save(transcription.getCourtCase());
         dartsDatabase.save(transcription.getCreatedBy());
         return dartsDatabase.save(transcription);

@@ -137,6 +137,7 @@ class TranscriptionControllerRequestTranscriptionIntTest extends IntegrationBase
         TranscriptionRepository transcriptionRepository = dartsDatabase.getTranscriptionRepository();
         TranscriptionEntity transcriptionEntity = transcriptionRepository.findById(transcriptionId).orElseThrow();
         assertTrue(transcriptionEntity.getIsManualTranscription());
+        assertThat(transcriptionEntity.getCourtroom().getId()).isEqualTo(hearing.getCourtroom().getId());
         List<TranscriptionWorkflowEntity> transcriptionWorkflowEntities = transcriptionEntity.getTranscriptionWorkflowEntities();
         assertEquals(2, transcriptionWorkflowEntities.size());
         assertTranscriptionWorkflow(transcriptionWorkflowEntities.get(0),
