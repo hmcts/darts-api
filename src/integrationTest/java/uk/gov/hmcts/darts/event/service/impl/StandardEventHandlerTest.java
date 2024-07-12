@@ -221,8 +221,7 @@ class StandardEventHandlerTest extends HandlerTestData {
         dartsGateway.darNotificationReturnsSuccess();
 
         int numberOfThreads = 100;
-        ExecutorService service = Executors.newFixedThreadPool(5);
-        try {
+        try (ExecutorService service = Executors.newFixedThreadPool(5)) {
             CountDownLatch latch = new CountDownLatch(numberOfThreads);
 
             for (int i = 0; i < numberOfThreads; i++) {
@@ -241,8 +240,6 @@ class StandardEventHandlerTest extends HandlerTestData {
             latch.await(5, TimeUnit.SECONDS);
             assertEquals(1, dartsDatabase.getHearingRepository().findAll().size());
             assertEquals(numberOfThreads, dartsDatabase.getAllEvents().size());
-        } finally {
-            service.shutdown();
         }
     }
 
