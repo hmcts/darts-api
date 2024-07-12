@@ -11,6 +11,7 @@ import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.test.util.ReflectionTestUtils;
 import uk.gov.hmcts.darts.arm.service.ExternalObjectDirectoryService;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.casedocument.model.CourtCaseDocument;
@@ -46,6 +47,10 @@ class GenerateCaseDocumentSingleCaseProcessorImplTest {
     private static final String CASE_DOCUMENT_JSON = """
         {"createdDateTime":"2029-12-12T13:19:01.698514618Z", ...}
         """;
+    private static final String FILE_NAME_PREFIX = "CASE_DOCUMENT";
+    private static final String FILE_EXTENSION = "json";
+    private static final String FILE_NAME_FORMAT = "%s_%s.%s";
+
 
     @Mock
     ObjectMapper objectMapper;
@@ -91,6 +96,8 @@ class GenerateCaseDocumentSingleCaseProcessorImplTest {
     @BeforeEach
     void setup() {
         when(configuration.getUnstructuredContainerName()).thenReturn(UNSTRUCTURED_CONTAINER_NAME);
+        ReflectionTestUtils.setField(processor, "caseDocumentFilenamePrefix", FILE_NAME_PREFIX);
+        ReflectionTestUtils.setField(processor, "caseDocumentFileExtension", FILE_EXTENSION);
     }
 
     @SneakyThrows
@@ -105,6 +112,11 @@ class GenerateCaseDocumentSingleCaseProcessorImplTest {
         when(caseDocumentRepository.save(any())).thenReturn(caseDocumentEntity);
         when(checksumCalculator.calculate(any(InputStream.class))).thenReturn(CHECKSUM);
         when(caseRepository.getReferenceById(CASE_ID)).thenReturn(caseEntity);
+        var fileName = String.format(FILE_NAME_FORMAT,
+                                     FILE_NAME_PREFIX,
+                                     UNSTRUCTURED_BLOB_UUID.toString(),
+                                     FILE_EXTENSION
+        );
         // when
         processor.processGenerateCaseDocument(CASE_ID);
 
@@ -118,7 +130,7 @@ class GenerateCaseDocumentSingleCaseProcessorImplTest {
         CaseDocumentEntity savedCaseDocument = caseDocumentCaptor.getValue();
         assertThat(savedCaseDocument.getCourtCase()).isEqualTo(caseEntity);
         assertThat(savedCaseDocument.getChecksum()).isEqualTo(CHECKSUM);
-        assertThat(savedCaseDocument.getFileName()).isEqualTo(UNSTRUCTURED_BLOB_UUID.toString());
+        assertThat(savedCaseDocument.getFileName()).isEqualTo(fileName);
         assertThat(savedCaseDocument.getFileSize()).isEqualTo(CASE_DOCUMENT_JSON.getBytes(StandardCharsets.UTF_8).length);
         assertThat(savedCaseDocument.getFileType()).isEqualTo("application/json");
         assertThat(savedCaseDocument.getCreatedBy()).isEqualTo(user);
