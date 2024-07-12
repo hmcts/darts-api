@@ -7,10 +7,10 @@ import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.darts.transcriptions.component.TranscriberTranscriptsQuery;
 import uk.gov.hmcts.darts.transcriptions.model.TranscriberViewSummary;
+import uk.gov.hmcts.darts.transcriptions.util.TranscriptionUtil;
 
+import java.math.BigInteger;
 import java.time.Duration;
-import java.util.Calendar;
-import java.util.Date;
 import java.util.List;
 
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.TRANSCRIBER;
@@ -31,11 +31,10 @@ public class TranscriberTranscriptsQueryImpl implements TranscriberTranscriptsQu
     private final Duration dateLimit;
 
     @Value("${darts.transcription.search.max-result-size}")
-    private final String maxResultSize;
+    private final BigInteger maxResultSize;
 
     @Override
     public List<TranscriberViewSummary> getTranscriptRequests(Integer userId) {
-
 
         return jdbcTemplate.query(
             """
@@ -90,7 +89,7 @@ public class TranscriberTranscriptsQueryImpl implements TranscriberTranscriptsQu
             new MapSqlParameterSource()
                 .addValue(USR_ID, userId)
                 .addValue(ROL_ID, TRANSCRIBER.getId())
-                .addValue(DATE_LIMIT, getDateToLimitResults())
+                .addValue(DATE_LIMIT, TranscriptionUtil.getDateToLimitResults(dateLimit))
                 .addValue(MAX_RESULT_SIZE, maxResultSize),
             transcriberViewSummaryRowMapper
         );
@@ -98,6 +97,7 @@ public class TranscriberTranscriptsQueryImpl implements TranscriberTranscriptsQu
 
     @Override
     public List<TranscriberViewSummary> getTranscriberTranscriptions(Integer userId) {
+
         return jdbcTemplate.query(
             """
                 -- Your work > To do (transcriber-view?assigned=true)
@@ -225,7 +225,7 @@ public class TranscriberTranscriptsQueryImpl implements TranscriberTranscriptsQu
             new MapSqlParameterSource()
                 .addValue(USR_ID, userId)
                 .addValue(ROL_ID, TRANSCRIBER.getId())
-                .addValue(DATE_LIMIT, getDateToLimitResults())
+                .addValue(DATE_LIMIT, TranscriptionUtil.getDateToLimitResults(dateLimit))
                 .addValue(MAX_RESULT_SIZE, maxResultSize),
             transcriberViewSummaryRowMapper
         );
@@ -285,14 +285,6 @@ public class TranscriberTranscriptsQueryImpl implements TranscriberTranscriptsQu
                 .addValue("trs_id", transcriptionStatusId),
             Integer.class
         );
-    }
-
-    private Date getDateToLimitResults() {
-        Calendar cal = Calendar.getInstance();
-        cal.setTime(Calendar.getInstance().getTime());
-        cal.add(Calendar.DAY_OF_MONTH, - (int) dateLimit.toDays());
-
-        return cal.getTime();
     }
 
 }

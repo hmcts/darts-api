@@ -14,7 +14,7 @@ import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
-import uk.gov.hmcts.darts.testutils.IntegrationBase;
+import uk.gov.hmcts.darts.testutils.PostgresIntegrationBase;
 
 import java.net.URI;
 
@@ -26,7 +26,7 @@ import static uk.gov.hmcts.darts.testutils.DateHelper.convertSqlDateTimeToLocalD
 import static uk.gov.hmcts.darts.testutils.DateHelper.todaysDateMinusDaysFormattedForSql;
 
 @AutoConfigureMockMvc
-class TranscriptionControllerGetTranscriberTranscriptsIntTest extends IntegrationBase {
+class TranscriptionControllerGetTranscriberTranscriptsIntTest extends PostgresIntegrationBase {
 
     private static final URI ENDPOINT_URI = URI.create("/transcriptions/transcriber-view");
     private static final String USER_ID_HEADER = "user_id";
@@ -356,7 +356,10 @@ class TranscriptionControllerGetTranscriberTranscriptsIntTest extends Integratio
                                 INSERT INTO darts.hearing (hea_id, cas_id, ctr_id, hearing_date, scheduled_start_time, hearing_is_actual,
                                 created_ts, created_by, last_modified_ts, last_modified_by)
                                 VALUES (-1, -1, -1, '2023-11-17', NULL, true, NULL, NULL, NULL, NULL);
-
+                                
+                                INSERT INTO darts.security_group (grp_id, rol_id, group_name, global_access, display_state)
+                                VALUES (-4, 4, 'Test Transcriber', false, true);
+                                
                                 INSERT INTO darts.user_account (usr_id, dm_user_s_object_id, user_name, user_full_name, user_email_address, description,
                                 is_active, created_ts,
                                 last_modified_ts, last_login_ts, last_modified_by, created_by, account_guid, is_system_user)
@@ -453,7 +456,7 @@ class TranscriptionControllerGetTranscriberTranscriptsIntTest extends Integratio
                                 INSERT INTO darts.transcription (tra_id, ctr_id, trt_id, transcription_object_id, requested_by, start_ts, end_ts,
                                 created_ts, last_modified_ts, last_modified_by, created_by, tru_id, trs_id, hearing_date,
                                 is_manual_transcription, hide_request_from_requestor)
-                                VALUES (121, NULL, 9, NULL, NULL, '$TODAYS_DATE', '$TODAYS_DATE', '$TODAYS_DATE', '$TODAYS_DATE', -10, 
+                                VALUES (121, NULL, 9, NULL, NULL, '$TODAYS_DATE', '$TODAYS_DATE', '$TODAYS_DATE', '$TODAYS_DATE', -10,
                                 -10, $URGENCY, 6, NULL, true, false);
                                 INSERT INTO darts.case_transcription_ae (tra_id, cas_id) VALUES (121,-1);
                                 INSERT INTO darts.hearing_transcription_ae (tra_id, hea_id) VALUES (121,-1);
@@ -486,6 +489,7 @@ class TranscriptionControllerGetTranscriberTranscriptsIntTest extends Integratio
                                 DELETE FROM darts.security_group_courthouse_ae WHERE grp_id=-4 AND cth_id=-1;
                                 DELETE FROM darts.security_group_user_account_ae WHERE usr_id=-10 AND grp_id=-4;
                                 DELETE FROM darts.user_account WHERE usr_id=-10;
+                                DELETE FROM darts.security_group WHERE grp_id=-4;
 
                                 DELETE FROM darts.hearing WHERE hea_id=-1;
                                 DELETE FROM darts.court_case WHERE cas_id=-1;
