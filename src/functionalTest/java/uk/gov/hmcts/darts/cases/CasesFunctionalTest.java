@@ -76,7 +76,7 @@ class CasesFunctionalTest extends FunctionalTest {
                 "<<caseNumber>>"
               ],
               "event_text": "some text for the event",
-              "date_time": "2023-08-08T14:01:06.085Z"
+              "date_time": "2023-08-08T14:01:06Z"
             }""";
 
         eventBody = eventBody.replace("<<courthouse>>", COURTHOUSE);
