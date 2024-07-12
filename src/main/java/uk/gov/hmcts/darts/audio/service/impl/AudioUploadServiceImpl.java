@@ -1,5 +1,6 @@
 package uk.gov.hmcts.darts.audio.service.impl;
 
+import com.google.common.io.ByteStreams;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -20,7 +21,6 @@ import uk.gov.hmcts.darts.common.entity.MediaEntity;
 import uk.gov.hmcts.darts.common.entity.MediaLinkedCaseEntity;
 import uk.gov.hmcts.darts.common.entity.ObjectRecordStatusEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
-import uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.common.repository.CourtLogEventRepository;
 import uk.gov.hmcts.darts.common.repository.ExternalLocationTypeRepository;
@@ -42,14 +42,13 @@ import java.io.IOException;
 import java.security.DigestInputStream;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import static org.apache.commons.collections4.CollectionUtils.isEmpty;
 import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
 import static uk.gov.hmcts.darts.audio.exception.AudioApiError.FAILED_TO_UPLOAD_AUDIO_FILE;
 import static uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum.INBOUND;
@@ -78,7 +77,7 @@ public class AudioUploadServiceImpl implements AudioUploadService {
 
     @Override
     @Transactional
-    public void addAudio(MultipartFile audioFileStream, AddAudioMetadataRequest addAudioMetadataRequest) {
+    public void addAudio(MultipartFile audioMultipartFile, AddAudioMetadataRequest addAudioMetadataRequest) {
 
         log.info("Adding audio using metadata {}", addAudioMetadataRequest.toString());
 
@@ -87,62 +86,47 @@ public class AudioUploadServiceImpl implements AudioUploadService {
         addAudioMetadataRequest.setCases(distinctCaseList);
 
         List<MediaEntity> duplicatesToBeSuperseded = getLatestDuplicateMediaFiles(addAudioMetadataRequest);
-        List<MediaEntity> duplicateMediaWithDifferentFileSizes = filterAudioFilesWithDifferentFileSizes(duplicatesToBeSuperseded,
-                                                                                                        addAudioMetadataRequest.getFileSize());
-        if (isNotEmpty(duplicatesToBeSuperseded) && duplicateMediaWithDifferentFileSizes.isEmpty()) {
-            log.info("Duplicate audio upload detected with no difference in file size. Returning 200 with no changes ");
+        String incomingChecksum = computeChecksum(audioMultipartFile);
+        List<MediaEntity> duplicatesWithDifferentChecksum = filterForMediaWithMismatchingChecksum(duplicatesToBeSuperseded, incomingChecksum);
+
+        if (isNotEmpty(duplicatesToBeSuperseded) && isEmpty(duplicatesWithDifferentChecksum)) {
+            log.info("Exact duplicate detected based upon media metadata and checksum. Returning 200 with no changes ");
             for (MediaEntity entity : duplicatesToBeSuperseded) {
                 log.info("Duplicate media id {}", entity.getId());
             }
             return;
         }
 
-        UUID externalLocation = null;
-        String checksum = null;
-
         // upload to the blob store
         ObjectRecordStatusEntity objectRecordStatusEntity = objectRecordStatusRepository.getReferenceById(STORED.getId());
-        Optional<AudioBlobUploadDetails> detailsOption = saveAudioToInbound(audioFileStream);
-        if (detailsOption.isEmpty()) {
-            objectRecordStatusEntity = objectRecordStatusRepository.getReferenceById(ObjectRecordStatusEnum.FAILURE_FILE_NOT_FOUND.getId());
-        } else {
-            externalLocation = detailsOption.get().uuid();
-            checksum = detailsOption.get().checksum();
-        }
+        UUID externalLocation = saveAudioToInbound(audioMultipartFile);
 
         UserAccountEntity currentUser = userIdentity.getUserAccount();
 
         List<MediaEntity> mediaToSupersede = new ArrayList<>();
 
         // if we have not found any duplicate audio files to process lets add a new one
-        if (duplicateMediaWithDifferentFileSizes.isEmpty()) {
+        if (isEmpty(duplicatesWithDifferentChecksum)) {
             log.info("No duplicates found. Uploading new file");
         } else {
-            mediaToSupersede.addAll(duplicateMediaWithDifferentFileSizes);
-            log.info("Duplicate audio file has been found with difference in file size");
+            mediaToSupersede.addAll(duplicatesWithDifferentChecksum);
+            log.info("Duplicate audio file has been found with difference in checksum");
         }
 
         // version the file upload to the database
         versionUpload(mediaToSupersede, addAudioMetadataRequest,
-                      externalLocation, checksum, objectRecordStatusEntity, currentUser);
-
+                      externalLocation, incomingChecksum, objectRecordStatusEntity, currentUser);
     }
 
-    private Optional<AudioBlobUploadDetails> saveAudioToInbound(MultipartFile audioFileStream) {
-        try (var digestInputStream = new DigestInputStream(new BufferedInputStream(audioFileStream.getInputStream()), audioDigest.getMessageDigest())) {
-            if (!audioFileStream.isEmpty()) {
-                UUID externalLocation = dataManagementApi.saveBlobDataToInboundContainer(digestInputStream);
-                String checksum = fileContentChecksum.calculate(digestInputStream);
-                return Optional.of(new AudioBlobUploadDetails(externalLocation, checksum));
-            }
+    private UUID saveAudioToInbound(MultipartFile audioFileStream) {
+        try (var bufferedInputStream = new BufferedInputStream(audioFileStream.getInputStream())) {
+            return dataManagementApi.saveBlobDataToInboundContainer(bufferedInputStream);
         } catch (IOException e) {
             throw new DartsApiException(FAILED_TO_UPLOAD_AUDIO_FILE, e);
         }
-
-        return Optional.empty();
     }
 
-    private void versionUpload(List<MediaEntity> mediaToReplace,
+    private void versionUpload(List<MediaEntity> mediaToSupersede,
                                AddAudioMetadataRequest addAudioMetadataRequest,
                                UUID externalLocation, String checksum,
                                ObjectRecordStatusEntity objectRecordStatusEntity,
@@ -150,16 +134,15 @@ public class AudioUploadServiceImpl implements AudioUploadService {
 
         MediaEntity newMediaEntity = mapper.mapToMedia(addAudioMetadataRequest, userAccount);
         newMediaEntity.setChecksum(checksum);
-        if (mediaToReplace.isEmpty()) {
-            log.info("New file uploaded with filename {}", newMediaEntity.getMediaFile());
-
+        if (mediaToSupersede.isEmpty()) {
             mediaRepository.save(newMediaEntity);
             newMediaEntity.setChronicleId(String.valueOf(newMediaEntity.getId()));
+            log.info("First version of media added with filename {}", newMediaEntity.getMediaFile());
         } else {
-            MediaEntity oldMediaEntity = mediaToReplace.stream().max(Comparator.comparing(MediaEntity::getCreatedDateTime)).get();
+            MediaEntity oldMediaEntity = mediaToSupersede.stream().max(Comparator.comparing(MediaEntity::getCreatedDateTime)).get();
             newMediaEntity.setChronicleId(oldMediaEntity.getChronicleId());
             newMediaEntity.setAntecedentId(String.valueOf(oldMediaEntity.getId()));
-            log.info("Uploading new version of duplicate filename {} with antecedent media id {}", newMediaEntity.getMediaFile(),
+            log.info("Revised version of media added with filename {} and antecedent media id {}", newMediaEntity.getMediaFile(),
                      newMediaEntity.getId().toString());
         }
         mediaRepository.save(newMediaEntity);
@@ -175,24 +158,26 @@ public class AudioUploadServiceImpl implements AudioUploadService {
             newMediaEntity,
             objectRecordStatusEntity
         );
-        for (MediaEntity mediaEntity : mediaToReplace) {
+        for (MediaEntity mediaEntity : mediaToSupersede) {
             deleteMediaLinking(mediaEntity);
         }
 
         logApi.audioUploaded(addAudioMetadataRequest);
     }
 
-    private List<MediaEntity> filterAudioFilesWithDifferentFileSizes(Collection<MediaEntity> mediaEntities, long expectedFileSize) {
-        List<MediaEntity> mediaEntitiesToVersion = new ArrayList<>();
-        for (MediaEntity mediaEntity : mediaEntities) {
-
-            // if file size is not expected
-            if (expectedFileSize != mediaEntity.getFileSize()) {
-                mediaEntitiesToVersion.add(mediaEntity);
-            }
+    private String computeChecksum(MultipartFile audioFileStream) {
+        try (var digestInputStream = new DigestInputStream(new BufferedInputStream(audioFileStream.getInputStream()), audioDigest.getMessageDigest())) {
+            ByteStreams.exhaust(digestInputStream); // We must consume the stream before calculating the checksum
+            return fileContentChecksum.calculate(digestInputStream);
+        } catch (IOException e) {
+            throw new DartsApiException(FAILED_TO_UPLOAD_AUDIO_FILE);
         }
+    }
 
-        return mediaEntitiesToVersion;
+    private List<MediaEntity> filterForMediaWithMismatchingChecksum(List<MediaEntity> mediaEntities, String checksum) {
+        return mediaEntities.stream()
+            .filter(mediaEntity -> !checksum.equals(mediaEntity.getChecksum()))
+            .toList();
     }
 
     private List<MediaEntity> filterMediaEntitiesWithIdenticalCaseList(List<String> caseNumbersToLookFor, List<MediaEntity> mediaEntities) {
@@ -316,6 +301,4 @@ public class AudioUploadServiceImpl implements AudioUploadService {
         externalObjectDirectoryRepository.save(externalObjectDirectoryEntity);
     }
 
-    record AudioBlobUploadDetails(UUID uuid, String checksum) {
-    }
 }
