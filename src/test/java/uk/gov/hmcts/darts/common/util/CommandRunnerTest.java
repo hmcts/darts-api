@@ -19,24 +19,18 @@ class CommandRunnerTest {
 
     @Test
     void callSuccessWhenCorrectCommandIsSent() throws Exception {
-        ExecutorService executorService = Executors.newSingleThreadExecutor();
-        try {
+        try (final ExecutorService executorService = Executors.newSingleThreadExecutor()) {
             Future<String> future = executorService.submit(new CommandRunner(new CommandLine("hostname")));
             String threadResponse = future.get();
             assertEquals("0", threadResponse);
-        } finally {
-            executorService.shutdown();
         }
     }
 
     @Test
     void callFailWhenWrongCommandIsSent() {
-        ExecutorService executorService = Executors.newSingleThreadExecutor();
-        try {
+        try (final ExecutorService executorService = Executors.newSingleThreadExecutor()) {
             Future<String> future = executorService.submit(new CommandRunner(new CommandLine("Dummy Command")));
             assertThrows(ExecutionException.class, future::get);
-        } finally {
-            executorService.shutdown();
         }
     }
 }
