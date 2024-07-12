@@ -1,12 +1,16 @@
 package uk.gov.hmcts.darts.transcriptions.component.impl;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.darts.transcriptions.component.YourTranscriptsQuery;
 import uk.gov.hmcts.darts.transcriptions.model.YourTranscriptsSummary;
+import uk.gov.hmcts.darts.transcriptions.util.TranscriptionUtil;
 
+import java.math.BigInteger;
+import java.time.Duration;
 import java.util.List;
 
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.APPROVER;
@@ -18,6 +22,19 @@ public class YourTranscriptsQueryImpl implements YourTranscriptsQuery {
 
     private final NamedParameterJdbcTemplate jdbcTemplate;
     private final YourTranscriptsSummaryRowMapper yourTranscriptsSummaryRowMapper;
+
+    private static final String USR_ID = "usr_id";
+    private static final String ROL_ID = "rol_id";
+    private static final String TRANSCRIPTION_STATUS_ID = "trs_id";
+    private static final String INCLUDE_HIDDEN_FROM_REQUESTOR = "include_hidden_from_requester";
+    private static final String DATE_LIMIT = "date_limit";
+    private static final String MAX_RESULT_SIZE = "max_result_size";
+
+    @Value("${darts.transcription.search.date-limit}")
+    private final Duration dateLimit;
+
+    @Value("${darts.transcription.search.max-result-size}")
+    private final BigInteger maxResultSize;
 
     @Override
     public List<YourTranscriptsSummary> getRequesterTranscriptions(Integer userId, Boolean includeHiddenFromRequester) {
@@ -64,6 +81,7 @@ public class YourTranscriptsQueryImpl implements YourTranscriptsQuery {
                         WHERE trd.tra_id = tra.tra_id
                     )
                 )
+                AND trw.workflow_ts >= :date_limit
 
                 UNION
 
@@ -111,11 +129,15 @@ public class YourTranscriptsQueryImpl implements YourTranscriptsQuery {
                         WHERE trd.tra_id = tra.tra_id
                     )
                 )
+                AND trw.workflow_ts >= :date_limit
                 ORDER BY transcription_id DESC
+                LIMIT :max_result_size
                 """,
             new MapSqlParameterSource()
-                .addValue("usr_id", userId)
-                .addValue("include_hidden_from_requester", includeHiddenFromRequester),
+                .addValue(USR_ID, userId)
+                .addValue(INCLUDE_HIDDEN_FROM_REQUESTOR, includeHiddenFromRequester)
+                .addValue(DATE_LIMIT, TranscriptionUtil.getDateToLimitResults(dateLimit))
+                .addValue(MAX_RESULT_SIZE, maxResultSize),
             yourTranscriptsSummaryRowMapper
         );
     }
@@ -173,6 +195,7 @@ public class YourTranscriptsQueryImpl implements YourTranscriptsQuery {
                         WHERE trd.tra_id = tra.tra_id
                     )
                 )
+                AND trw.workflow_ts >= :date_limit
 
                 UNION
 
@@ -228,11 +251,15 @@ public class YourTranscriptsQueryImpl implements YourTranscriptsQuery {
                         WHERE trd.tra_id = tra.tra_id
                     )
                 )
+                AND trw.workflow_ts >= :date_limit
                 ORDER BY transcription_id DESC
+                LIMIT :max_result_size
                 """,
             new MapSqlParameterSource("usr_id", userId)
-                .addValue("rol_id", APPROVER.getId())
-                .addValue("trs_id", AWAITING_AUTHORISATION.getId()),
+                .addValue(ROL_ID, APPROVER.getId())
+                .addValue(TRANSCRIPTION_STATUS_ID, AWAITING_AUTHORISATION.getId())
+                .addValue(DATE_LIMIT, TranscriptionUtil.getDateToLimitResults(dateLimit))
+                .addValue(MAX_RESULT_SIZE, maxResultSize),
             yourTranscriptsSummaryRowMapper
         );
     }
