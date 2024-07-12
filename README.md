@@ -14,7 +14,7 @@
 
 ## Prerequisites
 
-- [Java 17](https://www.oracle.com/java)
+- [Java 21](https://www.oracle.com/java)
 - ffmpeg
 
 ### Environment variables
