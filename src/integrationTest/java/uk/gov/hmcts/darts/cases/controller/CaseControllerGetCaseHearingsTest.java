@@ -3,29 +3,32 @@ package uk.gov.hmcts.darts.cases.controller;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 import org.skyscreamer.jsonassert.JSONAssert;
 import org.skyscreamer.jsonassert.JSONCompareMode;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
-import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.transaction.annotation.Transactional;
-import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
+import uk.gov.hmcts.darts.authorisation.exception.AuthorisationError;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
+import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
 import uk.gov.hmcts.darts.common.util.DateConverterUtil;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
+import uk.gov.hmcts.darts.testutils.stubs.SuperAdminUserStub;
 
 import java.time.OffsetDateTime;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @AutoConfigureMockMvc
@@ -41,13 +44,24 @@ class CaseControllerGetCaseHearingsTest extends IntegrationBase {
     private static final String SOME_COURTROOM = "some-courtroom";
     private static final String SOME_CASE_ID = "1";
 
-    @MockBean
-    private UserIdentity mockUserIdentity;
-
     private HearingEntity hearingEntity;
+
+    @Autowired
+    private SuperAdminUserStub superAdminUserStub;
+
+    private Authentication authentication;
+
+    @Autowired
+    private UserAccountRepository userAccountRepository;
+
+    private UserAccountEntity testUser;
 
     @BeforeEach
     void setUp() {
+        authentication = Mockito.mock(Authentication.class);
+        SecurityContextHolder.getContext()
+            .setAuthentication(authentication);
+
         hearingEntity = dartsDatabase.givenTheDatabaseContainsCourtCaseWithHearingAndCourthouseWithRoom(
             SOME_CASE_ID,
             SOME_COURTHOUSE,
@@ -58,14 +72,21 @@ class CaseControllerGetCaseHearingsTest extends IntegrationBase {
         CourthouseEntity courthouseEntity = hearingEntity.getCourtroom().getCourthouse();
         assertEquals(SOME_COURTHOUSE, courthouseEntity.getCourthouseName());
 
-        UserAccountEntity testUser = dartsDatabase.getUserAccountStub()
-            .createAuthorisedIntegrationTestUser(courthouseEntity);
-        when(mockUserIdentity.getUserAccount()).thenReturn(testUser);
+        testUser = dartsDatabase.getUserAccountStub()
+            .createAuthorisedIntegrationTestUser(false, courthouseEntity);
+        superAdminUserStub.setupUserAsAuthorised(authentication, testUser);
     }
 
     @Test
     void casesSearchGetEndpointShouldReturnForbidden() throws Exception {
-        when(mockUserIdentity.getUserAccount()).thenReturn(null);
+        Mockito.reset(authentication);
+
+        // a user that does not exist in the db
+        UserAccountEntity userAccountEntity = new UserAccountEntity();
+        userAccountEntity.setId(-1212);
+        userAccountEntity.setEmailAddress("-1212");
+
+        superAdminUserStub.setupUserAsAuthorised(authentication, userAccountEntity);
 
         MockHttpServletRequestBuilder requestBuilder = get(endpointUrl, hearingEntity.getCourtCase().getId());
 
@@ -81,7 +102,6 @@ class CaseControllerGetCaseHearingsTest extends IntegrationBase {
 
     @Test
     void casesSearchGetEndpoint() throws Exception {
-
         MockHttpServletRequestBuilder requestBuilder = get(endpointUrl, "25");
 
         mockMvc.perform(requestBuilder).andExpect(status().isNotFound());
@@ -90,22 +110,20 @@ class CaseControllerGetCaseHearingsTest extends IntegrationBase {
 
     @Test
     void casesSearchGetEndpointOneObjectReturned() throws Exception {
-
         HearingEntity hearingEntity = dartsDatabase.getHearingRepository().findAll().get(0);
 
         MockHttpServletRequestBuilder requestBuilder = get(endpointUrl, hearingEntity.getCourtCase().getId());
 
         mockMvc.perform(requestBuilder).andExpect(status().isOk())
-            .andExpect(MockMvcResultMatchers.jsonPath("$[0].id", Matchers.is(hearingEntity.getId())))
-            .andExpect(MockMvcResultMatchers.jsonPath("$[0].date", Matchers.is(Matchers.notNullValue())))
-            .andExpect(MockMvcResultMatchers.jsonPath("$[0].judges", Matchers.is(Matchers.notNullValue())))
-            .andExpect(MockMvcResultMatchers.jsonPath("$[0].courtroom", Matchers.is(SOME_COURTROOM)));
+            .andExpect(jsonPath("$[0].id", Matchers.is(hearingEntity.getId())))
+            .andExpect(jsonPath("$[0].date", Matchers.is(Matchers.notNullValue())))
+            .andExpect(jsonPath("$[0].judges", Matchers.is(Matchers.notNullValue())))
+            .andExpect(jsonPath("$[0].courtroom", Matchers.is(SOME_COURTROOM)));
 
     }
 
     @Test
     void casesSearchGetEndpointMultipleObjectsReturned() throws Exception {
-
         dartsDatabase.givenTheDatabaseContainsCourtCaseWithHearingAndCourthouseWithRoom(
             SOME_CASE_ID,
             SOME_COURTHOUSE,
@@ -122,22 +140,21 @@ class CaseControllerGetCaseHearingsTest extends IntegrationBase {
         MockHttpServletRequestBuilder requestBuilder = get(endpointUrl, hearingEntity.getCourtCase().getId());
 
         mockMvc.perform(requestBuilder).andExpect(status().isOk())
-            .andExpect(MockMvcResultMatchers.jsonPath("$[0].id", Matchers.is(hearingEntity.getId())))
-            .andExpect(MockMvcResultMatchers.jsonPath("$[0].date", Matchers.is(Matchers.notNullValue())))
-            .andExpect(MockMvcResultMatchers.jsonPath("$[0].judges", Matchers.is(Matchers.notNullValue())))
-            .andExpect(MockMvcResultMatchers.jsonPath("$[0].courtroom", Matchers.is(SOME_COURTROOM)))
-            .andExpect(MockMvcResultMatchers.jsonPath("$[1].id", Matchers.is(hearingEntity2.getId())))
-            .andExpect(MockMvcResultMatchers.jsonPath("$[1].courtroom", Matchers.is("CR1")));
+            .andExpect(jsonPath("$[0].id", Matchers.is(hearingEntity.getId())))
+            .andExpect(jsonPath("$[0].date", Matchers.is(Matchers.notNullValue())))
+            .andExpect(jsonPath("$[0].judges", Matchers.is(Matchers.notNullValue())))
+            .andExpect(jsonPath("$[0].courtroom", Matchers.is(SOME_COURTROOM)))
+            .andExpect(jsonPath("$[1].id", Matchers.is(hearingEntity2.getId())))
+            .andExpect(jsonPath("$[1].courtroom", Matchers.is("CR1")));
 
     }
 
     @Test
     void casesSearchGetEndpointNoObjectsReturned() throws Exception {
-
         MockHttpServletRequestBuilder requestBuilder = get(endpointUrl, "25");
 
         mockMvc.perform(requestBuilder).andExpect(status().isNotFound()).andExpect(
-            MockMvcResultMatchers.jsonPath(
+            jsonPath(
                 "$[0]").doesNotExist());
 
     }
@@ -155,9 +172,21 @@ class CaseControllerGetCaseHearingsTest extends IntegrationBase {
         MockHttpServletRequestBuilder requestBuilder = get(endpointUrl, courtCase.getId());
 
         mockMvc.perform(requestBuilder).andExpect(status().isOk())
-            .andExpect(MockMvcResultMatchers.jsonPath(
+            .andExpect(jsonPath(
                 "$.case_id").doesNotExist());
 
+    }
+
+    @Test
+    void casesSearchWithInactiveUser() throws Exception {
+
+        testUser.setActive(false);
+        userAccountRepository.save(testUser);
+
+        MockHttpServletRequestBuilder requestBuilder = get(endpointUrl, hearingEntity.getCourtCase().getId());
+
+        mockMvc.perform(requestBuilder).andExpect(status().isForbidden()).andExpect(jsonPath("$.type").value(
+            AuthorisationError.USER_DETAILS_INVALID.getType().toString()));
     }
 
 }

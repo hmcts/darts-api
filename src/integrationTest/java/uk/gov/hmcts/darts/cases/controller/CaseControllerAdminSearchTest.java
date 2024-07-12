@@ -181,7 +181,6 @@ class CaseControllerAdminSearchTest extends IntegrationBase {
         assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
     }
 
-
     private void setupUserAccountAndSecurityGroup() {
         var securityGroup = SecurityGroupTestData.buildGroupForRole(SUPER_ADMIN);
         securityGroup.setGlobalAccess(true);

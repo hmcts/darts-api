@@ -66,6 +66,7 @@ public class TranscriberTranscriptsQueryImpl implements TranscriberTranscriptsQu
                     JOIN darts.security_group_courthouse_ae grc ON grp.grp_id = grc.grp_id
                     WHERE usr.usr_id = :usr_id
                     AND grp.rol_id = :rol_id
+                    AND usr.is_active = true
                 )
                 JOIN darts.hearing_transcription_ae hearing_transcription ON tra.tra_id = hearing_transcription.tra_id
                 JOIN darts.hearing hea ON hearing_transcription.hea_id = hea.hea_id
@@ -126,6 +127,7 @@ public class TranscriberTranscriptsQueryImpl implements TranscriberTranscriptsQu
                     JOIN darts.security_group_courthouse_ae grc ON grp.grp_id = grc.grp_id
                     WHERE usr.usr_id = :usr_id
                     AND grp.rol_id = :rol_id
+                    AND usr.is_active = true
                 )
                 JOIN darts.hearing_transcription_ae hearing_transcription ON tra.tra_id = hearing_transcription.tra_id
                 JOIN darts.hearing hea ON hearing_transcription.hea_id = hea.hea_id
@@ -189,6 +191,7 @@ public class TranscriberTranscriptsQueryImpl implements TranscriberTranscriptsQu
                     JOIN darts.security_group_courthouse_ae grc ON grp.grp_id = grc.grp_id
                     WHERE usr.usr_id = :usr_id
                     AND grp.rol_id = :rol_id
+                    AND usr.is_active = true
                 )
                 JOIN darts.hearing_transcription_ae hearing_transcription ON tra.tra_id = hearing_transcription.tra_id
                 JOIN darts.hearing hea ON hearing_transcription.hea_id = hea.hea_id
@@ -251,6 +254,7 @@ public class TranscriberTranscriptsQueryImpl implements TranscriberTranscriptsQu
                         where
                             user_account.usr_id=:usr_id
                             and security_group.rol_id in (:rol_id)
+                            and user_account.is_Active=true
                 """,
             new MapSqlParameterSource(USR_ID, userId)
                 .addValue(ROL_ID, roleId),

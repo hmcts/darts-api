@@ -25,7 +25,7 @@ public interface UserAccountMapper {
 
     @Mappings({
         @Mapping(source = "id", target = "id"),
-        @Mapping(source = "userName", target = "fullName"),
+        @Mapping(source = "userFullName", target = "fullName"),
         @Mapping(source = "emailAddress", target = "emailAddress"),
         @Mapping(source = "userDescription", target = "description"),
         @Mapping(source = "active", target = "active")

@@ -159,7 +159,7 @@ class PostUserIntTest extends IntegrationBase {
             UserAccountEntity createdUserAccountEntity = dartsDatabase.getUserAccountRepository()
                 .findById(userId)
                 .orElseThrow();
-            assertEquals(USERNAME, createdUserAccountEntity.getUserName());
+            assertEquals(USERNAME, createdUserAccountEntity.getUserFullName());
             assertEquals(EMAIL_ADDRESS, createdUserAccountEntity.getEmailAddress());
             assertEquals(DESCRIPTION, createdUserAccountEntity.getUserDescription());
             assertEquals(true, createdUserAccountEntity.isActive());

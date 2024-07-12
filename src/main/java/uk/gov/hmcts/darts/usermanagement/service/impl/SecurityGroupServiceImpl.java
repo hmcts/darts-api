@@ -191,7 +191,7 @@ public class SecurityGroupServiceImpl implements SecurityGroupService {
 
         // check that users exist
         List<UserAccountEntity> patchUsers = userAccountRepository
-            .findByIdIn(securityGroupPatch.getUserIds());
+            .findByIdInAndActive(securityGroupPatch.getUserIds(), true);
 
         if (userIds.size() > 0 && patchUsers.isEmpty()) {
             throw new DartsApiException(

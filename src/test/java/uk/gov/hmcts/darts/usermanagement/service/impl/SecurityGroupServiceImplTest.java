@@ -4,6 +4,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.darts.audit.api.AuditApi;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
@@ -394,7 +395,7 @@ class SecurityGroupServiceImplTest {
         // three user ids added to patch - 11 is a system user
         securityGroupPatch.setUserIds(Arrays.asList(10,11,12));
 
-        when(userAccountRepository.findByIdIn(any()))
+        when(userAccountRepository.findByIdInAndActive(any(), Mockito.eq(true)))
             .thenReturn(Arrays.asList(userAccountEntity10, userAccountEntity11, userAccountEntity12));
         when(userAccountRepository.findById(2)).thenReturn(Optional.of(userAccountEntity2));
         when(userAccountRepository.findById(3)).thenReturn(Optional.of(userAccountEntity3));
