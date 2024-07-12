@@ -116,6 +116,9 @@ darts:
     allowed-media-formats:
       - "mpeg2"
       - "mp2"
+    allowed-content-types:
+      - "audio/mpeg"
+      - "application/octet-stream"
     allowed-media-extensions:
       - "mp2"
       - "a00"
@@ -292,6 +295,8 @@ darts:
       order: "UNSTRUCTURED,DETS,ARM,VODAFONE"
   case-document:
     generation-days: 28
+    filename-prefix: "CASE_DOCUMENT"
+    file-extension: "json"
   transcription:
     allowed-extensions:
       - "docx"
