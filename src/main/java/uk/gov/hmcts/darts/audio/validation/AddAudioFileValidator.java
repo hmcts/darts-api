@@ -28,8 +28,8 @@ public class AddAudioFileValidator implements Validator<MultipartFile> {
         }
 
         String contentType = addAudioFileRequest.getContentType();
-        if (contentType != null && !properties.getAllowedMediaFormats().contains(contentType)) {
-            log.warn("A file with format {} has been rejected.", contentType);
+        if (contentType != null && !properties.getAllowedContentTypes().contains(contentType)) {
+            log.warn("A file with contentType {} has been rejected.", contentType);
             throw new DartsApiException(AudioApiError.UNEXPECTED_FILE_TYPE);
         }
 

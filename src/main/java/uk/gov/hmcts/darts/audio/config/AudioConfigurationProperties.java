@@ -34,6 +34,7 @@ public class AudioConfigurationProperties {
     private List<String> allowedMediaExtensions = new ArrayList<>();
     private List<String> allowedMediaMimeTypes = new ArrayList<>();
     private List<String> allowedMediaFormats = new ArrayList<>();
+    private List<String> allowedContentTypes = new ArrayList<>();
 
     private Integer maxFileSize;
     private Duration allowableAudioGapDuration;
