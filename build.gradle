@@ -31,13 +31,13 @@ group = 'uk.gov.hmcts'
 version = '0.0.1'
 
 compileJava {
-  sourceCompatibility = '17'
-  targetCompatibility = '17'
+  sourceCompatibility = '21'
+  targetCompatibility = '21'
 }
 
 java {
   toolchain {
-    languageVersion = JavaLanguageVersion.of(17)
+    languageVersion = JavaLanguageVersion.of(21)
   }
 }
 
@@ -180,6 +180,8 @@ pmd {
   toolVersion = "7.3.0"
   sourceSets = [sourceSetsCopy.main]
   reportsDir = file("$project.buildDir/reports/pmd")
+  // https://github.com/pmd/pmd/issues/876
+  ruleSets = []
   ruleSetFiles = files("config/pmd/main-ruleset.xml")
 }
 
@@ -187,6 +189,8 @@ pmd {
   toolVersion = "7.3.0"
   sourceSets = [sourceSetsCopy.test, sourceSetsCopy.functionalTest, sourceSetsCopy.integrationTest, sourceSetsCopy.smokeTest]
   reportsDir = file("$project.buildDir/reports/pmd")
+  // https://github.com/pmd/pmd/issues/876
+  ruleSets = []
   ruleSetFiles = files("config/pmd/test-ruleset.xml")
 }
 

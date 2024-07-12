@@ -13,6 +13,7 @@ import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 import uk.gov.hmcts.darts.testutils.stubs.SuperAdminUserStub;
+import uk.gov.hmcts.darts.usermanagement.exception.UserManagementError;
 
 import java.util.UUID;
 
@@ -42,6 +43,7 @@ class PatchSecurityGroupIntTest extends IntegrationBase {
 
     @MockBean
     private UserIdentity userIdentity;
+
 
     @Test
     void patchSecurityGroupShouldSucceedWhenProvidedWithValidValueForSubsetOfAllowableFields() throws Exception {
@@ -172,6 +174,30 @@ class PatchSecurityGroupIntTest extends IntegrationBase {
             .andExpect(jsonPath("$.user_ids[0]").value(user1.getId()))
             .andExpect(jsonPath("$.user_ids[1]").value(user2.getId()))
             .andExpect(jsonPath("$.courthouse_ids").isEmpty())
+            .andReturn();
+    }
+
+    @Test
+    void patchSecurityGroupShouldFailWhenProvidedButInactive() throws Exception {
+
+
+
+        UserAccountEntity user = superAdminUserStub.givenUserIsAuthorised(userIdentity);
+        String name = "security group name" + UUID.randomUUID();
+        String displayName = "security group display name" + UUID.randomUUID();
+        Integer id = createSecurityGroup(name, displayName);
+
+        UserAccountEntity user1 = createEnabledUserAccountEntity(user, "email1", false, false);
+        UserAccountEntity user2 = createEnabledUserAccountEntity(user, "email2", false, false);
+
+        String patchContent = String.format("{\"user_ids\": [%s, %s]}", user1.getId(), user2.getId());
+
+        MockHttpServletRequestBuilder patchRequest = buildPatchRequest(id)
+            .content(patchContent);
+
+        mockMvc.perform(patchRequest)
+            .andExpect(status().isNotFound())
+            .andExpect(jsonPath("$.type").value(UserManagementError.USER_NOT_FOUND.getType().toString()))
             .andReturn();
     }
 
@@ -431,12 +457,16 @@ class PatchSecurityGroupIntTest extends IntegrationBase {
     }
 
     private UserAccountEntity createEnabledUserAccountEntity(UserAccountEntity user, String email, boolean isSystemUser) {
+        return createEnabledUserAccountEntity(user, email, isSystemUser, true);
+    }
+
+    private UserAccountEntity createEnabledUserAccountEntity(UserAccountEntity user, String email, boolean isSystemUser, boolean active) {
         UserAccountEntity userAccountEntity = new UserAccountEntity();
         userAccountEntity.setUserName("user name");
         userAccountEntity.setUserFullName("user full name");
         userAccountEntity.setEmailAddress(email);
         userAccountEntity.setUserDescription("Description");
-        userAccountEntity.setActive(true);
+        userAccountEntity.setActive(active);
 
         userAccountEntity.setIsSystemUser(isSystemUser);
         userAccountEntity.setCreatedBy(user);

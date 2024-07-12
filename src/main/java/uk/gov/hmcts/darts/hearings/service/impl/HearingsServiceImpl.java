@@ -10,6 +10,7 @@ import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionEntity;
 import uk.gov.hmcts.darts.common.enums.SecurityRoleEnum;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
+import uk.gov.hmcts.darts.common.model.TranscriptModel;
 import uk.gov.hmcts.darts.common.repository.AnnotationRepository;
 import uk.gov.hmcts.darts.common.repository.EventRepository;
 import uk.gov.hmcts.darts.common.repository.HearingRepository;
@@ -18,13 +19,15 @@ import uk.gov.hmcts.darts.hearings.exception.HearingApiError;
 import uk.gov.hmcts.darts.hearings.mapper.GetAnnotationsResponseMapper;
 import uk.gov.hmcts.darts.hearings.mapper.GetEventsResponseMapper;
 import uk.gov.hmcts.darts.hearings.mapper.GetHearingResponseMapper;
-import uk.gov.hmcts.darts.hearings.mapper.TranscriptionMapper;
+import uk.gov.hmcts.darts.hearings.mapper.HearingTranscriptionMapper;
 import uk.gov.hmcts.darts.hearings.model.Annotation;
 import uk.gov.hmcts.darts.hearings.model.EventResponse;
 import uk.gov.hmcts.darts.hearings.model.GetHearingResponse;
+import uk.gov.hmcts.darts.hearings.model.HearingTranscriptModel;
 import uk.gov.hmcts.darts.hearings.model.Transcript;
 import uk.gov.hmcts.darts.hearings.service.HearingsService;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -39,6 +42,7 @@ public class HearingsServiceImpl implements HearingsService {
     private final EventRepository eventRepository;
     private final AnnotationRepository annotationRepository;
     private final AuthorisationApi authorisationApi;
+    private final HearingTranscriptionMapper transcriptionMapper;
 
     public static final List<SecurityRoleEnum> SUPER_ADMIN_ROLE = List.of(SecurityRoleEnum.SUPER_ADMIN);
 
@@ -67,7 +71,19 @@ public class HearingsServiceImpl implements HearingsService {
     @Override
     public List<Transcript> getTranscriptsByHearingId(Integer hearingId) {
         List<TranscriptionEntity> transcriptionEntities = transcriptionRepository.findByHearingIdManualOrLegacy(hearingId);
-        return TranscriptionMapper.mapResponse(transcriptionEntities);
+        List<HearingTranscriptModel> hearingTranscriptModel =  transcriptionMapper.mapResponse(transcriptionEntities);
+        return transcriptionMapper.getTranscriptList(hearingTranscriptModel);
+    }
+
+    private <T extends TranscriptModel> List<Transcript> getTranscriptList(List<T> modelLst) {
+        List<Transcript> transcriptList = new ArrayList<>();
+        for (T model : modelLst) {
+            if (model instanceof Transcript) {
+                transcriptList.add((Transcript) model);
+            }
+        }
+
+        return transcriptList;
     }
 
     @Override
