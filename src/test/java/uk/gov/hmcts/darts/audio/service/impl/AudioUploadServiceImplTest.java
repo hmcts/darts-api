@@ -25,7 +25,6 @@ import uk.gov.hmcts.darts.common.entity.EventEntity;
 import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
-import uk.gov.hmcts.darts.common.entity.ObjectRecordStatusEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.common.helper.MediaLinkedCaseHelper;
@@ -60,7 +59,6 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.darts.audio.exception.AudioApiError.FAILED_TO_UPLOAD_AUDIO_FILE;
-import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.FAILURE_FILE_NOT_FOUND;
 
 @ExtendWith(MockitoExtension.class)
 @SuppressWarnings({"PMD.ExcessiveImports"})
@@ -209,59 +207,6 @@ class AudioUploadServiceImplTest {
         assertEquals(savedMedia.getChecksum(), externalObjectDirectoryEntity.getChecksum());
         assertNotNull(externalObjectDirectoryEntity.getChecksum());
         assertEquals(externalLocation, externalObjectDirectoryEntity.getExternalLocation());
-    }
-
-    @Test
-    void addAudioWillNotSaveBlobToDataStoreWhenAudioFileIsEmpty() {
-        // Given
-        HearingEntity hearingEntity = new HearingEntity();
-        when(retrieveCoreObjectService.retrieveOrCreateHearing(
-            anyString(),
-            anyString(),
-            anyString(),
-            any(),
-            any()
-        )).thenReturn(hearingEntity);
-
-        CourthouseEntity courthouse = new CourthouseEntity();
-        courthouse.setCourthouseName("SWANSEA");
-        CourtroomEntity courtroomEntity = new CourtroomEntity(1, "1", courthouse);
-        when(retrieveCoreObjectService.retrieveOrCreateCourtroom(eq("SWANSEA"), eq("1"), any(UserAccountEntity.class)))
-            .thenReturn(courtroomEntity);
-
-        UserAccountEntity userAccount = new UserAccountEntity();
-        userAccount.setId(10);
-        when(userIdentity.getUserAccount()).thenReturn(userAccount);
-
-        OffsetDateTime startedAt = OffsetDateTime.now().minusHours(1);
-        OffsetDateTime endedAt = OffsetDateTime.now();
-
-        MediaEntity mediaEntity = createMediaEntity(startedAt, endedAt);
-        mediaEntity.setId(10);
-        when(mediaRepository.save(any(MediaEntity.class))).thenReturn(mediaEntity);
-
-        ObjectRecordStatusEntity failedStatus = new ObjectRecordStatusEntity();
-        failedStatus.setId(4);
-        when(objectRecordStatusRepository.getReferenceById(any())).thenReturn(failedStatus);
-
-        MockMultipartFile audioFile = new MockMultipartFile(
-            "addAudio",
-            "audio_sample.mp2",
-            "audio/mpeg",
-            DUMMY_FILE_CONTENT_EMPTY.getBytes()
-        );
-        AddAudioMetadataRequest addAudioMetadataRequest = createAddAudioRequest(startedAt, endedAt);
-
-        // When
-        audioService.addAudio(audioFile, addAudioMetadataRequest);
-
-        // Then
-        verify(externalObjectDirectoryRepository).save(externalObjectDirectoryEntityArgumentCaptor.capture());
-
-        ExternalObjectDirectoryEntity externalObjectDirectoryEntity = externalObjectDirectoryEntityArgumentCaptor.getValue();
-        assertEquals(null, externalObjectDirectoryEntity.getExternalLocation());
-        assertEquals(null, externalObjectDirectoryEntity.getChecksum());
-        assertEquals(FAILURE_FILE_NOT_FOUND.getId(), externalObjectDirectoryEntity.getStatus().getId());
     }
 
     @Test

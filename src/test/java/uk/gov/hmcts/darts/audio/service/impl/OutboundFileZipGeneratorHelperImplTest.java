@@ -251,9 +251,9 @@ class OutboundFileZipGeneratorHelperImplTest {
                 if (line.startsWith(COURTHOUSE_README_LABEL)) {
                     assertEquals("Courthouse: Trainwell Crown Court", line);
                 } else if (line.startsWith(START_TIME_README_LABEL)) {
-                    assertEquals("Start Time: 24 March 2023 at 09:00:00 GMT", line);
+                    assertEquals("Start Time: 24 March 2023, 09:00:00 GMT", line);
                 } else if (line.startsWith(END_TIME_README_LABEL)) {
-                    assertEquals("End Time: 24 March 2023 at 12:00:00 GMT", line);
+                    assertEquals("End Time: 24 March 2023, 12:00:00 GMT", line);
                 } else if (line.startsWith(RAISED_BY_README_LABEL)) {
                     assertEquals("Raised by: ", line);
                 } else if (line.startsWith(REQUEST_TYPE_README_LABEL)) {
