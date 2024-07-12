@@ -1104,7 +1104,7 @@
 								],
 								"body": {
 									"mode": "raw",
-									"raw": "{\n  \"message_id\": \"100\",\n  \"type\": \"1000\",\n  \"sub_type\": \"1002\",\n  \"event_id\": \"12345\",\n  \"courthouse\": \"swansea\",\n  \"courtroom\": \"1\",\n  \"case_numbers\": [\n    \"Swansea_case_1\"\n  ],\n  \"event_text\": \"some text for the event\",\n  \"date_time\": \"2023-08-08T14:01:06.085Z\"\n}"
+									"raw": "{\n  \"message_id\": \"100\",\n  \"type\": \"1000\",\n  \"sub_type\": \"1002\",\n  \"event_id\": \"12345\",\n  \"courthouse\": \"swansea\",\n  \"courtroom\": \"1\",\n  \"case_numbers\": [\n    \"Swansea_case_1\"\n  ],\n  \"event_text\": \"some text for the event\",\n  \"date_time\": \"2023-08-08T14:01:06Z\"\n}"
 								},
 								"url": {
 									"raw": "{{serverUrl}}/events",
@@ -1233,7 +1233,7 @@
 								],
 								"body": {
 									"mode": "raw",
-									"raw": "{\n  \"message_id\": \"100\",\n  \"type\": \"3010\",\n  \"event_id\": \"12345\",\n  \"courthouse\": \"swansea\",\n  \"courtroom\": \"1\",\n  \"case_numbers\": [\n    \"Swansea_case_1\"\n  ],\n  \"event_text\": \"some text for the event\",\n  \"date_time\": \"2023-08-08T14:01:06.085Z\"\n}"
+									"raw": "{\n  \"message_id\": \"100\",\n  \"type\": \"3010\",\n  \"event_id\": \"12345\",\n  \"courthouse\": \"swansea\",\n  \"courtroom\": \"1\",\n  \"case_numbers\": [\n    \"Swansea_case_1\"\n  ],\n  \"event_text\": \"some text for the event\",\n  \"date_time\": \"2023-08-08T14:01:06Z\"\n}"
 								},
 								"url": {
 									"raw": "{{serverUrl}}/events",
