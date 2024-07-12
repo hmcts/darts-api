@@ -6,6 +6,7 @@ import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -34,6 +35,11 @@ import static org.apache.commons.lang3.CharEncoding.UTF_8;
 @Slf4j
 public class GenerateCaseDocumentSingleCaseProcessorImpl implements GenerateCaseDocumentSingleCaseProcessor {
 
+    private static final String FILE_NAME_FORMAT = "%s_%s.%s";
+    @Value("${darts.case-document.filename-prefix}")
+    private String caseDocumentFilenamePrefix;
+    @Value("${darts.case-document.file-extension}")
+    private String caseDocumentFileExtension;
     @Qualifier("caseDocumentObjectMapper")
     private final ObjectMapper objectMapper;
     private final CaseDocumentRepository caseDocumentRepository;
@@ -76,12 +82,17 @@ public class GenerateCaseDocumentSingleCaseProcessorImpl implements GenerateCase
     }
 
     private CaseDocumentEntity createAndSaveCaseDocumentEntity(Integer caseId, String caseDocument, UUID externalLocation, UserAccountEntity user) {
+        var fileName = String.format(FILE_NAME_FORMAT,
+                                     caseDocumentFilenamePrefix,
+                                     externalLocation.toString(),
+                                     caseDocumentFileExtension
+        );
         int fileSize = caseDocument.getBytes().length;
         String checksum = checksumCalculator.calculate(IOUtils.toInputStream(caseDocument, UTF_8));
 
         CaseDocumentEntity entity = new CaseDocumentEntity();
         entity.setCourtCase(caseRepository.getReferenceById(caseId));
-        entity.setFileName(externalLocation.toString());
+        entity.setFileName(fileName);
         entity.setChecksum(checksum);
         entity.setFileSize(fileSize);
         entity.setFileType(MediaType.APPLICATION_JSON_VALUE);
