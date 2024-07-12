@@ -160,8 +160,6 @@ public class AudioTransformationServiceImpl implements AudioTransformationServic
         try {
             log.info("Starting processing for audio request id: {}. Status: {}", requestId, mediaRequestEntity.getStatus());
 
-            logApi.atsProcessingUpdate(mediaRequestEntity);
-
             AudioRequestOutputFormat audioRequestOutputFormat = AudioRequestOutputFormat.MP3;
             if (mediaRequestEntity.getRequestType().equals(DOWNLOAD)) {
                 audioRequestOutputFormat = AudioRequestOutputFormat.ZIP;
@@ -185,10 +183,12 @@ public class AudioTransformationServiceImpl implements AudioTransformationServic
             boolean hasAllMediaBeenCopiedFromInboundStorage = eodService.hasAllMediaBeenCopiedFromInboundStorage(filteredMediaEntities);
 
             if (!hasAllMediaBeenCopiedFromInboundStorage) {
-                log.info("Skipping process for audio request id: {} as not All the media from Inbound has reached Unstructured data store", requestId);
+                log.info("Skipping process for audio request id: {} as not all the media from Inbound has reached Unstructured data store", requestId);
                 mediaRequestService.updateAudioRequestStatus(requestId, OPEN);
                 return;
             }
+
+            logApi.atsProcessingUpdate(mediaRequestEntity);
 
             Map<MediaEntity, Path> downloadedMedias = downloadAndSaveMediaToWorkspace(filteredMediaEntities);
 
