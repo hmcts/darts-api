@@ -18,6 +18,7 @@ import java.time.ZoneOffset;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import static uk.gov.hmcts.darts.event.enums.EventStatus.MODERNISED;
 
@@ -129,4 +130,18 @@ public class EventStub {
         return eventIdMap;
     }
 
+    public boolean isOnlyOneOfTheEventIdSetToCurrent(List<EventEntity> eventEntityList) {
+        boolean currentFnd= false;
+        for (EventEntity event : eventEntityList) {
+            Optional<EventEntity> readEventEntity = eventRepository.findById(event.getId());
+
+            if (readEventEntity.isPresent() && readEventEntity.get().getIsCurrent() && !currentFnd) {
+                currentFnd = true;
+            } else if (readEventEntity.isPresent() && readEventEntity.get().getIsCurrent()) {
+                return false;
+            }
+        }
+
+        return currentFnd;
+    }
 }

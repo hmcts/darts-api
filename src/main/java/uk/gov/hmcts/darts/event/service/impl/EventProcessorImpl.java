@@ -2,7 +2,6 @@ package uk.gov.hmcts.darts.event.service.impl;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
-import org.springframework.transaction.annotation.Transactional;
 import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
 import uk.gov.hmcts.darts.common.repository.EventRepository;
 import uk.gov.hmcts.darts.event.service.EventProcessor;
