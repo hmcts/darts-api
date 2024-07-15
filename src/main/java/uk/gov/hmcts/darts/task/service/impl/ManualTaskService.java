@@ -4,6 +4,7 @@ import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.javacrumbs.shedlock.core.LockProvider;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.darts.arm.component.AutomatedTaskProcessorFactory;
 import uk.gov.hmcts.darts.arm.service.ArmRetentionEventDateProcessor;
@@ -33,6 +34,7 @@ import uk.gov.hmcts.darts.task.runner.impl.CleanupArmResponseFilesAutomatedTask;
 import uk.gov.hmcts.darts.task.runner.impl.CloseOldCasesAutomatedTask;
 import uk.gov.hmcts.darts.task.runner.impl.CloseUnfinishedTranscriptionsAutomatedTask;
 import uk.gov.hmcts.darts.task.runner.impl.DailyListAutomatedTask;
+import uk.gov.hmcts.darts.task.runner.impl.CleanupCurrentEventTask;
 import uk.gov.hmcts.darts.task.runner.impl.ExternalDataStoreDeleterAutomatedTask;
 import uk.gov.hmcts.darts.task.runner.impl.GenerateCaseDocumentAutomatedTask;
 import uk.gov.hmcts.darts.task.runner.impl.InboundAudioDeleterAutomatedTask;
@@ -71,7 +73,6 @@ public class ManualTaskService {
     private final OutboundAudioDeleterProcessor outboundAudioDeleterProcessor;
     private final TranscriptionsProcessor transcriptionsProcessor;
     private final UnstructuredAudioDeleterProcessor unstructuredAudioDeleterProcessor;
-
     private final LockProvider lockProvider;
     private final LogApi logApi;
 
@@ -96,6 +97,7 @@ public class ManualTaskService {
         addArmRetentionEventDateCalculatorToTaskRegister();
         addBatchCleanupArmResponseFilesTaskRegistrar();
         addGenerateCaseDocumentToTaskRegistrar();
+        addEventHandler();
     }
 
     public List<AbstractLockableAutomatedTask> getAutomatedTasks() {
@@ -304,4 +306,15 @@ public class ManualTaskService {
         automatedTasks.add(manualTask);
     }
 
+    private void addEventHandler() {
+        var manualTask = new CleanupCurrentEventTask(
+            automatedTaskRepository,
+            lockProvider,
+            automatedTaskConfigurationProperties,
+            automatedTaskProcessorFactory,
+            logApi
+        );
+        manualTask.setManualTask();
+        automatedTasks.add(manualTask);
+    }
 }

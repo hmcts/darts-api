@@ -3,8 +3,10 @@ package uk.gov.hmcts.darts.common.repository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 import uk.gov.hmcts.darts.common.entity.EventEntity;
 import uk.gov.hmcts.darts.event.model.EventSearchResult;
 
@@ -74,4 +76,27 @@ public interface EventRepository extends JpaRepository<EventEntity, Integer> {
         LocalDate hearingStartDate,
         LocalDate hearingEndDate,
         Pageable pageable);
+
+    @Query(value = """
+            select distinct evnt.event_id from darts.event evnt
+                inner join (SELECT distinct count(event_id) as eventCount, event_id  FROM
+                darts.event where is_current=true GROUP BY event_id) eventIdCntResult ON evnt.event_id = eventIdCntResult.event_id
+            where evnt.event_id <> 0 and eventIdCntResult.eventCount > 1
+            LIMIT :batchSize
+        """, nativeQuery = true)
+    List<Integer> getCurrentEventIdsToBeProcessed(int batchSize);
+
+    @Query(value = """
+             select eve_id FROM darts.event e where event_id=:eventId order by created_ts desc LIMIT 1
+        """, nativeQuery = true)
+    Integer getTheCurrentEventPrimaryKeyForEventId(int eventId);
+
+    @Transactional
+    @Modifying
+    @Query(value = """
+        UPDATE EventEntity
+                SET isCurrent = false
+                WHERE id <> :currentPkEventId AND eventId=:eventId
+        """)
+    void updateAllEventIdEventsToNotCurrentWithTheExclusionOfTheCurrentEventPrimaryKey(Integer currentPkEventId, Integer eventId);
 }

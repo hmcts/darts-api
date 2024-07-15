@@ -1,6 +1,7 @@
 package uk.gov.hmcts.darts.testutils.stubs;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
@@ -10,9 +11,13 @@ import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.repository.EventHandlerRepository;
 import uk.gov.hmcts.darts.common.repository.EventRepository;
 import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
+import uk.gov.hmcts.darts.common.util.DateConverterUtil;
 
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import static uk.gov.hmcts.darts.event.enums.EventStatus.MODERNISED;
 
@@ -25,6 +30,11 @@ public class EventStub {
     private final UserAccountStub userAccountStub;
     private final CourtroomStub courtroomStub;
     private final UserAccountRepository userAccountRepository;
+
+    private static final OffsetDateTime STARTED_AT = OffsetDateTime.of(2024, 10, 10, 10, 0, 0, 0, ZoneOffset.UTC);
+
+    @Autowired
+    private HearingStub hearingStub;
 
     public EventEntity createEvent(HearingEntity hearing) {
         return createEvent(hearing, 10);
@@ -41,6 +51,11 @@ public class EventStub {
 
     @Transactional
     public EventEntity createEvent(HearingEntity hearing, int eventHandlerId, OffsetDateTime eventTimestamp, String eventName) {
+        return createEvent(hearing, eventHandlerId, eventTimestamp, eventName, -1);
+    }
+
+    @Transactional
+    public EventEntity createEvent(HearingEntity hearing, int eventHandlerId, OffsetDateTime eventTimestamp, String eventName, Integer eventId) {
         EventEntity eventEntity = new EventEntity();
         eventEntity.setEventText("testEventText");
         EventHandlerEntity eventHandlerEntity = eventHandlerRepository.findById(eventHandlerId).get();
@@ -50,16 +65,23 @@ public class EventStub {
         eventEntity.addHearing(hearing);
         eventEntity.setLastModifiedBy(userAccountStub.getIntegrationTestUserAccountEntity());
         eventEntity.setLastModifiedDateTime(eventTimestamp);
+        eventEntity.setCreatedDateTime(eventTimestamp);
         eventEntity.setIsLogEntry(false);
         eventEntity.setCourtroom(hearing.getCourtroom());
         eventEntity.setIsCurrent(true);
         eventEntity.setEventStatus(MODERNISED.getStatusNumber());
+        eventEntity.setEventId(eventId);
         eventRepository.saveAndFlush(eventEntity);
         return eventEntity;
     }
 
-    @Transactional
     public EventEntity createEvent(CourtroomEntity courtroom, int eventHandlerId, OffsetDateTime eventTimestamp, String eventName) {
+        return createEvent(courtroom, eventHandlerId, eventTimestamp, eventName, -1);
+    }
+
+
+    @Transactional
+    public EventEntity createEvent(CourtroomEntity courtroom, int eventHandlerId, OffsetDateTime eventTimestamp, String eventName, Integer eventId) {
         EventEntity eventEntity = new EventEntity();
         eventEntity.setEventText("testEventText");
         EventHandlerEntity eventHandlerEntity = eventHandlerRepository.findById(eventHandlerId).get();
@@ -72,6 +94,7 @@ public class EventStub {
         eventEntity.setCourtroom(courtroom);
         eventEntity.setIsCurrent(true);
         eventEntity.setEventStatus(MODERNISED.getStatusNumber());
+        eventEntity.setEventId(eventId);
         eventRepository.saveAndFlush(eventEntity);
         return eventEntity;
     }
@@ -81,6 +104,29 @@ public class EventStub {
         return createEvent(courtroom, 10, OffsetDateTime.of(2020, 6, 20, 10, 0, 0, 0, ZoneOffset.UTC),
                            "testEventName"
         );
+    }
+
+    /**
+     * generates two events (with the same event id) for each event specified. So the number of events generated will always be double that specified.
+     * @return The two events mapped to each event id
+     */
+    @Transactional
+    public  Map<Integer, List<EventEntity>> generateEventIdEventsIncludingZeroEventId(int numberOfEvents) {
+        Map<Integer, List<EventEntity>> eventIdMap = new HashMap<>();
+
+        HearingEntity hearingForEvent = hearingStub.createHearing("Bristol", "1", "case1", DateConverterUtil.toLocalDateTime(STARTED_AT));
+        createEvent(hearingForEvent, 10, STARTED_AT.minusMinutes(20), "LOG");
+        HearingEntity hearingDifferentCourtroom = hearingStub.createHearing("Bristol", "2", "case2", DateConverterUtil.toLocalDateTime(STARTED_AT));
+
+        for (int index = 0; index < numberOfEvents; index++) {
+            EventEntity event = createEvent(hearingDifferentCourtroom, 10, STARTED_AT.minusMinutes(20), "LOG", index);
+
+            EventEntity event1 = createEvent(hearingDifferentCourtroom, 10, STARTED_AT, "LOG", index);
+
+            eventIdMap.put(index, List.of(event, event1));
+        }
+
+        return eventIdMap;
     }
 
 }
