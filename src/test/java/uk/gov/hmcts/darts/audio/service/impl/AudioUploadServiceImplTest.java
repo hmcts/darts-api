@@ -12,7 +12,6 @@ import uk.gov.hmcts.darts.audio.component.AddAudioRequestMapper;
 import uk.gov.hmcts.darts.audio.component.AudioBeingProcessedFromArchiveQuery;
 import uk.gov.hmcts.darts.audio.component.AudioMessageDigest;
 import uk.gov.hmcts.darts.audio.component.impl.AddAudioRequestMapperImpl;
-import uk.gov.hmcts.darts.audio.config.AudioConfiguration;
 import uk.gov.hmcts.darts.audio.config.AudioConfigurationProperties;
 import uk.gov.hmcts.darts.audio.model.AddAudioMetadataRequest;
 import uk.gov.hmcts.darts.audio.service.AudioOperationService;
@@ -26,7 +25,6 @@ import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
-import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.common.helper.MediaLinkedCaseHelper;
 import uk.gov.hmcts.darts.common.repository.CourtLogEventRepository;
 import uk.gov.hmcts.darts.common.repository.ExternalLocationTypeRepository;
@@ -43,8 +41,6 @@ import uk.gov.hmcts.darts.log.api.LogApi;
 import uk.gov.hmcts.darts.test.common.data.HearingTestData;
 
 import java.io.InputStream;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.time.OffsetDateTime;
 import java.util.Arrays;
 import java.util.List;
@@ -58,7 +54,6 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static uk.gov.hmcts.darts.audio.exception.AudioApiError.FAILED_TO_UPLOAD_AUDIO_FILE;
 
 @ExtendWith(MockitoExtension.class)
 @SuppressWarnings({"PMD.ExcessiveImports"})
@@ -133,24 +128,13 @@ class AudioUploadServiceImplTest {
             logApi,
             audioDigest,
             mediaLinkedCaseRepository);
-
     }
 
     @Test
     void addAudio() {
-
-        MessageDigest digest;
-        try {
-            digest = MessageDigest.getInstance(AudioConfiguration.DEFAULT_ALGORITHM);
-        } catch (NoSuchAlgorithmException e) {
-            throw new DartsApiException(FAILED_TO_UPLOAD_AUDIO_FILE, e);
-        }
-        when(audioDigest.getMessageDigest()).thenReturn(digest);
-
         UserAccountEntity userAccount = new UserAccountEntity();
         userAccount.setId(10);
         when(userIdentity.getUserAccount()).thenReturn(userAccount);
-
 
         // Given
         HearingEntity hearingEntity = new HearingEntity();
@@ -375,15 +359,6 @@ class AudioUploadServiceImplTest {
         UserAccountEntity userAccount = new UserAccountEntity();
         userAccount.setId(10);
         when(userIdentity.getUserAccount()).thenReturn(userAccount);
-
-        MessageDigest digest;
-        try {
-            digest = MessageDigest.getInstance(AudioConfiguration.DEFAULT_ALGORITHM);
-        } catch (NoSuchAlgorithmException e) {
-            throw new DartsApiException(FAILED_TO_UPLOAD_AUDIO_FILE, e);
-        }
-        when(audioDigest.getMessageDigest()).thenReturn(digest);
-
 
         MockMultipartFile audioFile = new MockMultipartFile(
             "addAudio",
