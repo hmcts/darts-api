@@ -1,6 +1,5 @@
 package uk.gov.hmcts.darts.audio.service.impl;
 
-import com.google.common.io.ByteStreams;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -39,7 +38,6 @@ import uk.gov.hmcts.darts.log.api.LogApi;
 
 import java.io.BufferedInputStream;
 import java.io.IOException;
-import java.security.DigestInputStream;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -86,7 +84,13 @@ public class AudioUploadServiceImpl implements AudioUploadService {
         addAudioMetadataRequest.setCases(distinctCaseList);
 
         List<MediaEntity> duplicatesToBeSuperseded = getLatestDuplicateMediaFiles(addAudioMetadataRequest);
-        String incomingChecksum = computeChecksum(audioMultipartFile);
+
+        String incomingChecksum;
+        try {
+            incomingChecksum = fileContentChecksum.calculate(audioMultipartFile.getInputStream());
+        } catch (IOException e) {
+            throw new DartsApiException(FAILED_TO_UPLOAD_AUDIO_FILE, "Failed to compute incoming checksum", e);
+        }
         List<MediaEntity> duplicatesWithDifferentChecksum = filterForMediaWithMismatchingChecksum(duplicatesToBeSuperseded, incomingChecksum);
 
         if (isNotEmpty(duplicatesToBeSuperseded) && isEmpty(duplicatesWithDifferentChecksum)) {
@@ -163,15 +167,6 @@ public class AudioUploadServiceImpl implements AudioUploadService {
         }
 
         logApi.audioUploaded(addAudioMetadataRequest);
-    }
-
-    private String computeChecksum(MultipartFile audioFileStream) {
-        try (var digestInputStream = new DigestInputStream(new BufferedInputStream(audioFileStream.getInputStream()), audioDigest.getMessageDigest())) {
-            ByteStreams.exhaust(digestInputStream); // We must consume the stream before calculating the checksum
-            return fileContentChecksum.calculate(digestInputStream);
-        } catch (IOException e) {
-            throw new DartsApiException(FAILED_TO_UPLOAD_AUDIO_FILE);
-        }
     }
 
     private List<MediaEntity> filterForMediaWithMismatchingChecksum(List<MediaEntity> mediaEntities, String checksum) {
