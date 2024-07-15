@@ -3,14 +3,18 @@ package uk.gov.hmcts.darts.event.service.impl;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.common.repository.EventRepository;
 import uk.gov.hmcts.darts.event.mapper.EventSearchMapper;
 import uk.gov.hmcts.darts.event.model.AdminEventSearch;
-import uk.gov.hmcts.darts.event.model.AdminSearchEventResponse;
+import uk.gov.hmcts.darts.event.model.AdminSearchEventResponseResult;
+import uk.gov.hmcts.darts.event.model.EventSearchResult;
 import uk.gov.hmcts.darts.event.service.EventSearchService;
+
+import java.util.List;
 
 import static uk.gov.hmcts.darts.event.exception.EventError.TOO_MANY_SEARCH_RESULTS;
 
@@ -26,8 +30,8 @@ public class EventSearchServiceImpl implements EventSearchService {
     private Integer maxResults;
 
     @Override
-    public AdminSearchEventResponse searchForEvents(AdminEventSearch adminEventSearch) {
-        var eventSearchResults = eventRepository.searchEventsFilteringOn(
+    public List<AdminSearchEventResponseResult> searchForEvents(AdminEventSearch adminEventSearch) {
+        Page<EventSearchResult> eventSearchResults = eventRepository.searchEventsFilteringOn(
             adminEventSearch.getCourthouseIds(),
             adminEventSearch.getCaseNumber(),
             adminEventSearch.getCourtroomName(),
@@ -43,10 +47,8 @@ public class EventSearchServiceImpl implements EventSearchService {
             );
         }
 
-        var adminSearchEventResponseResults = eventSearchResults.stream()
-            .map(evr -> eventSearchMapper.adminSearchEventResponseResultFrom(evr))
+        return eventSearchResults.stream()
+            .map(eventSearchMapper::adminSearchEventResponseResultFrom)
             .toList();
-
-        return new AdminSearchEventResponse().events(adminSearchEventResponseResults);
     }
 }

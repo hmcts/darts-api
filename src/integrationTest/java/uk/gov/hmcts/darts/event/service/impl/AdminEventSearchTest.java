@@ -44,7 +44,7 @@ class AdminEventSearchTest extends IntegrationBase {
             new AdminEventSearch()
                 .courthouseIds(courthouseIdsAssociatedWithEvents(persistedEvents)));
 
-        assertThat(eventSearchResults.getEvents())
+        assertThat(eventSearchResults)
             .extracting("id")
             .isEqualTo(idsOf(persistedEvents));
     }
@@ -59,7 +59,7 @@ class AdminEventSearchTest extends IntegrationBase {
             new AdminEventSearch()
                 .caseNumber(hearing.getCourtCase().getCaseNumber()));
 
-        assertThat(eventSearchResults.getEvents())
+        assertThat(eventSearchResults)
             .extracting("id")
             .isEqualTo(idsOf(persistedEventsForHearing));
     }
@@ -74,7 +74,7 @@ class AdminEventSearchTest extends IntegrationBase {
             new AdminEventSearch()
                 .courtroomName(courtRoom.getName()));
 
-        assertThat(eventSearchResults.getEvents())
+        assertThat(eventSearchResults)
             .extracting("id")
             .isEqualTo(idsOf(persistedEventsForCourtroom));
     }
@@ -92,7 +92,7 @@ class AdminEventSearchTest extends IntegrationBase {
                 .hearingStartAt(parse("2020-02-28")));
 
 
-        assertThat(eventSearchResults.getEvents())
+        assertThat(eventSearchResults)
             .extracting("id")
             .containsExactly(persistedEvents.get(2).getId());
     }
@@ -110,7 +110,7 @@ class AdminEventSearchTest extends IntegrationBase {
                 .hearingEndAt(parse("2020-01-28")));
 
 
-        assertThat(eventSearchResults.getEvents())
+        assertThat(eventSearchResults)
             .extracting("id")
             .containsExactly(persistedEvents.get(0).getId());
     }

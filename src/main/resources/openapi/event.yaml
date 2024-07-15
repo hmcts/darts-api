@@ -490,7 +490,9 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/AdminSearchEventResponse'
+                type: array
+                items:
+                  $ref: '#/components/schemas/AdminSearchEventResponseResult'
 
         '400':
           description: Too many results
@@ -675,14 +677,6 @@ components:
           type: string
           format: date
           example: "2024-05-09"
-
-    AdminSearchEventResponse:
-      type: object
-      properties:
-        events:
-          type: array
-          items:
-            $ref: '#/components/schemas/AdminSearchEventResponseResult'
 
     AdminSearchEventResponseResult:
       type: object
