@@ -34,12 +34,14 @@ class EventRepositoryTest extends PostgresIntegrationBase {
         Assertions.assertEquals(1, eventIdsToBeProcessed1.size());
 
         Integer eventPkid = eventRepository.getTheLatestCreatedEventPrimaryKeyForTheEventId(eventIdsToBeProcessed1.get(0));
-        eventRepository.updateAllEventIdEventsToNotCurrentWithTheExclusionOfTheCurrentEventPrimaryKey(eventPkid, eventIdsToBeProcessed1.get(0));
+        eventRepository.updateAllEventIdEventsToNotCurrentWithTheExclusionOfTheCurrentEventPrimaryKey(
+            List.of(eventPkid), List.of(eventIdsToBeProcessed1.get(0)));
         Assertions.assertTrue(eventStub.isOnlyOneOfTheEventIdSetToCurrent(eventIdMap.get(eventIdsToBeProcessed1.get(0))));
 
         List<Integer> eventIdsToBeProcessed2 = eventRepository.getCurrentEventIdsToBeProcessed(Pageable.ofSize(1));
         Integer eventPkidSecond = eventRepository.getTheLatestCreatedEventPrimaryKeyForTheEventId(eventIdsToBeProcessed2.get(0));
-        eventRepository.updateAllEventIdEventsToNotCurrentWithTheExclusionOfTheCurrentEventPrimaryKey(eventPkidSecond, eventIdsToBeProcessed2.get(0));
+        eventRepository.updateAllEventIdEventsToNotCurrentWithTheExclusionOfTheCurrentEventPrimaryKey(
+            List.of(eventPkidSecond), List.of(eventIdsToBeProcessed2.get(0)));
 
         Assertions.assertEquals(1, eventIdsToBeProcessed1.size());
         Assertions.assertTrue(eventIdMap.containsKey(eventIdsToBeProcessed2.get(0)));

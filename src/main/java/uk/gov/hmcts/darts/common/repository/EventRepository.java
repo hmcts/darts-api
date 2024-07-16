@@ -100,7 +100,8 @@ public interface EventRepository extends JpaRepository<EventEntity, Integer> {
     @Query(value = """
         UPDATE EventEntity
                 SET isCurrent = false
-                WHERE id <> :currentPkEventId AND eventId=:eventId
+                WHERE id not in :eventIdsPrimaryKeysLst AND eventId in :eventIdLst
         """)
-    void updateAllEventIdEventsToNotCurrentWithTheExclusionOfTheCurrentEventPrimaryKey(Integer currentPkEventId, Integer eventId);
+    void updateAllEventIdEventsToNotCurrentWithTheExclusionOfTheCurrentEventPrimaryKey(
+        List<Integer> eventIdsPrimaryKeysLst, List<Integer> eventIdLst);
 }

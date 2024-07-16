@@ -31,7 +31,7 @@ import uk.gov.hmcts.darts.common.repository.ObjectRecordStatusRepository;
 import uk.gov.hmcts.darts.common.service.FileOperationService;
 import uk.gov.hmcts.darts.datamanagement.api.DataManagementApi;
 import uk.gov.hmcts.darts.event.service.CleanupCurrentFlagEventProcessor;
-import uk.gov.hmcts.darts.event.service.impl.CleanupCurrentFlagProcessorImpl;
+import uk.gov.hmcts.darts.event.service.impl.CleanupCurrentFlagEventProcessorImpl;
 
 @Component
 @RequiredArgsConstructor
@@ -124,7 +124,7 @@ public class AutomatedTaskProcessorFactoryImpl implements AutomatedTaskProcessor
 
     @Override
     public CleanupCurrentFlagEventProcessor createCleanupCurrentFlagEventProcessor(int batchSize) {
-        return new CleanupCurrentFlagProcessorImpl(
+        return new CleanupCurrentFlagEventProcessorImpl(
             batchSize, eventRepository);
     }
 }

@@ -14,7 +14,7 @@ import java.util.stream.Collectors;
 @Getter
 @RequiredArgsConstructor
 @Slf4j
-public class CleanupCurrentFlagProcessorImpl implements CleanupCurrentFlagEventProcessor {
+public class CleanupCurrentFlagEventProcessorImpl implements CleanupCurrentFlagEventProcessor {
     private final Integer batchSize;
     private final EventRepository eventRepository;
 
@@ -27,14 +27,22 @@ public class CleanupCurrentFlagProcessorImpl implements CleanupCurrentFlagEventP
             .collect(Collectors.joining(",")));
         log.info("Number of Event ids to be processed {}",  processedEventIdLst.size());
 
+        List<Integer> eventPrimaryKeysLst = new ArrayList<>();
+        List<Integer> eventIdsLst = new ArrayList<>();
+
         eventEntityReturned.forEach(event -> {
             Integer eventIdPrimaryKey = eventRepository.getTheLatestCreatedEventPrimaryKeyForTheEventId(event);
             log.info("Current event primary key is {}", eventIdPrimaryKey);
-            eventRepository.updateAllEventIdEventsToNotCurrentWithTheExclusionOfTheCurrentEventPrimaryKey(eventIdPrimaryKey, event);
-            log.info("Updated all events for event id {} excluding primary key {}", event, eventIdPrimaryKey);
+
+            eventPrimaryKeysLst.add(eventIdPrimaryKey);
+            eventIdsLst.add(event);
 
             processedEventIdLst.add(event);
         });
+
+        eventRepository.updateAllEventIdEventsToNotCurrentWithTheExclusionOfTheCurrentEventPrimaryKey(eventPrimaryKeysLst, eventIdsLst);
+        log.info("Updated all events for event id {} excluding primary key {}", eventIdsLst.stream().map(Object::toString),
+                 eventPrimaryKeysLst.stream().map(Object::toString));
 
         return processedEventIdLst;
     }
