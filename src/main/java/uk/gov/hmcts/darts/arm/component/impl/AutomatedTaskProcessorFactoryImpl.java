@@ -30,8 +30,8 @@ import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
 import uk.gov.hmcts.darts.common.repository.ObjectRecordStatusRepository;
 import uk.gov.hmcts.darts.common.service.FileOperationService;
 import uk.gov.hmcts.darts.datamanagement.api.DataManagementApi;
-import uk.gov.hmcts.darts.event.service.EventProcessor;
-import uk.gov.hmcts.darts.event.service.impl.EventProcessorImpl;
+import uk.gov.hmcts.darts.event.service.CleanupCurrentFlagEventProcessor;
+import uk.gov.hmcts.darts.event.service.impl.CleanupCurrentFlagProcessorImpl;
 
 @Component
 @RequiredArgsConstructor
@@ -123,8 +123,8 @@ public class AutomatedTaskProcessorFactoryImpl implements AutomatedTaskProcessor
     }
 
     @Override
-    public EventProcessor createEventProcessor(int batchSize) {
-        return new EventProcessorImpl(
-            batchSize, eventRepository, currentTimeHelper);
+    public CleanupCurrentFlagEventProcessor createCleanupCurrentFlagEventProcessor(int batchSize) {
+        return new CleanupCurrentFlagProcessorImpl(
+            batchSize, eventRepository);
     }
 }

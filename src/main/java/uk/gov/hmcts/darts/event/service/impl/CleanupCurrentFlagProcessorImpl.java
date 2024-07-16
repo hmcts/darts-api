@@ -5,7 +5,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Pageable;
 import uk.gov.hmcts.darts.common.repository.EventRepository;
-import uk.gov.hmcts.darts.event.service.EventProcessor;
+import uk.gov.hmcts.darts.event.service.CleanupCurrentFlagEventProcessor;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -14,7 +14,7 @@ import java.util.stream.Collectors;
 @Getter
 @RequiredArgsConstructor
 @Slf4j
-public class EventProcessorImpl implements EventProcessor {
+public class CleanupCurrentFlagProcessorImpl implements CleanupCurrentFlagEventProcessor {
     private final Integer batchSize;
     private final EventRepository eventRepository;
 

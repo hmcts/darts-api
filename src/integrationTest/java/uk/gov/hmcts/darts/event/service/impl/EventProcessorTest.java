@@ -37,7 +37,7 @@ class EventProcessorTest extends PostgresIntegrationBase {
 
         Map<Integer, List<EventEntity>> eventIdMap = eventStub.generateEventIdEventsIncludingZeroEventId(10);
 
-        List<Integer> processedCurrentEventIds = eventProcessorFactory.createEventProcessor(5).processCurrentEvent();
+        List<Integer> processedCurrentEventIds = eventProcessorFactory.createCleanupCurrentFlagEventProcessor(5).processCurrentEvent();
         Assertions.assertEquals(5, processedCurrentEventIds.size());
 
         // assert that only one of the event ids is set to current
@@ -47,7 +47,7 @@ class EventProcessorTest extends PostgresIntegrationBase {
         }
 
         // process second batch
-        List<Integer> processedCurrentEventIds2 = eventProcessorFactory.createEventProcessor(4).processCurrentEvent();
+        List<Integer> processedCurrentEventIds2 = eventProcessorFactory.createCleanupCurrentFlagEventProcessor(4).processCurrentEvent();
 
         Set<Integer> eventIdIntersectionBetweenProcessing = processedCurrentEventIds.stream()
             .distinct()
@@ -63,6 +63,6 @@ class EventProcessorTest extends PostgresIntegrationBase {
         }
 
         // process third batch which is expected to be empty
-        Assertions.assertTrue(eventProcessorFactory.createEventProcessor(1).processCurrentEvent().isEmpty());
+        Assertions.assertTrue(eventProcessorFactory.createCleanupCurrentFlagEventProcessor(1).processCurrentEvent().isEmpty());
     }
 }

@@ -3,7 +3,7 @@ package uk.gov.hmcts.darts.task.runner.impl;
 import net.javacrumbs.shedlock.core.LockProvider;
 import uk.gov.hmcts.darts.arm.component.AutomatedTaskProcessorFactory;
 import uk.gov.hmcts.darts.common.repository.AutomatedTaskRepository;
-import uk.gov.hmcts.darts.event.service.EventProcessor;
+import uk.gov.hmcts.darts.event.service.CleanupCurrentFlagEventProcessor;
 import uk.gov.hmcts.darts.log.api.LogApi;
 import uk.gov.hmcts.darts.task.config.AutomatedTaskConfigurationProperties;
 
@@ -31,7 +31,7 @@ public class CleanupCurrentEventTask extends AbstractLockableAutomatedTask {
     @Override
     protected void runTask() {
         Integer batchSize = getAutomatedTaskBatchSize(taskName);
-        EventProcessor processor = automatedTaskProcessorFactory.createEventProcessor(batchSize);
+        CleanupCurrentFlagEventProcessor processor = automatedTaskProcessorFactory.createCleanupCurrentFlagEventProcessor(batchSize);
         processor.processCurrentEvent();
     }
 }

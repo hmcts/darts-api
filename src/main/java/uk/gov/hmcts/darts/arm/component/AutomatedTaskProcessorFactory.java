@@ -3,7 +3,7 @@ package uk.gov.hmcts.darts.arm.component;
 import uk.gov.hmcts.darts.arm.service.ArmResponseFilesProcessor;
 import uk.gov.hmcts.darts.arm.service.UnstructuredToArmProcessor;
 import uk.gov.hmcts.darts.casedocument.service.GenerateCaseDocumentProcessor;
-import uk.gov.hmcts.darts.event.service.EventProcessor;
+import uk.gov.hmcts.darts.event.service.CleanupCurrentFlagEventProcessor;
 
 public interface AutomatedTaskProcessorFactory {
 
@@ -13,5 +13,5 @@ public interface AutomatedTaskProcessorFactory {
 
     GenerateCaseDocumentProcessor createGenerateCaseDocumentProcessor(int batchSize);
 
-    EventProcessor createEventProcessor(int batchSize);
+    CleanupCurrentFlagEventProcessor createCleanupCurrentFlagEventProcessor(int batchSize);
 }

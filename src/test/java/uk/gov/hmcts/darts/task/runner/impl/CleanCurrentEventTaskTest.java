@@ -8,7 +8,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.darts.arm.component.AutomatedTaskProcessorFactory;
 import uk.gov.hmcts.darts.common.entity.AutomatedTaskEntity;
 import uk.gov.hmcts.darts.common.repository.AutomatedTaskRepository;
-import uk.gov.hmcts.darts.event.service.EventProcessor;
+import uk.gov.hmcts.darts.event.service.CleanupCurrentFlagEventProcessor;
 import uk.gov.hmcts.darts.log.api.LogApi;
 
 import java.util.Optional;
@@ -26,7 +26,7 @@ class CleanCurrentEventTaskTest {
     @Mock
     private AutomatedTaskProcessorFactory factory;
     @Mock
-    private EventProcessor processor;
+    private CleanupCurrentFlagEventProcessor processor;
     @Mock
     private LogApi logApi;
     @Mock
@@ -37,7 +37,7 @@ class CleanCurrentEventTaskTest {
         AutomatedTaskEntity automatedTask = new AutomatedTaskEntity();
         automatedTask.setBatchSize(BATCH_SIZE);
         when(automatedTaskRepository.findByTaskName(any())).thenReturn(Optional.of(automatedTask));
-        when(factory.createEventProcessor(BATCH_SIZE)).thenReturn(processor);
+        when(factory.createCleanupCurrentFlagEventProcessor(BATCH_SIZE)).thenReturn(processor);
         CleanupCurrentEventTask task = new CleanupCurrentEventTask(
             automatedTaskRepository,
             lockProvider,
