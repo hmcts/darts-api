@@ -131,7 +131,7 @@ public class EventStub {
     }
 
     public boolean isOnlyOneOfTheEventIdSetToCurrent(List<EventEntity> eventEntityList) {
-        boolean currentFnd= false;
+        boolean currentFnd = false;
         for (EventEntity event : eventEntityList) {
             Optional<EventEntity> readEventEntity = eventRepository.findById(event.getId());
 
