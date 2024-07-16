@@ -81,7 +81,7 @@ public class TranscriberTranscriptsQueryImpl implements TranscriberTranscriptsQu
                     SELECT tra_id, MAX(workflow_ts) as latest_ts
                     FROM darts.transcription_workflow
                     GROUP BY tra_id
-                ) latest_trw ON tra.tra_id = approved_trw.tra_id AND approved_trw.workflow_ts = latest_trw.latest_ts
+                ) latest_trw ON tra.tra_id = latest_trw.tra_id AND approved_trw.workflow_ts = latest_trw.latest_ts
                 WHERE latest_trw.latest_ts >= :date_limit
                 ORDER BY transcription_id desc
                 LIMIT :max_result_size
@@ -161,7 +161,7 @@ public class TranscriberTranscriptsQueryImpl implements TranscriberTranscriptsQu
                         WHERE trd.tra_id = tra.tra_id
                     )
                 )
-                
+                                
                 UNION
 
                 -- Your work > Completed today (transcriber-view?assigned=true)
