@@ -217,8 +217,6 @@ class TranscriptionControllerGetTranscriberTranscriptsIntTest extends Integratio
             )
             .queryParam(ASSIGNED_QUERY_PARAM, FALSE.toString());
 
-        // FIXME: Change this to 89 days after DMP-3574 fixed and remove the 88 day variable.
-        // Using 88 days is only a workaround to get over the issue described in that ticket.
         String expectedStateChangeTs = convertSqlDateTimeToLocalDateTime(dateMinus89Days);
 
         final MvcResult mvcResult = mockMvc.perform(requestBuilder)
