@@ -11,11 +11,15 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
+import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
+import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
+import uk.gov.hmcts.darts.transcriptions.exception.TranscriptionApiError;
 
 import java.net.URI;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @AutoConfigureMockMvc
@@ -29,6 +33,9 @@ class TranscriptionControllerGetTranscriptionTranscriberCountsIntTest extends In
 
     @Autowired
     private JdbcTemplate jdbcTemplate;
+
+    @Autowired
+    private UserAccountRepository userAccountRepository;
 
     @BeforeEach
     @SuppressWarnings({"checkstyle.LineLengthCheck"})
@@ -151,6 +158,25 @@ class TranscriptionControllerGetTranscriptionTranscriberCountsIntTest extends In
             }
             """;
         JSONAssert.assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
+    }
+
+    @Test
+    void getTranscriberCountsShouldReturnOkWithInactive() throws Exception {
+
+        UserAccountEntity userAccountEntity = userAccountRepository.findById(-10).get();
+        userAccountEntity.setActive(false);
+        userAccountRepository.save(userAccountEntity);
+
+        MockHttpServletRequestBuilder requestBuilder = get(ENDPOINT_URI)
+            .header(
+                USER_ID_HEADER,
+                -10
+            );
+
+        mockMvc.perform(requestBuilder)
+            .andExpect(status().isForbidden())
+            .andExpect(jsonPath("$.type").value(TranscriptionApiError.USER_NOT_TRANSCRIBER.getType().toString()))
+            .andReturn();
     }
 
     @Test

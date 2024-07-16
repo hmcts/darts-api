@@ -13,16 +13,17 @@ import uk.gov.hmcts.darts.cases.helper.AdminCasesSearchRequestHelper;
 import uk.gov.hmcts.darts.cases.helper.AdvancedSearchRequestHelper;
 import uk.gov.hmcts.darts.cases.mapper.AdminCasesSearchResponseMapper;
 import uk.gov.hmcts.darts.cases.mapper.AdvancedSearchResponseMapper;
+import uk.gov.hmcts.darts.cases.mapper.CaseTranscriptionMapper;
 import uk.gov.hmcts.darts.cases.mapper.CasesAnnotationMapper;
 import uk.gov.hmcts.darts.cases.mapper.CasesMapper;
 import uk.gov.hmcts.darts.cases.mapper.EventMapper;
 import uk.gov.hmcts.darts.cases.mapper.HearingEntityToCaseHearing;
-import uk.gov.hmcts.darts.cases.mapper.TranscriptionMapper;
 import uk.gov.hmcts.darts.cases.model.AddCaseRequest;
 import uk.gov.hmcts.darts.cases.model.AdminCasesSearchRequest;
 import uk.gov.hmcts.darts.cases.model.AdminCasesSearchResponseItem;
 import uk.gov.hmcts.darts.cases.model.AdvancedSearchResult;
 import uk.gov.hmcts.darts.cases.model.Annotation;
+import uk.gov.hmcts.darts.cases.model.CaseTranscriptModel;
 import uk.gov.hmcts.darts.cases.model.Event;
 import uk.gov.hmcts.darts.cases.model.GetCasesRequest;
 import uk.gov.hmcts.darts.cases.model.GetCasesSearchRequest;
@@ -73,6 +74,7 @@ public class CaseServiceImpl implements CaseService {
     private final TranscriptionRepository transcriptionRepository;
     private final AuthorisationApi authorisationApi;
     private final LogApi logApi;
+    private final CaseTranscriptionMapper transcriptionMapper;
 
     @Value("${darts.cases.admin-search.max-results}")
     private Integer adminSearchMaxResults;
@@ -175,7 +177,8 @@ public class CaseServiceImpl implements CaseService {
     @Transactional
     public List<Transcript> getTranscriptsByCaseId(Integer caseId) {
         List<TranscriptionEntity> transcriptionEntities = transcriptionRepository.findByCaseIdManualOrLegacy(caseId, false);
-        return TranscriptionMapper.mapResponse(transcriptionEntities);
+        List<CaseTranscriptModel> caseTranscriptModelList = transcriptionMapper.mapResponse(transcriptionEntities);
+        return transcriptionMapper.getTranscriptList(caseTranscriptModelList);
     }
 
     @Override

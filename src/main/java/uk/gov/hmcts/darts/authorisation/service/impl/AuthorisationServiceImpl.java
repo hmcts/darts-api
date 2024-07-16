@@ -80,7 +80,7 @@ public class AuthorisationServiceImpl implements AuthorisationService {
         criteriaQuery.select(criteriaBuilder.construct(
                                  GetAuthorisationResult.class,
                                  root.get(UserAccountEntity_.id),
-                                 root.get(UserAccountEntity_.userName),
+                                 root.get(UserAccountEntity_.userFullName),
                                  root.get(UserAccountEntity_.active),
                                  securityGroup.get(SecurityGroupEntity_.globalAccess),
                                  courthouses.get(CourthouseEntity_.id),

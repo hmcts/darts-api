@@ -10,6 +10,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
+import uk.gov.hmcts.darts.authorisation.exception.AuthorisationError;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
@@ -30,6 +31,7 @@ import java.util.Arrays;
 
 import static org.skyscreamer.jsonassert.JSONAssert.assertEquals;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static uk.gov.hmcts.darts.cases.CasesConstants.GetSearchCasesParams.ENDPOINT_URL;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.APPROVER;
@@ -140,8 +142,6 @@ class CaseControllerSearchPostTest extends IntegrationBase {
         dartsDatabase.saveAll(event4a, event5b);
 
         givenBearerTokenExists(INTEGRATION_TEST_USER_EMAIL);
-        user = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
-        setupUserAccountAndSecurityGroup();
     }
 
     @AfterEach
@@ -151,7 +151,8 @@ class CaseControllerSearchPostTest extends IntegrationBase {
 
     @Test
     void casesSearchPostEndpoint() throws Exception {
-
+        user = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
+        setupUserAccountAndSecurityGroup();
         String requestBody = """
             {
               "courthouse": "SWANSEA",
@@ -173,7 +174,8 @@ class CaseControllerSearchPostTest extends IntegrationBase {
 
     @Test
     void casesSearchPostEndpointDateRange() throws Exception {
-
+        user = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
+        setupUserAccountAndSecurityGroup();
         String requestBody = """
             {
               "courthouse": "SWANSEA",
@@ -196,7 +198,8 @@ class CaseControllerSearchPostTest extends IntegrationBase {
 
     @Test
     void casesSearchPostEndpointEventText() throws Exception {
-
+        user = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
+        setupUserAccountAndSecurityGroup();
         String requestBody = """
             {
               "courthouse": "SWANSEA",
@@ -218,7 +221,8 @@ class CaseControllerSearchPostTest extends IntegrationBase {
 
     @Test
     void casesSearchPostEndpointJudgeName() throws Exception {
-
+        user = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
+        setupUserAccountAndSecurityGroup();
         String requestBody = """
             {
               "courthouse": "SWANSEA",
@@ -236,6 +240,27 @@ class CaseControllerSearchPostTest extends IntegrationBase {
         String expectedResponse = getContentsFromFile(
             "tests/cases/CaseControllerSearchGetTest/casesSearchGetEndpoint/expectedResponseJudgeName.json");
         assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
+    }
+
+    @Test
+    void casesSearchPostEndpointJudgeNameInactive() throws Exception {
+        user = dartsDatabase.getUserAccountStub().createJudgeUser();
+        user.setActive(false);
+        setupUserAccountAndSecurityGroup();
+
+        String requestBody = """
+            {
+              "courthouse": "SWANSEA",
+              "courtroom": "1",
+              "judge_name": "e3a"
+            }""";
+
+        MockHttpServletRequestBuilder requestBuilder = post(ENDPOINT_URL)
+            .contentType(MediaType.APPLICATION_JSON_VALUE)
+            .content(requestBody);
+        mockMvc.perform(requestBuilder).andExpect(status().isForbidden()).andExpect(jsonPath("$.type").value(
+            AuthorisationError.USER_DETAILS_INVALID.getType().toString()));
+
     }
 
     private void setupUserAccountAndSecurityGroup() {

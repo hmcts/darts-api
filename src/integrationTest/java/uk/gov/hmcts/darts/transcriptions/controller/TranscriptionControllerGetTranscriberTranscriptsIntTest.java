@@ -1,6 +1,7 @@
 package uk.gov.hmcts.darts.transcriptions.controller;
 
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.skyscreamer.jsonassert.JSONAssert;
@@ -11,6 +12,8 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
+import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
+import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 
 import java.net.URI;
@@ -40,6 +43,9 @@ class TranscriptionControllerGetTranscriberTranscriptsIntTest extends Integratio
 
     @Autowired
     private JdbcTemplate jdbcTemplate;
+
+    @Autowired
+    private UserAccountRepository userAccountRepository;
 
     String todaysDate;
     String dateMinus88Days;
@@ -181,6 +187,28 @@ class TranscriptionControllerGetTranscriberTranscriptsIntTest extends Integratio
     }
 
     @Test
+    void givenTranscriberUserAndYourWorkViewRequested_thenReturnUnassignedTranscriptionAndDoNotReturnCompletedTranscriptionFromBeforeTodayInactive()
+        throws Exception {
+
+        UserAccountEntity userAccountEntity = userAccountRepository.findById(-10).get();
+        userAccountEntity.setActive(false);
+        userAccountRepository.save(userAccountEntity);
+
+        MockHttpServletRequestBuilder requestBuilder = get(ENDPOINT_URI)
+            .header(
+                USER_ID_HEADER,
+                -10
+            )
+            .queryParam(ASSIGNED_QUERY_PARAM, FALSE.toString());
+
+        final MvcResult mvcResult = mockMvc.perform(requestBuilder)
+            .andReturn();
+
+        String actualResponse = mvcResult.getResponse().getContentAsString();
+        Assertions.assertEquals("[]", actualResponse);
+    }
+
+    @Test
     void givenTranscriberUserAndTranscriptRequestsViewRequestedWithNoUrgency_thenReturnApprovedTranscription() throws Exception {
         deleteTranscription();
         setupDataWithoutUrgency();
@@ -285,6 +313,28 @@ class TranscriptionControllerGetTranscriberTranscriptsIntTest extends Integratio
 
     }
 
+    @Test
+    void givenTranscriberAndYourWorkViewRequestedWithAnInactiveUser_thenReturn()
+        throws Exception {
+
+        UserAccountEntity userAccountEntity = userAccountRepository.findById(-10).get();
+        userAccountEntity.setActive(false);
+        userAccountRepository.save(userAccountEntity);
+
+        MockHttpServletRequestBuilder requestBuilder = get(ENDPOINT_URI)
+            .header(
+                USER_ID_HEADER,
+                -10
+            )
+            .queryParam(ASSIGNED_QUERY_PARAM, FALSE.toString());
+
+        final MvcResult mvcResult = mockMvc.perform(requestBuilder)
+            .andReturn();
+
+        String actualResponse = mvcResult.getResponse().getContentAsString();
+        Assertions.assertEquals("[]", actualResponse);
+    }
+
     private void setupDataWithUrgency() {
         setupData(true);
     }
@@ -306,7 +356,7 @@ class TranscriptionControllerGetTranscriberTranscriptsIntTest extends Integratio
                                 INSERT INTO darts.hearing (hea_id, cas_id, ctr_id, hearing_date, scheduled_start_time, hearing_is_actual,
                                 created_ts, created_by, last_modified_ts, last_modified_by)
                                 VALUES (-1, -1, -1, '2023-11-17', NULL, true, NULL, NULL, NULL, NULL);
-
+                                
                                 INSERT INTO darts.user_account (usr_id, dm_user_s_object_id, user_name, user_full_name, user_email_address, description,
                                 is_active, created_ts,
                                 last_modified_ts, last_login_ts, last_modified_by, created_by, account_guid, is_system_user)
@@ -403,7 +453,7 @@ class TranscriptionControllerGetTranscriberTranscriptsIntTest extends Integratio
                                 INSERT INTO darts.transcription (tra_id, ctr_id, trt_id, transcription_object_id, requested_by, start_ts, end_ts,
                                 created_ts, last_modified_ts, last_modified_by, created_by, tru_id, trs_id, hearing_date,
                                 is_manual_transcription, hide_request_from_requestor)
-                                VALUES (121, NULL, 9, NULL, NULL, '$TODAYS_DATE', '$TODAYS_DATE', '$TODAYS_DATE', '$TODAYS_DATE', -10, 
+                                VALUES (121, NULL, 9, NULL, NULL, '$TODAYS_DATE', '$TODAYS_DATE', '$TODAYS_DATE', '$TODAYS_DATE', -10,
                                 -10, $URGENCY, 6, NULL, true, false);
                                 INSERT INTO darts.case_transcription_ae (tra_id, cas_id) VALUES (121,-1);
                                 INSERT INTO darts.hearing_transcription_ae (tra_id, hea_id) VALUES (121,-1);

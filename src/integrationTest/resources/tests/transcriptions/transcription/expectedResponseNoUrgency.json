@@ -7,7 +7,7 @@
   "received" : "2023-06-20T10:00:00Z",
   "requestor" : {
     "user_id" : 2,
-    "user_full_name" : "integrationtest.user@example.comUsername"
+    "user_full_name" : "integrationtest.user@example.comFullName"
   },
   "requestor_comments" : "comment1",
   "defendants" : [ ],

@@ -1,28 +1,26 @@
-package uk.gov.hmcts.darts.cases.mapper;
+package uk.gov.hmcts.darts.common.mapper;
 
-import lombok.experimental.UtilityClass;
 import lombok.extern.slf4j.Slf4j;
-import uk.gov.hmcts.darts.cases.model.Transcript;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionEntity;
+import uk.gov.hmcts.darts.common.model.TranscriptModel;
 
 import java.util.ArrayList;
 import java.util.List;
 
 @Slf4j
-@UtilityClass
-public class TranscriptionMapper {
+public abstract class TranscriptionMapper<T extends TranscriptModel> {
 
-    public List<Transcript> mapResponse(List<TranscriptionEntity> transcriptionEntities) {
-        List<Transcript> response = new ArrayList<>();
+    public List<T> mapResponse(List<TranscriptionEntity> transcriptionEntities) {
+        List<T> response = new ArrayList<>();
         for (TranscriptionEntity transcriptionEntity : transcriptionEntities) {
             response.add(map(transcriptionEntity));
         }
         return response;
     }
 
-    private Transcript map(TranscriptionEntity transcriptionEntity) {
-        Transcript transcript = new Transcript();
+    private T map(TranscriptionEntity transcriptionEntity) {
+        T transcript = createNewTranscription();
         transcript.setTranscriptionId(transcriptionEntity.getId());
         List<HearingEntity> hearings = transcriptionEntity.getHearings();
         if (hearings.isEmpty()) {
@@ -41,13 +39,13 @@ public class TranscriptionMapper {
         return transcript;
     }
 
+    protected abstract T createNewTranscription();
+
     private String getRequestedBy(TranscriptionEntity transcriptionEntity) {
         if (transcriptionEntity.getCreatedBy() != null) {
-            return transcriptionEntity.getCreatedBy().getUserName();
+            return transcriptionEntity.getCreatedBy().getUserFullName();
         } else {
             return transcriptionEntity.getRequestedBy().getUserFullName();
         }
     }
-
-
 }
