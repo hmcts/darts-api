@@ -40,6 +40,7 @@ public class RequestValidator {
         totalPoints += StringUtils.length(request.getJudgeName()) >= 3 ? 1 : 0;
         totalPoints += StringUtils.length(request.getDefendantName()) >= 3 ? 1 : 0;
         totalPoints += (request.getDateFrom() != null || request.getDateTo() != null) ? 1 : 0;
+        totalPoints += (request.getDateFrom() != null && request.getDateFrom().equals(request.getDateTo())) ? 1 : 0;//specific date
         totalPoints += StringUtils.length(request.getEventTextContains()) >= 3 ? 1 : 0;
 
         int three = 3;
