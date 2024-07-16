@@ -78,18 +78,22 @@ public interface EventRepository extends JpaRepository<EventEntity, Integer> {
         Pageable pageable);
 
     @Query(value = """
-            select distinct evnt.event_id from darts.event evnt
-                inner join (SELECT distinct count(event_id) as eventCount, event_id  FROM
-                darts.event where is_current=true GROUP BY event_id) eventIdCntResult ON evnt.event_id = eventIdCntResult.event_id
-            where evnt.event_id <> 0 and eventIdCntResult.eventCount > 1
-            LIMIT :batchSize
+        SELECT event_id
+        FROM  darts.event
+        WHERE is_current=true
+        AND event_id <> 0
+        GROUP BY event_id
+        HAVING count(event_id) > 1
         """, nativeQuery = true)
-    List<Integer> getCurrentEventIdsToBeProcessed(int batchSize);
+    List<Integer> getCurrentEventIdsToBeProcessed(Pageable pageable);
 
     @Query(value = """
-             select eve_id FROM darts.event e where event_id=:eventId order by created_ts desc LIMIT 1
+         SELECT eve_id FROM darts.event e
+         WHERE event_id=:eventId
+         ORDER BY created_ts desc
+         LIMIT 1
         """, nativeQuery = true)
-    Integer getTheCurrentEventPrimaryKeyForEventId(int eventId);
+    Integer getTheLatestCreatedEventPrimaryKeyForTheEventId(Integer eventId);
 
     @Transactional
     @Modifying

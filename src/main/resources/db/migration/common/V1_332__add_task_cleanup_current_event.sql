@@ -1,2 +1,2 @@
 INSERT INTO darts.automated_task (aut_id,task_name,task_description,cron_expression,cron_editable, batch_size)
-VALUES (nextval('aut_seq'),'CleanupCurrentEvent','Cleans up the event','0 * 0/4 * * *',true,50);
+VALUES (nextval('aut_seq'),'CleanupCurrentEvent','Cleans up the current event statuses so there is only one current event record mapped to a single event id','0 0 * * * *',true,50);
