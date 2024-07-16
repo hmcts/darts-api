@@ -13,7 +13,7 @@ import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilde
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.RetentionPolicyTypeEntity;
 import uk.gov.hmcts.darts.common.repository.RetentionPolicyTypeRepository;
-import uk.gov.hmcts.darts.testutils.IntegrationBase;
+import uk.gov.hmcts.darts.testutils.PostgresIntegrationBase;
 import uk.gov.hmcts.darts.testutils.stubs.SuperAdminUserStub;
 
 import java.time.OffsetDateTime;
@@ -26,7 +26,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @AutoConfigureMockMvc
-class RetentionControllerPatchRetentionPolicyTypeIntTest extends IntegrationBase {
+class RetentionControllerPatchRetentionPolicyTypeIntTest extends PostgresIntegrationBase {
 
     private static final String POLICY_A_NAME = "Policy A";
     private static final String POLICY_B_NAME = "Policy B";
@@ -59,8 +59,8 @@ class RetentionControllerPatchRetentionPolicyTypeIntTest extends IntegrationBase
         superAdminUserStub.givenUserIsAuthorised(userIdentity);
 
         final RetentionPolicyTypeEntity inactivePolicy = createAndSavePolicyType(POLICY_A_NAME,
-                                                                           SOME_FUTURE_DATE_TIME, null,
-                                                                           "100");
+                                                                                 SOME_FUTURE_DATE_TIME, null,
+                                                                                 "100");
 
         // When
         ResultActions resultActions = mockMvc.perform(
@@ -97,11 +97,11 @@ class RetentionControllerPatchRetentionPolicyTypeIntTest extends IntegrationBase
         superAdminUserStub.givenUserIsAuthorised(userIdentity);
 
         final RetentionPolicyTypeEntity livePolicy = createAndSavePolicyType(POLICY_A_NAME,
-                                                                       SOME_PAST_DATE_TIME, SOME_FUTURE_DATE_TIME,
-                                                                       "100");
+                                                                             SOME_PAST_DATE_TIME, SOME_FUTURE_DATE_TIME,
+                                                                             "100");
         final RetentionPolicyTypeEntity pendingRevision = createAndSavePolicyType(POLICY_A_NAME,
-                                                                            SOME_FUTURE_DATE_TIME, null,
-                                                                            "100");
+                                                                                  SOME_FUTURE_DATE_TIME, null,
+                                                                                  "100");
 
         // When
         ResultActions resultActions = mockMvc.perform(
@@ -142,8 +142,8 @@ class RetentionControllerPatchRetentionPolicyTypeIntTest extends IntegrationBase
         superAdminUserStub.givenUserIsAuthorised(userIdentity);
 
         final RetentionPolicyTypeEntity pendingPolicy100 = createAndSavePolicyType(POLICY_A_NAME,
-                                                                             SOME_FUTURE_DATE_TIME, null,
-                                                                             "100");
+                                                                                   SOME_FUTURE_DATE_TIME, null,
+                                                                                   "100");
 
         // When
         ResultActions resultActions = mockMvc.perform(
@@ -175,16 +175,16 @@ class RetentionControllerPatchRetentionPolicyTypeIntTest extends IntegrationBase
     }
 
     @Test
-    void patchRetentionPolicyTypeShouldSucceedWhenFixedPolicyKeyIsChanged_Scenario2() throws Exception {
+    void patchRetentionPolicyTypeShouldFailWhenFixedPolicyKeyIsChanged_Scenario2() throws Exception {
         // Given
         superAdminUserStub.givenUserIsAuthorised(userIdentity);
 
-        final RetentionPolicyTypeEntity pendingPolicy100 = createAndSavePolicyType(POLICY_A_NAME,
-                                                                             SOME_FUTURE_DATE_TIME, null,
-                                                                             "100");
+        createAndSavePolicyType(POLICY_A_NAME,
+                                SOME_FUTURE_DATE_TIME, null,
+                                "100");
         final RetentionPolicyTypeEntity pendingPolicy200 = createAndSavePolicyType(POLICY_B_NAME,
-                                                                             SOME_OTHER_FUTURE_DATE_TIME, null,
-                                                                             "200");
+                                                                                   SOME_OTHER_FUTURE_DATE_TIME, null,
+                                                                                   "200");
 
         // When
         ResultActions resultActions = mockMvc.perform(
@@ -198,27 +198,9 @@ class RetentionControllerPatchRetentionPolicyTypeIntTest extends IntegrationBase
 
         // Then
         resultActions
-            .andExpect(status().isOk())
-            .andExpect(jsonPath("$.id").exists())
-            .andExpect(jsonPath("$.name").value(POLICY_B_NAME))
-            .andExpect(jsonPath("$.display_name").value(POLICY_B_NAME))
-            .andExpect(jsonPath("$.description").value(SOME_POLICY_DESCRIPTION))
-            .andExpect(jsonPath("$.fixed_policy_key").value(100))
-            .andExpect(jsonPath("$.duration").value(SOME_POLICY_DURATION))
-            .andExpect(jsonPath("$.policy_start_at").value(SOME_OTHER_FUTURE_DATE_TIME));
-
-        // And assert database state
-        var updatedPendingPolicy100 = retentionPolicyTypeRepository.findById(pendingPolicy100.getId())
-            .orElseThrow();
-        assertEquals(OffsetDateTime.parse(SOME_FUTURE_DATE_TIME), updatedPendingPolicy100.getPolicyStart());
-        assertEquals(OffsetDateTime.parse(SOME_OTHER_FUTURE_DATE_TIME), updatedPendingPolicy100.getPolicyEnd());
-        assertEquals("100", updatedPendingPolicy100.getFixedPolicyKey());
-
-        var updatedPendingPolicy200 = retentionPolicyTypeRepository.findById(pendingPolicy200.getId())
-            .orElseThrow();
-        assertEquals(OffsetDateTime.parse(SOME_OTHER_FUTURE_DATE_TIME), updatedPendingPolicy200.getPolicyStart());
-        assertNull(updatedPendingPolicy200.getPolicyEnd());
-        assertEquals("100", updatedPendingPolicy200.getFixedPolicyKey());
+            .andExpect(status().isConflict())
+            .andExpect(jsonPath("$.type").value("RETENTION_114"))
+            .andExpect(jsonPath("$.title").value("Fixed policy key must be unique"));
     }
 
     @Test
@@ -226,62 +208,15 @@ class RetentionControllerPatchRetentionPolicyTypeIntTest extends IntegrationBase
         // Given
         superAdminUserStub.givenUserIsAuthorised(userIdentity);
 
-        final RetentionPolicyTypeEntity livePolicy100 = createAndSavePolicyType(POLICY_A_NAME,
-                                                                          SOME_PAST_DATE_TIME, SOME_FUTURE_DATE_TIME,
-                                                                          "100");
-        final RetentionPolicyTypeEntity pendingRevisionPolicy100 = createAndSavePolicyType(POLICY_A_NAME,
-                                                                                     SOME_FUTURE_DATE_TIME, null,
-                                                                                     "100");
-
-        // When
-        ResultActions resultActions = mockMvc.perform(
-            buildRequest(pendingRevisionPolicy100.getId())
-                .content("""
-                             {
-                               "fixed_policy_key": "%s"
-                             }
-                             """.formatted(200)
-                ));
-
-        // Then
-        resultActions
-            .andExpect(status().isOk())
-            .andExpect(jsonPath("$.id").exists())
-            .andExpect(jsonPath("$.name").value(POLICY_A_NAME))
-            .andExpect(jsonPath("$.display_name").value(POLICY_A_NAME))
-            .andExpect(jsonPath("$.description").value(SOME_POLICY_DESCRIPTION))
-            .andExpect(jsonPath("$.fixed_policy_key").value(200))
-            .andExpect(jsonPath("$.duration").value(SOME_POLICY_DURATION))
-            .andExpect(jsonPath("$.policy_start_at").value(SOME_FUTURE_DATE_TIME));
-
-        // And assert database state
-        var updatedLivePolicy100 = retentionPolicyTypeRepository.findById(livePolicy100.getId())
-            .orElseThrow();
-        assertEquals(OffsetDateTime.parse(SOME_PAST_DATE_TIME), updatedLivePolicy100.getPolicyStart());
-        assertNull(updatedLivePolicy100.getPolicyEnd());
-        assertEquals("100", updatedLivePolicy100.getFixedPolicyKey());
-
-        var updatedPendingPolicy = retentionPolicyTypeRepository.findById(pendingRevisionPolicy100.getId())
-            .orElseThrow();
-        assertEquals(OffsetDateTime.parse(SOME_FUTURE_DATE_TIME), updatedPendingPolicy.getPolicyStart());
-        assertNull(updatedPendingPolicy.getPolicyEnd());
-        assertEquals("200", updatedPendingPolicy.getFixedPolicyKey());
-    }
-
-    @Test
-    void patchRetentionPolicyTypeShouldSucceedWhenFixedPolicyKeyIsChanged_Scenario4() throws Exception {
-        // Given
-        superAdminUserStub.givenUserIsAuthorised(userIdentity);
-
-        final RetentionPolicyTypeEntity livePolicy100 = createAndSavePolicyType(POLICY_A_NAME,
-                                                                          SOME_PAST_DATE_TIME, null,
-                                                                          "100");
-        final RetentionPolicyTypeEntity livePolicy200 = createAndSavePolicyType(POLICY_B_NAME,
-                                                                          SOME_PAST_DATE_TIME, SOME_FUTURE_DATE_TIME,
-                                                                          "200");
+        createAndSavePolicyType(POLICY_A_NAME,
+                                SOME_PAST_DATE_TIME, null,
+                                "100");
+        createAndSavePolicyType(POLICY_B_NAME,
+                                SOME_PAST_DATE_TIME, SOME_FUTURE_DATE_TIME,
+                                "200");
         final RetentionPolicyTypeEntity pendingRevisionPolicy200 = createAndSavePolicyType(POLICY_B_NAME,
-                                                                                     SOME_FUTURE_DATE_TIME, null,
-                                                                                     "200");
+                                                                                           SOME_FUTURE_DATE_TIME, null,
+                                                                                           "200");
 
         // When
         // Note names must be patched as part of this request to ensure they are unique amongst other fixed keys
@@ -300,49 +235,25 @@ class RetentionControllerPatchRetentionPolicyTypeIntTest extends IntegrationBase
 
         // Then
         resultActions
-            .andExpect(status().isOk())
-            .andExpect(jsonPath("$.id").exists())
-            .andExpect(jsonPath("$.name").value(POLICY_A_NAME))
-            .andExpect(jsonPath("$.display_name").value(POLICY_A_NAME))
-            .andExpect(jsonPath("$.description").value(SOME_POLICY_DESCRIPTION))
-            .andExpect(jsonPath("$.fixed_policy_key").value(100))
-            .andExpect(jsonPath("$.duration").value(SOME_POLICY_DURATION))
-            .andExpect(jsonPath("$.policy_start_at").value(SOME_FUTURE_DATE_TIME));
-
-        // And assert database state
-        var updatedLivePolicy100 = retentionPolicyTypeRepository.findById(livePolicy100.getId())
-            .orElseThrow();
-        assertEquals(OffsetDateTime.parse(SOME_PAST_DATE_TIME), updatedLivePolicy100.getPolicyStart());
-        assertEquals(OffsetDateTime.parse(SOME_FUTURE_DATE_TIME), updatedLivePolicy100.getPolicyEnd());
-        assertEquals("100", updatedLivePolicy100.getFixedPolicyKey());
-
-        var updatedLivePolicy200 = retentionPolicyTypeRepository.findById(livePolicy200.getId())
-            .orElseThrow();
-        assertEquals(OffsetDateTime.parse(SOME_PAST_DATE_TIME), updatedLivePolicy200.getPolicyStart());
-        assertNull(updatedLivePolicy200.getPolicyEnd());
-        assertEquals("200", updatedLivePolicy200.getFixedPolicyKey());
-
-        var updatedRetentionPolicy = retentionPolicyTypeRepository.findById(pendingRevisionPolicy200.getId())
-            .orElseThrow();
-        assertEquals(OffsetDateTime.parse(SOME_FUTURE_DATE_TIME), updatedRetentionPolicy.getPolicyStart());
-        assertNull(updatedRetentionPolicy.getPolicyEnd());
-        assertEquals("100", updatedRetentionPolicy.getFixedPolicyKey());
+            .andExpect(status().isConflict())
+            .andExpect(jsonPath("$.type").value("RETENTION_114"))
+            .andExpect(jsonPath("$.title").value("Fixed policy key must be unique"));
     }
 
     @Test
-    void patchRetentionPolicyTypeShouldSucceedWhenFixedPolicyKeyAndStartDateIsChanged() throws Exception {
+    void patchRetentionPolicyTypeShouldFailWhenFixedPolicyKeyAndStartDateIsChanged() throws Exception {
         // Given
         superAdminUserStub.givenUserIsAuthorised(userIdentity);
 
-        final RetentionPolicyTypeEntity livePolicy100 = createAndSavePolicyType(POLICY_A_NAME,
-                                                                          SOME_PAST_DATE_TIME, null,
-                                                                          "100");
-        final RetentionPolicyTypeEntity livePolicy200 = createAndSavePolicyType(POLICY_B_NAME,
-                                                                          SOME_PAST_DATE_TIME, SOME_FUTURE_DATE_TIME,
-                                                                          "200");
+        createAndSavePolicyType(POLICY_A_NAME,
+                                SOME_PAST_DATE_TIME, null,
+                                "100");
+        createAndSavePolicyType(POLICY_B_NAME,
+                                SOME_PAST_DATE_TIME, SOME_FUTURE_DATE_TIME,
+                                "200");
         final RetentionPolicyTypeEntity pendingRevisionPolicy200 = createAndSavePolicyType(POLICY_B_NAME,
-                                                                                     SOME_FUTURE_DATE_TIME, null,
-                                                                                     "200");
+                                                                                           SOME_FUTURE_DATE_TIME, null,
+                                                                                           "200");
 
         // When
         // Note names must be patched as part of this request to ensure they are unique amongst other fixed keys
@@ -363,33 +274,9 @@ class RetentionControllerPatchRetentionPolicyTypeIntTest extends IntegrationBase
 
         // Then
         resultActions
-            .andExpect(status().isOk())
-            .andExpect(jsonPath("$.id").exists())
-            .andExpect(jsonPath("$.name").value(POLICY_A_NAME))
-            .andExpect(jsonPath("$.display_name").value(POLICY_A_NAME))
-            .andExpect(jsonPath("$.description").value(SOME_POLICY_DESCRIPTION))
-            .andExpect(jsonPath("$.fixed_policy_key").value(100))
-            .andExpect(jsonPath("$.duration").value(SOME_POLICY_DURATION))
-            .andExpect(jsonPath("$.policy_start_at").value(SOME_OTHER_FUTURE_DATE_TIME));
-
-        // And assert database state
-        var updatedLivePolicy100 = retentionPolicyTypeRepository.findById(livePolicy100.getId())
-            .orElseThrow();
-        assertEquals(OffsetDateTime.parse(SOME_PAST_DATE_TIME), updatedLivePolicy100.getPolicyStart());
-        assertEquals(OffsetDateTime.parse(SOME_OTHER_FUTURE_DATE_TIME), updatedLivePolicy100.getPolicyEnd());
-        assertEquals("100", updatedLivePolicy100.getFixedPolicyKey());
-
-        var updatedLivePolicy200 = retentionPolicyTypeRepository.findById(livePolicy200.getId())
-            .orElseThrow();
-        assertEquals(OffsetDateTime.parse(SOME_PAST_DATE_TIME), updatedLivePolicy200.getPolicyStart());
-        assertNull(updatedLivePolicy200.getPolicyEnd());
-        assertEquals("200", updatedLivePolicy200.getFixedPolicyKey());
-
-        var updatedRetentionPolicy = retentionPolicyTypeRepository.findById(pendingRevisionPolicy200.getId())
-            .orElseThrow();
-        assertEquals(OffsetDateTime.parse(SOME_OTHER_FUTURE_DATE_TIME), updatedRetentionPolicy.getPolicyStart());
-        assertNull(updatedRetentionPolicy.getPolicyEnd());
-        assertEquals("100", updatedRetentionPolicy.getFixedPolicyKey());
+            .andExpect(status().isConflict())
+            .andExpect(jsonPath("$.type").value("RETENTION_114"))
+            .andExpect(jsonPath("$.title").value("Fixed policy key must be unique"));
     }
 
     @Test
@@ -398,8 +285,8 @@ class RetentionControllerPatchRetentionPolicyTypeIntTest extends IntegrationBase
         superAdminUserStub.givenUserIsAuthorised(userIdentity);
 
         final RetentionPolicyTypeEntity inactivePolicy = createAndSavePolicyType(POLICY_A_NAME,
-                                                                           SOME_FUTURE_DATE_TIME, null,
-                                                                           "100");
+                                                                                 SOME_FUTURE_DATE_TIME, null,
+                                                                                 "100");
 
         // When
         ResultActions resultActions = mockMvc.perform(
@@ -434,8 +321,8 @@ class RetentionControllerPatchRetentionPolicyTypeIntTest extends IntegrationBase
         superAdminUserStub.givenUserIsAuthorised(userIdentity);
 
         final RetentionPolicyTypeEntity inactivePolicy = createAndSavePolicyType(POLICY_A_NAME,
-                                                                           SOME_FUTURE_DATE_TIME, null,
-                                                                           "100");
+                                                                                 SOME_FUTURE_DATE_TIME, null,
+                                                                                 "100");
 
         // When
         ResultActions resultActions = mockMvc.perform(
@@ -470,8 +357,8 @@ class RetentionControllerPatchRetentionPolicyTypeIntTest extends IntegrationBase
         superAdminUserStub.givenUserIsAuthorised(userIdentity);
 
         final RetentionPolicyTypeEntity inactivePolicy = createAndSavePolicyType(POLICY_A_NAME,
-                                                                           SOME_FUTURE_DATE_TIME, null,
-                                                                           "100");
+                                                                                 SOME_FUTURE_DATE_TIME, null,
+                                                                                 "100");
 
         // When
         ResultActions resultActions = mockMvc.perform(
@@ -509,8 +396,8 @@ class RetentionControllerPatchRetentionPolicyTypeIntTest extends IntegrationBase
         superAdminUserStub.givenUserIsAuthorised(userIdentity);
 
         final RetentionPolicyTypeEntity inactivePolicy = createAndSavePolicyType(POLICY_A_NAME,
-                                                                           SOME_FUTURE_DATE_TIME, null,
-                                                                           "100");
+                                                                                 SOME_FUTURE_DATE_TIME, null,
+                                                                                 "100");
 
         // When
         ResultActions resultActions = mockMvc.perform(
@@ -548,8 +435,8 @@ class RetentionControllerPatchRetentionPolicyTypeIntTest extends IntegrationBase
         superAdminUserStub.givenUserIsAuthorised(userIdentity);
 
         final RetentionPolicyTypeEntity inactivePolicy = createAndSavePolicyType(POLICY_A_NAME,
-                                                                           SOME_FUTURE_DATE_TIME, null,
-                                                                           "100");
+                                                                                 SOME_FUTURE_DATE_TIME, null,
+                                                                                 "100");
 
         // When
         ResultActions resultActions = mockMvc.perform(
@@ -584,8 +471,8 @@ class RetentionControllerPatchRetentionPolicyTypeIntTest extends IntegrationBase
         superAdminUserStub.givenUserIsAuthorised(userIdentity);
 
         final RetentionPolicyTypeEntity inactivePolicy = createAndSavePolicyType(POLICY_A_NAME,
-                                                                           SOME_PAST_DATE_TIME, null,
-                                                                           "100");
+                                                                                 SOME_PAST_DATE_TIME, null,
+                                                                                 "100");
 
         // When
         ResultActions resultActions = mockMvc.perform(
@@ -605,7 +492,7 @@ class RetentionControllerPatchRetentionPolicyTypeIntTest extends IntegrationBase
     }
 
     @Test
-    void patchRetentionPolicyTypeShouldFailWhenChangingFixedPolicyKeyWithANameThatExistsInOtherPolicies() throws Exception {
+    void patchRetentionPolicyTypeShouldFailWhenChangingToAFixedPolicyKeyThatExists() throws Exception {
         // Given
         superAdminUserStub.givenUserIsAuthorised(userIdentity);
 
@@ -616,8 +503,8 @@ class RetentionControllerPatchRetentionPolicyTypeIntTest extends IntegrationBase
                                 SOME_PAST_DATE_TIME, SOME_FUTURE_DATE_TIME,
                                 "200");
         final RetentionPolicyTypeEntity pendingRevisionPolicy200 = createAndSavePolicyType(POLICY_B_NAME,
-                                                                                     SOME_FUTURE_DATE_TIME, null,
-                                                                                     "200");
+                                                                                           SOME_FUTURE_DATE_TIME, null,
+                                                                                           "200");
 
         // When
         ResultActions resultActions = mockMvc.perform(
@@ -632,8 +519,8 @@ class RetentionControllerPatchRetentionPolicyTypeIntTest extends IntegrationBase
         // Then
         resultActions
             .andExpect(status().isConflict())
-            .andExpect(jsonPath("$.type").value("RETENTION_109"))
-            .andExpect(jsonPath("$.title").value("Policy name must be unique"));
+            .andExpect(jsonPath("$.type").value("RETENTION_114"))
+            .andExpect(jsonPath("$.title").value("Fixed policy key must be unique"));
     }
 
     @Test
@@ -642,8 +529,8 @@ class RetentionControllerPatchRetentionPolicyTypeIntTest extends IntegrationBase
         superAdminUserStub.givenUserIsAuthorised(userIdentity);
 
         final RetentionPolicyTypeEntity inactivePolicy = createAndSavePolicyType(POLICY_A_NAME,
-                                                                           SOME_FUTURE_DATE_TIME, null,
-                                                                           "100");
+                                                                                 SOME_FUTURE_DATE_TIME, null,
+                                                                                 "100");
 
         // When
         ResultActions resultActions = mockMvc.perform(
@@ -671,8 +558,8 @@ class RetentionControllerPatchRetentionPolicyTypeIntTest extends IntegrationBase
                                 SOME_FUTURE_DATE_TIME, null,
                                 "100");
         final RetentionPolicyTypeEntity inactivePolicy200 = createAndSavePolicyType(POLICY_B_NAME,
-                                                                              SOME_FUTURE_DATE_TIME, null,
-                                                                              "200");
+                                                                                    SOME_FUTURE_DATE_TIME, null,
+                                                                                    "200");
 
         // When
         ResultActions resultActions = mockMvc.perform(
@@ -700,8 +587,8 @@ class RetentionControllerPatchRetentionPolicyTypeIntTest extends IntegrationBase
                                 SOME_FUTURE_DATE_TIME, null,
                                 "100");
         final RetentionPolicyTypeEntity inactivePolicy200 = createAndSavePolicyType(POLICY_B_NAME,
-                                                                              SOME_FUTURE_DATE_TIME, null,
-                                                                              "200");
+                                                                                    SOME_FUTURE_DATE_TIME, null,
+                                                                                    "200");
 
         // When
         ResultActions resultActions = mockMvc.perform(
@@ -726,8 +613,8 @@ class RetentionControllerPatchRetentionPolicyTypeIntTest extends IntegrationBase
         superAdminUserStub.givenUserIsAuthorised(userIdentity);
 
         final RetentionPolicyTypeEntity inactivePolicy = createAndSavePolicyType(POLICY_A_NAME,
-                                                                           SOME_FUTURE_DATE_TIME, null,
-                                                                           "100");
+                                                                                 SOME_FUTURE_DATE_TIME, null,
+                                                                                 "100");
 
         // When
         ResultActions resultActions = mockMvc.perform(
@@ -754,8 +641,8 @@ class RetentionControllerPatchRetentionPolicyTypeIntTest extends IntegrationBase
         superAdminUserStub.givenUserIsAuthorised(userIdentity);
 
         final RetentionPolicyTypeEntity inactivePolicy = createAndSavePolicyType(POLICY_A_NAME,
-                                                                           SOME_FUTURE_DATE_TIME, null,
-                                                                           "100");
+                                                                                 SOME_FUTURE_DATE_TIME, null,
+                                                                                 "100");
 
         // When
         ResultActions resultActions = mockMvc.perform(
@@ -781,8 +668,8 @@ class RetentionControllerPatchRetentionPolicyTypeIntTest extends IntegrationBase
         superAdminUserStub.givenUserIsAuthorised(userIdentity);
 
         final RetentionPolicyTypeEntity inactivePolicy = createAndSavePolicyType(POLICY_A_NAME,
-                                                                           SOME_FUTURE_DATE_TIME, null,
-                                                                           "100");
+                                                                                 SOME_FUTURE_DATE_TIME, null,
+                                                                                 "100");
 
         int maxAllowableCharacters = 256;
         String longDescription = StringUtils.repeat("A", ++maxAllowableCharacters);
@@ -812,14 +699,14 @@ class RetentionControllerPatchRetentionPolicyTypeIntTest extends IntegrationBase
         superAdminUserStub.givenUserIsAuthorised(userIdentity);
 
         final RetentionPolicyTypeEntity pendingPolicy100 = createAndSavePolicyType(POLICY_A_NAME,
-                                                                          SOME_OTHER_FUTURE_DATE_TIME, null,
-                                                                          "100");
+                                                                                   SOME_OTHER_FUTURE_DATE_TIME, null,
+                                                                                   "100");
         createAndSavePolicyType(POLICY_B_NAME,
                                 SOME_PAST_DATE_TIME, SOME_FUTURE_DATE_TIME,
                                 "200");
         final RetentionPolicyTypeEntity pendingPolicy200 = createAndSavePolicyType(POLICY_B_NAME,
-                                                                              SOME_FUTURE_DATE_TIME, null,
-                                                                              "200");
+                                                                                   SOME_FUTURE_DATE_TIME, null,
+                                                                                   "200");
 
         // When
         // Note names must be patched as part of this request to ensure they are unique amongst other fixed keys
@@ -850,8 +737,8 @@ class RetentionControllerPatchRetentionPolicyTypeIntTest extends IntegrationBase
         superAdminUserStub.givenUserIsNotAuthorised(userIdentity);
 
         final RetentionPolicyTypeEntity inactivePolicy = createAndSavePolicyType(POLICY_A_NAME,
-                                                                           SOME_FUTURE_DATE_TIME, null,
-                                                                           "100");
+                                                                                 SOME_FUTURE_DATE_TIME, null,
+                                                                                 "100");
 
         // When
         ResultActions resultActions = mockMvc.perform(

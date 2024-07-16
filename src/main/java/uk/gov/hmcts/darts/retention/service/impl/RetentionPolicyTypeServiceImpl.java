@@ -13,6 +13,7 @@ import uk.gov.hmcts.darts.common.repository.RetentionPolicyTypeRepository;
 import uk.gov.hmcts.darts.retention.mapper.RetentionPolicyTypeMapper;
 import uk.gov.hmcts.darts.retention.service.RetentionPolicyTypeService;
 import uk.gov.hmcts.darts.retention.validation.CreatePolicyTypeValidator;
+import uk.gov.hmcts.darts.retention.validation.EditPolicyTypeValidator;
 import uk.gov.hmcts.darts.retention.validation.LivePolicyValidator;
 import uk.gov.hmcts.darts.retention.validation.PolicyDisplayNameIsUniqueValidator;
 import uk.gov.hmcts.darts.retention.validation.PolicyDurationValidator;
@@ -44,6 +45,7 @@ public class RetentionPolicyTypeServiceImpl implements RetentionPolicyTypeServic
 
     private final PolicyDurationValidator policyDurationValidator;
     private final CreatePolicyTypeValidator createPolicyTypeValidator;
+    private final EditPolicyTypeValidator editPolicyTypeValidator;
     private final RevisePolicyTypeValidator revisePolicyTypeValidator;
     private final PolicyNameIsUniqueValidator policyNameIsUniqueValidator;
     private final PolicyDisplayNameIsUniqueValidator policyDisplayNameIsUniqueValidator;
@@ -163,6 +165,7 @@ public class RetentionPolicyTypeServiceImpl implements RetentionPolicyTypeServic
                                             String suppliedFixedPolicyKey,
                                             RetentionPolicyTypeEntity targetEntity) {
         policyHasNoPendingRevisionValidator.validate(suppliedFixedPolicyKey);
+        editPolicyTypeValidator.validate(suppliedFixedPolicyKey);
         targetEntity.setFixedPolicyKey(suppliedFixedPolicyKey);
         retentionPolicyTypeRepository.saveAndFlush(targetEntity);
 

@@ -14,6 +14,7 @@ import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.common.repository.RetentionPolicyTypeRepository;
 import uk.gov.hmcts.darts.retention.mapper.RetentionPolicyTypeMapper;
 import uk.gov.hmcts.darts.retention.validation.CreatePolicyTypeValidator;
+import uk.gov.hmcts.darts.retention.validation.EditPolicyTypeValidator;
 import uk.gov.hmcts.darts.retention.validation.LivePolicyValidator;
 import uk.gov.hmcts.darts.retention.validation.PolicyDisplayNameIsUniqueValidator;
 import uk.gov.hmcts.darts.retention.validation.PolicyDurationValidator;
@@ -54,6 +55,8 @@ class RetentionGetPolicyTypesServiceImplTest {
     @Mock
     private CreatePolicyTypeValidator createPolicyTypeValidator;
     @Mock
+    private EditPolicyTypeValidator editPolicyTypeValidator;
+    @Mock
     private RevisePolicyTypeValidator revisePolicyTypeValidator;
     @Mock
     private PolicyNameIsUniqueValidator policyNameIsUniqueValidator;
@@ -77,6 +80,7 @@ class RetentionGetPolicyTypesServiceImplTest {
             authorisationApi,
             policyDurationValidator,
             createPolicyTypeValidator,
+            editPolicyTypeValidator,
             revisePolicyTypeValidator,
             policyNameIsUniqueValidator,
             policyDisplayNameIsUniqueValidator,

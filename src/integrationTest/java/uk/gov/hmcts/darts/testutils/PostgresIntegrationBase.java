@@ -30,13 +30,16 @@ public class PostgresIntegrationBase {
 
     @DynamicPropertySource
     static void configureProperties(DynamicPropertyRegistry registry) {
-
         registry.add("spring.datasource.url", POSTGRES::getJdbcUrl);
         registry.add("spring.datasource.username", POSTGRES::getUsername);
         registry.add("spring.datasource.password", POSTGRES::getPassword);
     }
 
     static {
+        // Keep an eye on this, if it needs to be increased as more tests utilise PostgresIntegrationBase then we may have a connection leak somewhere
+        final int serverMaxConnections = 50;
+        POSTGRES.setCommand("postgres", "-c", String.format("max_connections=%d", serverMaxConnections));
+
         // container will be automatically stopped
         POSTGRES.start();
     }
