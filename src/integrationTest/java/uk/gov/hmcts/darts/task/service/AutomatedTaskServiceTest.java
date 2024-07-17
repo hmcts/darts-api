@@ -36,6 +36,7 @@ import uk.gov.hmcts.darts.task.runner.AutomatedTask;
 import uk.gov.hmcts.darts.task.runner.impl.ApplyRetentionCaseAssociatedObjectsAutomatedTask;
 import uk.gov.hmcts.darts.task.runner.impl.ArmRetentionEventDateCalculatorAutomatedTask;
 import uk.gov.hmcts.darts.task.runner.impl.CleanupArmResponseFilesAutomatedTask;
+import uk.gov.hmcts.darts.task.runner.impl.CleanupCurrentEventTask;
 import uk.gov.hmcts.darts.task.runner.impl.CloseOldCasesAutomatedTask;
 import uk.gov.hmcts.darts.task.runner.impl.CloseUnfinishedTranscriptionsAutomatedTask;
 import uk.gov.hmcts.darts.task.runner.impl.DailyListAutomatedTask;
@@ -215,7 +216,6 @@ class AutomatedTaskServiceTest extends IntegrationPerClassBase {
 
         log.info("About to reload task {}", automatedTask.getTaskName());
         automatedTaskService.reloadTaskByName(automatedTask.getTaskName());
-
     }
 
     @Test
@@ -1016,6 +1016,30 @@ class AutomatedTaskServiceTest extends IntegrationPerClassBase {
                 automatedTaskConfigurationProperties,
                 armRetentionEventDateProcessor,
                 logApi
+            );
+
+        Set<ScheduledTask> scheduledTasks = scheduledTaskHolder.getScheduledTasks();
+        displayTasks(scheduledTasks);
+
+        boolean mayInterruptIfRunning = false;
+        boolean taskCancelled = automatedTaskService.cancelAutomatedTask(
+            automatedTask.getTaskName(),
+            mayInterruptIfRunning
+        );
+        assertTrue(taskCancelled);
+
+        log.info("About to reload task {}", automatedTask.getTaskName());
+        automatedTaskService.reloadTaskByName(automatedTask.getTaskName());
+
+    }
+
+    @Test
+    void givenConfiguredTaskCleanEventAutomatedTask() {
+        AutomatedTask automatedTask =
+            new CleanupCurrentEventTask(automatedTaskRepository,
+                                        lockProvider,
+                                        automatedTaskConfigurationProperties,
+                                        taskProcessorFactory, logApi
             );
 
         Set<ScheduledTask> scheduledTasks = scheduledTaskHolder.getScheduledTasks();
