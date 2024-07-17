@@ -34,6 +34,15 @@ import static org.hibernate.envers.RelationTargetAuditMode.NOT_AUDITED;
 @Audited
 @AuditTable("user_account_aud")
 public class UserAccountEntity extends CreatedModifiedBaseEntity {
+    @Override
+    public String toString() {
+        return "UserAccountEntity{" +
+            "id=" + id +
+            ", userName='" + userName + '\'' +
+            ", userFullName='" + userFullName + '\'' +
+            ", emailAddress='" + emailAddress + '\'' +
+            '}';
+    }
 
     @Id
     @Column(name = "usr_id")

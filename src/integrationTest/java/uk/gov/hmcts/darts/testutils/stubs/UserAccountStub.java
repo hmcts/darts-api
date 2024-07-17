@@ -1,6 +1,7 @@
 package uk.gov.hmcts.darts.testutils.stubs;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.mockito.Mockito;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -28,6 +29,7 @@ import static org.mockito.ArgumentMatchers.argThat;
 
 @Component
 @RequiredArgsConstructor
+@Slf4j
 public class UserAccountStub {
 
     private static final int SYSTEM_USER_ID = 0;
@@ -77,6 +79,7 @@ public class UserAccountStub {
 
     public UserAccountEntity getIntegrationTestUserAccountEntity() {
         List<UserAccountEntity> userAccounts = userAccountRepository.findByEmailAddressIgnoreCase(INTEGRATION_TEST_USER_EMAIL);
+        log.info("Users: {}", userAccounts);
         if (userAccounts.isEmpty()) {
             return createIntegrationUser(UUID.randomUUID().toString());
         }

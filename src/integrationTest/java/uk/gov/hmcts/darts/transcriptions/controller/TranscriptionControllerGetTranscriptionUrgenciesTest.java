@@ -5,6 +5,7 @@ import org.skyscreamer.jsonassert.JSONAssert;
 import org.skyscreamer.jsonassert.JSONCompareMode;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
@@ -17,6 +18,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static uk.gov.hmcts.darts.test.common.TestUtils.getContentsFromFile;
 
 @AutoConfigureMockMvc
+@DirtiesContext
 class TranscriptionControllerGetTranscriptionUrgenciesTest extends IntegrationBase {
 
     private static final URI ENDPOINT_URI = URI.create("/transcriptions/urgencies");

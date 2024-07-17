@@ -129,6 +129,7 @@ import static uk.gov.hmcts.darts.test.common.data.HearingTestData.someMinimalHea
 @Slf4j
 public class DartsDatabaseStub {
 
+    private final EntityManager em;
     private final AnnotationDocumentRepository annotationDocumentRepository;
     private final AnnotationRepository annotationRepository;
     private final AuditRepository auditRepository;
@@ -200,6 +201,28 @@ public class DartsDatabaseStub {
     private final CurrentTimeHelper currentTimeHelper;
     private final TransactionalUtil transactionalUtil;
 
+//    private final List<String> excludedTables = List.of(
+//        "user_roles_courthouses",
+//        "hearing_reporting_restrictions",
+//        "security_group",
+//        "user_account"
+//    );
+
+//    @Transactional
+//    public void truncateTables () {
+//        final Query query = em
+//            .createNativeQuery("SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = 'darts'");
+//        final List result = query.getResultList();
+//        em.createNativeQuery("SET REFERENTIAL_INTEGRITY FALSE").executeUpdate();
+//        for (Object tableName : result) {
+//            if (!excludedTables.contains(tableName.toString())) {
+//                em.createNativeQuery("TRUNCATE TABLE darts." + tableName + " RESTART IDENTITY").executeUpdate();
+//            }
+//        }
+//        em.createNativeQuery("SET REFERENTIAL_INTEGRITY TRUE").executeUpdate();
+//    }
+
+    @Transactional
     public void clearDatabaseInThisOrder() {
         objectAdminActionRepository.deleteAll();
         auditRepository.deleteAll();
@@ -788,7 +811,7 @@ public class DartsDatabaseStub {
     }
 
     @Transactional
-    public void createValidAnnotationDocumentForDownload(UserAccountEntity judge) {
+    public AnnotationDocumentEntity createValidAnnotationDocumentForDownload(UserAccountEntity judge) {
 
         var annotation = someAnnotationCreatedBy(judge);
 
@@ -820,6 +843,8 @@ public class DartsDatabaseStub {
         );
         armEod.setTransferAttempts(1);
         save(armEod2);
+
+        return annotationDocumentEntity;
     }
 
     protected AnnotationEntity someAnnotationCreatedBy(UserAccountEntity userAccount) {
@@ -827,8 +852,9 @@ public class DartsDatabaseStub {
         annotation.setDeleted(false);
         annotation.setCurrentOwner(userAccount);
         annotation.addHearing(save(someMinimalHearing()));
-        save(annotation);
-        return annotation;
+        var saved = save(annotation);
+        log.info("created annotation id: {}", saved.getId());
+        return saved;
     }
 
     @Transactional

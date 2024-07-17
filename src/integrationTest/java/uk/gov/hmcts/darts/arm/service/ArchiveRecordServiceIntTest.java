@@ -553,6 +553,7 @@ class ArchiveRecordServiceIntTest extends IntegrationBase {
         authorisationStub.givenTestSchema();
 
         UserAccountEntity testUser = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
+        log.info("test user id: {}", testUser.getId());
         String testAnnotation = "TestAnnotation";
         AnnotationEntity annotation = dartsDatabase.getAnnotationStub().createAndSaveAnnotationEntityWith(testUser, testAnnotation, hearing);
         dartsDatabase.getAnnotationRepository().save(annotation);

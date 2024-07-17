@@ -1,10 +1,12 @@
 package uk.gov.hmcts.darts.annotation;
 
+import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.ApplicationContext;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import uk.gov.hmcts.darts.common.datamanagement.api.DataManagementFacade;
@@ -29,7 +31,12 @@ import static uk.gov.hmcts.darts.test.common.data.AnnotationTestData.minimalAnno
 import static uk.gov.hmcts.darts.test.common.data.HearingTestData.someMinimalHearing;
 
 @AutoConfigureMockMvc
+//@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
+@Slf4j
 class AnnotationGetTest extends IntegrationBase {
+
+    @Autowired
+    ApplicationContext applicationContext;
 
     private static final String ANNOTATION_DOCUMENT_ENDPOINT = "/annotations/{annotation_id}/documents/{annotation_document_id}";
 
@@ -68,13 +75,16 @@ class AnnotationGetTest extends IntegrationBase {
     void shouldDownloadAnnotationDocument() throws Exception {
 
         var judge = given.anAuthenticatedUserWithGlobalAccessAndRole(JUDICIARY);
-
         when(downloadResponseMetaData.getInputStream()).thenReturn(inputStreamResource);
         when(dataManagementFacade.retrieveFileFromStorage(anyList())).thenReturn(downloadResponseMetaData);
 
-        dartsDatabase.createValidAnnotationDocumentForDownload(judge);
+        var annotationDocument = dartsDatabase.createValidAnnotationDocumentForDownload(judge);
+//        List<AnnotationEntity> all = dartsDatabase.getAnnotationRepository().findAll();
+//        log.warn("all annotations: {}", all);
 
-        MockHttpServletRequestBuilder requestBuilder = get(ANNOTATION_DOCUMENT_ENDPOINT, 1, 1);
+        MockHttpServletRequestBuilder requestBuilder = get(ANNOTATION_DOCUMENT_ENDPOINT,
+                                                           annotationDocument.getAnnotation().getId(),
+                                                           annotationDocument.getId());
 
         mockMvc.perform(
                 requestBuilder)
