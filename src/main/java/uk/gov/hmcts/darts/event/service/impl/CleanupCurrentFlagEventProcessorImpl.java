@@ -21,18 +21,18 @@ public class CleanupCurrentFlagEventProcessorImpl implements CleanupCurrentFlagE
     @Override
     public List<Integer> processCurrentEvent() {
         List<Integer> processedEventIdLst = new ArrayList<>();
-        log.info("Batch size to process event ids for {}", batchSize);
+        log.debug("Batch size to process event ids for {}", batchSize);
         List<Integer> eventEntityReturned = eventRepository.getCurrentEventIdsToBeProcessed(Pageable.ofSize(batchSize));
-        log.info("Event ids being processed{}",  processedEventIdLst.stream().map(Object::toString)
+        log.debug("Event ids being processed{}",  processedEventIdLst.stream().map(Object::toString)
             .collect(Collectors.joining(",")));
-        log.info("Number of Event ids to be processed {}",  processedEventIdLst.size());
+        log.debug("Number of Event ids to be processed {}",  processedEventIdLst.size());
 
         List<Integer> eventPrimaryKeysLst = new ArrayList<>();
         List<Integer> eventIdsLst = new ArrayList<>();
 
         eventEntityReturned.forEach(event -> {
             Integer eventIdPrimaryKey = eventRepository.getTheLatestCreatedEventPrimaryKeyForTheEventId(event);
-            log.info("Current event primary key is {}", eventIdPrimaryKey);
+            log.debug("Current event primary key is {}", eventIdPrimaryKey);
 
             eventPrimaryKeysLst.add(eventIdPrimaryKey);
             eventIdsLst.add(event);
@@ -41,7 +41,7 @@ public class CleanupCurrentFlagEventProcessorImpl implements CleanupCurrentFlagE
         });
 
         eventRepository.updateAllEventIdEventsToNotCurrentWithTheExclusionOfTheCurrentEventPrimaryKey(eventPrimaryKeysLst, eventIdsLst);
-        log.info("Updated all events for event id {} excluding primary key {}", eventIdsLst.stream().map(Object::toString),
+        log.debug("Updated all events for event id {} excluding primary key {}", eventIdsLst.stream().map(Object::toString),
                  eventPrimaryKeysLst.stream().map(Object::toString));
 
         return processedEventIdLst;

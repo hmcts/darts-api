@@ -108,15 +108,25 @@ public class EventStub {
     }
 
     /**
-     * generates two events (with the same event id) for each event specified. So the number of events generated will always be double that specified.
-     * @return The two events mapped to each event id
+     * generates two event records with the same event id. So the number of events generated will
+     * always be double that actually specified.
+     * NOTE: This method also generates an event with a null event id and an event with an event id that only corresponds to one
+     * event record
+     * @return The map that corresponds to the event ids and the events mapped to each event id
      */
     @Transactional
     public  Map<Integer, List<EventEntity>> generateEventIdEventsIncludingZeroEventId(int numberOfEvents) {
         Map<Integer, List<EventEntity>> eventIdMap = new HashMap<>();
 
         HearingEntity hearingForEvent = hearingStub.createHearing("Bristol", "1", "case1", DateConverterUtil.toLocalDateTime(STARTED_AT));
+
+        // add a null based event to prove this will not get processed
         createEvent(hearingForEvent, 10, STARTED_AT.minusMinutes(20), "LOG");
+
+        // add a solitary event to prove this does not get processed
+        EventEntity standAloneEventIdEvent = createEvent(hearingForEvent, 10, STARTED_AT.minusMinutes(20), "LOG", numberOfEvents + 1);
+        eventIdMap.put(standAloneEventIdEvent.getEventId(), List.of(standAloneEventIdEvent));
+
         HearingEntity hearingDifferentCourtroom = hearingStub.createHearing("Bristol", "2", "case2", DateConverterUtil.toLocalDateTime(STARTED_AT));
 
         for (int index = 0; index < numberOfEvents; index++) {
