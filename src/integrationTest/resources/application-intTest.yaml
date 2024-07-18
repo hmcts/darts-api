@@ -33,6 +33,9 @@ spring:
     multipart:
       max-file-size: 1KB
       max-request-size: 10KB #this affects addAudio as well, so needs to handle a 350mb mp2 file
+  datasource:
+    hikari:
+      maximum-pool-size: 10 # Overrides the value in `application.yaml` to a smaller value more appropriate for integration tests, sized below the `max_connections` limit specified in PostgresIntegrationBase.
 darts:
   hearings:
     admin-search:
