@@ -10,6 +10,9 @@ import uk.gov.hmcts.darts.common.exception.DartsApiException;
 @UtilityClass
 public class RequestValidator {
 
+    public static final int SEARCH_COMPLEXITY_THRESHOLD = 3;
+    public static final int SEARCH_TEXT_LENGTH_THRESHOLD = 3;
+
     public void validate(GetCasesSearchRequest request) {
         checkNoCriteriaProvided(request);
 
@@ -32,19 +35,32 @@ public class RequestValidator {
      */
     @SuppressWarnings({"PMD.CyclomaticComplexity", "PMD.NPathComplexity"})
     private static void checkComplexity(GetCasesSearchRequest request) {
+        boolean courthouseProvided = StringUtils.length(request.getCourthouse()) >= SEARCH_TEXT_LENGTH_THRESHOLD || request.getCourthouseId() != null;
+        boolean anyDateProvided = request.getDateFrom() != null || request.getDateTo() != null;
+
+        if (courthouseProvided && anyDateProvided) {
+            //allowed case
+            return;
+        }
+
         int totalPoints = 0;
         //give a point for every letter more than 3
-        totalPoints += Math.max(0, StringUtils.length(request.getCaseNumber()) - 3);
-        totalPoints += (StringUtils.length(request.getCourthouse()) >= 3 || request.getCourthouseId() != null) ? 1 : 0;
-        totalPoints += (request.getCourtroom() != null || request.getCourtroomId() != null) ? 1 : 0;
-        totalPoints += StringUtils.length(request.getJudgeName()) >= 3 ? 1 : 0;
-        totalPoints += StringUtils.length(request.getDefendantName()) >= 3 ? 1 : 0;
-        totalPoints += (request.getDateFrom() != null || request.getDateTo() != null) ? 1 : 0;
-        totalPoints += (request.getDateFrom() != null && request.getDateFrom().equals(request.getDateTo())) ? 1 : 0;//specific date
-        totalPoints += StringUtils.length(request.getEventTextContains()) >= 3 ? 1 : 0;
+        totalPoints += Math.max(0, StringUtils.length(request.getCaseNumber()) - SEARCH_TEXT_LENGTH_THRESHOLD);
+        totalPoints += courthouseProvided ? 1 : 0;
+        boolean courtroomProvided = request.getCourtroom() != null || request.getCourtroomId() != null;
+        totalPoints += courtroomProvided ? 1 : 0;
+        boolean judgeNameLengthOk = StringUtils.length(request.getJudgeName()) >= SEARCH_TEXT_LENGTH_THRESHOLD;
+        totalPoints += judgeNameLengthOk ? 1 : 0;
+        boolean defendantNameLengthOk = StringUtils.length(request.getDefendantName()) >= SEARCH_TEXT_LENGTH_THRESHOLD;
+        totalPoints += defendantNameLengthOk ? 1 : 0;
+        totalPoints += anyDateProvided ? 1 : 0;
+        boolean specificDateProvided = request.getDateFrom() != null && request.getDateFrom().equals(request.getDateTo());
+        totalPoints += specificDateProvided ? 1 : 0;
+        boolean eventTextLengthOk = StringUtils.length(request.getEventTextContains()) >= SEARCH_TEXT_LENGTH_THRESHOLD;
+        totalPoints += eventTextLengthOk ? 1 : 0;
 
-        int three = 3;
-        if (totalPoints < three) {
+
+        if (totalPoints < SEARCH_COMPLEXITY_THRESHOLD) {
             throw new DartsApiException(CaseApiError.CRITERIA_TOO_BROAD);
         }
     }
