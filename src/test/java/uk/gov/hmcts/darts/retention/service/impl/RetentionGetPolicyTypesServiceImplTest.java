@@ -109,7 +109,7 @@ class RetentionGetPolicyTypesServiceImplTest {
 
         verify(retentionPolicyTypeRepository).findAll();
         verify(retentionPolicyTypeMapper).mapToModelList(any());
-
+        verifyNoInteractions(editPolicyTypeValidator);
     }
 
     @Test
@@ -127,7 +127,7 @@ class RetentionGetPolicyTypesServiceImplTest {
 
         verify(retentionPolicyTypeRepository).findById(anyInt());
         verify(retentionPolicyTypeMapper).mapToModel(any());
-
+        verifyNoInteractions(editPolicyTypeValidator);
     }
 
     @Test
@@ -145,6 +145,7 @@ class RetentionGetPolicyTypesServiceImplTest {
         assertEquals(RETENTION_POLICY_TYPE_ID_NOT_FOUND, exception.getError());
 
         verifyNoInteractions(retentionPolicyTypeMapper);
+        verifyNoInteractions(editPolicyTypeValidator);
     }
 
     private RetentionPolicyTypeEntity getRetentionPolicyTypeEntity() {
