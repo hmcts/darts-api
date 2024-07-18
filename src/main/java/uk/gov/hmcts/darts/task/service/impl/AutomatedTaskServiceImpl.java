@@ -43,6 +43,7 @@ import uk.gov.hmcts.darts.task.runner.impl.ApplyRetentionCaseAssociatedObjectsAu
 import uk.gov.hmcts.darts.task.runner.impl.ArmRetentionEventDateCalculatorAutomatedTask;
 import uk.gov.hmcts.darts.task.runner.impl.BatchCleanupArmResponseFilesAutomatedTask;
 import uk.gov.hmcts.darts.task.runner.impl.CleanupArmResponseFilesAutomatedTask;
+import uk.gov.hmcts.darts.task.runner.impl.CleanupCurrentEventTask;
 import uk.gov.hmcts.darts.task.runner.impl.CloseOldCasesAutomatedTask;
 import uk.gov.hmcts.darts.task.runner.impl.CloseUnfinishedTranscriptionsAutomatedTask;
 import uk.gov.hmcts.darts.task.runner.impl.DailyListAutomatedTask;
@@ -75,6 +76,7 @@ import static uk.gov.hmcts.darts.task.runner.AutomatedTaskName.CLEANUP_ARM_RESPO
 import static uk.gov.hmcts.darts.task.runner.AutomatedTaskName.CLOSE_OLD_CASES_TASK_NAME;
 import static uk.gov.hmcts.darts.task.runner.AutomatedTaskName.CLOSE_OLD_UNFINISHED_TRANSCRIPTIONS_TASK_NAME;
 import static uk.gov.hmcts.darts.task.runner.AutomatedTaskName.DAILY_LIST_HOUSEKEEPING_TASK_NAME;
+import static uk.gov.hmcts.darts.task.runner.AutomatedTaskName.EVENT_CLEANUP_CURRENT_TASK;
 import static uk.gov.hmcts.darts.task.runner.AutomatedTaskName.EXTERNAL_DATASTORE_DELETER_TASK_NAME;
 import static uk.gov.hmcts.darts.task.runner.AutomatedTaskName.GENERATE_CASE_DOCUMENT_TASK_NAME;
 import static uk.gov.hmcts.darts.task.runner.AutomatedTaskName.INBOUND_AUDIO_DELETER_TASK_NAME;
@@ -164,6 +166,7 @@ public class AutomatedTaskServiceImpl implements AutomatedTaskService {
         addUnstructuredAudioDeleterAutomatedTaskToTaskRegistrar(taskRegistrar);
         addUnstructuredToArmTaskRegistrar(taskRegistrar);
         addGenerateCaseDocumentToTaskRegistrar(taskRegistrar);
+        addCleanEventToTaskRegistrar(taskRegistrar);
     }
 
     @Override
@@ -245,6 +248,7 @@ public class AutomatedTaskServiceImpl implements AutomatedTaskService {
             case UNSTRUCTURED_AUDIO_DELETER_TASK_NAME -> rescheduleUnstructuredAudioDeleterAutomatedTask();
             case UNSTRUCTURED_TO_ARM_TASK_NAME -> rescheduleUnstructuredToArmAutomatedTask();
             case GENERATE_CASE_DOCUMENT_TASK_NAME -> rescheduleGenerateCaseDocumentAutomatedTask();
+            case EVENT_CLEANUP_CURRENT_TASK -> rescheduleEventCleanCurrentAutomatedTask();
             default -> throw new DartsApiException(FAILED_TO_FIND_AUTOMATED_TASK);
         }
     }
@@ -535,6 +539,17 @@ public class AutomatedTaskServiceImpl implements AutomatedTaskService {
         taskRegistrar.addTriggerTask(generateCaseDocumentAutomatedTask, trigger);
     }
 
+    private void addCleanEventToTaskRegistrar(ScheduledTaskRegistrar taskRegistrar) {
+        var eventCleanupTask = new CleanupCurrentEventTask(automatedTaskRepository,
+                                                           lockProvider,
+                                                           automatedTaskConfigurationProperties,
+                                                           automatedTaskProcessorFactory,
+                                                           logApi);
+        eventCleanupTask.setLastCronExpression(getAutomatedTaskCronExpression(eventCleanupTask));
+        Trigger trigger = createAutomatedTaskTrigger(eventCleanupTask);
+        taskRegistrar.addTriggerTask(eventCleanupTask, trigger);
+    }
+
     private void rescheduleProcessDailyListAutomatedTask() {
         TriggerAndAutomatedTask triggerAndAutomatedTask = getTriggerAndAutomatedTask(PROCESS_DAILY_LIST_TASK_NAME.getTaskName());
         if (triggerAndAutomatedTask == null) {
@@ -565,6 +580,24 @@ public class AutomatedTaskServiceImpl implements AutomatedTaskService {
             );
             Trigger trigger = createAutomatedTaskTrigger(closeUnfinishedTranscriptionsAutomatedTask);
             taskScheduler.schedule(closeUnfinishedTranscriptionsAutomatedTask, trigger);
+        } else {
+            taskScheduler.schedule(triggerAndAutomatedTask.getAutomatedTask(), triggerAndAutomatedTask.getTrigger());
+        }
+    }
+
+    private void rescheduleEventCleanCurrentAutomatedTask() {
+        TriggerAndAutomatedTask triggerAndAutomatedTask = getTriggerAndAutomatedTask(
+            EVENT_CLEANUP_CURRENT_TASK.getTaskName());
+        if (triggerAndAutomatedTask == null) {
+            CleanupCurrentEventTask eventCleanupTask = new CleanupCurrentEventTask(
+                automatedTaskRepository,
+                lockProvider,
+                automatedTaskConfigurationProperties,
+                automatedTaskProcessorFactory,
+                logApi
+            );
+            Trigger trigger = createAutomatedTaskTrigger(eventCleanupTask);
+            taskScheduler.schedule(eventCleanupTask, trigger);
         } else {
             taskScheduler.schedule(triggerAndAutomatedTask.getAutomatedTask(), triggerAndAutomatedTask.getTrigger());
         }
