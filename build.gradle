@@ -447,7 +447,7 @@ dependencies {
   implementation group: 'io.github.openfeign', name: 'feign-hc5', version: '13.3'
 
   testImplementation 'org.testcontainers:postgresql:1.19.8'
-  testImplementation 'com.h2database:h2:2.2.224'
+  testImplementation 'com.h2database:h2:2.3.230'
   testImplementation group: 'org.postgresql', name: 'postgresql', version: '42.7.3'
   testImplementation 'org.mockito:mockito-inline:5.2.0'
   testImplementation group: 'org.springframework.boot', name: 'spring-boot-starter-test', {
