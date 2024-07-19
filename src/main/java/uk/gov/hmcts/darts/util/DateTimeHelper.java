@@ -10,6 +10,6 @@ public class DateTimeHelper {
     }
 
     public static String getDateTimeIsoFormatted(OffsetDateTime dateTime) {
-        return dateTime.format(DateTimeFormatter.ISO_DATE_TIME);
+        return dateTime != null ? dateTime.format(DateTimeFormatter.ISO_DATE_TIME) : null;
     }
 }
