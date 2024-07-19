@@ -19,6 +19,8 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.testcontainers.containers.GenericContainer;
+import uk.gov.hmcts.darts.common.repository.SecurityGroupRepository;
+import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
 import uk.gov.hmcts.darts.test.common.LogUtil;
 import uk.gov.hmcts.darts.test.common.MemoryLogAppender;
 import uk.gov.hmcts.darts.testutils.stubs.DartsDatabaseStub;
@@ -40,6 +42,10 @@ public class IntegrationBase  {
     EntityManager emNonStatic;
     @Autowired
     EntityManagerFactory entityManagerFactoryNonStatic;
+    @Autowired
+    UserAccountRepository userAccountRepository;
+    @Autowired
+    SecurityGroupRepository securityGroupRepository;
 
     static EntityManager em;
 
@@ -130,16 +136,29 @@ public class IntegrationBase  {
     }
 
     public void resetUserAccountTable () {
-        EntityManager em = entityManagerFactoryNonStatic.createEntityManager();
+//        EntityManager em = entityManagerFactoryNonStatic.createEntityManager();
+//        em.getTransaction().begin();
+//        em.createNativeQuery("SET REFERENTIAL_INTEGRITY FALSE").executeUpdate();
+//        em.createNativeQuery("SELECT usr_id, grp_id from darts.security_group_user_account_ae").getResultList();
 //
-        em.getTransaction().begin();
-        em.createNativeQuery("SET REFERENTIAL_INTEGRITY FALSE").executeUpdate();
-        em.createNativeQuery("DELETE FROM darts.user_account WHERE user_name NOT IN ('darts_global_test_user', 'dartstestuser', 'Cpp', 'Xhibit', 'system', 'system_housekeeping')").executeUpdate();
-        em.createNativeQuery("DELETE FROM darts.security_group WHERE group_name NOT IN ('Mid Tier Group', 'Dar Pc Group', 'Cpp Group', 'Xhibit Group', 'Test RCJ Appeals', 'Test Language Shop', 'Test Transcriber', " +
-                                 "'Test Judge', 'Test Requestor', 'Test Approver', 'SUPER_ADMIN', 'SUPER_USER', 'DARTS', 'MEDIA_IN_PERPETUITY')").executeUpdate();
-        em.createNativeQuery("SET REFERENTIAL_INTEGRITY TRUE").executeUpdate();
+//        em.createNativeQuery("DELETE FROM darts.user_account WHERE user_name NOT IN ('darts_global_test_user', 'dartstestuser', 'Cpp', 'Xhibit', 'system', 'system_housekeeping')").executeUpdate();
+//        em.createNativeQuery("DELETE FROM darts.security_group WHERE group_name NOT IN ('Mid Tier Group', 'Dar Pc Group', 'Cpp Group', 'Xhibit Group', 'Test RCJ Appeals', 'Test Language Shop', 'Test Transcriber', " +
+//                                 "'Test Judge', 'Test Requestor', 'Test Approver', 'SUPER_ADMIN', 'SUPER_USER', 'DARTS', 'MEDIA_IN_PERPETUITY')").executeUpdate();
+//        em.createNativeQuery("SET REFERENTIAL_INTEGRITY TRUE").executeUpdate();
+//        em.createNativeQuery("SELECT usr_id, grp_id from darts.security_group_user_account_ae").getResultList();
+//
+//        em.getTransaction().commit();
 
-        em.getTransaction().commit();
+        em.createNativeQuery("SELECT usr_id, grp_id from darts.security_group_user_account_ae").getResultList();
+        userAccountRepository.deleteAll(
+            userAccountRepository.findByUserNameNotIn(List.of("darts_global_test_user", "dartstestuser", "Cpp", "Xhibit", "system", "system_housekeeping"))
+        );
+//        userAccountRepository.deleteByUserNameNotIn(List.of("darts_global_test_user", "dartstestuser", "Cpp", "Xhibit", "system", "system_housekeeping"))
+
+        em.createNativeQuery("SELECT usr_id, grp_id from darts.security_group_user_account_ae").getResultList();
+        securityGroupRepository.deleteAll(
+            securityGroupRepository.findByGroupNameNotIn(List.of("Mid Tier Group", "Dar Pc Group", "Cpp Group", "Xhibit Group", "Test RCJ Appeals", "Test Language Shop", "Test Transcriber", "Test Judge", "Test Requestor", "Test Approver", "SUPER_ADMIN", "SUPER_USER", "DARTS", "MEDIA_IN_PERPETUITY"))
+        );
     }
 
 //    @Autowired
@@ -184,8 +203,8 @@ public class IntegrationBase  {
     void clearDb() {
         resetSequences();
 //        truncateTables();
-//        resetUserAccountTable();
         dartsDatabase.clearDatabaseInThisOrder();
+        resetUserAccountTable();
         wireMockServer.resetAll();
     }
 

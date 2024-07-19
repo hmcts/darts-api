@@ -97,10 +97,11 @@ class ArchiveRecordServiceIntTest extends IntegrationBase {
     }
 
     //needed because use id seq are reset before each test. If there are users left in the DB created by previous tests, they will have the same id of the next call to the sequence
-    @AfterEach
-    void deleteUser() {
-        dartsDatabase.addToUserAccountTrash(INTEGRATION_TEST_USER_EMAIL);
-    }
+    //can this be moved to integration base?
+//    @AfterEach
+//    void deleteUser() {
+//        dartsDatabase.addToUserAccountTrash(INTEGRATION_TEST_USER_EMAIL);
+//    }
 
     @Test
     void generateArchiveRecord_WithLiveMediaProperties_ReturnFileSuccess() throws IOException {

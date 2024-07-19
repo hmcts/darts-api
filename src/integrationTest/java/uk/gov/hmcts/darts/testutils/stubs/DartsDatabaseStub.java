@@ -255,10 +255,13 @@ public class DartsDatabaseStub {
         dailyListRepository.deleteAll();
         retentionPolicyTypeRepository.deleteAll(retentionPolicyTypeBin);
         retentionPolicyTypeBin.clear();
-        userAccountRepository.deleteAll(userAccountBin);
-        userAccountBin.clear();
-        securityGroupRepository.deleteAll(securityGroupBin);
-        securityGroupBin.clear();
+//        em.createNativeQuery("SELECT usr_id, grp_id from darts.security_group_user_account_ae").getResultList();
+//        userAccountRepository.deleteAll(userAccountBin);
+//        userAccountBin.clear();
+//        em.createNativeQuery("SELECT usr_id, grp_id from darts.security_group_user_account_ae").getResultList();
+
+//        securityGroupRepository.deleteAll(securityGroupBin);
+//        securityGroupBin.clear();
         courthouseRepository.deleteAll();
         regionRepository.deleteAll();
         eventHandlerRepository.deleteAll(eventHandlerBin);
