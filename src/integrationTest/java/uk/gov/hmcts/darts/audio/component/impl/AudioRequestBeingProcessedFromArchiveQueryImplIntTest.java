@@ -1,7 +1,9 @@
 package uk.gov.hmcts.darts.audio.component.impl;
 
 import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,8 +18,6 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.TestInstance.Lifecycle.PER_CLASS;
 
-@Transactional
-@TestInstance(PER_CLASS)
 class AudioRequestBeingProcessedFromArchiveQueryImplIntTest extends IntegrationBase {
 
     @Autowired
@@ -26,9 +26,9 @@ class AudioRequestBeingProcessedFromArchiveQueryImplIntTest extends IntegrationB
     @Autowired
     private AudioRequestBeingProcessedFromArchiveQuery audioRequestBeingProcessedFromArchiveQuery;
 
-    @BeforeAll
+    @BeforeEach
     @SuppressWarnings("checkstyle:linelength")
-    void beforeAll() {
+    void beforeEach() {
         jdbcTemplate.update(
             """
                 INSERT INTO darts.courthouse (cth_id, courthouse_code, courthouse_name, created_ts, last_modified_ts, created_by, last_modified_by, display_name)
@@ -113,8 +113,9 @@ class AudioRequestBeingProcessedFromArchiveQueryImplIntTest extends IntegrationB
                 """);
     }
 
-    @AfterAll
-    void afterAll() {
+    //TODO can we get rid of this?
+    @AfterEach
+    void afterEach() {
         jdbcTemplate.update(
             """
                 DELETE FROM darts.media_request WHERE hea_id=101;

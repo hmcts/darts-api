@@ -1,6 +1,7 @@
 package uk.gov.hmcts.darts.audio.component.impl;
 
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,8 +16,6 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.TestInstance.Lifecycle.PER_CLASS;
 
-@Transactional
-@TestInstance(PER_CLASS)
 class AudioBeingProcessedFromArchiveQueryImplIntTest extends IntegrationBase {
 
     @Autowired
@@ -25,9 +24,9 @@ class AudioBeingProcessedFromArchiveQueryImplIntTest extends IntegrationBase {
     @Autowired
     private AudioBeingProcessedFromArchiveQuery audioBeingProcessedFromArchiveQuery;
 
-    @BeforeAll
+    @BeforeEach
     @SuppressWarnings("checkstyle:linelength")
-    void beforeAll() {
+    void beforeEach() {
         jdbcTemplate.update(
             """
                 INSERT INTO darts.courthouse (cth_id, courthouse_code, courthouse_name, created_ts, last_modified_ts, created_by, last_modified_by, display_name)
