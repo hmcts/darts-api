@@ -86,8 +86,33 @@ darts:
     max-file-size: 20
 logging:
   level:
+    ROOT: WARN
     uk:
       gov:
         hmcts:
-          darts: DEBUG
+          darts: INFO
+    org.apache.http: WARN
+    com.github.dockerjava: WARN
+    org.zeroturnaround.exec: WARN
+    org.flywaydb: INFO
+    org.springframework: INFO
+    org:
+      springframework:
+        jdbc.datasource: DEBUG
+        cloud:
+          contract:
+            wiremock: TRACE
+        test:
+          context:
+            support: TRACE
+    org.springframework.test.context.cache: TRACE
+    org.hibernate: WARN
+    org.rnorth: WARN
+    com.github.dockerjava.zerodep: INFO
+    com:
+      github:
+        tomakehurst:
+          wiremock: DEBUG
+      zaxxer:
+        hikari: WARN
   config: classpath:logback-test.xml

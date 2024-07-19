@@ -18,13 +18,13 @@ import org.springframework.security.oauth2.server.resource.authentication.JwtAut
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
-import org.springframework.transaction.annotation.Transactional;
 import org.testcontainers.containers.GenericContainer;
 import uk.gov.hmcts.darts.test.common.LogUtil;
 import uk.gov.hmcts.darts.test.common.MemoryLogAppender;
 import uk.gov.hmcts.darts.testutils.stubs.DartsDatabaseStub;
 
 import java.util.List;
+import java.util.Map;
 import javax.annotation.PostConstruct;
 
 /**
@@ -63,7 +63,6 @@ public class IntegrationBase  {
         "audit_activity",
         "user_roles_courthouses",
         "hearing_reporting_restrictions",
-        "security_group",
         "user_account",
         "external_location_type",
         "object_record_status",
@@ -72,18 +71,29 @@ public class IntegrationBase  {
         "flyway_schema_history",
         "node_register",
         "region",
+        "retention_policy_type",
         "security_permission",
         "security_role",
         "shedlock",
+        "security_group",
+        "security_group_user_account_ae",
         "transcription_status",
         "transcription_type",
         "transcription_urgency"
     );
 
-    @Transactional
-    public static void truncateTables () {
-        EntityManager em = emf.createEntityManager();
+    private List excludedSequences = List.of(
+        "grp_seq",
+        "revinfo_seq"
+    );
 
+    private Map<String, String> sequencesStartFrom = Map.of(
+        "usr_seq", "2"
+    );
+
+    public void truncateTables () {
+        EntityManager em = entityManagerFactoryNonStatic.createEntityManager();
+//
         em.getTransaction().begin();
         final Query query = em
             .createNativeQuery("SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = 'darts'");
@@ -95,6 +105,40 @@ public class IntegrationBase  {
             }
         }
         em.createNativeQuery("SET REFERENTIAL_INTEGRITY TRUE").executeUpdate();
+        em.getTransaction().commit();
+    }
+
+    public void resetSequences () {
+        EntityManager em = entityManagerFactoryNonStatic.createEntityManager();
+//
+        em.getTransaction().begin();
+        final Query query = em
+            .createNativeQuery("SELECT sequence_name FROM information_schema.sequences WHERE sequence_schema = 'darts'");
+        final List result = query.getResultList();
+
+
+
+        for (Object seqName : result) {
+            if (!excludedSequences.contains(seqName.toString())) {
+                em.createNativeQuery("ALTER SEQUENCE darts." + seqName + " RESTART").executeUpdate();
+            }
+            if (sequencesStartFrom.containsKey(seqName.toString())) {
+                em.createNativeQuery("ALTER SEQUENCE darts." + seqName + " RESTART WITH " + sequencesStartFrom.get(seqName.toString())).executeUpdate();
+            }
+        }
+        em.getTransaction().commit();
+    }
+
+    public void resetUserAccountTable () {
+        EntityManager em = entityManagerFactoryNonStatic.createEntityManager();
+//
+        em.getTransaction().begin();
+        em.createNativeQuery("SET REFERENTIAL_INTEGRITY FALSE").executeUpdate();
+        em.createNativeQuery("DELETE FROM darts.user_account WHERE user_name NOT IN ('darts_global_test_user', 'dartstestuser', 'Cpp', 'Xhibit', 'system', 'system_housekeeping')").executeUpdate();
+        em.createNativeQuery("DELETE FROM darts.security_group WHERE group_name NOT IN ('Mid Tier Group', 'Dar Pc Group', 'Cpp Group', 'Xhibit Group', 'Test RCJ Appeals', 'Test Language Shop', 'Test Transcriber', " +
+                                 "'Test Judge', 'Test Requestor', 'Test Approver', 'SUPER_ADMIN', 'SUPER_USER', 'DARTS', 'MEDIA_IN_PERPETUITY')").executeUpdate();
+        em.createNativeQuery("SET REFERENTIAL_INTEGRITY TRUE").executeUpdate();
+
         em.getTransaction().commit();
     }
 
@@ -133,12 +177,14 @@ public class IntegrationBase  {
 
     @BeforeAll()
     static void beforeAllTruncateTables() {
-        truncateTables();
+//        truncateTables();
     }
 
     @BeforeEach
     void clearDb() {
-
+        resetSequences();
+//        truncateTables();
+        resetUserAccountTable();
         dartsDatabase.clearDatabaseInThisOrder();
         wireMockServer.resetAll();
     }

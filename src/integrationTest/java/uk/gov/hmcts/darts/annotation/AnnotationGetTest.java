@@ -17,6 +17,7 @@ import uk.gov.hmcts.darts.testutils.GivenBuilder;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 
 import java.io.InputStream;
+import java.util.List;
 
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.Mockito.when;
@@ -79,12 +80,11 @@ class AnnotationGetTest extends IntegrationBase {
         when(dataManagementFacade.retrieveFileFromStorage(anyList())).thenReturn(downloadResponseMetaData);
 
         var annotationDocument = dartsDatabase.createValidAnnotationDocumentForDownload(judge);
-//        List<AnnotationEntity> all = dartsDatabase.getAnnotationRepository().findAll();
-//        log.warn("all annotations: {}", all);
+        List<AnnotationEntity> all = dartsDatabase.getAnnotationRepository().findAll();
+        log.warn("all annotations: {}", all);
 
-        MockHttpServletRequestBuilder requestBuilder = get(ANNOTATION_DOCUMENT_ENDPOINT,
-                                                           annotationDocument.getAnnotation().getId(),
-                                                           annotationDocument.getId());
+        MockHttpServletRequestBuilder requestBuilder = get(ANNOTATION_DOCUMENT_ENDPOINT, 1, 1);
+
 
         mockMvc.perform(
                 requestBuilder)
