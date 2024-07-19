@@ -1,6 +1,7 @@
 package uk.gov.hmcts.darts.arm.service;
 
 import lombok.extern.slf4j.Slf4j;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -42,6 +43,7 @@ import static org.skyscreamer.jsonassert.JSONAssert.assertEquals;
 import static uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum.ARM;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_DROP_ZONE;
 import static uk.gov.hmcts.darts.test.common.TestUtils.getContentsFromFile;
+import static uk.gov.hmcts.darts.testutils.stubs.UserAccountStub.INTEGRATION_TEST_USER_EMAIL;
 
 @Slf4j
 @SuppressWarnings({"PMD.ExcessiveImports", "VariableDeclarationUsageDistance", "PMD.AssignmentInOperand"})
@@ -95,10 +97,10 @@ class ArchiveRecordServiceIntTest extends IntegrationBase {
     }
 
     //needed because use id seq are reset before each test. If there are users left in the DB created by previous tests, they will have the same id of the next call to the sequence
-//    @AfterEach
-//    void deleteUser() {
-//        dartsDatabase.addToUserAccountTrash(INTEGRATION_TEST_USER_EMAIL);
-//    }
+    @AfterEach
+    void deleteUser() {
+        dartsDatabase.addToUserAccountTrash(INTEGRATION_TEST_USER_EMAIL);
+    }
 
     @Test
     void generateArchiveRecord_WithLiveMediaProperties_ReturnFileSuccess() throws IOException {

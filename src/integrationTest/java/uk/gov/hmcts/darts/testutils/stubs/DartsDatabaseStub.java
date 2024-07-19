@@ -255,10 +255,10 @@ public class DartsDatabaseStub {
         dailyListRepository.deleteAll();
         retentionPolicyTypeRepository.deleteAll(retentionPolicyTypeBin);
         retentionPolicyTypeBin.clear();
-//        userAccountRepository.deleteAll(userAccountBin);
+        userAccountRepository.deleteAll(userAccountBin);
         userAccountBin.clear();
-//        securityGroupRepository.deleteAll(securityGroupBin);
-//        securityGroupBin.clear();
+        securityGroupRepository.deleteAll(securityGroupBin);
+        securityGroupBin.clear();
         courthouseRepository.deleteAll();
         regionRepository.deleteAll();
         eventHandlerRepository.deleteAll(eventHandlerBin);

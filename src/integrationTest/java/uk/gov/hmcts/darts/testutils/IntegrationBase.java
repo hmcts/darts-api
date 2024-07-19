@@ -184,7 +184,7 @@ public class IntegrationBase  {
     void clearDb() {
         resetSequences();
 //        truncateTables();
-        resetUserAccountTable();
+//        resetUserAccountTable();
         dartsDatabase.clearDatabaseInThisOrder();
         wireMockServer.resetAll();
     }
