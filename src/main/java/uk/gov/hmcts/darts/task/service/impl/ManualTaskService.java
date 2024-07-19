@@ -30,6 +30,7 @@ import uk.gov.hmcts.darts.task.runner.impl.ApplyRetentionCaseAssociatedObjectsAu
 import uk.gov.hmcts.darts.task.runner.impl.ArmRetentionEventDateCalculatorAutomatedTask;
 import uk.gov.hmcts.darts.task.runner.impl.BatchCleanupArmResponseFilesAutomatedTask;
 import uk.gov.hmcts.darts.task.runner.impl.CleanupArmResponseFilesAutomatedTask;
+import uk.gov.hmcts.darts.task.runner.impl.CleanupCurrentEventTask;
 import uk.gov.hmcts.darts.task.runner.impl.CloseOldCasesAutomatedTask;
 import uk.gov.hmcts.darts.task.runner.impl.CloseUnfinishedTranscriptionsAutomatedTask;
 import uk.gov.hmcts.darts.task.runner.impl.DailyListAutomatedTask;
@@ -71,7 +72,6 @@ public class ManualTaskService {
     private final OutboundAudioDeleterProcessor outboundAudioDeleterProcessor;
     private final TranscriptionsProcessor transcriptionsProcessor;
     private final UnstructuredAudioDeleterProcessor unstructuredAudioDeleterProcessor;
-
     private final LockProvider lockProvider;
     private final LogApi logApi;
 
@@ -96,6 +96,7 @@ public class ManualTaskService {
         addArmRetentionEventDateCalculatorToTaskRegister();
         addBatchCleanupArmResponseFilesTaskRegistrar();
         addGenerateCaseDocumentToTaskRegistrar();
+        addEventHandler();
     }
 
     public List<AbstractLockableAutomatedTask> getAutomatedTasks() {
@@ -304,4 +305,15 @@ public class ManualTaskService {
         automatedTasks.add(manualTask);
     }
 
+    private void addEventHandler() {
+        var manualTask = new CleanupCurrentEventTask(
+            automatedTaskRepository,
+            lockProvider,
+            automatedTaskConfigurationProperties,
+            automatedTaskProcessorFactory,
+            logApi
+        );
+        manualTask.setManualTask();
+        automatedTasks.add(manualTask);
+    }
 }
