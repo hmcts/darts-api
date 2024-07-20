@@ -253,8 +253,8 @@ public class DartsDatabaseStub {
         caseRepository.deleteAll();
         judgeRepository.deleteAll();
         dailyListRepository.deleteAll();
-        retentionPolicyTypeRepository.deleteAll(retentionPolicyTypeBin);
-        retentionPolicyTypeBin.clear();
+//        retentionPolicyTypeRepository.deleteAll(retentionPolicyTypeBin);
+//        retentionPolicyTypeBin.clear();
 //        em.createNativeQuery("SELECT usr_id, grp_id from darts.security_group_user_account_ae").getResultList();
 //        userAccountRepository.deleteAll(userAccountBin);
 //        userAccountBin.clear();

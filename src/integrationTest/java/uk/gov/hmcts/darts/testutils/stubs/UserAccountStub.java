@@ -269,8 +269,9 @@ public class UserAccountStub {
 
     @Transactional
     public UserAccountEntity createJudgeUser(String identifier) {
-        SecurityGroupEntity securityGroupEntity = securityGroupRepository.findById(-3).get();
-        securityGroupEntity.setGlobalAccess(true);
+        // rather than "dirtying" the predefined test judge non global security group making it permanently  global, I've added a global test judge one
+        //TODO move -7 to a constant?
+        SecurityGroupEntity securityGroupEntity = securityGroupRepository.findById(-7).get();
         securityGroupEntity.getCourthouseEntities().addAll(courthouseRepository.findAll());
         securityGroupEntity = securityGroupRepository.saveAndFlush(securityGroupEntity);
 

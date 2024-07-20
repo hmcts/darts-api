@@ -19,6 +19,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.testcontainers.containers.GenericContainer;
+import uk.gov.hmcts.darts.common.repository.RetentionPolicyTypeRepository;
 import uk.gov.hmcts.darts.common.repository.SecurityGroupRepository;
 import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
 import uk.gov.hmcts.darts.test.common.LogUtil;
@@ -46,6 +47,8 @@ public class IntegrationBase  {
     UserAccountRepository userAccountRepository;
     @Autowired
     SecurityGroupRepository securityGroupRepository;
+    @Autowired
+    RetentionPolicyTypeRepository retentionPolicyTypeRepository;
 
     static EntityManager em;
 
@@ -89,12 +92,12 @@ public class IntegrationBase  {
     );
 
     private List excludedSequences = List.of(
-        "grp_seq",
         "revinfo_seq"
     );
 
     private Map<String, String> sequencesStartFrom = Map.of(
-        "usr_seq", "2"
+        "usr_seq", "2",
+        "grp_seq", "5"
     );
 
     public void truncateTables () {
@@ -149,15 +152,31 @@ public class IntegrationBase  {
 //
 //        em.getTransaction().commit();
 
-        em.createNativeQuery("SELECT usr_id, grp_id from darts.security_group_user_account_ae").getResultList();
+
+
+        retentionPolicyTypeRepository.deleteAll(
+            retentionPolicyTypeRepository.findByPolicyNameNotIn(List.of(
+                "DARTS Permanent Retention v3",
+                "DARTS Standard Retention v3",
+                "DARTS Not Guilty Policy",
+                "DARTS Non Custodial Policy",
+                "DARTS Custodial Policy",
+                "DARTS Life Policy",
+                "DARTS Default Policy",
+                "DARTS Permanent Policy",
+                "DARTS Manual Policy"
+            ))
+        );
+
+//        em.createNativeQuery("SELECT usr_id, grp_id from darts.security_group_user_account_ae").getResultList();
         userAccountRepository.deleteAll(
             userAccountRepository.findByUserNameNotIn(List.of("darts_global_test_user", "dartstestuser", "Cpp", "Xhibit", "system", "system_housekeeping"))
         );
 //        userAccountRepository.deleteByUserNameNotIn(List.of("darts_global_test_user", "dartstestuser", "Cpp", "Xhibit", "system", "system_housekeeping"))
 
-        em.createNativeQuery("SELECT usr_id, grp_id from darts.security_group_user_account_ae").getResultList();
+//        em.createNativeQuery("SELECT usr_id, grp_id from darts.security_group_user_account_ae").getResultList();
         securityGroupRepository.deleteAll(
-            securityGroupRepository.findByGroupNameNotIn(List.of("Mid Tier Group", "Dar Pc Group", "Cpp Group", "Xhibit Group", "Test RCJ Appeals", "Test Language Shop", "Test Transcriber", "Test Judge", "Test Requestor", "Test Approver", "SUPER_ADMIN", "SUPER_USER", "DARTS", "MEDIA_IN_PERPETUITY"))
+            securityGroupRepository.findByGroupNameNotIn(List.of("Mid Tier Group", "Dar Pc Group", "Cpp Group", "Xhibit Group", "Test RCJ Appeals", "Test Language Shop", "Test Transcriber", "Test Judge", "Test Judge Global", "Test Requestor", "Test Approver", "SUPER_ADMIN", "SUPER_USER", "DARTS", "MEDIA_IN_PERPETUITY"))
         );
     }
 
