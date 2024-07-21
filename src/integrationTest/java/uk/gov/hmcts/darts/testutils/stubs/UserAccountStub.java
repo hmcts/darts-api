@@ -269,7 +269,7 @@ public class UserAccountStub {
 
     @Transactional
     public UserAccountEntity createJudgeUser(String identifier) {
-        // rather than "dirtying" the predefined test judge non global security group making it permanently  global, I've added a global test judge one
+        // rather than "dirtying" the predefined test judge security group making it permanently global, I've added a global test judge
         //TODO move -7 to a constant?
         SecurityGroupEntity securityGroupEntity = securityGroupRepository.findById(-7).get();
         securityGroupEntity.getCourthouseEntities().addAll(courthouseRepository.findAll());
@@ -305,6 +305,7 @@ public class UserAccountStub {
 
     public UserAccountEntity createCppExternalUser(String guid, CourthouseEntity courthouseEntity) {
         SecurityGroupEntity securityGroupEntity = securityGroupRepository.getReferenceById(-15);
+        //TODO
         securityGroupEntity.setGlobalAccess(true);
         securityGroupEntity = securityGroupRepository.saveAndFlush(securityGroupEntity);
 

@@ -5,6 +5,7 @@ import com.github.tomakehurst.wiremock.WireMockServer;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
 import jakarta.persistence.Query;
+import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -36,11 +37,27 @@ import javax.annotation.PostConstruct;
  */
 @AutoConfigureWireMock(port = 0, files = "file:src/integrationTest/resources/wiremock")
 @SpringBootTest
+@Slf4j
 @ActiveProfiles({"intTest", "h2db", "in-memory-caching"})
 public class IntegrationBase  {
 
-    @Autowired
-    EntityManager emNonStatic;
+    public static final List<String> PREDEFINED_SECURITY_GROUPS = List.of(
+        "Mid Tier Group",
+        "Dar Pc Group",
+        "Cpp Group",
+        "Xhibit Group",
+        "Test RCJ Appeals",
+        "Test Language Shop",
+        "Test Transcriber",
+        "Test Judge",
+        "Test Judge Global",
+        "Test Requestor",
+        "Test Approver",
+        "SUPER_ADMIN",
+        "SUPER_USER",
+        "DARTS",
+        "MEDIA_IN_PERPETUITY"
+    );
     @Autowired
     EntityManagerFactory entityManagerFactoryNonStatic;
     @Autowired
@@ -49,24 +66,6 @@ public class IntegrationBase  {
     SecurityGroupRepository securityGroupRepository;
     @Autowired
     RetentionPolicyTypeRepository retentionPolicyTypeRepository;
-
-    static EntityManager em;
-
-    static EntityManagerFactory emf;
-    @PostConstruct
-    public void init() {
-        em = emNonStatic;
-        emf = entityManagerFactoryNonStatic;
-    }
-
-
-//    public static ApplicationContext applicationContext;
-//    @Override
-//    public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
-//        this.applicationContext = applicationContext;
-//    }
-
-//    private static final EntityManager em = IntegrationBase.applicationContext.getBean("entityManager",EntityManager.class);;
 
     private static final List<String> excludedTables = List.of(
         "audit_activity",
@@ -168,6 +167,8 @@ public class IntegrationBase  {
             ))
         );
 
+        log.info("retention policy types: {}", retentionPolicyTypeRepository.findAll());
+
 //        em.createNativeQuery("SELECT usr_id, grp_id from darts.security_group_user_account_ae").getResultList();
         userAccountRepository.deleteAll(
             userAccountRepository.findByUserNameNotIn(List.of("darts_global_test_user", "dartstestuser", "Cpp", "Xhibit", "system", "system_housekeeping"))
@@ -176,7 +177,7 @@ public class IntegrationBase  {
 
 //        em.createNativeQuery("SELECT usr_id, grp_id from darts.security_group_user_account_ae").getResultList();
         securityGroupRepository.deleteAll(
-            securityGroupRepository.findByGroupNameNotIn(List.of("Mid Tier Group", "Dar Pc Group", "Cpp Group", "Xhibit Group", "Test RCJ Appeals", "Test Language Shop", "Test Transcriber", "Test Judge", "Test Judge Global", "Test Requestor", "Test Approver", "SUPER_ADMIN", "SUPER_USER", "DARTS", "MEDIA_IN_PERPETUITY"))
+            securityGroupRepository.findByGroupNameNotIn(PREDEFINED_SECURITY_GROUPS)
         );
     }
 
