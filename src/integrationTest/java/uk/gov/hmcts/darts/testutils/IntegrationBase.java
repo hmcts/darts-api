@@ -166,13 +166,17 @@ public class IntegrationBase  {
                 "DARTS Manual Policy"
             ))
         );
-
+//TODO leave some logs in trace?
         log.info("retention policy types: {}", retentionPolicyTypeRepository.findAll());
 
 //        em.createNativeQuery("SELECT usr_id, grp_id from darts.security_group_user_account_ae").getResultList();
+
+        log.info("users before delete: {}", userAccountRepository.findAll());
         userAccountRepository.deleteAll(
             userAccountRepository.findByUserNameNotIn(List.of("darts_global_test_user", "dartstestuser", "Cpp", "Xhibit", "system", "system_housekeeping"))
         );
+        log.info("users after delete: {}", userAccountRepository.findAll());
+
 //        userAccountRepository.deleteByUserNameNotIn(List.of("darts_global_test_user", "dartstestuser", "Cpp", "Xhibit", "system", "system_housekeeping"))
 
 //        em.createNativeQuery("SELECT usr_id, grp_id from darts.security_group_user_account_ae").getResultList();

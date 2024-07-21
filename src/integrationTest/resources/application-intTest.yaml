@@ -73,7 +73,7 @@ darts:
     enabled: true
   bank-holidays:
     api:
-      baseurl: http://localhost:8080
+      baseurl: http://localhost:${wiremock.server.port}
   storage:
     arm:
       batch-size: 5

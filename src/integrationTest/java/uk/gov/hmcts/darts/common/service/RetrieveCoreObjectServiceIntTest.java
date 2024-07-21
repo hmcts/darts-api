@@ -18,6 +18,7 @@ class RetrieveCoreObjectServiceIntTest extends IntegrationBase {
         dartsDatabase.createCourthouseUnlessExists("swansea");
         LocalDateTime hearingDate = LocalDateTime.of(2020, 10, 10, 10, 0, 0, 0);
         UserAccountEntity userAccount = new UserAccountEntity();
+        //TODO remove
         userAccount.setId(0);
         HearingEntity existingHearing = dartsDatabase.getRetrieveCoreObjectService().retrieveOrCreateHearing("swansea",
                                                                                                              "1", "CaseNumber",
