@@ -6,7 +6,7 @@ import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 
 import java.util.function.Consumer;
 
-import static org.testcontainers.shaded.org.apache.commons.lang3.RandomStringUtils.random;
+import static org.apache.commons.lang3.RandomStringUtils.random;
 import static uk.gov.hmcts.darts.test.common.data.CourthouseTestData.someMinimalCourthouse;
 import static uk.gov.hmcts.darts.test.common.data.DefenceTestData.createDefenceForCaseWithName;
 import static uk.gov.hmcts.darts.test.common.data.DefendantTestData.createDefendantForCaseWithName;
@@ -17,7 +17,7 @@ import static uk.gov.hmcts.darts.test.common.data.ProsecutorTestData.createProse
 public class CaseTestData {
 
     public static CourtCaseEntity createSomeMinimalCase() {
-        var postfix = random(10);
+        var postfix = random(10, false, true);
         var courtCaseEntity = new CourtCaseEntity();
         courtCaseEntity.setCourthouse(someMinimalCourthouse());
         courtCaseEntity.setCaseNumber("case-1-" + postfix);
