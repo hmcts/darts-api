@@ -239,7 +239,7 @@ class DailyListPostControllerTest extends IntegrationBase {
     }
 
     @Test
-    public void callDailylistRunSuccess() throws Exception {
+    void callDailylistRunSuccess() throws Exception {
         superAdminUserStub.givenUserIsAuthorised(mockUserIdentity);
 
         String courthouseName = "func-swansea-house-" + randomAlphanumeric(7);
@@ -252,7 +252,7 @@ class DailyListPostControllerTest extends IntegrationBase {
     }
 
     @Test
-    public void callDailylistRunFailure() throws Exception {
+    void callDailylistRunFailure() throws Exception {
         superAdminUserStub.givenUserIsAuthorised(mockUserIdentity, SecurityRoleEnum.DAR_PC);
 
         String courthouseName = "func-swansea-house-" + randomAlphanumeric(7);
