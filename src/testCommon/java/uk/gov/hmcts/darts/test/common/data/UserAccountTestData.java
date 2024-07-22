@@ -13,7 +13,7 @@ import static uk.gov.hmcts.darts.test.common.data.SecurityGroupTestData.buildGro
 public class UserAccountTestData {
 
     public static UserAccountEntity minimalUserAccount() {
-        var postfix = random(10);
+        var postfix = random(10, false, true);
         var userAccount = new UserAccountEntity();
         userAccount.setActive(true);
         userAccount.setIsSystemUser(false);

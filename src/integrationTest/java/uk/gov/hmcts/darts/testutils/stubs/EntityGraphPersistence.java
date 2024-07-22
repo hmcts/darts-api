@@ -14,6 +14,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 @Component
@@ -25,6 +26,12 @@ public class EntityGraphPersistence {
 
     @Autowired
     private JudgeRepository judgeRepository;
+
+    @Transactional
+    public <T> List<T> persistAll(List<T> entities) {
+        entities.forEach(this::persist);
+        return entities;
+    }
 
     @Transactional
     @SuppressWarnings("PMD.AvoidThrowingRawExceptionTypes")
@@ -49,7 +56,7 @@ public class EntityGraphPersistence {
         processedEntities.add(entity);
 
         Class<?> clazz = entity.getClass();
-        while (clazz != null) {
+        while (clazz != null && clazz != Object.class) {
             Field[] fields = clazz.getDeclaredFields();
             for (Field field : fields) {
                 field.setAccessible(true);

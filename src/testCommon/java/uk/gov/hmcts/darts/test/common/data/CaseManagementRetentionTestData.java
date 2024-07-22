@@ -12,7 +12,8 @@ import static uk.gov.hmcts.darts.test.common.data.RetentionPolicyTypeTestData.so
 @SuppressWarnings({"HideUtilityClassConstructor"})
 public class CaseManagementRetentionTestData {
 
-    public static CaseManagementRetentionEntity someMinimalCaseManagementRetention() {
+    public static CaseManagementRetentionEntity
+    someMinimalCaseManagementRetention() {
         var caseManagementRetention = new CaseManagementRetentionEntity();
         caseManagementRetention.setEventEntity(someMinimalEvent());
         caseManagementRetention.setCourtCase(someMinimalCase());
