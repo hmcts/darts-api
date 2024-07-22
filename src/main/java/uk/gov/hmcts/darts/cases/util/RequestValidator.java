@@ -59,7 +59,6 @@ public class RequestValidator {
         boolean eventTextLengthOk = StringUtils.length(request.getEventTextContains()) >= SEARCH_TEXT_LENGTH_THRESHOLD;
         totalPoints += eventTextLengthOk ? 1 : 0;
 
-
         if (totalPoints < SEARCH_COMPLEXITY_THRESHOLD) {
             throw new DartsApiException(CaseApiError.CRITERIA_TOO_BROAD);
         }

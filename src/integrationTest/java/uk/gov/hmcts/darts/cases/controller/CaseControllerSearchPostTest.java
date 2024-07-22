@@ -255,64 +255,64 @@ class CaseControllerSearchPostTest extends IntegrationBase {
     }
 
     @Test
-    void courthouseAndDateRange() throws Exception {
-        user = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
-        setupUserAccountAndSecurityGroup();
-        String requestBody = """
-            {
-              "courthouse": "SWANSEA",
-              "date_from": "2023-05-19",
-              "date_to": "2023-05-20"
-            }""";
+void courthouseAndDateRange() throws Exception {
+    user = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
+    setupUserAccountAndSecurityGroup();
+    String requestBody = """
+        {
+          "courthouse": "SWANSEA",
+          "date_from": "2023-05-19",
+          "date_to": "2023-05-20"
+        }""";
 
-        MockHttpServletRequestBuilder requestBuilder = post(ENDPOINT_URL)
-            .contentType(MediaType.APPLICATION_JSON_VALUE)
-            .content(requestBody);
-        MvcResult response = mockMvc.perform(requestBuilder).andExpect(status().isOk()).andReturn();
+    MockHttpServletRequestBuilder requestBuilder = post(ENDPOINT_URL)
+        .contentType(MediaType.APPLICATION_JSON_VALUE)
+        .content(requestBody);
+    MvcResult response = mockMvc.perform(requestBuilder).andExpect(status().isOk()).andReturn();
 
-        String actualResponse = TestUtils.removeIds(response.getResponse().getContentAsString());
+    String actualResponse = TestUtils.removeIds(response.getResponse().getContentAsString());
 
-        String expectedResponse = """
-            [
+    String expectedResponse = """
+        [
+          {
+            "case_number": "Case1",
+            "courthouse": "SWANSEA",
+            "defendants": [
+              "aDefendant"
+            ],
+            "judges": [
+              "aJudge"
+            ],
+            "hearings": [
               {
-                "case_number": "Case1",
-                "courthouse": "SWANSEA",
-                "defendants": [
-                  "aDefendant"
-                ],
+                "date": "2023-05-20",
+                "courtroom": "courtroom1",
                 "judges": [
                   "aJudge"
-                ],
-                "hearings": [
-                  {
-                    "date": "2023-05-20",
-                    "courtroom": "courtroom1",
-                    "judges": [
-                      "aJudge"
-                    ]
-                  },
-                  {
-                    "date": "2023-05-21",
-                    "courtroom": "courtroom1",
-                    "judges": [
-                      "aJudge"
-                    ]
-                  },
-                  {
-                    "date": "2023-05-22",
-                    "courtroom": "courtroom1",
-                    "judges": [
-                      "aJudge"
-                    ]
-                  }
+                ]
+              },
+              {
+                "date": "2023-05-21",
+                "courtroom": "courtroom1",
+                "judges": [
+                  "aJudge"
+                ]
+              },
+              {
+                "date": "2023-05-22",
+                "courtroom": "courtroom1",
+                "judges": [
+                  "aJudge"
                 ]
               }
             ]
-            """;
-        assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
-    }
+          }
+        ]
+        """;
+    assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
+}
 
-    @Test
+@Test
     void casesSearchPostEndpointEventText() throws Exception {
         user = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
         setupUserAccountAndSecurityGroup();
