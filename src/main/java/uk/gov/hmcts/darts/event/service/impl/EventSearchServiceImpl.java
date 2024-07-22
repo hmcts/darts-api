@@ -32,7 +32,7 @@ public class EventSearchServiceImpl implements EventSearchService {
     @Override
     public List<AdminSearchEventResponseResult> searchForEvents(AdminEventSearch adminEventSearch) {
         Page<EventSearchResult> eventSearchResults = eventRepository.searchEventsFilteringOn(
-            adminEventSearch.getCourthouseIds(),
+            getNonEmptyOrNull(adminEventSearch.getCourthouseIds()),
             adminEventSearch.getCaseNumber(),
             adminEventSearch.getCourtroomName(),
             adminEventSearch.getHearingStartAt(),
@@ -50,5 +50,12 @@ public class EventSearchServiceImpl implements EventSearchService {
         return eventSearchResults.stream()
             .map(eventSearchMapper::adminSearchEventResponseResultFrom)
             .toList();
+    }
+
+    private static List<Integer> getNonEmptyOrNull(List<Integer> integerList) {
+        if (integerList != null && integerList.isEmpty()) {
+           return null;
+        }
+        return integerList;
     }
 }
