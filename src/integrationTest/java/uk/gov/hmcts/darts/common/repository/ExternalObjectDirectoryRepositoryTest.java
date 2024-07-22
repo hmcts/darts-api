@@ -261,7 +261,7 @@ class ExternalObjectDirectoryRepositoryTest  extends PostgresIntegrationBase {
 
         Assertions.assertEquals(resultCount, matchesEntity.size());
     }
-    
+
     private OffsetDateTime getCurrentDateTimeWithHoursBefore(int hours) {
         return currentTimeHelper.currentOffsetDateTime().minus(
             hours,

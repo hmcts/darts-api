@@ -55,7 +55,7 @@ class InboundAnnotationTranscriptionDeleterProcessorImplTest extends PostgresInt
 
 
         // excerise the logic
-        List<Integer> updatedResults = armTranscriptionAndAnnotationDeleterProcessor.processDeletionIfAfterHours(pageSize, hourDurationBeyondHours);
+        List<Integer> updatedResults = armTranscriptionAndAnnotationDeleterProcessor.processDeletionIfPreceding(pageSize, hourDurationBeyondHours);
 
         // assert the logic
         assertExpectedResults(updatedResults, expectedArmRecordsResultOutsideHours, pageSize);
@@ -63,7 +63,7 @@ class InboundAnnotationTranscriptionDeleterProcessorImplTest extends PostgresInt
         // assert the logic
         assertExternalObjectDirectoryUpdate(updatedResults, expectedArmRecordsResultOutsideHours, pageSize);
 
-        updatedResults = armTranscriptionAndAnnotationDeleterProcessor.processDeletionIfAfterHours(pageSize, hourDurationBeyondHours);
+        updatedResults = armTranscriptionAndAnnotationDeleterProcessor.processDeletionIfPreceding(pageSize, hourDurationBeyondHours);
 
         Assertions.assertTrue(updatedResults.isEmpty());
     }
@@ -96,7 +96,7 @@ class InboundAnnotationTranscriptionDeleterProcessorImplTest extends PostgresInt
         int hourDurationBeyondHours = setupHoursBeforeCurrentTime; // which no records are
 
         // exercise the logic
-        List<Integer> updatedResults = armTranscriptionAndAnnotationDeleterProcessor.processDeletionIfAfterHours(pageSize, hourDurationBeyondHours);
+        List<Integer> updatedResults = armTranscriptionAndAnnotationDeleterProcessor.processDeletionIfPreceding(pageSize, hourDurationBeyondHours);
 
         // assert the logic
         assertExpectedResults(updatedResults, expectedArmRecordsResultOutsideHours, pageSize);
@@ -104,7 +104,7 @@ class InboundAnnotationTranscriptionDeleterProcessorImplTest extends PostgresInt
         // assert the logic
         assertExternalObjectDirectoryUpdate(updatedResults, expectedArmRecordsResultOutsideHours, 1);
 
-        List<Integer> updatedResults2 = armTranscriptionAndAnnotationDeleterProcessor.processDeletionIfAfterHours(pageSize, hourDurationBeyondHours);
+        List<Integer> updatedResults2 = armTranscriptionAndAnnotationDeleterProcessor.processDeletionIfPreceding(pageSize, hourDurationBeyondHours);
 
         // assert the logic
         assertExpectedResults(updatedResults2, expectedArmRecordsResultOutsideHours, pageSize);
@@ -147,7 +147,7 @@ class InboundAnnotationTranscriptionDeleterProcessorImplTest extends PostgresInt
         int pageSize = 1;
 
         // exercise the logic
-        List<Integer> updatedResults = armTranscriptionAndAnnotationDeleterProcessor.processDeletionIfAfterHours(pageSize);
+        List<Integer> updatedResults = armTranscriptionAndAnnotationDeleterProcessor.processDeletionIfPreceding(pageSize);
 
         // assert the logic
         assertExpectedResults(updatedResults, expectedArmRecordsResultOutsideHours, pageSize);
@@ -155,7 +155,7 @@ class InboundAnnotationTranscriptionDeleterProcessorImplTest extends PostgresInt
         // assert the logic
         assertExternalObjectDirectoryUpdate(updatedResults, expectedArmRecordsResultOutsideHours, 1);
 
-        List<Integer> updatedResults2 = armTranscriptionAndAnnotationDeleterProcessor.processDeletionIfAfterHours(pageSize);
+        List<Integer> updatedResults2 = armTranscriptionAndAnnotationDeleterProcessor.processDeletionIfPreceding(pageSize);
 
         // assert the logic
         assertExpectedResults(updatedResults2, expectedArmRecordsResultOutsideHours, pageSize);
@@ -196,7 +196,7 @@ class InboundAnnotationTranscriptionDeleterProcessorImplTest extends PostgresInt
         int pageSize = 1;
         int hourDurationBeyondHours = setupHoursBeforeCurrentTime + 1; // which no records are
 
-        List<Integer> updatedResults = armTranscriptionAndAnnotationDeleterProcessor.processDeletionIfAfterHours(pageSize, hourDurationBeyondHours);
+        List<Integer> updatedResults = armTranscriptionAndAnnotationDeleterProcessor.processDeletionIfPreceding(pageSize, hourDurationBeyondHours);
 
         // assert that the test has inserted the data into the database
         Assertions.assertTrue(updatedResults.isEmpty());
