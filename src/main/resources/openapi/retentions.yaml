@@ -16,7 +16,7 @@ paths:
     get:
       tags:
         - Retention
-      summary: Get retention history
+      summary: Get retention history for a case
       parameters:
         - in: query
           name: case_id
@@ -42,7 +42,7 @@ paths:
     post:
       tags:
         - Retention
-      summary: allow case retention changes to be applied.
+      summary: Allow case retention changes to be applied.
       parameters:
         - in: query
           name: validate_only
@@ -141,7 +141,7 @@ paths:
               schema:
                 $ref: './problem.yaml'
     post:
-      summary: Create or revise a retention policy
+      summary: Create a retention policy type
       tags:
         - Retention
       parameters:
@@ -218,7 +218,7 @@ paths:
               schema:
                 $ref: './problem.yaml'
     patch:
-      summary: Create or revise a retention policy
+      summary: Update a retention policy type
       tags:
         - Retention
       parameters:
