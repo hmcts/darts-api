@@ -53,7 +53,7 @@ darts:
   data-management:
     inbound-to-unstructured-limit: 100
   gateway:
-    url: ${DARTS_GATEWAY_URL:http://localhost:${wiremock.server.port}}
+    url: http://localhost:${wiremock.server.port}
   audio:
     max-file-duration-minutes: 1440
     concat-workspace: ${java.io.tmpdir}/audiotransform/concatenate

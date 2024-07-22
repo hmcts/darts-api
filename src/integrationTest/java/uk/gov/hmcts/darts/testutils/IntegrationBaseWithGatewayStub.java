@@ -7,6 +7,7 @@ import uk.gov.hmcts.darts.testutils.stubs.wiremock.DartsGatewayStub;
 
 public class IntegrationBaseWithGatewayStub extends IntegrationBase {
 
+    //TODO: change to use extension
     protected DartsGatewayStub dartsGateway = new DartsGatewayStub();
 
     @Autowired

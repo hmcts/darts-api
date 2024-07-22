@@ -260,7 +260,8 @@ public class IntegrationBase  {
 
 
         watch.start("reset wiremock");
-        wireMockServer.resetAll();
+        //TODO is this needed?
+//        wireMockServer.resetAll();
         watch.stop();
 
         log.info("Clear DB took total: " + watch.getTotalTimeSeconds() + " seconds");
