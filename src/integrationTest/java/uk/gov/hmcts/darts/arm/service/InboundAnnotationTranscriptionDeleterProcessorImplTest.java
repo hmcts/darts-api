@@ -15,7 +15,7 @@ import java.util.List;
 
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.STORED;
 
-class InboundTranscriptionAndAnnotationDeleterProcessorImplTest extends PostgresIntegrationBase {
+class InboundAnnotationTranscriptionDeleterProcessorImplTest extends PostgresIntegrationBase {
 
     @Autowired
     private ExternalObjectDirectoryRepository externalObjectDirectoryRepository;
@@ -24,7 +24,7 @@ class InboundTranscriptionAndAnnotationDeleterProcessorImplTest extends Postgres
     private ExternalObjectDirectoryStub externalObjectDirectoryStub;
 
     @Autowired
-    private InboundTranscriptionAndAnnotationDeleterProcessor armTranscriptionAndAnnotationDeleterProcessor;
+    private InboundAnnotationTranscriptionDeleterProcessor armTranscriptionAndAnnotationDeleterProcessor;
 
     @Test
     void processBatchSingleRecords() throws Exception {

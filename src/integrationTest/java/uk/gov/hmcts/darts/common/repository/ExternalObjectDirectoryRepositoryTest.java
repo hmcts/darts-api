@@ -7,11 +7,15 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.auditing.DateTimeProvider;
 import org.springframework.data.domain.Pageable;
 import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
+import uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum;
 import uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum;
+import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
 import uk.gov.hmcts.darts.common.helper.SystemUserHelper;
 import uk.gov.hmcts.darts.testutils.PostgresIntegrationBase;
 import uk.gov.hmcts.darts.testutils.stubs.ExternalObjectDirectoryStub;
 
+import java.time.OffsetDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -33,6 +37,9 @@ class ExternalObjectDirectoryRepositoryTest  extends PostgresIntegrationBase {
 
     @Autowired
     private ObjectRecordStatusRepository objectRecordStatusRepository;
+
+    @Autowired
+    private CurrentTimeHelper currentTimeHelper;
 
     @Test
     void testSingleUpdateDirectoryIfArmMediaDateExistedFor24HoursOrBeyond() throws Exception {
@@ -64,7 +71,9 @@ class ExternalObjectDirectoryRepositoryTest  extends PostgresIntegrationBase {
         int hourDurationBeyondHours = setupHoursBeforeCurrentTime; // which no records are
 
         // exercise the logic
-        List<Integer> results = externalObjectDirectoryRepository.findAllInboundArmMediaExceedingHours(Pageable.ofSize(pageSize), hourDurationBeyondHours);
+        List<Integer> results = externalObjectDirectoryRepository
+            .findAllArmMediaBeforeOrEqualDate(Pageable.ofSize(pageSize),
+                                              ExternalLocationTypeEnum.INBOUND.getId(), getCurrentDateTimeWithHoursBefore(hourDurationBeyondHours));
 
         // assert we have returned one of the expected
         assertExpectedResults(results, expectedArmRecordsResultOutside24Hours, pageSize);
@@ -105,7 +114,9 @@ class ExternalObjectDirectoryRepositoryTest  extends PostgresIntegrationBase {
         int hourDurationBeyondHours = setupHoursBeforeCurrentTime; // which no records are
 
         // exercise the logic
-        List<Integer> results = externalObjectDirectoryRepository.findAllInboundArmMediaExceedingHours(Pageable.ofSize(pageSize), hourDurationBeyondHours);
+        List<Integer> results = externalObjectDirectoryRepository
+            .findAllArmMediaBeforeOrEqualDate(Pageable.ofSize(pageSize),
+                                              ExternalLocationTypeEnum.INBOUND.getId(), getCurrentDateTimeWithHoursBefore(hourDurationBeyondHours));
 
         // assert we have returned the expected records
         assertExpectedResults(results, expectedArmRecordsResultOutside24Hours, pageSize);
@@ -117,7 +128,9 @@ class ExternalObjectDirectoryRepositoryTest  extends PostgresIntegrationBase {
         assertExternalObjectDirectoryUpdate(updatedResults, expectedArmRecordsResultOutside24Hours, pageSize);
 
         // we should not find any more records for processing
-        results = externalObjectDirectoryRepository.findAllInboundArmMediaExceedingHours(Pageable.ofSize(pageSize), hourDurationBeyondHours);
+        results = externalObjectDirectoryRepository
+            .findAllArmMediaBeforeOrEqualDate(Pageable.ofSize(pageSize),
+                                              ExternalLocationTypeEnum.INBOUND.getId(), getCurrentDateTimeWithHoursBefore(hourDurationBeyondHours));
         
         Assertions.assertTrue(results.isEmpty());
     }
@@ -150,10 +163,20 @@ class ExternalObjectDirectoryRepositoryTest  extends PostgresIntegrationBase {
         int hourDurationBeyondHours = setupHoursBeforeCurrentTime; // which no records are
 
         // excerise the logic
-        List<Integer> results = externalObjectDirectoryRepository.findAllInboundArmMediaExceedingHours(Pageable.ofSize(pageSize), hourDurationBeyondHours);
+        List<Integer> results = externalObjectDirectoryRepository
+            .findAllArmMediaBeforeOrEqualDate(Pageable.ofSize(pageSize),
+                                              ExternalLocationTypeEnum.INBOUND.getId(), getCurrentDateTimeWithHoursBefore(hourDurationBeyondHours));
 
         // assert the logic
         assertExpectedResults(results, armRecordsResultOutside24Hours, pageSize);
+    }
+
+    private OffsetDateTime getCurrentDateTimeWithHoursBefore(int hours) {
+        OffsetDateTime currentDateMinusHours = currentTimeHelper.currentOffsetDateTime().minus(
+            hours,
+            ChronoUnit.HOURS
+        );
+        return currentDateMinusHours;
     }
 
     @Test
@@ -185,7 +208,9 @@ class ExternalObjectDirectoryRepositoryTest  extends PostgresIntegrationBase {
         int hourDurationBeyondHours = setupHoursBeforeCurrentTime; // which no records are
 
         // excerise the logic
-        List<Integer> results = externalObjectDirectoryRepository.findAllInboundArmMediaExceedingHours(Pageable.ofSize(pageSize), hourDurationBeyondHours);
+        List<Integer> results = externalObjectDirectoryRepository
+            .findAllArmMediaBeforeOrEqualDate(Pageable.ofSize(pageSize),
+                                              ExternalLocationTypeEnum.INBOUND.getId(), getCurrentDateTimeWithHoursBefore(hourDurationBeyondHours));
 
         // assert the logic
         assertExpectedResults(results, armRecordsResultOutside24Hours, pageSize);
@@ -220,7 +245,9 @@ class ExternalObjectDirectoryRepositoryTest  extends PostgresIntegrationBase {
         int hourDurationBeyondHours = 24; // which no records are
 
         // excerise the logic
-        List<Integer> results = externalObjectDirectoryRepository.findAllInboundArmMediaExceedingHours(Pageable.ofSize(pageSize), hourDurationBeyondHours);
+        List<Integer> results = externalObjectDirectoryRepository
+            .findAllArmMediaBeforeOrEqualDate(Pageable.ofSize(pageSize),
+                                              ExternalLocationTypeEnum.INBOUND.getId(), getCurrentDateTimeWithHoursBefore(hourDurationBeyondHours));
 
         // assert the logic
         Assertions.assertTrue(results.isEmpty());

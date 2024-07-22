@@ -373,12 +373,12 @@ public interface ExternalObjectDirectoryRepository extends JpaRepository<Externa
          SELECT od.eod_id FROM darts.external_object_directory od WHERE od.med_id IN
             (
                 SELECT med_id FROM darts.external_object_directory
-                WHERE elt_id=1 AND ors_id=2
+                WHERE elt_id=:externalLocationType AND ors_id=2
             ) AND elt_id=3 AND ors_id=2 
-            AND (floor (extract (epoch from (current_timestamp::timestamp - last_modified_ts::timestamp)) / 60 / 60) >= :hoursInArm)
+            AND last_modified_ts <= :lastModifiedEarliestDate 
         """, nativeQuery = true
     )
-    List<Integer> findAllInboundArmMediaExceedingHours(Pageable resultLimit, Integer hoursInArm);
+    List<Integer> findAllArmMediaBeforeOrEqualDate(Pageable resultLimit, int externalLocationType, OffsetDateTime lastModifiedEarliestDate);
 
     @Modifying
     @Transactional

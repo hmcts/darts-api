@@ -16,7 +16,7 @@ import org.springframework.scheduling.config.TriggerTask;
 import uk.gov.hmcts.darts.arm.component.AutomatedTaskProcessorFactory;
 import uk.gov.hmcts.darts.arm.service.ArmRetentionEventDateProcessor;
 import uk.gov.hmcts.darts.arm.service.CleanupArmResponseFilesService;
-import uk.gov.hmcts.darts.arm.service.InboundTranscriptionAndAnnotationDeleterProcessor;
+import uk.gov.hmcts.darts.arm.service.InboundAnnotationTranscriptionDeleterProcessor;
 import uk.gov.hmcts.darts.audio.deleter.impl.inbound.ExternalInboundDataStoreDeleter;
 import uk.gov.hmcts.darts.audio.deleter.impl.outbound.ExternalOutboundDataStoreDeleter;
 import uk.gov.hmcts.darts.audio.deleter.impl.unstructured.ExternalUnstructuredDataStoreDeleter;
@@ -128,7 +128,7 @@ class AutomatedTaskServiceTest extends IntegrationPerClassBase {
     private ApplyRetentionCaseAssociatedObjectsProcessor applyRetentionCaseAssociatedObjectsProcessor;
 
     @Autowired
-    private InboundTranscriptionAndAnnotationDeleterProcessor armTranscriptionAndAnnotationDeleterProcessor;
+    private InboundAnnotationTranscriptionDeleterProcessor armTranscriptionAndAnnotationDeleterProcessor;
 
     @Autowired
     private LogApi logApi;

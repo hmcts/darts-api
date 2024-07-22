@@ -17,7 +17,7 @@ import uk.gov.hmcts.darts.arm.component.AutomatedTaskProcessorFactory;
 import uk.gov.hmcts.darts.arm.service.ArmRetentionEventDateProcessor;
 import uk.gov.hmcts.darts.arm.service.BatchCleanupArmResponseFilesService;
 import uk.gov.hmcts.darts.arm.service.CleanupArmResponseFilesService;
-import uk.gov.hmcts.darts.arm.service.InboundTranscriptionAndAnnotationDeleterProcessor;
+import uk.gov.hmcts.darts.arm.service.InboundAnnotationTranscriptionDeleterProcessor;
 import uk.gov.hmcts.darts.audio.deleter.impl.inbound.ExternalInboundDataStoreDeleter;
 import uk.gov.hmcts.darts.audio.deleter.impl.outbound.ExternalOutboundDataStoreDeleter;
 import uk.gov.hmcts.darts.audio.deleter.impl.unstructured.ExternalUnstructuredDataStoreDeleter;
@@ -146,7 +146,7 @@ public class AutomatedTaskServiceImpl implements AutomatedTaskService {
     private final DailyListService dailyListService;
 
     private final ArmRetentionEventDateProcessor armRetentionEventDateProcessor;
-    private final InboundTranscriptionAndAnnotationDeleterProcessor inboundTranscriptionAndAnnotationDeleterProcessor;
+    private final InboundAnnotationTranscriptionDeleterProcessor inboundTranscriptionAndAnnotationDeleterProcessor;
 
     private final LogApi logApi;
 

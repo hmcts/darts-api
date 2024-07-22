@@ -5,25 +5,31 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
-import uk.gov.hmcts.darts.arm.service.InboundTranscriptionAndAnnotationDeleterProcessor;
+import uk.gov.hmcts.darts.arm.service.InboundAnnotationTranscriptionDeleterProcessor;
 import uk.gov.hmcts.darts.common.entity.ObjectRecordStatusEntity;
+import uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum;
 import uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum;
+import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
 import uk.gov.hmcts.darts.common.helper.SystemUserHelper;
 import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
 import uk.gov.hmcts.darts.common.repository.ObjectRecordStatusRepository;
 
+import java.time.OffsetDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 
 @Component
 @RequiredArgsConstructor
 @Slf4j
-public class InboundTranscriptionAndAnnotationDeleterProcessorImpl implements InboundTranscriptionAndAnnotationDeleterProcessor {
+public class InboundAnnotationTranscriptionDeleterProcessorImpl implements InboundAnnotationTranscriptionDeleterProcessor {
 
     private final ExternalObjectDirectoryRepository externalObjectDirectoryRepository;
 
     private final SystemUserHelper systemUserHelper;
 
     private final ObjectRecordStatusRepository objectRecordStatusRepository;
+    private final CurrentTimeHelper currentTimeHelper;
+
 
     @Value("${darts.data-management.retention-period.inbound.arm-minimum}")
     int hoursInArm;
@@ -34,8 +40,15 @@ public class InboundTranscriptionAndAnnotationDeleterProcessorImpl implements In
 
     @Override
     public List<Integer> processDeletionIfAfterHours(int batch, int hourThreshold) {
+
+        OffsetDateTime lastModifiedBefore = currentTimeHelper.currentOffsetDateTime().minus(
+            hoursInArm,
+            ChronoUnit.HOURS
+        );
+
         List<Integer> armRecordToBeMarkedForDeletion
-            = externalObjectDirectoryRepository.findAllInboundArmMediaExceedingHours(Pageable.ofSize(batch), hourThreshold);
+            = externalObjectDirectoryRepository
+            .findAllArmMediaBeforeOrEqualDate(Pageable.ofSize(batch), ExternalLocationTypeEnum.INBOUND.getId(), lastModifiedBefore);
 
         ObjectRecordStatusEntity status = objectRecordStatusRepository.getReferenceById(ObjectRecordStatusEnum.MARKED_FOR_DELETION.getId());
 
@@ -45,5 +58,10 @@ public class InboundTranscriptionAndAnnotationDeleterProcessorImpl implements In
         log.debug("Records have been marked as deleted");
 
         return armRecordToBeMarkedForDeletion;
+    }
+
+    @Override
+    public int getHoursBeforeOrEqualLastModified() {
+        return hoursInArm;
     }
 }
