@@ -324,4 +324,17 @@ class DailyListProcessorTest extends IntegrationBase {
 
         Assertions.assertThat(dailyListStatus).isEqualTo(IGNORED);
     }
+
+    @Test
+    void dailyListProcessorWithLock() throws IOException {
+        CourthouseEntity swanseaCourtEntity = dartsDatabase.createCourthouseWithTwoCourtrooms();
+        dartsDatabase.createDailyLists(swanseaCourtEntity.getCourthouseName());
+
+        dailyListProcessor.processAllDailyListsWithLock(null);
+
+        List<DailyListEntity> savedDailyLists = dailyListRepository.findAll();
+        List<JobStatusType> dailyListStatuses = savedDailyLists.stream().map(dailyList -> dailyList.getStatus()).toList();
+        long countOfProcessed = dailyListStatuses.stream().filter(status -> status.equals(PROCESSED)).count();
+        assertEquals(2, countOfProcessed);
+    }
 }

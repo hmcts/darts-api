@@ -90,7 +90,7 @@ public class AdminAutomatedTasksServiceImpl implements AdminAutomatedTaskService
         return mapper.mapEntityToDetailedAutomatedTask(updatedTask);
     }
 
-    private boolean isLocked(AutomatedTaskEntity automatedTask) {
+    public boolean isLocked(AutomatedTaskEntity automatedTask) {
         var lockedUntil = automatedTaskRepository.findLockedUntilForTask(automatedTask.getTaskName());
         return !lockedUntil.isEmpty() && isInFuture(lockedUntil);
     }

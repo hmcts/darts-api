@@ -16,6 +16,8 @@ import uk.gov.hmcts.darts.task.config.AutomatedTaskConfigurationProperties;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 
 @Component
@@ -30,7 +32,7 @@ public class SystemUserHelper {
     public static final String DAILYLIST_PROCESSOR = "dailylist-processor";
     private final UserAccountRepository userAccountRepository;
     private Map<String, String> systemUserGuidMap;
-    private Map<String, UserAccountEntity> systemUserNameToEntityMap = new HashMap<>();
+    private ConcurrentMap<String, UserAccountEntity> systemUserNameToEntityMap = new ConcurrentHashMap<>();
     private final AutomatedTaskConfigurationProperties properties;
 
     public String findSystemUserGuid(String configKey) {

@@ -1,6 +1,5 @@
 package uk.gov.hmcts.darts.task.runner.impl;
 
-import net.javacrumbs.shedlock.core.LockProvider;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
@@ -11,6 +10,7 @@ import uk.gov.hmcts.darts.arm.service.impl.ArmResponseFilesProcessorImpl;
 import uk.gov.hmcts.darts.common.entity.AutomatedTaskEntity;
 import uk.gov.hmcts.darts.common.repository.AutomatedTaskRepository;
 import uk.gov.hmcts.darts.log.api.LogApi;
+import uk.gov.hmcts.darts.task.service.LockService;
 
 import java.util.Optional;
 
@@ -19,8 +19,6 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 class ProcessArmResponseFilesAutomatedTaskTest {
     @Mock
-    private LockProvider lockProvider;
-    @Mock
     private ArmResponseFilesProcessorImpl armResponseFilesProcessor;
     @Mock
     private LogApi logApi;
@@ -28,6 +26,8 @@ class ProcessArmResponseFilesAutomatedTaskTest {
     private AutomatedTaskRepository automatedTaskRepository;
     @Mock
     private AutomatedTaskProcessorFactory processorFactory;
+    @Mock
+    private LockService lockService;
 
     @Test
     void runTask() {
@@ -39,10 +39,10 @@ class ProcessArmResponseFilesAutomatedTaskTest {
         ProcessArmResponseFilesAutomatedTask processArmResponseFilesAutomatedTask =
             new ProcessArmResponseFilesAutomatedTask(
                 automatedTaskRepository,
-                lockProvider,
                 null,
                 processorFactory,
-                logApi
+                logApi,
+                lockService
             );
 
         when(automatedTaskRepository.findByTaskName("ProcessArmResponseFiles")).thenReturn(Optional.of(automatedTask));
