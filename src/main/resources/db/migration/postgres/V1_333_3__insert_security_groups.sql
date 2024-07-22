@@ -3,17 +3,18 @@ DECLARE
 	recordToBeMigrated record;
 	newId integer;
 	oldId integer;
-	maxId integer;
+	--Prod data will have an id below this value, a deliberate gap will be left between prod data and test data.
+	sequenceRestartValue integer = 1000;
 BEGIN
-perform setval('grp_seq', 1000, false);
+perform setval('grp_seq', sequenceRestartValue, false);
 RAISE NOTICE 'migrating duplicate records';
 FOR recordToBeMigrated IN
     SELECT sg1.grp_id newId, sg2.group_name, sg2.grp_id oldId FROM security_group sg1, security_group sg2
 	where upper(sg1.group_name) = upper(sg2.group_name)
     and sg1.grp_id < sg2.grp_id
 	 and sg1.grp_id > 0
-     and sg1.grp_id < 1000
-     and sg2.grp_id >= 1000
+     and sg1.grp_id < sequenceRestartValue
+     and sg2.grp_id >= sequenceRestartValue
      order by 1
 	LOOP
 		select recordToBeMigrated.oldId into oldId;
@@ -33,7 +34,7 @@ FOR recordToBeMigrated IN
     END LOOP;
 RAISE NOTICE 'migrating other records';
 FOR recordToBeMigrated IN
-    SELECT grp_id, group_name from security_group where grp_id >=1000
+    SELECT grp_id, group_name from security_group where grp_id >=sequenceRestartValue
     order by 1
 	LOOP
 	select nextval('grp_seq') into newId;
@@ -58,6 +59,4 @@ FOR recordToBeMigrated IN
 
     END LOOP;
 
-    select max(grp_id) into maxId from security_group;
-    perform setval('grp_seq', maxId+1, false);
 END $$;
