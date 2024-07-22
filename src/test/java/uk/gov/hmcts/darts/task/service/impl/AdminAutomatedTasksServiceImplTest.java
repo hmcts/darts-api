@@ -7,7 +7,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.darts.audit.api.AuditActivity;
 import uk.gov.hmcts.darts.audit.api.AuditApi;
-import uk.gov.hmcts.darts.authorisation.api.AuthorisationApi;
 import uk.gov.hmcts.darts.common.entity.AutomatedTaskEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
@@ -49,9 +48,6 @@ class AdminAutomatedTasksServiceImplTest {
     @Mock
     private AuditApi auditApi;
 
-    @Mock
-    private AuthorisationApi authorisationApi;
-
     private AdminAutomatedTaskService adminAutomatedTaskService;
 
     @BeforeEach
@@ -62,8 +58,7 @@ class AdminAutomatedTasksServiceImplTest {
             manualTaskService,
             automatedTaskRunner,
             currentTimeHelper,
-            auditApi,
-            authorisationApi
+            auditApi
         );
     }
 

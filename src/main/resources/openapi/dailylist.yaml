@@ -115,6 +115,16 @@ paths:
                 type: "COMMON_100"
                 title: "Provided courthouse does not exist"
                 status: 400
+        '409':
+          description: Daily list already processing
+          content:
+            application/json+problem:
+              schema:
+                $ref: './problem.yaml'
+              example:
+                type: "DAILYLIST_106"
+                title: "Daily list already processing"
+                status: 400
         '500':
           description: Internal Server Error
           content:
@@ -476,7 +486,8 @@ components:
         - "DAILYLIST_103"
         - "DAILYLIST_104"
         - "DAILYLIST_105"
-      x-enum-varnames: [ FAILED_TO_PROCESS_DAILYLIST, XML_OR_JSON_NEEDS_TO_BE_PROVIDED, XML_EXTRA_PARAMETERS_MISSING, DAILY_LIST_NOT_FOUND, INTERNAL_ERROR, INVALID_SOURCE_SYSTEM ]
+        - "DAILYLIST_106"
+      x-enum-varnames: [ FAILED_TO_PROCESS_DAILYLIST, XML_OR_JSON_NEEDS_TO_BE_PROVIDED, XML_EXTRA_PARAMETERS_MISSING, DAILY_LIST_NOT_FOUND, INTERNAL_ERROR, INVALID_SOURCE_SYSTEM, DAILY_LIST_ALREADY_PROCESSING ]
 
     DailyListTitleErrors:
       type: string
@@ -487,5 +498,6 @@ components:
         - "The provided Daily List Id could not be found."
         - "An Internal Server Error has occurred."
         - "Invalid source system. Should be CPP or XHB."
-      x-enum-varnames: [ FAILED_TO_PROCESS_DAILYLIST, XML_OR_JSON_NEEDS_TO_BE_PROVIDED, XML_EXTRA_PARAMETERS_MISSING, DAILY_LIST_NOT_FOUND, INTERNAL_ERROR, INVALID_SOURCE_SYSTEM ]
+        - "Daily list already processing"
+      x-enum-varnames: [ FAILED_TO_PROCESS_DAILYLIST, XML_OR_JSON_NEEDS_TO_BE_PROVIDED, XML_EXTRA_PARAMETERS_MISSING, DAILY_LIST_NOT_FOUND, INTERNAL_ERROR, INVALID_SOURCE_SYSTEM, DAILY_LIST_ALREADY_PROCESSING ]
 

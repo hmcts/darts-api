@@ -11,8 +11,9 @@ import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
 
-import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 
 @Component
@@ -27,7 +28,7 @@ public class SystemUserHelper {
     public static final String DAILYLIST_PROCESSOR = "dailylist-processor";
     private final UserAccountRepository userAccountRepository;
     private Map<String, String> systemUserGuidMap;
-    private Map<String, UserAccountEntity> systemUserNameToEntityMap = new HashMap<>();
+    private ConcurrentMap<String, UserAccountEntity> systemUserNameToEntityMap = new ConcurrentHashMap<>();
 
     public String findSystemUserGuid(String configKey) {
         return systemUserGuidMap.get(configKey);

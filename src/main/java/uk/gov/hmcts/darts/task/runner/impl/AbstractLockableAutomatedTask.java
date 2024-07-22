@@ -1,11 +1,8 @@
 package uk.gov.hmcts.darts.task.runner.impl;
 
 import lombok.extern.slf4j.Slf4j;
-import net.javacrumbs.shedlock.core.DefaultLockingTaskExecutor;
 import net.javacrumbs.shedlock.core.LockAssert;
 import net.javacrumbs.shedlock.core.LockConfiguration;
-import net.javacrumbs.shedlock.core.LockProvider;
-import net.javacrumbs.shedlock.core.LockingTaskExecutor;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
@@ -14,6 +11,7 @@ import uk.gov.hmcts.darts.common.repository.AutomatedTaskRepository;
 import uk.gov.hmcts.darts.log.api.LogApi;
 import uk.gov.hmcts.darts.task.config.AutomatedTaskConfigurationProperties;
 import uk.gov.hmcts.darts.task.runner.AutomatedTask;
+import uk.gov.hmcts.darts.task.service.LockService;
 import uk.gov.hmcts.darts.task.status.AutomatedTaskStatus;
 
 import java.time.Duration;
@@ -37,9 +35,6 @@ import static uk.gov.hmcts.darts.task.status.AutomatedTaskStatus.SKIPPED;
 @Slf4j
 public abstract class AbstractLockableAutomatedTask implements AutomatedTask {
 
-    public static final int DEFAULT_LOCK_AT_MOST_SECONDS = 600;
-    public static final int DEFAULT_LOCK_AT_LEAST_SECONDS = 20;
-
     private AutomatedTaskStatus automatedTaskStatus = NOT_STARTED;
 
     private String lastCronExpression;
@@ -48,11 +43,11 @@ public abstract class AbstractLockableAutomatedTask implements AutomatedTask {
 
     private Instant start = Instant.now();
 
-    private final LockingTaskExecutor lockingTaskExecutor;
-
     private final AutomatedTaskConfigurationProperties automatedTaskConfigurationProperties;
 
     private final LogApi logApi;
+
+    private final LockService lockService;
 
     private ThreadLocal<UUID> executionId;
 
@@ -62,12 +57,13 @@ public abstract class AbstractLockableAutomatedTask implements AutomatedTask {
         this.isManualTask = true;
     }
 
-    protected AbstractLockableAutomatedTask(AutomatedTaskRepository automatedTaskRepository, LockProvider lockProvider,
-                                            AutomatedTaskConfigurationProperties automatedTaskConfigurationProperties, LogApi logApi) {
+    protected AbstractLockableAutomatedTask(AutomatedTaskRepository automatedTaskRepository,
+                                            AutomatedTaskConfigurationProperties automatedTaskConfigurationProperties,
+                                            LogApi logApi, LockService lockService) {
         this.automatedTaskRepository = automatedTaskRepository;
-        this.lockingTaskExecutor = new DefaultLockingTaskExecutor(lockProvider);
         this.automatedTaskConfigurationProperties = automatedTaskConfigurationProperties;
         this.logApi = logApi;
+        this.lockService = lockService;
     }
 
     private void setupUserAuthentication() {
@@ -94,7 +90,7 @@ public abstract class AbstractLockableAutomatedTask implements AutomatedTask {
                 if (isManualTask || getLastCronExpression().equals(dbCronExpression)) {
                     if (TRUE.equals(automatedTask.getTaskEnabled())) {
                         logApi.taskStarted(executionId.get(), this.getTaskName());
-                        lockingTaskExecutor.executeWithLock(new LockedTask(), getLockConfiguration());
+                        lockService.getLockingTaskExecutor().executeWithLock(new LockedTask(), getLockConfiguration());
                     } else {
                         setAutomatedTaskStatus(SKIPPED);
                         log.warn("Task: {} not running now as it has been disabled", getTaskName());
@@ -121,16 +117,6 @@ public abstract class AbstractLockableAutomatedTask implements AutomatedTask {
     }
 
     @Override
-    public LockConfiguration getLockConfiguration() {
-        return new LockConfiguration(
-            Instant.now(),
-            getTaskName(),
-            getLockAtMostFor(),
-            getLockAtLeastFor()
-        );
-    }
-
-    @Override
     public String getLastCronExpression() {
         return lastCronExpression;
     }
@@ -138,14 +124,6 @@ public abstract class AbstractLockableAutomatedTask implements AutomatedTask {
     @Override
     public void setLastCronExpression(@NotNull String cronExpression) {
         this.lastCronExpression = cronExpression;
-    }
-
-    protected Duration getLockAtMostFor() {
-        return Duration.ofSeconds(DEFAULT_LOCK_AT_MOST_SECONDS);
-    }
-
-    protected static Duration getLockAtLeastFor() {
-        return Duration.ofSeconds(DEFAULT_LOCK_AT_LEAST_SECONDS);
     }
 
     protected void setAutomatedTaskStatus(AutomatedTaskStatus automatedTaskStatus) {
@@ -186,6 +164,15 @@ public abstract class AbstractLockableAutomatedTask implements AutomatedTask {
         }
 
         return batchSize;
+    }
+
+    private LockConfiguration getLockConfiguration() {
+        return new LockConfiguration(
+            Instant.now(),
+            getTaskName(),
+            lockService.getLockAtMostFor(),
+            lockService.getLockAtLeastFor()
+        );
     }
 
     private void preRunTask() {

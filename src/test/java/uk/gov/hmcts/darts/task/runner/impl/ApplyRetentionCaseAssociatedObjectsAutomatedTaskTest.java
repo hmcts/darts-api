@@ -1,6 +1,5 @@
 package uk.gov.hmcts.darts.task.runner.impl;
 
-import net.javacrumbs.shedlock.core.LockProvider;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
@@ -8,16 +7,17 @@ import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.darts.log.api.LogApi;
 import uk.gov.hmcts.darts.retention.service.ApplyRetentionCaseAssociatedObjectsProcessor;
+import uk.gov.hmcts.darts.task.service.LockService;
 
 @ExtendWith(MockitoExtension.class)
 class ApplyRetentionCaseAssociatedObjectsAutomatedTaskTest {
 
     @Mock
-    private LockProvider lockProvider;
-    @Mock
     private ApplyRetentionCaseAssociatedObjectsProcessor applyRetentionCaseAssociatedObjectsProcessor;
     @Mock
     private LogApi logApi;
+    @Mock
+    private LockService lockService;
 
 
     @Test
@@ -25,10 +25,10 @@ class ApplyRetentionCaseAssociatedObjectsAutomatedTaskTest {
         ApplyRetentionCaseAssociatedObjectsAutomatedTask task =
             new ApplyRetentionCaseAssociatedObjectsAutomatedTask(
                 null,
-                lockProvider,
                 null,
                 applyRetentionCaseAssociatedObjectsProcessor,
-                logApi
+                logApi,
+                lockService
             );
 
         task.runTask();

@@ -4,7 +4,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.darts.audit.api.AuditApi;
-import uk.gov.hmcts.darts.authorisation.api.AuthorisationApi;
 import uk.gov.hmcts.darts.common.entity.AutomatedTaskEntity;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
@@ -36,7 +35,6 @@ public class AdminAutomatedTasksServiceImpl implements AdminAutomatedTaskService
     private final AutomatedTaskRunner automatedTaskRunner;
     private final CurrentTimeHelper currentTimeHelper;
     private final AuditApi auditApi;
-    private final AuthorisationApi authorisationApi;
 
     @Override
     public List<AutomatedTaskSummary> getAllAutomatedTasks() {
@@ -92,7 +90,7 @@ public class AdminAutomatedTasksServiceImpl implements AdminAutomatedTaskService
         return mapper.mapEntityToDetailedAutomatedTask(updatedTask);
     }
 
-    private boolean isLocked(AutomatedTaskEntity automatedTask) {
+    public boolean isLocked(AutomatedTaskEntity automatedTask) {
         var lockedUntil = automatedTaskRepository.findLockedUntilForTask(automatedTask.getTaskName());
         return !lockedUntil.isEmpty() && isInFuture(lockedUntil);
     }
