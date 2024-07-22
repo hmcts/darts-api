@@ -1,7 +1,6 @@
 package uk.gov.hmcts.darts.task.runner.impl;
 
 import net.javacrumbs.shedlock.core.LockProvider;
-import org.springframework.beans.factory.annotation.Value;
 import uk.gov.hmcts.darts.arm.service.InboundTranscriptionAndAnnotationDeleterProcessor;
 import uk.gov.hmcts.darts.common.repository.AutomatedTaskRepository;
 import uk.gov.hmcts.darts.log.api.LogApi;

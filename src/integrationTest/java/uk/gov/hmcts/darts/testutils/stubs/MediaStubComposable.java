@@ -29,6 +29,7 @@ public class MediaStubComposable {
                                          CourtroomStubComposable courtroomStub,
                                          String courthouseName, String courtroomName, OffsetDateTime startTime, OffsetDateTime endTime, int channel,
                                          String mediaType) {
+
         CourtroomEntity courtroom = courtroomStub
             .createCourtroomUnlessExists(courthouseStubComposable, courthouseName, courtroomName, userAccountRepository.getReferenceById(0));
         return mediaRepository.saveAndFlush(createMediaWith(courtroom, startTime, endTime, channel, mediaType));
@@ -55,7 +56,7 @@ public class MediaStubComposable {
                                          CourtroomStubComposable courtroomStub,
                                          String courthouseName, String courtroomName, OffsetDateTime startTime, OffsetDateTime endTime, int channel) {
         return createMediaEntity(courthouseStubComposable, courtroomStub,
-                                 courtroomName,courthouseName, startTime, endTime, channel, "mp2");
+                                 courthouseName, courtroomName, startTime, endTime, channel, "mp2");
     }
 
 

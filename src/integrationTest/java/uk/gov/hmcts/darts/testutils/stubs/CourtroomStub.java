@@ -19,8 +19,4 @@ public class CourtroomStub {
         return courtroomStubComposable.createCourtroomUnlessExists(courthouse, courtroomName, userAccount);
     }
 
-    public CourtroomEntity createCourtroomUnlessExists(CourthouseEntity courthouse, String courtroomName, UserAccountEntity userAccount) {
-        return retrieveCoreObjectService.retrieveOrCreateCourtroom(courthouse, courtroomName, userAccount);
-    }
-
 }
