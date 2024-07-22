@@ -4,11 +4,13 @@ import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.javacrumbs.shedlock.core.LockProvider;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.darts.arm.component.AutomatedTaskProcessorFactory;
 import uk.gov.hmcts.darts.arm.service.ArmRetentionEventDateProcessor;
 import uk.gov.hmcts.darts.arm.service.BatchCleanupArmResponseFilesService;
 import uk.gov.hmcts.darts.arm.service.CleanupArmResponseFilesService;
+import uk.gov.hmcts.darts.arm.service.InboundTranscriptionAndAnnotationDeleterProcessor;
 import uk.gov.hmcts.darts.audio.deleter.impl.inbound.ExternalInboundDataStoreDeleter;
 import uk.gov.hmcts.darts.audio.deleter.impl.outbound.ExternalOutboundDataStoreDeleter;
 import uk.gov.hmcts.darts.audio.deleter.impl.unstructured.ExternalUnstructuredDataStoreDeleter;
@@ -36,6 +38,7 @@ import uk.gov.hmcts.darts.task.runner.impl.CloseUnfinishedTranscriptionsAutomate
 import uk.gov.hmcts.darts.task.runner.impl.DailyListAutomatedTask;
 import uk.gov.hmcts.darts.task.runner.impl.ExternalDataStoreDeleterAutomatedTask;
 import uk.gov.hmcts.darts.task.runner.impl.GenerateCaseDocumentAutomatedTask;
+import uk.gov.hmcts.darts.task.runner.impl.InboundAnnotationTranscriptionDeleterAutomatedTask;
 import uk.gov.hmcts.darts.task.runner.impl.InboundAudioDeleterAutomatedTask;
 import uk.gov.hmcts.darts.task.runner.impl.InboundToUnstructuredAutomatedTask;
 import uk.gov.hmcts.darts.task.runner.impl.OutboundAudioDeleterAutomatedTask;
@@ -75,6 +78,8 @@ public class ManualTaskService {
     private final LockProvider lockProvider;
     private final LogApi logApi;
 
+    private InboundTranscriptionAndAnnotationDeleterProcessor armDeletionProcessor;
+
     private final List<AbstractLockableAutomatedTask> automatedTasks = new ArrayList<>();
 
     @PostConstruct
@@ -97,6 +102,7 @@ public class ManualTaskService {
         addBatchCleanupArmResponseFilesTaskRegistrar();
         addGenerateCaseDocumentToTaskRegistrar();
         addEventHandler();
+        addInboundTranscriptionAndAnnotationDeleterRegistrar();
     }
 
     public List<AbstractLockableAutomatedTask> getAutomatedTasks() {
@@ -311,6 +317,18 @@ public class ManualTaskService {
             lockProvider,
             automatedTaskConfigurationProperties,
             automatedTaskProcessorFactory,
+            logApi
+        );
+        manualTask.setManualTask();
+        automatedTasks.add(manualTask);
+    }
+
+    private void addInboundTranscriptionAndAnnotationDeleterRegistrar() {
+        var manualTask = new InboundAnnotationTranscriptionDeleterAutomatedTask(
+            automatedTaskRepository,
+            lockProvider,
+            automatedTaskConfigurationProperties,
+            armDeletionProcessor,
             logApi
         );
         manualTask.setManualTask();

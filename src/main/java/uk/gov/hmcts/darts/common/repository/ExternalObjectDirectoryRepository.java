@@ -5,6 +5,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 import uk.gov.hmcts.darts.common.entity.AnnotationDocumentEntity;
 import uk.gov.hmcts.darts.common.entity.CaseDocumentEntity;
 import uk.gov.hmcts.darts.common.entity.ExternalLocationTypeEntity;
@@ -366,6 +367,29 @@ public interface ExternalObjectDirectoryRepository extends JpaRepository<Externa
             """
     )
     List<ExternalObjectDirectoryEntity> findAllByStatusAndManifestFile(ObjectRecordStatusEntity status, String manifestFile);
+
+    @Query(
+        value = """
+         SELECT od.eod_id FROM darts.external_object_directory od WHERE od.med_id IN
+            (
+                SELECT med_id FROM darts.external_object_directory
+                WHERE elt_id=1 AND ors_id=2
+            ) AND elt_id=3 AND ors_id=2 
+            AND (floor (extract (epoch from (current_timestamp::timestamp - last_modified_ts::timestamp)) / 60 / 60) >= :hoursInArm)
+        """, nativeQuery = true
+    )
+    List<Integer> findAllInboundArmMediaExceedingHours(Pageable resultLimit, Integer hoursInArm);
+
+    @Modifying
+    @Transactional
+    @Query(
+        value = """
+        UPDATE ExternalObjectDirectoryEntity eod
+        SET status=:status, lastModifiedBy = :userToUpdate, lastModifiedDateTime=current_timestamp
+        WHERE id in :externalObjectDirectoryIdLst
+        """
+    )
+    void updateStatusAndUserOfObjectDirectory(List<Integer> externalObjectDirectoryIdLst, ObjectRecordStatusEntity status, UserAccountEntity userToUpdate);
 
     List<ExternalObjectDirectoryEntity> findByExternalLocationTypeAndUpdateRetention(ExternalLocationTypeEntity externalLocationTypeEntity,
                                                                                      boolean updateRetention);
