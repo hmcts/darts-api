@@ -34,12 +34,12 @@ public class InboundAnnotationTranscriptionDeleterProcessorImpl implements Inbou
     @Value("${darts.data-management.retention-period.inbound.arm-minimum}")
     int hoursInArm;
 
-    public List<Integer> processDeletionIfAfterHours(int batch) {
-        return processDeletionIfAfterHours(batch, hoursInArm);
+    public List<Integer> processDeletionIfPreceding(int batch) {
+        return processDeletionIfPreceding(batch, hoursInArm);
     }
 
     @Override
-    public List<Integer> processDeletionIfAfterHours(int batch, int hourThreshold) {
+    public List<Integer> processDeletionIfPreceding(int batch, int hourBeforeCurrentDate) {
 
         OffsetDateTime lastModifiedBefore = currentTimeHelper.currentOffsetDateTime().minus(
             hoursInArm,
@@ -58,10 +58,5 @@ public class InboundAnnotationTranscriptionDeleterProcessorImpl implements Inbou
         log.debug("Records have been marked as deleted");
 
         return armRecordToBeMarkedForDeletion;
-    }
-
-    @Override
-    public int getHoursBeforeOrEqualLastModified() {
-        return hoursInArm;
     }
 }

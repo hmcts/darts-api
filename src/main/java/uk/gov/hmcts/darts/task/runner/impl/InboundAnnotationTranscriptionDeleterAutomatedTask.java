@@ -30,6 +30,6 @@ public class InboundAnnotationTranscriptionDeleterAutomatedTask extends Abstract
     @Override
     protected void runTask() {
         Integer batchSize = getAutomatedTaskBatchSize(taskName);
-        armDeletionProcessor.processDeletionIfAfterHours(batchSize);
+        armDeletionProcessor.processDeletionIfPreceding(batchSize);
     }
 }
