@@ -104,7 +104,9 @@ public class IntegrationBase  {
 
     private Map<String, String> sequencesStartFrom = Map.of(
         "usr_seq", "2",
-        "grp_seq", "5"
+        "grp_seq", "5",
+        "aut_seq", "18",
+        "rpt_seq", "10"
 //        "evh_seq", "606"
     );
 
@@ -136,6 +138,7 @@ public class IntegrationBase  {
 
 
         for (Object seqName : result) {
+            //TODO swap and add if else
             if (!excludedSequences.contains(seqName.toString())) {
                 em.createNativeQuery("ALTER SEQUENCE darts." + seqName + " RESTART").executeUpdate();
             }
@@ -244,6 +247,8 @@ public class IntegrationBase  {
 
     @BeforeEach
     void clearDb() {
+        log.info("wiremock running on port: {}", wiremockPort);
+
         StopWatch watch = new StopWatch("Clear DB");
         watch.start("reset sequences");
         resetSequences();

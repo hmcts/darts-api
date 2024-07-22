@@ -99,6 +99,8 @@ logging:
     org:
       springframework:
         jdbc.datasource: DEBUG
+#        logs 'Releasing JDBC Connection'
+        jdbc.datasource.DataSourceTransactionManager: DEBUG
         cloud:
           contract:
             wiremock: TRACE

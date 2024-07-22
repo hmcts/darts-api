@@ -42,6 +42,7 @@ class SecurityGroupControllerIntTest extends IntegrationBase {
 
     @AfterEach
     void deleteUser() {
+        //TODO remove
         dartsDatabase.addToUserAccountTrash(INTEGRATION_TEST_USER_EMAIL);
         dartsDatabase.addToUserAccountTrash(SEPARATE_TEST_USER_EMAIL);
     }
@@ -105,6 +106,15 @@ class SecurityGroupControllerIntTest extends IntegrationBase {
 
         String expectedJson = """
                 [
+                    {
+                     "user_ids":[],
+                     "id":-7,
+                     "security_role_id":1,
+                     "global_access":true,
+                     "display_state":true,
+                     "courthouse_ids":[],
+                     "name":"Test Judge Global"
+                   },
                    {
                      "user_ids":[],
                      "id":-6,

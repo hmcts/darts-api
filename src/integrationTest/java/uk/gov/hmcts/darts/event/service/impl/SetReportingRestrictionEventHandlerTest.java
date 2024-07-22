@@ -1,5 +1,6 @@
 package uk.gov.hmcts.darts.event.service.impl;
 
+import com.github.tomakehurst.wiremock.client.WireMock;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -19,6 +20,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.when;
 
+@Slf4j
 class SetReportingRestrictionEventHandlerTest extends HandlerTestData {
     public static final String TEST_REPORTING_RESTRICTION = "Reporting Restriction Test";
 
@@ -43,6 +45,9 @@ class SetReportingRestrictionEventHandlerTest extends HandlerTestData {
 
     @Test
     void givenSetReportingRestrictionEventReceivedAndCourtCaseAndHearingDoesNotExist_thenNotifyDarUpdate() {
+        var result = WireMock.listAllStubMappings();
+        log.info("mappings: {}", result.getMappings());
+
         dartsDatabase.createCase(SOME_COURTHOUSE, SOME_CASE_NUMBER);
 
         eventDispatcher.receive(someMinimalDartsEvent()

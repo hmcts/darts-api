@@ -67,6 +67,7 @@ class RetentionControllerCreateRetentionPolicyTypeIntTest extends IntegrationBas
 
     @AfterEach
     void tearDown() {
+        //TODO is this still needed?
         clearCreatedRetentionPolicyTypes();
     }
 

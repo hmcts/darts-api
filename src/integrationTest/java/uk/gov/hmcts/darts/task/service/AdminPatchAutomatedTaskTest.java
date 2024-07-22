@@ -38,7 +38,7 @@ class AdminPatchAutomatedTaskTest extends IntegrationBase {
                 patch(ENDPOINT + "/1")
                     .contentType(APPLICATION_JSON_VALUE)
                     .content("""
-                                 { "is_active": false }
+                                 { "is_active": true }
                                  """))
             .andExpect(status().isOk())
             .andReturn();
