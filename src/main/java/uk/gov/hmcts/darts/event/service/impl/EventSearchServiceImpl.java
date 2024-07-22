@@ -21,6 +21,7 @@ import static uk.gov.hmcts.darts.event.exception.EventError.TOO_MANY_SEARCH_RESU
 @Service
 @Slf4j
 @RequiredArgsConstructor
+@SuppressWarnings({"squid:S1168"})
 public class EventSearchServiceImpl implements EventSearchService {
 
     private final EventRepository eventRepository;
