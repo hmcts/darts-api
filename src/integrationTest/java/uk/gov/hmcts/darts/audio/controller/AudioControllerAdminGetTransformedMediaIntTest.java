@@ -138,6 +138,7 @@ class AudioControllerAdminGetTransformedMediaIntTest extends IntegrationBase {
     void testSearchForTransformedMediaWithDateFromAndDateToAndReturnNoResults() throws Exception {
         List<TransformedMediaEntity> transformedMediaEntityList = transformedMediaStub.generateTransformedMediaEntities(4);
 
+        //TODO replace user identity mock with this
         superAdminUserStub.givenUserIsAuthorised(userIdentity);
 
         SearchTransformedMediaRequest request = new SearchTransformedMediaRequest();

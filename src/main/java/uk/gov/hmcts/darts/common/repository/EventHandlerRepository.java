@@ -29,4 +29,10 @@ public interface EventHandlerRepository extends RevisionRepository<EventHandlerE
         AND eh.active = true
         """)
     List<EventHandlerEntity> findActiveMappingsForTypeAndSubtype(String type, String subType);
+
+    @Query(value = """
+        SELECT * FROM darts.event_handler eh
+        WHERE eh.created_by != 0
+        """, nativeQuery = true)
+    List<EventHandlerEntity> findByCreatedByIsNot0();
 }

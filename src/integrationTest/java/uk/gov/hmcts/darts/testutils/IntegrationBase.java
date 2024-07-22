@@ -5,6 +5,7 @@ import com.github.tomakehurst.wiremock.WireMockServer;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
 import jakarta.persistence.Query;
+import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
@@ -19,7 +20,9 @@ import org.springframework.security.oauth2.server.resource.authentication.JwtAut
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
+import org.springframework.util.StopWatch;
 import org.testcontainers.containers.GenericContainer;
+import uk.gov.hmcts.darts.common.repository.EventHandlerRepository;
 import uk.gov.hmcts.darts.common.repository.RetentionPolicyTypeRepository;
 import uk.gov.hmcts.darts.common.repository.SecurityGroupRepository;
 import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
@@ -61,11 +64,15 @@ public class IntegrationBase  {
     @Autowired
     EntityManagerFactory entityManagerFactoryNonStatic;
     @Autowired
+    EntityManager entityManager;
+    @Autowired
     UserAccountRepository userAccountRepository;
     @Autowired
     SecurityGroupRepository securityGroupRepository;
     @Autowired
     RetentionPolicyTypeRepository retentionPolicyTypeRepository;
+    @Autowired
+    EventHandlerRepository eventHandlerRepository;
 
     private static final List<String> excludedTables = List.of(
         "audit_activity",
@@ -91,30 +98,32 @@ public class IntegrationBase  {
     );
 
     private List excludedSequences = List.of(
-        "revinfo_seq"
+        "revinfo_seq",
+        "evh_seq"
     );
 
     private Map<String, String> sequencesStartFrom = Map.of(
         "usr_seq", "2",
         "grp_seq", "5"
+//        "evh_seq", "606"
     );
 
-    public void truncateTables () {
-        EntityManager em = entityManagerFactoryNonStatic.createEntityManager();
-//
-        em.getTransaction().begin();
-        final Query query = em
-            .createNativeQuery("SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = 'darts'");
-        final List result = query.getResultList();
-        em.createNativeQuery("SET REFERENTIAL_INTEGRITY FALSE").executeUpdate();
-        for (Object tableName : result) {
-            if (!excludedTables.contains(tableName.toString())) {
-                em.createNativeQuery("TRUNCATE TABLE darts." + tableName + " RESTART IDENTITY").executeUpdate();
-            }
-        }
-        em.createNativeQuery("SET REFERENTIAL_INTEGRITY TRUE").executeUpdate();
-        em.getTransaction().commit();
-    }
+//    public void truncateTables () {
+//        EntityManager em = entityManagerFactoryNonStatic.createEntityManager();
+//        em.getTransaction().begin();
+//        final Query query = em
+//            .createNativeQuery("SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = 'darts'");
+//        final List result = query.getResultList();
+//        em.createNativeQuery("SET REFERENTIAL_INTEGRITY FALSE").executeUpdate();
+//        for (Object tableName : result) {
+//            if (!excludedTables.contains(tableName.toString())) {
+//                em.createNativeQuery("TRUNCATE TABLE darts." + tableName + " RESTART IDENTITY").executeUpdate();
+//            }
+//        }
+//        em.createNativeQuery("SET REFERENTIAL_INTEGRITY TRUE").executeUpdate();
+//        em.getTransaction().commit();
+//        em.close();
+//    }
 
     public void resetSequences () {
         EntityManager em = entityManagerFactoryNonStatic.createEntityManager();
@@ -135,8 +144,10 @@ public class IntegrationBase  {
             }
         }
         em.getTransaction().commit();
+        em.close();
     }
 
+    @Transactional
     public void resetUserAccountTable () {
 //        EntityManager em = entityManagerFactoryNonStatic.createEntityManager();
 //        em.getTransaction().begin();
@@ -150,8 +161,8 @@ public class IntegrationBase  {
 //        em.createNativeQuery("SELECT usr_id, grp_id from darts.security_group_user_account_ae").getResultList();
 //
 //        em.getTransaction().commit();
-
-
+//        EntityManager em = entityManagerFactoryNonStatic.createEntityManager();
+//        em.getTransaction().begin();
 
         retentionPolicyTypeRepository.deleteAll(
             retentionPolicyTypeRepository.findByPolicyNameNotIn(List.of(
@@ -169,8 +180,13 @@ public class IntegrationBase  {
 //TODO leave some logs in trace?
         log.info("retention policy types: {}", retentionPolicyTypeRepository.findAll());
 
+        eventHandlerRepository.deleteAll(
+            eventHandlerRepository.findByCreatedByIsNot0()
+        );
+
 //        em.createNativeQuery("SELECT usr_id, grp_id from darts.security_group_user_account_ae").getResultList();
 
+        //TODO change to createby is not 0
         log.info("users before delete: {}", userAccountRepository.findAll());
         userAccountRepository.deleteAll(
             userAccountRepository.findByUserNameNotIn(List.of("darts_global_test_user", "dartstestuser", "Cpp", "Xhibit", "system", "system_housekeeping"))
@@ -183,10 +199,13 @@ public class IntegrationBase  {
         securityGroupRepository.deleteAll(
             securityGroupRepository.findByGroupNameNotIn(PREDEFINED_SECURITY_GROUPS)
         );
+
+//        em.getTransaction().commit();
+
+
     }
 
-//    @Autowired
-//    EntityManager em;
+
     @Autowired
     protected WireMockServer wireMockServer;
 
@@ -225,11 +244,35 @@ public class IntegrationBase  {
 
     @BeforeEach
     void clearDb() {
+        StopWatch watch = new StopWatch("Clear DB");
+        watch.start("reset sequences");
         resetSequences();
+        watch.stop();
 //        truncateTables();
+
+        watch.start("clear database");
         dartsDatabase.clearDatabaseInThisOrder();
+        watch.stop();
+
+        watch.start("reset user account");
         resetUserAccountTable();
+        watch.stop();
+
+
+        watch.start("reset wiremock");
         wireMockServer.resetAll();
+        watch.stop();
+
+        log.info("Clear DB took total: " + watch.getTotalTimeSeconds() + " seconds");
+        // prettyPrint() return a string with a table describing all tasks performed. For custom reporting, call getTaskInfo() and use the
+        // task info directly.
+        log.info("1. prettyPrint Result: " + watch.prettyPrint());
+        // Return a short description of the total running time.
+        log.info("2. Short Summary: " + watch.shortSummary());
+        // Return the number of tasks timed.
+        log.info("3. Total Task Count: " + watch.getTaskCount());
+        // Return the name of this task.
+        log.info("4. Last Task Name: " + watch.getLastTaskInfo().getTaskName());
     }
 
     @AfterEach
