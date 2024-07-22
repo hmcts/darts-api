@@ -19,6 +19,7 @@ import uk.gov.hmcts.darts.common.entity.TranscriptionDocumentEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum;
 import uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum;
+import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
 import uk.gov.hmcts.darts.common.helper.SystemUserHelper;
 import uk.gov.hmcts.darts.common.repository.ExternalLocationTypeRepository;
 import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
@@ -28,6 +29,7 @@ import uk.gov.hmcts.darts.testutils.DatabaseDateSetter;
 
 import java.lang.reflect.InvocationTargetException;
 import java.time.OffsetDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -35,6 +37,7 @@ import java.util.function.Consumer;
 
 import static uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum.ARM;
 import static uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum.INBOUND;
+import static uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum.UNSTRUCTURED;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.STORED;
 import static uk.gov.hmcts.darts.common.helper.SystemUserHelper.HOUSEKEEPING;
 
@@ -53,6 +56,7 @@ public class ExternalObjectDirectoryStub {
     private final EntityManager em;
     private final DatabaseDateSetter dateConfigurer;
     private final SystemUserHelper systemUserHelper;
+    private final CurrentTimeHelper currentTimeHelper;
 
     public ExternalObjectDirectoryEntity createAndSaveEod(MediaEntity media,
                                                           ObjectRecordStatusEnum objectRecordStatusEnum,
@@ -261,16 +265,42 @@ public class ExternalObjectDirectoryStub {
         return entityListResult;
     }
 
+    @Transactional
+    public List<ExternalObjectDirectoryEntity> generateWithStatusAndUnstructuredLocation(ObjectRecordStatusEnum objectRecordStatusEnum,
+                                                                                    int numberOfObjectDirectory) {
+        List<ExternalObjectDirectoryEntity> entityListResult = new ArrayList<>();
+
+        for (int i = 0; i < numberOfObjectDirectory; i++) {
+            MediaEntity media = mediaStub.createAndSaveMedia(courthouseStubComposable, courtroomStubComposable);
+            ExternalObjectDirectoryEntity externalObjectDirectory = createAndSaveEod(media, objectRecordStatusEnum, UNSTRUCTURED);
+            entityListResult.add(externalObjectDirectory);
+        }
+
+        return entityListResult;
+    }
+
     @Transactional(isolation = Isolation.READ_UNCOMMITTED)
     public List<ExternalObjectDirectoryEntity> generateWithStatusAndMediaAndArmLocation(List<ExternalObjectDirectoryEntity> externalObjectDirectoryEntities,
                                                                                          int hoursBehindCurrentTime)
+        throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
+        OffsetDateTime lastModifiedBefore = currentTimeHelper.currentOffsetDateTime().minus(
+            hoursBehindCurrentTime,
+            ChronoUnit.HOURS
+        );
+
+        return generateWithStatusAndMediaAndArmLocation(externalObjectDirectoryEntities, lastModifiedBefore);
+    }
+
+    @Transactional(isolation = Isolation.READ_UNCOMMITTED)
+    public List<ExternalObjectDirectoryEntity> generateWithStatusAndMediaAndArmLocation(List<ExternalObjectDirectoryEntity> externalObjectDirectoryEntities,
+                                                                                        OffsetDateTime lastModifiedDate)
         throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
         List<ExternalObjectDirectoryEntity> entityListResult = new ArrayList<>();
 
         for (ExternalObjectDirectoryEntity externalObjectDirectory : externalObjectDirectoryEntities) {
             ExternalObjectDirectoryEntity newExternalObjectDirectory = createAndSaveEod(externalObjectDirectory.getMedia(), STORED, ARM, OffsetDateTime.now());
 
-            dateConfigurer.setLastModifiedDate(newExternalObjectDirectory, OffsetDateTime.now().minusHours(hoursBehindCurrentTime));
+            dateConfigurer.setLastModifiedDate(newExternalObjectDirectory, lastModifiedDate);
 
             newExternalObjectDirectory = eodRepository.getReferenceById(newExternalObjectDirectory.getId());
             entityListResult.add(newExternalObjectDirectory);

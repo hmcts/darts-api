@@ -18,6 +18,7 @@ import uk.gov.hmcts.darts.arm.service.ArmRetentionEventDateProcessor;
 import uk.gov.hmcts.darts.arm.service.BatchCleanupArmResponseFilesService;
 import uk.gov.hmcts.darts.arm.service.CleanupArmResponseFilesService;
 import uk.gov.hmcts.darts.arm.service.InboundAnnotationTranscriptionDeleterProcessor;
+import uk.gov.hmcts.darts.arm.service.UnstructuredTranscriptionAndAnnotationDeleterProcessor;
 import uk.gov.hmcts.darts.audio.deleter.impl.inbound.ExternalInboundDataStoreDeleter;
 import uk.gov.hmcts.darts.audio.deleter.impl.outbound.ExternalOutboundDataStoreDeleter;
 import uk.gov.hmcts.darts.audio.deleter.impl.unstructured.ExternalUnstructuredDataStoreDeleter;
@@ -56,6 +57,7 @@ import uk.gov.hmcts.darts.task.runner.impl.InboundToUnstructuredAutomatedTask;
 import uk.gov.hmcts.darts.task.runner.impl.OutboundAudioDeleterAutomatedTask;
 import uk.gov.hmcts.darts.task.runner.impl.ProcessArmResponseFilesAutomatedTask;
 import uk.gov.hmcts.darts.task.runner.impl.ProcessDailyListAutomatedTask;
+import uk.gov.hmcts.darts.task.runner.impl.UnstructuredAnnotationTranscriptionDeleterAutomatedTask;
 import uk.gov.hmcts.darts.task.runner.impl.UnstructuredAudioDeleterAutomatedTask;
 import uk.gov.hmcts.darts.task.runner.impl.UnstructuredToArmAutomatedTask;
 import uk.gov.hmcts.darts.task.service.AutomatedTaskService;
@@ -146,7 +148,10 @@ public class AutomatedTaskServiceImpl implements AutomatedTaskService {
     private final DailyListService dailyListService;
 
     private final ArmRetentionEventDateProcessor armRetentionEventDateProcessor;
+
     private final InboundAnnotationTranscriptionDeleterProcessor inboundTranscriptionAndAnnotationDeleterProcessor;
+
+    private final UnstructuredTranscriptionAndAnnotationDeleterProcessor unstructuredTranscriptionAndAnnotationDeleterProcessor;
 
     private final LogApi logApi;
 
@@ -172,6 +177,7 @@ public class AutomatedTaskServiceImpl implements AutomatedTaskService {
         addGenerateCaseDocumentToTaskRegistrar(taskRegistrar);
         addCleanEventToTaskRegistrar(taskRegistrar);
         addInboundTranscriptionAndAnnotationDeleterToTaskRegistrar(taskRegistrar);
+        addUnstructuredTranscriptionAndAnnotationDeleterToTaskRegistrar(taskRegistrar);
     }
 
     @Override
@@ -255,6 +261,8 @@ public class AutomatedTaskServiceImpl implements AutomatedTaskService {
             case GENERATE_CASE_DOCUMENT_TASK_NAME -> rescheduleGenerateCaseDocumentAutomatedTask();
             case EVENT_CLEANUP_CURRENT_TASK -> rescheduleEventCleanCurrentAutomatedTask();
             case INBOUND_TRANSCRIPTION_ANNOTATION_DELETER_TASK_NAME -> rescheduleInboundTranscriptionAndAnnotationDeleterAutomatedTask();
+            case UNSTRUCTURED_TRANSCRIPTION_ANNOTATION_DELETER_TASK_NAME -> rescheduleUnstructuredTranscriptionAndAnnotationDeleterAutomatedTask();
+
             default -> throw new DartsApiException(FAILED_TO_FIND_AUTOMATED_TASK);
         }
     }
@@ -561,6 +569,17 @@ public class AutomatedTaskServiceImpl implements AutomatedTaskService {
                                                                                       lockProvider,
                                                                                       automatedTaskConfigurationProperties,
                                                                                       inboundTranscriptionAndAnnotationDeleterProcessor,
+                                                                                      logApi);
+        eventCleanupTask.setLastCronExpression(getAutomatedTaskCronExpression(eventCleanupTask));
+        Trigger trigger = createAutomatedTaskTrigger(eventCleanupTask);
+        taskRegistrar.addTriggerTask(eventCleanupTask, trigger);
+    }
+
+    private void addUnstructuredTranscriptionAndAnnotationDeleterToTaskRegistrar(ScheduledTaskRegistrar taskRegistrar) {
+        var eventCleanupTask = new UnstructuredAnnotationTranscriptionDeleterAutomatedTask(automatedTaskRepository,
+                                                                                      lockProvider,
+                                                                                      automatedTaskConfigurationProperties,
+                                                                                      unstructuredTranscriptionAndAnnotationDeleterProcessor,
                                                                                       logApi);
         eventCleanupTask.setLastCronExpression(getAutomatedTaskCronExpression(eventCleanupTask));
         Trigger trigger = createAutomatedTaskTrigger(eventCleanupTask);
@@ -897,6 +916,23 @@ public class AutomatedTaskServiceImpl implements AutomatedTaskService {
                 lockProvider,
                 automatedTaskConfigurationProperties,
                 inboundTranscriptionAndAnnotationDeleterProcessor,
+                logApi
+            );
+            Trigger trigger = createAutomatedTaskTrigger(generateCaseDocumentAutomatedTask);
+            taskScheduler.schedule(generateCaseDocumentAutomatedTask, trigger);
+        } else {
+            taskScheduler.schedule(triggerAndAutomatedTask.getAutomatedTask(), triggerAndAutomatedTask.getTrigger());
+        }
+    }
+
+    private void rescheduleUnstructuredTranscriptionAndAnnotationDeleterAutomatedTask() {
+        TriggerAndAutomatedTask triggerAndAutomatedTask = getTriggerAndAutomatedTask(INBOUND_TRANSCRIPTION_ANNOTATION_DELETER_TASK_NAME.getTaskName());
+        if (triggerAndAutomatedTask == null) {
+            var generateCaseDocumentAutomatedTask = new UnstructuredAnnotationTranscriptionDeleterAutomatedTask(
+                automatedTaskRepository,
+                lockProvider,
+                automatedTaskConfigurationProperties,
+                unstructuredTranscriptionAndAnnotationDeleterProcessor,
                 logApi
             );
             Trigger trigger = createAutomatedTaskTrigger(generateCaseDocumentAutomatedTask);

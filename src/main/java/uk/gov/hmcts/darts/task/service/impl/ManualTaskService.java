@@ -102,6 +102,7 @@ public class ManualTaskService {
         addGenerateCaseDocumentToTaskRegistrar();
         addEventHandler();
         addInboundTranscriptionAndAnnotationDeleterRegistrar();
+        addUnstructuredTranscriptionAndAnnotationDeleterRegistrar();
     }
 
     public List<AbstractLockableAutomatedTask> getAutomatedTasks() {
@@ -323,6 +324,18 @@ public class ManualTaskService {
     }
 
     private void addInboundTranscriptionAndAnnotationDeleterRegistrar() {
+        var manualTask = new InboundAnnotationTranscriptionDeleterAutomatedTask(
+            automatedTaskRepository,
+            lockProvider,
+            automatedTaskConfigurationProperties,
+            armDeletionProcessor,
+            logApi
+        );
+        manualTask.setManualTask();
+        automatedTasks.add(manualTask);
+    }
+
+    private void addUnstructuredTranscriptionAndAnnotationDeleterRegistrar() {
         var manualTask = new InboundAnnotationTranscriptionDeleterAutomatedTask(
             automatedTaskRepository,
             lockProvider,

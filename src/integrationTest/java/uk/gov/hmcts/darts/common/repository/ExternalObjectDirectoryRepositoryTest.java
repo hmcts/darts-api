@@ -171,14 +171,6 @@ class ExternalObjectDirectoryRepositoryTest  extends PostgresIntegrationBase {
         assertExpectedResults(results, armRecordsResultOutside24Hours, pageSize);
     }
 
-    private OffsetDateTime getCurrentDateTimeWithHoursBefore(int hours) {
-        OffsetDateTime currentDateMinusHours = currentTimeHelper.currentOffsetDateTime().minus(
-            hours,
-            ChronoUnit.HOURS
-        );
-        return currentDateMinusHours;
-    }
-
     @Test
     void testGetDirectoryIfMediaDateBeyond24Hours() throws Exception {
 
@@ -268,5 +260,12 @@ class ExternalObjectDirectoryRepositoryTest  extends PostgresIntegrationBase {
             actualResults.stream().filter(expectedResult -> expectedResults.stream().anyMatch(result -> expectedResult.equals(result.getId()))).toList());
 
         Assertions.assertEquals(resultCount, matchesEntity.size());
+    }
+    
+    private OffsetDateTime getCurrentDateTimeWithHoursBefore(int hours) {
+        return currentTimeHelper.currentOffsetDateTime().minus(
+            hours,
+            ChronoUnit.HOURS
+        );
     }
 }

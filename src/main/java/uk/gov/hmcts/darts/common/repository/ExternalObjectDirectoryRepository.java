@@ -374,11 +374,10 @@ public interface ExternalObjectDirectoryRepository extends JpaRepository<Externa
             (
                 SELECT med_id FROM darts.external_object_directory
                 WHERE elt_id=:externalLocationType AND ors_id=2
-            ) AND elt_id=3 AND ors_id=2 
-            AND last_modified_ts <= :lastModifiedEarliestDate 
+            ) AND elt_id=3 AND ors_id=2 AND last_modified_ts <= :beforeOrEqualToLastModifiedDate
         """, nativeQuery = true
     )
-    List<Integer> findAllArmMediaBeforeOrEqualDate(Pageable resultLimit, int externalLocationType, OffsetDateTime lastModifiedEarliestDate);
+    List<Integer> findAllArmMediaBeforeOrEqualDate(Pageable resultLimit, int externalLocationType, OffsetDateTime beforeOrEqualToLastModifiedDate);
 
     @Modifying
     @Transactional
