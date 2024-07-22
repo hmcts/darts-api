@@ -239,6 +239,7 @@ public class DartsDatabaseStub {
         transientObjectDirectoryRepository.deleteAll();
         transformedMediaRepository.deleteAll();
         mediaRequestRepository.deleteAll();
+        eventLinkedCaseRepository.deleteAll();
         eventRepository.deleteAll();
         hearingRepository.deleteAll();
         annotationRepository.deleteAll();
@@ -269,7 +270,6 @@ public class DartsDatabaseStub {
         annotationRepository.deleteAll();
         transcriptionRepository.deleteAll();
         transcriptionWorkflowRepository.deleteAll();
-        eventLinkedCaseRepository.deleteAll();
     }
 
     public List<EventHandlerEntity> findByHandlerAndActiveTrue(String handlerName) {
