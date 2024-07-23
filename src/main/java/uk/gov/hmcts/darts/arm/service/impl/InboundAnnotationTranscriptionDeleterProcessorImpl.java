@@ -58,7 +58,7 @@ public class InboundAnnotationTranscriptionDeleterProcessorImpl implements Inbou
                                                            EodHelper.armLocation(),
                                                            lastModifiedBefore);
 
-        log.debug("Identified records to be deleted  {}",  recordsMarkedForDeletion.stream().map(Object::toString));
+        log.debug("Identified records to be marked for deletion  {}",  recordsMarkedForDeletion.stream().map(Object::toString));
 
         UserAccountEntity user = userAccountRepository.findSystemUser(systemUserHelper.findSystemUserGuid("housekeeping"));
         eodHelper.updateStatus(
@@ -68,7 +68,7 @@ public class InboundAnnotationTranscriptionDeleterProcessorImpl implements Inbou
             OffsetDateTime.now()
         );
 
-        log.debug("Records have been marked as deleted");
+        log.debug("Records have been marked for deletion");
 
         return recordsMarkedForDeletion;
     }
