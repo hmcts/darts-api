@@ -46,8 +46,8 @@ class SetReportingRestrictionEventHandlerTest extends HandlerTestData {
     }
 
     @Test
-    @Disabled
     void givenSetReportingRestrictionEventReceivedAndCourtCaseAndHearingDoesNotExist_thenNotifyDarUpdate() {
+
         var result = WireMock.listAllStubMappings();
         log.info("mappings: {}", result.getMappings());
 
@@ -122,7 +122,6 @@ class SetReportingRestrictionEventHandlerTest extends HandlerTestData {
     }
 
     @Test
-    @Disabled
     void givenSetReportingRestrictionEventReceivedAndCaseAndHearingExistButRoomHasChanged_thenNotifyDarUpdate() {
         var caseEntity = dartsDatabase.givenTheDatabaseContainsCourtCaseAndCourthouseWithRoom(
             SOME_CASE_NUMBER,

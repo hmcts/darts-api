@@ -25,6 +25,12 @@ spring:
             jwk-set-uri: http://localhost:${wiremock.server.port}/discovery/v2.0/keys
             logout-uri: http://localhost:${wiremock.server.port}/B2C_1_darts_externaluser_signin/oauth2/v2.0/logout
             reset-password-uri: http://localhost:${wiremock.server.port}/B2C_1_darts_externaluser_password_reset/oauth2/v2.0/authorize
+  cloud:
+    openfeign:
+      client:
+        config:
+          darts-gateway-client:
+            loggerLevel: full
   autoconfigure:
     exclude:
       - org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration
@@ -48,7 +54,7 @@ darts:
   hearings:
     admin-search:
       max-results: 5
-  automated-tasks-pod: ${AUTOMATED_TASK_MODE:true}
+  automated-tasks-pod: ${AUTOMATED_TASK_MODE:false}
   api-pod: ${API_MODE:true}
   data-management:
     inbound-to-unstructured-limit: 100
@@ -91,6 +97,7 @@ logging:
       gov:
         hmcts:
           darts: INFO
+          darts.event.client.DartsGatewayClient: DEBUG
     org.apache.http: WARN
     com.github.dockerjava: WARN
     org.zeroturnaround.exec: WARN
@@ -100,7 +107,7 @@ logging:
       springframework:
         jdbc.datasource: DEBUG
 #        logs 'Releasing JDBC Connection'
-        jdbc.datasource.DataSourceTransactionManager: DEBUG
+#        jdbc.datasource.DataSourceTransactionManager: DEBUG
         cloud:
           contract:
             wiremock: TRACE
@@ -114,7 +121,7 @@ logging:
     com:
       github:
         tomakehurst:
-          wiremock: DEBUG
+          wiremock: TRACE
       zaxxer:
         hikari: WARN
   config: classpath:logback-test.xml
