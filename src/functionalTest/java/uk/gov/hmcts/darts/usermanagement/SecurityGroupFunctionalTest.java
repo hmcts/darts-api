@@ -90,14 +90,14 @@ class SecurityGroupFunctionalTest extends FunctionalTest {
     @Test
     void shouldGetSecurityGroupWithIdAndRoleAndUsers() throws JsonProcessingException {
         buildRequestWithExternalGlobalAccessAuth()
-            .baseUri(getUri("/admin/security-groups/1"))
+            .baseUri(getUri("/admin/security-groups/4"))
             .contentType(ContentType.JSON)
             .get()
             .then()
             .assertThat()
             .statusCode(200)
             .body("user_ids", notNullValue())
-            .body("id", equalTo(1))
+            .body("id", equalTo(4))
             .body("security_role_id", equalTo(SUPER_ADMIN.getId()))
             .body("global_access", equalTo(true))
             .body("display_state", equalTo(true))
@@ -122,7 +122,7 @@ class SecurityGroupFunctionalTest extends FunctionalTest {
 
         List<SecurityGroupWithIdAndRoleAndUsers> staticGroups =
             securityGroupWithIdAndRoles.stream()
-                .filter(group -> group.getId() == 1
+                .filter(group -> group.getId() == 4
                     || group.getId() >= -6 && group.getId() <= -1
                     || group.getId() >= -17 && group.getId() <= -14
                     || group.getSecurityRoleId().equals(SecurityRoleEnum.SUPER_USER.getId())
@@ -131,8 +131,8 @@ class SecurityGroupFunctionalTest extends FunctionalTest {
                 .toList();
 
         checkGroup(staticGroups.get(0), "DARTS", true, 10, false, null);
-        checkGroup(staticGroups.get(1), "SUPER_USER", true, 7, true, null);
-        checkGroup(staticGroups.get(2), "SUPER_ADMIN", true, 8, true, null);
+        checkGroup(staticGroups.get(1), "SUPER_ADMIN", true, 8, true, null);
+        checkGroup(staticGroups.get(2), "SUPER_USER", true, 7, true, null);
         checkGroup(staticGroups.get(3), "hmcts_staff_1", false, 3, true, 127);
         checkGroup(staticGroups.get(4), "hmcts_staff_2", false, 2, true, 127);
         checkGroup(staticGroups.get(5), "hmcts_staff_3", false, 1, true, 127);

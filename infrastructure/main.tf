@@ -81,6 +81,7 @@ module "postgresql_flexible" {
   component           = var.component
   business_area       = "sds"
   location            = var.location
+  pgsql_storage_mb    = "262144"
 
   common_tags          = var.common_tags
   admin_user_object_id = var.jenkins_AAD_objectId
