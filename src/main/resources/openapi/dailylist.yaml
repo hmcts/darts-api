@@ -71,23 +71,6 @@ paths:
               schema:
                 $ref: './problem.yaml'
 
-  /dailylists/housekeeping:
-    post:
-      tags:
-        - DailyLists
-      summary: Deletes old DailyLists from the database
-      description: |-
-        Deletes old DailyLists from the database. It will keep x number of days, as defined by application properties.
-      responses:
-        '200':
-          description: OK
-
-        '500':
-          description: Internal Server Error
-          content:
-            application/json+problem:
-              schema:
-                $ref: './problem.yaml'
   /dailylists/run:
     post:
       tags:
@@ -488,4 +471,3 @@ components:
         - "An Internal Server Error has occurred."
         - "Invalid source system. Should be CPP or XHB."
       x-enum-varnames: [ FAILED_TO_PROCESS_DAILYLIST, XML_OR_JSON_NEEDS_TO_BE_PROVIDED, XML_EXTRA_PARAMETERS_MISSING, DAILY_LIST_NOT_FOUND, INTERNAL_ERROR, INVALID_SOURCE_SYSTEM ]
-
