@@ -103,10 +103,10 @@ public class IntegrationBase  {
     );
 
     private Map<String, String> sequencesStartFrom = Map.of(
-        "usr_seq", "2",
-        "grp_seq", "5",
-        "aut_seq", "18",
-        "rpt_seq", "10"
+        "usr_seq", "1000",
+        "grp_seq", "1000",
+        "aut_seq", "1000",
+        "rpt_seq", "1000"
 //        "evh_seq", "606"
     );
 

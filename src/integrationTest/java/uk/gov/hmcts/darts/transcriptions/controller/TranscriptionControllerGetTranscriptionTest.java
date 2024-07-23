@@ -105,8 +105,9 @@ class TranscriptionControllerGetTranscriptionTest extends IntegrationBase {
         String expected = TestUtils.removeTags(
             TAGS_TO_IGNORE,
             getContentsFromFile(
-                "tests/transcriptions/transcription/expectedResponse.json").replace("$COURTHOUSE_ID",
-                                                                                   hearingEntity.getCourtroom().getCourthouse().getId().toString())
+                "tests/transcriptions/transcription/expectedResponse.json")
+                .replace("$COURTHOUSE_ID", hearingEntity.getCourtroom().getCourthouse().getId().toString())
+                .replace("$USER_ACCOUNT_ID", userAccount.getId().toString())
         );
         MvcResult mvcResult = mockMvc.perform(requestBuilder).andExpect(status().isOk()).andReturn();
         String actualResponse = TestUtils.removeTags(TAGS_TO_IGNORE, mvcResult.getResponse().getContentAsString());
@@ -154,8 +155,9 @@ class TranscriptionControllerGetTranscriptionTest extends IntegrationBase {
         String expected = TestUtils.removeTags(
             TAGS_TO_IGNORE,
             getContentsFromFile(
-                "tests/transcriptions/transcription/expectedResponseNoHearing.json").replace("$COURTHOUSE_ID",
-                                                                                    hearingEntity.getCourtroom().getCourthouse().getId().toString())
+                "tests/transcriptions/transcription/expectedResponseNoHearing.json")
+                .replace("$COURTHOUSE_ID", hearingEntity.getCourtroom().getCourthouse().getId().toString())
+                .replace("$USER_ACCOUNT_ID", userAccount.getId().toString())
         );
         MvcResult mvcResult = mockMvc.perform(requestBuilder).andExpect(status().isOk()).andReturn();
         String actualResponse = TestUtils.removeTags(TAGS_TO_IGNORE, mvcResult.getResponse().getContentAsString());
@@ -203,8 +205,9 @@ class TranscriptionControllerGetTranscriptionTest extends IntegrationBase {
         String expected = TestUtils.removeTags(
             TAGS_TO_IGNORE,
             getContentsFromFile(
-                "tests/transcriptions/transcription/expectedResponseNoCourtroom.json").replace("$COURTHOUSE_ID",
-                                                                                             hearingEntity.getCourtroom().getCourthouse().getId().toString())
+                "tests/transcriptions/transcription/expectedResponseNoCourtroom.json")
+                .replace("$COURTHOUSE_ID", hearingEntity.getCourtroom().getCourthouse().getId().toString())
+                .replace("$USER_ACCOUNT_ID", userAccount.getId().toString())
         );
         MvcResult mvcResult = mockMvc.perform(requestBuilder).andExpect(status().isOk()).andReturn();
         String actualResponse = TestUtils.removeTags(TAGS_TO_IGNORE, mvcResult.getResponse().getContentAsString());
@@ -248,8 +251,9 @@ class TranscriptionControllerGetTranscriptionTest extends IntegrationBase {
         String expected = TestUtils.removeTags(
             TAGS_TO_IGNORE,
             getContentsFromFile(
-                "tests/transcriptions/transcription/expectedResponseNoUrgency.json").replace("$COURTHOUSE_ID",
-                                                                                             hearingEntity.getCourtroom().getCourthouse().getId().toString())
+                "tests/transcriptions/transcription/expectedResponseNoUrgency.json")
+                .replace("$COURTHOUSE_ID", hearingEntity.getCourtroom().getCourthouse().getId().toString())
+                .replace("$USER_ACCOUNT_ID", userAccount.getId().toString())
         );
         MvcResult mvcResult = mockMvc.perform(requestBuilder).andExpect(status().isOk()).andReturn();
         String actualResponse = TestUtils.removeTags(TAGS_TO_IGNORE, mvcResult.getResponse().getContentAsString());

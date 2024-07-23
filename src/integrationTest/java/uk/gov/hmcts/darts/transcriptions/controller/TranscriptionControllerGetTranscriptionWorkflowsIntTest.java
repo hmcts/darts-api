@@ -14,6 +14,7 @@ import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionEntity;
+import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.util.DateConverterUtil;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 import uk.gov.hmcts.darts.testutils.stubs.SuperAdminUserStub;
@@ -83,7 +84,7 @@ class TranscriptionControllerGetTranscriptionWorkflowsIntTest extends Integratio
 
     @Test
     void getTranscriptionWorkflowsShouldReturnOkSuccessAndAllAssociatedWorkflows() throws Exception {
-        superAdminUserStub.givenUserIsAuthorised(mockUserIdentity);
+        UserAccountEntity userAccount = superAdminUserStub.givenUserIsAuthorised(mockUserIdentity);
 
         MockHttpServletRequestBuilder requestBuilder = get(ENDPOINT_URI)
             .queryParam("transcription_id", transcription.getId().toString());
@@ -91,14 +92,15 @@ class TranscriptionControllerGetTranscriptionWorkflowsIntTest extends Integratio
         MvcResult response = mockMvc.perform(requestBuilder).andExpect(status().isOk()).andReturn();
         String actualResponse = response.getResponse().getContentAsString();
         String expectedResponse = getContentsFromFile(
-            "tests/transcriptions/transcription_workflow/expectedAllWorkflowResponse.json");
+            "tests/transcriptions/transcription_workflow/expectedAllWorkflowResponse.json")
+            .replace("$USER_ACCOUNT_ID", transcription.getCreatedBy().getId().toString());
 
         JSONAssert.assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
     }
 
     @Test
     void getCurrentTranscriptionWorkflowsShouldReturnOkSuccessAndMostRecentAssociatedWorkflows() throws Exception {
-        superAdminUserStub.givenUserIsAuthorised(mockUserIdentity);
+        UserAccountEntity userAccount = superAdminUserStub.givenUserIsAuthorised(mockUserIdentity);
 
         MockHttpServletRequestBuilder requestBuilder = get(ENDPOINT_URI)
             .queryParam("transcription_id", transcription.getId().toString())
@@ -107,7 +109,8 @@ class TranscriptionControllerGetTranscriptionWorkflowsIntTest extends Integratio
         MvcResult response = mockMvc.perform(requestBuilder).andExpect(status().isOk()).andReturn();
         String actualResponse = response.getResponse().getContentAsString();
         String expectedResponse = getContentsFromFile(
-            "tests/transcriptions/transcription_workflow/expectedCurrentWorkflowResponse.json");
+            "tests/transcriptions/transcription_workflow/expectedCurrentWorkflowResponse.json")
+            .replace("$USER_ACCOUNT_ID", transcription.getCreatedBy().getId().toString());
 
         JSONAssert.assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
     }
