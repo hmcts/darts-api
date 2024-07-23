@@ -68,6 +68,10 @@ public class UserAccountStub {
         newUser.setAccountGuid(UUID.randomUUID().toString());
         newUser.setIsSystemUser(true);
         newUser.setUserFullName(newUser.getUserName());
+        newUser.setCreatedBy(newUser);
+        newUser.setLastModifiedBy(newUser);
+        newUser.setCreatedDateTime(OffsetDateTime.of(2020, 10, 10, 10, 0, 0, 0, ZoneOffset.UTC));
+        newUser.setLastModifiedDateTime(OffsetDateTime.of(2020, 10, 10, 10, 0, 0, 0, ZoneOffset.UTC));
         return userAccountRepository.saveAndFlush(newUser);
     }
 
