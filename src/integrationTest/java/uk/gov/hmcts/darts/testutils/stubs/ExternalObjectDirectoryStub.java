@@ -16,7 +16,6 @@ import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
 import uk.gov.hmcts.darts.common.entity.ObjectRecordStatusEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionDocumentEntity;
-import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum;
 import uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum;
 import uk.gov.hmcts.darts.common.helper.SystemUserHelper;
@@ -276,19 +275,6 @@ public class ExternalObjectDirectoryStub {
             entityListResult.add(newExternalObjectDirectory);
         }
         return entityListResult;
-    }
-
-    @Transactional
-    public List<Integer> updateExternalDirectoryWithMarkedForDeletionUsingHouseKeeperUser(List<Integer> eodIds) {
-        ObjectRecordStatusEntity status = objectRecordStatusRepository.getReferenceById(ObjectRecordStatusEnum.MARKED_FOR_DELETION.getId());
-        UserAccountEntity entity = systemUserHelper.getHousekeepingUser();
-        eodRepository.updateStatusAndUserOfObjectDirectory(eodIds, status, entity);
-        List<Integer> externalObjectDirectoryEntities = new ArrayList<>();
-        for (Integer eodId : eodIds) {
-            externalObjectDirectoryEntities.add(eodRepository.getReferenceById(eodId).getId());
-        }
-
-        return externalObjectDirectoryEntities;
     }
 
     @Transactional

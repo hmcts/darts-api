@@ -37,6 +37,7 @@ public class InboundAudioDeleterProcessorImpl implements InboundAudioDeleterProc
             ChronoUnit.HOURS
         );
         List<Integer> audioFileIdsToBeMarked = externalObjectDirectoryRepository.findMediaFileIdsIn2StorageLocationsBeforeTime(
+            null,
             EodHelper.storedStatus(),
             EodHelper.storedStatus(),
             EodHelper.inboundLocation(),

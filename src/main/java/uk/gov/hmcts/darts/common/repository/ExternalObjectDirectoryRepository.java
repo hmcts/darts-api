@@ -5,7 +5,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
-import org.springframework.transaction.annotation.Transactional;
 import uk.gov.hmcts.darts.common.entity.AnnotationDocumentEntity;
 import uk.gov.hmcts.darts.common.entity.CaseDocumentEntity;
 import uk.gov.hmcts.darts.common.entity.ExternalLocationTypeEntity;
@@ -211,14 +210,32 @@ public interface ExternalObjectDirectoryRepository extends JpaRepository<Externa
             AND eod2.status = :status2
             AND eod.externalLocationType = :location1
             AND eod2.externalLocationType = :location2
-            AND eod.lastModifiedDateTime < :lastModifiedBefore
+            AND eod2.lastModifiedDateTime <= :lastModifiedBefore
             """
     )
-    List<Integer> findMediaFileIdsIn2StorageLocationsBeforeTime(ObjectRecordStatusEntity status1,
+    List<Integer> findMediaFileIdsIn2StorageLocationsBeforeTime(Pageable page, ObjectRecordStatusEntity status1,
                                                                 ObjectRecordStatusEntity status2,
                                                                 ExternalLocationTypeEntity location1,
                                                                 ExternalLocationTypeEntity location2,
                                                                 OffsetDateTime lastModifiedBefore);
+
+    @Query(
+        """
+            SELECT eod.id FROM ExternalObjectDirectoryEntity eod, ExternalObjectDirectoryEntity eod2
+            WHERE eod.media is not null
+            AND eod.media = eod2.media
+            AND eod.status = :status1
+            AND eod2.status = :status2
+            AND eod.externalLocationType = :location1
+            AND eod2.externalLocationType = :location2
+            AND eod.lastModifiedDateTime <= :lastModifiedBefore
+            """
+    )
+    List<Integer> findMediaFileIdsIn2StorageLocationsBeforeTime1(Pageable page, ObjectRecordStatusEntity status1,
+                                                                ObjectRecordStatusEntity status2,
+                                                                ExternalLocationTypeEntity location1,
+                                                                ExternalLocationTypeEntity location2);
+
 
     @Query(
         """
@@ -367,28 +384,6 @@ public interface ExternalObjectDirectoryRepository extends JpaRepository<Externa
             """
     )
     List<ExternalObjectDirectoryEntity> findAllByStatusAndManifestFile(ObjectRecordStatusEntity status, String manifestFile);
-
-    @Query(
-        value = """
-         SELECT od.eod_id FROM darts.external_object_directory od WHERE od.med_id IN
-            (
-                SELECT med_id FROM darts.external_object_directory
-                WHERE elt_id=:externalLocationType AND ors_id=2
-            ) AND elt_id=3 AND ors_id=2 AND last_modified_ts <= :beforeOrEqualToLastModifiedDate
-        """, nativeQuery = true
-    )
-    List<Integer> findAllArmMediaBeforeOrEqualDate(Pageable resultLimit, int externalLocationType, OffsetDateTime beforeOrEqualToLastModifiedDate);
-
-    @Modifying
-    @Transactional
-    @Query(
-        value = """
-        UPDATE ExternalObjectDirectoryEntity eod
-        SET status=:status, lastModifiedBy = :userToUpdate, lastModifiedDateTime=current_timestamp
-        WHERE id in :externalObjectDirectoryIdLst
-        """
-    )
-    void updateStatusAndUserOfObjectDirectory(List<Integer> externalObjectDirectoryIdLst, ObjectRecordStatusEntity status, UserAccountEntity userToUpdate);
 
     List<ExternalObjectDirectoryEntity> findByExternalLocationTypeAndUpdateRetention(ExternalLocationTypeEntity externalLocationTypeEntity,
                                                                                      boolean updateRetention);

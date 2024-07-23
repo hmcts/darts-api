@@ -6,13 +6,12 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.darts.arm.service.InboundAnnotationTranscriptionDeleterProcessor;
-import uk.gov.hmcts.darts.common.entity.ObjectRecordStatusEntity;
-import uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum;
-import uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum;
+import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
 import uk.gov.hmcts.darts.common.helper.SystemUserHelper;
 import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
-import uk.gov.hmcts.darts.common.repository.ObjectRecordStatusRepository;
+import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
+import uk.gov.hmcts.darts.common.util.EodHelper;
 
 import java.time.OffsetDateTime;
 import java.time.temporal.ChronoUnit;
@@ -24,12 +23,10 @@ import java.util.List;
 public class InboundAnnotationTranscriptionDeleterProcessorImpl implements InboundAnnotationTranscriptionDeleterProcessor {
 
     private final ExternalObjectDirectoryRepository externalObjectDirectoryRepository;
-
     private final SystemUserHelper systemUserHelper;
-
-    private final ObjectRecordStatusRepository objectRecordStatusRepository;
     private final CurrentTimeHelper currentTimeHelper;
-
+    private final UserAccountRepository userAccountRepository;
+    private final EodHelper eodHelper;
 
     @Value("${darts.data-management.retention-period.inbound.arm-minimum}")
     int hoursInArm;
@@ -41,22 +38,38 @@ public class InboundAnnotationTranscriptionDeleterProcessorImpl implements Inbou
     @Override
     public List<Integer> processDeletionIfPreceding(int batch, int hourBeforeCurrentDate) {
 
+        // if a default batch size of 0 is specified this means no batch
+        Pageable pageable = null;
+        if (batch > 0) {
+            pageable = Pageable.ofSize(batch);
+        }
+
         OffsetDateTime lastModifiedBefore = currentTimeHelper.currentOffsetDateTime().minus(
             hoursInArm,
             ChronoUnit.HOURS
         );
 
-        List<Integer> armRecordToBeMarkedForDeletion
+        List<Integer> recordsMarkedForDeletion
             = externalObjectDirectoryRepository
-            .findAllArmMediaBeforeOrEqualDate(Pageable.ofSize(batch), ExternalLocationTypeEnum.INBOUND.getId(), lastModifiedBefore);
+            .findMediaFileIdsIn2StorageLocationsBeforeTime(pageable,
+                                                           EodHelper.storedStatus(),
+                                                           EodHelper.storedStatus(),
+                                                           EodHelper.inboundLocation(),
+                                                           EodHelper.armLocation(),
+                                                           lastModifiedBefore);
 
-        ObjectRecordStatusEntity status = objectRecordStatusRepository.getReferenceById(ObjectRecordStatusEnum.MARKED_FOR_DELETION.getId());
+        log.debug("Identified records to be deleted  {}",  recordsMarkedForDeletion.stream().map(Object::toString));
 
-        log.debug("Identified records to be deleted  {}",  armRecordToBeMarkedForDeletion.stream().map(Object::toString));
-        externalObjectDirectoryRepository.updateStatusAndUserOfObjectDirectory(armRecordToBeMarkedForDeletion, status,
-                                                                               systemUserHelper.getHousekeepingUser());
+        UserAccountEntity user = userAccountRepository.findSystemUser(systemUserHelper.findSystemUserGuid("housekeeping"));
+        eodHelper.updateStatus(
+            EodHelper.markForDeletionStatus(),
+            user,
+            recordsMarkedForDeletion,
+            OffsetDateTime.now()
+        );
+
         log.debug("Records have been marked as deleted");
 
-        return armRecordToBeMarkedForDeletion;
+        return recordsMarkedForDeletion;
     }
 }

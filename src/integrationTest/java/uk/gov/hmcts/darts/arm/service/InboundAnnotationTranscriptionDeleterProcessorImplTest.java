@@ -31,15 +31,19 @@ class InboundAnnotationTranscriptionDeleterProcessorImplTest extends PostgresInt
         int numberOfRecordsToGenerate = 10;
         int setupHoursBeforeCurrentTime = 24;
 
+
         List<ExternalObjectDirectoryEntity> externalObjectDirectoryEntitiesNotRelevant
             = externalObjectDirectoryStub.generateWithStatusAndInboundLocation(
             ObjectRecordStatusEnum.ARM_RAW_DATA_FAILED, 10);
         List<ExternalObjectDirectoryEntity> externalObjectDirectoryEntities
             = externalObjectDirectoryStub.generateWithStatusAndInboundLocation(STORED, numberOfRecordsToGenerate);
 
+        List<ExternalObjectDirectoryEntity> entitiesToBeMarkedWithMediaOutsideOfHours
+            = externalObjectDirectoryEntities.subList(0, externalObjectDirectoryEntities.size() / 2);
+
         List<ExternalObjectDirectoryEntity> expectedArmRecordsResultOutsideHours
             = externalObjectDirectoryStub.generateWithStatusAndMediaAndArmLocation(
-                externalObjectDirectoryEntities.subList(0, externalObjectDirectoryEntities.size() / 2), setupHoursBeforeCurrentTime);
+                entitiesToBeMarkedWithMediaOutsideOfHours, setupHoursBeforeCurrentTime);
         List<ExternalObjectDirectoryEntity> expectedArmRecordsResultWithinTheHour
             = externalObjectDirectoryStub.generateWithStatusAndMediaAndArmLocation(
                 externalObjectDirectoryEntities.subList(externalObjectDirectoryEntities.size() / 2, externalObjectDirectoryEntities.size()), 1);
@@ -53,15 +57,14 @@ class InboundAnnotationTranscriptionDeleterProcessorImplTest extends PostgresInt
         int pageSize = 5;
         int hourDurationBeyondHours = setupHoursBeforeCurrentTime; // which no records are
 
-
         // excerise the logic
         List<Integer> updatedResults = armTranscriptionAndAnnotationDeleterProcessor.processDeletionIfPreceding(pageSize, hourDurationBeyondHours);
 
         // assert the logic
-        assertExpectedResults(updatedResults, expectedArmRecordsResultOutsideHours, pageSize);
+        assertExpectedResults(updatedResults, entitiesToBeMarkedWithMediaOutsideOfHours, pageSize);
 
         // assert the logic
-        assertExternalObjectDirectoryUpdate(updatedResults, expectedArmRecordsResultOutsideHours, pageSize);
+        assertExternalObjectDirectoryUpdate(updatedResults, entitiesToBeMarkedWithMediaOutsideOfHours, pageSize);
 
         updatedResults = armTranscriptionAndAnnotationDeleterProcessor.processDeletionIfPreceding(pageSize, hourDurationBeyondHours);
 
@@ -78,6 +81,8 @@ class InboundAnnotationTranscriptionDeleterProcessorImplTest extends PostgresInt
             ObjectRecordStatusEnum.ARM_RAW_DATA_FAILED, numberOfRecordsToGenerate);
         List<ExternalObjectDirectoryEntity> externalObjectDirectoryEntities
             = externalObjectDirectoryStub.generateWithStatusAndInboundLocation(STORED, numberOfRecordsToGenerate);
+        List<ExternalObjectDirectoryEntity> entitiesToBeMarkedWithMediaOutsideOfHours
+            = externalObjectDirectoryEntities.subList(0, externalObjectDirectoryEntities.size() / 2);
 
         List<ExternalObjectDirectoryEntity> expectedArmRecordsResultOutsideHours
             = externalObjectDirectoryStub.generateWithStatusAndMediaAndArmLocation(
@@ -99,21 +104,63 @@ class InboundAnnotationTranscriptionDeleterProcessorImplTest extends PostgresInt
         List<Integer> updatedResults = armTranscriptionAndAnnotationDeleterProcessor.processDeletionIfPreceding(pageSize, hourDurationBeyondHours);
 
         // assert the logic
-        assertExpectedResults(updatedResults, expectedArmRecordsResultOutsideHours, pageSize);
+        assertExpectedResults(updatedResults, entitiesToBeMarkedWithMediaOutsideOfHours, pageSize);
 
         // assert the logic
-        assertExternalObjectDirectoryUpdate(updatedResults, expectedArmRecordsResultOutsideHours, 1);
+        assertExternalObjectDirectoryUpdate(updatedResults, entitiesToBeMarkedWithMediaOutsideOfHours, 1);
 
         List<Integer> updatedResults2 = armTranscriptionAndAnnotationDeleterProcessor.processDeletionIfPreceding(pageSize, hourDurationBeyondHours);
 
         // assert the logic
-        assertExpectedResults(updatedResults2, expectedArmRecordsResultOutsideHours, pageSize);
+        assertExpectedResults(updatedResults2, entitiesToBeMarkedWithMediaOutsideOfHours, pageSize);
 
         // assert the update
-        assertExternalObjectDirectoryUpdate(updatedResults2, expectedArmRecordsResultOutsideHours, pageSize);
+        assertExternalObjectDirectoryUpdate(updatedResults2, entitiesToBeMarkedWithMediaOutsideOfHours, pageSize);
 
         // check the results are unique between processing
         Assertions.assertFalse(CollectionUtils.containsAny(updatedResults, updatedResults2));
+
+        externalObjectDirectoryStub.checkNotMarkedForDeletion(expectedArmRecordsResultWithinTheHour);
+    }
+
+    @Test
+    void processBatchMultipleRecordsNoPaging() throws Exception {
+        int numberOfRecordsToGenerate = 10;
+        int setupHoursBeforeCurrentTime = 25;
+
+        List<ExternalObjectDirectoryEntity> externalObjectDirectoryEntitiesNotRelevant
+            = externalObjectDirectoryStub.generateWithStatusAndInboundLocation(
+            ObjectRecordStatusEnum.ARM_RAW_DATA_FAILED, numberOfRecordsToGenerate);
+        List<ExternalObjectDirectoryEntity> externalObjectDirectoryEntities
+            = externalObjectDirectoryStub.generateWithStatusAndInboundLocation(STORED, numberOfRecordsToGenerate);
+
+        List<ExternalObjectDirectoryEntity> entitiesToBeMarkedWithMediaOutsideOfHours
+            = externalObjectDirectoryEntities.subList(0, externalObjectDirectoryEntities.size() / 2);
+
+        List<ExternalObjectDirectoryEntity> expectedArmRecordsResultOutsideHours
+            = externalObjectDirectoryStub.generateWithStatusAndMediaAndArmLocation(
+            externalObjectDirectoryEntities.subList(0, externalObjectDirectoryEntities.size() / 2), setupHoursBeforeCurrentTime);
+        List<ExternalObjectDirectoryEntity> expectedArmRecordsResultWithinTheHour
+            = externalObjectDirectoryStub.generateWithStatusAndMediaAndArmLocation(
+            externalObjectDirectoryEntities.subList(externalObjectDirectoryEntities.size() / 2, externalObjectDirectoryEntities.size()), 1);
+
+        int expectedRecords = externalObjectDirectoryEntitiesNotRelevant.size() + externalObjectDirectoryEntities.size()
+            + expectedArmRecordsResultOutsideHours.size() + expectedArmRecordsResultWithinTheHour.size();
+
+        // assert that the test has inserted the data into the database
+        Assertions.assertEquals(expectedRecords, externalObjectDirectoryRepository.findAll().size());
+
+
+        int hourDurationBeyondHours = setupHoursBeforeCurrentTime; // which no records are
+
+        // exercise the logic
+        List<Integer> updatedResults = armTranscriptionAndAnnotationDeleterProcessor.processDeletionIfPreceding(0, hourDurationBeyondHours);
+
+        // assert the logic
+        assertExpectedResults(updatedResults, entitiesToBeMarkedWithMediaOutsideOfHours, entitiesToBeMarkedWithMediaOutsideOfHours.size());
+
+        // assert the logic
+        assertExternalObjectDirectoryUpdate(updatedResults, entitiesToBeMarkedWithMediaOutsideOfHours, entitiesToBeMarkedWithMediaOutsideOfHours.size());
 
         externalObjectDirectoryStub.checkNotMarkedForDeletion(expectedArmRecordsResultWithinTheHour);
     }
@@ -131,9 +178,12 @@ class InboundAnnotationTranscriptionDeleterProcessorImplTest extends PostgresInt
         List<ExternalObjectDirectoryEntity> externalObjectDirectoryEntities
             = externalObjectDirectoryStub.generateWithStatusAndInboundLocation(STORED, numberOfRecordsToGenerate);
 
+        List<ExternalObjectDirectoryEntity> entitiesToBeMarkedWithMediaOutsideOfHours
+            = externalObjectDirectoryEntities.subList(0, externalObjectDirectoryEntities.size() / 2);
+
         List<ExternalObjectDirectoryEntity> expectedArmRecordsResultOutsideHours
             = externalObjectDirectoryStub.generateWithStatusAndMediaAndArmLocation(
-            externalObjectDirectoryEntities.subList(0, externalObjectDirectoryEntities.size() / 2), setupHoursBeforeCurrentTime);
+            entitiesToBeMarkedWithMediaOutsideOfHours, setupHoursBeforeCurrentTime);
         List<ExternalObjectDirectoryEntity> expectedArmRecordsResultWithinTheHour
             = externalObjectDirectoryStub.generateWithStatusAndMediaAndArmLocation(
             externalObjectDirectoryEntities.subList(externalObjectDirectoryEntities.size() / 2, externalObjectDirectoryEntities.size()), 1);
@@ -150,18 +200,18 @@ class InboundAnnotationTranscriptionDeleterProcessorImplTest extends PostgresInt
         List<Integer> updatedResults = armTranscriptionAndAnnotationDeleterProcessor.processDeletionIfPreceding(pageSize);
 
         // assert the logic
-        assertExpectedResults(updatedResults, expectedArmRecordsResultOutsideHours, pageSize);
+        assertExpectedResults(updatedResults, entitiesToBeMarkedWithMediaOutsideOfHours, pageSize);
 
         // assert the logic
-        assertExternalObjectDirectoryUpdate(updatedResults, expectedArmRecordsResultOutsideHours, 1);
+        assertExternalObjectDirectoryUpdate(updatedResults, entitiesToBeMarkedWithMediaOutsideOfHours, 1);
 
         List<Integer> updatedResults2 = armTranscriptionAndAnnotationDeleterProcessor.processDeletionIfPreceding(pageSize);
 
         // assert the logic
-        assertExpectedResults(updatedResults2, expectedArmRecordsResultOutsideHours, pageSize);
+        assertExpectedResults(updatedResults2, entitiesToBeMarkedWithMediaOutsideOfHours, pageSize);
 
         // assert the update
-        assertExternalObjectDirectoryUpdate(updatedResults2, expectedArmRecordsResultOutsideHours, pageSize);
+        assertExternalObjectDirectoryUpdate(updatedResults2, entitiesToBeMarkedWithMediaOutsideOfHours, pageSize);
 
         // check the results are unique between processing
         Assertions.assertFalse(CollectionUtils.containsAny(updatedResults, updatedResults2));
