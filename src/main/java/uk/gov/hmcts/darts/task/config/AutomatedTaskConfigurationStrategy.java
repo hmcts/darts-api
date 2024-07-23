@@ -14,7 +14,6 @@ import uk.gov.hmcts.darts.task.service.AutomatedTaskService;
 @EnableScheduling
 @AllArgsConstructor
 @Slf4j
-//TODO set this to false in base integration tests
 @ConditionalOnProperty(prefix = "darts", name = "automated-tasks-pod", havingValue = "true")
 public class AutomatedTaskConfigurationStrategy implements SchedulingConfigurer {
 

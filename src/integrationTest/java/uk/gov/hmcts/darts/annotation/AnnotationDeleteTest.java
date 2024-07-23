@@ -1,6 +1,5 @@
 package uk.gov.hmcts.darts.annotation;
 
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
@@ -26,7 +25,6 @@ import static uk.gov.hmcts.darts.test.common.data.AnnotationTestData.minimalAnno
 import static uk.gov.hmcts.darts.test.common.data.CourthouseTestData.someMinimalCourthouse;
 import static uk.gov.hmcts.darts.test.common.data.HearingTestData.createSomeMinimalHearing;
 import static uk.gov.hmcts.darts.test.common.data.UserAccountTestData.minimalUserAccount;
-import static uk.gov.hmcts.darts.testutils.stubs.UserAccountStub.INTEGRATION_TEST_USER_EMAIL;
 
 @AutoConfigureMockMvc
 class AnnotationDeleteTest extends IntegrationBase {

@@ -65,12 +65,6 @@ class RetentionControllerCreateRetentionPolicyTypeIntTest extends IntegrationBas
         transactionTemplate = new TransactionTemplate(transactionManager);
     }
 
-    @AfterEach
-    void tearDown() {
-        //TODO is this still needed?
-        clearCreatedRetentionPolicyTypes();
-    }
-
     @Test
     void createRetentionPolicyTypeShouldSucceedAndCreatePolicyWhenFixedPolicyKeyIsUnique() throws Exception {
         // Given

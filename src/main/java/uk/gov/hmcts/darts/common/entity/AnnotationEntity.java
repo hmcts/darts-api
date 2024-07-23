@@ -28,12 +28,6 @@ import java.util.List;
 @Setter
 @EqualsAndHashCode(callSuper = false)
 public class AnnotationEntity extends CreatedModifiedBaseEntity {
-    @Override
-    public String toString() {
-        return "AnnotationEntity{" +
-            "id=" + id +
-            '}';
-    }
 
     @Id
     @Column(name = "ann_id")

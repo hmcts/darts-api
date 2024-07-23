@@ -33,6 +33,7 @@ import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.SUPER_USER;
 class UserControllerGetUsersByIdIntTest extends IntegrationBase {
 
     private static final String ENDPOINT_URL = "/admin/users/";
+    public static final int TEST_JUDGE_GLOBAL_SECURITY_GROUP_ID = -7;
 
     @Autowired
     private MockMvc mockMvc;
@@ -64,7 +65,7 @@ class UserControllerGetUsersByIdIntTest extends IntegrationBase {
         Assertions.assertEquals("Judgedefault@example.com", userWithIdAndTimestamps.getEmailAddress());
         Assertions.assertTrue(userWithIdAndTimestamps.getActive());
         Assertions.assertEquals("JudgedefaultFullName", userWithIdAndTimestamps.getFullName());
-        Assertions.assertEquals(-7, userWithIdAndTimestamps.getSecurityGroupIds().get(0));
+        Assertions.assertEquals(TEST_JUDGE_GLOBAL_SECURITY_GROUP_ID, userWithIdAndTimestamps.getSecurityGroupIds().get(0));
 
         verify(mockUserIdentity).userHasGlobalAccess(Set.of(SUPER_ADMIN, SUPER_USER));
         verifyNoMoreInteractions(mockUserIdentity);

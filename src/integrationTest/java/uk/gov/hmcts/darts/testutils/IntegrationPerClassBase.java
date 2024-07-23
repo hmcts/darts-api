@@ -24,8 +24,6 @@ public class IntegrationPerClassBase {
 
     @BeforeAll
     void clearDbInThisOrder() {
-        //TODO remove?
-//        dartsDatabase.clearDatabaseInThisOrder();
         dartsGateway.clearStubs();
     }
 }

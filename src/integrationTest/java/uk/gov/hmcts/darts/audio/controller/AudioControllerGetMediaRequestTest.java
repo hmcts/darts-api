@@ -5,7 +5,6 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.web.servlet.MockMvc;
 import uk.gov.hmcts.darts.common.enums.SecurityRoleEnum;
 import uk.gov.hmcts.darts.testutils.GivenBuilder;
@@ -20,7 +19,6 @@ import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.SUPER_ADMIN;
 import static uk.gov.hmcts.darts.test.common.data.MediaRequestTestData.minimalRequestData;
 
 @AutoConfigureMockMvc
-@DirtiesContext
 class AudioControllerGetMediaRequestTest extends IntegrationBase {
 
     private static final URI ENDPOINT = URI.create("/admin/media-requests/");

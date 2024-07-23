@@ -34,18 +34,6 @@ import static org.hibernate.envers.RelationTargetAuditMode.NOT_AUDITED;
 @Audited
 @AuditTable("security_group_aud")
 public class SecurityGroupEntity extends CreatedModifiedBaseEntity {
-    @Override
-    public String toString() {
-        return "SecurityGroupEntity{" +
-            "id=" + id +
-            ", securityRoleEntity=" + securityRoleEntity.getId() +
-            ", groupName='" + groupName + '\'' +
-            ", description='" + description + '\'' +
-            ", groupGlobalUniqueId='" + groupGlobalUniqueId + '\'' +
-            ", globalAccess=" + globalAccess +
-            ", displayState=" + displayState +
-            '}';
-    }
 
     @Id
     @Column(name = "grp_id")

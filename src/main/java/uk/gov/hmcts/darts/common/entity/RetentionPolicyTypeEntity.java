@@ -26,15 +26,6 @@ public class RetentionPolicyTypeEntity extends CreatedModifiedBaseEntity {
     public static final String ID = "rpt_id";
     public static final String TABLE_NAME = "retention_policy_type";
 
-    @Override
-    public String toString() {
-        return "RetentionPolicyTypeEntity{" +
-            "id=" + id +
-            ", policyName='" + policyName + '\'' +
-            ", createdBy='" + getCreatedBy().getId() + '\'' +
-            '}';
-    }
-
     @Id
     @Column(name = ID)
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "rpt_gen")

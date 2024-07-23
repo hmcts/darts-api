@@ -113,28 +113,6 @@ class AudioRequestBeingProcessedFromArchiveQueryImplIntTest extends IntegrationB
                 """);
     }
 
-    //TODO can we get rid of this?
-    @AfterEach
-    void afterEach() {
-        jdbcTemplate.update(
-            """
-                DELETE FROM darts.media_request WHERE hea_id=101;
-                DELETE FROM darts.external_object_directory WHERE eod_id>=2541;
-                DELETE FROM darts.hearing_media_ae WHERE hea_id=101;
-                DELETE FROM darts.media WHERE ctr_id=-1;
-
-                DELETE FROM darts.hearing WHERE hea_id=101;
-                DELETE FROM darts.court_case WHERE cas_id=-1;
-                DELETE FROM darts.courtroom WHERE ctr_id=-1;
-
-                DELETE FROM darts.security_group_courthouse_ae WHERE grp_id=-4 AND cth_id=-1;
-                DELETE FROM darts.security_group_user_account_ae WHERE usr_id=-10 AND grp_id=-4;
-                DELETE FROM darts.user_account WHERE usr_id=-10;
-
-                DELETE FROM darts.courthouse WHERE cth_id=-1;
-                """);
-    }
-
     @Test
     void givenAudioRequestBeingProcessedFromArchive_thenReturnResults() throws Exception {
         Integer mediaRequestId = 421;

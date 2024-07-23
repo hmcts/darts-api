@@ -34,14 +34,6 @@ import static org.hibernate.envers.RelationTargetAuditMode.NOT_AUDITED;
 @Audited
 @AuditTable("courthouse_aud")
 public class CourthouseEntity extends CreatedModifiedBaseEntity {
-    @Override
-    public String toString() {
-        return "CourthouseEntity{" +
-            "id=" + id +
-            ", code=" + code +
-            ", courthouseName='" + courthouseName + '\'' +
-            '}';
-    }
 
     @Id
     @Column(name = "cth_id")

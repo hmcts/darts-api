@@ -312,7 +312,7 @@ class AudioControllerGetAdminMediasIntTest extends IntegrationBase {
         String actualJson = mvcResult.getResponse().getContentAsString();
         String expectedJson = """
             [
-
+               
              ]
               """;
         JSONAssert.assertEquals(expectedJson, actualJson, JSONCompareMode.NON_EXTENSIBLE);

@@ -42,13 +42,6 @@ class SecurityGroupControllerIntTest extends IntegrationBase {
     @Autowired
     private transient MockMvc mockMvc;
 
-    @AfterEach
-    void deleteUser() {
-        //TODO remove
-        dartsDatabase.addToUserAccountTrash(INTEGRATION_TEST_USER_EMAIL);
-        dartsDatabase.addToUserAccountTrash(SEPARATE_TEST_USER_EMAIL);
-    }
-
     @Test
     void getSecurityGroupsShouldSucceedAndReturnAllGroups() throws Exception {
         superAdminUserStub.givenUserIsAuthorised(userIdentity);
