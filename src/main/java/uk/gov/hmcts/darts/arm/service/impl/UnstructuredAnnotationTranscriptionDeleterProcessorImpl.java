@@ -8,12 +8,15 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.darts.arm.service.UnstructuredTranscriptionAndAnnotationDeleterProcessor;
 import uk.gov.hmcts.darts.common.entity.ObjectRecordStatusEntity;
+import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum;
 import uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum;
 import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
 import uk.gov.hmcts.darts.common.helper.SystemUserHelper;
 import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
 import uk.gov.hmcts.darts.common.repository.ObjectRecordStatusRepository;
+import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
+import uk.gov.hmcts.darts.common.util.EodHelper;
 
 import java.time.OffsetDateTime;
 import java.time.temporal.ChronoUnit;
@@ -29,6 +32,10 @@ public class UnstructuredAnnotationTranscriptionDeleterProcessorImpl implements 
 
     private final ObjectRecordStatusRepository objectRecordStatusRepository;
 
+    private final UserAccountRepository userAccountRepository;
+
+    private final EodHelper eodHelper;
+
     @Autowired
     private CurrentTimeHelper currentTimeHelper;
 
@@ -41,22 +48,39 @@ public class UnstructuredAnnotationTranscriptionDeleterProcessorImpl implements 
 
     @Override
     public List<Integer> processDeletionIfPreceding(int batch, int weeksBeforeCurrentDate) {
+
+        // if a default batch size of 0 is specified this means no batch
+        Pageable pageable = null;
+        if (batch > 0) {
+            pageable = Pageable.ofSize(batch);
+        }
+
         OffsetDateTime lastModifiedBefore = currentTimeHelper.currentOffsetDateTime().minus(
             weeksBeforeCurrentDate,
             ChronoUnit.WEEKS
         );
 
-        List<Integer> armRecordToBeMarkedForDeletion
+        List<Integer> recordsMarkedForDeletion
             = externalObjectDirectoryRepository
-            .findAllArmMediaBeforeOrEqualDate(Pageable.ofSize(batch), ExternalLocationTypeEnum.UNSTRUCTURED.getId(), lastModifiedBefore);
+            .findMediaFileIdsIn2StorageLocationsBeforeTime(pageable,
+                                                           EodHelper.storedStatus(),
+                                                           EodHelper.storedStatus(),
+                                                           EodHelper.unstructuredLocation(),
+                                                           EodHelper.armLocation(),
+                                                           lastModifiedBefore);
 
-        ObjectRecordStatusEntity status = objectRecordStatusRepository.getReferenceById(ObjectRecordStatusEnum.MARKED_FOR_DELETION.getId());
+        log.debug("Identified records to be marked for deletion  {}",  recordsMarkedForDeletion.stream().map(Object::toString));
 
-        log.debug("Identified records to be deleted  {}",  armRecordToBeMarkedForDeletion.stream().map(Object::toString));
-        externalObjectDirectoryRepository.updateStatusAndUserOfObjectDirectory(armRecordToBeMarkedForDeletion, status,
-                                                                               systemUserHelper.getHousekeepingUser());
-        log.debug("Records have been marked as deleted");
+        UserAccountEntity user = userAccountRepository.findSystemUser(systemUserHelper.findSystemUserGuid("housekeeping"));
+        eodHelper.updateStatus(
+            EodHelper.markForDeletionStatus(),
+            user,
+            recordsMarkedForDeletion,
+            OffsetDateTime.now()
+        );
 
-        return armRecordToBeMarkedForDeletion;
+        log.debug("Records have been marked for deletion");
+
+        return recordsMarkedForDeletion;
     }
 }

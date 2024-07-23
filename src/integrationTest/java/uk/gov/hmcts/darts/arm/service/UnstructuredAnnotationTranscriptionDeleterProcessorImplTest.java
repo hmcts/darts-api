@@ -33,7 +33,7 @@ class UnstructuredAnnotationTranscriptionDeleterProcessorImplTest extends Postgr
     private CurrentTimeHelper currentTimeHelper;
 
     @Test
-    void procesDeletionIfPrecedingWithSingleRecordFound() throws Exception {
+    void processDeletionIfPrecedingWithSingleRecordFound() throws Exception {
         int numberOfRecordsToGenerate = 10;
 
         List<ExternalObjectDirectoryEntity> externalObjectDirectoryEntitiesNotRelevant
@@ -42,9 +42,12 @@ class UnstructuredAnnotationTranscriptionDeleterProcessorImplTest extends Postgr
         List<ExternalObjectDirectoryEntity> externalObjectDirectoryEntities
             = externalObjectDirectoryStub.generateWithStatusAndUnstructuredLocation(STORED, numberOfRecordsToGenerate);
 
+        List<ExternalObjectDirectoryEntity> entitiesToBeMarkedWithMediaOutsideOfWeeks
+            = externalObjectDirectoryEntities.subList(0, externalObjectDirectoryEntities.size() / 2);
+
         List<ExternalObjectDirectoryEntity> expectedArmRecordsResultOutsideDuration
             = externalObjectDirectoryStub.generateWithStatusAndMediaAndArmLocation(
-                externalObjectDirectoryEntities.subList(0, externalObjectDirectoryEntities.size() / 2), getDateTimePrecedingCurrentDateTimeByWeeks(3));
+            entitiesToBeMarkedWithMediaOutsideOfWeeks, getDateTimePrecedingCurrentDateTimeByWeeks(3));
         List<ExternalObjectDirectoryEntity> expectedArmRecordsResultWithinTheHour
             = externalObjectDirectoryStub.generateWithStatusAndMediaAndArmLocation(
                 externalObjectDirectoryEntities.subList(externalObjectDirectoryEntities.size() / 2, externalObjectDirectoryEntities.size()), 1);
@@ -62,10 +65,10 @@ class UnstructuredAnnotationTranscriptionDeleterProcessorImplTest extends Postgr
         List<Integer> updatedResults = armTranscriptionAndAnnotationDeleterProcessor.processDeletionIfPreceding(pageSize,  weeksPrecedingCurrent);
 
         // assert the logic
-        assertExpectedResults(updatedResults, expectedArmRecordsResultOutsideDuration, pageSize);
+        assertExpectedResults(updatedResults, entitiesToBeMarkedWithMediaOutsideOfWeeks, pageSize);
 
         // assert the logic
-        assertExternalObjectDirectoryUpdate(updatedResults, expectedArmRecordsResultOutsideDuration, pageSize);
+        assertExternalObjectDirectoryUpdate(updatedResults, entitiesToBeMarkedWithMediaOutsideOfWeeks, pageSize);
 
         updatedResults = armTranscriptionAndAnnotationDeleterProcessor.processDeletionIfPreceding(pageSize, weeksPrecedingCurrent);
 
@@ -81,6 +84,9 @@ class UnstructuredAnnotationTranscriptionDeleterProcessorImplTest extends Postgr
             ObjectRecordStatusEnum.ARM_RAW_DATA_FAILED, numberOfRecordsToGenerate);
         List<ExternalObjectDirectoryEntity> externalObjectDirectoryEntities
             = externalObjectDirectoryStub.generateWithStatusAndUnstructuredLocation(STORED, numberOfRecordsToGenerate);
+
+        List<ExternalObjectDirectoryEntity> entitiesToBeMarkedWithMediaOutsideOfWeeks
+            = externalObjectDirectoryEntities.subList(0, externalObjectDirectoryEntities.size() / 2);
 
         List<ExternalObjectDirectoryEntity> expectedArmRecordsResultOutsideDuration
             = externalObjectDirectoryStub.generateWithStatusAndMediaAndArmLocation(
@@ -101,21 +107,59 @@ class UnstructuredAnnotationTranscriptionDeleterProcessorImplTest extends Postgr
         List<Integer> updatedResults = armTranscriptionAndAnnotationDeleterProcessor.processDeletionIfPreceding(pageSize, 3);
 
         // assert the logic
-        assertExpectedResults(updatedResults, expectedArmRecordsResultOutsideDuration, pageSize);
+        assertExpectedResults(updatedResults, entitiesToBeMarkedWithMediaOutsideOfWeeks, pageSize);
 
         // assert the logic
-        assertExternalObjectDirectoryUpdate(updatedResults, expectedArmRecordsResultOutsideDuration, 1);
+        assertExternalObjectDirectoryUpdate(updatedResults, entitiesToBeMarkedWithMediaOutsideOfWeeks, 1);
 
         List<Integer> updatedResults2 = armTranscriptionAndAnnotationDeleterProcessor.processDeletionIfPreceding(pageSize, 3);
 
         // assert the logic
-        assertExpectedResults(updatedResults2, expectedArmRecordsResultOutsideDuration, pageSize);
+        assertExpectedResults(updatedResults2, entitiesToBeMarkedWithMediaOutsideOfWeeks, pageSize);
 
         // assert the update
-        assertExternalObjectDirectoryUpdate(updatedResults2, expectedArmRecordsResultOutsideDuration, pageSize);
+        assertExternalObjectDirectoryUpdate(updatedResults2, entitiesToBeMarkedWithMediaOutsideOfWeeks, pageSize);
 
         // check the results are unique between processing
         Assertions.assertFalse(CollectionUtils.containsAny(updatedResults, updatedResults2));
+
+        externalObjectDirectoryStub.checkNotMarkedForDeletion(expectedArmRecordsResultWithinTheHour);
+    }
+
+    @Test
+    void processDeletionIfPrecedingWithMultipleRecordsFoundWithNoPaging() throws Exception {
+        int numberOfRecordsToGenerate = 10;
+
+        List<ExternalObjectDirectoryEntity> externalObjectDirectoryEntitiesNotRelevant
+            = externalObjectDirectoryStub.generateWithStatusAndUnstructuredLocation(
+            ObjectRecordStatusEnum.ARM_RAW_DATA_FAILED, numberOfRecordsToGenerate);
+        List<ExternalObjectDirectoryEntity> externalObjectDirectoryEntities
+            = externalObjectDirectoryStub.generateWithStatusAndUnstructuredLocation(STORED, numberOfRecordsToGenerate);
+
+        List<ExternalObjectDirectoryEntity> entitiesToBeMarkedWithMediaOutsideOfWeeks
+            = externalObjectDirectoryEntities.subList(0, externalObjectDirectoryEntities.size() / 2);
+
+        List<ExternalObjectDirectoryEntity> expectedArmRecordsResultOutsideDuration
+            = externalObjectDirectoryStub.generateWithStatusAndMediaAndArmLocation(
+            entitiesToBeMarkedWithMediaOutsideOfWeeks, getDateTimePrecedingCurrentDateTimeByWeeks(3));
+        List<ExternalObjectDirectoryEntity> expectedArmRecordsResultWithinTheHour
+            = externalObjectDirectoryStub.generateWithStatusAndMediaAndArmLocation(
+            externalObjectDirectoryEntities.subList(externalObjectDirectoryEntities.size() / 2, externalObjectDirectoryEntities.size()), 1);
+
+        int expectedRecords = externalObjectDirectoryEntitiesNotRelevant.size() + externalObjectDirectoryEntities.size()
+            + expectedArmRecordsResultOutsideDuration.size() + expectedArmRecordsResultWithinTheHour.size();
+
+        // assert that the test has inserted the data into the database
+        Assertions.assertEquals(expectedRecords, externalObjectDirectoryRepository.findAll().size());
+
+        // exercise the logic
+        List<Integer> updatedResults = armTranscriptionAndAnnotationDeleterProcessor.processDeletionIfPreceding(0, 3);
+
+        // assert the logic
+        assertExpectedResults(updatedResults, entitiesToBeMarkedWithMediaOutsideOfWeeks, entitiesToBeMarkedWithMediaOutsideOfWeeks.size());
+
+        // assert the logic
+        assertExternalObjectDirectoryUpdate(updatedResults, entitiesToBeMarkedWithMediaOutsideOfWeeks, entitiesToBeMarkedWithMediaOutsideOfWeeks.size());
 
         externalObjectDirectoryStub.checkNotMarkedForDeletion(expectedArmRecordsResultWithinTheHour);
     }
@@ -130,9 +174,13 @@ class UnstructuredAnnotationTranscriptionDeleterProcessorImplTest extends Postgr
         List<ExternalObjectDirectoryEntity> externalObjectDirectoryEntities
             = externalObjectDirectoryStub.generateWithStatusAndUnstructuredLocation(STORED, numberOfRecordsToGenerate);
 
+        List<ExternalObjectDirectoryEntity> entitiesToBeMarkedWithMediaOutsideOfWeeks
+            = externalObjectDirectoryEntities.subList(0, externalObjectDirectoryEntities.size() / 2);
+
+        // lets specify 40 week duration which is outside of the duration stipulated by spring i.e. 30 weeks
         List<ExternalObjectDirectoryEntity> expectedArmRecordsResultOutsideDuration
             = externalObjectDirectoryStub.generateWithStatusAndMediaAndArmLocation(
-            externalObjectDirectoryEntities.subList(0, externalObjectDirectoryEntities.size() / 2), getDateTimePrecedingCurrentDateTimeByWeeks(40));
+            entitiesToBeMarkedWithMediaOutsideOfWeeks, getDateTimePrecedingCurrentDateTimeByWeeks(40));
         List<ExternalObjectDirectoryEntity> expectedArmRecordsResultWithinTheHour
             = externalObjectDirectoryStub.generateWithStatusAndMediaAndArmLocation(
             externalObjectDirectoryEntities.subList(externalObjectDirectoryEntities.size() / 2, externalObjectDirectoryEntities.size()), 1);
@@ -149,18 +197,18 @@ class UnstructuredAnnotationTranscriptionDeleterProcessorImplTest extends Postgr
         List<Integer> updatedResults = armTranscriptionAndAnnotationDeleterProcessor.processDeletionIfPreceding(pageSize);
 
         // assert the logic
-        assertExpectedResults(updatedResults, expectedArmRecordsResultOutsideDuration, pageSize);
+        assertExpectedResults(updatedResults, entitiesToBeMarkedWithMediaOutsideOfWeeks, pageSize);
 
         // assert the logic
-        assertExternalObjectDirectoryUpdate(updatedResults, expectedArmRecordsResultOutsideDuration, 1);
+        assertExternalObjectDirectoryUpdate(updatedResults, entitiesToBeMarkedWithMediaOutsideOfWeeks, 1);
 
         List<Integer> updatedResults2 = armTranscriptionAndAnnotationDeleterProcessor.processDeletionIfPreceding(pageSize);
 
         // assert the logic
-        assertExpectedResults(updatedResults2, expectedArmRecordsResultOutsideDuration, pageSize);
+        assertExpectedResults(updatedResults2, entitiesToBeMarkedWithMediaOutsideOfWeeks, pageSize);
 
         // assert the update
-        assertExternalObjectDirectoryUpdate(updatedResults2, expectedArmRecordsResultOutsideDuration, pageSize);
+        assertExternalObjectDirectoryUpdate(updatedResults2, entitiesToBeMarkedWithMediaOutsideOfWeeks, pageSize);
 
         // check the results are unique between processing
         Assertions.assertFalse(CollectionUtils.containsAny(updatedResults, updatedResults2));
