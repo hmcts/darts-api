@@ -221,24 +221,6 @@ public interface ExternalObjectDirectoryRepository extends JpaRepository<Externa
 
     @Query(
         """
-            SELECT eod.id FROM ExternalObjectDirectoryEntity eod, ExternalObjectDirectoryEntity eod2
-            WHERE eod.media is not null
-            AND eod.media = eod2.media
-            AND eod.status = :status1
-            AND eod2.status = :status2
-            AND eod.externalLocationType = :location1
-            AND eod2.externalLocationType = :location2
-            AND eod.lastModifiedDateTime <= :lastModifiedBefore
-            """
-    )
-    List<Integer> findMediaFileIdsIn2StorageLocationsBeforeTime1(Pageable page, ObjectRecordStatusEntity status1,
-                                                                ObjectRecordStatusEntity status2,
-                                                                ExternalLocationTypeEntity location1,
-                                                                ExternalLocationTypeEntity location2);
-
-
-    @Query(
-        """
 
             SELECT eod FROM ExternalObjectDirectoryEntity eod
                   JOIN eod.annotationDocumentEntity ade
