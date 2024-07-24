@@ -25,7 +25,6 @@ public class GivenBuilder {
     private DartsDatabaseStub dartsDatabase;
 
     public UserAccountEntity anAuthenticatedUserWithGlobalAccessAndRole(SecurityRoleEnum role) {
-        //TODO use this?
         var userEmail = role.name() + "@global.com";
         anAuthenticatedUserFor(userEmail);
 

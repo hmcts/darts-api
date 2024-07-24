@@ -129,7 +129,6 @@ import static uk.gov.hmcts.darts.test.common.data.HearingTestData.someMinimalHea
 @Slf4j
 public class DartsDatabaseStub {
 
-    private final EntityManager em;
     private final AnnotationDocumentRepository annotationDocumentRepository;
     private final AnnotationRepository annotationRepository;
     private final AuditRepository auditRepository;
@@ -201,27 +200,6 @@ public class DartsDatabaseStub {
     private final CurrentTimeHelper currentTimeHelper;
     private final TransactionalUtil transactionalUtil;
 
-//    private final List<String> excludedTables = List.of(
-//        "user_roles_courthouses",
-//        "hearing_reporting_restrictions",
-//        "security_group",
-//        "user_account"
-//    );
-
-//    @Transactional
-//    public void truncateTables () {
-//        final Query query = em
-//            .createNativeQuery("SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = 'darts'");
-//        final List result = query.getResultList();
-//        em.createNativeQuery("SET REFERENTIAL_INTEGRITY FALSE").executeUpdate();
-//        for (Object tableName : result) {
-//            if (!excludedTables.contains(tableName.toString())) {
-//                em.createNativeQuery("TRUNCATE TABLE darts." + tableName + " RESTART IDENTITY").executeUpdate();
-//            }
-//        }
-//        em.createNativeQuery("SET REFERENTIAL_INTEGRITY TRUE").executeUpdate();
-//    }
-
     @Transactional
     public void clearDatabaseInThisOrder() {
         objectAdminActionRepository.deleteAll();
@@ -254,19 +232,8 @@ public class DartsDatabaseStub {
         caseRepository.deleteAll();
         judgeRepository.deleteAll();
         dailyListRepository.deleteAll();
-//        retentionPolicyTypeRepository.deleteAll(retentionPolicyTypeBin);
-//        retentionPolicyTypeBin.clear();
-//        em.createNativeQuery("SELECT usr_id, grp_id from darts.security_group_user_account_ae").getResultList();
-//        userAccountRepository.deleteAll(userAccountBin);
-//        userAccountBin.clear();
-//        em.createNativeQuery("SELECT usr_id, grp_id from darts.security_group_user_account_ae").getResultList();
-
-//        securityGroupRepository.deleteAll(securityGroupBin);
-//        securityGroupBin.clear();
         courthouseRepository.deleteAll();
         regionRepository.deleteAll();
-//        eventHandlerRepository.deleteAll(eventHandlerBin);
-//        eventHandlerBin.clear();
         annotationRepository.deleteAll();
         transcriptionRepository.deleteAll();
         transcriptionWorkflowRepository.deleteAll();

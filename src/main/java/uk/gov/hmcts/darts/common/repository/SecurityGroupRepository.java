@@ -23,4 +23,6 @@ public interface SecurityGroupRepository extends RevisionRepository<SecurityGrou
     boolean existsAllByIdIn(Set<Integer> ids);
 
     List<SecurityGroupEntity> findByGroupNameNotIn(List<String> names);
+
+    List<SecurityGroupEntity> findByIdGreaterThanEqual(Integer threshold);
 }

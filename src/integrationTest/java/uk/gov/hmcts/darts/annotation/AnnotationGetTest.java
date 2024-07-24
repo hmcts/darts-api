@@ -1,6 +1,5 @@
 package uk.gov.hmcts.darts.annotation;
 
-import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,7 +15,6 @@ import uk.gov.hmcts.darts.testutils.GivenBuilder;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 
 import java.io.InputStream;
-import java.util.List;
 
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.Mockito.when;
@@ -31,7 +29,6 @@ import static uk.gov.hmcts.darts.test.common.data.AnnotationTestData.minimalAnno
 import static uk.gov.hmcts.darts.test.common.data.HearingTestData.someMinimalHearing;
 
 @AutoConfigureMockMvc
-@Slf4j
 class AnnotationGetTest extends IntegrationBase {
 
     private static final String ANNOTATION_DOCUMENT_ENDPOINT = "/annotations/{annotation_id}/documents/{annotation_document_id}";
@@ -75,8 +72,6 @@ class AnnotationGetTest extends IntegrationBase {
         when(dataManagementFacade.retrieveFileFromStorage(anyList())).thenReturn(downloadResponseMetaData);
 
         var annotationDocument = dartsDatabase.createValidAnnotationDocumentForDownload(judge);
-        List<AnnotationEntity> all = dartsDatabase.getAnnotationRepository().findAll();
-        log.warn("all annotations: {}", all);
 
         MockHttpServletRequestBuilder requestBuilder = get(ANNOTATION_DOCUMENT_ENDPOINT,
                                                            annotationDocument.getAnnotation().getId(),

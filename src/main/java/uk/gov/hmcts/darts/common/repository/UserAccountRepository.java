@@ -24,6 +24,8 @@ public interface UserAccountRepository extends
 
     List<UserAccountEntity> findByUserNameNotIn(List<String> userName);
 
+    List<UserAccountEntity> findByIdGreaterThanEqual(Integer threshold);
+
     Optional<UserAccountEntity> findByAccountGuidAndActive(String guid, Boolean active);
 
     @Query("""

@@ -35,4 +35,6 @@ public interface EventHandlerRepository extends RevisionRepository<EventHandlerE
         WHERE eh.created_by != 0
         """, nativeQuery = true)
     List<EventHandlerEntity> findByCreatedByIsNot0();
+
+    List<EventHandlerEntity> findByIdGreaterThanEqual(Integer threshold);
 }

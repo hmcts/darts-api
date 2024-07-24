@@ -22,5 +22,5 @@ public interface AutomatedTaskRepository extends RevisionRepository<AutomatedTas
     )
     List<Timestamp> findLockedUntilForTask(String taskName);
 
-
+    List<AutomatedTaskEntity> findByIdGreaterThanEqual(Integer threshold);
 }

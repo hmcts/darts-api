@@ -22,6 +22,7 @@ import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.util.StopWatch;
 import org.testcontainers.containers.GenericContainer;
+import uk.gov.hmcts.darts.common.repository.AutomatedTaskRepository;
 import uk.gov.hmcts.darts.common.repository.EventHandlerRepository;
 import uk.gov.hmcts.darts.common.repository.RetentionPolicyTypeRepository;
 import uk.gov.hmcts.darts.common.repository.SecurityGroupRepository;
@@ -32,7 +33,6 @@ import uk.gov.hmcts.darts.testutils.stubs.DartsDatabaseStub;
 
 import java.util.List;
 import java.util.Map;
-import javax.annotation.PostConstruct;
 
 /**
  * Base class for integration tests running with H2 in Postgres compatibility mode.
@@ -73,6 +73,8 @@ public class IntegrationBase  {
     RetentionPolicyTypeRepository retentionPolicyTypeRepository;
     @Autowired
     EventHandlerRepository eventHandlerRepository;
+    @Autowired
+    AutomatedTaskRepository automatedTaskRepository;
 
     private static final List<String> excludedTables = List.of(
         "audit_activity",
@@ -98,15 +100,15 @@ public class IntegrationBase  {
     );
 
     private List excludedSequences = List.of(
-        "revinfo_seq",
-        "evh_seq"
+        "revinfo_seq"
     );
 
     private Map<String, String> sequencesStartFrom = Map.of(
         "usr_seq", "1000",
         "grp_seq", "1000",
         "aut_seq", "1000",
-        "rpt_seq", "1000"
+        "rpt_seq", "1000",
+        "evh_seq", "1000"
 //        "evh_seq", "606"
     );
 
@@ -168,23 +170,17 @@ public class IntegrationBase  {
 //        em.getTransaction().begin();
 
         retentionPolicyTypeRepository.deleteAll(
-            retentionPolicyTypeRepository.findByPolicyNameNotIn(List.of(
-                "DARTS Permanent Retention v3",
-                "DARTS Standard Retention v3",
-                "DARTS Not Guilty Policy",
-                "DARTS Non Custodial Policy",
-                "DARTS Custodial Policy",
-                "DARTS Life Policy",
-                "DARTS Default Policy",
-                "DARTS Permanent Policy",
-                "DARTS Manual Policy"
-            ))
+            retentionPolicyTypeRepository.findByIdGreaterThanEqual(1000)
         );
 //TODO leave some logs in trace?
         log.info("retention policy types: {}", retentionPolicyTypeRepository.findAll());
 
         eventHandlerRepository.deleteAll(
-            eventHandlerRepository.findByCreatedByIsNot0()
+            eventHandlerRepository.findByIdGreaterThanEqual(1000)
+        );
+
+        automatedTaskRepository.deleteAll(
+            automatedTaskRepository.findByIdGreaterThanEqual(1000)
         );
 
 //        em.createNativeQuery("SELECT usr_id, grp_id from darts.security_group_user_account_ae").getResultList();
@@ -192,7 +188,7 @@ public class IntegrationBase  {
         //TODO change to createby is not 0
         log.info("users before delete: {}", userAccountRepository.findAll());
         userAccountRepository.deleteAll(
-            userAccountRepository.findByUserNameNotIn(List.of("darts_global_test_user", "dartstestuser", "Cpp", "Xhibit", "system", "system_housekeeping"))
+            userAccountRepository.findByIdGreaterThanEqual(1000)
         );
         log.info("users after delete: {}", userAccountRepository.findAll());
 
@@ -200,7 +196,7 @@ public class IntegrationBase  {
 
 //        em.createNativeQuery("SELECT usr_id, grp_id from darts.security_group_user_account_ae").getResultList();
         securityGroupRepository.deleteAll(
-            securityGroupRepository.findByGroupNameNotIn(PREDEFINED_SECURITY_GROUPS)
+            securityGroupRepository.findByIdGreaterThanEqual(1000)
         );
 
 //        em.getTransaction().commit();
