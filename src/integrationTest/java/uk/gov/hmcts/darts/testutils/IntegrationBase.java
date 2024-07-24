@@ -40,7 +40,7 @@ import java.util.List;
 @ActiveProfiles({"intTest", "h2db", "in-memory-caching"})
 public class IntegrationBase {
 
-    private static final int PRIMARY_KEY_START_VALUE = 500;
+    private static final int SEQUENCE_START_VALUE = 500;
 
     private static final List<String> SEQUENCES_NO_RESET = List.of(
         "revinfo_seq"
@@ -98,17 +98,13 @@ public class IntegrationBase {
     public void resetSequences() {
         try (EntityManager em = entityManagerFactory.createEntityManager()) {
             em.getTransaction().begin();
-            final Query query = em
-                    .createNativeQuery("SELECT sequence_name FROM information_schema.sequences WHERE sequence_schema = 'darts'");
-            final List result = query.getResultList();
-
-            for (Object seqName : result) {
-                //TODO swap and add if else
-                if (!SEQUENCES_NO_RESET.contains(seqName.toString())) {
-                    em.createNativeQuery("ALTER SEQUENCE darts." + seqName + " RESTART").executeUpdate();
-                }
+            final Query query = em.createNativeQuery("SELECT sequence_name FROM information_schema.sequences WHERE sequence_schema = 'darts'");
+            final List sequences = query.getResultList();
+            for (Object seqName : sequences) {
                 if (SEQUENCES_RESET_FROM.contains(seqName.toString())) {
-                    em.createNativeQuery("ALTER SEQUENCE darts." + seqName + " RESTART WITH " + PRIMARY_KEY_START_VALUE).executeUpdate();
+                    em.createNativeQuery("ALTER SEQUENCE darts." + seqName + " RESTART WITH " + SEQUENCE_START_VALUE).executeUpdate();
+                } else if (!SEQUENCES_NO_RESET.contains(seqName.toString())) {
+                    em.createNativeQuery("ALTER SEQUENCE darts." + seqName + " RESTART").executeUpdate();
                 }
             }
             em.getTransaction().commit();
@@ -116,26 +112,26 @@ public class IntegrationBase {
     }
 
     @Transactional
-    public void resetTableWithPredefinedTestData() {
+    public void resetTablesWithPredefinedTestData() {
 
         retentionPolicyTypeRepository.deleteAll(
-            retentionPolicyTypeRepository.findByIdGreaterThanEqual(PRIMARY_KEY_START_VALUE)
+            retentionPolicyTypeRepository.findByIdGreaterThanEqual(SEQUENCE_START_VALUE)
         );
 
         eventHandlerRepository.deleteAll(
-            eventHandlerRepository.findByIdGreaterThanEqual(PRIMARY_KEY_START_VALUE)
+            eventHandlerRepository.findByIdGreaterThanEqual(SEQUENCE_START_VALUE)
         );
 
         automatedTaskRepository.deleteAll(
-            automatedTaskRepository.findByIdGreaterThanEqual(PRIMARY_KEY_START_VALUE)
+            automatedTaskRepository.findByIdGreaterThanEqual(SEQUENCE_START_VALUE)
         );
 
         userAccountRepository.deleteAll(
-            userAccountRepository.findByIdGreaterThanEqual(PRIMARY_KEY_START_VALUE)
+            userAccountRepository.findByIdGreaterThanEqual(SEQUENCE_START_VALUE)
         );
 
         securityGroupRepository.deleteAll(
-            securityGroupRepository.findByIdGreaterThanEqual(PRIMARY_KEY_START_VALUE)
+            securityGroupRepository.findByIdGreaterThanEqual(SEQUENCE_START_VALUE)
         );
     }
 
@@ -143,7 +139,7 @@ public class IntegrationBase {
     void clearDb() {
         resetSequences();
         dartsDatabase.clearDatabaseInThisOrder();
-        resetTableWithPredefinedTestData();
+        resetTablesWithPredefinedTestData();
     }
 
     @AfterEach
