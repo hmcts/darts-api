@@ -1,14 +1,12 @@
 package uk.gov.hmcts.darts.testutils;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.github.tomakehurst.wiremock.WireMockServer;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
 import jakarta.persistence.Query;
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -31,7 +29,6 @@ import uk.gov.hmcts.darts.test.common.MemoryLogAppender;
 import uk.gov.hmcts.darts.testutils.stubs.DartsDatabaseStub;
 
 import java.util.List;
-import java.util.Map;
 
 /**
  * Base class for integration tests running with H2 in Postgres compatibility mode.
@@ -43,7 +40,7 @@ import java.util.Map;
 @ActiveProfiles({"intTest", "h2db", "in-memory-caching"})
 public class IntegrationBase {
 
-    public static final int PRIMARY_KEY_START_VALUE = 500;
+    private static final int PRIMARY_KEY_START_VALUE = 500;
 
     private final List<String> SEQUENCES_NO_RESET = List.of(
         "revinfo_seq"
@@ -58,18 +55,17 @@ public class IntegrationBase {
     );
 
     @Autowired
-    EntityManagerFactory entityManagerFactory;
+    private EntityManagerFactory entityManagerFactory;
     @Autowired
-    UserAccountRepository userAccountRepository;
+    protected UserAccountRepository userAccountRepository;
     @Autowired
-    SecurityGroupRepository securityGroupRepository;
+    protected SecurityGroupRepository securityGroupRepository;
     @Autowired
-    RetentionPolicyTypeRepository retentionPolicyTypeRepository;
+    protected RetentionPolicyTypeRepository retentionPolicyTypeRepository;
     @Autowired
-    EventHandlerRepository eventHandlerRepository;
+    protected EventHandlerRepository eventHandlerRepository;
     @Autowired
-    AutomatedTaskRepository automatedTaskRepository;
-
+    protected AutomatedTaskRepository automatedTaskRepository;
 
     @Autowired
     protected OpenInViewUtil openInViewUtil;
@@ -145,7 +141,6 @@ public class IntegrationBase {
 
     @BeforeEach
     void clearDb() {
-        log.info("wiremock running on port: {}", wiremockPort);
         resetSequences();
         dartsDatabase.clearDatabaseInThisOrder();
         resetTableWithPredefinedTestData();

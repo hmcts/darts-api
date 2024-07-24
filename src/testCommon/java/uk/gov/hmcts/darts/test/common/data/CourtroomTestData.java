@@ -33,7 +33,7 @@ public class CourtroomTestData {
         courtroom.setCourthouse(courthouse);
         courtroom.setName(name);
         UserAccountEntity defaultUser = UserAccountTestData.minimalUserAccount();
-        defaultUser.setId(9988);
+        defaultUser.setId(1000);
         courtroom.setCreatedBy(defaultUser);
         return courtroom;
     }
