@@ -31,8 +31,34 @@ import uk.gov.hmcts.darts.testutils.stubs.DartsDatabaseStub;
 import java.util.List;
 
 /**
- * Base class for integration tests running with H2 in Postgres compatibility mode.
- * This class also starts a containerised Redis instance
+ * Base class for integration tests running with H2 in Postgres compatibility mode.<br>
+ * This class also starts a containerised Redis instance.<br>
+ *<br>
+ * To optimise tests total execution time, the below setup has been introduced:
+ * <ul>
+ *  <li>
+ *     predefined test data setup by Liquibase may NOT be deleted and recreated for every test class
+ *  </li>
+ *  <li>
+ *     existing test data is deleted before each test
+ *  </li>
+ *  <li>
+ *     sequences are reset to either their initial value or to SEQUENCE_START_VALUE before each test
+ *  </li>
+ * </ul>
+ *<br>
+ * Based on the above, please follow the below recommendations when writing integration tests
+ * <ul>
+ *  <li>
+ *     do not permanently modify predefined test data (e.g. setting the 'Test Judge' security group to global = true, setting a predefined automated task to disabled)
+ *  </li>
+ *  <li>
+ *     setup test data in a @BeforeEach rather than a @BeforeAll
+ *  </li>
+ *  <li>
+ *      when creating test data with manually assigned ids use ids >= SEQUENCE_START_VALUE so that data is automatically deleted
+ *  </li>
+ * </ul>
  */
 @AutoConfigureWireMock(port = 0, files = "file:src/integrationTest/resources/wiremock")
 @SpringBootTest
@@ -95,6 +121,18 @@ public class IntegrationBase {
         REDIS.start();
     }
 
+    @BeforeEach
+    void clearDb() {
+        resetSequences();
+        dartsDatabase.clearDatabaseInThisOrder();
+        resetTablesWithPredefinedTestData();
+    }
+
+    @AfterEach
+    void clearTestData() {
+        logAppender.reset();
+    }
+
     public void resetSequences() {
         try (EntityManager em = entityManagerFactory.createEntityManager()) {
             em.getTransaction().begin();
@@ -133,18 +171,6 @@ public class IntegrationBase {
         securityGroupRepository.deleteAll(
             securityGroupRepository.findByIdGreaterThanEqual(SEQUENCE_START_VALUE)
         );
-    }
-
-    @BeforeEach
-    void clearDb() {
-        resetSequences();
-        dartsDatabase.clearDatabaseInThisOrder();
-        resetTablesWithPredefinedTestData();
-    }
-
-    @AfterEach
-    void clearTestData() {
-        logAppender.reset();
     }
 
     protected void givenBearerTokenExists(String email) {
