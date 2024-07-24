@@ -115,6 +115,19 @@ class AdminEventSearchTest extends IntegrationBase {
             .containsExactly(persistedEvents.get(0).getId());
     }
 
+    @Test
+    void treatsEmptyCourthouseIdListAsNull() {
+        var persistedEvents = given.persistedEvents(3);
+
+        var eventSearchResults = eventSearchService.searchForEvents(
+            new AdminEventSearch()
+                .courthouseIds(List.of()));
+
+        assertThat(eventSearchResults)
+            .extracting("id")
+            .isEqualTo(idsOf(persistedEvents));
+    }
+
 
     private static List<Integer> idsOf(List<EventEntity> persistedEvents) {
         return persistedEvents.stream().map(EventEntity::getId).toList();
