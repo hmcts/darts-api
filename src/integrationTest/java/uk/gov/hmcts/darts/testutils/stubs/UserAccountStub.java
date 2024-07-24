@@ -25,7 +25,7 @@ import java.util.UUID;
 
 import static java.util.Objects.nonNull;
 import static org.mockito.ArgumentMatchers.argThat;
-import static uk.gov.hmcts.darts.PredefinedIdentifiers.TEST_JUDGE_GLOBAL_SECURITY_GROUP_ID;
+import static uk.gov.hmcts.darts.PredefinedPrimaryKeys.TEST_JUDGE_GLOBAL_SECURITY_GROUP_ID;
 
 @Component
 @RequiredArgsConstructor

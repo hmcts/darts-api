@@ -26,7 +26,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import static uk.gov.hmcts.darts.PredefinedIdentifiers.TEST_JUDGE_GLOBAL_SECURITY_GROUP_ID;
+import static uk.gov.hmcts.darts.PredefinedPrimaryKeys.TEST_JUDGE_GLOBAL_SECURITY_GROUP_ID;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.SUPER_ADMIN;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.SUPER_USER;
 

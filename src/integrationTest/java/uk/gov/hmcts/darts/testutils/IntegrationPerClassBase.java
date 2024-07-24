@@ -10,8 +10,7 @@ import org.springframework.test.context.ActiveProfiles;
 import uk.gov.hmcts.darts.testutils.stubs.DartsDatabaseStub;
 import uk.gov.hmcts.darts.testutils.stubs.wiremock.DartsGatewayStub;
 
-//TODO remove this?
-@AutoConfigureWireMock(port = 8070, files = "file:src/integrationTest/resources/wiremock")
+@AutoConfigureWireMock(port = 0, files = "file:src/integrationTest/resources/wiremock")
 @TestInstance(Lifecycle.PER_CLASS)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles({"intTest", "h2db", "in-memory-caching"})
@@ -24,6 +23,7 @@ public class IntegrationPerClassBase {
 
     @BeforeAll
     void clearDbInThisOrder() {
+        dartsDatabase.clearDatabaseInThisOrder();
         dartsGateway.clearStubs();
     }
 }

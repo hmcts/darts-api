@@ -30,5 +30,5 @@ public interface EventHandlerRepository extends RevisionRepository<EventHandlerE
         """)
     List<EventHandlerEntity> findActiveMappingsForTypeAndSubtype(String type, String subType);
 
-    List<EventHandlerEntity> findByIdGreaterThanEqual(Integer threshold);
+    List<EventHandlerEntity> findByIdGreaterThanEqual(Integer value);
 }

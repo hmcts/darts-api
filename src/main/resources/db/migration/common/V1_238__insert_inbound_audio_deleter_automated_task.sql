@@ -3,7 +3,6 @@ VALUES (4,'InboundAudioDeleter','Marks for deletion audio that is stored in outb
 
 ALTER SEQUENCE aut_seq RESTART WITH 5;
 
--- does this need to be 1? can we set it to a negative number not to consume the sequence and so we can reset sequence to 1 rather than 2?
 insert into user_account(usr_id,user_name,description,user_state, account_guid, is_system_user)
 values (nextval('usr_seq'),'system_housekeeping','Housekeeping job', 1, 'ecfd1f14-c9b6-4f15-94c7-cc60e53f2c7a', true);
 

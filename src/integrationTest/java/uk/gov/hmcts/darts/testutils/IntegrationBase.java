@@ -41,18 +41,20 @@ import java.util.Map;
 @SpringBootTest
 @Slf4j
 @ActiveProfiles({"intTest", "h2db", "in-memory-caching"})
-public class IntegrationBase  {
+public class IntegrationBase {
+
+    public static final int PRIMARY_KEY_START_VALUE = 500;
 
     private final List<String> SEQUENCES_NO_RESET = List.of(
         "revinfo_seq"
     );
 
-    private final Map<String, String> SEQUENCES_RESET_FROM = Map.of(
-        "usr_seq", "500",
-        "grp_seq", "500",
-        "aut_seq", "500",
-        "rpt_seq", "500",
-        "evh_seq", "500"
+    private final List<String> SEQUENCES_RESET_FROM = List.of(
+        "usr_seq",
+        "grp_seq",
+        "aut_seq",
+        "rpt_seq",
+        "evh_seq"
     );
 
     @Autowired
@@ -109,8 +111,8 @@ public class IntegrationBase  {
             if (!SEQUENCES_NO_RESET.contains(seqName.toString())) {
                 em.createNativeQuery("ALTER SEQUENCE darts." + seqName + " RESTART").executeUpdate();
             }
-            if (SEQUENCES_RESET_FROM.containsKey(seqName.toString())) {
-                em.createNativeQuery("ALTER SEQUENCE darts." + seqName + " RESTART WITH " + SEQUENCES_RESET_FROM.get(seqName.toString())).executeUpdate();
+            if (SEQUENCES_RESET_FROM.contains(seqName.toString())) {
+                em.createNativeQuery("ALTER SEQUENCE darts." + seqName + " RESTART WITH " + PRIMARY_KEY_START_VALUE).executeUpdate();
             }
         }
         em.getTransaction().commit();
@@ -121,23 +123,23 @@ public class IntegrationBase  {
     public void resetTableWithPredefinedTestData() {
 
         retentionPolicyTypeRepository.deleteAll(
-            retentionPolicyTypeRepository.findByIdGreaterThanEqual(500)
+            retentionPolicyTypeRepository.findByIdGreaterThanEqual(PRIMARY_KEY_START_VALUE)
         );
 
         eventHandlerRepository.deleteAll(
-            eventHandlerRepository.findByIdGreaterThanEqual(500)
+            eventHandlerRepository.findByIdGreaterThanEqual(PRIMARY_KEY_START_VALUE)
         );
 
         automatedTaskRepository.deleteAll(
-            automatedTaskRepository.findByIdGreaterThanEqual(500)
+            automatedTaskRepository.findByIdGreaterThanEqual(PRIMARY_KEY_START_VALUE)
         );
 
         userAccountRepository.deleteAll(
-            userAccountRepository.findByIdGreaterThanEqual(500)
+            userAccountRepository.findByIdGreaterThanEqual(PRIMARY_KEY_START_VALUE)
         );
 
         securityGroupRepository.deleteAll(
-            securityGroupRepository.findByIdGreaterThanEqual(500)
+            securityGroupRepository.findByIdGreaterThanEqual(PRIMARY_KEY_START_VALUE)
         );
     }
 
