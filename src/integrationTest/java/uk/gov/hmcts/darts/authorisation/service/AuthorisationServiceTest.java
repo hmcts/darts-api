@@ -81,7 +81,7 @@ class AuthorisationServiceTest extends IntegrationBase {
         dartsDatabase.getSecurityGroupRepository().saveAndFlush(globalSecurityGroup);
 
         UserAccountEntity judgeUserAccountGlobal = new UserAccountEntity();
-        judgeUserAccountGlobal.setSecurityGroupEntities(Set.of(globalSecurityGroup));
+        judgeUserAccountGlobal.setSecurityGroupEntities(Set.of(globalSecurityGroup, judgesSecurityGroup));
         judgeUserAccountGlobal.setUserName("Test Judge Global");
         judgeUserAccountGlobal.setUserFullName("Test Judge Global");
         judgeUserAccountGlobal.setEmailAddress(TEST_JUDGE_GLOBAL_EMAIL);
