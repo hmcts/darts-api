@@ -823,9 +823,7 @@ public class DartsDatabaseStub {
         annotation.setDeleted(false);
         annotation.setCurrentOwner(userAccount);
         annotation.addHearing(save(someMinimalHearing()));
-        var saved = save(annotation);
-        log.info("created annotation id: {}", saved.getId());
-        return saved;
+        return save(annotation);
     }
 
     @Transactional

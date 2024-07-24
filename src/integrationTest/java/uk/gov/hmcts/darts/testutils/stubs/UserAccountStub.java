@@ -1,7 +1,6 @@
 package uk.gov.hmcts.darts.testutils.stubs;
 
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.mockito.Mockito;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -26,10 +25,10 @@ import java.util.UUID;
 
 import static java.util.Objects.nonNull;
 import static org.mockito.ArgumentMatchers.argThat;
+import static uk.gov.hmcts.darts.PredefinedIdentifiers.TEST_JUDGE_GLOBAL_SECURITY_GROUP_ID;
 
 @Component
 @RequiredArgsConstructor
-@Slf4j
 public class UserAccountStub {
 
     private static final int SYSTEM_USER_ID = 0;
@@ -79,7 +78,6 @@ public class UserAccountStub {
 
     public UserAccountEntity getIntegrationTestUserAccountEntity() {
         List<UserAccountEntity> userAccounts = userAccountRepository.findByEmailAddressIgnoreCase(INTEGRATION_TEST_USER_EMAIL);
-        log.info("Users: {}", userAccounts);
         if (userAccounts.isEmpty()) {
             return createIntegrationUser(UUID.randomUUID().toString());
         }
@@ -269,9 +267,7 @@ public class UserAccountStub {
 
     @Transactional
     public UserAccountEntity createJudgeUser(String identifier) {
-        // rather than "dirtying" the predefined test judge security group making it permanently global, I've added a global test judge
-        //TODO move -7 to a constant?
-        SecurityGroupEntity securityGroupEntity = securityGroupRepository.findById(-7).get();
+        SecurityGroupEntity securityGroupEntity = securityGroupRepository.findById(TEST_JUDGE_GLOBAL_SECURITY_GROUP_ID).get();
         securityGroupEntity.getCourthouseEntities().addAll(courthouseRepository.findAll());
         securityGroupEntity = securityGroupRepository.saveAndFlush(securityGroupEntity);
 
@@ -305,7 +301,6 @@ public class UserAccountStub {
 
     public UserAccountEntity createCppExternalUser(String guid, CourthouseEntity courthouseEntity) {
         SecurityGroupEntity securityGroupEntity = securityGroupRepository.getReferenceById(-15);
-        //TODO
         securityGroupEntity.setGlobalAccess(true);
         securityGroupEntity = securityGroupRepository.saveAndFlush(securityGroupEntity);
 

@@ -26,6 +26,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static uk.gov.hmcts.darts.PredefinedIdentifiers.TEST_JUDGE_GLOBAL_SECURITY_GROUP_ID;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.SUPER_ADMIN;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.SUPER_USER;
 
@@ -33,7 +34,6 @@ import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.SUPER_USER;
 class UserControllerGetUsersByIdIntTest extends IntegrationBase {
 
     private static final String ENDPOINT_URL = "/admin/users/";
-    public static final int TEST_JUDGE_GLOBAL_SECURITY_GROUP_ID = -7;
 
     @Autowired
     private MockMvc mockMvc;

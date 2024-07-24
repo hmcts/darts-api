@@ -104,11 +104,11 @@ public class IntegrationBase  {
     );
 
     private Map<String, String> sequencesStartFrom = Map.of(
-        "usr_seq", "1000",
-        "grp_seq", "1000",
-        "aut_seq", "1000",
-        "rpt_seq", "1000",
-        "evh_seq", "1000"
+        "usr_seq", "500",
+        "grp_seq", "500",
+        "aut_seq", "500",
+        "rpt_seq", "500",
+        "evh_seq", "500"
 //        "evh_seq", "606"
     );
 
@@ -154,41 +154,23 @@ public class IntegrationBase  {
 
     @Transactional
     public void resetUserAccountTable () {
-//        EntityManager em = entityManagerFactoryNonStatic.createEntityManager();
-//        em.getTransaction().begin();
-//        em.createNativeQuery("SET REFERENTIAL_INTEGRITY FALSE").executeUpdate();
-//        em.createNativeQuery("SELECT usr_id, grp_id from darts.security_group_user_account_ae").getResultList();
-//
-//        em.createNativeQuery("DELETE FROM darts.user_account WHERE user_name NOT IN ('darts_global_test_user', 'dartstestuser', 'Cpp', 'Xhibit', 'system', 'system_housekeeping')").executeUpdate();
-//        em.createNativeQuery("DELETE FROM darts.security_group WHERE group_name NOT IN ('Mid Tier Group', 'Dar Pc Group', 'Cpp Group', 'Xhibit Group', 'Test RCJ Appeals', 'Test Language Shop', 'Test Transcriber', " +
-//                                 "'Test Judge', 'Test Requestor', 'Test Approver', 'SUPER_ADMIN', 'SUPER_USER', 'DARTS', 'MEDIA_IN_PERPETUITY')").executeUpdate();
-//        em.createNativeQuery("SET REFERENTIAL_INTEGRITY TRUE").executeUpdate();
-//        em.createNativeQuery("SELECT usr_id, grp_id from darts.security_group_user_account_ae").getResultList();
-//
-//        em.getTransaction().commit();
-//        EntityManager em = entityManagerFactoryNonStatic.createEntityManager();
-//        em.getTransaction().begin();
 
         retentionPolicyTypeRepository.deleteAll(
-            retentionPolicyTypeRepository.findByIdGreaterThanEqual(1000)
+            retentionPolicyTypeRepository.findByIdGreaterThanEqual(500)
         );
-//TODO leave some logs in trace?
-        log.info("retention policy types: {}", retentionPolicyTypeRepository.findAll());
 
         eventHandlerRepository.deleteAll(
-            eventHandlerRepository.findByIdGreaterThanEqual(1000)
+            eventHandlerRepository.findByIdGreaterThanEqual(500)
         );
 
         automatedTaskRepository.deleteAll(
-            automatedTaskRepository.findByIdGreaterThanEqual(1000)
+            automatedTaskRepository.findByIdGreaterThanEqual(500)
         );
-
-//        em.createNativeQuery("SELECT usr_id, grp_id from darts.security_group_user_account_ae").getResultList();
 
         //TODO change to createby is not 0
         log.info("users before delete: {}", userAccountRepository.findAll());
         userAccountRepository.deleteAll(
-            userAccountRepository.findByIdGreaterThanEqual(1000)
+            userAccountRepository.findByIdGreaterThanEqual(500)
         );
         log.info("users after delete: {}", userAccountRepository.findAll());
 
@@ -196,7 +178,7 @@ public class IntegrationBase  {
 
 //        em.createNativeQuery("SELECT usr_id, grp_id from darts.security_group_user_account_ae").getResultList();
         securityGroupRepository.deleteAll(
-            securityGroupRepository.findByIdGreaterThanEqual(1000)
+            securityGroupRepository.findByIdGreaterThanEqual(500)
         );
 
 //        em.getTransaction().commit();

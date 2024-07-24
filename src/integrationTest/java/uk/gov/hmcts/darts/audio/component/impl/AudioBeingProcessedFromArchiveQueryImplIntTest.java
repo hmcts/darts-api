@@ -1,13 +1,9 @@
 package uk.gov.hmcts.darts.audio.component.impl;
 
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestInstance;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.transaction.annotation.Transactional;
 import uk.gov.hmcts.darts.audio.component.AudioBeingProcessedFromArchiveQuery;
 import uk.gov.hmcts.darts.audio.model.AudioBeingProcessedFromArchiveQueryResult;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
@@ -15,9 +11,7 @@ import uk.gov.hmcts.darts.testutils.IntegrationBase;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.TestInstance.Lifecycle.PER_CLASS;
 
-@Disabled
 class AudioBeingProcessedFromArchiveQueryImplIntTest extends IntegrationBase {
 
     @Autowired
@@ -35,13 +29,13 @@ class AudioBeingProcessedFromArchiveQueryImplIntTest extends IntegrationBase {
                 VALUES (-1, NULL, 'Bristol', '2023-11-17 15:06:15.859244+00', '2023-11-17 15:06:15.859244+00', 0, 0, 'Bristol');
 
                 INSERT INTO darts.user_account (usr_id, dm_user_s_object_id, user_name, user_email_address, description, created_ts, last_modified_ts, last_login_ts, last_modified_by, created_by, account_guid, is_system_user, is_active, user_full_name)
-                VALUES (-10, NULL, 'Richard B', 'Richard.B@example.com', NULL, NULL, NULL, NULL, NULL, NULL, NULL, false, true, 'Richard B');
+                VALUES (1000, NULL, 'Richard B', 'Richard.B@example.com', NULL, NULL, NULL, NULL, NULL, NULL, NULL, false, true, 'Richard B');
 
                 INSERT INTO darts.security_group_courthouse_ae (grp_id, cth_id)
                 VALUES (-4, -1);
 
                 INSERT INTO darts.security_group_user_account_ae (usr_id, grp_id)
-                VALUES (-10, -4);
+                VALUES (1000, -4);
 
                 INSERT INTO darts.court_case (cas_id, cth_id, evh_id, case_object_id, case_number, case_closed, interpreter_used, case_closed_ts, created_ts, created_by, last_modified_ts, last_modified_by)
                 VALUES (-1, -1, NULL, NULL, 'T20231009-1', false, false, NULL, NULL, NULL, NULL, NULL);
@@ -105,7 +99,7 @@ class AudioBeingProcessedFromArchiveQueryImplIntTest extends IntegrationBase {
 
                 INSERT INTO darts.media_request (mer_id, hea_id, requestor, request_status, request_type, req_proc_attempts, start_ts, end_ts, created_ts, last_modified_ts, created_by, last_modified_by, current_owner)
                 VALUES
-                (421, 101, -10, 'OPEN', 'DOWNLOAD', 0, '2024-01-04 11:00:02+00', '2024-01-04 11:00:19+00', '2024-01-22 15:41:04.393833+00', '2024-01-22 15:41:04.393866+00', -10, -10, -10);
+                (421, 101, 1000, 'OPEN', 'DOWNLOAD', 0, '2024-01-04 11:00:02+00', '2024-01-04 11:00:19+00', '2024-01-22 15:41:04.393833+00', '2024-01-22 15:41:04.393866+00', 1000, 1000, 1000);
                 """);
     }
 
