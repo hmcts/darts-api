@@ -1,6 +1,5 @@
 package uk.gov.hmcts.darts.usermanagement.controller;
 
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.skyscreamer.jsonassert.JSONAssert;
 import org.skyscreamer.jsonassert.JSONCompareMode;
@@ -24,8 +23,6 @@ import java.util.Set;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import static uk.gov.hmcts.darts.testutils.stubs.UserAccountStub.INTEGRATION_TEST_USER_EMAIL;
-import static uk.gov.hmcts.darts.testutils.stubs.UserAccountStub.SEPARATE_TEST_USER_EMAIL;
 
 @AutoConfigureMockMvc
 class SecurityGroupControllerIntTest extends IntegrationBase {

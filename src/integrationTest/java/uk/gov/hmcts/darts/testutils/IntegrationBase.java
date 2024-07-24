@@ -42,11 +42,11 @@ public class IntegrationBase {
 
     private static final int PRIMARY_KEY_START_VALUE = 500;
 
-    private final List<String> SEQUENCES_NO_RESET = List.of(
+    private static final List<String> SEQUENCES_NO_RESET = List.of(
         "revinfo_seq"
     );
 
-    private final List<String> SEQUENCES_RESET_FROM = List.of(
+    private static final List<String> SEQUENCES_RESET_FROM = List.of(
         "usr_seq",
         "grp_seq",
         "aut_seq",
@@ -95,24 +95,24 @@ public class IntegrationBase {
         REDIS.start();
     }
 
-    public void resetSequences () {
-        EntityManager em = entityManagerFactory.createEntityManager();
-        em.getTransaction().begin();
-        final Query query = em
-            .createNativeQuery("SELECT sequence_name FROM information_schema.sequences WHERE sequence_schema = 'darts'");
-        final List result = query.getResultList();
+    public void resetSequences() {
+        try (EntityManager em = entityManagerFactory.createEntityManager()) {
+            em.getTransaction().begin();
+            final Query query = em
+                    .createNativeQuery("SELECT sequence_name FROM information_schema.sequences WHERE sequence_schema = 'darts'");
+            final List result = query.getResultList();
 
-        for (Object seqName : result) {
-            //TODO swap and add if else
-            if (!SEQUENCES_NO_RESET.contains(seqName.toString())) {
-                em.createNativeQuery("ALTER SEQUENCE darts." + seqName + " RESTART").executeUpdate();
+            for (Object seqName : result) {
+                //TODO swap and add if else
+                if (!SEQUENCES_NO_RESET.contains(seqName.toString())) {
+                    em.createNativeQuery("ALTER SEQUENCE darts." + seqName + " RESTART").executeUpdate();
+                }
+                if (SEQUENCES_RESET_FROM.contains(seqName.toString())) {
+                    em.createNativeQuery("ALTER SEQUENCE darts." + seqName + " RESTART WITH " + PRIMARY_KEY_START_VALUE).executeUpdate();
+                }
             }
-            if (SEQUENCES_RESET_FROM.contains(seqName.toString())) {
-                em.createNativeQuery("ALTER SEQUENCE darts." + seqName + " RESTART WITH " + PRIMARY_KEY_START_VALUE).executeUpdate();
-            }
+            em.getTransaction().commit();
         }
-        em.getTransaction().commit();
-        em.close();
     }
 
     @Transactional

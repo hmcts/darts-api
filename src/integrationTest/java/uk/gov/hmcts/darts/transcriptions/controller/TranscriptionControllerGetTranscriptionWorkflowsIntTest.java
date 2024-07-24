@@ -14,7 +14,6 @@ import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionEntity;
-import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.util.DateConverterUtil;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 import uk.gov.hmcts.darts.testutils.stubs.SuperAdminUserStub;
@@ -84,7 +83,7 @@ class TranscriptionControllerGetTranscriptionWorkflowsIntTest extends Integratio
 
     @Test
     void getTranscriptionWorkflowsShouldReturnOkSuccessAndAllAssociatedWorkflows() throws Exception {
-        UserAccountEntity userAccount = superAdminUserStub.givenUserIsAuthorised(mockUserIdentity);
+        superAdminUserStub.givenUserIsAuthorised(mockUserIdentity);
 
         MockHttpServletRequestBuilder requestBuilder = get(ENDPOINT_URI)
             .queryParam("transcription_id", transcription.getId().toString());
@@ -100,7 +99,7 @@ class TranscriptionControllerGetTranscriptionWorkflowsIntTest extends Integratio
 
     @Test
     void getCurrentTranscriptionWorkflowsShouldReturnOkSuccessAndMostRecentAssociatedWorkflows() throws Exception {
-        UserAccountEntity userAccount = superAdminUserStub.givenUserIsAuthorised(mockUserIdentity);
+        superAdminUserStub.givenUserIsAuthorised(mockUserIdentity);
 
         MockHttpServletRequestBuilder requestBuilder = get(ENDPOINT_URI)
             .queryParam("transcription_id", transcription.getId().toString())
