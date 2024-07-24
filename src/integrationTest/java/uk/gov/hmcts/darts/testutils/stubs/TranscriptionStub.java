@@ -69,26 +69,16 @@ public class TranscriptionStub {
     private final ExternalLocationTypeRepository externalLocationTypeRepository;
     private final ObjectRecordStatusRepository objectRecordStatusRepository;
     private final TranscriptionDocumentRepository transcriptionDocumentRepository;
-    private final UserAccountStub userAccountStub;
+    private final UserAccountStubComposable userAccountStub;
     private final HearingStub hearingStub;
+    private final TranscriptionStubComposable transcriptionStubComposable;
 
     public TranscriptionEntity createMinimalTranscription() {
         return createTranscription(hearingStub.createMinimalHearing());
     }
 
     public TranscriptionEntity createTranscription(HearingEntity hearing) {
-        TranscriptionTypeEntity transcriptionType = mapToTranscriptionTypeEntity(SENTENCING_REMARKS);
-        TranscriptionStatusEntity transcriptionStatus = mapToTranscriptionStatusEntity(APPROVED);
-        TranscriptionUrgencyEntity transcriptionUrgencyEntity = mapToTranscriptionUrgencyEntity(STANDARD);
-        UserAccountEntity authorisedIntegrationTestUser = userAccountStub.createAuthorisedIntegrationTestUser(hearing.getCourtCase()
-                                                                                                                  .getCourthouse());
-        return createAndSaveTranscriptionEntity(
-            hearing,
-            transcriptionType,
-            transcriptionStatus,
-            Optional.of(transcriptionUrgencyEntity),
-            authorisedIntegrationTestUser
-        );
+        return transcriptionStubComposable.createTranscription(userAccountStub, hearing);
     }
 
     public TranscriptionEntity createTranscription(CourtroomEntity courtroomEntity) {
@@ -98,7 +88,7 @@ public class TranscriptionStub {
 
         UserAccountEntity authorisedIntegrationTestUser = userAccountStub
             .createAuthorisedIntegrationTestUser(courtroomEntity != null ? courtroomEntity.getCourthouse() : null);
-        return createAndSaveTranscriptionEntity(
+        return transcriptionStubComposable.createAndSaveTranscriptionEntity(
             null,
             transcriptionType,
             transcriptionStatus,

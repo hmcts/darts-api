@@ -204,8 +204,8 @@ public interface ExternalObjectDirectoryRepository extends JpaRepository<Externa
     @Query(
         """
             SELECT eod.id FROM ExternalObjectDirectoryEntity eod, ExternalObjectDirectoryEntity eod2
-            WHERE eod.media is not null
-            AND eod.media = eod2.media
+            WHERE
+            eod.media is not null AND eod.media = eod2.media
             AND eod.status = :status1
             AND eod2.status = :status2
             AND eod.externalLocationType = :location1
@@ -213,11 +213,31 @@ public interface ExternalObjectDirectoryRepository extends JpaRepository<Externa
             AND eod2.lastModifiedDateTime <= :lastModifiedBefore
             """
     )
-    List<Integer> findMediaFileIdsIn2StorageLocationsBeforeTime(Pageable page, ObjectRecordStatusEntity status1,
+    List<Integer> findMediaFileIdsIn2StorageLocationsBeforeTime(ObjectRecordStatusEntity status1,
                                                                 ObjectRecordStatusEntity status2,
                                                                 ExternalLocationTypeEntity location1,
                                                                 ExternalLocationTypeEntity location2,
                                                                 OffsetDateTime lastModifiedBefore);
+
+
+    @Query(
+        """
+            SELECT eod.id FROM ExternalObjectDirectoryEntity eod, ExternalObjectDirectoryEntity eod2
+            WHERE
+            eod.transcriptionDocumentEntity=eod2.transcriptionDocumentEntity AND eod.annotationDocumentEntity=eod2.annotationDocumentEntity
+            AND eod.status = :status1
+            AND eod2.status = :status2
+            AND eod.externalLocationType = :location1
+            AND eod2.externalLocationType = :location2
+            AND eod2.lastModifiedDateTime <= :lastModifiedBefore
+            """
+    )
+    List<Integer> findAnnotationFileIdsIn2StorageLocationsBeforeTime(ObjectRecordStatusEntity status1,
+                                                                ObjectRecordStatusEntity status2,
+                                                                ExternalLocationTypeEntity location1,
+                                                                ExternalLocationTypeEntity location2,
+                                                                OffsetDateTime lastModifiedBefore);
+
 
     @Query(
         """

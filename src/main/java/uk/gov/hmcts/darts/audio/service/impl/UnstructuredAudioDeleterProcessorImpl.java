@@ -40,7 +40,6 @@ public class UnstructuredAudioDeleterProcessorImpl implements UnstructuredAudioD
         );
 
         List<Integer> audioFileIdsToBeMarked = externalObjectDirectoryRepository.findMediaFileIdsIn2StorageLocationsBeforeTime(
-            null,
             EodHelper.storedStatus(),
             EodHelper.storedStatus(),
             EodHelper.unstructuredLocation(),

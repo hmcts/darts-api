@@ -10,6 +10,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 import uk.gov.hmcts.darts.common.entity.AnnotationDocumentEntity;
+import uk.gov.hmcts.darts.common.entity.AnnotationEntity;
 import uk.gov.hmcts.darts.common.entity.CaseDocumentEntity;
 import uk.gov.hmcts.darts.common.entity.ExternalLocationTypeEntity;
 import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
@@ -41,7 +42,7 @@ import static uk.gov.hmcts.darts.common.helper.SystemUserHelper.HOUSEKEEPING;
 @RequiredArgsConstructor
 public class ExternalObjectDirectoryStub {
 
-    private final UserAccountStub userAccountStub;
+    private final UserAccountStubComposable userAccountStub;
     private final ExternalLocationTypeRepository externalLocationTypeRepository;
     private final ObjectRecordStatusRepository objectRecordStatusRepository;
     private final ExternalObjectDirectoryRepository eodRepository;
@@ -52,6 +53,10 @@ public class ExternalObjectDirectoryStub {
     private final EntityManager em;
     private final DatabaseDateSetter dateConfigurer;
     private final SystemUserHelper systemUserHelper;
+    private final AnnotationStubComposable annotationStub;
+    private final TranscriptionDocumentStubComposable transcriptionDocumentStub;
+    private final DartsDatabaseComposable dartsDatabaseComposable;
+    private final TranscriptionStubComposable transcriptionStubComposable;
 
     public ExternalObjectDirectoryEntity createAndSaveEod(MediaEntity media,
                                                           ObjectRecordStatusEnum objectRecordStatusEnum,
@@ -94,6 +99,20 @@ public class ExternalObjectDirectoryStub {
         var eod = createExternalObjectDirectory(annotationDocument, getStatus(objectRecordStatus), getLocation(externalLocationType), uuid);
         createdEodConsumer.accept(eod);
         return eodRepository.save(eod);
+    }
+
+    public ExternalObjectDirectoryEntity createAndSaveEod(AnnotationDocumentEntity annotationDocument,
+                                                          TranscriptionDocumentEntity transcriptionDocumentEntity,
+                                                          ObjectRecordStatusEnum objectRecordStatus,
+                                                          ExternalLocationTypeEnum externalLocationType,
+                                                          Consumer<ExternalObjectDirectoryEntity> createdEodConsumer) {
+        UUID uuid = UUID.randomUUID();
+        var eod = createExternalObjectDirectory(annotationDocument, getStatus(objectRecordStatus), getLocation(externalLocationType), uuid);
+        eod.setTranscriptionDocumentEntity(transcriptionDocumentEntity);
+        createdEodConsumer.accept(eod);
+        eodRepository.save(eod);
+        eodRepository.flush();
+        return eod;
     }
 
     /**
@@ -247,8 +266,29 @@ public class ExternalObjectDirectoryStub {
     }
 
     @Transactional
-    public List<ExternalObjectDirectoryEntity> generateWithStatusAndInboundLocation(ObjectRecordStatusEnum objectRecordStatusEnum,
+    public List<ExternalObjectDirectoryEntity> generateWithStatusAndTranscriptionAndAnnotationAndInboundLocation(ObjectRecordStatusEnum objectRecordStatusEnum,
                                                                                      int numberOfObjectDirectory) {
+        List<ExternalObjectDirectoryEntity> entityListResult = new ArrayList<>();
+
+        for (int i = 0; i < numberOfObjectDirectory; i++) {
+            var user = userAccountStub.getIntegrationTestUserAccountEntity();
+            AnnotationEntity annotationEntity = annotationStub.createAndSaveAnnotationEntityWith(user, "test annotation");
+            TranscriptionDocumentEntity transcriptionDocumentEntity
+                = transcriptionDocumentStub.createTranscriptionDocumentForTranscription(userAccountStub, dartsDatabaseComposable,
+                                                                                        transcriptionStubComposable, courthouseStubComposable, user);
+
+            ExternalObjectDirectoryEntity externalObjectDirectory = createAndSaveEod(
+                annotationStub.createAndSaveAnnotationDocumentEntity(
+                    userAccountStub, annotationEntity), transcriptionDocumentEntity, objectRecordStatusEnum, INBOUND, e -> { });
+            entityListResult.add(externalObjectDirectory);
+        }
+
+        return entityListResult;
+    }
+
+    @Transactional
+    public List<ExternalObjectDirectoryEntity> generateWithStatusAndMediaAndInboundLocation(ObjectRecordStatusEnum objectRecordStatusEnum,
+                                                                                    int numberOfObjectDirectory) {
         List<ExternalObjectDirectoryEntity> entityListResult = new ArrayList<>();
 
         for (int i = 0; i < numberOfObjectDirectory; i++) {
@@ -262,7 +302,7 @@ public class ExternalObjectDirectoryStub {
 
     @Transactional(isolation = Isolation.READ_UNCOMMITTED)
     public List<ExternalObjectDirectoryEntity> generateWithStatusAndMediaAndArmLocation(List<ExternalObjectDirectoryEntity> externalObjectDirectoryEntities,
-                                                                                         int hoursBehindCurrentTime)
+                                                                                        int hoursBehindCurrentTime)
         throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
         List<ExternalObjectDirectoryEntity> entityListResult = new ArrayList<>();
 
@@ -272,6 +312,28 @@ public class ExternalObjectDirectoryStub {
             dateConfigurer.setLastModifiedDate(newExternalObjectDirectory, OffsetDateTime.now().minusHours(hoursBehindCurrentTime));
 
             newExternalObjectDirectory = eodRepository.getReferenceById(newExternalObjectDirectory.getId());
+            entityListResult.add(newExternalObjectDirectory);
+        }
+        return entityListResult;
+    }
+
+    @Transactional
+    public List<ExternalObjectDirectoryEntity>
+    generateWithStatusAndTranscriptionAndAnnotationAndArmLocation(List<ExternalObjectDirectoryEntity> externalObjectDirectoryEntities,
+                                                                                         int hoursBehindCurrentTime)
+        throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
+        List<ExternalObjectDirectoryEntity> entityListResult = new ArrayList<>();
+
+        for (ExternalObjectDirectoryEntity externalObjectDirectory : externalObjectDirectoryEntities) {
+
+            ExternalObjectDirectoryEntity newExternalObjectDirectory
+                = createAndSaveEod(externalObjectDirectory.getAnnotationDocumentEntity(),
+                                    externalObjectDirectory.getTranscriptionDocumentEntity(), STORED, ARM, e -> { });
+
+            dateConfigurer.setLastModifiedDate(newExternalObjectDirectory, OffsetDateTime.now().minusHours(hoursBehindCurrentTime));
+
+            newExternalObjectDirectory = eodRepository.getReferenceById(newExternalObjectDirectory.getId());
+
             entityListResult.add(newExternalObjectDirectory);
         }
         return entityListResult;

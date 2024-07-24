@@ -5,7 +5,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.auditing.DateTimeProvider;
-import org.springframework.data.domain.Pageable;
 import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum;
 import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
@@ -49,9 +48,9 @@ class ExternalObjectDirectoryRepositoryTest  extends PostgresIntegrationBase {
 
         // setup the test data
         List<ExternalObjectDirectoryEntity> externalObjectDirectoryEntitiesNotRelevant
-            = externalObjectDirectoryStub.generateWithStatusAndInboundLocation(ObjectRecordStatusEnum.ARM_RAW_DATA_FAILED, numberOfRecordsToGenerate);
+            = externalObjectDirectoryStub.generateWithStatusAndMediaAndInboundLocation(ObjectRecordStatusEnum.ARM_RAW_DATA_FAILED, numberOfRecordsToGenerate);
         List<ExternalObjectDirectoryEntity> externalObjectDirectoryEntities
-            = externalObjectDirectoryStub.generateWithStatusAndInboundLocation(STORED, numberOfRecordsToGenerate);
+            = externalObjectDirectoryStub.generateWithStatusAndMediaAndInboundLocation(STORED, numberOfRecordsToGenerate);
         List<ExternalObjectDirectoryEntity> entitiesToBeMarkedWithMediaOutsideOfHours
             = externalObjectDirectoryEntities.subList(0, externalObjectDirectoryEntities.size() / 2);
         List<ExternalObjectDirectoryEntity> armRecordsResultOutside24Hours
@@ -67,18 +66,17 @@ class ExternalObjectDirectoryRepositoryTest  extends PostgresIntegrationBase {
         // assert that the test has inserted the data into the database
         Assertions.assertEquals(expectedRecords, externalObjectDirectoryRepository.findAll().size());
 
-        int pageSize = 2;
         int hourDurationBeyondHours = setupHoursBeforeCurrentTime; // which no records are
 
         // excerise the logic
         List<Integer> results = externalObjectDirectoryRepository
-            .findMediaFileIdsIn2StorageLocationsBeforeTime(Pageable.ofSize(pageSize),
-                                              EodHelper.storedStatus(), EodHelper.storedStatus(),
-                                              EodHelper.inboundLocation(), EodHelper.armLocation(),
-                                              getCurrentDateTimeWithHoursBefore(hourDurationBeyondHours));
+            .findMediaFileIdsIn2StorageLocationsBeforeTime(
+                EodHelper.storedStatus(), EodHelper.storedStatus(),
+                EodHelper.inboundLocation(), EodHelper.armLocation(),
+                getCurrentDateTimeWithHoursBefore(hourDurationBeyondHours));
 
         // assert the logic
-        assertExpectedResults(results, entitiesToBeMarkedWithMediaOutsideOfHours, pageSize);
+        assertExpectedResults(results, entitiesToBeMarkedWithMediaOutsideOfHours, entitiesToBeMarkedWithMediaOutsideOfHours.size());
     }
 
     @Test
@@ -89,9 +87,9 @@ class ExternalObjectDirectoryRepositoryTest  extends PostgresIntegrationBase {
 
         // setup the test data
         List<ExternalObjectDirectoryEntity> externalObjectDirectoryEntitiesNotRelevant
-            = externalObjectDirectoryStub.generateWithStatusAndInboundLocation(ObjectRecordStatusEnum.ARM_RAW_DATA_FAILED, numberOfRecordsToGenerate);
+            = externalObjectDirectoryStub.generateWithStatusAndMediaAndInboundLocation(ObjectRecordStatusEnum.ARM_RAW_DATA_FAILED, numberOfRecordsToGenerate);
         List<ExternalObjectDirectoryEntity> externalObjectDirectoryEntities
-            = externalObjectDirectoryStub.generateWithStatusAndInboundLocation(STORED, numberOfRecordsToGenerate);
+            = externalObjectDirectoryStub.generateWithStatusAndMediaAndInboundLocation(STORED, numberOfRecordsToGenerate);
 
         List<ExternalObjectDirectoryEntity> entitiesToBeMarkedWithMediaOutsideOfHours
             = externalObjectDirectoryEntities.subList(0, externalObjectDirectoryEntities.size() / 2);
@@ -110,43 +108,40 @@ class ExternalObjectDirectoryRepositoryTest  extends PostgresIntegrationBase {
         // assert that the test has inserted the data into the database
         Assertions.assertEquals(expectedRecords, externalObjectDirectoryRepository.findAll().size());
 
-        int pageSize = 2;
         int hourDurationBeyondHours = setupHoursBeforeCurrentTime; // which no records are
 
         // excerise the logic
         List<Integer> results = externalObjectDirectoryRepository
-            .findMediaFileIdsIn2StorageLocationsBeforeTime(Pageable.ofSize(pageSize), EodHelper.storedStatus(), EodHelper.storedStatus(),
-                                              EodHelper.inboundLocation(), EodHelper.armLocation(),
-                                              getCurrentDateTimeWithHoursBefore(hourDurationBeyondHours));
+            .findMediaFileIdsIn2StorageLocationsBeforeTime(EodHelper.storedStatus(), EodHelper.storedStatus(),
+                                                           EodHelper.inboundLocation(), EodHelper.armLocation(),
+                                                           getCurrentDateTimeWithHoursBefore(hourDurationBeyondHours));
 
         // assert the logic
-        assertExpectedResults(results, entitiesToBeMarkedWithMediaOutsideOfHours, pageSize);
+        assertExpectedResults(results, entitiesToBeMarkedWithMediaOutsideOfHours, entitiesToBeMarkedWithMediaOutsideOfHours.size());
     }
 
     @Test
-    void testGetDirectoryIfMediaDateBeyond24HoursNoPaging() throws Exception {
+    void testGetDirectoryIfAnnotationDate24Hours() throws Exception {
 
         int numberOfRecordsToGenerate = 10;
-        int setupHoursBeforeCurrentTime = 26;
+        int setupHoursBeforeCurrentTime = 24;
 
         // setup the test data
         List<ExternalObjectDirectoryEntity> externalObjectDirectoryEntitiesNotRelevant
-            = externalObjectDirectoryStub.generateWithStatusAndInboundLocation(ObjectRecordStatusEnum.ARM_RAW_DATA_FAILED, numberOfRecordsToGenerate);
+            = externalObjectDirectoryStub
+            .generateWithStatusAndTranscriptionAndAnnotationAndInboundLocation(ObjectRecordStatusEnum.ARM_RAW_DATA_FAILED, numberOfRecordsToGenerate);
         List<ExternalObjectDirectoryEntity> externalObjectDirectoryEntities
-            = externalObjectDirectoryStub.generateWithStatusAndInboundLocation(STORED, numberOfRecordsToGenerate);
-
+            = externalObjectDirectoryStub.generateWithStatusAndTranscriptionAndAnnotationAndInboundLocation(STORED, numberOfRecordsToGenerate);
         List<ExternalObjectDirectoryEntity> entitiesToBeMarkedWithMediaOutsideOfHours
             = externalObjectDirectoryEntities.subList(0, externalObjectDirectoryEntities.size() / 2);
-
         List<ExternalObjectDirectoryEntity> armRecordsResultOutside24Hours
-            = externalObjectDirectoryStub.generateWithStatusAndMediaAndArmLocation(
+            = externalObjectDirectoryStub.generateWithStatusAndTranscriptionAndAnnotationAndArmLocation(
             entitiesToBeMarkedWithMediaOutsideOfHours,setupHoursBeforeCurrentTime);
         List<ExternalObjectDirectoryEntity> armRecordsResultWithinTheHour
-            = externalObjectDirectoryStub.generateWithStatusAndMediaAndArmLocation(
+            = externalObjectDirectoryStub.generateWithStatusAndTranscriptionAndAnnotationAndArmLocation(
             externalObjectDirectoryEntities.subList(externalObjectDirectoryEntities.size() / 2, externalObjectDirectoryEntities.size()), 2);
 
-        int expectedRecords = externalObjectDirectoryEntitiesNotRelevant.size()
-            + externalObjectDirectoryEntities.size()
+        int expectedRecords = externalObjectDirectoryEntitiesNotRelevant.size() + externalObjectDirectoryEntities.size()
             + armRecordsResultOutside24Hours.size() + armRecordsResultWithinTheHour.size();
 
         // assert that the test has inserted the data into the database
@@ -156,9 +151,10 @@ class ExternalObjectDirectoryRepositoryTest  extends PostgresIntegrationBase {
 
         // excerise the logic
         List<Integer> results = externalObjectDirectoryRepository
-            .findMediaFileIdsIn2StorageLocationsBeforeTime(null, EodHelper.storedStatus(), EodHelper.storedStatus(),
-                                                           EodHelper.inboundLocation(), EodHelper.armLocation(),
-                                                           getCurrentDateTimeWithHoursBefore(hourDurationBeyondHours));
+            .findAnnotationFileIdsIn2StorageLocationsBeforeTime(
+                EodHelper.storedStatus(), EodHelper.storedStatus(),
+                EodHelper.inboundLocation(), EodHelper.armLocation(),
+                getCurrentDateTimeWithHoursBefore(hourDurationBeyondHours));
 
         // assert the logic
         assertExpectedResults(results, entitiesToBeMarkedWithMediaOutsideOfHours, entitiesToBeMarkedWithMediaOutsideOfHours.size());
@@ -171,9 +167,9 @@ class ExternalObjectDirectoryRepositoryTest  extends PostgresIntegrationBase {
 
         // setup the test data
         List<ExternalObjectDirectoryEntity> externalObjectDirectoryEntitiesNotRelevant
-            = externalObjectDirectoryStub.generateWithStatusAndInboundLocation(ObjectRecordStatusEnum.ARM_RAW_DATA_FAILED, numberOfRecordsToGenerate);
+            = externalObjectDirectoryStub.generateWithStatusAndMediaAndInboundLocation(ObjectRecordStatusEnum.ARM_RAW_DATA_FAILED, numberOfRecordsToGenerate);
         List<ExternalObjectDirectoryEntity> externalObjectDirectoryEntities
-            = externalObjectDirectoryStub.generateWithStatusAndInboundLocation(STORED, numberOfRecordsToGenerate);
+            = externalObjectDirectoryStub.generateWithStatusAndMediaAndInboundLocation(STORED, numberOfRecordsToGenerate);
 
         int setupHoursBeforeCurrentTime = 10;
         List<ExternalObjectDirectoryEntity> armRecordsResultOutside24Hours
@@ -189,15 +185,14 @@ class ExternalObjectDirectoryRepositoryTest  extends PostgresIntegrationBase {
         // assert that the test has inserted the data into the database
         Assertions.assertEquals(expectedRecords, externalObjectDirectoryRepository.findAll().size());
 
-        int pageSize = 2;
         int hourDurationBeyondHours = 24; // which no records are
 
         // excerise the logic
         List<Integer> results = externalObjectDirectoryRepository
-            .findMediaFileIdsIn2StorageLocationsBeforeTime(Pageable.ofSize(pageSize),
-                                                           EodHelper.storedStatus(), EodHelper.storedStatus(),
-                                                           EodHelper.inboundLocation(), EodHelper.armLocation(),
-                                                           getCurrentDateTimeWithHoursBefore(hourDurationBeyondHours));
+            .findMediaFileIdsIn2StorageLocationsBeforeTime(
+                EodHelper.storedStatus(), EodHelper.storedStatus(),
+                EodHelper.inboundLocation(), EodHelper.armLocation(),
+                getCurrentDateTimeWithHoursBefore(hourDurationBeyondHours));
 
         // assert the logic
         Assertions.assertTrue(results.isEmpty());

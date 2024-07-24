@@ -3,7 +3,6 @@ package uk.gov.hmcts.darts.arm.service.impl;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.darts.arm.service.InboundAnnotationTranscriptionDeleterProcessor;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
@@ -31,28 +30,20 @@ public class InboundAnnotationTranscriptionDeleterProcessorImpl implements Inbou
     @Value("${darts.data-management.retention-period.inbound.arm-minimum}")
     int hoursInArm;
 
-    public List<Integer> processDeletionIfPreceding(int batch) {
-        return processDeletionIfPreceding(batch, hoursInArm);
+    public List<Integer> markForDeletion() {
+        return markForDeletion(hoursInArm);
     }
 
     @Override
-    public List<Integer> processDeletionIfPreceding(int batch, int hourBeforeCurrentDate) {
-
-        // if a default batch size of 0 is specified this means no batch
-        Pageable pageable = null;
-        if (batch > 0) {
-            pageable = Pageable.ofSize(batch);
-        }
-
+    public List<Integer> markForDeletion(int hourBeforeCurrentDate) {
         OffsetDateTime lastModifiedBefore = currentTimeHelper.currentOffsetDateTime().minus(
-            hoursInArm,
+            hourBeforeCurrentDate,
             ChronoUnit.HOURS
         );
 
         List<Integer> recordsMarkedForDeletion
             = externalObjectDirectoryRepository
-            .findMediaFileIdsIn2StorageLocationsBeforeTime(pageable,
-                                                           EodHelper.storedStatus(),
+            .findAnnotationFileIdsIn2StorageLocationsBeforeTime(EodHelper.storedStatus(),
                                                            EodHelper.storedStatus(),
                                                            EodHelper.inboundLocation(),
                                                            EodHelper.armLocation(),
