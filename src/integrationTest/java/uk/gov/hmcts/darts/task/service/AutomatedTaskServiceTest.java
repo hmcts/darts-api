@@ -70,7 +70,6 @@ import static uk.gov.hmcts.darts.test.common.AwaitabilityUtil.waitForMax10Second
 
 @Slf4j
 @SuppressWarnings({"PMD.ExcessiveImports"})
-@TestPropertySource(properties = "darts.automated-tasks-pod = true")
 class AutomatedTaskServiceTest extends IntegrationPerClassBase {
 
     @Autowired

@@ -37,7 +37,7 @@ import java.util.List;
  * To optimise tests total execution time, the below setup has been introduced:
  * <ul>
  *  <li>
- *     predefined test data setup by Liquibase may NOT be deleted and recreated for every test class
+ *     predefined test data created by Liquibase may NOT be deleted and recreated for every test class
  *  </li>
  *  <li>
  *     existing test data is deleted before each test
@@ -56,7 +56,7 @@ import java.util.List;
  *     setup test data in a @BeforeEach rather than a @BeforeAll
  *  </li>
  *  <li>
- *      when creating test data with manually assigned ids use ids >= SEQUENCE_START_VALUE so that data is automatically deleted
+ *      when creating test data with manually assigned ids prefer using ids >= SEQUENCE_START_VALUE so that data is automatically deleted
  *  </li>
  * </ul>
  */
