@@ -37,26 +37,28 @@ import java.util.List;
  * To optimise tests total execution time, the below setup has been introduced:
  * <ul>
  *  <li>
- *     predefined test data created by Liquibase may NOT be deleted and recreated for every test class
+ *     predefined test data created by Liquibase (user accounts, security groups, event handlers, etc...) is not guaranteed
+ *     to be deleted and recreated in between test classes execution
  *  </li>
  *  <li>
- *     existing test data is deleted before each test. Tables with predefined test data have only rows with id >= SEQUENCE_START_VALUE deleted
+ *     test data created by tests is deleted before each test. Tables with predefined test data have only rows with id >= SEQUENCE_START_VALUE deleted,
+ *     i.e. the data created by tests, not Liquibase
  *  </li>
  *  <li>
- *     sequences are reset to either SEQUENCE_START_VALUE or their initial value (depending on the type of test data, if predefined or not) before each test
+ *     sequences are reset to either SEQUENCE_START_VALUE or their initial value (depending on the type of data, if predefined or not) before each test
  *  </li>
  * </ul>
  *<br>
- * Based on the above, please follow the below recommendations when writing integration tests
+ * Based on the above, please follow the following recommendations when writing integration tests:
  * <ul>
  *  <li>
- *     do not permanently modify predefined test data (e.g. setting the 'Test Judge' security group to global = true, setting an automated task to disabled)
+ *     do not permanently modify predefined test data (e.g. changing a security group global flag, disabling an automated task, etc...)
  *  </li>
  *  <li>
  *     setup test data in a @BeforeEach rather than a @BeforeAll
  *  </li>
  *  <li>
- *      when creating test data with manually assigned ids prefer using ids >= SEQUENCE_START_VALUE so that data is automatically deleted
+ *      when creating test data with manually assigned ids use ids >= SEQUENCE_START_VALUE so that data is automatically deleted
  *  </li>
  * </ul>
  */
