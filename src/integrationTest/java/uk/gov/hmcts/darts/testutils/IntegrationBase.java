@@ -40,17 +40,17 @@ import java.util.List;
  *     predefined test data created by Liquibase may NOT be deleted and recreated for every test class
  *  </li>
  *  <li>
- *     existing test data is deleted before each test
+ *     existing test data is deleted before each test. Tables with predefined test data have only rows with id >= SEQUENCE_START_VALUE deleted
  *  </li>
  *  <li>
- *     sequences are reset to either their initial value or to SEQUENCE_START_VALUE before each test
+ *     sequences are reset to either SEQUENCE_START_VALUE or their initial value (depending on the type of test data, if predefined or not) before each test
  *  </li>
  * </ul>
  *<br>
  * Based on the above, please follow the below recommendations when writing integration tests
  * <ul>
  *  <li>
- *     do not permanently modify predefined test data (e.g. setting the 'Test Judge' security group to global = true, setting a predefined automated task to disabled)
+ *     do not permanently modify predefined test data (e.g. setting the 'Test Judge' security group to global = true, setting an automated task to disabled)
  *  </li>
  *  <li>
  *     setup test data in a @BeforeEach rather than a @BeforeAll
