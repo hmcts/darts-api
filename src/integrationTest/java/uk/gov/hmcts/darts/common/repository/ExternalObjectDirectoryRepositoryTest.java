@@ -70,10 +70,10 @@ class ExternalObjectDirectoryRepositoryTest  extends PostgresIntegrationBase {
 
         // excerise the logic
         List<Integer> results = externalObjectDirectoryRepository
-            .findMediaFileIdsIn2StorageLocationsBeforeTime(
+            .findIdsIn2StorageLocationsBeforeTime(
                 EodHelper.storedStatus(), EodHelper.storedStatus(),
                 EodHelper.inboundLocation(), EodHelper.armLocation(),
-                getCurrentDateTimeWithHoursBefore(hourDurationBeyondHours));
+                getCurrentDateTimeWithHoursBefore(hourDurationBeyondHours), ExternalObjectDirectoryQueryTypeEnum.MEDIA_QUERY.getIndex());
 
         // assert the logic
         assertExpectedResults(results, entitiesToBeMarkedWithMediaOutsideOfHours, entitiesToBeMarkedWithMediaOutsideOfHours.size());
@@ -112,9 +112,10 @@ class ExternalObjectDirectoryRepositoryTest  extends PostgresIntegrationBase {
 
         // excerise the logic
         List<Integer> results = externalObjectDirectoryRepository
-            .findMediaFileIdsIn2StorageLocationsBeforeTime(EodHelper.storedStatus(), EodHelper.storedStatus(),
-                                                           EodHelper.inboundLocation(), EodHelper.armLocation(),
-                                                           getCurrentDateTimeWithHoursBefore(hourDurationBeyondHours));
+            .findIdsIn2StorageLocationsBeforeTime(EodHelper.storedStatus(), EodHelper.storedStatus(),
+                                                  EodHelper.inboundLocation(), EodHelper.armLocation(),
+                                                  getCurrentDateTimeWithHoursBefore(hourDurationBeyondHours),
+                                                  ExternalObjectDirectoryQueryTypeEnum.MEDIA_QUERY.getIndex());
 
         // assert the logic
         assertExpectedResults(results, entitiesToBeMarkedWithMediaOutsideOfHours, entitiesToBeMarkedWithMediaOutsideOfHours.size());
@@ -151,10 +152,10 @@ class ExternalObjectDirectoryRepositoryTest  extends PostgresIntegrationBase {
 
         // excerise the logic
         List<Integer> results = externalObjectDirectoryRepository
-            .findAnnotationFileIdsIn2StorageLocationsBeforeTime(
+            .findIdsIn2StorageLocationsBeforeTime(
                 EodHelper.storedStatus(), EodHelper.storedStatus(),
                 EodHelper.inboundLocation(), EodHelper.armLocation(),
-                getCurrentDateTimeWithHoursBefore(hourDurationBeyondHours));
+                getCurrentDateTimeWithHoursBefore(hourDurationBeyondHours), ExternalObjectDirectoryQueryTypeEnum.ANNOTATION_QUERY.getIndex());
 
         // assert the logic
         assertExpectedResults(results, entitiesToBeMarkedWithMediaOutsideOfHours, entitiesToBeMarkedWithMediaOutsideOfHours.size());
@@ -189,10 +190,11 @@ class ExternalObjectDirectoryRepositoryTest  extends PostgresIntegrationBase {
 
         // excerise the logic
         List<Integer> results = externalObjectDirectoryRepository
-            .findMediaFileIdsIn2StorageLocationsBeforeTime(
+            .findIdsIn2StorageLocationsBeforeTime(
                 EodHelper.storedStatus(), EodHelper.storedStatus(),
                 EodHelper.inboundLocation(), EodHelper.armLocation(),
-                getCurrentDateTimeWithHoursBefore(hourDurationBeyondHours));
+                getCurrentDateTimeWithHoursBefore(hourDurationBeyondHours),
+                ExternalObjectDirectoryQueryTypeEnum.MEDIA_QUERY.getIndex());
 
         // assert the logic
         Assertions.assertTrue(results.isEmpty());

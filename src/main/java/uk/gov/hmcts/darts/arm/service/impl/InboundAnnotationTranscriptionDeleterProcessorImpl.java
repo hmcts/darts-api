@@ -8,6 +8,7 @@ import uk.gov.hmcts.darts.arm.service.InboundAnnotationTranscriptionDeleterProce
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
 import uk.gov.hmcts.darts.common.helper.SystemUserHelper;
+import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryQueryTypeEnum;
 import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
 import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
 import uk.gov.hmcts.darts.common.util.EodHelper;
@@ -43,11 +44,11 @@ public class InboundAnnotationTranscriptionDeleterProcessorImpl implements Inbou
 
         List<Integer> recordsMarkedForDeletion
             = externalObjectDirectoryRepository
-            .findAnnotationFileIdsIn2StorageLocationsBeforeTime(EodHelper.storedStatus(),
-                                                           EodHelper.storedStatus(),
-                                                           EodHelper.inboundLocation(),
-                                                           EodHelper.armLocation(),
-                                                           lastModifiedBefore);
+            .findIdsIn2StorageLocationsBeforeTime(EodHelper.storedStatus(),
+                                                                EodHelper.storedStatus(),
+                                                                EodHelper.inboundLocation(),
+                                                                EodHelper.armLocation(),
+                                                                lastModifiedBefore, ExternalObjectDirectoryQueryTypeEnum.ANNOTATION_QUERY.getIndex());
 
         log.debug("Identified records to be marked for deletion  {}",  recordsMarkedForDeletion.stream().map(Object::toString));
 
