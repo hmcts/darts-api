@@ -139,7 +139,7 @@ class UnstructuredAnnotationTranscriptionDeleterProcessorImplTest extends Postgr
         // assert that the test has inserted the data into the database
         Assertions.assertEquals(expectedRecords, externalObjectDirectoryRepository.findAll().size());
 
-        ArrayList<ExternalObjectDirectoryEntity> allUnstructuredEntities = new ArrayList<>();
+        List<ExternalObjectDirectoryEntity> allUnstructuredEntities = new ArrayList<>();
         allUnstructuredEntities.addAll(externalObjectDirectoryEntitiesNotRelevant);
         allUnstructuredEntities.addAll(externalObjectDirectoryEntities);
         return allUnstructuredEntities;
