@@ -1,10 +1,6 @@
 package uk.gov.hmcts.darts.testutils;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.EntityManagerFactory;
-import jakarta.persistence.Query;
-import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -19,11 +15,6 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.testcontainers.containers.GenericContainer;
-import uk.gov.hmcts.darts.common.repository.AutomatedTaskRepository;
-import uk.gov.hmcts.darts.common.repository.EventHandlerRepository;
-import uk.gov.hmcts.darts.common.repository.RetentionPolicyTypeRepository;
-import uk.gov.hmcts.darts.common.repository.SecurityGroupRepository;
-import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
 import uk.gov.hmcts.darts.test.common.LogUtil;
 import uk.gov.hmcts.darts.test.common.MemoryLogAppender;
 import uk.gov.hmcts.darts.testutils.stubs.DartsDatabaseStub;
@@ -37,12 +28,12 @@ import java.util.List;
  * To optimise tests total execution time, the below setup has been introduced:
  * <ul>
  *  <li>
- *     predefined test data created by Liquibase (user accounts, security groups, event handlers, etc...) is not guaranteed
+ *     predefined test data created by Flyway (user accounts, security groups, event handlers, etc...) is not guaranteed
  *     to be deleted and recreated in between test classes execution
  *  </li>
  *  <li>
  *     test data created by tests is deleted before each test. Tables with predefined test data have only rows with id >= SEQUENCE_START_VALUE deleted,
- *     i.e. the data created by tests, not Liquibase
+ *     i.e. the data created by tests, not Flyway
  *  </li>
  *  <li>
  *     sequences are reset to either SEQUENCE_START_VALUE or their initial value (depending on the type of data, if predefined or not) before each test
@@ -60,6 +51,11 @@ import java.util.List;
  *  <li>
  *      when creating test data with manually assigned ids use ids >= SEQUENCE_START_VALUE so that data is automatically deleted
  *  </li>
+ *  <li>
+ *      avoid directly hardcoding primary key ids in assertions, since those might change. Instead retrieve the id from the created test data entities.
+ *      e.g. rather than assertThat(persistedUserGroup.createdBy.getId(), equalsTo(0)), use
+ *      assertThat(persistedUserGroup.createdBy.getId(), equalsTo(integrationTestUser.getId()))
+ *  </li>
  * </ul>
  */
 @AutoConfigureWireMock(port = 0, files = "file:src/integrationTest/resources/wiremock")
@@ -67,33 +63,6 @@ import java.util.List;
 @Slf4j
 @ActiveProfiles({"intTest", "h2db", "in-memory-caching"})
 public class IntegrationBase {
-
-    private static final int SEQUENCE_START_VALUE = 500;
-
-    private static final List<String> SEQUENCES_NO_RESET = List.of(
-        "revinfo_seq"
-    );
-
-    private static final List<String> SEQUENCES_RESET_FROM = List.of(
-        "usr_seq",
-        "grp_seq",
-        "aut_seq",
-        "rpt_seq",
-        "evh_seq"
-    );
-
-    @Autowired
-    private EntityManagerFactory entityManagerFactory;
-    @Autowired
-    protected UserAccountRepository userAccountRepository;
-    @Autowired
-    protected SecurityGroupRepository securityGroupRepository;
-    @Autowired
-    protected RetentionPolicyTypeRepository retentionPolicyTypeRepository;
-    @Autowired
-    protected EventHandlerRepository eventHandlerRepository;
-    @Autowired
-    protected AutomatedTaskRepository automatedTaskRepository;
 
     @Autowired
     protected OpenInViewUtil openInViewUtil;
@@ -125,54 +94,14 @@ public class IntegrationBase {
 
     @BeforeEach
     void clearDb() {
-        resetSequences();
+        dartsDatabase.resetSequences();
         dartsDatabase.clearDatabaseInThisOrder();
-        resetTablesWithPredefinedTestData();
+        dartsDatabase.resetTablesWithPredefinedTestData();
     }
 
     @AfterEach
     void clearTestData() {
         logAppender.reset();
-    }
-
-    public void resetSequences() {
-        try (EntityManager em = entityManagerFactory.createEntityManager()) {
-            em.getTransaction().begin();
-            final Query query = em.createNativeQuery("SELECT sequence_name FROM information_schema.sequences WHERE sequence_schema = 'darts'");
-            final List sequences = query.getResultList();
-            for (Object seqName : sequences) {
-                if (SEQUENCES_RESET_FROM.contains(seqName.toString())) {
-                    em.createNativeQuery("ALTER SEQUENCE darts." + seqName + " RESTART WITH " + SEQUENCE_START_VALUE).executeUpdate();
-                } else if (!SEQUENCES_NO_RESET.contains(seqName.toString())) {
-                    em.createNativeQuery("ALTER SEQUENCE darts." + seqName + " RESTART").executeUpdate();
-                }
-            }
-            em.getTransaction().commit();
-        }
-    }
-
-    @Transactional
-    public void resetTablesWithPredefinedTestData() {
-
-        retentionPolicyTypeRepository.deleteAll(
-            retentionPolicyTypeRepository.findByIdGreaterThanEqual(SEQUENCE_START_VALUE)
-        );
-
-        eventHandlerRepository.deleteAll(
-            eventHandlerRepository.findByIdGreaterThanEqual(SEQUENCE_START_VALUE)
-        );
-
-        automatedTaskRepository.deleteAll(
-            automatedTaskRepository.findByIdGreaterThanEqual(SEQUENCE_START_VALUE)
-        );
-
-        userAccountRepository.deleteAll(
-            userAccountRepository.findByIdGreaterThanEqual(SEQUENCE_START_VALUE)
-        );
-
-        securityGroupRepository.deleteAll(
-            securityGroupRepository.findByIdGreaterThanEqual(SEQUENCE_START_VALUE)
-        );
     }
 
     protected void givenBearerTokenExists(String email) {

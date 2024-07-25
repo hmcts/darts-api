@@ -2,6 +2,8 @@ package uk.gov.hmcts.darts.testutils.stubs;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.EntityManager;
+import jakarta.persistence.EntityManagerFactory;
+import jakarta.persistence.Query;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -129,6 +131,21 @@ import static uk.gov.hmcts.darts.test.common.data.HearingTestData.someMinimalHea
 @Slf4j
 public class DartsDatabaseStub {
 
+    private static final int SEQUENCE_START_VALUE = 800;
+
+    private static final List<String> SEQUENCES_NO_RESET = List.of(
+        "revinfo_seq"
+    );
+
+    private static final List<String> SEQUENCES_RESET_FROM = List.of(
+        "usr_seq",
+        "grp_seq",
+        "aut_seq",
+        "rpt_seq",
+        "evh_seq"
+    );
+
+    private final EntityManagerFactory entityManagerFactory;
     private final AnnotationDocumentRepository annotationDocumentRepository;
     private final AnnotationRepository annotationRepository;
     private final AuditRepository auditRepository;
@@ -199,6 +216,46 @@ public class DartsDatabaseStub {
     private final EntityManager entityManager;
     private final CurrentTimeHelper currentTimeHelper;
     private final TransactionalUtil transactionalUtil;
+
+    public void resetSequences() {
+        try (EntityManager em = entityManagerFactory.createEntityManager()) {
+            em.getTransaction().begin();
+            final Query query = em.createNativeQuery("SELECT sequence_name FROM information_schema.sequences WHERE sequence_schema = 'darts'");
+            final List sequences = query.getResultList();
+            for (Object seqName : sequences) {
+                if (SEQUENCES_RESET_FROM.contains(seqName.toString())) {
+                    em.createNativeQuery("ALTER SEQUENCE darts." + seqName + " RESTART WITH " + SEQUENCE_START_VALUE).executeUpdate();
+                } else if (!SEQUENCES_NO_RESET.contains(seqName.toString())) {
+                    em.createNativeQuery("ALTER SEQUENCE darts." + seqName + " RESTART").executeUpdate();
+                }
+            }
+            em.getTransaction().commit();
+        }
+    }
+
+    @Transactional
+    public void resetTablesWithPredefinedTestData() {
+
+        retentionPolicyTypeRepository.deleteAll(
+            retentionPolicyTypeRepository.findByIdGreaterThanEqual(SEQUENCE_START_VALUE)
+        );
+
+        eventHandlerRepository.deleteAll(
+            eventHandlerRepository.findByIdGreaterThanEqual(SEQUENCE_START_VALUE)
+        );
+
+        automatedTaskRepository.deleteAll(
+            automatedTaskRepository.findByIdGreaterThanEqual(SEQUENCE_START_VALUE)
+        );
+
+        userAccountRepository.deleteAll(
+            userAccountRepository.findByIdGreaterThanEqual(SEQUENCE_START_VALUE)
+        );
+
+        securityGroupRepository.deleteAll(
+            securityGroupRepository.findByIdGreaterThanEqual(SEQUENCE_START_VALUE)
+        );
+    }
 
     @Transactional
     public void clearDatabaseInThisOrder() {
@@ -928,5 +985,4 @@ public class DartsDatabaseStub {
     public Revisions<Long, RetentionPolicyTypeEntity> findRetentionPolicyRevisionsFor(Integer id) {
         return retentionPolicyTypeRepository.findRevisions(id);
     }
-
 }
