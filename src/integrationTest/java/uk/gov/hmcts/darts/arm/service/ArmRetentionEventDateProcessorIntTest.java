@@ -36,10 +36,16 @@ import java.util.UUID;
 import static java.time.temporal.ChronoUnit.MILLIS;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum.ARM;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_DROP_ZONE;
+import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_INGESTION;
+import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.STORED;
 
 @Slf4j
 @Transactional
@@ -108,7 +114,7 @@ class ArmRetentionEventDateProcessorIntTest extends IntegrationBase {
 
         ExternalObjectDirectoryEntity armEod = dartsDatabase.getExternalObjectDirectoryStub().createExternalObjectDirectory(
             savedMedia,
-            ARM_DROP_ZONE,
+            STORED,
             ARM,
             UUID.randomUUID()
         );
@@ -229,7 +235,7 @@ class ArmRetentionEventDateProcessorIntTest extends IntegrationBase {
 
         ExternalObjectDirectoryEntity armEod = dartsDatabase.getExternalObjectDirectoryStub().createExternalObjectDirectory(
             savedMedia,
-            ARM_DROP_ZONE,
+            STORED,
             ARM,
             UUID.randomUUID()
         );
@@ -285,7 +291,7 @@ class ArmRetentionEventDateProcessorIntTest extends IntegrationBase {
 
         ExternalObjectDirectoryEntity armEod = dartsDatabase.getExternalObjectDirectoryStub().createExternalObjectDirectory(
             transcriptionDocumentEntity,
-            dartsDatabase.getObjectRecordStatusEntity(ARM_DROP_ZONE),
+            dartsDatabase.getObjectRecordStatusEntity(STORED),
             dartsDatabase.getExternalLocationTypeEntity(ARM),
             UUID.randomUUID()
         );
@@ -341,7 +347,7 @@ class ArmRetentionEventDateProcessorIntTest extends IntegrationBase {
 
         ExternalObjectDirectoryEntity armEod = dartsDatabase.getExternalObjectDirectoryStub().createExternalObjectDirectory(
             annotationDocument,
-            dartsDatabase.getObjectRecordStatusEntity(ARM_DROP_ZONE),
+            dartsDatabase.getObjectRecordStatusEntity(STORED),
             dartsDatabase.getExternalLocationTypeEntity(ARM),
             UUID.randomUUID()
         );
@@ -388,7 +394,7 @@ class ArmRetentionEventDateProcessorIntTest extends IntegrationBase {
 
         ExternalObjectDirectoryEntity armEod = dartsDatabase.getExternalObjectDirectoryStub().createExternalObjectDirectory(
             caseDocument,
-            ARM_DROP_ZONE,
+            STORED,
             ARM,
             UUID.randomUUID()
         );
@@ -417,5 +423,51 @@ class ArmRetentionEventDateProcessorIntTest extends IntegrationBase {
         assertFalse(armEod.isUpdateRetention());
         assertEquals(0, armEod.getEventDateTs().truncatedTo(MILLIS).compareTo(RETENTION_DATE_TIME.truncatedTo(MILLIS)));
 
+    }
+
+    @Test
+    void calculateEventDates_NoArmRecord_NoRetentionDateSet() {
+
+        // given
+        when(armDataManagementConfiguration.getEventDateAdjustmentYears()).thenReturn(EVENT_DATE_ADJUSTMENT_YEARS);
+
+        HearingEntity hearing = dartsDatabase.createHearing(
+            "NEWCASTLE",
+            "Int Test Courtroom 2",
+            "2",
+            HEARING_DATE
+        );
+
+        MediaEntity savedMedia = dartsDatabase.save(
+            MediaTestData.createMediaWith(
+                hearing.getCourtroom(),
+                START_TIME,
+                END_TIME,
+                1
+            ));
+        savedMedia.setRetainUntilTs(DOCUMENT_RETENTION_DATE_TIME);
+        dartsDatabase.save(savedMedia);
+
+        ExternalObjectDirectoryEntity armEod = dartsDatabase.getExternalObjectDirectoryStub().createExternalObjectDirectory(
+            savedMedia,
+            ARM_INGESTION,
+            ARM,
+            UUID.randomUUID()
+        );
+
+        armEod.setUpdateRetention(true);
+        dartsDatabase.save(armEod);
+
+        UserAccountEntity testUser = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
+        when(userIdentity.getUserAccount()).thenReturn(testUser);
+
+        // when
+        armRetentionEventDateProcessor.calculateEventDates();
+
+        // then
+        dartsDatabase.getExternalObjectDirectoryRepository().findById(armEod.getId()).orElseThrow();
+        assertNull(armEod.getEventDateTs());
+        assertTrue(armEod.isUpdateRetention());
+        verify(armDataManagementApi, times(0)).updateMetadata(any(), any());
     }
 }
