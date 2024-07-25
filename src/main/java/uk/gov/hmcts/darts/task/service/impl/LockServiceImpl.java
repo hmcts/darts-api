@@ -20,8 +20,8 @@ import java.util.List;
 @RequiredArgsConstructor
 public class LockServiceImpl implements LockService {
 
-    private static final int DEFAULT_LOCK_AT_MOST_SECONDS = 600;
-    private static final int DEFAULT_LOCK_AT_LEAST_SECONDS = 20;
+    private static final Duration DEFAULT_LOCK_AT_MOST = Duration.ofSeconds(600);
+    private static final Duration DEFAULT_LOCK_AT_LEAST = Duration.ofSeconds(20);
 
     private final AutomatedTaskRepository automatedTaskRepository;
     private final CurrentTimeHelper currentTimeHelper;
@@ -39,12 +39,12 @@ public class LockServiceImpl implements LockService {
 
     @Override
     public Duration getLockAtMostFor() {
-        return Duration.ofSeconds(DEFAULT_LOCK_AT_MOST_SECONDS);
+        return DEFAULT_LOCK_AT_MOST;
     }
 
     @Override
     public Duration getLockAtLeastFor() {
-        return Duration.ofSeconds(DEFAULT_LOCK_AT_LEAST_SECONDS);
+        return DEFAULT_LOCK_AT_LEAST;
     }
 
     @Override
