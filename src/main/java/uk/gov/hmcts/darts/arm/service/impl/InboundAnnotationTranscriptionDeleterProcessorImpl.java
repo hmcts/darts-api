@@ -57,7 +57,7 @@ public class InboundAnnotationTranscriptionDeleterProcessorImpl implements Inbou
             EodHelper.markForDeletionStatus(),
             user,
             recordsMarkedForDeletion,
-            OffsetDateTime.now()
+            currentTimeHelper.currentOffsetDateTime()
         );
 
         log.debug("Records have been marked for deletion");

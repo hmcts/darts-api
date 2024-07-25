@@ -9,8 +9,6 @@ import uk.gov.hmcts.darts.arm.service.UnstructuredTranscriptionAndAnnotationDele
 import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
 import uk.gov.hmcts.darts.common.helper.SystemUserHelper;
 import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
-import uk.gov.hmcts.darts.common.repository.ObjectRecordStatusRepository;
-import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
 import uk.gov.hmcts.darts.common.util.EodHelper;
 
 import java.time.OffsetDateTime;
@@ -24,10 +22,6 @@ public class UnstructuredAnnotationTranscriptionDeleterProcessorImpl implements 
     private final ExternalObjectDirectoryRepository externalObjectDirectoryRepository;
 
     private final SystemUserHelper systemUserHelper;
-
-    private final ObjectRecordStatusRepository objectRecordStatusRepository;
-
-    private final UserAccountRepository userAccountRepository;
 
     private final EodHelper eodHelper;
 
@@ -74,7 +68,7 @@ public class UnstructuredAnnotationTranscriptionDeleterProcessorImpl implements 
             EodHelper.markForDeletionStatus(),
             systemUserHelper.getSystemUser(),
             recordsMarkedForDeletion,
-            OffsetDateTime.now()
+            currentTimeHelper.currentOffsetDateTime()
         );
 
         log.debug("Records have been marked for deletion");
