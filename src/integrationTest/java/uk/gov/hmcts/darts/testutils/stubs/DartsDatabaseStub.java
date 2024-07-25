@@ -131,7 +131,7 @@ import static uk.gov.hmcts.darts.test.common.data.HearingTestData.someMinimalHea
 @Slf4j
 public class DartsDatabaseStub {
 
-    private static final int SEQUENCE_START_VALUE = 800;
+    private static final int SEQUENCE_START_VALUE = 15_000;
 
     private static final List<String> SEQUENCES_NO_RESET = List.of(
         "revinfo_seq"
