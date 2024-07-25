@@ -86,7 +86,8 @@ class UnstructuredAnnotationTranscriptionDeleterProcessorImplTest extends Postgr
         int setupHoursBeforeCurrentTimeInArm = 25;
         int setupWeeksBeforeCurrentTimeInUnstructured = 3;
 
-        List<ExternalObjectDirectoryEntity> unstructuredEntities = generateDataWithAnnotation(setupWeeksBeforeCurrentTimeInUnstructured, setupHoursBeforeCurrentTimeInArm);
+        List<ExternalObjectDirectoryEntity> unstructuredEntities
+            = generateDataWithAnnotation(setupWeeksBeforeCurrentTimeInUnstructured, setupHoursBeforeCurrentTimeInArm);
 
         // exercise the logic
         List<Integer> updatedResults
