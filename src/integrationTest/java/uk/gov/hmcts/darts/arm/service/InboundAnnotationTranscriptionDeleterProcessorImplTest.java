@@ -11,6 +11,7 @@ import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
 import uk.gov.hmcts.darts.testutils.PostgresIntegrationBase;
 import uk.gov.hmcts.darts.testutils.stubs.ExternalObjectDirectoryStub;
 
+import java.lang.reflect.InvocationTargetException;
 import java.time.OffsetDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
@@ -33,19 +34,12 @@ class InboundAnnotationTranscriptionDeleterProcessorImplTest extends PostgresInt
     @Autowired
     private CurrentTimeHelper currentTimeHelper;
 
-    private List<ExternalObjectDirectoryEntity> externalObjectDirectoryEntitiesNotRelevant;
-
-    private List<ExternalObjectDirectoryEntity> externalObjectDirectoryEntities;
-
-    private List<ExternalObjectDirectoryEntity> expectedArmRecordsResultOutsideHours;
-
     private List<ExternalObjectDirectoryEntity> expectedArmRecordsResultWithinTheHour;
 
     private List<ExternalObjectDirectoryEntity> entitiesToBeMarkedWithMediaOutsideOfHours;
 
     @Test
     void processBatchMultipleRecords() throws Exception {
-        int numberOfRecordsToGenerate = 10;
         int setupHoursBeforeCurrentTime = 25;
 
         generateData(setupHoursBeforeCurrentTime);
@@ -99,7 +93,8 @@ class InboundAnnotationTranscriptionDeleterProcessorImplTest extends PostgresInt
         Assertions.assertTrue(updatedResults.isEmpty());
     }
 
-    private void generateData(int hoursBeforeCurrentTime) throws Exception {
+    private void generateData(int hoursBeforeCurrentTime) throws
+        NoSuchMethodException, IllegalAccessException, InvocationTargetException {
         int numberOfRecordsToGenerate = 10;
         int setupHoursBeforeCurrentTime = hoursBeforeCurrentTime;
 
@@ -113,19 +108,22 @@ class InboundAnnotationTranscriptionDeleterProcessorImplTest extends PostgresInt
             ChronoUnit.HOURS
         );
 
-        externalObjectDirectoryEntitiesNotRelevant
-            = externalObjectDirectoryStub.generateWithStatusAndTranscriptionAndAnnotationAndLocation(ExternalLocationTypeEnum.INBOUND, ObjectRecordStatusEnum.ARM_RAW_DATA_FAILED, numberOfRecordsToGenerate, Optional.empty());
-        externalObjectDirectoryEntities
-            = externalObjectDirectoryStub.generateWithStatusAndTranscriptionAndAnnotationAndLocation(ExternalLocationTypeEnum.INBOUND,  STORED, numberOfRecordsToGenerate, Optional.empty());
+        List<ExternalObjectDirectoryEntity> externalObjectDirectoryEntitiesNotRelevant = externalObjectDirectoryStub
+            .generateWithStatusAndTranscriptionAndAnnotationAndLocation(
+                ExternalLocationTypeEnum.INBOUND, ObjectRecordStatusEnum.ARM_RAW_DATA_FAILED, numberOfRecordsToGenerate, Optional.empty());
+        List<ExternalObjectDirectoryEntity> externalObjectDirectoryEntities = externalObjectDirectoryStub
+            .generateWithStatusAndTranscriptionAndAnnotationAndLocation(
+                ExternalLocationTypeEnum.INBOUND, STORED, numberOfRecordsToGenerate, Optional.empty());
         entitiesToBeMarkedWithMediaOutsideOfHours
             = externalObjectDirectoryEntities.subList(0, externalObjectDirectoryEntities.size() / 2);
 
-        expectedArmRecordsResultOutsideHours
+        List<ExternalObjectDirectoryEntity> expectedArmRecordsResultOutsideHours
             = externalObjectDirectoryStub.generateWithStatusAndTranscriptionAndAnnotationAndArmLocation(
             externalObjectDirectoryEntities.subList(0, externalObjectDirectoryEntities.size() / 2), Optional.of(lastModifiedBefore));
         expectedArmRecordsResultWithinTheHour
             = externalObjectDirectoryStub.generateWithStatusAndTranscriptionAndAnnotationAndArmLocation(
-            externalObjectDirectoryEntities.subList(externalObjectDirectoryEntities.size() / 2, externalObjectDirectoryEntities.size()), Optional.of(lastModifiedNotBeforeThreshold));
+            externalObjectDirectoryEntities
+                .subList(externalObjectDirectoryEntities.size() / 2, externalObjectDirectoryEntities.size()), Optional.of(lastModifiedNotBeforeThreshold));
 
         int expectedRecords = externalObjectDirectoryEntitiesNotRelevant.size() + externalObjectDirectoryEntities.size()
             + expectedArmRecordsResultOutsideHours.size() + expectedArmRecordsResultWithinTheHour.size();

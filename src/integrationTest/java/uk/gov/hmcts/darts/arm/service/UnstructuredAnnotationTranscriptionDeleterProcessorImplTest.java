@@ -1,25 +1,146 @@
 package uk.gov.hmcts.darts.arm.service;
 
-import org.apache.commons.collections4.CollectionUtils;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
+import uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum;
 import uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum;
 import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
 import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
 import uk.gov.hmcts.darts.testutils.PostgresIntegrationBase;
 import uk.gov.hmcts.darts.testutils.stubs.ExternalObjectDirectoryStub;
 
+import java.lang.reflect.InvocationTargetException;
 import java.time.OffsetDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.STORED;
 
 class UnstructuredAnnotationTranscriptionDeleterProcessorImplTest extends PostgresIntegrationBase {
 
+    @Autowired
+    private ExternalObjectDirectoryRepository externalObjectDirectoryRepository;
 
+    @Autowired
+    private ExternalObjectDirectoryStub externalObjectDirectoryStub;
+
+    @Autowired
+    private UnstructuredTranscriptionAndAnnotationDeleterProcessor armTranscriptionAndAnnotationDeleterProcessor;
+
+    @Autowired
+    private CurrentTimeHelper currentTimeHelper;
+
+    private List<ExternalObjectDirectoryEntity> expectedArmRecordsResultWithinTheHour;
+
+    private List<ExternalObjectDirectoryEntity> entitiesToBeMarkedWithMediaOutsideOfWeeksAndHours;
+
+    @Test
+    void processBatchMultipleRecords() throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
+        int setupHoursBeforeCurrentTimeInArm = 25;
+        int setupWeeksBeforeCurrentTimeInUnstructured = 3;
+
+        generateDataWithAnnotation(setupWeeksBeforeCurrentTimeInUnstructured, setupHoursBeforeCurrentTimeInArm);
+
+        // exercise the logic
+        List<Integer> updatedResults 
+            = armTranscriptionAndAnnotationDeleterProcessor.markForDeletion(setupWeeksBeforeCurrentTimeInUnstructured, setupHoursBeforeCurrentTimeInArm);
+
+        // assert the logic
+        assertExpectedResults(updatedResults, entitiesToBeMarkedWithMediaOutsideOfWeeksAndHours, entitiesToBeMarkedWithMediaOutsideOfWeeksAndHours.size());
+
+        // assert the logic
+        assertExternalObjectDirectoryUpdate(updatedResults, 
+                                            entitiesToBeMarkedWithMediaOutsideOfWeeksAndHours, entitiesToBeMarkedWithMediaOutsideOfWeeksAndHours.size());
+
+        externalObjectDirectoryStub.checkNotMarkedForDeletion(expectedArmRecordsResultWithinTheHour);
+    }
+
+    @Test
+    void processBatchMultipleRecordsWithSpringInjectedDurationThreshold() throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
+
+        int setupHoursBeforeCurrentTimeInArm = 24;
+        int setupWeeksBeforeCurrentTimeInUnstructured = 30;
+
+        generateDataWithAnnotation(setupWeeksBeforeCurrentTimeInUnstructured, setupHoursBeforeCurrentTimeInArm);
+
+        // exercise the logic
+        List<Integer> updatedResults = armTranscriptionAndAnnotationDeleterProcessor.markForDeletion();
+
+        // assert the logic
+        assertExpectedResults(updatedResults, 
+                              entitiesToBeMarkedWithMediaOutsideOfWeeksAndHours, entitiesToBeMarkedWithMediaOutsideOfWeeksAndHours.size());
+
+        // assert the logic
+        assertExternalObjectDirectoryUpdate(updatedResults,
+                                            entitiesToBeMarkedWithMediaOutsideOfWeeksAndHours, entitiesToBeMarkedWithMediaOutsideOfWeeksAndHours.size());
+
+        externalObjectDirectoryStub.checkNotMarkedForDeletion(expectedArmRecordsResultWithinTheHour);
+    }
+
+    private void generateDataWithAnnotation(int weeksBeforeCurrentTimeForUnstructured,
+                                            int hoursBeforeCurrentTimeForArm) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
+        int numberOfRecordsToGenerate = 10;
+
+        OffsetDateTime lastModifiedBeforeCurrentTimeForArm = currentTimeHelper.currentOffsetDateTime().minus(
+            hoursBeforeCurrentTimeForArm,
+            ChronoUnit.HOURS
+        );
+
+        OffsetDateTime lastModifiedBeforeCurrentTimeForUnstructured = currentTimeHelper.currentOffsetDateTime().minus(
+            weeksBeforeCurrentTimeForUnstructured,
+            ChronoUnit.WEEKS
+        );
+
+        OffsetDateTime lastModifiedNotBeforeThreshold = currentTimeHelper.currentOffsetDateTime().minus(
+            1,
+            ChronoUnit.HOURS
+        );
+
+        List<ExternalObjectDirectoryEntity> externalObjectDirectoryEntitiesNotRelevant = externalObjectDirectoryStub
+            .generateWithStatusAndTranscriptionAndAnnotationAndLocation(
+                ExternalLocationTypeEnum.UNSTRUCTURED,
+                ObjectRecordStatusEnum.ARM_RAW_DATA_FAILED, numberOfRecordsToGenerate, Optional.of(lastModifiedBeforeCurrentTimeForUnstructured));
+        List<ExternalObjectDirectoryEntity> externalObjectDirectoryEntities = externalObjectDirectoryStub
+            .generateWithStatusAndTranscriptionAndAnnotationAndLocation(
+                ExternalLocationTypeEnum.UNSTRUCTURED, STORED, numberOfRecordsToGenerate, Optional.of(lastModifiedBeforeCurrentTimeForUnstructured));
+        entitiesToBeMarkedWithMediaOutsideOfWeeksAndHours
+            = externalObjectDirectoryEntities.subList(0, externalObjectDirectoryEntities.size() / 2);
+
+        List<ExternalObjectDirectoryEntity> expectedArmRecordsResultOutsideHours
+            = externalObjectDirectoryStub.generateWithStatusAndTranscriptionAndAnnotationAndArmLocation(
+            entitiesToBeMarkedWithMediaOutsideOfWeeksAndHours, Optional.of(lastModifiedBeforeCurrentTimeForArm));
+        expectedArmRecordsResultWithinTheHour
+            = externalObjectDirectoryStub.generateWithStatusAndTranscriptionAndAnnotationAndArmLocation(
+            expectedArmRecordsResultOutsideHours, Optional.of(lastModifiedNotBeforeThreshold));
+
+        int expectedRecords = externalObjectDirectoryEntitiesNotRelevant.size() + externalObjectDirectoryEntities.size()
+            + expectedArmRecordsResultOutsideHours.size() + expectedArmRecordsResultWithinTheHour.size();
+
+        // assert that the test has inserted the data into the database
+        Assertions.assertEquals(expectedRecords, externalObjectDirectoryRepository.findAll().size());
+    }
+
+
+    private void assertExternalObjectDirectoryUpdate(List<Integer> actualResults, List<ExternalObjectDirectoryEntity> expectedResults, int resultCount) {
+        // find matching pn expected results
+        List<Integer> matchesEntity = new ArrayList<>(
+            actualResults.stream().filter(expectedResult -> expectedResults.stream().anyMatch(result -> expectedResult.equals(result.getId()))).toList());
+
+        Assertions.assertEquals(resultCount, matchesEntity.size());
+
+        Assertions.assertTrue(externalObjectDirectoryStub.areObjectDirectoriesMarkedForDeletionWithHousekeeper(actualResults));
+    }
+
+
+    private void assertExpectedResults(List<Integer> actualResults, List<ExternalObjectDirectoryEntity> expectedResults, int resultCount) {
+        List<Integer> matchesEntity = new ArrayList<>(
+            actualResults.stream().filter(expectedResult -> expectedResults.stream().anyMatch(result -> expectedResult.equals(result.getId()))).toList());
+
+        Assertions.assertEquals(resultCount, matchesEntity.size());
+    }
 
 }

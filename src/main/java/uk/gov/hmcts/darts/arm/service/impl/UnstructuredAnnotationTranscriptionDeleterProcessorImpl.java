@@ -4,13 +4,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.darts.arm.service.UnstructuredTranscriptionAndAnnotationDeleterProcessor;
-import uk.gov.hmcts.darts.common.entity.ObjectRecordStatusEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
-import uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum;
-import uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum;
 import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
 import uk.gov.hmcts.darts.common.helper.SystemUserHelper;
 import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
@@ -50,15 +46,15 @@ public class UnstructuredAnnotationTranscriptionDeleterProcessorImpl implements 
     }
 
     @Override
-    public List<Integer> markForDeletion( int weeksBeforeCurrentDateInUnstructured, int hoursBeforeCurrentDateInArm ) {
+    public List<Integer> markForDeletion(int weeksBeforeCurrentDateInUnstructured, int hoursBeforeCurrentDateInArm) {
 
         OffsetDateTime lastModifiedBeforeCurrentDateForUnstructured = currentTimeHelper.currentOffsetDateTime().minus(
-            weeksInUnstructured,
+            weeksBeforeCurrentDateInUnstructured,
             ChronoUnit.WEEKS
         );
 
         OffsetDateTime lastModifiedBeforeCurrentDateForArm = currentTimeHelper.currentOffsetDateTime().minus(
-            hoursInArm,
+            hoursBeforeCurrentDateInArm,
             ChronoUnit.HOURS
         );
 

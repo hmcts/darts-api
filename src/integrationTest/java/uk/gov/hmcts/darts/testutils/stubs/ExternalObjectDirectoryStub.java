@@ -35,7 +35,6 @@ import java.util.UUID;
 import java.util.function.Consumer;
 
 import static uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum.ARM;
-import static uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum.INBOUND;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.STORED;
 import static uk.gov.hmcts.darts.common.helper.SystemUserHelper.HOUSEKEEPING;
 
@@ -267,8 +266,9 @@ public class ExternalObjectDirectoryStub {
     }
 
     @Transactional
-    public List<ExternalObjectDirectoryEntity> generateWithStatusAndTranscriptionAndAnnotationAndLocation(ExternalLocationTypeEnum externalLocationTypeEnum, ObjectRecordStatusEnum objectRecordStatusEnum,
-                                                                                                          int numberOfObjectDirectory, Optional<OffsetDateTime> dateToSet)
+    public List<ExternalObjectDirectoryEntity> generateWithStatusAndTranscriptionAndAnnotationAndLocation(
+        ExternalLocationTypeEnum externalLocationTypeEnum, ObjectRecordStatusEnum objectRecordStatusEnum,
+        int numberOfObjectDirectory, Optional<OffsetDateTime> dateToSet)
         throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
 
         List<ExternalObjectDirectoryEntity> entityListResult = new ArrayList<>();
@@ -298,8 +298,7 @@ public class ExternalObjectDirectoryStub {
     public List<ExternalObjectDirectoryEntity> generateWithStatusAndMediaLocation(ExternalLocationTypeEnum externalLocationTypeEnum,
                                                                                   ObjectRecordStatusEnum objectRecordStatusEnum,
                                                                                   int numberOfObjectDirectory, Optional<OffsetDateTime> dateToSet)
-        throws NoSuchMethodException, IllegalAccessException, InvocationTargetException
-    {
+        throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
         List<ExternalObjectDirectoryEntity> entityListResult = new ArrayList<>();
 
         for (int i = 0; i < numberOfObjectDirectory; i++) {

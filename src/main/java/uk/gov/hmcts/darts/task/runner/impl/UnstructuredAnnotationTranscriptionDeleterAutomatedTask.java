@@ -29,7 +29,6 @@ public class UnstructuredAnnotationTranscriptionDeleterAutomatedTask extends Abs
 
     @Override
     protected void runTask() {
-        Integer batchSize = getAutomatedTaskBatchSize(taskName);
         armDeletionProcessor.markForDeletion();
     }
 }
