@@ -892,15 +892,15 @@ public class AutomatedTaskServiceImpl implements AutomatedTaskService {
     private void rescheduleInboundTranscriptionAndAnnotationDeleterAutomatedTask() {
         TriggerAndAutomatedTask triggerAndAutomatedTask = getTriggerAndAutomatedTask(INBOUND_TRANSCRIPTION_ANNOTATION_DELETER_TASK_NAME.getTaskName());
         if (triggerAndAutomatedTask == null) {
-            var generateCaseDocumentAutomatedTask = new InboundAnnotationTranscriptionDeleterAutomatedTask(
+            var generateInboundAnnotationTranscriptionTask = new InboundAnnotationTranscriptionDeleterAutomatedTask(
                 automatedTaskRepository,
                 lockProvider,
                 automatedTaskConfigurationProperties,
                 inboundTranscriptionAndAnnotationDeleterProcessor,
                 logApi
             );
-            Trigger trigger = createAutomatedTaskTrigger(generateCaseDocumentAutomatedTask);
-            taskScheduler.schedule(generateCaseDocumentAutomatedTask, trigger);
+            Trigger trigger = createAutomatedTaskTrigger(generateInboundAnnotationTranscriptionTask);
+            taskScheduler.schedule(generateInboundAnnotationTranscriptionTask, trigger);
         } else {
             taskScheduler.schedule(triggerAndAutomatedTask.getAutomatedTask(), triggerAndAutomatedTask.getTrigger());
         }
