@@ -12,6 +12,7 @@ import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 
@@ -24,6 +25,7 @@ import java.util.Map;
 public class SystemUserHelper {
 
     public static final String HOUSEKEEPING = "housekeeping";
+    public static final String SYSTEM_EMAIL_ADDRESS = "dartssystemuser@hmcts.net";
     public static final String DAILYLIST_PROCESSOR = "dailylist-processor";
     private final UserAccountRepository userAccountRepository;
     private Map<String, String> systemUserGuidMap;
@@ -55,4 +57,13 @@ public class SystemUserHelper {
 
     }
 
+    public UserAccountEntity getSystemUser() {
+        List<UserAccountEntity> userList = userAccountRepository.findByEmailAddressIgnoreCase(SystemUserHelper.SYSTEM_EMAIL_ADDRESS);
+
+        if (userList.isEmpty()) {
+            throw new DartsApiException(AudioApiError.MISSING_SYSTEM_USER);
+        }
+
+        return userList.getFirst();
+    }
 }

@@ -132,7 +132,7 @@ class UnstructuredAnnotationTranscriptionDeleterProcessorImplTest extends Postgr
 
         Assertions.assertEquals(resultCount, matchesEntity.size());
 
-        Assertions.assertTrue(externalObjectDirectoryStub.areObjectDirectoriesMarkedForDeletionWithHousekeeper(actualResults));
+        Assertions.assertTrue(externalObjectDirectoryStub.areObjectDirectoriesMarkedForDeletionWithSystemUser(actualResults));
     }
 
 

@@ -382,4 +382,18 @@ public class ExternalObjectDirectoryStub {
 
         return true;
     }
+
+    @Transactional
+    public boolean areObjectDirectoriesMarkedForDeletionWithSystemUser(List<Integer> entities) {
+        for (Integer entity : entities) {
+            ExternalObjectDirectoryEntity objectDirectoryEntity = eodRepository.getReferenceById(entity);
+
+            if (!ObjectRecordStatusEnum.MARKED_FOR_DELETION.getId().equals(objectDirectoryEntity.getStatus().getId())
+                || !systemUserHelper.getSystemUser().getUserFullName().equals(objectDirectoryEntity.getLastModifiedBy().getUserFullName())) {
+                return false;
+            }
+        }
+
+        return true;
+    }
 }
