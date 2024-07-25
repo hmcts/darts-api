@@ -8,6 +8,7 @@ import uk.gov.hmcts.darts.audio.service.InboundAudioDeleterProcessor;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
 import uk.gov.hmcts.darts.common.helper.SystemUserHelper;
+import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryQueryTypeEnum;
 import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
 import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
 import uk.gov.hmcts.darts.common.util.EodHelper;
@@ -36,13 +37,13 @@ public class InboundAudioDeleterProcessorImpl implements InboundAudioDeleterProc
             hoursInArm,
             ChronoUnit.HOURS
         );
-        List<Integer> audioFileIdsToBeMarked = externalObjectDirectoryRepository.findMediaFileIdsIn2StorageLocationsBeforeTime(
-            null,
+        List<Integer> audioFileIdsToBeMarked = externalObjectDirectoryRepository.findIdsIn2StorageLocationsBeforeTime(
             EodHelper.storedStatus(),
             EodHelper.storedStatus(),
             EodHelper.inboundLocation(),
             EodHelper.armLocation(),
-            lastModifiedBefore
+            lastModifiedBefore,
+            ExternalObjectDirectoryQueryTypeEnum.MEDIA_QUERY.getIndex()
         );
 
         if (audioFileIdsToBeMarked.isEmpty()) {

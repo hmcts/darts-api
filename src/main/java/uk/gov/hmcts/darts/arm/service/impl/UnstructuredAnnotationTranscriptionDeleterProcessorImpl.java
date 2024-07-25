@@ -40,34 +40,37 @@ public class UnstructuredAnnotationTranscriptionDeleterProcessorImpl implements 
     private CurrentTimeHelper currentTimeHelper;
 
     @Value("${darts.data-management.retention-period.unstructured.arm-minimum.weeks}")
-    int weeksInArm;
+    int weeksInUnstructured;
 
-    public List<Integer> processDeletionIfPreceding(int batch) {
-        return processDeletionIfPreceding(batch, weeksInArm);
+    @Value("${darts.data-management.retention-period.inbound.arm-minimum}")
+    int hoursInArm;
+
+    public List<Integer> markForDeletion() {
+        return markForDeletion(weeksInUnstructured, hoursInArm);
     }
 
     @Override
-    public List<Integer> processDeletionIfPreceding(int batch, int weeksBeforeCurrentDate) {
+    public List<Integer> markForDeletion( int weeksBeforeCurrentDateInUnstructured, int hoursBeforeCurrentDateInArm ) {
 
-        // if a default batch size of 0 is specified this means no batch
-        Pageable pageable = null;
-        if (batch > 0) {
-            pageable = Pageable.ofSize(batch);
-        }
-
-        OffsetDateTime lastModifiedBefore = currentTimeHelper.currentOffsetDateTime().minus(
-            weeksBeforeCurrentDate,
+        OffsetDateTime lastModifiedBeforeCurrentDateForUnstructured = currentTimeHelper.currentOffsetDateTime().minus(
+            weeksInUnstructured,
             ChronoUnit.WEEKS
+        );
+
+        OffsetDateTime lastModifiedBeforeCurrentDateForArm = currentTimeHelper.currentOffsetDateTime().minus(
+            hoursInArm,
+            ChronoUnit.HOURS
         );
 
         List<Integer> recordsMarkedForDeletion
             = externalObjectDirectoryRepository
-            .findMediaFileIdsIn2StorageLocationsBeforeTime(pageable,
-                                                           EodHelper.storedStatus(),
+            .findIdsIn2StorageLocationsBeforeTime(EodHelper.storedStatus(),
                                                            EodHelper.storedStatus(),
                                                            EodHelper.unstructuredLocation(),
                                                            EodHelper.armLocation(),
-                                                           lastModifiedBefore);
+                                                           lastModifiedBeforeCurrentDateForUnstructured,
+                                                           lastModifiedBeforeCurrentDateForArm
+                                                  );
 
         log.debug("Identified records to be marked for deletion  {}",  recordsMarkedForDeletion.stream().map(Object::toString));
 
