@@ -9,17 +9,14 @@ import uk.gov.hmcts.darts.audit.api.AuditActivity;
 import uk.gov.hmcts.darts.audit.api.AuditApi;
 import uk.gov.hmcts.darts.common.entity.AutomatedTaskEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
-import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
 import uk.gov.hmcts.darts.common.repository.AutomatedTaskRepository;
 import uk.gov.hmcts.darts.task.runner.impl.AbstractLockableAutomatedTask;
 import uk.gov.hmcts.darts.task.service.AdminAutomatedTaskService;
+import uk.gov.hmcts.darts.task.service.LockService;
 import uk.gov.hmcts.darts.tasks.model.AutomatedTaskPatch;
 import uk.gov.hmcts.darts.tasks.model.DetailedAutomatedTask;
 
-import java.sql.Timestamp;
-import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
-import java.time.ZoneOffset;
 import java.util.List;
 import java.util.Optional;
 
@@ -41,7 +38,7 @@ class AdminAutomatedTasksServiceImplTest {
     @Mock
     private AutomatedTaskRunner automatedTaskRunner;
     @Mock
-    private CurrentTimeHelper currentTimeHelper;
+    private LockService lockService;
     @Mock
     private AbstractLockableAutomatedTask someAutomatedTask;
 
@@ -57,18 +54,18 @@ class AdminAutomatedTasksServiceImplTest {
             mapper,
             manualTaskService,
             automatedTaskRunner,
-            currentTimeHelper,
-            auditApi
+            auditApi,
+            lockService
         );
     }
 
     @Test
     void invokesTaskWhenTaskIsNotLocked() {
+        var automatedTask = anAutomatedTaskEntityWithName("some-task-name");
         when(someAutomatedTask.getTaskName()).thenReturn("some-task-name");
-        when(currentTimeHelper.currentOffsetDateTime()).thenReturn(OffsetDateTime.now());
+        when(lockService.isLocked(automatedTask.get())).thenReturn(false);
 
-        when(automatedTaskRepository.findById(1)).thenReturn(anAutomatedTaskEntityWithName("some-task-name"));
-        when(automatedTaskRepository.findLockedUntilForTask("some-task-name")).thenReturn(anSqlDateInThePast());
+        when(automatedTaskRepository.findById(1)).thenReturn(automatedTask);
         when(manualTaskService.getAutomatedTasks()).thenReturn(List.of(someAutomatedTask));
 
         adminAutomatedTaskService.runAutomatedTask(1);
@@ -95,12 +92,6 @@ class AdminAutomatedTasksServiceImplTest {
         assertFalse(automatedTaskEntity.get().getTaskEnabled());
         assertEquals(expectedReturnTask, task);
         verify(auditApi, times(1)).record(AuditActivity.ENABLE_DISABLE_JOB);
-    }
-
-    private List<Timestamp> anSqlDateInThePast() {
-        var epochSecond = LocalDateTime.now().minusWeeks(1).toEpochSecond(ZoneOffset.UTC);
-        var epochMillis = epochSecond * 1000;
-        return List.of(new Timestamp(epochMillis));
     }
 
     private Optional<AutomatedTaskEntity> anAutomatedTaskEntityWithName(String taskName) {
