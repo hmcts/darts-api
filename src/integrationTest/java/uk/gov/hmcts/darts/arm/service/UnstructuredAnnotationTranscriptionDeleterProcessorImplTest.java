@@ -81,7 +81,22 @@ class UnstructuredAnnotationTranscriptionDeleterProcessorImplTest extends Postgr
         externalObjectDirectoryStub.checkNotMarkedForDeletion(expectedArmRecordsResultWithinTheHour);
     }
 
-    private void generateDataWithAnnotation(int weeksBeforeCurrentTimeForUnstructured,
+    @Test
+    void processRecordsWithNoMarkForDeletion() throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
+        int setupHoursBeforeCurrentTimeInArm = 25;
+        int setupWeeksBeforeCurrentTimeInUnstructured = 3;
+
+        List<ExternalObjectDirectoryEntity> unstructuredEntities = generateDataWithAnnotation(setupWeeksBeforeCurrentTimeInUnstructured, setupHoursBeforeCurrentTimeInArm);
+
+        // exercise the logic
+        List<Integer> updatedResults
+            = armTranscriptionAndAnnotationDeleterProcessor.markForDeletion(setupWeeksBeforeCurrentTimeInUnstructured, setupHoursBeforeCurrentTimeInArm + 1);
+
+        Assertions.assertTrue(updatedResults.isEmpty());
+        externalObjectDirectoryStub.checkNotMarkedForDeletion(unstructuredEntities);
+    }
+
+    private List<ExternalObjectDirectoryEntity> generateDataWithAnnotation(int weeksBeforeCurrentTimeForUnstructured,
                                             int hoursBeforeCurrentTimeForArm) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
         int numberOfRecordsToGenerate = 10;
 
@@ -122,6 +137,11 @@ class UnstructuredAnnotationTranscriptionDeleterProcessorImplTest extends Postgr
 
         // assert that the test has inserted the data into the database
         Assertions.assertEquals(expectedRecords, externalObjectDirectoryRepository.findAll().size());
+
+        ArrayList<ExternalObjectDirectoryEntity> allUnstructuredEntities = new ArrayList<>();
+        allUnstructuredEntities.addAll(externalObjectDirectoryEntitiesNotRelevant);
+        allUnstructuredEntities.addAll(externalObjectDirectoryEntities);
+        return allUnstructuredEntities;
     }
 
 
