@@ -21,6 +21,7 @@ import static uk.gov.hmcts.darts.event.exception.EventError.TOO_MANY_SEARCH_RESU
 @Service
 @Slf4j
 @RequiredArgsConstructor
+@SuppressWarnings({"squid:S1168"})
 public class EventSearchServiceImpl implements EventSearchService {
 
     private final EventRepository eventRepository;
@@ -32,7 +33,7 @@ public class EventSearchServiceImpl implements EventSearchService {
     @Override
     public List<AdminSearchEventResponseResult> searchForEvents(AdminEventSearch adminEventSearch) {
         Page<EventSearchResult> eventSearchResults = eventRepository.searchEventsFilteringOn(
-            adminEventSearch.getCourthouseIds(),
+            getNonEmptyOrNull(adminEventSearch.getCourthouseIds()),
             adminEventSearch.getCaseNumber(),
             adminEventSearch.getCourtroomName(),
             adminEventSearch.getHearingStartAt(),
@@ -50,5 +51,12 @@ public class EventSearchServiceImpl implements EventSearchService {
         return eventSearchResults.stream()
             .map(eventSearchMapper::adminSearchEventResponseResultFrom)
             .toList();
+    }
+
+    private static List<Integer> getNonEmptyOrNull(List<Integer> integerList) {
+        if (integerList != null && integerList.isEmpty()) {
+           return null;
+        }
+        return integerList;
     }
 }

@@ -25,6 +25,7 @@ import java.util.UUID;
 
 import static java.util.Objects.nonNull;
 import static org.mockito.ArgumentMatchers.argThat;
+import static uk.gov.hmcts.darts.PredefinedPrimaryKeys.TEST_JUDGE_GLOBAL_SECURITY_GROUP_ID;
 
 @Component
 @RequiredArgsConstructor
@@ -68,6 +69,10 @@ public class UserAccountStub {
         newUser.setAccountGuid(UUID.randomUUID().toString());
         newUser.setIsSystemUser(true);
         newUser.setUserFullName(newUser.getUserName());
+        newUser.setCreatedBy(newUser);
+        newUser.setLastModifiedBy(newUser);
+        newUser.setCreatedDateTime(OffsetDateTime.of(2020, 10, 10, 10, 0, 0, 0, ZoneOffset.UTC));
+        newUser.setLastModifiedDateTime(OffsetDateTime.of(2020, 10, 10, 10, 0, 0, 0, ZoneOffset.UTC));
         return userAccountRepository.saveAndFlush(newUser);
     }
 
@@ -262,8 +267,7 @@ public class UserAccountStub {
 
     @Transactional
     public UserAccountEntity createJudgeUser(String identifier) {
-        SecurityGroupEntity securityGroupEntity = securityGroupRepository.findById(-3).get();
-        securityGroupEntity.setGlobalAccess(true);
+        SecurityGroupEntity securityGroupEntity = securityGroupRepository.findById(TEST_JUDGE_GLOBAL_SECURITY_GROUP_ID).get();
         securityGroupEntity.getCourthouseEntities().addAll(courthouseRepository.findAll());
         securityGroupEntity = securityGroupRepository.saveAndFlush(securityGroupEntity);
 

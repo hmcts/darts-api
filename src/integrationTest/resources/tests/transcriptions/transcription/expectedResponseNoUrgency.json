@@ -6,7 +6,7 @@
   "status" : "Approved",
   "received" : "2023-06-20T10:00:00Z",
   "requestor" : {
-    "user_id" : 2,
+    "user_id" : $USER_ACCOUNT_ID,
     "user_full_name" : "integrationtest.user@example.comFullName"
   },
   "requestor_comments" : "comment1",

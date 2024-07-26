@@ -29,4 +29,6 @@ public interface EventHandlerRepository extends RevisionRepository<EventHandlerE
         AND eh.active = true
         """)
     List<EventHandlerEntity> findActiveMappingsForTypeAndSubtype(String type, String subType);
+
+    List<EventHandlerEntity> findByIdGreaterThanEqual(Integer value);
 }

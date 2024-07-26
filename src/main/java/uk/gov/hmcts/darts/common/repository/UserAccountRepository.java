@@ -22,6 +22,8 @@ public interface UserAccountRepository extends
 
     List<UserAccountEntity> findByEmailAddressIgnoreCase(String emailAddress);
 
+    List<UserAccountEntity> findByIdGreaterThanEqual(Integer value);
+
     Optional<UserAccountEntity> findByAccountGuidAndActive(String guid, Boolean active);
 
     @Query("""

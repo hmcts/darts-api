@@ -177,7 +177,7 @@ checkstyle {
 
 var sourceSetsCopy = sourceSets
 pmd {
-  toolVersion = "7.3.0"
+  toolVersion = "7.4.0"
   sourceSets = [sourceSetsCopy.main]
   reportsDir = file("$project.buildDir/reports/pmd")
   // https://github.com/pmd/pmd/issues/876
@@ -186,7 +186,7 @@ pmd {
 }
 
 pmd {
-  toolVersion = "7.3.0"
+  toolVersion = "7.4.0"
   sourceSets = [sourceSetsCopy.test, sourceSetsCopy.functionalTest, sourceSetsCopy.integrationTest, sourceSetsCopy.smokeTest]
   reportsDir = file("$project.buildDir/reports/pmd")
   // https://github.com/pmd/pmd/issues/876
@@ -400,8 +400,8 @@ dependencies {
   implementation group: 'org.springframework.cloud', name: 'spring-cloud-starter-openfeign', version: '4.1.3'
   implementation 'org.springframework.retry:spring-retry:2.0.7'
 
-  implementation 'net.javacrumbs.shedlock:shedlock-spring:5.13.0'
-  implementation 'net.javacrumbs.shedlock:shedlock-provider-jdbc-template:5.13.0'
+  implementation 'net.javacrumbs.shedlock:shedlock-spring:5.14.0'
+  implementation 'net.javacrumbs.shedlock:shedlock-provider-jdbc-template:5.14.0'
 
   implementation group: 'com.github.hmcts.java-logging', name: 'logging', version: '6.1.5'
   implementation group: 'org.apache.logging.log4j', name: 'log4j-api', version: log4JVersion
@@ -419,7 +419,7 @@ dependencies {
   implementation group: 'io.rest-assured', name: 'rest-assured'
   implementation group: 'org.flywaydb', name: 'flyway-core', version: '10.16.0'
   implementation group: 'org.flywaydb', name: 'flyway-database-postgresql', version: '10.16.0'
-  implementation group: 'io.hypersistence', name: 'hypersistence-utils-hibernate-60', version: '3.8.1'
+  implementation group: 'io.hypersistence', name: 'hypersistence-utils-hibernate-60', version: '3.8.2'
 
   //database
   implementation 'org.postgresql:postgresql:42.7.3'

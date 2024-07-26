@@ -103,8 +103,6 @@ class EventsControllerPostEventsTest extends IntegrationBase {
 
         EventHandlerEntity eventType = persistedEvent.getEventType();
         Assertions.assertEquals("New Description", eventType.getEventName());
-
-        dartsDatabase.addToTrash(activeHandler, inactiveHandler);
     }
 
     @Test

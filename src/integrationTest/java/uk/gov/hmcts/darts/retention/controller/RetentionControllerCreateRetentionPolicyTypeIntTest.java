@@ -2,13 +2,11 @@ package uk.gov.hmcts.darts.retention.controller;
 
 import org.apache.commons.lang3.StringUtils;
 import org.json.JSONObject;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.data.domain.Example;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.ResultActions;
@@ -23,7 +21,6 @@ import uk.gov.hmcts.darts.testutils.IntegrationBase;
 import uk.gov.hmcts.darts.testutils.stubs.SuperAdminUserStub;
 
 import java.time.OffsetDateTime;
-import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -63,11 +60,6 @@ class RetentionControllerCreateRetentionPolicyTypeIntTest extends IntegrationBas
     @BeforeEach
     void setUp() {
         transactionTemplate = new TransactionTemplate(transactionManager);
-    }
-
-    @AfterEach
-    void tearDown() {
-        clearCreatedRetentionPolicyTypes();
     }
 
     @Test
@@ -390,18 +382,4 @@ class RetentionControllerCreateRetentionPolicyTypeIntTest extends IntegrationBas
         return dartsDatabase.getRetentionPolicyTypeRepository()
             .save(retentionPolicyTypeEntity);
     }
-
-    private void clearCreatedRetentionPolicyTypes() {
-        RetentionPolicyTypeEntity exampleEntity = new RetentionPolicyTypeEntity();
-        exampleEntity.setDescription(SOME_POLICY_DESCRIPTION);
-
-        List<RetentionPolicyTypeEntity> entitiesForDeletion = dartsDatabase.getRetentionPolicyTypeRepository()
-            .findAll(Example.of(exampleEntity));
-
-        dartsDatabase.getRetentionPolicyTypeRepository()
-            .deleteAllById(entitiesForDeletion.stream()
-                               .map(RetentionPolicyTypeEntity::getId)
-                               .toList());
-    }
-
 }

@@ -40,9 +40,6 @@ class RetentionPolicyAuditTest extends IntegrationBase {
 
         var retentionPolicyRevisions = dartsDatabase.findRetentionPolicyRevisionsFor(retentionPolicy.getId());
         assertThat(retentionPolicyRevisions.getLatestRevision().getMetadata().getRevisionType()).isEqualTo(INSERT);
-
-        // clean up
-        dartsDatabase.addToTrash(retentionPolicy);
     }
 
     @Test
@@ -70,10 +67,6 @@ class RetentionPolicyAuditTest extends IntegrationBase {
 
         var priorPolicyRevisions = dartsDatabase.findRetentionPolicyRevisionsFor(priorPolicyEntity.getId());
         assertThat(priorPolicyRevisions.getLatestRevision().getMetadata().getRevisionType()).isEqualTo(UPDATE);
-
-        // clean up
-        dartsDatabase.addToTrash(retentionPolicy);
-        dartsDatabase.addToTrash(priorPolicyEntity);
     }
 
     @Test
@@ -96,9 +89,6 @@ class RetentionPolicyAuditTest extends IntegrationBase {
 
         var retentionPolicyRevisions = dartsDatabase.findRetentionPolicyRevisionsFor(retentionPolicyType.getId());
         assertThat(retentionPolicyRevisions.getLatestRevision().getMetadata().getRevisionType()).isEqualTo(UPDATE);
-
-        // clean up
-        dartsDatabase.addToTrash(retentionPolicyType);
     }
 
     private static AdminPostRetentionRequest adminPostRetentionRequestWithDefaults() {
