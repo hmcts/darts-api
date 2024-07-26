@@ -35,7 +35,6 @@ public class GivenBuilder {
         user.setEmailAddress(userEmail);
 
         dartsDatabase.addUserToGroup(user, securityGroup);
-        dartsDatabase.addToUserAccountTrash(userEmail);
 
         return user;
     }
@@ -48,7 +47,6 @@ public class GivenBuilder {
 
         var judge = minimalUserAccount();
         judge.setEmailAddress(userEmail);
-        dartsDatabase.addToUserAccountTrash(userEmail);
 
         dartsDatabase.addUserToGroup(judge, securityGroup);
 

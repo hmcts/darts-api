@@ -71,13 +71,11 @@ class SecurityGroupManagementAuditTest extends IntegrationBase {
     }
 
     private SecurityGroupWithIdAndRole createSecurityGroup() {
-        var securityGroup = securityGroupService.createSecurityGroup(
+        return securityGroupService.createSecurityGroup(
             new SecurityGroupPostRequest()
                 .name("some-security-group-name")
                 .displayName("some-security-group-display-name")
                 .securityRoleId(4));
-        dartsDatabase.addSecurityGroupToTrashById(securityGroup.getId());
-        return securityGroup;
     }
 
     private AuditEntity findAuditActivity(String activity, List<AuditEntity> audits) {

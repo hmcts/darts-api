@@ -1,6 +1,5 @@
 package uk.gov.hmcts.darts.cases.controller;
 
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.skyscreamer.jsonassert.JSONCompareMode;
@@ -142,11 +141,6 @@ class CaseControllerSearchPostTest extends IntegrationBase {
         dartsDatabase.saveAll(event4a, event5b);
 
         givenBearerTokenExists(INTEGRATION_TEST_USER_EMAIL);
-    }
-
-    @AfterEach
-    void deleteUser() {
-        dartsDatabase.addToUserAccountTrash(INTEGRATION_TEST_USER_EMAIL);
     }
 
     @Test
