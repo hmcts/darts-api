@@ -168,6 +168,7 @@ public class AudioTransformationServiceImpl implements AudioTransformationServic
             List<MediaEntity> mediaEntitiesForHearing = getMediaMetadata(hearingEntity.getId());
 
             if (mediaEntitiesForHearing.isEmpty()) {
+                logApi.atsProcessingUpdate(mediaRequestEntity);
                 throw new DartsApiException(AudioApiError.FAILED_TO_PROCESS_AUDIO_REQUEST, "No media present to process");
             }
 
@@ -177,6 +178,7 @@ public class AudioTransformationServiceImpl implements AudioTransformationServic
             );
 
             if (filteredMediaEntities.isEmpty()) {
+                logApi.atsProcessingUpdate(mediaRequestEntity);
                 throw new DartsApiException(AudioApiError.FAILED_TO_PROCESS_AUDIO_REQUEST, "No filtered media present to process");
             }
 
