@@ -37,6 +37,15 @@
   },
   {
     "user_ids":[],
+    "id": -7,
+    "security_role_id": 1,
+    "global_access": true,
+    "display_state": true,
+    "courthouse_ids": [],
+    "name": "Test Judge Global"
+  },
+  {
+    "user_ids":[],
     "id": -6,
     "security_role_id": 6,
     "global_access": true,

@@ -1,6 +1,5 @@
 package uk.gov.hmcts.darts.usermanagement.controller;
 
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.skyscreamer.jsonassert.JSONAssert;
 import org.skyscreamer.jsonassert.JSONCompareMode;
@@ -13,17 +12,17 @@ import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
+import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.test.common.TestUtils;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 import uk.gov.hmcts.darts.testutils.stubs.SuperAdminUserStub;
 import uk.gov.hmcts.darts.testutils.stubs.UserAccountStub;
 
+import java.util.List;
 import java.util.Set;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import static uk.gov.hmcts.darts.testutils.stubs.UserAccountStub.INTEGRATION_TEST_USER_EMAIL;
-import static uk.gov.hmcts.darts.testutils.stubs.UserAccountStub.SEPARATE_TEST_USER_EMAIL;
 
 @AutoConfigureMockMvc
 class SecurityGroupControllerIntTest extends IntegrationBase {
@@ -39,12 +38,6 @@ class SecurityGroupControllerIntTest extends IntegrationBase {
     private UserIdentity userIdentity;
     @Autowired
     private transient MockMvc mockMvc;
-
-    @AfterEach
-    void deleteUser() {
-        dartsDatabase.addToUserAccountTrash(INTEGRATION_TEST_USER_EMAIL);
-        dartsDatabase.addToUserAccountTrash(SEPARATE_TEST_USER_EMAIL);
-    }
 
     @Test
     void getSecurityGroupsShouldSucceedAndReturnAllGroups() throws Exception {
@@ -105,6 +98,15 @@ class SecurityGroupControllerIntTest extends IntegrationBase {
 
         String expectedJson = """
                 [
+                    {
+                     "user_ids":[],
+                     "id":-7,
+                     "security_role_id":1,
+                     "global_access":true,
+                     "display_state":true,
+                     "courthouse_ids":[],
+                     "name":"Test Judge Global"
+                   },
                    {
                      "user_ids":[],
                      "id":-6,
@@ -445,7 +447,8 @@ class SecurityGroupControllerIntTest extends IntegrationBase {
         addCourthouseToSecurityGroup(courthouseEntity, -4);
 
         // add 2 users - system/non-system. only expect to see non-system in response
-        userAccountStub.createAuthorisedIntegrationTestUsersSystemAndNonSystem(courthouseEntity);
+        List<UserAccountEntity> users = userAccountStub.createAuthorisedIntegrationTestUsersSystemAndNonSystem(courthouseEntity);
+        UserAccountEntity nonSystemUser = users.stream().filter(userAccount -> !userAccount.getIsSystemUser()).findFirst().orElseThrow();
 
         MockHttpServletRequestBuilder requestBuilder = get(ADMIN_SECURITY_GROUPS_ENDPOINT_URL)
             .queryParam("courthouse_id", courthouseEntity.getId().toString())
@@ -458,7 +461,7 @@ class SecurityGroupControllerIntTest extends IntegrationBase {
         String expectedJson = String.format("""
                                                     [
                                                       {
-                                                        "user_ids":[3],
+                                                        "user_ids":[%s],
                                                         "id":-4,
                                                         "security_role_id":4,
                                                         "global_access":false,
@@ -467,7 +470,7 @@ class SecurityGroupControllerIntTest extends IntegrationBase {
                                                         "name":"Test Transcriber"
                                                       }
                                                     ]
-                                                """, courthouseEntity.getId().toString());
+                                                """, nonSystemUser.getId(), courthouseEntity.getId());
 
         JSONAssert.assertEquals(expectedJson, actualJson, JSONCompareMode.NON_EXTENSIBLE);
     }

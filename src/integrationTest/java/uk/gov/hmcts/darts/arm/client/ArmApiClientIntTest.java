@@ -32,7 +32,7 @@ import static org.springframework.http.HttpHeaders.CONTENT_TYPE;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
 @TestPropertySource(properties = {
-    "darts.storage.arm-api.url=http://localhost:8080"
+    "darts.storage.arm-api.url=http://localhost:${wiremock.server.port}"
 })
 @SuppressWarnings("PMD.CloseResource")
 class ArmApiClientIntTest extends IntegrationBase {

@@ -2,6 +2,8 @@ package uk.gov.hmcts.darts.testutils.stubs;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.EntityManager;
+import jakarta.persistence.EntityManagerFactory;
+import jakarta.persistence.Query;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -129,6 +131,21 @@ import static uk.gov.hmcts.darts.test.common.data.HearingTestData.someMinimalHea
 @Slf4j
 public class DartsDatabaseStub {
 
+    private static final int SEQUENCE_START_VALUE = 15_000;
+
+    private static final List<String> SEQUENCES_NO_RESET = List.of(
+        "revinfo_seq"
+    );
+
+    private static final List<String> SEQUENCES_RESET_FROM = List.of(
+        "usr_seq",
+        "grp_seq",
+        "aut_seq",
+        "rpt_seq",
+        "evh_seq"
+    );
+
+    private final EntityManagerFactory entityManagerFactory;
     private final AnnotationDocumentRepository annotationDocumentRepository;
     private final AnnotationRepository annotationRepository;
     private final AuditRepository auditRepository;
@@ -200,6 +217,47 @@ public class DartsDatabaseStub {
     private final CurrentTimeHelper currentTimeHelper;
     private final TransactionalUtil transactionalUtil;
 
+    public void resetSequences() {
+        try (EntityManager em = entityManagerFactory.createEntityManager()) {
+            em.getTransaction().begin();
+            final Query query = em.createNativeQuery("SELECT sequence_name FROM information_schema.sequences WHERE sequence_schema = 'darts'");
+            final List sequences = query.getResultList();
+            for (Object seqName : sequences) {
+                if (SEQUENCES_RESET_FROM.contains(seqName.toString())) {
+                    em.createNativeQuery("ALTER SEQUENCE darts." + seqName + " RESTART WITH " + SEQUENCE_START_VALUE).executeUpdate();
+                } else if (!SEQUENCES_NO_RESET.contains(seqName.toString())) {
+                    em.createNativeQuery("ALTER SEQUENCE darts." + seqName + " RESTART").executeUpdate();
+                }
+            }
+            em.getTransaction().commit();
+        }
+    }
+
+    @Transactional
+    public void resetTablesWithPredefinedTestData() {
+
+        retentionPolicyTypeRepository.deleteAll(
+            retentionPolicyTypeRepository.findByIdGreaterThanEqual(SEQUENCE_START_VALUE)
+        );
+
+        eventHandlerRepository.deleteAll(
+            eventHandlerRepository.findByIdGreaterThanEqual(SEQUENCE_START_VALUE)
+        );
+
+        automatedTaskRepository.deleteAll(
+            automatedTaskRepository.findByIdGreaterThanEqual(SEQUENCE_START_VALUE)
+        );
+
+        userAccountRepository.deleteAll(
+            userAccountRepository.findByIdGreaterThanEqual(SEQUENCE_START_VALUE)
+        );
+
+        securityGroupRepository.deleteAll(
+            securityGroupRepository.findByIdGreaterThanEqual(SEQUENCE_START_VALUE)
+        );
+    }
+
+    @Transactional
     public void clearDatabaseInThisOrder() {
         objectAdminActionRepository.deleteAll();
         auditRepository.deleteAll();
@@ -216,6 +274,7 @@ public class DartsDatabaseStub {
         transientObjectDirectoryRepository.deleteAll();
         transformedMediaRepository.deleteAll();
         mediaRequestRepository.deleteAll();
+        eventLinkedCaseRepository.deleteAll();
         eventRepository.deleteAll();
         hearingRepository.deleteAll();
         annotationRepository.deleteAll();
@@ -230,20 +289,11 @@ public class DartsDatabaseStub {
         caseRepository.deleteAll();
         judgeRepository.deleteAll();
         dailyListRepository.deleteAll();
-        retentionPolicyTypeRepository.deleteAll(retentionPolicyTypeBin);
-        retentionPolicyTypeBin.clear();
-        userAccountRepository.deleteAll(userAccountBin);
-        userAccountBin.clear();
-        securityGroupRepository.deleteAll(securityGroupBin);
-        securityGroupBin.clear();
         courthouseRepository.deleteAll();
         regionRepository.deleteAll();
-        eventHandlerRepository.deleteAll(eventHandlerBin);
-        eventHandlerBin.clear();
         annotationRepository.deleteAll();
         transcriptionRepository.deleteAll();
         transcriptionWorkflowRepository.deleteAll();
-        eventLinkedCaseRepository.deleteAll();
     }
 
     public List<EventHandlerEntity> findByHandlerAndActiveTrue(String handlerName) {
@@ -649,6 +699,7 @@ public class DartsDatabaseStub {
         this.securityGroupBin.add(securityGroupRepository.getReferenceById(id));
     }
 
+    //TODO remove
     public void addToUserAccountTrash(String... emailAddresses) {
         stream(emailAddresses)
             .flatMap(email -> userAccountRepository.findByEmailAddressIgnoreCase(email).stream())
@@ -788,7 +839,7 @@ public class DartsDatabaseStub {
     }
 
     @Transactional
-    public void createValidAnnotationDocumentForDownload(UserAccountEntity judge) {
+    public AnnotationDocumentEntity createValidAnnotationDocumentForDownload(UserAccountEntity judge) {
 
         var annotation = someAnnotationCreatedBy(judge);
 
@@ -820,6 +871,8 @@ public class DartsDatabaseStub {
         );
         armEod.setTransferAttempts(1);
         save(armEod2);
+
+        return annotationDocumentEntity;
     }
 
     protected AnnotationEntity someAnnotationCreatedBy(UserAccountEntity userAccount) {
@@ -827,8 +880,7 @@ public class DartsDatabaseStub {
         annotation.setDeleted(false);
         annotation.setCurrentOwner(userAccount);
         annotation.addHearing(save(someMinimalHearing()));
-        save(annotation);
-        return annotation;
+        return save(annotation);
     }
 
     @Transactional
@@ -933,5 +985,4 @@ public class DartsDatabaseStub {
     public Revisions<Long, RetentionPolicyTypeEntity> findRetentionPolicyRevisionsFor(Integer id) {
         return retentionPolicyTypeRepository.findRevisions(id);
     }
-
 }

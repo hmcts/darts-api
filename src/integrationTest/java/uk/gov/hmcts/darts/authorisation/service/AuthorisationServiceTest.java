@@ -1,9 +1,7 @@
 package uk.gov.hmcts.darts.authorisation.service;
 
-import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestInstance;
-import org.junit.jupiter.api.TestInstance.Lifecycle;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.transaction.annotation.Transactional;
@@ -36,7 +34,6 @@ import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.APPROVER;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.JUDICIARY;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.REQUESTER;
 
-@TestInstance(Lifecycle.PER_CLASS)
 class AuthorisationServiceTest extends IntegrationBase {
 
     private static final String TEST_JUDGE_EMAIL = "test.judge@example.com";
@@ -54,8 +51,8 @@ class AuthorisationServiceTest extends IntegrationBase {
     @MockBean
     private UserIdentity mockUserIdentity;
 
-    @BeforeAll
-    void beforeAll() {
+    @BeforeEach
+    void beforeEach() {
         dartsDatabase.getUserAccountStub().getSystemUserAccountEntity();
 
         SecurityGroupRepository securityGroupRepository = dartsDatabase.getSecurityGroupRepository();
@@ -224,7 +221,6 @@ class AuthorisationServiceTest extends IntegrationBase {
         final Iterator<SecurityGroupEntity> bristolUserGroupIt = bristolUser.getSecurityGroupEntities().iterator();
         bristolUserGroupIt.next().getCourthouseEntities().addAll(Set.of(a1Court, b2Court));
         bristolUserGroupIt.next().getCourthouseEntities().addAll(Set.of(b2Court, c3Court));
-        dartsDatabase.getUserAccountRepository().saveAndFlush(bristolUser);
 
         when(mockUserIdentity.getUserAccount()).thenReturn(bristolUser);
         assertDoesNotThrow(() -> authorisationService.checkCourthouseAuthorisation(
