@@ -91,7 +91,6 @@ import uk.gov.hmcts.darts.dailylist.enums.SourceType;
 import uk.gov.hmcts.darts.notification.entity.NotificationEntity;
 import uk.gov.hmcts.darts.retention.enums.CaseRetentionStatus;
 import uk.gov.hmcts.darts.retention.enums.RetentionPolicyEnum;
-import uk.gov.hmcts.darts.retentions.model.RetentionPolicyType;
 import uk.gov.hmcts.darts.test.common.data.AudioTestData;
 import uk.gov.hmcts.darts.test.common.data.CourthouseTestData;
 import uk.gov.hmcts.darts.test.common.data.DailyListTestData;
@@ -105,10 +104,8 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.OffsetDateTime;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 import java.util.UUID;
 
 import static java.time.LocalDateTime.now;
@@ -207,11 +204,6 @@ public class DartsDatabaseStub {
     private final TranscriptionDocumentStub transcriptionDocumentStub;
     private final TransformedMediaStub transformedMediaStub;
     private final UserAccountStub userAccountStub;
-
-    private final List<EventHandlerEntity> eventHandlerBin = new ArrayList<>();
-    private final List<UserAccountEntity> userAccountBin = new ArrayList<>();
-    private final List<SecurityGroupEntity> securityGroupBin = new ArrayList<>();
-    private final List<RetentionPolicyTypeEntity> retentionPolicyTypeBin = new ArrayList<>();
 
     private final EntityManager entityManager;
     private final CurrentTimeHelper currentTimeHelper;
@@ -676,34 +668,6 @@ public class DartsDatabaseStub {
         save(mediaRequestEntity.getRequestor());
         save(mediaRequestEntity.getCurrentOwner());
         return save(mediaRequestEntity);
-    }
-
-    public void addToTrash(EventHandlerEntity... eventHandlerEntities) {
-        this.eventHandlerBin.addAll(asList(eventHandlerEntities));
-    }
-
-    public void addToTrash(RetentionPolicyType retentionPolicy) {
-        this.retentionPolicyTypeBin.add(
-            retentionPolicyTypeRepository.getReferenceById(retentionPolicy.getId()));
-    }
-
-    public void addToTrash(RetentionPolicyTypeEntity... retentionPolicyTypeEntities) {
-        this.retentionPolicyTypeBin.addAll(asList(retentionPolicyTypeEntities));
-    }
-
-    public void addToTrash(Set<SecurityGroupEntity> securityGroupEntities) {
-        this.securityGroupBin.addAll(securityGroupEntities);
-    }
-
-    public void addSecurityGroupToTrashById(Integer id) {
-        this.securityGroupBin.add(securityGroupRepository.getReferenceById(id));
-    }
-
-    //TODO remove
-    public void addToUserAccountTrash(String... emailAddresses) {
-        stream(emailAddresses)
-            .flatMap(email -> userAccountRepository.findByEmailAddressIgnoreCase(email).stream())
-            .forEach(userAccountBin::add);
     }
 
     public void createTestUserAccount() {
