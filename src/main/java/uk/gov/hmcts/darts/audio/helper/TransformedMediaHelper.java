@@ -18,6 +18,7 @@ import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.repository.TransformedMediaRepository;
 import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
 import uk.gov.hmcts.darts.common.service.TransientObjectDirectoryService;
+import uk.gov.hmcts.darts.common.util.DateConverterUtil;
 import uk.gov.hmcts.darts.datamanagement.api.DataManagementApi;
 import uk.gov.hmcts.darts.notification.api.NotificationApi;
 import uk.gov.hmcts.darts.notification.dto.SaveNotificationToDbRequest;
@@ -133,10 +134,10 @@ public class TransformedMediaHelper {
                 String hearingDate = getFormattedHearingDate(mediaRequestEntity.getHearing().getHearingDate());
 
                 String audioStartTime = mediaRequestEntity.getStartTime() != null
-                    ? mediaRequestEntity.getStartTime().format(formatter) : NOT_AVAILABLE;
+                    ? DateConverterUtil.toLocalDateTime(mediaRequestEntity.getStartTime()).format(formatter) : NOT_AVAILABLE;
 
                 String audioEndTime = mediaRequestEntity.getEndTime() != null
-                    ? mediaRequestEntity.getEndTime().format(formatter) : NOT_AVAILABLE;
+                    ? DateConverterUtil.toLocalDateTime(mediaRequestEntity.getEndTime()).format(formatter) : NOT_AVAILABLE;
 
                 templateParams.put(REQUEST_ID, String.valueOf(mediaRequestEntity.getId()));
                 templateParams.put(COURTHOUSE, courthouseName);
