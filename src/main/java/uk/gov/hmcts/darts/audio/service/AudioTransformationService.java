@@ -12,8 +12,6 @@ import java.util.UUID;
 
 public interface AudioTransformationService {
 
-    BinaryData getUnstructuredAudioBlob(UUID location);
-
     List<MediaEntity> getMediaMetadata(Integer hearingId);
 
     Optional<UUID> getMediaLocation(MediaEntity media, Integer containerLocationId);

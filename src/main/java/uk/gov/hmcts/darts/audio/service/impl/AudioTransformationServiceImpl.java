@@ -89,11 +89,6 @@ public class AudioTransformationServiceImpl implements AudioTransformationServic
     };
 
     @Override
-    public BinaryData getUnstructuredAudioBlob(UUID location) {
-        return dataManagementApi.getBlobDataFromUnstructuredContainer(location);
-    }
-
-    @Override
     public List<MediaEntity> getMediaMetadata(Integer hearingId) {
         List<MediaEntity> mediaEntityList = mediaRepository.findAllByHearingId(hearingId);
         return mediaEntityList.stream()

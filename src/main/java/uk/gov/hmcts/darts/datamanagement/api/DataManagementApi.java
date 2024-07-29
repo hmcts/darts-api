@@ -13,11 +13,7 @@ import java.util.UUID;
 
 public interface DataManagementApi extends BlobContainerDownloadable {
 
-    BinaryData getBlobDataFromUnstructuredContainer(UUID blobId);
-
     BinaryData getBlobDataFromOutboundContainer(UUID blobId);
-
-    BinaryData getBlobDataFromInboundContainer(UUID blobId);
 
     BlobClient saveBlobDataToContainer(BinaryData binaryData, DatastoreContainerType container, Map<String, String> metadata);
 
