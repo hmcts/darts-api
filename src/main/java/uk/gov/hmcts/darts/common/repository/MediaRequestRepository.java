@@ -22,7 +22,8 @@ public interface MediaRequestRepository extends JpaRepository<MediaRequestEntity
     @Transactional
     @Query(value = """
         UPDATE darts.media_request
-        SET request_status = 'PROCESSING'
+        SET request_status = 'PROCESSING',
+        last_modified_ts = current_timestamp
         WHERE mer_id IN (
           SELECT mr2.mer_id
           FROM darts.media_request mr2

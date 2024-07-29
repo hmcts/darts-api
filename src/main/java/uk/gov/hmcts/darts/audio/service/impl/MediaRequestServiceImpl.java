@@ -462,6 +462,8 @@ public class MediaRequestServiceImpl implements MediaRequestService {
     public MediaRequestEntity updateAudioRequestCompleted(MediaRequestEntity mediaRequestEntity) {
 
         mediaRequestEntity.setStatus(COMPLETED);
+        mediaRequestEntity.setLastModifiedBy(userIdentity.getUserAccount());
+
         //todo update transformed media info
         return mediaRequestRepository.saveAndFlush(mediaRequestEntity);
     }
