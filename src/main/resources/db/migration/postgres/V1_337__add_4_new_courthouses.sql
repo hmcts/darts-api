@@ -1,3 +1,5 @@
+ALTER SEQUENCE cth_seq CACHE 1;
+
 DO $$
 DECLARE
 	cHouseId integer;
