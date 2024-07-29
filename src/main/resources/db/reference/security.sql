@@ -16,7 +16,8 @@
 --v19 remove r_ from dm_group_s_object_id and r_modify_date  from security_group
 --    add display_name to security_group
 --v20 remove group_class and group_display_name from security_group
---
+--v21 add unique index on role_name to security_role
+--    add unique index on group_name to security_group
 
 -- assuming this already exists:
 -- CREATE TABLESPACE darts_tables  location 'E:/PostgreSQL/Tables';
@@ -160,4 +161,9 @@ FOREIGN KEY (rol_id) REFERENCES security_role(rol_id);
 ALTER TABLE security_role_permission_ae          
 ADD CONSTRAINT security_role_permission_permission_fk
 FOREIGN KEY (per_id) REFERENCES security_permission(per_id);
+
+-- additional UNIQUE constraints
+
+CREATE UNIQUE INDEX rol_rol_nm_idx       ON security_role(role_name) TABLESPACE darts_indexes; 
+CREATE UNIQUE INDEX grp_grp_nm_idx       ON security_group(group_name) TABLESPACE darts_indexes; 
 
