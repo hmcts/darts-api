@@ -25,7 +25,7 @@ FOR recordToBeMigrated IN
 	--"court_case"
 	update court_case set cth_id = newId where cth_id = oldId;
 	--"courthouse_region_ae"
-	delete from courthouse_region_ae; --repopulating in next script
+	update courthouse_region_ae set cth_id = newId where cth_id = oldId;
 	--"courtroom"
 	update courtroom set cth_id = newId where cth_id = oldId;
 	--"security_group_courthouse_ae"
