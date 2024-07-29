@@ -12,7 +12,7 @@ FOR recordToBeMigrated IN
     SELECT cth_id from courthouse where cth_id > 151
     order by 1
 	LOOP
-	select recordToBeMigrated.usr_id+1000000 into newId;
+	select recordToBeMigrated.cth_id+1000000 into newId;
 	select recordToBeMigrated.cth_id into oldId;
 	RAISE NOTICE 'migrating % to %', oldId, newId;
 

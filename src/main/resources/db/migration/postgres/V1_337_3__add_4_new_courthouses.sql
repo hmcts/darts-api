@@ -4,7 +4,7 @@ DECLARE
 	newId integer;
 	oldId integer;
 	--Prod data will have an id below this value, a deliberate gap will be left between prod data and test data.
-	sequenceRestartValue integer = 500;
+	sequenceRestartValue integer = 1000;
 BEGIN
 perform setval('cth_seq', sequenceRestartValue, false);
 RAISE NOTICE 'migrating duplicate records';
