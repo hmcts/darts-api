@@ -218,7 +218,7 @@ class StandardEventHandlerTest extends HandlerTestData {
         dartsDatabase.createCourthouseUnlessExists(SOME_COURTHOUSE);
         dartsGateway.darNotificationReturnsSuccess();
 
-        int numberOfThreads = 5;
+        int numberOfThreads = 100;
         CountDownLatch startLatch = new CountDownLatch(1);
         CountDownLatch completionLatch = new CountDownLatch(numberOfThreads);
 
@@ -244,12 +244,10 @@ class StandardEventHandlerTest extends HandlerTestData {
             }
 
             startLatch.countDown(); // Start all threads simultaneously
-            boolean completed = completionLatch.await(10, TimeUnit.SECONDS);
+            boolean completed = completionLatch.await(5, TimeUnit.SECONDS);
 
             assertTrue(completed, "Not all threads completed in time");
-
             assertEquals(1, dartsDatabase.getHearingRepository().findAll().size(), "Expected only one hearing");
-//            assertEquals(numberOfThreads, dartsDatabase.getAllEvents().size(), "Expected all events to be processed");
         }
     }
 
