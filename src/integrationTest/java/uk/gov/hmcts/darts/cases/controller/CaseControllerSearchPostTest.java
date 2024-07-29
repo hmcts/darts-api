@@ -217,28 +217,28 @@ class CaseControllerSearchPostTest extends IntegrationBase {
                   "aDefendant"
                 ],
                 "judges": [
-                  "aJudge"
+                  "AJUDGE"
                 ],
                 "hearings": [
                   {
                     "date": "2023-05-20",
                     "courtroom": "courtroom1",
                     "judges": [
-                      "aJudge"
+                      "AJUDGE"
                     ]
                   },
                   {
                     "date": "2023-05-21",
                     "courtroom": "courtroom1",
                     "judges": [
-                      "aJudge"
+                      "AJUDGE"
                     ]
                   },
                   {
                     "date": "2023-05-22",
                     "courtroom": "courtroom1",
                     "judges": [
-                      "aJudge"
+                      "AJUDGE"
                     ]
                   }
                 ]
@@ -275,28 +275,28 @@ class CaseControllerSearchPostTest extends IntegrationBase {
                   "aDefendant"
                 ],
                 "judges": [
-                  "aJudge"
+                  "AJUDGE"
                 ],
                 "hearings": [
                   {
                     "date": "2023-05-20",
                     "courtroom": "courtroom1",
                     "judges": [
-                      "aJudge"
+                      "AJUDGE"
                     ]
                   },
                   {
                     "date": "2023-05-21",
                     "courtroom": "courtroom1",
                     "judges": [
-                      "aJudge"
+                      "AJUDGE"
                     ]
                   },
                   {
                     "date": "2023-05-22",
                     "courtroom": "courtroom1",
                     "judges": [
-                      "aJudge"
+                      "AJUDGE"
                     ]
                   }
                 ]
