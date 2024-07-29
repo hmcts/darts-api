@@ -19,7 +19,6 @@ import uk.gov.hmcts.darts.common.datamanagement.component.impl.FileBasedDownload
 import uk.gov.hmcts.darts.common.datamanagement.enums.DatastoreContainerType;
 import uk.gov.hmcts.darts.datamanagement.exception.FileNotDownloadedException;
 
-import java.io.IOException;
 import java.time.OffsetDateTime;
 import java.util.Optional;
 
@@ -53,17 +52,17 @@ public class ArmApiServiceImpl implements ArmApiService {
     @SuppressWarnings({"PMD.CloseResource"})
     public DownloadResponseMetaData downloadArmData(String externalRecordId, String externalFileId) throws FileNotDownloadedException {
         DownloadResponseMetaData responseMetaData = new FileBasedDownloadResponseMetaData();
-        feign.Response response = armApiClient.downloadArmData(
-            getArmBearerToken(),
-            armApiConfigurationProperties.getCabinetId(),
-            externalRecordId,
-            externalFileId
-        );
-
-        responseMetaData.setContainerTypeUsedToDownload(DatastoreContainerType.ARM);
         try {
+            feign.Response response = armApiClient.downloadArmData(
+                getArmBearerToken(),
+                armApiConfigurationProperties.getCabinetId(),
+                externalRecordId,
+                externalFileId
+            );
+
+            responseMetaData.setContainerTypeUsedToDownload(DatastoreContainerType.ARM);
             responseMetaData.markInputStream(response.body().asInputStream());
-        } catch (IOException e) {
+        } catch (Exception e) {
             throw new FileNotDownloadedException("Arm file failed to download, externalRecordId:" + externalRecordId + ", externalFileId:" + externalFileId, e);
         }
 
