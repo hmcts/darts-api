@@ -40,7 +40,7 @@ class AuthorisationServiceTest extends IntegrationBase {
     private static final String TEST_JUDGE_GLOBAL_EMAIL = "test.judge.global@example.com";
     private static final String TEST_BRISTOL_EMAIL = "test.bristol@example.com";
     private static final String TEST_NEW_EMAIL = "test.new@example.com";
-    private static final int TEST_JUDGE_ID = -3;
+    private static final int TEST_JUDGE_GROUP_ID = -3;
     private static final int REQUESTOR_SG_ID = -2;
     private static final int APPROVER_SG_ID = -1;
 
@@ -57,7 +57,7 @@ class AuthorisationServiceTest extends IntegrationBase {
 
         SecurityGroupRepository securityGroupRepository = dartsDatabase.getSecurityGroupRepository();
 
-        SecurityGroupEntity judgesSecurityGroup = securityGroupRepository.getReferenceById(TEST_JUDGE_ID);
+        SecurityGroupEntity judgesSecurityGroup = securityGroupRepository.getReferenceById(TEST_JUDGE_GROUP_ID);
 
         UserAccountEntity judgeUserAccount = new UserAccountEntity();
         judgeUserAccount.setSecurityGroupEntities(Set.of(judgesSecurityGroup));
@@ -130,7 +130,7 @@ class AuthorisationServiceTest extends IntegrationBase {
     void shouldGetAuthorisationForTestJudge() {
         SecurityGroupRepository securityGroupRepository = dartsDatabase.getSecurityGroupRepository();
 
-        SecurityGroupEntity judgesSecurityGroup = securityGroupRepository.getReferenceById(TEST_JUDGE_ID);
+        SecurityGroupEntity judgesSecurityGroup = securityGroupRepository.getReferenceById(TEST_JUDGE_GROUP_ID);
         var courthouseEntity = dartsDatabase.createCourthouseUnlessExists("func-courthouse-auth-test");
         addCourthouseToSecurityGroup(courthouseEntity, judgesSecurityGroup.getId());
 
@@ -152,7 +152,7 @@ class AuthorisationServiceTest extends IntegrationBase {
     void shouldGetAuthorisationForTestJudgeWithGlobalAccess() {
         SecurityGroupRepository securityGroupRepository = dartsDatabase.getSecurityGroupRepository();
 
-        SecurityGroupEntity judgesSecurityGroup = securityGroupRepository.getReferenceById(TEST_JUDGE_ID);
+        SecurityGroupEntity judgesSecurityGroup = securityGroupRepository.getReferenceById(TEST_JUDGE_GROUP_ID);
         var courthouseEntity = dartsDatabase.createCourthouseUnlessExists("func-courthouse-auth-test-global");
         addCourthouseToSecurityGroup(courthouseEntity, judgesSecurityGroup.getId());
 
@@ -164,7 +164,7 @@ class AuthorisationServiceTest extends IntegrationBase {
         assertEquals(JUDICIARY.getId(), judgeRole.getRoleId());
         assertTrue(judgeRole.getGlobalAccess());
 
-        assertTrue(judgeRole.getCourthouseIds().isEmpty());
+        assertTrue(judgeRole.getCourthouseIds().contains(courthouseEntity.getId()));
 
         Set<String> judgePermissions = judgeRole.getPermissions();
         assertEquals(0, judgePermissions.size());

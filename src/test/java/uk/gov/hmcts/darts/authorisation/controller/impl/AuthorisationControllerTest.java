@@ -14,7 +14,6 @@ import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.common.util.CommonTestDataUtil;
 
 import java.util.HashSet;
-import java.util.Optional;
 import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -35,7 +34,7 @@ class AuthorisationControllerTest {
 
     @Test
     void getUserStateOk() {
-        UserAccountEntity userAccountEntity = CommonTestDataUtil.createUserAccount();
+        UserAccountEntity userAccountEntity = CommonTestDataUtil.createUserAccountWithId();
         when(authorisationApi.getCurrentUser()).thenReturn(userAccountEntity);
 
         Set<UserStateRole> newRoles = new HashSet<>();
@@ -54,25 +53,24 @@ class AuthorisationControllerTest {
 
         UserState userState = UserState.builder()
             .userId(123)
-            .userName("UserName")
+            .userName("testUsername")
             .roles(newRoles)
             .isActive(true)
             .build();
-        when(authorisationApi.getAuthorisation(userAccountEntity.getEmailAddress())).thenReturn(Optional.of(userState));
+        when(authorisationApi.getAuthorisation(userAccountEntity.getId())).thenReturn(userState);
 
         UserState userStateResponse = controller.getUserState();
 
         assertNotNull(userStateResponse);
-        assertEquals("UserName", userStateResponse.getUserName());
+        assertEquals("testUsername", userStateResponse.getUserName());
         assertTrue(userStateResponse.getIsActive());
     }
 
     @Test
     void getUserStateForbiddenWhenNoEmailAddress() {
-        UserAccountEntity userAccountEntity = CommonTestDataUtil.createUserAccount();
-        when(authorisationApi.getCurrentUser()).thenReturn(userAccountEntity);
-        when(authorisationApi.getAuthorisation(userAccountEntity.getEmailAddress())).thenReturn(Optional.empty());
+        when(authorisationApi.getCurrentUser()).thenThrow(new DartsApiException(AuthorisationError.USER_DETAILS_INVALID));
         var exception = assertThrows(DartsApiException.class, () -> controller.getUserState());
-        assertEquals(AuthorisationError.USER_NOT_AUTHORISED_FOR_ENDPOINT, exception.getError());
+        assertEquals(AuthorisationError.USER_DETAILS_INVALID, exception.getError());
     }
+
 }

@@ -25,6 +25,11 @@ public class AuthorisationApiImpl implements AuthorisationApi {
     private final UserIdentity userIdentity;
 
     @Override
+    public UserState getAuthorisation(int userId) {
+        return authorisationService.getAuthorisation(userId);
+    }
+
+    @Override
     public Optional<UserState> getAuthorisation(String emailAddress) {
         return authorisationService.getAuthorisation(emailAddress);
     }
