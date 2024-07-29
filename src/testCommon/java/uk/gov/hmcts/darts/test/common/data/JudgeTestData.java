@@ -22,7 +22,7 @@ public class JudgeTestData {
 
     public static JudgeEntity createJudgeWithName(String name) {
         var judgeEntity = new JudgeEntity();
-        judgeEntity.setName(name);
+        judgeEntity.setName(name.toUpperCase());
         return judgeEntity;
     }
 }

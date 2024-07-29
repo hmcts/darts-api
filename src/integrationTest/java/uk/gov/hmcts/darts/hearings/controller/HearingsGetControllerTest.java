@@ -84,7 +84,7 @@ class HearingsGetControllerTest extends IntegrationBase {
                "case_id": <case-id>,
                "case_number": "1",
                "judges": [
-                 "1judge1"
+                 "1JUDGE1"
                ],
                "transcription_count": 0,
                "case_reporting_restrictions":[]
