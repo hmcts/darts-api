@@ -6,28 +6,28 @@
       "aDefendant"
     ],
     "judges":[
-      "aJudge"
+      "AJUDGE"
     ],
     "hearings":[
       {
         "date":"2023-09-20",
         "courtroom":"courtroom2",
         "judges":[
-          "aJudge"
+          "AJUDGE"
         ]
       },
       {
         "date":"2023-09-21",
         "courtroom":"courtroom1",
         "judges":[
-          "aJudge"
+          "AJUDGE"
         ]
       },
       {
         "date":"2023-09-22",
         "courtroom":"courtroom3",
         "judges":[
-          "aJudge"
+          "AJUDGE"
         ]
       }
     ]
