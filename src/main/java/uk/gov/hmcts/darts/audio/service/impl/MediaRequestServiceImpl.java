@@ -128,7 +128,7 @@ public class MediaRequestServiceImpl implements MediaRequestService {
 
     @Override
     public Optional<MediaRequestEntity> retrieveMediaRequestForProcessing() {
-        return Optional.ofNullable(mediaRequestRepository.updateAndRetrieveMediaRequestToProcessing());
+        return Optional.ofNullable(mediaRequestRepository.updateAndRetrieveMediaRequestToProcessing(userIdentity.getUserAccount().getId()));
     }
 
     @Override

@@ -23,7 +23,8 @@ public interface MediaRequestRepository extends JpaRepository<MediaRequestEntity
     @Query(value = """
         UPDATE darts.media_request
         SET request_status = 'PROCESSING',
-        last_modified_ts = current_timestamp
+        last_modified_ts = current_timestamp,
+        last_modified_by = :userModifiedId
         WHERE mer_id IN (
           SELECT mr2.mer_id
           FROM darts.media_request mr2
@@ -33,7 +34,7 @@ public interface MediaRequestRepository extends JpaRepository<MediaRequestEntity
           )
         RETURNING *
         """, nativeQuery = true)
-    MediaRequestEntity updateAndRetrieveMediaRequestToProcessing();
+    MediaRequestEntity updateAndRetrieveMediaRequestToProcessing(int userModifiedId);
 
     @Query("""
         SELECT count(distinct(tm.id)) FROM MediaRequestEntity mr, TransformedMediaEntity tm
