@@ -73,7 +73,8 @@ public class UnstructuredDataHelper {
     private UUID saveToUnstructuredDataStore(ExternalObjectDirectoryEntity eodEntity, InputStream inputStream) {
         UUID uuid = null;
         try {
-            uuid = dataManagementService.saveBlobData(dataManagementConfiguration.getUnstructuredContainerName(), inputStream);
+            uuid = dataManagementService.saveBlobData(dataManagementConfiguration.getUnstructuredContainerName(), inputStream)
+                .getBlobName();
             log.debug(
                 "Completed upload to unstructured data store for EOD {}. Successfully uploaded with blobId: {}",
                 eodEntity.getId(),

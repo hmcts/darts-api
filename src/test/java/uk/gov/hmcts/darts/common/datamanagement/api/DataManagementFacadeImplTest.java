@@ -37,6 +37,7 @@ import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
 import uk.gov.hmcts.darts.datamanagement.api.DataManagementApi;
 import uk.gov.hmcts.darts.datamanagement.config.DataManagementConfiguration;
 import uk.gov.hmcts.darts.datamanagement.exception.FileNotDownloadedException;
+import uk.gov.hmcts.darts.datamanagement.model.BlobClientUploadResponseImpl;
 import uk.gov.hmcts.darts.datamanagement.service.DataManagementService;
 
 import java.io.File;
@@ -93,6 +94,8 @@ class DataManagementFacadeImplTest {
     private BlobClient blobClient;
     @Mock
     private DownloadResponseMetaData downloadResponseMetaDataMock;
+    @Mock
+    private BlobClientUploadResponseImpl blobClientUploadResponseImpl;
 
     private ExternalLocationTypeEntity inboundLocationEntity;
     private ExternalLocationTypeEntity unstructuredLocationEntity;
@@ -573,9 +576,10 @@ class DataManagementFacadeImplTest {
 
     @Test
     void testUnstructuredDataHelperCreate() throws Exception {
+        when(blobClientUploadResponseImpl.getBlobName()).thenReturn(UUID.randomUUID());
 
         when(dataManagementConfiguration.getUnstructuredContainerName()).thenReturn("unstructured");
-        when(dataManagementService.saveBlobData((String) any(), (InputStream) any())).thenReturn(UUID.randomUUID());
+        when(dataManagementService.saveBlobData((String) any(), (InputStream) any())).thenReturn(blobClientUploadResponseImpl);
 
         UnstructuredDataHelper unstructuredDataHelperTest = getUnstructuredDataHelper();
 

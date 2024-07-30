@@ -10,7 +10,6 @@ import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionEntity;
 import uk.gov.hmcts.darts.common.enums.SecurityRoleEnum;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
-import uk.gov.hmcts.darts.common.model.TranscriptModel;
 import uk.gov.hmcts.darts.common.repository.AnnotationRepository;
 import uk.gov.hmcts.darts.common.repository.EventRepository;
 import uk.gov.hmcts.darts.common.repository.HearingRepository;
@@ -27,7 +26,6 @@ import uk.gov.hmcts.darts.hearings.model.HearingTranscriptModel;
 import uk.gov.hmcts.darts.hearings.model.Transcript;
 import uk.gov.hmcts.darts.hearings.service.HearingsService;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -58,6 +56,8 @@ public class HearingsServiceImpl implements HearingsService {
         Optional<HearingEntity> foundHearingOpt = hearingRepository.findById(hearingId);
         if (foundHearingOpt.isEmpty()) {
             throw new DartsApiException(HearingApiError.HEARING_NOT_FOUND);
+        } else if (!foundHearingOpt.get().getHearingIsActual()) {
+            throw new DartsApiException(HearingApiError.HEARING_NOT_ACTUAL);
         }
         return foundHearingOpt.get();
     }
@@ -73,17 +73,6 @@ public class HearingsServiceImpl implements HearingsService {
         List<TranscriptionEntity> transcriptionEntities = transcriptionRepository.findByHearingIdManualOrLegacy(hearingId);
         List<HearingTranscriptModel> hearingTranscriptModel =  transcriptionMapper.mapResponse(transcriptionEntities);
         return transcriptionMapper.getTranscriptList(hearingTranscriptModel);
-    }
-
-    private <T extends TranscriptModel> List<Transcript> getTranscriptList(List<T> modelLst) {
-        List<Transcript> transcriptList = new ArrayList<>();
-        for (T model : modelLst) {
-            if (model instanceof Transcript) {
-                transcriptList.add((Transcript) model);
-            }
-        }
-
-        return transcriptList;
     }
 
     @Override
