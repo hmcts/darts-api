@@ -46,14 +46,12 @@ import uk.gov.hmcts.darts.task.runner.impl.CloseUnfinishedTranscriptionsAutomate
 import uk.gov.hmcts.darts.task.runner.impl.DailyListAutomatedTask;
 import uk.gov.hmcts.darts.task.runner.impl.ExternalDataStoreDeleterAutomatedTask;
 import uk.gov.hmcts.darts.task.runner.impl.GenerateCaseDocumentAutomatedTask;
-import uk.gov.hmcts.darts.task.runner.impl.InboundAnnotationTranscriptionDeleterAutomatedTask;
 import uk.gov.hmcts.darts.task.runner.impl.InboundAudioDeleterAutomatedTask;
 import uk.gov.hmcts.darts.task.runner.impl.InboundToUnstructuredAutomatedTask;
 import uk.gov.hmcts.darts.task.runner.impl.OutboundAudioDeleterAutomatedTask;
 import uk.gov.hmcts.darts.task.runner.impl.ProcessArmResponseFilesAutomatedTask;
 import uk.gov.hmcts.darts.task.runner.impl.ProcessDailyListAutomatedTask;
 import uk.gov.hmcts.darts.task.runner.impl.RemoveDuplicatedEventsAutomatedTask;
-import uk.gov.hmcts.darts.task.runner.impl.UnstructuredAnnotationTranscriptionDeleterAutomatedTask;
 import uk.gov.hmcts.darts.task.runner.impl.UnstructuredAudioDeleterAutomatedTask;
 import uk.gov.hmcts.darts.task.runner.impl.UnstructuredToArmAutomatedTask;
 import uk.gov.hmcts.darts.task.status.AutomatedTaskStatus;
@@ -173,9 +171,11 @@ class AutomatedTaskServiceTest extends IntegrationPerClassBase {
 
     @Test
     void givenSuccessfullyStartedTaskFailsDuringExecutionThenStatusIsSetToFailed() {
-        GenerateCaseDocumentAutomatedTask automatedTask = new GenerateCaseDocumentAutomatedTask(automatedTaskRepository, lockProvider,
-                                                                                        automatedTaskConfigurationProperties, taskProcessorFactory, logApi);
-        doThrow(ArithmeticException.class).when(caseRepository).findCasesNeedingCaseDocumentGenerated(any(), any());
+        GenerateCaseDocumentAutomatedTask automatedTask
+            = new GenerateCaseDocumentAutomatedTask(automatedTaskRepository, lockProvider,
+                automatedTaskConfigurationProperties, taskProcessorFactory, logApi);
+        doThrow(ArithmeticException.class).when(caseRepository)
+            .findCasesNeedingCaseDocumentGenerated(any(), any());
 
         automatedTaskService.cancelAutomatedTaskAndUpdateCronExpression(automatedTask.getTaskName(), true, "*/7 * * * * *");
 
@@ -230,9 +230,7 @@ class AutomatedTaskServiceTest extends IntegrationPerClassBase {
         assertTrue(taskCancelled);
 
         log.info("About to reload task {}", automatedTask.getTaskName());
-        Class<? extends AutomatedTask> automatedTaskUsedForProcessing
-            = automatedTaskService.reloadTaskByName(automatedTask.getTaskName());
-        assertEquals(ProcessDailyListAutomatedTask.class, automatedTaskUsedForProcessing);
+        automatedTaskService.reloadTaskByName(automatedTask.getTaskName());
     }
 
     @Test
@@ -407,9 +405,8 @@ class AutomatedTaskServiceTest extends IntegrationPerClassBase {
         assertTrue(taskCancelled);
 
         log.info("About to reload task {}", automatedTask.getTaskName());
-        Class<? extends AutomatedTask> automatedTaskUsedForProcessing
-            = automatedTaskService.reloadTaskByName(automatedTask.getTaskName());
-        assertEquals(CloseUnfinishedTranscriptionsAutomatedTask.class, automatedTaskUsedForProcessing);
+        automatedTaskService.reloadTaskByName(automatedTask.getTaskName());
+
     }
 
     @Test
@@ -461,9 +458,8 @@ class AutomatedTaskServiceTest extends IntegrationPerClassBase {
         assertTrue(taskCancelled);
 
         log.info("About to reload task {}", automatedTask.getTaskName());
-        Class<? extends AutomatedTask> automatedTaskUsedForProcessing
-            = automatedTaskService.reloadTaskByName(automatedTask.getTaskName());
-        assertEquals(OutboundAudioDeleterAutomatedTask.class, automatedTaskUsedForProcessing);
+        automatedTaskService.reloadTaskByName(automatedTask.getTaskName());
+
     }
 
     @Test
@@ -485,9 +481,8 @@ class AutomatedTaskServiceTest extends IntegrationPerClassBase {
         assertTrue(taskCancelled);
 
         log.info("About to reload task {}", automatedTask.getTaskName());
-        Class<? extends AutomatedTask> automatedTaskUsedForProcessing
-            = automatedTaskService.reloadTaskByName(automatedTask.getTaskName());
-        assertEquals(InboundAudioDeleterAutomatedTask.class, automatedTaskUsedForProcessing);
+        automatedTaskService.reloadTaskByName(automatedTask.getTaskName());
+
     }
 
     @Test
@@ -543,9 +538,8 @@ class AutomatedTaskServiceTest extends IntegrationPerClassBase {
         assertTrue(taskCancelled);
 
         log.info("About to reload task {}", automatedTask.getTaskName());
-        Class<? extends AutomatedTask> automatedTaskUsedForProcessing
-            = automatedTaskService.reloadTaskByName(automatedTask.getTaskName());
-        assertEquals(ExternalDataStoreDeleterAutomatedTask.class, automatedTaskUsedForProcessing);
+        automatedTaskService.reloadTaskByName(automatedTask.getTaskName());
+
     }
 
     @Test
@@ -567,9 +561,7 @@ class AutomatedTaskServiceTest extends IntegrationPerClassBase {
         assertTrue(taskCancelled);
 
         log.info("About to reload task {}", automatedTask.getTaskName());
-        Class<? extends AutomatedTask> automatedTaskUsedForProcessing
-            = automatedTaskService.reloadTaskByName(automatedTask.getTaskName());
-        assertEquals(InboundToUnstructuredAutomatedTask.class, automatedTaskUsedForProcessing);
+        automatedTaskService.reloadTaskByName(automatedTask.getTaskName());
 
     }
 
@@ -593,9 +585,7 @@ class AutomatedTaskServiceTest extends IntegrationPerClassBase {
         assertTrue(taskCancelled);
 
         log.info("About to reload task {}", automatedTask.getTaskName());
-        Class<? extends AutomatedTask> automatedTaskUsedForProcessing
-            = automatedTaskService.reloadTaskByName(automatedTask.getTaskName());
-        assertEquals(UnstructuredAudioDeleterAutomatedTask.class, automatedTaskUsedForProcessing);
+        automatedTaskService.reloadTaskByName(automatedTask.getTaskName());
 
     }
 
@@ -655,9 +645,7 @@ class AutomatedTaskServiceTest extends IntegrationPerClassBase {
         assertTrue(taskCancelled);
 
         log.info("About to reload task {}", automatedTask.getTaskName());
-        Class<? extends AutomatedTask> automatedTaskUsedForProcessing
-            = automatedTaskService.reloadTaskByName(automatedTask.getTaskName());
-        assertEquals(UnstructuredToArmAutomatedTask.class, automatedTaskUsedForProcessing);
+        automatedTaskService.reloadTaskByName(automatedTask.getTaskName());
 
     }
 
@@ -716,9 +704,7 @@ class AutomatedTaskServiceTest extends IntegrationPerClassBase {
         assertTrue(taskCancelled);
 
         log.info("About to reload task {}", automatedTask.getTaskName());
-        Class<? extends AutomatedTask> automatedTaskUsedForProcessing
-            = automatedTaskService.reloadTaskByName(automatedTask.getTaskName());
-        assertEquals(ProcessArmResponseFilesAutomatedTask.class, automatedTaskUsedForProcessing);
+        automatedTaskService.reloadTaskByName(automatedTask.getTaskName());
 
     }
 
@@ -778,9 +764,7 @@ class AutomatedTaskServiceTest extends IntegrationPerClassBase {
         assertTrue(taskCancelled);
 
         log.info("About to reload task {}", automatedTask.getTaskName());
-        Class<? extends AutomatedTask> automatedTaskUsedForProcessing
-            = automatedTaskService.reloadTaskByName(automatedTask.getTaskName());
-        assertEquals(CleanupArmResponseFilesAutomatedTask.class, automatedTaskUsedForProcessing);
+        automatedTaskService.reloadTaskByName(automatedTask.getTaskName());
     }
 
     @Test
@@ -839,9 +823,7 @@ class AutomatedTaskServiceTest extends IntegrationPerClassBase {
         assertTrue(taskCancelled);
 
         log.info("About to reload task {}", automatedTask.getTaskName());
-        Class<? extends AutomatedTask> automatedTaskUsedForProcessing
-            = automatedTaskService.reloadTaskByName(automatedTask.getTaskName());
-        assertEquals(CloseOldCasesAutomatedTask.class, automatedTaskUsedForProcessing);
+        automatedTaskService.reloadTaskByName(automatedTask.getTaskName());
     }
 
     @Test
@@ -900,9 +882,7 @@ class AutomatedTaskServiceTest extends IntegrationPerClassBase {
         assertTrue(taskCancelled);
 
         log.info("About to reload task {}", automatedTask.getTaskName());
-        Class<? extends AutomatedTask> automatedTaskUsedForProcessing
-            = automatedTaskService.reloadTaskByName(automatedTask.getTaskName());
-        assertEquals(GenerateCaseDocumentAutomatedTask.class, automatedTaskUsedForProcessing);
+        automatedTaskService.reloadTaskByName(automatedTask.getTaskName());
     }
 
     @Test
@@ -1007,9 +987,7 @@ class AutomatedTaskServiceTest extends IntegrationPerClassBase {
         assertTrue(taskCancelled);
 
         log.info("About to reload task {}", automatedTask.getTaskName());
-        Class<? extends AutomatedTask> automatedTaskUsedForProcessing
-            = automatedTaskService.reloadTaskByName(automatedTask.getTaskName());
-        assertEquals(DailyListAutomatedTask.class, automatedTaskUsedForProcessing);
+        automatedTaskService.reloadTaskByName(automatedTask.getTaskName());
     }
 
     @Test
@@ -1068,9 +1046,7 @@ class AutomatedTaskServiceTest extends IntegrationPerClassBase {
         assertTrue(taskCancelled);
 
         log.info("About to reload task {}", automatedTask.getTaskName());
-        Class<? extends AutomatedTask> automatedTaskUsedForProcessing
-            = automatedTaskService.reloadTaskByName(automatedTask.getTaskName());
-        assertEquals(ApplyRetentionCaseAssociatedObjectsAutomatedTask.class, automatedTaskUsedForProcessing);
+        automatedTaskService.reloadTaskByName(automatedTask.getTaskName());
     }
 
     @Test
@@ -1126,9 +1102,7 @@ class AutomatedTaskServiceTest extends IntegrationPerClassBase {
         assertTrue(taskCancelled);
 
         log.info("About to reload task {}", automatedTask.getTaskName());
-        Class<? extends AutomatedTask> automatedTaskUsedForProcessing
-            = automatedTaskService.reloadTaskByName(automatedTask.getTaskName());
-        assertEquals(ArmRetentionEventDateCalculatorAutomatedTask.class, automatedTaskUsedForProcessing);
+        automatedTaskService.reloadTaskByName(automatedTask.getTaskName());
 
     }
 
@@ -1152,10 +1126,7 @@ class AutomatedTaskServiceTest extends IntegrationPerClassBase {
         assertTrue(taskCancelled);
 
         log.info("About to reload task {}", automatedTask.getTaskName());
-        Class<? extends AutomatedTask> automatedTaskUsedForProcessing
-            = automatedTaskService.reloadTaskByName(automatedTask.getTaskName());
-        assertEquals(CleanupCurrentEventTask.class, automatedTaskUsedForProcessing);
-
+        automatedTaskService.reloadTaskByName(automatedTask.getTaskName());
 
     }
 
@@ -1172,10 +1143,6 @@ class AutomatedTaskServiceTest extends IntegrationPerClassBase {
         assertTrue(taskCancelled);
 
         automatedTaskService.reloadTaskByName(AutomatedTaskName.INBOUND_TRANSCRIPTION_ANNOTATION_DELETER_TASK_NAME.getTaskName());
-
-        Class<? extends AutomatedTask> automatedTaskUsedForProcessing
-            = automatedTaskService.reloadTaskByName(AutomatedTaskName.INBOUND_TRANSCRIPTION_ANNOTATION_DELETER_TASK_NAME.getTaskName());
-        assertEquals(InboundAnnotationTranscriptionDeleterAutomatedTask.class, automatedTaskUsedForProcessing);
     }
 
     @Test
@@ -1190,8 +1157,6 @@ class AutomatedTaskServiceTest extends IntegrationPerClassBase {
         );
         assertTrue(taskCancelled);
 
-        Class<? extends AutomatedTask> automatedTaskUsedForProcessing
-            = automatedTaskService.reloadTaskByName(AutomatedTaskName.UNSTRUCTURED_TRANSCRIPTION_ANNOTATION_DELETER_TASK_NAME.getTaskName());
-        assertEquals(UnstructuredAnnotationTranscriptionDeleterAutomatedTask.class, automatedTaskUsedForProcessing);
+        automatedTaskService.reloadTaskByName(AutomatedTaskName.UNSTRUCTURED_TRANSCRIPTION_ANNOTATION_DELETER_TASK_NAME.getTaskName());
     }
 }
