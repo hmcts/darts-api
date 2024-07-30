@@ -2,6 +2,7 @@ package uk.gov.hmcts.darts.common.entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -43,6 +44,16 @@ public class CaseDocumentEntity extends CreatedModifiedBaseEntity {
     @Column(name = "file_size", nullable = false)
     private Integer fileSize;
 
+    @Column(name = "is_deleted")
+    private boolean isDeleted;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "deleted_by")
+    private UserAccountEntity deletedBy;
+
+    @Column(name = "deleted_ts")
+    private OffsetDateTime deletedTs;
+
     @Column(name = "checksum")
     private String checksum;
 
@@ -51,5 +62,11 @@ public class CaseDocumentEntity extends CreatedModifiedBaseEntity {
 
     @Column(name = "retain_until_ts")
     private OffsetDateTime retainUntilTs;
+
+    @Column(name = "ret_conf_score")
+    private Integer ret_conf_score;
+
+    @Column(name = "ret_conf_reason")
+    private String ret_conf_reason;
 
 }

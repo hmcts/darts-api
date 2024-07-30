@@ -107,6 +107,10 @@ public class TranscriptionEntity extends CreatedModifiedBaseEntity {
     private Boolean isManualTranscription;
 
     @NotAudited
+    @Column(name = "is_current")
+    private Boolean isCurrent;
+
+    @NotAudited
     @Column(name = "hide_request_from_requestor", nullable = false)
     private Boolean hideRequestFromRequestor;
 

@@ -75,6 +75,9 @@ public class ExternalObjectDirectoryEntity extends CreatedModifiedBaseEntity imp
     @Column(name = "verification_attempts")
     private Integer verificationAttempts;
 
+    @Column(name = "data_ingestion_ts")
+    private OffsetDateTime dataIngestionTs;
+
     @Column(name = "manifest_file")
     private String manifestFile;
 
