@@ -6,15 +6,19 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.test.context.TestPropertySource;
 import uk.gov.hmcts.darts.audio.entity.MediaRequestEntity;
 import uk.gov.hmcts.darts.audiorequests.model.AudioRequestType;
+import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
+import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.notification.api.NotificationApi;
 import uk.gov.hmcts.darts.notification.entity.NotificationEntity;
 import uk.gov.hmcts.darts.notification.enums.NotificationStatus;
 import uk.gov.hmcts.darts.testutils.PostgresIntegrationBase;
+import uk.gov.hmcts.darts.testutils.stubs.SuperAdminUserStub;
 
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
@@ -71,6 +75,12 @@ class AudioTransformationServiceHandleKedaInvocationForMediaRequestsTest extends
     @SpyBean
     private MediaRequestService mediaRequestService;
 
+    @Autowired
+    private SuperAdminUserStub superAdminUserStub;
+
+    @MockBean
+    private UserIdentity mockUserIdentity;
+
     private HearingEntity hearing;
 
 
@@ -78,6 +88,10 @@ class AudioTransformationServiceHandleKedaInvocationForMediaRequestsTest extends
     void setUp() {
         dartsDatabase.getUserAccountStub().getSystemUserAccountEntity();
         hearing = given.aHearingWith("T202304130121", "some-courthouse", "some-courtroom", MOCK_HEARING_DATE);
+
+        UserAccountEntity testUser = superAdminUserStub.givenUserIsAuthorised(mockUserIdentity);
+        when(mockUserIdentity.getUserAccount()).thenReturn(testUser);
+
     }
 
     @Test
