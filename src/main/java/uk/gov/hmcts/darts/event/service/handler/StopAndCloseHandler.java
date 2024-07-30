@@ -104,7 +104,7 @@ public class StopAndCloseHandler extends EventHandlerBase {
             return;
         }
 
-        //ignore the caseTotalSentence if it's not an overridable policy
+        // ignore the caseTotalSentence if it's not an overridable policy
         if (dartsEvent.getRetentionPolicy().getCaseTotalSentence() != null && !overridableFixedPolicyKeys.contains(
             dartsEvent.getRetentionPolicy().getCaseRetentionFixedPolicy())) {
             dartsEvent.getRetentionPolicy().setCaseTotalSentence(null);

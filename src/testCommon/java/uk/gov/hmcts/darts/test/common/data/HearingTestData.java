@@ -67,6 +67,12 @@ public class HearingTestData {
     }
 
     public static HearingEntity createHearingWithDefaults(CourtCaseEntity courtCase, CourtroomEntity courtroom, LocalDate hearingDate, JudgeEntity judge) {
+        return createHearingWithDefaults(courtCase, courtroom, hearingDate, judge, true);
+    }
+
+
+    public static HearingEntity createHearingWithDefaults(CourtCaseEntity courtCase, CourtroomEntity courtroom, LocalDate hearingDate, JudgeEntity judge,
+                                                          boolean isHearingActual) {
         HearingEntity hearing = new HearingEntity();
         hearing.setCourtCase(Objects.requireNonNullElseGet(courtCase, CaseTestData::someMinimalCase));
 
@@ -74,7 +80,7 @@ public class HearingTestData {
 
         hearing.setHearingDate(Objects.requireNonNullElseGet(hearingDate, LocalDate::now));
 
-        hearing.setHearingIsActual(false);
+        hearing.setHearingIsActual(isHearingActual);
         hearing.addJudge(judge);
 
         return hearing;
