@@ -1,17 +1,17 @@
 package uk.gov.hmcts.darts.task.runner.impl;
 
 import lombok.extern.slf4j.Slf4j;
-import net.javacrumbs.shedlock.core.LockProvider;
 import uk.gov.hmcts.darts.common.repository.AutomatedTaskRepository;
 import uk.gov.hmcts.darts.dailylist.service.DailyListProcessor;
 import uk.gov.hmcts.darts.log.api.LogApi;
 import uk.gov.hmcts.darts.task.config.AutomatedTaskConfigurationProperties;
+import uk.gov.hmcts.darts.task.service.LockService;
 import uk.gov.hmcts.darts.task.status.AutomatedTaskStatus;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import static uk.gov.hmcts.darts.task.runner.AutomatedTaskName.PROCESS_DAILY_LIST_TASK_NAME;
+import static uk.gov.hmcts.darts.task.api.AutomatedTaskName.PROCESS_DAILY_LIST_TASK_NAME;
 
 @Slf4j
 @SuppressWarnings({"squid:S1135"})
@@ -22,15 +22,16 @@ public class ProcessDailyListAutomatedTask extends AbstractLockableAutomatedTask
 
     private final List<AutomatedTaskStatus> trackedStateChanges = new ArrayList<>();
 
-    public ProcessDailyListAutomatedTask(AutomatedTaskRepository automatedTaskRepository, LockProvider lockProvider,
-                                         AutomatedTaskConfigurationProperties automatedTaskConfigurationProperties, LogApi logApi) {
-        super(automatedTaskRepository, lockProvider, automatedTaskConfigurationProperties, logApi);
+    public ProcessDailyListAutomatedTask(AutomatedTaskRepository automatedTaskRepository,
+                                         AutomatedTaskConfigurationProperties automatedTaskConfigurationProperties,
+                                         LogApi logApi, LockService lockService) {
+        super(automatedTaskRepository, automatedTaskConfigurationProperties, logApi, lockService);
     }
 
-    public ProcessDailyListAutomatedTask(AutomatedTaskRepository automatedTaskRepository, LockProvider lockProvider,
+    public ProcessDailyListAutomatedTask(AutomatedTaskRepository automatedTaskRepository,
                                          AutomatedTaskConfigurationProperties automatedTaskConfigurationProperties,
-                                         DailyListProcessor processor, LogApi logApi) {
-        super(automatedTaskRepository, lockProvider, automatedTaskConfigurationProperties, logApi);
+                                         DailyListProcessor processor, LogApi logApi, LockService lockService) {
+        super(automatedTaskRepository, automatedTaskConfigurationProperties, logApi, lockService);
         this.dailyListProcessor = processor;
     }
 

@@ -1,14 +1,14 @@
 package uk.gov.hmcts.darts.task.runner.impl;
 
 import lombok.extern.slf4j.Slf4j;
-import net.javacrumbs.shedlock.core.LockProvider;
 import uk.gov.hmcts.darts.arm.component.AutomatedTaskProcessorFactory;
 import uk.gov.hmcts.darts.arm.service.ArmResponseFilesProcessor;
 import uk.gov.hmcts.darts.common.repository.AutomatedTaskRepository;
 import uk.gov.hmcts.darts.log.api.LogApi;
 import uk.gov.hmcts.darts.task.config.AutomatedTaskConfigurationProperties;
+import uk.gov.hmcts.darts.task.service.LockService;
 
-import static uk.gov.hmcts.darts.task.runner.AutomatedTaskName.PROCESS_ARM_RESPONSE_FILES_TASK_NAME;
+import static uk.gov.hmcts.darts.task.api.AutomatedTaskName.PROCESS_ARM_RESPONSE_FILES_TASK_NAME;
 
 @Slf4j
 public class ProcessArmResponseFilesAutomatedTask extends AbstractLockableAutomatedTask {
@@ -16,11 +16,10 @@ public class ProcessArmResponseFilesAutomatedTask extends AbstractLockableAutoma
     private final AutomatedTaskProcessorFactory automatedTaskProcessorFactory;
 
     public ProcessArmResponseFilesAutomatedTask(AutomatedTaskRepository automatedTaskRepository,
-                                                LockProvider lockProvider,
                                                 AutomatedTaskConfigurationProperties automatedTaskConfigurationProperties,
                                                 AutomatedTaskProcessorFactory automatedTaskProcessorFactory,
-                                                LogApi logApi) {
-        super(automatedTaskRepository, lockProvider, automatedTaskConfigurationProperties, logApi);
+                                                LogApi logApi, LockService lockService) {
+        super(automatedTaskRepository, automatedTaskConfigurationProperties, logApi, lockService);
         this.automatedTaskProcessorFactory = automatedTaskProcessorFactory;
     }
 

@@ -1,6 +1,5 @@
 package uk.gov.hmcts.darts.task.runner.impl;
 
-import net.javacrumbs.shedlock.core.LockProvider;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
@@ -10,6 +9,7 @@ import uk.gov.hmcts.darts.casedocument.service.GenerateCaseDocumentProcessor;
 import uk.gov.hmcts.darts.common.entity.AutomatedTaskEntity;
 import uk.gov.hmcts.darts.common.repository.AutomatedTaskRepository;
 import uk.gov.hmcts.darts.log.api.LogApi;
+import uk.gov.hmcts.darts.task.service.LockService;
 
 import java.util.Optional;
 
@@ -22,13 +22,13 @@ class GenerateCourtCaseDocumentAutomatedTaskTest {
 
     public static final int BATCH_SIZE = 50;
     @Mock
-    private LockProvider lockProvider;
-    @Mock
     private AutomatedTaskProcessorFactory factory;
     @Mock
     private GenerateCaseDocumentProcessor processor;
     @Mock
     private LogApi logApi;
+    @Mock
+    private LockService lockService;
     @Mock
     private AutomatedTaskRepository automatedTaskRepository;
 
@@ -40,10 +40,10 @@ class GenerateCourtCaseDocumentAutomatedTaskTest {
         when(factory.createGenerateCaseDocumentProcessor(BATCH_SIZE)).thenReturn(processor);
         GenerateCaseDocumentAutomatedTask task = new GenerateCaseDocumentAutomatedTask(
                 automatedTaskRepository,
-                lockProvider,
                 null,
                 factory,
-                logApi
+                logApi,
+                lockService
         );
 
         task.runTask();

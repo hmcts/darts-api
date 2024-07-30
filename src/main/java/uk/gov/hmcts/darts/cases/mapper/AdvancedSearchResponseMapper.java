@@ -33,10 +33,10 @@ public class AdvancedSearchResponseMapper {
             }
         }
         //case not already in response, so add it.
-        advancedSearchResults.add(maptToAdvancedSearchResult(hearing));
+        advancedSearchResults.add(mapToAdvancedSearchResult(hearing));
     }
 
-    private AdvancedSearchResult maptToAdvancedSearchResult(HearingEntity hearing) {
+    private AdvancedSearchResult mapToAdvancedSearchResult(HearingEntity hearing) {
         AdvancedSearchResult advancedSearchResult = new AdvancedSearchResult();
         CourtCaseEntity courtCase = hearing.getCourtCase();
         advancedSearchResult.setCaseId(courtCase.getId());
