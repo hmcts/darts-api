@@ -6,7 +6,7 @@ import uk.gov.hmcts.darts.common.entity.TranscriptionEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionStatusEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionTypeEntity;
 
-import java.util.List;
+import java.util.Arrays;
 
 import static uk.gov.hmcts.darts.test.common.data.CaseTestData.createSomeMinimalCase;
 import static uk.gov.hmcts.darts.test.common.data.UserAccountTestData.minimalUserAccount;
@@ -34,7 +34,7 @@ public class TranscriptionTestData {
     public static TranscriptionEntity someTranscriptionForHearing(HearingEntity hearingEntity) {
         var transcription = minimalTranscription();
         transcription.addHearing(hearingEntity);
-        transcription.setCourtCases(List.of(hearingEntity.getCourtCase()));
+        transcription.setCourtCases(Arrays.asList(hearingEntity.getCourtCase()));
         return transcription;
     }
 

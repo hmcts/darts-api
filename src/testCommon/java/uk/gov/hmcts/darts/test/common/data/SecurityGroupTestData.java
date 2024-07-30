@@ -6,7 +6,7 @@ import uk.gov.hmcts.darts.common.enums.SecurityRoleEnum;
 
 import java.util.Set;
 
-import static org.testcontainers.shaded.org.apache.commons.lang3.RandomStringUtils.random;
+import static org.apache.commons.lang3.RandomStringUtils.random;
 import static uk.gov.hmcts.darts.test.common.data.SecurityRoleTestData.securityRoleFor;
 
 @SuppressWarnings({"HideUtilityClassConstructor"})
