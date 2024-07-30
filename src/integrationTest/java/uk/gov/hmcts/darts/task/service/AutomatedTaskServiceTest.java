@@ -171,9 +171,11 @@ class AutomatedTaskServiceTest extends IntegrationPerClassBase {
 
     @Test
     void givenSuccessfullyStartedTaskFailsDuringExecutionThenStatusIsSetToFailed() {
-        GenerateCaseDocumentAutomatedTask automatedTask = new GenerateCaseDocumentAutomatedTask(automatedTaskRepository, lockProvider,
-                                                                                        automatedTaskConfigurationProperties, taskProcessorFactory, logApi);
-        doThrow(ArithmeticException.class).when(caseRepository).findCasesNeedingCaseDocumentGenerated(any(), any());
+        GenerateCaseDocumentAutomatedTask automatedTask
+            = new GenerateCaseDocumentAutomatedTask(automatedTaskRepository, lockProvider,
+                automatedTaskConfigurationProperties, taskProcessorFactory, logApi);
+        doThrow(ArithmeticException.class).when(caseRepository)
+            .findCasesNeedingCaseDocumentGenerated(any(), any());
 
         automatedTaskService.cancelAutomatedTaskAndUpdateCronExpression(automatedTask.getTaskName(), true, "*/7 * * * * *");
 
@@ -1141,5 +1143,20 @@ class AutomatedTaskServiceTest extends IntegrationPerClassBase {
         assertTrue(taskCancelled);
 
         automatedTaskService.reloadTaskByName(AutomatedTaskName.INBOUND_TRANSCRIPTION_ANNOTATION_DELETER_TASK_NAME.getTaskName());
-     }
+    }
+
+    @Test
+    void givenConfiguredTaskUnstructuredTranscriptionAndAnnotationDeleterAutomatedTask() throws Exception {
+        Set<ScheduledTask> scheduledTasks = scheduledTaskHolder.getScheduledTasks();
+        displayTasks(scheduledTasks);
+
+        boolean mayInterruptIfRunning = false;
+        boolean taskCancelled = automatedTaskService.cancelAutomatedTask(
+            AutomatedTaskName.UNSTRUCTURED_TRANSCRIPTION_ANNOTATION_DELETER_TASK_NAME.getTaskName(),
+            mayInterruptIfRunning
+        );
+        assertTrue(taskCancelled);
+
+        automatedTaskService.reloadTaskByName(AutomatedTaskName.UNSTRUCTURED_TRANSCRIPTION_ANNOTATION_DELETER_TASK_NAME.getTaskName());
+    }
 }

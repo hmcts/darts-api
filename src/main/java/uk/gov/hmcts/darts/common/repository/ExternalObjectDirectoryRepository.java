@@ -222,6 +222,28 @@ public interface ExternalObjectDirectoryRepository extends JpaRepository<Externa
                                                                      OffsetDateTime lastModifiedBefore,
                                                                      Integer externalObjectDirectoryQueryTypeEnumIndex);
 
+    @Query(
+        """
+            SELECT eod.id FROM ExternalObjectDirectoryEntity eod, ExternalObjectDirectoryEntity eod2
+            WHERE
+            eod.transcriptionDocumentEntity=eod2.transcriptionDocumentEntity
+            AND eod.annotationDocumentEntity=eod2.annotationDocumentEntity
+            AND eod.status = :status1
+            AND eod2.status = :status2
+            AND eod.externalLocationType = :location1
+            AND eod2.externalLocationType = :location2
+            AND eod2.lastModifiedDateTime <= :lastModifiedBefore2
+            AND eod.lastModifiedDateTime <= :lastModifiedBefore1
+            """
+    )
+    List<Integer> findIdsIn2StorageLocationsBeforeTime(ObjectRecordStatusEntity status1,
+                                                       ObjectRecordStatusEntity status2,
+                                                       ExternalLocationTypeEntity location1,
+                                                       ExternalLocationTypeEntity location2,
+                                                       OffsetDateTime lastModifiedBefore1,
+                                                       OffsetDateTime lastModifiedBefore2);
+
+
 
     @Query(
         """

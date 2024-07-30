@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.auditing.DateTimeProvider;
 import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
+import uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum;
 import uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum;
 import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
 import uk.gov.hmcts.darts.common.helper.SystemUserHelper;
@@ -13,10 +14,12 @@ import uk.gov.hmcts.darts.common.util.EodHelper;
 import uk.gov.hmcts.darts.testutils.PostgresIntegrationBase;
 import uk.gov.hmcts.darts.testutils.stubs.ExternalObjectDirectoryStub;
 
+import java.lang.reflect.InvocationTargetException;
 import java.time.OffsetDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.STORED;
 
@@ -40,31 +43,15 @@ class ExternalObjectDirectoryRepositoryTest  extends PostgresIntegrationBase {
     @Autowired
     private CurrentTimeHelper currentTimeHelper;
 
+    private List<ExternalObjectDirectoryEntity> entitiesToBeMarkedWithMediaOrAnnotationOutsideOfArmHours;
+
     @Test
     void testGetDirectoryIfMediaDate24Hours() throws Exception {
 
-        int numberOfRecordsToGenerate = 10;
         int setupHoursBeforeCurrentTime = 24;
 
         // setup the test data
-        List<ExternalObjectDirectoryEntity> externalObjectDirectoryEntitiesNotRelevant
-            = externalObjectDirectoryStub.generateWithStatusAndMediaAndInboundLocation(ObjectRecordStatusEnum.ARM_RAW_DATA_FAILED, numberOfRecordsToGenerate);
-        List<ExternalObjectDirectoryEntity> externalObjectDirectoryEntities
-            = externalObjectDirectoryStub.generateWithStatusAndMediaAndInboundLocation(STORED, numberOfRecordsToGenerate);
-        List<ExternalObjectDirectoryEntity> entitiesToBeMarkedWithMediaOutsideOfHours
-            = externalObjectDirectoryEntities.subList(0, externalObjectDirectoryEntities.size() / 2);
-        List<ExternalObjectDirectoryEntity> armRecordsResultOutside24Hours
-            = externalObjectDirectoryStub.generateWithStatusAndMediaAndArmLocation(
-            entitiesToBeMarkedWithMediaOutsideOfHours,setupHoursBeforeCurrentTime);
-        List<ExternalObjectDirectoryEntity> armRecordsResultWithinTheHour
-            = externalObjectDirectoryStub.generateWithStatusAndMediaAndArmLocation(
-                externalObjectDirectoryEntities.subList(externalObjectDirectoryEntities.size() / 2, externalObjectDirectoryEntities.size()), 2);
-
-        int expectedRecords = externalObjectDirectoryEntitiesNotRelevant.size() + externalObjectDirectoryEntities.size()
-            + armRecordsResultOutside24Hours.size() + armRecordsResultWithinTheHour.size();
-
-        // assert that the test has inserted the data into the database
-        Assertions.assertEquals(expectedRecords, externalObjectDirectoryRepository.findAll().size());
+        generateDataWithMediaForInbound(setupHoursBeforeCurrentTime);
 
         int hourDurationBeyondHours = setupHoursBeforeCurrentTime; // which no records are
 
@@ -76,37 +63,17 @@ class ExternalObjectDirectoryRepositoryTest  extends PostgresIntegrationBase {
                 getCurrentDateTimeWithHoursBefore(hourDurationBeyondHours), ExternalObjectDirectoryQueryTypeEnum.MEDIA_QUERY.getIndex());
 
         // assert the logic
-        assertExpectedResults(results, entitiesToBeMarkedWithMediaOutsideOfHours, entitiesToBeMarkedWithMediaOutsideOfHours.size());
+        assertExpectedResults(results, entitiesToBeMarkedWithMediaOrAnnotationOutsideOfArmHours,
+                              entitiesToBeMarkedWithMediaOrAnnotationOutsideOfArmHours.size());
     }
 
     @Test
     void testGetDirectoryIfMediaDateBeyond24Hours() throws Exception {
 
-        int numberOfRecordsToGenerate = 10;
         int setupHoursBeforeCurrentTime = 26;
 
         // setup the test data
-        List<ExternalObjectDirectoryEntity> externalObjectDirectoryEntitiesNotRelevant
-            = externalObjectDirectoryStub.generateWithStatusAndMediaAndInboundLocation(ObjectRecordStatusEnum.ARM_RAW_DATA_FAILED, numberOfRecordsToGenerate);
-        List<ExternalObjectDirectoryEntity> externalObjectDirectoryEntities
-            = externalObjectDirectoryStub.generateWithStatusAndMediaAndInboundLocation(STORED, numberOfRecordsToGenerate);
-
-        List<ExternalObjectDirectoryEntity> entitiesToBeMarkedWithMediaOutsideOfHours
-            = externalObjectDirectoryEntities.subList(0, externalObjectDirectoryEntities.size() / 2);
-
-        List<ExternalObjectDirectoryEntity> armRecordsResultOutside24Hours
-            = externalObjectDirectoryStub.generateWithStatusAndMediaAndArmLocation(
-            entitiesToBeMarkedWithMediaOutsideOfHours,setupHoursBeforeCurrentTime);
-        List<ExternalObjectDirectoryEntity> armRecordsResultWithinTheHour
-            = externalObjectDirectoryStub.generateWithStatusAndMediaAndArmLocation(
-                externalObjectDirectoryEntities.subList(externalObjectDirectoryEntities.size() / 2, externalObjectDirectoryEntities.size()), 2);
-
-        int expectedRecords = externalObjectDirectoryEntitiesNotRelevant.size()
-            + externalObjectDirectoryEntities.size()
-            + armRecordsResultOutside24Hours.size() + armRecordsResultWithinTheHour.size();
-
-        // assert that the test has inserted the data into the database
-        Assertions.assertEquals(expectedRecords, externalObjectDirectoryRepository.findAll().size());
+        generateDataWithMediaForInbound(setupHoursBeforeCurrentTime);
 
         int hourDurationBeyondHours = setupHoursBeforeCurrentTime; // which no records are
 
@@ -118,35 +85,17 @@ class ExternalObjectDirectoryRepositoryTest  extends PostgresIntegrationBase {
                                                   ExternalObjectDirectoryQueryTypeEnum.MEDIA_QUERY.getIndex());
 
         // assert the logic
-        assertExpectedResults(results, entitiesToBeMarkedWithMediaOutsideOfHours, entitiesToBeMarkedWithMediaOutsideOfHours.size());
+        assertExpectedResults(results, entitiesToBeMarkedWithMediaOrAnnotationOutsideOfArmHours,
+                              entitiesToBeMarkedWithMediaOrAnnotationOutsideOfArmHours.size());
     }
 
     @Test
     void testGetDirectoryIfAnnotationDate24Hours() throws Exception {
 
-        int numberOfRecordsToGenerate = 10;
         int setupHoursBeforeCurrentTime = 24;
 
         // setup the test data
-        List<ExternalObjectDirectoryEntity> externalObjectDirectoryEntitiesNotRelevant
-            = externalObjectDirectoryStub
-            .generateWithStatusAndTranscriptionAndAnnotationAndInboundLocation(ObjectRecordStatusEnum.ARM_RAW_DATA_FAILED, numberOfRecordsToGenerate);
-        List<ExternalObjectDirectoryEntity> externalObjectDirectoryEntities
-            = externalObjectDirectoryStub.generateWithStatusAndTranscriptionAndAnnotationAndInboundLocation(STORED, numberOfRecordsToGenerate);
-        List<ExternalObjectDirectoryEntity> entitiesToBeMarkedWithMediaOutsideOfHours
-            = externalObjectDirectoryEntities.subList(0, externalObjectDirectoryEntities.size() / 2);
-        List<ExternalObjectDirectoryEntity> armRecordsResultOutside24Hours
-            = externalObjectDirectoryStub.generateWithStatusAndTranscriptionAndAnnotationAndArmLocation(
-            entitiesToBeMarkedWithMediaOutsideOfHours,setupHoursBeforeCurrentTime);
-        List<ExternalObjectDirectoryEntity> armRecordsResultWithinTheHour
-            = externalObjectDirectoryStub.generateWithStatusAndTranscriptionAndAnnotationAndArmLocation(
-            externalObjectDirectoryEntities.subList(externalObjectDirectoryEntities.size() / 2, externalObjectDirectoryEntities.size()), 2);
-
-        int expectedRecords = externalObjectDirectoryEntitiesNotRelevant.size() + externalObjectDirectoryEntities.size()
-            + armRecordsResultOutside24Hours.size() + armRecordsResultWithinTheHour.size();
-
-        // assert that the test has inserted the data into the database
-        Assertions.assertEquals(expectedRecords, externalObjectDirectoryRepository.findAll().size());
+        generateDataWithAnnotationForInbound(setupHoursBeforeCurrentTime);
 
         int hourDurationBeyondHours = setupHoursBeforeCurrentTime; // which no records are
 
@@ -158,37 +107,64 @@ class ExternalObjectDirectoryRepositoryTest  extends PostgresIntegrationBase {
                 getCurrentDateTimeWithHoursBefore(hourDurationBeyondHours), ExternalObjectDirectoryQueryTypeEnum.ANNOTATION_QUERY.getIndex());
 
         // assert the logic
-        assertExpectedResults(results, entitiesToBeMarkedWithMediaOutsideOfHours, entitiesToBeMarkedWithMediaOutsideOfHours.size());
+        assertExpectedResults(results, entitiesToBeMarkedWithMediaOrAnnotationOutsideOfArmHours,
+                              entitiesToBeMarkedWithMediaOrAnnotationOutsideOfArmHours.size());
+    }
+
+    @Test
+    void testGetDirectoryIfAnnotationArmDateAndUnstructuredDateOutsideOfBounds() throws Exception {
+
+        int setupArmHoursBeforeCurrentTime = 24;
+        int setupUnstructuredWeeksBeforeCurrentTime = 4;
+
+        // setup the test data
+        generateDataWithAnnotationForUnstructured(setupArmHoursBeforeCurrentTime, setupUnstructuredWeeksBeforeCurrentTime);
+
+        // exercise the logic
+        List<Integer> results = externalObjectDirectoryRepository
+            .findIdsIn2StorageLocationsBeforeTime(
+                EodHelper.storedStatus(), EodHelper.storedStatus(),
+                EodHelper.unstructuredLocation(), EodHelper.armLocation(),
+                getCurrentDateTimeWithWeeksBefore(setupUnstructuredWeeksBeforeCurrentTime),
+                getCurrentDateTimeWithHoursBefore(setupArmHoursBeforeCurrentTime));
+
+        // assert the logic
+        assertExpectedResults(results, entitiesToBeMarkedWithMediaOrAnnotationOutsideOfArmHours,
+                              entitiesToBeMarkedWithMediaOrAnnotationOutsideOfArmHours.size());
+    }
+
+    @Test
+    void testGetDirectoryIfAnnotationArmDateAndUnstructuredDateWithNoRecordsFoundDueToArmDateBeingAcceptable() throws Exception {
+
+        int setupArmHoursBeforeCurrentTime = 24;
+        int setupUnstructuredWeeksBeforeCurrentTime = 4;
+
+        // setup the test data
+        generateDataWithAnnotationForUnstructured(setupArmHoursBeforeCurrentTime, setupUnstructuredWeeksBeforeCurrentTime);
+
+        // exercise the logic
+        List<Integer> results = externalObjectDirectoryRepository
+            .findIdsIn2StorageLocationsBeforeTime(
+                EodHelper.storedStatus(), EodHelper.storedStatus(),
+                EodHelper.unstructuredLocation(), EodHelper.armLocation(),
+                getCurrentDateTimeWithWeeksBefore(setupUnstructuredWeeksBeforeCurrentTime),
+                getCurrentDateTimeWithHoursBefore(setupArmHoursBeforeCurrentTime + 1));
+
+        // assert the logic
+        Assertions.assertTrue(results.isEmpty());
     }
 
     @Test
     void testGetDirectoryIfMediaDateNotBeyondThreshold() throws Exception {
 
-        int numberOfRecordsToGenerate = 10;
+        int setupHoursBeforeCurrentTime = 22;
 
         // setup the test data
-        List<ExternalObjectDirectoryEntity> externalObjectDirectoryEntitiesNotRelevant
-            = externalObjectDirectoryStub.generateWithStatusAndMediaAndInboundLocation(ObjectRecordStatusEnum.ARM_RAW_DATA_FAILED, numberOfRecordsToGenerate);
-        List<ExternalObjectDirectoryEntity> externalObjectDirectoryEntities
-            = externalObjectDirectoryStub.generateWithStatusAndMediaAndInboundLocation(STORED, numberOfRecordsToGenerate);
-
-        int setupHoursBeforeCurrentTime = 10;
-        List<ExternalObjectDirectoryEntity> armRecordsResultOutside24Hours
-            = externalObjectDirectoryStub.generateWithStatusAndMediaAndArmLocation(
-                externalObjectDirectoryEntities.subList(0, externalObjectDirectoryEntities.size() / 2),setupHoursBeforeCurrentTime);
-        List<ExternalObjectDirectoryEntity> armRecordsResultWithinTheHour
-            = externalObjectDirectoryStub.generateWithStatusAndMediaAndArmLocation(
-                externalObjectDirectoryEntities.subList(externalObjectDirectoryEntities.size() / 2, externalObjectDirectoryEntities.size()), 2);
-
-        int expectedRecords = externalObjectDirectoryEntitiesNotRelevant.size() + externalObjectDirectoryEntities.size()
-            + armRecordsResultOutside24Hours.size() + armRecordsResultWithinTheHour.size();
-
-        // assert that the test has inserted the data into the database
-        Assertions.assertEquals(expectedRecords, externalObjectDirectoryRepository.findAll().size());
+        generateDataWithMediaForInbound(setupHoursBeforeCurrentTime);
 
         int hourDurationBeyondHours = 24; // which no records are
 
-        // excerise the logic
+        // exercise the logic
         List<Integer> results = externalObjectDirectoryRepository
             .findIdsIn2StorageLocationsBeforeTime(
                 EodHelper.storedStatus(), EodHelper.storedStatus(),
@@ -212,5 +188,156 @@ class ExternalObjectDirectoryRepositoryTest  extends PostgresIntegrationBase {
             hours,
             ChronoUnit.HOURS
         );
+    }
+
+    private OffsetDateTime getCurrentDateTimeWithWeeksBefore(int hours) {
+        return currentTimeHelper.currentOffsetDateTime().minus(
+            hours,
+            ChronoUnit.HOURS
+        );
+    }
+
+    private void generateDataWithAnnotationForInbound(int hoursBeforeCurrentTime)
+        throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
+        int numberOfRecordsToGenerate = 10;
+        int setupHoursBeforeCurrentTime = hoursBeforeCurrentTime;
+
+        OffsetDateTime lastModifiedBeforeCurrentTime = currentTimeHelper.currentOffsetDateTime().minus(
+            setupHoursBeforeCurrentTime,
+            ChronoUnit.HOURS
+        );
+
+        OffsetDateTime lastModifiedNotBeforeThreshold = currentTimeHelper.currentOffsetDateTime().minus(
+            1,
+            ChronoUnit.HOURS
+        );
+        List<ExternalObjectDirectoryEntity> externalObjectDirectoryEntitiesNotRelevant;
+        List<ExternalObjectDirectoryEntity> externalObjectDirectoryEntities;
+        List<ExternalObjectDirectoryEntity> expectedArmRecordsResultOutsideHours;
+        List<ExternalObjectDirectoryEntity> expectedArmRecordsResultWithinTheHour;
+
+        externalObjectDirectoryEntitiesNotRelevant
+            = externalObjectDirectoryStub
+            .generateWithStatusAndTranscriptionAndAnnotationAndLocation(
+                ExternalLocationTypeEnum.INBOUND, ObjectRecordStatusEnum.ARM_RAW_DATA_FAILED, numberOfRecordsToGenerate, Optional.empty());
+        externalObjectDirectoryEntities
+            = externalObjectDirectoryStub
+            .generateWithStatusAndTranscriptionAndAnnotationAndLocation(
+                ExternalLocationTypeEnum.INBOUND,  STORED, numberOfRecordsToGenerate, Optional.empty());
+        entitiesToBeMarkedWithMediaOrAnnotationOutsideOfArmHours
+            = externalObjectDirectoryEntities.subList(0, externalObjectDirectoryEntities.size() / 2);
+
+        expectedArmRecordsResultOutsideHours
+            = externalObjectDirectoryStub
+            .generateWithStatusAndTranscriptionAndAnnotationAndArmLocation(
+            externalObjectDirectoryEntities.subList(0, externalObjectDirectoryEntities.size() / 2), Optional.of(lastModifiedBeforeCurrentTime));
+        expectedArmRecordsResultWithinTheHour
+            = externalObjectDirectoryStub
+            .generateWithStatusAndTranscriptionAndAnnotationAndArmLocation(
+            externalObjectDirectoryEntities
+                .subList(externalObjectDirectoryEntities.size() / 2, externalObjectDirectoryEntities.size()), Optional.of(lastModifiedNotBeforeThreshold));
+
+        int expectedRecords = externalObjectDirectoryEntitiesNotRelevant.size() + externalObjectDirectoryEntities.size()
+            + expectedArmRecordsResultOutsideHours.size() + expectedArmRecordsResultWithinTheHour.size();
+
+        // assert that the test has inserted the data into the database
+        Assertions.assertEquals(expectedRecords, externalObjectDirectoryRepository.findAll().size());
+    }
+
+    private void generateDataWithAnnotationForUnstructured(int hoursBeforeCurrentTimeForArm,
+                                                           int weeksBeforeCurrentTimeForUnstructured)
+        throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
+        int numberOfRecordsToGenerate = 10;
+        int setupHoursBeforeCurrentTime = hoursBeforeCurrentTimeForArm;
+
+        OffsetDateTime lastModifiedBeforeCurrentTimeForArm = currentTimeHelper.currentOffsetDateTime().minus(
+            setupHoursBeforeCurrentTime,
+            ChronoUnit.HOURS
+        );
+
+        OffsetDateTime lastModifiedBeforeCurrentTimeForUnstructured = currentTimeHelper.currentOffsetDateTime().minus(
+            weeksBeforeCurrentTimeForUnstructured,
+            ChronoUnit.WEEKS
+        );
+
+        OffsetDateTime lastModifiedNotBeforeThreshold = currentTimeHelper.currentOffsetDateTime().minus(
+            1,
+            ChronoUnit.HOURS
+        );
+
+        List<ExternalObjectDirectoryEntity> externalObjectDirectoryEntitiesNotRelevant;
+        List<ExternalObjectDirectoryEntity> externalObjectDirectoryEntities;
+        List<ExternalObjectDirectoryEntity> expectedArmRecordsResultOutsideHours;
+        List<ExternalObjectDirectoryEntity> expectedArmRecordsResultWithinTheHour;
+
+        externalObjectDirectoryEntitiesNotRelevant
+            = externalObjectDirectoryStub
+            .generateWithStatusAndTranscriptionAndAnnotationAndLocation(
+                ExternalLocationTypeEnum.UNSTRUCTURED,
+                ObjectRecordStatusEnum.ARM_RAW_DATA_FAILED, numberOfRecordsToGenerate, Optional.of(lastModifiedBeforeCurrentTimeForUnstructured));
+        externalObjectDirectoryEntities
+            = externalObjectDirectoryStub
+            .generateWithStatusAndTranscriptionAndAnnotationAndLocation(
+                ExternalLocationTypeEnum.UNSTRUCTURED,  STORED, numberOfRecordsToGenerate, Optional.of(lastModifiedBeforeCurrentTimeForUnstructured));
+        entitiesToBeMarkedWithMediaOrAnnotationOutsideOfArmHours
+            = externalObjectDirectoryEntities.subList(0, externalObjectDirectoryEntities.size() / 2);
+
+        expectedArmRecordsResultOutsideHours
+            = externalObjectDirectoryStub.generateWithStatusAndTranscriptionAndAnnotationAndArmLocation(
+            externalObjectDirectoryEntities.subList(0, externalObjectDirectoryEntities.size() / 2), Optional.of(lastModifiedBeforeCurrentTimeForArm));
+        expectedArmRecordsResultWithinTheHour
+            = externalObjectDirectoryStub.generateWithStatusAndTranscriptionAndAnnotationAndArmLocation(
+            expectedArmRecordsResultOutsideHours, Optional.of(lastModifiedNotBeforeThreshold));
+
+        int expectedRecords = externalObjectDirectoryEntitiesNotRelevant.size() + externalObjectDirectoryEntities.size()
+            + expectedArmRecordsResultOutsideHours.size() + expectedArmRecordsResultWithinTheHour.size();
+
+        // assert that the test has inserted the data into the database
+        Assertions.assertEquals(expectedRecords, externalObjectDirectoryRepository.findAll().size());
+    }
+
+    private void generateDataWithMediaForInbound(int hoursBeforeCurrentTime)
+        throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
+        int numberOfRecordsToGenerate = 10;
+        int setupHoursBeforeCurrentTime = hoursBeforeCurrentTime;
+
+        OffsetDateTime lastModifiedBeforeCurrentTime = currentTimeHelper.currentOffsetDateTime().minus(
+            setupHoursBeforeCurrentTime,
+            ChronoUnit.HOURS
+        );
+
+        OffsetDateTime lastModifiedNotBeforeThreshold = currentTimeHelper.currentOffsetDateTime().minus(
+            1,
+            ChronoUnit.HOURS
+        );
+
+        List<ExternalObjectDirectoryEntity> externalObjectDirectoryEntitiesNotRelevant;
+        List<ExternalObjectDirectoryEntity> externalObjectDirectoryEntities;
+        List<ExternalObjectDirectoryEntity> expectedArmRecordsResultOutsideHours;
+        List<ExternalObjectDirectoryEntity> expectedArmRecordsResultWithinTheHour;
+        externalObjectDirectoryEntitiesNotRelevant
+            = externalObjectDirectoryStub
+            .generateWithStatusAndMediaLocation(
+                ExternalLocationTypeEnum.INBOUND, ObjectRecordStatusEnum.ARM_RAW_DATA_FAILED, numberOfRecordsToGenerate, Optional.empty());
+        externalObjectDirectoryEntities
+            = externalObjectDirectoryStub
+            .generateWithStatusAndMediaLocation(
+                ExternalLocationTypeEnum.INBOUND,  STORED, numberOfRecordsToGenerate, Optional.empty());
+        entitiesToBeMarkedWithMediaOrAnnotationOutsideOfArmHours
+            = externalObjectDirectoryEntities.subList(0, externalObjectDirectoryEntities.size() / 2);
+
+        expectedArmRecordsResultOutsideHours
+            = externalObjectDirectoryStub.generateWithStatusAndMediaAndArmLocation(
+            entitiesToBeMarkedWithMediaOrAnnotationOutsideOfArmHours, Optional.of(lastModifiedBeforeCurrentTime));
+        expectedArmRecordsResultWithinTheHour
+            = externalObjectDirectoryStub.generateWithStatusAndMediaAndArmLocation(
+            externalObjectDirectoryEntities.subList(
+                externalObjectDirectoryEntities.size() / 2, externalObjectDirectoryEntities.size()), Optional.of(lastModifiedNotBeforeThreshold));
+
+        int expectedRecords = externalObjectDirectoryEntitiesNotRelevant.size() + externalObjectDirectoryEntities.size()
+            + expectedArmRecordsResultOutsideHours.size() + expectedArmRecordsResultWithinTheHour.size();
+
+        // assert that the test has inserted the data into the database
+        Assertions.assertEquals(expectedRecords, externalObjectDirectoryRepository.findAll().size());
     }
 }

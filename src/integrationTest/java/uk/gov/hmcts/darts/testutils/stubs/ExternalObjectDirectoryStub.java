@@ -30,11 +30,11 @@ import java.lang.reflect.InvocationTargetException;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Consumer;
 
 import static uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum.ARM;
-import static uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum.INBOUND;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.STORED;
 import static uk.gov.hmcts.darts.common.helper.SystemUserHelper.HOUSEKEEPING;
 
@@ -266,8 +266,11 @@ public class ExternalObjectDirectoryStub {
     }
 
     @Transactional
-    public List<ExternalObjectDirectoryEntity> generateWithStatusAndTranscriptionAndAnnotationAndInboundLocation(ObjectRecordStatusEnum objectRecordStatusEnum,
-                                                                                     int numberOfObjectDirectory) {
+    public List<ExternalObjectDirectoryEntity> generateWithStatusAndTranscriptionAndAnnotationAndLocation(
+        ExternalLocationTypeEnum externalLocationTypeEnum, ObjectRecordStatusEnum objectRecordStatusEnum,
+        int numberOfObjectDirectory, Optional<OffsetDateTime> dateToSet)
+        throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
+
         List<ExternalObjectDirectoryEntity> entityListResult = new ArrayList<>();
 
         for (int i = 0; i < numberOfObjectDirectory; i++) {
@@ -279,7 +282,12 @@ public class ExternalObjectDirectoryStub {
 
             ExternalObjectDirectoryEntity externalObjectDirectory = createAndSaveEod(
                 annotationStub.createAndSaveAnnotationDocumentEntity(
-                    userAccountStub, annotationEntity), transcriptionDocumentEntity, objectRecordStatusEnum, INBOUND, e -> { });
+                    userAccountStub, annotationEntity), transcriptionDocumentEntity, objectRecordStatusEnum, externalLocationTypeEnum, e -> { });
+
+            if (dateToSet.isPresent()) {
+                dateConfigurer.setLastModifiedDate(externalObjectDirectory, dateToSet.get());
+            }
+
             entityListResult.add(externalObjectDirectory);
         }
 
@@ -287,13 +295,20 @@ public class ExternalObjectDirectoryStub {
     }
 
     @Transactional
-    public List<ExternalObjectDirectoryEntity> generateWithStatusAndMediaAndInboundLocation(ObjectRecordStatusEnum objectRecordStatusEnum,
-                                                                                    int numberOfObjectDirectory) {
+    public List<ExternalObjectDirectoryEntity> generateWithStatusAndMediaLocation(ExternalLocationTypeEnum externalLocationTypeEnum,
+                                                                                  ObjectRecordStatusEnum objectRecordStatusEnum,
+                                                                                  int numberOfObjectDirectory, Optional<OffsetDateTime> dateToSet)
+        throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
         List<ExternalObjectDirectoryEntity> entityListResult = new ArrayList<>();
 
         for (int i = 0; i < numberOfObjectDirectory; i++) {
             MediaEntity media = mediaStub.createAndSaveMedia(courthouseStubComposable, courtroomStubComposable);
-            ExternalObjectDirectoryEntity externalObjectDirectory = createAndSaveEod(media, objectRecordStatusEnum, INBOUND);
+            ExternalObjectDirectoryEntity externalObjectDirectory = createAndSaveEod(media, objectRecordStatusEnum, externalLocationTypeEnum);
+
+            if (dateToSet.isPresent()) {
+                dateConfigurer.setLastModifiedDate(externalObjectDirectory, dateToSet.get());
+            }
+
             entityListResult.add(externalObjectDirectory);
         }
 
@@ -302,14 +317,16 @@ public class ExternalObjectDirectoryStub {
 
     @Transactional(isolation = Isolation.READ_UNCOMMITTED)
     public List<ExternalObjectDirectoryEntity> generateWithStatusAndMediaAndArmLocation(List<ExternalObjectDirectoryEntity> externalObjectDirectoryEntities,
-                                                                                        int hoursBehindCurrentTime)
+                                                                                        Optional<OffsetDateTime> dateToSet)
         throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
         List<ExternalObjectDirectoryEntity> entityListResult = new ArrayList<>();
 
         for (ExternalObjectDirectoryEntity externalObjectDirectory : externalObjectDirectoryEntities) {
             ExternalObjectDirectoryEntity newExternalObjectDirectory = createAndSaveEod(externalObjectDirectory.getMedia(), STORED, ARM, OffsetDateTime.now());
 
-            dateConfigurer.setLastModifiedDate(newExternalObjectDirectory, OffsetDateTime.now().minusHours(hoursBehindCurrentTime));
+            if (dateToSet.isPresent()) {
+                dateConfigurer.setLastModifiedDate(newExternalObjectDirectory, dateToSet.get());
+            }
 
             newExternalObjectDirectory = eodRepository.getReferenceById(newExternalObjectDirectory.getId());
             entityListResult.add(newExternalObjectDirectory);
@@ -318,9 +335,10 @@ public class ExternalObjectDirectoryStub {
     }
 
     @Transactional
-    public List<ExternalObjectDirectoryEntity>
-    generateWithStatusAndTranscriptionAndAnnotationAndArmLocation(List<ExternalObjectDirectoryEntity> externalObjectDirectoryEntities,
-                                                                                         int hoursBehindCurrentTime)
+    public List<ExternalObjectDirectoryEntity> generateWithStatusAndTranscriptionAndAnnotationAndArmLocation(
+        List<ExternalObjectDirectoryEntity> externalObjectDirectoryEntities,
+        Optional<OffsetDateTime> dateToSet)
+
         throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
         List<ExternalObjectDirectoryEntity> entityListResult = new ArrayList<>();
 
@@ -330,7 +348,9 @@ public class ExternalObjectDirectoryStub {
                 = createAndSaveEod(externalObjectDirectory.getAnnotationDocumentEntity(),
                                     externalObjectDirectory.getTranscriptionDocumentEntity(), STORED, ARM, e -> { });
 
-            dateConfigurer.setLastModifiedDate(newExternalObjectDirectory, OffsetDateTime.now().minusHours(hoursBehindCurrentTime));
+            if (dateToSet.isPresent()) {
+                dateConfigurer.setLastModifiedDate(newExternalObjectDirectory, dateToSet.get());
+            }
 
             newExternalObjectDirectory = eodRepository.getReferenceById(newExternalObjectDirectory.getId());
 
@@ -356,6 +376,20 @@ public class ExternalObjectDirectoryStub {
 
             if (!ObjectRecordStatusEnum.MARKED_FOR_DELETION.getId().equals(objectDirectoryEntity.getStatus().getId())
                 || !systemUserHelper.findSystemUserGuid(HOUSEKEEPING).equals(objectDirectoryEntity.getLastModifiedBy().getAccountGuid())) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    @Transactional
+    public boolean areObjectDirectoriesMarkedForDeletionWithSystemUser(List<Integer> entities) {
+        for (Integer entity : entities) {
+            ExternalObjectDirectoryEntity objectDirectoryEntity = eodRepository.getReferenceById(entity);
+
+            if (!ObjectRecordStatusEnum.MARKED_FOR_DELETION.getId().equals(objectDirectoryEntity.getStatus().getId())
+                || !systemUserHelper.getSystemUser().getUserFullName().equals(objectDirectoryEntity.getLastModifiedBy().getUserFullName())) {
                 return false;
             }
         }

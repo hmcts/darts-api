@@ -1,0 +1,2 @@
+INSERT INTO darts.automated_task (aut_id,task_name,task_description,cron_expression,cron_editable)
+VALUES (nextval('aut_seq'),'UnstructuredTranscriptionAnnotationDeleter','Marks for deletion the transcription and annotation that is stored in unstructured and arm for the longer than the specific dates.','0 0 22 * * *',true);
