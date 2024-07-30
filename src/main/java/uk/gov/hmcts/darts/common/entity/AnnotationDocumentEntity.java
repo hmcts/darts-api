@@ -77,10 +77,10 @@ public class AnnotationDocumentEntity extends ModifiedBaseEntity {
     private OffsetDateTime retainUntilTs;
 
     @Column(name = "ret_conf_score")
-    private Integer ret_conf_score;
+    private Integer retConfScore;
 
     @Column(name = "ret_conf_reason")
-    private String ret_conf_reason;
+    private String retConfReason;
 
     public List<CourtCaseEntity> associatedCourtCases() {
         var cases = annotation.getHearingList().stream().map(HearingEntity::getCourtCase);
