@@ -2,6 +2,7 @@ package uk.gov.hmcts.darts.common.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.history.RevisionRepository;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 import uk.gov.hmcts.darts.audio.entity.MediaRequestEntity;
@@ -15,7 +16,9 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
-public interface MediaRequestRepository extends JpaRepository<MediaRequestEntity, Integer> {
+public interface MediaRequestRepository extends
+    RevisionRepository<MediaRequestEntity, Integer, Long>,
+    JpaRepository<MediaRequestEntity, Integer> {
 
     Optional<MediaRequestEntity> findTopByStatusOrderByLastModifiedDateTimeAsc(MediaRequestStatus status);
 

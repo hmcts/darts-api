@@ -31,14 +31,14 @@ public class MediaHideOrShowValidator implements Validator<IdRequest<MediaHideRe
 
         AdminActionRequest adminActionRequest = request.getPayload().getAdminAction();
 
-        if (request.getPayload().getIsHidden() && adminActionRequest  == null) {
-             throw new DartsApiException(AudioApiError.MEDIA_HIDE_ACTION_PAYLOAD_INCORRECT_USAGE);
-         } else if (request.getPayload().getIsHidden()) {
-             List<ObjectAdminActionEntity> objectAdminActionEntityList = objectAdminActionRepository.findByMedia_Id(request.getId());
-             if (!objectAdminActionEntityList.isEmpty()) {
-                 throw new DartsApiException(AudioApiError.MEDIA_ALREADY_HIDDEN);
-             }
-         }
+        if (request.getPayload().getIsHidden() && adminActionRequest == null) {
+            throw new DartsApiException(AudioApiError.MEDIA_HIDE_ACTION_PAYLOAD_INCORRECT_USAGE);
+        } else if (request.getPayload().getIsHidden()) {
+            List<ObjectAdminActionEntity> objectAdminActionEntityList = objectAdminActionRepository.findByMedia_Id(request.getId());
+            if (!objectAdminActionEntityList.isEmpty()) {
+                throw new DartsApiException(AudioApiError.MEDIA_ALREADY_HIDDEN);
+            }
+        }
 
         if (!request.getPayload().getIsHidden() && adminActionRequest != null) {
             throw new DartsApiException(AudioApiError.MEDIA_SHOW_ACTION_PAYLOAD_INCORRECT_USAGE);
@@ -49,13 +49,11 @@ public class MediaHideOrShowValidator implements Validator<IdRequest<MediaHideRe
             Optional<ObjectHiddenReasonEntity> optionalObjectHiddenReasonEntity = objectHiddenReasonRepository.findById(
                 adminActionRequest.getReasonId());
             if (optionalObjectHiddenReasonEntity.isEmpty()) {
-                throw new DartsApiException(AudioApiError
-                                                .MEDIA_HIDE_ACTION_REASON_NOT_FOUND);
+                throw new DartsApiException(AudioApiError.MEDIA_HIDE_ACTION_REASON_NOT_FOUND);
             } else {
                 ObjectHiddenReasonEntity objectHiddenReasonEntity = optionalObjectHiddenReasonEntity.get();
                 if (objectHiddenReasonEntity.isMarkedForDeletion()) {
-                    throw new DartsApiException(AudioApiError
-                                                    .REASON_IS_MARKED_FOR_DELETION);
+                    throw new DartsApiException(AudioApiError.REASON_IS_MARKED_FOR_DELETION);
                 }
             }
         }
