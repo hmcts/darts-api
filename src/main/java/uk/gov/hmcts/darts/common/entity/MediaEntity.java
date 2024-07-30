@@ -114,6 +114,12 @@ public class MediaEntity extends CreatedModifiedBaseEntity {
         fetch = FetchType.LAZY)
     private List<ObjectAdminActionEntity> adminActionReasons = new ArrayList<>();
 
+    @Column(name = "ret_conf_score")
+    private Integer retConfScore;
+
+    @Column(name = "ret_conf_reason")
+    private String retConfReason;
+
     public List<CourtCaseEntity> associatedCourtCases() {
         var cases = hearingList.stream().map(HearingEntity::getCourtCase);
         return io.vavr.collection.List.ofAll(cases).distinctBy(CourtCaseEntity::getId).toJavaList();

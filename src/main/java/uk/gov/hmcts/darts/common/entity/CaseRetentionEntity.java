@@ -60,6 +60,9 @@ public class CaseRetentionEntity extends CreatedModifiedBaseEntity {
     @Column(name = "comments")
     private String comments;
 
+    @Column(name = "confidence_category")
+    private Integer confidenceCategory;
+
     @Column(name = "retention_object_id")
     private String retentionObjectId;
 

@@ -17,6 +17,7 @@ import uk.gov.hmcts.darts.dailylist.enums.JobStatusType;
 
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
+import java.util.UUID;
 
 @Entity
 @Table(name = DailyListEntity.TABLE_NAME)
@@ -89,5 +90,17 @@ public class DailyListEntity extends CreatedModifiedBaseEntity {
 
     @Column(name = MESSAGE_ID)
     private String messageId;
+
+    @Column(name = "content_object_id")
+    private String contentObjectId;
+
+    @Column(name = "clip_id")
+    private String clipId;
+
+    @Column(name = "external_location")
+    private UUID externalLocation;
+
+    @Column(name = "elt_id")
+    private Integer eltId;
 
 }
