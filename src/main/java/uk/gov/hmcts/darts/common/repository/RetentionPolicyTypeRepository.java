@@ -35,4 +35,5 @@ public interface RetentionPolicyTypeRepository extends
 
     Optional<RetentionPolicyTypeEntity> findByFixedPolicyKeyAndPolicyEndIsNull(String fixedPolicyKey);
 
+    List<RetentionPolicyTypeEntity> findByIdGreaterThanEqual(Integer value);
 }

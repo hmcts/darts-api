@@ -2,6 +2,8 @@ package uk.gov.hmcts.darts.testutils.stubs;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.EntityManager;
+import jakarta.persistence.EntityManagerFactory;
+import jakarta.persistence.Query;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -89,7 +91,6 @@ import uk.gov.hmcts.darts.dailylist.enums.SourceType;
 import uk.gov.hmcts.darts.notification.entity.NotificationEntity;
 import uk.gov.hmcts.darts.retention.enums.CaseRetentionStatus;
 import uk.gov.hmcts.darts.retention.enums.RetentionPolicyEnum;
-import uk.gov.hmcts.darts.retentions.model.RetentionPolicyType;
 import uk.gov.hmcts.darts.test.common.data.AudioTestData;
 import uk.gov.hmcts.darts.test.common.data.CourthouseTestData;
 import uk.gov.hmcts.darts.test.common.data.DailyListTestData;
@@ -103,10 +104,8 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.OffsetDateTime;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 import java.util.UUID;
 
 import static java.time.LocalDateTime.now;
@@ -129,6 +128,21 @@ import static uk.gov.hmcts.darts.test.common.data.HearingTestData.someMinimalHea
 @Slf4j
 public class DartsDatabaseStub {
 
+    private static final int SEQUENCE_START_VALUE = 15_000;
+
+    private static final List<String> SEQUENCES_NO_RESET = List.of(
+        "revinfo_seq"
+    );
+
+    private static final List<String> SEQUENCES_RESET_FROM = List.of(
+        "usr_seq",
+        "grp_seq",
+        "aut_seq",
+        "rpt_seq",
+        "evh_seq"
+    );
+
+    private final EntityManagerFactory entityManagerFactory;
     private final AnnotationDocumentRepository annotationDocumentRepository;
     private final AnnotationRepository annotationRepository;
     private final AuditRepository auditRepository;
@@ -191,15 +205,51 @@ public class DartsDatabaseStub {
     private final TransformedMediaStub transformedMediaStub;
     private final UserAccountStub userAccountStub;
 
-    private final List<EventHandlerEntity> eventHandlerBin = new ArrayList<>();
-    private final List<UserAccountEntity> userAccountBin = new ArrayList<>();
-    private final List<SecurityGroupEntity> securityGroupBin = new ArrayList<>();
-    private final List<RetentionPolicyTypeEntity> retentionPolicyTypeBin = new ArrayList<>();
-
     private final EntityManager entityManager;
     private final CurrentTimeHelper currentTimeHelper;
     private final TransactionalUtil transactionalUtil;
 
+    public void resetSequences() {
+        try (EntityManager em = entityManagerFactory.createEntityManager()) {
+            em.getTransaction().begin();
+            final Query query = em.createNativeQuery("SELECT sequence_name FROM information_schema.sequences WHERE sequence_schema = 'darts'");
+            final List sequences = query.getResultList();
+            for (Object seqName : sequences) {
+                if (SEQUENCES_RESET_FROM.contains(seqName.toString())) {
+                    em.createNativeQuery("ALTER SEQUENCE darts." + seqName + " RESTART WITH " + SEQUENCE_START_VALUE).executeUpdate();
+                } else if (!SEQUENCES_NO_RESET.contains(seqName.toString())) {
+                    em.createNativeQuery("ALTER SEQUENCE darts." + seqName + " RESTART").executeUpdate();
+                }
+            }
+            em.getTransaction().commit();
+        }
+    }
+
+    @Transactional
+    public void resetTablesWithPredefinedTestData() {
+
+        retentionPolicyTypeRepository.deleteAll(
+            retentionPolicyTypeRepository.findByIdGreaterThanEqual(SEQUENCE_START_VALUE)
+        );
+
+        eventHandlerRepository.deleteAll(
+            eventHandlerRepository.findByIdGreaterThanEqual(SEQUENCE_START_VALUE)
+        );
+
+        automatedTaskRepository.deleteAll(
+            automatedTaskRepository.findByIdGreaterThanEqual(SEQUENCE_START_VALUE)
+        );
+
+        userAccountRepository.deleteAll(
+            userAccountRepository.findByIdGreaterThanEqual(SEQUENCE_START_VALUE)
+        );
+
+        securityGroupRepository.deleteAll(
+            securityGroupRepository.findByIdGreaterThanEqual(SEQUENCE_START_VALUE)
+        );
+    }
+
+    @Transactional
     public void clearDatabaseInThisOrder() {
         objectAdminActionRepository.deleteAll();
         auditRepository.deleteAll();
@@ -216,6 +266,7 @@ public class DartsDatabaseStub {
         transientObjectDirectoryRepository.deleteAll();
         transformedMediaRepository.deleteAll();
         mediaRequestRepository.deleteAll();
+        eventLinkedCaseRepository.deleteAll();
         eventRepository.deleteAll();
         hearingRepository.deleteAll();
         annotationRepository.deleteAll();
@@ -230,20 +281,11 @@ public class DartsDatabaseStub {
         caseRepository.deleteAll();
         judgeRepository.deleteAll();
         dailyListRepository.deleteAll();
-        retentionPolicyTypeRepository.deleteAll(retentionPolicyTypeBin);
-        retentionPolicyTypeBin.clear();
-        userAccountRepository.deleteAll(userAccountBin);
-        userAccountBin.clear();
-        securityGroupRepository.deleteAll(securityGroupBin);
-        securityGroupBin.clear();
         courthouseRepository.deleteAll();
         regionRepository.deleteAll();
-        eventHandlerRepository.deleteAll(eventHandlerBin);
-        eventHandlerBin.clear();
         annotationRepository.deleteAll();
         transcriptionRepository.deleteAll();
         transcriptionWorkflowRepository.deleteAll();
-        eventLinkedCaseRepository.deleteAll();
     }
 
     public List<EventHandlerEntity> findByHandlerAndActiveTrue(String handlerName) {
@@ -628,33 +670,6 @@ public class DartsDatabaseStub {
         return save(mediaRequestEntity);
     }
 
-    public void addToTrash(EventHandlerEntity... eventHandlerEntities) {
-        this.eventHandlerBin.addAll(asList(eventHandlerEntities));
-    }
-
-    public void addToTrash(RetentionPolicyType retentionPolicy) {
-        this.retentionPolicyTypeBin.add(
-            retentionPolicyTypeRepository.getReferenceById(retentionPolicy.getId()));
-    }
-
-    public void addToTrash(RetentionPolicyTypeEntity... retentionPolicyTypeEntities) {
-        this.retentionPolicyTypeBin.addAll(asList(retentionPolicyTypeEntities));
-    }
-
-    public void addToTrash(Set<SecurityGroupEntity> securityGroupEntities) {
-        this.securityGroupBin.addAll(securityGroupEntities);
-    }
-
-    public void addSecurityGroupToTrashById(Integer id) {
-        this.securityGroupBin.add(securityGroupRepository.getReferenceById(id));
-    }
-
-    public void addToUserAccountTrash(String... emailAddresses) {
-        stream(emailAddresses)
-            .flatMap(email -> userAccountRepository.findByEmailAddressIgnoreCase(email).stream())
-            .forEach(userAccountBin::add);
-    }
-
     public void createTestUserAccount() {
         if (userAccountRepository.findByEmailAddressIgnoreCase("test.user@example.com").isEmpty()) {
             UserAccountEntity testUser = new UserAccountEntity();
@@ -788,7 +803,7 @@ public class DartsDatabaseStub {
     }
 
     @Transactional
-    public void createValidAnnotationDocumentForDownload(UserAccountEntity judge) {
+    public AnnotationDocumentEntity createValidAnnotationDocumentForDownload(UserAccountEntity judge) {
 
         var annotation = someAnnotationCreatedBy(judge);
 
@@ -820,6 +835,8 @@ public class DartsDatabaseStub {
         );
         armEod.setTransferAttempts(1);
         save(armEod2);
+
+        return annotationDocumentEntity;
     }
 
     protected AnnotationEntity someAnnotationCreatedBy(UserAccountEntity userAccount) {
@@ -827,8 +844,7 @@ public class DartsDatabaseStub {
         annotation.setDeleted(false);
         annotation.setCurrentOwner(userAccount);
         annotation.addHearing(save(someMinimalHearing()));
-        save(annotation);
-        return annotation;
+        return save(annotation);
     }
 
     @Transactional
@@ -933,5 +949,4 @@ public class DartsDatabaseStub {
     public Revisions<Long, RetentionPolicyTypeEntity> findRetentionPolicyRevisionsFor(Integer id) {
         return retentionPolicyTypeRepository.findRevisions(id);
     }
-
 }

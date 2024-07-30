@@ -87,10 +87,11 @@ class AudioTransformationServiceImplTest {
     public static final String MOCK_DEFENDANT_NAME = "Any Defendant";
     public static final String MOCK_DEFENDANT_LIST = "Any Defendant, Any Defendant";
     public static final String NOT_AVAILABLE = "N/A";
-    public static final LocalDate MOCK_HEARING_DATE = LocalDate.of(2023, 5, 1);
-    public static final String MOCK_HEARING_DATE_FORMATTED = "1st May 2023";
+    public static final LocalDate MOCK_HEARING_DATE = LocalDate.of(2023, 1, 1);
+    public static final LocalDate MOCK_HEARING_DATE_BST = LocalDate.of(2023, 7, 1);
+    public static final String MOCK_HEARING_DATE_FORMATTED = "1st January 2023";
+    public static final String MOCK_HEARING_DATE_BST_FORMATTED = "1st July 2023";
     public static final String MOCK_COURTHOUSE_NAME = "mockCourtHouse";
-    public static final String MOCK_EMAIL = "mock.email@mock.com";
     public static final int MOCK_CASEID = 99;
     public static final String TEST_EXTENSION = AudioRequestOutputFormat.MP3.getExtension();
     public static final String TEST_FILE_NAME = "case1_23_Nov_2023" + "." + TEST_EXTENSION;
@@ -402,6 +403,31 @@ class AudioTransformationServiceImplTest {
         assertEquals(actual.getTemplateValues().get(AUDIO_START_TIME), TIME_12_00.format(formatter));
         assertEquals(actual.getTemplateValues().get(AUDIO_END_TIME), TIME_13_00.format(formatter));
         assertEquals(MOCK_HEARING_DATE_FORMATTED, actual.getTemplateValues().get(HEARING_DATE));
+        assertEquals(MOCK_COURTHOUSE_NAME, actual.getTemplateValues().get(COURTHOUSE));
+        assertEquals(MOCK_DEFENDANT_LIST, actual.getTemplateValues().get(DEFENDANTS));
+        assertEquals(mockUserAccountEntity, actual.getUserAccountsToEmail().get(0));
+        assertEquals(actual.getEventId(), NotificationApi.NotificationTemplate.ERROR_PROCESSING_AUDIO.toString());
+        assertEquals(MOCK_CASEID, actual.getCaseId());
+    }
+
+    @Test
+    void testNotifyUserScheduleErrorNotificationUsingBstDateTime() {
+        List<String> defendants = new ArrayList<>();
+        defendants.add(MOCK_DEFENDANT_NAME);
+        defendants.add(MOCK_DEFENDANT_NAME);
+
+        OffsetDateTime startDateTime = OffsetDateTime.parse("2023-07-01T12:00Z");
+        OffsetDateTime endDateTime = OffsetDateTime.parse("2023-07-01T13:00Z");
+        initNotifyUserScheduleErrorNotificationMocks(MOCK_HEARING_DATE_BST, MOCK_COURTHOUSE_NAME, startDateTime, endDateTime);
+        when(mockCourtCase.getDefendantStringList()).thenReturn(defendants);
+
+        transformedMediaHelper.notifyUser(mockMediaRequestEntity, mockCourtCase, NotificationApi.NotificationTemplate.ERROR_PROCESSING_AUDIO.toString());
+        verify(mockNotificationApi).scheduleNotification(dbNotificationRequestCaptor.capture());
+        var actual = dbNotificationRequestCaptor.getValue();
+
+        assertEquals(actual.getTemplateValues().get(AUDIO_START_TIME), "13:00:00");
+        assertEquals(actual.getTemplateValues().get(AUDIO_END_TIME), "14:00:00");
+        assertEquals(MOCK_HEARING_DATE_BST_FORMATTED, actual.getTemplateValues().get(HEARING_DATE));
         assertEquals(MOCK_COURTHOUSE_NAME, actual.getTemplateValues().get(COURTHOUSE));
         assertEquals(MOCK_DEFENDANT_LIST, actual.getTemplateValues().get(DEFENDANTS));
         assertEquals(mockUserAccountEntity, actual.getUserAccountsToEmail().get(0));

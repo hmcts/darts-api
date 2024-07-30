@@ -1,13 +1,13 @@
 [
   {
-    "workflow_actor":2,
+    "workflow_actor": $USER_ACCOUNT_ID,
     "status_id":3,
     "workflow_ts":"2024-04-24T12:00:00Z",
     "comments":[
       {
         "comment":"comment2",
         "commented_at":"2024-04-24T12:00:00Z",
-        "author_id":2
+        "author_id": $USER_ACCOUNT_ID
       }
     ]
   }

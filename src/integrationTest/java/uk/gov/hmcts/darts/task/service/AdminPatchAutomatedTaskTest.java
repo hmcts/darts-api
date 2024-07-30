@@ -42,6 +42,16 @@ class AdminPatchAutomatedTaskTest extends IntegrationBase {
                                  """))
             .andExpect(status().isOk())
             .andReturn();
+
+        // reset data to predefined status
+        mockMvc.perform(
+                patch(ENDPOINT + "/1")
+                    .contentType(APPLICATION_JSON_VALUE)
+                    .content("""
+                                 { "is_active": true }
+                                 """))
+            .andExpect(status().isOk())
+            .andReturn();
     }
 
     @ParameterizedTest

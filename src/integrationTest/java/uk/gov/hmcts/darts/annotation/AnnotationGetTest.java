@@ -68,13 +68,15 @@ class AnnotationGetTest extends IntegrationBase {
     void shouldDownloadAnnotationDocument() throws Exception {
 
         var judge = given.anAuthenticatedUserWithGlobalAccessAndRole(JUDICIARY);
-
         when(downloadResponseMetaData.getInputStream()).thenReturn(inputStreamResource);
         when(dataManagementFacade.retrieveFileFromStorage(anyList())).thenReturn(downloadResponseMetaData);
 
-        dartsDatabase.createValidAnnotationDocumentForDownload(judge);
+        var annotationDocument = dartsDatabase.createValidAnnotationDocumentForDownload(judge);
 
-        MockHttpServletRequestBuilder requestBuilder = get(ANNOTATION_DOCUMENT_ENDPOINT, 1, 1);
+        MockHttpServletRequestBuilder requestBuilder = get(ANNOTATION_DOCUMENT_ENDPOINT,
+                                                           annotationDocument.getAnnotation().getId(),
+                                                           annotationDocument.getId());
+
 
         mockMvc.perform(
                 requestBuilder)

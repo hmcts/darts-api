@@ -1,36 +1,36 @@
 [
   {
-    "workflow_actor": 2,
+    "workflow_actor": $USER_ACCOUNT_ID,
     "workflow_ts": "2024-04-25T12:00:00Z",
     "comments": [
       {
         "comment": "this is a migrated transcription comment that is not associated to a transcription workflow",
         "commented_at": "2024-04-25T12:00:00Z",
-        "author_id": 2
+        "author_id": $USER_ACCOUNT_ID
       }
     ]
   },
   {
-    "workflow_actor":2,
+    "workflow_actor": $USER_ACCOUNT_ID,
     "status_id":3,
     "workflow_ts":"2024-04-24T12:00:00Z",
     "comments":[
       {
         "comment":"comment2",
         "commented_at":"2024-04-24T12:00:00Z",
-        "author_id":2
+        "author_id": $USER_ACCOUNT_ID
       }
     ]
   },
   {
-    "workflow_actor":2,
+    "workflow_actor": $USER_ACCOUNT_ID,
     "status_id":1,
     "workflow_ts":"2024-04-23T10:00:00Z",
     "comments":[
       {
         "comment":"comment1",
         "commented_at":"2024-04-23T10:00:00Z",
-        "author_id":2
+        "author_id": $USER_ACCOUNT_ID
       }
     ]
   }

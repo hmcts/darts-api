@@ -1,6 +1,5 @@
 package uk.gov.hmcts.darts.usermanagement.service;
 
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
@@ -17,20 +16,12 @@ class UserQueryTest extends IntegrationBase {
 
     @Autowired
     private UserManagementQuery userManagementQuery;
-    private UserAccountEntity user1;
-    private UserAccountEntity user2;
-    private UserAccountEntity user3;
-
-    @AfterEach
-    void tearDown() {
-        dartsDatabase.addToUserAccountTrash(user1.getEmailAddress(), user2.getEmailAddress(), user3.getEmailAddress());
-    }
 
     @Test
     void searchWithAllOptionalFieldsBlank() {
-        user1 = minimalUserAccount();
-        user2 = minimalUserAccount();
-        user3 = minimalUserAccount();
+        UserAccountEntity user1 = minimalUserAccount();
+        UserAccountEntity user2 = minimalUserAccount();
+        UserAccountEntity user3 = minimalUserAccount();
         dartsDatabase.saveAll(user1, user2, user3);
 
         var users = userManagementQuery.getUsers(null, null);
@@ -41,10 +32,10 @@ class UserQueryTest extends IntegrationBase {
 
     @Test
     void searchWithOnlyEmailSpecified() {
-        user1 = minimalUserAccount();
+        UserAccountEntity user1 = minimalUserAccount();
         user1.setEmailAddress("some-user-email");
-        user2 = minimalUserAccount();
-        user3 = minimalUserAccount();
+        UserAccountEntity user2 = minimalUserAccount();
+        UserAccountEntity user3 = minimalUserAccount();
         dartsDatabase.saveAll(user1, user2, user3);
 
         var users = userManagementQuery.getUsers(user1.getEmailAddress(), null);
@@ -54,9 +45,9 @@ class UserQueryTest extends IntegrationBase {
 
     @Test
     void searchWithOneUserIdSpecified() {
-        user1 = minimalUserAccount();
-        user2 = minimalUserAccount();
-        user3 = minimalUserAccount();
+        UserAccountEntity user1 = minimalUserAccount();
+        UserAccountEntity user2 = minimalUserAccount();
+        UserAccountEntity user3 = minimalUserAccount();
         dartsDatabase.saveAll(user1, user2, user3);
 
         var users = userManagementQuery.getUsers(null, List.of(user1.getId()));
@@ -66,9 +57,9 @@ class UserQueryTest extends IntegrationBase {
 
     @Test
     void searchWithMultipleUserIdsSpecified() {
-        user1 = minimalUserAccount();
-        user2 = minimalUserAccount();
-        user3 = minimalUserAccount();
+        UserAccountEntity user1 = minimalUserAccount();
+        UserAccountEntity user2 = minimalUserAccount();
+        UserAccountEntity user3 = minimalUserAccount();
         dartsDatabase.saveAll(user1, user2, user3);
 
         var users = userManagementQuery.getUsers(null, List.of(user1.getId(), user3.getId()));
@@ -79,10 +70,10 @@ class UserQueryTest extends IntegrationBase {
 
     @Test
     void returnsEmptyListIfNoUsersMatchOnMultiplePredicates() {
-        user1 = minimalUserAccount();
+        UserAccountEntity user1 = minimalUserAccount();
         user1.setEmailAddress("some-user-email");
-        user2 = minimalUserAccount();
-        user3 = minimalUserAccount();
+        UserAccountEntity user2 = minimalUserAccount();
+        UserAccountEntity user3 = minimalUserAccount();
         dartsDatabase.saveAll(user1, user2, user3);
 
         var users = userManagementQuery.getUsers(user1.getEmailAddress(), List.of(user3.getId()));

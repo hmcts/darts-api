@@ -1,6 +1,5 @@
 package uk.gov.hmcts.darts.cases.controller;
 
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.skyscreamer.jsonassert.JSONCompareMode;
@@ -144,11 +143,6 @@ class CaseControllerSearchPostTest extends IntegrationBase {
         givenBearerTokenExists(INTEGRATION_TEST_USER_EMAIL);
     }
 
-    @AfterEach
-    void deleteUser() {
-        dartsDatabase.addToUserAccountTrash(INTEGRATION_TEST_USER_EMAIL);
-    }
-
     @Test
     void casesSearchPostEndpoint() throws Exception {
         user = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
@@ -223,28 +217,28 @@ class CaseControllerSearchPostTest extends IntegrationBase {
                   "aDefendant"
                 ],
                 "judges": [
-                  "aJudge"
+                  "AJUDGE"
                 ],
                 "hearings": [
                   {
                     "date": "2023-05-20",
                     "courtroom": "courtroom1",
                     "judges": [
-                      "aJudge"
+                      "AJUDGE"
                     ]
                   },
                   {
                     "date": "2023-05-21",
                     "courtroom": "courtroom1",
                     "judges": [
-                      "aJudge"
+                      "AJUDGE"
                     ]
                   },
                   {
                     "date": "2023-05-22",
                     "courtroom": "courtroom1",
                     "judges": [
-                      "aJudge"
+                      "AJUDGE"
                     ]
                   }
                 ]
@@ -281,28 +275,28 @@ class CaseControllerSearchPostTest extends IntegrationBase {
                   "aDefendant"
                 ],
                 "judges": [
-                  "aJudge"
+                  "AJUDGE"
                 ],
                 "hearings": [
                   {
                     "date": "2023-05-20",
                     "courtroom": "courtroom1",
                     "judges": [
-                      "aJudge"
+                      "AJUDGE"
                     ]
                   },
                   {
                     "date": "2023-05-21",
                     "courtroom": "courtroom1",
                     "judges": [
-                      "aJudge"
+                      "AJUDGE"
                     ]
                   },
                   {
                     "date": "2023-05-22",
                     "courtroom": "courtroom1",
                     "judges": [
-                      "aJudge"
+                      "AJUDGE"
                     ]
                   }
                 ]

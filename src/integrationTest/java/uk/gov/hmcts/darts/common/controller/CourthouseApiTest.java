@@ -1,7 +1,6 @@
 package uk.gov.hmcts.darts.common.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
@@ -50,7 +49,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.hasItems;
@@ -144,16 +142,6 @@ class CourthouseApiTest extends IntegrationBase {
         transactionTemplate = new TransactionTemplate(transactionManager);
         SecurityContextHolder.getContext()
             .setAuthentication(authentication);
-    }
-
-    @AfterEach
-    void tearDown() {
-        Set<SecurityGroupEntity> securityGroupsToBeDeleted = dartsDatabase.getSecurityGroupRepository()
-            .findAll()
-            .stream()
-            .filter(securityGroupEntity -> securityGroupEntity.getGroupName().contains("INT-TEST"))
-            .collect(Collectors.toSet());
-        dartsDatabase.addToTrash(securityGroupsToBeDeleted);
     }
 
     @Test
