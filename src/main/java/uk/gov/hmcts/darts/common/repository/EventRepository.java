@@ -2,6 +2,7 @@ package uk.gov.hmcts.darts.common.repository;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -11,6 +12,7 @@ import uk.gov.hmcts.darts.common.entity.EventEntity;
 import uk.gov.hmcts.darts.event.model.EventSearchResult;
 
 import java.time.LocalDate;
+import java.time.OffsetDateTime;
 import java.util.List;
 
 @Repository
@@ -104,4 +106,13 @@ public interface EventRepository extends JpaRepository<EventEntity, Integer> {
         """)
     void updateAllEventIdEventsToNotCurrentWithTheExclusionOfTheCurrentEventPrimaryKey(
         List<Integer> eventIdsPrimaryKeysLst, List<Integer> eventIdLst);
+
+    @EntityGraph(attributePaths = {"id", "timestamp", "eventId", "messageId", "eventText"})
+    @Query("""
+        SELECT ee
+        FROM EventEntity ee
+        WHERE ee.timestamp >= :startDateTime
+        AND ee.timestamp <= :endDateTime
+        """)
+    List<EventEntity> findAllBetweenDateTimesInclusive(OffsetDateTime startDateTime, OffsetDateTime endDateTime);
 }

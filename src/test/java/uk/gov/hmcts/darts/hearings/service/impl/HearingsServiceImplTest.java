@@ -77,7 +77,8 @@ class HearingsServiceImplTest {
         HearingEntity hearingEntity = CommonTestDataUtil.createHearing(
             caseEntity,
             courtroomEntity,
-            LocalDate.now()
+            LocalDate.now(),
+            true
         );
 
         EventHandlerEntity eventType = mock(EventHandlerEntity.class);

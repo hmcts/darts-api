@@ -6,14 +6,14 @@ import uk.gov.hmcts.darts.common.enums.SecurityRoleEnum;
 
 import java.util.Set;
 
-import static org.testcontainers.shaded.org.apache.commons.lang3.RandomStringUtils.random;
+import static org.apache.commons.lang3.RandomStringUtils.random;
 import static uk.gov.hmcts.darts.test.common.data.SecurityGroupTestData.buildGroupForRoleAndCourthouse;
 
 @SuppressWarnings({"HideUtilityClassConstructor"})
 public class UserAccountTestData {
 
     public static UserAccountEntity minimalUserAccount() {
-        var postfix = random(10);
+        var postfix = random(10, false, true);
         var userAccount = new UserAccountEntity();
         userAccount.setActive(true);
         userAccount.setIsSystemUser(false);

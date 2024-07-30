@@ -74,7 +74,6 @@ class EventsControllerCourtLogsTest extends IntegrationBase {
             SOME_COURTROOM,
             DateConverterUtil.toLocalDateTime(SOME_DATE_TIME)
         );
-
     }
 
     @Test
