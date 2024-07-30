@@ -910,6 +910,10 @@ public class DartsDatabaseStub {
         return auditRepository.findAll();
     }
 
+    public Revisions<Long, MediaRequestEntity> findMediaRequestRevisionsFor(Integer id) {
+        return mediaRequestRepository.findRevisions(id);
+    }
+
     public Revisions<Long, CourthouseEntity> findCourthouseRevisionsFor(Integer id) {
         return courthouseRepository.findRevisions(id);
     }

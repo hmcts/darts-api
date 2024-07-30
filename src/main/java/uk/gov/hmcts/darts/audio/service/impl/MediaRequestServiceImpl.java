@@ -76,6 +76,7 @@ import java.time.LocalTime;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -84,6 +85,11 @@ import static uk.gov.hmcts.darts.audio.enums.MediaRequestStatus.DELETED;
 import static uk.gov.hmcts.darts.audio.enums.MediaRequestStatus.EXPIRED;
 import static uk.gov.hmcts.darts.audio.enums.MediaRequestStatus.OPEN;
 import static uk.gov.hmcts.darts.audio.enums.MediaRequestStatus.PROCESSING;
+import static uk.gov.hmcts.darts.audit.api.AuditActivity.AUDIO_PLAYBACK;
+import static uk.gov.hmcts.darts.audit.api.AuditActivity.CHANGE_AUDIO_OWNERSHIP;
+import static uk.gov.hmcts.darts.audit.api.AuditActivity.EXPORT_AUDIO;
+import static uk.gov.hmcts.darts.audit.api.AuditActivity.HIDE_AUDIO;
+import static uk.gov.hmcts.darts.audit.api.AuditActivity.REQUEST_AUDIO;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.STORED;
 import static uk.gov.hmcts.darts.notification.api.NotificationApi.NotificationTemplate.AUDIO_REQUEST_PROCESSING;
 import static uk.gov.hmcts.darts.notification.api.NotificationApi.NotificationTemplate.AUDIO_REQUEST_PROCESSING_ARCHIVE;
@@ -110,15 +116,10 @@ public class MediaRequestServiceImpl implements MediaRequestService {
     private final CurrentTimeHelper currentTimeHelper;
     private final GetTransformedMediaDetailsMapper getTransformedMediaDetailsMapper;
     private final MediaRequestMapper mediaRequestMapper;
-
     private final AudioMediaPatchRequestValidator mediaRequestValidator;
-
     private final MediaRepository mediaRepository;
-
     private final MediaHideOrShowValidator mediaHideOrShowValidator;
-
     private final ObjectAdminActionRepository objectAdminActionRepository;
-
     private final ObjectHiddenReasonRepository objectHiddenReasonRepository;
 
     @Override
@@ -184,7 +185,7 @@ public class MediaRequestServiceImpl implements MediaRequestService {
             request.getEndTime(),
             request.getRequestType()
         );
-        auditApi.record(AuditActivity.REQUEST_AUDIO, mediaRequest.getRequestor(), mediaRequest.getHearing().getCourtCase());
+        auditApi.record(REQUEST_AUDIO, mediaRequest.getRequestor(), mediaRequest.getHearing().getCourtCase());
         return mediaRequest;
     }
 
@@ -390,12 +391,12 @@ public class MediaRequestServiceImpl implements MediaRequestService {
 
     @Override
     public InputStream download(Integer transformedMediaId) {
-        return downloadOrPlayback(transformedMediaId, AuditActivity.EXPORT_AUDIO, AudioRequestType.DOWNLOAD);
+        return downloadOrPlayback(transformedMediaId, EXPORT_AUDIO, AudioRequestType.DOWNLOAD);
     }
 
     @Override
     public InputStream playback(Integer transformedMediaId) {
-        return downloadOrPlayback(transformedMediaId, AuditActivity.AUDIO_PLAYBACK, AudioRequestType.PLAYBACK);
+        return downloadOrPlayback(transformedMediaId, AUDIO_PLAYBACK, AudioRequestType.PLAYBACK);
     }
 
     @Override
@@ -499,6 +500,7 @@ public class MediaRequestServiceImpl implements MediaRequestService {
             accountEntityToPatch = userAccountRepository.findById(request.getOwnerId());
 
             if (accountEntityToPatch.isPresent()) {
+                auditOwnerChange(request, mediaRequestEntity.get());
                 mediaRequestEntity.get().setCurrentOwner(accountEntityToPatch.get());
                 mediaRequestRepository.save(mediaRequestEntity.get());
 
@@ -509,6 +511,12 @@ public class MediaRequestServiceImpl implements MediaRequestService {
         }
 
         return returnResponse;
+    }
+
+    private void auditOwnerChange(MediaPatchRequest request, MediaRequestEntity mediaRequestEntity) {
+        if (!Objects.equals(mediaRequestEntity.getCurrentOwner().getId(), request.getOwnerId())) {
+            auditApi.record(CHANGE_AUDIO_OWNERSHIP);
+        }
     }
 
     @Override
@@ -524,8 +532,11 @@ public class MediaRequestServiceImpl implements MediaRequestService {
         if (mediaEntityOptional.isPresent()) {
             MediaEntity mediaEntity = mediaEntityOptional.get();
 
+            if (!mediaEntity.isHidden() && mediaHideRequest.getIsHidden()) {
+                auditApi.record(HIDE_AUDIO);
+            }
             mediaEntity.setHidden(mediaHideRequest.getIsHidden());
-            mediaEntity = mediaRepository.saveAndFlush(mediaEntity);
+            mediaRepository.saveAndFlush(mediaEntity);
 
             if (request.getPayload().getIsHidden()) {
                 Optional<ObjectHiddenReasonEntity> objectHiddenReasonEntity;
