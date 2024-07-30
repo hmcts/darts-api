@@ -11,6 +11,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
+import uk.gov.hmcts.darts.common.enums.SecurityRoleEnum;
 import uk.gov.hmcts.darts.dailylist.model.PostDailyListRequest;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 import uk.gov.hmcts.darts.testutils.stubs.SuperAdminUserStub;
@@ -30,6 +31,8 @@ import static uk.gov.hmcts.darts.test.common.TestUtils.getContentsFromFile;
 class DailyListPostControllerTest extends IntegrationBase {
 
     private static final String ENDPOINT_URL = "/dailylists";
+
+    private static final String DAILYLIST_URL_RUN = "/dailylists/run";
 
     @Autowired
     private transient MockMvc mockMvc;
@@ -234,5 +237,30 @@ class DailyListPostControllerTest extends IntegrationBase {
             .andExpect(jsonPath("$.dal_id").value(isA(Integer.class)));
 
     }
-}
 
+    @Test
+    void callDailylistRunSuccess() throws Exception {
+        superAdminUserStub.givenUserIsAuthorised(mockUserIdentity);
+
+        String courthouseName = "func-swansea-house-" + randomAlphanumeric(7);
+
+        MockHttpServletRequestBuilder requestBuilder = post(DAILYLIST_URL_RUN)
+            .queryParam("listing_courthouse", courthouseName)
+            .contentType(MediaType.APPLICATION_JSON_VALUE);
+
+        mockMvc.perform(requestBuilder).andExpect(status().is2xxSuccessful());
+    }
+
+    @Test
+    void callDailylistRunFailure() throws Exception {
+        superAdminUserStub.givenUserIsAuthorised(mockUserIdentity, SecurityRoleEnum.DAR_PC);
+
+        String courthouseName = "func-swansea-house-" + randomAlphanumeric(7);
+
+        MockHttpServletRequestBuilder requestBuilder = post(DAILYLIST_URL_RUN)
+            .queryParam("listing_courthouse", courthouseName)
+            .contentType(MediaType.APPLICATION_JSON_VALUE);
+
+        mockMvc.perform(requestBuilder).andExpect(status().isForbidden());
+    }
+}
