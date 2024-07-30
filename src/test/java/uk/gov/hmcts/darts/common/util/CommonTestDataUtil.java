@@ -202,13 +202,14 @@ public class CommonTestDataUtil {
         return prosecutorEntity;
     }
 
-    public HearingEntity createHearing(CourtCaseEntity courtcase, CourtroomEntity courtroom, LocalDate date) {
+    public HearingEntity createHearing(CourtCaseEntity courtcase, CourtroomEntity courtroom, LocalDate date, boolean isHearingActual) {
         HearingEntity hearing1 = new HearingEntity();
         hearing1.setId(1);
         hearing1.setCourtCase(courtcase);
         hearing1.setCourtroom(courtroom);
         hearing1.setHearingDate(date);
         hearing1.setCreatedDateTime(createOffsetDateTime("2024-03-25T10:00:00"));
+        hearing1.setHearingIsActual(isHearingActual);
         return hearing1;
     }
 
@@ -430,7 +431,7 @@ public class CommonTestDataUtil {
         for (int courtroomCounter = 1; courtroomCounter <= numOfCourtrooms; courtroomCounter++) {
             CourtroomEntity courtroom = createCourtroom("courtroom" + courtroomCounter);
             for (int hearingCounter = 1; hearingCounter <= numOfHearingsPerCourtroom; hearingCounter++) {
-                HearingEntity hearing = createHearing(courtCase, courtroom, startDate);
+                HearingEntity hearing = createHearing(courtCase, courtroom, startDate, true);
                 hearings.add(hearing);
                 startDate = startDate.plusDays(1);
             }

@@ -102,11 +102,15 @@ public class CaseServiceImpl implements CaseService {
 
         List<HearingEntity> hearingList = hearingRepository.findByCaseIds(List.of(caseId));
 
-        if (hearingList.isEmpty()) {
-            getCourtCaseById(caseId);
+        if (hearingList.isEmpty() && !caseRepository.existsById(caseId)) {
+            throw new DartsApiException(CaseApiError.CASE_NOT_FOUND);
         }
 
-        return HearingEntityToCaseHearing.mapToHearingList(hearingList);
+        List<HearingEntity> filteredHearings = hearingList.stream()
+            .filter(HearingEntity::getHearingIsActual)
+            .toList();
+
+        return HearingEntityToCaseHearing.mapToHearingList(filteredHearings);
 
     }
 
@@ -162,7 +166,10 @@ public class CaseServiceImpl implements CaseService {
         if (caseIds.isEmpty()) {
             return new ArrayList<>();
         }
-        List<HearingEntity> hearings = hearingRepository.findByCaseIds(caseIds);
+        List<HearingEntity> hearings = hearingRepository.findByCaseIds(caseIds).stream()
+            .filter(HearingEntity::getHearingIsActual)
+            .toList();
+
         return AdvancedSearchResponseMapper.mapResponse(hearings);
     }
 
