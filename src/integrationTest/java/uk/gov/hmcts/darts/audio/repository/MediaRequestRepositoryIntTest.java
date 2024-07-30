@@ -2,6 +2,7 @@ package uk.gov.hmcts.darts.audio.repository;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import uk.gov.hmcts.darts.audio.entity.MediaRequestEntity;
 import uk.gov.hmcts.darts.common.repository.MediaRequestRepository;
 import uk.gov.hmcts.darts.testutils.PostgresIntegrationBase;
 import uk.gov.hmcts.darts.testutils.stubs.MediaRequestStub;
@@ -21,12 +22,12 @@ class MediaRequestRepositoryIntTest extends PostgresIntegrationBase {
 
     @Test
     void testUpdateAndRetrieveMediaRequestToProcessingIgnoresCompletedMediaRequest() {
-        mediaRequestStub.createAndSaveMediaRequestEntity(COMPLETED);
+        MediaRequestEntity mediaRequestEntity = mediaRequestStub.createAndSaveMediaRequestEntity(COMPLETED);
         var mediaRequest1 = mediaRequestStub.createAndSaveMediaRequestEntity(OPEN);
         mediaRequestStub.createAndSaveMediaRequestEntity(OPEN);
         mediaRequestStub.createAndSaveMediaRequestEntity(OPEN);
 
-        var updatedMediaRequest = mediaRequestRepository.updateAndRetrieveMediaRequestToProcessing();
+        var updatedMediaRequest = mediaRequestRepository.updateAndRetrieveMediaRequestToProcessing(mediaRequestEntity.getLastModifiedBy().getId());
 
         assertThat(updatedMediaRequest.getId()).isEqualTo(mediaRequest1.getId());
         assertThat(updatedMediaRequest.getStatus()).isEqualTo(PROCESSING);
@@ -34,12 +35,12 @@ class MediaRequestRepositoryIntTest extends PostgresIntegrationBase {
 
     @Test
     void testUpdateAndRetrieveMediaRequestToProcessingReturnsNullIfNoOpenMediaRequests() {
-        mediaRequestStub.createAndSaveMediaRequestEntity(COMPLETED);
+        MediaRequestEntity mediaRequestEntity = mediaRequestStub.createAndSaveMediaRequestEntity(COMPLETED);
         mediaRequestStub.createAndSaveMediaRequestEntity(COMPLETED);
         mediaRequestStub.createAndSaveMediaRequestEntity(COMPLETED);
         mediaRequestStub.createAndSaveMediaRequestEntity(COMPLETED);
 
-        var updatedMediaRequest = mediaRequestRepository.updateAndRetrieveMediaRequestToProcessing();
+        var updatedMediaRequest = mediaRequestRepository.updateAndRetrieveMediaRequestToProcessing(mediaRequestEntity.getLastModifiedBy().getId());
 
         assertThat(updatedMediaRequest).isNull();
     }

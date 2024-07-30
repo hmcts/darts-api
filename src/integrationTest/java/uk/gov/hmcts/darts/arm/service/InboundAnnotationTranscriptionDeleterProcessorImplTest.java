@@ -60,7 +60,6 @@ class InboundAnnotationTranscriptionDeleterProcessorImplTest extends PostgresInt
 
     @Test
     void processBatchMultipleRecordsWithSpringInjected24HourDurationThreshold() throws Exception {
-
         // assume that spring config is 24 hours
         int setupHoursBeforeCurrentTime = 24;
 
@@ -131,7 +130,6 @@ class InboundAnnotationTranscriptionDeleterProcessorImplTest extends PostgresInt
         // assert that the test has inserted the data into the database
         Assertions.assertEquals(expectedRecords, externalObjectDirectoryRepository.findAll().size());
     }
-
 
     private void assertExternalObjectDirectoryUpdate(List<Integer> actualResults, List<ExternalObjectDirectoryEntity> expectedResults, int resultCount) {
         // find matching pn expected results

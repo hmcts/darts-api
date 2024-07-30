@@ -12,6 +12,7 @@ import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
 import uk.gov.hmcts.darts.common.entity.EventEntity;
 import uk.gov.hmcts.darts.common.entity.EventHandlerEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
+import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.common.repository.AnnotationRepository;
 import uk.gov.hmcts.darts.common.repository.EventRepository;
 import uk.gov.hmcts.darts.common.repository.HearingReportingRestrictionsRepository;
@@ -24,9 +25,11 @@ import uk.gov.hmcts.darts.hearings.model.EventResponse;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -68,17 +71,36 @@ class HearingsServiceImplTest {
     }
 
     @Test
-    void testGetEventsResponse() {
-        CourthouseEntity courthouseEntity = CommonTestDataUtil.createCourthouse("swansea");
-        CourtroomEntity courtroomEntity = CommonTestDataUtil.createCourtroom(courthouseEntity, "1");
-        CourtCaseEntity caseEntity = CommonTestDataUtil.createCase("case1", courthouseEntity);
-        caseEntity.setId(1);
+    void testGetHearingsById() {
+        HearingEntity hearingEntity = createHearingEntity(true);
+        when(hearingRepository.findById(hearingEntity.getId())).thenReturn(Optional.of(hearingEntity));
 
-        HearingEntity hearingEntity = CommonTestDataUtil.createHearing(
-            caseEntity,
-            courtroomEntity,
-            LocalDate.now()
-        );
+        HearingEntity result = service.getHearingById(hearingEntity.getId());
+        assertEquals(1, result.getId());
+    }
+
+    @Test
+    void testGetHearingsByIdHearingNotFound() {
+        when(hearingRepository.findById(1)).thenReturn(Optional.empty());
+
+        DartsApiException exception = assertThrows(DartsApiException.class, () -> service.getHearingById(1));
+
+        assertEquals("HEARING_100", exception.getError().getErrorTypeNumeric());
+    }
+
+    @Test
+    void testGetHearingsByIdHearingNotActual() {
+        HearingEntity hearingEntity = createHearingEntity(false);
+        when(hearingRepository.findById(hearingEntity.getId())).thenReturn(Optional.of(hearingEntity));
+
+        DartsApiException exception = assertThrows(DartsApiException.class, () -> service.getHearingById(hearingEntity.getId()));
+
+        assertEquals("HEARING_102", exception.getError().getErrorTypeNumeric());
+    }
+
+    @Test
+    void testGetEventsResponse() {
+        HearingEntity hearingEntity = createHearingEntity(true);
 
         EventHandlerEntity eventType = mock(EventHandlerEntity.class);
         when(eventType.getEventName()).thenReturn("TestEvent");
@@ -94,6 +116,15 @@ class HearingsServiceImplTest {
         assertEquals("TestEvent", eventResponses.get(0).getName());
         assertNotNull(eventResponses.get(0).getTimestamp());
 
+    }
+
+    private HearingEntity createHearingEntity(boolean isHearingActual) {
+        CourthouseEntity courthouseEntity = CommonTestDataUtil.createCourthouse("swansea");
+        CourtroomEntity courtroomEntity = CommonTestDataUtil.createCourtroom(courthouseEntity, "1");
+        CourtCaseEntity caseEntity = CommonTestDataUtil.createCase("case1", courthouseEntity);
+        caseEntity.setId(1);
+
+        return CommonTestDataUtil.createHearing(caseEntity, courtroomEntity, LocalDate.now(), isHearingActual);
     }
 
 }

@@ -14,6 +14,9 @@ import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.envers.AuditTable;
+import org.hibernate.envers.Audited;
+import org.hibernate.envers.RelationTargetAuditMode;
 import uk.gov.hmcts.darts.audio.enums.MediaRequestStatus;
 import uk.gov.hmcts.darts.audiorequests.model.AudioRequestType;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
@@ -26,6 +29,7 @@ import java.time.OffsetDateTime;
 @Table(name = MediaRequestEntity.TABLE_NAME)
 @Getter
 @Setter
+@AuditTable("media_request_aud")
 public class MediaRequestEntity extends CreatedModifiedBaseEntity {
 
     public static final String ID_COLUMN_NAME = "mer_id";
@@ -47,18 +51,22 @@ public class MediaRequestEntity extends CreatedModifiedBaseEntity {
     @Column(name = ID_COLUMN_NAME)
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "media_request_gen")
     @SequenceGenerator(name = "media_request_gen", sequenceName = "mer_seq", allocationSize = 1)
+    @Audited
     private Integer id;
 
     @ManyToOne(fetch = FetchType.EAGER, optional = false)
     @JoinColumn(name = HEARING_ID_COLUMN_NAME, nullable = false)
+    @Audited(targetAuditMode = RelationTargetAuditMode.NOT_AUDITED)
     private HearingEntity hearing;
 
     @ManyToOne(optional = false, fetch = FetchType.LAZY)
     @JoinColumn(name = CURRENT_OWNER_COLUMN_NAME, nullable = false)
+    @Audited(targetAuditMode = RelationTargetAuditMode.NOT_AUDITED)
     private UserAccountEntity currentOwner;
 
     @ManyToOne(optional = false, fetch = FetchType.LAZY)
     @JoinColumn(name = REQUESTOR_COLUMN_NAME, nullable = false)
+    @Audited(targetAuditMode = RelationTargetAuditMode.NOT_AUDITED)
     private UserAccountEntity requestor;
 
     @Column(name = REQUEST_STATUS_COLUMN_NAME, nullable = false)
@@ -67,14 +75,17 @@ public class MediaRequestEntity extends CreatedModifiedBaseEntity {
 
     @Column(name = REQUEST_TYPE_COLUMN_NAME, nullable = false)
     @Enumerated(EnumType.STRING)
+    @Audited
     private AudioRequestType requestType;
 
     @Column(name = REQ_PROC_ATTEMPTS_COLUMN_NAME)
     private Integer attempts;
 
+    @Audited
     @Column(name = START_TIME_COLUMN_NAME, nullable = false)
     private OffsetDateTime startTime;
 
+    @Audited
     @Column(name = END_TIME_COLUMN_NAME, nullable = false)
     private OffsetDateTime endTime;
 

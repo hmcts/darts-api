@@ -97,7 +97,6 @@ class ExternalObjectDirectoryRepositoryTest  extends PostgresIntegrationBase {
         // setup the test data
         generateDataWithAnnotationForInbound(setupHoursBeforeCurrentTime);
 
-
         int hourDurationBeyondHours = setupHoursBeforeCurrentTime; // which no records are
 
         // excerise the logic

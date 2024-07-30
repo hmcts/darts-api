@@ -335,9 +335,10 @@ public class ExternalObjectDirectoryStub {
     }
 
     @Transactional
-    public List<ExternalObjectDirectoryEntity>
-    generateWithStatusAndTranscriptionAndAnnotationAndArmLocation(List<ExternalObjectDirectoryEntity> externalObjectDirectoryEntities,
-                                                                                          Optional<OffsetDateTime> dateToSet)
+    public List<ExternalObjectDirectoryEntity> generateWithStatusAndTranscriptionAndAnnotationAndArmLocation(
+        List<ExternalObjectDirectoryEntity> externalObjectDirectoryEntities,
+        Optional<OffsetDateTime> dateToSet)
+
         throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
         List<ExternalObjectDirectoryEntity> entityListResult = new ArrayList<>();
 
@@ -346,7 +347,6 @@ public class ExternalObjectDirectoryStub {
             ExternalObjectDirectoryEntity newExternalObjectDirectory
                 = createAndSaveEod(externalObjectDirectory.getAnnotationDocumentEntity(),
                                     externalObjectDirectory.getTranscriptionDocumentEntity(), STORED, ARM, e -> { });
-
 
             if (dateToSet.isPresent()) {
                 dateConfigurer.setLastModifiedDate(newExternalObjectDirectory, dateToSet.get());

@@ -32,6 +32,7 @@ import uk.gov.hmcts.darts.common.repository.AutomatedTaskRepository;
 import uk.gov.hmcts.darts.dailylist.service.DailyListProcessor;
 import uk.gov.hmcts.darts.dailylist.service.DailyListService;
 import uk.gov.hmcts.darts.datamanagement.service.InboundToUnstructuredProcessor;
+import uk.gov.hmcts.darts.event.service.RemoveDuplicateEventsProcessor;
 import uk.gov.hmcts.darts.log.api.LogApi;
 import uk.gov.hmcts.darts.retention.service.ApplyRetentionCaseAssociatedObjectsProcessor;
 import uk.gov.hmcts.darts.retention.service.ApplyRetentionProcessor;
@@ -57,6 +58,7 @@ import uk.gov.hmcts.darts.task.runner.impl.InboundToUnstructuredAutomatedTask;
 import uk.gov.hmcts.darts.task.runner.impl.OutboundAudioDeleterAutomatedTask;
 import uk.gov.hmcts.darts.task.runner.impl.ProcessArmResponseFilesAutomatedTask;
 import uk.gov.hmcts.darts.task.runner.impl.ProcessDailyListAutomatedTask;
+import uk.gov.hmcts.darts.task.runner.impl.RemoveDuplicatedEventsAutomatedTask;
 import uk.gov.hmcts.darts.task.runner.impl.UnstructuredAnnotationTranscriptionDeleterAutomatedTask;
 import uk.gov.hmcts.darts.task.runner.impl.UnstructuredAudioDeleterAutomatedTask;
 import uk.gov.hmcts.darts.task.runner.impl.UnstructuredToArmAutomatedTask;
@@ -89,6 +91,7 @@ import static uk.gov.hmcts.darts.task.runner.AutomatedTaskName.INBOUND_TRANSCRIP
 import static uk.gov.hmcts.darts.task.runner.AutomatedTaskName.OUTBOUND_AUDIO_DELETER_TASK_NAME;
 import static uk.gov.hmcts.darts.task.runner.AutomatedTaskName.PROCESS_ARM_RESPONSE_FILES_TASK_NAME;
 import static uk.gov.hmcts.darts.task.runner.AutomatedTaskName.PROCESS_DAILY_LIST_TASK_NAME;
+import static uk.gov.hmcts.darts.task.runner.AutomatedTaskName.REMOVE_DUPLICATED_EVENTS_TASK_NAME;
 import static uk.gov.hmcts.darts.task.runner.AutomatedTaskName.UNSTRUCTURED_AUDIO_DELETER_TASK_NAME;
 import static uk.gov.hmcts.darts.task.runner.AutomatedTaskName.UNSTRUCTURED_TO_ARM_TASK_NAME;
 import static uk.gov.hmcts.darts.task.runner.AutomatedTaskName.UNSTRUCTURED_TRANSCRIPTION_ANNOTATION_DELETER_TASK_NAME;
@@ -149,8 +152,9 @@ public class AutomatedTaskServiceImpl implements AutomatedTaskService {
     private final DailyListService dailyListService;
 
     private final ArmRetentionEventDateProcessor armRetentionEventDateProcessor;
-
     private final InboundAnnotationTranscriptionDeleterProcessor inboundTranscriptionAndAnnotationDeleterProcessor;
+
+    private final RemoveDuplicateEventsProcessor removeDuplicateEventsProcessor;
 
     private final UnstructuredTranscriptionAndAnnotationDeleterProcessor unstructuredTranscriptionAndAnnotationDeleterProcessor;
 
@@ -179,6 +183,7 @@ public class AutomatedTaskServiceImpl implements AutomatedTaskService {
         addCleanEventToTaskRegistrar(taskRegistrar);
         addInboundTranscriptionAndAnnotationDeleterToTaskRegistrar(taskRegistrar);
         addUnstructuredTranscriptionAndAnnotationDeleterToTaskRegistrar(taskRegistrar);
+        addRemoveDuplicateEventsToTaskRegistrar(taskRegistrar);
     }
 
     @Override
@@ -265,7 +270,7 @@ public class AutomatedTaskServiceImpl implements AutomatedTaskService {
             case INBOUND_TRANSCRIPTION_ANNOTATION_DELETER_TASK_NAME -> processedTaskType = rescheduleInboundTranscriptionAndAnnotationDeleterAutomatedTask();
             case UNSTRUCTURED_TRANSCRIPTION_ANNOTATION_DELETER_TASK_NAME
                 -> processedTaskType = rescheduleUnstructuredTranscriptionAndAnnotationDeleterAutomatedTask();
-
+            case REMOVE_DUPLICATED_EVENTS_TASK_NAME -> processedTaskType = rescheduleRemoveDuplicatedEventsAutomatedTask();
             default -> throw new DartsApiException(FAILED_TO_FIND_AUTOMATED_TASK);
         }
 
@@ -589,6 +594,20 @@ public class AutomatedTaskServiceImpl implements AutomatedTaskService {
         eventCleanupTask.setLastCronExpression(getAutomatedTaskCronExpression(eventCleanupTask));
         Trigger trigger = createAutomatedTaskTrigger(eventCleanupTask);
         taskRegistrar.addTriggerTask(eventCleanupTask, trigger);
+    }
+
+
+    private void addRemoveDuplicateEventsToTaskRegistrar(ScheduledTaskRegistrar taskRegistrar) {
+        var removeDuplicateEventsAutomatedTask = new RemoveDuplicatedEventsAutomatedTask(
+            automatedTaskRepository,
+            lockProvider,
+            automatedTaskConfigurationProperties,
+            removeDuplicateEventsProcessor,
+            logApi
+        );
+        removeDuplicateEventsAutomatedTask.setLastCronExpression(getAutomatedTaskCronExpression(removeDuplicateEventsAutomatedTask));
+        Trigger trigger = createAutomatedTaskTrigger(removeDuplicateEventsAutomatedTask);
+        taskRegistrar.addTriggerTask(removeDuplicateEventsAutomatedTask, trigger);
     }
 
     private Class<? extends AutomatedTask>  rescheduleProcessDailyListAutomatedTask() {
@@ -991,6 +1010,25 @@ public class AutomatedTaskServiceImpl implements AutomatedTaskService {
             Trigger trigger = createAutomatedTaskTrigger(generateUnstructuredAnnotationTranscriptionTask);
             taskScheduler.schedule(generateUnstructuredAnnotationTranscriptionTask, trigger);
             return generateUnstructuredAnnotationTranscriptionTask.getClass();
+        } else {
+            taskScheduler.schedule(triggerAndAutomatedTask.getAutomatedTask(), triggerAndAutomatedTask.getTrigger());
+        }
+
+        return triggerAndAutomatedTask.getAutomatedTask().getClass();
+    }
+
+    private Class<? extends AutomatedTask> rescheduleRemoveDuplicatedEventsAutomatedTask() {
+        TriggerAndAutomatedTask triggerAndAutomatedTask = getTriggerAndAutomatedTask(REMOVE_DUPLICATED_EVENTS_TASK_NAME.getTaskName());
+        if (triggerAndAutomatedTask == null) {
+            var removeDuplicatedEventsAutomatedTask = new RemoveDuplicatedEventsAutomatedTask(
+                automatedTaskRepository,
+                lockProvider,
+                automatedTaskConfigurationProperties,
+                removeDuplicateEventsProcessor,
+                logApi
+            );
+            Trigger trigger = createAutomatedTaskTrigger(removeDuplicatedEventsAutomatedTask);
+            taskScheduler.schedule(removeDuplicatedEventsAutomatedTask, trigger);
         } else {
             taskScheduler.schedule(triggerAndAutomatedTask.getAutomatedTask(), triggerAndAutomatedTask.getTrigger());
         }
