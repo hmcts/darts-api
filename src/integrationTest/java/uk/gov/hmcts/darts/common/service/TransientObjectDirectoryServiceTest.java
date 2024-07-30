@@ -1,6 +1,5 @@
 package uk.gov.hmcts.darts.common.service;
 
-import com.azure.storage.blob.BlobClientBuilder;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import uk.gov.hmcts.darts.audio.entity.MediaRequestEntity;
@@ -12,6 +11,7 @@ import uk.gov.hmcts.darts.common.entity.TransientObjectDirectoryEntity;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 
 import java.time.OffsetDateTime;
+import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -36,10 +36,7 @@ class TransientObjectDirectoryServiceTest extends IntegrationBase {
         var mediaRequestEntity1 = dartsDatabase.createAndLoadOpenMediaRequestEntity(requestor, AudioRequestType.DOWNLOAD);
 
         MediaRequestEntity mediaRequestEntity = mediaRequestService.getMediaRequestEntityById(mediaRequestEntity1.getId());
-        String blodId = "f744a74f-83c0-47e4-8bb2-2fd4d2b68647";
-        BlobClientBuilder blobClientBuilder = new BlobClientBuilder();
-        blobClientBuilder.blobName(blodId);
-        blobClientBuilder.endpoint("http://127.0.0.1:10000/devstoreaccount1");
+        UUID blobId = UUID.fromString("f744a74f-83c0-47e4-8bb2-2fd4d2b68647");
 
         TransformedMediaEntity transformedMediaEntity = transformedMediaHelper.createTransformedMediaEntity(
             mediaRequestEntity,
@@ -50,14 +47,14 @@ class TransientObjectDirectoryServiceTest extends IntegrationBase {
         );
         TransientObjectDirectoryEntity transientObjectDirectoryEntity = transientObjectDirectoryService.saveTransientObjectDirectoryEntity(
             transformedMediaEntity,
-            blobClientBuilder.buildClient()
+            blobId
         );
 
         assertNotNull(transientObjectDirectoryEntity);
         assertTrue(transientObjectDirectoryEntity.getId() > 0);
         assertEquals(mediaRequestEntity1.getId(), transientObjectDirectoryEntity.getTransformedMedia().getMediaRequest().getId());
         assertEquals(STORED.getId(), transientObjectDirectoryEntity.getStatus().getId());
-        assertEquals(blodId, transientObjectDirectoryEntity.getExternalLocation().toString());
+        assertEquals(blobId, transientObjectDirectoryEntity.getExternalLocation());
         assertNull(transientObjectDirectoryEntity.getChecksum());
         assertTrue(transientObjectDirectoryEntity.getCreatedDateTime()
                        .isAfter(OffsetDateTime.parse("2023-07-06T16:00:00.000Z")));

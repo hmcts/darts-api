@@ -3,7 +3,6 @@ package uk.gov.hmcts.darts.datamanagement;
 import com.azure.core.util.BinaryData;
 import com.azure.storage.blob.BlobClient;
 import com.azure.storage.blob.models.BlobStorageException;
-import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -17,6 +16,7 @@ import uk.gov.hmcts.darts.common.datamanagement.enums.DatastoreContainerType;
 import uk.gov.hmcts.darts.common.exception.AzureDeleteBlobException;
 import uk.gov.hmcts.darts.datamanagement.config.DataManagementConfiguration;
 import uk.gov.hmcts.darts.datamanagement.exception.FileNotDownloadedException;
+import uk.gov.hmcts.darts.datamanagement.model.BlobClientUploadResponse;
 import uk.gov.hmcts.darts.datamanagement.service.DataManagementService;
 
 import java.io.ByteArrayInputStream;
@@ -27,6 +27,7 @@ import java.util.Map;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -117,10 +118,10 @@ class DataManagementServiceTest {
         byte[] testStringInBytes = TEST_BINARY_STRING.getBytes(StandardCharsets.UTF_8);
         ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(testStringInBytes);
 
-        var uuid = dataManagementService.saveBlobData(unstructuredStorageContainerName, byteArrayInputStream);
+        BlobClientUploadResponse blobClientUploadResponse = dataManagementService.saveBlobData(unstructuredStorageContainerName, byteArrayInputStream);
 
-        assertTrue(uuid instanceof UUID);
-        assertTrue(StringUtils.isNotEmpty(uuid.toString()));
+        assertNotNull(blobClientUploadResponse.getBlobName());
+        assertNotNull(blobClientUploadResponse.getBlobSize());
     }
 
     @Test

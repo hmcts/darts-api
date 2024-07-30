@@ -1,7 +1,5 @@
 package uk.gov.hmcts.darts.audio.helper;
 
-import com.azure.core.util.BinaryData;
-import com.azure.storage.blob.BlobClient;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -20,9 +18,11 @@ import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
 import uk.gov.hmcts.darts.common.service.TransientObjectDirectoryService;
 import uk.gov.hmcts.darts.common.util.DateConverterUtil;
 import uk.gov.hmcts.darts.datamanagement.api.DataManagementApi;
+import uk.gov.hmcts.darts.datamanagement.model.BlobClientUploadResponse;
 import uk.gov.hmcts.darts.notification.api.NotificationApi;
 import uk.gov.hmcts.darts.notification.dto.SaveNotificationToDbRequest;
 
+import java.io.InputStream;
 import java.time.LocalDate;
 import java.time.Month;
 import java.time.OffsetDateTime;
@@ -61,25 +61,26 @@ public class TransformedMediaHelper {
     private static final String NOT_AVAILABLE = "N/A";
 
     @Transactional
-    public UUID saveToStorage(MediaRequestEntity mediaRequest, BinaryData binaryData, String filename, AudioFileInfo audioFileInfo) {
-
-        OffsetDateTime startTime = audioFileInfo.getStartTime().atOffset(ZoneOffset.UTC);
-        OffsetDateTime endTime = audioFileInfo.getEndTime().atOffset(ZoneOffset.UTC);
-
+    public UUID saveToStorage(MediaRequestEntity mediaRequest, InputStream inputStream, String filename, AudioFileInfo audioFileInfo) {
         //save in outbound datastore
         Map<String, String> metadata = new HashMap<>();
         metadata.put(MEDIA_REQUEST_ID, String.valueOf(mediaRequest.getId()));
-        BlobClient blobClient = dataManagementApi.saveBlobDataToContainer(binaryData, DatastoreContainerType.OUTBOUND, metadata);
+        BlobClientUploadResponse blobClientUploadResponse = dataManagementApi.saveBlobToContainer(inputStream, DatastoreContainerType.OUTBOUND, metadata);
+        final UUID blobName = blobClientUploadResponse.getBlobName();
 
+        OffsetDateTime startTime = audioFileInfo.getStartTime().atOffset(ZoneOffset.UTC);
+        OffsetDateTime endTime = audioFileInfo.getEndTime().atOffset(ZoneOffset.UTC);
         //save in database
-        TransformedMediaEntity transformedMediaEntity = createTransformedMediaEntity(mediaRequest, filename, startTime, endTime, binaryData.getLength());
+        TransformedMediaEntity transformedMediaEntity = createTransformedMediaEntity(mediaRequest, filename, startTime, endTime,
+                                                                                     blobClientUploadResponse.getBlobSize());
         TransientObjectDirectoryEntity transientObjectDirectoryEntity = transientObjectDirectoryService.saveTransientObjectDirectoryEntity(
             transformedMediaEntity,
-            blobClient
+            blobName
         );
+        Map<String, String> retrospectiveMetadata = Map.of(TRANSFORMED_MEDIA_ID, String.valueOf(transientObjectDirectoryEntity.getTransformedMedia().getId()));
+        blobClientUploadResponse.addMetadata(retrospectiveMetadata);
 
-        dataManagementApi.addMetadata(blobClient, TRANSFORMED_MEDIA_ID, String.valueOf(transientObjectDirectoryEntity.getTransformedMedia().getId()));
-        return UUID.fromString(blobClient.getBlobName());
+        return blobName;
     }
 
     @Transactional

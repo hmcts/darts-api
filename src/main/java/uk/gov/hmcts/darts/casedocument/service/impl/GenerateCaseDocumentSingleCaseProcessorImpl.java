@@ -15,14 +15,16 @@ import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.casedocument.model.CourtCaseDocument;
 import uk.gov.hmcts.darts.casedocument.service.CaseDocumentService;
 import uk.gov.hmcts.darts.casedocument.service.GenerateCaseDocumentSingleCaseProcessor;
+import uk.gov.hmcts.darts.common.datamanagement.enums.DatastoreContainerType;
 import uk.gov.hmcts.darts.common.entity.CaseDocumentEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.repository.CaseDocumentRepository;
 import uk.gov.hmcts.darts.common.repository.CaseRepository;
 import uk.gov.hmcts.darts.common.util.EodHelper;
 import uk.gov.hmcts.darts.common.util.FileContentChecksum;
+import uk.gov.hmcts.darts.datamanagement.api.DataManagementApi;
 import uk.gov.hmcts.darts.datamanagement.config.DataManagementConfiguration;
-import uk.gov.hmcts.darts.datamanagement.service.DataManagementService;
+import uk.gov.hmcts.darts.datamanagement.model.BlobClientUploadResponse;
 
 import java.time.Duration;
 import java.time.Instant;
@@ -45,7 +47,7 @@ public class GenerateCaseDocumentSingleCaseProcessorImpl implements GenerateCase
     private final CaseDocumentRepository caseDocumentRepository;
     private final CaseRepository caseRepository;
     private final CaseDocumentService caseDocumentService;
-    private final DataManagementService dataManagementService;
+    private final DataManagementApi dataManagementApi;
     private final DataManagementConfiguration configuration;
     private final ExternalObjectDirectoryService externalObjectDirectoryService;
     private final FileContentChecksum checksumCalculator;
@@ -66,10 +68,11 @@ public class GenerateCaseDocumentSingleCaseProcessorImpl implements GenerateCase
         log.info("completed generation of case document json for case id {}. Total execution time (ms): {}", caseId, timeElapsed);
         log.debug("generated case document: {}", caseDocumentJson);
 
-        UUID externalLocation = dataManagementService.saveBlobData(
-            configuration.getUnstructuredContainerName(),
-            IOUtils.toInputStream(caseDocumentJson, UTF_8)
+        BlobClientUploadResponse blobClientUploadResponse = dataManagementApi.saveBlobToContainer(
+            IOUtils.toInputStream(caseDocumentJson, UTF_8),
+            DatastoreContainerType.UNSTRUCTURED
         );
+        UUID externalLocation = blobClientUploadResponse.getBlobName();
 
         var systemUser = userIdentity.getUserAccount();
         CaseDocumentEntity caseDocumentEntity = createAndSaveCaseDocumentEntity(caseId, caseDocumentJson, externalLocation, systemUser);

@@ -218,7 +218,7 @@ public class AudioTransformationServiceImpl implements AudioTransformationServic
                 );
 
                 try (InputStream inputStream = Files.newInputStream(generatedAudioFile.getPath())) {
-                    blobId = transformedMediaHelper.saveToStorage(mediaRequestEntity, BinaryData.fromStream(inputStream), fileName, generatedAudioFile);
+                    blobId = transformedMediaHelper.saveToStorage(mediaRequestEntity, inputStream, fileName, generatedAudioFile);
                 } catch (NoSuchFileException nsfe) {
                     log.error("No file found when trying to save to storage. {}", generatedAudioFile.getPath());
                     throw nsfe;

@@ -7,6 +7,7 @@ import uk.gov.hmcts.darts.common.datamanagement.component.impl.DownloadResponseM
 import uk.gov.hmcts.darts.common.datamanagement.enums.DatastoreContainerType;
 import uk.gov.hmcts.darts.common.exception.AzureDeleteBlobException;
 import uk.gov.hmcts.darts.datamanagement.exception.FileNotDownloadedException;
+import uk.gov.hmcts.darts.datamanagement.model.BlobClientUploadResponse;
 
 import java.io.InputStream;
 import java.nio.file.Path;
@@ -20,7 +21,9 @@ public interface DataManagementService {
 
     UUID saveBlobData(String containerName, BinaryData binaryData);
 
-    UUID saveBlobData(String containerName, InputStream inputStream);
+    BlobClientUploadResponse saveBlobData(String containerName, InputStream inputStream, Map<String, String> metadata);
+
+    BlobClientUploadResponse saveBlobData(String containerName, InputStream inputStream);
 
     BlobClient saveBlobData(String containerName, BinaryData binaryData, Map<String, String> metadata);
 

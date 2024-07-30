@@ -12,10 +12,10 @@ import uk.gov.hmcts.darts.common.exception.AzureDeleteBlobException;
 import uk.gov.hmcts.darts.datamanagement.api.DataManagementApi;
 import uk.gov.hmcts.darts.datamanagement.config.DataManagementConfiguration;
 import uk.gov.hmcts.darts.datamanagement.exception.FileNotDownloadedException;
+import uk.gov.hmcts.darts.datamanagement.model.BlobClientUploadResponse;
 import uk.gov.hmcts.darts.datamanagement.service.DataManagementService;
 
 import java.io.InputStream;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
@@ -47,19 +47,19 @@ public class DataManagementApiImpl implements DataManagementApi {
     public BlobClient saveBlobDataToContainer(BinaryData binaryData, DatastoreContainerType container, Map<String, String> metadata) {
         Optional<String> containerName = getContainerName(container);
         return containerName.map(s -> dataManagementService.saveBlobData(s, binaryData, metadata)).orElse(null);
-
     }
 
     @Override
-    public void addMetadata(BlobClient client, Map<String, String> metadata) {
-        dataManagementService.addMetaData(client, metadata);
+    public BlobClientUploadResponse saveBlobToContainer(InputStream inputStream, DatastoreContainerType container, Map<String, String> metadata) {
+        String containerName = getContainerName(container)
+            .orElseThrow(() -> new IllegalArgumentException("Container name cannot be resolved"));
+
+        return dataManagementService.saveBlobData(containerName, inputStream, metadata);
     }
 
     @Override
-    public void addMetadata(BlobClient client, String key, String value) {
-        Map<String, String> newMetadata = new HashMap<>();
-        newMetadata.put(key, value);
-        addMetadata(client, newMetadata);
+    public BlobClientUploadResponse saveBlobToContainer(InputStream inputStream, DatastoreContainerType container) {
+        return saveBlobToContainer(inputStream, container, null);
     }
 
     @Override
@@ -79,7 +79,7 @@ public class DataManagementApiImpl implements DataManagementApi {
 
     @Override
     public UUID saveBlobDataToInboundContainer(InputStream inputStream) {
-        return dataManagementService.saveBlobData(getInboundContainerName(), inputStream);
+        return dataManagementService.saveBlobData(getInboundContainerName(), inputStream).getBlobName();
     }
 
     /**
