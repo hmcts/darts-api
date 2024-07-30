@@ -257,7 +257,7 @@ class StandardEventHandlerTest extends HandlerTestData {
             // Add a small delay to allow for any potential lag in DB updates
             Thread.sleep(100);
 
-            assertEquals(numberOfThreads, dartsDatabase.getHearingRepository().findAll().size(), "Expected only one hearing");
+            assertEquals(numberOfThreads, dartsDatabase.getHearingRepository().findAll().size());
             assertEquals(numberOfThreads, dartsDatabase.getAllEvents().size(), "Expected all events to be processed");
         }
     }
