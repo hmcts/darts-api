@@ -10,6 +10,7 @@ import uk.gov.hmcts.darts.arm.service.ArmRetentionEventDateProcessor;
 import uk.gov.hmcts.darts.arm.service.BatchCleanupArmResponseFilesService;
 import uk.gov.hmcts.darts.arm.service.CleanupArmResponseFilesService;
 import uk.gov.hmcts.darts.arm.service.InboundAnnotationTranscriptionDeleterProcessor;
+import uk.gov.hmcts.darts.arm.service.UnstructuredTranscriptionAndAnnotationDeleterProcessor;
 import uk.gov.hmcts.darts.audio.deleter.impl.inbound.ExternalInboundDataStoreDeleter;
 import uk.gov.hmcts.darts.audio.deleter.impl.outbound.ExternalOutboundDataStoreDeleter;
 import uk.gov.hmcts.darts.audio.deleter.impl.unstructured.ExternalUnstructuredDataStoreDeleter;
@@ -45,6 +46,7 @@ import uk.gov.hmcts.darts.task.runner.impl.OutboundAudioDeleterAutomatedTask;
 import uk.gov.hmcts.darts.task.runner.impl.ProcessArmResponseFilesAutomatedTask;
 import uk.gov.hmcts.darts.task.runner.impl.ProcessDailyListAutomatedTask;
 import uk.gov.hmcts.darts.task.runner.impl.RemoveDuplicatedEventsAutomatedTask;
+import uk.gov.hmcts.darts.task.runner.impl.UnstructuredAnnotationTranscriptionDeleterAutomatedTask;
 import uk.gov.hmcts.darts.task.runner.impl.UnstructuredAudioDeleterAutomatedTask;
 import uk.gov.hmcts.darts.task.runner.impl.UnstructuredToArmAutomatedTask;
 import uk.gov.hmcts.darts.transcriptions.service.TranscriptionsProcessor;
@@ -81,7 +83,8 @@ public class ManualTaskService {
     private final LockProvider lockProvider;
     private final LogApi logApi;
 
-    private InboundAnnotationTranscriptionDeleterProcessor armDeletionProcessor;
+    private InboundAnnotationTranscriptionDeleterProcessor inboundAnnotationTranscriptionDeleterProcessor;
+    private UnstructuredTranscriptionAndAnnotationDeleterProcessor unstructuredTranscriptionAndAnnotationDeleterProcessor;
 
     private final List<AbstractLockableAutomatedTask> automatedTasks = new ArrayList<>();
 
@@ -345,7 +348,7 @@ public class ManualTaskService {
             automatedTaskRepository,
             lockProvider,
             automatedTaskConfigurationProperties,
-            armDeletionProcessor,
+            inboundAnnotationTranscriptionDeleterProcessor,
             logApi
         );
         manualTask.setManualTask();
@@ -353,11 +356,11 @@ public class ManualTaskService {
     }
 
     private void addUnstructuredTranscriptionAndAnnotationDeleterRegistrar() {
-        var manualTask = new InboundAnnotationTranscriptionDeleterAutomatedTask(
+        var manualTask = new UnstructuredAnnotationTranscriptionDeleterAutomatedTask(
             automatedTaskRepository,
             lockProvider,
             automatedTaskConfigurationProperties,
-            armDeletionProcessor,
+            unstructuredTranscriptionAndAnnotationDeleterProcessor,
             logApi
         );
         manualTask.setManualTask();

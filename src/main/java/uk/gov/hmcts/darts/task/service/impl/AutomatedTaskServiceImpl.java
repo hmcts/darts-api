@@ -1029,6 +1029,7 @@ public class AutomatedTaskServiceImpl implements AutomatedTaskService {
             );
             Trigger trigger = createAutomatedTaskTrigger(removeDuplicatedEventsAutomatedTask);
             taskScheduler.schedule(removeDuplicatedEventsAutomatedTask, trigger);
+            return removeDuplicatedEventsAutomatedTask.getClass();
         } else {
             taskScheduler.schedule(triggerAndAutomatedTask.getAutomatedTask(), triggerAndAutomatedTask.getTrigger());
         }

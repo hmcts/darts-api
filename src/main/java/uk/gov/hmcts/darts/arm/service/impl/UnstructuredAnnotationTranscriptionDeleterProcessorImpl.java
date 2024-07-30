@@ -2,7 +2,6 @@ package uk.gov.hmcts.darts.arm.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.darts.arm.service.UnstructuredTranscriptionAndAnnotationDeleterProcessor;
@@ -25,8 +24,7 @@ public class UnstructuredAnnotationTranscriptionDeleterProcessorImpl implements 
 
     private final EodHelper eodHelper;
 
-    @Autowired
-    private CurrentTimeHelper currentTimeHelper;
+    private final CurrentTimeHelper currentTimeHelper;
 
     @Value("${darts.data-management.retention-period.unstructured.arm-minimum.weeks}")
     int weeksInUnstructured;
