@@ -26,6 +26,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static uk.gov.hmcts.darts.PredefinedPrimaryKeys.TEST_JUDGE_GLOBAL_SECURITY_GROUP_ID;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.SUPER_ADMIN;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.SUPER_USER;
 
@@ -64,7 +65,7 @@ class UserControllerGetUsersByIdIntTest extends IntegrationBase {
         Assertions.assertEquals("Judgedefault@example.com", userWithIdAndTimestamps.getEmailAddress());
         Assertions.assertTrue(userWithIdAndTimestamps.getActive());
         Assertions.assertEquals("JudgedefaultFullName", userWithIdAndTimestamps.getFullName());
-        Assertions.assertEquals(-3, userWithIdAndTimestamps.getSecurityGroupIds().get(0));
+        Assertions.assertEquals(TEST_JUDGE_GLOBAL_SECURITY_GROUP_ID, userWithIdAndTimestamps.getSecurityGroupIds().get(0));
 
         verify(mockUserIdentity).userHasGlobalAccess(Set.of(SUPER_ADMIN, SUPER_USER));
         verifyNoMoreInteractions(mockUserIdentity);

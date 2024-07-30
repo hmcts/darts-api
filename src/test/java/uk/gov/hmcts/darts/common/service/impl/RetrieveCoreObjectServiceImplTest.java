@@ -9,12 +9,14 @@ import uk.gov.hmcts.darts.authorisation.api.AuthorisationApi;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
+import uk.gov.hmcts.darts.common.entity.JudgeEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.common.repository.CaseRepository;
 import uk.gov.hmcts.darts.common.repository.CourthouseRepository;
 import uk.gov.hmcts.darts.common.repository.CourtroomRepository;
 import uk.gov.hmcts.darts.common.repository.HearingRepository;
+import uk.gov.hmcts.darts.common.repository.JudgeRepository;
 import uk.gov.hmcts.darts.common.util.CommonTestDataUtil;
 
 import java.time.LocalDate;
@@ -34,6 +36,7 @@ class RetrieveCoreObjectServiceImplTest {
     private static final String COURTHOUSE_1 = "courthouse1";
     private static final String COURTROOM_1 = "courtroom1";
     private static final String CASE_NUMBER_1 = "caseNumber1";
+    private static final UserAccountEntity USER_ACCOUNT_ENTITY = new UserAccountEntity();
 
     @Mock
     HearingRepository hearingRepository;
@@ -49,6 +52,9 @@ class RetrieveCoreObjectServiceImplTest {
 
     @Mock
     AuthorisationApi authorisationApi;
+
+    @Mock
+    JudgeRepository judgeRepository;
 
     @InjectMocks
     RetrieveCoreObjectServiceImpl retrieveCoreObjectServiceImpl;
@@ -147,6 +153,15 @@ class RetrieveCoreObjectServiceImplTest {
         );
 
         assertEquals("Provided courthouse does not exist. Courthouse 'courthouse1' not found.", exception.getMessage());
+    }
+
+    @Test
+    void createJudgeUppercase() {
+        when(authorisationApi.getCurrentUser()).thenReturn(USER_ACCOUNT_ENTITY);
+
+        JudgeEntity response = retrieveCoreObjectServiceImpl.retrieveOrCreateJudge("Mr Judge Smith");
+
+        assertEquals("MR JUDGE SMITH", response.getName());
     }
 
     private void mockCourthouse() {

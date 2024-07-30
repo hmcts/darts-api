@@ -1,5 +1,6 @@
 --v1	initial version based on obect_state_record.docx 15/3/24
 --v2	added parent_id, parent_object_id, content_object_id, object_type, dets_location
+--v3    add courthouse_name,cas_id, id_response_cr_file, id_response_uf_file
 
 
 CREATE TABLE object_state_record
@@ -12,6 +13,8 @@ CREATE TABLE object_state_record
 ,object_type                   CHARACTER VARYING --  
 ,id_clip                       CHARACTER VARYING
 ,id_case                       CHARACTER VARYING
+,courthouse_name               CHARACTER VARYING
+,cas_id                        INTEGER
 ,date_last_accessed            TIMESTAMP WITH TIME ZONE
 ,relation_id                   CHARACTER VARYING
 ,dets_location                 CHARACTER VARYING -- 
@@ -38,6 +41,8 @@ CREATE TABLE object_state_record
 ,md5_file_ingest_to_arm        CHARACTER VARYING
 ,file_size_ingest_to_arm       BIGINT
 ,id_response_file              CHARACTER VARYING
+,id_response_cr_file           CHARACTER VARYING
+,id_response_uf_file           CHARACTER VARYING
 ,flag_file_dets_cleanup_status BOOLEAN
 ,date_file_dets_cleanup        TIMESTAMP WITH TIME ZONE
 ,flag_file_retained_in_ods     BOOLEAN

@@ -35,7 +35,8 @@ public class EventMappingServiceImpl implements EventMappingService {
     private static final String HANDLER_ALREADY_EXISTS_MESSAGE = "Event handler mapping already exists for type: %s and subtype: %s.";
     private static final String HANDLER_DOES_NOT_EXIST_MESSAGE = "Event handler mapping does not exist for type: %s and subtype: %s.";
     private static final String NO_HANDLER_WITH_NAME_IN_DB_MESSAGE = "No event handler with name %s could be found in the database.";
-    private static final String MAPPING_IS_INACTIVE_MESSAGE = "Event handler mapping {0} cannot be deleted because it is inactive.";
+    // {0,number,#} is to format numbers without commas
+    private static final String MAPPING_IS_INACTIVE_MESSAGE = "Event handler mapping {0,number,#} cannot be deleted because it is inactive.";
     private static final String MAPPING_IN_USE_MESSAGE = "Event handler mapping {0} already has processed events, so cannot be deleted.";
 
     private final EventRepository eventRepository;

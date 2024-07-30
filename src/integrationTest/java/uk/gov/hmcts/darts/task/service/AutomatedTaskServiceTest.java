@@ -1065,7 +1065,7 @@ class AutomatedTaskServiceTest extends IntegrationPerClassBase {
         log.info("About to reload task {}", automatedTask.getTaskName());
         Class<? extends AutomatedTask> automatedTaskUsedForProcessing
             = automatedTaskService.reloadTaskByName(automatedTask.getTaskName());
-        assertEquals(ApplyRetentionCaseAssociatedObjectsAutomatedTask.class, automatedTaskUsedForProcessing);
+        assertEquals(ArmRetentionEventDateCalculatorAutomatedTask.class, automatedTaskUsedForProcessing);
 
     }
 

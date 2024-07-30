@@ -85,7 +85,7 @@ class CaseControllerGetCaseByIdTest extends IntegrationBase {
             "courthouse":"some-courthouse",
             "case_number":"1",
             "defendants":["aDefendant"],
-            "judges":["1judge1"],
+            "judges":["1JUDGE1"],
             "prosecutors":["aProsecutor"],
             "defenders":["aDefence"],
             "reporting_restrictions":[]
@@ -108,7 +108,7 @@ class CaseControllerGetCaseByIdTest extends IntegrationBase {
             .andExpect(MockMvcResultMatchers.status().isOk())
             .andExpect(MockMvcResultMatchers.jsonPath("$.case_id", Matchers.is(caseId)))
             .andExpect(MockMvcResultMatchers.jsonPath("$.judges", Matchers.hasSize(1)))
-            .andExpect(MockMvcResultMatchers.jsonPath("$.judges[0]", Matchers.is("1judge1")))
+            .andExpect(MockMvcResultMatchers.jsonPath("$.judges[0]", Matchers.is("1JUDGE1")))
             .andExpect(MockMvcResultMatchers.jsonPath("$.prosecutors", Matchers.hasSize(1)))
             .andExpect(MockMvcResultMatchers.jsonPath("$.prosecutors[0]", Matchers.is("aProsecutor")))
             .andExpect(MockMvcResultMatchers.jsonPath("$.defendants", Matchers.hasSize(1)))

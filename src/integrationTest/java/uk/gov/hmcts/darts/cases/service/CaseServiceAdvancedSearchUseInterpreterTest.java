@@ -1,7 +1,6 @@
 package uk.gov.hmcts.darts.cases.service;
 
 import lombok.extern.slf4j.Slf4j;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -88,11 +87,6 @@ class CaseServiceAdvancedSearchUseInterpreterTest extends IntegrationBase {
         givenBearerTokenExists(INTEGRATION_TEST_USER_EMAIL);
         user = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
         user.getSecurityGroupEntities().clear();
-    }
-
-    @AfterEach
-    void deleteUser() {
-        dartsDatabase.addToUserAccountTrash(INTEGRATION_TEST_USER_EMAIL);
     }
 
     @Test

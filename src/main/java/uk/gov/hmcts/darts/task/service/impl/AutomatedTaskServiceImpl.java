@@ -91,6 +91,7 @@ import static uk.gov.hmcts.darts.task.runner.AutomatedTaskName.PROCESS_ARM_RESPO
 import static uk.gov.hmcts.darts.task.runner.AutomatedTaskName.PROCESS_DAILY_LIST_TASK_NAME;
 import static uk.gov.hmcts.darts.task.runner.AutomatedTaskName.UNSTRUCTURED_AUDIO_DELETER_TASK_NAME;
 import static uk.gov.hmcts.darts.task.runner.AutomatedTaskName.UNSTRUCTURED_TO_ARM_TASK_NAME;
+import static uk.gov.hmcts.darts.task.runner.AutomatedTaskName.UNSTRUCTURED_TRANSCRIPTION_ANNOTATION_DELETER_TASK_NAME;
 
 
 /**
@@ -978,7 +979,7 @@ public class AutomatedTaskServiceImpl implements AutomatedTaskService {
     }
 
     private Class<? extends AutomatedTask> rescheduleUnstructuredTranscriptionAndAnnotationDeleterAutomatedTask() {
-        TriggerAndAutomatedTask triggerAndAutomatedTask = getTriggerAndAutomatedTask(UNSTRUCTURED_AUDIO_DELETER_TASK_NAME.getTaskName());
+        TriggerAndAutomatedTask triggerAndAutomatedTask = getTriggerAndAutomatedTask(UNSTRUCTURED_TRANSCRIPTION_ANNOTATION_DELETER_TASK_NAME.getTaskName());
         if (triggerAndAutomatedTask == null) {
             var generateUnstructuredAnnotationTranscriptionTask = new UnstructuredAnnotationTranscriptionDeleterAutomatedTask(
                 automatedTaskRepository,

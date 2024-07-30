@@ -12,7 +12,7 @@
         "date": "2023-05-20",
         "courtroom": "some-court-room",
         "judges": [
-          "aJudge"
+          "AJUDGE"
         ]
       },
       {
@@ -20,7 +20,7 @@
         "date": "2023-05-21",
         "courtroom": "some-court-room",
         "judges": [
-          "aJudge"
+          "AJUDGE"
         ]
       },
       {
@@ -28,7 +28,7 @@
         "date": "2023-05-22",
         "courtroom": "some-court-room",
         "judges": [
-          "aJudge"
+          "AJUDGE"
         ]
       }
     ]

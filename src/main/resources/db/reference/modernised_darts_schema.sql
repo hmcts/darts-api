@@ -281,6 +281,21 @@
 --    remove reference_id from media
 --    add is_migrated to transcription_comment
 --    add default to court_case.is_data_anonymised
+--v71 amend ret_conf_level to boolean from integer on court_case
+--    add ret_conf_updated_ts to court_case
+--    add the 3 ret_conf_* columns to annotation_document,case_document,media,transcription_document
+--    add boolean is_current_migrated to media and transcription
+--    amend event_id on event to bigint, current largest is 178million, int has capacity to 2 billion
+--v71.1 amend is_current_migrated to is_current on media and transcription and nullable !
+--    remove ret_conf_updated_ts from annotation_document,case_document,media,transcription_document
+--    amend ret_conf_level to integer
+--    amend ret_conf_level to ret_conf_score
+--    revert  event_id to int
+--    add content_object_id, clip_id, external_location to daily_list
+--    add elt_id to daily_list
+--    add is_deleted, deleted_by & deleted_ts to annotation_document, case_document, transcription_document
+--    add is_data_anonymised to event and transcription_comment
+--    add data_ingestion_ts to external_object_directory
 
 -- List of Table Aliases
 -- annotation                  ANN
@@ -402,9 +417,14 @@ CREATE TABLE annotation_document
 ,file_name                   CHARACTER VARYING             NOT NULL
 ,file_type                   CHARACTER VARYING             NOT NULL
 ,file_size                   INTEGER                       NOT NULL
-,checksum                    CHARACTER VARYING             
+,checksum                    CHARACTER VARYING
+,is_deleted                  BOOLEAN                       NOT NULL DEFAULT false
+,deleted_by                  INTEGER
+,deleted_ts                  TIMESTAMP WITH TIME ZONE             
 ,is_hidden                   BOOLEAN                       NOT NULL DEFAULT false
-,retain_until_ts             TIMESTAMP WITH TIME ZONE      
+,retain_until_ts             TIMESTAMP WITH TIME ZONE 
+,ret_conf_score              INTEGER
+,ret_conf_reason             CHARACTER VARYING
 ,uploaded_by                 INTEGER                       NOT NULL
 ,uploaded_ts                 TIMESTAMP WITH TIME ZONE      NOT NULL
 ,last_modified_ts            TIMESTAMP WITH TIME ZONE      NOT NULL
@@ -531,9 +551,14 @@ CREATE TABLE case_document
 ,file_name                   CHARACTER VARYING             NOT NULL
 ,file_type                   CHARACTER VARYING             NOT NULL
 ,file_size                   INTEGER                       NOT NULL
-,checksum                    CHARACTER VARYING             
+,checksum                    CHARACTER VARYING   
+,is_deleted                  BOOLEAN                       NOT NULL DEFAULT false
+,deleted_by                  INTEGER
+,deleted_ts                  TIMESTAMP WITH TIME ZONE                  
 ,is_hidden                   BOOLEAN                       NOT NULL DEFAULT false
-,retain_until_ts             TIMESTAMP WITH TIME ZONE      
+,retain_until_ts             TIMESTAMP WITH TIME ZONE  
+,ret_conf_score              INTEGER
+,ret_conf_reason             CHARACTER VARYING
 ,created_by                  INTEGER                       NOT NULL
 ,created_ts                  TIMESTAMP WITH TIME ZONE      NOT NULL
 ,last_modified_ts            TIMESTAMP WITH TIME ZONE      NOT NULL
@@ -598,8 +623,9 @@ CREATE TABLE court_case
 ,is_data_anonymised          BOOLEAN                       NOT NULL DEFAULT false
 ,data_anonymised_by          INTEGER
 ,data_anonymised_ts          TIMESTAMP WITH TIME ZONE
-,ret_conf_level              INTEGER
+,ret_conf_score              INTEGER
 ,ret_conf_reason             CHARACTER VARYING
+,ret_conf_updated_ts         TIMESTAMP WITH TIME ZONE
 ,is_deleted                  BOOLEAN                       NOT NULL DEFAULT false
 ,deleted_by                  INTEGER
 ,deleted_ts                  TIMESTAMP WITH TIME ZONE
@@ -686,6 +712,10 @@ CREATE TABLE daily_list
 ,daily_list_content_json     CHARACTER VARYING
 ,daily_list_content_xml      CHARACTER VARYING
 ,message_id                  CHARACTER VARYING 
+,content_object_id           CHARACTER VARYING
+,clip_id                     CHARACTER VARYING
+,external_location           UUID
+,elt_id                      INTEGER
 ,created_ts                  TIMESTAMP WITH TIME ZONE      NOT NULL
 ,created_by                  INTEGER                       NOT NULL
 ,last_modified_ts            TIMESTAMP WITH TIME ZONE      NOT NULL
@@ -764,6 +794,7 @@ CREATE TABLE event
 ,is_log_entry                BOOLEAN                       NOT NULL  -- needs to be not null to ensure only 2 valid states
 ,event_status                INTEGER
 ,is_current                  BOOLEAN                       NOT NULL
+,is_data_anonymised          BOOLEAN                       NOT NULL DEFAULT false
 ,version_label               CHARACTER VARYING(32)
 ,chronicle_id                CHARACTER VARYING(16)                   -- legacy id of the 1.0 version of the event
 ,antecedent_id               CHARACTER VARYING(16)                   -- legacy id of the immediately  preceding event 
@@ -862,6 +893,7 @@ CREATE TABLE external_object_directory
 ,transfer_attempts           INTEGER
 ,manifest_file               CHARACTER VARYING
 ,event_date_ts               TIMESTAMP WITH TIME ZONE                -- date upon which the retention date in ARM is derived
+,data_ingestion_ts           TIMESTAMP WITH TIME ZONE
 ,verification_attempts       INTEGER
 ,error_code                  CHARACTER VARYING
 ,is_response_cleaned         BOOLEAN                       NOT NULL DEFAULT false
@@ -1037,13 +1069,16 @@ CREATE TABLE media
 ,checksum                    CHARACTER VARYING
 ,is_hidden                   BOOLEAN                       NOT NULL DEFAULT false
 ,is_deleted                  BOOLEAN                       NOT NULL DEFAULT false
+,is_current                  BOOLEAN                       
 ,deleted_by                  INTEGER
 ,deleted_ts                  TIMESTAMP WITH TIME ZONE
 ,media_status                CHARACTER VARYING             NOT NULL
 ,version_label               CHARACTER VARYING(32)
 ,chronicle_id                CHARACTER VARYING(16)                   -- legacy id of the 1.0 version of the event
 ,antecedent_id               CHARACTER VARYING(16)                   -- legacy id of the immediately  preceding event 
-,retain_until_ts             TIMESTAMP WITH TIME ZONE      
+,retain_until_ts             TIMESTAMP WITH TIME ZONE 
+,ret_conf_score              INTEGER
+,ret_conf_reason             CHARACTER VARYING
 ,created_ts                  TIMESTAMP WITH TIME ZONE      NOT NULL
 ,created_by                  INTEGER                       NOT NULL
 ,last_modified_ts            TIMESTAMP WITH TIME ZONE      NOT NULL
@@ -1301,6 +1336,7 @@ CREATE TABLE transcription
 ,start_ts                    TIMESTAMP WITH TIME ZONE               -- both c_start and c_end have time components
 ,end_ts                      TIMESTAMP WITH TIME ZONE               -- we have 49k rows in legacy moj_transcription_s, 7k have c_end != c_start
 ,is_manual_transcription     BOOLEAN                       NOT NULL
+,is_current                  BOOLEAN                       
 ,hide_request_from_requestor BOOLEAN                       NOT NULL 
 ,is_deleted                  BOOLEAN                       NOT NULL DEFAULT false
 ,deleted_by                  INTEGER
@@ -1353,6 +1389,7 @@ CREATE TABLE transcription_comment
 ,comment_ts                  TIMESTAMP WITH TIME ZONE
 ,author                      INTEGER                       -- will need to be FK to user table
 ,is_migrated                 BOOLEAN                       NOT NULL default false
+,is_data_anonymised          BOOLEAN                       NOT NULL DEFAULT false
 ,created_ts                  TIMESTAMP WITH TIME ZONE      NOT NULL
 ,created_by                  INTEGER                       NOT NULL
 ,last_modified_ts            TIMESTAMP WITH TIME ZONE      NOT NULL
@@ -1385,9 +1422,14 @@ CREATE TABLE transcription_document
 ,file_name                   CHARACTER VARYING             NOT NULL
 ,file_type                   CHARACTER VARYING             NOT NULL
 ,file_size                   INTEGER                       NOT NULL
-,checksum                    CHARACTER VARYING             
+,checksum                    CHARACTER VARYING 
+,is_deleted                  BOOLEAN                       NOT NULL DEFAULT false
+,deleted_by                  INTEGER
+,deleted_ts                  TIMESTAMP WITH TIME ZONE                    
 ,is_hidden                   BOOLEAN                       NOT NULL DEFAULT false
-,retain_until_ts             TIMESTAMP WITH TIME ZONE      
+,retain_until_ts             TIMESTAMP WITH TIME ZONE     
+,ret_conf_score              INTEGER
+,ret_conf_reason             CHARACTER VARYING
 ,uploaded_by                 INTEGER                       NOT NULL
 ,uploaded_ts                 TIMESTAMP WITH TIME ZONE      NOT NULL
 ,last_modified_ts            TIMESTAMP WITH TIME ZONE      NOT NULL
