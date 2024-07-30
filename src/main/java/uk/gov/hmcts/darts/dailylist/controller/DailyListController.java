@@ -31,6 +31,7 @@ import java.util.concurrent.CompletableFuture;
 import static uk.gov.hmcts.darts.authorisation.constants.AuthorisationConstants.SECURITY_SCHEMES_BEARER_AUTH;
 import static uk.gov.hmcts.darts.authorisation.enums.ContextIdEnum.ANY_ENTITY_ID;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.CPP;
+import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.SUPER_USER;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.XHIBIT;
 
 /**
@@ -88,12 +89,9 @@ public class DailyListController implements DailyListsApi {
     }
 
     @Override
-    public ResponseEntity<Void> dailylistsHousekeepingPost() {
-        dailyListService.runHouseKeeping();
-        return new ResponseEntity<>(HttpStatus.OK);
-    }
-
-    @Override
+    @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
+    @Authorisation(contextId = ANY_ENTITY_ID,
+        globalAccessSecurityRoles = {SUPER_USER})
     public ResponseEntity<Void> dailylistsRunPost(String listingCourthouse) {
         if (listingCourthouse == null) {
             CompletableFuture.runAsync(processor::processAllDailyLists);
