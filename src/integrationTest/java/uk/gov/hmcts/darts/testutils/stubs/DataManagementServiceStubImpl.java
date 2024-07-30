@@ -4,6 +4,7 @@ import com.azure.core.http.rest.Response;
 import com.azure.core.util.BinaryData;
 import com.azure.storage.blob.BlobClient;
 import com.azure.storage.blob.BlobClientBuilder;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -16,6 +17,7 @@ import uk.gov.hmcts.darts.common.datamanagement.enums.DatastoreContainerType;
 import uk.gov.hmcts.darts.common.exception.DartsException;
 import uk.gov.hmcts.darts.datamanagement.config.DataManagementConfiguration;
 import uk.gov.hmcts.darts.datamanagement.exception.FileNotDownloadedException;
+import uk.gov.hmcts.darts.datamanagement.model.BlobClientUploadResponse;
 import uk.gov.hmcts.darts.datamanagement.service.DataManagementService;
 
 import java.io.File;
@@ -72,8 +74,16 @@ public class DataManagementServiceStubImpl implements DataManagementService {
     }
 
     @Override
-    public UUID saveBlobData(String containerName, InputStream inputStream) {
-        return saveBlobData();
+    public BlobClientUploadResponse saveBlobData(String containerName, InputStream inputStream, Map<String, String> metadata) {
+        return saveBlobData(containerName, inputStream);
+    }
+
+    @Override
+    public BlobClientUploadResponse saveBlobData(String containerName, InputStream inputStream) {
+        UUID blobName = saveBlobData();
+        long blobSize = 1000L; // Some arbitrary value
+
+        return new BlobClientUploadResponseStub(blobName, blobSize);
     }
 
     private UUID saveBlobData() {
@@ -152,4 +162,19 @@ public class DataManagementServiceStubImpl implements DataManagementService {
         log.warn("### This implementation is intended only for integration tests. If you see this log message elsewhere"
                      + " you should ask questions! ###");
     }
+
+    @Getter
+    @RequiredArgsConstructor
+    public static class BlobClientUploadResponseStub implements BlobClientUploadResponse {
+
+        private final UUID blobName;
+        private final Long blobSize;
+
+        @Override
+        public Map<String, String> addMetadata(Map<String, String> additionalMetadata) {
+            return additionalMetadata;
+        }
+
+    }
+
 }

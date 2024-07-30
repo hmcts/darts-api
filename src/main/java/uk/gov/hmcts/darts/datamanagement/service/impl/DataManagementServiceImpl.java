@@ -22,6 +22,7 @@ import uk.gov.hmcts.darts.common.exception.AzureDeleteBlobException;
 import uk.gov.hmcts.darts.common.exception.DartsException;
 import uk.gov.hmcts.darts.datamanagement.config.DataManagementConfiguration;
 import uk.gov.hmcts.darts.datamanagement.exception.FileNotDownloadedException;
+import uk.gov.hmcts.darts.datamanagement.model.BlobClientUploadResponseImpl;
 import uk.gov.hmcts.darts.datamanagement.service.DataManagementService;
 import uk.gov.hmcts.darts.util.AzureCopyUtil;
 
@@ -112,7 +113,7 @@ public class DataManagementServiceImpl implements DataManagementService {
     }
 
     @Override
-    public UUID saveBlobData(String containerName, InputStream inputStream) {
+    public BlobClientUploadResponseImpl saveBlobData(String containerName, InputStream inputStream, Map<String, String> metadata) {
         BlobServiceClient serviceClient = blobServiceFactory.getBlobServiceClient(dataManagementConfiguration.getBlobStorageAccountConnectionString());
         BlobContainerClient containerClient = blobServiceFactory.getBlobContainerClient(containerName, serviceClient);
 
@@ -121,10 +122,16 @@ public class DataManagementServiceImpl implements DataManagementService {
         var client = blobServiceFactory.getBlobClient(containerClient, uniqueBlobId);
 
         var uploadOptions = new BlobParallelUploadOptions(inputStream);
+        uploadOptions.setMetadata(metadata);
         uploadOptions.setParallelTransferOptions(createCommonTransferOptions());
         client.uploadWithResponse(uploadOptions, dataManagementConfiguration.getBlobClientTimeout(), null);
 
-        return uniqueBlobId;
+        return new BlobClientUploadResponseImpl(client);
+    }
+
+    @Override
+    public BlobClientUploadResponseImpl saveBlobData(String containerName, InputStream inputStream) {
+        return saveBlobData(containerName, inputStream, null);
     }
 
     @Override

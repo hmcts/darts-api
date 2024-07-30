@@ -1,8 +1,6 @@
 package uk.gov.hmcts.darts.audio.service.impl;
 
 import com.azure.core.util.BinaryData;
-import com.azure.storage.blob.BlobClient;
-import com.azure.storage.blob.BlobClientBuilder;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -30,10 +28,13 @@ import uk.gov.hmcts.darts.common.repository.TransformedMediaRepository;
 import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
 import uk.gov.hmcts.darts.common.service.TransientObjectDirectoryService;
 import uk.gov.hmcts.darts.datamanagement.api.DataManagementApi;
+import uk.gov.hmcts.darts.datamanagement.model.BlobClientUploadResponse;
+import uk.gov.hmcts.darts.datamanagement.model.BlobClientUploadResponseImpl;
 import uk.gov.hmcts.darts.log.api.LogApi;
 import uk.gov.hmcts.darts.notification.api.NotificationApi;
 import uk.gov.hmcts.darts.notification.dto.SaveNotificationToDbRequest;
 
+import java.io.ByteArrayInputStream;
 import java.nio.file.Path;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
@@ -47,11 +48,10 @@ import java.util.UUID;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static uk.gov.hmcts.darts.audio.enums.MediaRequestStatus.COMPLETED;
 import static uk.gov.hmcts.darts.audio.enums.MediaRequestStatus.PROCESSING;
 import static uk.gov.hmcts.darts.audiorequests.model.AudioRequestType.DOWNLOAD;
 import static uk.gov.hmcts.darts.notification.NotificationConstants.ParameterMapValues.AUDIO_END_TIME;
@@ -191,16 +191,16 @@ class AudioTransformationServiceImplTest {
     void saveProcessedDataShouldSaveBlobAndSetStatus() {
         final MediaRequestEntity mediaRequestEntity = new MediaRequestEntity();
         mediaRequestEntity.setRequestType(DOWNLOAD);
-        final MediaRequestEntity mediaRequestEntityUpdated = new MediaRequestEntity();
-        mediaRequestEntityUpdated.setStatus(COMPLETED);
 
-        BlobClientBuilder blobClientBuilder = new BlobClientBuilder();
-        blobClientBuilder.blobName("0ddf61c8-0cec-4164-a4a7-10c5e47df9f1");
-        blobClientBuilder.endpoint("http://127.0.0.1:10000/devstoreaccount1");
-        BlobClient blobClient = blobClientBuilder.buildClient();
+        BlobClientUploadResponse blobClientUploadResponse = mock(BlobClientUploadResponseImpl.class);
+        UUID blobName = UUID.randomUUID();
+        when(blobClientUploadResponse.getBlobName())
+            .thenReturn(blobName);
+        when(blobClientUploadResponse.getBlobSize())
+            .thenReturn(1000L);
 
-        when(mockDataManagementApi.saveBlobDataToContainer(any(), any(), any()))
-            .thenReturn(blobClient);
+        when(mockDataManagementApi.saveBlobToContainer(any(), any(), any()))
+            .thenReturn(blobClientUploadResponse);
 
         when(mockTransientObjectDirectoryService.saveTransientObjectDirectoryEntity(
             any(),
@@ -223,15 +223,15 @@ class AudioTransformationServiceImplTest {
             .path(Path.of("test/b6b51cb7-9ff8-44de-bf53-62c2bd2e13f3.zip"))
             .build();
 
-        transformedMediaHelper.saveToStorage(
+        UUID returnedBlobName = transformedMediaHelper.saveToStorage(
             mediaRequestEntity,
-            BINARY_DATA, "filename",
+            new ByteArrayInputStream(TEST_BINARY_STRING.getBytes()), "filename",
             audioFileInfo
         );
 
-        verify(mockDataManagementApi).saveBlobDataToContainer(eq(BINARY_DATA), eq(DatastoreContainerType.OUTBOUND), anyMap());
-
-        verify(mockTransientObjectDirectoryService).saveTransientObjectDirectoryEntity(any(TransformedMediaEntity.class), eq(blobClient));
+        verify(mockDataManagementApi).saveBlobToContainer(any(), eq(DatastoreContainerType.OUTBOUND), any());
+        verify(mockTransientObjectDirectoryService).saveTransientObjectDirectoryEntity(any(TransformedMediaEntity.class), eq(blobName));
+        assertEquals(blobName, returnedBlobName);
     }
 
     @Test
