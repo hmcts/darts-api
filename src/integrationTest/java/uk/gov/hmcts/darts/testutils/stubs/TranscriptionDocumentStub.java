@@ -31,12 +31,16 @@ import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum.AP
 public class TranscriptionDocumentStub {
 
     private final TranscriptionStub transcriptionStub;
-    private final UserAccountStub userAccountStub;
+    private final UserAccountStubComposable userAccountStub;
     private final CourtroomStub courtroomStub;
     private final RetrieveCoreObjectService retrieveCoreObjectService;
     private final UserAccountRepository userAccountRepository;
     private final CourtCaseStub courtCaseStub;
     private final TranscriptionDocumentRepository transcriptionDocumentRepository;
+    private final TranscriptionDocumentStubComposable transcriptionDocumentStubComposable;
+    private final DartsDatabaseComposable dartsDatabaseComposable;
+    private final CourthouseStubComposable courthouseStub;
+    private final TranscriptionStubComposable transcriptionStubComposable;
 
     /**
      * generates test data. The following will be used for generation:-
@@ -160,6 +164,10 @@ public class TranscriptionDocumentStub {
         return retTransformerMediaLst;
     }
 
+    public TranscriptionDocumentEntity createTranscriptionDocumentForTranscription(TranscriptionEntity transcriptionEntity) {
+        return transcriptionDocumentStubComposable.createTranscriptionDocumentForTranscription(transcriptionEntity);
+    }
+
     private TranscriptionStatusEntity mapToTranscriptionStatusEntity(TranscriptionStatusEnum statusEnum) {
         TranscriptionStatusEntity transcriptionStatus = new TranscriptionStatusEntity();
         transcriptionStatus.setId(statusEnum.getId());
@@ -168,19 +176,5 @@ public class TranscriptionDocumentStub {
         return transcriptionStatus;
     }
 
-    public TranscriptionDocumentEntity createTranscriptionDocumentForTranscription(TranscriptionEntity transcriptionEntity) {
-        TranscriptionDocumentEntity transcriptionDocument = new TranscriptionDocumentEntity();
-        transcriptionDocument.setTranscription(transcriptionEntity);
-        transcriptionDocument.setFileName("aFilename");
-        transcriptionDocument.setFileType("aFileType");
-        transcriptionDocument.setFileSize(100);
-        transcriptionDocument.setChecksum("");
 
-        UserAccountEntity userAccount = userAccountRepository.getReferenceById(0);
-        transcriptionDocument.setUploadedBy(userAccount);
-        transcriptionDocument.setLastModifiedBy(userAccount);
-
-        transcriptionDocumentRepository.saveAndFlush(transcriptionDocument);
-        return transcriptionDocument;
-    }
 }

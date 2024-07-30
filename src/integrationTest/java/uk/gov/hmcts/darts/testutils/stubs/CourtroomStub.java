@@ -11,15 +11,12 @@ import uk.gov.hmcts.darts.common.service.RetrieveCoreObjectService;
 @RequiredArgsConstructor
 public class CourtroomStub {
     private final RetrieveCoreObjectService retrieveCoreObjectService;
-    private final CourthouseStub courthouseStub;
+    private final CourtroomStubComposable courtroomStubComposable;
+    private final CourthouseStubComposable courthouseStubComposable;
 
     public CourtroomEntity createCourtroomUnlessExists(String courthouseName, String courtroomName, UserAccountEntity userAccount) {
-        CourthouseEntity courthouse = courthouseStub.createCourthouseUnlessExists(courthouseName);
-        return createCourtroomUnlessExists(courthouse, courtroomName, userAccount);
-    }
-
-    public CourtroomEntity createCourtroomUnlessExists(CourthouseEntity courthouse, String courtroomName, UserAccountEntity userAccount) {
-        return retrieveCoreObjectService.retrieveOrCreateCourtroom(courthouse, courtroomName, userAccount);
+        CourthouseEntity courthouse = courthouseStubComposable.createCourthouseUnlessExists(courthouseName);
+        return courtroomStubComposable.createCourtroomUnlessExists(courthouse, courtroomName, userAccount);
     }
 
 }
