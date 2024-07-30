@@ -20,6 +20,7 @@ import uk.gov.hmcts.darts.common.repository.AutomatedTaskRepository;
 import uk.gov.hmcts.darts.dailylist.service.DailyListProcessor;
 import uk.gov.hmcts.darts.dailylist.service.DailyListService;
 import uk.gov.hmcts.darts.datamanagement.service.InboundToUnstructuredProcessor;
+import uk.gov.hmcts.darts.event.service.RemoveDuplicateEventsProcessor;
 import uk.gov.hmcts.darts.log.api.LogApi;
 import uk.gov.hmcts.darts.retention.service.ApplyRetentionCaseAssociatedObjectsProcessor;
 import uk.gov.hmcts.darts.retention.service.ApplyRetentionProcessor;
@@ -41,6 +42,7 @@ import uk.gov.hmcts.darts.task.runner.impl.InboundToUnstructuredAutomatedTask;
 import uk.gov.hmcts.darts.task.runner.impl.OutboundAudioDeleterAutomatedTask;
 import uk.gov.hmcts.darts.task.runner.impl.ProcessArmResponseFilesAutomatedTask;
 import uk.gov.hmcts.darts.task.runner.impl.ProcessDailyListAutomatedTask;
+import uk.gov.hmcts.darts.task.runner.impl.RemoveDuplicatedEventsAutomatedTask;
 import uk.gov.hmcts.darts.task.runner.impl.UnstructuredAudioDeleterAutomatedTask;
 import uk.gov.hmcts.darts.task.runner.impl.UnstructuredToArmAutomatedTask;
 import uk.gov.hmcts.darts.transcriptions.service.TranscriptionsProcessor;
@@ -72,6 +74,8 @@ public class ManualTaskService {
     private final OutboundAudioDeleterProcessor outboundAudioDeleterProcessor;
     private final TranscriptionsProcessor transcriptionsProcessor;
     private final UnstructuredAudioDeleterProcessor unstructuredAudioDeleterProcessor;
+    private final RemoveDuplicateEventsProcessor removeDuplicateEventsProcessor;
+
     private final LockProvider lockProvider;
     private final LogApi logApi;
 
@@ -97,6 +101,7 @@ public class ManualTaskService {
         addBatchCleanupArmResponseFilesTaskRegistrar();
         addGenerateCaseDocumentToTaskRegistrar();
         addEventHandler();
+        addRemoveDuplicateEventsToTaskRegistrar();
     }
 
     public List<AbstractLockableAutomatedTask> getAutomatedTasks() {
@@ -299,6 +304,18 @@ public class ManualTaskService {
             lockProvider,
             automatedTaskConfigurationProperties,
             automatedTaskProcessorFactory,
+            logApi
+        );
+        manualTask.setManualTask();
+        automatedTasks.add(manualTask);
+    }
+
+    private void addRemoveDuplicateEventsToTaskRegistrar() {
+        var manualTask = new RemoveDuplicatedEventsAutomatedTask(
+            automatedTaskRepository,
+            lockProvider,
+            automatedTaskConfigurationProperties,
+            removeDuplicateEventsProcessor,
             logApi
         );
         manualTask.setManualTask();

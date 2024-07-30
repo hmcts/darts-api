@@ -40,6 +40,7 @@ import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.List;
 
+import static java.util.Arrays.asList;
 import static uk.gov.hmcts.darts.test.common.TestUtils.getContentsFromFile;
 
 @SuppressWarnings({"PMD.GodClass", "PMD.ExcessivePublicCount", "PMD.ExcessiveImports", "PMD.CouplingBetweenObjects"})
@@ -83,7 +84,7 @@ public class CommonTestDataUtil {
                                               boolean isCurrent) {
 
         EventEntity event = new EventEntity();
-        event.setHearingEntities(List.of(hearingEntity));
+        event.setHearingEntities(asList(hearingEntity));
         event.setCourtroom(hearingEntity.getCourtroom());
         event.setEventText(eventText);
         event.setId(id);
