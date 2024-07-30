@@ -428,11 +428,13 @@ components:
       enum:
         - "HEARING_100"
         - "HEARING_101"
-      x-enum-varnames: [HEARING_NOT_FOUND, TOO_MANY_RESULTS]
+        - "HEARING_102"
+      x-enum-varnames: [HEARING_NOT_FOUND, TOO_MANY_RESULTS, HEARING_NOT_ACTUAL]
 
     HearingsTitleErrors:
       type: string
       enum:
         - "The requested hearing cannot be found"
         - "Too many results have been returned. Please change search criteria."
-      x-enum-varnames: [HEARING_NOT_FOUND, TOO_MANY_RESULTS]
+        - "The requested hearing is not an actual hearing."
+      x-enum-varnames: [HEARING_NOT_FOUND, TOO_MANY_RESULTS, HEARING_NOT_ACTUAL]
