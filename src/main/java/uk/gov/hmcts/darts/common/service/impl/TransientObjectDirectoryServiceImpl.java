@@ -1,6 +1,5 @@
 package uk.gov.hmcts.darts.common.service.impl;
 
-import com.azure.storage.blob.BlobClient;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.darts.common.entity.TransformedMediaEntity;
@@ -25,12 +24,12 @@ public class TransientObjectDirectoryServiceImpl implements TransientObjectDirec
 
     @Override
     public TransientObjectDirectoryEntity saveTransientObjectDirectoryEntity(TransformedMediaEntity transformedMediaEntity,
-                                                                             BlobClient blobClient) {
+                                                                             UUID blobName) {
 
         TransientObjectDirectoryEntity transientObjectDirectoryEntity = new TransientObjectDirectoryEntity();
         transientObjectDirectoryEntity.setTransformedMedia(transformedMediaEntity);
         transientObjectDirectoryEntity.setStatus(objectRecordStatusRepository.getReferenceById(STORED.getId()));
-        transientObjectDirectoryEntity.setExternalLocation(UUID.fromString(blobClient.getBlobName()));
+        transientObjectDirectoryEntity.setExternalLocation(blobName);
         transientObjectDirectoryEntity.setTransferAttempts(null);
         var systemUser = userAccountRepository.getReferenceById(SystemUsersEnum.DEFAULT.getId());
         transientObjectDirectoryEntity.setCreatedBy(systemUser);
