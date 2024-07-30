@@ -131,11 +131,14 @@ public class CourtCaseEntity extends CreatedModifiedBaseEntity {
     @Column(name = "upload_priority")
     private Integer uploadPriority;
 
-    @Column(name = "ret_conf_level")
-    private Integer retConfLevel;
+    @Column(name = "ret_conf_score")
+    private Integer retConfScore;
 
     @Column(name = "ret_conf_reason")
     private String retConfReason;
+
+    @Column(name = "ret_conf_updated_ts")
+    private OffsetDateTime retConfUpdatedTs;
 
     public void addDefence(DefenceEntity defence) {
         if (defenceList.stream().noneMatch(defenceEntity -> defenceEntity.getName().equalsIgnoreCase(defence.getName()))) {
