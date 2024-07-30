@@ -24,7 +24,8 @@ public enum AutomatedTaskName {
     DAILY_LIST_HOUSEKEEPING_TASK_NAME("DailyListHousekeeping"),
     ARM_RETENTION_EVENT_DATE_CALCULATOR_TASK_NAME("ArmRetentionEventDateCalculator"),
     GENERATE_CASE_DOCUMENT_TASK_NAME("GenerateCaseDocument"),
-    EVENT_CLEANUP_CURRENT_TASK("CleanupCurrentEvent");
+    EVENT_CLEANUP_CURRENT_TASK("CleanupCurrentEvent"),
+    REMOVE_DUPLICATED_EVENTS_TASK_NAME("RemoveDuplicatedEvents");
 
     private final String taskName;
 

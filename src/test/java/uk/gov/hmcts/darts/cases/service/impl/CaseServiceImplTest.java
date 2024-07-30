@@ -287,7 +287,7 @@ class CaseServiceImplTest {
     }
 
     @Test
-    void testGetCaseHearings() {
+    void testGetCaseHearingsWhenHearingIsActualTrue() {
         CourthouseEntity courthouseEntity = CommonTestDataUtil.createCourthouse(SWANSEA);
         CourtroomEntity courtroomEntity = CommonTestDataUtil.createCourtroom(courthouseEntity, "1");
         CourtCaseEntity existingCaseEntity = CommonTestDataUtil.createCase("case1", courthouseEntity);
@@ -296,7 +296,8 @@ class CaseServiceImplTest {
         List<HearingEntity> existingHearings = Lists.newArrayList(CommonTestDataUtil.createHearing(
             existingCaseEntity,
             courtroomEntity,
-            LocalDate.now()
+            LocalDate.now(),
+            true
         ));
 
         when(hearingRepository.findByCaseIds(List.of(existingCaseEntity.getId()))).thenReturn(existingHearings);
@@ -310,6 +311,37 @@ class CaseServiceImplTest {
     }
 
     @Test
+    void testGetCaseHearingsWhenHearingIsActualFalse() {
+        CourthouseEntity courthouseEntity = CommonTestDataUtil.createCourthouse(SWANSEA);
+        CourtroomEntity courtroomEntity = CommonTestDataUtil.createCourtroom(courthouseEntity, "1");
+        CourtCaseEntity existingCaseEntity = CommonTestDataUtil.createCase("case1", courthouseEntity);
+        existingCaseEntity.setId(1);
+
+        List<HearingEntity> existingHearings = Lists.newArrayList(CommonTestDataUtil.createHearing(
+            existingCaseEntity,
+            courtroomEntity,
+            LocalDate.now(),
+            false
+        ));
+
+        when(hearingRepository.findByCaseIds(List.of(existingCaseEntity.getId()))).thenReturn(existingHearings);
+
+        List<Hearing> caseHearings = service.getCaseHearings(existingCaseEntity.getId());
+
+        assertEquals(0, caseHearings.size());
+    }
+
+    @Test
+    void testGetCaseHearingsWhenCaseDoesNotExistThrowsException() {
+        when(hearingRepository.findByCaseIds(any())).thenReturn(Collections.emptyList());
+
+        var exception = assertThrows(DartsApiException.class, () ->
+            service.getCaseHearings(1));
+
+        assertEquals("The requested case cannot be found", exception.getMessage());
+    }
+
+    @Test
     void testGetEventsByCaseId() throws Exception {
         CourthouseEntity courthouseEntity = CommonTestDataUtil.createCourthouse(SWANSEA);
         CourtroomEntity courtroomEntity = CommonTestDataUtil.createCourtroom(courthouseEntity, "1");
@@ -319,7 +351,8 @@ class CaseServiceImplTest {
         HearingEntity hearing = CommonTestDataUtil.createHearing(
             courtCaseEntity,
             courtroomEntity,
-            hearingDate.toLocalDate()
+            hearingDate.toLocalDate(),
+            true
         );
 
         List<EventEntity> events = Lists.newArrayList(createEventWith("eventName", "event", hearing, hearingDate));
@@ -460,6 +493,6 @@ class CaseServiceImplTest {
         CourthouseEntity courthouseEntity = CommonTestDataUtil.createCourthouse(SWANSEA);
         CourtroomEntity courtroomEntity = CommonTestDataUtil.createCourtroom(courthouseEntity, "2");
         CourtCaseEntity caseEntity = CommonTestDataUtil.createCase("Case0000009", courthouseEntity);
-        return CommonTestDataUtil.createHearing(caseEntity, courtroomEntity, LocalDate.of(2023, Month.JULY, 20));
+        return CommonTestDataUtil.createHearing(caseEntity, courtroomEntity, LocalDate.of(2023, Month.JULY, 20), true);
     }
 }
