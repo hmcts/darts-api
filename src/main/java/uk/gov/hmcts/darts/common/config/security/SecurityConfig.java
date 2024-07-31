@@ -7,13 +7,8 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Condition;
-import org.springframework.context.annotation.ConditionContext;
-import org.springframework.context.annotation.Conditional;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
-import org.springframework.core.env.Environment;
-import org.springframework.core.type.AnnotatedTypeMetadata;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -34,15 +29,8 @@ import uk.gov.hmcts.darts.authentication.config.external.ExternalAuthConfigurati
 import uk.gov.hmcts.darts.authentication.config.external.ExternalAuthProviderConfigurationProperties;
 import uk.gov.hmcts.darts.authentication.config.internal.InternalAuthConfigurationProperties;
 import uk.gov.hmcts.darts.authentication.config.internal.InternalAuthProviderConfigurationProperties;
-import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
-import uk.gov.hmcts.darts.authorisation.component.impl.AtsUserIdentityImpl;
-import uk.gov.hmcts.darts.authorisation.component.impl.UserIdentityImpl;
-import uk.gov.hmcts.darts.common.helper.SystemUserHelper;
-import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
-import uk.gov.hmcts.darts.common.repository.UserRolesCourthousesRepository;
 
 import java.io.IOException;
-import java.lang.annotation.Annotation;
 import java.util.Map;
 
 
@@ -147,35 +135,6 @@ public class SecurityConfig {
             }
 
             response.sendRedirect(locator.locateAuthenticationConfiguration(req -> fallbackConfiguration).getLoginUri(null).toString());
-        }
-    }
-
-    @Bean
-    @Conditional(ConditionOnAts.class)
-    public UserIdentity getATSIdentity (SystemUserHelper systemUserHelper, UserAccountRepository userAccountRepository, UserRolesCourthousesRepository userRolesCourthousesRepository) {
-        return new AtsUserIdentityImpl(systemUserHelper, userAccountRepository, userRolesCourthousesRepository);
-    }
-
-    @Bean
-    @Conditional(ConditionOnNotAts.class)
-    public UserIdentity geIdentity (UserAccountRepository userAccountRepository, UserRolesCourthousesRepository userRolesCourthousesRepository) {
-        return new UserIdentityImpl(userAccountRepository, userRolesCourthousesRepository);
-    }
-
-    class ConditionOnAts implements Condition {
-        @Override
-        public boolean matches(ConditionContext context,
-                               AnnotatedTypeMetadata metadata) {
-                Environment env = context.getEnvironment();
-            return System.getenv("ATS_MODE") != null;
-        }
-    }
-
-    class ConditionOnNotAts implements Condition {
-        private final ConditionOnAts conditionOnAts = new ConditionOnAts();
-        @Override
-        public boolean matches(ConditionContext context, AnnotatedTypeMetadata metadata) {
-            return !conditionOnAts.matches(context, metadata);
         }
     }
 }

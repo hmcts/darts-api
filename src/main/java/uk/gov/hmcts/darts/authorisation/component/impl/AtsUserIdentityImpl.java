@@ -1,9 +1,7 @@
 package uk.gov.hmcts.darts.authorisation.component.impl;
 
-import lombok.RequiredArgsConstructor;
+import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.stereotype.Component;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.enums.SecurityRoleEnum;
@@ -17,8 +15,7 @@ import java.util.stream.Collectors;
 
 import static java.util.Objects.nonNull;
 
-@Component
-@RequiredArgsConstructor
+@AllArgsConstructor
 @Slf4j
 public class AtsUserIdentityImpl implements UserIdentity {
 
