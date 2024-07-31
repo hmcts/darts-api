@@ -1,6 +1,5 @@
 package uk.gov.hmcts.darts.audio.service;
 
-import com.azure.core.util.BinaryData;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
 
 import java.io.IOException;

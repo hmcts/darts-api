@@ -29,8 +29,8 @@ public class DataManagementApiImpl implements DataManagementApi {
     private final DataManagementConfiguration dataManagementConfiguration;
 
     @Override
-    public BinaryData getBlobDataFromOutboundContainer(UUID blobId) {
-        return dataManagementService.getBlobData(getOutboundContainerName(), blobId);
+    public DownloadResponseMetaData getBlobDataFromOutboundContainer(UUID blobId) throws FileNotDownloadedException {
+        return dataManagementService.downloadData(DatastoreContainerType.OUTBOUND, getOutboundContainerName(), blobId);
     }
 
     @Override

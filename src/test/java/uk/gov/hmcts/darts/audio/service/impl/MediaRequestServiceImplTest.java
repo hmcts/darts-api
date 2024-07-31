@@ -1,6 +1,6 @@
 package uk.gov.hmcts.darts.audio.service.impl;
 
-import com.azure.core.util.BinaryData;
+import lombok.SneakyThrows;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -23,6 +23,7 @@ import uk.gov.hmcts.darts.audiorequests.model.MediaPatchRequest;
 import uk.gov.hmcts.darts.audiorequests.model.MediaPatchResponse;
 import uk.gov.hmcts.darts.audit.api.AuditApi;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
+import uk.gov.hmcts.darts.common.datamanagement.component.impl.DownloadResponseMetaData;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
@@ -54,6 +55,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 import static java.util.Collections.emptyList;
+import static org.apache.commons.io.IOUtils.toInputStream;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -129,7 +131,8 @@ class MediaRequestServiceImplTest {
     private CourtCaseEntity mockCourtCaseEntity;
     @Mock
     private UserAccountEntity mockUserAccountEntity;
-
+    @Mock
+    DownloadResponseMetaData responseMetaData;
     @Mock
     private AudioRequestBeingProcessedFromArchiveQuery audioRequestBeingProcessedFromArchiveQuery;
 
@@ -394,6 +397,7 @@ class MediaRequestServiceImplTest {
         verify(mockTransientObjectDirectoryRepository, times(0)).deleteById(any());
     }
 
+    @SneakyThrows
     @Test
     void downloadShouldReturnExpectedData() throws IOException {
         MediaEntity mediaEntity = new MediaEntity();
@@ -427,8 +431,8 @@ class MediaRequestServiceImplTest {
         when(mockUserIdentity.getUserAccount()).thenReturn(mockUserAccountEntity);
         doNothing().when(auditApi).record(any(), any(), any());
 
-        when(dataManagementApi.getBlobDataFromOutboundContainer(blobUuid))
-            .thenReturn(BinaryData.fromBytes(DUMMY_FILE_CONTENT.getBytes()));
+        when(dataManagementApi.getBlobDataFromOutboundContainer(blobUuid)).thenReturn(responseMetaData);
+        when(responseMetaData.getInputStream()).thenReturn(toInputStream(DUMMY_FILE_CONTENT, "UTF-8"));
 
         try (InputStream inputStream = mediaRequestService.download(transformedMediaId)) {
             byte[] bytes = inputStream.readAllBytes();
@@ -521,6 +525,7 @@ class MediaRequestServiceImplTest {
         assertEquals(AudioApiError.REQUESTED_DATA_CANNOT_BE_LOCATED, exception.getError());
     }
 
+    @SneakyThrows
     @Test
     void playbackShouldReturnExpectedData() throws IOException {
         MediaEntity mediaEntity = new MediaEntity();
@@ -554,8 +559,8 @@ class MediaRequestServiceImplTest {
         when(mockUserIdentity.getUserAccount()).thenReturn(mockUserAccountEntity);
         doNothing().when(auditApi).record(any(), any(), any());
 
-        when(dataManagementApi.getBlobDataFromOutboundContainer(blobUuid))
-            .thenReturn(BinaryData.fromBytes(DUMMY_FILE_CONTENT.getBytes()));
+        when(dataManagementApi.getBlobDataFromOutboundContainer(blobUuid)).thenReturn(responseMetaData);
+        when(responseMetaData.getInputStream()).thenReturn(toInputStream(DUMMY_FILE_CONTENT, "UTF-8"));
 
         try (InputStream inputStream = mediaRequestService.playback(transformedMediaId)) {
             byte[] bytes = inputStream.readAllBytes();

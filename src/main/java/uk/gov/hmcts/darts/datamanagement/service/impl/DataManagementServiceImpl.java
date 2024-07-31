@@ -55,8 +55,8 @@ public class DataManagementServiceImpl implements DataManagementService {
 
 
     /**
-     * Note: This implementation is not memory-efficient with large files,
-     * use downloadBlobToFile(String containerName, UUID blobId, String workspace) instead.
+     * Note: This implementation is not memory-efficient with large files
+     * use an implementation that stores the blob to a temp file instead.
      */
     @Override
     public BinaryData getBlobData(String containerName, UUID blobId) {
@@ -200,7 +200,7 @@ public class DataManagementServiceImpl implements DataManagementService {
 
             downloadResponse.setContainerTypeUsedToDownload(type);
         } catch (IOException e) {
-            log.error("Error trying to download Blob {} from container{}", blobId, containerName, e);
+            log.error("Error trying to download Blob {} from container {}", blobId, containerName, e);
             throw new FileNotDownloadedException(blobId, containerName, "Error trying to download blob", e);
         }
         return downloadResponse;

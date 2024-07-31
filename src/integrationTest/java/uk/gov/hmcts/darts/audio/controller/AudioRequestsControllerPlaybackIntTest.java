@@ -13,6 +13,7 @@ import uk.gov.hmcts.darts.audit.api.AuditActivity;
 import uk.gov.hmcts.darts.audit.service.AuditService;
 import uk.gov.hmcts.darts.authorisation.component.Authorisation;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
+import uk.gov.hmcts.darts.common.datamanagement.enums.DatastoreContainerType;
 import uk.gov.hmcts.darts.common.entity.AuditEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.repository.AuditRepository;
@@ -112,7 +113,7 @@ class AudioRequestsControllerPlaybackIntTest extends IntegrationBase {
         mockMvc.perform(requestBuilder)
             .andExpect(status().isOk());
 
-        verify(dataManagementService).getBlobData(eq("darts-outbound"), any());
+        verify(dataManagementService).downloadData(eq(DatastoreContainerType.OUTBOUND), eq("darts-outbound"), any());
 
         verify(mockAuthorisation).authoriseByTransformedMediaId(
             transformedMediaId,
