@@ -15,6 +15,7 @@ import uk.gov.hmcts.darts.transcriptions.mapper.TranscriptionResponseMapper;
 import uk.gov.hmcts.darts.transcriptions.model.GetTranscriptionWorkflowsResponse;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -78,6 +79,20 @@ class TranscriptionServiceGetWorkflowsTest {
         verify(transcriptionRepository, times(1)).findById(anyInt());
         verify(transcriptionWorkflowRepository, times(1)).findByTranscriptionOrderByWorkflowTimestampDesc(any());
         verify(transcriptionCommentRepository).getByTranscriptionAndTranscriptionWorkflowIsNull(transcription);
+    }
+
+    @Test
+    void handleNoTranscriptionWorkflows() {
+        when(transcriptionRepository.findById(anyInt())).thenReturn(Optional.of(new TranscriptionEntity()));
+        when(transcriptionWorkflowRepository.findByTranscriptionOrderByWorkflowTimestampDesc(any())).thenReturn(Collections.emptyList());
+        when(transcriptionResponseMapper.mapToTranscriptionWorkflowsResponse(List.of(), List.of()))
+            .thenReturn(List.of(mockTranscriptionWorkflowResponse));
+
+        List<GetTranscriptionWorkflowsResponse> transcriptionWorkflows = transcriptionService.getTranscriptionWorkflows(1, true);
+
+        assertEquals(1, transcriptionWorkflows.size());
+        verify(transcriptionRepository, times(1)).findById(anyInt());
+        verify(transcriptionWorkflowRepository, times(1)).findByTranscriptionOrderByWorkflowTimestampDesc(any());
     }
 
     @Test
