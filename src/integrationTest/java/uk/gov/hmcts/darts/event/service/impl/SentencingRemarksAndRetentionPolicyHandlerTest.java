@@ -233,8 +233,6 @@ class SentencingRemarksAndRetentionPolicyHandlerTest extends HandlerTestData {
     private UserAccountEntity givenATranscriberIsAuthorisedFor(CourthouseEntity courthouse) {
         var transcriber = buildUserWithRoleFor(TRANSCRIBER, courthouse);
         dartsDatabase.saveUserWithGroup(transcriber);
-        dartsDatabase.addToUserAccountTrash(transcriber.getEmailAddress());
-        dartsDatabase.addToTrash(transcriber.getSecurityGroupEntities());
         return transcriber;
     }
 

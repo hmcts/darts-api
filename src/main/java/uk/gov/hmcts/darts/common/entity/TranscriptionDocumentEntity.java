@@ -63,6 +63,16 @@ public class TranscriptionDocumentEntity extends ModifiedBaseEntity {
     @Column(name = "checksum")
     private String checksum;
 
+    @Column(name = "is_deleted")
+    private boolean isDeleted;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "deleted_by")
+    private UserAccountEntity deletedBy;
+
+    @Column(name = "deleted_ts")
+    private OffsetDateTime deletedTs;
+
     @Column(name = "content_object_id")
     private String contentObjectId;
 
@@ -71,6 +81,12 @@ public class TranscriptionDocumentEntity extends ModifiedBaseEntity {
 
     @Column(name = "retain_until_ts")
     private OffsetDateTime retainUntilTs;
+
+    @Column(name = "ret_conf_score")
+    private Integer retConfScore;
+
+    @Column(name = "ret_conf_reason")
+    private String retConfReason;
 
     @OneToMany(mappedBy = ObjectAdminActionEntity_.TRANSCRIPTION_DOCUMENT)
     private List<ObjectAdminActionEntity> adminActions = new ArrayList<>();

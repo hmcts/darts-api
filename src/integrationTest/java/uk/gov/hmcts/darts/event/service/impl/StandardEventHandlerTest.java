@@ -1,7 +1,6 @@
 package uk.gov.hmcts.darts.event.service.impl;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -14,10 +13,13 @@ import uk.gov.hmcts.darts.event.model.DartsEvent;
 import uk.gov.hmcts.darts.event.service.EventDispatcher;
 import uk.gov.hmcts.darts.testutils.stubs.NodeRegisterStub;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -214,33 +216,50 @@ class StandardEventHandlerTest extends HandlerTestData {
 
 
     @Test
-    @Disabled // TODO: Fix flaky test (see DMP-3512)
-    void testSummationWithConcurrency() throws InterruptedException {
+    void testSummationWithConcurrency() throws InterruptedException, ExecutionException {
 
         dartsDatabase.createCourthouseUnlessExists(SOME_COURTHOUSE);
         dartsGateway.darNotificationReturnsSuccess();
 
         int numberOfThreads = 100;
-        ExecutorService service = Executors.newFixedThreadPool(5);
-        CountDownLatch latch = new CountDownLatch(numberOfThreads);
+        try (ExecutorService service = Executors.newFixedThreadPool(5)) {
+            CountDownLatch latch = new CountDownLatch(numberOfThreads);
+            List<Future<?>> futures = new ArrayList<>();
 
+            for (int i = 0; i < numberOfThreads; i++) {
+                int nanoSec = i * 1000;
+                final int threadNum = i;
+                Future<?> future = service.submit(() -> {
+                    try {
+                        DartsEvent dartsEvent = someMinimalDartsEvent()
+                            .caseNumbers(List.of("asyncTestCaseNumber" + threadNum))
+                            .courthouse(SOME_COURTHOUSE)
+                            .courtroom("asyncTestCourtroom" + threadNum)
+                            .dateTime(HEARING_DATE_ODT.withNano(nanoSec))
+                            .eventId(null);
+                        eventDispatcher.receive(dartsEvent);
+                    } finally {
+                        latch.countDown();
+                    }
+                });
+                futures.add(future);
+            }
 
-        for (int i = 0; i < numberOfThreads; i++) {
-            int nanoSec = i * 1000;
-            service.submit(() -> {
-                DartsEvent dartsEvent = someMinimalDartsEvent()
-                    .caseNumbers(List.of("asyncTestCaseNumber"))
-                    .courthouse(SOME_COURTHOUSE)
-                    .courtroom("asyncTestCourtroom")
-                    .dateTime(HEARING_DATE_ODT.withNano(nanoSec))
-                    .eventId(null);
-                eventDispatcher.receive(dartsEvent);
-                latch.countDown();
-            });
+            // Wait for all tasks to complete
+            boolean completed = latch.await(5, TimeUnit.SECONDS);
+            assertTrue(completed, "Not all threads completed in time");
+
+            // Wait for all futures to complete to ensure DB operations are done
+            for (Future<?> future : futures) {
+                future.get();
+            }
+
+            // Add a small delay to allow for any potential lag in DB updates
+            Thread.sleep(100);
+
+            assertEquals(numberOfThreads, dartsDatabase.getHearingRepository().findAll().size());
+            assertEquals(numberOfThreads, dartsDatabase.getAllEvents().size(), "Expected all events to be processed");
         }
-        latch.await(5, TimeUnit.SECONDS);
-        assertEquals(1, dartsDatabase.getHearingRepository().findAll().size());
-        assertEquals(numberOfThreads, dartsDatabase.getAllEvents().size());
     }
 
     @Test

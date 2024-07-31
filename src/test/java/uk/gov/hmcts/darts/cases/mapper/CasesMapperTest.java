@@ -87,7 +87,7 @@ class CasesMapperTest {
         CourtroomEntity courtroomEntity = CommonTestDataUtil.createCourtroom(courthouse, "1");
 
         HearingEntity hearing = CommonTestDataUtil.createHearing(caseEntity, courtroomEntity,
-                                                                 LocalDate.of(2023, Month.JULY, 7)
+                                                                 LocalDate.of(2023, Month.JULY, 7), true
         );
 
         ScheduledCase scheduledCases = caseMapper.mapToScheduledCase(hearing);

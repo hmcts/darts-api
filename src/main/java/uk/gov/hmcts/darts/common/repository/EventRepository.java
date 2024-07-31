@@ -2,13 +2,17 @@ package uk.gov.hmcts.darts.common.repository;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 import uk.gov.hmcts.darts.common.entity.EventEntity;
 import uk.gov.hmcts.darts.event.model.EventSearchResult;
 
 import java.time.LocalDate;
+import java.time.OffsetDateTime;
 import java.util.List;
 
 @Repository
@@ -74,4 +78,41 @@ public interface EventRepository extends JpaRepository<EventEntity, Integer> {
         LocalDate hearingStartDate,
         LocalDate hearingEndDate,
         Pageable pageable);
+
+    @Query(value = """
+        SELECT event_id
+        FROM  darts.event
+        WHERE is_current=true
+        AND event_id <> 0
+        GROUP BY event_id
+        HAVING count(event_id) > 1
+        """, nativeQuery = true)
+    List<Integer> getCurrentEventIdsToBeProcessed(Pageable pageable);
+
+    @Query(value = """
+         SELECT eve_id FROM darts.event e
+         WHERE event_id=:eventId
+         ORDER BY created_ts desc
+         LIMIT 1
+        """, nativeQuery = true)
+    Integer getTheLatestCreatedEventPrimaryKeyForTheEventId(Integer eventId);
+
+    @Transactional
+    @Modifying
+    @Query(value = """
+        UPDATE EventEntity
+                SET isCurrent = false
+                WHERE id not in :eventIdsPrimaryKeysLst AND eventId in :eventIdLst
+        """)
+    void updateAllEventIdEventsToNotCurrentWithTheExclusionOfTheCurrentEventPrimaryKey(
+        List<Integer> eventIdsPrimaryKeysLst, List<Integer> eventIdLst);
+
+    @EntityGraph(attributePaths = {"id", "timestamp", "eventId", "messageId", "eventText"})
+    @Query("""
+        SELECT ee
+        FROM EventEntity ee
+        WHERE ee.timestamp >= :startDateTime
+        AND ee.timestamp <= :endDateTime
+        """)
+    List<EventEntity> findAllBetweenDateTimesInclusive(OffsetDateTime startDateTime, OffsetDateTime endDateTime);
 }

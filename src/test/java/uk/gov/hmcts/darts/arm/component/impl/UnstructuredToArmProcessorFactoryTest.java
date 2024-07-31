@@ -20,6 +20,7 @@ import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.casedocument.service.GenerateCaseDocumentSingleCaseProcessor;
 import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
 import uk.gov.hmcts.darts.common.repository.CaseRepository;
+import uk.gov.hmcts.darts.common.repository.EventRepository;
 import uk.gov.hmcts.darts.common.repository.ExternalLocationTypeRepository;
 import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
 import uk.gov.hmcts.darts.common.repository.ObjectRecordStatusRepository;
@@ -62,6 +63,8 @@ class UnstructuredToArmProcessorFactoryTest {
     @Mock
     private CaseRepository caseRepository;
     @Mock
+    private EventRepository eventRepository;
+    @Mock
     private GenerateCaseDocumentSingleCaseProcessor generateCaseDocumentSingleCaseProcessor;
 
 
@@ -83,7 +86,8 @@ class UnstructuredToArmProcessorFactoryTest {
                                                   objectMapper,
                                                   currentTimeHelper,
                                                   caseRepository,
-                                                  generateCaseDocumentSingleCaseProcessor);
+                                                  generateCaseDocumentSingleCaseProcessor,
+                                                  eventRepository);
 
         var unstructuredToArmProcessor = automatedTaskProcessorFactory.createUnstructuredToArmProcessor(10);
 
@@ -108,7 +112,8 @@ class UnstructuredToArmProcessorFactoryTest {
                                                   objectMapper,
                                                   currentTimeHelper,
                                                   caseRepository,
-                                                  generateCaseDocumentSingleCaseProcessor);
+                                                  generateCaseDocumentSingleCaseProcessor,
+                                                  eventRepository);
 
         var armResponseFilesProcessor = automatedTaskProcessorFactory.createArmResponseFilesProcessor(0);
 
@@ -133,7 +138,8 @@ class UnstructuredToArmProcessorFactoryTest {
                                                   objectMapper,
                                                   currentTimeHelper,
                                                   caseRepository,
-                                                  generateCaseDocumentSingleCaseProcessor);
+                                                  generateCaseDocumentSingleCaseProcessor,
+                                                  eventRepository);
 
         var armResponseFilesProcessor = automatedTaskProcessorFactory.createArmResponseFilesProcessor(10);
 

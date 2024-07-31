@@ -17,7 +17,7 @@ import uk.gov.hmcts.darts.authorisation.annotation.Authorisation;
 import uk.gov.hmcts.darts.event.component.DartsEventMapper;
 import uk.gov.hmcts.darts.event.http.api.EventApi;
 import uk.gov.hmcts.darts.event.model.AdminEventSearch;
-import uk.gov.hmcts.darts.event.model.AdminSearchEventResponse;
+import uk.gov.hmcts.darts.event.model.AdminSearchEventResponseResult;
 import uk.gov.hmcts.darts.event.model.CourtLog;
 import uk.gov.hmcts.darts.event.model.CourtLogsPostRequestBody;
 import uk.gov.hmcts.darts.event.model.DartsEvent;
@@ -156,7 +156,7 @@ public class EventsController implements EventApi {
     @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
     @Authorisation(contextId = ANY_ENTITY_ID,
         globalAccessSecurityRoles = {SUPER_ADMIN, SUPER_USER})
-    public ResponseEntity<AdminSearchEventResponse> adminSearchEvents(AdminEventSearch adminEventSearch) {
+    public ResponseEntity<List<AdminSearchEventResponseResult>> adminSearchEvents(AdminEventSearch adminEventSearch) {
         var adminSearchEventResponse = eventSearchService.searchForEvents(adminEventSearch);
         return new ResponseEntity<>(adminSearchEventResponse, HttpStatus.OK);
     }

@@ -47,7 +47,7 @@ class HearingsGetEventsFunctionalTest extends FunctionalTest {
                 "%s"
               ],
               "event_text": "%s",
-              "date_time": "2023-08-08T14:01:06.085Z"
+              "date_time": "2023-08-08T14:01:06Z"
             }""",
             COURTHOUSE, courtroomName, randomCaseNumber, randomEventText1);
 
@@ -74,7 +74,7 @@ class HearingsGetEventsFunctionalTest extends FunctionalTest {
                 "%s"
               ],
               "event_text": "%s",
-              "date_time": "2023-08-08T14:01:06.085Z"
+              "date_time": "2023-08-08T14:01:06Z"
             }""",
             COURTHOUSE, courtroomName, randomCaseNumber, randomEventText2);
 
@@ -101,7 +101,7 @@ class HearingsGetEventsFunctionalTest extends FunctionalTest {
                 "%s"
               ],
               "event_text": "%s",
-              "date_time": "2023-08-08T14:01:06.085Z"
+              "date_time": "2023-08-08T14:01:06Z"
             }""",
             COURTHOUSE, courtroomName, randomCaseNumber, versionedEventText3);
 

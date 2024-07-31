@@ -5,7 +5,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import uk.gov.hmcts.darts.audio.repository.TransformedMediaSubStringQueryEnum;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
-import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
 import uk.gov.hmcts.darts.common.repository.HearingRepository;
@@ -20,8 +19,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-import static uk.gov.hmcts.darts.test.common.data.MediaTestData.createMediaWith;
-
 @Component
 @RequiredArgsConstructor
 public class MediaStub {
@@ -33,43 +30,46 @@ public class MediaStub {
 
     private final HearingRepository hearingRepository;
     private final MediaRepository mediaRepository;
-    private final CourtroomStub courtroomStub;
     private final UserAccountRepository userAccountRepository;
     private final UserAccountStub userAccountStub;
     private final HearingStub hearingStub;
+    private final MediaStubComposable mediaStubComposable;
+    private final CourthouseStubComposable courthouseStubComposable;
+    private final CourtroomStubComposable courtroomStub;
 
     private static final String FILE_NAME_PREFIX = "FileName";
 
     private static final String CASE_NUMBER_PREFIX = "CaseNumber";
     private final RetrieveCoreObjectService retrieveCoreObjectService;
 
-    public MediaEntity createMediaEntity(String courthouseName, String courtroomName, OffsetDateTime startTime, OffsetDateTime endTime, int channel,
+    public MediaEntity createMediaEntity(String courthouseName, String courtroomName,
+                                         OffsetDateTime startTime, OffsetDateTime endTime, int channel,
                                          String mediaType) {
-        CourtroomEntity courtroom = courtroomStub.createCourtroomUnlessExists(courthouseName, courtroomName, userAccountRepository.getReferenceById(0));
-        return mediaRepository.saveAndFlush(createMediaWith(courtroom, startTime, endTime, channel, mediaType));
+        return mediaStubComposable.createMediaEntity(courthouseStubComposable,
+                                                     courtroomStub, courthouseName, courtroomName, startTime, endTime, channel, mediaType);
     }
 
-    public MediaEntity createMediaEntity(CourthouseEntity courthouse, String courtroomName, OffsetDateTime startTime, OffsetDateTime endTime, int channel,
+    public MediaEntity createMediaEntity(CourthouseEntity courthouse, String courtroomName,
+                                         OffsetDateTime startTime, OffsetDateTime endTime, int channel,
                                          String mediaType) {
-        CourtroomEntity courtroom = courtroomStub.createCourtroomUnlessExists(courthouse, courtroomName, userAccountRepository.getReferenceById(0));
-        return mediaRepository.saveAndFlush(createMediaWith(courtroom, startTime, endTime, channel, mediaType));
+        return mediaStubComposable.createMediaEntity(courtroomStub, courthouse, courtroomName, startTime, endTime, channel, mediaType);
     }
 
-    public MediaEntity createMediaEntity(CourthouseEntity courthouse, String courtroomName, OffsetDateTime startTime, OffsetDateTime endTime, int channel) {
-        CourtroomEntity courtroom = courtroomStub.createCourtroomUnlessExists(courthouse, courtroomName, userAccountRepository.getReferenceById(0));
-        return mediaRepository.saveAndFlush(createMediaWith(courtroom, startTime, endTime, channel, "mp2"));
+    public MediaEntity createMediaEntity(CourthouseEntity courthouse, String courtroomName,
+                                         OffsetDateTime startTime, OffsetDateTime endTime, int channel) {
+        return mediaStubComposable.createMediaEntity(courtroomStub, courthouse, courtroomName, startTime, endTime, channel);
     }
 
     public MediaEntity createMediaEntity(String courthouseName, String courtroomName, OffsetDateTime startTime, OffsetDateTime endTime, int channel) {
-        return createMediaEntity(courthouseName, courtroomName, startTime, endTime, channel, "mp2");
+        return mediaStubComposable.createMediaEntity(courthouseStubComposable,
+                                                     courtroomStub, courthouseName, courtroomName, startTime, endTime, channel);
     }
 
-    public MediaEntity createHiddenMediaEntity(String courthouseName, String courtroomName, OffsetDateTime startTime, OffsetDateTime endTime, int channel,
+    public MediaEntity createHiddenMediaEntity(String courthouseName, String courtroomName,
+                                               OffsetDateTime startTime, OffsetDateTime endTime, int channel,
                                                String mediaType) {
-        CourtroomEntity courtroom = courtroomStub.createCourtroomUnlessExists(courthouseName, courtroomName, userAccountRepository.getReferenceById(0));
-        MediaEntity mediaEntity = createMediaWith(courtroom, startTime, endTime, channel, mediaType);
-        mediaEntity.setHidden(true);
-        return mediaRepository.saveAndFlush(mediaEntity);
+        return mediaStubComposable.createHiddenMediaEntity(courthouseStubComposable,
+                                                           courtroomStub, courthouseName, courtroomName, startTime, endTime, channel, mediaType);
     }
 
     public List<MediaEntity> createAndSaveSomeMedias() {

@@ -22,6 +22,8 @@ public interface UserAccountRepository extends
 
     List<UserAccountEntity> findByEmailAddressIgnoreCase(String emailAddress);
 
+    List<UserAccountEntity> findByIdGreaterThanEqual(Integer value);
+
     Optional<UserAccountEntity> findByAccountGuidAndActive(String guid, Boolean active);
 
     @Query("""
@@ -54,6 +56,7 @@ public interface UserAccountRepository extends
         WHERE (upper(userAccount.emailAddress) = upper(:emailAddress) OR userAccount.accountGuid = :accountGuid)
         AND securityRole.id IN (:roleIds)
         AND securityGroup.globalAccess = true
+        AND userAccount.active = true
         """)
     List<UserAccountEntity> findByEmailAddressOrAccountGuidForRolesAndGlobalAccessIsTrue(String emailAddress, String accountGuid, Set<Integer> roleIds);
 
@@ -64,6 +67,7 @@ public interface UserAccountRepository extends
         JOIN securityGroup.securityRoleEntity securityRole
         WHERE userAccount.id = :userId
         AND securityRole.id = :securityRoleId
+        AND userAccount.active = true
         """)
     Optional<UserAccountEntity> findByRoleAndUserId(Integer securityRoleId, Integer userId);
 
@@ -77,5 +81,5 @@ public interface UserAccountRepository extends
         """)
     void updateLastLoginTime(Integer userId, OffsetDateTime now);
 
-    List<UserAccountEntity> findByIdIn(List<Integer> userIds);
+    List<UserAccountEntity> findByIdInAndActive(List<Integer> userIds, Boolean active);
 }

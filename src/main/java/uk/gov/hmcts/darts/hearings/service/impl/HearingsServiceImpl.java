@@ -18,10 +18,11 @@ import uk.gov.hmcts.darts.hearings.exception.HearingApiError;
 import uk.gov.hmcts.darts.hearings.mapper.GetAnnotationsResponseMapper;
 import uk.gov.hmcts.darts.hearings.mapper.GetEventsResponseMapper;
 import uk.gov.hmcts.darts.hearings.mapper.GetHearingResponseMapper;
-import uk.gov.hmcts.darts.hearings.mapper.TranscriptionMapper;
+import uk.gov.hmcts.darts.hearings.mapper.HearingTranscriptionMapper;
 import uk.gov.hmcts.darts.hearings.model.Annotation;
 import uk.gov.hmcts.darts.hearings.model.EventResponse;
 import uk.gov.hmcts.darts.hearings.model.GetHearingResponse;
+import uk.gov.hmcts.darts.hearings.model.HearingTranscriptModel;
 import uk.gov.hmcts.darts.hearings.model.Transcript;
 import uk.gov.hmcts.darts.hearings.service.HearingsService;
 
@@ -39,6 +40,7 @@ public class HearingsServiceImpl implements HearingsService {
     private final EventRepository eventRepository;
     private final AnnotationRepository annotationRepository;
     private final AuthorisationApi authorisationApi;
+    private final HearingTranscriptionMapper transcriptionMapper;
 
     public static final List<SecurityRoleEnum> SUPER_ADMIN_ROLE = List.of(SecurityRoleEnum.SUPER_ADMIN);
 
@@ -54,6 +56,8 @@ public class HearingsServiceImpl implements HearingsService {
         Optional<HearingEntity> foundHearingOpt = hearingRepository.findById(hearingId);
         if (foundHearingOpt.isEmpty()) {
             throw new DartsApiException(HearingApiError.HEARING_NOT_FOUND);
+        } else if (!foundHearingOpt.get().getHearingIsActual()) {
+            throw new DartsApiException(HearingApiError.HEARING_NOT_ACTUAL);
         }
         return foundHearingOpt.get();
     }
@@ -67,7 +71,8 @@ public class HearingsServiceImpl implements HearingsService {
     @Override
     public List<Transcript> getTranscriptsByHearingId(Integer hearingId) {
         List<TranscriptionEntity> transcriptionEntities = transcriptionRepository.findByHearingIdManualOrLegacy(hearingId);
-        return TranscriptionMapper.mapResponse(transcriptionEntities);
+        List<HearingTranscriptModel> hearingTranscriptModel =  transcriptionMapper.mapResponse(transcriptionEntities);
+        return transcriptionMapper.getTranscriptList(hearingTranscriptModel);
     }
 
     @Override

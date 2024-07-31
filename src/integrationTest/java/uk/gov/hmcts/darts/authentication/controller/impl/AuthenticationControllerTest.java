@@ -42,7 +42,6 @@ class AuthenticationControllerTest extends IntegrationBase {
     @Test
     void testGetUserStateIsActive() throws Exception {
         UserAccountEntity userAccountEntity = superAdminUserStub.givenUserIsAuthorised(mockUserIdentity);
-        dartsDatabase.addToUserAccountTrash(userAccountEntity.getEmailAddress());
 
         MvcResult mvcResult = mockMvc.perform(
             get(ENDPOINT))
@@ -54,7 +53,7 @@ class AuthenticationControllerTest extends IntegrationBase {
 
         assertTrue(userState.getIsActive());
         assertEquals(userAccountEntity.getId(), userState.getUserId());
-        assertEquals(userAccountEntity.getUserName(), userState.getUserName());
+        assertEquals(userAccountEntity.getUserFullName(), userState.getUserName());
         assertEquals(1, userState.getRoles().size());
         assertEquals(SecurityRoleEnum.SUPER_ADMIN.getId(), userState.getRoles().iterator().next().getRoleId());
     }
@@ -62,7 +61,6 @@ class AuthenticationControllerTest extends IntegrationBase {
     @Test
     void testGetUserStateAccountNotActive() throws Exception {
         UserAccountEntity userAccountEntity = superAdminUserStub.givenUserIsAuthorisedButInactive(mockUserIdentity);
-        dartsDatabase.addToUserAccountTrash(userAccountEntity.getEmailAddress());
 
         MvcResult mvcResult = mockMvc.perform(
                 get(ENDPOINT))
@@ -74,7 +72,7 @@ class AuthenticationControllerTest extends IntegrationBase {
 
         assertFalse(userState.getIsActive());
         assertEquals(userAccountEntity.getId(), userState.getUserId());
-        assertEquals(userAccountEntity.getUserName(), userState.getUserName());
+        assertEquals(userAccountEntity.getUserFullName(), userState.getUserName());
         assertEquals(1, userState.getRoles().size());
         assertEquals(SecurityRoleEnum.SUPER_ADMIN.getId(), userState.getRoles().iterator().next().getRoleId());
     }

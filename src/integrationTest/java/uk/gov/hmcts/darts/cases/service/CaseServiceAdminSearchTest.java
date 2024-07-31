@@ -1,7 +1,6 @@
 package uk.gov.hmcts.darts.cases.service;
 
 import lombok.extern.slf4j.Slf4j;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.skyscreamer.jsonassert.JSONAssert;
@@ -41,7 +40,6 @@ import static uk.gov.hmcts.darts.test.common.data.DefendantTestData.createDefend
 import static uk.gov.hmcts.darts.test.common.data.EventTestData.createEventWith;
 import static uk.gov.hmcts.darts.test.common.data.HearingTestData.createHearingWithDefaults;
 import static uk.gov.hmcts.darts.test.common.data.JudgeTestData.createJudgeWithName;
-import static uk.gov.hmcts.darts.testutils.stubs.UserAccountStub.INTEGRATION_TEST_USER_EMAIL;
 
 @Slf4j
 @TestPropertySource(properties = {
@@ -174,11 +172,6 @@ class CaseServiceAdminSearchTest extends IntegrationBase {
         EventEntity event5b = createEventWith("eventName", "event5b", hearing5b, OffsetDateTime.now());
         dartsDatabase.saveAll(event4a, event5b);
         user = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
-    }
-
-    @AfterEach
-    void deleteUser() {
-        dartsDatabase.addToUserAccountTrash(INTEGRATION_TEST_USER_EMAIL);
     }
 
     @Test

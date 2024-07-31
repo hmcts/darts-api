@@ -232,8 +232,6 @@ class UserControllerSearchIntTest extends IntegrationBase {
 
         verify(userIdentity).userHasGlobalAccess(Set.of(SUPER_ADMIN, SUPER_USER));
         verifyNoMoreInteractions(userIdentity);
-
-        dartsDatabaseStub.addToUserAccountTrash(username1 + "@ex.com", username2 + "@ex.com");
     }
 
     @Test
@@ -262,8 +260,6 @@ class UserControllerSearchIntTest extends IntegrationBase {
 
         verify(userIdentity).userHasGlobalAccess(Set.of(SUPER_ADMIN, SUPER_USER));
         verifyNoMoreInteractions(userIdentity);
-
-        dartsDatabaseStub.addToUserAccountTrash(username1 + "@ex.com", username2 + "@ex.com");
     }
 
     @Test
@@ -292,8 +288,6 @@ class UserControllerSearchIntTest extends IntegrationBase {
 
         verify(userIdentity).userHasGlobalAccess(Set.of(SUPER_ADMIN, SUPER_USER));
         verifyNoMoreInteractions(userIdentity);
-
-        dartsDatabaseStub.addToUserAccountTrash(username1 + "@ex.com", username2 + "@ex.com");
     }
 
     private UserAccountEntity activeUserWithName(String name) {

@@ -20,7 +20,12 @@ public enum HearingApiError implements DartsApiError {
         HttpStatus.BAD_REQUEST,
         HearingsTitleErrors.TOO_MANY_RESULTS.toString()
 
-    );
+    ),
+    HEARING_NOT_ACTUAL(
+        HearingsErrorCode.HEARING_NOT_ACTUAL.getValue(),
+        HttpStatus.NOT_FOUND,
+        HearingsTitleErrors.HEARING_NOT_ACTUAL.toString()
+    ),;
 
     private static final String ERROR_TYPE_PREFIX = "HEARING";
 

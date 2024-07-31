@@ -48,6 +48,8 @@ class TranscriptionControllerGetYourTranscriptsIntTest extends IntegrationBase {
     private static final OffsetDateTime YESTERDAY = now(UTC).minusDays(1).withHour(9).withMinute(0)
         .withSecond(0).withNano(0);
 
+    private static final OffsetDateTime MINUS_90_DAYS = now(UTC).minusDays(90);
+
     @BeforeEach
     void beforeEach() {
         authorisationStub.givenTestSchema();
@@ -206,6 +208,27 @@ class TranscriptionControllerGetYourTranscriptsIntTest extends IntegrationBase {
     }
 
     @Test
+    void getYourTranscriptsApproverOver90DaysShouldNotReturn() throws Exception {
+        var courtCase = authorisationStub.getCourtCaseEntity();
+        dartsDatabase.getTranscriptionStub()
+            .createAndSaveAwaitingAuthorisationTranscription(
+                systemUser,
+                courtCase,
+                authorisationStub.getHearingEntity(), MINUS_90_DAYS
+            );
+
+        MockHttpServletRequestBuilder requestBuilder = get(ENDPOINT_URI)
+            .header(
+                "user_id",
+                testUser.getId()
+            );
+
+        mockMvc.perform(requestBuilder)
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.approver_transcriptions").isEmpty());
+    }
+
+    @Test
     void getYourTranscriptsRequesterShouldNotReturnHidden() throws Exception {
         var courtCase = authorisationStub.getCourtCaseEntity();
         var hearing = authorisationStub.getHearingEntity();
@@ -250,5 +273,4 @@ class TranscriptionControllerGetYourTranscriptsIntTest extends IntegrationBase {
             .andExpect(jsonPath("$.approver_transcriptions", hasSize(1)))
             .andExpect(jsonPath("$.approver_transcriptions[0].transcription_id", is(systemUserTranscription.getId())));
     }
-
 }

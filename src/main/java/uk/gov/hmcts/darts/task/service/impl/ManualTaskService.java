@@ -9,6 +9,8 @@ import uk.gov.hmcts.darts.arm.component.AutomatedTaskProcessorFactory;
 import uk.gov.hmcts.darts.arm.service.ArmRetentionEventDateProcessor;
 import uk.gov.hmcts.darts.arm.service.BatchCleanupArmResponseFilesService;
 import uk.gov.hmcts.darts.arm.service.CleanupArmResponseFilesService;
+import uk.gov.hmcts.darts.arm.service.InboundAnnotationTranscriptionDeleterProcessor;
+import uk.gov.hmcts.darts.arm.service.UnstructuredTranscriptionAndAnnotationDeleterProcessor;
 import uk.gov.hmcts.darts.audio.deleter.impl.inbound.ExternalInboundDataStoreDeleter;
 import uk.gov.hmcts.darts.audio.deleter.impl.outbound.ExternalOutboundDataStoreDeleter;
 import uk.gov.hmcts.darts.audio.deleter.impl.unstructured.ExternalUnstructuredDataStoreDeleter;
@@ -20,6 +22,7 @@ import uk.gov.hmcts.darts.common.repository.AutomatedTaskRepository;
 import uk.gov.hmcts.darts.dailylist.service.DailyListProcessor;
 import uk.gov.hmcts.darts.dailylist.service.DailyListService;
 import uk.gov.hmcts.darts.datamanagement.service.InboundToUnstructuredProcessor;
+import uk.gov.hmcts.darts.event.service.RemoveDuplicateEventsProcessor;
 import uk.gov.hmcts.darts.log.api.LogApi;
 import uk.gov.hmcts.darts.retention.service.ApplyRetentionCaseAssociatedObjectsProcessor;
 import uk.gov.hmcts.darts.retention.service.ApplyRetentionProcessor;
@@ -30,16 +33,20 @@ import uk.gov.hmcts.darts.task.runner.impl.ApplyRetentionCaseAssociatedObjectsAu
 import uk.gov.hmcts.darts.task.runner.impl.ArmRetentionEventDateCalculatorAutomatedTask;
 import uk.gov.hmcts.darts.task.runner.impl.BatchCleanupArmResponseFilesAutomatedTask;
 import uk.gov.hmcts.darts.task.runner.impl.CleanupArmResponseFilesAutomatedTask;
+import uk.gov.hmcts.darts.task.runner.impl.CleanupCurrentEventTask;
 import uk.gov.hmcts.darts.task.runner.impl.CloseOldCasesAutomatedTask;
 import uk.gov.hmcts.darts.task.runner.impl.CloseUnfinishedTranscriptionsAutomatedTask;
 import uk.gov.hmcts.darts.task.runner.impl.DailyListAutomatedTask;
 import uk.gov.hmcts.darts.task.runner.impl.ExternalDataStoreDeleterAutomatedTask;
 import uk.gov.hmcts.darts.task.runner.impl.GenerateCaseDocumentAutomatedTask;
+import uk.gov.hmcts.darts.task.runner.impl.InboundAnnotationTranscriptionDeleterAutomatedTask;
 import uk.gov.hmcts.darts.task.runner.impl.InboundAudioDeleterAutomatedTask;
 import uk.gov.hmcts.darts.task.runner.impl.InboundToUnstructuredAutomatedTask;
 import uk.gov.hmcts.darts.task.runner.impl.OutboundAudioDeleterAutomatedTask;
 import uk.gov.hmcts.darts.task.runner.impl.ProcessArmResponseFilesAutomatedTask;
 import uk.gov.hmcts.darts.task.runner.impl.ProcessDailyListAutomatedTask;
+import uk.gov.hmcts.darts.task.runner.impl.RemoveDuplicatedEventsAutomatedTask;
+import uk.gov.hmcts.darts.task.runner.impl.UnstructuredAnnotationTranscriptionDeleterAutomatedTask;
 import uk.gov.hmcts.darts.task.runner.impl.UnstructuredAudioDeleterAutomatedTask;
 import uk.gov.hmcts.darts.task.runner.impl.UnstructuredToArmAutomatedTask;
 import uk.gov.hmcts.darts.transcriptions.service.TranscriptionsProcessor;
@@ -71,9 +78,13 @@ public class ManualTaskService {
     private final OutboundAudioDeleterProcessor outboundAudioDeleterProcessor;
     private final TranscriptionsProcessor transcriptionsProcessor;
     private final UnstructuredAudioDeleterProcessor unstructuredAudioDeleterProcessor;
+    private final RemoveDuplicateEventsProcessor removeDuplicateEventsProcessor;
 
     private final LockProvider lockProvider;
     private final LogApi logApi;
+
+    private InboundAnnotationTranscriptionDeleterProcessor inboundAnnotationTranscriptionDeleterProcessor;
+    private UnstructuredTranscriptionAndAnnotationDeleterProcessor unstructuredTranscriptionAndAnnotationDeleterProcessor;
 
     private final List<AbstractLockableAutomatedTask> automatedTasks = new ArrayList<>();
 
@@ -96,6 +107,10 @@ public class ManualTaskService {
         addArmRetentionEventDateCalculatorToTaskRegister();
         addBatchCleanupArmResponseFilesTaskRegistrar();
         addGenerateCaseDocumentToTaskRegistrar();
+        addEventHandler();
+        addInboundTranscriptionAndAnnotationDeleterRegistrar();
+        addUnstructuredTranscriptionAndAnnotationDeleterRegistrar();
+        addRemoveDuplicateEventsToTaskRegistrar();
     }
 
     public List<AbstractLockableAutomatedTask> getAutomatedTasks() {
@@ -304,4 +319,51 @@ public class ManualTaskService {
         automatedTasks.add(manualTask);
     }
 
+    private void addRemoveDuplicateEventsToTaskRegistrar() {
+        var manualTask = new RemoveDuplicatedEventsAutomatedTask(
+            automatedTaskRepository,
+            lockProvider,
+            automatedTaskConfigurationProperties,
+            removeDuplicateEventsProcessor,
+            logApi
+        );
+        manualTask.setManualTask();
+        automatedTasks.add(manualTask);
+    }
+
+    private void addEventHandler() {
+        var manualTask = new CleanupCurrentEventTask(
+            automatedTaskRepository,
+            lockProvider,
+            automatedTaskConfigurationProperties,
+            automatedTaskProcessorFactory,
+            logApi
+        );
+        manualTask.setManualTask();
+        automatedTasks.add(manualTask);
+    }
+
+    private void addInboundTranscriptionAndAnnotationDeleterRegistrar() {
+        var manualTask = new InboundAnnotationTranscriptionDeleterAutomatedTask(
+            automatedTaskRepository,
+            lockProvider,
+            automatedTaskConfigurationProperties,
+            inboundAnnotationTranscriptionDeleterProcessor,
+            logApi
+        );
+        manualTask.setManualTask();
+        automatedTasks.add(manualTask);
+    }
+
+    private void addUnstructuredTranscriptionAndAnnotationDeleterRegistrar() {
+        var manualTask = new UnstructuredAnnotationTranscriptionDeleterAutomatedTask(
+            automatedTaskRepository,
+            lockProvider,
+            automatedTaskConfigurationProperties,
+            unstructuredTranscriptionAndAnnotationDeleterProcessor,
+            logApi
+        );
+        manualTask.setManualTask();
+        automatedTasks.add(manualTask);
+    }
 }

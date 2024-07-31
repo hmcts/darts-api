@@ -23,7 +23,11 @@ public enum AutomatedTaskName {
     CLOSE_OLD_CASES_TASK_NAME("CloseOldCases"),
     DAILY_LIST_HOUSEKEEPING_TASK_NAME("DailyListHousekeeping"),
     ARM_RETENTION_EVENT_DATE_CALCULATOR_TASK_NAME("ArmRetentionEventDateCalculator"),
-    GENERATE_CASE_DOCUMENT_TASK_NAME("GenerateCaseDocument");
+    GENERATE_CASE_DOCUMENT_TASK_NAME("GenerateCaseDocument"),
+    EVENT_CLEANUP_CURRENT_TASK("CleanupCurrentEvent"),
+    INBOUND_TRANSCRIPTION_ANNOTATION_DELETER_TASK_NAME("InboundTranscriptionAnnotationDeleter"),
+    UNSTRUCTURED_TRANSCRIPTION_ANNOTATION_DELETER_TASK_NAME("UnstructuredTranscriptionAnnotationDeleter"),
+    REMOVE_DUPLICATED_EVENTS_TASK_NAME("RemoveDuplicatedEvents");
 
     private final String taskName;
 

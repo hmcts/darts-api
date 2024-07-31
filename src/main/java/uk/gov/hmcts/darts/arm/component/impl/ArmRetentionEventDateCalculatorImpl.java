@@ -12,6 +12,7 @@ import uk.gov.hmcts.darts.arm.config.ArmDataManagementConfiguration;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
+import uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum;
 import uk.gov.hmcts.darts.common.exception.DartsException;
 import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
 
@@ -44,8 +45,8 @@ public class ArmRetentionEventDateCalculatorImpl implements ArmRetentionEventDat
                     externalObjectDirectory.setLastModifiedBy(userAccount);
                     externalObjectDirectoryRepository.saveAndFlush(externalObjectDirectory);
                     return true;
-                } else {
-                    log.debug("Updating retention date for ARM EOD {} ", externalObjectDirectoryId);
+                } else if (ObjectRecordStatusEnum.STORED.getId() == externalObjectDirectory.getStatusId()) {
+                    log.info("Updating retention date for ARM EOD {} ", externalObjectDirectoryId);
                     UpdateMetadataResponse updateMetadataResponse = armDataManagementApi.updateMetadata(
                         externalObjectDirectory.getExternalRecordId(), armRetentionDate);
                     if (updateMetadataResponse.isError()) {
@@ -56,6 +57,7 @@ public class ArmRetentionEventDateCalculatorImpl implements ArmRetentionEventDat
                         externalObjectDirectory.setUpdateRetention(false);
                         externalObjectDirectory.setLastModifiedBy(userAccount);
                         externalObjectDirectoryRepository.saveAndFlush(externalObjectDirectory);
+                        log.info("Retention date is successfully applied on ARM for EOD {} ", externalObjectDirectoryId);
                         return true;
                     }
                 }

@@ -2,7 +2,7 @@
   {
     "user_ids":[],
     "id": -17,
-    "security_role_id": 10,
+    "security_role_id": 14,
     "global_access": true,
     "display_state": false,
     "courthouse_ids": [],
@@ -11,7 +11,7 @@
   {
     "user_ids":[],
     "id": -16,
-    "security_role_id": 9,
+    "security_role_id": 13,
     "global_access": true,
     "display_state": false,
     "courthouse_ids": [],
@@ -20,7 +20,7 @@
   {
     "user_ids":[],
     "id": -15,
-    "security_role_id": 8,
+    "security_role_id": 12,
     "global_access": true,
     "display_state": false,
     "courthouse_ids": [],
@@ -29,11 +29,20 @@
   {
     "user_ids":[],
     "id": -14,
-    "security_role_id": 7,
+    "security_role_id": 11,
     "global_access": true,
     "display_state": false,
     "courthouse_ids": [],
     "name": "Xhibit Group"
+  },
+  {
+    "user_ids":[],
+    "id": -7,
+    "security_role_id": 1,
+    "global_access": true,
+    "display_state": true,
+    "courthouse_ids": [],
+    "name": "Test Judge Global"
   },
   {
     "user_ids":[],
@@ -65,7 +74,7 @@
   {
     "user_ids":[],
     "id": -3,
-    "security_role_id": 3,
+    "security_role_id": 1,
     "global_access": false,
     "display_state": true,
     "courthouse_ids": [],
@@ -83,7 +92,7 @@
   {
     "user_ids":[],
     "id": -1,
-    "security_role_id": 1,
+    "security_role_id": 3,
     "global_access": false,
     "display_state": true,
     "courthouse_ids": [],
@@ -92,7 +101,7 @@
   {
     "user_ids":[],
     "id": 1,
-    "security_role_id": 11,
+    "security_role_id": 8,
     "global_access": true,
     "display_state": true,
     "courthouse_ids": [],
@@ -102,7 +111,7 @@
   {
     "user_ids":[],
     "id": 2,
-    "security_role_id": 12,
+    "security_role_id": 7,
     "global_access": true,
     "display_state": true,
     "courthouse_ids": [],
@@ -112,7 +121,7 @@
   {
     "user_ids": [],
     "id": 3,
-    "security_role_id": 13,
+    "security_role_id": 10,
     "global_access": true,
     "display_state": false,
     "courthouse_ids": [],
@@ -122,7 +131,7 @@
   {
     "user_ids":[],
     "id": 4,
-    "security_role_id": 14,
+    "security_role_id": 9,
     "global_access": true,
     "display_state": true,
     "courthouse_ids": [],

@@ -73,14 +73,14 @@ class AudioControllerGetMetadataIntTest extends IntegrationBase {
         String expectedJson = """
             [
               {
-                "id": 5,
+                "id": %d,
                 "media_start_timestamp": "2023-01-01T12:00:00Z",
                 "media_end_timestamp": "2023-01-01T13:00:00Z",
                 "is_archived": false,
                 "is_available": true
               }
             ]
-            """;
+            """.formatted(mediaChannel1.getId());
         JSONAssert.assertEquals(expectedJson, actualJson, JSONCompareMode.NON_EXTENSIBLE);
     }
 

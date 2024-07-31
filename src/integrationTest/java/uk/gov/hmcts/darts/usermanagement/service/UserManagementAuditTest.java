@@ -92,15 +92,13 @@ class UserManagementAuditTest extends IntegrationBase {
     }
 
     private UserWithId createUser(boolean active) {
-        var user = userManagementService.createUser(
+
+        return userManagementService.createUser(
             new User()
                 .fullName("some-full-name")
                 .emailAddress("someone@hmcts.net")
                 .description("some-description")
                 .active(active));
-        dartsDatabase.addToUserAccountTrash(user.getEmailAddress());
-
-        return user;
 
     }
 

@@ -2,7 +2,8 @@ package uk.gov.hmcts.darts.test.common.data;
 
 import uk.gov.hmcts.darts.common.entity.RegionEntity;
 
-import static org.testcontainers.shaded.org.apache.commons.lang3.RandomStringUtils.random;
+import static org.apache.commons.lang3.RandomStringUtils.random;
+
 
 @SuppressWarnings({"HideUtilityClassConstructor"})
 public class RegionTestData {

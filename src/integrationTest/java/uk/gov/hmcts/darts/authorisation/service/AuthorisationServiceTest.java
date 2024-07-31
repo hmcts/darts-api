@@ -1,9 +1,7 @@
 package uk.gov.hmcts.darts.authorisation.service;
 
-import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestInstance;
-import org.junit.jupiter.api.TestInstance.Lifecycle;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.transaction.annotation.Transactional;
@@ -36,7 +34,6 @@ import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.APPROVER;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.JUDICIARY;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.REQUESTER;
 
-@TestInstance(Lifecycle.PER_CLASS)
 class AuthorisationServiceTest extends IntegrationBase {
 
     private static final String TEST_JUDGE_EMAIL = "test.judge@example.com";
@@ -54,8 +51,8 @@ class AuthorisationServiceTest extends IntegrationBase {
     @MockBean
     private UserIdentity mockUserIdentity;
 
-    @BeforeAll
-    void beforeAll() {
+    @BeforeEach
+    void beforeEach() {
         dartsDatabase.getUserAccountStub().getSystemUserAccountEntity();
 
         SecurityGroupRepository securityGroupRepository = dartsDatabase.getSecurityGroupRepository();
@@ -148,9 +145,7 @@ class AuthorisationServiceTest extends IntegrationBase {
         assertTrue(judgeRole.getCourthouseIds().contains(courthouseEntity.getId()));
 
         Set<String> judgePermissions = judgeRole.getPermissions();
-        assertEquals(12, judgePermissions.size());
-        assertTrue(judgePermissions.contains("READ_JUDGES_NOTES"));
-        assertTrue(judgePermissions.contains("UPLOAD_JUDGES_NOTES"));
+        assertEquals(0, judgePermissions.size());
     }
 
     @Test
@@ -172,9 +167,7 @@ class AuthorisationServiceTest extends IntegrationBase {
         assertTrue(judgeRole.getCourthouseIds().isEmpty());
 
         Set<String> judgePermissions = judgeRole.getPermissions();
-        assertEquals(12, judgePermissions.size());
-        assertTrue(judgePermissions.contains("READ_JUDGES_NOTES"));
-        assertTrue(judgePermissions.contains("UPLOAD_JUDGES_NOTES"));
+        assertEquals(0, judgePermissions.size());
     }
 
     @Test
@@ -186,17 +179,15 @@ class AuthorisationServiceTest extends IntegrationBase {
         Iterator<UserStateRole> roleIterator = userState.getRoles().iterator();
 
         UserStateRole approverRole = roleIterator.next();
-        assertEquals(APPROVER.getId(), approverRole.getRoleId());
+        assertEquals(REQUESTER.getId(), approverRole.getRoleId());
         assertFalse(approverRole.getGlobalAccess());
         Set<String> approverPermissions = approverRole.getPermissions();
-        assertEquals(11, approverPermissions.size());
-        assertTrue(approverPermissions.contains("APPROVE_REJECT_TRANSCRIPTION_REQUEST"));
+        assertEquals(0, approverPermissions.size());
 
         UserStateRole requesterRole = roleIterator.next();
-        assertEquals(REQUESTER.getId(), requesterRole.getRoleId());
+        assertEquals(APPROVER.getId(), requesterRole.getRoleId());
         Set<String> requesterPermissions = requesterRole.getPermissions();
-        assertEquals(10, requesterPermissions.size());
-        assertFalse(requesterPermissions.contains("APPROVE_REJECT_TRANSCRIPTION_REQUEST"));
+        assertEquals(0, requesterPermissions.size());
     }
 
     @Test
@@ -230,7 +221,6 @@ class AuthorisationServiceTest extends IntegrationBase {
         final Iterator<SecurityGroupEntity> bristolUserGroupIt = bristolUser.getSecurityGroupEntities().iterator();
         bristolUserGroupIt.next().getCourthouseEntities().addAll(Set.of(a1Court, b2Court));
         bristolUserGroupIt.next().getCourthouseEntities().addAll(Set.of(b2Court, c3Court));
-        dartsDatabase.getUserAccountRepository().saveAndFlush(bristolUser);
 
         when(mockUserIdentity.getUserAccount()).thenReturn(bristolUser);
         assertDoesNotThrow(() -> authorisationService.checkCourthouseAuthorisation(

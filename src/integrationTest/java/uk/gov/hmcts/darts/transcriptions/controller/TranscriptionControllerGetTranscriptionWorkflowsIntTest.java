@@ -91,7 +91,8 @@ class TranscriptionControllerGetTranscriptionWorkflowsIntTest extends Integratio
         MvcResult response = mockMvc.perform(requestBuilder).andExpect(status().isOk()).andReturn();
         String actualResponse = response.getResponse().getContentAsString();
         String expectedResponse = getContentsFromFile(
-            "tests/transcriptions/transcription_workflow/expectedAllWorkflowResponse.json");
+            "tests/transcriptions/transcription_workflow/expectedAllWorkflowResponse.json")
+            .replace("$USER_ACCOUNT_ID", transcription.getCreatedBy().getId().toString());
 
         JSONAssert.assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
     }
@@ -107,7 +108,8 @@ class TranscriptionControllerGetTranscriptionWorkflowsIntTest extends Integratio
         MvcResult response = mockMvc.perform(requestBuilder).andExpect(status().isOk()).andReturn();
         String actualResponse = response.getResponse().getContentAsString();
         String expectedResponse = getContentsFromFile(
-            "tests/transcriptions/transcription_workflow/expectedCurrentWorkflowResponse.json");
+            "tests/transcriptions/transcription_workflow/expectedCurrentWorkflowResponse.json")
+            .replace("$USER_ACCOUNT_ID", transcription.getCreatedBy().getId().toString());
 
         JSONAssert.assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
     }

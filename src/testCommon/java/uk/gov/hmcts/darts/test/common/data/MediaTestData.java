@@ -10,6 +10,7 @@ import java.time.OffsetDateTime;
 import static java.time.OffsetDateTime.now;
 import static org.apache.commons.codec.digest.DigestUtils.md5;
 import static uk.gov.hmcts.darts.common.entity.MediaEntity.MEDIA_TYPE_DEFAULT;
+import static uk.gov.hmcts.darts.test.common.data.CourtroomTestData.someMinimalCourtRoom;
 
 @UtilityClass
 @SuppressWarnings({"HideUtilityClassConstructor"})
@@ -27,21 +28,13 @@ public class MediaTestData {
         media.setFileSize(1000L);
         media.setMediaFormat("mp2");
         media.setMediaType(MEDIA_TYPE_DEFAULT);
+        media.setCourtroom(someMinimalCourtRoom());
         return media;
     }
 
     public static MediaEntity createMediaFor(CourtroomEntity courtroomEntity) {
-        MediaEntity media = new MediaEntity();
-        media.setChannel(1);
-        media.setTotalChannels(2);
-        media.setStart(now());
-        media.setEnd(now());
+        var media = someMinimalMedia();
         media.setCourtroom(courtroomEntity);
-        media.setMediaFile("a-media-file");
-        media.setChecksum(getChecksum());
-        media.setFileSize(1000L);
-        media.setMediaFormat("mp2");
-        media.setMediaType(MEDIA_TYPE_DEFAULT);
         return media;
     }
 
@@ -58,10 +51,7 @@ public class MediaTestData {
         mediaEntity.setChannel(channel);
         mediaEntity.setTotalChannels(2);
         mediaEntity.setMediaFormat(mediaType);
-        mediaEntity.setMediaFile("a-media-file");
-        mediaEntity.setFileSize(1000L);
         mediaEntity.setChecksum(getChecksum());
-        mediaEntity.setMediaType(MEDIA_TYPE_DEFAULT);
 
         return mediaEntity;
     }

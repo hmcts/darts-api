@@ -41,7 +41,7 @@ class PostEventsFunctionalTest extends FunctionalTest {
                           "func-Swansea_case_1"
                         ],
                         "event_text": "some text for the event",
-                        "date_time": "2023-08-08T14:01:06.085Z"
+                        "date_time": "2023-08-08T14:01:06Z"
                       }""";
         bodyText = bodyText.replace("<<courtHouseName>>", courthouseName);
         bodyText = bodyText.replace("<<courtroomName>>", courtroomName);
@@ -75,7 +75,7 @@ class PostEventsFunctionalTest extends FunctionalTest {
                           "func-Swansea_case_1"
                         ],
                         "event_text": "some text for the event",
-                        "date_time": "2023-08-08T14:01:06.085Z"
+                        "date_time": "2023-08-08T14:01:06Z"
                       }""")
             .when()
             .baseUri(getUri(ENDPOINT_URL))

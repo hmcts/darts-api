@@ -160,8 +160,6 @@ public class AudioTransformationServiceImpl implements AudioTransformationServic
         try {
             log.info("Starting processing for audio request id: {}. Status: {}", requestId, mediaRequestEntity.getStatus());
 
-            logApi.atsProcessingUpdate(mediaRequestEntity);
-
             AudioRequestOutputFormat audioRequestOutputFormat = AudioRequestOutputFormat.MP3;
             if (mediaRequestEntity.getRequestType().equals(DOWNLOAD)) {
                 audioRequestOutputFormat = AudioRequestOutputFormat.ZIP;
@@ -170,6 +168,7 @@ public class AudioTransformationServiceImpl implements AudioTransformationServic
             List<MediaEntity> mediaEntitiesForHearing = getMediaMetadata(hearingEntity.getId());
 
             if (mediaEntitiesForHearing.isEmpty()) {
+                logApi.atsProcessingUpdate(mediaRequestEntity);
                 throw new DartsApiException(AudioApiError.FAILED_TO_PROCESS_AUDIO_REQUEST, "No media present to process");
             }
 
@@ -179,16 +178,19 @@ public class AudioTransformationServiceImpl implements AudioTransformationServic
             );
 
             if (filteredMediaEntities.isEmpty()) {
+                logApi.atsProcessingUpdate(mediaRequestEntity);
                 throw new DartsApiException(AudioApiError.FAILED_TO_PROCESS_AUDIO_REQUEST, "No filtered media present to process");
             }
 
             boolean hasAllMediaBeenCopiedFromInboundStorage = eodService.hasAllMediaBeenCopiedFromInboundStorage(filteredMediaEntities);
 
             if (!hasAllMediaBeenCopiedFromInboundStorage) {
-                log.info("Skipping process for audio request id: {} as not All the media from Inbound has reached Unstructured data store", requestId);
+                log.info("Skipping process for audio request id: {} as not all the media from Inbound has reached Unstructured data store", requestId);
                 mediaRequestService.updateAudioRequestStatus(requestId, OPEN);
                 return;
             }
+
+            logApi.atsProcessingUpdate(mediaRequestEntity);
 
             Map<MediaEntity, Path> downloadedMedias = downloadAndSaveMediaToWorkspace(filteredMediaEntities);
 
@@ -216,7 +218,7 @@ public class AudioTransformationServiceImpl implements AudioTransformationServic
                 );
 
                 try (InputStream inputStream = Files.newInputStream(generatedAudioFile.getPath())) {
-                    blobId = transformedMediaHelper.saveToStorage(mediaRequestEntity, BinaryData.fromStream(inputStream), fileName, generatedAudioFile);
+                    blobId = transformedMediaHelper.saveToStorage(mediaRequestEntity, inputStream, fileName, generatedAudioFile);
                 } catch (NoSuchFileException nsfe) {
                     log.error("No file found when trying to save to storage. {}", generatedAudioFile.getPath());
                     throw nsfe;

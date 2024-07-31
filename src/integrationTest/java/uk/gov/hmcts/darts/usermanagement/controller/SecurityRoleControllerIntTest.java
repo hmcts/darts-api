@@ -48,20 +48,20 @@ class SecurityRoleControllerIntTest extends IntegrationBase {
                 [
                   {
                     "id": 1,
-                    "role_name": "APPROVER",
-                    "display_name": "Approver",
+                    "role_name": "JUDICIARY",
+                    "display_name": "Judiciary",
                     "display_state": true
                   },
                   {
                     "id": 2,
                     "role_name": "REQUESTER",
-                    "display_name": "Requestor",
+                    "display_name": "Requester",
                     "display_state": true
                   },
                   {
                     "id": 3,
-                    "role_name": "JUDICIARY",
-                    "display_name": "Judiciary",
+                    "role_name": "APPROVER",
+                    "display_name": "Approver",
                     "display_state": true
                   },
                   {
@@ -84,51 +84,51 @@ class SecurityRoleControllerIntTest extends IntegrationBase {
                   },
                   {
                     "id": 7,
-                    "role_name": "XHIBIT",
-                    "display_name": "XHIBIT",
-                    "display_state": false
-                  },
-                  {
-                    "id": 8,
-                    "role_name": "CPP",
-                    "display_name": "CPP",
-                    "display_state": false
-                  },
-                  {
-                    "id": 9,
-                    "role_name": "DAR_PC",
-                    "display_name": "DAR PC",
-                    "display_state": false
-                  },
-                  {
-                    "id": 10,
-                    "role_name": "MID_TIER",
-                    "display_name": "Mid Tier",
-                    "display_state": false
-                  },
-                  {
-                    "id": 11,
-                    "role_name": "SUPER_ADMIN",
-                    "display_name": "Super Admin",
-                    "display_state": true
-                  },
-                  {
-                    "id": 12,
                     "role_name": "SUPER_USER",
                     "display_name": "Super User",
                     "display_state": true
                   },
                   {
-                    "id": 13,
+                    "id": 8,
+                    "role_name": "SUPER_ADMIN",
+                    "display_name": "Super Admin",
+                    "display_state": true
+                  },
+                  {
+                    "id": 9,
+                    "role_name": "MEDIA_ACCESSOR",
+                    "display_name": "Media Accessor",
+                    "display_state": true
+                  },
+                  {
+                    "id": 10,
                     "role_name": "DARTS",
                     "display_name": "DARTS",
                     "display_state": false
                   },
                   {
+                    "id": 11,
+                    "role_name": "XHIBIT",
+                    "display_name": "XHIBIT",
+                    "display_state": false
+                  },
+                  {
+                    "id": 12,
+                    "role_name": "CPP",
+                    "display_name": "CPP",
+                    "display_state": false
+                  },
+                  {
+                    "id": 13,
+                    "role_name": "DAR_PC",
+                    "display_name": "DAR PC",
+                    "display_state": false
+                  },
+                  {
                     "id": 14,
-                    "role_name": "MEDIA_ACCESSOR",
-                    "display_name": "Media Accessor",
-                    "display_state": true
+                    "role_name": "MID_TIER",
+                    "display_name": "Mid Tier",
+                    "display_state": false
                   }
                 ]
             """;

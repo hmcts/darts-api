@@ -13,7 +13,7 @@ public class RetentionMapper {
         GetCaseRetentionsResponse caseRetention = new GetCaseRetentionsResponse();
         caseRetention.setRetentionLastChangedDate(caseRetentionEntity.getLastModifiedDateTime());
         caseRetention.setRetentionDate(caseRetentionEntity.getRetainUntil().toLocalDate());
-        caseRetention.setAmendedBy(caseRetentionEntity.getSubmittedBy().getUserName());
+        caseRetention.setAmendedBy(caseRetentionEntity.getSubmittedBy().getUserFullName());
         caseRetention.setRetentionPolicyApplied(caseRetentionEntity.getRetentionPolicyType().getDisplayName());
         caseRetention.setComments(caseRetentionEntity.getComments());
         caseRetention.setStatus(caseRetentionEntity.getCurrentState());

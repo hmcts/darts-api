@@ -1,12 +1,16 @@
 package uk.gov.hmcts.darts.transcriptions.component.impl;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.darts.transcriptions.component.TranscriberTranscriptsQuery;
 import uk.gov.hmcts.darts.transcriptions.model.TranscriberViewSummary;
+import uk.gov.hmcts.darts.transcriptions.util.TranscriptionUtil;
 
+import java.math.BigInteger;
+import java.time.Duration;
 import java.util.List;
 
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.TRANSCRIBER;
@@ -18,11 +22,20 @@ public class TranscriberTranscriptsQueryImpl implements TranscriberTranscriptsQu
 
     private static final String USR_ID = "usr_id";
     private static final String ROL_ID = "rol_id";
+    private static final String DATE_LIMIT = "date_limit";
+    private static final String MAX_RESULT_SIZE = "max_result_size";
     private final NamedParameterJdbcTemplate jdbcTemplate;
     private final TranscriberViewSummaryRowMapper transcriberViewSummaryRowMapper;
 
+    @Value("${darts.transcription.search.date-limit}")
+    private final Duration dateLimit;
+
+    @Value("${darts.transcription.search.max-result-size}")
+    private final BigInteger maxResultSize;
+
     @Override
     public List<TranscriberViewSummary> getTranscriptRequests(Integer userId) {
+
         return jdbcTemplate.query(
             """
                 -- Transcript Requests (transcriber-view?assigned=false)
@@ -52,6 +65,7 @@ public class TranscriberTranscriptsQueryImpl implements TranscriberTranscriptsQu
                     JOIN darts.security_group_courthouse_ae grc ON grp.grp_id = grc.grp_id
                     WHERE usr.usr_id = :usr_id
                     AND grp.rol_id = :rol_id
+                    AND usr.is_active = true
                 )
                 JOIN darts.hearing_transcription_ae hearing_transcription ON tra.tra_id = hearing_transcription.tra_id
                 JOIN darts.hearing hea ON hearing_transcription.hea_id = hea.hea_id
@@ -67,17 +81,23 @@ public class TranscriberTranscriptsQueryImpl implements TranscriberTranscriptsQu
                     SELECT tra_id, MAX(workflow_ts) as latest_ts
                     FROM darts.transcription_workflow
                     GROUP BY tra_id
-                ) latest_trw ON tra.tra_id = approved_trw.tra_id AND approved_trw.workflow_ts = latest_trw.latest_ts
+                ) latest_trw ON tra.tra_id = latest_trw.tra_id AND approved_trw.workflow_ts = latest_trw.latest_ts
+                WHERE latest_trw.latest_ts >= :date_limit
                 ORDER BY transcription_id desc
+                LIMIT :max_result_size
                 """,
-            new MapSqlParameterSource(USR_ID, userId)
-                .addValue(ROL_ID, TRANSCRIBER.getId()),
+            new MapSqlParameterSource()
+                .addValue(USR_ID, userId)
+                .addValue(ROL_ID, TRANSCRIBER.getId())
+                .addValue(DATE_LIMIT, TranscriptionUtil.getDateToLimitResults(dateLimit))
+                .addValue(MAX_RESULT_SIZE, maxResultSize),
             transcriberViewSummaryRowMapper
         );
     }
 
     @Override
     public List<TranscriberViewSummary> getTranscriberTranscriptions(Integer userId) {
+
         return jdbcTemplate.query(
             """
                 -- Your work > To do (transcriber-view?assigned=true)
@@ -107,6 +127,7 @@ public class TranscriberTranscriptsQueryImpl implements TranscriberTranscriptsQu
                     JOIN darts.security_group_courthouse_ae grc ON grp.grp_id = grc.grp_id
                     WHERE usr.usr_id = :usr_id
                     AND grp.rol_id = :rol_id
+                    AND usr.is_active = true
                 )
                 JOIN darts.hearing_transcription_ae hearing_transcription ON tra.tra_id = hearing_transcription.tra_id
                 JOIN darts.hearing hea ON hearing_transcription.hea_id = hea.hea_id
@@ -124,6 +145,7 @@ public class TranscriberTranscriptsQueryImpl implements TranscriberTranscriptsQu
                     GROUP BY tra_id
                 ) with_transcriber_trw ON with_transcriber_trw.tra_id = tra.tra_id
                 WHERE tra.trs_id = 5
+                AND requested_trw.workflow_ts >= :date_limit
                 -- exclude ones with hidden docs - just in case there are any
                 AND (
                     EXISTS (
@@ -139,7 +161,7 @@ public class TranscriberTranscriptsQueryImpl implements TranscriberTranscriptsQu
                         WHERE trd.tra_id = tra.tra_id
                     )
                 )
-                
+                                
                 UNION
 
                 -- Your work > Completed today (transcriber-view?assigned=true)
@@ -169,6 +191,7 @@ public class TranscriberTranscriptsQueryImpl implements TranscriberTranscriptsQu
                     JOIN darts.security_group_courthouse_ae grc ON grp.grp_id = grc.grp_id
                     WHERE usr.usr_id = :usr_id
                     AND grp.rol_id = :rol_id
+                    AND usr.is_active = true
                 )
                 JOIN darts.hearing_transcription_ae hearing_transcription ON tra.tra_id = hearing_transcription.tra_id
                 JOIN darts.hearing hea ON hearing_transcription.hea_id = hea.hea_id
@@ -197,9 +220,13 @@ public class TranscriberTranscriptsQueryImpl implements TranscriberTranscriptsQu
                     )
                 )
                 ORDER BY transcription_id desc
+                LIMIT :max_result_size
                 """,
-            new MapSqlParameterSource("usr_id", userId)
-                .addValue("rol_id", TRANSCRIBER.getId()),
+            new MapSqlParameterSource()
+                .addValue(USR_ID, userId)
+                .addValue(ROL_ID, TRANSCRIBER.getId())
+                .addValue(DATE_LIMIT, TranscriptionUtil.getDateToLimitResults(dateLimit))
+                .addValue(MAX_RESULT_SIZE, maxResultSize),
             transcriberViewSummaryRowMapper
         );
     }
@@ -227,6 +254,7 @@ public class TranscriberTranscriptsQueryImpl implements TranscriberTranscriptsQu
                         where
                             user_account.usr_id=:usr_id
                             and security_group.rol_id in (:rol_id)
+                            and user_account.is_Active=true
                 """,
             new MapSqlParameterSource(USR_ID, userId)
                 .addValue(ROL_ID, roleId),
@@ -258,6 +286,5 @@ public class TranscriberTranscriptsQueryImpl implements TranscriberTranscriptsQu
             Integer.class
         );
     }
-
 
 }

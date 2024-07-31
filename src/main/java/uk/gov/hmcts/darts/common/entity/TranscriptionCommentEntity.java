@@ -14,6 +14,7 @@ import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.envers.AuditTable;
 import org.hibernate.envers.Audited;
+import org.hibernate.envers.NotAudited;
 import uk.gov.hmcts.darts.common.entity.base.CreatedModifiedBaseEntity;
 
 import java.time.OffsetDateTime;
@@ -55,5 +56,12 @@ public class TranscriptionCommentEntity extends CreatedModifiedBaseEntity {
 
     @Column(name = "author")
     private Integer authorUserId;
+
+    @NotAudited
+    @Column(name = "is_migrated")
+    private boolean isMigrated;
+
+    @Column(name = "is_data_anonymised")
+    private boolean isDataAnonymised;
 
 }

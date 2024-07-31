@@ -240,7 +240,8 @@ public class RetrieveCoreObjectServiceImpl implements RetrieveCoreObjectService 
 
     private JudgeEntity createJudge(String judgeName, UserAccountEntity userAccount) {
         JudgeEntity judge = new JudgeEntity();
-        judge.setName(judgeName);
+        String upperCaseJudgeName = judgeName != null ? judgeName.toUpperCase() : null;
+        judge.setName(upperCaseJudgeName);
         judge.setCreatedBy(userAccount);
         judge.setLastModifiedBy(userAccount);
         judgeRepository.saveAndFlush(judge);

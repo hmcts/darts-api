@@ -2,6 +2,7 @@ package uk.gov.hmcts.darts.common.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.history.RevisionRepository;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 import uk.gov.hmcts.darts.audio.entity.MediaRequestEntity;
@@ -15,14 +16,18 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
-public interface MediaRequestRepository extends JpaRepository<MediaRequestEntity, Integer> {
+public interface MediaRequestRepository extends
+    RevisionRepository<MediaRequestEntity, Integer, Long>,
+    JpaRepository<MediaRequestEntity, Integer> {
 
     Optional<MediaRequestEntity> findTopByStatusOrderByLastModifiedDateTimeAsc(MediaRequestStatus status);
 
     @Transactional
     @Query(value = """
         UPDATE darts.media_request
-        SET request_status = 'PROCESSING'
+        SET request_status = 'PROCESSING',
+        last_modified_ts = current_timestamp,
+        last_modified_by = :userModifiedId
         WHERE mer_id IN (
           SELECT mr2.mer_id
           FROM darts.media_request mr2
@@ -32,7 +37,7 @@ public interface MediaRequestRepository extends JpaRepository<MediaRequestEntity
           )
         RETURNING *
         """, nativeQuery = true)
-    MediaRequestEntity updateAndRetrieveMediaRequestToProcessing();
+    MediaRequestEntity updateAndRetrieveMediaRequestToProcessing(int userModifiedId);
 
     @Query("""
         SELECT count(distinct(tm.id)) FROM MediaRequestEntity mr, TransformedMediaEntity tm

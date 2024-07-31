@@ -1,6 +1,5 @@
 package uk.gov.hmcts.darts.usermanagement.controller;
 
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.skyscreamer.jsonassert.JSONAssert;
 import org.skyscreamer.jsonassert.JSONCompareMode;
@@ -13,17 +12,17 @@ import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
+import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.test.common.TestUtils;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 import uk.gov.hmcts.darts.testutils.stubs.SuperAdminUserStub;
 import uk.gov.hmcts.darts.testutils.stubs.UserAccountStub;
 
+import java.util.List;
 import java.util.Set;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import static uk.gov.hmcts.darts.testutils.stubs.UserAccountStub.INTEGRATION_TEST_USER_EMAIL;
-import static uk.gov.hmcts.darts.testutils.stubs.UserAccountStub.SEPARATE_TEST_USER_EMAIL;
 
 @AutoConfigureMockMvc
 class SecurityGroupControllerIntTest extends IntegrationBase {
@@ -39,12 +38,6 @@ class SecurityGroupControllerIntTest extends IntegrationBase {
     private UserIdentity userIdentity;
     @Autowired
     private transient MockMvc mockMvc;
-
-    @AfterEach
-    void deleteUser() {
-        dartsDatabase.addToUserAccountTrash(INTEGRATION_TEST_USER_EMAIL);
-        dartsDatabase.addToUserAccountTrash(SEPARATE_TEST_USER_EMAIL);
-    }
 
     @Test
     void getSecurityGroupsShouldSucceedAndReturnAllGroups() throws Exception {
@@ -67,7 +60,7 @@ class SecurityGroupControllerIntTest extends IntegrationBase {
         superAdminUserStub.givenUserIsAuthorised(userIdentity);
 
         MockHttpServletRequestBuilder requestBuilder = get(ADMIN_SECURITY_GROUPS_ENDPOINT_URL)
-            .queryParam("role_ids", "1")
+            .queryParam("role_ids", "3")
             .contentType(MediaType.APPLICATION_JSON_VALUE);
 
         MvcResult mvcResult = mockMvc.perform(requestBuilder).andExpect(status().isOk()).andReturn();
@@ -79,7 +72,7 @@ class SecurityGroupControllerIntTest extends IntegrationBase {
                   {
                     "user_ids":[],
                     "id":-1,
-                    "security_role_id":1,
+                    "security_role_id":3,
                     "global_access":false,
                     "display_state":true,
                     "courthouse_ids":[],
@@ -96,7 +89,7 @@ class SecurityGroupControllerIntTest extends IntegrationBase {
         superAdminUserStub.givenUserIsAuthorised(userIdentity);
 
         MockHttpServletRequestBuilder requestBuilder = get(ADMIN_SECURITY_GROUPS_ENDPOINT_URL)
-            .queryParam("role_ids", "3,6")
+            .queryParam("role_ids", "1,6")
             .contentType(MediaType.APPLICATION_JSON_VALUE);
 
         MvcResult mvcResult = mockMvc.perform(requestBuilder).andExpect(status().isOk()).andReturn();
@@ -105,6 +98,15 @@ class SecurityGroupControllerIntTest extends IntegrationBase {
 
         String expectedJson = """
                 [
+                    {
+                     "user_ids":[],
+                     "id":-7,
+                     "security_role_id":1,
+                     "global_access":true,
+                     "display_state":true,
+                     "courthouse_ids":[],
+                     "name":"Test Judge Global"
+                   },
                    {
                      "user_ids":[],
                      "id":-6,
@@ -117,7 +119,7 @@ class SecurityGroupControllerIntTest extends IntegrationBase {
                    {
                      "user_ids":[],
                      "id":-3,
-                     "security_role_id":3,
+                     "security_role_id":1,
                      "global_access":false,
                      "display_state":true,
                      "courthouse_ids":[],
@@ -160,18 +162,18 @@ class SecurityGroupControllerIntTest extends IntegrationBase {
         String actualJson = mvcResult.getResponse().getContentAsString();
 
         String expectedJson = String.format("""
-                [
-                  {
-                    "user_ids":[],
-                    "id":-17,
-                    "security_role_id":10,
-                    "global_access":true,
-                    "display_state":false,
-                    "courthouse_ids":[%s],
-                    "name":"Mid Tier Group"
-                  }
-                ]
-            """, courthouseEntity.getId().toString());
+                                                    [
+                                                      {
+                                                        "user_ids":[],
+                                                        "id":-17,
+                                                        "security_role_id":14,
+                                                        "global_access":true,
+                                                        "display_state":false,
+                                                        "courthouse_ids":[%s],
+                                                        "name":"Mid Tier Group"
+                                                      }
+                                                    ]
+                                                """, courthouseEntity.getId().toString());
 
         JSONAssert.assertEquals(expectedJson, actualJson, JSONCompareMode.NON_EXTENSIBLE);
     }
@@ -181,7 +183,7 @@ class SecurityGroupControllerIntTest extends IntegrationBase {
         superAdminUserStub.givenUserIsAuthorised(userIdentity);
 
         MockHttpServletRequestBuilder requestBuilder = get(ADMIN_SECURITY_GROUPS_ENDPOINT_URL)
-            .queryParam("courthouse_id","500")
+            .queryParam("courthouse_id", "500")
             .contentType(MediaType.APPLICATION_JSON_VALUE);
 
         MvcResult mvcResult = mockMvc.perform(requestBuilder).andExpect(status().isOk()).andReturn();
@@ -199,8 +201,8 @@ class SecurityGroupControllerIntTest extends IntegrationBase {
         addCourthouseToSecurityGroup(courthouseEntity, MID_TIER_GROUP_ID);
 
         MockHttpServletRequestBuilder requestBuilder = get(ADMIN_SECURITY_GROUPS_ENDPOINT_URL)
-            .queryParam("role_ids", "6,9,10")
-            .queryParam("courthouse_id",courthouseEntity.getId().toString())
+            .queryParam("role_ids", "6,9,14")
+            .queryParam("courthouse_id", courthouseEntity.getId().toString())
             .contentType(MediaType.APPLICATION_JSON_VALUE);
 
         MvcResult mvcResult = mockMvc.perform(requestBuilder).andExpect(status().isOk()).andReturn();
@@ -208,18 +210,18 @@ class SecurityGroupControllerIntTest extends IntegrationBase {
         String actualJson = mvcResult.getResponse().getContentAsString();
 
         String expectedJson = String.format("""
-                [
-                  {
-                    "user_ids":[],
-                    "id":-17,
-                    "security_role_id":10,
-                    "global_access":true,
-                    "display_state":false,
-                    "courthouse_ids":[%s],
-                    "name":"Mid Tier Group"
-                  }
-                ]
-            """, courthouseEntity.getId().toString());
+                                                    [
+                                                      {
+                                                        "user_ids":[],
+                                                        "id":-17,
+                                                        "security_role_id":14,
+                                                        "global_access":true,
+                                                        "display_state":false,
+                                                        "courthouse_ids":[%s],
+                                                        "name":"Mid Tier Group"
+                                                      }
+                                                    ]
+                                                """, courthouseEntity.getId().toString());
 
         JSONAssert.assertEquals(expectedJson, actualJson, JSONCompareMode.NON_EXTENSIBLE);
     }
@@ -241,7 +243,7 @@ class SecurityGroupControllerIntTest extends IntegrationBase {
                     {
                       "user_ids":[],
                       "id":-17,
-                      "security_role_id":10,
+                      "security_role_id":14,
                       "global_access":true,
                       "display_state":false,
                       "courthouse_ids":[],
@@ -250,7 +252,7 @@ class SecurityGroupControllerIntTest extends IntegrationBase {
                     {
                       "user_ids":[],
                       "id":-16,
-                      "security_role_id":9,
+                      "security_role_id":13,
                       "global_access":true,
                       "display_state":false,
                       "courthouse_ids":[],
@@ -259,7 +261,7 @@ class SecurityGroupControllerIntTest extends IntegrationBase {
                       {
                         "user_ids":[],
                         "id":-15,
-                        "security_role_id":8,
+                        "security_role_id":12,
                         "global_access":true,
                         "display_state":false,
                         "courthouse_ids":[],
@@ -268,7 +270,7 @@ class SecurityGroupControllerIntTest extends IntegrationBase {
                       {
                         "user_ids":[],
                         "id":1,
-                        "security_role_id":11,
+                        "security_role_id":8,
                         "global_access":true,
                         "display_state":true,
                         "courthouse_ids":[],
@@ -279,7 +281,7 @@ class SecurityGroupControllerIntTest extends IntegrationBase {
                       {
                         "user_ids":[],
                         "id":2,
-                        "security_role_id":12,
+                        "security_role_id":7,
                         "global_access":true,
                         "display_state":true,
                         "courthouse_ids":[],
@@ -309,7 +311,7 @@ class SecurityGroupControllerIntTest extends IntegrationBase {
                   {
                     "user_ids":[],
                     "id":-17,
-                    "security_role_id":10,
+                    "security_role_id":14,
                     "global_access":true,
                     "display_state":false,
                     "courthouse_ids":[],
@@ -318,7 +320,7 @@ class SecurityGroupControllerIntTest extends IntegrationBase {
                     {
                     "user_ids":[],
                     "id":-16,
-                    "security_role_id":9,
+                    "security_role_id":13,
                     "global_access":true,
                     "display_state":false,
                     "courthouse_ids":[],
@@ -327,7 +329,7 @@ class SecurityGroupControllerIntTest extends IntegrationBase {
                     {
                     "user_ids":[],
                     "id":-15,
-                    "security_role_id":8,
+                    "security_role_id":12,
                     "global_access":true,
                     "display_state":false,
                     "courthouse_ids":[],
@@ -336,7 +338,7 @@ class SecurityGroupControllerIntTest extends IntegrationBase {
                     {
                     "user_ids":[],
                     "id":2,
-                    "security_role_id":12,
+                    "security_role_id":7,
                     "global_access":true,
                     "display_state":true,
                     "courthouse_ids":[],
@@ -366,7 +368,7 @@ class SecurityGroupControllerIntTest extends IntegrationBase {
                     {
                         "user_ids":[],
                         "id":1,
-                        "security_role_id":11,
+                        "security_role_id":8,
                         "global_access":true,
                         "display_state":true,
                         "courthouse_ids":[],
@@ -397,7 +399,7 @@ class SecurityGroupControllerIntTest extends IntegrationBase {
                       {
                           "user_ids":[],
                           "id":-17,
-                          "security_role_id":10,
+                          "security_role_id":14,
                           "global_access":true,
                           "display_state":false,
                           "courthouse_ids":[],
@@ -406,7 +408,7 @@ class SecurityGroupControllerIntTest extends IntegrationBase {
                       {
                           "user_ids":[],
                           "id":-16,
-                          "security_role_id":9,
+                          "security_role_id":13,
                           "global_access":true,
                           "display_state":false,
                           "courthouse_ids":[],
@@ -415,7 +417,7 @@ class SecurityGroupControllerIntTest extends IntegrationBase {
                       {
                           "user_ids":[],
                           "id":-15,
-                          "security_role_id":8,
+                          "security_role_id":12,
                           "global_access":true,
                           "display_state":false,
                           "courthouse_ids":[],
@@ -424,7 +426,7 @@ class SecurityGroupControllerIntTest extends IntegrationBase {
                       {
                           "user_ids":[],
                           "id":2,
-                          "security_role_id":12,
+                          "security_role_id":7,
                           "global_access":true,
                           "display_state":true,
                           "courthouse_ids":[],
@@ -445,7 +447,8 @@ class SecurityGroupControllerIntTest extends IntegrationBase {
         addCourthouseToSecurityGroup(courthouseEntity, -4);
 
         // add 2 users - system/non-system. only expect to see non-system in response
-        userAccountStub.createAuthorisedIntegrationTestUsersSystemAndNonSystem(courthouseEntity);
+        List<UserAccountEntity> users = userAccountStub.createAuthorisedIntegrationTestUsersSystemAndNonSystem(courthouseEntity);
+        UserAccountEntity nonSystemUser = users.stream().filter(userAccount -> !userAccount.getIsSystemUser()).findFirst().orElseThrow();
 
         MockHttpServletRequestBuilder requestBuilder = get(ADMIN_SECURITY_GROUPS_ENDPOINT_URL)
             .queryParam("courthouse_id", courthouseEntity.getId().toString())
@@ -456,18 +459,18 @@ class SecurityGroupControllerIntTest extends IntegrationBase {
         String actualJson = mvcResult.getResponse().getContentAsString();
 
         String expectedJson = String.format("""
-                [
-                  {
-                    "user_ids":[3],
-                    "id":-4,
-                    "security_role_id":4,
-                    "global_access":false,
-                    "display_state":true,
-                    "courthouse_ids":[%s],
-                    "name":"Test Transcriber"
-                  }
-                ]
-            """, courthouseEntity.getId().toString());
+                                                    [
+                                                      {
+                                                        "user_ids":[%s],
+                                                        "id":-4,
+                                                        "security_role_id":4,
+                                                        "global_access":false,
+                                                        "display_state":true,
+                                                        "courthouse_ids":[%s],
+                                                        "name":"Test Transcriber"
+                                                      }
+                                                    ]
+                                                """, nonSystemUser.getId(), courthouseEntity.getId());
 
         JSONAssert.assertEquals(expectedJson, actualJson, JSONCompareMode.NON_EXTENSIBLE);
     }

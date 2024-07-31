@@ -5,6 +5,7 @@ import org.springframework.data.repository.history.RevisionRepository;
 import org.springframework.stereotype.Repository;
 import uk.gov.hmcts.darts.common.entity.SecurityGroupEntity;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
@@ -21,4 +22,5 @@ public interface SecurityGroupRepository extends RevisionRepository<SecurityGrou
 
     boolean existsAllByIdIn(Set<Integer> ids);
 
+    List<SecurityGroupEntity> findByIdGreaterThanEqual(Integer value);
 }

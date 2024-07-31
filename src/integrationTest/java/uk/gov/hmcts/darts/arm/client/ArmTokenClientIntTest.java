@@ -29,7 +29,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
  * of a broader integration test.
  */
 @TestPropertySource(properties = {
-    "darts.storage.arm-api.url=http://localhost:8080"
+    "darts.storage.arm-api.url=http://localhost:${wiremock.server.port}"
 })
 class ArmTokenClientIntTest extends IntegrationBase {
 
@@ -90,7 +90,7 @@ class ArmTokenClientIntTest extends IntegrationBase {
 
         // Then
         assertEquals(
-            "[403 Forbidden] during [POST] to [http://localhost:8080/api/v1/token] [ArmTokenClient#getToken(ArmTokenRequest)]: []",
+            "[403 Forbidden] during [POST] to [http://localhost:" + wiremockPort + "/api/v1/token] [ArmTokenClient#getToken(ArmTokenRequest)]: []",
             exception.getMessage()
         );
     }

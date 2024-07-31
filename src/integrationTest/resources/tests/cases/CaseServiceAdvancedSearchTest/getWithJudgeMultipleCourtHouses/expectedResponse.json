@@ -6,30 +6,30 @@
       "aDefendant"
     ],
     "judges": [
-      "Judge3a",
-      "aJudge"
+      "JUDGE3A",
+      "AJUDGE"
     ],
     "hearings": [
       {
         "date": "2023-07-20",
         "courtroom": "courtroom1",
         "judges": [
-          "aJudge",
-          "Judge3a"
+          "AJUDGE",
+          "JUDGE3A"
         ]
       },
       {
         "date": "2023-07-21",
         "courtroom": "courtroom1",
         "judges": [
-          "aJudge"
+          "AJUDGE"
         ]
       },
       {
         "date": "2023-07-22",
         "courtroom": "courtroom1",
         "judges": [
-          "aJudge"
+          "AJUDGE"
         ]
       }
     ]
@@ -41,14 +41,14 @@
       "aDefendant"
     ],
     "judges": [
-      "Judge3a"
+      "JUDGE3A"
     ],
     "hearings": [
       {
         "date": "2023-05-20",
         "courtroom": "courtroomLondon",
         "judges": [
-          "Judge3a"
+          "JUDGE3A"
         ]
       }
     ]

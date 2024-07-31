@@ -5,13 +5,13 @@
   "status": "Approved",
   "received": "2023-06-20T10:00:00Z",
   "requestor" : {
-    "user_id" : 2,
-    "user_full_name" : "integrationtest.user@example.comUsername"
+    "user_id" : $USER_ACCOUNT_ID,
+    "user_full_name" : "integrationtest.user@example.comFullName"
   },
   "requestor_comments": "comment1",
   "defendants": [],
   "judges": [
-    "1judge1"
+    "1JUDGE1"
   ],
   "request_type": "Sentencing remarks",
   "transcription_start_ts": "2023-01-01T12:00:00Z",
