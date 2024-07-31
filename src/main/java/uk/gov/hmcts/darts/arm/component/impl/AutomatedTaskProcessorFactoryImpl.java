@@ -128,8 +128,6 @@ public class AutomatedTaskProcessorFactoryImpl implements AutomatedTaskProcessor
     public GenerateCaseDocumentForRetentionDateProcessor createGenerateCaseDocumentForRetentionDate(int batchSize) {
         if (batchSize > 0) {
             return generateCaseDocumentForRetentionDateBatchProcessor;
-//            return new GenerateCaseDocumentForRetentionDateBatchProcessorImpl(
-//                caseRepository, generateCaseDocumentSingleCaseProcessor, currentTimeHelper);
         } else {
             throw new DartsException(String.format("batch size not supported: '%s'", batchSize));
         }
