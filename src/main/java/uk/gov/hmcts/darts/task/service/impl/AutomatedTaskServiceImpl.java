@@ -52,6 +52,7 @@ import uk.gov.hmcts.darts.task.runner.impl.CloseUnfinishedTranscriptionsAutomate
 import uk.gov.hmcts.darts.task.runner.impl.DailyListAutomatedTask;
 import uk.gov.hmcts.darts.task.runner.impl.ExternalDataStoreDeleterAutomatedTask;
 import uk.gov.hmcts.darts.task.runner.impl.GenerateCaseDocumentAutomatedTask;
+import uk.gov.hmcts.darts.task.runner.impl.GenerateCaseDocumentForRetentionDateAutomatedTask;
 import uk.gov.hmcts.darts.task.runner.impl.InboundAnnotationTranscriptionDeleterAutomatedTask;
 import uk.gov.hmcts.darts.task.runner.impl.InboundAudioDeleterAutomatedTask;
 import uk.gov.hmcts.darts.task.runner.impl.InboundToUnstructuredAutomatedTask;
@@ -84,6 +85,7 @@ import static uk.gov.hmcts.darts.task.runner.AutomatedTaskName.CLOSE_OLD_UNFINIS
 import static uk.gov.hmcts.darts.task.runner.AutomatedTaskName.DAILY_LIST_HOUSEKEEPING_TASK_NAME;
 import static uk.gov.hmcts.darts.task.runner.AutomatedTaskName.EVENT_CLEANUP_CURRENT_TASK;
 import static uk.gov.hmcts.darts.task.runner.AutomatedTaskName.EXTERNAL_DATASTORE_DELETER_TASK_NAME;
+import static uk.gov.hmcts.darts.task.runner.AutomatedTaskName.GENERATE_CASE_DOCUMENT_FOR_RETENTION_DATE_TASK_NAME;
 import static uk.gov.hmcts.darts.task.runner.AutomatedTaskName.GENERATE_CASE_DOCUMENT_TASK_NAME;
 import static uk.gov.hmcts.darts.task.runner.AutomatedTaskName.INBOUND_AUDIO_DELETER_TASK_NAME;
 import static uk.gov.hmcts.darts.task.runner.AutomatedTaskName.INBOUND_TO_UNSTRUCTURED_TASK_NAME;
@@ -183,6 +185,7 @@ public class AutomatedTaskServiceImpl implements AutomatedTaskService {
         addInboundTranscriptionAndAnnotationDeleterToTaskRegistrar(taskRegistrar);
         addUnstructuredTranscriptionAndAnnotationDeleterToTaskRegistrar(taskRegistrar);
         addRemoveDuplicateEventsToTaskRegistrar(taskRegistrar);
+        addGenerateCaseDocumentForRetentionDateToTaskRegistrar(taskRegistrar);
     }
 
     @Override
@@ -268,6 +271,7 @@ public class AutomatedTaskServiceImpl implements AutomatedTaskService {
             case INBOUND_TRANSCRIPTION_ANNOTATION_DELETER_TASK_NAME -> rescheduleInboundTranscriptionAndAnnotationDeleterAutomatedTask();
             case UNSTRUCTURED_TRANSCRIPTION_ANNOTATION_DELETER_TASK_NAME -> rescheduleUnstructuredTranscriptionAndAnnotationDeleterAutomatedTask();
             case REMOVE_DUPLICATED_EVENTS_TASK_NAME -> rescheduleRemoveDuplicatedEventsAutomatedTask();
+            case GENERATE_CASE_DOCUMENT_FOR_RETENTION_DATE_TASK_NAME -> rescheduleGenerateCaseDocumentForRetentionDateAutomatedTask();
             default -> throw new DartsApiException(FAILED_TO_FIND_AUTOMATED_TASK);
         }
     }
@@ -275,16 +279,16 @@ public class AutomatedTaskServiceImpl implements AutomatedTaskService {
     @Override
     public boolean cancelAutomatedTaskAndUpdateCronExpression(String taskName, boolean mayInterruptIfRunning, String cronExpression) {
         boolean cancelled = cancelAutomatedTask(taskName, mayInterruptIfRunning);
-        boolean updatedCronExpresssion = false;
+        boolean updatedCronExpression = false;
         if (cancelled) {
-            updatedCronExpresssion = updateAutomatedTaskCronExpression(taskName, cronExpression);
-            if (updatedCronExpresssion) {
+            updatedCronExpression = updateAutomatedTaskCronExpression(taskName, cronExpression);
+            if (updatedCronExpression) {
                 reloadTaskByName(taskName);
             } else {
                 throw new DartsApiException(FAILED_TO_FIND_AUTOMATED_TASK);
             }
         }
-        return cancelled && updatedCronExpresssion;
+        return cancelled && updatedCronExpression;
     }
 
     @Override
@@ -604,6 +608,18 @@ public class AutomatedTaskServiceImpl implements AutomatedTaskService {
         removeDuplicateEventsAutomatedTask.setLastCronExpression(getAutomatedTaskCronExpression(removeDuplicateEventsAutomatedTask));
         Trigger trigger = createAutomatedTaskTrigger(removeDuplicateEventsAutomatedTask);
         taskRegistrar.addTriggerTask(removeDuplicateEventsAutomatedTask, trigger);
+    }
+
+    private void addGenerateCaseDocumentForRetentionDateToTaskRegistrar(ScheduledTaskRegistrar taskRegistrar) {
+        var generateCaseDocumentForRetentionDateAutomatedTask = new GenerateCaseDocumentForRetentionDateAutomatedTask(automatedTaskRepository,
+                                                                                                                      lockProvider,
+                                                                                                                      automatedTaskConfigurationProperties,
+                                                                                                                      automatedTaskProcessorFactory,
+                                                                                                                      logApi);
+        generateCaseDocumentForRetentionDateAutomatedTask.setLastCronExpression(
+            getAutomatedTaskCronExpression(generateCaseDocumentForRetentionDateAutomatedTask));
+        Trigger trigger = createAutomatedTaskTrigger(generateCaseDocumentForRetentionDateAutomatedTask);
+        taskRegistrar.addTriggerTask(generateCaseDocumentForRetentionDateAutomatedTask, trigger);
     }
 
     private void rescheduleProcessDailyListAutomatedTask() {
@@ -974,6 +990,23 @@ public class AutomatedTaskServiceImpl implements AutomatedTaskService {
             );
             Trigger trigger = createAutomatedTaskTrigger(removeDuplicatedEventsAutomatedTask);
             taskScheduler.schedule(removeDuplicatedEventsAutomatedTask, trigger);
+        } else {
+            taskScheduler.schedule(triggerAndAutomatedTask.getAutomatedTask(), triggerAndAutomatedTask.getTrigger());
+        }
+    }
+
+    private void rescheduleGenerateCaseDocumentForRetentionDateAutomatedTask() {
+        TriggerAndAutomatedTask triggerAndAutomatedTask = getTriggerAndAutomatedTask(GENERATE_CASE_DOCUMENT_FOR_RETENTION_DATE_TASK_NAME.getTaskName());
+        if (triggerAndAutomatedTask == null) {
+            var generateCaseDocumentForRetentionDateAutomatedTask = new GenerateCaseDocumentForRetentionDateAutomatedTask(
+                automatedTaskRepository,
+                lockProvider,
+                automatedTaskConfigurationProperties,
+                automatedTaskProcessorFactory,
+                logApi
+            );
+            Trigger trigger = createAutomatedTaskTrigger(generateCaseDocumentForRetentionDateAutomatedTask);
+            taskScheduler.schedule(generateCaseDocumentForRetentionDateAutomatedTask, trigger);
         } else {
             taskScheduler.schedule(triggerAndAutomatedTask.getAutomatedTask(), triggerAndAutomatedTask.getTrigger());
         }

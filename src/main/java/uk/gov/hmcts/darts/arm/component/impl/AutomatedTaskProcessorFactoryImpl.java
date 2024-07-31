@@ -18,9 +18,11 @@ import uk.gov.hmcts.darts.arm.service.impl.ArmResponseFilesProcessorImpl;
 import uk.gov.hmcts.darts.arm.service.impl.UnstructuredToArmBatchProcessorImpl;
 import uk.gov.hmcts.darts.arm.service.impl.UnstructuredToArmProcessorImpl;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
+import uk.gov.hmcts.darts.casedocument.service.GenerateCaseDocumentForRetentionDateProcessor;
 import uk.gov.hmcts.darts.casedocument.service.GenerateCaseDocumentProcessor;
 import uk.gov.hmcts.darts.casedocument.service.GenerateCaseDocumentSingleCaseProcessor;
 import uk.gov.hmcts.darts.casedocument.service.impl.GenerateCaseDocumentBatchProcessorImpl;
+import uk.gov.hmcts.darts.casedocument.service.impl.GenerateCaseDocumentForRetentionDateBatchProcessorImpl;
 import uk.gov.hmcts.darts.common.exception.DartsException;
 import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
 import uk.gov.hmcts.darts.common.repository.CaseRepository;
@@ -116,6 +118,16 @@ public class AutomatedTaskProcessorFactoryImpl implements AutomatedTaskProcessor
     public GenerateCaseDocumentProcessor createGenerateCaseDocumentProcessor(int batchSize) {
         if (batchSize > 0) {
             return new GenerateCaseDocumentBatchProcessorImpl(
+                batchSize, caseRepository, generateCaseDocumentSingleCaseProcessor, currentTimeHelper);
+        } else {
+            throw new DartsException(String.format("batch size not supported: '%s'", batchSize));
+        }
+    }
+
+    @Override
+    public GenerateCaseDocumentForRetentionDateProcessor createGenerateCaseDocumentForRetentionDate(int batchSize) {
+        if (batchSize > 0) {
+            return new GenerateCaseDocumentForRetentionDateBatchProcessorImpl(
                 batchSize, caseRepository, generateCaseDocumentSingleCaseProcessor, currentTimeHelper);
         } else {
             throw new DartsException(String.format("batch size not supported: '%s'", batchSize));
