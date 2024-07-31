@@ -58,7 +58,6 @@ import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.exception.AzureDeleteBlobException;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
-import uk.gov.hmcts.darts.common.repository.HearingRepository;
 import uk.gov.hmcts.darts.common.repository.MediaRepository;
 import uk.gov.hmcts.darts.common.repository.MediaRequestRepository;
 import uk.gov.hmcts.darts.common.repository.ObjectAdminActionRepository;
@@ -68,6 +67,7 @@ import uk.gov.hmcts.darts.common.repository.TransientObjectDirectoryRepository;
 import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
 import uk.gov.hmcts.darts.common.validation.IdRequest;
 import uk.gov.hmcts.darts.datamanagement.api.DataManagementApi;
+import uk.gov.hmcts.darts.hearings.service.HearingsService;
 import uk.gov.hmcts.darts.notification.api.NotificationApi;
 import uk.gov.hmcts.darts.notification.dto.SaveNotificationToDbRequest;
 
@@ -100,7 +100,7 @@ import static uk.gov.hmcts.darts.notification.api.NotificationApi.NotificationTe
 @SuppressWarnings({"PMD.CouplingBetweenObjects"})
 public class MediaRequestServiceImpl implements MediaRequestService {
 
-    private final HearingRepository hearingRepository;
+    private final HearingsService hearingsService;
     private final UserAccountRepository userAccountRepository;
     private final UserIdentity userIdentity;
     private final MediaRequestRepository mediaRequestRepository;
@@ -164,7 +164,7 @@ public class MediaRequestServiceImpl implements MediaRequestService {
     public boolean isUserDuplicateAudioRequest(AudioRequestDetails audioRequestDetails) {
 
         var duplicateUserMediaRequests = mediaRequestRepository.findDuplicateUserMediaRequests(
-            hearingRepository.getReferenceById(audioRequestDetails.getHearingId()),
+            hearingsService.getHearingById(audioRequestDetails.getHearingId()),
             userAccountRepository.getReferenceById(audioRequestDetails.getRequestor()),
             audioRequestDetails.getStartTime(),
             audioRequestDetails.getEndTime(),
@@ -179,7 +179,7 @@ public class MediaRequestServiceImpl implements MediaRequestService {
     @Override
     public MediaRequestEntity saveAudioRequest(AudioRequestDetails request) {
         MediaRequestEntity mediaRequest = saveAudioRequestToDb(
-            hearingRepository.getReferenceById(request.getHearingId()),
+            hearingsService.getHearingById(request.getHearingId()),
             userAccountRepository.getReferenceById(request.getRequestor()),
             request.getStartTime(),
             request.getEndTime(),
