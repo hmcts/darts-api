@@ -62,8 +62,7 @@ class GenerateCaseDocumentBatchProcessorImplTest {
         when(currentTimeHelper.currentOffsetDateTime()).thenReturn(OffsetDateTime.now());
         when(caseRepository.findCasesNeedingCaseDocumentGenerated(any(), eq(Pageable.ofSize(BATCH_SIZE))))
             .thenReturn(List.of(case1, case2));
-
-
+        
         batchProcessor.processGenerateCaseDocument();
 
         verify(singleCaseProcessor, times(2)).processGenerateCaseDocument(any());

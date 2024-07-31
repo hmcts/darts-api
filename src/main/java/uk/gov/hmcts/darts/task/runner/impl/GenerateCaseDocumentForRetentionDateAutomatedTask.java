@@ -35,6 +35,6 @@ public class GenerateCaseDocumentForRetentionDateAutomatedTask extends AbstractL
     protected void runTask() {
         Integer batchSize = getAutomatedTaskBatchSize(taskName);
         GenerateCaseDocumentForRetentionDateProcessor processor = automatedTaskProcessorFactory.createGenerateCaseDocumentForRetentionDate(batchSize);
-        processor.processGenerateCaseDocumentForRetentionDate();
+        processor.processGenerateCaseDocumentForRetentionDate(batchSize);
     }
 }

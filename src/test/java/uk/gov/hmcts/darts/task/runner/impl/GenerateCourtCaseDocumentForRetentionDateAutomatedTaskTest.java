@@ -48,6 +48,6 @@ class GenerateCourtCaseDocumentForRetentionDateAutomatedTaskTest {
 
         task.runTask();
 
-        verify(processor).processGenerateCaseDocumentForRetentionDate();
+        verify(processor).processGenerateCaseDocumentForRetentionDate(BATCH_SIZE);
     }
 }

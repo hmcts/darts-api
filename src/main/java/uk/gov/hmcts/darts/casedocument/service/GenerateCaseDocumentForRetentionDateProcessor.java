@@ -2,5 +2,5 @@ package uk.gov.hmcts.darts.casedocument.service;
 
 public interface GenerateCaseDocumentForRetentionDateProcessor {
 
-    void processGenerateCaseDocumentForRetentionDate();
+    void processGenerateCaseDocumentForRetentionDate(int batchSize);
 }

@@ -46,7 +46,6 @@ class GenerateCaseDocumentForRetentionDateBatchProcessorImplTest {
     @BeforeEach
     void setup() {
         batchProcessor = new GenerateCaseDocumentForRetentionDateBatchProcessorImpl(
-            BATCH_SIZE,
             caseRepository,
             singleCaseProcessor,
             currentTimeHelper
@@ -64,7 +63,7 @@ class GenerateCaseDocumentForRetentionDateBatchProcessorImplTest {
         when(caseRepository.findCasesNeedingCaseDocumentForRetentionDateGeneration(any(), any(), eq(Pageable.ofSize(BATCH_SIZE))))
             .thenReturn(List.of(case1, case2));
 
-        batchProcessor.processGenerateCaseDocumentForRetentionDate();
+        batchProcessor.processGenerateCaseDocumentForRetentionDate(BATCH_SIZE);
 
         verify(singleCaseProcessor, times(2)).processGenerateCaseDocument(any());
         verify(singleCaseProcessor).processGenerateCaseDocument(CASE_1_ID);
@@ -78,7 +77,7 @@ class GenerateCaseDocumentForRetentionDateBatchProcessorImplTest {
             .thenReturn(List.of(case1, case2));
         doThrow(RuntimeException.class).when(singleCaseProcessor).processGenerateCaseDocument(CASE_1_ID);
 
-        batchProcessor.processGenerateCaseDocumentForRetentionDate();
+        batchProcessor.processGenerateCaseDocumentForRetentionDate(BATCH_SIZE);
 
         verify(singleCaseProcessor).processGenerateCaseDocument(CASE_2_ID);
     }
