@@ -21,7 +21,6 @@ import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 import static uk.gov.hmcts.darts.authorisation.exception.AuthorisationError.USER_DETAILS_INVALID;
 
-@Component
 @AllArgsConstructor
 @Slf4j
 public class UserIdentityImpl implements UserIdentity {

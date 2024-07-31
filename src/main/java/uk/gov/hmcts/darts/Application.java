@@ -38,7 +38,6 @@ public class Application implements CommandLineRunner {
             log.info("ATS_MODE found, closing instance");
             instance.close();
         }
-
     }
 
     @Override
