@@ -60,6 +60,7 @@ import uk.gov.hmcts.darts.common.exception.AzureDeleteBlobException;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.common.exception.DartsException;
 import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
+import uk.gov.hmcts.darts.common.helper.SystemUserHelper;
 import uk.gov.hmcts.darts.common.repository.HearingRepository;
 import uk.gov.hmcts.darts.common.repository.MediaRepository;
 import uk.gov.hmcts.darts.common.repository.MediaRequestRepository;
@@ -125,6 +126,7 @@ public class MediaRequestServiceImpl implements MediaRequestService {
     private final MediaHideOrShowValidator mediaHideOrShowValidator;
     private final ObjectAdminActionRepository objectAdminActionRepository;
     private final ObjectHiddenReasonRepository objectHiddenReasonRepository;
+    private final SystemUserHelper systemUserHelper;
 
     @Override
     public Optional<MediaRequestEntity> getOldestMediaRequestByStatus(MediaRequestStatus status) {
@@ -133,7 +135,7 @@ public class MediaRequestServiceImpl implements MediaRequestService {
 
     @Override
     public Optional<MediaRequestEntity> retrieveMediaRequestForProcessing() {
-        return Optional.ofNullable(mediaRequestRepository.updateAndRetrieveMediaRequestToProcessing(userIdentity.getUserAccount().getId()));
+        return Optional.ofNullable(mediaRequestRepository.updateAndRetrieveMediaRequestToProcessing(systemUserHelper.getSystemUser().getId()));
     }
 
     @Override
@@ -479,7 +481,7 @@ public class MediaRequestServiceImpl implements MediaRequestService {
     public MediaRequestEntity updateAudioRequestCompleted(MediaRequestEntity mediaRequestEntity) {
 
         mediaRequestEntity.setStatus(COMPLETED);
-        mediaRequestEntity.setLastModifiedBy(userIdentity.getUserAccount());
+        mediaRequestEntity.setLastModifiedBy(systemUserHelper.getSystemUser());
 
         //todo update transformed media info
         return mediaRequestRepository.saveAndFlush(mediaRequestEntity);
