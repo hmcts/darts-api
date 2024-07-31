@@ -2,6 +2,7 @@ package uk.gov.hmcts.darts.audio.service;
 
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import uk.gov.hmcts.darts.audio.entity.MediaRequestEntity;
@@ -11,6 +12,7 @@ import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
+import uk.gov.hmcts.darts.common.helper.SystemUserHelper;
 import uk.gov.hmcts.darts.common.repository.MediaRequestRepository;
 import uk.gov.hmcts.darts.testutils.IntegrationPerClassBase;
 import uk.gov.hmcts.darts.testutils.stubs.SuperAdminUserStub;
@@ -55,6 +57,9 @@ class MediaRequestServiceTest extends IntegrationPerClassBase {
 
     @MockBean
     private UserIdentity mockUserIdentity;
+
+    @Autowired
+    private SystemUserHelper systemUserHelper;
 
     @BeforeAll
     void beforeAll() {
@@ -199,9 +204,6 @@ class MediaRequestServiceTest extends IntegrationPerClassBase {
 
         assertNull(mediaRequestEntityBeforeCompleted.getLastModifiedBy());
 
-        UserAccountEntity testUser = superAdminUserStub.givenUserIsAuthorised(mockUserIdentity);
-        when(mockUserIdentity.getUserAccount()).thenReturn(testUser);
-
         MediaRequestEntity mediaRequestEntity = mediaRequestService.updateAudioRequestCompleted(mediaRequestService.getMediaRequestEntityById(1));
 
         // assert the date and user is set
@@ -209,7 +211,7 @@ class MediaRequestServiceTest extends IntegrationPerClassBase {
         assertNotEquals(mediaRequestEntityBeforeCompleted
                                        .getLastModifiedDateTime()
                                        .atZoneSameInstant(ZoneOffset.UTC), mediaRequestEntity.getLastModifiedDateTime().atZoneSameInstant(ZoneOffset.UTC));
-        assertEquals(testUser.getId(), mediaRequestEntity.getLastModifiedBy().getId());
+        assertEquals(systemUserHelper.getSystemUser().getId(), mediaRequestEntity.getLastModifiedBy().getId());
     }
 
     @Test

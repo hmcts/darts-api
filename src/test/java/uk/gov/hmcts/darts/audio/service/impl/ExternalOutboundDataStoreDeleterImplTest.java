@@ -16,6 +16,7 @@ import uk.gov.hmcts.darts.common.helper.SystemUserHelper;
 import uk.gov.hmcts.darts.common.repository.TransformedMediaRepository;
 import uk.gov.hmcts.darts.common.repository.TransientObjectDirectoryRepository;
 import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
+import uk.gov.hmcts.darts.task.config.AutomatedTaskConfigurationProperties;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -44,10 +45,12 @@ class ExternalOutboundDataStoreDeleterImplTest {
     private OutboundDataStoreDeleter outboundDataStoreDeleter;
     @Mock
     private TransformedMediaRepository transformedMediaRepository;
+    @Mock
+    private AutomatedTaskConfigurationProperties automatedTaskConfigurationProperties;
 
     @BeforeEach
     void setUp() {
-        SystemUserHelper systemUserHelper = new SystemUserHelper(userAccountRepository);
+        SystemUserHelper systemUserHelper = new SystemUserHelper(userAccountRepository, automatedTaskConfigurationProperties);
         Map<String, String> systemUserGuidMap = new HashMap<>();
         systemUserGuidMap.put("housekeeping", "123");
         systemUserHelper.setSystemUserGuidMap(systemUserGuidMap);
