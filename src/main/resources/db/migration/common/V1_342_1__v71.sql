@@ -39,4 +39,3 @@ ALTER TABLE transcription_document ADD COLUMN ret_conf_reason CHARACTER VARYING;
 ALTER TABLE case_retention ADD COLUMN confidence_category INTEGER;
 
 CREATE UNIQUE INDEX rol_rol_nm_idx       ON security_role(role_name);
-CREATE UNIQUE INDEX grp_grp_nm_idx       ON security_group(group_name);
