@@ -18,6 +18,7 @@ import uk.gov.hmcts.darts.common.datamanagement.enums.DatastoreContainerType;
 import uk.gov.hmcts.darts.common.entity.AuditEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.repository.AuditRepository;
+import uk.gov.hmcts.darts.datamanagement.exception.FileNotDownloadedException;
 import uk.gov.hmcts.darts.datamanagement.service.DataManagementService;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 import uk.gov.hmcts.darts.testutils.stubs.AuthorisationStub;
@@ -123,6 +124,35 @@ class AudioRequestsControllerDownloadIntTest extends IntegrationBase {
 
         assertEquals("2", auditEntities.get(0).getCourtCase().getCaseNumber());
         assertEquals(1, auditEntities.size());
+    }
+
+    @Test
+    void audioRequestDownloadShouldReturnInternalServerErrorWhenExceptionDuringDownloadBlobData() throws Exception {
+        var blobId = UUID.randomUUID();
+
+        var requestor = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
+        var mediaRequestEntity = dartsDatabase.createAndLoadOpenMediaRequestEntity(requestor, AudioRequestType.DOWNLOAD);
+        var objectRecordStatusEntity = dartsDatabase.getObjectRecordStatusEntity(STORED);
+
+        var transientObjectDirectoryEntity = dartsDatabase.getTransientObjectDirectoryRepository()
+            .saveAndFlush(transientObjectDirectoryStub.createTransientObjectDirectoryEntity(
+                mediaRequestEntity,
+                objectRecordStatusEntity,
+                blobId
+            ));
+
+        final Integer transformedMediaId = transientObjectDirectoryEntity.getTransformedMedia().getId();
+
+        doNothing().when(mockAuthorisation)
+            .authoriseByTransformedMediaId(transformedMediaId, Set.of(TRANSCRIBER));
+
+        MockHttpServletRequestBuilder requestBuilder = get(ENDPOINT)
+            .queryParam("transformed_media_id", String.valueOf(transformedMediaId));
+
+        when(dataManagementService.downloadData(any(), any(), any())).thenThrow(new FileNotDownloadedException("Bom!"));
+
+        mockMvc.perform(requestBuilder)
+            .andExpect(status().isInternalServerError());
     }
 
     @Test
