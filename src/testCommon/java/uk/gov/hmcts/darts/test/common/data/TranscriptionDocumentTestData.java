@@ -5,7 +5,7 @@ import uk.gov.hmcts.darts.common.entity.TranscriptionDocumentEntity;
 
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
-import java.util.List;
+import java.util.Arrays;
 
 import static uk.gov.hmcts.darts.test.common.data.ObjectAdminActionTestData.objectAdminActionWithDefaults;
 import static uk.gov.hmcts.darts.test.common.data.TranscriptionTestData.minimalTranscription;
@@ -34,7 +34,7 @@ public class TranscriptionDocumentTestData {
     public static TranscriptionDocumentEntity transcriptionDocumentWithAdminAction() {
         var transcriptionDocument = minimalTranscriptionDocument();
         transcriptionDocument.setHidden(true);
-        transcriptionDocument.setAdminActions(List.of(objectAdminActionWithDefaults()));
+        transcriptionDocument.setAdminActions(Arrays.asList(objectAdminActionWithDefaults()));
         return transcriptionDocument;
     }
 

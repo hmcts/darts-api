@@ -107,6 +107,10 @@ public class TranscriptionEntity extends CreatedModifiedBaseEntity {
     private Boolean isManualTranscription;
 
     @NotAudited
+    @Column(name = "is_current")
+    private Boolean isCurrent;
+
+    @NotAudited
     @Column(name = "hide_request_from_requestor", nullable = false)
     private Boolean hideRequestFromRequestor;
 
@@ -155,7 +159,19 @@ public class TranscriptionEntity extends CreatedModifiedBaseEntity {
 
     public void addHearing(HearingEntity hearing) {
         if (hearing != null) {
+            if (hearings.isEmpty()) {
+                this.courtroom = hearing.getCourtroom();
+            }
             hearings.add(hearing);
+        }
+    }
+
+    public void setHearings(List<HearingEntity> hearings) {
+        this.hearings = hearings;
+        if (CollectionUtils.isEmpty(hearings)) {
+            this.courtroom = null;
+        } else {
+            this.courtroom = hearings.get(0).getCourtroom();
         }
     }
 

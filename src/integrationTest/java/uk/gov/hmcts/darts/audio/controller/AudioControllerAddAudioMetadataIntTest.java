@@ -1,7 +1,6 @@
 package uk.gov.hmcts.darts.audio.controller;
 
 import ch.qos.logback.classic.Level;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.skyscreamer.jsonassert.JSONAssert;
@@ -11,16 +10,12 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
-import org.springframework.util.LinkedMultiValueMap;
-import org.springframework.util.MultiValueMap;
+import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.util.unit.DataSize;
-import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 import org.testcontainers.shaded.org.apache.commons.io.IOUtils;
 import uk.gov.hmcts.darts.audio.exception.AudioApiError;
@@ -34,7 +29,7 @@ import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.enums.SecurityRoleEnum;
 import uk.gov.hmcts.darts.common.helper.MediaLinkedCaseHelper;
 import uk.gov.hmcts.darts.common.util.DateConverterUtil;
-import uk.gov.hmcts.darts.test.common.InMemoryMultipart;
+import uk.gov.hmcts.darts.test.common.DataGenerator;
 import uk.gov.hmcts.darts.test.common.LogUtil;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 import uk.gov.hmcts.darts.testutils.stubs.AuthorisationStub;
@@ -51,7 +46,6 @@ import java.time.Duration;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
@@ -67,6 +61,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @AutoConfigureMockMvc
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@TestPropertySource(properties = {
+    "spring.servlet.multipart.max-file-size=4MB",
+    "spring.servlet.multipart.max-request-size=4MB",
+})
 class AudioControllerAddAudioMetadataIntTest extends IntegrationBase {
 
     @Value("${local.server.port}")
@@ -77,6 +75,14 @@ class AudioControllerAddAudioMetadataIntTest extends IntegrationBase {
 
     private static final URI ENDPOINT = URI.create("/audios");
     private static final OffsetDateTime STARTED_AT = OffsetDateTime.of(2024, 10, 10, 10, 0, 0, 0, ZoneOffset.UTC);
+    private static final Path AUDIO_BINARY_PAYLOAD_1 = DataGenerator.createUniqueFile(DataSize.ofBytes(10),
+                                                                                      DataGenerator.FileType.MP2);
+    private static final Path AUDIO_BINARY_PAYLOAD_2 = DataGenerator.createUniqueFile(DataSize.ofBytes(10),
+                                                                                      DataGenerator.FileType.MP2);
+    private static final Path AUDIO_BINARY_PAYLOAD_3 = DataGenerator.createUniqueFile(DataSize.ofBytes(10),
+                                                                                      DataGenerator.FileType.MP2);
+    private static final Path AUDIO_BINARY_PAYLOAD_EXCEEDING_MAX_ALLOWABLE_SIZE = DataGenerator.createUniqueFile(DataSize.ofMegabytes(5),
+                                                                                                                 DataGenerator.FileType.MP2);
 
     @Value("${darts.audio.max-file-duration}")
     private Duration maxFileDuration;
@@ -130,8 +136,7 @@ class AudioControllerAddAudioMetadataIntTest extends IntegrationBase {
             "file",
             "audio.mp2",
             "audio/mpeg",
-            IOUtils.toByteArray(Files.newInputStream(Path.of(Thread.currentThread().getContextClassLoader()
-                                                                 .getResource("sample6.mp2").getFile())))
+            IOUtils.toByteArray(Files.newInputStream(AUDIO_BINARY_PAYLOAD_1))
         );
 
         MockMultipartFile metadataJson = new MockMultipartFile(
@@ -189,7 +194,8 @@ class AudioControllerAddAudioMetadataIntTest extends IntegrationBase {
     void addAudioMetadataDifferentCases() throws Exception {
         superAdminUserStub.givenUserIsAuthorised(mockUserIdentity, SecurityRoleEnum.MID_TIER);
 
-        makeAddAudioCall(1000, "case1");
+        makeAddAudioCall(AUDIO_BINARY_PAYLOAD_1, "case1")
+            .andExpect(status().isOk());
 
         List<HearingEntity> allHearings = dartsDatabase.getHearingRepository().findByCourthouseCourtroomAndDate("bristol", "1", STARTED_AT.toLocalDate());
 
@@ -217,7 +223,8 @@ class AudioControllerAddAudioMetadataIntTest extends IntegrationBase {
             assertNull(mediaFirst.getAntecedentId());
         }
 
-        makeAddAudioCall(1000, "case2");
+        makeAddAudioCall(AUDIO_BINARY_PAYLOAD_1, "case2")
+            .andExpect(status().isOk());
 
         addAudioLinkedHearings = new ArrayList<>();
         allHearings = dartsDatabase.getHearingRepository().findByCourthouseCourtroomAndDate("bristol", "1", STARTED_AT.toLocalDate());
@@ -293,12 +300,12 @@ class AudioControllerAddAudioMetadataIntTest extends IntegrationBase {
         assertEquals(0, mediaEntities.size());//shouldn't have any as no audio in that courtroom
 
         assertFalse(Objects.requireNonNull(LogUtil.getMemoryLogger())
-                        .searchLogs("Duplicate audio upload detected", toLevel(
+                        .searchLogs("Exact duplicate detected based upon media metadata and checksum.", toLevel(
                             Level.INFO_INT)).isEmpty());
     }
 
     @Test
-    void addAudioMetadataVersionedDueToDuplicateFileSizeDifference() throws Exception {
+    void addAudioMetadataVersionedDueToDuplicateMetadataButDifferentChecksum() throws Exception {
         superAdminUserStub.givenUserIsAuthorised(mockUserIdentity, SecurityRoleEnum.MID_TIER);
 
         makeAddAudioCall();
@@ -339,8 +346,8 @@ class AudioControllerAddAudioMetadataIntTest extends IntegrationBase {
         );
         assertEquals(1, hearingsInAnotherCourtroom.size());//should have hearingDifferentCourtroom
 
-        Integer newMedia = uploadAnotherAudioWithSize(1001L, originalMedia.getId().toString(), originalMedia.getId().toString());
-        Integer newMedia2 = uploadAnotherAudioWithSize(1002L, newMedia.toString(), originalMedia.getId().toString());
+        Integer newMedia = uploadAnotherAudioWithSize(AUDIO_BINARY_PAYLOAD_2, originalMedia.getId().toString(), originalMedia.getId().toString());
+        Integer newMedia2 = uploadAnotherAudioWithSize(AUDIO_BINARY_PAYLOAD_3, newMedia.toString(), originalMedia.getId().toString());
         assertNotEquals(newMedia, newMedia2);
     }
 
@@ -348,39 +355,20 @@ class AudioControllerAddAudioMetadataIntTest extends IntegrationBase {
     void addAudioBeyondAudioFileSizeThresholdExceeded() throws Exception {
         superAdminUserStub.givenUserIsAuthorised(mockUserIdentity, SecurityRoleEnum.MID_TIER);
 
-        InMemoryMultipart audioFile = InMemoryMultipart.getMultiPartOfRandomisedLengthKb(
-            "file",
-            "audio.mp2",
-            // add one onto the threshold so we are going to fail
-            addAudioThreshold.toBytes() + 1
-        );
+        MvcResult mvcResult = makeAddAudioCall(AUDIO_BINARY_PAYLOAD_EXCEEDING_MAX_ALLOWABLE_SIZE)
+            .andExpect(status().isBadRequest())
+            .andReturn();
 
-        UserAccountEntity testUser = authorisationStub.getSystemUser();
-        dartsDatabase.getUserAccountRepository().save(testUser);
+        String actualResponse = mvcResult.getResponse().getContentAsString();
 
-        dartsDatabase.createCase("Bristol", "case1");
-        dartsDatabase.createCase("Bristol", "case2");
-        dartsDatabase.createCase("Bristol", "case3");
-
-        HearingEntity hearingForEvent = hearingStub.createHearing("Bristol", "1", "case1", DateConverterUtil.toLocalDateTime(STARTED_AT));
-        eventStub.createEvent(hearingForEvent, 10, STARTED_AT.minusMinutes(20), "LOG");
-        HearingEntity hearingDifferentCourtroom = hearingStub.createHearing("Bristol", "2", "case2", DateConverterUtil.toLocalDateTime(STARTED_AT));
-        eventStub.createEvent(hearingDifferentCourtroom, 10, STARTED_AT.minusMinutes(20), "LOG");
-        HearingEntity hearingAfter = hearingStub.createHearing("Bristol", "1", "case3", DateConverterUtil.toLocalDateTime(STARTED_AT));
-        eventStub.createEvent(hearingAfter, 10, STARTED_AT.plusMinutes(20), "LOG");
-
-        AddAudioMetadataRequest addAudioMetadataRequest = createAddAudioRequest(STARTED_AT, STARTED_AT.plusMinutes(20), "Bristol", "1");
-
-        try {
-            streamFileWithMetaData(audioFile, addAudioMetadataRequest, "http://localhost:" + port + "/audios");
-            Assertions.fail();
-        } catch (RestClientException restClientException) {
-            String expectedJson = """
-                400 : "{"title":"Bad Request","status":400,"detail":"Maximum upload size exceeded"}"
-                """;
-
-            assertEquals(expectedJson.trim(), restClientException.getMessage());
-        }
+        String expectedResponse = """
+            {
+              "type": "AUDIO_108",
+              "title": "The audio metadata size exceeds maximum threshold",
+              "status": 400
+            }
+            """;
+        JSONAssert.assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
     }
 
     @Test
@@ -393,8 +381,7 @@ class AudioControllerAddAudioMetadataIntTest extends IntegrationBase {
             "file",
             "audio.mp2",
             "audio/mpeg",
-            IOUtils.toByteArray(Files.newInputStream(Path.of(Thread.currentThread().getContextClassLoader()
-                                                                 .getResource("sample6.mp2").getFile())))
+            IOUtils.toByteArray(Files.newInputStream(AUDIO_BINARY_PAYLOAD_1))
         );
 
         MockMultipartFile metadataJson = new MockMultipartFile(
@@ -429,8 +416,7 @@ class AudioControllerAddAudioMetadataIntTest extends IntegrationBase {
             "file",
             "audio.mp2",
             "audio/mpeg",
-            IOUtils.toByteArray(Files.newInputStream(Path.of(Thread.currentThread().getContextClassLoader()
-                                                                 .getResource("sample6.mp2").getFile())))
+            IOUtils.toByteArray(Files.newInputStream(AUDIO_BINARY_PAYLOAD_1))
         );
 
         MockMultipartFile metadataJson = new MockMultipartFile(
@@ -498,8 +484,7 @@ class AudioControllerAddAudioMetadataIntTest extends IntegrationBase {
             "file",
             "audio.mp2",
             "audio/mpeg",
-            IOUtils.toByteArray(Files.newInputStream(Path.of(Thread.currentThread().getContextClassLoader()
-                                                                 .getResource("sample6.mp2").getFile())))
+            IOUtils.toByteArray(Files.newInputStream(AUDIO_BINARY_PAYLOAD_EXCEEDING_MAX_ALLOWABLE_SIZE))
         );
 
         MockMultipartFile metadataJson = new MockMultipartFile(
@@ -534,8 +519,7 @@ class AudioControllerAddAudioMetadataIntTest extends IntegrationBase {
             "file",
             "audio.mp2",
             "audio/mpeg",
-            IOUtils.toByteArray(Files.newInputStream(Path.of(Thread.currentThread().getContextClassLoader()
-                                                                 .getResource("sample6.mp2").getFile())))
+            IOUtils.toByteArray(Files.newInputStream(AUDIO_BINARY_PAYLOAD_1))
         ) {
             private int fileSignatureValidationCallCount;
 
@@ -584,8 +568,7 @@ class AudioControllerAddAudioMetadataIntTest extends IntegrationBase {
             "file",
             "audio.mp2",
             "audio/mpeg",
-            IOUtils.toByteArray(Files.newInputStream(Path.of(Thread.currentThread().getContextClassLoader()
-                                                                 .getResource("sample6.mp2").getFile())))
+            IOUtils.toByteArray(Files.newInputStream(AUDIO_BINARY_PAYLOAD_1))
         );
 
         MockMultipartFile metadataJson = new MockMultipartFile(
@@ -619,8 +602,7 @@ class AudioControllerAddAudioMetadataIntTest extends IntegrationBase {
             "file",
             "audio.incorrect",
             "audio/mpeg",
-            IOUtils.toByteArray(Files.newInputStream(Path.of(Thread.currentThread().getContextClassLoader()
-                                                                 .getResource("sample6.mp2").getFile())))
+            IOUtils.toByteArray(Files.newInputStream(AUDIO_BINARY_PAYLOAD_1))
         );
 
         MockMultipartFile metadataJson = new MockMultipartFile(
@@ -654,8 +636,7 @@ class AudioControllerAddAudioMetadataIntTest extends IntegrationBase {
             "file",
             "audio.mp2",
             "audio/mpegincorrect",
-            IOUtils.toByteArray(Files.newInputStream(Path.of(Thread.currentThread().getContextClassLoader()
-                                                                 .getResource("sample6.mp2").getFile())))
+            IOUtils.toByteArray(Files.newInputStream(AUDIO_BINARY_PAYLOAD_1))
         );
 
         MockMultipartFile metadataJson = new MockMultipartFile(
@@ -723,8 +704,7 @@ class AudioControllerAddAudioMetadataIntTest extends IntegrationBase {
             "file",
             "audio.mp2",
             "audio/mpeg",
-            IOUtils.toByteArray(Files.newInputStream(Path.of(Thread.currentThread().getContextClassLoader()
-                                                                 .getResource("sample6.mp2").getFile())))
+            IOUtils.toByteArray(Files.newInputStream(AUDIO_BINARY_PAYLOAD_1))
         );
 
         MockMultipartFile metadataJson = new MockMultipartFile(
@@ -750,33 +730,35 @@ class AudioControllerAddAudioMetadataIntTest extends IntegrationBase {
     }
 
     private AddAudioMetadataRequest createAddAudioRequest(OffsetDateTime startedAt,
-                                                          OffsetDateTime endedAt, String courthouse, String courtroom, String filetype) {
+                                                          OffsetDateTime endedAt, String courthouse, String courtroom, String filetype) throws IOException {
         return createAddAudioRequest(startedAt, endedAt, courthouse, courtroom, filetype,
-                                     100, "case1", "case2", "case3");
+                                     AUDIO_BINARY_PAYLOAD_1, "case1", "case2", "case3");
     }
 
     private AddAudioMetadataRequest createAddAudioRequest(OffsetDateTime startedAt,
-                                                          OffsetDateTime endedAt, String courthouse, String courtroom) {
+                                                          OffsetDateTime endedAt, String courthouse, String courtroom) throws IOException {
         return createAddAudioRequest(startedAt, endedAt, courthouse, courtroom,
-                                     "mp2", 100, "case1", "case2", "case3");
+                                     "mp2", AUDIO_BINARY_PAYLOAD_1, "case1", "case2", "case3");
     }
 
 
     private AddAudioMetadataRequest createAddAudioRequest(OffsetDateTime startedAt,
                                                           OffsetDateTime endedAt,
-                                                          String courthouse, String courtroom, long fileSize) {
-        return createAddAudioRequest(startedAt, endedAt, courthouse, courtroom, "mp2", fileSize, "case1", "case2", "case3");
+                                                          String courthouse, String courtroom, Path audioBinaryPayload) throws IOException {
+        return createAddAudioRequest(startedAt, endedAt, courthouse, courtroom, "mp2", audioBinaryPayload, "case1", "case2", "case3");
     }
 
     private AddAudioMetadataRequest createAddAudioRequest(OffsetDateTime startedAt, OffsetDateTime endedAt,
-                                                          String courthouse, String courtroom, long fileSize, String... casesList) {
+                                                          String courthouse, String courtroom, Path audioBinaryPayload,
+                                                          String... casesList) throws IOException {
         return createAddAudioRequest(startedAt, endedAt, courthouse, courtroom,
-                                     "mp2", fileSize, casesList);
-
+                                     "mp2", audioBinaryPayload, casesList);
     }
 
     private AddAudioMetadataRequest createAddAudioRequest(OffsetDateTime startedAt, OffsetDateTime endedAt,
-                                                          String courthouse, String courtroom, String filetype, long fileSize, String... casesList) {
+                                                          String courthouse, String courtroom, String filetype, Path audioBinaryPayload,
+                                                          String... casesList) throws IOException {
+
         AddAudioMetadataRequest addAudioMetadataRequest = new AddAudioMetadataRequest();
         addAudioMetadataRequest.startedAt(startedAt);
         addAudioMetadataRequest.endedAt(endedAt);
@@ -788,18 +770,18 @@ class AudioControllerAddAudioMetadataIntTest extends IntegrationBase {
         addAudioMetadataRequest.courtroom(courtroom);
         addAudioMetadataRequest.cases(List.of(casesList));
         addAudioMetadataRequest.setMediaFile("media file");
-        addAudioMetadataRequest.setFileSize(fileSize);
+        addAudioMetadataRequest.setFileSize(Files.size(audioBinaryPayload));
         addAudioMetadataRequest.setChecksum("calculatedchecksum");
         return addAudioMetadataRequest;
     }
 
     @SuppressWarnings({"PMD.SignatureDeclareThrowsException"})
-    private void makeAddAudioCall() throws Exception {
-        makeAddAudioCall(1000L);
+    private ResultActions makeAddAudioCall() throws Exception {
+        return makeAddAudioCall(AUDIO_BINARY_PAYLOAD_1);
     }
 
     @SuppressWarnings({"PMD.SignatureDeclareThrowsException"})
-    private void makeAddAudioCall(long fileSize, String... casesToMapTo) throws Exception {
+    private ResultActions makeAddAudioCall(Path audioBinaryPayload, String... casesToMapTo) throws Exception {
         UserAccountEntity testUser = authorisationStub.getSystemUser();
         dartsDatabase.getUserAccountRepository().save(testUser);
 
@@ -816,17 +798,16 @@ class AudioControllerAddAudioMetadataIntTest extends IntegrationBase {
 
         AddAudioMetadataRequest addAudioMetadataRequest;
         if (casesToMapTo.length == 0) {
-            addAudioMetadataRequest = createAddAudioRequest(STARTED_AT, STARTED_AT, "Bristol", "1", fileSize);
+            addAudioMetadataRequest = createAddAudioRequest(STARTED_AT, STARTED_AT, "Bristol", "1", audioBinaryPayload);
         } else {
-            addAudioMetadataRequest = createAddAudioRequest(STARTED_AT, STARTED_AT, "Bristol", "1", fileSize, casesToMapTo);
+            addAudioMetadataRequest = createAddAudioRequest(STARTED_AT, STARTED_AT, "Bristol", "1", audioBinaryPayload, casesToMapTo);
         }
 
         MockMultipartFile audioFile = new MockMultipartFile(
             "file",
             "audio.mp2",
             "audio/mpeg",
-            IOUtils.toByteArray(Files.newInputStream(Path.of(Thread.currentThread().getContextClassLoader()
-                                                                 .getResource("sample6.mp2").getFile()))));
+            IOUtils.toByteArray(Files.newInputStream(audioBinaryPayload)));
 
         MockMultipartFile metadataJson = new MockMultipartFile(
             "metadata",
@@ -835,17 +816,16 @@ class AudioControllerAddAudioMetadataIntTest extends IntegrationBase {
             objectMapper.writeValueAsString(addAudioMetadataRequest).getBytes()
         );
 
-        mockMvc.perform(
-                multipart(ENDPOINT)
-                    .file(audioFile)
-                    .file(metadataJson))
-            .andExpect(status().isOk())
-            .andReturn();
+        return mockMvc.perform(
+            multipart(ENDPOINT)
+                .file(audioFile)
+                .file(metadataJson));
     }
 
     @SuppressWarnings({"PMD.SignatureDeclareThrowsException"})
-    private Integer uploadAnotherAudioWithSize(long sizeToUse, String expectedAntecedantId, String expectedChronicleId) throws Exception {
-        makeAddAudioCall(sizeToUse);
+    private Integer uploadAnotherAudioWithSize(Path audioBinaryPayload, String expectedAntecedantId, String expectedChronicleId) throws Exception {
+        makeAddAudioCall(audioBinaryPayload)
+            .andExpect(status().isOk());
 
         List<HearingEntity> allHearings = dartsDatabase.getHearingRepository().findByCourthouseCourtroomAndDate("bristol", "1", STARTED_AT.toLocalDate());
 
@@ -885,24 +865,10 @@ class AudioControllerAddAudioMetadataIntTest extends IntegrationBase {
         List<MediaEntity> mediaEntities = dartsDatabase.getMediaRepository().findAllByHearingId(hearingEntity.getId());
         assertEquals(0, mediaEntities.size());//shouldn't have any as no audio in that courtroom
         assertFalse(Objects.requireNonNull(LogUtil.getMemoryLogger())
-                        .searchLogs("Uploading new version of duplicate", toLevel(
+                        .searchLogs("Revised version of media added", toLevel(
                             Level.INFO_INT)).isEmpty());
 
         return media.getId();
     }
 
-    @SuppressWarnings("PMD.LooseCoupling")
-    public <T> void streamFileWithMetaData(InMemoryMultipart multipartFile, T metadata, String url) {
-        MultiValueMap<String, Object> map = new LinkedMultiValueMap<>();
-
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.MULTIPART_FORM_DATA);
-
-        map.put("metadata", Collections.singletonList(metadata));
-        map.put("file", List.of(multipartFile.getResource()));
-
-        HttpEntity<MultiValueMap<String, Object>> requestEntity = new HttpEntity<>(map, headers);
-
-        restTemplate.postForEntity(url, requestEntity, String.class);
-    }
 }

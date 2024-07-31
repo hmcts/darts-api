@@ -10,7 +10,7 @@
       }
     ],
     "judges": [
-      "aJudge"
+      "AJUDGE"
     ],
     "defendants": [
       "aDefendant"
@@ -27,7 +27,7 @@
       }
     ],
     "judges": [
-      "aJudge"
+      "AJUDGE"
     ],
     "defendants": [
       "Defendant2"
@@ -44,8 +44,8 @@
       }
     ],
     "judges": [
-      "Judge3a",
-      "aJudge"
+      "JUDGE3A",
+      "AJUDGE"
     ],
     "defendants": [
       "aDefendant"
@@ -65,7 +65,7 @@
       }
     ],
     "judges": [
-      "aJudge"
+      "AJUDGE"
     ],
     "defendants": [
       "aDefendant"
@@ -88,7 +88,7 @@
       }
     ],
     "judges": [
-      "aJudge"
+      "AJUDGE"
     ],
     "defendants": [
       "aDefendant"
@@ -111,8 +111,8 @@
       }
     ],
     "judges": [
-      "Judge6b",
-      "aJudge"
+      "JUDGE6B",
+      "AJUDGE"
     ],
     "defendants": [
       "aDefendant"
@@ -129,7 +129,7 @@
       }
     ],
     "judges": [
-      "aJudge"
+      "AJUDGE"
     ],
     "defendants": [
       "aDefendant"
@@ -146,7 +146,7 @@
       }
     ],
     "judges": [
-      "aJudge"
+      "AJUDGE"
     ],
     "defendants": [
       "aDefendant"
@@ -163,7 +163,7 @@
       }
     ],
     "judges": [
-      "Judge3a"
+      "JUDGE3A"
     ],
     "defendants": [
       "aDefendant"
@@ -180,7 +180,7 @@
       }
     ],
     "judges": [
-      "aJudge"
+      "AJUDGE"
     ],
     "defendants": [
       "aDefendant"

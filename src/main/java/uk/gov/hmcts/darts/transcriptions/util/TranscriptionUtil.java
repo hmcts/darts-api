@@ -7,12 +7,14 @@ import uk.gov.hmcts.darts.common.entity.TranscriptionEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionWorkflowEntity;
 import uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum;
 
+import java.time.Duration;
+import java.time.OffsetDateTime;
+import java.time.Period;
 import java.util.List;
 import java.util.Optional;
 
 @UtilityClass
 public class TranscriptionUtil {
-
 
     /*
     Returns the transcription comment that was added when the transcription was set to this status in the workflow.
@@ -28,5 +30,9 @@ public class TranscriptionUtil {
             return null;
         }
         return StringUtils.trimToNull(transcriptionCommentEntities.get(0).getComment());
+    }
+
+    public OffsetDateTime getDateToLimitResults(Duration dateLimit) {
+        return OffsetDateTime.now().minus(Period.ofDays((int) dateLimit.toDays()));
     }
 }

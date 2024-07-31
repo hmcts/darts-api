@@ -19,6 +19,7 @@ import uk.gov.hmcts.darts.audio.model.MediaHideRequest;
 import uk.gov.hmcts.darts.audio.model.MediaHideResponse;
 import uk.gov.hmcts.darts.audio.validation.MediaHideOrShowValidator;
 import uk.gov.hmcts.darts.audio.validation.SearchMediaValidator;
+import uk.gov.hmcts.darts.audit.api.AuditApi;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
 import uk.gov.hmcts.darts.common.entity.ObjectAdminActionEntity;
@@ -71,6 +72,8 @@ class MediaRequestServiceImplAdminMediaSearchTest {
     @Mock
     private SearchMediaValidator searchMediaValidator;
 
+    @Mock
+    private AuditApi auditApi;
 
     @Captor
     ArgumentCaptor<ObjectAdminActionEntity> objectAdminActionEntityArgumentCaptor;

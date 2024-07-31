@@ -1,7 +1,6 @@
 package uk.gov.hmcts.darts.cases.service;
 
 import lombok.extern.slf4j.Slf4j;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.skyscreamer.jsonassert.JSONAssert;
@@ -152,6 +151,7 @@ class CaseServiceAdvancedSearchTest extends IntegrationBase {
 
         CourtroomEntity courtroom4 = createCourtRoomWithNameAtCourthouse(swanseaCourthouse, "courtroom4");
         HearingEntity hearing10a = createHearingWithDefaults(case10, courtroom4, LocalDate.of(2023, 10, 23), judge);
+        HearingEntity hearing10b = createHearingWithDefaults(case10, courtroom4, LocalDate.of(2023, 10, 24), judge, false);
 
         dartsDatabase.saveAll(hearing1a, hearing1b, hearing1c,
                               hearing2a, hearing2b, hearing2c,
@@ -162,7 +162,7 @@ class CaseServiceAdvancedSearchTest extends IntegrationBase {
                               hearing7a, hearing7b,
                               hearing8,
                               hearing9,
-                              hearing10a
+                              hearing10a, hearing10b
         );
 
         EventEntity event4a = createEventWith("eventName", "event4a", hearing4a, OffsetDateTime.now());
@@ -171,11 +171,6 @@ class CaseServiceAdvancedSearchTest extends IntegrationBase {
 
         givenBearerTokenExists(INTEGRATION_TEST_USER_EMAIL);
         user = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
-    }
-
-    @AfterEach
-    void deleteUser() {
-        dartsDatabase.addToUserAccountTrash(INTEGRATION_TEST_USER_EMAIL);
     }
 
     @Test

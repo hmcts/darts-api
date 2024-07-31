@@ -38,7 +38,9 @@ public enum AuditActivity {
     ENABLE_DISABLE_JOB(29),
     ADDING_EVENT_MAPPING(30),
     DELETE_EVENT_MAPPING(31),
-    CHANGE_EVENT_MAPPING(32);
+    CHANGE_EVENT_MAPPING(32),
+    CHANGE_AUDIO_OWNERSHIP(33),
+    HIDE_AUDIO(34);
 
     private final Integer id;
 }

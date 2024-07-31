@@ -1,6 +1,5 @@
 package uk.gov.hmcts.darts.cases.controller;
 
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.skyscreamer.jsonassert.JSONCompareMode;
@@ -10,6 +9,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
+import uk.gov.hmcts.darts.authorisation.exception.AuthorisationError;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
@@ -30,6 +30,7 @@ import java.util.Arrays;
 
 import static org.skyscreamer.jsonassert.JSONAssert.assertEquals;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static uk.gov.hmcts.darts.cases.CasesConstants.GetSearchCasesParams.ENDPOINT_URL;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.APPROVER;
@@ -140,18 +141,12 @@ class CaseControllerSearchPostTest extends IntegrationBase {
         dartsDatabase.saveAll(event4a, event5b);
 
         givenBearerTokenExists(INTEGRATION_TEST_USER_EMAIL);
-        user = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
-        setupUserAccountAndSecurityGroup();
-    }
-
-    @AfterEach
-    void deleteUser() {
-        dartsDatabase.addToUserAccountTrash(INTEGRATION_TEST_USER_EMAIL);
     }
 
     @Test
     void casesSearchPostEndpoint() throws Exception {
-
+        user = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
+        setupUserAccountAndSecurityGroup();
         String requestBody = """
             {
               "courthouse": "SWANSEA",
@@ -173,7 +168,8 @@ class CaseControllerSearchPostTest extends IntegrationBase {
 
     @Test
     void casesSearchPostEndpointDateRange() throws Exception {
-
+        user = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
+        setupUserAccountAndSecurityGroup();
         String requestBody = """
             {
               "courthouse": "SWANSEA",
@@ -195,8 +191,125 @@ class CaseControllerSearchPostTest extends IntegrationBase {
     }
 
     @Test
-    void casesSearchPostEndpointEventText() throws Exception {
+    void courthouseAndSpecificDate() throws Exception {
+        user = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
+        setupUserAccountAndSecurityGroup();
+        String requestBody = """
+            {
+              "courthouse": "SWANSEA",
+              "date_to": "2023-05-20",
+              "date_from": "2023-05-20"
+            }""";
 
+        MockHttpServletRequestBuilder requestBuilder = post(ENDPOINT_URL)
+            .contentType(MediaType.APPLICATION_JSON_VALUE)
+            .content(requestBody);
+        MvcResult response = mockMvc.perform(requestBuilder).andExpect(status().isOk()).andReturn();
+
+        String actualResponse = TestUtils.removeIds(response.getResponse().getContentAsString());
+
+        String expectedResponse = """
+            [
+              {
+                "case_number": "Case1",
+                "courthouse": "SWANSEA",
+                "defendants": [
+                  "aDefendant"
+                ],
+                "judges": [
+                  "AJUDGE"
+                ],
+                "hearings": [
+                  {
+                    "date": "2023-05-20",
+                    "courtroom": "courtroom1",
+                    "judges": [
+                      "AJUDGE"
+                    ]
+                  },
+                  {
+                    "date": "2023-05-21",
+                    "courtroom": "courtroom1",
+                    "judges": [
+                      "AJUDGE"
+                    ]
+                  },
+                  {
+                    "date": "2023-05-22",
+                    "courtroom": "courtroom1",
+                    "judges": [
+                      "AJUDGE"
+                    ]
+                  }
+                ]
+              }
+            ]
+            """;
+        assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
+    }
+
+    @Test
+    void courthouseAndDateRange() throws Exception {
+        user = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
+        setupUserAccountAndSecurityGroup();
+        String requestBody = """
+            {
+              "courthouse": "SWANSEA",
+              "date_from": "2023-05-19",
+              "date_to": "2023-05-20"
+            }""";
+
+        MockHttpServletRequestBuilder requestBuilder = post(ENDPOINT_URL)
+            .contentType(MediaType.APPLICATION_JSON_VALUE)
+            .content(requestBody);
+        MvcResult response = mockMvc.perform(requestBuilder).andExpect(status().isOk()).andReturn();
+
+        String actualResponse = TestUtils.removeIds(response.getResponse().getContentAsString());
+
+        String expectedResponse = """
+            [
+              {
+                "case_number": "Case1",
+                "courthouse": "SWANSEA",
+                "defendants": [
+                  "aDefendant"
+                ],
+                "judges": [
+                  "AJUDGE"
+                ],
+                "hearings": [
+                  {
+                    "date": "2023-05-20",
+                    "courtroom": "courtroom1",
+                    "judges": [
+                      "AJUDGE"
+                    ]
+                  },
+                  {
+                    "date": "2023-05-21",
+                    "courtroom": "courtroom1",
+                    "judges": [
+                      "AJUDGE"
+                    ]
+                  },
+                  {
+                    "date": "2023-05-22",
+                    "courtroom": "courtroom1",
+                    "judges": [
+                      "AJUDGE"
+                    ]
+                  }
+                ]
+              }
+            ]
+            """;
+        assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
+    }
+
+    @Test
+    void casesSearchPostEndpointEventText() throws Exception {
+        user = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
+        setupUserAccountAndSecurityGroup();
         String requestBody = """
             {
               "courthouse": "SWANSEA",
@@ -218,7 +331,8 @@ class CaseControllerSearchPostTest extends IntegrationBase {
 
     @Test
     void casesSearchPostEndpointJudgeName() throws Exception {
-
+        user = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
+        setupUserAccountAndSecurityGroup();
         String requestBody = """
             {
               "courthouse": "SWANSEA",
@@ -236,6 +350,27 @@ class CaseControllerSearchPostTest extends IntegrationBase {
         String expectedResponse = getContentsFromFile(
             "tests/cases/CaseControllerSearchGetTest/casesSearchGetEndpoint/expectedResponseJudgeName.json");
         assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
+    }
+
+    @Test
+    void casesSearchPostEndpointJudgeNameInactive() throws Exception {
+        user = dartsDatabase.getUserAccountStub().createJudgeUser();
+        user.setActive(false);
+        setupUserAccountAndSecurityGroup();
+
+        String requestBody = """
+            {
+              "courthouse": "SWANSEA",
+              "courtroom": "1",
+              "judge_name": "e3a"
+            }""";
+
+        MockHttpServletRequestBuilder requestBuilder = post(ENDPOINT_URL)
+            .contentType(MediaType.APPLICATION_JSON_VALUE)
+            .content(requestBody);
+        mockMvc.perform(requestBuilder).andExpect(status().isForbidden()).andExpect(jsonPath("$.type").value(
+            AuthorisationError.USER_DETAILS_INVALID.getType().toString()));
+
     }
 
     private void setupUserAccountAndSecurityGroup() {

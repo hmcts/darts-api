@@ -17,6 +17,7 @@ import uk.gov.hmcts.darts.common.repository.CaseRetentionRepository;
 import uk.gov.hmcts.darts.common.repository.EventRepository;
 import uk.gov.hmcts.darts.common.repository.HearingRepository;
 import uk.gov.hmcts.darts.common.service.RetrieveCoreObjectService;
+import uk.gov.hmcts.darts.event.exception.DarNotifyError;
 import uk.gov.hmcts.darts.event.model.CreatedHearingAndEvent;
 import uk.gov.hmcts.darts.event.model.DarNotifyApplicationEvent;
 import uk.gov.hmcts.darts.event.model.DartsEvent;
@@ -78,12 +79,17 @@ public class StopAndCloseHandler extends EventHandlerBase {
 
     @Override
     @Transactional
+    @SuppressWarnings("PMD.EmptyCatchBlock")
     public void handle(DartsEvent dartsEvent, EventHandlerEntity eventHandler) {
         var hearingAndEvent = createHearingAndSaveEvent(dartsEvent, eventHandler); // saveEvent
         var courtCase = hearingAndEvent.getHearingEntity().getCourtCase();
 
-        var notifyEvent = new DarNotifyApplicationEvent(this, dartsEvent, STOP_RECORDING, hearingAndEvent.getCourtroomId());
-        eventPublisher.publishEvent(notifyEvent);
+        try {
+            var notifyEvent = new DarNotifyApplicationEvent(this, dartsEvent, STOP_RECORDING, hearingAndEvent.getCourtroomId());
+            darNotifyService.notifyDarPc(notifyEvent);
+        } catch (DarNotifyError ignored) {
+            // if DAR notify fails, continue processing the event
+        }
 
         setDefaultPolicyIfNotDefined(dartsEvent);
 
@@ -98,7 +104,7 @@ public class StopAndCloseHandler extends EventHandlerBase {
             return;
         }
 
-        //ignore the caseTotalSentence if it's not an overridable policy
+        // ignore the caseTotalSentence if it's not an overridable policy
         if (dartsEvent.getRetentionPolicy().getCaseTotalSentence() != null && !overridableFixedPolicyKeys.contains(
             dartsEvent.getRetentionPolicy().getCaseRetentionFixedPolicy())) {
             dartsEvent.getRetentionPolicy().setCaseTotalSentence(null);

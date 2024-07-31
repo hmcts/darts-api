@@ -33,7 +33,7 @@ class DailylistFunctionalTest extends FunctionalTest {
     ObjectMapper objectMapper;
 
     @BeforeEach
-    void createObjectMApper() {
+    void createObjectMapper() {
         objectMapper = new ObjectMapper();
         objectMapper.registerModule(new JavaTimeModule());
         objectMapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);

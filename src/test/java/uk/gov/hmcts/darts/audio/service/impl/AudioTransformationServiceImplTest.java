@@ -1,8 +1,6 @@
 package uk.gov.hmcts.darts.audio.service.impl;
 
 import com.azure.core.util.BinaryData;
-import com.azure.storage.blob.BlobClient;
-import com.azure.storage.blob.BlobClientBuilder;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -30,10 +28,13 @@ import uk.gov.hmcts.darts.common.repository.TransformedMediaRepository;
 import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
 import uk.gov.hmcts.darts.common.service.TransientObjectDirectoryService;
 import uk.gov.hmcts.darts.datamanagement.api.DataManagementApi;
+import uk.gov.hmcts.darts.datamanagement.model.BlobClientUploadResponse;
+import uk.gov.hmcts.darts.datamanagement.model.BlobClientUploadResponseImpl;
 import uk.gov.hmcts.darts.log.api.LogApi;
 import uk.gov.hmcts.darts.notification.api.NotificationApi;
 import uk.gov.hmcts.darts.notification.dto.SaveNotificationToDbRequest;
 
+import java.io.ByteArrayInputStream;
 import java.nio.file.Path;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
@@ -47,11 +48,10 @@ import java.util.UUID;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static uk.gov.hmcts.darts.audio.enums.MediaRequestStatus.COMPLETED;
 import static uk.gov.hmcts.darts.audio.enums.MediaRequestStatus.PROCESSING;
 import static uk.gov.hmcts.darts.audiorequests.model.AudioRequestType.DOWNLOAD;
 import static uk.gov.hmcts.darts.notification.NotificationConstants.ParameterMapValues.AUDIO_END_TIME;
@@ -87,10 +87,11 @@ class AudioTransformationServiceImplTest {
     public static final String MOCK_DEFENDANT_NAME = "Any Defendant";
     public static final String MOCK_DEFENDANT_LIST = "Any Defendant, Any Defendant";
     public static final String NOT_AVAILABLE = "N/A";
-    public static final LocalDate MOCK_HEARING_DATE = LocalDate.of(2023, 5, 1);
-    public static final String MOCK_HEARING_DATE_FORMATTED = "1st May 2023";
+    public static final LocalDate MOCK_HEARING_DATE = LocalDate.of(2023, 1, 1);
+    public static final LocalDate MOCK_HEARING_DATE_BST = LocalDate.of(2023, 7, 1);
+    public static final String MOCK_HEARING_DATE_FORMATTED = "1st January 2023";
+    public static final String MOCK_HEARING_DATE_BST_FORMATTED = "1st July 2023";
     public static final String MOCK_COURTHOUSE_NAME = "mockCourtHouse";
-    public static final String MOCK_EMAIL = "mock.email@mock.com";
     public static final int MOCK_CASEID = 99;
     public static final String TEST_EXTENSION = AudioRequestOutputFormat.MP3.getExtension();
     public static final String TEST_FILE_NAME = "case1_23_Nov_2023" + "." + TEST_EXTENSION;
@@ -190,16 +191,16 @@ class AudioTransformationServiceImplTest {
     void saveProcessedDataShouldSaveBlobAndSetStatus() {
         final MediaRequestEntity mediaRequestEntity = new MediaRequestEntity();
         mediaRequestEntity.setRequestType(DOWNLOAD);
-        final MediaRequestEntity mediaRequestEntityUpdated = new MediaRequestEntity();
-        mediaRequestEntityUpdated.setStatus(COMPLETED);
 
-        BlobClientBuilder blobClientBuilder = new BlobClientBuilder();
-        blobClientBuilder.blobName("0ddf61c8-0cec-4164-a4a7-10c5e47df9f1");
-        blobClientBuilder.endpoint("http://127.0.0.1:10000/devstoreaccount1");
-        BlobClient blobClient = blobClientBuilder.buildClient();
+        BlobClientUploadResponse blobClientUploadResponse = mock(BlobClientUploadResponseImpl.class);
+        UUID blobName = UUID.randomUUID();
+        when(blobClientUploadResponse.getBlobName())
+            .thenReturn(blobName);
+        when(blobClientUploadResponse.getBlobSize())
+            .thenReturn(1000L);
 
-        when(mockDataManagementApi.saveBlobDataToContainer(any(), any(), any()))
-            .thenReturn(blobClient);
+        when(mockDataManagementApi.saveBlobToContainer(any(), any(), any()))
+            .thenReturn(blobClientUploadResponse);
 
         when(mockTransientObjectDirectoryService.saveTransientObjectDirectoryEntity(
             any(),
@@ -222,15 +223,15 @@ class AudioTransformationServiceImplTest {
             .path(Path.of("test/b6b51cb7-9ff8-44de-bf53-62c2bd2e13f3.zip"))
             .build();
 
-        transformedMediaHelper.saveToStorage(
+        UUID returnedBlobName = transformedMediaHelper.saveToStorage(
             mediaRequestEntity,
-            BINARY_DATA, "filename",
+            new ByteArrayInputStream(TEST_BINARY_STRING.getBytes()), "filename",
             audioFileInfo
         );
 
-        verify(mockDataManagementApi).saveBlobDataToContainer(eq(BINARY_DATA), eq(DatastoreContainerType.OUTBOUND), anyMap());
-
-        verify(mockTransientObjectDirectoryService).saveTransientObjectDirectoryEntity(any(TransformedMediaEntity.class), eq(blobClient));
+        verify(mockDataManagementApi).saveBlobToContainer(any(), eq(DatastoreContainerType.OUTBOUND), any());
+        verify(mockTransientObjectDirectoryService).saveTransientObjectDirectoryEntity(any(TransformedMediaEntity.class), eq(blobName));
+        assertEquals(blobName, returnedBlobName);
     }
 
     @Test
@@ -402,6 +403,31 @@ class AudioTransformationServiceImplTest {
         assertEquals(actual.getTemplateValues().get(AUDIO_START_TIME), TIME_12_00.format(formatter));
         assertEquals(actual.getTemplateValues().get(AUDIO_END_TIME), TIME_13_00.format(formatter));
         assertEquals(MOCK_HEARING_DATE_FORMATTED, actual.getTemplateValues().get(HEARING_DATE));
+        assertEquals(MOCK_COURTHOUSE_NAME, actual.getTemplateValues().get(COURTHOUSE));
+        assertEquals(MOCK_DEFENDANT_LIST, actual.getTemplateValues().get(DEFENDANTS));
+        assertEquals(mockUserAccountEntity, actual.getUserAccountsToEmail().get(0));
+        assertEquals(actual.getEventId(), NotificationApi.NotificationTemplate.ERROR_PROCESSING_AUDIO.toString());
+        assertEquals(MOCK_CASEID, actual.getCaseId());
+    }
+
+    @Test
+    void testNotifyUserScheduleErrorNotificationUsingBstDateTime() {
+        List<String> defendants = new ArrayList<>();
+        defendants.add(MOCK_DEFENDANT_NAME);
+        defendants.add(MOCK_DEFENDANT_NAME);
+
+        OffsetDateTime startDateTime = OffsetDateTime.parse("2023-07-01T12:00Z");
+        OffsetDateTime endDateTime = OffsetDateTime.parse("2023-07-01T13:00Z");
+        initNotifyUserScheduleErrorNotificationMocks(MOCK_HEARING_DATE_BST, MOCK_COURTHOUSE_NAME, startDateTime, endDateTime);
+        when(mockCourtCase.getDefendantStringList()).thenReturn(defendants);
+
+        transformedMediaHelper.notifyUser(mockMediaRequestEntity, mockCourtCase, NotificationApi.NotificationTemplate.ERROR_PROCESSING_AUDIO.toString());
+        verify(mockNotificationApi).scheduleNotification(dbNotificationRequestCaptor.capture());
+        var actual = dbNotificationRequestCaptor.getValue();
+
+        assertEquals(actual.getTemplateValues().get(AUDIO_START_TIME), "13:00:00");
+        assertEquals(actual.getTemplateValues().get(AUDIO_END_TIME), "14:00:00");
+        assertEquals(MOCK_HEARING_DATE_BST_FORMATTED, actual.getTemplateValues().get(HEARING_DATE));
         assertEquals(MOCK_COURTHOUSE_NAME, actual.getTemplateValues().get(COURTHOUSE));
         assertEquals(MOCK_DEFENDANT_LIST, actual.getTemplateValues().get(DEFENDANTS));
         assertEquals(mockUserAccountEntity, actual.getUserAccountsToEmail().get(0));

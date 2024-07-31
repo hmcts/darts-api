@@ -19,12 +19,12 @@ import java.time.ZoneOffset;
 import java.util.Arrays;
 import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
 import static java.util.Objects.nonNull;
 import static org.mockito.ArgumentMatchers.argThat;
+import static uk.gov.hmcts.darts.PredefinedPrimaryKeys.TEST_JUDGE_GLOBAL_SECURITY_GROUP_ID;
 
 @Component
 @RequiredArgsConstructor
@@ -42,41 +42,18 @@ public class UserAccountStub {
     private final CourthouseStub courthouseStub;
     private final CourthouseRepository courthouseRepository;
     private final SecurityGroupStub securityGroupStub;
+    private final UserAccountStubComposable userAccountStubComposable;
 
     public UserAccountEntity getSystemUserAccountEntity() {
-
-        Optional<UserAccountEntity> userAccountEntityOptional = userAccountRepository.findById(SYSTEM_USER_ID);
-
-        if (userAccountEntityOptional.isPresent()) {
-            return userAccountEntityOptional.get();
-        } else {
-            var newUser = new UserAccountEntity();
-            newUser.setUserName("System User");
-            newUser.setEmailAddress("system.user@example.com");
-            newUser.setActive(true);
-            newUser.setAccountGuid(UUID.randomUUID().toString());
-            newUser.setIsSystemUser(true);
-            return userAccountRepository.saveAndFlush(newUser);
-        }
+        return userAccountStubComposable.getSystemUserAccountEntity();
     }
 
     public UserAccountEntity createSystemUserAccount(String username) {
-        var newUser = new UserAccountEntity();
-        newUser.setUserName(username);
-        newUser.setEmailAddress(username + "@example.com");
-        newUser.setActive(true);
-        newUser.setAccountGuid(UUID.randomUUID().toString());
-        newUser.setIsSystemUser(true);
-        newUser.setUserFullName(newUser.getUserName());
-        return userAccountRepository.saveAndFlush(newUser);
+        return userAccountStubComposable.createSystemUserAccount(username);
     }
 
     public UserAccountEntity getIntegrationTestUserAccountEntity() {
-        List<UserAccountEntity> userAccounts = userAccountRepository.findByEmailAddressIgnoreCase(INTEGRATION_TEST_USER_EMAIL);
-        if (userAccounts.isEmpty()) {
-            return createIntegrationUser(UUID.randomUUID().toString());
-        }
-        return userAccounts.get(0);
+        return userAccountStubComposable.getIntegrationTestUserAccountEntity();
     }
 
     /**
@@ -86,29 +63,15 @@ public class UserAccountStub {
      * @return the user account
      */
     public UserAccountEntity getIntegrationTestUserAccountEntity(String identifier) {
-        String emailAddress = identifier + "@example.com";
-        List<UserAccountEntity> userAccounts = userAccountRepository.findByEmailAddressIgnoreCase(emailAddress);
-        if (userAccounts.isEmpty()) {
-            return createIntegrationUser(UUID.randomUUID().toString(), identifier, emailAddress, true);
-        }
-        return userAccounts.get(0);
+        return userAccountStubComposable.getIntegrationTestUserAccountEntity(identifier);
     }
 
     public UserAccountEntity getSeparateIntegrationTestUserAccountEntity() {
-        List<UserAccountEntity> userAccounts = userAccountRepository.findByEmailAddressIgnoreCase(SEPARATE_TEST_USER_EMAIL);
-        if (userAccounts.isEmpty()) {
-            return createSeparateUser(UUID.randomUUID().toString());
-        }
-        return userAccounts.get(0);
+        return userAccountStubComposable.getSeparateIntegrationTestUserAccountEntity();
     }
 
     public UserAccountEntity getIntegrationTestUserAccountEntityInactive(String identifier) {
-        String emailAddress = identifier + "@example.com";
-        List<UserAccountEntity> userAccounts = userAccountRepository.findByEmailAddressIgnoreCase(emailAddress);
-        if (userAccounts.isEmpty()) {
-            return createIntegrationUser(UUID.randomUUID().toString(), identifier, emailAddress, false);
-        }
-        return userAccounts.get(0);
+        return userAccountStubComposable.getIntegrationTestUserAccountEntityInactive(identifier);
     }
 
     public UserAccountEntity createIntegrationUser(String guid) {
@@ -136,45 +99,52 @@ public class UserAccountStub {
         return userAccountRepository.saveAndFlush(newUser);
     }
 
-
-    private UserAccountEntity createSeparateUser(String guid) {
-        UserAccountEntity systemUser = userAccountRepository.getReferenceById(SYSTEM_USER_ID);
-        var newUser = new UserAccountEntity();
-        newUser.setUserName("Saad Integration User");
-        newUser.setUserFullName("Saad Integration User");
-        newUser.setEmailAddress(SEPARATE_TEST_USER_EMAIL);
-        newUser.setCreatedBy(systemUser);
-        newUser.setLastModifiedBy(systemUser);
-        newUser.setActive(true);
-        newUser.setAccountGuid(guid);
-        newUser.setIsSystemUser(false);
-        return userAccountRepository.saveAndFlush(newUser);
-    }
-
     @Transactional
     public UserAccountEntity createAuthorisedIntegrationTestUser(String courthouse) {
         return createAuthorisedIntegrationTestUser(courthouseStub.createCourthouseUnlessExists(courthouse));
     }
 
     @Transactional
-    public UserAccountEntity createAuthorisedIntegrationTestUser(CourthouseEntity courthouseEntity) {
-        SecurityGroupEntity securityGroupEntity = securityGroupRepository.getReferenceById(-4);
-
-        if (courthouseEntity != null) {
-            addCourthouseToSecurityGroup(securityGroupEntity, courthouseEntity);
-        }
-        var testUser = getIntegrationTestUserAccountEntity();
-        testUser.getSecurityGroupEntities().add(securityGroupEntity);
-        testUser = userAccountRepository.saveAndFlush(testUser);
-        return testUser;
+    public UserAccountEntity createAuthorisedIntegrationTestUser(boolean reuse, String courthouse) {
+        return createAuthorisedIntegrationTestUser(reuse, courthouseStub.createCourthouseUnlessExists(courthouse));
     }
 
     @Transactional
-    public UserAccountEntity createAuthorisedIntegrationTestUserWithoutCourthouse() {
-        SecurityGroupEntity securityGroupEntity = securityGroupRepository.getReferenceById(-4);
-        var testUser = getIntegrationTestUserAccountEntity();
-        testUser.getSecurityGroupEntities().add(securityGroupEntity);
-        testUser = userAccountRepository.saveAndFlush(testUser);
+    public UserAccountEntity createAuthorisedIntegrationTestUser(String... courthouses) {
+        CourthouseEntity[] courthouseEntities = new CourthouseEntity[courthouses.length];
+        for (int i = 0; i < courthouses.length; i++) {
+            courthouseEntities[i] = courthouseStub.createCourthouseUnlessExists(courthouses[i]);
+        }
+
+        return createAuthorisedIntegrationTestUser(true, courthouseEntities);
+    }
+
+    @Transactional
+    public UserAccountEntity createAuthorisedIntegrationTestUser(CourthouseEntity... courthouseEntities) {
+        return createReusableAuthorisedIntegrationTestUser(true, courthouseEntities);
+    }
+
+    @Transactional
+    public UserAccountEntity createAuthorisedIntegrationTestUser(boolean reuse, CourthouseEntity... courthouseEntities) {
+        return createReusableAuthorisedIntegrationTestUser(reuse, courthouseEntities);
+    }
+
+    private UserAccountEntity createReusableAuthorisedIntegrationTestUser(boolean reuse,
+                                                                          CourthouseEntity... courthouseEntities) {
+
+        var testUser = reuse ? getIntegrationTestUserAccountEntity() :
+            createIntegrationUser(UUID.randomUUID().toString(), UUID.randomUUID().toString() + "@test.com");
+
+        for (CourthouseEntity courthouseEntity : courthouseEntities) {
+            SecurityGroupEntity securityGroupEntity = securityGroupRepository.getReferenceById(-4);
+
+            if (courthouseEntity != null) {
+                addCourthouseToSecurityGroup(securityGroupEntity, courthouseEntity);
+            }
+            testUser.getSecurityGroupEntities().add(securityGroupEntity);
+            testUser = userAccountRepository.saveAndFlush(testUser);
+        }
+
         return testUser;
     }
 
@@ -231,8 +201,7 @@ public class UserAccountStub {
 
     @Transactional
     public UserAccountEntity createJudgeUser(String identifier) {
-        SecurityGroupEntity securityGroupEntity = securityGroupRepository.findById(-3).get();
-        securityGroupEntity.setGlobalAccess(true);
+        SecurityGroupEntity securityGroupEntity = securityGroupRepository.findById(TEST_JUDGE_GLOBAL_SECURITY_GROUP_ID).get();
         securityGroupEntity.getCourthouseEntities().addAll(courthouseRepository.findAll());
         securityGroupEntity = securityGroupRepository.saveAndFlush(securityGroupEntity);
 

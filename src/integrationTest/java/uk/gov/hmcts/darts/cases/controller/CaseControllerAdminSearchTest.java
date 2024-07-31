@@ -1,6 +1,5 @@
 package uk.gov.hmcts.darts.cases.controller;
 
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.skyscreamer.jsonassert.JSONCompareMode;
@@ -149,11 +148,6 @@ class CaseControllerAdminSearchTest extends IntegrationBase {
 
     }
 
-    @AfterEach
-    void deleteUser() {
-        dartsDatabase.addToUserAccountTrash(INTEGRATION_TEST_USER_EMAIL);
-    }
-
     @Test
     void testOk() throws Exception {
 
@@ -180,7 +174,6 @@ class CaseControllerAdminSearchTest extends IntegrationBase {
             "tests/cases/CaseControllerAdminSearchTest/testOk/expectedResponse.json");
         assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
     }
-
 
     private void setupUserAccountAndSecurityGroup() {
         var securityGroup = SecurityGroupTestData.buildGroupForRole(SUPER_ADMIN);

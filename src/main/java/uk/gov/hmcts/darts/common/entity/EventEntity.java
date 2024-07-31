@@ -81,6 +81,9 @@ public class EventEntity extends CreatedModifiedBaseEntity {
     @Column(name = "is_current")
     private Boolean isCurrent;
 
+    @Column(name = "is_data_anonymised")
+    private boolean isDataAnonymised;
+
     public void addHearing(HearingEntity hearingEntity) {
         hearingEntities.add(hearingEntity);
     }

@@ -1,16 +1,12 @@
 package uk.gov.hmcts.darts.common.util;
 
-import com.google.common.hash.HashCode;
-import com.google.common.hash.Hashing;
-import com.google.common.io.ByteSource;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
-import java.io.IOException;
+import java.io.FileInputStream;
 import java.io.InputStream;
 import java.nio.file.Path;
-import java.security.DigestInputStream;
 
 import static org.apache.commons.codec.digest.DigestUtils.md5;
 
@@ -28,7 +24,7 @@ import static org.apache.commons.codec.digest.DigestUtils.md5;
 public class FileContentChecksum {
 
     /**
-     * @deprecated This implementation is not memory-efficient with large files, use calculate(DigestInputStream digestInputStream) instead.
+     * @deprecated This implementation is not memory-efficient with large files, use calculate(InputStream inputStream) instead.
      */
     @Deprecated
     public String calculate(byte[] bytes) {
@@ -40,18 +36,9 @@ public class FileContentChecksum {
         return encodeToString(md5(inputStream));
     }
 
-    /**
-     * Calculates the digest when the source data has already been consumed.
-     */
-    public String calculate(DigestInputStream digestInputStream) throws IOException {
-        return encodeToString(digestInputStream.getMessageDigest().digest());
-    }
-
     @SneakyThrows
     public String calculate(Path filePath) {
-        ByteSource byteSource = com.google.common.io.Files.asByteSource(filePath.toFile());
-        HashCode hc = byteSource.hash(Hashing.md5());
-        return encodeToString(hc.asBytes());
+        return calculate(new FileInputStream(filePath.toFile()));
     }
 
     protected String encodeToString(byte[] bytes) {

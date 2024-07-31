@@ -17,6 +17,8 @@ import uk.gov.hmcts.darts.arm.component.AutomatedTaskProcessorFactory;
 import uk.gov.hmcts.darts.arm.service.ArmRetentionEventDateProcessor;
 import uk.gov.hmcts.darts.arm.service.BatchCleanupArmResponseFilesService;
 import uk.gov.hmcts.darts.arm.service.CleanupArmResponseFilesService;
+import uk.gov.hmcts.darts.arm.service.InboundAnnotationTranscriptionDeleterProcessor;
+import uk.gov.hmcts.darts.arm.service.UnstructuredTranscriptionAndAnnotationDeleterProcessor;
 import uk.gov.hmcts.darts.audio.deleter.impl.inbound.ExternalInboundDataStoreDeleter;
 import uk.gov.hmcts.darts.audio.deleter.impl.outbound.ExternalOutboundDataStoreDeleter;
 import uk.gov.hmcts.darts.audio.deleter.impl.unstructured.ExternalUnstructuredDataStoreDeleter;
@@ -30,6 +32,7 @@ import uk.gov.hmcts.darts.common.repository.AutomatedTaskRepository;
 import uk.gov.hmcts.darts.dailylist.service.DailyListProcessor;
 import uk.gov.hmcts.darts.dailylist.service.DailyListService;
 import uk.gov.hmcts.darts.datamanagement.service.InboundToUnstructuredProcessor;
+import uk.gov.hmcts.darts.event.service.RemoveDuplicateEventsProcessor;
 import uk.gov.hmcts.darts.log.api.LogApi;
 import uk.gov.hmcts.darts.retention.service.ApplyRetentionCaseAssociatedObjectsProcessor;
 import uk.gov.hmcts.darts.retention.service.ApplyRetentionProcessor;
@@ -43,16 +46,20 @@ import uk.gov.hmcts.darts.task.runner.impl.ApplyRetentionCaseAssociatedObjectsAu
 import uk.gov.hmcts.darts.task.runner.impl.ArmRetentionEventDateCalculatorAutomatedTask;
 import uk.gov.hmcts.darts.task.runner.impl.BatchCleanupArmResponseFilesAutomatedTask;
 import uk.gov.hmcts.darts.task.runner.impl.CleanupArmResponseFilesAutomatedTask;
+import uk.gov.hmcts.darts.task.runner.impl.CleanupCurrentEventTask;
 import uk.gov.hmcts.darts.task.runner.impl.CloseOldCasesAutomatedTask;
 import uk.gov.hmcts.darts.task.runner.impl.CloseUnfinishedTranscriptionsAutomatedTask;
 import uk.gov.hmcts.darts.task.runner.impl.DailyListAutomatedTask;
 import uk.gov.hmcts.darts.task.runner.impl.ExternalDataStoreDeleterAutomatedTask;
 import uk.gov.hmcts.darts.task.runner.impl.GenerateCaseDocumentAutomatedTask;
+import uk.gov.hmcts.darts.task.runner.impl.InboundAnnotationTranscriptionDeleterAutomatedTask;
 import uk.gov.hmcts.darts.task.runner.impl.InboundAudioDeleterAutomatedTask;
 import uk.gov.hmcts.darts.task.runner.impl.InboundToUnstructuredAutomatedTask;
 import uk.gov.hmcts.darts.task.runner.impl.OutboundAudioDeleterAutomatedTask;
 import uk.gov.hmcts.darts.task.runner.impl.ProcessArmResponseFilesAutomatedTask;
 import uk.gov.hmcts.darts.task.runner.impl.ProcessDailyListAutomatedTask;
+import uk.gov.hmcts.darts.task.runner.impl.RemoveDuplicatedEventsAutomatedTask;
+import uk.gov.hmcts.darts.task.runner.impl.UnstructuredAnnotationTranscriptionDeleterAutomatedTask;
 import uk.gov.hmcts.darts.task.runner.impl.UnstructuredAudioDeleterAutomatedTask;
 import uk.gov.hmcts.darts.task.runner.impl.UnstructuredToArmAutomatedTask;
 import uk.gov.hmcts.darts.task.service.AutomatedTaskService;
@@ -75,15 +82,19 @@ import static uk.gov.hmcts.darts.task.runner.AutomatedTaskName.CLEANUP_ARM_RESPO
 import static uk.gov.hmcts.darts.task.runner.AutomatedTaskName.CLOSE_OLD_CASES_TASK_NAME;
 import static uk.gov.hmcts.darts.task.runner.AutomatedTaskName.CLOSE_OLD_UNFINISHED_TRANSCRIPTIONS_TASK_NAME;
 import static uk.gov.hmcts.darts.task.runner.AutomatedTaskName.DAILY_LIST_HOUSEKEEPING_TASK_NAME;
+import static uk.gov.hmcts.darts.task.runner.AutomatedTaskName.EVENT_CLEANUP_CURRENT_TASK;
 import static uk.gov.hmcts.darts.task.runner.AutomatedTaskName.EXTERNAL_DATASTORE_DELETER_TASK_NAME;
 import static uk.gov.hmcts.darts.task.runner.AutomatedTaskName.GENERATE_CASE_DOCUMENT_TASK_NAME;
 import static uk.gov.hmcts.darts.task.runner.AutomatedTaskName.INBOUND_AUDIO_DELETER_TASK_NAME;
 import static uk.gov.hmcts.darts.task.runner.AutomatedTaskName.INBOUND_TO_UNSTRUCTURED_TASK_NAME;
+import static uk.gov.hmcts.darts.task.runner.AutomatedTaskName.INBOUND_TRANSCRIPTION_ANNOTATION_DELETER_TASK_NAME;
 import static uk.gov.hmcts.darts.task.runner.AutomatedTaskName.OUTBOUND_AUDIO_DELETER_TASK_NAME;
 import static uk.gov.hmcts.darts.task.runner.AutomatedTaskName.PROCESS_ARM_RESPONSE_FILES_TASK_NAME;
 import static uk.gov.hmcts.darts.task.runner.AutomatedTaskName.PROCESS_DAILY_LIST_TASK_NAME;
+import static uk.gov.hmcts.darts.task.runner.AutomatedTaskName.REMOVE_DUPLICATED_EVENTS_TASK_NAME;
 import static uk.gov.hmcts.darts.task.runner.AutomatedTaskName.UNSTRUCTURED_AUDIO_DELETER_TASK_NAME;
 import static uk.gov.hmcts.darts.task.runner.AutomatedTaskName.UNSTRUCTURED_TO_ARM_TASK_NAME;
+import static uk.gov.hmcts.darts.task.runner.AutomatedTaskName.UNSTRUCTURED_TRANSCRIPTION_ANNOTATION_DELETER_TASK_NAME;
 
 
 /**
@@ -141,6 +152,10 @@ public class AutomatedTaskServiceImpl implements AutomatedTaskService {
     private final DailyListService dailyListService;
 
     private final ArmRetentionEventDateProcessor armRetentionEventDateProcessor;
+    private final InboundAnnotationTranscriptionDeleterProcessor inboundTranscriptionAndAnnotationDeleterProcessor;
+    private final UnstructuredTranscriptionAndAnnotationDeleterProcessor unstructuredTranscriptionAndAnnotationDeleterProcessor;
+
+    private final RemoveDuplicateEventsProcessor removeDuplicateEventsProcessor;
 
     private final LogApi logApi;
 
@@ -164,6 +179,10 @@ public class AutomatedTaskServiceImpl implements AutomatedTaskService {
         addUnstructuredAudioDeleterAutomatedTaskToTaskRegistrar(taskRegistrar);
         addUnstructuredToArmTaskRegistrar(taskRegistrar);
         addGenerateCaseDocumentToTaskRegistrar(taskRegistrar);
+        addCleanEventToTaskRegistrar(taskRegistrar);
+        addInboundTranscriptionAndAnnotationDeleterToTaskRegistrar(taskRegistrar);
+        addUnstructuredTranscriptionAndAnnotationDeleterToTaskRegistrar(taskRegistrar);
+        addRemoveDuplicateEventsToTaskRegistrar(taskRegistrar);
     }
 
     @Override
@@ -245,6 +264,10 @@ public class AutomatedTaskServiceImpl implements AutomatedTaskService {
             case UNSTRUCTURED_AUDIO_DELETER_TASK_NAME -> rescheduleUnstructuredAudioDeleterAutomatedTask();
             case UNSTRUCTURED_TO_ARM_TASK_NAME -> rescheduleUnstructuredToArmAutomatedTask();
             case GENERATE_CASE_DOCUMENT_TASK_NAME -> rescheduleGenerateCaseDocumentAutomatedTask();
+            case EVENT_CLEANUP_CURRENT_TASK -> rescheduleEventCleanCurrentAutomatedTask();
+            case INBOUND_TRANSCRIPTION_ANNOTATION_DELETER_TASK_NAME -> rescheduleInboundTranscriptionAndAnnotationDeleterAutomatedTask();
+            case UNSTRUCTURED_TRANSCRIPTION_ANNOTATION_DELETER_TASK_NAME -> rescheduleUnstructuredTranscriptionAndAnnotationDeleterAutomatedTask();
+            case REMOVE_DUPLICATED_EVENTS_TASK_NAME -> rescheduleRemoveDuplicatedEventsAutomatedTask();
             default -> throw new DartsApiException(FAILED_TO_FIND_AUTOMATED_TASK);
         }
     }
@@ -526,13 +549,61 @@ public class AutomatedTaskServiceImpl implements AutomatedTaskService {
 
     private void addGenerateCaseDocumentToTaskRegistrar(ScheduledTaskRegistrar taskRegistrar) {
         var generateCaseDocumentAutomatedTask = new GenerateCaseDocumentAutomatedTask(automatedTaskRepository,
-                                                                  lockProvider,
-                                                                  automatedTaskConfigurationProperties,
-                                                                  automatedTaskProcessorFactory,
-                                                                  logApi);
+                                                                                      lockProvider,
+                                                                                      automatedTaskConfigurationProperties,
+                                                                                      automatedTaskProcessorFactory,
+                                                                                      logApi);
         generateCaseDocumentAutomatedTask.setLastCronExpression(getAutomatedTaskCronExpression(generateCaseDocumentAutomatedTask));
         Trigger trigger = createAutomatedTaskTrigger(generateCaseDocumentAutomatedTask);
         taskRegistrar.addTriggerTask(generateCaseDocumentAutomatedTask, trigger);
+    }
+
+    private void addCleanEventToTaskRegistrar(ScheduledTaskRegistrar taskRegistrar) {
+        var eventCleanupTask = new CleanupCurrentEventTask(automatedTaskRepository,
+                                                           lockProvider,
+                                                           automatedTaskConfigurationProperties,
+                                                           automatedTaskProcessorFactory,
+                                                           logApi);
+        eventCleanupTask.setLastCronExpression(getAutomatedTaskCronExpression(eventCleanupTask));
+        Trigger trigger = createAutomatedTaskTrigger(eventCleanupTask);
+        taskRegistrar.addTriggerTask(eventCleanupTask, trigger);
+    }
+
+
+    private void addInboundTranscriptionAndAnnotationDeleterToTaskRegistrar(ScheduledTaskRegistrar taskRegistrar) {
+        var eventCleanupTask = new InboundAnnotationTranscriptionDeleterAutomatedTask(automatedTaskRepository,
+                                                                                      lockProvider,
+                                                                                      automatedTaskConfigurationProperties,
+                                                                                      inboundTranscriptionAndAnnotationDeleterProcessor,
+                                                                                      logApi);
+        eventCleanupTask.setLastCronExpression(getAutomatedTaskCronExpression(eventCleanupTask));
+        Trigger trigger = createAutomatedTaskTrigger(eventCleanupTask);
+        taskRegistrar.addTriggerTask(eventCleanupTask, trigger);
+    }
+
+    private void addUnstructuredTranscriptionAndAnnotationDeleterToTaskRegistrar(ScheduledTaskRegistrar taskRegistrar) {
+        var unstructuredAnnotationTranscriptionDeleterAutomatedTask = new UnstructuredAnnotationTranscriptionDeleterAutomatedTask(automatedTaskRepository,
+                                                                                      lockProvider,
+                                                                                      automatedTaskConfigurationProperties,
+                                                                                      unstructuredTranscriptionAndAnnotationDeleterProcessor,
+                                                                                      logApi);
+        unstructuredAnnotationTranscriptionDeleterAutomatedTask
+            .setLastCronExpression(getAutomatedTaskCronExpression(unstructuredAnnotationTranscriptionDeleterAutomatedTask));
+        Trigger trigger = createAutomatedTaskTrigger(unstructuredAnnotationTranscriptionDeleterAutomatedTask);
+        taskRegistrar.addTriggerTask(unstructuredAnnotationTranscriptionDeleterAutomatedTask, trigger);
+    }
+
+    private void addRemoveDuplicateEventsToTaskRegistrar(ScheduledTaskRegistrar taskRegistrar) {
+        var removeDuplicateEventsAutomatedTask = new RemoveDuplicatedEventsAutomatedTask(
+            automatedTaskRepository,
+            lockProvider,
+            automatedTaskConfigurationProperties,
+            removeDuplicateEventsProcessor,
+            logApi
+        );
+        removeDuplicateEventsAutomatedTask.setLastCronExpression(getAutomatedTaskCronExpression(removeDuplicateEventsAutomatedTask));
+        Trigger trigger = createAutomatedTaskTrigger(removeDuplicateEventsAutomatedTask);
+        taskRegistrar.addTriggerTask(removeDuplicateEventsAutomatedTask, trigger);
     }
 
     private void rescheduleProcessDailyListAutomatedTask() {
@@ -565,6 +636,24 @@ public class AutomatedTaskServiceImpl implements AutomatedTaskService {
             );
             Trigger trigger = createAutomatedTaskTrigger(closeUnfinishedTranscriptionsAutomatedTask);
             taskScheduler.schedule(closeUnfinishedTranscriptionsAutomatedTask, trigger);
+        } else {
+            taskScheduler.schedule(triggerAndAutomatedTask.getAutomatedTask(), triggerAndAutomatedTask.getTrigger());
+        }
+    }
+
+    private void rescheduleEventCleanCurrentAutomatedTask() {
+        TriggerAndAutomatedTask triggerAndAutomatedTask = getTriggerAndAutomatedTask(
+            EVENT_CLEANUP_CURRENT_TASK.getTaskName());
+        if (triggerAndAutomatedTask == null) {
+            CleanupCurrentEventTask eventCleanupTask = new CleanupCurrentEventTask(
+                automatedTaskRepository,
+                lockProvider,
+                automatedTaskConfigurationProperties,
+                automatedTaskProcessorFactory,
+                logApi
+            );
+            Trigger trigger = createAutomatedTaskTrigger(eventCleanupTask);
+            taskScheduler.schedule(eventCleanupTask, trigger);
         } else {
             taskScheduler.schedule(triggerAndAutomatedTask.getAutomatedTask(), triggerAndAutomatedTask.getTrigger());
         }
@@ -834,6 +923,57 @@ public class AutomatedTaskServiceImpl implements AutomatedTaskService {
             );
             Trigger trigger = createAutomatedTaskTrigger(generateCaseDocumentAutomatedTask);
             taskScheduler.schedule(generateCaseDocumentAutomatedTask, trigger);
+        } else {
+            taskScheduler.schedule(triggerAndAutomatedTask.getAutomatedTask(), triggerAndAutomatedTask.getTrigger());
+        }
+    }
+
+    private void rescheduleInboundTranscriptionAndAnnotationDeleterAutomatedTask() {
+        TriggerAndAutomatedTask triggerAndAutomatedTask = getTriggerAndAutomatedTask(INBOUND_TRANSCRIPTION_ANNOTATION_DELETER_TASK_NAME.getTaskName());
+        if (triggerAndAutomatedTask == null) {
+            var generateInboundAnnotationTranscriptionTask = new InboundAnnotationTranscriptionDeleterAutomatedTask(
+                automatedTaskRepository,
+                lockProvider,
+                automatedTaskConfigurationProperties,
+                inboundTranscriptionAndAnnotationDeleterProcessor,
+                logApi
+            );
+            Trigger trigger = createAutomatedTaskTrigger(generateInboundAnnotationTranscriptionTask);
+            taskScheduler.schedule(generateInboundAnnotationTranscriptionTask, trigger);
+        } else {
+            taskScheduler.schedule(triggerAndAutomatedTask.getAutomatedTask(), triggerAndAutomatedTask.getTrigger());
+        }
+    }
+
+    private void rescheduleUnstructuredTranscriptionAndAnnotationDeleterAutomatedTask() {
+        TriggerAndAutomatedTask triggerAndAutomatedTask = getTriggerAndAutomatedTask(UNSTRUCTURED_TRANSCRIPTION_ANNOTATION_DELETER_TASK_NAME.getTaskName());
+        if (triggerAndAutomatedTask == null) {
+            var unstructuredAnnotationTranscriptionDeleterAutomatedTask = new UnstructuredAnnotationTranscriptionDeleterAutomatedTask(
+                automatedTaskRepository,
+                lockProvider,
+                automatedTaskConfigurationProperties,
+                unstructuredTranscriptionAndAnnotationDeleterProcessor,
+                logApi
+            );
+            Trigger trigger = createAutomatedTaskTrigger(unstructuredAnnotationTranscriptionDeleterAutomatedTask);
+            taskScheduler.schedule(unstructuredAnnotationTranscriptionDeleterAutomatedTask, trigger);
+        } else {
+            taskScheduler.schedule(triggerAndAutomatedTask.getAutomatedTask(), triggerAndAutomatedTask.getTrigger());
+        }
+    }
+
+    private void rescheduleRemoveDuplicatedEventsAutomatedTask() {
+        TriggerAndAutomatedTask triggerAndAutomatedTask = getTriggerAndAutomatedTask(REMOVE_DUPLICATED_EVENTS_TASK_NAME.getTaskName());
+        if (triggerAndAutomatedTask == null) {
+            var removeDuplicatedEventsAutomatedTask = new RemoveDuplicatedEventsAutomatedTask(
+                automatedTaskRepository,
+                lockProvider,
+                automatedTaskConfigurationProperties,
+                removeDuplicateEventsProcessor,
+                logApi
+            );
+            Trigger trigger = createAutomatedTaskTrigger(removeDuplicatedEventsAutomatedTask);
+            taskScheduler.schedule(removeDuplicatedEventsAutomatedTask, trigger);
         } else {
             taskScheduler.schedule(triggerAndAutomatedTask.getAutomatedTask(), triggerAndAutomatedTask.getTrigger());
         }

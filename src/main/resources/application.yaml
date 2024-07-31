@@ -110,15 +110,34 @@ darts:
   automated-tasks-pod: ${AUTOMATED_TASK_MODE:true}
   api-pod: ${API_MODE:true}
   audio:
+    allowed-media-mime-types:
+      - "audio/mpeg"
+      - "application/octet-stream"
     allowed-media-formats:
       - "mpeg2"
       - "mp2"
+    allowed-content-types:
       - "audio/mpeg"
+      - "application/octet-stream"
+    allowed-media-extensions:
+      - "mp2"
       - "a00"
       - "a01"
       - "a02"
       - "a03"
-      - "application/octet-stream"
+      - "a04"
+      - "a05"
+      - "a06"
+      - "a07"
+      - "b00"
+      - "b01"
+      - "b02"
+      - "b03"
+      - "b04"
+      - "b05"
+      - "b06"
+      - "b07"
+      - "b08"
     admin-search:
       max-results: 1000
     allowable-audio-gap-duration: 1s
@@ -168,6 +187,9 @@ darts:
   dar-pc-notification:
     url-format: http://{0}/VIQDARNotifyEvent/DARNotifyEvent.asmx
   events:
+    duplicates:
+      earliest-removable-event-date: ${MODERNISED_DARTS_START_DATE:2024-07-16}
+      clear-up-window: ${DUPLICATE_EVENTS_CLEAR_UP_WINDOW_DAYS:2}
     admin-search:
       max-results: 1000
   gateway:
@@ -276,6 +298,8 @@ darts:
       order: "UNSTRUCTURED,DETS,ARM,VODAFONE"
   case-document:
     generation-days: 28
+    filename-prefix: "CASE_DOCUMENT"
+    file-extension: "json"
   transcription:
     allowed-extensions:
       - "docx"
@@ -285,6 +309,9 @@ darts:
       - "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
       - "application/msword"
     max-created-by-duration: 30d
+    search:
+      date-limit: 90d
+      max-result-size: 500
   portal:
     url: ${DARTS_PORTAL_URL:https://darts.staging.apps.hmcts.net}
   automated:

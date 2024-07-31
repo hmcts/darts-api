@@ -24,11 +24,14 @@ import uk.gov.hmcts.darts.casedocument.service.impl.GenerateCaseDocumentBatchPro
 import uk.gov.hmcts.darts.common.exception.DartsException;
 import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
 import uk.gov.hmcts.darts.common.repository.CaseRepository;
+import uk.gov.hmcts.darts.common.repository.EventRepository;
 import uk.gov.hmcts.darts.common.repository.ExternalLocationTypeRepository;
 import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
 import uk.gov.hmcts.darts.common.repository.ObjectRecordStatusRepository;
 import uk.gov.hmcts.darts.common.service.FileOperationService;
 import uk.gov.hmcts.darts.datamanagement.api.DataManagementApi;
+import uk.gov.hmcts.darts.event.service.CleanupCurrentFlagEventProcessor;
+import uk.gov.hmcts.darts.event.service.impl.CleanupCurrentFlagEventProcessorImpl;
 
 @Component
 @RequiredArgsConstructor
@@ -51,6 +54,7 @@ public class AutomatedTaskProcessorFactoryImpl implements AutomatedTaskProcessor
     private final CurrentTimeHelper currentTimeHelper;
     private final CaseRepository caseRepository;
     private final GenerateCaseDocumentSingleCaseProcessor generateCaseDocumentSingleCaseProcessor;
+    private final EventRepository eventRepository;
 
     @Override
     public ArmResponseFilesProcessor createArmResponseFilesProcessor(int batchSize) {
@@ -118,4 +122,9 @@ public class AutomatedTaskProcessorFactoryImpl implements AutomatedTaskProcessor
         }
     }
 
+    @Override
+    public CleanupCurrentFlagEventProcessor createCleanupCurrentFlagEventProcessor(int batchSize) {
+        return new CleanupCurrentFlagEventProcessorImpl(
+            batchSize, eventRepository);
+    }
 }

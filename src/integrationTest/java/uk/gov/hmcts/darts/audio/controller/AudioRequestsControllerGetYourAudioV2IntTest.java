@@ -1,5 +1,6 @@
 package uk.gov.hmcts.darts.audio.controller;
 
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.TestInstance.Lifecycle;
@@ -9,6 +10,8 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import uk.gov.hmcts.darts.audio.enums.MediaRequestStatus;
 import uk.gov.hmcts.darts.audiorequests.model.AudioRequestType;
+import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
+import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
 import uk.gov.hmcts.darts.test.common.TestUtils;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 import uk.gov.hmcts.darts.testutils.stubs.MediaRequestStub;
@@ -30,6 +33,9 @@ class AudioRequestsControllerGetYourAudioV2IntTest extends IntegrationBase {
 
     @Autowired
     private MockMvc mockMvc;
+
+    @Autowired
+    private UserAccountRepository userAccountRepository;
 
     private static final List<String> TAGS_TO_IGNORE = List.of("media_request_id", "transformed_media_id", "case_id", "hearing_id");
 
@@ -381,4 +387,25 @@ class AudioRequestsControllerGetYourAudioV2IntTest extends IntegrationBase {
         TestUtils.compareJson(expectedJson, actualJson, TAGS_TO_IGNORE);
     }
 
+    @Test
+    void getYourAudioCurrentInactive() throws Exception {
+        setupTestData();
+        var thisOwner = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
+        UserAccountEntity userAccountEntity = userAccountRepository.findById(thisOwner.getId()).get();
+        userAccountEntity.setActive(false);
+        userAccountRepository.save(userAccountEntity);
+
+        var requestBuilder = get(URI.create(String.format("/audio-requests/v2?expired=%s", FALSE)))
+            .header(
+                "user_id",
+                thisOwner.getId()
+            );
+
+        MvcResult mvcResult = mockMvc.perform(requestBuilder)
+            .andExpect(status().isOk())
+            .andReturn();
+
+        String actualJson = mvcResult.getResponse().getContentAsString();
+        Assertions.assertEquals("{\"media_request_details\":[],\"transformed_media_details\":[]}", actualJson);
+    }
 }

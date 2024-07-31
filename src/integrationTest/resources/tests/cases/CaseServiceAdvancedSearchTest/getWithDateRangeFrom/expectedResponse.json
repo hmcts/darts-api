@@ -6,30 +6,30 @@
       "aDefendant"
     ],
     "judges": [
-      "Judge3a",
-      "aJudge"
+      "JUDGE3A",
+      "AJUDGE"
     ],
     "hearings": [
       {
         "date": "2023-07-20",
         "courtroom": "courtroom1",
         "judges": [
-          "aJudge",
-          "Judge3a"
+          "AJUDGE",
+          "JUDGE3A"
         ]
       },
       {
         "date": "2023-07-21",
         "courtroom": "courtroom1",
         "judges": [
-          "aJudge"
+          "AJUDGE"
         ]
       },
       {
         "date": "2023-07-22",
         "courtroom": "courtroom1",
         "judges": [
-          "aJudge"
+          "AJUDGE"
         ]
       }
     ]
@@ -41,28 +41,28 @@
       "aDefendant"
     ],
     "judges": [
-      "aJudge"
+      "AJUDGE"
     ],
     "hearings": [
       {
         "date": "2023-08-20",
         "courtroom": "courtroom2",
         "judges": [
-          "aJudge"
+          "AJUDGE"
         ]
       },
       {
         "date": "2023-08-21",
         "courtroom": "courtroom1",
         "judges": [
-          "aJudge"
+          "AJUDGE"
         ]
       },
       {
         "date": "2023-08-22",
         "courtroom": "courtroom1",
         "judges": [
-          "aJudge"
+          "AJUDGE"
         ]
       }
     ]
@@ -74,28 +74,28 @@
       "aDefendant"
     ],
     "judges": [
-      "aJudge"
+      "AJUDGE"
     ],
     "hearings": [
       {
         "date": "2023-09-20",
         "courtroom": "courtroom2",
         "judges": [
-          "aJudge"
+          "AJUDGE"
         ]
       },
       {
         "date": "2023-09-21",
         "courtroom": "courtroom1",
         "judges": [
-          "aJudge"
+          "AJUDGE"
         ]
       },
       {
         "date": "2023-09-22",
         "courtroom": "courtroom3",
         "judges": [
-          "aJudge"
+          "AJUDGE"
         ]
       }
     ]
@@ -107,30 +107,30 @@
       "aDefendant"
     ],
     "judges": [
-      "Judge6b",
-      "aJudge"
+      "JUDGE6B",
+      "AJUDGE"
     ],
     "hearings": [
       {
         "date": "2023-09-20",
         "courtroom": "courtroom2",
         "judges": [
-          "aJudge"
+          "AJUDGE"
         ]
       },
       {
         "date": "2023-09-21",
         "courtroom": "courtroom3",
         "judges": [
-          "aJudge",
-          "Judge6b"
+          "AJUDGE",
+          "JUDGE6B"
         ]
       },
       {
         "date": "2023-09-22",
         "courtroom": "courtroom1",
         "judges": [
-          "aJudge"
+          "AJUDGE"
         ]
       }
     ]
@@ -142,21 +142,21 @@
       "aDefendant"
     ],
     "judges": [
-      "aJudge"
+      "AJUDGE"
     ],
     "hearings": [
       {
         "date": "2023-10-21",
         "courtroom": "courtroom1",
         "judges": [
-          "aJudge"
+          "AJUDGE"
         ]
       },
       {
         "date": "2023-10-23",
         "courtroom": "courtroom1",
         "judges": [
-          "aJudge"
+          "AJUDGE"
         ]
       }
     ]
@@ -168,14 +168,14 @@
       "aDefendant"
     ],
     "judges": [
-      "aJudge"
+      "AJUDGE"
     ],
     "hearings": [
       {
         "date": "2023-10-22",
         "courtroom": "courtroom1",
         "judges": [
-          "aJudge"
+          "AJUDGE"
         ]
       }
     ]
@@ -187,14 +187,14 @@
       "aDefendant"
     ],
     "judges": [
-      "aJudge"
+      "AJUDGE"
     ],
     "hearings": [
       {
         "date": "2023-10-23",
         "courtroom": "courtroom4",
         "judges": [
-          "aJudge"
+          "AJUDGE"
         ]
       }
     ]

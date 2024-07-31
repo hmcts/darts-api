@@ -12,13 +12,15 @@ import uk.gov.hmcts.darts.audio.entity.MediaRequestEntity;
 import uk.gov.hmcts.darts.audio.exception.AudioApiError;
 import uk.gov.hmcts.darts.audio.exception.AudioRequestsApiError;
 import uk.gov.hmcts.darts.audio.mapper.GetTransformedMediaDetailsMapper;
+import uk.gov.hmcts.darts.audio.model.AdminActionRequest;
 import uk.gov.hmcts.darts.audio.model.AudioRequestBeingProcessedFromArchiveQueryResult;
+import uk.gov.hmcts.darts.audio.model.MediaHideRequest;
 import uk.gov.hmcts.darts.audio.validation.AudioMediaPatchRequestValidator;
+import uk.gov.hmcts.darts.audio.validation.MediaHideOrShowValidator;
 import uk.gov.hmcts.darts.audiorequests.model.AudioNonAccessedResponse;
 import uk.gov.hmcts.darts.audiorequests.model.AudioRequestDetails;
 import uk.gov.hmcts.darts.audiorequests.model.MediaPatchRequest;
 import uk.gov.hmcts.darts.audiorequests.model.MediaPatchResponse;
-import uk.gov.hmcts.darts.audit.api.AuditActivity;
 import uk.gov.hmcts.darts.audit.api.AuditApi;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
@@ -30,8 +32,12 @@ import uk.gov.hmcts.darts.common.entity.TransientObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.exception.AzureDeleteBlobException;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
+import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
 import uk.gov.hmcts.darts.common.repository.HearingRepository;
+import uk.gov.hmcts.darts.common.repository.MediaRepository;
 import uk.gov.hmcts.darts.common.repository.MediaRequestRepository;
+import uk.gov.hmcts.darts.common.repository.ObjectAdminActionRepository;
+import uk.gov.hmcts.darts.common.repository.ObjectHiddenReasonRepository;
 import uk.gov.hmcts.darts.common.repository.TransformedMediaRepository;
 import uk.gov.hmcts.darts.common.repository.TransientObjectDirectoryRepository;
 import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
@@ -65,10 +71,19 @@ import static uk.gov.hmcts.darts.audio.enums.MediaRequestStatus.OPEN;
 import static uk.gov.hmcts.darts.audio.enums.MediaRequestStatus.PROCESSING;
 import static uk.gov.hmcts.darts.audiorequests.model.AudioRequestType.DOWNLOAD;
 import static uk.gov.hmcts.darts.audiorequests.model.AudioRequestType.PLAYBACK;
+import static uk.gov.hmcts.darts.audit.api.AuditActivity.AUDIO_PLAYBACK;
+import static uk.gov.hmcts.darts.audit.api.AuditActivity.CHANGE_AUDIO_OWNERSHIP;
+import static uk.gov.hmcts.darts.audit.api.AuditActivity.EXPORT_AUDIO;
+import static uk.gov.hmcts.darts.audit.api.AuditActivity.HIDE_AUDIO;
+import static uk.gov.hmcts.darts.audit.api.AuditActivity.REQUEST_AUDIO;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.FAILURE_CHECKSUM_FAILED;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.STORED;
 import static uk.gov.hmcts.darts.notification.api.NotificationApi.NotificationTemplate.AUDIO_REQUEST_PROCESSING;
 import static uk.gov.hmcts.darts.notification.api.NotificationApi.NotificationTemplate.AUDIO_REQUEST_PROCESSING_ARCHIVE;
+import static uk.gov.hmcts.darts.test.common.data.MediaRequestTestData.minimalRequestData;
+import static uk.gov.hmcts.darts.test.common.data.MediaTestData.someMinimalMedia;
+import static uk.gov.hmcts.darts.test.common.data.ObjectHiddenReasonTestData.classified;
+import static uk.gov.hmcts.darts.util.EntityIdPopulator.withIdsPopulated;
 
 @ExtendWith(MockitoExtension.class)
 @SuppressWarnings({"PMD.ExcessiveImports"})
@@ -120,6 +135,21 @@ class MediaRequestServiceImplTest {
 
     @Mock
     private GetTransformedMediaDetailsMapper getTransformedMediaDetailsMapper;
+
+    @Mock
+    private MediaRepository mediaRepository;
+
+    @Mock
+    private MediaHideOrShowValidator mediaHideOrShowValidator;
+
+    @Mock
+    private ObjectAdminActionRepository objectAdminActionRepository;
+
+    @Mock
+    private ObjectHiddenReasonRepository objectHiddenReasonRepository;
+
+    @Mock
+    private CurrentTimeHelper currentTimeHelper;
 
     @BeforeEach
     void beforeEach() {
@@ -180,7 +210,7 @@ class MediaRequestServiceImplTest {
         verify(mockHearingRepository).getReferenceById(hearingId);
         verify(mockMediaRequestRepository).saveAndFlush(any(MediaRequestEntity.class));
         verify(mockUserAccountRepository).getReferenceById(TEST_REQUESTER);
-        verify(auditApi).record(AuditActivity.REQUEST_AUDIO, mockUserAccountEntity, mockCourtCaseEntity);
+        verify(auditApi).record(REQUEST_AUDIO, mockUserAccountEntity, mockCourtCaseEntity);
     }
 
     @Test
@@ -407,7 +437,7 @@ class MediaRequestServiceImplTest {
 
         verify(mockTransformedMediaRepository).findById(transformedMediaId);
         verifyNoInteractions(mockTransientObjectDirectoryRepository);
-        verify(auditApi).record(AuditActivity.EXPORT_AUDIO, mockUserAccountEntity, mockCourtCaseEntity);
+        verify(auditApi).record(EXPORT_AUDIO, mockUserAccountEntity, mockCourtCaseEntity);
     }
 
     @Test
@@ -534,7 +564,7 @@ class MediaRequestServiceImplTest {
 
         verify(mockTransformedMediaRepository).findById(transformedMediaId);
         verifyNoInteractions(mockTransientObjectDirectoryRepository);
-        verify(auditApi).record(AuditActivity.AUDIO_PLAYBACK, mockUserAccountEntity, mockCourtCaseEntity);
+        verify(auditApi).record(AUDIO_PLAYBACK, mockUserAccountEntity, mockCourtCaseEntity);
     }
 
     @Test
@@ -695,5 +725,56 @@ class MediaRequestServiceImplTest {
             .validate(any());
         verify(mockMediaRequestRepository, times(1))
             .save(entity);
+    }
+
+    @Test
+    void auditsWhenOwnerChanged() {
+        var mediaRequest = withIdsPopulated(minimalRequestData());
+        when(mockMediaRequestRepository.findById(any())).thenReturn(Optional.of(mediaRequest));
+        when(mockUserAccountRepository.findById(any())).thenReturn(Optional.of(mediaRequest.getCurrentOwner()));
+
+        mediaRequestService.patchMediaRequest(mediaRequest.getId(), new MediaPatchRequest().ownerId(999));
+
+        verify(auditApi).record(CHANGE_AUDIO_OWNERSHIP);
+    }
+
+    @Test
+    void doesNotAuditWhenOwnerNotChanged() {
+        var mediaRequest = withIdsPopulated(minimalRequestData());
+        when(mockMediaRequestRepository.findById(any())).thenReturn(Optional.of(mediaRequest));
+        when(mockUserAccountRepository.findById(any())).thenReturn(Optional.of(mediaRequest.getCurrentOwner()));
+
+        mediaRequestService.patchMediaRequest(
+            mediaRequest.getId(),
+            new MediaPatchRequest().ownerId(mediaRequest.getCurrentOwner().getId()));
+
+        verifyNoInteractions(auditApi);
+    }
+
+    @Test
+    void auditsWhenAudioHidden() {
+        var media = withIdsPopulated(someMinimalMedia());
+        media.setHidden(false);
+        when(mediaRepository.findById(any())).thenReturn(Optional.of(media));
+        when(objectHiddenReasonRepository.findById(any())).thenReturn(Optional.of(classified()));
+
+        var mediaHideRequest = new MediaHideRequest()
+            .isHidden(true)
+            .adminAction(new AdminActionRequest().reasonId(1));
+
+        mediaRequestService.adminHideOrShowMediaById(media.getId(), mediaHideRequest);
+
+        verify(auditApi).record(HIDE_AUDIO);
+    }
+
+    @Test
+    void doesNotAuditWhenAudioMadeVisible() {
+        var media = withIdsPopulated(someMinimalMedia());
+        media.setHidden(true);
+        when(mediaRepository.findById(any())).thenReturn(Optional.of(media));
+
+        mediaRequestService.adminHideOrShowMediaById(media.getId(), new MediaHideRequest().isHidden(false));
+
+        verifyNoInteractions(auditApi);
     }
 }
