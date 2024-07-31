@@ -65,11 +65,11 @@ public interface CaseRepository extends JpaRepository<CourtCaseEntity, Integer> 
             CaseRetentionEntity cr,
             (select cr2.courtCase.id as caseId, max(cr2.createdDateTime) latest_ts
                 FROM CaseRetentionEntity cr2
+                WHERE cr2.currentState = 'COMPLETE'
                 GROUP by cr2.courtCase.id) latest_case_retention
             WHERE cr.courtCase.id = cc.id
             AND latest_case_retention.latest_ts = cr.createdDateTime
             AND latest_case_retention.caseId = cr.courtCase.id
-            AND cr.currentState = 'COMPLETE'
             AND cr.retainUntil between CURRENT_TIMESTAMP and :retainUntilTimestamp
             AND not exists (select 1 from CaseDocumentEntity cd
                 WHERE cd.courtCase.id = cc.id
