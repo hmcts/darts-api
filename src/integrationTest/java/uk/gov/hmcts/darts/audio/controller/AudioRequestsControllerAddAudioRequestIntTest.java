@@ -228,6 +228,24 @@ class AudioRequestsControllerAddAudioRequestIntTest extends IntegrationBase {
     }
 
     @Test
+    void addAudioRequestWhenHearingNotFoundShouldThrow404() throws Exception {
+        var audioRequestDetails = new AudioRequestDetails();
+        audioRequestDetails.setHearingId(9999); // Set to invalid hearing id
+        audioRequestDetails.setStartTime(START_TIME);
+        audioRequestDetails.setEndTime(END_TIME);
+        audioRequestDetails.setRequestor(testUser.getId());
+        audioRequestDetails.setRequestType(AUDIO_REQUEST_TYPE_DOWNLOAD);
+
+        MockHttpServletRequestBuilder requestBuilder = post(ENDPOINT)
+            .header("Content-Type", "application/json")
+            .content(objectMapper.writeValueAsString(audioRequestDetails));
+
+        mockMvc.perform(requestBuilder)
+            .andExpect(status().isNotFound())
+            .andReturn();
+    }
+
+    @Test
     void duplicateAddAudioRequestShouldThrowConflictError() throws Exception {
         var requestor = dartsDatabase.getUserAccountStub()
             .createAuthorisedIntegrationTestUser("NEWCASTLE");
