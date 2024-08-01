@@ -145,6 +145,14 @@ public class AnnotationArchiveRecordMapperImpl implements AnnotationArchiveRecor
             metadata.setContributor(courthouse + " & " + courtroom);
         }
 
+        if (nonNull(annotationDocument.getRetConfReason())) {
+            metadata.setRetentionConfidenceReason(annotationDocument.getRetConfReason());
+        }
+
+        if (annotationDocument.getRetConfScore() != 0) {
+            metadata.setRetentionConfidenceScore(annotationDocument.getRetConfScore());
+        }
+
         if (annotationRecordProperties.containsKey(BF_001_KEY)) {
             metadata.setBf001(mapToString(annotationRecordProperties.getProperty(BF_001_KEY), annotationDocument));
         }

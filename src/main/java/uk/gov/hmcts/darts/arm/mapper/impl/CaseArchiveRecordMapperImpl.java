@@ -155,6 +155,14 @@ public class CaseArchiveRecordMapperImpl implements CaseArchiveRecordMapper {
             metadata.setContributor(courthouse);
         }
 
+        if (nonNull(caseDocument.getRetConfReason())) {
+            metadata.setRetentionConfidenceReason(caseDocument.getRetConfReason());
+        }
+
+        if (caseDocument.getRetConfScore() != 0) {
+            metadata.setRetentionConfidenceScore(caseDocument.getRetConfScore());
+        }
+
         if (caseRecordProperties.containsKey(BF_001_KEY)) {
             metadata.setBf001(mapToString(caseRecordProperties.getProperty(BF_001_KEY), caseDocument));
         }
