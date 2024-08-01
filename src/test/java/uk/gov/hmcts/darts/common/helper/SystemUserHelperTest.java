@@ -10,6 +10,7 @@ import uk.gov.hmcts.darts.audio.exception.AudioApiError;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
+import uk.gov.hmcts.darts.task.config.AutomatedTaskConfigurationProperties;
 
 import java.util.HashMap;
 import java.util.List;
@@ -30,11 +31,14 @@ class SystemUserHelperTest {
     @Mock
     private UserAccountRepository userAccountRepository;
 
+    @Mock
+    private AutomatedTaskConfigurationProperties automatedTaskConfigurationProperties;
+
     private SystemUserHelper systemUserHelper;
 
     @BeforeEach
     void setUp() {
-        systemUserHelper = new SystemUserHelper(userAccountRepository);
+        systemUserHelper = new SystemUserHelper(userAccountRepository, automatedTaskConfigurationProperties);
 
         Map<String, String> guidMap = new HashMap<>();
         guidMap.put("housekeeping", HOUSEKEEPING_GUID);
@@ -79,10 +83,13 @@ class SystemUserHelperTest {
         UserAccountEntity coreSystemUser = new UserAccountEntity();
         coreSystemUser.setAccountGuid(CORE_SYSTEM_USER);
 
-        when(userAccountRepository.findByEmailAddressIgnoreCase(SystemUserHelper.SYSTEM_EMAIL_ADDRESS)).thenReturn(List.of(coreSystemUser));
+        String email = "test@email.com";
+        when(automatedTaskConfigurationProperties.getSystemUserEmail()).thenReturn(email);
+
+        when(userAccountRepository.findByEmailAddressIgnoreCase(email)).thenReturn(List.of(coreSystemUser));
 
         UserAccountEntity user = systemUserHelper.getSystemUser();
-        verify(userAccountRepository, times(1)).findByEmailAddressIgnoreCase(SystemUserHelper.SYSTEM_EMAIL_ADDRESS);
+        verify(userAccountRepository, times(1)).findByEmailAddressIgnoreCase(email);
         assertEquals(CORE_SYSTEM_USER, user.getAccountGuid());
     }
 
@@ -91,7 +98,10 @@ class SystemUserHelperTest {
         UserAccountEntity coreSystemUser = new UserAccountEntity();
         coreSystemUser.setAccountGuid(CORE_SYSTEM_USER);
 
-        when(userAccountRepository.findByEmailAddressIgnoreCase(SystemUserHelper.SYSTEM_EMAIL_ADDRESS)).thenReturn(List.of());
+        String email = "test@email.com";
+        when(automatedTaskConfigurationProperties.getSystemUserEmail()).thenReturn(email);
+
+        when(userAccountRepository.findByEmailAddressIgnoreCase(email)).thenReturn(List.of());
 
         DartsApiException exception = Assertions.assertThrows(DartsApiException.class, () -> systemUserHelper.getSystemUser());
         assertEquals(AudioApiError.MISSING_SYSTEM_USER, exception.getError());

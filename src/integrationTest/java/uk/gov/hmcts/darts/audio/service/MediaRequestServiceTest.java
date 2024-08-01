@@ -8,9 +8,9 @@ import uk.gov.hmcts.darts.audio.entity.MediaRequestEntity;
 import uk.gov.hmcts.darts.audiorequests.model.AudioRequestDetails;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
-import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
+import uk.gov.hmcts.darts.common.helper.SystemUserHelper;
 import uk.gov.hmcts.darts.common.repository.MediaRequestRepository;
 import uk.gov.hmcts.darts.testutils.IntegrationPerClassBase;
 import uk.gov.hmcts.darts.testutils.stubs.SuperAdminUserStub;
@@ -27,7 +27,6 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.darts.audio.enums.MediaRequestStatus.COMPLETED;
 import static uk.gov.hmcts.darts.audio.enums.MediaRequestStatus.OPEN;
 import static uk.gov.hmcts.darts.audio.enums.MediaRequestStatus.PROCESSING;
@@ -55,6 +54,9 @@ class MediaRequestServiceTest extends IntegrationPerClassBase {
 
     @MockBean
     private UserIdentity mockUserIdentity;
+
+    @Autowired
+    private SystemUserHelper systemUserHelper;
 
     @BeforeAll
     void beforeAll() {
@@ -199,9 +201,6 @@ class MediaRequestServiceTest extends IntegrationPerClassBase {
 
         assertNull(mediaRequestEntityBeforeCompleted.getLastModifiedBy());
 
-        UserAccountEntity testUser = superAdminUserStub.givenUserIsAuthorised(mockUserIdentity);
-        when(mockUserIdentity.getUserAccount()).thenReturn(testUser);
-
         MediaRequestEntity mediaRequestEntity = mediaRequestService.updateAudioRequestCompleted(mediaRequestService.getMediaRequestEntityById(1));
 
         // assert the date and user is set
@@ -209,7 +208,7 @@ class MediaRequestServiceTest extends IntegrationPerClassBase {
         assertNotEquals(mediaRequestEntityBeforeCompleted
                                        .getLastModifiedDateTime()
                                        .atZoneSameInstant(ZoneOffset.UTC), mediaRequestEntity.getLastModifiedDateTime().atZoneSameInstant(ZoneOffset.UTC));
-        assertEquals(testUser.getId(), mediaRequestEntity.getLastModifiedBy().getId());
+        assertEquals(systemUserHelper.getSystemUser().getId(), mediaRequestEntity.getLastModifiedBy().getId());
     }
 
     @Test
