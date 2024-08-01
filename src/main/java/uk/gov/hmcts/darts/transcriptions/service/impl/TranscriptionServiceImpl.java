@@ -496,7 +496,9 @@ public class TranscriptionServiceImpl implements TranscriptionService {
         var transcriptionWorkflows = transcriptionWorkflowRepository.findByTranscriptionOrderByWorkflowTimestampDesc(transcription.get());
 
         if (nonNull(isCurrent) && TRUE.equals(isCurrent)) {
-            return transcriptionResponseMapper.mapToTranscriptionWorkflowsResponse(List.of(transcriptionWorkflows.get(0)), Collections.emptyList());
+            List<TranscriptionWorkflowEntity> workflow =
+                !transcriptionWorkflows.isEmpty() ? List.of(transcriptionWorkflows.getFirst()) : Collections.emptyList();
+            return transcriptionResponseMapper.mapToTranscriptionWorkflowsResponse(workflow, Collections.emptyList());
         }
 
         // migrated transcription comments are not associated to a transcription workflow
