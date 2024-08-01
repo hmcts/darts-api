@@ -21,10 +21,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 class CaseRepositoryIntTest extends IntegrationBase {
     protected static final String SOME_COURTHOUSE = "some-courthouse";
-    protected static final String UNKNOWN_COURTHOUSE = "unknown-courthouse";
     protected static final String SOME_ROOM = "some-room";
-    protected static final String SOME_OTHER_ROOM = "some-other-room";
-
     protected static final String SOME_CASE_NUMBER_1 = "CASE1";
     protected static final String SOME_CASE_NUMBER_2 = "CASE2";
 
@@ -195,6 +192,7 @@ class CaseRepositoryIntTest extends IntegrationBase {
         assertThat(result).hasSize(2);
         assertThat(result.get(0).getId()).isEqualTo(courtCaseEntityWithNoCaseDocuments.getId());
         assertThat(result.get(1).getId()).isEqualTo(courtCaseEntityWithCaseDocument.getId());
+
     }
 
     @Test
