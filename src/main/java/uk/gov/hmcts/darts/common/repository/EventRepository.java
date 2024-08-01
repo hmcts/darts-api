@@ -2,7 +2,6 @@ package uk.gov.hmcts.darts.common.repository;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -107,7 +106,6 @@ public interface EventRepository extends JpaRepository<EventEntity, Integer> {
     void updateAllEventIdEventsToNotCurrentWithTheExclusionOfTheCurrentEventPrimaryKey(
         List<Integer> eventIdsPrimaryKeysLst, List<Integer> eventIdLst);
 
-    @EntityGraph(attributePaths = {"id", "createdDateTime", "eventId", "messageId", "eventText"})
     @Query("""
         SELECT ee
         FROM EventEntity ee
