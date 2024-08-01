@@ -43,6 +43,7 @@ import uk.gov.hmcts.darts.audiorequests.model.TransformedMediaDetails;
 import uk.gov.hmcts.darts.audit.api.AuditActivity;
 import uk.gov.hmcts.darts.audit.api.AuditApi;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
+import uk.gov.hmcts.darts.common.datamanagement.component.impl.DownloadResponseMetaData;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity_;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
@@ -57,7 +58,9 @@ import uk.gov.hmcts.darts.common.entity.TransientObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.exception.AzureDeleteBlobException;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
+import uk.gov.hmcts.darts.common.exception.DartsException;
 import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
+import uk.gov.hmcts.darts.common.helper.SystemUserHelper;
 import uk.gov.hmcts.darts.common.repository.HearingRepository;
 import uk.gov.hmcts.darts.common.repository.MediaRepository;
 import uk.gov.hmcts.darts.common.repository.MediaRequestRepository;
@@ -68,9 +71,11 @@ import uk.gov.hmcts.darts.common.repository.TransientObjectDirectoryRepository;
 import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
 import uk.gov.hmcts.darts.common.validation.IdRequest;
 import uk.gov.hmcts.darts.datamanagement.api.DataManagementApi;
+import uk.gov.hmcts.darts.datamanagement.exception.FileNotDownloadedException;
 import uk.gov.hmcts.darts.notification.api.NotificationApi;
 import uk.gov.hmcts.darts.notification.dto.SaveNotificationToDbRequest;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.time.LocalTime;
 import java.time.OffsetDateTime;
@@ -121,6 +126,7 @@ public class MediaRequestServiceImpl implements MediaRequestService {
     private final MediaHideOrShowValidator mediaHideOrShowValidator;
     private final ObjectAdminActionRepository objectAdminActionRepository;
     private final ObjectHiddenReasonRepository objectHiddenReasonRepository;
+    private final SystemUserHelper systemUserHelper;
 
     @Override
     public Optional<MediaRequestEntity> getOldestMediaRequestByStatus(MediaRequestStatus status) {
@@ -129,7 +135,7 @@ public class MediaRequestServiceImpl implements MediaRequestService {
 
     @Override
     public Optional<MediaRequestEntity> retrieveMediaRequestForProcessing() {
-        return Optional.ofNullable(mediaRequestRepository.updateAndRetrieveMediaRequestToProcessing(userIdentity.getUserAccount().getId()));
+        return Optional.ofNullable(mediaRequestRepository.updateAndRetrieveMediaRequestToProcessing(systemUserHelper.getSystemUser().getId()));
     }
 
     @Override
@@ -391,12 +397,20 @@ public class MediaRequestServiceImpl implements MediaRequestService {
 
     @Override
     public InputStream download(Integer transformedMediaId) {
-        return downloadOrPlayback(transformedMediaId, EXPORT_AUDIO, AudioRequestType.DOWNLOAD);
+        try {
+            return downloadOrPlayback(transformedMediaId, EXPORT_AUDIO, AudioRequestType.DOWNLOAD);
+        } catch (IOException | FileNotDownloadedException e) {
+            throw new DartsException("Exception during download", e);
+        }
     }
 
     @Override
     public InputStream playback(Integer transformedMediaId) {
-        return downloadOrPlayback(transformedMediaId, AUDIO_PLAYBACK, AudioRequestType.PLAYBACK);
+        try {
+            return downloadOrPlayback(transformedMediaId, AUDIO_PLAYBACK, AudioRequestType.PLAYBACK);
+        } catch (IOException | FileNotDownloadedException e) {
+            throw new DartsException("Exception during playback", e);
+        }
     }
 
     @Override
@@ -420,7 +434,9 @@ public class MediaRequestServiceImpl implements MediaRequestService {
         return getTransformedMediaDetailsMapper.mapSearchResults(mediaEntities);
     }
 
-    private InputStream downloadOrPlayback(Integer transformedMediaId, AuditActivity auditActivity, AudioRequestType expectedType) {
+    private InputStream downloadOrPlayback(
+        Integer transformedMediaId, AuditActivity auditActivity, AudioRequestType expectedType
+    ) throws FileNotDownloadedException, IOException {
         final TransformedMediaEntity transformedMediaEntity = getTransformedMediaById(transformedMediaId);
         MediaRequestEntity mediaRequestEntity = transformedMediaEntity.getMediaRequest();
         validateMediaRequestType(mediaRequestEntity, expectedType);
@@ -432,7 +448,9 @@ public class MediaRequestServiceImpl implements MediaRequestService {
             this.getUserAccount(),
             mediaRequestEntity.getHearing().getCourtCase()
         );
-        return dataManagementApi.getBlobDataFromOutboundContainer(blobId).toStream();
+
+        DownloadResponseMetaData downloadResponse = dataManagementApi.getBlobDataFromOutboundContainer(blobId);
+        return downloadResponse.getInputStream();
     }
 
     private UUID getBlobId(TransformedMediaEntity transformedMediaEntity) {
@@ -463,7 +481,7 @@ public class MediaRequestServiceImpl implements MediaRequestService {
     public MediaRequestEntity updateAudioRequestCompleted(MediaRequestEntity mediaRequestEntity) {
 
         mediaRequestEntity.setStatus(COMPLETED);
-        mediaRequestEntity.setLastModifiedBy(userIdentity.getUserAccount());
+        mediaRequestEntity.setLastModifiedBy(systemUserHelper.getSystemUser());
 
         //todo update transformed media info
         return mediaRequestRepository.saveAndFlush(mediaRequestEntity);

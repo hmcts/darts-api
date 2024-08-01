@@ -1,6 +1,5 @@
 package uk.gov.hmcts.darts.audio.service.impl;
 
-import com.azure.core.util.BinaryData;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.NotImplementedException;
@@ -87,11 +86,6 @@ public class AudioTransformationServiceImpl implements AudioTransformationServic
             return media1.getStart().compareTo(media2.getStart());
         }
     };
-
-    @Override
-    public BinaryData getUnstructuredAudioBlob(UUID location) {
-        return dataManagementApi.getBlobDataFromUnstructuredContainer(location);
-    }
 
     @Override
     public List<MediaEntity> getMediaMetadata(Integer hearingId) {

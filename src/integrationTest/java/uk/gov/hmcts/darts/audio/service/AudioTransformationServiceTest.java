@@ -69,25 +69,6 @@ class AudioTransformationServiceTest extends IntegrationBase {
     private ExternalObjectDirectoryStub externalObjectDirectoryStub;
 
     @Test
-    void shouldGetAudioBlobDataUsingLocation() {
-        String containerName = dataManagementConfiguration.getUnstructuredContainerName();
-
-        when(mockDataManagementService.getBlobData(
-                containerName,
-                BLOB_LOCATION
-        )).thenReturn(BINARY_DATA);
-
-        BinaryData binaryData = audioTransformationService.getUnstructuredAudioBlob(BLOB_LOCATION);
-
-        assertEquals(BINARY_DATA, binaryData);
-        verify(mockDataManagementService).getBlobData(
-                containerName,
-                BLOB_LOCATION
-        );
-        verifyNoMoreInteractions(mockDataManagementService);
-    }
-
-    @Test
     void getMediaMetadataShouldReturnExpectedMediaEntitiesWhenHearingIdHasRelatedMedia() {
         given.setupTest();
         given.externalObjectDirForMedia(given.getMediaEntity1());

@@ -47,10 +47,11 @@ class TranscriptionControllerGetTranscriptionWorkflowsIntTest extends Integratio
     @Autowired
     private TranscriptionStub transcriptionStub;
     private TranscriptionEntity transcription;
+    private HearingEntity hearingEntity;
 
     @BeforeEach
     void beforeEach() {
-        HearingEntity hearingEntity = dartsDatabase.givenTheDatabaseContainsCourtCaseWithHearingAndCourthouseWithRoom(
+        hearingEntity = dartsDatabase.givenTheDatabaseContainsCourtCaseWithHearingAndCourthouseWithRoom(
             SOME_CASE_ID,
             SOME_COURTHOUSE,
             SOME_COURTROOM,
@@ -110,6 +111,27 @@ class TranscriptionControllerGetTranscriptionWorkflowsIntTest extends Integratio
         String expectedResponse = getContentsFromFile(
             "tests/transcriptions/transcription_workflow/expectedCurrentWorkflowResponse.json")
             .replace("$USER_ACCOUNT_ID", transcription.getCreatedBy().getId().toString());
+
+        JSONAssert.assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
+    }
+
+    @Test
+    void getCurrentTranscriptionWorkflowWithNoWorkflowInDbShouldReturnOkSuccessAndEmptyAssociatedWorkflows() throws Exception {
+        superAdminUserStub.givenUserIsAuthorised(mockUserIdentity);
+
+        TranscriptionEntity transcription2 = dartsDatabase.getTranscriptionStub().createTranscription(hearingEntity);
+        transcription2.setCreatedDateTime(OffsetDateTime.of(2024, 4, 24, 10, 0, 0, 0, ZoneOffset.UTC));
+        transcription2.setStartTime(SOME_DATE_TIME);
+        transcription2.setEndTime(SOME_DATE_TIME);
+        transcription2 = dartsDatabase.save(transcription2);
+
+        MockHttpServletRequestBuilder requestBuilder = get(ENDPOINT_URI)
+            .queryParam("transcription_id", transcription2.getId().toString())
+            .queryParam("is_current", "true");
+
+        MvcResult response = mockMvc.perform(requestBuilder).andExpect(status().isOk()).andReturn();
+        String actualResponse = response.getResponse().getContentAsString();
+        String expectedResponse = "[]";
 
         JSONAssert.assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
     }

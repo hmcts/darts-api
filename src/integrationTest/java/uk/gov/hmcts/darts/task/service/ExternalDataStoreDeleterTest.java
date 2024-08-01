@@ -32,6 +32,7 @@ import uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum;
 import uk.gov.hmcts.darts.common.enums.SystemUsersAccountUUIDEnum;
 import uk.gov.hmcts.darts.common.helper.SystemUserHelper;
 import uk.gov.hmcts.darts.common.repository.TransformedMediaRepository;
+import uk.gov.hmcts.darts.task.config.AutomatedTaskConfigurationProperties;
 import uk.gov.hmcts.darts.test.common.data.AudioTestData;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 import uk.gov.hmcts.darts.testutils.stubs.TransientObjectDirectoryStub;
@@ -96,6 +97,9 @@ class ExternalDataStoreDeleterTest extends IntegrationBase {
     private ExternalUnstructuredDataStoreDeleter externalUnstructuredDataStoreDeleter;
     private ExternalOutboundDataStoreDeleter externalOutboundDataStoreDeleter;
 
+    @Mock
+    private AutomatedTaskConfigurationProperties automatedTaskConfigurationProperties;
+
     @BeforeEach
     void setUp() {
         this.requestor = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
@@ -106,7 +110,7 @@ class ExternalDataStoreDeleterTest extends IntegrationBase {
             LocalDateTime.now()
         );
 
-        SystemUserHelper systemUserHelper = new SystemUserHelper(dartsDatabase.getUserAccountRepository());
+        SystemUserHelper systemUserHelper = new SystemUserHelper(dartsDatabase.getUserAccountRepository(), automatedTaskConfigurationProperties);
         systemUserHelper.setSystemUserGuidMap(Collections.singletonMap(
             "housekeeping",
             SystemUsersAccountUUIDEnum.HOUSE_KEEPING.getUuid()

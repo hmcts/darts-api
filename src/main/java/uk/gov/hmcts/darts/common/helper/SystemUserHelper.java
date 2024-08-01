@@ -10,6 +10,7 @@ import uk.gov.hmcts.darts.audio.exception.AudioApiError;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
+import uk.gov.hmcts.darts.task.config.AutomatedTaskConfigurationProperties;
 
 import java.util.HashMap;
 import java.util.List;
@@ -25,11 +26,11 @@ import java.util.Map;
 public class SystemUserHelper {
 
     public static final String HOUSEKEEPING = "housekeeping";
-    public static final String SYSTEM_EMAIL_ADDRESS = "dartssystemuser@hmcts.net";
     public static final String DAILYLIST_PROCESSOR = "dailylist-processor";
     private final UserAccountRepository userAccountRepository;
     private Map<String, String> systemUserGuidMap;
     private Map<String, UserAccountEntity> systemUserNameToEntityMap = new HashMap<>();
+    private final AutomatedTaskConfigurationProperties properties;
 
     public String findSystemUserGuid(String configKey) {
         return systemUserGuidMap.get(configKey);
@@ -58,7 +59,7 @@ public class SystemUserHelper {
     }
 
     public UserAccountEntity getSystemUser() {
-        List<UserAccountEntity> userList = userAccountRepository.findByEmailAddressIgnoreCase(SystemUserHelper.SYSTEM_EMAIL_ADDRESS);
+        List<UserAccountEntity> userList = userAccountRepository.findByEmailAddressIgnoreCase(properties.getSystemUserEmail());
 
         if (userList.isEmpty()) {
             throw new DartsApiException(AudioApiError.MISSING_SYSTEM_USER);

@@ -153,16 +153,6 @@ class AudioTransformationServiceImplTest {
     @Captor
     private ArgumentCaptor<SaveNotificationToDbRequest> dbNotificationRequestCaptor;
 
-
-    @Test
-    void testGetAudioBlobData() {
-        when(mockDataManagementApi.getBlobDataFromUnstructuredContainer(BLOB_LOCATION))
-            .thenReturn(BINARY_DATA);
-
-        BinaryData binaryData = audioTransformationService.getUnstructuredAudioBlob(BLOB_LOCATION);
-        assertEquals(BINARY_DATA, binaryData);
-    }
-
     @Test
     void getMediaMetadataShouldReturnRepositoryResultsUnmodifiedWhenRepositoryHasResult() {
         List<MediaEntity> expectedResults = Collections.singletonList(new MediaEntity());
