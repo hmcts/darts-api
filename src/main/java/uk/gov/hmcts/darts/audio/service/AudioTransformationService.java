@@ -1,6 +1,5 @@
 package uk.gov.hmcts.darts.audio.service;
 
-import com.azure.core.util.BinaryData;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
 
 import java.io.IOException;
@@ -11,8 +10,6 @@ import java.util.Optional;
 import java.util.UUID;
 
 public interface AudioTransformationService {
-
-    BinaryData getUnstructuredAudioBlob(UUID location);
 
     List<MediaEntity> getMediaMetadata(Integer hearingId);
 
