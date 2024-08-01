@@ -3,7 +3,6 @@ package uk.gov.hmcts.darts.cases.helper;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.TypedQuery;
-import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.JoinType;
@@ -14,6 +13,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.hibernate.query.criteria.HibernateCriteriaBuilder;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.darts.authorisation.api.AuthorisationApi;
 import uk.gov.hmcts.darts.cases.exception.AdvancedSearchNoResultsException;
@@ -37,7 +37,6 @@ import uk.gov.hmcts.darts.common.repository.CourtroomRepository;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 import java.util.Optional;
 
 import static uk.gov.hmcts.darts.cases.service.impl.CaseServiceImpl.MAX_RESULTS;
@@ -56,7 +55,7 @@ public class AdvancedSearchRequestHelper {
     private final CourthouseRepository courthouseRepository;
 
     public List<Integer> getMatchingCourtCases(GetCasesSearchRequest request) throws AdvancedSearchNoResultsException {
-        CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
+        HibernateCriteriaBuilder criteriaBuilder = (HibernateCriteriaBuilder) entityManager.getCriteriaBuilder();
         CriteriaQuery<Integer> criteriaQuery = criteriaBuilder.createQuery(Integer.class);
         Root<CourtCaseEntity> caseRoot = criteriaQuery.from(CourtCaseEntity.class);
         List<Predicate> predicates = createPredicates(request, criteriaBuilder, caseRoot);
@@ -72,7 +71,7 @@ public class AdvancedSearchRequestHelper {
     }
 
     private List<Predicate> createPredicates(GetCasesSearchRequest request,
-                                             CriteriaBuilder criteriaBuilder, Root<CourtCaseEntity> caseRoot) throws AdvancedSearchNoResultsException {
+                                             HibernateCriteriaBuilder criteriaBuilder, Root<CourtCaseEntity> caseRoot) throws AdvancedSearchNoResultsException {
         List<Predicate> predicates = new ArrayList<>();
         CollectionUtils.addAll(predicates, addCourthouseAccessCriteria(caseRoot));
         CollectionUtils.addAll(predicates, addCaseCriteria(request, criteriaBuilder, caseRoot));
@@ -94,53 +93,53 @@ public class AdvancedSearchRequestHelper {
         return courthouseJoin.get(CourthouseEntity_.ID).in(courthouseIdsUserHasAccessTo);
     }
 
-    private List<Predicate> addCaseCriteria(GetCasesSearchRequest request, CriteriaBuilder criteriaBuilder, Root<CourtCaseEntity> caseRoot) {
+    private List<Predicate> addCaseCriteria(GetCasesSearchRequest request, HibernateCriteriaBuilder criteriaBuilder, Root<CourtCaseEntity> caseRoot) {
         List<Predicate> predicateList = new ArrayList<>();
         if (StringUtils.isNotBlank(request.getCaseNumber())) {
-            predicateList.add(criteriaBuilder.like(
-                criteriaBuilder.upper(caseRoot.get(CourtCaseEntity_.CASE_NUMBER)),
-                surroundWithPercentagesUpper(request.getCaseNumber())
+            predicateList.add(criteriaBuilder.ilike(
+                caseRoot.get(CourtCaseEntity_.CASE_NUMBER),
+                surroundWithPercentages(request.getCaseNumber())
             ));
         }
         return predicateList;
     }
 
-    private String surroundWithPercentagesUpper(String value) {
-        return surroundValue(value.toUpperCase(Locale.ROOT), "%");
+    private String surroundWithPercentages(String value) {
+        return surroundValue(value, "%");
     }
 
     private String surroundValue(String value, String surroundWith) {
         return surroundWith + value + surroundWith;
     }
 
-    private List<Predicate> addDefendantCriteria(GetCasesSearchRequest request, CriteriaBuilder criteriaBuilder, Root<CourtCaseEntity> caseRoot) {
+    private List<Predicate> addDefendantCriteria(GetCasesSearchRequest request, HibernateCriteriaBuilder criteriaBuilder, Root<CourtCaseEntity> caseRoot) {
         List<Predicate> predicateList = new ArrayList<>();
         if (StringUtils.isNotBlank(request.getDefendantName())) {
             Join<CourtCaseEntity, DefendantEntity> defendantJoin = joinDefendantEntity(caseRoot);
 
-            predicateList.add(criteriaBuilder.like(
-                criteriaBuilder.upper(defendantJoin.get(DefendantEntity_.NAME)),
-                surroundWithPercentagesUpper(request.getDefendantName())
+            predicateList.add(criteriaBuilder.ilike(
+                defendantJoin.get(DefendantEntity_.NAME),
+                surroundWithPercentages(request.getDefendantName())
             ));
         }
         return predicateList;
     }
 
-    private List<Predicate> addEventCriteria(GetCasesSearchRequest request, CriteriaBuilder criteriaBuilder, Root<CourtCaseEntity> caseRoot) {
+    private List<Predicate> addEventCriteria(GetCasesSearchRequest request, HibernateCriteriaBuilder criteriaBuilder, Root<CourtCaseEntity> caseRoot) {
         List<Predicate> predicateList = new ArrayList<>();
         if (StringUtils.isNotBlank(request.getEventTextContains())) {
             Join<CourtCaseEntity, EventEntity> eventJoin = joinEventEntity(caseRoot);
 
-            predicateList.add(criteriaBuilder.like(
-                criteriaBuilder.upper(eventJoin.get(EventEntity_.EVENT_TEXT)),
-                surroundWithPercentagesUpper(request.getEventTextContains())
+            predicateList.add(criteriaBuilder.ilike(
+                eventJoin.get(EventEntity_.EVENT_TEXT),
+                surroundWithPercentages(request.getEventTextContains())
             ));
         }
         return predicateList;
     }
 
     private List<Predicate> addCourthouseCourtroomCriteria(GetCasesSearchRequest request,
-                                                           CriteriaBuilder criteriaBuilder,
+                                                           HibernateCriteriaBuilder criteriaBuilder,
                                                            Root<CourtCaseEntity> caseRoot) throws AdvancedSearchNoResultsException {
         List<Predicate> predicateList = new ArrayList<>();
 
@@ -157,7 +156,7 @@ public class AdvancedSearchRequestHelper {
     }
 
     private List<Predicate> addCourtroomIdCriteria(GetCasesSearchRequest request,
-                                                   CriteriaBuilder criteriaBuilder,
+                                                   HibernateCriteriaBuilder criteriaBuilder,
                                                    Root<CourtCaseEntity> caseRoot) throws AdvancedSearchNoResultsException {
         List<Predicate> predicateList = new ArrayList<>();
         Join<CourtCaseEntity, HearingEntity> hearingJoin = joinHearing(caseRoot);
@@ -196,7 +195,7 @@ public class AdvancedSearchRequestHelper {
     }
 
     private List<Predicate> addCourthouseIdCriteria(GetCasesSearchRequest request,
-                                                    CriteriaBuilder criteriaBuilder,
+                                                    HibernateCriteriaBuilder criteriaBuilder,
                                                     Root<CourtCaseEntity> caseRoot) throws AdvancedSearchNoResultsException {
         List<Predicate> predicateList = new ArrayList<>();
         if (request.getCourthouseId() != null) {
@@ -223,19 +222,19 @@ public class AdvancedSearchRequestHelper {
         return predicateList;
     }
 
-    private List<Predicate> addJudgeCriteria(GetCasesSearchRequest request, CriteriaBuilder criteriaBuilder, Root<CourtCaseEntity> caseRoot) {
+    private List<Predicate> addJudgeCriteria(GetCasesSearchRequest request, HibernateCriteriaBuilder criteriaBuilder, Root<CourtCaseEntity> caseRoot) {
         List<Predicate> predicateList = new ArrayList<>();
         if (StringUtils.isNotBlank(request.getJudgeName())) {
             Join<CourtCaseEntity, JudgeEntity> judgeJoin = joinJudge(caseRoot);
-            predicateList.add(criteriaBuilder.like(
-                criteriaBuilder.upper(judgeJoin.get(JudgeEntity_.NAME)),
-                surroundWithPercentagesUpper(request.getJudgeName())
+            predicateList.add(criteriaBuilder.ilike(
+                judgeJoin.get(JudgeEntity_.NAME),
+                surroundWithPercentages(request.getJudgeName())
             ));
         }
         return predicateList;
     }
 
-    private List<Predicate> addHearingDateCriteria(GetCasesSearchRequest request, CriteriaBuilder criteriaBuilder, Root<CourtCaseEntity> caseRoot) {
+    private List<Predicate> addHearingDateCriteria(GetCasesSearchRequest request, HibernateCriteriaBuilder criteriaBuilder, Root<CourtCaseEntity> caseRoot) {
         List<Predicate> predicateList = new ArrayList<>();
         if (request.getDateFrom() != null || request.getDateTo() != null) {
             Join<CourtCaseEntity, HearingEntity> hearingJoin = joinHearing(caseRoot);
@@ -255,7 +254,7 @@ public class AdvancedSearchRequestHelper {
         return predicateList;
     }
 
-    private List<Predicate> addEUseInterpreterCriteria(CriteriaBuilder criteriaBuilder, Root<CourtCaseEntity> caseRoot) {
+    private List<Predicate> addEUseInterpreterCriteria(HibernateCriteriaBuilder criteriaBuilder, Root<CourtCaseEntity> caseRoot) {
         List<Predicate> predicateList = new ArrayList<>();
         if (authorisationApi.userHasOneOfRoles(List.of(TRANSLATION_QA))) {
             predicateList.add(criteriaBuilder.isTrue(

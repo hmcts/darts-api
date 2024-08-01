@@ -3,7 +3,6 @@ package uk.gov.hmcts.darts.audio.helper;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.TypedQuery;
-import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.JoinType;
@@ -14,6 +13,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.hibernate.query.criteria.HibernateCriteriaBuilder;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.darts.audio.model.PostAdminMediasSearchRequest;
@@ -29,7 +29,6 @@ import uk.gov.hmcts.darts.common.entity.MediaEntity_;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 import java.util.Optional;
 
 @Component
@@ -44,7 +43,7 @@ public class PostAdminMediasSearchHelper {
     private Integer maxResults;
 
     public List<MediaEntity> getMatchingMedia(PostAdminMediasSearchRequest request) {
-        CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
+        HibernateCriteriaBuilder criteriaBuilder = (HibernateCriteriaBuilder) entityManager.getCriteriaBuilder();
         CriteriaQuery<MediaEntity> criteriaQuery = criteriaBuilder.createQuery(MediaEntity.class);
         Root<MediaEntity> mediaRoot = criteriaQuery.from(MediaEntity.class);
 
@@ -61,7 +60,7 @@ public class PostAdminMediasSearchHelper {
     }
 
     private List<Predicate> createPredicates(PostAdminMediasSearchRequest request,
-                                             CriteriaBuilder criteriaBuilder, Root<MediaEntity> mediaRoot) {
+                                             HibernateCriteriaBuilder criteriaBuilder, Root<MediaEntity> mediaRoot) {
         List<Predicate> predicates = new ArrayList<>();
 
         CollectionUtils.addAll(predicates, addCourthouseIdCriteria(mediaRoot, request));
@@ -81,33 +80,33 @@ public class PostAdminMediasSearchHelper {
         return predicateList;
     }
 
-    private List<Predicate> addCaseNumberCriteria(CriteriaBuilder criteriaBuilder, Root<MediaEntity> mediaRoot,
+    private List<Predicate> addCaseNumberCriteria(HibernateCriteriaBuilder criteriaBuilder, Root<MediaEntity> mediaRoot,
                                                   PostAdminMediasSearchRequest request) {
         List<Predicate> predicateList = new ArrayList<>();
         if (StringUtils.isNotBlank(request.getCaseNumber())) {
             Join<MediaEntity, CourtCaseEntity> caseJoin = getCaseJoin(mediaRoot);
-            predicateList.add(criteriaBuilder.like(
-                criteriaBuilder.upper(caseJoin.get(CourtCaseEntity_.CASE_NUMBER)),
-                surroundWithPercentagesUpper(request.getCaseNumber())
+            predicateList.add(criteriaBuilder.ilike(
+                caseJoin.get(CourtCaseEntity_.CASE_NUMBER),
+                surroundWithPercentages(request.getCaseNumber())
             ));
         }
         return predicateList;
     }
 
-    private List<Predicate> addCourtroomNameCriteria(CriteriaBuilder criteriaBuilder, Root<MediaEntity> mediaRoot,
+    private List<Predicate> addCourtroomNameCriteria(HibernateCriteriaBuilder criteriaBuilder, Root<MediaEntity> mediaRoot,
                                                      PostAdminMediasSearchRequest request) {
         List<Predicate> predicateList = new ArrayList<>();
         if (StringUtils.isNotBlank(request.getCourtroomName())) {
             Join<MediaEntity, CourtroomEntity> courtroomJoin = getCourtroomJoin(mediaRoot);
-            predicateList.add(criteriaBuilder.like(
-                criteriaBuilder.upper(courtroomJoin.get(CourtroomEntity_.NAME)),
-                surroundWithPercentagesUpper(request.getCourtroomName())
+            predicateList.add(criteriaBuilder.ilike(
+                courtroomJoin.get(CourtroomEntity_.NAME),
+                surroundWithPercentages(request.getCourtroomName())
             ));
         }
         return predicateList;
     }
 
-    private List<Predicate> addDateCriteria(CriteriaBuilder criteriaBuilder, Root<MediaEntity> mediaRoot,
+    private List<Predicate> addDateCriteria(HibernateCriteriaBuilder criteriaBuilder, Root<MediaEntity> mediaRoot,
                                             PostAdminMediasSearchRequest request) {
         List<Predicate> predicateList = new ArrayList<>();
         if (request.getHearingStartAt() != null || request.getHearingEndAt() != null) {
@@ -128,8 +127,8 @@ public class PostAdminMediasSearchHelper {
         return predicateList;
     }
 
-    private String surroundWithPercentagesUpper(String value) {
-        return surroundValue(value.toUpperCase(Locale.ROOT), "%");
+    private String surroundWithPercentages(String value) {
+        return surroundValue(value, "%");
     }
 
     private String surroundValue(String value, String surroundWith) {
