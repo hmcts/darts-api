@@ -107,7 +107,7 @@ public interface EventRepository extends JpaRepository<EventEntity, Integer> {
     void updateAllEventIdEventsToNotCurrentWithTheExclusionOfTheCurrentEventPrimaryKey(
         List<Integer> eventIdsPrimaryKeysLst, List<Integer> eventIdLst);
 
-    @EntityGraph(attributePaths = {"id", "timestamp", "eventId", "messageId", "eventText"})
+    @EntityGraph(attributePaths = {"id", "createdDateTime", "eventId", "messageId", "eventText"})
     @Query("""
         SELECT ee
         FROM EventEntity ee

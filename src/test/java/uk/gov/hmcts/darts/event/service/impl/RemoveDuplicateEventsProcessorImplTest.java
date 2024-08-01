@@ -164,7 +164,7 @@ class RemoveDuplicateEventsProcessorImplTest {
         eventEntity.setEventId(quantity % 3);
         eventEntity.setMessageId("message-id-" + quantity % 3);
         eventEntity.setEventText("some-event-text-" + quantity % 3);
-        eventEntity.setTimestamp(OffsetDateTime.now().plusSeconds(quantity));
+        eventEntity.setCreatedDateTime(OffsetDateTime.now().plusSeconds(quantity));
         return eventEntity;
     }
 }
