@@ -159,7 +159,7 @@ public class CaseArchiveRecordMapperImpl implements CaseArchiveRecordMapper {
             metadata.setRetentionConfidenceReason(caseDocument.getRetConfReason());
         }
 
-        if (caseDocument.getRetConfScore() != 0) {
+        if (nonNull(caseDocument.getRetConfScore()) && caseDocument.getRetConfScore() != 0) {
             metadata.setRetentionConfidenceScore(caseDocument.getRetConfScore());
         }
 

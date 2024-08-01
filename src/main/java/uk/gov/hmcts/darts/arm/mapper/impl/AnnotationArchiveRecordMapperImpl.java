@@ -149,7 +149,7 @@ public class AnnotationArchiveRecordMapperImpl implements AnnotationArchiveRecor
             metadata.setRetentionConfidenceReason(annotationDocument.getRetConfReason());
         }
 
-        if (annotationDocument.getRetConfScore() != 0) {
+        if (nonNull(annotationDocument.getRetConfScore()) && annotationDocument.getRetConfScore() != 0) {
             metadata.setRetentionConfidenceScore(annotationDocument.getRetConfScore());
         }
 
