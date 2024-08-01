@@ -99,6 +99,9 @@ module "postgresql_flexible" {
   ]
   pgsql_version = "15"
 }
+resource "postgresql_extension" "my_extension" {
+  name = "pg_trgm"
+}
 
 data "azurerm_subnet" "private_endpoints" {
   resource_group_name  = local.private_endpoint_rg_name
