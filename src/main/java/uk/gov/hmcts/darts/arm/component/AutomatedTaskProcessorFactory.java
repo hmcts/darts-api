@@ -16,5 +16,5 @@ public interface AutomatedTaskProcessorFactory {
 
     CleanupCurrentFlagEventProcessor createCleanupCurrentFlagEventProcessor(int batchSize);
 
-    GenerateCaseDocumentForRetentionDateProcessor createGenerateCaseDocumentForRetentionDate(int batchSize);
+    GenerateCaseDocumentForRetentionDateProcessor createGenerateCaseDocumentForRetentionDateProcessor(int batchSize);
 }

@@ -37,7 +37,7 @@ class GenerateCourtCaseDocumentForRetentionDateAutomatedTaskTest {
         AutomatedTaskEntity automatedTask = new AutomatedTaskEntity();
         automatedTask.setBatchSize(BATCH_SIZE);
         when(automatedTaskRepository.findByTaskName(any())).thenReturn(Optional.of(automatedTask));
-        when(factory.createGenerateCaseDocumentForRetentionDate(BATCH_SIZE)).thenReturn(processor);
+        when(factory.createGenerateCaseDocumentForRetentionDateProcessor(BATCH_SIZE)).thenReturn(processor);
         GenerateCaseDocumentForRetentionDateAutomatedTask task = new GenerateCaseDocumentForRetentionDateAutomatedTask(
             automatedTaskRepository,
             lockProvider,

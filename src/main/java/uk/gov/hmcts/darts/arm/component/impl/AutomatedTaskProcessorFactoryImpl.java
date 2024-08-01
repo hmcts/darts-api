@@ -125,7 +125,7 @@ public class AutomatedTaskProcessorFactoryImpl implements AutomatedTaskProcessor
     }
 
     @Override
-    public GenerateCaseDocumentForRetentionDateProcessor createGenerateCaseDocumentForRetentionDate(int batchSize) {
+    public GenerateCaseDocumentForRetentionDateProcessor createGenerateCaseDocumentForRetentionDateProcessor(int batchSize) {
         if (batchSize > 0) {
             return generateCaseDocumentForRetentionDateBatchProcessor;
         } else {

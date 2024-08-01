@@ -35,10 +35,9 @@ public class GenerateCaseDocumentForRetentionDateBatchProcessorImpl implements G
         for (var courtCase : cases) {
             try {
                 if (!courtCase.isRetentionUpdated()) {
-                    log.info("Retention calculation is In Progress for case id {}", courtCase.getId());
                     singleCaseProcessor.processGenerateCaseDocument(courtCase.getId());
-                    courtCase.setRetentionUpdated(true);
-                    caseRepository.saveAndFlush(courtCase);
+                } else {
+                    log.info("Retention calculation is In Progress for case id {}", courtCase.getId());
                 }
             } catch (Exception exc) {
                 log.error("Error generating retention date case document for case id '{}'", courtCase.getId(), exc);

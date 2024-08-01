@@ -17,9 +17,10 @@ import uk.gov.hmcts.darts.testutils.IntegrationBase;
 
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
+import java.util.List;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.when;
 
 @Transactional
@@ -82,10 +83,14 @@ class GenerateCaseDocumentForRetentionDateBatchProcessorIntTest extends Integrat
 
         // then
         CourtCaseEntity courtCaseEntity1 = dartsDatabase.getCaseRepository().getReferenceById(courtCaseEntityWithNoCaseDocuments.getId());
-        assertTrue(courtCaseEntity1.isRetentionUpdated());
+        List<CaseDocumentEntity> caseDocumentEntities1 =
+            dartsDatabase.getCaseDocumentStub().getCaseDocumentRepository().findByCourtCase(courtCaseEntity1);
+        assertEquals(1, caseDocumentEntities1.size());
 
         CourtCaseEntity courtCaseEntity2 = dartsDatabase.getCaseRepository().getReferenceById(courtCaseEntityWithCaseDocument.getId());
-        assertTrue(courtCaseEntity2.isRetentionUpdated());
+        List<CaseDocumentEntity> caseDocumentEntities2 =
+            dartsDatabase.getCaseDocumentStub().getCaseDocumentRepository().findByCourtCase(courtCaseEntity2);
+        assertEquals(2, caseDocumentEntities2.size());
 
     }
 
