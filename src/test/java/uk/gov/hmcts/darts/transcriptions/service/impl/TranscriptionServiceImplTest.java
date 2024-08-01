@@ -222,6 +222,7 @@ class TranscriptionServiceImplTest {
         assertThat(transcriptionEntity.getStartTime()).isEqualTo(startDateTime);
         assertThat(transcriptionEntity.getEndTime()).isEqualTo(endDateTime);
         assertThat(transcriptionEntity.getIsManualTranscription()).isTrue();
+        assertThat(transcriptionEntity.getIsCurrent()).isTrue();
 
         verify(
             mockTranscriptionWorkflowRepository,
@@ -303,6 +304,7 @@ class TranscriptionServiceImplTest {
         assertThat(transcriptionEntity.getStartTime()).isEqualTo(startDateTime);
         assertThat(transcriptionEntity.getEndTime()).isEqualTo(endDateTime);
         assertThat(transcriptionEntity.getIsManualTranscription()).isTrue();
+        assertThat(transcriptionEntity.getIsCurrent()).isTrue();
 
         verify(
             mockTranscriptionWorkflowRepository,
@@ -387,6 +389,7 @@ class TranscriptionServiceImplTest {
         assertThat(transcriptionEntity.getStartTime()).isEqualTo(startDateTime);
         assertThat(transcriptionEntity.getEndTime()).isEqualTo(endDateTime);
         assertThat(transcriptionEntity.getIsManualTranscription()).isTrue();
+        assertThat(transcriptionEntity.getIsCurrent()).isTrue();
 
         verify(
             mockTranscriptionWorkflowRepository,
@@ -474,6 +477,7 @@ class TranscriptionServiceImplTest {
         assertThat(transcriptionEntity.getStartTime()).isEqualTo(startDateTime);
         assertThat(transcriptionEntity.getEndTime()).isEqualTo(endDateTime);
         assertThat(transcriptionEntity.getIsManualTranscription()).isFalse();
+        assertThat(transcriptionEntity.getIsCurrent()).isTrue();
 
         verify(
             mockTranscriptionWorkflowRepository,
