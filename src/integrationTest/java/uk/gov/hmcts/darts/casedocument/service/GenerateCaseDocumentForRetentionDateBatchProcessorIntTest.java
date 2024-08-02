@@ -95,7 +95,7 @@ class GenerateCaseDocumentForRetentionDateBatchProcessorIntTest extends Integrat
     }
 
     @Test
-    void testProcessGenerateCaseDocumentForRetentionDateRetentionDateTooFarInTheFuture() {
+    void testProcessGenerateCaseDocumentForRetentionDateRetentionDateTooFarInTheFutureNoDocumentGenerated() {
         // given
         CourtCaseEntity courtCaseEntityWithNoCaseDocuments = dartsDatabase.createCase(SOME_COURTHOUSE, SOME_CASE_NUMBER_1);
 
@@ -133,7 +133,7 @@ class GenerateCaseDocumentForRetentionDateBatchProcessorIntTest extends Integrat
     }
 
     @Test
-    void testProcessGenerateCaseDocumentForRetentionDateWithRecentDocumentsNotProcessed() {
+    void testProcessGenerateCaseDocumentForRetentionDateWithRecentDocumentsNoDocumentGenerated() {
         // given
         CourtCaseEntity courtCaseEntityWithCaseDocuments1 = dartsDatabase.createCase(SOME_COURTHOUSE, SOME_CASE_NUMBER_1);
 
@@ -176,6 +176,57 @@ class GenerateCaseDocumentForRetentionDateBatchProcessorIntTest extends Integrat
 
         CourtCaseEntity courtCaseEntity2 = dartsDatabase.getCaseRepository().getReferenceById(courtCaseEntityWithCaseDocument2.getId());
         assertFalse(courtCaseEntity2.isRetentionUpdated());
+
+    }
+
+    @Test
+    void testProcessGenerateCaseDocumentForRetentionDateWithIsRetentionUpdateTrueNoDocumentGenerated() {
+        // given
+        CourtCaseEntity courtCaseEntityWithNoCaseDocuments = dartsDatabase.createCase(SOME_COURTHOUSE, SOME_CASE_NUMBER_1);
+        courtCaseEntityWithNoCaseDocuments.setRetentionUpdated(true);
+        dartsDatabase.save(courtCaseEntityWithNoCaseDocuments);
+
+        dartsDatabase.getHearingStub().createHearing(SOME_COURTHOUSE, SOME_ROOM, SOME_CASE_NUMBER_1,
+                                                     DateConverterUtil.toLocalDateTime(testTime));
+
+        CaseRetentionEntity caseRetentionObject1 = dartsDatabase.createCaseRetentionObject(
+            courtCaseEntityWithNoCaseDocuments, CaseRetentionStatus.COMPLETE, OffsetDateTime.now().plusDays(30), false);
+        dartsDatabase.save(caseRetentionObject1);
+
+        CaseRetentionEntity caseRetentionObject2 = dartsDatabase.createCaseRetentionObject(
+            courtCaseEntityWithNoCaseDocuments, CaseRetentionStatus.COMPLETE, OffsetDateTime.now().plusDays(20), false);
+        dartsDatabase.save(caseRetentionObject2);
+
+        CourtCaseEntity courtCaseEntityWithCaseDocument = dartsDatabase.createCase(SOME_COURTHOUSE, SOME_CASE_NUMBER_2);
+        courtCaseEntityWithCaseDocument.setRetentionUpdated(true);
+        dartsDatabase.save(courtCaseEntityWithCaseDocument);
+
+        dartsDatabase.getHearingStub().createHearing(SOME_COURTHOUSE, SOME_ROOM, SOME_CASE_NUMBER_2,
+                                                     DateConverterUtil.toLocalDateTime(testTime));
+
+        CaseRetentionEntity caseRetentionObject3 = dartsDatabase.createCaseRetentionObject(
+            courtCaseEntityWithCaseDocument, CaseRetentionStatus.COMPLETE, OffsetDateTime.now().plusDays(10), false);
+        dartsDatabase.save(caseRetentionObject3);
+
+        UserAccountEntity uploadedBy = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
+        CaseDocumentEntity caseDocument = dartsDatabase.getCaseDocumentStub().createAndSaveCaseDocumentEntity(
+            courtCaseEntityWithCaseDocument, uploadedBy);
+        caseDocument.setCreatedDateTime(OffsetDateTime.now().minusDays(30));
+        dartsDatabase.save(caseDocument);
+
+        // when
+        generateCaseDocumentForRetentionDateBatchProcessor.processGenerateCaseDocumentForRetentionDate(2);
+
+        // then
+        CourtCaseEntity courtCaseEntity1 = dartsDatabase.getCaseRepository().getReferenceById(courtCaseEntityWithNoCaseDocuments.getId());
+        List<CaseDocumentEntity> caseDocumentEntities1 =
+            dartsDatabase.getCaseDocumentStub().getCaseDocumentRepository().findByCourtCase(courtCaseEntity1);
+        assertEquals(0, caseDocumentEntities1.size());
+
+        CourtCaseEntity courtCaseEntity2 = dartsDatabase.getCaseRepository().getReferenceById(courtCaseEntityWithCaseDocument.getId());
+        List<CaseDocumentEntity> caseDocumentEntities2 =
+            dartsDatabase.getCaseDocumentStub().getCaseDocumentRepository().findByCourtCase(courtCaseEntity2);
+        assertEquals(1, caseDocumentEntities2.size());
 
     }
 }
