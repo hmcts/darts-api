@@ -230,7 +230,7 @@ class AudioRequestsControllerAddAudioRequestIntTest extends IntegrationBase {
     @Test
     void addAudioRequestWhenHearingNotFoundShouldThrow404() throws Exception {
         var audioRequestDetails = new AudioRequestDetails();
-        audioRequestDetails.setHearingId(9999); // Set to invalid hearing id
+        audioRequestDetails.setHearingId(9999); // Set to not existing hearing id
         audioRequestDetails.setStartTime(START_TIME);
         audioRequestDetails.setEndTime(END_TIME);
         audioRequestDetails.setRequestor(testUser.getId());

@@ -219,7 +219,7 @@ class MediaRequestServiceImplTest {
     }
 
     @Test
-    void saveAudioRequest_whenHearingNotFound_shouldThrowException() {
+    void whenSavingAudioAndHearingNotFoundShouldThrowException() {
         Integer hearingId = 4567;
         mockHearingEntity.setId(hearingId);
         mockMediaRequestEntity.setId(1);
