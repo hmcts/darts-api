@@ -94,14 +94,12 @@ module "postgresql_flexible" {
   pgsql_server_configuration = [
     {
       name  = "azure.extensions"
-      value = "pg_stat_statements"
+      value = "pg_stat_statements, PG_TRGM"
     }
   ]
   pgsql_version = "15"
 }
-resource "postgresql_extension" "my_extension" {
-  name = "pg_trgm"
-}
+
 
 data "azurerm_subnet" "private_endpoints" {
   resource_group_name  = local.private_endpoint_rg_name
