@@ -67,6 +67,8 @@ paths:
           description: 'invalid input, object invalid'
         '401':
           description: Unauthorised Error
+        '404':
+          description: Hearing Not Found
         '409':
           description: audio request item already exists
       requestBody:

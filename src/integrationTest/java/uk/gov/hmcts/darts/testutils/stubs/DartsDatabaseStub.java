@@ -375,13 +375,15 @@ public class DartsDatabaseStub {
     public HearingEntity createHearing(String courthouseName, String courtroomName, String caseNumber,
                                        LocalDateTime hearingDate) {
         createCourthouseUnlessExists(courthouseName);
-        return retrieveCoreObjectService.retrieveOrCreateHearing(
+        var hearingEntity =  retrieveCoreObjectService.retrieveOrCreateHearing(
             courthouseName,
             courtroomName,
             caseNumber,
             hearingDate,
             userAccountRepository.getReferenceById(0)
         );
+        hearingEntity.setHearingIsActual(true);
+        return hearingEntity;
     }
 
     public CourthouseEntity createCourthouseUnlessExists(String courthouseName) {
