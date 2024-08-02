@@ -83,7 +83,7 @@ class ArchiveRecordServiceImplTest {
     public static final int EODID = 1234;
     public static final String FILE_EXTENSION = "a360";
     public static final String DATE_FORMAT = "yyyy-MM-dd";
-    public static final int RETENTION_CONF_SCORE = 2;
+    public static final int RETENTION_CONFIDENCE_SCORE = 2;
     public static final String RETENTION_CONFIDENCE_REASON = "RetentionConfidenceReason";
 
     private final DateTimeFormatter formatter = DateTimeFormatter.ofPattern(DATE_TIME_FORMAT);
@@ -213,7 +213,7 @@ class ArchiveRecordServiceImplTest {
         when(mediaEntity.getId()).thenReturn(1);
         when(mediaEntity.getCourtroom()).thenReturn(courtroomEntity);
         when(mediaEntity.getRetConfReason()).thenReturn(RETENTION_CONFIDENCE_REASON);
-        when(mediaEntity.getRetConfScore()).thenReturn(RETENTION_CONF_SCORE);
+        when(mediaEntity.getRetConfScore()).thenReturn(RETENTION_CONFIDENCE_SCORE);
         when(mediaEntity.getChecksum()).thenReturn("xi/XkzD2HuqTUzDafW8Cgw==");
         when(mediaEntity.getChannel()).thenReturn(1);
         when(mediaEntity.getTotalChannels()).thenReturn(4);
@@ -281,7 +281,7 @@ class ArchiveRecordServiceImplTest {
         when(mediaEntity.getId()).thenReturn(1);
         when(mediaEntity.getCourtroom()).thenReturn(courtroomEntity);
         when(mediaEntity.getRetConfReason()).thenReturn(RETENTION_CONFIDENCE_REASON);
-        when(mediaEntity.getRetConfScore()).thenReturn(RETENTION_CONF_SCORE);
+        when(mediaEntity.getRetConfScore()).thenReturn(RETENTION_CONFIDENCE_SCORE);
         when(mediaEntity.getChannel()).thenReturn(1);
         when(mediaEntity.getTotalChannels()).thenReturn(4);
         when(mediaEntity.getChecksum()).thenReturn("xi/XkzD2HuqTUzDafW8Cgw==");
@@ -342,7 +342,7 @@ class ArchiveRecordServiceImplTest {
         when(mediaEntity.getId()).thenReturn(1);
         when(mediaEntity.getCourtroom()).thenReturn(courtroomEntity);
         when(mediaEntity.getRetConfReason()).thenReturn(RETENTION_CONFIDENCE_REASON);
-        when(mediaEntity.getRetConfScore()).thenReturn(RETENTION_CONF_SCORE);
+        when(mediaEntity.getRetConfScore()).thenReturn(RETENTION_CONFIDENCE_SCORE);
         when(mediaEntity.getMediaFile()).thenReturn(TEST_ARCHIVE_FILENAME);
         when(mediaEntity.getMediaFormat()).thenReturn(MP_2);
         when(mediaEntity.getCreatedDateTime()).thenReturn(startedAt);
@@ -419,7 +419,7 @@ class ArchiveRecordServiceImplTest {
         OffsetDateTime startedAt = testTime.minusHours(1);
         when(transcriptionDocumentEntity.getUploadedDateTime()).thenReturn(startedAt);
         when(transcriptionDocumentEntity.getRetConfReason()).thenReturn(RETENTION_CONFIDENCE_REASON);
-        when(transcriptionDocumentEntity.getRetConfScore()).thenReturn(RETENTION_CONF_SCORE);
+        when(transcriptionDocumentEntity.getRetConfScore()).thenReturn(RETENTION_CONFIDENCE_SCORE);
 
         when(externalObjectDirectoryEntity.getId()).thenReturn(EODID);
         when(externalObjectDirectoryEntity.getTranscriptionDocumentEntity()).thenReturn(transcriptionDocumentEntity);
@@ -439,7 +439,7 @@ class ArchiveRecordServiceImplTest {
         String actualResponse = getFileContents(archiveRecordFileInfo.getArchiveRecordFile().getAbsoluteFile());
         log.info("aResponse {}", actualResponse);
 
-        OffsetDateTime endedAt = testTime.plusHours(RETENTION_CONF_SCORE);
+        OffsetDateTime endedAt = testTime.plusHours(2);
         String expectedResponse = getContentsFromFile("Tests/arm/service/testGenerateTranscriptionArchiveRecord/expectedResponse.a360");
         expectedResponse = expectedResponse.replaceAll("<START_DATE>", startedAt.format(formatter));
         expectedResponse = expectedResponse.replaceAll("<END_DATE>", endedAt.format(formatter));
@@ -473,7 +473,7 @@ class ArchiveRecordServiceImplTest {
         when(transcriptionTypeEntity.getDescription()).thenReturn("SPECIFIED_TIMES");
 
         OffsetDateTime startedAt = testTime.minusHours(1);
-        OffsetDateTime endedAt = testTime.plusHours(RETENTION_CONF_SCORE);
+        OffsetDateTime endedAt = testTime.plusHours(2);
 
         when(transcriptionEntity.getId()).thenReturn(1);
         when(transcriptionEntity.getTranscriptionCommentEntities()).thenReturn(List.of(transcriptionCommentEntity));
@@ -494,7 +494,7 @@ class ArchiveRecordServiceImplTest {
         when(transcriptionDocumentEntity.getChecksum()).thenReturn("xi/XkzD2HuqTUzDafW8Cgw==");
         when(transcriptionDocumentEntity.getUploadedDateTime()).thenReturn(startedAt);
         when(transcriptionDocumentEntity.getRetConfReason()).thenReturn(RETENTION_CONFIDENCE_REASON);
-        when(transcriptionDocumentEntity.getRetConfScore()).thenReturn(RETENTION_CONF_SCORE);
+        when(transcriptionDocumentEntity.getRetConfScore()).thenReturn(RETENTION_CONFIDENCE_SCORE);
 
         when(externalObjectDirectoryEntity.getId()).thenReturn(EODID);
         when(externalObjectDirectoryEntity.getTranscriptionDocumentEntity()).thenReturn(transcriptionDocumentEntity);
@@ -542,7 +542,7 @@ class ArchiveRecordServiceImplTest {
         when(transcriptionDocumentEntity.getFileName()).thenReturn("transcription.");
         when(transcriptionDocumentEntity.getUploadedDateTime()).thenReturn(startedAt);
         when(transcriptionDocumentEntity.getRetConfReason()).thenReturn(RETENTION_CONFIDENCE_REASON);
-        when(transcriptionDocumentEntity.getRetConfScore()).thenReturn(RETENTION_CONF_SCORE);
+        when(transcriptionDocumentEntity.getRetConfScore()).thenReturn(RETENTION_CONFIDENCE_SCORE);
 
         when(externalObjectDirectoryEntity.getId()).thenReturn(EODID);
         when(externalObjectDirectoryEntity.getTranscriptionDocumentEntity()).thenReturn(transcriptionDocumentEntity);
@@ -563,7 +563,7 @@ class ArchiveRecordServiceImplTest {
         String actualResponse = getFileContents(archiveRecordFileInfo.getArchiveRecordFile().getAbsoluteFile());
         log.info("aResponse {}", actualResponse);
 
-        OffsetDateTime endedAt = testTime.plusHours(RETENTION_CONF_SCORE);
+        OffsetDateTime endedAt = testTime.plusHours(2);
 
         String expectedResponse = getContentsFromFile(
             "Tests/arm/service/testGenerateTranscriptionArchiveRecord/invalid_properties_path/expectedResponse.a360");
@@ -608,7 +608,7 @@ class ArchiveRecordServiceImplTest {
         when(annotationDocumentEntity.getChecksum()).thenReturn("xi/XkzD2HuqTUzDafW8Cgw==");
         when(annotationDocumentEntity.getUploadedDateTime()).thenReturn(uploadedDateTime);
         when(annotationDocumentEntity.getRetConfReason()).thenReturn(RETENTION_CONFIDENCE_REASON);
-        when(annotationDocumentEntity.getRetConfScore()).thenReturn(RETENTION_CONF_SCORE);
+        when(annotationDocumentEntity.getRetConfScore()).thenReturn(RETENTION_CONFIDENCE_SCORE);
 
         when(externalObjectDirectoryEntity.getId()).thenReturn(EODID);
         when(externalObjectDirectoryEntity.getAnnotationDocumentEntity()).thenReturn(annotationDocumentEntity);
@@ -673,7 +673,7 @@ class ArchiveRecordServiceImplTest {
         when(annotationDocumentEntity.getChecksum()).thenReturn("xi/XkzD2HuqTUzDafW8Cgw==");
         when(annotationDocumentEntity.getUploadedDateTime()).thenReturn(uploadedDateTime);
         when(annotationDocumentEntity.getRetConfReason()).thenReturn(RETENTION_CONFIDENCE_REASON);
-        when(annotationDocumentEntity.getRetConfScore()).thenReturn(RETENTION_CONF_SCORE);
+        when(annotationDocumentEntity.getRetConfScore()).thenReturn(RETENTION_CONFIDENCE_SCORE);
 
         when(externalObjectDirectoryEntity.getId()).thenReturn(EODID);
         when(externalObjectDirectoryEntity.getAnnotationDocumentEntity()).thenReturn(annotationDocumentEntity);
@@ -727,7 +727,7 @@ class ArchiveRecordServiceImplTest {
         when(annotationDocumentEntity.getFileName()).thenReturn("annotation.d");
         when(annotationDocumentEntity.getUploadedDateTime()).thenReturn(uploadedDateTime);
         when(annotationDocumentEntity.getRetConfReason()).thenReturn(RETENTION_CONFIDENCE_REASON);
-        when(annotationDocumentEntity.getRetConfScore()).thenReturn(RETENTION_CONF_SCORE);
+        when(annotationDocumentEntity.getRetConfScore()).thenReturn(RETENTION_CONFIDENCE_SCORE);
 
         when(externalObjectDirectoryEntity.getId()).thenReturn(EODID);
         when(externalObjectDirectoryEntity.getAnnotationDocumentEntity()).thenReturn(annotationDocumentEntity);
@@ -783,7 +783,7 @@ class ArchiveRecordServiceImplTest {
         when(caseDocumentEntity.getChecksum()).thenReturn("xi/XkzD2HuqTUzDafW8Cgw==");
         when(caseDocumentEntity.getCreatedDateTime()).thenReturn(uploadedDateTime);
         when(caseDocumentEntity.getRetConfReason()).thenReturn(RETENTION_CONFIDENCE_REASON);
-        when(caseDocumentEntity.getRetConfScore()).thenReturn(RETENTION_CONF_SCORE);
+        when(caseDocumentEntity.getRetConfScore()).thenReturn(RETENTION_CONFIDENCE_SCORE);
 
         when(externalObjectDirectoryEntity.getId()).thenReturn(EODID);
         when(externalObjectDirectoryEntity.getCaseDocument()).thenReturn(caseDocumentEntity);
@@ -837,7 +837,7 @@ class ArchiveRecordServiceImplTest {
         when(caseDocumentEntity.getChecksum()).thenReturn("xi/XkzD2HuqTUzDafW8Cgw==");
         when(caseDocumentEntity.getCreatedDateTime()).thenReturn(uploadedDateTime);
         when(caseDocumentEntity.getRetConfReason()).thenReturn(RETENTION_CONFIDENCE_REASON);
-        when(caseDocumentEntity.getRetConfScore()).thenReturn(RETENTION_CONF_SCORE);
+        when(caseDocumentEntity.getRetConfScore()).thenReturn(RETENTION_CONFIDENCE_SCORE);
 
         when(externalObjectDirectoryEntity.getId()).thenReturn(EODID);
         when(externalObjectDirectoryEntity.getCaseDocument()).thenReturn(caseDocumentEntity);
