@@ -27,6 +27,11 @@ public class UpdateMetadataRequest {
     public static class Manifest {
         @JsonProperty("event_date")
         private OffsetDateTime eventDate;
-    }
 
+        @JsonProperty("ret_conf_score")
+        private int retConfScore;
+
+        @JsonProperty("ret_conf_reason")
+        private String retConfReason;
+    }
 }
