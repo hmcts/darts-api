@@ -300,6 +300,7 @@ darts:
     generation-days: 28
     filename-prefix: "CASE_DOCUMENT"
     file-extension: "json"
+    expiry-days: 28
   transcription:
     allowed-extensions:
       - "docx"

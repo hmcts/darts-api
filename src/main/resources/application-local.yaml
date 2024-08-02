@@ -16,6 +16,7 @@ spring:
     properties:
       hibernate:
         format_sql: true
+        generate_statistics: true
 darts:
   daily-list:
     housekeeping:

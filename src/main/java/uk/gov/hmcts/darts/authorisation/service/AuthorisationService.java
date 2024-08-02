@@ -11,6 +11,8 @@ import java.util.Set;
 
 public interface AuthorisationService {
 
+    UserState getAuthorisation(int userId);
+
     Optional<UserState> getAuthorisation(String emailAddress);
 
     void checkCourthouseAuthorisation(List<CourthouseEntity> courthouses, Set<SecurityRoleEnum> securityRoles);

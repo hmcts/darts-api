@@ -27,7 +27,8 @@ public enum AutomatedTaskName {
     EVENT_CLEANUP_CURRENT_TASK("CleanupCurrentEvent"),
     INBOUND_TRANSCRIPTION_ANNOTATION_DELETER_TASK_NAME("InboundTranscriptionAnnotationDeleter"),
     UNSTRUCTURED_TRANSCRIPTION_ANNOTATION_DELETER_TASK_NAME("UnstructuredTranscriptionAnnotationDeleter"),
-    REMOVE_DUPLICATED_EVENTS_TASK_NAME("RemoveDuplicatedEvents");
+    REMOVE_DUPLICATED_EVENTS_TASK_NAME("RemoveDuplicatedEvents"),
+    GENERATE_CASE_DOCUMENT_FOR_RETENTION_DATE_TASK_NAME("GenerateCaseDocumentForRetentionDate");
 
     private final String taskName;
 

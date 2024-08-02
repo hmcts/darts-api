@@ -75,7 +75,7 @@ public class RemoveDuplicateEventsProcessorImpl implements RemoveDuplicateEvents
         eventRepository.findAllBetweenDateTimesInclusive(startDateTime, endDateTime).stream()
             .collect(groupingBy(duplicateIdentification()))
             .forEach((key, eventList) -> {
-                eventList.sort(comparing(EventEntity::getTimestamp));
+                eventList.sort(comparing(EventEntity::getCreatedDateTime));
                 // Keep the last (latest) event and delete the rest
                 duplicateEvents.addAll(eventList.subList(0, eventList.size() - 1));
             });
