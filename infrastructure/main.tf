@@ -81,7 +81,7 @@ module "postgresql_flexible" {
   component            = var.component
   business_area        = "sds"
   location             = var.location
-  pgsql_storage_mb     = "262144"
+  pgsql_storage_mb     = "524288"
   pgsql_sku            = "GP_Standard_D4s_v3"
   auto_grow_enabled    = true
   common_tags          = var.common_tags
