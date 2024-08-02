@@ -56,6 +56,7 @@ class TranscriptionMapperTest {
         transcription.setId(1);
         transcription.setHearingDate(LocalDate.of(2023, 6, 20));
         transcription.setRequestedBy(CommonTestDataUtil.createUserAccount("someLegacyRequestor"));
+        transcription.setIsCurrent(true);
 
         TranscriptionStatusEntity transcriptionStatus = new TranscriptionStatusEntity();
         transcriptionStatus.setId(TranscriptionStatusEnum.APPROVED.getId());
@@ -71,5 +72,16 @@ class TranscriptionMapperTest {
 
         assertEquals("someLegacyRequestor", transcript.getRequestedByName());
         assertEquals("APPROVED", transcript.getStatus());
+    }
+
+    @Test
+    void happyPathDoNotIncludeTranscriptionsIsCurrentFalse() {
+        HearingEntity hearing1 = CommonTestDataUtil.createHearing("case1", LocalTime.NOON);
+        List<TranscriptionEntity> transcriptionList = CommonTestDataUtil.createTranscriptionList(hearing1);
+
+        transcriptionList.get(0).setIsCurrent(false);
+
+        List<Transcript> transcripts = hearingTranscriptionMapper.getTranscriptList(hearingTranscriptionMapper.mapResponse(transcriptionList));
+        assertEquals(0, transcripts.size());
     }
 }

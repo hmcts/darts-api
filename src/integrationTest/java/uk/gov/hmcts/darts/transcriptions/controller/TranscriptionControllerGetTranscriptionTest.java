@@ -80,27 +80,8 @@ class TranscriptionControllerGetTranscriptionTest extends IntegrationBase {
 
         UserAccountEntity userAccount = transcription.getCreatedBy();
 
-        {
-            TranscriptionWorkflowEntity workflowAEntity = new TranscriptionWorkflowEntity();
-            workflowAEntity.setTranscription(transcription);
-            workflowAEntity.setWorkflowActor(transcription.getCreatedBy());
-            workflowAEntity.setWorkflowTimestamp(OffsetDateTime.of(2023, 6, 20, 10, 0, 0, 0, ZoneOffset.UTC));
-            workflowAEntity.setTranscriptionStatus(dartsDatabase.getTranscriptionStub().getTranscriptionStatusByEnum(TranscriptionStatusEnum.REQUESTED));
-            dartsDatabase.save(workflowAEntity);
-
-            addCommentToWorkflow(workflowAEntity, "comment1", userAccount);
-        }
-
-        {
-            TranscriptionWorkflowEntity workflowBEntity = new TranscriptionWorkflowEntity();
-            workflowBEntity.setTranscription(transcription);
-            workflowBEntity.setWorkflowActor(transcription.getCreatedBy());
-            workflowBEntity.setWorkflowTimestamp(OffsetDateTime.of(2023, 6, 20, 10, 0, 0, 0, ZoneOffset.UTC));
-            workflowBEntity.setTranscriptionStatus(dartsDatabase.getTranscriptionStub().getTranscriptionStatusByEnum(TranscriptionStatusEnum.APPROVED));
-            dartsDatabase.save(workflowBEntity);
-
-            addCommentToWorkflow(workflowBEntity, "comment2", userAccount);
-        }
+        addTranscriptionWorkflow(transcription, userAccount, "comment1", TranscriptionStatusEnum.REQUESTED);
+        addTranscriptionWorkflow(transcription, userAccount, "comment2", TranscriptionStatusEnum.APPROVED);
 
         MockHttpServletRequestBuilder requestBuilder = get(ENDPOINT_URL_TRANSCRIPTION, transcription.getId());
         String expected = TestUtils.removeTags(
@@ -130,27 +111,8 @@ class TranscriptionControllerGetTranscriptionTest extends IntegrationBase {
 
         UserAccountEntity userAccount = transcription.getCreatedBy();
 
-        {
-            TranscriptionWorkflowEntity workflowAEntity = new TranscriptionWorkflowEntity();
-            workflowAEntity.setTranscription(transcription);
-            workflowAEntity.setWorkflowActor(transcription.getCreatedBy());
-            workflowAEntity.setWorkflowTimestamp(OffsetDateTime.of(2023, 6, 20, 10, 0, 0, 0, ZoneOffset.UTC));
-            workflowAEntity.setTranscriptionStatus(dartsDatabase.getTranscriptionStub().getTranscriptionStatusByEnum(TranscriptionStatusEnum.REQUESTED));
-            dartsDatabase.save(workflowAEntity);
-
-            addCommentToWorkflow(workflowAEntity, "comment1", userAccount);
-        }
-
-        {
-            TranscriptionWorkflowEntity workflowBEntity = new TranscriptionWorkflowEntity();
-            workflowBEntity.setTranscription(transcription);
-            workflowBEntity.setWorkflowActor(transcription.getCreatedBy());
-            workflowBEntity.setWorkflowTimestamp(OffsetDateTime.of(2023, 6, 20, 10, 0, 0, 0, ZoneOffset.UTC));
-            workflowBEntity.setTranscriptionStatus(dartsDatabase.getTranscriptionStub().getTranscriptionStatusByEnum(TranscriptionStatusEnum.APPROVED));
-            dartsDatabase.save(workflowBEntity);
-
-            addCommentToWorkflow(workflowBEntity, "comment2", userAccount);
-        }
+        addTranscriptionWorkflow(transcription, userAccount, "comment1", TranscriptionStatusEnum.REQUESTED);
+        addTranscriptionWorkflow(transcription, userAccount, "comment2", TranscriptionStatusEnum.APPROVED);
 
         MockHttpServletRequestBuilder requestBuilder = get(ENDPOINT_URL_TRANSCRIPTION, transcription.getId());
         String expected = TestUtils.removeTags(
@@ -180,27 +142,8 @@ class TranscriptionControllerGetTranscriptionTest extends IntegrationBase {
 
         UserAccountEntity userAccount = transcription.getCreatedBy();
 
-        {
-            TranscriptionWorkflowEntity workflowAEntity = new TranscriptionWorkflowEntity();
-            workflowAEntity.setTranscription(transcription);
-            workflowAEntity.setWorkflowActor(transcription.getCreatedBy());
-            workflowAEntity.setWorkflowTimestamp(OffsetDateTime.of(2023, 6, 20, 10, 0, 0, 0, ZoneOffset.UTC));
-            workflowAEntity.setTranscriptionStatus(dartsDatabase.getTranscriptionStub().getTranscriptionStatusByEnum(TranscriptionStatusEnum.REQUESTED));
-            dartsDatabase.save(workflowAEntity);
-
-            addCommentToWorkflow(workflowAEntity, "comment1", userAccount);
-        }
-
-        {
-            TranscriptionWorkflowEntity workflowBEntity = new TranscriptionWorkflowEntity();
-            workflowBEntity.setTranscription(transcription);
-            workflowBEntity.setWorkflowActor(transcription.getCreatedBy());
-            workflowBEntity.setWorkflowTimestamp(OffsetDateTime.of(2023, 6, 20, 10, 0, 0, 0, ZoneOffset.UTC));
-            workflowBEntity.setTranscriptionStatus(dartsDatabase.getTranscriptionStub().getTranscriptionStatusByEnum(TranscriptionStatusEnum.APPROVED));
-            dartsDatabase.save(workflowBEntity);
-
-            addCommentToWorkflow(workflowBEntity, "comment2", userAccount);
-        }
+        addTranscriptionWorkflow(transcription, userAccount, "comment1", TranscriptionStatusEnum.REQUESTED);
+        addTranscriptionWorkflow(transcription, userAccount, "comment2", TranscriptionStatusEnum.APPROVED);
 
         MockHttpServletRequestBuilder requestBuilder = get(ENDPOINT_URL_TRANSCRIPTION, transcription.getId());
         String expected = TestUtils.removeTags(
@@ -226,27 +169,8 @@ class TranscriptionControllerGetTranscriptionTest extends IntegrationBase {
 
         UserAccountEntity userAccount = transcription.getCreatedBy();
 
-        {
-            TranscriptionWorkflowEntity workflowAEntity = new TranscriptionWorkflowEntity();
-            workflowAEntity.setTranscription(transcription);
-            workflowAEntity.setWorkflowActor(transcription.getCreatedBy());
-            workflowAEntity.setWorkflowTimestamp(OffsetDateTime.of(2023, 6, 20, 10, 0, 0, 0, ZoneOffset.UTC));
-            workflowAEntity.setTranscriptionStatus(dartsDatabase.getTranscriptionStub().getTranscriptionStatusByEnum(TranscriptionStatusEnum.REQUESTED));
-            dartsDatabase.save(workflowAEntity);
-
-            addCommentToWorkflow(workflowAEntity, "comment1", userAccount);
-        }
-
-        {
-            TranscriptionWorkflowEntity workflowBEntity = new TranscriptionWorkflowEntity();
-            workflowBEntity.setTranscription(transcription);
-            workflowBEntity.setWorkflowActor(transcription.getCreatedBy());
-            workflowBEntity.setWorkflowTimestamp(OffsetDateTime.of(2023, 6, 20, 10, 0, 0, 0, ZoneOffset.UTC));
-            workflowBEntity.setTranscriptionStatus(dartsDatabase.getTranscriptionStub().getTranscriptionStatusByEnum(TranscriptionStatusEnum.APPROVED));
-            dartsDatabase.save(workflowBEntity);
-
-            addCommentToWorkflow(workflowBEntity, "comment2", userAccount);
-        }
+        addTranscriptionWorkflow(transcription, userAccount, "comment1", TranscriptionStatusEnum.REQUESTED);
+        addTranscriptionWorkflow(transcription, userAccount, "comment2", TranscriptionStatusEnum.APPROVED);
 
         MockHttpServletRequestBuilder requestBuilder = get(ENDPOINT_URL_TRANSCRIPTION, transcription.getId());
         String expected = TestUtils.removeTags(
@@ -259,6 +183,28 @@ class TranscriptionControllerGetTranscriptionTest extends IntegrationBase {
         MvcResult mvcResult = mockMvc.perform(requestBuilder).andExpect(status().isOk()).andReturn();
         String actualResponse = TestUtils.removeTags(TAGS_TO_IGNORE, mvcResult.getResponse().getContentAsString());
         JSONAssert.assertEquals(expected, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
+    }
+
+    @Test
+    void getTranscriptionNotFoundWhenIsCurrentFalse() throws Exception {
+        HearingEntity hearingEntity = dartsDatabase.getHearingRepository().findAll().get(0);
+        TranscriptionEntity transcription = dartsDatabase.getTranscriptionStub().createTranscription(hearingEntity);
+        transcription.setCreatedDateTime(OffsetDateTime.of(2023, 6, 20, 10, 0, 0, 0, ZoneOffset.UTC));
+        transcription.setStartTime(SOME_DATE_TIME);
+        transcription.setEndTime(SOME_DATE_TIME);
+        transcription.setIsCurrent(false);
+        transcription = dartsDatabase.save(transcription);
+
+        UserAccountEntity userAccount = transcription.getCreatedBy();
+
+        addTranscriptionWorkflow(transcription, userAccount, "comment1", TranscriptionStatusEnum.REQUESTED);
+        addTranscriptionWorkflow(transcription, userAccount, "comment2", TranscriptionStatusEnum.APPROVED);
+
+        MockHttpServletRequestBuilder requestBuilder = get(ENDPOINT_URL_TRANSCRIPTION, transcription.getId());
+        MvcResult response = mockMvc.perform(requestBuilder).andExpect(status().isNotFound()).andReturn();
+        String actualResponse = response.getResponse().getContentAsString();
+        String expectedResponse = getContentsFromFile("tests/transcriptions/transcription/expectedResponseNotFound.json");
+        JSONAssert.assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
     }
 
     @Test
@@ -278,5 +224,16 @@ class TranscriptionControllerGetTranscriptionTest extends IntegrationBase {
         commentEntity.setLastModifiedBy(userAccount);
         commentEntity.setCreatedBy(userAccount);
         dartsDatabase.save(commentEntity);
+    }
+
+    private void addTranscriptionWorkflow(TranscriptionEntity transcription, UserAccountEntity userAccount, String comment, TranscriptionStatusEnum status) {
+        TranscriptionWorkflowEntity workflowAEntity = new TranscriptionWorkflowEntity();
+        workflowAEntity.setTranscription(transcription);
+        workflowAEntity.setWorkflowActor(transcription.getCreatedBy());
+        workflowAEntity.setWorkflowTimestamp(OffsetDateTime.of(2023, 6, 20, 10, 0, 0, 0, ZoneOffset.UTC));
+        workflowAEntity.setTranscriptionStatus(dartsDatabase.getTranscriptionStub().getTranscriptionStatusByEnum(status));
+        dartsDatabase.save(workflowAEntity);
+
+        addCommentToWorkflow(workflowAEntity, comment, userAccount);
     }
 }

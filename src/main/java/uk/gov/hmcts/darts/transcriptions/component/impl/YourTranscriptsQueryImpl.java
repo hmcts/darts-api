@@ -82,7 +82,7 @@ public class YourTranscriptsQueryImpl implements YourTranscriptsQuery {
                     )
                 )
                 AND trw.workflow_ts >= :date_limit
-
+                AND tra.is_current = true
                 UNION
 
                 -- Migrated "requester_transcriptions"
@@ -130,6 +130,7 @@ public class YourTranscriptsQueryImpl implements YourTranscriptsQuery {
                     )
                 )
                 AND trw.workflow_ts >= :date_limit
+                AND tra.is_current = true
                 ORDER BY transcription_id DESC
                 LIMIT :max_result_size
                 """,
@@ -196,6 +197,7 @@ public class YourTranscriptsQueryImpl implements YourTranscriptsQuery {
                     )
                 )
                 AND trw.workflow_ts >= :date_limit
+                AND tra.is_current = true
 
                 UNION
 
@@ -252,6 +254,7 @@ public class YourTranscriptsQueryImpl implements YourTranscriptsQuery {
                     )
                 )
                 AND trw.workflow_ts >= :date_limit
+                AND tra.is_current = true
                 ORDER BY transcription_id DESC
                 LIMIT :max_result_size
                 """,

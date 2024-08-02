@@ -15,7 +15,9 @@ public abstract class TranscriptionMapper<T extends TranscriptModel> {
     public List<T> mapResponse(List<TranscriptionEntity> transcriptionEntities) {
         List<T> response = new ArrayList<>();
         for (TranscriptionEntity transcriptionEntity : transcriptionEntities) {
-            response.add(map(transcriptionEntity));
+            if (Boolean.TRUE.equals(transcriptionEntity.getIsCurrent())) {
+                response.add(map(transcriptionEntity));
+            }
         }
         return response;
     }
