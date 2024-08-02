@@ -6,7 +6,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Pageable;
-import org.springframework.test.util.ReflectionTestUtils;
 import uk.gov.hmcts.darts.casedocument.service.GenerateCaseDocumentSingleCaseProcessor;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
@@ -28,6 +27,8 @@ class GenerateCaseDocumentBatchProcessorImplTest {
     public static final int BATCH_SIZE = 2;
     public static final int CASE_1_ID = 22;
     public static final int CASE_2_ID = 23;
+    public static final int CASE_DOCUMENT_GENERATION_DAYS = 5;
+
     @Mock
     CaseRepository caseRepository;
     @Mock
@@ -46,6 +47,7 @@ class GenerateCaseDocumentBatchProcessorImplTest {
     void setup() {
         batchProcessor = new GenerateCaseDocumentBatchProcessorImpl(
             BATCH_SIZE,
+            CASE_DOCUMENT_GENERATION_DAYS,
             caseRepository,
             singleCaseProcessor,
             currentTimeHelper
@@ -53,8 +55,6 @@ class GenerateCaseDocumentBatchProcessorImplTest {
 
         when(case1.getId()).thenReturn(CASE_1_ID);
         when(case2.getId()).thenReturn(CASE_2_ID);
-
-        ReflectionTestUtils.setField(batchProcessor, "caseDocumentGenerationDays", 5);
     }
 
     @Test
