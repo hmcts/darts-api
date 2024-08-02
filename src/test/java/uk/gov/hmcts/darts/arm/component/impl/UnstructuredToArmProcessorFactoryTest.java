@@ -17,6 +17,7 @@ import uk.gov.hmcts.darts.arm.service.impl.ArmBatchProcessResponseFilesImpl;
 import uk.gov.hmcts.darts.arm.service.impl.ArmResponseFilesProcessorImpl;
 import uk.gov.hmcts.darts.arm.service.impl.UnstructuredToArmBatchProcessorImpl;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
+import uk.gov.hmcts.darts.casedocument.service.GenerateCaseDocumentForRetentionDateProcessor;
 import uk.gov.hmcts.darts.casedocument.service.GenerateCaseDocumentSingleCaseProcessor;
 import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
 import uk.gov.hmcts.darts.common.repository.CaseRepository;
@@ -66,7 +67,8 @@ class UnstructuredToArmProcessorFactoryTest {
     private EventRepository eventRepository;
     @Mock
     private GenerateCaseDocumentSingleCaseProcessor generateCaseDocumentSingleCaseProcessor;
-
+    @Mock
+    private GenerateCaseDocumentForRetentionDateProcessor generateCaseDocumentForRetentionDateBatchProcessor;
 
     @Test
     void whenBatchModeTrueBatchProcessorCreated() {
@@ -87,7 +89,8 @@ class UnstructuredToArmProcessorFactoryTest {
                                                   currentTimeHelper,
                                                   caseRepository,
                                                   generateCaseDocumentSingleCaseProcessor,
-                                                  eventRepository);
+                                                  eventRepository,
+                                                  generateCaseDocumentForRetentionDateBatchProcessor);
 
         var unstructuredToArmProcessor = automatedTaskProcessorFactory.createUnstructuredToArmProcessor(10);
 
@@ -113,7 +116,8 @@ class UnstructuredToArmProcessorFactoryTest {
                                                   currentTimeHelper,
                                                   caseRepository,
                                                   generateCaseDocumentSingleCaseProcessor,
-                                                  eventRepository);
+                                                  eventRepository,
+                                                  generateCaseDocumentForRetentionDateBatchProcessor);
 
         var armResponseFilesProcessor = automatedTaskProcessorFactory.createArmResponseFilesProcessor(0);
 
@@ -139,7 +143,8 @@ class UnstructuredToArmProcessorFactoryTest {
                                                   currentTimeHelper,
                                                   caseRepository,
                                                   generateCaseDocumentSingleCaseProcessor,
-                                                  eventRepository);
+                                                  eventRepository,
+                                                  generateCaseDocumentForRetentionDateBatchProcessor);
 
         var armResponseFilesProcessor = automatedTaskProcessorFactory.createArmResponseFilesProcessor(10);
 

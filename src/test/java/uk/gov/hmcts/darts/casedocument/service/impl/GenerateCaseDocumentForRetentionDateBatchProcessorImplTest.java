@@ -7,6 +7,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Pageable;
 import org.springframework.test.util.ReflectionTestUtils;
+import uk.gov.hmcts.darts.casedocument.service.GenerateCaseDocumentForRetentionDateProcessor;
 import uk.gov.hmcts.darts.casedocument.service.GenerateCaseDocumentSingleCaseProcessor;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
@@ -23,7 +24,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-class GenerateCaseDocumentBatchProcessorImplTest {
+class GenerateCaseDocumentForRetentionDateBatchProcessorImplTest {
 
     public static final int BATCH_SIZE = 2;
     public static final int CASE_1_ID = 22;
@@ -35,7 +36,7 @@ class GenerateCaseDocumentBatchProcessorImplTest {
     @Mock
     CurrentTimeHelper currentTimeHelper;
 
-    GenerateCaseDocumentBatchProcessorImpl batchProcessor;
+    GenerateCaseDocumentForRetentionDateProcessor batchProcessor;
 
     @Mock
     CourtCaseEntity case1;
@@ -44,8 +45,7 @@ class GenerateCaseDocumentBatchProcessorImplTest {
 
     @BeforeEach
     void setup() {
-        batchProcessor = new GenerateCaseDocumentBatchProcessorImpl(
-            BATCH_SIZE,
+        batchProcessor = new GenerateCaseDocumentForRetentionDateBatchProcessorImpl(
             caseRepository,
             singleCaseProcessor,
             currentTimeHelper
@@ -54,16 +54,16 @@ class GenerateCaseDocumentBatchProcessorImplTest {
         when(case1.getId()).thenReturn(CASE_1_ID);
         when(case2.getId()).thenReturn(CASE_2_ID);
 
-        ReflectionTestUtils.setField(batchProcessor, "caseDocumentGenerationDays", 5);
+        ReflectionTestUtils.setField(batchProcessor, "caseDocumentExpiryDays", 5);
     }
 
     @Test
-    void testBatchGenerationOfCaseDocument() {
+    void testBatchGenerationOfCaseDocumentForRetentionDate() {
         when(currentTimeHelper.currentOffsetDateTime()).thenReturn(OffsetDateTime.now());
-        when(caseRepository.findCasesNeedingCaseDocumentGenerated(any(), eq(Pageable.ofSize(BATCH_SIZE))))
+        when(caseRepository.findCasesNeedingCaseDocumentForRetentionDateGeneration(any(), any(), eq(Pageable.ofSize(BATCH_SIZE))))
             .thenReturn(List.of(case1, case2));
-        
-        batchProcessor.processGenerateCaseDocument();
+
+        batchProcessor.processGenerateCaseDocumentForRetentionDate(BATCH_SIZE);
 
         verify(singleCaseProcessor, times(2)).processGenerateCaseDocument(any());
         verify(singleCaseProcessor).processGenerateCaseDocument(CASE_1_ID);
@@ -73,11 +73,11 @@ class GenerateCaseDocumentBatchProcessorImplTest {
     @Test
     void testExceptionIsHandledAndProcessingContinues() {
         when(currentTimeHelper.currentOffsetDateTime()).thenReturn(OffsetDateTime.now());
-        when(caseRepository.findCasesNeedingCaseDocumentGenerated(any(), eq(Pageable.ofSize(BATCH_SIZE))))
+        when(caseRepository.findCasesNeedingCaseDocumentForRetentionDateGeneration(any(), any(), eq(Pageable.ofSize(BATCH_SIZE))))
             .thenReturn(List.of(case1, case2));
         doThrow(RuntimeException.class).when(singleCaseProcessor).processGenerateCaseDocument(CASE_1_ID);
 
-        batchProcessor.processGenerateCaseDocument();
+        batchProcessor.processGenerateCaseDocumentForRetentionDate(BATCH_SIZE);
 
         verify(singleCaseProcessor).processGenerateCaseDocument(CASE_2_ID);
     }

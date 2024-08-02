@@ -46,6 +46,7 @@ import uk.gov.hmcts.darts.task.runner.impl.CloseUnfinishedTranscriptionsAutomate
 import uk.gov.hmcts.darts.task.runner.impl.DailyListAutomatedTask;
 import uk.gov.hmcts.darts.task.runner.impl.ExternalDataStoreDeleterAutomatedTask;
 import uk.gov.hmcts.darts.task.runner.impl.GenerateCaseDocumentAutomatedTask;
+import uk.gov.hmcts.darts.task.runner.impl.GenerateCaseDocumentForRetentionDateAutomatedTask;
 import uk.gov.hmcts.darts.task.runner.impl.InboundAudioDeleterAutomatedTask;
 import uk.gov.hmcts.darts.task.runner.impl.InboundToUnstructuredAutomatedTask;
 import uk.gov.hmcts.darts.task.runner.impl.OutboundAudioDeleterAutomatedTask;
@@ -173,7 +174,7 @@ class AutomatedTaskServiceTest extends IntegrationPerClassBase {
     void givenSuccessfullyStartedTaskFailsDuringExecutionThenStatusIsSetToFailed() {
         GenerateCaseDocumentAutomatedTask automatedTask
             = new GenerateCaseDocumentAutomatedTask(automatedTaskRepository, lockProvider,
-                automatedTaskConfigurationProperties, taskProcessorFactory, logApi);
+                                                    automatedTaskConfigurationProperties, taskProcessorFactory, logApi);
         doThrow(ArithmeticException.class).when(caseRepository)
             .findCasesNeedingCaseDocumentGenerated(any(), any());
 
@@ -1158,5 +1159,64 @@ class AutomatedTaskServiceTest extends IntegrationPerClassBase {
         assertTrue(taskCancelled);
 
         automatedTaskService.reloadTaskByName(AutomatedTaskName.UNSTRUCTURED_TRANSCRIPTION_ANNOTATION_DELETER_TASK_NAME.getTaskName());
+    }
+
+    @Test
+    void givenConfiguredTaskGenerateCaseDocumentForRetentionDateAutomatedTask() {
+        AutomatedTask automatedTask =
+            new GenerateCaseDocumentForRetentionDateAutomatedTask(
+                automatedTaskRepository,
+                lockProvider,
+                automatedTaskConfigurationProperties,
+                taskProcessorFactory,
+                logApi
+            );
+
+        Optional<AutomatedTaskEntity> originalAutomatedTaskEntity =
+            automatedTaskService.getAutomatedTaskEntityByTaskName(automatedTask.getTaskName());
+        log.info("TEST - Original task {} cron expression {}", automatedTask.getTaskName(),
+                 originalAutomatedTaskEntity.get().getCronExpression()
+        );
+
+        automatedTaskService.updateAutomatedTaskCronExpression(automatedTask.getTaskName(), "*/9 * * * * *");
+
+        Set<ScheduledTask> scheduledTasks = scheduledTaskHolder.getScheduledTasks();
+        displayTasks(scheduledTasks);
+
+        Optional<AutomatedTaskEntity> updatedAutomatedTaskEntity =
+            automatedTaskService.getAutomatedTaskEntityByTaskName(automatedTask.getTaskName());
+        log.info("TEST - Updated task {} cron expression {}", automatedTask.getTaskName(),
+                 updatedAutomatedTaskEntity.get().getCronExpression()
+        );
+        assertEquals(originalAutomatedTaskEntity.get().getTaskName(), updatedAutomatedTaskEntity.get().getTaskName());
+        assertNotEquals(originalAutomatedTaskEntity.get().getCronExpression(), updatedAutomatedTaskEntity.get().getCronExpression());
+
+        automatedTaskService.updateAutomatedTaskCronExpression(
+            automatedTask.getTaskName(), originalAutomatedTaskEntity.get().getCronExpression());
+    }
+
+    @Test
+    void givenConfiguredTaskCancelGenerateCaseDocumentForRetentionDateAutomatedTask() {
+        AutomatedTask automatedTask =
+            new GenerateCaseDocumentForRetentionDateAutomatedTask(
+                automatedTaskRepository,
+                lockProvider,
+                automatedTaskConfigurationProperties,
+                taskProcessorFactory,
+                logApi
+            );
+
+        Set<ScheduledTask> scheduledTasks = scheduledTaskHolder.getScheduledTasks();
+        displayTasks(scheduledTasks);
+
+        boolean mayInterruptIfRunning = false;
+        boolean taskCancelled = automatedTaskService.cancelAutomatedTask(
+            automatedTask.getTaskName(),
+            mayInterruptIfRunning
+        );
+        assertTrue(taskCancelled);
+
+        log.info("About to reload task {}", automatedTask.getTaskName());
+        automatedTaskService.reloadTaskByName(automatedTask.getTaskName());
     }
 }
