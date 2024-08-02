@@ -231,6 +231,7 @@ public class TranscriptionStub {
         transcription.setLastModifiedBy(testUser);
         transcription.setIsManualTranscription(true);
         transcription.setHideRequestFromRequestor(false);
+        transcription.setIsCurrent(true);
 
         if (hearing != null) {
             hearing.getTranscriptions().add(transcription);
@@ -279,6 +280,7 @@ public class TranscriptionStub {
         transcription.setLastModifiedBy(testUser);
         transcription.setIsManualTranscription(isManualTranscription);
         transcription.setHideRequestFromRequestor(false);
+        transcription.setIsCurrent(true);
         return transcriptionRepository.saveAndFlush(transcription);
     }
 
@@ -296,6 +298,7 @@ public class TranscriptionStub {
         transcription.setLastModifiedBy(testUser);
         transcription.setIsManualTranscription(true);
         transcription.setHideRequestFromRequestor(false);
+        transcription.setIsCurrent(true);
         return transcriptionRepository.saveAndFlush(transcription);
     }
 
@@ -338,16 +341,26 @@ public class TranscriptionStub {
                                                                                HearingEntity hearingEntity,
                                                                                OffsetDateTime workflowTimestamp,
                                                                                boolean associatedUrgency) {
-        var transcriptionEntity = this.createTranscriptionWithStatus(
+        return createAndSaveAwaitingAuthorisationTranscription(userAccountEntity, courtCaseEntity,
+                                                               hearingEntity, workflowTimestamp, associatedUrgency,true);
+    }
+
+    @Transactional
+    public TranscriptionEntity createAndSaveAwaitingAuthorisationTranscription(UserAccountEntity userAccountEntity,
+                                                                               CourtCaseEntity courtCaseEntity,
+                                                                               HearingEntity hearingEntity,
+                                                                               OffsetDateTime workflowTimestamp,
+                                                                               boolean associatedUrgency, boolean isCurrent) {
+        return this.createTranscriptionWithStatus(
             userAccountEntity,
             courtCaseEntity,
             hearingEntity,
             workflowTimestamp,
             getTranscriptionStatusByEnum(AWAITING_AUTHORISATION),
             null,
-            associatedUrgency
+            associatedUrgency,
+            isCurrent
         );
-        return transcriptionRepository.saveAndFlush(transcriptionEntity);
     }
 
     @Transactional
@@ -429,6 +442,7 @@ public class TranscriptionStub {
         transcriptionEntity.setStartTime(startDate);
         transcriptionEntity.setEndTime(endDate);
         transcriptionEntity.setTranscriptionType(transcriptionType);
+        transcriptionEntity.setIsCurrent(true);
         return transcriptionRepository.saveAndFlush(transcriptionEntity);
     }
 
@@ -602,6 +616,17 @@ public class TranscriptionStub {
                                                               OffsetDateTime workflowTimestamp,
                                                               TranscriptionStatusEntity status,
                                                               String comment, boolean associateUrgency) {
+
+        return createTranscriptionWithStatus(userAccountEntity, courtCaseEntity, hearingEntity, workflowTimestamp,
+                                      status, comment, associateUrgency, true);
+    }
+
+    private TranscriptionEntity createTranscriptionWithStatus(UserAccountEntity userAccountEntity,
+                                                              CourtCaseEntity courtCaseEntity,
+                                                              HearingEntity hearingEntity,
+                                                              OffsetDateTime workflowTimestamp,
+                                                              TranscriptionStatusEntity status,
+                                                              String comment, boolean associateUrgency, boolean isCurrent) {
         final var transcriptionEntity = new TranscriptionEntity();
         transcriptionEntity.addCase(courtCaseEntity);
         transcriptionEntity.addHearing(hearingEntity);
@@ -620,6 +645,7 @@ public class TranscriptionStub {
         transcriptionEntity.setLastModifiedBy(userAccountEntity);
         transcriptionEntity.setIsManualTranscription(true);
         transcriptionEntity.setHideRequestFromRequestor(false);
+        transcriptionEntity.setIsCurrent(isCurrent);
         transcriptionRepository.save(transcriptionEntity);
 
         final var requestedTranscriptionWorkflowEntity = createTranscriptionWorkflowEntity(

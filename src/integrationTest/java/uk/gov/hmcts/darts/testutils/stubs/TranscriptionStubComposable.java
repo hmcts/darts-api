@@ -92,6 +92,7 @@ public class TranscriptionStubComposable {
         transcription.setLastModifiedBy(testUser);
         transcription.setIsManualTranscription(true);
         transcription.setHideRequestFromRequestor(false);
+        transcription.setIsCurrent(true);
 
         if (hearing != null) {
             hearing.getTranscriptions().add(transcription);

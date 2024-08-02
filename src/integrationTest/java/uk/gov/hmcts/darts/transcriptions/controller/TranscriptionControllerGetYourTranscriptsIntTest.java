@@ -273,4 +273,33 @@ class TranscriptionControllerGetYourTranscriptsIntTest extends IntegrationBase {
             .andExpect(jsonPath("$.approver_transcriptions", hasSize(1)))
             .andExpect(jsonPath("$.approver_transcriptions[0].transcription_id", is(systemUserTranscription.getId())));
     }
+
+    @Test
+    void getYourTranscriptsShouldNotReturnTranscriptWhenIsCurrentFalse() throws Exception {
+        var courtCase = authorisationStub.getCourtCaseEntity();
+        transcriptionStub.createAndSaveAwaitingAuthorisationTranscription(
+                systemUser,
+                courtCase,
+                authorisationStub.getHearingEntity(), now(UTC), false, false
+            );
+
+        transcriptionStub.createAndSaveAwaitingAuthorisationTranscription(
+                authorisationStub.getTestUser(),
+                courtCase,
+                authorisationStub.getHearingEntity(), YESTERDAY, false, false
+            );
+
+
+        MockHttpServletRequestBuilder requestBuilder = get(ENDPOINT_URI)
+            .header(
+                "user_id",
+                testUser.getId()
+            );
+
+        mockMvc.perform(requestBuilder)
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.requester_transcriptions", hasSize(1)))
+            .andExpect(jsonPath("$.requester_transcriptions[0].transcription_id", is(transcriptionEntity.getId())))
+            .andExpect(jsonPath("$.approver_transcriptions").isEmpty());
+    }
 }
