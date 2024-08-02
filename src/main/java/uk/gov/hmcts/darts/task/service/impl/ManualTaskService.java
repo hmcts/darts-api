@@ -39,6 +39,7 @@ import uk.gov.hmcts.darts.task.runner.impl.CloseUnfinishedTranscriptionsAutomate
 import uk.gov.hmcts.darts.task.runner.impl.DailyListAutomatedTask;
 import uk.gov.hmcts.darts.task.runner.impl.ExternalDataStoreDeleterAutomatedTask;
 import uk.gov.hmcts.darts.task.runner.impl.GenerateCaseDocumentAutomatedTask;
+import uk.gov.hmcts.darts.task.runner.impl.GenerateCaseDocumentForRetentionDateAutomatedTask;
 import uk.gov.hmcts.darts.task.runner.impl.InboundAnnotationTranscriptionDeleterAutomatedTask;
 import uk.gov.hmcts.darts.task.runner.impl.InboundAudioDeleterAutomatedTask;
 import uk.gov.hmcts.darts.task.runner.impl.InboundToUnstructuredAutomatedTask;
@@ -111,6 +112,7 @@ public class ManualTaskService {
         addInboundTranscriptionAndAnnotationDeleterRegistrar();
         addUnstructuredTranscriptionAndAnnotationDeleterRegistrar();
         addRemoveDuplicateEventsToTaskRegistrar();
+        addGenerateCaseDocumentForRetentionDateToTaskRegistrar();
     }
 
     public List<AbstractLockableAutomatedTask> getAutomatedTasks() {
@@ -361,6 +363,18 @@ public class ManualTaskService {
             lockProvider,
             automatedTaskConfigurationProperties,
             unstructuredTranscriptionAndAnnotationDeleterProcessor,
+            logApi
+        );
+        manualTask.setManualTask();
+        automatedTasks.add(manualTask);
+    }
+
+    private void addGenerateCaseDocumentForRetentionDateToTaskRegistrar() {
+        var manualTask = new GenerateCaseDocumentForRetentionDateAutomatedTask(
+            automatedTaskRepository,
+            lockProvider,
+            automatedTaskConfigurationProperties,
+            automatedTaskProcessorFactory,
             logApi
         );
         manualTask.setManualTask();
