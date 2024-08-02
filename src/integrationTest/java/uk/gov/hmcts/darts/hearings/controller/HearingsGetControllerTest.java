@@ -130,7 +130,7 @@ class HearingsGetControllerTest extends IntegrationBase {
         );
 
         JudgeEntity testJudge = dartsDatabase.createSimpleJudge("testJudge");
-        hearing.addJudge(testJudge);
+        hearing.addJudge(testJudge, false);
         dartsDatabase.save(hearing);
 
         when(mockUserIdentity.getUserAccount()).thenReturn(null);

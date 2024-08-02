@@ -60,21 +60,21 @@ public class AudioTransformationServiceGivenBuilder {
             LocalDateTime.of(2020, 6, 20, 10, 0, 0)
         );
         judge = dartsDatabase.save(createJudgeWithName("aJudge"));
-        hearingEntityWithMedia1.addJudge(judge);
+        hearingEntityWithMedia1.addJudge(judge, false);
         hearingEntityWithMedia2 = dartsDatabase.createHearing(
             "NEWCASTLE",
             "room_a",
             "c1",
             LocalDateTime.of(2020, 6, 21, 10, 0, 0)
         );
-        hearingEntityWithMedia2.addJudge(judge);
+        hearingEntityWithMedia2.addJudge(judge, false);
         hearingEntityWithoutMedia = dartsDatabase.createHearing(
             "NEWCASTLE",
             "room_a",
             "c1",
             LocalDateTime.of(2020, 6, 22, 10, 0, 0)
         );
-        hearingEntityWithoutMedia.addJudge(judge);
+        hearingEntityWithoutMedia.addJudge(judge, false);
 
         int channel = 1;
 

@@ -240,6 +240,7 @@ public class CommonTestDataUtil {
 
     public HearingEntity createHearing(CourtCaseEntity courtCase, CourtroomEntity courtroom, LocalDate date, LocalTime time) {
         HearingEntity hearing1 = new HearingEntity();
+        hearing1.setHearingIsActual(true);
         hearing1.setCourtCase(courtCase);
         hearing1.setCourtroom(courtroom);
         hearing1.setHearingDate(date);

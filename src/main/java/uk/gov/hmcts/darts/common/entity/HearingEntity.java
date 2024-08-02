@@ -99,8 +99,8 @@ public class HearingEntity extends CreatedModifiedBaseEntity {
         }
     }
 
-    public void addJudge(JudgeEntity judgeEntity) {
-        if (judgeEntity == null) {
+    public void addJudge(JudgeEntity judgeEntity, boolean isFromDailyList) {
+        if (judgeEntity == null || (!Boolean.TRUE.equals(hearingIsActual) && !isFromDailyList)) {
             return;
         }
         courtCase.addJudge(judgeEntity);
@@ -112,7 +112,7 @@ public class HearingEntity extends CreatedModifiedBaseEntity {
 
     public void addJudges(List<JudgeEntity> judges) {
         for (JudgeEntity judge : judges) {
-            addJudge(judge);
+            addJudge(judge, false);
         }
     }
 
