@@ -1,28 +1,21 @@
 package uk.gov.hmcts.darts.authorisation.service.impl;
 
+import jakarta.persistence.EntityGraph;
 import jakarta.persistence.EntityManager;
-import jakarta.persistence.TypedQuery;
-import jakarta.persistence.criteria.CriteriaBuilder;
-import jakarta.persistence.criteria.CriteriaQuery;
-import jakarta.persistence.criteria.Join;
-import jakarta.persistence.criteria.JoinType;
-import jakarta.persistence.criteria.ParameterExpression;
-import jakarta.persistence.criteria.Root;
+import jakarta.persistence.NoResultException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.hibernate.jpa.SpecHints;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.authorisation.exception.AuthorisationError;
-import uk.gov.hmcts.darts.authorisation.model.GetAuthorisationResult;
 import uk.gov.hmcts.darts.authorisation.model.UserState;
 import uk.gov.hmcts.darts.authorisation.model.UserStateRole;
 import uk.gov.hmcts.darts.authorisation.service.AuthorisationService;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
-import uk.gov.hmcts.darts.common.entity.CourthouseEntity_;
 import uk.gov.hmcts.darts.common.entity.SecurityGroupEntity;
 import uk.gov.hmcts.darts.common.entity.SecurityGroupEntity_;
 import uk.gov.hmcts.darts.common.entity.SecurityPermissionEntity;
-import uk.gov.hmcts.darts.common.entity.SecurityPermissionEntity_;
 import uk.gov.hmcts.darts.common.entity.SecurityRoleEntity;
 import uk.gov.hmcts.darts.common.entity.SecurityRoleEntity_;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
@@ -32,9 +25,10 @@ import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.common.repository.CourthouseRepository;
 import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
 
+import java.util.Collection;
 import java.util.HashSet;
-import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -46,112 +40,132 @@ import static java.util.Objects.nonNull;
 @RequiredArgsConstructor
 public class AuthorisationServiceImpl implements AuthorisationService {
 
-    private final EntityManager em;
     private final CourthouseRepository courthouseRepository;
     private final UserAccountRepository userAccountRepository;
     private final UserIdentity userIdentity;
+    private final EntityManager entityManager;
 
+    private EntityGraph<UserAccountEntity> userAccountEntityEntityGraph;
+
+    /**
+     * Obtain UserState, querying by UserAccount.id.
+     *
+     * <p>A corresponding UserAccount is expected to exist. A NoResultException will be thrown otherwise.
+     *
+     * @param userId the user's id
+     * @return the UserState corresponding to the provided user id.
+     */
     @Override
-    public Optional<UserState> getAuthorisation(String emailAddress) {
-        CriteriaBuilder criteriaBuilder = em.getCriteriaBuilder();
-        CriteriaQuery<GetAuthorisationResult> criteriaQuery = criteriaBuilder.createQuery(GetAuthorisationResult.class);
+    public UserState getAuthorisation(int userId) {
+        UserAccountEntity userById = entityManager.createQuery(
+                """
+                    SELECT user FROM UserAccountEntity user
+                    WHERE user.id = :id
+                    """,
+                UserAccountEntity.class)
+            .setParameter("id", userId)
+            .setHint(SpecHints.HINT_SPEC_FETCH_GRAPH, getUserAccountEntityGraph())
+            .getSingleResult();
 
-        Root<UserAccountEntity> root = criteriaQuery.from(UserAccountEntity.class);
-        Join<UserAccountEntity, SecurityGroupEntity> securityGroup = root.join(
-            UserAccountEntity_.securityGroupEntities,
-            JoinType.LEFT
-        );
-
-        Join<SecurityGroupEntity, CourthouseEntity> courthouses = securityGroup.join(
-            SecurityGroupEntity_.courthouseEntities,
-            JoinType.LEFT
-        );
-
-        Join<SecurityGroupEntity, SecurityRoleEntity> securityRole = securityGroup.join(
-            SecurityGroupEntity_.securityRoleEntity,
-            JoinType.LEFT
-        );
-
-        Join<SecurityRoleEntity, SecurityPermissionEntity> securityPermission = securityRole.join(
-            SecurityRoleEntity_.securityPermissionEntities,
-            JoinType.LEFT
-        );
-
-        criteriaQuery.select(criteriaBuilder.construct(
-                                 GetAuthorisationResult.class,
-                                 root.get(UserAccountEntity_.id),
-                                 root.get(UserAccountEntity_.userFullName),
-                                 root.get(UserAccountEntity_.active),
-                                 securityGroup.get(SecurityGroupEntity_.globalAccess),
-                                 courthouses.get(CourthouseEntity_.id),
-                                 securityRole.get(SecurityRoleEntity_.id),
-                                 securityRole.get(SecurityRoleEntity_.roleName),
-                                 securityPermission.get(SecurityPermissionEntity_.id),
-                                 securityPermission.get(SecurityPermissionEntity_.permissionName))
-        );
-
-        ParameterExpression<String> paramEmailAddress = criteriaBuilder.parameter(String.class);
-        criteriaQuery.where(criteriaBuilder.equal(
-            criteriaBuilder.upper(root.get(UserAccountEntity_.emailAddress)),
-            criteriaBuilder.upper(paramEmailAddress)
-        ));
-        criteriaQuery.orderBy(List.of(
-            criteriaBuilder.asc(securityRole.get(SecurityRoleEntity_.id)),
-            criteriaBuilder.asc(securityPermission.get(SecurityPermissionEntity_.id))
-        ));
-
-        TypedQuery<GetAuthorisationResult> query = em.createQuery(criteriaQuery);
-        query.setParameter(paramEmailAddress, emailAddress);
-
-        return getUserState(query.getResultList());
+        return getUserState(userById);
     }
 
-    @SuppressWarnings("PMD.AvoidInstantiatingObjectsInLoops")
-    private Optional<UserState> getUserState(List<GetAuthorisationResult> getAuthorisationResultList) {
-        if (getAuthorisationResultList.isEmpty()) {
+    /**
+     * Obtain UserState, querying by UserAccount.emailAddress.
+     *
+     * @param emailAddress the user's email address
+     * @return an optional UserState corresponding to the provided email address (if the account exists), or an empty Optional if no matching account exists.
+     */
+    @Override
+    public Optional<UserState> getAuthorisation(String emailAddress) {
+        UserAccountEntity userById;
+        try {
+            userById = entityManager.createQuery(
+                    """
+                        SELECT user FROM UserAccountEntity user
+                        WHERE UPPER(user.emailAddress) = UPPER(:emailAddress)
+                        """,
+                    UserAccountEntity.class)
+                .setParameter("emailAddress", emailAddress)
+                .setHint(SpecHints.HINT_SPEC_FETCH_GRAPH, getUserAccountEntityGraph())
+                .getSingleResult();
+
+        } catch (NoResultException e) {
             return Optional.empty();
         }
 
-        UserState.UserStateBuilder userStateBuilder = UserState.builder();
-        Set<UserStateRole> roles = new LinkedHashSet<>();
-        userStateBuilder.roles(roles);
+        return Optional.of(getUserState(userById));
+    }
 
-        Integer tmpRoleId = 0;
-        Set<String> permissions = new LinkedHashSet<>();
-        Set<Integer> courthouses = new LinkedHashSet<>();
+    /**
+     * Build an entity graph encompassing all security groups, courthouses, roles and permissions related to a user.
+     */
+    private EntityGraph<UserAccountEntity> getUserAccountEntityGraph() {
+        if (userAccountEntityEntityGraph == null) {
+            var entityGraph = entityManager.createEntityGraph(UserAccountEntity.class);
+            entityGraph.addAttributeNodes(UserAccountEntity_.SECURITY_GROUP_ENTITIES);
 
-        for (GetAuthorisationResult result : getAuthorisationResultList) {
-            userStateBuilder.userId(result.userId());
-            userStateBuilder.userName(result.userName());
-            userStateBuilder.isActive(result.active());
+            var securityGroupSubgraph = entityGraph.addSubgraph(UserAccountEntity_.SECURITY_GROUP_ENTITIES);
+            securityGroupSubgraph.addAttributeNodes(SecurityGroupEntity_.SECURITY_ROLE_ENTITY,
+                                                    SecurityGroupEntity_.COURTHOUSE_ENTITIES);
 
-            Integer roleId = result.roleId();
-            if (roleId != null && !tmpRoleId.equals(roleId)) {
-                permissions = new LinkedHashSet<>();
-                courthouses = new LinkedHashSet<>();
+            var securityRoleSubgraph = securityGroupSubgraph.addSubgraph(SecurityGroupEntity_.SECURITY_ROLE_ENTITY);
+            securityRoleSubgraph.addAttributeNodes(SecurityRoleEntity_.SECURITY_PERMISSION_ENTITIES);
 
-                roles.add(UserStateRole.builder()
-                              .roleId(roleId)
-                              .roleName(result.roleName())
-                              .globalAccess(result.globalAccess())
-                              .courthouseIds(courthouses)
-                              .permissions(permissions)
-                              .build());
-
-                tmpRoleId = roleId;
-            }
-
-            Integer permissionId = result.permissionId();
-            if (permissionId != null) {
-                permissions.add(result.permissionName());
-            }
-            Integer courthouseId = result.courthouseId();
-            if ((result.globalAccess() == null || !result.globalAccess()) && courthouseId != null) {
-                courthouses.add(courthouseId);
-            }
+            userAccountEntityEntityGraph = entityGraph;
         }
 
-        return Optional.ofNullable(userStateBuilder.build());
+        return userAccountEntityEntityGraph;
+    }
+
+    private UserState getUserState(UserAccountEntity userAccountEntity) {
+        return UserState.builder()
+            .userId(userAccountEntity.getId())
+            .userName(userAccountEntity.getUserFullName())
+            .isActive(userAccountEntity.isActive())
+            .roles(mapRoles(userAccountEntity.getSecurityGroupEntities()))
+            .build();
+    }
+
+    private Set<UserStateRole> mapRoles(Set<SecurityGroupEntity> securityGroupEntities) {
+        Map<SecurityRoleEntity, List<SecurityGroupEntity>> securityGroupsByRole = securityGroupEntities.stream()
+            .collect(Collectors.groupingBy(SecurityGroupEntity::getSecurityRoleEntity));
+
+        Set<UserStateRole> userStateRoles = new HashSet<>();
+        for (Map.Entry<SecurityRoleEntity, List<SecurityGroupEntity>> entrySet : securityGroupsByRole.entrySet()) {
+            final SecurityRoleEntity roleEntity = entrySet.getKey();
+            final List<SecurityGroupEntity> securityGroupEntitiesForRole = entrySet.getValue();
+
+            UserStateRole userStateRole = UserStateRole.builder()
+                .roleId(roleEntity.getId())
+                .roleName(roleEntity.getRoleName())
+                .globalAccess(hasAnyGroupHaveGlobalAccess(securityGroupEntitiesForRole))
+                .courthouseIds(getAssociatedCourthouses(securityGroupEntitiesForRole))
+                .permissions(getAssociatedPermissions(roleEntity))
+                .build();
+            userStateRoles.add(userStateRole);
+        }
+
+        return userStateRoles;
+    }
+
+    private boolean hasAnyGroupHaveGlobalAccess(List<SecurityGroupEntity> securityGroupEntities) {
+        return securityGroupEntities.stream()
+            .anyMatch(SecurityGroupEntity::getGlobalAccess);
+    }
+
+    private Set<Integer> getAssociatedCourthouses(List<SecurityGroupEntity> securityGroupEntities) {
+        return securityGroupEntities.stream()
+            .map(SecurityGroupEntity::getCourthouseEntities)
+            .flatMap(Collection::stream)
+            .map(CourthouseEntity::getId)
+            .collect(Collectors.toSet());
+    }
+
+    private Set<String> getAssociatedPermissions(SecurityRoleEntity roleEntity) {
+        return roleEntity.getSecurityPermissionEntities().stream()
+            .map(SecurityPermissionEntity::getPermissionName)
+            .collect(Collectors.toSet());
     }
 
     @Override
