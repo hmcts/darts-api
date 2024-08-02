@@ -62,8 +62,6 @@ class AudioUploadServiceImplTest {
     public static final OffsetDateTime STARTED_AT = OffsetDateTime.now().minusHours(1);
     public static final OffsetDateTime ENDED_AT = OffsetDateTime.now();
     private static final String DUMMY_FILE_CONTENT = "DUMMY FILE CONTENT";
-    private static final String DUMMY_FILE_CONTENT_EMPTY = "";
-
     @Captor
     ArgumentCaptor<MediaEntity> mediaEntityArgumentCaptor;
     @Captor
