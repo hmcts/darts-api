@@ -60,7 +60,7 @@ class ArchiveRecordServiceIntTest extends IntegrationBase {
     private static final String REGION = "GBR";
 
     private static final String FILE_EXTENSION = "a360";
-    public static final int RET_CONF_SCORE = 2;
+    public static final int RETENTION_CONFIDENCE_SCORE = 2;
     public static final String RETENTION_CONFIDENCE_REASON = "RetentionConfidenceReason";
 
     private final DateTimeFormatter formatter = DateTimeFormatter.ofPattern(DATE_TIME_FORMAT).withZone(ZoneId.of("UTC"));
@@ -112,7 +112,7 @@ class ArchiveRecordServiceIntTest extends IntegrationBase {
         savedMedia.setMediaFile("a-media-file.mp2");
         savedMedia.setCreatedDateTime(startedAt);
         savedMedia.setRetConfReason(RETENTION_CONFIDENCE_REASON);
-        savedMedia.setRetConfScore(RET_CONF_SCORE);
+        savedMedia.setRetConfScore(RETENTION_CONFIDENCE_SCORE);
         dartsDatabase.save(savedMedia);
 
         ExternalObjectDirectoryEntity armEod = dartsDatabase.getExternalObjectDirectoryStub().createExternalObjectDirectory(
@@ -177,7 +177,7 @@ class ArchiveRecordServiceIntTest extends IntegrationBase {
         savedMedia.setMediaFile("a-media-file.mp2");
         savedMedia.setCreatedDateTime(startedAt);
         savedMedia.setRetConfReason(RETENTION_CONFIDENCE_REASON);
-        savedMedia.setRetConfScore(RET_CONF_SCORE);
+        savedMedia.setRetConfScore(RETENTION_CONFIDENCE_SCORE);
         dartsDatabase.save(savedMedia);
 
         ExternalObjectDirectoryEntity armEod = dartsDatabase.getExternalObjectDirectoryStub().createExternalObjectDirectory(
@@ -241,7 +241,7 @@ class ArchiveRecordServiceIntTest extends IntegrationBase {
         savedMedia.setMediaFile("a-media-file.mp2");
         savedMedia.setCreatedDateTime(startedAt);
         savedMedia.setRetConfReason(RETENTION_CONFIDENCE_REASON);
-        savedMedia.setRetConfScore(RET_CONF_SCORE);
+        savedMedia.setRetConfScore(RETENTION_CONFIDENCE_SCORE);
         dartsDatabase.save(savedMedia);
 
         ExternalObjectDirectoryEntity armEod = dartsDatabase.getExternalObjectDirectoryStub().createExternalObjectDirectory(
@@ -308,7 +308,7 @@ class ArchiveRecordServiceIntTest extends IntegrationBase {
         TranscriptionDocumentEntity transcriptionDocumentEntity = TranscriptionStub.createTranscriptionDocumentEntity(
             transcriptionEntity, fileName, fileType, fileSize, testUser, checksum, startedAt);
         transcriptionDocumentEntity.setRetConfReason(RETENTION_CONFIDENCE_REASON);
-        transcriptionDocumentEntity.setRetConfScore(RET_CONF_SCORE);
+        transcriptionDocumentEntity.setRetConfScore(RETENTION_CONFIDENCE_SCORE);
         dartsDatabase.getTranscriptionDocumentRepository().save(transcriptionDocumentEntity);
 
         ExternalObjectDirectoryEntity armEod = dartsDatabase.getExternalObjectDirectoryStub().createExternalObjectDirectory(
@@ -380,7 +380,7 @@ class ArchiveRecordServiceIntTest extends IntegrationBase {
             transcriptionEntity, fileName, fileType, fileSize, testUser, checksum, startedAt);
         transcriptionDocumentEntity.setRetainUntilTs(retainUntil);
         transcriptionDocumentEntity.setRetConfReason(RETENTION_CONFIDENCE_REASON);
-        transcriptionDocumentEntity.setRetConfScore(RET_CONF_SCORE);
+        transcriptionDocumentEntity.setRetConfScore(RETENTION_CONFIDENCE_SCORE);
         dartsDatabase.getTranscriptionDocumentRepository().save(transcriptionDocumentEntity);
 
         ExternalObjectDirectoryEntity armEod = dartsDatabase.getExternalObjectDirectoryStub().createExternalObjectDirectory(
@@ -450,7 +450,7 @@ class ArchiveRecordServiceIntTest extends IntegrationBase {
         TranscriptionDocumentEntity transcriptionDocumentEntity = TranscriptionStub.createTranscriptionDocumentEntity(
             transcriptionEntity, fileName, fileType, fileSize, testUser, checksum, startedAt);
         transcriptionDocumentEntity.setRetConfReason(RETENTION_CONFIDENCE_REASON);
-        transcriptionDocumentEntity.setRetConfScore(RET_CONF_SCORE);
+        transcriptionDocumentEntity.setRetConfScore(RETENTION_CONFIDENCE_SCORE);
         dartsDatabase.getTranscriptionDocumentRepository().save(transcriptionDocumentEntity);
 
         ExternalObjectDirectoryEntity armEod = dartsDatabase.getExternalObjectDirectoryStub().createExternalObjectDirectory(
@@ -517,7 +517,7 @@ class ArchiveRecordServiceIntTest extends IntegrationBase {
         AnnotationDocumentEntity annotationDocument = dartsDatabase.getAnnotationStub()
             .createAnnotationDocumentEntity(annotation, fileName, fileType, fileSize, testUser, uploadedDateTime, checksum);
         annotationDocument.setRetConfReason(RETENTION_CONFIDENCE_REASON);
-        annotationDocument.setRetConfScore(RET_CONF_SCORE);
+        annotationDocument.setRetConfScore(RETENTION_CONFIDENCE_SCORE);
         dartsDatabase.save(annotationDocument);
 
         ExternalObjectDirectoryEntity armEod = dartsDatabase.getExternalObjectDirectoryStub().createExternalObjectDirectory(
@@ -581,7 +581,7 @@ class ArchiveRecordServiceIntTest extends IntegrationBase {
         AnnotationDocumentEntity annotationDocument = dartsDatabase.getAnnotationStub()
             .createAnnotationDocumentEntity(annotation, fileName, fileType, fileSize, testUser, uploadedDateTime, checksum);
         annotationDocument.setRetConfReason(RETENTION_CONFIDENCE_REASON);
-        annotationDocument.setRetConfScore(RET_CONF_SCORE);
+        annotationDocument.setRetConfScore(RETENTION_CONFIDENCE_SCORE);
         annotationDocument.setRetainUntilTs(retainUntil);
         dartsDatabase.save(annotationDocument);
 
@@ -646,7 +646,7 @@ class ArchiveRecordServiceIntTest extends IntegrationBase {
         AnnotationDocumentEntity annotationDocument = dartsDatabase.getAnnotationStub()
             .createAnnotationDocumentEntity(annotation, fileName, fileType, fileSize, testUser, uploadedDateTime, checksum);
         annotationDocument.setRetConfReason(RETENTION_CONFIDENCE_REASON);
-        annotationDocument.setRetConfScore(RET_CONF_SCORE);
+        annotationDocument.setRetConfScore(RETENTION_CONFIDENCE_SCORE);
         dartsDatabase.save(annotationDocument);
 
         ExternalObjectDirectoryEntity armEod = dartsDatabase.getExternalObjectDirectoryStub().createExternalObjectDirectory(
@@ -700,7 +700,7 @@ class ArchiveRecordServiceIntTest extends IntegrationBase {
         CaseDocumentEntity caseDocument = dartsDatabase.getCaseDocumentStub().createAndSaveCaseDocumentEntity(courtCaseEntity, uploadedBy);
         caseDocument.setFileName("test_case_document.docx");
         caseDocument.setRetConfReason(RETENTION_CONFIDENCE_REASON);
-        caseDocument.setRetConfScore(RET_CONF_SCORE);
+        caseDocument.setRetConfScore(RETENTION_CONFIDENCE_SCORE);
         dartsDatabase.save(caseDocument);
 
         ExternalObjectDirectoryEntity armEod = dartsDatabase.getExternalObjectDirectoryStub().createExternalObjectDirectory(
@@ -760,7 +760,7 @@ class ArchiveRecordServiceIntTest extends IntegrationBase {
         caseDocument.setFileName("test_case_document.docx");
         caseDocument.setRetainUntilTs(retainUntil);
         caseDocument.setRetConfReason(RETENTION_CONFIDENCE_REASON);
-        caseDocument.setRetConfScore(RET_CONF_SCORE);
+        caseDocument.setRetConfScore(RETENTION_CONFIDENCE_SCORE);
         dartsDatabase.save(caseDocument);
 
         ExternalObjectDirectoryEntity armEod = dartsDatabase.getExternalObjectDirectoryStub().createExternalObjectDirectory(
@@ -817,7 +817,7 @@ class ArchiveRecordServiceIntTest extends IntegrationBase {
 
         CaseDocumentEntity caseDocument = dartsDatabase.getCaseDocumentStub().createAndSaveCaseDocumentEntity(courtCaseEntity, uploadedBy);
         caseDocument.setRetConfReason(RETENTION_CONFIDENCE_REASON);
-        caseDocument.setRetConfScore(RET_CONF_SCORE);
+        caseDocument.setRetConfScore(RETENTION_CONFIDENCE_SCORE);
         dartsDatabase.save(caseDocument);
 
         ExternalObjectDirectoryEntity armEod = dartsDatabase.getExternalObjectDirectoryStub().createExternalObjectDirectory(
