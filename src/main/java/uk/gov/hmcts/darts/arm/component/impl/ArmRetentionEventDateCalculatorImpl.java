@@ -47,11 +47,19 @@ public class ArmRetentionEventDateCalculatorImpl implements ArmRetentionEventDat
                     return true;
                 } else if (ObjectRecordStatusEnum.STORED.getId() == externalObjectDirectory.getStatusId()) {
                     log.info("Updating retention date for ARM EOD {} ", externalObjectDirectoryId);
-                    UpdateMetadataResponse updateMetadataResponse = armDataManagementApi.updateMetadata(
+                    UpdateMetadataResponse updateMetadataResponseMedia = armDataManagementApi.updateMetadata(
                         externalObjectDirectory.getExternalRecordId(), armRetentionDate, externalObjectDirectory.getMedia().getRetConfScore(), externalObjectDirectory.getMedia().getRetConfReason());
-                    if (updateMetadataResponse.isError()){
+                    UpdateMetadataResponse updateMetadataResponseTranscriptionDocument = armDataManagementApi.updateMetadata(
+                        externalObjectDirectory.getExternalRecordId(), armRetentionDate, externalObjectDirectory.getTranscriptionDocumentEntity().getRetConfScore(), externalObjectDirectory.getTranscriptionDocumentEntity().getRetConfReason());
+                    UpdateMetadataResponse updateMetadataResponseAnnotation = armDataManagementApi.updateMetadata(
+                        externalObjectDirectory.getExternalRecordId(), armRetentionDate, externalObjectDirectory.getAnnotationDocumentEntity().getRetConfScore(), externalObjectDirectory.getAnnotationDocumentEntity().getRetConfReason());
+                    UpdateMetadataResponse updateMetadataResponseCase = armDataManagementApi.updateMetadata(
+                        externalObjectDirectory.getExternalRecordId(), armRetentionDate, externalObjectDirectory.getCaseDocument().getRetConfScore(), externalObjectDirectory.getCaseDocument().getRetConfReason());
+
+                    if (updateMetadataResponseMedia.isError() || updateMetadataResponseAnnotation.isError()
+                        || updateMetadataResponseTranscriptionDocument.isError() || updateMetadataResponseCase.isError()){
                         log.error("Unable set retention date for ARM EOD {} due to error(s) {}",
-                                  externalObjectDirectoryId, StringUtils.join(updateMetadataResponse.getResponseStatusMessages(), ", "));
+                                  externalObjectDirectoryId, StringUtils.join(updateMetadataResponseMedia.getResponseStatusMessages(), ", "));
                     } else {
                         externalObjectDirectory.setEventDateTs(armRetentionDate);
                         externalObjectDirectory.setUpdateRetention(false);
