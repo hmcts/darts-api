@@ -2,6 +2,8 @@ package uk.gov.hmcts.darts.audio.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -66,8 +68,9 @@ class MediaControllerAdminPostMediaIntTest extends IntegrationBase {
     @Autowired
     private ObjectAdminActionRepository objectAdminActionRepository;
 
-    @Test
-    void testMediaDocumentHideSuccess() throws Exception {
+    @ParameterizedTest
+    @EnumSource(value = HiddenReason.class, names = {"OTHER_HIDE", "OTHER_DELETE"})
+    void testMediaDocumentHideSuccess(HiddenReason hiddenReason) throws Exception {
         superAdminUserStub.givenUserIsAuthorised(userIdentity);
 
         MediaEntity mediaEntity = mediaStub
@@ -80,7 +83,7 @@ class MediaControllerAdminPostMediaIntTest extends IntegrationBase {
         String ticketReference = "reference";
 
         AdminActionRequest adminActionRequest = new AdminActionRequest();
-        adminActionRequest.setReasonId(HiddenReason.OTHER_HIDE.getId());
+        adminActionRequest.setReasonId(hiddenReason.getId());
         adminActionRequest.setComments(comment);
         adminActionRequest.setTicketReference(ticketReference);
         mediaHideRequest.setAdminAction(adminActionRequest);
@@ -304,35 +307,6 @@ class MediaControllerAdminPostMediaIntTest extends IntegrationBase {
         String content = mvcResult.getResponse().getContentAsString();
         Problem problemResponse = objectMapper.readValue(content, Problem.class);
         assertEquals(AudioApiError.MEDIA_HIDE_ACTION_REASON_NOT_FOUND.getType(), problemResponse.getType());
-    }
-
-    @Test
-    void testMediaIdHideAdminActionWithMarkedForDeletionReason() throws Exception {
-        superAdminUserStub.givenUserIsAuthorised(userIdentity);
-
-        MediaEntity mediaEntity = mediaStub.createAndSaveMedia();
-
-        MediaHideRequest mediaHideRequest = new MediaHideRequest();
-        mediaHideRequest.setIsHidden(true);
-
-        AdminActionRequest adminActionRequest = new AdminActionRequest();
-        Integer markedForDeletionReason = HiddenReason.PUBLIC_INTEREST_IMMUNITY.getId();
-        adminActionRequest.setReasonId(markedForDeletionReason);
-        adminActionRequest.setComments("");
-        adminActionRequest.setTicketReference("");
-        mediaHideRequest.setAdminAction(adminActionRequest);
-
-
-        MvcResult mvcResult = mockMvc.perform(post(ENDPOINT_URL.replace(
-                MEDIA_ID_SUBSTITUTION_KEY, mediaEntity.getId().toString()))
-                                                  .content(objectMapper.writeValueAsString(mediaHideRequest))
-                                                  .header("Content-Type", "application/json"))
-
-            .andExpect(status().isNotImplemented())
-            .andReturn();
-        String content = mvcResult.getResponse().getContentAsString();
-        Problem problemResponse = objectMapper.readValue(content, Problem.class);
-        assertEquals(AudioApiError.REASON_IS_MARKED_FOR_DELETION.getType(), problemResponse.getType());
     }
 
     @Test
