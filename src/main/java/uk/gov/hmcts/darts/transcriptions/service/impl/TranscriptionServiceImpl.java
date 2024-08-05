@@ -303,6 +303,7 @@ public class TranscriptionServiceImpl implements TranscriptionService {
         transcription.setIsManualTranscription(isManual);
         transcription.setHideRequestFromRequestor(false);
         transcription.setIsCurrent(true);
+        transcription.setRequestedBy(userAccount);
 
         if (nonNull(transcriptionRequestDetails.getCaseId())) {
             transcription.addCase(caseService.getCourtCaseById(transcriptionRequestDetails.getCaseId()));
