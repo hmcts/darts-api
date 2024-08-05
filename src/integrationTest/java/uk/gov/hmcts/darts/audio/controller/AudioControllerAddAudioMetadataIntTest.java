@@ -48,6 +48,7 @@ import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 
 import static ch.qos.logback.classic.Level.toLevel;
 import static org.junit.Assert.assertFalse;
@@ -175,6 +176,7 @@ class AudioControllerAddAudioMetadataIntTest extends IntegrationBase {
             assertEquals(3, mediaLinkedCaseEntities.size());
             assertEquals("1", dartsDatabase.getCourtroomRepository().findById(media.getCourtroom().getId()).get().getName());
             assertEquals(media.getId().toString(), media.getChronicleId());
+            assertEquals(true, media.getIsCurrent());
             assertNull(media.getAntecedentId());
         }
 
@@ -349,6 +351,11 @@ class AudioControllerAddAudioMetadataIntTest extends IntegrationBase {
         Integer newMedia = uploadAnotherAudioWithSize(AUDIO_BINARY_PAYLOAD_2, originalMedia.getId().toString(), originalMedia.getId().toString());
         Integer newMedia2 = uploadAnotherAudioWithSize(AUDIO_BINARY_PAYLOAD_3, newMedia.toString(), originalMedia.getId().toString());
         assertNotEquals(newMedia, newMedia2);
+        Optional<MediaEntity> newMediaEntity = dartsDatabase.getMediaRepository().findById(newMedia);
+        assertEquals(false, newMediaEntity.get().getIsCurrent());
+        Optional<MediaEntity> newMedia2Entity = dartsDatabase.getMediaRepository().findById(newMedia2);
+        assertEquals(true, newMedia2Entity.get().getIsCurrent());
+
     }
 
     @Test
