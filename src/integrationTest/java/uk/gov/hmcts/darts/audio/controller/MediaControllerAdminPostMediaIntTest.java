@@ -115,10 +115,10 @@ class MediaControllerAdminPostMediaIntTest extends IntegrationBase {
         assertEquals(objectAdminActionEntity.get(0)
                          .getHiddenDateTime().truncatedTo(ChronoUnit.SECONDS),
                      mediaResponse.getAdminAction().getHiddenAt().truncatedTo(ChronoUnit.SECONDS));
-        assertEquals(objectAdminActionEntity.get(0).getMarkedForManualDelBy().getId(), mediaResponse.getAdminAction().getMarkedForManualDeletionById());
-        assertEquals(objectAdminActionEntity.get(0).getMarkedForManualDelDateTime()
-                         .truncatedTo(ChronoUnit.SECONDS), mediaResponse.getAdminAction()
-            .getMarkedForManualDeletionAt().truncatedTo(ChronoUnit.SECONDS));
+        assertNull(objectAdminActionEntity.get(0).getMarkedForManualDelBy());
+        assertNull(mediaResponse.getAdminAction().getMarkedForManualDeletionById());
+        assertNull(objectAdminActionEntity.get(0).getMarkedForManualDelDateTime());
+        assertNull(mediaResponse.getAdminAction().getMarkedForManualDeletionAt());
     }
 
     @Test

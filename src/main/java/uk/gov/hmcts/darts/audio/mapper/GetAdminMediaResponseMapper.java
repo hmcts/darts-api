@@ -88,8 +88,10 @@ public class GetAdminMediaResponseMapper {
             aaResponse.setHiddenById(objectAdminActionEntity.getHiddenBy().getId());
             aaResponse.setHiddenAt(objectAdminActionEntity.getHiddenDateTime());
             aaResponse.setIsMarkedForManualDeletion(objectAdminActionEntity.isMarkedForManualDeletion());
-            aaResponse.setMarkedForManualDeletionById(objectAdminActionEntity.getMarkedForManualDelBy().getId());
-            aaResponse.setMarkedForManualDeletionAt(objectAdminActionEntity.getMarkedForManualDelDateTime());
+            aaResponse.setMarkedForManualDeletionById(
+                objectAdminActionEntity.getMarkedForManualDelBy() == null ? null : objectAdminActionEntity.getMarkedForManualDelBy().getId());
+            aaResponse.setMarkedForManualDeletionAt(
+                objectAdminActionEntity.getMarkedForManualDelDateTime() == null ? null : objectAdminActionEntity.getMarkedForManualDelDateTime());
             aaResponse.setTicketReference(objectAdminActionEntity.getTicketReference());
             aaResponse.setComments(objectAdminActionEntity.getComments());
 
