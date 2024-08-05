@@ -42,7 +42,7 @@ public class DartsDatabaseComposable {
             userAccountRepository.getReferenceById(0)
         );
         hearing.setHearingIsActual(true);
-        hearing.addJudge(createSimpleJudge(caseNumber + "judge1"));
+        hearing.addJudge(createSimpleJudge(caseNumber + "judge1"), false);
         return hearingRepository.saveAndFlush(hearing);
     }
 
