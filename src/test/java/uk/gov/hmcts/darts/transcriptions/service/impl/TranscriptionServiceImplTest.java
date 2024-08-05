@@ -223,6 +223,7 @@ class TranscriptionServiceImplTest {
         assertThat(transcriptionEntity.getEndTime()).isEqualTo(endDateTime);
         assertThat(transcriptionEntity.getIsManualTranscription()).isTrue();
         assertThat(transcriptionEntity.getIsCurrent()).isTrue();
+        assertThat(transcriptionEntity.getRequestedBy()).isEqualTo(testUser);
 
         verify(
             mockTranscriptionWorkflowRepository,
