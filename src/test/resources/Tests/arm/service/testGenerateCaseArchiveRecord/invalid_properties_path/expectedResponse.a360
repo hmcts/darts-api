@@ -9,7 +9,8 @@
     "event_date": "2023-01-01T09:00:00Z",
     "title": "case.",
     "client_identifier": "1234",
-    "contributor": "Swansea"
+    "contributor": "Swansea",
+    "rtn_reason":"RetentionConfidenceReason"
   }
 }
 {

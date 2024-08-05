@@ -9,7 +9,9 @@
     "event_date": "2023-01-01T09:00:00Z",
     "title": "transcription.",
     "client_identifier": "1234",
-    "contributor": "Swansea & Room1"
+    "contributor": "Swansea & Room1",
+    "rtn_score":2,
+    "rtn_reason":"RetentionConfidenceReason"
   }
 }
 {
