@@ -94,6 +94,9 @@ public class MediaEntity extends CreatedModifiedBaseEntity implements Confidence
     @Column(name = "is_deleted", nullable = false)
     private boolean isDeleted;
 
+    @Column(name = "is_current")
+    private Boolean isCurrent;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "deleted_by")
     private UserAccountEntity deletedBy;

@@ -138,6 +138,7 @@ public class AudioUploadServiceImpl implements AudioUploadService {
 
         MediaEntity newMediaEntity = mapper.mapToMedia(addAudioMetadataRequest, userAccount);
         newMediaEntity.setChecksum(checksum);
+        newMediaEntity.setIsCurrent(true);
         if (mediaToSupersede.isEmpty()) {
             mediaRepository.save(newMediaEntity);
             newMediaEntity.setChronicleId(String.valueOf(newMediaEntity.getId()));
@@ -163,7 +164,7 @@ public class AudioUploadServiceImpl implements AudioUploadService {
             objectRecordStatusEntity
         );
         for (MediaEntity mediaEntity : mediaToSupersede) {
-            deleteMediaLinking(mediaEntity);
+            deleteMediaLinkingAndSetCurrentFalse(mediaEntity);
         }
 
         logApi.audioUploaded(addAudioMetadataRequest);
@@ -238,11 +239,12 @@ public class AudioUploadServiceImpl implements AudioUploadService {
         }
     }
 
-    private void deleteMediaLinking(MediaEntity mediaEntity) {
+    private void deleteMediaLinkingAndSetCurrentFalse(MediaEntity mediaEntity) {
         List<HearingEntity> hearingList = mediaEntity.getHearingList();
         for (HearingEntity hearing : hearingList) {
             mediaEntity.removeHearing(hearing);
         }
+        mediaEntity.setIsCurrent(false);
         mediaRepository.save(mediaEntity);
     }
 

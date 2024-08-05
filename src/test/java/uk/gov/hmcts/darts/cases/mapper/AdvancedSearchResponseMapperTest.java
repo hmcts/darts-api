@@ -57,6 +57,7 @@ class AdvancedSearchResponseMapperTest {
     @Test
     void twoSameCase() throws IOException {
         HearingEntity hearing1 = new HearingEntity();
+        hearing1.setHearingIsActual(true);
         hearing1.setCourtCase(CommonTestDataUtil.createCase(TEST_1));
         hearing1.setCourtroom(CommonTestDataUtil.createCourtroom("1"));
         hearing1.setHearingDate(LocalDate.of(2023, 6, 20));
@@ -65,13 +66,13 @@ class AdvancedSearchResponseMapperTest {
         hearing1.addJudges(CommonTestDataUtil.createJudges(2));
 
         HearingEntity hearing2 = new HearingEntity();
+        hearing2.setHearingIsActual(true);
         hearing2.setCourtCase(CommonTestDataUtil.createCase(TEST_1));
         hearing2.setCourtroom(CommonTestDataUtil.createCourtroom("2"));
         hearing2.setHearingDate(LocalDate.of(2023, 6, 21));
         hearing2.setScheduledStartTime(LocalTime.NOON);
         hearing2.setId(202);
         hearing2.addJudges(CommonTestDataUtil.createJudges(3));
-
 
         List<HearingEntity> hearings = new ArrayList<>();
         hearings.add(hearing1);
@@ -97,6 +98,7 @@ class AdvancedSearchResponseMapperTest {
     @Test
     void fourWithTwoSameCase() throws IOException {
         HearingEntity hearing1 = new HearingEntity();
+        hearing1.setHearingIsActual(true);
         hearing1.setCourtCase(CommonTestDataUtil.createCaseWithId(TEST_1, 101));
         hearing1.setCourtroom(CommonTestDataUtil.createCourtroom("1"));
         hearing1.setHearingDate(LocalDate.of(2023, 6, 20));
@@ -105,6 +107,7 @@ class AdvancedSearchResponseMapperTest {
         hearing1.addJudges(CommonTestDataUtil.createJudges(2));
 
         HearingEntity hearing2 = new HearingEntity();
+        hearing2.setHearingIsActual(true);
         hearing2.setCourtCase(CommonTestDataUtil.createCaseWithId(TEST_1, 101));
         hearing2.setCourtroom(CommonTestDataUtil.createCourtroom("2"));
         hearing2.setHearingDate(LocalDate.of(2023, 6, 21));
@@ -112,8 +115,8 @@ class AdvancedSearchResponseMapperTest {
         hearing2.setId(202);
         hearing2.addJudges(CommonTestDataUtil.createJudges(3));
 
-
         HearingEntity hearing3 = new HearingEntity();
+        hearing3.setHearingIsActual(true);
         hearing3.setCourtCase(CommonTestDataUtil.createCaseWithId("test2", 102));
         hearing3.setCourtroom(CommonTestDataUtil.createCourtroom("2"));
         hearing3.setHearingDate(LocalDate.of(2023, 6, 22));
@@ -121,15 +124,14 @@ class AdvancedSearchResponseMapperTest {
         hearing3.setId(203);
         hearing3.addJudges(CommonTestDataUtil.createJudges(4));
 
-
         HearingEntity hearing4 = new HearingEntity();
+        hearing4.setHearingIsActual(true);
         hearing4.setCourtCase(CommonTestDataUtil.createCaseWithId("test3", 103));
         hearing4.setCourtroom(CommonTestDataUtil.createCourtroom("2"));
         hearing4.setHearingDate(LocalDate.of(2023, 6, 23));
         hearing4.setScheduledStartTime(LocalTime.of(13, 0));
         hearing4.setId(204);
         hearing4.addJudges(CommonTestDataUtil.createJudges(5));
-
 
         List<HearingEntity> hearings = new ArrayList<>();
         hearings.add(hearing1);
