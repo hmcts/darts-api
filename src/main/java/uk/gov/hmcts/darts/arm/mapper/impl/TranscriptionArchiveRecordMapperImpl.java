@@ -173,6 +173,14 @@ public class TranscriptionArchiveRecordMapperImpl implements TranscriptionArchiv
             metadata.setContributor(courthouse + " & " + courtroom);
         }
 
+        if (nonNull(transcriptionDocument.getRetConfReason())) {
+            metadata.setRetentionConfidenceReason(transcriptionDocument.getRetConfReason());
+        }
+
+        if (nonNull(transcriptionDocument.getRetConfScore()) && transcriptionDocument.getRetConfScore() != 0) {
+            metadata.setRetentionConfidenceScore(transcriptionDocument.getRetConfScore());
+        }
+
         if (transcriptionRecordProperties.containsKey(BF_001_KEY)) {
             metadata.setBf001(mapToString(transcriptionRecordProperties.getProperty(BF_001_KEY), transcriptionDocument));
         }

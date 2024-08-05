@@ -10,6 +10,8 @@
     "title": "Test Document.docx",
     "client_identifier": "<EODID>",
     "contributor": "NEWCASTLE & Int Test Courtroom 2",
+    "rtn_score":2,
+    "rtn_reason":"RetentionConfidenceReason",
     "bf_001": "Transcription",
     "bf_002": "Case1|Case2",
     "bf_003": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",

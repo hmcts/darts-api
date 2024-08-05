@@ -143,6 +143,14 @@ public class MediaArchiveRecordMapperImpl implements MediaArchiveRecordMapper {
             metadata.setContributor(courthouse + " & " + courtroom);
         }
 
+        if (nonNull(media.getRetConfReason())) {
+            metadata.setRetentionConfidenceReason(media.getRetConfReason());
+        }
+
+        if (nonNull(media.getRetConfScore()) && media.getRetConfScore() != 0) {
+            metadata.setRetentionConfidenceScore(media.getRetConfScore());
+        }
+
         if (mediaRecordProperties.containsKey(BF_001_KEY)) {
             metadata.setBf001(mapToString(mediaRecordProperties.getProperty(BF_001_KEY), media));
         }
