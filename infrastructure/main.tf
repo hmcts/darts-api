@@ -74,16 +74,16 @@ module "postgresql_flexible" {
     azurerm.postgres_network = azurerm.postgres_network
   }
 
-  source              = "git@github.com:hmcts/terraform-module-postgresql-flexible?ref=master"
-  env                 = var.env
-  product             = var.product
-  resource_group_name = local.rg_name
-  component           = var.component
-  business_area       = "sds"
-  location            = var.location
-  pgsql_storage_mb    = "262144"
-  pgsql_sku           = "GP_Standard_D4s_v3"
-
+  source               = "git@github.com:hmcts/terraform-module-postgresql-flexible?ref=master"
+  env                  = var.env
+  product              = var.product
+  resource_group_name  = local.rg_name
+  component            = var.component
+  business_area        = "sds"
+  location             = var.location
+  pgsql_storage_mb     = "524288"
+  pgsql_sku            = "GP_Standard_D4s_v3"
+  auto_grow_enabled    = true
   common_tags          = var.common_tags
   admin_user_object_id = var.jenkins_AAD_objectId
   pgsql_databases = [
@@ -94,11 +94,12 @@ module "postgresql_flexible" {
   pgsql_server_configuration = [
     {
       name  = "azure.extensions"
-      value = "pg_stat_statements"
+      value = "pg_stat_statements, PG_TRGM"
     }
   ]
   pgsql_version = "15"
 }
+
 
 data "azurerm_subnet" "private_endpoints" {
   resource_group_name  = local.private_endpoint_rg_name
