@@ -2,7 +2,6 @@ package uk.gov.hmcts.darts.casedocument.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Pageable;
 import uk.gov.hmcts.darts.casedocument.service.GenerateCaseDocumentProcessor;
 import uk.gov.hmcts.darts.casedocument.service.GenerateCaseDocumentSingleCaseProcessor;
@@ -15,10 +14,8 @@ import java.time.OffsetDateTime;
 @Slf4j
 public class GenerateCaseDocumentBatchProcessorImpl implements GenerateCaseDocumentProcessor {
 
-    @Value("${darts.case-document.generation-days}")
-    private int caseDocumentGenerationDays;
-
     private final int batchSize;
+    private final int caseDocumentGenerationDays;
     private final CaseRepository caseRepository;
     private final GenerateCaseDocumentSingleCaseProcessor singleCaseProcessor;
     private final CurrentTimeHelper currentTimeHelper;

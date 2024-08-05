@@ -3,6 +3,7 @@ package uk.gov.hmcts.darts.arm.component.impl;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.darts.arm.api.ArmDataManagementApi;
 import uk.gov.hmcts.darts.arm.component.ArchiveRecordFileGenerator;
@@ -57,6 +58,8 @@ public class AutomatedTaskProcessorFactoryImpl implements AutomatedTaskProcessor
     private final GenerateCaseDocumentSingleCaseProcessor generateCaseDocumentSingleCaseProcessor;
     private final EventRepository eventRepository;
     private final GenerateCaseDocumentForRetentionDateProcessor generateCaseDocumentForRetentionDateBatchProcessor;
+    @Value("${darts.case-document.generation-days}")
+    private final int caseDocumentGenerationDays;
 
     @Override
     public ArmResponseFilesProcessor createArmResponseFilesProcessor(int batchSize) {
@@ -118,7 +121,7 @@ public class AutomatedTaskProcessorFactoryImpl implements AutomatedTaskProcessor
     public GenerateCaseDocumentProcessor createGenerateCaseDocumentProcessor(int batchSize) {
         if (batchSize > 0) {
             return new GenerateCaseDocumentBatchProcessorImpl(
-                batchSize, caseRepository, generateCaseDocumentSingleCaseProcessor, currentTimeHelper);
+                batchSize, caseDocumentGenerationDays, caseRepository, generateCaseDocumentSingleCaseProcessor, currentTimeHelper);
         } else {
             throw new DartsException(String.format("batch size not supported: '%s'", batchSize));
         }

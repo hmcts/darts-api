@@ -33,6 +33,9 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 @ExtendWith(MockitoExtension.class)
 @Slf4j
 class UnstructuredToArmProcessorFactoryTest {
+
+    private static final int CASE_DOCUMENT_GENERATION_DAYS = 44;
+
     @Mock
     private ExternalObjectDirectoryRepository externalObjectDirectoryRepository;
     @Mock
@@ -90,7 +93,8 @@ class UnstructuredToArmProcessorFactoryTest {
                                                   caseRepository,
                                                   generateCaseDocumentSingleCaseProcessor,
                                                   eventRepository,
-                                                  generateCaseDocumentForRetentionDateBatchProcessor);
+                                                  generateCaseDocumentForRetentionDateBatchProcessor,
+                                                  CASE_DOCUMENT_GENERATION_DAYS);
 
         var unstructuredToArmProcessor = automatedTaskProcessorFactory.createUnstructuredToArmProcessor(10);
 
@@ -117,7 +121,8 @@ class UnstructuredToArmProcessorFactoryTest {
                                                   caseRepository,
                                                   generateCaseDocumentSingleCaseProcessor,
                                                   eventRepository,
-                                                  generateCaseDocumentForRetentionDateBatchProcessor);
+                                                  generateCaseDocumentForRetentionDateBatchProcessor,
+                                                  CASE_DOCUMENT_GENERATION_DAYS);
 
         var armResponseFilesProcessor = automatedTaskProcessorFactory.createArmResponseFilesProcessor(0);
 
@@ -144,7 +149,8 @@ class UnstructuredToArmProcessorFactoryTest {
                                                   caseRepository,
                                                   generateCaseDocumentSingleCaseProcessor,
                                                   eventRepository,
-                                                  generateCaseDocumentForRetentionDateBatchProcessor);
+                                                  generateCaseDocumentForRetentionDateBatchProcessor,
+                                                  CASE_DOCUMENT_GENERATION_DAYS);
 
         var armResponseFilesProcessor = automatedTaskProcessorFactory.createArmResponseFilesProcessor(10);
 
