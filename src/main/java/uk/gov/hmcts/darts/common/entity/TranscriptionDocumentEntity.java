@@ -25,7 +25,7 @@ import java.util.List;
 @Table(name = "transcription_document")
 @Getter
 @Setter
-public class TranscriptionDocumentEntity extends ModifiedBaseEntity {
+public class TranscriptionDocumentEntity extends ModifiedBaseEntity implements ConfidenceAware {
 
     @Id
     @Column(name = "trd_id")

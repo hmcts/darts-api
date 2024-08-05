@@ -39,8 +39,26 @@ public class MediaTestData {
     }
 
     public static MediaEntity createMediaWith(CourtroomEntity courtroomEntity, OffsetDateTime startTime, OffsetDateTime endTime, int channel) {
-        return createMediaWith(courtroomEntity, startTime, endTime, channel, "mp2");
+        return createMediaWith(courtroomEntity, startTime, endTime, channel, "mp2", 100, "reason");
     }
+
+    public static MediaEntity createMediaWith(CourtroomEntity courtroomEntity, OffsetDateTime startTime, OffsetDateTime endTime, int channel,
+                                              String mediaType, Integer refConfScore, String reFConfReason) {
+        var mediaEntity = someMinimalMedia();
+        mediaEntity.setCourtroom(courtroomEntity);
+        mediaEntity.setStart(startTime);
+        mediaEntity.setEnd(endTime);
+        mediaEntity.setChannel(channel);
+        mediaEntity.setTotalChannels(2);
+        mediaEntity.setMediaFormat(mediaType);
+        mediaEntity.setChecksum(getChecksum());
+        mediaEntity.setRetConfScore(refConfScore);
+        mediaEntity.setRetConfReason(reFConfReason);
+
+        return mediaEntity;
+    }
+
+
 
     public static MediaEntity createMediaWith(CourtroomEntity courtroomEntity, OffsetDateTime startTime, OffsetDateTime endTime, int channel,
                                               String mediaType) {

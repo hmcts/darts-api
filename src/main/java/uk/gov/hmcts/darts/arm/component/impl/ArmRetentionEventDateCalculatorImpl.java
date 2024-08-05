@@ -9,7 +9,9 @@ import uk.gov.hmcts.darts.arm.api.ArmDataManagementApi;
 import uk.gov.hmcts.darts.arm.client.model.UpdateMetadataResponse;
 import uk.gov.hmcts.darts.arm.component.ArmRetentionEventDateCalculator;
 import uk.gov.hmcts.darts.arm.config.ArmDataManagementConfiguration;
+import uk.gov.hmcts.darts.arm.helper.ArmHelper;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
+import uk.gov.hmcts.darts.common.entity.ConfidenceAware;
 import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum;
@@ -29,6 +31,7 @@ public class ArmRetentionEventDateCalculatorImpl implements ArmRetentionEventDat
     private final ArmDataManagementApi armDataManagementApi;
     private final UserIdentity userIdentity;
     private final ArmDataManagementConfiguration armDataManagementConfiguration;
+    private final ArmHelper armHelper;
 
     @Transactional
     @Override
@@ -47,26 +50,26 @@ public class ArmRetentionEventDateCalculatorImpl implements ArmRetentionEventDat
                     return true;
                 } else if (ObjectRecordStatusEnum.STORED.getId() == externalObjectDirectory.getStatusId()) {
                     log.info("Updating retention date for ARM EOD {} ", externalObjectDirectoryId);
-                    UpdateMetadataResponse updateMetadataResponseMedia = armDataManagementApi.updateMetadata(
-                        externalObjectDirectory.getExternalRecordId(), armRetentionDate, externalObjectDirectory.getMedia().getRetConfScore(), externalObjectDirectory.getMedia().getRetConfReason());
-                    UpdateMetadataResponse updateMetadataResponseTranscriptionDocument = armDataManagementApi.updateMetadata(
-                        externalObjectDirectory.getExternalRecordId(), armRetentionDate, externalObjectDirectory.getTranscriptionDocumentEntity().getRetConfScore(), externalObjectDirectory.getTranscriptionDocumentEntity().getRetConfReason());
-                    UpdateMetadataResponse updateMetadataResponseAnnotation = armDataManagementApi.updateMetadata(
-                        externalObjectDirectory.getExternalRecordId(), armRetentionDate, externalObjectDirectory.getAnnotationDocumentEntity().getRetConfScore(), externalObjectDirectory.getAnnotationDocumentEntity().getRetConfReason());
-                    UpdateMetadataResponse updateMetadataResponseCase = armDataManagementApi.updateMetadata(
-                        externalObjectDirectory.getExternalRecordId(), armRetentionDate, externalObjectDirectory.getCaseDocument().getRetConfScore(), externalObjectDirectory.getCaseDocument().getRetConfReason());
+                    ConfidenceAware confidenceAware = armHelper.getDocumentConfidence(externalObjectDirectory);
 
-                    if (updateMetadataResponseMedia.isError() || updateMetadataResponseAnnotation.isError()
-                        || updateMetadataResponseTranscriptionDocument.isError() || updateMetadataResponseCase.isError()){
-                        log.error("Unable set retention date for ARM EOD {} due to error(s) {}",
-                                  externalObjectDirectoryId, StringUtils.join(updateMetadataResponseMedia.getResponseStatusMessages(), ", "));
-                    } else {
-                        externalObjectDirectory.setEventDateTs(armRetentionDate);
-                        externalObjectDirectory.setUpdateRetention(false);
-                        externalObjectDirectory.setLastModifiedBy(userAccount);
-                        externalObjectDirectoryRepository.saveAndFlush(externalObjectDirectory);
-                        log.info("Retention date is successfully applied on ARM for EOD {} ", externalObjectDirectoryId);
-                        return true;
+                    if (confidenceAware != null) {
+                        Integer confidenceScore = confidenceAware.getRetConfScore();
+                        String confidenceReason = confidenceAware.getRetConfReason();
+
+                        UpdateMetadataResponse updateMetadataResponseMedia = armDataManagementApi.updateMetadata(
+                            externalObjectDirectory.getExternalRecordId(), armRetentionDate, confidenceScore, confidenceReason);
+
+                        if (updateMetadataResponseMedia.isError()) {
+                            log.error("Unable set retention date for ARM EOD {} due to error(s) {}",
+                                      externalObjectDirectoryId, StringUtils.join(updateMetadataResponseMedia.getResponseStatusMessages(), ", "));
+                        } else {
+                            externalObjectDirectory.setEventDateTs(armRetentionDate);
+                            externalObjectDirectory.setUpdateRetention(false);
+                            externalObjectDirectory.setLastModifiedBy(userAccount);
+                            externalObjectDirectoryRepository.saveAndFlush(externalObjectDirectory);
+                            log.info("Retention date is successfully applied on ARM for EOD {} ", externalObjectDirectoryId);
+                            return true;
+                        }
                     }
                 }
             } else {
