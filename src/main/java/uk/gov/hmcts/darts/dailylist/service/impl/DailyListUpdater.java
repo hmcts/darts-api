@@ -234,7 +234,7 @@ class DailyListUpdater {
         UserAccountEntity dailyListSystemUser = systemUserHelper.getDailyListProcessorUser();
         for (CitizenName judge : sitting.getJudiciary()) {
             JudgeEntity judgeEntity = retrieveCoreObjectService.retrieveOrCreateJudge(judge.getCitizenNameRequestedName(), dailyListSystemUser);
-            hearing.addJudge(judgeEntity);
+            hearing.addJudge(judgeEntity, true);
         }
     }
 

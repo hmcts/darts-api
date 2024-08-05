@@ -115,7 +115,7 @@ class CaseServiceAdvancedSearchTest extends IntegrationBase {
 
         HearingEntity hearing3a = createHearingWithDefaults(case3, courtroom1, LocalDate.of(2023, 7, 20), judge);
         JudgeEntity judge3a = createJudgeWithName("Judge3a");
-        hearing3a.addJudge(judge3a);
+        hearing3a.addJudge(judge3a, false);
 
         HearingEntity hearing3b = createHearingWithDefaults(case3, courtroom1, LocalDate.of(2023, 7, 21), judge);
 
@@ -138,7 +138,7 @@ class CaseServiceAdvancedSearchTest extends IntegrationBase {
         HearingEntity hearing6a = createHearingWithDefaults(case6, courtroom2, LocalDate.of(2023, 9, 20), judge);
 
         HearingEntity hearing6b = createHearingWithDefaults(case6, courtroom3, LocalDate.of(2023, 9, 21), judge);
-        hearing6b.addJudge(createJudgeWithName("Judge6b"));
+        hearing6b.addJudge(createJudgeWithName("Judge6b"), false);
 
         HearingEntity hearing6c = createHearingWithDefaults(case6, courtroom1, LocalDate.of(2023, 9, 22), judge);
 
@@ -151,7 +151,7 @@ class CaseServiceAdvancedSearchTest extends IntegrationBase {
 
         CourtroomEntity courtroom4 = createCourtRoomWithNameAtCourthouse(swanseaCourthouse, "courtroom4");
         HearingEntity hearing10a = createHearingWithDefaults(case10, courtroom4, LocalDate.of(2023, 10, 23), judge);
-        HearingEntity hearing10b = createHearingWithDefaults(case10, courtroom4, LocalDate.of(2023, 10, 24), judge, false);
+        HearingEntity hearing10b = createHearingWithDefaults(case10, courtroom4, LocalDate.of(2023, 10, 24), judge3a, false);
 
         dartsDatabase.saveAll(hearing1a, hearing1b, hearing1c,
                               hearing2a, hearing2b, hearing2c,
