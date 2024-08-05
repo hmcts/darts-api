@@ -10,6 +10,8 @@
     "title": "a-media-file.mp2",
     "client_identifier": "<EODID>",
     "contributor": "NEWCASTLE & Int Test Courtroom 2",
+    "rtn_score":2,
+    "rtn_reason":"RetentionConfidenceReason",
     "bf_001": "Media",
     "bf_002": "Case1",
     "bf_003": "mp2",

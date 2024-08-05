@@ -100,7 +100,7 @@ class CaseControllerAdminSearchTest extends IntegrationBase {
 
         HearingEntity hearing3a = createHearingWithDefaults(case3, courtroom1, LocalDate.of(2023, 7, 20), judge);
         JudgeEntity judge3a = createJudgeWithName("Judge3a");
-        hearing3a.addJudge(judge3a);
+        hearing3a.addJudge(judge3a, false);
 
         HearingEntity hearing3b = createHearingWithDefaults(case3, courtroom1, LocalDate.of(2023, 7, 21), judge);
 
@@ -124,7 +124,7 @@ class CaseControllerAdminSearchTest extends IntegrationBase {
         HearingEntity hearing6a = createHearingWithDefaults(case6, courtroom2, LocalDate.of(2023, 9, 20), judge);
 
         HearingEntity hearing6b = createHearingWithDefaults(case6, courtroom3, LocalDate.of(2023, 9, 21), judge);
-        hearing6b.addJudge(createJudgeWithName("Judge6b"));
+        hearing6b.addJudge(createJudgeWithName("Judge6b"), false);
 
         HearingEntity hearing6c = createHearingWithDefaults(case6, courtroom1, LocalDate.of(2023, 9, 22), judge);
 

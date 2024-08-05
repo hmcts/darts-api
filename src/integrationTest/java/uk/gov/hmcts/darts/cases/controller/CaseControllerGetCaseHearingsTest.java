@@ -134,8 +134,8 @@ class CaseControllerGetCaseHearingsTest extends IntegrationBase {
         HearingEntity hearingEntity = dartsDatabase.getHearingRepository().findAll().get(0);
         HearingEntity hearingEntity2 = dartsDatabase.getHearingRepository().findAll().get(1);
 
-        hearingEntity.addJudge(dartsDatabase.createSimpleJudge("hearing1Judge"));
-        hearingEntity2.addJudge(dartsDatabase.createSimpleJudge("hearing2Judge"));
+        hearingEntity.addJudge(dartsDatabase.createSimpleJudge("hearing1Judge"), false);
+        hearingEntity2.addJudge(dartsDatabase.createSimpleJudge("hearing2Judge"), false);
 
         MockHttpServletRequestBuilder requestBuilder = get(endpointUrl, hearingEntity.getCourtCase().getId());
 

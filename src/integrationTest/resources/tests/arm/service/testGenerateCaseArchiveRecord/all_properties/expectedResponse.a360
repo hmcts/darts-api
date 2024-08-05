@@ -10,6 +10,8 @@
     "title": "test_filename",
     "client_identifier": "<EODID>",
     "contributor": "Bristol",
+    "rtn_score":2,
+    "rtn_reason":"RetentionConfidenceReason",
     "bf_001": "Case",
     "bf_002": "Case1",
     "bf_003": "docx",

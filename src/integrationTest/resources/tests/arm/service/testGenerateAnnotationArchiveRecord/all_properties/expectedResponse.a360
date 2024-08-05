@@ -10,6 +10,8 @@
     "title": "judges-notes.txt",
     "client_identifier": "<EODID>",
     "contributor": "NEWCASTLE & Int Test Courtroom 2",
+    "rtn_score":2,
+    "rtn_reason":"RetentionConfidenceReason",
     "bf_001": "Annotation",
     "bf_002": "Case1",
     "bf_003": "text/plain",
