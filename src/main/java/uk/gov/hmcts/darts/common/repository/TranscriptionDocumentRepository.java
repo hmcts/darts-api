@@ -42,7 +42,7 @@ public interface TranscriptionDocumentRepository extends JpaRepository<Transcrip
                 OR (hearingcourthouse.displayName ILIKE CONCAT('%', cast(:courtHouseDisplayName as text), '%'))))) AND
                 ((cast(:hearingDate AS LocalDate)) IS NULL OR (hearings.hearingDate=:hearingDate ))AND
                 (:isManualTranscription IS NULL OR t.isManualTranscription=:isManualTranscription) AND
-                (:requestedBy IS NULL OR (t.requestedBy.userFullName ILIKE CONCAT('%', cast(:requestedBy as text), '%')))AND
+                (:requestedBy IS NULL OR (t.createdBy.userFullName ILIKE CONCAT('%', cast(:requestedBy as text), '%')))AND
                 ((cast(:requestedAtFrom as TIMESTAMP)) IS NULL OR (t.createdDateTime >= :requestedAtFrom)) AND
                 (:owner IS NULL OR (wfa.userFullName ILIKE CONCAT('%', cast(:owner as text), '%'))) AND
                 ((cast(:requestedAtTo as TIMESTAMP)) IS NULL OR t.createdDateTime <= :requestedAtTo)
