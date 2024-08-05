@@ -32,7 +32,9 @@ public class PostgresIntegrationBase {
 
     private static final PostgreSQLContainer<?> POSTGRES = new PostgreSQLContainer<>(
         "postgres:15-alpine"
-    ).withDatabaseName("darts");
+    ).withDatabaseName("darts")
+        .withUsername("darts")
+        .withPassword("darts");
 
     @DynamicPropertySource
     static void configureProperties(DynamicPropertyRegistry registry) {
