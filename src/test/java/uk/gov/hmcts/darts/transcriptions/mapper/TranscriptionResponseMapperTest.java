@@ -127,8 +127,8 @@ class TranscriptionResponseMapperTest {
     @Test
     void mapToTranscriptionResponseWithNoStatus() throws Exception {
         HearingEntity hearing1 = CommonTestDataUtil.createHearing("case1", LocalTime.NOON);
-        List<TranscriptionEntity> transcriptionList = CommonTestDataUtil.createTranscriptionList(hearing1, false);
-        TranscriptionEntity transcriptionEntity = transcriptionList.get(0);
+        List<TranscriptionEntity> transcriptionList = CommonTestDataUtil.createTranscriptionList(hearing1, false, true, true);
+        TranscriptionEntity transcriptionEntity = transcriptionList.getFirst();
 
         GetTranscriptionByIdResponse transcriptionResponse =
             transcriptionResponseMapper.mapToTranscriptionResponse(transcriptionEntity);
@@ -145,7 +145,7 @@ class TranscriptionResponseMapperTest {
         CourtroomEntity courtroomEntity = new CourtroomEntity();
         courtroomEntity.setName(courtName);
 
-        List<TranscriptionEntity> transcriptionList = CommonTestDataUtil.createTranscriptionList(null, true, false, false, courtroomEntity);
+        List<TranscriptionEntity> transcriptionList = CommonTestDataUtil.createTranscriptionList(null, true, false, true, courtroomEntity);
         TranscriptionEntity transcriptionEntity = transcriptionList.get(0);
         transcriptionEntity.setHearings(new ArrayList<>());
         transcriptionEntity.setHearingDate(LocalDate.of(2023, 6, 20));
@@ -162,7 +162,7 @@ class TranscriptionResponseMapperTest {
 
     @Test
     void mapToTranscriptionResponseWithCourtroom() throws Exception {
-        List<TranscriptionEntity> transcriptionList = CommonTestDataUtil.createTranscriptionList(null, true, false, false, null);
+        List<TranscriptionEntity> transcriptionList = CommonTestDataUtil.createTranscriptionList(null, true, false, true, null);
         TranscriptionEntity transcriptionEntity = transcriptionList.get(0);
         transcriptionEntity.setHearings(new ArrayList<>());
         transcriptionEntity.setHearingDate(LocalDate.of(2023, 6, 20));
@@ -197,8 +197,8 @@ class TranscriptionResponseMapperTest {
     @Test
     void mapToTranscriptionResponseWithWorkflow() throws Exception {
         HearingEntity hearing1 = CommonTestDataUtil.createHearing("case1", LocalTime.NOON);
-        List<TranscriptionEntity> transcriptionList = CommonTestDataUtil.createTranscriptionList(hearing1, true, false);
-        TranscriptionEntity transcriptionEntity = transcriptionList.get(0);
+        List<TranscriptionEntity> transcriptionList = CommonTestDataUtil.createTranscriptionList(hearing1, true, false, true);
+        TranscriptionEntity transcriptionEntity = transcriptionList.getFirst();
 
         GetTranscriptionByIdResponse transcriptionResponse =
             transcriptionResponseMapper.mapToTranscriptionResponse(transcriptionEntity);
@@ -212,8 +212,8 @@ class TranscriptionResponseMapperTest {
     @Test
     void mapToTranscriptionResponse() throws Exception {
         HearingEntity hearing1 = CommonTestDataUtil.createHearing("case1", LocalTime.NOON);
-        List<TranscriptionEntity> transcriptionList = CommonTestDataUtil.createTranscriptionList(hearing1, true, false);
-        TranscriptionEntity transcriptionEntity = transcriptionList.get(0);
+        List<TranscriptionEntity> transcriptionList = CommonTestDataUtil.createTranscriptionList(hearing1, true, false, true);
+        TranscriptionEntity transcriptionEntity = transcriptionList.getFirst();
 
         GetTranscriptionByIdResponse transcriptionResponse =
             transcriptionResponseMapper.mapToTranscriptionResponse(transcriptionEntity);
@@ -227,7 +227,7 @@ class TranscriptionResponseMapperTest {
     @Test
     void mapToTranscriptionResponseIsAutomated() throws Exception {
         HearingEntity hearing1 = CommonTestDataUtil.createHearing("case1", LocalTime.NOON);
-        List<TranscriptionEntity> transcriptionList = CommonTestDataUtil.createTranscriptionList(hearing1, true, false);
+        List<TranscriptionEntity> transcriptionList = CommonTestDataUtil.createTranscriptionList(hearing1, true, false, true);
         TranscriptionEntity transcriptionEntity = transcriptionList.get(0);
         transcriptionEntity.setIsManualTranscription(false);
 
