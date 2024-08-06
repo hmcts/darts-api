@@ -18,6 +18,7 @@ import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
 import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
 import uk.gov.hmcts.darts.common.service.FileOperationService;
 import uk.gov.hmcts.darts.common.service.impl.EodHelperMocks;
+import uk.gov.hmcts.darts.log.api.LogApi;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -26,6 +27,7 @@ import java.util.UUID;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.darts.common.util.EodHelper.armDropZoneStatus;
 import static uk.gov.hmcts.darts.common.util.EodHelper.armProcessingResponseFilesStatus;
@@ -49,6 +51,8 @@ class ArmBatchProcessResponseFilesImplTest {
     private UserIdentity userIdentity;
     @Mock
     private CurrentTimeHelper currentTimeHelper;
+    @Mock
+    private LogApi logApi;
 
     @Mock
     private ExternalObjectDirectoryService externalObjectDirectoryService;
@@ -76,7 +80,8 @@ class ArmBatchProcessResponseFilesImplTest {
             userIdentity,
             currentTimeHelper,
             externalObjectDirectoryService,
-            BATCH_SIZE
+            BATCH_SIZE,
+            logApi
         );
 
     }
@@ -127,5 +132,6 @@ class ArmBatchProcessResponseFilesImplTest {
         verify(externalObjectDirectoryRepository).findAllByStatusAndManifestFile(armDropZoneStatus(), manifestFile2);
         verify(externalObjectDirectoryRepository).findAllByStatusAndManifestFile(armProcessingResponseFilesStatus(), manifestFile2);
 
+        verifyNoMoreInteractions(logApi);
     }
 }

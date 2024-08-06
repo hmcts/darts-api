@@ -24,6 +24,7 @@ import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
 import uk.gov.hmcts.darts.common.repository.ObjectRecordStatusRepository;
 import uk.gov.hmcts.darts.common.service.FileOperationService;
+import uk.gov.hmcts.darts.log.api.LogApi;
 import uk.gov.hmcts.darts.test.common.TestUtils;
 
 import java.io.File;
@@ -38,7 +39,9 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
@@ -53,6 +56,12 @@ import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.STORED;
 @Slf4j
 class ArmResponseFilesProcessSingleElementImplTest {
 
+    public static final String STORED_DESCRIPTION = "Stored";
+    public static final String ARM_DROP_ZONE_DESCRIPTION = "Arm Drop Zone";
+    public static final String ARM_PROCESSING_RESPONSE_FILES_DESCRIPTION = "Arm Processing Response Files";
+    public static final String ARM_RESPONSE_PROCESS_FAILED_DESCRIPTION = "Arm Response Process Failed";
+    public static final String ARM_RESPONSE_CHECKSUM_VERIFICATION_FAILED_DESCRIPTION = "Arm Response Checksum Verification Failed";
+    public static final String ARM_RESPONSE_MANIFEST_FAILED_DESCRIPTION = "Arm Response Manifest Failed";
     @Mock
     private ExternalObjectDirectoryRepository externalObjectDirectoryRepository;
     @Mock
@@ -71,6 +80,8 @@ class ArmResponseFilesProcessSingleElementImplTest {
 
     @Mock
     private MediaEntity mediaEntity;
+    @Mock
+    private LogApi logApi;
 
     @TempDir
     private File tempDirectory;
@@ -92,27 +103,27 @@ class ArmResponseFilesProcessSingleElementImplTest {
 
         ObjectRecordStatusEntity objectRecordStatusStored = new ObjectRecordStatusEntity();
         objectRecordStatusStored.setId(STORED.getId());
-        objectRecordStatusStored.setDescription("Stored");
+        objectRecordStatusStored.setDescription(STORED_DESCRIPTION);
 
         objectRecordStatusArmDropZone = new ObjectRecordStatusEntity();
         objectRecordStatusArmDropZone.setId(ARM_DROP_ZONE.getId());
-        objectRecordStatusArmDropZone.setDescription("Arm Drop Zone");
+        objectRecordStatusArmDropZone.setDescription(ARM_DROP_ZONE_DESCRIPTION);
 
         ObjectRecordStatusEntity objectRecordStatusArmProcessingFiles = new ObjectRecordStatusEntity();
         objectRecordStatusArmProcessingFiles.setId(ARM_PROCESSING_RESPONSE_FILES.getId());
-        objectRecordStatusArmProcessingFiles.setDescription("Arm Processing Response Files");
+        objectRecordStatusArmProcessingFiles.setDescription(ARM_PROCESSING_RESPONSE_FILES_DESCRIPTION);
 
         objectRecordStatusArmResponseProcessingFailed = new ObjectRecordStatusEntity();
         objectRecordStatusArmResponseProcessingFailed.setId(ARM_RESPONSE_PROCESSING_FAILED.getId());
-        objectRecordStatusArmResponseProcessingFailed.setDescription("Arm Response Process Failed");
+        objectRecordStatusArmResponseProcessingFailed.setDescription(ARM_RESPONSE_PROCESS_FAILED_DESCRIPTION);
 
         ObjectRecordStatusEntity objectRecordStatusArmChecksumFailed = new ObjectRecordStatusEntity();
         objectRecordStatusArmChecksumFailed.setId(ARM_RESPONSE_CHECKSUM_VERIFICATION_FAILED.getId());
-        objectRecordStatusArmChecksumFailed.setDescription("Arm Response Checksum Verification Failed");
+        objectRecordStatusArmChecksumFailed.setDescription(ARM_RESPONSE_CHECKSUM_VERIFICATION_FAILED_DESCRIPTION);
 
         ObjectRecordStatusEntity objectRecordStatusArmResponseManifestFailed = new ObjectRecordStatusEntity();
         objectRecordStatusArmResponseManifestFailed.setId(ARM_RESPONSE_MANIFEST_FAILED.getId());
-        objectRecordStatusArmResponseManifestFailed.setDescription("Arm Response Manifest Failed");
+        objectRecordStatusArmResponseManifestFailed.setDescription(ARM_RESPONSE_MANIFEST_FAILED_DESCRIPTION);
 
         when(objectRecordStatusRepository.findById(STORED.getId()))
             .thenReturn(Optional.of(objectRecordStatusStored));
@@ -147,7 +158,8 @@ class ArmResponseFilesProcessSingleElementImplTest {
             fileOperationService,
             armDataManagementConfiguration,
             objectMapper,
-            userIdentity
+            userIdentity,
+            logApi
         );
     }
 
@@ -173,6 +185,8 @@ class ArmResponseFilesProcessSingleElementImplTest {
         verify(armDataManagementApi).listResponseBlobs(prefix);
         verifyNoMoreInteractions(armDataManagementApi);
         verify(externalObjectDirectoryRepository).saveAndFlush(externalObjectDirectoryEntityCaptor.capture());
+
+        verify(logApi).archiveToArmFailed(anyInt());
     }
 
     @Test
@@ -201,6 +215,8 @@ class ArmResponseFilesProcessSingleElementImplTest {
         verify(armDataManagementApi).listResponseBlobs(prefix);
         verifyNoMoreInteractions(armDataManagementApi);
         verify(externalObjectDirectoryRepository).saveAndFlush(externalObjectDirectoryEntityCaptor.capture());
+
+        verifyNoMoreInteractions(logApi);
     }
 
     @Test
@@ -225,6 +241,8 @@ class ArmResponseFilesProcessSingleElementImplTest {
         verify(armDataManagementApi).listResponseBlobs(prefix);
         verifyNoMoreInteractions(armDataManagementApi);
         verify(externalObjectDirectoryRepository).saveAndFlush(externalObjectDirectoryEntityCaptor.capture());
+
+        verifyNoMoreInteractions(logApi);
     }
 
     @Test
@@ -257,6 +275,7 @@ class ArmResponseFilesProcessSingleElementImplTest {
         assertEquals(objectRecordStatusArmResponseProcessingFailed, externalObjectDirectoryArmResponseProcessing.getStatus());
         assertFalse(externalObjectDirectoryArmResponseProcessing.isResponseCleaned());
 
+        verify(logApi).archiveToArmFailed(anyInt());
     }
 
     @Test
@@ -289,6 +308,7 @@ class ArmResponseFilesProcessSingleElementImplTest {
         assertEquals(objectRecordStatusArmResponseProcessingFailed, externalObjectDirectoryArmResponseProcessing.getStatus());
         assertFalse(externalObjectDirectoryArmResponseProcessing.isResponseCleaned());
 
+        verify(logApi).archiveToArmFailed(anyInt());
     }
 
     @Test
@@ -321,6 +341,7 @@ class ArmResponseFilesProcessSingleElementImplTest {
         assertEquals(objectRecordStatusArmResponseProcessingFailed, externalObjectDirectoryArmResponseProcessing.getStatus());
         assertFalse(externalObjectDirectoryArmResponseProcessing.isResponseCleaned());
 
+        verify(logApi).archiveToArmFailed(anyInt());
     }
 
     @Test
@@ -343,6 +364,8 @@ class ArmResponseFilesProcessSingleElementImplTest {
         verify(externalObjectDirectoryRepository).saveAndFlush(externalObjectDirectoryEntityCaptor.capture());
         assertEquals(objectRecordStatusArmDropZone, externalObjectDirectoryArmResponseProcessing.getStatus());
         assertFalse(externalObjectDirectoryArmResponseProcessing.isResponseCleaned());
+
+        verifyNoMoreInteractions(logApi);
 
     }
 
@@ -402,6 +425,8 @@ class ArmResponseFilesProcessSingleElementImplTest {
         verify(armDataManagementApi).deleteBlobData(uploadFileFilename);
         verify(armDataManagementApi).deleteBlobData(createRecordFilename);
         verify(armDataManagementApi).deleteBlobData(responseBlobFilename);
+
+        verify(logApi).archiveToArmFailed(anyInt());
     }
 
     @Test
@@ -430,6 +455,8 @@ class ArmResponseFilesProcessSingleElementImplTest {
         verify(externalObjectDirectoryRepository).saveAndFlush(externalObjectDirectoryEntityCaptor.capture());
         assertEquals(objectRecordStatusArmDropZone, externalObjectDirectoryArmResponseProcessing.getStatus());
         assertFalse(externalObjectDirectoryArmResponseProcessing.isResponseCleaned());
+
+        verifyNoMoreInteractions(logApi);
     }
 
     @Test
@@ -470,6 +497,8 @@ class ArmResponseFilesProcessSingleElementImplTest {
         verify(armDataManagementApi).getBlobData(invalidLineFileFilename);
         verify(armDataManagementApi).getBlobData(failedUploadFileFilename);
         verifyNoMoreInteractions(armDataManagementApi);
+
+        verify(logApi, times(2)).archiveToArmFailed(anyInt());
     }
 
     @Test
@@ -523,6 +552,8 @@ class ArmResponseFilesProcessSingleElementImplTest {
         verify(armDataManagementApi).deleteBlobData(invalidLineFileFilename);
         verify(armDataManagementApi).deleteBlobData(failedUploadFileFilename);
         verifyNoMoreInteractions(armDataManagementApi);
+
+        verify(logApi).archiveToArmFailed(anyInt());
     }
 
     @Test
@@ -576,6 +607,8 @@ class ArmResponseFilesProcessSingleElementImplTest {
         verify(armDataManagementApi).deleteBlobData(invalidLineFileFilename);
         verify(armDataManagementApi).deleteBlobData(failedUploadFileFilename);
         verifyNoMoreInteractions(armDataManagementApi);
+
+        verify(logApi).archiveToArmFailed(anyInt());
     }
 
     @Test
@@ -631,6 +664,8 @@ class ArmResponseFilesProcessSingleElementImplTest {
         verify(armDataManagementApi).deleteBlobData(failedUploadFileFilename);
         verify(armDataManagementApi).deleteBlobData(responseBlobFilename);
         verifyNoMoreInteractions(armDataManagementApi);
+
+        verify(logApi).archiveToArmFailed(anyInt());
     }
 
     @Test
@@ -686,6 +721,8 @@ class ArmResponseFilesProcessSingleElementImplTest {
         verify(armDataManagementApi).deleteBlobData(invalidLineFileFilename);
         verify(armDataManagementApi).deleteBlobData(responseBlobFilename);
         verifyNoMoreInteractions(armDataManagementApi);
+
+        verify(logApi).archiveToArmFailed(anyInt());
     }
 
     @Test
@@ -742,6 +779,8 @@ class ArmResponseFilesProcessSingleElementImplTest {
         verify(armDataManagementApi).deleteBlobData(failedUploadFileFilename);
         verify(armDataManagementApi).deleteBlobData(responseBlobFilename);
         verifyNoMoreInteractions(armDataManagementApi);
+
+        verify(logApi).archiveToArmFailed(anyInt());
     }
 
     @Test
@@ -784,6 +823,8 @@ class ArmResponseFilesProcessSingleElementImplTest {
         verify(armDataManagementApi).getBlobData(failedUploadFileFilename);
         verify(armDataManagementApi).getBlobData(invalidLineFileFilename);
         verifyNoMoreInteractions(armDataManagementApi);
+
+        verify(logApi).archiveToArmFailed(anyInt());
     }
 
     @Test
@@ -840,6 +881,8 @@ class ArmResponseFilesProcessSingleElementImplTest {
         verify(armDataManagementApi).deleteBlobData(failedUploadFileFilename);
         verify(armDataManagementApi).deleteBlobData(invalidLineFileFilename);
         verifyNoMoreInteractions(armDataManagementApi);
+
+        verify(logApi).archiveToArmFailed(anyInt());
     }
 
     @Test
@@ -896,6 +939,8 @@ class ArmResponseFilesProcessSingleElementImplTest {
         verify(armDataManagementApi).deleteBlobData(createRecordFileFilename);
         verify(armDataManagementApi).deleteBlobData(invalidLineFileFilename);
         verifyNoMoreInteractions(armDataManagementApi);
+
+        verify(logApi).archiveToArmFailed(anyInt());
     }
 
 }

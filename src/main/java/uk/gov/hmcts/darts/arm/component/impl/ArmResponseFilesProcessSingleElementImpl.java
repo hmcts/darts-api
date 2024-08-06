@@ -27,6 +27,7 @@ import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
 import uk.gov.hmcts.darts.common.repository.ObjectRecordStatusRepository;
 import uk.gov.hmcts.darts.common.service.FileOperationService;
 import uk.gov.hmcts.darts.common.util.EodHelper;
+import uk.gov.hmcts.darts.log.api.LogApi;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -63,6 +64,7 @@ public class ArmResponseFilesProcessSingleElementImpl implements ArmResponseFile
     private final ArmDataManagementConfiguration armDataManagementConfiguration;
     private final ObjectMapper objectMapper;
     private final UserIdentity userIdentity;
+    private final LogApi logApi;
 
     private ObjectRecordStatusEntity armDropZoneStatus;
     private ObjectRecordStatusEntity armProcessingResponseFilesStatus;
@@ -520,6 +522,14 @@ public class ArmResponseFilesProcessSingleElementImpl implements ArmResponseFile
             objectRecordStatus.getDescription(),
             externalObjectDirectory.getId()
         );
+        if (storedStatus.equals(objectRecordStatus)) {
+            logApi.archiveToArmSuccessful(externalObjectDirectory.getId());
+        } else if (armResponseManifestFailedStatus.equals(objectRecordStatus)) {
+            logApi.archiveToArmFailed(externalObjectDirectory.getId());
+        } else if (armResponseProcessingFailedStatus.equals(objectRecordStatus)
+            && externalObjectDirectory.getVerificationAttempts() > armDataManagementConfiguration.getMaxRetryAttempts()) {
+            logApi.archiveToArmFailed(externalObjectDirectory.getId());
+        }
         externalObjectDirectory.setStatus(objectRecordStatus);
         externalObjectDirectory.setLastModifiedBy(userAccount);
         return externalObjectDirectoryRepository.saveAndFlush(externalObjectDirectory);

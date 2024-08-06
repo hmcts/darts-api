@@ -34,6 +34,7 @@ import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
 import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
 import uk.gov.hmcts.darts.common.service.FileOperationService;
 import uk.gov.hmcts.darts.common.util.EodHelper;
+import uk.gov.hmcts.darts.log.api.LogApi;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -72,13 +73,15 @@ public class ArmBatchProcessResponseFilesImpl implements ArmResponseFilesProcess
     private final CurrentTimeHelper currentTimeHelper;
     private final ExternalObjectDirectoryService externalObjectDirectoryService;
     private final Integer batchSize;
+    private final LogApi logApi;
 
     private UserAccountEntity userAccount;
 
     public ArmBatchProcessResponseFilesImpl(ExternalObjectDirectoryRepository externalObjectDirectoryRepository, ArmDataManagementApi armDataManagementApi,
                                             FileOperationService fileOperationService, ArmDataManagementConfiguration armDataManagementConfiguration,
                                             ObjectMapper objectMapper, UserIdentity userIdentity, CurrentTimeHelper currentTimeHelper,
-                                            ExternalObjectDirectoryService externalObjectDirectoryService, Integer batchSize) {
+                                            ExternalObjectDirectoryService externalObjectDirectoryService, Integer batchSize,
+                                            LogApi logApi) {
         this.externalObjectDirectoryRepository = externalObjectDirectoryRepository;
         this.armDataManagementApi = armDataManagementApi;
         this.fileOperationService = fileOperationService;
@@ -88,6 +91,7 @@ public class ArmBatchProcessResponseFilesImpl implements ArmResponseFilesProcess
         this.currentTimeHelper = currentTimeHelper;
         this.externalObjectDirectoryService = externalObjectDirectoryService;
         this.batchSize = batchSize;
+        this.logApi = logApi;
     }
 
     @Override
@@ -658,6 +662,14 @@ public class ArmBatchProcessResponseFilesImpl implements ArmResponseFilesProcess
                 objectRecordStatus.getId(),
                 externalObjectDirectory.getId()
             );
+
+            if (STORED.equals(objectRecordStatus)) {
+                logApi.archiveToArmSuccessful(externalObjectDirectory.getId());
+            } else if (ARM_RESPONSE_PROCESSING_FAILED.equals(objectRecordStatus)
+                || ARM_RESPONSE_MANIFEST_FAILED.equals(objectRecordStatus)
+                || ARM_RESPONSE_CHECKSUM_VERIFICATION_FAILED.equals(objectRecordStatus)) {
+                logApi.archiveToArmFailed(externalObjectDirectory.getId());
+            }
             externalObjectDirectory.setStatus(objectRecordStatus);
             externalObjectDirectory.setLastModifiedBy(userAccount);
             externalObjectDirectory.setLastModifiedDateTime(currentTimeHelper.currentOffsetDateTime());

@@ -28,6 +28,7 @@ import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
 import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
 import uk.gov.hmcts.darts.common.service.FileOperationService;
+import uk.gov.hmcts.darts.log.api.LogApi;
 import uk.gov.hmcts.darts.test.common.data.MediaTestData;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 import uk.gov.hmcts.darts.testutils.stubs.AuthorisationStub;
@@ -83,6 +84,8 @@ class ArmBatchProcessResponseFilesIntTest extends IntegrationBase {
 
     @Autowired
     private AuthorisationStub authorisationStub;
+    @Autowired
+    private LogApi logApi;
 
     @TempDir
     private File tempDirectory;
@@ -105,7 +108,8 @@ class ArmBatchProcessResponseFilesIntTest extends IntegrationBase {
             userIdentity,
             currentTimeHelper,
             externalObjectDirectoryService,
-            BATCH_SIZE
+            BATCH_SIZE,
+            logApi
         );
 
         UserAccountEntity testUser = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
