@@ -574,8 +574,6 @@ public class MediaRequestServiceImpl implements MediaRequestService {
                 objectAdminActionEntity.setHiddenBy(userIdentity.getUserAccount());
                 objectAdminActionEntity.setHiddenDateTime(currentTimeHelper.currentOffsetDateTime());
                 objectAdminActionEntity.setMarkedForManualDeletion(false);
-                objectAdminActionEntity.setMarkedForManualDelBy(userIdentity.getUserAccount());
-                objectAdminActionEntity.setMarkedForManualDelDateTime(currentTimeHelper.currentOffsetDateTime());
 
                 objectAdminActionEntity = objectAdminActionRepository.saveAndFlush(objectAdminActionEntity);
 

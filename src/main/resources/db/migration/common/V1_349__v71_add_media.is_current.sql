@@ -1,0 +1,1 @@
+ALTER TABLE media ADD COLUMN is_current BOOLEAN;

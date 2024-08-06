@@ -916,7 +916,6 @@ components:
         - "AUDIO_111"
         - "AUDIO_112"
         - "AUDIO_113"
-        - "AUDIO_114"
         - "AUDIO_115"
         - "AUDIO_116"
       x-enum-varnames: [ FAILED_TO_PROCESS_AUDIO_REQUEST,
@@ -933,7 +932,6 @@ components:
                          MEDIA_HIDE_ACTION_PAYLOAD_INCORRECT_USAGE,
                          MEDIA_SHOW_ACTION_PAYLOAD_INCORRECT_USAGE,
                          MEDIA_HIDE_ACTION_REASON_NOT_FOUND,
-                         MEDIA_HIDE_ACTION_REASON_MARKED_FOR_DELETION,
                          ADMIN_SEARCH_CRITERIA_NOT_SUITABLE,
                          TOO_MANY_RESULTS ]
 
@@ -954,7 +952,6 @@ components:
         - "Hide media action payload not correct"
         - "Showing media action payload not correct"
         - "Hide reason is incorrect"
-        - "Reason has been marked for deletion"
         - "transformed_media_id OR one of hearing_id, start_at or end_at must be provided"
         - "Too many results"
       x-enum-varnames: [ FAILED_TO_PROCESS_AUDIO_REQUEST,
@@ -971,6 +968,5 @@ components:
                          MEDIA_HIDE_ACTION_PAYLOAD_INCORRECT_USAGE,
                          MEDIA_SHOW_ACTION_PAYLOAD_INCORRECT_USAGE,
                          MEDIA_HIDE_ACTION_REASON_NOT_FOUND,
-                         MEDIA_HIDE_ACTION_REASON_MARKED_FOR_DELETION,
                          ADMIN_SEARCH_CRITERIA_NOT_SUITABLE,
                          TOO_MANY_RESULTS ]
