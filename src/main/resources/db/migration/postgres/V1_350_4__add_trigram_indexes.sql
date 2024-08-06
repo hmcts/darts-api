@@ -1,0 +1,2 @@
+DROP INDEX cas_cn_idx;
+CREATE INDEX cas_cn_idx CONCURRENTLY ON court_case USING gin (case_number gin_trgm_ops);
