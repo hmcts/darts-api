@@ -173,7 +173,7 @@ public class TranscriptionResponseMapper {
         transcriptionResponse.setReceived(transcriptionEntity.getCreatedDateTime());
 
         Requestor requestor = new Requestor();
-        requestor.setUserFullName(getRequestorName(transcriptionEntity));
+        requestor.setUserFullName(TranscriptionUtil.getRequestedByName(transcriptionEntity));
         requestor.setUserId(getRequestorId(transcriptionEntity));
         transcriptionResponse.setRequestor(requestor);
 
@@ -264,14 +264,6 @@ public class TranscriptionResponseMapper {
         reportingRestriction.setHearingId(restrictionsEntity.getHearingId());
         reportingRestriction.setEventTs(restrictionsEntity.getEventDateTime());
         return reportingRestriction;
-    }
-
-    private String getRequestorName(TranscriptionEntity transcriptionEntity) {
-        if (transcriptionEntity.getCreatedBy() != null) {
-            return transcriptionEntity.getCreatedBy().getUserFullName();
-        } else {
-            return transcriptionEntity.getRequestedBy().getUserFullName();
-        }
     }
 
     private Integer getRequestorId(TranscriptionEntity transcriptionEntity) {
