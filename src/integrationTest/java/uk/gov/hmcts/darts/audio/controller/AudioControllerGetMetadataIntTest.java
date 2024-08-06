@@ -42,6 +42,8 @@ class AudioControllerGetMetadataIntTest extends IntegrationBase {
         var mediaChannel2 = dartsDatabase.createMediaEntity("testCourthouse", "testCourtroom", MEDIA_START_TIME, MEDIA_END_TIME, 2);
         var mediaChannel3 = dartsDatabase.createMediaEntity("testCourthouse", "testCourtroom", MEDIA_START_TIME, MEDIA_END_TIME, 3);
         var mediaChannel4 = dartsDatabase.createMediaEntity("testCourthouse", "testCourtroom", MEDIA_START_TIME, MEDIA_END_TIME, 4);
+        var mediaChannel5NotCurrent = dartsDatabase.createMediaEntity("testCourthouse", "testCourtroom", MEDIA_START_TIME, MEDIA_END_TIME, 5);
+        mediaChannel5NotCurrent.setIsCurrent(false);
         dartsDatabase.getExternalObjectDirectoryStub().createExternalObjectDirectory(mediaChannel1,
                                                                                      ObjectRecordStatusEnum.STORED,
                                                                                      ExternalLocationTypeEnum.UNSTRUCTURED,
@@ -57,6 +59,7 @@ class AudioControllerGetMetadataIntTest extends IntegrationBase {
         hearingEntity.addMedia(mediaChannel2);
         hearingEntity.addMedia(mediaChannel3);
         hearingEntity.addMedia(mediaChannel4);
+        hearingEntity.addMedia(mediaChannel5NotCurrent);
         dartsDatabase.save(hearingEntity);
 
         UserAccountEntity testUser = dartsDatabase.getUserAccountStub()

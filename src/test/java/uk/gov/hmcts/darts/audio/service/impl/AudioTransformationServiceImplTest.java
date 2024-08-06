@@ -138,25 +138,25 @@ class AudioTransformationServiceImplTest {
     private ArgumentCaptor<SaveNotificationToDbRequest> dbNotificationRequestCaptor;
 
     @Test
-    void getMediaMetadataShouldReturnRepositoryResultsUnmodifiedWhenRepositoryHasResult() {
+    void getMediaByHearingIdShouldReturnRepositoryResultsUnmodifiedWhenRepositoryHasResult() {
         List<MediaEntity> expectedResults = Collections.singletonList(new MediaEntity());
 
-        when(mediaRepository.findAllByHearingId(any()))
+        when(mediaRepository.findAllCurrentMediaByHearingId(any()))
             .thenReturn(expectedResults);
 
-        List<MediaEntity> mediaEntities = audioTransformationService.getMediaMetadata(1);
+        List<MediaEntity> mediaEntities = audioTransformationService.getMediaByHearingId(1);
 
         assertEquals(expectedResults, mediaEntities);
     }
 
     @Test
-    void getMediaMetadataShouldReturnRepositoryResultsUnmodifiedWhenRepositoryResultIsEmpty() {
+    void getMediaByHearingIdShouldReturnRepositoryResultsUnmodifiedWhenRepositoryResultIsEmpty() {
         List<MediaEntity> expectedResults = Collections.emptyList();
 
-        when(mediaRepository.findAllByHearingId(any()))
+        when(mediaRepository.findAllCurrentMediaByHearingId(any()))
             .thenReturn(expectedResults);
 
-        List<MediaEntity> mediaEntities = audioTransformationService.getMediaMetadata(1);
+        List<MediaEntity> mediaEntities = audioTransformationService.getMediaByHearingId(1);
 
         assertEquals(expectedResults, mediaEntities);
     }
