@@ -11,13 +11,11 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.darts.audio.entity.MediaRequestEntity;
 import uk.gov.hmcts.darts.audio.enums.AudioRequestOutputFormat;
 import uk.gov.hmcts.darts.audio.helper.TransformedMediaHelper;
-import uk.gov.hmcts.darts.audio.helper.UnstructuredDataHelper;
 import uk.gov.hmcts.darts.audio.model.AudioFileInfo;
 import uk.gov.hmcts.darts.audiorequests.model.AudioRequestType;
 import uk.gov.hmcts.darts.common.datamanagement.enums.DatastoreContainerType;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
-import uk.gov.hmcts.darts.common.entity.DefendantEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
 import uk.gov.hmcts.darts.common.entity.TransformedMediaEntity;
@@ -30,7 +28,6 @@ import uk.gov.hmcts.darts.common.service.TransientObjectDirectoryService;
 import uk.gov.hmcts.darts.datamanagement.api.DataManagementApi;
 import uk.gov.hmcts.darts.datamanagement.model.BlobClientUploadResponse;
 import uk.gov.hmcts.darts.datamanagement.model.BlobClientUploadResponseImpl;
-import uk.gov.hmcts.darts.log.api.LogApi;
 import uk.gov.hmcts.darts.notification.api.NotificationApi;
 import uk.gov.hmcts.darts.notification.dto.SaveNotificationToDbRequest;
 
@@ -78,9 +75,6 @@ class AudioTransformationServiceImplTest {
     private static final OffsetDateTime TIME_12_59 = OffsetDateTime.parse("2023-01-01T12:59Z");
     private static final OffsetDateTime TIME_13_00 = OffsetDateTime.parse("2023-01-01T13:00Z");
     private static final OffsetDateTime TIME_13_01 = OffsetDateTime.parse("2023-01-01T13:01Z");
-
-
-    private static final UUID BLOB_LOCATION = UUID.randomUUID();
     private static final String TEST_BINARY_STRING = "Test String to be converted to binary!";
     private static final BinaryData BINARY_DATA = BinaryData.fromBytes(TEST_BINARY_STRING.getBytes());
     public static final String NO_DEFENDANTS = "There are no defendants for this hearing";
@@ -140,16 +134,6 @@ class AudioTransformationServiceImplTest {
 
     @Mock
     private NotificationApi mockNotificationApi;
-
-    @Mock
-    private DefendantEntity mockDefendantEntity;
-
-    @Mock
-    LogApi logApi;
-
-    @Mock
-    private UnstructuredDataHelper unstructuredDataHelper;
-
     @Captor
     private ArgumentCaptor<SaveNotificationToDbRequest> dbNotificationRequestCaptor;
 

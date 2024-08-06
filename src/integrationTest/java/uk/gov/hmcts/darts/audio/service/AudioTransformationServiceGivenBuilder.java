@@ -5,7 +5,6 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
-import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
 import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
@@ -38,14 +37,12 @@ public class AudioTransformationServiceGivenBuilder {
     private HearingEntity hearingEntityWithMedia1;
     private HearingEntity hearingEntityWithMedia2;
     private MediaEntity mediaEntity1Hearing2;
-    private MediaEntity mediaEntity2Hearing2;
     private HearingEntity hearingEntityWithoutMedia;
     private MediaEntity mediaEntity1;
     private MediaEntity mediaEntity2;
     private MediaEntity mediaEntity3;
     private MediaEntity mediaEntity4;
     private CourtroomEntity courtroomAtNewcastle;
-    private CourtCaseEntity courtCase;
     private JudgeEntity judge;
 
     private static final OffsetDateTime MEDIA_START_TIME = OffsetDateTime.parse("2023-01-01T12:00:00Z");
