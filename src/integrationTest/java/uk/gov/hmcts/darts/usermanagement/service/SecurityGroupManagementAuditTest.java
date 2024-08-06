@@ -16,7 +16,7 @@ import static org.springframework.data.history.RevisionMetadata.RevisionType.INS
 import static org.springframework.data.history.RevisionMetadata.RevisionType.UPDATE;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.SUPER_ADMIN;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.TRANSCRIBER;
-import static uk.gov.hmcts.darts.test.common.data.SecurityGroupTestData.buildGroupForRole;
+import static uk.gov.hmcts.darts.test.common.data.SecurityGroupTestData.createGroupForRole;
 import static uk.gov.hmcts.darts.test.common.data.UserAccountTestData.minimalUserAccount;
 
 class SecurityGroupManagementAuditTest extends IntegrationBase {
@@ -58,7 +58,7 @@ class SecurityGroupManagementAuditTest extends IntegrationBase {
     @Test
     void auditsWhenSecurityGroupsMembersAreUpdated() {
         var userAccountEntity = given.anAuthenticatedUserWithGlobalAccessAndRole(SUPER_ADMIN);
-        var securityGroup = dartsDatabase.save(buildGroupForRole(TRANSCRIBER));
+        var securityGroup = dartsDatabase.save(createGroupForRole(TRANSCRIBER));
         var userAccount = dartsDatabase.save(minimalUserAccount());
 
         securityGroupService.modifySecurityGroup(

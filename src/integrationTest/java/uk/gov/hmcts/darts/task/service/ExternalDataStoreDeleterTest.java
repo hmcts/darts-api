@@ -3,7 +3,6 @@ package uk.gov.hmcts.darts.task.service;
 import com.azure.storage.blob.BlobClient;
 import com.azure.storage.blob.BlobContainerClient;
 import com.azure.storage.blob.BlobServiceClient;
-import jakarta.transaction.Transactional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
@@ -56,7 +55,6 @@ import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.MARKED_FOR_
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.STORED;
 
 @SuppressWarnings({"PMD.ExcessiveImports"})
-@Transactional
 class ExternalDataStoreDeleterTest extends IntegrationBase {
     @Autowired
     protected TransientObjectDirectoryStub transientObjectDirectoryStub;
@@ -196,14 +194,13 @@ class ExternalDataStoreDeleterTest extends IntegrationBase {
             AudioRequestType.DOWNLOAD,
             COMPLETED
         );
-        dartsDatabase.save(
-            currentMediaRequest);
+        dartsDatabase.save(currentMediaRequest);
 
-        TransientObjectDirectoryEntity outboundEntity = createTransientDirectoryAndObjectStatus(
-            currentMediaRequest, STORED);
+        TransientObjectDirectoryEntity outboundEntity = createTransientDirectoryAndObjectStatus(currentMediaRequest, STORED);
         ExternalObjectDirectoryEntity unstructuredEntity = createExternalObjectDirectory(
             audioBuilder.getMediaEntity1(),
-            UNSTRUCTURED.getId(), STORED
+            UNSTRUCTURED.getId(),
+            STORED
         );
         ExternalObjectDirectoryEntity inboundEntity = createExternalObjectDirectory(
             audioBuilder.getMediaEntity2(),
@@ -237,25 +234,17 @@ class ExternalDataStoreDeleterTest extends IntegrationBase {
                 savedEntity.getLastModifiedBy().getId()
             );
 
-            assertEquals(entity.getLastModifiedDateTime(), savedEntity.getLastModifiedDateTime());
+            assertEquals(entity.getLastModifiedDateTime().toInstant(), savedEntity.getLastModifiedDateTime().toInstant());
         }
     }
 
-    private void assertExternalObjectDirectoryStateNotChanged(List<ExternalObjectDirectoryEntity> unstructuredEntity) {
-        for (ExternalObjectDirectoryEntity entity : unstructuredEntity) {
-            ExternalObjectDirectoryEntity savedEntity = dartsDatabase.getExternalObjectDirectoryRepository().findById(
-                entity.getId()).get();
-            assertEquals(
-                entity.getStatus().getId(),
-                savedEntity.getStatus().getId()
-            );
+    private void assertExternalObjectDirectoryStateNotChanged(List<ExternalObjectDirectoryEntity> externalObjectDirectoryEntities) {
+        for (ExternalObjectDirectoryEntity eod : externalObjectDirectoryEntities) {
+            ExternalObjectDirectoryEntity savedEod = dartsDatabase.getExternalObjectDirectoryRepository().findById(eod.getId()).get();
 
-            assertEquals(
-                entity.getLastModifiedBy().getId(),
-                savedEntity.getLastModifiedBy().getId()
-            );
-
-            assertEquals(entity.getLastModifiedDateTime(), savedEntity.getLastModifiedDateTime());
+            assertEquals(eod.getStatus().getId(), savedEod.getStatus().getId());
+            assertEquals(eod.getLastModifiedBy().getId(), savedEod.getLastModifiedBy().getId());
+            assertEquals(eod.getLastModifiedDateTime().toInstant(), savedEod.getLastModifiedDateTime().toInstant());
         }
     }
 

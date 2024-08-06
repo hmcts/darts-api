@@ -1,8 +1,9 @@
 package uk.gov.hmcts.darts.common.repository;
 
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.transaction.annotation.Transactional;
 import uk.gov.hmcts.darts.common.entity.SecurityPermissionEntity;
 import uk.gov.hmcts.darts.common.entity.SecurityRoleEntity;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
@@ -24,11 +25,20 @@ import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.TRANSCRIBER;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.TRANSLATION_QA;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.XHIBIT;
 
-@Transactional
 class SecurityRoleRepositoryTest extends IntegrationBase {
 
     @Autowired
     private SecurityRoleRepository securityRoleRepository;
+
+    @BeforeEach
+    void startHibernateSession() {
+        openInViewUtil.openEntityManager();
+    }
+
+    @AfterEach
+    void closeHibernateSession() {
+        openInViewUtil.closeEntityManager();
+    }
 
     @Test
     void shouldFindAllSecurityRoles() {

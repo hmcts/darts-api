@@ -1,5 +1,6 @@
 package uk.gov.hmcts.darts.cases.controller;
 
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -11,7 +12,6 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
-import org.springframework.transaction.annotation.Transactional;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.cases.model.AddCaseRequest;
 import uk.gov.hmcts.darts.cases.model.PostCaseResponse;
@@ -54,12 +54,12 @@ import static uk.gov.hmcts.darts.test.common.data.JudgeTestData.createListOfJudg
 import static uk.gov.hmcts.darts.test.common.data.ProsecutorTestData.createListOfProsecutor;
 
 @AutoConfigureMockMvc
-@Transactional
 class CaseControllerTest extends IntegrationBase {
 
     public static final String EXPECTED_RESPONSE_FILE = "tests/cases/CaseControllerTest/casesGetEndpoint/expectedResponse.json";
     public static final String HEARING_DATE = "2023-06-20";
     public static final String BASE_PATH = "/cases";
+
     @Autowired
     private transient MockMvc mockMvc;
 
@@ -142,6 +142,16 @@ class CaseControllerTest extends IntegrationBase {
 
 
         dartsDatabase.saveAll(hearingForCase1, hearingForCase2, hearingForCase3, hearingForCase4);
+    }
+
+    @BeforeEach
+    void startHibernateSession() {
+        openInViewUtil.openEntityManager();
+    }
+
+    @AfterEach
+    void closeHibernateSession() {
+        openInViewUtil.closeEntityManager();
     }
 
     @Test

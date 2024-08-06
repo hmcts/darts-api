@@ -13,6 +13,7 @@ import uk.gov.hmcts.darts.common.entity.SecurityGroupEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.repository.SecurityGroupRepository;
 import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
+import uk.gov.hmcts.darts.test.common.data.CourthouseTestData;
 import uk.gov.hmcts.darts.test.common.data.SecurityGroupTestData;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 
@@ -22,7 +23,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.APPROVER;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.TRANSLATION_QA;
 import static uk.gov.hmcts.darts.test.common.data.CaseTestData.createCaseAt;
-import static uk.gov.hmcts.darts.test.common.data.CourthouseTestData.createCourthouse;
 import static uk.gov.hmcts.darts.test.common.data.CourtroomTestData.createCourtRoomWithNameAtCourthouse;
 import static uk.gov.hmcts.darts.test.common.data.HearingTestData.createHearingWith;
 import static uk.gov.hmcts.darts.testutils.stubs.UserAccountStub.INTEGRATION_TEST_USER_EMAIL;
@@ -45,7 +45,7 @@ class CaseServiceAdvancedSearchUseInterpreterTest extends IntegrationBase {
     @BeforeEach
     void setupData() {
         // swansea cases
-        swanseaCourthouse = createCourthouse("SWANSEA");
+        swanseaCourthouse = CourthouseTestData.createCourthouseWithName("SWANSEA");
 
         CourtCaseEntity case1 = createCaseAt(swanseaCourthouse, "Case1");
         CourtCaseEntity case2 = createCaseAt(swanseaCourthouse, "Case2");
@@ -58,7 +58,7 @@ class CaseServiceAdvancedSearchUseInterpreterTest extends IntegrationBase {
         dartsDatabase.saveAll(hearing1, hearing2);
 
         // cardiff cases
-        cardiffCourthouse = createCourthouse("CARDIFF");
+        cardiffCourthouse = CourthouseTestData.createCourthouseWithName("CARDIFF");
 
         CourtCaseEntity case3 = createCaseAt(cardiffCourthouse, "Case3");
         CourtCaseEntity case4 = createCaseAt(cardiffCourthouse, "Case4");
@@ -71,7 +71,7 @@ class CaseServiceAdvancedSearchUseInterpreterTest extends IntegrationBase {
         dartsDatabase.saveAll(hearing3, hearing4);
 
         // liverpool cases
-        liverpoolCourthouse = createCourthouse("LIVERPOOL");
+        liverpoolCourthouse = CourthouseTestData.createCourthouseWithName("LIVERPOOL");
 
         CourtCaseEntity case5 = createCaseAt(liverpoolCourthouse, "Case5");
 
@@ -92,7 +92,7 @@ class CaseServiceAdvancedSearchUseInterpreterTest extends IntegrationBase {
     @Test
     void testSearchCasesWithUseInterpreterFalsePermissionIsIgnoredForTranslationQaAndCasesWithInterpreterAreReturned() {
         // given
-        var securityGroup = SecurityGroupTestData.buildGroupForRole(TRANSLATION_QA);
+        var securityGroup = SecurityGroupTestData.createGroupForRole(TRANSLATION_QA);
         securityGroup.setGlobalAccess(true);
         securityGroup.setUseInterpreter(false);
         assignSecurityGroupToUser(user, securityGroup);
@@ -111,7 +111,7 @@ class CaseServiceAdvancedSearchUseInterpreterTest extends IntegrationBase {
     @Test
     void testSearchCasesWithPermissionsGlobalTrue() {
         // given
-        var securityGroup = SecurityGroupTestData.buildGroupForRole(TRANSLATION_QA);
+        var securityGroup = SecurityGroupTestData.createGroupForRole(TRANSLATION_QA);
         securityGroup.setGlobalAccess(true);
         securityGroup.setUseInterpreter(true);
         assignSecurityGroupToUser(user, securityGroup);
@@ -130,7 +130,7 @@ class CaseServiceAdvancedSearchUseInterpreterTest extends IntegrationBase {
     @Test
     void testSearchCasesWithPermissionsGlobalFalse() {
         // given
-        var securityGroup = SecurityGroupTestData.buildGroupForRole(TRANSLATION_QA);
+        var securityGroup = SecurityGroupTestData.createGroupForRole(TRANSLATION_QA);
         securityGroup.setGlobalAccess(false);
         securityGroup.setUseInterpreter(true);
         assignSecurityGroupToUser(user, securityGroup);

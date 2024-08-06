@@ -8,7 +8,6 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
-import org.springframework.transaction.annotation.Transactional;
 import uk.gov.hmcts.darts.audit.api.AuditActivity;
 import uk.gov.hmcts.darts.audit.service.AuditService;
 import uk.gov.hmcts.darts.authorisation.component.Authorisation;
@@ -177,7 +176,6 @@ class AudioRequestsControllerPlaybackIntTest extends IntegrationBase {
     }
 
     @Test
-    @Transactional
     void audioRequestPlaybackGetShouldReturnBadRequestWhenMediaRequestEntityIsDownload() throws Exception {
         authorisationStub.givenTestSchema();
 
@@ -204,7 +202,6 @@ class AudioRequestsControllerPlaybackIntTest extends IntegrationBase {
     }
 
     @Test
-    @Transactional
     void audioRequestPlaybackGetShouldReturnErrorWhenNoRelatedTransientObjectExistsInDatabase() throws Exception {
         authorisationStub.givenTestSchema();
         var mediaRequestEntity = authorisationStub.getMediaRequestEntity();
