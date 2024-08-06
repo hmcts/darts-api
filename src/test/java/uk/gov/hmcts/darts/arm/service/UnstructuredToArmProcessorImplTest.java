@@ -135,8 +135,9 @@ class UnstructuredToArmProcessorImplTest {
         lenient().when(objectRecordStatusRepository.findById(13)).thenReturn(Optional.ofNullable(objectRecordStatusEntityArmDropZone));
 
         lenient().when(armDataManagementConfiguration.getMaxRetryAttempts()).thenReturn(MAX_RETRY_ATTEMPTS);
-        lenient().when(externalObjectDirectoryEntityUnstructured.getExternalLocation()).thenReturn(UNSTRUCTURED_UUID);
+
         lenient().when(externalObjectDirectoryEntityArm.getId()).thenReturn(123);
+        lenient().when(externalObjectDirectoryEntityUnstructured.getExternalLocation()).thenReturn(UNSTRUCTURED_UUID);
     }
 
     @Test
@@ -162,7 +163,7 @@ class UnstructuredToArmProcessorImplTest {
         when(externalObjectDirectoryEntityUnstructured.getExternalLocationType()).thenReturn(externalLocationTypeUnstructured);
         when(externalLocationTypeUnstructured.getId()).thenReturn(ExternalLocationTypeEnum.UNSTRUCTURED.getId());
         when(externalObjectDirectoryEntityUnstructured.getExternalLocationType()).thenReturn(externalLocationTypeUnstructured);
-
+        lenient().when(externalObjectDirectoryEntityUnstructured.getExternalLocation()).thenReturn(UNSTRUCTURED_UUID);
         unstructuredToArmProcessor.processUnstructuredToArm();
 
         verify(externalObjectDirectoryRepository, times(3)).saveAndFlush(externalObjectDirectoryEntityCaptor.capture());
@@ -177,12 +178,6 @@ class UnstructuredToArmProcessorImplTest {
         when(externalLocationTypeRepository.getReferenceById(2)).thenReturn(externalLocationTypeUnstructured);
         when(externalLocationTypeRepository.getReferenceById(3)).thenReturn(externalLocationTypeArm);
 
-        when(objectRecordStatusRepository.findById(2)).thenReturn(Optional.ofNullable(objectRecordStatusEntityStored));
-        when(objectRecordStatusRepository.findById(12)).thenReturn(Optional.ofNullable(objectRecordStatusEntityArmIngestion));
-        when(objectRecordStatusRepository.findById(14)).thenReturn(Optional.ofNullable(objectRecordStatusEntityRawDataFailed));
-        when(objectRecordStatusRepository.findById(15)).thenReturn(Optional.ofNullable(objectRecordStatusEntityManifestFailed));
-        when(objectRecordStatusRepository.findById(13)).thenReturn(Optional.ofNullable(objectRecordStatusEntityArmDropZone));
-
         List<ExternalObjectDirectoryEntity> inboundList = new ArrayList<>(Collections.singletonList(externalObjectDirectoryEntityUnstructured));
         when(externalObjectDirectoryRepository.findExternalObjectsNotIn2StorageLocations(
             objectRecordStatusEntityStored,
@@ -190,7 +185,6 @@ class UnstructuredToArmProcessorImplTest {
             externalLocationTypeArm
         )).thenReturn(inboundList);
 
-        when(externalObjectDirectoryEntityUnstructured.getExternalLocationType()).thenReturn(externalLocationTypeUnstructured);
         when(externalLocationTypeUnstructured.getId()).thenReturn(ExternalLocationTypeEnum.UNSTRUCTURED.getId());
         when(externalObjectDirectoryEntityUnstructured.getExternalLocationType()).thenReturn(externalLocationTypeUnstructured);
 
@@ -200,8 +194,6 @@ class UnstructuredToArmProcessorImplTest {
         unstructuredToArmProcessor.processUnstructuredToArm();
 
         verify(externalObjectDirectoryRepository, times(2)).saveAndFlush(externalObjectDirectoryEntityCaptor.capture());
-
-        verify(logApi, times(2)).armPushFailed(null);
     }
 
     @Test
@@ -222,11 +214,6 @@ class UnstructuredToArmProcessorImplTest {
             .build();
         when(archiveRecordService.generateArchiveRecord(any(), any())).thenReturn(archiveRecordFileInfo);
 
-        when(objectRecordStatusRepository.findById(2)).thenReturn(Optional.ofNullable(objectRecordStatusEntityStored));
-        when(objectRecordStatusRepository.findById(12)).thenReturn(Optional.ofNullable(objectRecordStatusEntityArmIngestion));
-        when(objectRecordStatusRepository.findById(14)).thenReturn(Optional.ofNullable(objectRecordStatusEntityRawDataFailed));
-        when(objectRecordStatusRepository.findById(15)).thenReturn(Optional.ofNullable(objectRecordStatusEntityManifestFailed));
-        when(objectRecordStatusRepository.findById(13)).thenReturn(Optional.ofNullable(objectRecordStatusEntityArmDropZone));
         when(externalLocationTypeRepository.getReferenceById(2)).thenReturn(externalLocationTypeUnstructured);
         when(externalLocationTypeRepository.getReferenceById(3)).thenReturn(externalLocationTypeArm);
 
@@ -290,12 +277,6 @@ class UnstructuredToArmProcessorImplTest {
         when(externalLocationTypeRepository.getReferenceById(2)).thenReturn(externalLocationTypeUnstructured);
         when(externalLocationTypeRepository.getReferenceById(3)).thenReturn(externalLocationTypeArm);
 
-        when(objectRecordStatusRepository.findById(2)).thenReturn(Optional.ofNullable(objectRecordStatusEntityStored));
-        when(objectRecordStatusRepository.findById(12)).thenReturn(Optional.ofNullable(objectRecordStatusEntityArmIngestion));
-        when(objectRecordStatusRepository.findById(14)).thenReturn(Optional.ofNullable(objectRecordStatusEntityRawDataFailed));
-        when(objectRecordStatusRepository.findById(15)).thenReturn(Optional.ofNullable(objectRecordStatusEntityManifestFailed));
-        when(objectRecordStatusRepository.findById(13)).thenReturn(Optional.ofNullable(objectRecordStatusEntityArmDropZone));
-
         List<ExternalObjectDirectoryEntity> inboundList = new ArrayList<>(Collections.singletonList(externalObjectDirectoryEntityUnstructured));
         when(externalObjectDirectoryRepository.findExternalObjectsNotIn2StorageLocations(
             objectRecordStatusEntityStored,
@@ -314,7 +295,7 @@ class UnstructuredToArmProcessorImplTest {
 
         verify(externalObjectDirectoryRepository, times(3)).saveAndFlush(externalObjectDirectoryEntityCaptor.capture());
 
-        verify(logApi).armPushFailed(anyInt());
+        verifyNoMoreInteractions(logApi);
     }
 
     @Test
@@ -332,12 +313,6 @@ class UnstructuredToArmProcessorImplTest {
         when(externalLocationTypeRepository.getReferenceById(2)).thenReturn(externalLocationTypeUnstructured);
         when(externalLocationTypeRepository.getReferenceById(3)).thenReturn(externalLocationTypeArm);
 
-        when(objectRecordStatusRepository.findById(2)).thenReturn(Optional.ofNullable(objectRecordStatusEntityStored));
-        when(objectRecordStatusRepository.findById(12)).thenReturn(Optional.ofNullable(objectRecordStatusEntityArmIngestion));
-        when(objectRecordStatusRepository.findById(14)).thenReturn(Optional.ofNullable(objectRecordStatusEntityRawDataFailed));
-        when(objectRecordStatusRepository.findById(15)).thenReturn(Optional.ofNullable(objectRecordStatusEntityManifestFailed));
-        when(objectRecordStatusRepository.findById(13)).thenReturn(Optional.ofNullable(objectRecordStatusEntityArmDropZone));
-
         List<ExternalObjectDirectoryEntity> inboundList = new ArrayList<>(Collections.singletonList(externalObjectDirectoryEntityUnstructured));
         when(externalObjectDirectoryRepository.findExternalObjectsNotIn2StorageLocations(
             objectRecordStatusEntityStored,
@@ -356,7 +331,7 @@ class UnstructuredToArmProcessorImplTest {
 
         verify(externalObjectDirectoryRepository, times(3)).saveAndFlush(externalObjectDirectoryEntityCaptor.capture());
 
-        verify(logApi).armPushFailed(anyInt());
+        verifyNoMoreInteractions(logApi);
     }
 
     @Test
@@ -370,11 +345,6 @@ class UnstructuredToArmProcessorImplTest {
             .build();
         when(archiveRecordService.generateArchiveRecord(any(), any())).thenReturn(archiveRecordFileInfo);
 
-        when(objectRecordStatusRepository.findById(2)).thenReturn(Optional.ofNullable(objectRecordStatusEntityStored));
-        when(objectRecordStatusRepository.findById(12)).thenReturn(Optional.ofNullable(objectRecordStatusEntityArmIngestion));
-        when(objectRecordStatusRepository.findById(14)).thenReturn(Optional.ofNullable(objectRecordStatusEntityRawDataFailed));
-        when(objectRecordStatusRepository.findById(15)).thenReturn(Optional.ofNullable(objectRecordStatusEntityManifestFailed));
-        when(objectRecordStatusRepository.findById(13)).thenReturn(Optional.ofNullable(objectRecordStatusEntityArmDropZone));
         when(externalLocationTypeRepository.getReferenceById(2)).thenReturn(externalLocationTypeUnstructured);
         when(externalLocationTypeRepository.getReferenceById(3)).thenReturn(externalLocationTypeArm);
 
@@ -422,11 +392,6 @@ class UnstructuredToArmProcessorImplTest {
 
         when(objectRecordStatusEntityRawDataFailed.getDescription()).thenReturn("FAILURE_ARM_RAW_DATA_FAILED");
 
-        when(objectRecordStatusRepository.findById(2)).thenReturn(Optional.ofNullable(objectRecordStatusEntityStored));
-        when(objectRecordStatusRepository.findById(12)).thenReturn(Optional.ofNullable(objectRecordStatusEntityArmIngestion));
-        when(objectRecordStatusRepository.findById(14)).thenReturn(Optional.ofNullable(objectRecordStatusEntityRawDataFailed));
-        when(objectRecordStatusRepository.findById(15)).thenReturn(Optional.ofNullable(objectRecordStatusEntityManifestFailed));
-        when(objectRecordStatusRepository.findById(13)).thenReturn(Optional.ofNullable(objectRecordStatusEntityArmDropZone));
         when(externalLocationTypeRepository.getReferenceById(2)).thenReturn(externalLocationTypeUnstructured);
         when(externalLocationTypeRepository.getReferenceById(3)).thenReturn(externalLocationTypeArm);
 

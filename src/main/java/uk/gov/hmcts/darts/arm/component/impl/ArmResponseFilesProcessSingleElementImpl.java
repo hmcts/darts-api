@@ -524,9 +524,9 @@ public class ArmResponseFilesProcessSingleElementImpl implements ArmResponseFile
         );
         if (storedStatus.equals(objectRecordStatus)) {
             logApi.archiveToArmSuccessful(externalObjectDirectory.getId());
-        } else if (armResponseManifestFailedStatus.equals(objectRecordStatus)) {
+        } else if (armResponseProcessingFailedStatus.equals(objectRecordStatus)) {
             logApi.archiveToArmFailed(externalObjectDirectory.getId());
-        } else if (armResponseProcessingFailedStatus.equals(objectRecordStatus)
+        } else if (armResponseManifestFailedStatus.equals(objectRecordStatus)
             && externalObjectDirectory.getVerificationAttempts() > armDataManagementConfiguration.getMaxRetryAttempts()) {
             logApi.archiveToArmFailed(externalObjectDirectory.getId());
         }
