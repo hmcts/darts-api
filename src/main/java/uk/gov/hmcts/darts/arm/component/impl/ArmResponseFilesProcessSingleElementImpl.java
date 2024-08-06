@@ -32,6 +32,7 @@ import uk.gov.hmcts.darts.log.api.LogApi;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.time.OffsetDateTime;
 import java.util.List;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
@@ -412,6 +413,7 @@ public class ArmResponseFilesProcessSingleElementImpl implements ArmResponseFile
                     errorDescription,
                     armResponseUploadFileRecord.getErrorStatus()
                 );
+                externalObjectDirectory.setErrorCode(errorDescription);
                 externalObjectDirectory = updateExternalObjectDirectoryStatus(externalObjectDirectory, armResponseProcessingFailedStatus);
             }
         } else {
@@ -436,10 +438,13 @@ public class ArmResponseFilesProcessSingleElementImpl implements ArmResponseFile
                     armResponseInvalidLineRecord.getErrorStatus()
                 );
                 updateTransferAttempts(externalObjectDirectory);
+                externalObjectDirectory.setErrorCode(armResponseInvalidLineRecord.getExceptionDescription());
                 updateExternalObjectDirectoryStatus(externalObjectDirectory, armResponseManifestFailedStatus);
             } else {
-                log.warn("Incorrect status [{}] for invalid line file {}", invalidLineFileFilenameProcessor.getStatus(),
-                         invalidLineFileFilenameProcessor.getInvalidLineFileFilenameAndPath());
+                String error = String.format("Incorrect status [%s] for invalid line file %s", invalidLineFileFilenameProcessor.getStatus(),
+                                             invalidLineFileFilenameProcessor.getInvalidLineFileFilenameAndPath());
+                log.warn(error);
+                externalObjectDirectory.setErrorCode(error);
                 updateExternalObjectDirectoryStatus(externalObjectDirectory, armResponseProcessingFailedStatus);
             }
         } else {
@@ -477,6 +482,7 @@ public class ArmResponseFilesProcessSingleElementImpl implements ArmResponseFile
         if (objectChecksum.equalsIgnoreCase(armResponseUploadFileRecord.getMd5())) {
             externalObjectDirectory.setExternalFileId(armResponseUploadFileRecord.getA360FileId());
             externalObjectDirectory.setExternalRecordId(armResponseUploadFileRecord.getA360RecordId());
+            externalObjectDirectory.setDataIngestionTs(OffsetDateTime.now());
             updateExternalObjectDirectoryStatus(externalObjectDirectory, storedStatus);
         } else {
             log.warn("External object id {} checksum differs. Arm checksum: {} Object Checksum: {}",

@@ -41,6 +41,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Duration;
 import java.time.Instant;
+import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -418,6 +419,9 @@ public class ArmBatchProcessResponseFilesImpl implements ArmResponseFilesProcess
                         armResponseUploadFileRecord.getA360RecordId(),
                         armResponseUploadFileRecord.getA360FileId()
                     );
+                    if (nonNull(externalObjectDirectory)) {
+                        externalObjectDirectory.setErrorCode(errorDescription);
+                    }
                     updateExternalObjectDirectoryStatus(externalObjectDirectory, EodHelper.armResponseProcessingFailedStatus());
                 }
             } else {
@@ -445,6 +449,7 @@ public class ArmBatchProcessResponseFilesImpl implements ArmResponseFilesProcess
         if (objectChecksum.equalsIgnoreCase(armResponseUploadFileRecord.getMd5())) {
             externalObjectDirectory.setExternalFileId(armResponseUploadFileRecord.getA360FileId());
             externalObjectDirectory.setExternalRecordId(armResponseUploadFileRecord.getA360RecordId());
+            externalObjectDirectory.setDataIngestionTs(OffsetDateTime.now());
             updateExternalObjectDirectoryStatus(externalObjectDirectory, EodHelper.storedStatus());
         } else {
             log.warn("External object id {} checksum differs. Arm checksum: {} Object Checksum: {}",
@@ -568,10 +573,13 @@ public class ArmBatchProcessResponseFilesImpl implements ArmResponseFilesProcess
                         armResponseInvalidLineRecord.getErrorStatus()
                     );
                     updateTransferAttempts(externalObjectDirectory);
+                    externalObjectDirectory.setErrorCode(armResponseInvalidLineRecord.getExceptionDescription());
                     updateExternalObjectDirectoryStatus(externalObjectDirectory, EodHelper.armResponseManifestFailedStatus());
                 } else {
-                    log.warn("Incorrect status [{}] for invalid line file {}", invalidLineFileFilenameProcessor.getStatus(),
-                             invalidLineFileFilenameProcessor.getInvalidLineFileFilenameAndPath());
+                    String error = String.format("Incorrect status [%s] for invalid line file %s", invalidLineFileFilenameProcessor.getStatus(),
+                                  invalidLineFileFilenameProcessor.getInvalidLineFileFilenameAndPath());
+                    log.warn(error);
+                    externalObjectDirectory.setErrorCode(error);
                     updateExternalObjectDirectoryStatus(externalObjectDirectory, EodHelper.armResponseProcessingFailedStatus());
                 }
             } else {
