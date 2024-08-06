@@ -203,7 +203,6 @@ public abstract class AbstractUnstructuredToArmProcessor implements Unstructured
                 unstructuredExternalObjectDirectory.getExternalLocation(),
                 e
             );
-            logApi.armPushFailed(armExternalObjectDirectory.getId());
             recoveryAction.run();
             return false;
         }
