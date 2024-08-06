@@ -28,10 +28,10 @@ public class UpdateMetadataRequest {
         @JsonProperty("event_date")
         private OffsetDateTime eventDate;
 
-        @JsonProperty("ret_conf_score")
+        @JsonProperty("rtn_score")
         private int retConfScore;
 
-        @JsonProperty("ret_conf_reason")
+        @JsonProperty("rtn_reason")
         private String retConfReason;
     }
 }
