@@ -1,1 +1,1 @@
-CREATE INDEX eve_evt_idx CONCURRENTLY ON event USING gin (event_text gin_trgm_ops);
+CREATE INDEX CONCURRENTLY eve_evt_idx ON event USING gin (event_text gin_trgm_ops);
