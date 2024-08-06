@@ -1,5 +1,6 @@
 package uk.gov.hmcts.darts.transcriptions.util;
 
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
@@ -21,31 +22,63 @@ class TranscriptionUtilTest {
     @Mock
     UserAccountEntity userAccountEntity;
 
-    @Test
-    void getRequestedByNameWithValidRequestedBy() {
+    @Nested
+    class GetRequestedByName {
+        @Test
+        void getRequestedByNameWithValidRequestedBy() {
 
-        when(transcriptionEntity.getRequestedBy()).thenReturn(userAccountEntity);
-        when(userAccountEntity.getUserFullName()).thenReturn("John Doe");
+            when(transcriptionEntity.getRequestedBy()).thenReturn(userAccountEntity);
+            when(userAccountEntity.getUserFullName()).thenReturn("John Doe");
 
-        String result = TranscriptionUtil.getRequestedByName(transcriptionEntity);
+            String result = TranscriptionUtil.getRequestedByName(transcriptionEntity);
 
-        assertEquals("John Doe", result);
+            assertEquals("John Doe", result);
+        }
+
+        @Test
+        void getRequestedByNameWithNullRequestedBy() {
+
+            when(transcriptionEntity.getRequestedBy()).thenReturn(null);
+
+            String result = TranscriptionUtil.getRequestedByName(transcriptionEntity);
+
+            assertNull(result);
+        }
+
+        @Test
+        void getRequestedByNameWithNullTranscriptionEntityThrowsNullPointerException() {
+            assertThrows(NullPointerException.class, () -> {
+                TranscriptionUtil.getRequestedByName(null);
+            });
+        }
     }
 
-    @Test
-    void getRequestedByNameWithNullRequestedBy() {
+    @Nested
+    class GetRequestedById {
+        @Test
+        void getRequestedByIdWithValidRequestedBy() {
+            when(transcriptionEntity.getRequestedBy()).thenReturn(userAccountEntity);
+            when(userAccountEntity.getId()).thenReturn(123);
 
-        when(transcriptionEntity.getRequestedBy()).thenReturn(null);
+            Integer result = TranscriptionUtil.getRequestedById(transcriptionEntity);
 
-        String result = TranscriptionUtil.getRequestedByName(transcriptionEntity);
+            assertEquals(123, result);
+        }
 
-        assertNull(result);
-    }
+        @Test
+        void getRequestedByIdWithNullRequestedBy() {
+            when(transcriptionEntity.getRequestedBy()).thenReturn(null);
 
-    @Test
-    void getRequestedByNameWithNullTranscriptionEntityThrowsNullPointerException() {
-        assertThrows(NullPointerException.class, () -> {
-            TranscriptionUtil.getRequestedByName(null);
-        });
+            Integer result = TranscriptionUtil.getRequestedById(transcriptionEntity);
+
+            assertNull(result);
+        }
+
+        @Test
+        void getRequestedByIdWithNullTranscriptionEntityThrowsNullPointerException() {
+            assertThrows(NullPointerException.class, () -> {
+                TranscriptionUtil.getRequestedById(null);
+            });
+        }
     }
 }

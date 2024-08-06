@@ -42,4 +42,10 @@ public class TranscriptionUtil {
             .map(UserAccountEntity::getUserFullName)
             .orElse(null);
     }
+
+    public static Integer getRequestedById(TranscriptionEntity transcriptionEntity) {
+        return Optional.ofNullable(transcriptionEntity.getRequestedBy())
+            .map(UserAccountEntity::getId)
+            .orElse(null);
+    }
 }
