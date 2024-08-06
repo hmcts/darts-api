@@ -665,9 +665,11 @@ public class ArmBatchProcessResponseFilesImpl implements ArmResponseFilesProcess
 
             if (STORED.equals(objectRecordStatus)) {
                 logApi.archiveToArmSuccessful(externalObjectDirectory.getId());
-            } else if (ARM_RESPONSE_PROCESSING_FAILED.equals(objectRecordStatus)
-                || ARM_RESPONSE_MANIFEST_FAILED.equals(objectRecordStatus)
+            } else if (ARM_RESPONSE_MANIFEST_FAILED.equals(objectRecordStatus)
                 || ARM_RESPONSE_CHECKSUM_VERIFICATION_FAILED.equals(objectRecordStatus)) {
+                logApi.archiveToArmFailed(externalObjectDirectory.getId());
+            } else if (ARM_RESPONSE_PROCESSING_FAILED.equals(objectRecordStatus)
+                && externalObjectDirectory.getTransferAttempts() > armDataManagementConfiguration.getMaxRetryAttempts()) {
                 logApi.archiveToArmFailed(externalObjectDirectory.getId());
             }
             externalObjectDirectory.setStatus(objectRecordStatus);
