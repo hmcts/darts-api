@@ -44,17 +44,11 @@ public class MediaHideOrShowValidator implements Validator<IdRequest<MediaHideRe
             throw new DartsApiException(AudioApiError.MEDIA_SHOW_ACTION_PAYLOAD_INCORRECT_USAGE);
         }
 
-
         if (adminActionRequest != null && adminActionRequest.getReasonId() != null) {
             Optional<ObjectHiddenReasonEntity> optionalObjectHiddenReasonEntity = objectHiddenReasonRepository.findById(
                 adminActionRequest.getReasonId());
             if (optionalObjectHiddenReasonEntity.isEmpty()) {
                 throw new DartsApiException(AudioApiError.MEDIA_HIDE_ACTION_REASON_NOT_FOUND);
-            } else {
-                ObjectHiddenReasonEntity objectHiddenReasonEntity = optionalObjectHiddenReasonEntity.get();
-                if (objectHiddenReasonEntity.isMarkedForDeletion()) {
-                    throw new DartsApiException(AudioApiError.REASON_IS_MARKED_FOR_DELETION);
-                }
             }
         }
     }
