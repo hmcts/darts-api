@@ -25,7 +25,6 @@ import java.time.OffsetDateTime;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -104,7 +103,6 @@ class AudioTransformationServiceHandleKedaInvocationForMediaRequestsTest extends
             AudioRequestType.DOWNLOAD,
             userAccountEntity
         );
-        when(mediaRequestService.retrieveMediaRequestForProcessing()).thenReturn(Optional.of(given.getMediaRequestEntity()));
 
         Integer mediaRequestId = given.getMediaRequestEntity().getId();
 
