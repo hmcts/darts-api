@@ -40,8 +40,6 @@ spring:
             issuer-uri: ${ACTIVE_DIRECTORY_B2C_BASE_URI}/${AAD_B2C_TENANT_ID:00000000-0000-0000-0000-000000000000}/v2.0/
             claims: emails
             provider: external-azure-ad-provider
-            jwks-cache-refresh_period: ${EXTERNAL_JWKS_REFRESH_PERIOD:30m}
-            jwks-cache-lifetime_period: ${EXTERNAL_JWKS_LIFETIME_PERIOD:60m}
           internal-azure-ad:
             client-id: ${AAD_CLIENT_ID_JUSTICE:00000000-0000-0000-0000-000000000000}
             client-secret: ${AAD_CLIENT_SECRET_JUSTICE:}
@@ -55,8 +53,6 @@ spring:
             issuer-uri: ${darts.azure.active-directory-justice-auth-uri}/${AAD_TENANT_ID_JUSTICE:00000000-0000-0000-0000-000000000000}/v2.0
             claims: preferred_username
             provider: internal-azure-ad-provider
-            jwks-cache-refresh_period: ${INTERNAL_JWKS_REFRESH_PERIOD:30m}
-            jwks-cache-lifetime_period:  ${INTERNAL_JWKS_LIFETIME_PERIOD:60m}
         provider:
           external-azure-ad-provider:
             authorization-uri: ${ACTIVE_DIRECTORY_B2C_AUTH_URI}/${darts.azure.active-directory-b2c-external-user-signin-policy}/oauth2/v2.0/authorize
@@ -64,7 +60,6 @@ spring:
             jwk-set-uri: ${ACTIVE_DIRECTORY_B2C_AUTH_URI:https://hmctsstgextid.b2clogin.com/hmctsstgextid.onmicrosoft.com}/${darts.azure.active-directory-b2c-external-user-signin-policy}/discovery/v2.0/keys
             logout-uri: ${ACTIVE_DIRECTORY_B2C_AUTH_URI}/${darts.azure.active-directory-b2c-external-user-signin-policy}/oauth2/v2.0/logout
             reset-password-uri: ${ACTIVE_DIRECTORY_B2C_AUTH_URI}/${darts.azure.active-directory-b2c-external-user-passwordreset-policy}/oauth2/v2.0/authorize
-
           internal-azure-ad-provider:
             authorization-uri: ${darts.azure.active-directory-justice-auth-uri}/${AAD_TENANT_ID_JUSTICE:00000000-0000-0000-0000-000000000000}/oauth2/v2.0/authorize
             token-uri: ${darts.azure.active-directory-justice-auth-uri}/${AAD_TENANT_ID_JUSTICE:00000000-0000-0000-0000-000000000000}/oauth2/v2.0/token
