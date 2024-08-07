@@ -94,7 +94,7 @@ module "postgresql_flexible" {
   pgsql_server_configuration = [
     {
       name  = "azure.extensions"
-      value = "pg_stat_statements, PG_TRGM"
+      value = "pg_stat_statements, pg_trgm"
     }
   ]
   pgsql_version = "15"

@@ -23,6 +23,7 @@ import uk.gov.hmcts.darts.common.repository.ObjectRecordStatusRepository;
 import uk.gov.hmcts.darts.common.service.FileOperationService;
 import uk.gov.hmcts.darts.common.util.EodHelper;
 import uk.gov.hmcts.darts.datamanagement.api.DataManagementApi;
+import uk.gov.hmcts.darts.log.api.LogApi;
 
 import java.io.File;
 import java.nio.file.Path;
@@ -37,10 +38,10 @@ import static uk.gov.hmcts.darts.common.util.EodHelper.isEqual;
 
 @Slf4j
 public class UnstructuredToArmBatchProcessorImpl extends AbstractUnstructuredToArmProcessor {
-    private final ArmDataManagementConfiguration armDataManagementConfiguration;
     private final ArchiveRecordService archiveRecordService;
     private final ExternalObjectDirectoryService eodService;
     private final ArchiveRecordFileGenerator archiveRecordFileGenerator;
+
     private static final String DARTS_STRING = "darts";
     private static final String DETS_STRING = "dets";
 
@@ -56,7 +57,8 @@ public class UnstructuredToArmBatchProcessorImpl extends AbstractUnstructuredToA
                                                ArchiveRecordService archiveRecordService,
                                                ExternalObjectDirectoryService eodService,
                                                ArchiveRecordFileGenerator archiveRecordFileGenerator,
-                                               Integer batchSize) {
+                                               Integer batchSize,
+                                               LogApi logApi) {
         super(objectRecordStatusRepository,
               userIdentity,
               externalObjectDirectoryRepository,
@@ -64,8 +66,9 @@ public class UnstructuredToArmBatchProcessorImpl extends AbstractUnstructuredToA
               dataManagementApi,
               armDataManagementApi,
               fileOperationService,
-              batchSize);
-        this.armDataManagementConfiguration = armDataManagementConfiguration;
+              batchSize,
+              logApi,
+              armDataManagementConfiguration);
         this.archiveRecordService = archiveRecordService;
         this.eodService = eodService;
         this.archiveRecordFileGenerator = archiveRecordFileGenerator;
@@ -128,6 +131,7 @@ public class UnstructuredToArmBatchProcessorImpl extends AbstractUnstructuredToA
 
             for (var batchItem : batchItems.getSuccessful()) {
                 updateExternalObjectDirectoryStatus(batchItem.getArmEod(), EodHelper.armDropZoneStatus());
+                logApi.armPushSuccessful(batchItem.getArmEod().getId());
             }
         }
 
@@ -258,6 +262,7 @@ public class UnstructuredToArmBatchProcessorImpl extends AbstractUnstructuredToA
     @SuppressWarnings({"PMD.ConfusingTernary"})
     private void recoverByUpdatingEodToFailedArmStatus(BatchItem batchItem) {
         if (batchItem.getArmEod() != null) {
+            logApi.armPushFailed(batchItem.getArmEod().getId());
             batchItem.undoManifestFileChange();
             if (!batchItem.isRawFilePushNotNeededOrSuccessfulWhenNeeded()) {
                 updateExternalObjectDirectoryStatusToFailed(batchItem.getArmEod(), EodHelper.failedArmRawDataStatus());

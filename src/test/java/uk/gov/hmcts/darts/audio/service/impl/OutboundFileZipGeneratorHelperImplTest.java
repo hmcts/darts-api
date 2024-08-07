@@ -233,10 +233,10 @@ class OutboundFileZipGeneratorHelperImplTest {
 
         ViqMetaData viqMetaData = ViqMetaData.builder()
             .courthouse("Trainwell Crown Court")
-            .raisedBy(null)
+            .raisedBy("6544")
             .startTime(startTime)
             .endTime(endTime)
-            .type(null)
+            .type("Zip")
             .build();
 
         String fileLocation = tempDirectory.getAbsolutePath();
@@ -255,9 +255,9 @@ class OutboundFileZipGeneratorHelperImplTest {
                 } else if (line.startsWith(END_TIME_README_LABEL)) {
                     assertEquals("End Time: 24 March 2023, 12:00:00 GMT", line);
                 } else if (line.startsWith(RAISED_BY_README_LABEL)) {
-                    assertEquals("Raised by: ", line);
+                    assertEquals("Raised by (User Id): 6544", line);
                 } else if (line.startsWith(REQUEST_TYPE_README_LABEL)) {
-                    assertEquals("Type: ", line);
+                    assertEquals("Type: Zip", line);
                 }
             }
         }

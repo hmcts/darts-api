@@ -39,6 +39,7 @@ public class OutboundFileZipGeneratorImpl implements OutboundFileZipGenerator {
 
     private static final String DAUDIO = "daudio";
     private static final String LOCALAUDIO = "localaudio";
+    private static final String VIQ_METADATA_TYPE = "Zip";
     private final AudioConfigurationProperties audioConfigurationProperties;
     private final OutboundFileZipGeneratorHelper outboundFileZipGeneratorHelper;
 
@@ -82,9 +83,10 @@ public class OutboundFileZipGeneratorImpl implements OutboundFileZipGenerator {
     private ViqMetaData createViqMetaData(MediaRequestEntity mediaRequestEntity) {
         return ViqMetaData.builder()
             .courthouse(mediaRequestEntity.getHearing().getCourtroom().getCourthouse().getCourthouseName())
-            .raisedBy(null)
+            .raisedBy(mediaRequestEntity.getRequestor().getId().toString())
             .startTime(DateConverterUtil.toZonedDateTime(mediaRequestEntity.getStartTime()))
             .endTime(DateConverterUtil.toZonedDateTime(mediaRequestEntity.getEndTime()))
+            .type(VIQ_METADATA_TYPE)
             .build();
     }
 

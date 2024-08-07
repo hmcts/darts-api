@@ -17,6 +17,7 @@ import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
 import uk.gov.hmcts.darts.common.repository.ObjectRecordStatusRepository;
 import uk.gov.hmcts.darts.common.service.FileOperationService;
 import uk.gov.hmcts.darts.datamanagement.api.DataManagementApi;
+import uk.gov.hmcts.darts.log.api.LogApi;
 
 import java.io.File;
 import java.time.OffsetDateTime;
@@ -31,8 +32,6 @@ import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.STORED;
 
 @Slf4j
 public class UnstructuredToArmProcessorImpl extends AbstractUnstructuredToArmProcessor {
-
-    private final ArmDataManagementConfiguration armDataManagementConfiguration;
 
     private final ArchiveRecordService archiveRecordService;
 
@@ -52,10 +51,10 @@ public class UnstructuredToArmProcessorImpl extends AbstractUnstructuredToArmPro
                                           ArmDataManagementConfiguration armDataManagementConfiguration,
                                           FileOperationService fileOperationService,
                                           ArchiveRecordService archiveRecordService,
-                                          Integer batchSize) {
+                                          Integer batchSize,
+                                          LogApi logApi) {
         super(objectRecordStatusRepository, userIdentity, externalObjectDirectoryRepository, externalLocationTypeRepository, dataManagementApi,
-              armDataManagementApi, fileOperationService, batchSize);
-        this.armDataManagementConfiguration = armDataManagementConfiguration;
+              armDataManagementApi, fileOperationService, batchSize, logApi, armDataManagementConfiguration);
         this.archiveRecordService = archiveRecordService;
     }
 
@@ -111,6 +110,7 @@ public class UnstructuredToArmProcessorImpl extends AbstractUnstructuredToArmPro
                 );
                 if (copyRawDataToArmSuccessful && generateAndCopyMetadataToArm(armExternalObjectDirectory, rawFilename)) {
                     updateExternalObjectDirectoryStatus(armExternalObjectDirectory, armDropZoneStatus);
+                    logApi.armPushSuccessful(armExternalObjectDirectory.getId());
                 }
                 log.info("Finished running ARM Push processing for EOD {} running at: {}", armExternalObjectDirectory.getId(), OffsetDateTime.now());
             } catch (Exception e) {
