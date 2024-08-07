@@ -375,7 +375,7 @@ public class DartsDatabaseStub {
     public HearingEntity createHearing(String courthouseName, String courtroomName, String caseNumber,
                                        LocalDateTime hearingDate) {
         createCourthouseUnlessExists(courthouseName);
-        var hearingEntity =  retrieveCoreObjectService.retrieveOrCreateHearing(
+        var hearingEntity = retrieveCoreObjectService.retrieveOrCreateHearing(
             courthouseName,
             courtroomName,
             caseNumber,
@@ -501,6 +501,7 @@ public class DartsDatabaseStub {
     public MediaEntity addMediaToHearingNonTransactional(HearingEntity hearing, MediaEntity mediaEntity) {
         hearing.addMedia(mediaEntity);
         mediaEntity.setCourtroom(hearing.getCourtroom());
+        mediaEntity.setIsCurrent(true);
         mediaRepository.saveAndFlush(mediaEntity);
         courthouseRepository.saveAndFlush(hearing.getCourtroom().getCourthouse());
         courtroomRepository.saveAndFlush(hearing.getCourtroom());

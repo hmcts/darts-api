@@ -12,6 +12,7 @@ import java.util.List;
 @Repository
 public interface MediaRepository extends JpaRepository<MediaEntity, Integer> {
 
+    //Warning - This deliberately does not filter on me.isCurrent. Admin may want to see the old media.
     @Query("""
            SELECT me
            FROM HearingEntity he
@@ -20,6 +21,16 @@ public interface MediaRepository extends JpaRepository<MediaEntity, Integer> {
            ORDER BY me.start
         """)
     List<MediaEntity> findAllByHearingId(Integer hearingId);
+
+    @Query("""
+           SELECT me
+           FROM HearingEntity he
+           JOIN he.mediaList me
+           WHERE he.id = :hearingId
+           AND me.isCurrent = true
+           ORDER BY me.start
+        """)
+    List<MediaEntity> findAllCurrentMediaByHearingId(Integer hearingId);
 
     @Query("""
            SELECT me
@@ -38,9 +49,10 @@ public interface MediaRepository extends JpaRepository<MediaEntity, Integer> {
            WHERE he.id = :hearingId
            AND me.channel = :channel
            AND me.isHidden = false
+           AND me.isCurrent = true
            ORDER BY me.start
         """)
-    List<MediaEntity> findAllByHearingIdAndChannel(Integer hearingId, Integer channel);
+    List<MediaEntity> findAllByHearingIdAndChannelAndIsCurrentTrue(Integer hearingId, Integer channel);
 
 
     @Query("""
