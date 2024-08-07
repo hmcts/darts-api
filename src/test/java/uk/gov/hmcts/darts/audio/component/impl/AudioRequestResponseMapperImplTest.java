@@ -67,7 +67,7 @@ class AudioRequestResponseMapperImplTest {
 
         CourthouseEntity mockCourthouseEntity = mock(CourthouseEntity.class);
         when(mockCourtroomEntity.getCourthouse()).thenReturn(mockCourthouseEntity);
-        when(mockCourthouseEntity.getCourthouseName()).thenReturn(COURTHOUSE);
+        when(mockCourthouseEntity.getDisplayName()).thenReturn(COURTHOUSE);
         when(mockCourtCaseEntity.getCaseNumber()).thenReturn(CASE_NUMBER);
         when(mockCourtCaseEntity.getId()).thenReturn(CASE_ID);
         UserAccountEntity mockUserAccountEntity = mock(UserAccountEntity.class);

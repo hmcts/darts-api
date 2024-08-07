@@ -41,7 +41,7 @@ public class AdvancedSearchResponseMapper {
         CourtCaseEntity courtCase = hearing.getCourtCase();
         advancedSearchResult.setCaseId(courtCase.getId());
         advancedSearchResult.setCaseNumber(courtCase.getCaseNumber());
-        advancedSearchResult.setCourthouse(courtCase.getCourthouse().getCourthouseName());
+        advancedSearchResult.setCourthouse(courtCase.getCourthouse().getDisplayName());
         advancedSearchResult.setDefendants(courtCase.getDefendantStringList());
         advancedSearchResult.setJudges(courtCase.getJudgeStringList());
 

@@ -155,7 +155,7 @@ public class TranscriptionResponseMapper {
         transcriptionResponse.setCaseId(courtCase.getId());
         transcriptionResponse.setCaseNumber(courtCase.getCaseNumber());
         transcriptionResponse.setCourthouseId(courtCase.getCourthouse().getId());
-        transcriptionResponse.setCourthouse(courtCase.getCourthouse().getCourthouseName());
+        transcriptionResponse.setCourthouse(courtCase.getCourthouse().getDisplayName());
         transcriptionResponse.setDefendants(courtCase.getDefendantStringList());
         transcriptionResponse.setJudges(courtCase.getJudgeStringList());
         CourtroomEntity courtroomEntity = transcriptionEntity.getPrimaryOrSecondaryCourtroom();

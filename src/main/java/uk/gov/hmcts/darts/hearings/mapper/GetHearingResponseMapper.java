@@ -25,7 +25,7 @@ public class GetHearingResponseMapper {
         GetHearingResponse getHearingResponse = new GetHearingResponse();
         getHearingResponse.setHearingId(hearing.getId());
         getHearingResponse.setCourthouseId(hearing.getCourtroom().getCourthouse().getId());
-        getHearingResponse.setCourthouse(hearing.getCourtroom().getCourthouse().getCourthouseName());
+        getHearingResponse.setCourthouse(hearing.getCourtroom().getCourthouse().getDisplayName());
         getHearingResponse.setCourtroom(hearing.getCourtroom().getName());
         getHearingResponse.setCaseId(hearing.getCourtCase().getId());
         getHearingResponse.setCaseNumber(hearing.getCourtCase().getCaseNumber());
