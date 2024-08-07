@@ -27,6 +27,7 @@ import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
 import uk.gov.hmcts.darts.common.repository.ObjectRecordStatusRepository;
 import uk.gov.hmcts.darts.common.service.FileOperationService;
 import uk.gov.hmcts.darts.datamanagement.api.DataManagementApi;
+import uk.gov.hmcts.darts.log.api.LogApi;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -72,6 +73,8 @@ class UnstructuredToArmProcessorFactoryTest {
     private GenerateCaseDocumentSingleCaseProcessor generateCaseDocumentSingleCaseProcessor;
     @Mock
     private GenerateCaseDocumentForRetentionDateProcessor generateCaseDocumentForRetentionDateBatchProcessor;
+    @Mock
+    private LogApi logApi;
 
     @Test
     void whenBatchModeTrueBatchProcessorCreated() {
@@ -94,6 +97,7 @@ class UnstructuredToArmProcessorFactoryTest {
                                                   generateCaseDocumentSingleCaseProcessor,
                                                   eventRepository,
                                                   generateCaseDocumentForRetentionDateBatchProcessor,
+                                                  logApi,
                                                   CASE_DOCUMENT_GENERATION_DAYS);
 
         var unstructuredToArmProcessor = automatedTaskProcessorFactory.createUnstructuredToArmProcessor(10);
@@ -122,6 +126,7 @@ class UnstructuredToArmProcessorFactoryTest {
                                                   generateCaseDocumentSingleCaseProcessor,
                                                   eventRepository,
                                                   generateCaseDocumentForRetentionDateBatchProcessor,
+                                                  logApi,
                                                   CASE_DOCUMENT_GENERATION_DAYS);
 
         var armResponseFilesProcessor = automatedTaskProcessorFactory.createArmResponseFilesProcessor(0);
@@ -150,6 +155,7 @@ class UnstructuredToArmProcessorFactoryTest {
                                                   generateCaseDocumentSingleCaseProcessor,
                                                   eventRepository,
                                                   generateCaseDocumentForRetentionDateBatchProcessor,
+                                                  logApi,
                                                   CASE_DOCUMENT_GENERATION_DAYS);
 
         var armResponseFilesProcessor = automatedTaskProcessorFactory.createArmResponseFilesProcessor(10);
