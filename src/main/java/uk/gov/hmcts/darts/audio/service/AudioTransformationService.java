@@ -9,7 +9,7 @@ import java.util.List;
 
 public interface AudioTransformationService {
 
-    List<MediaEntity> getMediaMetadata(Integer hearingId);
+    List<MediaEntity> getMediaByHearingId(Integer hearingId);
 
     Path saveBlobDataToTempWorkspace(InputStream mediaFile, String fileName) throws IOException;
 
