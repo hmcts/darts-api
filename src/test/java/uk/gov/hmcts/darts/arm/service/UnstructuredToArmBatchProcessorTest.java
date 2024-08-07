@@ -20,6 +20,7 @@ import uk.gov.hmcts.darts.common.repository.ObjectRecordStatusRepository;
 import uk.gov.hmcts.darts.common.service.FileOperationService;
 import uk.gov.hmcts.darts.common.service.impl.EodHelperMocks;
 import uk.gov.hmcts.darts.datamanagement.api.DataManagementApi;
+import uk.gov.hmcts.darts.log.api.LogApi;
 
 import java.io.File;
 import java.io.IOException;
@@ -31,11 +32,13 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Answers.RETURNS_DEEP_STUBS;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.matches;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.darts.common.util.EodHelper.armLocation;
 import static uk.gov.hmcts.darts.common.util.EodHelper.detsLocation;
@@ -78,6 +81,8 @@ class UnstructuredToArmBatchProcessorTest {
     private Path manifestFilePath;
     @Mock
     private File manifestFile;
+    @Mock
+    private LogApi logApi;
 
     private static final EodHelperMocks EOD_HELPER_MOCKS = new EodHelperMocks();
 
@@ -103,12 +108,14 @@ class UnstructuredToArmBatchProcessorTest {
             archiveRecordService,
             eodService,
             archiveRecordFileGenerator,
-            batchSize
+            batchSize,
+            logApi
         );
 
         lenient().when(fileOperationService.createFile(any(), any(), anyBoolean())).thenReturn(manifestFilePath);
         when(manifestFilePath.toFile()).thenReturn(manifestFile);
 
+        verifyNoMoreInteractions(logApi);
     }
 
     @Test
@@ -138,6 +145,8 @@ class UnstructuredToArmBatchProcessorTest {
             null,
             null
         );
+
+        verify(logApi).armPushFailed(anyInt());
     }
 
     @Test
@@ -167,6 +176,8 @@ class UnstructuredToArmBatchProcessorTest {
             null,
             null
         );
+
+        verify(logApi).armPushFailed(anyInt());
     }
 
     @Test
@@ -199,6 +210,7 @@ class UnstructuredToArmBatchProcessorTest {
             Pageable.ofSize(3)
         );
 
+        verifyNoMoreInteractions(logApi);
     }
 
     @Test
@@ -216,6 +228,8 @@ class UnstructuredToArmBatchProcessorTest {
 
         //then
         verify(fileOperationService).createFile(matches("DARTS_.+\\.a360"), eq("/temp_workspace"), eq(true));
+
+        verifyNoMoreInteractions(logApi);
     }
 
 }

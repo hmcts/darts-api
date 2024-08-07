@@ -13,6 +13,7 @@ import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
 import uk.gov.hmcts.darts.common.repository.ObjectRecordStatusRepository;
 import uk.gov.hmcts.darts.common.service.FileOperationService;
+import uk.gov.hmcts.darts.log.api.LogApi;
 
 import java.util.Collections;
 import java.util.List;
@@ -40,6 +41,8 @@ class ArmResponseFilesProcessSingleElementImplDeleteResponseBlobsTest {
     private ObjectMapper objectMapper;
     @Mock
     private UserIdentity userIdentity;
+    @Mock
+    private LogApi logApi;
 
     private ArmResponseFilesProcessSingleElementImpl armResponseFilesProcessSingleElement;
 
@@ -52,7 +55,8 @@ class ArmResponseFilesProcessSingleElementImplDeleteResponseBlobsTest {
             fileOperationService,
             armDataManagementConfiguration,
             objectMapper,
-            userIdentity
+            userIdentity,
+            logApi
         );
     }
 

@@ -34,6 +34,7 @@ import uk.gov.hmcts.darts.common.service.FileOperationService;
 import uk.gov.hmcts.darts.datamanagement.api.DataManagementApi;
 import uk.gov.hmcts.darts.event.service.CleanupCurrentFlagEventProcessor;
 import uk.gov.hmcts.darts.event.service.impl.CleanupCurrentFlagEventProcessorImpl;
+import uk.gov.hmcts.darts.log.api.LogApi;
 
 @Component
 @RequiredArgsConstructor
@@ -58,6 +59,7 @@ public class AutomatedTaskProcessorFactoryImpl implements AutomatedTaskProcessor
     private final GenerateCaseDocumentSingleCaseProcessor generateCaseDocumentSingleCaseProcessor;
     private final EventRepository eventRepository;
     private final GenerateCaseDocumentForRetentionDateProcessor generateCaseDocumentForRetentionDateBatchProcessor;
+    private final LogApi logApi;
     @Value("${darts.case-document.generation-days}")
     private final int caseDocumentGenerationDays;
 
@@ -73,7 +75,8 @@ public class AutomatedTaskProcessorFactoryImpl implements AutomatedTaskProcessor
                 userIdentity,
                 currentTimeHelper,
                 eodService,
-                batchSize
+                batchSize,
+                logApi
             );
         }
 
@@ -99,7 +102,8 @@ public class AutomatedTaskProcessorFactoryImpl implements AutomatedTaskProcessor
                 archiveRecordService,
                 eodService,
                 archiveRecordFileGenerator,
-                batchSize
+                batchSize,
+                logApi
             );
         }
 
@@ -113,7 +117,8 @@ public class AutomatedTaskProcessorFactoryImpl implements AutomatedTaskProcessor
             armDataManagementConfiguration,
             fileOperationService,
             archiveRecordService,
-            batchSize
+            batchSize,
+            logApi
         );
     }
 
