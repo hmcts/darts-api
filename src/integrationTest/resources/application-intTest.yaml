@@ -11,7 +11,6 @@ spring:
       client:
         registration:
           external-azure-ad:
-            client-id: dummy_client_id
             client-secret: dummy_client_secret
             scope: openid
             redirect-uri: https://example.com/handle-oauth-code
@@ -19,8 +18,9 @@ spring:
             response-type: code
             response-mode: form_post
             prompt: login
-            issuer-uri: dummy_issuer_uri
             provider: external-azure-ad-provider
+            client-id: "053d44f9-cd27-463e-a995-bcf835233cf8"
+            issuer-uri: "https://hmctsdartsb2csbox.b2clogin.com/89b8de2e-eb1b-42fb-a59c-813ea2b82a56/v2.0/"
         provider:
           external-azure-ad-provider:
             authorization-uri: http://localhost:${wiremock.server.port}/oauth2/v2.0/authorize
@@ -28,7 +28,17 @@ spring:
             jwk-set-uri: http://localhost:${wiremock.server.port}/discovery/v2.0/keys
             logout-uri: http://localhost:${wiremock.server.port}/B2C_1_darts_externaluser_signin/oauth2/v2.0/logout
             reset-password-uri: http://localhost:${wiremock.server.port}/B2C_1_darts_externaluser_password_reset/oauth2/v2.0/authorize
-  autoconfigure:
+            jwks-cache-refresh_period: 10S
+            jwks-cache-lifetime_period: 20S
+          internal-azure-ad-provider:
+            authorization-uri: http://localhost:${wiremock.server.port}/oauth2/v2.0/authorize
+            token-uri: http://localhost:${wiremock.server.port}/oauth2/v2.0/token
+            jwk-set-uri: http://localhost:${wiremock.server.port}/discovery/v2.0/keys
+            logout-uri: http://localhost:${wiremock.server.port}/B2C_1_darts_externaluser_signin/oauth2/v2.0/logout
+            reset-password-uri: http://localhost:${wiremock.server.port}/B2C_1_darts_externaluser_password_reset/oauth2/v2.0/authorize
+            jwks-cache-refresh_period: 10S
+            jwks-cache-lifetime_period: 20S
+    autoconfigure:
     exclude:
       - org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration
       - org.springframework.boot.actuate.autoconfigure.security.servlet.ManagementWebSecurityAutoConfiguration

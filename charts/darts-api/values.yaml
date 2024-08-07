@@ -96,6 +96,14 @@ java:
           alias: DARTS_UNSTRUCTURED_STORAGE_SAS_URL
         - name: ArmServiceProfile
           alias: ARM_SERVICE_PROFILE
+        - name: JwksRefreshPeriod
+          alias: EXTERNAL_JWKS_REFRESH_PERIOD
+        - name: JwksLifetimePeriod
+          alias: EXTERNAL_JWKS_LIFETIME_PERIOD
+        - name: InternalJwksRefreshPeriod
+          alias: INTERNAL_JWKS_REFRESH_PERIOD
+        - name: InternalJwksLifetimePeriod
+          alias: INTERNAL_JWKS_LIFETIME_PERIOD
   environment:
     NOTIFICATION_SCHEDULER_CRON: "3 */2 * * * MON-FRI"
     POSTGRES_SSL_MODE: require
