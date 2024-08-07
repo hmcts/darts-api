@@ -147,8 +147,8 @@ public abstract class AbstractUnstructuredToArmProcessor implements Unstructured
             currentNumberOfAttempts + 1,
             externalObjectDirectoryEntity.getId()
         );
-        externalObjectDirectoryEntity.setTransferAttempts(currentNumberOfAttempts + 1);
-        if (currentNumberOfAttempts >= armDataManagementConfiguration.getMaxRetryAttempts()) {
+        externalObjectDirectoryEntity.setTransferAttempts(++currentNumberOfAttempts);
+        if (currentNumberOfAttempts > armDataManagementConfiguration.getMaxRetryAttempts()) {
             logApi.armPushFailed(externalObjectDirectoryEntity.getId());
         }
     }
