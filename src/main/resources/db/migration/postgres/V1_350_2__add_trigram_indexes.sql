@@ -1,0 +1,1 @@
+CREATE INDEX eve_evt_trgm_idx ON event USING gin (event_text gin_trgm_ops);
