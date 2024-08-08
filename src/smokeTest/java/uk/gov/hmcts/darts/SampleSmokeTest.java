@@ -8,12 +8,14 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.cloud.contract.wiremock.AutoConfigureWireMock;
 import org.springframework.test.context.ActiveProfiles;
 
 import static io.restassured.RestAssured.given;
 
 @SpringBootTest
-@ActiveProfiles({"smoke", "h2db"})
+@ActiveProfiles({"smoke", "intTest", "h2db", "in-memory-caching"})
+@AutoConfigureWireMock(port = 0)
 class SampleSmokeTest {
 
     @Value("${test-url}")

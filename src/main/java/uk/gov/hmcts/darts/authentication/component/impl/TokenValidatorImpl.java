@@ -60,9 +60,6 @@ public class TokenValidatorImpl implements TokenValidator {
             log.debug("JWT Token Validation successful");
         } catch (ParseException | JOSEException | BadJOSEException e) {
             log.error("JWT Token Validation failed", e);
-            if (shouldIgnoreValidationException(e)) {
-                return new JwtValidationResult(true, null);
-            }
             return new JwtValidationResult(false, e.getMessage());
         }
 

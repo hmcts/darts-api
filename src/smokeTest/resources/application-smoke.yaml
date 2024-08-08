@@ -1,25 +1,18 @@
 test-url: ${TEST_URL:http://localhost:4550}
 
-darts:
-  storage:
-    arm-api:
-      arm-username: some-username
-      arm-password: some-password
-      arm-service-profile: some-profile
-      url: http://localhost:4551
-  automated-tasks-pod: true
-  api-pod: true
 spring:
-  config:
-    import: "optional:configtree:/mnt/secrets/darts/"
-  application:
-    name: Darts Api
+  data-management:
+    retention-period:
+      inbound:
+        arm-minimum: 24
   security:
     oauth2:
+      resourceserver:
+        jwt:
+          jwk-set-uri: false
       client:
         registration:
           external-azure-ad:
-            client-id: dummy_client_id
             client-secret: dummy_client_secret
             scope: openid
             redirect-uri: https://example.com/handle-oauth-code
@@ -27,12 +20,87 @@ spring:
             response-type: code
             response-mode: form_post
             prompt: login
+            client-id: dummy_client_id
             issuer-uri: dummy_issuer_uri
-            provider: external-azure-ad-provider
         provider:
           external-azure-ad-provider:
-            authorization-uri: http://localhost:4551/oauth2/v2.0/authorize
-            token-uri: http://localhost:4551/oauth2/v2.0/token
-            jwk-set-uri: http://localhost:4551/discovery/v2.0/keys
-            logout-uri: http://localhost:4551/B2C_1_darts_externaluser_signin/oauth2/v2.0/logout
-            reset-password-uri: http://localhost:4551/B2C_1_darts_externaluser_password_reset/oauth2/v2.0/authorize
+            authorization-uri: http://localhost:${wiremock.server.port}/oauth2/v2.0/authorize
+            token-uri: http://localhost:${wiremock.server.port}/oauth2/v2.0/token
+            jwk-set-uri: http://localhost:${wiremock.server.port}/discovery/v2.0/keys
+            logout-uri: http://localhost:${wiremock.server.port}/B2C_1_darts_externaluser_signin/oauth2/v2.0/logout
+            reset-password-uri: http://localhost:${wiremock.server.port}/B2C_1_darts_externaluser_password_reset/oauth2/v2.0/authorize
+            jwks-cache-refresh_period: 5S
+            jwks-cache-lifetime_period: 10S
+          internal-azure-ad-provider:
+            authorization-uri: http://localhost:${wiremock.server.port}/oauth2/v2.0/authorize
+            token-uri: http://localhost:${wiremock.server.port}/oauth2/v2.0/token
+            jwk-set-uri: http://localhost:${wiremock.server.port}/discovery/v2.0/keys
+            logout-uri: http://localhost:${wiremock.server.port}/B2C_1_darts_externaluser_signin/oauth2/v2.0/logout
+            reset-password-uri: http://localhost:${wiremock.server.port}/B2C_1_darts_externaluser_password_reset/oauth2/v2.0/authorize
+            jwks-cache-refresh_period: 5S
+            jwks-cache-lifetime_period: 10S
+  autoconfigure:
+    exclude:
+      - org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration
+      - org.springframework.boot.actuate.autoconfigure.security.servlet.ManagementWebSecurityAutoConfiguration
+      - org.springframework.boot.autoconfigure.security.oauth2.client.servlet.OAuth2ClientAutoConfiguration
+  servlet:
+    multipart:
+      max-file-size: 1KB
+      max-request-size: 10KB #this affects addAudio as well, so needs to handle a 350mb mp2 file
+  datasource:
+    hikari:
+      maximum-pool-size: 10 # Overrides the value in `application.yaml` to a smaller value more appropriate for integration tests, sized below the `max_connections` limit specified in PostgresIntegrationBase.
+  main:
+    allow-bean-definition-overriding: true
+darts:
+  hearings:
+    admin-search:
+      max-results: 5
+  automated-tasks-pod: ${AUTOMATED_TASK_MODE:true}
+  api-pod: ${API_MODE:true}
+  data-management:
+    inbound-to-unstructured-limit: 100
+  gateway:
+    url: ${DARTS_GATEWAY_URL:http://localhost:${wiremock.server.port}}
+  audio:
+    max-file-duration-minutes: 1440
+    concat-workspace: ${java.io.tmpdir}/audiotransform/concatenate
+    merge-workspace: ${java.io.tmpdir}/audiotransform/merge
+    trim-workspace: ${java.io.tmpdir}/audiotransform/trim
+    re-encode-workspace: ${java.io.tmpdir}/audiotransform/encode
+    temp-blob-workspace: ${java.io.tmpdir}/audiotransform/tempworkspace
+    allowed-media-formats:
+      - "mpeg2"
+      - "mp2"
+      - "audio/mpeg"
+  transformation:
+    service:
+      audio:
+        file:
+  testing-support-endpoints:
+    enabled: true
+  bank-holidays:
+    api:
+      baseurl: http://localhost:${wiremock.server.port}
+  storage:
+    arm:
+      batch-size: 5
+    arm-api:
+      arm-username: some-username
+      arm-password: some-password
+      arm-service-profile: some-profile-name
+      url: http://localhost:4551
+  transcription:
+    max-file-size: 20
+  automated:
+    task:
+      system-user-email: dartssystemuser@hmcts.net
+
+logging:
+  level:
+    root: DEBUG
+    uk:
+      gov:
+        hmcts:
+          darts: DEBUG
