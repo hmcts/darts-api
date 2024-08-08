@@ -377,6 +377,23 @@ paths:
           description: A required parameter is missing or an invalid datatype or value was provided for property.
         '500':
           description: Internal Server Error
+
+  /admin/medias/marked-for-deletion:
+    get:
+      tags:
+        - Audio
+      summary: |-
+        Returns a representation of all media marked for deletion.
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/PostAdminMediasMarkedForDeletionItem'
+
 ########################################################################################################################
 # COMPONENT DEFINITIONS
 ########################################################################################################################
@@ -428,6 +445,24 @@ components:
           example: 1
         is_hidden:
           type: boolean
+
+    PostAdminMediasMarkedForDeletionItem:
+      type: object
+      properties:
+        media_id:
+          $ref: '#/components/schemas/MediaId'
+        channel:
+          $ref: '#/components/schemas/Channel'
+        start_at:
+          $ref: '#/components/schemas/StartAt'
+        end_at:
+          $ref: '#/components/schemas/EndAt'
+        courthouse:
+          $ref: '#/components/schemas/AdminMediaCourthouseResponse'
+        courtroom:
+          $ref: '#/components/schemas/AdminMediaCourtroomResponse'
+        admin_action:
+          $ref: '#/components/schemas/AdminActionResponse'
 
     CourthouseResponseObject:
       type: object

@@ -7,25 +7,30 @@ import org.springframework.stereotype.Service;
 import uk.gov.hmcts.darts.audio.entity.MediaRequestEntity;
 import uk.gov.hmcts.darts.audio.exception.AudioApiError;
 import uk.gov.hmcts.darts.audio.helper.PostAdminMediasSearchHelper;
+import uk.gov.hmcts.darts.audio.mapper.AdminMarkedForDeletionMapper;
 import uk.gov.hmcts.darts.audio.mapper.AdminMediaMapper;
 import uk.gov.hmcts.darts.audio.mapper.GetAdminMediaResponseMapper;
 import uk.gov.hmcts.darts.audio.mapper.PostAdminMediaSearchResponseMapper;
 import uk.gov.hmcts.darts.audio.model.AdminMediaResponse;
 import uk.gov.hmcts.darts.audio.model.GetAdminMediaResponseItem;
 import uk.gov.hmcts.darts.audio.model.MediaSearchData;
+import uk.gov.hmcts.darts.audio.model.PostAdminMediasMarkedForDeletionItem;
 import uk.gov.hmcts.darts.audio.model.PostAdminMediasSearchRequest;
 import uk.gov.hmcts.darts.audio.model.PostAdminMediasSearchResponseItem;
 import uk.gov.hmcts.darts.audio.service.AdminMediaService;
 import uk.gov.hmcts.darts.audio.validation.SearchMediaValidator;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
+import uk.gov.hmcts.darts.common.entity.ObjectAdminActionEntity;
 import uk.gov.hmcts.darts.common.entity.TransformedMediaEntity;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.common.repository.MediaRepository;
+import uk.gov.hmcts.darts.common.repository.ObjectAdminActionRepository;
 import uk.gov.hmcts.darts.common.repository.TransformedMediaRepository;
 
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 
@@ -35,12 +40,14 @@ public class AdminMediaServiceImpl implements AdminMediaService {
 
     private final MediaRepository mediaRepository;
     private final AdminMediaMapper adminMediaMapper;
+    private final AdminMarkedForDeletionMapper adminMarkedForDeletionMapper;
     private final PostAdminMediasSearchHelper postAdminMediasSearchHelper;
 
     @Value("${darts.audio.admin-search.max-results}")
     private Integer adminSearchMaxResults;
     private final SearchMediaValidator searchMediaValidator;
     private final TransformedMediaRepository transformedMediaRepository;
+    private final ObjectAdminActionRepository objectAdminActionRepository;
 
     public AdminMediaResponse getMediasById(Integer id) {
         var mediaEntity = mediaRepository.findById(id)
@@ -94,6 +101,14 @@ public class AdminMediaServiceImpl implements AdminMediaService {
         }
     }
 
+    @Override
+    public List<PostAdminMediasMarkedForDeletionItem> getMediasMarkedForDeletion() {
+        return objectAdminActionRepository.findAllMediaActionsWithAnyDeletionReason().stream()
+            .map(ObjectAdminActionEntity::getMedia)
+            .map(adminMarkedForDeletionMapper::toApiModel)
+            .sorted(Comparator.comparing(PostAdminMediasMarkedForDeletionItem::getMediaId))
+            .toList();
+    }
 
     private List<HearingEntity> getApplicableMediaHearings(MediaEntity mediaEntity, List<Integer> hearingsToMatchOn) {
         List<HearingEntity> hearingEntityList = CollectionUtils.isEmpty(hearingsToMatchOn) ? mediaEntity.getHearingList() : new ArrayList<>();

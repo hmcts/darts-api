@@ -13,13 +13,13 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
-class AdminMediaMapperTest {
+class ObjectActionMapperTest {
 
-    private AdminMediaMapper adminMediaMapper;
+    private ObjectActionMapper adminMediaMapper;
 
     @BeforeEach
     void setUp() {
-        adminMediaMapper = new AdminMediaMapperImpl();
+        adminMediaMapper = new ObjectActionMapperImpl();
     }
 
     @Test
