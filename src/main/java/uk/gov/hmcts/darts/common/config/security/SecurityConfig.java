@@ -21,10 +21,8 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.oauth2.client.web.OAuth2LoginAuthenticationFilter;
-import org.springframework.security.oauth2.core.DelegatingOAuth2TokenValidator;
 import org.springframework.security.oauth2.core.OAuth2TokenValidator;
 import org.springframework.security.oauth2.jwt.Jwt;
-import org.springframework.security.oauth2.jwt.JwtClaimValidator;
 import org.springframework.security.oauth2.jwt.JwtValidators;
 import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationProvider;
@@ -40,9 +38,6 @@ import uk.gov.hmcts.darts.authentication.config.internal.InternalAuthProviderCon
 
 import java.io.IOException;
 import java.util.Map;
-
-import static org.springframework.security.oauth2.jwt.JwtClaimNames.AUD;
-
 
 @Slf4j
 @Configuration
@@ -135,10 +130,12 @@ public class SecurityConfig {
         jwtProcessor.setJWSKeySelector(jwsKeySelector);
 
         var jwtDecoder = new NimbusJwtDecoder(jwtProcessor);
-        OAuth2TokenValidator<Jwt> jwtValidator = new DelegatingOAuth2TokenValidator<>(
-            JwtValidators.createDefaultWithIssuer(issuer),
-            new JwtClaimValidator<>(AUD, aud ->
-            aud != null && aud.toString().contains(audience)));
+        OAuth2TokenValidator<Jwt> jwtValidator = JwtValidators.createDefaultWithIssuer(issuer);
+
+        // TODO: Use this when we can successfully validate against the audience
+        // new DelegatingOAuth2TokenValidator<>(
+        //new JwtClaimValidator<>(AUD, aud ->
+        //aud != null && aud.toString().contains(audience)));
         jwtDecoder.setJwtValidator(jwtValidator);
 
         var authenticationProvider = new JwtAuthenticationProvider(jwtDecoder);

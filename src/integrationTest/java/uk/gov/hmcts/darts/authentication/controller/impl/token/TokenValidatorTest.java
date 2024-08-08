@@ -125,7 +125,7 @@ class TokenValidatorTest extends IntegrationBase {
     }
 
     @Test
-    public void testWithTokenSignedByGlobalKey() throws Exception{
+    void testWithTokenSignedByGlobalKey() throws Exception {
         DartsTokenGenerator token = DartsTokenGenerator.builder().issuer(configurationProperties.getIssuerUri())
             .audience(configurationProperties.getClientId()).useGlobalKey(true).build();
 
