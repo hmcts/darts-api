@@ -106,7 +106,8 @@ class AudioRequestsControllerDownloadIntTest extends IntegrationBase {
             .queryParam("transformed_media_id", String.valueOf(transformedMediaId));
 
         mockMvc.perform(requestBuilder)
-            .andExpect(status().isOk());
+            .andExpect(status().isOk())
+            .andExpect(header().exists("Content-Length"));
 
         verify(dataManagementService).downloadData(eq(DatastoreContainerType.OUTBOUND), eq("darts-outbound"), any());
 
