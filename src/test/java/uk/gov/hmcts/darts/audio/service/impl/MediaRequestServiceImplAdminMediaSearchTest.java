@@ -162,8 +162,8 @@ class MediaRequestServiceImplAdminMediaSearchTest {
         Assertions.assertFalse(objectAdminActionEntityArgumentCaptor.getValue().isMarkedForManualDeletion());
         Assertions.assertNotNull(objectAdminActionEntityArgumentCaptor.getValue().getHiddenBy());
         Assertions.assertNotNull(objectAdminActionEntityArgumentCaptor.getValue().getHiddenDateTime());
-        Assertions.assertNotNull(objectAdminActionEntityArgumentCaptor.getValue().getMarkedForManualDelBy());
-        Assertions.assertNotNull(objectAdminActionEntityArgumentCaptor.getValue().getMarkedForManualDelDateTime());
+        Assertions.assertNull(objectAdminActionEntityArgumentCaptor.getValue().getMarkedForManualDelBy());
+        Assertions.assertNull(objectAdminActionEntityArgumentCaptor.getValue().getMarkedForManualDelDateTime());
     }
 
     @Test

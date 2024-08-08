@@ -18,18 +18,11 @@ import uk.gov.hmcts.darts.audio.service.MediaRequestService;
 import uk.gov.hmcts.darts.audiorequests.model.AudioRequestType;
 import uk.gov.hmcts.darts.common.datamanagement.api.DataManagementFacade;
 import uk.gov.hmcts.darts.common.datamanagement.component.impl.DownloadResponseMetaData;
-import uk.gov.hmcts.darts.common.entity.ExternalLocationTypeEntity;
-import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
-import uk.gov.hmcts.darts.common.entity.ObjectRecordStatusEntity;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
-import uk.gov.hmcts.darts.common.repository.ExternalLocationTypeRepository;
-import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
 import uk.gov.hmcts.darts.common.repository.MediaRepository;
-import uk.gov.hmcts.darts.common.repository.ObjectRecordStatusRepository;
 import uk.gov.hmcts.darts.common.service.FileOperationService;
-import uk.gov.hmcts.darts.datamanagement.api.DataManagementApi;
 import uk.gov.hmcts.darts.datamanagement.exception.FileNotDownloadedException;
 import uk.gov.hmcts.darts.log.api.LogApi;
 import uk.gov.hmcts.darts.notification.api.NotificationApi;
@@ -53,7 +46,6 @@ import java.util.stream.Collectors;
 import static uk.gov.hmcts.darts.audio.enums.MediaRequestStatus.FAILED;
 import static uk.gov.hmcts.darts.audio.enums.MediaRequestStatus.OPEN;
 import static uk.gov.hmcts.darts.audiorequests.model.AudioRequestType.DOWNLOAD;
-import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.STORED;
 
 @Service
 @RequiredArgsConstructor
@@ -63,17 +55,9 @@ public class AudioTransformationServiceImpl implements AudioTransformationServic
     private final MediaRequestService mediaRequestService;
     private final OutboundFileProcessor outboundFileProcessor;
     private final OutboundFileZipGenerator outboundFileZipGenerator;
-
     private final FileOperationService fileOperationService;
-
     private final MediaRepository mediaRepository;
-    private final ObjectRecordStatusRepository objectRecordStatusRepository;
-    private final ExternalObjectDirectoryRepository externalObjectDirectoryRepository;
-    private final ExternalLocationTypeRepository externalLocationTypeRepository;
     private final ExternalObjectDirectoryService eodService;
-
-    private final DataManagementApi dataManagementApi;
-
     private final TransformedMediaHelper transformedMediaHelper;
     private final LogApi logApi;
     private final DataManagementFacade dataManagementFacade;
@@ -88,37 +72,11 @@ public class AudioTransformationServiceImpl implements AudioTransformationServic
     };
 
     @Override
-    public List<MediaEntity> getMediaMetadata(Integer hearingId) {
-        List<MediaEntity> mediaEntityList = mediaRepository.findAllByHearingId(hearingId);
+    public List<MediaEntity> getMediaByHearingId(Integer hearingId) {
+        List<MediaEntity> mediaEntityList = mediaRepository.findAllCurrentMediaByHearingId(hearingId);
         return mediaEntityList.stream()
             .filter(m -> !m.isHidden())
             .toList();
-    }
-
-    @Override
-    public Optional<UUID> getMediaLocation(MediaEntity media, Integer containerLocationId) {
-        Optional<UUID> externalLocation = Optional.empty();
-
-        ObjectRecordStatusEntity objectRecordStatus = objectRecordStatusRepository.getReferenceById(STORED.getId());
-        ExternalLocationTypeEntity externalLocationType = externalLocationTypeRepository.getReferenceById(containerLocationId);
-        List<ExternalObjectDirectoryEntity> externalObjectDirectoryEntityList = externalObjectDirectoryRepository.findByMediaStatusAndType(
-            media, objectRecordStatus, externalLocationType
-        );
-
-        if (!externalObjectDirectoryEntityList.isEmpty()) {
-            if (externalObjectDirectoryEntityList.size() != 1) {
-                log.warn(
-                    "Only one External Object Directory expected, but found {} for mediaId={}, statusEnum={}, externalLocationTypeId={}",
-                    externalObjectDirectoryEntityList.size(),
-                    media.getId(),
-                    STORED,
-                    externalLocationType.getId()
-                );
-            }
-            externalLocation = Optional.ofNullable(externalObjectDirectoryEntityList.get(0).getExternalLocation());
-        }
-
-        return externalLocation;
     }
 
     @Override
@@ -142,7 +100,6 @@ public class AudioTransformationServiceImpl implements AudioTransformationServic
     /**
      * For all audio related to a given AudioRequest, download, transform and upload the processed file to outbound
      * storage.
-     *
      */
     @SuppressWarnings({"PMD.AvoidRethrowingException", "PMD.CyclomaticComplexity"})
     private void processAudioRequest(MediaRequestEntity mediaRequestEntity) {
@@ -159,7 +116,7 @@ public class AudioTransformationServiceImpl implements AudioTransformationServic
                 audioRequestOutputFormat = AudioRequestOutputFormat.ZIP;
             }
 
-            List<MediaEntity> mediaEntitiesForHearing = getMediaMetadata(hearingEntity.getId());
+            List<MediaEntity> mediaEntitiesForHearing = getMediaByHearingId(hearingEntity.getId());
 
             if (mediaEntitiesForHearing.isEmpty()) {
                 logApi.atsProcessingUpdate(mediaRequestEntity);
@@ -233,7 +190,7 @@ public class AudioTransformationServiceImpl implements AudioTransformationServic
 
             if (hearingEntity != null) {
                 transformedMediaHelper.notifyUser(updatedMediaRequest, hearingEntity.getCourtCase(),
-                           NotificationApi.NotificationTemplate.ERROR_PROCESSING_AUDIO.toString()
+                                                  NotificationApi.NotificationTemplate.ERROR_PROCESSING_AUDIO.toString()
                 );
             }
 

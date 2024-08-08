@@ -6,14 +6,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Path;
 import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
 
 public interface AudioTransformationService {
 
-    List<MediaEntity> getMediaMetadata(Integer hearingId);
-
-    Optional<UUID> getMediaLocation(MediaEntity media, Integer containerLocationId);
+    List<MediaEntity> getMediaByHearingId(Integer hearingId);
 
     Path saveBlobDataToTempWorkspace(InputStream mediaFile, String fileName) throws IOException;
 

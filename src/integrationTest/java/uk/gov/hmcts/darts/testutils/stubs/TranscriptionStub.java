@@ -276,6 +276,7 @@ public class TranscriptionStub {
         transcription.setTranscriptionStatus(transcriptionStatus);
         transcription.setTranscriptionUrgency(transcriptionUrgency);
         transcription.setCreatedBy(testUser);
+        transcription.setRequestedBy(testUser);
         transcription.setLastModifiedBy(testUser);
         transcription.setIsManualTranscription(isManualTranscription);
         transcription.setHideRequestFromRequestor(false);
@@ -293,6 +294,7 @@ public class TranscriptionStub {
         transcription.setTranscriptionStatus(transcriptionStatus);
         transcription.setTranscriptionUrgency(transcriptionUrgency);
         transcription.setCreatedBy(testUser);
+        transcription.setRequestedBy(testUser);
         transcription.setLastModifiedBy(testUser);
         transcription.setIsManualTranscription(true);
         transcription.setHideRequestFromRequestor(false);
@@ -638,6 +640,7 @@ public class TranscriptionStub {
         transcriptionEntity.setEndTime(yesterday.plusHours(now.getHour()).plusMinutes(now.getMinute())
                                            .plusSeconds(now.getSecond()).plusNanos(now.getNano()));
         transcriptionEntity.setCreatedBy(userAccountEntity);
+        transcriptionEntity.setRequestedBy(userAccountEntity);
         transcriptionEntity.setLastModifiedBy(userAccountEntity);
         transcriptionEntity.setIsManualTranscription(true);
         transcriptionEntity.setHideRequestFromRequestor(false);

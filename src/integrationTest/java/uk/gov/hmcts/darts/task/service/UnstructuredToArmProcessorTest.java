@@ -25,6 +25,7 @@ import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
 import uk.gov.hmcts.darts.common.repository.ObjectRecordStatusRepository;
 import uk.gov.hmcts.darts.common.service.FileOperationService;
 import uk.gov.hmcts.darts.datamanagement.api.DataManagementApi;
+import uk.gov.hmcts.darts.log.api.LogApi;
 import uk.gov.hmcts.darts.test.common.data.MediaTestData;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 import uk.gov.hmcts.darts.testutils.stubs.AuthorisationStub;
@@ -67,6 +68,8 @@ class UnstructuredToArmProcessorTest extends IntegrationBase {
     private FileOperationService fileOperationService;
     @Autowired
     private ArchiveRecordService archiveRecordService;
+    @Autowired
+    private LogApi logApi;
 
     @Autowired
     private AuthorisationStub authorisationStub;
@@ -85,7 +88,8 @@ class UnstructuredToArmProcessorTest extends IntegrationBase {
             armDataManagementConfiguration,
             fileOperationService,
             archiveRecordService,
-            batchSize
+            batchSize,
+            logApi
         );
 
     }

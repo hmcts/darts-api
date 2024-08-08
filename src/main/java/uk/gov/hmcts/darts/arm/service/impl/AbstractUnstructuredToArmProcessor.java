@@ -2,6 +2,7 @@ package uk.gov.hmcts.darts.arm.service.impl;
 
 import lombok.extern.slf4j.Slf4j;
 import uk.gov.hmcts.darts.arm.api.ArmDataManagementApi;
+import uk.gov.hmcts.darts.arm.config.ArmDataManagementConfiguration;
 import uk.gov.hmcts.darts.arm.service.UnstructuredToArmProcessor;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.ExternalLocationTypeEntity;
@@ -13,6 +14,7 @@ import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
 import uk.gov.hmcts.darts.common.repository.ObjectRecordStatusRepository;
 import uk.gov.hmcts.darts.common.service.FileOperationService;
 import uk.gov.hmcts.darts.datamanagement.api.DataManagementApi;
+import uk.gov.hmcts.darts.log.api.LogApi;
 
 import java.time.Duration;
 import java.time.Instant;
@@ -36,7 +38,12 @@ public abstract class AbstractUnstructuredToArmProcessor implements Unstructured
     protected final DataManagementApi dataManagementApi;
     protected final ArmDataManagementApi armDataManagementApi;
     protected final FileOperationService fileOperationService;
+    protected final LogApi logApi;
+    protected final ArmDataManagementConfiguration armDataManagementConfiguration;
+
+
     protected UserAccountEntity userAccount;
+
 
     protected final Integer batchSize;
 
@@ -47,7 +54,9 @@ public abstract class AbstractUnstructuredToArmProcessor implements Unstructured
                                                  DataManagementApi dataManagementApi,
                                                  ArmDataManagementApi armDataManagementApi,
                                                  FileOperationService fileOperationService,
-                                                 Integer batchSize) {
+                                                 Integer batchSize,
+                                                 LogApi logApi,
+                                                 ArmDataManagementConfiguration armDataManagementConfiguration) {
         this.objectRecordStatusRepository = objectRecordStatusRepository;
         this.userIdentity = userIdentity;
         this.externalObjectDirectoryRepository = externalObjectDirectoryRepository;
@@ -56,6 +65,8 @@ public abstract class AbstractUnstructuredToArmProcessor implements Unstructured
         this.armDataManagementApi = armDataManagementApi;
         this.fileOperationService = fileOperationService;
         this.batchSize = batchSize;
+        this.logApi = logApi;
+        this.armDataManagementConfiguration = armDataManagementConfiguration;
     }
 
     protected ExternalObjectDirectoryEntity createArmExternalObjectDirectoryEntity(ExternalObjectDirectoryEntity externalObjectDirectory,
@@ -88,16 +99,18 @@ public abstract class AbstractUnstructuredToArmProcessor implements Unstructured
     }
 
     protected void updateExternalObjectDirectoryStatus(ExternalObjectDirectoryEntity armExternalObjectDirectory, ObjectRecordStatusEntity armStatus) {
-        log.debug(
-            "Updating ARM status from {} to {} for ID {}",
-            armExternalObjectDirectory.getStatus().getDescription(),
-            armStatus.getDescription(),
-            armExternalObjectDirectory.getId()
-        );
-        armExternalObjectDirectory.setStatus(armStatus);
-        armExternalObjectDirectory.setLastModifiedBy(userAccount);
-        armExternalObjectDirectory.setLastModifiedDateTime(OffsetDateTime.now());
-        externalObjectDirectoryRepository.saveAndFlush(armExternalObjectDirectory);
+        if (nonNull(armExternalObjectDirectory)) {
+            log.debug(
+                "Updating ARM status from {} to {} for ID {}",
+                armExternalObjectDirectory.getStatus().getDescription(),
+                armStatus.getDescription(),
+                armExternalObjectDirectory.getId()
+            );
+            armExternalObjectDirectory.setStatus(armStatus);
+            armExternalObjectDirectory.setLastModifiedBy(userAccount);
+            armExternalObjectDirectory.setLastModifiedDateTime(OffsetDateTime.now());
+            externalObjectDirectoryRepository.saveAndFlush(armExternalObjectDirectory);
+        }
     }
 
     protected void updateExternalObjectDirectoryStatusToFailed(ExternalObjectDirectoryEntity externalObjectDirectoryEntity,
@@ -134,7 +147,10 @@ public abstract class AbstractUnstructuredToArmProcessor implements Unstructured
             currentNumberOfAttempts + 1,
             externalObjectDirectoryEntity.getId()
         );
-        externalObjectDirectoryEntity.setTransferAttempts(currentNumberOfAttempts + 1);
+        externalObjectDirectoryEntity.setTransferAttempts(++currentNumberOfAttempts);
+        if (currentNumberOfAttempts > armDataManagementConfiguration.getMaxRetryAttempts()) {
+            logApi.armPushFailed(externalObjectDirectoryEntity.getId());
+        }
     }
 
     public String generateRawFilename(ExternalObjectDirectoryEntity externalObjectDirectoryEntity) {

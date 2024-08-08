@@ -2,6 +2,7 @@ package uk.gov.hmcts.darts.audio.service;
 
 import uk.gov.hmcts.darts.audio.model.AdminMediaResponse;
 import uk.gov.hmcts.darts.audio.model.GetAdminMediaResponseItem;
+import uk.gov.hmcts.darts.audio.model.PostAdminMediasMarkedForDeletionItem;
 import uk.gov.hmcts.darts.audio.model.PostAdminMediasSearchRequest;
 import uk.gov.hmcts.darts.audio.model.PostAdminMediasSearchResponseItem;
 
@@ -20,5 +21,7 @@ public interface AdminMediaService {
     }
 
     List<PostAdminMediasSearchResponseItem> performAdminMediasSearchPost(PostAdminMediasSearchRequest adminMediasSearchRequest);
+
+    List<PostAdminMediasMarkedForDeletionItem> getMediasMarkedForDeletion();
 
 }

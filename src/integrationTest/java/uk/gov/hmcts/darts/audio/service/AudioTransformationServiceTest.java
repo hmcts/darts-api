@@ -1,30 +1,18 @@
 package uk.gov.hmcts.darts.audio.service;
 
-import com.azure.core.util.BinaryData;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import uk.gov.hmcts.darts.audio.config.AudioConfigurationProperties;
-import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
-import uk.gov.hmcts.darts.common.entity.ExternalLocationTypeEntity;
-import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
-import uk.gov.hmcts.darts.common.entity.ObjectRecordStatusEntity;
 import uk.gov.hmcts.darts.common.service.FileOperationService;
-import uk.gov.hmcts.darts.common.service.TransientObjectDirectoryService;
-import uk.gov.hmcts.darts.datamanagement.config.DataManagementConfiguration;
-import uk.gov.hmcts.darts.datamanagement.service.DataManagementService;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
-import uk.gov.hmcts.darts.testutils.stubs.ExternalObjectDirectoryStub;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Path;
-import java.time.OffsetDateTime;
 import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
 
 import static java.util.stream.Collectors.toList;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -33,22 +21,13 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
-import static uk.gov.hmcts.darts.common.entity.MediaEntity.MEDIA_TYPE_DEFAULT;
-import static uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum.UNSTRUCTURED;
-import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.STORED;
 
 @SuppressWarnings({"PMD.ExcessiveImports"})
 class AudioTransformationServiceTest extends IntegrationBase {
 
     private static final String TEST_BINARY_STRING = "Test String to be converted to binary!";
-    private static final BinaryData BINARY_DATA = BinaryData.fromBytes(TEST_BINARY_STRING.getBytes());
-    private static final UUID BLOB_LOCATION = UUID.randomUUID();
-
     @Autowired
     private AudioTransformationService audioTransformationService;
-
-    @Autowired
-    private DataManagementConfiguration dataManagementConfiguration;
 
     @Autowired
     private AudioConfigurationProperties audioConfigurationProperties;
@@ -57,24 +36,15 @@ class AudioTransformationServiceTest extends IntegrationBase {
     private AudioTransformationServiceGivenBuilder given;
 
     @MockBean
-    private DataManagementService mockDataManagementService;
-
-    @MockBean
-    private TransientObjectDirectoryService mockTransientObjectDirectoryService;
-
-    @MockBean
     FileOperationService mockFileOperationService;
 
-    @Autowired
-    private ExternalObjectDirectoryStub externalObjectDirectoryStub;
-
     @Test
-    void getMediaMetadataShouldReturnExpectedMediaEntitiesWhenHearingIdHasRelatedMedia() {
+    void getMediaByHearingIdShouldReturnExpectedMediaEntitiesWhenHearingIdHasRelatedMedia() {
         given.setupTest();
         given.externalObjectDirForMedia(given.getMediaEntity1());
         Integer hearingIdWithMedia = given.getHearingEntityWithMedia1().getId();
 
-        List<MediaEntity> mediaEntities = audioTransformationService.getMediaMetadata(hearingIdWithMedia);
+        List<MediaEntity> mediaEntities = audioTransformationService.getMediaByHearingId(hearingIdWithMedia);
 
         assertEquals(2, mediaEntities.size());
 
@@ -86,12 +56,12 @@ class AudioTransformationServiceTest extends IntegrationBase {
     }
 
     @Test
-    void getMediaMetadataShouldNotReturnMediaEntitiesWhenMediaIsHidden() {
+    void getMediaByHearingIdShouldNotReturnMediaEntitiesWhenMediaIsHidden() {
         given.setupTest();
         given.externalObjectDirForMedia(given.getMediaEntity4());
         Integer hearingIdWithMedia = given.getHearingEntityWithMedia1().getId();
 
-        List<MediaEntity> mediaEntities = audioTransformationService.getMediaMetadata(hearingIdWithMedia);
+        List<MediaEntity> mediaEntities = audioTransformationService.getMediaByHearingId(hearingIdWithMedia);
 
         assertEquals(2, mediaEntities.size());
 
@@ -101,102 +71,24 @@ class AudioTransformationServiceTest extends IntegrationBase {
     }
 
     @Test
-    void getMediaMetadataShouldReturnEmptyListWhenHearingIdHasNoRelatedMedia() {
+    void getMediaByHearingIdShouldReturnEmptyListWhenHearingIdHasNoRelatedMedia() {
         given.setupTest();
         given.externalObjectDirForMedia(given.getMediaEntity1());
         Integer hearingIdWithNoRelatedMedia = given.getHearingEntityWithoutMedia().getId();
 
-        List<MediaEntity> mediaEntities = audioTransformationService.getMediaMetadata(hearingIdWithNoRelatedMedia);
+        List<MediaEntity> mediaEntities = audioTransformationService.getMediaByHearingId(hearingIdWithNoRelatedMedia);
 
         assertEquals(0, mediaEntities.size());
     }
 
     @Test
-    void getMediaMetadataShouldReturnEmptyListWhenHearingIdDoesNotExist() {
+    void getMediaByHearingIdShouldReturnEmptyListWhenHearingIdDoesNotExist() {
         given.setupTest();
         given.externalObjectDirForMedia(given.getMediaEntity1());
 
-        List<MediaEntity> mediaEntities = audioTransformationService.getMediaMetadata(123_456);
+        List<MediaEntity> mediaEntities = audioTransformationService.getMediaByHearingId(123_456);
 
         assertEquals(0, mediaEntities.size());
-    }
-
-    @Test
-    void shouldGetMediaLocation() {
-        given.setupTest();
-        var externalObjectDirectoryEntity =
-                given.externalObjectDirForMedia(given.getMediaEntity1());
-
-        assertEquals(
-                externalObjectDirectoryEntity.getExternalLocation(),
-                audioTransformationService.getMediaLocation(given.getMediaEntity1(), UNSTRUCTURED.getId()).get()
-        );
-    }
-
-    @Test
-    void shouldGetEmptyOptionalMediaLocationWhenNoExternalObjectDirectoryExists() {
-        MediaEntity newMedia = new MediaEntity();
-        newMedia.setCourtroom(somePersistedCourtroom());
-        newMedia.setChannel(1);
-        newMedia.setTotalChannels(4);
-        newMedia.setStart(OffsetDateTime.parse("2023-07-04T10:00:00Z"));
-        newMedia.setEnd(OffsetDateTime.parse("2023-07-04T11:00:00Z"));
-        newMedia.setMediaFile("a-media-file");
-        newMedia.setChecksum("a-checksum");
-        newMedia.setFileSize(1000L);
-        newMedia.setMediaFormat("mp3");
-        newMedia.setMediaType(MEDIA_TYPE_DEFAULT);
-        newMedia = dartsDatabase.save(newMedia);
-
-        assertEquals(Optional.empty(), audioTransformationService.getMediaLocation(newMedia, UNSTRUCTURED.getId()));
-    }
-
-    @Test
-    void shouldGetMediaLocationWithWarningThatMultipleExistByStatusAndType() {
-
-        MediaEntity newMedia = new MediaEntity();
-        newMedia.setCourtroom(somePersistedCourtroom());
-        newMedia.setChannel(1);
-        newMedia.setTotalChannels(4);
-        newMedia.setStart(OffsetDateTime.parse("2023-07-04T16:00:00Z"));
-        newMedia.setEnd(OffsetDateTime.parse("2023-07-04T17:00:00Z"));
-        newMedia.setMediaFile("filename");
-        newMedia.setMediaFormat("mp3");
-        newMedia.setFileSize(1000L);
-        newMedia.setMediaType(MEDIA_TYPE_DEFAULT);
-        newMedia = dartsDatabase.save(newMedia);
-
-        ExternalLocationTypeEntity externalLocationTypeEntity =
-                dartsDatabase.getExternalLocationTypeRepository().getReferenceById(UNSTRUCTURED.getId());
-        ObjectRecordStatusEntity objectRecordStatus =
-                dartsDatabase.getObjectRecordStatusRepository().getReferenceById(STORED.getId());
-        UUID externalLocation1 = UUID.randomUUID();
-        UUID externalLocation2 = UUID.randomUUID();
-        ExternalObjectDirectoryEntity externalObjectDirectory1 = externalObjectDirectoryStub.createExternalObjectDirectory(
-                newMedia,
-                objectRecordStatus,
-                externalLocationTypeEntity,
-                externalLocation1
-        );
-        dartsDatabase.getExternalObjectDirectoryRepository().saveAndFlush(externalObjectDirectory1);
-
-        ExternalObjectDirectoryEntity externalObjectDirectory2 = externalObjectDirectoryStub.createExternalObjectDirectory(
-                newMedia,
-                objectRecordStatus,
-                externalLocationTypeEntity,
-                externalLocation2
-        );
-        dartsDatabase.getExternalObjectDirectoryRepository().saveAndFlush(externalObjectDirectory2);
-
-        assertEquals(
-                Optional.of(externalLocation1),
-                audioTransformationService.getMediaLocation(newMedia, UNSTRUCTURED.getId())
-        );
-
-    }
-
-    private CourtroomEntity somePersistedCourtroom() {
-        return dartsDatabase.createCourtroomUnlessExists("some-courthouse", "some-room");
     }
 
     @Test

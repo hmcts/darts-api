@@ -136,7 +136,7 @@ public class UserAccountStub {
             createIntegrationUser(UUID.randomUUID().toString(), UUID.randomUUID().toString() + "@test.com");
 
         for (CourthouseEntity courthouseEntity : courthouseEntities) {
-            SecurityGroupEntity securityGroupEntity = securityGroupRepository.getReferenceById(-4);
+            SecurityGroupEntity securityGroupEntity = securityGroupRepository.findByGroupNameIgnoreCase("Test Transcriber").orElseThrow();
 
             if (courthouseEntity != null) {
                 addCourthouseToSecurityGroup(securityGroupEntity, courthouseEntity);

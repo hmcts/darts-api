@@ -53,7 +53,7 @@ public class OutboundFileZipGeneratorHelperImpl implements OutboundFileZipGenera
     public static final String PLAYLIST_XML_FILENAME = "playlist.xml";
     public static final String README_TXT_FILENAME = "Readme.txt";
     public static final String COURTHOUSE_README_LABEL = "Courthouse";
-    public static final String RAISED_BY_README_LABEL = "Raised by";
+    public static final String RAISED_BY_README_LABEL = "Raised by (User Id)";
     public static final String START_TIME_README_LABEL = "Start Time";
     public static final String END_TIME_README_LABEL = "End Time";
     public static final String REQUEST_TYPE_README_LABEL = "Type";

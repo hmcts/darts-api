@@ -51,6 +51,8 @@ import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 import static java.util.stream.Collectors.toList;
 import static org.apache.commons.collections4.ListUtils.emptyIfNull;
+import static uk.gov.hmcts.darts.transcriptions.util.TranscriptionUtil.getRequestedById;
+import static uk.gov.hmcts.darts.transcriptions.util.TranscriptionUtil.getRequestedByName;
 
 @Component
 @RequiredArgsConstructor
@@ -173,8 +175,8 @@ public class TranscriptionResponseMapper {
         transcriptionResponse.setReceived(transcriptionEntity.getCreatedDateTime());
 
         Requestor requestor = new Requestor();
-        requestor.setUserFullName(getRequestorName(transcriptionEntity));
-        requestor.setUserId(getRequestorId(transcriptionEntity));
+        requestor.setUserFullName(getRequestedByName(transcriptionEntity));
+        requestor.setUserId(getRequestedById(transcriptionEntity));
         transcriptionResponse.setRequestor(requestor);
 
         transcriptionResponse.setRequestorComments(TranscriptionUtil.getTranscriptionCommentAtStatus(
@@ -265,23 +267,6 @@ public class TranscriptionResponseMapper {
         reportingRestriction.setEventTs(restrictionsEntity.getEventDateTime());
         return reportingRestriction;
     }
-
-    private String getRequestorName(TranscriptionEntity transcriptionEntity) {
-        if (transcriptionEntity.getCreatedBy() != null) {
-            return transcriptionEntity.getCreatedBy().getUserFullName();
-        } else {
-            return transcriptionEntity.getRequestedBy().getUserFullName();
-        }
-    }
-
-    private Integer getRequestorId(TranscriptionEntity transcriptionEntity) {
-        if (transcriptionEntity.getCreatedBy() != null) {
-            return transcriptionEntity.getCreatedBy().getId();
-        } else {
-            return null;
-        }
-    }
-
 
     public GetTranscriptionDetailAdminResponse mapTransactionEntityToTransactionDetails(TranscriptionEntity transcriptionEntity) {
         GetTranscriptionDetailAdminResponse details = new GetTranscriptionDetailAdminResponse();

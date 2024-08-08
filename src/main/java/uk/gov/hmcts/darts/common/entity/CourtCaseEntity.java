@@ -3,6 +3,8 @@ package uk.gov.hmcts.darts.common.entity;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -18,6 +20,8 @@ import lombok.Getter;
 import lombok.Setter;
 import org.apache.commons.collections4.CollectionUtils;
 import uk.gov.hmcts.darts.common.entity.base.CreatedModifiedBaseEntity;
+import uk.gov.hmcts.darts.retention.enums.RetentionConfidenceReasonEnum;
+import uk.gov.hmcts.darts.retention.enums.RetentionConfidenceScoreEnum;
 
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
@@ -132,10 +136,11 @@ public class CourtCaseEntity extends CreatedModifiedBaseEntity {
     private Integer uploadPriority;
 
     @Column(name = "ret_conf_score")
-    private Integer retConfScore;
+    private RetentionConfidenceScoreEnum retConfScore;
 
     @Column(name = "ret_conf_reason")
-    private String retConfReason;
+    @Enumerated(EnumType.STRING)
+    private RetentionConfidenceReasonEnum retConfReason;
 
     @Column(name = "ret_conf_updated_ts")
     private OffsetDateTime retConfUpdatedTs;
@@ -212,4 +217,3 @@ public class CourtCaseEntity extends CreatedModifiedBaseEntity {
     }
 
 }
-

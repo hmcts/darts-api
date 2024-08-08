@@ -70,6 +70,7 @@ public class MediaTestData {
         mediaEntity.setTotalChannels(2);
         mediaEntity.setMediaFormat(mediaType);
         mediaEntity.setChecksum(getChecksum());
+        mediaEntity.setIsCurrent(true);
 
         return mediaEntity;
     }

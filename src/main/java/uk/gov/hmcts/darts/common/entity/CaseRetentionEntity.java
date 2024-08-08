@@ -14,6 +14,7 @@ import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
 import uk.gov.hmcts.darts.common.entity.base.CreatedModifiedBaseEntity;
+import uk.gov.hmcts.darts.retention.enums.RetentionConfidenceCategoryEnum;
 
 import java.time.OffsetDateTime;
 
@@ -61,7 +62,7 @@ public class CaseRetentionEntity extends CreatedModifiedBaseEntity {
     private String comments;
 
     @Column(name = "confidence_category")
-    private Integer confidenceCategory;
+    private RetentionConfidenceCategoryEnum confidenceCategory;
 
     @Column(name = "retention_object_id")
     private String retentionObjectId;
