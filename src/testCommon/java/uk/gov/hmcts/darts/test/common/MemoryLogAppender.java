@@ -26,11 +26,23 @@ public class MemoryLogAppender extends AppenderBase<ILoggingEvent> {
             .collect(Collectors.toList());
     }
 
+    public List<ILoggingEvent> searchLogs(String string, String causeMessage, Level level) {
+        synchronized (GENERAL_LOGS) {
+            return GENERAL_LOGS.stream()
+                .filter(event -> event.toString().contains(string)
+                    && event.getThrowableProxy().getMessage().contains(causeMessage)
+                    && event.getLevel().equals(level))
+                .collect(Collectors.toList());
+        }
+    }
+
     public List<ILoggingEvent> searchLogs(String string, Level level) {
-        return this.GENERAL_LOGS.stream()
-            .filter(event -> event.toString().contains(string)
-                && event.getLevel().equals(level))
-            .collect(Collectors.toList());
+        synchronized (GENERAL_LOGS) {
+            return GENERAL_LOGS.stream()
+                .filter(event -> event.toString().contains(string)
+                    && event.getLevel().equals(level))
+                .collect(Collectors.toList());
+        }
     }
 
     public boolean hasLogApiCallTakenPlace() {

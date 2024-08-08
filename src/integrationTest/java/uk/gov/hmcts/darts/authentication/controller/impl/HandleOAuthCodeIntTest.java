@@ -21,6 +21,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+import uk.gov.hmcts.darts.authentication.config.external.ExternalAuthConfigurationProperties;
 import uk.gov.hmcts.darts.authorisation.api.AuthorisationApi;
 import uk.gov.hmcts.darts.authorisation.model.UserState;
 import uk.gov.hmcts.darts.authorisation.model.UserStateRole;
@@ -55,11 +56,12 @@ import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.TRANSCRIBER;
 @SuppressWarnings("PMD.ExcessiveImports")
 class HandleOAuthCodeIntTest extends IntegrationBase {
 
+    @Autowired
+    private ExternalAuthConfigurationProperties configurationProperties;
+
     private static final String EXTERNAL_USER_HANDLE_OAUTH_CODE_ENDPOINT_WITH_CODE =
         "/external-user/handle-oauth-code?code=abc";
     private static final String KEY_ID_VALUE = "dummy_key_id";
-    private static final String CONFIGURED_ISSUER_VALUE = "dummy_issuer_uri";
-    private static final String CONFIGURED_AUDIENCE_VALUE = "dummy_client_id";
     private static final String OAUTH_TOKEN_ENDPOINT = "/oauth2/v2.0/token";
     private static final String OAUTH_KEYS_ENDPOINT = "/discovery/v2.0/keys";
     private static final String VALID_SUBJECT_VALUE = "VALID SUBJECT VALUE";
@@ -202,8 +204,8 @@ class HandleOAuthCodeIntTest extends IntegrationBase {
      */
     private KeyPair setTokenStub(List<String> emails) {
         JWTClaimsSet.Builder claimBuilder = new JWTClaimsSet.Builder()
-            .audience(CONFIGURED_AUDIENCE_VALUE)
-            .issuer(CONFIGURED_ISSUER_VALUE)
+            .audience(configurationProperties.getClientId())
+            .issuer(configurationProperties.getIssuerUri())
             .expirationTime(createDateInFuture())
             .issueTime(Date.from(Instant.now()))
             .subject(VALID_SUBJECT_VALUE);
@@ -238,7 +240,7 @@ class HandleOAuthCodeIntTest extends IntegrationBase {
             KEY_ID_VALUE,
             encoder.encodeToString(publicKey.getModulus().toByteArray()),
             encoder.encodeToString(publicKey.getPublicExponent().toByteArray()),
-            CONFIGURED_ISSUER_VALUE
+            configurationProperties.getIssuerUri()
         );
         JwksKeySet jwksKeySet = new JwksKeySet(Collections.singletonList(jwksKey));
 
