@@ -58,7 +58,7 @@ public class CasesMapper {
 
     public PostCaseResponse mapToPostCaseResponse(CourtCaseEntity caseEntity) {
         PostCaseResponse postCaseResponse = new PostCaseResponse();
-        postCaseResponse.setCourthouse(caseEntity.getCourthouse().getCourthouseName());
+        postCaseResponse.setCourthouse(caseEntity.getCourthouse().getDisplayName());
         postCaseResponse.setCaseNumber(caseEntity.getCaseNumber());
         postCaseResponse.setCaseId(caseEntity.getId());
         postCaseResponse.setDefendants(caseEntity.getDefendantStringList());
@@ -70,7 +70,7 @@ public class CasesMapper {
 
     public ScheduledCase mapToScheduledCase(CourtCaseEntity caseEntity) {
         ScheduledCase scheduledCase = new ScheduledCase();
-        scheduledCase.setCourthouse(caseEntity.getCourthouse().getCourthouseName());
+        scheduledCase.setCourthouse(caseEntity.getCourthouse().getDisplayName());
         scheduledCase.setCaseNumber(caseEntity.getCaseNumber());
         scheduledCase.setDefendants(caseEntity.getDefendantStringList());
         scheduledCase.setProsecutors(caseEntity.getProsecutorsStringList());
@@ -137,7 +137,7 @@ public class CasesMapper {
         singleCase.setCaseId(caseEntity.getId());
         singleCase.setCaseNumber(caseEntity.getCaseNumber());
         singleCase.setCourthouseId(caseEntity.getCourthouse().getId());
-        singleCase.setCourthouse(caseEntity.getCourthouse().getCourthouseName());
+        singleCase.setCourthouse(caseEntity.getCourthouse().getDisplayName());
         singleCase.setDefendants(caseEntity.getDefendantStringList());
         singleCase.setDefenders(caseEntity.getDefenceStringList());
         singleCase.setProsecutors(caseEntity.getProsecutorsStringList());

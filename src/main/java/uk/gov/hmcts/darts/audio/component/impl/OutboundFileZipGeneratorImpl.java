@@ -82,7 +82,7 @@ public class OutboundFileZipGeneratorImpl implements OutboundFileZipGenerator {
 
     private ViqMetaData createViqMetaData(MediaRequestEntity mediaRequestEntity) {
         return ViqMetaData.builder()
-            .courthouse(mediaRequestEntity.getHearing().getCourtroom().getCourthouse().getCourthouseName())
+            .courthouse(mediaRequestEntity.getHearing().getCourtroom().getCourthouse().getDisplayName())
             .raisedBy(mediaRequestEntity.getRequestor().getId().toString())
             .startTime(DateConverterUtil.toZonedDateTime(mediaRequestEntity.getStartTime()))
             .endTime(DateConverterUtil.toZonedDateTime(mediaRequestEntity.getEndTime()))

@@ -129,8 +129,8 @@ public class TransformedMediaHelper {
 
                 DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm:ss");
 
-                String courthouseName = mediaRequestEntity.getHearing().getCourtCase().getCourthouse().getCourthouseName() != null
-                    ? mediaRequestEntity.getHearing().getCourtCase().getCourthouse().getCourthouseName() : NOT_AVAILABLE;
+                String courthouseName = mediaRequestEntity.getHearing().getCourtCase().getCourthouse().getDisplayName() != null
+                    ? mediaRequestEntity.getHearing().getCourtCase().getCourthouse().getDisplayName() : NOT_AVAILABLE;
 
                 String hearingDate = getFormattedHearingDate(mediaRequestEntity.getHearing().getHearingDate());
 

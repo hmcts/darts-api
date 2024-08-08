@@ -17,7 +17,7 @@ public class AudioRequestResponseMapperImpl implements AudioRequestResponseMappe
         addAudioResponse.setRequestId(audioRequest.getId());
         addAudioResponse.setCaseId(courtCase.getId());
         addAudioResponse.setCaseNumber(courtCase.getCaseNumber());
-        addAudioResponse.setCourthouseName(hearing.getCourtroom().getCourthouse().getCourthouseName());
+        addAudioResponse.setCourthouseName(hearing.getCourtroom().getCourthouse().getDisplayName());
         addAudioResponse.setDefendants(courtCase.getDefendantStringList());
         addAudioResponse.setHearingDate(hearing.getHearingDate());
         addAudioResponse.setStartTime(audioRequest.getStartTime());

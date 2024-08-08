@@ -133,7 +133,7 @@ class OutboundFileZipGeneratorImplTest {
         when(eventRepository.findAllByHearingId(anyInt())).thenReturn(List.of(eventEntity));
         CourthouseEntity mockCourthouseEntity = mock(CourthouseEntity.class);
         when(mockCourtroomEntity.getCourthouse()).thenReturn(mockCourthouseEntity);
-        when(mockCourthouseEntity.getCourthouseName()).thenReturn("SWANSEA");
+        when(mockCourthouseEntity.getDisplayName()).thenReturn("SWANSEA");
         when(mockCourtCaseEntity.getCaseNumber()).thenReturn(caseNumber);
 
         UserAccountEntity mockUserAccountEntity = mock(UserAccountEntity.class);
