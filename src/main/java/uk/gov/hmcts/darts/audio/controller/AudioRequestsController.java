@@ -7,7 +7,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
@@ -85,10 +84,7 @@ public class AudioRequestsController implements AudioRequestsApi {
         globalAccessSecurityRoles = {SUPER_ADMIN, SUPER_USER, DARTS})
     public ResponseEntity<Resource> download(Integer transformedMediaId) {
         FileBasedDownloadResponseMetaData downloadResponseMetadata = (FileBasedDownloadResponseMetaData) mediaRequestService.download(transformedMediaId);
-        HttpHeaders respHeaders = new HttpHeaders();
-        return new ResponseEntity<>(
-            new FileSystemResource(downloadResponseMetadata.getFileToBeDownloadedTo()), respHeaders, HttpStatus.OK
-        );
+        return ResponseEntity.ok().body(new FileSystemResource(downloadResponseMetadata.getFileToBeDownloadedTo()));
     }
 
     @Override
