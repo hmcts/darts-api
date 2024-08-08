@@ -5,6 +5,7 @@ import org.apache.commons.lang3.StringUtils;
 import uk.gov.hmcts.darts.common.entity.TranscriptionCommentEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionWorkflowEntity;
+import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum;
 
 import java.time.Duration;
@@ -34,5 +35,17 @@ public class TranscriptionUtil {
 
     public OffsetDateTime getDateToLimitResults(Duration dateLimit) {
         return OffsetDateTime.now().minus(Period.ofDays((int) dateLimit.toDays()));
+    }
+
+    public static String getRequestedByName(TranscriptionEntity transcriptionEntity) {
+        return Optional.ofNullable(transcriptionEntity.getRequestedBy())
+            .map(UserAccountEntity::getUserFullName)
+            .orElse(null);
+    }
+
+    public static Integer getRequestedById(TranscriptionEntity transcriptionEntity) {
+        return Optional.ofNullable(transcriptionEntity.getRequestedBy())
+            .map(UserAccountEntity::getId)
+            .orElse(null);
     }
 }

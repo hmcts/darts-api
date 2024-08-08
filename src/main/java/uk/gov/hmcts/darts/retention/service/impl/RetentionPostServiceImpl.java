@@ -18,6 +18,7 @@ import uk.gov.hmcts.darts.common.repository.CaseRepository;
 import uk.gov.hmcts.darts.common.repository.CaseRetentionRepository;
 import uk.gov.hmcts.darts.common.repository.RetentionPolicyTypeRepository;
 import uk.gov.hmcts.darts.retention.enums.CaseRetentionStatus;
+import uk.gov.hmcts.darts.retention.enums.RetentionConfidenceCategoryEnum;
 import uk.gov.hmcts.darts.retention.enums.RetentionPolicyEnum;
 import uk.gov.hmcts.darts.retention.exception.RetentionApiError;
 import uk.gov.hmcts.darts.retention.helper.RetentionDateHelper;
@@ -37,6 +38,8 @@ import java.util.Optional;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.JUDICIARY;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.SUPER_ADMIN;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.SUPER_USER;
+import static uk.gov.hmcts.darts.retention.enums.RetentionConfidenceReasonEnum.MANUAL_OVERRIDE;
+import static uk.gov.hmcts.darts.retention.enums.RetentionConfidenceScoreEnum.CASE_PERFECTLY_CLOSED;
 
 @Service
 @RequiredArgsConstructor
@@ -76,6 +79,7 @@ public class RetentionPostServiceImpl implements RetentionPostService {
 
         if (BooleanUtils.isNotTrue(validateOnly)) {
             createNewCaseRetention(postRetentionRequest, courtCase, newRetentionDate);
+            updateCourtCaseConfidenceAttributesForRetention(courtCase);
         }
 
         PostRetentionResponse response = new PostRetentionResponse();
@@ -177,8 +181,8 @@ public class RetentionPostServiceImpl implements RetentionPostService {
         caseRetention.setRetainUntil(newRetentionDate.atTime(OffsetTime.of(0, 0, 0, 0, ZoneOffset.UTC)));
         caseRetention.setCurrentState(String.valueOf(caseRetentionStatus));
         caseRetention.setRetainUntilAppliedOn(currentTimeHelper.currentOffsetDateTime());
-
         caseRetention.setRetentionPolicyType(getRetentionPolicy(postRetentionRequest.getIsPermanentRetention()));
+        caseRetention.setConfidenceCategory(RetentionConfidenceCategoryEnum.MANUAL_OVERRIDE);
 
         caseRetentionRepository.saveAndFlush(caseRetention);
         auditApi.record(
@@ -219,6 +223,12 @@ public class RetentionPostServiceImpl implements RetentionPostService {
                                         MessageFormat.format("More than 1 retention policy found for fixedPolicyKey ''{0}''", policyKey));
         }
         return retentionPolicyList.get(0);
+    }
+
+    private void updateCourtCaseConfidenceAttributesForRetention(CourtCaseEntity courtCase) {
+        courtCase.setRetConfScore(CASE_PERFECTLY_CLOSED);
+        courtCase.setRetConfReason(MANUAL_OVERRIDE);
+        caseRepository.save(courtCase);
     }
 
 }

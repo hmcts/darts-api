@@ -30,6 +30,8 @@ import uk.gov.hmcts.darts.event.service.impl.DarNotifyServiceImpl;
 import uk.gov.hmcts.darts.log.api.LogApi;
 import uk.gov.hmcts.darts.retention.api.RetentionApi;
 import uk.gov.hmcts.darts.retention.enums.CaseRetentionStatus;
+import uk.gov.hmcts.darts.retention.enums.RetentionConfidenceCategoryEnum;
+import uk.gov.hmcts.darts.retention.enums.RetentionConfidenceReasonEnum;
 import uk.gov.hmcts.darts.retention.enums.RetentionPolicyEnum;
 
 import java.time.LocalDate;
@@ -40,6 +42,7 @@ import java.util.Optional;
 
 import static java.lang.Boolean.TRUE;
 import static uk.gov.hmcts.darts.event.enums.DarNotifyType.STOP_RECORDING;
+import static uk.gov.hmcts.darts.retention.enums.RetentionConfidenceScoreEnum.CASE_PERFECTLY_CLOSED;
 
 @Service
 @Slf4j
@@ -140,6 +143,8 @@ public class StopAndCloseHandler extends EventHandlerBase {
             courtCase.setClosed(TRUE);
             courtCase.setCaseClosedTimestamp(dartsEvent.getDateTime());
             courtCase.setLastModifiedBy(authorisationApi.getCurrentUser());
+            courtCase.setRetConfScore(CASE_PERFECTLY_CLOSED);
+            courtCase.setRetConfReason(RetentionConfidenceReasonEnum.CASE_CLOSED);
             caseRepository.saveAndFlush(courtCase);
         }
     }
@@ -162,6 +167,7 @@ public class StopAndCloseHandler extends EventHandlerBase {
         existingCaseRetention.setSubmittedBy(currentUser);
         existingCaseRetention.setCreatedBy(currentUser);
         existingCaseRetention.setLastModifiedBy(currentUser);
+        existingCaseRetention.setConfidenceCategory(RetentionConfidenceCategoryEnum.CASE_CLOSED);
         caseRetentionRepository.save(existingCaseRetention);
     }
 
@@ -174,6 +180,7 @@ public class StopAndCloseHandler extends EventHandlerBase {
         caseRetentionEntity.setRetentionPolicyType(caseManagementRetentionEntity.getRetentionPolicyTypeEntity());
         caseRetentionEntity.setCaseManagementRetention(caseManagementRetentionEntity);
         caseRetentionEntity.setTotalSentence(dartsEventRetentionPolicy.getCaseTotalSentence());
+        caseRetentionEntity.setConfidenceCategory(RetentionConfidenceCategoryEnum.CASE_CLOSED);
         OffsetDateTime eventTimestamp = dartsEvent.getDateTime();
         LocalDate eventDate = eventTimestamp.toLocalDate();
         LocalDate retentionDate = retentionApi.applyPolicyStringToDate(eventDate,

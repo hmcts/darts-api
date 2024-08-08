@@ -22,6 +22,8 @@ import uk.gov.hmcts.darts.event.model.DartsEvent;
 import uk.gov.hmcts.darts.event.model.DartsEventRetentionPolicy;
 import uk.gov.hmcts.darts.event.service.EventDispatcher;
 import uk.gov.hmcts.darts.retention.enums.CaseRetentionStatus;
+import uk.gov.hmcts.darts.retention.enums.RetentionConfidenceReasonEnum;
+import uk.gov.hmcts.darts.retention.enums.RetentionConfidenceScoreEnum;
 import uk.gov.hmcts.darts.testutils.stubs.NodeRegisterStub;
 
 import java.time.OffsetDateTime;
@@ -41,6 +43,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.darts.retention.enums.RetentionConfidenceCategoryEnum.CASE_CLOSED;
 import static uk.gov.hmcts.darts.test.common.data.CaseTestData.someMinimalCase;
 
 class StopAndCloseHandlerTest extends HandlerTestData {
@@ -279,6 +282,8 @@ class StopAndCloseHandlerTest extends HandlerTestData {
 
         assertEquals(testTime, persistedCase.getCaseClosedTimestamp());
         assertTrue(persistedCase.getClosed());
+        assertEquals(RetentionConfidenceReasonEnum.CASE_CLOSED, persistedCase.getRetConfReason());
+        assertEquals(RetentionConfidenceScoreEnum.CASE_PERFECTLY_CLOSED, persistedCase.getRetConfScore());
 
         var hearingsForCase = dartsDatabase.findByCourthouseCourtroomAndDate(
             SOME_COURTHOUSE, SOME_ROOM, testTime.toLocalDate());
@@ -295,6 +300,7 @@ class StopAndCloseHandlerTest extends HandlerTestData {
         assertEquals(OffsetDateTime.of(2041, 1, 14, 0, 0, 0, 0, ZoneOffset.UTC), caseRetentionEntity.getRetainUntil());
         assertEquals("PENDING", caseRetentionEntity.getCurrentState());
         assertEquals(5, caseRetentionEntity.getRetentionPolicyType().getId());
+        assertEquals(CASE_CLOSED, caseRetentionEntity.getConfidenceCategory());
         assertNotNull(caseRetentionEntity.getCaseManagementRetention().getId());
     }
 
@@ -352,6 +358,7 @@ class StopAndCloseHandlerTest extends HandlerTestData {
         assertEquals(OffsetDateTime.of(2027, 10, 10, 0, 0, 0, 0, ZoneOffset.UTC), caseRetentionEntity.getRetainUntil());
         assertEquals("PENDING", caseRetentionEntity.getCurrentState());
         assertEquals(4, caseRetentionEntity.getRetentionPolicyType().getId());
+        assertEquals(CASE_CLOSED, caseRetentionEntity.getConfidenceCategory());
         assertNotNull(caseRetentionEntity.getCaseManagementRetention().getId());
 
         List<EventEntity> eventsForHearing = dartsDatabase.getEventRepository().findAllByHearingId(hearing.getId());
@@ -365,6 +372,14 @@ class StopAndCloseHandlerTest extends HandlerTestData {
         CaseManagementRetentionEntity caseManagementRetentionEntity = dartsDatabase.getCaseManagementRetentionRepository().findById(
             caseRetentionEntity.getCaseManagementRetention().getId()).get();
         assertEquals(latestEvent.getId(), caseManagementRetentionEntity.getEventEntity().getId());
+
+        var persistedCase = dartsDatabase.findByCaseByCaseNumberAndCourtHouseName(
+            SOME_CASE_NUMBER,
+            SOME_COURTHOUSE
+        ).get();
+
+        assertEquals(RetentionConfidenceReasonEnum.CASE_CLOSED, persistedCase.getRetConfReason());
+        assertEquals(RetentionConfidenceScoreEnum.CASE_PERFECTLY_CLOSED, persistedCase.getRetConfScore());
     }
 
     @Test
@@ -483,6 +498,7 @@ class StopAndCloseHandlerTest extends HandlerTestData {
         assertEquals(OffsetDateTime.of(2021, 10, 10, 10, 0, 0, 0, ZoneOffset.UTC), caseRetentionEntity.getRetainUntil());
         assertEquals("COMPLETE", caseRetentionEntity.getCurrentState());
         assertEquals(9, caseRetentionEntity.getRetentionPolicyType().getId());
+        assertNull(caseRetentionEntity.getConfidenceCategory());
 
         List<CaseManagementRetentionEntity> caseManagementRetentionEntities = dartsDatabase.getCaseManagementRetentionRepository().findAll();
         assertEquals(1, caseManagementRetentionEntities.size());

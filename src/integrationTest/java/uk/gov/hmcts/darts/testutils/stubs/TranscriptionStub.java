@@ -504,6 +504,8 @@ public class TranscriptionStub {
         final int fileSize = 10;
         final ObjectRecordStatusEntity objectRecordStatusEntity = getStatusEntity(status);
         final ExternalLocationTypeEntity externalLocationTypeEntity = getLocationEntity(location);
+        final String confidenceReason = "reason";
+        final Integer confidenceScore = 232;
 
         return updateTranscriptionWithDocument(transcriptionEntity,
                                                fileName,
@@ -513,10 +515,12 @@ public class TranscriptionStub {
                                                objectRecordStatusEntity,
                                                externalLocationTypeEntity,
                                                eodExternalLocation,
-                                               getChecksum());
+                                               getChecksum(), confidenceScore,
+                                               confidenceReason);
     }
 
     @Transactional
+    @SuppressWarnings({"PMD.ExcessiveParameterList", "PMD.UseObjectForClearerAPI"})
     public TranscriptionEntity updateTranscriptionWithDocument(TranscriptionEntity transcriptionEntity,
                                                                String fileName,
                                                                String fileType,
@@ -525,11 +529,14 @@ public class TranscriptionStub {
                                                                ObjectRecordStatusEntity objectRecordStatusEntity,
                                                                ExternalLocationTypeEntity externalLocationTypeEntity,
                                                                UUID externalLocation,
-                                                               String checksum) {
+                                                               String checksum,
+                                                               Integer confScore,
+                                                               String confReason
+                                                               ) {
 
         TranscriptionDocumentEntity transcriptionDocumentEntity = createTranscriptionDocumentEntity(transcriptionEntity, fileName,
                                                                                                     fileType, fileSize, testUser,
-                                                                                                    checksum);
+                                                                                                    checksum, confScore, confReason);
         transcriptionDocumentRepository.save(transcriptionDocumentEntity);
         transcriptionEntity.getTranscriptionDocumentEntities().add(transcriptionDocumentEntity);
         transcriptionRepository.save(transcriptionEntity);
@@ -556,6 +563,15 @@ public class TranscriptionStub {
 
     public static TranscriptionDocumentEntity createTranscriptionDocumentEntity(TranscriptionEntity transcriptionEntity, String fileName, String fileType,
                                                                                 int fileSize, UserAccountEntity testUser, String checksum) {
+        return createTranscriptionDocumentEntity(transcriptionEntity, fileName, fileType, fileSize, testUser, checksum, 100, "confidence reason");
+    }
+
+
+    @SuppressWarnings("PMD.UseObjectForClearerAPI")
+    public static TranscriptionDocumentEntity createTranscriptionDocumentEntity(TranscriptionEntity transcriptionEntity, String fileName, String fileType,
+                                                                                int fileSize,
+                                                                                UserAccountEntity testUser,
+                                                                                String checksum, Integer confScore, String confReason) {
         TranscriptionDocumentEntity transcriptionDocumentEntity = new TranscriptionDocumentEntity();
         transcriptionDocumentEntity.setTranscription(transcriptionEntity);
         transcriptionDocumentEntity.setFileName(fileName);
@@ -565,17 +581,22 @@ public class TranscriptionStub {
         transcriptionDocumentEntity.setUploadedDateTime(now(UTC));
         transcriptionDocumentEntity.setChecksum(checksum);
         transcriptionDocumentEntity.setLastModifiedBy(testUser);
+        transcriptionDocumentEntity.setRetConfScore(confScore);
+        transcriptionDocumentEntity.setRetConfReason(confReason);
+
         return transcriptionDocumentEntity;
     }
 
+    @SuppressWarnings("PMD.UseObjectForClearerAPI")
     public static TranscriptionDocumentEntity createTranscriptionDocumentEntity(TranscriptionEntity transcriptionEntity, String fileName, String fileType,
                                                                                 int fileSize, UserAccountEntity testUser, String checksum,
                                                                                 OffsetDateTime uploadedDateTime) {
         TranscriptionDocumentEntity transcriptionDocumentEntity = createTranscriptionDocumentEntity(
-            transcriptionEntity, fileName, fileType, fileSize, testUser, checksum);
+            transcriptionEntity, fileName, fileType, fileSize, testUser, checksum, 100, "confidence reason");
         transcriptionDocumentEntity.setUploadedDateTime(uploadedDateTime);
         return transcriptionDocumentEntity;
     }
+
 
     public TranscriptionStatusEntity getTranscriptionStatusByEnum(TranscriptionStatusEnum transcriptionStatusEnum) {
         return transcriptionStatusRepository.getReferenceById(transcriptionStatusEnum.getId());

@@ -15,17 +15,21 @@ import uk.gov.hmcts.darts.common.entity.CaseRetentionEntity;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.retention.enums.CaseRetentionStatus;
+import uk.gov.hmcts.darts.retention.enums.RetentionConfidenceReasonEnum;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.Optional;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static uk.gov.hmcts.darts.retention.enums.RetentionConfidenceCategoryEnum.MANUAL_OVERRIDE;
+import static uk.gov.hmcts.darts.retention.enums.RetentionConfidenceScoreEnum.CASE_PERFECTLY_CLOSED;
 
 @AutoConfigureMockMvc
 class RetentionControllerPostRetentionIntTest extends IntegrationBase {
@@ -76,6 +80,7 @@ class RetentionControllerPostRetentionIntTest extends IntegrationBase {
                 .andReturn().getResponse().getContentAsString();
         Optional<CaseRetentionEntity> latestCompletedRetention = dartsDatabase.getCaseRetentionRepository().findLatestCompletedRetention(courtCase);
         assertEquals(OffsetDateTime.parse("2024-05-20T00:00Z"), latestCompletedRetention.get().getRetainUntil());
+        assertThat(latestCompletedRetention.get().getConfidenceCategory()).isEqualTo(MANUAL_OVERRIDE);
 
         String expectedResponse = """
                 {
@@ -83,6 +88,9 @@ class RetentionControllerPostRetentionIntTest extends IntegrationBase {
                 }
                 """;
         JSONAssert.assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
+        CourtCaseEntity actualCourtCase = dartsDatabase.getCaseRepository().findById(courtCase.getId()).get();
+        assertThat(actualCourtCase.getRetConfScore()).isEqualTo(CASE_PERFECTLY_CLOSED);
+        assertThat(actualCourtCase.getRetConfReason()).isEqualTo(RetentionConfidenceReasonEnum.MANUAL_OVERRIDE);
     }
 
     @Test

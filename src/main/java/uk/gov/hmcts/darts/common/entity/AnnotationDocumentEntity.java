@@ -22,7 +22,7 @@ import java.util.List;
 @Setter
 @Getter
 @Table(name = "annotation_document")
-public class AnnotationDocumentEntity extends ModifiedBaseEntity {
+public class AnnotationDocumentEntity extends ModifiedBaseEntity implements ConfidenceAware {
 
     @Id
     @Column(name = "ado_id")

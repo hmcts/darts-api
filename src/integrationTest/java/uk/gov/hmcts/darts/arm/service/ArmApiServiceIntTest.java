@@ -66,10 +66,14 @@ class ArmApiServiceIntTest extends IntegrationBase {
         var eventTimestamp = OffsetDateTime.parse("2024-01-31T11:29:56.101701Z").plusYears(7);
 
         var bearerAuth = "Bearer some-token";
+        var reasonConf = "reason";
+        var scoreConfId = 23;
         var updateMetadataRequest = UpdateMetadataRequest.builder()
             .itemId(EXTERNAL_RECORD_ID)
             .manifest(UpdateMetadataRequest.Manifest.builder()
                           .eventDate(eventTimestamp)
+                          .retConfScore(scoreConfId)
+                          .retConfReason(reasonConf)
                           .build())
             .useGuidsForFields(false)
             .build();
@@ -93,7 +97,7 @@ class ArmApiServiceIntTest extends IntegrationBase {
         )).thenReturn(updateMetadataResponse);
 
         // When
-        var responseToTest = armApiService.updateMetadata(EXTERNAL_RECORD_ID, eventTimestamp);
+        var responseToTest = armApiService.updateMetadata(EXTERNAL_RECORD_ID, eventTimestamp, scoreConfId, reasonConf);
 
         // Then
         verify(armTokenClient).getToken(armTokenRequest);
