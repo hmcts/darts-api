@@ -20,7 +20,7 @@ import java.time.OffsetDateTime;
 @Table(name = CaseDocumentEntity.TABLE_NAME)
 @Getter
 @Setter
-public class CaseDocumentEntity extends CreatedModifiedBaseEntity {
+public class CaseDocumentEntity extends CreatedModifiedBaseEntity implements ConfidenceAware {
 
     public static final String ID = "cad_id";
     public static final String TABLE_NAME = "case_document";

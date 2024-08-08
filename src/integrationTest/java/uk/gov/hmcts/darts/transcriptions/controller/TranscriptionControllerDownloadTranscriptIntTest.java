@@ -186,6 +186,8 @@ class TranscriptionControllerDownloadTranscriptIntTest extends IntegrationBase {
             UNSTRUCTURED);
         final UUID externalLocation = UUID.randomUUID();
         final String checksum = "xi/XkzD2HuqTUzDafW8Cgw==";
+        final String confidenceReason = "reason";
+        final Integer confidenceScore = 232;
 
         var mockFileBasedDownloadResponseMetaData = mock(FileBasedDownloadResponseMetaData.class);
         when(mockDataManagementFacade.retrieveFileFromStorage(any(TranscriptionDocumentEntity.class))).thenReturn(mockFileBasedDownloadResponseMetaData);
@@ -200,7 +202,9 @@ class TranscriptionControllerDownloadTranscriptIntTest extends IntegrationBase {
             storedStatus,
             unstructuredLocation,
             externalLocation,
-            checksum
+            checksum,
+            confidenceScore,
+            confidenceReason
         );
 
         MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders.get(URL_TEMPLATE, transcriptionId)
@@ -240,6 +244,8 @@ class TranscriptionControllerDownloadTranscriptIntTest extends IntegrationBase {
             UNSTRUCTURED);
         final UUID externalLocation = UUID.randomUUID();
         final String checksum = "KQ9vVogyRdsnEvxyNQz77g==";
+        final Integer confidenceScore = 232;
+        final String confidenceReason = "reason";
 
         transcriptionEntity = transcriptionStub.updateTranscriptionWithDocument(
             transcriptionEntity,
@@ -250,7 +256,9 @@ class TranscriptionControllerDownloadTranscriptIntTest extends IntegrationBase {
             objectRecordStatusEntity,
             externalLocationTypeEntity,
             externalLocation,
-            checksum
+            checksum,
+            confidenceScore,
+            confidenceReason
         );
 
         var mockFileBasedDownloadResponseMetaData = mock(FileBasedDownloadResponseMetaData.class);

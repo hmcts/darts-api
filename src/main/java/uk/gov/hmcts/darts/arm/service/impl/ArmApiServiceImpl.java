@@ -32,12 +32,14 @@ public class ArmApiServiceImpl implements ArmApiService {
     private final ArmApiClient armApiClient;
 
     @Override
-    public UpdateMetadataResponse updateMetadata(String externalRecordId, OffsetDateTime eventTimestamp) {
+    public UpdateMetadataResponse updateMetadata(String externalRecordId, OffsetDateTime eventTimestamp, int retConfScore, String retConfReason) {
 
         UpdateMetadataRequest armUpdateMetadataRequest = UpdateMetadataRequest.builder()
             .itemId(externalRecordId)
             .manifest(UpdateMetadataRequest.Manifest.builder()
                           .eventDate(eventTimestamp)
+                          .retConfReason(retConfReason)
+                          .retConfScore(retConfScore)
                           .build())
             .useGuidsForFields(false)
             .build();

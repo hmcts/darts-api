@@ -27,7 +27,7 @@ import java.util.List;
 @Getter
 @Setter
 @EqualsAndHashCode(callSuper = false)
-public class MediaEntity extends CreatedModifiedBaseEntity {
+public class MediaEntity extends CreatedModifiedBaseEntity implements ConfidenceAware {
     public static final Character MEDIA_TYPE_DEFAULT = 'A';
 
     @Id
