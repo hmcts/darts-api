@@ -270,7 +270,7 @@ public class CommonTestDataUtil {
     }
 
     public List<TranscriptionEntity> createTranscriptionList(HearingEntity hearing) {
-        return createTranscriptionList(hearing, true, true, false, null);
+        return createTranscriptionList(hearing, true, true, true, null);
     }
 
     public List<TranscriptionEntity> createTranscriptionList(HearingEntity hearing, boolean generateStatus) {
@@ -311,10 +311,10 @@ public class CommonTestDataUtil {
         transcription.setLegacyObjectId("legacyObjectId");
         transcription.setId(1);
         if (generateRequestor) {
-            transcription.setCreatedBy(createUserAccountWithId());
-        } else {
-            transcription.setCreatedBy(createUserAccount());
+            transcription.setRequestedBy(createUserAccountWithId());
         }
+        transcription.setCreatedBy(createUserAccount());
+
         transcription.setTranscriptionDocumentEntities(createTranscriptionDocuments());
         transcription.setTranscriptionUrgency(createTranscriptionUrgencyEntityFromEnum(TranscriptionUrgencyEnum.STANDARD));
         transcription.setTranscriptionCommentEntities(createTranscriptionComments());

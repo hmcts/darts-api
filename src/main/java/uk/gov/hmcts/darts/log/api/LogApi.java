@@ -45,4 +45,12 @@ public interface LogApi {
     void taskCompleted(UUID taskExecutionId, String taskName);
 
     void taskFailed(UUID taskExecutionId, String taskName);
+
+    void armPushSuccessful(Integer eodId);
+
+    void armPushFailed(Integer eodId);
+
+    void archiveToArmSuccessful(Integer eodId);
+
+    void archiveToArmFailed(Integer eodId);
 }

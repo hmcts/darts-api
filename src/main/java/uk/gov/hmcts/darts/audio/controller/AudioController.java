@@ -21,6 +21,7 @@ import uk.gov.hmcts.darts.audio.model.GetAdminMediaResponseItem;
 import uk.gov.hmcts.darts.audio.model.GetTransformedMediaResponse;
 import uk.gov.hmcts.darts.audio.model.MediaHideRequest;
 import uk.gov.hmcts.darts.audio.model.MediaHideResponse;
+import uk.gov.hmcts.darts.audio.model.PostAdminMediasMarkedForDeletionItem;
 import uk.gov.hmcts.darts.audio.model.PostAdminMediasSearchRequest;
 import uk.gov.hmcts.darts.audio.model.PostAdminMediasSearchResponseItem;
 import uk.gov.hmcts.darts.audio.service.AdminMediaService;
@@ -77,7 +78,7 @@ public class AudioController implements AudioApi {
         securityRoles = {JUDICIARY, REQUESTER, APPROVER, TRANSCRIBER, TRANSLATION_QA},
         globalAccessSecurityRoles = {JUDICIARY, SUPER_ADMIN, SUPER_USER, RCJ_APPEALS, TRANSLATION_QA, DARTS})
     public ResponseEntity<List<AudioMetadata>> getAudioMetadata(Integer hearingId) {
-        List<MediaEntity> mediaEntities = audioService.getAudioMetadata(hearingId, 1);
+        List<MediaEntity> mediaEntities = audioService.getMediaEntitiesByHearingAndChannel(hearingId, 1);
         List<AudioMetadata> audioMetadata = audioResponseMapper.mapToAudioMetadata(mediaEntities);
         audioService.setIsArchived(audioMetadata, hearingId);
         audioService.setIsAvailable(audioMetadata);
@@ -160,4 +161,12 @@ public class AudioController implements AudioApi {
     public ResponseEntity<List<PostAdminMediasSearchResponseItem>> adminMediasSearchPost(PostAdminMediasSearchRequest adminMediasSearchRequest) {
         return new ResponseEntity<>(adminMediaService.performAdminMediasSearchPost(adminMediasSearchRequest), HttpStatus.OK);
     }
+
+    @Override
+    @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
+    @Authorisation(contextId = ANY_ENTITY_ID, globalAccessSecurityRoles = {SUPER_ADMIN})
+    public ResponseEntity<List<PostAdminMediasMarkedForDeletionItem>> adminMediasMarkedForDeletionGet() {
+        return new ResponseEntity<>(adminMediaService.getMediasMarkedForDeletion(), HttpStatus.OK);
+    }
+
 }

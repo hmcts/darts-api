@@ -72,8 +72,8 @@ public class AudioTransformationServiceImpl implements AudioTransformationServic
     };
 
     @Override
-    public List<MediaEntity> getMediaMetadata(Integer hearingId) {
-        List<MediaEntity> mediaEntityList = mediaRepository.findAllByHearingId(hearingId);
+    public List<MediaEntity> getMediaByHearingId(Integer hearingId) {
+        List<MediaEntity> mediaEntityList = mediaRepository.findAllCurrentMediaByHearingId(hearingId);
         return mediaEntityList.stream()
             .filter(m -> !m.isHidden())
             .toList();
@@ -100,7 +100,6 @@ public class AudioTransformationServiceImpl implements AudioTransformationServic
     /**
      * For all audio related to a given AudioRequest, download, transform and upload the processed file to outbound
      * storage.
-     *
      */
     @SuppressWarnings({"PMD.AvoidRethrowingException", "PMD.CyclomaticComplexity"})
     private void processAudioRequest(MediaRequestEntity mediaRequestEntity) {
@@ -117,7 +116,7 @@ public class AudioTransformationServiceImpl implements AudioTransformationServic
                 audioRequestOutputFormat = AudioRequestOutputFormat.ZIP;
             }
 
-            List<MediaEntity> mediaEntitiesForHearing = getMediaMetadata(hearingEntity.getId());
+            List<MediaEntity> mediaEntitiesForHearing = getMediaByHearingId(hearingEntity.getId());
 
             if (mediaEntitiesForHearing.isEmpty()) {
                 logApi.atsProcessingUpdate(mediaRequestEntity);
@@ -191,7 +190,7 @@ public class AudioTransformationServiceImpl implements AudioTransformationServic
 
             if (hearingEntity != null) {
                 transformedMediaHelper.notifyUser(updatedMediaRequest, hearingEntity.getCourtCase(),
-                           NotificationApi.NotificationTemplate.ERROR_PROCESSING_AUDIO.toString()
+                                                  NotificationApi.NotificationTemplate.ERROR_PROCESSING_AUDIO.toString()
                 );
             }
 

@@ -22,6 +22,7 @@ import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
 import uk.gov.hmcts.darts.common.repository.ObjectRecordStatusRepository;
 import uk.gov.hmcts.darts.common.service.FileOperationService;
 import uk.gov.hmcts.darts.datamanagement.api.DataManagementApi;
+import uk.gov.hmcts.darts.log.api.LogApi;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 import uk.gov.hmcts.darts.testutils.stubs.AuthorisationStub;
 import uk.gov.hmcts.darts.testutils.stubs.ExternalObjectDirectoryStub;
@@ -96,6 +97,9 @@ class UnstructuredToArmBatchProcessorIntTest extends IntegrationBase {
     private static final Integer BATCH_SIZE = 5;
 
     @Autowired
+    private LogApi logApi;
+
+    @Autowired
     private ExternalObjectDirectoryService eodService;
 
     private UnstructuredToArmBatchProcessorImpl unstructuredToArmProcessor;
@@ -117,7 +121,8 @@ class UnstructuredToArmBatchProcessorIntTest extends IntegrationBase {
             archiveRecordService,
             eodService,
             archiveRecordFileGenerator,
-            BATCH_SIZE
+            BATCH_SIZE,
+            logApi
         );
     }
 

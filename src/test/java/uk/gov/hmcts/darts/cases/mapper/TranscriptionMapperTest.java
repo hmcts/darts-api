@@ -33,10 +33,10 @@ class TranscriptionMapperTest {
     @Test
     void happyPath() {
         HearingEntity hearing1 = CommonTestDataUtil.createHearing("case1", LocalTime.NOON);
-        List<TranscriptionEntity> transcriptionList = CommonTestDataUtil.createTranscriptionList(hearing1);
+        List<TranscriptionEntity> transcriptionList = CommonTestDataUtil.createTranscriptionList(hearing1, true, true, true);
 
         List<Transcript> transcripts = caseTranscriptionMapper.getTranscriptList(caseTranscriptionMapper.mapResponse(transcriptionList));
-        Transcript transcript = transcripts.get(0);
+        Transcript transcript = transcripts.getFirst();
         assertEquals(1, transcript.getTranscriptionId());
         assertEquals(102, transcript.getHearingId());
         assertEquals(LocalDate.of(2023, 6, 20), transcript.getHearingDate());

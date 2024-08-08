@@ -8,6 +8,7 @@ import uk.gov.hmcts.darts.cases.model.AddCaseRequest;
 import uk.gov.hmcts.darts.cases.model.GetCasesRequest;
 import uk.gov.hmcts.darts.event.model.DartsEvent;
 import uk.gov.hmcts.darts.log.api.LogApi;
+import uk.gov.hmcts.darts.log.service.ArmLoggerService;
 import uk.gov.hmcts.darts.log.service.AtsLoggerService;
 import uk.gov.hmcts.darts.log.service.AudioLoggerService;
 import uk.gov.hmcts.darts.log.service.AutomatedTaskLoggerService;
@@ -32,6 +33,7 @@ public class LogApiImpl implements LogApi {
     private final NotificationLoggerService notificationLoggerService;
     private final DailyListLoggerService logJobService;
     private final AutomatedTaskLoggerService automatedTaskLoggerService;
+    private final ArmLoggerService armLoggerService;
 
     @Override
     public void eventReceived(DartsEvent event) {
@@ -116,6 +118,26 @@ public class LogApiImpl implements LogApi {
     @Override
     public void taskFailed(UUID taskExecutionId, String taskName) {
         automatedTaskLoggerService.taskFailed(taskExecutionId, taskName);
+    }
+
+    @Override
+    public void armPushSuccessful(Integer eodId) {
+        armLoggerService.armPushSuccessful(eodId);
+    }
+
+    @Override
+    public void armPushFailed(Integer eodId) {
+        armLoggerService.armPushFailed(eodId);
+    }
+
+    @Override
+    public void archiveToArmSuccessful(Integer eodId) {
+        armLoggerService.archiveToArmSuccessful(eodId);
+    }
+
+    @Override
+    public void archiveToArmFailed(Integer eodId) {
+        armLoggerService.archiveToArmFailed(eodId);
     }
 }
 

@@ -34,12 +34,14 @@ import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
 import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
 import uk.gov.hmcts.darts.common.service.FileOperationService;
 import uk.gov.hmcts.darts.common.util.EodHelper;
+import uk.gov.hmcts.darts.log.api.LogApi;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Duration;
 import java.time.Instant;
+import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -72,13 +74,15 @@ public class ArmBatchProcessResponseFilesImpl implements ArmResponseFilesProcess
     private final CurrentTimeHelper currentTimeHelper;
     private final ExternalObjectDirectoryService externalObjectDirectoryService;
     private final Integer batchSize;
+    private final LogApi logApi;
 
     private UserAccountEntity userAccount;
 
     public ArmBatchProcessResponseFilesImpl(ExternalObjectDirectoryRepository externalObjectDirectoryRepository, ArmDataManagementApi armDataManagementApi,
                                             FileOperationService fileOperationService, ArmDataManagementConfiguration armDataManagementConfiguration,
                                             ObjectMapper objectMapper, UserIdentity userIdentity, CurrentTimeHelper currentTimeHelper,
-                                            ExternalObjectDirectoryService externalObjectDirectoryService, Integer batchSize) {
+                                            ExternalObjectDirectoryService externalObjectDirectoryService, Integer batchSize,
+                                            LogApi logApi) {
         this.externalObjectDirectoryRepository = externalObjectDirectoryRepository;
         this.armDataManagementApi = armDataManagementApi;
         this.fileOperationService = fileOperationService;
@@ -88,6 +92,7 @@ public class ArmBatchProcessResponseFilesImpl implements ArmResponseFilesProcess
         this.currentTimeHelper = currentTimeHelper;
         this.externalObjectDirectoryService = externalObjectDirectoryService;
         this.batchSize = batchSize;
+        this.logApi = logApi;
     }
 
     @Override
@@ -414,6 +419,9 @@ public class ArmBatchProcessResponseFilesImpl implements ArmResponseFilesProcess
                         armResponseUploadFileRecord.getA360RecordId(),
                         armResponseUploadFileRecord.getA360FileId()
                     );
+                    if (nonNull(externalObjectDirectory)) {
+                        externalObjectDirectory.setErrorCode(errorDescription);
+                    }
                     updateExternalObjectDirectoryStatus(externalObjectDirectory, EodHelper.armResponseProcessingFailedStatus());
                 }
             } else {
@@ -441,6 +449,7 @@ public class ArmBatchProcessResponseFilesImpl implements ArmResponseFilesProcess
         if (objectChecksum.equalsIgnoreCase(armResponseUploadFileRecord.getMd5())) {
             externalObjectDirectory.setExternalFileId(armResponseUploadFileRecord.getA360FileId());
             externalObjectDirectory.setExternalRecordId(armResponseUploadFileRecord.getA360RecordId());
+            externalObjectDirectory.setDataIngestionTs(OffsetDateTime.now());
             updateExternalObjectDirectoryStatus(externalObjectDirectory, EodHelper.storedStatus());
         } else {
             log.warn("External object id {} checksum differs. Arm checksum: {} Object Checksum: {}",
@@ -564,10 +573,13 @@ public class ArmBatchProcessResponseFilesImpl implements ArmResponseFilesProcess
                         armResponseInvalidLineRecord.getErrorStatus()
                     );
                     updateTransferAttempts(externalObjectDirectory);
+                    externalObjectDirectory.setErrorCode(armResponseInvalidLineRecord.getExceptionDescription());
                     updateExternalObjectDirectoryStatus(externalObjectDirectory, EodHelper.armResponseManifestFailedStatus());
                 } else {
-                    log.warn("Incorrect status [{}] for invalid line file {}", invalidLineFileFilenameProcessor.getStatus(),
-                             invalidLineFileFilenameProcessor.getInvalidLineFileFilenameAndPath());
+                    String error = String.format("Incorrect status [%s] for invalid line file %s", invalidLineFileFilenameProcessor.getStatus(),
+                                  invalidLineFileFilenameProcessor.getInvalidLineFileFilenameAndPath());
+                    log.warn(error);
+                    externalObjectDirectory.setErrorCode(error);
                     updateExternalObjectDirectoryStatus(externalObjectDirectory, EodHelper.armResponseProcessingFailedStatus());
                 }
             } else {
@@ -658,6 +670,16 @@ public class ArmBatchProcessResponseFilesImpl implements ArmResponseFilesProcess
                 objectRecordStatus.getId(),
                 externalObjectDirectory.getId()
             );
+            ObjectRecordStatusEnum status = ObjectRecordStatusEnum.valueOfId(objectRecordStatus.getId());
+            if (STORED.equals(status)) {
+                logApi.archiveToArmSuccessful(externalObjectDirectory.getId());
+            } else if (ARM_RESPONSE_MANIFEST_FAILED.equals(status)
+                || ARM_RESPONSE_CHECKSUM_VERIFICATION_FAILED.equals(status)) {
+                logApi.archiveToArmFailed(externalObjectDirectory.getId());
+            } else if (ARM_RESPONSE_PROCESSING_FAILED.equals(status)
+                && externalObjectDirectory.getTransferAttempts() > armDataManagementConfiguration.getMaxRetryAttempts()) {
+                logApi.archiveToArmFailed(externalObjectDirectory.getId());
+            }
             externalObjectDirectory.setStatus(objectRecordStatus);
             externalObjectDirectory.setLastModifiedBy(userAccount);
             externalObjectDirectory.setLastModifiedDateTime(currentTimeHelper.currentOffsetDateTime());

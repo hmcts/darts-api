@@ -56,8 +56,8 @@ public class AudioServiceImpl implements AudioService {
     }
 
     @Override
-    public List<MediaEntity> getAudioMetadata(Integer hearingId, Integer channel) {
-        return mediaRepository.findAllByHearingIdAndChannel(hearingId, channel);
+    public List<MediaEntity> getMediaEntitiesByHearingAndChannel(Integer hearingId, Integer channel) {
+        return mediaRepository.findAllByHearingIdAndChannelAndIsCurrentTrue(hearingId, channel);
     }
 
     @Override

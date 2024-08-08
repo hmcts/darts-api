@@ -7,7 +7,8 @@
   "courthouse": "case_courthouse",
   "received": "2020-06-20T10:10:00Z",
   "requestor": {
-    "user_full_name":"testUsername"
+    "user_full_name":"testUsername",
+    "user_id": 1002
   },
   "defendants": [
     "defendant_case1_1",

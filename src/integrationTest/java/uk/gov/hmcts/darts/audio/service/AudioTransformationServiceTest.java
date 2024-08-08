@@ -39,12 +39,12 @@ class AudioTransformationServiceTest extends IntegrationBase {
     FileOperationService mockFileOperationService;
 
     @Test
-    void getMediaMetadataShouldReturnExpectedMediaEntitiesWhenHearingIdHasRelatedMedia() {
+    void getMediaByHearingIdShouldReturnExpectedMediaEntitiesWhenHearingIdHasRelatedMedia() {
         given.setupTest();
         given.externalObjectDirForMedia(given.getMediaEntity1());
         Integer hearingIdWithMedia = given.getHearingEntityWithMedia1().getId();
 
-        List<MediaEntity> mediaEntities = audioTransformationService.getMediaMetadata(hearingIdWithMedia);
+        List<MediaEntity> mediaEntities = audioTransformationService.getMediaByHearingId(hearingIdWithMedia);
 
         assertEquals(2, mediaEntities.size());
 
@@ -56,12 +56,12 @@ class AudioTransformationServiceTest extends IntegrationBase {
     }
 
     @Test
-    void getMediaMetadataShouldNotReturnMediaEntitiesWhenMediaIsHidden() {
+    void getMediaByHearingIdShouldNotReturnMediaEntitiesWhenMediaIsHidden() {
         given.setupTest();
         given.externalObjectDirForMedia(given.getMediaEntity4());
         Integer hearingIdWithMedia = given.getHearingEntityWithMedia1().getId();
 
-        List<MediaEntity> mediaEntities = audioTransformationService.getMediaMetadata(hearingIdWithMedia);
+        List<MediaEntity> mediaEntities = audioTransformationService.getMediaByHearingId(hearingIdWithMedia);
 
         assertEquals(2, mediaEntities.size());
 
@@ -71,22 +71,22 @@ class AudioTransformationServiceTest extends IntegrationBase {
     }
 
     @Test
-    void getMediaMetadataShouldReturnEmptyListWhenHearingIdHasNoRelatedMedia() {
+    void getMediaByHearingIdShouldReturnEmptyListWhenHearingIdHasNoRelatedMedia() {
         given.setupTest();
         given.externalObjectDirForMedia(given.getMediaEntity1());
         Integer hearingIdWithNoRelatedMedia = given.getHearingEntityWithoutMedia().getId();
 
-        List<MediaEntity> mediaEntities = audioTransformationService.getMediaMetadata(hearingIdWithNoRelatedMedia);
+        List<MediaEntity> mediaEntities = audioTransformationService.getMediaByHearingId(hearingIdWithNoRelatedMedia);
 
         assertEquals(0, mediaEntities.size());
     }
 
     @Test
-    void getMediaMetadataShouldReturnEmptyListWhenHearingIdDoesNotExist() {
+    void getMediaByHearingIdShouldReturnEmptyListWhenHearingIdDoesNotExist() {
         given.setupTest();
         given.externalObjectDirForMedia(given.getMediaEntity1());
 
-        List<MediaEntity> mediaEntities = audioTransformationService.getMediaMetadata(123_456);
+        List<MediaEntity> mediaEntities = audioTransformationService.getMediaByHearingId(123_456);
 
         assertEquals(0, mediaEntities.size());
     }
