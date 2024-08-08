@@ -24,5 +24,5 @@ public interface ArmDataManagementApi extends BlobContainerDownloadable {
 
     boolean deleteBlobData(String blobPathAndName);
 
-    UpdateMetadataResponse updateMetadata(String externalRecordId, OffsetDateTime eventTimestamp);
+    UpdateMetadataResponse updateMetadata(String externalRecordId, OffsetDateTime eventTimestamp, int retConfScore, String retConfReason);
 }

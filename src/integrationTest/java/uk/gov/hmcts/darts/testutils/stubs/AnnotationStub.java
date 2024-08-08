@@ -38,18 +38,30 @@ public class AnnotationStub {
                                                                               String checksum) {
         return
             annotationStubComposable.createAndSaveAnnotationDocumentEntityWith(
-                annotationEntity, fileName, fileType, fileSize, uploadedBy,uploadedDateTime, checksum);
+                annotationEntity, fileName, fileType, fileSize, uploadedBy,uploadedDateTime, checksum, 0, "confidence reason");
+    }
+
+    @Transactional
+    @SuppressWarnings("PMD.UseObjectForClearerAPI")
+    public AnnotationDocumentEntity createAnnotationDocumentEntity(AnnotationEntity annotationEntity, String fileName, String fileType, Integer fileSize,
+                                                                   UserAccountEntity uploadedBy,
+                                                                   OffsetDateTime uploadedDateTime, String checksum, Integer confScore,
+                                                                   String confReason) {
+        return annotationStubComposable
+            .createAnnotationDocumentEntity(annotationEntity, fileName, fileType, fileSize, uploadedBy,uploadedDateTime, checksum, confScore, confReason);
     }
 
     @Transactional
     public AnnotationDocumentEntity createAnnotationDocumentEntity(AnnotationEntity annotationEntity, String fileName, String fileType, Integer fileSize,
                                                                    UserAccountEntity uploadedBy, OffsetDateTime uploadedDateTime, String checksum) {
-        return annotationStubComposable.createAnnotationDocumentEntity(annotationEntity, fileName, fileType, fileSize, uploadedBy,uploadedDateTime, checksum);
+        return annotationStubComposable
+            .createAnnotationDocumentEntity(annotationEntity, fileName, fileType, fileSize, uploadedBy,uploadedDateTime, checksum, 100, "confidence reason");
     }
 
     @Transactional
     public AnnotationDocumentEntity createAndSaveAnnotationDocumentEntity(AnnotationEntity annotation) {
-        return annotationStubComposable.createAndSaveAnnotationDocumentEntity(userAccountStub, annotation);
+        return annotationStubComposable
+            .createAndSaveAnnotationDocumentEntity(userAccountStub, annotation);
     }
 
 }

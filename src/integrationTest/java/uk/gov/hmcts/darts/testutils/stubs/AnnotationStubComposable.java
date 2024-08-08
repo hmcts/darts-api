@@ -50,20 +50,26 @@ public class AnnotationStubComposable {
         final int fileSize = 123;
         final OffsetDateTime uploadedDateTime = OffsetDateTime.now();
         final String checksum = "123";
+        final Integer confScore = 100;
+        final String confReason = "confidenceReason";
 
-        return createAndSaveAnnotationDocumentEntityWith(managedAnnotation, fileName, fileType, fileSize, testUser, uploadedDateTime, checksum);
+        return createAndSaveAnnotationDocumentEntityWith(
+            managedAnnotation, fileName, fileType, fileSize, testUser, uploadedDateTime, checksum, confScore, confReason);
     }
 
     @Transactional
+    @SuppressWarnings("PMD.UseObjectForClearerAPI")
     public AnnotationDocumentEntity createAndSaveAnnotationDocumentEntityWith(AnnotationEntity annotationEntity,
                                                                               String fileName,
                                                                               String fileType,
                                                                               Integer fileSize,
                                                                               UserAccountEntity uploadedBy,
                                                                               OffsetDateTime uploadedDateTime,
-                                                                              String checksum) {
+                                                                              String checksum,
+                                                                              Integer confScore,
+                                                                              String confReason) {
         AnnotationDocumentEntity annotationDocument = createAnnotationDocumentEntity(annotationEntity, fileName, fileType, fileSize,
-                                                                                     uploadedBy, uploadedDateTime, checksum);
+                                                                                     uploadedBy, uploadedDateTime, checksum, confScore, confReason);
         annotationDocument.setAnnotation(annotationRepository.getReferenceById(annotationEntity.getId()));
         annotationDocument = annotationDocumentRepository.saveAndFlush(annotationDocument);
         return annotationDocument;
@@ -79,8 +85,11 @@ public class AnnotationStubComposable {
     }
 
     @Transactional
+    @SuppressWarnings("PMD.UseObjectForClearerAPI")
     public AnnotationDocumentEntity createAnnotationDocumentEntity(AnnotationEntity annotationEntity, String fileName, String fileType, Integer fileSize,
-                                                                   UserAccountEntity uploadedBy, OffsetDateTime uploadedDateTime, String checksum) {
+                                                                   UserAccountEntity uploadedBy, OffsetDateTime uploadedDateTime,
+                                                                   String checksum, Integer confScore,
+                                                                   String confReason) {
         AnnotationDocumentEntity annotationDocument = new AnnotationDocumentEntity();
         annotationDocument.setAnnotation(annotationEntity);
         annotationDocument.setFileName(fileName);
@@ -90,6 +99,8 @@ public class AnnotationStubComposable {
         annotationDocument.setUploadedDateTime(uploadedDateTime);
         annotationDocument.setChecksum(checksum);
         annotationDocument.setLastModifiedBy(uploadedBy);
+        annotationDocument.setRetConfScore(confScore);
+        annotationDocument.setRetConfReason(confReason);
 
         return annotationDocument;
     }

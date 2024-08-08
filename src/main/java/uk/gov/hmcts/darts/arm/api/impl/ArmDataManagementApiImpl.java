@@ -79,8 +79,8 @@ public class ArmDataManagementApiImpl implements ArmDataManagementApi {
     }
 
     @Override
-    public UpdateMetadataResponse updateMetadata(String externalRecordId, OffsetDateTime eventTimestamp) {
-        return armApiService.updateMetadata(externalRecordId, eventTimestamp);
+    public UpdateMetadataResponse updateMetadata(String externalRecordId, OffsetDateTime eventTimestamp, int retConfScore, String retConfReason) {
+        return armApiService.updateMetadata(externalRecordId, eventTimestamp, retConfScore, retConfReason);
     }
 
     @Override
