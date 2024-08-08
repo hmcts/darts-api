@@ -977,9 +977,7 @@ public class DartsDatabaseStub {
 
     @Transactional
     public SecurityRoleEntity findSecurityRole(SecurityRoleEnum role) {
-        var securityRoleEntity = securityRoleRepository.findById(role.getId()).orElseThrow();
-        var securityPermissionEntities = securityRoleEntity.getSecurityPermissionEntities();
-        return securityRoleEntity;
+        return securityRoleRepository.findById(role.getId()).orElseThrow();
 
     }
 }
