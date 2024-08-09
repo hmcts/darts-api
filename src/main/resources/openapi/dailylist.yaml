@@ -459,7 +459,15 @@ components:
         - "DAILYLIST_103"
         - "DAILYLIST_104"
         - "DAILYLIST_105"
-      x-enum-varnames: [ FAILED_TO_PROCESS_DAILYLIST, XML_OR_JSON_NEEDS_TO_BE_PROVIDED, XML_EXTRA_PARAMETERS_MISSING, DAILY_LIST_NOT_FOUND, INTERNAL_ERROR, INVALID_SOURCE_SYSTEM ]
+        - "DAILYLIST_106"
+      x-enum-varnames: [
+        FAILED_TO_PROCESS_DAILYLIST,
+        XML_OR_JSON_NEEDS_TO_BE_PROVIDED,
+        XML_EXTRA_PARAMETERS_MISSING,
+        DAILY_LIST_NOT_FOUND,
+        INTERNAL_ERROR,
+        INVALID_SOURCE_SYSTEM,
+        MISSING_SYSTEM_USER ]
 
     DailyListTitleErrors:
       type: string
@@ -470,4 +478,12 @@ components:
         - "The provided Daily List Id could not be found."
         - "An Internal Server Error has occurred."
         - "Invalid source system. Should be CPP or XHB."
-      x-enum-varnames: [ FAILED_TO_PROCESS_DAILYLIST, XML_OR_JSON_NEEDS_TO_BE_PROVIDED, XML_EXTRA_PARAMETERS_MISSING, DAILY_LIST_NOT_FOUND, INTERNAL_ERROR, INVALID_SOURCE_SYSTEM ]
+        - "Failed to find user to process daily list."
+      x-enum-varnames: [
+        FAILED_TO_PROCESS_DAILYLIST,
+        XML_OR_JSON_NEEDS_TO_BE_PROVIDED,
+        XML_EXTRA_PARAMETERS_MISSING,
+        DAILY_LIST_NOT_FOUND,
+        INTERNAL_ERROR,
+        INVALID_SOURCE_SYSTEM,
+        MISSING_SYSTEM_USER ]

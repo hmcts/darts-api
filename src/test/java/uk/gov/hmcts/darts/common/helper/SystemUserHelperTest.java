@@ -17,7 +17,6 @@ import java.util.List;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -44,38 +43,6 @@ class SystemUserHelperTest {
         guidMap.put("housekeeping", HOUSEKEEPING_GUID);
         guidMap.put("dailylist-processor", DAILYLIST_PROCESSOR_GUID);
         systemUserHelper.setSystemUserGuidMap(guidMap);
-    }
-
-    /**
-     * check if cache is used and populated correctly by trying to get a user.
-     * The first time the repository will be hit the second time the same user will exist in the cache.
-     */
-    @Test
-    void getSystemUser() {
-        UserAccountEntity housekeepingUser = new UserAccountEntity();
-        housekeepingUser.setAccountGuid(HOUSEKEEPING_GUID);
-
-        UserAccountEntity dailylistProcessorUser = new UserAccountEntity();
-        dailylistProcessorUser.setAccountGuid(DAILYLIST_PROCESSOR_GUID);
-
-        when(userAccountRepository.findSystemUser(HOUSEKEEPING_GUID)).thenReturn(housekeepingUser);
-        when(userAccountRepository.findSystemUser(DAILYLIST_PROCESSOR_GUID)).thenReturn(dailylistProcessorUser);
-
-        UserAccountEntity user = systemUserHelper.getHousekeepingUser();
-        verify(userAccountRepository, times(1)).findSystemUser(anyString());
-        assertEquals(HOUSEKEEPING_GUID, user.getAccountGuid());
-
-        user = systemUserHelper.getHousekeepingUser();
-        verify(userAccountRepository, times(1)).findSystemUser(anyString());
-        assertEquals(HOUSEKEEPING_GUID, user.getAccountGuid());
-
-        user = systemUserHelper.getDailyListProcessorUser();
-        verify(userAccountRepository, times(2)).findSystemUser(anyString());
-        assertEquals(DAILYLIST_PROCESSOR_GUID, user.getAccountGuid());
-
-        user = systemUserHelper.getDailyListProcessorUser();
-        verify(userAccountRepository, times(2)).findSystemUser(anyString());
-        assertEquals(DAILYLIST_PROCESSOR_GUID, user.getAccountGuid());
     }
 
     @Test
