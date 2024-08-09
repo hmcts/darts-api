@@ -28,3 +28,8 @@ variable "account_kind" {
   description = "Defines the Kind of account. Valid options are Storage, StorageV2 and BlobStorage. Changing this forces a new resource to be created."
   default     = "StorageV2"
 }
+
+variable "pgsqlSku" {
+  description = "sku set for postgreSQL databse"
+  default     = "GP_Standard_D4s_v3"
+}
