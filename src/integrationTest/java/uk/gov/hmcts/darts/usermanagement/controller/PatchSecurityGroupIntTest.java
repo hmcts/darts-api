@@ -22,7 +22,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.APPROVER;
-import static uk.gov.hmcts.darts.test.common.data.SecurityGroupTestData.buildGroupForRole;
+import static uk.gov.hmcts.darts.test.common.data.SecurityGroupTestData.createGroupForRole;
 import static uk.gov.hmcts.darts.test.common.data.UserAccountTestData.minimalUserAccount;
 
 @AutoConfigureMockMvc
@@ -375,7 +375,7 @@ class PatchSecurityGroupIntTest extends IntegrationBase {
     void removeAllUsersGivenEmptyUserPatchList() throws Exception {
         superAdminUserStub.givenUserIsAuthorised(userIdentity);
 
-        var securityGroupEntity = buildGroupForRole(APPROVER);
+        var securityGroupEntity = createGroupForRole(APPROVER);
         dartsDatabase.addUserToGroup(minimalUserAccount(), securityGroupEntity);
         dartsDatabase.addUserToGroup(minimalUserAccount(), securityGroupEntity);
 
@@ -393,7 +393,7 @@ class PatchSecurityGroupIntTest extends IntegrationBase {
     void removesOnlyAbsentUsersGivenPatchWithSubsetOfCurrentUsers() throws Exception {
         superAdminUserStub.givenUserIsAuthorised(userIdentity);
 
-        var securityGroupEntity = buildGroupForRole(APPROVER);
+        var securityGroupEntity = createGroupForRole(APPROVER);
         var userAccount1 = minimalUserAccount();
         var userAccount2 = minimalUserAccount();
         dartsDatabase.addUserToGroup(userAccount1, securityGroupEntity);

@@ -4,7 +4,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.transaction.annotation.Transactional;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.CaseDocumentEntity;
 import uk.gov.hmcts.darts.common.entity.CaseRetentionEntity;
@@ -23,7 +22,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.mockito.Mockito.when;
 
-@Transactional
 class GenerateCaseDocumentForRetentionDateBatchProcessorIntTest extends IntegrationBase {
     protected static final String SOME_COURTHOUSE = "some-courthouse";
     protected static final String SOME_ROOM = "some-room";
@@ -124,12 +122,15 @@ class GenerateCaseDocumentForRetentionDateBatchProcessorIntTest extends Integrat
         generateCaseDocumentForRetentionDateBatchProcessor.processGenerateCaseDocumentForRetentionDate(2);
 
         // then
-        CourtCaseEntity courtCaseEntity1 = dartsDatabase.getCaseRepository().getReferenceById(courtCaseEntityWithNoCaseDocuments.getId());
-        assertFalse(courtCaseEntity1.isRetentionUpdated());
+        assertFalse(
+            dartsDatabase.getCaseRepository()
+                .findById(courtCaseEntityWithNoCaseDocuments.getId()).orElseThrow()
+                .isRetentionUpdated());
 
-        CourtCaseEntity courtCaseEntity2 = dartsDatabase.getCaseRepository().getReferenceById(courtCaseEntityWithCaseDocument.getId());
-        assertFalse(courtCaseEntity2.isRetentionUpdated());
-
+        assertFalse(
+            dartsDatabase.getCaseRepository()
+                .findById(courtCaseEntityWithCaseDocument.getId()).orElseThrow()
+                .isRetentionUpdated());
     }
 
     @Test
@@ -171,12 +172,15 @@ class GenerateCaseDocumentForRetentionDateBatchProcessorIntTest extends Integrat
         generateCaseDocumentForRetentionDateBatchProcessor.processGenerateCaseDocumentForRetentionDate(2);
 
         // then
-        CourtCaseEntity courtCaseEntity1 = dartsDatabase.getCaseRepository().getReferenceById(courtCaseEntityWithCaseDocuments1.getId());
-        assertFalse(courtCaseEntity1.isRetentionUpdated());
+        assertFalse(
+            dartsDatabase.getCaseRepository()
+                .findById(courtCaseEntityWithCaseDocuments1.getId()).orElseThrow()
+                .isRetentionUpdated());
 
-        CourtCaseEntity courtCaseEntity2 = dartsDatabase.getCaseRepository().getReferenceById(courtCaseEntityWithCaseDocument2.getId());
-        assertFalse(courtCaseEntity2.isRetentionUpdated());
-
+        assertFalse(
+            dartsDatabase.getCaseRepository()
+                .findById(courtCaseEntityWithCaseDocument2.getId()).orElseThrow()
+                .isRetentionUpdated());
     }
 
     @Test

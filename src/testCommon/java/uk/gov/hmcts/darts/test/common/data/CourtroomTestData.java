@@ -8,7 +8,6 @@ import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import java.util.ArrayList;
 
 import static org.apache.commons.lang3.RandomStringUtils.random;
-import static uk.gov.hmcts.darts.test.common.data.CourthouseTestData.createCourthouse;
 import static uk.gov.hmcts.darts.test.common.data.UserAccountTestData.minimalUserAccount;
 
 @UtilityClass
@@ -18,7 +17,7 @@ public class CourtroomTestData {
     public static CourtroomEntity someMinimalCourtRoom() {
         var postfix = random(10, false, true);
         var courtroom = new CourtroomEntity();
-        var courthouse = createCourthouse("some-courthouse-" + postfix);
+        var courthouse = CourthouseTestData.createCourthouseWithName("some-courthouse-" + postfix);
         var courtrooms = new ArrayList<CourtroomEntity>();
         courtrooms.add(courtroom);
         courthouse.setCourtrooms(courtrooms);

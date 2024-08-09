@@ -19,55 +19,54 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static uk.gov.hmcts.darts.test.common.TestUtils.getContentsFromFile;
 
 
-    @AutoConfigureMockMvc
-    class TranscriptionControllerGetAllStatusTest extends IntegrationBase {
+@AutoConfigureMockMvc
+class TranscriptionControllerGetAllStatusTest extends IntegrationBase {
 
-        private static final String ENDPOINT_URL_TRANSCRIPTION = "/admin/transcription-status";
+    private static final String ENDPOINT_URL_TRANSCRIPTION = "/admin/transcription-status";
 
-        @Autowired
-        private MockMvc mockMvc;
+    @Autowired
+    private MockMvc mockMvc;
 
-        @Autowired
-        private SuperAdminUserStub superAdminUserStub;
+    @Autowired
+    private SuperAdminUserStub superAdminUserStub;
 
-        @Autowired
-        private SuperUserStub superUserStub;
+    @Autowired
+    private SuperUserStub superUserStub;
 
-        @MockBean
-        private UserIdentity mockUserIdentity;
+    @MockBean
+    private UserIdentity mockUserIdentity;
 
-        @Test
-        void shouldSuccessfullyReturnTranscriptionStatusesForSuperAdmin() throws Exception {
+    @Test
+    void shouldSuccessfullyReturnTranscriptionStatusesForSuperAdmin() throws Exception {
 
-            superAdminUserStub.givenUserIsAuthorised(mockUserIdentity);
-            MockHttpServletRequestBuilder requestBuilder = get(ENDPOINT_URL_TRANSCRIPTION);
-            MvcResult response = mockMvc.perform(requestBuilder).andExpect(status().isOk()).andReturn();
-            String actualResponse = response.getResponse().getContentAsString();
-            String expectedResponse = getContentsFromFile("tests/transcriptions/transcription_status/expectedResponse.json");
-            JSONAssert.assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
-        }
-
-        @Test
-        void shouldSuccessfullyReturnTranscriptionStatusesForSuperUser() throws Exception {
-
-            superUserStub.givenUserIsAuthorised(mockUserIdentity);
-            MockHttpServletRequestBuilder requestBuilder = get(ENDPOINT_URL_TRANSCRIPTION);
-            MvcResult response = mockMvc.perform(requestBuilder).andExpect(status().isOk()).andReturn();
-            String actualResponse = response.getResponse().getContentAsString();
-            String expectedResponse = getContentsFromFile("tests/transcriptions/transcription_status/expectedResponse.json");
-            JSONAssert.assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
-        }
-
-
-        @Test
-        void shouldFailToReturnTranscriptionStatusesForNonSuperAdminOrSuperUser() throws Exception {
-
-            MockHttpServletRequestBuilder requestBuilder = get(ENDPOINT_URL_TRANSCRIPTION);
-
-            mockMvc.perform(requestBuilder).andExpect(status().isForbidden()).andReturn();
-        }
-
-
-
+        superAdminUserStub.givenUserIsAuthorised(mockUserIdentity);
+        MockHttpServletRequestBuilder requestBuilder = get(ENDPOINT_URL_TRANSCRIPTION);
+        MvcResult response = mockMvc.perform(requestBuilder).andExpect(status().isOk()).andReturn();
+        String actualResponse = response.getResponse().getContentAsString();
+        String expectedResponse = getContentsFromFile("tests/transcriptions/transcription_status/expectedResponse.json");
+        JSONAssert.assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
     }
+
+    @Test
+    void shouldSuccessfullyReturnTranscriptionStatusesForSuperUser() throws Exception {
+
+        superUserStub.givenUserIsAuthorised(mockUserIdentity);
+        MockHttpServletRequestBuilder requestBuilder = get(ENDPOINT_URL_TRANSCRIPTION);
+        MvcResult response = mockMvc.perform(requestBuilder).andExpect(status().isOk()).andReturn();
+        String actualResponse = response.getResponse().getContentAsString();
+        String expectedResponse = getContentsFromFile("tests/transcriptions/transcription_status/expectedResponse.json");
+        JSONAssert.assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
+    }
+
+
+    @Test
+    void shouldFailToReturnTranscriptionStatusesForNonSuperAdminOrSuperUser() throws Exception {
+
+        MockHttpServletRequestBuilder requestBuilder = get(ENDPOINT_URL_TRANSCRIPTION);
+
+        mockMvc.perform(requestBuilder).andExpect(status().isForbidden()).andReturn();
+    }
+
+
+}
 

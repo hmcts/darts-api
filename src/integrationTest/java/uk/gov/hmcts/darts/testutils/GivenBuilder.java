@@ -14,8 +14,8 @@ import java.util.List;
 import java.util.UUID;
 
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.JUDICIARY;
-import static uk.gov.hmcts.darts.test.common.data.SecurityGroupTestData.buildGroupForRole;
 import static uk.gov.hmcts.darts.test.common.data.SecurityGroupTestData.buildGroupForRoleAndCourthouse;
+import static uk.gov.hmcts.darts.test.common.data.SecurityGroupTestData.createGroupForRole;
 import static uk.gov.hmcts.darts.test.common.data.UserAccountTestData.minimalUserAccount;
 
 @Component
@@ -28,7 +28,7 @@ public class GivenBuilder {
         var userEmail = role.name() + "@global.com";
         anAuthenticatedUserFor(userEmail);
 
-        var securityGroup = buildGroupForRole(role);
+        var securityGroup = createGroupForRole(role);
         securityGroup.setGlobalAccess(true);
 
         var user = minimalUserAccount();

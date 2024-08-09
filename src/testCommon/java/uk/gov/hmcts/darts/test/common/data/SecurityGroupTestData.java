@@ -7,13 +7,13 @@ import uk.gov.hmcts.darts.common.enums.SecurityRoleEnum;
 import java.util.Set;
 
 import static org.apache.commons.lang3.RandomStringUtils.random;
-import static uk.gov.hmcts.darts.test.common.data.SecurityRoleTestData.securityRoleFor;
+import static uk.gov.hmcts.darts.test.common.data.SecurityRoleTestData.createSecurityRoleFor;
 
 @SuppressWarnings({"HideUtilityClassConstructor"})
 public class SecurityGroupTestData {
 
     public static SecurityGroupEntity minimalSecurityGroup() {
-        var postfix = random(10);
+        var postfix = random(10, false, true);
         var securityGroup = new SecurityGroupEntity();
         securityGroup.setGroupName("some-group-name-" + postfix);
         securityGroup.setGlobalAccess(false);
@@ -24,14 +24,18 @@ public class SecurityGroupTestData {
         return securityGroup;
     }
 
-    public static SecurityGroupEntity buildGroupForRole(SecurityRoleEnum role) {
+    // Use with caution, when persisted it will overwrite values for subsequent tests
+    @Deprecated
+    public static SecurityGroupEntity createGroupForRole(SecurityRoleEnum role) {
         var securityGroupEntity = minimalSecurityGroup();
-        securityGroupEntity.setSecurityRoleEntity(securityRoleFor(role));
+        securityGroupEntity.setSecurityRoleEntity(createSecurityRoleFor(role));
         return securityGroupEntity;
     }
 
+    // Use with caution, when persisted it will overwrite values for subsequent tests
+    @Deprecated
     public static SecurityGroupEntity buildGroupForRoleAndCourthouse(SecurityRoleEnum role, CourthouseEntity courthouse) {
-        var securityGroupEntity = buildGroupForRole(role);
+        var securityGroupEntity = createGroupForRole(role);
         securityGroupEntity.setCourthouseEntities(Set.of(courthouse));
         return securityGroupEntity;
     }
