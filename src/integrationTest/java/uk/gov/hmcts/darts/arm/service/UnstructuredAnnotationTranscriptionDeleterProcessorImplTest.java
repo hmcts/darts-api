@@ -117,11 +117,11 @@ class UnstructuredAnnotationTranscriptionDeleterProcessorImplTest extends Postgr
         );
 
         List<ExternalObjectDirectoryEntity> externalObjectDirectoryEntitiesNotRelevant = externalObjectDirectoryStub
-            .generateWithStatusAndTranscriptionAndAnnotationAndLocation(
+            .generateWithStatusAndTranscriptionOrAnnotationAndLocation(
                 ExternalLocationTypeEnum.UNSTRUCTURED,
                 ObjectRecordStatusEnum.ARM_RAW_DATA_FAILED, numberOfRecordsToGenerate, Optional.of(lastModifiedBeforeCurrentTimeForUnstructured));
         List<ExternalObjectDirectoryEntity> externalObjectDirectoryEntities = externalObjectDirectoryStub
-            .generateWithStatusAndTranscriptionAndAnnotationAndLocation(
+            .generateWithStatusAndTranscriptionOrAnnotationAndLocation(
                 ExternalLocationTypeEnum.UNSTRUCTURED, STORED, numberOfRecordsToGenerate, Optional.of(lastModifiedBeforeCurrentTimeForUnstructured));
         entitiesToBeMarkedWithMediaOutsideOfWeeksAndHours
             = externalObjectDirectoryEntities.subList(0, externalObjectDirectoryEntities.size() / 2);
