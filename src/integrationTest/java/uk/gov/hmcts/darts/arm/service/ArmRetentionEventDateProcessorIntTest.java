@@ -81,6 +81,7 @@ class ArmRetentionEventDateProcessorIntTest extends IntegrationBase {
     private ArmDataManagementConfiguration armDataManagementConfiguration;
 
     private ArmDataManagementApi armDataManagementApi;
+
     @MockBean
     private UserIdentity userIdentity;
 
