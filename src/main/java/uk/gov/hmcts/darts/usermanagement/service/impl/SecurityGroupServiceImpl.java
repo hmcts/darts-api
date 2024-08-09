@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.darts.audit.api.AuditApi;
+import uk.gov.hmcts.darts.authorisation.api.AuthorisationApi;
 import uk.gov.hmcts.darts.common.entity.SecurityGroupEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.enums.SecurityRoleEnum;
@@ -51,6 +52,7 @@ public class SecurityGroupServiceImpl implements SecurityGroupService {
     private final SecurityGroupWithIdAndRoleAndUsersMapper securityGroupWithIdAndRoleAndUsersMapper;
     private final SecurityGroupCreationValidation securityGroupCreationValidation;
     private final AuditApi auditApi;
+    private final AuthorisationApi authorisationApi;
 
     private final List<SecurityRoleEnum> securityRolesAllowedToBeCreatedInGroup = List.of(SecurityRoleEnum.TRANSCRIBER, SecurityRoleEnum.TRANSLATION_QA);
 
@@ -97,11 +99,15 @@ public class SecurityGroupServiceImpl implements SecurityGroupService {
         securityGroupEntity.setGlobalAccess(false);
         securityGroupEntity.setDisplayState(true);
 
+
         var role = securityRoleRepository.getReferenceById(securityGroupModel.getRoleId());
         securityGroupEntity.setSecurityRoleEntity(role);
 
-        auditApi.record(CREATE_GROUP);
+        var currentUser = this.authorisationApi.getCurrentUser();
+        securityGroupEntity.setCreatedBy(currentUser);
+        securityGroupEntity.setLastModifiedBy(currentUser);
 
+        auditApi.record(CREATE_GROUP);
         return securityGroupRepository.saveAndFlush(securityGroupEntity);
     }
 
@@ -134,6 +140,9 @@ public class SecurityGroupServiceImpl implements SecurityGroupService {
         updateSecurityGroupEntity(securityGroupPatch, securityGroupEntity);
 
         var updatedGroup = securityGroupRepository.saveAndFlush(securityGroupEntity);
+
+        var currentUser = this.authorisationApi.getCurrentUser();
+        securityGroupEntity.setLastModifiedBy(currentUser);
 
         auditApi.recordAll(auditableActivities);
 

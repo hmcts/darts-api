@@ -20,8 +20,7 @@ import org.hibernate.envers.AuditJoinTable;
 import org.hibernate.envers.AuditTable;
 import org.hibernate.envers.Audited;
 import org.hibernate.envers.NotAudited;
-import uk.gov.hmcts.darts.common.entity.base.CreatedModifiedBaseEntity;
-import uk.gov.hmcts.darts.common.entity.base.NonNullableCreatedModifiedBaseEntity;
+import uk.gov.hmcts.darts.common.entity.base.MandatoryCreatedModifiedBaseEntity;
 
 import java.util.LinkedHashSet;
 import java.util.Set;
@@ -34,7 +33,7 @@ import static org.hibernate.envers.RelationTargetAuditMode.NOT_AUDITED;
 @Setter
 @Audited
 @AuditTable("security_group_aud")
-public class SecurityGroupEntity extends NonNullableCreatedModifiedBaseEntity {
+public class SecurityGroupEntity extends MandatoryCreatedModifiedBaseEntity {
 
     @Id
     @Column(name = "grp_id")

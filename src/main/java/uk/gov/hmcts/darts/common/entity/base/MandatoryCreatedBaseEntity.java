@@ -17,7 +17,7 @@ import javax.validation.constraints.NotNull;
 @MappedSuperclass
 @Getter
 @Setter
-public class NonNullableCreatedBaseEntity {
+public class MandatoryCreatedBaseEntity {
 
     @NotNull
     @CreationTimestamp

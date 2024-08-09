@@ -16,7 +16,7 @@ import java.time.OffsetDateTime;
 @MappedSuperclass
 @Getter
 @Setter
-public class NonNullableCreatedModifiedBaseEntity extends CreatedBaseEntity {
+public class MandatoryCreatedModifiedBaseEntity extends MandatoryCreatedBaseEntity {
 
     @UpdateTimestamp
     @Column(name = "last_modified_ts", nullable = false)
