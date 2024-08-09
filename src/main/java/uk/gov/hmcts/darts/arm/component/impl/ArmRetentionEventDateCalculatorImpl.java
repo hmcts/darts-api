@@ -50,35 +50,41 @@ public class ArmRetentionEventDateCalculatorImpl implements ArmRetentionEventDat
                     return true;
                 } else if (ObjectRecordStatusEnum.STORED.getId() == externalObjectDirectory.getStatusId()) {
                     log.info("Updating retention date for ARM EOD {} ", externalObjectDirectoryId);
-                    ConfidenceAware confidenceAware = armHelper.getDocumentConfidence(externalObjectDirectory);
-
-                    if (confidenceAware != null) {
-                        Integer confidenceScore = confidenceAware.getRetConfScore();
-                        String confidenceReason = confidenceAware.getRetConfReason();
-
-                        if (confidenceScore != null) {
-                            UpdateMetadataResponse updateMetadataResponseMedia = armDataManagementApi.updateMetadata(
-                                externalObjectDirectory.getExternalRecordId(), armRetentionDate, confidenceScore, confidenceReason);
-
-                            if (updateMetadataResponseMedia.isError()) {
-                                log.error("Unable set retention date for ARM EOD {} due to error(s) {}",
-                                          externalObjectDirectoryId, StringUtils.join(updateMetadataResponseMedia.getResponseStatusMessages(), ", "));
-                            } else {
-                                externalObjectDirectory.setEventDateTs(armRetentionDate);
-                                externalObjectDirectory.setUpdateRetention(false);
-                                externalObjectDirectory.setLastModifiedBy(userAccount);
-                                externalObjectDirectoryRepository.saveAndFlush(externalObjectDirectory);
-                                log.info("Retention date is successfully applied on ARM for EOD {} ", externalObjectDirectoryId);
-                                return true;
-                            }
-                        }
-                    }
+                    return processArmUpdate(externalObjectDirectory, armRetentionDate, userAccount, externalObjectDirectoryId);
                 }
             } else {
                 log.warn("Retention date has not be set for EOD {}", externalObjectDirectoryId);
             }
         } catch (Exception e) {
             log.error("Unable to calculate ARM retention date for EOD {}", externalObjectDirectoryId, e);
+        }
+        return false;
+    }
+
+    private boolean processArmUpdate(ExternalObjectDirectoryEntity externalObjectDirectory,OffsetDateTime armRetentionDate,
+                                  UserAccountEntity userAccount, Integer externalObjectDirectoryId) {
+        ConfidenceAware confidenceAware = armHelper.getDocumentConfidence(externalObjectDirectory);
+
+        if (confidenceAware != null) {
+            Integer confidenceScore = confidenceAware.getRetConfScore();
+            String confidenceReason = confidenceAware.getRetConfReason();
+
+            if (confidenceScore != null) {
+                UpdateMetadataResponse updateMetadataResponseMedia = armDataManagementApi.updateMetadata(
+                    externalObjectDirectory.getExternalRecordId(), armRetentionDate, confidenceScore, confidenceReason);
+
+                if (updateMetadataResponseMedia.isError()) {
+                    log.error("Unable set retention date for ARM EOD {} due to error(s) {}",
+                              externalObjectDirectoryId, StringUtils.join(updateMetadataResponseMedia.getResponseStatusMessages(), ", "));
+                } else {
+                    externalObjectDirectory.setEventDateTs(armRetentionDate);
+                    externalObjectDirectory.setUpdateRetention(false);
+                    externalObjectDirectory.setLastModifiedBy(userAccount);
+                    externalObjectDirectoryRepository.saveAndFlush(externalObjectDirectory);
+                    log.info("Retention date is successfully applied on ARM for EOD {} ", externalObjectDirectoryId);
+                    return true;
+                }
+            }
         }
         return false;
     }
