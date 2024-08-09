@@ -6,6 +6,7 @@ import uk.gov.hmcts.darts.audio.entity.MediaRequestEntity;
 import uk.gov.hmcts.darts.common.entity.ObjectRecordStatusEntity;
 import uk.gov.hmcts.darts.common.entity.TransformedMediaEntity;
 import uk.gov.hmcts.darts.common.entity.TransientObjectDirectoryEntity;
+import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.repository.TransientObjectDirectoryRepository;
 
 import java.time.OffsetDateTime;
@@ -39,7 +40,9 @@ public class TransientObjectDirectoryStub {
                                                                                UUID externalLocation) {
         var transientObjectDirectoryEntity = new TransientObjectDirectoryEntity();
         transientObjectDirectoryEntity.setTransformedMedia(transformedMediaEntity);
-        transientObjectDirectoryEntity.setLastModifiedBy(userAccountStub.getIntegrationTestUserAccountEntity());
+        UserAccountEntity userAccount = userAccountStub.getIntegrationTestUserAccountEntity();
+        transientObjectDirectoryEntity.setLastModifiedBy(userAccount);
+        transientObjectDirectoryEntity.setCreatedBy(userAccount);
         transientObjectDirectoryEntity.setStatus(objectRecordStatusEntity);
         transientObjectDirectoryEntity.setExternalLocation(externalLocation);
         transientObjectDirectoryEntity.setLastModifiedDateTime(OffsetDateTime.parse("2024-02-12T13:45:00Z"));

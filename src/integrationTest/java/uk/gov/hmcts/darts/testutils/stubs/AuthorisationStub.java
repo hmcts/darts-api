@@ -2,6 +2,7 @@ package uk.gov.hmcts.darts.testutils.stubs;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import uk.gov.hmcts.darts.audio.entity.MediaRequestEntity;
@@ -16,6 +17,7 @@ import uk.gov.hmcts.darts.common.entity.TranscriptionEntity;
 import uk.gov.hmcts.darts.common.entity.TransformedMediaEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.repository.SecurityGroupRepository;
+import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
 
 import java.time.LocalTime;
 import java.time.OffsetDateTime;
@@ -55,6 +57,8 @@ public class AuthorisationStub {
     private TranscriptionEntity transcriptionEntity;
     private AnnotationEntity annotationEntity;
     private UserAccountEntity separateIntegrationUser;
+    @Autowired
+    private UserAccountRepository userAccountRepository;
 
     @Transactional
     public void givenTestSchema() {
@@ -90,6 +94,8 @@ public class AuthorisationStub {
         mediaRequestEntity.setRequestType(DOWNLOAD);
         mediaRequestEntity.setStartTime(YESTERDAY);
         mediaRequestEntity.setEndTime(YESTERDAY.plusHours(1));
+        mediaRequestEntity.setCreatedBy(userAccountRepository.getReferenceById(0));
+        mediaRequestEntity.setLastModifiedBy(userAccountRepository.getReferenceById(0));
 
         dartsDatabaseStub.save(mediaRequestEntity);
 
@@ -103,6 +109,8 @@ public class AuthorisationStub {
         mediaRequestEntitySystemUser.setRequestType(DOWNLOAD);
         mediaRequestEntitySystemUser.setStartTime(YESTERDAY);
         mediaRequestEntitySystemUser.setEndTime(YESTERDAY.plusHours(1));
+        mediaRequestEntitySystemUser.setCreatedBy(userAccountRepository.getReferenceById(0));
+        mediaRequestEntitySystemUser.setLastModifiedBy(userAccountRepository.getReferenceById(0));
         dartsDatabaseStub.save(mediaRequestEntitySystemUser);
 
         mediaEntity = new MediaEntity();
@@ -116,6 +124,8 @@ public class AuthorisationStub {
         mediaEntity.setMediaFormat("mp3");
         mediaEntity.setChecksum("checksum");
         mediaEntity.setMediaType(MEDIA_TYPE_DEFAULT);
+        mediaEntity.setCreatedBy(userAccountRepository.getReferenceById(0));
+        mediaEntity.setLastModifiedBy(userAccountRepository.getReferenceById(0));
         dartsDatabaseStub.save(mediaEntity);
 
         hearingEntity.addMedia(mediaEntity);
@@ -141,6 +151,8 @@ public class AuthorisationStub {
         hearingEntity.setHearingDate(YESTERDAY.toLocalDate());
         hearingEntity.setHearingIsActual(true);
         hearingEntity.setScheduledStartTime(LocalTime.now());
+        hearingEntity.setCreatedBy(userAccountRepository.getReferenceById(0));
+        hearingEntity.setLastModifiedBy(userAccountRepository.getReferenceById(0));
         dartsDatabaseStub.save(hearingEntity);
     }
 
@@ -150,6 +162,8 @@ public class AuthorisationStub {
         courtCaseEntity.setCourthouse(courthouseEntity);
         courtCaseEntity.setClosed(false);
         courtCaseEntity.setInterpreterUsed(false);
+        courtCaseEntity.setCreatedBy(userAccountRepository.getReferenceById(0));
+        courtCaseEntity.setLastModifiedBy(userAccountRepository.getReferenceById(0));
         dartsDatabaseStub.save(courtCaseEntity);
     }
 

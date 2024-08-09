@@ -75,9 +75,9 @@ class AudioRequestsControllerAddAudioRequestDownloadIntTest extends IntegrationB
             LocalDateTime.parse(HEARING_DATETIME)
         );
         CourtCaseEntity courtCase = hearingEntity.getCourtCase();
-        courtCase.addProsecutor("aProsecutor");
-        courtCase.addDefendant("aDefendant");
-        courtCase.addDefence("aDefence");
+        courtCase.addProsecutor("aProsecutor", courtCase.getCreatedBy());
+        courtCase.addDefendant("aDefendant", courtCase.getCreatedBy());
+        courtCase.addDefence("aDefence", courtCase.getCreatedBy());
         dartsDatabase.save(courtCase);
 
         testUser = dartsDatabase.getUserAccountStub()

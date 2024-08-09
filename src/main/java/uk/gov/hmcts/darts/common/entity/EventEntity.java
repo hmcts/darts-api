@@ -76,7 +76,7 @@ public class EventEntity extends CreatedModifiedBaseEntity {
     private List<HearingEntity> hearingEntities = new ArrayList<>();
 
     @Column(name = "event_status")
-    private String eventStatus;
+    private Integer eventStatus;
 
     @Column(name = "is_current")
     private Boolean isCurrent;
