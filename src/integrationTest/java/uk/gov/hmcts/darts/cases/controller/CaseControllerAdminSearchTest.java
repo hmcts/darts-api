@@ -176,7 +176,7 @@ class CaseControllerAdminSearchTest extends IntegrationBase {
     }
 
     private void setupUserAccountAndSecurityGroup() {
-        var securityGroup = SecurityGroupTestData.buildGroupForRole(SUPER_ADMIN);
+        var securityGroup = SecurityGroupTestData.createGroupForRole(SUPER_ADMIN);
         securityGroup.setGlobalAccess(true);
         securityGroup.setUseInterpreter(false);
         assignSecurityGroupToUser(user, securityGroup);

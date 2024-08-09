@@ -12,7 +12,6 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
-import org.springframework.transaction.annotation.Transactional;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
@@ -34,7 +33,6 @@ import static uk.gov.hmcts.darts.test.common.TestUtils.getContentsFromFile;
 
 @Slf4j
 @AutoConfigureMockMvc
-@Transactional
 class HearingsControllerGetTranscriptsTest extends IntegrationBase {
     private static final String ENDPOINT_URL_HEARINGS = "/hearings/{hearing_id}/transcripts";
     private static final OffsetDateTime SOME_DATE_TIME = OffsetDateTime.parse("2023-01-01T12:00Z");

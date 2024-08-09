@@ -14,7 +14,6 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import org.springframework.transaction.PlatformTransactionManager;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionTemplate;
 import uk.gov.hmcts.darts.authorisation.api.AuthorisationApi;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
@@ -23,7 +22,6 @@ import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 import uk.gov.hmcts.darts.common.entity.RegionEntity;
 import uk.gov.hmcts.darts.common.entity.SecurityGroupEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
-import uk.gov.hmcts.darts.common.enums.SecurityRoleEnum;
 import uk.gov.hmcts.darts.common.repository.CourthouseRepository;
 import uk.gov.hmcts.darts.common.repository.RegionRepository;
 import uk.gov.hmcts.darts.common.repository.SecurityGroupRepository;
@@ -31,12 +29,10 @@ import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
 import uk.gov.hmcts.darts.common.repository.UserRolesCourthousesRepository;
 import uk.gov.hmcts.darts.courthouse.model.CourthousePost;
 import uk.gov.hmcts.darts.courthouse.model.ExtendedCourthousePost;
-import uk.gov.hmcts.darts.test.common.data.SecurityGroupTestData;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
-import uk.gov.hmcts.darts.testutils.stubs.CourthouseStub;
 import uk.gov.hmcts.darts.testutils.stubs.DartsDatabaseStub;
+import uk.gov.hmcts.darts.testutils.stubs.EntityGraphPersistence;
 import uk.gov.hmcts.darts.testutils.stubs.RegionStub;
-import uk.gov.hmcts.darts.testutils.stubs.SecurityGroupStub;
 import uk.gov.hmcts.darts.testutils.stubs.SuperAdminUserStub;
 import uk.gov.hmcts.darts.testutils.stubs.UserAccountStub;
 
@@ -44,13 +40,12 @@ import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.Collections;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
-import static org.hamcrest.Matchers.contains;
+import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.hasItems;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
@@ -65,7 +60,12 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.APPROVER;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.REQUESTER;
+import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.SUPER_USER;
+import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.TRANSCRIBER;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.TRANSLATION_QA;
+import static uk.gov.hmcts.darts.test.common.data.CourthouseTestData.createCourthouseWithName;
+import static uk.gov.hmcts.darts.test.common.data.RegionTestData.minimalRegion;
+import static uk.gov.hmcts.darts.test.common.data.SecurityGroupTestData.createGroupForRole;
 
 @AutoConfigureMockMvc
 class CourthouseApiTest extends IntegrationBase {
@@ -124,15 +124,14 @@ class CourthouseApiTest extends IntegrationBase {
 
     private TransactionTemplate transactionTemplate;
 
-    private CourthouseStub courthouseStub;
-
-    private SecurityGroupStub securityGroupStub;
-
     @Autowired
     DartsDatabaseStub dartsDatabaseStub;
 
     @Autowired
     UserAccountStub userStub;
+
+    @Autowired
+    private EntityGraphPersistence entityGraphPersistence;
 
     private Authentication authentication;
 
@@ -222,36 +221,30 @@ class CourthouseApiTest extends IntegrationBase {
 
 
     @Test
-    @Transactional
     void courthousesWithRegionAndSecurityGroupsGet() throws Exception {
         UserAccountEntity user = superAdminUserStub.givenUserIsAuthorised(authentication);
         createEnabledUserAccountEntity(user);
 
-        CourthouseEntity courtHouseEntity = dartsDatabase.createCourthouseUnlessExists(COURTHOUSE_NAME);
+        var courthouse = createCourthouseWithName(COURTHOUSE_NAME);
+        var region = minimalRegion();
+        var secGrp1 = createGroupForRole(SUPER_USER);
+        var secGrp2 = createGroupForRole(SUPER_USER);
 
-        RegionEntity region = new RegionEntity();
-        region.setId(5);
-        courtHouseEntity.setRegion(region);
+        courthouse.setRegion(region);
+        courthouse.setSecurityGroups(Set.of(secGrp1, secGrp2));
 
-        Set<SecurityGroupEntity> secGrps = new LinkedHashSet<>();
-        SecurityGroupEntity s1 = new SecurityGroupEntity();
-        s1.setId(3);
-        secGrps.add(s1);
-        SecurityGroupEntity s2 = new SecurityGroupEntity();
-        s2.setId(4);
-        secGrps.add(s2);
+        entityGraphPersistence.persist(courthouse);
 
-        courtHouseEntity.setSecurityGroups(secGrps);
-
-        MockHttpServletRequestBuilder requestBuilder = get("/admin/courthouses/{courthouse_id}", courtHouseEntity.getId())
+        MockHttpServletRequestBuilder requestBuilder = get("/admin/courthouses/{courthouse_id}", courthouse.getId())
             .contentType(MediaType.APPLICATION_JSON_VALUE);
+
         MvcResult response = mockMvc.perform(requestBuilder).andExpect(status().isOk())
             .andExpect(jsonPath("$.courthouse_name", is(COURTHOUSE_NAME)))
             .andExpect(jsonPath("$.created_date_time", is(notNullValue())))
             .andExpect(jsonPath("$.last_modified_date_time", is(notNullValue())))
-            .andExpect(jsonPath("$.region_id", is(5)))
+            .andExpect(jsonPath("$.region_id", is(region.getId())))
             .andExpect(jsonPath("$.security_group_ids", hasSize(2)))
-            .andExpect(jsonPath("$.security_group_ids", contains(3, 4)))
+            .andExpect(jsonPath("$.security_group_ids", containsInAnyOrder(secGrp1.getId(), secGrp2.getId())))
             .andDo(print())
             .andReturn();
 
@@ -331,7 +324,6 @@ class CourthouseApiTest extends IntegrationBase {
     }
 
     @Test
-    @Transactional
     void courthousesGetRequestedByJudge() throws Exception {
         final CourthouseEntity leedsCourthouse = dartsDatabase.createCourthouseUnlessExists(LEEDS_COURT);
         final CourthouseEntity swanseaCourthouse = dartsDatabase.createCourthouseUnlessExists(SWANSEA_CROWN_COURT);
@@ -521,7 +513,7 @@ class CourthouseApiTest extends IntegrationBase {
             Optional<SecurityGroupEntity> standingTranscriberGroupOptional = dartsDatabase.getSecurityGroupRepository()
                 .findAll()
                 .stream()
-                .filter(securityGroupEntity -> securityGroupEntity.getSecurityRoleEntity().getRoleName().equals(SecurityRoleEnum.TRANSCRIBER.name()))
+                .filter(securityGroupEntity -> securityGroupEntity.getSecurityRoleEntity().getRoleName().equals(TRANSCRIBER.name()))
                 .findFirst();
             assertTrue(standingTranscriberGroupOptional.isPresent(), "Precondition failed: Expected a standing transcriber group to be available");
 
@@ -777,7 +769,7 @@ class CourthouseApiTest extends IntegrationBase {
     }
 
     private static SecurityGroupEntity getSecurityGroupEntity(Set<CourthouseEntity> courthouseEntities) {
-        var securityGroup = SecurityGroupTestData.buildGroupForRole(TRANSLATION_QA);
+        var securityGroup = createGroupForRole(TRANSLATION_QA);
         securityGroup.setCourthouseEntities(courthouseEntities);
         securityGroup.setGlobalAccess(true);
         securityGroup.setUseInterpreter(false);

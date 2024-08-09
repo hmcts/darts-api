@@ -34,6 +34,7 @@ import uk.gov.hmcts.darts.common.entity.NodeRegisterEntity;
 import uk.gov.hmcts.darts.common.entity.ObjectRecordStatusEntity;
 import uk.gov.hmcts.darts.common.entity.RetentionPolicyTypeEntity;
 import uk.gov.hmcts.darts.common.entity.SecurityGroupEntity;
+import uk.gov.hmcts.darts.common.entity.SecurityRoleEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionCommentEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionWorkflowEntity;
@@ -42,6 +43,7 @@ import uk.gov.hmcts.darts.common.entity.base.CreatedModifiedBaseEntity;
 import uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum;
 import uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum;
 import uk.gov.hmcts.darts.common.enums.SecurityGroupEnum;
+import uk.gov.hmcts.darts.common.enums.SecurityRoleEnum;
 import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
 import uk.gov.hmcts.darts.common.repository.AnnotationDocumentRepository;
 import uk.gov.hmcts.darts.common.repository.AnnotationRepository;
@@ -208,6 +210,7 @@ public class DartsDatabaseStub {
     private final EntityManager entityManager;
     private final CurrentTimeHelper currentTimeHelper;
     private final TransactionalUtil transactionalUtil;
+    private final EntityGraphPersistence entityGraphPersistence;
 
     public void resetSequences() {
         try (EntityManager em = entityManagerFactory.createEntityManager()) {
@@ -391,7 +394,7 @@ public class DartsDatabaseStub {
     }
 
     public CourthouseEntity createCourthouseWithNameAndCode(String name, Integer code, String displayName) {
-        var courthouse = CourthouseTestData.createCourthouse(name);
+        var courthouse = CourthouseTestData.createCourthouseWithName(name);
         courthouse.setCode(code);
         courthouse.setDisplayName(displayName);
         UserAccountEntity defaultUser = userAccountRepository.getReferenceById(0);
@@ -550,6 +553,21 @@ public class DartsDatabaseStub {
     public CourtCaseEntity save(CourtCaseEntity courtCase) {
         save(courtCase.getCourthouse());
         return caseRepository.save(courtCase);
+    }
+
+    @Transactional
+    public TranscriptionEntity save(TranscriptionEntity transcriptionEntity) {
+        save(transcriptionEntity.getCourtCase());
+        userAccountRepository.save(transcriptionEntity.getCreatedBy());
+        userAccountRepository.save(transcriptionEntity.getLastModifiedBy());
+        var transcription = transcriptionRepository.save(transcriptionEntity);
+        userAccountRepository.save(transcription.getCreatedBy());
+        transcription.getTranscriptionDocumentEntities().forEach(td -> {
+            userAccountRepository.save(td.getUploadedBy());
+            userAccountRepository.save(td.getLastModifiedBy());
+            transcriptionDocumentRepository.save(td);
+        });
+        return transcription;
     }
 
     @Transactional
@@ -955,5 +973,11 @@ public class DartsDatabaseStub {
 
     public Revisions<Long, RetentionPolicyTypeEntity> findRetentionPolicyRevisionsFor(Integer id) {
         return retentionPolicyTypeRepository.findRevisions(id);
+    }
+
+    @Transactional
+    public SecurityRoleEntity findSecurityRole(SecurityRoleEnum role) {
+        return securityRoleRepository.findById(role.getId()).orElseThrow();
+
     }
 }

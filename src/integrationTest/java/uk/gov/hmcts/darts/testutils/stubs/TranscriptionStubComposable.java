@@ -35,6 +35,7 @@ public class TranscriptionStubComposable {
 
     public TranscriptionEntity createTranscription(
         UserAccountStubComposable userAccountStubComposable, HearingEntity hearing, UserAccountEntity authorisedIntegrationTestUser) {
+
         TranscriptionTypeEntity transcriptionType = mapToTranscriptionTypeEntity(SENTENCING_REMARKS);
         TranscriptionStatusEntity transcriptionStatus = mapToTranscriptionStatusEntity(APPROVED);
         TranscriptionUrgencyEntity transcriptionUrgencyEntity = mapToTranscriptionUrgencyEntity(STANDARD);

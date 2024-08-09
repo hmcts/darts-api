@@ -437,10 +437,10 @@ dependencies {
   implementation group: 'org.apache.tika', name: 'tika-core', version: '2.9.2'
   implementation group: 'org.springframework.data', name: 'spring-data-envers', version: '3.3.2'
   implementation 'org.hibernate.orm:hibernate-ant:6.6.0.Final'
-  implementation 'org.hibernate:hibernate-spatial:6.5.2.Final'
+  implementation 'org.hibernate:hibernate-spatial:6.6.0.Final'
 
   annotationProcessor 'org.mapstruct:mapstruct-processor:1.5.5.Final'
-  annotationProcessor('org.hibernate.orm:hibernate-jpamodelgen:6.5.2.Final')
+  annotationProcessor('org.hibernate.orm:hibernate-jpamodelgen:6.6.0.Final')
 
   // Added to resolve issue where the default Feign client will silently convert GET requests to POST if the request contains a body
   // Ref: https://github.com/spring-cloud/spring-cloud-openfeign/issues/832

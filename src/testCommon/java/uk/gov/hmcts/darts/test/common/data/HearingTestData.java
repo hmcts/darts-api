@@ -12,7 +12,6 @@ import java.util.Objects;
 
 import static uk.gov.hmcts.darts.test.common.data.CaseTestData.createCaseWithCaseNumber;
 import static uk.gov.hmcts.darts.test.common.data.CaseTestData.createSomeMinimalCase;
-import static uk.gov.hmcts.darts.test.common.data.CourthouseTestData.createCourthouse;
 import static uk.gov.hmcts.darts.test.common.data.CourtroomTestData.createCourtRoomWithNameAtCourthouse;
 import static uk.gov.hmcts.darts.test.common.data.CourtroomTestData.someMinimalCourtRoom;
 
@@ -48,7 +47,7 @@ public class HearingTestData {
         HearingEntity hearing1 = createHearingWithDefaults(
             createCaseWithCaseNumber(caseNumber),
             createCourtRoomWithNameAtCourthouse(
-                createCourthouse("NEWCASTLE"),
+                CourthouseTestData.createCourthouseWithName("NEWCASTLE"),
                 "1"
             ),
             HEARING_DATE,
