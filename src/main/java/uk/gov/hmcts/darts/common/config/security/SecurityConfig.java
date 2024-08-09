@@ -1,11 +1,18 @@
 package uk.gov.hmcts.darts.common.config.security;
 
+import com.nimbusds.jose.JOSEException;
+import com.nimbusds.jose.KeySourceException;
+import com.nimbusds.jose.jwk.source.JWKSource;
+import com.nimbusds.jose.proc.JWSAlgorithmFamilyJWSKeySelector;
+import com.nimbusds.jose.proc.SecurityContext;
+import com.nimbusds.jwt.proc.DefaultJWTProcessor;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
@@ -15,7 +22,6 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.oauth2.client.web.OAuth2LoginAuthenticationFilter;
 import org.springframework.security.oauth2.core.OAuth2TokenValidator;
-import org.springframework.security.oauth2.jose.jws.SignatureAlgorithm;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.jwt.JwtValidators;
 import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
@@ -33,13 +39,15 @@ import uk.gov.hmcts.darts.authentication.config.internal.InternalAuthProviderCon
 import java.io.IOException;
 import java.util.Map;
 
-
 @Slf4j
 @Configuration
 @EnableWebSecurity
 @RequiredArgsConstructor
-@Profile("!intTest")
+@Profile("!intTest || tokenSecurityTest")
 public class SecurityConfig {
+
+    @Autowired(required = false)
+    private JwksInitialize initialize;
 
     private final AuthStrategySelector locator;
 
@@ -98,23 +106,36 @@ public class SecurityConfig {
             .logout().disable();
     }
 
-    private JwtIssuerAuthenticationManagerResolver jwtIssuerAuthenticationManagerResolver() {
+    private JwtIssuerAuthenticationManagerResolver jwtIssuerAuthenticationManagerResolver() throws KeySourceException, JOSEException {
         Map<String, AuthenticationManager> authenticationManagers = Map.ofEntries(
             createAuthenticationEntry(externalAuthConfigurationProperties.getIssuerUri(),
-                externalAuthProviderConfigurationProperties.getJwkSetUri()),
+                externalAuthProviderConfigurationProperties.getJwkSource(), externalAuthConfigurationProperties.getClientId()),
             createAuthenticationEntry(internalAuthConfigurationProperties.getIssuerUri(),
-                internalAuthProviderConfigurationProperties.getJwkSetUri())
+                internalAuthProviderConfigurationProperties.getJwkSource(), internalAuthConfigurationProperties.getClientId())
         );
         return new JwtIssuerAuthenticationManagerResolver(authenticationManagers::get);
     }
 
     private Map.Entry<String, AuthenticationManager> createAuthenticationEntry(String issuer,
-        String jwkSetUri) {
-        var jwtDecoder = NimbusJwtDecoder.withJwkSetUri(jwkSetUri)
-            .jwsAlgorithm(SignatureAlgorithm.RS256)
-            .build();
+        JWKSource<SecurityContext> jwkSetUri, String audience) throws KeySourceException, JOSEException {
 
+        // allow the jwks set to be initialised if needed
+        if (initialize != null) {
+            initialize.init();
+        }
+
+        JWSAlgorithmFamilyJWSKeySelector<SecurityContext> jwsKeySelector
+            = JWSAlgorithmFamilyJWSKeySelector.fromJWKSource(jwkSetUri);
+        DefaultJWTProcessor<SecurityContext> jwtProcessor = new DefaultJWTProcessor<>();
+        jwtProcessor.setJWSKeySelector(jwsKeySelector);
+
+        var jwtDecoder = new NimbusJwtDecoder(jwtProcessor);
         OAuth2TokenValidator<Jwt> jwtValidator = JwtValidators.createDefaultWithIssuer(issuer);
+
+        // TODO: Use this when we can successfully validate against the audience
+        // new DelegatingOAuth2TokenValidator<>(
+        //new JwtClaimValidator<>(AUD, aud ->
+        //aud != null && aud.toString().contains(audience)));
         jwtDecoder.setJwtValidator(jwtValidator);
 
         var authenticationProvider = new JwtAuthenticationProvider(jwtDecoder);

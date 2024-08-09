@@ -11,7 +11,6 @@ spring:
       client:
         registration:
           external-azure-ad:
-            client-id: dummy_client_id
             client-secret: dummy_client_secret
             scope: openid
             redirect-uri: https://example.com/handle-oauth-code
@@ -19,8 +18,8 @@ spring:
             response-type: code
             response-mode: form_post
             prompt: login
+            client-id: dummy_client_id
             issuer-uri: dummy_issuer_uri
-            provider: external-azure-ad-provider
         provider:
           external-azure-ad-provider:
             authorization-uri: http://localhost:${wiremock.server.port}/oauth2/v2.0/authorize
@@ -28,6 +27,16 @@ spring:
             jwk-set-uri: http://localhost:${wiremock.server.port}/discovery/v2.0/keys
             logout-uri: http://localhost:${wiremock.server.port}/B2C_1_darts_externaluser_signin/oauth2/v2.0/logout
             reset-password-uri: http://localhost:${wiremock.server.port}/B2C_1_darts_externaluser_password_reset/oauth2/v2.0/authorize
+            jwks-cache-refresh_period: 5S
+            jwks-cache-lifetime_period: 10S
+          internal-azure-ad-provider:
+            authorization-uri: http://localhost:${wiremock.server.port}/oauth2/v2.0/authorize
+            token-uri: http://localhost:${wiremock.server.port}/oauth2/v2.0/token
+            jwk-set-uri: http://localhost:${wiremock.server.port}/discovery/v2.0/keys
+            logout-uri: http://localhost:${wiremock.server.port}/B2C_1_darts_externaluser_signin/oauth2/v2.0/logout
+            reset-password-uri: http://localhost:${wiremock.server.port}/B2C_1_darts_externaluser_password_reset/oauth2/v2.0/authorize
+            jwks-cache-refresh_period: 5S
+            jwks-cache-lifetime_period: 10S
   autoconfigure:
     exclude:
       - org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration
@@ -40,6 +49,8 @@ spring:
   datasource:
     hikari:
       maximum-pool-size: 10 # Overrides the value in `application.yaml` to a smaller value more appropriate for integration tests, sized below the `max_connections` limit specified in PostgresIntegrationBase.
+  main:
+    allow-bean-definition-overriding: true
 darts:
   hearings:
     admin-search:
@@ -83,6 +94,7 @@ darts:
   automated:
     task:
       system-user-email: dartssystemuser@hmcts.net
+
 logging:
   level:
     root: DEBUG

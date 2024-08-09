@@ -41,3 +41,7 @@ export MAX_FILE_UPLOAD_REQUEST_SIZE_MEGABYTES="$(az keyvault secret show --vault
 export DARTS_INBOUND_STORAGE_SAS_URL="$(az keyvault secret show --vault-name darts-stg --name DartsInboundStorageSasUrl | jq .value -r)"
 export DARTS_UNSTRUCTURED_STORAGE_SAS_URL="$(az keyvault secret show --vault-name darts-stg --name DartsUnstructuredStorageSasUrl | jq .value -r)"
 export ARM_SERVICE_PROFILE="$(az keyvault secret show --vault-name darts-stg --name ArmServiceProfile | jq .value -r)"
+export EXTERNAL_JWKS_REFRESH_PERIOD="$(az keyvault secret show --vault-name darts-stg --name ExternalJwksRefreshPeriod | jq .value -r)"
+export EXTERNAL_JWKS_LIFETIME_PERIOD="$(az keyvault secret show --vault-name darts-stg --name ExternalJwksLifetimePeriod | jq .value -r)"
+export INTERNAL_JWKS_REFRESH_PERIOD="$(az keyvault secret show --vault-name darts-stg --name InternalJwksRefreshPeriod | jq .value -r)"
+export INTERNAL_JWKS_LIFETIME_PERIOD="$(az keyvault secret show --vault-name darts-stg --name InternalJwksLifetimePeriod | jq .value -r)"

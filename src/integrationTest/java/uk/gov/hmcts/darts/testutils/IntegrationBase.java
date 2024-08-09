@@ -1,6 +1,7 @@
 package uk.gov.hmcts.darts.testutils;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.github.tomakehurst.wiremock.client.WireMock;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -15,10 +16,14 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.testcontainers.containers.GenericContainer;
+import uk.gov.hmcts.darts.authentication.config.external.ExternalAuthProviderConfigurationProperties;
 import uk.gov.hmcts.darts.test.common.LogUtil;
 import uk.gov.hmcts.darts.test.common.MemoryLogAppender;
 import uk.gov.hmcts.darts.testutils.stubs.DartsDatabaseStub;
+import uk.gov.hmcts.darts.testutils.stubs.wiremock.TokenStub;
 
+import java.time.Duration;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 
 /**
@@ -70,6 +75,8 @@ public class IntegrationBase {
     protected DartsDatabaseStub dartsDatabase;
     @Autowired
     protected ObjectMapper objectMapper;
+    @Autowired
+    private ExternalAuthProviderConfigurationProperties configurationProviderProperties;
 
     @Value("${wiremock.server.port}")
     protected String wiremockPort;
@@ -79,6 +86,8 @@ public class IntegrationBase {
     private static final GenericContainer<?> REDIS = new GenericContainer<>(
         "redis:7.2.4-alpine"
     ).withExposedPorts(6379);
+
+    protected TokenStub tokenStub = new TokenStub();
 
     @DynamicPropertySource
     static void configureProperties(DynamicPropertyRegistry registry) {
@@ -94,9 +103,13 @@ public class IntegrationBase {
 
     @BeforeEach
     void clearDb() {
+        WireMock.reset();
         dartsDatabase.resetSequences();
         dartsDatabase.clearDatabaseInThisOrder();
         dartsDatabase.resetTablesWithPredefinedTestData();
+
+        // populate the jkws keys endpoint with a global public key
+        tokenStub.stubExternalJwksKeys(DartsTokenGenerator.getGlobalKey());
     }
 
     @AfterEach
@@ -110,5 +123,18 @@ public class IntegrationBase {
             .claim("emails", List.of(email))
             .build();
         SecurityContextHolder.getContext().setAuthentication(new JwtAuthenticationToken(jwt));
+    }
+
+    @SuppressWarnings({"PMD.DoNotUseThreads",  "PMD.SignatureDeclareThrowsException"})
+    protected void runWhenExpectingExternalJwksRefresh(JkwsRefreshableRunnable runnable) throws Exception {
+        // make sure we have left it enough time for the refresh to take place
+        Thread.sleep(configurationProviderProperties.getJwksCacheRefreshPeriod().toMillis() + Duration.of(1, ChronoUnit.SECONDS).toMillis());
+        runnable.run();
+    }
+
+    @FunctionalInterface
+    public interface JkwsRefreshableRunnable {
+        @SuppressWarnings("PMD.SignatureDeclareThrowsException")
+        void run() throws Exception;
     }
 }
