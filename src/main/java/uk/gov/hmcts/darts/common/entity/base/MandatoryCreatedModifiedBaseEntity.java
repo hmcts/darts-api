@@ -24,7 +24,7 @@ public class MandatoryCreatedModifiedBaseEntity extends MandatoryCreatedBaseEnti
     private OffsetDateTime lastModifiedDateTime;
 
     @NotAudited
-    @ManyToOne(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
     @JoinColumn(name = "last_modified_by", nullable = false)
     private UserAccountEntity lastModifiedBy;
 }
