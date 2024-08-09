@@ -47,6 +47,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.notNull;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -431,6 +432,52 @@ class ArmRetentionEventDateProcessorIntTest extends IntegrationBase {
             .build();
 
         verify(armApiClient, times(1)).updateMetadata("Bearer " + BEARER_TOKEN, expectedMetadataRequest);
+    }
+
+    @Test
+    void calculateEventDates_NoConfidenceScore() {
+        // given
+        when(armDataManagementConfiguration.getEventDateAdjustmentYears()).thenReturn(EVENT_DATE_ADJUSTMENT_YEARS);
+
+        CourtCaseEntity courtCaseEntity = dartsDatabase.createCase("Bristol", "Case1");
+        UserAccountEntity testUser = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
+        when(userIdentity.getUserAccount()).thenReturn(testUser);
+
+        String confidenceReason = "reason";
+
+        CaseDocumentEntity caseDocument = dartsDatabase.getCaseDocumentStub().createAndSaveCaseDocumentEntity(courtCaseEntity, testUser);
+        caseDocument.setFileName("test_case_document.docx");
+        caseDocument.setRetainUntilTs(DOCUMENT_RETENTION_DATE_TIME);
+        caseDocument.setRetConfReason(confidenceReason);
+        caseDocument.setRetConfScore(null);
+
+        dartsDatabase.save(caseDocument);
+
+        String externalRecordId = "recordId";
+        ExternalObjectDirectoryEntity armEod = dartsDatabase.getExternalObjectDirectoryStub().createExternalObjectDirectory(
+            caseDocument,
+            STORED,
+            ARM,
+            UUID.randomUUID()
+        );
+        armEod.setExternalRecordId(externalRecordId);
+        armEod.setEventDateTs(END_TIME);
+        armEod.setUpdateRetention(true);
+        dartsDatabase.getExternalObjectDirectoryRepository().save(armEod);
+
+        UpdateMetadataResponse response = UpdateMetadataResponse.builder().responseStatus(200).isError(false).build();
+        when(armApiClient.updateMetadata(any(), any())).thenReturn(response);
+
+        // when
+        armRetentionEventDateProcessor.calculateEventDates();
+
+        // then
+        var persistedEod = dartsDatabase.getExternalObjectDirectoryRepository().findById(armEod.getId()).orElseThrow();
+        log.info("EOD event date time {}", persistedEod.getEventDateTs().truncatedTo(MILLIS));
+        log.info("Retention date time {}", RETENTION_DATE_TIME.truncatedTo(MILLIS));
+        assertTrue(persistedEod.isUpdateRetention());
+
+        verify(armApiClient, times(0)).updateMetadata(notNull(), notNull());
     }
 
     @Test
