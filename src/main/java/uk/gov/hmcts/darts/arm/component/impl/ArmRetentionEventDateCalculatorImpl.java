@@ -56,19 +56,21 @@ public class ArmRetentionEventDateCalculatorImpl implements ArmRetentionEventDat
                         Integer confidenceScore = confidenceAware.getRetConfScore();
                         String confidenceReason = confidenceAware.getRetConfReason();
 
-                        UpdateMetadataResponse updateMetadataResponseMedia = armDataManagementApi.updateMetadata(
-                            externalObjectDirectory.getExternalRecordId(), armRetentionDate, confidenceScore, confidenceReason);
+                        if (confidenceScore != null) {
+                            UpdateMetadataResponse updateMetadataResponseMedia = armDataManagementApi.updateMetadata(
+                                externalObjectDirectory.getExternalRecordId(), armRetentionDate, confidenceScore, confidenceReason);
 
-                        if (updateMetadataResponseMedia.isError()) {
-                            log.error("Unable set retention date for ARM EOD {} due to error(s) {}",
-                                      externalObjectDirectoryId, StringUtils.join(updateMetadataResponseMedia.getResponseStatusMessages(), ", "));
-                        } else {
-                            externalObjectDirectory.setEventDateTs(armRetentionDate);
-                            externalObjectDirectory.setUpdateRetention(false);
-                            externalObjectDirectory.setLastModifiedBy(userAccount);
-                            externalObjectDirectoryRepository.saveAndFlush(externalObjectDirectory);
-                            log.info("Retention date is successfully applied on ARM for EOD {} ", externalObjectDirectoryId);
-                            return true;
+                            if (updateMetadataResponseMedia.isError()) {
+                                log.error("Unable set retention date for ARM EOD {} due to error(s) {}",
+                                          externalObjectDirectoryId, StringUtils.join(updateMetadataResponseMedia.getResponseStatusMessages(), ", "));
+                            } else {
+                                externalObjectDirectory.setEventDateTs(armRetentionDate);
+                                externalObjectDirectory.setUpdateRetention(false);
+                                externalObjectDirectory.setLastModifiedBy(userAccount);
+                                externalObjectDirectoryRepository.saveAndFlush(externalObjectDirectory);
+                                log.info("Retention date is successfully applied on ARM for EOD {} ", externalObjectDirectoryId);
+                                return true;
+                            }
                         }
                     }
                 }
