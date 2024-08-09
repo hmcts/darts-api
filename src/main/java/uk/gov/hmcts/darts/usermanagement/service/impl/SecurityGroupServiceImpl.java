@@ -103,7 +103,7 @@ public class SecurityGroupServiceImpl implements SecurityGroupService {
         var role = securityRoleRepository.getReferenceById(securityGroupModel.getRoleId());
         securityGroupEntity.setSecurityRoleEntity(role);
 
-        var currentUser = this.authorisationApi.getCurrentUser();
+        var currentUser = authorisationApi.getCurrentUser();
         securityGroupEntity.setCreatedBy(currentUser);
         securityGroupEntity.setLastModifiedBy(currentUser);
 
@@ -141,7 +141,7 @@ public class SecurityGroupServiceImpl implements SecurityGroupService {
 
         var updatedGroup = securityGroupRepository.saveAndFlush(securityGroupEntity);
 
-        var currentUser = this.authorisationApi.getCurrentUser();
+        var currentUser = authorisationApi.getCurrentUser();
         securityGroupEntity.setLastModifiedBy(currentUser);
 
         auditApi.recordAll(auditableActivities);
