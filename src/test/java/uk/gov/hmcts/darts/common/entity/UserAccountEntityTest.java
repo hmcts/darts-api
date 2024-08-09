@@ -17,7 +17,7 @@ class UserAccountEntityTest {
     @Test
     void reportsCorrectlyIfUserIsSuperUser() {
         var userAccountEntity = minimalUserAccount();
-        var securityGroupEntity = minimalSecurityGroup();
+        var securityGroupEntity = minimalSecurityGroup(userAccountEntity);
         securityGroupEntity.setGroupName(SUPER_USER.getName());
         userAccountEntity.getSecurityGroupEntities().add(securityGroupEntity);
 
@@ -28,7 +28,7 @@ class UserAccountEntityTest {
     @Test
     void reportsCorrectlyIfUserIsSuperAdmin() {
         var userAccountEntity = minimalUserAccount();
-        var securityGroupEntity = minimalSecurityGroup();
+        var securityGroupEntity = minimalSecurityGroup(userAccountEntity);
         securityGroupEntity.setGroupName(SUPER_ADMIN.getName());
         userAccountEntity.getSecurityGroupEntities().add(securityGroupEntity);
 
@@ -40,7 +40,7 @@ class UserAccountEntityTest {
     @Test
     void reportsCorrectlyIfUserIsMediaInPerpetuityGroup() {
         var userAccountEntity = minimalUserAccount();
-        var securityGroupEntity = minimalSecurityGroup();
+        var securityGroupEntity = minimalSecurityGroup(minimalUserAccount());
         securityGroupEntity.setGroupName(MEDIA_IN_PERPETUITY.getName());
         userAccountEntity.getSecurityGroupEntities().add(securityGroupEntity);
 
