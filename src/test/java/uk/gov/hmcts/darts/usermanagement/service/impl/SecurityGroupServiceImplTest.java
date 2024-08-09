@@ -7,6 +7,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.darts.audit.api.AuditApi;
+import uk.gov.hmcts.darts.authorisation.api.AuthorisationApi;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 import uk.gov.hmcts.darts.common.entity.SecurityGroupEntity;
 import uk.gov.hmcts.darts.common.entity.SecurityRoleEntity;
@@ -54,6 +55,8 @@ class SecurityGroupServiceImplTest {
     SecurityGroupCreationValidation securityGroupCreationValidation;
     @Mock
     AuditApi auditApi;
+    @Mock
+    AuthorisationApi authorisationApi;
 
     @BeforeEach
     void setUp() {
@@ -66,7 +69,8 @@ class SecurityGroupServiceImplTest {
             securityGroupCourthouseMapper,
             securityGroupWithIdAndRoleAndUsersMapper,
             securityGroupCreationValidation,
-            auditApi
+            auditApi,
+            authorisationApi
         );
     }
 
