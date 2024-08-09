@@ -22,14 +22,14 @@ public class CourthouseTestData {
         return courtHouse;
     }
 
-    public static CourthouseEntity createCourthouse(String name) {
+    public static CourthouseEntity createCourthouseWithName(String name) {
         var courthouse = someMinimalCourthouse();
         courthouse.setCourthouseName(name);
         courthouse.setDisplayName(name);
         return courthouse;
     }
 
-    public static CourthouseEntity createCourthouse(String name, Integer code) {
+    public static CourthouseEntity createCourthouseWithNameAndCode(String name, Integer code) {
         var courthouse = someMinimalCourthouse();
         courthouse.setCourthouseName(name);
         courthouse.setDisplayName(name);
