@@ -5,6 +5,7 @@ import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.JudgeEntity;
+import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -14,6 +15,7 @@ import static uk.gov.hmcts.darts.test.common.data.CaseTestData.createCaseWithCas
 import static uk.gov.hmcts.darts.test.common.data.CaseTestData.createSomeMinimalCase;
 import static uk.gov.hmcts.darts.test.common.data.CourtroomTestData.createCourtRoomWithNameAtCourthouse;
 import static uk.gov.hmcts.darts.test.common.data.CourtroomTestData.someMinimalCourtRoom;
+import static uk.gov.hmcts.darts.test.common.data.UserAccountTestData.getSystemUser;
 
 @UtilityClass
 @SuppressWarnings({"HideUtilityClassConstructor"})
@@ -31,6 +33,10 @@ public class HearingTestData {
         hearingEntity.setCourtroom(minimalCourtRoom);
         hearingEntity.setHearingIsActual(true);
         hearingEntity.setHearingDate(LocalDate.now().plusWeeks(1));
+        UserAccountEntity systemUser = getSystemUser();
+        hearingEntity.setCreatedBy(systemUser);
+        hearingEntity.setLastModifiedBy(systemUser);
+
         return hearingEntity;
     }
 

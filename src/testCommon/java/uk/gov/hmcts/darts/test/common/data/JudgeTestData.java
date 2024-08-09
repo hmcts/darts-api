@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import static java.util.stream.IntStream.rangeClosed;
+import static uk.gov.hmcts.darts.test.common.data.UserAccountTestData.getSystemUser;
 
 @UtilityClass
 @SuppressWarnings({"HideUtilityClassConstructor"})
@@ -23,6 +24,8 @@ public class JudgeTestData {
     public static JudgeEntity createJudgeWithName(String name) {
         var judgeEntity = new JudgeEntity();
         judgeEntity.setName(name.toUpperCase());
+        judgeEntity.setCreatedBy(getSystemUser());
+        judgeEntity.setLastModifiedBy(getSystemUser());
         return judgeEntity;
     }
 }

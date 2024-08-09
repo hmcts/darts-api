@@ -205,6 +205,9 @@ public class TestSupportController {
         courtCase.setCaseNumber("func-case1");
         courtCase.setClosed(false);
         courtCase.setInterpreterUsed(false);
+        UserAccountEntity systemUser = userAccountRepository.getReferenceById(0);
+        courtCase.setCreatedBy(systemUser);
+        courtCase.setLastModifiedBy(systemUser);
 
         Optional<CourthouseEntity> foundCourthouse = courthouseRepository.findByCourthouseNameIgnoreCase(
             courthouseName);
@@ -224,7 +227,8 @@ public class TestSupportController {
                 AuditActivity.valueOf(auditActivity).getId()
             );
             audit.setAuditActivity(foundAuditActivity);
-
+            audit.setCreatedBy(systemUser);
+            audit.setLastModifiedBy(systemUser);
             auditRepository.saveAndFlush(audit);
             return new ResponseEntity<>(CREATED);
         } catch (DataIntegrityViolationException ex) {
@@ -413,6 +417,9 @@ public class TestSupportController {
         courtCase.setCaseNumber(caseNumber);
         courtCase.setClosed(false);
         courtCase.setInterpreterUsed(false);
+        UserAccountEntity systemUser = userAccountRepository.getReferenceById(0);
+        courtCase.setCreatedBy(systemUser);
+        courtCase.setLastModifiedBy(systemUser);
 
         String courtroomName = "func-" + randomAlphanumeric(7);
         String courthouseName = "func-" + randomAlphanumeric(7);

@@ -3,7 +3,9 @@ package uk.gov.hmcts.darts.test.common.data;
 import lombok.experimental.UtilityClass;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
+import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 
+import java.time.OffsetDateTime;
 import java.util.function.Consumer;
 
 import static org.apache.commons.lang3.RandomStringUtils.random;
@@ -11,6 +13,7 @@ import static uk.gov.hmcts.darts.test.common.data.CourthouseTestData.someMinimal
 import static uk.gov.hmcts.darts.test.common.data.DefenceTestData.createDefenceForCaseWithName;
 import static uk.gov.hmcts.darts.test.common.data.DefendantTestData.createDefendantForCaseWithName;
 import static uk.gov.hmcts.darts.test.common.data.ProsecutorTestData.createProsecutorForCaseWithName;
+import static uk.gov.hmcts.darts.test.common.data.UserAccountTestData.getSystemUser;
 
 @UtilityClass
 @SuppressWarnings({"HideUtilityClassConstructor"})
@@ -23,6 +26,11 @@ public class CaseTestData {
         courtCaseEntity.setCaseNumber("case-1-" + postfix);
         courtCaseEntity.setClosed(false);
         courtCaseEntity.setInterpreterUsed(false);
+        UserAccountEntity systemUser = getSystemUser();
+        courtCaseEntity.setCreatedBy(systemUser);
+        courtCaseEntity.setCreatedDateTime(OffsetDateTime.now());
+        courtCaseEntity.setLastModifiedBy(systemUser);
+        courtCaseEntity.setLastModifiedDateTime(OffsetDateTime.now());
         return courtCaseEntity;
     }
 

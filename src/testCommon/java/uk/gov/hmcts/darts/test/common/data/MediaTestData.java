@@ -3,6 +3,7 @@ package uk.gov.hmcts.darts.test.common.data;
 import lombok.experimental.UtilityClass;
 import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
+import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.test.common.TestUtils;
 
 import java.time.OffsetDateTime;
@@ -11,6 +12,7 @@ import static java.time.OffsetDateTime.now;
 import static org.apache.commons.codec.digest.DigestUtils.md5;
 import static uk.gov.hmcts.darts.common.entity.MediaEntity.MEDIA_TYPE_DEFAULT;
 import static uk.gov.hmcts.darts.test.common.data.CourtroomTestData.someMinimalCourtRoom;
+import static uk.gov.hmcts.darts.test.common.data.UserAccountTestData.getSystemUser;
 
 @UtilityClass
 @SuppressWarnings({"HideUtilityClassConstructor"})
@@ -29,6 +31,8 @@ public class MediaTestData {
         media.setMediaFormat("mp2");
         media.setMediaType(MEDIA_TYPE_DEFAULT);
         media.setCourtroom(someMinimalCourtRoom());
+        media.setCreatedBy(getSystemUser());
+        media.setLastModifiedBy(getSystemUser());
         return media;
     }
 
@@ -71,7 +75,11 @@ public class MediaTestData {
         mediaEntity.setMediaFormat(mediaType);
         mediaEntity.setChecksum(getChecksum());
         mediaEntity.setIsCurrent(true);
-
+        UserAccountEntity systemUser = getSystemUser();
+        mediaEntity.setCreatedBy(systemUser);
+        mediaEntity.setCreatedDateTime(OffsetDateTime.now());
+        mediaEntity.setLastModifiedBy(systemUser);
+        mediaEntity.setLastModifiedDateTime(OffsetDateTime.now());
         return mediaEntity;
     }
 

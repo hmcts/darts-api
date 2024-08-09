@@ -700,6 +700,8 @@ public class DartsDatabaseStub {
             testUser.setAccountGuid(UUID.randomUUID().toString());
             testUser.setIsSystemUser(false);
             testUser.setActive(true);
+            testUser.setCreatedBy(userAccountRepository.getReferenceById(0));
+            testUser.setLastModifiedBy(userAccountRepository.getReferenceById(0));
             userAccountRepository.saveAndFlush(testUser);
         }
     }

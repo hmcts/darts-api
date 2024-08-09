@@ -151,12 +151,14 @@ public class CourtCaseEntity extends CreatedModifiedBaseEntity {
         }
     }
 
-    public void addDefence(String name) {
+    public void addDefence(String name, UserAccountEntity userAccount) {
         if (defenceList.stream().noneMatch(defenceEntity -> defenceEntity.getName().equalsIgnoreCase(
             name))) {
             DefenceEntity defenceEntity = new DefenceEntity();
             defenceEntity.setName(name);
             defenceEntity.setCourtCase(this);
+            defenceEntity.setCreatedBy(userAccount);
+            defenceEntity.setLastModifiedBy(userAccount);
             defenceList.add(defenceEntity);
         }
     }
@@ -167,12 +169,14 @@ public class CourtCaseEntity extends CreatedModifiedBaseEntity {
         }
     }
 
-    public void addDefendant(String name) {
+    public void addDefendant(String name, UserAccountEntity userAccount) {
         if (defendantList.stream().noneMatch(defendantEntity -> defendantEntity.getName().equalsIgnoreCase(
             name))) {
             DefendantEntity defendantEntity = new DefendantEntity();
             defendantEntity.setName(name);
             defendantEntity.setCourtCase(this);
+            defendantEntity.setCreatedBy(userAccount);
+            defendantEntity.setLastModifiedBy(userAccount);
             defendantList.add(defendantEntity);
         }
     }
@@ -190,12 +194,14 @@ public class CourtCaseEntity extends CreatedModifiedBaseEntity {
         }
     }
 
-    public void addProsecutor(String name) {
+    public void addProsecutor(String name, UserAccountEntity userAccount) {
         if (prosecutorList.stream().noneMatch(prosecutorEntity -> prosecutorEntity.getName().equalsIgnoreCase(
             name))) {
             ProsecutorEntity prosecutorEntity = new ProsecutorEntity();
             prosecutorEntity.setName(name);
             prosecutorEntity.setCourtCase(this);
+            prosecutorEntity.setCreatedBy(userAccount);
+            prosecutorEntity.setLastModifiedBy(userAccount);
             prosecutorList.add(prosecutorEntity);
         }
     }
