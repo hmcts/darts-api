@@ -1,0 +1,1 @@
+pgsqlSku = "GP_Standard_D8s_v5"
