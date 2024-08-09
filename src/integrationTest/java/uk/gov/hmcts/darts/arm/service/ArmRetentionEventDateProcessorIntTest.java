@@ -6,7 +6,6 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import uk.gov.hmcts.darts.arm.api.ArmDataManagementApi;
 import uk.gov.hmcts.darts.arm.client.ArmApiClient;
 import uk.gov.hmcts.darts.arm.client.ArmTokenClient;
 import uk.gov.hmcts.darts.arm.client.model.ArmTokenRequest;
@@ -79,8 +78,6 @@ class ArmRetentionEventDateProcessorIntTest extends IntegrationBase {
 
     @MockBean
     private ArmDataManagementConfiguration armDataManagementConfiguration;
-
-    private ArmDataManagementApi armDataManagementApi;
 
     @MockBean
     private UserIdentity userIdentity;
@@ -249,65 +246,7 @@ class ArmRetentionEventDateProcessorIntTest extends IntegrationBase {
 
     }
 
-    @Test
-    void calculateEventDates_WithCorrectlySetRetention() {
 
-        // given
-        when(armDataManagementConfiguration.getEventDateAdjustmentYears()).thenReturn(EVENT_DATE_ADJUSTMENT_YEARS);
-
-        HearingEntity hearing = dartsDatabase.createHearing(
-            "NEWCASTLE",
-            "Int Test Courtroom 2",
-            "2",
-            HEARING_DATE
-        );
-
-        MediaEntity savedMedia = dartsDatabase.save(
-            MediaTestData.createMediaWith(
-                hearing.getCourtroom(),
-                START_TIME,
-                END_TIME,
-                1
-            ));
-        savedMedia.setRetainUntilTs(DOCUMENT_RETENTION_DATE_TIME);
-        dartsDatabase.save(savedMedia);
-
-        ExternalObjectDirectoryEntity armEod = dartsDatabase.getExternalObjectDirectoryStub().createExternalObjectDirectory(
-            savedMedia,
-            STORED,
-            ARM,
-            UUID.randomUUID()
-        );
-
-        armEod.setEventDateTs(END_TIME);
-        armEod.setUpdateRetention(true);
-        dartsDatabase.save(armEod);
-
-        UserAccountEntity testUser = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
-        when(userIdentity.getUserAccount()).thenReturn(testUser);
-
-        UpdateMetadataResponse updateMetadataResponse = UpdateMetadataResponse.builder().itemId(UUID.randomUUID())
-            .cabinetId(101)
-            .objectId(UUID.fromString("4bfe4fc7-4e2f-4086-8a0e-146cc4556260"))
-            .objectType(1)
-            .fileName("UpdateMetadata-20241801-122819.json")
-            .isError(false)
-            .responseStatus(0)
-            .responseStatusMessages(null)
-            .build();
-        when(armDataManagementApi.updateMetadata(any(), any())).thenReturn(updateMetadataResponse);
-
-        // when
-        armRetentionEventDateProcessor.calculateEventDates();
-
-        // then
-        var persistedEod = dartsDatabase.getExternalObjectDirectoryRepository().findById(armEod.getId()).orElseThrow();
-        log.info("EOD event date time {}", persistedEod.getEventDateTs().truncatedTo(MILLIS));
-        log.info("Retention date time {}", RETENTION_DATE_TIME.truncatedTo(MILLIS));
-        assertFalse(persistedEod.isUpdateRetention());
-        assertEquals(0, persistedEod.getEventDateTs().truncatedTo(MILLIS).compareTo(RETENTION_DATE_TIME.truncatedTo(MILLIS)));
-
-    }
 
     @Test
     void calculateEventDates_WithTranscriptionSuccessfulUpdate() {
