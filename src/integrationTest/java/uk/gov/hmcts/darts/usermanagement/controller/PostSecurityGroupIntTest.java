@@ -1,5 +1,6 @@
 package uk.gov.hmcts.darts.usermanagement.controller;
 
+import jakarta.transaction.Transactional;
 import org.json.JSONObject;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -30,6 +31,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @AutoConfigureMockMvc
+@Transactional
 class PostSecurityGroupIntTest extends IntegrationBase {
 
     private static final String DESCRIPTION = "A test group";
@@ -54,7 +56,7 @@ class PostSecurityGroupIntTest extends IntegrationBase {
     @BeforeEach
     void setUp() {
         List<SecurityGroupEntity> securityGroupEntities = securityGroupRepository.findAll(Sort.by(SecurityGroupEntity_.ID).descending());
-        maxSecurityGroupId = securityGroupEntities.get(0).getId();
+        maxSecurityGroupId = securityGroupEntities.getFirst().getId();
     }
 
     @AfterEach

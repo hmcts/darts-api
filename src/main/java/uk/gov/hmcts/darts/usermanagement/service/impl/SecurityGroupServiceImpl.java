@@ -196,7 +196,7 @@ public class SecurityGroupServiceImpl implements SecurityGroupService {
         List<Integer> systemUserIds = securityGroupEntity
             .getUsers()
             .stream()
-            .filter(user -> user.getIsSystemUser())
+            .filter(user -> Boolean.TRUE.equals(user.getIsSystemUser()))
             .map(UserAccountEntity::getId)
             .toList();
 
@@ -204,7 +204,7 @@ public class SecurityGroupServiceImpl implements SecurityGroupService {
         List<UserAccountEntity> patchUsers = userAccountRepository
             .findByIdInAndActive(securityGroupPatch.getUserIds(), true);
 
-        if (userIds.size() > 0 && patchUsers.isEmpty()) {
+        if (!userIds.isEmpty() && patchUsers.isEmpty()) {
             throw new DartsApiException(
                 UserManagementError.USER_NOT_FOUND,
                 String.format("No User accounts found for patch user IDs %s", securityGroupPatch.getUserIds()));

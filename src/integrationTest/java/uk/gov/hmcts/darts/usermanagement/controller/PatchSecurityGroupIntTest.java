@@ -1,6 +1,7 @@
 package uk.gov.hmcts.darts.usermanagement.controller;
 
 
+import jakarta.transaction.Transactional;
 import org.json.JSONObject;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,6 +27,7 @@ import static uk.gov.hmcts.darts.test.common.data.SecurityGroupTestData.createGr
 import static uk.gov.hmcts.darts.test.common.data.UserAccountTestData.minimalUserAccount;
 
 @AutoConfigureMockMvc
+@Transactional
 class PatchSecurityGroupIntTest extends IntegrationBase {
     private static final String ORIGINAL_DESCRIPTION = "Security group description original";
     private static final String NEW_DISPLAY_NAME = "Security group display name new";
