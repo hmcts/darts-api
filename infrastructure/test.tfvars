@@ -1,1 +1,1 @@
-pgsqlSku = "GP_Standard_D8s_v4"
+pgsqlSku = "GP_Standard_D8ads_v5"
