@@ -681,8 +681,7 @@ class AutomatedTaskServiceTest extends IntegrationPerClassBase {
         Optional<AutomatedTaskEntity> originalAutomatedTaskEntity =
             automatedTaskService.getAutomatedTaskEntityByTaskName(automatedTask.getTaskName());
         log.info("TEST - Original task {} cron expression {}", automatedTask.getTaskName(), originalAutomatedTaskEntity.get().getCronExpression());
-        originalAutomatedTaskEntity.get().setCreatedBy(testUser);
-        
+
         automatedTaskService.updateAutomatedTaskCronExpression(automatedTask.getTaskName(), "*/9 * * * * *");
 
         Set<ScheduledTask> scheduledTasks = scheduledTaskHolder.getScheduledTasks();
