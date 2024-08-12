@@ -108,10 +108,10 @@ class InboundAnnotationTranscriptionDeleterProcessorImplTest extends PostgresInt
         );
 
         List<ExternalObjectDirectoryEntity> externalObjectDirectoryEntitiesNotRelevant = externalObjectDirectoryStub
-            .generateWithStatusAndTranscriptionAndAnnotationAndLocation(
+            .generateWithStatusAndTranscriptionOrAnnotationAndLocation(
                 ExternalLocationTypeEnum.INBOUND, ObjectRecordStatusEnum.ARM_RAW_DATA_FAILED, numberOfRecordsToGenerate, Optional.empty());
         List<ExternalObjectDirectoryEntity> externalObjectDirectoryEntities = externalObjectDirectoryStub
-            .generateWithStatusAndTranscriptionAndAnnotationAndLocation(
+            .generateWithStatusAndTranscriptionOrAnnotationAndLocation(
                 ExternalLocationTypeEnum.INBOUND, STORED, numberOfRecordsToGenerate, Optional.empty());
         entitiesToBeMarkedWithMediaOutsideOfHours
             = externalObjectDirectoryEntities.subList(0, externalObjectDirectoryEntities.size() / 2);

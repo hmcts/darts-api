@@ -207,7 +207,7 @@ public interface ExternalObjectDirectoryRepository extends JpaRepository<Externa
             WHERE
             ((:externalObjectDirectoryQueryTypeEnumIndex=1 AND eod.media is not null AND eod.media = eod2.media) OR                 
             (:externalObjectDirectoryQueryTypeEnumIndex=2 
-            AND eod.transcriptionDocumentEntity=eod2.transcriptionDocumentEntity AND eod.annotationDocumentEntity=eod2.annotationDocumentEntity))
+            AND (eod.transcriptionDocumentEntity=eod2.transcriptionDocumentEntity OR eod.annotationDocumentEntity=eod2.annotationDocumentEntity)))
             AND eod.status = :status1
             AND eod2.status = :status2
             AND eod.externalLocationType = :location1
@@ -226,8 +226,8 @@ public interface ExternalObjectDirectoryRepository extends JpaRepository<Externa
         """
             SELECT eod.id FROM ExternalObjectDirectoryEntity eod, ExternalObjectDirectoryEntity eod2
             WHERE
-            eod.transcriptionDocumentEntity=eod2.transcriptionDocumentEntity
-            AND eod.annotationDocumentEntity=eod2.annotationDocumentEntity
+            (eod.transcriptionDocumentEntity=eod2.transcriptionDocumentEntity
+            OR eod.annotationDocumentEntity=eod2.annotationDocumentEntity)
             AND eod.status = :status1
             AND eod2.status = :status2
             AND eod.externalLocationType = :location1
