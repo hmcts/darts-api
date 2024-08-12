@@ -169,6 +169,10 @@ public class SecurityGroupServiceImpl implements SecurityGroupService {
             securityGroupEntity.setDescription(description);
         }
         if (securityGroupPatch.getCourthouseIds() != null) {
+            // The PATCH contains the totality of courthouses we wish to have assigned to our group. So first we must remove any existing courthouses, and then
+            // assign whatever courthouses are provided in the request.
+            securityGroupEntity.getCourthouseEntities()
+                .clear();
             securityGroupPatch.getCourthouseIds()
                 .forEach(courthouseId -> addToSecurityGroup(courthouseId, securityGroupEntity));
         }
