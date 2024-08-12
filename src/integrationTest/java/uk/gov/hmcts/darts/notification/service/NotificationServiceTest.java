@@ -33,7 +33,9 @@ import static uk.gov.hmcts.darts.test.common.data.CaseTestData.someMinimalCase;
 @SuppressWarnings("checkstyle:VariableDeclarationUsageDistance")
 class NotificationServiceTest extends IntegrationBase {
 
-    public static final String TEST_EMAIL_ADDRESS = "test@test.com";
+    private static final int SYSTEM_USER_ID = 0;
+    private static final String TEST_EMAIL_ADDRESS = "test@test.com";
+
     @Autowired
     NotificationService service;
     @MockBean
@@ -60,6 +62,9 @@ class NotificationServiceTest extends IntegrationBase {
         assertTrue(notification.getId() > 0);
         assertEquals(NotificationStatus.OPEN, notification.getStatus());
         assertEquals(caseId, notification.getCourtCase().getId());
+
+        assertEquals(SYSTEM_USER_ID, notification.getCreatedBy().getId());
+        assertEquals(SYSTEM_USER_ID, notification.getLastModifiedBy().getId());
 
         verify(logApi, times(1)).scheduleNotification(any(), any());
     }
