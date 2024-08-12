@@ -82,7 +82,7 @@ module "postgresql_flexible" {
   business_area        = "sds"
   location             = var.location
   pgsql_storage_mb     = "524288"
-  pgsql_sku            = "GP_Standard_D4s_v3"
+  pgsql_sku            = var.pgsqlSku
   auto_grow_enabled    = true
   common_tags          = var.common_tags
   admin_user_object_id = var.jenkins_AAD_objectId
