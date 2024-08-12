@@ -241,6 +241,7 @@ class AuthorisationServiceTest extends IntegrationBase {
         var secGrpForRequestor = minimalSecurityGroup(bristolUser);
         secGrpForRequestor.setSecurityRoleEntity(dartsDatabase.findSecurityRole(REQUESTER));
         secGrpForRequestor.setCourthouseEntities(asSet(b2Court, c3Court));
+        entityGraphPersistence.persistAll(List.of(secGrpForApprover, secGrpForRequestor));
 
         bristolUser.setSecurityGroupEntities(asSet(secGrpForApprover, secGrpForRequestor));
 
