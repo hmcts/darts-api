@@ -73,6 +73,7 @@ public class AnnotationStubComposable {
         AnnotationDocumentEntity annotationDocument = createAnnotationDocumentEntity(annotationEntity, fileName, fileType, fileSize,
                                                                                      uploadedBy, uploadedDateTime, checksum, confScore, confReason);
         annotationDocument.setAnnotation(annotationRepository.getReferenceById(annotationEntity.getId()));
+        annotationDocument.setLastModifiedBy(uploadedBy);
         annotationDocument = annotationDocumentRepository.saveAndFlush(annotationDocument);
         return annotationDocument;
     }

@@ -219,12 +219,14 @@ public class TestSupportController {
         AuditEntity audit = new AuditEntity();
         audit.setCourtCase(savedCase);
         audit.setUser(userAccountRepository.getReferenceById(0));
+        audit.setCreatedBy(userAccountRepository.getReferenceById(0));
+        audit.setLastModifiedBy(userAccountRepository.getReferenceById(0));
+
         try {
             AuditActivityEntity foundAuditActivity = auditActivityRepository.getReferenceById(
                 AuditActivity.valueOf(auditActivity).getId()
             );
             audit.setAuditActivity(foundAuditActivity);
-
             auditRepository.saveAndFlush(audit);
             return new ResponseEntity<>(CREATED);
         } catch (DataIntegrityViolationException ex) {

@@ -154,8 +154,8 @@ class AutomatedTaskServiceImplTest {
         AbstractLockableAutomatedTask automatedTask = new AbstractLockableAutomatedTask(
             mockAutomatedTaskRepository,
             mockLockProvider,
-                mockAutomatedTaskConfigurationProperties,
-                logApi) {
+            mockAutomatedTaskConfigurationProperties,
+            logApi) {
             @Override
             protected void runTask() {
             }
