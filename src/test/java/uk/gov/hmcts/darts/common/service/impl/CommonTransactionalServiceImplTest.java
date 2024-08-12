@@ -44,6 +44,6 @@ class CommonTransactionalServiceImplTest {
             "Courtroom Name 1",
             userAccount
         );
-        assertEquals("test result", createdCourtroom.getName());
+        assertEquals("TEST RESULT", createdCourtroom.getName());
     }
 }

@@ -49,7 +49,7 @@ class AdminCasesSearchResponseMapperTest {
                 "courtrooms": [
                   {
                     "id": 1581,
-                    "name": "courtroom1"
+                    "name": "COURTROOM1"
                   }
                 ],
                 "judges": [
@@ -71,11 +71,11 @@ class AdminCasesSearchResponseMapperTest {
                 "courtrooms": [
                   {
                     "id": 1581,
-                    "name": "courtroom1"
+                    "name": "COURTROOM1"
                   },
                   {
                     "id": 1582,
-                    "name": "courtroom2"
+                    "name": "COURTROOM2"
                   }
                 ],
                 "judges": [
@@ -97,15 +97,15 @@ class AdminCasesSearchResponseMapperTest {
                 "courtrooms": [
                   {
                     "id": 1581,
-                    "name": "courtroom1"
+                    "name": "COURTROOM1"
                   },
                   {
                     "id": 1582,
-                    "name": "courtroom2"
+                    "name": "COURTROOM2"
                   },
                   {
                     "id": 1583,
-                    "name": "courtroom3"
+                    "name": "COURTROOM3"
                   }
                 ],
                 "judges": [

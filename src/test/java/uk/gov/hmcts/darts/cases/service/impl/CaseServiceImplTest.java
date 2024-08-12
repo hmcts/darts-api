@@ -73,7 +73,7 @@ import static uk.gov.hmcts.darts.test.common.TestUtils.getContentsFromFile;
 class CaseServiceImplTest {
 
     public static final String SWANSEA = "SWANSEA";
-    public static final String TEST_COURT_CASE = "case_courthouse";
+    public static final String TEST_COURT_CASE = "CASE_COURTHOUSE";
     public static final OffsetDateTime FIXED_DATETIME = OffsetDateTime.of(2024, 3, 25, 10, 0, 0, 0, ZoneOffset.UTC);
 
     CaseServiceImpl service;

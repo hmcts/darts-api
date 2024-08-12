@@ -9,7 +9,7 @@
     "event_date": "<EVENT_DATE_TIME>",
     "title": "judges-notes.txt",
     "client_identifier": "<EODID>",
-    "contributor": "NEWCASTLE & Int Test Courtroom 2",
+    "contributor": "NEWCASTLE & INT TEST COURTROOM 2",
     "rtn_score":2,
     "rtn_reason":"RetentionConfidenceReason",
     "bf_001": "Annotation",
@@ -23,7 +23,7 @@
     "bf_013": <PARENT_ID>,
     "bf_016": "15000",
     "bf_019": "NEWCASTLE",
-    "bf_020": "Int Test Courtroom 2"
+    "bf_020": "INT TEST COURTROOM 2"
   }
 }
 {

@@ -126,7 +126,7 @@ class CourthouseServiceImplTest {
 
 
         CourthouseEntity returnedEntity = courthouseService.getCourtHouseById(COURTHOUSE_ID);
-        assertEquals("Test courthouse", returnedEntity.getCourthouseName());
+        assertEquals("TEST COURTHOUSE", returnedEntity.getCourthouseName());
         assertEquals((short) 123, returnedEntity.getCode());
     }
 

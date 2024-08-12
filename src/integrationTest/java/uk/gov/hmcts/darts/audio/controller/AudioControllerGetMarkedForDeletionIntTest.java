@@ -112,7 +112,7 @@ class AudioControllerGetMarkedForDeletionIntTest extends PostgresIntegrationBase
                                         },
                                         "courtroom": {
                                           "id": 1,
-                                          "name": "Test Courtroom"
+                                          "name": "TEST COURTROOM"
                                         },
                                         "admin_action": {
                                           "id": %d,

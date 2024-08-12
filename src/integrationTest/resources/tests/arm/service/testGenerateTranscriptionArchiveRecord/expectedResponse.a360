@@ -9,7 +9,7 @@
     "event_date": "<EVENT_DATE_TIME>",
     "title": "Test Document.docx",
     "client_identifier": "<EODID>",
-    "contributor": "NEWCASTLE & Int Test Courtroom 2",
+    "contributor": "NEWCASTLE & INT TEST COURTROOM 2",
     "rtn_score":2,
     "rtn_reason":"RetentionConfidenceReason",
     "bf_001": "Transcription",
@@ -26,7 +26,7 @@
     "bf_013": <PARENT_ID>,
     "bf_016": "<UPLOADED_BY>",
     "bf_019": "NEWCASTLE",
-    "bf_020": "Int Test Courtroom 2"
+    "bf_020": "INT TEST COURTROOM 2"
   }
 }
 {
