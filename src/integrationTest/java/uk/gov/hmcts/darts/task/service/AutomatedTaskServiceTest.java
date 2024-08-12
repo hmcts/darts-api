@@ -146,14 +146,13 @@ class AutomatedTaskServiceTest extends IntegrationPerClassBase {
 
     @MockBean
     private UserIdentity userIdentity;
-    private UserAccountEntity testUser;
 
     @Value("${darts.data-management.retention-period.inbound.arm-minimum}")
     private int hoursArmStorage;
 
     @BeforeEach
     void setupData() {
-        testUser = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
+        UserAccountEntity testUser = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
         lenient().when(userIdentity.getUserAccount()).thenReturn(testUser);
     }
 
