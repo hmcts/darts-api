@@ -40,6 +40,11 @@ public enum DailyListError implements DartsApiError {
         DailyListErrorCode.INTERNAL_ERROR.getValue(),
         HttpStatus.INTERNAL_SERVER_ERROR,
         DailyListTitleErrors.INTERNAL_ERROR.toString()
+    ),
+    MISSING_DAILY_LIST_USER(
+        DailyListErrorCode.MISSING_SYSTEM_USER.getValue(),
+        HttpStatus.INTERNAL_SERVER_ERROR,
+        DailyListTitleErrors.MISSING_SYSTEM_USER.toString()
     );
 
     private static final String ERROR_TYPE_PREFIX = "DAILYLIST";
