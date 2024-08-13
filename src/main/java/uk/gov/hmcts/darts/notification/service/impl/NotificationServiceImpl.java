@@ -13,6 +13,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
+import uk.gov.hmcts.darts.common.helper.SystemUserHelper;
 import uk.gov.hmcts.darts.common.repository.CaseRepository;
 import uk.gov.hmcts.darts.common.repository.NotificationRepository;
 import uk.gov.hmcts.darts.log.api.LogApi;
@@ -42,6 +43,7 @@ public class NotificationServiceImpl implements NotificationService {
         NotificationStatus.PROCESSING
     );
 
+    private final SystemUserHelper systemUserHelper;
     private final NotificationRepository notificationRepo;
     private final CaseRepository caseRepository;
     private final GovNotifyService govNotifyService;
@@ -53,6 +55,7 @@ public class NotificationServiceImpl implements NotificationService {
     private final int maxRetry;
 
     public NotificationServiceImpl(
+        SystemUserHelper systemUserHelper,
         NotificationRepository notificationRepo,
         CaseRepository caseRepository,
         GovNotifyService govNotifyService,
@@ -63,6 +66,7 @@ public class NotificationServiceImpl implements NotificationService {
         @Value("${darts.automated-tasks-pod}") boolean automatedTasksMode,
         @Value("${darts.notification.max_retry_attempts}") int maxRetry) {
 
+        this.systemUserHelper = systemUserHelper;
         this.notificationRepo = notificationRepo;
         this.caseRepository = caseRepository;
         this.govNotifyService = govNotifyService;
@@ -87,7 +91,6 @@ public class NotificationServiceImpl implements NotificationService {
                 templateParamsString
             );
             logApi.scheduleNotification(notificationEntity, request.getCaseId());
-
         }
     }
 
@@ -139,6 +142,14 @@ public class NotificationServiceImpl implements NotificationService {
         dbNotification.setStatus(NotificationStatus.OPEN);
         dbNotification.setAttempts(0);
         dbNotification.setTemplateValues(templateValues);
+
+        // This code is used in the context of automated tasks and Keda functions. It's also triggered by user calls.Instead of passing the UserAccountEntity
+        // through the call hierarchy for each scenario we are settling it to the system user.  https://tools.hmcts.net/jira/browse/DMP-3737 may
+        // address the issue of the current thread of execution understanding its mode/context, in which case this should be changed to the UserAccountEntity
+        // of the current user in the relevant context.
+        var systemUser = systemUserHelper.getSystemUser();
+        dbNotification.setCreatedBy(systemUser);
+        dbNotification.setLastModifiedBy(systemUser);
 
         return notificationRepo.save(dbNotification);
     }
