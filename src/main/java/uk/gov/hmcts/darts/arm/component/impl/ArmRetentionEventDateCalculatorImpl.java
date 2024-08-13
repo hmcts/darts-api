@@ -69,7 +69,7 @@ public class ArmRetentionEventDateCalculatorImpl implements ArmRetentionEventDat
             Integer confidenceScore = confidenceAware.getRetConfScore();
             String confidenceReason = confidenceAware.getRetConfReason();
 
-            if (confidenceScore != null) {
+            if (confidenceScore != null && confidenceScore != 0) {
                 UpdateMetadataResponse updateMetadataResponseMedia = armDataManagementApi.updateMetadata(
                     externalObjectDirectory.getExternalRecordId(), armRetentionDate, confidenceScore, confidenceReason);
 
