@@ -85,9 +85,9 @@ class StandardEventHandlerTest extends HandlerTestData {
 
         var persistedEvent = dartsDatabase.getAllEvents().get(0);
 
-        assertThat(persistedEvent.getCourtroom().getName()).isEqualTo(SOME_ROOM);
+        assertThat(persistedEvent.getCourtroom().getName()).isEqualTo(SOME_ROOM.toUpperCase());
         assertThat(persistedEvent.getIsLogEntry()).isEqualTo(false);
-        assertThat(persistedCase.getCourthouse().getCourthouseName()).isEqualTo(SOME_COURTHOUSE);
+        assertThat(persistedCase.getCourthouse().getCourthouseName()).isEqualTo(SOME_COURTHOUSE.toUpperCase());
         assertThat(hearingsForCase.size()).isEqualTo(1);
         assertThat(hearingsForCase.get(0).getHearingIsActual()).isEqualTo(true);
         assertThat(persistedEvent.getEventStatus()).isEqualTo(MODERNISED.getStatusNumber());
@@ -120,9 +120,9 @@ class StandardEventHandlerTest extends HandlerTestData {
 
         var persistedEvent = dartsDatabase.getAllEvents().get(0);
 
-        assertThat(persistedEvent.getCourtroom().getName()).isEqualTo(SOME_ROOM);
+        assertThat(persistedEvent.getCourtroom().getName()).isEqualTo(SOME_ROOM.toUpperCase());
         assertThat(persistedEvent.getIsLogEntry()).isEqualTo(false);
-        assertThat(persistedCase.getCourthouse().getCourthouseName()).isEqualTo(SOME_COURTHOUSE);
+        assertThat(persistedCase.getCourthouse().getCourthouseName()).isEqualTo(SOME_COURTHOUSE.toUpperCase());
         assertThat(hearingsForCase.size()).isEqualTo(1);
         assertThat(hearingsForCase.get(0).getHearingIsActual()).isEqualTo(true);
 
@@ -157,9 +157,9 @@ class StandardEventHandlerTest extends HandlerTestData {
 
         var persistedEvent = dartsDatabase.getAllEvents().get(0);
 
-        assertThat(persistedEvent.getCourtroom().getName()).isEqualTo(SOME_OTHER_ROOM);
+        assertThat(persistedEvent.getCourtroom().getName()).isEqualTo(SOME_OTHER_ROOM.toUpperCase());
         assertThat(persistedEvent.getIsLogEntry()).isEqualTo(false);
-        assertThat(persistedCase.getCourthouse().getCourthouseName()).isEqualTo(SOME_COURTHOUSE);
+        assertThat(persistedCase.getCourthouse().getCourthouseName()).isEqualTo(SOME_COURTHOUSE.toUpperCase());
         assertThat(caseHearing.size()).isEqualTo(1);
         assertThat(caseHearing.get(0).getHearingIsActual()).isEqualTo(true);
 
@@ -194,9 +194,9 @@ class StandardEventHandlerTest extends HandlerTestData {
 
         var persistedEvent = dartsDatabase.getAllEvents().get(0);
 
-        assertThat(persistedEvent.getCourtroom().getName()).isEqualTo(SOME_ROOM);
+        assertThat(persistedEvent.getCourtroom().getName()).isEqualTo(SOME_ROOM.toUpperCase());
         assertThat(persistedEvent.getIsLogEntry()).isEqualTo(false);
-        assertThat(persistedCase.getCourthouse().getCourthouseName()).isEqualTo(SOME_COURTHOUSE);
+        assertThat(persistedCase.getCourthouse().getCourthouseName()).isEqualTo(SOME_COURTHOUSE.toUpperCase());
         assertThat(hearingsForCase.size()).isEqualTo(1);
         assertThat(hearingsForCase.get(0).getHearingIsActual()).isEqualTo(true);
 

@@ -79,8 +79,8 @@ class InterpreterUsedHandlerTest extends HandlerTestData {
 
         var persistedEvent = dartsDatabase.getAllEvents().get(0);
 
-        assertThat(persistedEvent.getCourtroom().getName()).isEqualTo(SOME_ROOM);
-        assertThat(persistedCase.getCourthouse().getCourthouseName()).isEqualTo(SOME_COURTHOUSE);
+        assertThat(persistedEvent.getCourtroom().getName()).isEqualTo(SOME_ROOM.toUpperCase());
+        assertThat(persistedCase.getCourthouse().getCourthouseName()).isEqualTo(SOME_COURTHOUSE.toUpperCase());
         assertThat(hearingsForCase.size()).isEqualTo(1);
         assertThat(hearingsForCase.get(0).getHearingIsActual()).isEqualTo(true);
 
@@ -114,8 +114,8 @@ class InterpreterUsedHandlerTest extends HandlerTestData {
 
         var persistedEvent = dartsDatabase.getAllEvents().get(0);
 
-        assertThat(persistedEvent.getCourtroom().getName()).isEqualTo(SOME_ROOM);
-        assertThat(persistedCase.getCourthouse().getCourthouseName()).isEqualTo(SOME_COURTHOUSE);
+        assertThat(persistedEvent.getCourtroom().getName()).isEqualTo(SOME_ROOM.toUpperCase());
+        assertThat(persistedCase.getCourthouse().getCourthouseName()).isEqualTo(SOME_COURTHOUSE.toUpperCase());
         assertThat(hearingsForCase.size()).isEqualTo(1);
         assertThat(hearingsForCase.get(0).getHearingIsActual()).isEqualTo(true);
 
@@ -152,8 +152,8 @@ class InterpreterUsedHandlerTest extends HandlerTestData {
 
         var persistedEvent = dartsDatabase.getAllEvents().get(0);
 
-        assertThat(persistedEvent.getCourtroom().getName()).isEqualTo(SOME_OTHER_ROOM);
-        assertThat(persistedCase.getCourthouse().getCourthouseName()).isEqualTo(SOME_COURTHOUSE);
+        assertThat(persistedEvent.getCourtroom().getName()).isEqualTo(SOME_OTHER_ROOM.toUpperCase());
+        assertThat(persistedCase.getCourthouse().getCourthouseName()).isEqualTo(SOME_COURTHOUSE.toUpperCase());
         assertThat(caseHearing.size()).isEqualTo(1);
         assertThat(caseHearing.get(0).getHearingIsActual()).isEqualTo(true);
 
@@ -187,8 +187,8 @@ class InterpreterUsedHandlerTest extends HandlerTestData {
 
         var persistedEvent = dartsDatabase.getAllEvents().get(0);
 
-        assertThat(persistedEvent.getCourtroom().getName()).isEqualTo(SOME_ROOM);
-        assertThat(persistedCase.getCourthouse().getCourthouseName()).isEqualTo(SOME_COURTHOUSE);
+        assertThat(persistedEvent.getCourtroom().getName()).isEqualTo(SOME_ROOM.toUpperCase());
+        assertThat(persistedCase.getCourthouse().getCourthouseName()).isEqualTo(SOME_COURTHOUSE.toUpperCase());
         assertThat(hearingsForCase.size()).isEqualTo(1);
         assertThat(hearingsForCase.get(0).getHearingIsActual()).isEqualTo(true);
 

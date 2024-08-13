@@ -56,8 +56,8 @@ public class DarNotifyServiceImpl {
                 .notificationUrl(notificationUrl)
                 .notificationType(darNotifyType.getNotificationType())
                 .timestamp(dartsEvent.getDateTime())
-                .courthouse(dartsEvent.getCourthouse())
-                .courtroom(dartsEvent.getCourtroom())
+                .courthouse(dartsEvent.getCourthouse().toUpperCase())
+                .courtroom(dartsEvent.getCourtroom().toUpperCase())
                 .caseNumbers(openCaseNumbers)
                 .build();
 

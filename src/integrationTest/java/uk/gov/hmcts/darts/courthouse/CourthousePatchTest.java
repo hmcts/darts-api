@@ -47,7 +47,7 @@ class CourthousePatchTest extends IntegrationBase {
 
         var response = json.from(mvcResult.getResponse().getContentAsString());
         assertThat(response).extractingJsonPathStringValue("courthouse_name")
-            .isEqualTo("some-new-courthouse-name");
+            .isEqualTo("SOME-NEW-COURTHOUSE-NAME");
     }
 
     @Test
@@ -114,30 +114,30 @@ class CourthousePatchTest extends IntegrationBase {
     }
 
     private String regionPatch(Integer regionId) {
-         return String.format("""
-            {
-              "region_id": %d
-            }""", regionId);
+        return String.format("""
+                                 {
+                                   "region_id": %d
+                                 }""", regionId);
     }
 
     private String courthouseNamePatch(String name) {
         return String.format("""
-            {
-              "courthouse_name": "%s"
-            }""", name);
+                                 {
+                                   "courthouse_name": "%s"
+                                 }""", name);
     }
 
     private String displayNamePatch(String displayName) {
         return String.format("""
-            {
-              "display_name": "%s"
-            }""", displayName);
+                                 {
+                                   "display_name": "%s"
+                                 }""", displayName);
     }
 
     private String securityGroupsPatch(String grpIds) {
         return String.format("""
-            {
-              "security_group_ids": [ %s ]
-            }""", grpIds);
+                                 {
+                                   "security_group_ids": [ %s ]
+                                 }""", grpIds);
     }
 }
