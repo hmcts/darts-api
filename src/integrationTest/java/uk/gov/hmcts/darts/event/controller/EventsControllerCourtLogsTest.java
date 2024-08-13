@@ -29,6 +29,7 @@ import java.net.URI;
 import java.time.OffsetDateTime;
 import java.util.Collections;
 import java.util.List;
+import java.util.Locale;
 import java.util.Set;
 
 import static org.mockito.Mockito.when;
@@ -102,8 +103,8 @@ class EventsControllerCourtLogsTest extends IntegrationBase {
         Assertions.assertNotNull(persistedEvent.getId());
         Assertions.assertEquals(SOME_TEXT, persistedEvent.getEventText());
         Assertions.assertEquals(SOME_DATE_TIME, persistedEvent.getTimestamp());
-        Assertions.assertEquals(SOME_COURTROOM.toUpperCase(), persistedEvent.getCourtroom().getName());
-        Assertions.assertEquals(SOME_COURTHOUSE.toUpperCase(), persistedEvent.getCourtroom().getCourthouse().getCourthouseName());
+        Assertions.assertEquals(SOME_COURTROOM.toUpperCase(Locale.ROOT), persistedEvent.getCourtroom().getName());
+        Assertions.assertEquals(SOME_COURTHOUSE.toUpperCase(Locale.ROOT), persistedEvent.getCourtroom().getCourthouse().getCourthouseName());
         Assertions.assertEquals(true, persistedEvent.getIsLogEntry());
         Assertions.assertNull(persistedEvent.getMessageId());
 
