@@ -78,9 +78,10 @@ class TranscriptionControllerGetTranscriptionWorkflowsIntTest extends Integratio
                                                                                               TranscriptionStatusEnum.APPROVED));
         transcriptionStub.createAndSaveTranscriptionWorkflowComment(transcriptionWorkflow2, "comment2", transcription.getCreatedBy());
 
-        transcriptionStub.createAndSaveTranscriptionCommentNotAssociatedToWorkflow(transcription,
-                                                                                   OffsetDateTime.of(2024, 4, 25, 12, 0, 0, 0, ZoneOffset.UTC),
-                                                                                   "this is a migrated transcription comment that is not associated to a transcription workflow"
+        transcriptionStub.createAndSaveTranscriptionCommentNotAssociatedToWorkflow(
+            transcription,
+            OffsetDateTime.of(2024, 4, 25, 12, 0, 0, 0, ZoneOffset.UTC),
+            "this is a migrated transcription comment that is not associated to a transcription workflow"
         );
     }
 
