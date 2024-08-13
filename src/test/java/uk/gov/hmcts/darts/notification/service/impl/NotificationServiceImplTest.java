@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import uk.gov.hmcts.darts.common.helper.SystemUserHelper;
 import uk.gov.hmcts.darts.common.repository.CaseRepository;
 import uk.gov.hmcts.darts.common.repository.NotificationRepository;
 import uk.gov.hmcts.darts.log.api.LogApi;
@@ -26,6 +27,8 @@ import static org.mockito.Mockito.verifyNoInteractions;
 @ExtendWith(MockitoExtension.class)
 class NotificationServiceImplTest {
 
+    @Mock
+    private SystemUserHelper systemUserHelper;
     @Mock
     private NotificationRepository notificationRepo;
     @Mock
@@ -85,7 +88,7 @@ class NotificationServiceImplTest {
 
     private NotificationServiceImpl buildNotificationService(boolean atsMode, boolean enabled) {
         return new NotificationServiceImpl(
-            notificationRepo, caseRepository, govNotifyService, templateIdHelper, govNotifyRequestHelper, logApi,
+            systemUserHelper, notificationRepo, caseRepository, govNotifyService, templateIdHelper, govNotifyRequestHelper, logApi,
             enabled, atsMode, 0);
     }
 

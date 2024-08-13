@@ -31,6 +31,7 @@ import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.Random;
 import java.util.UUID;
 import java.util.function.Consumer;
 
@@ -108,7 +109,10 @@ public class ExternalObjectDirectoryStub {
                                                           Consumer<ExternalObjectDirectoryEntity> createdEodConsumer) {
         UUID uuid = UUID.randomUUID();
         var eod = createExternalObjectDirectory(annotationDocument, getStatus(objectRecordStatus), getLocation(externalLocationType), uuid);
-        eod.setTranscriptionDocumentEntity(transcriptionDocumentEntity);
+
+        if (transcriptionDocumentEntity != null) {
+            eod.setTranscriptionDocumentEntity(transcriptionDocumentEntity);
+        }
         createdEodConsumer.accept(eod);
         eodRepository.save(eod);
         eodRepository.flush();
@@ -187,8 +191,9 @@ public class ExternalObjectDirectoryStub {
             externalLocation
         );
 
-        externalObjectDirectory.setAnnotationDocumentEntity(annotationDocumentEntity);
-
+        if (annotationStub != null) {
+            externalObjectDirectory.setAnnotationDocumentEntity(annotationDocumentEntity);
+        }
         return externalObjectDirectory;
     }
 
@@ -266,23 +271,34 @@ public class ExternalObjectDirectoryStub {
     }
 
     @Transactional
-    public List<ExternalObjectDirectoryEntity> generateWithStatusAndTranscriptionAndAnnotationAndLocation(
+    public List<ExternalObjectDirectoryEntity> generateWithStatusAndTranscriptionOrAnnotationAndLocation(
         ExternalLocationTypeEnum externalLocationTypeEnum, ObjectRecordStatusEnum objectRecordStatusEnum,
         int numberOfObjectDirectory, Optional<OffsetDateTime> dateToSet)
         throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
 
         List<ExternalObjectDirectoryEntity> entityListResult = new ArrayList<>();
 
+        Random randomiseAnnotationOrTranscription = new Random();
+
         for (int i = 0; i < numberOfObjectDirectory; i++) {
             var user = userAccountStub.getIntegrationTestUserAccountEntity();
-            AnnotationEntity annotationEntity = annotationStub.createAndSaveAnnotationEntityWith(user, "test annotation");
-            TranscriptionDocumentEntity transcriptionDocumentEntity
-                = transcriptionDocumentStub.createTranscriptionDocumentForTranscription(userAccountStub, dartsDatabaseComposable,
-                                                                                        transcriptionStubComposable, courthouseStubComposable, user);
+            int random = randomiseAnnotationOrTranscription.nextInt(10);
+
+            AnnotationEntity annotationEntity;
+            AnnotationDocumentEntity annotationDocumentEntity = null;
+            TranscriptionDocumentEntity transcriptionDocumentEntity = null;
+            if (random % 2 == 0) {
+                annotationEntity = annotationStub.createAndSaveAnnotationEntityWith(user, "test annotation");
+                annotationDocumentEntity = annotationStub.createAndSaveAnnotationDocumentEntity(
+                    userAccountStub, annotationEntity);
+            } else {
+                transcriptionDocumentEntity
+                    = transcriptionDocumentStub.createTranscriptionDocumentForTranscription(userAccountStub, dartsDatabaseComposable,
+                                                                                            transcriptionStubComposable, courthouseStubComposable, user);
+            }
 
             ExternalObjectDirectoryEntity externalObjectDirectory = createAndSaveEod(
-                annotationStub.createAndSaveAnnotationDocumentEntity(
-                    userAccountStub, annotationEntity), transcriptionDocumentEntity, objectRecordStatusEnum, externalLocationTypeEnum, e -> { });
+                annotationDocumentEntity, transcriptionDocumentEntity, objectRecordStatusEnum, externalLocationTypeEnum, e -> { });
 
             if (dateToSet.isPresent()) {
                 dateConfigurer.setLastModifiedDate(externalObjectDirectory, dateToSet.get());

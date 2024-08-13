@@ -218,11 +218,11 @@ class ExternalObjectDirectoryRepositoryTest  extends PostgresIntegrationBase {
 
         externalObjectDirectoryEntitiesNotRelevant
             = externalObjectDirectoryStub
-            .generateWithStatusAndTranscriptionAndAnnotationAndLocation(
+            .generateWithStatusAndTranscriptionOrAnnotationAndLocation(
                 ExternalLocationTypeEnum.INBOUND, ObjectRecordStatusEnum.ARM_RAW_DATA_FAILED, numberOfRecordsToGenerate, Optional.empty());
         externalObjectDirectoryEntities
             = externalObjectDirectoryStub
-            .generateWithStatusAndTranscriptionAndAnnotationAndLocation(
+            .generateWithStatusAndTranscriptionOrAnnotationAndLocation(
                 ExternalLocationTypeEnum.INBOUND,  STORED, numberOfRecordsToGenerate, Optional.empty());
         entitiesToBeMarkedWithMediaOrAnnotationOutsideOfArmHours
             = externalObjectDirectoryEntities.subList(0, externalObjectDirectoryEntities.size() / 2);
@@ -272,12 +272,12 @@ class ExternalObjectDirectoryRepositoryTest  extends PostgresIntegrationBase {
 
         externalObjectDirectoryEntitiesNotRelevant
             = externalObjectDirectoryStub
-            .generateWithStatusAndTranscriptionAndAnnotationAndLocation(
+            .generateWithStatusAndTranscriptionOrAnnotationAndLocation(
                 ExternalLocationTypeEnum.UNSTRUCTURED,
                 ObjectRecordStatusEnum.ARM_RAW_DATA_FAILED, numberOfRecordsToGenerate, Optional.of(lastModifiedBeforeCurrentTimeForUnstructured));
         externalObjectDirectoryEntities
             = externalObjectDirectoryStub
-            .generateWithStatusAndTranscriptionAndAnnotationAndLocation(
+            .generateWithStatusAndTranscriptionOrAnnotationAndLocation(
                 ExternalLocationTypeEnum.UNSTRUCTURED,  STORED, numberOfRecordsToGenerate, Optional.of(lastModifiedBeforeCurrentTimeForUnstructured));
         entitiesToBeMarkedWithMediaOrAnnotationOutsideOfArmHours
             = externalObjectDirectoryEntities.subList(0, externalObjectDirectoryEntities.size() / 2);

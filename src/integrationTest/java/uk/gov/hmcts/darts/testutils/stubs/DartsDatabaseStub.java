@@ -243,12 +243,12 @@ public class DartsDatabaseStub {
             automatedTaskRepository.findByIdGreaterThanEqual(SEQUENCE_START_VALUE)
         );
 
-        userAccountRepository.deleteAll(
-            userAccountRepository.findByIdGreaterThanEqual(SEQUENCE_START_VALUE)
-        );
-
         securityGroupRepository.deleteAll(
             securityGroupRepository.findByIdGreaterThanEqual(SEQUENCE_START_VALUE)
+        );
+
+        userAccountRepository.deleteAll(
+            userAccountRepository.findByIdGreaterThanEqual(SEQUENCE_START_VALUE)
         );
     }
 
@@ -864,6 +864,8 @@ public class DartsDatabaseStub {
         var annotation = minimalAnnotationEntity();
         annotation.setDeleted(false);
         annotation.setCurrentOwner(userAccount);
+        annotation.setCreatedBy(userAccount);
+        annotation.setLastModifiedBy(userAccount);
         annotation.addHearing(save(someMinimalHearing()));
         return save(annotation);
     }

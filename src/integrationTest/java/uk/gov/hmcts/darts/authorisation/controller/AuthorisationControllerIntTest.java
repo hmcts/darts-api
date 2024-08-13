@@ -1,5 +1,7 @@
 package uk.gov.hmcts.darts.authorisation.controller;
 
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.skyscreamer.jsonassert.JSONAssert;
 import org.skyscreamer.jsonassert.JSONCompareMode;
@@ -27,6 +29,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.net.URI;
 import java.time.Instant;
+import java.time.OffsetDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.Collections;
 import java.util.Map;
@@ -49,6 +52,16 @@ class AuthorisationControllerIntTest extends PostgresIntegrationBase {
 
     @Autowired
     private MockMvc mockMvc;
+
+    @BeforeEach
+    void openHibernateSession() {
+        openInViewUtil.openEntityManager();
+    }
+
+    @AfterEach
+    void closeHibernateSession() {
+        openInViewUtil.closeEntityManager();
+    }
 
     @Test
     @WithMockSecurityContextWithEmailAddress(emailAddress = EMAIL_ADDRESS)
@@ -81,9 +94,8 @@ class AuthorisationControllerIntTest extends PostgresIntegrationBase {
         // Given
         UserAccountEntity userAccount = createAndSaveUser(EMAIL_ADDRESS, true);
 
-        SecurityGroupEntity group = createAndSaveSecurityGroup("Test", SecurityRoleEnum.JUDICIARY, true);
+        SecurityGroupEntity group = createAndSaveSecurityGroup(userAccount, "Test", SecurityRoleEnum.JUDICIARY, true);
         userAccount.setSecurityGroupEntities(Collections.singleton(group));
-        dartsDatabase.getUserAccountRepository().save(userAccount);
 
         // When
         MvcResult mvcResult = mockMvc.perform(
@@ -131,10 +143,9 @@ class AuthorisationControllerIntTest extends PostgresIntegrationBase {
         // Given
         UserAccountEntity userAccount = createAndSaveUser(EMAIL_ADDRESS, true);
 
-        SecurityGroupEntity globalJudiciaryGroup = createAndSaveSecurityGroup("Global Judiciary", SecurityRoleEnum.JUDICIARY, true);
-        SecurityGroupEntity nonGlobalJudiciaryGroup = createAndSaveSecurityGroup("Non Global Judiciary", SecurityRoleEnum.JUDICIARY, false);
+        SecurityGroupEntity globalJudiciaryGroup = createAndSaveSecurityGroup(userAccount, "Global Judiciary", SecurityRoleEnum.JUDICIARY, true);
+        SecurityGroupEntity nonGlobalJudiciaryGroup = createAndSaveSecurityGroup(userAccount, "Non Global Judiciary", SecurityRoleEnum.JUDICIARY, false);
         userAccount.setSecurityGroupEntities(Set.of(globalJudiciaryGroup, nonGlobalJudiciaryGroup));
-        dartsDatabase.getUserAccountRepository().save(userAccount);
 
         // When
         MvcResult mvcResult = mockMvc.perform(
@@ -185,15 +196,13 @@ class AuthorisationControllerIntTest extends PostgresIntegrationBase {
         // Given
         UserAccountEntity userAccount = createAndSaveUser(EMAIL_ADDRESS, true);
 
-        SecurityGroupEntity globalJudiciaryGroup = createAndSaveSecurityGroup("Global Judiciary", SecurityRoleEnum.JUDICIARY, true);
-        SecurityGroupEntity nonGlobalJudiciaryGroup = createAndSaveSecurityGroup("Non Global Judiciary", SecurityRoleEnum.JUDICIARY, false);
+        SecurityGroupEntity globalJudiciaryGroup = createAndSaveSecurityGroup(userAccount, "Global Judiciary", SecurityRoleEnum.JUDICIARY, true);
+        SecurityGroupEntity nonGlobalJudiciaryGroup = createAndSaveSecurityGroup(userAccount, "Non Global Judiciary", SecurityRoleEnum.JUDICIARY, false);
 
         CourthouseEntity courthouse = courthouseStub.createMinimalCourthouse();
         nonGlobalJudiciaryGroup.setCourthouseEntities(Collections.singleton(courthouse));
-        dartsDatabase.getSecurityGroupRepository().save(nonGlobalJudiciaryGroup);
 
         userAccount.setSecurityGroupEntities(Set.of(globalJudiciaryGroup, nonGlobalJudiciaryGroup));
-        dartsDatabase.getUserAccountRepository().save(userAccount);
 
         // When
         MvcResult mvcResult = mockMvc.perform(
@@ -243,11 +252,10 @@ class AuthorisationControllerIntTest extends PostgresIntegrationBase {
         // Given
         UserAccountEntity userAccount = createAndSaveUser(EMAIL_ADDRESS, true);
 
-        SecurityGroupEntity judiciaryGroup = createAndSaveSecurityGroup("Global Judiciary", SecurityRoleEnum.JUDICIARY, true);
-        SecurityGroupEntity approverGroup = createAndSaveSecurityGroup("Non Global Approver", SecurityRoleEnum.APPROVER, false);
+        SecurityGroupEntity judiciaryGroup = createAndSaveSecurityGroup(userAccount, "Global Judiciary", SecurityRoleEnum.JUDICIARY, true);
+        SecurityGroupEntity approverGroup = createAndSaveSecurityGroup(userAccount, "Non Global Approver", SecurityRoleEnum.APPROVER, false);
 
         userAccount.setSecurityGroupEntities(Set.of(judiciaryGroup, approverGroup));
-        dartsDatabase.getUserAccountRepository().save(userAccount);
 
         // When
         MvcResult mvcResult = mockMvc.perform(
@@ -315,12 +323,12 @@ class AuthorisationControllerIntTest extends PostgresIntegrationBase {
         // Given
         final UserAccountEntity userAccount = createAndSaveUser(EMAIL_ADDRESS, true);
 
-        final SecurityGroupEntity globalJudiciaryGroup = createAndSaveSecurityGroup("Global Judiciary", SecurityRoleEnum.JUDICIARY, true);
-        final SecurityGroupEntity nonGlobalJudiciaryGroup = createAndSaveSecurityGroup("Non Global Judiciary", SecurityRoleEnum.JUDICIARY, false);
-        final SecurityGroupEntity approverGroup1 = createAndSaveSecurityGroup("Approver 1", SecurityRoleEnum.APPROVER, false);
-        final SecurityGroupEntity approverGroup2 = createAndSaveSecurityGroup("Approver 2", SecurityRoleEnum.APPROVER, false);
-        final SecurityGroupEntity requesterGroup = createAndSaveSecurityGroup("Requester", SecurityRoleEnum.REQUESTER, false);
-        final SecurityGroupEntity translationGroup = createAndSaveSecurityGroup("Translation QA", SecurityRoleEnum.TRANSLATION_QA, false);
+        final SecurityGroupEntity globalJudiciaryGroup = createAndSaveSecurityGroup(userAccount, "Global Judiciary", SecurityRoleEnum.JUDICIARY, true);
+        final SecurityGroupEntity nonGlobalJudiciaryGroup = createAndSaveSecurityGroup(userAccount, "Non Global Judiciary", SecurityRoleEnum.JUDICIARY, false);
+        final SecurityGroupEntity approverGroup1 = createAndSaveSecurityGroup(userAccount, "Approver 1", SecurityRoleEnum.APPROVER, false);
+        final SecurityGroupEntity approverGroup2 = createAndSaveSecurityGroup(userAccount, "Approver 2", SecurityRoleEnum.APPROVER, false);
+        final SecurityGroupEntity requesterGroup = createAndSaveSecurityGroup(userAccount, "Requester", SecurityRoleEnum.REQUESTER, false);
+        final SecurityGroupEntity translationGroup = createAndSaveSecurityGroup(userAccount, "Translation QA", SecurityRoleEnum.TRANSLATION_QA, false);
 
         final CourthouseEntity courthouse1 = courthouseStub.createCourthouseUnlessExists("Courthouse 1");
         final CourthouseEntity courthouse2 = courthouseStub.createCourthouseUnlessExists("Courthouse 2");
@@ -332,19 +340,12 @@ class AuthorisationControllerIntTest extends PostgresIntegrationBase {
         requesterGroup.setCourthouseEntities(Collections.singleton(courthouse1));
         translationGroup.setCourthouseEntities(Set.of(courthouse1, courthouse2));
 
-        dartsDatabase.getSecurityGroupRepository().saveAll(Set.of(nonGlobalJudiciaryGroup,
-                                                                  approverGroup1,
-                                                                  approverGroup2,
-                                                                  requesterGroup,
-                                                                  translationGroup));
-
         userAccount.setSecurityGroupEntities(Set.of(globalJudiciaryGroup,
                                                     nonGlobalJudiciaryGroup,
                                                     approverGroup1,
                                                     approverGroup2,
                                                     requesterGroup,
                                                     translationGroup));
-        dartsDatabase.getUserAccountRepository().save(userAccount);
 
         // When
         MvcResult mvcResult = mockMvc.perform(
@@ -502,12 +503,17 @@ class AuthorisationControllerIntTest extends PostgresIntegrationBase {
         return userAccountStub.createIntegrationUser(null, "Test User", emailAddress, isActive);
     }
 
-    private SecurityGroupEntity createAndSaveSecurityGroup(String name, SecurityRoleEnum securityRoleEnum, boolean isGlobalAccess) {
+    private SecurityGroupEntity createAndSaveSecurityGroup(UserAccountEntity user, String name, SecurityRoleEnum securityRoleEnum, boolean isGlobalAccess) {
         SecurityGroupEntity groupEntity = new SecurityGroupEntity();
         groupEntity.setGroupName(name);
         groupEntity.setGlobalAccess(isGlobalAccess);
         groupEntity.setDisplayState(true);
+        groupEntity.setDisplayName("Some name");
         groupEntity.setUseInterpreter(false);
+        groupEntity.setCreatedBy(user);
+        groupEntity.setLastModifiedBy(user);
+        groupEntity.setCreatedDateTime(OffsetDateTime.now());
+        groupEntity.setLastModifiedDateTime(OffsetDateTime.now());
 
         SecurityRoleRepository roleRepository = dartsDatabase.getSecurityRoleRepository();
         SecurityRoleEntity roleEntity = roleRepository.findByRoleName(securityRoleEnum.name())
@@ -515,7 +521,6 @@ class AuthorisationControllerIntTest extends PostgresIntegrationBase {
         roleRepository.save(roleEntity);
 
         groupEntity.setSecurityRoleEntity(roleEntity);
-
         return dartsDatabase.getSecurityGroupRepository()
             .save(groupEntity);
     }

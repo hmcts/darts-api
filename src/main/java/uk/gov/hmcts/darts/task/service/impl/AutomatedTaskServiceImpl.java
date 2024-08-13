@@ -25,6 +25,7 @@ import uk.gov.hmcts.darts.audio.deleter.impl.unstructured.ExternalUnstructuredDa
 import uk.gov.hmcts.darts.audio.service.InboundAudioDeleterProcessor;
 import uk.gov.hmcts.darts.audio.service.OutboundAudioDeleterProcessor;
 import uk.gov.hmcts.darts.audio.service.UnstructuredAudioDeleterProcessor;
+import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.cases.service.CloseOldCasesProcessor;
 import uk.gov.hmcts.darts.common.entity.AutomatedTaskEntity;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
@@ -160,6 +161,7 @@ public class AutomatedTaskServiceImpl implements AutomatedTaskService {
     private final RemoveDuplicateEventsProcessor removeDuplicateEventsProcessor;
 
     private final LogApi logApi;
+    private final UserIdentity userIdentity;
 
     @Override
     public void configureAndLoadAutomatedTasks(ScheduledTaskRegistrar taskRegistrar) {
@@ -231,6 +233,7 @@ public class AutomatedTaskServiceImpl implements AutomatedTaskService {
             AutomatedTaskEntity automatedTask = automatedTaskEntity.get();
             if (CronExpression.isValidExpression(cronExpression)) {
                 automatedTask.setCronExpression(cronExpression);
+                automatedTask.setLastModifiedBy(userIdentity.getUserAccount());
                 automatedTaskRepository.saveAndFlush(automatedTask);
                 log.debug("Updated the task {} with cron expression {}", taskName, cronExpression);
             } else {
@@ -586,11 +589,12 @@ public class AutomatedTaskServiceImpl implements AutomatedTaskService {
     }
 
     private void addUnstructuredTranscriptionAndAnnotationDeleterToTaskRegistrar(ScheduledTaskRegistrar taskRegistrar) {
-        var unstructuredAnnotationTranscriptionDeleterAutomatedTask = new UnstructuredAnnotationTranscriptionDeleterAutomatedTask(automatedTaskRepository,
-                                                                                      lockProvider,
-                                                                                      automatedTaskConfigurationProperties,
-                                                                                      unstructuredTranscriptionAndAnnotationDeleterProcessor,
-                                                                                      logApi);
+        var unstructuredAnnotationTranscriptionDeleterAutomatedTask = new
+            UnstructuredAnnotationTranscriptionDeleterAutomatedTask(automatedTaskRepository,
+                                                                    lockProvider,
+                                                                    automatedTaskConfigurationProperties,
+                                                                    unstructuredTranscriptionAndAnnotationDeleterProcessor,
+                                                                    logApi);
         unstructuredAnnotationTranscriptionDeleterAutomatedTask
             .setLastCronExpression(getAutomatedTaskCronExpression(unstructuredAnnotationTranscriptionDeleterAutomatedTask));
         Trigger trigger = createAutomatedTaskTrigger(unstructuredAnnotationTranscriptionDeleterAutomatedTask);
@@ -643,13 +647,14 @@ public class AutomatedTaskServiceImpl implements AutomatedTaskService {
         TriggerAndAutomatedTask triggerAndAutomatedTask = getTriggerAndAutomatedTask(
             CLOSE_OLD_UNFINISHED_TRANSCRIPTIONS_TASK_NAME.getTaskName());
         if (triggerAndAutomatedTask == null) {
-            CloseUnfinishedTranscriptionsAutomatedTask closeUnfinishedTranscriptionsAutomatedTask = new CloseUnfinishedTranscriptionsAutomatedTask(
-                automatedTaskRepository,
-                lockProvider,
-                automatedTaskConfigurationProperties,
-                transcriptionsProcessor,
-                logApi
-            );
+            CloseUnfinishedTranscriptionsAutomatedTask closeUnfinishedTranscriptionsAutomatedTask =
+                new CloseUnfinishedTranscriptionsAutomatedTask(
+                    automatedTaskRepository,
+                    lockProvider,
+                    automatedTaskConfigurationProperties,
+                    transcriptionsProcessor,
+                    logApi
+                );
             Trigger trigger = createAutomatedTaskTrigger(closeUnfinishedTranscriptionsAutomatedTask);
             taskScheduler.schedule(closeUnfinishedTranscriptionsAutomatedTask, trigger);
         } else {

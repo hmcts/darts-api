@@ -234,13 +234,14 @@ class AuthorisationServiceTest extends IntegrationBase {
         bristolUser.setEmailAddress(TEST_BRISTOL_EMAIL);
         when(mockUserIdentity.getUserAccount()).thenReturn(bristolUser);
 
-        var secGrpForApprover = minimalSecurityGroup();
+        var secGrpForApprover = minimalSecurityGroup(bristolUser);
         secGrpForApprover.setSecurityRoleEntity(dartsDatabase.findSecurityRole(APPROVER));
         secGrpForApprover.setCourthouseEntities(asSet(a1Court, b2Court));
 
-        var secGrpForRequestor = minimalSecurityGroup();
+        var secGrpForRequestor = minimalSecurityGroup(bristolUser);
         secGrpForRequestor.setSecurityRoleEntity(dartsDatabase.findSecurityRole(REQUESTER));
         secGrpForRequestor.setCourthouseEntities(asSet(b2Court, c3Court));
+        entityGraphPersistence.persistAll(List.of(secGrpForApprover, secGrpForRequestor));
 
         bristolUser.setSecurityGroupEntities(asSet(secGrpForApprover, secGrpForRequestor));
 

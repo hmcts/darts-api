@@ -22,6 +22,9 @@ public class PostgresIntegrationBase {
     @Autowired
     protected DartsDatabaseStub dartsDatabase;
 
+    @Autowired
+    protected OpenInViewUtil openInViewUtil;
+
     protected MemoryLogAppender logAppender = LogUtil.getMemoryLogger();
 
     /**
