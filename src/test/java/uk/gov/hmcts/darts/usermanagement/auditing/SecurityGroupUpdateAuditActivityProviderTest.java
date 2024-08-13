@@ -16,6 +16,7 @@ import static uk.gov.hmcts.darts.audit.api.AuditActivity.UPDATE_COURTHOUSE_GROUP
 import static uk.gov.hmcts.darts.audit.api.AuditActivity.UPDATE_GROUP;
 import static uk.gov.hmcts.darts.audit.api.AuditActivity.UPDATE_USERS_GROUP;
 import static uk.gov.hmcts.darts.test.common.data.SecurityGroupTestData.minimalSecurityGroup;
+import static uk.gov.hmcts.darts.test.common.data.UserAccountTestData.minimalUserAccount;
 import static uk.gov.hmcts.darts.usermanagement.auditing.SecurityGroupUpdateAuditActivityProvider.auditActivitiesFor;
 
 class SecurityGroupUpdateAuditActivityProviderTest {
@@ -23,7 +24,7 @@ class SecurityGroupUpdateAuditActivityProviderTest {
     @ParameterizedTest
     @MethodSource("patchCombinationsExceptAllNull")
     void identifiesUpdatesToBasicFields(String description, String displayName, String name) {
-        var prePatchedEntity = minimalSecurityGroup();
+        var prePatchedEntity = minimalSecurityGroup(minimalUserAccount());
         var patch = new SecurityGroupPatch()
             .description(description)
             .displayName(displayName)
@@ -36,7 +37,7 @@ class SecurityGroupUpdateAuditActivityProviderTest {
 
     @Test
     void reportsNoChangesWhenAllBasicPatchValuesAreNull() {
-        var prePatchedEntity = minimalSecurityGroup();
+        var prePatchedEntity = minimalSecurityGroup(minimalUserAccount());
         var patch = new SecurityGroupPatch()
             .description(null)
             .displayName(null)
@@ -49,7 +50,7 @@ class SecurityGroupUpdateAuditActivityProviderTest {
 
     @Test
     void identifiesUpdatesToUsersGroup() {
-        var prePatchedEntity = minimalSecurityGroup();
+        var prePatchedEntity = minimalSecurityGroup(minimalUserAccount());
         var patch = new SecurityGroupPatch()
             .userIds(asList(1, 2, 3));
 
@@ -60,7 +61,7 @@ class SecurityGroupUpdateAuditActivityProviderTest {
 
     @Test
     void identifiesUpdatesToCourthouseGroup() {
-        var prePatchedEntity = minimalSecurityGroup();
+        var prePatchedEntity = minimalSecurityGroup(minimalUserAccount());
         var patch = new SecurityGroupPatch()
             .courthouseIds(asList(1, 2, 3));
 
