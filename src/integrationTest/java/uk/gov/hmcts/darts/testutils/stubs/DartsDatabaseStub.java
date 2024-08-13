@@ -243,12 +243,12 @@ public class DartsDatabaseStub {
             automatedTaskRepository.findByIdGreaterThanEqual(SEQUENCE_START_VALUE)
         );
 
-        userAccountRepository.deleteAll(
-            userAccountRepository.findByIdGreaterThanEqual(SEQUENCE_START_VALUE)
-        );
-
         securityGroupRepository.deleteAll(
             securityGroupRepository.findByIdGreaterThanEqual(SEQUENCE_START_VALUE)
+        );
+
+        userAccountRepository.deleteAll(
+            userAccountRepository.findByIdGreaterThanEqual(SEQUENCE_START_VALUE)
         );
     }
 

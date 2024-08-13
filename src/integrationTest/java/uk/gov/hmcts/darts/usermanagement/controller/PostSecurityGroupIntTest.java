@@ -53,8 +53,9 @@ class PostSecurityGroupIntTest extends IntegrationBase {
 
     @BeforeEach
     void setUp() {
+        openInViewUtil.openEntityManager();
         List<SecurityGroupEntity> securityGroupEntities = securityGroupRepository.findAll(Sort.by(SecurityGroupEntity_.ID).descending());
-        maxSecurityGroupId = securityGroupEntities.get(0).getId();
+        maxSecurityGroupId = securityGroupEntities.getFirst().getId();
     }
 
     @AfterEach
@@ -65,6 +66,7 @@ class PostSecurityGroupIntTest extends IntegrationBase {
                 securityGroupRepository.delete(securityGroup);
             }
         }
+        openInViewUtil.closeEntityManager();
     }
 
     @Test

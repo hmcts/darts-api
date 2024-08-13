@@ -220,7 +220,7 @@ function:
       secretRef: darts-api-function-values
       key: DARTS_API_DB_CONNECTION_STRING
   job:
-    activeDeadlineSeconds: 300
+    activeDeadlineSeconds: 1800
     parallelism: 1
     completions: 1
   triggers:

@@ -1,6 +1,6 @@
 buildscript {
   dependencies {
-    classpath("org.flywaydb:flyway-database-postgresql:10.17.0")
+    classpath("org.flywaydb:flyway-database-postgresql:10.17.1")
   }
 }
 
@@ -17,7 +17,7 @@ plugins {
   id 'org.sonarqube' version '5.1.0.4882'
   id "io.freefair.lombok" version "8.7.1"
   id "org.openapi.generator" version "7.7.0"
-  id "org.flywaydb.flyway" version "10.17.0"
+  id "org.flywaydb.flyway" version "10.17.1"
   id 'maven-publish'
   id("com.dorongold.task-tree") version "4.0.0"
 }
@@ -419,8 +419,8 @@ dependencies {
   implementation 'com.azure:azure-storage-blob'
 
   implementation group: 'io.rest-assured', name: 'rest-assured'
-  implementation group: 'org.flywaydb', name: 'flyway-core', version: '10.17.0'
-  implementation group: 'org.flywaydb', name: 'flyway-database-postgresql', version: '10.17.0'
+  implementation group: 'org.flywaydb', name: 'flyway-core', version: '10.17.1'
+  implementation group: 'org.flywaydb', name: 'flyway-database-postgresql', version: '10.17.1'
   implementation group: 'io.hypersistence', name: 'hypersistence-utils-hibernate-63', version: '3.8.2'
 
   //database
@@ -435,13 +435,13 @@ dependencies {
 
   implementation group: 'com.google.guava', name: 'guava', version: '33.2.1-jre'
 
-  implementation 'org.mapstruct:mapstruct:1.5.5.Final'
+  implementation 'org.mapstruct:mapstruct:1.6.0'
   implementation group: 'org.apache.tika', name: 'tika-core', version: '2.9.2'
   implementation group: 'org.springframework.data', name: 'spring-data-envers', version: '3.3.2'
   implementation 'org.hibernate.orm:hibernate-ant:6.6.0.Final'
   implementation 'org.hibernate:hibernate-spatial:6.6.0.Final'
 
-  annotationProcessor 'org.mapstruct:mapstruct-processor:1.5.5.Final'
+  annotationProcessor 'org.mapstruct:mapstruct-processor:1.6.0'
   annotationProcessor('org.hibernate.orm:hibernate-jpamodelgen:6.6.0.Final')
 
   // Added to resolve issue where the default Feign client will silently convert GET requests to POST if the request contains a body
@@ -458,7 +458,7 @@ dependencies {
   }
   testImplementation group: 'org.springframework.cloud', name: 'spring-cloud-starter-contract-stub-runner', version: '4.1.4'
   testImplementation 'org.junit.jupiter:junit-jupiter:5.10.3'
-  testImplementation group: 'io.projectreactor', name: 'reactor-test', version: '3.6.8'
+  testImplementation group: 'io.projectreactor', name: 'reactor-test', version: '3.6.9'
   testImplementation 'org.springframework.security:spring-security-test:6.3.1'
 
   // https://mvnrepository.com/artifact/org.awaitility/awaitility
