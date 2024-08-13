@@ -77,7 +77,7 @@ class HearingsGetControllerTest extends IntegrationBase {
                "hearing_id": <hearing-id>,
                "courthouse_id": <courthouse-id>,
                "courthouse": "some-courthouse",
-               "courtroom": "some-courtroom",
+               "courtroom": "SOME-COURTROOM",
                "hearing_date": "<hearing-date>",
                "case_id": <case-id>,
                "case_number": "1",

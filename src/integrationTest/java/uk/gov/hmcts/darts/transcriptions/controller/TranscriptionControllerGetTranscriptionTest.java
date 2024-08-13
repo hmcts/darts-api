@@ -61,7 +61,7 @@ class TranscriptionControllerGetTranscriptionTest extends IntegrationBase {
             DateConverterUtil.toLocalDateTime(SOME_DATE_TIME)
         );
         CourthouseEntity courthouseEntity = hearingEntity.getCourtroom().getCourthouse();
-        assertEquals(SOME_COURTHOUSE, courthouseEntity.getCourthouseName());
+        assertEquals(SOME_COURTHOUSE.toUpperCase(), courthouseEntity.getCourthouseName());
 
         UserAccountEntity testUser = dartsDatabase.getUserAccountStub()
             .createAuthorisedIntegrationTestUser(courthouseEntity);
@@ -169,7 +169,7 @@ class TranscriptionControllerGetTranscriptionTest extends IntegrationBase {
         superAdminUserStub.givenUserIsAuthorised(mockUserIdentity);
 
         HearingEntity hearingEntity = dartsDatabase.getHearingRepository().findAll().get(0);
-        TranscriptionEntity transcription = dartsDatabase.getTranscriptionStub().createTranscription((CourtroomEntity)null);
+        TranscriptionEntity transcription = dartsDatabase.getTranscriptionStub().createTranscription((CourtroomEntity) null);
 
         transcription.getCourtCases().add(hearingEntity.getCourtCase());
         transcription.setCreatedDateTime(OffsetDateTime.of(2023, 6, 20, 10, 0, 0, 0, ZoneOffset.UTC));

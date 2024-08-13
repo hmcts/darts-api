@@ -12,24 +12,24 @@
   },
   {
     "workflow_actor": $USER_ACCOUNT_ID,
-    "status_id":3,
-    "workflow_ts":"2024-04-24T12:00:00Z",
-    "comments":[
+    "status_id": 3,
+    "workflow_ts": "2024-04-24T12:00:00Z",
+    "comments": [
       {
-        "comment":"comment2",
-        "commented_at":"2024-04-24T12:00:00Z",
+        "comment": "comment2",
+        "commented_at": "2024-04-24T12:00:00Z",
         "author_id": $USER_ACCOUNT_ID
       }
     ]
   },
   {
     "workflow_actor": $USER_ACCOUNT_ID,
-    "status_id":1,
-    "workflow_ts":"2024-04-23T10:00:00Z",
-    "comments":[
+    "status_id": 1,
+    "workflow_ts": "2024-04-23T10:00:00Z",
+    "comments": [
       {
-        "comment":"comment1",
-        "commented_at":"2024-04-23T10:00:00Z",
+        "comment": "comment1",
+        "commented_at": "2024-04-23T10:00:00Z",
         "author_id": $USER_ACCOUNT_ID
       }
     ]
