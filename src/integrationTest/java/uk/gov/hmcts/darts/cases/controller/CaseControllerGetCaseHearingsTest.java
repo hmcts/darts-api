@@ -68,7 +68,7 @@ class CaseControllerGetCaseHearingsTest extends IntegrationBase {
         );
 
         CourthouseEntity courthouseEntity = hearingEntity.getCourtroom().getCourthouse();
-        assertEquals(SOME_COURTHOUSE, courthouseEntity.getCourthouseName());
+        assertEquals(SOME_COURTHOUSE.toUpperCase(), courthouseEntity.getCourthouseName());
 
         testUser = dartsDatabase.getUserAccountStub()
             .createAuthorisedIntegrationTestUser(false, courthouseEntity);
@@ -116,7 +116,7 @@ class CaseControllerGetCaseHearingsTest extends IntegrationBase {
             .andExpect(jsonPath("$[0].id", Matchers.is(hearingEntity.getId())))
             .andExpect(jsonPath("$[0].date", Matchers.is(Matchers.notNullValue())))
             .andExpect(jsonPath("$[0].judges", Matchers.is(Matchers.notNullValue())))
-            .andExpect(jsonPath("$[0].courtroom", Matchers.is(SOME_COURTROOM)));
+            .andExpect(jsonPath("$[0].courtroom", Matchers.is(SOME_COURTROOM.toUpperCase())));
 
     }
 
@@ -141,7 +141,7 @@ class CaseControllerGetCaseHearingsTest extends IntegrationBase {
             .andExpect(jsonPath("$[0].id", Matchers.is(hearingEntity.getId())))
             .andExpect(jsonPath("$[0].date", Matchers.is(Matchers.notNullValue())))
             .andExpect(jsonPath("$[0].judges", Matchers.is(Matchers.notNullValue())))
-            .andExpect(jsonPath("$[0].courtroom", Matchers.is(SOME_COURTROOM)))
+            .andExpect(jsonPath("$[0].courtroom", Matchers.is(SOME_COURTROOM.toUpperCase())))
             .andExpect(jsonPath("$[1].id", Matchers.is(hearingEntity2.getId())))
             .andExpect(jsonPath("$[1].courtroom", Matchers.is("CR1")));
 

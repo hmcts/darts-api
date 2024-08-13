@@ -53,7 +53,8 @@ class CasesControllerGetTranscriptsTest extends IntegrationBase {
         );
 
         CourthouseEntity courthouseEntity = hearingEntity.getCourtroom().getCourthouse();
-        assertEquals(SOME_COURTHOUSE, courthouseEntity.getCourthouseName());
+        assertEquals(SOME_COURTHOUSE.toUpperCase(), courthouseEntity.getCourthouseName());
+        assertEquals(SOME_COURTHOUSE, courthouseEntity.getDisplayName());
 
         UserAccountEntity testUser = dartsDatabase.getUserAccountStub()
             .createAuthorisedIntegrationTestUser(courthouseEntity);

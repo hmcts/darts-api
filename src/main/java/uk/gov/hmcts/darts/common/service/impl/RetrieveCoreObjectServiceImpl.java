@@ -117,16 +117,22 @@ public class RetrieveCoreObjectServiceImpl implements RetrieveCoreObjectService 
 
     @Override
     public CourtroomEntity retrieveOrCreateCourtroom(CourthouseEntity courthouse, String courtroomName, UserAccountEntity userAccount) {
+        courtroomName = courtroomName.toUpperCase();
         Optional<CourtroomEntity> foundCourtroom = courtroomRepository.findByNameAndId(
             courthouse.getId(),
             courtroomName
         );
-        return foundCourtroom.orElseGet(() -> createCourtroom(courthouse, courtroomName, userAccount));
+        if (foundCourtroom.isPresent()) {
+            return foundCourtroom.get();
+        } else {
+            return createCourtroom(courthouse, courtroomName, userAccount);
+        }
     }
 
 
     @Override
     public CourtroomEntity retrieveOrCreateCourtroom(String courthouseName, String courtroomName, UserAccountEntity userAccount) {
+        courtroomName = courtroomName.toUpperCase();
         Optional<CourtroomEntity> foundCourtroom = courtroomRepository.findByCourthouseNameAndCourtroomName(
             courthouseName,
             courtroomName

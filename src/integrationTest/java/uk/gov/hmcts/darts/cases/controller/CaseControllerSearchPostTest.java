@@ -221,21 +221,21 @@ class CaseControllerSearchPostTest extends IntegrationBase {
                 "hearings": [
                   {
                     "date": "2023-05-20",
-                    "courtroom": "courtroom1",
+                    "courtroom": "COURTROOM1",
                     "judges": [
                       "AJUDGE"
                     ]
                   },
                   {
                     "date": "2023-05-21",
-                    "courtroom": "courtroom1",
+                    "courtroom": "COURTROOM1",
                     "judges": [
                       "AJUDGE"
                     ]
                   },
                   {
                     "date": "2023-05-22",
-                    "courtroom": "courtroom1",
+                    "courtroom": "COURTROOM1",
                     "judges": [
                       "AJUDGE"
                     ]
@@ -279,21 +279,21 @@ class CaseControllerSearchPostTest extends IntegrationBase {
                 "hearings": [
                   {
                     "date": "2023-05-20",
-                    "courtroom": "courtroom1",
+                    "courtroom": "COURTROOM1",
                     "judges": [
                       "AJUDGE"
                     ]
                   },
                   {
                     "date": "2023-05-21",
-                    "courtroom": "courtroom1",
+                    "courtroom": "COURTROOM1",
                     "judges": [
                       "AJUDGE"
                     ]
                   },
                   {
                     "date": "2023-05-22",
-                    "courtroom": "courtroom1",
+                    "courtroom": "COURTROOM1",
                     "judges": [
                       "AJUDGE"
                     ]
