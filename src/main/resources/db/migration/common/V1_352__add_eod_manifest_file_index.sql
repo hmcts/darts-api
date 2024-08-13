@@ -1,1 +1,1 @@
-CREATE INDEX IF NOT EXISTS eod_manifest_file_idx ON external_object_directory (manifest_file)
+CREATE INDEX IF NOT EXISTS eod_manifest_file_idx ON external_object_directory (manifest_file text_pattern_ops)
