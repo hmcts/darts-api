@@ -10,6 +10,7 @@ import uk.gov.hmcts.darts.audio.exception.AudioApiError;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
+import uk.gov.hmcts.darts.dailylist.exception.DailyListError;
 import uk.gov.hmcts.darts.task.config.AutomatedTaskConfigurationProperties;
 
 import java.util.HashMap;
@@ -36,26 +37,14 @@ public class SystemUserHelper {
         return systemUserGuidMap.get(configKey);
     }
 
-    public UserAccountEntity getHousekeepingUser() {
-        return getSystemUser(HOUSEKEEPING);
-    }
-
     public UserAccountEntity getDailyListProcessorUser() {
-        return getSystemUser(DAILYLIST_PROCESSOR);
-    }
-
-    /**
-     * This method does not search the database by username but by the key defined in the application yaml.
-     */
-    public UserAccountEntity getSystemUser(String configKey) {
-        return systemUserNameToEntityMap.computeIfAbsent(configKey, k -> {
-            UserAccountEntity user = userAccountRepository.findSystemUser(findSystemUserGuid(configKey));
+        return systemUserNameToEntityMap.computeIfAbsent(DAILYLIST_PROCESSOR, k -> {
+            UserAccountEntity user = userAccountRepository.findSystemUser(findSystemUserGuid(DAILYLIST_PROCESSOR));
             if (user == null) {
-                throw new DartsApiException(AudioApiError.MISSING_SYSTEM_USER);
+                throw new DartsApiException(DailyListError.MISSING_DAILY_LIST_USER);
             }
             return user;
         });
-
     }
 
     public UserAccountEntity getSystemUser() {

@@ -403,7 +403,7 @@ dependencies {
   implementation 'net.javacrumbs.shedlock:shedlock-spring:5.14.0'
   implementation 'net.javacrumbs.shedlock:shedlock-provider-jdbc-template:5.14.0'
 
-  implementation group: 'com.github.hmcts.java-logging', name: 'logging', version: '6.1.5'
+  implementation group: 'com.github.hmcts.java-logging', name: 'logging', version: '6.1.6'
   implementation group: 'org.apache.logging.log4j', name: 'log4j-api', version: log4JVersion
   implementation group: 'org.apache.logging.log4j', name: 'log4j-to-slf4j', version: log4JVersion
   implementation group: 'org.apache.commons', name: 'commons-exec', version: '1.4.0'
@@ -447,7 +447,7 @@ dependencies {
   implementation group: 'io.github.openfeign', name: 'feign-hc5', version: '13.3'
 
   testImplementation 'org.testcontainers:postgresql:1.20.1'
-  testImplementation 'com.h2database:h2:2.3.230'
+  testImplementation 'com.h2database:h2:2.3.232'
   testImplementation group: 'org.postgresql', name: 'postgresql', version: '42.7.3'
   testImplementation 'org.mockito:mockito-inline:5.2.0'
   testImplementation group: 'org.springframework.boot', name: 'spring-boot-starter-test', {
