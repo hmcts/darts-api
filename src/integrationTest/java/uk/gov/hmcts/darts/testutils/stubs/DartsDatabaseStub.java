@@ -864,6 +864,8 @@ public class DartsDatabaseStub {
         var annotation = minimalAnnotationEntity();
         annotation.setDeleted(false);
         annotation.setCurrentOwner(userAccount);
+        annotation.setCreatedBy(userAccount);
+        annotation.setLastModifiedBy(userAccount);
         annotation.addHearing(save(someMinimalHearing()));
         return save(annotation);
     }
