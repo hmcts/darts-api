@@ -9,6 +9,7 @@ import java.util.List;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.IntStream.rangeClosed;
 import static uk.gov.hmcts.darts.test.common.data.CaseTestData.someMinimalCase;
+import static uk.gov.hmcts.darts.test.common.data.UserAccountTestData.minimalUserAccount;
 
 @UtilityClass
 @SuppressWarnings({"HideUtilityClassConstructor"})
@@ -40,8 +41,8 @@ public class ProsecutorTestData {
         var prosecutor = new ProsecutorEntity();
         prosecutor.setCourtCase(courtCase);
         prosecutor.setName(name);
-        prosecutor.setCreatedBy(courtCase.getLastModifiedBy());
-        prosecutor.setLastModifiedBy(courtCase.getLastModifiedBy());
+        prosecutor.setCreatedBy(minimalUserAccount());
+        prosecutor.setLastModifiedBy(minimalUserAccount());
 
         return prosecutor;
     }
