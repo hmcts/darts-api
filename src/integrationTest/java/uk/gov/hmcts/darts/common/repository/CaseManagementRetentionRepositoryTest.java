@@ -35,7 +35,8 @@ class CaseManagementRetentionRepositoryTest extends PostgresIntegrationBase {
     @Test
     void deletesCaseManagementRetentionsForAssociatedWithEvents() {
         var caseManagementRetentionsWithEvents = createSomeCmrWithEvents(3);
-        entityGraphPersistence.persistAll(caseManagementRetentionsWithEvents);
+        caseManagementRetentionsWithEvents.forEach(cmre -> dartsDatabase.save(cmre));
+        //entityGraphPersistence.persistAll(caseManagementRetentionsWithEvents);
 
         caseManagementRetentionRepository.deleteAllByEventEntityIn(
             asList(
