@@ -12,6 +12,7 @@ import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilde
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
+import uk.gov.hmcts.darts.common.entity.DefendantEntity;
 import uk.gov.hmcts.darts.common.entity.EventEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.JudgeEntity;
@@ -25,7 +26,7 @@ import uk.gov.hmcts.darts.testutils.IntegrationBase;
 
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
-import java.util.Arrays;
+import java.util.ArrayList;
 
 import static org.skyscreamer.jsonassert.JSONAssert.assertEquals;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -40,7 +41,6 @@ import static uk.gov.hmcts.darts.test.common.data.EventTestData.createEventWith;
 import static uk.gov.hmcts.darts.test.common.data.HearingTestData.createHearingWithDefaults;
 import static uk.gov.hmcts.darts.test.common.data.JudgeTestData.createJudgeWithName;
 import static uk.gov.hmcts.darts.testutils.stubs.UserAccountStub.INTEGRATION_TEST_USER_EMAIL;
-
 
 @AutoConfigureMockMvc
 
@@ -69,7 +69,9 @@ class CaseControllerAdminSearchTest extends IntegrationBase {
 
         CourtCaseEntity case2 = createCaseAt(swanseaCourthouse);
         case2.setCaseNumber("Case2");
-        case2.setDefendantList(Arrays.asList(createDefendantForCaseWithName(case2, "Defendant2")));
+        var defendants = new ArrayList<DefendantEntity>();
+        defendants.add(createDefendantForCaseWithName(case2, "Defendant2"));
+        case2.setDefendantList(defendants);
 
         CourtCaseEntity case3 = createCaseAt(swanseaCourthouse);
         case3.setCaseNumber("Case3");

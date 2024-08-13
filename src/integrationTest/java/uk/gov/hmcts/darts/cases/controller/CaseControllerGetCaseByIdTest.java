@@ -50,14 +50,14 @@ class CaseControllerGetCaseByIdTest extends IntegrationBase {
             SOME_COURTROOM,
             DateConverterUtil.toLocalDateTime(SOME_DATE_TIME)
         );
-        CourtCaseEntity courtCase = hearingEntity.getCourtCase();
-        courtCase.addProsecutor("aProsecutor");
-        courtCase.addDefendant("aDefendant");
-        courtCase.addDefence("aDefence");
-        dartsDatabase.save(courtCase);
-
         UserAccountEntity testUser = dartsDatabase.getUserAccountStub()
             .createAuthorisedIntegrationTestUser(hearingEntity.getCourtroom().getCourthouse());
+        CourtCaseEntity courtCase = hearingEntity.getCourtCase();
+        courtCase.addProsecutor("aProsecutor", testUser);
+        courtCase.addDefendant("aDefendant", testUser);
+        courtCase.addDefence("aDefence", testUser);
+        dartsDatabase.save(courtCase);
+
         when(mockUserIdentity.getUserAccount()).thenReturn(testUser);
     }
 

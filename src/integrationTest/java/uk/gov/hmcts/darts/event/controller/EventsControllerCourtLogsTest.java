@@ -173,8 +173,8 @@ class EventsControllerCourtLogsTest extends IntegrationBase {
 
         HearingEntity hearingEntity = dartsDatabase.getHearingRepository().findAll().get(0);
 
-        var event = createEventWith(LOG, "test", hearingEntity, createOffsetDateTime("2023-07-01T10:00:00"));
-        eventRepository.saveAndFlush(event);
+        EventEntity event = createEventWith(LOG, "test", hearingEntity, createOffsetDateTime("2023-07-01T10:00:00"));
+        dartsDatabase.save(event);
 
         String courthouseName = hearingEntity.getCourtCase().getCourthouse().getDisplayName();
         String caseNumber = hearingEntity.getCourtCase().getCaseNumber();
@@ -201,15 +201,15 @@ class EventsControllerCourtLogsTest extends IntegrationBase {
         HearingEntity hearingEntity = dartsDatabase.getHearingRepository().findAll().get(0);
 
         var eventTime = createOffsetDateTime("2023-07-01T10:00:00");
-        var event = createEventWith(LOG, "test", hearingEntity, eventTime);
-        var event2 = createEventWith(LOG, "Tester", hearingEntity, eventTime);
-        var event3 = createEventWith("Event", "ShouldNotShow", hearingEntity, eventTime);
-        var event4 = createEventWith("Event", "ShouldAlsoNotShow", hearingEntity, eventTime);
+        EventEntity event = createEventWith(LOG, "test", hearingEntity, eventTime);
+        EventEntity event2 = createEventWith(LOG, "Tester", hearingEntity, eventTime);
+        EventEntity event3 = createEventWith("Event", "ShouldNotShow", hearingEntity, eventTime);
+        EventEntity event4 = createEventWith("Event", "ShouldAlsoNotShow", hearingEntity, eventTime);
 
-        eventRepository.saveAndFlush(event);
-        eventRepository.saveAndFlush(event2);
-        eventRepository.saveAndFlush(event3);
-        eventRepository.saveAndFlush(event4);
+        dartsDatabase.save(event);
+        dartsDatabase.save(event2);
+        dartsDatabase.save(event3);
+        dartsDatabase.save(event4);
 
         String courthouseName = hearingEntity.getCourtCase().getCourthouse().getCourthouseName();
         String caseNumber = hearingEntity.getCourtCase().getCaseNumber();
@@ -233,8 +233,8 @@ class EventsControllerCourtLogsTest extends IntegrationBase {
         HearingEntity hearingEntity = dartsDatabase.getHearingRepository().findAll().get(0);
 
         var eventTime = createOffsetDateTime("2023-07-01T10:00:00");
-        var event = createEventWith(LOG, "eventText", hearingEntity, eventTime);
-        var event2 = createEventWith(LOG, "Tester", hearingEntity, eventTime);
+        EventEntity event = createEventWith(LOG, "eventText", hearingEntity, eventTime);
+        EventEntity event2 = createEventWith(LOG, "Tester", hearingEntity, eventTime);
 
         HearingEntity hearingEntity1 = dartsDatabase.givenTheDatabaseContainsCourtCaseWithHearingAndCourthouseWithRoom(
             NEW_CASE,
@@ -243,13 +243,13 @@ class EventsControllerCourtLogsTest extends IntegrationBase {
             DateConverterUtil.toLocalDateTime(SOME_DATE_TIME)
         );
 
-        var eventHearing = createEventWith(LOG, "eventText", hearingEntity1, eventTime);
-        var eventHearing2 = createEventWith(LOG, "eventText2", hearingEntity1, eventTime);
+        EventEntity eventHearing = createEventWith(LOG, "eventText", hearingEntity1, eventTime);
+        EventEntity eventHearing2 = createEventWith(LOG, "eventText2", hearingEntity1, eventTime);
 
-        eventRepository.saveAndFlush(event);
-        eventRepository.saveAndFlush(event2);
-        eventRepository.saveAndFlush(eventHearing);
-        eventRepository.saveAndFlush(eventHearing2);
+        dartsDatabase.save(event);
+        dartsDatabase.save(event2);
+        dartsDatabase.save(eventHearing);
+        dartsDatabase.save(eventHearing2);
 
         String displayName = hearingEntity.getCourtCase().getCourthouse().getDisplayName();
 

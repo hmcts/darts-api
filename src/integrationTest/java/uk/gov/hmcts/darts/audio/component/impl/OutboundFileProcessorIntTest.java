@@ -28,6 +28,7 @@ import java.util.concurrent.ExecutionException;
 
 import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static uk.gov.hmcts.darts.test.common.data.UserAccountTestData.minimalUserAccount;
 
 @TestPropertySource(properties = {"darts.audio.transformation.service.audio.file=tests/audio/WithViqHeader/viq0001min.mp2"})
 @Slf4j
@@ -83,9 +84,11 @@ class OutboundFileProcessorIntTest extends IntegrationBase {
             LocalDateTime.parse(HEARING_DATETIME)
         );
         CourtCaseEntity courtCase = hearingEntity.getCourtCase();
-        courtCase.addProsecutor("aProsecutor");
-        courtCase.addDefendant("aDefendant");
-        courtCase.addDefence("aDefence");
+        var userAccount = minimalUserAccount();
+        courtCase.addProsecutor("aProsecutor", userAccount);
+        courtCase.addDefendant("aDefendant", userAccount);
+        courtCase.addDefence("aDefence", userAccount);
+
         dartsDatabase.save(courtCase);
 
     }

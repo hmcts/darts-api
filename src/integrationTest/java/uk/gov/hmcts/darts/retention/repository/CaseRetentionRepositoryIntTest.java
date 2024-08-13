@@ -8,6 +8,7 @@ import uk.gov.hmcts.darts.common.repository.CaseRetentionRepository;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 import uk.gov.hmcts.darts.testutils.stubs.CaseRetentionStub;
 import uk.gov.hmcts.darts.testutils.stubs.CourtCaseStub;
+import uk.gov.hmcts.darts.testutils.stubs.DartsDatabaseStub;
 import uk.gov.hmcts.darts.testutils.stubs.EntityGraphPersistence;
 
 import java.time.OffsetDateTime;
@@ -34,6 +35,8 @@ class CaseRetentionRepositoryIntTest extends IntegrationBase {
     CaseRetentionRepository caseRetentionRepository;
     @Autowired
     EntityGraphPersistence entityGraphPersistence;
+    @Autowired
+    DartsDatabaseStub dartsDatabaseStub;
 
     @Test
     void testFindTopByCourtCaseOrderByRetainUntilAppliedOnDesc() {
@@ -57,7 +60,7 @@ class CaseRetentionRepositoryIntTest extends IntegrationBase {
 
     @Test
     void deleteCaseRetentionsByCaseManagementId() {
-        var caseRetentionsWithCmr = entityGraphPersistence.persistAll(someCaseRetentionsWithCmr(3));
+        var caseRetentionsWithCmr = someCaseRetentionsWithCmr(3);
 
         caseRetentionRepository.deleteAllByCaseManagementIdsIn(
             firstTwoCmrIdsFrom(caseRetentionsWithCmr));
@@ -75,7 +78,7 @@ class CaseRetentionRepositoryIntTest extends IntegrationBase {
 
     private List<CaseRetentionEntity> someCaseRetentionsWithCmr(int quantity) {
         return range(0, quantity)
-            .mapToObj(i -> createCaseRetentionFor(someMinimalCaseManagementRetention()))
+            .mapToObj(i -> dartsDatabaseStub.save(createCaseRetentionFor(someMinimalCaseManagementRetention())))
             .collect(toList());
     }
 }

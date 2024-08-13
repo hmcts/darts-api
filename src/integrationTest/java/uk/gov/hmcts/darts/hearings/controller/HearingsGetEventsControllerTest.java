@@ -47,24 +47,23 @@ class HearingsGetEventsControllerTest extends IntegrationBase {
 
     @BeforeEach
     void setUp() {
-
         HearingEntity hearing = dartsDatabase.givenTheDatabaseContainsCourtCaseWithHearingAndCourthouseWithRoom(
             SOME_CASE_NUMBER,
             SOME_COURTHOUSE,
             SOME_COURTROOM,
             DateConverterUtil.toLocalDateTime(SOME_DATE_TIME)
         );
+        hearingEntity = dartsDatabase.getHearingRepository().findById(hearing.getId()).orElseThrow();
+        UserAccountEntity testUser = dartsDatabase.getUserAccountStub()
+            .createAuthorisedIntegrationTestUser(hearingEntity.getCourtroom().getCourthouse());
         CourtCaseEntity courtCase = hearing.getCourtCase();
-        courtCase.addProsecutor("aProsecutor");
-        courtCase.addDefendant("aDefendant");
-        courtCase.addDefence("aDefence");
+        courtCase.addProsecutor("aProsecutor", testUser);
+        courtCase.addDefendant("aDefendant", testUser);
+        courtCase.addDefence("aDefence", testUser);
         dartsDatabase.save(courtCase);
 
         event = dartsDatabase.createEvent(hearing);
 
-        hearingEntity = dartsDatabase.getHearingRepository().findById(hearing.getId()).orElseThrow();
-        UserAccountEntity testUser = dartsDatabase.getUserAccountStub()
-            .createAuthorisedIntegrationTestUser(hearingEntity.getCourtroom().getCourthouse());
         when(mockUserIdentity.getUserAccount()).thenReturn(testUser);
     }
 

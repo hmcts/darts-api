@@ -42,6 +42,7 @@ import java.util.List;
 
 import static java.util.Arrays.asList;
 import static uk.gov.hmcts.darts.test.common.TestUtils.getContentsFromFile;
+import static uk.gov.hmcts.darts.testutils.UserAccountTestData.minimalUserAccount;
 
 @SuppressWarnings({"PMD.GodClass", "PMD.ExcessivePublicCount", "PMD.ExcessiveImports", "PMD.CouplingBetweenObjects"})
 @UtilityClass
@@ -174,6 +175,8 @@ public class CommonTestDataUtil {
         DefenceEntity defenceEntity = new DefenceEntity();
         defenceEntity.setCourtCase(courtCase);
         defenceEntity.setName("defence_" + courtCase.getCaseNumber() + "_" + number);
+        defenceEntity.setCreatedBy(minimalUserAccount());
+        defenceEntity.setLastModifiedBy(minimalUserAccount());
         return defenceEntity;
     }
 
@@ -187,6 +190,8 @@ public class CommonTestDataUtil {
         DefendantEntity defendantEntity = new DefendantEntity();
         defendantEntity.setCourtCase(courtCase);
         defendantEntity.setName("defendant_" + courtCase.getCaseNumber() + "_" + number);
+        defendantEntity.setCreatedBy(minimalUserAccount());
+        defendantEntity.setLastModifiedBy(minimalUserAccount());
         return defendantEntity;
     }
 

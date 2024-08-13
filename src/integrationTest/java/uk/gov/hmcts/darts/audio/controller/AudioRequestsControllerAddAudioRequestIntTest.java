@@ -73,14 +73,13 @@ class AudioRequestsControllerAddAudioRequestIntTest extends IntegrationBase {
             SOME_COURTROOM,
             LocalDateTime.parse(HEARING_DATETIME)
         );
-        CourtCaseEntity courtCase = hearingEntity.getCourtCase();
-        courtCase.addProsecutor("aProsecutor");
-        courtCase.addDefendant("aDefendant");
-        courtCase.addDefence("aDefence");
-        dartsDatabase.save(courtCase);
-
         testUser = dartsDatabase.getUserAccountStub()
             .createAuthorisedIntegrationTestUser(hearingEntity.getCourtroom().getCourthouse());
+        CourtCaseEntity courtCase = hearingEntity.getCourtCase();
+        courtCase.addProsecutor("aProsecutor", testUser);
+        courtCase.addDefendant("aDefendant", testUser);
+        courtCase.addDefence("aDefence", testUser);
+        dartsDatabase.save(courtCase);
         when(mockUserIdentity.getUserAccount()).thenReturn(testUser);
     }
 

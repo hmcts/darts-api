@@ -13,6 +13,7 @@ import uk.gov.hmcts.darts.cases.model.AdminCasesSearchResponseItem;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
+import uk.gov.hmcts.darts.common.entity.DefendantEntity;
 import uk.gov.hmcts.darts.common.entity.EventEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.JudgeEntity;
@@ -27,7 +28,7 @@ import uk.gov.hmcts.darts.testutils.stubs.CourtCaseStub;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -77,7 +78,9 @@ class CaseServiceAdminSearchTest extends IntegrationBase {
 
         CourtCaseEntity case2 = createCaseAt(swanseaCourthouse);
         case2.setCaseNumber("Case2");
-        case2.setDefendantList(Arrays.asList(createDefendantForCaseWithName(case2, "Defendant2")));
+        var defendants = new ArrayList<DefendantEntity>();
+        defendants.add(createDefendantForCaseWithName(case2, "Defendant2"));
+        case2.setDefendantList(defendants);
 
         CourtCaseEntity case3 = createCaseAt(swanseaCourthouse);
         case3.setCaseNumber("Case3");

@@ -65,7 +65,6 @@ public class EventStub {
         eventEntity.setCreatedBy(userAccountStub.getIntegrationTestUserAccountEntity());
         eventEntity.addHearing(hearing);
         eventEntity.setLastModifiedBy(userAccountStub.getIntegrationTestUserAccountEntity());
-        eventEntity.setLastModifiedDateTime(eventTimestamp);
         eventEntity.setCreatedDateTime(eventTimestamp);
         eventEntity.setIsLogEntry(false);
         eventEntity.setCourtroom(hearing.getCourtroom());

@@ -18,11 +18,14 @@ import uk.gov.hmcts.darts.common.entity.AnnotationDocumentEntity;
 import uk.gov.hmcts.darts.common.entity.AnnotationEntity;
 import uk.gov.hmcts.darts.common.entity.AuditEntity;
 import uk.gov.hmcts.darts.common.entity.AutomatedTaskEntity;
+import uk.gov.hmcts.darts.common.entity.CaseManagementRetentionEntity;
 import uk.gov.hmcts.darts.common.entity.CaseRetentionEntity;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
 import uk.gov.hmcts.darts.common.entity.DailyListEntity;
+import uk.gov.hmcts.darts.common.entity.DefenceEntity;
+import uk.gov.hmcts.darts.common.entity.DefendantEntity;
 import uk.gov.hmcts.darts.common.entity.EventEntity;
 import uk.gov.hmcts.darts.common.entity.EventHandlerEntity;
 import uk.gov.hmcts.darts.common.entity.ExternalLocationTypeEntity;
@@ -406,8 +409,8 @@ public class DartsDatabaseStub {
     @Transactional
     public CourthouseEntity createCourthouseWithTwoCourtrooms() {
         CourthouseEntity swanseaCourtEntity = createCourthouseWithNameAndCode("SWANSEA", 457, "Swansea");
-        courtroomRepository.saveAndFlush(createCourtRoomWithNameAtCourthouse(swanseaCourtEntity, "1"));
-        courtroomRepository.saveAndFlush(createCourtRoomWithNameAtCourthouse(swanseaCourtEntity, "2"));
+        save(createCourtRoomWithNameAtCourthouse(swanseaCourtEntity, "1"));
+        save(createCourtRoomWithNameAtCourthouse(swanseaCourtEntity, "2"));
         return swanseaCourtEntity;
 
     }
@@ -532,6 +535,7 @@ public class DartsDatabaseStub {
 
     @Transactional
     public HearingEntity save(HearingEntity hearingEntity) {
+        save(hearingEntity.getCourtCase());
         save(hearingEntity.getCourtroom().getCourthouse());
         save(hearingEntity.getCourtroom());
         return hearingRepository.save(hearingEntity);
@@ -545,14 +549,37 @@ public class DartsDatabaseStub {
 
     @Transactional
     public CourtroomEntity save(CourtroomEntity courtroom) {
-        userAccountRepository.save(courtroom.getCreatedBy());
+        save(courtroom.getCourthouse());
+        var createdBy = courtroom.getCreatedBy();
+        if (createdBy != null) {
+            userAccountRepository.save(createdBy);
+        }
         return courtroomRepository.save(courtroom);
     }
 
     @Transactional
     public CourtCaseEntity save(CourtCaseEntity courtCase) {
         save(courtCase.getCourthouse());
+        userAccountRepository.save(courtCase.getCreatedBy());
+        userAccountRepository.save(courtCase.getLastModifiedBy());
+        judgeRepository.saveAll(courtCase.getJudges());
+        courtCase.getDefenceList().forEach(this::save);
+        courtCase.getDefendantList().forEach(this::save);
         return caseRepository.save(courtCase);
+    }
+
+    @Transactional
+    public DefenceEntity save(DefenceEntity defenceEntity) {
+        userAccountRepository.save(defenceEntity.getCreatedBy());
+        userAccountRepository.save(defenceEntity.getLastModifiedBy());
+        return defenceEntity;
+    }
+
+    @Transactional
+    public DefendantEntity save(DefendantEntity defendantEntity) {
+        userAccountRepository.save(defendantEntity.getCreatedBy());
+        userAccountRepository.save(defendantEntity.getLastModifiedBy());
+        return defendantEntity;
     }
 
     @Transactional
@@ -568,6 +595,43 @@ public class DartsDatabaseStub {
             transcriptionDocumentRepository.save(td);
         });
         return transcription;
+    }
+
+    @Transactional
+    public RetentionPolicyTypeEntity save(RetentionPolicyTypeEntity retentionPolicyTypeEntity) {
+        userAccountRepository.save(retentionPolicyTypeEntity.getCreatedBy());
+        userAccountRepository.save(retentionPolicyTypeEntity.getLastModifiedBy());
+        return retentionPolicyTypeRepository.save(retentionPolicyTypeEntity);
+    }
+
+    @Transactional
+    public EventEntity save(EventEntity eventEntity) {
+        userAccountRepository.save(eventEntity.getCreatedBy());
+        userAccountRepository.save(eventEntity.getLastModifiedBy());
+        save(eventEntity.getCourtroom());
+        return eventRepository.save(eventEntity);
+    }
+
+    @Transactional
+    public CaseRetentionEntity save(CaseRetentionEntity caseRetentionEntity) {
+        userAccountRepository.save(caseRetentionEntity.getSubmittedBy());
+        userAccountRepository.save(caseRetentionEntity.getCreatedBy());
+        userAccountRepository.save(caseRetentionEntity.getLastModifiedBy());
+        save(caseRetentionEntity.getCourtCase());
+        save(caseRetentionEntity.getRetentionPolicyType());
+        var caseManagementRetentionEntity = caseRetentionEntity.getCaseManagementRetention();
+        if (caseManagementRetentionEntity != null) {
+            save(caseManagementRetentionEntity);
+        }
+        return caseRetentionRepository.save(caseRetentionEntity);
+    }
+
+    @Transactional
+    public CaseManagementRetentionEntity save(CaseManagementRetentionEntity caseManagementRetentionEntity) {
+        save(caseManagementRetentionEntity.getRetentionPolicyTypeEntity());
+        save(caseManagementRetentionEntity.getCourtCase());
+        save(caseManagementRetentionEntity.getEventEntity());
+        return caseManagementRetentionRepository.save(caseManagementRetentionEntity);
     }
 
     @Transactional
@@ -671,6 +735,12 @@ public class DartsDatabaseStub {
         stream(hearingEntities).forEach(this::save);
     }
 
+    @Transactional
+    public void saveAll(EventEntity... eventEntities) {
+        stream(eventEntities).forEach(this::save);
+    }
+
+
     public List<DailyListEntity> saveAll(DailyListEntity... dailyListEntity) {
         return dailyListRepository.saveAll(asList(dailyListEntity));
     }
@@ -706,7 +776,7 @@ public class DartsDatabaseStub {
 
     private void saveSingleEventForHearing(HearingEntity hearing, EventEntity event) {
         event.setHearingEntities(List.of(hearingRepository.getReferenceById(hearing.getId())));
-        eventRepository.save(event);
+        save(event);
     }
 
     public EventEntity addHandlerToEvent(EventEntity event, int handlerId) {
