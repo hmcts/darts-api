@@ -15,6 +15,7 @@ import uk.gov.hmcts.darts.common.repository.SecurityGroupRepository;
 import uk.gov.hmcts.darts.common.repository.SecurityRoleRepository;
 import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
 
+import java.time.OffsetDateTime;
 import java.util.Optional;
 import java.util.Set;
 
@@ -65,7 +66,7 @@ public class SecurityGroupStub {
         securityGroupRepository.saveAndFlush(entity.get());
     }
 
-    public SecurityGroupEntity createAndSave(SecurityGroupEntitySpec spec) {
+    public SecurityGroupEntity createAndSave(SecurityGroupEntitySpec spec, UserAccountEntity user) {
         SecurityGroupEntity securityGroup = new SecurityGroupEntity();
         securityGroup.setSecurityRoleEntity(spec.securityRoleEntity);
         securityGroup.setLegacyObjectId(spec.legacyObjectId);
@@ -79,6 +80,10 @@ public class SecurityGroupStub {
         securityGroup.setCourthouseEntities(spec.courthouseEntities);
         securityGroup.setUsers(spec.users);
         securityGroup.setDisplayName(spec.displayName);
+        securityGroup.setCreatedBy(user);
+        securityGroup.setLastModifiedBy(user);
+        securityGroup.setCreatedDateTime(OffsetDateTime.now());
+        securityGroup.setLastModifiedDateTime(OffsetDateTime.now());
 
         return securityGroupRepository.save(securityGroup);
     }

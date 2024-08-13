@@ -28,6 +28,7 @@ import uk.gov.hmcts.darts.usermanagement.service.SecurityGroupService;
 
 import java.text.MessageFormat;
 import java.util.Collections;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -171,8 +172,8 @@ public class SecurityGroupServiceImpl implements SecurityGroupService {
         if (securityGroupPatch.getCourthouseIds() != null) {
             // The PATCH contains the totality of courthouses we wish to have assigned to our group. So first we must remove any existing courthouses, and then
             // assign whatever courthouses are provided in the request.
-            securityGroupEntity.getCourthouseEntities()
-                .clear();
+            securityGroupEntity.setCourthouseEntities(new LinkedHashSet<>());
+
             securityGroupPatch.getCourthouseIds()
                 .forEach(courthouseId -> addToSecurityGroup(courthouseId, securityGroupEntity));
         }

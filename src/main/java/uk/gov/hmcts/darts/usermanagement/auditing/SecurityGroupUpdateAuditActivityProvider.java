@@ -7,7 +7,9 @@ import uk.gov.hmcts.darts.common.entity.SecurityGroupEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.usermanagement.model.SecurityGroupPatch;
 
+import java.util.Collections;
 import java.util.HashSet;
+import java.util.Optional;
 import java.util.Set;
 
 import static java.util.stream.Collectors.toSet;
@@ -52,7 +54,11 @@ public class SecurityGroupUpdateAuditActivityProvider implements AuditActivityPr
 
     private boolean userInGroupAreUpdated(SecurityGroupEntity prePatched, SecurityGroupPatch patch) {
         Set<Integer> patchValues = patch.getUserIds() == null ? new HashSet<>() : new HashSet<>(patch.getUserIds());
-        var prePatchValues = prePatched.getUsers().stream().map((UserAccountEntity::getId)).collect(toSet());
+        var prePatchValues = Optional.ofNullable(prePatched.getUsers())
+            .map(users -> users.stream()
+                .map(UserAccountEntity::getId)
+                .collect(toSet()))
+            .orElse(Collections.emptySet());
 
         return notNullAndDifferent(prePatchValues, patchValues);
     }

@@ -131,7 +131,7 @@ class PatchSecurityGroupIntTest extends IntegrationBase {
     @Test
     void patchSecurityGroupShouldSucceedAndReturnExpectedResultWhenCourthousesAreAddedAndRemoved() throws Exception {
         // Given
-        superAdminUserStub.givenUserIsAuthorised(userIdentity);
+        var user = superAdminUserStub.givenUserIsAuthorised(userIdentity);
 
         var courthouseEntity1 = dartsDatabase.createCourthouseUnlessExists(TEST_COURTHOUSE_NAME_1);
         var courthouseEntity2 = dartsDatabase.createCourthouseUnlessExists(TEST_COURTHOUSE_NAME_2);
@@ -139,8 +139,8 @@ class PatchSecurityGroupIntTest extends IntegrationBase {
 
         // And a group with two assigned courthouses exists (1) (2).
         var securityGroupEntity = securityGroupStub.createAndSave(SecurityGroupStub.SecurityGroupEntitySpec.builder()
-                                                                                      .courthouseEntities(Set.of(courthouseEntity1, courthouseEntity2))
-                                                                                      .build());
+                                                                      .courthouseEntities(Set.of(courthouseEntity1, courthouseEntity2))
+                                                                      .build(), user);
 
         // When we wish to keep one existing courthouse assigned (1), remove the other (2), and add a new one (3)
         MockHttpServletRequestBuilder patchRequest = buildPatchRequest(securityGroupEntity.getId())
@@ -197,7 +197,6 @@ class PatchSecurityGroupIntTest extends IntegrationBase {
 
     @Test
     void patchSecurityGroupShouldFailWhenProvidedButInactive() throws Exception {
-
 
 
         UserAccountEntity user = superAdminUserStub.givenUserIsAuthorised(userIdentity);
