@@ -70,7 +70,7 @@ class CourthousesFunctionalTest extends FunctionalTest {
         JSONAssert.assertEquals(
             """
                 {
-                    "courthouse_name": "func-swansea",
+                    "courthouse_name": "FUNC-SWANSEA",
                     "display_name": "Swansea Functional Test Courthouse",
                     "id": 0,
                     "security_group_ids": [ ],
@@ -177,11 +177,11 @@ class CourthousesFunctionalTest extends FunctionalTest {
             .when()
             .baseUri(getUri(ADMIN_COURTHOUSES_URI))
             .body("""
-                {
-                    "courthouse_name": "func-swansea",
-                    "display_name": "Swansea Functional Test Courthouse"
-                }
-            """)
+                          {
+                              "courthouse_name": "func-swansea",
+                              "display_name": "Swansea Functional Test Courthouse"
+                          }
+                      """)
             .post()
             .thenReturn();
     }
