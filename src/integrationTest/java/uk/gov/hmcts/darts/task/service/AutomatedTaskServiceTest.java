@@ -1,7 +1,10 @@
 package uk.gov.hmcts.darts.task.service;
 
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.Query;
 import lombok.extern.slf4j.Slf4j;
 import net.javacrumbs.shedlock.core.LockProvider;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -66,6 +69,7 @@ import uk.gov.hmcts.darts.transcriptions.service.TranscriptionsProcessor;
 import java.util.Optional;
 import java.util.Set;
 
+import static java.util.Objects.nonNull;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -147,13 +151,30 @@ class AutomatedTaskServiceTest extends IntegrationPerClassBase {
     @MockBean
     private UserIdentity userIdentity;
 
+    private UserAccountEntity testUser;
+
     @Value("${darts.data-management.retention-period.inbound.arm-minimum}")
     private int hoursArmStorage;
 
     @BeforeEach
     void setupData() {
-        UserAccountEntity testUser = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
+        testUser = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
         lenient().when(userIdentity.getUserAccount()).thenReturn(testUser);
+    }
+
+    @AfterEach
+    public void resetTables() {
+        if (nonNull(testUser)) {
+            try (EntityManager em = dartsDatabase.getEntityManagerFactory().createEntityManager()) {
+                em.getTransaction().begin();
+
+                final Query query1 = em.createNativeQuery("truncate table darts.automated_task_aud");
+                query1.executeUpdate();
+                final Query query2 = em.createNativeQuery("update darts.automated_task set last_modified_by = 0 where last_modified_by = " + testUser.getId());
+                query2.executeUpdate();
+                em.getTransaction().commit();
+            }
+        }
     }
 
     private static void displayTasks(Set<ScheduledTask> scheduledTasks) {
