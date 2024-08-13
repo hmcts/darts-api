@@ -11,6 +11,7 @@ import static uk.gov.hmcts.darts.test.common.data.CourthouseTestData.someMinimal
 import static uk.gov.hmcts.darts.test.common.data.DefenceTestData.createDefenceForCaseWithName;
 import static uk.gov.hmcts.darts.test.common.data.DefendantTestData.createDefendantForCaseWithName;
 import static uk.gov.hmcts.darts.test.common.data.ProsecutorTestData.createProsecutorForCaseWithName;
+import static uk.gov.hmcts.darts.test.common.data.UserAccountTestData.minimalUserAccount;
 
 @UtilityClass
 @SuppressWarnings({"HideUtilityClassConstructor"})
@@ -49,6 +50,9 @@ public class CaseTestData {
     public static CourtCaseEntity someMinimalCase() {
         var courtCaseEntity = new CourtCaseEntity();
         courtCaseEntity.setCaseNumber("case-1");
+        var defaultUser = minimalUserAccount();
+        courtCaseEntity.setCreatedBy(defaultUser);
+        courtCaseEntity.setLastModifiedBy(defaultUser);
         courtCaseEntity.setCourthouse(someMinimalCourthouse());
         courtCaseEntity.addDefendant(createDefendantForCaseWithName(courtCaseEntity, "aDefendant"));
         courtCaseEntity.addDefence(createDefenceForCaseWithName(courtCaseEntity, "aDefence"));

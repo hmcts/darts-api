@@ -40,6 +40,9 @@ public class ProsecutorTestData {
         var prosecutor = new ProsecutorEntity();
         prosecutor.setCourtCase(courtCase);
         prosecutor.setName(name);
+        prosecutor.setCreatedBy(courtCase.getLastModifiedBy());
+        prosecutor.setLastModifiedBy(courtCase.getLastModifiedBy());
+
         return prosecutor;
     }
 }
