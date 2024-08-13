@@ -196,6 +196,8 @@ public class CourtCaseEntity extends CreatedModifiedBaseEntity {
             ProsecutorEntity prosecutorEntity = new ProsecutorEntity();
             prosecutorEntity.setName(name);
             prosecutorEntity.setCourtCase(this);
+            prosecutorEntity.setCreatedBy(getLastModifiedBy());
+            prosecutorEntity.setLastModifiedBy(getLastModifiedBy());
             prosecutorList.add(prosecutorEntity);
         }
     }
