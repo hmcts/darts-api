@@ -386,10 +386,11 @@ public class TestSupportController {
     }
 
     private void removeSecurityGroups(Session session) {
-        List<Integer> securityGroupIds = session.createNativeQuery("""
-                                                                       select grp_id from darts.security_group where description = 'A temporary group created by functional test'
-                                                                       or description like '%func-%'
-                                                                       """, Integer.class)
+        List<Integer> securityGroupIds = session.createNativeQuery(
+                """
+                    select grp_id from darts.security_group where description = 'A temporary group created by functional test'
+                    or description like '%func-%'
+                    """, Integer.class)
             .getResultList();
         if (securityGroupIds.isEmpty()) {
             return;
