@@ -1,8 +1,9 @@
 package uk.gov.hmcts.darts.usermanagement.controller;
 
 
-import jakarta.transaction.Transactional;
 import org.json.JSONObject;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -31,7 +32,6 @@ import static uk.gov.hmcts.darts.test.common.data.SecurityGroupTestData.createGr
 import static uk.gov.hmcts.darts.test.common.data.UserAccountTestData.minimalUserAccount;
 
 @AutoConfigureMockMvc
-@Transactional
 class PatchSecurityGroupIntTest extends IntegrationBase {
     private static final String ORIGINAL_DESCRIPTION = "Security group description original";
     private static final String NEW_DISPLAY_NAME = "Security group display name new";
@@ -54,6 +54,15 @@ class PatchSecurityGroupIntTest extends IntegrationBase {
     @MockBean
     private UserIdentity userIdentity;
 
+    @BeforeEach
+    void openHibernateSession() {
+        openInViewUtil.openEntityManager();
+    }
+
+    @AfterEach
+    void closeHibernateSession() {
+        openInViewUtil.closeEntityManager();
+    }
 
     @Test
     void patchSecurityGroupShouldSucceedWhenProvidedWithValidValueForSubsetOfAllowableFields() throws Exception {
@@ -88,7 +97,6 @@ class PatchSecurityGroupIntTest extends IntegrationBase {
             .andExpect(jsonPath("$.user_ids").isEmpty())
             .andReturn();
     }
-
 
     @Test
     void patchSecurityGroupShouldSucceedWhenProvidedWithValidValuesForAllAllowableFields() throws Exception {

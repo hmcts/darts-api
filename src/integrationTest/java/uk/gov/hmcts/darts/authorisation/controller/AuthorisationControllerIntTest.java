@@ -1,6 +1,7 @@
 package uk.gov.hmcts.darts.authorisation.controller;
 
-import jakarta.transaction.Transactional;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.skyscreamer.jsonassert.JSONAssert;
 import org.skyscreamer.jsonassert.JSONCompareMode;
@@ -38,7 +39,6 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @AutoConfigureMockMvc
-@Transactional
 class AuthorisationControllerIntTest extends PostgresIntegrationBase {
 
     private static final URI ENDPOINT = URI.create("/userstate");
@@ -52,6 +52,16 @@ class AuthorisationControllerIntTest extends PostgresIntegrationBase {
 
     @Autowired
     private MockMvc mockMvc;
+
+    @BeforeEach
+    void openHibernateSession() {
+        openInViewUtil.openEntityManager();
+    }
+
+    @AfterEach
+    void closeHibernateSession() {
+        openInViewUtil.closeEntityManager();
+    }
 
     @Test
     @WithMockSecurityContextWithEmailAddress(emailAddress = EMAIL_ADDRESS)
