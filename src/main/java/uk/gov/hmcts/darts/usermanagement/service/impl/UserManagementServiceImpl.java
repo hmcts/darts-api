@@ -106,9 +106,9 @@ public class UserManagementServiceImpl implements UserManagementService {
         var userAccountEntity = userAccountRepository.findById(userId)
             .orElseThrow(() -> new NoSuchElementException("No value present"));
 
-        //var activitiesForAudit = auditActivitiesFor(userAccountEntity, userPatch);
+        var activitiesForAudit = auditActivitiesFor(userAccountEntity, userPatch);
         var rolledBackTranscriptionsIds = updatedUserAccount(userPatch, userAccountEntity);
-        //auditApi.recordAll(activitiesForAudit);
+        auditApi.recordAll(activitiesForAudit);
 
         UserWithIdAndTimestamps user = userAccountMapper.mapToUserWithIdAndLastLoginModel(userAccountEntity);
 

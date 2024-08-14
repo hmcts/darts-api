@@ -273,6 +273,7 @@ class ArmRetentionEventDateProcessorIntTest extends IntegrationBase {
             transcriptionEntity, fileName, fileType, fileSize, testUser, checksum, confidenceScore, confidenceReason);
         transcriptionDocumentEntity.setRetainUntilTs(DOCUMENT_RETENTION_DATE_TIME);
         when(userIdentity.getUserAccount()).thenReturn(testUser);
+        dartsDatabase.getTranscriptionDocumentRepository().save(transcriptionDocumentEntity);
 
         ExternalObjectDirectoryEntity armEod = dartsDatabase.getExternalObjectDirectoryStub().createExternalObjectDirectory(
             transcriptionDocumentEntity,

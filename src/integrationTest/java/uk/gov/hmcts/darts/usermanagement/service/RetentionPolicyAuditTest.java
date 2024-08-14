@@ -97,6 +97,7 @@ class RetentionPolicyAuditTest extends IntegrationBase {
             .fixedPolicyKey("some-fixed-policy-key")
             .description("some-description")
             .policyStartAt(OffsetDateTime.now().plusWeeks(1))
+            .displayName("some-name")
             .duration("1Y2M3D");
     }
 

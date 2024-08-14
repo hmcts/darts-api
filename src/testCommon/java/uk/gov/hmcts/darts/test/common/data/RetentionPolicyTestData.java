@@ -20,7 +20,7 @@ public class RetentionPolicyTestData {
         minimalRetentionPolicy.setCreatedBy(minimalUserAccount());
         minimalRetentionPolicy.setLastModifiedBy(minimalUserAccount());
         minimalRetentionPolicy.setDescription("some-description");
-
+        minimalRetentionPolicy.setDisplayName("some-name");
         return minimalRetentionPolicy;
     }
 }

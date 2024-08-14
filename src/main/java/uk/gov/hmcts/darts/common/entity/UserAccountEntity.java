@@ -18,7 +18,6 @@ import org.hibernate.envers.AuditTable;
 import org.hibernate.envers.Audited;
 import org.hibernate.envers.NotAudited;
 import uk.gov.hmcts.darts.common.entity.base.CreatedModifiedBaseEntity;
-import uk.gov.hmcts.darts.common.entity.base.MandatoryCreatedModifiedBaseEntity;
 import uk.gov.hmcts.darts.common.enums.SecurityGroupEnum;
 
 import java.time.OffsetDateTime;
