@@ -64,9 +64,10 @@ public class UserAccountStubComposable {
     public UserAccountEntity createSystemUserAccount(String username) {
         var newUser = new UserAccountEntity();
         newUser.setUserName(username);
-        newUser.setEmailAddress(username + "@example.com");
+        String guid = UUID.randomUUID().toString();
+        newUser.setEmailAddress(guid + "@example.com");
+        newUser.setAccountGuid(guid);
         newUser.setActive(true);
-        newUser.setAccountGuid(UUID.randomUUID().toString());
         newUser.setIsSystemUser(true);
         newUser.setUserFullName(newUser.getUserName());
         newUser.setCreatedBy(newUser);
