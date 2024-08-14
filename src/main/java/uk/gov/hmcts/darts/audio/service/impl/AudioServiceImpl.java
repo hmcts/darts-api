@@ -12,14 +12,10 @@ import uk.gov.hmcts.darts.audio.model.AudioMetadata;
 import uk.gov.hmcts.darts.audio.service.AudioOperationService;
 import uk.gov.hmcts.darts.audio.service.AudioService;
 import uk.gov.hmcts.darts.audio.service.AudioTransformationService;
-import uk.gov.hmcts.darts.common.entity.ExternalLocationTypeEntity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
-import uk.gov.hmcts.darts.common.entity.ObjectRecordStatusEntity;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
-import uk.gov.hmcts.darts.common.repository.ExternalLocationTypeRepository;
 import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
 import uk.gov.hmcts.darts.common.repository.MediaRepository;
-import uk.gov.hmcts.darts.common.repository.ObjectRecordStatusRepository;
 import uk.gov.hmcts.darts.common.service.FileOperationService;
 
 import java.io.IOException;
@@ -38,8 +34,6 @@ public class AudioServiceImpl implements AudioService {
 
     private final AudioTransformationService audioTransformationService;
     private final ExternalObjectDirectoryRepository externalObjectDirectoryRepository;
-    private final ObjectRecordStatusRepository objectRecordStatusRepository;
-    private final ExternalLocationTypeRepository externalLocationTypeRepository;
     private final MediaRepository mediaRepository;
     private final AudioOperationService audioOperationService;
     private final FileOperationService fileOperationService;
@@ -107,10 +101,8 @@ public class AudioServiceImpl implements AudioService {
     @Override
     public void setIsAvailable(List<AudioMetadata> audioMetadataList) {
         List<Integer> mediaIdList = audioMetadataList.stream().map(AudioMetadata::getId).toList();
-        ObjectRecordStatusEntity storedStatus = objectRecordStatusRepository.getReferenceById(STORED.getId());
-        ExternalLocationTypeEntity unstructuredLocationType = externalLocationTypeRepository.getReferenceById(UNSTRUCTURED.getId());
-        List<Integer> mediaIdsStoredInUnstructured = externalObjectDirectoryRepository.findMediaIdsByInMediaIdStatusAndType(mediaIdList, storedStatus,
-                                                                                                                            unstructuredLocationType);
+        List<Integer> mediaIdsStoredInUnstructured = externalObjectDirectoryRepository.findMediaIdsByInMediaIdStatusAndType(mediaIdList, STORED.getId(),
+                                                                                                                            UNSTRUCTURED.getId());
 
         for (AudioMetadata audioMetadataItem : audioMetadataList) {
             audioMetadataItem.setIsAvailable(mediaIdsStoredInUnstructured.contains(audioMetadataItem.getId()));

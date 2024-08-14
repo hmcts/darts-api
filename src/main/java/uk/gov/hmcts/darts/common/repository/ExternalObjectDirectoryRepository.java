@@ -62,16 +62,17 @@ public interface ExternalObjectDirectoryRepository extends JpaRepository<Externa
     List<ExternalObjectDirectoryEntity> findByTranscriptionDocumentEntityAndExternalLocationType(TranscriptionDocumentEntity transcriptionDocument,
                                                                                                  ExternalLocationTypeEntity externalLocationType);
 
-    @Query(
-        """
-                SELECT eod.media.id FROM ExternalObjectDirectoryEntity eod
-                WHERE eod.media.id in :mediaIdList
-                AND eod.status = :status
-                AND eod.externalLocationType = :externalLocationType
-            """
+    @Query(value = """
+                SELECT eod.med_id 
+                FROM darts.external_object_directory eod
+                WHERE eod.med_id in (:mediaIdList)
+                AND eod.ors_id = :status
+                AND eod.elt_id = :externalLocationType
+            """,
+        nativeQuery = true
     )
-    List<Integer> findMediaIdsByInMediaIdStatusAndType(List<Integer> mediaIdList, ObjectRecordStatusEntity status,
-                                                       ExternalLocationTypeEntity externalLocationType);
+    List<Integer> findMediaIdsByInMediaIdStatusAndType(List<Integer> mediaIdList, Integer status,
+                                                       Integer externalLocationType);
 
     @Query(
         """
