@@ -13,9 +13,11 @@ import uk.gov.hmcts.darts.audio.service.AudioOperationService;
 import uk.gov.hmcts.darts.audio.service.AudioService;
 import uk.gov.hmcts.darts.audio.service.AudioTransformationService;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
+import uk.gov.hmcts.darts.common.repository.ExternalLocationTypeRepository;
 import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
 import uk.gov.hmcts.darts.common.repository.HearingRepository;
 import uk.gov.hmcts.darts.common.repository.MediaRepository;
+import uk.gov.hmcts.darts.common.repository.ObjectRecordStatusRepository;
 import uk.gov.hmcts.darts.common.repository.TransformedMediaRepository;
 import uk.gov.hmcts.darts.common.service.FileOperationService;
 import uk.gov.hmcts.darts.common.service.RetrieveCoreObjectService;
@@ -49,6 +51,10 @@ class AudioServiceImplTest {
     @Mock
     private ExternalObjectDirectoryRepository externalObjectDirectoryRepository;
     @Mock
+    private ExternalLocationTypeRepository externalLocationTypeRepository;
+    @Mock
+    private ObjectRecordStatusRepository objectRecordStatusRepository;
+    @Mock
     private DataManagementApi dataManagementApi;
     @Mock
     AudioBeingProcessedFromArchiveQuery audioBeingProcessedFromArchiveQuery;
@@ -64,6 +70,8 @@ class AudioServiceImplTest {
         audioService = new AudioServiceImpl(
             audioTransformationService,
             externalObjectDirectoryRepository,
+            objectRecordStatusRepository,
+            externalLocationTypeRepository,
             mediaRepository,
             audioOperationService,
             fileOperationService,

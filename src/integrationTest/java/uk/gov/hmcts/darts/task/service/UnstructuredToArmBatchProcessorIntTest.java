@@ -159,12 +159,12 @@ class UnstructuredToArmBatchProcessorIntTest extends IntegrationBase {
                     medias.get(3).getId(),
                     medias.get(4).getId(),
                     medias.get(5).getId()),
-            armDropZoneStatus().getId(),
-            armLocation().getId()
+            armDropZoneStatus(),
+            armLocation()
         );
         assertThat(foundMediaList.size()).isEqualTo(BATCH_SIZE);
         assertThat(
-            eodRepository.findMediaIdsByInMediaIdStatusAndType(List.of(medias.get(0).getId()), storedStatus().getId(), unstructuredLocation().getId())
+            eodRepository.findMediaIdsByInMediaIdStatusAndType(List.of(medias.get(0).getId()), storedStatus(), unstructuredLocation())
         )
             .hasSize(1);
     }
