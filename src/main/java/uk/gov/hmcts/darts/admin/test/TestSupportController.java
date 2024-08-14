@@ -153,14 +153,24 @@ public class TestSupportController {
     }
 
     private void removeCourtHouses(Session session) {
+        List<Integer> courthouseIds = session.createNativeQuery(
+                """
+                    select cth_id from darts.courthouse where  courthouse_name ilike 'func-%'
+                    """, Integer.class)
+            .getResultList();
+        if (courthouseIds.isEmpty()) {
+            return;
+        }
+
         session.createNativeQuery("""
-                                      delete from darts.courtroom where courtroom_name like 'func-%'
-                                      """)
-            .executeUpdate();
+                                      delete from darts.courtroom where cth_id in ( :ids ) 
+                                      """).setParameter("ids", courthouseIds).executeUpdate();
         session.createNativeQuery("""
-                                      delete from darts.courthouse where courthouse_name like 'func-%'
-                                      """)
-            .executeUpdate();
+                                      delete from darts.security_group_courthouse_ae where cth_id in ( :ids ) 
+                                      """).setParameter("ids", courthouseIds).executeUpdate();
+        session.createNativeQuery("""
+                                      delete from darts.courthouse where cth_id in ( :ids ) 
+                                      """).setParameter("ids", courthouseIds).executeUpdate();
     }
 
     @PostMapping(value = "/courthouse/{courthouse_name}/courtroom/{courtroom_name}")
