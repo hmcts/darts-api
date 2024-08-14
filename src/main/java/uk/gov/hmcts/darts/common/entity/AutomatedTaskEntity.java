@@ -11,7 +11,7 @@ import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.envers.AuditTable;
 import org.hibernate.envers.Audited;
-import uk.gov.hmcts.darts.common.entity.base.AuditCreatedModifiedBaseEntity;
+import uk.gov.hmcts.darts.common.entity.base.MandatoryCreatedModifiedBaseEntity;
 
 @Entity
 @Table(name = AutomatedTaskEntity.TABLE_NAME)
@@ -19,7 +19,7 @@ import uk.gov.hmcts.darts.common.entity.base.AuditCreatedModifiedBaseEntity;
 @Setter
 @Audited
 @AuditTable("automated_task_aud")
-public class AutomatedTaskEntity extends AuditCreatedModifiedBaseEntity {
+public class AutomatedTaskEntity extends MandatoryCreatedModifiedBaseEntity {
 
     public static final String TABLE_NAME = "automated_task";
     public static final String AUTOMATED_TASK_ID = "aut_id";
