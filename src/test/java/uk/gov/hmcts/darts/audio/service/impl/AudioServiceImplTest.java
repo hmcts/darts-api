@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import uk.gov.hmcts.darts.audio.component.AudioBeingProcessedFromArchiveQuery;
 import uk.gov.hmcts.darts.audio.model.AudioBeingProcessedFromArchiveQueryResult;
 import uk.gov.hmcts.darts.audio.model.AudioMetadata;
@@ -24,16 +25,19 @@ import uk.gov.hmcts.darts.common.service.RetrieveCoreObjectService;
 import uk.gov.hmcts.darts.datamanagement.api.DataManagementApi;
 import uk.gov.hmcts.darts.log.api.LogApi;
 
+import java.util.Collections;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 @SuppressWarnings({"PMD.ExcessiveImports"})
 class AudioServiceImplTest {
+    public static final int HEARING_ID = 1;
     @Mock
     private AudioTransformationService audioTransformationService;
     @Mock
@@ -62,6 +66,8 @@ class AudioServiceImplTest {
     private LogApi logApi;
     @Mock
     private TransformedMediaRepository transformedMediaRepository;
+    @Mock
+    private NamedParameterJdbcTemplate jdbcTemplate;
 
     private AudioService audioService;
 
@@ -119,7 +125,7 @@ class AudioServiceImplTest {
         audioMetadata.setId(mediaId);
         List<AudioMetadata> audioMetadataList = List.of(audioMetadata);
 
-        audioService.setIsArchived(audioMetadataList, 1);
+        audioService.setIsArchived(audioMetadataList, HEARING_ID);
 
         assertEquals(false, audioMetadataList.get(0).getIsArchived());
     }
@@ -141,5 +147,33 @@ class AudioServiceImplTest {
         assertEquals(true, audioMetadataList.get(0).getIsAvailable());
         assertEquals(false, audioMetadataList.get(1).getIsAvailable());
         assertEquals(true, audioMetadataList.get(2).getIsAvailable());
+    }
+
+    @Test
+    void whenAudioMetadataListIsEmpty_thenIsAvailableWontExecute() {
+        audioService.setIsAvailable(Collections.emptyList());
+
+        verifyNoInteractions(externalObjectDirectoryRepository);
+    }
+
+    @Test
+    void whenAudioMetadataListIsNull_thenIsAvailableWontExecute() {
+        audioService.setIsAvailable(null);
+
+        verifyNoInteractions(externalObjectDirectoryRepository);
+    }
+
+    @Test
+    void whenAudioMetadataListIsEmpty_thenIsArchivedWontExecute() {
+        audioService.setIsArchived(Collections.emptyList(), HEARING_ID);
+
+        verifyNoInteractions(jdbcTemplate);
+    }
+
+    @Test
+    void whenAudioMetadataListIsNull_thenIsArchivedWontExecute() {
+        audioService.setIsArchived(null, HEARING_ID);
+
+        verifyNoInteractions(jdbcTemplate);
     }
 }
