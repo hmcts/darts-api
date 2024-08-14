@@ -71,6 +71,9 @@ class ArmResponseFilesProcessorIntTest extends IntegrationBase {
     @Autowired
     private AuthorisationStub authorisationStub;
 
+    @Autowired
+    private TranscriptionStub transcriptionStub;
+
     @TempDir
     private File tempDirectory;
 
@@ -807,10 +810,9 @@ class ArmResponseFilesProcessorIntTest extends IntegrationBase {
         final int fileSize = 11_937;
         final UserAccountEntity testUser = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
         final String checksum = "123";
-        TranscriptionDocumentEntity transcriptionDocumentEntity = TranscriptionStub.createTranscriptionDocumentEntity(
+        TranscriptionDocumentEntity transcriptionDocumentEntity = transcriptionStub.createTranscriptionDocumentEntity(
             transcriptionEntity, fileName, fileType, fileSize, testUser, checksum);
         when(userIdentity.getUserAccount()).thenReturn(testUser);
-        dartsDatabase.getTranscriptionDocumentRepository().save(transcriptionDocumentEntity);
 
         ExternalObjectDirectoryEntity armEod = dartsDatabase.getExternalObjectDirectoryStub().createExternalObjectDirectory(
             transcriptionDocumentEntity,
@@ -1029,10 +1031,9 @@ class ArmResponseFilesProcessorIntTest extends IntegrationBase {
         final int fileSize = 11_937;
         final UserAccountEntity testUser = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
         final String checksum = "C3CCA7021CF79B42F245AF350601C284";
-        TranscriptionDocumentEntity transcriptionDocumentEntity = TranscriptionStub.createTranscriptionDocumentEntity(
+        TranscriptionDocumentEntity transcriptionDocumentEntity = transcriptionStub.createTranscriptionDocumentEntity(
             transcriptionEntity, fileName, fileType, fileSize, testUser, checksum);
         when(userIdentity.getUserAccount()).thenReturn(testUser);
-        dartsDatabase.getTranscriptionDocumentRepository().save(transcriptionDocumentEntity);
 
         ExternalObjectDirectoryEntity armEod = dartsDatabase.getExternalObjectDirectoryStub().createExternalObjectDirectory(
             transcriptionDocumentEntity,

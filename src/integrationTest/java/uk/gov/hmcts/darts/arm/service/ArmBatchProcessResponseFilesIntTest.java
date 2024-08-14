@@ -78,6 +78,8 @@ class ArmBatchProcessResponseFilesIntTest extends IntegrationBase {
     private ArmDataManagementConfiguration armDataManagementConfiguration;
     @Autowired
     private ObjectMapper objectMapper;
+    @Autowired
+    private TranscriptionStub transcriptionStub;
     @MockBean
     private UserIdentity userIdentity;
     @Mock
@@ -754,10 +756,9 @@ class ArmBatchProcessResponseFilesIntTest extends IntegrationBase {
         final int fileSize = 11_937;
         final UserAccountEntity testUser = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
         final String checksum = "C3CCA7021CF79B42F245AF350601C284";
-        TranscriptionDocumentEntity transcriptionDocumentEntity = TranscriptionStub.createTranscriptionDocumentEntity(
+        TranscriptionDocumentEntity transcriptionDocumentEntity = transcriptionStub.createTranscriptionDocumentEntity(
             transcriptionEntity, fileName, fileType, fileSize, testUser, checksum);
         when(userIdentity.getUserAccount()).thenReturn(testUser);
-        dartsDatabase.getTranscriptionDocumentRepository().save(transcriptionDocumentEntity);
 
         String manifest1Uuid = UUID.randomUUID().toString();
         String manifestFile1 = "DARTS_" + manifest1Uuid + ".a360";
@@ -857,10 +858,9 @@ class ArmBatchProcessResponseFilesIntTest extends IntegrationBase {
         final int fileSize = 11_937;
         final UserAccountEntity testUser = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
         final String checksum = "C3CCA7021CF79B42F245AF350601C284";
-        TranscriptionDocumentEntity transcriptionDocumentEntity = TranscriptionStub.createTranscriptionDocumentEntity(
+        TranscriptionDocumentEntity transcriptionDocumentEntity = transcriptionStub.createTranscriptionDocumentEntity(
             transcriptionEntity, fileName, fileType, fileSize, testUser, checksum);
         when(userIdentity.getUserAccount()).thenReturn(testUser);
-        dartsDatabase.getTranscriptionDocumentRepository().save(transcriptionDocumentEntity);
 
         String manifest1Uuid = UUID.randomUUID().toString();
         String manifestFile1 = "DARTS_" + manifest1Uuid + ".a360";
@@ -1439,10 +1439,9 @@ class ArmBatchProcessResponseFilesIntTest extends IntegrationBase {
         final String fileType = "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
         final int fileSize = 11_937;
         final UserAccountEntity testUser = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
-        TranscriptionDocumentEntity transcriptionDocumentEntity = TranscriptionStub.createTranscriptionDocumentEntity(
+        TranscriptionDocumentEntity transcriptionDocumentEntity = transcriptionStub.createTranscriptionDocumentEntity(
             transcriptionEntity, fileName, fileType, fileSize, testUser, null);
         when(userIdentity.getUserAccount()).thenReturn(testUser);
-        dartsDatabase.getTranscriptionDocumentRepository().save(transcriptionDocumentEntity);
 
         String manifest1Uuid = UUID.randomUUID().toString();
         String manifestFile1 = "DARTS_" + manifest1Uuid + ".a360";

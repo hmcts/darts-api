@@ -8,8 +8,7 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.MappedSuperclass;
 import lombok.Getter;
 import lombok.Setter;
-import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.envers.NotAudited;
+import org.hibernate.annotations.UpdateTimestamp;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 
 import java.time.OffsetDateTime;
@@ -18,17 +17,14 @@ import javax.validation.constraints.NotNull;
 @MappedSuperclass
 @Getter
 @Setter
-public class MandatoryCreatedBaseEntity {
+public class MandatoryModifiedBaseEntity {
+
+    @UpdateTimestamp
+    @Column(name = "last_modified_ts")
+    private OffsetDateTime lastModifiedTimestamp;
 
     @NotNull
-    @CreationTimestamp
-    @Column(name = "created_ts", nullable = false)
-    private OffsetDateTime createdDateTime;
-
-    @NotNull
-    @NotAudited
-    @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.PERSIST)
-    @JoinColumn(name = "created_by", nullable = false)
-    private UserAccountEntity createdBy;
-
+    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
+    @JoinColumn(name = "last_modified_by")
+    private UserAccountEntity lastModifiedBy;
 }

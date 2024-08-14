@@ -29,6 +29,7 @@ import uk.gov.hmcts.darts.common.repository.TranscriptionStatusRepository;
 import uk.gov.hmcts.darts.common.repository.TranscriptionTypeRepository;
 import uk.gov.hmcts.darts.common.repository.TranscriptionUrgencyRepository;
 import uk.gov.hmcts.darts.common.repository.TranscriptionWorkflowRepository;
+import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
 import uk.gov.hmcts.darts.test.common.TestUtils;
 import uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum;
 import uk.gov.hmcts.darts.transcriptions.enums.TranscriptionTypeEnum;
@@ -59,6 +60,7 @@ public class TranscriptionStub {
 
     public static final byte[] TRANSCRIPTION_TEST_DATA_BINARY_DATA = "test binary data".getBytes();
 
+    private static final int SYSTEM_USER_ID = 0;
     private final TranscriptionRepository transcriptionRepository;
     private final TranscriptionCommentRepository transcriptionCommentRepository;
     private final TranscriptionStatusRepository transcriptionStatusRepository;
@@ -72,6 +74,7 @@ public class TranscriptionStub {
     private final UserAccountStubComposable userAccountStub;
     private final HearingStub hearingStub;
     private final TranscriptionStubComposable transcriptionStubComposable;
+    private final UserAccountRepository userAccountRepository;
 
     public TranscriptionEntity createMinimalTranscription() {
         return createTranscription(hearingStub.createMinimalHearing());
@@ -561,17 +564,22 @@ public class TranscriptionStub {
         return TestUtils.encodeToString(md5(TRANSCRIPTION_TEST_DATA_BINARY_DATA));
     }
 
-    public static TranscriptionDocumentEntity createTranscriptionDocumentEntity(TranscriptionEntity transcriptionEntity, String fileName, String fileType,
+    @Transactional
+    public TranscriptionDocumentEntity createTranscriptionDocumentEntity(TranscriptionEntity transcriptionEntity, String fileName, String fileType,
                                                                                 int fileSize, UserAccountEntity testUser, String checksum) {
         return createTranscriptionDocumentEntity(transcriptionEntity, fileName, fileType, fileSize, testUser, checksum, 100, "confidence reason");
     }
 
 
     @SuppressWarnings("PMD.UseObjectForClearerAPI")
-    public static TranscriptionDocumentEntity createTranscriptionDocumentEntity(TranscriptionEntity transcriptionEntity, String fileName, String fileType,
+    @Transactional
+    public TranscriptionDocumentEntity createTranscriptionDocumentEntity(TranscriptionEntity transcriptionEntity, String fileName, String fileType,
                                                                                 int fileSize,
                                                                                 UserAccountEntity testUser,
                                                                                 String checksum, Integer confScore, String confReason) {
+
+        UserAccountEntity systemUser = userAccountRepository.getReferenceById(SYSTEM_USER_ID);
+
         TranscriptionDocumentEntity transcriptionDocumentEntity = new TranscriptionDocumentEntity();
         transcriptionDocumentEntity.setTranscription(transcriptionEntity);
         transcriptionDocumentEntity.setFileName(fileName);
@@ -583,12 +591,15 @@ public class TranscriptionStub {
         transcriptionDocumentEntity.setLastModifiedBy(testUser);
         transcriptionDocumentEntity.setRetConfScore(confScore);
         transcriptionDocumentEntity.setRetConfReason(confReason);
+        transcriptionDocumentEntity.setLastModifiedBy(systemUser);
+        transcriptionDocumentRepository.save(transcriptionDocumentEntity);
 
         return transcriptionDocumentEntity;
     }
 
     @SuppressWarnings("PMD.UseObjectForClearerAPI")
-    public static TranscriptionDocumentEntity createTranscriptionDocumentEntity(TranscriptionEntity transcriptionEntity, String fileName, String fileType,
+    @Transactional
+    public TranscriptionDocumentEntity createTranscriptionDocumentEntity(TranscriptionEntity transcriptionEntity, String fileName, String fileType,
                                                                                 int fileSize, UserAccountEntity testUser, String checksum,
                                                                                 OffsetDateTime uploadedDateTime) {
         TranscriptionDocumentEntity transcriptionDocumentEntity = createTranscriptionDocumentEntity(

@@ -70,10 +70,10 @@ class UnstructuredToArmProcessorTest extends IntegrationBase {
     private ArchiveRecordService archiveRecordService;
     @Autowired
     private LogApi logApi;
-
     @Autowired
     private AuthorisationStub authorisationStub;
-
+    @Autowired
+    private TranscriptionStub transcriptionStub;
 
     @BeforeEach
     void setupData() {
@@ -192,9 +192,8 @@ class UnstructuredToArmProcessorTest extends IntegrationBase {
         final UserAccountEntity uploadedBy = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
         final String checksum = "xi/XkzD2HuqTUzDafW8Cgw==";
 
-        TranscriptionDocumentEntity transcriptionDocumentEntity = TranscriptionStub.createTranscriptionDocumentEntity(
+        TranscriptionDocumentEntity transcriptionDocumentEntity = transcriptionStub.createTranscriptionDocumentEntity(
             transcriptionEntity, fileName, fileType, fileSize, uploadedBy, checksum);
-        dartsDatabase.getTranscriptionDocumentRepository().save(transcriptionDocumentEntity);
 
         when(userIdentity.getUserAccount()).thenReturn(uploadedBy);
 

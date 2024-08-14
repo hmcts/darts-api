@@ -27,6 +27,7 @@ import uk.gov.hmcts.darts.testutils.stubs.AuthorisationStub;
 import uk.gov.hmcts.darts.testutils.stubs.DartsDatabaseStub;
 import uk.gov.hmcts.darts.testutils.stubs.SecurityGroupStub;
 import uk.gov.hmcts.darts.testutils.stubs.SuperAdminUserStub;
+import uk.gov.hmcts.darts.testutils.stubs.UserAccountStub;
 import uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum;
 import uk.gov.hmcts.darts.usermanagement.exception.UserManagementError;
 import uk.gov.hmcts.darts.usermanagement.model.Problem;
@@ -74,8 +75,13 @@ class UserControllerTest extends IntegrationBase {
     private UserAccountRepository userAccountRepository;
 
     @Autowired
+    private UserAccountStub userAccountStub;
+
+    @Autowired
     private SecurityGroupStub securityGroupStub;
 
+
+    private static final int SYSTEM_USER_ID = 0;
     private static final OffsetDateTime SOME_DATE_TIME = OffsetDateTime.parse("2023-01-01T12:00Z");
     private static final String SOME_COURTHOUSE = "some-courthouse";
     private static final String SOME_COURTROOM = "some-courtroom";
@@ -88,7 +94,7 @@ class UserControllerTest extends IntegrationBase {
         superAdminUserStub.givenSystemAdminIsAuthorised(userIdentity);
 
         UserAccountEntity userAccountEntity = UserAccountTestData.minimalUserAccount();
-        userAccountEntity = userAccountRepository.save(userAccountEntity);
+        userAccountEntity = userAccountStub.createUser(userAccountEntity);
 
         dartsDatabase.addUserToGroup(userAccountEntity, SecurityGroupEnum.SUPER_ADMIN);
 
@@ -143,7 +149,7 @@ class UserControllerTest extends IntegrationBase {
         superAdminUserStub.givenSystemUserIsAuthorised(userIdentity);
 
         UserAccountEntity userAccountEntity = UserAccountTestData.minimalUserAccount();
-        userAccountEntity = userAccountRepository.save(userAccountEntity);
+        userAccountEntity = userAccountStub.createUser(userAccountEntity);
 
         // add user to the super user group
         Optional<SecurityGroupEntity> groupEntity
@@ -205,7 +211,7 @@ class UserControllerTest extends IntegrationBase {
         superAdminUserStub.givenSystemAdminIsAuthorised(userIdentity);
 
         UserAccountEntity userAccountEntity = UserAccountTestData.minimalUserAccount();
-        userAccountEntity = userAccountRepository.save(userAccountEntity);
+        userAccountEntity = userAccountStub.createUser(userAccountEntity);
         userAccountEntity.setActive(false);
         userAccountEntity.setEmailAddress("test@hmcts.net");
         userAccountEntity.setUserFullName("full name");
@@ -270,7 +276,7 @@ class UserControllerTest extends IntegrationBase {
         userAccountEntity.setEmailAddress("test@hmcts.net");
         userAccountEntity.setUserFullName(null);
         userAccountEntity.setActive(false);
-        userAccountEntity = userAccountRepository.save(userAccountEntity);
+        userAccountEntity = userAccountStub.createUser(userAccountEntity);
 
         // add user to the super admin group
         Optional<SecurityGroupEntity> groupEntity
@@ -320,7 +326,7 @@ class UserControllerTest extends IntegrationBase {
         userAccountEntity.setUserFullName("full name");
         userAccountEntity.setEmailAddress(null);
         userAccountEntity.setActive(false);
-        userAccountEntity = userAccountRepository.save(userAccountEntity);
+        userAccountEntity = userAccountStub.createUser(userAccountEntity);
 
         // add user to the super admin group
         Optional<SecurityGroupEntity> groupEntity
@@ -368,7 +374,7 @@ class UserControllerTest extends IntegrationBase {
 
         UserAccountEntity userAccountEntity = UserAccountTestData.minimalUserAccount();
         userAccountEntity.setActive(false);
-        userAccountEntity = userAccountRepository.save(userAccountEntity);
+        userAccountEntity = userAccountStub.createUser(userAccountEntity);
 
         // add user to the super admin group
         Optional<SecurityGroupEntity> groupEntity
@@ -415,7 +421,7 @@ class UserControllerTest extends IntegrationBase {
         superAdminUserStub.givenSystemAdminIsAuthorised(userIdentity);
 
         UserAccountEntity userAccountEntity = UserAccountTestData.minimalUserAccount();
-        userAccountEntity = userAccountRepository.save(userAccountEntity);
+        userAccountEntity = userAccountStub.createUser(userAccountEntity);
 
         // clear all users that are associated with the super admin group
         securityGroupStub.clearUsers(SecurityGroupEnum.SUPER_ADMIN);
@@ -459,7 +465,7 @@ class UserControllerTest extends IntegrationBase {
         superAdminUserStub.givenSystemUserIsAuthorised(userIdentity);
 
         UserAccountEntity userAccountEntity = UserAccountTestData.minimalUserAccount();
-        userAccountEntity = userAccountRepository.save(userAccountEntity);
+        userAccountEntity = userAccountStub.createUser(userAccountEntity);
 
         dartsDatabaseStub.addUserToGroup(userAccountEntity, SecurityGroupEnum.SUPER_USER);
 
@@ -487,7 +493,7 @@ class UserControllerTest extends IntegrationBase {
         superAdminUserStub.givenSystemUserIsAuthorised(userIdentity);
 
         UserAccountEntity userAccountEntity = UserAccountTestData.minimalUserAccount();
-        userAccountEntity = userAccountRepository.save(userAccountEntity);
+        userAccountEntity = userAccountStub.createUser(userAccountEntity);
 
         dartsDatabaseStub.addUserToGroup(userAccountEntity, SecurityGroupEnum.SUPER_USER);
 

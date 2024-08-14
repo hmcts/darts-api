@@ -52,6 +52,7 @@ public class UserAccountStub {
         return userAccountStubComposable.createSystemUserAccount(username);
     }
 
+    @Transactional
     public UserAccountEntity getIntegrationTestUserAccountEntity() {
         return userAccountStubComposable.getIntegrationTestUserAccountEntity();
     }
@@ -62,26 +63,32 @@ public class UserAccountStub {
      * @param identifier unique reference
      * @return the user account
      */
+    @Transactional
     public UserAccountEntity getIntegrationTestUserAccountEntity(String identifier) {
         return userAccountStubComposable.getIntegrationTestUserAccountEntity(identifier);
     }
 
+    @Transactional
     public UserAccountEntity getSeparateIntegrationTestUserAccountEntity() {
         return userAccountStubComposable.getSeparateIntegrationTestUserAccountEntity();
     }
 
+    @Transactional
     public UserAccountEntity getIntegrationTestUserAccountEntityInactive(String identifier) {
         return userAccountStubComposable.getIntegrationTestUserAccountEntityInactive(identifier);
     }
 
+    @Transactional
     public UserAccountEntity createIntegrationUser(String guid) {
         return createIntegrationUser(guid, INTEGRATION_TEST_USER_EMAIL);
     }
 
+    @Transactional
     public UserAccountEntity createIntegrationUser(String guid, String emailAddress) {
         return createIntegrationUser(guid, INTEGRATION_TEST_USER_EMAIL, emailAddress, true);
     }
 
+    @Transactional
     public UserAccountEntity createIntegrationUser(String guid, String fullName, String emailAddress, boolean active) {
         UserAccountEntity systemUser = userAccountRepository.getReferenceById(SYSTEM_USER_ID);
         var newUser = new UserAccountEntity();
@@ -97,6 +104,14 @@ public class UserAccountStub {
         newUser.setLastModifiedDateTime(LAST_MODIFIED_DATE_TIME);
         newUser.setLastLoginTime(LAST_LOGIN_TIME);
         return userAccountRepository.saveAndFlush(newUser);
+    }
+
+    @Transactional
+    public UserAccountEntity createUser(UserAccountEntity userAccountEntity) {
+        UserAccountEntity systemUser = userAccountRepository.getReferenceById(SYSTEM_USER_ID);
+        userAccountEntity.setCreatedBy(systemUser);
+        userAccountEntity.setLastModifiedBy(systemUser);
+        return userAccountRepository.saveAndFlush(userAccountEntity);
     }
 
     @Transactional

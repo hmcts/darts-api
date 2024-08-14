@@ -126,6 +126,7 @@ public class ExternalObjectDirectoryStub {
      *     {@link ExternalObjectDirectoryStub#createExternalObjectDirectory(MediaEntity, ObjectRecordStatusEnum, ExternalLocationTypeEnum, UUID)} instead.
      */
     @Deprecated
+    @Transactional
     public ExternalObjectDirectoryEntity createExternalObjectDirectory(MediaEntity mediaEntity,
                                                                        ObjectRecordStatusEntity objectRecordStatusEntity,
                                                                        ExternalLocationTypeEntity externalLocationTypeEntity,
@@ -160,6 +161,7 @@ public class ExternalObjectDirectoryStub {
         return externalObjectDirectory;
     }
 
+    @Transactional
     public ExternalObjectDirectoryEntity createExternalObjectDirectory(MediaEntity media,
                                                                        ObjectRecordStatusEnum objectRecordStatusEnum,
                                                                        ExternalLocationTypeEnum externalLocationTypeEnum,

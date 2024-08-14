@@ -47,7 +47,7 @@ public class UserAccountStubComposable {
     public UserAccountEntity getSystemUserAccountEntity() {
 
         Optional<UserAccountEntity> userAccountEntityOptional = userAccountRepository.findById(SYSTEM_USER_ID);
-
+        UserAccountEntity systemUser = userAccountRepository.getReferenceById(SYSTEM_USER_ID);
         if (userAccountEntityOptional.isPresent()) {
             return userAccountEntityOptional.get();
         } else {
@@ -57,11 +57,14 @@ public class UserAccountStubComposable {
             newUser.setActive(true);
             newUser.setAccountGuid(UUID.randomUUID().toString());
             newUser.setIsSystemUser(true);
+            newUser.setCreatedBy(systemUser);
+            newUser.setLastModifiedBy(systemUser);
             return userAccountRepository.saveAndFlush(newUser);
         }
     }
 
     public UserAccountEntity createSystemUserAccount(String username) {
+        UserAccountEntity systemUser = userAccountRepository.getReferenceById(SYSTEM_USER_ID);
         var newUser = new UserAccountEntity();
         newUser.setUserName(username);
         newUser.setEmailAddress(username + "@example.com");
@@ -69,8 +72,8 @@ public class UserAccountStubComposable {
         newUser.setAccountGuid(UUID.randomUUID().toString());
         newUser.setIsSystemUser(true);
         newUser.setUserFullName(newUser.getUserName());
-        newUser.setCreatedBy(newUser);
-        newUser.setLastModifiedBy(newUser);
+        newUser.setCreatedBy(systemUser);
+        newUser.setLastModifiedBy(systemUser);
         newUser.setCreatedDateTime(OffsetDateTime.of(2020, 10, 10, 10, 0, 0, 0, ZoneOffset.UTC));
         newUser.setLastModifiedDateTime(OffsetDateTime.of(2020, 10, 10, 10, 0, 0, 0, ZoneOffset.UTC));
         return userAccountRepository.saveAndFlush(newUser);
@@ -130,14 +133,14 @@ public class UserAccountStubComposable {
         newUser.setUserName(fullName + "Username");
         newUser.setUserFullName(fullName + "FullName");
         newUser.setEmailAddress(emailAddress);
-        newUser.setCreatedBy(systemUser);
-        newUser.setLastModifiedBy(systemUser);
         newUser.setActive(active);
         newUser.setAccountGuid(guid);
         newUser.setIsSystemUser(false);
         newUser.setCreatedDateTime(CREATED_DATE_TIME);
         newUser.setLastModifiedDateTime(LAST_MODIFIED_DATE_TIME);
         newUser.setLastLoginTime(LAST_LOGIN_TIME);
+        newUser.setCreatedBy(systemUser);
+        newUser.setLastModifiedBy(systemUser);
         return userAccountRepository.saveAndFlush(newUser);
     }
 

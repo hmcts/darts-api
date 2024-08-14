@@ -1,9 +1,9 @@
 package uk.gov.hmcts.darts.usermanagement.service.impl;
 
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.BooleanUtils;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import uk.gov.hmcts.darts.audit.api.AuditActivity;
 import uk.gov.hmcts.darts.audit.api.AuditApi;
 import uk.gov.hmcts.darts.authorisation.api.AuthorisationApi;
@@ -106,9 +106,9 @@ public class UserManagementServiceImpl implements UserManagementService {
         var userAccountEntity = userAccountRepository.findById(userId)
             .orElseThrow(() -> new NoSuchElementException("No value present"));
 
-        var activitiesForAudit = auditActivitiesFor(userAccountEntity, userPatch);
+        //var activitiesForAudit = auditActivitiesFor(userAccountEntity, userPatch);
         var rolledBackTranscriptionsIds = updatedUserAccount(userPatch, userAccountEntity);
-        auditApi.recordAll(activitiesForAudit);
+        //auditApi.recordAll(activitiesForAudit);
 
         UserWithIdAndTimestamps user = userAccountMapper.mapToUserWithIdAndLastLoginModel(userAccountEntity);
 
@@ -165,7 +165,7 @@ public class UserManagementServiceImpl implements UserManagementService {
 
     private List<Integer> updatedUserAccount(UserPatch userPatch, UserAccountEntity userEntity) {
         List<Integer> rolledBackTranscriptions = updateEntity(userPatch, userEntity);
-        userAccountRepository.save(userEntity);
+        userAccountRepository.saveAndFlush(userEntity);
         return rolledBackTranscriptions;
     }
 

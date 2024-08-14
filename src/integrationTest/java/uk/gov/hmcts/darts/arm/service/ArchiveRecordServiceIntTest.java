@@ -83,6 +83,9 @@ class ArchiveRecordServiceIntTest extends IntegrationBase {
     @Autowired
     private ArchiveRecordService archiveRecordService;
 
+    @Autowired
+    private TranscriptionStub transcriptionStub;
+
 
     @BeforeEach
     void setUp() {
@@ -305,7 +308,7 @@ class ArchiveRecordServiceIntTest extends IntegrationBase {
         final String fileType = "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
         final int fileSize = 11_937;
         final String checksum = "C3CCA7021CF79B42F245AF350601C284";
-        TranscriptionDocumentEntity transcriptionDocumentEntity = TranscriptionStub.createTranscriptionDocumentEntity(
+        TranscriptionDocumentEntity transcriptionDocumentEntity = transcriptionStub.createTranscriptionDocumentEntity(
             transcriptionEntity, fileName, fileType, fileSize, testUser, checksum, startedAt);
         transcriptionDocumentEntity.setRetConfReason(RETENTION_CONFIDENCE_REASON);
         transcriptionDocumentEntity.setRetConfScore(RETENTION_CONFIDENCE_SCORE);
@@ -376,7 +379,7 @@ class ArchiveRecordServiceIntTest extends IntegrationBase {
         final String fileType = "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
         final int fileSize = 11_937;
         final String checksum = "C3CCA7021CF79B42F245AF350601C284";
-        TranscriptionDocumentEntity transcriptionDocumentEntity = TranscriptionStub.createTranscriptionDocumentEntity(
+        TranscriptionDocumentEntity transcriptionDocumentEntity = transcriptionStub.createTranscriptionDocumentEntity(
             transcriptionEntity, fileName, fileType, fileSize, testUser, checksum, startedAt);
         transcriptionDocumentEntity.setRetainUntilTs(retainUntil);
         transcriptionDocumentEntity.setRetConfReason(RETENTION_CONFIDENCE_REASON);
@@ -447,7 +450,7 @@ class ArchiveRecordServiceIntTest extends IntegrationBase {
         final String fileType = "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
         final int fileSize = 11_937;
         final String checksum = "C3CCA7021CF79B42F245AF350601C284";
-        TranscriptionDocumentEntity transcriptionDocumentEntity = TranscriptionStub.createTranscriptionDocumentEntity(
+        TranscriptionDocumentEntity transcriptionDocumentEntity = transcriptionStub.createTranscriptionDocumentEntity(
             transcriptionEntity, fileName, fileType, fileSize, testUser, checksum, startedAt);
         transcriptionDocumentEntity.setRetConfReason(RETENTION_CONFIDENCE_REASON);
         transcriptionDocumentEntity.setRetConfScore(RETENTION_CONFIDENCE_SCORE);

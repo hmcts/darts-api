@@ -95,6 +95,9 @@ class ArmRetentionEventDateProcessorIntTest extends IntegrationBase {
     @MockBean
     private ArmApiClient armApiClient;
 
+    @Autowired
+    private TranscriptionStub transcriptionStub;
+
 
     private ArmRetentionEventDateProcessor armRetentionEventDateProcessor;
 
@@ -266,11 +269,10 @@ class ArmRetentionEventDateProcessorIntTest extends IntegrationBase {
         final Integer confidenceScore = 232;
         final String externalRecordId = "recordId";
 
-        TranscriptionDocumentEntity transcriptionDocumentEntity = TranscriptionStub.createTranscriptionDocumentEntity(
+        TranscriptionDocumentEntity transcriptionDocumentEntity = transcriptionStub.createTranscriptionDocumentEntity(
             transcriptionEntity, fileName, fileType, fileSize, testUser, checksum, confidenceScore, confidenceReason);
         transcriptionDocumentEntity.setRetainUntilTs(DOCUMENT_RETENTION_DATE_TIME);
         when(userIdentity.getUserAccount()).thenReturn(testUser);
-        dartsDatabase.getTranscriptionDocumentRepository().save(transcriptionDocumentEntity);
 
         ExternalObjectDirectoryEntity armEod = dartsDatabase.getExternalObjectDirectoryStub().createExternalObjectDirectory(
             transcriptionDocumentEntity,
