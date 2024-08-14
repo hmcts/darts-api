@@ -83,6 +83,7 @@ public interface EventRepository extends JpaRepository<EventEntity, Integer> {
         FROM  darts.event
         WHERE is_current=true
         AND event_id <> 0
+        AND event_id IS NOT NULL
         GROUP BY event_id
         HAVING count(event_id) > 1
         """, nativeQuery = true)
