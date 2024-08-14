@@ -399,7 +399,7 @@ public class TestSupportController {
                                       delete from darts.security_group_courthouse_ae where grp_id in ( :ids )
                                       """, Integer.class).setParameter("ids", securityGroupIds).executeUpdate();
         session.createNativeQuery("""
-                                      delete from darts.security_group where grp_id in ( :ids )"
+                                      delete from darts.security_group where grp_id in ( :ids )
                                       """, Integer.class).setParameter("ids", securityGroupIds).executeUpdate();
     }
 
