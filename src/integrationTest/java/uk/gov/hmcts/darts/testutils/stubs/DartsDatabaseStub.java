@@ -341,6 +341,10 @@ public class DartsDatabaseStub {
         );
         hearing.setHearingIsActual(true);
         hearing.addJudge(createSimpleJudge(caseNumber + "judge1"), false);
+        var courtCase = hearing.getCourtCase();
+        var systemUser = userAccountRepository.getReferenceById(0);
+        courtCase.setCreatedBy(systemUser);
+        courtCase.setLastModifiedBy(systemUser);
         return hearingRepository.saveAndFlush(hearing);
     }
 
@@ -532,8 +536,11 @@ public class DartsDatabaseStub {
 
     @Transactional
     public HearingEntity save(HearingEntity hearingEntity) {
+        save(hearingEntity.getCourtCase());
         save(hearingEntity.getCourtroom().getCourthouse());
         save(hearingEntity.getCourtroom());
+        userAccountRepository.save(hearingEntity.getCreatedBy());
+        userAccountRepository.save(hearingEntity.getLastModifiedBy());
         return hearingRepository.save(hearingEntity);
     }
 
@@ -551,6 +558,9 @@ public class DartsDatabaseStub {
 
     @Transactional
     public CourtCaseEntity save(CourtCaseEntity courtCase) {
+        userAccountRepository.save(courtCase.getCreatedBy());
+        userAccountRepository.save(courtCase.getLastModifiedBy());
+        judgeRepository.saveAll(courtCase.getJudges());
         save(courtCase.getCourthouse());
         return caseRepository.save(courtCase);
     }

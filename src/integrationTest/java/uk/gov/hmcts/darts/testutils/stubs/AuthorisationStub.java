@@ -16,6 +16,8 @@ import uk.gov.hmcts.darts.common.entity.TranscriptionEntity;
 import uk.gov.hmcts.darts.common.entity.TransformedMediaEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.repository.SecurityGroupRepository;
+import uk.gov.hmcts.darts.test.common.data.UserAccountTestData;
+import uk.gov.hmcts.darts.usermanagement.model.User;
 
 import java.time.LocalTime;
 import java.time.OffsetDateTime;
@@ -29,6 +31,7 @@ import static uk.gov.hmcts.darts.audio.enums.MediaRequestStatus.COMPLETED;
 import static uk.gov.hmcts.darts.audio.enums.MediaRequestStatus.OPEN;
 import static uk.gov.hmcts.darts.audiorequests.model.AudioRequestType.DOWNLOAD;
 import static uk.gov.hmcts.darts.common.entity.MediaEntity.MEDIA_TYPE_DEFAULT;
+import static uk.gov.hmcts.darts.test.common.data.UserAccountTestData.*;
 
 @Component
 @RequiredArgsConstructor
@@ -150,6 +153,9 @@ public class AuthorisationStub {
         courtCaseEntity.setCourthouse(courthouseEntity);
         courtCaseEntity.setClosed(false);
         courtCaseEntity.setInterpreterUsed(false);
+        var userAccount = minimalUserAccount();
+        courtCaseEntity.setCreatedBy(userAccount);
+        courtCaseEntity.setLastModifiedBy(userAccount);
         dartsDatabaseStub.save(courtCaseEntity);
     }
 

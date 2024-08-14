@@ -3,6 +3,7 @@ package uk.gov.hmcts.darts.test.common.data;
 import lombok.experimental.UtilityClass;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
+import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 
 import java.util.function.Consumer;
 
@@ -24,6 +25,9 @@ public class CaseTestData {
         courtCaseEntity.setCaseNumber("case-1-" + postfix);
         courtCaseEntity.setClosed(false);
         courtCaseEntity.setInterpreterUsed(false);
+        var accountEntity = minimalUserAccount();
+        courtCaseEntity.setCreatedBy(accountEntity);
+        courtCaseEntity.setLastModifiedBy(accountEntity);
         return courtCaseEntity;
     }
 
