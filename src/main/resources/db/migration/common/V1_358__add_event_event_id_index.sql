@@ -1,0 +1,1 @@
+CREATE INDEX IF NOT EXISTS event_event_id_is_current_idx ON event (event_id, is_current)
