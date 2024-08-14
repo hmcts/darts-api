@@ -28,6 +28,7 @@ import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 
+import static org.apache.commons.collections.CollectionUtils.isEmpty;
 import static uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum.UNSTRUCTURED;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.STORED;
 
@@ -89,14 +90,16 @@ public class AudioServiceImpl implements AudioService {
 
     @Override
     public void setIsArchived(List<AudioMetadata> audioMetadata, Integer hearingId) {
-        List<AudioBeingProcessedFromArchiveQueryResult> archivedArmRecords =
-            audioBeingProcessedFromArchiveQuery.getResults(hearingId);
+        if (!isEmpty(audioMetadata)) {
+            List<AudioBeingProcessedFromArchiveQueryResult> archivedArmRecords =
+                audioBeingProcessedFromArchiveQuery.getResults(hearingId);
 
-        for (AudioMetadata audioMetadataItem : audioMetadata) {
-            if (isMediaArchived(audioMetadataItem, archivedArmRecords) && isValidFileSize()) {
-                audioMetadataItem.setIsArchived(true);
-            } else {
-                audioMetadataItem.setIsArchived(false);
+            for (AudioMetadata audioMetadataItem : audioMetadata) {
+                if (isMediaArchived(audioMetadataItem, archivedArmRecords) && isValidFileSize()) {
+                    audioMetadataItem.setIsArchived(true);
+                } else {
+                    audioMetadataItem.setIsArchived(false);
+                }
             }
         }
     }
@@ -106,14 +109,15 @@ public class AudioServiceImpl implements AudioService {
      */
     @Override
     public void setIsAvailable(List<AudioMetadata> audioMetadataList) {
-        List<Integer> mediaIdList = audioMetadataList.stream().map(AudioMetadata::getId).toList();
-        ObjectRecordStatusEntity storedStatus = objectRecordStatusRepository.getReferenceById(STORED.getId());
-        ExternalLocationTypeEntity unstructuredLocationType = externalLocationTypeRepository.getReferenceById(UNSTRUCTURED.getId());
-        List<Integer> mediaIdsStoredInUnstructured = externalObjectDirectoryRepository.findMediaIdsByInMediaIdStatusAndType(mediaIdList, storedStatus,
-                                                                                                                            unstructuredLocationType);
-
-        for (AudioMetadata audioMetadataItem : audioMetadataList) {
-            audioMetadataItem.setIsAvailable(mediaIdsStoredInUnstructured.contains(audioMetadataItem.getId()));
+        if (!isEmpty(audioMetadataList)) {
+            List<Integer> mediaIdList = audioMetadataList.stream().map(AudioMetadata::getId).toList();
+            ObjectRecordStatusEntity storedStatus = objectRecordStatusRepository.getReferenceById(STORED.getId());
+            ExternalLocationTypeEntity unstructuredLocationType = externalLocationTypeRepository.getReferenceById(UNSTRUCTURED.getId());
+            List<Integer> mediaIdsStoredInUnstructured = externalObjectDirectoryRepository.findMediaIdsByInMediaIdStatusAndType(mediaIdList, storedStatus,
+                                                                                                                                unstructuredLocationType);
+            for (AudioMetadata audioMetadataItem : audioMetadataList) {
+                audioMetadataItem.setIsAvailable(mediaIdsStoredInUnstructured.contains(audioMetadataItem.getId()));
+            }
         }
     }
 
