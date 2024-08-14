@@ -1,5 +1,6 @@
 package uk.gov.hmcts.darts.audit.service.impl;
 
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -22,7 +23,7 @@ public class AuditServiceImpl implements AuditService {
     @Value("${darts.audit.application-server}")
     private String applicationServer;
 
-    ///@Transactional
+    @Transactional
     @Override
     public void recordAudit(AuditActivity activity, UserAccountEntity userAccountEntity, CourtCaseEntity courtCase) {
         AuditEntity auditEntity = new AuditEntity();
@@ -34,4 +35,6 @@ public class AuditServiceImpl implements AuditService {
         auditEntity.setLastModifiedBy(userAccountEntity);
         auditRepository.saveAndFlush(auditEntity);
     }
+
+
 }

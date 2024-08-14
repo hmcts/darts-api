@@ -27,7 +27,7 @@ public class MandatoryCreatedBaseEntity {
 
     @NotNull
     @NotAudited
-    @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.PERSIST)
+    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
     @JoinColumn(name = "created_by", nullable = false)
     private UserAccountEntity createdBy;
 
