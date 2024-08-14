@@ -103,7 +103,7 @@ class AnnotationDeleteTest extends IntegrationBase {
     }
 
     @ParameterizedTest
-    @EnumSource(value = SecurityRoleEnum.class, names = {"SUPER_ADMIN", "JUDICIARY" }, mode = Mode.EXCLUDE)
+    @EnumSource(value = SecurityRoleEnum.class, names = {"SUPER_ADMIN", "JUDICIARY"}, mode = Mode.EXCLUDE)
     void disallowsDeleteAnnotationByRolesOtherThanSuperAdminAndJudge(SecurityRoleEnum role) throws Exception {
         given.anAuthenticatedUserWithGlobalAccessAndRole(role);
         var someJudge = minimalUserAccount();
@@ -133,6 +133,8 @@ class AnnotationDeleteTest extends IntegrationBase {
         var annotation = minimalAnnotationEntity();
         annotation.setDeleted(false);
         annotation.setCurrentOwner(userAccount);
+        annotation.setCreatedBy(userAccount);
+        annotation.setLastModifiedBy(userAccount);
         annotation.addHearing(dartsDatabase.save(hearing));
         dartsDatabase.save(annotation);
         return annotation;

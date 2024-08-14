@@ -1,140 +1,152 @@
 [
   {
-    "user_ids":[],
+    "user_ids": [],
     "id": -17,
-    "security_role_id": 14,
     "global_access": true,
     "display_state": false,
     "courthouse_ids": [],
-    "name": "Mid Tier Group"
+    "name": "Mid Tier Group",
+    "display_name": "Mid Tier Group",
+    "security_role_id": 14
   },
   {
-    "user_ids":[],
+    "user_ids": [],
     "id": -16,
-    "security_role_id": 13,
     "global_access": true,
     "display_state": false,
     "courthouse_ids": [],
-    "name": "Dar Pc Group"
+    "name": "Dar Pc Group",
+    "display_name": "Dar Pc Group",
+    "security_role_id": 13
   },
   {
-    "user_ids":[],
+    "user_ids": [],
     "id": -15,
-    "security_role_id": 12,
     "global_access": true,
     "display_state": false,
     "courthouse_ids": [],
-    "name": "Cpp Group"
+    "name": "Cpp Group",
+    "display_name": "Cpp Group",
+    "security_role_id": 12
   },
   {
-    "user_ids":[],
+    "user_ids": [],
     "id": -14,
-    "security_role_id": 11,
     "global_access": true,
     "display_state": false,
     "courthouse_ids": [],
-    "name": "Xhibit Group"
+    "name": "Xhibit Group",
+    "display_name": "Xhibit Group",
+    "security_role_id": 11
   },
   {
-    "user_ids":[],
+    "user_ids": [],
     "id": -7,
-    "security_role_id": 1,
     "global_access": true,
     "display_state": true,
     "courthouse_ids": [],
-    "name": "Test Judge Global"
+    "name": "Test Judge Global",
+    "display_name": "Test Judge Global",
+    "security_role_id": 1
   },
   {
-    "user_ids":[],
+    "user_ids": [],
     "id": -6,
-    "security_role_id": 6,
     "global_access": true,
     "display_state": true,
     "courthouse_ids": [],
-    "name": "Test RCJ Appeals"
+    "name": "Test RCJ Appeals",
+    "display_name": "Test RCJ Appeals",
+    "security_role_id": 6
   },
   {
-    "user_ids":[],
+    "user_ids": [],
     "id": -5,
-    "security_role_id": 5,
     "global_access": true,
     "display_state": true,
     "courthouse_ids": [],
-    "name": "Test Language Shop"
+    "name": "Test Language Shop",
+    "display_name": "Test Language Shop",
+    "security_role_id": 5
   },
   {
-    "user_ids":[],
+    "user_ids": [],
     "id": -4,
-    "security_role_id": 4,
     "global_access": false,
     "display_state": true,
     "courthouse_ids": [],
-    "name": "Test Transcriber"
+    "name": "Test Transcriber",
+    "display_name": "Test Transcriber",
+    "security_role_id": 4
   },
   {
-    "user_ids":[],
+    "user_ids": [],
     "id": -3,
-    "security_role_id": 1,
     "global_access": false,
     "display_state": true,
     "courthouse_ids": [],
-    "name": "Test Judge"
+    "name": "Test Judge",
+    "display_name": "Test Judge",
+    "security_role_id": 1
   },
   {
-    "user_ids":[],
+    "user_ids": [],
     "id": -2,
-    "security_role_id": 2,
     "global_access": false,
     "display_state": true,
     "courthouse_ids": [],
-    "name": "Test Requestor"
+    "name": "Test Requestor",
+    "display_name": "Test Requestor",
+    "security_role_id": 2
   },
   {
-    "user_ids":[],
+    "user_ids": [],
     "id": -1,
-    "security_role_id": 3,
     "global_access": false,
     "display_state": true,
     "courthouse_ids": [],
-    "name": "Test Approver"
+    "name": "Test Approver",
+    "display_name": "Test Approver",
+    "security_role_id": 3
   },
   {
-    "user_ids":[],
+    "user_ids": [],
     "id": 1,
-    "security_role_id": 8,
     "global_access": true,
     "display_state": true,
     "courthouse_ids": [],
     "name": "SUPER_ADMIN",
-    "display_name": "Super Admin"
+    "display_name": "Super Admin",
+    "security_role_id": 8
   },
   {
-    "user_ids":[],
+    "user_ids": [],
     "id": 2,
-    "security_role_id": 7,
     "global_access": true,
     "display_state": true,
     "courthouse_ids": [],
     "name": "SUPER_USER",
-    "display_name": "Super User"
+    "display_name": "Super User",
+    "security_role_id": 7
   },
   {
     "user_ids": [],
     "id": 3,
-    "security_role_id": 10,
     "global_access": true,
     "display_state": false,
     "courthouse_ids": [],
     "name": "DARTS",
-    "display_name": "DARTS"
+    "display_name": "DARTS",
+    "security_role_id": 10
   },
   {
-    "user_ids":[],
+    "user_ids": [],
     "id": 4,
-    "security_role_id": 9,
     "global_access": true,
     "display_state": true,
     "courthouse_ids": [],
-    "name": "MEDIA_IN_PERPETUITY"
+    "name": "MEDIA_IN_PERPETUITY",
+    "display_name": "MEDIA_IN_PERPETUITY",
+    "security_role_id": 9
   }
 ]

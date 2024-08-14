@@ -24,6 +24,8 @@ public class AnnotationStubComposable {
         AnnotationEntity annotationEntity = new AnnotationEntity();
         annotationEntity.setCurrentOwner(currentOwner);
         annotationEntity.setText(annotationText);
+        annotationEntity.setCreatedBy(currentOwner);
+        annotationEntity.setLastModifiedBy(currentOwner);
         return annotationRepository.save(annotationEntity);
     }
 
@@ -71,6 +73,7 @@ public class AnnotationStubComposable {
         AnnotationDocumentEntity annotationDocument = createAnnotationDocumentEntity(annotationEntity, fileName, fileType, fileSize,
                                                                                      uploadedBy, uploadedDateTime, checksum, confScore, confReason);
         annotationDocument.setAnnotation(annotationRepository.getReferenceById(annotationEntity.getId()));
+        annotationDocument.setLastModifiedBy(uploadedBy);
         annotationDocument = annotationDocumentRepository.saveAndFlush(annotationDocument);
         return annotationDocument;
     }
@@ -81,6 +84,7 @@ public class AnnotationStubComposable {
         annotationEntity.setText(annotationText);
         annotationEntity.setTimestamp(OffsetDateTime.now());
         annotationEntity.setCreatedBy(currentOwner);
+        annotationEntity.setLastModifiedBy(currentOwner);
         return annotationEntity;
     }
 

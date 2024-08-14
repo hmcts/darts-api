@@ -48,7 +48,6 @@ import uk.gov.hmcts.darts.notification.api.NotificationApi;
 import uk.gov.hmcts.darts.notification.dto.SaveNotificationToDbRequest;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -426,7 +425,7 @@ class MediaRequestServiceImplTest {
 
     @SneakyThrows
     @Test
-    void downloadShouldReturnExpectedData() throws IOException {
+    void downloadShouldReturnExpectedData() {
         MediaEntity mediaEntity = new MediaEntity();
         mediaEntity.setId(1);
         mediaEntity.setStart(START_TIME);
@@ -461,8 +460,8 @@ class MediaRequestServiceImplTest {
         when(dataManagementApi.getBlobDataFromOutboundContainer(blobUuid)).thenReturn(responseMetaData);
         when(responseMetaData.getInputStream()).thenReturn(toInputStream(DUMMY_FILE_CONTENT, "UTF-8"));
 
-        try (InputStream inputStream = mediaRequestService.download(transformedMediaId)) {
-            byte[] bytes = inputStream.readAllBytes();
+        try (DownloadResponseMetaData downloadResponseMetaData = mediaRequestService.download(transformedMediaId)) {
+            byte[] bytes = downloadResponseMetaData.getInputStream().readAllBytes();
             assertEquals(DUMMY_FILE_CONTENT, new String(bytes));
         }
 
@@ -589,8 +588,8 @@ class MediaRequestServiceImplTest {
         when(dataManagementApi.getBlobDataFromOutboundContainer(blobUuid)).thenReturn(responseMetaData);
         when(responseMetaData.getInputStream()).thenReturn(toInputStream(DUMMY_FILE_CONTENT, "UTF-8"));
 
-        try (InputStream inputStream = mediaRequestService.playback(transformedMediaId)) {
-            byte[] bytes = inputStream.readAllBytes();
+        try (DownloadResponseMetaData downloadResponseMetaData = mediaRequestService.playback(transformedMediaId)) {
+            byte[] bytes = downloadResponseMetaData.getInputStream().readAllBytes();
             assertEquals(DUMMY_FILE_CONTENT, new String(bytes));
         }
 

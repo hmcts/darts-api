@@ -5,7 +5,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.core.io.InputStreamResource;
+import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -27,10 +27,11 @@ import uk.gov.hmcts.darts.audiorequests.model.MediaRequest;
 import uk.gov.hmcts.darts.audiorequests.model.SearchTransformedMediaRequest;
 import uk.gov.hmcts.darts.audiorequests.model.SearchTransformedMediaResponse;
 import uk.gov.hmcts.darts.authorisation.annotation.Authorisation;
+import uk.gov.hmcts.darts.common.datamanagement.component.impl.DownloadResponseMetaData;
+import uk.gov.hmcts.darts.common.datamanagement.component.impl.FileBasedDownloadResponseMetaData;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.log.api.LogApi;
 
-import java.io.InputStream;
 import java.util.List;
 
 import static uk.gov.hmcts.darts.authorisation.constants.AuthorisationConstants.SECURITY_SCHEMES_BEARER_AUTH;
@@ -82,12 +83,8 @@ public class AudioRequestsController implements AudioRequestsApi {
         securityRoles = {TRANSCRIBER},
         globalAccessSecurityRoles = {SUPER_ADMIN, SUPER_USER, DARTS})
     public ResponseEntity<Resource> download(Integer transformedMediaId) {
-        InputStream audioFileStream = mediaRequestService.download(transformedMediaId);
-
-        return new ResponseEntity<>(
-            new InputStreamResource(audioFileStream),
-            HttpStatus.OK
-        );
+        FileBasedDownloadResponseMetaData downloadResponseMetadata = (FileBasedDownloadResponseMetaData) mediaRequestService.download(transformedMediaId);
+        return ResponseEntity.ok().body(new FileSystemResource(downloadResponseMetadata.getFileToBeDownloadedTo()));
     }
 
     @Override
@@ -137,9 +134,9 @@ public class AudioRequestsController implements AudioRequestsApi {
         securityRoles = {JUDICIARY, REQUESTER, APPROVER, TRANSCRIBER, TRANSLATION_QA},
         globalAccessSecurityRoles = {JUDICIARY, SUPER_ADMIN, SUPER_USER, RCJ_APPEALS, TRANSLATION_QA, DARTS})
     public ResponseEntity<byte[]> playback(Integer transformedMediaId, String httpRangeList) {
-        InputStream audioFileStream = mediaRequestService.playback(transformedMediaId);
+        DownloadResponseMetaData downloadResponseMetadata = mediaRequestService.playback(transformedMediaId);
 
-        return StreamingResponseEntityUtil.createResponseEntity(audioFileStream, httpRangeList);
+        return StreamingResponseEntityUtil.createResponseEntity(downloadResponseMetadata.getInputStream(), httpRangeList);
     }
 
     @Override

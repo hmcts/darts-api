@@ -1,5 +1,6 @@
 package uk.gov.hmcts.darts.common.datamanagement.component.impl;
 
+import lombok.Getter;
 import uk.gov.hmcts.darts.common.datamanagement.StorageConfiguration;
 
 import java.io.File;
@@ -16,6 +17,8 @@ import java.util.UUID;
  *The response download data. Always use in combination with a try resources to ensure the file resources are cleaned up
  */
 public class FileBasedDownloadResponseMetaData extends DownloadResponseMetaData {
+
+    @Getter
     private File fileToBeDownloadedTo;
 
     @Override

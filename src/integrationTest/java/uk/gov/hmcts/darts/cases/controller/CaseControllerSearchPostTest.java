@@ -36,7 +36,7 @@ import static uk.gov.hmcts.darts.cases.CasesConstants.GetSearchCasesParams.ENDPO
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.APPROVER;
 import static uk.gov.hmcts.darts.test.common.TestUtils.getContentsFromFile;
 import static uk.gov.hmcts.darts.test.common.data.CaseTestData.createCaseAt;
-import static uk.gov.hmcts.darts.test.common.data.CourthouseTestData.someMinimalCourthouse;
+import static uk.gov.hmcts.darts.test.common.data.CourthouseTestData.createCourthouseWithName;
 import static uk.gov.hmcts.darts.test.common.data.CourtroomTestData.createCourtRoomWithNameAtCourthouse;
 import static uk.gov.hmcts.darts.test.common.data.DefendantTestData.createDefendantForCaseWithName;
 import static uk.gov.hmcts.darts.test.common.data.EventTestData.createEventWith;
@@ -60,8 +60,7 @@ class CaseControllerSearchPostTest extends IntegrationBase {
 
     @BeforeEach
     void setupData() {
-        swanseaCourthouse = someMinimalCourthouse();
-        swanseaCourthouse.setCourthouseName("SWANSEA");
+        swanseaCourthouse = createCourthouseWithName("SWANSEA");
 
         CourtCaseEntity case1 = createCaseAt(swanseaCourthouse);
         case1.setCaseNumber("Case1");

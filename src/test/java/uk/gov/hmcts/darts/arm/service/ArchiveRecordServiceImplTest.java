@@ -193,7 +193,7 @@ class ArchiveRecordServiceImplTest {
 
         OffsetDateTime testTime = OffsetDateTime.of(2023, 1, 1, 10, 0, 0, 0, ZoneOffset.UTC);
         when(currentTimeHelper.currentOffsetDateTime()).thenReturn(testTime);
-        when(courthouseEntity.getCourthouseName()).thenReturn("Swansea");
+        when(courthouseEntity.getDisplayName()).thenReturn("Swansea");
 
         when(courtroomEntity.getCourthouse()).thenReturn(courthouseEntity);
         when(courtroomEntity.getName()).thenReturn("Room1");
@@ -255,7 +255,7 @@ class ArchiveRecordServiceImplTest {
 
         OffsetDateTime testTime = OffsetDateTime.of(2023, 1, 1, 10, 0, 0, 0, ZoneOffset.UTC);
         when(currentTimeHelper.currentOffsetDateTime()).thenReturn(testTime);
-        when(courthouseEntity.getCourthouseName()).thenReturn("Swansea");
+        when(courthouseEntity.getDisplayName()).thenReturn("Swansea");
 
         when(courtroomEntity.getCourthouse()).thenReturn(courthouseEntity);
         when(courtroomEntity.getName()).thenReturn("Room1");
@@ -325,7 +325,7 @@ class ArchiveRecordServiceImplTest {
 
         OffsetDateTime testTime = OffsetDateTime.of(2023, 1, 1, 10, 0, 0, 0, ZoneOffset.UTC);
         when(currentTimeHelper.currentOffsetDateTime()).thenReturn(testTime);
-        when(courthouseEntity.getCourthouseName()).thenReturn("Swansea");
+        when(courthouseEntity.getDisplayName()).thenReturn("Swansea");
 
         when(courtroomEntity.getCourthouse()).thenReturn(courthouseEntity);
         when(courtroomEntity.getName()).thenReturn("Room1");
@@ -382,7 +382,7 @@ class ArchiveRecordServiceImplTest {
         OffsetDateTime testTime = OffsetDateTime.of(2023, 1, 1, 10, 0, 0, 0, ZoneOffset.UTC);
         when(currentTimeHelper.currentOffsetDateTime()).thenReturn(testTime);
 
-        when(courthouseEntity.getCourthouseName()).thenReturn("Swansea");
+        when(courthouseEntity.getDisplayName()).thenReturn("Swansea");
 
         when(courtroomEntity.getName()).thenReturn("Room1");
         when(courtroomEntity.getCourthouse()).thenReturn(courthouseEntity);
@@ -453,7 +453,7 @@ class ArchiveRecordServiceImplTest {
         OffsetDateTime testTime = OffsetDateTime.of(2023, 1, 1, 10, 0, 0, 0, ZoneOffset.UTC);
         when(currentTimeHelper.currentOffsetDateTime()).thenReturn(testTime);
 
-        when(courthouseEntity.getCourthouseName()).thenReturn("Swansea");
+        when(courthouseEntity.getDisplayName()).thenReturn("Swansea");
 
         when(courtroomEntity.getName()).thenReturn("Room1");
         when(courtroomEntity.getCourthouse()).thenReturn(courthouseEntity);
@@ -528,7 +528,7 @@ class ArchiveRecordServiceImplTest {
         OffsetDateTime testTime = OffsetDateTime.of(2023, 1, 1, 10, 0, 0, 0, ZoneOffset.UTC);
         when(currentTimeHelper.currentOffsetDateTime()).thenReturn(testTime);
 
-        when(courthouseEntity.getCourthouseName()).thenReturn("Swansea");
+        when(courthouseEntity.getDisplayName()).thenReturn("Swansea");
 
         when(courtroomEntity.getName()).thenReturn("Room1");
         when(courtroomEntity.getCourthouse()).thenReturn(courthouseEntity);
@@ -579,7 +579,7 @@ class ArchiveRecordServiceImplTest {
         OffsetDateTime testTime = OffsetDateTime.of(2023, 1, 1, 10, 0, 0, 0, ZoneOffset.UTC);
         when(currentTimeHelper.currentOffsetDateTime()).thenReturn(testTime);
 
-        when(courthouseEntity.getCourthouseName()).thenReturn("Swansea");
+        when(courthouseEntity.getDisplayName()).thenReturn("Swansea");
 
         when(courtroomEntity.getName()).thenReturn("Room1");
 
@@ -644,7 +644,7 @@ class ArchiveRecordServiceImplTest {
         OffsetDateTime testTime = OffsetDateTime.of(2023, 1, 1, 10, 0, 0, 0, ZoneOffset.UTC);
         when(currentTimeHelper.currentOffsetDateTime()).thenReturn(testTime);
 
-        when(courthouseEntity.getCourthouseName()).thenReturn("Swansea");
+        when(courthouseEntity.getDisplayName()).thenReturn("Swansea");
 
         when(courtroomEntity.getName()).thenReturn("Room1");
 
@@ -709,7 +709,7 @@ class ArchiveRecordServiceImplTest {
         OffsetDateTime testTime = OffsetDateTime.of(2023, 1, 1, 10, 0, 0, 0, ZoneOffset.UTC);
         when(currentTimeHelper.currentOffsetDateTime()).thenReturn(testTime);
 
-        when(courthouseEntity.getCourthouseName()).thenReturn("Swansea");
+        when(courthouseEntity.getDisplayName()).thenReturn("Swansea");
 
         when(courtroomEntity.getName()).thenReturn("Room1");
 
@@ -763,7 +763,7 @@ class ArchiveRecordServiceImplTest {
         OffsetDateTime testTime = OffsetDateTime.of(2023, 1, 1, 10, 0, 0, 0, ZoneOffset.UTC);
         when(currentTimeHelper.currentOffsetDateTime()).thenReturn(testTime);
 
-        when(courthouseEntity.getCourthouseName()).thenReturn("Swansea");
+        when(courthouseEntity.getDisplayName()).thenReturn("Swansea");
 
         when(courtCaseEntity1.getId()).thenReturn(1);
         when(courtCaseEntity1.getCaseNumber()).thenReturn("Case1");
@@ -818,7 +818,7 @@ class ArchiveRecordServiceImplTest {
         OffsetDateTime testTime = OffsetDateTime.of(2023, 1, 1, 10, 0, 0, 0, ZoneOffset.UTC);
         when(currentTimeHelper.currentOffsetDateTime()).thenReturn(testTime);
 
-        when(courthouseEntity.getCourthouseName()).thenReturn("Swansea");
+        when(courthouseEntity.getDisplayName()).thenReturn("Swansea");
 
         when(courtCaseEntity1.getCaseNumber()).thenReturn("Case1");
         when(courtCaseEntity1.getCourthouse()).thenReturn(courthouseEntity);
@@ -872,7 +872,7 @@ class ArchiveRecordServiceImplTest {
         OffsetDateTime testTime = OffsetDateTime.of(2023, 1, 1, 10, 0, 0, 0, ZoneOffset.UTC);
         when(currentTimeHelper.currentOffsetDateTime()).thenReturn(testTime);
 
-        when(courthouseEntity.getCourthouseName()).thenReturn("Swansea");
+        when(courthouseEntity.getDisplayName()).thenReturn("Swansea");
 
         when(courtCaseEntity1.getCourthouse()).thenReturn(courthouseEntity);
 

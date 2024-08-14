@@ -12,9 +12,9 @@ import uk.gov.hmcts.darts.audiorequests.model.MediaPatchResponse;
 import uk.gov.hmcts.darts.audiorequests.model.MediaRequest;
 import uk.gov.hmcts.darts.audiorequests.model.SearchTransformedMediaRequest;
 import uk.gov.hmcts.darts.audiorequests.model.SearchTransformedMediaResponse;
+import uk.gov.hmcts.darts.common.datamanagement.component.impl.DownloadResponseMetaData;
 import uk.gov.hmcts.darts.common.entity.TransformedMediaEntity;
 
-import java.io.InputStream;
 import java.util.List;
 import java.util.Optional;
 
@@ -48,9 +48,9 @@ public interface MediaRequestService {
 
     void updateTransformedMediaLastAccessedTimestampForMediaRequestId(Integer mediaRequestId);
 
-    InputStream download(Integer transformedMediaId);
+    DownloadResponseMetaData download(Integer transformedMediaId);
 
-    InputStream playback(Integer transformedMediaId);
+    DownloadResponseMetaData playback(Integer transformedMediaId);
 
     MediaRequestEntity updateAudioRequestCompleted(MediaRequestEntity mediaRequestEntity);
 

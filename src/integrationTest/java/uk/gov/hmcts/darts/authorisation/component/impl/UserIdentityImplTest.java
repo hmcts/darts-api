@@ -6,11 +6,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
-import org.springframework.transaction.annotation.Transactional;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
-import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 import uk.gov.hmcts.darts.testutils.stubs.AuthorisationStub;
 
@@ -30,9 +28,6 @@ class UserIdentityImplTest extends IntegrationBase {
 
     @Autowired
     private UserIdentity userIdentity;
-
-    @Autowired
-    private UserAccountRepository userAccountRepository;
 
     @Autowired
     private AuthorisationStub authorisationStub;
@@ -145,7 +140,6 @@ class UserIdentityImplTest extends IntegrationBase {
     }
 
     @Test
-    @Transactional
     void getGuid() {
         String guid = UUID.randomUUID().toString();
         Jwt jwt = Jwt.withTokenValue("test")
@@ -160,7 +154,6 @@ class UserIdentityImplTest extends IntegrationBase {
     }
 
     @Test
-    @Transactional
     void userHasGlobalAccess() {
         String guid = UUID.randomUUID().toString();
         Jwt jwt = Jwt.withTokenValue("test")
@@ -177,7 +170,6 @@ class UserIdentityImplTest extends IntegrationBase {
     }
 
     @Test
-    @Transactional
     void userHasGlobalAccessReturnsFalseWhenUserHasNoGlobalAccess() {
         String guid = UUID.randomUUID().toString();
         Jwt jwt = Jwt.withTokenValue("test")
@@ -194,7 +186,6 @@ class UserIdentityImplTest extends IntegrationBase {
     }
 
     @Test
-    @Transactional
     void whenEmailAddressIsWrongCaseInToken_thenUserHasGlobalAccessReturnsTrue() {
         String guid = UUID.randomUUID().toString();
         Jwt jwt = Jwt.withTokenValue("test")

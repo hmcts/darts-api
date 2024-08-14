@@ -267,7 +267,7 @@ public class CaseArchiveRecordMapperImpl implements CaseArchiveRecordMapper {
     private static String getCourthouse(CaseDocumentEntity caseDocument) {
         String courthouse = null;
         if (nonNull(caseDocument.getCourtCase())) {
-            courthouse = caseDocument.getCourtCase().getCourthouse().getCourthouseName();
+            courthouse = caseDocument.getCourtCase().getCourthouse().getDisplayName();
         }
         return courthouse;
     }

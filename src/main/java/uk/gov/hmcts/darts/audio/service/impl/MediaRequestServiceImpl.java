@@ -76,7 +76,6 @@ import uk.gov.hmcts.darts.notification.api.NotificationApi;
 import uk.gov.hmcts.darts.notification.dto.SaveNotificationToDbRequest;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.time.LocalTime;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
@@ -396,7 +395,7 @@ public class MediaRequestServiceImpl implements MediaRequestService {
     }
 
     @Override
-    public InputStream download(Integer transformedMediaId) {
+    public DownloadResponseMetaData download(Integer transformedMediaId) {
         try {
             return downloadOrPlayback(transformedMediaId, EXPORT_AUDIO, AudioRequestType.DOWNLOAD);
         } catch (IOException | FileNotDownloadedException e) {
@@ -405,7 +404,7 @@ public class MediaRequestServiceImpl implements MediaRequestService {
     }
 
     @Override
-    public InputStream playback(Integer transformedMediaId) {
+    public DownloadResponseMetaData playback(Integer transformedMediaId) {
         try {
             return downloadOrPlayback(transformedMediaId, AUDIO_PLAYBACK, AudioRequestType.PLAYBACK);
         } catch (IOException | FileNotDownloadedException e) {
@@ -434,7 +433,7 @@ public class MediaRequestServiceImpl implements MediaRequestService {
         return getTransformedMediaDetailsMapper.mapSearchResults(mediaEntities);
     }
 
-    private InputStream downloadOrPlayback(
+    private DownloadResponseMetaData downloadOrPlayback(
         Integer transformedMediaId, AuditActivity auditActivity, AudioRequestType expectedType
     ) throws FileNotDownloadedException, IOException {
         final TransformedMediaEntity transformedMediaEntity = getTransformedMediaById(transformedMediaId);
@@ -448,9 +447,7 @@ public class MediaRequestServiceImpl implements MediaRequestService {
             this.getUserAccount(),
             mediaRequestEntity.getHearing().getCourtCase()
         );
-
-        DownloadResponseMetaData downloadResponse = dataManagementApi.getBlobDataFromOutboundContainer(blobId);
-        return downloadResponse.getInputStream();
+        return dataManagementApi.getBlobDataFromOutboundContainer(blobId);
     }
 
     private UUID getBlobId(TransformedMediaEntity transformedMediaEntity) {

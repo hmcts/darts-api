@@ -2,6 +2,7 @@ package uk.gov.hmcts.darts.arm.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.darts.arm.service.InboundAnnotationTranscriptionDeleterProcessor;
@@ -50,7 +51,7 @@ public class InboundAnnotationTranscriptionDeleterProcessorImpl implements Inbou
                                                                 EodHelper.armLocation(),
                                                                 lastModifiedBefore, ExternalObjectDirectoryQueryTypeEnum.ANNOTATION_QUERY.getIndex());
 
-        log.debug("Identified records to be marked for deletion  {}",  recordsMarkedForDeletion.stream().map(Object::toString));
+        log.debug("Identified records to be marked for deletion  {}", StringUtils.join(recordsMarkedForDeletion, ","));
 
         UserAccountEntity user = userAccountRepository.findSystemUser(systemUserHelper.findSystemUserGuid("housekeeping"));
         eodHelper.updateStatus(
