@@ -2,6 +2,8 @@ package uk.gov.hmcts.darts.usermanagement.controller;
 
 
 import org.json.JSONObject;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -12,11 +14,15 @@ import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilde
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
+import uk.gov.hmcts.darts.testutils.stubs.SecurityGroupStub;
 import uk.gov.hmcts.darts.testutils.stubs.SuperAdminUserStub;
 import uk.gov.hmcts.darts.usermanagement.exception.UserManagementError;
 
+import java.util.Set;
 import java.util.UUID;
 
+import static org.hamcrest.Matchers.hasItem;
+import static org.hamcrest.Matchers.hasSize;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -32,6 +38,7 @@ class PatchSecurityGroupIntTest extends IntegrationBase {
 
     private static final String TEST_COURTHOUSE_NAME_1 = "Courthouse name 1";
     private static final String TEST_COURTHOUSE_NAME_2 = "Courthouse name 2";
+    private static final String TEST_COURTHOUSE_NAME_3 = "Courthouse name 3";
     private static final String NEW_DESCRIPTION = "Security group description new";
 
 
@@ -41,9 +48,21 @@ class PatchSecurityGroupIntTest extends IntegrationBase {
     @Autowired
     private SuperAdminUserStub superAdminUserStub;
 
+    @Autowired
+    private SecurityGroupStub securityGroupStub;
+
     @MockBean
     private UserIdentity userIdentity;
 
+    @BeforeEach
+    void openHibernateSession() {
+        openInViewUtil.openEntityManager();
+    }
+
+    @AfterEach
+    void closeHibernateSession() {
+        openInViewUtil.closeEntityManager();
+    }
 
     @Test
     void patchSecurityGroupShouldSucceedWhenProvidedWithValidValueForSubsetOfAllowableFields() throws Exception {
@@ -78,7 +97,6 @@ class PatchSecurityGroupIntTest extends IntegrationBase {
             .andExpect(jsonPath("$.user_ids").isEmpty())
             .andReturn();
     }
-
 
     @Test
     void patchSecurityGroupShouldSucceedWhenProvidedWithValidValuesForAllAllowableFields() throws Exception {
@@ -119,31 +137,39 @@ class PatchSecurityGroupIntTest extends IntegrationBase {
     }
 
     @Test
-    void patchSecurityGroupShouldSucceedWhenProvidedWithCourthouseIds() throws Exception {
-        superAdminUserStub.givenUserIsAuthorised(userIdentity);
-
-        String name = "security group name" + UUID.randomUUID();
-        String displayName = "security group display name" + UUID.randomUUID();
-        Integer id = createSecurityGroup(name, displayName);
+    void patchSecurityGroupShouldSucceedAndReturnExpectedResultWhenCourthousesAreAddedAndRemoved() throws Exception {
+        // Given
+        var user = superAdminUserStub.givenUserIsAuthorised(userIdentity);
 
         var courthouseEntity1 = dartsDatabase.createCourthouseUnlessExists(TEST_COURTHOUSE_NAME_1);
         var courthouseEntity2 = dartsDatabase.createCourthouseUnlessExists(TEST_COURTHOUSE_NAME_2);
+        var courthouseEntity3 = dartsDatabase.createCourthouseUnlessExists(TEST_COURTHOUSE_NAME_3);
 
-        String patchContent = String.format("{\"courthouse_ids\": [%s, %s]}", courthouseEntity1.getId(), courthouseEntity2.getId());
+        // And a group with two assigned courthouses exists (1) (2).
+        var securityGroupEntity = securityGroupStub.createAndSave(SecurityGroupStub.SecurityGroupEntitySpec.builder()
+                                                                      .courthouseEntities(Set.of(courthouseEntity1, courthouseEntity2))
+                                                                      .build(), user);
 
-        MockHttpServletRequestBuilder patchRequest = buildPatchRequest(id)
-            .content(patchContent);
+        // When we wish to keep one existing courthouse assigned (1), remove the other (2), and add a new one (3)
+        MockHttpServletRequestBuilder patchRequest = buildPatchRequest(securityGroupEntity.getId())
+            .content("""
+                         {
+                            "courthouse_ids": [%d, %d]
+                         }
+                         """.formatted(courthouseEntity1.getId(), courthouseEntity3.getId()));
 
+        // Then assert that only courthouse (1) and (3) are assigned
         mockMvc.perform(patchRequest)
             .andExpect(status().isOk())
-            .andExpect(jsonPath("$.id").value(id))
-            .andExpect(jsonPath("$.name").value(name))
-            .andExpect(jsonPath("$.display_name").value(displayName))
-            .andExpect(jsonPath("$.description").value(ORIGINAL_DESCRIPTION))
-            .andExpect(jsonPath("$.global_access").value(false))
-            .andExpect(jsonPath("$.security_role_id").isNumber())
-            .andExpect(jsonPath("$.courthouse_ids[0]").value(courthouseEntity1.getId()))
-            .andExpect(jsonPath("$.courthouse_ids[1]").value(courthouseEntity2.getId()))
+            .andExpect(jsonPath("$.id").value(securityGroupEntity.getId()))
+            .andExpect(jsonPath("$.name").value(securityGroupEntity.getGroupName()))
+            .andExpect(jsonPath("$.display_name").value(securityGroupEntity.getDisplayName()))
+            .andExpect(jsonPath("$.description").value(securityGroupEntity.getDescription()))
+            .andExpect(jsonPath("$.global_access").value(securityGroupEntity.getGlobalAccess()))
+            .andExpect(jsonPath("$.security_role_id").value(securityGroupEntity.getSecurityRoleEntity().getId()))
+            .andExpect(jsonPath("$.courthouse_ids", hasSize(2)))
+            .andExpect(jsonPath("$.courthouse_ids", hasItem(courthouseEntity1.getId())))
+            .andExpect(jsonPath("$.courthouse_ids", hasItem(courthouseEntity3.getId())))
             .andExpect(jsonPath("$.user_ids").isEmpty())
             .andReturn();
     }
@@ -179,7 +205,6 @@ class PatchSecurityGroupIntTest extends IntegrationBase {
 
     @Test
     void patchSecurityGroupShouldFailWhenProvidedButInactive() throws Exception {
-
 
 
         UserAccountEntity user = superAdminUserStub.givenUserIsAuthorised(userIdentity);

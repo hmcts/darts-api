@@ -75,6 +75,7 @@ class SecurityGroupControllerIntTest extends IntegrationBase {
                     "security_role_id":3,
                     "global_access":false,
                     "display_state":true,
+                    "display_name":"Test Approver",
                     "courthouse_ids":[],
                     "name":"Test Approver"
                   }
@@ -97,35 +98,34 @@ class SecurityGroupControllerIntTest extends IntegrationBase {
         String actualJson = mvcResult.getResponse().getContentAsString();
 
         String expectedJson = """
-                [
-                    {
-                     "user_ids":[],
-                     "id":-7,
-                     "security_role_id":1,
-                     "global_access":true,
-                     "display_state":true,
-                     "courthouse_ids":[],
-                     "name":"Test Judge Global"
-                   },
-                   {
-                     "user_ids":[],
-                     "id":-6,
-                     "security_role_id":6,
-                     "global_access":true,
-                     "display_state":true,
-                     "courthouse_ids":[],
-                     "name":"Test RCJ Appeals"
-                   },
-                   {
-                     "user_ids":[],
-                     "id":-3,
-                     "security_role_id":1,
-                     "global_access":false,
-                     "display_state":true,
-                     "courthouse_ids":[],
-                     "name":"Test Judge"
-                   }
-                 ]
+             [{
+                  "courthouse_ids": [],
+                  "display_name": "Test Judge Global",
+                  "display_state": true,
+                  "global_access": true,
+                  "id": -7,
+                  "name": "Test Judge Global",
+                  "security_role_id": 1,
+                  "user_ids": []
+              }, {
+                  "courthouse_ids": [],
+                  "display_name": "Test Judge",
+                  "display_state": true,
+                  "global_access": false,
+                  "id": -3,
+                  "name": "Test Judge",
+                  "security_role_id": 1,
+                  "user_ids": []
+              }, {
+                  "courthouse_ids": [],
+                  "display_name": "Test RCJ Appeals",
+                  "display_state": true,
+                  "global_access": true,
+                  "id": -6,
+                  "name": "Test RCJ Appeals",
+                  "security_role_id": 6,
+                  "user_ids": []
+              }]
             """;
 
         JSONAssert.assertEquals(expectedJson, actualJson, JSONCompareMode.NON_EXTENSIBLE);
@@ -169,6 +169,7 @@ class SecurityGroupControllerIntTest extends IntegrationBase {
                                                         "security_role_id":14,
                                                         "global_access":true,
                                                         "display_state":false,
+                                                        "display_name":"Mid Tier Group",
                                                         "courthouse_ids":[%s],
                                                         "name":"Mid Tier Group"
                                                       }
@@ -217,6 +218,7 @@ class SecurityGroupControllerIntTest extends IntegrationBase {
                                                         "security_role_id":14,
                                                         "global_access":true,
                                                         "display_state":false,
+                                                        "display_name": "Mid Tier Group",
                                                         "courthouse_ids":[%s],
                                                         "name":"Mid Tier Group"
                                                       }
@@ -239,56 +241,52 @@ class SecurityGroupControllerIntTest extends IntegrationBase {
         String actualJson = mvcResult.getResponse().getContentAsString();
 
         String expectedJson = """
-                [
-                    {
-                      "user_ids":[],
-                      "id":-17,
-                      "security_role_id":14,
-                      "global_access":true,
-                      "display_state":false,
-                      "courthouse_ids":[],
-                      "name":"Mid Tier Group"
-                    },
-                    {
-                      "user_ids":[],
-                      "id":-16,
-                      "security_role_id":13,
-                      "global_access":true,
-                      "display_state":false,
-                      "courthouse_ids":[],
-                      "name":"Dar Pc Group"
-                      },
-                      {
-                        "user_ids":[],
-                        "id":-15,
-                        "security_role_id":12,
-                        "global_access":true,
-                        "display_state":false,
-                        "courthouse_ids":[],
-                        "name":"Cpp Group"
-                      },
-                      {
-                        "user_ids":[],
-                        "id":1,
-                        "security_role_id":8,
-                        "global_access":true,
-                        "display_state":true,
-                        "courthouse_ids":[],
-                        "name":"SUPER_ADMIN",
-                        "display_name":
-                        "Super Admin"
-                      },
-                      {
-                        "user_ids":[],
-                        "id":2,
-                        "security_role_id":7,
-                        "global_access":true,
-                        "display_state":true,
-                        "courthouse_ids":[],
-                        "name":"SUPER_USER",
-                        "display_name":"Super User"
-                        }
-                ]
+               [{
+                   "courthouse_ids": [],
+                   "display_name": "Cpp Group",
+                   "display_state": false,
+                   "global_access": true,
+                   "id": -15,
+                   "name": "Cpp Group",
+                   "security_role_id": 12,
+                   "user_ids": []
+               }, {
+                   "courthouse_ids": [],
+                   "display_name": "Dar Pc Group",
+                   "display_state": false,
+                   "global_access": true,
+                   "id": -16,
+                   "name": "Dar Pc Group",
+                   "security_role_id": 13,
+                   "user_ids": []
+               }, {
+                   "courthouse_ids": [],
+                   "display_name": "Mid Tier Group",
+                   "display_state": false,
+                   "global_access": true,
+                   "id": -17,
+                   "name": "Mid Tier Group",
+                   "security_role_id": 14,
+                   "user_ids": []
+               }, {
+                   "courthouse_ids": [],
+                   "display_name": "Super Admin",
+                   "display_state": true,
+                   "global_access": true,
+                   "id": 1,
+                   "name": "SUPER_ADMIN",
+                   "security_role_id": 8,
+                   "user_ids": []
+               }, {
+                   "courthouse_ids": [],
+                   "display_name": "Super User",
+                   "display_state": true,
+                   "global_access": true,
+                   "id": 2,
+                   "name": "SUPER_USER",
+                   "security_role_id": 7,
+                   "user_ids": []
+               }]
             """;
 
         JSONAssert.assertEquals(expectedJson, actualJson, JSONCompareMode.NON_EXTENSIBLE);
@@ -307,45 +305,43 @@ class SecurityGroupControllerIntTest extends IntegrationBase {
         String actualJson = mvcResult.getResponse().getContentAsString();
 
         String expectedJson = """
-                [
-                  {
-                    "user_ids":[],
-                    "id":-17,
-                    "security_role_id":14,
-                    "global_access":true,
-                    "display_state":false,
-                    "courthouse_ids":[],
-                    "name":"Mid Tier Group"
-                    },
-                    {
-                    "user_ids":[],
-                    "id":-16,
-                    "security_role_id":13,
-                    "global_access":true,
-                    "display_state":false,
-                    "courthouse_ids":[],
-                    "name":"Dar Pc Group"
-                    },
-                    {
-                    "user_ids":[],
-                    "id":-15,
-                    "security_role_id":12,
-                    "global_access":true,
-                    "display_state":false,
-                    "courthouse_ids":[],
-                    "name":"Cpp Group"
-                    },
-                    {
-                    "user_ids":[],
-                    "id":2,
-                    "security_role_id":7,
-                    "global_access":true,
-                    "display_state":true,
-                    "courthouse_ids":[],
-                    "name":"SUPER_USER",
-                    "display_name":"Super User"
-                    }
-                 ]
+                [{
+                    "courthouse_ids": [],
+                    "display_name": "Cpp Group",
+                    "display_state": false,
+                    "global_access": true,
+                    "id": -15,
+                    "name": "Cpp Group",
+                    "security_role_id": 12,
+                    "user_ids": []
+                }, {
+                    "courthouse_ids": [],
+                    "display_name": "Dar Pc Group",
+                    "display_state": false,
+                    "global_access": true,
+                    "id": -16,
+                    "name": "Dar Pc Group",
+                    "security_role_id": 13,
+                    "user_ids": []
+                }, {
+                    "courthouse_ids": [],
+                    "display_name": "Mid Tier Group",
+                    "display_state": false,
+                    "global_access": true,
+                    "id": -17,
+                    "name": "Mid Tier Group",
+                    "security_role_id": 14,
+                    "user_ids": []
+                }, {
+                    "courthouse_ids": [],
+                    "display_name": "Super User",
+                    "display_state": true,
+                    "global_access": true,
+                    "id": 2,
+                    "name": "SUPER_USER",
+                    "security_role_id": 7,
+                    "user_ids": []
+                }]
             """;
 
         JSONAssert.assertEquals(expectedJson, actualJson, JSONCompareMode.NON_EXTENSIBLE);
@@ -395,45 +391,43 @@ class SecurityGroupControllerIntTest extends IntegrationBase {
         String actualJson = mvcResult.getResponse().getContentAsString();
 
         String expectedJson = """
-                [
-                      {
-                          "user_ids":[],
-                          "id":-17,
-                          "security_role_id":14,
-                          "global_access":true,
-                          "display_state":false,
-                          "courthouse_ids":[],
-                          "name":"Mid Tier Group"
-                      },
-                      {
-                          "user_ids":[],
-                          "id":-16,
-                          "security_role_id":13,
-                          "global_access":true,
-                          "display_state":false,
-                          "courthouse_ids":[],
-                          "name":"Dar Pc Group"
-                      },
-                      {
-                          "user_ids":[],
-                          "id":-15,
-                          "security_role_id":12,
-                          "global_access":true,
-                          "display_state":false,
-                          "courthouse_ids":[],
-                          "name":"Cpp Group"
-                      },
-                      {
-                          "user_ids":[],
-                          "id":2,
-                          "security_role_id":7,
-                          "global_access":true,
-                          "display_state":true,
-                          "courthouse_ids":[],
-                          "name":"SUPER_USER",
-                          "display_name":"Super User"
-                      }
-                  ]
+               [{
+                   "courthouse_ids": [],
+                   "display_name": "Cpp Group",
+                   "display_state": false,
+                   "global_access": true,
+                   "id": -15,
+                   "name": "Cpp Group",
+                   "security_role_id": 12,
+                   "user_ids": []
+               }, {
+                   "courthouse_ids": [],
+                   "display_name": "Dar Pc Group",
+                   "display_state": false,
+                   "global_access": true,
+                   "id": -16,
+                   "name": "Dar Pc Group",
+                   "security_role_id": 13,
+                   "user_ids": []
+               }, {
+                   "courthouse_ids": [],
+                   "display_name": "Mid Tier Group",
+                   "display_state": false,
+                   "global_access": true,
+                   "id": -17,
+                   "name": "Mid Tier Group",
+                   "security_role_id": 14,
+                   "user_ids": []
+               }, {
+                   "courthouse_ids": [],
+                   "display_name": "Super User",
+                   "display_state": true,
+                   "global_access": true,
+                   "id": 2,
+                   "name": "SUPER_USER",
+                   "security_role_id": 7,
+                   "user_ids": []
+               }]
             """;
 
         JSONAssert.assertEquals(expectedJson, actualJson, JSONCompareMode.NON_EXTENSIBLE);
@@ -466,6 +460,7 @@ class SecurityGroupControllerIntTest extends IntegrationBase {
                                                         "security_role_id":4,
                                                         "global_access":false,
                                                         "display_state":true,
+                                                        "display_name": "Test Transcriber",
                                                         "courthouse_ids":[%s],
                                                         "name":"Test Transcriber"
                                                       }

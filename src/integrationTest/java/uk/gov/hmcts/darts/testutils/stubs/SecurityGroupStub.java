@@ -1,15 +1,21 @@
 package uk.gov.hmcts.darts.testutils.stubs;
 
+import jakarta.annotation.PostConstruct;
+import lombok.Builder;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 import uk.gov.hmcts.darts.common.entity.SecurityGroupEntity;
+import uk.gov.hmcts.darts.common.entity.SecurityRoleEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.enums.SecurityGroupEnum;
+import uk.gov.hmcts.darts.common.enums.SecurityRoleEnum;
 import uk.gov.hmcts.darts.common.repository.SecurityGroupRepository;
+import uk.gov.hmcts.darts.common.repository.SecurityRoleRepository;
 import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
 
+import java.time.OffsetDateTime;
 import java.util.Optional;
 import java.util.Set;
 
@@ -18,7 +24,17 @@ import java.util.Set;
 public class SecurityGroupStub {
     private final SecurityGroupRepository securityGroupRepository;
     private final UserAccountRepository userAccountRepository;
+    private final SecurityRoleRepository securityRoleRepository;
 
+    private static SecurityRoleEntity defaultRole;
+
+    @PostConstruct
+    public void init() {
+        defaultRole = securityRoleRepository.findAll().stream()
+            .filter(securityRoleEntity -> securityRoleEntity.getId().equals(SecurityRoleEnum.REQUESTER.getId()))
+            .findFirst()
+            .orElseThrow();
+    }
 
     @Transactional
     public void addCourthouse(SecurityGroupEntity securityGroupEntity, CourthouseEntity courthouseEntity) {
@@ -48,5 +64,50 @@ public class SecurityGroupStub {
         entity.get().getUsers().clear();
 
         securityGroupRepository.saveAndFlush(entity.get());
+    }
+
+    public SecurityGroupEntity createAndSave(SecurityGroupEntitySpec spec, UserAccountEntity user) {
+        SecurityGroupEntity securityGroup = new SecurityGroupEntity();
+        securityGroup.setSecurityRoleEntity(spec.securityRoleEntity);
+        securityGroup.setLegacyObjectId(spec.legacyObjectId);
+        securityGroup.setGroupName(spec.groupName);
+        securityGroup.setIsPrivate(spec.isPrivate);
+        securityGroup.setDescription(spec.description);
+        securityGroup.setGroupGlobalUniqueId(securityGroup.getGroupGlobalUniqueId());
+        securityGroup.setGlobalAccess(spec.globalAccess);
+        securityGroup.setDisplayState(spec.displayState);
+        securityGroup.setUseInterpreter(spec.useInterpreter);
+        securityGroup.setCourthouseEntities(spec.courthouseEntities);
+        securityGroup.setUsers(spec.users);
+        securityGroup.setDisplayName(spec.displayName);
+        securityGroup.setCreatedBy(user);
+        securityGroup.setLastModifiedBy(user);
+        securityGroup.setCreatedDateTime(OffsetDateTime.now());
+        securityGroup.setLastModifiedDateTime(OffsetDateTime.now());
+
+        return securityGroupRepository.save(securityGroup);
+    }
+
+    @Builder
+    public static class SecurityGroupEntitySpec {
+        @Builder.Default
+        private SecurityRoleEntity securityRoleEntity = defaultRole;
+        private String legacyObjectId;
+        @Builder.Default
+        private String groupName = "Some security group name";
+        private Boolean isPrivate;
+        @Builder.Default
+        private String description = "Some description";
+        private String groupGlobalUniqueId;
+        @Builder.Default
+        private Boolean globalAccess = false;
+        @Builder.Default
+        private Boolean displayState = true;
+        @Builder.Default
+        private Boolean useInterpreter = false;
+        private Set<CourthouseEntity> courthouseEntities;
+        private Set<UserAccountEntity> users;
+        @Builder.Default
+        private String displayName = "Some security group display name";
     }
 }

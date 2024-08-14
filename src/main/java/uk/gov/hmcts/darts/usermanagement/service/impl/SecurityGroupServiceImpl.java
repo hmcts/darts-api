@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.darts.audit.api.AuditApi;
+import uk.gov.hmcts.darts.authorisation.api.AuthorisationApi;
 import uk.gov.hmcts.darts.common.entity.SecurityGroupEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.enums.SecurityRoleEnum;
@@ -27,6 +28,7 @@ import uk.gov.hmcts.darts.usermanagement.service.SecurityGroupService;
 
 import java.text.MessageFormat;
 import java.util.Collections;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -51,6 +53,7 @@ public class SecurityGroupServiceImpl implements SecurityGroupService {
     private final SecurityGroupWithIdAndRoleAndUsersMapper securityGroupWithIdAndRoleAndUsersMapper;
     private final SecurityGroupCreationValidation securityGroupCreationValidation;
     private final AuditApi auditApi;
+    private final AuthorisationApi authorisationApi;
 
     private final List<SecurityRoleEnum> securityRolesAllowedToBeCreatedInGroup = List.of(SecurityRoleEnum.TRANSCRIBER, SecurityRoleEnum.TRANSLATION_QA);
 
@@ -97,11 +100,15 @@ public class SecurityGroupServiceImpl implements SecurityGroupService {
         securityGroupEntity.setGlobalAccess(false);
         securityGroupEntity.setDisplayState(true);
 
+
         var role = securityRoleRepository.getReferenceById(securityGroupModel.getRoleId());
         securityGroupEntity.setSecurityRoleEntity(role);
 
-        auditApi.record(CREATE_GROUP);
+        var currentUser = authorisationApi.getCurrentUser();
+        securityGroupEntity.setCreatedBy(currentUser);
+        securityGroupEntity.setLastModifiedBy(currentUser);
 
+        auditApi.record(CREATE_GROUP);
         return securityGroupRepository.saveAndFlush(securityGroupEntity);
     }
 
@@ -133,6 +140,11 @@ public class SecurityGroupServiceImpl implements SecurityGroupService {
 
         updateSecurityGroupEntity(securityGroupPatch, securityGroupEntity);
 
+        var currentUser = authorisationApi.getCurrentUser();
+        securityGroupEntity.setLastModifiedBy(currentUser);
+        if (securityGroupEntity.getCreatedBy() == null) {
+            securityGroupEntity.setCreatedBy(currentUser);
+        }
         var updatedGroup = securityGroupRepository.saveAndFlush(securityGroupEntity);
 
         auditApi.recordAll(auditableActivities);
@@ -158,6 +170,10 @@ public class SecurityGroupServiceImpl implements SecurityGroupService {
             securityGroupEntity.setDescription(description);
         }
         if (securityGroupPatch.getCourthouseIds() != null) {
+            // The PATCH contains the totality of courthouses we wish to have assigned to our group. So first we must remove any existing courthouses, and then
+            // assign whatever courthouses are provided in the request.
+            securityGroupEntity.setCourthouseEntities(new LinkedHashSet<>());
+
             securityGroupPatch.getCourthouseIds()
                 .forEach(courthouseId -> addToSecurityGroup(courthouseId, securityGroupEntity));
         }
@@ -185,7 +201,7 @@ public class SecurityGroupServiceImpl implements SecurityGroupService {
         List<Integer> systemUserIds = securityGroupEntity
             .getUsers()
             .stream()
-            .filter(user -> user.getIsSystemUser())
+            .filter(user -> Boolean.TRUE.equals(user.getIsSystemUser()))
             .map(UserAccountEntity::getId)
             .toList();
 
@@ -193,7 +209,7 @@ public class SecurityGroupServiceImpl implements SecurityGroupService {
         List<UserAccountEntity> patchUsers = userAccountRepository
             .findByIdInAndActive(securityGroupPatch.getUserIds(), true);
 
-        if (userIds.size() > 0 && patchUsers.isEmpty()) {
+        if (!userIds.isEmpty() && patchUsers.isEmpty()) {
             throw new DartsApiException(
                 UserManagementError.USER_NOT_FOUND,
                 String.format("No User accounts found for patch user IDs %s", securityGroupPatch.getUserIds()));

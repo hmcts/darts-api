@@ -1,10 +1,15 @@
 package uk.gov.hmcts.darts.task.service;
 
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.Query;
 import lombok.extern.slf4j.Slf4j;
 import net.javacrumbs.shedlock.core.LockProvider;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.scheduling.config.CronTask;
 import org.springframework.scheduling.config.FixedDelayTask;
@@ -23,8 +28,10 @@ import uk.gov.hmcts.darts.audio.deleter.impl.unstructured.ExternalUnstructuredDa
 import uk.gov.hmcts.darts.audio.service.InboundAudioDeleterProcessor;
 import uk.gov.hmcts.darts.audio.service.OutboundAudioDeleterProcessor;
 import uk.gov.hmcts.darts.audio.service.UnstructuredAudioDeleterProcessor;
+import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.cases.service.CloseOldCasesProcessor;
 import uk.gov.hmcts.darts.common.entity.AutomatedTaskEntity;
+import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.common.repository.AutomatedTaskRepository;
 import uk.gov.hmcts.darts.common.repository.CaseRepository;
@@ -62,12 +69,14 @@ import uk.gov.hmcts.darts.transcriptions.service.TranscriptionsProcessor;
 import java.util.Optional;
 import java.util.Set;
 
+import static java.util.Objects.nonNull;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.lenient;
 import static uk.gov.hmcts.darts.task.status.AutomatedTaskStatus.COMPLETED;
 import static uk.gov.hmcts.darts.task.status.AutomatedTaskStatus.FAILED;
 import static uk.gov.hmcts.darts.task.status.AutomatedTaskStatus.NOT_STARTED;
@@ -139,8 +148,34 @@ class AutomatedTaskServiceTest extends IntegrationPerClassBase {
     @Autowired
     private LogApi logApi;
 
+    @MockBean
+    private UserIdentity userIdentity;
+
+    private UserAccountEntity testUser;
+
     @Value("${darts.data-management.retention-period.inbound.arm-minimum}")
     private int hoursArmStorage;
+
+    @BeforeEach
+    void setupData() {
+        testUser = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
+        lenient().when(userIdentity.getUserAccount()).thenReturn(testUser);
+    }
+
+    @AfterEach
+    public void resetTables() {
+        if (nonNull(testUser)) {
+            try (EntityManager em = dartsDatabase.getEntityManagerFactory().createEntityManager()) {
+                em.getTransaction().begin();
+
+                final Query query1 = em.createNativeQuery("truncate table darts.automated_task_aud");
+                query1.executeUpdate();
+                final Query query2 = em.createNativeQuery("update darts.automated_task set last_modified_by = 0 where last_modified_by = " + testUser.getId());
+                query2.executeUpdate();
+                em.getTransaction().commit();
+            }
+        }
+    }
 
     private static void displayTasks(Set<ScheduledTask> scheduledTasks) {
         log.info("Number of scheduled tasks " + scheduledTasks.size());
@@ -495,6 +530,7 @@ class AutomatedTaskServiceTest extends IntegrationPerClassBase {
                 automatedTaskConfigurationProperties,
                 externalInboundDataStoreDeleter, externalUnstructuredDataStoreDeleter, externalOutboundDataStoreDeleter, logApi
             );
+
         Optional<AutomatedTaskEntity> originalAutomatedTaskEntity =
             automatedTaskService.getAutomatedTaskEntityByTaskName(automatedTask.getTaskName());
         log.info("TEST - Original task {} cron expression {}", automatedTask.getTaskName(),

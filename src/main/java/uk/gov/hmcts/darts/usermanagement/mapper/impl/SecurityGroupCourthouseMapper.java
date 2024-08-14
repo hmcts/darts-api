@@ -8,7 +8,9 @@ import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.usermanagement.model.SecurityGroupWithIdAndRole;
 import uk.gov.hmcts.darts.usermanagement.model.SecurityGroupWithIdAndRoleAndUsers;
 
+import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -43,10 +45,15 @@ public class SecurityGroupCourthouseMapper {
 
         Set<CourthouseEntity> courthouseEntities = securityGroupEntity.getCourthouseEntities();
         securityGroupWithIdAndRoleAndUsers.setCourthouseIds(courthouseEntities
-            .stream().map(CourthouseEntity::getId).sorted().collect(Collectors.toList()));
+                                                                .stream().map(CourthouseEntity::getId).sorted().collect(Collectors.toList()));
         Set<UserAccountEntity> users = securityGroupEntity.getUsers();
 
-        List<UserAccountEntity> nonSystemUsers = securityGroupEntity.getUsers().stream().filter(user -> !user.getIsSystemUser()).toList();
+        List<UserAccountEntity> nonSystemUsers = Optional.ofNullable(securityGroupEntity.getUsers())
+            .map(usrs -> usrs.stream()
+                .filter(user -> !Boolean.TRUE.equals(user.getIsSystemUser()))
+                .toList())
+            .orElse(Collections.emptyList());
+
         securityGroupWithIdAndRoleAndUsers.setUserIds(nonSystemUsers.stream().map(UserAccountEntity::getId).sorted().toList());
 
         return securityGroupWithIdAndRoleAndUsers;
