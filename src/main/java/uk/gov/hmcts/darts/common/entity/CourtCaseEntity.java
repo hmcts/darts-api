@@ -190,12 +190,14 @@ public class CourtCaseEntity extends CreatedModifiedBaseEntity {
         }
     }
 
-    public void addProsecutor(String name) {
+    public void addProsecutor(String name, UserAccountEntity createdBy) {
         if (prosecutorList.stream().noneMatch(prosecutorEntity -> prosecutorEntity.getName().equalsIgnoreCase(
             name))) {
             ProsecutorEntity prosecutorEntity = new ProsecutorEntity();
             prosecutorEntity.setName(name);
             prosecutorEntity.setCourtCase(this);
+            prosecutorEntity.setCreatedBy(createdBy);
+            prosecutorEntity.setLastModifiedBy(createdBy);
             prosecutorList.add(prosecutorEntity);
         }
     }

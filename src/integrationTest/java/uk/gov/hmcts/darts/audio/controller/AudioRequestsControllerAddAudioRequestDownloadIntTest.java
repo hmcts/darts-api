@@ -36,6 +36,7 @@ import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static uk.gov.hmcts.darts.test.common.data.UserAccountTestData.minimalUserAccount;
 
 @AutoConfigureMockMvc
 @Slf4j
@@ -73,7 +74,7 @@ class AudioRequestsControllerAddAudioRequestDownloadIntTest extends IntegrationB
             LocalDateTime.parse(HEARING_DATETIME)
         );
         CourtCaseEntity courtCase = hearingEntity.getCourtCase();
-        courtCase.addProsecutor("aProsecutor");
+        courtCase.addProsecutor("aProsecutor", dartsDatabase.save(minimalUserAccount()));
         courtCase.addDefendant("aDefendant");
         courtCase.addDefence("aDefence");
         dartsDatabase.save(courtCase);
