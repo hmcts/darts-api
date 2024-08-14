@@ -27,7 +27,7 @@ public interface TransformedMediaRepository extends JpaRepository<TransformedMed
         he.id,
         mr.requestType,
         case.caseNumber,
-        ch.courthouseName,
+        ch.displayName,
         he.hearingDate,
         tm.startTime,
         tm.endTime,
