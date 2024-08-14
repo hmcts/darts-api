@@ -6,5 +6,3 @@ and ua2.is_active = true
 order by last_modified_ts desc limit 1);
 
 CREATE UNIQUE INDEX user_account_user_email_address_unq ON darts.user_account (user_email_address) where is_active;
-
-
