@@ -15,11 +15,11 @@ import java.util.Optional;
 @Repository
 public interface CaseRepository extends JpaRepository<CourtCaseEntity, Integer> {
 
-    Optional<CourtCaseEntity> findByCaseNumberIgnoreCaseAndCourthouse_CourthouseNameIgnoreCase(String caseNumber,
-                                                                                               String courthouseName);
+    Optional<CourtCaseEntity> findByCaseNumberAndCourthouse_CourthouseNameIgnoreCase(String caseNumber,
+                                                                                     String courthouseName);
 
-    Optional<CourtCaseEntity> findByCaseNumberIgnoreCaseAndCourthouse(String caseNumber,
-                                                                      CourthouseEntity courthouse);
+    Optional<CourtCaseEntity> findByCaseNumberAndCourthouse(String caseNumber,
+                                                            CourthouseEntity courthouse);
 
     @Query("""
         SELECT case.caseNumber

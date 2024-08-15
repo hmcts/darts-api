@@ -7,7 +7,7 @@ import uk.gov.hmcts.darts.testutils.IntegrationBase;
 
 import java.time.LocalDateTime;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
 class RetrieveCoreObjectServiceIntTest extends IntegrationBase {
     @Test
@@ -29,8 +29,8 @@ class RetrieveCoreObjectServiceIntTest extends IntegrationBase {
                                                                                                         hearingDate,
                                                                                                         userAccount);
 
-        //Should be the same as case numbers should be case-insensitive.
-        assertEquals(existingHearing.getId(), newHearing.getId());
+        //Should be a different case  as case numbers should be case-sensitive.
+        assertNotEquals(existingHearing.getId(), newHearing.getId());
     }
 
 }
