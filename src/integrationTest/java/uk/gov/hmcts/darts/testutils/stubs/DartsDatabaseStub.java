@@ -297,7 +297,7 @@ public class DartsDatabaseStub {
 
     public Optional<CourtCaseEntity> findByCaseByCaseNumberAndCourtHouseName(String someCaseNumber,
                                                                              String someCourthouse) {
-        return caseRepository.findByCaseNumberIgnoreCaseAndCourthouse_CourthouseNameIgnoreCase(
+        return caseRepository.findByCaseNumberAndCourthouse_CourthouseNameIgnoreCase(
             someCaseNumber,
             someCourthouse
         );
