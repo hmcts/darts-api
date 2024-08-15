@@ -21,6 +21,7 @@ import java.util.List;
 
 import static java.time.OffsetDateTime.now;
 import static java.time.ZoneOffset.UTC;
+import static uk.gov.hmcts.darts.test.common.data.CaseTestData.createSomeMinimalCase;
 
 @Component
 @RequiredArgsConstructor
@@ -90,8 +91,8 @@ public class HearingStub {
                 TranscriptionDocumentSubStringQueryEnum.COURT_HOUSE
                     .getQueryString(Integer.toString(hearingCount)), userAccountRepository.getReferenceById(0));
 
-            CourtCaseEntity caseEntity = courtCaseStub.createAndSaveMinimalCourtCase(HearingSubStringQueryEnum.CASE_NUMBER.getQueryString(
-                Integer.toString(hearingCount)), courtroomEntity.getCourthouse().getId());
+            CourtCaseEntity caseEntity = createSomeMinimalCase(HearingSubStringQueryEnum.CASE_NUMBER.getQueryString(
+                Integer.toString(hearingCount)), courtroomEntity.getCourthouse());
 
             HearingEntity hearingEntity = retrieveCoreObjectService.retrieveOrCreateHearing(
                 courtroomEntity.getCourthouse().getCourthouseName(),

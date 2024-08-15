@@ -11,7 +11,6 @@ import static uk.gov.hmcts.darts.test.common.data.CourthouseTestData.someMinimal
 import static uk.gov.hmcts.darts.test.common.data.DefenceTestData.createDefenceForCaseWithName;
 import static uk.gov.hmcts.darts.test.common.data.DefendantTestData.createDefendantForCaseWithName;
 import static uk.gov.hmcts.darts.test.common.data.ProsecutorTestData.createProsecutorForCaseWithName;
-import static uk.gov.hmcts.darts.test.common.data.UserAccountTestData.minimalUserAccount;
 
 @UtilityClass
 @SuppressWarnings({"HideUtilityClassConstructor"})
@@ -24,9 +23,6 @@ public class CaseTestData {
         courtCaseEntity.setCaseNumber("case-1-" + postfix);
         courtCaseEntity.setClosed(false);
         courtCaseEntity.setInterpreterUsed(false);
-        var userAccount = minimalUserAccount();
-        courtCaseEntity.setCreatedBy(userAccount);
-        courtCaseEntity.setLastModifiedBy(userAccount);
         return courtCaseEntity;
     }
 
@@ -46,9 +42,6 @@ public class CaseTestData {
         courtCaseEntity.setCaseNumber(caseNumber);
         courtCaseEntity.setClosed(false);
         courtCaseEntity.setInterpreterUsed(false);
-        var userAccount = minimalUserAccount();
-        courtCaseEntity.setCreatedBy(userAccount);
-        courtCaseEntity.setLastModifiedBy(userAccount);
         return courtCaseEntity;
     }
 
@@ -62,9 +55,6 @@ public class CaseTestData {
         courtCaseEntity.addProsecutor(createProsecutorForCaseWithName(courtCaseEntity, "aProsecutor"));
         courtCaseEntity.setClosed(false);
         courtCaseEntity.setInterpreterUsed(false);
-        var userAccount = minimalUserAccount();
-        courtCaseEntity.setCreatedBy(userAccount);
-        courtCaseEntity.setLastModifiedBy(userAccount);
         return courtCaseEntity;
     }
 
@@ -80,9 +70,6 @@ public class CaseTestData {
         courtCaseEntity.addProsecutor(createProsecutorForCaseWithName(courtCaseEntity, "aProsecutor"));
         courtCaseEntity.setClosed(false);
         courtCaseEntity.setInterpreterUsed(false);
-        var userAccount = minimalUserAccount();
-        courtCaseEntity.setCreatedBy(userAccount);
-        courtCaseEntity.setLastModifiedBy(userAccount);
         createdCaseConsumer.accept(courtCaseEntity);
         return courtCaseEntity;
     }

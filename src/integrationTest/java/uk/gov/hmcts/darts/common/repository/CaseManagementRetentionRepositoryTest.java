@@ -1,6 +1,5 @@
 package uk.gov.hmcts.darts.common.repository;
 
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import uk.gov.hmcts.darts.common.entity.CaseManagementRetentionEntity;
@@ -28,7 +27,6 @@ class CaseManagementRetentionRepositoryTest extends PostgresIntegrationBase {
     private DartsDatabaseStub dartsDatabaseStub;
 
     @Test
-    @Disabled("Fails with user account null column issue")
     void getCaseManagementRetentionIdsForEvents() {
         var caseManagementRetention = dartsDatabaseStub.save(someMinimalCaseManagementRetention());
 
@@ -39,7 +37,6 @@ class CaseManagementRetentionRepositoryTest extends PostgresIntegrationBase {
     }
 
     @Test
-    @Disabled("Fails with user account null column issue")
     void deletesCaseManagementRetentionsForAssociatedWithEvents() {
         var caseManagementRetentionsWithEvents = createSomeCmrWithEvents(3);
 

@@ -3,6 +3,7 @@ package uk.gov.hmcts.darts.test.common.data;
 import lombok.experimental.UtilityClass;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
+import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 
 import java.util.ArrayList;
 
@@ -30,7 +31,9 @@ public class CourtroomTestData {
         var courtroom = new CourtroomEntity();
         courtroom.setCourthouse(courthouse);
         courtroom.setName(name);
-        courtroom.setCreatedBy(minimalUserAccount());
+        UserAccountEntity defaultUser = UserAccountTestData.minimalUserAccount();
+        defaultUser.setId(1000);
+        courtroom.setCreatedBy(defaultUser);
         return courtroom;
     }
 }

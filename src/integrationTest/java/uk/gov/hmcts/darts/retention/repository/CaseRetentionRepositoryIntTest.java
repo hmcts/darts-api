@@ -4,6 +4,7 @@ import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import uk.gov.hmcts.darts.common.entity.CaseRetentionEntity;
+import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.repository.CaseRetentionRepository;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 import uk.gov.hmcts.darts.testutils.stubs.CaseRetentionStub;
@@ -21,6 +22,8 @@ import static java.util.stream.IntStream.range;
 import static org.assertj.core.api.Assertions.assertThat;
 import static uk.gov.hmcts.darts.test.common.data.CaseManagementRetentionTestData.someMinimalCaseManagementRetention;
 import static uk.gov.hmcts.darts.test.common.data.CaseRetentionTestData.createCaseRetentionFor;
+import static uk.gov.hmcts.darts.test.common.data.CaseTestData.createSomeMinimalCase;
+import static uk.gov.hmcts.darts.test.common.data.UserAccountTestData.minimalUserAccount;
 
 class CaseRetentionRepositoryIntTest extends IntegrationBase {
 
@@ -42,11 +45,14 @@ class CaseRetentionRepositoryIntTest extends IntegrationBase {
     void testFindTopByCourtCaseOrderByRetainUntilAppliedOnDesc() {
 
         // given
-        var courtCase = caseStub.createAndSaveCourtCase(createdCourtCase -> {
-            createdCourtCase.setRetentionUpdated(true);
-            createdCourtCase.setRetentionRetries(1);
-            createdCourtCase.setClosed(true);
-        });
+        CourtCaseEntity courtCase = createSomeMinimalCase();
+        courtCase.setRetentionUpdated(true);
+        courtCase.setRetentionRetries(1);
+        courtCase.setClosed(true);
+        var userAccount = minimalUserAccount();
+        courtCase.setCreatedBy(userAccount);
+        courtCase.setLastModifiedBy(userAccount);
+        dartsDatabaseStub.save(courtCase);
 
         caseRetentionStub.createCaseRetentionObject(courtCase, DT_2025);
         caseRetentionStub.createCaseRetentionObject(courtCase, DT_2026);
