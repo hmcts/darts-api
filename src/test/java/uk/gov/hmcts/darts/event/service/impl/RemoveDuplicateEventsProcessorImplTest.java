@@ -32,7 +32,7 @@ import static uk.gov.hmcts.darts.test.common.data.EventTestData.someMinimalEvent
 @ExtendWith(MockitoExtension.class)
 class RemoveDuplicateEventsProcessorImplTest {
 
-    private static final LocalDate EARLIEST_REMOVABLE_EVENT_DATE = LocalDate.parse("2024-01-01");
+    private static final String EARLIEST_REMOVABLE_EVENT_DATE = "2024-01-01";
     private static final int CLEAR_UP_WINDOW_DAYS = 2;
     private static final LocalDate TODAY = LocalDate.parse("2024-01-04");
 
