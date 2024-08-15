@@ -689,6 +689,8 @@ public class DartsDatabaseStub {
         return obj.getClass().isAnnotationPresent(Entity.class);
     }
 
+
+
     @SneakyThrows
     @Transactional
     public void saveAll(Object... entities) {
@@ -728,6 +730,11 @@ public class DartsDatabaseStub {
     @Transactional
     public void saveAll(HearingEntity... hearingEntities) {
         stream(hearingEntities).forEach(this::save);
+    }
+
+    @Transactional
+    public void saveAll(EventEntity... eventEntities) {
+        stream(eventEntities).forEach(this::save);
     }
 
     public List<DailyListEntity> saveAll(DailyListEntity... dailyListEntity) {

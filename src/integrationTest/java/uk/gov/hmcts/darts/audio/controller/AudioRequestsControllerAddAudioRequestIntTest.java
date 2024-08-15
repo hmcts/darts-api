@@ -1,6 +1,7 @@
 package uk.gov.hmcts.darts.audio.controller;
 
 import com.jayway.jsonpath.JsonPath;
+import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -23,6 +24,7 @@ import uk.gov.hmcts.darts.notification.api.NotificationApi;
 import uk.gov.hmcts.darts.notification.entity.NotificationEntity;
 import uk.gov.hmcts.darts.notification.enums.NotificationStatus;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
+import uk.gov.hmcts.darts.testutils.TransactionalUtil;
 
 import java.net.URI;
 import java.time.LocalDateTime;
@@ -66,23 +68,29 @@ class AudioRequestsControllerAddAudioRequestIntTest extends IntegrationBase {
     private HearingEntity hearingEntity;
     private UserAccountEntity testUser;
 
+    @Autowired
+    private TransactionalUtil transactionalUtil;
+
     @BeforeEach
     void beforeEach() {
-        hearingEntity = dartsDatabase.givenTheDatabaseContainsCourtCaseWithHearingAndCourthouseWithRoom(
-            SOME_CASE_NUMBER,
-            SOME_COURTHOUSE,
-            SOME_COURTROOM,
-            LocalDateTime.parse(HEARING_DATETIME)
-        );
-        CourtCaseEntity courtCase = hearingEntity.getCourtCase();
-        courtCase.addProsecutor("aProsecutor", dartsDatabase.save(minimalUserAccount()));
-        courtCase.addDefendant("aDefendant");
-        courtCase.addDefence("aDefence");
-        dartsDatabase.save(courtCase);
+        transactionalUtil.inTransaction(() -> {
+            hearingEntity = dartsDatabase.givenTheDatabaseContainsCourtCaseWithHearingAndCourthouseWithRoom(
+                SOME_CASE_NUMBER,
+                SOME_COURTHOUSE,
+                SOME_COURTROOM,
+                LocalDateTime.parse(HEARING_DATETIME)
+            );
+            CourtCaseEntity courtCase = hearingEntity.getCourtCase();
+            courtCase.addProsecutor("aProsecutor", dartsDatabase.save(minimalUserAccount()));
+            courtCase.addDefendant("aDefendant");
+            courtCase.addDefence("aDefence");
+            dartsDatabase.save(courtCase);
 
-        testUser = dartsDatabase.getUserAccountStub()
-            .createAuthorisedIntegrationTestUser(hearingEntity.getCourtroom().getCourthouse());
-        when(mockUserIdentity.getUserAccount()).thenReturn(testUser);
+            testUser = dartsDatabase.getUserAccountStub()
+                .createAuthorisedIntegrationTestUser(hearingEntity.getCourtroom().getCourthouse());
+            when(mockUserIdentity.getUserAccount()).thenReturn(testUser);
+        });
+
     }
 
     @Test

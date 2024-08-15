@@ -18,6 +18,7 @@ import uk.gov.hmcts.darts.retention.enums.RetentionConfidenceCategoryEnum;
 import uk.gov.hmcts.darts.retention.enums.RetentionConfidenceReasonEnum;
 import uk.gov.hmcts.darts.retention.enums.RetentionConfidenceScoreEnum;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
+import uk.gov.hmcts.darts.testutils.TransactionalUtil;
 
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
@@ -32,8 +33,12 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @Slf4j
 class CloseOldCasesProcessorTest extends IntegrationBase {
+
     @Autowired
     CloseOldCasesProcessor closeOldCasesProcessor;
+
+    @Autowired
+    TransactionalUtil transactionalUtil;
 
     private static final String REQUESTER_EMAIL = "test.user@example.com";
 
@@ -50,6 +55,7 @@ class CloseOldCasesProcessorTest extends IntegrationBase {
 
     @Test
     void givenClosedEventsUseDateAsClosedDate() {
+
         HearingEntity hearing = dartsDatabase.createHearing("a_courthouse", "1", "1078", LocalDateTime.now().minusYears(7).plusMonths(3));
 
         OffsetDateTime closeDate = OffsetDateTime.now().minusYears(7);
