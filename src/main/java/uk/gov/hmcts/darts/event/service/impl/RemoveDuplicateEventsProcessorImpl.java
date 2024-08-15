@@ -39,14 +39,14 @@ public class RemoveDuplicateEventsProcessorImpl implements RemoveDuplicateEvents
     private final CaseRetentionRepository caseRetentionRepository;
 
     public RemoveDuplicateEventsProcessorImpl(
-        @Value("${darts.events.duplicates.earliest-removable-event-date}") LocalDate earliestRemovableEventDate,
+        @Value("${darts.events.duplicates.earliest-removable-event-date}") String earliestRemovableEventDate,
         @Value("${darts.events.duplicates.clear-up-window}") int clearUpWindow,
         EventRepository eventRepository,
         CurrentTimeHelper currentTimeHelper,
         CaseManagementRetentionRepository caseManagementRetentionRepository,
         CaseRetentionRepository caseRetentionRepository) {
 
-        this.earliestRemovableEventDate = earliestRemovableEventDate
+        this.earliestRemovableEventDate = LocalDate.parse(earliestRemovableEventDate)
             .atStartOfDay()
             .atOffset(UTC);
         this.clearUpWindow = clearUpWindow;
