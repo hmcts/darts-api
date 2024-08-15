@@ -1,0 +1,2 @@
+ALTER TABLE automated_task_aud DROP CONSTRAINT automated_task_aud_created_by_fk;
+ALTER TABLE automated_task_aud DROP CONSTRAINT automated_task_aud_modified_by_fk;
