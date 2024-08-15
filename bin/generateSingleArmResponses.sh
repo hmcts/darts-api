@@ -32,7 +32,7 @@ then
   exit 1
 fi
 
-iuFilename="EODID_OBJECTID_TRANSFERATTEMPTS_UUID1_1_ui.rsp"
+iuFilename="EODID_OBJECTID_TRANSFERATTEMPTS_UUID1_1_iu.rsp"
 iuFilename=${iuFilename//EODID/$eodid}
 iuFilename=${iuFilename//OBJECTID/$objectid}
 iuFilename=${iuFilename//TRANSFERATTEMPTS/$transferattempt}
