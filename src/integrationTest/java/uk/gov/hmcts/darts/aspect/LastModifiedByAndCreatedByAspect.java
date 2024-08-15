@@ -4,22 +4,18 @@ import lombok.RequiredArgsConstructor;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
-import org.aspectj.lang.annotation.Pointcut;
+import org.hibernate.LazyInitializationException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
-import uk.gov.hmcts.darts.common.entity.base.CreatedBaseEntity;
 import uk.gov.hmcts.darts.common.entity.base.CreatedModifiedBaseEntity;
 import uk.gov.hmcts.darts.common.entity.base.MandatoryCreatedBaseEntity;
 import uk.gov.hmcts.darts.common.entity.base.MandatoryCreatedModifiedBaseEntity;
 import uk.gov.hmcts.darts.common.entity.base.ModifiedBaseEntity;
 import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
 
-import java.util.Arrays;
-import java.util.List;
 import java.util.Optional;
-import javax.annotation.PostConstruct;
 
 @Aspect
 @Component
@@ -32,10 +28,6 @@ public class LastModifiedByAndCreatedByAspect {
 
     private static final int SYSTEM_USER_ID = 0;
 
-    @PostConstruct
-    public void test () {
-        System.out.println("");
-    }
     @Around("execution(* org.springframework.data.jpa.repository.JpaRepository+.save(..))")
     public Object handleUserCreatedByAndLastModifiedByForSave(ProceedingJoinPoint joinPoint)
         throws Throwable {
@@ -45,10 +37,10 @@ public class LastModifiedByAndCreatedByAspect {
 
         processEntities(body);
 
-
         return joinPoint.proceed();
     }
 
+    @SuppressWarnings({"PMD.SimplifyBooleanExpressions"})
     @Around("execution(* org.springframework.data.jpa.repository.JpaRepository+.saveAndFlush(..))")
     public Object handleUserCreatedByAndLastModifiedByForSaveAndFlush(ProceedingJoinPoint joinPoint) throws Throwable {
         Object[] objects = joinPoint.getArgs();
@@ -65,14 +57,20 @@ public class LastModifiedByAndCreatedByAspect {
     }
 
 
-    private void processEntities(Object body){
+    @SuppressWarnings({"PMD.CyclomaticComplexity"})
+    private void processEntities(Object body) {
         if (body instanceof ModifiedBaseEntity) {
             ModifiedBaseEntity entity = (ModifiedBaseEntity) body;
 
             Optional<UserAccountEntity> userAccount = userAccountRepository.findById(SYSTEM_USER_ID);
 
-            if (entity.getLastModifiedBy() == null) {
-                entity.setLastModifiedBy(userAccount.get());
+            try {
+                if (entity.getLastModifiedBy() == null) {
+                    entity.setLastModifiedBy(userAccount.get());
+                }
+            }
+            catch (LazyInitializationException lazyInitializationException) {
+
             }
         }
 
@@ -80,12 +78,21 @@ public class LastModifiedByAndCreatedByAspect {
             CreatedModifiedBaseEntity entity = (CreatedModifiedBaseEntity) body;
             Optional<UserAccountEntity> userAccount = userAccountRepository.findById(SYSTEM_USER_ID);
 
-            if (entity.getLastModifiedBy() == null) {
-                entity.setLastModifiedBy(userAccount.get());
+            try {
+                if (entity.getLastModifiedBy() == null) {
+                    entity.setLastModifiedBy(userAccount.get());
+                }
+            }
+            catch (LazyInitializationException lazyInitializationException) {
+
             }
 
-            if (entity.getCreatedBy() == null) {
-                entity.setCreatedBy(userAccount.get());
+            try {
+                if (entity.getCreatedBy() == null) {
+                    entity.setCreatedBy(userAccount.get());
+                }
+            } catch (LazyInitializationException lazyInitializationException) {
+
             }
         }
 
@@ -93,8 +100,12 @@ public class LastModifiedByAndCreatedByAspect {
             MandatoryCreatedBaseEntity entity = (MandatoryCreatedBaseEntity) body;
             Optional<UserAccountEntity> userAccount = userAccountRepository.findById(SYSTEM_USER_ID);
 
-            if (entity.getCreatedBy() == null) {
-                entity.setCreatedBy(userAccount.get());
+            try {
+                if (entity.getCreatedBy() == null) {
+                    entity.setCreatedBy(userAccount.get());
+                }
+            } catch (LazyInitializationException lazyInitializationException) {
+
             }
         }
 
@@ -102,8 +113,12 @@ public class LastModifiedByAndCreatedByAspect {
             MandatoryCreatedModifiedBaseEntity entity = (MandatoryCreatedModifiedBaseEntity) body;
             Optional<UserAccountEntity> userAccount = userAccountRepository.findById(SYSTEM_USER_ID);
 
-            if (entity.getCreatedBy() == null) {
-                entity.setCreatedBy(userAccount.get());
+            try {
+                if (entity.getCreatedBy() == null) {
+                    entity.setCreatedBy(userAccount.get());
+                }
+            } catch (LazyInitializationException lazyInitializationException) {
+
             }
         }
     }

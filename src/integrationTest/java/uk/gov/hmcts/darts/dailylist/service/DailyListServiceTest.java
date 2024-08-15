@@ -149,6 +149,9 @@ class DailyListServiceTest extends IntegrationBase {
     private void checkExpectedResponse(DailyListEntity dailyListEntity, String expectedResponseLocation) throws IOException {
         dailyListEntity.setCreatedDateTime(null);
         dailyListEntity.setLastModifiedDateTime(null);
+        dailyListEntity.setLastModifiedBy(null);
+        dailyListEntity.setCreatedBy(null);
+
         dailyListEntity.setId(null);
         String actualResponse = MAPPER.writeValueAsString(dailyListEntity);
         String expectedResponse = getContentsFromFile(expectedResponseLocation);
