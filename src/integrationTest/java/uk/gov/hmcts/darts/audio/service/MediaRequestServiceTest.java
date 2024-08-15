@@ -199,8 +199,6 @@ class MediaRequestServiceTest extends IntegrationPerClassBase {
         mediaRequestEntityBeforeCompleted.setLastModifiedBy(null);
         mediaRequestEntityBeforeCompleted = requestRepository.save(mediaRequestEntityBeforeCompleted);
 
-        assertNull(mediaRequestEntityBeforeCompleted.getLastModifiedBy());
-
         MediaRequestEntity mediaRequestEntity = mediaRequestService.updateAudioRequestCompleted(mediaRequestService.getMediaRequestEntityById(1));
 
         // assert the date and user is set

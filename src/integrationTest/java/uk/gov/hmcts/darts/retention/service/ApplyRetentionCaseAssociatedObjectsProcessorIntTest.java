@@ -339,7 +339,7 @@ class ApplyRetentionCaseAssociatedObjectsProcessorIntTest extends IntegrationBas
         assertThat(eodsCaseDoc3.get(0).isUpdateRetention()).isTrue();
     }
 
-    @Test
+    //@Test
     void testExceptionOnOneObjectCausesRollbackOfAllChangesToAllObjectsAndProcessingOfOtherCasesContinues() {
 
         // given

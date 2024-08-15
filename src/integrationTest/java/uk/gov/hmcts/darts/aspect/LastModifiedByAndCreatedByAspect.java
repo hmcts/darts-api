@@ -57,7 +57,7 @@ public class LastModifiedByAndCreatedByAspect {
     }
 
 
-    @SuppressWarnings({"PMD.CyclomaticComplexity"})
+    @SuppressWarnings({"PMD.CyclomaticComplexity", "PMD.NPathComplexity", "PMD.CognitiveComplexity", "PMD.EmptyCatchBlock"})
     private void processEntities(Object body) {
         if (body instanceof ModifiedBaseEntity) {
             ModifiedBaseEntity entity = (ModifiedBaseEntity) body;
@@ -68,9 +68,8 @@ public class LastModifiedByAndCreatedByAspect {
                 if (entity.getLastModifiedBy() == null) {
                     entity.setLastModifiedBy(userAccount.get());
                 }
-            }
-            catch (LazyInitializationException lazyInitializationException) {
-
+            } catch (LazyInitializationException lazyInitializationException) {
+                // do nothing
             }
         }
 
@@ -82,9 +81,8 @@ public class LastModifiedByAndCreatedByAspect {
                 if (entity.getLastModifiedBy() == null) {
                     entity.setLastModifiedBy(userAccount.get());
                 }
-            }
-            catch (LazyInitializationException lazyInitializationException) {
-
+            } catch (LazyInitializationException lazyInitializationException) {
+                // do nothing
             }
 
             try {
@@ -92,6 +90,7 @@ public class LastModifiedByAndCreatedByAspect {
                     entity.setCreatedBy(userAccount.get());
                 }
             } catch (LazyInitializationException lazyInitializationException) {
+                // do nothing
 
             }
         }
@@ -105,7 +104,7 @@ public class LastModifiedByAndCreatedByAspect {
                     entity.setCreatedBy(userAccount.get());
                 }
             } catch (LazyInitializationException lazyInitializationException) {
-
+                // do nothing
             }
         }
 
@@ -118,7 +117,7 @@ public class LastModifiedByAndCreatedByAspect {
                     entity.setCreatedBy(userAccount.get());
                 }
             } catch (LazyInitializationException lazyInitializationException) {
-
+                // do nothing
             }
         }
     }

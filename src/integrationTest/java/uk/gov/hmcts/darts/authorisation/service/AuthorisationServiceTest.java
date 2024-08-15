@@ -226,7 +226,6 @@ class AuthorisationServiceTest extends IntegrationBase {
     }
 
     @Test
-    @Disabled("Circle back to this")
     void shouldCheckAuthorisationOK() {
         var a1Court = createCourthouseWithName("A1 COURT");
         var b2Court = createCourthouseWithName("B2 COURT");
