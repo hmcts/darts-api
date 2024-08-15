@@ -43,7 +43,7 @@ public class CourtCaseStub {
     public CourtCaseEntity createAndSaveMinimalCourtCase() {
 
         var courtCase = CaseTestData.createSomeMinimalCase();
-        courtCase.getCourthouse().getCreatedBy().setId(0);
+//        courtCase.getCourthouse().getCreatedBy().setId(0);
         return caseRepository.save(courtCase);
     }
 

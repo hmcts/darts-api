@@ -24,6 +24,9 @@ public class CaseTestData {
         courtCaseEntity.setCaseNumber("case-1-" + postfix);
         courtCaseEntity.setClosed(false);
         courtCaseEntity.setInterpreterUsed(false);
+        var userAccount = minimalUserAccount();
+        courtCaseEntity.setCreatedBy(userAccount);
+        courtCaseEntity.setLastModifiedBy(userAccount);
         return courtCaseEntity;
     }
 
@@ -43,6 +46,9 @@ public class CaseTestData {
         courtCaseEntity.setCaseNumber(caseNumber);
         courtCaseEntity.setClosed(false);
         courtCaseEntity.setInterpreterUsed(false);
+        var userAccount = minimalUserAccount();
+        courtCaseEntity.setCreatedBy(userAccount);
+        courtCaseEntity.setLastModifiedBy(userAccount);
         return courtCaseEntity;
     }
 
