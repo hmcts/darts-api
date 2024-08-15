@@ -560,8 +560,12 @@ public class DartsDatabaseStub {
     @Transactional
     public CourtCaseEntity save(CourtCaseEntity courtCase) {
         save(courtCase.getCourthouse());
-        userAccountRepository.save(courtCase.getCreatedBy());
-        userAccountRepository.save(courtCase.getLastModifiedBy());
+        if (courtCase.getCreatedBy() != null) {
+            userAccountRepository.save(courtCase.getCreatedBy());
+        }
+        if (courtCase.getLastModifiedBy() != null) {
+            userAccountRepository.save(courtCase.getLastModifiedBy());
+        }
         judgeRepository.saveAll(courtCase.getJudges());
         courtCase.getDefenceList().forEach(this::save);
         courtCase.getDefendantList().forEach(this::save);
