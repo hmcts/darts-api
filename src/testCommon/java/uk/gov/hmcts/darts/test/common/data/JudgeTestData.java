@@ -5,6 +5,7 @@ import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.JudgeEntity;
 
 import java.util.List;
+import java.util.Locale;
 import java.util.stream.Collectors;
 
 import static java.util.stream.IntStream.rangeClosed;
@@ -22,7 +23,7 @@ public class JudgeTestData {
 
     public static JudgeEntity createJudgeWithName(String name) {
         var judgeEntity = new JudgeEntity();
-        judgeEntity.setName(name.toUpperCase());
+        judgeEntity.setName(name.toUpperCase(Locale.ROOT));
         return judgeEntity;
     }
 }

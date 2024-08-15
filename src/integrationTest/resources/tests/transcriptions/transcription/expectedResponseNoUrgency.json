@@ -1,23 +1,25 @@
 {
-  "case_number" : "1",
-  "courthouse_id" :  $COURTHOUSE_ID,
-  "courthouse" : "some-courthouse",
-  "case_reporting_restrictions" : [ ],
-  "status" : "Approved",
-  "received" : "2023-06-20T10:00:00Z",
-  "requestor" : {
-    "user_id" : $USER_ACCOUNT_ID,
-    "user_full_name" : "integrationtest.user@example.comFullName"
+  "case_number": "1",
+  "courthouse_id": $COURTHOUSE_ID,
+  "courthouse": "some-courthouse",
+  "case_reporting_restrictions": [],
+  "status": "Approved",
+  "received": "2023-06-20T10:00:00Z",
+  "requestor": {
+    "user_id": $USER_ACCOUNT_ID,
+    "user_full_name": "integrationtest.user@example.comFullName"
   },
-  "requestor_comments" : "comment1",
-  "defendants" : [ ],
-  "judges" : [ "1JUDGE1" ],
-  "hearing_date" : "2023-01-01",
-  "request_type" : "Sentencing remarks",
-  "is_manual" : true,
-  "transcription_start_ts" : "2023-01-01T12:00:00Z",
-  "transcription_end_ts" : "2023-01-01T12:00:00Z",
-  "courtroom" : "some-courtroom",
-  "transcription_object_id" : "legacyObjectId",
+  "requestor_comments": "comment1",
+  "defendants": [],
+  "judges": [
+    "1JUDGE1"
+  ],
+  "hearing_date": "2023-01-01",
+  "request_type": "Sentencing remarks",
+  "is_manual": true,
+  "transcription_start_ts": "2023-01-01T12:00:00Z",
+  "transcription_end_ts": "2023-01-01T12:00:00Z",
+  "courtroom": "SOME-COURTROOM",
+  "transcription_object_id": "legacyObjectId",
   "hide_request_from_requestor": false
 }

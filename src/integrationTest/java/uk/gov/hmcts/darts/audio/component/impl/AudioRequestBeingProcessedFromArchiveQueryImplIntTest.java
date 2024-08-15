@@ -27,7 +27,7 @@ class AudioRequestBeingProcessedFromArchiveQueryImplIntTest extends IntegrationB
         jdbcTemplate.update(
             """
                 INSERT INTO darts.courthouse (cth_id, courthouse_code, courthouse_name, created_ts, last_modified_ts, created_by, last_modified_by, display_name)
-                VALUES (-1, NULL, 'Bristol', '2023-11-17 15:06:15.859244+00', '2023-11-17 15:06:15.859244+00', 0, 0, 'Bristol');
+                VALUES (-1, NULL, 'BRISTOL', '2023-11-17 15:06:15.859244+00', '2023-11-17 15:06:15.859244+00', 0, 0, 'Bristol');
 
                 INSERT INTO darts.user_account (usr_id, dm_user_s_object_id, user_name, user_email_address, description, created_ts, last_modified_ts, last_login_ts, last_modified_by, created_by, account_guid, is_system_user, is_active, user_full_name)
                 VALUES (20000, NULL, 'Richard B', 'Richard.B@example.com', NULL, NULL, NULL, NULL, NULL, NULL, NULL, false, true, 'Richard B');
@@ -42,7 +42,7 @@ class AudioRequestBeingProcessedFromArchiveQueryImplIntTest extends IntegrationB
                 VALUES (-1, -1, NULL, NULL, 'T20231009-1', false, false, NULL, NULL, NULL, NULL, NULL);
 
                 INSERT INTO darts.courtroom (ctr_id, cth_id, courtroom_name, created_ts, created_by)
-                VALUES (-1, -1, 'Court 1', NULL, 0);
+                VALUES (-1, -1, 'COURT 1', NULL, 0);
 
                 INSERT INTO darts.hearing (hea_id, cas_id, ctr_id, hearing_date, scheduled_start_time, hearing_is_actual, created_ts, created_by, last_modified_ts, last_modified_by)
                 VALUES (101, -1, -1, '2024-01-04', NULL, false, '2024-01-04 15:52:41.084085+00', NULL, '2024-01-04 15:52:41.084114+00', NULL);

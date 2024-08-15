@@ -152,7 +152,7 @@ class AdminMediaServiceImplTest {
                  },
                  "courtroom": {
                    "id": 2,
-                   "display_name": "Courtroom1"
+                   "display_name": "COURTROOM1"
                  },
                  "case": {
                    "id": 7,
@@ -217,7 +217,7 @@ class AdminMediaServiceImplTest {
                 },
                 "courtroom": {
                   "id": 2,
-                  "display_name": "Courtroom1"
+                  "display_name": "COURTROOM1"
                 },
                 "case": {
                   "id": 7,
@@ -239,7 +239,7 @@ class AdminMediaServiceImplTest {
                 },
                 "courtroom": {
                   "id": 2,
-                  "display_name": "Courtroom1"
+                  "display_name": "COURTROOM1"
                 },
                 "case": {
                   "id": 7,
@@ -298,7 +298,7 @@ class AdminMediaServiceImplTest {
                  },
                  "courtroom": {
                    "id": 2,
-                   "display_name": "Courtroom1"
+                   "display_name": "COURTROOM1"
                  },
                  "case": {
                    "id": 7,

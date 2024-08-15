@@ -47,7 +47,7 @@ class CourthouseUpdateTest extends IntegrationBase {
 
         dbAssert.inTransaction(() -> {
             var courthouse = dartsDatabase.findCourthouseById(courthouseEntity.getId());
-            assertThat(courthouse.getCourthouseName()).isEqualTo("some-new-name");
+            assertThat(courthouse.getCourthouseName()).isEqualTo("SOME-NEW-NAME");
             assertThat(courthouse.getDisplayName()).isEqualTo("some-new-display-name");
             assertThat(courthouse.getRegion().getId()).isEqualTo(someOtherRegionId);
             assertThat(courthouse.getSecurityGroups()).extracting("id").containsExactlyInAnyOrder(2);

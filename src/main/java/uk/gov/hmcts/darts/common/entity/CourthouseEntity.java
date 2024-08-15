@@ -23,6 +23,7 @@ import uk.gov.hmcts.darts.common.entity.base.CreatedModifiedBaseEntity;
 
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Set;
 
 import static org.hibernate.envers.RelationTargetAuditMode.NOT_AUDITED;
@@ -100,4 +101,7 @@ public class CourthouseEntity extends CreatedModifiedBaseEntity {
         }
     }
 
+    public void setCourthouseName(String courthouseName) {
+        this.courthouseName = courthouseName.toUpperCase(Locale.ROOT);
+    }
 }

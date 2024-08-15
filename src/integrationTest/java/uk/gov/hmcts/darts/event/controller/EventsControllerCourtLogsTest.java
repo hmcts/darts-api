@@ -29,6 +29,7 @@ import java.net.URI;
 import java.time.OffsetDateTime;
 import java.util.Collections;
 import java.util.List;
+import java.util.Locale;
 import java.util.Set;
 
 import static org.mockito.Mockito.when;
@@ -102,8 +103,8 @@ class EventsControllerCourtLogsTest extends IntegrationBase {
         Assertions.assertNotNull(persistedEvent.getId());
         Assertions.assertEquals(SOME_TEXT, persistedEvent.getEventText());
         Assertions.assertEquals(SOME_DATE_TIME, persistedEvent.getTimestamp());
-        Assertions.assertEquals(SOME_COURTROOM, persistedEvent.getCourtroom().getName());
-        Assertions.assertEquals(SOME_COURTHOUSE, persistedEvent.getCourtroom().getCourthouse().getCourthouseName());
+        Assertions.assertEquals(SOME_COURTROOM.toUpperCase(Locale.ROOT), persistedEvent.getCourtroom().getName());
+        Assertions.assertEquals(SOME_COURTHOUSE.toUpperCase(Locale.ROOT), persistedEvent.getCourtroom().getCourthouse().getCourthouseName());
         Assertions.assertEquals(true, persistedEvent.getIsLogEntry());
         Assertions.assertNull(persistedEvent.getMessageId());
 
@@ -175,7 +176,7 @@ class EventsControllerCourtLogsTest extends IntegrationBase {
         var event = createEventWith(LOG, "test", hearingEntity, createOffsetDateTime("2023-07-01T10:00:00"));
         eventRepository.saveAndFlush(event);
 
-        String courthouseName = hearingEntity.getCourtCase().getCourthouse().getCourthouseName();
+        String courthouseName = hearingEntity.getCourtCase().getCourthouse().getDisplayName();
         String caseNumber = hearingEntity.getCourtCase().getCaseNumber();
 
         setupExternalUserForCourthouse(hearingEntity.getCourtCase().getCourthouse());
@@ -250,7 +251,7 @@ class EventsControllerCourtLogsTest extends IntegrationBase {
         eventRepository.saveAndFlush(eventHearing);
         eventRepository.saveAndFlush(eventHearing2);
 
-        String courthouseName = hearingEntity.getCourtCase().getCourthouse().getCourthouseName();
+        String displayName = hearingEntity.getCourtCase().getCourthouse().getDisplayName();
 
         setupExternalUserForCourthouse(hearingEntity.getCourtCase().getCourthouse());
 
@@ -262,7 +263,7 @@ class EventsControllerCourtLogsTest extends IntegrationBase {
             .contentType(MediaType.APPLICATION_JSON_VALUE);
 
         mockMvc.perform(requestBuilder).andExpect(MockMvcResultMatchers.status().isOk())
-            .andExpect(MockMvcResultMatchers.jsonPath("$[0].courthouse", Matchers.is(courthouseName)))
+            .andExpect(MockMvcResultMatchers.jsonPath("$[0].courthouse", Matchers.is(displayName)))
             .andExpect(MockMvcResultMatchers.jsonPath("$[0].caseNumber", Matchers.is(NEW_CASE)))
             .andExpect(MockMvcResultMatchers.jsonPath("$[0].timestamp", Matchers.is(Matchers.notNullValue())))
             .andExpect(MockMvcResultMatchers.jsonPath("$[0].eventText", Matchers.notNullValue()))

@@ -11,21 +11,21 @@
     "hearings": [
       {
         "date": "2023-08-20",
-        "courtroom": "courtroom2",
+        "courtroom": "COURTROOM2",
         "judges": [
           "AJUDGE"
         ]
       },
       {
         "date": "2023-08-21",
-        "courtroom": "courtroom1",
+        "courtroom": "COURTROOM1",
         "judges": [
           "AJUDGE"
         ]
       },
       {
         "date": "2023-08-22",
-        "courtroom": "courtroom1",
+        "courtroom": "COURTROOM1",
         "judges": [
           "AJUDGE"
         ]
@@ -44,21 +44,21 @@
     "hearings": [
       {
         "date": "2023-09-20",
-        "courtroom": "courtroom2",
+        "courtroom": "COURTROOM2",
         "judges": [
           "AJUDGE"
         ]
       },
       {
         "date": "2023-09-21",
-        "courtroom": "courtroom1",
+        "courtroom": "COURTROOM1",
         "judges": [
           "AJUDGE"
         ]
       },
       {
         "date": "2023-09-22",
-        "courtroom": "courtroom3",
+        "courtroom": "COURTROOM3",
         "judges": [
           "AJUDGE"
         ]
@@ -78,14 +78,14 @@
     "hearings": [
       {
         "date": "2023-09-20",
-        "courtroom": "courtroom2",
+        "courtroom": "COURTROOM2",
         "judges": [
           "AJUDGE"
         ]
       },
       {
         "date": "2023-09-21",
-        "courtroom": "courtroom3",
+        "courtroom": "COURTROOM3",
         "judges": [
           "AJUDGE",
           "JUDGE6B"
@@ -93,7 +93,7 @@
       },
       {
         "date": "2023-09-22",
-        "courtroom": "courtroom1",
+        "courtroom": "COURTROOM1",
         "judges": [
           "AJUDGE"
         ]

@@ -16,6 +16,8 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import uk.gov.hmcts.darts.common.entity.base.CreatedBaseEntity;
 
+import java.util.Locale;
+
 @Entity
 @Table(name = CourtroomEntity.TABLE_NAME, uniqueConstraints = {@UniqueConstraint(columnNames = {CourtroomEntity.CTH_ID, CourtroomEntity.COURTROOM_NAME})})
 @AllArgsConstructor
@@ -42,4 +44,7 @@ public class CourtroomEntity extends CreatedBaseEntity {
     @JoinColumn(name = CTH_ID)
     private CourthouseEntity courthouse;
 
+    public void setName(String name) {
+        this.name = name.toUpperCase(Locale.ROOT);
+    }
 }

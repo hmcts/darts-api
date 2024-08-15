@@ -33,8 +33,8 @@ import static uk.gov.hmcts.darts.common.util.CommonTestDataUtil.createOffsetDate
 @ExtendWith(MockitoExtension.class)
 class RetrieveCoreObjectServiceImplTest {
 
-    private static final String COURTHOUSE_1 = "courthouse1";
-    private static final String COURTROOM_1 = "courtroom1";
+    private static final String COURTHOUSE_1 = "COURTHOUSE1";
+    private static final String COURTROOM_1 = "COURTROOM1";
     private static final String CASE_NUMBER_1 = "caseNumber1";
     private static final UserAccountEntity USER_ACCOUNT_ENTITY = new UserAccountEntity();
 
@@ -152,7 +152,7 @@ class RetrieveCoreObjectServiceImplTest {
             )
         );
 
-        assertEquals("Provided courthouse does not exist. Courthouse 'courthouse1' not found.", exception.getMessage());
+        assertEquals("Provided courthouse does not exist. Courthouse 'COURTHOUSE1' not found.", exception.getMessage());
     }
 
     @Test

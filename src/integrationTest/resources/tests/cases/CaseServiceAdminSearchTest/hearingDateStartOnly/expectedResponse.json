@@ -6,7 +6,7 @@
     },
     "courtrooms": [
       {
-        "name": "courtroom1"
+        "name": "COURTROOM1"
       }
     ],
     "judges": [
@@ -23,7 +23,7 @@
     },
     "courtrooms": [
       {
-        "name": "courtroom1"
+        "name": "COURTROOM1"
       }
     ],
     "judges": [
@@ -40,7 +40,7 @@
     },
     "courtrooms": [
       {
-        "name": "courtroom4"
+        "name": "COURTROOM4"
       }
     ],
     "judges": [

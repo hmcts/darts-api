@@ -39,7 +39,7 @@ class CourthouseUpdatePatchToEntityMapperTest {
         var courthouseEntity = courthouseUpdateMapper.mapPatchToEntity(
             new CourthousePatch().courthouseName("some-name"), new CourthouseEntity());
 
-        assertThat(courthouseEntity.getCourthouseName()).isEqualTo("some-name");
+        assertThat(courthouseEntity.getCourthouseName()).isEqualTo("SOME-NAME");
     }
 
     @Test
@@ -86,7 +86,7 @@ class CourthouseUpdatePatchToEntityMapperTest {
 
         var courthouseEntity = courthouseUpdateMapper.mapPatchToEntity(fullCourthousePatch, new CourthouseEntity());
 
-        assertThat(courthouseEntity.getCourthouseName()).isEqualTo("some-name");
+        assertThat(courthouseEntity.getCourthouseName()).isEqualTo("SOME-NAME");
         assertThat(courthouseEntity.getDisplayName()).isEqualTo("some-display-name");
         assertThat(courthouseEntity.getSecurityGroups())
             .extracting("id").containsExactlyInAnyOrder(1);

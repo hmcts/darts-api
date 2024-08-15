@@ -39,7 +39,7 @@ class CourthouseEntityToAdminCourthouseMapperTest {
 
         var adminCourthouse = courthouseUpdateMapper.mapEntityToAdminCourthouse(patchedCourthouse);
 
-        assertThat(adminCourthouse.getCourthouseName()).isEqualTo("some-name");
+        assertThat(adminCourthouse.getCourthouseName()).isEqualTo("SOME-NAME");
         assertThat(adminCourthouse.getDisplayName()).isEqualTo("some-display-name");
         assertThat(adminCourthouse.getRegionId()).isEqualTo(1);
         assertThat(adminCourthouse.getSecurityGroupIds()).containsExactlyInAnyOrder(1, 2, 3);

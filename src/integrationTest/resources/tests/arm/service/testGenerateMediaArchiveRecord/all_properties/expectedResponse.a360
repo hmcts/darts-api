@@ -9,7 +9,7 @@
     "event_date": "2023-09-23T14:00:00Z",
     "title": "a-media-file.mp2",
     "client_identifier": "<EODID>",
-    "contributor": "NEWCASTLE & Int Test Courtroom 2",
+    "contributor": "NEWCASTLE & INT TEST COURTROOM 2",
     "rtn_score":2,
     "rtn_reason":"RetentionConfidenceReason",
     "bf_001": "Media",
@@ -25,7 +25,7 @@
     "bf_015": 2,
     "bf_017": "2023-09-23T14:45:00Z",
     "bf_019": "NEWCASTLE",
-    "bf_020": "Int Test Courtroom 2"
+    "bf_020": "INT TEST COURTROOM 2"
   }
 }
 {

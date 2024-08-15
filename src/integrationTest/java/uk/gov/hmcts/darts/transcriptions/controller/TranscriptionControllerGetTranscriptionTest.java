@@ -27,6 +27,7 @@ import uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.List;
+import java.util.Locale;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.when;
@@ -61,7 +62,7 @@ class TranscriptionControllerGetTranscriptionTest extends IntegrationBase {
             DateConverterUtil.toLocalDateTime(SOME_DATE_TIME)
         );
         CourthouseEntity courthouseEntity = hearingEntity.getCourtroom().getCourthouse();
-        assertEquals(SOME_COURTHOUSE, courthouseEntity.getCourthouseName());
+        assertEquals(SOME_COURTHOUSE.toUpperCase(Locale.ROOT), courthouseEntity.getCourthouseName());
 
         UserAccountEntity testUser = dartsDatabase.getUserAccountStub()
             .createAuthorisedIntegrationTestUser(courthouseEntity);
@@ -169,7 +170,7 @@ class TranscriptionControllerGetTranscriptionTest extends IntegrationBase {
         superAdminUserStub.givenUserIsAuthorised(mockUserIdentity);
 
         HearingEntity hearingEntity = dartsDatabase.getHearingRepository().findAll().get(0);
-        TranscriptionEntity transcription = dartsDatabase.getTranscriptionStub().createTranscription((CourtroomEntity)null);
+        TranscriptionEntity transcription = dartsDatabase.getTranscriptionStub().createTranscription((CourtroomEntity) null);
 
         transcription.getCourtCases().add(hearingEntity.getCourtCase());
         transcription.setCreatedDateTime(OffsetDateTime.of(2023, 6, 20, 10, 0, 0, 0, ZoneOffset.UTC));

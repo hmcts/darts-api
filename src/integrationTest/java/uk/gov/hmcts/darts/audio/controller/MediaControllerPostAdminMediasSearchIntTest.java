@@ -211,7 +211,7 @@ class MediaControllerPostAdminMediasSearchIntTest extends IntegrationBase {
                   "display_name": "Courthouse1"
                 },
                 "courtroom": {
-                  "name": "courtroom1"
+                  "name": "COURTROOM1"
                 },
                 "start_at": "2020-10-10T10:00:01Z",
                 "end_at": "2020-10-10T11:00:01Z",
@@ -223,7 +223,7 @@ class MediaControllerPostAdminMediasSearchIntTest extends IntegrationBase {
                   "display_name": "Courthouse1"
                 },
                 "courtroom": {
-                  "name": "courtroom1"
+                  "name": "COURTROOM1"
                 },
                 "start_at": "2020-10-10T10:00:02Z",
                 "end_at": "2020-10-10T11:00:02Z",
@@ -235,7 +235,7 @@ class MediaControllerPostAdminMediasSearchIntTest extends IntegrationBase {
                   "display_name": "Courthouse1"
                 },
                 "courtroom": {
-                  "name": "courtroom1"
+                  "name": "COURTROOM1"
                 },
                 "start_at": "2020-10-10T10:00:03Z",
                 "end_at": "2020-10-10T11:00:03Z",
