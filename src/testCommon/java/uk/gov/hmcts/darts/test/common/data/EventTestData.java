@@ -4,6 +4,7 @@ import lombok.experimental.UtilityClass;
 import uk.gov.hmcts.darts.common.entity.EventEntity;
 import uk.gov.hmcts.darts.common.entity.EventHandlerEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
+import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
@@ -13,6 +14,7 @@ import java.util.Random;
 import static java.util.Arrays.asList;
 import static uk.gov.hmcts.darts.event.enums.EventStatus.MODERNISED;
 import static uk.gov.hmcts.darts.test.common.data.CourtroomTestData.someMinimalCourtRoom;
+import static uk.gov.hmcts.darts.test.common.data.UserAccountTestData.*;
 
 
 @UtilityClass
@@ -35,6 +37,9 @@ public class EventTestData {
         eventEntity.setTimestamp(OffsetDateTime.now());
         eventEntity.setIsLogEntry(false);
         eventEntity.setIsCurrent(true);
+        var userAccount = minimalUserAccount();
+        eventEntity.setCreatedBy(userAccount);
+        eventEntity.setLastModifiedBy(userAccount);
         return eventEntity;
     }
 

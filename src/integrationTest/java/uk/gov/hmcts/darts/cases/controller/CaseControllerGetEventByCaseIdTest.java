@@ -1,5 +1,6 @@
 package uk.gov.hmcts.darts.cases.controller;
 
+import jakarta.transaction.Transactional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.skyscreamer.jsonassert.JSONAssert;
@@ -18,6 +19,7 @@ import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.util.DateConverterUtil;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
+import uk.gov.hmcts.darts.testutils.TransactionalUtil;
 
 import java.time.OffsetDateTime;
 import java.util.List;
@@ -44,29 +46,34 @@ class CaseControllerGetEventByCaseIdTest extends IntegrationBase {
 
     private List<EventEntity> eventEntityList;
 
+    @Autowired
+    private TransactionalUtil transactionalUtil;
+
     @MockBean
     private UserIdentity mockUserIdentity;
 
     @BeforeEach
     void setUp() {
-        hearingEntity = dartsDatabase.givenTheDatabaseContainsCourtCaseWithHearingAndCourthouseWithRoom(
-            SOME_CASE_NUMBER,
-            SOME_COURTHOUSE,
-            SOME_COURTROOM,
-            DateConverterUtil.toLocalDateTime(SOME_DATE_TIME)
-        );
-        CourtCaseEntity courtCase = hearingEntity.getCourtCase();
-        dartsDatabase.save(courtCase);
+        transactionalUtil.inTransaction(() -> {
+            hearingEntity = dartsDatabase.givenTheDatabaseContainsCourtCaseWithHearingAndCourthouseWithRoom(
+                SOME_CASE_NUMBER,
+                SOME_COURTHOUSE,
+                SOME_COURTROOM,
+                DateConverterUtil.toLocalDateTime(SOME_DATE_TIME)
+            );
+            CourtCaseEntity courtCase = hearingEntity.getCourtCase();
+            dartsDatabase.save(courtCase);
 
-        eventEntityList = createEventsWithDefaults(1).stream()
-            .map(eve -> dartsDatabase.addHandlerToEvent(eve, SECTION_11_1981_DB_ID))
-            .toList();
+            eventEntityList = createEventsWithDefaults(1).stream()
+                .map(eve -> dartsDatabase.addHandlerToEvent(eve, SECTION_11_1981_DB_ID))
+                .toList();
 
-        dartsDatabase.saveEventsForHearing(hearingEntity, eventEntityList);
+            dartsDatabase.saveEventsForHearing(hearingEntity, eventEntityList);
 
-        UserAccountEntity testUser = dartsDatabase.getUserAccountStub()
-            .createAuthorisedIntegrationTestUser(hearingEntity.getCourtroom().getCourthouse());
-        when(mockUserIdentity.getUserAccount()).thenReturn(testUser);
+            UserAccountEntity testUser = dartsDatabase.getUserAccountStub()
+                .createAuthorisedIntegrationTestUser(hearingEntity.getCourtroom().getCourthouse());
+            when(mockUserIdentity.getUserAccount()).thenReturn(testUser);
+        });
     }
 
     @Test

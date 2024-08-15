@@ -13,6 +13,7 @@ import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
 import uk.gov.hmcts.darts.test.common.TestUtils;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
+import uk.gov.hmcts.darts.testutils.TransactionalUtil;
 
 import java.io.File;
 import java.io.IOException;
@@ -69,6 +70,9 @@ class OutboundFileProcessorIntTest extends IntegrationBase {
     @Autowired
     private OutboundFileProcessorImpl outboundFileProcessor;
 
+    @Autowired
+    private TransactionalUtil transactionalUtil;
+
     @BeforeEach
     void setUp() throws IOException {
         UUID externalLocation = UUID.randomUUID();
@@ -77,18 +81,19 @@ class OutboundFileProcessorIntTest extends IntegrationBase {
         File audioFileTest = TestUtils.getFile(AUDIO_FILENAME);
         audioPath = Files.copy(audioFileTest.toPath(), createFile(tempDirectory, "audio-test.mp2"), REPLACE_EXISTING);
 
-        HearingEntity hearingEntity = dartsDatabase.givenTheDatabaseContainsCourtCaseWithHearingAndCourthouseWithRoom(
-            SOME_CASE_NUMBER,
-            SOME_COURTHOUSE,
-            SOME_COURTROOM,
-            LocalDateTime.parse(HEARING_DATETIME)
-        );
-        CourtCaseEntity courtCase = hearingEntity.getCourtCase();
-        courtCase.addProsecutor("aProsecutor", dartsDatabase.save(minimalUserAccount()));
-        courtCase.addDefendant("aDefendant");
-        courtCase.addDefence("aDefence");
-        dartsDatabase.save(courtCase);
-
+        transactionalUtil.inTransaction(() -> {
+            HearingEntity hearingEntity = dartsDatabase.givenTheDatabaseContainsCourtCaseWithHearingAndCourthouseWithRoom(
+                SOME_CASE_NUMBER,
+                SOME_COURTHOUSE,
+                SOME_COURTROOM,
+                LocalDateTime.parse(HEARING_DATETIME)
+            );
+            CourtCaseEntity courtCase = hearingEntity.getCourtCase();
+            courtCase.addProsecutor("aProsecutor", dartsDatabase.save(minimalUserAccount()));
+            courtCase.addDefendant("aDefendant");
+            courtCase.addDefence("aDefence");
+            dartsDatabase.save(courtCase);
+        });
     }
 
     @Test

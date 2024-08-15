@@ -275,7 +275,7 @@ public class RetrieveCoreObjectServiceImpl implements RetrieveCoreObjectService 
         prosecutor.setCourtCase(courtCase);
         prosecutor.setCreatedBy(userAccount);
         prosecutor.setLastModifiedBy(userAccount);
-        prosecutorRepository.saveAndFlush(prosecutor);
+        prosecutorRepository.save(prosecutor);
         return prosecutor;
     }
 }

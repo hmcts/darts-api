@@ -18,6 +18,7 @@ import uk.gov.hmcts.darts.common.entity.AnnotationDocumentEntity;
 import uk.gov.hmcts.darts.common.entity.AnnotationEntity;
 import uk.gov.hmcts.darts.common.entity.AuditEntity;
 import uk.gov.hmcts.darts.common.entity.AutomatedTaskEntity;
+import uk.gov.hmcts.darts.common.entity.CaseManagementRetentionEntity;
 import uk.gov.hmcts.darts.common.entity.CaseRetentionEntity;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
@@ -32,6 +33,7 @@ import uk.gov.hmcts.darts.common.entity.JudgeEntity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
 import uk.gov.hmcts.darts.common.entity.NodeRegisterEntity;
 import uk.gov.hmcts.darts.common.entity.ObjectRecordStatusEntity;
+import uk.gov.hmcts.darts.common.entity.ProsecutorEntity;
 import uk.gov.hmcts.darts.common.entity.RetentionPolicyTypeEntity;
 import uk.gov.hmcts.darts.common.entity.SecurityGroupEntity;
 import uk.gov.hmcts.darts.common.entity.SecurityRoleEntity;
@@ -106,15 +108,19 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.OffsetDateTime;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
 import static java.time.LocalDateTime.now;
 import static java.time.ZoneOffset.UTC;
+import static java.util.Arrays.*;
 import static java.util.Arrays.asList;
 import static java.util.Arrays.stream;
 import static java.util.Comparator.comparing;
+import static java.util.Objects.isNull;
 import static uk.gov.hmcts.darts.audio.enums.MediaRequestStatus.OPEN;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.STORED;
 import static uk.gov.hmcts.darts.test.common.data.AnnotationTestData.minimalAnnotationEntity;
@@ -539,45 +545,88 @@ public class DartsDatabaseStub {
         save(hearingEntity.getCourtCase());
         save(hearingEntity.getCourtroom().getCourthouse());
         save(hearingEntity.getCourtroom());
-        userAccountRepository.save(hearingEntity.getCreatedBy());
-        userAccountRepository.save(hearingEntity.getLastModifiedBy());
+        save(hearingEntity.getCreatedBy());
+        save(hearingEntity.getLastModifiedBy());
         return hearingRepository.save(hearingEntity);
     }
 
     @Transactional
     public CourthouseEntity save(CourthouseEntity courthouse) {
-        userAccountRepository.save(courthouse.getCreatedBy());
+        save(courthouse.getCreatedBy());
         return courthouseRepository.save(courthouse);
     }
 
     @Transactional
     public CourtroomEntity save(CourtroomEntity courtroom) {
-        userAccountRepository.save(courtroom.getCreatedBy());
+        if (isNull(courtroom.getCourthouse().getId())) {
+            save(courtroom.getCourthouse());
+        }
+        save(courtroom.getCreatedBy());
         return courtroomRepository.save(courtroom);
     }
 
     @Transactional
     public CourtCaseEntity save(CourtCaseEntity courtCase) {
-        userAccountRepository.save(courtCase.getCreatedBy());
-        userAccountRepository.save(courtCase.getLastModifiedBy());
+        save(courtCase.getCreatedBy());
+        save(courtCase.getLastModifiedBy());
         judgeRepository.saveAll(courtCase.getJudges());
         save(courtCase.getCourthouse());
-        return caseRepository.save(courtCase);
+        courtCase.getProsecutorList().forEach(this::save);
+        caseRepository.save(courtCase);
+        return courtCase;
+    }
+
+    @Transactional
+    public ProsecutorEntity save(ProsecutorEntity prosecutor) {
+        save(prosecutor.getCreatedBy());
+        save(prosecutor.getLastModifiedBy());
+        return prosecutor;
     }
 
     @Transactional
     public TranscriptionEntity save(TranscriptionEntity transcriptionEntity) {
         save(transcriptionEntity.getCourtCase());
-        userAccountRepository.save(transcriptionEntity.getCreatedBy());
-        userAccountRepository.save(transcriptionEntity.getLastModifiedBy());
+        save(transcriptionEntity.getCreatedBy());
+        save(transcriptionEntity.getLastModifiedBy());
         var transcription = transcriptionRepository.save(transcriptionEntity);
-        userAccountRepository.save(transcription.getCreatedBy());
+        save(transcription.getCreatedBy());
         transcription.getTranscriptionDocumentEntities().forEach(td -> {
-            userAccountRepository.save(td.getUploadedBy());
-            userAccountRepository.save(td.getLastModifiedBy());
+            save(td.getUploadedBy());
+            save(td.getLastModifiedBy());
             transcriptionDocumentRepository.save(td);
         });
         return transcription;
+    }
+
+    @Transactional
+    public EventEntity save(EventEntity eventEntity) {
+        save(eventEntity.getCourtroom());
+        save(eventEntity.getCreatedBy());
+        save(eventEntity.getLastModifiedBy());
+        return eventRepository.save(eventEntity);
+    }
+
+    @Transactional
+    public RetentionPolicyTypeEntity save(RetentionPolicyTypeEntity retentionPolicyTypeEntity) {
+        save(retentionPolicyTypeEntity.getLastModifiedBy());
+        save(retentionPolicyTypeEntity.getCreatedBy());
+        return retentionPolicyTypeRepository.save(retentionPolicyTypeEntity);
+    }
+
+    @Transactional
+    public CaseManagementRetentionEntity save(CaseManagementRetentionEntity caseManagementRetentionEntity) {
+        save(caseManagementRetentionEntity.getCourtCase());
+        save(caseManagementRetentionEntity.getEventEntity());
+        save(caseManagementRetentionEntity.getRetentionPolicyTypeEntity());
+        return caseManagementRetentionRepository.saveAndFlush(caseManagementRetentionEntity);
+    }
+
+    @Transactional
+    public UserAccountEntity save(UserAccountEntity userAccountEntity) {
+        var systemUser = userAccountRepository.getReferenceById(0);
+        userAccountEntity.setCreatedBy(systemUser);
+        userAccountEntity.setLastModifiedBy(systemUser);
+        return userAccountRepository.save(userAccountEntity);
     }
 
     @Transactional
@@ -715,7 +764,7 @@ public class DartsDatabaseStub {
     }
 
     private void saveSingleEventForHearing(HearingEntity hearing, EventEntity event) {
-        event.setHearingEntities(List.of(hearingRepository.getReferenceById(hearing.getId())));
+        event.setHearingEntities(new ArrayList<>(asList(hearingRepository.getReferenceById(hearing.getId()))));
         eventRepository.save(event);
     }
 

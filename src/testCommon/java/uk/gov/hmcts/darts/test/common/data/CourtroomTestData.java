@@ -23,7 +23,8 @@ public class CourtroomTestData {
         courthouse.setCourtrooms(courtrooms);
         courtroom.setCourthouse(courthouse);
         courtroom.setName("room_a-" + postfix);
-        courtroom.setCreatedBy(minimalUserAccount());
+        var userAccount = minimalUserAccount();
+        courtroom.setCreatedBy(userAccount);
         return courtroom;
     }
 

@@ -3,6 +3,7 @@ package uk.gov.hmcts.darts.test.common.data;
 import lombok.experimental.UtilityClass;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.ProsecutorEntity;
+import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 
 import java.util.List;
 
@@ -17,8 +18,10 @@ public class ProsecutorTestData {
 
     public static ProsecutorEntity someMinimalProsecutor() {
         var prosecutor = new ProsecutorEntity();
-        prosecutor.setCourtCase(someMinimalCase());
         prosecutor.setName("some-prosecutor");
+        var accountEntity = minimalUserAccount();
+        prosecutor.setCreatedBy(accountEntity);
+        prosecutor.setLastModifiedBy(accountEntity);
         return prosecutor;
     }
 
@@ -38,12 +41,9 @@ public class ProsecutorTestData {
     }
 
     public static ProsecutorEntity createProsecutorForCaseWithName(CourtCaseEntity courtCase, String name) {
-        var prosecutor = new ProsecutorEntity();
+        var prosecutor = someMinimalProsecutor();
         prosecutor.setCourtCase(courtCase);
         prosecutor.setName(name);
-        prosecutor.setCreatedBy(minimalUserAccount());
-        prosecutor.setLastModifiedBy(minimalUserAccount());
-
         return prosecutor;
     }
 }

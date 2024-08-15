@@ -1,5 +1,7 @@
 package uk.gov.hmcts.darts.audio.controller;
 
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.skyscreamer.jsonassert.JSONAssert;
 import org.skyscreamer.jsonassert.JSONCompareMode;
@@ -13,6 +15,7 @@ import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum;
 import uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
+import uk.gov.hmcts.darts.testutils.TransactionalUtil;
 
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
@@ -35,6 +38,16 @@ class AudioControllerGetMetadataIntTest extends IntegrationBase {
 
     @MockBean
     private UserIdentity mockUserIdentity;
+
+    @BeforeEach
+    void openSessionInView() {
+        openInViewUtil.openEntityManager();
+    }
+
+    @AfterEach
+    void closeSessionInView() {
+        openInViewUtil.closeEntityManager();
+    }
 
     @Test
     void getAudioMetadataGetShouldReturnMediaChannel1MetadataAssociatedWithProvidedHearing() throws Exception {

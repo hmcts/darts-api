@@ -144,6 +144,8 @@ public class AuthorisationStub {
         hearingEntity.setHearingDate(YESTERDAY.toLocalDate());
         hearingEntity.setHearingIsActual(true);
         hearingEntity.setScheduledStartTime(LocalTime.now());
+        hearingEntity.setCreatedBy(testUser);
+        hearingEntity.setLastModifiedBy(testUser);
         dartsDatabaseStub.save(hearingEntity);
     }
 

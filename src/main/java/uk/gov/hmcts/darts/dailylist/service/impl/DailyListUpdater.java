@@ -196,8 +196,9 @@ class DailyListUpdater {
         UserAccountEntity dailyListSystemUser = systemUserHelper.getDailyListProcessorUser();
         advocates.forEach(advocate -> {
             if (!isExistingProsecutor(courtCase, advocate)) {
-                courtCase.addProsecutor(retrieveCoreObjectService.createProsecutor(
-                    citizenNameMapper.getCitizenName(advocate.getName()), courtCase, dailyListSystemUser));
+                var citizenName = citizenNameMapper.getCitizenName(advocate.getName());
+                var prosecutor = retrieveCoreObjectService.createProsecutor(citizenName, courtCase, dailyListSystemUser);
+                courtCase.addProsecutor(prosecutor);
             }
         });
     }
