@@ -26,7 +26,7 @@ import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 
 @AutoConfigureMockMvc
-@Disabled("Impacted by V1_364__not_null_constraints_part3.sql")
+@Disabled("Impacted by V1_363__not_null_constraints_part3.sql")
 class CaseControllerGetCaseByIdTest extends IntegrationBase {
 
     @Autowired

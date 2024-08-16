@@ -13,7 +13,7 @@ import uk.gov.hmcts.darts.testutils.stubs.HearingStub;
 import java.util.List;
 import java.util.Map;
 
-@Disabled("Impacted by V1_364__not_null_constraints_part3.sql")
+@Disabled("Impacted by V1_363__not_null_constraints_part3.sql")
 class EventRepositoryTest extends PostgresIntegrationBase {
     @Autowired
     private EventRepository eventRepository;

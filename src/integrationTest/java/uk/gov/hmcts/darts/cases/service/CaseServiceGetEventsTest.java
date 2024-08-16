@@ -17,7 +17,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static uk.gov.hmcts.darts.test.common.data.EventTestData.createEventWith;
 
 @Slf4j
-@Disabled("Impacted by V1_364__not_null_constraints_part3.sql")
+@Disabled("Impacted by V1_363__not_null_constraints_part3.sql")
 class CaseServiceGetEventsTest extends IntegrationBase {
 
     @Autowired

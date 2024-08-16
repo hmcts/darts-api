@@ -170,7 +170,7 @@ class EventsControllerCourtLogsTest extends IntegrationBase {
     }
 
     @Test
-    @Disabled("Impacted by V1_364__not_null_constraints_part3.sql")
+    @Disabled("Impacted by V1_363__not_null_constraints_part3.sql")
     void courtLogsGetResultMatch() throws Exception {
 
         HearingEntity hearingEntity = dartsDatabase.getHearingRepository().findAll().get(0);
@@ -198,7 +198,7 @@ class EventsControllerCourtLogsTest extends IntegrationBase {
     }
 
     @Test
-    @Disabled("Impacted by V1_364__not_null_constraints_part3.sql")
+    @Disabled("Impacted by V1_363__not_null_constraints_part3.sql")
     void courtlogsGetOnlyExpectedResults() throws Exception {
 
         HearingEntity hearingEntity = dartsDatabase.getHearingRepository().findAll().get(0);
@@ -231,7 +231,7 @@ class EventsControllerCourtLogsTest extends IntegrationBase {
     }
 
     @Test
-    @Disabled("Impacted by V1_364__not_null_constraints_part3.sql")
+    @Disabled("Impacted by V1_363__not_null_constraints_part3.sql")
     void courtLogsWrongCaseNumber() throws Exception {
 
         HearingEntity hearingEntity = dartsDatabase.getHearingRepository().findAll().get(0);

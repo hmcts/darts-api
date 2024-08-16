@@ -32,7 +32,7 @@ import static uk.gov.hmcts.darts.notification.api.NotificationApi.NotificationTe
 import static uk.gov.hmcts.darts.test.common.data.CaseTestData.someMinimalCase;
 
 @SuppressWarnings("checkstyle:VariableDeclarationUsageDistance")
-@Disabled("Impacted by V1_364__not_null_constraints_part3.sql")
+@Disabled("Impacted by V1_363__not_null_constraints_part3.sql")
 class NotificationServiceTest extends IntegrationBase {
 
     private static final int SYSTEM_USER_ID = 0;

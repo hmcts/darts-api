@@ -19,7 +19,7 @@ import static uk.gov.hmcts.darts.test.common.data.CourtroomTestData.someMinimalC
 import static uk.gov.hmcts.darts.test.common.data.HearingTestData.createSomeMinimalHearing;
 
 @TestPropertySource(properties = {"darts.events.admin-search.max-results=5"})
-@Disabled("Impacted by V1_364__not_null_constraints_part3.sql")
+@Disabled("Impacted by V1_363__not_null_constraints_part3.sql")
 class AdminEventSearchTest extends IntegrationBase {
 
     @Autowired

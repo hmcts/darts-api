@@ -46,7 +46,7 @@ class DarStopHandlerTest extends HandlerTestData {
     }
 
     @Test
-    @Disabled("Impacted by V1_364__not_null_constraints_part3.sql")
+    @Disabled("Impacted by V1_363__not_null_constraints_part3.sql")
     void throwsOnUnknownCourthouse() {
         dartsDatabase.save(someMinimalCase());
         DartsEvent event = someMinimalDartsEvent().courthouse(SOME_ROOM);

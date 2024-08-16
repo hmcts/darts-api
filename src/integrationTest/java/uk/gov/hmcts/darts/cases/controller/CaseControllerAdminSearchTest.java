@@ -46,7 +46,7 @@ import static uk.gov.hmcts.darts.testutils.stubs.UserAccountStub.INTEGRATION_TES
 @AutoConfigureMockMvc
 
 @SuppressWarnings({"PMD.VariableDeclarationUsageDistance", "PMD.NcssCount", "PMD.ExcessiveImports"})
-@Disabled("Impacted by V1_364__not_null_constraints_part3.sql")
+@Disabled("Impacted by V1_363__not_null_constraints_part3.sql")
 class CaseControllerAdminSearchTest extends IntegrationBase {
 
     private static final String ENDPOINT_URL = "/admin/cases/search";

@@ -41,7 +41,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @AutoConfigureMockMvc
 @Slf4j
 @SuppressWarnings({"PMD.ExcessiveImports"})
-@Disabled("Impacted by V1_364__not_null_constraints_part3.sql")
+@Disabled("Impacted by V1_363__not_null_constraints_part3.sql")
 class AudioRequestsControllerAddAudioRequestDownloadIntTest extends IntegrationBase {
 
     private static final URI ENDPOINT = URI.create("/audio-requests/download");
