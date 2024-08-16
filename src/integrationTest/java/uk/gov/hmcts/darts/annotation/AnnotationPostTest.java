@@ -43,7 +43,7 @@ class AnnotationPostTest extends IntegrationBase {
     @Autowired
     private MockMvc mockMvc;
 
-    @Disabled("Impacted by V1_363__adding_not_null_constraints_part_4.sql")
+    @Disabled("Impacted by V1_365__adding_not_null_constraints_part_4.sql")
     @Test
     void returnsAnnotationId() throws Exception {
         given.anAuthenticatedUserWithGlobalAccessAndRole(JUDICIARY);
@@ -72,7 +72,7 @@ class AnnotationPostTest extends IntegrationBase {
         assertThat(dartsDatabase.findExternalObjectDirectoryFor(annotationId).size()).isEqualTo(2);
     }
 
-    @Disabled("Impacted by V1_363__adding_not_null_constraints_part_4.sql")
+    @Disabled("Impacted by V1_365__adding_not_null_constraints_part_4.sql")
     @Test
     void allowsJudgeWithGlobalAccessToUploadAnnotations() throws Exception {
         given.anAuthenticatedUserWithGlobalAccessAndRole(JUDICIARY);
@@ -86,7 +86,7 @@ class AnnotationPostTest extends IntegrationBase {
             .andReturn();
     }
 
-    @Disabled("Impacted by V1_363__adding_not_null_constraints_part_4.sql")
+    @Disabled("Impacted by V1_365__adding_not_null_constraints_part_4.sql")
     @Test
     void allowsJudgeAuthorisedForCourthouseAccessToUploadAnnotations() throws Exception {
         var hearing = dartsDatabase.save(createSomeMinimalHearing());

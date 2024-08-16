@@ -41,7 +41,7 @@ class AudioControllerGetMediaRequestTest extends IntegrationBase {
             .andReturn();
     }
 
-    @Disabled("Impacted by V1_363__adding_not_null_constraints_part_4.sql")
+    @Disabled("Impacted by V1_365__adding_not_null_constraints_part_4.sql")
     @Test
     @Disabled("Impacted by V1_364_*.sql")
     void allowsSuperAdmin() throws Exception {

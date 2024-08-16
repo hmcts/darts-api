@@ -32,7 +32,7 @@ class UnstructuredAudioDeleterProcessorTest extends IntegrationBase {
     @MockBean
     private CurrentTimeHelper currentTimeHelper;
 
-    @Disabled("Impacted by V1_363__adding_not_null_constraints_part_4.sql")
+    @Disabled("Impacted by V1_365__adding_not_null_constraints_part_4.sql")
     @Test
     void storedInArmAndLastUpdatedInUnstructuredMoreThan30WeeksAgo() {
         when(currentTimeHelper.currentOffsetDateTime())
@@ -82,7 +82,7 @@ class UnstructuredAudioDeleterProcessorTest extends IntegrationBase {
         assertEquals(MARKED_FOR_DELETION.getId(), foundMedia.getStatus().getId());
     }
 
-    @Disabled("Impacted by V1_363__adding_not_null_constraints_part_4.sql")
+    @Disabled("Impacted by V1_365__adding_not_null_constraints_part_4.sql")
     @Test
     void storedInArmAndLastUpdatedInUnstructuredLessThan30WeeksAgo() {
         when(currentTimeHelper.currentOffsetDateTime())

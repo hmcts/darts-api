@@ -20,7 +20,7 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@Disabled("Impacted by V1_363__adding_not_null_constraints_part_4.sql")
+@Disabled("Impacted by V1_365__adding_not_null_constraints_part_4.sql")
 class MediaRepositoryIntTest extends IntegrationBase {
 
     public static final LocalDateTime DATE_NOW = DateConverterUtil.toLocalDateTime(OffsetDateTime.now());

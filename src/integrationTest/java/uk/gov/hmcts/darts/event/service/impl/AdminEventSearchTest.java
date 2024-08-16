@@ -18,7 +18,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static uk.gov.hmcts.darts.test.common.data.CourtroomTestData.someMinimalCourtRoom;
 import static uk.gov.hmcts.darts.test.common.data.HearingTestData.createSomeMinimalHearing;
 
-@Disabled("Impacted by V1_363__adding_not_null_constraints_part_4.sql")
+@Disabled("Impacted by V1_365__adding_not_null_constraints_part_4.sql")
 @TestPropertySource(properties = {"darts.events.admin-search.max-results=5"})
 @Disabled("Impacted by V1_363__not_null_constraints_part3.sql")
 class AdminEventSearchTest extends IntegrationBase {

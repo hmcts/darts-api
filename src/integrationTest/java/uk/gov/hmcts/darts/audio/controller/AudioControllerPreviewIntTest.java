@@ -36,7 +36,7 @@ import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.TRANSCRIBER;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.TRANSLATION_QA;
 import static uk.gov.hmcts.darts.test.common.AwaitabilityUtil.waitForMaxWithOneSecondPoll;
 
-@Disabled("Impacted by V1_363__adding_not_null_constraints_part_4.sql")
+@Disabled("Impacted by V1_365__adding_not_null_constraints_part_4.sql")
 @AutoConfigureMockMvc
 @TestPropertySource(properties = {"darts.audio.transformation.service.audio.file=tests/audio/WithViqHeader/viq0001min.mp2"})
 class AudioControllerPreviewIntTest extends IntegrationBase {
@@ -109,7 +109,7 @@ class AudioControllerPreviewIntTest extends IntegrationBase {
         );
     }
 
-    @Disabled("Impacted by V1_363__adding_not_null_constraints_part_4.sql")
+    @Disabled("Impacted by V1_365__adding_not_null_constraints_part_4.sql")
     @Test
     void previewWithRangeShouldReturnSuccess() throws Exception {
 

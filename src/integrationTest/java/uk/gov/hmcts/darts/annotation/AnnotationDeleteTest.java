@@ -27,7 +27,7 @@ import static uk.gov.hmcts.darts.test.common.data.CourthouseTestData.someMinimal
 import static uk.gov.hmcts.darts.test.common.data.HearingTestData.createSomeMinimalHearing;
 import static uk.gov.hmcts.darts.test.common.data.UserAccountTestData.minimalUserAccount;
 
-@Disabled("Impacted by V1_363__adding_not_null_constraints_part_4.sql")
+@Disabled("Impacted by V1_365__adding_not_null_constraints_part_4.sql")
 @AutoConfigureMockMvc
 class AnnotationDeleteTest extends IntegrationBase {
 

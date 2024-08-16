@@ -48,7 +48,7 @@ class EventSearchControllerTest extends IntegrationBase {
         openInViewUtil.closeEntityManager();
     }
 
-    @Disabled("Impacted by V1_363__adding_not_null_constraints_part_4.sql")
+    @Disabled("Impacted by V1_365__adding_not_null_constraints_part_4.sql")
     @Test
     @Disabled("Impacted by V1_363__not_null_constraints_part3.sql")
     void returnsErrorIfTooManyResults() throws Exception {
@@ -90,7 +90,7 @@ class EventSearchControllerTest extends IntegrationBase {
             .andReturn();
     }
 
-    @Disabled("Impacted by V1_363__adding_not_null_constraints_part_4.sql")
+    @Disabled("Impacted by V1_365__adding_not_null_constraints_part_4.sql")
     @Test
     @Disabled("Impacted by V1_363__not_null_constraints_part3.sql")
     void returnsAllFieldsCorrectly() throws Exception {

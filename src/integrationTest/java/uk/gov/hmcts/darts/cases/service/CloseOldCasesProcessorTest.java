@@ -31,7 +31,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-@Disabled("Impacted by V1_363__adding_not_null_constraints_part_4.sql")
+@Disabled("Impacted by V1_365__adding_not_null_constraints_part_4.sql")
 @Slf4j
 class CloseOldCasesProcessorTest extends IntegrationBase {
     @Autowired

@@ -23,7 +23,7 @@ import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.MARKED_FOR_DELETION;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.STORED;
 
-@Disabled("Impacted by V1_363__adding_not_null_constraints_part_4.sql")
+@Disabled("Impacted by V1_365__adding_not_null_constraints_part_4.sql")
 @SuppressWarnings("PMD.ExcessiveImports")
 class InboundAudioDeleterProcessorTest extends IntegrationBase {
 

@@ -40,7 +40,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@Disabled("Impacted by V1_363__adding_not_null_constraints_part_4.sql")
+@Disabled("Impacted by V1_365__adding_not_null_constraints_part_4.sql")
 @AutoConfigureMockMvc
 @SuppressWarnings("VariableDeclarationUsageDistance")
 class AudioControllerGetAdminMediasIntTest extends IntegrationBase {

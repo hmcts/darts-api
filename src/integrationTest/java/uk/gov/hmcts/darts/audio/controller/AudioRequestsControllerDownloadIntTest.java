@@ -169,7 +169,7 @@ class AudioRequestsControllerDownloadIntTest extends IntegrationBase {
             .andExpect(jsonPath("$.type").value("AUDIO_REQUESTS_103"));
     }
 
-    @Disabled("Impacted by V1_363__adding_not_null_constraints_part_4.sql")
+    @Disabled("Impacted by V1_365__adding_not_null_constraints_part_4.sql")
     @Test
     @Disabled("Impacted by V1_364_*.sql")
     void audioRequestDownloadGetShouldReturnBadRequestWhenMediaRequestEntityIsPlayback() throws Exception {
@@ -198,7 +198,7 @@ class AudioRequestsControllerDownloadIntTest extends IntegrationBase {
         );
     }
 
-    @Disabled("Impacted by V1_363__adding_not_null_constraints_part_4.sql")
+    @Disabled("Impacted by V1_365__adding_not_null_constraints_part_4.sql")
     @Test
     @Disabled("Impacted by V1_364_*.sql")
     void audioRequestDownloadGetShouldReturnErrorWhenNoRelatedTransientObjectExistsInDatabase() throws Exception {

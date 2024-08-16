@@ -46,7 +46,7 @@ class ExternalObjectDirectoryRepositoryTest  extends PostgresIntegrationBase {
 
     private List<ExternalObjectDirectoryEntity> entitiesToBeMarkedWithMediaOrAnnotationOutsideOfArmHours;
 
-    @Disabled("Impacted by V1_363__adding_not_null_constraints_part_4.sql")
+    @Disabled("Impacted by V1_365__adding_not_null_constraints_part_4.sql")
     @Test
     void testGetDirectoryIfMediaDate24Hours() throws Exception {
 
@@ -69,7 +69,7 @@ class ExternalObjectDirectoryRepositoryTest  extends PostgresIntegrationBase {
                               entitiesToBeMarkedWithMediaOrAnnotationOutsideOfArmHours.size());
     }
 
-    @Disabled("Impacted by V1_363__adding_not_null_constraints_part_4.sql")
+    @Disabled("Impacted by V1_365__adding_not_null_constraints_part_4.sql")
     @Test
     void testGetDirectoryIfMediaDateBeyond24Hours() throws Exception {
 
@@ -157,7 +157,7 @@ class ExternalObjectDirectoryRepositoryTest  extends PostgresIntegrationBase {
         Assertions.assertTrue(results.isEmpty());
     }
 
-    @Disabled("Impacted by V1_363__adding_not_null_constraints_part_4.sql")
+    @Disabled("Impacted by V1_365__adding_not_null_constraints_part_4.sql")
     @Test
     void testGetDirectoryIfMediaDateNotBeyondThreshold() throws Exception {
 
