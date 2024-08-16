@@ -1,5 +1,6 @@
 package uk.gov.hmcts.darts.casedocument.service;
 
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -8,10 +9,13 @@ import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.CaseDocumentEntity;
 import uk.gov.hmcts.darts.common.entity.CaseRetentionEntity;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
+import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.repository.CaseRepository;
 import uk.gov.hmcts.darts.common.util.DateConverterUtil;
 import uk.gov.hmcts.darts.retention.enums.CaseRetentionStatus;
+import uk.gov.hmcts.darts.test.common.data.CaseTestData;
+import uk.gov.hmcts.darts.test.common.data.CourthouseTestData;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 
 import java.time.OffsetDateTime;
@@ -21,6 +25,8 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.darts.test.common.data.CaseTestData.*;
+import static uk.gov.hmcts.darts.test.common.data.CourthouseTestData.*;
 
 class GenerateCaseDocumentForRetentionDateBatchProcessorIntTest extends IntegrationBase {
     protected static final String SOME_COURTHOUSE = "some-courthouse";
@@ -43,6 +49,16 @@ class GenerateCaseDocumentForRetentionDateBatchProcessorIntTest extends Integrat
     void setupData() {
         UserAccountEntity testUser = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
         when(mockUserIdentity.getUserAccount()).thenReturn(testUser);
+    }
+
+    @BeforeEach
+    void openHibernateSession() {
+        openInViewUtil.openEntityManager();
+    }
+
+    @AfterEach
+    void closeHibernateSession() {
+        openInViewUtil.closeEntityManager();
     }
 
     @Test
@@ -186,7 +202,8 @@ class GenerateCaseDocumentForRetentionDateBatchProcessorIntTest extends Integrat
     @Test
     void testProcessGenerateCaseDocumentForRetentionDateWithIsRetentionUpdateTrueNoDocumentGenerated() {
         // given
-        CourtCaseEntity courtCaseEntityWithNoCaseDocuments = dartsDatabase.createCase(SOME_COURTHOUSE, SOME_CASE_NUMBER_1);
+        var courthouse = createCourthouseWithName(SOME_COURTHOUSE);
+        CourtCaseEntity courtCaseEntityWithNoCaseDocuments = createCaseAt(courthouse, SOME_CASE_NUMBER_1);
         courtCaseEntityWithNoCaseDocuments.setRetentionUpdated(true);
         dartsDatabase.save(courtCaseEntityWithNoCaseDocuments);
 
@@ -201,7 +218,7 @@ class GenerateCaseDocumentForRetentionDateBatchProcessorIntTest extends Integrat
             courtCaseEntityWithNoCaseDocuments, CaseRetentionStatus.COMPLETE, OffsetDateTime.now().plusDays(20), false);
         dartsDatabase.save(caseRetentionObject2);
 
-        CourtCaseEntity courtCaseEntityWithCaseDocument = dartsDatabase.createCase(SOME_COURTHOUSE, SOME_CASE_NUMBER_2);
+        CourtCaseEntity courtCaseEntityWithCaseDocument = createCaseAt(courthouse, SOME_CASE_NUMBER_2);
         courtCaseEntityWithCaseDocument.setRetentionUpdated(true);
         dartsDatabase.save(courtCaseEntityWithCaseDocument);
 

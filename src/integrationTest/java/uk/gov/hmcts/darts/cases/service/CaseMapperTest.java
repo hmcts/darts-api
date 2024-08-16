@@ -1,10 +1,13 @@
 package uk.gov.hmcts.darts.cases.service;
 
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import uk.gov.hmcts.darts.cases.mapper.CasesMapper;
 import uk.gov.hmcts.darts.common.entity.EventEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
+import uk.gov.hmcts.darts.test.common.data.EventTestData;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 
 import java.time.OffsetDateTime;
@@ -19,6 +22,7 @@ import static java.util.Comparator.naturalOrder;
 import static java.util.stream.IntStream.rangeClosed;
 import static org.assertj.core.api.Assertions.assertThat;
 import static uk.gov.hmcts.darts.test.common.data.CaseTestData.createSomeMinimalCase;
+import static uk.gov.hmcts.darts.test.common.data.EventTestData.*;
 import static uk.gov.hmcts.darts.test.common.data.EventTestData.REPORTING_RESTRICTIONS_LIFTED_DB_ID;
 import static uk.gov.hmcts.darts.test.common.data.EventTestData.SECTION_11_1981_DB_ID;
 import static uk.gov.hmcts.darts.test.common.data.EventTestData.SECTION_4_1981_DB_ID;
@@ -30,6 +34,16 @@ class CaseMapperTest extends IntegrationBase {
 
     @Autowired
     private CasesMapper casesMapper;
+
+    @BeforeEach
+    void setUp() {
+        openInViewUtil.openEntityManager();
+    }
+
+    @AfterEach
+    void closeHibernateSession() {
+        openInViewUtil.closeEntityManager();
+    }
 
     @Test
     void mapsSingleCaseCorrectlyWhenZeroReportingRestrictionsAssociatedWithCase() {
@@ -99,6 +113,7 @@ class CaseMapperTest extends IntegrationBase {
         assertThat(mappedRestrictions).extracting("hearingId").hasSameElementsAs(hearingIdsFrom(reportingRestrictions));
         assertThat(mappedRestrictions).extracting("eventId").hasSameElementsAs(eventIdsFrom(reportingRestrictions));
         assertThat(mappedRestrictions).extracting((rr) -> rr.getEventTs().truncatedTo(MILLIS)).hasSameElementsAs(eventTsFrom(reportingRestrictions));
+
     }
 
     @Test
@@ -132,14 +147,12 @@ class CaseMapperTest extends IntegrationBase {
     @Test
     void includesReportingRestrictionsLifted() {
 
-        var event1 = dartsDatabase.getEventStub().createDefaultEvent();
+        var event1 = someMinimalEvent();
         event1.setTimestamp(OffsetDateTime.of(2020, 10, 1, 10, 0, 0, 0, ZoneOffset.UTC));
-        dartsDatabase.save(event1);
         var reportingRestriction = dartsDatabase.addHandlerToEvent(event1, someReportingRestrictionId());
 
-        var event2 = dartsDatabase.getEventStub().createDefaultEvent();
+        var event2 = someMinimalEvent();
         event2.setTimestamp(OffsetDateTime.of(2020, 11, 1, 10, 0, 0, 0, ZoneOffset.UTC));
-        dartsDatabase.save(event2);
         var reportingRestrictionLifted = dartsDatabase.addHandlerToEvent(event2, REPORTING_RESTRICTIONS_LIFTED_DB_ID);
 
         var minimalHearing = createSomeMinimalHearing();
@@ -196,7 +209,7 @@ class CaseMapperTest extends IntegrationBase {
     private List<EventEntity> createEventsWithDifferentTimestamps(List<OffsetDateTime> eventDateTimes) {
         return rangeClosed(1, eventDateTimes.size())
             .mapToObj(index -> {
-                var event = dartsDatabase.getEventStub().createDefaultEvent();
+                var event = EventTestData.someMinimalEvent();
                 event.setEventText("some-event-text-" + index);
                 event.setMessageId("some-message-id-" + index);
                 event.setTimestamp(eventDateTimes.get(index - 1));

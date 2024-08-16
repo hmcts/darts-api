@@ -585,6 +585,8 @@ public class DartsDatabaseStub {
 
     @Transactional
     public TranscriptionEntity save(TranscriptionEntity transcriptionEntity) {
+        save(transcriptionEntity.getHearing());
+        save(transcriptionEntity.getCourtroom());
         save(transcriptionEntity.getCourtCase());
         save(transcriptionEntity.getCreatedBy());
         save(transcriptionEntity.getLastModifiedBy());
@@ -626,6 +628,7 @@ public class DartsDatabaseStub {
         var systemUser = userAccountRepository.getReferenceById(0);
         userAccountEntity.setCreatedBy(systemUser);
         userAccountEntity.setLastModifiedBy(systemUser);
+
         return userAccountRepository.save(userAccountEntity);
     }
 
@@ -688,7 +691,6 @@ public class DartsDatabaseStub {
     private boolean isEntity(Object obj) {
         return obj.getClass().isAnnotationPresent(Entity.class);
     }
-
 
 
     @SneakyThrows
@@ -772,14 +774,14 @@ public class DartsDatabaseStub {
 
     private void saveSingleEventForHearing(HearingEntity hearing, EventEntity event) {
         event.setHearingEntities(new ArrayList<>(asList(hearingRepository.getReferenceById(hearing.getId()))));
-        eventRepository.save(event);
+        save(event);
     }
 
     public EventEntity addHandlerToEvent(EventEntity event, int handlerId) {
-        var handler = eventHandlerRepository.getReferenceById(handlerId);
+        var handler = eventHandlerRepository.findById(handlerId).orElseThrow();
         event.setEventType(handler);
         event.setIsLogEntry(false);
-        return eventRepository.save(event);
+        return save(event);
     }
 
     @Transactional

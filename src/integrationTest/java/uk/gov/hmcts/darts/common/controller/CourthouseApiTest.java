@@ -29,6 +29,7 @@ import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
 import uk.gov.hmcts.darts.common.repository.UserRolesCourthousesRepository;
 import uk.gov.hmcts.darts.courthouse.model.CourthousePost;
 import uk.gov.hmcts.darts.courthouse.model.ExtendedCourthousePost;
+import uk.gov.hmcts.darts.test.common.data.CourthouseTestData;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 import uk.gov.hmcts.darts.testutils.stubs.DartsDatabaseStub;
 import uk.gov.hmcts.darts.testutils.stubs.EntityGraphPersistence;
@@ -581,7 +582,7 @@ class CourthouseApiTest extends IntegrationBase {
         UserAccountEntity user = superAdminUserStub.givenUserIsAuthorised(authentication);
         createEnabledUserAccountEntity(user);
 
-        CourthouseEntity courtHouseEntity = dartsDatabase.createCourthouseUnlessExists(COURTHOUSE_NAME);
+        CourthouseEntity courtHouseEntity = CourthouseTestData.createCourthouseWithName(COURTHOUSE_NAME);
         courtHouseEntity.setDisplayName(COURTHOUSE_DISPLAY_NAME);
         dartsDatabase.save(courtHouseEntity);
 

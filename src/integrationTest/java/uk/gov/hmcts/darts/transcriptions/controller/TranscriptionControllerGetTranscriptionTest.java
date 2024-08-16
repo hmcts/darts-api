@@ -20,6 +20,8 @@ import uk.gov.hmcts.darts.common.entity.TranscriptionWorkflowEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.util.DateConverterUtil;
 import uk.gov.hmcts.darts.test.common.TestUtils;
+import uk.gov.hmcts.darts.test.common.data.HearingTestData;
+import uk.gov.hmcts.darts.test.common.data.TranscriptionTestData;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 import uk.gov.hmcts.darts.testutils.stubs.SuperAdminUserStub;
 import uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum;
@@ -33,6 +35,8 @@ import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static uk.gov.hmcts.darts.test.common.TestUtils.getContentsFromFile;
+import static uk.gov.hmcts.darts.test.common.data.HearingTestData.*;
+import static uk.gov.hmcts.darts.test.common.data.TranscriptionTestData.*;
 
 @AutoConfigureMockMvc
 class TranscriptionControllerGetTranscriptionTest extends IntegrationBase {
@@ -54,14 +58,13 @@ class TranscriptionControllerGetTranscriptionTest extends IntegrationBase {
 
     @BeforeEach
     void setUp() {
-        HearingEntity hearingEntity = dartsDatabase.givenTheDatabaseContainsCourtCaseWithHearingAndCourthouseWithRoom(
-            SOME_CASE_ID,
-            SOME_COURTHOUSE,
-            SOME_COURTROOM,
-            DateConverterUtil.toLocalDateTime(SOME_DATE_TIME)
-        );
-        CourthouseEntity courthouseEntity = hearingEntity.getCourtroom().getCourthouse();
-        assertEquals(SOME_COURTHOUSE, courthouseEntity.getCourthouseName());
+//        HearingEntity hearingEntity = dartsDatabase.givenTheDatabaseContainsCourtCaseWithHearingAndCourthouseWithRoom(
+//            SOME_CASE_ID,
+//            SOME_COURTHOUSE,
+//            SOME_COURTROOM,
+//            DateConverterUtil.toLocalDateTime(SOME_DATE_TIME)
+//        );
+//        CourthouseEntity courthouseEntity = hearingEntity.getCourtroom().getCourthouse();
 
         UserAccountEntity testUser = dartsDatabase.getUserAccountStub()
             .createAuthorisedIntegrationTestUser(courthouseEntity);
@@ -71,7 +74,7 @@ class TranscriptionControllerGetTranscriptionTest extends IntegrationBase {
     @Test
     void getTranscriptionWithHearing() throws Exception {
         HearingEntity hearingEntity = dartsDatabase.getHearingRepository().findAll().get(0);
-        TranscriptionEntity transcription = dartsDatabase.getTranscriptionStub().createTranscription(hearingEntity);
+        TranscriptionEntity transcription = someTranscriptionForHearing(hearingEntity);
         transcription.setCreatedDateTime(OffsetDateTime.of(2023, 6, 20, 10, 0, 0, 0, ZoneOffset.UTC));
         transcription.setStartTime(SOME_DATE_TIME);
         transcription.setEndTime(SOME_DATE_TIME);

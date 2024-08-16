@@ -1,10 +1,13 @@
 package uk.gov.hmcts.darts.transcriptions.service;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import uk.gov.hmcts.darts.common.entity.EventEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionEntity;
+import uk.gov.hmcts.darts.test.common.data.EventTestData;
+import uk.gov.hmcts.darts.test.common.data.HearingTestData;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 
 import java.time.OffsetDateTime;
@@ -17,9 +20,11 @@ import static java.util.Comparator.naturalOrder;
 import static java.util.stream.IntStream.rangeClosed;
 import static org.assertj.core.api.Assertions.assertThat;
 import static uk.gov.hmcts.darts.test.common.data.CaseTestData.createSomeMinimalCase;
+import static uk.gov.hmcts.darts.test.common.data.EventTestData.*;
 import static uk.gov.hmcts.darts.test.common.data.EventTestData.REPORTING_RESTRICTIONS_LIFTED_DB_ID;
 import static uk.gov.hmcts.darts.test.common.data.EventTestData.SECTION_11_1981_DB_ID;
 import static uk.gov.hmcts.darts.test.common.data.EventTestData.someReportingRestrictionId;
+import static uk.gov.hmcts.darts.test.common.data.HearingTestData.*;
 import static uk.gov.hmcts.darts.test.common.data.HearingTestData.createSomeMinimalHearing;
 
 @SuppressWarnings("VariableDeclarationUsageDistance")
@@ -27,6 +32,16 @@ class TranscriptionReportingRestrictionsMapperTest extends IntegrationBase {
 
     @Autowired
     private TranscriptionService transcriptionService;
+
+    @BeforeEach
+    void openSessionInView() {
+        openInViewUtil.openEntityManager();
+    }
+
+    @BeforeEach
+    void closeSessionInView() {
+        openInViewUtil.closeEntityManager();
+    }
 
     @Test
     void mapsTranscriptionsCorrectlyWhenZeroReportingRestrictionsAssociatedWithCase() {
@@ -42,7 +57,7 @@ class TranscriptionReportingRestrictionsMapperTest extends IntegrationBase {
         var reportingRestrictions = createEventsWithDefaults(1).stream()
             .map(eve -> dartsDatabase.addHandlerToEvent(eve, someReportingRestrictionId()))
             .toList();
-        var hearingEntity = dartsDatabase.saveEventsForHearing(dartsDatabase.getHearingStub().createMinimalHearing(), reportingRestrictions);
+        var hearingEntity = dartsDatabase.saveEventsForHearing(someMinimalHearing(), reportingRestrictions);
         var transcriptionEntity = dartsDatabase.getTranscriptionStub().createTranscription(hearingEntity);
 
         var transcriptionResponse = transcriptionService.getTranscription(transcriptionEntity.getId());
@@ -60,7 +75,7 @@ class TranscriptionReportingRestrictionsMapperTest extends IntegrationBase {
         var reportingRestrictions = createEventsWithDifferentTimestamps(3).stream()
             .map(eve -> dartsDatabase.addHandlerToEvent(eve, someReportingRestrictionId()))
             .toList();
-        var hearingEntity = dartsDatabase.saveEventsForHearing(dartsDatabase.getHearingStub().createMinimalHearing(), reportingRestrictions);
+        var hearingEntity = dartsDatabase.saveEventsForHearing(someMinimalHearing(), reportingRestrictions);
         var transcriptionEntity = dartsDatabase.getTranscriptionStub().createTranscription(hearingEntity);
 
         var transcriptionResponse = transcriptionService.getTranscription(transcriptionEntity.getId());
@@ -79,7 +94,7 @@ class TranscriptionReportingRestrictionsMapperTest extends IntegrationBase {
             .map(eve -> dartsDatabase.addHandlerToEvent(eve, someReportingRestrictionId()))
             .toList();
         var expectedOrderedTs = orderedTsFrom(reportingRestrictions);
-        var hearingEntity = dartsDatabase.saveEventsForHearing(dartsDatabase.getHearingStub().createMinimalHearing(), reportingRestrictions);
+        var hearingEntity = dartsDatabase.saveEventsForHearing(someMinimalHearing(), reportingRestrictions);
         var transcriptionEntity = dartsDatabase.getTranscriptionStub().createTranscription(hearingEntity);
 
         var transcriptionResponse = transcriptionService.getTranscription(transcriptionEntity.getId());
@@ -92,16 +107,16 @@ class TranscriptionReportingRestrictionsMapperTest extends IntegrationBase {
 
     @Test
     void includesReportingRestrictionsLifted() {
-        var event1 = dartsDatabase.getEventStub().createDefaultEvent();
+        var event1 = someMinimalEvent();
         event1.setTimestamp(now().minusDays(1));
         var reportingRestriction = dartsDatabase.addHandlerToEvent(event1, someReportingRestrictionId());
 
-        var event2 = dartsDatabase.getEventStub().createDefaultEvent();
+        var event2 = someMinimalEvent();
         event2.setTimestamp(now());
         var reportingRestrictionLifted = dartsDatabase.addHandlerToEvent(event2, REPORTING_RESTRICTIONS_LIFTED_DB_ID);
 
         var hearingEntity = dartsDatabase.saveEventsForHearing(
-            dartsDatabase.getHearingStub().createMinimalHearing(),
+            someMinimalHearing(),
             reportingRestriction,
             reportingRestrictionLifted
         );
@@ -115,15 +130,15 @@ class TranscriptionReportingRestrictionsMapperTest extends IntegrationBase {
 
     @Test
     void includesReportingRestrictionsLiftedWhenReapplied() {
-        var event1 = dartsDatabase.getEventStub().createDefaultEvent();
+        var event1 = someMinimalEvent();
         event1.setTimestamp(now().minusDays(2));
         var reportingRestriction = dartsDatabase.addHandlerToEvent(event1, someReportingRestrictionId());
 
-        var event2 = dartsDatabase.getEventStub().createDefaultEvent();
+        var event2 = someMinimalEvent();
         event2.setTimestamp(now().minusDays(1));
         var reportingRestrictionLifted = dartsDatabase.addHandlerToEvent(event2, REPORTING_RESTRICTIONS_LIFTED_DB_ID);
 
-        var event3 = dartsDatabase.getEventStub().createDefaultEvent();
+        var event3 = someMinimalEvent();
         event3.setTimestamp(now());
         var reappliedReportingRestriction = dartsDatabase.addHandlerToEvent(event3, SECTION_11_1981_DB_ID);
 
@@ -204,7 +219,7 @@ class TranscriptionReportingRestrictionsMapperTest extends IntegrationBase {
     private List<EventEntity> createEventsWithDefaults(int quantity) {
         return rangeClosed(1, quantity)
             .mapToObj(index -> {
-                var event = dartsDatabase.getEventStub().createDefaultEvent();
+                var event = someMinimalEvent();
                 event.setEventText("some-event-text-" + index);
                 event.setMessageId("some-message-id-" + index);
                 event.setTimestamp(now());

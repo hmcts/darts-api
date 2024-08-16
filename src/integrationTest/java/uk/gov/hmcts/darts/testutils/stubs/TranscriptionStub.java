@@ -29,6 +29,7 @@ import uk.gov.hmcts.darts.common.repository.TranscriptionStatusRepository;
 import uk.gov.hmcts.darts.common.repository.TranscriptionTypeRepository;
 import uk.gov.hmcts.darts.common.repository.TranscriptionUrgencyRepository;
 import uk.gov.hmcts.darts.common.repository.TranscriptionWorkflowRepository;
+import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
 import uk.gov.hmcts.darts.test.common.TestUtils;
 import uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum;
 import uk.gov.hmcts.darts.transcriptions.enums.TranscriptionTypeEnum;
@@ -72,6 +73,7 @@ public class TranscriptionStub {
     private final UserAccountStubComposable userAccountStub;
     private final HearingStub hearingStub;
     private final TranscriptionStubComposable transcriptionStubComposable;
+    private final UserAccountRepository userAccountRepository;
 
     public TranscriptionEntity createMinimalTranscription() {
         return createTranscription(hearingStub.createMinimalHearing());
@@ -236,6 +238,7 @@ public class TranscriptionStub {
             hearing.getTranscriptions().add(transcription);
         }
 
+        userAccountRepository.save(transcription.getCreatedBy());
         return transcriptionRepository.saveAndFlush(transcription);
     }
 

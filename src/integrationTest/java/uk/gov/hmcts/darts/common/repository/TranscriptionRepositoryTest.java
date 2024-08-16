@@ -8,6 +8,7 @@ import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionDocumentEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionEntity;
 import uk.gov.hmcts.darts.common.util.DateConverterUtil;
+import uk.gov.hmcts.darts.test.common.data.TranscriptionDocumentTestData;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 import uk.gov.hmcts.darts.testutils.stubs.TranscriptionDocumentStub;
 import uk.gov.hmcts.darts.testutils.stubs.TranscriptionStub;
@@ -19,6 +20,8 @@ import static java.util.Arrays.asList;
 import static java.util.stream.IntStream.range;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static uk.gov.hmcts.darts.test.common.data.CaseTestData.createSomeMinimalCase;
+import static uk.gov.hmcts.darts.test.common.data.CaseTestData.someMinimalCase;
+import static uk.gov.hmcts.darts.test.common.data.TranscriptionDocumentTestData.*;
 import static uk.gov.hmcts.darts.test.common.data.TranscriptionDocumentTestData.minimalTranscriptionDocument;
 
 class TranscriptionRepositoryTest extends IntegrationBase {
@@ -60,7 +63,7 @@ class TranscriptionRepositoryTest extends IntegrationBase {
 
     @Test
     void doesNotShowAutomated() {
-        TranscriptionEntity legacyTranscription = createTranscriptionWithDocument(courtCaseEntity, false);
+        TranscriptionEntity legacyTranscription = minimalTranscriptionDocument().getTranscription();
         legacyTranscription.setIsManualTranscription(false);
         dartsDatabase.save(legacyTranscription);
 

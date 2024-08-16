@@ -29,52 +29,56 @@ class CaseServiceGetTranscriptsTest extends IntegrationBase {
     private static final String COURTROOM = "1";
     private static final OffsetDateTime DATE_TIME = OffsetDateTime.of(2023, 6, 20, 10, 1, 0, 0, ZoneOffset.UTC);
 
+
     @BeforeEach
     void setupData() {
-        HearingEntity hearingEntity = dartsDatabase.givenTheDatabaseContainsCourtCaseWithHearingAndCourthouseWithRoom(
-            CASE_NUMBER,
-            COURTHOUSE,
-            COURTROOM,
-            DateConverterUtil.toLocalDateTime(OffsetDateTime.parse("2023-01-01T12:00Z"))
-        );
-        CourtCaseEntity courtCaseEntity = hearingEntity.getCourtCase();
-        caseId = courtCaseEntity.getId();
+        transactionalUtil.inTransaction(() -> {
+            HearingEntity hearingEntity = dartsDatabase.givenTheDatabaseContainsCourtCaseWithHearingAndCourthouseWithRoom(
+                CASE_NUMBER,
+                COURTHOUSE,
+                COURTROOM,
+                DateConverterUtil.toLocalDateTime(OffsetDateTime.parse("2023-01-01T12:00Z"))
+            );
+            CourtCaseEntity courtCaseEntity = hearingEntity.getCourtCase();
+            caseId = courtCaseEntity.getId();
 
-        // transcription with 0 docs - should be visible
-        // linked to case
-        TranscriptionEntity transcription = dartsDatabase.getTranscriptionStub().createTranscription(courtCaseEntity);
-        transcription.setId(1);
-        transcription.setCreatedDateTime(DATE_TIME);
-        transcription.setIsManualTranscription(true);
-        dartsDatabase.save(transcription);
-        createTranscriptionDocs(transcription, List.of());
+            // transcription with 0 docs - should be visible
+            // linked to case
+            TranscriptionEntity transcription = dartsDatabase.getTranscriptionStub().createTranscription(courtCaseEntity);
+            transcription.setId(1);
+            transcription.setCreatedDateTime(DATE_TIME);
+            transcription.setIsManualTranscription(true);
+            dartsDatabase.save(transcription);
+            createTranscriptionDocs(transcription, List.of());
 
-        // transcription with 3 docs, none hidden - should be visible
-        // linked to case
-        TranscriptionEntity transcription2 = dartsDatabase.getTranscriptionStub().createTranscription(courtCaseEntity);
-        transcription2.setId(1);
-        transcription2.setCreatedDateTime(DATE_TIME);
-        transcription2.setIsManualTranscription(true);
-        dartsDatabase.save(transcription2);
-        createTranscriptionDocs(transcription2, List.of(false, false, false));
+            // transcription with 3 docs, none hidden - should be visible
+            // linked to case
+            TranscriptionEntity transcription2 = dartsDatabase.getTranscriptionStub().createTranscription(courtCaseEntity);
+            transcription2.setId(1);
+            transcription2.setCreatedDateTime(DATE_TIME);
+            transcription2.setIsManualTranscription(true);
+            dartsDatabase.save(transcription2);
+            createTranscriptionDocs(transcription2, List.of(false, false, false));
 
-        // transcription with 3 docs, 1 hidden - should be visible
-        // linked to hearing
-        TranscriptionEntity transcription3 = dartsDatabase.getTranscriptionStub().createTranscription(hearingEntity);
-        transcription3.setId(3);
-        transcription3.setCreatedDateTime(DATE_TIME);
-        transcription3.setIsManualTranscription(true);
-        dartsDatabase.save(transcription3);
-        createTranscriptionDocs(transcription3, List.of(false, true, false));
+            // transcription with 3 docs, 1 hidden - should be visible
+            // linked to hearing
+            TranscriptionEntity transcription3 = dartsDatabase.getTranscriptionStub().createTranscription(hearingEntity);
+            transcription3.setId(3);
+            transcription3.setCreatedDateTime(DATE_TIME);
+            transcription3.setIsManualTranscription(true);
+            dartsDatabase.save(transcription3);
+            createTranscriptionDocs(transcription3, List.of(false, true, false));
 
-        // transcription with 3 docs, all hidden - should be hidden
-        // linked to hearing
-        TranscriptionEntity transcription4 = dartsDatabase.getTranscriptionStub().createTranscription(hearingEntity);
-        transcription3.setId(4);
-        transcription4.setCreatedDateTime(DATE_TIME);
-        transcription4.setIsManualTranscription(true);
-        dartsDatabase.save(transcription4);
-        createTranscriptionDocs(transcription4, List.of(true, true, true));
+            // transcription with 3 docs, all hidden - should be hidden
+            // linked to hearing
+            TranscriptionEntity transcription4 = dartsDatabase.getTranscriptionStub().createTranscription(hearingEntity);
+            transcription3.setId(4);
+            transcription4.setCreatedDateTime(DATE_TIME);
+            transcription4.setIsManualTranscription(true);
+            dartsDatabase.save(transcription4);
+            createTranscriptionDocs(transcription4, List.of(true, true, true));
+        });
+
     }
 
     @Test

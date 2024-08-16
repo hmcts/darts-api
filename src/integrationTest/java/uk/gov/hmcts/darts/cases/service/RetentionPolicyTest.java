@@ -10,11 +10,13 @@ import uk.gov.hmcts.darts.common.entity.CaseRetentionEntity;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
 import uk.gov.hmcts.darts.retention.enums.CaseRetentionStatus;
+import uk.gov.hmcts.darts.test.common.data.CaseTestData;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 
 import java.time.OffsetDateTime;
 
 import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.darts.test.common.data.CaseTestData.*;
 
 @SuppressWarnings("VariableDeclarationUsageDistance")
 class RetentionPolicyTest extends IntegrationBase {
@@ -108,7 +110,10 @@ class RetentionPolicyTest extends IntegrationBase {
 
     @Test
     void onePolicyWithCurrentStatePending() {
-        CourtCaseEntity courtCase = dartsDatabase.createCase("Swansea", "aCaseNumber");
+//        CourtCaseEntity courtCase = dartsDatabase.createCase("Swansea", "aCaseNumber");
+        CourtCaseEntity courtCase = someMinimalCase();
+        courtCase.getCourthouse().setCourthouseName("Swansea");
+        courtCase.setCaseNumber("aCaseNumber");
         courtCase.setCaseClosedTimestamp(OffsetDateTime.now());
         dartsDatabase.save(courtCase);
 

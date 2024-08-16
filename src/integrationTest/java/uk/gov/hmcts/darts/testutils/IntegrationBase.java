@@ -70,6 +70,8 @@ public class IntegrationBase {
     protected DartsDatabaseStub dartsDatabase;
     @Autowired
     protected ObjectMapper objectMapper;
+    @Autowired
+    protected TransactionalUtil transactionalUtil;
 
     @Value("${wiremock.server.port}")
     protected String wiremockPort;

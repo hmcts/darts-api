@@ -37,7 +37,7 @@ public class AdminEventsSearchGivensBuilder {
     }
 
     private EventEntity createEventWithCourtroom(CourtroomEntity courtroom) {
-        saveWithTransients(courtroom);
+        dartsDatabase.save(courtroom);
         var hearingEntity = createSomeMinimalHearing();
         hearingEntity.setCourtroom(courtroom);
         hearingEntity.getCourtCase().setCourthouse(courtroom.getCourthouse());
@@ -49,7 +49,7 @@ public class AdminEventsSearchGivensBuilder {
     }
 
     private EventEntity createEventWithHearing(HearingEntity hearingEntity) {
-        saveWithTransients(hearingEntity.getCourtroom());
+        dartsDatabase.save(hearingEntity.getCourtroom());
         var eventForHearing = createEventForHearing(hearingEntity);
         dartsDatabase.saveEventsForHearing(hearingEntity, eventForHearing);
         return eventForHearing;
@@ -57,7 +57,7 @@ public class AdminEventsSearchGivensBuilder {
 
     private EventEntity createEvent() {
         var hearing = createSomeMinimalHearing();
-        saveWithTransients(hearing.getCourtroom());
+        dartsDatabase.save(hearing.getCourtroom());
         var eventForHearing = createEventForHearing(hearing);
         dartsDatabase.saveEventsForHearing(hearing, eventForHearing);
         return eventForHearing;
@@ -66,16 +66,10 @@ public class AdminEventsSearchGivensBuilder {
     private EventEntity createEventForHearingOn(LocalDate date) {
         var hearing = createSomeMinimalHearing();
         hearing.setHearingDate(date);
-        saveWithTransients(hearing.getCourtroom());
+        dartsDatabase.save(hearing.getCourtroom());
         var eventForHearing = createEventForHearing(hearing);
         dartsDatabase.saveEventsForHearing(hearing, eventForHearing);
         return eventForHearing;
-    }
-
-
-    private void saveWithTransients(CourtroomEntity courtroom) {
-        dartsDatabase.save(courtroom.getCourthouse());
-        dartsDatabase.save(courtroom);
     }
 
 }

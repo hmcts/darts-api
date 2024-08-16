@@ -46,21 +46,23 @@ class CaseControllerGetCaseByIdTest extends IntegrationBase {
 
     @BeforeEach
     void setUp() {
-        hearingEntity = dartsDatabase.givenTheDatabaseContainsCourtCaseWithHearingAndCourthouseWithRoom(
-            SOME_CASE_NUMBER,
-            SOME_COURTHOUSE,
-            SOME_COURTROOM,
-            DateConverterUtil.toLocalDateTime(SOME_DATE_TIME)
-        );
-        CourtCaseEntity courtCase = hearingEntity.getCourtCase();
-        courtCase.addProsecutor("aProsecutor", dartsDatabase.save(minimalUserAccount()));
-        courtCase.addDefendant("aDefendant");
-        courtCase.addDefence("aDefence");
-        dartsDatabase.save(courtCase);
+        transactionalUtil.inTransaction(() -> {
+            hearingEntity = dartsDatabase.givenTheDatabaseContainsCourtCaseWithHearingAndCourthouseWithRoom(
+                SOME_CASE_NUMBER,
+                SOME_COURTHOUSE,
+                SOME_COURTROOM,
+                DateConverterUtil.toLocalDateTime(SOME_DATE_TIME)
+            );
+            CourtCaseEntity courtCase = hearingEntity.getCourtCase();
+            courtCase.addProsecutor("aProsecutor", dartsDatabase.save(minimalUserAccount()));
+            courtCase.addDefendant("aDefendant");
+            courtCase.addDefence("aDefence");
+            dartsDatabase.save(courtCase);
 
-        UserAccountEntity testUser = dartsDatabase.getUserAccountStub()
-            .createAuthorisedIntegrationTestUser(hearingEntity.getCourtroom().getCourthouse());
-        when(mockUserIdentity.getUserAccount()).thenReturn(testUser);
+            UserAccountEntity testUser = dartsDatabase.getUserAccountStub()
+                .createAuthorisedIntegrationTestUser(hearingEntity.getCourtroom().getCourthouse());
+            when(mockUserIdentity.getUserAccount()).thenReturn(testUser);
+        });
     }
 
     @Test
