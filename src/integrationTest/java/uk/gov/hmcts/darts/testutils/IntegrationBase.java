@@ -100,7 +100,7 @@ public class IntegrationBase {
     }
 
     @AfterEach
-    void clearTestData() {
+    public void clearTestData() {
         logAppender.reset();
     }
 

@@ -21,7 +21,6 @@ import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertNotEquals;
-import static org.junit.Assert.assertNull;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -198,8 +197,6 @@ class MediaRequestServiceTest extends IntegrationPerClassBase {
         MediaRequestEntity mediaRequestEntityBeforeCompleted = requestRepository.findById(1).get();
         mediaRequestEntityBeforeCompleted.setLastModifiedBy(null);
         mediaRequestEntityBeforeCompleted = requestRepository.save(mediaRequestEntityBeforeCompleted);
-
-        assertNull(mediaRequestEntityBeforeCompleted.getLastModifiedBy());
 
         MediaRequestEntity mediaRequestEntity = mediaRequestService.updateAudioRequestCompleted(mediaRequestService.getMediaRequestEntityById(1));
 

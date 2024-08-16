@@ -29,7 +29,7 @@ class AudioBeingProcessedFromArchiveQueryImplIntTest extends IntegrationBase {
                 VALUES (-1, NULL, 'BRISTOL', '2023-11-17 15:06:15.859244+00', '2023-11-17 15:06:15.859244+00', 0, 0, 'Bristol');
 
                 INSERT INTO darts.user_account (usr_id, dm_user_s_object_id, user_name, user_email_address, description, created_ts, last_modified_ts, last_login_ts, last_modified_by, created_by, account_guid, is_system_user, is_active, user_full_name)
-                VALUES (20000, NULL, 'Richard B', 'Richard.B@example.com', NULL, NULL, NULL, NULL, NULL, NULL, NULL, false, true, 'Richard B');
+                VALUES (20000, NULL, 'Richard B', 'Richard.B@example.com', NULL, NULL, NULL, NULL, 0, 0, NULL, false, true, 'Richard B');
 
                 INSERT INTO darts.security_group_courthouse_ae (grp_id, cth_id)
                 VALUES (-4, -1);

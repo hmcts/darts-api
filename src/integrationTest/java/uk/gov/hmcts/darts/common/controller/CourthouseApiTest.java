@@ -1,6 +1,7 @@
 package uk.gov.hmcts.darts.common.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.transaction.Transactional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
@@ -68,6 +69,7 @@ import static uk.gov.hmcts.darts.test.common.data.RegionTestData.minimalRegion;
 import static uk.gov.hmcts.darts.test.common.data.SecurityGroupTestData.createGroupForRole;
 
 @AutoConfigureMockMvc
+//TODO: TIDYUP
 class CourthouseApiTest extends IntegrationBase {
 
     private static final String ORIGINAL_USERNAME = "James Smith";
@@ -144,6 +146,7 @@ class CourthouseApiTest extends IntegrationBase {
     }
 
     @Test
+    @Transactional
     void adminCourthousesGet() throws Exception {
         UserIdentity mockUserIdentity = Mockito.mock(UserIdentity.class);
         UserAccountEntity user = superAdminUserStub.givenUserIsAuthorised(mockUserIdentity);
@@ -169,6 +172,7 @@ class CourthouseApiTest extends IntegrationBase {
     }
 
     @Test
+    @Transactional
     void adminCourthousesGetWithCase() throws Exception {
         UserAccountEntity user = superAdminUserStub.givenUserIsAuthorised(authentication);
         createEnabledUserAccountEntity(user);
@@ -194,6 +198,7 @@ class CourthouseApiTest extends IntegrationBase {
     }
 
     @Test
+    @Transactional
     void adminCourthousesGetWithHearing() throws Exception {
         UserAccountEntity user = superAdminUserStub.givenUserIsAuthorised(authentication);
         createEnabledUserAccountEntity(user);
@@ -221,6 +226,7 @@ class CourthouseApiTest extends IntegrationBase {
 
 
     @Test
+    @Transactional
     void courthousesWithRegionAndSecurityGroupsGet() throws Exception {
         UserAccountEntity user = superAdminUserStub.givenUserIsAuthorised(authentication);
         createEnabledUserAccountEntity(user);
@@ -255,6 +261,7 @@ class CourthouseApiTest extends IntegrationBase {
     }
 
     @Test
+    @Transactional
     void courthousesGet_ThreeCourthousesAssignedToUser() throws Exception {
         final CourthouseEntity swanseaCourthouse = dartsDatabase.createCourthouseUnlessExists(SWANSEA_CROWN_COURT);
         final CourthouseEntity leedsCourthouse = dartsDatabase.createCourthouseUnlessExists(LEEDS_COURT);
@@ -285,6 +292,7 @@ class CourthouseApiTest extends IntegrationBase {
     }
 
     @Test
+    @Transactional
     void courthousesGet_ThreeCourthousesAssignedToUserInactive() throws Exception {
         String courthouseName = "courthousetest";
         UserAccountEntity userAccountEntity = userStub.createAuthorisedIntegrationTestUser(false, courthouseName);
@@ -300,6 +308,7 @@ class CourthouseApiTest extends IntegrationBase {
     }
 
     @Test
+    @Transactional
     void courthousesGet_TwoCourthousesAssignedToUser() throws Exception {
         dartsDatabase.createCourthouseUnlessExists(LEEDS_COURT);
         final CourthouseEntity swanseaCourthouse = dartsDatabase.createCourthouseUnlessExists(SWANSEA_CROWN_COURT);
@@ -324,6 +333,8 @@ class CourthouseApiTest extends IntegrationBase {
     }
 
     @Test
+    @Transactional
+    //TODO: Move data setup
     void courthousesGetRequestedByJudge() throws Exception {
         final CourthouseEntity leedsCourthouse = dartsDatabase.createCourthouseUnlessExists(LEEDS_COURT);
         final CourthouseEntity swanseaCourthouse = dartsDatabase.createCourthouseUnlessExists(SWANSEA_CROWN_COURT);
@@ -357,6 +368,7 @@ class CourthouseApiTest extends IntegrationBase {
     }
 
     @Test
+    @Transactional
     void courthousesGetNonExistingId() throws Exception {
         UserAccountEntity user = superAdminUserStub.givenUserIsAuthorised(authentication);
         createEnabledUserAccountEntity(user);
@@ -369,6 +381,7 @@ class CourthouseApiTest extends IntegrationBase {
     }
 
     @Test
+    @Transactional
     void courthousesGetNotAuthorised() throws Exception {
         CourthouseEntity swanseaCourthouse = dartsDatabase.createCourthouseUnlessExists(SWANSEA_CROWN_COURT);
         Integer addedId = swanseaCourthouse.getId();
@@ -381,6 +394,7 @@ class CourthouseApiTest extends IntegrationBase {
     }
 
     @Test
+    @Transactional
     void courthousesGetRequestedByAdmin() throws Exception {
         // Given
         UserAccountEntity user = superAdminUserStub.givenUserIsAuthorised(authentication);
@@ -415,6 +429,7 @@ class CourthouseApiTest extends IntegrationBase {
     }
 
     @Test
+    @Transactional
     void courthousesPostShouldCreateExpectedApproverAndRequesterGroupsAndCourthouse() throws Exception {
         // Given
         UserAccountEntity user = superAdminUserStub.givenUserIsAuthorised(authentication);
@@ -471,6 +486,7 @@ class CourthouseApiTest extends IntegrationBase {
     }
 
     @Test
+    @Transactional
     void courthousesPostShouldFailWhenNonTranscriberSecurityGroupIsProvided() throws Exception {
         // Given
         final SecurityGroupEntity standingApproverGroup = transactionTemplate.execute(status -> {
@@ -507,6 +523,7 @@ class CourthouseApiTest extends IntegrationBase {
     }
 
     @Test
+    @Transactional
     void courthousesPostShouldSucceedWhenTranscriberSecurityGroupIsProvided() throws Exception {
         // Given
         final SecurityGroupEntity standingTranscriberGroup = transactionTemplate.execute(status -> {
@@ -548,6 +565,7 @@ class CourthouseApiTest extends IntegrationBase {
     }
 
     @Test
+    @Transactional
     void courthousesPostShouldFailWhenCourthouseWithSameNameAlreadyExists() throws Exception {
         // Given
         UserAccountEntity user = superAdminUserStub.givenUserIsAuthorised(authentication);
@@ -576,6 +594,7 @@ class CourthouseApiTest extends IntegrationBase {
     }
 
     @Test
+    @Transactional
     void courthousesPostShouldFailWhenCourthouseWithSameDisplayNameAlreadyExists() throws Exception {
         // Given
         UserAccountEntity user = superAdminUserStub.givenUserIsAuthorised(authentication);
@@ -604,6 +623,7 @@ class CourthouseApiTest extends IntegrationBase {
     }
 
     @Test
+    @Transactional
     void courthousesPostShouldSucceedWhenRegionIsProvided() throws Exception {
         // Given
         UserAccountEntity user = superAdminUserStub.givenUserIsAuthorised(authentication);
@@ -637,6 +657,7 @@ class CourthouseApiTest extends IntegrationBase {
     }
 
     @Test
+    @Transactional
     void courthousesPostShouldFailIfProvidedRegionDoesNotExist() throws Exception {
         // Given
         final int nonExistingRegionId = 999_999;
@@ -666,6 +687,7 @@ class CourthouseApiTest extends IntegrationBase {
     }
 
     @Test
+    @Transactional
     void courthousesPostShouldFailIfMissingCourthouseName() throws Exception {
         // Given
         UserAccountEntity user = superAdminUserStub.givenUserIsAuthorised(authentication);
@@ -692,6 +714,7 @@ class CourthouseApiTest extends IntegrationBase {
     }
 
     @Test
+    @Transactional
     void courthousesPostShouldFailIfMissingDisplayName() throws Exception {
         // Given
         UserAccountEntity user = superAdminUserStub.givenUserIsAuthorised(authentication);
@@ -718,6 +741,7 @@ class CourthouseApiTest extends IntegrationBase {
     }
 
     @Test
+    @Transactional
     void adminRegionsGet() throws Exception {
         UserAccountEntity user = superAdminUserStub.givenUserIsAuthorised(authentication);
         createEnabledUserAccountEntity(user);
@@ -742,6 +766,7 @@ class CourthouseApiTest extends IntegrationBase {
     }
 
     @Test
+    @Transactional
     void adminRegionsNotAuthorised() throws Exception {
         MockHttpServletRequestBuilder requestBuilder = get("/admin/regions")
             .contentType(MediaType.APPLICATION_JSON_VALUE);

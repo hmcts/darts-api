@@ -23,7 +23,7 @@ public class RetentionPolicyTypeTestData {
         retentionPolicyType.setCreatedBy(minimalUserAccount());
         retentionPolicyType.setLastModifiedBy(minimalUserAccount());
         retentionPolicyType.setDescription("some-description-" + postfix);
-
+        retentionPolicyType.setDisplayName("some_name");
         return retentionPolicyType;
     }
 }

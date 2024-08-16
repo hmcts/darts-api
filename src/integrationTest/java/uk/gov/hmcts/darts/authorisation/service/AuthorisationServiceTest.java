@@ -1,5 +1,6 @@
 package uk.gov.hmcts.darts.authorisation.service;
 
+import jakarta.transaction.Transactional;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -58,6 +59,17 @@ class AuthorisationServiceTest extends IntegrationBase {
 
     @Autowired
     private EntityGraphPersistence entityGraphPersistence;
+
+
+    @BeforeEach
+    void startHibernateSession() {
+        openInViewUtil.openEntityManager();
+    }
+
+    @AfterEach
+    void closeHibernateSession() {
+        openInViewUtil.closeEntityManager();
+    }
 
     @BeforeEach
     void beforeEach() {
@@ -123,16 +135,6 @@ class AuthorisationServiceTest extends IntegrationBase {
         userAccountRepository.saveAndFlush(newUser);
     }
 
-    @BeforeEach
-    void startHibernateSession() {
-        openInViewUtil.openEntityManager();
-    }
-
-    @AfterEach
-    void closeHibernateSession() {
-        openInViewUtil.closeEntityManager();
-    }
-
     private void addCourthouseToSecurityGroup(CourthouseEntity courthouseEntity, Integer securityGroupId) {
 
         var securityGroupEntity = dartsDatabase.getSecurityGroupRepository().findById(securityGroupId);
@@ -168,6 +170,8 @@ class AuthorisationServiceTest extends IntegrationBase {
 
     @Test
     void shouldGetAuthorisationForTestJudgeWithGlobalAccess() {
+
+
         SecurityGroupRepository securityGroupRepository = dartsDatabase.getSecurityGroupRepository();
 
         SecurityGroupEntity judgesSecurityGroup = securityGroupRepository.getReferenceById(TEST_JUDGE_GROUP_ID);

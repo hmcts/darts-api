@@ -133,8 +133,6 @@ class AnnotationDeleteTest extends IntegrationBase {
         var annotation = minimalAnnotationEntity();
         annotation.setDeleted(false);
         annotation.setCurrentOwner(userAccount);
-        annotation.setCreatedBy(userAccount);
-        annotation.setLastModifiedBy(userAccount);
         annotation.addHearing(dartsDatabase.save(hearing));
         dartsDatabase.save(annotation);
         return annotation;

@@ -12,6 +12,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.junit.platform.commons.JUnitException;
 import org.springframework.data.history.Revisions;
 import org.springframework.stereotype.Service;
+import uk.gov.hmcts.darts.aspect.LastModifiedByAndCreatedByAspect;
 import uk.gov.hmcts.darts.audio.entity.MediaRequestEntity;
 import uk.gov.hmcts.darts.audiorequests.model.AudioRequestType;
 import uk.gov.hmcts.darts.common.entity.AnnotationDocumentEntity;
@@ -189,6 +190,7 @@ public class DartsDatabaseStub {
     private final AutomatedTaskRepository automatedTaskRepository;
     private final ObjectAdminActionRepository objectAdminActionRepository;
     private final EventLinkedCaseRepository eventLinkedCaseRepository;
+    private final LastModifiedByAndCreatedByAspect aspect;
 
     private final AnnotationStub annotationStub;
     private final AuditStub auditStub;
@@ -389,6 +391,7 @@ public class DartsDatabaseStub {
         return hearingEntity;
     }
 
+
     public CourthouseEntity createCourthouseUnlessExists(String courthouseName) {
         return courthouseStub.createCourthouseUnlessExists(courthouseName);
     }
@@ -572,6 +575,8 @@ public class DartsDatabaseStub {
 
     @Transactional
     public <T> T save(T entity) {
+        aspect.processEntities(entity);
+
         Method getIdInstanceMethod;
         try {
             getIdInstanceMethod = entity.getClass().getMethod("getId");
@@ -590,6 +595,7 @@ public class DartsDatabaseStub {
     @SuppressWarnings({"PMD.CognitiveComplexity", "PMD.AvoidAccessibilityAlteration"})
     @Transactional
     public <T> T saveWithTransientEntities(T entity) {
+        aspect.processEntities(entity);
         try {
             // Check and persist transient entities
             Class<?> clazz = entity.getClass();
@@ -603,6 +609,7 @@ public class DartsDatabaseStub {
                         Method getIdMethod = fieldValue.getClass().getMethod("getId");
                         Object id = getIdMethod.invoke(fieldValue);
                         if (id == null || (id instanceof Integer && (Integer) id == 0)) {
+                            aspect.processEntities(fieldValue);
                             // Save the transient entity
                             entityManager.persist(fieldValue);
                             entityManager.flush();
@@ -641,7 +648,7 @@ public class DartsDatabaseStub {
 
         stream(entities).forEach(entity -> {
             Integer id;
-
+            aspect.processEntities(entity);
             try {
                 id = (Integer) getIdInstanceMethod.invoke(entity);
             } catch (IllegalAccessException | InvocationTargetException e) {
@@ -805,10 +812,10 @@ public class DartsDatabaseStub {
 
     @Transactional
     public void addUserToGroup(UserAccountEntity userAccount, SecurityGroupEntity securityGroup) {
+        userAccountRepository.save(userAccount);
         securityGroup.getUsers().add(userAccount);
         userAccount.getSecurityGroupEntities().add(securityGroup);
         securityGroupRepository.save(securityGroup);
-        userAccountRepository.save(userAccount);
     }
 
     @Transactional
