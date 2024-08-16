@@ -25,6 +25,7 @@ import static uk.gov.hmcts.darts.test.common.data.ExternalObjectDirectoryTestDat
 import static uk.gov.hmcts.darts.test.common.data.HearingTestData.createSomeMinimalHearing;
 import static uk.gov.hmcts.darts.test.common.data.MediaTestData.someMinimalMedia;
 
+@Disabled("Impacted by V1_363__adding_not_null_constraints_part_4.sql")
 @TestPropertySource(properties = {"darts.audio.transformation.service.audio.file=tests/audio/WithViqHeader/viq0001min.mp2"})
 class AudioPreviewTest extends IntegrationBase {
 

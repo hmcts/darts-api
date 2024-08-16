@@ -26,6 +26,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static uk.gov.hmcts.darts.testutils.DateHelper.convertSqlDateTimeToLocalDateTime;
 import static uk.gov.hmcts.darts.testutils.DateHelper.todaysDateMinusDaysFormattedForSql;
 
+@Disabled("Impacted by V1_363__adding_not_null_constraints_part_4.sql")
 @AutoConfigureMockMvc
 @Disabled("Impacted by V1_364_*.sql")
 class TranscriptionControllerGetTranscriberTranscriptsIntTest extends IntegrationBase {

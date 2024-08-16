@@ -45,7 +45,7 @@ import static uk.gov.hmcts.darts.test.common.data.HearingTestData.createHearingW
 import static uk.gov.hmcts.darts.test.common.data.JudgeTestData.createJudgeWithName;
 import static uk.gov.hmcts.darts.testutils.stubs.UserAccountStub.INTEGRATION_TEST_USER_EMAIL;
 
-
+@Disabled("Impacted by V1_363__adding_not_null_constraints_part_4.sql")
 @AutoConfigureMockMvc
 @SuppressWarnings({"PMD.VariableDeclarationUsageDistance", "PMD.NcssCount", "PMD.ExcessiveImports"})
 @Disabled("Impacted by V1_363__not_null_constraints_part3.sql")
