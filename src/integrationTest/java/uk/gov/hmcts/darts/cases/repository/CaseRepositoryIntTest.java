@@ -18,6 +18,7 @@ import java.time.ZoneOffset;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static uk.gov.hmcts.darts.test.common.data.CaseTestData.createSomeMinimalCase;
 
 class CaseRepositoryIntTest extends IntegrationBase {
     protected static final String SOME_COURTHOUSE = "some-courthouse";
@@ -35,23 +36,27 @@ class CaseRepositoryIntTest extends IntegrationBase {
 
     @Test
     void testFindByIsRetentionUpdatedTrueAndRetentionRetriesLessThan() {
+        // TODO: use CaseTestData
         // given
-        caseStub.createAndSaveCourtCase(courtCase -> {
-            courtCase.setRetentionUpdated(true);
-            courtCase.setRetentionRetries(3);
-        });
-        caseStub.createAndSaveCourtCase(courtCase -> {
-            courtCase.setRetentionUpdated(true);
-            courtCase.setRetentionRetries(4);
-        });
-        caseStub.createAndSaveCourtCase(courtCase -> {
-            courtCase.setRetentionUpdated(false);
-            courtCase.setRetentionRetries(1);
-        });
-        var matchingCase = caseStub.createAndSaveCourtCase(courtCase -> {
-            courtCase.setRetentionUpdated(true);
-            courtCase.setRetentionRetries(1);
-        });
+        CourtCaseEntity caseWithRetries3 = createSomeMinimalCase();
+        caseWithRetries3.setRetentionUpdated(true);
+        caseWithRetries3.setRetentionRetries(3);
+        dartsDatabase.save(caseWithRetries3);
+
+        CourtCaseEntity caseWithRetries4 = createSomeMinimalCase();
+        caseWithRetries4.setRetentionUpdated(true);
+        caseWithRetries4.setRetentionRetries(4);
+        dartsDatabase.save(caseWithRetries4);
+
+        CourtCaseEntity caseWithNoUpdate = createSomeMinimalCase();
+        caseWithNoUpdate.setRetentionUpdated(false);
+        caseWithNoUpdate.setRetentionRetries(1);
+        dartsDatabase.save(caseWithNoUpdate);
+
+        CourtCaseEntity matchingCase = createSomeMinimalCase();
+        matchingCase.setRetentionUpdated(true);
+        matchingCase.setRetentionRetries(1);
+        dartsDatabase.save(matchingCase);
 
         // when
         var result = caseRepository.findByIsRetentionUpdatedTrueAndRetentionRetriesLessThan(3);
@@ -64,35 +69,34 @@ class CaseRepositoryIntTest extends IntegrationBase {
     @Test
     void testFindCasesNeedingCaseDocumentGeneratedPaged() {
         // given
-        caseStub.createAndSaveCourtCase(courtCase -> {
-            courtCase.setClosed(true);
-            courtCase.setCaseClosedTimestamp(OffsetDateTime.now().minusDays(27));
-        });
+        CourtCaseEntity caseClosed27DaysAgo = createSomeMinimalCase();
+        caseClosed27DaysAgo.setClosed(true);
+        caseClosed27DaysAgo.setCaseClosedTimestamp(OffsetDateTime.now().minusDays(27));
+        dartsDatabase.save(caseClosed27DaysAgo);
 
-        var matchingCase1 = caseStub.createAndSaveCourtCase(courtCase -> {
-            courtCase.setClosed(true);
-            courtCase.setCaseClosedTimestamp(OffsetDateTime.now().minusDays(28));
-        });
+        CourtCaseEntity matchingCase1 = createSomeMinimalCase();
+        matchingCase1.setClosed(true);
+        matchingCase1.setCaseClosedTimestamp(OffsetDateTime.now().minusDays(28));
+        dartsDatabase.save(matchingCase1);
 
-        var matchingCase2 = caseStub.createAndSaveCourtCase(courtCase -> {
-            courtCase.setClosed(true);
-            courtCase.setCaseClosedTimestamp(OffsetDateTime.now().minusDays(29));
-        });
+        CourtCaseEntity matchingCase2 = createSomeMinimalCase();
+        matchingCase2.setClosed(true);
+        matchingCase2.setCaseClosedTimestamp(OffsetDateTime.now().minusDays(29));
+        dartsDatabase.save(matchingCase2);
 
-        caseStub.createAndSaveCourtCase(courtCase -> {
-            courtCase.setClosed(true);
-            courtCase.setCaseClosedTimestamp(OffsetDateTime.now().minusDays(29));
-        });
+        CourtCaseEntity matchingCase3 = createSomeMinimalCase();
+        matchingCase3.setClosed(true);
+        matchingCase3.setCaseClosedTimestamp(OffsetDateTime.now().minusDays(29));
+        dartsDatabase.save(matchingCase3);
 
-        var courtCaseWithCaseDocument = caseStub.createAndSaveCourtCase(courtCase -> {
-            courtCase.setClosed(true);
-            courtCase.setCaseClosedTimestamp(OffsetDateTime.now().minusDays(29));
-        });
+        CourtCaseEntity courtCaseWithCaseDocument = createSomeMinimalCase();
+        courtCaseWithCaseDocument.setClosed(true);
+        courtCaseWithCaseDocument.setCaseClosedTimestamp(OffsetDateTime.now().minusDays(29));
+        dartsDatabase.save(courtCaseWithCaseDocument);
         dartsDatabase.getCaseDocumentStub().createCaseDocumentEntity(courtCaseWithCaseDocument, courtCaseWithCaseDocument.getCreatedBy());
 
-        caseStub.createAndSaveCourtCase(courtCase -> {
-            courtCase.setClosed(false);
-        });
+        CourtCaseEntity openCase = createSomeMinimalCase();
+        dartsDatabase.save(openCase);
 
         // when
         List<CourtCaseEntity> result = caseRepository.findCasesNeedingCaseDocumentGenerated(
@@ -107,35 +111,34 @@ class CaseRepositoryIntTest extends IntegrationBase {
     @Test
     void testFindCasesNeedingCaseDocumentGeneratedUnpaged() {
         // given
-        caseStub.createAndSaveCourtCase(courtCase -> {
-            courtCase.setClosed(true);
-            courtCase.setCaseClosedTimestamp(OffsetDateTime.now().minusDays(27));
-        });
+        CourtCaseEntity notMatchingCase = createSomeMinimalCase();
+        notMatchingCase.setClosed(true);
+        notMatchingCase.setCaseClosedTimestamp(OffsetDateTime.now().minusDays(27));
+        dartsDatabase.save(notMatchingCase);
 
-        var courtCaseWithCaseDocument = caseStub.createAndSaveCourtCase(courtCase -> {
-            courtCase.setClosed(true);
-            courtCase.setCaseClosedTimestamp(OffsetDateTime.now().minusDays(29));
-        });
+        CourtCaseEntity courtCaseWithCaseDocument = createSomeMinimalCase();
+        courtCaseWithCaseDocument.setClosed(true);
+        courtCaseWithCaseDocument.setCaseClosedTimestamp(OffsetDateTime.now().minusDays(29));
+        dartsDatabase.save(courtCaseWithCaseDocument);
         dartsDatabase.getCaseDocumentStub().createAndSaveCaseDocumentEntity(courtCaseWithCaseDocument);
 
-        caseStub.createAndSaveCourtCase(courtCase -> {
-            courtCase.setClosed(false);
-        });
+        CourtCaseEntity openCase = createSomeMinimalCase();
+        dartsDatabase.save(openCase);
 
-        var matchingCase1 = caseStub.createAndSaveCourtCase(courtCase -> {
-            courtCase.setClosed(true);
-            courtCase.setCaseClosedTimestamp(OffsetDateTime.now().minusDays(28));
-        });
+        CourtCaseEntity matchingCase1 = createSomeMinimalCase();
+        matchingCase1.setClosed(true);
+        matchingCase1.setCaseClosedTimestamp(OffsetDateTime.now().minusDays(28));
+        dartsDatabase.save(matchingCase1);
 
-        var matchingCase2 = caseStub.createAndSaveCourtCase(courtCase -> {
-            courtCase.setClosed(true);
-            courtCase.setCaseClosedTimestamp(OffsetDateTime.now().minusDays(29));
-        });
+        CourtCaseEntity matchingCase2 = createSomeMinimalCase();
+        matchingCase2.setClosed(true);
+        matchingCase2.setCaseClosedTimestamp(OffsetDateTime.now().minusDays(28));
+        dartsDatabase.save(matchingCase2);
 
-        var matchingCase3 = caseStub.createAndSaveCourtCase(courtCase -> {
-            courtCase.setClosed(true);
-            courtCase.setCaseClosedTimestamp(OffsetDateTime.now().minusDays(29));
-        });
+        CourtCaseEntity matchingCase3 = createSomeMinimalCase();
+        matchingCase3.setClosed(true);
+        matchingCase3.setCaseClosedTimestamp(OffsetDateTime.now().minusDays(29));
+        dartsDatabase.save(matchingCase3);
 
         assertThat(dartsDatabase.getCaseRepository().findAll()).hasSize(6);
 
