@@ -11,6 +11,7 @@ import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 import uk.gov.hmcts.darts.common.repository.CaseRepository;
 import uk.gov.hmcts.darts.common.repository.CourthouseRepository;
+import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
 import uk.gov.hmcts.darts.test.common.data.CaseTestData;
 
 import java.time.LocalDateTime;
@@ -39,21 +40,28 @@ public class CourtCaseStub {
     @Autowired
     CourthouseStub courthouseStub;
 
+    @Autowired
+    private UserAccountRepository userAccountRepository;
+
     @Transactional
     public CourtCaseEntity createAndSaveMinimalCourtCase() {
-
-        var courtCase = CaseTestData.createSomeMinimalCase();
+        CourtCaseEntity courtCase = CaseTestData.createSomeMinimalCase();
+        userAccountRepository.save(courtCase.getCreatedBy());
+        userAccountRepository.save(courtCase.getCourthouse().getCreatedBy());
+        userAccountRepository.save(courtCase.getCourthouse().getLastModifiedBy());
         return caseRepository.save(courtCase);
     }
 
     @Transactional
     public CourtCaseEntity createAndSaveMinimalCourtCase(String caseNumber, Integer courthouseId) {
         var courtCase = CaseTestData.createSomeMinimalCase(caseNumber, courthouseRepository.findById(courthouseId).get());
+        userAccountRepository.save(courtCase.getCreatedBy());
         return caseRepository.save(courtCase);
     }
 
     public CourtCaseEntity createAndSaveMinimalCourtCase(String caseNumber, CourthouseEntity courthouse) {
         var courtCase = CaseTestData.createSomeMinimalCase(caseNumber, courthouse);
+        userAccountRepository.save(courtCase.getCreatedBy());
         return caseRepository.save(courtCase);
     }
 
@@ -64,6 +72,7 @@ public class CourtCaseStub {
     public CourtCaseEntity createAndSaveCourtCase(Consumer<CourtCaseEntity> caseConsumer) {
 
         var courtCase = createAndSaveMinimalCourtCase();
+        userAccountRepository.save(courtCase.getCreatedBy());
         caseConsumer.accept(courtCase);
         return caseRepository.save(courtCase);
     }
@@ -74,6 +83,8 @@ public class CourtCaseStub {
     @Transactional
     public CourtCaseEntity createAndSaveCourtCaseWithHearings(Consumer<CourtCaseEntity> caseConsumer) {
         var courtCase = createAndSaveMinimalCourtCase();
+        userAccountRepository.save(courtCase.getCreatedBy());
+        userAccountRepository.save(courtCase.getCourthouse().getCreatedBy());
         caseConsumer.accept(courtCase);
 
         var courthouseName = courtCase.getCourthouse().getCourthouseName();

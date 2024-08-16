@@ -11,6 +11,7 @@ import static uk.gov.hmcts.darts.test.common.data.CourthouseTestData.someMinimal
 import static uk.gov.hmcts.darts.test.common.data.DefenceTestData.createDefenceForCaseWithName;
 import static uk.gov.hmcts.darts.test.common.data.DefendantTestData.createDefendantForCaseWithName;
 import static uk.gov.hmcts.darts.test.common.data.ProsecutorTestData.createProsecutorForCaseWithName;
+import static uk.gov.hmcts.darts.test.common.data.UserAccountTestData.minimalUserAccount;
 
 @UtilityClass
 @SuppressWarnings({"HideUtilityClassConstructor"})
@@ -23,6 +24,9 @@ public class CaseTestData {
         courtCaseEntity.setCaseNumber("case-1-" + postfix);
         courtCaseEntity.setClosed(false);
         courtCaseEntity.setInterpreterUsed(false);
+        var accountEntity = minimalUserAccount();
+        courtCaseEntity.setCreatedBy(accountEntity);
+        courtCaseEntity.setLastModifiedBy(accountEntity);
         return courtCaseEntity;
     }
 
@@ -55,6 +59,9 @@ public class CaseTestData {
         courtCaseEntity.addProsecutor(createProsecutorForCaseWithName(courtCaseEntity, "aProsecutor"));
         courtCaseEntity.setClosed(false);
         courtCaseEntity.setInterpreterUsed(false);
+        var accountEntity = minimalUserAccount();
+        courtCaseEntity.setCreatedBy(accountEntity);
+        courtCaseEntity.setLastModifiedBy(accountEntity);
         return courtCaseEntity;
     }
 
@@ -70,6 +77,9 @@ public class CaseTestData {
         courtCaseEntity.addProsecutor(createProsecutorForCaseWithName(courtCaseEntity, "aProsecutor"));
         courtCaseEntity.setClosed(false);
         courtCaseEntity.setInterpreterUsed(false);
+        var accountEntity = minimalUserAccount();
+        courtCaseEntity.setCreatedBy(accountEntity);
+        courtCaseEntity.setLastModifiedBy(accountEntity);
         createdCaseConsumer.accept(courtCaseEntity);
         return courtCaseEntity;
     }

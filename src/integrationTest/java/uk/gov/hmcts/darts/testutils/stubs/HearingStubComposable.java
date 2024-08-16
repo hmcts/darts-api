@@ -5,6 +5,7 @@ import org.springframework.stereotype.Component;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
+import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
 import uk.gov.hmcts.darts.common.service.RetrieveCoreObjectService;
 
 import java.time.LocalDateTime;
@@ -21,10 +22,13 @@ import static uk.gov.hmcts.darts.test.common.data.CourtroomTestData.createCourtR
 @RequiredArgsConstructor
 public class HearingStubComposable {
     private final RetrieveCoreObjectService retrieveCoreObjectService;
+    private final UserAccountRepository userAccountRepository;
 
     public HearingEntity createHearing(String courthouseName, String courtroomName, String caseNumber,
                                        LocalDateTime hearingDate, CourthouseStub courthouseStub, UserAccountStub userAccountStub) {
-        courthouseStub.createCourthouseUnlessExists(courthouseName);
+        var courthouse = courthouseStub.createCourthouseUnlessExists(courthouseName);
+        userAccountRepository.save(courthouse.getCreatedBy());
+        userAccountRepository.save(courthouse.getLastModifiedBy());
         return retrieveCoreObjectService.retrieveOrCreateHearing(
             courthouseName,
             courtroomName,
