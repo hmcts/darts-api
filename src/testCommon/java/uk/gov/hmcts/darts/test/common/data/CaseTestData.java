@@ -46,6 +46,9 @@ public class CaseTestData {
         courtCaseEntity.setCaseNumber(caseNumber);
         courtCaseEntity.setClosed(false);
         courtCaseEntity.setInterpreterUsed(false);
+        var accountEntity = minimalUserAccount();
+        courtCaseEntity.setCreatedBy(accountEntity);
+        courtCaseEntity.setLastModifiedBy(accountEntity);
         return courtCaseEntity;
     }
 

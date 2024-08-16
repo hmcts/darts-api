@@ -47,6 +47,7 @@ public class CourtCaseStub {
     public CourtCaseEntity createAndSaveMinimalCourtCase() {
         CourtCaseEntity courtCase = CaseTestData.createSomeMinimalCase();
         userAccountRepository.save(courtCase.getCreatedBy());
+        userAccountRepository.save(courtCase.getLastModifiedBy());
         userAccountRepository.save(courtCase.getCourthouse().getCreatedBy());
         userAccountRepository.save(courtCase.getCourthouse().getLastModifiedBy());
         return caseRepository.save(courtCase);
@@ -54,14 +55,18 @@ public class CourtCaseStub {
 
     @Transactional
     public CourtCaseEntity createAndSaveMinimalCourtCase(String caseNumber, Integer courthouseId) {
-        var courtCase = CaseTestData.createSomeMinimalCase(caseNumber, courthouseRepository.findById(courthouseId).get());
-        userAccountRepository.save(courtCase.getCreatedBy());
+        CourtCaseEntity courtCase = CaseTestData.createSomeMinimalCase(caseNumber, courthouseRepository.findById(courthouseId).get());
+        var systemUser = userAccountRepository.getReferenceById(0);
+        courtCase.setCreatedBy(systemUser);
+        courtCase.setLastModifiedBy(systemUser);
         return caseRepository.save(courtCase);
     }
 
     public CourtCaseEntity createAndSaveMinimalCourtCase(String caseNumber, CourthouseEntity courthouse) {
-        var courtCase = CaseTestData.createSomeMinimalCase(caseNumber, courthouse);
-        userAccountRepository.save(courtCase.getCreatedBy());
+        CourtCaseEntity courtCase = CaseTestData.createSomeMinimalCase(caseNumber, courthouse);
+        var systemUser = userAccountRepository.getReferenceById(0);
+        courtCase.setCreatedBy(systemUser);
+        courtCase.setLastModifiedBy(systemUser);
         return caseRepository.save(courtCase);
     }
 
@@ -70,9 +75,10 @@ public class CourtCaseStub {
      */
     @Transactional
     public CourtCaseEntity createAndSaveCourtCase(Consumer<CourtCaseEntity> caseConsumer) {
-
         var courtCase = createAndSaveMinimalCourtCase();
-        userAccountRepository.save(courtCase.getCreatedBy());
+        var systemUser = userAccountRepository.getReferenceById(0);
+        courtCase.setCreatedBy(systemUser);
+        courtCase.setLastModifiedBy(systemUser);
         caseConsumer.accept(courtCase);
         return caseRepository.save(courtCase);
     }
@@ -84,7 +90,9 @@ public class CourtCaseStub {
     public CourtCaseEntity createAndSaveCourtCaseWithHearings(Consumer<CourtCaseEntity> caseConsumer) {
         var courtCase = createAndSaveMinimalCourtCase();
         userAccountRepository.save(courtCase.getCreatedBy());
+        userAccountRepository.save(courtCase.getLastModifiedBy());
         userAccountRepository.save(courtCase.getCourthouse().getCreatedBy());
+        userAccountRepository.save(courtCase.getCourthouse().getLastModifiedBy());
         caseConsumer.accept(courtCase);
 
         var courthouseName = courtCase.getCourthouse().getCourthouseName();

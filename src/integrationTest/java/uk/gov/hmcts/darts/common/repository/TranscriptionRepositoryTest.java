@@ -62,7 +62,7 @@ class TranscriptionRepositoryTest extends IntegrationBase {
     void doesNotShowAutomated() {
         TranscriptionEntity legacyTranscription = createTranscriptionWithDocument(courtCaseEntity, false);
         legacyTranscription.setIsManualTranscription(false);
-        dartsDatabase.save(legacyTranscription);
+        transcriptionRepository.save(legacyTranscription);
 
         List<TranscriptionEntity> transcriptionEntities = transcriptionRepository.findByCaseIdManualOrLegacy(caseId, true);
         assertEquals(4, transcriptionEntities.size());

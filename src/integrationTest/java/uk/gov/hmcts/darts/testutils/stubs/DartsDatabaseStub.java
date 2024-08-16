@@ -543,7 +543,7 @@ public class DartsDatabaseStub {
 
     @Transactional
     public CourthouseEntity save(CourthouseEntity courthouse) {
-        userAccountRepository.save(courthouse.getCreatedBy());
+        save(courthouse.getCreatedBy());
         return courthouseRepository.save(courthouse);
     }
 
@@ -552,7 +552,7 @@ public class DartsDatabaseStub {
         save(courtroom.getCourthouse());
         var createdBy = courtroom.getCreatedBy();
         if (createdBy != null) {
-            userAccountRepository.save(createdBy);
+            save(createdBy);
         }
         return courtroomRepository.save(courtroom);
     }
@@ -561,10 +561,10 @@ public class DartsDatabaseStub {
     public CourtCaseEntity save(CourtCaseEntity courtCase) {
         save(courtCase.getCourthouse());
         if (courtCase.getCreatedBy() != null) {
-            userAccountRepository.save(courtCase.getCreatedBy());
+            save(courtCase.getCreatedBy());
         }
         if (courtCase.getLastModifiedBy() != null) {
-            userAccountRepository.save(courtCase.getLastModifiedBy());
+            save(courtCase.getLastModifiedBy());
         }
         judgeRepository.saveAll(courtCase.getJudges());
         courtCase.getDefenceList().forEach(this::save);
@@ -574,53 +574,61 @@ public class DartsDatabaseStub {
 
     @Transactional
     public DefenceEntity save(DefenceEntity defenceEntity) {
-        userAccountRepository.save(defenceEntity.getCreatedBy());
-        userAccountRepository.save(defenceEntity.getLastModifiedBy());
+        save(defenceEntity.getCreatedBy());
+        save(defenceEntity.getLastModifiedBy());
         return defenceEntity;
     }
 
     @Transactional
     public DefendantEntity save(DefendantEntity defendantEntity) {
-        userAccountRepository.save(defendantEntity.getCreatedBy());
-        userAccountRepository.save(defendantEntity.getLastModifiedBy());
+        save(defendantEntity.getCreatedBy());
+        save(defendantEntity.getLastModifiedBy());
         return defendantEntity;
     }
 
     @Transactional
     public TranscriptionEntity save(TranscriptionEntity transcriptionEntity) {
         save(transcriptionEntity.getCourtCase());
-        userAccountRepository.save(transcriptionEntity.getCreatedBy());
-        userAccountRepository.save(transcriptionEntity.getLastModifiedBy());
+        save(transcriptionEntity.getCreatedBy());
+        save(transcriptionEntity.getLastModifiedBy());
         var transcription = transcriptionRepository.save(transcriptionEntity);
-        userAccountRepository.save(transcription.getCreatedBy());
+        save(transcription.getCreatedBy());
         transcription.getTranscriptionDocumentEntities().forEach(td -> {
-            userAccountRepository.save(td.getUploadedBy());
-            userAccountRepository.save(td.getLastModifiedBy());
+            save(td.getUploadedBy());
+            save(td.getLastModifiedBy());
             transcriptionDocumentRepository.save(td);
         });
         return transcription;
     }
 
     @Transactional
+    public UserAccountEntity save(UserAccountEntity userAccountEntity) {
+        var systemUser = userAccountRepository.getReferenceById(0);
+        userAccountEntity.setCreatedBy(systemUser);
+        userAccountEntity.setLastModifiedBy(systemUser);
+        return userAccountRepository.save(userAccountEntity);
+    }
+
+    @Transactional
     public RetentionPolicyTypeEntity save(RetentionPolicyTypeEntity retentionPolicyTypeEntity) {
-        userAccountRepository.save(retentionPolicyTypeEntity.getCreatedBy());
-        userAccountRepository.save(retentionPolicyTypeEntity.getLastModifiedBy());
+        save(retentionPolicyTypeEntity.getCreatedBy());
+        save(retentionPolicyTypeEntity.getLastModifiedBy());
         return retentionPolicyTypeRepository.save(retentionPolicyTypeEntity);
     }
 
     @Transactional
     public EventEntity save(EventEntity eventEntity) {
-        userAccountRepository.save(eventEntity.getCreatedBy());
-        userAccountRepository.save(eventEntity.getLastModifiedBy());
+        save(eventEntity.getCreatedBy());
+        save(eventEntity.getLastModifiedBy());
         save(eventEntity.getCourtroom());
         return eventRepository.save(eventEntity);
     }
 
     @Transactional
     public CaseRetentionEntity save(CaseRetentionEntity caseRetentionEntity) {
-        userAccountRepository.save(caseRetentionEntity.getSubmittedBy());
-        userAccountRepository.save(caseRetentionEntity.getCreatedBy());
-        userAccountRepository.save(caseRetentionEntity.getLastModifiedBy());
+        save(caseRetentionEntity.getSubmittedBy());
+        save(caseRetentionEntity.getCreatedBy());
+        save(caseRetentionEntity.getLastModifiedBy());
         save(caseRetentionEntity.getCourtCase());
         save(caseRetentionEntity.getRetentionPolicyType());
         var caseManagementRetentionEntity = caseRetentionEntity.getCaseManagementRetention();
