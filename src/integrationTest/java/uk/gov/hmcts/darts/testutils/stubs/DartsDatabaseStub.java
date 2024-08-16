@@ -397,13 +397,13 @@ public class DartsDatabaseStub {
     }
 
     public CourthouseEntity createCourthouseWithNameAndCode(String name, Integer code, String displayName) {
-        var courthouse = CourthouseTestData.createCourthouseWithName(name);
+        CourthouseEntity courthouse = CourthouseTestData.createCourthouseWithName(name);
         courthouse.setCode(code);
         courthouse.setDisplayName(displayName);
         UserAccountEntity defaultUser = userAccountRepository.getReferenceById(0);
         courthouse.setCreatedBy(defaultUser);
         courthouse.setLastModifiedBy(defaultUser);
-        return courthouseRepository.save(courthouse);
+        return save(courthouse);
     }
 
     @Transactional
