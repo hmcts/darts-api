@@ -556,6 +556,14 @@ public class DartsDatabaseStub {
     }
 
     @Transactional
+    public EventEntity save(EventEntity eventEntity) {
+        userAccountRepository.save(eventEntity.getCreatedBy());
+        userAccountRepository.save(eventEntity.getLastModifiedBy());
+        save(eventEntity.getCourtroom());
+        return eventRepository.save(eventEntity);
+    }
+
+    @Transactional
     public TranscriptionEntity save(TranscriptionEntity transcriptionEntity) {
         save(transcriptionEntity.getCourtCase());
         userAccountRepository.save(transcriptionEntity.getCreatedBy());
@@ -706,7 +714,7 @@ public class DartsDatabaseStub {
 
     private void saveSingleEventForHearing(HearingEntity hearing, EventEntity event) {
         event.setHearingEntities(List.of(hearingRepository.getReferenceById(hearing.getId())));
-        eventRepository.save(event);
+        save(event);
     }
 
     public EventEntity addHandlerToEvent(EventEntity event, int handlerId) {

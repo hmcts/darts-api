@@ -13,7 +13,7 @@ import java.util.Random;
 import static java.util.Arrays.asList;
 import static uk.gov.hmcts.darts.event.enums.EventStatus.MODERNISED;
 import static uk.gov.hmcts.darts.test.common.data.CourtroomTestData.someMinimalCourtRoom;
-
+import static uk.gov.hmcts.darts.test.common.data.UserAccountTestData.minimalUserAccount;
 
 @UtilityClass
 @SuppressWarnings({"HideUtilityClassConstructor"})
@@ -35,6 +35,9 @@ public class EventTestData {
         eventEntity.setTimestamp(OffsetDateTime.now());
         eventEntity.setIsLogEntry(false);
         eventEntity.setIsCurrent(true);
+        var userAccount = minimalUserAccount();
+        eventEntity.setCreatedBy(userAccount);
+        eventEntity.setLastModifiedBy(userAccount);
         return eventEntity;
     }
 
@@ -48,6 +51,9 @@ public class EventTestData {
         event.setEventType(createTestEventHandlerEntity(eventName));
         event.setIsCurrent(true);
         event.setEventStatus(MODERNISED.getStatusNumber());
+        var userAccount = minimalUserAccount();
+        event.setCreatedBy(userAccount);
+        event.setLastModifiedBy(userAccount);
         return event;
     }
 
