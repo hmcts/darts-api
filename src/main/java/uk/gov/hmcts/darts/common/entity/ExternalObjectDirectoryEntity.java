@@ -90,6 +90,9 @@ public class ExternalObjectDirectoryEntity extends CreatedModifiedBaseEntity imp
     @Column(name = "is_response_cleaned")
     private boolean responseCleaned;
 
+    @Column(name = "osr_uuid")
+    private Long osrUuid;
+
     @Column(name = "update_retention")
     private boolean updateRetention;
 
