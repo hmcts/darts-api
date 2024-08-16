@@ -83,6 +83,7 @@ public class TranscriberTranscriptsQueryImpl implements TranscriberTranscriptsQu
                     GROUP BY tra_id
                 ) latest_trw ON tra.tra_id = latest_trw.tra_id AND approved_trw.workflow_ts = latest_trw.latest_ts
                 WHERE latest_trw.latest_ts >= :date_limit
+                AND tra.is_current = true
                 ORDER BY transcription_id desc
                 LIMIT :max_result_size
                 """,
@@ -161,6 +162,7 @@ public class TranscriberTranscriptsQueryImpl implements TranscriberTranscriptsQu
                         WHERE trd.tra_id = tra.tra_id
                     )
                 )
+                AND tra.is_current = true
                                 
                 UNION
 
@@ -219,6 +221,7 @@ public class TranscriberTranscriptsQueryImpl implements TranscriberTranscriptsQu
                         WHERE trd.tra_id = tra.tra_id
                     )
                 )
+                AND tra.is_current = true
                 ORDER BY transcription_id desc
                 LIMIT :max_result_size
                 """,
