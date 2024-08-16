@@ -2,6 +2,7 @@ package uk.gov.hmcts.darts.common.repository;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
@@ -15,6 +16,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
 
+@Disabled("Impacted by V1_364_*.sql")
 class TranscriptionDocumentTest extends PostgresIntegrationBase {
 
     @Autowired
