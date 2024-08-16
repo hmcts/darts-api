@@ -27,6 +27,7 @@ import java.time.OffsetDateTime;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 
+@Disabled("Impacted by V1_357__add_missing_constraints_part5b.sql")
 @AutoConfigureMockMvc
 @Slf4j
 @Disabled("Impacted by V1_363__not_null_constraints_part3.sql")

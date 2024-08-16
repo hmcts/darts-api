@@ -38,6 +38,7 @@ class DartsEventNullHandlerTest extends HandlerTestData {
             .eventText("some-text");
     }
 
+    @Disabled("Impacted by V1_357__add_missing_constraints_part5b.sql")
     @Test
     @Disabled("Impacted by V1_363__not_null_constraints_part3.sql")
     void shouldDoNothingForNullMappedEvent() {
