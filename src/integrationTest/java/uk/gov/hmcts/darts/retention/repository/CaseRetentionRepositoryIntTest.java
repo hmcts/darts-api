@@ -1,7 +1,6 @@
 package uk.gov.hmcts.darts.retention.repository;
 
 import org.jetbrains.annotations.NotNull;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import uk.gov.hmcts.darts.common.entity.CaseRetentionEntity;
@@ -57,7 +56,6 @@ class CaseRetentionRepositoryIntTest extends IntegrationBase {
     }
 
     @Test
-    @Disabled("Impacted by V1_362__constraint_transcription_part6.sql")
     void deleteCaseRetentionsByCaseManagementId() {
         var caseRetentionsWithCmr = entityGraphPersistence.persistAll(someCaseRetentionsWithCmr(3));
 

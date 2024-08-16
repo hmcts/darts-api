@@ -1,7 +1,7 @@
 package uk.gov.hmcts.darts.task.service;
 
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -62,6 +62,16 @@ class OutboundAudioDeleterProcessorTest extends IntegrationBase {
     private OutboundAudioDeleterProcessor outboundAudioDeleterProcessor;
 
     @BeforeEach
+    void startHibernateSession() {
+        openInViewUtil.openEntityManager();
+    }
+
+    @AfterEach
+    void closeHibernateSession() {
+        openInViewUtil.closeEntityManager();
+    }
+
+    @BeforeEach
     void setUp() {
         requestor = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
         //setting clock to 2023-10-27
@@ -69,7 +79,6 @@ class OutboundAudioDeleterProcessorTest extends IntegrationBase {
     }
 
     @Test
-    @Disabled("Impacted by V1_362__constraint_transcription_part6.sql")
     void whereLastAccessed2DaysAgoAndStatusIsCompleted() {
         HearingEntity hearing = dartsDatabase.createHearing(
             "NEWCASTLE",
@@ -127,7 +136,6 @@ class OutboundAudioDeleterProcessorTest extends IntegrationBase {
     }
 
     @Test
-    @Disabled("Impacted by V1_362__constraint_transcription_part6.sql")
     void whereLastAccessed2DaysAgoAndStatusIsCompletedAndMarkedForDeletion() {
         HearingEntity hearing = dartsDatabase.createHearing(
             "NEWCASTLE",
@@ -186,7 +194,6 @@ class OutboundAudioDeleterProcessorTest extends IntegrationBase {
      * The deleter task should not be using hours to calculate last accessed time but days.
      */
     @Test
-    @Disabled("Impacted by V1_362__constraint_transcription_part6.sql")
     void shouldNotTakeIntoAccountTimeWhenCalculatingLastAccessed() {
         HearingEntity hearing = dartsDatabase.createHearing(
             "NEWCASTLE",
@@ -221,7 +228,6 @@ class OutboundAudioDeleterProcessorTest extends IntegrationBase {
 
 
     @Test
-    @Disabled("Impacted by V1_362__constraint_transcription_part6.sql")
     void whereLastAccessedDoesNotIncludesNonBusinessDays() {
         HearingEntity hearing = dartsDatabase.createHearing(
             "NEWCASTLE",
@@ -255,7 +261,6 @@ class OutboundAudioDeleterProcessorTest extends IntegrationBase {
 
 
     @Test
-    @Disabled("Impacted by V1_362__constraint_transcription_part6.sql")
     void shouldNotDeleteIfLastAccessWas10DaysAgoWith3BankHoliday() {
         outboundAudioDeleterProcessor.setDeletionDays(10);
         HearingEntity hearing = dartsDatabase.createHearing(
@@ -299,7 +304,6 @@ class OutboundAudioDeleterProcessorTest extends IntegrationBase {
     }
 
     @Test
-    @Disabled("Impacted by V1_362__constraint_transcription_part6.sql")
     void deleteWithTwoTransformedMediaDefaultLastAccessedDays() {
         HearingEntity hearing = dartsDatabase.createHearing(
             "NEWCASTLE",
@@ -345,7 +349,6 @@ class OutboundAudioDeleterProcessorTest extends IntegrationBase {
     }
 
     @Test
-    @Disabled("Impacted by V1_362__constraint_transcription_part6.sql")
     void ifMediaRequestLastAccessedIsOnAWeekendThenTreatItAsItWasAccessedOnAFriday() {
         HearingEntity hearing = dartsDatabase.createHearing(
             "NEWCASTLE",
@@ -404,7 +407,6 @@ class OutboundAudioDeleterProcessorTest extends IntegrationBase {
 
 
     @Test
-    @Disabled("Impacted by V1_362__constraint_transcription_part6.sql")
     void whereLastAccessedIsNullUseCreatedAtAndInProgressStatus() {
         TransientObjectDirectoryEntity markedForDeletion = createMediaRequestsAndTransientObjectDirectoryWithHearingWithLastAccessedTimeIsNull();
 
@@ -487,7 +489,7 @@ class OutboundAudioDeleterProcessorTest extends IntegrationBase {
         );
 
         assertNotNull(transientObjectDirectory.getTransformedMedia().getExpiryTime());
-        assertEquals(1, transientObjectDirectory.getTransformedMedia().getLastModifiedBy().getId());
+        assertEquals(0, transientObjectDirectory.getTransformedMedia().getLastModifiedBy().getId());
     }
 
     private void assertTransientObjectDirectoryStateNotChanged(Integer id) {

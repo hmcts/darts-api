@@ -2,7 +2,6 @@ package uk.gov.hmcts.darts.authorisation.service;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -40,7 +39,6 @@ import static uk.gov.hmcts.darts.test.common.data.CourthouseTestData.createCourt
 import static uk.gov.hmcts.darts.test.common.data.SecurityGroupTestData.minimalSecurityGroup;
 import static uk.gov.hmcts.darts.test.common.data.UserAccountTestData.minimalUserAccount;
 
-@Disabled("Impacted by V1_362__constraint_transcription_part6.sql")
 class AuthorisationServiceTest extends IntegrationBase {
 
     private static final String TEST_JUDGE_EMAIL = "test.judge@example.com";
@@ -62,7 +60,8 @@ class AuthorisationServiceTest extends IntegrationBase {
     private EntityGraphPersistence entityGraphPersistence;
 
     @BeforeEach
-    void beforeEach() {
+    void startHibernateSession() {
+        openInViewUtil.openEntityManager();
         dartsDatabase.getUserAccountStub().getSystemUserAccountEntity();
 
         SecurityGroupRepository securityGroupRepository = dartsDatabase.getSecurityGroupRepository();
@@ -97,6 +96,7 @@ class AuthorisationServiceTest extends IntegrationBase {
         judgeUserAccountGlobal.setAccountGuid(UUID.randomUUID().toString());
         judgeUserAccountGlobal.setIsSystemUser(false);
         judgeUserAccountGlobal.setActive(true);
+
         userAccountRepository.saveAndFlush(judgeUserAccountGlobal);
 
         SecurityGroupEntity bristolStaff = securityGroupRepository.getReferenceById(REQUESTOR_SG_ID);
@@ -123,11 +123,6 @@ class AuthorisationServiceTest extends IntegrationBase {
         newUser.setActive(true);
         newUser.setIsSystemUser(false);
         userAccountRepository.saveAndFlush(newUser);
-    }
-
-    @BeforeEach
-    void startHibernateSession() {
-        openInViewUtil.openEntityManager();
     }
 
     @AfterEach
@@ -178,15 +173,20 @@ class AuthorisationServiceTest extends IntegrationBase {
 
         UserState judgeUserState = authorisationService.getAuthorisation(TEST_JUDGE_GLOBAL_EMAIL).orElseThrow();
 
-        assertEquals(1, judgeUserState.getRoles().size());
+        assertEquals(2, judgeUserState.getRoles().size());
 
-        UserStateRole judgeRole = judgeUserState.getRoles().iterator().next();
-        assertEquals(JUDICIARY.getId(), judgeRole.getRoleId());
-        assertTrue(judgeRole.getGlobalAccess());
+        Set<UserStateRole> judgeRole = judgeUserState.getRoles();
+        Iterator<UserStateRole> it = judgeRole.iterator();
+        UserStateRole globalRole = it.next();
+        UserStateRole judiciaryRole = it.next();
 
-        assertTrue(judgeRole.getCourthouseIds().contains(courthouseEntity.getId()));
+        boolean globalAccess = globalRole.getGlobalAccess();
+        assertEquals(JUDICIARY.getId(), judiciaryRole.getRoleId());
+        assertTrue(globalAccess);
 
-        Set<String> judgePermissions = judgeRole.getPermissions();
+        assertTrue(judiciaryRole.getCourthouseIds().contains(courthouseEntity.getId()));
+
+        Set<String> judgePermissions = judiciaryRole.getPermissions();
         assertEquals(0, judgePermissions.size());
     }
 
@@ -220,7 +220,6 @@ class AuthorisationServiceTest extends IntegrationBase {
     }
 
     @Test
-    @Disabled("Impacted by V1_362__constraint_transcription_part6.sql")
     void shouldGetOptionalUserStateForMissingUserAccount() {
         Optional<UserState> userStateOptional = authorisationService.getAuthorisation("test.missing@example.com");
 

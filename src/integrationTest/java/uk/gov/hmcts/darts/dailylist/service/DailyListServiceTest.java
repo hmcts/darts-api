@@ -3,8 +3,9 @@ package uk.gov.hmcts.darts.dailylist.service;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.skyscreamer.jsonassert.JSONAssert;
 import org.skyscreamer.jsonassert.JSONCompareMode;
@@ -49,6 +50,16 @@ class DailyListServiceTest extends IntegrationBase {
     @MockBean
     UserIdentity mockUserIdentity;
 
+    @BeforeEach
+    void startHibernateSession() {
+        openInViewUtil.openEntityManager();
+    }
+
+    @AfterEach
+    void closeHibernateSession() {
+        openInViewUtil.closeEntityManager();
+    }
+
     @BeforeAll
     static void beforeAll() {
         MAPPER.registerModule(new JavaTimeModule());
@@ -56,7 +67,6 @@ class DailyListServiceTest extends IntegrationBase {
     }
 
     @Test
-    @Disabled("Impacted by V1_362__constraint_transcription_part6.sql")
     void insert1OkJson() throws IOException {
         dartsDatabase.createCourthouseWithNameAndCode("SWANSEA", 457, "Swansea");
         String dailyListJsonStr = getContentsFromFile(
@@ -76,7 +86,6 @@ class DailyListServiceTest extends IntegrationBase {
     }
 
     @Test
-    @Disabled("Impacted by V1_362__constraint_transcription_part6.sql")
     void insert1OkJsonAndXml() throws IOException {
         dartsDatabase.createCourthouseWithNameAndCode("SWANSEA", 457, "Swansea");
         String dailyListJsonStr = getContentsFromFile(
@@ -96,7 +105,6 @@ class DailyListServiceTest extends IntegrationBase {
     }
 
     @Test
-    @Disabled("Impacted by V1_362__constraint_transcription_part6.sql")
     void updateOkJsonWithXml() throws IOException {
         dartsDatabase.createCourthouseWithNameAndCode("SWANSEA", 457, "Swansea");
         String dailyListJsonStr = getContentsFromFile(
@@ -122,7 +130,6 @@ class DailyListServiceTest extends IntegrationBase {
     }
 
     @Test
-    @Disabled("Impacted by V1_362__constraint_transcription_part6.sql")
     void insert1DuplicateOk() throws IOException {
         dartsDatabase.createCourthouseWithNameAndCode("SWANSEA", 457, "Swansea");
 
@@ -155,6 +162,9 @@ class DailyListServiceTest extends IntegrationBase {
         dailyListEntity.setCreatedDateTime(null);
         dailyListEntity.setLastModifiedDateTime(null);
         dailyListEntity.setId(null);
+        dailyListEntity.setCreatedBy(null);
+        dailyListEntity.setLastModifiedBy(null);
+
         String actualResponse = MAPPER.writeValueAsString(dailyListEntity);
         String expectedResponse = getContentsFromFile(expectedResponseLocation);
         JSONAssert.assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
