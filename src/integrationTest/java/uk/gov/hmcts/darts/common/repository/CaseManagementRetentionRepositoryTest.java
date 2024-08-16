@@ -3,6 +3,8 @@ package uk.gov.hmcts.darts.common.repository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import uk.gov.hmcts.darts.common.entity.CaseManagementRetentionEntity;
+import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
+import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.testutils.PostgresIntegrationBase;
 import uk.gov.hmcts.darts.testutils.stubs.EntityGraphPersistence;
 
@@ -22,6 +24,9 @@ class CaseManagementRetentionRepositoryTest extends PostgresIntegrationBase {
     @Autowired
     private EntityGraphPersistence entityGraphPersistence;
 
+    @Autowired
+    private UserAccountRepository userAccountRepository;
+
     @Test
     void getCaseManagementRetentionIdsForEvents() {
         var caseManagementRetention = entityGraphPersistence.persist(someMinimalCaseManagementRetention());
@@ -35,6 +40,7 @@ class CaseManagementRetentionRepositoryTest extends PostgresIntegrationBase {
     @Test
     void deletesCaseManagementRetentionsForAssociatedWithEvents() {
         var caseManagementRetentionsWithEvents = createSomeCmrWithEvents(3);
+
         entityGraphPersistence.persistAll(caseManagementRetentionsWithEvents);
 
         caseManagementRetentionRepository.deleteAllByEventEntityIn(
@@ -49,7 +55,16 @@ class CaseManagementRetentionRepositoryTest extends PostgresIntegrationBase {
 
     private List<CaseManagementRetentionEntity> createSomeCmrWithEvents(int quantity) {
         return range(0, quantity)
-            .mapToObj(i -> someMinimalCaseManagementRetention())
+            .mapToObj(i -> {
+                CaseManagementRetentionEntity caseManagementRetentionEntity = someMinimalCaseManagementRetention();
+                // There appears to be a bug in EntityGraphPersistence that stops child UserAccounts being saved. So this is a kludge,
+                // we set the user account fields to some already existing value.
+                UserAccountEntity someUser = userAccountRepository.getReferenceById(0);
+                CourtCaseEntity courtCase = caseManagementRetentionEntity.getCourtCase();
+                courtCase.setCreatedBy(someUser);
+                courtCase.setLastModifiedBy(someUser);
+                return caseManagementRetentionEntity;
+            })
             .collect(toList());
     }
 }

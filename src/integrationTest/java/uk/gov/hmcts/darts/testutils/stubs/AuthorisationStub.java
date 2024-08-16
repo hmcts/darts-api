@@ -16,6 +16,7 @@ import uk.gov.hmcts.darts.common.entity.TranscriptionEntity;
 import uk.gov.hmcts.darts.common.entity.TransformedMediaEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.repository.SecurityGroupRepository;
+import uk.gov.hmcts.darts.test.common.data.UserAccountTestData;
 
 import java.time.LocalTime;
 import java.time.OffsetDateTime;
@@ -150,6 +151,10 @@ public class AuthorisationStub {
         courtCaseEntity.setCourthouse(courthouseEntity);
         courtCaseEntity.setClosed(false);
         courtCaseEntity.setInterpreterUsed(false);
+        courtCaseEntity.setCreatedBy(UserAccountTestData.minimalUserAccount());
+        courtCaseEntity.setLastModifiedBy(UserAccountTestData.minimalUserAccount());
+        courtCaseEntity.setCreatedDateTime(OffsetDateTime.now());
+        courtCaseEntity.setLastModifiedDateTime(OffsetDateTime.now());
         dartsDatabaseStub.save(courtCaseEntity);
     }
 

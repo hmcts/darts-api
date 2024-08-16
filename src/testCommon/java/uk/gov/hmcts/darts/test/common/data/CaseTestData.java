@@ -3,7 +3,9 @@ package uk.gov.hmcts.darts.test.common.data;
 import lombok.experimental.UtilityClass;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
+import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 
+import java.time.OffsetDateTime;
 import java.util.function.Consumer;
 
 import static org.apache.commons.lang3.RandomStringUtils.random;
@@ -23,6 +25,11 @@ public class CaseTestData {
         courtCaseEntity.setCaseNumber("case-1-" + postfix);
         courtCaseEntity.setClosed(false);
         courtCaseEntity.setInterpreterUsed(false);
+
+        courtCaseEntity.setCreatedBy(UserAccountTestData.minimalUserAccount());
+        courtCaseEntity.setLastModifiedBy(UserAccountTestData.minimalUserAccount());
+        courtCaseEntity.setCreatedDateTime(OffsetDateTime.now());
+        courtCaseEntity.setLastModifiedDateTime(OffsetDateTime.now());
         return courtCaseEntity;
     }
 
@@ -55,6 +62,15 @@ public class CaseTestData {
         courtCaseEntity.addProsecutor(createProsecutorForCaseWithName(courtCaseEntity, "aProsecutor"));
         courtCaseEntity.setClosed(false);
         courtCaseEntity.setInterpreterUsed(false);
+
+//        var userAccount = UserAccountTestData.minimalUserAccount();
+//        courtCaseEntity.setCreatedBy(userAccount);
+//        courtCaseEntity.setLastModifiedBy(userAccount);
+
+        var now = OffsetDateTime.now();
+        courtCaseEntity.setCreatedDateTime(now);
+        courtCaseEntity.setLastModifiedDateTime(now);
+
         return courtCaseEntity;
     }
 

@@ -1,0 +1,5 @@
+-- update courtroom theTable set created_by = 0 where created_by is null or not exists (select 1 from user_account ua where ua.usr_id = theTable.created_by);
+-- ALTER TABLE courtroom ADD CONSTRAINT courtroom_created_by_fk FOREIGN KEY (created_by) REFERENCES user_account(usr_id);
+--
+-- update courtroom set created_ts = current_timestamp where created_ts is null;
+-- ALTER TABLE courtroom ALTER COLUMN created_ts SET NOT NULL;

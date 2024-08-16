@@ -39,7 +39,7 @@ class AudioRequestBeingProcessedFromArchiveQueryImplIntTest extends IntegrationB
                 VALUES (20000, -4);
 
                 INSERT INTO darts.court_case (cas_id, cth_id, evh_id, case_object_id, case_number, case_closed, interpreter_used, case_closed_ts, created_ts, created_by, last_modified_ts, last_modified_by)
-                VALUES (-1, -1, NULL, NULL, 'T20231009-1', false, false, NULL, NULL, NULL, NULL, NULL);
+                VALUES (-1, -1, NULL, NULL, 'T20231009-1', false, false, NULL, '2024-01-04 15:55:08.85461+00', 20000, '2024-01-04 15:55:08.85461+00', 20000);
 
                 INSERT INTO darts.courtroom (ctr_id, cth_id, courtroom_name, created_ts, created_by)
                 VALUES (-1, -1, 'COURT 1', NULL, 0);

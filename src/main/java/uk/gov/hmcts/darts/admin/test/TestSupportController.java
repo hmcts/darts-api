@@ -26,6 +26,7 @@ import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
 import uk.gov.hmcts.darts.common.entity.RetentionPolicyTypeEntity;
 import uk.gov.hmcts.darts.common.entity.SecurityGroupEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
+import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
 import uk.gov.hmcts.darts.common.repository.AuditActivityRepository;
 import uk.gov.hmcts.darts.common.repository.AuditRepository;
 import uk.gov.hmcts.darts.common.repository.CaseRepository;
@@ -37,6 +38,7 @@ import uk.gov.hmcts.darts.common.repository.RetentionPolicyTypeRepository;
 import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
 import uk.gov.hmcts.darts.common.service.bankholidays.BankHolidaysService;
 import uk.gov.hmcts.darts.common.service.bankholidays.Event;
+import uk.gov.hmcts.darts.util.DateTimeHelper;
 
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
@@ -72,6 +74,7 @@ public class TestSupportController {
     private final List<Integer> courthouseTrash = new ArrayList<>();
     private final List<Integer> courtroomTrash = new ArrayList<>();
     private final BankHolidaysService bankHolidaysService;
+    private final CurrentTimeHelper currentTimeHelper;
 
     @SuppressWarnings({"unchecked", "PMD.CloseResource"})
     @DeleteMapping(value = "/clean")
@@ -215,6 +218,11 @@ public class TestSupportController {
         courtCase.setCaseNumber("func-case1");
         courtCase.setClosed(false);
         courtCase.setInterpreterUsed(false);
+        courtCase.setCreatedDateTime(currentTimeHelper.currentOffsetDateTime());
+        courtCase.setLastModifiedDateTime(currentTimeHelper.currentOffsetDateTime());
+        UserAccountEntity someUser = userAccountRepository.getReferenceById(0);
+        courtCase.setCreatedBy(someUser);
+        courtCase.setLastModifiedBy(someUser);
 
         Optional<CourthouseEntity> foundCourthouse = courthouseRepository.findByCourthouseNameIgnoreCase(
             courthouseName);
@@ -435,6 +443,11 @@ public class TestSupportController {
         courtCase.setCaseNumber(caseNumber);
         courtCase.setClosed(false);
         courtCase.setInterpreterUsed(false);
+        courtCase.setCreatedDateTime(currentTimeHelper.currentOffsetDateTime());
+        courtCase.setLastModifiedDateTime(currentTimeHelper.currentOffsetDateTime());
+        UserAccountEntity someUser = userAccountRepository.getReferenceById(0);
+        courtCase.setCreatedBy(someUser);
+        courtCase.setLastModifiedBy(someUser);
 
         String courtroomName = "func-" + randomAlphanumeric(7);
         String courthouseName = "func-" + randomAlphanumeric(7);

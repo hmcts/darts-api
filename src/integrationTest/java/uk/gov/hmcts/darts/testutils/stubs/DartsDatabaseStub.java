@@ -96,6 +96,7 @@ import uk.gov.hmcts.darts.retention.enums.RetentionPolicyEnum;
 import uk.gov.hmcts.darts.test.common.data.AudioTestData;
 import uk.gov.hmcts.darts.test.common.data.CourthouseTestData;
 import uk.gov.hmcts.darts.test.common.data.DailyListTestData;
+import uk.gov.hmcts.darts.testutils.PersistenceHelper;
 import uk.gov.hmcts.darts.testutils.TransactionalUtil;
 
 import java.io.IOException;
@@ -194,7 +195,6 @@ public class DartsDatabaseStub {
     private final AuditStub auditStub;
     private final CaseDocumentStub caseDocumentStub;
     private final CaseRetentionStub caseRetentionStub;
-    private final CourtCaseStub courtCaseStub;
     private final CourthouseStub courthouseStub;
     private final CourtroomStub courtroomStub;
     private final EventStub eventStub;
@@ -211,6 +211,7 @@ public class DartsDatabaseStub {
     private final CurrentTimeHelper currentTimeHelper;
     private final TransactionalUtil transactionalUtil;
     private final EntityGraphPersistence entityGraphPersistence;
+    private final PersistenceHelper persistenceHelper;
 
     public void resetSequences() {
         try (EntityManager em = entityManagerFactory.createEntityManager()) {
@@ -534,13 +535,19 @@ public class DartsDatabaseStub {
     public HearingEntity save(HearingEntity hearingEntity) {
         save(hearingEntity.getCourtroom().getCourthouse());
         save(hearingEntity.getCourtroom());
+        for (JudgeEntity judge : hearingEntity.getJudges()) {
+            save(judge);
+        }
+        var courtCase = hearingEntity.getCourtCase();
+        if (courtCase != null) {
+            save(hearingEntity.getCourtCase());
+        }
         return hearingRepository.save(hearingEntity);
     }
 
     @Transactional
     public CourthouseEntity save(CourthouseEntity courthouse) {
-        userAccountRepository.save(courthouse.getCreatedBy());
-        return courthouseRepository.save(courthouse);
+        return persistenceHelper.save(courthouse);
     }
 
     @Transactional
@@ -551,8 +558,7 @@ public class DartsDatabaseStub {
 
     @Transactional
     public CourtCaseEntity save(CourtCaseEntity courtCase) {
-        save(courtCase.getCourthouse());
-        return caseRepository.save(courtCase);
+        return persistenceHelper.save(courtCase);
     }
 
     @Transactional
@@ -570,64 +576,14 @@ public class DartsDatabaseStub {
         return transcription;
     }
 
-    @Transactional
     public <T> T save(T entity) {
-        Method getIdInstanceMethod;
-        try {
-            getIdInstanceMethod = entity.getClass().getMethod("getId");
-            Integer id = (Integer) getIdInstanceMethod.invoke(entity);
-            if (id == null) {
-                this.entityManager.persist(entity);
-                return entity;
-            } else {
-                return this.entityManager.merge(entity);
-            }
-        } catch (NoSuchMethodException | InvocationTargetException | IllegalAccessException e) {
-            throw new JUnitException("Failed to save entity", e);
-        }
+        return persistenceHelper.save(entity);
     }
 
     @SuppressWarnings({"PMD.CognitiveComplexity", "PMD.AvoidAccessibilityAlteration"})
     @Transactional
     public <T> T saveWithTransientEntities(T entity) {
-        try {
-            // Check and persist transient entities
-            Class<?> clazz = entity.getClass();
-            while (clazz != null) {
-                Field[] fields = clazz.getDeclaredFields();
-                for (Field field : fields) {
-                    field.setAccessible(true);
-                    Object fieldValue = field.get(entity);
-                    if (fieldValue != null && isEntity(fieldValue)) {
-                        // Check if the entity is transient
-                        Method getIdMethod = fieldValue.getClass().getMethod("getId");
-                        Object id = getIdMethod.invoke(fieldValue);
-                        if (id == null || (id instanceof Integer && (Integer) id == 0)) {
-                            // Save the transient entity
-                            entityManager.persist(fieldValue);
-                            entityManager.flush();
-                        }
-                    }
-                }
-                clazz = clazz.getSuperclass();
-            }
-
-            // Proceed with original save logic
-            Method getIdInstanceMethod = entity.getClass().getMethod("getId");
-            Integer id = (Integer) getIdInstanceMethod.invoke(entity);
-            if (id == null) {
-                entityManager.persist(entity);
-                return entity;
-            } else {
-                return entityManager.merge(entity);
-            }
-        } catch (NoSuchMethodException | InvocationTargetException | IllegalAccessException e) {
-            throw new JUnitException("Failed to save entity", e);
-        }
-    }
-
-    private boolean isEntity(Object obj) {
-        return obj.getClass().isAnnotationPresent(Entity.class);
+        return persistenceHelper.saveWithTransientEntities(entity);
     }
 
     @SneakyThrows

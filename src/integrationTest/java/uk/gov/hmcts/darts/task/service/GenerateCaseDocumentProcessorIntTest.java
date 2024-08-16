@@ -16,6 +16,7 @@ import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
 import uk.gov.hmcts.darts.common.repository.HearingRepository;
 import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
+import uk.gov.hmcts.darts.testutils.stubs.CourtCaseStub;
 
 import java.time.OffsetDateTime;
 import java.util.List;
@@ -43,6 +44,8 @@ class GenerateCaseDocumentProcessorIntTest extends IntegrationBase {
     GenerateCaseDocumentSingleCaseProcessor processor;
     @Autowired
     HearingRepository hearingRepository;
+    @Autowired
+    CourtCaseStub courtCaseStub;
 
     @Test
     void testGenerateCaseDocument() {
@@ -50,7 +53,7 @@ class GenerateCaseDocumentProcessorIntTest extends IntegrationBase {
         givenBearerTokenExists("darts.global.user@hmcts.net");
         UserAccountEntity testUser = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
 
-        CourtCaseEntity courtCase = dartsDatabase.getCourtCaseStub().createAndSaveCourtCaseWithHearings(createdCourtCase -> {
+        CourtCaseEntity courtCase = courtCaseStub.createAndSaveCourtCaseWithHearings(createdCourtCase -> {
             createdCourtCase.setRetentionUpdated(true);
             createdCourtCase.setRetentionRetries(1);
             createdCourtCase.setClosed(true);

@@ -28,7 +28,7 @@ import uk.gov.hmcts.darts.common.service.RetrieveCoreObjectService;
 
 import java.text.MessageFormat;
 import java.time.LocalDateTime;
-import java.util.Locale;
+import java.time.OffsetDateTime;
 import java.util.Optional;
 
 @RequiredArgsConstructor
@@ -118,22 +118,16 @@ public class RetrieveCoreObjectServiceImpl implements RetrieveCoreObjectService 
 
     @Override
     public CourtroomEntity retrieveOrCreateCourtroom(CourthouseEntity courthouse, String courtroomName, UserAccountEntity userAccount) {
-        courtroomName = courtroomName.toUpperCase(Locale.ROOT);
         Optional<CourtroomEntity> foundCourtroom = courtroomRepository.findByNameAndId(
             courthouse.getId(),
             courtroomName
         );
-        if (foundCourtroom.isPresent()) {
-            return foundCourtroom.get();
-        } else {
-            return createCourtroom(courthouse, courtroomName, userAccount);
-        }
+        return foundCourtroom.orElseGet(() -> createCourtroom(courthouse, courtroomName, userAccount));
     }
 
 
     @Override
     public CourtroomEntity retrieveOrCreateCourtroom(String courthouseName, String courtroomName, UserAccountEntity userAccount) {
-        courtroomName = courtroomName.toUpperCase(Locale.ROOT);
         Optional<CourtroomEntity> foundCourtroom = courtroomRepository.findByCourthouseNameAndCourtroomName(
             courthouseName,
             courtroomName
@@ -247,7 +241,7 @@ public class RetrieveCoreObjectServiceImpl implements RetrieveCoreObjectService 
 
     private JudgeEntity createJudge(String judgeName, UserAccountEntity userAccount) {
         JudgeEntity judge = new JudgeEntity();
-        String upperCaseJudgeName = judgeName != null ? judgeName.toUpperCase(Locale.ROOT) : null;
+        String upperCaseJudgeName = judgeName != null ? judgeName.toUpperCase() : null;
         judge.setName(upperCaseJudgeName);
         judge.setCreatedBy(userAccount);
         judge.setLastModifiedBy(userAccount);

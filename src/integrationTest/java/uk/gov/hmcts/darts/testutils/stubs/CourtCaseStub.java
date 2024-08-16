@@ -12,6 +12,7 @@ import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 import uk.gov.hmcts.darts.common.repository.CaseRepository;
 import uk.gov.hmcts.darts.common.repository.CourthouseRepository;
 import uk.gov.hmcts.darts.test.common.data.CaseTestData;
+import uk.gov.hmcts.darts.testutils.PersistenceHelper;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -39,12 +40,14 @@ public class CourtCaseStub {
     @Autowired
     CourthouseStub courthouseStub;
 
+    @Autowired
+    private PersistenceHelper persistenceHelper;
+
     @Transactional
     public CourtCaseEntity createAndSaveMinimalCourtCase() {
-
         var courtCase = CaseTestData.createSomeMinimalCase();
-        courtCase.getCourthouse().getCreatedBy().setId(0);
-        return caseRepository.save(courtCase);
+
+        return persistenceHelper.save(courtCase);
     }
 
     @Transactional
