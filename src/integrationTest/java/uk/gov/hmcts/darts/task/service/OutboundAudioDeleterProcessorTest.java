@@ -69,7 +69,7 @@ class OutboundAudioDeleterProcessorTest extends IntegrationBase {
     }
 
     @Test
-    @Disabled("Impacted by V1_362__constraint_transcription_user_part6.sql")
+    @Disabled("Impacted by V1_362__constraint_transcription_part6.sql")
     void whereLastAccessed2DaysAgoAndStatusIsCompleted() {
         HearingEntity hearing = dartsDatabase.createHearing(
             "NEWCASTLE",
@@ -185,7 +185,7 @@ class OutboundAudioDeleterProcessorTest extends IntegrationBase {
      * The deleter task should not be using hours to calculate last accessed time but days.
      */
     @Test
-    @Disabled("Impacted by V1_362__constraint_transcription_user_part6.sql")
+    @Disabled("Impacted by V1_362__constraint_transcription_part6.sql")
     void shouldNotTakeIntoAccountTimeWhenCalculatingLastAccessed() {
         HearingEntity hearing = dartsDatabase.createHearing(
             "NEWCASTLE",
@@ -296,7 +296,7 @@ class OutboundAudioDeleterProcessorTest extends IntegrationBase {
     }
 
     @Test
-    @Disabled("Impacted by V1_362__constraint_transcription_user_part6.sql")
+    @Disabled("Impacted by V1_362__constraint_transcription_part6.sql")
     void deleteWithTwoTransformedMediaDefaultLastAccessedDays() {
         HearingEntity hearing = dartsDatabase.createHearing(
             "NEWCASTLE",
@@ -400,7 +400,7 @@ class OutboundAudioDeleterProcessorTest extends IntegrationBase {
 
 
     @Test
-    @Disabled("Impacted by V1_362__constraint_transcription_user_part6.sql")
+    @Disabled("Impacted by V1_362__constraint_transcription_part6.sql")
     void whereLastAccessedIsNullUseCreatedAtAndInProgressStatus() {
         TransientObjectDirectoryEntity markedForDeletion = createMediaRequestsAndTransientObjectDirectoryWithHearingWithLastAccessedTimeIsNull();
 

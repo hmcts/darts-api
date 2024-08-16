@@ -31,7 +31,7 @@ class AdminGetAutomatedTasksByIdTest extends IntegrationBase {
 
     @ParameterizedTest
     @EnumSource(value = SecurityRoleEnum.class, names = {"SUPER_ADMIN"}, mode = Mode.INCLUDE)
-    @Disabled("Impacted by V1_362__constraint_transcription_user_part6.sql")
+    @Disabled("Impacted by V1_362__constraint_transcription_part6.sql")
     void allowsSuperAdminToRetrieveAllAutomatedTasks(SecurityRoleEnum role) throws Exception {
         given.anAuthenticatedUserWithGlobalAccessAndRole(role);
 
@@ -54,7 +54,7 @@ class AdminGetAutomatedTasksByIdTest extends IntegrationBase {
 
 
     @Test
-    @Disabled("Impacted by V1_362__constraint_transcription_user_part6.sql")
+    @Disabled("Impacted by V1_362__constraint_transcription_part6.sql")
     void returns404WhenTheTaskDoesntExist()  throws Exception {
         given.anAuthenticatedUserWithGlobalAccessAndRole(SUPER_ADMIN);
 

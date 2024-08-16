@@ -40,7 +40,7 @@ import static uk.gov.hmcts.darts.test.common.data.CourthouseTestData.createCourt
 import static uk.gov.hmcts.darts.test.common.data.SecurityGroupTestData.minimalSecurityGroup;
 import static uk.gov.hmcts.darts.test.common.data.UserAccountTestData.minimalUserAccount;
 
-@Disabled("Impacted by V1_362__constraint_transcription_user_part6.sql")
+@Disabled("Impacted by V1_362__constraint_transcription_part6.sql")
 class AuthorisationServiceTest extends IntegrationBase {
 
     private static final String TEST_JUDGE_EMAIL = "test.judge@example.com";
@@ -220,7 +220,7 @@ class AuthorisationServiceTest extends IntegrationBase {
     }
 
     @Test
-    @Disabled("Impacted by V1_362__constraint_transcription_user_part6.sql")
+    @Disabled("Impacted by V1_362__constraint_transcription_part6.sql")
     void shouldGetOptionalUserStateForMissingUserAccount() {
         Optional<UserState> userStateOptional = authorisationService.getAuthorisation("test.missing@example.com");
 

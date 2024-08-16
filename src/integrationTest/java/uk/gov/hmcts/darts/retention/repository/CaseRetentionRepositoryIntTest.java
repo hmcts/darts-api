@@ -57,7 +57,7 @@ class CaseRetentionRepositoryIntTest extends IntegrationBase {
     }
 
     @Test
-    @Disabled("Impacted by V1_362__constraint_transcription_user_part6.sql")
+    @Disabled("Impacted by V1_362__constraint_transcription_part6.sql")
     void deleteCaseRetentionsByCaseManagementId() {
         var caseRetentionsWithCmr = entityGraphPersistence.persistAll(someCaseRetentionsWithCmr(3));
 

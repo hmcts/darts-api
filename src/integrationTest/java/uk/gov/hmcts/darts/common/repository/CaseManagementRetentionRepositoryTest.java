@@ -15,7 +15,7 @@ import static java.util.stream.IntStream.range;
 import static org.assertj.core.api.Assertions.assertThat;
 import static uk.gov.hmcts.darts.test.common.data.CaseManagementRetentionTestData.someMinimalCaseManagementRetention;
 
-@Disabled("Impacted by V1_362__constraint_transcription_user_part6.sql")
+@Disabled("Impacted by V1_362__constraint_transcription_part6.sql")
 class CaseManagementRetentionRepositoryTest extends PostgresIntegrationBase {
 
     @Autowired

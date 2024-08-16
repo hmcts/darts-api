@@ -56,7 +56,7 @@ class DailyListServiceTest extends IntegrationBase {
     }
 
     @Test
-    @Disabled("Impacted by V1_362__constraint_transcription_user_part6.sql")
+    @Disabled("Impacted by V1_362__constraint_transcription_part6.sql")
     void insert1OkJson() throws IOException {
         dartsDatabase.createCourthouseWithNameAndCode("SWANSEA", 457, "Swansea");
         String dailyListJsonStr = getContentsFromFile(
@@ -76,7 +76,7 @@ class DailyListServiceTest extends IntegrationBase {
     }
 
     @Test
-    @Disabled("Impacted by V1_362__constraint_transcription_user_part6.sql")
+    @Disabled("Impacted by V1_362__constraint_transcription_part6.sql")
     void insert1OkJsonAndXml() throws IOException {
         dartsDatabase.createCourthouseWithNameAndCode("SWANSEA", 457, "Swansea");
         String dailyListJsonStr = getContentsFromFile(
@@ -96,7 +96,7 @@ class DailyListServiceTest extends IntegrationBase {
     }
 
     @Test
-    @Disabled("Impacted by V1_362__constraint_transcription_user_part6.sql")
+    @Disabled("Impacted by V1_362__constraint_transcription_part6.sql")
     void updateOkJsonWithXml() throws IOException {
         dartsDatabase.createCourthouseWithNameAndCode("SWANSEA", 457, "Swansea");
         String dailyListJsonStr = getContentsFromFile(
@@ -122,7 +122,7 @@ class DailyListServiceTest extends IntegrationBase {
     }
 
     @Test
-    @Disabled("Impacted by V1_362__constraint_transcription_user_part6.sql")
+    @Disabled("Impacted by V1_362__constraint_transcription_part6.sql")
     void insert1DuplicateOk() throws IOException {
         dartsDatabase.createCourthouseWithNameAndCode("SWANSEA", 457, "Swansea");
 
