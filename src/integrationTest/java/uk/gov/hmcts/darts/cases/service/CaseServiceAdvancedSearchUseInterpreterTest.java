@@ -28,7 +28,7 @@ import static uk.gov.hmcts.darts.test.common.data.CourtroomTestData.createCourtR
 import static uk.gov.hmcts.darts.test.common.data.HearingTestData.createHearingWith;
 import static uk.gov.hmcts.darts.testutils.stubs.UserAccountStub.INTEGRATION_TEST_USER_EMAIL;
 
-@Disabled("Impacted by V1_357__add_missing_constraints_part5b.sql")
+@Disabled("Impacted by V1_366__add_missing_constraints_part5b.sql")
 @Slf4j
 @Disabled("Impacted by V1_363__not_null_constraints_part3.sql")
 class CaseServiceAdvancedSearchUseInterpreterTest extends IntegrationBase {
