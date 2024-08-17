@@ -464,7 +464,7 @@ class TranscriptionControllerGetTranscriberTranscriptsIntTest extends Integratio
                                 VALUES (164, 121, 5, -10, '$TODAYS_DATE');
                                 INSERT INTO darts.transcription_workflow (trw_id, tra_id, trs_id, workflow_actor, workflow_ts)
                                 VALUES (165, 121, 6, -10, '$TODAYS_DATE');
-                                
+                                                                
                                 -- test is_current false is not returned
                                 INSERT INTO darts.transcription (tra_id, ctr_id, trt_id, transcription_object_id, requested_by, start_ts, end_ts,
                                 created_ts, last_modified_ts, last_modified_by, created_by, tru_id, trs_id, hearing_date,
@@ -483,7 +483,7 @@ class TranscriptionControllerGetTranscriberTranscriptsIntTest extends Integratio
                                 VALUES (244, 150, 5, -10, '2023-11-23 16:30:00.0+00');
                                 INSERT INTO darts.transcription_workflow (trw_id, tra_id, trs_id, workflow_actor, workflow_ts)
                                 VALUES (245, 150, 3, -10, '$MINUS_89_DAYS');
-                                
+                                                                
                                 INSERT INTO darts.transcription (tra_id, ctr_id, trt_id, transcription_object_id, requested_by, start_ts, end_ts,
                                 created_ts, last_modified_ts, last_modified_by, created_by, tru_id, trs_id, hearing_date,
                                 is_manual_transcription, hide_request_from_requestor, is_current)
@@ -499,7 +499,7 @@ class TranscriptionControllerGetTranscriberTranscriptsIntTest extends Integratio
                                 VALUES (248, 151, 3, -10, '$MINUS_89_DAYS');
                                 INSERT INTO darts.transcription_workflow (trw_id, tra_id, trs_id, workflow_actor, workflow_ts)
                                 VALUES (249, 151, 5, -10, '$MINUS_89_DAYS');
-                                
+                                                                
                                 """.replace(PLACEHOLDER_URGENCY_ID, generatedUrgency ? "1" : "NULL")
                                 .replace(TODAYS_DATE, todaysDate)
                                 .replace(MINUS_89_DAYS, dateMinus89Days)
@@ -523,7 +523,7 @@ class TranscriptionControllerGetTranscriberTranscriptsIntTest extends Integratio
                                 DELETE FROM darts.court_case WHERE cas_id=-1;
                                 DELETE FROM darts.courtroom WHERE ctr_id=-1;
                                 DELETE FROM darts.courthouse WHERE cth_id=-1;
-                                
+                                                                
                                 """);
     }
 }

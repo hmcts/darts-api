@@ -253,7 +253,7 @@ class TranscriptionControllerGetYourTranscriptsIntTest extends IntegrationBase {
     @Test
     void getYourTranscriptsApproverShouldNotReturnHidden() throws Exception {
         var courtCase = authorisationStub.getCourtCaseEntity();
-        TranscriptionEntity systemUserTranscription =  dartsDatabase.getTranscriptionStub()
+        TranscriptionEntity systemUserTranscription = dartsDatabase.getTranscriptionStub()
             .createAndSaveAwaitingAuthorisationTranscription(
                 systemUser,
                 courtCase,
@@ -280,16 +280,16 @@ class TranscriptionControllerGetYourTranscriptsIntTest extends IntegrationBase {
     void getYourTranscriptsShouldNotReturnTranscriptWhenIsCurrentFalse() throws Exception {
         var courtCase = authorisationStub.getCourtCaseEntity();
         transcriptionStub.createAndSaveAwaitingAuthorisationTranscription(
-                systemUser,
-                courtCase,
-                authorisationStub.getHearingEntity(), now(UTC), false, false
-            );
+            systemUser,
+            courtCase,
+            authorisationStub.getHearingEntity(), now(UTC), false, false
+        );
 
         transcriptionStub.createAndSaveAwaitingAuthorisationTranscription(
-                authorisationStub.getTestUser(),
-                courtCase,
-                authorisationStub.getHearingEntity(), YESTERDAY, false, false
-            );
+            authorisationStub.getTestUser(),
+            courtCase,
+            authorisationStub.getHearingEntity(), YESTERDAY, false, false
+        );
 
 
         MockHttpServletRequestBuilder requestBuilder = get(ENDPOINT_URI)

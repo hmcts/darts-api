@@ -55,8 +55,8 @@ class EventSearchControllerTest extends IntegrationBase {
         eventsGivensBuilder.persistedEvents(6);
 
         var mvcResult = mockMvc.perform(post(EVENT_SEARCH_ENDPOINT)
-                            .content("{}")
-                            .contentType("application/json"))
+                                            .content("{}")
+                                            .contentType("application/json"))
             .andExpect(status().isBadRequest())
             .andReturn();
 
@@ -83,8 +83,8 @@ class EventSearchControllerTest extends IntegrationBase {
         given.anAuthenticatedUserWithGlobalAccessAndRole(SUPER_ADMIN);
 
         mockMvc.perform(post(EVENT_SEARCH_ENDPOINT)
-            .content("{}")
-            .contentType("application/json"))
+                            .content("{}")
+                            .contentType("application/json"))
             .andExpect(status().isOk())
             .andReturn();
     }

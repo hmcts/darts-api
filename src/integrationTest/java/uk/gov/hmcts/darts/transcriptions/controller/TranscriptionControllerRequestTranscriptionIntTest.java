@@ -115,7 +115,7 @@ class TranscriptionControllerRequestTranscriptionIntTest extends IntegrationBase
     }
 
     @ParameterizedTest
-    @EnumSource(names = {"COURT_LOG", "SPECIFIED_TIMES","OTHER"})
+    @EnumSource(names = {"COURT_LOG", "SPECIFIED_TIMES", "OTHER"})
     void transcriptionRequestWithValidValuesShouldReturnSuccess(TranscriptionTypeEnum transcriptionTypeEnum) throws Exception {
         TranscriptionUrgencyEnum transcriptionUrgencyEnum = TranscriptionUrgencyEnum.STANDARD;
 
@@ -196,7 +196,7 @@ class TranscriptionControllerRequestTranscriptionIntTest extends IntegrationBase
         TranscriptionTypeEnum transcriptionTypeEnum = TranscriptionTypeEnum.SPECIFIED_TIMES;
 
         var dupeTranscription = transcriptionStub.createAndSaveCompletedTranscription(
-            testUser, courtCase, hearing,startTime, endTime, now(), false);
+            testUser, courtCase, hearing, startTime, endTime, now(), false);
 
         TranscriptionRequestDetails transcriptionRequestDetails = createTranscriptionRequestDetails(
             hearing.getId(), courtCase.getId(), transcriptionUrgencyEnum.getId(),
