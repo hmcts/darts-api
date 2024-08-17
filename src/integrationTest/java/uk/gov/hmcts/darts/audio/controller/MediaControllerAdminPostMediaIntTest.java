@@ -39,7 +39,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@Disabled("Impacted by V1_365__adding_not_null_constraints_part_4.sql")
+@Disabled("Impacted by V1_367__adding_not_null_constraints_part_4.sql")
 @AutoConfigureMockMvc
 class MediaControllerAdminPostMediaIntTest extends IntegrationBase {
 
@@ -144,15 +144,15 @@ class MediaControllerAdminPostMediaIntTest extends IntegrationBase {
         // run the test
         mockMvc.perform(post(ENDPOINT_URL.replace(
                 MEDIA_ID_SUBSTITUTION_KEY, mediaEntity.getId().toString()))
-                                                  .header("Content-Type", "application/json")
-                                                  .content(objectMapper.writeValueAsString(mediaHideRequest)))
+                            .header("Content-Type", "application/json")
+                            .content(objectMapper.writeValueAsString(mediaHideRequest)))
             .andExpect(status().is2xxSuccessful())
             .andReturn();
 
         MvcResult hideSecondCall = mockMvc.perform(post(ENDPOINT_URL.replace(
                 "${MEDIA_ID}", mediaEntity.getId().toString()))
-                                                  .header("Content-Type", "application/json")
-                                                  .content(objectMapper.writeValueAsString(mediaHideRequest)))
+                                                       .header("Content-Type", "application/json")
+                                                       .content(objectMapper.writeValueAsString(mediaHideRequest)))
             .andExpect(status().isConflict())
             .andReturn();
 
@@ -181,10 +181,10 @@ class MediaControllerAdminPostMediaIntTest extends IntegrationBase {
         // hide the media
         mockMvc.perform(post(ENDPOINT_URL.replace(
                 MEDIA_ID_SUBSTITUTION_KEY, mediaEntity.getId().toString()))
-                                              .header("Content-Type", "application/json")
-                                              .content(objectMapper.writeValueAsString(mediaHideRequest)))
-        .andExpect(status().is2xxSuccessful())
-        .andReturn();
+                            .header("Content-Type", "application/json")
+                            .content(objectMapper.writeValueAsString(mediaHideRequest)))
+            .andExpect(status().is2xxSuccessful())
+            .andReturn();
 
         mediaHideRequest.setAdminAction(null);
         mediaHideRequest.setIsHidden(false);
@@ -192,16 +192,16 @@ class MediaControllerAdminPostMediaIntTest extends IntegrationBase {
         // now show the media
         MvcResult showResult = mockMvc.perform(post(ENDPOINT_URL.replace(
                 MEDIA_ID_SUBSTITUTION_KEY, mediaEntity.getId().toString()))
-                                              .header("Content-Type", "application/json")
-                                              .content(objectMapper.writeValueAsString(mediaHideRequest)))
-        .andExpect(status().is2xxSuccessful())
-        .andReturn();
+                                                   .header("Content-Type", "application/json")
+                                                   .content(objectMapper.writeValueAsString(mediaHideRequest)))
+            .andExpect(status().is2xxSuccessful())
+            .andReturn();
 
         // a follow up show even if already shown will not error
         mockMvc.perform(post(ENDPOINT_URL.replace(
                 MEDIA_ID_SUBSTITUTION_KEY, mediaEntity.getId().toString()))
-                                                   .header("Content-Type", "application/json")
-                                                   .content(objectMapper.writeValueAsString(mediaHideRequest)))
+                            .header("Content-Type", "application/json")
+                            .content(objectMapper.writeValueAsString(mediaHideRequest)))
             .andExpect(status().is2xxSuccessful())
             .andReturn();
 
@@ -217,7 +217,7 @@ class MediaControllerAdminPostMediaIntTest extends IntegrationBase {
         assertEquals(documentEntity.getId(), mediaHideResponse.getId());
         assertEquals(documentEntity.isHidden(), mediaHideResponse.getIsHidden());
         assertNull(mediaHideResponse.getAdminAction());
-   }
+    }
 
     @Test
     void testTranscriptionDocumentShowForbidden() throws Exception {
@@ -249,10 +249,10 @@ class MediaControllerAdminPostMediaIntTest extends IntegrationBase {
         mediaHideRequest.setIsHidden(true);
 
 
-        MvcResult mvcResult =  mockMvc.perform(post(ENDPOINT_URL.replace(
+        MvcResult mvcResult = mockMvc.perform(post(ENDPOINT_URL.replace(
                 MEDIA_ID_SUBSTITUTION_KEY, Integer.valueOf(-12).toString()))
-                                                    .header("Content-Type", "application/json")
-                                                    .content(objectMapper.writeValueAsString(mediaHideRequest)))
+                                                  .header("Content-Type", "application/json")
+                                                  .content(objectMapper.writeValueAsString(mediaHideRequest)))
             .andExpect(status().isNotFound())
             .andReturn();
 
@@ -331,8 +331,8 @@ class MediaControllerAdminPostMediaIntTest extends IntegrationBase {
         // hide the media
         mockMvc.perform(post(ENDPOINT_URL.replace(
                 MEDIA_ID_SUBSTITUTION_KEY, mediaEntity.getId().toString()))
-                                                   .header("Content-Type", "application/json")
-                                                   .content(objectMapper.writeValueAsString(mediaHideRequest)))
+                            .header("Content-Type", "application/json")
+                            .content(objectMapper.writeValueAsString(mediaHideRequest)))
             .andExpect(status().is2xxSuccessful())
             .andReturn();
 

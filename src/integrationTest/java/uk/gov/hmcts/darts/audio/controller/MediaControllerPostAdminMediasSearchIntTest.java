@@ -40,7 +40,7 @@ import static org.hamcrest.Matchers.is;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@Disabled("Impacted by V1_365__adding_not_null_constraints_part_4.sql")
+@Disabled("Impacted by V1_367__adding_not_null_constraints_part_4.sql")
 @AutoConfigureMockMvc
 @TestPropertySource(properties = {
     "darts.audio.admin-search.max-results=20"

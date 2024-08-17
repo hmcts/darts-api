@@ -34,7 +34,6 @@ class AudioAuditTest extends IntegrationBase {
     @Autowired
     private GivenBuilder given;
 
-    @Disabled("Impacted by V1_365__adding_not_null_constraints_part_4.sql")
     @Test
     @Disabled("Impacted by V1_364_*.sql")
     void performsStandardAndAdvancedAuditsWhenAudioOwnershipIsChanged() {
@@ -53,7 +52,7 @@ class AudioAuditTest extends IntegrationBase {
         assertThat(mediaRequestRevisions.getLatestRevision().getMetadata().getRevisionType()).isEqualTo(UPDATE);
     }
 
-    @Disabled("Impacted by V1_365__adding_not_null_constraints_part_4.sql")
+    @Disabled("Impacted by V1_367__adding_not_null_constraints_part_4.sql")
     @Test
     void performsStandardAuditWhenAudioIsChangedToHidden() {
         var activeUser = given.anAuthenticatedUserWithGlobalAccessAndRole(SUPER_ADMIN);

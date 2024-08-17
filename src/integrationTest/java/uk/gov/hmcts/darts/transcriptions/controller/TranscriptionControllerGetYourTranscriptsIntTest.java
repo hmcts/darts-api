@@ -27,7 +27,6 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@Disabled("Impacted by V1_365__adding_not_null_constraints_part_4.sql")
 @AutoConfigureMockMvc
 @Transactional
 @Disabled("Impacted by V1_364_*.sql")
@@ -254,7 +253,7 @@ class TranscriptionControllerGetYourTranscriptsIntTest extends IntegrationBase {
     @Test
     void getYourTranscriptsApproverShouldNotReturnHidden() throws Exception {
         var courtCase = authorisationStub.getCourtCaseEntity();
-        TranscriptionEntity systemUserTranscription =  dartsDatabase.getTranscriptionStub()
+        TranscriptionEntity systemUserTranscription = dartsDatabase.getTranscriptionStub()
             .createAndSaveAwaitingAuthorisationTranscription(
                 systemUser,
                 courtCase,
@@ -281,16 +280,16 @@ class TranscriptionControllerGetYourTranscriptsIntTest extends IntegrationBase {
     void getYourTranscriptsShouldNotReturnTranscriptWhenIsCurrentFalse() throws Exception {
         var courtCase = authorisationStub.getCourtCaseEntity();
         transcriptionStub.createAndSaveAwaitingAuthorisationTranscription(
-                systemUser,
-                courtCase,
-                authorisationStub.getHearingEntity(), now(UTC), false, false
-            );
+            systemUser,
+            courtCase,
+            authorisationStub.getHearingEntity(), now(UTC), false, false
+        );
 
         transcriptionStub.createAndSaveAwaitingAuthorisationTranscription(
-                authorisationStub.getTestUser(),
-                courtCase,
-                authorisationStub.getHearingEntity(), YESTERDAY, false, false
-            );
+            authorisationStub.getTestUser(),
+            courtCase,
+            authorisationStub.getHearingEntity(), YESTERDAY, false, false
+        );
 
 
         MockHttpServletRequestBuilder requestBuilder = get(ENDPOINT_URI)

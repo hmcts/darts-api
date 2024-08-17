@@ -23,7 +23,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@Disabled("Impacted by V1_365__adding_not_null_constraints_part_4.sql")
+@Disabled("Impacted by V1_367__adding_not_null_constraints_part_4.sql")
 @AutoConfigureMockMvc
 class TranscriptionControllerGetTranscriptionTranscriberCountsIntTest extends IntegrationBase {
 

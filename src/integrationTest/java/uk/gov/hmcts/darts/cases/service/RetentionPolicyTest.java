@@ -17,7 +17,7 @@ import java.time.OffsetDateTime;
 
 import static org.mockito.Mockito.when;
 
-@Disabled("Impacted by V1_365__adding_not_null_constraints_part_4.sql")
+@Disabled("Impacted by V1_367__adding_not_null_constraints_part_4.sql")
 @SuppressWarnings("VariableDeclarationUsageDistance")
 class RetentionPolicyTest extends IntegrationBase {
 

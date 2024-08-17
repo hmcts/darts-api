@@ -29,7 +29,6 @@ import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.JUDICIARY;
 import static uk.gov.hmcts.darts.test.common.data.AnnotationTestData.minimalAnnotationEntity;
 import static uk.gov.hmcts.darts.test.common.data.HearingTestData.someMinimalHearing;
 
-@Disabled("Impacted by V1_365__adding_not_null_constraints_part_4.sql")
 @AutoConfigureMockMvc
 @Disabled("Impacted by V1_364_*.sql")
 class AnnotationGetTest extends IntegrationBase {

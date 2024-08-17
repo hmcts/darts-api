@@ -27,7 +27,7 @@ import static uk.gov.hmcts.darts.common.util.EodHelper.inboundLocation;
 import static uk.gov.hmcts.darts.common.util.EodHelper.storedStatus;
 import static uk.gov.hmcts.darts.common.util.EodHelper.unstructuredLocation;
 
-@Disabled("Impacted by V1_365__adding_not_null_constraints_part_4.sql")
+@Disabled("Impacted by V1_367__adding_not_null_constraints_part_4.sql")
 class EodRepositoryHasMediaNotBeenCopiedFromInboundStorageIntTest extends IntegrationBase {
 
     MediaEntity media;

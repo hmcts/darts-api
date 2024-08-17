@@ -109,7 +109,7 @@ class ArmRetentionEventDateProcessorIntTest extends IntegrationBase {
         String bearerToken = "bearer";
         ArmTokenRequest tokenRequest = new ArmTokenRequest(
             armApiConfigurationProperties.getArmUsername(), armApiConfigurationProperties.getArmPassword(), GrantType.PASSWORD.getValue());
-        ArmTokenResponse tokenResponse =  ArmTokenResponse.builder().accessToken(bearerToken).build();
+        ArmTokenResponse tokenResponse = ArmTokenResponse.builder().accessToken(bearerToken).build();
         String armProfileId = "profileId";
 
         when(armTokenClient.getToken(tokenRequest)).thenReturn(tokenResponse);
@@ -124,7 +124,7 @@ class ArmRetentionEventDateProcessorIntTest extends IntegrationBase {
 
     }
 
-    @Disabled("Impacted by V1_365__adding_not_null_constraints_part_4.sql")
+    @Disabled("Impacted by V1_367__adding_not_null_constraints_part_4.sql")
     @Test
     void calculateEventDates_WithMediaSuccessfulUpdate() {
         final String confidenceReason = "reason";
@@ -195,7 +195,7 @@ class ArmRetentionEventDateProcessorIntTest extends IntegrationBase {
 
     }
 
-    @Disabled("Impacted by V1_365__adding_not_null_constraints_part_4.sql")
+    @Disabled("Impacted by V1_367__adding_not_null_constraints_part_4.sql")
     @Test
     void calculateEventDates_NoEodsToProcess() {
 
@@ -251,8 +251,6 @@ class ArmRetentionEventDateProcessorIntTest extends IntegrationBase {
     }
 
 
-
-    @Disabled("Impacted by V1_365__adding_not_null_constraints_part_4.sql")
     @Test
     @Disabled("Impacted by V1_364_*.sql")
     void calculateEventDates_WithTranscriptionSuccessfulUpdate() {
@@ -338,7 +336,7 @@ class ArmRetentionEventDateProcessorIntTest extends IntegrationBase {
 
         AnnotationDocumentEntity annotationDocument = dartsDatabase.getAnnotationStub()
             .createAnnotationDocumentEntity(annotation, fileName, fileType, fileSize,
-                                                       testUser, uploadedDateTime, checksum, confidenceScore, confidenceReason
+                                            testUser, uploadedDateTime, checksum, confidenceScore, confidenceReason
             );
         annotationDocument.setRetainUntilTs(DOCUMENT_RETENTION_DATE_TIME);
         dartsDatabase.save(annotationDocument);
@@ -531,7 +529,7 @@ class ArmRetentionEventDateProcessorIntTest extends IntegrationBase {
         verify(armApiClient, times(0)).updateMetadata(notNull(), notNull());
     }
 
-    @Disabled("Impacted by V1_365__adding_not_null_constraints_part_4.sql")
+    @Disabled("Impacted by V1_367__adding_not_null_constraints_part_4.sql")
     @Test
     void calculateEventDates_NoArmRecord_NoRetentionDateSet() {
 

@@ -39,7 +39,7 @@ import static uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum.ARM;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.STORED;
 import static uk.gov.hmcts.darts.test.common.TestUtils.getContentsFromFile;
 
-@Disabled("Impacted by V1_365__adding_not_null_constraints_part_4.sql")
+@Disabled("Impacted by V1_367__adding_not_null_constraints_part_4.sql")
 @SuppressWarnings({"PMD.NcssCount"})
 class BatchCleanupArmResponseFilesServiceIntTest extends IntegrationBase {
 

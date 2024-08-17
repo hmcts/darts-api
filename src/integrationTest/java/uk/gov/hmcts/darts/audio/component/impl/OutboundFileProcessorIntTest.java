@@ -30,7 +30,6 @@ import java.util.concurrent.ExecutionException;
 import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-@Disabled("Impacted by V1_365__adding_not_null_constraints_part_4.sql")
 @TestPropertySource(properties = {"darts.audio.transformation.service.audio.file=tests/audio/WithViqHeader/viq0001min.mp2"})
 @Slf4j
 @Disabled("Impacted by V1_363__not_null_constraints_part3.sql")

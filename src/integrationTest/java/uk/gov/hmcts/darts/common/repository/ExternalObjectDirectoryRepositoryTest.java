@@ -24,7 +24,7 @@ import java.util.Optional;
 
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.STORED;
 
-class ExternalObjectDirectoryRepositoryTest  extends PostgresIntegrationBase {
+class ExternalObjectDirectoryRepositoryTest extends PostgresIntegrationBase {
 
     @Autowired
     private ExternalObjectDirectoryRepository externalObjectDirectoryRepository;
@@ -46,7 +46,7 @@ class ExternalObjectDirectoryRepositoryTest  extends PostgresIntegrationBase {
 
     private List<ExternalObjectDirectoryEntity> entitiesToBeMarkedWithMediaOrAnnotationOutsideOfArmHours;
 
-    @Disabled("Impacted by V1_365__adding_not_null_constraints_part_4.sql")
+    @Disabled("Impacted by V1_367__adding_not_null_constraints_part_4.sql")
     @Test
     void testGetDirectoryIfMediaDate24Hours() throws Exception {
 
@@ -69,7 +69,7 @@ class ExternalObjectDirectoryRepositoryTest  extends PostgresIntegrationBase {
                               entitiesToBeMarkedWithMediaOrAnnotationOutsideOfArmHours.size());
     }
 
-    @Disabled("Impacted by V1_365__adding_not_null_constraints_part_4.sql")
+    @Disabled("Impacted by V1_367__adding_not_null_constraints_part_4.sql")
     @Test
     void testGetDirectoryIfMediaDateBeyond24Hours() throws Exception {
 
@@ -157,7 +157,7 @@ class ExternalObjectDirectoryRepositoryTest  extends PostgresIntegrationBase {
         Assertions.assertTrue(results.isEmpty());
     }
 
-    @Disabled("Impacted by V1_365__adding_not_null_constraints_part_4.sql")
+    @Disabled("Impacted by V1_367__adding_not_null_constraints_part_4.sql")
     @Test
     void testGetDirectoryIfMediaDateNotBeyondThreshold() throws Exception {
 
@@ -227,19 +227,19 @@ class ExternalObjectDirectoryRepositoryTest  extends PostgresIntegrationBase {
         externalObjectDirectoryEntities
             = externalObjectDirectoryStub
             .generateWithStatusAndTranscriptionOrAnnotationAndLocation(
-                ExternalLocationTypeEnum.INBOUND,  STORED, numberOfRecordsToGenerate, Optional.empty());
+                ExternalLocationTypeEnum.INBOUND, STORED, numberOfRecordsToGenerate, Optional.empty());
         entitiesToBeMarkedWithMediaOrAnnotationOutsideOfArmHours
             = externalObjectDirectoryEntities.subList(0, externalObjectDirectoryEntities.size() / 2);
 
         expectedArmRecordsResultOutsideHours
             = externalObjectDirectoryStub
             .generateWithStatusAndTranscriptionAndAnnotationAndArmLocation(
-            externalObjectDirectoryEntities.subList(0, externalObjectDirectoryEntities.size() / 2), Optional.of(lastModifiedBeforeCurrentTime));
+                externalObjectDirectoryEntities.subList(0, externalObjectDirectoryEntities.size() / 2), Optional.of(lastModifiedBeforeCurrentTime));
         expectedArmRecordsResultWithinTheHour
             = externalObjectDirectoryStub
             .generateWithStatusAndTranscriptionAndAnnotationAndArmLocation(
-            externalObjectDirectoryEntities
-                .subList(externalObjectDirectoryEntities.size() / 2, externalObjectDirectoryEntities.size()), Optional.of(lastModifiedNotBeforeThreshold));
+                externalObjectDirectoryEntities
+                    .subList(externalObjectDirectoryEntities.size() / 2, externalObjectDirectoryEntities.size()), Optional.of(lastModifiedNotBeforeThreshold));
 
         int expectedRecords = externalObjectDirectoryEntitiesNotRelevant.size() + externalObjectDirectoryEntities.size()
             + expectedArmRecordsResultOutsideHours.size() + expectedArmRecordsResultWithinTheHour.size();
@@ -282,7 +282,7 @@ class ExternalObjectDirectoryRepositoryTest  extends PostgresIntegrationBase {
         externalObjectDirectoryEntities
             = externalObjectDirectoryStub
             .generateWithStatusAndTranscriptionOrAnnotationAndLocation(
-                ExternalLocationTypeEnum.UNSTRUCTURED,  STORED, numberOfRecordsToGenerate, Optional.of(lastModifiedBeforeCurrentTimeForUnstructured));
+                ExternalLocationTypeEnum.UNSTRUCTURED, STORED, numberOfRecordsToGenerate, Optional.of(lastModifiedBeforeCurrentTimeForUnstructured));
         entitiesToBeMarkedWithMediaOrAnnotationOutsideOfArmHours
             = externalObjectDirectoryEntities.subList(0, externalObjectDirectoryEntities.size() / 2);
 
@@ -326,7 +326,7 @@ class ExternalObjectDirectoryRepositoryTest  extends PostgresIntegrationBase {
         externalObjectDirectoryEntities
             = externalObjectDirectoryStub
             .generateWithStatusAndMediaLocation(
-                ExternalLocationTypeEnum.INBOUND,  STORED, numberOfRecordsToGenerate, Optional.empty());
+                ExternalLocationTypeEnum.INBOUND, STORED, numberOfRecordsToGenerate, Optional.empty());
         entitiesToBeMarkedWithMediaOrAnnotationOutsideOfArmHours
             = externalObjectDirectoryEntities.subList(0, externalObjectDirectoryEntities.size() / 2);
 

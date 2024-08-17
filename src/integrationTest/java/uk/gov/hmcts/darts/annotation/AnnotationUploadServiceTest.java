@@ -26,7 +26,6 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static uk.gov.hmcts.darts.test.common.data.HearingTestData.createSomeMinimalHearing;
 
-@Disabled("Impacted by V1_365__adding_not_null_constraints_part_4.sql")
 @SuppressWarnings("VariableDeclarationUsageDistance")
 @Slf4j
 @Disabled("Impacted by V1_364_*.sql")

@@ -50,7 +50,6 @@ class ObjectAdminActionRepositoryTest extends PostgresIntegrationBase {
         Assertions.assertEquals(0, allWithAnyDeletionReason.size());
     }
 
-    @Disabled("Impacted by V1_365__adding_not_null_constraints_part_4.sql")
     @Test
     @Disabled("Impacted by V1_364_*.sql")
     void findAllWithAnyDeletionReasonShouldReturnExpectedResultsWhenMediaExistsMediaActionsWithDeletionReasonButNotYetApprovedForDeletion() {

@@ -114,7 +114,6 @@ class TranscriptionReportingRestrictionsMapperTest extends IntegrationBase {
         assertThat(transcriptionResponse.getCaseReportingRestrictions()).extracting("eventName").contains("Restrictions lifted");
     }
 
-    @Disabled("Impacted by V1_365__adding_not_null_constraints_part_4.sql")
     @Test
     @Disabled("Impacted by V1_364_*.sql")
     void includesReportingRestrictionsLiftedWhenReapplied() {

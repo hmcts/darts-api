@@ -57,7 +57,6 @@ import static uk.gov.hmcts.darts.notification.api.NotificationApi.NotificationTe
 import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum.AWAITING_AUTHORISATION;
 import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum.REQUESTED;
 
-@Disabled("Impacted by V1_365__adding_not_null_constraints_part_4.sql")
 @AutoConfigureMockMvc
 @SuppressWarnings({"PMD.ExcessiveImports"})
 @Transactional
@@ -116,7 +115,7 @@ class TranscriptionControllerRequestTranscriptionIntTest extends IntegrationBase
     }
 
     @ParameterizedTest
-    @EnumSource(names = {"COURT_LOG", "SPECIFIED_TIMES","OTHER"})
+    @EnumSource(names = {"COURT_LOG", "SPECIFIED_TIMES", "OTHER"})
     void transcriptionRequestWithValidValuesShouldReturnSuccess(TranscriptionTypeEnum transcriptionTypeEnum) throws Exception {
         TranscriptionUrgencyEnum transcriptionUrgencyEnum = TranscriptionUrgencyEnum.STANDARD;
 
@@ -197,7 +196,7 @@ class TranscriptionControllerRequestTranscriptionIntTest extends IntegrationBase
         TranscriptionTypeEnum transcriptionTypeEnum = TranscriptionTypeEnum.SPECIFIED_TIMES;
 
         var dupeTranscription = transcriptionStub.createAndSaveCompletedTranscription(
-            testUser, courtCase, hearing,startTime, endTime, now(), false);
+            testUser, courtCase, hearing, startTime, endTime, now(), false);
 
         TranscriptionRequestDetails transcriptionRequestDetails = createTranscriptionRequestDetails(
             hearing.getId(), courtCase.getId(), transcriptionUrgencyEnum.getId(),

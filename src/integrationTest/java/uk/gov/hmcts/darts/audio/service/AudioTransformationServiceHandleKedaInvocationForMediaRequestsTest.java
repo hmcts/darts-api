@@ -94,7 +94,7 @@ class AudioTransformationServiceHandleKedaInvocationForMediaRequestsTest extends
 
     }
 
-    @Disabled("Impacted by V1_365__adding_not_null_constraints_part_4.sql")
+    @Disabled("Impacted by V1_367__adding_not_null_constraints_part_4.sql")
     @Test
     @SuppressWarnings("PMD.LawOfDemeter")
     public void handleKedaInvocationForMediaRequestsShouldSucceedAndUpdateRequestStatusToCompletedAndScheduleSuccessNotificationForDownload() {
@@ -126,7 +126,7 @@ class AudioTransformationServiceHandleKedaInvocationForMediaRequestsTest extends
         assertEquals(EMAIL_ADDRESS, notificationEntity.getEmailAddress());
     }
 
-    @Disabled("Impacted by V1_365__adding_not_null_constraints_part_4.sql")
+    @Disabled("Impacted by V1_367__adding_not_null_constraints_part_4.sql")
     @Test
     @SuppressWarnings("PMD.LawOfDemeter")
     public void handleKedaInvocationForMediaRequestsShouldSucceedAndUpdateRequestStatusToCompletedOnlyOnce() {
@@ -147,7 +147,7 @@ class AudioTransformationServiceHandleKedaInvocationForMediaRequestsTest extends
         verify(mediaRequestService, times(1)).updateAudioRequestCompleted(any(MediaRequestEntity.class));
     }
 
-    @Disabled("Impacted by V1_365__adding_not_null_constraints_part_4.sql")
+    @Disabled("Impacted by V1_367__adding_not_null_constraints_part_4.sql")
     @Test
     @SuppressWarnings("PMD.LawOfDemeter")
     public void handleKedaInvocationForMediaRequestsShouldSucceedAndUpdateRequestStatusToCompletedAndScheduleSuccessNotificationForPlayback() {
@@ -179,7 +179,7 @@ class AudioTransformationServiceHandleKedaInvocationForMediaRequestsTest extends
         assertEquals(EMAIL_ADDRESS, notificationEntity.getEmailAddress());
     }
 
-    @Disabled("Impacted by V1_365__adding_not_null_constraints_part_4.sql")
+    @Disabled("Impacted by V1_367__adding_not_null_constraints_part_4.sql")
     @Test
     @SuppressWarnings("PMD.LawOfDemeter")
     public void handleKedaInvocationForMediaRequestsShouldResetRequestStatusToOpen() {
