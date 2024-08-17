@@ -45,7 +45,6 @@ class DarStopHandlerTest extends HandlerTestData {
         dartsGateway.darNotificationReturnsSuccess();
     }
 
-    @Disabled("Impacted by V1_366__add_missing_constraints_part5b.sql")
     @Test
     @Disabled("Impacted by V1_363__not_null_constraints_part3.sql")
     void throwsOnUnknownCourthouse() {

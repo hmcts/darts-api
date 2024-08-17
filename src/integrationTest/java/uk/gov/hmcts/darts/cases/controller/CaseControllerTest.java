@@ -54,7 +54,6 @@ import static uk.gov.hmcts.darts.test.common.data.HearingTestData.createHearingW
 import static uk.gov.hmcts.darts.test.common.data.JudgeTestData.createListOfJudges;
 import static uk.gov.hmcts.darts.test.common.data.ProsecutorTestData.createListOfProsecutor;
 
-@Disabled("Impacted by V1_366__add_missing_constraints_part5b.sql")
 @AutoConfigureMockMvc
 @Disabled("Impacted by V1_363__not_null_constraints_part3.sql")
 class CaseControllerTest extends IntegrationBase {
