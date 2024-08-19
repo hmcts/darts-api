@@ -1,8 +1,3 @@
-SELECT setval('aud_seq'
-            , nextval('audit_seq')
-            , false)
-;
-
 DROP SEQUENCE IF EXISTS audit_activities_seq;
 DROP SEQUENCE IF EXISTS audit_seq;
 DROP SEQUENCE IF EXISTS cre_seq;
@@ -41,6 +36,4 @@ ALTER TABLE transcription_document ALTER COLUMN content_object_id TYPE character
 
 ALTER TABLE IF EXISTS transcription_urgency ALTER COLUMN display_state DROP DEFAULT;
 
-DROP INDEX user_account_user_email_address_unq;
-CREATE UNIQUE INDEX user_account_user_email_address_unq ON user_account (upper(user_email_address)) where is_active;
 
