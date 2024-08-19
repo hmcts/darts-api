@@ -7,6 +7,7 @@
 -- v3 remove indexes on hea_id and cas_id from transcription
 -- v4 amend a number of the indexes on character columns to be case-insenstive upper() function based
 -- v5 add 2 user_account indexes
+-- v6 add 4 application team derived indexes
 
 SET ROLE DARTS_OWNER;
 SET SEARCH_PATH TO darts;
@@ -181,9 +182,9 @@ CREATE INDEX rpt_cre_by_fk      ON RETENTION_POLICY_TYPE(created_by) TABLESPACE 
 CREATE INDEX rpt_lst_mod_by_fk  ON RETENTION_POLICY_TYPE(last_modified_by) TABLESPACE darts_indexes;
 
 
---v2 
+--v2
 CREATE INDEX cas_cn_idx         ON COURT_CASE(case_number)                  TABLESPACE darts_indexes;
-CREATE INDEX cth_cn_idx         ON COURTHOUSE(UPPER(courthouse_name))       TABLESPACE darts_indexes;  
+CREATE INDEX cth_cn_idx         ON COURTHOUSE(UPPER(courthouse_name))       TABLESPACE darts_indexes;
 CREATE INDEX ctr_cn_idx         ON COURTROOM(UPPER(courtroom_name))         TABLESPACE darts_indexes;
 CREATE INDEX dfc_dn_idx         ON DEFENCE(UPPER(defence_name))             TABLESPACE darts_indexes;
 CREATE INDEX dfd_dn_idx         ON DEFENDANT(UPPER(defendant_name))         TABLESPACE darts_indexes;
@@ -193,3 +194,28 @@ CREATE INDEX prn_pn_idx         ON PROSECUTOR(UPPER(prosecutor_name))       TABL
 CREATE INDEX usr_un_idx         ON USER_ACCOUNT(user_name)                  TABLESPACE darts_indexes;
 CREATE INDEX usr_upea_idx       ON USER_ACCOUNT(UPPER(user_email_address))  TABLESPACE darts_indexes;
 CREATE INDEX usr_ag_idx         ON USER_ACCOUNT(account_guid)               TABLESPACE darts_indexes;
+
+--v6
+CREATE INDEX event_event_id_is_current_idx
+    ON darts.event USING btree
+    (event_id ASC NULLS LAST, is_current ASC NULLS LAST)
+    TABLESPACE darts_indexes;
+
+CREATE UNIQUE INDEX event_handler_event_type_event_event_sub_type_unq
+    ON darts.event_handler USING btree
+    (event_type COLLATE pg_catalog."default" ASC NULLS LAST, event_sub_type COLLATE pg_catalog."default" ASC NULLS LAST)
+    TABLESPACE darts_indexes
+    WHERE active;
+
+CREATE UNIQUE INDEX retention_policy_type_type_unq
+    ON darts.retention_policy_type USING btree
+    (fixed_policy_key COLLATE pg_catalog."default" ASC NULLS LAST)
+    TABLESPACE darts_indexes
+    WHERE policy_end_ts IS NULL;
+
+CREATE UNIQUE INDEX user_account_user_email_address_unq
+    ON darts.user_account USING btree
+    (user_email_address COLLATE pg_catalog."default" ASC NULLS LAST)
+    TABLESPACE darts_indexes
+    WHERE is_active;
+

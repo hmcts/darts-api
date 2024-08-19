@@ -1,10 +1,11 @@
 --v1	initial version based on obect_state_record.docx 15/3/24
 --v2	added parent_id, parent_object_id, content_object_id, object_type, dets_location
 --v3    add courthouse_name,cas_id, id_response_cr_file, id_response_uf_file
+--v4    amend osr_uuid from character to bigint
 
 
 CREATE TABLE object_state_record
-(osr_uuid                      CHARACTER VARYING                     NOT NULL
+(osr_uuid                      BIGINT                     NOT NULL
 ,eod_id                        CHARACTER VARYING
 ,arm_eod_id                    CHARACTER VARYING
 ,parent_id                     CHARACTER VARYING --

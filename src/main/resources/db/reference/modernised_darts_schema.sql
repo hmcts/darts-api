@@ -303,6 +303,13 @@
 --    object_retrieval_queue[created_by, last_modified_by]
 --    transcription_document[delted_by, uploaded_by, last_modified_by]
 --    amend courthouse sequence to nocache
+--v71.3 amend datatype on eod.osr_uuid from char to int
+--    nod_seq, ors_seq, trm_seq nocache
+--    automated_task.task_enabled default true
+--    court_case.is_retention_updated default false
+--    event.is_current default true
+--    transformed_media start_ts, end_ts to not null
+--    user account is_system_user default to false
 
 -- List of Table Aliases
 -- annotation                  ANN
@@ -542,7 +549,7 @@ CREATE TABLE automated_task
 ,task_description            CHARACTER VARYING             NOT NULL
 ,cron_expression             CHARACTER VARYING             NOT NULL
 ,cron_editable               BOOLEAN                       NOT NULL
-,task_enabled                BOOLEAN                       NOT NULL
+,task_enabled                BOOLEAN                       NOT NULL DEFAULT true
 ,batch_size                  INTEGER
 ,created_ts                  TIMESTAMP WITH TIME ZONE      NOT NULL
 ,created_by                  INTEGER                       NOT NULL
@@ -626,7 +633,7 @@ CREATE TABLE court_case
 ,case_closed                 BOOLEAN                       NOT NULL
 ,interpreter_used            BOOLEAN                       NOT NULL
 ,case_closed_ts              TIMESTAMP WITH TIME ZONE
-,is_retention_updated        BOOLEAN                       NOT NULL  -- flag to indicate retention has been updated
+,is_retention_updated        BOOLEAN                       NOT NULL DEFAULT false -- flag to indicate retention has been updated
 ,retention_retries           INTEGER
 ,is_data_anonymised          BOOLEAN                       NOT NULL DEFAULT false
 ,data_anonymised_by          INTEGER
@@ -801,7 +808,7 @@ CREATE TABLE event
 ,message_id                  CHARACTER VARYING
 ,is_log_entry                BOOLEAN                       NOT NULL  -- needs to be not null to ensure only 2 valid states
 ,event_status                INTEGER
-,is_current                  BOOLEAN                       NOT NULL
+,is_current                  BOOLEAN                       NOT NULL DEFAULT true
 ,is_data_anonymised          BOOLEAN                       NOT NULL DEFAULT false
 ,version_label               CHARACTER VARYING(32)
 ,chronicle_id                CHARACTER VARYING(16)                   -- legacy id of the 1.0 version of the event
@@ -892,7 +899,7 @@ CREATE TABLE external_object_directory
 ,trd_id                      INTEGER                                 -- FK to transcription_document
 ,ors_id                      INTEGER                       NOT NULL  -- FK to object_record_status
 ,elt_id                      INTEGER                       NOT NULL  -- FK to external_location_type
-,osr_uuid                    CHARACTER VARYING                       -- logical FK to object_state_record
+,osr_uuid                    BIGINT                                  -- logical FK to object_state_record
 -- additional optional FKs to other relevant internal objects would require columns here
 ,external_location           UUID                                    -- for use where address of Ext Obj requires 1 field
 ,external_file_id            CHARACTER VARYING                       -- for use where address of Ext Obj requires 2 fields
@@ -1504,8 +1511,8 @@ CREATE TABLE transcription_workflow
 CREATE TABLE transformed_media
 (trm_id                      INTEGER                       NOT NULL
 ,mer_id                      INTEGER                       NOT NULL  -- FK to media_request
-,start_ts                    TIMESTAMP WITH TIME ZONE
-,end_ts                      TIMESTAMP WITH TIME ZONE
+,start_ts                    TIMESTAMP WITH TIME ZONE      NOT NULL
+,end_ts                      TIMESTAMP WITH TIME ZONE      NOT NULL
 ,last_accessed_ts            TIMESTAMP WITH TIME ZONE
 ,expiry_ts                   TIMESTAMP WITH TIME ZONE
 ,output_filename             CHARACTER VARYING
@@ -1550,7 +1557,7 @@ CREATE TABLE user_account
 ,description                 CHARACTER VARYING
 ,is_active                   BOOLEAN                       NOT NULL
 ,last_login_ts               TIMESTAMP WITH TIME ZONE
-,is_system_user              BOOLEAN                       NOT NULL
+,is_system_user              BOOLEAN                       NOT NULL DEFAULT false
 ,account_guid                CHARACTER VARYING
 ,created_ts                  TIMESTAMP WITH TIME ZONE      NOT NULL
 ,created_by                  INTEGER                       NOT NULL
@@ -1747,11 +1754,11 @@ CREATE SEQUENCE hea_seq CACHE 20;
 CREATE SEQUENCE med_seq CACHE 20;
 CREATE SEQUENCE mlc_seq CACHE 20;
 CREATE SEQUENCE mer_seq CACHE 20;
-CREATE SEQUENCE nod_seq CACHE 20 START WITH 50000;   -- sequence for node_register.node_id
+CREATE SEQUENCE nod_seq CACHE 1 START WITH 50000;   -- sequence for node_register.node_id
 CREATE SEQUENCE not_seq CACHE 20;
 CREATE SEQUENCE oaa_seq CACHE 20;
 CREATE SEQUENCE ohr_seq CACHE 20;
-CREATE SEQUENCE ors_seq CACHE 20;
+CREATE SEQUENCE ors_seq CACHE 1;
 CREATE SEQUENCE orq_seq CACHE 20;
 CREATE SEQUENCE prn_seq CACHE 20;
 CREATE SEQUENCE reg_seq CACHE 20;
@@ -1761,7 +1768,7 @@ CREATE SEQUENCE tra_seq CACHE 20;
 CREATE SEQUENCE trc_seq CACHE 20;
 CREATE SEQUENCE trd_seq CACHE 20;
 CREATE SEQUENCE trw_seq CACHE 20;
-CREATE SEQUENCE trm_seq CACHE 20;
+CREATE SEQUENCE trm_seq CACHE 1;
 CREATE SEQUENCE usr_seq CACHE 20;
 
 
@@ -2308,6 +2315,9 @@ ADD CONSTRAINT courthouse_name_ck CHECK (courthouse_name = UPPER(courthouse_name
 
 ALTER TABLE courtroom
 ADD CONSTRAINT courtroom_name_ck CHECK (courtroom_name = UPPER(courtroom_name));
+
+ALTER TABLE user_account
+ADD CONSTRAINT user_account_user_email_address_ck CHECK (user_email_address = LOWER(user_email_address));
 
 ALTER TABLE external_service_auth_token
 ADD CONSTRAINT token_type_ck CHECK (token_type in (1,2));
