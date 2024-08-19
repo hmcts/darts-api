@@ -310,6 +310,8 @@
 --    event.is_current default true
 --    transformed_media start_ts, end_ts to not null
 --    user account is_system_user default to false
+--    add unique index on user_account, upper(user_email_address)
+--v71.4 amend all tablespaces to pg_default
 
 -- List of Table Aliases
 -- annotation                  ANN
@@ -383,11 +385,11 @@ PASSWORD 'darts_user';
 
 CREATE SCHEMA DARTS AUTHORIZATION DARTS_OWNER;
 
-CREATE TABLESPACE darts_tables  location 'E:/PostgreSQL/Tables';
-CREATE TABLESPACE darts_indexes location 'E:/PostgreSQL/Indexes';
+--CREATE TABLESPACE darts_tables  location 'E:/PostgreSQL/Tables';
+--CREATE TABLESPACE darts_indexes location 'E:/PostgreSQL/Indexes';
 
-GRANT ALL ON TABLESPACE darts_tables TO darts_owner;
-GRANT ALL ON TABLESPACE darts_indexes TO darts_owner;
+--GRANT ALL ON TABLESPACE darts_tables TO darts_owner;
+--GRANT ALL ON TABLESPACE darts_indexes TO darts_owner;
 
 SET ROLE DARTS_OWNER;
 
@@ -407,7 +409,7 @@ CREATE TABLE annotation
 ,created_by                  INTEGER                       NOT NULL
 ,last_modified_ts            TIMESTAMP WITH TIME ZONE      NOT NULL
 ,last_modified_by            INTEGER                       NOT NULL
-) TABLESPACE darts_tables;
+) TABLESPACE pg_default;
 
 COMMENT ON COLUMN annotation.ann_id
 IS 'primary key of annotation';
@@ -444,7 +446,7 @@ CREATE TABLE annotation_document
 ,uploaded_ts                 TIMESTAMP WITH TIME ZONE      NOT NULL
 ,last_modified_ts            TIMESTAMP WITH TIME ZONE      NOT NULL
 ,last_modified_by            INTEGER                       NOT NULL
-) TABLESPACE darts_tables;
+) TABLESPACE pg_default;
 
 COMMENT ON COLUMN annotation_document.ado_id
 IS 'primary key of annotation_document';
@@ -463,7 +465,7 @@ CREATE TABLE audit
 ,last_modified_ts            TIMESTAMP WITH TIME ZONE      NOT NULL
 ,last_modified_by            INTEGER                       NOT NULL
 
-) TABLESPACE darts_tables;
+) TABLESPACE pg_default;
 
 COMMENT ON COLUMN audit.aud_id
 IS 'primary key of audit';
@@ -487,7 +489,7 @@ CREATE TABLE audit_activity
 ,last_modified_ts             TIMESTAMP WITH TIME ZONE     NOT NULL
 ,last_modified_by             INTEGER                      NOT NULL
 
-) TABLESPACE darts_tables;
+) TABLESPACE pg_default;
 
 COMMENT ON COLUMN audit.aua_id
 IS 'primary key of audit_activity';
@@ -540,7 +542,7 @@ CREATE TABLE audit_heritage
 ,I_VSTAMP                     INTEGER
 ,ATTRIBUTE_LIST_ASPECT_ID     CHARACTER VARYING
 ,R_OBJECT_SEQUENCE            INTEGER
- ) TABLESPACE darts_tables;
+ ) TABLESPACE pg_default;
 
 
 CREATE TABLE automated_task
@@ -555,7 +557,7 @@ CREATE TABLE automated_task
 ,created_by                  INTEGER                       NOT NULL
 ,last_modified_ts            TIMESTAMP WITH TIME ZONE      NOT NULL
 ,last_modified_by            INTEGER                       NOT NULL
-) TABLESPACE darts_tables;
+) TABLESPACE pg_default;
 
 COMMENT ON COLUMN automated_task.aut_id
 IS 'primary key of automated_task';
@@ -578,13 +580,13 @@ CREATE TABLE case_document
 ,created_ts                  TIMESTAMP WITH TIME ZONE      NOT NULL
 ,last_modified_ts            TIMESTAMP WITH TIME ZONE      NOT NULL
 ,last_modified_by            INTEGER                       NOT NULL
-) TABLESPACE darts_tables;
+) TABLESPACE pg_default;
 
 
 CREATE TABLE case_judge_ae
 (cas_id                      INTEGER                       NOT NULL
 ,jud_id                      INTEGER                       NOT NULL
-) TABLESPACE darts_tables;
+) TABLESPACE pg_default;
 
 COMMENT ON COLUMN case_judge_ae.cas_id
 IS 'foreign key from case, part of composite natural key and PK';
@@ -595,7 +597,7 @@ IS 'foreign key from judge, part of composite natural key and PK';
 CREATE TABLE case_transcription_ae
 (cas_id                      INTEGER                       NOT NULL
 ,tra_id                      INTEGER                       NOT NULL
-) TABLESPACE darts_tables;
+) TABLESPACE pg_default;
 
 COMMENT ON COLUMN case_transcription_ae.cas_id
 IS 'foreign key from case, part of composite natural key and PK';
@@ -620,7 +622,7 @@ CREATE TABLE case_overflow
 ,c_case_closed_date_pre_live TIMESTAMP WITH TIME ZONE
 ,audio_folder_object_id      CHARACTER VARYING(16)
 ,case_object_name            CHARACTER VARYING(255)                  -- to accommodate dm_sysobject_s.object_name
-) TABLESPACE darts_tables;
+) TABLESPACE pg_default;
 
 CREATE TABLE court_case
 (cas_id                      INTEGER                       NOT NULL
@@ -648,7 +650,7 @@ CREATE TABLE court_case
 ,created_by                  INTEGER                       NOT NULL
 ,last_modified_ts            TIMESTAMP WITH TIME ZONE      NOT NULL
 ,last_modified_by            INTEGER                       NOT NULL
-) TABLESPACE darts_tables;
+) TABLESPACE pg_default;
 
 COMMENT ON COLUMN court_case.cas_id
 IS 'primary key of court_case';
@@ -680,7 +682,7 @@ CREATE TABLE courthouse
 ,created_by                  INTEGER                       NOT NULL
 ,last_modified_ts            TIMESTAMP WITH TIME ZONE      NOT NULL
 ,last_modified_by            INTEGER                       NOT NULL
-) TABLESPACE darts_tables;
+) TABLESPACE pg_default;
 
 COMMENT ON COLUMN courthouse.cth_id
 IS 'primary key of courthouse';
@@ -694,7 +696,7 @@ IS 'directly sourced from moj_courthouse_s.c_id';
 CREATE TABLE courthouse_region_ae
 (cth_id                      INTEGER                       NOT NULL
 ,reg_id                      INTEGER                       NOT NULL
-) TABLESPACE darts_tables;
+) TABLESPACE pg_default;
 
 CREATE TABLE courtroom
 (ctr_id                      INTEGER                       NOT NULL
@@ -703,7 +705,7 @@ CREATE TABLE courtroom
 --,UNIQUE(moj_cth_id,courtroom_name)
 ,created_ts                  TIMESTAMP WITH TIME ZONE      NOT NULL
 ,created_by                  INTEGER                       NOT NULL
-) TABLESPACE darts_tables;
+) TABLESPACE pg_default;
 
 COMMENT ON COLUMN courtroom.ctr_id
 IS 'primary key of courtroom';
@@ -735,7 +737,7 @@ CREATE TABLE daily_list
 ,created_by                  INTEGER                       NOT NULL
 ,last_modified_ts            TIMESTAMP WITH TIME ZONE      NOT NULL
 ,last_modified_by            INTEGER                       NOT NULL
-) TABLESPACE darts_tables;
+) TABLESPACE pg_default;
 
 COMMENT ON COLUMN daily_list.dal_id
 IS 'primary key of daily_list';
@@ -772,7 +774,7 @@ CREATE TABLE defence
 ,created_by                  INTEGER                       NOT NULL
 ,last_modified_ts            TIMESTAMP WITH TIME ZONE      NOT NULL
 ,last_modified_by            INTEGER                       NOT NULL
-) TABLESPACE darts_tables;
+) TABLESPACE pg_default;
 
 COMMENT ON COLUMN defence.dfc_id
 IS 'primary key of defence';
@@ -788,7 +790,7 @@ CREATE TABLE defendant
 ,created_by                  INTEGER                       NOT NULL
 ,last_modified_ts            TIMESTAMP WITH TIME ZONE      NOT NULL
 ,last_modified_by            INTEGER                       NOT NULL
-) TABLESPACE darts_tables;
+) TABLESPACE pg_default;
 
 COMMENT ON COLUMN defendant.dfd_id
 IS 'primary key of defendant';
@@ -817,7 +819,7 @@ CREATE TABLE event
 ,created_by                  INTEGER                       NOT NULL
 ,last_modified_ts            TIMESTAMP WITH TIME ZONE      NOT NULL
 ,last_modified_by            INTEGER                       NOT NULL
-) TABLESPACE darts_tables;
+) TABLESPACE pg_default;
 
 COMMENT ON COLUMN event.eve_id
 IS 'primary key of moj_event';
@@ -857,7 +859,7 @@ CREATE TABLE event_handler
 ,is_reporting_restriction    BOOLEAN                       NOT NULL
 ,created_ts                  TIMESTAMP WITH TIME ZONE      NOT NULL
 ,created_by                  INTEGER                       NOT NULL
-) TABLESPACE darts_tables;
+) TABLESPACE pg_default;
 
 COMMENT ON TABLE event_handler
 IS 'content will be derived from TBL_MOJ_DOC_HANDLER in the legacy database, but currently has no primary key and 6 fully duplicated rows';
@@ -886,7 +888,7 @@ CREATE TABLE event_linked_case
 ,cas_id                      INTEGER                                    -- unenforced and optional FK
 ,courthouse_name             CHARACTER VARYING
 ,case_number                 CHARACTER VARYING
-) TABLESPACE darts_tables;
+) TABLESPACE pg_default;
 
 COMMENT ON TABLE event_linked_case
 IS 'content is to be populated via migration';
@@ -917,7 +919,7 @@ CREATE TABLE external_object_directory
 ,created_by                  INTEGER                       NOT NULL
 ,last_modified_ts            TIMESTAMP WITH TIME ZONE      NOT NULL
 ,last_modified_by            INTEGER                       NOT NULL
-) TABLESPACE darts_tables;
+) TABLESPACE pg_default;
 
 COMMENT ON COLUMN external_object_directory.eod_id
 IS 'primary key of external_object_directory';
@@ -940,7 +942,7 @@ IS 'foreign key from annotation_document';
 CREATE TABLE external_location_type
 (elt_id                      INTEGER                       NOT NULL
 ,elt_description             CHARACTER VARYING
-) TABLESPACE darts_tables;
+) TABLESPACE pg_default;
 
 COMMENT ON TABLE external_location_type
 IS 'used to record acceptable external locations, found in external_object_directory';
@@ -956,7 +958,7 @@ CREATE TABLE external_service_auth_token
 ,created_by                  INTEGER                       NOT NULL
 ,last_modified_ts            TIMESTAMP WITH TIME ZONE      NOT NULL
 ,last_modified_by            INTEGER                       NOT NULL
-) TABLESPACE darts_tables;
+) TABLESPACE pg_default;
 
 COMMENT ON COLUMN external_service_auth_token.esa_id
 IS 'primary key of external_service_auth_token';
@@ -986,7 +988,7 @@ CREATE TABLE hearing
 ,created_by                  INTEGER                       NOT NULL
 ,last_modified_ts            TIMESTAMP WITH TIME ZONE      NOT NULL
 ,last_modified_by            INTEGER                       NOT NULL
-) TABLESPACE darts_tables;
+) TABLESPACE pg_default;
 
 COMMENT ON COLUMN hearing.hea_id
 IS 'primary key of hearing';
@@ -1003,7 +1005,7 @@ IS 'directly sourced from moj_case_r';
 CREATE TABLE hearing_annotation_ae
 (hea_id                      INTEGER                       NOT NULL
 ,ann_id                      INTEGER                       NOT NULL
-) TABLESPACE darts_tables;
+) TABLESPACE pg_default;
 
 COMMENT ON COLUMN hearing_annotation_ae.hea_id
 IS 'foreign key from hearing, part of composite natural key and PK';
@@ -1014,7 +1016,7 @@ IS 'foreign key from annotation, part of composite natural key and PK';
 CREATE TABLE hearing_event_ae
 (hea_id                      INTEGER                       NOT NULL
 ,eve_id                      INTEGER                       NOT NULL
-) TABLESPACE darts_tables;
+) TABLESPACE pg_default;
 
 COMMENT ON COLUMN hearing_event_ae.hea_id
 IS 'foreign key from hearing, part of composite natural key and PK';
@@ -1025,7 +1027,7 @@ IS 'foreign key from event, part of composite natural key and PK';
 CREATE TABLE hearing_judge_ae
 (hea_id                      INTEGER                       NOT NULL
 ,jud_id                      INTEGER                       NOT NULL
-) TABLESPACE darts_tables;
+) TABLESPACE pg_default;
 
 COMMENT ON COLUMN hearing_judge_ae.hea_id
 IS 'foreign key from case, part of composite natural key and PK';
@@ -1036,7 +1038,7 @@ IS 'foreign key from judge, part of composite natural key and PK';
 CREATE TABLE hearing_media_ae
 (hea_id                      INTEGER                       NOT NULL
 ,med_id                      INTEGER                       NOT NULL
-) TABLESPACE darts_tables;
+) TABLESPACE pg_default;
 
 COMMENT ON COLUMN hearing_media_ae.hea_id
 IS 'foreign key from hearing, part of composite natural key and PK';
@@ -1047,7 +1049,7 @@ IS 'foreign key from media, part of composite natural key and PK';
 CREATE TABLE hearing_transcription_ae
 (hea_id                      INTEGER                       NOT NULL
 ,tra_id                      INTEGER                       NOT NULL
-) TABLESPACE darts_tables;
+) TABLESPACE pg_default;
 
 COMMENT ON COLUMN hearing_transcription_ae.hea_id
 IS 'foreign key from hearing, part of composite natural key and PK';
@@ -1062,7 +1064,7 @@ CREATE TABLE judge
 ,created_by                  INTEGER                       NOT NULL
 ,last_modified_ts            TIMESTAMP WITH TIME ZONE      NOT NULL
 ,last_modified_by            INTEGER                       NOT NULL
-) TABLESPACE darts_tables;
+) TABLESPACE pg_default;
 
 COMMENT ON COLUMN judge.jud_id
 IS 'primary key of judge';
@@ -1098,7 +1100,7 @@ CREATE TABLE media
 ,created_by                  INTEGER                       NOT NULL
 ,last_modified_ts            TIMESTAMP WITH TIME ZONE      NOT NULL
 ,last_modified_by            INTEGER                       NOT NULL
-) TABLESPACE darts_tables;
+) TABLESPACE pg_default;
 
 COMMENT ON COLUMN media.med_id
 IS 'primary key of media';
@@ -1130,7 +1132,7 @@ CREATE TABLE media_linked_case
 ,cas_id                      INTEGER                                    -- unenforced and optional FK
 ,courthouse_name             CHARACTER VARYING
 ,case_number                 CHARACTER VARYING
-) TABLESPACE darts_tables;
+) TABLESPACE pg_default;
 
 COMMENT ON TABLE media_linked_case
 IS 'content is to be populated via migration';
@@ -1149,7 +1151,7 @@ CREATE TABLE media_request
 ,created_by                  INTEGER                       NOT NULL
 ,last_modified_ts            TIMESTAMP WITH TIME ZONE      NOT NULL
 ,last_modified_by            INTEGER                       NOT NULL
-) TABLESPACE darts_tables;
+) TABLESPACE pg_default;
 
 COMMENT ON COLUMN media_request.mer_id
 IS 'primary key of media_request';
@@ -1183,7 +1185,7 @@ CREATE TABLE node_register
 ,mac_address                 CHARACTER VARYING             NOT NULL
 ,created_ts                  TIMESTAMP WITH TIME ZONE      NOT NULL
 ,created_by                  INTEGER                       NOT NULL
-) TABLESPACE darts_tables;
+) TABLESPACE pg_default;
 
 COMMENT ON TABLE node_register
 IS 'corresponds to tbl_moj_node from legacy';
@@ -1206,7 +1208,7 @@ CREATE TABLE notification
 ,created_by                  INTEGER                       NOT NULL
 ,last_modified_ts            TIMESTAMP WITH TIME ZONE      NOT NULL
 ,last_modified_by            INTEGER                       NOT NULL
-) TABLESPACE darts_tables;
+) TABLESPACE pg_default;
 
 COMMENT ON COLUMN notification.not_id
 IS 'primary key of notification';
@@ -1243,7 +1245,7 @@ CREATE TABLE object_admin_action
 ,marked_for_manual_del_ts    TIMESTAMP WITH TIME ZONE
 ,ticket_reference            CHARACTER VARYING
 ,comments                    CHARACTER VARYING
-) TABLESPACE darts_tables;
+) TABLESPACE pg_default;
 
 CREATE TABLE object_hidden_reason
 (ohr_id                      INTEGER                       NOT NULL
@@ -1252,7 +1254,7 @@ CREATE TABLE object_hidden_reason
 ,display_state               BOOLEAN                       NOT NULL DEFAULT true
 ,display_order               INTEGER                       NOT NULL
 ,marked_for_deletion         BOOLEAN                       NOT NULL DEFAULT false
-) TABLESPACE darts_tables;
+) TABLESPACE pg_default;
 
 COMMENT ON TABLE object_hidden_reason
 IS 'used to record acceptable reasons for data to be hidden in tables ADO,CAD, MED, TRD';
@@ -1260,7 +1262,7 @@ IS 'used to record acceptable reasons for data to be hidden in tables ADO,CAD, M
 CREATE TABLE object_record_status
 (ors_id                      INTEGER                       NOT NULL
 ,ors_description             CHARACTER VARYING
-) TABLESPACE darts_tables;
+) TABLESPACE pg_default;
 
 COMMENT ON TABLE object_record_status
 IS 'used to record acceptable statuses found in [external/transient]_object_directory';
@@ -1279,7 +1281,7 @@ CREATE TABLE object_retrieval_queue
 ,created_by                  INTEGER                       NOT NULL
 ,last_modified_ts            TIMESTAMP WITH TIME ZONE      NOT NULL
 ,last_modified_by            INTEGER                       NOT NULL
-) TABLESPACE darts_tables;
+) TABLESPACE pg_default;
 
 CREATE TABLE prosecutor
 (prn_id                      INTEGER                       NOT NULL
@@ -1289,7 +1291,7 @@ CREATE TABLE prosecutor
 ,created_by                  INTEGER                       NOT NULL
 ,last_modified_ts            TIMESTAMP WITH TIME ZONE      NOT NULL
 ,last_modified_by            INTEGER                       NOT NULL
-) TABLESPACE darts_tables;
+) TABLESPACE pg_default;
 
 COMMENT ON COLUMN prosecutor.prn_id
 IS 'primary key of prosecutor';
@@ -1300,7 +1302,7 @@ IS 'foreign key from court_case';
 CREATE TABLE region
 (reg_id                      INTEGER                       NOT NULL
 ,region_name                 CHARACTER VARYING             NOT NULL
-) TABLESPACE darts_tables;
+) TABLESPACE pg_default;
 
 
 CREATE TABLE report
@@ -1315,7 +1317,7 @@ CREATE TABLE report
 ,created_by                  INTEGER                       NOT NULL
 ,last_modified_ts            TIMESTAMP WITH TIME ZONE      NOT NULL
 ,last_modified_by            INTEGER                       NOT NULL
-) TABLESPACE darts_tables;
+) TABLESPACE pg_default;
 
 COMMENT ON COLUMN report.rep_id
 IS 'primary key of report';
@@ -1363,7 +1365,7 @@ CREATE TABLE transcription
 ,created_by                  INTEGER                       NOT NULL
 ,last_modified_ts            TIMESTAMP WITH TIME ZONE      NOT NULL
 ,last_modified_by            INTEGER                       NOT NULL
-) TABLESPACE darts_tables;
+) TABLESPACE pg_default;
 
 COMMENT ON COLUMN transcription.tra_id
 IS 'primary key of transcription';
@@ -1409,7 +1411,7 @@ CREATE TABLE transcription_comment
 ,created_by                  INTEGER                       NOT NULL
 ,last_modified_ts            TIMESTAMP WITH TIME ZONE      NOT NULL
 ,last_modified_by            INTEGER                       NOT NULL
-) TABLESPACE darts_tables;
+) TABLESPACE pg_default;
 
 COMMENT ON COLUMN transcription_comment.trc_id
 IS 'primary key of transcription_comment';
@@ -1449,7 +1451,7 @@ CREATE TABLE transcription_document
 ,uploaded_ts                 TIMESTAMP WITH TIME ZONE      NOT NULL
 ,last_modified_ts            TIMESTAMP WITH TIME ZONE      NOT NULL
 ,last_modified_by            INTEGER                       NOT NULL
-) TABLESPACE darts_tables;
+) TABLESPACE pg_default;
 
 COMMENT ON COLUMN transcription_document.trd_id
 IS 'primary key of transcription_document';
@@ -1461,7 +1463,7 @@ CREATE TABLE transcription_status
 (trs_id                      INTEGER                       NOT NULL
 ,status_type                 CHARACTER VARYING             NOT NULL
 ,display_name                CHARACTER VARYING             NOT NULL
-)TABLESPACE darts_tables;
+)TABLESPACE pg_default;
 
 COMMENT ON TABLE transcription_status
 IS 'standing data table';
@@ -1474,7 +1476,7 @@ CREATE TABLE transcription_type
 (trt_id                      INTEGER                       NOT NULL
 ,description                 CHARACTER VARYING             NOT NULL
 ,display_state               BOOLEAN                       NOT NULL
-)TABLESPACE darts_tables;
+)TABLESPACE pg_default;
 
 COMMENT ON TABLE transcription_type
 IS 'standing data table, migrated from tbl_moj_transcription_type';
@@ -1488,7 +1490,7 @@ CREATE TABLE transcription_urgency
 ,description                 CHARACTER VARYING             NOT NULL
 ,display_state               BOOLEAN                       NOT NULL
 ,priority_order              INTEGER                       NOT NULL
-) TABLESPACE darts_tables;
+) TABLESPACE pg_default;
 
 COMMENT ON TABLE transcription_urgency
 IS 'will be migrated from tbl_moj_urgency';
@@ -1506,7 +1508,7 @@ CREATE TABLE transcription_workflow
 ,workflow_actor              INTEGER                       NOT NULL  -- FK to account_user
 ,workflow_ts                 TIMESTAMP WITH TIME ZONE      NOT NULL
 --,workflow_comment            CHARACTER VARYING
-) TABLESPACE darts_tables;
+) TABLESPACE pg_default;
 
 CREATE TABLE transformed_media
 (trm_id                      INTEGER                       NOT NULL
@@ -1523,7 +1525,7 @@ CREATE TABLE transformed_media
 ,created_by                  INTEGER                       NOT NULL
 ,last_modified_ts            TIMESTAMP WITH TIME ZONE      NOT NULL
 ,last_modified_by            INTEGER                       NOT NULL
-) TABLESPACE darts_tables;
+) TABLESPACE pg_default;
 
 COMMENT ON TABLE transformed_media
 IS 'to accommodate the possibility that a single media_request may be fulfilled as more than one resulting piece of media';
@@ -1545,7 +1547,7 @@ CREATE TABLE transient_object_directory
 ,created_by                  INTEGER                       NOT NULL
 ,last_modified_ts            TIMESTAMP WITH TIME ZONE      NOT NULL
 ,last_modified_by            INTEGER                       NOT NULL
-) TABLESPACE darts_tables;
+) TABLESPACE pg_default;
 
 
 CREATE TABLE user_account
@@ -1563,7 +1565,7 @@ CREATE TABLE user_account
 ,created_by                  INTEGER                       NOT NULL
 ,last_modified_ts            TIMESTAMP WITH TIME ZONE      NOT NULL
 ,last_modified_by            INTEGER                       NOT NULL
-) TABLESPACE darts_tables;
+) TABLESPACE pg_default;
 
 COMMENT ON TABLE user_account
 IS 'migration columns all sourced directly from dm_user_s, but only for rows where r_is_group = 0';
@@ -1575,157 +1577,157 @@ IS 'internal Documentum primary key from dm_user_s';
 
 -- primary keys
 
-CREATE UNIQUE INDEX annotation_pk ON annotation(ann_id) TABLESPACE darts_indexes;
+CREATE UNIQUE INDEX annotation_pk ON annotation(ann_id) TABLESPACE pg_default;
 ALTER TABLE annotation              ADD PRIMARY KEY USING INDEX annotation_pk;
 
-CREATE UNIQUE INDEX annotation_document_pk ON annotation_document(ado_id) TABLESPACE darts_indexes;
+CREATE UNIQUE INDEX annotation_document_pk ON annotation_document(ado_id) TABLESPACE pg_default;
 ALTER TABLE annotation_document   ADD PRIMARY KEY USING INDEX annotation_document_pk;
 
-CREATE UNIQUE INDEX audit_pk ON audit(aud_id) TABLESPACE darts_indexes;
+CREATE UNIQUE INDEX audit_pk ON audit(aud_id) TABLESPACE pg_default;
 ALTER TABLE audit          ADD PRIMARY KEY USING INDEX audit_pk;
 
-CREATE UNIQUE INDEX audit_activity_pk ON audit_activity(aua_id) TABLESPACE darts_indexes;
+CREATE UNIQUE INDEX audit_activity_pk ON audit_activity(aua_id) TABLESPACE pg_default;
 ALTER TABLE audit_activity          ADD PRIMARY KEY USING INDEX audit_activity_pk;
 
-CREATE UNIQUE INDEX automated_task_pk ON automated_task(aut_id) TABLESPACE darts_indexes;
+CREATE UNIQUE INDEX automated_task_pk ON automated_task(aut_id) TABLESPACE pg_default;
 ALTER TABLE automated_task          ADD PRIMARY KEY USING INDEX automated_task_pk;
 
-CREATE UNIQUE INDEX case_document_pk ON case_document(cad_id) TABLESPACE darts_indexes;
+CREATE UNIQUE INDEX case_document_pk ON case_document(cad_id) TABLESPACE pg_default;
 ALTER TABLE case_document        ADD PRIMARY KEY USING INDEX case_document_pk;
 
-CREATE UNIQUE INDEX case_judge_ae_pk ON case_judge_ae(cas_id,jud_id) TABLESPACE darts_indexes;
+CREATE UNIQUE INDEX case_judge_ae_pk ON case_judge_ae(cas_id,jud_id) TABLESPACE pg_default;
 ALTER TABLE case_judge_ae        ADD PRIMARY KEY USING INDEX case_judge_ae_pk;
 
-CREATE UNIQUE INDEX case_transcription_ae_pk ON case_transcription_ae(cas_id,tra_id) TABLESPACE darts_indexes;
+CREATE UNIQUE INDEX case_transcription_ae_pk ON case_transcription_ae(cas_id,tra_id) TABLESPACE pg_default;
 ALTER TABLE case_transcription_ae        ADD PRIMARY KEY USING INDEX case_transcription_ae_pk;
 
-CREATE UNIQUE INDEX case_overflow_pk ON case_overflow(cas_id) TABLESPACE darts_indexes;
+CREATE UNIQUE INDEX case_overflow_pk ON case_overflow(cas_id) TABLESPACE pg_default;
 ALTER TABLE case_overflow              ADD PRIMARY KEY USING INDEX case_overflow_pk;
 
-CREATE UNIQUE INDEX court_case_pk ON court_case(cas_id) TABLESPACE darts_indexes;
+CREATE UNIQUE INDEX court_case_pk ON court_case(cas_id) TABLESPACE pg_default;
 ALTER TABLE court_case              ADD PRIMARY KEY USING INDEX court_case_pk;
 
-CREATE UNIQUE INDEX courthouse_pk ON courthouse(cth_id) TABLESPACE darts_indexes;
+CREATE UNIQUE INDEX courthouse_pk ON courthouse(cth_id) TABLESPACE pg_default;
 ALTER TABLE courthouse              ADD PRIMARY KEY USING INDEX courthouse_pk;
 
-CREATE UNIQUE INDEX courthouse_region_ae_pk ON courthouse_region_ae(cth_id,reg_id) TABLESPACE darts_indexes;
+CREATE UNIQUE INDEX courthouse_region_ae_pk ON courthouse_region_ae(cth_id,reg_id) TABLESPACE pg_default;
 ALTER TABLE courthouse_region_ae    ADD PRIMARY KEY USING INDEX courthouse_region_ae_pk;
 
-CREATE UNIQUE INDEX courtroom_pk ON courtroom(ctr_id) TABLESPACE darts_indexes;
+CREATE UNIQUE INDEX courtroom_pk ON courtroom(ctr_id) TABLESPACE pg_default;
 ALTER TABLE courtroom               ADD PRIMARY KEY USING INDEX courtroom_pk;
 
-CREATE UNIQUE INDEX daily_list_pk ON daily_list(dal_id) TABLESPACE darts_indexes;
+CREATE UNIQUE INDEX daily_list_pk ON daily_list(dal_id) TABLESPACE pg_default;
 ALTER TABLE daily_list              ADD PRIMARY KEY USING INDEX daily_list_pk;
 
-CREATE UNIQUE INDEX defence_pk    ON defence(dfc_id) TABLESPACE darts_indexes;
+CREATE UNIQUE INDEX defence_pk    ON defence(dfc_id) TABLESPACE pg_default;
 ALTER TABLE defence               ADD PRIMARY KEY USING INDEX defence_pk;
 
-CREATE UNIQUE INDEX defendant_pk ON defendant(dfd_id) TABLESPACE darts_indexes;
+CREATE UNIQUE INDEX defendant_pk ON defendant(dfd_id) TABLESPACE pg_default;
 ALTER TABLE defendant             ADD PRIMARY KEY USING INDEX defendant_pk;
 
-CREATE UNIQUE INDEX event_pk ON event(eve_id) TABLESPACE darts_indexes;
+CREATE UNIQUE INDEX event_pk ON event(eve_id) TABLESPACE pg_default;
 ALTER TABLE event                   ADD PRIMARY KEY USING INDEX event_pk;
 
-CREATE UNIQUE INDEX event_linked_case_pk ON event_linked_case(elc_id) TABLESPACE darts_indexes;
+CREATE UNIQUE INDEX event_linked_case_pk ON event_linked_case(elc_id) TABLESPACE pg_default;
 ALTER TABLE event_linked_case  ADD PRIMARY KEY USING INDEX event_linked_case_pk;
 
-CREATE UNIQUE INDEX event_handler_pk ON event_handler(evh_id) TABLESPACE darts_indexes;
+CREATE UNIQUE INDEX event_handler_pk ON event_handler(evh_id) TABLESPACE pg_default;
 ALTER TABLE event_handler            ADD PRIMARY KEY USING INDEX event_handler_pk;
 
-CREATE UNIQUE INDEX external_object_directory_pk ON external_object_directory(eod_id) TABLESPACE darts_indexes;
+CREATE UNIQUE INDEX external_object_directory_pk ON external_object_directory(eod_id) TABLESPACE pg_default;
 ALTER TABLE external_object_directory   ADD PRIMARY KEY USING INDEX external_object_directory_pk;
 
-CREATE UNIQUE INDEX external_location_type_pk ON external_location_type(elt_id) TABLESPACE darts_indexes;
+CREATE UNIQUE INDEX external_location_type_pk ON external_location_type(elt_id) TABLESPACE pg_default;
 ALTER TABLE external_location_type   ADD PRIMARY KEY USING INDEX external_location_type_pk;
 
-CREATE UNIQUE INDEX external_service_auth_token_pk ON external_service_auth_token(esa_id) TABLESPACE darts_indexes;
+CREATE UNIQUE INDEX external_service_auth_token_pk ON external_service_auth_token(esa_id) TABLESPACE pg_default;
 ALTER TABLE external_service_auth_token   ADD PRIMARY KEY USING INDEX external_service_auth_token_pk;
 
-CREATE UNIQUE INDEX hearing_pk ON hearing(hea_id) TABLESPACE darts_indexes;
+CREATE UNIQUE INDEX hearing_pk ON hearing(hea_id) TABLESPACE pg_default;
 ALTER TABLE hearing                 ADD PRIMARY KEY USING INDEX hearing_pk;
 
-CREATE UNIQUE INDEX hearing_annotation_ae_pk ON hearing_annotation_ae(hea_id,ann_id) TABLESPACE darts_indexes;
+CREATE UNIQUE INDEX hearing_annotation_ae_pk ON hearing_annotation_ae(hea_id,ann_id) TABLESPACE pg_default;
 ALTER TABLE hearing_annotation_ae        ADD PRIMARY KEY USING INDEX hearing_annotation_ae_pk;
 
-CREATE UNIQUE INDEX hearing_event_ae_pk ON hearing_event_ae(hea_id,eve_id) TABLESPACE darts_indexes;
+CREATE UNIQUE INDEX hearing_event_ae_pk ON hearing_event_ae(hea_id,eve_id) TABLESPACE pg_default;
 ALTER TABLE hearing_event_ae        ADD PRIMARY KEY USING INDEX hearing_event_ae_pk;
 
-CREATE UNIQUE INDEX hearing_judge_ae_pk ON hearing_judge_ae(hea_id,jud_id) TABLESPACE darts_indexes;
+CREATE UNIQUE INDEX hearing_judge_ae_pk ON hearing_judge_ae(hea_id,jud_id) TABLESPACE pg_default;
 ALTER TABLE hearing_judge_ae        ADD PRIMARY KEY USING INDEX hearing_judge_ae_pk;
 
-CREATE UNIQUE INDEX hearing_media_ae_pk ON hearing_media_ae(hea_id,med_id) TABLESPACE darts_indexes;
+CREATE UNIQUE INDEX hearing_media_ae_pk ON hearing_media_ae(hea_id,med_id) TABLESPACE pg_default;
 ALTER TABLE hearing_media_ae        ADD PRIMARY KEY USING INDEX hearing_media_ae_pk;
 
-CREATE UNIQUE INDEX hearing_transcription_ae_pk ON hearing_transcription_ae(hea_id,tra_id) TABLESPACE darts_indexes;
+CREATE UNIQUE INDEX hearing_transcription_ae_pk ON hearing_transcription_ae(hea_id,tra_id) TABLESPACE pg_default;
 ALTER TABLE hearing_transcription_ae        ADD PRIMARY KEY USING INDEX hearing_transcription_ae_pk;
 
-CREATE UNIQUE INDEX judge_pk     ON judge(jud_id) TABLESPACE darts_indexes;
+CREATE UNIQUE INDEX judge_pk     ON judge(jud_id) TABLESPACE pg_default;
 ALTER TABLE judge                ADD PRIMARY KEY USING INDEX judge_pk;
 
-CREATE UNIQUE INDEX media_pk ON media(med_id) TABLESPACE darts_indexes;
+CREATE UNIQUE INDEX media_pk ON media(med_id) TABLESPACE pg_default;
 ALTER TABLE media                   ADD PRIMARY KEY USING INDEX media_pk;
 
-CREATE UNIQUE INDEX media_linked_case_pk ON media_linked_case(mlc_id) TABLESPACE darts_indexes;
+CREATE UNIQUE INDEX media_linked_case_pk ON media_linked_case(mlc_id) TABLESPACE pg_default;
 ALTER TABLE media_linked_case  ADD PRIMARY KEY USING INDEX media_linked_case_pk;
 
-CREATE UNIQUE INDEX media_request_pk ON media_request(mer_id) TABLESPACE darts_indexes;
+CREATE UNIQUE INDEX media_request_pk ON media_request(mer_id) TABLESPACE pg_default;
 ALTER TABLE media_request           ADD PRIMARY KEY USING INDEX media_request_pk;
 
-CREATE UNIQUE INDEX node_register_pk ON node_register(node_id) TABLESPACE darts_indexes;
+CREATE UNIQUE INDEX node_register_pk ON node_register(node_id) TABLESPACE pg_default;
 ALTER TABLE node_register         ADD PRIMARY KEY USING INDEX node_register_pk;
 
-CREATE UNIQUE INDEX notification_pk ON notification(not_id) TABLESPACE darts_indexes;
+CREATE UNIQUE INDEX notification_pk ON notification(not_id) TABLESPACE pg_default;
 ALTER TABLE notification            ADD PRIMARY KEY USING INDEX notification_pk;
 
-CREATE UNIQUE INDEX object_admin_action_pk ON object_admin_action(oaa_id) TABLESPACE darts_indexes;
+CREATE UNIQUE INDEX object_admin_action_pk ON object_admin_action(oaa_id) TABLESPACE pg_default;
 ALTER TABLE object_admin_action ADD PRIMARY KEY USING INDEX object_admin_action_pk;
 
-CREATE UNIQUE INDEX object_hidden_reason_pk ON object_hidden_reason(ohr_id) TABLESPACE darts_indexes;
+CREATE UNIQUE INDEX object_hidden_reason_pk ON object_hidden_reason(ohr_id) TABLESPACE pg_default;
 ALTER TABLE object_hidden_reason ADD PRIMARY KEY USING INDEX object_hidden_reason_pk;
 
-CREATE UNIQUE INDEX object_record_status_pk ON object_record_status(ors_id) TABLESPACE darts_indexes;
+CREATE UNIQUE INDEX object_record_status_pk ON object_record_status(ors_id) TABLESPACE pg_default;
 ALTER TABLE object_record_status ADD PRIMARY KEY USING INDEX object_record_status_pk;
 
-CREATE UNIQUE INDEX object_retrieval_queue_pk ON object_retrieval_queue(orq_id) TABLESPACE darts_indexes;
+CREATE UNIQUE INDEX object_retrieval_queue_pk ON object_retrieval_queue(orq_id) TABLESPACE pg_default;
 ALTER TABLE object_retrieval_queue ADD PRIMARY KEY USING INDEX object_retrieval_queue_pk;
 
-CREATE UNIQUE INDEX prosecutor_pk ON prosecutor(prn_id) TABLESPACE darts_indexes;
+CREATE UNIQUE INDEX prosecutor_pk ON prosecutor(prn_id) TABLESPACE pg_default;
 ALTER TABLE prosecutor          ADD PRIMARY KEY USING INDEX prosecutor_pk;
 
-CREATE UNIQUE INDEX region_pk ON region(reg_id) TABLESPACE darts_indexes;
+CREATE UNIQUE INDEX region_pk ON region(reg_id) TABLESPACE pg_default;
 ALTER TABLE region                  ADD PRIMARY KEY USING INDEX region_pk;
 
-CREATE UNIQUE INDEX report_pk ON report(rep_id) TABLESPACE darts_indexes;
+CREATE UNIQUE INDEX report_pk ON report(rep_id) TABLESPACE pg_default;
 ALTER TABLE report                  ADD PRIMARY KEY USING INDEX report_pk;
 
-CREATE UNIQUE INDEX transcription_pk ON transcription(tra_id) TABLESPACE darts_indexes;
+CREATE UNIQUE INDEX transcription_pk ON transcription(tra_id) TABLESPACE pg_default;
 ALTER TABLE transcription           ADD PRIMARY KEY USING INDEX transcription_pk;
 
-CREATE UNIQUE INDEX transcription_comment_pk ON transcription_comment(trc_id) TABLESPACE darts_indexes;
+CREATE UNIQUE INDEX transcription_comment_pk ON transcription_comment(trc_id) TABLESPACE pg_default;
 ALTER TABLE transcription_comment   ADD PRIMARY KEY USING INDEX transcription_comment_pk;
 
-CREATE UNIQUE INDEX transcription_document_pk ON transcription_document(trd_id) TABLESPACE darts_indexes;
+CREATE UNIQUE INDEX transcription_document_pk ON transcription_document(trd_id) TABLESPACE pg_default;
 ALTER TABLE transcription_document   ADD PRIMARY KEY USING INDEX transcription_document_pk;
 
-CREATE UNIQUE INDEX transcription_status_pk ON transcription_status(trs_id) TABLESPACE darts_indexes;
+CREATE UNIQUE INDEX transcription_status_pk ON transcription_status(trs_id) TABLESPACE pg_default;
 ALTER TABLE transcription_status      ADD PRIMARY KEY USING INDEX transcription_status_pk;
 
-CREATE UNIQUE INDEX transcription_type_pk ON transcription_type(trt_id) TABLESPACE darts_indexes;
+CREATE UNIQUE INDEX transcription_type_pk ON transcription_type(trt_id) TABLESPACE pg_default;
 ALTER TABLE transcription_type      ADD PRIMARY KEY USING INDEX transcription_type_pk;
 
-CREATE UNIQUE INDEX transcription_urgency_pk ON transcription_urgency(tru_id) TABLESPACE darts_indexes;
+CREATE UNIQUE INDEX transcription_urgency_pk ON transcription_urgency(tru_id) TABLESPACE pg_default;
 ALTER TABLE transcription_urgency                 ADD PRIMARY KEY USING INDEX transcription_urgency_pk;
 
-CREATE UNIQUE INDEX transcription_workflow_pk ON transcription_workflow( trw_id) TABLESPACE darts_indexes;
+CREATE UNIQUE INDEX transcription_workflow_pk ON transcription_workflow( trw_id) TABLESPACE pg_default;
 ALTER TABLE transcription_workflow               ADD PRIMARY KEY USING INDEX transcription_workflow_pk;
 
-CREATE UNIQUE INDEX transformed_media_pk ON transformed_media( trm_id) TABLESPACE darts_indexes;
+CREATE UNIQUE INDEX transformed_media_pk ON transformed_media( trm_id) TABLESPACE pg_default;
 ALTER TABLE transformed_media               ADD PRIMARY KEY USING INDEX transformed_media_pk;
 
-CREATE UNIQUE INDEX transient_object_directory_pk ON transient_object_directory(tod_id) TABLESPACE darts_indexes;
+CREATE UNIQUE INDEX transient_object_directory_pk ON transient_object_directory(tod_id) TABLESPACE pg_default;
 ALTER TABLE transient_object_directory  ADD PRIMARY KEY USING INDEX transient_object_directory_pk;
 
-CREATE UNIQUE INDEX user_account_pk ON user_account( usr_id) TABLESPACE darts_indexes;
+CREATE UNIQUE INDEX user_account_pk ON user_account( usr_id) TABLESPACE pg_default;
 ALTER TABLE user_account            ADD PRIMARY KEY USING INDEX user_account_pk;
 
 
@@ -2316,9 +2318,6 @@ ADD CONSTRAINT courthouse_name_ck CHECK (courthouse_name = UPPER(courthouse_name
 ALTER TABLE courtroom
 ADD CONSTRAINT courtroom_name_ck CHECK (courtroom_name = UPPER(courtroom_name));
 
-ALTER TABLE user_account
-ADD CONSTRAINT user_account_user_email_address_ck CHECK (user_email_address = LOWER(user_email_address));
-
 ALTER TABLE external_service_auth_token
 ADD CONSTRAINT token_type_ck CHECK (token_type in (1,2));
 
@@ -2347,25 +2346,31 @@ CHECK (med_id is not null or trd_id is not null);
 -- additional unique multi-column indexes and constraints
 
 --,UNIQUE (cth_id,courtroom_name)
-CREATE UNIQUE INDEX ctr_chr_crn_unq ON courtroom( cth_id, courtroom_name) TABLESPACE darts_indexes;
+CREATE UNIQUE INDEX ctr_chr_crn_unq ON courtroom( cth_id, courtroom_name) TABLESPACE pg_default;
 ALTER TABLE courtroom ADD UNIQUE USING INDEX ctr_chr_crn_unq;
 
 --,UNIQUE(cas_id,ctr_id,c_hearing_date)
-CREATE UNIQUE INDEX hea_cas_ctr_hd_unq ON hearing( cas_id, ctr_id,hearing_date) TABLESPACE darts_indexes;
+CREATE UNIQUE INDEX hea_cas_ctr_hd_unq ON hearing( cas_id, ctr_id,hearing_date) TABLESPACE pg_default;
 ALTER TABLE hearing ADD UNIQUE USING INDEX hea_cas_ctr_hd_unq;
 
 --,UNIQUE(cth_id, case_number)
-CREATE UNIQUE INDEX cas_case_number_cth_id_unq ON court_case(case_number,cth_id) TABLESPACE darts_indexes;
+CREATE UNIQUE INDEX cas_case_number_cth_id_unq ON court_case(case_number,cth_id) TABLESPACE pg_default;
 ALTER TABLE court_case ADD UNIQUE USING INDEX cas_case_number_cth_id_unq;
 
-CREATE UNIQUE INDEX dfc_cas_id_defence_name_unq ON defence(cas_id,defence_name) TABLESPACE darts_indexes;
+CREATE UNIQUE INDEX dfc_cas_id_defence_name_unq ON defence(cas_id,defence_name) TABLESPACE pg_default;
 ALTER TABLE defence ADD UNIQUE USING INDEX dfc_cas_id_defence_name_unq;
 
-CREATE UNIQUE INDEX dfd_cas_id_defendant_name_unq ON defendant(cas_id,defendant_name) TABLESPACE darts_indexes;
+CREATE UNIQUE INDEX dfd_cas_id_defendant_name_unq ON defendant(cas_id,defendant_name) TABLESPACE pg_default;
 ALTER TABLE defendant ADD UNIQUE USING INDEX dfd_cas_id_defendant_name_unq;
 
-CREATE UNIQUE INDEX prn_cas_id_prosecutor_name_unq ON prosecutor(cas_id,prosecutor_name) TABLESPACE darts_indexes;
+CREATE UNIQUE INDEX prn_cas_id_prosecutor_name_unq ON prosecutor(cas_id,prosecutor_name) TABLESPACE pg_default;
 ALTER TABLE prosecutor ADD UNIQUE USING INDEX prn_cas_id_prosecutor_name_unq;
+
+CREATE UNIQUE INDEX user_account_user_email_address_unq
+    ON user_account USING btree
+    (upper(user_email_address) COLLATE pg_catalog."default" ASC NULLS LAST)
+    TABLESPACE pg_default
+    WHERE is_active;
 
 GRANT SELECT,INSERT,UPDATE,DELETE ON annotation TO darts_user;
 GRANT SELECT,INSERT,UPDATE,DELETE ON annotation_document TO darts_user;

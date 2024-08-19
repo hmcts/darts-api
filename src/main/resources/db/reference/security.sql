@@ -18,13 +18,15 @@
 --v20 remove group_class and group_display_name from security_group
 --v21 add unique index on role_name to security_role
 --    add unique index on group_name to security_group
+--v22 change name of FK on security_group last_modified
+--v23 switch all tablespaces to pg_default
 
 -- assuming this already exists:
--- CREATE TABLESPACE darts_tables  location 'E:/PostgreSQL/Tables';
--- CREATE TABLESPACE darts_indexes location 'E:/PostgreSQL/Indexes';
+-- CREATE TABLESPACE pg_default  location 'E:/PostgreSQL/Tables';
+-- CREATE TABLESPACE pg_default location 'E:/PostgreSQL/Indexes';
 
--- GRANT ALL ON TABLESPACE darts_tables TO darts_owner;
--- GRANT ALL ON TABLESPACE darts_indexes TO darts_owner;
+-- GRANT ALL ON TABLESPACE pg_default TO darts_owner;
+-- GRANT ALL ON TABLESPACE pg_default TO darts_owner;
 
 -- List of Table Aliases
 
@@ -53,10 +55,10 @@ CREATE TABLE security_group
 ,created_ts              TIMESTAMP WITH TIME ZONE        NOT NULL
 ,created_by              INTEGER                         NOT NULL
 ,last_modified_ts        TIMESTAMP WITH TIME ZONE        NOT NULL
-,last_modified_by        INTEGER                         NOT NULL  
-) TABLESPACE darts_tables;
+,last_modified_by        INTEGER                         NOT NULL
+) TABLESPACE pg_default;
 
-COMMENT ON TABLE security_group 
+COMMENT ON TABLE security_group
 IS 'migration columns all sourced directly from dm_group_s, additional attributes may be required from dm_user_s, but data only where dm_user_s.r_is_group=1';
 COMMENT ON COLUMN security_group.grp_id
 IS 'primary key of security_group';
@@ -66,9 +68,9 @@ IS 'internal Documentum primary key from dm_group_s';
 CREATE TABLE security_group_user_account_ae
 (usr_id                 INTEGER                         NOT NULL
 ,grp_id                 INTEGER                         NOT NULL
-) TABLESPACE darts_tables;
+) TABLESPACE pg_default;
 
-COMMENT ON TABLE security_group_user_account_ae 
+COMMENT ON TABLE security_group_user_account_ae
 IS 'is the associative entity mapping users to groups, content will be defined by dm_group_r';
 COMMENT ON COLUMN security_group_user_account_ae.usr_id
 IS 'foreign key from user_account';
@@ -82,39 +84,39 @@ CREATE TABLE security_role
 ,role_name               CHARACTER VARYING               NOT NULL
 ,display_name            CHARACTER VARYING               NOT NULL
 ,display_state           BOOLEAN                         NOT NULL
-) TABLESPACE darts_tables;
+) TABLESPACE pg_default;
 
 CREATE TABLE security_permission
 (per_id                  INTEGER                         NOT NULL
 ,permission_name         CHARACTER VARYING               NOT NULL
-) TABLESPACE darts_tables;
+) TABLESPACE pg_default;
 
 CREATE TABLE security_role_permission_ae
 (rol_id                  INTEGER                         NOT NULL
 ,per_id                  INTEGER                         NOT NULL
-) TABLESPACE darts_tables;
+) TABLESPACE pg_default;
 
 CREATE TABLE security_group_courthouse_ae
 (grp_id                  INTEGER                         NOT NULL
 ,cth_id                  INTEGER                         NOT NULL
-) TABLESPACE darts_tables;
+) TABLESPACE pg_default;
 
-CREATE UNIQUE INDEX security_group_pk               ON security_group(grp_id) TABLESPACE darts_indexes; 
+CREATE UNIQUE INDEX security_group_pk               ON security_group(grp_id) TABLESPACE pg_default;
 ALTER TABLE security_group                          ADD PRIMARY KEY USING INDEX security_group_pk;
 
-CREATE UNIQUE INDEX security_group_user_account_ae_pk ON security_group_user_account_ae(usr_id,grp_id) TABLESPACE darts_indexes;
+CREATE UNIQUE INDEX security_group_user_account_ae_pk ON security_group_user_account_ae(usr_id,grp_id) TABLESPACE pg_default;
 ALTER TABLE security_group_user_account_ae            ADD PRIMARY KEY USING INDEX security_group_user_account_ae_pk;
 
-CREATE UNIQUE INDEX security_role_pk                ON security_role(rol_id) TABLESPACE darts_indexes; 
+CREATE UNIQUE INDEX security_role_pk                ON security_role(rol_id) TABLESPACE pg_default;
 ALTER TABLE security_role                           ADD PRIMARY KEY USING INDEX security_role_pk;
 
-CREATE UNIQUE INDEX security_permission_pk          ON security_permission(per_id) TABLESPACE darts_indexes;
+CREATE UNIQUE INDEX security_permission_pk          ON security_permission(per_id) TABLESPACE pg_default;
 ALTER TABLE security_permission                     ADD PRIMARY KEY USING INDEX security_permission_pk;
 
-CREATE UNIQUE INDEX security_role_permission_ae_pk  ON security_role_permission_ae(rol_id,per_id) TABLESPACE darts_indexes;
+CREATE UNIQUE INDEX security_role_permission_ae_pk  ON security_role_permission_ae(rol_id,per_id) TABLESPACE pg_default;
 ALTER TABLE security_role_permission_ae             ADD PRIMARY KEY USING INDEX security_role_permission_ae_pk;
 
-CREATE UNIQUE INDEX security_group_courthouse_ae_pk ON security_group_courthouse_ae(grp_id,cth_id) TABLESPACE darts_indexes;
+CREATE UNIQUE INDEX security_group_courthouse_ae_pk ON security_group_courthouse_ae(grp_id,cth_id) TABLESPACE pg_default;
 ALTER TABLE security_group_courthouse_ae            ADD PRIMARY KEY USING INDEX security_group_courthouse_ae_pk;
 
 
@@ -122,7 +124,7 @@ CREATE SEQUENCE grp_seq CACHE 20;
 CREATE SEQUENCE rol_seq CACHE 20;
 CREATE SEQUENCE per_seq CACHE 20;
 
-ALTER TABLE security_group                    
+ALTER TABLE security_group
 ADD CONSTRAINT security_group_role_fk
 FOREIGN KEY (rol_id) REFERENCES security_role(rol_id);
 
@@ -131,39 +133,39 @@ ADD CONSTRAINT security_group_created_by_fk
 FOREIGN KEY (created_by) REFERENCES user_account(usr_id);
 
 ALTER TABLE security_group
-ADD CONSTRAINT security_group_modified_by_fk
+ADD CONSTRAINT security_group_last_modified_by_fk
 FOREIGN KEY (last_modified_by) REFERENCES user_account(usr_id);
 
 
 
-ALTER TABLE security_group_courthouse_ae         
+ALTER TABLE security_group_courthouse_ae
 ADD CONSTRAINT security_group_courthouse_group_fk
 FOREIGN KEY (grp_id) REFERENCES security_group(grp_id);
 
-ALTER TABLE security_group_courthouse_ae         
+ALTER TABLE security_group_courthouse_ae
 ADD CONSTRAINT security_group_courthouse_courthouse_fk
 FOREIGN KEY (cth_id) REFERENCES courthouse(cth_id);
 
 
-ALTER TABLE security_group_user_account_ae         
+ALTER TABLE security_group_user_account_ae
 ADD CONSTRAINT security_group_user_account_ae_user_fk
 FOREIGN KEY (usr_id) REFERENCES user_account(usr_id);
 
-ALTER TABLE security_group_user_account_ae         
+ALTER TABLE security_group_user_account_ae
 ADD CONSTRAINT security_group_user_account_ae_group_fk
 FOREIGN KEY (grp_id) REFERENCES security_group(grp_id);
 
 
-ALTER TABLE security_role_permission_ae          
+ALTER TABLE security_role_permission_ae
 ADD CONSTRAINT security_role_permission_ae_role_fk
 FOREIGN KEY (rol_id) REFERENCES security_role(rol_id);
 
-ALTER TABLE security_role_permission_ae          
+ALTER TABLE security_role_permission_ae
 ADD CONSTRAINT security_role_permission_permission_fk
 FOREIGN KEY (per_id) REFERENCES security_permission(per_id);
 
 -- additional UNIQUE constraints
 
-CREATE UNIQUE INDEX rol_rol_nm_idx       ON security_role(role_name) TABLESPACE darts_indexes; 
-CREATE UNIQUE INDEX grp_grp_nm_idx       ON security_group(group_name) TABLESPACE darts_indexes; 
+CREATE UNIQUE INDEX rol_rol_nm_idx       ON security_role(role_name) TABLESPACE pg_default;
+CREATE UNIQUE INDEX grp_grp_nm_idx       ON security_group(group_name) TABLESPACE pg_default;
 
