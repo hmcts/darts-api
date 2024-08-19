@@ -23,7 +23,6 @@ import uk.gov.hmcts.darts.common.enums.SecurityGroupEnum;
 import java.time.OffsetDateTime;
 import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Locale;
 import java.util.Set;
 
 import static org.hibernate.envers.RelationTargetAuditMode.NOT_AUDITED;
@@ -93,7 +92,4 @@ public class UserAccountEntity extends CreatedModifiedBaseEntity {
                 .anyMatch(enumGroup -> enumGroup.name().equalsIgnoreCase(group.getGroupName())));
     }
 
-    public void setEmailAddress(String emailAddress) {
-        this.emailAddress = emailAddress.toLowerCase(Locale.ROOT);
-    }
 }
