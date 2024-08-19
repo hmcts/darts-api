@@ -1,3 +1,7 @@
+DROP SEQUENCE IF EXISTS audit_activities_seq;
+DROP SEQUENCE IF EXISTS audit_seq;
+DROP SEQUENCE IF EXISTS cre_seq;
+
 ALTER TABLE annotation_document ALTER COLUMN content_object_id TYPE character varying(16);
 
 ALTER TABLE IF EXISTS audit DROP CONSTRAINT IF EXISTS audit_audit_activity_id_fkey;
@@ -29,4 +33,5 @@ ALTER TABLE transcription_document ALTER COLUMN content_object_id TYPE character
 
 ALTER TABLE IF EXISTS transcription_urgency ALTER COLUMN display_state DROP DEFAULT;
 
-ALTER TABLE user_account ADD CONSTRAINT user_account_user_email_address_ck CHECK (user_email_address = LOWER(user_email_address));
+DROP INDEX user_account_user_email_address_unq;
+CREATE UNIQUE INDEX user_account_user_email_address_unq ON user_account (upper(user_email_address)) where is_active;
