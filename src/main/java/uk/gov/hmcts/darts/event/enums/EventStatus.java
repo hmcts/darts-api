@@ -8,9 +8,9 @@ import lombok.Getter;
 @Getter
 public enum EventStatus {
 
-    HERITAGE("1"),
-    MODERNISED("2");
+    HERITAGE(1),
+    MODERNISED(2);
 
-    private final String statusNumber;
+    private final Integer statusNumber;
 
 }

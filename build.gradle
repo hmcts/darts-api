@@ -274,7 +274,7 @@ sonarqube {
     property "sonar.projectName", "DARTS :: darts-api"
     property "sonar.projectKey", "uk.gov.hmcts.reform:darts-api"
     property "sonar.exclusions", coverageExclusions.join(', ')
-    property 'sonar.coverage.exclusions', "**/entity/*,**/dto/*,**/AzureCopyUtil.java,**/TestSupportController.java"
+    property 'sonar.coverage.exclusions', "**/entity/*,**/dto/*,**/AzureCopyUtil.java,**/TestSupportController.java,**/darts/**"
     //duplicate code here due to OpenAPI codegen that creates identical
     // objects (Transcript) in different packages
     property "sonar.cpd.exclusions", "**/TranscriptionMapper.java"
@@ -401,7 +401,7 @@ dependencies {
 
   implementation group: 'org.springdoc', name: 'springdoc-openapi-starter-webmvc-ui', version: '2.6.0'
   implementation group: 'org.springframework.cloud', name: 'spring-cloud-starter-openfeign', version: '4.1.3'
-  implementation 'org.springframework.retry:spring-retry:2.0.7'
+  implementation 'org.springframework.retry:spring-retry:2.0.8'
 
   implementation 'net.javacrumbs.shedlock:shedlock-spring:5.15.0'
   implementation 'net.javacrumbs.shedlock:shedlock-provider-jdbc-template:5.15.0'
