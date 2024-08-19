@@ -7,11 +7,11 @@ import lombok.EqualsAndHashCode;
 @Data
 public class EventHandlerCaseDocument extends CreatedCaseDocument {
 
-    private final Integer id;
-    private final String type;
-    private final String subType;
-    private final String eventName;
-    private final String handler;
-    private final Boolean active;
-    private final Boolean isReportingRestriction;
+    private Integer id;
+    private String type;
+    private String subType;
+    private String eventName;
+    private String handler;
+    private Boolean active;
+    private boolean isReportingRestriction;
 }

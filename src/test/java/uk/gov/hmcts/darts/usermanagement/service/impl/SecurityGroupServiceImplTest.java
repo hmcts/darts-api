@@ -283,6 +283,7 @@ class SecurityGroupServiceImplTest {
         SecurityRoleEntity securityRoleEntity = new SecurityRoleEntity();
         securityRoleEntity.setId(roleId);
         securityRoleEntity.setRoleName("Test Role " + roleId);
+        securityRoleEntity.setDisplayState(true);
 
         CourthouseEntity courthouse = new CourthouseEntity();
         courthouse.setId(courthouseId);
@@ -306,6 +307,7 @@ class SecurityGroupServiceImplTest {
         securityGroupEntity.setSecurityRoleEntity(securityRoleEntity);
         securityGroupEntity.setCourthouseEntities(courthouseEntitySet);
         securityGroupEntity.setUsers(userAccountEntitySet);
+        securityGroupEntity.setDisplayState(true);
 
         return securityGroupEntity;
     }
@@ -397,7 +399,7 @@ class SecurityGroupServiceImplTest {
         SecurityGroupPatch securityGroupPatch = new SecurityGroupPatch();
 
         // three user ids added to patch - 11 is a system user
-        securityGroupPatch.setUserIds(Arrays.asList(10,11,12));
+        securityGroupPatch.setUserIds(Arrays.asList(10, 11, 12));
 
         when(userAccountRepository.findByIdInAndActive(any(), Mockito.eq(true)))
             .thenReturn(Arrays.asList(userAccountEntity10, userAccountEntity11, userAccountEntity12));

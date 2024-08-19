@@ -55,21 +55,27 @@ class SecurityGroupUtilTest {
     private static Set<SecurityGroupEntity> getSecurityGroupEntities() {
         SecurityRoleEntity securityRoleEntity1 = new SecurityRoleEntity();
         securityRoleEntity1.setId(1);
+        securityRoleEntity1.setDisplayState(true);
 
         SecurityRoleEntity securityRoleEntity2 = new SecurityRoleEntity();
         securityRoleEntity2.setId(2);
+        securityRoleEntity2.setDisplayState(true);
 
         SecurityRoleEntity securityRoleEntity3 = new SecurityRoleEntity();
         securityRoleEntity3.setId(3);
+        securityRoleEntity3.setDisplayState(true);
 
         SecurityGroupEntity securityGroupEntity1 = new SecurityGroupEntity();
         securityGroupEntity1.setSecurityRoleEntity(securityRoleEntity1);
+        securityGroupEntity1.setDisplayState(true);
 
         SecurityGroupEntity securityGroupEntity2 = new SecurityGroupEntity();
         securityGroupEntity2.setSecurityRoleEntity(securityRoleEntity2);
+        securityGroupEntity2.setDisplayState(true);
 
         SecurityGroupEntity securityGroupEntity3 = new SecurityGroupEntity();
         securityGroupEntity3.setSecurityRoleEntity(securityRoleEntity3);
+        securityGroupEntity3.setDisplayState(true);
 
         Set<SecurityGroupEntity> securityGroupEntities = new HashSet<>();
         securityGroupEntities.add(securityGroupEntity1);

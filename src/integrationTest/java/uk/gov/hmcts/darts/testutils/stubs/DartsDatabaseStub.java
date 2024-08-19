@@ -712,7 +712,7 @@ public class DartsDatabaseStub {
     public EventEntity addHandlerToEvent(EventEntity event, int handlerId) {
         var handler = eventHandlerRepository.getReferenceById(handlerId);
         event.setEventType(handler);
-        event.setIsLogEntry(false);
+        event.setLogEntry(false);
         return eventRepository.save(event);
     }
 
