@@ -18,8 +18,11 @@ public class ExternalObjectDirectoryTestData {
         externalObjectDirectory.setExternalLocationType(locationTypeOf(UNSTRUCTURED));
         externalObjectDirectory.setExternalLocation(randomUUID());
         externalObjectDirectory.setVerificationAttempts(1);
-        externalObjectDirectory.setCreatedBy(minimalUserAccount());
-        externalObjectDirectory.setLastModifiedBy(minimalUserAccount());
+        var userAccount = minimalUserAccount();
+        externalObjectDirectory.setCreatedBy(userAccount);
+        externalObjectDirectory.setLastModifiedBy(userAccount);
         return externalObjectDirectory;
     }
+
+
 }

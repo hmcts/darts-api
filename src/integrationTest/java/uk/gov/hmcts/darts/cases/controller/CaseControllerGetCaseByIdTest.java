@@ -18,12 +18,14 @@ import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.util.DateConverterUtil;
+import uk.gov.hmcts.darts.test.common.data.DefendantTestData;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 
 import java.time.OffsetDateTime;
 
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static uk.gov.hmcts.darts.test.common.data.ProsecutorTestData.someMinimalProsecutorForCase;
 
 @AutoConfigureMockMvc
 @Disabled("Impacted by V1_363__not_null_constraints_part3.sql")
@@ -53,8 +55,8 @@ class CaseControllerGetCaseByIdTest extends IntegrationBase {
             DateConverterUtil.toLocalDateTime(SOME_DATE_TIME)
         );
         CourtCaseEntity courtCase = hearingEntity.getCourtCase();
-        courtCase.addProsecutor("aProsecutor");
-        courtCase.addDefendant("aDefendant");
+        courtCase.addProsecutor(someMinimalProsecutorForCase(courtCase));
+        courtCase.addDefendant(DefendantTestData.someMinimalDefendant());
         courtCase.addDefence("aDefence");
         dartsDatabase.save(courtCase);
 

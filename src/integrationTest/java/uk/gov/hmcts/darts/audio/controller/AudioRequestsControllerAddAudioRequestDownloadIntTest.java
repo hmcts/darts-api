@@ -16,7 +16,6 @@ import uk.gov.hmcts.darts.audio.enums.MediaRequestStatus;
 import uk.gov.hmcts.darts.audiorequests.model.AudioRequestDetails;
 import uk.gov.hmcts.darts.audiorequests.model.AudioRequestType;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
-import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
@@ -74,11 +73,11 @@ class AudioRequestsControllerAddAudioRequestDownloadIntTest extends IntegrationB
             SOME_COURTROOM,
             LocalDateTime.parse(HEARING_DATETIME)
         );
-        CourtCaseEntity courtCase = hearingEntity.getCourtCase();
-        courtCase.addProsecutor("aProsecutor");
-        courtCase.addDefendant("aDefendant");
-        courtCase.addDefence("aDefence");
-        dartsDatabase.save(courtCase);
+        //        CourtCaseEntity courtCase = hearingEntity.getCourtCase();
+        //        courtCase.addProsecutor("aProsecutor");
+        //        courtCase.addDefendant("aDefendant");
+        //        courtCase.addDefence("aDefence");
+        //        dartsDatabase.save(courtCase);
 
         testUser = dartsDatabase.getUserAccountStub()
             .createAuthorisedIntegrationTestUser(hearingEntity.getCourtroom().getCourthouse());

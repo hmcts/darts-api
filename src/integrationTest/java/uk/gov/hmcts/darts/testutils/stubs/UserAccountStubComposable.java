@@ -29,6 +29,8 @@ public class UserAccountStubComposable {
 
     private final SecurityGroupRepository securityGroupRepository;
 
+    private final DartsPersistence dartsPersistence;
+
     @Transactional
     public UserAccountEntity createAuthorisedIntegrationTestUser(CourthouseStubComposable courthouseStubComposable, String courthouse) {
         return createAuthorisedIntegrationTestUser(courthouseStubComposable.createCourthouseUnlessExists(courthouse));
@@ -154,7 +156,7 @@ public class UserAccountStubComposable {
         newUser.setActive(true);
         newUser.setAccountGuid(guid);
         newUser.setIsSystemUser(false);
-        return userAccountRepository.saveAndFlush(newUser);
+        return dartsPersistence.save(newUser);
     }
 
     private UserAccountEntity createReusableAuthorisedIntegrationTestUser(boolean reuse,

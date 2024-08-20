@@ -49,6 +49,7 @@ public class CaseTestData {
         return courtCaseEntity;
     }
 
+    @Deprecated
     // Not a minimal case. refactor
     public static CourtCaseEntity someMinimalCase() {
         var courtCaseEntity = new CourtCaseEntity();
