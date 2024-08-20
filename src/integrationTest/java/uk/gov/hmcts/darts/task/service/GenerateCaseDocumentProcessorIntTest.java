@@ -52,11 +52,11 @@ class GenerateCaseDocumentProcessorIntTest extends IntegrationBase {
         givenBearerTokenExists("darts.global.user@hmcts.net");
         UserAccountEntity testUser = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
 
-        CourtCaseEntity courtCase = dartsDatabase.getCourtCaseStub().createAndSaveCourtCaseWithHearings(createdCourtCase -> {
-            createdCourtCase.setRetentionUpdated(true);
-            createdCourtCase.setRetentionRetries(1);
-            createdCourtCase.setClosed(true);
-        });
+        CourtCaseEntity courtCase = dartsDatabase.getCourtCaseStub().createAndSaveCourtCaseWithHearings();
+
+        courtCase.setRetentionUpdated(true);
+        courtCase.setRetentionRetries(1);
+        courtCase.setClosed(true);
 
         List<MediaEntity> medias = dartsDatabase.getMediaStub().createAndSaveSomeMedias();
         var hearing = courtCase.getHearings().get(0);

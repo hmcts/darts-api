@@ -110,16 +110,15 @@ class ApplyRetentionCaseAssociatedObjectsProcessorIntTest extends IntegrationBas
         */
 
         // given
-        caseA = caseStub.createAndSaveCourtCaseWithHearings(courtCase -> {
-            courtCase.setRetentionUpdated(true);
-            courtCase.setRetentionRetries(1);
-            courtCase.setClosed(true);
-        });
-        caseB = caseStub.createAndSaveCourtCaseWithHearings(courtCase -> {
-            courtCase.setRetentionUpdated(true);
-            courtCase.setRetentionRetries(2);
-            courtCase.setClosed(true);
-        });
+        caseA = caseStub.createAndSaveCourtCaseWithHearings();
+        caseA.setRetentionUpdated(true);
+        caseA.setRetentionRetries(1);
+        caseA.setClosed(true);
+
+        caseB = caseStub.createAndSaveCourtCaseWithHearings();
+        caseB.setRetentionUpdated(true);
+        caseB.setRetentionRetries(2);
+        caseB.setClosed(true);
 
         medias = dartsDatabase.getMediaStub().createAndSaveSomeMedias();
 

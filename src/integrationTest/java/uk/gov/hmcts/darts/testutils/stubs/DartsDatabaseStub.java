@@ -116,11 +116,8 @@ import static java.util.Arrays.asList;
 import static java.util.Arrays.stream;
 import static java.util.Comparator.comparing;
 import static uk.gov.hmcts.darts.audio.enums.MediaRequestStatus.OPEN;
-import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.STORED;
-import static uk.gov.hmcts.darts.test.common.data.AnnotationTestData.minimalAnnotationEntity;
 import static uk.gov.hmcts.darts.test.common.data.CourtroomTestData.createCourtRoomWithNameAtCourthouse;
 import static uk.gov.hmcts.darts.test.common.data.EventHandlerTestData.createEventHandlerWith;
-import static uk.gov.hmcts.darts.test.common.data.HearingTestData.someMinimalHearing;
 
 @Service
 @AllArgsConstructor
@@ -211,6 +208,7 @@ public class DartsDatabaseStub {
     private final CurrentTimeHelper currentTimeHelper;
     private final TransactionalUtil transactionalUtil;
     private final EntityGraphPersistence entityGraphPersistence;
+    private final DartsPersistence dartsPersistence;
 
     public void resetSequences() {
         try (EntityManager em = entityManagerFactory.createEntityManager()) {
@@ -821,53 +819,6 @@ public class DartsDatabaseStub {
     @Transactional
     public Integer getLastModifiedByUserId(CreatedModifiedBaseEntity createdModifiedBaseEntity) {
         return createdModifiedBaseEntity.getLastModifiedBy().getId();
-    }
-
-    @Transactional
-    public AnnotationDocumentEntity createValidAnnotationDocumentForDownload(UserAccountEntity judge) {
-
-        var annotation = someAnnotationCreatedBy(judge);
-
-        final String fileName = "judges-notes.txt";
-        final String fileType = "text/plain";
-        final int fileSize = 123;
-        final OffsetDateTime uploadedDateTime = OffsetDateTime.now();
-        final String checksum = "123";
-        var annotationDocumentEntity = getAnnotationStub()
-            .createAndSaveAnnotationDocumentEntityWith(annotation, fileName, fileType, fileSize,
-                                                       judge, uploadedDateTime, checksum
-            );
-
-
-        ExternalObjectDirectoryEntity armEod = getExternalObjectDirectoryStub().createExternalObjectDirectory(
-            annotationDocumentEntity,
-            getObjectRecordStatusEntity(STORED),
-            getExternalLocationTypeEntity(ExternalLocationTypeEnum.ARM),
-            UUID.fromString("665e00c8-5b82-4392-8766-e0c982f603d3")
-        );
-        armEod.setTransferAttempts(1);
-        save(armEod);
-
-        ExternalObjectDirectoryEntity armEod2 = getExternalObjectDirectoryStub().createExternalObjectDirectory(
-            annotationDocumentEntity,
-            getObjectRecordStatusEntity(STORED),
-            getExternalLocationTypeEntity(ExternalLocationTypeEnum.ARM),
-            UUID.fromString("665e00c8-5b82-4392-8766-e0c982f603d3")
-        );
-        armEod.setTransferAttempts(1);
-        save(armEod2);
-
-        return annotationDocumentEntity;
-    }
-
-    protected AnnotationEntity someAnnotationCreatedBy(UserAccountEntity userAccount) {
-        var annotation = minimalAnnotationEntity();
-        annotation.setDeleted(false);
-        annotation.setCurrentOwner(userAccount);
-        annotation.setCreatedBy(userAccount);
-        annotation.setLastModifiedBy(userAccount);
-        annotation.addHearing(save(someMinimalHearing()));
-        return save(annotation);
     }
 
     @Transactional

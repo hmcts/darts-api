@@ -1,21 +1,23 @@
 package uk.gov.hmcts.darts.annotation.repository;
 
-import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import uk.gov.hmcts.darts.common.entity.AnnotationDocumentEntity;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.repository.AnnotationDocumentRepository;
 import uk.gov.hmcts.darts.common.repository.AnnotationRepository;
+import uk.gov.hmcts.darts.test.common.data.AnnotationDocumentTestData;
+import uk.gov.hmcts.darts.test.common.data.HearingTestData;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 import uk.gov.hmcts.darts.testutils.stubs.AnnotationStub;
 import uk.gov.hmcts.darts.testutils.stubs.CourtCaseStub;
 
-import java.util.List;
-
+import static java.util.Arrays.stream;
 import static org.assertj.core.api.Assertions.assertThat;
+import static uk.gov.hmcts.darts.test.common.data.CaseTestData.createSomeMinimalCase;
 
-@Disabled("Impacted by V1_364_*.sql")
 class AnnotationDocumentRepositoryIntTest extends IntegrationBase {
 
     @Autowired
@@ -28,50 +30,52 @@ class AnnotationDocumentRepositoryIntTest extends IntegrationBase {
     @Autowired
     AnnotationDocumentRepository annotationDocumentRepository;
 
+    @BeforeEach
+    void openHibernateSession() {
+        openInViewUtil.openEntityManager();
+    }
+
+    @AfterEach
+    void closeHibernateSession() {
+        openInViewUtil.closeEntityManager();
+    }
+
     @Test
-    void testFindAllByCaseId() {
-
+    void findsAnnotationDocumentsByCaseId() {
         // given
-        var caseA = caseStub.createAndSaveCourtCaseWithHearings();
-        var caseB = caseStub.createAndSaveCourtCaseWithHearings();
-
-        var hear1A = caseA.getHearings().get(0);
-        var hear2A = caseA.getHearings().get(1);
-        var hear1B = caseB.getHearings().get(0);
-
-        var testUser = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
-        var annotation1A = annotationStub.createAndSaveAnnotationEntityWith(testUser, "TestAnnotation", hear1A);
-        var annotation2A = annotationStub.createAndSaveAnnotationEntityWith(testUser, "TestAnnotation", hear1A);
-        var annotation3A = annotationStub.createAndSaveAnnotationEntityWith(testUser, "TestAnnotation", hear2A);
-        var annotation1B = annotationStub.createAndSaveAnnotationEntityWith(testUser, "TestAnnotation", hear1B);
-
-        annotation1A.addHearing(hear1B);
-        annotationRepository.save(annotation1A);
-        annotation2A.addHearing(hear2A);
-        annotationRepository.save(annotation2A);
-
-        var annotationDocument1 = annotationStub.createAndSaveAnnotationDocumentEntity(annotation1A);
-        var annotationDocument2 = annotationStub.createAndSaveAnnotationDocumentEntity(annotation1A);
-        var annotationDocument3 = annotationStub.createAndSaveAnnotationDocumentEntity(annotation2A);
-        var annotationDocument4 = annotationStub.createAndSaveAnnotationDocumentEntity(annotation3A);
-        var annotationDocument5 = annotationStub.createAndSaveAnnotationDocumentEntity(annotation3A);
-        annotationStub.createAndSaveAnnotationDocumentEntity(annotation1B);
+        var courtCaseA = createSomeMinimalCase();
+        var courtCaseB = createSomeMinimalCase();
+        var annotationDocument1 = createAnnotationDocumentForCases(courtCaseA);
+        var annotationDocument2 = createAnnotationDocumentForCases(courtCaseA);
+        var annotationDocument3 = createAnnotationDocumentForCases(courtCaseA);
+        createAnnotationDocumentForCases(courtCaseB);
+        createAnnotationDocumentForCases(courtCaseB);
+        dartsPersistence.saveAll(annotationDocument1, annotationDocument2, annotationDocument3);
 
         // when
-        var result = annotationDocumentRepository.findAllByCaseId(caseA.getId());
+        var result = annotationDocumentRepository.findAllByCaseId(courtCaseA.getId());
 
         // then
         assertThat(result.stream().map(AnnotationDocumentEntity::getId))
             .containsExactlyInAnyOrder(
                 annotationDocument1.getId(),
                 annotationDocument2.getId(),
-                annotationDocument3.getId(),
-                annotationDocument4.getId(),
-                annotationDocument5.getId());
-
-        List<CourtCaseEntity> annotationDocument3Cases = annotationDocument3.associatedCourtCases();
-        assertThat(annotationDocument3Cases.stream().map(CourtCaseEntity::getId)).containsExactlyInAnyOrder(caseA.getId());
-        List<CourtCaseEntity> annotationDocument2Cases = annotationDocument2.associatedCourtCases();
-        assertThat(annotationDocument2Cases.stream().map(CourtCaseEntity::getId)).containsExactlyInAnyOrder(caseA.getId(), caseB.getId());
+                annotationDocument3.getId());
     }
+
+    @Test
+    void canGetAssociatedCasesFromAnnotationDocument () {
+        var courtCaseA = createSomeMinimalCase();
+        var courtCaseB = createSomeMinimalCase();
+        var annotationDocument1 = createAnnotationDocumentForCases(courtCaseA, courtCaseB);
+
+        assertThat(annotationDocument1.associatedCourtCases()).containsExactlyInAnyOrder(courtCaseA, courtCaseB);
+    }
+
+    private AnnotationDocumentEntity createAnnotationDocumentForCases(CourtCaseEntity... courtCases) {
+        var hearingEntities = stream(courtCases).map(HearingTestData::createHearingFor).toList();
+        var annotationDocument = AnnotationDocumentTestData.createAnnotationDocumentForHearings(hearingEntities);
+        return dartsPersistence.save(annotationDocument);
+    }
+
 }
