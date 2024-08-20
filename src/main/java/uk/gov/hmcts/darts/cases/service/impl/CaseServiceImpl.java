@@ -118,6 +118,10 @@ public class CaseServiceImpl implements CaseService {
     @Transactional
     public SingleCase getCasesById(Integer caseId) {
         CourtCaseEntity caseEntity = getCourtCaseById(caseId);
+
+        if (caseEntity.getHearings().stream().noneMatch(HearingEntity::getHearingIsActual)) {
+            throw new DartsApiException(CaseApiError.HEARINGS_NOT_ACTUAL);
+        }
         return casesMapper.mapToSingleCase(caseEntity);
     }
 
