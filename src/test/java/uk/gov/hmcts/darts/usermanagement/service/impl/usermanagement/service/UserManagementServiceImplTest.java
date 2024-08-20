@@ -172,6 +172,7 @@ class UserManagementServiceImplTest {
 
         SecurityGroupEntity securityGroupEntity = new SecurityGroupEntity();
         securityGroupEntity.setId(secGroupId);
+        securityGroupEntity.setDisplayState(true);
 
         Set<SecurityGroupEntity> securityGroupEntitySet = new HashSet<>();
         securityGroupEntitySet.add(securityGroupEntity);
@@ -214,6 +215,7 @@ class UserManagementServiceImplTest {
 
         SecurityGroupEntity securityGroupEntity = new SecurityGroupEntity();
         securityGroupEntity.setId(secGroupId);
+        securityGroupEntity.setDisplayState(true);
 
         Set<SecurityGroupEntity> securityGroupEntitySet = new HashSet<>();
         securityGroupEntitySet.add(securityGroupEntity);

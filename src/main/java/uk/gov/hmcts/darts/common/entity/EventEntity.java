@@ -61,7 +61,7 @@ public class EventEntity extends CreatedModifiedBaseEntity {
     private String messageId;
 
     @Column(name = "is_log_entry")
-    private Boolean isLogEntry;
+    private boolean isLogEntry;
 
     @Column(name = "chronicle_id")
     private String chronicleId;
@@ -87,4 +87,6 @@ public class EventEntity extends CreatedModifiedBaseEntity {
     public void addHearing(HearingEntity hearingEntity) {
         hearingEntities.add(hearingEntity);
     }
+
+
 }

@@ -67,7 +67,7 @@ public class EventStub {
         eventEntity.setLastModifiedBy(userAccountStub.getIntegrationTestUserAccountEntity());
         eventEntity.setLastModifiedDateTime(eventTimestamp);
         eventEntity.setCreatedDateTime(eventTimestamp);
-        eventEntity.setIsLogEntry(false);
+        eventEntity.setLogEntry(false);
         eventEntity.setCourtroom(hearing.getCourtroom());
         eventEntity.setIsCurrent(true);
         eventEntity.setEventStatus(MODERNISED.getStatusNumber());
@@ -91,7 +91,7 @@ public class EventStub {
         eventEntity.setCreatedBy(userAccountStub.getIntegrationTestUserAccountEntity());
         eventEntity.setLastModifiedBy(userAccountStub.getIntegrationTestUserAccountEntity());
         eventEntity.setLastModifiedDateTime(eventTimestamp);
-        eventEntity.setIsLogEntry(false);
+        eventEntity.setLogEntry(false);
         eventEntity.setCourtroom(courtroom);
         eventEntity.setIsCurrent(true);
         eventEntity.setEventStatus(MODERNISED.getStatusNumber());
@@ -112,10 +112,11 @@ public class EventStub {
      * always be double that actually specified.
      * NOTE: This method also generates an event with a null event id and an event with an event id that only corresponds to one
      * event record
+     *
      * @return The map that corresponds to the event ids and the events mapped to each event id
      */
     @Transactional
-    public  Map<Integer, List<EventEntity>> generateEventIdEventsIncludingZeroEventId(int numberOfEvents) {
+    public Map<Integer, List<EventEntity>> generateEventIdEventsIncludingZeroEventId(int numberOfEvents) {
         Map<Integer, List<EventEntity>> eventIdMap = new HashMap<>();
 
         HearingEntity hearingForEvent = hearingStub.createHearing("Bristol", "1", "case1", DateConverterUtil.toLocalDateTime(STARTED_AT));

@@ -185,7 +185,7 @@ class EventMappingServiceImplTest {
         eventHandlerEntity.setEventName("Test event");
         eventHandlerEntity.setHandler("Standard Handler");
         eventHandlerEntity.setActive(true);
-        eventHandlerEntity.setIsReportingRestriction(false);
+        eventHandlerEntity.setReportingRestriction(false);
         OffsetDateTime now = OffsetDateTime.now();
         eventHandlerEntity.setCreatedDateTime(now);
 
@@ -202,7 +202,7 @@ class EventMappingServiceImplTest {
         assertEquals(eventHandlerEntity.getEventName(), result.get(0).getName());
         assertEquals(eventHandlerEntity.getHandler(), result.get(0).getHandler());
         assertEquals(eventHandlerEntity.getActive(), result.get(0).getIsActive());
-        assertEquals(eventHandlerEntity.getIsReportingRestriction(), result.get(0).getHasRestrictions());
+        assertEquals(eventHandlerEntity.isReportingRestriction(), result.get(0).getHasRestrictions());
         assertEquals(eventHandlerEntity.getCreatedDateTime(), result.get(0).getCreatedAt());
 
         verify(eventHandlerRepository).findAll();
@@ -218,7 +218,7 @@ class EventMappingServiceImplTest {
         eventHandlerEntity.setEventName("Test event");
         eventHandlerEntity.setHandler("Standard Handler");
         eventHandlerEntity.setActive(true);
-        eventHandlerEntity.setIsReportingRestriction(false);
+        eventHandlerEntity.setReportingRestriction(false);
         OffsetDateTime now = OffsetDateTime.now();
         eventHandlerEntity.setCreatedDateTime(now);
 
@@ -233,7 +233,7 @@ class EventMappingServiceImplTest {
         assertEquals(eventHandlerEntity.getEventName(), result.getName());
         assertEquals(eventHandlerEntity.getHandler(), result.getHandler());
         assertEquals(eventHandlerEntity.getActive(), result.getIsActive());
-        assertEquals(eventHandlerEntity.getIsReportingRestriction(), result.getHasRestrictions());
+        assertEquals(eventHandlerEntity.isReportingRestriction(), result.getHasRestrictions());
         assertEquals(eventHandlerEntity.getCreatedDateTime(), result.getCreatedAt());
         assertEquals(hasEvents, result.getHasEvents());
 
@@ -249,7 +249,7 @@ class EventMappingServiceImplTest {
         eventHandlerEntity.setEventName("Test event");
         eventHandlerEntity.setHandler("Standard Handler");
         eventHandlerEntity.setActive(true);
-        eventHandlerEntity.setIsReportingRestriction(false);
+        eventHandlerEntity.setReportingRestriction(false);
         OffsetDateTime now = OffsetDateTime.now();
         eventHandlerEntity.setCreatedDateTime(now);
 
@@ -280,7 +280,7 @@ class EventMappingServiceImplTest {
         eventHandlerEntity.setEventName("My Event");
         eventHandlerEntity.setHandler("DarStartHandler");
         eventHandlerEntity.setActive(true);
-        eventHandlerEntity.setIsReportingRestriction(false);
+        eventHandlerEntity.setReportingRestriction(false);
         return eventHandlerEntity;
     }
 

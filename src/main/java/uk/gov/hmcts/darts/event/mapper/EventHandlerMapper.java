@@ -23,7 +23,7 @@ public class EventHandlerMapper {
         eventHandlerEntity.setSubType(eventMapping.getSubType());
         eventHandlerEntity.setEventName(eventMapping.getName());
         eventHandlerEntity.setHandler(getHandlerMappingOrNullHandler(eventMapping.getHandler()));
-        eventHandlerEntity.setIsReportingRestriction(eventMapping.getHasRestrictions());
+        eventHandlerEntity.setReportingRestriction(eventMapping.getHasRestrictions());
         eventHandlerEntity.setActive(true);
         UserAccountEntity currentUser = authorisationApi.getCurrentUser();
         eventHandlerEntity.setCreatedBy(currentUser);
@@ -43,7 +43,7 @@ public class EventHandlerMapper {
         eventMapping.setName(eventHandlerEntity.getEventName());
         eventMapping.setHandler(eventHandlerEntity.getHandler());
         eventMapping.setIsActive(eventHandlerEntity.getActive());
-        eventMapping.setHasRestrictions(eventHandlerEntity.getIsReportingRestriction());
+        eventMapping.setHasRestrictions(eventHandlerEntity.isReportingRestriction());
         eventMapping.setCreatedAt(eventHandlerEntity.getCreatedDateTime());
 
         return eventMapping;

@@ -91,4 +91,5 @@ public class UserAccountEntity extends CreatedModifiedBaseEntity {
             .anyMatch(group -> securityGroupEnum.stream()
                 .anyMatch(enumGroup -> enumGroup.name().equalsIgnoreCase(group.getGroupName())));
     }
+
 }

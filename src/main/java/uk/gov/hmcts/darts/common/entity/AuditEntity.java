@@ -21,8 +21,8 @@ import uk.gov.hmcts.darts.common.entity.base.CreatedModifiedBaseEntity;
 public class AuditEntity extends CreatedModifiedBaseEntity {
     @Id
     @Column(name = "aud_id")
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "audit_gen")
-    @SequenceGenerator(name = "audit_gen", sequenceName = "audit_seq", allocationSize = 1)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "aud_gen")
+    @SequenceGenerator(name = "aud_gen", sequenceName = "aud_seq", allocationSize = 1)
     private Integer id;
 
     @ManyToOne

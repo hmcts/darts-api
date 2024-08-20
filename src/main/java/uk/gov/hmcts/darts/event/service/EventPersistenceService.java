@@ -66,7 +66,7 @@ public class EventPersistenceService {
         event.setEventText(dartsEvent.getEventText());
         event.setEventType(eventHandler);
         event.setMessageId(dartsEvent.getMessageId());
-        event.setIsLogEntry(dartsEvent.getIsMidTier());
+        event.setLogEntry(dartsEvent.getIsMidTier());
         event.setCreatedBy(currentUser);
         event.setLastModifiedBy(currentUser);
         event.setIsCurrent(true);

@@ -97,6 +97,7 @@ class CourthouseUpdatePatchToEntityMapperTest {
     private SecurityGroupEntity securityGroupWithId(int id) {
         var securityGroup = new SecurityGroupEntity();
         securityGroup.setId(id);
+        securityGroup.setDisplayState(true);
         return securityGroup;
     }
 

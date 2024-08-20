@@ -33,7 +33,7 @@ public class EventTestData {
         eventEntity.setCourtroom(someMinimalCourtRoom());
         eventEntity.setEventType(createTestEventHandlerEntity("some-event-name"));
         eventEntity.setTimestamp(OffsetDateTime.now());
-        eventEntity.setIsLogEntry(false);
+        eventEntity.setLogEntry(false);
         eventEntity.setIsCurrent(true);
         return eventEntity;
     }
@@ -44,7 +44,7 @@ public class EventTestData {
         event.setCourtroom(hearingEntity.getCourtroom());
         event.setEventText(eventText);
         event.setTimestamp(eventTime);
-        event.setIsLogEntry(LOG_ENTRY_EVENT_NAME.equals(eventName));
+        event.setLogEntry(LOG_ENTRY_EVENT_NAME.equals(eventName));
         event.setEventType(createTestEventHandlerEntity(eventName));
         event.setIsCurrent(true);
         event.setEventStatus(MODERNISED.getStatusNumber());
@@ -61,7 +61,7 @@ public class EventTestData {
         entity.setId(1);
         entity.setEventName(eventName);
         entity.setType("some-event-type");
-        entity.setIsReportingRestriction(true);
+        entity.setReportingRestriction(true);
         entity.setActive(true);
         entity.setCreatedDateTime(OffsetDateTime.now());
         return entity;
