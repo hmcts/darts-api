@@ -312,6 +312,7 @@
 --    user account is_system_user default to false
 --    add unique index on user_account, upper(user_email_address)
 --v71.4 amend all tablespaces to pg_default
+-- make media_status nullable
 
 -- List of Table Aliases
 -- annotation                  ANN
@@ -1089,7 +1090,7 @@ CREATE TABLE media
 ,is_current                  BOOLEAN
 ,deleted_by                  INTEGER
 ,deleted_ts                  TIMESTAMP WITH TIME ZONE
-,media_status                CHARACTER VARYING             NOT NULL
+,media_status                CHARACTER VARYING
 ,version_label               CHARACTER VARYING(32)
 ,chronicle_id                CHARACTER VARYING(16)                   -- legacy id of the 1.0 version of the event
 ,antecedent_id               CHARACTER VARYING(16)                   -- legacy id of the immediately  preceding event

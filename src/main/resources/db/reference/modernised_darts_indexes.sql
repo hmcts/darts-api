@@ -214,5 +214,10 @@ CREATE UNIQUE INDEX retention_policy_type_type_unq
     TABLESPACE pg_default
     WHERE policy_end_ts IS NULL;
 
+CREATE INDEX eod_manifest_file_idx
+    ON darts.external_object_directory USING btree
+    (manifest_file COLLATE pg_catalog."default" text_pattern_ops ASC NULLS LAST)
+    TABLESPACE pg_default;
+
 
 
