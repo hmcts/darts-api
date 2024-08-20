@@ -11,6 +11,9 @@ import org.hibernate.LazyInitializationException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.stereotype.Component;
+import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
+import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
+import uk.gov.hmcts.darts.common.entity.RegionEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.entity.base.CreatedModifiedBaseEntity;
 import uk.gov.hmcts.darts.common.entity.base.MandatoryCreatedBaseEntity;
@@ -20,6 +23,8 @@ import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
@@ -109,6 +114,8 @@ public class LastModifiedByAndCreatedByAspect {
 
         return joinPoint.proceed();
     }
+
+
 
 
     @SuppressWarnings({"PMD.CyclomaticComplexity", "PMD.NcssCount", "PMD.NPathComplexity", "PMD.CognitiveComplexity", "PMD.EmptyCatchBlock"})
@@ -213,11 +220,21 @@ public class LastModifiedByAndCreatedByAspect {
                 // do nothing
             }
         }
-    }
 
+        try {
+            List<Object> objects = new ArrayList<>();
+            processNested(body, objects);
+            for (Object object : objects) {
+                processEntities(object);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 
     @SuppressWarnings("PMD.EmptyCatchBlock")
     private UserAccountEntity getId(Object id) {
+
 
         for (Field method : UserAccountEntity.class.getDeclaredFields()) {
             Id ann = method.getAnnotation(Id.class);
@@ -239,5 +256,50 @@ public class LastModifiedByAndCreatedByAspect {
 
 
         return null;
+    }
+
+    @SuppressWarnings({"PMD.GodClass", "PMD.AvoidPrintStackTrace",
+        "PMD.UselessParentheses", "PMD.SystemPrintln", "PMD.CognitiveComplexity", "PMD.CollapsibleIfStatements"})
+    public static void processNested(Object object, List<Object> objects) throws Exception {
+
+        if (object != null) {
+            for (Field field : object.getClass().getDeclaredFields()) {
+                if ((field.getType().getComponentType() != null
+                    && !field.getType().getComponentType().isPrimitive()
+                    && !field.getType().getCanonicalName().equals(String.class.getCanonicalName())
+                    ||
+                    (!field.getType().isPrimitive()
+                        && !field.getType().getCanonicalName().equals(String.class.getCanonicalName())))) {
+                    field.setAccessible(true);
+                    Object fieldObj = field.get(object);
+
+                    if (fieldObj != null && !(fieldObj instanceof Collection) && !objects.contains(fieldObj)) {
+                        objects.add(fieldObj);
+                        processNested(fieldObj, objects);
+                    }
+                    if (fieldObj instanceof Collection) {
+                        for (Object colObject : (Collection) fieldObj) {
+                            if (!objects.contains(colObject)) {
+                                if (fieldObj != null) {
+                                    objects.add(colObject);
+                                    processNested(colObject, objects);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    public static void main(String[] args) throws Exception {
+        CourtCaseEntity entity = new CourtCaseEntity();
+        CourthouseEntity courthouse = new CourthouseEntity();
+        entity.setCourthouse(courthouse);
+        RegionEntity regionEntity = new RegionEntity();
+        courthouse.setRegion(regionEntity);
+        List<Object> list = new ArrayList<>();
+        processNested(entity, list);
+        System.out.println("OUTCOME " + list);
     }
 }
