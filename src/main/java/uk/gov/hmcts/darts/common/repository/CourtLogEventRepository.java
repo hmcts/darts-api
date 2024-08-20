@@ -15,8 +15,8 @@ public interface CourtLogEventRepository extends JpaRepository<EventEntity, Inte
            SELECT ee
            FROM EventEntity ee, CourtroomEntity cr, CourthouseEntity ch, CourtCaseEntity ce
            JOIN ee.hearingEntities hearing
-           WHERE upper(ch.courthouseName) = upper(:courtHouse)
-           AND upper(ce.caseNumber) = upper(:caseNumber)
+           WHERE ch.courthouseName = upper(:courtHouse)
+           AND ce.caseNumber = upper(:caseNumber)
            AND ee.isLogEntry = true
            AND ee.timestamp between :start AND :end
            AND cr.courthouse = ch
@@ -28,8 +28,8 @@ public interface CourtLogEventRepository extends JpaRepository<EventEntity, Inte
     @Query("""
            SELECT ee FROM EventEntity ee, CourtroomEntity cr, CourthouseEntity ch
            JOIN ee.hearingEntities hearing
-           WHERE upper(ch.courthouseName) = upper(:courtHouse)
-           AND upper(cr.name) = upper(:courtRoomName)
+           WHERE ch.courthouseName = upper(:courtHouse)
+           AND cr.name = upper(:courtRoomName)
            AND ee.isLogEntry = true
            AND ee.timestamp between :start AND :end
            AND cr.courthouse = ch

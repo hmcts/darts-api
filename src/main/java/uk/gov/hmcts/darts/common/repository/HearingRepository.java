@@ -14,8 +14,8 @@ public interface HearingRepository extends JpaRepository<HearingEntity, Integer>
 
     @Query("""
         SELECT h FROM HearingEntity h, CourthouseEntity ch, CourtroomEntity cr
-        WHERE upper(ch.courthouseName) = upper(:courthouse)
-        AND upper(cr.name) = upper(:courtroom)
+        WHERE ch.courthouseName = upper(:courthouse)
+        AND cr.name = upper(:courtroom)
         AND h.hearingDate = :date
         AND h.courtroom = cr
         AND cr.courthouse = ch
@@ -33,8 +33,8 @@ public interface HearingRepository extends JpaRepository<HearingEntity, Integer>
 
     @Query("""
         SELECT h FROM HearingEntity h, CourthouseEntity ch, CourtroomEntity cr, CourtCaseEntity case
-        WHERE upper(ch.courthouseName) = upper(:courthouse)
-        AND upper(cr.name) = upper(:courtroom)
+        WHERE ch.courthouseName = upper(:courthouse)
+        AND cr.name = upper(:courtroom)
         AND h.hearingDate = :date
         AND h.courtroom = cr
         AND cr.courthouse = ch
