@@ -24,6 +24,8 @@ import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
 import uk.gov.hmcts.darts.common.entity.DailyListEntity;
+import uk.gov.hmcts.darts.common.entity.DefenceEntity;
+import uk.gov.hmcts.darts.common.entity.DefendantEntity;
 import uk.gov.hmcts.darts.common.entity.EventEntity;
 import uk.gov.hmcts.darts.common.entity.EventHandlerEntity;
 import uk.gov.hmcts.darts.common.entity.ExternalLocationTypeEntity;
@@ -537,6 +539,10 @@ public class DartsDatabaseStub {
     public HearingEntity save(HearingEntity hearingEntity) {
         save(hearingEntity.getCourtroom().getCourthouse());
         save(hearingEntity.getCourtroom());
+        for (DefenceEntity defenceEntity : hearingEntity.getCourtCase().getDefenceList()) {
+            defenceRepository.save(defenceEntity);
+        }
+        save(hearingEntity.getCourtCase());
         return hearingRepository.save(hearingEntity);
     }
 
@@ -555,6 +561,13 @@ public class DartsDatabaseStub {
     @Transactional
     public CourtCaseEntity save(CourtCaseEntity courtCase) {
         save(courtCase.getCourthouse());
+        for (DefendantEntity defendantEntity : courtCase.getDefendantList()) {
+            defendantRepository.save(defendantEntity);
+        }
+
+        for (DefenceEntity defenceEntity : courtCase.getDefenceList()) {
+            defenceRepository.save(defenceEntity);
+        }
         return caseRepository.save(courtCase);
     }
 

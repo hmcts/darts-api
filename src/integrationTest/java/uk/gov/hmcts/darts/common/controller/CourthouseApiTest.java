@@ -1,6 +1,7 @@
 package uk.gov.hmcts.darts.common.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
@@ -134,6 +135,16 @@ class CourthouseApiTest extends IntegrationBase {
     private EntityGraphPersistence entityGraphPersistence;
 
     private Authentication authentication;
+
+    @BeforeEach
+    void openHibernateSession() {
+        openInViewUtil.openEntityManager();
+    }
+
+    @AfterEach
+    void closeHibernateSession() {
+        openInViewUtil.closeEntityManager();
+    }
 
     @BeforeEach
     void setUp() {

@@ -1,8 +1,8 @@
 package uk.gov.hmcts.darts.task.service;
 
 import com.azure.storage.blob.models.BlobStorageException;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -75,6 +75,15 @@ class UnstructuredToArmProcessorTest extends IntegrationBase {
     @Autowired
     private AuthorisationStub authorisationStub;
 
+    @BeforeEach
+    void openHibernateSession() {
+        openInViewUtil.openEntityManager();
+    }
+
+    @AfterEach
+    void closeHibernateSession() {
+        openInViewUtil.closeEntityManager();
+    }
 
     @BeforeEach
     void setupData() {
@@ -182,7 +191,6 @@ class UnstructuredToArmProcessorTest extends IntegrationBase {
     }
 
     @Test
-    @Disabled("Impacted by V1_364_*.sql")
     void movePendingTranscriptionDataFromUnstructuredToArmStorage() {
 
         authorisationStub.givenTestSchema();

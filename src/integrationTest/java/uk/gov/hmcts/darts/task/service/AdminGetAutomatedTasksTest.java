@@ -1,6 +1,8 @@
 package uk.gov.hmcts.darts.task.service;
 
-import org.junit.jupiter.api.Disabled;
+
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,7 +19,6 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @AutoConfigureMockMvc
-@Disabled("Impacted by V1_362__constraint_transcription_part6.sql")
 class AdminGetAutomatedTasksTest extends IntegrationBase {
 
     private static final URI ENDPOINT = URI.create("/admin/automated-tasks");
@@ -27,6 +28,16 @@ class AdminGetAutomatedTasksTest extends IntegrationBase {
 
     @Autowired
     private MockMvc mockMvc;
+
+    @BeforeEach
+    void openHibernateSession() {
+        openInViewUtil.openEntityManager();
+    }
+
+    @AfterEach
+    void closeHibernateSession() {
+        openInViewUtil.closeEntityManager();
+    }
 
     @ParameterizedTest
     @EnumSource(value = SecurityRoleEnum.class, names = {"SUPER_ADMIN"}, mode = Mode.INCLUDE)

@@ -1,6 +1,8 @@
 package uk.gov.hmcts.darts.usermanagement.service;
 
-import org.junit.jupiter.api.Disabled;
+
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import uk.gov.hmcts.darts.common.entity.AuditEntity;
@@ -19,7 +21,7 @@ import static org.springframework.data.history.RevisionMetadata.RevisionType.UPD
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.SUPER_ADMIN;
 import static uk.gov.hmcts.darts.test.common.data.RetentionPolicyTestData.minimalRetentionPolicy;
 
-@Disabled("Impacted by V1_362__constraint_transcription_part6.sql")
+
 class RetentionPolicyAuditTest extends IntegrationBase {
 
     @Autowired
@@ -27,6 +29,16 @@ class RetentionPolicyAuditTest extends IntegrationBase {
 
     @Autowired
     private GivenBuilder given;
+
+    @BeforeEach
+    void openHibernateSession() {
+        openInViewUtil.openEntityManager();
+    }
+
+    @AfterEach
+    void closeHibernateSession() {
+        openInViewUtil.closeEntityManager();
+    }
 
     @Test
     void auditsWhenRetentionPolicyTypesAreCreated() {

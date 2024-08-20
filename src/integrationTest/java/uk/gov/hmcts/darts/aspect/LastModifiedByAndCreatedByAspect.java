@@ -1,4 +1,3 @@
-
 package uk.gov.hmcts.darts.aspect;
 
 import jakarta.persistence.Id;
@@ -32,6 +31,7 @@ import java.util.Optional;
 @Component
 @Configuration
 @RequiredArgsConstructor
+@SuppressWarnings("PMD.GodClass")
 public class LastModifiedByAndCreatedByAspect {
 
     @Autowired
@@ -48,6 +48,7 @@ public class LastModifiedByAndCreatedByAspect {
 
         processEntities(body);
 
+        processNested(body);
         return joinPoint.proceed(args);
     }
 
@@ -60,6 +61,7 @@ public class LastModifiedByAndCreatedByAspect {
 
         processEntities(body);
 
+        processNested(body);
         return joinPoint.proceed(args);
     }
 
@@ -72,9 +74,11 @@ public class LastModifiedByAndCreatedByAspect {
 
         if (objects[0] instanceof List<?> == false) {
             processEntities(objects[0]);
+            processNested(objects[0]);
         } else {
             for (Object object : (List) objects[0]) {
                 processEntities(object);
+                processNested(object);
             }
         }
 
@@ -90,9 +94,13 @@ public class LastModifiedByAndCreatedByAspect {
 
         if (objects[0] instanceof List<?> == false) {
             processEntities(objects[0]);
+            processNested(objects[0]);
+
         } else {
             for (Object object : (List) objects[0]) {
                 processEntities(object);
+
+                processNested(object);
             }
         }
 
@@ -106,9 +114,11 @@ public class LastModifiedByAndCreatedByAspect {
 
         if (objects[0] instanceof Iterable == false) {
             processEntities(objects[0]);
+            processNested(objects[0]);
         } else {
             for (Object object : (Iterable) objects[0]) {
                 processEntities(object);
+                processNested(object);
             }
         }
 
@@ -116,9 +126,9 @@ public class LastModifiedByAndCreatedByAspect {
     }
 
 
-
-
-    @SuppressWarnings({"PMD.CyclomaticComplexity", "PMD.NcssCount", "PMD.NPathComplexity", "PMD.CognitiveComplexity", "PMD.EmptyCatchBlock"})
+    @SuppressWarnings({"PMD.SignatureDeclareThrowsException", "PMD.CyclomaticComplexity", "PMD.NcssCount", "PMD.NPathComplexity",
+        "PMD.CognitiveComplexity", "PMD.EmptyCatchBlock", "PMD.GodClass", "PMD.AvoidPrintStackTrace",
+        "PMD.UselessParentheses", "PMD.SystemPrintln", "PMD.CognitiveComplexity", "PMD.CollapsibleIfStatements"})
     public void processEntities(Object body) {
         if (body instanceof ModifiedBaseEntity) {
             ModifiedBaseEntity entity = (ModifiedBaseEntity) body;
@@ -220,16 +230,6 @@ public class LastModifiedByAndCreatedByAspect {
                 // do nothing
             }
         }
-
-        try {
-            List<Object> objects = new ArrayList<>();
-            processNested(body, objects);
-            for (Object object : objects) {
-                processEntities(object);
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
     }
 
     @SuppressWarnings("PMD.EmptyCatchBlock")
@@ -258,8 +258,24 @@ public class LastModifiedByAndCreatedByAspect {
         return null;
     }
 
+    @SuppressWarnings("PMD.AvoidPrintStackTrace")
+    private void processNested(Object object) {
+        try {
+            List<Object> objectsLst = new ArrayList<>();
+            processNested(object, objectsLst);
+            for (Object myobject : objectsLst) {
+                processEntities(myobject);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
     @SuppressWarnings({"PMD.GodClass", "PMD.AvoidPrintStackTrace",
-        "PMD.UselessParentheses", "PMD.SystemPrintln", "PMD.CognitiveComplexity", "PMD.CollapsibleIfStatements"})
+        "PMD.UselessParentheses", "PMD.SystemPrintln",
+        "PMD.CognitiveComplexity",
+        "PMD.SignatureDeclareThrowsException", "PMD.CyclomaticComplexity",
+        "PMD.CollapsibleIfStatements", "PMD.AvoidAccessibilityAlteration"})
     public static void processNested(Object object, List<Object> objects) throws Exception {
 
         if (object != null) {
@@ -273,7 +289,8 @@ public class LastModifiedByAndCreatedByAspect {
                     field.setAccessible(true);
                     Object fieldObj = field.get(object);
 
-                    if (fieldObj != null && !(fieldObj instanceof Collection) && !objects.contains(fieldObj)) {
+                    if (fieldObj != null && !(fieldObj instanceof Collection) && !objects.contains(fieldObj)
+                        && !fieldObj.getClass().getPackageName().startsWith("java.")) {
                         objects.add(fieldObj);
                         processNested(fieldObj, objects);
                     }
@@ -292,6 +309,8 @@ public class LastModifiedByAndCreatedByAspect {
         }
     }
 
+    @SuppressWarnings({"PMD.GodClass", "PMD.AvoidPrintStackTrace",
+        "PMD.UselessParentheses", "PMD.SystemPrintln", "PMD.SignatureDeclareThrowsException"})
     public static void main(String[] args) throws Exception {
         CourtCaseEntity entity = new CourtCaseEntity();
         CourthouseEntity courthouse = new CourthouseEntity();

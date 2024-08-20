@@ -1,8 +1,8 @@
 package uk.gov.hmcts.darts.cases.service;
 
 import lombok.extern.slf4j.Slf4j;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.skyscreamer.jsonassert.JSONAssert;
 import org.skyscreamer.jsonassert.JSONCompareMode;
@@ -45,7 +45,7 @@ import static uk.gov.hmcts.darts.test.common.data.JudgeTestData.createJudgeWithN
 import static uk.gov.hmcts.darts.testutils.stubs.UserAccountStub.INTEGRATION_TEST_USER_EMAIL;
 
 @Slf4j
-@Disabled("Impacted by V1_363__not_null_constraints_part3.sql")
+
 @SuppressWarnings({"PMD.VariableDeclarationUsageDistance", "PMD.NcssCount", "PMD.ExcessiveImports"})
 class CaseServiceAdvancedSearchTest extends IntegrationBase {
     @Autowired
@@ -59,6 +59,16 @@ class CaseServiceAdvancedSearchTest extends IntegrationBase {
     UserAccountEntity user;
     CourtroomEntity courtroom1;
     CourtroomEntity courtroomLondon;
+
+    @BeforeEach
+    void openHibernateSession() {
+        openInViewUtil.openEntityManager();
+    }
+
+    @AfterEach
+    void closeHibernateSession() {
+        openInViewUtil.closeEntityManager();
+    }
 
     @BeforeEach
     void setupData() {

@@ -2,8 +2,8 @@ package uk.gov.hmcts.darts.event.service.impl;
 
 import com.github.tomakehurst.wiremock.client.WireMock;
 import lombok.extern.slf4j.Slf4j;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -23,7 +23,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.when;
 
 @Slf4j
-@Disabled("temporarily disabling since some of the tests are flaky. Will fix soon")
+
 class SetReportingRestrictionEventHandlerTest extends HandlerTestData {
     public static final String TEST_REPORTING_RESTRICTION = "Reporting Restriction Test";
 
@@ -35,6 +35,16 @@ class SetReportingRestrictionEventHandlerTest extends HandlerTestData {
 
     @MockBean
     private UserIdentity mockUserIdentity;
+
+    @BeforeEach
+    void openHibernateSession() {
+        openInViewUtil.openEntityManager();
+    }
+
+    @AfterEach
+    void closeHibernateSession() {
+        openInViewUtil.closeEntityManager();
+    }
 
     @BeforeEach
     public void setupStubs() {

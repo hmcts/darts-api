@@ -1,6 +1,7 @@
 package uk.gov.hmcts.darts.transcriptions.service;
 
-import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -13,7 +14,7 @@ import static java.time.LocalDate.now;
 import static java.time.LocalDate.parse;
 import static org.assertj.core.api.Assertions.assertThat;
 
-@Disabled("Impacted by V1_364_*.sql")
+
 class ModernisedTranscriptionSearchTest extends IntegrationBase {
 
     @Autowired
@@ -21,6 +22,16 @@ class ModernisedTranscriptionSearchTest extends IntegrationBase {
 
     @Autowired
     private AdminTranscriptionService adminTranscriptionSearchService;
+
+    @BeforeEach
+    void openHibernateSession() {
+        openInViewUtil.openEntityManager();
+    }
+
+    @AfterEach
+    void closeHibernateSession() {
+        openInViewUtil.closeEntityManager();
+    }
 
     @Test
     void findsTranscriptionByIdOnly() {

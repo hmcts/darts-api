@@ -1,7 +1,8 @@
 package uk.gov.hmcts.darts.common.repository;
 
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
@@ -13,7 +14,7 @@ import uk.gov.hmcts.darts.testutils.stubs.HearingStub;
 import java.util.List;
 import java.util.Map;
 
-@Disabled("Impacted by V1_363__not_null_constraints_part3.sql")
+
 class EventRepositoryTest extends PostgresIntegrationBase {
     @Autowired
     private EventRepository eventRepository;
@@ -23,6 +24,16 @@ class EventRepositoryTest extends PostgresIntegrationBase {
 
     @Autowired
     private HearingStub hearingStub;
+
+    @BeforeEach
+    void openHibernateSession() {
+        openInViewUtil.openEntityManager();
+    }
+
+    @AfterEach
+    void closeHibernateSession() {
+        openInViewUtil.closeEntityManager();
+    }
 
     @Test
     void testEventProcessing() {

@@ -2,7 +2,6 @@ package uk.gov.hmcts.darts.audio.service;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -43,6 +42,16 @@ class AudioPreviewTest extends IntegrationBase {
     private MediaEntity mediaEntity;
 
     @BeforeEach
+    void openHibernateSession() {
+        openInViewUtil.openEntityManager();
+    }
+
+    @AfterEach
+    void closeHibernateSession() {
+        openInViewUtil.closeEntityManager();
+    }
+
+    @BeforeEach
     void setUp() {
         hearing = createSomeMinimalHearing();
     }
@@ -55,7 +64,6 @@ class AudioPreviewTest extends IntegrationBase {
     }
 
     @Test
-    @Disabled("Impacted by V1_364_*.sql")
     void generatesAndCachesAudioPreviewOnCacheMiss() {
         mediaEntity = givenSomeStoredMedia();
 
@@ -67,7 +75,6 @@ class AudioPreviewTest extends IntegrationBase {
     }
 
     @Test
-    @Disabled("Impacted by V1_364_*.sql")
     void audioPreviewEventuallyBecomesReady() {
         mediaEntity = givenSomeStoredMedia();
 

@@ -1,6 +1,8 @@
 package uk.gov.hmcts.darts.annotation.repository;
 
-import org.junit.jupiter.api.Disabled;
+
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import uk.gov.hmcts.darts.common.entity.AnnotationDocumentEntity;
@@ -15,7 +17,6 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@Disabled("Impacted by V1_364_*.sql")
 class AnnotationDocumentRepositoryIntTest extends IntegrationBase {
 
     @Autowired
@@ -27,6 +28,16 @@ class AnnotationDocumentRepositoryIntTest extends IntegrationBase {
 
     @Autowired
     AnnotationDocumentRepository annotationDocumentRepository;
+
+    @BeforeEach
+    void openHibernateSession() {
+        openInViewUtil.openEntityManager();
+    }
+
+    @AfterEach
+    void closeHibernateSession() {
+        openInViewUtil.closeEntityManager();
+    }
 
     @Test
     void testFindAllByCaseId() {

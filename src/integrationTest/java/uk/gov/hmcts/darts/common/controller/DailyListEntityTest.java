@@ -1,7 +1,8 @@
 package uk.gov.hmcts.darts.common.controller;
 
 import org.apache.commons.io.FileUtils;
-import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -40,8 +41,17 @@ class DailyListEntityTest extends IntegrationBase {
     @MockBean
     UserIdentity mockUserIdentity;
 
+    @BeforeEach
+    void openHibernateSession() {
+        openInViewUtil.openEntityManager();
+    }
+
+    @AfterEach
+    void closeHibernateSession() {
+        openInViewUtil.closeEntityManager();
+    }
+
     @Test
-    @Disabled("Impacted by V1_364_*.sql")
     void dailyListAddDailyListEndpoint() throws Exception {
         when(mockUserIdentity.userHasGlobalAccess(Set.of(XHIBIT, CPP))).thenReturn(true);
 
@@ -120,7 +130,7 @@ class DailyListEntityTest extends IntegrationBase {
     }
 
     @Test
-    @Disabled("Impacted by V1_364_*.sql")
+    
     void dailyListPatchDailyListEndpoint() throws Exception {
         when(mockUserIdentity.userHasGlobalAccess(Set.of(XHIBIT, CPP))).thenReturn(true);
 

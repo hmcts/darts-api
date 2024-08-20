@@ -2,8 +2,8 @@ package uk.gov.hmcts.darts.transcriptions.controller;
 
 import com.jayway.jsonpath.DocumentContext;
 import com.jayway.jsonpath.JsonPath;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.skyscreamer.jsonassert.JSONAssert;
 import org.skyscreamer.jsonassert.JSONCompareMode;
@@ -55,7 +55,7 @@ import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum.WI
 @AutoConfigureMockMvc
 @Transactional
 @SuppressWarnings({"PMD.ExcessiveImports"})
-@Disabled("Impacted by V1_364_*.sql")
+
 class TranscriptionControllerAttachTranscriptIntTest extends IntegrationBase {
 
     private static final String URL_TEMPLATE = "/transcriptions/{transcription_id}/document";
@@ -78,6 +78,16 @@ class TranscriptionControllerAttachTranscriptIntTest extends IntegrationBase {
 
     private TranscriptionEntity transcriptionEntity;
     private SecurityGroupEntity transcriptionCompany;
+
+    @BeforeEach
+    void openHibernateSession() {
+        openInViewUtil.openEntityManager();
+    }
+
+    @AfterEach
+    void closeHibernateSession() {
+        openInViewUtil.closeEntityManager();
+    }
 
     @BeforeEach
     void beforeEach() {

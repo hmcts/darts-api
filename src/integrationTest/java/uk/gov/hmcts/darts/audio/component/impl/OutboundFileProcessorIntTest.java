@@ -4,7 +4,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.TestPropertySource;
@@ -32,7 +31,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @TestPropertySource(properties = {"darts.audio.transformation.service.audio.file=tests/audio/WithViqHeader/viq0001min.mp2"})
 @Slf4j
-@Disabled("Impacted by V1_363__not_null_constraints_part3.sql")
+
 class OutboundFileProcessorIntTest extends IntegrationBase {
     private static final String AUDIO_FILENAME = "tests/audio/WithViqHeader/viq0001min.mp2";
     private static final String HEARING_DATETIME = "2023-01-01T10:00:00";
@@ -69,6 +68,16 @@ class OutboundFileProcessorIntTest extends IntegrationBase {
 
     @Autowired
     private OutboundFileProcessorImpl outboundFileProcessor;
+
+    @BeforeEach
+    void openHibernateSession() {
+        openInViewUtil.openEntityManager();
+    }
+
+    @AfterEach
+    void closeHibernateSession() {
+        openInViewUtil.closeEntityManager();
+    }
 
     @BeforeEach
     void setUp() throws IOException {

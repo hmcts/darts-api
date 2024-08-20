@@ -163,6 +163,7 @@ tasks.register('integration', Test) {
   group = "Verification"
   testClassesDirs = sourceSets.integrationTest.output.classesDirs
   classpath = sourceSets.integrationTest.runtimeClasspath
+  jvmArgs '--add-opens=java.base/java.lang=ALL-UNNAMED'
 }
 
 tasks.register('smoke', Test) {
@@ -441,6 +442,9 @@ dependencies {
   implementation group: 'org.springframework.data', name: 'spring-data-envers', version: '3.3.2'
   implementation 'org.hibernate.orm:hibernate-ant:6.6.0.Final'
   implementation 'org.hibernate:hibernate-spatial:6.6.0.Final'
+
+  // https://mvnrepository.com/artifact/org.reflections/reflections
+  implementation group: 'org.reflections', name: 'reflections', version: '0.10.2'
 
   annotationProcessor 'org.mapstruct:mapstruct-processor:1.6.0'
   annotationProcessor('org.hibernate.orm:hibernate-jpamodelgen:6.6.0.Final')

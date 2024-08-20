@@ -1,7 +1,8 @@
 package uk.gov.hmcts.darts.common.repository;
 
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
@@ -41,6 +42,16 @@ class ObjectAdminActionRepositoryTest extends PostgresIntegrationBase {
     @Autowired
     private TranscriptionDocumentStub transcriptionDocumentStub;
 
+    @BeforeEach
+    void openHibernateSession() {
+        openInViewUtil.openEntityManager();
+    }
+
+    @AfterEach
+    void closeHibernateSession() {
+        openInViewUtil.closeEntityManager();
+    }
+
     @Test
     void findAllMediaActionsWithAnyDeletionReasonShouldReturnEmptyListWhenThereAreNoMatches() {
         // When
@@ -51,7 +62,7 @@ class ObjectAdminActionRepositoryTest extends PostgresIntegrationBase {
     }
 
     @Test
-    @Disabled("Impacted by V1_364_*.sql")
+    
     void findAllWithAnyDeletionReasonShouldReturnExpectedResultsWhenMediaExistsMediaActionsWithDeletionReasonButNotYetApprovedForDeletion() {
         // Given
         var courtroomEntity = courtroomStub.createCourtroomUnlessExists("Test Courthouse", "Test Courtroom",

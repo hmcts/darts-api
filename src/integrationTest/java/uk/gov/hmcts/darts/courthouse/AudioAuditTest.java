@@ -1,6 +1,8 @@
 package uk.gov.hmcts.darts.courthouse;
 
-import org.junit.jupiter.api.Disabled;
+
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import uk.gov.hmcts.darts.audio.entity.MediaRequestEntity;
@@ -34,8 +36,18 @@ class AudioAuditTest extends IntegrationBase {
     @Autowired
     private GivenBuilder given;
 
+    @BeforeEach
+    void openHibernateSession() {
+        openInViewUtil.openEntityManager();
+    }
+
+    @AfterEach
+    void closeHibernateSession() {
+        openInViewUtil.closeEntityManager();
+    }
+
     @Test
-    @Disabled("Impacted by V1_364_*.sql")
+    
     void performsStandardAndAdvancedAuditsWhenAudioOwnershipIsChanged() {
         var activeUser = given.anAuthenticatedUserWithGlobalAccessAndRole(SUPER_ADMIN);
         MediaRequestEntity mediaRequest = entityGraphPersistence.persist(minimalRequestData());

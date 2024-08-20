@@ -1,7 +1,7 @@
 package uk.gov.hmcts.darts.cases.controller;
 
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.skyscreamer.jsonassert.JSONCompareMode;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -48,7 +48,7 @@ import static uk.gov.hmcts.darts.testutils.stubs.UserAccountStub.INTEGRATION_TES
 
 @AutoConfigureMockMvc
 @SuppressWarnings({"PMD.VariableDeclarationUsageDistance", "PMD.NcssCount", "PMD.ExcessiveImports"})
-@Disabled("Impacted by V1_363__not_null_constraints_part3.sql")
+
 class CaseControllerSearchPostTest extends IntegrationBase {
 
     @Autowired
@@ -59,6 +59,16 @@ class CaseControllerSearchPostTest extends IntegrationBase {
     private transient MockMvc mockMvc;
     CourthouseEntity swanseaCourthouse;
     UserAccountEntity user;
+
+    @BeforeEach
+    void openHibernateSession() {
+        openInViewUtil.openEntityManager();
+    }
+
+    @AfterEach
+    void closeHibernateSession() {
+        openInViewUtil.closeEntityManager();
+    }
 
     @BeforeEach
     void setupData() {

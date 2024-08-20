@@ -1,8 +1,8 @@
 package uk.gov.hmcts.darts.audio.controller;
 
 import ch.qos.logback.classic.Level;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.skyscreamer.jsonassert.JSONAssert;
 import org.skyscreamer.jsonassert.JSONCompareMode;
@@ -67,7 +67,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
     "spring.servlet.multipart.max-file-size=4MB",
     "spring.servlet.multipart.max-request-size=4MB",
 })
-@Disabled("Impacted by V1_364_*.sql")
+
 class AudioControllerAddAudioMetadataIntTest extends IntegrationBase {
 
     @Value("${local.server.port}")
@@ -109,6 +109,16 @@ class AudioControllerAddAudioMetadataIntTest extends IntegrationBase {
 
     @Autowired
     private SuperAdminUserStub superAdminUserStub;
+
+    @BeforeEach
+    void openHibernateSession() {
+        openInViewUtil.openEntityManager();
+    }
+
+    @AfterEach
+    void closeHibernateSession() {
+        openInViewUtil.closeEntityManager();
+    }
 
     @BeforeEach
     void beforeEach() {

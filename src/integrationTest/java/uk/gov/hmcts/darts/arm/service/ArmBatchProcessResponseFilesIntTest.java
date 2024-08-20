@@ -4,8 +4,8 @@ import com.azure.core.exception.AzureException;
 import com.azure.core.util.BinaryData;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.jetbrains.annotations.NotNull;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.mockito.Mock;
@@ -97,6 +97,15 @@ class ArmBatchProcessResponseFilesIntTest extends IntegrationBase {
 
     private static final Integer BATCH_SIZE = 10;
 
+    @BeforeEach
+    void openHibernateSession() {
+        openInViewUtil.openEntityManager();
+    }
+
+    @AfterEach
+    void closeHibernateSession() {
+        openInViewUtil.closeEntityManager();
+    }
 
     @BeforeEach
     void setupData() {
@@ -744,7 +753,6 @@ class ArmBatchProcessResponseFilesIntTest extends IntegrationBase {
     }
 
     @Test
-    @Disabled("Impacted by V1_364_*.sql")
     void batchProcessResponseFiles_WithTranscriptionReturnsSuccess() throws IOException {
 
         // given
@@ -848,7 +856,7 @@ class ArmBatchProcessResponseFilesIntTest extends IntegrationBase {
     }
 
     @Test
-    @Disabled("Impacted by V1_364_*.sql")
+    
     void batchProcessResponseFiles_WithInvalidTranscriptionChecksum() throws IOException {
 
         // given
@@ -1432,7 +1440,6 @@ class ArmBatchProcessResponseFilesIntTest extends IntegrationBase {
     }
 
     @Test
-    @Disabled("Impacted by V1_364_*.sql")
     void batchProcessResponseFiles_WithNullTranscriptionChecksum() throws IOException {
 
         // given

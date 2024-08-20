@@ -2,7 +2,6 @@ package uk.gov.hmcts.darts.authorisation.service;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -40,7 +39,7 @@ import static uk.gov.hmcts.darts.test.common.data.CourthouseTestData.createCourt
 import static uk.gov.hmcts.darts.test.common.data.SecurityGroupTestData.minimalSecurityGroup;
 import static uk.gov.hmcts.darts.test.common.data.UserAccountTestData.minimalUserAccount;
 
-@Disabled("Impacted by V1_362__constraint_transcription_part6.sql")
+
 class AuthorisationServiceTest extends IntegrationBase {
 
     private static final String TEST_JUDGE_EMAIL = "test.judge@example.com";
@@ -60,6 +59,16 @@ class AuthorisationServiceTest extends IntegrationBase {
 
     @Autowired
     private EntityGraphPersistence entityGraphPersistence;
+
+    @BeforeEach
+    void openHibernateSession() {
+        openInViewUtil.openEntityManager();
+    }
+
+    @AfterEach
+    void closeHibernateSession() {
+        openInViewUtil.closeEntityManager();
+    }
 
     @BeforeEach
     void startHibernateSession() {
@@ -125,11 +134,6 @@ class AuthorisationServiceTest extends IntegrationBase {
         newUser.setActive(true);
         newUser.setIsSystemUser(false);
         userAccountRepository.saveAndFlush(newUser);
-    }
-
-    @AfterEach
-    void closeHibernateSession() {
-        openInViewUtil.closeEntityManager();
     }
 
     private void addCourthouseToSecurityGroup(CourthouseEntity courthouseEntity, Integer securityGroupId) {
@@ -222,7 +226,7 @@ class AuthorisationServiceTest extends IntegrationBase {
     }
 
     @Test
-    @Disabled("Impacted by V1_362__constraint_transcription_part6.sql")
+    
     void shouldGetOptionalUserStateForMissingUserAccount() {
         Optional<UserState> userStateOptional = authorisationService.getAuthorisation("test.missing@example.com");
 

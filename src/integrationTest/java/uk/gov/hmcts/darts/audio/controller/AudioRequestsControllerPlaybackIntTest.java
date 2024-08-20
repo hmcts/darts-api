@@ -1,7 +1,7 @@
 package uk.gov.hmcts.darts.audio.controller;
 
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -80,13 +80,23 @@ class AudioRequestsControllerPlaybackIntTest extends IntegrationBase {
     private AuditRepository auditRepository;
 
     @BeforeEach
+    void openHibernateSession() {
+        openInViewUtil.openEntityManager();
+    }
+
+    @AfterEach
+    void closeHibernateSession() {
+        openInViewUtil.closeEntityManager();
+    }
+
+    @BeforeEach
     void setUp() {
         UserAccountEntity testUser = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
         when(mockUserIdentity.getUserAccount()).thenReturn(testUser);
     }
 
     @Test
-    @Disabled("Impacted by V1_362__constraint_transcription_part6.sql")
+    
     void audioRequestPlaybackShouldPlaybackFromOutboundStorageAndReturnSuccess() throws Exception {
         var blobId = UUID.randomUUID();
 
@@ -135,7 +145,7 @@ class AudioRequestsControllerPlaybackIntTest extends IntegrationBase {
     }
 
     @Test
-    @Disabled("Impacted by V1_362__constraint_transcription_part6.sql")
+    
     void audioRequestPlaybackShouldReturnInternalServerErrorWhenExceptionDuringDownloadBlobData() throws Exception {
         var blobId = UUID.randomUUID();
 
@@ -179,7 +189,7 @@ class AudioRequestsControllerPlaybackIntTest extends IntegrationBase {
     }
 
     @Test
-    @Disabled("Impacted by V1_364_*.sql")
+    
     void audioRequestPlaybackGetShouldReturnBadRequestWhenMediaRequestEntityIsDownload() throws Exception {
         authorisationStub.givenTestSchema();
 
@@ -206,7 +216,6 @@ class AudioRequestsControllerPlaybackIntTest extends IntegrationBase {
     }
 
     @Test
-    @Disabled("Impacted by V1_364_*.sql")
     void audioRequestPlaybackGetShouldReturnErrorWhenNoRelatedTransientObjectExistsInDatabase() throws Exception {
         authorisationStub.givenTestSchema();
         var mediaRequestEntity = authorisationStub.getMediaRequestEntity();

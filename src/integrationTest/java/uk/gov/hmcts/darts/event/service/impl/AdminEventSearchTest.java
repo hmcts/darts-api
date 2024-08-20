@@ -2,7 +2,6 @@ package uk.gov.hmcts.darts.event.service.impl;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.TestPropertySource;
@@ -19,7 +18,7 @@ import static uk.gov.hmcts.darts.test.common.data.CourtroomTestData.someMinimalC
 import static uk.gov.hmcts.darts.test.common.data.HearingTestData.createSomeMinimalHearing;
 
 @TestPropertySource(properties = {"darts.events.admin-search.max-results=5"})
-@Disabled("Impacted by V1_363__not_null_constraints_part3.sql")
+
 class AdminEventSearchTest extends IntegrationBase {
 
     @Autowired
@@ -37,6 +36,7 @@ class AdminEventSearchTest extends IntegrationBase {
     void tearDown() {
         openInViewUtil.closeEntityManager();
     }
+
 
     @Test
     void findsEventsByCourtHouseIdOnly() {

@@ -3,9 +3,9 @@ package uk.gov.hmcts.darts.transcriptions.controller;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.jayway.jsonpath.JsonPath;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -47,7 +47,7 @@ import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum.AW
 @AutoConfigureMockMvc
 @Transactional
 @SuppressWarnings({"PMD.ExcessiveImports"})
-@Disabled("Impacted by V1_364_*.sql")
+
 class TranscriptionControllerUpdateTranscriptionsTest extends IntegrationBase {
 
     @MockBean
@@ -74,6 +74,15 @@ class TranscriptionControllerUpdateTranscriptionsTest extends IntegrationBase {
 
     private Integer transcriptionId2;
 
+    @BeforeEach
+    void openHibernateSession() {
+        openInViewUtil.openEntityManager();
+    }
+
+    @AfterEach
+    void closeHibernateSession() {
+        openInViewUtil.closeEntityManager();
+    }
 
     @BeforeEach
     void beforeEach() {

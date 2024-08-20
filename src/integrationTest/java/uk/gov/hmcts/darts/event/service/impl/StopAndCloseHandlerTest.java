@@ -1,7 +1,7 @@
 package uk.gov.hmcts.darts.event.service.impl;
 
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -70,6 +70,15 @@ class StopAndCloseHandlerTest extends HandlerTestData {
     @Mock
     private CaseRetentionRepository caseRetentionRepository;
 
+    @BeforeEach
+    void openHibernateSession() {
+        openInViewUtil.openEntityManager();
+    }
+
+    @AfterEach
+    void closeHibernateSession() {
+        openInViewUtil.closeEntityManager();
+    }
 
     @BeforeEach
     public void setupStubs() {
@@ -84,7 +93,7 @@ class StopAndCloseHandlerTest extends HandlerTestData {
     }
 
     @Test
-    @Disabled("Impacted by V1_363__not_null_constraints_part3.sql")
+    
     void throwsOnUnknownCourthouse() {
         dartsDatabase.save(someMinimalCase());
         DartsEvent event = someMinimalDartsEvent().courthouse(SOME_ROOM);

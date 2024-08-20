@@ -1,9 +1,9 @@
 package uk.gov.hmcts.darts.event.controller;
 
 import org.hamcrest.Matchers;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.skyscreamer.jsonassert.JSONAssert;
 import org.skyscreamer.jsonassert.JSONCompareMode;
@@ -67,6 +67,16 @@ class EventsControllerCourtLogsTest extends IntegrationBase {
 
     @MockBean
     private UserIdentity mockUserIdentity;
+
+    @BeforeEach
+    void openHibernateSession() {
+        openInViewUtil.openEntityManager();
+    }
+
+    @AfterEach
+    void closeHibernateSession() {
+        openInViewUtil.closeEntityManager();
+    }
 
     @BeforeEach
     void setUp() {
@@ -170,7 +180,7 @@ class EventsControllerCourtLogsTest extends IntegrationBase {
     }
 
     @Test
-    @Disabled("Impacted by V1_363__not_null_constraints_part3.sql")
+    
     void courtLogsGetResultMatch() throws Exception {
 
         HearingEntity hearingEntity = dartsDatabase.getHearingRepository().findAll().get(0);
@@ -198,7 +208,7 @@ class EventsControllerCourtLogsTest extends IntegrationBase {
     }
 
     @Test
-    @Disabled("Impacted by V1_363__not_null_constraints_part3.sql")
+    
     void courtlogsGetOnlyExpectedResults() throws Exception {
 
         HearingEntity hearingEntity = dartsDatabase.getHearingRepository().findAll().get(0);
@@ -231,7 +241,7 @@ class EventsControllerCourtLogsTest extends IntegrationBase {
     }
 
     @Test
-    @Disabled("Impacted by V1_363__not_null_constraints_part3.sql")
+    
     void courtLogsWrongCaseNumber() throws Exception {
 
         HearingEntity hearingEntity = dartsDatabase.getHearingRepository().findAll().get(0);
