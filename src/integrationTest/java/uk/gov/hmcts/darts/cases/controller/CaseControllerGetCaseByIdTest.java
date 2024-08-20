@@ -12,20 +12,21 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
-import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.util.DateConverterUtil;
-import uk.gov.hmcts.darts.test.common.data.DefendantTestData;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 
 import java.time.OffsetDateTime;
 
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static uk.gov.hmcts.darts.test.common.data.ProsecutorTestData.someMinimalProsecutorForCase;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static uk.gov.hmcts.darts.test.common.data.DefendantTestData.someMinimalDefendant;
+import static uk.gov.hmcts.darts.test.common.data.ProsecutorTestData.createProsecutorForCase;
 
 @AutoConfigureMockMvc
 @Disabled("Impacted by V1_363__not_null_constraints_part3.sql")
@@ -55,8 +56,8 @@ class CaseControllerGetCaseByIdTest extends IntegrationBase {
             DateConverterUtil.toLocalDateTime(SOME_DATE_TIME)
         );
         CourtCaseEntity courtCase = hearingEntity.getCourtCase();
-        courtCase.addProsecutor(someMinimalProsecutorForCase(courtCase));
-        courtCase.addDefendant(DefendantTestData.someMinimalDefendant());
+        courtCase.addProsecutor(createProsecutorForCase(courtCase));
+        courtCase.addDefendant(someMinimalDefendant());
         courtCase.addDefence("aDefence");
         dartsDatabase.save(courtCase);
 
@@ -67,12 +68,11 @@ class CaseControllerGetCaseByIdTest extends IntegrationBase {
 
     @Test
     void casesSearchGetEndpointShouldReturnForbiddenError() throws Exception {
-
         when(mockUserIdentity.getUserAccount()).thenReturn(null);
 
         MockHttpServletRequestBuilder requestBuilder = get(endpointUrl, getCaseId(SOME_CASE_NUMBER, SOME_COURTHOUSE));
 
-        mockMvc.perform(requestBuilder).andExpect(MockMvcResultMatchers.status().isForbidden());
+        mockMvc.perform(requestBuilder).andExpect(status().isForbidden());
     }
 
     @Test
@@ -80,7 +80,7 @@ class CaseControllerGetCaseByIdTest extends IntegrationBase {
 
         MockHttpServletRequestBuilder requestBuilder = get(endpointUrl, getCaseId(SOME_CASE_NUMBER, SOME_COURTHOUSE));
 
-        MvcResult mvcResult = mockMvc.perform(requestBuilder).andExpect(MockMvcResultMatchers.status().isOk()).andReturn();
+        MvcResult mvcResult = mockMvc.perform(requestBuilder).andExpect(status().isOk()).andReturn();
 
         String actualJson = mvcResult.getResponse().getContentAsString();
         String expectedJson = """
@@ -109,33 +109,27 @@ class CaseControllerGetCaseByIdTest extends IntegrationBase {
         MockHttpServletRequestBuilder requestBuilder = get(endpointUrl, caseId);
 
         mockMvc.perform(requestBuilder)
-            .andExpect(MockMvcResultMatchers.status().isOk())
-            .andExpect(MockMvcResultMatchers.jsonPath("$.case_id", Matchers.is(caseId)))
-            .andExpect(MockMvcResultMatchers.jsonPath("$.judges", Matchers.hasSize(1)))
-            .andExpect(MockMvcResultMatchers.jsonPath("$.judges[0]", Matchers.is("1JUDGE1")))
-            .andExpect(MockMvcResultMatchers.jsonPath("$.prosecutors", Matchers.hasSize(1)))
-            .andExpect(MockMvcResultMatchers.jsonPath("$.prosecutors[0]", Matchers.is("aProsecutor")))
-            .andExpect(MockMvcResultMatchers.jsonPath("$.defendants", Matchers.hasSize(1)))
-            .andExpect(MockMvcResultMatchers.jsonPath("$.defendants[0]", Matchers.is("aDefendant")))
-            .andExpect(MockMvcResultMatchers.jsonPath("$.defenders", Matchers.hasSize(1)))
-            .andExpect(MockMvcResultMatchers.jsonPath("$.defenders[0]", Matchers.is("aDefence")));
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.case_id", Matchers.is(caseId)))
+            .andExpect(jsonPath("$.judges", Matchers.hasSize(1)))
+            .andExpect(jsonPath("$.judges[0]", Matchers.is("1JUDGE1")))
+            .andExpect(jsonPath("$.prosecutors", Matchers.hasSize(1)))
+            .andExpect(jsonPath("$.prosecutors[0]", Matchers.is("aProsecutor")))
+            .andExpect(jsonPath("$.defendants", Matchers.hasSize(1)))
+            .andExpect(jsonPath("$.defendants[0]", Matchers.is("aDefendant")))
+            .andExpect(jsonPath("$.defenders", Matchers.hasSize(1)))
+            .andExpect(jsonPath("$.defenders[0]", Matchers.is("aDefence")));
 
     }
 
     @Test
     void casesSearchGetEndpointCaseNotFound() throws Exception {
-
-        MockHttpServletRequestBuilder requestBuilder = get(endpointUrl, 25);
-
-        mockMvc.perform(requestBuilder).andExpect(MockMvcResultMatchers.status().isNotFound());
-
+        mockMvc.perform(get(endpointUrl, 25))
+            .andExpect(status().isNotFound());
     }
 
     private Integer getCaseId(String caseNumber, String courthouse) {
-
-        CourtCaseEntity courtCase = dartsDatabase.createCase(courthouse, caseNumber);
-
-        return courtCase.getId();
+        return dartsDatabase.createCase(courthouse, caseNumber).getId();
     }
 
 }

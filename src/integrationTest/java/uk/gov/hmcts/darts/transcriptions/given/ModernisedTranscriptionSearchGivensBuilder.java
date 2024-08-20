@@ -7,7 +7,7 @@ import java.time.LocalDate;
 import java.util.List;
 
 import static java.util.stream.IntStream.range;
-import static uk.gov.hmcts.darts.test.common.data.HearingTestData.createSomeMinimalHearing;
+import static uk.gov.hmcts.darts.test.common.data.HearingTestData.someMinimalHearing;
 import static uk.gov.hmcts.darts.test.common.data.TranscriptionTestData.someTranscriptionForHearing;
 
 @Component
@@ -75,7 +75,7 @@ public class ModernisedTranscriptionSearchGivensBuilder extends TranscriptionSea
 
     @Override
     public TranscriptionEntity createTranscription() {
-        var hearing = dartsDatabase.save(createSomeMinimalHearing());
+        var hearing = dartsDatabase.save(someMinimalHearing());
         var transcription = someTranscriptionForHearing(hearing);
         dartsDatabase.save(transcription.getCreatedBy());
         return dartsDatabase.save(transcription);

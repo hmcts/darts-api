@@ -5,7 +5,6 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.skyscreamer.jsonassert.JSONAssert;
 import org.skyscreamer.jsonassert.JSONCompareMode;
@@ -21,8 +20,6 @@ import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
 import uk.gov.hmcts.darts.common.repository.MediaRepository;
-import uk.gov.hmcts.darts.common.repository.ObjectAdminActionRepository;
-import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
 import uk.gov.hmcts.darts.test.common.TestUtils;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 import uk.gov.hmcts.darts.testutils.stubs.MediaStub;
@@ -40,7 +37,6 @@ import static org.hamcrest.Matchers.is;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@Disabled("Impacted by V1_367__adding_not_null_constraints_part_4.sql")
 @AutoConfigureMockMvc
 @TestPropertySource(properties = {
     "darts.audio.admin-search.max-results=20"
@@ -51,9 +47,6 @@ class MediaControllerPostAdminMediasSearchIntTest extends IntegrationBase {
 
     @Autowired
     private SuperAdminUserStub superAdminUserStub;
-
-    @Autowired
-    private UserAccountRepository userAccountRepository;
 
     @Autowired
     private MockMvc mockMvc;
@@ -69,9 +62,6 @@ class MediaControllerPostAdminMediasSearchIntTest extends IntegrationBase {
 
     @Autowired
     private MediaRepository mediaRepository;
-
-    @Autowired
-    private ObjectAdminActionRepository objectAdminActionRepository;
 
     private CourthouseEntity courthouse1;
     private CourthouseEntity courthouse2;

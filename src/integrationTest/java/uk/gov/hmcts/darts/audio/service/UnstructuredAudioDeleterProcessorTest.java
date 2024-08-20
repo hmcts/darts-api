@@ -1,6 +1,5 @@
 package uk.gov.hmcts.darts.audio.service;
 
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -21,6 +20,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.MARKED_FOR_DELETION;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.STORED;
+import static uk.gov.hmcts.darts.test.common.data.HearingTestData.someMinimalHearing;
 
 class UnstructuredAudioDeleterProcessorTest extends IntegrationBase {
 
@@ -32,19 +32,15 @@ class UnstructuredAudioDeleterProcessorTest extends IntegrationBase {
     @MockBean
     private CurrentTimeHelper currentTimeHelper;
 
-    @Disabled("Impacted by V1_367__adding_not_null_constraints_part_4.sql")
     @Test
     void storedInArmAndLastUpdatedInUnstructuredMoreThan30WeeksAgo() {
         when(currentTimeHelper.currentOffsetDateTime())
             .thenReturn(OffsetDateTime.now().plusWeeks(35));
-        HearingEntity hearing = dartsDatabase.createHearing(
-            "NEWCASTLE",
-            "Int Test Courtroom 2",
-            "2",
-            HEARING_DATE
-        );
 
-        MediaEntity savedMedia = dartsDatabase.save(
+        HearingEntity hearing = someMinimalHearing();
+        dartsPersistence.save(hearing);
+
+        MediaEntity savedMedia = dartsPersistence.save(
             MediaTestData.createMediaWith(
                 hearing.getCourtroom(),
                 OffsetDateTime.parse("2023-09-26T13:00:00Z"),
@@ -82,19 +78,15 @@ class UnstructuredAudioDeleterProcessorTest extends IntegrationBase {
         assertEquals(MARKED_FOR_DELETION.getId(), foundMedia.getStatus().getId());
     }
 
-    @Disabled("Impacted by V1_367__adding_not_null_constraints_part_4.sql")
     @Test
     void storedInArmAndLastUpdatedInUnstructuredLessThan30WeeksAgo() {
         when(currentTimeHelper.currentOffsetDateTime())
             .thenReturn(OffsetDateTime.now().plusWeeks(25));
-        HearingEntity hearing = dartsDatabase.createHearing(
-            "NEWCASTLE",
-            "Int Test Courtroom 2",
-            "2",
-            HEARING_DATE
-        );
 
-        MediaEntity savedMedia = dartsDatabase.save(
+        HearingEntity hearing = someMinimalHearing();
+        dartsPersistence.save(hearing);
+
+        MediaEntity savedMedia = dartsPersistence.save(
             MediaTestData.createMediaWith(
                 hearing.getCourtroom(),
                 OffsetDateTime.parse("2023-09-26T13:00:00Z"),

@@ -1,6 +1,10 @@
 package uk.gov.hmcts.darts.test.common.data;
 
 import uk.gov.hmcts.darts.audio.entity.MediaRequestEntity;
+import uk.gov.hmcts.darts.audio.enums.MediaRequestStatus;
+import uk.gov.hmcts.darts.audiorequests.model.AudioRequestType;
+import uk.gov.hmcts.darts.common.entity.HearingEntity;
+import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -15,7 +19,7 @@ import static uk.gov.hmcts.darts.test.common.data.UserAccountTestData.minimalUse
 @SuppressWarnings({"HideUtilityClassConstructor"})
 public class MediaRequestTestData {
 
-    public static MediaRequestEntity minimalRequestData() {
+    public static MediaRequestEntity someMinimalRequestData() {
         var mediaRequest = new MediaRequestEntity();
         mediaRequest.setHearing(someMinimalHearing());
         mediaRequest.setStatus(OPEN);
@@ -29,6 +33,68 @@ public class MediaRequestTestData {
         mediaRequest.setLastModifiedBy(userAccount);
         return mediaRequest;
     }
+
+    public static MediaRequestEntity createCurrentMediaRequest(HearingEntity hearingEntity, UserAccountEntity requestor,
+                                                        OffsetDateTime startTime, OffsetDateTime endTime,
+                                                        AudioRequestType audioRequestType, MediaRequestStatus status) {
+
+        return createCurrentMediaRequest(hearingEntity, requestor, requestor, startTime, endTime, audioRequestType, status, OffsetDateTime.now());
+    }
+
+    public static MediaRequestEntity createCurrentMediaRequest(HearingEntity hearingEntity, UserAccountEntity owner, UserAccountEntity requestor,
+                                                        OffsetDateTime startTime, OffsetDateTime endTime,
+                                                        AudioRequestType audioRequestType, MediaRequestStatus status, OffsetDateTime requestedDate) {
+        MediaRequestEntity mediaRequestEntity = someMinimalRequestData();
+        mediaRequestEntity.setHearing(hearingEntity);
+        mediaRequestEntity.setRequestor(requestor);
+        mediaRequestEntity.setCurrentOwner(owner);
+        mediaRequestEntity.setStatus(status);
+        mediaRequestEntity.setRequestType(audioRequestType);
+        mediaRequestEntity.setAttempts(0);
+        mediaRequestEntity.setStartTime(startTime);
+        mediaRequestEntity.setEndTime(endTime);
+        mediaRequestEntity.setCreatedBy(requestor);
+        mediaRequestEntity.setLastModifiedBy(requestor);
+        mediaRequestEntity.setCreatedDateTime(requestedDate);
+
+        return mediaRequestEntity;
+    }
+
+    public static MediaRequestEntity createExpiredMediaRequest(HearingEntity hearingEntity, UserAccountEntity requestor,
+                                                        OffsetDateTime startTime, OffsetDateTime endTime,
+                                                        AudioRequestType audioRequestType) {
+
+        MediaRequestEntity mediaRequestEntity = someMinimalRequestData();
+        mediaRequestEntity.setHearing(hearingEntity);
+        mediaRequestEntity.setRequestor(requestor);
+        mediaRequestEntity.setCurrentOwner(requestor);
+        mediaRequestEntity.setStatus(MediaRequestStatus.EXPIRED);
+        mediaRequestEntity.setRequestType(audioRequestType);
+        mediaRequestEntity.setAttempts(0);
+        mediaRequestEntity.setStartTime(startTime);
+        mediaRequestEntity.setEndTime(endTime);
+        mediaRequestEntity.setCreatedBy(requestor);
+        mediaRequestEntity.setLastModifiedBy(requestor);
+        return mediaRequestEntity;
+    }
+
+    public static MediaRequestEntity createCompletedMediaRequest(HearingEntity hearingEntity, UserAccountEntity requestor,
+                                                          OffsetDateTime startTime, OffsetDateTime endTime,
+                                                          AudioRequestType audioRequestType) {
+        MediaRequestEntity mediaRequestEntity = someMinimalRequestData();
+        mediaRequestEntity.setHearing(hearingEntity);
+        mediaRequestEntity.setRequestor(requestor);
+        mediaRequestEntity.setCurrentOwner(requestor);
+        mediaRequestEntity.setStatus(MediaRequestStatus.COMPLETED);
+        mediaRequestEntity.setRequestType(audioRequestType);
+        mediaRequestEntity.setAttempts(0);
+        mediaRequestEntity.setStartTime(startTime);
+        mediaRequestEntity.setEndTime(endTime);
+        mediaRequestEntity.setCreatedBy(requestor);
+        mediaRequestEntity.setLastModifiedBy(requestor);
+        return mediaRequestEntity;
+    }
+
 
     private static OffsetDateTime middayToday() {
         return OffsetDateTime.of(LocalDate.now(), LocalTime.of(12, 0), UTC);

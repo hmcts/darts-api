@@ -10,7 +10,6 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
-import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
@@ -20,18 +19,13 @@ import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 
 import static java.util.Arrays.stream;
-import static java.util.UUID.randomUUID;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import static uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum.UNSTRUCTURED;
-import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.STORED;
 import static uk.gov.hmcts.darts.test.common.data.CourtroomTestData.someMinimalCourtRoom;
-import static uk.gov.hmcts.darts.test.common.data.ExternalLocationTypeTestData.locationTypeOf;
-import static uk.gov.hmcts.darts.test.common.data.ExternalObjectDirectoryTestData.minimalExternalObjectDirectory;
-import static uk.gov.hmcts.darts.test.common.data.HearingTestData.createSomeMinimalHearing;
+import static uk.gov.hmcts.darts.test.common.data.ExternalObjectDirectoryTestData.eodStoredInUnstructuredLocationForMedia;
+import static uk.gov.hmcts.darts.test.common.data.HearingTestData.someMinimalHearing;
 import static uk.gov.hmcts.darts.test.common.data.MediaTestData.createMediaWith;
-import static uk.gov.hmcts.darts.test.common.data.ObjectRecordStatusTestData.statusOf;
 
 @AutoConfigureMockMvc
 @SuppressWarnings("VariableDeclarationUsageDistance")
@@ -195,18 +189,9 @@ class AudioControllerGetMetadataIntTest extends IntegrationBase {
     }
 
     private HearingEntity hearingWithMedias(MediaEntity... mediaEntities) {
-        var hearingEntity = createSomeMinimalHearing();
+        var hearingEntity = someMinimalHearing();
         stream(mediaEntities).forEach(hearingEntity::addMedia);
         return hearingEntity;
-    }
-
-    private ExternalObjectDirectoryEntity eodStoredInUnstructuredLocationForMedia(MediaEntity media) {
-        var eod = minimalExternalObjectDirectory();
-        eod.setMedia(media);
-        eod.setStatus(statusOf(STORED));
-        eod.setExternalLocationType(locationTypeOf(UNSTRUCTURED));
-        eod.setExternalLocation(randomUUID());
-        return eod;
     }
 
 }

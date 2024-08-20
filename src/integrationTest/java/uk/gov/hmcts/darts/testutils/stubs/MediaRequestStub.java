@@ -9,7 +9,7 @@ import uk.gov.hmcts.darts.audiorequests.model.AudioRequestType;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.repository.MediaRequestRepository;
-import uk.gov.hmcts.darts.test.common.data.AudioTestData;
+import uk.gov.hmcts.darts.test.common.data.MediaRequestTestData;
 
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
@@ -42,7 +42,7 @@ public class MediaRequestStub {
                                                           caseNumber, hearingDate);
 
         return  mediaRequestRepository.save(
-            AudioTestData.createCurrentMediaRequest(
+            MediaRequestTestData.createCurrentMediaRequest(
                 hearing,
                 owner,
                 requestor,

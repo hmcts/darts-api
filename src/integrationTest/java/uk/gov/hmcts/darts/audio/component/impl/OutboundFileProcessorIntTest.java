@@ -4,7 +4,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.TestPropertySource;
@@ -32,11 +31,10 @@ import static uk.gov.hmcts.darts.test.common.data.CourtroomTestData.someMinimalC
 import static uk.gov.hmcts.darts.test.common.data.DefenceTestData.createDefenceForCase;
 import static uk.gov.hmcts.darts.test.common.data.DefendantTestData.createDefendantForCase;
 import static uk.gov.hmcts.darts.test.common.data.HearingTestData.createHearingWith;
-import static uk.gov.hmcts.darts.test.common.data.ProsecutorTestData.someMinimalProsecutorForCase;
+import static uk.gov.hmcts.darts.test.common.data.ProsecutorTestData.createProsecutorForCase;
 
 @TestPropertySource(properties = {"darts.audio.transformation.service.audio.file=tests/audio/WithViqHeader/viq0001min.mp2"})
 @Slf4j
-@Disabled
 class OutboundFileProcessorIntTest extends IntegrationBase {
     private static final String AUDIO_FILENAME = "tests/audio/WithViqHeader/viq0001min.mp2";
     private static final String HEARING_DATETIME = "2023-01-01";
@@ -76,7 +74,7 @@ class OutboundFileProcessorIntTest extends IntegrationBase {
         audioPath = Files.copy(audioFileTest.toPath(), createFile(tempDirectory, "audio-test.mp2"), REPLACE_EXISTING);
 
         var courtCase = createSomeMinimalCase();
-        courtCase.addProsecutor(someMinimalProsecutorForCase(courtCase));
+        courtCase.addProsecutor(createProsecutorForCase(courtCase));
         courtCase.addDefendant(createDefendantForCase(courtCase));
         courtCase.addDefence(createDefenceForCase(courtCase));
         var hearing = createHearingWith(courtCase, someMinimalCourtRoom(), LocalDate.parse(HEARING_DATETIME));

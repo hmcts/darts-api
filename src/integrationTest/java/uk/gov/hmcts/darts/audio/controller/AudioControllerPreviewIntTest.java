@@ -2,7 +2,6 @@ package uk.gov.hmcts.darts.audio.controller;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -12,14 +11,15 @@ import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import uk.gov.hmcts.darts.audio.model.AudioPreview;
-import uk.gov.hmcts.darts.audio.service.AudioTransformationServiceGivenBuilder;
 import uk.gov.hmcts.darts.authorisation.component.Authorisation;
+import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
 import uk.gov.hmcts.darts.common.service.RedisService;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 
 import java.net.URI;
 import java.time.Duration;
+import java.time.OffsetDateTime;
 import java.util.Set;
 
 import static java.util.Objects.nonNull;
@@ -35,17 +35,19 @@ import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.REQUESTER;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.TRANSCRIBER;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.TRANSLATION_QA;
 import static uk.gov.hmcts.darts.test.common.AwaitabilityUtil.waitForMaxWithOneSecondPoll;
+import static uk.gov.hmcts.darts.test.common.data.ExternalObjectDirectoryTestData.eodStoredInUnstructuredLocationForMedia;
+import static uk.gov.hmcts.darts.test.common.data.HearingTestData.someMinimalHearing;
+import static uk.gov.hmcts.darts.test.common.data.MediaTestData.createMediaWith;
 
-@Disabled("Impacted by V1_367__adding_not_null_constraints_part_4.sql")
 @AutoConfigureMockMvc
 @TestPropertySource(properties = {"darts.audio.transformation.service.audio.file=tests/audio/WithViqHeader/viq0001min.mp2"})
 class AudioControllerPreviewIntTest extends IntegrationBase {
 
+    private static final OffsetDateTime MEDIA_START_TIME = OffsetDateTime.parse("2023-01-01T12:00:00Z");
+    private static final OffsetDateTime MEDIA_END_TIME = MEDIA_START_TIME.plusHours(1);
+
     @Value("${darts.audio.preview.redis-folder}")
     private String folder;
-
-    @Autowired
-    private AudioTransformationServiceGivenBuilder given;
 
     @MockBean
     private Authorisation authorisation;
@@ -60,14 +62,15 @@ class AudioControllerPreviewIntTest extends IntegrationBase {
 
     @BeforeEach
     void setupData() {
-        given.setupTest();
-        mediaEntity = given.getMediaEntity1();
-        given.externalObjectDirForMedia(mediaEntity);
+        var hearing = dartsPersistence.save(hearingWithMedia());
+        mediaEntity = hearing.getMediaList().getFirst();
+
+        dartsPersistence.save(eodStoredInUnstructuredLocationForMedia(mediaEntity));
+
         doNothing().when(authorisation).authoriseByMediaId(
             mediaEntity.getId(),
             Set.of(JUDICIARY, REQUESTER, APPROVER, TRANSCRIBER, TRANSLATION_QA)
         );
-
     }
 
     @AfterEach
@@ -109,7 +112,6 @@ class AudioControllerPreviewIntTest extends IntegrationBase {
         );
     }
 
-    @Disabled("Impacted by V1_367__adding_not_null_constraints_part_4.sql")
     @Test
     void previewWithRangeShouldReturnSuccess() throws Exception {
 
@@ -132,4 +134,12 @@ class AudioControllerPreviewIntTest extends IntegrationBase {
             return cachedAudioPreview.getStatus().equals(READY);
         }, Duration.ofSeconds(20));
     }
+
+    private HearingEntity hearingWithMedia() {
+        var hearing = someMinimalHearing();
+        var media = createMediaWith(hearing.getCourtroom(), MEDIA_START_TIME, MEDIA_END_TIME, 1);
+        hearing.addMedia(media);
+        return hearing;
+    }
+
 }

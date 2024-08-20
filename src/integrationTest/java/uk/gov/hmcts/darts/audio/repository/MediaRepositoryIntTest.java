@@ -2,28 +2,25 @@ package uk.gov.hmcts.darts.audio.repository;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
 import uk.gov.hmcts.darts.common.repository.HearingRepository;
 import uk.gov.hmcts.darts.common.repository.MediaRepository;
-import uk.gov.hmcts.darts.common.util.DateConverterUtil;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 import uk.gov.hmcts.darts.testutils.stubs.CourtCaseStub;
 import uk.gov.hmcts.darts.testutils.stubs.MediaStub;
 
-import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static uk.gov.hmcts.darts.test.common.data.CaseTestData.createSomeMinimalCase;
+import static uk.gov.hmcts.darts.test.common.data.HearingTestData.createHearingFor;
+import static uk.gov.hmcts.darts.test.common.data.MediaTestData.someMinimalMedia;
 
-@Disabled("Impacted by V1_367__adding_not_null_constraints_part_4.sql")
 class MediaRepositoryIntTest extends IntegrationBase {
-
-    public static final LocalDateTime DATE_NOW = DateConverterUtil.toLocalDateTime(OffsetDateTime.now());
 
     @Autowired
     HearingRepository hearingRepository;
@@ -46,27 +43,24 @@ class MediaRepositoryIntTest extends IntegrationBase {
     }
 
     @Test
-    @Disabled("Impacted by V1_364_*.sql")
     void testFindMediasByCaseId() {
-
         // given
-        var caseA = caseStub.createAndSaveCourtCaseWithHearings();
-        var caseB = caseStub.createAndSaveCourtCaseWithHearings();
+        var caseA = createSomeMinimalCase();
+        var hearA1 = createHearingFor(caseA);
+        var hearA2 = createHearingFor(caseA);
+        var hearA3 = createHearingFor(caseA);
 
-        var hearA1 = caseA.getHearings().get(0);
-        var hearA2 = caseA.getHearings().get(1);
-        var hearA3 = caseA.getHearings().get(2);
-        var hearB = caseB.getHearings().get(0);
+        var caseB = createSomeMinimalCase();
+        var hearB = createHearingFor(caseB);
 
-        var medias = dartsDatabase.getMediaStub().createAndSaveSomeMedias();
-        hearA1.addMedia(medias.get(0));
-        hearA1.addMedia(medias.get(1));
-        hearA2.addMedia(medias.get(2));
-        hearB.addMedia(medias.get(0));
-        hearingRepository.save(hearA2);
-        hearingRepository.save(hearA3);
-        hearingRepository.save(hearA1);
-        hearingRepository.save(hearB);
+        var media0 = someMinimalMedia();
+        var media1 = someMinimalMedia();
+        var media2 = someMinimalMedia();
+        hearA1.addMedia(media0);
+        hearA1.addMedia(media1);
+        hearA2.addMedia(media2);
+        hearB.addMedia(media0);
+        dartsPersistence.saveAll(hearA1, hearA2, hearA3, hearB);
 
         // when
         var caseAMedias = mediaRepository.findAllByCaseId(caseA.getId());
@@ -74,14 +68,15 @@ class MediaRepositoryIntTest extends IntegrationBase {
 
         // then
         var caseAMediasId = caseAMedias.stream().map(MediaEntity::getId);
-        assertThat(caseAMediasId).containsExactlyInAnyOrder(medias.get(0).getId(), medias.get(1).getId(), medias.get(2).getId());
+        assertThat(caseAMediasId).containsExactlyInAnyOrder(media0.getId(), media1.getId(), media2.getId());
         var caseBMediasId = caseBMedias.stream().map(MediaEntity::getId);
-        assertThat(caseBMediasId).containsExactlyInAnyOrder(medias.get(0).getId());
+        assertThat(caseBMediasId).containsExactlyInAnyOrder(media0.getId());
 
-        List<CourtCaseEntity> media0cases = medias.get(0).associatedCourtCases();
+        List<CourtCaseEntity> media0cases = media0.associatedCourtCases();
         assertThat(media0cases.stream().map(CourtCaseEntity::getId)).containsExactlyInAnyOrder(caseA.getId(), caseB.getId());
-        List<CourtCaseEntity> media1cases = medias.get(1).associatedCourtCases();
+        List<CourtCaseEntity> media1cases = media1.associatedCourtCases();
         assertThat(media1cases.stream().map(CourtCaseEntity::getId)).containsExactlyInAnyOrder(caseA.getId());
+
     }
 
     @Test

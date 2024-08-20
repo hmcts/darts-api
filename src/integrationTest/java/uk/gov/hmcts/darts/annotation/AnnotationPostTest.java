@@ -25,7 +25,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.JUDICIARY;
-import static uk.gov.hmcts.darts.test.common.data.HearingTestData.createSomeMinimalHearing;
+import static uk.gov.hmcts.darts.test.common.data.HearingTestData.someMinimalHearing;
 
 @AutoConfigureMockMvc
 class AnnotationPostTest extends IntegrationBase {
@@ -43,7 +43,7 @@ class AnnotationPostTest extends IntegrationBase {
     @Test
     void returnsAnnotationId() throws Exception {
         given.anAuthenticatedUserWithGlobalAccessAndRole(JUDICIARY);
-        HearingEntity hearingEntity = createSomeMinimalHearing();
+        HearingEntity hearingEntity = someMinimalHearing();
         hearingEntity = dartsPersistence.save(hearingEntity);
 
         var mvcResult = mockMvc.perform(
@@ -71,7 +71,7 @@ class AnnotationPostTest extends IntegrationBase {
     @Test
     void allowsJudgeWithGlobalAccessToUploadAnnotations() throws Exception {
         given.anAuthenticatedUserWithGlobalAccessAndRole(JUDICIARY);
-        HearingEntity hearingEntity = createSomeMinimalHearing();
+        HearingEntity hearingEntity = someMinimalHearing();
         hearingEntity = dartsPersistence.save(hearingEntity);
         mockMvc.perform(
                 multipart(ENDPOINT)
@@ -83,7 +83,7 @@ class AnnotationPostTest extends IntegrationBase {
 
     @Test
     void allowsJudgeAuthorisedForCourthouseAccessToUploadAnnotations() throws Exception {
-        var hearing = dartsPersistence.save(createSomeMinimalHearing());
+        var hearing = dartsPersistence.save(someMinimalHearing());
         given.anAuthenticatedUserAuthorizedForCourthouse(JUDICIARY, hearing.getCourtroom().getCourthouse());
 
         mockMvc.perform(
@@ -100,7 +100,7 @@ class AnnotationPostTest extends IntegrationBase {
 
         mockMvc.perform(
                 multipart(ENDPOINT)
-                    .file(someAnnotationPostBodyFor(createSomeMinimalHearing())))
+                    .file(someAnnotationPostBodyFor(someMinimalHearing())))
             .andExpect(status().isBadRequest())
             .andReturn();
     }

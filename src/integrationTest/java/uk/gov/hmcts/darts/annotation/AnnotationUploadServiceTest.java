@@ -23,7 +23,7 @@ import java.util.UUID;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static uk.gov.hmcts.darts.test.common.data.HearingTestData.createSomeMinimalHearing;
+import static uk.gov.hmcts.darts.test.common.data.HearingTestData.someMinimalHearing;
 
 @SuppressWarnings("VariableDeclarationUsageDistance")
 @Slf4j
@@ -46,7 +46,7 @@ class AnnotationUploadServiceTest extends IntegrationBase {
 
     @Test
     void persistsAnnotationCorrectly() {
-        var hearing = dartsPersistence.save(createSomeMinimalHearing());
+        var hearing = dartsPersistence.save(someMinimalHearing());
         var annotation = someAnnotationFor(hearing);
         var document = someMultipartFile();
 
@@ -57,7 +57,7 @@ class AnnotationUploadServiceTest extends IntegrationBase {
 
     @Test
     void addsAnnotationToCorrectHearing() {
-        var hearing = dartsPersistence.save(createSomeMinimalHearing());
+        var hearing = dartsPersistence.save(someMinimalHearing());
         var annotation = someAnnotationFor(hearing);
         var document = someMultipartFile();
 
@@ -70,7 +70,7 @@ class AnnotationUploadServiceTest extends IntegrationBase {
 
     @Test
     void persistsAnnotationDocumentCorrectly() {
-        var hearing = dartsPersistence.save(createSomeMinimalHearing());
+        var hearing = dartsPersistence.save(someMinimalHearing());
         var annotation = someAnnotationFor(hearing);
         var document = someMultipartFile();
 
@@ -81,7 +81,7 @@ class AnnotationUploadServiceTest extends IntegrationBase {
 
     @Test
     void persistExternalObjectDirectoryCorrectly() {
-        var hearing = dartsPersistence.save(createSomeMinimalHearing());
+        var hearing = dartsPersistence.save(someMinimalHearing());
         var annotation = someAnnotationFor(hearing);
         var document = someMultipartFile();
 
