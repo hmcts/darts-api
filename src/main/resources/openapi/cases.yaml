@@ -852,7 +852,8 @@ components:
         - "CASE_103"
         - "CASE_104"
         - "CASE_106"
-      x-enum-varnames: [ TOO_MANY_RESULTS, NO_CRITERIA_SPECIFIED, CRITERIA_TOO_BROAD, INVALID_REQUEST, CASE_NOT_FOUND, PATCH_CRITERIA_NOT_MET ]
+        - "CASE_107"
+      x-enum-varnames: [ TOO_MANY_RESULTS, NO_CRITERIA_SPECIFIED, CRITERIA_TOO_BROAD, INVALID_REQUEST, CASE_NOT_FOUND, PATCH_CRITERIA_NOT_MET, HEARINGS_NOT_ACTUAL ]
 
     CaseTitleErrors:
       type: string
@@ -863,5 +864,6 @@ components:
         - "The request is not valid.."
         - "The requested case cannot be found"
         - "The request does not contain any values that are supported by the PATCH operation."
-      x-enum-varnames: [ TOO_MANY_RESULTS, NO_CRITERIA_SPECIFIED, CRITERIA_TOO_BROAD, INVALID_REQUEST, CASE_NOT_FOUND, PATCH_CRITERIA_NOT_MET ]
+        - "The requested case does not contain any actual hearings."
+      x-enum-varnames: [ TOO_MANY_RESULTS, NO_CRITERIA_SPECIFIED, CRITERIA_TOO_BROAD, INVALID_REQUEST, CASE_NOT_FOUND, PATCH_CRITERIA_NOT_MET, HEARINGS_NOT_ACTUAL ]
 
