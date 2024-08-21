@@ -132,10 +132,6 @@ public class SecurityConfig {
         var jwtDecoder = new NimbusJwtDecoder(jwtProcessor);
         OAuth2TokenValidator<Jwt> jwtValidator = JwtValidators.createDefaultWithIssuer(issuer);
 
-        // TODO: Use this when we can successfully validate against the audience
-        // new DelegatingOAuth2TokenValidator<>(
-        //new JwtClaimValidator<>(AUD, aud ->
-        //aud != null && aud.toString().contains(audience)));
         jwtDecoder.setJwtValidator(jwtValidator);
 
         var authenticationProvider = new JwtAuthenticationProvider(jwtDecoder);
