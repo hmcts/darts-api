@@ -23,6 +23,8 @@
 -- v8 amend case_retention.retain_until_applied_on_ts to be nullable
 -- v9 add confidence_category to case_retention
 -- v10 switch all tablespaces to pg_default
+-- v11 add table case_retention_audit_heritage
+-- v12 add dm_sysobject_s attributes to case_retention_audit_heritage
 
 
 SET ROLE DARTS_OWNER;
@@ -73,6 +75,12 @@ CREATE TABLE case_retention_audit_heritage
 ,c_courthouse                CHARACTER VARYING(64)
 ,c_policy_type               CHARACTER VARYING(20)
 ,c_case_closed_date          TIMESTAMP WITH TIME ZONE
+,object_name                 CHARACTER VARYING(255)
+,r_creator_name              CHARACTER VARYING(32)
+,r_creation_date             TIMESTAMP WITH TIME ZONE
+,r_modifier                  CHARACTER VARYING(32)
+,r_modify_date               TIMESTAMP WITH TIME ZONE
+,owner_name                  CHARACTER VARYING(32)
 ) TABLESPACE pg_default;
 
 

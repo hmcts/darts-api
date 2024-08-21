@@ -313,6 +313,7 @@
 --    add unique index on user_account, upper(user_email_address)
 --v71.4 amend all tablespaces to pg_default
 -- make media_status nullable
+--v71.5 add extension pg_trgm for trigram index support
 
 -- List of Table Aliases
 -- annotation                  ANN
@@ -385,6 +386,8 @@ NOREPLICATION
 PASSWORD 'darts_user';
 
 CREATE SCHEMA DARTS AUTHORIZATION DARTS_OWNER;
+
+CREATE EXTENSION IF NOT EXISTS pg_trgm;
 
 --CREATE TABLESPACE darts_tables  location 'E:/PostgreSQL/Tables';
 --CREATE TABLESPACE darts_indexes location 'E:/PostgreSQL/Indexes';
