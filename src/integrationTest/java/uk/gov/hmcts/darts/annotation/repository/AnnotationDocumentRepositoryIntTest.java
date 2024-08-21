@@ -64,7 +64,7 @@ class AnnotationDocumentRepositoryIntTest extends IntegrationBase {
     }
 
     @Test
-    void canGetAssociatedCasesFromAnnotationDocument () {
+    void canGetAssociatedCasesFromAnnotationDocument() {
         var courtCaseA = createSomeMinimalCase();
         var courtCaseB = createSomeMinimalCase();
         var annotationDocument1 = createAnnotationDocumentForCases(courtCaseA, courtCaseB);

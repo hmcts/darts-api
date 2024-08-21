@@ -13,6 +13,7 @@ public class TransactionalUtil {
         runnable.run();
     }
 
+    @SuppressWarnings("PMD.AvoidThrowingRawExceptionTypes")
     @Transactional
     public <T> T inTransaction(Callable<T> supplier) {
         try {

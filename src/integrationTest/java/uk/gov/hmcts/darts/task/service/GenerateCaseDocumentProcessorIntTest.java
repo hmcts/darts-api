@@ -50,7 +50,6 @@ class GenerateCaseDocumentProcessorIntTest extends IntegrationBase {
     void testGenerateCaseDocument() {
         // given
         givenBearerTokenExists("darts.global.user@hmcts.net");
-        UserAccountEntity testUser = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
 
         CourtCaseEntity courtCase = dartsDatabase.getCourtCaseStub().createAndSaveCourtCaseWithHearings();
 
@@ -67,6 +66,7 @@ class GenerateCaseDocumentProcessorIntTest extends IntegrationBase {
 
         dartsDatabase.getExternalObjectDirectoryStub().createAndSaveEod(medias.get(0), ARM_DROP_ZONE, ARM, eod -> { });
 
+        var testUser = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
         var annotation = dartsDatabase.getAnnotationStub().createAndSaveAnnotationEntityWith(testUser, "TestAnnotation", hearing);
         annotationRepository.save(annotation);
 
