@@ -11,6 +11,7 @@ DROP TABLE object_retrieval_queue;
 DROP TABLE case_retention;
 DROP TABLE case_management_retention;
 DROP TABLE retention_policy_type;
+DROP TABLE case_retention_audit_heritage;
 
 DROP SEQUENCE cmr_seq;
 DROP SEQUENCE car_seq;
@@ -132,15 +133,10 @@ DROP SEQUENCE trw_seq;
 DROP SEQUENCE trm_seq;
 DROP SEQUENCE usr_seq;
 
-
-
-
-DROP SCHEMA darts;
-
 SET ROLE POSTGRES;
 
-DROP TABLESPACE darts_tables;
-DROP TABLESPACE darts_indexes;
+DROP EXTENSION pg_trgm;
+DROP SCHEMA darts;
 
 DROP USER darts_owner;
 DROP USER darts_user;
