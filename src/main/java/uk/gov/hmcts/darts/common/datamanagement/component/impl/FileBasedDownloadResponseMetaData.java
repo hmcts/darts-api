@@ -26,7 +26,7 @@ public class FileBasedDownloadResponseMetaData extends DownloadResponseMetaData 
         if (inputStream == null) {
             inputStream = Files.newInputStream(Path.of(fileToBeDownloadedTo.toURI()), StandardOpenOption.READ);
         }
-        return inputStream;
+        return new FileInputStreamWrapper(inputStream);
     }
 
     @Override
@@ -49,6 +49,24 @@ public class FileBasedDownloadResponseMetaData extends DownloadResponseMetaData 
 
         if (fileToBeDownloadedTo != null) {
             Files.delete(Path.of(fileToBeDownloadedTo.toURI()));
+        }
+    }
+
+    class FileInputStreamWrapper extends InputStream {
+
+        private InputStream inputStream;
+
+        public FileInputStreamWrapper(InputStream inputStream) {
+            this.inputStream = inputStream;
+        }
+
+        public int read() throws IOException {
+            return inputStream.read();
+        }
+
+        @Override
+        public void close() throws IOException {
+            FileBasedDownloadResponseMetaData.this.close();
         }
     }
 }

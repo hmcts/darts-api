@@ -1,6 +1,7 @@
 package uk.gov.hmcts.darts.transcriptions.controller;
 
 import org.apache.commons.io.IOUtils;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
@@ -16,6 +17,7 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.transaction.annotation.Transactional;
 import uk.gov.hmcts.darts.audit.api.AuditApi;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
+import uk.gov.hmcts.darts.common.datamanagement.StorageConfiguration;
 import uk.gov.hmcts.darts.common.datamanagement.api.DataManagementFacade;
 import uk.gov.hmcts.darts.common.datamanagement.component.impl.FileBasedDownloadResponseMetaData;
 import uk.gov.hmcts.darts.common.entity.ExternalLocationTypeEntity;
@@ -28,6 +30,10 @@ import uk.gov.hmcts.darts.testutils.IntegrationBase;
 import uk.gov.hmcts.darts.testutils.stubs.AuthorisationStub;
 import uk.gov.hmcts.darts.testutils.stubs.TranscriptionStub;
 
+import java.io.File;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.nio.channels.ClosedChannelException;
 import java.nio.charset.Charset;
 import java.util.List;
 import java.util.UUID;
@@ -191,9 +197,15 @@ class TranscriptionControllerDownloadTranscriptIntTest extends IntegrationBase {
         final String confidenceReason = "reason";
         final Integer confidenceScore = 232;
 
-        var mockFileBasedDownloadResponseMetaData = mock(FileBasedDownloadResponseMetaData.class);
+        // setup a real file so we can assert against its processing
+        StorageConfiguration configuration = new StorageConfiguration();
+        configuration.setTempBlobWorkspace("./tmp");
+        var mockFileBasedDownloadResponseMetaData = new FileBasedDownloadResponseMetaData();
+        try (OutputStream outputStream = mockFileBasedDownloadResponseMetaData.getOutputStream(configuration)) {
+            outputStream.write("test-transcription".getBytes());
+        }
+
         when(mockDataManagementFacade.retrieveFileFromStorage(any(TranscriptionDocumentEntity.class))).thenReturn(mockFileBasedDownloadResponseMetaData);
-        when(mockFileBasedDownloadResponseMetaData.getInputStream()).thenReturn(IOUtils.toInputStream("test-transcription", Charset.defaultCharset()));
 
         transcriptionEntity = transcriptionStub.updateTranscriptionWithDocument(
             transcriptionEntity,
@@ -230,6 +242,16 @@ class TranscriptionControllerDownloadTranscriptIntTest extends IntegrationBase {
                 String.valueOf(transcriptionEntity.getTranscriptionDocumentEntities().get(0).getId())
             ));
 
+        // ensure that the input stream is closed
+        try {
+            mockFileBasedDownloadResponseMetaData.getInputStream().read();
+            Assertions.fail();
+        } catch (IOException closedConnectionException) {
+            Assertions.assertTrue(closedConnectionException instanceof ClosedChannelException);
+        }
+
+        // ensure the source file is removed
+        Assertions.assertEquals(0, new File(configuration.getTempBlobWorkspace()).list().length);
         verify(mockAuditApi).record(DOWNLOAD_TRANSCRIPTION, testUser, transcriptionEntity.getCourtCase());
 
     }
