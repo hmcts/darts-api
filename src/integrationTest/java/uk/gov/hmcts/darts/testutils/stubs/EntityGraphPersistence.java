@@ -20,6 +20,7 @@ import java.util.Set;
 
 @Component
 @RequiredArgsConstructor
+@Deprecated
 public class EntityGraphPersistence {
 
     @Autowired

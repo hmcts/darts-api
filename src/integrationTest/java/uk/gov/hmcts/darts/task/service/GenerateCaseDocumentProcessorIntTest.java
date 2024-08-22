@@ -9,7 +9,6 @@ import uk.gov.hmcts.darts.common.entity.CaseDocumentEntity;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
-import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.repository.AnnotationRepository;
 import uk.gov.hmcts.darts.common.repository.CaseDocumentRepository;
 import uk.gov.hmcts.darts.common.repository.CaseRepository;
@@ -50,13 +49,12 @@ class GenerateCaseDocumentProcessorIntTest extends IntegrationBase {
     void testGenerateCaseDocument() {
         // given
         givenBearerTokenExists("darts.global.user@hmcts.net");
-        UserAccountEntity testUser = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
 
-        CourtCaseEntity courtCase = dartsDatabase.getCourtCaseStub().createAndSaveCourtCaseWithHearings(createdCourtCase -> {
-            createdCourtCase.setRetentionUpdated(true);
-            createdCourtCase.setRetentionRetries(1);
-            createdCourtCase.setClosed(true);
-        });
+        CourtCaseEntity courtCase = dartsDatabase.getCourtCaseStub().createAndSaveCourtCaseWithHearings();
+
+        courtCase.setRetentionUpdated(true);
+        courtCase.setRetentionRetries(1);
+        courtCase.setClosed(true);
 
         List<MediaEntity> medias = dartsDatabase.getMediaStub().createAndSaveSomeMedias();
         var hearing = courtCase.getHearings().get(0);
@@ -67,6 +65,7 @@ class GenerateCaseDocumentProcessorIntTest extends IntegrationBase {
 
         dartsDatabase.getExternalObjectDirectoryStub().createAndSaveEod(medias.get(0), ARM_DROP_ZONE, ARM, eod -> { });
 
+        var testUser = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
         var annotation = dartsDatabase.getAnnotationStub().createAndSaveAnnotationEntityWith(testUser, "TestAnnotation", hearing);
         annotationRepository.save(annotation);
 

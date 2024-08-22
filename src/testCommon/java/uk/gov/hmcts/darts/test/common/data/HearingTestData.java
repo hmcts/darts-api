@@ -14,6 +14,7 @@ import static uk.gov.hmcts.darts.test.common.data.CaseTestData.createCaseWithCas
 import static uk.gov.hmcts.darts.test.common.data.CaseTestData.createSomeMinimalCase;
 import static uk.gov.hmcts.darts.test.common.data.CourtroomTestData.createCourtRoomWithNameAtCourthouse;
 import static uk.gov.hmcts.darts.test.common.data.CourtroomTestData.someMinimalCourtRoom;
+import static uk.gov.hmcts.darts.test.common.data.UserAccountTestData.minimalUserAccount;
 
 @UtilityClass
 @SuppressWarnings({"HideUtilityClassConstructor"})
@@ -31,7 +32,16 @@ public class HearingTestData {
         hearingEntity.setCourtroom(minimalCourtRoom);
         hearingEntity.setHearingIsActual(true);
         hearingEntity.setHearingDate(LocalDate.now().plusWeeks(1));
+        var userAccount = minimalUserAccount();
+        hearingEntity.setCreatedBy(userAccount);
+        hearingEntity.setLastModifiedBy(userAccount);
         return hearingEntity;
+    }
+
+    public static HearingEntity createHearingFor(CourtCaseEntity courtCase) {
+        var minimalHearing = someMinimalHearing();
+        minimalHearing.setCourtCase(courtCase);
+        return minimalHearing;
     }
 
     // Refactor, this isn't a minimal hearing
