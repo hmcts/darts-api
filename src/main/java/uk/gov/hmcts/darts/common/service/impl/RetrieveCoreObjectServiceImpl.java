@@ -7,23 +7,17 @@ import uk.gov.hmcts.darts.authorisation.api.AuthorisationApi;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
-import uk.gov.hmcts.darts.common.entity.DefenceEntity;
-import uk.gov.hmcts.darts.common.entity.DefendantEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.JudgeEntity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
-import uk.gov.hmcts.darts.common.entity.ProsecutorEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.exception.CommonApiError;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.common.repository.CaseRepository;
 import uk.gov.hmcts.darts.common.repository.CourthouseRepository;
 import uk.gov.hmcts.darts.common.repository.CourtroomRepository;
-import uk.gov.hmcts.darts.common.repository.DefenceRepository;
-import uk.gov.hmcts.darts.common.repository.DefendantRepository;
 import uk.gov.hmcts.darts.common.repository.HearingRepository;
 import uk.gov.hmcts.darts.common.repository.JudgeRepository;
-import uk.gov.hmcts.darts.common.repository.ProsecutorRepository;
 import uk.gov.hmcts.darts.common.service.RetrieveCoreObjectService;
 
 import java.text.MessageFormat;
@@ -36,14 +30,12 @@ import java.util.Optional;
 @Slf4j
 @SuppressWarnings("PMD.TooManyMethods")
 public class RetrieveCoreObjectServiceImpl implements RetrieveCoreObjectService {
+
     private final HearingRepository hearingRepository;
     private final CaseRepository caseRepository;
     private final JudgeRepository judgeRepository;
     private final CourthouseRepository courthouseRepository;
     private final CourtroomRepository courtroomRepository;
-    private final DefenceRepository defenceRepository;
-    private final DefendantRepository defendantRepository;
-    private final ProsecutorRepository prosecutorRepository;
     private final AuthorisationApi authorisationApi;
 
     @Override
@@ -255,34 +247,4 @@ public class RetrieveCoreObjectServiceImpl implements RetrieveCoreObjectService 
         return judge;
     }
 
-    @Override
-    public DefenceEntity createDefence(String defenceName, CourtCaseEntity courtCase, UserAccountEntity userAccount) {
-        DefenceEntity defence = new DefenceEntity();
-        defence.setName(defenceName);
-        defence.setCourtCase(courtCase);
-        defence.setCreatedBy(userAccount);
-        defence.setLastModifiedBy(userAccount);
-        return defenceRepository.saveAndFlush(defence);
-    }
-
-    @Override
-    public DefendantEntity createDefendant(String defendantName, CourtCaseEntity courtCase, UserAccountEntity userAccount) {
-        DefendantEntity defendant = new DefendantEntity();
-        defendant.setName(defendantName);
-        defendant.setCourtCase(courtCase);
-        defendant.setCreatedBy(userAccount);
-        defendant.setLastModifiedBy(userAccount);
-        return defendantRepository.insertOrUpdateDefendant(defendant);
-    }
-
-    @Override
-    public ProsecutorEntity createProsecutor(String prosecutorName, CourtCaseEntity courtCase, UserAccountEntity userAccount) {
-        ProsecutorEntity prosecutor = new ProsecutorEntity();
-        prosecutor.setName(prosecutorName);
-        prosecutor.setCourtCase(courtCase);
-        prosecutor.setCreatedBy(userAccount);
-        prosecutor.setLastModifiedBy(userAccount);
-        prosecutorRepository.insertOrUpdate(prosecutor);
-        return prosecutor;
-    }
 }

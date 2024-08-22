@@ -20,6 +20,7 @@ import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
 import uk.gov.hmcts.darts.common.helper.SystemUserHelper;
 import uk.gov.hmcts.darts.common.repository.CourthouseRepository;
 import uk.gov.hmcts.darts.common.repository.HearingRepository;
+import uk.gov.hmcts.darts.common.service.CreateCoreObjectService;
 import uk.gov.hmcts.darts.common.service.RetrieveCoreObjectService;
 import uk.gov.hmcts.darts.dailylist.enums.JobStatusType;
 import uk.gov.hmcts.darts.dailylist.enums.SourceType;
@@ -51,6 +52,7 @@ class DailyListUpdater {
     public static final String SITTING_AT_FORMAT = "HH:mm:ss";
 
     private final RetrieveCoreObjectService retrieveCoreObjectService;
+    private final CreateCoreObjectService createCoreObjectService;
     private final CourthouseRepository courthouseRepository;
     private final HearingRepository hearingRepository;
     private final ObjectMapper objectMapper;
@@ -196,7 +198,7 @@ class DailyListUpdater {
         UserAccountEntity dailyListSystemUser = systemUserHelper.getDailyListProcessorUser();
         advocates.forEach(advocate -> {
             if (!isExistingProsecutor(courtCase, advocate)) {
-                courtCase.addProsecutor(retrieveCoreObjectService.createProsecutor(
+                courtCase.addProsecutor(createCoreObjectService.createProsecutor(
                     citizenNameMapper.getCitizenName(advocate.getName()), courtCase, dailyListSystemUser));
             }
         });
@@ -210,7 +212,7 @@ class DailyListUpdater {
                     continue;
                 }
                 if (!isExistingDefenders(courtCase, counselDetails)) {
-                    courtCase.addDefence(retrieveCoreObjectService.createDefence(
+                    courtCase.addDefence(createCoreObjectService.createDefence(
                         citizenNameMapper.getCitizenName(counselDetails.getName()), courtCase, dailyListSystemUser));
                 }
             }
@@ -221,7 +223,7 @@ class DailyListUpdater {
         UserAccountEntity dailyListSystemUser = systemUserHelper.getDailyListProcessorUser();
         for (Defendant defendant : defendants) {
             if (!isExistingDefendant(courtCase, defendant)) {
-                courtCase.addDefendant(retrieveCoreObjectService.createDefendant(
+                courtCase.addDefendant(createCoreObjectService.createDefendant(
                     citizenNameMapper.getCitizenName(defendant.getPersonalDetails().getName()),
                     courtCase,
                     dailyListSystemUser
