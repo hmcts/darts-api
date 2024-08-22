@@ -67,7 +67,9 @@ public interface RetrieveCoreObjectService {
     @Transactional
     DefenceEntity createDefence(String defence, CourtCaseEntity courtCase, UserAccountEntity userAccount);
 
+    @Transactional
     DefendantEntity createDefendant(String defendant, CourtCaseEntity courtCase, UserAccountEntity userAccount);
 
+    @Transactional
     ProsecutorEntity createProsecutor(String prosecution, CourtCaseEntity courtCase, UserAccountEntity userAccount);
 }

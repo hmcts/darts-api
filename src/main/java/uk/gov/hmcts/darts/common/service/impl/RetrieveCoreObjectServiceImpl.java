@@ -272,7 +272,7 @@ public class RetrieveCoreObjectServiceImpl implements RetrieveCoreObjectService 
         defendant.setCourtCase(courtCase);
         defendant.setCreatedBy(userAccount);
         defendant.setLastModifiedBy(userAccount);
-        return defendantRepository.saveAndFlush(defendant);
+        return defendantRepository.insertOrUpdateDefendant(defendant);
     }
 
     @Override
@@ -282,7 +282,7 @@ public class RetrieveCoreObjectServiceImpl implements RetrieveCoreObjectService 
         prosecutor.setCourtCase(courtCase);
         prosecutor.setCreatedBy(userAccount);
         prosecutor.setLastModifiedBy(userAccount);
-        prosecutorRepository.saveAndFlush(prosecutor);
+        prosecutorRepository.insertOrUpdate(prosecutor);
         return prosecutor;
     }
 }
