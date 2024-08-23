@@ -1,9 +1,10 @@
 package uk.gov.hmcts.darts.event.service;
 
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 import uk.gov.hmcts.darts.authorisation.api.AuthorisationApi;
 import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
 import uk.gov.hmcts.darts.common.entity.EventEntity;
@@ -27,7 +28,7 @@ public class EventPersistenceService {
     private final AuthorisationApi authorisationApi;
 
 
-    @Transactional(Transactional.TxType.REQUIRES_NEW)
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public EventEntity recordEvent(DartsEvent dartsEvent, EventHandlerEntity eventHandler) {
         var currentUser = authorisationApi.getCurrentUser();
         var courtroomEntity = retrieveCoreObjectService.retrieveOrCreateCourtroom(
