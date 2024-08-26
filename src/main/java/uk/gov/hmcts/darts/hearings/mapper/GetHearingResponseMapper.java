@@ -1,8 +1,8 @@
 package uk.gov.hmcts.darts.hearings.mapper;
 
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.HearingReportingRestrictionsEntity;
 import uk.gov.hmcts.darts.common.repository.HearingReportingRestrictionsRepository;

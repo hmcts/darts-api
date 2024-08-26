@@ -1,7 +1,7 @@
 package uk.gov.hmcts.darts.testutils;
 
-import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.concurrent.Callable;
 

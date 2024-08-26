@@ -1,6 +1,5 @@
 package uk.gov.hmcts.darts.admin.test;
 
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.hibernate.Session;
@@ -8,6 +7,7 @@ import org.hibernate.SessionFactory;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -207,7 +207,7 @@ public class TestSupportController {
     }
 
     @PostMapping(value = "/audit/{audit_activity}/courthouse/{courthouse_name}")
-    @Transactional(rollbackOn = DataIntegrityViolationException.class)
+    @Transactional(rollbackFor = DataIntegrityViolationException.class)
     public ResponseEntity<String> createAudit(@PathVariable(name = "audit_activity") String auditActivity,
                                               @PathVariable(name = "courthouse_name") String courthouseName) {
 
