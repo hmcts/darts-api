@@ -30,20 +30,33 @@ import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.STORED;
  */
 public class EodHelperMocks {
 
-    @Mock private ExternalLocationTypeEntity armLocation;
-    @Mock private ExternalLocationTypeEntity unstructuredLocation;
-    @Mock private ExternalLocationTypeEntity inboundLocation;
-    @Mock private ExternalLocationTypeEntity detsLocation;
+    @Mock
+    private ExternalLocationTypeEntity armLocation;
+    @Mock
+    private ExternalLocationTypeEntity unstructuredLocation;
+    @Mock
+    private ExternalLocationTypeEntity inboundLocation;
+    @Mock
+    private ExternalLocationTypeEntity detsLocation;
 
-    @Mock private ObjectRecordStatusEntity storedStatus;
-    @Mock private ObjectRecordStatusEntity failureStatus;
-    @Mock private ObjectRecordStatusEntity markForDeletionStatus;
-    @Mock private ObjectRecordStatusEntity armIngestionStatus;
-    @Mock private ObjectRecordStatusEntity armProcessingResponseFilesStatus;
-    @Mock private ObjectRecordStatusEntity armDropZoneStatus;
-    @Mock private ObjectRecordStatusEntity failedArmRawDataStatus;
-    @Mock private ObjectRecordStatusEntity failedArmManifestFileStatus;
-    @Mock private ObjectRecordStatusEntity awaitingVerificationStatus;
+    @Mock
+    private ObjectRecordStatusEntity storedStatus;
+    @Mock
+    private ObjectRecordStatusEntity failureStatus;
+    @Mock
+    private ObjectRecordStatusEntity markForDeletionStatus;
+    @Mock
+    private ObjectRecordStatusEntity armIngestionStatus;
+    @Mock
+    private ObjectRecordStatusEntity armProcessingResponseFilesStatus;
+    @Mock
+    private ObjectRecordStatusEntity armDropZoneStatus;
+    @Mock
+    private ObjectRecordStatusEntity failedArmRawDataStatus;
+    @Mock
+    private ObjectRecordStatusEntity failedArmManifestFileStatus;
+    @Mock
+    private ObjectRecordStatusEntity awaitingVerificationStatus;
 
     private MockedStatic<EodHelper> mockedEodHelper;
     private AutoCloseable closeable;

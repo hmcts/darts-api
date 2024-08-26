@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.repository.ExternalLocationTypeRepository;
 import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
 import uk.gov.hmcts.darts.common.repository.ObjectRecordStatusRepository;
@@ -40,8 +41,12 @@ class InboundToUnstructuredProcessorImplTest {
     @Test
     void testContinuesProcessingNextIterationOnException() {
         // given
-        when(externalObjectDirectoryRepository.findEodIdsForTransfer(any(), any(), any(), any(), any(), any()))
-            .thenReturn(List.of(1, 2));
+        ExternalObjectDirectoryEntity eod1 = new ExternalObjectDirectoryEntity();
+        eod1.setId(1);
+        ExternalObjectDirectoryEntity eod2 = new ExternalObjectDirectoryEntity();
+        eod2.setId(2);
+        when(externalObjectDirectoryRepository.findEodsForTransfer(any(), any(), any(), any(), any(), any()))
+            .thenReturn(List.of(eod1, eod2));
 
         doThrow(new RuntimeException("some exception"))
             .doNothing()

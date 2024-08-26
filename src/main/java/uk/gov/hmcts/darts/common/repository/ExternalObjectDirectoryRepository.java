@@ -73,36 +73,6 @@ public interface ExternalObjectDirectoryRepository extends JpaRepository<Externa
     List<Integer> findMediaIdsByInMediaIdStatusAndType(List<Integer> mediaIdList, ObjectRecordStatusEntity status,
                                                        ExternalLocationTypeEntity externalLocationType);
 
-    @Query(
-        """
-            SELECT eo FROM ExternalObjectDirectoryEntity eo
-            WHERE eo.status = :status
-            AND eo.externalLocationType = :location1
-            AND eo.id NOT IN
-              (
-              SELECT eod.id FROM ExternalObjectDirectoryEntity eod, ExternalObjectDirectoryEntity eod2
-              WHERE (eod.media = eod2.media
-              OR eod.transcriptionDocumentEntity = eod2.transcriptionDocumentEntity
-              OR eod.annotationDocumentEntity = eod2.annotationDocumentEntity
-              OR eod.caseDocument = eod2.caseDocument )
-              AND eod.status = :status
-              AND eod.externalLocationType = :location1
-              AND eod2.externalLocationType = :location2
-              )
-            """
-    )
-    List<ExternalObjectDirectoryEntity> findExternalObjectsNotIn2StorageLocations(ObjectRecordStatusEntity status,
-                                                                                  ExternalLocationTypeEntity location1,
-                                                                                  ExternalLocationTypeEntity location2,
-                                                                                  Pageable pageable);
-
-
-    default List<ExternalObjectDirectoryEntity> findExternalObjectsNotIn2StorageLocations(ObjectRecordStatusEntity status,
-                                                                                          ExternalLocationTypeEntity location1,
-                                                                                          ExternalLocationTypeEntity location2) {
-        return findExternalObjectsNotIn2StorageLocations(status, location1, location2, Pageable.unpaged());
-    }
-
 
     @Query(
         """
@@ -201,7 +171,7 @@ public interface ExternalObjectDirectoryRepository extends JpaRepository<Externa
                                                ExternalLocationTypeEntity location1,
                                                ExternalLocationTypeEntity location2);
 
-@Query(
+    @Query(
         """
             SELECT eod.id FROM ExternalObjectDirectoryEntity eod, ExternalObjectDirectoryEntity eod2
             WHERE
@@ -216,11 +186,11 @@ public interface ExternalObjectDirectoryRepository extends JpaRepository<Externa
             """
     )
     List<Integer> findIdsIn2StorageLocationsBeforeTime(ObjectRecordStatusEntity status1,
-                                                                     ObjectRecordStatusEntity status2,
-                                                                     ExternalLocationTypeEntity location1,
-                                                                     ExternalLocationTypeEntity location2,
-                                                                     OffsetDateTime lastModifiedBefore,
-                                                                     Integer externalObjectDirectoryQueryTypeEnumIndex);
+                                                       ObjectRecordStatusEntity status2,
+                                                       ExternalLocationTypeEntity location1,
+                                                       ExternalLocationTypeEntity location2,
+                                                       OffsetDateTime lastModifiedBefore,
+                                                       Integer externalObjectDirectoryQueryTypeEnumIndex);
 
     @Query(
         """
@@ -242,7 +212,6 @@ public interface ExternalObjectDirectoryRepository extends JpaRepository<Externa
                                                        ExternalLocationTypeEntity location2,
                                                        OffsetDateTime lastModifiedBefore1,
                                                        OffsetDateTime lastModifiedBefore2);
-
 
 
     @Query(
@@ -329,7 +298,7 @@ public interface ExternalObjectDirectoryRepository extends JpaRepository<Externa
 
     @Query(
         """
-            SELECT eod.id FROM ExternalObjectDirectoryEntity eod
+            SELECT eod FROM ExternalObjectDirectoryEntity eod
             WHERE eod.status = :status
             AND eod.externalLocationType = :type
             AND NOT EXISTS (select 1 from ExternalObjectDirectoryEntity eod2
@@ -343,9 +312,9 @@ public interface ExternalObjectDirectoryRepository extends JpaRepository<Externa
             LIMIT :limitRecords
             """
     )
-    List<Integer> findEodIdsForTransfer(ObjectRecordStatusEntity status, ExternalLocationTypeEntity type,
-                                        ObjectRecordStatusEntity notExistsStatus, ExternalLocationTypeEntity notExistsType,
-                                        Integer maxTransferAttempts, Integer limitRecords);
+    List<ExternalObjectDirectoryEntity> findEodsForTransfer(ObjectRecordStatusEntity status, ExternalLocationTypeEntity type,
+                                                            ObjectRecordStatusEntity notExistsStatus, ExternalLocationTypeEntity notExistsType,
+                                                            Integer maxTransferAttempts, Integer limitRecords);
 
     @Query(
         """

@@ -17,10 +17,8 @@ import uk.gov.hmcts.darts.datamanagement.config.DataManagementConfiguration;
 import uk.gov.hmcts.darts.datamanagement.service.DataManagementService;
 import uk.gov.hmcts.darts.datamanagement.service.InboundToUnstructuredProcessorSingleElement;
 
-import java.util.NoSuchElementException;
 import java.util.UUID;
 
-import static java.lang.String.format;
 import static uk.gov.hmcts.darts.datamanagement.service.impl.InboundToUnstructuredProcessorImpl.FAILURE_STATES_LIST;
 
 
@@ -40,27 +38,24 @@ public class InboundToUnstructuredProcessorSingleElementImpl implements InboundT
     @SuppressWarnings({"java:S4790", "PMD.AvoidFileStream"})
     @Override
     @Transactional
-    public void processSingleElement(Integer inboundObjectId) {
-        ExternalObjectDirectoryEntity inboundExternalObjectDirectory = externalObjectDirectoryRepository.findById(inboundObjectId)
-            .orElseThrow(() -> new NoSuchElementException(format("EOD not found with id: %d", inboundObjectId)));
-
-        ExternalObjectDirectoryEntity unstructuredExternalObjectDirectoryEntity = getNewOrExistingInUnstructuredFailed(inboundExternalObjectDirectory);
+    public void processSingleElement(ExternalObjectDirectoryEntity inboundEodEntity) {
+        ExternalObjectDirectoryEntity unstructuredExternalObjectDirectoryEntity = getNewOrExistingInUnstructuredFailed(inboundEodEntity);
 
         unstructuredExternalObjectDirectoryEntity.setStatus(EodHelper.awaitingVerificationStatus());
         externalObjectDirectoryRepository.saveAndFlush(unstructuredExternalObjectDirectoryEntity);
         try {
-            UUID inboundExternalLocation = inboundExternalObjectDirectory.getExternalLocation();
+            UUID inboundExternalLocation = inboundEodEntity.getExternalLocation();
             UUID unstructuredExternalLocation = UUID.randomUUID();
             dataManagementService.copyBlobData(
                 getInboundContainerName(), getUnstructuredContainerName(), inboundExternalLocation.toString(), unstructuredExternalLocation.toString());
-            unstructuredExternalObjectDirectoryEntity.setChecksum(inboundExternalObjectDirectory.getChecksum());
+            unstructuredExternalObjectDirectoryEntity.setChecksum(inboundEodEntity.getChecksum());
             unstructuredExternalObjectDirectoryEntity.setExternalLocation(unstructuredExternalLocation);
             unstructuredExternalObjectDirectoryEntity.setStatus(EodHelper.storedStatus());
             log.debug("Saved unstructured stored EOD with Id: {}", unstructuredExternalObjectDirectoryEntity.getId());
             externalObjectDirectoryRepository.saveAndFlush(unstructuredExternalObjectDirectoryEntity);
-            log.debug("Transfer complete for EOD ID: {}", inboundExternalObjectDirectory.getId());
+            log.debug("Transfer complete for EOD ID: {}", inboundEodEntity.getId());
         } catch (Exception e) {
-            log.error("Failed to move file from inbound store to unstructured store. EOD id: {}", inboundExternalObjectDirectory.getId(), e);
+            log.error("Failed to move file from inbound store to unstructured store. EOD id: {}", inboundEodEntity.getId(), e);
             unstructuredExternalObjectDirectoryEntity.setStatus(EodHelper.failureStatus());
             setNumTransferAttempts(unstructuredExternalObjectDirectoryEntity);
         } finally {

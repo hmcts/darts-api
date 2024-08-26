@@ -10,14 +10,12 @@ import uk.gov.hmcts.darts.arm.component.ArchiveRecordFileGenerator;
 import uk.gov.hmcts.darts.arm.component.ArmResponseFilesProcessSingleElement;
 import uk.gov.hmcts.darts.arm.component.AutomatedTaskProcessorFactory;
 import uk.gov.hmcts.darts.arm.config.ArmDataManagementConfiguration;
+import uk.gov.hmcts.darts.arm.helper.UnstructuredToArmHelper;
 import uk.gov.hmcts.darts.arm.service.ArchiveRecordService;
 import uk.gov.hmcts.darts.arm.service.ArmResponseFilesProcessor;
 import uk.gov.hmcts.darts.arm.service.ExternalObjectDirectoryService;
-import uk.gov.hmcts.darts.arm.service.UnstructuredToArmProcessor;
 import uk.gov.hmcts.darts.arm.service.impl.ArmBatchProcessResponseFilesImpl;
 import uk.gov.hmcts.darts.arm.service.impl.ArmResponseFilesProcessorImpl;
-import uk.gov.hmcts.darts.arm.service.impl.UnstructuredToArmBatchProcessorImpl;
-import uk.gov.hmcts.darts.arm.service.impl.UnstructuredToArmProcessorImpl;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.casedocument.service.GenerateCaseDocumentForRetentionDateProcessor;
 import uk.gov.hmcts.darts.casedocument.service.GenerateCaseDocumentProcessor;
@@ -62,6 +60,7 @@ public class AutomatedTaskProcessorFactoryImpl implements AutomatedTaskProcessor
     private final LogApi logApi;
     @Value("${darts.case-document.generation-days}")
     private final int caseDocumentGenerationDays;
+    private final UnstructuredToArmHelper unstructuredToArmHelper;
 
     @Override
     public ArmResponseFilesProcessor createArmResponseFilesProcessor(int batchSize) {
@@ -84,41 +83,6 @@ public class AutomatedTaskProcessorFactoryImpl implements AutomatedTaskProcessor
             externalObjectDirectoryRepository,
             userIdentity,
             armResponseFilesProcessSingleElement
-        );
-    }
-
-    @Override
-    public UnstructuredToArmProcessor createUnstructuredToArmProcessor(int batchSize) {
-        if (batchSize > 0) {
-            return new UnstructuredToArmBatchProcessorImpl(
-                externalObjectDirectoryRepository,
-                objectRecordStatusRepository,
-                externalLocationTypeRepository,
-                dataManagementApi,
-                armDataManagementApi,
-                userIdentity,
-                armDataManagementConfiguration,
-                fileOperationService,
-                archiveRecordService,
-                eodService,
-                archiveRecordFileGenerator,
-                batchSize,
-                logApi
-            );
-        }
-
-        return new UnstructuredToArmProcessorImpl(
-            externalObjectDirectoryRepository,
-            objectRecordStatusRepository,
-            externalLocationTypeRepository,
-            dataManagementApi,
-            armDataManagementApi,
-            userIdentity,
-            armDataManagementConfiguration,
-            fileOperationService,
-            archiveRecordService,
-            batchSize,
-            logApi
         );
     }
 
