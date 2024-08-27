@@ -30,8 +30,8 @@ class AudioControllerGetMediaRequestTest extends IntegrationBase {
     private MockMvc mockMvc;
 
     @ParameterizedTest
-    @EnumSource(value = SecurityRoleEnum.class, names = {"SUPER_ADMIN"}, mode = EXCLUDE)
-    void disallowsAllUsersExceptSuperAdmin(SecurityRoleEnum role) throws Exception {
+    @EnumSource(value = SecurityRoleEnum.class, names = {"SUPER_ADMIN", "SUPER_USER"}, mode = EXCLUDE)
+    void disallowsAllUsersExceptSuperAdminAndSuperUser(SecurityRoleEnum role) throws Exception {
         given.anAuthenticatedUserWithGlobalAccessAndRole(role);
 
         mockMvc.perform(
