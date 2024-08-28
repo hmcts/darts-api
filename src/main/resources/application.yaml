@@ -110,7 +110,7 @@ spring:
       client:
         config:
           default:
-            loggerLevel: ${FEIGN_LOG_LEVEL:full}
+            loggerLevel: ${FEIGN_LOG_LEVEL:none}
 
 darts:
   automated-tasks-pod: ${AUTOMATED_TASK_MODE:true}
