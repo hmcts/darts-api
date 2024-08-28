@@ -27,28 +27,28 @@ public interface RetrieveCoreObjectService {
     HearingEntity retrieveOrCreateHearing(String courthouseName, String courtroomName, String caseNumber, LocalDateTime hearingDate,
                                           UserAccountEntity userAccount);
 
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    @Transactional
     @Retryable(backoff = @Backoff(delay = 50), retryFor = {DataIntegrityViolationException.class, PSQLException.class})
     HearingEntity retrieveOrCreateHearingWithMedia(String courthouseName, String courtroomName, String caseNumber, LocalDateTime hearingDate,
                                                    UserAccountEntity userAccount, MediaEntity mediaEntity);
 
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    @Transactional
     @Retryable(backoff = @Backoff(delay = 50), retryFor = {DataIntegrityViolationException.class, PSQLException.class})
     CourtroomEntity retrieveOrCreateCourtroom(CourthouseEntity courthouse, String courtroomName, UserAccountEntity userAccount);
 
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    @Transactional
     @Retryable(backoff = @Backoff(delay = 50), retryFor = {DataIntegrityViolationException.class, PSQLException.class})
     CourtroomEntity retrieveOrCreateCourtroom(String courthouseName, String courtroomName, UserAccountEntity userAccount);
 
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    @Transactional
     @Retryable(backoff = @Backoff(delay = 50), retryFor = {DataIntegrityViolationException.class, PSQLException.class})
     CourtCaseEntity retrieveOrCreateCase(String courthouseName, String caseNumber);
 
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    @Transactional
     @Retryable(backoff = @Backoff(delay = 50), retryFor = {DataIntegrityViolationException.class, PSQLException.class})
     CourtCaseEntity retrieveOrCreateCase(String courthouseName, String caseNumber, UserAccountEntity userAccount);
 
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    @Transactional
     @Retryable(backoff = @Backoff(delay = 50), retryFor = {DataIntegrityViolationException.class, PSQLException.class})
     CourtCaseEntity retrieveOrCreateCase(CourthouseEntity courthouse, String caseNumber, UserAccountEntity userAccount);
 
