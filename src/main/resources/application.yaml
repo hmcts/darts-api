@@ -105,6 +105,12 @@ spring:
     locations: classpath:db/migration/common,db/migration/postgres
     default-schema: ${spring.datasource.schema}
     mixed: true
+  cloud:
+    openfeign:
+      client:
+        config:
+          default:
+            loggerLevel: ${FEIGN_LOG_LEVEL:none}
 
 darts:
   automated-tasks-pod: ${AUTOMATED_TASK_MODE:true}
@@ -362,8 +368,3 @@ logging:
   level:
     uk.gov.hmcts.darts: ${DARTS_LOG_LEVEL:INFO}
     net.javacrumbs.shedlock: ${DARTS_LOG_LEVEL:INFO}
-feign:
-  client:
-    config:
-      default:
-        loggerLevel: full

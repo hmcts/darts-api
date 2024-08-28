@@ -108,6 +108,7 @@ java:
     ACTIVE_DIRECTORY_B2C_BASE_URI: https://hmctsstgextid.b2clogin.com
     ACTIVE_DIRECTORY_B2C_AUTH_URI: https://hmctsstgextid.b2clogin.com/hmctsstgextid.onmicrosoft.com
     ARM_URL: http://darts-stub-services.{{ .Values.global.environment }}.platform.hmcts.net
+    FEIGN_LOG_LEVEL: none
 
 function:
   scaleType: Job
@@ -214,6 +215,7 @@ function:
     ACTIVE_DIRECTORY_B2C_BASE_URI: https://hmctsstgextid.b2clogin.com
     ACTIVE_DIRECTORY_B2C_AUTH_URI: https://hmctsstgextid.b2clogin.com/hmctsstgextid.onmicrosoft.com
     ARM_URL: http://darts-stub-services.{{ .Values.global.environment }}.platform.hmcts.net
+    FEIGN_LOG_LEVEL: none
 
   secrets:
     DARTS_API_DB_CONNECTION_STRING:
