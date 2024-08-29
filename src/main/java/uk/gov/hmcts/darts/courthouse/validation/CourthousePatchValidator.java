@@ -1,8 +1,9 @@
 package uk.gov.hmcts.darts.courthouse.validation;
 
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 import uk.gov.hmcts.darts.common.component.validation.BiValidator;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.common.repository.CaseRepository;
@@ -30,7 +31,7 @@ public class CourthousePatchValidator implements BiValidator<CourthousePatch, In
     private final SecurityGroupRepository securityGroupRepository;
 
     @Override
-    @Transactional(value = Transactional.TxType.REQUIRED)
+    @Transactional(propagation = Propagation.REQUIRED)
     @SuppressWarnings({"PMD.CyclomaticComplexity", "PMD.UnnecessaryAnnotationValueElement"})
     public void validate(CourthousePatch patch, Integer id) {
         var courthouseEntity = repository.findById(id)

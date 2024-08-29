@@ -7,6 +7,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import uk.gov.hmcts.darts.audio.entity.MediaRequestEntity;
 import uk.gov.hmcts.darts.common.entity.AnnotationDocumentEntity;
 import uk.gov.hmcts.darts.common.entity.AnnotationEntity;
 import uk.gov.hmcts.darts.common.entity.CaseManagementRetentionEntity;
@@ -14,11 +15,16 @@ import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
 import uk.gov.hmcts.darts.common.entity.DailyListEntity;
+import uk.gov.hmcts.darts.common.entity.DefenceEntity;
+import uk.gov.hmcts.darts.common.entity.DefendantEntity;
 import uk.gov.hmcts.darts.common.entity.EventEntity;
+import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
+import uk.gov.hmcts.darts.common.entity.MediaEntity;
 import uk.gov.hmcts.darts.common.entity.ProsecutorEntity;
 import uk.gov.hmcts.darts.common.entity.RetentionPolicyTypeEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionEntity;
+import uk.gov.hmcts.darts.common.entity.TransformedMediaEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
 import uk.gov.hmcts.darts.common.repository.AnnotationDocumentRepository;
@@ -132,12 +138,13 @@ public class DartsPersistence {
     @Transactional
     public AnnotationEntity save(AnnotationEntity annotationEntity) {
         save(annotationEntity.getCurrentOwner());
-        saveAll(annotationEntity.getHearingList());
+        saveHearingList(annotationEntity.getHearingList());
         return annotationRepository.save(annotationEntity);
     }
 
     @Transactional
     public HearingEntity save(HearingEntity hearingEntity) {
+        saveMediaList(hearingEntity.getMediaList());
         save(hearingEntity.getCourtroom().getCourthouse());
         save(hearingEntity.getCourtroom());
         save(hearingEntity.getCreatedBy());
@@ -166,15 +173,54 @@ public class DartsPersistence {
     }
 
     @Transactional
+    public MediaRequestEntity save(MediaRequestEntity mediaRequestEntity) {
+        save(mediaRequestEntity.getHearing());
+        save(mediaRequestEntity.getRequestor());
+        save(mediaRequestEntity.getCurrentOwner());
+        save(mediaRequestEntity.getCreatedBy());
+        save(mediaRequestEntity.getLastModifiedBy());
+        return mediaRequestRepository.save(mediaRequestEntity);
+    }
+
+    @Transactional
     public CourtCaseEntity save(CourtCaseEntity courtCase) {
         save(courtCase.getCreatedBy());
         save(courtCase.getLastModifiedBy());
         judgeRepository.saveAll(courtCase.getJudges());
         save(courtCase.getCourthouse());
         courtCase.getProsecutorList().forEach(this::save);
-        saveAll(courtCase.getHearings());
+        courtCase.getDefenceList().forEach(this::save);
+        courtCase.getDefendantList().forEach(this::save);
+        saveHearingList(courtCase.getHearings());
         caseRepository.save(courtCase);
         return courtCase;
+    }
+
+    @Transactional
+    public ExternalObjectDirectoryEntity save(ExternalObjectDirectoryEntity eod) {
+        var locationType = externalLocationTypeRepository.getReferenceById(eod.getExternalLocationType().getId());
+        eod.setExternalLocationType(locationType);
+        var recordStatus = objectRecordStatusRepository.getReferenceById(eod.getStatus().getId());
+        eod.setStatus(recordStatus);
+
+        save(eod.getMedia());
+        save(eod.getCreatedBy());
+        save(eod.getLastModifiedBy());
+        return externalObjectDirectoryRepository.save(eod);
+    }
+
+    @Transactional
+    public DefenceEntity save(DefenceEntity defenceEntity) {
+        save(defenceEntity.getCreatedBy());
+        save(defenceEntity.getLastModifiedBy());
+        return defenceEntity;
+    }
+
+    @Transactional
+    public DefendantEntity save(DefendantEntity defendantEntity) {
+        save(defendantEntity.getCreatedBy());
+        save(defendantEntity.getLastModifiedBy());
+        return defendantEntity;
     }
 
     @Transactional
@@ -244,6 +290,21 @@ public class DartsPersistence {
     }
 
     @Transactional
+    public MediaEntity save(MediaEntity media) {
+        save(media.getCourtroom());
+        save(media.getCreatedBy());
+        save(media.getLastModifiedBy());
+        return mediaRepository.save(media);
+    }
+
+    @Transactional
+    public TransformedMediaEntity save(TransformedMediaEntity transformedMedia) {
+        save(transformedMedia.getCreatedBy());
+        save(transformedMedia.getLastModifiedBy());
+        return transformedMediaRepository.save(transformedMedia);
+    }
+
+    @Transactional
     public void saveAll(UserAccountEntity... testUsers) {
         stream(testUsers).forEach(user -> {
             UserAccountEntity systemUser = userAccountRepository.getReferenceById(0);
@@ -271,5 +332,16 @@ public class DartsPersistence {
 
     public void saveAll(AnnotationDocumentEntity... annotationDocuments) {
         stream(annotationDocuments).forEach(this::save);
+    }
+
+    public void saveMediaList(List<MediaEntity> mediaList) {
+        mediaList.forEach(this::save);
+    }
+
+    @Transactional
+    public void saveHearingList(List<HearingEntity> hearingEntities) {
+        for (HearingEntity hearingEntity : hearingEntities) {
+            save(hearingEntity);
+        }
     }
 }

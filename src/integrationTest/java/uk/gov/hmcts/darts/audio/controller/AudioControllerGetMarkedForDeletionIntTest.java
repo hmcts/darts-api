@@ -1,6 +1,5 @@
 package uk.gov.hmcts.darts.audio.controller;
 
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.skyscreamer.jsonassert.JSONAssert;
 import org.skyscreamer.jsonassert.JSONCompareMode;
@@ -73,7 +72,6 @@ class AudioControllerGetMarkedForDeletionIntTest extends PostgresIntegrationBase
                                 JSONCompareMode.NON_EXTENSIBLE);
     }
 
-    @Disabled("Impacted by V1_367__adding_not_null_constraints_part_4.sql")
     @Test
     void getMediasMarkedForDeletionShouldReturnExpectedResponseWhenMediaExistsWithDeletionReasonButNotYetApprovedForDeletion() throws Exception {
         // Given

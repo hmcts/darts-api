@@ -5,12 +5,10 @@ import org.springframework.stereotype.Component;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
-import uk.gov.hmcts.darts.common.service.RetrieveCoreObjectService;
 
 @Component
 @RequiredArgsConstructor
 public class CourtroomStub {
-    private final RetrieveCoreObjectService retrieveCoreObjectService;
     private final CourtroomStubComposable courtroomStubComposable;
     private final CourthouseStubComposable courthouseStubComposable;
 

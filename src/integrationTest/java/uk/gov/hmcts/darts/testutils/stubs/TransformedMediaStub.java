@@ -22,6 +22,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class TransformedMediaStub {
 
+    private final DartsPersistence dartsPersistence;
     private final TransformedMediaRepository transformedMediaRepository;
     private final UserAccountStub userAccountStub;
     private final MediaRequestStub mediaRequestStub;
@@ -68,7 +69,7 @@ public class TransformedMediaStub {
 
         transformedMediaEntity.setExpiryTime(expiry);
         transformedMediaEntity.setLastAccessed(lastAccessed);
-        return transformedMediaRepository.saveAndFlush(transformedMediaEntity);
+        return dartsPersistence.save(transformedMediaEntity);
     }
 
     /**

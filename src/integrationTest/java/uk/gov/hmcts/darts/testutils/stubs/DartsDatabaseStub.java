@@ -4,7 +4,6 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
 import jakarta.persistence.Query;
-import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.SneakyThrows;
@@ -12,6 +11,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.junit.platform.commons.JUnitException;
 import org.springframework.data.history.Revisions;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import uk.gov.hmcts.darts.audio.entity.MediaRequestEntity;
 import uk.gov.hmcts.darts.audiorequests.model.AudioRequestType;
 import uk.gov.hmcts.darts.common.entity.AnnotationDocumentEntity;
@@ -429,12 +429,9 @@ public class DartsDatabaseStub {
         dailyListRepository.saveAllAndFlush(List.of(xhbDailyList, cppDailyList));
     }
 
+    @Transactional
     public MediaEntity createMediaEntity(String courthouseName, String courtroomName, OffsetDateTime startTime, OffsetDateTime endTime, int channel) {
         return mediaStub.createMediaEntity(courthouseName, courtroomName, startTime, endTime, channel);
-    }
-
-    public MediaEntity createHiddenMediaEntity(String courthouseName, String courtroomName, OffsetDateTime startTime, OffsetDateTime endTime, int channel) {
-        return mediaStub.createHiddenMediaEntity(courthouseName, courtroomName, startTime, endTime, channel, "mp2");
     }
 
     public CourtroomEntity findCourtroomBy(String courthouseName, String courtroomName) {
@@ -854,7 +851,7 @@ public class DartsDatabaseStub {
         return automatedTaskRepository.findAll();
     }
 
-    @Transactional(dontRollbackOn = RuntimeException.class)
+    @Transactional(noRollbackFor = RuntimeException.class)
     public void lockTaskUntil(String taskName, OffsetDateTime taskReleaseDateTime) {
         var updateRowForTaskSql = """
             update darts.shedlock

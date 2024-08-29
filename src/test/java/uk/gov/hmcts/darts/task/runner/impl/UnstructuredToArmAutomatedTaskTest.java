@@ -6,7 +6,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
-import uk.gov.hmcts.darts.arm.component.AutomatedTaskProcessorFactory;
 import uk.gov.hmcts.darts.arm.service.impl.UnstructuredToArmBatchProcessorImpl;
 import uk.gov.hmcts.darts.arm.service.impl.UnstructuredToArmProcessorImpl;
 import uk.gov.hmcts.darts.common.entity.AutomatedTaskEntity;
@@ -27,8 +26,6 @@ class UnstructuredToArmAutomatedTaskTest {
     @Mock
     private AutomatedTaskConfigurationProperties automatedTaskConfigurationProperties;
     @Mock
-    AutomatedTaskProcessorFactory processorFactory;
-    @Mock
     private LogApi logApi;
     @Mock
     UnstructuredToArmProcessorImpl unstructuredToArmProcessor;
@@ -46,12 +43,12 @@ class UnstructuredToArmAutomatedTaskTest {
                 automatedTaskRepository,
                 lockProvider,
                 automatedTaskConfigurationProperties,
-                processorFactory,
+                unstructuredToArmBatchProcessor,
+                unstructuredToArmProcessor,
                 logApi
             );
 
         when(automatedTaskRepository.findByTaskName("UnstructuredToArmDataStore")).thenReturn(Optional.of(automatedTask));
-        when(processorFactory.createUnstructuredToArmProcessor(0)).thenReturn(unstructuredToArmProcessor);
 
         unstructuredToArmAutomatedTask.runTask();
 
@@ -71,17 +68,17 @@ class UnstructuredToArmAutomatedTaskTest {
                 automatedTaskRepository,
                 lockProvider,
                 automatedTaskConfigurationProperties,
-                processorFactory,
+                unstructuredToArmBatchProcessor,
+                unstructuredToArmProcessor,
                 logApi
             );
 
         when(automatedTaskRepository.findByTaskName("UnstructuredToArmDataStore")).thenReturn(Optional.of(automatedTask));
-        when(processorFactory.createUnstructuredToArmProcessor(10)).thenReturn(unstructuredToArmBatchProcessor);
 
         unstructuredToArmAutomatedTask.runTask();
 
         //then
-        Mockito.verify(unstructuredToArmBatchProcessor, Mockito.times(1)).processUnstructuredToArm();
+        Mockito.verify(unstructuredToArmBatchProcessor, Mockito.times(1)).processUnstructuredToArm(10);
     }
 }
 
