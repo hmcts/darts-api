@@ -10,6 +10,7 @@ import uk.gov.hmcts.darts.common.exception.CommonApiError;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.common.repository.CourthouseRepository;
 
+import java.util.Locale;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -43,7 +44,7 @@ class CourthouseServiceImplTest {
         CourthouseEntity result = courthouseService.retrieveCourthouse("Test Courthouse");
 
         assertNotNull(result);
-        assertEquals("Test Courthouse".toUpperCase(), result.getCourthouseName());
+        assertEquals("Test Courthouse".toUpperCase(Locale.ROOT), result.getCourthouseName());
         verify(courthouseRepository).findByCourthouseNameIgnoreCase("Test Courthouse");
     }
 
@@ -68,7 +69,7 @@ class CourthouseServiceImplTest {
         CourthouseEntity result = courthouseService.retrieveCourthouse("test courthouse");
 
         assertNotNull(result);
-        assertEquals("Test Courthouse".toUpperCase(), result.getCourthouseName());
+        assertEquals("Test Courthouse".toUpperCase(Locale.ROOT), result.getCourthouseName());
         verify(courthouseRepository).findByCourthouseNameIgnoreCase("test courthouse");
     }
 

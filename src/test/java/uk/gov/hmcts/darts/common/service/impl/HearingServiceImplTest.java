@@ -96,7 +96,8 @@ class HearingServiceImplTest {
             .thenReturn(Optional.of(existingHearing));
         when(hearingRepository.saveAndFlush(existingHearing)).thenReturn(existingHearing);
 
-        HearingEntity result = hearingService.retrieveOrCreateHearingWithMedia(courthouseName, courtroomName, caseNumber, hearingDate, userAccount, mediaEntity);
+        HearingEntity result = hearingService.retrieveOrCreateHearingWithMedia(courthouseName, courtroomName, caseNumber, hearingDate, userAccount,
+                                                                               mediaEntity);
 
         assertEquals(existingHearing, result);
         verify(hearingRepository).saveAndFlush(existingHearing);
@@ -120,7 +121,8 @@ class HearingServiceImplTest {
         when(courtroomService.retrieveOrCreateCourtroom(courtCase.getCourthouse(), courtroomName, userAccount)).thenReturn(courtroom);
         when(hearingRepository.saveAndFlush(any(HearingEntity.class))).thenReturn(newHearing);
 
-        HearingEntity result = hearingService.retrieveOrCreateHearingWithMedia(courthouseName, courtroomName, caseNumber, hearingDate, userAccount, mediaEntity);
+        HearingEntity result = hearingService.retrieveOrCreateHearingWithMedia(courthouseName, courtroomName, caseNumber, hearingDate, userAccount,
+                                                                               mediaEntity);
 
         assertEquals(newHearing, result);
         verify(hearingRepository).saveAndFlush(any(HearingEntity.class));
