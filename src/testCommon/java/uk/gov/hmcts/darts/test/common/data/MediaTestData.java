@@ -11,6 +11,7 @@ import static java.time.OffsetDateTime.now;
 import static org.apache.commons.codec.digest.DigestUtils.md5;
 import static uk.gov.hmcts.darts.common.entity.MediaEntity.MEDIA_TYPE_DEFAULT;
 import static uk.gov.hmcts.darts.test.common.data.CourtroomTestData.someMinimalCourtRoom;
+import static uk.gov.hmcts.darts.test.common.data.UserAccountTestData.minimalUserAccount;
 
 @UtilityClass
 @SuppressWarnings({"HideUtilityClassConstructor"})
@@ -29,6 +30,9 @@ public class MediaTestData {
         media.setMediaFormat("mp2");
         media.setMediaType(MEDIA_TYPE_DEFAULT);
         media.setCourtroom(someMinimalCourtRoom());
+        var userAccount = minimalUserAccount();
+        media.setCreatedBy(userAccount);
+        media.setLastModifiedBy(userAccount);
         return media;
     }
 

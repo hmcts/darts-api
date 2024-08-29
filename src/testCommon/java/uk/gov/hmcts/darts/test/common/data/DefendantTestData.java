@@ -8,7 +8,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import static java.util.stream.IntStream.rangeClosed;
-import static uk.gov.hmcts.darts.test.common.data.CaseTestData.someMinimalCase;
+import static uk.gov.hmcts.darts.test.common.data.CaseTestData.createSomeMinimalCase;
+import static uk.gov.hmcts.darts.test.common.data.UserAccountTestData.minimalUserAccount;
 
 @UtilityClass
 @SuppressWarnings({"HideUtilityClassConstructor"})
@@ -16,8 +17,17 @@ public class DefendantTestData {
 
     public static DefendantEntity someMinimalDefendant() {
         var defendant = new DefendantEntity();
-        defendant.setCourtCase(someMinimalCase());
+        defendant.setCourtCase(createSomeMinimalCase());
         defendant.setName("some-defendant");
+        var accountEntity = minimalUserAccount();
+        defendant.setCreatedBy(accountEntity);
+        defendant.setLastModifiedBy(accountEntity);
+        return defendant;
+    }
+
+    public static DefendantEntity createDefendantForCase(CourtCaseEntity courtCase) {
+        var defendant = someMinimalDefendant();
+        defendant.setCourtCase(courtCase);
         return defendant;
     }
 
@@ -31,14 +41,13 @@ public class DefendantTestData {
     }
 
     public static DefendantEntity createDefendantWithCaseBasedName(int index, CourtCaseEntity courtCase) {
-        var defendant = someMinimalDefendant();
+        var defendant = createDefendantForCase(courtCase);
         defendant.setName("defendant_" + courtCase.getCaseNumber() + "_" + index);
         return defendant;
     }
 
     public static DefendantEntity createDefendantForCaseWithName(CourtCaseEntity courtCase, String name) {
-        var defendant = new DefendantEntity();
-        defendant.setCourtCase(courtCase);
+        var defendant = createDefendantForCase(courtCase);
         defendant.setName(name);
         return defendant;
     }
