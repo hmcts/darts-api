@@ -85,7 +85,6 @@ public class ManualTaskService {
     private final UnstructuredToArmBatchProcessor unstructuredToArmBatchProcessor;
     private final UnstructuredToArmProcessor unstructuredToArmProcessor;
 
-    private final LockProvider lockProvider;
     private final LogApi logApi;
     private final LockService lockService;
 
@@ -330,10 +329,10 @@ public class ManualTaskService {
     private void addRemoveDuplicateEventsToTaskRegistrar() {
         var manualTask = new RemoveDuplicatedEventsAutomatedTask(
             automatedTaskRepository,
-            lockProvider,
             automatedTaskConfigurationProperties,
             removeDuplicateEventsProcessor,
-            logApi
+            logApi,
+            lockService
         );
         manualTask.setManualTask();
         automatedTasks.add(manualTask);
@@ -354,10 +353,10 @@ public class ManualTaskService {
     private void addInboundTranscriptionAndAnnotationDeleterRegistrar() {
         var manualTask = new InboundAnnotationTranscriptionDeleterAutomatedTask(
             automatedTaskRepository,
-            lockProvider,
             automatedTaskConfigurationProperties,
             inboundAnnotationTranscriptionDeleterProcessor,
-            logApi
+            logApi,
+            lockService
         );
         manualTask.setManualTask();
         automatedTasks.add(manualTask);
@@ -366,10 +365,10 @@ public class ManualTaskService {
     private void addUnstructuredTranscriptionAndAnnotationDeleterRegistrar() {
         var manualTask = new UnstructuredAnnotationTranscriptionDeleterAutomatedTask(
             automatedTaskRepository,
-            lockProvider,
             automatedTaskConfigurationProperties,
             unstructuredTranscriptionAndAnnotationDeleterProcessor,
-            logApi
+            logApi,
+            lockService
         );
         manualTask.setManualTask();
         automatedTasks.add(manualTask);
@@ -378,10 +377,10 @@ public class ManualTaskService {
     private void addGenerateCaseDocumentForRetentionDateToTaskRegistrar() {
         var manualTask = new GenerateCaseDocumentForRetentionDateAutomatedTask(
             automatedTaskRepository,
-            lockProvider,
             automatedTaskConfigurationProperties,
             automatedTaskProcessorFactory,
-            logApi
+            logApi,
+            lockService
         );
         manualTask.setManualTask();
         automatedTasks.add(manualTask);

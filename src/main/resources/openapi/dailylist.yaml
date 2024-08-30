@@ -470,6 +470,7 @@ components:
         - "DAILYLIST_104"
         - "DAILYLIST_105"
         - "DAILYLIST_106"
+        - "DAILYLIST_107"
       x-enum-varnames: [
         FAILED_TO_PROCESS_DAILYLIST,
         XML_OR_JSON_NEEDS_TO_BE_PROVIDED,

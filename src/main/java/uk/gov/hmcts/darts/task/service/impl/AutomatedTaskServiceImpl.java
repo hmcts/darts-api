@@ -86,39 +86,20 @@ import static uk.gov.hmcts.darts.task.api.AutomatedTaskName.CLOSE_OLD_UNFINISHED
 import static uk.gov.hmcts.darts.task.api.AutomatedTaskName.DAILY_LIST_HOUSEKEEPING_TASK_NAME;
 import static uk.gov.hmcts.darts.task.api.AutomatedTaskName.EVENT_CLEANUP_CURRENT_TASK;
 import static uk.gov.hmcts.darts.task.api.AutomatedTaskName.EXTERNAL_DATASTORE_DELETER_TASK_NAME;
+import static uk.gov.hmcts.darts.task.api.AutomatedTaskName.GENERATE_CASE_DOCUMENT_FOR_RETENTION_DATE_TASK_NAME;
 import static uk.gov.hmcts.darts.task.api.AutomatedTaskName.GENERATE_CASE_DOCUMENT_TASK_NAME;
 import static uk.gov.hmcts.darts.task.api.AutomatedTaskName.INBOUND_AUDIO_DELETER_TASK_NAME;
 import static uk.gov.hmcts.darts.task.api.AutomatedTaskName.INBOUND_TO_UNSTRUCTURED_TASK_NAME;
+import static uk.gov.hmcts.darts.task.api.AutomatedTaskName.INBOUND_TRANSCRIPTION_ANNOTATION_DELETER_TASK_NAME;
 import static uk.gov.hmcts.darts.task.api.AutomatedTaskName.OUTBOUND_AUDIO_DELETER_TASK_NAME;
 import static uk.gov.hmcts.darts.task.api.AutomatedTaskName.PROCESS_ARM_RESPONSE_FILES_TASK_NAME;
 import static uk.gov.hmcts.darts.task.api.AutomatedTaskName.PROCESS_DAILY_LIST_TASK_NAME;
+import static uk.gov.hmcts.darts.task.api.AutomatedTaskName.REMOVE_DUPLICATED_EVENTS_TASK_NAME;
 import static uk.gov.hmcts.darts.task.api.AutomatedTaskName.UNSTRUCTURED_AUDIO_DELETER_TASK_NAME;
 import static uk.gov.hmcts.darts.task.api.AutomatedTaskName.UNSTRUCTURED_TO_ARM_TASK_NAME;
+import static uk.gov.hmcts.darts.task.api.AutomatedTaskName.UNSTRUCTURED_TRANSCRIPTION_ANNOTATION_DELETER_TASK_NAME;
 import static uk.gov.hmcts.darts.task.exception.AutomatedTaskSetupError.FAILED_TO_FIND_AUTOMATED_TASK;
 import static uk.gov.hmcts.darts.task.exception.AutomatedTaskSetupError.INVALID_CRON_EXPRESSION;
-import static uk.gov.hmcts.darts.task.runner.AutomatedTaskName.APPLY_RETENTION_CASE_ASSOCIATED_OBJECTS_TASK_NAME;
-import static uk.gov.hmcts.darts.task.runner.AutomatedTaskName.APPLY_RETENTION_TASK_NAME;
-import static uk.gov.hmcts.darts.task.runner.AutomatedTaskName.ARM_RETENTION_EVENT_DATE_CALCULATOR_TASK_NAME;
-import static uk.gov.hmcts.darts.task.runner.AutomatedTaskName.BATCH_CLEANUP_ARM_RESPONSE_FILES_TASK_NAME;
-import static uk.gov.hmcts.darts.task.runner.AutomatedTaskName.CLEANUP_ARM_RESPONSE_FILES_TASK_NAME;
-import static uk.gov.hmcts.darts.task.runner.AutomatedTaskName.CLOSE_OLD_CASES_TASK_NAME;
-import static uk.gov.hmcts.darts.task.runner.AutomatedTaskName.CLOSE_OLD_UNFINISHED_TRANSCRIPTIONS_TASK_NAME;
-import static uk.gov.hmcts.darts.task.runner.AutomatedTaskName.DAILY_LIST_HOUSEKEEPING_TASK_NAME;
-import static uk.gov.hmcts.darts.task.runner.AutomatedTaskName.EVENT_CLEANUP_CURRENT_TASK;
-import static uk.gov.hmcts.darts.task.runner.AutomatedTaskName.EXTERNAL_DATASTORE_DELETER_TASK_NAME;
-import static uk.gov.hmcts.darts.task.runner.AutomatedTaskName.GENERATE_CASE_DOCUMENT_FOR_RETENTION_DATE_TASK_NAME;
-import static uk.gov.hmcts.darts.task.runner.AutomatedTaskName.GENERATE_CASE_DOCUMENT_TASK_NAME;
-import static uk.gov.hmcts.darts.task.runner.AutomatedTaskName.INBOUND_AUDIO_DELETER_TASK_NAME;
-import static uk.gov.hmcts.darts.task.runner.AutomatedTaskName.INBOUND_TO_UNSTRUCTURED_TASK_NAME;
-import static uk.gov.hmcts.darts.task.runner.AutomatedTaskName.INBOUND_TRANSCRIPTION_ANNOTATION_DELETER_TASK_NAME;
-import static uk.gov.hmcts.darts.task.runner.AutomatedTaskName.OUTBOUND_AUDIO_DELETER_TASK_NAME;
-import static uk.gov.hmcts.darts.task.runner.AutomatedTaskName.PROCESS_ARM_RESPONSE_FILES_TASK_NAME;
-import static uk.gov.hmcts.darts.task.runner.AutomatedTaskName.PROCESS_DAILY_LIST_TASK_NAME;
-import static uk.gov.hmcts.darts.task.runner.AutomatedTaskName.REMOVE_DUPLICATED_EVENTS_TASK_NAME;
-import static uk.gov.hmcts.darts.task.runner.AutomatedTaskName.UNSTRUCTURED_AUDIO_DELETER_TASK_NAME;
-import static uk.gov.hmcts.darts.task.runner.AutomatedTaskName.UNSTRUCTURED_TO_ARM_TASK_NAME;
-import static uk.gov.hmcts.darts.task.runner.AutomatedTaskName.UNSTRUCTURED_TRANSCRIPTION_ANNOTATION_DELETER_TASK_NAME;
-
 
 /**
  * Refer to <a href="https://docs.spring.io/spring-framework/reference/integration/scheduling.html#scheduling-cron-expression">...</a>
@@ -603,10 +584,10 @@ public class AutomatedTaskServiceImpl implements AutomatedTaskService {
 
     private void addInboundTranscriptionAndAnnotationDeleterToTaskRegistrar(ScheduledTaskRegistrar taskRegistrar) {
         var eventCleanupTask = new InboundAnnotationTranscriptionDeleterAutomatedTask(automatedTaskRepository,
-                                                                                      lockProvider,
                                                                                       automatedTaskConfigurationProperties,
                                                                                       inboundTranscriptionAndAnnotationDeleterProcessor,
-                                                                                      logApi);
+                                                                                      logApi,
+                                                                                      lockService);
         eventCleanupTask.setLastCronExpression(getAutomatedTaskCronExpression(eventCleanupTask));
         Trigger trigger = createAutomatedTaskTrigger(eventCleanupTask);
         taskRegistrar.addTriggerTask(eventCleanupTask, trigger);
@@ -615,10 +596,10 @@ public class AutomatedTaskServiceImpl implements AutomatedTaskService {
     private void addUnstructuredTranscriptionAndAnnotationDeleterToTaskRegistrar(ScheduledTaskRegistrar taskRegistrar) {
         var unstructuredAnnotationTranscriptionDeleterAutomatedTask = new
             UnstructuredAnnotationTranscriptionDeleterAutomatedTask(automatedTaskRepository,
-                                                                    lockProvider,
                                                                     automatedTaskConfigurationProperties,
                                                                     unstructuredTranscriptionAndAnnotationDeleterProcessor,
-                                                                    logApi);
+                                                                    logApi,
+                                                                    lockService);
         unstructuredAnnotationTranscriptionDeleterAutomatedTask
             .setLastCronExpression(getAutomatedTaskCronExpression(unstructuredAnnotationTranscriptionDeleterAutomatedTask));
         Trigger trigger = createAutomatedTaskTrigger(unstructuredAnnotationTranscriptionDeleterAutomatedTask);
@@ -628,10 +609,10 @@ public class AutomatedTaskServiceImpl implements AutomatedTaskService {
     private void addRemoveDuplicateEventsToTaskRegistrar(ScheduledTaskRegistrar taskRegistrar) {
         var removeDuplicateEventsAutomatedTask = new RemoveDuplicatedEventsAutomatedTask(
             automatedTaskRepository,
-            lockProvider,
             automatedTaskConfigurationProperties,
             removeDuplicateEventsProcessor,
-            logApi
+            logApi,
+            lockService
         );
         removeDuplicateEventsAutomatedTask.setLastCronExpression(getAutomatedTaskCronExpression(removeDuplicateEventsAutomatedTask));
         Trigger trigger = createAutomatedTaskTrigger(removeDuplicateEventsAutomatedTask);
@@ -640,10 +621,10 @@ public class AutomatedTaskServiceImpl implements AutomatedTaskService {
 
     private void addGenerateCaseDocumentForRetentionDateToTaskRegistrar(ScheduledTaskRegistrar taskRegistrar) {
         var generateCaseDocumentForRetentionDateAutomatedTask = new GenerateCaseDocumentForRetentionDateAutomatedTask(automatedTaskRepository,
-                                                                                                                      lockProvider,
                                                                                                                       automatedTaskConfigurationProperties,
                                                                                                                       automatedTaskProcessorFactory,
-                                                                                                                      logApi);
+                                                                                                                      logApi,
+                                                                                                                      lockService);
         generateCaseDocumentForRetentionDateAutomatedTask.setLastCronExpression(
             getAutomatedTaskCronExpression(generateCaseDocumentForRetentionDateAutomatedTask));
         Trigger trigger = createAutomatedTaskTrigger(generateCaseDocumentForRetentionDateAutomatedTask);
@@ -979,10 +960,10 @@ public class AutomatedTaskServiceImpl implements AutomatedTaskService {
         if (triggerAndAutomatedTask == null) {
             var generateInboundAnnotationTranscriptionTask = new InboundAnnotationTranscriptionDeleterAutomatedTask(
                 automatedTaskRepository,
-                lockProvider,
                 automatedTaskConfigurationProperties,
                 inboundTranscriptionAndAnnotationDeleterProcessor,
-                logApi
+                logApi,
+                lockService
             );
             Trigger trigger = createAutomatedTaskTrigger(generateInboundAnnotationTranscriptionTask);
             taskScheduler.schedule(generateInboundAnnotationTranscriptionTask, trigger);
@@ -996,10 +977,10 @@ public class AutomatedTaskServiceImpl implements AutomatedTaskService {
         if (triggerAndAutomatedTask == null) {
             var unstructuredAnnotationTranscriptionDeleterAutomatedTask = new UnstructuredAnnotationTranscriptionDeleterAutomatedTask(
                 automatedTaskRepository,
-                lockProvider,
                 automatedTaskConfigurationProperties,
                 unstructuredTranscriptionAndAnnotationDeleterProcessor,
-                logApi
+                logApi,
+                lockService
             );
             Trigger trigger = createAutomatedTaskTrigger(unstructuredAnnotationTranscriptionDeleterAutomatedTask);
             taskScheduler.schedule(unstructuredAnnotationTranscriptionDeleterAutomatedTask, trigger);
@@ -1013,10 +994,10 @@ public class AutomatedTaskServiceImpl implements AutomatedTaskService {
         if (triggerAndAutomatedTask == null) {
             var removeDuplicatedEventsAutomatedTask = new RemoveDuplicatedEventsAutomatedTask(
                 automatedTaskRepository,
-                lockProvider,
                 automatedTaskConfigurationProperties,
                 removeDuplicateEventsProcessor,
-                logApi
+                logApi,
+                lockService
             );
             Trigger trigger = createAutomatedTaskTrigger(removeDuplicatedEventsAutomatedTask);
             taskScheduler.schedule(removeDuplicatedEventsAutomatedTask, trigger);
@@ -1030,10 +1011,10 @@ public class AutomatedTaskServiceImpl implements AutomatedTaskService {
         if (triggerAndAutomatedTask == null) {
             var generateCaseDocumentForRetentionDateAutomatedTask = new GenerateCaseDocumentForRetentionDateAutomatedTask(
                 automatedTaskRepository,
-                lockProvider,
                 automatedTaskConfigurationProperties,
                 automatedTaskProcessorFactory,
-                logApi
+                logApi,
+                lockService
             );
             Trigger trigger = createAutomatedTaskTrigger(generateCaseDocumentForRetentionDateAutomatedTask);
             taskScheduler.schedule(generateCaseDocumentForRetentionDateAutomatedTask, trigger);

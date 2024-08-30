@@ -3,7 +3,6 @@ package uk.gov.hmcts.darts.task.service;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.Query;
 import lombok.extern.slf4j.Slf4j;
-import net.javacrumbs.shedlock.core.LockProvider;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -42,10 +41,10 @@ import uk.gov.hmcts.darts.datamanagement.service.InboundToUnstructuredProcessor;
 import uk.gov.hmcts.darts.event.service.RemoveDuplicateEventsProcessor;
 import uk.gov.hmcts.darts.log.api.LogApi;
 import uk.gov.hmcts.darts.retention.service.ApplyRetentionCaseAssociatedObjectsProcessor;
+import uk.gov.hmcts.darts.task.api.AutomatedTaskName;
 import uk.gov.hmcts.darts.task.config.AutomatedTaskConfigurationProperties;
 import uk.gov.hmcts.darts.task.exception.AutomatedTaskSetupError;
 import uk.gov.hmcts.darts.task.runner.AutomatedTask;
-import uk.gov.hmcts.darts.task.runner.AutomatedTaskName;
 import uk.gov.hmcts.darts.task.runner.impl.ApplyRetentionCaseAssociatedObjectsAutomatedTask;
 import uk.gov.hmcts.darts.task.runner.impl.ArmRetentionEventDateCalculatorAutomatedTask;
 import uk.gov.hmcts.darts.task.runner.impl.CleanupArmResponseFilesAutomatedTask;
@@ -938,10 +937,10 @@ class AutomatedTaskServiceTest extends IntegrationPerClassBase {
         AutomatedTask automatedTask =
             new RemoveDuplicatedEventsAutomatedTask(
                 automatedTaskRepository,
-                lockProvider,
                 automatedTaskConfigurationProperties,
                 removeDuplicateEventsProcessor,
-                logApi
+                logApi,
+                lockService
             );
 
         Optional<AutomatedTaskEntity> originalAutomatedTaskEntity =
@@ -972,10 +971,10 @@ class AutomatedTaskServiceTest extends IntegrationPerClassBase {
         AutomatedTask automatedTask =
             new RemoveDuplicatedEventsAutomatedTask(
                 automatedTaskRepository,
-                lockProvider,
                 automatedTaskConfigurationProperties,
                 removeDuplicateEventsProcessor,
-                logApi
+                logApi,
+                lockService
             );
 
         Set<ScheduledTask> scheduledTasks = scheduledTaskHolder.getScheduledTasks();
@@ -1213,10 +1212,10 @@ class AutomatedTaskServiceTest extends IntegrationPerClassBase {
         AutomatedTask automatedTask =
             new GenerateCaseDocumentForRetentionDateAutomatedTask(
                 automatedTaskRepository,
-                lockProvider,
                 automatedTaskConfigurationProperties,
                 taskProcessorFactory,
-                logApi
+                logApi,
+                lockService
             );
 
         Optional<AutomatedTaskEntity> originalAutomatedTaskEntity =
@@ -1247,10 +1246,10 @@ class AutomatedTaskServiceTest extends IntegrationPerClassBase {
         AutomatedTask automatedTask =
             new GenerateCaseDocumentForRetentionDateAutomatedTask(
                 automatedTaskRepository,
-                lockProvider,
                 automatedTaskConfigurationProperties,
                 taskProcessorFactory,
-                logApi
+                logApi,
+                lockService
             );
 
         Set<ScheduledTask> scheduledTasks = scheduledTaskHolder.getScheduledTasks();
