@@ -56,7 +56,6 @@ import static uk.gov.hmcts.darts.test.common.data.JudgeTestData.createListOfJudg
 import static uk.gov.hmcts.darts.test.common.data.ProsecutorTestData.createListOfProsecutor;
 
 @AutoConfigureMockMvc
-//@Disabled("Impacted by V1_363__not_null_constraints_part3.sql")
 class CaseControllerTest extends IntegrationBase {
 
     public static final String EXPECTED_RESPONSE_FILE = "tests/cases/CaseControllerTest/casesGetEndpoint/expectedResponse.json";
