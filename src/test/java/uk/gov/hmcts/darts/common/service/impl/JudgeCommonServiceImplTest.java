@@ -13,7 +13,7 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -78,32 +78,23 @@ class JudgeCommonServiceImplTest {
     }
 
     @Test
-    void retrieveOrCreateJudgeNullJudgeName() {
-        when(judgeRepository.findByNameIgnoreCase(null)).thenReturn(Optional.empty());
-        when(judgeRepository.saveAndFlush(any(JudgeEntity.class))).thenAnswer(invocation -> invocation.getArgument(0));
-
-        JudgeEntity result = judgeService.retrieveOrCreateJudge(null, userAccount);
-
-        assertNotNull(result);
-        assertNull(result.getName());
-        assertEquals(userAccount, result.getCreatedBy());
-        assertEquals(userAccount, result.getLastModifiedBy());
-        verify(judgeRepository).findByNameIgnoreCase(null);
-        verify(judgeRepository).saveAndFlush(any(JudgeEntity.class));
+    void retrieveOrCreateJudgeWithNullNameShouldThrowException() {
+        assertThrows(IllegalArgumentException.class, () ->
+            judgeService.retrieveOrCreateJudge(null, userAccount)
+        );
     }
 
     @Test
-    void retrieveOrCreateJudgeEmptyJudgeName() {
-        when(judgeRepository.findByNameIgnoreCase("")).thenReturn(Optional.empty());
-        when(judgeRepository.saveAndFlush(any(JudgeEntity.class))).thenAnswer(invocation -> invocation.getArgument(0));
+    void retrieveOrCreateJudgeWithEmptyNameShouldThrowException() {
+        assertThrows(IllegalArgumentException.class, () ->
+            judgeService.retrieveOrCreateJudge("", userAccount)
+        );
+    }
 
-        JudgeEntity result = judgeService.retrieveOrCreateJudge("", userAccount);
-
-        assertNotNull(result);
-        assertEquals("", result.getName());
-        assertEquals(userAccount, result.getCreatedBy());
-        assertEquals(userAccount, result.getLastModifiedBy());
-        verify(judgeRepository).findByNameIgnoreCase("");
-        verify(judgeRepository).saveAndFlush(any(JudgeEntity.class));
+    @Test
+    void retrieveOrCreateJudgeWithBlankNameShouldThrowException() {
+        assertThrows(IllegalArgumentException.class, () ->
+            judgeService.retrieveOrCreateJudge("   ", userAccount)
+        );
     }
 }

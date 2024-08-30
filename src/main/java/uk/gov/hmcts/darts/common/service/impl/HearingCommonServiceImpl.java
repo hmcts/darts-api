@@ -36,6 +36,7 @@ public class HearingCommonServiceImpl implements HearingCommonService {
 
     @Override
     @Transactional
+    @Deprecated(since = "This method is used only in tests and will be removed in future.")
     public HearingEntity retrieveOrCreateHearingWithMedia(String courthouseName, String courtroomName, String caseNumber, LocalDateTime hearingDate,
                                                           UserAccountEntity userAccount, MediaEntity mediaEntity) {
         Optional<HearingEntity> foundHearing = hearingRepository.findHearing(courthouseName, courtroomName, caseNumber, hearingDate.toLocalDate());

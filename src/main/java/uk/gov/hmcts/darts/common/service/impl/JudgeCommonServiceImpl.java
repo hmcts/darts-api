@@ -21,13 +21,17 @@ public class JudgeCommonServiceImpl implements JudgeCommonService {
     @Override
     @Transactional
     public JudgeEntity retrieveOrCreateJudge(String judgeName, UserAccountEntity userAccount) {
-        Optional<JudgeEntity> foundJudge = judgeRepository.findByNameIgnoreCase(judgeName);
-        return foundJudge.orElseGet(() -> createJudge(judgeName, userAccount));
+        if (judgeName == null || judgeName.trim().isEmpty()) {
+            throw new IllegalArgumentException("Judge name cannot be null or empty");
+        }
+        String trimmedJudgeName = judgeName.trim();
+        Optional<JudgeEntity> foundJudge = judgeRepository.findByNameIgnoreCase(trimmedJudgeName);
+        return foundJudge.orElseGet(() -> createJudge(trimmedJudgeName, userAccount));
     }
 
     private JudgeEntity createJudge(String judgeName, UserAccountEntity userAccount) {
         JudgeEntity judge = new JudgeEntity();
-        String upperCaseJudgeName = judgeName != null ? judgeName.toUpperCase(Locale.ROOT) : null;
+        String upperCaseJudgeName = judgeName.toUpperCase(Locale.ROOT);
         judge.setName(upperCaseJudgeName);
         judge.setCreatedBy(userAccount);
         judge.setLastModifiedBy(userAccount);
