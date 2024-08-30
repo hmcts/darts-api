@@ -208,6 +208,7 @@ function:
   environment:
     ATS_MODE: true
     API_MODE: false
+    NOTIFICATION_SCHEDULER_ENABLED: false
     AUTOMATED_TASK_MODE: false
     POSTGRES_SSL_MODE: require
     RUN_DB_MIGRATION_ON_STARTUP: false
