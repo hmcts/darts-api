@@ -31,17 +31,15 @@ public class MediaStub {
     private final HearingRepository hearingRepository;
     private final MediaRepository mediaRepository;
     private final UserAccountRepository userAccountRepository;
-    private final UserAccountStub userAccountStub;
     private final HearingStub hearingStub;
     private final MediaStubComposable mediaStubComposable;
     private final CourthouseStubComposable courthouseStubComposable;
     private final CourtroomStubComposable courtroomStub;
 
-    private static final String FILE_NAME_PREFIX = "FileName";
-
     private static final String CASE_NUMBER_PREFIX = "CaseNumber";
     private final RetrieveCoreObjectService retrieveCoreObjectService;
 
+    @Transactional
     public MediaEntity createMediaEntity(String courthouseName, String courtroomName,
                                          OffsetDateTime startTime, OffsetDateTime endTime, int channel,
                                          String mediaType) {

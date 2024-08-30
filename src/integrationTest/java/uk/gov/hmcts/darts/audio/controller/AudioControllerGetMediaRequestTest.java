@@ -1,6 +1,5 @@
 package uk.gov.hmcts.darts.audio.controller;
 
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
@@ -42,10 +41,9 @@ class AudioControllerGetMediaRequestTest extends IntegrationBase {
     }
 
     @Test
-    @Disabled("Impacted by V1_364_*.sql")
     void allowsSuperAdmin() throws Exception {
         given.anAuthenticatedUserWithGlobalAccessAndRole(SUPER_ADMIN);
-        var persistedMediaRequest = dartsDatabase.saveWithMediaRequestWithTransientEntities(minimalRequestData());
+        var persistedMediaRequest = dartsPersistence.save(minimalRequestData());
 
         mockMvc.perform(
                 get(ENDPOINT + String.valueOf(persistedMediaRequest.getId()))
