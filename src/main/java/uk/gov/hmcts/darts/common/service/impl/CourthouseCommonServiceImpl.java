@@ -2,7 +2,6 @@ package uk.gov.hmcts.darts.common.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 import uk.gov.hmcts.darts.common.exception.CommonApiError;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
@@ -19,7 +18,6 @@ public class CourthouseCommonServiceImpl implements CourthouseCommonService {
     private final CourthouseRepository courthouseRepository;
 
     @Override
-    @Transactional(readOnly = true)
     public CourthouseEntity retrieveCourthouse(String courthouseName) {
         Optional<CourthouseEntity> foundCourthouse = courthouseRepository.findByCourthouseNameIgnoreCase(courthouseName);
         if (foundCourthouse.isEmpty()) {
