@@ -66,7 +66,7 @@ class EventMapperTest {
         AdminGetEventForIdResponseResult responseResult = eventMapper.mapToAdminGetEventsResponseForId(Optional.of(eventEntity));
 
         // Then
-        Assertions.assertEquals(eventEntity.getId(), responseResult.getId());Assertions.assertEquals(eventEntity.getId(), responseResult.getId());
+        Assertions.assertEquals(eventEntity.getId(), responseResult.getId());
         Assertions.assertEquals(eventEntity.getLegacyObjectId(), responseResult.getDocumentumId());
         Assertions.assertEquals(eventEntity.getEventId(), responseResult.getSourceId());
         Assertions.assertEquals(eventEntity.getMessageId(), responseResult.getMessageId());
