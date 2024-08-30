@@ -7,17 +7,17 @@ import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.repository.CaseRepository;
-import uk.gov.hmcts.darts.common.service.CaseService;
-import uk.gov.hmcts.darts.common.service.CourthouseService;
+import uk.gov.hmcts.darts.common.service.CaseCommonService;
+import uk.gov.hmcts.darts.common.service.CourthouseCommonService;
 
 import java.util.Optional;
 
 @RequiredArgsConstructor
 @Service
-public class CaseServiceImpl implements CaseService {
+public class CaseCommonServiceImpl implements CaseCommonService {
 
     private final CaseRepository caseRepository;
-    private final CourthouseService courthouseService;
+    private final CourthouseCommonService courthouseCommonService;
 
     @Override
     @Transactional
@@ -36,7 +36,7 @@ public class CaseServiceImpl implements CaseService {
     }
 
     private CourtCaseEntity createCase(String courthouseName, String caseNumber, UserAccountEntity userAccount) {
-        CourthouseEntity foundCourthouse = courthouseService.retrieveCourthouse(courthouseName);
+        CourthouseEntity foundCourthouse = courthouseCommonService.retrieveCourthouse(courthouseName);
         return createCase(foundCourthouse, caseNumber, userAccount);
     }
 

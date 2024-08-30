@@ -12,8 +12,8 @@ import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.repository.HearingRepository;
-import uk.gov.hmcts.darts.common.service.CaseService;
-import uk.gov.hmcts.darts.common.service.CourtroomService;
+import uk.gov.hmcts.darts.common.service.CaseCommonService;
+import uk.gov.hmcts.darts.common.service.CourtroomCommonService;
 
 import java.time.LocalDateTime;
 import java.util.Optional;
@@ -29,15 +29,15 @@ class HearingServiceImplTest {
     @Mock
     private HearingRepository hearingRepository;
     @Mock
-    private CaseService caseService;
+    private CaseCommonService caseCommonService;
     @Mock
-    private CourtroomService courtroomService;
+    private CourtroomCommonService courtroomCommonService;
 
-    private HearingServiceImpl hearingService;
+    private HearingCommonServiceImpl hearingService;
 
     @BeforeEach
     void setUp() {
-        hearingService = new HearingServiceImpl(hearingRepository, caseService, courtroomService);
+        hearingService = new HearingCommonServiceImpl(hearingRepository, caseCommonService, courtroomCommonService);
     }
 
     @Test
@@ -72,8 +72,8 @@ class HearingServiceImplTest {
 
         when(hearingRepository.findHearing(courthouseName, courtroomName, caseNumber, hearingDate.toLocalDate()))
             .thenReturn(Optional.empty());
-        when(caseService.retrieveOrCreateCase(courthouseName, caseNumber, userAccount)).thenReturn(courtCase);
-        when(courtroomService.retrieveOrCreateCourtroom(courtCase.getCourthouse(), courtroomName, userAccount)).thenReturn(courtroom);
+        when(caseCommonService.retrieveOrCreateCase(courthouseName, caseNumber, userAccount)).thenReturn(courtCase);
+        when(courtroomCommonService.retrieveOrCreateCourtroom(courtCase.getCourthouse(), courtroomName, userAccount)).thenReturn(courtroom);
         when(hearingRepository.saveAndFlush(any(HearingEntity.class))).thenReturn(newHearing);
 
         HearingEntity result = hearingService.retrieveOrCreateHearing(courthouseName, courtroomName, caseNumber, hearingDate, userAccount);
@@ -117,8 +117,8 @@ class HearingServiceImplTest {
 
         when(hearingRepository.findHearing(courthouseName, courtroomName, caseNumber, hearingDate.toLocalDate()))
             .thenReturn(Optional.empty());
-        when(caseService.retrieveOrCreateCase(courthouseName, caseNumber, userAccount)).thenReturn(courtCase);
-        when(courtroomService.retrieveOrCreateCourtroom(courtCase.getCourthouse(), courtroomName, userAccount)).thenReturn(courtroom);
+        when(caseCommonService.retrieveOrCreateCase(courthouseName, caseNumber, userAccount)).thenReturn(courtCase);
+        when(courtroomCommonService.retrieveOrCreateCourtroom(courtCase.getCourthouse(), courtroomName, userAccount)).thenReturn(courtroom);
         when(hearingRepository.saveAndFlush(any(HearingEntity.class))).thenReturn(newHearing);
 
         HearingEntity result = hearingService.retrieveOrCreateHearingWithMedia(courthouseName, courtroomName, caseNumber, hearingDate, userAccount,

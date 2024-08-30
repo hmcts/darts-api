@@ -7,14 +7,14 @@ import org.springframework.transaction.annotation.Transactional;
 import uk.gov.hmcts.darts.common.entity.JudgeEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.repository.JudgeRepository;
-import uk.gov.hmcts.darts.common.service.JudgeService;
+import uk.gov.hmcts.darts.common.service.JudgeCommonService;
 
 import java.util.Locale;
 import java.util.Optional;
 
 @RequiredArgsConstructor
 @Service
-public class JudgeServiceImpl implements JudgeService {
+public class JudgeCommonServiceImpl implements JudgeCommonService {
 
     private final JudgeRepository judgeRepository;
 

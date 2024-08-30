@@ -2,6 +2,7 @@ package uk.gov.hmcts.darts.common.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
@@ -9,20 +10,20 @@ import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.repository.HearingRepository;
-import uk.gov.hmcts.darts.common.service.CaseService;
-import uk.gov.hmcts.darts.common.service.CourtroomService;
-import uk.gov.hmcts.darts.common.service.HearingService;
+import uk.gov.hmcts.darts.common.service.CaseCommonService;
+import uk.gov.hmcts.darts.common.service.CourtroomCommonService;
+import uk.gov.hmcts.darts.common.service.HearingCommonService;
 
 import java.time.LocalDateTime;
 import java.util.Optional;
 
 @RequiredArgsConstructor
 @Service
-public class HearingServiceImpl implements HearingService {
+public class HearingCommonServiceImpl implements HearingCommonService {
 
     private final HearingRepository hearingRepository;
-    private final CaseService caseService;
-    private final CourtroomService courtroomService;
+    private final CaseCommonService caseCommonService;
+    private final CourtroomCommonService courtroomCommonService;
 
     @Override
     @Transactional
@@ -46,8 +47,8 @@ public class HearingServiceImpl implements HearingService {
 
     private HearingEntity createHearing(String courthouseName, String courtroomName, String caseNumber, LocalDateTime hearingDate,
                                         UserAccountEntity userAccount, MediaEntity mediaEntity) {
-        final CourtCaseEntity courtCase = caseService.retrieveOrCreateCase(courthouseName, caseNumber, userAccount);
-        final CourtroomEntity courtroom = courtroomService.retrieveOrCreateCourtroom(courtCase.getCourthouse(), courtroomName, userAccount);
+        final CourtCaseEntity courtCase = caseCommonService.retrieveOrCreateCase(courthouseName, caseNumber, userAccount);
+        final CourtroomEntity courtroom = courtroomCommonService.retrieveOrCreateCourtroom(courtCase.getCourthouse(), courtroomName, userAccount);
 
         HearingEntity hearing = new HearingEntity();
         hearing.setCourtCase(courtCase);

@@ -11,11 +11,11 @@ import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.JudgeEntity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
-import uk.gov.hmcts.darts.common.service.CaseService;
-import uk.gov.hmcts.darts.common.service.CourthouseService;
-import uk.gov.hmcts.darts.common.service.CourtroomService;
-import uk.gov.hmcts.darts.common.service.HearingService;
-import uk.gov.hmcts.darts.common.service.JudgeService;
+import uk.gov.hmcts.darts.common.service.CaseCommonService;
+import uk.gov.hmcts.darts.common.service.CourthouseCommonService;
+import uk.gov.hmcts.darts.common.service.CourtroomCommonService;
+import uk.gov.hmcts.darts.common.service.HearingCommonService;
+import uk.gov.hmcts.darts.common.service.JudgeCommonService;
 import uk.gov.hmcts.darts.common.service.RetrieveCoreObjectService;
 
 import java.time.LocalDateTime;
@@ -25,70 +25,70 @@ import java.time.LocalDateTime;
 @Slf4j
 public class RetrieveCoreObjectServiceImpl implements RetrieveCoreObjectService {
 
-    private final HearingService hearingService;
-    private final CourthouseService courthouseService;
-    private final CourtroomService courtroomService;
-    private final CaseService caseService;
-    private final JudgeService judgeService;
+    private final HearingCommonService hearingCommonService;
+    private final CourthouseCommonService courthouseCommonService;
+    private final CourtroomCommonService courtroomCommonService;
+    private final CaseCommonService caseCommonService;
+    private final JudgeCommonService judgeCommonService;
     private final AuthorisationApi authorisationApi;
 
     @Override
     public HearingEntity retrieveOrCreateHearing(String courthouseName, String courtroomName, String caseNumber, LocalDateTime hearingDate) {
         UserAccountEntity userAccount = authorisationApi.getCurrentUser();
-        return hearingService.retrieveOrCreateHearing(courthouseName, courtroomName, caseNumber, hearingDate, userAccount);
+        return hearingCommonService.retrieveOrCreateHearing(courthouseName, courtroomName, caseNumber, hearingDate, userAccount);
     }
 
     @Override
     public HearingEntity retrieveOrCreateHearing(String courthouseName, String courtroomName, String caseNumber, LocalDateTime hearingDate,
                                                  UserAccountEntity userAccount) {
-        return hearingService.retrieveOrCreateHearing(courthouseName, courtroomName, caseNumber, hearingDate, userAccount);
+        return hearingCommonService.retrieveOrCreateHearing(courthouseName, courtroomName, caseNumber, hearingDate, userAccount);
     }
 
     @Override
     public HearingEntity retrieveOrCreateHearingWithMedia(String courthouseName, String courtroomName, String caseNumber, LocalDateTime hearingDate,
                                                           UserAccountEntity userAccount, MediaEntity mediaEntity) {
-        return hearingService.retrieveOrCreateHearingWithMedia(courthouseName, courtroomName, caseNumber, hearingDate, userAccount, mediaEntity);
+        return hearingCommonService.retrieveOrCreateHearingWithMedia(courthouseName, courtroomName, caseNumber, hearingDate, userAccount, mediaEntity);
     }
 
     @Override
     public CourtroomEntity retrieveOrCreateCourtroom(CourthouseEntity courthouse, String courtroomName, UserAccountEntity userAccount) {
-        return courtroomService.retrieveOrCreateCourtroom(courthouse, courtroomName, userAccount);
+        return courtroomCommonService.retrieveOrCreateCourtroom(courthouse, courtroomName, userAccount);
     }
 
     @Override
     public CourtroomEntity retrieveOrCreateCourtroom(String courthouseName, String courtroomName, UserAccountEntity userAccount) {
-        return courtroomService.retrieveOrCreateCourtroom(courthouseName, courtroomName, userAccount);
+        return courtroomCommonService.retrieveOrCreateCourtroom(courthouseName, courtroomName, userAccount);
     }
 
     @Override
     public CourtCaseEntity retrieveOrCreateCase(String courthouseName, String caseNumber) {
         UserAccountEntity userAccount = authorisationApi.getCurrentUser();
-        return caseService.retrieveOrCreateCase(courthouseName, caseNumber, userAccount);
+        return caseCommonService.retrieveOrCreateCase(courthouseName, caseNumber, userAccount);
     }
 
     @Override
     public CourtCaseEntity retrieveOrCreateCase(String courthouseName, String caseNumber, UserAccountEntity userAccount) {
-        return caseService.retrieveOrCreateCase(courthouseName, caseNumber, userAccount);
+        return caseCommonService.retrieveOrCreateCase(courthouseName, caseNumber, userAccount);
     }
 
     @Override
     public CourtCaseEntity retrieveOrCreateCase(CourthouseEntity courthouse, String caseNumber, UserAccountEntity userAccount) {
-        return caseService.retrieveOrCreateCase(courthouse, caseNumber, userAccount);
+        return caseCommonService.retrieveOrCreateCase(courthouse, caseNumber, userAccount);
     }
 
     @Override
     public CourthouseEntity retrieveCourthouse(String courthouseName) {
-        return courthouseService.retrieveCourthouse(courthouseName);
+        return courthouseCommonService.retrieveCourthouse(courthouseName);
     }
 
     @Override
     public JudgeEntity retrieveOrCreateJudge(String judgeName) {
         UserAccountEntity userAccount = authorisationApi.getCurrentUser();
-        return judgeService.retrieveOrCreateJudge(judgeName, userAccount);
+        return judgeCommonService.retrieveOrCreateJudge(judgeName, userAccount);
     }
 
     @Override
     public JudgeEntity retrieveOrCreateJudge(String judgeName, UserAccountEntity userAccount) {
-        return judgeService.retrieveOrCreateJudge(judgeName, userAccount);
+        return judgeCommonService.retrieveOrCreateJudge(judgeName, userAccount);
     }
 }

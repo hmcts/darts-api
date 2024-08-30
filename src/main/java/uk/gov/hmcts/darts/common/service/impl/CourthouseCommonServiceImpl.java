@@ -7,14 +7,14 @@ import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 import uk.gov.hmcts.darts.common.exception.CommonApiError;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.common.repository.CourthouseRepository;
-import uk.gov.hmcts.darts.common.service.CourthouseService;
+import uk.gov.hmcts.darts.common.service.CourthouseCommonService;
 
 import java.text.MessageFormat;
 import java.util.Optional;
 
 @RequiredArgsConstructor
 @Service
-public class CourthouseServiceImpl implements CourthouseService {
+public class CourthouseCommonServiceImpl implements CourthouseCommonService {
 
     private final CourthouseRepository courthouseRepository;
 

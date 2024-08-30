@@ -14,11 +14,11 @@ import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.JudgeEntity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
-import uk.gov.hmcts.darts.common.service.CaseService;
-import uk.gov.hmcts.darts.common.service.CourthouseService;
-import uk.gov.hmcts.darts.common.service.CourtroomService;
-import uk.gov.hmcts.darts.common.service.HearingService;
-import uk.gov.hmcts.darts.common.service.JudgeService;
+import uk.gov.hmcts.darts.common.service.CaseCommonService;
+import uk.gov.hmcts.darts.common.service.CourthouseCommonService;
+import uk.gov.hmcts.darts.common.service.CourtroomCommonService;
+import uk.gov.hmcts.darts.common.service.HearingCommonService;
+import uk.gov.hmcts.darts.common.service.JudgeCommonService;
 
 import java.time.LocalDateTime;
 
@@ -30,15 +30,15 @@ import static org.mockito.Mockito.when;
 class RetrieveCoreObjectServiceImplTest {
 
     @Mock
-    private HearingService hearingService;
+    private HearingCommonService hearingCommonService;
     @Mock
-    private CourthouseService courthouseService;
+    private CourthouseCommonService courthouseCommonService;
     @Mock
-    private CourtroomService courtroomService;
+    private CourtroomCommonService courtroomCommonService;
     @Mock
-    private CaseService caseService;
+    private CaseCommonService caseCommonService;
     @Mock
-    private JudgeService judgeService;
+    private JudgeCommonService judgeCommonService;
     @Mock
     private AuthorisationApi authorisationApi;
 
@@ -47,11 +47,11 @@ class RetrieveCoreObjectServiceImplTest {
     @BeforeEach
     void setUp() {
         retrieveCoreObjectService = new RetrieveCoreObjectServiceImpl(
-            hearingService,
-            courthouseService,
-            courtroomService,
-            caseService,
-            judgeService,
+            hearingCommonService,
+            courthouseCommonService,
+            courtroomCommonService,
+            caseCommonService,
+            judgeCommonService,
             authorisationApi
         );
     }
@@ -66,13 +66,13 @@ class RetrieveCoreObjectServiceImplTest {
         HearingEntity expectedHearing = new HearingEntity();
 
         when(authorisationApi.getCurrentUser()).thenReturn(userAccount);
-        when(hearingService.retrieveOrCreateHearing(courthouseName, courtroomName, caseNumber, hearingDate, userAccount))
+        when(hearingCommonService.retrieveOrCreateHearing(courthouseName, courtroomName, caseNumber, hearingDate, userAccount))
             .thenReturn(expectedHearing);
 
         HearingEntity result = retrieveCoreObjectService.retrieveOrCreateHearing(courthouseName, courtroomName, caseNumber, hearingDate);
 
         assertEquals(expectedHearing, result);
-        verify(hearingService).retrieveOrCreateHearing(courthouseName, courtroomName, caseNumber, hearingDate, userAccount);
+        verify(hearingCommonService).retrieveOrCreateHearing(courthouseName, courtroomName, caseNumber, hearingDate, userAccount);
     }
 
     @Test
@@ -85,14 +85,14 @@ class RetrieveCoreObjectServiceImplTest {
         MediaEntity mediaEntity = new MediaEntity();
         HearingEntity expectedHearing = new HearingEntity();
 
-        when(hearingService.retrieveOrCreateHearingWithMedia(courthouseName, courtroomName, caseNumber, hearingDate, userAccount, mediaEntity))
+        when(hearingCommonService.retrieveOrCreateHearingWithMedia(courthouseName, courtroomName, caseNumber, hearingDate, userAccount, mediaEntity))
             .thenReturn(expectedHearing);
 
         HearingEntity result = retrieveCoreObjectService.retrieveOrCreateHearingWithMedia(courthouseName, courtroomName, caseNumber, hearingDate, userAccount,
                                                                                           mediaEntity);
 
         assertEquals(expectedHearing, result);
-        verify(hearingService).retrieveOrCreateHearingWithMedia(courthouseName, courtroomName, caseNumber, hearingDate, userAccount, mediaEntity);
+        verify(hearingCommonService).retrieveOrCreateHearingWithMedia(courthouseName, courtroomName, caseNumber, hearingDate, userAccount, mediaEntity);
     }
 
     @Test
@@ -102,12 +102,12 @@ class RetrieveCoreObjectServiceImplTest {
         UserAccountEntity userAccount = new UserAccountEntity();
         CourtroomEntity expectedCourtroom = new CourtroomEntity();
 
-        when(courtroomService.retrieveOrCreateCourtroom(courthouse, courtroomName, userAccount)).thenReturn(expectedCourtroom);
+        when(courtroomCommonService.retrieveOrCreateCourtroom(courthouse, courtroomName, userAccount)).thenReturn(expectedCourtroom);
 
         CourtroomEntity result = retrieveCoreObjectService.retrieveOrCreateCourtroom(courthouse, courtroomName, userAccount);
 
         assertEquals(expectedCourtroom, result);
-        verify(courtroomService).retrieveOrCreateCourtroom(courthouse, courtroomName, userAccount);
+        verify(courtroomCommonService).retrieveOrCreateCourtroom(courthouse, courtroomName, userAccount);
     }
 
     @Test
@@ -117,12 +117,12 @@ class RetrieveCoreObjectServiceImplTest {
         UserAccountEntity userAccount = new UserAccountEntity();
         CourtroomEntity expectedCourtroom = new CourtroomEntity();
 
-        when(courtroomService.retrieveOrCreateCourtroom(courthouseName, courtroomName, userAccount)).thenReturn(expectedCourtroom);
+        when(courtroomCommonService.retrieveOrCreateCourtroom(courthouseName, courtroomName, userAccount)).thenReturn(expectedCourtroom);
 
         CourtroomEntity result = retrieveCoreObjectService.retrieveOrCreateCourtroom(courthouseName, courtroomName, userAccount);
 
         assertEquals(expectedCourtroom, result);
-        verify(courtroomService).retrieveOrCreateCourtroom(courthouseName, courtroomName, userAccount);
+        verify(courtroomCommonService).retrieveOrCreateCourtroom(courthouseName, courtroomName, userAccount);
     }
 
     @Test
@@ -133,12 +133,12 @@ class RetrieveCoreObjectServiceImplTest {
         CourtCaseEntity expectedCase = new CourtCaseEntity();
 
         when(authorisationApi.getCurrentUser()).thenReturn(userAccount);
-        when(caseService.retrieveOrCreateCase(courthouseName, caseNumber, userAccount)).thenReturn(expectedCase);
+        when(caseCommonService.retrieveOrCreateCase(courthouseName, caseNumber, userAccount)).thenReturn(expectedCase);
 
         CourtCaseEntity result = retrieveCoreObjectService.retrieveOrCreateCase(courthouseName, caseNumber);
 
         assertEquals(expectedCase, result);
-        verify(caseService).retrieveOrCreateCase(courthouseName, caseNumber, userAccount);
+        verify(caseCommonService).retrieveOrCreateCase(courthouseName, caseNumber, userAccount);
     }
 
     @Test
@@ -148,12 +148,12 @@ class RetrieveCoreObjectServiceImplTest {
         UserAccountEntity userAccount = new UserAccountEntity();
         CourtCaseEntity expectedCase = new CourtCaseEntity();
 
-        when(caseService.retrieveOrCreateCase(courthouseName, caseNumber, userAccount)).thenReturn(expectedCase);
+        when(caseCommonService.retrieveOrCreateCase(courthouseName, caseNumber, userAccount)).thenReturn(expectedCase);
 
         CourtCaseEntity result = retrieveCoreObjectService.retrieveOrCreateCase(courthouseName, caseNumber, userAccount);
 
         assertEquals(expectedCase, result);
-        verify(caseService).retrieveOrCreateCase(courthouseName, caseNumber, userAccount);
+        verify(caseCommonService).retrieveOrCreateCase(courthouseName, caseNumber, userAccount);
     }
 
     @Test
@@ -163,12 +163,12 @@ class RetrieveCoreObjectServiceImplTest {
         UserAccountEntity userAccount = new UserAccountEntity();
         CourtCaseEntity expectedCase = new CourtCaseEntity();
 
-        when(caseService.retrieveOrCreateCase(courthouse, caseNumber, userAccount)).thenReturn(expectedCase);
+        when(caseCommonService.retrieveOrCreateCase(courthouse, caseNumber, userAccount)).thenReturn(expectedCase);
 
         CourtCaseEntity result = retrieveCoreObjectService.retrieveOrCreateCase(courthouse, caseNumber, userAccount);
 
         assertEquals(expectedCase, result);
-        verify(caseService).retrieveOrCreateCase(courthouse, caseNumber, userAccount);
+        verify(caseCommonService).retrieveOrCreateCase(courthouse, caseNumber, userAccount);
     }
 
     @Test
@@ -176,12 +176,12 @@ class RetrieveCoreObjectServiceImplTest {
         String courthouseName = "Test Courthouse";
         CourthouseEntity expectedCourthouse = new CourthouseEntity();
 
-        when(courthouseService.retrieveCourthouse(courthouseName)).thenReturn(expectedCourthouse);
+        when(courthouseCommonService.retrieveCourthouse(courthouseName)).thenReturn(expectedCourthouse);
 
         CourthouseEntity result = retrieveCoreObjectService.retrieveCourthouse(courthouseName);
 
         assertEquals(expectedCourthouse, result);
-        verify(courthouseService).retrieveCourthouse(courthouseName);
+        verify(courthouseCommonService).retrieveCourthouse(courthouseName);
     }
 
     @Test
@@ -191,12 +191,12 @@ class RetrieveCoreObjectServiceImplTest {
         JudgeEntity expectedJudge = new JudgeEntity();
 
         when(authorisationApi.getCurrentUser()).thenReturn(userAccount);
-        when(judgeService.retrieveOrCreateJudge(judgeName, userAccount)).thenReturn(expectedJudge);
+        when(judgeCommonService.retrieveOrCreateJudge(judgeName, userAccount)).thenReturn(expectedJudge);
 
         JudgeEntity result = retrieveCoreObjectService.retrieveOrCreateJudge(judgeName);
 
         assertEquals(expectedJudge, result);
-        verify(judgeService).retrieveOrCreateJudge(judgeName, userAccount);
+        verify(judgeCommonService).retrieveOrCreateJudge(judgeName, userAccount);
     }
 
     @Test
@@ -205,11 +205,11 @@ class RetrieveCoreObjectServiceImplTest {
         UserAccountEntity userAccount = new UserAccountEntity();
         JudgeEntity expectedJudge = new JudgeEntity();
 
-        when(judgeService.retrieveOrCreateJudge(judgeName, userAccount)).thenReturn(expectedJudge);
+        when(judgeCommonService.retrieveOrCreateJudge(judgeName, userAccount)).thenReturn(expectedJudge);
 
         JudgeEntity result = retrieveCoreObjectService.retrieveOrCreateJudge(judgeName, userAccount);
 
         assertEquals(expectedJudge, result);
-        verify(judgeService).retrieveOrCreateJudge(judgeName, userAccount);
+        verify(judgeCommonService).retrieveOrCreateJudge(judgeName, userAccount);
     }
 }

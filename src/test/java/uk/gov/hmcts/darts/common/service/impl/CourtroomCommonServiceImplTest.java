@@ -9,7 +9,7 @@ import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.repository.CourtroomRepository;
-import uk.gov.hmcts.darts.common.service.CourthouseService;
+import uk.gov.hmcts.darts.common.service.CourthouseCommonService;
 
 import java.util.Optional;
 
@@ -22,15 +22,15 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-class CourtroomServiceImplTest {
+class CourtroomCommonServiceImplTest {
 
     @Mock
     private CourtroomRepository courtroomRepository;
 
     @Mock
-    private CourthouseService courthouseService;
+    private CourthouseCommonService courthouseCommonService;
 
-    private CourtroomServiceImpl courtroomService;
+    private CourtroomCommonServiceImpl courtroomService;
 
     private CourthouseEntity courthouse;
     private UserAccountEntity userAccount;
@@ -48,7 +48,7 @@ class CourtroomServiceImplTest {
         existingCourtroom.setName("COURTROOM 1");
         existingCourtroom.setCourthouse(courthouse);
 
-        courtroomService = new CourtroomServiceImpl(courtroomRepository, courthouseService);
+        courtroomService = new CourtroomCommonServiceImpl(courtroomRepository, courthouseCommonService);
     }
 
     @Test
@@ -90,7 +90,7 @@ class CourtroomServiceImplTest {
         assertNotNull(result);
         assertEquals("COURTROOM 1", result.getName());
         assertEquals(courthouse, result.getCourthouse());
-        verify(courthouseService, never()).retrieveCourthouse(anyString());
+        verify(courthouseCommonService, never()).retrieveCourthouse(anyString());
         verify(courtroomRepository, never()).saveAndFlush(any(CourtroomEntity.class));
     }
 
@@ -98,7 +98,7 @@ class CourtroomServiceImplTest {
     void retrieveOrCreateCourtroomWithCourthouseNameNewCourtroom() {
         when(courtroomRepository.findByCourthouseNameAndCourtroomName("Test Courthouse", "COURTROOM 2"))
             .thenReturn(Optional.empty());
-        when(courthouseService.retrieveCourthouse("Test Courthouse"))
+        when(courthouseCommonService.retrieveCourthouse("Test Courthouse"))
             .thenReturn(courthouse);
         when(courtroomRepository.saveAndFlush(any(CourtroomEntity.class)))
             .thenAnswer(invocation -> invocation.getArgument(0));
@@ -109,7 +109,7 @@ class CourtroomServiceImplTest {
         assertEquals("COURTROOM 2", result.getName());
         assertEquals(courthouse, result.getCourthouse());
         assertEquals(userAccount, result.getCreatedBy());
-        verify(courthouseService).retrieveCourthouse("Test Courthouse");
+        verify(courthouseCommonService).retrieveCourthouse("Test Courthouse");
         verify(courtroomRepository).saveAndFlush(any(CourtroomEntity.class));
     }
 

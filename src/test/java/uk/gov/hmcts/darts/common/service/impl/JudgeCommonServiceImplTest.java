@@ -20,12 +20,12 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-class JudgeServiceImplTest {
+class JudgeCommonServiceImplTest {
 
     @Mock
     private JudgeRepository judgeRepository;
 
-    private JudgeServiceImpl judgeService;
+    private JudgeCommonServiceImpl judgeService;
 
     private UserAccountEntity userAccount;
     private JudgeEntity existingJudge;
@@ -36,7 +36,7 @@ class JudgeServiceImplTest {
         existingJudge = new JudgeEntity();
         existingJudge.setName("JUDGE SMITH");
 
-        judgeService = new JudgeServiceImpl(judgeRepository);
+        judgeService = new JudgeCommonServiceImpl(judgeRepository);
     }
 
     @Test

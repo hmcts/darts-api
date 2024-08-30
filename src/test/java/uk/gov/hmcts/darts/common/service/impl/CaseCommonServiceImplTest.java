@@ -9,7 +9,7 @@ import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.repository.CaseRepository;
-import uk.gov.hmcts.darts.common.service.CourthouseService;
+import uk.gov.hmcts.darts.common.service.CourthouseCommonService;
 
 import java.util.Optional;
 
@@ -21,15 +21,15 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-class CaseServiceImplTest {
+class CaseCommonServiceImplTest {
 
     @Mock
     private CaseRepository caseRepository;
 
     @Mock
-    private CourthouseService courthouseService;
+    private CourthouseCommonService courthouseCommonService;
 
-    private CaseServiceImpl caseService;
+    private CaseCommonServiceImpl caseService;
 
     private UserAccountEntity userAccount;
     private CourthouseEntity courthouse;
@@ -43,7 +43,7 @@ class CaseServiceImplTest {
         existingCase = new CourtCaseEntity();
         existingCase.setCaseNumber("CASE123");
         existingCase.setCourthouse(courthouse);
-        caseService = new CaseServiceImpl(caseRepository, courthouseService);
+        caseService = new CaseCommonServiceImpl(caseRepository, courthouseCommonService);
     }
 
     @Test
@@ -64,7 +64,7 @@ class CaseServiceImplTest {
     void retrieveOrCreateCaseWithCourthouseNameNewCase() {
         when(caseRepository.findByCaseNumberAndCourthouse_CourthouseNameIgnoreCase("CASE123", "Test Courthouse"))
             .thenReturn(Optional.empty());
-        when(courthouseService.retrieveCourthouse("Test Courthouse")).thenReturn(courthouse);
+        when(courthouseCommonService.retrieveCourthouse("Test Courthouse")).thenReturn(courthouse);
         when(caseRepository.saveAndFlush(any(CourtCaseEntity.class))).thenAnswer(i -> i.getArguments()[0]);
 
         CourtCaseEntity result = caseService.retrieveOrCreateCase("Test Courthouse", "CASE123", userAccount);

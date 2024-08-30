@@ -6,7 +6,7 @@ import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 
 import java.time.LocalDateTime;
 
-public interface HearingService {
+public interface HearingCommonService {
 
     HearingEntity retrieveOrCreateHearing(String courthouseName, String courtroomName, String caseNumber, LocalDateTime hearingDate,
                                           UserAccountEntity userAccount);

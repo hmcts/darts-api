@@ -7,18 +7,18 @@ import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.repository.CourtroomRepository;
-import uk.gov.hmcts.darts.common.service.CourthouseService;
-import uk.gov.hmcts.darts.common.service.CourtroomService;
+import uk.gov.hmcts.darts.common.service.CourthouseCommonService;
+import uk.gov.hmcts.darts.common.service.CourtroomCommonService;
 
 import java.util.Locale;
 import java.util.Optional;
 
 @RequiredArgsConstructor
 @Service
-public class CourtroomServiceImpl implements CourtroomService {
+public class CourtroomCommonServiceImpl implements CourtroomCommonService {
 
     private final CourtroomRepository courtroomRepository;
-    private final CourthouseService courthouseService;
+    private final CourthouseCommonService courthouseCommonService;
 
     @Override
     @Transactional
@@ -37,7 +37,7 @@ public class CourtroomServiceImpl implements CourtroomService {
             return foundCourtroom.get();
         }
 
-        CourthouseEntity courthouse = courthouseService.retrieveCourthouse(courthouseName);
+        CourthouseEntity courthouse = courthouseCommonService.retrieveCourthouse(courthouseName);
         return createCourtroom(courthouse, courtroomNameUpper, userAccount);
     }
 

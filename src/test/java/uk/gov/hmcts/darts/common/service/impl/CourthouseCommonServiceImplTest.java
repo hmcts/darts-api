@@ -20,12 +20,12 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-class CourthouseServiceImplTest {
+class CourthouseCommonServiceImplTest {
 
     @Mock
     private CourthouseRepository courthouseRepository;
 
-    private CourthouseServiceImpl courthouseService;
+    private CourthouseCommonServiceImpl courthouseService;
 
     private CourthouseEntity courthouse;
 
@@ -33,7 +33,7 @@ class CourthouseServiceImplTest {
     void setUp() {
         courthouse = new CourthouseEntity();
         courthouse.setCourthouseName("Test Courthouse");
-        courthouseService = new CourthouseServiceImpl(courthouseRepository);
+        courthouseService = new CourthouseCommonServiceImpl(courthouseRepository);
     }
 
     @Test
