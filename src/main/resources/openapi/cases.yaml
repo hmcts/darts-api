@@ -433,6 +433,9 @@ components:
         case_number:
           type: string
           example: CASE1001
+        case_type:
+          type: string
+          example: 1
         defendants:
           type: array
           items:

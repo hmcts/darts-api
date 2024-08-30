@@ -88,7 +88,7 @@ public class CasesMapper {
         return scheduledCase;
     }
 
-    public CourtCaseEntity addDefendantProsecutorDefenderJudge(CourtCaseEntity caseEntity, AddCaseRequest caseRequest) {
+    public CourtCaseEntity addDefendantProsecutorDefenderJudgeType(CourtCaseEntity caseEntity, AddCaseRequest caseRequest) {
 
         emptyIfNull(caseRequest.getDefendants()).forEach(newDefendant -> {
             if (unallocatedCaseRegex.matcher(newDefendant).matches()) {
@@ -110,6 +110,9 @@ public class CasesMapper {
             caseEntity.addJudge(retrieveCoreObjectService.retrieveOrCreateJudge(newJudge));
         });
 
+        if (caseRequest.getCaseType() != null) {
+            caseEntity.setCaseType(caseRequest.getCaseType());
+        }
         return caseEntity;
     }
 
