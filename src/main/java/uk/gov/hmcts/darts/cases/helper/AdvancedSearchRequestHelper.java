@@ -251,6 +251,7 @@ public class AdvancedSearchRequestHelper {
                     request.getDateTo()
                 ));
             }
+            predicateList.add(criteriaBuilder.isTrue(hearingJoin.get(HearingEntity_.HEARING_IS_ACTUAL)));
         }
         return predicateList;
     }
