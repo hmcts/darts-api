@@ -26,6 +26,7 @@ import uk.gov.hmcts.darts.testutils.stubs.TranscriptionDocumentStub;
 import uk.gov.hmcts.darts.testutils.stubs.TranscriptionStub;
 import uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum;
 import uk.gov.hmcts.darts.transcriptions.exception.TranscriptionApiError;
+import uk.gov.hmcts.darts.transcriptions.model.AdminMarkedForDeletionResponse;
 import uk.gov.hmcts.darts.transcriptions.model.GetTranscriptionDetailAdminResponse;
 import uk.gov.hmcts.darts.transcriptions.model.GetTranscriptionDocumentByIdResponse;
 import uk.gov.hmcts.darts.transcriptions.model.Problem;
@@ -58,6 +59,9 @@ class TranscriptionControllerAdminGetTranscriptionIntTest extends IntegrationBas
     private static final String ENDPOINT_DOCUMENT_SEARCH = "/admin/transcription-documents/search";
 
     private static final String ENDPOINT_GET_DOCUMENT_ID = "/admin/transcription-documents/";
+
+    private static final String ENDPOINT_DOCUMENT_MARKED_FOR_DELETION = "/admin/transcription-documents/marked-for-deletion";
+
 
     @Autowired
     private SuperAdminUserStub superAdminUserStub;
@@ -538,6 +542,39 @@ class TranscriptionControllerAdminGetTranscriptionIntTest extends IntegrationBas
         superAdminUserStub.givenUserIsAuthorised(userIdentity, SecurityRoleEnum.DAR_PC);
 
         mockMvc.perform(get(ENDPOINT_GET_DOCUMENT_ID + 10).header("Content-Type", "application/json"))
+            .andExpect(status().isForbidden())
+            .andReturn();
+    }
+
+    @Test
+    @Disabled("Impacted by V1_364_*.sql")
+    void testGetTranscriptionDocumentMarkedForDeletionWithResults() throws Exception {
+        // TODO: Resume when all test disablements are re-enabled
+    }
+
+    @Test
+    void testGetTranscriptionDocumentMarkedForDeletionNoResults() throws Exception {
+        superAdminUserStub.givenUserIsAuthorised(userIdentity);
+
+        MvcResult mvcResult = mockMvc.perform(get(ENDPOINT_DOCUMENT_MARKED_FOR_DELETION)
+                                                  .header("Content-Type", "application/json"))
+            .andExpect(status().is2xxSuccessful())
+            .andReturn();
+
+        AdminMarkedForDeletionResponse[] responses = objectMapper.readValue(
+            mvcResult.getResponse().getContentAsString(),
+            AdminMarkedForDeletionResponse[].class
+        );
+        assertEquals(0, responses.length);
+        assertEquals(200, mvcResult.getResponse().getStatus());
+    }
+
+    @Test
+    void testGetTranscriptionDocumentMarkedForDeletionNotSuperAdmin() throws Exception {
+        superAdminUserStub.givenUserIsAuthorised(userIdentity, SecurityRoleEnum.SUPER_USER);
+
+        mockMvc.perform(get(ENDPOINT_DOCUMENT_MARKED_FOR_DELETION)
+                                                  .header("Content-Type", "application/json"))
             .andExpect(status().isForbidden())
             .andReturn();
     }

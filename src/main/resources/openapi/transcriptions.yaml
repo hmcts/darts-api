@@ -867,7 +867,6 @@ paths:
               schema:
                 allOf:
                   - $ref: './problem.yaml'
-
   /admin/transcription-documents/{transcription_document_id}:
     get:
       tags:
@@ -952,6 +951,21 @@ paths:
               schema:
                 allOf:
                   - $ref: './problem.yaml'
+  /admin/transcription-documents/marked-for-deletion:
+    get:
+      tags:
+        - Transcription
+      summary: Get transcription documents marked for deletion
+      operationId: getTranscriptionDocumentsMarkedForDeletion
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/AdminMarkedForDeletionResponse'
 
 components:
   schemas:
@@ -1705,6 +1719,68 @@ components:
         comments:
           type: string
           description: 'The comments for the admin action'
+
+    TranscriptionResponseDetails:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: 'The transcription document id'
+
+    CaseResponseDetails:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: 'The case id'
+        case_number:
+          type: string
+          description: 'The case number'
+
+    CourthouseResponseDetails:
+      type: object
+      properties:
+        id:
+          type: integer
+        display_name:
+          type: string
+
+    CourtroomResponseDetails:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+
+    HearingResponseDetails:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: 'The case id'
+        hearing_date:
+          type: date
+          description: 'The case number'
+
+    AdminMarkedForDeletionResponse:
+      type: object
+      properties:
+        transcription_document_id:
+          type: integer
+          description: 'The transcription document id'
+        transcription:
+          $ref: '#/components/schemas/TranscriptionResponseDetails'
+        case:
+          $ref: '#/components/schemas/CaseResponseDetails'
+        hearing:
+          $ref: '#/components/schemas/HearingResponseDetails'
+        courthouse:
+          $ref: '#/components/schemas/CourthouseResponseDetails'
+        courtroom:
+          $ref: '#/components/schemas/CourtroomResponseDetails'
+        admin_action:
+          $ref: '#/components/schemas/AdminAction'
 
     TranscriptionsErrorCode:
       type: string

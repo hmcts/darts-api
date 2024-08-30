@@ -55,4 +55,15 @@ public interface TranscriptionDocumentRepository extends JpaRepository<Transcrip
                                                              OffsetDateTime requestedAtTo,
                                                              Boolean isManualTranscription,
                                                              String owner);
+
+
+
+    @Query("""
+            SELECT t
+            FROM TranscriptionDocumentEntity t
+            JOIN t.adminActions ae
+            JOIN ae.objectHiddenReason hr
+            WHERE ae.markedForManualDeletion = false AND hr.markedForDeletion = true
+     """)
+    List<TranscriptionDocumentEntity> getMarkedForDeletion();
 }
