@@ -8,7 +8,7 @@ import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
 import uk.gov.hmcts.darts.common.repository.HearingRepository;
 import uk.gov.hmcts.darts.common.repository.MediaRepository;
-import uk.gov.hmcts.darts.testutils.IntegrationBase;
+import uk.gov.hmcts.darts.testutils.PostgresIntegrationBase;
 import uk.gov.hmcts.darts.testutils.stubs.CourtCaseStub;
 import uk.gov.hmcts.darts.testutils.stubs.MediaStub;
 
@@ -20,10 +20,11 @@ import static uk.gov.hmcts.darts.test.common.data.CaseTestData.createSomeMinimal
 import static uk.gov.hmcts.darts.test.common.data.HearingTestData.createHearingFor;
 import static uk.gov.hmcts.darts.test.common.data.MediaTestData.someMinimalMedia;
 
-class MediaRepositoryIntTest extends IntegrationBase {
+class MediaRepositoryIntTest extends PostgresIntegrationBase {
 
     @Autowired
     HearingRepository hearingRepository;
+
     @Autowired
     CourtCaseStub caseStub;
 
