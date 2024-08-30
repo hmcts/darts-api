@@ -57,7 +57,7 @@ class RetrieveCoreObjectServiceImplTest {
     }
 
     @Test
-    void retrieveOrCreateHearing_shouldDelegateToHearingService() {
+    void retrieveOrCreateHearingShouldDelegateToHearingService() {
         String courthouseName = "Test Courthouse";
         String courtroomName = "Test Courtroom";
         String caseNumber = "Case123";
@@ -76,7 +76,7 @@ class RetrieveCoreObjectServiceImplTest {
     }
 
     @Test
-    void retrieveOrCreateHearingWithMedia_shouldDelegateToHearingService() {
+    void retrieveOrCreateHearingWithMediaShouldDelegateToHearingService() {
         String courthouseName = "Test Courthouse";
         String courtroomName = "Test Courtroom";
         String caseNumber = "Case123";
@@ -96,7 +96,7 @@ class RetrieveCoreObjectServiceImplTest {
     }
 
     @Test
-    void retrieveOrCreateCourtroom_withCourthouse_shouldDelegateToCourtroomService() {
+    void retrieveOrCreateCourtroomWithCourthouseShouldDelegateToCourtroomService() {
         CourthouseEntity courthouse = new CourthouseEntity();
         String courtroomName = "Test Courtroom";
         UserAccountEntity userAccount = new UserAccountEntity();
@@ -111,7 +111,7 @@ class RetrieveCoreObjectServiceImplTest {
     }
 
     @Test
-    void retrieveOrCreateCourtroom_withCourthouseName_shouldDelegateToCourtroomService() {
+    void retrieveOrCreateCourtroomWithCourthouseNameShouldDelegateToCourtroomService() {
         String courthouseName = "Test Courthouse";
         String courtroomName = "Test Courtroom";
         UserAccountEntity userAccount = new UserAccountEntity();
@@ -126,7 +126,7 @@ class RetrieveCoreObjectServiceImplTest {
     }
 
     @Test
-    void retrieveOrCreateCase_withoutUserAccount_shouldDelegateToCaseService() {
+    void retrieveOrCreateCaseWithoutUserAccountShouldDelegateToCaseService() {
         String courthouseName = "Test Courthouse";
         String caseNumber = "Case123";
         UserAccountEntity userAccount = new UserAccountEntity();
@@ -142,7 +142,7 @@ class RetrieveCoreObjectServiceImplTest {
     }
 
     @Test
-    void retrieveOrCreateCase_withUserAccount_shouldDelegateToCaseService() {
+    void retrieveOrCreateCaseWithUserAccountShouldDelegateToCaseService() {
         String courthouseName = "Test Courthouse";
         String caseNumber = "Case123";
         UserAccountEntity userAccount = new UserAccountEntity();
@@ -157,7 +157,7 @@ class RetrieveCoreObjectServiceImplTest {
     }
 
     @Test
-    void retrieveOrCreateCase_withCourthouse_shouldDelegateToCaseService() {
+    void retrieveOrCreateCaseWithCourthouseShouldDelegateToCaseService() {
         CourthouseEntity courthouse = new CourthouseEntity();
         String caseNumber = "Case123";
         UserAccountEntity userAccount = new UserAccountEntity();
@@ -172,7 +172,7 @@ class RetrieveCoreObjectServiceImplTest {
     }
 
     @Test
-    void retrieveCourthouse_shouldDelegateToCourthouseService() {
+    void retrieveCourthouseShouldDelegateToCourthouseService() {
         String courthouseName = "Test Courthouse";
         CourthouseEntity expectedCourthouse = new CourthouseEntity();
 
@@ -185,7 +185,7 @@ class RetrieveCoreObjectServiceImplTest {
     }
 
     @Test
-    void retrieveOrCreateJudge_withoutUserAccount_shouldDelegateToJudgeService() {
+    void retrieveOrCreateJudgeWithoutUserAccountShouldDelegateToJudgeService() {
         String judgeName = "Judge Smith";
         UserAccountEntity userAccount = new UserAccountEntity();
         JudgeEntity expectedJudge = new JudgeEntity();
@@ -200,7 +200,7 @@ class RetrieveCoreObjectServiceImplTest {
     }
 
     @Test
-    void retrieveOrCreateJudge_withUserAccount_shouldDelegateToJudgeService() {
+    void retrieveOrCreateJudgeWithUserAccountShouldDelegateToJudgeService() {
         String judgeName = "Judge Smith";
         UserAccountEntity userAccount = new UserAccountEntity();
         JudgeEntity expectedJudge = new JudgeEntity();
