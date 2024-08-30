@@ -249,7 +249,7 @@ public class TestSupportController {
     private CourthouseEntity newCourthouse(String courthouseName) {
         var courthouse = new CourthouseEntity();
         courthouse.setCourthouseName(courthouseName);
-        courthouse.setDisplayName(courthouseName);
+        courthouse.setDisplayName(StringUtils.toRootLowerCase(courthouseName));
         UserAccountEntity defaultUser = new UserAccountEntity();
         defaultUser.setId(0);
         courthouse.setCreatedBy(defaultUser);
