@@ -49,16 +49,17 @@ public abstract class EventHandlerBase implements EventHandler {
 
     protected CreatedHearingAndEvent createHearingAndSaveEvent(DartsEvent dartsEvent, EventHandlerEntity eventHandler) {
 
-        var eventEntity = eventPersistenceService.recordEvent(dartsEvent, eventHandler);
-
-        final var caseNumbers = dartsEvent.getCaseNumbers();
-        if (caseNumbers.size() > 1) {
-            log.warn(format(MULTIPLE_CASE_NUMBERS, dartsEvent.getEventId(), join(", ", caseNumbers)));
-            // This needs fixing to deal with multiple case numbers https://tools.hmcts.net/jira/browse/DMP-2835
-        }
-        String caseNumber = caseNumbers.get(0);
-
         try {
+
+            var eventEntity = eventPersistenceService.recordEvent(dartsEvent, eventHandler);
+
+            final var caseNumbers = dartsEvent.getCaseNumbers();
+            if (caseNumbers.size() > 1) {
+                log.warn(format(MULTIPLE_CASE_NUMBERS, dartsEvent.getEventId(), join(", ", caseNumbers)));
+                // This needs fixing to deal with multiple case numbers https://tools.hmcts.net/jira/browse/DMP-2835
+            }
+            String caseNumber = caseNumbers.get(0);
+
             LocalDateTime hearingDateTime = DateConverterUtil.toLocalDateTime(dartsEvent.getDateTime());
             HearingEntity hearingEntity = retrieveCoreObjectService.retrieveOrCreateHearing(
                 dartsEvent.getCourthouse(),
