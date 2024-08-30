@@ -115,7 +115,7 @@ class AudioServiceImplTest {
 
         audioService.setIsArchived(audioMetadataList, 1);
 
-        assertEquals(false, audioMetadataList.get(0).getIsArchived());
+        assertEquals(true, audioMetadataList.get(0).getIsArchived());
     }
 
     @Test

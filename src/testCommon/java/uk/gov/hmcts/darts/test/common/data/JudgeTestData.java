@@ -9,10 +9,20 @@ import java.util.Locale;
 import java.util.stream.Collectors;
 
 import static java.util.stream.IntStream.rangeClosed;
+import static uk.gov.hmcts.darts.test.common.data.UserAccountTestData.minimalUserAccount;
 
 @UtilityClass
 @SuppressWarnings({"HideUtilityClassConstructor"})
 public class JudgeTestData {
+
+    public static JudgeEntity someMinimalJudge() {
+        var judge = new JudgeEntity();
+        judge.setName("some-judge");
+        var userAccount = minimalUserAccount();
+        judge.setCreatedBy(userAccount);
+        judge.setLastModifiedBy(userAccount);
+        return judge;
+    }
 
     public static List<JudgeEntity> createListOfJudges(int quantity, CourtCaseEntity courtCase) {
         return rangeClosed(1, quantity)
@@ -22,7 +32,7 @@ public class JudgeTestData {
 
 
     public static JudgeEntity createJudgeWithName(String name) {
-        var judgeEntity = new JudgeEntity();
+        var judgeEntity = someMinimalJudge();
         judgeEntity.setName(name.toUpperCase(Locale.ROOT));
         return judgeEntity;
     }

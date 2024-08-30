@@ -18,12 +18,15 @@ public class MediaRequestTestData {
     public static MediaRequestEntity minimalRequestData() {
         var mediaRequest = new MediaRequestEntity();
         mediaRequest.setHearing(someMinimalHearing());
-        mediaRequest.setRequestor(minimalUserAccount());
         mediaRequest.setStatus(OPEN);
         mediaRequest.setRequestType(DOWNLOAD);
         mediaRequest.setStartTime(middayToday());
         mediaRequest.setEndTime(middayToday().plusHours(1));
-        mediaRequest.setCurrentOwner(minimalUserAccount());
+        var userAccount = minimalUserAccount();
+        mediaRequest.setRequestor(userAccount);
+        mediaRequest.setCurrentOwner(userAccount);
+        mediaRequest.setCreatedBy(userAccount);
+        mediaRequest.setLastModifiedBy(userAccount);
         return mediaRequest;
     }
 

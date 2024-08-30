@@ -1,32 +1,39 @@
 package uk.gov.hmcts.darts.arm.service;
 
-import feign.Response;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.github.tomakehurst.wiremock.client.WireMock;
+import com.github.tomakehurst.wiremock.matching.RegexPattern;
 import lombok.SneakyThrows;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import uk.gov.hmcts.darts.arm.client.ArmApiClient;
 import uk.gov.hmcts.darts.arm.client.ArmTokenClient;
 import uk.gov.hmcts.darts.arm.client.model.ArmTokenRequest;
 import uk.gov.hmcts.darts.arm.client.model.ArmTokenResponse;
 import uk.gov.hmcts.darts.arm.client.model.AvailableEntitlementProfile;
 import uk.gov.hmcts.darts.arm.client.model.UpdateMetadataRequest;
 import uk.gov.hmcts.darts.arm.client.model.UpdateMetadataResponse;
+import uk.gov.hmcts.darts.arm.config.ArmApiConfigurationProperties;
 import uk.gov.hmcts.darts.arm.enums.GrantType;
 import uk.gov.hmcts.darts.common.datamanagement.component.impl.DownloadResponseMetaData;
+import uk.gov.hmcts.darts.datamanagement.exception.FileNotDownloadedException;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 
-import java.io.ByteArrayInputStream;
 import java.time.OffsetDateTime;
-import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
 
+import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
+import static com.github.tomakehurst.wiremock.client.WireMock.equalToJson;
+import static com.github.tomakehurst.wiremock.client.WireMock.getRequestedFor;
+import static com.github.tomakehurst.wiremock.client.WireMock.postRequestedFor;
+import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
+import static com.github.tomakehurst.wiremock.client.WireMock.urlPathMatching;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -44,8 +51,21 @@ class ArmApiServiceIntTest extends IntegrationBase {
 
     @MockBean
     private ArmTokenClient armTokenClient;
-    @MockBean
-    private ArmApiClient armApiClient;
+
+    @Value("${darts.storage.arm-api.download-data-path}")
+    private String downloadPath;
+
+    @Value("${darts.storage.arm-api.update-metadata-path}")
+    private String uploadPath;
+
+    @Value("${darts.storage.arm-api.url}")
+    private String baseArmPath;
+
+    @Autowired
+    private ArmApiConfigurationProperties armApiConfigurationProperties;
+
+    @Autowired
+    private ObjectMapper objectMapper;
 
     @BeforeEach
     void setup() {
@@ -61,7 +81,8 @@ class ArmApiServiceIntTest extends IntegrationBase {
     }
 
     @Test
-    void updateMetadata() {
+    void updateMetadata() throws Exception {
+
         // Given
         var eventTimestamp = OffsetDateTime.parse("2024-01-31T11:29:56.101701Z").plusYears(7);
 
@@ -87,45 +108,71 @@ class ArmApiServiceIntTest extends IntegrationBase {
             .responseStatus(0)
             .responseStatusMessages(null)
             .build();
-        when(armApiClient.updateMetadata(
-            bearerAuth,
-            updateMetadataRequest
-        )).thenReturn(updateMetadataResponse);
-        when(armApiClient.updateMetadata(
-            bearerAuth,
-            updateMetadataRequest
-        )).thenReturn(updateMetadataResponse);
+
+        String dummyResponse = objectMapper.writeValueAsString(updateMetadataResponse);
+        String dummyRequest = objectMapper.writeValueAsString(updateMetadataRequest);
+
+        stubFor(
+            WireMock.post(urlPathMatching(uploadPath)).withRequestBody(equalToJson(dummyRequest))
+                .willReturn(
+                    aResponse().withHeader("Content-Type", "application/json").withBody(dummyResponse)
+                        .withStatus(200)));
 
         // When
         var responseToTest = armApiService.updateMetadata(EXTERNAL_RECORD_ID, eventTimestamp, scoreConfId, reasonConf);
 
         // Then
         verify(armTokenClient).getToken(armTokenRequest);
-        verify(armApiClient).updateMetadata(bearerAuth, updateMetadataRequest);
+
+        WireMock.verify(postRequestedFor(urlPathMatching(uploadPath))
+            .withHeader("Authorization", new RegexPattern(bearerAuth))
+                            .withRequestBody(equalToJson(dummyRequest)));
+
         assertEquals(updateMetadataResponse, responseToTest);
     }
 
     @Test
     @SneakyThrows
     void downloadArmData() {
-
         // Given
         byte[] binaryData = "some binary content".getBytes();
-        Response response = Response.builder()
-            .status(200)
-            .headers(new HashMap<>())
-            .request(Mockito.mock(feign.Request.class))
-            .body(new ByteArrayInputStream(binaryData), binaryData.length)
-            .build();
-        when(armApiClient.downloadArmData(any(), any(), any(), any())).thenReturn(response);
+
+        stubFor(
+            WireMock.get(urlPathMatching(getDownloadPath(downloadPath, CABINET_ID, EXTERNAL_RECORD_ID, EXTERNAL_FILE_ID)))
+                .willReturn(
+                    aResponse().withBody(binaryData)
+                    .withStatus(200)));
 
         // When
         DownloadResponseMetaData downloadResponseMetaData = armApiService.downloadArmData(EXTERNAL_RECORD_ID, EXTERNAL_FILE_ID);
 
         // Then
         verify(armTokenClient).getToken(armTokenRequest);
-        verify(armApiClient).downloadArmData("Bearer some-token", CABINET_ID, EXTERNAL_RECORD_ID, EXTERNAL_FILE_ID);
+
+        WireMock.verify(getRequestedFor(urlPathMatching(getDownloadPath(downloadPath, CABINET_ID, EXTERNAL_RECORD_ID, EXTERNAL_FILE_ID)))
+                    .withHeader("Authorization", new RegexPattern("Bearer some-token")));
+
         assertThat(downloadResponseMetaData.getInputStream().readAllBytes()).isEqualTo(binaryData);
+    }
+
+
+    @Test
+    @SneakyThrows
+    void downloadFailureExceptionFromFeign() {
+        // Given
+        stubFor(
+            WireMock.get(urlPathMatching(getDownloadPath(downloadPath, CABINET_ID, EXTERNAL_RECORD_ID, EXTERNAL_FILE_ID)))
+                .willReturn(
+                    aResponse().withStatus(400)));
+        // When
+        FileNotDownloadedException exception
+            = Assertions.assertThrows(FileNotDownloadedException.class, () -> armApiService.downloadArmData(EXTERNAL_RECORD_ID, EXTERNAL_FILE_ID));
+
+        // Then
+        verify(armTokenClient).getToken(armTokenRequest);
+        Assertions.assertTrue(exception.getMessage().contains(CABINET_ID));
+        Assertions.assertTrue(exception.getMessage().contains(EXTERNAL_RECORD_ID));
+        Assertions.assertTrue(exception.getMessage().contains(EXTERNAL_FILE_ID));
     }
 
     private AvailableEntitlementProfile getAvailableEntitlementProfile() {
@@ -146,5 +193,9 @@ class ArmApiServiceIntTest extends IntegrationBase {
             .tokenType("Bearer")
             .expiresIn("3600")
             .build();
+    }
+
+    private String getDownloadPath(String downloadPath, String cabinetId, String recordId, String fileId) {
+        return downloadPath.replace("{cabinet_id}", cabinetId).replace("{record_id}", recordId).replace("{file_id}", fileId);
     }
 }
