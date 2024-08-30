@@ -60,24 +60,6 @@ public class MediaRequestTestData {
         return mediaRequestEntity;
     }
 
-    public static MediaRequestEntity createExpiredMediaRequest(HearingEntity hearingEntity, UserAccountEntity requestor,
-                                                        OffsetDateTime startTime, OffsetDateTime endTime,
-                                                        AudioRequestType audioRequestType) {
-
-        MediaRequestEntity mediaRequestEntity = someMinimalRequestData();
-        mediaRequestEntity.setHearing(hearingEntity);
-        mediaRequestEntity.setRequestor(requestor);
-        mediaRequestEntity.setCurrentOwner(requestor);
-        mediaRequestEntity.setStatus(MediaRequestStatus.EXPIRED);
-        mediaRequestEntity.setRequestType(audioRequestType);
-        mediaRequestEntity.setAttempts(0);
-        mediaRequestEntity.setStartTime(startTime);
-        mediaRequestEntity.setEndTime(endTime);
-        mediaRequestEntity.setCreatedBy(requestor);
-        mediaRequestEntity.setLastModifiedBy(requestor);
-        return mediaRequestEntity;
-    }
-
     public static MediaRequestEntity createCompletedMediaRequest(HearingEntity hearingEntity, UserAccountEntity requestor,
                                                           OffsetDateTime startTime, OffsetDateTime endTime,
                                                           AudioRequestType audioRequestType) {

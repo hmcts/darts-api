@@ -41,15 +41,17 @@ public class MediaRequestStub {
         HearingEntity hearing = hearingStub.createHearing(courtName, "Int Test Courtroom 2",
                                                           caseNumber, hearingDate);
 
+        var currentMediaRequest = MediaRequestTestData.createCurrentMediaRequest(
+            hearing,
+            owner,
+            requestor,
+            startTime,
+            endTime,
+            audioRequestType, status, requestedDate
+        );
+        currentMediaRequest.setCreatedDateTime(requestedDate);
         return  mediaRequestRepository.save(
-            MediaRequestTestData.createCurrentMediaRequest(
-                hearing,
-                owner,
-                requestor,
-                startTime,
-                endTime,
-                audioRequestType, status, requestedDate
-            ));
+            currentMediaRequest);
     }
 
     @Transactional
