@@ -1,6 +1,7 @@
 package uk.gov.hmcts.darts.courthouse.validation;
 
 import lombok.RequiredArgsConstructor;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -34,6 +35,7 @@ public class CourthousePatchValidator implements BiValidator<CourthousePatch, In
     @Transactional(propagation = Propagation.REQUIRED)
     @SuppressWarnings({"PMD.CyclomaticComplexity", "PMD.UnnecessaryAnnotationValueElement"})
     public void validate(CourthousePatch patch, Integer id) {
+        patch.setCourthouseName(StringUtils.toRootUpperCase(patch.getCourthouseName()));
         var courthouseEntity = repository.findById(id)
             .orElseThrow(() -> new DartsApiException(COURTHOUSE_NOT_FOUND));
 
@@ -44,7 +46,7 @@ public class CourthousePatchValidator implements BiValidator<CourthousePatch, In
         }
 
         if (nonNull(patch.getCourthouseName())) {
-            if (repository.existsByCourthouseNameIgnoreCaseAndIdNot(patch.getCourthouseName(), id)) {
+            if (repository.existsByCourthouseNameAndIdNot(patch.getCourthouseName(), id)) {
                 throw new DartsApiException(COURTHOUSE_NAME_PROVIDED_ALREADY_EXISTS);
             }
         }

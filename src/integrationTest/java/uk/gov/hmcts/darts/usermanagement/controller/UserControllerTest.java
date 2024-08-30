@@ -77,7 +77,7 @@ class UserControllerTest extends IntegrationBase {
     private SecurityGroupStub securityGroupStub;
 
     private static final OffsetDateTime SOME_DATE_TIME = OffsetDateTime.parse("2023-01-01T12:00Z");
-    private static final String SOME_COURTHOUSE = "some-courthouse";
+    private static final String SOME_COURTHOUSE = "SOME-COURTHOUSE";
     private static final String SOME_COURTROOM = "some-courtroom";
     private static final String SOME_CASE_ID = "1";
     private static final OffsetDateTime YESTERDAY = now(UTC).minusDays(1).withHour(9).withMinute(0)
@@ -100,7 +100,7 @@ class UserControllerTest extends IntegrationBase {
 
         var courtCase = authorisationStub.getCourtCaseEntity();
         TranscriptionEntity transcription
-            = dartsDatabase.getTranscriptionStub().createAndSaveWithTranscriberTranscription(userAccountEntity, courtCase, hearingEntity,  YESTERDAY, false);
+            = dartsDatabase.getTranscriptionStub().createAndSaveWithTranscriberTranscription(userAccountEntity, courtCase, hearingEntity, YESTERDAY, false);
 
         // now run the test to disable the user
         UserPatch userPatch = new UserPatch();
@@ -125,7 +125,7 @@ class UserControllerTest extends IntegrationBase {
         mapper.registerModule(new JavaTimeModule());
 
         UserWithIdAndTimestamps userWithIdAndTimestamps = mapper.readValue(mvcResult.getResponse().getContentAsString(),
-                                                              UserWithIdAndTimestamps.class);
+                                                                           UserWithIdAndTimestamps.class);
 
         List<Integer> rolledBackTranscription = userWithIdAndTimestamps.getRolledBackTranscriptRequests();
 
@@ -162,7 +162,7 @@ class UserControllerTest extends IntegrationBase {
 
         var courtCase = authorisationStub.getCourtCaseEntity();
         TranscriptionEntity transcription
-            = dartsDatabase.getTranscriptionStub().createAndSaveWithTranscriberTranscription(userAccountEntity, courtCase, hearingEntity,  YESTERDAY, false);
+            = dartsDatabase.getTranscriptionStub().createAndSaveWithTranscriberTranscription(userAccountEntity, courtCase, hearingEntity, YESTERDAY, false);
 
         // now run the test to disable the user
         UserPatch userPatch = new UserPatch();
@@ -303,9 +303,9 @@ class UserControllerTest extends IntegrationBase {
 
         uk.gov.hmcts.darts.transcriptions.model.Problem failureResponse = objectMapper
             .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false).readValue(
-            mvcResult.getResponse().getContentAsString(),
-            uk.gov.hmcts.darts.transcriptions.model.Problem.class
-        );
+                mvcResult.getResponse().getContentAsString(),
+                uk.gov.hmcts.darts.transcriptions.model.Problem.class
+            );
 
         // assert the failure response
         Assertions.assertEquals(UserManagementError.USER_ACTIVATION_FULLNAME_OR_EMAIL_VIOLATION.getType(), failureResponse.getType());
@@ -353,9 +353,9 @@ class UserControllerTest extends IntegrationBase {
 
         uk.gov.hmcts.darts.transcriptions.model.Problem failureResponse = objectMapper
             .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false).readValue(
-            mvcResult.getResponse().getContentAsString(),
-            uk.gov.hmcts.darts.transcriptions.model.Problem.class
-        );
+                mvcResult.getResponse().getContentAsString(),
+                uk.gov.hmcts.darts.transcriptions.model.Problem.class
+            );
 
         // assert the failure response
         Assertions.assertEquals(UserManagementError.USER_ACTIVATION_FULLNAME_OR_EMAIL_VIOLATION.getType(), failureResponse.getType());
@@ -450,7 +450,7 @@ class UserControllerTest extends IntegrationBase {
         mapper.registerModule(new JavaTimeModule());
 
         Problem problem = mapper.readValue(mvcResult.getResponse().getContentAsString(),
-                                                                           Problem.class);
+                                           Problem.class);
         Assertions.assertEquals(AuthorisationError.UNABLE_TO_DEACTIVATE_USER.getErrorTypeNumeric(), problem.getType().toString());
     }
 

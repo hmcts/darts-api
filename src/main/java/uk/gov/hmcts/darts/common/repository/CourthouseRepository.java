@@ -15,7 +15,7 @@ public interface CourthouseRepository extends RevisionRepository<CourthouseEntit
 
     Optional<CourthouseEntity> findByCode(int code);
 
-    Optional<CourthouseEntity> findByCourthouseNameIgnoreCase(String name);
+    Optional<CourthouseEntity> findByCourthouseName(String name);
 
     @Query("""
         SELECT DISTINCT courthouse
@@ -40,7 +40,7 @@ public interface CourthouseRepository extends RevisionRepository<CourthouseEntit
 
     Optional<CourthouseEntity> findByDisplayNameIgnoreCase(String displayName);
 
-    boolean existsByCourthouseNameIgnoreCaseAndIdNot(String name, Integer id);
+    boolean existsByCourthouseNameAndIdNot(String name, Integer id);
 
     boolean existsByDisplayNameIgnoreCaseAndIdNot(String name, Integer id);
 

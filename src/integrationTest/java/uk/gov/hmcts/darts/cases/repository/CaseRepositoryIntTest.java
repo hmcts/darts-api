@@ -21,7 +21,7 @@ import java.util.List;
 import static org.assertj.core.api.Assertions.assertThat;
 
 class CaseRepositoryIntTest extends IntegrationBase {
-    protected static final String SOME_COURTHOUSE = "some-courthouse";
+    protected static final String SOME_COURTHOUSE = "SOME-COURTHOUSE";
     protected static final String SOME_ROOM = "some-room";
     protected static final String SOME_CASE_NUMBER_1 = "CASE1";
     protected static final String SOME_CASE_NUMBER_2 = "CASE2";

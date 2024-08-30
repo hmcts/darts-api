@@ -81,7 +81,7 @@ class DailyListUpdaterTest {
 
         var dailyListUser = new UserAccountEntity();
         when(systemUserHelper.getDailyListProcessorUser()).thenReturn(dailyListUser);
-        when(courthouseRepository.findByCourthouseNameIgnoreCase("SWANSEA")).thenReturn(Optional.of(new CourthouseEntity()));
+        when(courthouseRepository.findByCourthouseName("SWANSEA")).thenReturn(Optional.of(new CourthouseEntity()));
         HearingEntity hearing = new HearingEntity();
         CourtCaseEntity courtCase = new CourtCaseEntity();
         hearing.setCourtCase(courtCase);
@@ -101,7 +101,7 @@ class DailyListUpdaterTest {
         OffsetDateTime testTime = DateConverterUtil.toOffsetDateTime(HEARING_DATE);
         when(currentTimeHelper.currentOffsetDateTime()).thenReturn(testTime);
         when(systemUserHelper.getDailyListProcessorUser()).thenReturn(dailyListUser);
-        when(courthouseRepository.findByCourthouseNameIgnoreCase("SWANSEA")).thenReturn(Optional.of(new CourthouseEntity()));
+        when(courthouseRepository.findByCourthouseName("SWANSEA")).thenReturn(Optional.of(new CourthouseEntity()));
         HearingEntity hearing = new HearingEntity();
         CourtCaseEntity courtCase = new CourtCaseEntity();
         hearing.setCourtCase(courtCase);
