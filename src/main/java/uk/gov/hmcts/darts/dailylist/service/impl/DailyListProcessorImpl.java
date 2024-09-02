@@ -32,7 +32,7 @@ public class DailyListProcessorImpl implements DailyListProcessor {
 
         stream(SourceType.values()).forEach(sourceType -> {
 
-            var dailyListsGroupedByCourthouse = dailyListRepository.findByStatusAndStartDateAndSourceOrderByPublishedTimestampDesc(
+            var dailyListsGroupedByCourthouse = dailyListRepository.findByStatusAndStartDateAndSourceOrderByPublishedTimestampDescCreatedDateTimeDesc(
                 JobStatusType.NEW,
                 now(),
                 String.valueOf(sourceType)
@@ -87,14 +87,14 @@ public class DailyListProcessorImpl implements DailyListProcessor {
 
         if (!dailyLists.isEmpty()) {
             try {
-                dailyListUpdater.processDailyList(dailyLists.get(0));
+                dailyListUpdater.processDailyList(dailyLists.getFirst());
 
                 // report on the daily list result
-                report.registerResult(dailyLists.get(0).getStatus());
+                report.registerResult(dailyLists.getFirst().getStatus());
             } catch (Exception e) {
-                dailyLists.get(0).setStatus(JobStatusType.FAILED);
+                dailyLists.getFirst().setStatus(JobStatusType.FAILED);
                 report.registerFailed();
-                log.error("Failed to process dailylist for dailylist id: {}", dailyLists.get(0).getId(), e);
+                log.error("Failed to process dailylist for dailylist id: {}", dailyLists.getFirst().getId(), e);
             }
 
             if (dailyLists.size() > 1) {
