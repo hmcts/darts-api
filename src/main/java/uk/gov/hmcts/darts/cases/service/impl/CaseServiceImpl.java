@@ -148,7 +148,7 @@ public class CaseServiceImpl implements CaseService {
     }
 
     private PostCaseResponse updateCase(AddCaseRequest addCaseRequest, CourtCaseEntity existingCase) {
-        CourtCaseEntity updatedCaseEntity = casesMapper.addDefendantProsecutorDefenderJudge(
+        CourtCaseEntity updatedCaseEntity = casesMapper.addDefendantProsecutorDefenderJudgeType(
             existingCase,
             addCaseRequest
         );
