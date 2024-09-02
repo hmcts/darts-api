@@ -142,6 +142,8 @@ public class CasesMapper {
         singleCase.setDefenders(caseEntity.getDefenceStringList());
         singleCase.setProsecutors(caseEntity.getProsecutorsStringList());
         singleCase.setJudges(caseEntity.getJudgeStringList());
+        singleCase.setIsDataAnonymised(caseEntity.isDataAnonymised());
+        singleCase.setDataAnonymisedAt(caseEntity.getDataAnonymisedTs());
 
         var reportingRestrictions = hearingReportingRestrictionsRepository.findAllByCaseId(caseEntity.getId()).stream()
             .map(this::toReportingRestriction)

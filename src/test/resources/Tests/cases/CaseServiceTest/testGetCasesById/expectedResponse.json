@@ -18,5 +18,6 @@
   "prosecutors": [
     "prosecutor_caseNum_1_1",
     "prosecutor_caseNum_1_2"
-  ]
+  ],
+  "is_data_anonymised": false
 }
