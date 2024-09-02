@@ -14,7 +14,6 @@ import uk.gov.hmcts.darts.common.entity.CaseManagementRetentionEntity;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
-import uk.gov.hmcts.darts.common.entity.DailyListEntity;
 import uk.gov.hmcts.darts.common.entity.DefenceEntity;
 import uk.gov.hmcts.darts.common.entity.DefendantEntity;
 import uk.gov.hmcts.darts.common.entity.EventEntity;
@@ -331,16 +330,6 @@ public class DartsPersistence {
     }
 
     @Transactional
-    public void saveAll(List<HearingEntity> hearings) {
-        for (HearingEntity hearingEntity : hearings) {
-            save(hearingEntity);
-        }
-    }
-
-    public List<DailyListEntity> saveAll(DailyListEntity... dailyLists) {
-        return dailyListRepository.saveAll(asList(dailyLists));
-    }
-
     public void saveAll(AnnotationDocumentEntity... annotationDocuments) {
         stream(annotationDocuments).forEach(this::save);
     }

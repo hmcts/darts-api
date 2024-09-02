@@ -13,6 +13,7 @@ import org.springframework.data.history.Revisions;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import uk.gov.hmcts.darts.audio.entity.MediaRequestEntity;
+import uk.gov.hmcts.darts.audio.enums.MediaRequestStatus;
 import uk.gov.hmcts.darts.audiorequests.model.AudioRequestType;
 import uk.gov.hmcts.darts.common.entity.AnnotationDocumentEntity;
 import uk.gov.hmcts.darts.common.entity.AnnotationEntity;
@@ -473,11 +474,12 @@ public class DartsDatabaseStub {
 
         HearingEntity hearing = createHearing("NEWCASTLE", "Int Test Courtroom 2", "2", LocalDateTime.of(2023, 6, 10, 10, 0, 0));
 
-        MediaRequestEntity completedMediaRequest = MediaRequestTestData.createCompletedMediaRequest(
+        MediaRequestEntity completedMediaRequest = MediaRequestTestData.createCurrentMediaRequest(
             hearing,
             requestor,
             OffsetDateTime.parse("2023-06-26T13:00:00Z"),
-            OffsetDateTime.parse("2023-06-26T14:00:00Z"), audioRequestType
+            OffsetDateTime.parse("2023-06-26T14:00:00Z"), audioRequestType,
+            MediaRequestStatus.COMPLETED
         );
         save(completedMediaRequest);
 
