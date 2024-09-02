@@ -70,8 +70,8 @@ class DailyListUpdater {
 
         for (CourtList courtList : dailyList.getCourtLists()) {
 
-            String courtHouseName = courtList.getCourtHouse().getCourtHouseName();
-            Optional<CourthouseEntity> foundCourthouse = courthouseRepository.findByCourthouseNameIgnoreCase(
+            String courtHouseName = courtList.getCourtHouse().getCourtHouseName().toUpperCase(Locale.ROOT);
+            Optional<CourthouseEntity> foundCourthouse = courthouseRepository.findByCourthouseName(
                 courtHouseName);
 
             if (foundCourthouse.isPresent()) {

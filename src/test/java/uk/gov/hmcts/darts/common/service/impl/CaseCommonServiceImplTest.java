@@ -48,7 +48,7 @@ class CaseCommonServiceImplTest {
 
     @Test
     void retrieveOrCreateCaseWithCourthouseNameExistingCase() {
-        when(caseRepository.findByCaseNumberAndCourthouse_CourthouseNameIgnoreCase("CASE123", "Test Courthouse"))
+        when(caseRepository.findByCaseNumberAndCourthouse_CourthouseName("CASE123", "TEST COURTHOUSE"))
             .thenReturn(Optional.of(existingCase));
         when(caseRepository.saveAndFlush(any(CourtCaseEntity.class))).thenReturn(existingCase);
 
@@ -62,7 +62,7 @@ class CaseCommonServiceImplTest {
 
     @Test
     void retrieveOrCreateCaseWithCourthouseNameNewCase() {
-        when(caseRepository.findByCaseNumberAndCourthouse_CourthouseNameIgnoreCase("CASE123", "Test Courthouse"))
+        when(caseRepository.findByCaseNumberAndCourthouse_CourthouseName("CASE123", "TEST COURTHOUSE"))
             .thenReturn(Optional.empty());
         when(courthouseCommonService.retrieveCourthouse("Test Courthouse")).thenReturn(courthouse);
         when(caseRepository.saveAndFlush(any(CourtCaseEntity.class))).thenAnswer(i -> i.getArguments()[0]);

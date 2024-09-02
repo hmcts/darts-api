@@ -295,7 +295,7 @@ public class DartsDatabaseStub {
 
     public Optional<CourtCaseEntity> findByCaseByCaseNumberAndCourtHouseName(String someCaseNumber,
                                                                              String someCourthouse) {
-        return caseRepository.findByCaseNumberAndCourthouse_CourthouseNameIgnoreCase(
+        return caseRepository.findByCaseNumberAndCourthouse_CourthouseName(
             someCaseNumber,
             someCourthouse
         );
@@ -439,7 +439,7 @@ public class DartsDatabaseStub {
     }
 
     public CourthouseEntity findCourthouseWithName(String name) {
-        return courthouseRepository.findByCourthouseNameIgnoreCase(name).get();
+        return courthouseRepository.findByCourthouseName(name).get();
     }
 
     public ExternalLocationTypeEntity getExternalLocationTypeEntity(ExternalLocationTypeEnum externalLocationTypeEnum) {

@@ -18,7 +18,7 @@ class AudioLoggerServiceImplTest {
 
     private static final OffsetDateTime STARTED_AT = OffsetDateTime.parse("2021-01-01T01:00:00Z");
     private static final OffsetDateTime ENDED_AT = OffsetDateTime.parse("2021-01-01T02:00:00Z");
-    private static final String SOME_COURTHOUSE = "some-courthouse";
+    private static final String SOME_COURTHOUSE = "SOME-COURTHOUSE";
     private static final String SOME_COURTROOM = "some-courtroom";
 
     private static LogCaptor logCaptor;

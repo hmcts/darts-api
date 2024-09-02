@@ -1,6 +1,7 @@
 package uk.gov.hmcts.darts.common.service.impl;
 
 import lombok.RequiredArgsConstructor;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 import uk.gov.hmcts.darts.common.exception.CommonApiError;
@@ -19,9 +20,10 @@ public class CourthouseCommonServiceImpl implements CourthouseCommonService {
 
     @Override
     public CourthouseEntity retrieveCourthouse(String courthouseName) {
-        Optional<CourthouseEntity> foundCourthouse = courthouseRepository.findByCourthouseNameIgnoreCase(courthouseName);
+        String courthouseNameUC = StringUtils.toRootUpperCase(courthouseName);
+        Optional<CourthouseEntity> foundCourthouse = courthouseRepository.findByCourthouseName(courthouseNameUC);
         if (foundCourthouse.isEmpty()) {
-            String message = MessageFormat.format("Courthouse ''{0}'' not found.", courthouseName);
+            String message = MessageFormat.format("Courthouse ''{0}'' not found.", courthouseNameUC);
             throw new DartsApiException(CommonApiError.COURTHOUSE_PROVIDED_DOES_NOT_EXIST, message);
         }
         return foundCourthouse.get();
