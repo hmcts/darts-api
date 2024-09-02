@@ -93,8 +93,6 @@ public class AudioTransformationServiceImpl implements AudioTransformationServic
             this::processAudioRequest,
             () -> log.info("No open requests found for ATS to process.")
         );
-
-        unstructuredDataHelper.waitForAllJobsToFinish();
     }
 
     /**

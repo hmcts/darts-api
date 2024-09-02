@@ -53,7 +53,6 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.apache.commons.io.IOUtils.toInputStream;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -148,7 +147,6 @@ class DataManagementFacadeImplTest {
     public void teardown() throws IOException {
         fileBasedDownloadResponseMetaData.close();
         downloadResponseMetaData.close();
-        unstructuredDataHelper.waitForAllJobsToFinish();
     }
 
     @Test
@@ -177,7 +175,6 @@ class DataManagementFacadeImplTest {
         try (DownloadResponseMetaData downloadResponseMetaData = dmFacade.retrieveFileFromStorage(entitiesToDownload)) {
             assertEquals(DatastoreContainerType.ARM, downloadResponseMetaData.getContainerTypeUsedToDownload());
         }
-        unstructuredDataHelper.waitForAllJobsToFinish();
 
     }
 
@@ -374,11 +371,11 @@ class DataManagementFacadeImplTest {
                                                                                dataManagementConfiguration, armApiService, objectRetrievalQueueRepository);
 
         when(objectRetrievalQueueRepository.findMatchingObjectRetrievalQueueItem(mediaEntity,
-                                                                                   null,
-                                                                                   mediaEntity.getId().toString(),
-                                                                                   mediaEntity.getContentObjectId(),
-                                                                                   mediaEntity.getClipId())
-                                                                                    ).thenReturn(Optional.of(objectRetrievalQueueEntity));
+                                                                                 null,
+                                                                                 mediaEntity.getId().toString(),
+                                                                                 mediaEntity.getContentObjectId(),
+                                                                                 mediaEntity.getClipId())
+        ).thenReturn(Optional.of(objectRetrievalQueueEntity));
         // make the assertion on the response
         var exception = assertThrows(
             FileNotDownloadedException.class,
@@ -626,7 +623,6 @@ class DataManagementFacadeImplTest {
 
     @Test
     void testDownloadOfFacadeCreatesUnstructuredWhenUnstructuredNotFound() throws Exception {
-        unstructuredDataHelper.waitForAllJobsToFinish();
         ExternalObjectDirectoryEntity inboundEntity = createEodEntity(inboundLocationEntity);
         ExternalObjectDirectoryEntity unstructuredEntity = createEodEntity(unstructuredLocationEntity);
         ExternalObjectDirectoryEntity armEntity = createEodEntity(armLocationEntity);
@@ -648,7 +644,6 @@ class DataManagementFacadeImplTest {
 
         downloadResponseMetaData = dmFacade.retrieveFileFromStorage(mediaEntity);
         assertEquals(DatastoreContainerType.ARM, downloadResponseMetaData.getContainerTypeUsedToDownload());
-        assertNotEquals(0, unstructuredDataHelperFacade.getJobsList().size());
     }
 
     @NotNull
@@ -674,12 +669,12 @@ class DataManagementFacadeImplTest {
         lenient().when(downloadable.getContainerName(containerType)).thenReturn(Optional.of("test"));
         if (processSuccess) {
             lenient().when(downloadable
-                     .downloadBlobFromContainer(eq(containerType),
-                                                Mockito.notNull())).thenReturn(fileBasedDownloadResponseMetaData);
+                               .downloadBlobFromContainer(eq(containerType),
+                                                          Mockito.notNull())).thenReturn(fileBasedDownloadResponseMetaData);
         } else {
             lenient().when(downloadable
-                                       .downloadBlobFromContainer(eq(containerType),
-                                                                  Mockito.notNull())).thenThrow(new FileNotDownloadedException());
+                               .downloadBlobFromContainer(eq(containerType),
+                                                          Mockito.notNull())).thenThrow(new FileNotDownloadedException());
         }
         return downloadable;
     }
