@@ -1,6 +1,5 @@
 package uk.gov.hmcts.darts.audio.controller;
 
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.skyscreamer.jsonassert.JSONAssert;
 import org.skyscreamer.jsonassert.JSONCompareMode;
@@ -41,57 +40,6 @@ class AudioControllerGetMetadataIntTest extends IntegrationBase {
     @MockBean
     private UserIdentity mockUserIdentity;
 
-    // Will remove this in next PR
-    @Disabled
-    @Test
-    void old() throws Exception {
-        var mediaChannel1 = dartsDatabase.createMediaEntity("testCourthouse", "testCourtroom", MEDIA_START_TIME, MEDIA_END_TIME, 1);
-        var mediaChannel2 = dartsDatabase.createMediaEntity("testCourthouse", "testCourtroom", MEDIA_START_TIME, MEDIA_END_TIME, 2);
-        var mediaChannel3 = dartsDatabase.createMediaEntity("testCourthouse", "testCourtroom", MEDIA_START_TIME, MEDIA_END_TIME, 3);
-        var mediaChannel4 = dartsDatabase.createMediaEntity("testCourthouse", "testCourtroom", MEDIA_START_TIME, MEDIA_END_TIME, 4);
-        var mediaChannel5NotCurrent = dartsDatabase.createMediaEntity("testCourthouse", "testCourtroom", MEDIA_START_TIME, MEDIA_END_TIME, 5);
-        mediaChannel5NotCurrent.setIsCurrent(false);
-
-        var hearingEntity = dartsDatabase.givenTheDatabaseContainsCourtCaseWithHearingAndCourthouseWithRoom(
-            "999",
-            "test",
-            "test",
-            LocalDateTime.now()
-        );
-        hearingEntity.addMedia(mediaChannel1);
-        hearingEntity.addMedia(mediaChannel2);
-        hearingEntity.addMedia(mediaChannel3);
-        hearingEntity.addMedia(mediaChannel4);
-        hearingEntity.addMedia(mediaChannel5NotCurrent);
-        dartsDatabase.save(hearingEntity);
-
-        UserAccountEntity testUser = dartsDatabase.getUserAccountStub()
-            .createAuthorisedIntegrationTestUser(hearingEntity.getCourtroom().getCourthouse());
-        when(mockUserIdentity.getUserAccount()).thenReturn(testUser);
-
-        var requestBuilder = get(ENDPOINT_URL, hearingEntity.getId());
-
-        MvcResult mvcResult = mockMvc.perform(requestBuilder)
-            .andExpect(status().isOk())
-            .andReturn();
-
-        String actualJson = mvcResult.getResponse().getContentAsString();
-        String expectedJson = """
-            [
-              {
-                "id": %d,
-                "media_start_timestamp": "2023-01-01T12:00:00Z",
-                "media_end_timestamp": "2023-01-01T13:00:00Z",
-                "is_archived": false,
-                "is_available": true
-              }
-            ]
-            """.formatted(mediaChannel1.getId());
-        JSONAssert.assertEquals(expectedJson, actualJson, JSONCompareMode.NON_EXTENSIBLE);
-    }
-
-
-    @Disabled
     @Test
     void getAudioMetadataGetShouldReturnMediaChannel1MetadataAssociatedWithProvidedHearing() throws Exception {
         var courtroomEntity = someMinimalCourtRoom();
@@ -102,7 +50,7 @@ class AudioControllerGetMetadataIntTest extends IntegrationBase {
         var mediaChannel5NotCurrent = createMediaWith(courtroomEntity, MEDIA_START_TIME, MEDIA_END_TIME, 5);
         mediaChannel5NotCurrent.setIsCurrent(false);
 
-        //        dartsPersistence.save(eodStoredInUnstructuredLocationForMedia(mediaChannel1));
+        dartsPersistence.save(eodStoredInUnstructuredLocationForMedia(mediaChannel1));
 
         var hearingEntity = dartsPersistence.save(
             hearingWithMedias(mediaChannel1, mediaChannel2, mediaChannel3, mediaChannel4, mediaChannel5NotCurrent));
@@ -166,6 +114,9 @@ class AudioControllerGetMetadataIntTest extends IntegrationBase {
     void getAudioMetadataGetShouldNotReturnHiddenMediaChannel1() throws Exception {
         var courtroomEntity = someMinimalCourtRoom();
         var mediaChannel1 = createMediaWith(courtroomEntity, MEDIA_START_TIME, MEDIA_END_TIME, 1);
+        mediaChannel1.setIsCurrent(false);
+        dartsPersistence.save(mediaChannel1);
+
         var mediaChannel2 = createMediaWith(courtroomEntity, MEDIA_START_TIME, MEDIA_END_TIME, 2);
         var mediaChannel3 = createMediaWith(courtroomEntity, MEDIA_START_TIME, MEDIA_END_TIME, 3);
         var mediaChannel4 = createMediaWith(courtroomEntity, MEDIA_START_TIME, MEDIA_END_TIME, 4);
