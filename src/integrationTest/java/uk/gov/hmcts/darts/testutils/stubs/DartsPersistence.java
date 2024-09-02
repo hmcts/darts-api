@@ -20,6 +20,7 @@ import uk.gov.hmcts.darts.common.entity.DefendantEntity;
 import uk.gov.hmcts.darts.common.entity.EventEntity;
 import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
+import uk.gov.hmcts.darts.common.entity.JudgeEntity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
 import uk.gov.hmcts.darts.common.entity.ProsecutorEntity;
 import uk.gov.hmcts.darts.common.entity.RetentionPolicyTypeEntity;
@@ -149,6 +150,7 @@ public class DartsPersistence {
         save(hearingEntity.getCourtroom());
         save(hearingEntity.getCreatedBy());
         save(hearingEntity.getLastModifiedBy());
+        save(hearingEntity.getJudges());
         if (hearingEntity.getCourtCase().getId() == null) {
             save(hearingEntity.getCourtCase());
         } else {
@@ -221,6 +223,18 @@ public class DartsPersistence {
         save(defendantEntity.getCreatedBy());
         save(defendantEntity.getLastModifiedBy());
         return defendantEntity;
+    }
+
+    @Transactional
+    public void save(List<JudgeEntity> judgeEntities) {
+        judgeEntities.forEach(this::save);
+    }
+
+    @Transactional
+    public JudgeEntity save(JudgeEntity judgeEntity) {
+        save(judgeEntity.getCreatedBy());
+        save(judgeEntity.getLastModifiedBy());
+        return judgeEntity;
     }
 
     @Transactional
