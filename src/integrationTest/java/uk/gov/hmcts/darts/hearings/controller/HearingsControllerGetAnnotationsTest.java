@@ -34,7 +34,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 class HearingsControllerGetAnnotationsTest extends IntegrationBase {
     private static final String ENDPOINT_URL = "/hearings/{hearing_id}/annotations";
     private static final OffsetDateTime SOME_DATE_TIME = OffsetDateTime.parse("2023-01-01T12:00Z");
-    private static final String SOME_COURTHOUSE = "some-courthouse";
+    private static final String SOME_COURTHOUSE = "SOME-COURTHOUSE";
     private static final String SOME_COURTROOM = "some-courtroom";
     private static final String SOME_CASE_ID = "1";
     private static final List<String> TAGS_TO_IGNORE = List.of("annotation_id", "uploaded_ts", "hearing_id", "annotation_document_id");

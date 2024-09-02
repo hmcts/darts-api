@@ -45,7 +45,7 @@ class AudioRequestsControllerAddAudioRequestPlaybackIntTest extends IntegrationB
     private static final URI ENDPOINT = URI.create("/audio-requests/playback");
     private static final String HEARING_DATETIME = "2023-01-01T10:00:00";
     private static final String HEARING_DATE = "2023-01-01";
-    private static final String SOME_COURTHOUSE = "some-courthouse";
+    private static final String SOME_COURTHOUSE = "SOME-COURTHOUSE";
     private static final String SOME_COURTROOM = "some-courtroom";
     private static final String SOME_CASE_NUMBER = "1";
     private static final String SOME_START_TIME = "2023-01-01T12:00:00Z";

@@ -1,6 +1,7 @@
 package uk.gov.hmcts.darts.common.service.impl;
 
 import lombok.RequiredArgsConstructor;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
@@ -22,7 +23,8 @@ public class CaseCommonServiceImpl implements CaseCommonService {
     @Override
     @Transactional
     public CourtCaseEntity retrieveOrCreateCase(String courthouseName, String caseNumber, UserAccountEntity userAccount) {
-        Optional<CourtCaseEntity> foundCase = caseRepository.findByCaseNumberAndCourthouse_CourthouseNameIgnoreCase(caseNumber, courthouseName);
+        String courthouseNameUC = StringUtils.toRootUpperCase(courthouseName);
+        Optional<CourtCaseEntity> foundCase = caseRepository.findByCaseNumberAndCourthouse_CourthouseName(caseNumber, courthouseNameUC);
         return foundCase.map(entity -> setCourtCaseLastDateModifiedBy(entity, userAccount))
             .orElseGet(() -> createCase(courthouseName, caseNumber, userAccount));
     }

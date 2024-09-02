@@ -35,7 +35,7 @@ class TranscriptionControllerGetTranscriptionWorkflowsIntTest extends Integratio
 
     private static final URI ENDPOINT_URI = URI.create("/admin/transcription-workflows");
     private static final OffsetDateTime SOME_DATE_TIME = OffsetDateTime.parse("2023-01-01T12:00Z");
-    private static final String SOME_COURTHOUSE = "some-courthouse";
+    private static final String SOME_COURTHOUSE = "SOME-COURTHOUSE";
     private static final String SOME_COURTROOM = "some-courtroom";
     private static final String SOME_CASE_ID = "1";
 

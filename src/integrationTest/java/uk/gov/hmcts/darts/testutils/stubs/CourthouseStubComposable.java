@@ -1,6 +1,7 @@
 package uk.gov.hmcts.darts.testutils.stubs;
 
 import lombok.RequiredArgsConstructor;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
@@ -20,8 +21,9 @@ public class CourthouseStubComposable {
     private UserAccountRepository userAccountRepository;
 
     public CourthouseEntity createCourthouseUnlessExists(String name) {
-        Optional<CourthouseEntity> foundCourthouse = courthouseRepository.findByCourthouseNameIgnoreCase(name);
-        return foundCourthouse.orElseGet(() -> createCourthouse(name));
+        String nameUC = StringUtils.toRootUpperCase(name);
+        Optional<CourthouseEntity> foundCourthouse = courthouseRepository.findByCourthouseName(nameUC);
+        return foundCourthouse.orElseGet(() -> createCourthouse(nameUC));
     }
 
     private CourthouseEntity createCourthouse(String name) {
