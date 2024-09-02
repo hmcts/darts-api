@@ -200,7 +200,7 @@ class MediaControllerPostAdminMediasSearchIntTest extends IntegrationBase {
             [
               {
                 "courthouse": {
-                  "display_name": "Courthouse1"
+                  "display_name": "COURTHOUSE1"
                 },
                 "courtroom": {
                   "name": "COURTROOM1"
@@ -212,7 +212,7 @@ class MediaControllerPostAdminMediasSearchIntTest extends IntegrationBase {
               },
               {
                 "courthouse": {
-                  "display_name": "Courthouse1"
+                  "display_name": "COURTHOUSE1"
                 },
                 "courtroom": {
                   "name": "COURTROOM1"
@@ -224,7 +224,7 @@ class MediaControllerPostAdminMediasSearchIntTest extends IntegrationBase {
               },
               {
                 "courthouse": {
-                  "display_name": "Courthouse1"
+                  "display_name": "COURTHOUSE1"
                 },
                 "courtroom": {
                   "name": "COURTROOM1"
