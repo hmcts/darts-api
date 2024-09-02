@@ -38,47 +38,47 @@ class CourthouseCommonServiceImplTest {
 
     @Test
     void retrieveCourthouseExistingCourthouseReturnsEntity() {
-        when(courthouseRepository.findByCourthouseNameIgnoreCase("Test Courthouse"))
+        when(courthouseRepository.findByCourthouseName("TEST COURTHOUSE"))
             .thenReturn(Optional.of(courthouse));
 
         CourthouseEntity result = courthouseService.retrieveCourthouse("Test Courthouse");
 
         assertNotNull(result);
         assertEquals("Test Courthouse".toUpperCase(Locale.ROOT), result.getCourthouseName());
-        verify(courthouseRepository).findByCourthouseNameIgnoreCase("Test Courthouse");
+        verify(courthouseRepository).findByCourthouseName("TEST COURTHOUSE");
     }
 
     @Test
     void retrieveCourthouseNonExistentCourthouseThrowsException() {
-        when(courthouseRepository.findByCourthouseNameIgnoreCase("Non-existent Courthouse"))
+        when(courthouseRepository.findByCourthouseName("NON-EXISTENT COURTHOUSE"))
             .thenReturn(Optional.empty());
 
         DartsApiException exception = assertThrows(DartsApiException.class,
                                                    () -> courthouseService.retrieveCourthouse("Non-existent Courthouse"));
 
         assertEquals(CommonApiError.COURTHOUSE_PROVIDED_DOES_NOT_EXIST, exception.getError());
-        assertEquals("Provided courthouse does not exist. Courthouse 'Non-existent Courthouse' not found.", exception.getMessage());
-        verify(courthouseRepository).findByCourthouseNameIgnoreCase("Non-existent Courthouse");
+        assertEquals("Provided courthouse does not exist. Courthouse 'NON-EXISTENT COURTHOUSE' not found.", exception.getMessage());
+        verify(courthouseRepository).findByCourthouseName("NON-EXISTENT COURTHOUSE");
     }
 
     @Test
     void retrieveCourthouseCaseInsensitiveSearch() {
-        when(courthouseRepository.findByCourthouseNameIgnoreCase("test courthouse"))
+        when(courthouseRepository.findByCourthouseName("TEST COURTHOUSE"))
             .thenReturn(Optional.of(courthouse));
 
         CourthouseEntity result = courthouseService.retrieveCourthouse("test courthouse");
 
         assertNotNull(result);
         assertEquals("Test Courthouse".toUpperCase(Locale.ROOT), result.getCourthouseName());
-        verify(courthouseRepository).findByCourthouseNameIgnoreCase("test courthouse");
+        verify(courthouseRepository).findByCourthouseName("TEST COURTHOUSE");
     }
 
     @Test
     void retrieveCourthouseNullInputThrowsException() {
         DartsApiException exception = assertThrows(DartsApiException.class,
-                                                      () -> courthouseService.retrieveCourthouse(null));
+                                                   () -> courthouseService.retrieveCourthouse(null));
 
         assertEquals("Provided courthouse does not exist. Courthouse 'null' not found.", exception.getMessage());
-        verify(courthouseRepository).findByCourthouseNameIgnoreCase(null);
+        verify(courthouseRepository).findByCourthouseName(null);
     }
 }
