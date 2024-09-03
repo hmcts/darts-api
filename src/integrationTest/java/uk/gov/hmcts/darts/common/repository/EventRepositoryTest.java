@@ -13,7 +13,6 @@ import uk.gov.hmcts.darts.testutils.stubs.HearingStub;
 import java.util.List;
 import java.util.Map;
 
-@Disabled("Impacted by V1_363__not_null_constraints_part3.sql")
 class EventRepositoryTest extends PostgresIntegrationBase {
     @Autowired
     private EventRepository eventRepository;
@@ -35,18 +34,18 @@ class EventRepositoryTest extends PostgresIntegrationBase {
         List<Integer> eventIdsToBeProcessed1 = eventRepository.getCurrentEventIdsToBeProcessed(Pageable.ofSize(1));
         Assertions.assertEquals(1, eventIdsToBeProcessed1.size());
 
-        Integer eventPkid = eventRepository.getTheLatestCreatedEventPrimaryKeyForTheEventId(eventIdsToBeProcessed1.get(0));
+        EventRepository.EventIdAndHearingIds eventPkid = eventRepository.getTheLatestCreatedEventPrimaryKeyForTheEventId(eventIdsToBeProcessed1.getFirst());
         eventRepository.updateAllEventIdEventsToNotCurrentWithTheExclusionOfTheCurrentEventPrimaryKey(
-            List.of(eventPkid), List.of(eventIdsToBeProcessed1.get(0)));
-        Assertions.assertTrue(eventStub.isOnlyOneOfTheEventIdSetToCurrent(eventIdMap.get(eventIdsToBeProcessed1.get(0))));
+            eventPkid.getEveId(), eventPkid.getEventId(), eventPkid.getHearingIds());
+        Assertions.assertTrue(eventStub.isOnlyOneOfTheEventIdSetToCurrent(eventIdMap.get(eventIdsToBeProcessed1.getFirst())));
 
         List<Integer> eventIdsToBeProcessed2 = eventRepository.getCurrentEventIdsToBeProcessed(Pageable.ofSize(1));
-        Integer eventPkidSecond = eventRepository.getTheLatestCreatedEventPrimaryKeyForTheEventId(eventIdsToBeProcessed2.get(0));
+        EventRepository.EventIdAndHearingIds eventPkidSecond = eventRepository.getTheLatestCreatedEventPrimaryKeyForTheEventId(eventIdsToBeProcessed2.getFirst());
         eventRepository.updateAllEventIdEventsToNotCurrentWithTheExclusionOfTheCurrentEventPrimaryKey(
-            List.of(eventPkidSecond), List.of(eventIdsToBeProcessed2.get(0)));
+            eventPkidSecond.getEveId(), eventPkidSecond.getEventId(), eventPkidSecond.getHearingIds());
 
         Assertions.assertEquals(1, eventIdsToBeProcessed1.size());
-        Assertions.assertTrue(eventIdMap.containsKey(eventIdsToBeProcessed2.get(0)));
+        Assertions.assertTrue(eventIdMap.containsKey(eventIdsToBeProcessed2.getFirst()));
         Assertions.assertNotEquals(eventIdsToBeProcessed1, eventIdsToBeProcessed2);
 
         // ENSURE WE DONT PROCESS THE THIRD BATCH I.E. THE ZERO EVENT ID

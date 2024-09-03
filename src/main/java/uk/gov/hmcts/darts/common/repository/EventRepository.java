@@ -1,5 +1,6 @@
 package uk.gov.hmcts.darts.common.repository;
 
+import jakarta.persistence.Column;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -90,22 +91,33 @@ public interface EventRepository extends JpaRepository<EventEntity, Integer> {
     List<Integer> getCurrentEventIdsToBeProcessed(Pageable pageable);
 
     @Query(value = """
-         SELECT eve_id FROM darts.event e
-         WHERE event_id=:eventId
+         SELECT e.eve_id, event_id, string_agg(he.hea_id::varchar, ',') as hearing_ids FROM darts.event e
+         left join darts.hearing_event_ae he
+         on he.eve_id = e.eve_id
+         WHERE e.event_id=:eventId
+         group by e.eve_id, event_id
          ORDER BY created_ts desc
          LIMIT 1
         """, nativeQuery = true)
-    Integer getTheLatestCreatedEventPrimaryKeyForTheEventId(Integer eventId);
+    EventIdAndHearingIds getTheLatestCreatedEventPrimaryKeyForTheEventId(Integer eventId);
 
     @Transactional
     @Modifying
     @Query(value = """
-        UPDATE EventEntity
-                SET isCurrent = false
-                WHERE id not in :eventIdsPrimaryKeysLst AND eventId in :eventIdLst
-        """)
+        UPDATE darts.event e
+            SET is_current = false
+        FROM (
+           select string_agg(he.hea_id::varchar, ',') as hearing_ids FROM darts.event e
+           left join darts.hearing_event_ae he
+            on he.eve_id = e.eve_id
+            where event_id=:eventId
+            and he.eve_id != :eventIdsPrimaryKey
+        ) h WHERE e.eve_id != :eventIdsPrimaryKey
+                AND e.event_id = :eventId
+                and h.hearing_ids = :hearingIds
+        """, nativeQuery = true)
     void updateAllEventIdEventsToNotCurrentWithTheExclusionOfTheCurrentEventPrimaryKey(
-        List<Integer> eventIdsPrimaryKeysLst, List<Integer> eventIdLst);
+        Integer eventIdsPrimaryKey, Integer eventId, String hearingIds);
 
     @Query("""
         SELECT ee
@@ -114,4 +126,16 @@ public interface EventRepository extends JpaRepository<EventEntity, Integer> {
         AND ee.timestamp <= :endDateTime
         """)
     List<EventEntity> findAllBetweenDateTimesInclusive(OffsetDateTime startDateTime, OffsetDateTime endDateTime);
+
+    interface EventIdAndHearingIds {
+
+        @Column(name = "eve_id")
+        Integer getEveId();
+
+        @Column(name = "event_id")
+        Integer getEventId();
+
+        @Column(name = "hearing_ids")
+        String getHearingIds();
+    }
 }
