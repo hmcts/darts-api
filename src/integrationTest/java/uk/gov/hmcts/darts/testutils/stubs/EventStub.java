@@ -32,7 +32,7 @@ public class EventStub {
     private final CourtroomStub courtroomStub;
     private final UserAccountRepository userAccountRepository;
 
-    private static final OffsetDateTime STARTED_AT = OffsetDateTime.of(2024, 10, 10, 10, 0, 0, 0, ZoneOffset.UTC);
+    public static final OffsetDateTime STARTED_AT = OffsetDateTime.of(2024, 10, 10, 10, 0, 0, 0, ZoneOffset.UTC);
 
     @Autowired
     private HearingStub hearingStub;
