@@ -98,6 +98,7 @@ public class UnstructuredToArmBatchProcessorImpl implements UnstructuredToArmBat
             try {
                 ExternalObjectDirectoryEntity armEod;
                 if (isEqual(currentEod.getExternalLocationType(), EodHelper.armLocation())) {
+                    //retry existing attempt that has previously failed.
                     armEod = currentEod;
                     batchItem.setArmEod(armEod);
                     updateArmEodToArmIngestionStatus(currentEod, batchItem, batchItems, archiveRecordsFile, userAccount);
@@ -153,6 +154,7 @@ public class UnstructuredToArmBatchProcessorImpl implements UnstructuredToArmBat
             batchItem.setSourceEod(matchingEntity.get());
             batchItems.add(batchItem);
             armEod.setManifestFile(archiveRecordsFile.getName());
+            unstructuredToArmHelper.incrementTransferAttempts(armEod);
             unstructuredToArmHelper.updateExternalObjectDirectoryStatus(armEod, EodHelper.armIngestionStatus(), userAccount);
         } else {
             log.error("Unable to find matching external object directory for {}", armEod.getId());
