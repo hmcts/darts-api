@@ -1,6 +1,7 @@
 buildscript {
   dependencies {
     classpath("org.flywaydb:flyway-database-postgresql:10.17.3")
+    classpath ("io.spring.gradle:dependency-management-plugin:1.1.6")
   }
 }
 
