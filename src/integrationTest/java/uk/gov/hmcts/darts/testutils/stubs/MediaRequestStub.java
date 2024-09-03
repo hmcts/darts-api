@@ -9,7 +9,7 @@ import uk.gov.hmcts.darts.audiorequests.model.AudioRequestType;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.repository.MediaRequestRepository;
-import uk.gov.hmcts.darts.test.common.data.AudioTestData;
+import uk.gov.hmcts.darts.test.common.data.MediaRequestTestData;
 
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
@@ -41,15 +41,17 @@ public class MediaRequestStub {
         HearingEntity hearing = hearingStub.createHearing(courtName, "Int Test Courtroom 2",
                                                           caseNumber, hearingDate);
 
+        var currentMediaRequest = MediaRequestTestData.createCurrentMediaRequest(
+            hearing,
+            owner,
+            requestor,
+            startTime,
+            endTime,
+            audioRequestType, status, requestedDate
+        );
+        currentMediaRequest.setCreatedDateTime(requestedDate);
         return  mediaRequestRepository.save(
-            AudioTestData.createCurrentMediaRequest(
-                hearing,
-                owner,
-                requestor,
-                startTime,
-                endTime,
-                audioRequestType, status, requestedDate
-            ));
+            currentMediaRequest);
     }
 
     @Transactional

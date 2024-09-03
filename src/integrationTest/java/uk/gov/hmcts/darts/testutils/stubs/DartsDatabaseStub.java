@@ -13,6 +13,7 @@ import org.springframework.data.history.Revisions;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import uk.gov.hmcts.darts.audio.entity.MediaRequestEntity;
+import uk.gov.hmcts.darts.audio.enums.MediaRequestStatus;
 import uk.gov.hmcts.darts.audiorequests.model.AudioRequestType;
 import uk.gov.hmcts.darts.common.entity.AnnotationDocumentEntity;
 import uk.gov.hmcts.darts.common.entity.AnnotationEntity;
@@ -93,9 +94,9 @@ import uk.gov.hmcts.darts.dailylist.enums.SourceType;
 import uk.gov.hmcts.darts.notification.entity.NotificationEntity;
 import uk.gov.hmcts.darts.retention.enums.CaseRetentionStatus;
 import uk.gov.hmcts.darts.retention.enums.RetentionPolicyEnum;
-import uk.gov.hmcts.darts.test.common.data.AudioTestData;
 import uk.gov.hmcts.darts.test.common.data.CourthouseTestData;
 import uk.gov.hmcts.darts.test.common.data.DailyListTestData;
+import uk.gov.hmcts.darts.test.common.data.MediaRequestTestData;
 import uk.gov.hmcts.darts.testutils.TransactionalUtil;
 
 import java.io.IOException;
@@ -329,6 +330,7 @@ public class DartsDatabaseStub {
 
     public HearingEntity givenTheDatabaseContainsCourtCaseWithHearingAndCourthouseWithRoom(
         String caseNumber, String courthouseName, String courtroomName, LocalDateTime hearingDate) {
+
         createCourthouseUnlessExists(courthouseName);
         HearingEntity hearing = retrieveCoreObjectService.retrieveOrCreateHearing(
             courthouseName,
@@ -456,12 +458,13 @@ public class DartsDatabaseStub {
         HearingEntity hearing = createHearing("NEWCASTLE", "Int Test Courtroom 2", "2", LocalDateTime.of(2023, 6, 10, 10, 0, 0));
 
         return save(
-            AudioTestData.createCurrentMediaRequest(
+            MediaRequestTestData.createCurrentMediaRequest(
                 hearing,
                 requestor,
                 OffsetDateTime.parse("2023-06-26T13:00:00Z"),
                 OffsetDateTime.parse("2023-06-26T13:45:00Z"),
-                audioRequestType, OPEN
+                audioRequestType,
+                OPEN
             ));
     }
 
@@ -471,11 +474,12 @@ public class DartsDatabaseStub {
 
         HearingEntity hearing = createHearing("NEWCASTLE", "Int Test Courtroom 2", "2", LocalDateTime.of(2023, 6, 10, 10, 0, 0));
 
-        MediaRequestEntity completedMediaRequest = AudioTestData.createCompletedMediaRequest(
+        MediaRequestEntity completedMediaRequest = MediaRequestTestData.createCurrentMediaRequest(
             hearing,
             requestor,
             OffsetDateTime.parse("2023-06-26T13:00:00Z"),
-            OffsetDateTime.parse("2023-06-26T14:00:00Z"), audioRequestType
+            OffsetDateTime.parse("2023-06-26T14:00:00Z"), audioRequestType,
+            MediaRequestStatus.COMPLETED
         );
         save(completedMediaRequest);
 

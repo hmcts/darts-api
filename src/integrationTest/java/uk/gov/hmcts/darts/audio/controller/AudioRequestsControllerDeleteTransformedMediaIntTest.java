@@ -1,6 +1,5 @@
 package uk.gov.hmcts.darts.audio.controller;
 
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -46,7 +45,6 @@ class AudioRequestsControllerDeleteTransformedMediaIntTest extends IntegrationBa
     protected TransientObjectDirectoryStub transientObjectDirectoryStub;
 
     @Test
-    @Disabled("Impacted by V1_362__constraint_transcription_part6.sql")
     void transformedMediaDeleteShouldReturnSuccess() throws Exception {
         var blobId = UUID.randomUUID();
 
@@ -88,7 +86,6 @@ class AudioRequestsControllerDeleteTransformedMediaIntTest extends IntegrationBa
     }
 
     @Test
-    @Disabled("Impacted by V1_362__constraint_transcription_part6.sql")
     void transformedMediaDeleteShouldReturnSuccessOthersExist() throws Exception {
         //only deletes the one requested.
 

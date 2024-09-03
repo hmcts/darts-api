@@ -58,7 +58,7 @@ class CaseServiceAdvancedSearchTempTest extends IntegrationBase {
         otherHearing.setHearingIsActual(false);
         otherHearing.setHearingDate(notActualHearingDate);
 
-        dartsPersistence.saveHearingList(List.of(actualHearing, otherHearing));
+        dartsPersistence.saveAll(actualHearing, otherHearing);
 
         setupUserAccountSecurityGroup(APPROVER, actualHearing.getCourtCase().getCourthouse());
         userAccountRepository.save(user);

@@ -39,7 +39,9 @@ public class TransientObjectDirectoryStub {
                                                                                UUID externalLocation) {
         var transientObjectDirectoryEntity = new TransientObjectDirectoryEntity();
         transientObjectDirectoryEntity.setTransformedMedia(transformedMediaEntity);
-        transientObjectDirectoryEntity.setLastModifiedBy(userAccountStub.getIntegrationTestUserAccountEntity());
+        var userAccount = userAccountStub.getIntegrationTestUserAccountEntity();
+        transientObjectDirectoryEntity.setLastModifiedBy(userAccount);
+        transientObjectDirectoryEntity.setCreatedBy(userAccount);
         transientObjectDirectoryEntity.setStatus(objectRecordStatusEntity);
         transientObjectDirectoryEntity.setExternalLocation(externalLocation);
         transientObjectDirectoryEntity.setLastModifiedDateTime(OffsetDateTime.parse("2024-02-12T13:45:00Z"));

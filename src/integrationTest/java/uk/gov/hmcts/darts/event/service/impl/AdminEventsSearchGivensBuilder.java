@@ -12,7 +12,7 @@ import java.util.List;
 
 import static java.util.stream.IntStream.range;
 import static uk.gov.hmcts.darts.test.common.data.EventTestData.createEventForHearing;
-import static uk.gov.hmcts.darts.test.common.data.HearingTestData.createSomeMinimalHearing;
+import static uk.gov.hmcts.darts.test.common.data.HearingTestData.someMinimalHearing;
 
 @Component
 public class AdminEventsSearchGivensBuilder {
@@ -38,7 +38,7 @@ public class AdminEventsSearchGivensBuilder {
 
     private EventEntity createEventWithCourtroom(CourtroomEntity courtroom) {
         saveWithTransients(courtroom);
-        var hearingEntity = createSomeMinimalHearing();
+        var hearingEntity = someMinimalHearing();
         hearingEntity.setCourtroom(courtroom);
         hearingEntity.getCourtCase().setCourthouse(courtroom.getCourthouse());
 
@@ -56,7 +56,7 @@ public class AdminEventsSearchGivensBuilder {
     }
 
     private EventEntity createEvent() {
-        var hearing = createSomeMinimalHearing();
+        var hearing = someMinimalHearing();
         saveWithTransients(hearing.getCourtroom());
         var eventForHearing = createEventForHearing(hearing);
         dartsDatabase.saveEventsForHearing(hearing, eventForHearing);
@@ -64,7 +64,7 @@ public class AdminEventsSearchGivensBuilder {
     }
 
     private EventEntity createEventForHearingOn(LocalDate date) {
-        var hearing = createSomeMinimalHearing();
+        var hearing = someMinimalHearing();
         hearing.setHearingDate(date);
         saveWithTransients(hearing.getCourtroom());
         var eventForHearing = createEventForHearing(hearing);
