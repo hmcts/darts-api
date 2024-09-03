@@ -32,7 +32,7 @@ where task_name = 'CleanupCurrentEvent';
 
 -- Run every day at 20:15
 update automated_task set cron_expression = '0 15 20 * * *'
-where task_name = 'CleanupCurrentEvent';
+where task_name = 'CloseOldUnfinishedTranscriptions';
 
 -- Run every day at 21:03
 update automated_task set cron_expression = '0 3 21 * * *'
