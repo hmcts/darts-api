@@ -2,6 +2,7 @@ package uk.gov.hmcts.darts.events;
 
 import io.restassured.http.ContentType;
 import io.restassured.response.Response;
+import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
@@ -37,15 +38,15 @@ class CourtlogsFunctionalTest extends FunctionalTest {
         createCourtroomAndCourthouse(courthouseName, courtroomName);
 
         String bodyText = """
-                      {
-                        "log_entry_date_time": "1999-05-23T09:15:25Z",
-                        "courthouse": "<<courtHouseName>>",
-                        "courtroom": "<<courtroomName>>",
-                        "case_numbers": [
-                          "func-CASE1001"
-                        ],
-                        "text": "System : Start Recording : Record: Case Code:0008, New Case"
-                      }""";
+            {
+              "log_entry_date_time": "1999-05-23T09:15:25Z",
+              "courthouse": "<<courtHouseName>>",
+              "courtroom": "<<courtroomName>>",
+              "case_numbers": [
+                "func-CASE1001"
+              ],
+              "text": "System : Start Recording : Record: Case Code:0008, New Case"
+            }""";
         bodyText = bodyText.replace("<<courtHouseName>>", courthouseName);
         bodyText = bodyText.replace("<<courtroomName>>", courtroomName);
 
@@ -104,15 +105,15 @@ class CourtlogsFunctionalTest extends FunctionalTest {
             .extract().response();
 
         String expectedResponse = """
-                         [
-                             {
-                                 "courthouse": "<<courtHouseName>>",
-                                 "caseNumber": "func-CASE1001",
-                                 "timestamp": "1999-05-23T09:15:25Z",
-                                 "eventText": "System : Start Recording : Record: Case Code:0008, New Case"
-                             }
-                         ]""";
-        expectedResponse = expectedResponse.replace("<<courtHouseName>>", courthouseName);
+            [
+                {
+                    "courthouse": "<<courtHouseName>>",
+                    "caseNumber": "func-CASE1001",
+                    "timestamp": "1999-05-23T09:15:25Z",
+                    "eventText": "System : Start Recording : Record: Case Code:0008, New Case"
+                }
+            ]""";
+        expectedResponse = expectedResponse.replace("<<courtHouseName>>", StringUtils.toRootLowerCase(courthouseName));
         assertEquals(expectedResponse, response.asPrettyString());
     }
 

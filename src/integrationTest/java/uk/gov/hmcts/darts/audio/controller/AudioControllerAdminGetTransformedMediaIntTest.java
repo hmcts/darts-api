@@ -1,7 +1,6 @@
 package uk.gov.hmcts.darts.audio.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -14,17 +13,15 @@ import uk.gov.hmcts.darts.audiorequests.model.SearchTransformedMediaResponse;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.TransformedMediaEntity;
 import uk.gov.hmcts.darts.common.enums.SecurityRoleEnum;
-import uk.gov.hmcts.darts.common.repository.TranscriptionStatusRepository;
-import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 import uk.gov.hmcts.darts.testutils.stubs.SuperAdminUserStub;
-import uk.gov.hmcts.darts.testutils.stubs.TranscriptionStub;
 import uk.gov.hmcts.darts.testutils.stubs.TransformedMediaStub;
 
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -37,16 +34,7 @@ class AudioControllerAdminGetTransformedMediaIntTest extends IntegrationBase {
     private SuperAdminUserStub superAdminUserStub;
 
     @Autowired
-    private TranscriptionStub transcriptionStub;
-
-    @Autowired
     private TransformedMediaStub transformedMediaStub;
-
-    @Autowired
-    private UserAccountRepository userAccountRepository;
-
-    @Autowired
-    private TranscriptionStatusRepository transcriptionStatusRepository;
 
     @Autowired
     private MockMvc mockMvc;
@@ -72,11 +60,11 @@ class AudioControllerAdminGetTransformedMediaIntTest extends IntegrationBase {
             .andExpect(status().is2xxSuccessful())
             .andReturn();
 
-        Assertions.assertEquals(200, mvcResult.getResponse().getStatus());
+        assertEquals(200, mvcResult.getResponse().getStatus());
 
         SearchTransformedMediaResponse[] transformedMediaResponses
             = objectMapper.readValue(mvcResult.getResponse().getContentAsByteArray(), SearchTransformedMediaResponse[].class);
-        Assertions.assertEquals(1, transformedMediaResponses.length);
+        assertEquals(1, transformedMediaResponses.length);
 
         assertResponseEquality(transformedMediaResponses[0], getTransformMediaEntity(transformedMediaResponses[0].getId(), transformedMediaEntityList));
     }
@@ -96,11 +84,11 @@ class AudioControllerAdminGetTransformedMediaIntTest extends IntegrationBase {
             .andExpect(status().is2xxSuccessful())
             .andReturn();
 
-        Assertions.assertEquals(200, mvcResult.getResponse().getStatus());
+        assertEquals(200, mvcResult.getResponse().getStatus());
 
         SearchTransformedMediaResponse[] transformedMediaResponses
             = objectMapper.readValue(mvcResult.getResponse().getContentAsByteArray(), SearchTransformedMediaResponse[].class);
-        Assertions.assertEquals(transformedMediaEntityList.size(), transformedMediaResponses.length);
+        assertEquals(transformedMediaEntityList.size(), transformedMediaResponses.length);
 
         for (SearchTransformedMediaResponse response : transformedMediaResponses) {
             assertResponseEquality(response, getTransformMediaEntity(response.getId(), transformedMediaEntityList));
@@ -123,11 +111,11 @@ class AudioControllerAdminGetTransformedMediaIntTest extends IntegrationBase {
             .andExpect(status().is2xxSuccessful())
             .andReturn();
 
-        Assertions.assertEquals(200, mvcResult.getResponse().getStatus());
+        assertEquals(200, mvcResult.getResponse().getStatus());
 
         SearchTransformedMediaResponse[] transformedMediaResponses
             = objectMapper.readValue(mvcResult.getResponse().getContentAsByteArray(), SearchTransformedMediaResponse[].class);
-        Assertions.assertEquals(transformedMediaEntityList.size(), transformedMediaResponses.length);
+        assertEquals(transformedMediaEntityList.size(), transformedMediaResponses.length);
 
         for (SearchTransformedMediaResponse response : transformedMediaResponses) {
             assertResponseEquality(response, getTransformMediaEntity(response.getId(), transformedMediaEntityList));
@@ -150,11 +138,11 @@ class AudioControllerAdminGetTransformedMediaIntTest extends IntegrationBase {
             .andExpect(status().is2xxSuccessful())
             .andReturn();
 
-        Assertions.assertEquals(200, mvcResult.getResponse().getStatus());
+        assertEquals(200, mvcResult.getResponse().getStatus());
 
         SearchTransformedMediaResponse[] transformedMediaResponses
             = objectMapper.readValue(mvcResult.getResponse().getContentAsByteArray(), SearchTransformedMediaResponse[].class);
-        Assertions.assertEquals(0, transformedMediaResponses.length);
+        assertEquals(0, transformedMediaResponses.length);
     }
 
     @Test
@@ -182,11 +170,11 @@ class AudioControllerAdminGetTransformedMediaIntTest extends IntegrationBase {
             .andExpect(status().is2xxSuccessful())
             .andReturn();
 
-        Assertions.assertEquals(200, mvcResult.getResponse().getStatus());
+        assertEquals(200, mvcResult.getResponse().getStatus());
 
         SearchTransformedMediaResponse[] transformedMediaResponses
             = objectMapper.readValue(mvcResult.getResponse().getContentAsByteArray(), SearchTransformedMediaResponse[].class);
-        Assertions.assertEquals(1, transformedMediaResponses.length);
+        assertEquals(1, transformedMediaResponses.length);
         assertResponseEquality(transformedMediaResponses[0], getTransformMediaEntity(transformedMediaResponses[0].getId(), transformedMediaEntityList));
 
     }
@@ -203,11 +191,11 @@ class AudioControllerAdminGetTransformedMediaIntTest extends IntegrationBase {
             .andExpect(status().is2xxSuccessful())
             .andReturn();
 
-        Assertions.assertEquals(200, mvcResult.getResponse().getStatus());
+        assertEquals(200, mvcResult.getResponse().getStatus());
 
         SearchTransformedMediaResponse[] transformedMediaResponses
             = objectMapper.readValue(mvcResult.getResponse().getContentAsByteArray(), SearchTransformedMediaResponse[].class);
-        Assertions.assertEquals(transformedMediaEntityList.size(), transformedMediaResponses.length);
+        assertEquals(transformedMediaEntityList.size(), transformedMediaResponses.length);
 
         for (SearchTransformedMediaResponse response : transformedMediaResponses) {
             assertResponseEquality(response, getTransformMediaEntity(response.getId(), transformedMediaEntityList));
@@ -239,25 +227,25 @@ class AudioControllerAdminGetTransformedMediaIntTest extends IntegrationBase {
 
     private void assertResponseEquality(SearchTransformedMediaResponse response, TransformedMediaEntity entity) {
         DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss'Z'");
-        Assertions.assertEquals(response.getId(), entity.getId());
-        Assertions.assertEquals(AudioRequestOutputFormat.ZIP.name(), entity.getOutputFormat().name());
-        Assertions.assertEquals(response.getFileName(), entity.getOutputFilename());
-        Assertions.assertEquals(response.getFileSizeBytes(), entity.getOutputFilesize());
-        Assertions.assertEquals(dateTimeFormatter.format(response.getLastAccessedAt()),
+        assertEquals(response.getId(), entity.getId());
+        assertEquals(AudioRequestOutputFormat.ZIP.name(), entity.getOutputFormat().name());
+        assertEquals(response.getFileName(), entity.getOutputFilename());
+        assertEquals(response.getFileSizeBytes(), entity.getOutputFilesize());
+        assertEquals(dateTimeFormatter.format(response.getLastAccessedAt()),
                                 dateTimeFormatter.format(entity.getLastAccessed().atZoneSameInstant(ZoneId.of("UTC")).toOffsetDateTime()));
-        Assertions.assertEquals(response.getMediaRequest().getId(), entity.getMediaRequest().getId());
-        Assertions.assertEquals(dateTimeFormatter.format(response.getMediaRequest().getRequestedAt()),
+        assertEquals(response.getMediaRequest().getId(), entity.getMediaRequest().getId());
+        assertEquals(dateTimeFormatter.format(response.getMediaRequest().getRequestedAt()),
                                 dateTimeFormatter.format(entity.getMediaRequest().getCreatedDateTime().atZoneSameInstant(ZoneId.of("UTC")).toOffsetDateTime()));
-        Assertions.assertEquals(response.getMediaRequest().getOwnerUserId(),
+        assertEquals(response.getMediaRequest().getOwnerUserId(),
                                 entity.getMediaRequest().getCurrentOwner().getId());
-        Assertions.assertEquals(response.getMediaRequest().getRequestedByUserId(), entity.getMediaRequest().getRequestor().getId());
-        Assertions.assertEquals(response.getCase().getId(), entity.getMediaRequest().getHearing().getCourtCase().getId());
-        Assertions.assertEquals(response.getCase().getCaseNumber(), entity.getMediaRequest().getHearing().getCourtCase().getCaseNumber());
-        Assertions.assertEquals(response.getCourthouse().getId(),
+        assertEquals(response.getMediaRequest().getRequestedByUserId(), entity.getMediaRequest().getRequestor().getId());
+        assertEquals(response.getCase().getId(), entity.getMediaRequest().getHearing().getCourtCase().getId());
+        assertEquals(response.getCase().getCaseNumber(), entity.getMediaRequest().getHearing().getCourtCase().getCaseNumber());
+        assertEquals(response.getCourthouse().getId(),
                                 entity.getMediaRequest().getHearing().getCourtroom().getCourthouse().getId());
-        Assertions.assertEquals(response.getCourthouse().getDisplayName(),
+        assertEquals(response.getCourthouse().getDisplayName(),
                                 entity.getMediaRequest().getHearing().getCourtroom().getCourthouse().getDisplayName());
-        Assertions.assertEquals(response.getHearing().getId(), entity.getMediaRequest().getHearing().getId());
-        Assertions.assertEquals(response.getHearing().getHearingDate(), entity.getMediaRequest().getHearing().getHearingDate());
+        assertEquals(response.getHearing().getId(), entity.getMediaRequest().getHearing().getId());
+        assertEquals(response.getHearing().getHearingDate(), entity.getMediaRequest().getHearing().getHearingDate());
     }
 }

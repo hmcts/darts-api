@@ -1,9 +1,9 @@
 package uk.gov.hmcts.darts.event.service.impl;
 
-import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import uk.gov.hmcts.darts.common.entity.EventEntity;
 import uk.gov.hmcts.darts.common.exception.DartsException;
 import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
@@ -39,14 +39,14 @@ public class RemoveDuplicateEventsProcessorImpl implements RemoveDuplicateEvents
     private final CaseRetentionRepository caseRetentionRepository;
 
     public RemoveDuplicateEventsProcessorImpl(
-        @Value("${darts.events.duplicates.earliest-removable-event-date}") LocalDate earliestRemovableEventDate,
+        @Value("${darts.events.duplicates.earliest-removable-event-date}") String earliestRemovableEventDate,
         @Value("${darts.events.duplicates.clear-up-window}") int clearUpWindow,
         EventRepository eventRepository,
         CurrentTimeHelper currentTimeHelper,
         CaseManagementRetentionRepository caseManagementRetentionRepository,
         CaseRetentionRepository caseRetentionRepository) {
 
-        this.earliestRemovableEventDate = earliestRemovableEventDate
+        this.earliestRemovableEventDate = LocalDate.parse(earliestRemovableEventDate)
             .atStartOfDay()
             .atOffset(UTC);
         this.clearUpWindow = clearUpWindow;

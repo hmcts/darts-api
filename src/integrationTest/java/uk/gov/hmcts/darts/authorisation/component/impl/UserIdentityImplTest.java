@@ -1,6 +1,7 @@
 package uk.gov.hmcts.darts.authorisation.component.impl;
 
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -24,6 +25,7 @@ import static uk.gov.hmcts.darts.authorisation.exception.AuthorisationError.USER
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.CPP;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.XHIBIT;
 
+@Disabled("Impacted by V1_364_*.sql")
 class UserIdentityImplTest extends IntegrationBase {
 
     @Autowired

@@ -108,11 +108,11 @@ class AudioControllerGetMarkedForDeletionIntTest extends PostgresIntegrationBase
                                         "end_at": "2024-01-01T00:00:00Z",
                                         "courthouse": {
                                           "id": 1,
-                                          "display_name": "Test Courthouse"
+                                          "display_name": "TEST COURTHOUSE"
                                         },
                                         "courtroom": {
                                           "id": 1,
-                                          "name": "Test Courtroom"
+                                          "name": "TEST COURTROOM"
                                         },
                                         "admin_action": {
                                           "id": %d,

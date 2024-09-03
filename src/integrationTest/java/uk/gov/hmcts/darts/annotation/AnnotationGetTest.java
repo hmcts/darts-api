@@ -9,12 +9,16 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import uk.gov.hmcts.darts.common.datamanagement.api.DataManagementFacade;
 import uk.gov.hmcts.darts.common.datamanagement.component.impl.DownloadResponseMetaData;
+import uk.gov.hmcts.darts.common.entity.AnnotationDocumentEntity;
 import uk.gov.hmcts.darts.common.entity.AnnotationEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
+import uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum;
 import uk.gov.hmcts.darts.testutils.GivenBuilder;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 
 import java.io.InputStream;
+import java.time.OffsetDateTime;
+import java.util.UUID;
 
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.Mockito.when;
@@ -24,6 +28,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.STORED;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.JUDICIARY;
 import static uk.gov.hmcts.darts.test.common.data.AnnotationTestData.minimalAnnotationEntity;
 import static uk.gov.hmcts.darts.test.common.data.HearingTestData.someMinimalHearing;
@@ -49,8 +54,8 @@ class AnnotationGetTest extends IntegrationBase {
 
     @Test
     void shouldThrowHttp404ForValidJudgeAndInvalidAnnotationDocumentEntity() throws Exception {
-
-        AnnotationEntity uae = someAnnotationCreatedBy(given.anAuthenticatedUserWithGlobalAccessAndRole(JUDICIARY));
+        var judge = given.anAuthenticatedUserWithGlobalAccessAndRole(JUDICIARY);
+        var uae = someAnnotationCreatedBy(judge);
 
         MockHttpServletRequestBuilder requestBuilder = get(ANNOTATION_DOCUMENT_ENDPOINT, uae.getId(), -1);
 
@@ -71,29 +76,58 @@ class AnnotationGetTest extends IntegrationBase {
         when(downloadResponseMetaData.getInputStream()).thenReturn(inputStreamResource);
         when(dataManagementFacade.retrieveFileFromStorage(anyList())).thenReturn(downloadResponseMetaData);
 
-        var annotationDocument = dartsDatabase.createValidAnnotationDocumentForDownload(judge);
+        var annotationDocument = createValidAnnotationDocumentForDownload(judge);
 
         MockHttpServletRequestBuilder requestBuilder = get(ANNOTATION_DOCUMENT_ENDPOINT,
                                                            annotationDocument.getAnnotation().getId(),
                                                            annotationDocument.getId());
-
 
         mockMvc.perform(
                 requestBuilder)
             .andExpect(status().isOk())
             .andExpect(header().string(
                 CONTENT_DISPOSITION,
-                "attachment; filename=\"judges-notes.txt\""
-            ))
+                "attachment; filename=\"judges-notes.txt\""))
             .andExpect(header().string(
                 CONTENT_TYPE,
-                "application/zip"
-            ))
+                "application/zip"))
             .andExpect(header().string(
                 "annotation_document_id",
-                "1"
-            ));
+                "1"));
 
+    }
+
+    private AnnotationDocumentEntity createValidAnnotationDocumentForDownload(UserAccountEntity judge) {
+        var annotation = someAnnotationCreatedBy(judge);
+
+        final String fileName = "judges-notes.txt";
+        final String fileType = "text/plain";
+        final int fileSize = 123;
+        final OffsetDateTime uploadedDateTime = OffsetDateTime.now();
+        final String checksum = "123";
+        var annotationDocumentEntity = dartsDatabase.getAnnotationStub()
+            .createAndSaveAnnotationDocumentEntityWith(annotation, fileName, fileType, fileSize,
+                                                       judge, uploadedDateTime, checksum);
+
+        var armEod = dartsDatabase.getExternalObjectDirectoryStub().createExternalObjectDirectory(
+            annotationDocumentEntity,
+            dartsDatabase.getObjectRecordStatusEntity(STORED),
+            dartsDatabase.getExternalLocationTypeEntity(ExternalLocationTypeEnum.ARM),
+            UUID.fromString("665e00c8-5b82-4392-8766-e0c982f603d3")
+        );
+        armEod.setTransferAttempts(1);
+        dartsDatabase.save(armEod);
+
+        var armEod2 = dartsDatabase.getExternalObjectDirectoryStub().createExternalObjectDirectory(
+            annotationDocumentEntity,
+            dartsDatabase.getObjectRecordStatusEntity(STORED),
+            dartsDatabase.getExternalLocationTypeEntity(ExternalLocationTypeEnum.ARM),
+            UUID.fromString("665e00c8-5b82-4392-8766-e0c982f603d3")
+        );
+        armEod.setTransferAttempts(1);
+        dartsDatabase.save(armEod2);
+
+        return annotationDocumentEntity;
     }
 
     private AnnotationEntity someAnnotationCreatedBy(UserAccountEntity userAccount) {
@@ -102,8 +136,8 @@ class AnnotationGetTest extends IntegrationBase {
         annotation.setCurrentOwner(userAccount);
         annotation.setCreatedBy(userAccount);
         annotation.setLastModifiedBy(userAccount);
-        annotation.addHearing(dartsDatabase.save(someMinimalHearing()));
-        dartsDatabase.save(annotation);
+        annotation.addHearing(someMinimalHearing());
+        dartsPersistence.save(annotation);
         return annotation;
     }
 

@@ -9,6 +9,7 @@ bin/main/
 bin/smokeTest/
 bin/test/
 bin/generated-sources/
+bin/arm_responses/
 
 ### STS ###
 .apt_generated

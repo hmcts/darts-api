@@ -1,175 +1,215 @@
 package uk.gov.hmcts.darts.common.service.impl;
 
+
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.darts.authorisation.api.AuthorisationApi;
+import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.JudgeEntity;
+import uk.gov.hmcts.darts.common.entity.MediaEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
-import uk.gov.hmcts.darts.common.exception.DartsApiException;
-import uk.gov.hmcts.darts.common.repository.CaseRepository;
-import uk.gov.hmcts.darts.common.repository.CourthouseRepository;
-import uk.gov.hmcts.darts.common.repository.CourtroomRepository;
-import uk.gov.hmcts.darts.common.repository.HearingRepository;
-import uk.gov.hmcts.darts.common.repository.JudgeRepository;
-import uk.gov.hmcts.darts.common.util.CommonTestDataUtil;
+import uk.gov.hmcts.darts.common.service.CaseCommonService;
+import uk.gov.hmcts.darts.common.service.CourthouseCommonService;
+import uk.gov.hmcts.darts.common.service.CourtroomCommonService;
+import uk.gov.hmcts.darts.common.service.HearingCommonService;
+import uk.gov.hmcts.darts.common.service.JudgeCommonService;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static uk.gov.hmcts.darts.common.util.CommonTestDataUtil.createOffsetDateTime;
 
 @ExtendWith(MockitoExtension.class)
 class RetrieveCoreObjectServiceImplTest {
 
-    private static final String COURTHOUSE_1 = "courthouse1";
-    private static final String COURTROOM_1 = "courtroom1";
-    private static final String CASE_NUMBER_1 = "caseNumber1";
-    private static final UserAccountEntity USER_ACCOUNT_ENTITY = new UserAccountEntity();
-
     @Mock
-    HearingRepository hearingRepository;
-
+    private HearingCommonService hearingCommonService;
     @Mock
-    CaseRepository caseRepository;
-
+    private CourthouseCommonService courthouseCommonService;
     @Mock
-    CourthouseRepository courthouseRepository;
-
+    private CourtroomCommonService courtroomCommonService;
     @Mock
-    CourtroomRepository courtroomRepository;
-
+    private CaseCommonService caseCommonService;
     @Mock
-    AuthorisationApi authorisationApi;
-
+    private JudgeCommonService judgeCommonService;
     @Mock
-    JudgeRepository judgeRepository;
+    private AuthorisationApi authorisationApi;
 
-    @InjectMocks
-    RetrieveCoreObjectServiceImpl retrieveCoreObjectServiceImpl;
+    private RetrieveCoreObjectServiceImpl retrieveCoreObjectService;
 
-    @Test
-    void hearingExists() {
-        HearingEntity hearingToBeFound = new HearingEntity();
-        hearingToBeFound.setId(123);
-        hearingToBeFound.setCreatedDateTime(createOffsetDateTime("2024-03-25T10:00:00"));
-
-        when(hearingRepository.findHearing(anyString(), anyString(), anyString(), any(LocalDate.class))).thenReturn(
-            Optional.of(hearingToBeFound));
-
-        HearingEntity response = retrieveCoreObjectServiceImpl.retrieveOrCreateHearing(
-            COURTHOUSE_1,
-            COURTROOM_1,
-            CASE_NUMBER_1,
-            LocalDateTime.now()
+    @BeforeEach
+    void setUp() {
+        retrieveCoreObjectService = new RetrieveCoreObjectServiceImpl(
+            hearingCommonService,
+            courthouseCommonService,
+            courtroomCommonService,
+            caseCommonService,
+            judgeCommonService,
+            authorisationApi
         );
-
-        assertEquals(123, response.getId());
     }
 
     @Test
-    void hearingCreate() {
-        mockCourthouse();
-        when(hearingRepository.findHearing(anyString(), anyString(), anyString(), any(LocalDate.class))).thenReturn(
-            Optional.empty());
-
-        HearingEntity response = retrieveCoreObjectServiceImpl.retrieveOrCreateHearing(
-            COURTHOUSE_1,
-            COURTROOM_1,
-            CASE_NUMBER_1,
-            LocalDateTime.now()
-        );
-
-        assertEquals(COURTROOM_1, response.getCourtroom().getName());
-        assertEquals(1, response.getCourtroom().getCourthouse().getId());
-        assertEquals(CASE_NUMBER_1, response.getCourtCase().getCaseNumber());
-        assertEquals(authorisationApi.getCurrentUser(), response.getCreatedBy());
-        assertEquals(authorisationApi.getCurrentUser(), response.getLastModifiedBy());
-    }
-
-    @Test
-    void courtroomCreate() {
-        mockCourthouse();
-        when(courtroomRepository.findByCourthouseNameAndCourtroomName(anyString(), anyString())).thenReturn(
-            Optional.empty());
+    void retrieveOrCreateHearingShouldDelegateToHearingService() {
+        String courthouseName = "Test Courthouse";
+        String courtroomName = "Test Courtroom";
+        String caseNumber = "Case123";
+        LocalDateTime hearingDate = LocalDateTime.now();
         UserAccountEntity userAccount = new UserAccountEntity();
-        userAccount.setId(0);
+        HearingEntity expectedHearing = new HearingEntity();
 
-        CourtroomEntity response = retrieveCoreObjectServiceImpl.retrieveOrCreateCourtroom(
-            COURTHOUSE_1,
-            COURTROOM_1,
-            userAccount
-        );
+        when(authorisationApi.getCurrentUser()).thenReturn(userAccount);
+        when(hearingCommonService.retrieveOrCreateHearing(courthouseName, courtroomName, caseNumber, hearingDate, userAccount))
+            .thenReturn(expectedHearing);
 
-        assertEquals(COURTROOM_1, response.getName());
-        assertEquals(1, response.getCourthouse().getId());
+        HearingEntity result = retrieveCoreObjectService.retrieveOrCreateHearing(courthouseName, courtroomName, caseNumber, hearingDate);
+
+        assertEquals(expectedHearing, result);
+        verify(hearingCommonService).retrieveOrCreateHearing(courthouseName, courtroomName, caseNumber, hearingDate, userAccount);
     }
 
     @Test
-    void courtroomRetrieve() {
-
-        CourtroomEntity courtroom = CommonTestDataUtil.createCourtroom(COURTROOM_1);
-        when(courtroomRepository.findByCourthouseNameAndCourtroomName(anyString(), anyString())).thenReturn(
-            Optional.of(courtroom));
-
+    void retrieveOrCreateHearingWithMediaShouldDelegateToHearingService() {
+        String courthouseName = "Test Courthouse";
+        String courtroomName = "Test Courtroom";
+        String caseNumber = "Case123";
+        LocalDateTime hearingDate = LocalDateTime.now();
         UserAccountEntity userAccount = new UserAccountEntity();
-        userAccount.setId(0);
+        MediaEntity mediaEntity = new MediaEntity();
+        HearingEntity expectedHearing = new HearingEntity();
 
-        CourtroomEntity response = retrieveCoreObjectServiceImpl.retrieveOrCreateCourtroom(
-            COURTHOUSE_1,
-            COURTROOM_1,
-            userAccount
-        );
+        when(hearingCommonService.retrieveOrCreateHearingWithMedia(courthouseName, courtroomName, caseNumber, hearingDate, userAccount, mediaEntity))
+            .thenReturn(expectedHearing);
 
-        assertEquals(COURTROOM_1, response.getName());
+        HearingEntity result = retrieveCoreObjectService.retrieveOrCreateHearingWithMedia(courthouseName, courtroomName, caseNumber, hearingDate, userAccount,
+                                                                                          mediaEntity);
+
+        assertEquals(expectedHearing, result);
+        verify(hearingCommonService).retrieveOrCreateHearingWithMedia(courthouseName, courtroomName, caseNumber, hearingDate, userAccount, mediaEntity);
     }
 
     @Test
-    void hearingCreateMissingCourthouse() {
-        HearingEntity hearingToBeFound = new HearingEntity();
-        hearingToBeFound.setId(123);
-        when(hearingRepository.findHearing(anyString(), anyString(), anyString(), any(LocalDate.class))).thenReturn(
-            Optional.empty());
-
-        DartsApiException exception = assertThrows(
-            DartsApiException.class,
-            () -> retrieveCoreObjectServiceImpl.retrieveOrCreateHearing(
-                COURTHOUSE_1,
-                COURTROOM_1,
-                CASE_NUMBER_1,
-                LocalDateTime.now()
-            )
-        );
-
-        assertEquals("Provided courthouse does not exist. Courthouse 'courthouse1' not found.", exception.getMessage());
-    }
-
-    @Test
-    void createJudgeUppercase() {
-        when(authorisationApi.getCurrentUser()).thenReturn(USER_ACCOUNT_ENTITY);
-
-        JudgeEntity response = retrieveCoreObjectServiceImpl.retrieveOrCreateJudge("Mr Judge Smith");
-
-        assertEquals("MR JUDGE SMITH", response.getName());
-    }
-
-    private void mockCourthouse() {
+    void retrieveOrCreateCourtroomWithCourthouseShouldDelegateToCourtroomService() {
         CourthouseEntity courthouse = new CourthouseEntity();
-        courthouse.setId(1);
-        courthouse.setCourthouseName("Swansea");
-        when(courthouseRepository.findByCourthouseNameIgnoreCase(anyString())).thenReturn(
-            Optional.of(courthouse));
+        String courtroomName = "Test Courtroom";
+        UserAccountEntity userAccount = new UserAccountEntity();
+        CourtroomEntity expectedCourtroom = new CourtroomEntity();
+
+        when(courtroomCommonService.retrieveOrCreateCourtroom(courthouse, courtroomName, userAccount)).thenReturn(expectedCourtroom);
+
+        CourtroomEntity result = retrieveCoreObjectService.retrieveOrCreateCourtroom(courthouse, courtroomName, userAccount);
+
+        assertEquals(expectedCourtroom, result);
+        verify(courtroomCommonService).retrieveOrCreateCourtroom(courthouse, courtroomName, userAccount);
     }
 
+    @Test
+    void retrieveOrCreateCourtroomWithCourthouseNameShouldDelegateToCourtroomService() {
+        String courthouseName = "Test Courthouse";
+        String courtroomName = "Test Courtroom";
+        UserAccountEntity userAccount = new UserAccountEntity();
+        CourtroomEntity expectedCourtroom = new CourtroomEntity();
+
+        when(courtroomCommonService.retrieveOrCreateCourtroom(courthouseName, courtroomName, userAccount)).thenReturn(expectedCourtroom);
+
+        CourtroomEntity result = retrieveCoreObjectService.retrieveOrCreateCourtroom(courthouseName, courtroomName, userAccount);
+
+        assertEquals(expectedCourtroom, result);
+        verify(courtroomCommonService).retrieveOrCreateCourtroom(courthouseName, courtroomName, userAccount);
+    }
+
+    @Test
+    void retrieveOrCreateCaseWithoutUserAccountShouldDelegateToCaseService() {
+        String courthouseName = "Test Courthouse";
+        String caseNumber = "Case123";
+        UserAccountEntity userAccount = new UserAccountEntity();
+        CourtCaseEntity expectedCase = new CourtCaseEntity();
+
+        when(authorisationApi.getCurrentUser()).thenReturn(userAccount);
+        when(caseCommonService.retrieveOrCreateCase(courthouseName, caseNumber, userAccount)).thenReturn(expectedCase);
+
+        CourtCaseEntity result = retrieveCoreObjectService.retrieveOrCreateCase(courthouseName, caseNumber);
+
+        assertEquals(expectedCase, result);
+        verify(caseCommonService).retrieveOrCreateCase(courthouseName, caseNumber, userAccount);
+    }
+
+    @Test
+    void retrieveOrCreateCaseWithUserAccountShouldDelegateToCaseService() {
+        String courthouseName = "Test Courthouse";
+        String caseNumber = "Case123";
+        UserAccountEntity userAccount = new UserAccountEntity();
+        CourtCaseEntity expectedCase = new CourtCaseEntity();
+
+        when(caseCommonService.retrieveOrCreateCase(courthouseName, caseNumber, userAccount)).thenReturn(expectedCase);
+
+        CourtCaseEntity result = retrieveCoreObjectService.retrieveOrCreateCase(courthouseName, caseNumber, userAccount);
+
+        assertEquals(expectedCase, result);
+        verify(caseCommonService).retrieveOrCreateCase(courthouseName, caseNumber, userAccount);
+    }
+
+    @Test
+    void retrieveOrCreateCaseWithCourthouseShouldDelegateToCaseService() {
+        CourthouseEntity courthouse = new CourthouseEntity();
+        String caseNumber = "Case123";
+        UserAccountEntity userAccount = new UserAccountEntity();
+        CourtCaseEntity expectedCase = new CourtCaseEntity();
+
+        when(caseCommonService.retrieveOrCreateCase(courthouse, caseNumber, userAccount)).thenReturn(expectedCase);
+
+        CourtCaseEntity result = retrieveCoreObjectService.retrieveOrCreateCase(courthouse, caseNumber, userAccount);
+
+        assertEquals(expectedCase, result);
+        verify(caseCommonService).retrieveOrCreateCase(courthouse, caseNumber, userAccount);
+    }
+
+    @Test
+    void retrieveCourthouseShouldDelegateToCourthouseService() {
+        String courthouseName = "Test Courthouse";
+        CourthouseEntity expectedCourthouse = new CourthouseEntity();
+
+        when(courthouseCommonService.retrieveCourthouse(courthouseName)).thenReturn(expectedCourthouse);
+
+        CourthouseEntity result = retrieveCoreObjectService.retrieveCourthouse(courthouseName);
+
+        assertEquals(expectedCourthouse, result);
+        verify(courthouseCommonService).retrieveCourthouse(courthouseName);
+    }
+
+    @Test
+    void retrieveOrCreateJudgeWithoutUserAccountShouldDelegateToJudgeService() {
+        String judgeName = "Judge Smith";
+        UserAccountEntity userAccount = new UserAccountEntity();
+        JudgeEntity expectedJudge = new JudgeEntity();
+
+        when(authorisationApi.getCurrentUser()).thenReturn(userAccount);
+        when(judgeCommonService.retrieveOrCreateJudge(judgeName, userAccount)).thenReturn(expectedJudge);
+
+        JudgeEntity result = retrieveCoreObjectService.retrieveOrCreateJudge(judgeName);
+
+        assertEquals(expectedJudge, result);
+        verify(judgeCommonService).retrieveOrCreateJudge(judgeName, userAccount);
+    }
+
+    @Test
+    void retrieveOrCreateJudgeWithUserAccountShouldDelegateToJudgeService() {
+        String judgeName = "Judge Smith";
+        UserAccountEntity userAccount = new UserAccountEntity();
+        JudgeEntity expectedJudge = new JudgeEntity();
+
+        when(judgeCommonService.retrieveOrCreateJudge(judgeName, userAccount)).thenReturn(expectedJudge);
+
+        JudgeEntity result = retrieveCoreObjectService.retrieveOrCreateJudge(judgeName, userAccount);
+
+        assertEquals(expectedJudge, result);
+        verify(judgeCommonService).retrieveOrCreateJudge(judgeName, userAccount);
+    }
 }

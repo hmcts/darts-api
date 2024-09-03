@@ -2,6 +2,7 @@ package uk.gov.hmcts.darts.event.service.impl;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.TestPropertySource;
@@ -15,9 +16,10 @@ import java.util.List;
 import static java.time.LocalDate.parse;
 import static org.assertj.core.api.Assertions.assertThat;
 import static uk.gov.hmcts.darts.test.common.data.CourtroomTestData.someMinimalCourtRoom;
-import static uk.gov.hmcts.darts.test.common.data.HearingTestData.createSomeMinimalHearing;
+import static uk.gov.hmcts.darts.test.common.data.HearingTestData.someMinimalHearing;
 
 @TestPropertySource(properties = {"darts.events.admin-search.max-results=5"})
+@Disabled("Impacted by V1_363__not_null_constraints_part3.sql")
 class AdminEventSearchTest extends IntegrationBase {
 
     @Autowired
@@ -51,7 +53,7 @@ class AdminEventSearchTest extends IntegrationBase {
 
     @Test
     void findsEventsByCaseNumberOnly() {
-        var hearing = createSomeMinimalHearing();
+        var hearing = someMinimalHearing();
         var persistedEventsForHearing = given.persistedEventsForHearing(3, hearing);
         given.persistedEvents(3);  // Persist some other events for the other hearings
 

@@ -45,7 +45,7 @@ public class YourTranscriptsQueryImpl implements YourTranscriptsQuery {
                     tra.tra_id as transcription_id,
                     cas.cas_id as case_id,
                     cas.case_number,
-                    cth.courthouse_name,
+                    cth.display_name courthouse_name,
                     hea.hearing_date,
                     trt.description as transcription_type,
                     trs.display_name as status,
@@ -82,7 +82,7 @@ public class YourTranscriptsQueryImpl implements YourTranscriptsQuery {
                     )
                 )
                 AND trw.workflow_ts >= :date_limit
-
+                AND tra.is_current = true
                 UNION
 
                 -- Migrated "requester_transcriptions"
@@ -90,7 +90,7 @@ public class YourTranscriptsQueryImpl implements YourTranscriptsQuery {
                     tra.tra_id as transcription_id,
                     cas.cas_id as case_id,
                     cas.case_number,
-                    cth.courthouse_name,
+                    cth.display_name courthouse_name,
                     tra.hearing_date,
                     trt.description as transcription_type,
                     trs.display_name as status,
@@ -130,6 +130,7 @@ public class YourTranscriptsQueryImpl implements YourTranscriptsQuery {
                     )
                 )
                 AND trw.workflow_ts >= :date_limit
+                AND tra.is_current = true
                 ORDER BY transcription_id DESC
                 LIMIT :max_result_size
                 """,
@@ -151,7 +152,7 @@ public class YourTranscriptsQueryImpl implements YourTranscriptsQuery {
                     tra.tra_id as transcription_id,
                     cas.cas_id as case_id,
                     cas.case_number,
-                    cth.courthouse_name,
+                    cth.display_name courthouse_name,
                     hea.hearing_date,
                     trt.description as transcription_type,
                     trs.display_name as status,
@@ -196,6 +197,7 @@ public class YourTranscriptsQueryImpl implements YourTranscriptsQuery {
                     )
                 )
                 AND trw.workflow_ts >= :date_limit
+                AND tra.is_current = true
 
                 UNION
 
@@ -204,7 +206,7 @@ public class YourTranscriptsQueryImpl implements YourTranscriptsQuery {
                     tra.tra_id as transcription_id,
                     cas.cas_id as case_id,
                     cas.case_number,
-                    cth.courthouse_name,
+                    cth.display_name courthouse_name,
                     hearing_date,
                     trt.description as transcription_type,
                     trs.display_name as status,
@@ -252,6 +254,7 @@ public class YourTranscriptsQueryImpl implements YourTranscriptsQuery {
                     )
                 )
                 AND trw.workflow_ts >= :date_limit
+                AND tra.is_current = true
                 ORDER BY transcription_id DESC
                 LIMIT :max_result_size
                 """,

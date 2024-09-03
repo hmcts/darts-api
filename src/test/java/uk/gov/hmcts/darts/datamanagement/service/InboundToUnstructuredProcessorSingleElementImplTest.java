@@ -87,7 +87,7 @@ class InboundToUnstructuredProcessorSingleElementImplTest {
         when(externalObjectDirectoryEntityInbound.getAnnotationDocumentEntity()).thenReturn(annotationDocumentEntity);
         when(externalObjectDirectoryEntityInbound.getExternalLocation()).thenReturn(EXTERNAL_LOCATION_UUID);
 
-        inboundToUnstructuredProcessor.processSingleElement(INBOUND_ID);
+        inboundToUnstructuredProcessor.processSingleElement(externalObjectDirectoryRepository.findById(INBOUND_ID).get());
 
         verify(externalObjectDirectoryRepository, times(3)).saveAndFlush(externalObjectDirectoryEntityCaptor.capture());
 
@@ -104,7 +104,7 @@ class InboundToUnstructuredProcessorSingleElementImplTest {
         when(externalObjectDirectoryEntityInbound.getExternalLocation()).thenReturn(EXTERNAL_LOCATION_UUID);
         when(caseDocumentEntity.getId()).thenReturn(44);
 
-        inboundToUnstructuredProcessor.processSingleElement(INBOUND_ID);
+        inboundToUnstructuredProcessor.processSingleElement(externalObjectDirectoryRepository.findById(INBOUND_ID).get());
 
         verify(externalObjectDirectoryRepository, times(3)).saveAndFlush(externalObjectDirectoryEntityCaptor.capture());
         verify(dataManagementService).copyBlobData(
@@ -121,7 +121,8 @@ class InboundToUnstructuredProcessorSingleElementImplTest {
 
         when(externalObjectDirectoryRepository.findById(INBOUND_ID)).thenReturn(Optional.empty());
 
-        assertThrows(NoSuchElementException.class, () -> inboundToUnstructuredProcessor.processSingleElement(INBOUND_ID));
+        assertThrows(NoSuchElementException.class,
+                     () -> inboundToUnstructuredProcessor.processSingleElement(externalObjectDirectoryRepository.findById(INBOUND_ID).get()));
     }
 
 }

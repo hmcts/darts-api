@@ -43,7 +43,7 @@ public class TranscriberTranscriptsQueryImpl implements TranscriberTranscriptsQu
                     tra.tra_id as transcription_id,
                     cas.cas_id as case_id,
                     cas.case_number,
-                    cth.courthouse_name,
+                    cth.display_name courthouse_name,
                     hea.hearing_date,
                     trt.description                  as transcription_type,
                     trs.display_name                 as status,
@@ -83,6 +83,7 @@ public class TranscriberTranscriptsQueryImpl implements TranscriberTranscriptsQu
                     GROUP BY tra_id
                 ) latest_trw ON tra.tra_id = latest_trw.tra_id AND approved_trw.workflow_ts = latest_trw.latest_ts
                 WHERE latest_trw.latest_ts >= :date_limit
+                AND tra.is_current = true
                 ORDER BY transcription_id desc
                 LIMIT :max_result_size
                 """,
@@ -105,7 +106,7 @@ public class TranscriberTranscriptsQueryImpl implements TranscriberTranscriptsQu
                     tra.tra_id as transcription_id,
                     cas.cas_id as case_id,
                     cas.case_number,
-                    cth.courthouse_name,
+                    cth.display_name courthouse_name,
                     hea.hearing_date,
                     trt.description                  as transcription_type,
                     trs.display_name                 as status,
@@ -161,6 +162,7 @@ public class TranscriberTranscriptsQueryImpl implements TranscriberTranscriptsQu
                         WHERE trd.tra_id = tra.tra_id
                     )
                 )
+                AND tra.is_current = true
                                 
                 UNION
 
@@ -169,7 +171,7 @@ public class TranscriberTranscriptsQueryImpl implements TranscriberTranscriptsQu
                     tra.tra_id as transcription_id,
                     cas.cas_id as case_id,
                     cas.case_number,
-                    cth.courthouse_name,
+                    cth.display_name courthouse_name,
                     hea.hearing_date,
                     trt.description             as transcription_type,
                     trs.display_name            as status,
@@ -219,6 +221,7 @@ public class TranscriberTranscriptsQueryImpl implements TranscriberTranscriptsQu
                         WHERE trd.tra_id = tra.tra_id
                     )
                 )
+                AND tra.is_current = true
                 ORDER BY transcription_id desc
                 LIMIT :max_result_size
                 """,

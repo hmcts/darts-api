@@ -136,7 +136,7 @@ public class EventMappingServiceImpl implements EventMappingService {
         mapping.setName(eventEntity.getEventName());
         mapping.setHandler(eventEntity.getHandler());
         mapping.setIsActive(eventEntity.getActive());
-        mapping.setHasRestrictions(eventEntity.getIsReportingRestriction());
+        mapping.setHasRestrictions(eventEntity.isReportingRestriction());
         mapping.setCreatedAt(eventEntity.getCreatedDateTime());
 
         return mapping;

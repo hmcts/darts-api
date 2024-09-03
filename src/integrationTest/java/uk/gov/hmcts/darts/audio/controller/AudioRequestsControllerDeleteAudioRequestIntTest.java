@@ -45,13 +45,14 @@ class AudioRequestsControllerDeleteAudioRequestIntTest extends IntegrationBase {
 
         var requestor = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
         var mediaRequestEntity = dartsDatabase.createAndLoadOpenMediaRequestEntity(requestor, AudioRequestType.DOWNLOAD);
-        var objectRecordStatusEntity = dartsDatabase.getObjectRecordStatusEntity(STORED);
-        dartsDatabase.getTransientObjectDirectoryRepository()
-            .saveAndFlush(transientObjectDirectoryStub.createTransientObjectDirectoryEntity(
-                mediaRequestEntity,
-                objectRecordStatusEntity,
-                blobId
-            ));
+        var objectRecordStatusEntity = dartsDataRetrieval.getObjectRecordStatusEntity(STORED);
+
+        var transientObjectDirectoryEntity = transientObjectDirectoryStub.createTransientObjectDirectoryEntity(
+            mediaRequestEntity,
+            objectRecordStatusEntity,
+            blobId
+        );
+        dartsDatabase.getTransientObjectDirectoryRepository().saveAndFlush(transientObjectDirectoryEntity);
 
         doNothing().when(authorisation).authoriseByMediaRequestId(
             mediaRequestEntity.getId(),

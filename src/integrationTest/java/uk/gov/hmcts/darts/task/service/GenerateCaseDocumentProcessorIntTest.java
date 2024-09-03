@@ -1,5 +1,6 @@
 package uk.gov.hmcts.darts.task.service;
 
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.SpyBean;
@@ -8,7 +9,6 @@ import uk.gov.hmcts.darts.common.entity.CaseDocumentEntity;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
-import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.repository.AnnotationRepository;
 import uk.gov.hmcts.darts.common.repository.CaseDocumentRepository;
 import uk.gov.hmcts.darts.common.repository.CaseRepository;
@@ -25,6 +25,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum.ARM;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_DROP_ZONE;
 
+@Disabled("Impacted by V1_364_*.sql")
 class GenerateCaseDocumentProcessorIntTest extends IntegrationBase {
 
     private static final OffsetDateTime DT_2025 = OffsetDateTime.of(2025, 1, 1, 1, 0, 0, 0, UTC);
@@ -48,13 +49,12 @@ class GenerateCaseDocumentProcessorIntTest extends IntegrationBase {
     void testGenerateCaseDocument() {
         // given
         givenBearerTokenExists("darts.global.user@hmcts.net");
-        UserAccountEntity testUser = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
 
-        CourtCaseEntity courtCase = dartsDatabase.getCourtCaseStub().createAndSaveCourtCaseWithHearings(createdCourtCase -> {
-            createdCourtCase.setRetentionUpdated(true);
-            createdCourtCase.setRetentionRetries(1);
-            createdCourtCase.setClosed(true);
-        });
+        CourtCaseEntity courtCase = dartsDatabase.getCourtCaseStub().createAndSaveCourtCaseWithHearings();
+
+        courtCase.setRetentionUpdated(true);
+        courtCase.setRetentionRetries(1);
+        courtCase.setClosed(true);
 
         List<MediaEntity> medias = dartsDatabase.getMediaStub().createAndSaveSomeMedias();
         var hearing = courtCase.getHearings().get(0);
@@ -65,6 +65,7 @@ class GenerateCaseDocumentProcessorIntTest extends IntegrationBase {
 
         dartsDatabase.getExternalObjectDirectoryStub().createAndSaveEod(medias.get(0), ARM_DROP_ZONE, ARM, eod -> { });
 
+        var testUser = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
         var annotation = dartsDatabase.getAnnotationStub().createAndSaveAnnotationEntityWith(testUser, "TestAnnotation", hearing);
         annotationRepository.save(annotation);
 

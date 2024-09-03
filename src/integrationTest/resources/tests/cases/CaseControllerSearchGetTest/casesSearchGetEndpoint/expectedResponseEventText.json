@@ -1,32 +1,32 @@
 [
   {
-    "case_number":"case5",
-    "courthouse":"SWANSEA",
-    "defendants":[
+    "case_number": "case5",
+    "courthouse": "SWANSEA",
+    "defendants": [
       "aDefendant"
     ],
-    "judges":[
+    "judges": [
       "AJUDGE"
     ],
-    "hearings":[
+    "hearings": [
       {
-        "date":"2023-09-20",
-        "courtroom":"courtroom2",
-        "judges":[
+        "date": "2023-09-20",
+        "courtroom": "COURTROOM2",
+        "judges": [
           "AJUDGE"
         ]
       },
       {
-        "date":"2023-09-21",
-        "courtroom":"courtroom1",
-        "judges":[
+        "date": "2023-09-21",
+        "courtroom": "COURTROOM1",
+        "judges": [
           "AJUDGE"
         ]
       },
       {
-        "date":"2023-09-22",
-        "courtroom":"courtroom3",
-        "judges":[
+        "date": "2023-09-22",
+        "courtroom": "COURTROOM3",
+        "judges": [
           "AJUDGE"
         ]
       }

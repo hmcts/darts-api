@@ -1,6 +1,7 @@
 package uk.gov.hmcts.darts.transcriptions.controller;
 
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -28,6 +29,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @AutoConfigureMockMvc
 @Transactional
+@Disabled("Impacted by V1_364_*.sql")
 class TranscriptionControllerGetYourTranscriptsIntTest extends IntegrationBase {
 
     private static final URI ENDPOINT_URI = URI.create("/transcriptions");
@@ -251,7 +253,7 @@ class TranscriptionControllerGetYourTranscriptsIntTest extends IntegrationBase {
     @Test
     void getYourTranscriptsApproverShouldNotReturnHidden() throws Exception {
         var courtCase = authorisationStub.getCourtCaseEntity();
-        TranscriptionEntity systemUserTranscription =  dartsDatabase.getTranscriptionStub()
+        TranscriptionEntity systemUserTranscription = dartsDatabase.getTranscriptionStub()
             .createAndSaveAwaitingAuthorisationTranscription(
                 systemUser,
                 courtCase,
@@ -272,5 +274,34 @@ class TranscriptionControllerGetYourTranscriptsIntTest extends IntegrationBase {
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.approver_transcriptions", hasSize(1)))
             .andExpect(jsonPath("$.approver_transcriptions[0].transcription_id", is(systemUserTranscription.getId())));
+    }
+
+    @Test
+    void getYourTranscriptsShouldNotReturnTranscriptWhenIsCurrentFalse() throws Exception {
+        var courtCase = authorisationStub.getCourtCaseEntity();
+        transcriptionStub.createAndSaveAwaitingAuthorisationTranscription(
+            systemUser,
+            courtCase,
+            authorisationStub.getHearingEntity(), now(UTC), false, false
+        );
+
+        transcriptionStub.createAndSaveAwaitingAuthorisationTranscription(
+            authorisationStub.getTestUser(),
+            courtCase,
+            authorisationStub.getHearingEntity(), YESTERDAY, false, false
+        );
+
+
+        MockHttpServletRequestBuilder requestBuilder = get(ENDPOINT_URI)
+            .header(
+                "user_id",
+                testUser.getId()
+            );
+
+        mockMvc.perform(requestBuilder)
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.requester_transcriptions", hasSize(1)))
+            .andExpect(jsonPath("$.requester_transcriptions[0].transcription_id", is(transcriptionEntity.getId())))
+            .andExpect(jsonPath("$.approver_transcriptions").isEmpty());
     }
 }

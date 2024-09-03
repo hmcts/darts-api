@@ -11,6 +11,7 @@ import uk.gov.hmcts.darts.common.config.ObjectMapperConfig;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.util.CommonTestDataUtil;
 
+import java.time.OffsetDateTime;
 import java.util.List;
 
 class AdminCasesSearchResponseMapperTest {
@@ -32,6 +33,8 @@ class AdminCasesSearchResponseMapperTest {
         CourtCaseEntity case2 = CommonTestDataUtil.createCaseWithId("case2", 102);
         CommonTestDataUtil.createHearingsForCase(case2, 2, 3);
         CourtCaseEntity case3 = CommonTestDataUtil.createCaseWithId("case3", 103);
+        case3.setDataAnonymised(true);
+        case3.setDataAnonymisedTs(OffsetDateTime.parse("2024-01-01T00:00:00Z"));
         CommonTestDataUtil.createHearingsForCase(case3, 3, 4);
 
         List<AdminCasesSearchResponseItem> result = AdminCasesSearchResponseMapper.mapResponse(List.of(case1, case2, case3));
@@ -49,7 +52,7 @@ class AdminCasesSearchResponseMapperTest {
                 "courtrooms": [
                   {
                     "id": 1581,
-                    "name": "courtroom1"
+                    "name": "COURTROOM1"
                   }
                 ],
                 "judges": [
@@ -59,7 +62,8 @@ class AdminCasesSearchResponseMapperTest {
                 "defendants": [
                   "defendant_case1_1",
                   "defendant_case1_2"
-                ]
+                ],
+                "is_data_anonymised": false
               },
               {
                 "id": 102,
@@ -71,11 +75,11 @@ class AdminCasesSearchResponseMapperTest {
                 "courtrooms": [
                   {
                     "id": 1581,
-                    "name": "courtroom1"
+                    "name": "COURTROOM1"
                   },
                   {
                     "id": 1582,
-                    "name": "courtroom2"
+                    "name": "COURTROOM2"
                   }
                 ],
                 "judges": [
@@ -85,7 +89,8 @@ class AdminCasesSearchResponseMapperTest {
                 "defendants": [
                   "defendant_case2_1",
                   "defendant_case2_2"
-                ]
+                ],
+                "is_data_anonymised": false
               },
               {
                 "id": 103,
@@ -97,15 +102,15 @@ class AdminCasesSearchResponseMapperTest {
                 "courtrooms": [
                   {
                     "id": 1581,
-                    "name": "courtroom1"
+                    "name": "COURTROOM1"
                   },
                   {
                     "id": 1582,
-                    "name": "courtroom2"
+                    "name": "COURTROOM2"
                   },
                   {
                     "id": 1583,
-                    "name": "courtroom3"
+                    "name": "COURTROOM3"
                   }
                 ],
                 "judges": [
@@ -115,7 +120,9 @@ class AdminCasesSearchResponseMapperTest {
                 "defendants": [
                   "defendant_case3_1",
                   "defendant_case3_2"
-                ]
+                ],
+                "is_data_anonymised": true,
+                "data_anonymised_at": "2024-01-01T00:00:00Z"
               }
             ]""";
         JSONAssert.assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);

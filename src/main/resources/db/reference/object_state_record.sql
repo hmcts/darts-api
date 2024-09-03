@@ -1,23 +1,25 @@
 --v1	initial version based on obect_state_record.docx 15/3/24
 --v2	added parent_id, parent_object_id, content_object_id, object_type, dets_location
 --v3    add courthouse_name,cas_id, id_response_cr_file, id_response_uf_file
+--v4    amend osr_uuid from character to bigint
+--v5    amend tablespace to pg_default
 
 
 CREATE TABLE object_state_record
-(osr_uuid                      CHARACTER VARYING                     NOT NULL
+(osr_uuid                      BIGINT                     NOT NULL
 ,eod_id                        CHARACTER VARYING
 ,arm_eod_id                    CHARACTER VARYING
 ,parent_id                     CHARACTER VARYING --
 ,parent_object_id              CHARACTER VARYING --
 ,content_object_id             CHARACTER VARYING --
-,object_type                   CHARACTER VARYING --  
+,object_type                   CHARACTER VARYING --
 ,id_clip                       CHARACTER VARYING
 ,id_case                       CHARACTER VARYING
 ,courthouse_name               CHARACTER VARYING
 ,cas_id                        INTEGER
 ,date_last_accessed            TIMESTAMP WITH TIME ZONE
 ,relation_id                   CHARACTER VARYING
-,dets_location                 CHARACTER VARYING -- 
+,dets_location                 CHARACTER VARYING --
 ,flag_file_transfer_to_dets    BOOLEAN
 ,date_file_transfer_to_dets    TIMESTAMP WITH TIME ZONE
 ,md5_doc_transfer_to_dets      CHARACTER VARYING
@@ -47,4 +49,4 @@ CREATE TABLE object_state_record
 ,date_file_dets_cleanup        TIMESTAMP WITH TIME ZONE
 ,flag_file_retained_in_ods     BOOLEAN
 ,object_status                 CHARACTER VARYING
-) TABLESPACE darts_tables;
+) TABLESPACE pg_default;

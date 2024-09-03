@@ -15,8 +15,10 @@ class SecurityGroupIdMapperTest {
     void givenUserAccountEntityReturnUserWithIdAndTimestamps() {
         SecurityGroupEntity securityGroupEntity1 = new SecurityGroupEntity();
         securityGroupEntity1.setId(1);
+        securityGroupEntity1.setDisplayState(true);
         SecurityGroupEntity securityGroupEntity2 = new SecurityGroupEntity();
         securityGroupEntity2.setId(2);
+        securityGroupEntity1.setDisplayState(true);
 
         UserAccountEntity userAccountEntity = new UserAccountEntity();
         userAccountEntity.setSecurityGroupEntities(Set.of(securityGroupEntity1, securityGroupEntity2));

@@ -23,6 +23,7 @@ import uk.gov.hmcts.darts.testutils.IntegrationBase;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.List;
+import java.util.Locale;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.when;
@@ -33,7 +34,7 @@ import static uk.gov.hmcts.darts.test.common.TestUtils.getContentsFromFile;
 class CasesControllerGetTranscriptsTest extends IntegrationBase {
     private static final String ENDPOINT_URL_CASE = "/cases/{case_id}/transcripts";
     private static final OffsetDateTime SOME_DATE_TIME = OffsetDateTime.parse("2023-01-01T12:00Z");
-    private static final String SOME_COURTHOUSE = "some-courthouse";
+    private static final String SOME_COURTHOUSE = "SOME-COURTHOUSE";
     private static final String SOME_COURTROOM = "some-courtroom";
     private static final String SOME_CASE_ID = "1";
     private static final List<String> TAGS_TO_IGNORE = List.of("tra_id", "hea_id", "transcription_id", "hearing_id");
@@ -53,7 +54,8 @@ class CasesControllerGetTranscriptsTest extends IntegrationBase {
         );
 
         CourthouseEntity courthouseEntity = hearingEntity.getCourtroom().getCourthouse();
-        assertEquals(SOME_COURTHOUSE, courthouseEntity.getCourthouseName());
+        assertEquals(SOME_COURTHOUSE.toUpperCase(Locale.ROOT), courthouseEntity.getCourthouseName());
+        assertEquals(SOME_COURTHOUSE, courthouseEntity.getDisplayName());
 
         UserAccountEntity testUser = dartsDatabase.getUserAccountStub()
             .createAuthorisedIntegrationTestUser(courthouseEntity);

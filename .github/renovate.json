@@ -3,5 +3,10 @@
   "extends": [
     "local>hmcts/.github:renovate-config",
     "local>hmcts/.github//renovate/automerge-minor"
+  ],
+  "timezone": "Europe/London",
+  "schedule": [
+    "after 7am and before 9am every weekday",
+    "after 6pm and before 8pm every weekday"
   ]
 }

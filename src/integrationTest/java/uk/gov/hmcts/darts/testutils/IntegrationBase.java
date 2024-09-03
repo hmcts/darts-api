@@ -19,8 +19,13 @@ import org.testcontainers.containers.GenericContainer;
 import uk.gov.hmcts.darts.authentication.config.external.ExternalAuthProviderConfigurationProperties;
 import uk.gov.hmcts.darts.test.common.LogUtil;
 import uk.gov.hmcts.darts.test.common.MemoryLogAppender;
+import uk.gov.hmcts.darts.testutils.stubs.DartsDatabaseRetrieval;
 import uk.gov.hmcts.darts.testutils.stubs.DartsDatabaseStub;
+<<<<<<< HEAD
 import uk.gov.hmcts.darts.testutils.stubs.wiremock.TokenStub;
+=======
+import uk.gov.hmcts.darts.testutils.stubs.DartsPersistence;
+>>>>>>> master
 
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
@@ -74,9 +79,16 @@ public class IntegrationBase {
     @Autowired
     protected DartsDatabaseStub dartsDatabase;
     @Autowired
+    protected DartsPersistence dartsPersistence;
+    @Autowired
+    protected DartsDatabaseRetrieval dartsDataRetrieval;
+    @Autowired
     protected ObjectMapper objectMapper;
     @Autowired
+
     private ExternalAuthProviderConfigurationProperties configurationProviderProperties;
+
+    protected TransactionalUtil transactionalUtil;
 
     @Value("${wiremock.server.port}")
     protected String wiremockPort;

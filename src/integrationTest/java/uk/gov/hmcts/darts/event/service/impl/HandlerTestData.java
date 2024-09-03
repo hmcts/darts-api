@@ -10,8 +10,8 @@ import static java.time.OffsetDateTime.now;
 
 class HandlerTestData extends IntegrationBaseWithGatewayStub {
 
-    protected static final String SOME_COURTHOUSE = "some-courthouse";
-    protected static final String UNKNOWN_COURTHOUSE = "unknown-courthouse";
+    protected static final String SOME_COURTHOUSE = "SOME-COURTHOUSE";
+    protected static final String UNKNOWN_COURTHOUSE = "UNKNOWN-COURTHOUSE";
     protected static final String SOME_ROOM = "some-room";
     protected static final String SOME_OTHER_ROOM = "some-other-room";
 

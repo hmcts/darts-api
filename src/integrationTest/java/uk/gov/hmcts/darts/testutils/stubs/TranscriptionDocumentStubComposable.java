@@ -19,7 +19,7 @@ public class TranscriptionDocumentStubComposable {
     private final TranscriptionDocumentRepository transcriptionDocumentRepository;
     private final UserAccountRepository userAccountRepository;
 
-    private static final String SOME_COURTHOUSE = "some-courthouse";
+    private static final String SOME_COURTHOUSE = "SOME-COURTHOUSE";
     private static final String SOME_COURTROOM = "some-courtroom";
     private static final String SOME_CASE_ID = "1";
 
@@ -30,7 +30,7 @@ public class TranscriptionDocumentStubComposable {
                                                                                    TranscriptionStubComposable transcriptionStubComposable,
                                                                                    CourthouseStubComposable courthouseStubComposable,
                                                                                    UserAccountEntity userAccountEntity
-        ) {
+    ) {
         HearingEntity hearingEntity = dartsDatabaseComposable.givenTheDatabaseContainsCourtCaseWithHearingAndCourthouseWithRoom(
             courthouseStubComposable,
             SOME_CASE_ID,

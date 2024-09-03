@@ -71,12 +71,14 @@ class UserAuthorisedToDeleteAnnotationValidatorTest {
     private SecurityGroupEntity securityGroupWithRole(SecurityRoleEnum role) {
         var securityGroupEntity = new SecurityGroupEntity();
         securityGroupEntity.setSecurityRoleEntity(securityRoleOf(role));
+        securityGroupEntity.setDisplayState(true);
         return securityGroupEntity;
     }
 
     private SecurityRoleEntity securityRoleOf(SecurityRoleEnum role) {
         var securityRoleEntity = new SecurityRoleEntity();
         securityRoleEntity.setRoleName(role.name());
+        securityRoleEntity.setDisplayState(true);
         return securityRoleEntity;
     }
 }

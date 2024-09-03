@@ -110,8 +110,10 @@ class CourthouseEntityTest {
         Set<SecurityGroupEntity> securityGroups = new LinkedHashSet<>();
         SecurityGroupEntity securityGroup1 = new SecurityGroupEntity();
         securityGroup1.setId(3);
+        securityGroup1.setDisplayState(true);
         SecurityGroupEntity securityGroup2 = new SecurityGroupEntity();
         securityGroup2.setId(4);
+        securityGroup2.setDisplayState(true);
 
         securityGroups.add(securityGroup1);
         securityGroups.add(securityGroup2);

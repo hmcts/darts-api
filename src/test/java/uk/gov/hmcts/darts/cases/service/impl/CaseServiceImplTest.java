@@ -73,7 +73,7 @@ import static uk.gov.hmcts.darts.test.common.TestUtils.getContentsFromFile;
 class CaseServiceImplTest {
 
     public static final String SWANSEA = "SWANSEA";
-    public static final String TEST_COURT_CASE = "case_courthouse";
+    public static final String TEST_COURT_CASE = "CASE_COURTHOUSE";
     public static final OffsetDateTime FIXED_DATETIME = OffsetDateTime.of(2024, 3, 25, 10, 0, 0, 0, ZoneOffset.UTC);
 
     CaseServiceImpl service;
@@ -146,8 +146,9 @@ class CaseServiceImplTest {
 
     @Test
     void testGetCasesById() throws Exception {
-
-        CourtCaseEntity courtCaseEntity = CommonTestDataUtil.createCase("1");
+        List<HearingEntity> hearings = CommonTestDataUtil.createHearings(1);
+        CourtCaseEntity courtCaseEntity = hearings.getFirst().getCourtCase();
+        courtCaseEntity.setHearings(hearings);
         when(caseRepository.findById(any())).thenReturn(Optional.of(courtCaseEntity));
 
         SingleCase result = service.getCasesById(101);
@@ -158,6 +159,17 @@ class CaseServiceImplTest {
             "Tests/cases/CaseServiceTest/testGetCasesById/expectedResponse.json");
         JSONAssert.assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
 
+    }
+
+    @Test
+    void testGetCasesByIdHearingsNotActual() {
+        CourtCaseEntity courtCaseEntity = CommonTestDataUtil.createCase("1");
+
+        when(caseRepository.findById(any())).thenReturn(Optional.of(courtCaseEntity));
+
+        DartsApiException exception = assertThrows(DartsApiException.class, () -> service.getCasesById(101));
+
+        assertEquals("CASE_107", exception.getError().getErrorTypeNumeric());
     }
 
     @Test

@@ -8,8 +8,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.TestPropertySource;
 import uk.gov.hmcts.darts.audio.model.AudioFileInfo;
-import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
-import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
 import uk.gov.hmcts.darts.test.common.TestUtils;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
@@ -18,7 +16,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -28,12 +26,18 @@ import java.util.concurrent.ExecutionException;
 
 import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static uk.gov.hmcts.darts.test.common.data.CaseTestData.createSomeMinimalCase;
+import static uk.gov.hmcts.darts.test.common.data.CourtroomTestData.someMinimalCourtRoom;
+import static uk.gov.hmcts.darts.test.common.data.DefenceTestData.createDefenceForCase;
+import static uk.gov.hmcts.darts.test.common.data.DefendantTestData.createDefendantForCase;
+import static uk.gov.hmcts.darts.test.common.data.HearingTestData.createHearingWith;
+import static uk.gov.hmcts.darts.test.common.data.ProsecutorTestData.createProsecutorForCase;
 
 @TestPropertySource(properties = {"darts.audio.transformation.service.audio.file=tests/audio/WithViqHeader/viq0001min.mp2"})
 @Slf4j
 class OutboundFileProcessorIntTest extends IntegrationBase {
     private static final String AUDIO_FILENAME = "tests/audio/WithViqHeader/viq0001min.mp2";
-    private static final String HEARING_DATETIME = "2023-01-01T10:00:00";
+    private static final String HEARING_DATETIME = "2023-01-01";
     private static final OffsetDateTime TIME_10_00 = OffsetDateTime.parse("2023-01-01T10:00:00Z");
     private static final OffsetDateTime TIME_10_00_15 = OffsetDateTime.parse("2023-01-01T10:00:15Z");
     private static final OffsetDateTime TIME_10_00_30 = OffsetDateTime.parse("2023-01-01T10:00:30Z");
@@ -49,19 +53,12 @@ class OutboundFileProcessorIntTest extends IntegrationBase {
     private static final OffsetDateTime TIME_12_09 = OffsetDateTime.parse("2023-01-01T12:09:00Z");
     private static final OffsetDateTime TIME_12_10 = OffsetDateTime.parse("2023-01-01T12:10:00Z");
     private static final OffsetDateTime TIME_12_11 = OffsetDateTime.parse("2023-01-01T12:11:00Z");
-    private static final OffsetDateTime TIME_12_19 = OffsetDateTime.parse("2023-01-01T12:19:00Z");
-    private static final OffsetDateTime TIME_12_20 = OffsetDateTime.parse("2023-01-01T12:20Z");
     private static final OffsetDateTime TIME_12_29 = OffsetDateTime.parse("2023-01-01T12:29Z");
     private static final OffsetDateTime TIME_12_29_45 = OffsetDateTime.parse("2023-01-01T12:45Z");
     private static final OffsetDateTime TIME_12_30 = OffsetDateTime.parse("2023-01-01T12:30Z");
     private static final OffsetDateTime TIME_12_30_30 = OffsetDateTime.parse("2023-01-01T12:30:30Z");
     private static final OffsetDateTime TIME_12_31 = OffsetDateTime.parse("2023-01-01T12:31Z");
-    private static final OffsetDateTime TIME_12_50 = OffsetDateTime.parse("2023-01-01T12:50Z");
-    private static final OffsetDateTime TIME_12_51 = OffsetDateTime.parse("2023-01-01T12:51Z");
     private static final OffsetDateTime TIME_13_00 = OffsetDateTime.parse("2023-01-01T13:00Z");
-    private static final String SOME_COURTHOUSE = "some-courthouse";
-    private static final String SOME_COURTROOM = "some-courtroom";
-    private static final String SOME_CASE_NUMBER = "1";
     private Path tempDirectory;
     private Path audioPath;
 
@@ -76,18 +73,24 @@ class OutboundFileProcessorIntTest extends IntegrationBase {
         File audioFileTest = TestUtils.getFile(AUDIO_FILENAME);
         audioPath = Files.copy(audioFileTest.toPath(), createFile(tempDirectory, "audio-test.mp2"), REPLACE_EXISTING);
 
-        HearingEntity hearingEntity = dartsDatabase.givenTheDatabaseContainsCourtCaseWithHearingAndCourthouseWithRoom(
-            SOME_CASE_NUMBER,
-            SOME_COURTHOUSE,
-            SOME_COURTROOM,
-            LocalDateTime.parse(HEARING_DATETIME)
-        );
-        CourtCaseEntity courtCase = hearingEntity.getCourtCase();
-        courtCase.addProsecutor("aProsecutor");
-        courtCase.addDefendant("aDefendant");
-        courtCase.addDefence("aDefence");
-        dartsDatabase.save(courtCase);
+        var courtCase = createSomeMinimalCase();
+        courtCase.addProsecutor(createProsecutorForCase(courtCase));
+        courtCase.addDefendant(createDefendantForCase(courtCase));
+        courtCase.addDefence(createDefenceForCase(courtCase));
+        var hearing = createHearingWith(courtCase, someMinimalCourtRoom(), LocalDate.parse(HEARING_DATETIME));
 
+        dartsPersistence.save(hearing);
+    }
+
+    @AfterEach
+    void deleteFile() {
+        if (tempDirectory != null) {
+            try {
+                FileUtils.forceDelete(tempDirectory.toFile());
+            } catch (IOException e) {
+                log.error("Unable to delete directory {}", tempDirectory);
+            }
+        }
     }
 
     @Test
@@ -565,16 +568,5 @@ class OutboundFileProcessorIntTest extends IntegrationBase {
 
     private Path createFile(Path path, String name) throws IOException {
         return Files.createFile(path.resolve(name));
-    }
-
-    @AfterEach
-    void deleteFile() {
-        if (tempDirectory != null) {
-            try {
-                FileUtils.forceDelete(tempDirectory.toFile());
-            } catch (IOException e) {
-                log.error("Unable to delete directory {}", tempDirectory);
-            }
-        }
     }
 }

@@ -18,7 +18,7 @@ import java.time.OffsetDateTime;
 public class ObjectStateRecordEntity {
     @Id
     @Column(name = "osr_uuid")
-    private String uuid;
+    private Long uuid;
 
     @Column(name = "eod_id")
     private String eodId;

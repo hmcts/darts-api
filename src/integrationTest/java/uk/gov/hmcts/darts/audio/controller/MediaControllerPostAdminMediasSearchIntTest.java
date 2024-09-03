@@ -20,8 +20,6 @@ import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
 import uk.gov.hmcts.darts.common.repository.MediaRepository;
-import uk.gov.hmcts.darts.common.repository.ObjectAdminActionRepository;
-import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
 import uk.gov.hmcts.darts.test.common.TestUtils;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 import uk.gov.hmcts.darts.testutils.stubs.MediaStub;
@@ -51,9 +49,6 @@ class MediaControllerPostAdminMediasSearchIntTest extends IntegrationBase {
     private SuperAdminUserStub superAdminUserStub;
 
     @Autowired
-    private UserAccountRepository userAccountRepository;
-
-    @Autowired
     private MockMvc mockMvc;
 
     @MockBean
@@ -67,9 +62,6 @@ class MediaControllerPostAdminMediasSearchIntTest extends IntegrationBase {
 
     @Autowired
     private MediaRepository mediaRepository;
-
-    @Autowired
-    private ObjectAdminActionRepository objectAdminActionRepository;
 
     private CourthouseEntity courthouse1;
     private CourthouseEntity courthouse2;
@@ -208,10 +200,10 @@ class MediaControllerPostAdminMediasSearchIntTest extends IntegrationBase {
             [
               {
                 "courthouse": {
-                  "display_name": "Courthouse1"
+                  "display_name": "COURTHOUSE1"
                 },
                 "courtroom": {
-                  "name": "courtroom1"
+                  "name": "COURTROOM1"
                 },
                 "start_at": "2020-10-10T10:00:01Z",
                 "end_at": "2020-10-10T11:00:01Z",
@@ -220,10 +212,10 @@ class MediaControllerPostAdminMediasSearchIntTest extends IntegrationBase {
               },
               {
                 "courthouse": {
-                  "display_name": "Courthouse1"
+                  "display_name": "COURTHOUSE1"
                 },
                 "courtroom": {
-                  "name": "courtroom1"
+                  "name": "COURTROOM1"
                 },
                 "start_at": "2020-10-10T10:00:02Z",
                 "end_at": "2020-10-10T11:00:02Z",
@@ -232,10 +224,10 @@ class MediaControllerPostAdminMediasSearchIntTest extends IntegrationBase {
               },
               {
                 "courthouse": {
-                  "display_name": "Courthouse1"
+                  "display_name": "COURTHOUSE1"
                 },
                 "courtroom": {
-                  "name": "courtroom1"
+                  "name": "COURTROOM1"
                 },
                 "start_at": "2020-10-10T10:00:03Z",
                 "end_at": "2020-10-10T11:00:03Z",

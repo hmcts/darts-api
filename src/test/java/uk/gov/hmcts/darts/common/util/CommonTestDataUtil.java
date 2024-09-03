@@ -319,6 +319,7 @@ public class CommonTestDataUtil {
         transcription.setTranscriptionUrgency(createTranscriptionUrgencyEntityFromEnum(TranscriptionUrgencyEnum.STANDARD));
         transcription.setTranscriptionCommentEntities(createTranscriptionComments());
         transcription.setIsManualTranscription(true);
+        transcription.setIsCurrent(true);
 
         if (!excludeWorkflow) {
             transcription.setTranscriptionWorkflowEntities(createTranscriptionWorkflow());

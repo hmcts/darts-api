@@ -126,7 +126,7 @@ class CourthouseServiceImplTest {
 
 
         CourthouseEntity returnedEntity = courthouseService.getCourtHouseById(COURTHOUSE_ID);
-        assertEquals("Test courthouse", returnedEntity.getCourthouseName());
+        assertEquals("TEST COURTHOUSE", returnedEntity.getCourthouseName());
         assertEquals((short) 123, returnedEntity.getCode());
     }
 
@@ -155,7 +155,7 @@ class CourthouseServiceImplTest {
 
     @Test
     void retrieveCourthouseUsingJustName() throws CourthouseCodeNotMatchException, CourthouseNameNotFoundException {
-        when(courthouseRepository.findByCourthouseNameIgnoreCase(SWANSEA_NAME_UC)).thenReturn(Optional.of(
+        when(courthouseRepository.findByCourthouseName(SWANSEA_NAME_UC)).thenReturn(Optional.of(
             createSwanseaCourthouseEntity()));
         CourthouseEntity courthouse = courthouseService.retrieveAndUpdateCourtHouse(null, SWANSEA_NAME);
         assertEquals(SWANSEA_NAME_UC, courthouse.getCourthouseName());
@@ -174,7 +174,7 @@ class CourthouseServiceImplTest {
     @Test
     void retrieveCourthouseUsingNameAndDifferentCode() {
         when(courthouseRepository.findByCode(458)).thenReturn(Optional.empty());
-        when(courthouseRepository.findByCourthouseNameIgnoreCase(SWANSEA_NAME_UC)).thenReturn(Optional.of(
+        when(courthouseRepository.findByCourthouseName(SWANSEA_NAME_UC)).thenReturn(Optional.of(
             createSwanseaCourthouseEntity()));
 
         CourthouseCodeNotMatchException thrownException = assertThrows(
@@ -190,7 +190,7 @@ class CourthouseServiceImplTest {
     @Test
     void retrieveCourthouseUsingInvalidName() {
         when(courthouseRepository.findByCode(Short.parseShort("458"))).thenReturn(Optional.empty());
-        when(courthouseRepository.findByCourthouseNameIgnoreCase("TEST")).thenReturn(Optional.empty());
+        when(courthouseRepository.findByCourthouseName("TEST")).thenReturn(Optional.empty());
 
         assertThrows(
             CourthouseNameNotFoundException.class,

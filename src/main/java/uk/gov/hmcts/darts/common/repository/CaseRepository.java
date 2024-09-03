@@ -15,18 +15,18 @@ import java.util.Optional;
 @Repository
 public interface CaseRepository extends JpaRepository<CourtCaseEntity, Integer> {
 
-    Optional<CourtCaseEntity> findByCaseNumberIgnoreCaseAndCourthouse_CourthouseNameIgnoreCase(String caseNumber,
-                                                                                               String courthouseName);
+    Optional<CourtCaseEntity> findByCaseNumberAndCourthouse_CourthouseName(String caseNumber,
+                                                                           String courthouseName);
 
-    Optional<CourtCaseEntity> findByCaseNumberIgnoreCaseAndCourthouse(String caseNumber,
-                                                                      CourthouseEntity courthouse);
+    Optional<CourtCaseEntity> findByCaseNumberAndCourthouse(String caseNumber,
+                                                            CourthouseEntity courthouse);
 
     @Query("""
         SELECT case.caseNumber
         FROM CourtCaseEntity case
         WHERE case.closed = false
         and case.caseNumber in :caseNumbers
-        and upper(case.courthouse.courthouseName) = upper(:courthouseName)
+        and case.courthouse.courthouseName = upper(:courthouseName)
         """)
     List<String> findOpenCaseNumbers(String courthouseName, List<String> caseNumbers);
 

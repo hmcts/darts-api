@@ -88,7 +88,7 @@ darts:
       arm-username: some-username
       arm-password: some-password
       arm-service-profile: some-profile-name
-      url: http://localhost:4551
+      url: http://localhost:${wiremock.server.port}
   transcription:
     max-file-size: 20
   automated:
@@ -103,3 +103,6 @@ logging:
         hmcts:
           darts: DEBUG
   config: classpath:logback-test.xml
+
+  darts:
+    storage:

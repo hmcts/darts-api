@@ -15,6 +15,7 @@ import uk.gov.hmcts.darts.common.util.CommonTestDataUtil;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -44,7 +45,12 @@ class AdvancedSearchResponseMapperTest {
     @Test
     void one() throws IOException {
         List<HearingEntity> hearings = new ArrayList<>();
-        hearings.add(CommonTestDataUtil.createHearing(TEST_1, LocalTime.NOON));
+        var hearing = CommonTestDataUtil.createHearing(TEST_1, LocalTime.NOON);
+        var courtCase = hearing.getCourtCase();
+        courtCase.setDataAnonymised(true);
+        courtCase.setDataAnonymisedTs(OffsetDateTime.parse("2024-01-01T00:00:00Z"));
+
+        hearings.add(hearing);
         List<AdvancedSearchResult> result = AdvancedSearchResponseMapper.mapResponse(hearings);
 
         String actualResponse = objectMapper.writeValueAsString(result);

@@ -8,7 +8,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import static java.util.stream.IntStream.rangeClosed;
-import static uk.gov.hmcts.darts.test.common.data.CaseTestData.someMinimalCase;
+import static uk.gov.hmcts.darts.test.common.data.CaseTestData.createSomeMinimalCase;
+import static uk.gov.hmcts.darts.test.common.data.UserAccountTestData.minimalUserAccount;
 
 @UtilityClass
 @SuppressWarnings({"HideUtilityClassConstructor"})
@@ -16,8 +17,17 @@ public class DefenceTestData {
 
     public static DefenceEntity someMinimalDefence() {
         var defence = new DefenceEntity();
-        defence.setCourtCase(someMinimalCase());
+        defence.setCourtCase(createSomeMinimalCase());
         defence.setName("some-defence");
+        var userAccount = minimalUserAccount();
+        defence.setCreatedBy(userAccount);
+        defence.setLastModifiedBy(userAccount);
+        return defence;
+    }
+
+    public static DefenceEntity createDefenceForCase(CourtCaseEntity courtCase) {
+        var defence = someMinimalDefence();
+        defence.setCourtCase(courtCase);
         return defence;
     }
 
@@ -37,8 +47,7 @@ public class DefenceTestData {
     }
 
     public static DefenceEntity createDefenceForCaseWithName(CourtCaseEntity courtCase, String name) {
-        var defence = new DefenceEntity();
-        defence.setCourtCase(courtCase);
+        var defence = createDefenceForCase(courtCase);
         defence.setName(name);
         return defence;
     }

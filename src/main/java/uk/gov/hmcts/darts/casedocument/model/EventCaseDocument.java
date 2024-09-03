@@ -9,15 +9,15 @@ import java.time.OffsetDateTime;
 @Data
 public class EventCaseDocument extends CreatedModifiedCaseDocument {
 
-    private final Integer id;
-    private final String legacyObjectId;
-    private final EventHandlerCaseDocument eventType;
-    private final Integer eventId;
-    private final String eventText;
-    private final OffsetDateTime timestamp;
-    private final String legacyVersionLabel;
-    private final String messageId;
-    private final Boolean isLogEntry;
-    private final String chronicleId;
-    private final String antecedentId;
+    private Integer id;
+    private String legacyObjectId;
+    private EventHandlerCaseDocument eventType;
+    private Integer eventId;
+    private String eventText;
+    private OffsetDateTime timestamp;
+    private String legacyVersionLabel;
+    private String messageId;
+    private boolean isLogEntry;
+    private String chronicleId;
+    private String antecedentId;
 }

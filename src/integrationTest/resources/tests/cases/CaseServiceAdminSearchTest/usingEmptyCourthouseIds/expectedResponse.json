@@ -6,7 +6,7 @@
     },
     "courtrooms": [
       {
-        "name": "courtroom1"
+        "name": "COURTROOM1"
       }
     ],
     "judges": [
@@ -23,7 +23,7 @@
     },
     "courtrooms": [
       {
-        "name": "courtroom1"
+        "name": "COURTROOM1"
       }
     ],
     "judges": [
@@ -40,7 +40,7 @@
     },
     "courtrooms": [
       {
-        "name": "courtroom1"
+        "name": "COURTROOM1"
       }
     ],
     "judges": [
@@ -58,10 +58,10 @@
     },
     "courtrooms": [
       {
-        "name": "courtroom2"
+        "name": "COURTROOM2"
       },
       {
-        "name": "courtroom1"
+        "name": "COURTROOM1"
       }
     ],
     "judges": [
@@ -78,13 +78,13 @@
     },
     "courtrooms": [
       {
-        "name": "courtroom2"
+        "name": "COURTROOM2"
       },
       {
-        "name": "courtroom1"
+        "name": "COURTROOM1"
       },
       {
-        "name": "courtroom3"
+        "name": "COURTROOM3"
       }
     ],
     "judges": [
@@ -101,13 +101,13 @@
     },
     "courtrooms": [
       {
-        "name": "courtroom2"
+        "name": "COURTROOM2"
       },
       {
-        "name": "courtroom3"
+        "name": "COURTROOM3"
       },
       {
-        "name": "courtroom1"
+        "name": "COURTROOM1"
       }
     ],
     "judges": [
@@ -125,7 +125,7 @@
     },
     "courtrooms": [
       {
-        "name": "courtroom1"
+        "name": "COURTROOM1"
       }
     ],
     "judges": [
@@ -142,7 +142,7 @@
     },
     "courtrooms": [
       {
-        "name": "courtroom1"
+        "name": "COURTROOM1"
       }
     ],
     "judges": [
@@ -159,7 +159,7 @@
     },
     "courtrooms": [
       {
-        "name": "courtroomLondon"
+        "name": "COURTROOMLONDON"
       }
     ],
     "judges": [
@@ -176,7 +176,7 @@
     },
     "courtrooms": [
       {
-        "name": "courtroom4"
+        "name": "COURTROOM4"
       }
     ],
     "judges": [

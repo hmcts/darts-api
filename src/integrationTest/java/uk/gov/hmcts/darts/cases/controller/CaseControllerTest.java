@@ -15,6 +15,7 @@ import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilde
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.cases.model.AddCaseRequest;
 import uk.gov.hmcts.darts.cases.model.PostCaseResponse;
+import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
@@ -26,6 +27,7 @@ import uk.gov.hmcts.darts.testutils.IntegrationBase;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
@@ -141,7 +143,7 @@ class CaseControllerTest extends IntegrationBase {
         HearingEntity hearingForCase4 = createCaseWithHearingToday(swanseaCourthouse, swanseaCourtroom1);
 
 
-        dartsDatabase.saveAll(hearingForCase1, hearingForCase2, hearingForCase3, hearingForCase4);
+        dartsPersistence.saveAll(hearingForCase1, hearingForCase2, hearingForCase3, hearingForCase4);
     }
 
     @BeforeEach
@@ -232,6 +234,25 @@ class CaseControllerTest extends IntegrationBase {
             "tests/cases/CaseControllerTest/casesPostEndpoint/expectedResponseNoHearing.json"));
         assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
     }
+
+    @Test
+    void casesPostWithType() throws Exception {
+        setupExternalMidTierUserForCourthouse(null);
+
+        dartsDatabase.createCase("EDINBURGH", "case1");
+        MockHttpServletRequestBuilder requestBuilder = post(BASE_PATH)
+            .contentType(MediaType.APPLICATION_JSON_VALUE)
+            .content(getContentsFromFile(
+                "tests/cases/CaseControllerTest/casesPostEndpoint/requestBodyForCaseWithType.json"));
+        MvcResult response = mockMvc.perform(requestBuilder).andExpect(status().isCreated()).andReturn();
+
+        String actualResponse = response.getResponse().getContentAsString();
+        PostCaseResponse postCaseResponse = objectMapper.readValue(actualResponse, PostCaseResponse.class);
+        Optional<CourtCaseEntity> savedCase = dartsDatabase.getCaseRepository().findById(postCaseResponse.getCaseId());
+        String caseType = savedCase.get().getCaseType();
+        Assertions.assertEquals("1", caseType);
+    }
+
 
     @Test
     void casesPostUpdateExistingCase() throws Exception {

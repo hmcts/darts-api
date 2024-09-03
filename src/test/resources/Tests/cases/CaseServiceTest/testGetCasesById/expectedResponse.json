@@ -1,22 +1,23 @@
 {
   "case_id": 101,
-  "courthouse_id": 1001,
+  "case_number": "caseNum_1",
   "courthouse": "case_courthouse",
-  "case_number": "1",
+  "courthouse_id": 1001,
   "defendants": [
-    "defendant_1_1",
-    "defendant_1_2"
+    "defendant_caseNum_1_1",
+    "defendant_caseNum_1_2"
+  ],
+  "defenders": [
+    "defence_caseNum_1_1",
+    "defence_caseNum_1_2"
   ],
   "judges": [
     "Judge_1",
     "Judge_2"
   ],
   "prosecutors": [
-    "prosecutor_1_1",
-    "prosecutor_1_2"
+    "prosecutor_caseNum_1_1",
+    "prosecutor_caseNum_1_2"
   ],
-  "defenders": [
-    "defence_1_1",
-    "defence_1_2"
-  ]
+  "is_data_anonymised": false
 }

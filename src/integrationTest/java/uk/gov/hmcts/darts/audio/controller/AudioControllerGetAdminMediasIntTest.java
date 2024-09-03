@@ -165,8 +165,8 @@ class AudioControllerGetAdminMediasIntTest extends IntegrationBase {
                                                  mediaEntityNow.getHearingList().get(0).getCourtCase().getId(),
                                                  mediaEntityNow.getHearingList().get(0).getId(), mediaEntityNow.getStart(), mediaEntityNow.getEnd());
 
-        JSONAssert.assertEquals(objectMapper.writeValueAsString(responseItems[0]), expectedJsonBefore, JSONCompareMode.NON_EXTENSIBLE);
-        JSONAssert.assertEquals(objectMapper.writeValueAsString(responseItems[1]), expectedJsonNow, JSONCompareMode.NON_EXTENSIBLE);
+        JSONAssert.assertEquals(expectedJsonBefore, objectMapper.writeValueAsString(responseItems[0]), JSONCompareMode.NON_EXTENSIBLE);
+        JSONAssert.assertEquals(expectedJsonNow, objectMapper.writeValueAsString(responseItems[1]), JSONCompareMode.NON_EXTENSIBLE);
     }
 
     @Test
@@ -201,8 +201,8 @@ class AudioControllerGetAdminMediasIntTest extends IntegrationBase {
         GetAdminMediaResponseItem[] responseItems = objectMapper.readValue(mvcResult.getResponse()
                                                                                .getContentAsString(), GetAdminMediaResponseItem[].class);
 
-        JSONAssert.assertEquals(objectMapper.writeValueAsString(responseItems[0]), expectedJsonNow, JSONCompareMode.NON_EXTENSIBLE);
-        JSONAssert.assertEquals(objectMapper.writeValueAsString(responseItems[1]), expectedJsonAfter, JSONCompareMode.NON_EXTENSIBLE);
+        JSONAssert.assertEquals(expectedJsonNow, objectMapper.writeValueAsString(responseItems[0]), JSONCompareMode.NON_EXTENSIBLE);
+        JSONAssert.assertEquals(expectedJsonAfter, objectMapper.writeValueAsString(responseItems[1]), JSONCompareMode.NON_EXTENSIBLE);
     }
 
     @Test
@@ -244,9 +244,9 @@ class AudioControllerGetAdminMediasIntTest extends IntegrationBase {
         GetAdminMediaResponseItem[] responseItems = objectMapper.readValue(mvcResult
                                                                                .getResponse().getContentAsString(), GetAdminMediaResponseItem[].class);
 
-        JSONAssert.assertEquals(objectMapper.writeValueAsString(responseItems[1]), expectedJsonNow, JSONCompareMode.NON_EXTENSIBLE);
-        JSONAssert.assertEquals(objectMapper.writeValueAsString(responseItems[2]), expectedJsonAfter, JSONCompareMode.NON_EXTENSIBLE);
-        JSONAssert.assertEquals(objectMapper.writeValueAsString(responseItems[0]), expectedJsonBefore, JSONCompareMode.NON_EXTENSIBLE);
+        JSONAssert.assertEquals(expectedJsonNow, objectMapper.writeValueAsString(responseItems[1]), JSONCompareMode.NON_EXTENSIBLE);
+        JSONAssert.assertEquals(expectedJsonAfter, objectMapper.writeValueAsString(responseItems[2]), JSONCompareMode.NON_EXTENSIBLE);
+        JSONAssert.assertEquals(expectedJsonBefore, objectMapper.writeValueAsString(responseItems[0]), JSONCompareMode.NON_EXTENSIBLE);
     }
 
     @Test
@@ -434,7 +434,7 @@ class AudioControllerGetAdminMediasIntTest extends IntegrationBase {
 
         GetAdminMediaResponseCourtroom courtroomResponse = new GetAdminMediaResponseCourtroom();
         courtroomResponse.setId(courtroomId);
-        courtroomResponse.setDisplayName("Int Test Courtroom 2");
+        courtroomResponse.setDisplayName("INT TEST COURTROOM 2");
         responseItem.setCourtroom(courtroomResponse);
 
         GetAdminMediaResponseCase caseResponse = new GetAdminMediaResponseCase();

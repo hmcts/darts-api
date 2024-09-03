@@ -76,7 +76,7 @@ class EventHandlerMapperTest {
             .hasFieldOrPropertyWithValue("subType", eventHandlerEntity.getSubType())
             .hasFieldOrPropertyWithValue("name", eventHandlerEntity.getEventName())
             .hasFieldOrPropertyWithValue("handler", eventHandlerEntity.getHandler())
-            .hasFieldOrPropertyWithValue("hasRestrictions", eventHandlerEntity.getIsReportingRestriction())
+            .hasFieldOrPropertyWithValue("hasRestrictions", eventHandlerEntity.isReportingRestriction())
             .hasFieldOrPropertyWithValue("isActive", true)
             .hasFieldOrPropertyWithValue("hasEvents", null);
     }
@@ -98,7 +98,7 @@ class EventHandlerMapperTest {
         eventHandlerEntity.setSubType("9876");
         eventHandlerEntity.setEventName("My Event");
         eventHandlerEntity.setHandler("Standard Handler");
-        eventHandlerEntity.setIsReportingRestriction(false);
+        eventHandlerEntity.setReportingRestriction(false);
         eventHandlerEntity.setActive(true);
         return eventHandlerEntity;
     }

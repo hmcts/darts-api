@@ -2,10 +2,10 @@ package uk.gov.hmcts.darts.testutils.stubs;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.EntityManager;
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 import uk.gov.hmcts.darts.common.entity.DefendantEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.repository.JudgeRepository;
@@ -20,6 +20,7 @@ import java.util.Set;
 
 @Component
 @RequiredArgsConstructor
+@Deprecated
 public class EntityGraphPersistence {
 
     @Autowired

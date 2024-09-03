@@ -116,7 +116,7 @@ class CasesMapperTest {
         request.setDefenders(new ArrayList<>(List.of("New Defenders")));
         request.setDefendants(new ArrayList<>(List.of("New Defendants")));
 
-        CourtCaseEntity scheduledCases = caseMapper.addDefendantProsecutorDefenderJudge(caseEntity, request);
+        CourtCaseEntity scheduledCases = caseMapper.addDefendantProsecutorDefenderJudgeType(caseEntity, request);
         assertEquals(CASE_NUMBER, scheduledCases.getCaseNumber());
         assertEquals(SWANSEA, scheduledCases.getCourthouse().getCourthouseName());
         assertEquals(3, scheduledCases.getProsecutorList().size());
@@ -142,7 +142,7 @@ class CasesMapperTest {
         request.setDefenders(new ArrayList<>(List.of("defence_casenumber1_1")));
         request.setDefendants(new ArrayList<>(List.of("defendant_casenumber1_1")));
 
-        CourtCaseEntity scheduledCases = caseMapper.addDefendantProsecutorDefenderJudge(caseEntity, request);
+        CourtCaseEntity scheduledCases = caseMapper.addDefendantProsecutorDefenderJudgeType(caseEntity, request);
         assertEquals(CASE_NUMBER, scheduledCases.getCaseNumber());
         assertEquals(SWANSEA, scheduledCases.getCourthouse().getCourthouseName());
         assertEquals(2, scheduledCases.getProsecutorList().size());
@@ -159,7 +159,7 @@ class CasesMapperTest {
         var unallocatedCaseNumber = "U20240603-103622, U20240603-03622";
         request.setDefendants(new ArrayList<>(List.of(unallocatedCaseNumber, "Mr Defendant")));
 
-        CourtCaseEntity courtCaseEntity = caseMapper.addDefendantProsecutorDefenderJudge(existingCourtCaseEntity, request);
+        CourtCaseEntity courtCaseEntity = caseMapper.addDefendantProsecutorDefenderJudgeType(existingCourtCaseEntity, request);
 
         assertEquals(1, courtCaseEntity.getDefendantList().size());
         Mockito.verify(logApi, Mockito.times(1)).defendantNotAdded(unallocatedCaseNumber, CASE_NUMBER);

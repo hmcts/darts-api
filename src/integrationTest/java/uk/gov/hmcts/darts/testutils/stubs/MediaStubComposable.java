@@ -18,12 +18,12 @@ public class MediaStubComposable {
 
     private final MediaRepository mediaRepository;
 
+    private final DartsPersistence dartsPersistence;
+
     private final UserAccountRepository userAccountRepository;
 
     private static final OffsetDateTime MEDIA_1_START_TIME = OffsetDateTime.parse("2023-01-01T12:00:00Z");
     private static final OffsetDateTime MEDIA_1_END_TIME = MEDIA_1_START_TIME.plusHours(1);
-    private static final OffsetDateTime MEDIA_2_START_TIME = OffsetDateTime.parse("2023-01-01T16:00:00Z");
-    private static final OffsetDateTime MEDIA_2_END_TIME = MEDIA_2_START_TIME.plusHours(1);
 
     public MediaEntity createMediaEntity(CourthouseStubComposable courthouseStubComposable,
                                          CourtroomStubComposable courtroomStub,
@@ -32,7 +32,7 @@ public class MediaStubComposable {
 
         CourtroomEntity courtroom = courtroomStub
             .createCourtroomUnlessExists(courthouseStubComposable, courthouseName, courtroomName, userAccountRepository.getReferenceById(0));
-        return mediaRepository.saveAndFlush(createMediaWith(courtroom, startTime, endTime, channel, mediaType));
+        return dartsPersistence.save(createMediaWith(courtroom, startTime, endTime, channel, mediaType));
     }
 
     public MediaEntity createMediaEntity(CourtroomStubComposable courtroomStub,
@@ -41,7 +41,7 @@ public class MediaStubComposable {
                                          String mediaType) {
         CourtroomEntity courtroom = courtroomStub
             .createCourtroomUnlessExists(courthouse, courtroomName, userAccountRepository.getReferenceById(0));
-        return mediaRepository.saveAndFlush(createMediaWith(courtroom, startTime, endTime, channel, mediaType));
+        return dartsPersistence.save(createMediaWith(courtroom, startTime, endTime, channel, mediaType));
     }
 
     public MediaEntity createMediaEntity(CourtroomStubComposable courtroomStub,
@@ -49,7 +49,7 @@ public class MediaStubComposable {
                                          OffsetDateTime startTime, OffsetDateTime endTime, int channel) {
         CourtroomEntity courtroom = courtroomStub
             .createCourtroomUnlessExists(courthouse, courtroomName, userAccountRepository.getReferenceById(0));
-        return mediaRepository.saveAndFlush(createMediaWith(courtroom, startTime, endTime, channel, "mp2"));
+        return dartsPersistence.save(createMediaWith(courtroom, startTime, endTime, channel, "mp2"));
     }
 
     public MediaEntity createMediaEntity(CourthouseStubComposable courthouseStubComposable,
@@ -69,7 +69,7 @@ public class MediaStubComposable {
             courthouseStubComposable, courthouseName, courtroomName, userAccountRepository.getReferenceById(0));
         MediaEntity mediaEntity = createMediaWith(courtroom, startTime, endTime, channel, mediaType);
         mediaEntity.setHidden(true);
-        return mediaRepository.saveAndFlush(mediaEntity);
+        return dartsPersistence.save(mediaEntity);
     }
 
     public MediaEntity createAndSaveMedia(CourthouseStubComposable courthouseStubComposable, CourtroomStubComposable courtroomStub) {

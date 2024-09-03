@@ -108,6 +108,12 @@ spring:
     locations: classpath:db/migration/common,db/migration/postgres
     default-schema: ${spring.datasource.schema}
     mixed: true
+  cloud:
+    openfeign:
+      client:
+        config:
+          default:
+            loggerLevel: ${FEIGN_LOG_LEVEL:none}
 
 darts:
   automated-tasks-pod: ${AUTOMATED_TASK_MODE:true}
@@ -191,7 +197,7 @@ darts:
     url-format: http://{0}/VIQDARNotifyEvent/DARNotifyEvent.asmx
   events:
     duplicates:
-      earliest-removable-event-date: ${MODERNISED_DARTS_START_DATE:2024-07-16}
+      earliest-removable-event-date: ${MODERNISED_DARTS_START_DATE:2024-12-01}
       clear-up-window: ${DUPLICATE_EVENTS_CLEAR_UP_WINDOW_DAYS:2}
     admin-search:
       max-results: 1000
@@ -325,6 +331,8 @@ darts:
       system-user-guid-map:
         housekeeping: ecfd1f14-c9b6-4f15-94c7-cc60e53f2c7a
         dailylist-processor: f6f71122-ff85-4ebe-93d9-1706460dbea5
+      unstructured-to-arm-batch-processor:
+        max-result-size: 100000
   annotations:
     allowed-extensions:
       - "docx"
@@ -363,8 +371,3 @@ logging:
   level:
     uk.gov.hmcts.darts: ${DARTS_LOG_LEVEL:INFO}
     net.javacrumbs.shedlock: ${DARTS_LOG_LEVEL:INFO}
-feign:
-  client:
-    config:
-      default:
-        loggerLevel: full

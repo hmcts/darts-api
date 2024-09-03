@@ -25,7 +25,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.JUDICIARY;
-import static uk.gov.hmcts.darts.test.common.data.HearingTestData.createSomeMinimalHearing;
+import static uk.gov.hmcts.darts.test.common.data.HearingTestData.someMinimalHearing;
 
 @AutoConfigureMockMvc
 class AnnotationPostTest extends IntegrationBase {
@@ -37,15 +37,14 @@ class AnnotationPostTest extends IntegrationBase {
     @Autowired
     private GivenBuilder given;
 
-
     @Autowired
     private MockMvc mockMvc;
 
     @Test
     void returnsAnnotationId() throws Exception {
         given.anAuthenticatedUserWithGlobalAccessAndRole(JUDICIARY);
-        HearingEntity hearingEntity = createSomeMinimalHearing();
-        hearingEntity = dartsDatabase.save(hearingEntity);
+        HearingEntity hearingEntity = someMinimalHearing();
+        hearingEntity = dartsPersistence.save(hearingEntity);
 
         var mvcResult = mockMvc.perform(
                 multipart(ENDPOINT)
@@ -66,14 +65,14 @@ class AnnotationPostTest extends IntegrationBase {
         List<AnnotationEntity> annotationByHearing = dartsDatabase.getAnnotationRepository().findByHearingId(hearingEntity.getId());
         assertFalse(annotationByHearing.isEmpty());
 
-        assertThat(dartsDatabase.findExternalObjectDirectoryFor(annotationId).size()).isEqualTo(2);
+        assertThat(dartsDataRetrieval.findExternalObjectDirectoryFor(annotationId).size()).isEqualTo(2);
     }
 
     @Test
     void allowsJudgeWithGlobalAccessToUploadAnnotations() throws Exception {
         given.anAuthenticatedUserWithGlobalAccessAndRole(JUDICIARY);
-        HearingEntity hearingEntity = createSomeMinimalHearing();
-        hearingEntity = dartsDatabase.save(hearingEntity);
+        HearingEntity hearingEntity = someMinimalHearing();
+        hearingEntity = dartsPersistence.save(hearingEntity);
         mockMvc.perform(
                 multipart(ENDPOINT)
                     .file(someAnnotationPostDocument())
@@ -84,7 +83,7 @@ class AnnotationPostTest extends IntegrationBase {
 
     @Test
     void allowsJudgeAuthorisedForCourthouseAccessToUploadAnnotations() throws Exception {
-        var hearing = dartsDatabase.save(createSomeMinimalHearing());
+        var hearing = dartsPersistence.save(someMinimalHearing());
         given.anAuthenticatedUserAuthorizedForCourthouse(JUDICIARY, hearing.getCourtroom().getCourthouse());
 
         mockMvc.perform(
@@ -101,7 +100,7 @@ class AnnotationPostTest extends IntegrationBase {
 
         mockMvc.perform(
                 multipart(ENDPOINT)
-                    .file(someAnnotationPostBodyFor(createSomeMinimalHearing())))
+                    .file(someAnnotationPostBodyFor(someMinimalHearing())))
             .andExpect(status().isBadRequest())
             .andReturn();
     }

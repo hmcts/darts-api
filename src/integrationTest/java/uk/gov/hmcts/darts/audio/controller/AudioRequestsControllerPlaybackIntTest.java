@@ -9,7 +9,6 @@ import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import uk.gov.hmcts.darts.audit.api.AuditActivity;
-import uk.gov.hmcts.darts.audit.service.AuditService;
 import uk.gov.hmcts.darts.authorisation.component.Authorisation;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.datamanagement.enums.DatastoreContainerType;
@@ -71,9 +70,6 @@ class AudioRequestsControllerPlaybackIntTest extends IntegrationBase {
 
     @SpyBean
     private DataManagementService dataManagementService;
-
-    @Autowired
-    private AuditService auditService;
 
     @Autowired
     private AuditRepository auditRepository;

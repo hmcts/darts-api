@@ -24,6 +24,7 @@ import uk.gov.hmcts.darts.testutils.IntegrationBase;
 import uk.gov.hmcts.darts.testutils.stubs.SuperAdminUserStub;
 
 import java.time.OffsetDateTime;
+import java.util.Locale;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -38,7 +39,7 @@ class CaseControllerGetCaseHearingsTest extends IntegrationBase {
 
     private static String endpointUrl = "/cases/{case_id}/hearings";
     private static final OffsetDateTime SOME_DATE_TIME = OffsetDateTime.parse("2023-01-01T12:00Z");
-    private static final String SOME_COURTHOUSE = "some-courthouse";
+    private static final String SOME_COURTHOUSE = "SOME-COURTHOUSE";
     private static final String SOME_COURTROOM = "some-courtroom";
     private static final String SOME_CASE_ID = "1";
 
@@ -68,7 +69,7 @@ class CaseControllerGetCaseHearingsTest extends IntegrationBase {
         );
 
         CourthouseEntity courthouseEntity = hearingEntity.getCourtroom().getCourthouse();
-        assertEquals(SOME_COURTHOUSE, courthouseEntity.getCourthouseName());
+        assertEquals(SOME_COURTHOUSE.toUpperCase(Locale.ROOT), courthouseEntity.getCourthouseName());
 
         testUser = dartsDatabase.getUserAccountStub()
             .createAuthorisedIntegrationTestUser(false, courthouseEntity);
@@ -116,7 +117,7 @@ class CaseControllerGetCaseHearingsTest extends IntegrationBase {
             .andExpect(jsonPath("$[0].id", Matchers.is(hearingEntity.getId())))
             .andExpect(jsonPath("$[0].date", Matchers.is(Matchers.notNullValue())))
             .andExpect(jsonPath("$[0].judges", Matchers.is(Matchers.notNullValue())))
-            .andExpect(jsonPath("$[0].courtroom", Matchers.is(SOME_COURTROOM)));
+            .andExpect(jsonPath("$[0].courtroom", Matchers.is(SOME_COURTROOM.toUpperCase(Locale.ROOT))));
 
     }
 
@@ -141,7 +142,7 @@ class CaseControllerGetCaseHearingsTest extends IntegrationBase {
             .andExpect(jsonPath("$[0].id", Matchers.is(hearingEntity.getId())))
             .andExpect(jsonPath("$[0].date", Matchers.is(Matchers.notNullValue())))
             .andExpect(jsonPath("$[0].judges", Matchers.is(Matchers.notNullValue())))
-            .andExpect(jsonPath("$[0].courtroom", Matchers.is(SOME_COURTROOM)))
+            .andExpect(jsonPath("$[0].courtroom", Matchers.is(SOME_COURTROOM.toUpperCase(Locale.ROOT))))
             .andExpect(jsonPath("$[1].id", Matchers.is(hearingEntity2.getId())))
             .andExpect(jsonPath("$[1].courtroom", Matchers.is("CR1")));
 

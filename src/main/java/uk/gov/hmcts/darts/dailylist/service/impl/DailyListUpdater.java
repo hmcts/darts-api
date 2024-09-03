@@ -2,11 +2,11 @@ package uk.gov.hmcts.darts.dailylist.service.impl;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 import uk.gov.hmcts.darts.common.entity.DailyListEntity;
@@ -20,6 +20,7 @@ import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
 import uk.gov.hmcts.darts.common.helper.SystemUserHelper;
 import uk.gov.hmcts.darts.common.repository.CourthouseRepository;
 import uk.gov.hmcts.darts.common.repository.HearingRepository;
+import uk.gov.hmcts.darts.common.service.CreateCoreObjectService;
 import uk.gov.hmcts.darts.common.service.RetrieveCoreObjectService;
 import uk.gov.hmcts.darts.dailylist.enums.JobStatusType;
 import uk.gov.hmcts.darts.dailylist.enums.SourceType;
@@ -51,6 +52,7 @@ class DailyListUpdater {
     public static final String SITTING_AT_FORMAT = "HH:mm:ss";
 
     private final RetrieveCoreObjectService retrieveCoreObjectService;
+    private final CreateCoreObjectService createCoreObjectService;
     private final CourthouseRepository courthouseRepository;
     private final HearingRepository hearingRepository;
     private final ObjectMapper objectMapper;
@@ -68,8 +70,8 @@ class DailyListUpdater {
 
         for (CourtList courtList : dailyList.getCourtLists()) {
 
-            String courtHouseName = courtList.getCourtHouse().getCourtHouseName();
-            Optional<CourthouseEntity> foundCourthouse = courthouseRepository.findByCourthouseNameIgnoreCase(
+            String courtHouseName = courtList.getCourtHouse().getCourtHouseName().toUpperCase(Locale.ROOT);
+            Optional<CourthouseEntity> foundCourthouse = courthouseRepository.findByCourthouseName(
                 courtHouseName);
 
             if (foundCourthouse.isPresent()) {
@@ -196,7 +198,7 @@ class DailyListUpdater {
         UserAccountEntity dailyListSystemUser = systemUserHelper.getDailyListProcessorUser();
         advocates.forEach(advocate -> {
             if (!isExistingProsecutor(courtCase, advocate)) {
-                courtCase.addProsecutor(retrieveCoreObjectService.createProsecutor(
+                courtCase.addProsecutor(createCoreObjectService.createProsecutor(
                     citizenNameMapper.getCitizenName(advocate.getName()), courtCase, dailyListSystemUser));
             }
         });
@@ -210,7 +212,7 @@ class DailyListUpdater {
                     continue;
                 }
                 if (!isExistingDefenders(courtCase, counselDetails)) {
-                    courtCase.addDefence(retrieveCoreObjectService.createDefence(
+                    courtCase.addDefence(createCoreObjectService.createDefence(
                         citizenNameMapper.getCitizenName(counselDetails.getName()), courtCase, dailyListSystemUser));
                 }
             }
@@ -221,7 +223,7 @@ class DailyListUpdater {
         UserAccountEntity dailyListSystemUser = systemUserHelper.getDailyListProcessorUser();
         for (Defendant defendant : defendants) {
             if (!isExistingDefendant(courtCase, defendant)) {
-                courtCase.addDefendant(retrieveCoreObjectService.createDefendant(
+                courtCase.addDefendant(createCoreObjectService.createDefendant(
                     citizenNameMapper.getCitizenName(defendant.getPersonalDetails().getName()),
                     courtCase,
                     dailyListSystemUser

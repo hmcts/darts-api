@@ -81,8 +81,8 @@ public class TranscriptionDocumentStub {
         List<CourtCaseEntity> caseEntityList;
         for (int transriptionDocumentCount = 0; transriptionDocumentCount < count; transriptionDocumentCount++) {
 
-            owner = userAccountStub.createSystemUserAccount(
-                TranscriptionDocumentSubStringQueryEnum.OWNER.getQueryString(Integer.toString(transriptionDocumentCount)));
+            String username = TranscriptionDocumentSubStringQueryEnum.OWNER.getQueryString(Integer.toString(transriptionDocumentCount));
+            owner = userAccountStub.createSystemUserAccount(username);
 
             hearingEntityList = new ArrayList<>();
             caseEntityList = new ArrayList<>();

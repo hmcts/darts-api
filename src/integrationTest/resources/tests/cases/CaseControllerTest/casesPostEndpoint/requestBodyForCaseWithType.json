@@ -1,0 +1,17 @@
+{
+  "courthouse": "EDINBURGH",
+  "case_number": "case1",
+  "case_type": "1",
+  "defendants": [
+    "Jow Bloggs"
+  ],
+  "judges": [
+    "Mr Judge"
+  ],
+  "prosecutors": [
+    "Mrs Prosecutor"
+  ],
+  "defenders": [
+    "Mr Defender"
+  ]
+}

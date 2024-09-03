@@ -23,6 +23,7 @@ import uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum;
 import java.net.URI;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
+import java.util.Locale;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -34,7 +35,7 @@ class TranscriptionControllerGetTranscriptionWorkflowsIntTest extends Integratio
 
     private static final URI ENDPOINT_URI = URI.create("/admin/transcription-workflows");
     private static final OffsetDateTime SOME_DATE_TIME = OffsetDateTime.parse("2023-01-01T12:00Z");
-    private static final String SOME_COURTHOUSE = "some-courthouse";
+    private static final String SOME_COURTHOUSE = "SOME-COURTHOUSE";
     private static final String SOME_COURTROOM = "some-courtroom";
     private static final String SOME_CASE_ID = "1";
 
@@ -58,7 +59,7 @@ class TranscriptionControllerGetTranscriptionWorkflowsIntTest extends Integratio
             DateConverterUtil.toLocalDateTime(SOME_DATE_TIME)
         );
         CourthouseEntity courthouseEntity = hearingEntity.getCourtroom().getCourthouse();
-        assertEquals(SOME_COURTHOUSE, courthouseEntity.getCourthouseName());
+        assertEquals(SOME_COURTHOUSE.toUpperCase(Locale.ROOT), courthouseEntity.getCourthouseName());
 
         transcription = dartsDatabase.getTranscriptionStub().createTranscription(hearingEntity);
         transcription.setCreatedDateTime(OffsetDateTime.of(2024, 4, 24, 10, 0, 0, 0, ZoneOffset.UTC));
@@ -67,18 +68,21 @@ class TranscriptionControllerGetTranscriptionWorkflowsIntTest extends Integratio
         transcription = dartsDatabase.save(transcription);
 
         var transcriptionWorkflow1 = transcriptionStub.createAndSaveTranscriptionWorkflow(transcription,
-                             OffsetDateTime.of(2024, 4, 23, 10, 0, 0, 0, ZoneOffset.UTC),
-                             transcriptionStub.getTranscriptionStatusByEnum(TranscriptionStatusEnum.REQUESTED));
+                                                                                          OffsetDateTime.of(2024, 4, 23, 10, 0, 0, 0, ZoneOffset.UTC),
+                                                                                          transcriptionStub.getTranscriptionStatusByEnum(
+                                                                                              TranscriptionStatusEnum.REQUESTED));
         transcriptionStub.createAndSaveTranscriptionWorkflowComment(transcriptionWorkflow1, "comment1", transcription.getCreatedBy());
 
         var transcriptionWorkflow2 = transcriptionStub.createAndSaveTranscriptionWorkflow(transcription,
-                             OffsetDateTime.of(2024, 4, 24, 12, 0, 0, 0, ZoneOffset.UTC),
-                             transcriptionStub.getTranscriptionStatusByEnum(TranscriptionStatusEnum.APPROVED));
+                                                                                          OffsetDateTime.of(2024, 4, 24, 12, 0, 0, 0, ZoneOffset.UTC),
+                                                                                          transcriptionStub.getTranscriptionStatusByEnum(
+                                                                                              TranscriptionStatusEnum.APPROVED));
         transcriptionStub.createAndSaveTranscriptionWorkflowComment(transcriptionWorkflow2, "comment2", transcription.getCreatedBy());
 
-        transcriptionStub.createAndSaveTranscriptionCommentNotAssociatedToWorkflow(transcription,
+        transcriptionStub.createAndSaveTranscriptionCommentNotAssociatedToWorkflow(
+            transcription,
             OffsetDateTime.of(2024, 4, 25, 12, 0, 0, 0, ZoneOffset.UTC),
-    "this is a migrated transcription comment that is not associated to a transcription workflow"
+            "this is a migrated transcription comment that is not associated to a transcription workflow"
         );
     }
 

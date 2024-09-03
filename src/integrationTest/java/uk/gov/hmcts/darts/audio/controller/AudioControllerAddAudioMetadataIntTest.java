@@ -16,7 +16,6 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.util.unit.DataSize;
-import org.springframework.web.client.RestTemplate;
 import org.testcontainers.shaded.org.apache.commons.io.IOUtils;
 import uk.gov.hmcts.darts.audio.exception.AudioApiError;
 import uk.gov.hmcts.darts.audio.model.AddAudioMetadataRequest;
@@ -27,7 +26,6 @@ import uk.gov.hmcts.darts.common.entity.MediaEntity;
 import uk.gov.hmcts.darts.common.entity.MediaLinkedCaseEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.enums.SecurityRoleEnum;
-import uk.gov.hmcts.darts.common.helper.MediaLinkedCaseHelper;
 import uk.gov.hmcts.darts.common.util.DateConverterUtil;
 import uk.gov.hmcts.darts.test.common.DataGenerator;
 import uk.gov.hmcts.darts.test.common.LogUtil;
@@ -71,9 +69,6 @@ class AudioControllerAddAudioMetadataIntTest extends IntegrationBase {
     @Value("${local.server.port}")
     protected int port;
 
-    @Autowired
-    private MediaLinkedCaseHelper mediaLinkedCaseHelper;
-
     private static final URI ENDPOINT = URI.create("/audios");
     private static final OffsetDateTime STARTED_AT = OffsetDateTime.of(2024, 10, 10, 10, 0, 0, 0, ZoneOffset.UTC);
     private static final Path AUDIO_BINARY_PAYLOAD_1 = DataGenerator.createUniqueFile(DataSize.ofBytes(10),
@@ -98,9 +93,6 @@ class AudioControllerAddAudioMetadataIntTest extends IntegrationBase {
     HearingStub hearingStub;
     @MockBean
     private UserIdentity mockUserIdentity;
-
-    @Autowired
-    private RestTemplate restTemplate;
 
     @Value("${spring.servlet.multipart.max-file-size}")
     private DataSize addAudioThreshold;

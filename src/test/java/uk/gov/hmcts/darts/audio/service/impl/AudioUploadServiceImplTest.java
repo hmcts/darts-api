@@ -291,7 +291,7 @@ class AudioUploadServiceImplTest {
         AddAudioMetadataRequest addAudioMetadataRequest = createAddAudioRequest(STARTED_AT, ENDED_AT);
         MediaEntity mediaEntity = createMediaEntity(STARTED_AT, ENDED_AT);
 
-        HearingEntity hearing1 = HearingTestData.createSomeMinimalHearing();
+        HearingEntity hearing1 = HearingTestData.someMinimalHearing();
         when(retrieveCoreObjectService.retrieveOrCreateHearing(
             anyString(),
             anyString(),
@@ -300,7 +300,7 @@ class AudioUploadServiceImplTest {
             any()
         )).thenReturn(hearing1);
 
-        HearingEntity hearing2 = HearingTestData.createSomeMinimalHearing();
+        HearingEntity hearing2 = HearingTestData.someMinimalHearing();
         when(retrieveCoreObjectService.retrieveOrCreateHearing(
             anyString(),
             anyString(),
@@ -309,7 +309,7 @@ class AudioUploadServiceImplTest {
             any()
         )).thenReturn(hearing2);
 
-        HearingEntity hearing3 = HearingTestData.createSomeMinimalHearing();
+        HearingEntity hearing3 = HearingTestData.someMinimalHearing();
         when(retrieveCoreObjectService.retrieveOrCreateHearing(
             anyString(),
             anyString(),
@@ -330,7 +330,7 @@ class AudioUploadServiceImplTest {
         addAudioMetadataRequest.setCases(List.of("1", "2", "1"));
         createMediaEntity(STARTED_AT, ENDED_AT);
 
-        HearingEntity hearing1 = HearingTestData.createSomeMinimalHearing();
+        HearingEntity hearing1 = HearingTestData.someMinimalHearing();
         when(retrieveCoreObjectService.retrieveOrCreateHearing(
             anyString(),
             anyString(),
@@ -339,7 +339,7 @@ class AudioUploadServiceImplTest {
             any()
         )).thenReturn(hearing1);
 
-        HearingEntity hearing2 = HearingTestData.createSomeMinimalHearing();
+        HearingEntity hearing2 = HearingTestData.someMinimalHearing();
         when(retrieveCoreObjectService.retrieveOrCreateHearing(
             anyString(),
             anyString(),

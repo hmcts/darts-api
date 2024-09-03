@@ -14,7 +14,7 @@ public class CourthouseTestData {
         var postfix = random(10, false, true);
         var courtHouse = new CourthouseEntity();
         courtHouse.setCourthouseName("some-courthouse-" + postfix);
-        courtHouse.setDisplayName("some-courthouse" + postfix);
+        courtHouse.setDisplayName("SOME-COURTHOUSE" + postfix);
 
         var defaultUser = minimalUserAccount();
         courtHouse.setLastModifiedBy(defaultUser);

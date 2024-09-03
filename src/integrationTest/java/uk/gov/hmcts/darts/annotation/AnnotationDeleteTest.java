@@ -23,7 +23,7 @@ import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.JUDICIARY;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.SUPER_ADMIN;
 import static uk.gov.hmcts.darts.test.common.data.AnnotationTestData.minimalAnnotationEntity;
 import static uk.gov.hmcts.darts.test.common.data.CourthouseTestData.someMinimalCourthouse;
-import static uk.gov.hmcts.darts.test.common.data.HearingTestData.createSomeMinimalHearing;
+import static uk.gov.hmcts.darts.test.common.data.HearingTestData.someMinimalHearing;
 import static uk.gov.hmcts.darts.test.common.data.UserAccountTestData.minimalUserAccount;
 
 @AutoConfigureMockMvc
@@ -55,7 +55,7 @@ class AnnotationDeleteTest extends IntegrationBase {
 
     @Test
     void judgeWithCourthouseAccessCanDeleteTheirOwnAnnotation() throws Exception {
-        var hearing = dartsDatabase.save(createSomeMinimalHearing());
+        var hearing = dartsPersistence.save(someMinimalHearing());
         var judge = given.anAuthenticatedUserAuthorizedForCourthouse(JUDICIARY, hearing.getCourtroom().getCourthouse());
         var annotation = someAnnotationForHearingNotMarkedForDeletionCreatedBy(judge, hearing);
 
@@ -67,8 +67,8 @@ class AnnotationDeleteTest extends IntegrationBase {
 
     @Test
     void preventsJudgeNotAuthorizedForCourthouseDeletingAnnotationAssociatedWithThatCourthouse() throws Exception {
-        var annotationHearing = dartsDatabase.save(createSomeMinimalHearing());
-        var someOtherCourthouse = dartsDatabase.save(someMinimalCourthouse());
+        var annotationHearing = dartsPersistence.save(someMinimalHearing());
+        var someOtherCourthouse = dartsPersistence.save(someMinimalCourthouse());
         var judge = given.anAuthenticatedUserAuthorizedForCourthouse(JUDICIARY, someOtherCourthouse);
         var annotation = someAnnotationForHearingNotMarkedForDeletionCreatedBy(judge, annotationHearing);
 
@@ -126,7 +126,7 @@ class AnnotationDeleteTest extends IntegrationBase {
     }
 
     private AnnotationEntity someAnnotationNotMarkedForDeletionCreatedBy(UserAccountEntity userAccount) {
-        return someAnnotationForHearingNotMarkedForDeletionCreatedBy(userAccount, createSomeMinimalHearing());
+        return someAnnotationForHearingNotMarkedForDeletionCreatedBy(userAccount, someMinimalHearing());
     }
 
     private AnnotationEntity someAnnotationForHearingNotMarkedForDeletionCreatedBy(UserAccountEntity userAccount, HearingEntity hearing) {
@@ -135,8 +135,9 @@ class AnnotationDeleteTest extends IntegrationBase {
         annotation.setCurrentOwner(userAccount);
         annotation.setCreatedBy(userAccount);
         annotation.setLastModifiedBy(userAccount);
-        annotation.addHearing(dartsDatabase.save(hearing));
-        dartsDatabase.save(annotation);
+        var hearingEntity = dartsPersistence.save(hearing);
+        annotation.addHearing(hearingEntity);
+        dartsPersistence.save(annotation);
         return annotation;
     }
 }

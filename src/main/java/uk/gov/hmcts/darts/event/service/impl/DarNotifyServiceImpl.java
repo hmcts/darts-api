@@ -17,6 +17,7 @@ import uk.gov.hmcts.darts.log.api.LogApi;
 
 import java.text.MessageFormat;
 import java.util.List;
+import java.util.Locale;
 import java.util.Optional;
 
 @Service
@@ -56,8 +57,8 @@ public class DarNotifyServiceImpl {
                 .notificationUrl(notificationUrl)
                 .notificationType(darNotifyType.getNotificationType())
                 .timestamp(dartsEvent.getDateTime())
-                .courthouse(dartsEvent.getCourthouse())
-                .courtroom(dartsEvent.getCourtroom())
+                .courthouse(dartsEvent.getCourthouse().toUpperCase(Locale.ROOT))
+                .courtroom(dartsEvent.getCourtroom().toUpperCase(Locale.ROOT))
                 .caseNumbers(openCaseNumbers)
                 .build();
 
