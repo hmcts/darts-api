@@ -10,6 +10,8 @@ import uk.gov.hmcts.darts.arm.service.ArmRetentionEventDateProcessor;
 import uk.gov.hmcts.darts.arm.service.BatchCleanupArmResponseFilesService;
 import uk.gov.hmcts.darts.arm.service.CleanupArmResponseFilesService;
 import uk.gov.hmcts.darts.arm.service.InboundAnnotationTranscriptionDeleterProcessor;
+import uk.gov.hmcts.darts.arm.service.UnstructuredToArmBatchProcessor;
+import uk.gov.hmcts.darts.arm.service.UnstructuredToArmProcessor;
 import uk.gov.hmcts.darts.arm.service.UnstructuredTranscriptionAndAnnotationDeleterProcessor;
 import uk.gov.hmcts.darts.audio.deleter.impl.inbound.ExternalInboundDataStoreDeleter;
 import uk.gov.hmcts.darts.audio.deleter.impl.outbound.ExternalOutboundDataStoreDeleter;
@@ -80,6 +82,8 @@ public class ManualTaskService {
     private final TranscriptionsProcessor transcriptionsProcessor;
     private final UnstructuredAudioDeleterProcessor unstructuredAudioDeleterProcessor;
     private final RemoveDuplicateEventsProcessor removeDuplicateEventsProcessor;
+    private final UnstructuredToArmBatchProcessor unstructuredToArmBatchProcessor;
+    private final UnstructuredToArmProcessor unstructuredToArmProcessor;
 
     private final LockProvider lockProvider;
     private final LogApi logApi;
@@ -211,7 +215,8 @@ public class ManualTaskService {
             automatedTaskRepository,
             lockProvider,
             automatedTaskConfigurationProperties,
-            automatedTaskProcessorFactory,
+            unstructuredToArmBatchProcessor,
+            unstructuredToArmProcessor,
             logApi
         );
         manualTask.setManualTask();

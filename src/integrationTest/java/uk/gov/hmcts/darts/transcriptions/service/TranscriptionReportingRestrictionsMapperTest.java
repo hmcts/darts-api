@@ -21,7 +21,7 @@ import static uk.gov.hmcts.darts.test.common.data.CaseTestData.createSomeMinimal
 import static uk.gov.hmcts.darts.test.common.data.EventTestData.REPORTING_RESTRICTIONS_LIFTED_DB_ID;
 import static uk.gov.hmcts.darts.test.common.data.EventTestData.SECTION_11_1981_DB_ID;
 import static uk.gov.hmcts.darts.test.common.data.EventTestData.someReportingRestrictionId;
-import static uk.gov.hmcts.darts.test.common.data.HearingTestData.createSomeMinimalHearing;
+import static uk.gov.hmcts.darts.test.common.data.HearingTestData.someMinimalHearing;
 
 @SuppressWarnings("VariableDeclarationUsageDistance")
 class TranscriptionReportingRestrictionsMapperTest extends IntegrationBase {
@@ -130,7 +130,7 @@ class TranscriptionReportingRestrictionsMapperTest extends IntegrationBase {
         var reappliedReportingRestriction = dartsDatabase.addHandlerToEvent(event3, SECTION_11_1981_DB_ID);
 
         HearingEntity hearingEntity = dartsDatabase.saveEventsForHearing(
-            createSomeMinimalHearing(),
+            someMinimalHearing(),
             reportingRestriction,
             reportingRestrictionLifted,
             reappliedReportingRestriction

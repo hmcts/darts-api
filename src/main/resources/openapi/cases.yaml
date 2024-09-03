@@ -433,6 +433,9 @@ components:
         case_number:
           type: string
           example: CASE1001
+        case_type:
+          type: string
+          example: 1
         defendants:
           type: array
           items:
@@ -575,6 +578,10 @@ components:
         retention_policy_applied:
           type: string
           example: "MANUAL"
+        is_data_anonymised:
+          $ref: '#/components/schemas/IsDataAnonymised'
+        data_anonymised_at:
+          $ref: '#/components/schemas/DataAnonymisedAt'
     advancedSearchResult:
       type: object
       properties:
@@ -605,6 +612,10 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/advancedSearchResultHearing'
+        is_data_anonymised:
+          $ref: '#/components/schemas/IsDataAnonymised'
+        data_anonymised_at:
+          $ref: '#/components/schemas/DataAnonymisedAt'
     advancedSearchResultHearing:
       type: object
       properties:
@@ -758,6 +769,10 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/defendant'
+        is_data_anonymised:
+          $ref: '#/components/schemas/IsDataAnonymised'
+        data_anonymised_at:
+          $ref: '#/components/schemas/DataAnonymisedAt'
 
     CourthouseResponseObject:
       type: object
@@ -823,6 +838,13 @@ components:
           type: string
           example: 'Event text'
           maxLength: 255
+
+    IsDataAnonymised:
+      type: boolean
+
+    DataAnonymisedAt:
+      type: string
+      format: date-time
 
     PostCasesErrorCode:
       type: string

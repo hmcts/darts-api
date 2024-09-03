@@ -1,6 +1,5 @@
 package uk.gov.hmcts.darts.audio.controller;
 
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.skyscreamer.jsonassert.JSONAssert;
@@ -43,7 +42,7 @@ class AudioControllerGetAdminMediasByIdIntTest extends IntegrationBase {
     private DartsDatabaseStub databaseStub;
 
     private static final URI ENDPOINT = URI.create("/admin/medias/");
-    private static final String COURTHOUSE_NAME = "testCourthouse";
+    private static final String COURTHOUSE_NAME = "TESTCOURTHOUSE";
     private static final String COURTROOM_NAME = "TESTCOURTROOM";
     private static final String CASE_NUMBER = "testCaseNumber";
     private static final OffsetDateTime HEARING_START_AT = OffsetDateTime.parse("2024-01-01T12:10:10Z");
@@ -52,7 +51,6 @@ class AudioControllerGetAdminMediasByIdIntTest extends IntegrationBase {
     private static final String HIDE_DELETE_AT = "2024-02-01T00:00:00Z";
     private static final String RETAIN_UNTIL = "2200-02-01T00:00:00Z";
 
-    @Disabled("Impacted by V1_367__adding_not_null_constraints_part_4.sql")
     @ParameterizedTest
     @EnumSource(value = SecurityRoleEnum.class, names = {"SUPER_USER", "SUPER_ADMIN"}, mode = INCLUDE)
     void shouldReturnExpectedMediaObjectAndChildren(SecurityRoleEnum role) throws Exception {

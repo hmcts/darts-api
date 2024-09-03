@@ -2,12 +2,12 @@ package uk.gov.hmcts.darts.testutils.stubs;
 
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
-import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.history.Revisions;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import uk.gov.hmcts.darts.audio.entity.MediaRequestEntity;
 import uk.gov.hmcts.darts.common.entity.AnnotationDocumentEntity;
 import uk.gov.hmcts.darts.common.entity.AnnotationEntity;
@@ -171,7 +171,7 @@ public class DartsDatabaseRetrieval {
 
     public Optional<CourtCaseEntity> findByCaseByCaseNumberAndCourtHouseName(String someCaseNumber,
                                                                              String someCourthouse) {
-        return caseRepository.findByCaseNumberAndCourthouse_CourthouseNameIgnoreCase(
+        return caseRepository.findByCaseNumberAndCourthouse_CourthouseName(
             someCaseNumber,
             someCourthouse
         );
@@ -195,7 +195,7 @@ public class DartsDatabaseRetrieval {
     }
 
     public CourthouseEntity findCourthouseWithName(String name) {
-        return courthouseRepository.findByCourthouseNameIgnoreCase(name).get();
+        return courthouseRepository.findByCourthouseName(name).get();
     }
 
     public ExternalLocationTypeEntity getExternalLocationTypeEntity(ExternalLocationTypeEnum externalLocationTypeEnum) {

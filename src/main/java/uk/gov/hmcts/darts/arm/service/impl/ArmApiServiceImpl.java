@@ -3,6 +3,7 @@ package uk.gov.hmcts.darts.arm.service.impl;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.darts.arm.client.ArmApiClient;
 import uk.gov.hmcts.darts.arm.client.ArmTokenClient;
@@ -17,6 +18,7 @@ import uk.gov.hmcts.darts.arm.service.ArmApiService;
 import uk.gov.hmcts.darts.common.datamanagement.component.impl.DownloadResponseMetaData;
 import uk.gov.hmcts.darts.common.datamanagement.component.impl.FileBasedDownloadResponseMetaData;
 import uk.gov.hmcts.darts.common.datamanagement.enums.DatastoreContainerType;
+import uk.gov.hmcts.darts.datamanagement.exception.FileNotDownloadReadingBodyException;
 import uk.gov.hmcts.darts.datamanagement.exception.FileNotDownloadedException;
 
 import java.time.OffsetDateTime;
@@ -54,18 +56,33 @@ public class ArmApiServiceImpl implements ArmApiService {
     @SuppressWarnings({"PMD.CloseResource"})
     public DownloadResponseMetaData downloadArmData(String externalRecordId, String externalFileId) throws FileNotDownloadedException {
         DownloadResponseMetaData responseMetaData = new FileBasedDownloadResponseMetaData();
-        try {
-            feign.Response response = armApiClient.downloadArmData(
-                getArmBearerToken(),
-                armApiConfigurationProperties.getCabinetId(),
-                externalRecordId,
-                externalFileId
-            );
 
+        feign.Response response = armApiClient.downloadArmData(
+            getArmBearerToken(),
+            armApiConfigurationProperties.getCabinetId(),
+            externalRecordId,
+            externalFileId
+        );
+
+        // on any error occurring return a download failure
+        if (!HttpStatus.valueOf(response.status()).is2xxSuccessful()) {
+            String message = ("Arm file failed to download, cabinet: %s, record id: %s, " +
+                "file id: %s. Failure response: %s").formatted(armApiConfigurationProperties.getCabinetId(),
+            externalRecordId, externalFileId, response.status());
+            log.error(message);
+            throw new FileNotDownloadedException(message);
+        }
+
+        try {
             responseMetaData.setContainerTypeUsedToDownload(DatastoreContainerType.ARM);
             responseMetaData.markInputStream(response.body().asInputStream());
         } catch (Exception e) {
-            throw new FileNotDownloadedException("Arm file failed to download, externalRecordId:" + externalRecordId + ", externalFileId:" + externalFileId, e);
+            String message = ("Arm file failed to download due to body stream, " +
+                "cabinet: %s, " +
+                "record id: %s, file id: %s. Failure response: %s")
+                .formatted(armApiConfigurationProperties.getCabinetId(), externalRecordId, externalFileId, response.status());
+            log.error(message, e);
+            throw new FileNotDownloadReadingBodyException(message);
         }
 
         log.debug("Successfully downloaded ARM data for recordId: {}, fileId: {}", externalRecordId, externalFileId);

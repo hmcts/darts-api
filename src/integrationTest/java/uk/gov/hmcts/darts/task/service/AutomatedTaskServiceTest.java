@@ -22,6 +22,8 @@ import uk.gov.hmcts.darts.arm.component.AutomatedTaskProcessorFactory;
 import uk.gov.hmcts.darts.arm.service.ArmRetentionEventDateProcessor;
 import uk.gov.hmcts.darts.arm.service.CleanupArmResponseFilesService;
 import uk.gov.hmcts.darts.arm.service.InboundAnnotationTranscriptionDeleterProcessor;
+import uk.gov.hmcts.darts.arm.service.impl.UnstructuredToArmBatchProcessorImpl;
+import uk.gov.hmcts.darts.arm.service.impl.UnstructuredToArmProcessorImpl;
 import uk.gov.hmcts.darts.audio.deleter.impl.inbound.ExternalInboundDataStoreDeleter;
 import uk.gov.hmcts.darts.audio.deleter.impl.outbound.ExternalOutboundDataStoreDeleter;
 import uk.gov.hmcts.darts.audio.deleter.impl.unstructured.ExternalUnstructuredDataStoreDeleter;
@@ -147,6 +149,12 @@ class AutomatedTaskServiceTest extends IntegrationPerClassBase {
 
     @Autowired
     private LogApi logApi;
+
+    @Autowired
+    UnstructuredToArmProcessorImpl unstructuredToArmProcessor;
+    @Autowired
+    UnstructuredToArmBatchProcessorImpl unstructuredToArmBatchProcessor;
+
 
     @MockBean
     private UserIdentity userIdentity;
@@ -633,7 +641,8 @@ class AutomatedTaskServiceTest extends IntegrationPerClassBase {
                 automatedTaskRepository,
                 lockProvider,
                 automatedTaskConfigurationProperties,
-                taskProcessorFactory,
+                unstructuredToArmBatchProcessor,
+                unstructuredToArmProcessor,
                 logApi
             );
 
@@ -667,7 +676,8 @@ class AutomatedTaskServiceTest extends IntegrationPerClassBase {
                 automatedTaskRepository,
                 lockProvider,
                 automatedTaskConfigurationProperties,
-                taskProcessorFactory,
+                unstructuredToArmBatchProcessor,
+                unstructuredToArmProcessor,
                 logApi
             );
 

@@ -18,6 +18,8 @@ import uk.gov.hmcts.darts.arm.service.ArmRetentionEventDateProcessor;
 import uk.gov.hmcts.darts.arm.service.BatchCleanupArmResponseFilesService;
 import uk.gov.hmcts.darts.arm.service.CleanupArmResponseFilesService;
 import uk.gov.hmcts.darts.arm.service.InboundAnnotationTranscriptionDeleterProcessor;
+import uk.gov.hmcts.darts.arm.service.UnstructuredToArmBatchProcessor;
+import uk.gov.hmcts.darts.arm.service.UnstructuredToArmProcessor;
 import uk.gov.hmcts.darts.arm.service.UnstructuredTranscriptionAndAnnotationDeleterProcessor;
 import uk.gov.hmcts.darts.audio.deleter.impl.inbound.ExternalInboundDataStoreDeleter;
 import uk.gov.hmcts.darts.audio.deleter.impl.outbound.ExternalOutboundDataStoreDeleter;
@@ -162,6 +164,9 @@ public class AutomatedTaskServiceImpl implements AutomatedTaskService {
 
     private final LogApi logApi;
     private final UserIdentity userIdentity;
+    private final UnstructuredToArmBatchProcessor unstructuredToArmBatchProcessor;
+    private final UnstructuredToArmProcessor unstructuredToArmProcessor;
+
 
     @Override
     public void configureAndLoadAutomatedTasks(ScheduledTaskRegistrar taskRegistrar) {
@@ -443,7 +448,8 @@ public class AutomatedTaskServiceImpl implements AutomatedTaskService {
             automatedTaskRepository,
             lockProvider,
             automatedTaskConfigurationProperties,
-            automatedTaskProcessorFactory,
+            unstructuredToArmBatchProcessor,
+            unstructuredToArmProcessor,
             logApi
         );
         unstructuredToArmAutomatedTask.setLastCronExpression(getAutomatedTaskCronExpression(unstructuredToArmAutomatedTask));
@@ -779,7 +785,8 @@ public class AutomatedTaskServiceImpl implements AutomatedTaskService {
                 automatedTaskRepository,
                 lockProvider,
                 automatedTaskConfigurationProperties,
-                automatedTaskProcessorFactory,
+                unstructuredToArmBatchProcessor,
+                unstructuredToArmProcessor,
                 logApi
             );
             Trigger trigger = createAutomatedTaskTrigger(unstructuredToArmAutomatedTask);

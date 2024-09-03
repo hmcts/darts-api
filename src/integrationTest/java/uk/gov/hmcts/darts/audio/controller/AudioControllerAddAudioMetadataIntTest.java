@@ -2,7 +2,6 @@ package uk.gov.hmcts.darts.audio.controller;
 
 import ch.qos.logback.classic.Level;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.skyscreamer.jsonassert.JSONAssert;
 import org.skyscreamer.jsonassert.JSONCompareMode;
@@ -17,7 +16,6 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.util.unit.DataSize;
-import org.springframework.web.client.RestTemplate;
 import org.testcontainers.shaded.org.apache.commons.io.IOUtils;
 import uk.gov.hmcts.darts.audio.exception.AudioApiError;
 import uk.gov.hmcts.darts.audio.model.AddAudioMetadataRequest;
@@ -28,7 +26,6 @@ import uk.gov.hmcts.darts.common.entity.MediaEntity;
 import uk.gov.hmcts.darts.common.entity.MediaLinkedCaseEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.enums.SecurityRoleEnum;
-import uk.gov.hmcts.darts.common.helper.MediaLinkedCaseHelper;
 import uk.gov.hmcts.darts.common.util.DateConverterUtil;
 import uk.gov.hmcts.darts.test.common.DataGenerator;
 import uk.gov.hmcts.darts.test.common.LogUtil;
@@ -67,14 +64,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
     "spring.servlet.multipart.max-file-size=4MB",
     "spring.servlet.multipart.max-request-size=4MB",
 })
-@Disabled("Impacted by V1_364_*.sql")
 class AudioControllerAddAudioMetadataIntTest extends IntegrationBase {
 
     @Value("${local.server.port}")
     protected int port;
-
-    @Autowired
-    private MediaLinkedCaseHelper mediaLinkedCaseHelper;
 
     private static final URI ENDPOINT = URI.create("/audios");
     private static final OffsetDateTime STARTED_AT = OffsetDateTime.of(2024, 10, 10, 10, 0, 0, 0, ZoneOffset.UTC);
@@ -100,9 +93,6 @@ class AudioControllerAddAudioMetadataIntTest extends IntegrationBase {
     HearingStub hearingStub;
     @MockBean
     private UserIdentity mockUserIdentity;
-
-    @Autowired
-    private RestTemplate restTemplate;
 
     @Value("${spring.servlet.multipart.max-file-size}")
     private DataSize addAudioThreshold;

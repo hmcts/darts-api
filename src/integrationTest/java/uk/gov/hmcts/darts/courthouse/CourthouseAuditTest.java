@@ -93,7 +93,7 @@ class CourthouseAuditTest extends IntegrationBase {
         given.anAuthenticatedUserWithGlobalAccessAndRole(SUPER_ADMIN);
 
         assertThatThrownBy(() -> courthouseService.createCourthouseAndGroups(
-            new CourthousePost().courthouseName("some-courthouse").displayName("some-display-name").regionId(-1)));
+            new CourthousePost().courthouseName("SOME-COURTHOUSE").displayName("some-display-name").regionId(-1)));
         assertThat(dartsDatabase.findAudits()).isEmpty();
     }
 

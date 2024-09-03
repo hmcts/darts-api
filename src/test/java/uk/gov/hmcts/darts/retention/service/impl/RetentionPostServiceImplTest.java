@@ -145,6 +145,28 @@ class RetentionPostServiceImplTest {
     }
 
     @Test
+    void fail_case_retention_passed() {
+        setupStubs();
+        CourtCaseEntity courtCase = CommonTestDataUtil.createCase("1");
+        courtCase.setClosed(true);
+        courtCase.setDataAnonymised(true);
+        when(caseRepository.findById(1)).thenReturn(Optional.of(courtCase));
+
+        PostRetentionRequest postRetentionRequest = new PostRetentionRequest();
+        postRetentionRequest.setCaseId(1);
+        postRetentionRequest.setRetentionDate(LocalDate.of(2026, 1, 1));
+        postRetentionRequest.setComments("TheComments");
+
+        var exception = assertThrows(
+            DartsApiException.class,
+            () -> retentionPostService.postRetention(false, postRetentionRequest)
+        );
+        assertEquals("caseId '101' retention date cannot be amended as the case is already expired.", exception.getDetail());
+        assertEquals("RETENTION_118", exception.getError().getType().toString());
+        assertEquals(422, exception.getError().getHttpStatus().value());
+    }
+
+    @Test
     void fail_CaseOpen() {
         setupStubs();
         CourtCaseEntity courtCase = CommonTestDataUtil.createCase("1");

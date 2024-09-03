@@ -7,18 +7,24 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import uk.gov.hmcts.darts.audio.entity.MediaRequestEntity;
 import uk.gov.hmcts.darts.common.entity.AnnotationDocumentEntity;
 import uk.gov.hmcts.darts.common.entity.AnnotationEntity;
 import uk.gov.hmcts.darts.common.entity.CaseManagementRetentionEntity;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
-import uk.gov.hmcts.darts.common.entity.DailyListEntity;
+import uk.gov.hmcts.darts.common.entity.DefenceEntity;
+import uk.gov.hmcts.darts.common.entity.DefendantEntity;
 import uk.gov.hmcts.darts.common.entity.EventEntity;
+import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
+import uk.gov.hmcts.darts.common.entity.JudgeEntity;
+import uk.gov.hmcts.darts.common.entity.MediaEntity;
 import uk.gov.hmcts.darts.common.entity.ProsecutorEntity;
 import uk.gov.hmcts.darts.common.entity.RetentionPolicyTypeEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionEntity;
+import uk.gov.hmcts.darts.common.entity.TransformedMediaEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
 import uk.gov.hmcts.darts.common.repository.AnnotationDocumentRepository;
@@ -132,22 +138,25 @@ public class DartsPersistence {
     @Transactional
     public AnnotationEntity save(AnnotationEntity annotationEntity) {
         save(annotationEntity.getCurrentOwner());
-        saveAll(annotationEntity.getHearingList());
+        saveHearingList(annotationEntity.getHearingList());
         return annotationRepository.save(annotationEntity);
     }
 
     @Transactional
-    public HearingEntity save(HearingEntity hearingEntity) {
-        save(hearingEntity.getCourtroom().getCourthouse());
-        save(hearingEntity.getCourtroom());
-        save(hearingEntity.getCreatedBy());
-        save(hearingEntity.getLastModifiedBy());
-        if (hearingEntity.getCourtCase().getId() == null) {
-            save(hearingEntity.getCourtCase());
+    public HearingEntity save(HearingEntity hearing) {
+        save(hearing.getCourtroom().getCourthouse());
+        save(hearing.getCourtroom());
+        save(hearing.getCreatedBy());
+        save(hearing.getLastModifiedBy());
+        saveJudgeList(hearing.getJudges());
+        if (hearing.getCourtCase().getId() == null) {
+            save(hearing.getCourtCase());
         } else {
-            entityManager.merge(hearingEntity.getCourtCase());
+            entityManager.merge(hearing.getCourtCase());
         }
-        return hearingRepository.save(hearingEntity);
+        hearingRepository.save(hearing);
+        saveMediaList(hearing.getMediaList());
+        return hearing;
     }
 
     @Transactional
@@ -166,15 +175,54 @@ public class DartsPersistence {
     }
 
     @Transactional
+    public MediaRequestEntity save(MediaRequestEntity mediaRequest) {
+        save(mediaRequest.getHearing());
+        save(mediaRequest.getRequestor());
+        save(mediaRequest.getCurrentOwner());
+        save(mediaRequest.getCreatedBy());
+        save(mediaRequest.getLastModifiedBy());
+        return mediaRequestRepository.save(mediaRequest);
+    }
+
+    @Transactional
     public CourtCaseEntity save(CourtCaseEntity courtCase) {
         save(courtCase.getCreatedBy());
         save(courtCase.getLastModifiedBy());
-        judgeRepository.saveAll(courtCase.getJudges());
+        saveJudgeList(courtCase.getJudges());
         save(courtCase.getCourthouse());
         courtCase.getProsecutorList().forEach(this::save);
-        saveAll(courtCase.getHearings());
+        courtCase.getDefenceList().forEach(this::save);
+        courtCase.getDefendantList().forEach(this::save);
+        saveHearingList(courtCase.getHearings());
         caseRepository.save(courtCase);
         return courtCase;
+    }
+
+    @Transactional
+    public ExternalObjectDirectoryEntity save(ExternalObjectDirectoryEntity eod) {
+        var locationType = externalLocationTypeRepository.getReferenceById(eod.getExternalLocationType().getId());
+        eod.setExternalLocationType(locationType);
+        var recordStatus = objectRecordStatusRepository.getReferenceById(eod.getStatus().getId());
+        eod.setStatus(recordStatus);
+
+        save(eod.getMedia());
+        save(eod.getCreatedBy());
+        save(eod.getLastModifiedBy());
+        return externalObjectDirectoryRepository.save(eod);
+    }
+
+    @Transactional
+    public DefenceEntity save(DefenceEntity defence) {
+        save(defence.getCreatedBy());
+        save(defence.getLastModifiedBy());
+        return defence;
+    }
+
+    @Transactional
+    public DefendantEntity save(DefendantEntity defendant) {
+        save(defendant.getCreatedBy());
+        save(defendant.getLastModifiedBy());
+        return defendant;
     }
 
     @Transactional
@@ -185,13 +233,13 @@ public class DartsPersistence {
     }
 
     @Transactional
-    public TranscriptionEntity save(TranscriptionEntity transcriptionEntity) {
-        save(transcriptionEntity.getHearing());
-        save(transcriptionEntity.getCourtroom());
-        save(transcriptionEntity.getCourtCase());
-        save(transcriptionEntity.getCreatedBy());
-        save(transcriptionEntity.getLastModifiedBy());
-        var transcription = transcriptionRepository.save(transcriptionEntity);
+    public TranscriptionEntity save(TranscriptionEntity transcription) {
+        save(transcription.getHearing());
+        save(transcription.getCourtroom());
+        save(transcription.getCourtCase());
+        save(transcription.getCreatedBy());
+        save(transcription.getLastModifiedBy());
+        transcriptionRepository.save(transcription);
         save(transcription.getCreatedBy());
         transcription.getTranscriptionDocumentEntities().forEach(td -> {
             save(td.getUploadedBy());
@@ -202,74 +250,108 @@ public class DartsPersistence {
     }
 
     @Transactional
-    public EventEntity save(EventEntity eventEntity) {
-        save(eventEntity.getCourtroom());
-        save(eventEntity.getCreatedBy());
-        save(eventEntity.getLastModifiedBy());
-        return eventRepository.save(eventEntity);
+    public EventEntity save(EventEntity event) {
+        save(event.getCourtroom());
+        save(event.getCreatedBy());
+        save(event.getLastModifiedBy());
+        return eventRepository.save(event);
     }
 
     @Transactional
-    public RetentionPolicyTypeEntity save(RetentionPolicyTypeEntity retentionPolicyTypeEntity) {
-        save(retentionPolicyTypeEntity.getLastModifiedBy());
-        save(retentionPolicyTypeEntity.getCreatedBy());
-        return retentionPolicyTypeRepository.save(retentionPolicyTypeEntity);
+    public RetentionPolicyTypeEntity save(RetentionPolicyTypeEntity retentionPolicyType) {
+        save(retentionPolicyType.getLastModifiedBy());
+        save(retentionPolicyType.getCreatedBy());
+        return retentionPolicyTypeRepository.save(retentionPolicyType);
     }
 
     @Transactional
-    public CaseManagementRetentionEntity save(CaseManagementRetentionEntity caseManagementRetentionEntity) {
-        save(caseManagementRetentionEntity.getCourtCase());
-        save(caseManagementRetentionEntity.getEventEntity());
-        save(caseManagementRetentionEntity.getRetentionPolicyTypeEntity());
-        return caseManagementRetentionRepository.saveAndFlush(caseManagementRetentionEntity);
+    public CaseManagementRetentionEntity save(CaseManagementRetentionEntity caseManagementRetention) {
+        save(caseManagementRetention.getCourtCase());
+        save(caseManagementRetention.getEventEntity());
+        save(caseManagementRetention.getRetentionPolicyTypeEntity());
+        return caseManagementRetentionRepository.saveAndFlush(caseManagementRetention);
     }
 
     @Transactional
-    public UserAccountEntity save(UserAccountEntity userAccountEntity) {
+    public UserAccountEntity save(UserAccountEntity userAccount) {
         var systemUser = userAccountRepository.getReferenceById(0);
-        userAccountEntity.setCreatedBy(systemUser);
-        userAccountEntity.setLastModifiedBy(systemUser);
+        userAccount.setCreatedBy(systemUser);
+        userAccount.setLastModifiedBy(systemUser);
 
-        return userAccountRepository.save(userAccountEntity);
+        return userAccountRepository.save(userAccount);
     }
 
     @Transactional
-    public AnnotationDocumentEntity save(AnnotationDocumentEntity annotationDocumentEntity) {
-        if (annotationDocumentEntity.getAnnotation().getId() == null) {
-            save(annotationDocumentEntity.getAnnotation());
+    public AnnotationDocumentEntity save(AnnotationDocumentEntity annotationDocument) {
+        if (annotationDocument.getAnnotation().getId() == null) {
+            save(annotationDocument.getAnnotation());
         }
-        save(annotationDocumentEntity.getLastModifiedBy());
-        return annotationDocumentRepository.save(annotationDocumentEntity);
-
+        save(annotationDocument.getLastModifiedBy());
+        return annotationDocumentRepository.save(annotationDocument);
     }
 
     @Transactional
-    public void saveAll(UserAccountEntity... testUsers) {
-        stream(testUsers).forEach(user -> {
+    public void save(JudgeEntity judge) {
+        save(judge.getCreatedBy());
+        save(judge.getLastModifiedBy());
+        judgeRepository.save(judge);
+    }
+
+    @Transactional
+    public MediaEntity save(MediaEntity media) {
+        save(media.getCourtroom());
+        save(media.getCreatedBy());
+        save(media.getLastModifiedBy());
+        mediaRepository.save(media);
+        saveHearingList(media.getHearingList());
+        return media;
+    }
+
+    @Transactional
+    public TransformedMediaEntity save(TransformedMediaEntity transformedMedia) {
+        save(transformedMedia.getCreatedBy());
+        save(transformedMedia.getLastModifiedBy());
+        return transformedMediaRepository.save(transformedMedia);
+    }
+
+    @Transactional
+    public void saveAll(UserAccountEntity... userAccounts) {
+        stream(userAccounts).forEach(user -> {
             UserAccountEntity systemUser = userAccountRepository.getReferenceById(0);
             user.setCreatedBy(systemUser);
             user.setLastModifiedBy(systemUser);
         });
-        userAccountRepository.saveAll(asList(testUsers));
+        userAccountRepository.saveAll(asList(userAccounts));
     }
 
     @Transactional
-    public void saveAll(HearingEntity... hearingEntities) {
-        stream(hearingEntities).forEach(this::save);
+    public void saveAll(HearingEntity... hearings) {
+        stream(hearings).forEach(this::save);
     }
 
     @Transactional
-    public void saveAll(List<HearingEntity> hearingEntities) {
-        for (HearingEntity hearingEntity : hearingEntities) {
-            save(hearingEntity);
-        }
-    }
-
-    public List<DailyListEntity> saveAll(DailyListEntity... dailyListEntity) {
-        return dailyListRepository.saveAll(asList(dailyListEntity));
-    }
-
     public void saveAll(AnnotationDocumentEntity... annotationDocuments) {
         stream(annotationDocuments).forEach(this::save);
     }
+
+    private void saveMediaList(List<MediaEntity> mediaList) {
+        mediaList.forEach(media -> {
+            if (media.getId() == null) {
+                save(media);
+            }
+        });
+    }
+
+    private void saveHearingList(List<HearingEntity> hearings) {
+        hearings.forEach(media -> {
+            if (media.getId() == null) {
+                save(media);
+            }
+        });
+    }
+
+    private void saveJudgeList(List<JudgeEntity> judges) {
+        judges.forEach(this::save);
+    }
+
 }

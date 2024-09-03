@@ -3,7 +3,6 @@ package uk.gov.hmcts.darts.audio.controller;
 import com.jayway.jsonpath.JsonPath;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -16,7 +15,6 @@ import uk.gov.hmcts.darts.audio.enums.MediaRequestStatus;
 import uk.gov.hmcts.darts.audiorequests.model.AudioRequestDetails;
 import uk.gov.hmcts.darts.audiorequests.model.AudioRequestType;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
-import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
@@ -26,7 +24,6 @@ import uk.gov.hmcts.darts.notification.enums.NotificationStatus;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 
 import java.net.URI;
-import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.util.Collections;
 import java.util.List;
@@ -37,17 +34,20 @@ import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static uk.gov.hmcts.darts.test.common.data.DefenceTestData.createDefenceForCaseWithName;
+import static uk.gov.hmcts.darts.test.common.data.DefendantTestData.createDefendantForCaseWithName;
+import static uk.gov.hmcts.darts.test.common.data.HearingTestData.hearingWith;
+import static uk.gov.hmcts.darts.test.common.data.ProsecutorTestData.createProsecutorForCaseWithName;
 
 @AutoConfigureMockMvc
 @Slf4j
 @SuppressWarnings({"PMD.ExcessiveImports"})
-@Disabled("Impacted by V1_363__not_null_constraints_part3.sql")
 class AudioRequestsControllerAddAudioRequestDownloadIntTest extends IntegrationBase {
 
     private static final URI ENDPOINT = URI.create("/audio-requests/download");
     private static final String HEARING_DATETIME = "2023-01-01T10:00:00";
     private static final String HEARING_DATE = "2023-01-01";
-    private static final String SOME_COURTHOUSE = "some-courthouse";
+    private static final String SOME_COURTHOUSE = "SOME-COURTHOUSE";
     private static final String SOME_COURTROOM = "some-courtroom";
     private static final String SOME_CASE_NUMBER = "1";
     private static final String SOME_START_TIME = "2023-01-01T12:00:00Z";
@@ -68,17 +68,17 @@ class AudioRequestsControllerAddAudioRequestDownloadIntTest extends IntegrationB
 
     @BeforeEach
     void beforeEach() {
-        hearingEntity = dartsDatabase.givenTheDatabaseContainsCourtCaseWithHearingAndCourthouseWithRoom(
+        hearingEntity = hearingWith(
             SOME_CASE_NUMBER,
             SOME_COURTHOUSE,
             SOME_COURTROOM,
-            LocalDateTime.parse(HEARING_DATETIME)
+            HEARING_DATETIME
         );
-        CourtCaseEntity courtCase = hearingEntity.getCourtCase();
-        courtCase.addProsecutor("aProsecutor");
-        courtCase.addDefendant("aDefendant");
-        courtCase.addDefence("aDefence");
-        dartsDatabase.save(courtCase);
+        var courtCase = hearingEntity.getCourtCase();
+        courtCase.addProsecutor(createProsecutorForCaseWithName(courtCase, "aProsecutor"));
+        courtCase.addDefendant(createDefendantForCaseWithName(courtCase, "aDefendant"));
+        courtCase.addDefence(createDefenceForCaseWithName(courtCase, "aDefence"));
+        dartsPersistence.save(hearingEntity);
 
         testUser = dartsDatabase.getUserAccountStub()
             .createAuthorisedIntegrationTestUser(hearingEntity.getCourtroom().getCourthouse());

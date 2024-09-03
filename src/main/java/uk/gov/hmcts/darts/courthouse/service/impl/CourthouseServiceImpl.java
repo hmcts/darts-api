@@ -1,10 +1,10 @@
 package uk.gov.hmcts.darts.courthouse.service.impl;
 
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import uk.gov.hmcts.darts.audit.api.AuditApi;
 import uk.gov.hmcts.darts.authorisation.api.AuthorisationApi;
 import uk.gov.hmcts.darts.common.component.validation.BiValidator;
@@ -205,7 +205,7 @@ public class CourthouseServiceImpl implements CourthouseService {
     }
 
     private void checkCourthouseNameIsUnique(String courthouseName) {
-        Optional<CourthouseEntity> foundCourthouse = courthouseRepository.findByCourthouseNameIgnoreCase(courthouseName);
+        Optional<CourthouseEntity> foundCourthouse = courthouseRepository.findByCourthouseName(StringUtils.toRootUpperCase(courthouseName));
 
         if (foundCourthouse.isPresent()) {
             throw new DartsApiException(CourthouseApiError.COURTHOUSE_NAME_PROVIDED_ALREADY_EXISTS);
@@ -286,7 +286,7 @@ public class CourthouseServiceImpl implements CourthouseService {
         }
         if (courthouseOptional.isEmpty()) {
             //code not found, lookup name instead
-            courthouseOptional = courthouseRepository.findByCourthouseNameIgnoreCase(courthouseNameUC);
+            courthouseOptional = courthouseRepository.findByCourthouseName(courthouseNameUC);
             if (courthouseOptional.isEmpty()) {
                 throw new CourthouseNameNotFoundException(courthouseNameUC);
             }

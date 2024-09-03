@@ -21,6 +21,7 @@ import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
 import uk.gov.hmcts.darts.common.helper.SystemUserHelper;
 import uk.gov.hmcts.darts.common.repository.CourthouseRepository;
 import uk.gov.hmcts.darts.common.repository.HearingRepository;
+import uk.gov.hmcts.darts.common.service.CreateCoreObjectService;
 import uk.gov.hmcts.darts.common.service.RetrieveCoreObjectService;
 import uk.gov.hmcts.darts.common.util.DateConverterUtil;
 import uk.gov.hmcts.darts.dailylist.mapper.CitizenNameMapper;
@@ -46,6 +47,8 @@ class DailyListUpdaterTest {
     @Mock
     private RetrieveCoreObjectService retrieveCoreObjectService;
     @Mock
+    private CreateCoreObjectService createCoreObjectService;
+    @Mock
     private CourthouseRepository courthouseRepository;
     @Mock
     private HearingRepository hearingRepository;
@@ -68,7 +71,7 @@ class DailyListUpdaterTest {
     @BeforeEach
     void setUp() {
         ObjectMapper objectMapper = JsonMapper.builder().addModule(new JavaTimeModule()).build();
-        dailyListUpdater = new DailyListUpdater(retrieveCoreObjectService, courthouseRepository,
+        dailyListUpdater = new DailyListUpdater(retrieveCoreObjectService, createCoreObjectService, courthouseRepository,
                                                 hearingRepository, objectMapper, systemUserHelper,
                                                 currentTimeHelper, citizenNameMapper, citizenNameComparator);
     }
@@ -78,7 +81,7 @@ class DailyListUpdaterTest {
 
         var dailyListUser = new UserAccountEntity();
         when(systemUserHelper.getDailyListProcessorUser()).thenReturn(dailyListUser);
-        when(courthouseRepository.findByCourthouseNameIgnoreCase("SWANSEA")).thenReturn(Optional.of(new CourthouseEntity()));
+        when(courthouseRepository.findByCourthouseName("SWANSEA")).thenReturn(Optional.of(new CourthouseEntity()));
         HearingEntity hearing = new HearingEntity();
         CourtCaseEntity courtCase = new CourtCaseEntity();
         hearing.setCourtCase(courtCase);
@@ -98,7 +101,7 @@ class DailyListUpdaterTest {
         OffsetDateTime testTime = DateConverterUtil.toOffsetDateTime(HEARING_DATE);
         when(currentTimeHelper.currentOffsetDateTime()).thenReturn(testTime);
         when(systemUserHelper.getDailyListProcessorUser()).thenReturn(dailyListUser);
-        when(courthouseRepository.findByCourthouseNameIgnoreCase("SWANSEA")).thenReturn(Optional.of(new CourthouseEntity()));
+        when(courthouseRepository.findByCourthouseName("SWANSEA")).thenReturn(Optional.of(new CourthouseEntity()));
         HearingEntity hearing = new HearingEntity();
         CourtCaseEntity courtCase = new CourtCaseEntity();
         hearing.setCourtCase(courtCase);
