@@ -1329,4 +1329,40 @@ class AutomatedTaskServiceTest extends IntegrationPerClassBase {
         assertTrue(next.equals(LocalDateTime.of(2024, 9, 2, 20, 50)));
 
     }
+
+    @Test
+    void verifyCronExpressionRunsEveryHourAt15MinutesPastTheHour() {
+        CronExpression cronTrigger = CronExpression.parse("0 15 * * * *");
+
+        LocalDateTime next = cronTrigger.next(LocalDateTime.of(2024, 9, 1, 10, 14));
+        log.info("Next Execution Time: " + next);
+        assertTrue(next.equals(LocalDateTime.of(2024, 9, 1, 10, 15)));
+
+        next = cronTrigger.next(LocalDateTime.of(2024, 9, 1, 10, 16));
+        log.info("Next Execution Time: " + next);
+        assertTrue(next.equals(LocalDateTime.of(2024, 9, 1, 11, 15)));
+
+        next = cronTrigger.next(LocalDateTime.of(2024, 9, 1, 23, 59));
+        log.info("Next Execution Time: " + next);
+        assertTrue(next.equals(LocalDateTime.of(2024, 9, 2, 0, 15)));
+
+    }
+
+    @Test
+    void verifyCronExpressionRunsEvery5MinutesAt1MinutePast() {
+        CronExpression cronTrigger = CronExpression.parse("0 1/5 * * * *");
+
+        LocalDateTime next = cronTrigger.next(LocalDateTime.of(2024, 9, 1, 10, 15));
+        log.info("Next Execution Time: " + next);
+        assertTrue(next.equals(LocalDateTime.of(2024, 9, 1, 10, 16)));
+
+        next = cronTrigger.next(LocalDateTime.of(2024, 9, 1, 10, 16));
+        log.info("Next Execution Time: " + next);
+        assertTrue(next.equals(LocalDateTime.of(2024, 9, 1, 10, 21)));
+
+        next = cronTrigger.next(LocalDateTime.of(2024, 9, 1, 23, 59));
+        log.info("Next Execution Time: " + next);
+        assertTrue(next.equals(LocalDateTime.of(2024, 9, 2, 0, 1)));
+        //0 1/5 * * * *
+    }
 }
