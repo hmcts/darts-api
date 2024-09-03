@@ -17,6 +17,7 @@ import org.springframework.scheduling.config.ScheduledTask;
 import org.springframework.scheduling.config.ScheduledTaskHolder;
 import org.springframework.scheduling.config.Task;
 import org.springframework.scheduling.config.TriggerTask;
+import org.springframework.scheduling.support.CronExpression;
 import uk.gov.hmcts.darts.arm.component.AutomatedTaskProcessorFactory;
 import uk.gov.hmcts.darts.arm.service.ArmRetentionEventDateProcessor;
 import uk.gov.hmcts.darts.arm.service.CleanupArmResponseFilesService;
@@ -67,6 +68,7 @@ import uk.gov.hmcts.darts.task.status.AutomatedTaskStatus;
 import uk.gov.hmcts.darts.testutils.IntegrationPerClassBase;
 import uk.gov.hmcts.darts.transcriptions.service.TranscriptionsProcessor;
 
+import java.time.LocalDateTime;
 import java.util.Optional;
 import java.util.Set;
 
@@ -1264,5 +1266,67 @@ class AutomatedTaskServiceTest extends IntegrationPerClassBase {
 
         log.info("About to reload task {}", automatedTask.getTaskName());
         automatedTaskService.reloadTaskByName(automatedTask.getTaskName());
+    }
+
+    @Test
+    void verifyCronExpressionRunsBetween8pmAnd8amAt50MinutesPastTheHour() {
+        CronExpression cronTrigger = CronExpression.parse("0 50 20-23,0-7 * * *");
+
+        LocalDateTime next = cronTrigger.next(LocalDateTime.of(2024, 9, 1, 19, 49));
+        log.info("Next Execution Time: " + next);
+        assertTrue(next.equals(LocalDateTime.of(2024, 9, 1, 20, 50)));
+
+        next = cronTrigger.next(LocalDateTime.of(2024, 9, 1, 20, 49));
+        log.info("Next Execution Time: " + next);
+        assertTrue(next.equals(LocalDateTime.of(2024, 9, 1, 20, 50)));
+
+        next = cronTrigger.next(LocalDateTime.of(2024, 9, 1, 21, 49));
+        log.info("Next Execution Time: " + next);
+        assertTrue(next.equals(LocalDateTime.of(2024, 9, 1, 21, 50)));
+
+        next = cronTrigger.next(LocalDateTime.of(2024, 9, 1, 22, 49));
+        log.info("Next Execution Time: " + next);
+        assertTrue(next.equals(LocalDateTime.of(2024, 9, 1, 22, 50)));
+
+        next = cronTrigger.next(LocalDateTime.of(2024, 9, 1, 23, 49));
+        log.info("Next Execution Time: " + next);
+        assertTrue(next.equals(LocalDateTime.of(2024, 9, 1, 23, 50)));
+
+        next = cronTrigger.next(LocalDateTime.of(2024, 9, 2, 0, 49));
+        log.info("Next Execution Time: " + next);
+        assertTrue(next.equals(LocalDateTime.of(2024, 9, 2, 0, 50)));
+
+        next = cronTrigger.next(LocalDateTime.of(2024, 9, 2, 1, 49));
+        log.info("Next Execution Time: " + next);
+        assertTrue(next.equals(LocalDateTime.of(2024, 9, 2, 1, 50)));
+
+        next = cronTrigger.next(LocalDateTime.of(2024, 9, 2, 2, 49));
+        log.info("Next Execution Time: " + next);
+        assertTrue(next.equals(LocalDateTime.of(2024, 9, 2, 2, 50)));
+
+        next = cronTrigger.next(LocalDateTime.of(2024, 9, 2, 3, 49));
+        log.info("Next Execution Time: " + next);
+        assertTrue(next.equals(LocalDateTime.of(2024, 9, 2, 3, 50)));
+
+        next = cronTrigger.next(LocalDateTime.of(2024, 9, 2, 4, 49));
+        log.info("Next Execution Time: " + next);
+        assertTrue(next.equals(LocalDateTime.of(2024, 9, 2, 4, 50)));
+
+        next = cronTrigger.next(LocalDateTime.of(2024, 9, 2, 5, 49));
+        log.info("Next Execution Time: " + next);
+        assertTrue(next.equals(LocalDateTime.of(2024, 9, 2, 5, 50)));
+
+        next = cronTrigger.next(LocalDateTime.of(2024, 9, 2, 6, 49));
+        log.info("Next Execution Time: " + next);
+        assertTrue(next.equals(LocalDateTime.of(2024, 9, 2, 6, 50)));
+
+        next = cronTrigger.next(LocalDateTime.of(2024, 9, 2, 7, 49));
+        log.info("Next Execution Time: " + next);
+        assertTrue(next.equals(LocalDateTime.of(2024, 9, 2, 7, 50)));
+
+        next = cronTrigger.next(LocalDateTime.of(2024, 9, 2, 8, 49));
+        log.info("Next Execution Time: " + next);
+        assertTrue(next.equals(LocalDateTime.of(2024, 9, 2, 20, 50)));
+
     }
 }
