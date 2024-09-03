@@ -1,6 +1,5 @@
 package uk.gov.hmcts.darts.audio.controller;
 
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -41,19 +40,19 @@ class AudioRequestsControllerDeleteAudioRequestIntTest extends IntegrationBase {
     protected TransientObjectDirectoryStub transientObjectDirectoryStub;
 
     @Test
-    @Disabled("Impacted by V1_362__constraint_transcription_part6.sql")
     void audioRequestDeleteShouldReturnSuccess() throws Exception {
         var blobId = UUID.randomUUID();
 
         var requestor = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
         var mediaRequestEntity = dartsDatabase.createAndLoadOpenMediaRequestEntity(requestor, AudioRequestType.DOWNLOAD);
-        var objectRecordStatusEntity = dartsDatabase.getObjectRecordStatusEntity(STORED);
-        dartsDatabase.getTransientObjectDirectoryRepository()
-            .saveAndFlush(transientObjectDirectoryStub.createTransientObjectDirectoryEntity(
-                mediaRequestEntity,
-                objectRecordStatusEntity,
-                blobId
-            ));
+        var objectRecordStatusEntity = dartsDataRetrieval.getObjectRecordStatusEntity(STORED);
+
+        var transientObjectDirectoryEntity = transientObjectDirectoryStub.createTransientObjectDirectoryEntity(
+            mediaRequestEntity,
+            objectRecordStatusEntity,
+            blobId
+        );
+        dartsDatabase.getTransientObjectDirectoryRepository().saveAndFlush(transientObjectDirectoryEntity);
 
         doNothing().when(authorisation).authoriseByMediaRequestId(
             mediaRequestEntity.getId(),

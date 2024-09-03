@@ -1,6 +1,7 @@
 package uk.gov.hmcts.darts.test.common.data;
 
 import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
+import uk.gov.hmcts.darts.common.entity.MediaEntity;
 
 import static java.util.UUID.randomUUID;
 import static uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum.UNSTRUCTURED;
@@ -22,6 +23,15 @@ public class ExternalObjectDirectoryTestData {
         externalObjectDirectory.setCreatedBy(userAccount);
         externalObjectDirectory.setLastModifiedBy(userAccount);
         return externalObjectDirectory;
+    }
+
+    public static ExternalObjectDirectoryEntity eodStoredInUnstructuredLocationForMedia(MediaEntity media) {
+        var eod = minimalExternalObjectDirectory();
+        eod.setMedia(media);
+        eod.setStatus(statusOf(STORED));
+        eod.setExternalLocationType(locationTypeOf(UNSTRUCTURED));
+        eod.setExternalLocation(randomUUID());
+        return eod;
     }
 
 

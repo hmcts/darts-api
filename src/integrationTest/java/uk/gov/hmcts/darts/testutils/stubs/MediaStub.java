@@ -1,8 +1,8 @@
 package uk.gov.hmcts.darts.testutils.stubs;
 
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
 import uk.gov.hmcts.darts.audio.repository.TransformedMediaSubStringQueryEnum;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
@@ -70,6 +70,7 @@ public class MediaStub {
                                                            courtroomStub, courthouseName, courtroomName, startTime, endTime, channel, mediaType);
     }
 
+    @Transactional
     public List<MediaEntity> createAndSaveSomeMedias() {
         return List.of(
             createMediaEntity("testCourthouse", "testCourtroom", MEDIA_1_START_TIME, MEDIA_1_END_TIME, 1),
@@ -83,6 +84,7 @@ public class MediaStub {
         );
     }
 
+    @Transactional
     public MediaEntity createAndSaveMedia() {
         return createMediaEntity("testCourthouse", "testCourtroom", MEDIA_1_START_TIME, MEDIA_1_END_TIME, 1);
     }
@@ -98,6 +100,7 @@ public class MediaStub {
      * @param count The number of  media objects that are to be generated
      * @return The list of generated media in chronological order
      */
+    @Transactional
     public List<MediaEntity> generateMediaEntities(int count) {
         List<MediaEntity> retMediaList = new ArrayList<>();
         OffsetDateTime hoursBefore = OffsetDateTime.now(ZoneOffset.UTC);
@@ -111,8 +114,7 @@ public class MediaStub {
             MediaEntity mediaEntity = this.createMediaEntity(courtName, caseNumber, hoursBefore, hoursAfter, 1);
             mediaRepository.save(mediaEntity);
 
-            hearingStub.createHearingWithMedia(courtName, courtName,
-                                               caseNumber, hearingDate, mediaEntity);
+            hearingStub.createHearingWithMedia(courtName, courtName, caseNumber, hearingDate, mediaEntity);
 
 
             hoursBefore = hoursBefore.minusHours(1);

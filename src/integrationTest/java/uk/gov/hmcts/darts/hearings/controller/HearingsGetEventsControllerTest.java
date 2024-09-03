@@ -28,7 +28,7 @@ import static uk.gov.hmcts.darts.test.common.data.CourtroomTestData.someMinimalC
 import static uk.gov.hmcts.darts.test.common.data.DefenceTestData.createDefenceForCase;
 import static uk.gov.hmcts.darts.test.common.data.DefendantTestData.createDefendantForCase;
 import static uk.gov.hmcts.darts.test.common.data.HearingTestData.createHearingWith;
-import static uk.gov.hmcts.darts.test.common.data.ProsecutorTestData.someMinimalProsecutorForCase;
+import static uk.gov.hmcts.darts.test.common.data.ProsecutorTestData.createProsecutorForCase;
 
 @AutoConfigureMockMvc
 @Slf4j
@@ -55,7 +55,7 @@ class HearingsGetEventsControllerTest extends IntegrationBase {
     void setUp() {
 
         var courtCase = createSomeMinimalCase();
-        courtCase.addProsecutor(someMinimalProsecutorForCase(courtCase));
+        courtCase.addProsecutor(createProsecutorForCase(courtCase));
         courtCase.addDefendant(createDefendantForCase(courtCase));
         courtCase.addDefence(createDefenceForCase(courtCase));
         var hearing = createHearingWith(courtCase, someMinimalCourtRoom(), LocalDate.parse(SOME_DATE));

@@ -14,7 +14,7 @@ import uk.gov.hmcts.darts.common.entity.TransientObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
 import uk.gov.hmcts.darts.common.service.bankholidays.BankHolidaysService;
-import uk.gov.hmcts.darts.test.common.data.AudioTestData;
+import uk.gov.hmcts.darts.test.common.data.MediaRequestTestData;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 import uk.gov.hmcts.darts.testutils.stubs.TransientObjectDirectoryStub;
 
@@ -78,7 +78,7 @@ class OutboundAudioDeleterProcessorTest extends IntegrationBase {
             HEARING_DATE
         );
 
-        MediaRequestEntity unchangedMediaRequest = AudioTestData.createCurrentMediaRequest(
+        MediaRequestEntity unchangedMediaRequest = MediaRequestTestData.createCurrentMediaRequest(
             hearing,
             requestor,
             OffsetDateTime.parse("2023-06-26T13:00:00Z"),
@@ -90,7 +90,7 @@ class OutboundAudioDeleterProcessorTest extends IntegrationBase {
             unchangedMediaRequest);
 
         //This media request should be deleted as its 3 days old
-        MediaRequestEntity currentMediaRequest = AudioTestData.createCurrentMediaRequest(
+        MediaRequestEntity currentMediaRequest = MediaRequestTestData.createCurrentMediaRequest(
             hearing,
             requestor,
             OffsetDateTime.parse("2023-06-26T13:00:00Z"),
@@ -136,7 +136,7 @@ class OutboundAudioDeleterProcessorTest extends IntegrationBase {
             HEARING_DATE
         );
 
-        MediaRequestEntity unchangedMediaRequest = AudioTestData.createCurrentMediaRequest(
+        MediaRequestEntity unchangedMediaRequest = MediaRequestTestData.createCurrentMediaRequest(
             hearing,
             requestor,
             OffsetDateTime.parse("2023-06-26T13:00:00Z"),
@@ -148,7 +148,7 @@ class OutboundAudioDeleterProcessorTest extends IntegrationBase {
             unchangedMediaRequest);
 
         //This media request should be deleted as its 3 days old
-        MediaRequestEntity currentMediaRequest = AudioTestData.createCurrentMediaRequest(
+        MediaRequestEntity currentMediaRequest = MediaRequestTestData.createCurrentMediaRequest(
             hearing,
             requestor,
             OffsetDateTime.parse("2023-06-26T13:00:00Z"),
@@ -196,7 +196,7 @@ class OutboundAudioDeleterProcessorTest extends IntegrationBase {
         );
 
         // Last accessed on a wednesday
-        MediaRequestEntity currentMediaRequest = AudioTestData.createCurrentMediaRequest(
+        MediaRequestEntity currentMediaRequest = MediaRequestTestData.createCurrentMediaRequest(
             hearing,
             requestor,
             OffsetDateTime.parse("2023-06-26T13:00:00Z"),
@@ -231,7 +231,7 @@ class OutboundAudioDeleterProcessorTest extends IntegrationBase {
         );
 
         // Last accessed on a 2023-10-20 friday
-        MediaRequestEntity currentMediaRequest = AudioTestData.createCurrentMediaRequest(
+        MediaRequestEntity currentMediaRequest = MediaRequestTestData.createCurrentMediaRequest(
             hearing,
             requestor,
             OffsetDateTime.parse("2023-06-26T13:00:00Z"),
@@ -266,7 +266,7 @@ class OutboundAudioDeleterProcessorTest extends IntegrationBase {
         );
 
 
-        MediaRequestEntity currentMediaRequest = AudioTestData.createCurrentMediaRequest(
+        MediaRequestEntity currentMediaRequest = MediaRequestTestData.createCurrentMediaRequest(
             hearing,
             requestor,
             OffsetDateTime.parse("2023-06-26T13:00:00Z"),
@@ -310,7 +310,7 @@ class OutboundAudioDeleterProcessorTest extends IntegrationBase {
 
 
         //last accessed monday
-        MediaRequestEntity currentMediaRequest = AudioTestData.createCurrentMediaRequest(
+        MediaRequestEntity currentMediaRequest = MediaRequestTestData.createCurrentMediaRequest(
             hearing,
             requestor,
             OffsetDateTime.parse("2023-06-26T13:00:00Z"),
@@ -355,7 +355,7 @@ class OutboundAudioDeleterProcessorTest extends IntegrationBase {
         );
 
         //last accessed sunday
-        MediaRequestEntity currentMediaRequest = AudioTestData.createCurrentMediaRequest(
+        MediaRequestEntity currentMediaRequest = MediaRequestTestData.createCurrentMediaRequest(
             hearing,
             requestor,
             OffsetDateTime.parse("2023-06-26T13:00:00Z"),
@@ -380,7 +380,7 @@ class OutboundAudioDeleterProcessorTest extends IntegrationBase {
 
 
         //last accessed saturday
-        currentMediaRequest = AudioTestData.createCurrentMediaRequest(
+        currentMediaRequest = MediaRequestTestData.createCurrentMediaRequest(
             hearing,
             requestor,
             OffsetDateTime.parse("2023-06-26T13:00:00Z"),
@@ -425,7 +425,7 @@ class OutboundAudioDeleterProcessorTest extends IntegrationBase {
 
 
         // Non Matching request
-        MediaRequestEntity currentMediaRequest2 = AudioTestData.createCurrentMediaRequest(
+        MediaRequestEntity currentMediaRequest2 = MediaRequestTestData.createCurrentMediaRequest(
             hearing,
             requestor,
             OffsetDateTime.parse("2023-06-26T13:00:00Z"),
@@ -439,7 +439,7 @@ class OutboundAudioDeleterProcessorTest extends IntegrationBase {
 
         createTransientDirectoryWithTransformedMediaNullLastAccessedDate(savedValue, OffsetDateTime.parse("2023-06-26T13:45:00Z"));
 
-        MediaRequestEntity currentMediaRequest3 = AudioTestData.createCurrentMediaRequest(
+        MediaRequestEntity currentMediaRequest3 = MediaRequestTestData.createCurrentMediaRequest(
             hearing,
             requestor,
             OffsetDateTime.parse("2023-06-26T13:00:00Z"),
@@ -452,7 +452,7 @@ class OutboundAudioDeleterProcessorTest extends IntegrationBase {
 
 
         // should match this
-        MediaRequestEntity mediaRequestThatShouldMatch = AudioTestData.createCurrentMediaRequest(
+        MediaRequestEntity mediaRequestThatShouldMatch = MediaRequestTestData.createCurrentMediaRequest(
             hearing,
             requestor,
             OffsetDateTime.parse("2023-06-26T13:00:00Z"),

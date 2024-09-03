@@ -30,6 +30,8 @@ public class MediaTestData {
         media.setMediaFormat("mp2");
         media.setMediaType(MEDIA_TYPE_DEFAULT);
         media.setCourtroom(someMinimalCourtRoom());
+        media.setIsCurrent(true);
+
         var userAccount = minimalUserAccount();
         media.setCreatedBy(userAccount);
         media.setLastModifiedBy(userAccount);
@@ -74,7 +76,6 @@ public class MediaTestData {
         mediaEntity.setTotalChannels(2);
         mediaEntity.setMediaFormat(mediaType);
         mediaEntity.setChecksum(getChecksum());
-        mediaEntity.setIsCurrent(true);
 
         return mediaEntity;
     }

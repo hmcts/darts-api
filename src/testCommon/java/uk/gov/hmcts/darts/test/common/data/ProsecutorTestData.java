@@ -25,6 +25,12 @@ public class ProsecutorTestData {
         return prosecutor;
     }
 
+    public static ProsecutorEntity createProsecutorForCase(CourtCaseEntity courtCase) {
+        var prosecutor = someMinimalProsecutor();
+        prosecutor.setCourtCase(courtCase);
+        return prosecutor;
+    }
+
     public static List<ProsecutorEntity> createListOfProsecutor(int quantity, CourtCaseEntity courtCase) {
         return rangeClosed(1, quantity)
             .mapToObj(index -> {
@@ -41,14 +47,8 @@ public class ProsecutorTestData {
     }
 
     public static ProsecutorEntity createProsecutorForCaseWithName(CourtCaseEntity courtCase, String name) {
-        var prosecutor = someMinimalProsecutorForCase(courtCase);
+        var prosecutor = createProsecutorForCase(courtCase);
         prosecutor.setName(name);
-        return prosecutor;
-    }
-
-    public static ProsecutorEntity someMinimalProsecutorForCase(CourtCaseEntity courtCase) {
-        var prosecutor = someMinimalProsecutor();
-        prosecutor.setCourtCase(courtCase);
         return prosecutor;
     }
 }
