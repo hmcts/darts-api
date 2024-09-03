@@ -1363,6 +1363,6 @@ class AutomatedTaskServiceTest extends IntegrationPerClassBase {
         next = cronTrigger.next(LocalDateTime.of(2024, 9, 1, 23, 59));
         log.info("Next Execution Time: " + next);
         assertTrue(next.equals(LocalDateTime.of(2024, 9, 2, 0, 1)));
-        //0 1/5 * * * *
+        
     }
 }
