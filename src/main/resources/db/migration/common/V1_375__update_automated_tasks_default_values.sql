@@ -64,7 +64,7 @@ where task_name = 'ProcessArmResponseFiles';
 
 -- Run every day at 22:37
 update automated_task set cron_expression = '0 37 22 * * *'
-where task_name = 'ProcessDailyList';
+where task_name = 'RemoveDuplicatedEvents';
 
 -- Run every day at 22:27
 update automated_task set cron_expression = '0 27 22 * * *'
