@@ -19,7 +19,7 @@ import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_RAW_DAT
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.NEW;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.STORED;
 
-public class UnstructuredToArmHelperIntTest extends IntegrationBase {
+class UnstructuredToArmHelperIntTest extends IntegrationBase {
 
     @Autowired
     private UnstructuredToArmHelper unstructuredToArmHelper;
