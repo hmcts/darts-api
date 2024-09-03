@@ -1,13 +1,13 @@
--- Run every hour at 10 mins past the hour between 8pm and 7am with batch size 5,000
-update automated_task set cron_expression = '0 10 20-22,23,0-7 * * *', batch_size = 5000
+-- Run every hour at 10 mins past the hour between 8pm and 8am with batch size 5,000
+update automated_task set cron_expression = '0 10 20-23,0-7 * * *', batch_size = 5000
 where task_name = 'CloseOldCases';
 
--- Run every hour at 30 mins past the hour between 8pm and 7am with batch size 5,000
-update automated_task set cron_expression = '0 30 20-22,23,0-7 * * *', batch_size = 5000
+-- Run every hour at 30 mins past the hour between 8pm and 8am with batch size 5,000
+update automated_task set cron_expression = '0 30 20-23,0-7 * * *', batch_size = 5000
 where task_name = 'GenerateCaseDocument';
 
--- Run every hour at 50 mins past the hour between 8pm and 7am with batch size 5,000
-update automated_task set cron_expression = '0 50 20-22,23,0-7 * * *', batch_size = 5000
+-- Run every hour at 50 mins past the hour between 8pm and 8am with batch size 5,000
+update automated_task set cron_expression = '0 50 20-23,0-7 * * *', batch_size = 5000
 where task_name = 'GenerateCaseDocumentForRetentionDate';
 
 -- Run every hour at 15 mins past the hour
