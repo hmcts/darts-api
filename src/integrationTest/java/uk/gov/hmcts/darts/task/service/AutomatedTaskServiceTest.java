@@ -1280,59 +1280,59 @@ class AutomatedTaskServiceTest extends IntegrationPerClassBase {
 
         LocalDateTime next = cronTrigger.next(LocalDateTime.of(2024, 9, 1, 19, 49));
         log.info("Next Execution Time: " + next);
-        assertTrue(next.equals(LocalDateTime.of(2024, 9, 1, 20, 50)));
+        assertEquals(LocalDateTime.of(2024, 9, 1, 20, 50), next);
 
         next = cronTrigger.next(LocalDateTime.of(2024, 9, 1, 20, 49));
         log.info("Next Execution Time: " + next);
-        assertTrue(next.equals(LocalDateTime.of(2024, 9, 1, 20, 50)));
+        assertEquals(LocalDateTime.of(2024, 9, 1, 20, 50), next);
 
         next = cronTrigger.next(LocalDateTime.of(2024, 9, 1, 21, 49));
         log.info("Next Execution Time: " + next);
-        assertTrue(next.equals(LocalDateTime.of(2024, 9, 1, 21, 50)));
+        assertEquals(LocalDateTime.of(2024, 9, 1, 21, 50), next);
 
         next = cronTrigger.next(LocalDateTime.of(2024, 9, 1, 22, 49));
         log.info("Next Execution Time: " + next);
-        assertTrue(next.equals(LocalDateTime.of(2024, 9, 1, 22, 50)));
+        assertEquals(LocalDateTime.of(2024, 9, 1, 22, 50), next);
 
         next = cronTrigger.next(LocalDateTime.of(2024, 9, 1, 23, 49));
         log.info("Next Execution Time: " + next);
-        assertTrue(next.equals(LocalDateTime.of(2024, 9, 1, 23, 50)));
+        assertEquals(LocalDateTime.of(2024, 9, 1, 23, 50), next);
 
         next = cronTrigger.next(LocalDateTime.of(2024, 9, 2, 0, 49));
         log.info("Next Execution Time: " + next);
-        assertTrue(next.equals(LocalDateTime.of(2024, 9, 2, 0, 50)));
+        assertEquals(LocalDateTime.of(2024, 9, 2, 0, 50), next);
 
         next = cronTrigger.next(LocalDateTime.of(2024, 9, 2, 1, 49));
         log.info("Next Execution Time: " + next);
-        assertTrue(next.equals(LocalDateTime.of(2024, 9, 2, 1, 50)));
+        assertEquals(LocalDateTime.of(2024, 9, 2, 1, 50), next);
 
         next = cronTrigger.next(LocalDateTime.of(2024, 9, 2, 2, 49));
         log.info("Next Execution Time: " + next);
-        assertTrue(next.equals(LocalDateTime.of(2024, 9, 2, 2, 50)));
+        assertEquals(LocalDateTime.of(2024, 9, 2, 2, 50), next);
 
         next = cronTrigger.next(LocalDateTime.of(2024, 9, 2, 3, 49));
         log.info("Next Execution Time: " + next);
-        assertTrue(next.equals(LocalDateTime.of(2024, 9, 2, 3, 50)));
+        assertEquals(LocalDateTime.of(2024, 9, 2, 3, 50), next);
 
         next = cronTrigger.next(LocalDateTime.of(2024, 9, 2, 4, 49));
         log.info("Next Execution Time: " + next);
-        assertTrue(next.equals(LocalDateTime.of(2024, 9, 2, 4, 50)));
+        assertEquals(LocalDateTime.of(2024, 9, 2, 4, 50), next);
 
         next = cronTrigger.next(LocalDateTime.of(2024, 9, 2, 5, 49));
         log.info("Next Execution Time: " + next);
-        assertTrue(next.equals(LocalDateTime.of(2024, 9, 2, 5, 50)));
+        assertEquals(LocalDateTime.of(2024, 9, 2, 5, 50), next);
 
         next = cronTrigger.next(LocalDateTime.of(2024, 9, 2, 6, 49));
         log.info("Next Execution Time: " + next);
-        assertTrue(next.equals(LocalDateTime.of(2024, 9, 2, 6, 50)));
+        assertEquals(LocalDateTime.of(2024, 9, 2, 6, 50), next);
 
         next = cronTrigger.next(LocalDateTime.of(2024, 9, 2, 7, 49));
         log.info("Next Execution Time: " + next);
-        assertTrue(next.equals(LocalDateTime.of(2024, 9, 2, 7, 50)));
+        assertEquals(LocalDateTime.of(2024, 9, 2, 7, 50), next);
 
         next = cronTrigger.next(LocalDateTime.of(2024, 9, 2, 8, 49));
         log.info("Next Execution Time: " + next);
-        assertTrue(next.equals(LocalDateTime.of(2024, 9, 2, 20, 50)));
+        assertEquals(LocalDateTime.of(2024, 9, 2, 20, 50), next);
 
     }
 
@@ -1342,15 +1342,15 @@ class AutomatedTaskServiceTest extends IntegrationPerClassBase {
 
         LocalDateTime next = cronTrigger.next(LocalDateTime.of(2024, 9, 1, 10, 14));
         log.info("Next Execution Time: " + next);
-        assertTrue(next.equals(LocalDateTime.of(2024, 9, 1, 10, 15)));
+        assertEquals(LocalDateTime.of(2024, 9, 1, 10, 15), next);
 
         next = cronTrigger.next(LocalDateTime.of(2024, 9, 1, 10, 16));
         log.info("Next Execution Time: " + next);
-        assertTrue(next.equals(LocalDateTime.of(2024, 9, 1, 11, 15)));
+        assertEquals(LocalDateTime.of(2024, 9, 1, 11, 15), next);
 
         next = cronTrigger.next(LocalDateTime.of(2024, 9, 1, 23, 59));
         log.info("Next Execution Time: " + next);
-        assertTrue(next.equals(LocalDateTime.of(2024, 9, 2, 0, 15)));
+        assertEquals(LocalDateTime.of(2024, 9, 2, 0, 15), next);
 
     }
 
@@ -1360,15 +1360,15 @@ class AutomatedTaskServiceTest extends IntegrationPerClassBase {
 
         LocalDateTime next = cronTrigger.next(LocalDateTime.of(2024, 9, 1, 10, 15));
         log.info("Next Execution Time: " + next);
-        assertTrue(next.equals(LocalDateTime.of(2024, 9, 1, 10, 16)));
+        assertEquals(LocalDateTime.of(2024, 9, 1, 10, 16), next);
 
         next = cronTrigger.next(LocalDateTime.of(2024, 9, 1, 10, 16));
         log.info("Next Execution Time: " + next);
-        assertTrue(next.equals(LocalDateTime.of(2024, 9, 1, 10, 21)));
+        assertEquals(LocalDateTime.of(2024, 9, 1, 10, 21), next);
 
         next = cronTrigger.next(LocalDateTime.of(2024, 9, 1, 23, 59));
         log.info("Next Execution Time: " + next);
-        assertTrue(next.equals(LocalDateTime.of(2024, 9, 2, 0, 1)));
+        assertEquals(LocalDateTime.of(2024, 9, 2, 0, 1), next);
 
         Set<ScheduledTask> scheduledTasks = scheduledTaskHolder.getScheduledTasks();
         displayTasks(scheduledTasks);
