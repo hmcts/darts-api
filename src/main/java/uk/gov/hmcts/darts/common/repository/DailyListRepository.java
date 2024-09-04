@@ -17,7 +17,7 @@ public interface DailyListRepository extends JpaRepository<DailyListEntity, Inte
     List<DailyListEntity> findByListingCourthouseAndStatusAndStartDateAndSourceOrderByPublishedTimestampDesc(
         String listingCourthouse, JobStatusType status, LocalDate date, String source);
 
-    List<DailyListEntity> findByStatusAndStartDateAndSourceOrderByPublishedTimestampDesc(
+    List<DailyListEntity> findByStatusAndStartDateAndSourceOrderByPublishedTimestampDescCreatedDateTimeDesc(
         JobStatusType status, LocalDate date, String source);
 
     List<DailyListEntity> deleteByStartDateBefore(LocalDate startDate);

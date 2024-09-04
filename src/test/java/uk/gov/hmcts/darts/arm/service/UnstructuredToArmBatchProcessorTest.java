@@ -147,7 +147,7 @@ class UnstructuredToArmBatchProcessorTest {
         //given
         when(armDataManagementConfiguration.getArmClient()).thenReturn("darts");
         when(externalObjectDirectoryRepository.findNotFinishedAndNotExceededRetryInStorageLocation(any(), any(), any(), any())).thenReturn(List.of(eod10));
-        when(externalObjectDirectoryRepository.findEodsForTransfer(any(), any(), any(), any(), any(), any())).thenReturn(emptyList());
+        when(externalObjectDirectoryRepository.findEodsNotInOtherStorage(any(), any(), any(), any())).thenReturn(emptyList());
         EOD_HELPER_MOCKS.givenIsEqualLocationReturns(true);
         when(unstructuredToArmProcessorConfiguration.getMaxResultSize()).thenReturn(1000);
         when(armDataManagementConfiguration.getMaxRetryAttempts()).thenReturn(3);
@@ -156,12 +156,10 @@ class UnstructuredToArmBatchProcessorTest {
         unstructuredToArmBatchProcessor.processUnstructuredToArm(5);
 
         //then
-        verify(externalObjectDirectoryRepository).findEodsForTransfer(
+        verify(externalObjectDirectoryRepository).findEodsNotInOtherStorage(
             storedStatus(),
             unstructuredLocation(),
-            storedStatus(),
-            armLocation(),
-            3, 999
+            armLocation(), 999
         );
 
         verify(logApi).armPushFailed(anyInt());
@@ -171,7 +169,7 @@ class UnstructuredToArmBatchProcessorTest {
     void testDetsArmClientConfigInBatchQuery() {
         //given
         when(armDataManagementConfiguration.getArmClient()).thenReturn("dets");
-        when(externalObjectDirectoryRepository.findEodsForTransfer(any(), any(), any(), any(), any(), any())).thenReturn(emptyList());
+        when(externalObjectDirectoryRepository.findEodsNotInOtherStorage(any(), any(), any(), any())).thenReturn(emptyList());
         when(unstructuredToArmProcessorConfiguration.getMaxResultSize()).thenReturn(1000);
         when(armDataManagementConfiguration.getMaxRetryAttempts()).thenReturn(3);
 
@@ -181,12 +179,10 @@ class UnstructuredToArmBatchProcessorTest {
         unstructuredToArmBatchProcessor.processUnstructuredToArm(5);
 
         //then
-        verify(externalObjectDirectoryRepository).findEodsForTransfer(
+        verify(externalObjectDirectoryRepository).findEodsNotInOtherStorage(
             storedStatus(),
             detsLocation(),
-            storedStatus(),
-            armLocation(),
-            3, 1000
+            armLocation(), 1000
         );
 
     }
@@ -205,7 +201,7 @@ class UnstructuredToArmBatchProcessorTest {
         //given
         when(armDataManagementConfiguration.getArmClient()).thenReturn("darts");
         when(externalObjectDirectoryRepository.findNotFinishedAndNotExceededRetryInStorageLocation(any(), any(), any(), any())).thenReturn(List.of(eod1, eod2));
-        when(externalObjectDirectoryRepository.findEodsForTransfer(any(), any(), any(), any(), any(), any())).thenReturn(emptyList());
+        when(externalObjectDirectoryRepository.findEodsNotInOtherStorage(any(), any(), any(), any())).thenReturn(emptyList());
         when(unstructuredToArmProcessorConfiguration.getMaxResultSize()).thenReturn(1000);
         when(armDataManagementConfiguration.getMaxRetryAttempts()).thenReturn(3);
 
@@ -220,12 +216,10 @@ class UnstructuredToArmBatchProcessorTest {
             any(ExternalLocationTypeEntity.class),
             eq(3),
             eq(Pageable.ofSize(1000)));
-        verify(externalObjectDirectoryRepository).findEodsForTransfer(
+        verify(externalObjectDirectoryRepository).findEodsNotInOtherStorage(
             storedStatus(),
             unstructuredLocation(),
-            storedStatus(),
-            armLocation(),
-            3, 998
+            armLocation(), 998
         );
 
         verifyNoMoreInteractions(logApi);
@@ -238,7 +232,7 @@ class UnstructuredToArmBatchProcessorTest {
         when(armDataManagementConfiguration.getManifestFilePrefix()).thenReturn("DARTS");
         when(armDataManagementConfiguration.getFileExtension()).thenReturn("a360");
         when(armDataManagementConfiguration.getTempBlobWorkspace()).thenReturn("/temp_workspace");
-        when(externalObjectDirectoryRepository.findEodsForTransfer(any(), any(), any(), any(), any(), any())).thenReturn(List.of(eod1));
+        when(externalObjectDirectoryRepository.findEodsNotInOtherStorage(any(), any(), any(), any())).thenReturn(List.of(eod1));
         when(unstructuredToArmProcessorConfiguration.getMaxResultSize()).thenReturn(1000);
         when(armDataManagementConfiguration.getMaxRetryAttempts()).thenReturn(3);
 

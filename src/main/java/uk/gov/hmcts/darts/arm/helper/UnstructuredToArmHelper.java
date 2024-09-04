@@ -58,9 +58,9 @@ public class UnstructuredToArmHelper {
             Pageable.ofSize(maxResultSize)
         );
 
-        var pendingUnstructuredExternalObjectDirectoryEntities = externalObjectDirectoryRepository.findEodsForTransfer(
+        var pendingUnstructuredExternalObjectDirectoryEntities = externalObjectDirectoryRepository.findEodsNotInOtherStorage(
             EodHelper.storedStatus(), sourceLocation,
-            EodHelper.storedStatus(), EodHelper.armLocation(), 3,
+            EodHelper.armLocation(),
             maxResultSize - failedArmExternalObjectDirectoryEntities.size());
 
         List<ExternalObjectDirectoryEntity> returnList = new ArrayList<>();
@@ -84,11 +84,10 @@ public class UnstructuredToArmHelper {
 
     public void updateExternalObjectDirectoryStatusToFailed(ExternalObjectDirectoryEntity externalObjectDirectoryEntity,
                                                             ObjectRecordStatusEntity objectRecordStatus, UserAccountEntity userAccount) {
-        updateTransferAttempts(externalObjectDirectoryEntity);
         updateExternalObjectDirectoryStatus(externalObjectDirectoryEntity, objectRecordStatus, userAccount);
     }
 
-    private void updateTransferAttempts(ExternalObjectDirectoryEntity externalObjectDirectoryEntity) {
+    public void incrementTransferAttempts(ExternalObjectDirectoryEntity externalObjectDirectoryEntity) {
         int currentNumberOfAttempts = ObjectUtils.firstNonNull(externalObjectDirectoryEntity.getTransferAttempts(), 0);
         int newNumberOfAttempts = currentNumberOfAttempts + 1;
         log.debug(
@@ -200,7 +199,7 @@ public class UnstructuredToArmHelper {
 
     public void updateExternalObjectDirectoryFailedTransferAttempts(ExternalObjectDirectoryEntity externalObjectDirectoryEntity,
                                                                     UserAccountEntity userAccount) {
-        updateTransferAttempts(externalObjectDirectoryEntity);
+        incrementTransferAttempts(externalObjectDirectoryEntity);
         externalObjectDirectoryEntity.setLastModifiedBy(userAccount);
         externalObjectDirectoryEntity.setLastModifiedDateTime(OffsetDateTime.now());
         externalObjectDirectoryRepository.saveAndFlush(externalObjectDirectoryEntity);
