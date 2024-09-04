@@ -965,7 +965,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/AdminMarkedForDeletionResponse'
+                  $ref: '#/components/schemas/AdminMarkedForDeletionResponseItem'
 
 components:
   schemas:
@@ -1763,7 +1763,7 @@ components:
           type: date
           description: 'The case number'
 
-    AdminMarkedForDeletionResponse:
+    AdminMarkedForDeletionResponseItem:
       type: object
       properties:
         transcription_document_id:

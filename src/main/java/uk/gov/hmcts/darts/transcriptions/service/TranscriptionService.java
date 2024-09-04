@@ -6,7 +6,7 @@ import uk.gov.hmcts.darts.common.entity.TranscriptionEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionStatusEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionWorkflowEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
-import uk.gov.hmcts.darts.transcriptions.model.AdminMarkedForDeletionResponse;
+import uk.gov.hmcts.darts.transcriptions.model.AdminMarkedForDeletionResponseItem;
 import uk.gov.hmcts.darts.transcriptions.model.AttachTranscriptResponse;
 import uk.gov.hmcts.darts.transcriptions.model.DownloadTranscriptResponse;
 import uk.gov.hmcts.darts.transcriptions.model.GetTranscriptionByIdResponse;
@@ -73,6 +73,6 @@ public interface TranscriptionService {
 
     List<Integer> rollbackUserTranscriptions(UserAccountEntity entity);
 
-    List<AdminMarkedForDeletionResponse> adminGetTranscriptionDocumentsMarkedForDeletion();
+    List<AdminMarkedForDeletionResponseItem> adminGetTranscriptionDocumentsMarkedForDeletion();
 
 }

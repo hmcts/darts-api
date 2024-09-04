@@ -26,7 +26,7 @@ import uk.gov.hmcts.darts.testutils.stubs.TranscriptionDocumentStub;
 import uk.gov.hmcts.darts.testutils.stubs.TranscriptionStub;
 import uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum;
 import uk.gov.hmcts.darts.transcriptions.exception.TranscriptionApiError;
-import uk.gov.hmcts.darts.transcriptions.model.AdminMarkedForDeletionResponse;
+import uk.gov.hmcts.darts.transcriptions.model.AdminMarkedForDeletionResponseItem;
 import uk.gov.hmcts.darts.transcriptions.model.GetTranscriptionDetailAdminResponse;
 import uk.gov.hmcts.darts.transcriptions.model.GetTranscriptionDocumentByIdResponse;
 import uk.gov.hmcts.darts.transcriptions.model.Problem;
@@ -561,9 +561,9 @@ class TranscriptionControllerAdminGetTranscriptionIntTest extends IntegrationBas
             .andExpect(status().is2xxSuccessful())
             .andReturn();
 
-        AdminMarkedForDeletionResponse[] responses = objectMapper.readValue(
+        AdminMarkedForDeletionResponseItem[] responses = objectMapper.readValue(
             mvcResult.getResponse().getContentAsString(),
-            AdminMarkedForDeletionResponse[].class
+            AdminMarkedForDeletionResponseItem[].class
         );
         assertEquals(0, responses.length);
         assertEquals(200, mvcResult.getResponse().getStatus());

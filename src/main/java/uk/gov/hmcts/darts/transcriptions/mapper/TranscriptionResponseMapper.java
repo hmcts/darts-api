@@ -23,7 +23,8 @@ import uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum;
 import uk.gov.hmcts.darts.transcriptions.exception.TranscriptionApiError;
 import uk.gov.hmcts.darts.transcriptions.model.AdminAction;
 import uk.gov.hmcts.darts.transcriptions.model.AdminActionResponse;
-import uk.gov.hmcts.darts.transcriptions.model.AdminMarkedForDeletionResponse;
+import uk.gov.hmcts.darts.transcriptions.model.AdminMarkedForDeletionResponseItem;
+import uk.gov.hmcts.darts.transcriptions.model.AdminMarkedForDeletionResponseItem;
 import uk.gov.hmcts.darts.transcriptions.model.CaseResponseDetails;
 import uk.gov.hmcts.darts.transcriptions.model.CourthouseResponseDetails;
 import uk.gov.hmcts.darts.transcriptions.model.CourtroomResponseDetails;
@@ -421,30 +422,32 @@ public class TranscriptionResponseMapper {
         return response;
     }
 
-    public AdminMarkedForDeletionResponse mapTranscriptionDocumentMarkedForDeletion(TranscriptionDocumentEntity entity) {
-        AdminMarkedForDeletionResponse response = new AdminMarkedForDeletionResponse();
+    public AdminMarkedForDeletionResponseItem mapTranscriptionDocumentMarkedForDeletion(TranscriptionDocumentEntity transcriptionDocumentEntity) {
+        AdminMarkedForDeletionResponseItem response = new AdminMarkedForDeletionResponseItem();
 
-        response.setTranscriptionDocumentId(entity.getId());
+        response.setTranscriptionDocumentId(transcriptionDocumentEntity.getId());
 
-        AdminAction adminAction = buildAdminAction(entity);
+        AdminAction adminAction = buildAdminAction(transcriptionDocumentEntity);
 
         // if the hearing is null then dont read any associated information
-        if (entity.getTranscription().getHearing() != null) {
+        if (transcriptionDocumentEntity.getTranscription().getHearing() != null) {
             CaseResponseDetails caseResponseDetails = new CaseResponseDetails();
-            caseResponseDetails.setId(entity.getTranscription().getHearing().getCourtCase().getId());
-            caseResponseDetails.setCaseNumber(entity.getTranscription().getHearing().getCourtCase().getCaseNumber());
+            caseResponseDetails.setId(transcriptionDocumentEntity.getTranscription().getHearing().getCourtCase().getId());
+            caseResponseDetails.setCaseNumber(transcriptionDocumentEntity.getTranscription().getHearing().getCourtCase().getCaseNumber());
+
+            HearingEntity hearingEntity = transcriptionDocumentEntity.getTranscription().getHearing();
 
             CourthouseResponseDetails courthouseResponseDetails = new CourthouseResponseDetails();
-            courthouseResponseDetails.setId(entity.getTranscription().getHearing().getCourtroom().getCourthouse().getId());
-            courthouseResponseDetails.setDisplayName(entity.getTranscription().getHearing().getCourtroom().getCourthouse().getDisplayName());
+            courthouseResponseDetails.setId(hearingEntity.getCourtroom().getCourthouse().getId());
+            courthouseResponseDetails.setDisplayName(hearingEntity.getCourtroom().getCourthouse().getDisplayName());
 
             CourtroomResponseDetails courtroomResponseDetails = new CourtroomResponseDetails();
-            courtroomResponseDetails.setId(entity.getTranscription().getHearing().getCourtroom().getId());
-            courtroomResponseDetails.setName(entity.getTranscription().getHearing().getCourtroom().getName());
+            courtroomResponseDetails.setId(hearingEntity.getCourtroom().getId());
+            courtroomResponseDetails.setName(hearingEntity.getCourtroom().getName());
 
             HearingResponseDetails hearingResponseDetails = new HearingResponseDetails();
-            hearingResponseDetails.setId(entity.getTranscription().getHearing().getId());
-            hearingResponseDetails.setHearingDate(entity.getTranscription().getHearing().getHearingDate());
+            hearingResponseDetails.setId(transcriptionDocumentEntity.getTranscription().getHearing().getId());
+            hearingResponseDetails.setHearingDate(hearingEntity.getHearingDate());
 
             response.setCourthouse(courthouseResponseDetails);
             response.setCourtroom(courtroomResponseDetails);
@@ -453,11 +456,11 @@ public class TranscriptionResponseMapper {
         }
 
         TranscriptionResponseDetails transcriptionResponseDetails = new TranscriptionResponseDetails();
-        transcriptionResponseDetails.setId(entity.getTranscription().getId());
+        transcriptionResponseDetails.setId(transcriptionDocumentEntity.getTranscription().getId());
 
         response.setAdminAction(adminAction);
         response.setTranscription(transcriptionResponseDetails);
-        response.setTranscriptionDocumentId(entity.getId());
+        response.setTranscriptionDocumentId(transcriptionDocumentEntity.getId());
 
         return response;
     }

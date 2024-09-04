@@ -1,9 +1,10 @@
 {
 	"info": {
-		"_postman_id": "c83ecb2b-3eff-4f2a-b28f-03fee488e5a3",
+		"_postman_id": "2bdedd4f-e111-4585-85a6-da8bc92ac814",
 		"name": "ModernisedDarts",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
-		"_exporter_id": "30362290"
+		"_exporter_id": "15829068",
+		"_collection_link": "https://speeding-resonance-716248.postman.co/workspace/darts-workspace2~8cfe3af4-319e-46ad-920e-2ba6cc1f253b/collection/15829068-2bdedd4f-e111-4585-85a6-da8bc92ac814?action=share&source=collection_link&creator=15829068"
 	},
 	"item": [
 		{
@@ -2578,6 +2579,37 @@
 									"key": "transcription_id",
 									"value": "61"
 								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/admin/transcription-documents/marked-for-deletion",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "accept",
+								"value": "*/*"
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": []
+						},
+						"url": {
+							"raw": "{{serverUrl}}/admin/transcription-documents/marked-for-deletion",
+							"host": [
+								"{{serverUrl}}"
+							],
+							"path": [
+								"admin",
+								"transcription-documents",
+								"marked-for-deletion"
 							]
 						}
 					},

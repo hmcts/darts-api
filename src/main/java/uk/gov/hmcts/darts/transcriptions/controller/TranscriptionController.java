@@ -16,7 +16,7 @@ import uk.gov.hmcts.darts.authorisation.util.AuthorisationUnitOfWork;
 import uk.gov.hmcts.darts.common.component.validation.Validator;
 import uk.gov.hmcts.darts.common.enums.SecurityRoleEnum;
 import uk.gov.hmcts.darts.transcriptions.http.api.TranscriptionApi;
-import uk.gov.hmcts.darts.transcriptions.model.AdminMarkedForDeletionResponse;
+import uk.gov.hmcts.darts.transcriptions.model.AdminMarkedForDeletionResponseItem;
 import uk.gov.hmcts.darts.transcriptions.model.AttachTranscriptResponse;
 import uk.gov.hmcts.darts.transcriptions.model.DownloadTranscriptResponse;
 import uk.gov.hmcts.darts.transcriptions.model.GetTranscriptionByIdResponse;
@@ -282,8 +282,8 @@ public class TranscriptionController implements TranscriptionApi {
     @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
     @Authorisation(contextId = ANY_ENTITY_ID,
         globalAccessSecurityRoles = {SUPER_ADMIN})
-    public ResponseEntity<List<AdminMarkedForDeletionResponse>> getTranscriptionDocumentsMarkedForDeletion() {
-        List<AdminMarkedForDeletionResponse> response
+    public ResponseEntity<List<AdminMarkedForDeletionResponseItem>> getTranscriptionDocumentsMarkedForDeletion() {
+        List<AdminMarkedForDeletionResponseItem> response
             = transcriptionService.adminGetTranscriptionDocumentsMarkedForDeletion();
         return new ResponseEntity<>(response, HttpStatus.OK);
     }

@@ -29,7 +29,7 @@ import uk.gov.hmcts.darts.test.common.data.TranscriptionDocumentTestData;
 import uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum;
 import uk.gov.hmcts.darts.transcriptions.enums.TranscriptionTypeEnum;
 import uk.gov.hmcts.darts.transcriptions.exception.TranscriptionApiError;
-import uk.gov.hmcts.darts.transcriptions.model.AdminMarkedForDeletionResponse;
+import uk.gov.hmcts.darts.transcriptions.model.AdminMarkedForDeletionResponseItem;
 import uk.gov.hmcts.darts.transcriptions.model.GetTranscriptionByIdResponse;
 import uk.gov.hmcts.darts.transcriptions.model.GetTranscriptionDetailAdminResponse;
 import uk.gov.hmcts.darts.transcriptions.model.GetTranscriptionDocumentByIdResponse;
@@ -738,7 +738,7 @@ class TranscriptionResponseMapperTest {
 
         TranscriptionDocumentEntity documentEntity = TranscriptionDocumentTestData.complexTranscriptionDocument();
 
-        AdminMarkedForDeletionResponse response = transcriptionResponseMapper.mapTranscriptionDocumentMarkedForDeletion(documentEntity);
+        AdminMarkedForDeletionResponseItem response = transcriptionResponseMapper.mapTranscriptionDocumentMarkedForDeletion(documentEntity);
 
         ObjectAdminActionEntity adminActionEntity = documentEntity.getAdminActions().get(0);
         assertEquals(documentEntity.getId(), response.getTranscriptionDocumentId());
