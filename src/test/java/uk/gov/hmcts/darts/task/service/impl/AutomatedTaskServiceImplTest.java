@@ -1,13 +1,12 @@
 package uk.gov.hmcts.darts.task.service.impl;
 
 import lombok.extern.slf4j.Slf4j;
-import net.javacrumbs.shedlock.core.LockConfiguration;
-import net.javacrumbs.shedlock.core.LockProvider;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.Trigger;
 import org.springframework.scheduling.config.ScheduledTask;
@@ -22,10 +21,9 @@ import uk.gov.hmcts.darts.task.runner.AutomatedTask;
 import uk.gov.hmcts.darts.task.runner.impl.AbstractLockableAutomatedTask;
 import uk.gov.hmcts.darts.task.runner.impl.DailyListAutomatedTask;
 import uk.gov.hmcts.darts.task.runner.impl.ProcessDailyListAutomatedTask;
+import uk.gov.hmcts.darts.task.service.LockService;
 import uk.gov.hmcts.darts.task.status.AutomatedTaskStatus;
 
-import java.time.Duration;
-import java.time.Instant;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
@@ -52,9 +50,6 @@ class AutomatedTaskServiceImplTest {
     private AutomatedTaskRepository mockAutomatedTaskRepository;
 
     @Mock
-    private LockProvider mockLockProvider;
-
-    @Mock
     private TaskScheduler taskScheduler;
 
     @Mock
@@ -66,16 +61,17 @@ class AutomatedTaskServiceImplTest {
     @Mock
     private LogApi logApi;
 
+    @Autowired
+    private LockService lockService;
+
     @Test
     void getAutomatedTaskUsingProcessDailyListAutomatedTask() {
         AutomatedTask processDailyListAutomatedTask = new ProcessDailyListAutomatedTask(
             mockAutomatedTaskRepository,
-            mockLockProvider,
             mockAutomatedTaskConfigurationProperties,
-            logApi
+            logApi,
+            lockService
         );
-        assertEquals(Duration.ofSeconds(20), processDailyListAutomatedTask.getLockConfiguration().getLockAtLeastFor());
-        assertEquals(Duration.ofSeconds(600), processDailyListAutomatedTask.getLockConfiguration().getLockAtMostFor());
 
         AutomatedTaskEntity expectedAutomatedTaskEntity = createAutomatedTaskEntity(
             processDailyListAutomatedTask,
@@ -93,9 +89,9 @@ class AutomatedTaskServiceImplTest {
     void getAutomatedTaskCronExpressionWithNullCronExpression() {
         AutomatedTask processDailyListAutomatedTask = new ProcessDailyListAutomatedTask(
             mockAutomatedTaskRepository,
-            mockLockProvider,
             mockAutomatedTaskConfigurationProperties,
-            logApi
+            logApi,
+            lockService
         );
         AutomatedTaskEntity expectedAutomatedTaskEntity = createAutomatedTaskEntity(
             processDailyListAutomatedTask,
@@ -119,9 +115,9 @@ class AutomatedTaskServiceImplTest {
 
         AbstractLockableAutomatedTask automatedTask = new AbstractLockableAutomatedTask(
             mockAutomatedTaskRepository,
-            mockLockProvider,
             mockAutomatedTaskConfigurationProperties,
-            logApi) {
+            logApi,
+            lockService) {
             @Override
             protected void runTask() {
             }
@@ -153,9 +149,9 @@ class AutomatedTaskServiceImplTest {
 
         AbstractLockableAutomatedTask automatedTask = new AbstractLockableAutomatedTask(
             mockAutomatedTaskRepository,
-            mockLockProvider,
             mockAutomatedTaskConfigurationProperties,
-            logApi) {
+            logApi,
+            lockService) {
             @Override
             protected void runTask() {
             }
@@ -187,9 +183,9 @@ class AutomatedTaskServiceImplTest {
 
         var automatedTask = new AbstractLockableAutomatedTask(
             mockAutomatedTaskRepository,
-            mockLockProvider,
             mockAutomatedTaskConfigurationProperties,
-            logApi) {
+            logApi,
+            lockService) {
             @Override
             protected void runTask() {
             }
@@ -220,9 +216,9 @@ class AutomatedTaskServiceImplTest {
 
         var failingAutomatedTask = new AbstractLockableAutomatedTask(
             mockAutomatedTaskRepository,
-            mockLockProvider,
             mockAutomatedTaskConfigurationProperties,
-            logApi) {
+            logApi,
+            lockService) {
             @Override
             protected void runTask() {
             }
@@ -277,9 +273,9 @@ class AutomatedTaskServiceImplTest {
     private TriggerTask getTriggerTask() {
         AbstractLockableAutomatedTask automatedTask = new AbstractLockableAutomatedTask(
             mockAutomatedTaskRepository,
-            mockLockProvider,
             mockAutomatedTaskConfigurationProperties,
-            logApi) {
+            logApi,
+            lockService) {
             @Override
             protected void runTask() {
             }
@@ -320,9 +316,9 @@ class AutomatedTaskServiceImplTest {
 
         AbstractLockableAutomatedTask automatedTask = new AbstractLockableAutomatedTask(
             mockAutomatedTaskRepository,
-            mockLockProvider,
             mockAutomatedTaskConfigurationProperties,
-            logApi) {
+            logApi,
+            lockService) {
             @Override
             public String getTaskName() {
                 return "Test";
@@ -366,10 +362,6 @@ class AutomatedTaskServiceImplTest {
         return new AutomatedTask() {
             private String lastCronExpression = "*/10 * * * * *";
 
-            private static Duration getLockAtLeastFor() {
-                return Duration.ofSeconds(10);
-            }
-
             @Override
             public String getTaskName() {
                 return taskName;
@@ -381,11 +373,6 @@ class AutomatedTaskServiceImplTest {
             }
 
             @Override
-            public LockConfiguration getLockConfiguration() {
-                return new LockConfiguration(Instant.now(), getTaskName(), getLockAtMostFor(), getLockAtLeastFor());
-            }
-
-            @Override
             public String getLastCronExpression() {
                 return lastCronExpression;
             }
@@ -393,10 +380,6 @@ class AutomatedTaskServiceImplTest {
             @Override
             public void setLastCronExpression(String cronExpression) {
                 this.lastCronExpression = cronExpression;
-            }
-
-            private Duration getLockAtMostFor() {
-                return Duration.ofSeconds(20);
             }
 
             @Override

@@ -1,6 +1,5 @@
 package uk.gov.hmcts.darts.task.runner.impl;
 
-import net.javacrumbs.shedlock.core.LockProvider;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
@@ -12,6 +11,7 @@ import uk.gov.hmcts.darts.common.entity.AutomatedTaskEntity;
 import uk.gov.hmcts.darts.common.repository.AutomatedTaskRepository;
 import uk.gov.hmcts.darts.log.api.LogApi;
 import uk.gov.hmcts.darts.task.config.AutomatedTaskConfigurationProperties;
+import uk.gov.hmcts.darts.task.service.LockService;
 
 import java.util.Optional;
 
@@ -22,11 +22,11 @@ class UnstructuredToArmAutomatedTaskTest {
     @Mock
     private AutomatedTaskRepository automatedTaskRepository;
     @Mock
-    private LockProvider lockProvider;
-    @Mock
     private AutomatedTaskConfigurationProperties automatedTaskConfigurationProperties;
     @Mock
     private LogApi logApi;
+    @Mock
+    private LockService lockService;
     @Mock
     UnstructuredToArmProcessorImpl unstructuredToArmProcessor;
     @Mock
@@ -41,11 +41,11 @@ class UnstructuredToArmAutomatedTaskTest {
         UnstructuredToArmAutomatedTask unstructuredToArmAutomatedTask =
             new UnstructuredToArmAutomatedTask(
                 automatedTaskRepository,
-                lockProvider,
                 automatedTaskConfigurationProperties,
                 unstructuredToArmBatchProcessor,
                 unstructuredToArmProcessor,
-                logApi
+                logApi,
+                lockService
             );
 
         when(automatedTaskRepository.findByTaskName("UnstructuredToArmDataStore")).thenReturn(Optional.of(automatedTask));
@@ -66,11 +66,11 @@ class UnstructuredToArmAutomatedTaskTest {
         UnstructuredToArmAutomatedTask unstructuredToArmAutomatedTask =
             new UnstructuredToArmAutomatedTask(
                 automatedTaskRepository,
-                lockProvider,
                 automatedTaskConfigurationProperties,
                 unstructuredToArmBatchProcessor,
                 unstructuredToArmProcessor,
-                logApi
+                logApi,
+                lockService
             );
 
         when(automatedTaskRepository.findByTaskName("UnstructuredToArmDataStore")).thenReturn(Optional.of(automatedTask));

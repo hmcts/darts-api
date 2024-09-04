@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.darts.authorisation.annotation.Authorisation;
 import uk.gov.hmcts.darts.common.config.ObjectMapperConfig;
+import uk.gov.hmcts.darts.common.entity.AutomatedTaskEntity;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.dailylist.exception.DailyListError;
 import uk.gov.hmcts.darts.dailylist.http.api.DailyListsApi;
@@ -25,7 +26,9 @@ import uk.gov.hmcts.darts.dailylist.model.PostDailyListResponse;
 import uk.gov.hmcts.darts.dailylist.service.DailyListProcessor;
 import uk.gov.hmcts.darts.dailylist.service.DailyListService;
 import uk.gov.hmcts.darts.dailylist.validation.DailyListPostValidator;
+import uk.gov.hmcts.darts.task.api.AutomatedTasksApi;
 
+import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
 import static uk.gov.hmcts.darts.authorisation.constants.AuthorisationConstants.SECURITY_SCHEMES_BEARER_AUTH;
@@ -33,11 +36,9 @@ import static uk.gov.hmcts.darts.authorisation.enums.ContextIdEnum.ANY_ENTITY_ID
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.CPP;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.SUPER_USER;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.XHIBIT;
+import static uk.gov.hmcts.darts.dailylist.exception.DailyListError.DAILY_LIST_ALREADY_PROCESSING;
+import static uk.gov.hmcts.darts.task.api.AutomatedTaskName.PROCESS_DAILY_LIST_TASK_NAME;
 
-/**
- * Default endpoints per application.
- */
-@SuppressWarnings({"checkstyle.LineLengthCheck"})
 @RestController
 @RequiredArgsConstructor
 @ConditionalOnProperty(prefix = "darts", name = "api-pod", havingValue = "true")
@@ -46,6 +47,7 @@ public class DailyListController implements DailyListsApi {
     private final DailyListService dailyListService;
     private final DailyListProcessor processor;
     private final DailyListPostRequestMapper dailyListPostRequestMapper;
+    private final AutomatedTasksApi automatedTasksApi;
 
     ObjectMapperConfig objectMapperConfig = new ObjectMapperConfig();
     ObjectMapper objectMapper = objectMapperConfig.objectMapper();
@@ -93,12 +95,12 @@ public class DailyListController implements DailyListsApi {
     @Authorisation(contextId = ANY_ENTITY_ID,
         globalAccessSecurityRoles = {SUPER_USER})
     public ResponseEntity<Void> dailylistsRunPost(String listingCourthouse) {
-        if (listingCourthouse == null) {
-            CompletableFuture.runAsync(processor::processAllDailyLists);
-        } else {
-            CompletableFuture.runAsync(() -> processor.processAllDailyListForListingCourthouse(listingCourthouse));
+        var taskName = PROCESS_DAILY_LIST_TASK_NAME.getTaskName();
+        Optional<AutomatedTaskEntity> automatedTaskEntity = automatedTasksApi.getTaskByName(taskName);
+        if (automatedTaskEntity.isPresent() && automatedTasksApi.isLocked(automatedTaskEntity.get())) {
+            throw new DartsApiException(DAILY_LIST_ALREADY_PROCESSING);
         }
-
+        CompletableFuture.runAsync(() -> processor.processAllDailyListsWithLock(listingCourthouse));
         return new ResponseEntity<>(HttpStatus.ACCEPTED);
     }
 }
