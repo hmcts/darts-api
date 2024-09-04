@@ -10,6 +10,7 @@ import org.springframework.boot.test.mock.mockito.SpyBean;
 import uk.gov.hmcts.darts.arm.api.ArmDataManagementApi;
 import uk.gov.hmcts.darts.arm.component.ArchiveRecordFileGenerator;
 import uk.gov.hmcts.darts.arm.config.ArmDataManagementConfiguration;
+import uk.gov.hmcts.darts.arm.config.UnstructuredToArmProcessorConfiguration;
 import uk.gov.hmcts.darts.arm.mapper.MediaArchiveRecordMapper;
 import uk.gov.hmcts.darts.arm.service.ArchiveRecordService;
 import uk.gov.hmcts.darts.arm.service.ExternalObjectDirectoryService;
@@ -61,7 +62,6 @@ import static uk.gov.hmcts.darts.common.util.EodHelper.failedArmRawDataStatus;
 import static uk.gov.hmcts.darts.common.util.EodHelper.storedStatus;
 import static uk.gov.hmcts.darts.common.util.EodHelper.unstructuredLocation;
 
-@Disabled("Impacted by V1_367__adding_not_null_constraints_part_4.sql")
 class UnstructuredToArmBatchProcessorIntTest extends IntegrationBase {
 
     ArgumentCaptor<File> manifestFileNameCaptor = ArgumentCaptor.forClass(File.class);
@@ -95,6 +95,9 @@ class UnstructuredToArmBatchProcessorIntTest extends IntegrationBase {
     private ExternalObjectDirectoryRepository eodRepository;
     @SpyBean
     private MediaArchiveRecordMapper mediaArchiveRecordMapper;
+
+    @MockBean
+    private UnstructuredToArmProcessorConfiguration unstructuredToArmProcessorConfiguration;
     private UserAccountEntity testUser;
     private static final Integer BATCH_SIZE = 5;
 
@@ -111,7 +114,7 @@ class UnstructuredToArmBatchProcessorIntTest extends IntegrationBase {
     void setupData() {
         testUser = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
         when(userIdentity.getUserAccount()).thenReturn(testUser);
-
+        when(unstructuredToArmProcessorConfiguration.getMaxResultSize()).thenReturn(5);
     }
 
     @Test
@@ -285,7 +288,7 @@ class UnstructuredToArmBatchProcessorIntTest extends IntegrationBase {
         externalObjectDirectoryStub.createAndSaveEod(medias.get(1), STORED, UNSTRUCTURED);
         externalObjectDirectoryStub.createAndSaveEod(medias.get(1), ARM_RAW_DATA_FAILED, ARM);
 
-        doThrow(RuntimeException.class).when(armDataManagementApi).copyBlobDataToArm(any(), matches(".+_.+_2"));
+        doThrow(RuntimeException.class).when(armDataManagementApi).copyBlobDataToArm(any(), matches(".+_.+_3"));
 
         //when
         unstructuredToArmProcessor.processUnstructuredToArm(5);
