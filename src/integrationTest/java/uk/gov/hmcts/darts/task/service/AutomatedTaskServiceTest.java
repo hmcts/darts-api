@@ -46,6 +46,7 @@ import uk.gov.hmcts.darts.task.api.AutomatedTaskName;
 import uk.gov.hmcts.darts.task.config.AutomatedTaskConfigurationProperties;
 import uk.gov.hmcts.darts.task.exception.AutomatedTaskSetupError;
 import uk.gov.hmcts.darts.task.runner.AutomatedTask;
+import uk.gov.hmcts.darts.task.runner.impl.AbstractLockableAutomatedTask;
 import uk.gov.hmcts.darts.task.runner.impl.ApplyRetentionCaseAssociatedObjectsAutomatedTask;
 import uk.gov.hmcts.darts.task.runner.impl.ArmRetentionEventDateCalculatorAutomatedTask;
 import uk.gov.hmcts.darts.task.runner.impl.CleanupArmResponseFilesAutomatedTask;
@@ -197,9 +198,14 @@ class AutomatedTaskServiceTest extends IntegrationPerClassBase {
                              cronTask.getExpression(), cronTask.getRunnable()
                     );
                 } else if (task instanceof TriggerTask triggerTask) {
-                    log.info("TriggerTask trigger: {} Runnable: {}",
-                             triggerTask.getTrigger(), triggerTask.getRunnable()
-                    );
+
+                    if (triggerTask.getRunnable() instanceof AbstractLockableAutomatedTask automatedTask) {
+                        log.info("TriggerTask name: {}, cron expression: {}",
+                                 automatedTask.getTaskName(), automatedTask.getLastCronExpression());
+                    } else {
+                        log.info("TriggerTask trigger: {} Runnable: {}",
+                                 triggerTask.getTrigger(), triggerTask.getRunnable());
+                    }
                 } else if (task instanceof FixedRateTask fixedRateTask) {
                     log.info("FixedRateTask initial delay duration: {} Interval duration: {} ",
                              fixedRateTask.getInitialDelayDuration(), fixedRateTask.getIntervalDuration()
