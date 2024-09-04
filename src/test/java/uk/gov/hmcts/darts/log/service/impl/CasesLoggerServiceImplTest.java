@@ -17,7 +17,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class CasesLoggerServiceImplTest {
 
-    private static final String SOME_COURTHOUSE = "some-courthouse";
+    private static final String SOME_COURTHOUSE = "SOME-COURTHOUSE";
     private static final String SOME_COURTROOM = "some-courtroom";
     private static final String SOME_CASE_NUMBER = "some-case-number";
 

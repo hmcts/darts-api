@@ -32,7 +32,7 @@ import static uk.gov.hmcts.darts.audio.enums.MediaRequestStatus.COMPLETED;
 import static uk.gov.hmcts.darts.audio.enums.MediaRequestStatus.OPEN;
 import static uk.gov.hmcts.darts.audio.enums.MediaRequestStatus.PROCESSING;
 import static uk.gov.hmcts.darts.audiorequests.model.AudioRequestType.DOWNLOAD;
-import static uk.gov.hmcts.darts.test.common.data.MediaRequestTestData.minimalRequestData;
+import static uk.gov.hmcts.darts.test.common.data.MediaRequestTestData.someMinimalRequestData;
 
 class MediaRequestServiceTest extends IntegrationPerClassBase {
 
@@ -231,7 +231,7 @@ class MediaRequestServiceTest extends IntegrationPerClassBase {
     @Test
     @Disabled("Impacted by V1_364_*.sql")
     void getsMediaRequestById() {
-        var persistedMediaRequest = dartsDatabase.saveWithMediaRequestWithTransientEntities(minimalRequestData());
+        var persistedMediaRequest = dartsDatabase.saveWithMediaRequestWithTransientEntities(someMinimalRequestData());
 
         var mediaRequestResponse = mediaRequestService.getMediaRequestById(persistedMediaRequest.getId());
 

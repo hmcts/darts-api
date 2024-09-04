@@ -29,7 +29,7 @@ import static uk.gov.hmcts.darts.test.common.data.CourtroomTestData.someMinimalC
 import static uk.gov.hmcts.darts.test.common.data.DefenceTestData.createDefenceForCase;
 import static uk.gov.hmcts.darts.test.common.data.DefendantTestData.createDefendantForCase;
 import static uk.gov.hmcts.darts.test.common.data.HearingTestData.createHearingWith;
-import static uk.gov.hmcts.darts.test.common.data.ProsecutorTestData.someMinimalProsecutorForCase;
+import static uk.gov.hmcts.darts.test.common.data.ProsecutorTestData.createProsecutorForCase;
 
 @AutoConfigureMockMvc
 @Slf4j
@@ -47,14 +47,14 @@ class HearingsGetControllerTest extends IntegrationBase {
     private HearingEntity hearingEntity;
 
     private static final String SOME_DATE_TIME = "2023-01-01T12:00Z";
-    private static final String SOME_COURTHOUSE = "some-courthouse";
+    private static final String SOME_COURTHOUSE = "SOME-COURTHOUSE";
     private static final String SOME_COURTROOM = "some-courtroom";
     private static final String SOME_CASE_NUMBER = "1";
 
     @BeforeEach
     void setUp() {
         var courtCase = createSomeMinimalCase();
-        courtCase.addProsecutor(someMinimalProsecutorForCase(courtCase));
+        courtCase.addProsecutor(createProsecutorForCase(courtCase));
         courtCase.addDefendant(createDefendantForCase(courtCase));
         courtCase.addDefence(createDefenceForCase(courtCase));
         var hearing = createHearingWith(courtCase, someMinimalCourtRoom(), LocalDate.parse(SOME_DATE_TIME));

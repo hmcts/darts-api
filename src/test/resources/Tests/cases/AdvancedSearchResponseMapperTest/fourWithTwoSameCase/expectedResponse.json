@@ -31,7 +31,8 @@
           "Judge_3"
         ]
       }
-    ]
+    ],
+    "is_data_anonymised": false
   },
   {
     "case_id": 102,
@@ -59,7 +60,8 @@
           "Judge_4"
         ]
       }
-    ]
+    ],
+    "is_data_anonymised": false
   },
   {
     "case_id": 103,
@@ -89,6 +91,7 @@
           "Judge_5"
         ]
       }
-    ]
+    ],
+    "is_data_anonymised": false
   }
 ]

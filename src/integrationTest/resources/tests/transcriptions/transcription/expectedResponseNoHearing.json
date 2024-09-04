@@ -1,7 +1,7 @@
 {
   "case_number": "1",
   "courthouse_id": $COURTHOUSE_ID,
-  "courthouse": "some-courthouse",
+  "courthouse": "SOME-COURTHOUSE",
   "status": "Approved",
   "received": "2023-06-20T10:00:00Z",
   "requestor": {

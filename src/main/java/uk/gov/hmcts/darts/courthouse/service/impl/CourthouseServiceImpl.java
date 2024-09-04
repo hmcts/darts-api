@@ -205,7 +205,7 @@ public class CourthouseServiceImpl implements CourthouseService {
     }
 
     private void checkCourthouseNameIsUnique(String courthouseName) {
-        Optional<CourthouseEntity> foundCourthouse = courthouseRepository.findByCourthouseNameIgnoreCase(courthouseName);
+        Optional<CourthouseEntity> foundCourthouse = courthouseRepository.findByCourthouseName(StringUtils.toRootUpperCase(courthouseName));
 
         if (foundCourthouse.isPresent()) {
             throw new DartsApiException(CourthouseApiError.COURTHOUSE_NAME_PROVIDED_ALREADY_EXISTS);
@@ -286,7 +286,7 @@ public class CourthouseServiceImpl implements CourthouseService {
         }
         if (courthouseOptional.isEmpty()) {
             //code not found, lookup name instead
-            courthouseOptional = courthouseRepository.findByCourthouseNameIgnoreCase(courthouseNameUC);
+            courthouseOptional = courthouseRepository.findByCourthouseName(courthouseNameUC);
             if (courthouseOptional.isEmpty()) {
                 throw new CourthouseNameNotFoundException(courthouseNameUC);
             }

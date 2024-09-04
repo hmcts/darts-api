@@ -23,7 +23,7 @@ import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.JUDICIARY;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.SUPER_ADMIN;
 import static uk.gov.hmcts.darts.test.common.data.AnnotationTestData.minimalAnnotationEntity;
 import static uk.gov.hmcts.darts.test.common.data.CourthouseTestData.someMinimalCourthouse;
-import static uk.gov.hmcts.darts.test.common.data.HearingTestData.createSomeMinimalHearing;
+import static uk.gov.hmcts.darts.test.common.data.HearingTestData.someMinimalHearing;
 import static uk.gov.hmcts.darts.test.common.data.UserAccountTestData.minimalUserAccount;
 
 @AutoConfigureMockMvc
@@ -55,7 +55,7 @@ class AnnotationDeleteTest extends IntegrationBase {
 
     @Test
     void judgeWithCourthouseAccessCanDeleteTheirOwnAnnotation() throws Exception {
-        var hearing = dartsPersistence.save(createSomeMinimalHearing());
+        var hearing = dartsPersistence.save(someMinimalHearing());
         var judge = given.anAuthenticatedUserAuthorizedForCourthouse(JUDICIARY, hearing.getCourtroom().getCourthouse());
         var annotation = someAnnotationForHearingNotMarkedForDeletionCreatedBy(judge, hearing);
 
@@ -67,7 +67,7 @@ class AnnotationDeleteTest extends IntegrationBase {
 
     @Test
     void preventsJudgeNotAuthorizedForCourthouseDeletingAnnotationAssociatedWithThatCourthouse() throws Exception {
-        var annotationHearing = dartsPersistence.save(createSomeMinimalHearing());
+        var annotationHearing = dartsPersistence.save(someMinimalHearing());
         var someOtherCourthouse = dartsPersistence.save(someMinimalCourthouse());
         var judge = given.anAuthenticatedUserAuthorizedForCourthouse(JUDICIARY, someOtherCourthouse);
         var annotation = someAnnotationForHearingNotMarkedForDeletionCreatedBy(judge, annotationHearing);
@@ -126,7 +126,7 @@ class AnnotationDeleteTest extends IntegrationBase {
     }
 
     private AnnotationEntity someAnnotationNotMarkedForDeletionCreatedBy(UserAccountEntity userAccount) {
-        return someAnnotationForHearingNotMarkedForDeletionCreatedBy(userAccount, createSomeMinimalHearing());
+        return someAnnotationForHearingNotMarkedForDeletionCreatedBy(userAccount, someMinimalHearing());
     }
 
     private AnnotationEntity someAnnotationForHearingNotMarkedForDeletionCreatedBy(UserAccountEntity userAccount, HearingEntity hearing) {

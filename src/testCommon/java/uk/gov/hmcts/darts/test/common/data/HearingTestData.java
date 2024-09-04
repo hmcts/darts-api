@@ -7,11 +7,14 @@ import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.JudgeEntity;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.Objects;
 
+import static uk.gov.hmcts.darts.test.common.data.CaseTestData.caseWithCaseNumber;
 import static uk.gov.hmcts.darts.test.common.data.CaseTestData.createCaseWithCaseNumber;
 import static uk.gov.hmcts.darts.test.common.data.CaseTestData.createSomeMinimalCase;
+import static uk.gov.hmcts.darts.test.common.data.CourthouseTestData.createCourthouseWithName;
 import static uk.gov.hmcts.darts.test.common.data.CourtroomTestData.createCourtRoomWithNameAtCourthouse;
 import static uk.gov.hmcts.darts.test.common.data.CourtroomTestData.someMinimalCourtRoom;
 import static uk.gov.hmcts.darts.test.common.data.UserAccountTestData.minimalUserAccount;
@@ -22,7 +25,7 @@ public class HearingTestData {
 
     private static final LocalDate HEARING_DATE = LocalDate.of(2023, 6, 20);
 
-    public static HearingEntity createSomeMinimalHearing() {
+    public static HearingEntity someMinimalHearing() {
         var minimalCase = createSomeMinimalCase();
         var minimalCourtRoom = someMinimalCourtRoom();
         minimalCourtRoom.setCourthouse(minimalCase.getCourthouse());
@@ -44,11 +47,6 @@ public class HearingTestData {
         return minimalHearing;
     }
 
-    // Refactor, this isn't a minimal hearing
-    public static HearingEntity someMinimalHearing() {
-        return createSomeMinimalHearing();
-    }
-
     public static HearingEntity createHearingWith(CourtCaseEntity courtCase, CourtroomEntity courtroom, LocalDate hearingDate) {
         var hearing = createHearingFor(courtCase);
         hearing.setCourtroom(courtroom);
@@ -60,7 +58,7 @@ public class HearingTestData {
         HearingEntity hearing1 = createHearingWithDefaults(
             createCaseWithCaseNumber(caseNumber),
             createCourtRoomWithNameAtCourthouse(
-                CourthouseTestData.createCourthouseWithName("NEWCASTLE"),
+                createCourthouseWithName("NEWCASTLE"),
                 "1"
             ),
             HEARING_DATE,
@@ -98,4 +96,17 @@ public class HearingTestData {
         return hearing;
     }
 
+    public static HearingEntity hearingWith(String caseNumber, String courthouseName, String courtroomName, String hearingDatetime) {
+        var courtroom =
+            createCourtRoomWithNameAtCourthouse(
+                createCourthouseWithName(courthouseName),
+                courtroomName);
+
+        var hearing = createHearingFor(caseWithCaseNumber(caseNumber));
+        var hearingStartDateTime = LocalDateTime.parse(hearingDatetime);
+        hearing.setHearingDate(hearingStartDateTime.toLocalDate());
+        hearing.setScheduledStartTime(hearingStartDateTime.toLocalTime());
+        hearing.setCourtroom(courtroom);
+        return hearing;
+    }
 }

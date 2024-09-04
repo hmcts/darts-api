@@ -2,7 +2,6 @@ package uk.gov.hmcts.darts.audio.service;
 
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
@@ -53,7 +52,7 @@ class AudioTransformationServiceHandleKedaInvocationForMediaRequestsTest extends
     private static final String EMAIL_ADDRESS = "test@test.com";
     public static final LocalDateTime MOCK_HEARING_DATE = LocalDateTime.of(2023, 5, 1, 10, 0, 0);
     public static final String MOCK_HEARING_DATE_FORMATTED = "1st May 2023";
-    public static final String MOCK_COURTHOUSE_NAME = "some-courthouse";
+    public static final String MOCK_COURTHOUSE_NAME = "SOME-COURTHOUSE";
     public static final String NO_DEFENDANTS = "There are no defendants for this hearing";
     private static final String MOCK_PLAYBACK_REQUEST_ID = "1";
     private static final String MOCK_DOWNLOAD_REQUEST_ID = "2";
@@ -87,14 +86,13 @@ class AudioTransformationServiceHandleKedaInvocationForMediaRequestsTest extends
     @BeforeEach
     void setUp() {
         dartsDatabase.getUserAccountStub().getSystemUserAccountEntity();
-        hearing = given.aHearingWith("T202304130121", "some-courthouse", "some-courtroom", MOCK_HEARING_DATE);
+        hearing = given.aHearingWith("T202304130121", "SOME-COURTHOUSE", "some-courtroom", MOCK_HEARING_DATE);
 
         UserAccountEntity testUser = superAdminUserStub.givenUserIsAuthorised(mockUserIdentity);
         when(mockUserIdentity.getUserAccount()).thenReturn(testUser);
 
     }
 
-    @Disabled("Impacted by V1_367__adding_not_null_constraints_part_4.sql")
     @Test
     @SuppressWarnings("PMD.LawOfDemeter")
     public void handleKedaInvocationForMediaRequestsShouldSucceedAndUpdateRequestStatusToCompletedAndScheduleSuccessNotificationForDownload() {
@@ -126,7 +124,6 @@ class AudioTransformationServiceHandleKedaInvocationForMediaRequestsTest extends
         assertEquals(EMAIL_ADDRESS, notificationEntity.getEmailAddress());
     }
 
-    @Disabled("Impacted by V1_367__adding_not_null_constraints_part_4.sql")
     @Test
     @SuppressWarnings("PMD.LawOfDemeter")
     public void handleKedaInvocationForMediaRequestsShouldSucceedAndUpdateRequestStatusToCompletedOnlyOnce() {
@@ -147,7 +144,6 @@ class AudioTransformationServiceHandleKedaInvocationForMediaRequestsTest extends
         verify(mediaRequestService, times(1)).updateAudioRequestCompleted(any(MediaRequestEntity.class));
     }
 
-    @Disabled("Impacted by V1_367__adding_not_null_constraints_part_4.sql")
     @Test
     @SuppressWarnings("PMD.LawOfDemeter")
     public void handleKedaInvocationForMediaRequestsShouldSucceedAndUpdateRequestStatusToCompletedAndScheduleSuccessNotificationForPlayback() {
@@ -179,7 +175,6 @@ class AudioTransformationServiceHandleKedaInvocationForMediaRequestsTest extends
         assertEquals(EMAIL_ADDRESS, notificationEntity.getEmailAddress());
     }
 
-    @Disabled("Impacted by V1_367__adding_not_null_constraints_part_4.sql")
     @Test
     @SuppressWarnings("PMD.LawOfDemeter")
     public void handleKedaInvocationForMediaRequestsShouldResetRequestStatusToOpen() {

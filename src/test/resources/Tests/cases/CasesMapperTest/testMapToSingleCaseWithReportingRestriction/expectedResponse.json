@@ -23,5 +23,6 @@
     {
       "event_name": "test reporting restriction name"
     }
-  ]
+  ],
+  "is_data_anonymised": false
 }

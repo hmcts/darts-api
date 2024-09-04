@@ -30,8 +30,8 @@ import static uk.gov.hmcts.darts.audio.enums.MediaRequestStatus.OPEN;
 import static uk.gov.hmcts.darts.audiorequests.model.AudioRequestType.DOWNLOAD;
 import static uk.gov.hmcts.darts.common.entity.MediaEntity.MEDIA_TYPE_DEFAULT;
 import static uk.gov.hmcts.darts.test.common.data.CaseTestData.createSomeMinimalCase;
-import static uk.gov.hmcts.darts.test.common.data.HearingTestData.createSomeMinimalHearing;
-import static uk.gov.hmcts.darts.test.common.data.MediaRequestTestData.minimalRequestData;
+import static uk.gov.hmcts.darts.test.common.data.HearingTestData.someMinimalHearing;
+import static uk.gov.hmcts.darts.test.common.data.MediaRequestTestData.someMinimalRequestData;
 import static uk.gov.hmcts.darts.test.common.data.MediaTestData.someMinimalMedia;
 
 @Component
@@ -87,7 +87,7 @@ public class AuthorisationStub {
 
         createHearing();
 
-        mediaRequestEntity = minimalRequestData();
+        mediaRequestEntity = someMinimalRequestData();
         mediaRequestEntity.setHearing(hearingEntity);
         mediaRequestEntity.setRequestor(testUser);
         mediaRequestEntity.setCurrentOwner(testUser);
@@ -99,7 +99,7 @@ public class AuthorisationStub {
 
         transformedMediaEntity = dartsDatabaseStub.getTransformedMediaStub().createTransformedMediaEntity(mediaRequestEntity);
 
-        mediaRequestEntitySystemUser = minimalRequestData();
+        mediaRequestEntitySystemUser = someMinimalRequestData();
         mediaRequestEntitySystemUser.setHearing(hearingEntity);
         mediaRequestEntitySystemUser.setRequestor(systemUser);
         mediaRequestEntitySystemUser.setCurrentOwner(systemUser);
@@ -139,7 +139,7 @@ public class AuthorisationStub {
     }
 
     private void createHearing() {
-        hearingEntity = createSomeMinimalHearing();
+        hearingEntity = someMinimalHearing();
         hearingEntity.setCourtCase(courtCaseEntity);
         hearingEntity.setCourtroom(courtroomEntity);
         hearingEntity.setHearingDate(YESTERDAY.toLocalDate());

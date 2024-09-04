@@ -30,12 +30,14 @@ public class CaseTestData {
         return courtCaseEntity;
     }
 
-    public static CourtCaseEntity createSomeMinimalCase(String caseNumber) {
-        return createSomeMinimalCase(caseNumber, null);
+    public static CourtCaseEntity caseWithCaseNumber(String caseNumber) {
+        var someMinimalCase = createSomeMinimalCase();
+        someMinimalCase.setCaseNumber(caseNumber);
+        return someMinimalCase;
     }
 
-    public static CourtCaseEntity createSomeMinimalCase(String caseNumber, CourthouseEntity courthouseEntity) {
-        var courtCaseEntity = new CourtCaseEntity();
+    public static CourtCaseEntity createCaseWith(String caseNumber, CourthouseEntity courthouseEntity) {
+        var courtCaseEntity = createSomeMinimalCase();
 
         if (courthouseEntity == null) {
             courtCaseEntity.setCourthouse(someMinimalCourthouse());
@@ -60,6 +62,8 @@ public class CaseTestData {
         courtCaseEntity.addProsecutor(createProsecutorForCaseWithName(courtCaseEntity, "aProsecutor"));
         courtCaseEntity.setClosed(false);
         courtCaseEntity.setInterpreterUsed(false);
+        courtCaseEntity.setCreatedBy(UserAccountTestData.minimalUserAccount());
+        courtCaseEntity.setLastModifiedBy(UserAccountTestData.minimalUserAccount());
         return courtCaseEntity;
     }
 
@@ -97,11 +101,4 @@ public class CaseTestData {
         courtCase.setCaseNumber(caseNumber);
         return courtCase;
     }
-
-    public static CourtCaseEntity createCaseAtCourthouse(String caseNumber, CourthouseEntity courthouse) {
-        var courtCase = createCaseWithCaseNumber(caseNumber);
-        courtCase.setCourthouse(courthouse);
-        return courtCase;
-    }
-
 }

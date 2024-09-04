@@ -33,6 +33,9 @@ public class AdminCasesSearchResponseMapper {
         responseItem.setCourtrooms(createCourtroomList(courtCase.getHearings()));
         responseItem.setJudges(courtCase.getJudgeStringList());
         responseItem.setDefendants(courtCase.getDefendantStringList());
+        responseItem.isDataAnonymised(courtCase.isDataAnonymised());
+        responseItem.dataAnonymisedAt(courtCase.getDataAnonymisedTs());
+
         return responseItem;
     }
 

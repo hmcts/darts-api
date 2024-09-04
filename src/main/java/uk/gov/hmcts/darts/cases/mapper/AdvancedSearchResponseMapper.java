@@ -44,6 +44,8 @@ public class AdvancedSearchResponseMapper {
         advancedSearchResult.setCourthouse(courtCase.getCourthouse().getDisplayName());
         advancedSearchResult.setDefendants(courtCase.getDefendantStringList());
         advancedSearchResult.setJudges(courtCase.getJudgeStringList());
+        advancedSearchResult.setIsDataAnonymised(courtCase.isDataAnonymised());
+        advancedSearchResult.setDataAnonymisedAt(courtCase.getDataAnonymisedTs());
 
         advancedSearchResult.addHearingsItem(mapToAdvancedSearchResultHearing(hearing));
 

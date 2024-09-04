@@ -24,7 +24,7 @@ import static uk.gov.hmcts.darts.test.common.data.EventTestData.REPORTING_RESTRI
 import static uk.gov.hmcts.darts.test.common.data.EventTestData.SECTION_11_1981_DB_ID;
 import static uk.gov.hmcts.darts.test.common.data.EventTestData.SECTION_4_1981_DB_ID;
 import static uk.gov.hmcts.darts.test.common.data.EventTestData.someReportingRestrictionId;
-import static uk.gov.hmcts.darts.test.common.data.HearingTestData.createSomeMinimalHearing;
+import static uk.gov.hmcts.darts.test.common.data.HearingTestData.someMinimalHearing;
 
 @SuppressWarnings("VariableDeclarationUsageDistance")
 @Disabled("Impacted by V1_364_*.sql")
@@ -35,7 +35,7 @@ class CaseMapperTest extends IntegrationBase {
 
     @Test
     void mapsSingleCaseCorrectlyWhenZeroReportingRestrictionsAssociatedWithCase() {
-        var minimalHearing = createSomeMinimalHearing();
+        var minimalHearing = someMinimalHearing();
         var hearingEntity = dartsDatabase.save(minimalHearing);
 
         var singleCase = casesMapper.mapToSingleCase(hearingEntity.getCourtCase());
@@ -50,7 +50,7 @@ class CaseMapperTest extends IntegrationBase {
         var reportingRestrictions = createEventsWithDifferentTimestamps(eventDateTimes).stream()
             .map(eve -> dartsDatabase.addHandlerToEvent(eve, someReportingRestrictionId()))
             .toList();
-        var minimalHearing = createSomeMinimalHearing();
+        var minimalHearing = someMinimalHearing();
         dartsDatabase.saveEventsForHearing(minimalHearing, reportingRestrictions);
 
         var singleCase = casesMapper.mapToSingleCase(minimalHearing.getCourtCase());
@@ -70,7 +70,7 @@ class CaseMapperTest extends IntegrationBase {
         var reportingRestrictions = createEventsWithDifferentTimestamps(eventDateTimes).stream()
             .map(eve -> dartsDatabase.addHandlerToEvent(eve, someReportingRestrictionId()))
             .toList();
-        var minimalHearing = createSomeMinimalHearing();
+        var minimalHearing = someMinimalHearing();
         dartsDatabase.saveEventsForHearing(minimalHearing, reportingRestrictions);
 
         var singleCase = casesMapper.mapToSingleCase(minimalHearing.getCourtCase());
@@ -90,7 +90,7 @@ class CaseMapperTest extends IntegrationBase {
         var reportingRestrictions = createEventsWithDifferentTimestamps(eventDateTimes).stream()
             .map(eve -> dartsDatabase.addHandlerToEvent(eve, someReportingRestrictionId()))
             .toList();
-        var minimalHearing = createSomeMinimalHearing();
+        var minimalHearing = someMinimalHearing();
         dartsDatabase.saveEventsForHearing(minimalHearing, reportingRestrictions);
 
         var singleCase = casesMapper.mapToSingleCase(minimalHearing.getCourtCase());
@@ -120,7 +120,7 @@ class CaseMapperTest extends IntegrationBase {
             .map(eve -> dartsDatabase.addHandlerToEvent(eve, someReportingRestrictionId()))
             .toList();
         var expectedOrderedTs = orderedTsFrom(reportingRestrictions);
-        var minimalHearing = createSomeMinimalHearing();
+        var minimalHearing = someMinimalHearing();
         dartsDatabase.saveEventsForHearing(minimalHearing, reportingRestrictions);
 
         var singleCase = casesMapper.mapToSingleCase(minimalHearing.getCourtCase());
@@ -144,7 +144,7 @@ class CaseMapperTest extends IntegrationBase {
         dartsDatabase.save(event2);
         var reportingRestrictionLifted = dartsDatabase.addHandlerToEvent(event2, REPORTING_RESTRICTIONS_LIFTED_DB_ID);
 
-        var minimalHearing = createSomeMinimalHearing();
+        var minimalHearing = someMinimalHearing();
         dartsDatabase.saveEventsForHearing(minimalHearing, reportingRestriction, reportingRestrictionLifted);
 
         var singleCase = casesMapper.mapToSingleCase(minimalHearing.getCourtCase());
@@ -167,7 +167,7 @@ class CaseMapperTest extends IntegrationBase {
         event3.setTimestamp(now());
         var reappliedReportingRestriction = dartsDatabase.addHandlerToEvent(event3, SECTION_11_1981_DB_ID);
 
-        var minimalHearing = createSomeMinimalHearing();
+        var minimalHearing = someMinimalHearing();
         dartsDatabase.saveEventsForHearing(minimalHearing, reportingRestriction, reportingRestrictionLifted, reappliedReportingRestriction);
 
         var singleCase = casesMapper.mapToSingleCase(minimalHearing.getCourtCase());

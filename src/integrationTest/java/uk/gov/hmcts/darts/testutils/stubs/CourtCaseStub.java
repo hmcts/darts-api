@@ -49,12 +49,12 @@ public class CourtCaseStub {
 
     @Transactional
     public CourtCaseEntity createAndSaveMinimalCourtCase(String caseNumber, Integer courthouseId) {
-        var courtCase = CaseTestData.createSomeMinimalCase(caseNumber, courthouseRepository.findById(courthouseId).get());
+        var courtCase = CaseTestData.createCaseWith(caseNumber, courthouseRepository.findById(courthouseId).get());
         return caseRepository.save(courtCase);
     }
 
     public CourtCaseEntity createAndSaveMinimalCourtCase(String caseNumber, CourthouseEntity courthouse) {
-        var courtCase = CaseTestData.createSomeMinimalCase(caseNumber, courthouse);
+        var courtCase = CaseTestData.createCaseWith(caseNumber, courthouse);
         return caseRepository.save(courtCase);
     }
 

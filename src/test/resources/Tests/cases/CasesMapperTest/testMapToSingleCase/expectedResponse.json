@@ -19,5 +19,6 @@
     "defence_Case00001_1",
     "defence_Case00001_2"
   ],
-  "reporting_restrictions": []
+  "reporting_restrictions": [],
+  "is_data_anonymised": false
 }

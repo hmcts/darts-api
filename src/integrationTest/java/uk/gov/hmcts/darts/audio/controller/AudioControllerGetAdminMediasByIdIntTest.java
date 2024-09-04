@@ -42,7 +42,7 @@ class AudioControllerGetAdminMediasByIdIntTest extends IntegrationBase {
     private DartsDatabaseStub databaseStub;
 
     private static final URI ENDPOINT = URI.create("/admin/medias/");
-    private static final String COURTHOUSE_NAME = "testCourthouse";
+    private static final String COURTHOUSE_NAME = "TESTCOURTHOUSE";
     private static final String COURTROOM_NAME = "TESTCOURTROOM";
     private static final String CASE_NUMBER = "testCaseNumber";
     private static final OffsetDateTime HEARING_START_AT = OffsetDateTime.parse("2024-01-01T12:10:10Z");
