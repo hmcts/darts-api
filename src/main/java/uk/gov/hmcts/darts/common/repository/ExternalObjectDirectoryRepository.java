@@ -319,6 +319,24 @@ public interface ExternalObjectDirectoryRepository extends JpaRepository<Externa
     @Query(
         """
             SELECT eod FROM ExternalObjectDirectoryEntity eod
+            WHERE eod.status = :status
+            AND eod.externalLocationType = :type
+            AND NOT EXISTS (select 1 from ExternalObjectDirectoryEntity eod2
+            where eod2.externalLocationType = :notExistsLocation
+            and (eod.media = eod2.media
+              OR eod.transcriptionDocumentEntity = eod2.transcriptionDocumentEntity
+              OR eod.annotationDocumentEntity = eod2.annotationDocumentEntity
+              OR eod.caseDocument = eod2.caseDocument ))
+            order by eod.lastModifiedDateTime
+            LIMIT :limitRecords
+            """
+    )
+    List<ExternalObjectDirectoryEntity> findEodsNotInOtherStorage(ObjectRecordStatusEntity status, ExternalLocationTypeEntity type,
+                                                                  ExternalLocationTypeEntity notExistsLocation, Integer limitRecords);
+
+    @Query(
+        """
+            SELECT eod FROM ExternalObjectDirectoryEntity eod
             WHERE eod.status.id in :failureStatesList and
             (eod.media.id = :mediaId or eod.caseDocument.id = :caseDocumentId
             or eod.annotationDocumentEntity.id = :annotationDocumentId
