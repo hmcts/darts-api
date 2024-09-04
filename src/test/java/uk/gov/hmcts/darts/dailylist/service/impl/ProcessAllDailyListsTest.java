@@ -12,6 +12,7 @@ import uk.gov.hmcts.darts.common.entity.DailyListEntity;
 import uk.gov.hmcts.darts.common.repository.DailyListRepository;
 import uk.gov.hmcts.darts.dailylist.enums.SourceType;
 import uk.gov.hmcts.darts.log.api.LogApi;
+import uk.gov.hmcts.darts.task.api.AutomatedTasksApi;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -47,10 +48,12 @@ class ProcessAllDailyListsTest {
     private DailyListEntity latestDailyListForLeeds;
     @Mock
     private LogApi logApi;
+    @Mock
+    private AutomatedTasksApi automatedTasksApi;
 
     @BeforeEach
     void setUp() {
-        dailyListProcessor = new DailyListProcessorImpl(dailyListRepository, dailyListUpdater, logApi);
+        dailyListProcessor = new DailyListProcessorImpl(dailyListRepository, dailyListUpdater, logApi, automatedTasksApi);
         setCourthouseForStubs("Swansea", dailyListForSwansea);
         setCourthouseForStubs("Leeds",
                               oldestDailyListForLeeds,
@@ -62,21 +65,21 @@ class ProcessAllDailyListsTest {
     @ParameterizedTest
     @EnumSource(SourceType.class)
     void handlesScenarioWhereNoDailyListsAreFound(SourceType sourceType) {
-        lenient().when(dailyListRepository.findByStatusAndStartDateAndSourceOrderByPublishedTimestampDesc(NEW, NOW, sourceType.name()))
+        lenient().when(dailyListRepository.findByStatusAndStartDateAndSourceOrderByPublishedTimestampDescCreatedDateTimeDesc(NEW, NOW, sourceType.name()))
             .thenReturn(emptyList());
 
         dailyListProcessor.processAllDailyLists();
 
-        verify(dailyListRepository).findByStatusAndStartDateAndSourceOrderByPublishedTimestampDesc(NEW, NOW, sourceType.name());
+        verify(dailyListRepository).findByStatusAndStartDateAndSourceOrderByPublishedTimestampDescCreatedDateTimeDesc(NEW, NOW, sourceType.name());
         verifyNoInteractions(dailyListUpdater);
     }
 
 
     @Test
     void handlesSingleDailyListItemForOneSourceType() throws JsonProcessingException {
-        when(dailyListRepository.findByStatusAndStartDateAndSourceOrderByPublishedTimestampDesc(NEW, NOW, SourceType.XHB.name()))
+        when(dailyListRepository.findByStatusAndStartDateAndSourceOrderByPublishedTimestampDescCreatedDateTimeDesc(NEW, NOW, SourceType.XHB.name()))
             .thenReturn(emptyList());
-        when(dailyListRepository.findByStatusAndStartDateAndSourceOrderByPublishedTimestampDesc(NEW, NOW, SourceType.CPP.name()))
+        when(dailyListRepository.findByStatusAndStartDateAndSourceOrderByPublishedTimestampDescCreatedDateTimeDesc(NEW, NOW, SourceType.CPP.name()))
             .thenReturn(List.of(dailyListForSwansea));
 
         dailyListProcessor.processAllDailyLists();
@@ -87,9 +90,9 @@ class ProcessAllDailyListsTest {
 
     @Test
     void groupsDailyListsByListingCourthouse() throws JsonProcessingException {
-        when(dailyListRepository.findByStatusAndStartDateAndSourceOrderByPublishedTimestampDesc(NEW, NOW, SourceType.XHB.name()))
+        when(dailyListRepository.findByStatusAndStartDateAndSourceOrderByPublishedTimestampDescCreatedDateTimeDesc(NEW, NOW, SourceType.XHB.name()))
             .thenReturn(emptyList());
-        when(dailyListRepository.findByStatusAndStartDateAndSourceOrderByPublishedTimestampDesc(NEW, NOW, SourceType.CPP.name()))
+        when(dailyListRepository.findByStatusAndStartDateAndSourceOrderByPublishedTimestampDescCreatedDateTimeDesc(NEW, NOW, SourceType.CPP.name()))
             .thenReturn(List.of(latestDailyListForLeeds, oldDailyListForLeeds, oldestDailyListForLeeds, dailyListForSwansea));
 
         dailyListProcessor.processAllDailyLists();
@@ -101,9 +104,9 @@ class ProcessAllDailyListsTest {
 
     @Test
     void handlesDailyListsFromBothSourceTypes() throws JsonProcessingException {
-        when(dailyListRepository.findByStatusAndStartDateAndSourceOrderByPublishedTimestampDesc(NEW, NOW, SourceType.XHB.name()))
+        when(dailyListRepository.findByStatusAndStartDateAndSourceOrderByPublishedTimestampDescCreatedDateTimeDesc(NEW, NOW, SourceType.XHB.name()))
             .thenReturn(List.of(oldDailyListForLeeds));
-        when(dailyListRepository.findByStatusAndStartDateAndSourceOrderByPublishedTimestampDesc(NEW, NOW, SourceType.CPP.name()))
+        when(dailyListRepository.findByStatusAndStartDateAndSourceOrderByPublishedTimestampDescCreatedDateTimeDesc(NEW, NOW, SourceType.CPP.name()))
             .thenReturn(List.of(latestDailyListForLeeds, oldestDailyListForLeeds));
 
         dailyListProcessor.processAllDailyLists();

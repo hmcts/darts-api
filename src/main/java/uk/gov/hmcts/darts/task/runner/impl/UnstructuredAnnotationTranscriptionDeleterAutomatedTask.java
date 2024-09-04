@@ -1,12 +1,12 @@
 package uk.gov.hmcts.darts.task.runner.impl;
 
-import net.javacrumbs.shedlock.core.LockProvider;
 import uk.gov.hmcts.darts.arm.service.UnstructuredTranscriptionAndAnnotationDeleterProcessor;
 import uk.gov.hmcts.darts.common.repository.AutomatedTaskRepository;
 import uk.gov.hmcts.darts.log.api.LogApi;
 import uk.gov.hmcts.darts.task.config.AutomatedTaskConfigurationProperties;
+import uk.gov.hmcts.darts.task.service.LockService;
 
-import static uk.gov.hmcts.darts.task.runner.AutomatedTaskName.UNSTRUCTURED_TRANSCRIPTION_ANNOTATION_DELETER_TASK_NAME;
+import static uk.gov.hmcts.darts.task.api.AutomatedTaskName.UNSTRUCTURED_TRANSCRIPTION_ANNOTATION_DELETER_TASK_NAME;
 
 public class UnstructuredAnnotationTranscriptionDeleterAutomatedTask extends AbstractLockableAutomatedTask {
 
@@ -14,11 +14,11 @@ public class UnstructuredAnnotationTranscriptionDeleterAutomatedTask extends Abs
     private UnstructuredTranscriptionAndAnnotationDeleterProcessor armDeletionProcessor;
 
     public UnstructuredAnnotationTranscriptionDeleterAutomatedTask(AutomatedTaskRepository automatedTaskRepository,
-                                                              LockProvider lockProvider,
-                                                              AutomatedTaskConfigurationProperties automatedTaskConfigurationProperties,
+                                                                   AutomatedTaskConfigurationProperties automatedTaskConfigurationProperties,
                                                                    UnstructuredTranscriptionAndAnnotationDeleterProcessor armDeletionProcessor,
-                                                              LogApi logApi) {
-        super(automatedTaskRepository, lockProvider, automatedTaskConfigurationProperties, logApi);
+                                                                   LogApi logApi,
+                                                                   LockService lockService) {
+        super(automatedTaskRepository, automatedTaskConfigurationProperties, logApi, lockService);
         this.armDeletionProcessor = armDeletionProcessor;
     }
 

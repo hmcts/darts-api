@@ -17,6 +17,7 @@ import uk.gov.hmcts.darts.authorisation.annotation.Authorisation;
 import uk.gov.hmcts.darts.event.component.DartsEventMapper;
 import uk.gov.hmcts.darts.event.http.api.EventApi;
 import uk.gov.hmcts.darts.event.model.AdminEventSearch;
+import uk.gov.hmcts.darts.event.model.AdminGetEventForIdResponseResult;
 import uk.gov.hmcts.darts.event.model.AdminSearchEventResponseResult;
 import uk.gov.hmcts.darts.event.model.CourtLog;
 import uk.gov.hmcts.darts.event.model.CourtLogsPostRequestBody;
@@ -27,6 +28,7 @@ import uk.gov.hmcts.darts.event.service.CourtLogsService;
 import uk.gov.hmcts.darts.event.service.EventDispatcher;
 import uk.gov.hmcts.darts.event.service.EventMappingService;
 import uk.gov.hmcts.darts.event.service.EventSearchService;
+import uk.gov.hmcts.darts.event.service.EventService;
 import uk.gov.hmcts.darts.event.service.handler.EventHandlerEnumerator;
 
 import java.time.OffsetDateTime;
@@ -49,12 +51,12 @@ import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.XHIBIT;
 public class EventsController implements EventApi {
 
     private final CourtLogsService courtLogsService;
-
     private final EventDispatcher eventDispatcher;
     private final DartsEventMapper dartsEventMapper;
     private final EventMappingService eventMappingService;
     private final EventHandlerEnumerator eventHandlers;
     private final EventSearchService eventSearchService;
+    private final EventService eventService;
 
     @Override
     @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
@@ -159,5 +161,13 @@ public class EventsController implements EventApi {
     public ResponseEntity<List<AdminSearchEventResponseResult>> adminSearchEvents(AdminEventSearch adminEventSearch) {
         var adminSearchEventResponse = eventSearchService.searchForEvents(adminEventSearch);
         return new ResponseEntity<>(adminSearchEventResponse, HttpStatus.OK);
+    }
+
+    @Override
+    @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
+    @Authorisation(contextId = ANY_ENTITY_ID,
+        globalAccessSecurityRoles = {SUPER_ADMIN})
+    public ResponseEntity<AdminGetEventForIdResponseResult> adminGetEventById(Integer eventId) {
+        return  new ResponseEntity<>(eventService.adminGetEventById(eventId), HttpStatus.OK);
     }
 }

@@ -507,7 +507,34 @@ paths:
             application/json+problem:
               schema:
                 $ref: './problem.yaml'
-
+  /admin/events/{event_id}:
+    get:
+      tags:
+        - Event
+      summary: Gets an event id details
+      description: |-
+        Retrieves an event for a given event_id
+      operationId: adminGetEventById
+      parameters:
+        - in: path
+          name: event_id
+          schema:
+            type: integer
+          description: "event_id is the internal event_id of the event."
+          required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdminGetEventForIdResponseResult'
+        '404':
+          description: Not Found - Event id
+          content:
+            application/json+problem:
+              schema:
+                $ref: './problem.yaml'
 components:
   schemas:
 
@@ -726,6 +753,68 @@ components:
       type: string
       maxLength: 25
 
+    CourthouseResponseDetails:
+      type: object
+      properties:
+        id:
+          type: integer
+        display_name:
+          type: string
+
+    CourtroomResponseDetails:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+
+    EventMappingDetails:
+      type: object
+      properties:
+        id:
+          type: integer
+
+    AdminGetEventForIdResponseResult:
+      type: object
+      properties:
+        id:
+          type: integer
+        documentum_id:
+          type: string
+        source_id:
+          type: integer
+        message_id:
+          type: string
+        text:
+          type: string
+        event_mapping:
+          $ref: '#/components/schemas/EventMappingDetails'
+        is_log_entry:
+          type: boolean
+        courthouse:
+          $ref: '#/components/schemas/CourthouseResponseDetails'
+        courtroom:
+          $ref: '#/components/schemas/CourtroomResponseDetails'
+        version:
+          type: string
+        chronicle_id:
+          type: string
+        antecedent_id:
+          type: string
+        is_data_anonymised:
+          type: boolean
+        created_at:
+          type: string
+          format: date-time
+        created_by:
+          type: integer
+        last_modified_at:
+          type: string
+          format: date-time
+        last_modified_by:
+          type: integer
+
     GetCourtLogsErrorCode:
       type: string
       enum:
@@ -752,6 +841,7 @@ components:
         - "EVENT_105"
         - "EVENT_106"
         - "EVENT_107"
+        - "EVENT_108"
       x-enum-varnames: [
         EVENT_DATA_NOT_FOUND,
         EVENT_HANDLER_NOT_FOUND_IN_DB,
@@ -760,7 +850,9 @@ components:
         INVALID_HANDLER_MAPPING_NAME,
         MAPPING_INACTIVE,
         MAPPING_IN_USE,
-        TOO_MANY_RESULTS ]
+        TOO_MANY_RESULTS,
+        EVENT_ID_NOT_FOUND,
+      ]
 
     EventTitleErrors:
       type: string
@@ -773,6 +865,7 @@ components:
         - "The mapping is inactive, so cannot be deleted"
         - "The mapping has already processed events, so cannot be deleted"
         - "The search resulted in too many results"
+        - "Event id does not exist"
       x-enum-varnames: [
         EVENT_DATA_NOT_FOUND,
         EVENT_HANDLER_NOT_FOUND_IN_DB,
@@ -781,5 +874,5 @@ components:
         INVALID_HANDLER_MAPPING_NAME,
         MAPPING_INACTIVE,
         MAPPING_IN_USE,
-        TOO_MANY_RESULTS]
-
+        TOO_MANY_RESULTS,
+        EVENT_ID_NOT_FOUND]

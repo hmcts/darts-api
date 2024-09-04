@@ -1,12 +1,12 @@
 package uk.gov.hmcts.darts.task.runner.impl;
 
-import net.javacrumbs.shedlock.core.LockProvider;
 import uk.gov.hmcts.darts.arm.service.InboundAnnotationTranscriptionDeleterProcessor;
 import uk.gov.hmcts.darts.common.repository.AutomatedTaskRepository;
 import uk.gov.hmcts.darts.log.api.LogApi;
 import uk.gov.hmcts.darts.task.config.AutomatedTaskConfigurationProperties;
+import uk.gov.hmcts.darts.task.service.LockService;
 
-import static uk.gov.hmcts.darts.task.runner.AutomatedTaskName.INBOUND_TRANSCRIPTION_ANNOTATION_DELETER_TASK_NAME;
+import static uk.gov.hmcts.darts.task.api.AutomatedTaskName.INBOUND_TRANSCRIPTION_ANNOTATION_DELETER_TASK_NAME;
 
 public class InboundAnnotationTranscriptionDeleterAutomatedTask extends AbstractLockableAutomatedTask {
 
@@ -14,11 +14,11 @@ public class InboundAnnotationTranscriptionDeleterAutomatedTask extends Abstract
     private InboundAnnotationTranscriptionDeleterProcessor armDeletionProcessor;
 
     public InboundAnnotationTranscriptionDeleterAutomatedTask(AutomatedTaskRepository automatedTaskRepository,
-                                                              LockProvider lockProvider,
                                                               AutomatedTaskConfigurationProperties automatedTaskConfigurationProperties,
                                                               InboundAnnotationTranscriptionDeleterProcessor armDeletionProcessor,
-                                                              LogApi logApi) {
-        super(automatedTaskRepository, lockProvider, automatedTaskConfigurationProperties, logApi);
+                                                              LogApi logApi,
+                                                              LockService lockService) {
+        super(automatedTaskRepository, automatedTaskConfigurationProperties, logApi, lockService);
         this.armDeletionProcessor = armDeletionProcessor;
     }
 
