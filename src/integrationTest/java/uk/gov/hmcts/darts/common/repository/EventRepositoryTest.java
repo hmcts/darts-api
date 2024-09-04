@@ -7,12 +7,9 @@ import org.springframework.data.domain.Pageable;
 import uk.gov.hmcts.darts.common.entity.EventEntity;
 import uk.gov.hmcts.darts.common.util.DateConverterUtil;
 import uk.gov.hmcts.darts.testutils.PostgresIntegrationBase;
-import uk.gov.hmcts.darts.testutils.stubs.DartsDatabaseStub;
 import uk.gov.hmcts.darts.testutils.stubs.EventStub;
 import uk.gov.hmcts.darts.testutils.stubs.HearingStub;
 
-import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 
