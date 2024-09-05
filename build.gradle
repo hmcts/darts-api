@@ -607,6 +607,23 @@ tasks.register('updateOpenSpecificationsWithVersion') {
   }
 }
 
+task runAllStyleChecks {
+  dependsOn 'checkstyleMain'
+  dependsOn 'checkstyleTest'
+  dependsOn 'checkstyleIntegrationTest'
+  dependsOn 'checkstyleSmokeTest'
+  dependsOn 'checkstyleFunctionalTest'
+  dependsOn 'checkstyleTestCommon'
+
+  dependsOn 'pmdMain'
+  dependsOn 'pmdTest'
+  dependsOn 'pmdIntegrationTest'
+  dependsOn 'pmdSmokeTest'
+  dependsOn 'pmdFunctionalTest'
+  dependsOn 'pmdTestCommon'
+}
+
+
 // set flyway cleanDisabled to true above and uncomment if we require a fresh migration from scratch across all DBs
 // migratePostgresDatabase.dependsOn cleanPostgresDatabase
 processResources.dependsOn updateOpenSpecificationsWithVersion
