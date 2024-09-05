@@ -30,6 +30,7 @@ class AudioRequestNonAccessedCountIntTest extends IntegrationBase {
     void getNonAccessedAudioCountForUser() throws Exception {
         var requestor = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
         dartsDatabase.createAndLoadNonAccessedCurrentMediaRequestEntity(requestor, AudioRequestType.DOWNLOAD);
+
         MockHttpServletRequestBuilder requestBuilder = get(ENDPOINT)
             .header("user_id", requestor.getId().toString());
         List<TransformedMediaEntity> transformedMediaEntities = dartsDatabase.getTransformedMediaRepository().findAll();
