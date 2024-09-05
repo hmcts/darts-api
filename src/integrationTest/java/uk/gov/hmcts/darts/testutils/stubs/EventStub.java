@@ -122,6 +122,7 @@ public class EventStub {
     }
 
     @Transactional
+    @SuppressWarnings("PMD.AvoidInstantiatingObjectsInLoops")
     public Map<Integer, List<EventEntity>> generateEventIdEventsIncludingZeroEventId(int numberOfEvents,
                                                                                      int numberOfEventsPerEventId,
                                                                                      boolean includeNull) {
@@ -137,7 +138,7 @@ public class EventStub {
         HearingEntity hearingDifferentCourtroom = hearingStub.createHearing("Bristol", "2", "case2", DateConverterUtil.toLocalDateTime(STARTED_AT));
 
         for (int index = 0; index < numberOfEvents; index++) {
-            List<EventEntity> eventEntities = new ArrayList<>();
+            List<EventEntity> eventEntities = new ArrayList<>(numberOfEventsPerEventId);
             for (int i = 0; i < numberOfEventsPerEventId; i++) {
                 eventEntities.add(createEvent(hearingDifferentCourtroom, 10, STARTED_AT.minusMinutes(i), "LOG", index));
             }

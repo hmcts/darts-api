@@ -32,7 +32,7 @@ class CleanupCurrentFlagEventProcessorImplTest extends PostgresIntegrationBase {
     }
 
     @Test
-    void givenEventCleanUpProcessor_whenVersionedEventsAreFound_thenOlderVersionsAreMarkedAsNonCurrentWhenHearingsMatch() throws InterruptedException {
+    void givenEventCleanUpProcessor_whenVersionedEventsAreFound_thenOlderVersionsAreMarkedAsNonCurrentWhenHearingsMatch() {
         dartsDatabase.createCase("Bristol", "case1");
         dartsDatabase.createCase("Bristol", "case2");
         dartsDatabase.createCase("Bristol", "case3");
@@ -48,10 +48,10 @@ class CleanupCurrentFlagEventProcessorImplTest extends PostgresIntegrationBase {
         dartsDatabase.createCase("Bristol", "case1");
         dartsDatabase.createCase("Bristol", "case2");
         dartsDatabase.createCase("Bristol", "case3");
+        HearingEntity newHearing = hearingStub.createHearing("Bristol", "2", "case3", DateConverterUtil.toLocalDateTime(EventStub.STARTED_AT));
+        EventEntity newEventEntity = eventStub.createEvent(newHearing, 10, EventStub.STARTED_AT, "LOG", 2);
         Map<Integer, List<EventEntity>> eventIdMap = eventStub.generateEventIdEventsIncludingZeroEventId(3, 3, false);
-        HearingEntity newHearing = hearingStub.createHearing("Bristol", "2", "case2", DateConverterUtil.toLocalDateTime(EventStub.STARTED_AT));
-        EventEntity newEventEntity = eventStub.createEvent(newHearing.getCourtroom(), 10, EventStub.STARTED_AT, "LOG", 3);
-        eventIdMap.get(3).add(newEventEntity);
+        eventIdMap.get(2).add(newEventEntity);
         assertAllEventsAreCurrent(eventIdMap);
         cleanupCurrentFlagEventProcessor.processCurrentEvent();
         assertOnlyOneCurrentPerEventId(eventIdMap, newEventEntity.getId());
@@ -63,8 +63,7 @@ class CleanupCurrentFlagEventProcessorImplTest extends PostgresIntegrationBase {
             .stream()
             .filter(eventId -> eventId != 0)
             .forEach(eventId -> Assertions.assertEquals(
-                1,
-                eventRepository.findAllByEventId(eventId)
+                1, eventRepository.findAllByEventId(eventId)
                     .stream()
                     .filter(eventEntity -> {
                         if (eventIds.contains(eventEntity.getId())) {
@@ -74,7 +73,8 @@ class CleanupCurrentFlagEventProcessorImplTest extends PostgresIntegrationBase {
                         return true;
                     })
                     .filter(EventEntity::getIsCurrent)
-                    .count()));
+                    .count())
+            );
     }
 
     private void assertAllEventsAreCurrent(Map<Integer, List<EventEntity>> eventIdMap) {
