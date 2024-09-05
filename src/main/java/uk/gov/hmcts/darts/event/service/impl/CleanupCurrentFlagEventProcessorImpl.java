@@ -33,13 +33,13 @@ public class CleanupCurrentFlagEventProcessorImpl implements CleanupCurrentFlagE
 
         eventEntityReturned.forEach(event -> {
             EventRepository.EventIdAndHearingIds eventIdAndHearingIds = eventRepository.getTheLatestCreatedEventPrimaryKeyForTheEventId(event);
-            log.debug("Current event primary key is {}", eventIdAndHearingIds);
             eventRepository.updateAllEventIdEventsToNotCurrentWithTheExclusionOfTheCurrentEventPrimaryKey(
                 eventIdAndHearingIds.getEveId(), eventIdAndHearingIds.getEventId(), eventIdAndHearingIds.getHearingIds());
 
-            log.debug("Updated all events for event id {} excluding primary key {}",
+            log.debug("Updated all events for event id {} excluding primary key {} where hearings match {}",
                       eventIdAndHearingIds.getEventId(),
-                      eventIdAndHearingIds.getEveId());
+                      eventIdAndHearingIds.getEveId(),
+                      eventIdAndHearingIds.getHearingIds());
             processedEventIdLst.add(event);
         });
         return processedEventIdLst;
