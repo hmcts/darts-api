@@ -35,7 +35,6 @@ import java.text.MessageFormat;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.concurrent.CompletableFuture;
 
 import static java.util.Objects.nonNull;
 import static uk.gov.hmcts.darts.common.datamanagement.enums.DatastoreContainerType.ARM;
@@ -217,25 +216,28 @@ public class DataManagementFacadeImpl implements DataManagementFacade {
             downloadResponseMetaDataUnstructured.setEodEntity(eodEntity);
             downloadResponseMetaDataUnstructured.setContainerTypeUsedToDownload(downloadResponseMetaData.getContainerTypeUsedToDownload());
             downloadResponseMetaDataUnstructured.markInputStream(inputStreamUnstructured);
-            createUnstructuredData(downloadResponseMetaDataUnstructured, eodEntityToDelete, targetFile);
+            createCopyInUnstructuredDatastore(downloadResponseMetaDataUnstructured, eodEntityToDelete, targetFile);
         }
     }
 
-    private void createUnstructuredData(
+    /*
+    Creates a copy in the unstructured data store for quicker retrieval next time.
+     */
+    private void createCopyInUnstructuredDatastore(
         DownloadResponseMetaData downloadResponseMetaData,
         ExternalObjectDirectoryEntity eodEntityToDelete,
-        File targetFile) throws IOException {
-        InputStream inputStream =  new BufferedInputStream(downloadResponseMetaData.getInputStream());
-        CompletableFuture<Void> createUnstructuredJob = CompletableFuture.runAsync(() -> {
+        File targetFile) {
+        try {
+            InputStream inputStream = new BufferedInputStream(downloadResponseMetaData.getInputStream());
             unstructuredDataHelper.createUnstructuredDataFromEod(
                 eodEntityToDelete,
                 downloadResponseMetaData.getEodEntity(),
                 inputStream,
                 targetFile
             );
-        });
-        unstructuredDataHelper.addToJobsList(createUnstructuredJob);
-
+        } catch (Exception e) {
+            log.warn("unable to store a copy of EOD {} in the unstructured Datastore.", downloadResponseMetaData.getEodEntity().getId(), e);
+        }
     }
 
     private ExternalObjectDirectoryEntity findCorrespondingEodEntityForStorageLocation(List<ExternalObjectDirectoryEntity> storedEodEntities,
