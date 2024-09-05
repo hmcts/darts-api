@@ -14,6 +14,7 @@ import java.util.stream.Collectors;
 @Getter
 @RequiredArgsConstructor
 @Slf4j
+//TODO add integration tests for this class
 public class CleanupCurrentFlagEventProcessorImpl implements CleanupCurrentFlagEventProcessor {
     private final Integer batchSize;
     private final EventRepository eventRepository;

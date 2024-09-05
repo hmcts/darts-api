@@ -91,7 +91,7 @@ public interface EventRepository extends JpaRepository<EventEntity, Integer> {
     List<Integer> getCurrentEventIdsToBeProcessed(Pageable pageable);
 
     @Query(value = """
-         SELECT e.eve_id, event_id, string_agg(he.hea_id::varchar, ',') as hearing_ids FROM darts.event e
+         SELECT e.eve_id, event_id, string_agg(he.hea_id::varchar, ',' order by he.hea_id) as hearing_ids FROM darts.event e
          left join darts.hearing_event_ae he
          on he.eve_id = e.eve_id
          WHERE e.event_id=:eventId
@@ -101,17 +101,23 @@ public interface EventRepository extends JpaRepository<EventEntity, Integer> {
         """, nativeQuery = true)
     EventIdAndHearingIds getTheLatestCreatedEventPrimaryKeyForTheEventId(Integer eventId);
 
+    /**
+     *  string_agg(he.hea_id::varchar, ',' order by he.hea_id) to ensure we only update the events that have the same hearing ids
+     *  This is done by reading the hearing ids from the latest event created and only updating the events that have the same hearing ids
+     * @param eventIdsPrimaryKey the primary key of the event that is the latest created
+     * @param eventId the event id that we want to close old events for
+     * @param hearingIds the hearing ids that we want to close old events for (Should match hearing ids of the latest event created)
+     */
     @Transactional
     @Modifying
     @Query(value = """
         UPDATE darts.event e
             SET is_current = false
         FROM (
-           select string_agg(he.hea_id::varchar, ',') as hearing_ids FROM darts.event e
+           select string_agg(he.hea_id::varchar, ',' order by he.hea_id) as hearing_ids FROM darts.event e
            left join darts.hearing_event_ae he
             on he.eve_id = e.eve_id
             where event_id=:eventId
-            and he.eve_id != :eventIdsPrimaryKey
         ) h WHERE e.eve_id != :eventIdsPrimaryKey
                 AND e.event_id = :eventId
                 and h.hearing_ids = :hearingIds
