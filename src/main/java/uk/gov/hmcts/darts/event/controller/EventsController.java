@@ -166,7 +166,7 @@ public class EventsController implements EventApi {
     @Override
     @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
     @Authorisation(contextId = ANY_ENTITY_ID,
-        globalAccessSecurityRoles = {SUPER_ADMIN})
+        globalAccessSecurityRoles = {SUPER_ADMIN, SUPER_USER})
     public ResponseEntity<AdminGetEventForIdResponseResult> adminGetEventById(Integer eventId) {
         return  new ResponseEntity<>(eventService.adminGetEventById(eventId), HttpStatus.OK);
     }
