@@ -54,7 +54,7 @@ class EventRepositoryTest extends PostgresIntegrationBase {
     }
 
     @Test
-    void testEventProcessingWithMultipleHearings() {
+    void givenEventCleanUpTask_whenVersionedEventsAreFound_thenOlderVersionsAreNotMarkedAsNonCurrentWhenHearingsDoNotMatch() {
         dartsDatabase.createCase("Bristol", "case1");
         dartsDatabase.createCase("Bristol", "case2");
         dartsDatabase.createCase("Bristol", "case3");
