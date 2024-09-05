@@ -27,6 +27,8 @@ public interface EventRepository extends JpaRepository<EventEntity, Integer> {
         """)
     List<EventEntity> findAllByHearingId(Integer hearingId);
 
+    List<EventEntity> findAllByEventId(Integer eventId);
+
     @Query("""
            SELECT ee
            FROM EventEntity ee, CourtCaseEntity ce
@@ -114,13 +116,15 @@ public interface EventRepository extends JpaRepository<EventEntity, Integer> {
         UPDATE darts.event e
             SET is_current = false
         FROM (
-           select string_agg(he.hea_id::varchar, ',' order by he.hea_id) as hearing_ids FROM darts.event e
-           left join darts.hearing_event_ae he
-            on he.eve_id = e.eve_id
-            where event_id=:eventId
+           SELECT he.eve_id, string_agg(he.hea_id::varchar, ',' order by he.hea_id) as hearing_ids FROM darts.event e
+           LEFT JOIN darts.hearing_event_ae he
+           ON he.eve_id = e.eve_id
+           WHERE e.event_id=:eventId
+           GROUP by he.eve_id
         ) h WHERE e.eve_id != :eventIdsPrimaryKey
                 AND e.event_id = :eventId
-                and h.hearing_ids = :hearingIds
+                AND h.hearing_ids = :hearingIds
+                AND h.eve_id = e.eve_id
         """, nativeQuery = true)
     void updateAllEventIdEventsToNotCurrentWithTheExclusionOfTheCurrentEventPrimaryKey(
         Integer eventIdsPrimaryKey, Integer eventId, String hearingIds);

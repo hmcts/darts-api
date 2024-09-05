@@ -29,7 +29,6 @@ public class CleanupCurrentFlagEventProcessorImpl implements CleanupCurrentFlagE
                 .stream()
                 .map(Object::toString)
                 .collect(Collectors.joining(",")));
-            log.debug("Number of Event ids to be processed {}", eventEntityReturned.size());
         }
 
         eventEntityReturned.forEach(event -> {

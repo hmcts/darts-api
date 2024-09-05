@@ -15,6 +15,7 @@ import uk.gov.hmcts.darts.common.util.DateConverterUtil;
 
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -117,25 +118,30 @@ public class EventStub {
      */
     @Transactional
     public Map<Integer, List<EventEntity>> generateEventIdEventsIncludingZeroEventId(int numberOfEvents) {
+        return generateEventIdEventsIncludingZeroEventId(numberOfEvents, 2, true);
+    }
+
+    @Transactional
+    public Map<Integer, List<EventEntity>> generateEventIdEventsIncludingZeroEventId(int numberOfEvents,
+                                                                                     int numberOfEventsPerEventId,
+                                                                                     boolean includeNull) {
         Map<Integer, List<EventEntity>> eventIdMap = new HashMap<>();
 
         HearingEntity hearingForEvent = hearingStub.createHearing("Bristol", "1", "case1", DateConverterUtil.toLocalDateTime(STARTED_AT));
 
-        // add a null based event to prove this will not get processed
-        createEvent(hearingForEvent, 10, STARTED_AT.minusMinutes(20), "LOG");
-
         // add a solitary event to prove this does not get processed
-        EventEntity standAloneEventIdEvent = createEvent(hearingForEvent, 10, STARTED_AT.minusMinutes(20), "LOG", numberOfEvents + 1);
-        eventIdMap.put(standAloneEventIdEvent.getEventId(), List.of(standAloneEventIdEvent));
-
+        if (includeNull) {
+            EventEntity standAloneEventIdEvent = createEvent(hearingForEvent, 10, STARTED_AT.minusMinutes(20), "LOG", numberOfEvents + 1);
+            eventIdMap.put(standAloneEventIdEvent.getEventId(), List.of(standAloneEventIdEvent));
+        }
         HearingEntity hearingDifferentCourtroom = hearingStub.createHearing("Bristol", "2", "case2", DateConverterUtil.toLocalDateTime(STARTED_AT));
 
         for (int index = 0; index < numberOfEvents; index++) {
-            EventEntity event = createEvent(hearingDifferentCourtroom, 10, STARTED_AT.minusMinutes(20), "LOG", index);
-
-            EventEntity event1 = createEvent(hearingDifferentCourtroom, 10, STARTED_AT, "LOG", index);
-
-            eventIdMap.put(index, List.of(event, event1));
+            List<EventEntity> eventEntities = new ArrayList<>();
+            for (int i = 0; i < numberOfEventsPerEventId; i++) {
+                eventEntities.add(createEvent(hearingDifferentCourtroom, 10, STARTED_AT.minusMinutes(i), "LOG", index));
+            }
+            eventIdMap.put(index, eventEntities);
         }
 
         return eventIdMap;
