@@ -40,7 +40,6 @@ public class TranscriptionRequestDetailsValidator implements Validator<Transcrip
         } else {
             checkIdExistsOrThrowCaseNotFoundException(transcriptionRequestDetails);
         }
-        //TODO
         checkStartAndEndDatesValid(transcriptionRequestDetails);
     }
 
