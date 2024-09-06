@@ -549,7 +549,7 @@ class TranscriptionControllerAdminGetTranscriptionIntTest extends IntegrationBas
     @Test
     @Disabled("Impacted by V1_364_*.sql")
     void testGetTranscriptionDocumentMarkedForDeletionWithResults() throws Exception {
-        // TODO: Resume when all test disablements are re-enabled
+        // TODO: Resume when all test disablements are re-enabled. See https://tools.hmcts.net/jira/browse/DMP-3821
     }
 
     @Test
