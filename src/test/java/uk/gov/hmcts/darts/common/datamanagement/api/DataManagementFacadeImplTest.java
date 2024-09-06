@@ -12,6 +12,7 @@ import org.junit.jupiter.api.io.TempDir;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.core.io.Resource;
 import uk.gov.hmcts.darts.arm.service.impl.ArmApiServiceImpl;
 import uk.gov.hmcts.darts.audio.helper.UnstructuredDataHelper;
 import uk.gov.hmcts.darts.common.datamanagement.component.impl.DownloadResponseMetaData;
@@ -140,7 +141,9 @@ class DataManagementFacadeImplTest {
         storedStatus.setId(2);
         lenient().when(objectRecordStatusRepository.getReferenceById(anyInt())).thenReturn(storedStatus);
 
-        lenient().when(downloadResponseMetaDataMock.getInputStream()).thenReturn(toInputStream("testInputStream", UTF_8));
+        Resource resource = Mockito.mock(Resource.class);
+        when(downloadResponseMetaDataMock.getResource()).thenReturn(resource);
+        lenient().when(resource.getInputStream()).thenReturn(toInputStream("testInputStream", UTF_8));
         lenient().when(downloadResponseMetaDataMock.getContainerTypeUsedToDownload()).thenReturn(DatastoreContainerType.ARM);
     }
 

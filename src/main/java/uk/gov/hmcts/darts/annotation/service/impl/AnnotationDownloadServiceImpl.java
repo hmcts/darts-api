@@ -3,6 +3,7 @@ package uk.gov.hmcts.darts.annotation.service.impl;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.io.InputStreamResource;
+import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.darts.annotation.controller.dto.AnnotationResponseDto;
 import uk.gov.hmcts.darts.annotation.service.AnnotationDownloadService;
@@ -45,7 +46,7 @@ public class AnnotationDownloadServiceImpl implements AnnotationDownloadService 
 
         final ExternalObjectDirectoryEntity latestExternalObjectDirectoryEntity = externalObjectDirectoryEntities.get(0);
 
-        final InputStreamResource blobStream = annotationDataManagement.download(externalObjectDirectoryEntities);
+        final Resource blobStream = annotationDataManagement.download(externalObjectDirectoryEntities);
 
         return AnnotationResponseDto.builder()
             .resource(blobStream)

@@ -73,7 +73,7 @@ class AnnotationGetTest extends IntegrationBase {
     void shouldDownloadAnnotationDocument() throws Exception {
 
         var judge = given.anAuthenticatedUserWithGlobalAccessAndRole(JUDICIARY);
-        when(downloadResponseMetaData.getInputStream()).thenReturn(inputStreamResource);
+        when(downloadResponseMetaData.getResource().getInputStream()).thenReturn(inputStreamResource);
         when(dataManagementFacade.retrieveFileFromStorage(anyList())).thenReturn(downloadResponseMetaData);
 
         var annotationDocument = createValidAnnotationDocumentForDownload(judge);

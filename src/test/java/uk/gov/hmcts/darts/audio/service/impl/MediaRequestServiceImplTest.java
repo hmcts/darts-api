@@ -458,10 +458,10 @@ class MediaRequestServiceImplTest {
         doNothing().when(auditApi).record(any(), any(), any());
 
         when(dataManagementApi.getBlobDataFromOutboundContainer(blobUuid)).thenReturn(responseMetaData);
-        when(responseMetaData.getInputStream()).thenReturn(toInputStream(DUMMY_FILE_CONTENT, "UTF-8"));
+        when(responseMetaData.getResource().getInputStream()).thenReturn(toInputStream(DUMMY_FILE_CONTENT, "UTF-8"));
 
         try (DownloadResponseMetaData downloadResponseMetaData = mediaRequestService.download(transformedMediaId)) {
-            byte[] bytes = downloadResponseMetaData.getInputStream().readAllBytes();
+            byte[] bytes = downloadResponseMetaData.getResource().getInputStream().readAllBytes();
             assertEquals(DUMMY_FILE_CONTENT, new String(bytes));
         }
 
@@ -586,10 +586,10 @@ class MediaRequestServiceImplTest {
         doNothing().when(auditApi).record(any(), any(), any());
 
         when(dataManagementApi.getBlobDataFromOutboundContainer(blobUuid)).thenReturn(responseMetaData);
-        when(responseMetaData.getInputStream()).thenReturn(toInputStream(DUMMY_FILE_CONTENT, "UTF-8"));
+        when(responseMetaData.getResource().getInputStream()).thenReturn(toInputStream(DUMMY_FILE_CONTENT, "UTF-8"));
 
         try (DownloadResponseMetaData downloadResponseMetaData = mediaRequestService.playback(transformedMediaId)) {
-            byte[] bytes = downloadResponseMetaData.getInputStream().readAllBytes();
+            byte[] bytes = downloadResponseMetaData.getResource().getInputStream().readAllBytes();
             assertEquals(DUMMY_FILE_CONTENT, new String(bytes));
         }
 

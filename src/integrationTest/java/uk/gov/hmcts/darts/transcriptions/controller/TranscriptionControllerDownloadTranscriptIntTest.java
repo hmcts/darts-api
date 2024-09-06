@@ -5,11 +5,13 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 import org.skyscreamer.jsonassert.JSONAssert;
 import org.skyscreamer.jsonassert.JSONCompareMode;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.core.io.Resource;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
@@ -26,6 +28,7 @@ import uk.gov.hmcts.darts.common.entity.TranscriptionDocumentEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionWorkflowEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
+import uk.gov.hmcts.darts.common.util.RequestFileStore;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 import uk.gov.hmcts.darts.testutils.stubs.AuthorisationStub;
 import uk.gov.hmcts.darts.testutils.stubs.TranscriptionStub;
@@ -35,6 +38,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.channels.ClosedChannelException;
 import java.nio.charset.Charset;
+import java.nio.file.NoSuchFileException;
 import java.util.List;
 import java.util.UUID;
 
@@ -60,7 +64,7 @@ import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum.WI
 @AutoConfigureMockMvc
 @Transactional
 @SuppressWarnings({"PMD.ExcessiveImports"})
-@Disabled("Impacted by V1_364_*.sql")
+
 class TranscriptionControllerDownloadTranscriptIntTest extends IntegrationBase {
 
     private static final String URL_TEMPLATE = "/transcriptions/{transcription_id}/document";
@@ -199,11 +203,15 @@ class TranscriptionControllerDownloadTranscriptIntTest extends IntegrationBase {
 
         // setup a real file so we can assert against its processing
         StorageConfiguration configuration = new StorageConfiguration();
-        configuration.setTempBlobWorkspace("./tmp");
+        configuration.setTempBlobWorkspace("./tmpFiles3");
         var mockFileBasedDownloadResponseMetaData = new FileBasedDownloadResponseMetaData();
         try (OutputStream outputStream = mockFileBasedDownloadResponseMetaData.getOutputStream(configuration)) {
             outputStream.write("test-transcription".getBytes());
         }
+
+        // generate a random file so we can prove it has been deleted
+        RequestFileStore.getFileCreatedForThread().create(configuration.getTempBlobWorkspace());
+        Assertions.assertEquals(2, RequestFileStore.getFileCreatedForThread().get().size());
 
         when(mockDataManagementFacade.retrieveFileFromStorage(any(TranscriptionDocumentEntity.class))).thenReturn(mockFileBasedDownloadResponseMetaData);
 
@@ -244,10 +252,10 @@ class TranscriptionControllerDownloadTranscriptIntTest extends IntegrationBase {
 
         // ensure that the input stream is closed
         try {
-            mockFileBasedDownloadResponseMetaData.getInputStream().read();
+            mockFileBasedDownloadResponseMetaData.getResource().getInputStream().read();
             Assertions.fail();
-        } catch (IOException closedConnectionException) {
-            Assertions.assertTrue(closedConnectionException instanceof ClosedChannelException);
+        } catch (Exception closedConnectionException) {
+            Assertions.assertTrue(closedConnectionException instanceof NoSuchFileException);
         }
 
         // ensure the source file is removed
@@ -287,7 +295,10 @@ class TranscriptionControllerDownloadTranscriptIntTest extends IntegrationBase {
 
         var mockFileBasedDownloadResponseMetaData = mock(FileBasedDownloadResponseMetaData.class);
         when(mockDataManagementFacade.retrieveFileFromStorage(any(TranscriptionDocumentEntity.class))).thenReturn(mockFileBasedDownloadResponseMetaData);
-        when(mockFileBasedDownloadResponseMetaData.getInputStream()).thenReturn(IOUtils.toInputStream("test-transcription", Charset.defaultCharset()));
+
+        Resource resource = Mockito.mock(Resource.class);
+        when(mockFileBasedDownloadResponseMetaData.getResource()).thenReturn(resource);
+        when(resource.getInputStream()).thenReturn(IOUtils.toInputStream("test-transcription", Charset.defaultCharset()));
 
         MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders.get(URL_TEMPLATE, transcriptionId)
             .header(
@@ -312,7 +323,8 @@ class TranscriptionControllerDownloadTranscriptIntTest extends IntegrationBase {
 
         verify(mockAuditApi).record(DOWNLOAD_TRANSCRIPTION, testUser, transcriptionEntity.getCourtCase());
         verify(mockDataManagementFacade).retrieveFileFromStorage(any(TranscriptionDocumentEntity.class));
-        verify(mockFileBasedDownloadResponseMetaData).getInputStream();
+        verify(mockFileBasedDownloadResponseMetaData).getResource();
+        verify(resource).getInputStream();
         verifyNoMoreInteractions(mockAuditApi, mockDataManagementFacade, mockFileBasedDownloadResponseMetaData);
     }
 

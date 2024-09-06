@@ -152,7 +152,7 @@ class ArmApiServiceIntTest extends IntegrationBase {
         WireMock.verify(getRequestedFor(urlPathMatching(getDownloadPath(downloadPath, CABINET_ID, EXTERNAL_RECORD_ID, EXTERNAL_FILE_ID)))
                     .withHeader("Authorization", new RegexPattern("Bearer some-token")));
 
-        assertThat(downloadResponseMetaData.getInputStream().readAllBytes()).isEqualTo(binaryData);
+        assertThat(downloadResponseMetaData.getResource().getInputStream().readAllBytes()).isEqualTo(binaryData);
     }
 
 

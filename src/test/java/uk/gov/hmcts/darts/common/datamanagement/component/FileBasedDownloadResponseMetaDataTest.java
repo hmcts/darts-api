@@ -30,15 +30,15 @@ class FileBasedDownloadResponseMetaDataTest {
                 Assertions.assertEquals(DatastoreContainerType.ARM, fileBasedDownloadResponseMetaData.getContainerTypeUsedToDownload());
 
                 // ensure we do not generate new is or os
-                Assertions.assertSame(fileBasedDownloadResponseMetaData.getInputStream(),
-                                      fileBasedDownloadResponseMetaData.getInputStream());
+                Assertions.assertSame(fileBasedDownloadResponseMetaData.getResource().getInputStream(),
+                                      fileBasedDownloadResponseMetaData.getResource().getInputStream());
                 Assertions.assertSame(fileBasedDownloadResponseMetaData.getOutputStream(configuration),
                                       fileBasedDownloadResponseMetaData.getOutputStream(configuration));
-                Assertions.assertEquals(byteToWrite, new String(fileBasedDownloadResponseMetaData.getInputStream().readAllBytes()));
+                Assertions.assertEquals(byteToWrite, new String(fileBasedDownloadResponseMetaData.getResource().getInputStream().readAllBytes()));
 
                 try (FileInputStream fis = Mockito.mock(FileInputStream.class)) {
                     fileBasedDownloadResponseMetaData.markInputStream(fis);
-                    Assertions.assertSame(fis, fileBasedDownloadResponseMetaData.getInputStream());
+                    Assertions.assertSame(fis, fileBasedDownloadResponseMetaData.getResource().getInputStream());
                 }
             }
         }

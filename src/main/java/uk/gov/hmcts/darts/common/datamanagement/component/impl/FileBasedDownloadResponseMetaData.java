@@ -1,7 +1,11 @@
 package uk.gov.hmcts.darts.common.datamanagement.component.impl;
 
 import lombok.Getter;
+import org.springframework.core.io.FileUrlResource;
+import org.springframework.core.io.Resource;
+import reactor.util.annotation.NonNullApi;
 import uk.gov.hmcts.darts.common.datamanagement.StorageConfiguration;
+import uk.gov.hmcts.darts.common.util.RequestFileStore;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -21,22 +25,23 @@ public class FileBasedDownloadResponseMetaData extends DownloadResponseMetaData 
     @Getter
     private File fileToBeDownloadedTo;
 
-    @Override
-    public InputStream getInputStream()  throws IOException {
-        if (inputStream == null) {
-            inputStream = Files.newInputStream(Path.of(fileToBeDownloadedTo.toURI()), StandardOpenOption.READ);
-        }
-        return new FileInputStreamWrapper(inputStream);
+    public Resource getResource()  throws IOException {
+        return new FileUrlResource(fileToBeDownloadedTo.toURI().toURL()) {
+            public InputStream getInputStream() throws IOException {
+                if (inputStream == null) {
+                    inputStream = Files.newInputStream(Path.of(fileToBeDownloadedTo.toURI()), StandardOpenOption.READ);
+                }
+
+                return new FileInputStreamWrapper(inputStream);
+            }
+        };
     }
 
     @Override
     @SuppressWarnings("PMD.AvoidFileStream")
     public OutputStream getOutputStream(StorageConfiguration configuration) throws IOException {
         if (outputStream == null) {
-            Files.createDirectories(Path.of(configuration.getTempBlobWorkspace()));
-            fileToBeDownloadedTo = Files.createFile(Path.of(
-                configuration.getTempBlobWorkspace(),
-                UUID.randomUUID().toString())).toFile();
+            fileToBeDownloadedTo = RequestFileStore.getFileCreatedForThread().create(configuration.getTempBlobWorkspace());
             outputStream = new FileOutputStream(fileToBeDownloadedTo);
         }
 
@@ -67,6 +72,7 @@ public class FileBasedDownloadResponseMetaData extends DownloadResponseMetaData 
         @Override
         public void close() throws IOException {
             FileBasedDownloadResponseMetaData.this.close();
+            FileBasedDownloadResponseMetaData.this.inputStream = null;
         }
     }
 }

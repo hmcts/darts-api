@@ -207,17 +207,18 @@ public class DataManagementFacadeImpl implements DataManagementFacade {
 
             String tempBlobPath = dataManagementConfiguration.getTempBlobWorkspace() + "/" + UUID.randomUUID();
             File targetFile = new File(tempBlobPath);
-            FileUtils.copyInputStreamToFile(downloadResponseMetaData.getInputStream(), targetFile);
+            FileUtils.copyInputStreamToFile(downloadResponseMetaData.getResource().getInputStream(), targetFile);
 
             InputStream inputStreamOriginal = new FileInputStream(targetFile);
             downloadResponseMetaData.markInputStream(inputStreamOriginal);
 
-            InputStream inputStreamUnstructured = new FileInputStream(targetFile);
-            DownloadResponseMetaData downloadResponseMetaDataUnstructured = new FileBasedDownloadResponseMetaData();
-            downloadResponseMetaDataUnstructured.setEodEntity(eodEntity);
-            downloadResponseMetaDataUnstructured.setContainerTypeUsedToDownload(downloadResponseMetaData.getContainerTypeUsedToDownload());
-            downloadResponseMetaDataUnstructured.markInputStream(inputStreamUnstructured);
-            createUnstructuredData(downloadResponseMetaDataUnstructured, eodEntityToDelete, targetFile);
+            try (InputStream inputStreamUnstructured = new FileInputStream(targetFile)) {
+                DownloadResponseMetaData downloadResponseMetaDataUnstructured = new FileBasedDownloadResponseMetaData();
+                downloadResponseMetaDataUnstructured.setEodEntity(eodEntity);
+                downloadResponseMetaDataUnstructured.setContainerTypeUsedToDownload(downloadResponseMetaData.getContainerTypeUsedToDownload());
+                downloadResponseMetaDataUnstructured.markInputStream(inputStreamUnstructured);
+                createUnstructuredData(downloadResponseMetaDataUnstructured, eodEntityToDelete, targetFile);
+            }
         }
     }
 
@@ -225,16 +226,18 @@ public class DataManagementFacadeImpl implements DataManagementFacade {
         DownloadResponseMetaData downloadResponseMetaData,
         ExternalObjectDirectoryEntity eodEntityToDelete,
         File targetFile) throws IOException {
-        InputStream inputStream =  new BufferedInputStream(downloadResponseMetaData.getInputStream());
-        CompletableFuture<Void> createUnstructuredJob = CompletableFuture.runAsync(() -> {
-            unstructuredDataHelper.createUnstructuredDataFromEod(
-                eodEntityToDelete,
-                downloadResponseMetaData.getEodEntity(),
-                inputStream,
-                targetFile
-            );
-        });
-        unstructuredDataHelper.addToJobsList(createUnstructuredJob);
+        try (InputStream inputStream =  new BufferedInputStream(downloadResponseMetaData.getResource().getInputStream())) {
+            CompletableFuture<Void> createUnstructuredJob = CompletableFuture.runAsync(() -> {
+                unstructuredDataHelper.createUnstructuredDataFromEod(
+                    eodEntityToDelete,
+                    downloadResponseMetaData.getEodEntity(),
+                    inputStream,
+                    targetFile
+                );
+
+            });
+            unstructuredDataHelper.addToJobsList(createUnstructuredJob);
+        }
 
     }
 

@@ -122,7 +122,7 @@ class TranscriptionDownloaderTest {
         var transcription = someTranscriptionWith(List.of(transcriptionDocument));
         when(transcriptionRepository.findById(transcription.getId())).thenReturn(Optional.of(transcription));
 
-        when(fileBasedDownloadResponseMetaData.getInputStream()).thenThrow(new IOException());
+        when(fileBasedDownloadResponseMetaData.getResource().getInputStream()).thenThrow(new IOException());
         when(dataManagementFacade.retrieveFileFromStorage(any(TranscriptionDocumentEntity.class))).thenReturn(fileBasedDownloadResponseMetaData);
 
         assertThatThrownBy(() -> transcriptionDownloader.downloadTranscript(transcription.getId()))
@@ -150,7 +150,7 @@ class TranscriptionDownloaderTest {
         var transcription = someTranscriptionWith(transcriptionDocuments);
         when(transcriptionRepository.findById(transcription.getId())).thenReturn(Optional.of(transcription));
         when(dataManagementFacade.retrieveFileFromStorage(any(TranscriptionDocumentEntity.class))).thenReturn(fileBasedDownloadResponseMetaData);
-        when(fileBasedDownloadResponseMetaData.getInputStream()).thenReturn(IOUtils.toInputStream("test-transcription", Charset.defaultCharset()));
+        when(fileBasedDownloadResponseMetaData.getResource().getInputStream()).thenReturn(IOUtils.toInputStream("test-transcription", Charset.defaultCharset()));
 
         // When
         var downloadTranscriptResponse = transcriptionDownloader.downloadTranscript(transcription.getId());
@@ -161,7 +161,7 @@ class TranscriptionDownloaderTest {
         assertThat(downloadTranscriptResponse.getContentType()).isEqualTo(transcriptionDocumentUploadedToday.getFileType());
         assertThat(downloadTranscriptResponse.getResource()).isInstanceOf(InputStreamResource.class);
 
-        verify(fileBasedDownloadResponseMetaData).getInputStream();
+        verify(fileBasedDownloadResponseMetaData).getResource().getInputStream();
         verifyNoMoreInteractions(dataManagementFacade, fileBasedDownloadResponseMetaData);
 
     }

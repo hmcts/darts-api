@@ -2,6 +2,7 @@ package uk.gov.hmcts.darts.common.datamanagement.component.impl;
 
 import lombok.Getter;
 import lombok.Setter;
+import org.springframework.core.io.Resource;
 import uk.gov.hmcts.darts.common.datamanagement.StorageConfiguration;
 import uk.gov.hmcts.darts.common.datamanagement.enums.DatastoreContainerType;
 import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
@@ -19,6 +20,9 @@ public abstract class DownloadResponseMetaData implements Closeable {
 
     protected OutputStream outputStream;
 
+
+    public abstract Resource getResource()  throws IOException;
+
     @Getter
     @Setter
     private ExternalObjectDirectoryEntity eodEntity;
@@ -26,10 +30,6 @@ public abstract class DownloadResponseMetaData implements Closeable {
     @Getter
     @Setter
     private DatastoreContainerType containerTypeUsedToDownload;
-
-    public InputStream getInputStream() throws IOException {
-        return inputStream;
-    }
 
     public abstract OutputStream getOutputStream(StorageConfiguration configuration) throws IOException;
 

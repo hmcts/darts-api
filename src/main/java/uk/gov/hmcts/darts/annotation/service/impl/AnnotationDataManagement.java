@@ -4,6 +4,7 @@ import com.azure.core.util.BinaryData;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.io.InputStreamResource;
+import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.darts.common.datamanagement.api.DataManagementFacade;
 import uk.gov.hmcts.darts.common.datamanagement.component.impl.DownloadResponseMetaData;
@@ -54,11 +55,11 @@ public class AnnotationDataManagement {
     }
 
     @SuppressWarnings({"PMD.CloseResource"})
-    public InputStreamResource download(List<ExternalObjectDirectoryEntity> externalObjectDirectoryEntities) {
+    public Resource download(List<ExternalObjectDirectoryEntity> externalObjectDirectoryEntities) {
         try {
             DownloadResponseMetaData downloadResponseMetaData = dataManagementFacade.retrieveFileFromStorage(externalObjectDirectoryEntities);
 
-            return new InputStreamResource(downloadResponseMetaData.getInputStream());
+            return downloadResponseMetaData.getResource();
         } catch (IOException | FileNotDownloadedException e) {
             log.error("Failed to download annotation document {}",
                       externalObjectDirectoryEntities.get(0).getAnnotationDocumentEntity().getId(), e);
