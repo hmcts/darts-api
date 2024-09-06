@@ -206,8 +206,8 @@ class TranscriptionControllerDownloadTranscriptIntTest extends IntegrationBase {
         }
 
         // generate a random file so we can prove it has been deleted
-        RequestFileStore.getFileCreatedForThread().create(configuration.getTempBlobWorkspace());
-        assertEquals(2, RequestFileStore.getFileCreatedForThread().get().size());
+        RequestFileStore.getFileStore().create(configuration.getTempBlobWorkspace());
+        assertEquals(2, RequestFileStore.getFileStore().get().size());
 
         when(mockDataManagementFacade.retrieveFileFromStorage(any(TranscriptionDocumentEntity.class))).thenReturn(mockFileBasedDownloadResponseMetaData);
 

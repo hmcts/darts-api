@@ -44,21 +44,22 @@ class FileBasedDownloadResponseMetaDataTest {
 
     @Test
     void testFileMetaDataSetInputStream() throws Exception {
-        FileBasedDownloadResponseMetaData fileBasedDownloadResponseMetaData = new FileBasedDownloadResponseMetaData();
-        StorageConfiguration configuration = new StorageConfiguration();
-        configuration.setTempBlobWorkspace(System.getenv("java.home") + "/" + "temp");
-        int fileCountPostCleanupBefore = new File(configuration.getTempBlobWorkspace()).list().length;
-        fileBasedDownloadResponseMetaData.setInputStream(new ByteArrayInputStream("test".getBytes()), configuration);
 
-        Assertions.assertEquals(fileCountPostCleanupBefore + 1, new File(configuration.getTempBlobWorkspace()).list().length);
+        try (FileBasedDownloadResponseMetaData fileBasedDownloadResponseMetaData = new FileBasedDownloadResponseMetaData()) {
+            StorageConfiguration configuration = new StorageConfiguration();
+            configuration.setTempBlobWorkspace(System.getenv("java.home") + "/" + "temp");
+            int fileCountPostCleanupBefore = new File(configuration.getTempBlobWorkspace()).list().length;
+            fileBasedDownloadResponseMetaData.setInputStream(new ByteArrayInputStream("test".getBytes()), configuration);
 
-        try (InputStream inputStream = fileBasedDownloadResponseMetaData.getResource().getInputStream()) {
-            String content = IOUtils.toString(inputStream);
-            Assertions.assertEquals("test", content);
+            Assertions.assertEquals(fileCountPostCleanupBefore + 1, new File(configuration.getTempBlobWorkspace()).list().length);
+
+            try (InputStream inputStream = fileBasedDownloadResponseMetaData.getResource().getInputStream()) {
+                String content = IOUtils.toString(inputStream);
+                Assertions.assertEquals("test", content);
+            }
+
+            int fileCountPostCleanup = new File(configuration.getTempBlobWorkspace()).list().length;
+            Assertions.assertEquals(fileCountPostCleanupBefore, fileCountPostCleanup);
         }
-
-        int fileCountPostCleanup = new File(configuration.getTempBlobWorkspace()).list().length;
-        Assertions.assertEquals(fileCountPostCleanupBefore, fileCountPostCleanup);
-
     }
 }

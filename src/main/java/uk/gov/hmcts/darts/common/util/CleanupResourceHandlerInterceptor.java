@@ -6,6 +6,9 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.ModelAndView;
 
+/**
+ * A cleanup interceptor for system resources i.e. files that have been generated.
+ */
 @Component
 public class CleanupResourceHandlerInterceptor implements HandlerInterceptor {
     @Override
@@ -19,7 +22,7 @@ public class CleanupResourceHandlerInterceptor implements HandlerInterceptor {
 
     @Override
     public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex) throws Exception {
-        RequestFileStore.getFileCreatedForThread().remove();
+        RequestFileStore.getFileStore().remove();
 
     }
 }

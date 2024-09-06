@@ -12,7 +12,7 @@ import java.util.UUID;
 
 
 /**
- * A thread local class that holds for the thread. Working in combination with the CleanupResourceHandlerInterceptor
+ * A thread local class that holds file references for the thread. Works in combination with the CleanupResourceHandlerInterceptor
  * to protect against files hanging about
  */
 @Slf4j
@@ -20,7 +20,7 @@ public class RequestFileStore extends ThreadLocal<List<String>> {
 
     private static RequestFileStore fileCreatedForThread;
 
-    public static RequestFileStore getFileCreatedForThread() {
+    public static RequestFileStore getFileStore() {
         if (fileCreatedForThread == null) {
             fileCreatedForThread = new RequestFileStore();
         }

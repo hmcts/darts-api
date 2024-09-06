@@ -39,7 +39,7 @@ public class FileBasedDownloadResponseMetaData extends DownloadResponseMetaData 
     @SuppressWarnings("PMD.AvoidFileStream")
     public OutputStream getOutputStream(StorageConfiguration configuration) throws IOException {
         if (outputStream == null) {
-            fileToBeDownloadedTo = RequestFileStore.getFileCreatedForThread().create(configuration.getTempBlobWorkspace());
+            fileToBeDownloadedTo = RequestFileStore.getFileStore().create(configuration.getTempBlobWorkspace());
             outputStream = new FileOutputStream(fileToBeDownloadedTo);
         }
 
@@ -47,7 +47,7 @@ public class FileBasedDownloadResponseMetaData extends DownloadResponseMetaData 
     }
 
     public void setInputStream(InputStream inputStream, StorageConfiguration configuration)  throws IOException {
-        fileToBeDownloadedTo = RequestFileStore.getFileCreatedForThread().create(configuration.getTempBlobWorkspace());
+        fileToBeDownloadedTo = RequestFileStore.getFileStore().create(configuration.getTempBlobWorkspace());
         FileUtils.copyInputStreamToFile(inputStream, fileToBeDownloadedTo);
     }
 
@@ -72,6 +72,9 @@ public class FileBasedDownloadResponseMetaData extends DownloadResponseMetaData 
             return inputStream.read();
         }
 
+        /**
+         * Delete the file when the input stream close is called.
+         */
         @Override
         public void close() throws IOException {
             FileBasedDownloadResponseMetaData.this.close();
