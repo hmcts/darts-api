@@ -7,7 +7,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import uk.gov.hmcts.darts.common.entity.TransformedMediaEntity;
 import uk.gov.hmcts.darts.common.repository.TransformedMediaRepository;
 import uk.gov.hmcts.darts.testutils.PostgresIntegrationBase;
-import uk.gov.hmcts.darts.testutils.stubs.MediaRequestStub;
 import uk.gov.hmcts.darts.testutils.stubs.TransformedMediaStub;
 
 import java.util.List;
@@ -17,9 +16,6 @@ class TransformedMediaRepositoryTest extends PostgresIntegrationBase {
 
     @Autowired
     private TransformedMediaStub transformedMediaStub;
-
-    @Autowired
-    private MediaRequestStub mediaRequestStub;
 
     @Autowired
     private TransformedMediaRepository transformedMediaRepository;

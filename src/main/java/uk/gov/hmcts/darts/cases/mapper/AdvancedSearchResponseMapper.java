@@ -33,10 +33,10 @@ public class AdvancedSearchResponseMapper {
             }
         }
         //case not already in response, so add it.
-        advancedSearchResults.add(maptToAdvancedSearchResult(hearing));
+        advancedSearchResults.add(mapToAdvancedSearchResult(hearing));
     }
 
-    private AdvancedSearchResult maptToAdvancedSearchResult(HearingEntity hearing) {
+    private AdvancedSearchResult mapToAdvancedSearchResult(HearingEntity hearing) {
         AdvancedSearchResult advancedSearchResult = new AdvancedSearchResult();
         CourtCaseEntity courtCase = hearing.getCourtCase();
         advancedSearchResult.setCaseId(courtCase.getId());
@@ -44,6 +44,8 @@ public class AdvancedSearchResponseMapper {
         advancedSearchResult.setCourthouse(courtCase.getCourthouse().getDisplayName());
         advancedSearchResult.setDefendants(courtCase.getDefendantStringList());
         advancedSearchResult.setJudges(courtCase.getJudgeStringList());
+        advancedSearchResult.setIsDataAnonymised(courtCase.isDataAnonymised());
+        advancedSearchResult.setDataAnonymisedAt(courtCase.getDataAnonymisedTs());
 
         advancedSearchResult.addHearingsItem(mapToAdvancedSearchResultHearing(hearing));
 

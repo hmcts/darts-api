@@ -11,6 +11,7 @@ import static uk.gov.hmcts.darts.test.common.data.CourthouseTestData.someMinimal
 import static uk.gov.hmcts.darts.test.common.data.DefenceTestData.createDefenceForCaseWithName;
 import static uk.gov.hmcts.darts.test.common.data.DefendantTestData.createDefendantForCaseWithName;
 import static uk.gov.hmcts.darts.test.common.data.ProsecutorTestData.createProsecutorForCaseWithName;
+import static uk.gov.hmcts.darts.test.common.data.UserAccountTestData.minimalUserAccount;
 
 @UtilityClass
 @SuppressWarnings({"HideUtilityClassConstructor"})
@@ -23,15 +24,20 @@ public class CaseTestData {
         courtCaseEntity.setCaseNumber("case-1-" + postfix);
         courtCaseEntity.setClosed(false);
         courtCaseEntity.setInterpreterUsed(false);
+        var userAccount = minimalUserAccount();
+        courtCaseEntity.setCreatedBy(userAccount);
+        courtCaseEntity.setLastModifiedBy(userAccount);
         return courtCaseEntity;
     }
 
-    public static CourtCaseEntity createSomeMinimalCase(String caseNumber) {
-        return createSomeMinimalCase(caseNumber, null);
+    public static CourtCaseEntity caseWithCaseNumber(String caseNumber) {
+        var someMinimalCase = createSomeMinimalCase();
+        someMinimalCase.setCaseNumber(caseNumber);
+        return someMinimalCase;
     }
 
-    public static CourtCaseEntity createSomeMinimalCase(String caseNumber, CourthouseEntity courthouseEntity) {
-        var courtCaseEntity = new CourtCaseEntity();
+    public static CourtCaseEntity createCaseWith(String caseNumber, CourthouseEntity courthouseEntity) {
+        var courtCaseEntity = createSomeMinimalCase();
 
         if (courthouseEntity == null) {
             courtCaseEntity.setCourthouse(someMinimalCourthouse());
@@ -45,6 +51,7 @@ public class CaseTestData {
         return courtCaseEntity;
     }
 
+    @Deprecated
     // Not a minimal case. refactor
     public static CourtCaseEntity someMinimalCase() {
         var courtCaseEntity = new CourtCaseEntity();
@@ -55,6 +62,8 @@ public class CaseTestData {
         courtCaseEntity.addProsecutor(createProsecutorForCaseWithName(courtCaseEntity, "aProsecutor"));
         courtCaseEntity.setClosed(false);
         courtCaseEntity.setInterpreterUsed(false);
+        courtCaseEntity.setCreatedBy(UserAccountTestData.minimalUserAccount());
+        courtCaseEntity.setLastModifiedBy(UserAccountTestData.minimalUserAccount());
         return courtCaseEntity;
     }
 
@@ -92,11 +101,4 @@ public class CaseTestData {
         courtCase.setCaseNumber(caseNumber);
         return courtCase;
     }
-
-    public static CourtCaseEntity createCaseAtCourthouse(String caseNumber, CourthouseEntity courthouse) {
-        var courtCase = createCaseWithCaseNumber(caseNumber);
-        courtCase.setCourthouse(courthouse);
-        return courtCase;
-    }
-
 }

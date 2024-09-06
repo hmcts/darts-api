@@ -108,8 +108,14 @@ paths:
                     type: "RETENTION_107"
                     title: "The retention date being applied is too late."
                     status: 422
-                    detail: caseId '26029' must have a retention date before the maximum retention date '2123-01-15'..
+                    detail: caseId '26029' must have a retention date before the maximum retention date '2123-01-15'.
                     max_duration: "99Y0M0D"
+                case_retention_passed:
+                  value:
+                    type: "RETENTION_118"
+                    title: "The retention date cannot be amended as the case is already expired."
+                    status: 422
+                    detail: caseId '26029' retention date cannot be amended as the case is already expired.
         '500':
           description: Internal Server Error
           content:
@@ -436,11 +442,12 @@ components:
         - "RETENTION_115"
         - "RETENTION_116"
         - "RETENTION_117"
+        - "RETENTION_118"
       x-enum-varnames: [ NO_PERMISSION_REDUCE_RETENTION, RETENTION_DATE_TOO_EARLY, INVALID_REQUEST, CASE_NOT_FOUND, CASE_NOT_CLOSED,
                          NO_RETENTION_POLICIES_APPLIED, INTERNAL_SERVER_ERROR, RETENTION_DATE_TOO_LATE, RETENTION_POLICY_TYPE_ID_NOT_FOUND,
                          NON_UNIQUE_POLICY_NAME, NON_UNIQUE_POLICY_DISPLAY_NAME, DURATION_TOO_SHORT, POLICY_START_MUST_BE_FUTURE,
                          POLICY_START_DATE_MUST_BE_PAST, NON_UNIQUE_FIXED_POLICY_KEY, FIXED_POLICY_KEY_NOT_FOUND, LIVE_POLICIES_CANNOT_BE_EDITED,
-                         TARGET_POLICY_HAS_PENDING_REVISION ]
+                         TARGET_POLICY_HAS_PENDING_REVISION, CASE_RETENTION_PASSED]
 
     RetentionTitleErrors:
       type: string
@@ -463,8 +470,9 @@ components:
         - "Fixed policy key not recognised"
         - "Live policies cannot be edited"
         - "Target policy has pending revision"
+        - "The retention date cannot be amended as the case is already expired."
       x-enum-varnames: [ NO_PERMISSION_REDUCE_RETENTION, RETENTION_DATE_TOO_EARLY, INVALID_REQUEST, CASE_NOT_FOUND, CASE_NOT_CLOSED,
                          NO_RETENTION_POLICIES_APPLIED, INTERNAL_SERVER_ERROR, RETENTION_DATE_TOO_LATE, RETENTION_POLICY_TYPE_ID_NOT_FOUND,
                          NON_UNIQUE_POLICY_NAME, NON_UNIQUE_POLICY_DISPLAY_NAME, DURATION_TOO_SHORT, POLICY_START_MUST_BE_FUTURE,
                          POLICY_START_DATE_MUST_BE_PAST, NON_UNIQUE_FIXED_POLICY_KEY, FIXED_POLICY_KEY_NOT_FOUND, LIVE_POLICIES_CANNOT_BE_EDITED,
-                         TARGET_POLICY_HAS_PENDING_REVISION ]
+                         TARGET_POLICY_HAS_PENDING_REVISION, CASE_RETENTION_PASSED]

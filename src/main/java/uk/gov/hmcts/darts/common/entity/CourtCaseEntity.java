@@ -167,16 +167,6 @@ public class CourtCaseEntity extends CreatedModifiedBaseEntity {
         }
     }
 
-    public void addDefendant(String name) {
-        if (defendantList.stream().noneMatch(defendantEntity -> defendantEntity.getName().equalsIgnoreCase(
-            name))) {
-            DefendantEntity defendantEntity = new DefendantEntity();
-            defendantEntity.setName(name);
-            defendantEntity.setCourtCase(this);
-            defendantList.add(defendantEntity);
-        }
-    }
-
     public void addJudge(JudgeEntity judge) {
         if (judges.stream().noneMatch(judgeEntity -> judgeEntity.getName().equalsIgnoreCase(judge.getName()))) {
             judges.add(judge);
@@ -187,16 +177,6 @@ public class CourtCaseEntity extends CreatedModifiedBaseEntity {
         if (prosecutorList.stream().noneMatch(prosecutorEntity -> prosecutorEntity.getName().equalsIgnoreCase(
             prosecutor.getName()))) {
             prosecutorList.add(prosecutor);
-        }
-    }
-
-    public void addProsecutor(String name) {
-        if (prosecutorList.stream().noneMatch(prosecutorEntity -> prosecutorEntity.getName().equalsIgnoreCase(
-            name))) {
-            ProsecutorEntity prosecutorEntity = new ProsecutorEntity();
-            prosecutorEntity.setName(name);
-            prosecutorEntity.setCourtCase(this);
-            prosecutorList.add(prosecutorEntity);
         }
     }
 

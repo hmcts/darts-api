@@ -11,6 +11,7 @@ import org.testcontainers.containers.PostgreSQLContainer;
 import uk.gov.hmcts.darts.test.common.LogUtil;
 import uk.gov.hmcts.darts.test.common.MemoryLogAppender;
 import uk.gov.hmcts.darts.testutils.stubs.DartsDatabaseStub;
+import uk.gov.hmcts.darts.testutils.stubs.DartsPersistence;
 
 /**
  * Base class for integration tests running against a containerized Postgres with Testcontainers.
@@ -21,6 +22,9 @@ public class PostgresIntegrationBase {
 
     @Autowired
     protected DartsDatabaseStub dartsDatabase;
+
+    @Autowired
+    protected DartsPersistence dartsPersistence;
 
     @Autowired
     protected OpenInViewUtil openInViewUtil;

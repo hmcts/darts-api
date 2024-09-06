@@ -23,7 +23,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.mockito.Mockito.when;
 
 class GenerateCaseDocumentForRetentionDateBatchProcessorIntTest extends IntegrationBase {
-    protected static final String SOME_COURTHOUSE = "some-courthouse";
+    protected static final String SOME_COURTHOUSE = "SOME-COURTHOUSE";
     protected static final String SOME_ROOM = "some-room";
     protected static final String SOME_CASE_NUMBER_1 = "CASE1";
     protected static final String SOME_CASE_NUMBER_2 = "CASE2";

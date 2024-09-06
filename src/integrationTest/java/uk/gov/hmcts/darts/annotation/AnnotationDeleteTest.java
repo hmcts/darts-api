@@ -1,6 +1,5 @@
 package uk.gov.hmcts.darts.annotation;
 
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
@@ -24,10 +23,9 @@ import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.JUDICIARY;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.SUPER_ADMIN;
 import static uk.gov.hmcts.darts.test.common.data.AnnotationTestData.minimalAnnotationEntity;
 import static uk.gov.hmcts.darts.test.common.data.CourthouseTestData.someMinimalCourthouse;
-import static uk.gov.hmcts.darts.test.common.data.HearingTestData.createSomeMinimalHearing;
+import static uk.gov.hmcts.darts.test.common.data.HearingTestData.someMinimalHearing;
 import static uk.gov.hmcts.darts.test.common.data.UserAccountTestData.minimalUserAccount;
 
-@Disabled("Impacted by V1_367__adding_not_null_constraints_part_4.sql")
 @AutoConfigureMockMvc
 class AnnotationDeleteTest extends IntegrationBase {
 
@@ -40,7 +38,6 @@ class AnnotationDeleteTest extends IntegrationBase {
     private MockMvc mockMvc;
 
     @Test
-    @Disabled("Impacted by V1_364_*.sql")
     void judgeWithGlobalAccessCanDeleteTheirOwnAnnotation() throws Exception {
         var judge = given.anAuthenticatedUserWithGlobalAccessAndRole(JUDICIARY);
         var annotation = someAnnotationNotMarkedForDeletionCreatedBy(judge);
@@ -57,9 +54,8 @@ class AnnotationDeleteTest extends IntegrationBase {
     }
 
     @Test
-    @Disabled("Impacted by V1_364_*.sql")
     void judgeWithCourthouseAccessCanDeleteTheirOwnAnnotation() throws Exception {
-        var hearing = dartsDatabase.save(createSomeMinimalHearing());
+        var hearing = dartsPersistence.save(someMinimalHearing());
         var judge = given.anAuthenticatedUserAuthorizedForCourthouse(JUDICIARY, hearing.getCourtroom().getCourthouse());
         var annotation = someAnnotationForHearingNotMarkedForDeletionCreatedBy(judge, hearing);
 
@@ -70,10 +66,9 @@ class AnnotationDeleteTest extends IntegrationBase {
     }
 
     @Test
-    @Disabled("Impacted by V1_364_*.sql")
     void preventsJudgeNotAuthorizedForCourthouseDeletingAnnotationAssociatedWithThatCourthouse() throws Exception {
-        var annotationHearing = dartsDatabase.save(createSomeMinimalHearing());
-        var someOtherCourthouse = dartsDatabase.save(someMinimalCourthouse());
+        var annotationHearing = dartsPersistence.save(someMinimalHearing());
+        var someOtherCourthouse = dartsPersistence.save(someMinimalCourthouse());
         var judge = given.anAuthenticatedUserAuthorizedForCourthouse(JUDICIARY, someOtherCourthouse);
         var annotation = someAnnotationForHearingNotMarkedForDeletionCreatedBy(judge, annotationHearing);
 
@@ -84,7 +79,6 @@ class AnnotationDeleteTest extends IntegrationBase {
     }
 
     @Test
-    @Disabled("Impacted by V1_364_*.sql")
     void preventsJudgesFromDeletingAnotherJudgesAnnotations() throws Exception {
         given.anAuthenticatedUserWithGlobalAccessAndRole(JUDICIARY);
         var someOtherJudge = minimalUserAccount();
@@ -97,7 +91,6 @@ class AnnotationDeleteTest extends IntegrationBase {
     }
 
     @Test
-    @Disabled("Impacted by V1_364_*.sql")
     void allowsDeleteAnnotationBySuperAdmin() throws Exception {
         given.anAuthenticatedUserWithGlobalAccessAndRole(SUPER_ADMIN);
         var someJudge = minimalUserAccount();
@@ -111,7 +104,6 @@ class AnnotationDeleteTest extends IntegrationBase {
 
     @ParameterizedTest
     @EnumSource(value = SecurityRoleEnum.class, names = {"SUPER_ADMIN", "JUDICIARY"}, mode = Mode.EXCLUDE)
-    @Disabled("Impacted by V1_364_*.sql")
     void disallowsDeleteAnnotationByRolesOtherThanSuperAdminAndJudge(SecurityRoleEnum role) throws Exception {
         given.anAuthenticatedUserWithGlobalAccessAndRole(role);
         var someJudge = minimalUserAccount();
@@ -134,7 +126,7 @@ class AnnotationDeleteTest extends IntegrationBase {
     }
 
     private AnnotationEntity someAnnotationNotMarkedForDeletionCreatedBy(UserAccountEntity userAccount) {
-        return someAnnotationForHearingNotMarkedForDeletionCreatedBy(userAccount, createSomeMinimalHearing());
+        return someAnnotationForHearingNotMarkedForDeletionCreatedBy(userAccount, someMinimalHearing());
     }
 
     private AnnotationEntity someAnnotationForHearingNotMarkedForDeletionCreatedBy(UserAccountEntity userAccount, HearingEntity hearing) {
@@ -143,8 +135,9 @@ class AnnotationDeleteTest extends IntegrationBase {
         annotation.setCurrentOwner(userAccount);
         annotation.setCreatedBy(userAccount);
         annotation.setLastModifiedBy(userAccount);
-        annotation.addHearing(dartsDatabase.save(hearing));
-        dartsDatabase.save(annotation);
+        var hearingEntity = dartsPersistence.save(hearing);
+        annotation.addHearing(hearingEntity);
+        dartsPersistence.save(annotation);
         return annotation;
     }
 }

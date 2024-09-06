@@ -1,7 +1,6 @@
 package uk.gov.hmcts.darts.audio.controller;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -11,7 +10,6 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import uk.gov.hmcts.darts.audiorequests.model.AudioRequestType;
 import uk.gov.hmcts.darts.audit.api.AuditActivity;
-import uk.gov.hmcts.darts.audit.service.AuditService;
 import uk.gov.hmcts.darts.authorisation.component.Authorisation;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.datamanagement.enums.DatastoreContainerType;
@@ -71,9 +69,6 @@ class AudioRequestsControllerDownloadIntTest extends IntegrationBase {
     private DataManagementService dataManagementService;
 
     @Autowired
-    private AuditService auditService;
-
-    @Autowired
     private AuditRepository auditRepository;
 
     @BeforeEach
@@ -83,7 +78,6 @@ class AudioRequestsControllerDownloadIntTest extends IntegrationBase {
     }
 
     @Test
-    @Disabled("Impacted by V1_362__constraint_transcription_part6.sql")
     void audioRequestDownloadShouldDownloadFromOutboundStorageAndReturnSuccess() throws Exception {
         var blobId = UUID.randomUUID();
 
@@ -129,7 +123,6 @@ class AudioRequestsControllerDownloadIntTest extends IntegrationBase {
     }
 
     @Test
-    @Disabled("Impacted by V1_362__constraint_transcription_part6.sql")
     void audioRequestDownloadShouldReturnInternalServerErrorWhenExceptionDuringDownloadBlobData() throws Exception {
         var blobId = UUID.randomUUID();
 
@@ -170,7 +163,6 @@ class AudioRequestsControllerDownloadIntTest extends IntegrationBase {
     }
 
     @Test
-    @Disabled("Impacted by V1_364_*.sql")
     void audioRequestDownloadGetShouldReturnBadRequestWhenMediaRequestEntityIsPlayback() throws Exception {
         authorisationStub.givenTestSchema();
 
@@ -198,7 +190,6 @@ class AudioRequestsControllerDownloadIntTest extends IntegrationBase {
     }
 
     @Test
-    @Disabled("Impacted by V1_364_*.sql")
     void audioRequestDownloadGetShouldReturnErrorWhenNoRelatedTransientObjectExistsInDatabase() throws Exception {
         authorisationStub.givenTestSchema();
 

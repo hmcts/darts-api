@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.darts.common.entity.ExternalLocationTypeEntity;
+import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.entity.ObjectRecordStatusEntity;
 import uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum;
 import uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum;
@@ -59,15 +60,16 @@ public class InboundToUnstructuredProcessorImpl implements InboundToUnstructured
     }
 
     private void processAllStoredInboundExternalObjectsOneCall() {
-        List<Integer> inboundList = externalObjectDirectoryRepository.findEodIdsForTransfer(getStatus(STORED), getType(INBOUND),
-                                                                                            getStatus(STORED), getType(UNSTRUCTURED), 3, limit);
+        List<ExternalObjectDirectoryEntity> inboundList = externalObjectDirectoryRepository.findEodsForTransfer(getStatus(STORED), getType(INBOUND),
+                                                                                                                getStatus(STORED), getType(UNSTRUCTURED), 3,
+                                                                                                                limit);
         int count = 1;
-        for (Integer inboundObjectId : inboundList) {
-            log.debug("Processing Inbound to Unstructured record {} of {} with EOD {}", count++, inboundList.size(), inboundObjectId);
+        for (ExternalObjectDirectoryEntity inboundObject : inboundList) {
+            log.debug("Processing Inbound to Unstructured record {} of {} with EOD {}", count++, inboundList.size(), inboundObject);
             try {
-                singleElementProcessor.processSingleElement(inboundObjectId);
+                singleElementProcessor.processSingleElement(inboundObject);
             } catch (Exception exception) {
-                log.error("Failed to move from inbound file to unstructured data store for EOD id: {}", inboundObjectId, exception);
+                log.error("Failed to move from inbound file to unstructured data store for EOD id: {}", inboundObject.getId(), exception);
             }
         }
     }

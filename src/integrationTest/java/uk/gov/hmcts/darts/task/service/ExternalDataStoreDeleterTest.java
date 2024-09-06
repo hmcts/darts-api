@@ -33,7 +33,7 @@ import uk.gov.hmcts.darts.common.enums.SystemUsersAccountUUIDEnum;
 import uk.gov.hmcts.darts.common.helper.SystemUserHelper;
 import uk.gov.hmcts.darts.common.repository.TransformedMediaRepository;
 import uk.gov.hmcts.darts.task.config.AutomatedTaskConfigurationProperties;
-import uk.gov.hmcts.darts.test.common.data.AudioTestData;
+import uk.gov.hmcts.darts.test.common.data.MediaRequestTestData;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 import uk.gov.hmcts.darts.testutils.stubs.TransientObjectDirectoryStub;
 
@@ -149,7 +149,7 @@ class ExternalDataStoreDeleterTest extends IntegrationBase {
         Mockito.when(dataManagementFactory.getBlobContainerClient(anyString(), eq(blobServiceClient))).thenReturn(blobContainerClient);
         Mockito.when(dataManagementFactory.getBlobClient(any(), any())).thenReturn(blobClient);
 
-        MediaRequestEntity currentMediaRequest = AudioTestData.createCurrentMediaRequest(
+        MediaRequestEntity currentMediaRequest = MediaRequestTestData.createCurrentMediaRequest(
             hearing,
             requestor,
             OffsetDateTime.parse("2023-06-26T13:00:00Z"),
@@ -190,7 +190,7 @@ class ExternalDataStoreDeleterTest extends IntegrationBase {
         Mockito.when(dataManagementFactory.getBlobContainerClient(anyString(), eq(blobServiceClient))).thenReturn(blobContainerClient);
         Mockito.when(dataManagementFactory.getBlobClient(any(), any())).thenReturn(blobClient);
 
-        MediaRequestEntity currentMediaRequest = AudioTestData.createCurrentMediaRequest(
+        MediaRequestEntity currentMediaRequest = MediaRequestTestData.createCurrentMediaRequest(
             hearing,
             requestor,
             OffsetDateTime.parse("2023-06-26T13:00:00Z"),

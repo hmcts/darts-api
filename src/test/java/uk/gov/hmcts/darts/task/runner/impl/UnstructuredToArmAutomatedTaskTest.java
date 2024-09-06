@@ -1,18 +1,17 @@
 package uk.gov.hmcts.darts.task.runner.impl;
 
-import net.javacrumbs.shedlock.core.LockProvider;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
-import uk.gov.hmcts.darts.arm.component.AutomatedTaskProcessorFactory;
 import uk.gov.hmcts.darts.arm.service.impl.UnstructuredToArmBatchProcessorImpl;
 import uk.gov.hmcts.darts.arm.service.impl.UnstructuredToArmProcessorImpl;
 import uk.gov.hmcts.darts.common.entity.AutomatedTaskEntity;
 import uk.gov.hmcts.darts.common.repository.AutomatedTaskRepository;
 import uk.gov.hmcts.darts.log.api.LogApi;
 import uk.gov.hmcts.darts.task.config.AutomatedTaskConfigurationProperties;
+import uk.gov.hmcts.darts.task.service.LockService;
 
 import java.util.Optional;
 
@@ -23,13 +22,11 @@ class UnstructuredToArmAutomatedTaskTest {
     @Mock
     private AutomatedTaskRepository automatedTaskRepository;
     @Mock
-    private LockProvider lockProvider;
-    @Mock
     private AutomatedTaskConfigurationProperties automatedTaskConfigurationProperties;
     @Mock
-    AutomatedTaskProcessorFactory processorFactory;
-    @Mock
     private LogApi logApi;
+    @Mock
+    private LockService lockService;
     @Mock
     UnstructuredToArmProcessorImpl unstructuredToArmProcessor;
     @Mock
@@ -44,14 +41,14 @@ class UnstructuredToArmAutomatedTaskTest {
         UnstructuredToArmAutomatedTask unstructuredToArmAutomatedTask =
             new UnstructuredToArmAutomatedTask(
                 automatedTaskRepository,
-                lockProvider,
                 automatedTaskConfigurationProperties,
-                processorFactory,
-                logApi
+                unstructuredToArmBatchProcessor,
+                unstructuredToArmProcessor,
+                logApi,
+                lockService
             );
 
         when(automatedTaskRepository.findByTaskName("UnstructuredToArmDataStore")).thenReturn(Optional.of(automatedTask));
-        when(processorFactory.createUnstructuredToArmProcessor(0)).thenReturn(unstructuredToArmProcessor);
 
         unstructuredToArmAutomatedTask.runTask();
 
@@ -69,19 +66,19 @@ class UnstructuredToArmAutomatedTaskTest {
         UnstructuredToArmAutomatedTask unstructuredToArmAutomatedTask =
             new UnstructuredToArmAutomatedTask(
                 automatedTaskRepository,
-                lockProvider,
                 automatedTaskConfigurationProperties,
-                processorFactory,
-                logApi
+                unstructuredToArmBatchProcessor,
+                unstructuredToArmProcessor,
+                logApi,
+                lockService
             );
 
         when(automatedTaskRepository.findByTaskName("UnstructuredToArmDataStore")).thenReturn(Optional.of(automatedTask));
-        when(processorFactory.createUnstructuredToArmProcessor(10)).thenReturn(unstructuredToArmBatchProcessor);
 
         unstructuredToArmAutomatedTask.runTask();
 
         //then
-        Mockito.verify(unstructuredToArmBatchProcessor, Mockito.times(1)).processUnstructuredToArm();
+        Mockito.verify(unstructuredToArmBatchProcessor, Mockito.times(1)).processUnstructuredToArm(10);
     }
 }
 

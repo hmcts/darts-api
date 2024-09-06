@@ -1,13 +1,13 @@
 package uk.gov.hmcts.darts.task.runner.impl;
 
 import lombok.extern.slf4j.Slf4j;
-import net.javacrumbs.shedlock.core.LockProvider;
 import uk.gov.hmcts.darts.common.repository.AutomatedTaskRepository;
 import uk.gov.hmcts.darts.log.api.LogApi;
 import uk.gov.hmcts.darts.task.config.AutomatedTaskConfigurationProperties;
+import uk.gov.hmcts.darts.task.service.LockService;
 import uk.gov.hmcts.darts.transcriptions.service.TranscriptionsProcessor;
 
-import static uk.gov.hmcts.darts.task.runner.AutomatedTaskName.CLOSE_OLD_UNFINISHED_TRANSCRIPTIONS_TASK_NAME;
+import static uk.gov.hmcts.darts.task.api.AutomatedTaskName.CLOSE_OLD_UNFINISHED_TRANSCRIPTIONS_TASK_NAME;
 
 @Slf4j
 public class CloseUnfinishedTranscriptionsAutomatedTask extends AbstractLockableAutomatedTask {
@@ -17,11 +17,10 @@ public class CloseUnfinishedTranscriptionsAutomatedTask extends AbstractLockable
     protected String taskName = CLOSE_OLD_UNFINISHED_TRANSCRIPTIONS_TASK_NAME.getTaskName();
 
     public CloseUnfinishedTranscriptionsAutomatedTask(AutomatedTaskRepository automatedTaskRepository,
-                                                      LockProvider lockProvider,
                                                       AutomatedTaskConfigurationProperties automatedTaskConfigurationProperties,
                                                       TranscriptionsProcessor transcriptionsProcessor,
-                                                      LogApi logApi) {
-        super(automatedTaskRepository, lockProvider, automatedTaskConfigurationProperties, logApi);
+                                                      LogApi logApi, LockService lockService) {
+        super(automatedTaskRepository, automatedTaskConfigurationProperties, logApi, lockService);
         this.transcriptionsProcessor = transcriptionsProcessor;
     }
 

@@ -3,7 +3,6 @@ package uk.gov.hmcts.darts.task.service;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.Query;
 import lombok.extern.slf4j.Slf4j;
-import net.javacrumbs.shedlock.core.LockProvider;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -18,10 +17,13 @@ import org.springframework.scheduling.config.ScheduledTask;
 import org.springframework.scheduling.config.ScheduledTaskHolder;
 import org.springframework.scheduling.config.Task;
 import org.springframework.scheduling.config.TriggerTask;
+import org.springframework.scheduling.support.CronExpression;
 import uk.gov.hmcts.darts.arm.component.AutomatedTaskProcessorFactory;
 import uk.gov.hmcts.darts.arm.service.ArmRetentionEventDateProcessor;
 import uk.gov.hmcts.darts.arm.service.CleanupArmResponseFilesService;
 import uk.gov.hmcts.darts.arm.service.InboundAnnotationTranscriptionDeleterProcessor;
+import uk.gov.hmcts.darts.arm.service.impl.UnstructuredToArmBatchProcessorImpl;
+import uk.gov.hmcts.darts.arm.service.impl.UnstructuredToArmProcessorImpl;
 import uk.gov.hmcts.darts.audio.deleter.impl.inbound.ExternalInboundDataStoreDeleter;
 import uk.gov.hmcts.darts.audio.deleter.impl.outbound.ExternalOutboundDataStoreDeleter;
 import uk.gov.hmcts.darts.audio.deleter.impl.unstructured.ExternalUnstructuredDataStoreDeleter;
@@ -40,10 +42,11 @@ import uk.gov.hmcts.darts.datamanagement.service.InboundToUnstructuredProcessor;
 import uk.gov.hmcts.darts.event.service.RemoveDuplicateEventsProcessor;
 import uk.gov.hmcts.darts.log.api.LogApi;
 import uk.gov.hmcts.darts.retention.service.ApplyRetentionCaseAssociatedObjectsProcessor;
+import uk.gov.hmcts.darts.task.api.AutomatedTaskName;
 import uk.gov.hmcts.darts.task.config.AutomatedTaskConfigurationProperties;
 import uk.gov.hmcts.darts.task.exception.AutomatedTaskSetupError;
 import uk.gov.hmcts.darts.task.runner.AutomatedTask;
-import uk.gov.hmcts.darts.task.runner.AutomatedTaskName;
+import uk.gov.hmcts.darts.task.runner.impl.AbstractLockableAutomatedTask;
 import uk.gov.hmcts.darts.task.runner.impl.ApplyRetentionCaseAssociatedObjectsAutomatedTask;
 import uk.gov.hmcts.darts.task.runner.impl.ArmRetentionEventDateCalculatorAutomatedTask;
 import uk.gov.hmcts.darts.task.runner.impl.CleanupArmResponseFilesAutomatedTask;
@@ -66,6 +69,7 @@ import uk.gov.hmcts.darts.task.status.AutomatedTaskStatus;
 import uk.gov.hmcts.darts.testutils.IntegrationPerClassBase;
 import uk.gov.hmcts.darts.transcriptions.service.TranscriptionsProcessor;
 
+import java.time.LocalDateTime;
 import java.util.Optional;
 import java.util.Set;
 
@@ -92,8 +96,6 @@ class AutomatedTaskServiceTest extends IntegrationPerClassBase {
     private ScheduledTaskHolder scheduledTaskHolder;
     @Autowired
     private AutomatedTaskRepository automatedTaskRepository;
-    @Autowired
-    private LockProvider lockProvider;
     @Autowired
     private AutomatedTaskConfigurationProperties automatedTaskConfigurationProperties;
     @Autowired
@@ -148,6 +150,15 @@ class AutomatedTaskServiceTest extends IntegrationPerClassBase {
     @Autowired
     private LogApi logApi;
 
+    @Autowired
+    private LockService lockService;
+
+    @Autowired
+    UnstructuredToArmProcessorImpl unstructuredToArmProcessor;
+    @Autowired
+    UnstructuredToArmBatchProcessorImpl unstructuredToArmBatchProcessor;
+
+
     @MockBean
     private UserIdentity userIdentity;
 
@@ -187,9 +198,14 @@ class AutomatedTaskServiceTest extends IntegrationPerClassBase {
                              cronTask.getExpression(), cronTask.getRunnable()
                     );
                 } else if (task instanceof TriggerTask triggerTask) {
-                    log.info("TriggerTask trigger: {} Runnable: {}",
-                             triggerTask.getTrigger(), triggerTask.getRunnable()
-                    );
+
+                    if (triggerTask.getRunnable() instanceof AbstractLockableAutomatedTask automatedTask) {
+                        log.info("TriggerTask name: {}, cron expression: {}",
+                                 automatedTask.getTaskName(), automatedTask.getLastCronExpression());
+                    } else {
+                        log.info("TriggerTask trigger: {} Runnable: {}",
+                                 triggerTask.getTrigger(), triggerTask.getRunnable());
+                    }
                 } else if (task instanceof FixedRateTask fixedRateTask) {
                     log.info("FixedRateTask initial delay duration: {} Interval duration: {} ",
                              fixedRateTask.getInitialDelayDuration(), fixedRateTask.getIntervalDuration()
@@ -208,10 +224,10 @@ class AutomatedTaskServiceTest extends IntegrationPerClassBase {
     @Test
     void givenSuccessfullyStartedTaskFailsDuringExecutionThenStatusIsSetToFailed() {
         GenerateCaseDocumentAutomatedTask automatedTask
-            = new GenerateCaseDocumentAutomatedTask(automatedTaskRepository, lockProvider,
-                                                    automatedTaskConfigurationProperties, taskProcessorFactory, logApi);
-        doThrow(ArithmeticException.class).when(caseRepository)
-            .findCasesNeedingCaseDocumentGenerated(any(), any());
+            = new GenerateCaseDocumentAutomatedTask(
+            automatedTaskRepository, automatedTaskConfigurationProperties, taskProcessorFactory, logApi, lockService
+        );
+        doThrow(ArithmeticException.class).when(caseRepository).findCasesNeedingCaseDocumentGenerated(any(), any());
 
         automatedTaskService.cancelAutomatedTaskAndUpdateCronExpression(automatedTask.getTaskName(), true, "*/7 * * * * *");
 
@@ -223,8 +239,8 @@ class AutomatedTaskServiceTest extends IntegrationPerClassBase {
 
     @Test
     void givenAutomatedTaskVerifyStatusBeforeAndAfterRunning() {
-        ProcessDailyListAutomatedTask automatedTask = new ProcessDailyListAutomatedTask(automatedTaskRepository, lockProvider,
-                                                                                        automatedTaskConfigurationProperties, logApi
+        ProcessDailyListAutomatedTask automatedTask = new ProcessDailyListAutomatedTask(
+            automatedTaskRepository, automatedTaskConfigurationProperties, logApi, lockService
         );
 
         Optional<AutomatedTaskEntity> originalAutomatedTaskEntity =
@@ -254,8 +270,8 @@ class AutomatedTaskServiceTest extends IntegrationPerClassBase {
 
     @Test
     void givenConfiguredTaskCancelProcessDailyList() {
-        AutomatedTask automatedTask = new ProcessDailyListAutomatedTask(automatedTaskRepository, lockProvider,
-                                                                        automatedTaskConfigurationProperties, logApi
+        AutomatedTask automatedTask = new ProcessDailyListAutomatedTask(
+            automatedTaskRepository, automatedTaskConfigurationProperties, logApi, lockService
         );
 
         Set<ScheduledTask> scheduledTasks = scheduledTaskHolder.getScheduledTasks();
@@ -271,8 +287,8 @@ class AutomatedTaskServiceTest extends IntegrationPerClassBase {
 
     @Test
     void givenConfiguredTasksUpdateCronExpressionAndResetCronExpression() {
-        AutomatedTask automatedTask = new ProcessDailyListAutomatedTask(automatedTaskRepository, lockProvider,
-                                                                        automatedTaskConfigurationProperties, logApi
+        AutomatedTask automatedTask = new ProcessDailyListAutomatedTask(
+            automatedTaskRepository, automatedTaskConfigurationProperties, logApi, lockService
         );
         Optional<AutomatedTaskEntity> originalAutomatedTaskEntity =
             automatedTaskService.getAutomatedTaskEntityByTaskName(automatedTask.getTaskName());
@@ -296,8 +312,8 @@ class AutomatedTaskServiceTest extends IntegrationPerClassBase {
 
     @Test
     void cancelAutomatedTaskAndUpdateCronExpression() {
-        AutomatedTask automatedTask = new ProcessDailyListAutomatedTask(automatedTaskRepository, lockProvider,
-                                                                        automatedTaskConfigurationProperties, logApi
+        AutomatedTask automatedTask = new ProcessDailyListAutomatedTask(
+            automatedTaskRepository, automatedTaskConfigurationProperties, logApi, lockService
         );
         Optional<AutomatedTaskEntity> originalAutomatedTaskEntity =
             automatedTaskService.getAutomatedTaskEntityByTaskName(automatedTask.getTaskName());
@@ -332,8 +348,8 @@ class AutomatedTaskServiceTest extends IntegrationPerClassBase {
     @Test
     @SuppressWarnings("PMD.LawOfDemeter")
     void givenExistingAutomatedTaskNameAndInvalidCronExpressionThrowsDartsApiException() {
-        AutomatedTask automatedTask = new ProcessDailyListAutomatedTask(automatedTaskRepository, lockProvider,
-                                                                        automatedTaskConfigurationProperties, logApi
+        AutomatedTask automatedTask = new ProcessDailyListAutomatedTask(
+            automatedTaskRepository, automatedTaskConfigurationProperties, logApi, lockService
         );
 
         var exception = assertThrows(
@@ -348,9 +364,9 @@ class AutomatedTaskServiceTest extends IntegrationPerClassBase {
     }
 
     @Test
-    void updateCronExpressionWithoutRescheduleForcingTaskToSkipRunning() throws InterruptedException {
-        AutomatedTask automatedTask = new ProcessDailyListAutomatedTask(automatedTaskRepository, lockProvider,
-                                                                        automatedTaskConfigurationProperties, logApi
+    void updateCronExpressionWithoutRescheduleForcingTaskToSkipRunning() {
+        AutomatedTask automatedTask = new ProcessDailyListAutomatedTask(
+            automatedTaskRepository, automatedTaskConfigurationProperties, logApi, lockService
         );
         Optional<AutomatedTaskEntity> originalAutomatedTaskEntity =
             automatedTaskService.getAutomatedTaskEntityByTaskName(automatedTask.getTaskName());
@@ -394,10 +410,10 @@ class AutomatedTaskServiceTest extends IntegrationPerClassBase {
         AutomatedTask automatedTask =
             new CloseUnfinishedTranscriptionsAutomatedTask(
                 automatedTaskRepository,
-                lockProvider,
                 automatedTaskConfigurationProperties,
                 transcriptionsProcessor,
-                logApi
+                logApi,
+                lockService
             );
         Optional<AutomatedTaskEntity> originalAutomatedTaskEntity =
             automatedTaskService.getAutomatedTaskEntityByTaskName(automatedTask.getTaskName());
@@ -427,10 +443,10 @@ class AutomatedTaskServiceTest extends IntegrationPerClassBase {
         AutomatedTask automatedTask =
             new CloseUnfinishedTranscriptionsAutomatedTask(
                 automatedTaskRepository,
-                lockProvider,
                 automatedTaskConfigurationProperties,
                 transcriptionsProcessor,
-                logApi
+                logApi,
+                lockService
             );
 
         Set<ScheduledTask> scheduledTasks = scheduledTaskHolder.getScheduledTasks();
@@ -450,10 +466,10 @@ class AutomatedTaskServiceTest extends IntegrationPerClassBase {
         AutomatedTask automatedTask =
             new OutboundAudioDeleterAutomatedTask(
                 automatedTaskRepository,
-                lockProvider,
                 automatedTaskConfigurationProperties,
                 outboundAudioDeleterProcessor,
-                logApi
+                logApi,
+                lockService
             );
         Optional<AutomatedTaskEntity> originalAutomatedTaskEntity =
             automatedTaskService.getAutomatedTaskEntityByTaskName(automatedTask.getTaskName());
@@ -482,8 +498,8 @@ class AutomatedTaskServiceTest extends IntegrationPerClassBase {
     void givenConfiguredTaskCancelOutboundAudioDeleterAutomatedTask() {
         AutomatedTask automatedTask =
             new OutboundAudioDeleterAutomatedTask(automatedTaskRepository,
-                                                  lockProvider,
-                                                  automatedTaskConfigurationProperties, outboundAudioDeleterProcessor, logApi
+                                                  automatedTaskConfigurationProperties, outboundAudioDeleterProcessor, logApi,
+                                                  lockService
             );
 
         Set<ScheduledTask> scheduledTasks = scheduledTaskHolder.getScheduledTasks();
@@ -502,8 +518,8 @@ class AutomatedTaskServiceTest extends IntegrationPerClassBase {
     void givenConfiguredTaskCancelInboundAudioDeleterAutomatedTask() {
         AutomatedTask automatedTask =
             new InboundAudioDeleterAutomatedTask(automatedTaskRepository,
-                                                 lockProvider,
-                                                 automatedTaskConfigurationProperties, inboundAudioDeleterProcessor, logApi
+                                                 automatedTaskConfigurationProperties, inboundAudioDeleterProcessor, logApi,
+                                                 lockService
             );
 
         Set<ScheduledTask> scheduledTasks = scheduledTaskHolder.getScheduledTasks();
@@ -526,9 +542,9 @@ class AutomatedTaskServiceTest extends IntegrationPerClassBase {
         AutomatedTask automatedTask =
             new ExternalDataStoreDeleterAutomatedTask(
                 automatedTaskRepository,
-                lockProvider,
                 automatedTaskConfigurationProperties,
-                externalInboundDataStoreDeleter, externalUnstructuredDataStoreDeleter, externalOutboundDataStoreDeleter, logApi
+                externalInboundDataStoreDeleter, externalUnstructuredDataStoreDeleter, externalOutboundDataStoreDeleter, logApi,
+                lockService
             );
 
         Optional<AutomatedTaskEntity> originalAutomatedTaskEntity =
@@ -559,12 +575,12 @@ class AutomatedTaskServiceTest extends IntegrationPerClassBase {
         AutomatedTask automatedTask =
             new ExternalDataStoreDeleterAutomatedTask(
                 automatedTaskRepository,
-                lockProvider,
                 automatedTaskConfigurationProperties,
                 externalInboundDataStoreDeleter,
                 externalUnstructuredDataStoreDeleter,
                 externalOutboundDataStoreDeleter,
-                logApi
+                logApi,
+                lockService
             );
 
         Set<ScheduledTask> scheduledTasks = scheduledTaskHolder.getScheduledTasks();
@@ -583,8 +599,8 @@ class AutomatedTaskServiceTest extends IntegrationPerClassBase {
     void givenConfiguredTaskCancelInboundToUnstructuredAutomatedTask() {
         AutomatedTask automatedTask =
             new InboundToUnstructuredAutomatedTask(automatedTaskRepository,
-                                                   lockProvider,
-                                                   automatedTaskConfigurationProperties, inboundToUnstructuredProcessor, logApi
+                                                   automatedTaskConfigurationProperties, inboundToUnstructuredProcessor, logApi,
+                                                   lockService
             );
 
         Set<ScheduledTask> scheduledTasks = scheduledTaskHolder.getScheduledTasks();
@@ -606,9 +622,9 @@ class AutomatedTaskServiceTest extends IntegrationPerClassBase {
     void givenConfiguredTaskCancelUnstructuredAudioDeleterAutomatedTask() {
         AutomatedTask automatedTask =
             new UnstructuredAudioDeleterAutomatedTask(automatedTaskRepository,
-                                                      lockProvider,
                                                       automatedTaskConfigurationProperties,
-                                                      unstructuredAudioDeleterProcessor, logApi
+                                                      unstructuredAudioDeleterProcessor, logApi,
+                                                      lockService
             );
 
         Set<ScheduledTask> scheduledTasks = scheduledTaskHolder.getScheduledTasks();
@@ -631,10 +647,11 @@ class AutomatedTaskServiceTest extends IntegrationPerClassBase {
         AutomatedTask automatedTask =
             new UnstructuredToArmAutomatedTask(
                 automatedTaskRepository,
-                lockProvider,
                 automatedTaskConfigurationProperties,
-                taskProcessorFactory,
-                logApi
+                unstructuredToArmBatchProcessor,
+                unstructuredToArmProcessor,
+                logApi,
+                lockService
             );
 
         Optional<AutomatedTaskEntity> originalAutomatedTaskEntity =
@@ -665,10 +682,11 @@ class AutomatedTaskServiceTest extends IntegrationPerClassBase {
         AutomatedTask automatedTask =
             new UnstructuredToArmAutomatedTask(
                 automatedTaskRepository,
-                lockProvider,
                 automatedTaskConfigurationProperties,
-                taskProcessorFactory,
-                logApi
+                unstructuredToArmBatchProcessor,
+                unstructuredToArmProcessor,
+                logApi,
+                lockService
             );
 
         Set<ScheduledTask> scheduledTasks = scheduledTaskHolder.getScheduledTasks();
@@ -692,10 +710,10 @@ class AutomatedTaskServiceTest extends IntegrationPerClassBase {
         AutomatedTask automatedTask =
             new ProcessArmResponseFilesAutomatedTask(
                 automatedTaskRepository,
-                lockProvider,
                 automatedTaskConfigurationProperties,
                 taskProcessorFactory,
-                logApi
+                logApi,
+                lockService
             );
 
         Optional<AutomatedTaskEntity> originalAutomatedTaskEntity =
@@ -724,10 +742,10 @@ class AutomatedTaskServiceTest extends IntegrationPerClassBase {
         AutomatedTask automatedTask =
             new ProcessArmResponseFilesAutomatedTask(
                 automatedTaskRepository,
-                lockProvider,
                 automatedTaskConfigurationProperties,
                 taskProcessorFactory,
-                logApi
+                logApi,
+                lockService
             );
 
         Set<ScheduledTask> scheduledTasks = scheduledTaskHolder.getScheduledTasks();
@@ -750,10 +768,10 @@ class AutomatedTaskServiceTest extends IntegrationPerClassBase {
         AutomatedTask automatedTask =
             new CleanupArmResponseFilesAutomatedTask(
                 automatedTaskRepository,
-                lockProvider,
                 automatedTaskConfigurationProperties,
                 cleanupArmResponseFilesService,
-                logApi
+                logApi,
+                lockService
             );
 
         Optional<AutomatedTaskEntity> originalAutomatedTaskEntity =
@@ -784,10 +802,10 @@ class AutomatedTaskServiceTest extends IntegrationPerClassBase {
         AutomatedTask automatedTask =
             new CleanupArmResponseFilesAutomatedTask(
                 automatedTaskRepository,
-                lockProvider,
                 automatedTaskConfigurationProperties,
                 cleanupArmResponseFilesService,
-                logApi
+                logApi,
+                lockService
             );
 
         Set<ScheduledTask> scheduledTasks = scheduledTaskHolder.getScheduledTasks();
@@ -809,10 +827,10 @@ class AutomatedTaskServiceTest extends IntegrationPerClassBase {
         AutomatedTask automatedTask =
             new CloseOldCasesAutomatedTask(
                 automatedTaskRepository,
-                lockProvider,
                 automatedTaskConfigurationProperties,
                 closeOldCasesProcessor,
-                logApi
+                logApi,
+                lockService
             );
 
         Optional<AutomatedTaskEntity> originalAutomatedTaskEntity =
@@ -843,10 +861,10 @@ class AutomatedTaskServiceTest extends IntegrationPerClassBase {
         AutomatedTask automatedTask =
             new CloseOldCasesAutomatedTask(
                 automatedTaskRepository,
-                lockProvider,
                 automatedTaskConfigurationProperties,
                 closeOldCasesProcessor,
-                logApi
+                logApi,
+                lockService
             );
 
         Set<ScheduledTask> scheduledTasks = scheduledTaskHolder.getScheduledTasks();
@@ -868,10 +886,10 @@ class AutomatedTaskServiceTest extends IntegrationPerClassBase {
         AutomatedTask automatedTask =
             new GenerateCaseDocumentAutomatedTask(
                 automatedTaskRepository,
-                lockProvider,
                 automatedTaskConfigurationProperties,
                 taskProcessorFactory,
-                logApi
+                logApi,
+                lockService
             );
 
         Optional<AutomatedTaskEntity> originalAutomatedTaskEntity =
@@ -902,10 +920,10 @@ class AutomatedTaskServiceTest extends IntegrationPerClassBase {
         AutomatedTask automatedTask =
             new GenerateCaseDocumentAutomatedTask(
                 automatedTaskRepository,
-                lockProvider,
                 automatedTaskConfigurationProperties,
                 taskProcessorFactory,
-                logApi
+                logApi,
+                lockService
             );
 
         Set<ScheduledTask> scheduledTasks = scheduledTaskHolder.getScheduledTasks();
@@ -927,10 +945,10 @@ class AutomatedTaskServiceTest extends IntegrationPerClassBase {
         AutomatedTask automatedTask =
             new RemoveDuplicatedEventsAutomatedTask(
                 automatedTaskRepository,
-                lockProvider,
                 automatedTaskConfigurationProperties,
                 removeDuplicateEventsProcessor,
-                logApi
+                logApi,
+                lockService
             );
 
         Optional<AutomatedTaskEntity> originalAutomatedTaskEntity =
@@ -961,10 +979,10 @@ class AutomatedTaskServiceTest extends IntegrationPerClassBase {
         AutomatedTask automatedTask =
             new RemoveDuplicatedEventsAutomatedTask(
                 automatedTaskRepository,
-                lockProvider,
                 automatedTaskConfigurationProperties,
                 removeDuplicateEventsProcessor,
-                logApi
+                logApi,
+                lockService
             );
 
         Set<ScheduledTask> scheduledTasks = scheduledTaskHolder.getScheduledTasks();
@@ -985,10 +1003,10 @@ class AutomatedTaskServiceTest extends IntegrationPerClassBase {
     void canUpdatedCronForDailyListHouseKeepingTask() {
         var automatedTask = new DailyListAutomatedTask(
             automatedTaskRepository,
-            lockProvider,
             automatedTaskConfigurationProperties,
             dailyListService,
-            logApi
+            logApi,
+            lockService
         );
         var originalAutomatedTaskEntity = automatedTaskService.getAutomatedTaskEntityByTaskName(automatedTask.getTaskName());
 
@@ -1007,10 +1025,10 @@ class AutomatedTaskServiceTest extends IntegrationPerClassBase {
         AutomatedTask automatedTask =
             new DailyListAutomatedTask(
                 automatedTaskRepository,
-                lockProvider,
                 automatedTaskConfigurationProperties,
                 dailyListService,
-                logApi
+                logApi,
+                lockService
             );
 
         Set<ScheduledTask> scheduledTasks = scheduledTaskHolder.getScheduledTasks();
@@ -1032,10 +1050,10 @@ class AutomatedTaskServiceTest extends IntegrationPerClassBase {
         AutomatedTask automatedTask =
             new ApplyRetentionCaseAssociatedObjectsAutomatedTask(
                 automatedTaskRepository,
-                lockProvider,
                 automatedTaskConfigurationProperties,
                 applyRetentionCaseAssociatedObjectsProcessor,
-                logApi
+                logApi,
+                lockService
             );
 
         Optional<AutomatedTaskEntity> originalAutomatedTaskEntity =
@@ -1066,10 +1084,10 @@ class AutomatedTaskServiceTest extends IntegrationPerClassBase {
         AutomatedTask automatedTask =
             new ApplyRetentionCaseAssociatedObjectsAutomatedTask(
                 automatedTaskRepository,
-                lockProvider,
                 automatedTaskConfigurationProperties,
                 applyRetentionCaseAssociatedObjectsProcessor,
-                logApi
+                logApi,
+                lockService
             );
 
         Set<ScheduledTask> scheduledTasks = scheduledTaskHolder.getScheduledTasks();
@@ -1091,10 +1109,10 @@ class AutomatedTaskServiceTest extends IntegrationPerClassBase {
         AutomatedTask automatedTask =
             new ArmRetentionEventDateCalculatorAutomatedTask(
                 automatedTaskRepository,
-                lockProvider,
                 automatedTaskConfigurationProperties,
                 armRetentionEventDateProcessor,
-                logApi
+                logApi,
+                lockService
             );
         Optional<AutomatedTaskEntity> originalAutomatedTaskEntity =
             automatedTaskService.getAutomatedTaskEntityByTaskName(automatedTask.getTaskName());
@@ -1122,10 +1140,10 @@ class AutomatedTaskServiceTest extends IntegrationPerClassBase {
         AutomatedTask automatedTask =
             new ArmRetentionEventDateCalculatorAutomatedTask(
                 automatedTaskRepository,
-                lockProvider,
                 automatedTaskConfigurationProperties,
                 armRetentionEventDateProcessor,
-                logApi
+                logApi,
+                lockService
             );
 
         Set<ScheduledTask> scheduledTasks = scheduledTaskHolder.getScheduledTasks();
@@ -1147,9 +1165,9 @@ class AutomatedTaskServiceTest extends IntegrationPerClassBase {
     void givenConfiguredTaskCleanEventAutomatedTask() {
         AutomatedTask automatedTask =
             new CleanupCurrentEventTask(automatedTaskRepository,
-                                        lockProvider,
                                         automatedTaskConfigurationProperties,
-                                        taskProcessorFactory, logApi
+                                        taskProcessorFactory,
+                                        logApi, lockService
             );
 
         Set<ScheduledTask> scheduledTasks = scheduledTaskHolder.getScheduledTasks();
@@ -1202,10 +1220,10 @@ class AutomatedTaskServiceTest extends IntegrationPerClassBase {
         AutomatedTask automatedTask =
             new GenerateCaseDocumentForRetentionDateAutomatedTask(
                 automatedTaskRepository,
-                lockProvider,
                 automatedTaskConfigurationProperties,
                 taskProcessorFactory,
-                logApi
+                logApi,
+                lockService
             );
 
         Optional<AutomatedTaskEntity> originalAutomatedTaskEntity =
@@ -1236,10 +1254,10 @@ class AutomatedTaskServiceTest extends IntegrationPerClassBase {
         AutomatedTask automatedTask =
             new GenerateCaseDocumentForRetentionDateAutomatedTask(
                 automatedTaskRepository,
-                lockProvider,
                 automatedTaskConfigurationProperties,
                 taskProcessorFactory,
-                logApi
+                logApi,
+                lockService
             );
 
         Set<ScheduledTask> scheduledTasks = scheduledTaskHolder.getScheduledTasks();
@@ -1254,5 +1272,105 @@ class AutomatedTaskServiceTest extends IntegrationPerClassBase {
 
         log.info("About to reload task {}", automatedTask.getTaskName());
         automatedTaskService.reloadTaskByName(automatedTask.getTaskName());
+    }
+
+    @Test
+    void verifyCronExpressionRunsBetween8pmAnd8amAt50MinutesPastTheHour() {
+        CronExpression cronTrigger = CronExpression.parse("0 50 20-23,0-7 * * *");
+
+        LocalDateTime next = cronTrigger.next(LocalDateTime.of(2024, 9, 1, 19, 49));
+        log.info("Next Execution Time: " + next);
+        assertEquals(LocalDateTime.of(2024, 9, 1, 20, 50), next);
+
+        next = cronTrigger.next(LocalDateTime.of(2024, 9, 1, 20, 49));
+        log.info("Next Execution Time: " + next);
+        assertEquals(LocalDateTime.of(2024, 9, 1, 20, 50), next);
+
+        next = cronTrigger.next(LocalDateTime.of(2024, 9, 1, 21, 49));
+        log.info("Next Execution Time: " + next);
+        assertEquals(LocalDateTime.of(2024, 9, 1, 21, 50), next);
+
+        next = cronTrigger.next(LocalDateTime.of(2024, 9, 1, 22, 49));
+        log.info("Next Execution Time: " + next);
+        assertEquals(LocalDateTime.of(2024, 9, 1, 22, 50), next);
+
+        next = cronTrigger.next(LocalDateTime.of(2024, 9, 1, 23, 49));
+        log.info("Next Execution Time: " + next);
+        assertEquals(LocalDateTime.of(2024, 9, 1, 23, 50), next);
+
+        next = cronTrigger.next(LocalDateTime.of(2024, 9, 2, 0, 49));
+        log.info("Next Execution Time: " + next);
+        assertEquals(LocalDateTime.of(2024, 9, 2, 0, 50), next);
+
+        next = cronTrigger.next(LocalDateTime.of(2024, 9, 2, 1, 49));
+        log.info("Next Execution Time: " + next);
+        assertEquals(LocalDateTime.of(2024, 9, 2, 1, 50), next);
+
+        next = cronTrigger.next(LocalDateTime.of(2024, 9, 2, 2, 49));
+        log.info("Next Execution Time: " + next);
+        assertEquals(LocalDateTime.of(2024, 9, 2, 2, 50), next);
+
+        next = cronTrigger.next(LocalDateTime.of(2024, 9, 2, 3, 49));
+        log.info("Next Execution Time: " + next);
+        assertEquals(LocalDateTime.of(2024, 9, 2, 3, 50), next);
+
+        next = cronTrigger.next(LocalDateTime.of(2024, 9, 2, 4, 49));
+        log.info("Next Execution Time: " + next);
+        assertEquals(LocalDateTime.of(2024, 9, 2, 4, 50), next);
+
+        next = cronTrigger.next(LocalDateTime.of(2024, 9, 2, 5, 49));
+        log.info("Next Execution Time: " + next);
+        assertEquals(LocalDateTime.of(2024, 9, 2, 5, 50), next);
+
+        next = cronTrigger.next(LocalDateTime.of(2024, 9, 2, 6, 49));
+        log.info("Next Execution Time: " + next);
+        assertEquals(LocalDateTime.of(2024, 9, 2, 6, 50), next);
+
+        next = cronTrigger.next(LocalDateTime.of(2024, 9, 2, 7, 49));
+        log.info("Next Execution Time: " + next);
+        assertEquals(LocalDateTime.of(2024, 9, 2, 7, 50), next);
+
+        next = cronTrigger.next(LocalDateTime.of(2024, 9, 2, 8, 49));
+        log.info("Next Execution Time: " + next);
+        assertEquals(LocalDateTime.of(2024, 9, 2, 20, 50), next);
+
+    }
+
+    @Test
+    void verifyCronExpressionRunsEveryHourAt15MinutesPastTheHour() {
+        CronExpression cronTrigger = CronExpression.parse("0 15 * * * *");
+
+        LocalDateTime next = cronTrigger.next(LocalDateTime.of(2024, 9, 1, 10, 14));
+        log.info("Next Execution Time: " + next);
+        assertEquals(LocalDateTime.of(2024, 9, 1, 10, 15), next);
+
+        next = cronTrigger.next(LocalDateTime.of(2024, 9, 1, 10, 16));
+        log.info("Next Execution Time: " + next);
+        assertEquals(LocalDateTime.of(2024, 9, 1, 11, 15), next);
+
+        next = cronTrigger.next(LocalDateTime.of(2024, 9, 1, 23, 59));
+        log.info("Next Execution Time: " + next);
+        assertEquals(LocalDateTime.of(2024, 9, 2, 0, 15), next);
+
+    }
+
+    @Test
+    void verifyCronExpressionRunsEvery5MinutesAt1MinutePast() {
+        CronExpression cronTrigger = CronExpression.parse("0 1/5 * * * *");
+
+        LocalDateTime next = cronTrigger.next(LocalDateTime.of(2024, 9, 1, 10, 15));
+        log.info("Next Execution Time: " + next);
+        assertEquals(LocalDateTime.of(2024, 9, 1, 10, 16), next);
+
+        next = cronTrigger.next(LocalDateTime.of(2024, 9, 1, 10, 16));
+        log.info("Next Execution Time: " + next);
+        assertEquals(LocalDateTime.of(2024, 9, 1, 10, 21), next);
+
+        next = cronTrigger.next(LocalDateTime.of(2024, 9, 1, 23, 59));
+        log.info("Next Execution Time: " + next);
+        assertEquals(LocalDateTime.of(2024, 9, 2, 0, 1), next);
+
+        Set<ScheduledTask> scheduledTasks = scheduledTaskHolder.getScheduledTasks();
+        displayTasks(scheduledTasks);
     }
 }

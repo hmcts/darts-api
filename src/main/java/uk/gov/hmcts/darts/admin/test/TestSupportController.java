@@ -1,13 +1,14 @@
 package uk.gov.hmcts.darts.admin.test;
 
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -182,10 +183,11 @@ public class TestSupportController {
         if (!courthouseName.startsWith("func-")) {
             return new ResponseEntity<>("Courthouse name must start with func-", BAD_REQUEST);
         }
+        String courthouseNameUC = StringUtils.toRootUpperCase(courthouseName);
 
-        if (courtroomRepository.findByCourthouseNameAndCourtroomName(courthouseName, courtroomName).isEmpty()) {
-            var courthouse = courthouseRepository.findByCourthouseNameIgnoreCase(courthouseName)
-                .orElseGet(() -> newCourthouse(courthouseName));
+        if (courtroomRepository.findByCourthouseNameAndCourtroomName(courthouseNameUC, courtroomName).isEmpty()) {
+            var courthouse = courthouseRepository.findByCourthouseName(courthouseNameUC)
+                .orElseGet(() -> newCourthouse(courthouseNameUC));
 
             newUserCourthousePermissions(courthouse);
             newCourtroom(courtroomName, courthouse);
@@ -207,7 +209,7 @@ public class TestSupportController {
     }
 
     @PostMapping(value = "/audit/{audit_activity}/courthouse/{courthouse_name}")
-    @Transactional(rollbackOn = DataIntegrityViolationException.class)
+    @Transactional(rollbackFor = DataIntegrityViolationException.class)
     public ResponseEntity<String> createAudit(@PathVariable(name = "audit_activity") String auditActivity,
                                               @PathVariable(name = "courthouse_name") String courthouseName) {
 
@@ -216,7 +218,7 @@ public class TestSupportController {
         courtCase.setClosed(false);
         courtCase.setInterpreterUsed(false);
 
-        Optional<CourthouseEntity> foundCourthouse = courthouseRepository.findByCourthouseNameIgnoreCase(
+        Optional<CourthouseEntity> foundCourthouse = courthouseRepository.findByCourthouseName(
             courthouseName);
         if (foundCourthouse.isPresent()) {
             courtCase.setCourthouse(foundCourthouse.get());
@@ -247,7 +249,7 @@ public class TestSupportController {
     private CourthouseEntity newCourthouse(String courthouseName) {
         var courthouse = new CourthouseEntity();
         courthouse.setCourthouseName(courthouseName);
-        courthouse.setDisplayName(courthouseName);
+        courthouse.setDisplayName(StringUtils.toRootLowerCase(courthouseName));
         UserAccountEntity defaultUser = new UserAccountEntity();
         defaultUser.setId(0);
         courthouse.setCreatedBy(defaultUser);

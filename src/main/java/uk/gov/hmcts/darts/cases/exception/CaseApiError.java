@@ -41,6 +41,11 @@ public enum CaseApiError implements DartsApiError {
         CaseErrorCode.PATCH_CRITERIA_NOT_MET.getValue(),
         HttpStatus.BAD_REQUEST,
         CaseTitleErrors.PATCH_CRITERIA_NOT_MET.toString()
+    ),
+    HEARINGS_NOT_ACTUAL(
+        CaseErrorCode.HEARINGS_NOT_ACTUAL.getValue(),
+        HttpStatus.NOT_FOUND,
+        CaseTitleErrors.HEARINGS_NOT_ACTUAL.toString()
     );
 
     private static final String ERROR_TYPE_PREFIX = "CASE";

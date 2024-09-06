@@ -1,6 +1,5 @@
 package uk.gov.hmcts.darts.task.runner.impl;
 
-import net.javacrumbs.shedlock.core.LockProvider;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
@@ -8,6 +7,7 @@ import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.darts.audio.service.OutboundAudioDeleterProcessor;
 import uk.gov.hmcts.darts.log.api.LogApi;
+import uk.gov.hmcts.darts.task.service.LockService;
 
 @ExtendWith(MockitoExtension.class)
 class OutboundAudioDeleterAutomatedTaskTest {
@@ -16,15 +16,15 @@ class OutboundAudioDeleterAutomatedTaskTest {
     OutboundAudioDeleterProcessor processor;
 
     @Mock
-    LockProvider provider;
+    private LogApi logApi;
 
     @Mock
-    private LogApi logApi;
+    private LockService lockService;
 
     @Test
     void runTask() {
         OutboundAudioDeleterAutomatedTask outboundAudioDeleterAutomatedTask =
-            new OutboundAudioDeleterAutomatedTask(null, provider, null, processor, logApi);
+            new OutboundAudioDeleterAutomatedTask(null, null, processor, logApi, lockService);
 
         outboundAudioDeleterAutomatedTask.runTask();
 

@@ -21,6 +21,8 @@
           "Judge_2"
         ]
       }
-    ]
+    ],
+    "is_data_anonymised": true,
+    "data_anonymised_at": "2024-01-01T00:00:00Z"
   }
 ]

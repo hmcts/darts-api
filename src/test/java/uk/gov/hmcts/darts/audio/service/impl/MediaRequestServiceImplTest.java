@@ -83,7 +83,7 @@ import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.FAILURE_CHE
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.STORED;
 import static uk.gov.hmcts.darts.notification.api.NotificationApi.NotificationTemplate.AUDIO_REQUEST_PROCESSING;
 import static uk.gov.hmcts.darts.notification.api.NotificationApi.NotificationTemplate.AUDIO_REQUEST_PROCESSING_ARCHIVE;
-import static uk.gov.hmcts.darts.test.common.data.MediaRequestTestData.minimalRequestData;
+import static uk.gov.hmcts.darts.test.common.data.MediaRequestTestData.someMinimalRequestData;
 import static uk.gov.hmcts.darts.test.common.data.MediaTestData.someMinimalMedia;
 import static uk.gov.hmcts.darts.test.common.data.ObjectHiddenReasonTestData.classified;
 import static uk.gov.hmcts.darts.util.EntityIdPopulator.withIdsPopulated;
@@ -760,7 +760,7 @@ class MediaRequestServiceImplTest {
 
     @Test
     void auditsWhenOwnerChanged() {
-        var mediaRequest = withIdsPopulated(minimalRequestData());
+        var mediaRequest = withIdsPopulated(someMinimalRequestData());
         when(mockMediaRequestRepository.findById(any())).thenReturn(Optional.of(mediaRequest));
         when(mockUserAccountRepository.findById(any())).thenReturn(Optional.of(mediaRequest.getCurrentOwner()));
 
@@ -771,7 +771,7 @@ class MediaRequestServiceImplTest {
 
     @Test
     void doesNotAuditWhenOwnerNotChanged() {
-        var mediaRequest = withIdsPopulated(minimalRequestData());
+        var mediaRequest = withIdsPopulated(someMinimalRequestData());
         when(mockMediaRequestRepository.findById(any())).thenReturn(Optional.of(mediaRequest));
         when(mockUserAccountRepository.findById(any())).thenReturn(Optional.of(mediaRequest.getCurrentOwner()));
 

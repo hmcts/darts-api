@@ -2,7 +2,6 @@ package uk.gov.hmcts.darts.annotation;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.jayway.jsonpath.JsonPath;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -26,10 +25,9 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.JUDICIARY;
-import static uk.gov.hmcts.darts.test.common.data.HearingTestData.createSomeMinimalHearing;
+import static uk.gov.hmcts.darts.test.common.data.HearingTestData.someMinimalHearing;
 
 @AutoConfigureMockMvc
-@Disabled("Impacted by V1_364_*.sql")
 class AnnotationPostTest extends IntegrationBase {
 
     private static final URI ENDPOINT = URI.create("/annotations");
@@ -39,16 +37,14 @@ class AnnotationPostTest extends IntegrationBase {
     @Autowired
     private GivenBuilder given;
 
-
     @Autowired
     private MockMvc mockMvc;
 
-    @Disabled("Impacted by V1_367__adding_not_null_constraints_part_4.sql")
     @Test
     void returnsAnnotationId() throws Exception {
         given.anAuthenticatedUserWithGlobalAccessAndRole(JUDICIARY);
-        HearingEntity hearingEntity = createSomeMinimalHearing();
-        hearingEntity = dartsDatabase.save(hearingEntity);
+        HearingEntity hearingEntity = someMinimalHearing();
+        hearingEntity = dartsPersistence.save(hearingEntity);
 
         var mvcResult = mockMvc.perform(
                 multipart(ENDPOINT)
@@ -69,15 +65,14 @@ class AnnotationPostTest extends IntegrationBase {
         List<AnnotationEntity> annotationByHearing = dartsDatabase.getAnnotationRepository().findByHearingId(hearingEntity.getId());
         assertFalse(annotationByHearing.isEmpty());
 
-        assertThat(dartsDatabase.findExternalObjectDirectoryFor(annotationId).size()).isEqualTo(2);
+        assertThat(dartsDataRetrieval.findExternalObjectDirectoryFor(annotationId).size()).isEqualTo(2);
     }
 
-    @Disabled("Impacted by V1_367__adding_not_null_constraints_part_4.sql")
     @Test
     void allowsJudgeWithGlobalAccessToUploadAnnotations() throws Exception {
         given.anAuthenticatedUserWithGlobalAccessAndRole(JUDICIARY);
-        HearingEntity hearingEntity = createSomeMinimalHearing();
-        hearingEntity = dartsDatabase.save(hearingEntity);
+        HearingEntity hearingEntity = someMinimalHearing();
+        hearingEntity = dartsPersistence.save(hearingEntity);
         mockMvc.perform(
                 multipart(ENDPOINT)
                     .file(someAnnotationPostDocument())
@@ -86,10 +81,9 @@ class AnnotationPostTest extends IntegrationBase {
             .andReturn();
     }
 
-    @Disabled("Impacted by V1_367__adding_not_null_constraints_part_4.sql")
     @Test
     void allowsJudgeAuthorisedForCourthouseAccessToUploadAnnotations() throws Exception {
-        var hearing = dartsDatabase.save(createSomeMinimalHearing());
+        var hearing = dartsPersistence.save(someMinimalHearing());
         given.anAuthenticatedUserAuthorizedForCourthouse(JUDICIARY, hearing.getCourtroom().getCourthouse());
 
         mockMvc.perform(
@@ -106,7 +100,7 @@ class AnnotationPostTest extends IntegrationBase {
 
         mockMvc.perform(
                 multipart(ENDPOINT)
-                    .file(someAnnotationPostBodyFor(createSomeMinimalHearing())))
+                    .file(someAnnotationPostBodyFor(someMinimalHearing())))
             .andExpect(status().isBadRequest())
             .andReturn();
     }

@@ -98,6 +98,12 @@ public class RetentionPostServiceImpl implements RetentionPostService {
             );
         }
 
+        if (courtCase.isDataAnonymised()) {
+            throw new DartsApiException(
+                RetentionApiError.CASE_RETENTION_PASSED,
+                MessageFormat.format("caseId ''{0}'' retention date cannot be amended as the case is already expired.", courtCase.getId().toString())
+            );
+        }
 
         //No retention can be applied/amended when no current retention policy has been applied
         CaseRetentionEntity lastCompletedAutomatedCaseRetention = getLatestCompleteAutomatedCaseRetention(courtCase);

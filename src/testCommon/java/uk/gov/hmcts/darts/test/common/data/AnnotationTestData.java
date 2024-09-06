@@ -13,6 +13,7 @@ public class AnnotationTestData {
         UserAccountEntity userAccount = minimalUserAccount();
         annotation.setCurrentOwner(userAccount);
         annotation.setLastModifiedBy(userAccount);
+        annotation.setCreatedBy(userAccount);
         return annotation;
     }
 }

@@ -4,21 +4,27 @@ import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Pageable;
 import uk.gov.hmcts.darts.arm.api.ArmDataManagementApi;
 import uk.gov.hmcts.darts.arm.component.ArchiveRecordFileGenerator;
 import uk.gov.hmcts.darts.arm.config.ArmDataManagementConfiguration;
+import uk.gov.hmcts.darts.arm.config.UnstructuredToArmProcessorConfiguration;
+import uk.gov.hmcts.darts.arm.helper.UnstructuredToArmHelper;
 import uk.gov.hmcts.darts.arm.service.impl.UnstructuredToArmBatchProcessorImpl;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
+import uk.gov.hmcts.darts.common.entity.ExternalLocationTypeEntity;
 import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
+import uk.gov.hmcts.darts.common.entity.ObjectRecordStatusEntity;
 import uk.gov.hmcts.darts.common.exception.DartsException;
 import uk.gov.hmcts.darts.common.repository.ExternalLocationTypeRepository;
 import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
 import uk.gov.hmcts.darts.common.repository.ObjectRecordStatusRepository;
 import uk.gov.hmcts.darts.common.service.FileOperationService;
 import uk.gov.hmcts.darts.common.service.impl.EodHelperMocks;
+import uk.gov.hmcts.darts.common.util.EodHelper;
 import uk.gov.hmcts.darts.datamanagement.api.DataManagementApi;
 import uk.gov.hmcts.darts.log.api.LogApi;
 
@@ -35,13 +41,15 @@ import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.matches;
-import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_MANIFEST_FAILED;
+import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_RAW_DATA_FAILED;
 import static uk.gov.hmcts.darts.common.util.EodHelper.armLocation;
 import static uk.gov.hmcts.darts.common.util.EodHelper.detsLocation;
+import static uk.gov.hmcts.darts.common.util.EodHelper.failedArmManifestFileStatus;
 import static uk.gov.hmcts.darts.common.util.EodHelper.storedStatus;
 import static uk.gov.hmcts.darts.common.util.EodHelper.unstructuredLocation;
 
@@ -71,11 +79,16 @@ class UnstructuredToArmBatchProcessorTest {
     @Mock
     private ArchiveRecordService archiveRecordService;
 
-    private UnstructuredToArmProcessor unstructuredToArmProcessor;
+    private UnstructuredToArmBatchProcessor unstructuredToArmBatchProcessor;
     @Mock
     private ExternalObjectDirectoryService eodService;
     @Mock
     private ArchiveRecordFileGenerator archiveRecordFileGenerator;
+    @InjectMocks
+    private UnstructuredToArmHelper unstructuredToArmHelper;
+
+    @Mock
+    UnstructuredToArmProcessorConfiguration unstructuredToArmProcessorConfiguration;
 
     @Mock(answer = RETURNS_DEEP_STUBS)
     private Path manifestFilePath;
@@ -83,6 +96,9 @@ class UnstructuredToArmBatchProcessorTest {
     private File manifestFile;
     @Mock
     private LogApi logApi;
+
+    @Mock
+    private EodHelper eodHelper;
 
     private static final EodHelperMocks EOD_HELPER_MOCKS = new EodHelperMocks();
 
@@ -94,56 +110,56 @@ class UnstructuredToArmBatchProcessorTest {
     @BeforeEach
     void setUp() throws IOException {
 
-        int batchSize = 5;
-
-        unstructuredToArmProcessor = new UnstructuredToArmBatchProcessorImpl(
-            externalObjectDirectoryRepository,
-            objectRecordStatusRepository,
-            externalLocationTypeRepository,
-            dataManagementApi,
-            armDataManagementApi,
-            userIdentity,
-            armDataManagementConfiguration,
-            fileOperationService,
+        unstructuredToArmBatchProcessor = new UnstructuredToArmBatchProcessorImpl(
             archiveRecordService,
-            eodService,
             archiveRecordFileGenerator,
-            batchSize,
-            logApi
+            unstructuredToArmHelper,
+            userIdentity,
+            logApi,
+            armDataManagementConfiguration,
+            externalObjectDirectoryRepository,
+            fileOperationService,
+            armDataManagementApi,
+            unstructuredToArmProcessorConfiguration,
+            eodHelper
         );
 
         lenient().when(fileOperationService.createFile(any(), any(), anyBoolean())).thenReturn(manifestFilePath);
         when(manifestFilePath.toFile()).thenReturn(manifestFile);
-
         verifyNoMoreInteractions(logApi);
+
+        ObjectRecordStatusEntity armRawFailedStatus = new ObjectRecordStatusEntity();
+        armRawFailedStatus.setId(ARM_RAW_DATA_FAILED.getId());
+        armRawFailedStatus.setDescription(ARM_RAW_DATA_FAILED.name());
+        lenient().when(objectRecordStatusRepository.getReferenceById(ARM_RAW_DATA_FAILED.getId())).thenReturn(armRawFailedStatus);
+        ObjectRecordStatusEntity armManifestFailedStatus = new ObjectRecordStatusEntity();
+        armManifestFailedStatus.setId(ARM_MANIFEST_FAILED.getId());
+        armManifestFailedStatus.setDescription(ARM_MANIFEST_FAILED.name());
+        lenient().when(objectRecordStatusRepository.getReferenceById(ARM_MANIFEST_FAILED.getId())).thenReturn(armManifestFailedStatus);
     }
 
     @Test
     void testDartsArmClientConfigInBatchQuery() {
+        ExternalObjectDirectoryEntity eod10 = new ExternalObjectDirectoryEntity();
+        eod10.setId(10);
+        eod10.setExternalLocationType(armLocation());
+        eod10.setStatus(failedArmManifestFileStatus());
         //given
         when(armDataManagementConfiguration.getArmClient()).thenReturn("darts");
-        when(eodService.findFailedStillRetriableArmEods(any())).thenReturn(List.of(eod1));
-        when(externalObjectDirectoryRepository.findExternalObjectsNotIn2StorageLocations(any(), any(), any(), any())).thenReturn(emptyList());
-        doReturn(armLocation()).when(eod1).getExternalLocationType();
+        when(externalObjectDirectoryRepository.findNotFinishedAndNotExceededRetryInStorageLocation(any(), any(), any(), any())).thenReturn(List.of(eod10));
+        when(externalObjectDirectoryRepository.findEodsNotInOtherStorage(any(), any(), any(), any())).thenReturn(emptyList());
         EOD_HELPER_MOCKS.givenIsEqualLocationReturns(true);
+        when(unstructuredToArmProcessorConfiguration.getMaxResultSize()).thenReturn(1000);
+        when(armDataManagementConfiguration.getMaxRetryAttempts()).thenReturn(3);
 
         //when
-        unstructuredToArmProcessor.processUnstructuredToArm();
+        unstructuredToArmBatchProcessor.processUnstructuredToArm(5);
 
         //then
-        verify(externalObjectDirectoryRepository).findExternalObjectsNotIn2StorageLocations(
+        verify(externalObjectDirectoryRepository).findEodsNotInOtherStorage(
             storedStatus(),
             unstructuredLocation(),
-            armLocation(),
-            Pageable.ofSize(4)
-        );
-        verify(externalObjectDirectoryRepository).findMatchingExternalObjectDirectoryEntityByLocation(
-            storedStatus(),
-            unstructuredLocation(),
-            null,
-            null,
-            null,
-            null
+            armLocation(), 999
         );
 
         verify(logApi).armPushFailed(anyInt());
@@ -153,31 +169,22 @@ class UnstructuredToArmBatchProcessorTest {
     void testDetsArmClientConfigInBatchQuery() {
         //given
         when(armDataManagementConfiguration.getArmClient()).thenReturn("dets");
-        when(eodService.findFailedStillRetriableArmEods(any())).thenReturn(List.of(eod1));
-        when(externalObjectDirectoryRepository.findExternalObjectsNotIn2StorageLocations(any(), any(), any(), any())).thenReturn(emptyList());
-        doReturn(armLocation()).when(eod1).getExternalLocationType();
+        when(externalObjectDirectoryRepository.findEodsNotInOtherStorage(any(), any(), any(), any())).thenReturn(emptyList());
+        when(unstructuredToArmProcessorConfiguration.getMaxResultSize()).thenReturn(1000);
+        when(armDataManagementConfiguration.getMaxRetryAttempts()).thenReturn(3);
+
         EOD_HELPER_MOCKS.givenIsEqualLocationReturns(true);
 
         //when
-        unstructuredToArmProcessor.processUnstructuredToArm();
+        unstructuredToArmBatchProcessor.processUnstructuredToArm(5);
 
         //then
-        verify(externalObjectDirectoryRepository).findExternalObjectsNotIn2StorageLocations(
+        verify(externalObjectDirectoryRepository).findEodsNotInOtherStorage(
             storedStatus(),
             detsLocation(),
-            armLocation(),
-            Pageable.ofSize(4)
-        );
-        verify(externalObjectDirectoryRepository).findMatchingExternalObjectDirectoryEntityByLocation(
-            storedStatus(),
-            detsLocation(),
-            null,
-            null,
-            null,
-            null
+            armLocation(), 1000
         );
 
-        verify(logApi).armPushFailed(anyInt());
     }
 
     @Test
@@ -186,28 +193,33 @@ class UnstructuredToArmBatchProcessorTest {
         when(armDataManagementConfiguration.getArmClient()).thenReturn("unknown");
 
         //then
-        assertThrows(DartsException.class, () -> unstructuredToArmProcessor.processUnstructuredToArm());
+        assertThrows(DartsException.class, () -> unstructuredToArmBatchProcessor.processUnstructuredToArm(5));
     }
 
     @Test
     void testPaginatedBatchQuery() throws IOException {
         //given
         when(armDataManagementConfiguration.getArmClient()).thenReturn("darts");
-        when(eodService.findFailedStillRetriableArmEods(any())).thenReturn(List.of(eod1, eod2));
-        when(externalObjectDirectoryRepository.findExternalObjectsNotIn2StorageLocations(any(), any(), any(), any())).thenReturn(emptyList());
+        when(externalObjectDirectoryRepository.findNotFinishedAndNotExceededRetryInStorageLocation(any(), any(), any(), any())).thenReturn(List.of(eod1, eod2));
+        when(externalObjectDirectoryRepository.findEodsNotInOtherStorage(any(), any(), any(), any())).thenReturn(emptyList());
+        when(unstructuredToArmProcessorConfiguration.getMaxResultSize()).thenReturn(1000);
+        when(armDataManagementConfiguration.getMaxRetryAttempts()).thenReturn(3);
 
         when(fileOperationService.createFile(any(), any(), anyBoolean())).thenReturn(manifestFilePath);
 
         //when
-        unstructuredToArmProcessor.processUnstructuredToArm();
+        unstructuredToArmBatchProcessor.processUnstructuredToArm(5);
 
         //then
-        verify(eodService).findFailedStillRetriableArmEods(Pageable.ofSize(5));
-        verify(externalObjectDirectoryRepository).findExternalObjectsNotIn2StorageLocations(
+        verify(externalObjectDirectoryRepository).findNotFinishedAndNotExceededRetryInStorageLocation(
+            any(),
+            any(ExternalLocationTypeEntity.class),
+            eq(3),
+            eq(Pageable.ofSize(1000)));
+        verify(externalObjectDirectoryRepository).findEodsNotInOtherStorage(
             storedStatus(),
             unstructuredLocation(),
-            armLocation(),
-            Pageable.ofSize(3)
+            armLocation(), 998
         );
 
         verifyNoMoreInteractions(logApi);
@@ -220,11 +232,12 @@ class UnstructuredToArmBatchProcessorTest {
         when(armDataManagementConfiguration.getManifestFilePrefix()).thenReturn("DARTS");
         when(armDataManagementConfiguration.getFileExtension()).thenReturn("a360");
         when(armDataManagementConfiguration.getTempBlobWorkspace()).thenReturn("/temp_workspace");
-        when(externalObjectDirectoryRepository.findExternalObjectsNotIn2StorageLocations(any(), any(), any(), any())).thenReturn(List.of(eod1));
-        when(eodService.findFailedStillRetriableArmEods(any())).thenReturn(emptyList());
+        when(externalObjectDirectoryRepository.findEodsNotInOtherStorage(any(), any(), any(), any())).thenReturn(List.of(eod1));
+        when(unstructuredToArmProcessorConfiguration.getMaxResultSize()).thenReturn(1000);
+        when(armDataManagementConfiguration.getMaxRetryAttempts()).thenReturn(3);
 
         //when
-        unstructuredToArmProcessor.processUnstructuredToArm();
+        unstructuredToArmBatchProcessor.processUnstructuredToArm(5);
 
         //then
         verify(fileOperationService).createFile(matches("DARTS_.+\\.a360"), eq("/temp_workspace"), eq(true));

@@ -17,7 +17,9 @@ import org.springframework.test.context.DynamicPropertySource;
 import org.testcontainers.containers.GenericContainer;
 import uk.gov.hmcts.darts.test.common.LogUtil;
 import uk.gov.hmcts.darts.test.common.MemoryLogAppender;
+import uk.gov.hmcts.darts.testutils.stubs.DartsDatabaseRetrieval;
 import uk.gov.hmcts.darts.testutils.stubs.DartsDatabaseStub;
+import uk.gov.hmcts.darts.testutils.stubs.DartsPersistence;
 
 import java.util.List;
 
@@ -69,7 +71,13 @@ public class IntegrationBase {
     @Autowired
     protected DartsDatabaseStub dartsDatabase;
     @Autowired
+    protected DartsPersistence dartsPersistence;
+    @Autowired
+    protected DartsDatabaseRetrieval dartsDataRetrieval;
+    @Autowired
     protected ObjectMapper objectMapper;
+    @Autowired
+    protected TransactionalUtil transactionalUtil;
 
     @Value("${wiremock.server.port}")
     protected String wiremockPort;
