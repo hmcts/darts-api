@@ -1,7 +1,7 @@
 package uk.gov.hmcts.darts.audio.service;
 
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Disabled;
+import org.assertj.core.data.TemporalUnitOffset;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -13,16 +13,19 @@ import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
 import uk.gov.hmcts.darts.common.helper.SystemUserHelper;
 import uk.gov.hmcts.darts.common.repository.MediaRequestRepository;
-import uk.gov.hmcts.darts.testutils.IntegrationPerClassBase;
+import uk.gov.hmcts.darts.test.common.data.HearingTestData;
+import uk.gov.hmcts.darts.test.common.data.MediaRequestTestData;
+import uk.gov.hmcts.darts.testutils.IntegrationBase;
 import uk.gov.hmcts.darts.testutils.stubs.SuperAdminUserStub;
 
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
+import java.time.temporal.ChronoUnit;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.within;
 import static org.junit.Assert.assertNotEquals;
-import static org.junit.Assert.assertNull;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -32,9 +35,8 @@ import static uk.gov.hmcts.darts.audio.enums.MediaRequestStatus.COMPLETED;
 import static uk.gov.hmcts.darts.audio.enums.MediaRequestStatus.OPEN;
 import static uk.gov.hmcts.darts.audio.enums.MediaRequestStatus.PROCESSING;
 import static uk.gov.hmcts.darts.audiorequests.model.AudioRequestType.DOWNLOAD;
-import static uk.gov.hmcts.darts.test.common.data.MediaRequestTestData.someMinimalRequestData;
 
-class MediaRequestServiceTest extends IntegrationPerClassBase {
+class MediaRequestServiceTest extends IntegrationBase {
 
     private static final String T_09_00_00_Z = "2023-05-31T09:00:00Z";
     private static final String T_12_00_00_Z = "2023-05-31T12:00:00Z";
@@ -48,8 +50,6 @@ class MediaRequestServiceTest extends IntegrationPerClassBase {
     @MockBean
     private CurrentTimeHelper currentTimeHelper;
 
-    private AudioRequestDetails requestDetails;
-
     @Autowired
     private SuperAdminUserStub superAdminUserStub;
 
@@ -59,18 +59,16 @@ class MediaRequestServiceTest extends IntegrationPerClassBase {
     @Autowired
     private SystemUserHelper systemUserHelper;
 
-    @BeforeAll
-    void beforeAll() {
-        HearingEntity hearing = dartsDatabase.hasSomeHearing();
+    private HearingEntity hearing;
 
-        requestDetails = new AudioRequestDetails(null, null, null, null, null);
-        requestDetails.setHearingId(hearing.getId());
-        requestDetails.setRequestor(0);
-        requestDetails.setRequestType(DOWNLOAD);
+    @BeforeEach
+    void setUp() {
+        hearing = dartsPersistence.save(HearingTestData.someMinimalHearing());
     }
 
     @Test
     void shouldSaveAudioRequestWithZuluTimeOk() {
+        AudioRequestDetails requestDetails = createRequestDetails(hearing.getId());
         requestDetails.setStartTime(OffsetDateTime.parse(T_09_00_00_Z));
         requestDetails.setEndTime(OffsetDateTime.parse(T_12_00_00_Z));
 
@@ -90,6 +88,7 @@ class MediaRequestServiceTest extends IntegrationPerClassBase {
 
     @Test
     void shouldSaveAudioRequestWithOffsetTimeOk() {
+        AudioRequestDetails requestDetails = createRequestDetails(hearing.getId());
         requestDetails.setStartTime(OffsetDateTime.parse("2023-05-31T10:00:00+01:00"));
         requestDetails.setEndTime(OffsetDateTime.parse("2023-05-31T13:00:00+01:00"));
 
@@ -111,6 +110,7 @@ class MediaRequestServiceTest extends IntegrationPerClassBase {
     void shouldSaveAudioRequestWithZuluTimeOkWhenDaylightSavingTimeStarts() {
         // In the UK the clocks go forward 1 hour at 1am on the last Sunday in March.
         // The period when the clocks are 1 hour ahead is called British Summer Time (BST).
+        AudioRequestDetails requestDetails = createRequestDetails(hearing.getId());
         requestDetails.setStartTime(OffsetDateTime.parse("2023-03-25T23:30:00Z"));
         requestDetails.setEndTime(OffsetDateTime.parse("2023-03-26T01:30:00Z"));
 
@@ -131,6 +131,7 @@ class MediaRequestServiceTest extends IntegrationPerClassBase {
     @Test
     void shouldSaveAudioRequestWithZuluTimeOkWhenDaylightSavingTimeEnds() {
         // In the UK the clocks go back 1 hour at 2am on the last Sunday in October.
+        AudioRequestDetails requestDetails = createRequestDetails(hearing.getId());
         requestDetails.setStartTime(OffsetDateTime.parse("2023-10-29T00:30:00Z"));
         requestDetails.setEndTime(OffsetDateTime.parse("2023-10-29T02:15:00Z"));
 
@@ -150,13 +151,17 @@ class MediaRequestServiceTest extends IntegrationPerClassBase {
 
     @Test
     void shouldUpdateStatusToProcessing() {
-        MediaRequestEntity mediaRequestEntity = mediaRequestService.updateAudioRequestStatus(1, PROCESSING);
+        MediaRequestEntity mediaRequest = new MediaRequestTestData().someMinimal();
+        dartsPersistence.save(mediaRequest);
+
+        MediaRequestEntity mediaRequestEntity = mediaRequestService.updateAudioRequestStatus(mediaRequest.getId(), PROCESSING);
 
         assertEquals(PROCESSING, mediaRequestEntity.getStatus());
     }
 
     @Test
     void shouldGetMediaRequestsByStatus() {
+        AudioRequestDetails requestDetails = createRequestDetails(hearing.getId());
         requestDetails.setStartTime(OffsetDateTime.parse(T_09_00_00_Z));
         requestDetails.setEndTime(OffsetDateTime.parse(T_12_00_00_Z));
 
@@ -175,39 +180,34 @@ class MediaRequestServiceTest extends IntegrationPerClassBase {
 
     @Test
     void shouldDeleteAudioRequestById() {
-        requestDetails.setStartTime(OffsetDateTime.parse(T_09_00_00_Z));
-        requestDetails.setEndTime(OffsetDateTime.parse(T_12_00_00_Z));
+        MediaRequestEntity mediaRequest = new MediaRequestTestData().someMinimal();
+        dartsPersistence.save(mediaRequest);
 
-        var request = mediaRequestService.saveAudioRequest(requestDetails);
-
-        MediaRequestEntity mediaRequestEntity = mediaRequestService.getMediaRequestEntityById(request.getId());
+        MediaRequestEntity mediaRequestEntity = mediaRequestService.getMediaRequestEntityById(mediaRequest.getId());
         assertNotNull(mediaRequestEntity);
 
-        mediaRequestService.deleteAudioRequest(request.getId());
-        assertThrows(DartsApiException.class, () -> mediaRequestService.getMediaRequestEntityById(request.getId()));
+        mediaRequestService.deleteAudioRequest(mediaRequest.getId());
+        assertThrows(DartsApiException.class, () -> mediaRequestService.getMediaRequestEntityById(mediaRequest.getId()));
     }
 
-    @Disabled("Impacted by V1_367__adding_not_null_constraints_part_4.sql")
     @Test
     void updateAudioRequestCompleted() {
-        MediaRequestEntity mediaRequestEntityBeforeCompleted = requestRepository.findById(1).get();
-        mediaRequestEntityBeforeCompleted.setLastModifiedBy(null);
-        mediaRequestEntityBeforeCompleted = requestRepository.save(mediaRequestEntityBeforeCompleted);
+        MediaRequestEntity mediaRequest = new MediaRequestTestData().someMinimal();
+        dartsPersistence.save(mediaRequest);
+        final OffsetDateTime originalLastModifiedDateTime = mediaRequest.getLastModifiedDateTime();
 
-        assertNull(mediaRequestEntityBeforeCompleted.getLastModifiedBy());
-
-        MediaRequestEntity mediaRequestEntity = mediaRequestService.updateAudioRequestCompleted(mediaRequestService.getMediaRequestEntityById(1));
+        MediaRequestEntity updatedMediaRequest = mediaRequestService.updateAudioRequestCompleted(mediaRequest);
 
         // assert the date and user is set
-        assertEquals(COMPLETED, mediaRequestEntity.getStatus());
-        assertNotEquals(mediaRequestEntityBeforeCompleted
-                            .getLastModifiedDateTime()
-                            .atZoneSameInstant(ZoneOffset.UTC), mediaRequestEntity.getLastModifiedDateTime().atZoneSameInstant(ZoneOffset.UTC));
-        assertEquals(systemUserHelper.getSystemUser().getId(), mediaRequestEntity.getLastModifiedBy().getId());
+        assertEquals(COMPLETED, updatedMediaRequest.getStatus());
+        assertNotEquals(originalLastModifiedDateTime.atZoneSameInstant(ZoneOffset.UTC),
+                        updatedMediaRequest.getLastModifiedDateTime().atZoneSameInstant(ZoneOffset.UTC));
+        assertEquals(systemUserHelper.getSystemUser().getId(), updatedMediaRequest.getLastModifiedBy().getId());
     }
 
     @Test
     void shouldReturnTrueWhenADuplicateAudioRequestIsFound() {
+        AudioRequestDetails requestDetails = createRequestDetails(hearing.getId());
         requestDetails.setStartTime(OffsetDateTime.parse("2023-03-25T23:30:00Z"));
         requestDetails.setEndTime(OffsetDateTime.parse("2023-03-26T01:30:00Z"));
 
@@ -221,6 +221,7 @@ class MediaRequestServiceTest extends IntegrationPerClassBase {
 
     @Test
     void shouldReturnFalseWhenNoDuplicateAudioRequestExists() {
+        AudioRequestDetails requestDetails = createRequestDetails(hearing.getId());
         requestDetails.setStartTime(OffsetDateTime.parse("2023-03-26T12:00:00Z"));
         requestDetails.setEndTime(OffsetDateTime.parse("2023-03-26T12:30:00Z"));
 
@@ -229,16 +230,16 @@ class MediaRequestServiceTest extends IntegrationPerClassBase {
     }
 
     @Test
-    @Disabled("Impacted by V1_364_*.sql")
     void getsMediaRequestById() {
-        var persistedMediaRequest = dartsDatabase.saveWithMediaRequestWithTransientEntities(someMinimalRequestData());
+        MediaRequestEntity persistedMediaRequest = dartsPersistence.save(new MediaRequestTestData().someMaximal());
 
         var mediaRequestResponse = mediaRequestService.getMediaRequestById(persistedMediaRequest.getId());
 
+        final TemporalUnitOffset within = within(1, ChronoUnit.SECONDS); // Small allowance to account for H2 precision differences
         assertThat(mediaRequestResponse.getId()).isEqualTo(persistedMediaRequest.getId());
-        assertThat(mediaRequestResponse.getStartAt()).isEqualTo(persistedMediaRequest.getStartTime());
-        assertThat(mediaRequestResponse.getEndAt()).isEqualTo(persistedMediaRequest.getEndTime());
-        assertThat(mediaRequestResponse.getRequestedAt()).isEqualTo(persistedMediaRequest.getCreatedDateTime());
+        assertThat(mediaRequestResponse.getStartAt()).isCloseTo(persistedMediaRequest.getStartTime(), within);
+        assertThat(mediaRequestResponse.getEndAt()).isCloseTo(persistedMediaRequest.getEndTime(), within);
+        assertThat(mediaRequestResponse.getRequestedAt()).isCloseTo(persistedMediaRequest.getCreatedDateTime(), within);
         assertThat(mediaRequestResponse.getOwnerId()).isEqualTo(persistedMediaRequest.getCurrentOwner().getId());
         assertThat(mediaRequestResponse.getRequestedById()).isEqualTo(persistedMediaRequest.getRequestor().getId());
         assertThat(mediaRequestResponse.getCourtroom().getId()).isEqualTo(persistedMediaRequest.getHearing().getCourtroom().getId());
@@ -246,4 +247,14 @@ class MediaRequestServiceTest extends IntegrationPerClassBase {
         assertThat(mediaRequestResponse.getHearing().getId()).isEqualTo(persistedMediaRequest.getHearing().getId());
         assertThat(mediaRequestResponse.getHearing().getHearingDate()).isEqualTo(persistedMediaRequest.getHearing().getHearingDate());
     }
+
+    private AudioRequestDetails createRequestDetails(int hearingId) {
+        AudioRequestDetails requestDetails = new AudioRequestDetails(null, null, null, null, null);
+        requestDetails.setHearingId(hearingId);
+        requestDetails.setRequestor(0);
+        requestDetails.setRequestType(DOWNLOAD);
+
+        return requestDetails;
+    }
+
 }

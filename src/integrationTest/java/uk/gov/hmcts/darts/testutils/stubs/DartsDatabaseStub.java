@@ -457,7 +457,7 @@ public class DartsDatabaseStub {
 
         HearingEntity hearing = createHearing("NEWCASTLE", "Int Test Courtroom 2", "2", LocalDateTime.of(2023, 6, 10, 10, 0, 0));
 
-        return save(
+        return dartsPersistence.save(
             MediaRequestTestData.createCurrentMediaRequest(
                 hearing,
                 requestor,
@@ -472,22 +472,21 @@ public class DartsDatabaseStub {
     public MediaRequestEntity createAndLoadNonAccessedCurrentMediaRequestEntity(UserAccountEntity requestor,
                                                                                 AudioRequestType audioRequestType) {
 
-        HearingEntity hearing = createHearing("NEWCASTLE", "Int Test Courtroom 2", "2", LocalDateTime.of(2023, 6, 10, 10, 0, 0));
-
-        MediaRequestEntity completedMediaRequest = MediaRequestTestData.createCurrentMediaRequest(
-            hearing,
-            requestor,
-            OffsetDateTime.parse("2023-06-26T13:00:00Z"),
-            OffsetDateTime.parse("2023-06-26T14:00:00Z"), audioRequestType,
-            MediaRequestStatus.COMPLETED
-        );
-        save(completedMediaRequest);
+        MediaRequestEntity mediaRequestEntity = new MediaRequestTestData().fromSpec(MediaRequestTestData.TestSpec.builder()
+                                                                                        .requestor(requestor)
+                                                                                        .currentOwner(requestor)
+                                                                                        .startTime(OffsetDateTime.parse("2023-06-26T13:00:00Z"))
+                                                                                        .endTime(OffsetDateTime.parse("2023-06-26T14:00:00Z"))
+                                                                                        .requestType(audioRequestType)
+                                                                                        .status(MediaRequestStatus.COMPLETED)
+                                                                                        .build());
+        dartsPersistence.save(mediaRequestEntity);
 
         OffsetDateTime expiryTime = OffsetDateTime.of(2023, 7, 2, 13, 0, 0, 0, UTC);
         OffsetDateTime lastAccessed = OffsetDateTime.of(2023, 6, 30, 13, 0, 0, 0, UTC);
-        transformedMediaStub.createTransformedMediaEntity(completedMediaRequest, "T20231010_0", expiryTime, lastAccessed);
+        transformedMediaStub.createTransformedMediaEntity(mediaRequestEntity, "T20231010_0", expiryTime, lastAccessed);
 
-        return completedMediaRequest;
+        return mediaRequestEntity;
     }
 
     @Transactional
