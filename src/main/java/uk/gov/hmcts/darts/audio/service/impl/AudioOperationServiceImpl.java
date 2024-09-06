@@ -41,6 +41,7 @@ public class AudioOperationServiceImpl implements AudioOperationService {
             command.append(" -i ").append(audioFileInfo.getPath().toString());
         }
 
+        command.append(" -b:a 32k");
         command.append(" -filter_complex ");
 
         int concatNumberOfSegments = audioFileInfos.size();
@@ -51,7 +52,6 @@ public class AudioOperationServiceImpl implements AudioOperationService {
 
         command.append(String.format("\"%sconcat=n=%d:v=0:a=1\"", inputFileAudioStreams, concatNumberOfSegments))
             .append(' ').append(outputPath.toString());
-
         return CommandLine.parse(command.toString());
     }
 
@@ -138,6 +138,7 @@ public class AudioOperationServiceImpl implements AudioOperationService {
             log.info("Setting up to merge audio {}", audioFileInfo);
             command.addArgument("-i").addArgument(audioFileInfo.getPath().toString());
         }
+        command.addArgument("-b:a").addArgument("32k");
         command.addArgument("-filter_complex")
             .addArgument(String.format("amix=inputs=%d:duration=longest", numberOfChannels))
             .addArgument(outputPath.toString());
@@ -167,6 +168,7 @@ public class AudioOperationServiceImpl implements AudioOperationService {
 
         CommandLine command = new CommandLine(audioConfigurationProperties.getFfmpegExecutable());
         command.addArgument("-i").addArgument(audioFileInfo.getPath().toString());
+        command.addArgument("-b:a").addArgument("32k");
         command.addArgument("-ss").addArgument(toTimeString(startDuration));
         command.addArgument("-to").addArgument(toTimeString(endDuration));
         command.addArgument("-c").addArgument("copy").addArgument(outputPath.toString());
