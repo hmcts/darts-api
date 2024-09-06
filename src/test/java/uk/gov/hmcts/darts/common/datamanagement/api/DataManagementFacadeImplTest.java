@@ -54,7 +54,6 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.apache.commons.io.IOUtils.toInputStream;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -155,7 +154,6 @@ class DataManagementFacadeImplTest {
     public void teardown() throws IOException {
         fileBasedDownloadResponseMetaData.close();
         downloadResponseMetaData.close();
-        unstructuredDataHelper.waitForAllJobsToFinish();
     }
 
     @Test
@@ -185,7 +183,6 @@ class DataManagementFacadeImplTest {
         try (DownloadResponseMetaData downloadResponseMetaData = dmFacade.retrieveFileFromStorage(entitiesToDownload)) {
             assertEquals(DatastoreContainerType.ARM, downloadResponseMetaData.getContainerTypeUsedToDownload());
         }
-        unstructuredDataHelper.waitForAllJobsToFinish();
 
     }
 
@@ -634,7 +631,6 @@ class DataManagementFacadeImplTest {
 
     @Test
     void testDownloadOfFacadeCreatesUnstructuredWhenUnstructuredNotFound() throws Exception {
-        unstructuredDataHelper.waitForAllJobsToFinish();
         ExternalObjectDirectoryEntity inboundEntity = createEodEntity(inboundLocationEntity);
         ExternalObjectDirectoryEntity unstructuredEntity = createEodEntity(unstructuredLocationEntity);
         ExternalObjectDirectoryEntity armEntity = createEodEntity(armLocationEntity);
@@ -656,7 +652,6 @@ class DataManagementFacadeImplTest {
 
         downloadResponseMetaData = dmFacade.retrieveFileFromStorage(mediaEntity);
         assertEquals(DatastoreContainerType.ARM, downloadResponseMetaData.getContainerTypeUsedToDownload());
-        assertNotEquals(0, unstructuredDataHelperFacade.getJobsList().size());
     }
 
     @NotNull

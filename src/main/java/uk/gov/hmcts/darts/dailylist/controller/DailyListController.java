@@ -34,7 +34,7 @@ import java.util.concurrent.CompletableFuture;
 import static uk.gov.hmcts.darts.authorisation.constants.AuthorisationConstants.SECURITY_SCHEMES_BEARER_AUTH;
 import static uk.gov.hmcts.darts.authorisation.enums.ContextIdEnum.ANY_ENTITY_ID;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.CPP;
-import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.SUPER_USER;
+import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.SUPER_ADMIN;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.XHIBIT;
 import static uk.gov.hmcts.darts.dailylist.exception.DailyListError.DAILY_LIST_ALREADY_PROCESSING;
 import static uk.gov.hmcts.darts.task.api.AutomatedTaskName.PROCESS_DAILY_LIST_TASK_NAME;
@@ -93,7 +93,7 @@ public class DailyListController implements DailyListsApi {
     @Override
     @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
     @Authorisation(contextId = ANY_ENTITY_ID,
-        globalAccessSecurityRoles = {SUPER_USER})
+        globalAccessSecurityRoles = {SUPER_ADMIN})
     public ResponseEntity<Void> dailylistsRunPost(String listingCourthouse) {
         var taskName = PROCESS_DAILY_LIST_TASK_NAME.getTaskName();
         Optional<AutomatedTaskEntity> automatedTaskEntity = automatedTasksApi.getTaskByName(taskName);

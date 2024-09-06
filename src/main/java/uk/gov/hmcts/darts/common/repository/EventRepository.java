@@ -1,5 +1,6 @@
 package uk.gov.hmcts.darts.common.repository;
 
+import jakarta.persistence.Column;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -25,6 +26,8 @@ public interface EventRepository extends JpaRepository<EventEntity, Integer> {
            ORDER by ee.timestamp
         """)
     List<EventEntity> findAllByHearingId(Integer hearingId);
+
+    List<EventEntity> findAllByEventId(Integer eventId);
 
     @Query("""
            SELECT ee
@@ -90,22 +93,41 @@ public interface EventRepository extends JpaRepository<EventEntity, Integer> {
     List<Integer> getCurrentEventIdsToBeProcessed(Pageable pageable);
 
     @Query(value = """
-         SELECT eve_id FROM darts.event e
-         WHERE event_id=:eventId
+         SELECT e.eve_id, event_id, string_agg(he.hea_id::varchar, ',' order by he.hea_id) as hearing_ids FROM darts.event e
+         left join darts.hearing_event_ae he
+         on he.eve_id = e.eve_id
+         WHERE e.event_id=:eventId
+         group by e.eve_id, event_id
          ORDER BY created_ts desc
          LIMIT 1
         """, nativeQuery = true)
-    Integer getTheLatestCreatedEventPrimaryKeyForTheEventId(Integer eventId);
+    EventIdAndHearingIds getTheLatestCreatedEventPrimaryKeyForTheEventId(Integer eventId);
 
+    /**
+     *  string_agg(he.hea_id::varchar, ',' order by he.hea_id) to ensure we only update the events that have the same hearing ids
+     *  This is done by reading the hearing ids from the latest event created and only updating the events that have the same hearing ids
+     * @param eventIdsPrimaryKey the primary key of the event that is the latest created
+     * @param eventId the event id that we want to close old events for
+     * @param hearingIds the hearing ids that we want to close old events for (Should match hearing ids of the latest event created)
+     */
     @Transactional
     @Modifying
     @Query(value = """
-        UPDATE EventEntity
-                SET isCurrent = false
-                WHERE id not in :eventIdsPrimaryKeysLst AND eventId in :eventIdLst
-        """)
+        UPDATE darts.event e
+            SET is_current = false
+        FROM (
+           SELECT he.eve_id, string_agg(he.hea_id::varchar, ',' order by he.hea_id) as hearing_ids FROM darts.event e
+           LEFT JOIN darts.hearing_event_ae he
+           ON he.eve_id = e.eve_id
+           WHERE e.event_id=:eventId
+           GROUP by he.eve_id
+        ) h WHERE e.eve_id != :eventIdsPrimaryKey
+                AND e.event_id = :eventId
+                AND h.hearing_ids = :hearingIds
+                AND h.eve_id = e.eve_id
+        """, nativeQuery = true)
     void updateAllEventIdEventsToNotCurrentWithTheExclusionOfTheCurrentEventPrimaryKey(
-        List<Integer> eventIdsPrimaryKeysLst, List<Integer> eventIdLst);
+        Integer eventIdsPrimaryKey, Integer eventId, String hearingIds);
 
     @Query("""
         SELECT ee
@@ -114,4 +136,16 @@ public interface EventRepository extends JpaRepository<EventEntity, Integer> {
         AND ee.timestamp <= :endDateTime
         """)
     List<EventEntity> findAllBetweenDateTimesInclusive(OffsetDateTime startDateTime, OffsetDateTime endDateTime);
+
+    interface EventIdAndHearingIds {
+
+        @Column(name = "eve_id")
+        Integer getEveId();
+
+        @Column(name = "event_id")
+        Integer getEventId();
+
+        @Column(name = "hearing_ids")
+        String getHearingIds();
+    }
 }

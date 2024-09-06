@@ -29,7 +29,8 @@ public class MediaRequestStub {
                                                               MediaRequestStatus status) {
         return createAndLoadMediaRequestEntity(requestor, requestor, audioRequestType, status, "NEWCASTLE", "2",
                                                LocalDateTime.of(2023, 6, 10, 10, 0, 0),
-                                               OffsetDateTime.parse("2023-06-26T13:00:00Z"), OffsetDateTime.parse("2023-06-26T13:45:00Z"), null);
+                                               OffsetDateTime.parse("2023-06-26T13:00:00Z"), OffsetDateTime.parse("2023-06-26T13:45:00Z"),
+                                               OffsetDateTime.now());
     }
 
     @Transactional
