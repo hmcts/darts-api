@@ -1,7 +1,6 @@
 package uk.gov.hmcts.darts.common.datamanagement.component.impl;
 
 import lombok.Getter;
-import lombok.Setter;
 import org.apache.commons.io.FileUtils;
 import org.springframework.core.io.FileUrlResource;
 import org.springframework.core.io.Resource;
