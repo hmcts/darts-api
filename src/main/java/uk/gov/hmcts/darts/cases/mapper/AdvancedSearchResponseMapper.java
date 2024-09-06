@@ -10,6 +10,7 @@ import uk.gov.hmcts.darts.common.entity.HearingEntity;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Slf4j
 @UtilityClass
@@ -20,6 +21,16 @@ public class AdvancedSearchResponseMapper {
         for (HearingEntity hearing : hearings) {
             addHearingToResultList(advancedSearchResults, hearing);
         }
+        //Set the top level judges to be all the distinct judges in each valid hearing for the case
+        advancedSearchResults
+            .forEach(advancedSearchResult ->
+                         advancedSearchResult.setJudges(
+                             Optional.ofNullable(advancedSearchResult.getHearings()).orElseGet(ArrayList::new)
+                                 .stream()
+                                 .map(AdvancedSearchResultHearing::getJudges)
+                                 .flatMap(List::stream)
+                                 .distinct()
+                                 .toList()));
         return advancedSearchResults;
     }
 
@@ -43,7 +54,6 @@ public class AdvancedSearchResponseMapper {
         advancedSearchResult.setCaseNumber(courtCase.getCaseNumber());
         advancedSearchResult.setCourthouse(courtCase.getCourthouse().getDisplayName());
         advancedSearchResult.setDefendants(courtCase.getDefendantStringList());
-        advancedSearchResult.setJudges(courtCase.getJudgeStringList());
         advancedSearchResult.setIsDataAnonymised(courtCase.isDataAnonymised());
         advancedSearchResult.setDataAnonymisedAt(courtCase.getDataAnonymisedTs());
 
