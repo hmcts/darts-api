@@ -5,9 +5,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.core.io.Resource;
 import uk.gov.hmcts.darts.common.datamanagement.api.DataManagementFacade;
 import uk.gov.hmcts.darts.common.datamanagement.component.impl.DownloadResponseMetaData;
 import uk.gov.hmcts.darts.common.datamanagement.component.impl.FileBasedDownloadResponseMetaData;
@@ -134,8 +132,7 @@ class AnnotationDataManagementTest {
         var mockFileBasedDownloadResponseMetaData = mock(FileBasedDownloadResponseMetaData.class);
         when(dataManagementFacade.retrieveFileFromStorage(anyList())).thenReturn(mockFileBasedDownloadResponseMetaData);
 
-        Resource resource = Mockito.mock(Resource.class);
-        when(mockFileBasedDownloadResponseMetaData.getResource()).thenReturn(resource).thenThrow(new IOException());
+        when(mockFileBasedDownloadResponseMetaData.getResource()).thenThrow(new IOException());
 
         assertThatThrownBy(() -> annotationDataManagement.download(Arrays.asList(someExternalObjectDirectoryEntity())))
             .isInstanceOf(DartsApiException.class)

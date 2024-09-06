@@ -1,9 +1,10 @@
 package uk.gov.hmcts.darts.common.datamanagement.component.impl;
 
 import lombok.Getter;
+import lombok.Setter;
+import org.apache.commons.io.FileUtils;
 import org.springframework.core.io.FileUrlResource;
 import org.springframework.core.io.Resource;
-import reactor.util.annotation.NonNullApi;
 import uk.gov.hmcts.darts.common.datamanagement.StorageConfiguration;
 import uk.gov.hmcts.darts.common.util.RequestFileStore;
 
@@ -15,7 +16,6 @@ import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
-import java.util.UUID;
 
 /**
  *The response download data. Always use in combination with a try resources to ensure the file resources are cleaned up
@@ -26,11 +26,10 @@ public class FileBasedDownloadResponseMetaData extends DownloadResponseMetaData 
     private File fileToBeDownloadedTo;
 
     public Resource getResource()  throws IOException {
+
         return new FileUrlResource(fileToBeDownloadedTo.toURI().toURL()) {
             public InputStream getInputStream() throws IOException {
-                if (inputStream == null) {
-                    inputStream = Files.newInputStream(Path.of(fileToBeDownloadedTo.toURI()), StandardOpenOption.READ);
-                }
+                InputStream inputStream = Files.newInputStream(Path.of(fileToBeDownloadedTo.toURI()), StandardOpenOption.READ);
 
                 return new FileInputStreamWrapper(inputStream);
             }
@@ -48,11 +47,16 @@ public class FileBasedDownloadResponseMetaData extends DownloadResponseMetaData 
         return outputStream;
     }
 
+    public void setInputStream(InputStream inputStream, StorageConfiguration configuration)  throws IOException {
+        fileToBeDownloadedTo = RequestFileStore.getFileCreatedForThread().create(configuration.getTempBlobWorkspace());
+        FileUtils.copyInputStreamToFile(inputStream, fileToBeDownloadedTo);
+    }
+
     @Override
     public void close() throws IOException {
         super.close();
 
-        if (fileToBeDownloadedTo != null) {
+        if (fileToBeDownloadedTo != null && fileToBeDownloadedTo.exists()) {
             Files.delete(Path.of(fileToBeDownloadedTo.toURI()));
         }
     }
@@ -72,7 +76,6 @@ public class FileBasedDownloadResponseMetaData extends DownloadResponseMetaData 
         @Override
         public void close() throws IOException {
             FileBasedDownloadResponseMetaData.this.close();
-            FileBasedDownloadResponseMetaData.this.inputStream = null;
         }
     }
 }

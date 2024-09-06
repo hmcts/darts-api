@@ -66,7 +66,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-@ExtendWith(MockitoExtension.class)
+@ExtendWith({MockitoExtension.class})
 class DataManagementFacadeImplTest {
 
     @Mock
@@ -141,9 +141,13 @@ class DataManagementFacadeImplTest {
         storedStatus.setId(2);
         lenient().when(objectRecordStatusRepository.getReferenceById(anyInt())).thenReturn(storedStatus);
 
-        Resource resource = Mockito.mock(Resource.class);
-        when(downloadResponseMetaDataMock.getResource()).thenReturn(resource);
+        Resource resource = mock(Resource.class);
+
+        lenient().when(objectRecordStatusRepository.getReferenceById(anyInt())).thenReturn(storedStatus);
+
+        lenient().when(dataManagementConfiguration.getTempBlobWorkspace()).thenReturn("/tmp");
         lenient().when(resource.getInputStream()).thenReturn(toInputStream("testInputStream", UTF_8));
+        lenient().when(downloadResponseMetaDataMock.getResource()).thenReturn(resource);
         lenient().when(downloadResponseMetaDataMock.getContainerTypeUsedToDownload()).thenReturn(DatastoreContainerType.ARM);
     }
 
@@ -156,6 +160,7 @@ class DataManagementFacadeImplTest {
 
     @Test
     void testDownloadOfFacadeWithArm() throws Exception {
+
         final List<BlobContainerDownloadable> blobContainerDownloadables = new ArrayList<>();
 
         BlobContainerDownloadable downloadable = mock(BlobContainerDownloadable.class);
@@ -377,11 +382,11 @@ class DataManagementFacadeImplTest {
                                                                                dataManagementConfiguration, armApiService, objectRetrievalQueueRepository);
 
         when(objectRetrievalQueueRepository.findMatchingObjectRetrievalQueueItem(mediaEntity,
-                                                                                   null,
-                                                                                   mediaEntity.getId().toString(),
-                                                                                   mediaEntity.getContentObjectId(),
-                                                                                   mediaEntity.getClipId())
-                                                                                    ).thenReturn(Optional.of(objectRetrievalQueueEntity));
+                                                                                 null,
+                                                                                 mediaEntity.getId().toString(),
+                                                                                 mediaEntity.getContentObjectId(),
+                                                                                 mediaEntity.getClipId())
+        ).thenReturn(Optional.of(objectRetrievalQueueEntity));
         // make the assertion on the response
         var exception = assertThrows(
             FileNotDownloadedException.class,
@@ -667,22 +672,22 @@ class DataManagementFacadeImplTest {
     }
 
     private BlobContainerDownloadable setupDownloadableContainer(DatastoreContainerType containerType,
-                                                                 boolean processSuccess) throws FileNotDownloadedException {
+                                                                 boolean processSuccess) throws IOException, FileNotDownloadedException {
         BlobContainerDownloadable downloadable = mock(BlobContainerDownloadable.class);
 
         BinaryData data = BinaryData.fromString("Test String");
 
-        fileBasedDownloadResponseMetaData.markInputStream(data.toStream());
+        fileBasedDownloadResponseMetaData.setInputStream(data.toStream(), dataManagementConfiguration);
 
         lenient().when(downloadable.getContainerName(containerType)).thenReturn(Optional.of("test"));
         if (processSuccess) {
             lenient().when(downloadable
-                     .downloadBlobFromContainer(eq(containerType),
-                                                Mockito.notNull())).thenReturn(fileBasedDownloadResponseMetaData);
+                               .downloadBlobFromContainer(eq(containerType),
+                                                          Mockito.notNull())).thenReturn(fileBasedDownloadResponseMetaData);
         } else {
             lenient().when(downloadable
-                                       .downloadBlobFromContainer(eq(containerType),
-                                                                  Mockito.notNull())).thenThrow(new FileNotDownloadedException());
+                               .downloadBlobFromContainer(eq(containerType),
+                                                          Mockito.notNull())).thenThrow(new FileNotDownloadedException());
         }
         return downloadable;
     }

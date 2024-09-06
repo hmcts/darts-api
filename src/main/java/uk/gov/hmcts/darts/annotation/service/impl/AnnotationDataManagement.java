@@ -3,7 +3,6 @@ package uk.gov.hmcts.darts.annotation.service.impl;
 import com.azure.core.util.BinaryData;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.core.io.InputStreamResource;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.darts.common.datamanagement.api.DataManagementFacade;

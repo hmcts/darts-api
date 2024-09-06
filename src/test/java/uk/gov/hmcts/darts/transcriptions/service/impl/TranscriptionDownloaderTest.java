@@ -1,12 +1,12 @@
 package uk.gov.hmcts.darts.transcriptions.service.impl;
 
-import org.apache.commons.io.IOUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.core.io.InputStreamResource;
+import org.springframework.core.io.Resource;
 import uk.gov.hmcts.darts.audit.api.AuditApi;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.datamanagement.api.DataManagementFacade;
@@ -22,7 +22,6 @@ import uk.gov.hmcts.darts.common.repository.TranscriptionRepository;
 import uk.gov.hmcts.darts.datamanagement.exception.FileNotDownloadedException;
 
 import java.io.IOException;
-import java.nio.charset.Charset;
 import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -122,7 +121,8 @@ class TranscriptionDownloaderTest {
         var transcription = someTranscriptionWith(List.of(transcriptionDocument));
         when(transcriptionRepository.findById(transcription.getId())).thenReturn(Optional.of(transcription));
 
-        when(fileBasedDownloadResponseMetaData.getResource().getInputStream()).thenThrow(new IOException());
+        when(fileBasedDownloadResponseMetaData.getResource()).thenThrow(new IOException());
+
         when(dataManagementFacade.retrieveFileFromStorage(any(TranscriptionDocumentEntity.class))).thenReturn(fileBasedDownloadResponseMetaData);
 
         assertThatThrownBy(() -> transcriptionDownloader.downloadTranscript(transcription.getId()))
@@ -150,7 +150,10 @@ class TranscriptionDownloaderTest {
         var transcription = someTranscriptionWith(transcriptionDocuments);
         when(transcriptionRepository.findById(transcription.getId())).thenReturn(Optional.of(transcription));
         when(dataManagementFacade.retrieveFileFromStorage(any(TranscriptionDocumentEntity.class))).thenReturn(fileBasedDownloadResponseMetaData);
-        when(fileBasedDownloadResponseMetaData.getResource().getInputStream()).thenReturn(IOUtils.toInputStream("test-transcription", Charset.defaultCharset()));
+
+
+        Resource resource = Mockito.mock(Resource.class);
+        when(fileBasedDownloadResponseMetaData.getResource()).thenReturn(resource);
 
         // When
         var downloadTranscriptResponse = transcriptionDownloader.downloadTranscript(transcription.getId());
@@ -159,9 +162,9 @@ class TranscriptionDownloaderTest {
         assertThat(downloadTranscriptResponse.getTranscriptionDocumentId()).isEqualTo(transcriptionDocumentUploadedToday.getId());
         assertThat(downloadTranscriptResponse.getFileName()).isEqualTo(transcriptionDocumentUploadedToday.getFileName());
         assertThat(downloadTranscriptResponse.getContentType()).isEqualTo(transcriptionDocumentUploadedToday.getFileType());
-        assertThat(downloadTranscriptResponse.getResource()).isInstanceOf(InputStreamResource.class);
+        assertThat(downloadTranscriptResponse.getResource()).isInstanceOf(Resource.class);
 
-        verify(fileBasedDownloadResponseMetaData).getResource().getInputStream();
+        verify(fileBasedDownloadResponseMetaData).getResource();
         verifyNoMoreInteractions(dataManagementFacade, fileBasedDownloadResponseMetaData);
 
     }

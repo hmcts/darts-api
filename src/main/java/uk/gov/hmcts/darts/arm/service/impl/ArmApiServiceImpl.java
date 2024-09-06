@@ -13,6 +13,7 @@ import uk.gov.hmcts.darts.arm.client.model.AvailableEntitlementProfile;
 import uk.gov.hmcts.darts.arm.client.model.UpdateMetadataRequest;
 import uk.gov.hmcts.darts.arm.client.model.UpdateMetadataResponse;
 import uk.gov.hmcts.darts.arm.config.ArmApiConfigurationProperties;
+import uk.gov.hmcts.darts.arm.config.ArmDataManagementConfiguration;
 import uk.gov.hmcts.darts.arm.enums.GrantType;
 import uk.gov.hmcts.darts.arm.service.ArmApiService;
 import uk.gov.hmcts.darts.common.datamanagement.component.impl.DownloadResponseMetaData;
@@ -32,6 +33,7 @@ public class ArmApiServiceImpl implements ArmApiService {
     private final ArmApiConfigurationProperties armApiConfigurationProperties;
     private final ArmTokenClient armTokenClient;
     private final ArmApiClient armApiClient;
+    private final ArmDataManagementConfiguration armDataManagementConfiguration;
 
     @Override
     public UpdateMetadataResponse updateMetadata(String externalRecordId, OffsetDateTime eventTimestamp, int retConfScore, String retConfReason) {
@@ -55,7 +57,7 @@ public class ArmApiServiceImpl implements ArmApiService {
     @Override
     @SuppressWarnings({"PMD.CloseResource"})
     public DownloadResponseMetaData downloadArmData(String externalRecordId, String externalFileId) throws FileNotDownloadedException {
-        DownloadResponseMetaData responseMetaData = new FileBasedDownloadResponseMetaData();
+        FileBasedDownloadResponseMetaData responseMetaData = new FileBasedDownloadResponseMetaData();
 
         feign.Response response = armApiClient.downloadArmData(
             getArmBearerToken(),
@@ -75,7 +77,7 @@ public class ArmApiServiceImpl implements ArmApiService {
 
         try {
             responseMetaData.setContainerTypeUsedToDownload(DatastoreContainerType.ARM);
-            responseMetaData.markInputStream(response.body().asInputStream());
+            responseMetaData.setInputStream(response.body().asInputStream(), armDataManagementConfiguration);
         } catch (Exception e) {
             String message = ("Arm file failed to download due to body stream, " +
                 "cabinet: %s, " +

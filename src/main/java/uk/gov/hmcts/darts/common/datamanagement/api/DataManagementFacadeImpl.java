@@ -209,16 +209,11 @@ public class DataManagementFacadeImpl implements DataManagementFacade {
             File targetFile = new File(tempBlobPath);
             FileUtils.copyInputStreamToFile(downloadResponseMetaData.getResource().getInputStream(), targetFile);
 
-            InputStream inputStreamOriginal = new FileInputStream(targetFile);
-            downloadResponseMetaData.markInputStream(inputStreamOriginal);
-
-            try (InputStream inputStreamUnstructured = new FileInputStream(targetFile)) {
-                DownloadResponseMetaData downloadResponseMetaDataUnstructured = new FileBasedDownloadResponseMetaData();
-                downloadResponseMetaDataUnstructured.setEodEntity(eodEntity);
-                downloadResponseMetaDataUnstructured.setContainerTypeUsedToDownload(downloadResponseMetaData.getContainerTypeUsedToDownload());
-                downloadResponseMetaDataUnstructured.markInputStream(inputStreamUnstructured);
-                createUnstructuredData(downloadResponseMetaDataUnstructured, eodEntityToDelete, targetFile);
-            }
+            FileBasedDownloadResponseMetaData downloadResponseMetaDataUnstructured = new FileBasedDownloadResponseMetaData();
+            downloadResponseMetaDataUnstructured.setEodEntity(eodEntity);
+            downloadResponseMetaDataUnstructured.setContainerTypeUsedToDownload(downloadResponseMetaData.getContainerTypeUsedToDownload());
+            downloadResponseMetaDataUnstructured.setInputStream(new FileInputStream(targetFile), dataManagementConfiguration);
+            createUnstructuredData(downloadResponseMetaDataUnstructured, eodEntityToDelete, targetFile);
         }
     }
 
