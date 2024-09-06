@@ -68,11 +68,6 @@ public enum TranscriptionApiError implements DartsApiError {
         HttpStatus.NOT_FOUND,
         TranscriptionsTitleErrors.AUDIO_NOT_FOUND.toString()
     ),
-    TIMES_OUTSIDE_OF_HEARING_TIMES(
-        TranscriptionsErrorCode.TIMES_OUTSIDE_OF_HEARING_TIMES.getValue(),
-        HttpStatus.NOT_FOUND,
-        TranscriptionsTitleErrors.TIMES_OUTSIDE_OF_HEARING_TIMES.toString()
-    ),
     FAILED_TO_UPDATE_TRANSCRIPTIONS(
         UpdateTranscriptions400ErrorCode.UPDATE_TRANSCRIPTIONS_PARTIAL_PROBLEM.getValue(),
         HttpStatus.BAD_REQUEST,
