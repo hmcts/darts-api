@@ -23,10 +23,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.UUID;
-import java.util.concurrent.CompletableFuture;
 
 import static uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum.UNSTRUCTURED;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.STORED;
@@ -41,12 +38,6 @@ public class UnstructuredDataHelper {
     private final UserAccountRepository userAccountRepository;
     private final DataManagementService dataManagementService;
     private final DataManagementConfiguration dataManagementConfiguration;
-
-    private static final List<CompletableFuture> JOBS_LIST = new ArrayList<>();
-
-    public  List<CompletableFuture> getJobsList() {
-        return JOBS_LIST;
-    }
 
     @Transactional
     public boolean createUnstructuredDataFromEod(
@@ -138,12 +129,4 @@ public class UnstructuredDataHelper {
         }
     }
 
-    public void addToJobsList(CompletableFuture<Void> saveToUnstructuredFuture) {
-        JOBS_LIST.add(saveToUnstructuredFuture);
-    }
-
-    public void waitForAllJobsToFinish() {
-        JOBS_LIST.forEach(CompletableFuture::join);
-        JOBS_LIST.clear();
-    }
 }

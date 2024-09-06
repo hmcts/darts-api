@@ -23,27 +23,24 @@ public class CleanupCurrentFlagEventProcessorImpl implements CleanupCurrentFlagE
         List<Integer> processedEventIdLst = new ArrayList<>();
         log.debug("Batch size to process event ids for {}", batchSize);
         List<Integer> eventEntityReturned = eventRepository.getCurrentEventIdsToBeProcessed(Pageable.ofSize(batchSize));
-        log.debug("Event ids being processed{}",  processedEventIdLst.stream().map(Object::toString)
-            .collect(Collectors.joining(",")));
-        log.debug("Number of Event ids to be processed {}",  processedEventIdLst.size());
-
-        List<Integer> eventPrimaryKeysLst = new ArrayList<>();
-        List<Integer> eventIdsLst = new ArrayList<>();
+        if (log.isDebugEnabled()) {
+            log.debug("Event ids being processed {}", eventEntityReturned
+                .stream()
+                .map(Object::toString)
+                .collect(Collectors.joining(",")));
+        }
 
         eventEntityReturned.forEach(event -> {
-            Integer eventIdPrimaryKey = eventRepository.getTheLatestCreatedEventPrimaryKeyForTheEventId(event);
-            log.debug("Current event primary key is {}", eventIdPrimaryKey);
+            EventRepository.EventIdAndHearingIds eventIdAndHearingIds = eventRepository.getTheLatestCreatedEventPrimaryKeyForTheEventId(event);
+            eventRepository.updateAllEventIdEventsToNotCurrentWithTheExclusionOfTheCurrentEventPrimaryKey(
+                eventIdAndHearingIds.getEveId(), eventIdAndHearingIds.getEventId(), eventIdAndHearingIds.getHearingIds());
 
-            eventPrimaryKeysLst.add(eventIdPrimaryKey);
-            eventIdsLst.add(event);
-
+            log.debug("Updated all events for event id {} excluding primary key {} where hearings match {}",
+                      eventIdAndHearingIds.getEventId(),
+                      eventIdAndHearingIds.getEveId(),
+                      eventIdAndHearingIds.getHearingIds());
             processedEventIdLst.add(event);
         });
-
-        eventRepository.updateAllEventIdEventsToNotCurrentWithTheExclusionOfTheCurrentEventPrimaryKey(eventPrimaryKeysLst, eventIdsLst);
-        log.debug("Updated all events for event id {} excluding primary key {}", eventIdsLst.stream().map(Object::toString),
-                 eventPrimaryKeysLst.stream().map(Object::toString));
-
         return processedEventIdLst;
     }
 }

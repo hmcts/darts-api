@@ -47,7 +47,8 @@ class AudioOperationServiceIntTest extends IntegrationBase {
 
     private static final Duration ALLOWABLE_GAP = Duration.ofSeconds(1);
     private static final Duration ALLOWABLE_GAP_MS = Duration.ofMillis(1200);
-    private static final String AUDIO_FILENAME = "tests/audio/WithViqHeader/viq0001min.mp2";
+    private static final String AUDIO_FILENAME1 = "tests/audio/WithViqHeader/viq0001min.mp2";
+    private static final String AUDIO_FILENAME2 = "tests/audio/WithViqHeader/1_to_2m.mp2";
     public static final String COMMAND_INPUT = " -i ";
     public static final String FFMPEG = "ffmpeg";
 
@@ -63,9 +64,10 @@ class AudioOperationServiceIntTest extends IntegrationBase {
         UUID externalLocation = UUID.randomUUID();
         tempDirectory = Files.createTempDirectory(externalLocation + "darts_api_unit_test");
 
-        File audioFileTest = TestUtils.getFile(AUDIO_FILENAME);
-        Path path1 = Files.copy(audioFileTest.toPath(), createFile(tempDirectory, "original0.mp2"), REPLACE_EXISTING);
-        Path path2 = Files.copy(audioFileTest.toPath(), createFile(tempDirectory, "original1.mp2"), REPLACE_EXISTING);
+        File audioFileTest1 = TestUtils.getFile(AUDIO_FILENAME1);
+        Path path1 = Files.copy(audioFileTest1.toPath(), createFile(tempDirectory, "original0.mp2"), REPLACE_EXISTING);
+        File audioFileTest2 = TestUtils.getFile(AUDIO_FILENAME2);
+        Path path2 = Files.copy(audioFileTest2.toPath(), createFile(tempDirectory, "original1.mp2"), REPLACE_EXISTING);
 
         preloadedInputAudioFileInfos = new ArrayList<>(Arrays.asList(
             AudioFileInfo.builder()
@@ -86,9 +88,10 @@ class AudioOperationServiceIntTest extends IntegrationBase {
     }
 
     @Test
+    @SuppressWarnings({"PMD.InsufficientStringBufferDeclaration"})
     void shouldGenerateConcatenateCommandWhenValidAudioFilesAreReceived() throws IOException {
 
-        File audioFileTest = TestUtils.getFile(AUDIO_FILENAME);
+        File audioFileTest = TestUtils.getFile(AUDIO_FILENAME1);
         Path path1 = Files.copy(audioFileTest.toPath(), createFile(tempDirectory, "test1.mp2"), REPLACE_EXISTING);
         Path path2 = Files.copy(audioFileTest.toPath(), createFile(tempDirectory, "test2.mp2"), REPLACE_EXISTING);
 
@@ -115,11 +118,11 @@ class AudioOperationServiceIntTest extends IntegrationBase {
             outputPath
         );
 
-        StringBuilder command = new StringBuilder(52);
+        StringBuilder command = new StringBuilder();
         command.append(FFMPEG)
             .append(COMMAND_INPUT).append(path1)
             .append(COMMAND_INPUT).append(path2)
-            .append(" -filter_complex [0:a][1:a]concat=n=2:v=0:a=1 ")
+            .append(" -b:a 32k -filter_complex [0:a][1:a]concat=n=2:v=0:a=1 ")
             .append(outputPath);
         CommandLine expectedCommand = CommandLine.parse(command.toString());
 
@@ -128,9 +131,10 @@ class AudioOperationServiceIntTest extends IntegrationBase {
     }
 
     @Test
+    @SuppressWarnings({"PMD.InsufficientStringBufferDeclaration"})
     void shouldGenerateConcatenateCommandWhenMultipleChannelsAreReceived() throws IOException {
 
-        File audioFileTest = TestUtils.getFile(AUDIO_FILENAME);
+        File audioFileTest = TestUtils.getFile(AUDIO_FILENAME1);
         Path path1 = Files.copy(audioFileTest.toPath(), createFile(tempDirectory, "test1.mp2"), REPLACE_EXISTING);
         Path path2 = Files.copy(audioFileTest.toPath(), createFile(tempDirectory, "test2.mp2"), REPLACE_EXISTING);
         Path path3 = Files.copy(audioFileTest.toPath(), createFile(tempDirectory, "test3.mp2"), REPLACE_EXISTING);
@@ -173,13 +177,13 @@ class AudioOperationServiceIntTest extends IntegrationBase {
             outputPath
         );
 
-        StringBuilder command = new StringBuilder(62);
+        StringBuilder command = new StringBuilder();
         command.append(FFMPEG)
             .append(COMMAND_INPUT).append(path1)
             .append(COMMAND_INPUT).append(path2)
             .append(COMMAND_INPUT).append(path3)
             .append(COMMAND_INPUT).append(path4)
-            .append(" -filter_complex [0:a][1:a][2:a][3:a]concat=n=4:v=0:a=1 ")
+            .append(" -b:a 32k -filter_complex [0:a][1:a][2:a][3:a]concat=n=4:v=0:a=1 ")
             .append(outputPath);
         CommandLine expectedCommand = CommandLine.parse(command.toString());
 
@@ -219,7 +223,7 @@ class AudioOperationServiceIntTest extends IntegrationBase {
     void shouldReturnTrimmedAudioFileWhenValidInputAudioFile()
         throws ExecutionException, InterruptedException, IOException {
 
-        File audioFileTest = TestUtils.getFile(AUDIO_FILENAME);
+        File audioFileTest = TestUtils.getFile(AUDIO_FILENAME1);
         Path path1 = Files.copy(audioFileTest.toPath(), createFile(tempDirectory, "test1.mp2"), REPLACE_EXISTING);
 
         AudioFileInfo audioFileInfo = audioOperationService.trim(
@@ -302,7 +306,7 @@ class AudioOperationServiceIntTest extends IntegrationBase {
 
     @Test
     void shouldReturnConcatenatedAudioFileListInfoWhenValidInputAudioFilesHaveGap() throws Exception {
-        File audioFileTest = TestUtils.getFile(AUDIO_FILENAME);
+        File audioFileTest = TestUtils.getFile(AUDIO_FILENAME1);
         Path path1 = Files.copy(audioFileTest.toPath(), createFile(tempDirectory, "test2.mp2"), REPLACE_EXISTING);
         Path path2 = Files.copy(audioFileTest.toPath(), createFile(tempDirectory, "test3.mp2"), REPLACE_EXISTING);
 
@@ -339,7 +343,7 @@ class AudioOperationServiceIntTest extends IntegrationBase {
     @Test
     void shouldReturnConcatenatedAudioFileListInfoWhenValidInputAudioFilesHaveGapWithSeconds() throws Exception {
 
-        File audioFileTest = TestUtils.getFile(AUDIO_FILENAME);
+        File audioFileTest = TestUtils.getFile(AUDIO_FILENAME1);
         Path path1 = Files.copy(audioFileTest.toPath(), createFile(tempDirectory, "original4.mp2"), REPLACE_EXISTING);
         Path path2 = Files.copy(audioFileTest.toPath(), createFile(tempDirectory, "original5.mp2"), REPLACE_EXISTING);
 
@@ -377,7 +381,7 @@ class AudioOperationServiceIntTest extends IntegrationBase {
 
     @Test
     void shouldNotReturnConcatenatedAudioFileListInfoWhenValidInputAudioFilesHaveLargeGap() throws Exception {
-        File audioFileTest = TestUtils.getFile(AUDIO_FILENAME);
+        File audioFileTest = TestUtils.getFile(AUDIO_FILENAME1);
         Path path1 = Files.copy(audioFileTest.toPath(), createFile(tempDirectory, "test6.mp2"), REPLACE_EXISTING);
         Path path2 = Files.copy(audioFileTest.toPath(), createFile(tempDirectory, "test7.mp2"), REPLACE_EXISTING);
 

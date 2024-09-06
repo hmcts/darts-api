@@ -2,6 +2,8 @@ package uk.gov.hmcts.darts.event.controller;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -12,6 +14,7 @@ import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilde
 import uk.gov.hmcts.darts.audio.api.AudioApi;
 import uk.gov.hmcts.darts.common.entity.EventEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
+import uk.gov.hmcts.darts.common.enums.SecurityRoleEnum;
 import uk.gov.hmcts.darts.event.component.DartsEventMapper;
 import uk.gov.hmcts.darts.event.exception.EventError;
 import uk.gov.hmcts.darts.event.model.AdminGetEventForIdResponseResult;
@@ -34,7 +37,6 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.CPP;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.SUPER_ADMIN;
-import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.SUPER_USER;
 
 @AutoConfigureMockMvc
 class EventsControllerTest extends IntegrationBase {
@@ -88,12 +90,13 @@ class EventsControllerTest extends IntegrationBase {
         verify(eventDispatcher).receive(any(DartsEvent.class));
     }
 
-    @Test
-    void adminEventsApiGetByIdEndpointSuccess() throws Exception {
+    @ParameterizedTest
+    @EnumSource(value = SecurityRoleEnum.class, names = {"SUPER_ADMIN", "SUPER_USER"})
+    void adminEventsApiGetByIdEndpointSuccess(SecurityRoleEnum role) throws Exception {
 
         // Given
         // setup an event id
-        given.anAuthenticatedUserWithGlobalAccessAndRole(SUPER_ADMIN);
+        given.anAuthenticatedUserWithGlobalAccessAndRole(role);
         LocalDateTime hearingDate = LocalDateTime.of(2020, 6, 6, 20, 0, 0);
         HearingEntity hearing = dartsDatabaseStub.createHearing("Courthouse", "1", "12345", hearingDate);
         EventEntity eventEntity = dartsDatabaseStub.createEvent(hearing);
@@ -142,17 +145,5 @@ class EventsControllerTest extends IntegrationBase {
 
         // Then
         Assertions.assertEquals(EventError.EVENT_ID_NOT_FOUND_RESULTS.getType(), responseResult.getType());
-    }
-
-    @Test
-    void adminEventsApiGetByIdEndpointFailureNotSuperAdmin() throws Exception {
-        given.anAuthenticatedUserWithGlobalAccessAndRole(SUPER_USER);
-
-        // When
-        MockHttpServletRequestBuilder requestBuilder = get("/admin/events/-1")
-            .contentType(MediaType.APPLICATION_JSON_VALUE);
-
-        // Then
-        mockMvc.perform(requestBuilder).andExpect(status().isForbidden()).andReturn();
     }
 }
