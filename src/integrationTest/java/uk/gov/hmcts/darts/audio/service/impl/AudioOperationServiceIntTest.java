@@ -88,6 +88,7 @@ class AudioOperationServiceIntTest extends IntegrationBase {
     }
 
     @Test
+    @SuppressWarnings({"PMD.InsufficientStringBufferDeclaration"})
     void shouldGenerateConcatenateCommandWhenValidAudioFilesAreReceived() throws IOException {
 
         File audioFileTest = TestUtils.getFile(AUDIO_FILENAME1);
@@ -117,7 +118,7 @@ class AudioOperationServiceIntTest extends IntegrationBase {
             outputPath
         );
 
-        StringBuilder command = new StringBuilder(52);
+        StringBuilder command = new StringBuilder();
         command.append(FFMPEG)
             .append(COMMAND_INPUT).append(path1)
             .append(COMMAND_INPUT).append(path2)
@@ -130,6 +131,7 @@ class AudioOperationServiceIntTest extends IntegrationBase {
     }
 
     @Test
+    @SuppressWarnings({"PMD.InsufficientStringBufferDeclaration"})
     void shouldGenerateConcatenateCommandWhenMultipleChannelsAreReceived() throws IOException {
 
         File audioFileTest = TestUtils.getFile(AUDIO_FILENAME1);
@@ -175,7 +177,7 @@ class AudioOperationServiceIntTest extends IntegrationBase {
             outputPath
         );
 
-        StringBuilder command = new StringBuilder(62);
+        StringBuilder command = new StringBuilder();
         command.append(FFMPEG)
             .append(COMMAND_INPUT).append(path1)
             .append(COMMAND_INPUT).append(path2)

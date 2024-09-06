@@ -41,7 +41,7 @@ public class AudioOperationServiceImpl implements AudioOperationService {
             command.append(" -i ").append(audioFileInfo.getPath().toString());
         }
 
-        command.append((" -b:a 32k"));
+        command.append(" -b:a 32k");
         command.append(" -filter_complex ");
 
         int concatNumberOfSegments = audioFileInfos.size();
