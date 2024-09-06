@@ -19,7 +19,7 @@ public class AzureCopyUtil {
     public void copy(String source, String destination) {
         try {
             ProcessBuilder builder = new ProcessBuilder();
-            builder.command(config.getAzCopyExecutable(), "copy", source, destination);
+            builder.command(config.getAzCopyExecutable(), "copy", source, destination, config.getAzCopyPreserveAccessTier());
 
             var startTime = Instant.now();
             log.info("copy of blob started at {}", startTime);
