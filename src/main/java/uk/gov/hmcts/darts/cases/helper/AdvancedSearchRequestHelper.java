@@ -81,8 +81,8 @@ public class AdvancedSearchRequestHelper {
         CollectionUtils.addAll(predicates, addJudgeCriteria(request, criteriaBuilder, caseRoot));
         CollectionUtils.addAll(predicates, addDefendantCriteria(request, criteriaBuilder, caseRoot));
         CollectionUtils.addAll(predicates, addEventCriteria(request, criteriaBuilder, caseRoot));
-        CollectionUtils.addAll(predicates, addEUseInterpreterCriteria(criteriaBuilder, caseRoot));
-
+        CollectionUtils.addAll(predicates, addUseInterpreterCriteria(criteriaBuilder, caseRoot));
+        CollectionUtils.addAll(predicates, addHearingIsActualCriteria(criteriaBuilder, caseRoot));
         return predicates;
     }
 
@@ -256,13 +256,22 @@ public class AdvancedSearchRequestHelper {
         return predicateList;
     }
 
-    private List<Predicate> addEUseInterpreterCriteria(HibernateCriteriaBuilder criteriaBuilder, Root<CourtCaseEntity> caseRoot) {
+    private List<Predicate> addUseInterpreterCriteria(HibernateCriteriaBuilder criteriaBuilder, Root<CourtCaseEntity> caseRoot) {
         List<Predicate> predicateList = new ArrayList<>();
         if (authorisationApi.userHasOneOfRoles(List.of(TRANSLATION_QA))) {
             predicateList.add(criteriaBuilder.isTrue(
                 caseRoot.get(CourtCaseEntity_.interpreterUsed)
             ));
         }
+        return predicateList;
+    }
+
+    private List<Predicate> addHearingIsActualCriteria(HibernateCriteriaBuilder criteriaBuilder, Root<CourtCaseEntity> caseRoot) {
+        List<Predicate> predicateList = new ArrayList<>();
+        Join<CourtCaseEntity, HearingEntity> hearingJoin = joinHearing(caseRoot);
+        predicateList.add(criteriaBuilder.isTrue(
+            hearingJoin.get(HearingEntity_.HEARING_IS_ACTUAL)
+        ));
         return predicateList;
     }
 
