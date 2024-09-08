@@ -37,7 +37,7 @@ class CloseOldCasesProcessorTest extends IntegrationBase {
     @Autowired
     CloseOldCasesProcessor closeOldCasesProcessor;
 
-    private int batchSize = 5;
+    private final int batchSize = 5;
 
     private static final String REQUESTER_EMAIL = "test.user@example.com";
 
