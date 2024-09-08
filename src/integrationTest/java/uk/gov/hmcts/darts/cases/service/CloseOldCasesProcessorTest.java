@@ -37,6 +37,8 @@ class CloseOldCasesProcessorTest extends IntegrationBase {
     @Autowired
     CloseOldCasesProcessor closeOldCasesProcessor;
 
+    private int batchSize = 5;
+
     private static final String REQUESTER_EMAIL = "test.user@example.com";
 
     @BeforeEach
@@ -69,7 +71,7 @@ class CloseOldCasesProcessorTest extends IntegrationBase {
         dartsDatabase.getCaseRepository().save(courtCaseEntity);
         assertFalse(courtCaseEntity.getClosed());
 
-        closeOldCasesProcessor.closeCases();
+        closeOldCasesProcessor.closeCases(batchSize);
 
         CourtCaseEntity updatedCourtCaseEntity = dartsDatabase.getCaseRepository().findById(courtCaseEntity.getId()).orElse(null);
         assert updatedCourtCaseEntity != null;
@@ -102,7 +104,7 @@ class CloseOldCasesProcessorTest extends IntegrationBase {
         dartsDatabase.getCaseRepository().save(courtCaseEntity);
         assertFalse(courtCaseEntity.getClosed());
 
-        closeOldCasesProcessor.closeCases();
+        closeOldCasesProcessor.closeCases(batchSize);
 
         CourtCaseEntity updatedCourtCaseEntity = dartsDatabase.getCaseRepository().findById(courtCaseEntity.getId()).orElse(null);
         assert updatedCourtCaseEntity != null;
@@ -130,7 +132,7 @@ class CloseOldCasesProcessorTest extends IntegrationBase {
         dartsDatabase.getCaseRepository().save(courtCaseEntity);
         assertFalse(courtCaseEntity.getClosed());
 
-        closeOldCasesProcessor.closeCases();
+        closeOldCasesProcessor.closeCases(batchSize);
 
         CourtCaseEntity updatedCourtCaseEntity = dartsDatabase.getCaseRepository().findById(courtCaseEntity.getId()).orElse(null);
         assert updatedCourtCaseEntity != null;
@@ -169,7 +171,7 @@ class CloseOldCasesProcessorTest extends IntegrationBase {
         dartsDatabase.getCaseRepository().save(courtCaseEntity);
         assertFalse(courtCaseEntity.getClosed());
 
-        closeOldCasesProcessor.closeCases();
+        closeOldCasesProcessor.closeCases(batchSize);
 
         CourtCaseEntity updatedCourtCaseEntity = dartsDatabase.getCaseRepository().findById(courtCaseEntity.getId()).orElse(null);
         assert updatedCourtCaseEntity != null;
@@ -194,7 +196,7 @@ class CloseOldCasesProcessorTest extends IntegrationBase {
         dartsDatabase.getCaseRepository().save(courtCaseEntity);
         assertFalse(courtCaseEntity.getClosed());
 
-        closeOldCasesProcessor.closeCases();
+        closeOldCasesProcessor.closeCases(batchSize);
 
         CourtCaseEntity updatedCourtCaseEntity = dartsDatabase.getCaseRepository().findById(courtCaseEntity.getId()).orElse(null);
         assert updatedCourtCaseEntity != null;
@@ -214,7 +216,7 @@ class CloseOldCasesProcessorTest extends IntegrationBase {
         courtCaseEntity.setCreatedDateTime(closeDate);
         dartsDatabase.getCaseRepository().save(courtCaseEntity);
         assertFalse(courtCaseEntity.getClosed());
-        closeOldCasesProcessor.closeCases();
+        closeOldCasesProcessor.closeCases(batchSize);
 
         CourtCaseEntity updatedCourtCaseEntity = dartsDatabase.getCaseRepository().findById(courtCaseEntity.getId()).orElse(null);
         assert updatedCourtCaseEntity != null;
@@ -237,7 +239,7 @@ class CloseOldCasesProcessorTest extends IntegrationBase {
         dartsDatabase.getCaseRetentionStub().createCaseRetentionObject(courtCaseEntity, CaseRetentionStatus.COMPLETE,
                                                                        OffsetDateTime.now().plusYears(7), false);
 
-        closeOldCasesProcessor.closeCases();
+        closeOldCasesProcessor.closeCases(batchSize);
 
         CourtCaseEntity updatedCourtCaseEntity = dartsDatabase.getCaseRepository().findById(courtCaseEntity.getId()).orElse(null);
         assert updatedCourtCaseEntity != null;
@@ -257,7 +259,7 @@ class CloseOldCasesProcessorTest extends IntegrationBase {
         dartsDatabase.getCaseRepository().save(courtCaseEntity);
         assertFalse(courtCaseEntity.getClosed());
 
-        closeOldCasesProcessor.closeCases();
+        closeOldCasesProcessor.closeCases(batchSize);
 
         CourtCaseEntity updatedCourtCaseEntity = dartsDatabase.getCaseRepository().findById(courtCaseEntity.getId()).orElse(null);
         assert updatedCourtCaseEntity != null;

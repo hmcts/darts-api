@@ -46,7 +46,7 @@ public interface CaseRepository extends JpaRepository<CourtCaseEntity, Integer> 
         AND NOT EXISTS (select 1 from CaseRetentionEntity cre
             where cre.courtCase.id = case.id)
         """)
-    List<CourtCaseEntity> findOpenCasesToClose(OffsetDateTime cutoffDate);
+    List<CourtCaseEntity> findOpenCasesToClose(OffsetDateTime cutoffDate, Pageable pageable);
 
     List<CourtCaseEntity> findByIsRetentionUpdatedTrueAndRetentionRetriesLessThan(int maxRetentionRetries);
 

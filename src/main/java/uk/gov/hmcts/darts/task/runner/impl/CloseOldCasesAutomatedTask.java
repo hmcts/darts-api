@@ -1,6 +1,7 @@
 package uk.gov.hmcts.darts.task.runner.impl;
 
 import lombok.extern.slf4j.Slf4j;
+import uk.gov.hmcts.darts.arm.component.AutomatedTaskProcessorFactory;
 import uk.gov.hmcts.darts.cases.service.CloseOldCasesProcessor;
 import uk.gov.hmcts.darts.common.repository.AutomatedTaskRepository;
 import uk.gov.hmcts.darts.log.api.LogApi;
@@ -12,13 +13,14 @@ import static uk.gov.hmcts.darts.task.api.AutomatedTaskName.CLOSE_OLD_CASES_TASK
 @Slf4j
 public class CloseOldCasesAutomatedTask extends AbstractLockableAutomatedTask {
 
-    CloseOldCasesProcessor closeOldCasesProcessor;
+    private final AutomatedTaskProcessorFactory automatedTaskProcessorFactory;
 
     public CloseOldCasesAutomatedTask(AutomatedTaskRepository automatedTaskRepository,
                                       AutomatedTaskConfigurationProperties automatedTaskConfigurationProperties,
-                                      CloseOldCasesProcessor closeOldCasesProcessor, LogApi logApi, LockService lockService) {
+                                      LogApi logApi, LockService lockService,
+                                      AutomatedTaskProcessorFactory automatedTaskProcessorFactory) {
         super(automatedTaskRepository, automatedTaskConfigurationProperties, logApi, lockService);
-        this.closeOldCasesProcessor = closeOldCasesProcessor;
+        this.automatedTaskProcessorFactory = automatedTaskProcessorFactory;
     }
 
     @Override
@@ -28,6 +30,8 @@ public class CloseOldCasesAutomatedTask extends AbstractLockableAutomatedTask {
 
     @Override
     protected void runTask() {
-        closeOldCasesProcessor.closeCases();
+        Integer batchSize = getAutomatedTaskBatchSize(getTaskName());
+        CloseOldCasesProcessor closeOldCasesProcessor = automatedTaskProcessorFactory.createCloseOldCasesProcessor(batchSize);
+        closeOldCasesProcessor.closeCases(batchSize);
     }
 }
