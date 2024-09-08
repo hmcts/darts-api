@@ -37,7 +37,7 @@ class CloseOldCasesProcessorTest extends IntegrationBase {
     @Autowired
     CloseOldCasesProcessor closeOldCasesProcessor;
 
-    private final int batchSize = 5;
+    private static final Integer BATCH_SIZE = 5;
 
     private static final String REQUESTER_EMAIL = "test.user@example.com";
 
@@ -71,7 +71,7 @@ class CloseOldCasesProcessorTest extends IntegrationBase {
         dartsDatabase.getCaseRepository().save(courtCaseEntity);
         assertFalse(courtCaseEntity.getClosed());
 
-        closeOldCasesProcessor.closeCases(batchSize);
+        closeOldCasesProcessor.closeCases(BATCH_SIZE);
 
         CourtCaseEntity updatedCourtCaseEntity = dartsDatabase.getCaseRepository().findById(courtCaseEntity.getId()).orElse(null);
         assert updatedCourtCaseEntity != null;
@@ -104,7 +104,7 @@ class CloseOldCasesProcessorTest extends IntegrationBase {
         dartsDatabase.getCaseRepository().save(courtCaseEntity);
         assertFalse(courtCaseEntity.getClosed());
 
-        closeOldCasesProcessor.closeCases(batchSize);
+        closeOldCasesProcessor.closeCases(BATCH_SIZE);
 
         CourtCaseEntity updatedCourtCaseEntity = dartsDatabase.getCaseRepository().findById(courtCaseEntity.getId()).orElse(null);
         assert updatedCourtCaseEntity != null;
@@ -132,7 +132,7 @@ class CloseOldCasesProcessorTest extends IntegrationBase {
         dartsDatabase.getCaseRepository().save(courtCaseEntity);
         assertFalse(courtCaseEntity.getClosed());
 
-        closeOldCasesProcessor.closeCases(batchSize);
+        closeOldCasesProcessor.closeCases(BATCH_SIZE);
 
         CourtCaseEntity updatedCourtCaseEntity = dartsDatabase.getCaseRepository().findById(courtCaseEntity.getId()).orElse(null);
         assert updatedCourtCaseEntity != null;
@@ -171,7 +171,7 @@ class CloseOldCasesProcessorTest extends IntegrationBase {
         dartsDatabase.getCaseRepository().save(courtCaseEntity);
         assertFalse(courtCaseEntity.getClosed());
 
-        closeOldCasesProcessor.closeCases(batchSize);
+        closeOldCasesProcessor.closeCases(BATCH_SIZE);
 
         CourtCaseEntity updatedCourtCaseEntity = dartsDatabase.getCaseRepository().findById(courtCaseEntity.getId()).orElse(null);
         assert updatedCourtCaseEntity != null;
@@ -196,7 +196,7 @@ class CloseOldCasesProcessorTest extends IntegrationBase {
         dartsDatabase.getCaseRepository().save(courtCaseEntity);
         assertFalse(courtCaseEntity.getClosed());
 
-        closeOldCasesProcessor.closeCases(batchSize);
+        closeOldCasesProcessor.closeCases(BATCH_SIZE);
 
         CourtCaseEntity updatedCourtCaseEntity = dartsDatabase.getCaseRepository().findById(courtCaseEntity.getId()).orElse(null);
         assert updatedCourtCaseEntity != null;
@@ -216,7 +216,7 @@ class CloseOldCasesProcessorTest extends IntegrationBase {
         courtCaseEntity.setCreatedDateTime(closeDate);
         dartsDatabase.getCaseRepository().save(courtCaseEntity);
         assertFalse(courtCaseEntity.getClosed());
-        closeOldCasesProcessor.closeCases(batchSize);
+        closeOldCasesProcessor.closeCases(BATCH_SIZE);
 
         CourtCaseEntity updatedCourtCaseEntity = dartsDatabase.getCaseRepository().findById(courtCaseEntity.getId()).orElse(null);
         assert updatedCourtCaseEntity != null;
@@ -230,6 +230,48 @@ class CloseOldCasesProcessorTest extends IntegrationBase {
     }
 
     @Test
+    void givenNoDataUseCreatedDateAsClosedDateUseBatchSizeTwo() {
+        // given
+        OffsetDateTime closeDate = OffsetDateTime.now().minusYears(7);
+        CourtCaseEntity courtCaseEntity1 = dartsDatabase.createCase("a_courthouse", "019278");
+        courtCaseEntity1.setCreatedDateTime(closeDate);
+        dartsDatabase.getCaseRepository().save(courtCaseEntity1);
+        assertFalse(courtCaseEntity1.getClosed());
+
+        CourtCaseEntity courtCaseEntity2 = dartsDatabase.createCase("b_courthouse", "019279");
+        courtCaseEntity2.setCreatedDateTime(closeDate);
+        dartsDatabase.getCaseRepository().save(courtCaseEntity2);
+        assertFalse(courtCaseEntity2.getClosed());
+
+        CourtCaseEntity courtCaseEntity3 = dartsDatabase.createCase("c_courthouse", "019280");
+        courtCaseEntity3.setCreatedDateTime(closeDate);
+        dartsDatabase.getCaseRepository().save(courtCaseEntity3);
+        assertFalse(courtCaseEntity3.getClosed());
+
+        // when
+        closeOldCasesProcessor.closeCases(2);
+
+        // then
+        CourtCaseEntity updatedCourtCaseEntity1 = dartsDatabase.getCaseRepository().findById(courtCaseEntity1.getId()).orElse(null);
+        assert updatedCourtCaseEntity1 != null;
+        assertTrue(updatedCourtCaseEntity1.getClosed());
+        assertEquals(closeDate.truncatedTo(ChronoUnit.MINUTES), updatedCourtCaseEntity1.getCaseClosedTimestamp().truncatedTo(ChronoUnit.MINUTES));
+        assertEquals(RetentionConfidenceScoreEnum.CASE_NOT_PERFECTLY_CLOSED, updatedCourtCaseEntity1.getRetConfScore());
+        assertEquals(RetentionConfidenceReasonEnum.AGED_CASE, updatedCourtCaseEntity1.getRetConfReason());
+        CaseRetentionEntity caseRetentionEntity = dartsDatabase.getCaseRetentionRepository().findAll().get(0);
+        assertEquals(courtCaseEntity1.getId(), caseRetentionEntity.getCourtCase().getId());
+        assertEquals(RetentionConfidenceCategoryEnum.AGED_CASE, caseRetentionEntity.getConfidenceCategory());
+
+        CourtCaseEntity updatedCourtCaseEntity2 = dartsDatabase.getCaseRepository().findById(courtCaseEntity2.getId()).orElse(null);
+        assert updatedCourtCaseEntity2 != null;
+        assertTrue(updatedCourtCaseEntity2.getClosed());
+
+        CourtCaseEntity updatedCourtCaseEntity3 = dartsDatabase.getCaseRepository().findById(courtCaseEntity3.getId()).orElse(null);
+        assert updatedCourtCaseEntity3 != null;
+        assertFalse(updatedCourtCaseEntity3.getClosed());
+    }
+
+    @Test
     void givenRetentionPolicyDoNotClose() {
         CourtCaseEntity courtCaseEntity = dartsDatabase.createCase("a_courthouse", "019278");
         courtCaseEntity.setCreatedDateTime(OffsetDateTime.now().minusYears(7));
@@ -239,7 +281,7 @@ class CloseOldCasesProcessorTest extends IntegrationBase {
         dartsDatabase.getCaseRetentionStub().createCaseRetentionObject(courtCaseEntity, CaseRetentionStatus.COMPLETE,
                                                                        OffsetDateTime.now().plusYears(7), false);
 
-        closeOldCasesProcessor.closeCases(batchSize);
+        closeOldCasesProcessor.closeCases(BATCH_SIZE);
 
         CourtCaseEntity updatedCourtCaseEntity = dartsDatabase.getCaseRepository().findById(courtCaseEntity.getId()).orElse(null);
         assert updatedCourtCaseEntity != null;
@@ -259,7 +301,7 @@ class CloseOldCasesProcessorTest extends IntegrationBase {
         dartsDatabase.getCaseRepository().save(courtCaseEntity);
         assertFalse(courtCaseEntity.getClosed());
 
-        closeOldCasesProcessor.closeCases(batchSize);
+        closeOldCasesProcessor.closeCases(BATCH_SIZE);
 
         CourtCaseEntity updatedCourtCaseEntity = dartsDatabase.getCaseRepository().findById(courtCaseEntity.getId()).orElse(null);
         assert updatedCourtCaseEntity != null;
