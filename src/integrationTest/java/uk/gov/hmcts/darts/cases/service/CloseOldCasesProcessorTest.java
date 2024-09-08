@@ -232,19 +232,21 @@ class CloseOldCasesProcessorTest extends IntegrationBase {
     @Test
     void givenNoDataUseCreatedDateAsClosedDateUseBatchSizeTwo() {
         // given
-        OffsetDateTime closeDate = OffsetDateTime.now().minusYears(7);
+        OffsetDateTime closeDate1 = OffsetDateTime.now().minusYears(9);
         CourtCaseEntity courtCaseEntity1 = dartsDatabase.createCase("a_courthouse", "019278");
-        courtCaseEntity1.setCreatedDateTime(closeDate);
+        courtCaseEntity1.setCreatedDateTime(closeDate1);
         dartsDatabase.getCaseRepository().save(courtCaseEntity1);
         assertFalse(courtCaseEntity1.getClosed());
 
+        OffsetDateTime closeDate2 = OffsetDateTime.now().minusYears(8);
         CourtCaseEntity courtCaseEntity2 = dartsDatabase.createCase("b_courthouse", "019279");
-        courtCaseEntity2.setCreatedDateTime(closeDate);
+        courtCaseEntity2.setCreatedDateTime(closeDate2);
         dartsDatabase.getCaseRepository().save(courtCaseEntity2);
         assertFalse(courtCaseEntity2.getClosed());
 
+        OffsetDateTime closeDate3 = OffsetDateTime.now().minusYears(7);
         CourtCaseEntity courtCaseEntity3 = dartsDatabase.createCase("c_courthouse", "019280");
-        courtCaseEntity3.setCreatedDateTime(closeDate);
+        courtCaseEntity3.setCreatedDateTime(closeDate3);
         dartsDatabase.getCaseRepository().save(courtCaseEntity3);
         assertFalse(courtCaseEntity3.getClosed());
 
@@ -255,7 +257,7 @@ class CloseOldCasesProcessorTest extends IntegrationBase {
         CourtCaseEntity updatedCourtCaseEntity1 = dartsDatabase.getCaseRepository().findById(courtCaseEntity1.getId()).orElse(null);
         assert updatedCourtCaseEntity1 != null;
         assertTrue(updatedCourtCaseEntity1.getClosed());
-        assertEquals(closeDate.truncatedTo(ChronoUnit.MINUTES), updatedCourtCaseEntity1.getCaseClosedTimestamp().truncatedTo(ChronoUnit.MINUTES));
+        assertEquals(closeDate1.truncatedTo(ChronoUnit.MINUTES), updatedCourtCaseEntity1.getCaseClosedTimestamp().truncatedTo(ChronoUnit.MINUTES));
         assertEquals(RetentionConfidenceScoreEnum.CASE_NOT_PERFECTLY_CLOSED, updatedCourtCaseEntity1.getRetConfScore());
         assertEquals(RetentionConfidenceReasonEnum.AGED_CASE, updatedCourtCaseEntity1.getRetConfReason());
         CaseRetentionEntity caseRetentionEntity = dartsDatabase.getCaseRetentionRepository().findAll().get(0);
