@@ -35,6 +35,7 @@ import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
 import uk.gov.hmcts.darts.common.repository.ObjectRecordStatusRepository;
 import uk.gov.hmcts.darts.common.repository.ObjectRetrievalQueueRepository;
 import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
+import uk.gov.hmcts.darts.common.util.RequestFileStore;
 import uk.gov.hmcts.darts.datamanagement.api.DataManagementApi;
 import uk.gov.hmcts.darts.datamanagement.config.DataManagementConfiguration;
 import uk.gov.hmcts.darts.datamanagement.exception.FileNotDownloadedException;
@@ -44,6 +45,7 @@ import uk.gov.hmcts.darts.datamanagement.service.DataManagementService;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -151,9 +153,14 @@ class DataManagementFacadeImplTest {
     }
 
     @AfterEach
+    @SuppressWarnings("SignatureDeclareThrowsException")
     public void teardown() throws IOException {
         fileBasedDownloadResponseMetaData.close();
         downloadResponseMetaData.close();
+
+        RequestFileStore.getFileStore().remove();
+
+        assertEquals(0, Files.list(tempDirectory.toPath()).count());
     }
 
     @Test

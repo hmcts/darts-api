@@ -21,7 +21,7 @@ public final class XmlUtil {
         marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.TRUE);
 
         try {
-            RequestFileStore.getFileStore().create(Path.of(outputFileLocation), Path.of(filename));
+            RequestFileStore.getFileStore().create(Path.of(outputFileLocation).resolve(Path.of(filename)));
 
             File xmlFile = new File(outputFileLocation, filename);
             marshaller.marshal(object, xmlFile);

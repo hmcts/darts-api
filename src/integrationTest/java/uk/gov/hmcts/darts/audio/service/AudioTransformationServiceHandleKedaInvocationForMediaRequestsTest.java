@@ -1,25 +1,31 @@
 package uk.gov.hmcts.darts.audio.service;
 
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.io.FileUtils;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.test.context.TestPropertySource;
+import uk.gov.hmcts.darts.audio.config.AudioConfigurationProperties;
 import uk.gov.hmcts.darts.audio.entity.MediaRequestEntity;
 import uk.gov.hmcts.darts.audiorequests.model.AudioRequestType;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
+import uk.gov.hmcts.darts.common.util.RequestFileStore;
 import uk.gov.hmcts.darts.notification.api.NotificationApi;
 import uk.gov.hmcts.darts.notification.entity.NotificationEntity;
 import uk.gov.hmcts.darts.notification.enums.NotificationStatus;
 import uk.gov.hmcts.darts.testutils.PostgresIntegrationBase;
 import uk.gov.hmcts.darts.testutils.stubs.SuperAdminUserStub;
 
+import java.io.File;
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.util.Arrays;
@@ -77,11 +83,17 @@ class AudioTransformationServiceHandleKedaInvocationForMediaRequestsTest extends
     @Autowired
     private SuperAdminUserStub superAdminUserStub;
 
+    @Autowired
+    private AudioConfigurationProperties audioConfigurationProperties;
+
     @MockBean
     private UserIdentity mockUserIdentity;
 
     private HearingEntity hearing;
 
+
+    @TempDir
+    private File tempDirectory;
 
     @BeforeEach
     void setUp() {
@@ -91,6 +103,14 @@ class AudioTransformationServiceHandleKedaInvocationForMediaRequestsTest extends
         UserAccountEntity testUser = superAdminUserStub.givenUserIsAuthorised(mockUserIdentity);
         when(mockUserIdentity.getUserAccount()).thenReturn(testUser);
 
+        audioConfigurationProperties.setTempBlobWorkspace(tempDirectory.getAbsolutePath());
+    }
+
+    @AfterEach
+    void clean() {
+        RequestFileStore.getFileStore().remove();
+
+        assertEquals(0, FileUtils.listFiles(tempDirectory.toPath().toFile(), null, true).size());
     }
 
     @Test

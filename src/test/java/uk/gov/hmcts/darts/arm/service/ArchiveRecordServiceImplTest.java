@@ -1,6 +1,7 @@
 package uk.gov.hmcts.darts.arm.service;
 
 import lombok.extern.slf4j.Slf4j;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -48,6 +49,7 @@ import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.exception.DartsException;
 import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
 import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
+import uk.gov.hmcts.darts.common.util.RequestFileStore;
 import uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum;
 
 import java.io.BufferedReader;
@@ -186,6 +188,13 @@ class ArchiveRecordServiceImplTest {
         when(armDataManagementConfiguration.getRegion()).thenReturn(REGION);
         when(armDataManagementConfiguration.getFileExtension()).thenReturn(FILE_EXTENSION);
 
+    }
+
+    @AfterEach
+    @SuppressWarnings("PMD.SignatureDeclareThrowsException")
+    public void clean() throws Exception {
+        RequestFileStore.getFileStore().remove();
+        Assertions.assertEquals(0, Files.list(tempDirectory.toPath()).count());
     }
 
     @Test

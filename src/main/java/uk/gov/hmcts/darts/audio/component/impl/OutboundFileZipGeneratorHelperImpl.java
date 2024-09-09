@@ -167,7 +167,7 @@ public class OutboundFileZipGeneratorHelperImpl implements OutboundFileZipGenera
         ViqHeader viqHeader = new ViqHeader(audioFileInfo.getStartTime());
 
         try {
-            RequestFileStore.getFileStore().create(viqOutputFile);
+            RequestFileStore.getFileStore().create(viqOutputFile.getParent(), viqOutputFile);
 
             FileUtils.writeByteArrayToFile(viqOutputFile.toFile(), viqHeader.getViqHeaderBytes());
             FileUtils.writeByteArrayToFile(viqOutputFile.toFile(), Files.readAllBytes(audioFileInfo.getPath()), true);

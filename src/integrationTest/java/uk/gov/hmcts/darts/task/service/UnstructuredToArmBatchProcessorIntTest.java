@@ -2,6 +2,7 @@ package uk.gov.hmcts.darts.task.service;
 
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
@@ -27,6 +28,7 @@ import uk.gov.hmcts.darts.common.repository.ExternalLocationTypeRepository;
 import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
 import uk.gov.hmcts.darts.common.repository.ObjectRecordStatusRepository;
 import uk.gov.hmcts.darts.common.service.FileOperationService;
+import uk.gov.hmcts.darts.common.util.RequestFileStore;
 import uk.gov.hmcts.darts.datamanagement.api.DataManagementApi;
 import uk.gov.hmcts.darts.log.api.LogApi;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
@@ -129,6 +131,13 @@ class UnstructuredToArmBatchProcessorIntTest extends IntegrationBase {
         testUser = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
         when(userIdentity.getUserAccount()).thenReturn(testUser);
         when(unstructuredToArmProcessorConfiguration.getMaxResultSize()).thenReturn(5);
+    }
+
+    @Override
+    protected void checkCleanup() {
+        RequestFileStore.getFileStore().remove();
+
+        Assertions.assertEquals(0, FileUtils.listFiles(tempDirectory.toPath().toFile(), null, true).size());
     }
 
     @Test

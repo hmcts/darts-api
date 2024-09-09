@@ -55,7 +55,7 @@ public class RequestFileStore extends ThreadLocal<List<String>> {
     public File create(Path directory, Path filePath) throws IOException {
         Files.createDirectories(directory);
 
-        Path file = Files.createFile(filePath);
+        Path file = Files.createFile(directory.resolve(filePath));
 
         store(file.toFile());
 

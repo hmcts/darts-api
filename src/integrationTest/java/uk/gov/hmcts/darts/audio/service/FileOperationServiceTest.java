@@ -2,13 +2,14 @@ package uk.gov.hmcts.darts.audio.service;
 
 import com.azure.core.util.BinaryData;
 import lombok.extern.slf4j.Slf4j;
-import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.springframework.beans.factory.annotation.Autowired;
 import uk.gov.hmcts.darts.common.service.FileOperationService;
+import uk.gov.hmcts.darts.common.util.RequestFileStore;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 
 import java.io.ByteArrayInputStream;
@@ -44,6 +45,13 @@ class FileOperationServiceTest extends IntegrationBase {
         String data = "this is a binary data file";
         mediaFile = new ByteArrayInputStream(data.getBytes());
         fileName = "caseAudioFile.pdf";
+    }
+
+    @Override
+    protected void checkCleanup() {
+        if (filePath != null) {
+            Assertions.assertFalse(filePath.toFile().exists());
+        }
     }
 
     @Test
@@ -108,17 +116,11 @@ class FileOperationServiceTest extends IntegrationBase {
         assertEquals(0L, Files.size(filePath));
     }
 
-    @AfterEach
-    void deleteFile() throws IOException {
-        if (filePath != null) {
-            Files.delete(filePath);
-        }
-    }
-
     private Path createDummyFile() throws IOException {
         var tempFilename = UUID.randomUUID().toString();
         var tempDirectoryName = UUID.randomUUID().toString();
         Path tempDirectory = Files.createTempDirectory(tempDirectoryName);
-        return Files.write(tempDirectory.resolve(tempFilename), new byte[1024]);
+
+        return RequestFileStore.getFileStore().create(tempDirectory, Path.of(tempFilename)).toPath();
     }
 }

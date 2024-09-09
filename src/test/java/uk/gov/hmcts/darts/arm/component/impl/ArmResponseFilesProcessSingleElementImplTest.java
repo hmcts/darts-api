@@ -4,6 +4,7 @@ import com.azure.core.exception.AzureException;
 import com.azure.core.util.BinaryData;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -24,6 +25,7 @@ import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
 import uk.gov.hmcts.darts.common.repository.ObjectRecordStatusRepository;
 import uk.gov.hmcts.darts.common.service.FileOperationService;
+import uk.gov.hmcts.darts.common.util.RequestFileStore;
 import uk.gov.hmcts.darts.log.api.LogApi;
 import uk.gov.hmcts.darts.test.common.TestUtils;
 
@@ -165,6 +167,13 @@ class ArmResponseFilesProcessSingleElementImplTest {
             userIdentity,
             logApi
         );
+    }
+
+    @AfterEach
+    @SuppressWarnings("PMD.SignatureDeclareThrowsException")
+    public void clean() throws Exception {
+        RequestFileStore.getFileStore().remove();
+        assertEquals(0, Files.list(tempDirectory.toPath()).count());
     }
 
     @Test

@@ -22,6 +22,7 @@ import uk.gov.hmcts.darts.common.entity.TranscriptionDocumentEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
+import uk.gov.hmcts.darts.common.util.RequestFileStore;
 import uk.gov.hmcts.darts.test.common.TestUtils;
 import uk.gov.hmcts.darts.test.common.data.MediaTestData;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
@@ -30,6 +31,7 @@ import uk.gov.hmcts.darts.testutils.stubs.TranscriptionStub;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
@@ -84,6 +86,12 @@ class ArmResponseFilesProcessorIntTest extends IntegrationBase {
             userIdentity,
             armResponseFilesProcessSingleElement
         );
+    }
+
+    @Override
+    protected void checkCleanup() throws Exception {
+        RequestFileStore.getFileStore().remove();
+        assertEquals(0, Files.list(tempDirectory.toPath()).count());
     }
 
     @Test

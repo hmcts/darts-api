@@ -3,6 +3,7 @@ package uk.gov.hmcts.darts.audio.service.impl;
 import jakarta.xml.bind.JAXBException;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -22,6 +23,7 @@ import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.common.repository.EventRepository;
 import uk.gov.hmcts.darts.common.util.CommonTestDataUtil;
+import uk.gov.hmcts.darts.common.util.RequestFileStore;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -76,6 +78,13 @@ class OutboundFileZipGeneratorHelperImplTest {
     @BeforeEach
     void setUp() throws ParserConfigurationException {
         outboundFileZipGeneratorHelper = new OutboundFileZipGeneratorHelperImpl(new AnnotationXmlGeneratorImpl(), eventRepository);
+    }
+
+    @AfterEach
+    @SuppressWarnings("PMD.SignatureDeclareThrowsException")
+    public void clean() throws Exception {
+        RequestFileStore.getFileStore().remove();
+        assertEquals(0, Files.list(tempDirectory.toPath()).count());
     }
 
     @Test
@@ -295,7 +304,6 @@ class OutboundFileZipGeneratorHelperImplTest {
     void generateViqFileThrowsExceptionWhenErrorInWritingViqHeader() {
 
         Path outputFile = mock(Path.class);
-        when(outputFile.toFile()).thenThrow(RuntimeException.class);
         AudioFileInfo audioFileInfo = AudioFileInfo.builder()
             .startTime(Instant.parse("2023-04-28T09:00:00Z"))
             .endTime(Instant.parse("2023-04-28T10:30:00Z"))

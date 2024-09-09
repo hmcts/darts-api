@@ -3,6 +3,7 @@ package uk.gov.hmcts.darts.arm.service;
 import com.azure.core.exception.AzureException;
 import com.azure.core.util.BinaryData;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.apache.commons.io.FileUtils;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
@@ -29,6 +30,7 @@ import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
 import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
 import uk.gov.hmcts.darts.common.service.FileOperationService;
+import uk.gov.hmcts.darts.common.util.RequestFileStore;
 import uk.gov.hmcts.darts.log.api.LogApi;
 import uk.gov.hmcts.darts.test.common.data.MediaTestData;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
@@ -116,6 +118,13 @@ class ArmBatchProcessResponseFilesIntTest extends IntegrationBase {
 
         UserAccountEntity testUser = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
         when(userIdentity.getUserAccount()).thenReturn(testUser);
+
+    }
+
+    @Override
+    protected void checkCleanup() throws Exception {
+        RequestFileStore.getFileStore().remove();
+        assertEquals(0, FileUtils.listFiles(tempDirectory.toPath().toFile(), null, true).size());
 
     }
 

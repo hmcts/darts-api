@@ -109,9 +109,16 @@ public class IntegrationBase {
     }
 
     @AfterEach
-    void clearTestData() {
+    @SuppressWarnings("PMD.SignatureDeclareThrowsException")
+    void clearTestData() throws Exception {
         logAppender.reset();
         RequestFileStore.getFileStore().remove();
+        checkCleanup();
+    }
+
+    @SuppressWarnings("PMD.SignatureDeclareThrowsException")
+    protected void checkCleanup() throws Exception{
+
     }
 
     protected void givenBearerTokenExists(String email) {

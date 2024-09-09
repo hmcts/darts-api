@@ -21,6 +21,7 @@ import uk.gov.hmcts.darts.common.entity.MediaEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionDocumentEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
+import uk.gov.hmcts.darts.common.util.RequestFileStore;
 import uk.gov.hmcts.darts.test.common.data.MediaTestData;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 import uk.gov.hmcts.darts.testutils.stubs.AuthorisationStub;
@@ -96,6 +97,12 @@ class ArchiveRecordServiceIntTest extends IntegrationBase {
             HEARING_DATE
         );
 
+    }
+
+    @Override
+    protected void checkCleanup() throws Exception {
+        RequestFileStore.getFileStore().remove();
+        Assertions.assertEquals(0, Files.list(tempDirectory.toPath()).count());
     }
 
     @Test
