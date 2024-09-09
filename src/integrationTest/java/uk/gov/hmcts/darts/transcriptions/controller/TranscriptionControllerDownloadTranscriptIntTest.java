@@ -35,6 +35,7 @@ import java.io.File;
 import java.io.OutputStream;
 import java.nio.charset.Charset;
 import java.nio.file.NoSuchFileException;
+import java.nio.file.Path;
 import java.util.List;
 import java.util.UUID;
 
@@ -206,7 +207,7 @@ class TranscriptionControllerDownloadTranscriptIntTest extends IntegrationBase {
         }
 
         // generate a random file so we can prove it has been deleted
-        RequestFileStore.getFileStore().create(configuration.getTempBlobWorkspace());
+        RequestFileStore.getFileStore().createTempFile(Path.of(configuration.getTempBlobWorkspace()));
         assertEquals(2, RequestFileStore.getFileStore().get().size());
 
         when(mockDataManagementFacade.retrieveFileFromStorage(any(TranscriptionDocumentEntity.class))).thenReturn(mockFileBasedDownloadResponseMetaData);

@@ -168,9 +168,9 @@ public class OutboundFileZipGeneratorImpl implements OutboundFileZipGenerator {
 
     @SuppressWarnings({"PMD.AvoidInstantiatingObjectsInLoops", "PMD.AssignmentInOperand"})
     private void writeZip(Map<Path, Path> sourceToDestinationPaths, Path outputPath) throws IOException {
-        File patHToFile = RequestFileStore.getFileStore().create(outputPath);
+        File pathToFile = RequestFileStore.getFileStore().create(outputPath);
 
-        try (ZipOutputStream zipOutputStream = new ZipOutputStream(Files.newOutputStream(patHToFile.toPath()))) {
+        try (ZipOutputStream zipOutputStream = new ZipOutputStream(Files.newOutputStream(pathToFile.toPath()))) {
             for (Entry<Path, Path> paths : sourceToDestinationPaths.entrySet()) {
                 Path sourcePath = paths.getKey();
                 Path destinationPath = paths.getValue();

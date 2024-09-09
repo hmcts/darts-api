@@ -21,6 +21,7 @@ import uk.gov.hmcts.darts.common.entity.EventEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.common.repository.EventRepository;
+import uk.gov.hmcts.darts.common.util.RequestFileStore;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -120,30 +121,40 @@ public class OutboundFileZipGeneratorHelperImpl implements OutboundFileZipGenera
         File readmeFile = new File(fileLocation, README_TXT_FILENAME);
         log.debug("Writing readme to {}", readmeFile.getAbsoluteFile());
 
-        try (BufferedWriter fileWriter = Files.newBufferedWriter(readmeFile.toPath());
-            PrintWriter printWriter = new PrintWriter(fileWriter)) {
+        try {
+            RequestFileStore.getFileStore().create(readmeFile.toPath());
 
-            printWriter.println(format(COURTHOUSE_README_LABEL + README_FORMAT, viqMetaData.getCourthouse()));
-            printWriter.println(format(
-                RAISED_BY_README_LABEL + README_FORMAT,
-                StringUtils.defaultIfEmpty(viqMetaData.getRaisedBy(), "")
-            ));
-            printWriter.println(format(
-                START_TIME_README_LABEL + README_FORMAT,
-                viqMetaData.getStartTime().format(DATE_TIME_FORMATTER)
-            ));
-            printWriter.println(format(
-                END_TIME_README_LABEL + README_FORMAT,
-                viqMetaData.getEndTime().format(DATE_TIME_FORMATTER)
-            ));
-            printWriter.print(format(
-                REQUEST_TYPE_README_LABEL + README_FORMAT,
-                StringUtils.defaultIfEmpty(viqMetaData.getType(), "")
-            ));
-        } catch (IOException exception) {
+            try (
+                BufferedWriter fileWriter = Files.newBufferedWriter(readmeFile.toPath());
+                PrintWriter printWriter = new PrintWriter(fileWriter)) {
+
+                printWriter.println(format(COURTHOUSE_README_LABEL + README_FORMAT, viqMetaData.getCourthouse()));
+                printWriter.println(format(
+                    RAISED_BY_README_LABEL + README_FORMAT,
+                    StringUtils.defaultIfEmpty(viqMetaData.getRaisedBy(), "")
+                ));
+                printWriter.println(format(
+                    START_TIME_README_LABEL + README_FORMAT,
+                    viqMetaData.getStartTime().format(DATE_TIME_FORMATTER)
+                ));
+                printWriter.println(format(
+                    END_TIME_README_LABEL + README_FORMAT,
+                    viqMetaData.getEndTime().format(DATE_TIME_FORMATTER)
+                ));
+                printWriter.print(format(
+                    REQUEST_TYPE_README_LABEL + README_FORMAT,
+                    StringUtils.defaultIfEmpty(viqMetaData.getType(), "")
+                ));
+            } catch (IOException exception) {
+                log.error("Unable to generate readme file: {}", readmeFile.getAbsoluteFile(), exception);
+                throw new DartsApiException(AudioApiError.FAILED_TO_PROCESS_AUDIO_REQUEST, exception);
+            }
+        }
+        catch (IOException exception) {
             log.error("Unable to generate readme file: {}", readmeFile.getAbsoluteFile(), exception);
             throw new DartsApiException(AudioApiError.FAILED_TO_PROCESS_AUDIO_REQUEST, exception);
         }
+
         return readmeFile.getAbsolutePath();
     }
 
@@ -157,6 +168,8 @@ public class OutboundFileZipGeneratorHelperImpl implements OutboundFileZipGenera
         ViqHeader viqHeader = new ViqHeader(audioFileInfo.getStartTime());
 
         try {
+            RequestFileStore.getFileStore().create(viqOutputFile);
+
             FileUtils.writeByteArrayToFile(viqOutputFile.toFile(), viqHeader.getViqHeaderBytes());
             FileUtils.writeByteArrayToFile(viqOutputFile.toFile(), Files.readAllBytes(audioFileInfo.getPath()), true);
         } catch (Exception exception) {

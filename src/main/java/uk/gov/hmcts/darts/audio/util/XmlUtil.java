@@ -3,8 +3,11 @@ package uk.gov.hmcts.darts.audio.util;
 import jakarta.xml.bind.JAXBContext;
 import jakarta.xml.bind.JAXBException;
 import jakarta.xml.bind.Marshaller;
+import uk.gov.hmcts.darts.common.util.RequestFileStore;
 
 import java.io.File;
+import java.io.IOException;
+import java.nio.file.Path;
 
 public final class XmlUtil {
 
@@ -16,8 +19,16 @@ public final class XmlUtil {
         JAXBContext context = JAXBContext.newInstance(type);
         Marshaller marshaller = context.createMarshaller();
         marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.TRUE);
-        File xmlFile = new File(outputFileLocation, filename);
-        marshaller.marshal(object, xmlFile);
-        return xmlFile.getAbsolutePath();
+
+        try {
+            RequestFileStore.getFileStore().create(Path.of(outputFileLocation), Path.of(filename));
+
+            File xmlFile = new File(outputFileLocation, filename);
+            marshaller.marshal(object, xmlFile);
+            return xmlFile.getAbsolutePath();
+        }
+        catch (IOException jaxbException) {
+            throw new JAXBException(jaxbException);
+        }
     }
 }

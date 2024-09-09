@@ -6,6 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.w3c.dom.Document;
 import uk.gov.hmcts.darts.audio.component.OutboundDocumentGenerator;
+import uk.gov.hmcts.darts.common.util.RequestFileStore;
 
 import java.io.BufferedWriter;
 import java.io.IOException;
@@ -41,6 +42,7 @@ public abstract class AbstractDocumentGenerator implements OutboundDocumentGener
     }
 
     public void transformDocument(Document document, Path outboundFilePath) throws TransformerException, IOException {
+        RequestFileStore.getFileStore().create(outboundFilePath);
         try (BufferedWriter writer = Files.newBufferedWriter(outboundFilePath)) {
             Transformer transformer = transformerFactory.newTransformer();
             transformer.setOutputProperty(OutputKeys.INDENT, "yes");

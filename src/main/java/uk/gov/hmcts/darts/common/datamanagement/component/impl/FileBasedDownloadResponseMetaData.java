@@ -1,6 +1,7 @@
 package uk.gov.hmcts.darts.common.datamanagement.component.impl;
 
 import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
 import org.springframework.core.io.FileUrlResource;
 import org.springframework.core.io.Resource;
@@ -19,6 +20,7 @@ import java.nio.file.StandardOpenOption;
 /**
  *The response download data. Always use in combination with a try resources to ensure the file resources are cleaned up
  */
+@Slf4j
 public class FileBasedDownloadResponseMetaData extends DownloadResponseMetaData {
 
     @Getter
@@ -44,7 +46,7 @@ public class FileBasedDownloadResponseMetaData extends DownloadResponseMetaData 
     @SuppressWarnings("PMD.AvoidFileStream")
     public OutputStream getOutputStream(StorageConfiguration configuration) throws IOException {
         if (outputStream == null) {
-            fileToBeDownloadedTo = RequestFileStore.getFileStore().create(configuration.getTempBlobWorkspace());
+            fileToBeDownloadedTo = RequestFileStore.getFileStore().createTempFile(Path.of(configuration.getTempBlobWorkspace()));
             outputStream = new FileOutputStream(fileToBeDownloadedTo);
         }
 
@@ -52,7 +54,7 @@ public class FileBasedDownloadResponseMetaData extends DownloadResponseMetaData 
     }
 
     public void setInputStream(InputStream inputStream, StorageConfiguration configuration)  throws IOException {
-        fileToBeDownloadedTo = RequestFileStore.getFileStore().create(configuration.getTempBlobWorkspace());
+        fileToBeDownloadedTo = RequestFileStore.getFileStore().createTempFile(Path.of(configuration.getTempBlobWorkspace()));
         FileUtils.copyInputStreamToFile(inputStream, fileToBeDownloadedTo);
     }
 
@@ -60,8 +62,13 @@ public class FileBasedDownloadResponseMetaData extends DownloadResponseMetaData 
     public void close() throws IOException {
         super.close();
 
-        if (fileToBeDownloadedTo != null && fileToBeDownloadedTo.exists()) {
-            Files.delete(Path.of(fileToBeDownloadedTo.toURI()));
+        try {
+            if (fileToBeDownloadedTo != null && fileToBeDownloadedTo.exists()) {
+                Files.delete(Path.of(fileToBeDownloadedTo.toURI()));
+            }
+        }
+        catch (IOException ioException) {
+            log.error("Could not clean up file %s. Please manually delete it", ioException);
         }
     }
 

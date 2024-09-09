@@ -63,12 +63,10 @@ public class RequestFileStore extends ThreadLocal<List<String>> {
     }
 
 
-    public File create(String directory) throws IOException {
-        Files.createDirectories(Path.of(directory));
-        File file = Files.createFile(Path.of(
-            directory,
-            UUID.randomUUID().toString())).toFile();
-
+    public File createTempFile(Path directory) throws IOException {
+        Files.createDirectories(directory);
+        File file = Files.createFile(
+            directory.resolve(UUID.randomUUID().toString())).toFile();
         store(file);
 
         return file;
@@ -81,7 +79,9 @@ public class RequestFileStore extends ThreadLocal<List<String>> {
             list.add(file.getAbsolutePath());
             set(list);
         } else {
-            files.add(file.getAbsolutePath());
+            if (!files.contains(file.getAbsolutePath())) {
+                files.add(file.getAbsolutePath());
+            }
         }
     }
 }
