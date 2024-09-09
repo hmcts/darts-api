@@ -3,7 +3,6 @@ package uk.gov.hmcts.darts.audio.service.impl;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.exec.CommandLine;
 import org.apache.commons.io.FileUtils;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -22,7 +21,6 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 
 import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
@@ -63,8 +61,6 @@ class AudioOperationServiceIntTest extends IntegrationBase {
 
     @BeforeEach
     void beforeEach() throws IOException {
-        UUID externalLocation = UUID.randomUUID();
-
         File audioFileTest1 = TestUtils.getFile(AUDIO_FILENAME1);
         Path path1 = Files.copy(audioFileTest1.toPath(), createFile(tempDirectory.toPath(), "original0.mp2"), REPLACE_EXISTING);
         File audioFileTest2 = TestUtils.getFile(AUDIO_FILENAME2);

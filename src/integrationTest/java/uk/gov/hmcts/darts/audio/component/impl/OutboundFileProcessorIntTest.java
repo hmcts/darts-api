@@ -2,7 +2,6 @@ package uk.gov.hmcts.darts.audio.component.impl;
 
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -23,7 +22,6 @@ import java.time.OffsetDateTime;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 
 import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
@@ -71,8 +69,6 @@ class OutboundFileProcessorIntTest extends IntegrationBase {
 
     @BeforeEach
     void setUp() throws IOException {
-        UUID externalLocation = UUID.randomUUID();
-
         File audioFileTest = TestUtils.getFile(AUDIO_FILENAME);
         audioPath = Files.copy(audioFileTest.toPath(), createFile(tempDirectory.toPath(), "audio-test.mp2"), REPLACE_EXISTING);
 
