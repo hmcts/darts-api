@@ -47,7 +47,7 @@ public class RequestFileStore extends ThreadLocal<List<String>> {
     public File create(Path filePath) throws IOException {
         Path file = Files.createFile(filePath);
 
-        store(file.toFile());
+        store(file.toFile().getAbsolutePath());
 
         return file.toFile();
     }
@@ -57,7 +57,7 @@ public class RequestFileStore extends ThreadLocal<List<String>> {
 
         Path file = Files.createFile(directory.resolve(filePath));
 
-        store(file.toFile());
+        store(file.toFile().getAbsolutePath());
 
         return file.toFile();
     }
@@ -67,20 +67,20 @@ public class RequestFileStore extends ThreadLocal<List<String>> {
         Files.createDirectories(directory);
         File file = Files.createFile(
             directory.resolve(UUID.randomUUID().toString())).toFile();
-        store(file);
+        store(file.getAbsolutePath());
 
         return file;
     }
 
-    private void store(File file) {
+    public void store(String fileStr) {
         List<String> files = get();
         if (files == null) {
             ArrayList<String> list = new ArrayList<>();
-            list.add(file.getAbsolutePath());
+            list.add(fileStr);
             set(list);
         } else {
-            if (!files.contains(file.getAbsolutePath())) {
-                files.add(file.getAbsolutePath());
+            if (!files.contains(fileStr)) {
+                files.add(fileStr);
             }
         }
     }

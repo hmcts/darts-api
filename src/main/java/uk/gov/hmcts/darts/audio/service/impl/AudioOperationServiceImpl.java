@@ -71,7 +71,7 @@ public class AudioOperationServiceImpl implements AudioOperationService {
             AudioConstants.AudioFileFormats.MP2
         );
 
-        RequestFileStore.getFileStore().create(outputPath);
+        RequestFileStore.getFileStore().store(outputPath.toFile().getAbsolutePath());
 
         CommandLine command = generateConcatenateCommand(audioFileInfos, outputPath);
         systemCommandExecutor.execute(command);
