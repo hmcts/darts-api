@@ -26,8 +26,7 @@ public final class XmlUtil {
             File xmlFile = new File(outputFileLocation, filename);
             marshaller.marshal(object, xmlFile);
             return xmlFile.getAbsolutePath();
-        }
-        catch (IOException jaxbException) {
+        } catch (IOException jaxbException) {
             throw new JAXBException(jaxbException);
         }
     }

@@ -66,8 +66,7 @@ public class FileBasedDownloadResponseMetaData extends DownloadResponseMetaData 
             if (fileToBeDownloadedTo != null && fileToBeDownloadedTo.exists()) {
                 Files.delete(Path.of(fileToBeDownloadedTo.toURI()));
             }
-        }
-        catch (IOException ioException) {
+        } catch (IOException ioException) {
             log.error("Could not clean up file %s. Please manually delete it", ioException);
         }
     }
