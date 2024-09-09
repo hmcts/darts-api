@@ -125,7 +125,7 @@ public class EventsController implements EventApi {
     @Override
     @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
     @Authorisation(contextId = ANY_ENTITY_ID,
-        globalAccessSecurityRoles = {SUPER_ADMIN})
+        globalAccessSecurityRoles = {SUPER_ADMIN, SUPER_USER})
     public ResponseEntity<List<EventMapping>> adminGetEventMappings() {
 
         List<EventMapping> eventMappings = eventMappingService.getEventMappings();
@@ -136,7 +136,7 @@ public class EventsController implements EventApi {
     @Override
     @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
     @Authorisation(contextId = ANY_ENTITY_ID,
-        globalAccessSecurityRoles = {SUPER_ADMIN})
+        globalAccessSecurityRoles = {SUPER_ADMIN, SUPER_USER})
     public ResponseEntity<EventMapping> adminGetEventMappingById(Integer eventHandlerId) {
 
         EventMapping eventMapping = eventMappingService.getEventMappingById(eventHandlerId);
