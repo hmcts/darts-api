@@ -421,6 +421,7 @@ class AudioControllerGetAdminMediasIntTest extends IntegrationBase {
         responseItem.setChannel(1);
         responseItem.setStartAt(startDate);
         responseItem.setEndAt(endDate);
+        responseItem.setIsHidden(false);
 
         GetAdminMediaResponseHearing hearing = new GetAdminMediaResponseHearing();
         hearing.setId(hearingId);

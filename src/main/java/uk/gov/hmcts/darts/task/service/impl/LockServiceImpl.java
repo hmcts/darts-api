@@ -20,7 +20,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class LockServiceImpl implements LockService {
 
-    private static final Duration DEFAULT_LOCK_AT_MOST = Duration.ofSeconds(600);
+    private static final Duration DEFAULT_LOCK_AT_MOST = Duration.ofMinutes(300);
     private static final Duration DEFAULT_LOCK_AT_LEAST = Duration.ofSeconds(20);
 
     private final AutomatedTaskRepository automatedTaskRepository;

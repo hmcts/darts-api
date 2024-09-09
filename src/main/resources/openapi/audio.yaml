@@ -585,6 +585,8 @@ components:
           $ref: '#/components/schemas/StartAt'
         end_at:
           $ref: '#/components/schemas/EndAt'
+        is_hidden:
+          type: boolean
         case:
           $ref: '#/components/schemas/GetAdminMediaResponseCase'
         hearing:

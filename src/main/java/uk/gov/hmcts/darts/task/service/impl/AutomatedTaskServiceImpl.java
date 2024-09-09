@@ -27,7 +27,6 @@ import uk.gov.hmcts.darts.audio.service.InboundAudioDeleterProcessor;
 import uk.gov.hmcts.darts.audio.service.OutboundAudioDeleterProcessor;
 import uk.gov.hmcts.darts.audio.service.UnstructuredAudioDeleterProcessor;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
-import uk.gov.hmcts.darts.cases.service.CloseOldCasesProcessor;
 import uk.gov.hmcts.darts.common.entity.AutomatedTaskEntity;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.common.repository.AutomatedTaskRepository;
@@ -148,8 +147,6 @@ public class AutomatedTaskServiceImpl implements AutomatedTaskService {
 
     private final BatchCleanupArmResponseFilesService batchCleanupArmResponseFilesService;
     private final CleanupArmResponseFilesService cleanupArmResponseFilesService;
-
-    private final CloseOldCasesProcessor closeOldCasesProcessor;
 
     private final DailyListService dailyListService;
 
@@ -526,9 +523,9 @@ public class AutomatedTaskServiceImpl implements AutomatedTaskService {
     private void addCloseOldCasesTaskRegistrar(ScheduledTaskRegistrar taskRegistrar) {
         CloseOldCasesAutomatedTask closeOldCasesAutomatedTask = new CloseOldCasesAutomatedTask(automatedTaskRepository,
                                                                                                automatedTaskConfigurationProperties,
-                                                                                               closeOldCasesProcessor,
                                                                                                logApi,
-                                                                                               lockService);
+                                                                                               lockService,
+                                                                                               automatedTaskProcessorFactory);
         closeOldCasesAutomatedTask.setLastCronExpression(getAutomatedTaskCronExpression(closeOldCasesAutomatedTask));
         Trigger trigger = createAutomatedTaskTrigger(closeOldCasesAutomatedTask);
         taskRegistrar.addTriggerTask(closeOldCasesAutomatedTask, trigger);
@@ -561,10 +558,10 @@ public class AutomatedTaskServiceImpl implements AutomatedTaskService {
 
     private void addGenerateCaseDocumentToTaskRegistrar(ScheduledTaskRegistrar taskRegistrar) {
         var generateCaseDocumentAutomatedTask = new GenerateCaseDocumentAutomatedTask(automatedTaskRepository,
-                                                                  automatedTaskConfigurationProperties,
-                                                                  automatedTaskProcessorFactory,
-                                                                  logApi,
-                                                                  lockService);
+                                                                                      automatedTaskConfigurationProperties,
+                                                                                      automatedTaskProcessorFactory,
+                                                                                      logApi,
+                                                                                      lockService);
         generateCaseDocumentAutomatedTask.setLastCronExpression(getAutomatedTaskCronExpression(generateCaseDocumentAutomatedTask));
         Trigger trigger = createAutomatedTaskTrigger(generateCaseDocumentAutomatedTask);
         taskRegistrar.addTriggerTask(generateCaseDocumentAutomatedTask, trigger);
@@ -656,10 +653,10 @@ public class AutomatedTaskServiceImpl implements AutomatedTaskService {
                 new CloseUnfinishedTranscriptionsAutomatedTask(
                     automatedTaskRepository,
                     automatedTaskConfigurationProperties,
-                transcriptionsProcessor,
-                logApi,
-                lockService
-            );
+                    transcriptionsProcessor,
+                    logApi,
+                    lockService
+                );
             Trigger trigger = createAutomatedTaskTrigger(closeUnfinishedTranscriptionsAutomatedTask);
             taskScheduler.schedule(closeUnfinishedTranscriptionsAutomatedTask, trigger);
         } else {
@@ -890,9 +887,9 @@ public class AutomatedTaskServiceImpl implements AutomatedTaskService {
             CloseOldCasesAutomatedTask closeOldCasesAutomatedTask = new CloseOldCasesAutomatedTask(
                 automatedTaskRepository,
                 automatedTaskConfigurationProperties,
-                closeOldCasesProcessor,
                 logApi,
-                lockService
+                lockService,
+                automatedTaskProcessorFactory
             );
             Trigger trigger = createAutomatedTaskTrigger(closeOldCasesAutomatedTask);
             taskScheduler.schedule(closeOldCasesAutomatedTask, trigger);

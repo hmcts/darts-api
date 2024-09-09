@@ -38,7 +38,7 @@ class LockServiceImplTest {
 
     @Test
     void getLockAtMostFor() {
-        assertEquals(Duration.ofSeconds(600), lockService.getLockAtMostFor());
+        assertEquals(Duration.ofMinutes(300), lockService.getLockAtMostFor());
     }
 
     @Test
