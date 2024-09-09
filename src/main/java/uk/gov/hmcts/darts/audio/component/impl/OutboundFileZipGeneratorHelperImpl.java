@@ -149,8 +149,7 @@ public class OutboundFileZipGeneratorHelperImpl implements OutboundFileZipGenera
                 log.error("Unable to generate readme file: {}", readmeFile.getAbsoluteFile(), exception);
                 throw new DartsApiException(AudioApiError.FAILED_TO_PROCESS_AUDIO_REQUEST, exception);
             }
-        }
-        catch (IOException exception) {
+        } catch (IOException exception) {
             log.error("Unable to generate readme file: {}", readmeFile.getAbsoluteFile(), exception);
             throw new DartsApiException(AudioApiError.FAILED_TO_PROCESS_AUDIO_REQUEST, exception);
         }
