@@ -193,9 +193,14 @@ public abstract class AbstractLockableAutomatedTask implements AutomatedTask {
 
     private void stopStopwatchAndLogFinished() {
         Instant finish = Instant.now();
-        long timeElapsed = Duration.between(start, finish).toMillis();
+        Duration timeElapsedDuration = Duration.between(start, finish);
+        long timeElapsed = timeElapsedDuration.toMillis();
         log.info("Task: {} finished running at: {}", getTaskName(), LocalDateTime.now());
-        log.debug("Task: {} time elapsed: {} ms", getTaskName(), timeElapsed);
+        log.info("Task: {} time elapsed: {} ms", getTaskName(), timeElapsed);
+        if (lockService.getLockAtMostFor().compareTo(timeElapsedDuration) < 0) {
+            log.warn("Task: {} started at {} and finished at {}, taking {}ms, which is longer than the max locking time of {}",
+                     getTaskName(), start, finish, timeElapsed, lockService.getLockAtMostFor());
+        }
     }
 
     class LockedTask implements Runnable {
