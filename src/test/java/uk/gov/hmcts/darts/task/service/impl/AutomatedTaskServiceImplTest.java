@@ -6,7 +6,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.Trigger;
 import org.springframework.scheduling.config.ScheduledTask;
@@ -24,6 +23,8 @@ import uk.gov.hmcts.darts.task.runner.impl.ProcessDailyListAutomatedTask;
 import uk.gov.hmcts.darts.task.service.LockService;
 import uk.gov.hmcts.darts.task.status.AutomatedTaskStatus;
 
+import java.time.Duration;
+import java.time.temporal.ChronoUnit;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
@@ -61,7 +62,7 @@ class AutomatedTaskServiceImplTest {
     @Mock
     private LogApi logApi;
 
-    @Autowired
+    @Mock
     private LockService lockService;
 
     @Test
@@ -213,6 +214,7 @@ class AutomatedTaskServiceImplTest {
     @SuppressWarnings("PMD.AvoidThrowingRawExceptionTypes")
     void taskFailedToBeStartedMovesToFailedStatus() {
         when(mockAutomatedTaskConfigurationProperties.getSystemUserEmail()).thenReturn("system@darts.test");
+        when(lockService.getLockAtMostFor()).thenReturn(Duration.of(1, ChronoUnit.HOURS));
 
         var failingAutomatedTask = new AbstractLockableAutomatedTask(
             mockAutomatedTaskRepository,
