@@ -24,7 +24,6 @@ import uk.gov.hmcts.darts.transcriptions.exception.TranscriptionApiError;
 import uk.gov.hmcts.darts.transcriptions.model.AdminAction;
 import uk.gov.hmcts.darts.transcriptions.model.AdminActionResponse;
 import uk.gov.hmcts.darts.transcriptions.model.AdminMarkedForDeletionResponseItem;
-import uk.gov.hmcts.darts.transcriptions.model.AdminMarkedForDeletionResponseItem;
 import uk.gov.hmcts.darts.transcriptions.model.CaseResponseDetails;
 import uk.gov.hmcts.darts.transcriptions.model.CourthouseResponseDetails;
 import uk.gov.hmcts.darts.transcriptions.model.CourtroomResponseDetails;
