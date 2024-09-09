@@ -286,9 +286,9 @@ public class ManualTaskService {
     private void addCloseOldCasesTaskRegistrar() {
         var manualTask = new CloseOldCasesAutomatedTask(automatedTaskRepository,
                                                         automatedTaskConfigurationProperties,
-                                                        closeOldCasesProcessor,
                                                         logApi,
-                                                        lockService);
+                                                        lockService,
+                                                        automatedTaskProcessorFactory);
         manualTask.setManualTask();
         automatedTasks.add(manualTask);
     }

@@ -282,4 +282,38 @@ class CaseRepositoryIntTest extends IntegrationBase {
         assertThat(result).hasSize(0);
 
     }
+
+    @Test
+    @Disabled("Impacted by V1_364_*.sql")
+    void testFindOpenCasesToClosePaged() {
+        // given
+        caseStub.createAndSaveCourtCase(courtCase -> {
+            courtCase.setClosed(false);
+            courtCase.setCreatedDateTime(OffsetDateTime.now().minusDays(27));
+        });
+
+        caseStub.createAndSaveCourtCase(courtCase -> {
+            courtCase.setClosed(true);
+            courtCase.setCreatedDateTime(OffsetDateTime.now().minusDays(27));
+        });
+
+        var foundCourtCase1 = caseStub.createAndSaveCourtCase(courtCase -> {
+            courtCase.setClosed(false);
+            courtCase.setCreatedDateTime(OffsetDateTime.now().minusDays(30));
+        });
+
+        caseStub.createAndSaveCourtCase(courtCase -> {
+            courtCase.setClosed(true);
+            courtCase.setCreatedDateTime(OffsetDateTime.now().minusDays(30));
+        });
+
+
+        // when
+        List<CourtCaseEntity> result = caseRepository.findCasesNeedingCaseDocumentGenerated(
+            OffsetDateTime.now().minusDays(28), Pageable.ofSize(2));
+
+        // then
+        assertThat(result).hasSize(1);
+        assertThat(result.get(0).getId()).isEqualTo(foundCourtCase1.getId());
+    }
 }
