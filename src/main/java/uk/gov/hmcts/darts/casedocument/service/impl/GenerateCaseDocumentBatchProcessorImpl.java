@@ -25,7 +25,7 @@ public class GenerateCaseDocumentBatchProcessorImpl implements GenerateCaseDocum
 
         OffsetDateTime caseClosedBeforeTimestamp = currentTimeHelper.currentOffsetDateTime().minusDays(caseDocumentGenerationDays);
         var cases = caseRepository.findCasesNeedingCaseDocumentGenerated(caseClosedBeforeTimestamp, Pageable.ofSize(batchSize));
-
+        log.debug("Found {} cases needing case document out of a batch size {}", cases.size(), batchSize);
         for (var courtCase : cases) {
             try {
                 singleCaseProcessor.processGenerateCaseDocument(courtCase.getId());

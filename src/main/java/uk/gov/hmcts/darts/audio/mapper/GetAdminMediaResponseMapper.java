@@ -38,6 +38,7 @@ public class GetAdminMediaResponseMapper {
         responseItem.setChannel(mediaEntity.getChannel());
         responseItem.setStartAt(mediaEntity.getStart());
         responseItem.setEndAt(mediaEntity.getEnd());
+        responseItem.setIsHidden(mediaEntity.isHidden());
         responseItem.setCase(createResponseCase(hearing.getCourtCase()));
         responseItem.setHearing(createResponseHearing(hearing));
         responseItem.setCourthouse(createResponseCourthouse(hearing));

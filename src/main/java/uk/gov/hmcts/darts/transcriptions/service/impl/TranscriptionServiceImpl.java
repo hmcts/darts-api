@@ -47,6 +47,7 @@ import uk.gov.hmcts.darts.transcriptions.enums.TranscriptionTypeEnum;
 import uk.gov.hmcts.darts.transcriptions.exception.TranscriptionApiError;
 import uk.gov.hmcts.darts.transcriptions.helper.UpdateTranscriptionEntityHelper;
 import uk.gov.hmcts.darts.transcriptions.mapper.TranscriptionResponseMapper;
+import uk.gov.hmcts.darts.transcriptions.model.AdminMarkedForDeletionResponseItem;
 import uk.gov.hmcts.darts.transcriptions.model.AttachTranscriptResponse;
 import uk.gov.hmcts.darts.transcriptions.model.DownloadTranscriptResponse;
 import uk.gov.hmcts.darts.transcriptions.model.GetTranscriptionByIdResponse;
@@ -610,6 +611,17 @@ public class TranscriptionServiceImpl implements TranscriptionService {
         }
 
         return transcriptionIds;
+    }
+
+    @Override
+    public List<AdminMarkedForDeletionResponseItem> adminGetTranscriptionDocumentsMarkedForDeletion() {
+        List<TranscriptionDocumentEntity> transcriptionDocumentEntities = transcriptionDocumentRepository.getMarkedForDeletion();
+        List<AdminMarkedForDeletionResponseItem> transcriptionResponsesLst = new ArrayList<>();
+        for (TranscriptionDocumentEntity entity : transcriptionDocumentEntities) {
+            transcriptionResponsesLst.add(transcriptionResponseMapper.mapTranscriptionDocumentMarkedForDeletion(entity));
+        }
+
+        return transcriptionResponsesLst;
     }
 
     private List<TranscriptionEntity> processTranscriptionUpdates(List<UpdateTranscriptionsItem> request) {

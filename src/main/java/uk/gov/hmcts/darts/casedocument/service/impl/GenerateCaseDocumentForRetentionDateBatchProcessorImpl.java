@@ -32,6 +32,7 @@ public class GenerateCaseDocumentForRetentionDateBatchProcessorImpl implements G
         var cases = caseRepository.findCasesNeedingCaseDocumentForRetentionDateGeneration(caseRetailUntilTimestamp,
                                                                                           caseDocumentCreatedAfterTimestamp,
                                                                                           Pageable.ofSize(batchSize));
+        log.debug("Found {} cases needing case document based on retention out of a batch size {}", cases.size(), batchSize);
         for (var courtCase : cases) {
             try {
                 if (!courtCase.isRetentionUpdated()) {

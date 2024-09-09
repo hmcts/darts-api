@@ -1,10 +1,10 @@
 {
 	"info": {
-		"_postman_id": "c0ffce99-a96d-499f-b555-19937e81910b",
+		"_postman_id": "5b8f9be9-b1c5-4fd0-bb8a-5c916191bb6e",
 		"name": "ModernisedDarts",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
 		"_exporter_id": "15829068",
-		"_collection_link": "https://speeding-resonance-716248.postman.co/workspace/darts-workspace2~8cfe3af4-319e-46ad-920e-2ba6cc1f253b/collection/15829068-c0ffce99-a96d-499f-b555-19937e81910b?action=share&source=collection_link&creator=15829068"
+		"_collection_link": "https://speeding-resonance-716248.postman.co/workspace/darts-workspace~7b348c54-cda1-41d9-aca3-fe24f04ce206/collection/15829068-5b8f9be9-b1c5-4fd0-bb8a-5c916191bb6e?action=share&source=collection_link&creator=15829068"
 	},
 	"item": [
 		{
@@ -2598,6 +2598,37 @@
 									"key": "transcription_id",
 									"value": "61"
 								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/admin/transcription-documents/marked-for-deletion",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "accept",
+								"value": "*/*"
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": []
+						},
+						"url": {
+							"raw": "{{serverUrl}}/admin/transcription-documents/marked-for-deletion",
+							"host": [
+								"{{serverUrl}}"
+							],
+							"path": [
+								"admin",
+								"transcription-documents",
+								"marked-for-deletion"
 							]
 						}
 					},
