@@ -29,13 +29,15 @@ public class RequestFileStore extends ThreadLocal<List<String>> {
 
     @Override
     public void remove() {
-        for (String file : get()) {
-            try {
-                if (Path.of(file).toFile().exists()) {
-                    Files.delete(Path.of(file));
+        if (get() != null) {
+            for (String file : get()) {
+                try {
+                    if (Path.of(file).toFile().exists()) {
+                        Files.delete(Path.of(file));
+                    }
+                } catch (IOException e) {
+                    log.error("Could not clean up file %s. Please manually delete it".formatted(file), e);
                 }
-            } catch (IOException e) {
-                log.error("Could not clean up file", e);
             }
         }
 
@@ -49,6 +51,17 @@ public class RequestFileStore extends ThreadLocal<List<String>> {
 
         return file.toFile();
     }
+
+    public File create(Path directory, Path filePath) throws IOException {
+        Files.createDirectories(directory);
+
+        Path file = Files.createFile(filePath);
+
+        store(file.toFile());
+
+        return file.toFile();
+    }
+
 
     public File create(String directory) throws IOException {
         Files.createDirectories(Path.of(directory));

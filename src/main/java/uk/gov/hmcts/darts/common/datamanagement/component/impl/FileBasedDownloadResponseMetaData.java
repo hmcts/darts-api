@@ -24,6 +24,11 @@ public class FileBasedDownloadResponseMetaData extends DownloadResponseMetaData 
     @Getter
     private File fileToBeDownloadedTo;
 
+    /**
+     * gets a spring file resource. The file is cleaned up after the closure of the associated input stream.
+     * To that end this method call is single use
+     * @return The resource
+     */
     public Resource getResource()  throws IOException {
 
         return new FileUrlResource(fileToBeDownloadedTo.toURI().toURL()) {

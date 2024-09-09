@@ -6,6 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.darts.audio.config.AudioConfigurationProperties;
 import uk.gov.hmcts.darts.common.service.FileOperationService;
+import uk.gov.hmcts.darts.common.util.RequestFileStore;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -28,8 +29,7 @@ public class FileOperationServiceImpl implements FileOperationService {
             workspacePath = workspacePath.resolve(UUID.randomUUID().toString());
         }
         Path targetTempFile = workspacePath.resolve(fileName);
-        Files.createDirectories(workspacePath);
-        return Files.createFile(targetTempFile);
+        return RequestFileStore.getFileStore().create(workspacePath, targetTempFile).toPath();
     }
 
     @Override

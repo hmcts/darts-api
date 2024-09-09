@@ -11,6 +11,7 @@ import uk.gov.hmcts.darts.audio.model.AudioFileInfo;
 import uk.gov.hmcts.darts.audio.service.AudioOperationService;
 import uk.gov.hmcts.darts.audio.util.AudioConstants;
 import uk.gov.hmcts.darts.audio.util.AudioConstants.AudioOperationTypes;
+import uk.gov.hmcts.darts.common.util.RequestFileStore;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -69,6 +70,8 @@ public class AudioOperationServiceImpl implements AudioOperationService {
             channel,
             AudioConstants.AudioFileFormats.MP2
         );
+
+        RequestFileStore.getFileStore().create(outputPath);
 
         CommandLine command = generateConcatenateCommand(audioFileInfos, outputPath);
         systemCommandExecutor.execute(command);

@@ -21,10 +21,10 @@ import uk.gov.hmcts.darts.arm.service.ArchiveRecordService;
 import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.exception.DartsException;
 import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
+import uk.gov.hmcts.darts.common.util.RequestFileStore;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
 import java.util.Optional;
 
 import static java.lang.String.format;
@@ -88,7 +88,7 @@ public class ArchiveRecordServiceImpl implements ArchiveRecordService {
 
         File archiveRecordFile = new File(armDataManagementConfiguration.getTempBlobWorkspace(), fullFilename);
         archiveRecordFileInfo.setArchiveRecordFile(archiveRecordFile);
-        Files.createDirectories(archiveRecordFile.getParentFile().toPath());
+        RequestFileStore.getFileStore().create(archiveRecordFile.getParentFile().toPath(), archiveRecordFile.toPath());
 
         CaseArchiveRecord caseArchiveRecord =
             caseArchiveRecordMapper.mapToCaseArchiveRecord(externalObjectDirectory, rawFilename);
@@ -108,7 +108,7 @@ public class ArchiveRecordServiceImpl implements ArchiveRecordService {
 
         File archiveRecordFile = new File(armDataManagementConfiguration.getTempBlobWorkspace(), fullFilename);
         archiveRecordFileInfo.setArchiveRecordFile(archiveRecordFile);
-        Files.createDirectories(archiveRecordFile.getParentFile().toPath());
+        RequestFileStore.getFileStore().create(archiveRecordFile.getParentFile().toPath(), archiveRecordFile.toPath());
 
         MediaArchiveRecord mediaArchiveRecord = mediaArchiveRecordMapper.mapToMediaArchiveRecord(externalObjectDirectory, rawFilename);
         archiveRecordFileInfo.setFileGenerationSuccessful(
@@ -127,7 +127,7 @@ public class ArchiveRecordServiceImpl implements ArchiveRecordService {
                                     archiveRecordAttempt);
         File archiveRecordFile = new File(armDataManagementConfiguration.getTempBlobWorkspace(), fullFilename);
         archiveRecordFileInfo.setArchiveRecordFile(archiveRecordFile);
-        Files.createDirectories(archiveRecordFile.getParentFile().toPath());
+        RequestFileStore.getFileStore().create(archiveRecordFile.getParentFile().toPath(), archiveRecordFile.toPath());
 
         TranscriptionArchiveRecord transcriptionArchiveRecord =
             transcriptionArchiveRecordMapper.mapToTranscriptionArchiveRecord(externalObjectDirectory, rawFilename);
@@ -146,7 +146,7 @@ public class ArchiveRecordServiceImpl implements ArchiveRecordService {
             generateArchiveFilename(externalObjectDirectory.getId(), externalObjectDirectory.getAnnotationDocumentEntity().getId(), archiveRecordAttempt);
         File archiveRecordFile = new File(armDataManagementConfiguration.getTempBlobWorkspace(), fullFilename);
         archiveRecordFileInfo.setArchiveRecordFile(archiveRecordFile);
-        Files.createDirectories(archiveRecordFile.getParentFile().toPath());
+        RequestFileStore.getFileStore().create(archiveRecordFile.getParentFile().toPath(), archiveRecordFile.toPath());
 
         AnnotationArchiveRecord annotationArchiveRecord =
             annotationArchiveRecordMapper.mapToAnnotationArchiveRecord(externalObjectDirectory, rawFilename);

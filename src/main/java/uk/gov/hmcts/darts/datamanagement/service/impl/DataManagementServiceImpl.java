@@ -29,7 +29,6 @@ import uk.gov.hmcts.darts.util.AzureCopyUtil;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
@@ -87,9 +86,9 @@ public class DataManagementServiceImpl implements DataManagementService {
 
         Path workspacePath = Path.of(workspace);
         Path targetFile = workspacePath.resolve(UUID.randomUUID() + ".tmp");
-        Files.createDirectories(workspacePath);
 
         log.debug("started downloading blob {} to {}", blobId, targetFile.toAbsolutePath());
+
         blobClient.downloadToFile(targetFile.toString());
         log.debug("finished downloading blob {}", blobId);
         return targetFile;

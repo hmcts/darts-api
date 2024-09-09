@@ -14,7 +14,9 @@ import uk.gov.hmcts.darts.audio.model.ViqMetaData;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.common.util.DateConverterUtil;
+import uk.gov.hmcts.darts.common.util.RequestFileStore;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
@@ -166,7 +168,9 @@ public class OutboundFileZipGeneratorImpl implements OutboundFileZipGenerator {
 
     @SuppressWarnings({"PMD.AvoidInstantiatingObjectsInLoops", "PMD.AssignmentInOperand"})
     private void writeZip(Map<Path, Path> sourceToDestinationPaths, Path outputPath) throws IOException {
-        try (ZipOutputStream zipOutputStream = new ZipOutputStream(Files.newOutputStream(outputPath))) {
+        File patHToFile = RequestFileStore.getFileStore().create(outputPath);
+
+        try (ZipOutputStream zipOutputStream = new ZipOutputStream(Files.newOutputStream(patHToFile.toPath()))) {
             for (Entry<Path, Path> paths : sourceToDestinationPaths.entrySet()) {
                 Path sourcePath = paths.getKey();
                 Path destinationPath = paths.getValue();

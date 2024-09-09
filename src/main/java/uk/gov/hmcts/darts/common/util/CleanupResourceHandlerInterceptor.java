@@ -7,7 +7,7 @@ import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.ModelAndView;
 
 /**
- * A cleanup interceptor for system resources i.e. files that have been generated.
+ * A cleanup interceptor for system resources i.e. files that have been generated but not explicitly removed (due to ynexpected system errors).
  */
 @Component
 public class CleanupResourceHandlerInterceptor implements HandlerInterceptor {
@@ -22,7 +22,7 @@ public class CleanupResourceHandlerInterceptor implements HandlerInterceptor {
 
     @Override
     public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex) throws Exception {
+        // clean up all files created by this request that are still hanging around
         RequestFileStore.getFileStore().remove();
-
     }
 }
