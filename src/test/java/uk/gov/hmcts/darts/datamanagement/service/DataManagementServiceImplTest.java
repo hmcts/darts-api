@@ -8,6 +8,7 @@ import com.azure.storage.blob.BlobServiceClient;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.api.io.TempDir;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -23,6 +24,7 @@ import uk.gov.hmcts.darts.datamanagement.service.impl.DataManagementServiceImpl;
 import uk.gov.hmcts.darts.util.AzureCopyUtil;
 
 import java.io.ByteArrayInputStream;
+import java.io.File;
 import java.time.Duration;
 import java.util.UUID;
 
@@ -58,6 +60,10 @@ class DataManagementServiceImplTest {
     private DataManagementServiceImpl dataManagementService;
     private BlobContainerClient blobContainerClient;
     private BlobClient blobClient;
+
+    @TempDir
+    private File tempDirectory;
+
 
     private BlobServiceClient serviceClient;
 
@@ -117,11 +123,11 @@ class DataManagementServiceImplTest {
         when(dataManagementFactory.getBlobContainerClient(BLOB_CONTAINER_NAME, serviceClient)).thenReturn(blobContainerClient);
         when(dataManagementFactory.getBlobClient(blobContainerClient, BLOB_ID)).thenReturn(blobClient);
 
-        dataManagementService.downloadBlobToFile(BLOB_CONTAINER_NAME, BLOB_ID, "workspacePath");
+        dataManagementService.downloadBlobToFile(BLOB_CONTAINER_NAME, BLOB_ID, tempDirectory.getAbsolutePath());
 
         var fileNameCaptor = ArgumentCaptor.forClass(String.class);
         verify(blobClient).downloadToFile(fileNameCaptor.capture());
-        assertThat(fileNameCaptor.getValue().contains("workspacePath")).isTrue();
+        assertThat(fileNameCaptor.getValue().contains(tempDirectory.getAbsolutePath())).isTrue();
     }
 
     @Test

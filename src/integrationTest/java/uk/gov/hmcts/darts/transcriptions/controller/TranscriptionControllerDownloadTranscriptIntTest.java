@@ -4,6 +4,7 @@ import org.apache.commons.io.IOUtils;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 import org.skyscreamer.jsonassert.JSONAssert;
 import org.skyscreamer.jsonassert.JSONCompareMode;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -81,6 +82,9 @@ class TranscriptionControllerDownloadTranscriptIntTest extends IntegrationBase {
     private AuditApi mockAuditApi;
     @MockBean
     private DataManagementFacade mockDataManagementFacade;
+
+    @TempDir
+    private File tempDirectory;
 
     private TranscriptionEntity transcriptionEntity;
     private UserAccountEntity testUser;
@@ -200,7 +204,7 @@ class TranscriptionControllerDownloadTranscriptIntTest extends IntegrationBase {
 
         // setup a real file so we can assert against its processing
         StorageConfiguration configuration = new StorageConfiguration();
-        configuration.setTempBlobWorkspace("./tmpFiles3");
+        configuration.setTempBlobWorkspace(tempDirectory.getAbsolutePath());
         var mockFileBasedDownloadResponseMetaData = new FileBasedDownloadResponseMetaData();
         try (OutputStream outputStream = mockFileBasedDownloadResponseMetaData.getOutputStream(configuration)) {
             outputStream.write("test-transcription".getBytes());

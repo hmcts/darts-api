@@ -3,6 +3,7 @@ package uk.gov.hmcts.darts.common.datamanagement.component;
 import org.apache.commons.io.IOUtils;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 import uk.gov.hmcts.darts.common.datamanagement.StorageConfiguration;
 import uk.gov.hmcts.darts.common.datamanagement.component.impl.FileBasedDownloadResponseMetaData;
 import uk.gov.hmcts.darts.common.datamanagement.enums.DatastoreContainerType;
@@ -13,10 +14,14 @@ import java.io.InputStream;
 import java.io.OutputStream;
 
 class FileBasedDownloadResponseMetaDataTest {
+
+    @TempDir
+    private File tempDirectory;
+
     @Test
     void testFileMetaData() throws Exception {
         StorageConfiguration configuration = new StorageConfiguration();
-        configuration.setTempBlobWorkspace(System.getenv("java.home") + "/" + "temp");
+        configuration.setTempBlobWorkspace(tempDirectory.getAbsolutePath());
 
         int fileCount;
         String byteToWrite = "test";
@@ -47,7 +52,7 @@ class FileBasedDownloadResponseMetaDataTest {
 
         try (FileBasedDownloadResponseMetaData fileBasedDownloadResponseMetaData = new FileBasedDownloadResponseMetaData()) {
             StorageConfiguration configuration = new StorageConfiguration();
-            configuration.setTempBlobWorkspace(System.getenv("java.home") + "/" + "temp");
+            configuration.setTempBlobWorkspace(tempDirectory.getAbsolutePath());
             int fileCountPostCleanupBefore = new File(configuration.getTempBlobWorkspace()).list().length;
             fileBasedDownloadResponseMetaData.setInputStream(new ByteArrayInputStream("test".getBytes()), configuration);
 
