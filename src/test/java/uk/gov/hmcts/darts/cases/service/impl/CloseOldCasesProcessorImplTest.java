@@ -15,7 +15,6 @@ import uk.gov.hmcts.darts.common.repository.CaseRepository;
 import uk.gov.hmcts.darts.common.repository.CaseRetentionRepository;
 import uk.gov.hmcts.darts.common.util.CommonTestDataUtil;
 import uk.gov.hmcts.darts.common.util.DateConverterUtil;
-import uk.gov.hmcts.darts.log.api.LogApi;
 import uk.gov.hmcts.darts.retention.api.RetentionApi;
 import uk.gov.hmcts.darts.retention.helper.RetentionDateHelper;
 
@@ -41,8 +40,6 @@ class CloseOldCasesProcessorImplTest {
     private RetentionDateHelper retentionDateHelper;
     @Mock
     private AuthorisationApi authorisationApi;
-    @Mock
-    private LogApi logApi;
 
     private UserAccountEntity userAccountEntity;
 
