@@ -48,6 +48,7 @@ import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -234,6 +235,29 @@ class AudioUploadServiceImplTest {
     }
 
     @Test
+    void linkAudioToInactiveHearingByEvent() {
+        HearingEntity hearing = new HearingEntity();
+        EventEntity eventEntity = new EventEntity();
+        eventEntity.setTimestamp(STARTED_AT.minusMinutes(30));
+        eventEntity.addHearing(hearing);
+
+        AddAudioMetadataRequest addAudioMetadataRequest = createAddAudioRequest(STARTED_AT, ENDED_AT);
+        MediaEntity mediaEntity = createMediaEntity(STARTED_AT, ENDED_AT);
+
+        when(courtLogEventRepository.findByCourthouseAndCourtroomBetweenStartAndEnd(
+            anyString(),
+            anyString(),
+            any(),
+            any()
+        )).thenReturn(List.of(eventEntity));
+
+        audioService.linkAudioToHearingByEvent(addAudioMetadataRequest, mediaEntity);
+        verify(hearingRepository, times(1)).saveAndFlush(any());
+        assertEquals(1, hearing.getMediaList().size());
+        assertTrue(hearing.getHearingIsActual());
+    }
+
+    @Test
     void linkAudioToHearingByEventShouldOnlyLinkOncePerHearing() {
         HearingEntity hearing = new HearingEntity();
         EventEntity firstEventEntity = new EventEntity();
@@ -322,6 +346,46 @@ class AudioUploadServiceImplTest {
         assertEquals(1, hearing1.getMediaList().size());
         assertEquals(1, hearing2.getMediaList().size());
         assertEquals(1, hearing3.getMediaList().size());
+    }
+
+    @Test
+    void linkAudioAndInactiveHearing() {
+        AddAudioMetadataRequest addAudioMetadataRequest = createAddAudioRequest(STARTED_AT, ENDED_AT);
+        MediaEntity mediaEntity = createMediaEntity(STARTED_AT, ENDED_AT);
+
+        HearingEntity hearing1 = HearingTestData.someMinimalHearing();
+        when(retrieveCoreObjectService.retrieveOrCreateHearing(
+            anyString(),
+            anyString(),
+            eq("1"),
+            any(),
+            any()
+        )).thenReturn(hearing1);
+
+        HearingEntity hearing2 = HearingTestData.someMinimalHearing();
+        hearing2.setHearingIsActual(false);
+        when(retrieveCoreObjectService.retrieveOrCreateHearing(
+            anyString(),
+            anyString(),
+            eq("2"),
+            any(),
+            any()
+        )).thenReturn(hearing2);
+
+        HearingEntity hearing3 = HearingTestData.someMinimalHearing();
+        when(retrieveCoreObjectService.retrieveOrCreateHearing(
+            anyString(),
+            anyString(),
+            eq("3"),
+            any(),
+            any()
+        )).thenReturn(hearing3);
+        audioService.linkAudioToHearingInMetadata(addAudioMetadataRequest, mediaEntity);
+        verify(hearingRepository, times(3)).saveAndFlush(any());
+        assertEquals(1, hearing1.getMediaList().size());
+        assertEquals(1, hearing2.getMediaList().size());
+        assertEquals(1, hearing3.getMediaList().size());
+        assertTrue(hearing2.getHearingIsActual());
     }
 
     @Test
