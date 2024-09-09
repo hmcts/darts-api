@@ -6,8 +6,10 @@ import org.apache.commons.io.FileUtils;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 import org.springframework.beans.factory.annotation.Autowired;
 import uk.gov.hmcts.darts.audio.model.AudioFileInfo;
+import uk.gov.hmcts.darts.common.util.RequestFileStore;
 import uk.gov.hmcts.darts.test.common.TestUtils;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 
@@ -35,7 +37,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @Slf4j
 class AudioOperationServiceIntTest extends IntegrationBase {
 
-    private static final String WORKSPACE_DIR = "44887a8c-d918-4907-b9e8-38d5b1bf9c9c";
     private static final String T_09_00_00_Z = "2023-04-28T09:00:00Z";
     private static final String T_09_01_00_Z = "2023-04-28T09:01:00Z";
     private static final String T_09_02_00_Z = "2023-04-28T09:02:00Z";
@@ -53,21 +54,21 @@ class AudioOperationServiceIntTest extends IntegrationBase {
     public static final String FFMPEG = "ffmpeg";
 
     private List<AudioFileInfo> preloadedInputAudioFileInfos;
-    private Path tempDirectory;
 
     @Autowired
     private AudioOperationServiceImpl audioOperationService;
 
+    @TempDir
+    private File tempDirectory;
 
     @BeforeEach
     void beforeEach() throws IOException {
         UUID externalLocation = UUID.randomUUID();
-        tempDirectory = Files.createTempDirectory(externalLocation + "darts_api_unit_test");
 
         File audioFileTest1 = TestUtils.getFile(AUDIO_FILENAME1);
-        Path path1 = Files.copy(audioFileTest1.toPath(), createFile(tempDirectory, "original0.mp2"), REPLACE_EXISTING);
+        Path path1 = Files.copy(audioFileTest1.toPath(), createFile(tempDirectory.toPath(), "original0.mp2"), REPLACE_EXISTING);
         File audioFileTest2 = TestUtils.getFile(AUDIO_FILENAME2);
-        Path path2 = Files.copy(audioFileTest2.toPath(), createFile(tempDirectory, "original1.mp2"), REPLACE_EXISTING);
+        Path path2 = Files.copy(audioFileTest2.toPath(), createFile(tempDirectory.toPath(), "original1.mp2"), REPLACE_EXISTING);
 
         preloadedInputAudioFileInfos = new ArrayList<>(Arrays.asList(
             AudioFileInfo.builder()
@@ -87,13 +88,19 @@ class AudioOperationServiceIntTest extends IntegrationBase {
         ));
     }
 
+    @Override
+    protected void checkCleanup() throws Exception {
+        RequestFileStore.getFileStore().remove();
+        assertEquals(0, FileUtils.listFiles(tempDirectory.toPath().toFile(), null, true).size());
+    }
+
     @Test
     @SuppressWarnings({"PMD.InsufficientStringBufferDeclaration"})
     void shouldGenerateConcatenateCommandWhenValidAudioFilesAreReceived() throws IOException {
 
         File audioFileTest = TestUtils.getFile(AUDIO_FILENAME1);
-        Path path1 = Files.copy(audioFileTest.toPath(), createFile(tempDirectory, "test1.mp2"), REPLACE_EXISTING);
-        Path path2 = Files.copy(audioFileTest.toPath(), createFile(tempDirectory, "test2.mp2"), REPLACE_EXISTING);
+        Path path1 = Files.copy(audioFileTest.toPath(), createFile(tempDirectory.toPath(), "test1.mp2"), REPLACE_EXISTING);
+        Path path2 = Files.copy(audioFileTest.toPath(), createFile(tempDirectory.toPath(), "test2.mp2"), REPLACE_EXISTING);
 
         List<AudioFileInfo> inputAudioFileInfos = List.of(
             AudioFileInfo.builder()
@@ -112,7 +119,7 @@ class AudioOperationServiceIntTest extends IntegrationBase {
                 .build()
         );
 
-        Path outputPath = tempDirectory.resolve("/audio.mp2");
+        Path outputPath = tempDirectory.toPath().resolve("/audio.mp2");
         CommandLine actualCommand = audioOperationService.generateConcatenateCommand(
             inputAudioFileInfos,
             outputPath
@@ -135,10 +142,10 @@ class AudioOperationServiceIntTest extends IntegrationBase {
     void shouldGenerateConcatenateCommandWhenMultipleChannelsAreReceived() throws IOException {
 
         File audioFileTest = TestUtils.getFile(AUDIO_FILENAME1);
-        Path path1 = Files.copy(audioFileTest.toPath(), createFile(tempDirectory, "test1.mp2"), REPLACE_EXISTING);
-        Path path2 = Files.copy(audioFileTest.toPath(), createFile(tempDirectory, "test2.mp2"), REPLACE_EXISTING);
-        Path path3 = Files.copy(audioFileTest.toPath(), createFile(tempDirectory, "test3.mp2"), REPLACE_EXISTING);
-        Path path4 = Files.copy(audioFileTest.toPath(), createFile(tempDirectory, "test4.mp2"), REPLACE_EXISTING);
+        Path path1 = Files.copy(audioFileTest.toPath(), createFile(tempDirectory.toPath(), "test1.mp2"), REPLACE_EXISTING);
+        Path path2 = Files.copy(audioFileTest.toPath(), createFile(tempDirectory.toPath(), "test2.mp2"), REPLACE_EXISTING);
+        Path path3 = Files.copy(audioFileTest.toPath(), createFile(tempDirectory.toPath(), "test3.mp2"), REPLACE_EXISTING);
+        Path path4 = Files.copy(audioFileTest.toPath(), createFile(tempDirectory.toPath(), "test4.mp2"), REPLACE_EXISTING);
 
         List<AudioFileInfo> inputAudioFileInfos = List.of(
             AudioFileInfo.builder()
@@ -171,7 +178,7 @@ class AudioOperationServiceIntTest extends IntegrationBase {
                 .build()
         );
 
-        Path outputPath = tempDirectory.resolve("/audio.mp2");
+        Path outputPath = tempDirectory.toPath().resolve("/audio.mp2");
         CommandLine actualCommand = audioOperationService.generateConcatenateCommand(
             inputAudioFileInfos,
             outputPath
@@ -194,11 +201,11 @@ class AudioOperationServiceIntTest extends IntegrationBase {
     @Test
     void shouldReturnConcatenatedAudioFileInfoWhenValidInputAudioFiles() throws Exception {
         AudioFileInfo audioFileInfo = audioOperationService.concatenate(
-            WORKSPACE_DIR,
+            tempDirectory.getAbsolutePath(),
             preloadedInputAudioFileInfos
         );
 
-        assertTrue(audioFileInfo.getPath().toString().matches(".*/44887a8c-d918-4907-b9e8-38d5b1bf9c9c/C[1-4]-concatenate-[0-9]*.mp2"));
+        assertTrue(audioFileInfo.getPath().toString().matches(".*/C[1-4]-concatenate-[0-9]*.mp2"));
         assertEquals(1, audioFileInfo.getChannel());
         assertEquals(Instant.parse(T_09_00_00_Z), audioFileInfo.getStartTime());
         assertEquals(Instant.parse(T_09_02_00_Z), audioFileInfo.getEndTime());
@@ -209,10 +216,10 @@ class AudioOperationServiceIntTest extends IntegrationBase {
     void shouldReturnMergedAudioFileInfoWhenValidInputAudioFiles() throws Exception {
         AudioFileInfo audioFileInfo = audioOperationService.merge(
             preloadedInputAudioFileInfos,
-            WORKSPACE_DIR
+            tempDirectory.getAbsolutePath()
         );
 
-        assertTrue(audioFileInfo.getPath().toString().matches(".*/44887a8c-d918-4907-b9e8-38d5b1bf9c9c/C0-merge-[0-9]*.mp2"));
+        assertTrue(audioFileInfo.getPath().toString().matches(".*/C0-merge-[0-9]*.mp2"));
         assertEquals(0, audioFileInfo.getChannel());
         assertEquals(Instant.parse(T_09_00_00_Z), audioFileInfo.getStartTime());
         assertEquals(Instant.parse(T_09_02_00_Z), audioFileInfo.getEndTime());
@@ -224,10 +231,10 @@ class AudioOperationServiceIntTest extends IntegrationBase {
         throws ExecutionException, InterruptedException, IOException {
 
         File audioFileTest = TestUtils.getFile(AUDIO_FILENAME1);
-        Path path1 = Files.copy(audioFileTest.toPath(), createFile(tempDirectory, "test1.mp2"), REPLACE_EXISTING);
+        Path path1 = Files.copy(audioFileTest.toPath(), createFile(tempDirectory.toPath(), "test1.mp2"), REPLACE_EXISTING);
 
         AudioFileInfo audioFileInfo = audioOperationService.trim(
-            WORKSPACE_DIR,
+            tempDirectory.getAbsolutePath(),
             AudioFileInfo.builder()
                 .startTime(Instant.parse(T_09_00_00_Z))
                 .endTime(Instant.parse(T_09_01_00_Z))
@@ -239,7 +246,7 @@ class AudioOperationServiceIntTest extends IntegrationBase {
             Duration.of(45, SECONDS)
         );
 
-        assertTrue(audioFileInfo.getPath().toString().matches(".*/44887a8c-d918-4907-b9e8-38d5b1bf9c9c/C[1-4]-trim-[0-9]*.mp2"));
+        assertTrue(audioFileInfo.getPath().toString().matches(".*/C[1-4]-trim-[0-9]*.mp2"));
         assertEquals(1, audioFileInfo.getChannel());
         assertEquals(Instant.parse("2023-04-28T09:00:15Z"), audioFileInfo.getStartTime());
         assertEquals(Instant.parse("2023-04-28T09:00:45Z"), audioFileInfo.getEndTime());
@@ -293,11 +300,11 @@ class AudioOperationServiceIntTest extends IntegrationBase {
         throws ExecutionException, InterruptedException, IOException {
 
         AudioFileInfo audioFileInfo = audioOperationService.reEncode(
-            WORKSPACE_DIR,
+            tempDirectory.getAbsolutePath(),
             preloadedInputAudioFileInfos.get(0)
         );
 
-        assertTrue(audioFileInfo.getPath().toString().matches(".*/44887a8c-d918-4907-b9e8-38d5b1bf9c9c/C[0-4]-encode-[0-9]*.mp3"));
+        assertTrue(audioFileInfo.getPath().toString().matches(".*/C[0-4]-encode-[0-9]*.mp3"));
         assertEquals(1, audioFileInfo.getChannel());
         assertEquals(Instant.parse(T_09_00_00_Z), audioFileInfo.getStartTime());
         assertEquals(Instant.parse(T_09_01_00_Z), audioFileInfo.getEndTime());
@@ -307,8 +314,8 @@ class AudioOperationServiceIntTest extends IntegrationBase {
     @Test
     void shouldReturnConcatenatedAudioFileListInfoWhenValidInputAudioFilesHaveGap() throws Exception {
         File audioFileTest = TestUtils.getFile(AUDIO_FILENAME1);
-        Path path1 = Files.copy(audioFileTest.toPath(), createFile(tempDirectory, "test2.mp2"), REPLACE_EXISTING);
-        Path path2 = Files.copy(audioFileTest.toPath(), createFile(tempDirectory, "test3.mp2"), REPLACE_EXISTING);
+        Path path1 = Files.copy(audioFileTest.toPath(), createFile(tempDirectory.toPath(), "test2.mp2"), REPLACE_EXISTING);
+        Path path2 = Files.copy(audioFileTest.toPath(), createFile(tempDirectory.toPath(), "test3.mp2"), REPLACE_EXISTING);
 
         List<AudioFileInfo> inputAudioFileInfosWithGaps = new ArrayList<>(Arrays.asList(
             AudioFileInfo.builder()
@@ -328,12 +335,12 @@ class AudioOperationServiceIntTest extends IntegrationBase {
         ));
 
         List<AudioFileInfo> audioFileInfo = audioOperationService.concatenateWithGaps(
-            WORKSPACE_DIR,
+            tempDirectory.getAbsolutePath(),
             inputAudioFileInfosWithGaps,
             ALLOWABLE_GAP
         );
 
-        assertTrue(audioFileInfo.get(0).getPath().toString().matches(".*/44887a8c-d918-4907-b9e8-38d5b1bf9c9c/C[1-4]-concatenate-[0-9]*.mp2"));
+        assertTrue(audioFileInfo.get(0).getPath().toString().matches(".*/C[1-4]-concatenate-[0-9]*.mp2"));
         assertEquals(1, audioFileInfo.get(0).getChannel());
         assertEquals(Instant.parse(T_09_01_00_Z), audioFileInfo.get(0).getStartTime());
         assertEquals(Instant.parse(T_09_03_01_Z), audioFileInfo.get(0).getEndTime());
@@ -344,8 +351,8 @@ class AudioOperationServiceIntTest extends IntegrationBase {
     void shouldReturnConcatenatedAudioFileListInfoWhenValidInputAudioFilesHaveGapWithSeconds() throws Exception {
 
         File audioFileTest = TestUtils.getFile(AUDIO_FILENAME1);
-        Path path1 = Files.copy(audioFileTest.toPath(), createFile(tempDirectory, "original4.mp2"), REPLACE_EXISTING);
-        Path path2 = Files.copy(audioFileTest.toPath(), createFile(tempDirectory, "original5.mp2"), REPLACE_EXISTING);
+        Path path1 = Files.copy(audioFileTest.toPath(), createFile(tempDirectory.toPath(), "original4.mp2"), REPLACE_EXISTING);
+        Path path2 = Files.copy(audioFileTest.toPath(), createFile(tempDirectory.toPath(), "original5.mp2"), REPLACE_EXISTING);
 
         List<AudioFileInfo> inputAudioFileInfosWithSecondGaps = new ArrayList<>(Arrays.asList(
             AudioFileInfo.builder()
@@ -365,12 +372,12 @@ class AudioOperationServiceIntTest extends IntegrationBase {
         ));
 
         List<AudioFileInfo> audioFileInfo = audioOperationService.concatenateWithGaps(
-            WORKSPACE_DIR,
+            tempDirectory.toString(),
             inputAudioFileInfosWithSecondGaps,
             ALLOWABLE_GAP_MS
         );
 
-        assertTrue(audioFileInfo.get(0).getPath().toString().matches(".*/44887a8c-d918-4907-b9e8-38d5b1bf9c9c/C[1-4]-concatenate-[0-9]*.mp2"));
+        assertTrue(audioFileInfo.get(0).getPath().toString().matches(".*/C[1-4]-concatenate-[0-9]*.mp2"));
         assertEquals(1, audioFileInfo.get(0).getChannel());
         assertEquals(Instant.parse(T_09_00_00_Z), audioFileInfo.get(0).getStartTime());
         assertEquals(Instant.parse(T_09_01_00_Z), audioFileInfo.get(0).getEndTime());
@@ -382,8 +389,8 @@ class AudioOperationServiceIntTest extends IntegrationBase {
     @Test
     void shouldNotReturnConcatenatedAudioFileListInfoWhenValidInputAudioFilesHaveLargeGap() throws Exception {
         File audioFileTest = TestUtils.getFile(AUDIO_FILENAME1);
-        Path path1 = Files.copy(audioFileTest.toPath(), createFile(tempDirectory, "test6.mp2"), REPLACE_EXISTING);
-        Path path2 = Files.copy(audioFileTest.toPath(), createFile(tempDirectory, "test7.mp2"), REPLACE_EXISTING);
+        Path path1 = Files.copy(audioFileTest.toPath(), createFile(tempDirectory.toPath(), "test6.mp2"), REPLACE_EXISTING);
+        Path path2 = Files.copy(audioFileTest.toPath(), createFile(tempDirectory.toPath(), "test7.mp2"), REPLACE_EXISTING);
 
         List<AudioFileInfo> inputAudioFileInfosWithGaps = new ArrayList<>(Arrays.asList(
             AudioFileInfo.builder()
@@ -403,12 +410,12 @@ class AudioOperationServiceIntTest extends IntegrationBase {
         ));
 
         List<AudioFileInfo> audioFileInfo = audioOperationService.concatenateWithGaps(
-            WORKSPACE_DIR,
+            tempDirectory.getAbsolutePath(),
             inputAudioFileInfosWithGaps,
             ALLOWABLE_GAP
         );
 
-        assertTrue(audioFileInfo.get(0).getPath().toString().matches(".*/44887a8c-d918-4907-b9e8-38d5b1bf9c9c/C[1-4]-concatenate-[0-9]*.mp2"));
+        assertTrue(audioFileInfo.get(0).getPath().toString().matches(".*/C[1-4]-concatenate-[0-9]*.mp2"));
         assertEquals(1, audioFileInfo.get(0).getChannel());
         assertEquals(Instant.parse(T_09_00_00_Z), audioFileInfo.get(0).getStartTime());
         assertEquals(Instant.parse(T_09_01_00_Z), audioFileInfo.get(0).getEndTime());
@@ -419,12 +426,12 @@ class AudioOperationServiceIntTest extends IntegrationBase {
     void shouldReturnConcatenatedAudioFileListInfoWhenValidInputAudioFilesHaveNoGap() throws Exception {
 
         List<AudioFileInfo> audioFileInfo = audioOperationService.concatenateWithGaps(
-            WORKSPACE_DIR,
+            tempDirectory.getAbsolutePath(),
             preloadedInputAudioFileInfos,
             ALLOWABLE_GAP
         );
 
-        assertTrue(audioFileInfo.get(0).getPath().toString().matches(".*/44887a8c-d918-4907-b9e8-38d5b1bf9c9c/C[1-4]-concatenate-[0-9]*.mp2"));
+        assertTrue(audioFileInfo.get(0).getPath().toString().matches(".*/C[1-4]-concatenate-[0-9]*.mp2"));
         assertEquals(1, audioFileInfo.get(0).getChannel());
         assertEquals(Instant.parse(T_09_00_00_Z), audioFileInfo.get(0).getStartTime());
         assertEquals(Instant.parse(T_09_02_00_Z), audioFileInfo.get(0).getEndTime());
@@ -433,17 +440,7 @@ class AudioOperationServiceIntTest extends IntegrationBase {
     }
 
     private Path createFile(Path path, String name) throws IOException {
-        return Files.createFile(path.resolve(name));
+        return RequestFileStore.getFileStore().create(path, Path.of(name)).toPath();
     }
 
-    @AfterEach
-    void deleteFile() {
-        if (tempDirectory != null) {
-            try {
-                FileUtils.forceDelete(tempDirectory.toFile());
-            } catch (IOException e) {
-                log.error("Unable to delete directory {}", tempDirectory);
-            }
-        }
-    }
 }
