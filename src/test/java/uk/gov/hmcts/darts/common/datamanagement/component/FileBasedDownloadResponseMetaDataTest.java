@@ -12,6 +12,7 @@ import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.nio.charset.StandardCharsets;
 
 class FileBasedDownloadResponseMetaDataTest {
 
@@ -59,7 +60,7 @@ class FileBasedDownloadResponseMetaDataTest {
             Assertions.assertEquals(fileCountPostCleanupBefore + 1, new File(configuration.getTempBlobWorkspace()).list().length);
 
             try (InputStream inputStream = fileBasedDownloadResponseMetaData.getResource().getInputStream()) {
-                String content = IOUtils.toString(inputStream);
+                String content = IOUtils.toString(inputStream, StandardCharsets.UTF_8);
                 Assertions.assertEquals("test", content);
             }
 

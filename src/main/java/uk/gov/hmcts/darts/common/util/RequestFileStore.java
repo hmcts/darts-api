@@ -16,6 +16,7 @@ import java.util.UUID;
  * to protect against files hanging about
  */
 @Slf4j
+@SuppressWarnings("java:S6548")
 public class RequestFileStore extends ThreadLocal<List<String>> {
 
     private static RequestFileStore fileCreatedForThread;

@@ -170,7 +170,7 @@ class ArchiveRecordFileGeneratorImplTest {
     }
 
     @Test
-    void generateArchiveRecordsEmptyArchiveRecords() throws Exception {
+    void generateArchiveRecordsEmptyArchiveRecords() {
         String fileLocation = tempDirectory.getAbsolutePath();
         File archiveFile = new File(fileLocation, "archive-records.a360");
 
@@ -198,7 +198,7 @@ class ArchiveRecordFileGeneratorImplTest {
     }
 
     @Test
-    void generateArchiveRecordsFileError() throws Exception {
+    void generateArchiveRecordsFileError() {
 
         String fileLocation = tempDirectory.getAbsolutePath();
         File invalidFile = new File(fileLocation, "archive-recor/ds.a360");

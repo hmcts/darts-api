@@ -127,7 +127,7 @@ class DataManagementServiceImplTest {
 
         var fileNameCaptor = ArgumentCaptor.forClass(String.class);
         verify(blobClient).downloadToFile(fileNameCaptor.capture());
-        assertThat(fileNameCaptor.getValue().contains(tempDirectory.getAbsolutePath())).isTrue();
+        assertThat(fileNameCaptor.getValue()).contains(tempDirectory.getAbsolutePath());
     }
 
     @Test

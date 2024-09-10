@@ -123,32 +123,32 @@ public class OutboundFileZipGeneratorHelperImpl implements OutboundFileZipGenera
 
         try {
             RequestFileStore.getFileStore().create(readmeFile.toPath());
+        } catch (IOException exception) {
+            log.error("Unable to generate readme file: {}", readmeFile.getAbsoluteFile(), exception);
+            throw new DartsApiException(AudioApiError.FAILED_TO_PROCESS_AUDIO_REQUEST, exception);
+        }
 
-            try (
-                BufferedWriter fileWriter = Files.newBufferedWriter(readmeFile.toPath());
-                PrintWriter printWriter = new PrintWriter(fileWriter)) {
+        try (
+            BufferedWriter fileWriter = Files.newBufferedWriter(readmeFile.toPath());
+            PrintWriter printWriter = new PrintWriter(fileWriter)) {
 
-                printWriter.println(format(COURTHOUSE_README_LABEL + README_FORMAT, viqMetaData.getCourthouse()));
-                printWriter.println(format(
-                    RAISED_BY_README_LABEL + README_FORMAT,
-                    StringUtils.defaultIfEmpty(viqMetaData.getRaisedBy(), "")
-                ));
-                printWriter.println(format(
-                    START_TIME_README_LABEL + README_FORMAT,
-                    viqMetaData.getStartTime().format(DATE_TIME_FORMATTER)
-                ));
-                printWriter.println(format(
-                    END_TIME_README_LABEL + README_FORMAT,
-                    viqMetaData.getEndTime().format(DATE_TIME_FORMATTER)
-                ));
-                printWriter.print(format(
-                    REQUEST_TYPE_README_LABEL + README_FORMAT,
-                    StringUtils.defaultIfEmpty(viqMetaData.getType(), "")
-                ));
-            } catch (IOException exception) {
-                log.error("Unable to generate readme file: {}", readmeFile.getAbsoluteFile(), exception);
-                throw new DartsApiException(AudioApiError.FAILED_TO_PROCESS_AUDIO_REQUEST, exception);
-            }
+            printWriter.println(format(COURTHOUSE_README_LABEL + README_FORMAT, viqMetaData.getCourthouse()));
+            printWriter.println(format(
+                RAISED_BY_README_LABEL + README_FORMAT,
+                StringUtils.defaultIfEmpty(viqMetaData.getRaisedBy(), "")
+            ));
+            printWriter.println(format(
+                START_TIME_README_LABEL + README_FORMAT,
+                viqMetaData.getStartTime().format(DATE_TIME_FORMATTER)
+            ));
+            printWriter.println(format(
+                END_TIME_README_LABEL + README_FORMAT,
+                viqMetaData.getEndTime().format(DATE_TIME_FORMATTER)
+            ));
+            printWriter.print(format(
+                REQUEST_TYPE_README_LABEL + README_FORMAT,
+                StringUtils.defaultIfEmpty(viqMetaData.getType(), "")
+            ));
         } catch (IOException exception) {
             log.error("Unable to generate readme file: {}", readmeFile.getAbsoluteFile(), exception);
             throw new DartsApiException(AudioApiError.FAILED_TO_PROCESS_AUDIO_REQUEST, exception);

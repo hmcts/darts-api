@@ -18,6 +18,7 @@ public class CleanupResourceHandlerInterceptor implements HandlerInterceptor {
 
     @Override
     public void postHandle(HttpServletRequest request, HttpServletResponse response, Object handler, ModelAndView modelAndView) throws Exception {
+        // no need to post handle
     }
 
     @Override

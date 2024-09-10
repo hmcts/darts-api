@@ -31,9 +31,12 @@ public class FileBasedDownloadResponseMetaData extends DownloadResponseMetaData 
      * To that end this method call is single use
      * @return The resource
      */
+    @Override
     public Resource getResource()  throws IOException {
 
         return new FileUrlResource(fileToBeDownloadedTo.toURI().toURL()) {
+
+            @Override
             public InputStream getInputStream() throws IOException {
                 InputStream inputStream = Files.newInputStream(Path.of(fileToBeDownloadedTo.toURI()), StandardOpenOption.READ);
 

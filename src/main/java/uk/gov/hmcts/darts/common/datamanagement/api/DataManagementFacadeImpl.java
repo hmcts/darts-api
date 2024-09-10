@@ -208,11 +208,12 @@ public class DataManagementFacadeImpl implements DataManagementFacade {
             File targetFile = new File(tempBlobPath);
             FileUtils.copyInputStreamToFile(downloadResponseMetaData.getResource().getInputStream(), targetFile);
 
-            FileBasedDownloadResponseMetaData downloadResponseMetaDataUnstructured = new FileBasedDownloadResponseMetaData();
-            downloadResponseMetaDataUnstructured.setEodEntity(eodEntity);
-            downloadResponseMetaDataUnstructured.setContainerTypeUsedToDownload(downloadResponseMetaData.getContainerTypeUsedToDownload());
-            downloadResponseMetaDataUnstructured.setInputStream(new FileInputStream(targetFile), dataManagementConfiguration);
-            createCopyInUnstructuredDatastore(downloadResponseMetaDataUnstructured, eodEntityToDelete, targetFile);
+            try (FileBasedDownloadResponseMetaData downloadResponseMetaDataUnstructured = new FileBasedDownloadResponseMetaData()) {
+                downloadResponseMetaDataUnstructured.setEodEntity(eodEntity);
+                downloadResponseMetaDataUnstructured.setContainerTypeUsedToDownload(downloadResponseMetaData.getContainerTypeUsedToDownload());
+                downloadResponseMetaDataUnstructured.setInputStream(new FileInputStream(targetFile), dataManagementConfiguration);
+                createCopyInUnstructuredDatastore(downloadResponseMetaDataUnstructured, eodEntityToDelete, targetFile);
+            }
         }
     }
 
@@ -223,6 +224,7 @@ public class DataManagementFacadeImpl implements DataManagementFacade {
         DownloadResponseMetaData downloadResponseMetaData,
         ExternalObjectDirectoryEntity eodEntityToDelete,
         File targetFile) throws IOException {
+
         try (InputStream inputStream = new BufferedInputStream(downloadResponseMetaData.getResource().getInputStream())) {
             unstructuredDataHelper.createUnstructuredDataFromEod(
                 eodEntityToDelete,
