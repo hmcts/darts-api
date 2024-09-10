@@ -8,6 +8,7 @@ import uk.gov.hmcts.darts.audio.config.AudioConfigurationProperties;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
 import uk.gov.hmcts.darts.common.service.FileOperationService;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
+import uk.gov.hmcts.darts.testutils.stubs.DartsPersistence;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -23,7 +24,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
-@Disabled("Impacted by V1_367__adding_not_null_constraints_part_4.sql")
 @SuppressWarnings({"PMD.ExcessiveImports"})
 class AudioTransformationServiceTest extends IntegrationBase {
 
@@ -39,6 +39,9 @@ class AudioTransformationServiceTest extends IntegrationBase {
 
     @MockBean
     FileOperationService mockFileOperationService;
+
+    @Autowired
+    DartsPersistence dartsPersistence;
 
     @Test
     void getMediaByHearingIdShouldReturnExpectedMediaEntitiesWhenHearingIdHasRelatedMedia() {

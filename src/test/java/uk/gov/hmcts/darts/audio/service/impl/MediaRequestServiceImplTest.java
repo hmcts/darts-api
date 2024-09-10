@@ -760,7 +760,7 @@ class MediaRequestServiceImplTest {
 
     @Test
     void auditsWhenOwnerChanged() {
-        var mediaRequest = withIdsPopulated(someMinimalRequestData());
+        var mediaRequest = withIdsPopulated(someMinimalRequestData().build());
         when(mockMediaRequestRepository.findById(any())).thenReturn(Optional.of(mediaRequest));
         when(mockUserAccountRepository.findById(any())).thenReturn(Optional.of(mediaRequest.getCurrentOwner()));
 
@@ -771,7 +771,7 @@ class MediaRequestServiceImplTest {
 
     @Test
     void doesNotAuditWhenOwnerNotChanged() {
-        var mediaRequest = withIdsPopulated(someMinimalRequestData());
+        var mediaRequest = withIdsPopulated(someMinimalRequestData().build());
         when(mockMediaRequestRepository.findById(any())).thenReturn(Optional.of(mediaRequest));
         when(mockUserAccountRepository.findById(any())).thenReturn(Optional.of(mediaRequest.getCurrentOwner()));
 

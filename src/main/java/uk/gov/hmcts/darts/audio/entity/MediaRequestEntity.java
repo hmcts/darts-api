@@ -90,4 +90,3 @@ public class MediaRequestEntity extends CreatedModifiedBaseEntity {
     private OffsetDateTime endTime;
 
 }
-

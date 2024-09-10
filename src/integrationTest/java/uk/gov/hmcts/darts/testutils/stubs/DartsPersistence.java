@@ -181,6 +181,7 @@ public class DartsPersistence {
         save(mediaRequest.getCurrentOwner());
         save(mediaRequest.getCreatedBy());
         save(mediaRequest.getLastModifiedBy());
+
         return mediaRequestRepository.save(mediaRequest);
     }
 

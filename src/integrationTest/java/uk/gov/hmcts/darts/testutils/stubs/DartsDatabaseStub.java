@@ -472,14 +472,14 @@ public class DartsDatabaseStub {
     public MediaRequestEntity createAndLoadNonAccessedCurrentMediaRequestEntity(UserAccountEntity requestor,
                                                                                 AudioRequestType audioRequestType) {
 
-        MediaRequestEntity mediaRequestEntity = new MediaRequestTestData().fromSpec(MediaRequestTestData.TestSpec.builder()
+        MediaRequestEntity mediaRequestEntity = new MediaRequestTestData().someMinimal()
                                                                                         .requestor(requestor)
                                                                                         .currentOwner(requestor)
                                                                                         .startTime(OffsetDateTime.parse("2023-06-26T13:00:00Z"))
                                                                                         .endTime(OffsetDateTime.parse("2023-06-26T14:00:00Z"))
                                                                                         .requestType(audioRequestType)
                                                                                         .status(MediaRequestStatus.COMPLETED)
-                                                                                        .build());
+                                                                                        .build();
         dartsPersistence.save(mediaRequestEntity);
 
         OffsetDateTime expiryTime = OffsetDateTime.of(2023, 7, 2, 13, 0, 0, 0, UTC);

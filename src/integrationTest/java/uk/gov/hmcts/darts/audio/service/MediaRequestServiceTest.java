@@ -151,7 +151,7 @@ class MediaRequestServiceTest extends IntegrationBase {
 
     @Test
     void shouldUpdateStatusToProcessing() {
-        MediaRequestEntity mediaRequest = new MediaRequestTestData().someMinimal();
+        MediaRequestEntity mediaRequest = new MediaRequestTestData().someMinimal().build();
         dartsPersistence.save(mediaRequest);
 
         MediaRequestEntity mediaRequestEntity = mediaRequestService.updateAudioRequestStatus(mediaRequest.getId(), PROCESSING);
@@ -180,7 +180,7 @@ class MediaRequestServiceTest extends IntegrationBase {
 
     @Test
     void shouldDeleteAudioRequestById() {
-        MediaRequestEntity mediaRequest = new MediaRequestTestData().someMinimal();
+        MediaRequestEntity mediaRequest = new MediaRequestTestData().someMinimal().build();
         dartsPersistence.save(mediaRequest);
 
         MediaRequestEntity mediaRequestEntity = mediaRequestService.getMediaRequestEntityById(mediaRequest.getId());
@@ -192,7 +192,7 @@ class MediaRequestServiceTest extends IntegrationBase {
 
     @Test
     void updateAudioRequestCompleted() {
-        MediaRequestEntity mediaRequest = new MediaRequestTestData().someMinimal();
+        MediaRequestEntity mediaRequest = new MediaRequestTestData().someMinimal().build();
         dartsPersistence.save(mediaRequest);
         final OffsetDateTime originalLastModifiedDateTime = mediaRequest.getLastModifiedDateTime();
 
@@ -231,7 +231,7 @@ class MediaRequestServiceTest extends IntegrationBase {
 
     @Test
     void getsMediaRequestById() {
-        MediaRequestEntity persistedMediaRequest = dartsPersistence.save(new MediaRequestTestData().someMaximal());
+        MediaRequestEntity persistedMediaRequest = dartsPersistence.save(new MediaRequestTestData().someMaximal().build());
 
         var mediaRequestResponse = mediaRequestService.getMediaRequestById(persistedMediaRequest.getId());
 

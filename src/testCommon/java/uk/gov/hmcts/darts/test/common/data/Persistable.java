@@ -1,14 +1,9 @@
 package uk.gov.hmcts.darts.test.common.data;
 
-public interface Persistable<M, T> {
+import java.util.ArrayList;
+import java.util.List;
 
-    /**
-     * NOTE: Objects created by this method will never populate the id field, as this is expected to be populated by the persistence layer upon save.
-     *
-     * @param testSpec a specification that defines the expected entity data
-     * @return an entity that has state specified by the supplied test specification.
-     */
-    M fromSpec(T testSpec);
+public interface Persistable<M> {
 
     /**
      * Return an entity that has only its non-null fields populated. All other fields should be expected to be null.
@@ -33,4 +28,19 @@ public interface Persistable<M, T> {
      */
     M someMaximal();
 
+    default List<M> someMinimalList(int count) {
+        List<M> minimalList = new ArrayList<>();
+        for (int i=0; i<count; i++) {
+            someMinimal();
+        }
+        return minimalList;
+    }
+
+    default List<M> someMaximalList(int count) {
+        List<M> maximalList = new ArrayList<>();
+        for (int i=0; i<count; i++) {
+            someMinimal();
+        }
+        return maximalList;
+    }
 }

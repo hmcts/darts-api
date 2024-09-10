@@ -12,7 +12,7 @@ public class TransformedMediaTestData {
 
     public static TransformedMediaEntity minimalTransformedMedia() {
         var transformedMedia = new TransformedMediaEntity();
-        transformedMedia.setMediaRequest(someMinimalRequestData());
+        transformedMedia.setMediaRequest(someMinimalRequestData().build());
         transformedMedia.setStartTime(OffsetDateTime.now());
         transformedMedia.setEndTime(OffsetDateTime.now().plusHours(1));
         transformedMedia.setCreatedBy(minimalUserAccount());
