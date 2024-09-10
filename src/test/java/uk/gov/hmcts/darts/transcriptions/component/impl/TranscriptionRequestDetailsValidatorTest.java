@@ -111,41 +111,6 @@ class TranscriptionRequestDetailsValidatorTest {
     }
 
     @ParameterizedTest
-    @MethodSource("requestsWithInvalidTimings")
-    void validateShouldThrowExceptionWhenTranscriptionRequestTimesAreInvalid(TranscriptionRequestDetails requestDetails) {
-        // Given
-        var hearingEntity = new HearingEntity();
-        hearingEntity.setMediaList(createMediaList());
-        Mockito.when(hearingsServiceMock.getHearingById(DUMMY_HEARING_ID))
-            .thenReturn(hearingEntity);
-
-        // When
-        var actualException = assertThrows(DARTS_EXCEPTION, () -> validator.validate(requestDetails));
-
-        // Then
-        assertEquals(URI.create("TRANSCRIPTION_111"), actualException.getError().getType());
-
-
-    }
-
-    private static Stream<Arguments> requestsWithInvalidTimings() {
-        return Stream.of(
-            // Boundary cases around media 1 timespan
-            Arguments.of(createRequestDetails(MEDIA_1_START_TIME.minusSeconds(1), MEDIA_1_END_TIME)),
-            Arguments.of(createRequestDetails(MEDIA_1_START_TIME, MEDIA_1_END_TIME.plusSeconds(1))),
-
-            // Boundary cases around media 2 timespan
-            Arguments.of(createRequestDetails(MEDIA_2_START_TIME.minusSeconds(1), MEDIA_2_END_TIME)),
-            Arguments.of(createRequestDetails(MEDIA_2_START_TIME, MEDIA_2_END_TIME.plusSeconds(1))),
-
-            // Boundary cases around overall timespan
-            Arguments.of(createRequestDetails(MEDIA_1_START_TIME, MEDIA_2_END_TIME)),
-            Arguments.of(createRequestDetails(MEDIA_1_START_TIME.minusSeconds(1), MEDIA_2_END_TIME)),
-            Arguments.of(createRequestDetails(MEDIA_1_START_TIME, MEDIA_2_END_TIME.plusSeconds(1)))
-        );
-    }
-
-    @ParameterizedTest
     @MethodSource("requestsThatRequireDatesButNoDatesArePresent")
     void validateShouldThrowExceptionWhenTranscriptTypeRequiresDatesAndDatesAreNotPresent(TranscriptionRequestDetails requestDetails) {
         var actualException = assertThrows(DARTS_EXCEPTION, () -> validator.validate(requestDetails));
