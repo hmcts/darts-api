@@ -210,6 +210,66 @@ class AutomatedTaskServiceImplTest {
         verify(taskScheduler).schedule(automatedTask, trigger);
     }
 
+
+    @Test
+    void overrideTaskLockDurations() {
+        when(lockService.getLockAtMostFor()).thenReturn(Duration.ofMinutes(20));
+        when(lockService.getLockAtLeastFor()).thenReturn(Duration.ofMinutes(1));
+
+        var automatedTask = new AbstractLockableAutomatedTask(
+            mockAutomatedTaskRepository,
+            mockAutomatedTaskConfigurationProperties,
+            logApi,
+            lockService) {
+            @Override
+            protected void runTask() {
+            }
+
+            @Override
+            protected void handleException(Exception exception) {
+            }
+
+            @Override
+            public String getTaskName() {
+                return "StandardTask";
+            }
+        };
+        var overriddenAutomatedTask = new AbstractLockableAutomatedTask(
+            mockAutomatedTaskRepository,
+            mockAutomatedTaskConfigurationProperties,
+            logApi,
+            lockService) {
+            @Override
+            protected void runTask() {
+            }
+
+            @Override
+            protected void handleException(Exception exception) {
+            }
+
+            @Override
+            public Duration getLockAtMostFor() {
+                return Duration.ofDays(1);
+            }
+
+            @Override
+            public Duration getLockAtLeastFor() {
+                return Duration.ofSeconds(1);
+            }
+
+            @Override
+            public String getTaskName() {
+                return "TaskWithOverriddenLockTimes";
+            }
+        };
+
+        assertEquals(Duration.ofMinutes(1), automatedTask.getLockAtLeastFor());
+        assertEquals(Duration.ofMinutes(20), automatedTask.getLockAtMostFor());
+
+        assertEquals(Duration.ofSeconds(1), overriddenAutomatedTask.getLockAtLeastFor());
+        assertEquals(Duration.ofDays(1), overriddenAutomatedTask.getLockAtMostFor());
+    }
+
     @Test
     @SuppressWarnings("PMD.AvoidThrowingRawExceptionTypes")
     void taskFailedToBeStartedMovesToFailedStatus() {
