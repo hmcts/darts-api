@@ -325,7 +325,7 @@ repositories {
 }
 
 ext {
-  log4JVersion = "2.23.1"
+  log4JVersion = "2.24.0"
   tomcatEmbedVersion = "10.1.28"
 }
 
