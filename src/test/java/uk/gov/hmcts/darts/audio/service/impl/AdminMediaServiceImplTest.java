@@ -137,29 +137,30 @@ class AdminMediaServiceImplTest {
         String responseString = objectMapper.writeValueAsString(response);
         String expectedString = """
             [
-               {
-                 "id": 5,
-                 "channel": 6,
-                 "start_at": "2020-10-10T10:00:00Z",
-                 "end_at": "2020-10-10T11:00:00Z",
-                 "hearing": {
-                   "id": 3,
-                   "hearing_date": "2020-10-10"
-                 },
-                 "courthouse": {
-                   "id": 1,
-                   "display_name": "courthouseName1"
-                 },
-                 "courtroom": {
-                   "id": 2,
-                   "display_name": "COURTROOM1"
-                 },
-                 "case": {
-                   "id": 7,
-                   "case_number": "caseNumber1"
-                 }
-               }
-             ]""";
+              {
+                "id": 5,
+                "channel": 6,
+                "start_at": "2020-10-10T10:00:00Z",
+                "end_at": "2020-10-10T11:00:00Z",
+                "is_hidden": false,
+                "hearing": {
+                  "id": 3,
+                  "hearing_date": "2020-10-10"
+                },
+                "courthouse": {
+                  "id": 1,
+                  "display_name": "courthouseName1"
+                },
+                "courtroom": {
+                  "id": 2,
+                  "display_name": "COURTROOM1"
+                },
+                "case": {
+                  "id": 7,
+                  "case_number": "caseNumber1"
+                }
+              }
+            ]""";
         JSONAssert.assertEquals(expectedString, responseString, JSONCompareMode.NON_EXTENSIBLE);
         verify(searchMediaValidator, times(1)).validate(Mockito.notNull());
     }
@@ -207,6 +208,7 @@ class AdminMediaServiceImplTest {
                 "channel": 6,
                 "start_at": "2020-10-10T10:00:00Z",
                 "end_at": "2020-10-10T11:00:00Z",
+                "is_hidden": false,
                 "hearing": {
                   "id": 3,
                   "hearing_date": "2020-10-10"
@@ -229,6 +231,99 @@ class AdminMediaServiceImplTest {
                 "channel": 60,
                 "start_at": "2020-10-10T10:00:00Z",
                 "end_at": "2020-10-10T11:00:00Z",
+                "is_hidden": false,
+                "hearing": {
+                  "id": 3,
+                  "hearing_date": "2020-10-10"
+                },
+                "courthouse": {
+                  "id": 1,
+                  "display_name": "courthouseName1"
+                },
+                "courtroom": {
+                  "id": 2,
+                  "display_name": "COURTROOM1"
+                },
+                "case": {
+                  "id": 7,
+                  "case_number": "caseNumber1"
+                }
+              }
+            ]""";
+        JSONAssert.assertEquals(expectedString,
+                                responseString, JSONCompareMode.NON_EXTENSIBLE);
+
+        verify(searchMediaValidator, times(1)).validate(Mockito.notNull());
+    }
+
+    @Test
+    void okTwoResponseOneHidden() throws JsonProcessingException {
+        HearingEntity hearing = createHearing();
+
+        MediaRequestEntity mediaRequest = new MediaRequestEntity();
+        mediaRequest.setId(8);
+        mediaRequest.setHearing(hearing);
+        mediaRequest.setStartTime(OffsetDateTime.of(2020, 10, 10, 10, 0, 0, 0, ZoneOffset.UTC));
+        mediaRequest.setEndTime(OffsetDateTime.of(2020, 10, 10, 11, 0, 0, 0, ZoneOffset.UTC));
+
+        TransformedMediaEntity transformedMedia = new TransformedMediaEntity();
+        transformedMedia.setId(4);
+        transformedMedia.setMediaRequest(mediaRequest);
+
+        MediaEntity mediaEntity = new MediaEntity();
+        mediaEntity.setId(5);
+        mediaEntity.setChannel(6);
+        mediaEntity.setStart(OffsetDateTime.of(2020, 10, 10, 10, 0, 0, 0, ZoneOffset.UTC));
+        mediaEntity.setEnd(OffsetDateTime.of(2020, 10, 10, 11, 0, 0, 0, ZoneOffset.UTC));
+
+        MediaEntity mediaEntity2 = new MediaEntity();
+        mediaEntity2.setId(50);
+        mediaEntity2.setChannel(60);
+        mediaEntity2.setStart(OffsetDateTime.of(2020, 10, 10, 10, 0, 0, 0, ZoneOffset.UTC));
+        mediaEntity2.setEnd(OffsetDateTime.of(2020, 10, 10, 11, 0, 0, 0, ZoneOffset.UTC));
+        mediaEntity2.setHidden(true);
+
+        Integer transformedMediaId = 1;
+
+        when(mockTransformedMediaRepository.findById(transformedMediaId))
+            .thenReturn(Optional.of(transformedMedia));
+        when(mediaRepository.findAllByHearingId(hearing.getId()))
+            .thenReturn(List.of(mediaEntity, mediaEntity2));
+
+        List<GetAdminMediaResponseItem> response = mediaRequestService.filterMedias(transformedMediaId, null, null, null);
+
+        String responseString = objectMapper.writeValueAsString(response);
+        String expectedString = """
+            [
+              {
+                "id": 5,
+                "channel": 6,
+                "start_at": "2020-10-10T10:00:00Z",
+                "end_at": "2020-10-10T11:00:00Z",
+                "is_hidden": false,
+                "hearing": {
+                  "id": 3,
+                  "hearing_date": "2020-10-10"
+                },
+                "courthouse": {
+                  "id": 1,
+                  "display_name": "courthouseName1"
+                },
+                "courtroom": {
+                  "id": 2,
+                  "display_name": "COURTROOM1"
+                },
+                "case": {
+                  "id": 7,
+                  "case_number": "caseNumber1"
+                }
+              },
+              {
+                "id": 50,
+                "channel": 60,
+                "start_at": "2020-10-10T10:00:00Z",
+                "end_at": "2020-10-10T11:00:00Z",
+                "is_hidden": true,
                 "hearing": {
                   "id": 3,
                   "hearing_date": "2020-10-10"
@@ -283,29 +378,30 @@ class AdminMediaServiceImplTest {
         String responseString = objectMapper.writeValueAsString(response);
         String expectedString = """
             [
-               {
-                 "id": 5,
-                 "channel": 6,
-                 "start_at": "2020-10-10T10:00:00Z",
-                 "end_at": "2020-10-10T11:00:00Z",
-                 "hearing": {
-                   "id": 3,
-                   "hearing_date": "2020-10-10"
-                 },
-                 "courthouse": {
-                   "id": 1,
-                   "display_name": "courthouseName1"
-                 },
-                 "courtroom": {
-                   "id": 2,
-                   "display_name": "COURTROOM1"
-                 },
-                 "case": {
-                   "id": 7,
-                   "case_number": "caseNumber1"
-                 }
-               }
-             ]""";
+              {
+                "id": 5,
+                "channel": 6,
+                "start_at": "2020-10-10T10:00:00Z",
+                "end_at": "2020-10-10T11:00:00Z",
+                "is_hidden": false,
+                "hearing": {
+                  "id": 3,
+                  "hearing_date": "2020-10-10"
+                },
+                "courthouse": {
+                  "id": 1,
+                  "display_name": "courthouseName1"
+                },
+                "courtroom": {
+                  "id": 2,
+                  "display_name": "COURTROOM1"
+                },
+                "case": {
+                  "id": 7,
+                  "case_number": "caseNumber1"
+                }
+              }
+            ]""";
         JSONAssert.assertEquals(expectedString, responseString, JSONCompareMode.NON_EXTENSIBLE);
         verify(searchMediaValidator, times(1)).validate(Mockito.notNull());
     }

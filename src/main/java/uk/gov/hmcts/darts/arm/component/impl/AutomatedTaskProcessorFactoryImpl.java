@@ -21,6 +21,7 @@ import uk.gov.hmcts.darts.casedocument.service.GenerateCaseDocumentForRetentionD
 import uk.gov.hmcts.darts.casedocument.service.GenerateCaseDocumentProcessor;
 import uk.gov.hmcts.darts.casedocument.service.GenerateCaseDocumentSingleCaseProcessor;
 import uk.gov.hmcts.darts.casedocument.service.impl.GenerateCaseDocumentBatchProcessorImpl;
+import uk.gov.hmcts.darts.cases.service.CloseOldCasesProcessor;
 import uk.gov.hmcts.darts.common.exception.DartsException;
 import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
 import uk.gov.hmcts.darts.common.repository.CaseRepository;
@@ -61,6 +62,7 @@ public class AutomatedTaskProcessorFactoryImpl implements AutomatedTaskProcessor
     @Value("${darts.case-document.generation-days}")
     private final int caseDocumentGenerationDays;
     private final UnstructuredToArmHelper unstructuredToArmHelper;
+    private final CloseOldCasesProcessor closeOldCasesProcessor;
 
     @Override
     public ArmResponseFilesProcessor createArmResponseFilesProcessor(int batchSize) {
@@ -92,7 +94,7 @@ public class AutomatedTaskProcessorFactoryImpl implements AutomatedTaskProcessor
             return new GenerateCaseDocumentBatchProcessorImpl(
                 batchSize, caseDocumentGenerationDays, caseRepository, generateCaseDocumentSingleCaseProcessor, currentTimeHelper);
         } else {
-            throw new DartsException(String.format("batch size not supported: '%s'", batchSize));
+            throw new DartsException(String.format("Batch size not supported for case document generation: '%s'", batchSize));
         }
     }
 
@@ -101,7 +103,7 @@ public class AutomatedTaskProcessorFactoryImpl implements AutomatedTaskProcessor
         if (batchSize > 0) {
             return generateCaseDocumentForRetentionDateBatchProcessor;
         } else {
-            throw new DartsException(String.format("batch size not supported: '%s'", batchSize));
+            throw new DartsException(String.format("Batch size not supported for generating case document for retention date: '%s'", batchSize));
         }
     }
 
@@ -109,5 +111,14 @@ public class AutomatedTaskProcessorFactoryImpl implements AutomatedTaskProcessor
     public CleanupCurrentFlagEventProcessor createCleanupCurrentFlagEventProcessor(int batchSize) {
         return new CleanupCurrentFlagEventProcessorImpl(
             batchSize, eventRepository);
+    }
+
+    @Override
+    public CloseOldCasesProcessor createCloseOldCasesProcessor(int batchSize) {
+        if (batchSize > 0) {
+            return closeOldCasesProcessor;
+        } else {
+            throw new DartsException(String.format("Batch size not supported for closing old cases: '%s'", batchSize));
+        }
     }
 }

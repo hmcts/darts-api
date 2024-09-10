@@ -27,8 +27,8 @@ class EventControllerGetEventMappingsTest extends IntegrationBase  {
     private GivenBuilder given;
 
     @ParameterizedTest
-    @EnumSource(value = SecurityRoleEnum.class, names = {"SUPER_ADMIN"}, mode = EnumSource.Mode.INCLUDE)
-    void allowSuperAdminToGetEventMappings(SecurityRoleEnum role) throws Exception {
+    @EnumSource(value = SecurityRoleEnum.class, names = {"SUPER_ADMIN", "SUPER_USER"}, mode = EnumSource.Mode.INCLUDE)
+    void allowSuperAdminSuperUserToGetEventMappings(SecurityRoleEnum role) throws Exception {
         given.anAuthenticatedUserWithGlobalAccessAndRole(role);
 
         MockHttpServletRequestBuilder requestBuilder = get(EVENT_MAPPINGS_ENDPOINT);
@@ -45,8 +45,8 @@ class EventControllerGetEventMappingsTest extends IntegrationBase  {
     }
 
     @ParameterizedTest
-    @EnumSource(value = SecurityRoleEnum.class, names = {"SUPER_ADMIN"}, mode = EnumSource.Mode.EXCLUDE)
-    void disallowsAllUsersExceptSuperAdminToGetEventMappings(SecurityRoleEnum role) throws Exception {
+    @EnumSource(value = SecurityRoleEnum.class, names = {"SUPER_ADMIN", "SUPER_USER"}, mode = EnumSource.Mode.EXCLUDE)
+    void disallowsAllUsersExceptSuperAdminSuperUserToGetEventMappings(SecurityRoleEnum role) throws Exception {
         given.anAuthenticatedUserWithGlobalAccessAndRole(role);
 
         MockHttpServletRequestBuilder requestBuilder = get(EVENT_MAPPINGS_ENDPOINT);

@@ -25,9 +25,11 @@ import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.common.repository.HearingReportingRestrictionsRepository;
 import uk.gov.hmcts.darts.common.util.CommonTestDataUtil;
 import uk.gov.hmcts.darts.common.util.TranscriptionUrgencyEnum;
+import uk.gov.hmcts.darts.test.common.data.TranscriptionDocumentTestData;
 import uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum;
 import uk.gov.hmcts.darts.transcriptions.enums.TranscriptionTypeEnum;
 import uk.gov.hmcts.darts.transcriptions.exception.TranscriptionApiError;
+import uk.gov.hmcts.darts.transcriptions.model.AdminMarkedForDeletionResponseItem;
 import uk.gov.hmcts.darts.transcriptions.model.GetTranscriptionByIdResponse;
 import uk.gov.hmcts.darts.transcriptions.model.GetTranscriptionDetailAdminResponse;
 import uk.gov.hmcts.darts.transcriptions.model.GetTranscriptionDocumentByIdResponse;
@@ -730,4 +732,45 @@ class TranscriptionResponseMapperTest {
         assertEquals(response.getId(), documentEntity.getId());
         assertEquals(response.getIsHidden(), documentEntity.isHidden());
      }
+
+    @Test
+    void mapTranscriptionDocumentMarkedForDeletion() {
+
+        TranscriptionDocumentEntity documentEntity = TranscriptionDocumentTestData.complexTranscriptionDocument();
+
+        AdminMarkedForDeletionResponseItem response = transcriptionResponseMapper.mapTranscriptionDocumentMarkedForDeletion(documentEntity);
+
+        ObjectAdminActionEntity adminActionEntity = documentEntity.getAdminActions().get(0);
+        assertEquals(documentEntity.getId(), response.getTranscriptionDocumentId());
+        assertEquals(adminActionEntity.getId(), response.getAdminAction().getId());
+        assertEquals(adminActionEntity.getComments(), response.getAdminAction().getComments());
+        assertEquals(adminActionEntity.getTicketReference(), response.getAdminAction().getTicketReference());
+        assertEquals(adminActionEntity.getHiddenDateTime(), response.getAdminAction().getHiddenAt());
+        assertEquals(adminActionEntity.getMarkedForManualDelDateTime(), response.getAdminAction().getMarkedForManualDeletionAt());
+        assertEquals(adminActionEntity.isMarkedForManualDeletion(), response.getAdminAction().getIsMarkedForManualDeletion());
+        assertEquals(adminActionEntity.getHiddenBy().getId(), response.getAdminAction().getHiddenById());
+        assertEquals(adminActionEntity.getMarkedForManualDelBy().getId(), response.getAdminAction().getMarkedForManualDeletionById());
+        assertEquals(adminActionEntity.getObjectHiddenReason().getId(), response.getAdminAction().getReasonId());
+
+        HearingEntity hearingEntity = documentEntity.getTranscription().getHearing();
+        assertEquals(hearingEntity.getId(), response.getHearing().getId());
+        assertEquals(hearingEntity.getHearingDate(), response.getHearing().getHearingDate());
+
+        CourtroomEntity courtroomEntity = documentEntity.getTranscription().getHearing().getCourtroom();
+        assertEquals(courtroomEntity.getId(), response.getCourtroom().getId());
+        assertEquals(courtroomEntity.getName(), response.getCourtroom().getName());
+
+        CourthouseEntity courthouseEntity = documentEntity.getTranscription().getHearing().getCourtroom().getCourthouse();
+        assertEquals(courthouseEntity.getId(), response.getCourthouse().getId());
+        assertEquals(courthouseEntity.getDisplayName(), response.getCourthouse().getDisplayName());
+
+        TranscriptionEntity transcriptionEntity = documentEntity.getTranscription();
+        assertEquals(transcriptionEntity.getId(), response.getTranscription().getId());
+
+        CourtCaseEntity caseEntity = documentEntity.getTranscription().getHearing().getCourtCase();
+        assertEquals(caseEntity.getId(), response.getCase().getId());
+        assertEquals(caseEntity.getCaseNumber(), response.getCase().getCaseNumber());
+    }
+
+
 }

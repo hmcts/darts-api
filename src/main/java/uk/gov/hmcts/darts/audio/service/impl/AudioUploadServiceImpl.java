@@ -234,6 +234,7 @@ public class AudioUploadServiceImpl implements AudioUploadService {
 
             // add the new media
             hearing.addMedia(mediaEntity);
+            hearing.setHearingIsActual(true);
 
             hearingRepository.saveAndFlush(hearing);
         }
@@ -276,6 +277,7 @@ public class AudioUploadServiceImpl implements AudioUploadService {
         for (var hearing : associatedHearings) {
             if (!hearing.getMediaList().contains(savedMedia)) {
                 hearing.addMedia(savedMedia);
+                hearing.setHearingIsActual(true);
                 hearingRepository.saveAndFlush(hearing);
             }
         }

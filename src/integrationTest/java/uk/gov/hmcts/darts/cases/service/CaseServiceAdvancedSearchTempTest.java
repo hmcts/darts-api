@@ -79,6 +79,41 @@ class CaseServiceAdvancedSearchTempTest extends IntegrationBase {
         assertEquals(0, resultListForNotActualDate.size());
     }
 
+    @Test
+    void getWithCaseNumberCourthouseCourtroomWithNotActualHearings() throws IOException {
+        var actualHearingDate = LocalDate.of(2023, 10, 22);
+        var notActualHearingDate = LocalDate.of(2023, 10, 21);
+
+        HearingEntity actualHearing = someMinimalHearing();
+        actualHearing.setHearingDate(actualHearingDate);
+
+        HearingEntity otherHearing = createHearingFor(actualHearing.getCourtCase());
+        otherHearing.setHearingIsActual(false);
+        otherHearing.setHearingDate(notActualHearingDate);
+
+        dartsPersistence.saveAll(actualHearing, otherHearing);
+
+        setupUserAccountSecurityGroup(APPROVER, actualHearing.getCourtCase().getCourthouse());
+        userAccountRepository.save(user);
+
+        GetCasesSearchRequest requestActualHearingDate = GetCasesSearchRequest.builder()
+            .caseNumber(actualHearing.getCourtCase().getCaseNumber().substring(0, 5))
+            .courthouse(actualHearing.getCourtCase().getCourthouse().getCourthouseName())
+            .courtroom(actualHearing.getCourtroom().getName())
+            .build();
+        List<AdvancedSearchResult> resultListForActualDate = service.advancedSearch(requestActualHearingDate);
+        assertEquals(1, resultListForActualDate.size());
+        assertEquals(actualHearingDate, resultListForActualDate.get(0).getHearings().get(0).getDate());
+
+        GetCasesSearchRequest requestNotActualHearingDate = GetCasesSearchRequest.builder()
+            .caseNumber(otherHearing.getCourtCase().getCaseNumber().substring(0, 5))
+            .courthouse(otherHearing.getCourtCase().getCourthouse().getCourthouseName())
+            .courtroom(otherHearing.getCourtroom().getName())
+            .build();
+        List<AdvancedSearchResult> resultListForNotActualDate = service.advancedSearch(requestNotActualHearingDate);
+        assertEquals(0, resultListForNotActualDate.size());
+    }
+
     private void setupUserAccountSecurityGroup(SecurityRoleEnum securityRole, CourthouseEntity courthouse) {
         var securityGroup = SecurityGroupTestData.buildGroupForRoleAndCourthouse(securityRole, courthouse);
         securityGroup.setGlobalAccess(false);

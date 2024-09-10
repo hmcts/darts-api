@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import uk.gov.hmcts.darts.authorisation.api.AuthorisationApi;
@@ -56,14 +57,16 @@ public class CloseOldCasesProcessorImpl implements CloseOldCasesProcessor {
 
     @Transactional
     @Override
-    public void closeCases() {
-        List<CourtCaseEntity> courtCaseEntityList = caseRepository.findOpenCasesToClose(OffsetDateTime.now().minusYears(years));
+    public void closeCases(int batchSize) {
+        List<CourtCaseEntity> courtCaseEntityList = caseRepository.findOpenCasesToClose(OffsetDateTime.now().minusYears(years),
+                                                                                        Pageable.ofSize(batchSize));
 
         userAccount = authorisationApi.getCurrentUser();
         courtCaseEntityList.forEach(this::closeCase);
     }
 
     private void closeCase(CourtCaseEntity courtCase) {
+        log.debug("About to close court case id {}", courtCase.getId());
         List<EventEntity> eventList = new ArrayList<>();
         for (HearingEntity hearingEntity : courtCase.getHearings()) {
             eventList.addAll(hearingEntity.getEventList());
@@ -97,7 +100,7 @@ public class CloseOldCasesProcessorImpl implements CloseOldCasesProcessor {
             } else {
                 mediaList.sort(Comparator.comparing(MediaEntity::getCreatedDateTime).reversed());
                 closeCaseInDbAndAddRetention(courtCase, mediaList.get(0).getCreatedDateTime());
-           }
+            }
         }
 
     }
@@ -108,6 +111,7 @@ public class CloseOldCasesProcessorImpl implements CloseOldCasesProcessor {
         courtCase.setRetConfReason(AGED_CASE);
         courtCase.setRetConfScore(CASE_NOT_PERFECTLY_CLOSED);
         caseRepository.save(courtCase);
+        log.info("Closed court case id {}", courtCase.getId());
 
         LocalDate retentionDate = retentionDateHelper.getRetentionDateForPolicy(courtCase, RetentionPolicyEnum.DEFAULT);
 
@@ -119,5 +123,7 @@ public class CloseOldCasesProcessorImpl implements CloseOldCasesProcessor {
                                                                            CaseRetentionStatus.PENDING);
         retentionEntity.setConfidenceCategory(RetentionConfidenceCategoryEnum.AGED_CASE);
         caseRetentionRepository.save(retentionEntity);
+        log.info("Set retention date {} and confidence category {} for case id {}", retentionDate, RetentionConfidenceCategoryEnum.AGED_CASE,
+                 courtCase.getId());
     }
 }

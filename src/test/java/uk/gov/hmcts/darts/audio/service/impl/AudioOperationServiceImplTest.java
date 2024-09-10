@@ -106,7 +106,7 @@ class AudioOperationServiceImplTest {
 
         CommandLine expectedCommand = CommandLine.parse(
             "/usr/bin/ffmpeg -i /path/to/audio/original0.mp2 -i /path/to/audio/original1.mp2"
-                + " -filter_complex [0:a][1:a]concat=n=2:v=0:a=1 /path/to/output/audio.mp2");
+                + " -b:a 32k -filter_complex [0:a][1:a]concat=n=2:v=0:a=1 /path/to/output/audio.mp2");
 
         assertNotNull(actualCommand);
         assertEquals(expectedCommand.toString(), actualCommand.toString());
