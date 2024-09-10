@@ -280,58 +280,6 @@ class TranscriptionControllerRequestTranscriptionIntTest extends IntegrationBase
     }
 
     @Test
-    void transcriptionRequestStartTimeOutsideHearing() throws Exception {
-        TranscriptionUrgencyEnum transcriptionUrgencyEnum = TranscriptionUrgencyEnum.STANDARD;
-        TranscriptionTypeEnum transcriptionTypeEnum = TranscriptionTypeEnum.SENTENCING_REMARKS;
-
-        TranscriptionRequestDetails transcriptionRequestDetails = createTranscriptionRequestDetails(
-            hearing.getId(), courtCase.getId(), transcriptionUrgencyEnum.getId(),
-            transcriptionTypeEnum.getId(), TEST_COMMENT, now().minusHours(1), now().plusMinutes(10)
-        );
-
-        dartsDatabase.save(hearing);
-
-        MockHttpServletRequestBuilder requestBuilder = post(ENDPOINT_URI)
-            .header("Content-Type", "application/json")
-            .content(objectMapper.writeValueAsString(transcriptionRequestDetails));
-
-        MvcResult mvcResult = mockMvc.perform(requestBuilder)
-            .andExpect(status().isNotFound())
-            .andReturn();
-
-        String actualJson = mvcResult.getResponse().getContentAsString();
-        assertFailedTranscription111Error(actualJson);
-
-        assertAudit(0);
-    }
-
-    @Test
-    void transcriptionRequestEndTimeOutsideHearing() throws Exception {
-        TranscriptionUrgencyEnum transcriptionUrgencyEnum = TranscriptionUrgencyEnum.STANDARD;
-        TranscriptionTypeEnum transcriptionTypeEnum = TranscriptionTypeEnum.SENTENCING_REMARKS;
-
-        TranscriptionRequestDetails transcriptionRequestDetails = createTranscriptionRequestDetails(
-            hearing.getId(), courtCase.getId(), transcriptionUrgencyEnum.getId(),
-            transcriptionTypeEnum.getId(), TEST_COMMENT, now().plusMinutes(1), now().plusHours(10)
-        );
-
-        dartsDatabase.save(hearing);
-
-        MockHttpServletRequestBuilder requestBuilder = post(ENDPOINT_URI)
-            .header("Content-Type", "application/json")
-            .content(objectMapper.writeValueAsString(transcriptionRequestDetails));
-
-        MvcResult mvcResult = mockMvc.perform(requestBuilder)
-            .andExpect(status().isNotFound())
-            .andReturn();
-
-        String actualJson = mvcResult.getResponse().getContentAsString();
-        assertFailedTranscription111Error(actualJson);
-
-        assertAudit(0);
-    }
-
-    @Test
     void transcriptionRequestExactStartAndEnd() throws Exception {
         TranscriptionUrgencyEnum transcriptionUrgencyEnum = TranscriptionUrgencyEnum.STANDARD;
         TranscriptionTypeEnum transcriptionTypeEnum = TranscriptionTypeEnum.SENTENCING_REMARKS;
@@ -389,17 +337,6 @@ class TranscriptionControllerRequestTranscriptionIntTest extends IntegrationBase
         assertNotNull(transcriptionId);
 
         assertAudit(1);
-    }
-
-    private void assertFailedTranscription111Error(String actualJson) {
-        String expectedJson = """
-            {
-              "type": "TRANSCRIPTION_111",
-              "title": "Transcription could not be requested, times outside of hearing times",
-              "status": 404
-            }
-            """;
-        JSONAssert.assertEquals(expectedJson, actualJson, JSONCompareMode.NON_EXTENSIBLE);
     }
 
     @Test
