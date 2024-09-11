@@ -3,7 +3,6 @@ package uk.gov.hmcts.darts.event.service.impl;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.Pageable;
 import uk.gov.hmcts.darts.common.repository.EventRepository;
 import uk.gov.hmcts.darts.event.service.CleanupCurrentFlagEventProcessor;
 
@@ -22,7 +21,7 @@ public class CleanupCurrentFlagEventProcessorImpl implements CleanupCurrentFlagE
     public List<Integer> processCurrentEvent() {
         List<Integer> processedEventIdLst = new ArrayList<>();
         log.debug("Batch size to process event ids for {}", batchSize);
-        List<Integer> eventEntityReturned = eventRepository.getCurrentEventIdsToBeProcessed(Pageable.ofSize(batchSize));
+        List<Integer> eventEntityReturned = eventRepository.getCurrentEventIdsToBeProcessed(batchSize);
         if (log.isDebugEnabled()) {
             log.debug("Event ids being processed {}", eventEntityReturned
                 .stream()
