@@ -94,7 +94,7 @@ public interface EventRepository extends JpaRepository<EventEntity, Integer> {
         ) e2
         GROUP BY e2.event_id, e2.hearing_ids
         having count(e2.event_id) > 1
-        limit = :limit
+        limit :limit
         """, nativeQuery = true)
     List<Integer> getCurrentEventIdsToBeProcessed(long limit);
 
