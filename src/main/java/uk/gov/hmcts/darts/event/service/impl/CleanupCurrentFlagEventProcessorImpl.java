@@ -22,7 +22,7 @@ public class CleanupCurrentFlagEventProcessorImpl implements CleanupCurrentFlagE
     public List<Integer> processCurrentEvent() {
         List<Integer> processedEventIdLst = new ArrayList<>();
         log.debug("Batch size to process event ids for {}", batchSize);
-        List<Integer> eventEntityReturned = eventRepository.getCurrentEventIdsToBeProcessed(Pageable.ofSize(batchSize));
+        List<Integer> eventEntityReturned = eventRepository.getCurrentEventIdsToBeProcessed(batchSize);
         if (log.isDebugEnabled()) {
             log.debug("Event ids being processed {}", eventEntityReturned
                 .stream()
