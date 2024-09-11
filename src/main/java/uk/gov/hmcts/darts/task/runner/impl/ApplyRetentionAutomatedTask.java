@@ -35,5 +35,4 @@ public class ApplyRetentionAutomatedTask extends AbstractLockableAutomatedTask
     protected void runTask() {
         applyRetentionProcessor.processApplyRetention();
     }
-
 }

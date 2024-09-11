@@ -37,5 +37,4 @@ public class InboundToUnstructuredAutomatedTask extends AbstractLockableAutomate
     protected void runTask() {
         inboundToUnstructuredProcessor.processInboundToUnstructured();
     }
-
 }

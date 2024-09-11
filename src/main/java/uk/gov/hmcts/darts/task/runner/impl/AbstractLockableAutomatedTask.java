@@ -230,5 +230,4 @@ public abstract class AbstractLockableAutomatedTask implements AutomatedTask {
             }
         }
     }
-
 }

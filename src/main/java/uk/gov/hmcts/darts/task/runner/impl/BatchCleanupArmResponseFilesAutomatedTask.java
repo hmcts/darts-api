@@ -36,5 +36,4 @@ public class BatchCleanupArmResponseFilesAutomatedTask extends AbstractLockableA
         Integer batchSize = getAutomatedTaskBatchSize(taskName);
         batchCleanupArmResponseFilesService.cleanupResponseFiles(batchSize);
     }
-
 }

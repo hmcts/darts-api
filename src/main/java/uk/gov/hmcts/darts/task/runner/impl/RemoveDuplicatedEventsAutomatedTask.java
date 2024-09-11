@@ -39,5 +39,4 @@ public class RemoveDuplicatedEventsAutomatedTask extends AbstractLockableAutomat
     protected void runTask() {
         removeDuplicateEventsProcessor.processRemoveDuplicateEvents();
     }
-
 }

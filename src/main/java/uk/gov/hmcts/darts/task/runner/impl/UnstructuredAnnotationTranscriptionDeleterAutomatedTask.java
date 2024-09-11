@@ -35,5 +35,4 @@ public class UnstructuredAnnotationTranscriptionDeleterAutomatedTask extends Abs
     protected void runTask() {
         armDeletionProcessor.markForDeletion();
     }
-
 }

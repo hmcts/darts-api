@@ -45,5 +45,4 @@ public class UnstructuredToArmAutomatedTask extends AbstractLockableAutomatedTas
             unstructuredToArmProcessor.processUnstructuredToArm();
         }
     }
-
 }

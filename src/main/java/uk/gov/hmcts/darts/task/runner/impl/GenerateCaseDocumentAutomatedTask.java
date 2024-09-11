@@ -40,5 +40,4 @@ public class GenerateCaseDocumentAutomatedTask extends AbstractLockableAutomated
         GenerateCaseDocumentProcessor processor = automatedTaskProcessorFactory.createGenerateCaseDocumentProcessor(batchSize);
         processor.processGenerateCaseDocument();
     }
-
 }

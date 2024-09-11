@@ -37,5 +37,4 @@ public class CloseUnfinishedTranscriptionsAutomatedTask extends AbstractLockable
     protected void runTask() {
         transcriptionsProcessor.closeTranscriptions();
     }
-
 }

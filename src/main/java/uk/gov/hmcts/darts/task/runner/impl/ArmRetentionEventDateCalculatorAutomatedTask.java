@@ -35,6 +35,5 @@ public class ArmRetentionEventDateCalculatorAutomatedTask extends AbstractLockab
     protected void runTask() {
         armRetentionEventDateProcessor.calculateEventDates();
     }
-
 }
 

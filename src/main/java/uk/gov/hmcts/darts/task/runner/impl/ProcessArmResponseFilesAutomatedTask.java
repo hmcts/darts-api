@@ -38,5 +38,4 @@ public class ProcessArmResponseFilesAutomatedTask extends AbstractLockableAutoma
         ArmResponseFilesProcessor armResponseFilesProcessor = automatedTaskProcessorFactory.createArmResponseFilesProcessor(batchSize);
         armResponseFilesProcessor.processResponseFiles();
     }
-
 }

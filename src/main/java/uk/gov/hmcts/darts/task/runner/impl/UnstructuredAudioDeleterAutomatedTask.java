@@ -38,5 +38,4 @@ public class UnstructuredAudioDeleterAutomatedTask extends AbstractLockableAutom
     protected void runTask() {
         unstructuredAudioDeleterProcessor.markForDeletion();
     }
-
 }

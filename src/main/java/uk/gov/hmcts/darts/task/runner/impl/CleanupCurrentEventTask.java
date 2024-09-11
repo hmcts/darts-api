@@ -37,5 +37,4 @@ public class CleanupCurrentEventTask extends AbstractLockableAutomatedTask
         CleanupCurrentFlagEventProcessor processor = automatedTaskProcessorFactory.createCleanupCurrentFlagEventProcessor(batchSize);
         processor.processCurrentEvent();
     }
-
 }

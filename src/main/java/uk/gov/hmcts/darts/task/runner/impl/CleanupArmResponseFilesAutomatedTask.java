@@ -35,5 +35,4 @@ public class CleanupArmResponseFilesAutomatedTask extends AbstractLockableAutoma
     protected void runTask() {
         cleanupArmResponseFilesService.cleanupResponseFiles();
     }
-
 }

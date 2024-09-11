@@ -35,5 +35,4 @@ public class InboundAnnotationTranscriptionDeleterAutomatedTask extends Abstract
     protected void runTask() {
         armDeletionProcessor.markForDeletion();
     }
-
 }

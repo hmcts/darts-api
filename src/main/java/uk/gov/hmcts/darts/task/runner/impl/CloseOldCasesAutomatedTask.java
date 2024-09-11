@@ -38,5 +38,4 @@ public class CloseOldCasesAutomatedTask extends AbstractLockableAutomatedTask
         CloseOldCasesProcessor closeOldCasesProcessor = automatedTaskProcessorFactory.createCloseOldCasesProcessor(batchSize);
         closeOldCasesProcessor.closeCases(batchSize);
     }
-
 }

@@ -37,5 +37,4 @@ public class ApplyRetentionCaseAssociatedObjectsAutomatedTask extends AbstractLo
     protected void runTask() {
         processor.processApplyRetentionToCaseAssociatedObjects();
     }
-
 }

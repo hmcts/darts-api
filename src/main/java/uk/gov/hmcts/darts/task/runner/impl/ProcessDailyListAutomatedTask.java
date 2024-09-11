@@ -63,5 +63,4 @@ public class ProcessDailyListAutomatedTask
         }
         return trackedStateChanges.contains(automatedTaskStatus);
     }
-
 }

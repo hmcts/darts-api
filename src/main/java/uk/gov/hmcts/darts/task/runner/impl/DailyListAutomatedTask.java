@@ -35,5 +35,4 @@ public class DailyListAutomatedTask extends AbstractLockableAutomatedTask
     protected void runTask() {
         dailyListService.runHouseKeeping();
     }
-
 }

@@ -49,5 +49,4 @@ public class ExternalDataStoreDeleterAutomatedTask extends AbstractLockableAutom
         unstructuredDeleter.delete();
         outboundDeleter.delete();
     }
-
 }
