@@ -773,7 +773,6 @@ class MediaRequestServiceImplTest {
     void doesNotAuditWhenOwnerNotChanged() {
         var mediaRequest = withIdsPopulated(someMinimalRequestData().build());
         when(mockMediaRequestRepository.findById(any())).thenReturn(Optional.of(mediaRequest));
-        when(mockUserAccountRepository.findById(any())).thenReturn(Optional.of(mediaRequest.getCurrentOwner()));
 
         mediaRequestService.patchMediaRequest(
             mediaRequest.getId(),

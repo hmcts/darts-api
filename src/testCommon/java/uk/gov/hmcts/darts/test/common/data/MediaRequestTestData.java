@@ -1,7 +1,5 @@
 package uk.gov.hmcts.darts.test.common.data;
 
-import lombok.Builder;
-import lombok.NonNull;
 import uk.gov.hmcts.darts.audio.entity.MediaRequestEntity;
 import uk.gov.hmcts.darts.audio.enums.MediaRequestStatus;
 import uk.gov.hmcts.darts.audiorequests.model.AudioRequestType;
@@ -15,15 +13,50 @@ import static uk.gov.hmcts.darts.audio.enums.MediaRequestStatus.OPEN;
 import static uk.gov.hmcts.darts.audiorequests.model.AudioRequestType.DOWNLOAD;
 
 @SuppressWarnings("SummaryJavadoc")
-public class MediaRequestTestData implements Persistable<CustomMediaRequestEntity.CustomMediaRequestEntityBuilder> {
+public class MediaRequestTestData implements Persistable<CustomMediaRequestEntity.CustomMediaBuilderRetrieve> {
 
-    public CustomMediaRequestEntity.CustomMediaRequestEntityBuilder someMinimal() {
-        return CustomMediaRequestEntity.builder()
-                            .status(MediaRequestStatus.PROCESSING)
-                            .requestType(AudioRequestType.PLAYBACK);
+    private static final OffsetDateTime NOW = OffsetDateTime.now();
+    private static final OffsetDateTime YESTERDAY = NOW.minusDays(1);
+
+    private Integer id;
+
+    private HearingEntity hearing = HearingTestData.someMinimalHearing();
+
+    private UserAccountEntity currentOwner = UserAccountTestData.minimalUserAccount();
+
+    private UserAccountEntity requestor = UserAccountTestData.minimalUserAccount();
+
+    private MediaRequestStatus status = OPEN;
+
+    private AudioRequestType requestType = DOWNLOAD;
+
+    private Integer attempts = 0;
+
+    private OffsetDateTime startTime = YESTERDAY;
+
+    private OffsetDateTime endTime = YESTERDAY.plusHours(1);
+
+    private UserAccountEntity createdBy = UserAccountTestData.minimalUserAccount();
+
+    private UserAccountEntity lastModifiedBy = UserAccountTestData.minimalUserAccount();
+
+    private OffsetDateTime createdAt = NOW;
+
+    private OffsetDateTime lastModifiedAt = NOW;
+
+    private CustomMediaRequestEntity.CustomMediaBuilderRetrieve builder = new CustomMediaRequestEntity.CustomMediaBuilderRetrieve();
+
+    public CustomMediaRequestEntity.CustomMediaBuilderRetrieve someMinimal() {
+        builder.getBuilder().hearing(hearing).currentOwner(currentOwner).requestor(requestor)
+            .attempts(attempts).startTime(startTime)
+            .endTime(endTime).createdBy(createdBy).lastModifiedBy(lastModifiedBy).createdAt(createdAt)
+            .lastModifiedAt(lastModifiedAt)
+            .status(MediaRequestStatus.PROCESSING)
+            .requestType(AudioRequestType.PLAYBACK);
+        return builder;
     }
 
-    public CustomMediaRequestEntity.CustomMediaRequestEntityBuilder someMaximal() {
+    public CustomMediaRequestEntity.CustomMediaBuilderRetrieve someMaximal() {
         return someMinimalRequestData();
     }
 
@@ -31,7 +64,7 @@ public class MediaRequestTestData implements Persistable<CustomMediaRequestEntit
      * @deprecated do not use. Instead, use someMinimal().
      */
     @Deprecated
-    public static CustomMediaRequestEntity.CustomMediaRequestEntityBuilder someMinimalRequestData() {
+    public static CustomMediaRequestEntity.CustomMediaBuilderRetrieve someMinimalRequestData() {
         return new MediaRequestTestData().someMinimal();
     }
 
@@ -42,7 +75,7 @@ public class MediaRequestTestData implements Persistable<CustomMediaRequestEntit
     public static MediaRequestEntity createCurrentMediaRequest(HearingEntity hearingEntity, UserAccountEntity requestor,
                                                                OffsetDateTime startTime, OffsetDateTime endTime,
                                                                AudioRequestType audioRequestType, MediaRequestStatus status) {
-        return someMinimalRequestData()
+        return someMinimalRequestData().getBuilder()
                    .hearing(hearingEntity)
                    .requestor(requestor)
                    .currentOwner(requestor)
@@ -73,5 +106,4 @@ public class MediaRequestTestData implements Persistable<CustomMediaRequestEntit
                    .lastModifiedBy(requestor)
                    .build();
     }
-
 }

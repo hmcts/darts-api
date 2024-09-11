@@ -1,9 +1,11 @@
 package uk.gov.hmcts.darts.test.common.data;
 
+import uk.gov.hmcts.darts.test.common.data.builder.BuilderRetrieve;
+
 import java.util.ArrayList;
 import java.util.List;
 
-public interface Persistable<M> {
+public interface Persistable<M extends BuilderRetrieve<?,?>> {
 
     /**
      * Return an entity that has only its non-null fields populated. All other fields should be expected to be null.

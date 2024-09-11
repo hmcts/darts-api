@@ -71,6 +71,7 @@ import uk.gov.hmcts.darts.common.repository.TransformedMediaRepository;
 import uk.gov.hmcts.darts.common.repository.TransientObjectDirectoryRepository;
 import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
 import uk.gov.hmcts.darts.testutils.TransactionalUtil;
+import uk.gov.hmcts.darts.test.common.data.persistence.Persistence;
 
 import java.util.List;
 
@@ -84,7 +85,7 @@ import static java.util.Objects.isNull;
     "PMD.ExcessiveImports", "PMD.ExcessivePublicCount", "PMD.GodClass", "PMD.CouplingBetweenObjects", "PMD.CyclomaticComplexity"})
 @Getter
 @Slf4j
-public class DartsPersistence {
+public class DartsPersistence{
 
     private final EntityManagerFactory entityManagerFactory;
     private final AnnotationDocumentRepository annotationDocumentRepository;
@@ -161,8 +162,14 @@ public class DartsPersistence {
 
     @Transactional
     public CourthouseEntity save(CourthouseEntity courthouse) {
-        save(courthouse.getCreatedBy());
-        return courthouseRepository.save(courthouse);
+
+        if (courthouse.getId() == null) {
+            save(courthouse.getCreatedBy());
+            save(courthouse.getLastModifiedBy());
+            courthouse = courthouseRepository.save(courthouse);
+        }
+
+        return courthouse;
     }
 
     @Transactional

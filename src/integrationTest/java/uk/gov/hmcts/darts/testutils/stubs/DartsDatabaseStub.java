@@ -472,7 +472,7 @@ public class DartsDatabaseStub {
     public MediaRequestEntity createAndLoadNonAccessedCurrentMediaRequestEntity(UserAccountEntity requestor,
                                                                                 AudioRequestType audioRequestType) {
 
-        MediaRequestEntity mediaRequestEntity = new MediaRequestTestData().someMinimal()
+        MediaRequestEntity mediaRequestEntity = new MediaRequestTestData().someMinimal().getBuilder()
                                                                                         .requestor(requestor)
                                                                                         .currentOwner(requestor)
                                                                                         .startTime(OffsetDateTime.parse("2023-06-26T13:00:00Z"))
