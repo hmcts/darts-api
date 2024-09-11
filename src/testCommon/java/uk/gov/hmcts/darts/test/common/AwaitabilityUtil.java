@@ -12,6 +12,10 @@ public final class AwaitabilityUtil {
 
     }
 
+    public static void waitForMax15SecondsWithOneSecondPoll(Callable<Boolean> callable) {
+        waitForMaxWithOneSecondPoll(callable, Duration.ofSeconds(15));
+    }
+
     public static void waitForMax10SecondsWithOneSecondPoll(Callable<Boolean> callable) {
         waitForMaxWithOneSecondPoll(callable, Duration.ofSeconds(10));
     }

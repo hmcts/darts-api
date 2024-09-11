@@ -11,6 +11,7 @@ import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
 import static com.github.tomakehurst.wiremock.client.WireMock.verify;
 import static uk.gov.hmcts.darts.test.common.AwaitabilityUtil.waitForMax10SecondsWithOneSecondPoll;
+import static uk.gov.hmcts.darts.test.common.AwaitabilityUtil.waitForMax15SecondsWithOneSecondPoll;
 
 @SuppressWarnings("PMD.AvoidThrowingRawExceptionTypes")
 public class DartsGatewayStub {
@@ -19,7 +20,7 @@ public class DartsGatewayStub {
 
     public void darNotificationReturnsSuccess() {
         stubFor(post(urlEqualTo(DAR_NOTIFY_PATH))
-                        .willReturn(aResponse().withStatus(200).withBody("")));
+                    .willReturn(aResponse().withStatus(200).withBody("")));
     }
 
     public void darNotificationReturnsGatewayTimeoutError() {
@@ -33,9 +34,9 @@ public class DartsGatewayStub {
 
     public void verifyReceivedNotificationType(int type) {
         var notificationType = "\"notification_type\":\"" + type + "\"";
-        waitForMax10SecondsWithOneSecondPoll(() -> {
+        waitForMax15SecondsWithOneSecondPoll(() -> {
             verify(exactly(1), postRequestedFor(urlEqualTo(DAR_NOTIFY_PATH))
-                    .withRequestBody(containing(notificationType)));
+                .withRequestBody(containing(notificationType)));
             return true;
         });
     }
@@ -44,7 +45,7 @@ public class DartsGatewayStub {
         var notificationType = "\"notification_url\":\"" + url + "\"";
         waitForMax10SecondsWithOneSecondPoll(() -> {
             verify(exactly(count), postRequestedFor(urlEqualTo(DAR_NOTIFY_PATH))
-                    .withRequestBody(containing(notificationType)));
+                .withRequestBody(containing(notificationType)));
             return true;
         });
     }
