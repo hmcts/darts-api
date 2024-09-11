@@ -3,7 +3,6 @@ package uk.gov.hmcts.darts.common.repository;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Pageable;
 import uk.gov.hmcts.darts.common.entity.EventEntity;
 import uk.gov.hmcts.darts.common.util.DateConverterUtil;
 import uk.gov.hmcts.darts.testutils.PostgresIntegrationBase;
@@ -31,14 +30,14 @@ class EventRepositoryTest extends PostgresIntegrationBase {
 
         Map<Integer, List<EventEntity>> eventIdMap = eventStub.generateEventIdEventsIncludingZeroEventId(3);
 
-        List<Integer> eventIdsToBeProcessed1 = eventRepository.getCurrentEventIdsToBeProcessed(Pageable.ofSize(1));
+        List<Integer> eventIdsToBeProcessed1 = eventRepository.getCurrentEventIdsToBeProcessed(1);
         Assertions.assertEquals(1, eventIdsToBeProcessed1.size());
         EventRepository.EventIdAndHearingIds eventPkid = eventRepository.getTheLatestCreatedEventPrimaryKeyForTheEventId(eventIdsToBeProcessed1.getFirst());
         eventRepository.updateAllEventIdEventsToNotCurrentWithTheExclusionOfTheCurrentEventPrimaryKey(
             eventPkid.getEveId(), eventPkid.getEventId(), eventPkid.getHearingIds());
         Assertions.assertTrue(eventStub.isOnlyOneOfTheEventIdSetToCurrent(eventIdMap.get(eventIdsToBeProcessed1.getFirst())));
 
-        List<Integer> eventIdsToBeProcessed2 = eventRepository.getCurrentEventIdsToBeProcessed(Pageable.ofSize(1));
+        List<Integer> eventIdsToBeProcessed2 = eventRepository.getCurrentEventIdsToBeProcessed(1);
         EventRepository.EventIdAndHearingIds eventPkidSecond =
             eventRepository.getTheLatestCreatedEventPrimaryKeyForTheEventId(eventIdsToBeProcessed2.getFirst());
         eventRepository.updateAllEventIdEventsToNotCurrentWithTheExclusionOfTheCurrentEventPrimaryKey(
@@ -49,7 +48,7 @@ class EventRepositoryTest extends PostgresIntegrationBase {
         Assertions.assertNotEquals(eventIdsToBeProcessed1, eventIdsToBeProcessed2);
 
         // ENSURE WE DONT PROCESS THE THIRD BATCH I.E. THE ZERO EVENT ID
-        List<Integer> eventIdsToBeProcessed3 = eventRepository.getCurrentEventIdsToBeProcessed(Pageable.ofSize(1));
+        List<Integer> eventIdsToBeProcessed3 = eventRepository.getCurrentEventIdsToBeProcessed(1);
         Assertions.assertTrue(eventIdsToBeProcessed3.isEmpty());
     }
 
@@ -61,7 +60,7 @@ class EventRepositoryTest extends PostgresIntegrationBase {
 
         Map<Integer, List<EventEntity>> eventIdMap = eventStub.generateEventIdEventsIncludingZeroEventId(3);
 
-        List<Integer> eventIdsToBeProcessed1 = eventRepository.getCurrentEventIdsToBeProcessed(Pageable.ofSize(1));
+        List<Integer> eventIdsToBeProcessed1 = eventRepository.getCurrentEventIdsToBeProcessed(1);
         Assertions.assertEquals(1, eventIdsToBeProcessed1.size());
         List<EventEntity> eventEntities = eventIdMap.get(eventIdsToBeProcessed1.getFirst());
         EventEntity eventEntity = eventEntities.getFirst();

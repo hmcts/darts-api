@@ -3,7 +3,6 @@ package uk.gov.hmcts.darts.event.service.impl;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.Pageable;
 import uk.gov.hmcts.darts.common.repository.EventRepository;
 import uk.gov.hmcts.darts.event.service.CleanupCurrentFlagEventProcessor;
 
