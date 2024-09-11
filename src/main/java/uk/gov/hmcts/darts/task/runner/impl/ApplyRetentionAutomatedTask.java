@@ -36,8 +36,4 @@ public class ApplyRetentionAutomatedTask extends AbstractLockableAutomatedTask
         applyRetentionProcessor.processApplyRetention();
     }
 
-    @Override
-    public AbstractLockableAutomatedTask getAbstractLockableAutomatedTask() {
-        return this;
-    }
 }

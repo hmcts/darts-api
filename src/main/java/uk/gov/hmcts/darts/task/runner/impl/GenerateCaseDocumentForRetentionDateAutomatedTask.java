@@ -42,8 +42,4 @@ public class GenerateCaseDocumentForRetentionDateAutomatedTask extends AbstractL
         processor.processGenerateCaseDocumentForRetentionDate(batchSize);
     }
 
-    @Override
-    public AbstractLockableAutomatedTask getAbstractLockableAutomatedTask() {
-        return this;
-    }
 }

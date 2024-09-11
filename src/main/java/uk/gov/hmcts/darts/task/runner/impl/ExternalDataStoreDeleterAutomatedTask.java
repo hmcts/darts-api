@@ -50,8 +50,4 @@ public class ExternalDataStoreDeleterAutomatedTask extends AbstractLockableAutom
         outboundDeleter.delete();
     }
 
-    @Override
-    public AbstractLockableAutomatedTask getAbstractLockableAutomatedTask() {
-        return this;
-    }
 }

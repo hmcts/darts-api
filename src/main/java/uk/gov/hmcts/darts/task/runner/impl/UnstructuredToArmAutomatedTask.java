@@ -46,8 +46,4 @@ public class UnstructuredToArmAutomatedTask extends AbstractLockableAutomatedTas
         }
     }
 
-    @Override
-    public AbstractLockableAutomatedTask getAbstractLockableAutomatedTask() {
-        return this;
-    }
 }

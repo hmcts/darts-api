@@ -64,8 +64,4 @@ public class ProcessDailyListAutomatedTask
         return trackedStateChanges.contains(automatedTaskStatus);
     }
 
-    @Override
-    public AbstractLockableAutomatedTask getAbstractLockableAutomatedTask() {
-        return this;
-    }
 }

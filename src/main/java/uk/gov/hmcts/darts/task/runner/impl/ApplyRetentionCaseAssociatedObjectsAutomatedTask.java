@@ -38,8 +38,4 @@ public class ApplyRetentionCaseAssociatedObjectsAutomatedTask extends AbstractLo
         processor.processApplyRetentionToCaseAssociatedObjects();
     }
 
-    @Override
-    public AbstractLockableAutomatedTask getAbstractLockableAutomatedTask() {
-        return this;
-    }
 }

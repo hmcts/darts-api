@@ -37,8 +37,4 @@ public class BatchCleanupArmResponseFilesAutomatedTask extends AbstractLockableA
         batchCleanupArmResponseFilesService.cleanupResponseFiles(batchSize);
     }
 
-    @Override
-    public AbstractLockableAutomatedTask getAbstractLockableAutomatedTask() {
-        return this;
-    }
 }

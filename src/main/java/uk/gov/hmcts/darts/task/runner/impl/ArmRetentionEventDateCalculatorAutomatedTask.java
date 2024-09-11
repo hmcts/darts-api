@@ -36,9 +36,5 @@ public class ArmRetentionEventDateCalculatorAutomatedTask extends AbstractLockab
         armRetentionEventDateProcessor.calculateEventDates();
     }
 
-    @Override
-    public AbstractLockableAutomatedTask getAbstractLockableAutomatedTask() {
-        return this;
-    }
 }
 

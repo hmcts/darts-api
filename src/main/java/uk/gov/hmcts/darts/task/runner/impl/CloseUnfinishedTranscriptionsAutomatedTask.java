@@ -38,8 +38,4 @@ public class CloseUnfinishedTranscriptionsAutomatedTask extends AbstractLockable
         transcriptionsProcessor.closeTranscriptions();
     }
 
-    @Override
-    public AbstractLockableAutomatedTask getAbstractLockableAutomatedTask() {
-        return this;
-    }
 }

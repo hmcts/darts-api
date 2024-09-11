@@ -39,8 +39,4 @@ public class UnstructuredAudioDeleterAutomatedTask extends AbstractLockableAutom
         unstructuredAudioDeleterProcessor.markForDeletion();
     }
 
-    @Override
-    public AbstractLockableAutomatedTask getAbstractLockableAutomatedTask() {
-        return this;
-    }
 }

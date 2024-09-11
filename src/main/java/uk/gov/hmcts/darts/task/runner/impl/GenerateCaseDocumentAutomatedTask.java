@@ -41,8 +41,4 @@ public class GenerateCaseDocumentAutomatedTask extends AbstractLockableAutomated
         processor.processGenerateCaseDocument();
     }
 
-    @Override
-    public AbstractLockableAutomatedTask getAbstractLockableAutomatedTask() {
-        return this;
-    }
 }

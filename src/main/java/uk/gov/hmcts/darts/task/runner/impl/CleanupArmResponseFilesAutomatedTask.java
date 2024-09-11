@@ -36,8 +36,4 @@ public class CleanupArmResponseFilesAutomatedTask extends AbstractLockableAutoma
         cleanupArmResponseFilesService.cleanupResponseFiles();
     }
 
-    @Override
-    public AbstractLockableAutomatedTask getAbstractLockableAutomatedTask() {
-        return this;
-    }
 }

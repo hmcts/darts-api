@@ -39,8 +39,4 @@ public class ProcessArmResponseFilesAutomatedTask extends AbstractLockableAutoma
         armResponseFilesProcessor.processResponseFiles();
     }
 
-    @Override
-    public AbstractLockableAutomatedTask getAbstractLockableAutomatedTask() {
-        return this;
-    }
 }

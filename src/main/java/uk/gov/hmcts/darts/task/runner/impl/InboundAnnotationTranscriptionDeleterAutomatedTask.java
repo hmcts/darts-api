@@ -36,8 +36,4 @@ public class InboundAnnotationTranscriptionDeleterAutomatedTask extends Abstract
         armDeletionProcessor.markForDeletion();
     }
 
-    @Override
-    public AbstractLockableAutomatedTask getAbstractLockableAutomatedTask() {
-        return this;
-    }
 }

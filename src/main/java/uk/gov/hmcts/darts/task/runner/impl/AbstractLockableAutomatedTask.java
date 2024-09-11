@@ -211,6 +211,10 @@ public abstract class AbstractLockableAutomatedTask implements AutomatedTask {
         }
     }
 
+    public AbstractLockableAutomatedTask getAbstractLockableAutomatedTask() {
+        return this;
+    }
+
     class LockedTask implements Runnable {
         @Override
         public void run() {

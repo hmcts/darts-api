@@ -38,8 +38,4 @@ public class CleanupCurrentEventTask extends AbstractLockableAutomatedTask
         processor.processCurrentEvent();
     }
 
-    @Override
-    public AbstractLockableAutomatedTask getAbstractLockableAutomatedTask() {
-        return this;
-    }
 }

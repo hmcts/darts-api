@@ -36,8 +36,4 @@ public class DailyListAutomatedTask extends AbstractLockableAutomatedTask
         dailyListService.runHouseKeeping();
     }
 
-    @Override
-    public AbstractLockableAutomatedTask getAbstractLockableAutomatedTask() {
-        return this;
-    }
 }

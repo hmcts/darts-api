@@ -36,8 +36,4 @@ public class UnstructuredAnnotationTranscriptionDeleterAutomatedTask extends Abs
         armDeletionProcessor.markForDeletion();
     }
 
-    @Override
-    public AbstractLockableAutomatedTask getAbstractLockableAutomatedTask() {
-        return this;
-    }
 }

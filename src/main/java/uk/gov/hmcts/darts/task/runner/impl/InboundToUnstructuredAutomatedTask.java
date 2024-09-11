@@ -38,8 +38,4 @@ public class InboundToUnstructuredAutomatedTask extends AbstractLockableAutomate
         inboundToUnstructuredProcessor.processInboundToUnstructured();
     }
 
-    @Override
-    public AbstractLockableAutomatedTask getAbstractLockableAutomatedTask() {
-        return this;
-    }
 }

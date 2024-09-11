@@ -37,8 +37,4 @@ public class OutboundAudioDeleterAutomatedTask extends AbstractLockableAutomated
         outboundAudioDeleterProcessor.markForDeletion();
     }
 
-    @Override
-    public AbstractLockableAutomatedTask getAbstractLockableAutomatedTask() {
-        return this;
-    }
 }

@@ -40,8 +40,4 @@ public class RemoveDuplicatedEventsAutomatedTask extends AbstractLockableAutomat
         removeDuplicateEventsProcessor.processRemoveDuplicateEvents();
     }
 
-    @Override
-    public AbstractLockableAutomatedTask getAbstractLockableAutomatedTask() {
-        return this;
-    }
 }

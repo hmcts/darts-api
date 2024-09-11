@@ -39,8 +39,4 @@ public class CloseOldCasesAutomatedTask extends AbstractLockableAutomatedTask
         closeOldCasesProcessor.closeCases(batchSize);
     }
 
-    @Override
-    public AbstractLockableAutomatedTask getAbstractLockableAutomatedTask() {
-        return this;
-    }
 }
