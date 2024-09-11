@@ -58,11 +58,23 @@ public class CloseOldCasesProcessorImpl implements CloseOldCasesProcessor {
     @Transactional
     @Override
     public void closeCases(int batchSize) {
+        log.info("Starting to close old cases...");
+
         List<CourtCaseEntity> courtCaseEntityList = caseRepository.findOpenCasesToClose(OffsetDateTime.now().minusYears(years),
                                                                                         Pageable.ofSize(batchSize));
+        int totalCasesToClose = courtCaseEntityList.size();
+        log.info("Found {} cases to close.", totalCasesToClose);
 
         userAccount = authorisationApi.getCurrentUser();
-        courtCaseEntityList.forEach(this::closeCase);
+
+        int closedCaseCount = 0;
+        for (CourtCaseEntity courtCase : courtCaseEntityList) {
+            closeCase(courtCase);
+            closedCaseCount++;
+            log.info("Closed {} out of {} cases.", closedCaseCount, totalCasesToClose);
+        }
+
+        log.info("Completed closing old cases.");
     }
 
     private void closeCase(CourtCaseEntity courtCase) {
@@ -81,7 +93,7 @@ public class CloseOldCasesProcessorImpl implements CloseOldCasesProcessor {
                 closeCaseInDbAndAddRetention(courtCase, closedEvent.get().getCreatedDateTime());
             } else {
                 //look for the last event and use that date
-                closeCaseInDbAndAddRetention(courtCase, eventList.get(0).getCreatedDateTime());
+                closeCaseInDbAndAddRetention(courtCase, eventList.getFirst().getCreatedDateTime());
             }
         } else if (courtCase.getHearings().isEmpty()) {
             //set to created date
@@ -95,14 +107,14 @@ public class CloseOldCasesProcessorImpl implements CloseOldCasesProcessor {
             if (mediaList.isEmpty()) {
                 //look for the last hearing date and use that
                 courtCase.getHearings().sort(Comparator.comparing(HearingEntity::getHearingDate).reversed());
-                HearingEntity lastHearingEntity = courtCase.getHearings().get(0);
+                HearingEntity lastHearingEntity = courtCase.getHearings().getFirst();
                 closeCaseInDbAndAddRetention(courtCase, OffsetDateTime.of(lastHearingEntity.getHearingDate().atStartOfDay(), ZoneOffset.UTC));
             } else {
                 mediaList.sort(Comparator.comparing(MediaEntity::getCreatedDateTime).reversed());
-                closeCaseInDbAndAddRetention(courtCase, mediaList.get(0).getCreatedDateTime());
+                closeCaseInDbAndAddRetention(courtCase, mediaList.getFirst().getCreatedDateTime());
             }
         }
-
+        log.info("Successfully closed case with ID: {}", courtCase.getId());
     }
 
     private void closeCaseInDbAndAddRetention(CourtCaseEntity courtCase, OffsetDateTime caseClosedDate) {
