@@ -43,13 +43,13 @@ class SetReportingRestrictionEventHandlerTest extends HandlerTestData {
         CourtroomEntity courtroom = dartsDatabase.createCourtroomUnlessExists(SOME_COURTHOUSE, SOME_ROOM);
         nodeRegisterStub.setupNodeRegistry(courtroom);
         dartsGateway.darNotificationReturnsSuccess();
+
+        var result = WireMock.listAllStubMappings();
+        log.info("mappings: {}", result.getMappings());
     }
 
     @Test
     void givenSetReportingRestrictionEventReceivedAndCourtCaseAndHearingDoesNotExist_thenNotifyDarUpdate() {
-
-        var result = WireMock.listAllStubMappings();
-        log.info("mappings: {}", result.getMappings());
 
         dartsDatabase.createCase(SOME_COURTHOUSE, SOME_CASE_NUMBER);
 
