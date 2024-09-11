@@ -70,6 +70,7 @@ class AutomatedTaskServiceImplTest {
         AutomatedTask processDailyListAutomatedTask = new ProcessDailyListAutomatedTask(
             mockAutomatedTaskRepository,
             mockAutomatedTaskConfigurationProperties,
+            null,
             logApi,
             lockService
         );
@@ -91,6 +92,7 @@ class AutomatedTaskServiceImplTest {
         AutomatedTask processDailyListAutomatedTask = new ProcessDailyListAutomatedTask(
             mockAutomatedTaskRepository,
             mockAutomatedTaskConfigurationProperties,
+            null,
             logApi,
             lockService
         );

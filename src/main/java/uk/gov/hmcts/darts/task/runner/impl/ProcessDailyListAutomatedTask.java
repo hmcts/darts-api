@@ -1,6 +1,7 @@
 package uk.gov.hmcts.darts.task.runner.impl;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.darts.common.repository.AutomatedTaskRepository;
 import uk.gov.hmcts.darts.dailylist.service.DailyListProcessor;
@@ -27,12 +28,7 @@ public class ProcessDailyListAutomatedTask
 
     private final List<AutomatedTaskStatus> trackedStateChanges = new ArrayList<>();
 
-    public ProcessDailyListAutomatedTask(AutomatedTaskRepository automatedTaskRepository,
-                                         AutomatedTaskConfigurationProperties automatedTaskConfigurationProperties,
-                                         LogApi logApi, LockService lockService) {
-        super(automatedTaskRepository, automatedTaskConfigurationProperties, logApi, lockService);
-    }
-
+    @Autowired
     public ProcessDailyListAutomatedTask(AutomatedTaskRepository automatedTaskRepository,
                                          AutomatedTaskConfigurationProperties automatedTaskConfigurationProperties,
                                          DailyListProcessor processor, LogApi logApi, LockService lockService) {
