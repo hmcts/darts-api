@@ -29,17 +29,17 @@ public class CleanupCurrentFlagEventProcessorImpl implements CleanupCurrentFlagE
                 .collect(Collectors.joining(",")));
         }
 
-        eventEntityReturned.forEach(event -> {
-            EventRepository.EventIdAndHearingIds eventIdAndHearingIds = eventRepository.getTheLatestCreatedEventPrimaryKeyForTheEventId(event);
-            eventRepository.updateAllEventIdEventsToNotCurrentWithTheExclusionOfTheCurrentEventPrimaryKey(
-                eventIdAndHearingIds.getEveId(), eventIdAndHearingIds.getEventId(), eventIdAndHearingIds.getHearingIds());
+        eventEntityReturned.forEach(event -> eventRepository.getTheLatestCreatedEventPrimaryKeyForTheEventId(event)
+            .forEach(eventIdAndHearingIds -> {
+                eventRepository.updateAllEventIdEventsToNotCurrentWithTheExclusionOfTheCurrentEventPrimaryKey(
+                    eventIdAndHearingIds.getEveId(), eventIdAndHearingIds.getEventId(), eventIdAndHearingIds.getHearingIds());
 
-            log.debug("Updated all events for event id {} excluding primary key {} where hearings match {}",
-                      eventIdAndHearingIds.getEventId(),
-                      eventIdAndHearingIds.getEveId(),
-                      eventIdAndHearingIds.getHearingIds());
-            processedEventIdLst.add(event);
-        });
+                log.debug("Updated all events for event id {} excluding primary key {} where hearings match {}",
+                          eventIdAndHearingIds.getEventId(),
+                          eventIdAndHearingIds.getEveId(),
+                          eventIdAndHearingIds.getHearingIds());
+                processedEventIdLst.add(event);
+            }));
         return processedEventIdLst;
     }
 }
