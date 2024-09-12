@@ -4,7 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.text.StringEscapeUtils;
-import org.junit.Assert;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.skyscreamer.jsonassert.JSONCompareMode;
@@ -15,9 +15,8 @@ import java.util.List;
 import static org.skyscreamer.jsonassert.JSONAssert.assertEquals;
 
 @Slf4j
+@SuppressWarnings("checkstyle:LineLength")
 class CaseRetentionConfidenceReasonTest {
-
-    private CaseRetentionConfidenceReason caseRetentionConfidenceReason;
 
     private ObjectMapper objectMapper;
 
@@ -30,7 +29,7 @@ class CaseRetentionConfidenceReasonTest {
     @Test
     void getCaseRetentionConfidenceReason() throws JsonProcessingException {
 
-        caseRetentionConfidenceReason = CaseRetentionConfidenceReason.builder()
+        CaseRetentionConfidenceReason caseRetentionConfidenceReason = CaseRetentionConfidenceReason.builder()
             .retentionConfidenceAppliedTimestamp("2024-06-26 12:10:00")
             .retentionCases(List.of(buildRetentionCase("Swansea",
                                                        "T1234558",
@@ -71,14 +70,14 @@ class CaseRetentionConfidenceReasonTest {
         String escapedExpectedResponse = "{\\\"ret_conf_applied_ts\\\":\\\"2024-06-26 12:10:00\\\",\\\"cases\\\":[{\\\"courthouse\\\":\\\"Swansea\\\",\\\"case_number\\\":\\\"T1234558\\\",\\\"ret_conf_updated_ts\\\":\\\"2024-06-26 12:10:00\\\",\\\"ret_conf_reason\\\":\\\"AGED_CASE\\\"},{\\\"courthouse\\\":\\\"Swansea\\\",\\\"case_number\\\":\\\"T12341234\\\",\\\"ret_conf_updated_ts\\\":\\\"2024-06-26 12:10:00\\\",\\\"ret_conf_reason\\\":\\\"AGED_CASE\\\"}]}";
         log.info("escapedActualResponse   {}", escapedActualResponse);
         log.info("escapedExpectedResponse {}", escapedExpectedResponse);
-        Assert.assertEquals(escapedExpectedResponse, escapedActualResponse);
+        Assertions.assertEquals(escapedExpectedResponse, escapedActualResponse);
 
     }
 
     @Test
     void getCaseRetentionConfidenceReasonWithNullReason() throws JsonProcessingException {
 
-        caseRetentionConfidenceReason = CaseRetentionConfidenceReason.builder()
+        CaseRetentionConfidenceReason caseRetentionConfidenceReason = CaseRetentionConfidenceReason.builder()
             .retentionConfidenceAppliedTimestamp("2024-06-26 12:10:00")
             .retentionCases(List.of(buildRetentionCase("Swansea",
                                                        "T1234558",
@@ -117,7 +116,7 @@ class CaseRetentionConfidenceReasonTest {
         String escapedExpectedResponse = "{\\\"ret_conf_applied_ts\\\":\\\"2024-06-26 12:10:00\\\",\\\"cases\\\":[{\\\"courthouse\\\":\\\"Swansea\\\",\\\"case_number\\\":\\\"T1234558\\\",\\\"ret_conf_updated_ts\\\":\\\"2024-06-26 12:10:00\\\"},{\\\"courthouse\\\":\\\"Swansea\\\",\\\"case_number\\\":\\\"T12341234\\\",\\\"ret_conf_updated_ts\\\":\\\"2024-06-26 12:10:00\\\"}]}";
         log.info("escapedActualResponse   {}", escapedActualResponse);
         log.info("escapedExpectedResponse {}", escapedExpectedResponse);
-        Assert.assertEquals(escapedExpectedResponse, escapedActualResponse);
+        Assertions.assertEquals(escapedExpectedResponse, escapedActualResponse);
 
     }
 
