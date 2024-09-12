@@ -99,15 +99,16 @@ public interface EventRepository extends JpaRepository<EventEntity, Integer> {
     List<Integer> getCurrentEventIdsToBeProcessed(long limit);
 
     @Query(value = """
-         SELECT e.eve_id, event_id, string_agg(he.hea_id::varchar, ',' order by he.hea_id) as hearing_ids FROM darts.event e
-         left join darts.hearing_event_ae he
-         on he.eve_id = e.eve_id
-         WHERE e.event_id=:eventId
-         group by e.eve_id, event_id
-         ORDER BY created_ts desc
-         LIMIT 1
+        select distinct on (event_id, hearing_ids) e.* from (
+            SELECT e.eve_id, event_id, string_agg(he.hea_id::varchar, ',' order by he.hea_id) as hearing_ids FROM darts.event e
+            left join darts.hearing_event_ae he
+            on he.eve_id = e.eve_id
+            WHERE e.event_id=:eventId
+            group by e.eve_id, event_id
+            ORDER BY created_ts desc
+        ) e
         """, nativeQuery = true)
-    EventIdAndHearingIds getTheLatestCreatedEventPrimaryKeyForTheEventId(Integer eventId);
+    List<EventIdAndHearingIds> getTheLatestCreatedEventPrimaryKeyForTheEventId(Integer eventId);
 
     /**
      *  string_agg(he.hea_id::varchar, ',' order by he.hea_id) to ensure we only update the events that have the same hearing ids
