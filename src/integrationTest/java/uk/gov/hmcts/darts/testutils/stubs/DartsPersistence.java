@@ -21,6 +21,7 @@ import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.JudgeEntity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
+import uk.gov.hmcts.darts.common.entity.MediaLinkedCaseEntity;
 import uk.gov.hmcts.darts.common.entity.ProsecutorEntity;
 import uk.gov.hmcts.darts.common.entity.RetentionPolicyTypeEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionEntity;
@@ -71,7 +72,6 @@ import uk.gov.hmcts.darts.common.repository.TransformedMediaRepository;
 import uk.gov.hmcts.darts.common.repository.TransientObjectDirectoryRepository;
 import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
 import uk.gov.hmcts.darts.testutils.TransactionalUtil;
-import uk.gov.hmcts.darts.test.common.data.persistence.Persistence;
 
 import java.util.List;
 
@@ -85,7 +85,7 @@ import static java.util.Objects.isNull;
     "PMD.ExcessiveImports", "PMD.ExcessivePublicCount", "PMD.GodClass", "PMD.CouplingBetweenObjects", "PMD.CyclomaticComplexity"})
 @Getter
 @Slf4j
-public class DartsPersistence{
+public class DartsPersistence {
 
     private final EntityManagerFactory entityManagerFactory;
     private final AnnotationDocumentRepository annotationDocumentRepository;
@@ -145,18 +145,28 @@ public class DartsPersistence{
 
     @Transactional
     public HearingEntity save(HearingEntity hearing) {
-        save(hearing.getCourtroom().getCourthouse());
-        save(hearing.getCourtroom());
-        save(hearing.getCreatedBy());
-        save(hearing.getLastModifiedBy());
-        saveJudgeList(hearing.getJudges());
-        if (hearing.getCourtCase().getId() == null) {
-            save(hearing.getCourtCase());
-        } else {
-            entityManager.merge(hearing.getCourtCase());
+        return save(hearing, true);
+    }
+
+    @Transactional
+    public HearingEntity save(HearingEntity hearing, boolean processMedia) {
+        if (hearing.getId() == null) {
+            save(hearing.getCourtroom().getCourthouse());
+            save(hearing.getCourtroom());
+            save(hearing.getCreatedBy());
+            save(hearing.getLastModifiedBy());
+            saveJudgeList(hearing.getJudges());
+            if (hearing.getCourtCase().getId() == null) {
+                save(hearing.getCourtCase());
+            } else {
+                entityManager.merge(hearing.getCourtCase());
+            }
+
+            if (processMedia) {
+                saveMediaList(hearing.getMediaList(), false);
+            }
+            hearingRepository.save(hearing);
         }
-        hearingRepository.save(hearing);
-        saveMediaList(hearing.getMediaList());
         return hearing;
     }
 
@@ -166,7 +176,7 @@ public class DartsPersistence{
         if (courthouse.getId() == null) {
             save(courthouse.getCreatedBy());
             save(courthouse.getLastModifiedBy());
-            courthouse = courthouseRepository.save(courthouse);
+            courthouseRepository.save(courthouse);
         }
 
         return courthouse;
@@ -193,6 +203,12 @@ public class DartsPersistence{
     }
 
     @Transactional
+    public MediaLinkedCaseEntity save(MediaLinkedCaseEntity mediaRequest) {
+        save(mediaRequest.getCourtCase());
+        return mediaLinkedCaseRepository.save(mediaRequest);
+    }
+
+    @Transactional
     public CourtCaseEntity save(CourtCaseEntity courtCase) {
         save(courtCase.getCreatedBy());
         save(courtCase.getLastModifiedBy());
@@ -213,7 +229,10 @@ public class DartsPersistence{
         var recordStatus = objectRecordStatusRepository.getReferenceById(eod.getStatus().getId());
         eod.setStatus(recordStatus);
 
-        save(eod.getMedia());
+        if (eod.getMedia() != null) {
+            save(eod.getMedia());
+        }
+
         save(eod.getCreatedBy());
         save(eod.getLastModifiedBy());
         return externalObjectDirectoryRepository.save(eod);
@@ -305,13 +324,30 @@ public class DartsPersistence{
         judgeRepository.save(judge);
     }
 
-    @Transactional
     public MediaEntity save(MediaEntity media) {
-        save(media.getCourtroom());
-        save(media.getCreatedBy());
-        save(media.getLastModifiedBy());
-        mediaRepository.save(media);
-        saveHearingList(media.getHearingList());
+        return save(media, true);
+    }
+
+    @Transactional
+    public MediaEntity save(MediaEntity media, boolean processhHearing) {
+
+        if (media.getId() == null) {
+            save(media.getCourtroom());
+            save(media.getCreatedBy());
+            save(media.getLastModifiedBy());
+
+            if (media.getMediaLinkedCaseList() != null) {
+                saveLinkedCaseList(media.getMediaLinkedCaseList());
+            }
+
+            mediaRepository.save(media);
+            if (media.getHearingList() != null && processhHearing) {
+                for (HearingEntity hearingEntity : media.getHearingList()) {
+                    hearingEntity.getMediaList().add(media);
+                    save(hearingEntity, false);
+                }
+            }
+        }
         return media;
     }
 
@@ -319,6 +355,7 @@ public class DartsPersistence{
     public TransformedMediaEntity save(TransformedMediaEntity transformedMedia) {
         save(transformedMedia.getCreatedBy());
         save(transformedMedia.getLastModifiedBy());
+        save(transformedMedia.getMediaRequest());
         return transformedMediaRepository.save(transformedMedia);
     }
 
@@ -342,18 +379,26 @@ public class DartsPersistence{
         stream(annotationDocuments).forEach(this::save);
     }
 
-    private void saveMediaList(List<MediaEntity> mediaList) {
+    private void saveMediaList(List<MediaEntity> mediaList, boolean processHearings) {
         mediaList.forEach(media -> {
             if (media.getId() == null) {
-                save(media);
+                save(media, processHearings);
             }
         });
     }
 
     private void saveHearingList(List<HearingEntity> hearings) {
-        hearings.forEach(media -> {
-            if (media.getId() == null) {
-                save(media);
+        hearings.forEach(hearing -> {
+            if (hearing.getId() == null) {
+                save(hearing);
+            }
+        });
+    }
+
+    private void saveLinkedCaseList(List<MediaLinkedCaseEntity> linkedCases) {
+        linkedCases.forEach(cse -> {
+            if (cse.getId() == null) {
+                save(cse);
             }
         });
     }

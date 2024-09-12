@@ -16,6 +16,7 @@ import java.time.OffsetDateTime;
 import javax.annotation.PostConstruct;
 
 @Component
+@Deprecated
 public class ObjectAdminActionStub {
 
     @Autowired

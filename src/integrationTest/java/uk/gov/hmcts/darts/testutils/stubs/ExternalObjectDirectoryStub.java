@@ -41,6 +41,7 @@ import static uk.gov.hmcts.darts.common.helper.SystemUserHelper.HOUSEKEEPING;
 
 @Component
 @RequiredArgsConstructor
+@Deprecated
 public class ExternalObjectDirectoryStub {
 
     private final UserAccountStubComposable userAccountStub;

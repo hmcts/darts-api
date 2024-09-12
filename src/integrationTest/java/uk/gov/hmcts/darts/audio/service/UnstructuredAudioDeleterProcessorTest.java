@@ -8,7 +8,7 @@ import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
 import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
 import uk.gov.hmcts.darts.common.util.EodHelper;
-import uk.gov.hmcts.darts.test.common.data.MediaTestData;
+import uk.gov.hmcts.darts.test.common.data.PersistableFactory;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 
 import java.time.LocalDateTime;
@@ -41,7 +41,7 @@ class UnstructuredAudioDeleterProcessorTest extends IntegrationBase {
         dartsPersistence.save(hearing);
 
         MediaEntity savedMedia = dartsPersistence.save(
-            MediaTestData.createMediaWith(
+            PersistableFactory.getMediaEntity().createMediaWith(
                 hearing.getCourtroom(),
                 OffsetDateTime.parse("2023-09-26T13:00:00Z"),
                 OffsetDateTime.parse("2023-09-26T13:45:00Z"),
@@ -87,7 +87,7 @@ class UnstructuredAudioDeleterProcessorTest extends IntegrationBase {
         dartsPersistence.save(hearing);
 
         MediaEntity savedMedia = dartsPersistence.save(
-            MediaTestData.createMediaWith(
+            PersistableFactory.getMediaEntity().createMediaWith(
                 hearing.getCourtroom(),
                 OffsetDateTime.parse("2023-09-26T13:00:00Z"),
                 OffsetDateTime.parse("2023-09-26T13:45:00Z"),

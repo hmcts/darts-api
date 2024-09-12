@@ -21,7 +21,6 @@ import uk.gov.hmcts.darts.common.entity.MediaEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionDocumentEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
-import uk.gov.hmcts.darts.test.common.data.MediaTestData;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 import uk.gov.hmcts.darts.testutils.stubs.AuthorisationStub;
 import uk.gov.hmcts.darts.testutils.stubs.TranscriptionStub;
@@ -43,6 +42,7 @@ import static org.skyscreamer.jsonassert.JSONAssert.assertEquals;
 import static uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum.ARM;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_DROP_ZONE;
 import static uk.gov.hmcts.darts.test.common.TestUtils.getContentsFromFile;
+import static uk.gov.hmcts.darts.test.common.data.PersistableFactory.getMediaEntity;
 
 @Disabled("Impacted by V1_367__adding_not_null_constraints_part_4.sql")
 @Slf4j
@@ -104,7 +104,7 @@ class ArchiveRecordServiceIntTest extends IntegrationBase {
         when(currentTimeHelper.currentOffsetDateTime()).thenReturn(startedAt);
         OffsetDateTime endedAt = OffsetDateTime.of(2023, 9, 23, 13, 45, 0, 0, UTC);
 
-        MediaEntity media = MediaTestData.createMediaWith(
+        MediaEntity media = getMediaEntity().createMediaWith(
             hearing.getCourtroom(),
             startedAt,
             endedAt,
@@ -168,7 +168,7 @@ class ArchiveRecordServiceIntTest extends IntegrationBase {
         when(currentTimeHelper.currentOffsetDateTime()).thenReturn(startedAt);
         OffsetDateTime endedAt = OffsetDateTime.of(2023, 9, 23, 13, 45, 0, 0, UTC);
 
-        MediaEntity media = MediaTestData.createMediaWith(
+        MediaEntity media = getMediaEntity().createMediaWith(
             hearing.getCourtroom(),
             startedAt,
             endedAt,
@@ -233,7 +233,7 @@ class ArchiveRecordServiceIntTest extends IntegrationBase {
         when(currentTimeHelper.currentOffsetDateTime()).thenReturn(startedAt);
         OffsetDateTime endedAt = OffsetDateTime.of(2023, 9, 23, 14, 45, 0, 0, UTC);
 
-        MediaEntity media = MediaTestData.createMediaWith(
+        MediaEntity media = getMediaEntity().createMediaWith(
             hearing.getCourtroom(),
             startedAt,
             endedAt,

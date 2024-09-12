@@ -1,0 +1,91 @@
+package uk.gov.hmcts.darts.test.common.data.builder;
+
+import lombok.RequiredArgsConstructor;
+import org.apache.commons.beanutils.BeanUtils;
+import org.hibernate.AssertionFailure;
+import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
+import uk.gov.hmcts.darts.common.entity.HearingEntity;
+import uk.gov.hmcts.darts.common.entity.MediaEntity;
+import uk.gov.hmcts.darts.common.entity.MediaLinkedCaseEntity;
+import uk.gov.hmcts.darts.common.entity.ObjectAdminActionEntity;
+import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
+
+import java.lang.reflect.InvocationTargetException;
+import java.time.OffsetDateTime;
+import java.util.List;
+
+@RequiredArgsConstructor
+public class CustomMediaEntity extends MediaEntity {
+
+    @lombok.Builder
+    public CustomMediaEntity(Integer id, CourtroomEntity courtroom,
+                             String legacyObjectId, Integer channel, Integer totalChannels, OffsetDateTime start, OffsetDateTime end,
+                             List<MediaLinkedCaseEntity> mediaLinkedCaseList, String legacyVersionLabel,
+                             String mediaFile, String mediaFormat, Long fileSize, String checksum,
+                             Character mediaType, String contentObjectId, String clipId,
+                             String chronicleId, String antecedentId, boolean isHidden,
+                             boolean isDeleted, Boolean isCurrent, UserAccountEntity deletedBy,
+                             OffsetDateTime deletedTimestamp, String mediaStatus,
+                             List<HearingEntity> hearingList, OffsetDateTime retainUntilTs,
+                             List<ObjectAdminActionEntity> adminActionReasons, Integer retConfScore,
+                             String retConfReason, OffsetDateTime createdDateTime,
+                             UserAccountEntity createdBy, OffsetDateTime lastModifiedDateTime,
+                             UserAccountEntity lastModifiedBy) {
+        setId(id);
+        setCourtroom(courtroom);
+        setLegacyObjectId(legacyObjectId);
+        setChannel(channel);
+        setTotalChannels(totalChannels);
+        setStart(start);
+        setEnd(end);
+        setMediaLinkedCaseList(mediaLinkedCaseList);
+        setLegacyVersionLabel(legacyVersionLabel);
+        setMediaFile(mediaFile);
+        setMediaFormat(mediaFormat);
+        setFileSize(fileSize);
+        setChecksum(checksum);
+        setMediaType(mediaType);
+        setContentObjectId(contentObjectId);
+        setClipId(clipId);
+        setChronicleId(chronicleId);
+        setAntecedentId(antecedentId);
+        setHidden(isHidden);
+        setDeleted(isDeleted);
+        setIsCurrent(isCurrent);
+        setDeletedBy(deletedBy);
+        setDeletedTimestamp(deletedTimestamp);
+        setMediaStatus(mediaStatus);
+        setHearingList(hearingList);
+        setRetainUntilTs(retainUntilTs);
+        setAdminActionReasons(adminActionReasons);
+        setRetConfScore(retConfScore);
+        setRetConfReason(retConfReason);
+        setCreatedDateTime(createdDateTime);
+        setCreatedBy(createdBy);
+        setLastModifiedDateTime(lastModifiedDateTime);
+        setLastModifiedBy(lastModifiedBy);
+    }
+
+    public static class CustomMediaBuilderRetrieve implements BuilderRetrieve<MediaEntity, CustomMediaEntity.CustomMediaEntityBuilder> {
+        public CustomMediaBuilderRetrieve() {
+        }
+
+        private CustomMediaEntity.CustomMediaEntityBuilder builder = CustomMediaEntity.builder();
+
+        @Override
+        public MediaEntity build() {
+            try {
+                MediaEntity mediaRequestEntity = new MediaEntity();
+                BeanUtils.copyProperties(mediaRequestEntity, builder.build());
+                return mediaRequestEntity;
+            } catch (IllegalAccessException | InvocationTargetException e) {
+                throw new AssertionFailure("Assumed that there would be no error on mapping data", e);
+            }
+        }
+
+        @Override
+        public CustomMediaEntity.CustomMediaEntityBuilder getBuilder() {
+            return builder;
+        }
+    }
+}

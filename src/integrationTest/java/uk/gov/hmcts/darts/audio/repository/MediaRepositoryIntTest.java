@@ -8,6 +8,7 @@ import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
 import uk.gov.hmcts.darts.common.repository.HearingRepository;
 import uk.gov.hmcts.darts.common.repository.MediaRepository;
+import uk.gov.hmcts.darts.test.common.data.PersistableFactory;
 import uk.gov.hmcts.darts.testutils.PostgresIntegrationBase;
 import uk.gov.hmcts.darts.testutils.stubs.CourtCaseStub;
 import uk.gov.hmcts.darts.testutils.stubs.MediaStub;
@@ -18,7 +19,6 @@ import java.util.List;
 import static org.assertj.core.api.Assertions.assertThat;
 import static uk.gov.hmcts.darts.test.common.data.CaseTestData.createSomeMinimalCase;
 import static uk.gov.hmcts.darts.test.common.data.HearingTestData.createHearingFor;
-import static uk.gov.hmcts.darts.test.common.data.MediaTestData.someMinimalMedia;
 
 class MediaRepositoryIntTest extends PostgresIntegrationBase {
 
@@ -54,9 +54,9 @@ class MediaRepositoryIntTest extends PostgresIntegrationBase {
         var caseB = createSomeMinimalCase();
         var hearB = createHearingFor(caseB);
 
-        var media0 = someMinimalMedia();
-        var media1 = someMinimalMedia();
-        var media2 = someMinimalMedia();
+        var media0 = PersistableFactory.getMediaEntity().someMinimalMedia();
+        var media1 = PersistableFactory.getMediaEntity().someMinimalMedia();
+        var media2 = PersistableFactory.getMediaEntity().someMinimalMedia();
         hearA1.addMedia(media0);
         hearA1.addMedia(media1);
         hearA2.addMedia(media2);

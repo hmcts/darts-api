@@ -2,9 +2,6 @@ package uk.gov.hmcts.darts.test.common.data;
 
 import uk.gov.hmcts.darts.test.common.data.builder.BuilderRetrieve;
 
-import java.util.ArrayList;
-import java.util.List;
-
 public interface Persistable<M extends BuilderRetrieve<?,?>> {
 
     /**
@@ -29,20 +26,4 @@ public interface Persistable<M extends BuilderRetrieve<?,?>> {
      * @return a maximally persistent instance of M
      */
     M someMaximal();
-
-    default List<M> someMinimalList(int count) {
-        List<M> minimalList = new ArrayList<>();
-        for (int i=0; i<count; i++) {
-            someMinimal();
-        }
-        return minimalList;
-    }
-
-    default List<M> someMaximalList(int count) {
-        List<M> maximalList = new ArrayList<>();
-        for (int i=0; i<count; i++) {
-            someMinimal();
-        }
-        return maximalList;
-    }
 }

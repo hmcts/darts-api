@@ -10,6 +10,7 @@ import uk.gov.hmcts.darts.audio.model.AudioPreview;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
 import uk.gov.hmcts.darts.common.service.RedisService;
+import uk.gov.hmcts.darts.test.common.data.PersistableFactory;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 
 import java.time.LocalDate;
@@ -20,9 +21,7 @@ import static uk.gov.hmcts.darts.audio.enums.AudioPreviewStatus.ENCODING;
 import static uk.gov.hmcts.darts.audio.enums.AudioPreviewStatus.FAILED;
 import static uk.gov.hmcts.darts.audio.enums.AudioPreviewStatus.READY;
 import static uk.gov.hmcts.darts.test.common.AwaitabilityUtil.waitForMax10SecondsWithOneSecondPoll;
-import static uk.gov.hmcts.darts.test.common.data.ExternalObjectDirectoryTestData.minimalExternalObjectDirectory;
 import static uk.gov.hmcts.darts.test.common.data.HearingTestData.someMinimalHearing;
-import static uk.gov.hmcts.darts.test.common.data.MediaTestData.someMinimalMedia;
 
 @TestPropertySource(properties = {"darts.audio.transformation.service.audio.file=tests/audio/WithViqHeader/viq0001min.mp2"})
 class AudioPreviewTest extends IntegrationBase {
@@ -89,11 +88,11 @@ class AudioPreviewTest extends IntegrationBase {
     }
 
     private MediaEntity givenSomeStoredMedia() {
-        var mediaEntity = someMinimalMedia();
+        var mediaEntity = PersistableFactory.getMediaEntity().someMinimalMedia();
         hearing.addMedia(mediaEntity);
         dartsPersistence.save(hearing);
 
-        var externalObjectDirectory = minimalExternalObjectDirectory();
+        var externalObjectDirectory = PersistableFactory.getExternalObjectDirectoryTestData().minimalExternalObjectDirectory();
         externalObjectDirectory.setMedia(mediaEntity);
         dartsPersistence.save(externalObjectDirectory);
         return mediaEntity;

@@ -14,6 +14,7 @@ import java.time.OffsetDateTime;
 
 @Component
 @RequiredArgsConstructor
+@Deprecated
 public class TranscriptionDocumentStubComposable {
 
     private final TranscriptionDocumentRepository transcriptionDocumentRepository;

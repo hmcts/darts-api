@@ -7,10 +7,9 @@ import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
 import uk.gov.hmcts.darts.common.repository.MediaRepository;
 import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
+import uk.gov.hmcts.darts.test.common.data.PersistableFactory;
 
 import java.time.OffsetDateTime;
-
-import static uk.gov.hmcts.darts.test.common.data.MediaTestData.createMediaWith;
 
 @Component
 @RequiredArgsConstructor
@@ -32,7 +31,7 @@ public class MediaStubComposable {
 
         CourtroomEntity courtroom = courtroomStub
             .createCourtroomUnlessExists(courthouseStubComposable, courthouseName, courtroomName, userAccountRepository.getReferenceById(0));
-        return dartsPersistence.save(createMediaWith(courtroom, startTime, endTime, channel, mediaType));
+        return dartsPersistence.save(PersistableFactory.getMediaEntity().createMediaWith(courtroom, startTime, endTime, channel, mediaType));
     }
 
     public MediaEntity createMediaEntity(CourtroomStubComposable courtroomStub,
@@ -41,7 +40,7 @@ public class MediaStubComposable {
                                          String mediaType) {
         CourtroomEntity courtroom = courtroomStub
             .createCourtroomUnlessExists(courthouse, courtroomName, userAccountRepository.getReferenceById(0));
-        return dartsPersistence.save(createMediaWith(courtroom, startTime, endTime, channel, mediaType));
+        return dartsPersistence.save(PersistableFactory.getMediaEntity().createMediaWith(courtroom, startTime, endTime, channel, mediaType));
     }
 
     public MediaEntity createMediaEntity(CourtroomStubComposable courtroomStub,
@@ -49,7 +48,7 @@ public class MediaStubComposable {
                                          OffsetDateTime startTime, OffsetDateTime endTime, int channel) {
         CourtroomEntity courtroom = courtroomStub
             .createCourtroomUnlessExists(courthouse, courtroomName, userAccountRepository.getReferenceById(0));
-        return dartsPersistence.save(createMediaWith(courtroom, startTime, endTime, channel, "mp2"));
+        return dartsPersistence.save(PersistableFactory.getMediaEntity().createMediaWith(courtroom, startTime, endTime, channel, "mp2"));
     }
 
     public MediaEntity createMediaEntity(CourthouseStubComposable courthouseStubComposable,
@@ -67,7 +66,7 @@ public class MediaStubComposable {
                                                String mediaType) {
         CourtroomEntity courtroom = courtroomStub.createCourtroomUnlessExists(
             courthouseStubComposable, courthouseName, courtroomName, userAccountRepository.getReferenceById(0));
-        MediaEntity mediaEntity = createMediaWith(courtroom, startTime, endTime, channel, mediaType);
+        MediaEntity mediaEntity = PersistableFactory.getMediaEntity().createMediaWith(courtroom, startTime, endTime, channel, mediaType);
         mediaEntity.setHidden(true);
         return dartsPersistence.save(mediaEntity);
     }

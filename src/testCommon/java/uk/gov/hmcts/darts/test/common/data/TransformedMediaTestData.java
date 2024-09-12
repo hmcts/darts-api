@@ -4,7 +4,6 @@ import uk.gov.hmcts.darts.common.entity.TransformedMediaEntity;
 
 import java.time.OffsetDateTime;
 
-import static uk.gov.hmcts.darts.test.common.data.MediaRequestTestData.someMinimalRequestData;
 import static uk.gov.hmcts.darts.test.common.data.UserAccountTestData.minimalUserAccount;
 
 @SuppressWarnings({"HideUtilityClassConstructor"})
@@ -12,7 +11,7 @@ public class TransformedMediaTestData {
 
     public static TransformedMediaEntity minimalTransformedMedia() {
         var transformedMedia = new TransformedMediaEntity();
-        transformedMedia.setMediaRequest(someMinimalRequestData().build());
+        transformedMedia.setMediaRequest(PersistableFactory.getMediaRequestEntity().someMinimalRequestData().build());
         transformedMedia.setStartTime(OffsetDateTime.now());
         transformedMedia.setEndTime(OffsetDateTime.now().plusHours(1));
         transformedMedia.setCreatedBy(minimalUserAccount());

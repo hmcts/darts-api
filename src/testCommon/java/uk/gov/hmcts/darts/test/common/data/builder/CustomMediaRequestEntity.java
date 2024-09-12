@@ -1,16 +1,9 @@
 package uk.gov.hmcts.darts.test.common.data.builder;
 
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import lombok.RequiredArgsConstructor;
-import lombok.experimental.SuperBuilder;
 import org.apache.commons.beanutils.BeanUtils;
-import org.codehaus.groovy.runtime.InvokerInvocationException;
 import org.hibernate.AssertionFailure;
 import uk.gov.hmcts.darts.audio.entity.MediaRequestEntity;
-
 import uk.gov.hmcts.darts.audio.enums.MediaRequestStatus;
 import uk.gov.hmcts.darts.audiorequests.model.AudioRequestType;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
@@ -43,7 +36,8 @@ public class CustomMediaRequestEntity extends MediaRequestEntity {
     }
 
     public static class CustomMediaBuilderRetrieve implements BuilderRetrieve<MediaRequestEntity, CustomMediaRequestEntity.CustomMediaRequestEntityBuilder> {
-        private final CustomMediaRequestEntity.CustomMediaRequestEntityBuilder builder = CustomMediaRequestEntity.builder();
+
+        private CustomMediaRequestEntity.CustomMediaRequestEntityBuilder builder = CustomMediaRequestEntity.builder();
 
         @Override
         public MediaRequestEntity build() {
@@ -58,7 +52,7 @@ public class CustomMediaRequestEntity extends MediaRequestEntity {
 
         @Override
         public CustomMediaRequestEntity.CustomMediaRequestEntityBuilder getBuilder() {
-            return builder;
+             return builder;
         }
     }
 }

@@ -11,6 +11,7 @@ import java.time.OffsetDateTime;
 
 @Component
 @RequiredArgsConstructor
+@Deprecated
 @SuppressWarnings({"PMD.AvoidUsingHardCodedIP"})
 public class NodeRegisterStub {
     private final NodeRegisterRepository nodeRegisterRepository;

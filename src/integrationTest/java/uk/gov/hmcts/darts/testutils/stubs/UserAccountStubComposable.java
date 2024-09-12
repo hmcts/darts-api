@@ -17,6 +17,7 @@ import java.util.UUID;
 
 @Component
 @RequiredArgsConstructor
+@Deprecated
 public class UserAccountStubComposable {
     private static final int SYSTEM_USER_ID = 0;
     public static final String INTEGRATION_TEST_USER_EMAIL = "integrationtest.user@example.com";

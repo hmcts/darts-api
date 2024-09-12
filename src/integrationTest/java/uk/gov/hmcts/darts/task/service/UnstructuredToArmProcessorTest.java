@@ -1,6 +1,7 @@
 package uk.gov.hmcts.darts.task.service;
 
 import com.azure.storage.blob.models.BlobStorageException;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,6 +19,7 @@ import uk.gov.hmcts.darts.common.entity.TranscriptionEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum;
 import uk.gov.hmcts.darts.test.common.data.MediaTestData;
+import uk.gov.hmcts.darts.test.common.data.PersistableFactory;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 import uk.gov.hmcts.darts.testutils.stubs.AuthorisationStub;
 import uk.gov.hmcts.darts.testutils.stubs.TranscriptionStub;
@@ -52,6 +54,13 @@ class UnstructuredToArmProcessorTest extends IntegrationBase {
     @Autowired
     private AuthorisationStub authorisationStub;
 
+    private MediaTestData mediaTestData;
+
+    @BeforeEach
+    void setUp() {
+        mediaTestData = PersistableFactory.getMediaEntity();
+    }
+
     @Test
     void movePendingMediaDataFromUnstructuredToArmStorage() {
 
@@ -65,7 +74,7 @@ class UnstructuredToArmProcessorTest extends IntegrationBase {
         when(userIdentity.getUserAccount()).thenReturn(testUser);
 
         MediaEntity savedMedia = dartsDatabase.save(
-            MediaTestData.createMediaWith(
+            mediaTestData.createMediaWith(
                 hearing.getCourtroom(),
                 OffsetDateTime.parse("2023-09-26T13:00:00Z"),
                 OffsetDateTime.parse("2023-09-26T13:45:00Z"),
@@ -188,7 +197,7 @@ class UnstructuredToArmProcessorTest extends IntegrationBase {
         );
 
         MediaEntity savedMedia = dartsDatabase.save(
-            MediaTestData.createMediaWith(
+            mediaTestData.createMediaWith(
                 hearing.getCourtroom(),
                 OffsetDateTime.parse("2023-09-26T13:00:00Z"),
                 OffsetDateTime.parse("2023-09-26T13:45:00Z"),
@@ -237,7 +246,7 @@ class UnstructuredToArmProcessorTest extends IntegrationBase {
         );
 
         MediaEntity savedMedia = dartsDatabase.save(
-            MediaTestData.createMediaWith(
+            mediaTestData.createMediaWith(
                 hearing.getCourtroom(),
                 OffsetDateTime.parse("2023-09-26T13:00:00Z"),
                 OffsetDateTime.parse("2023-09-26T13:45:00Z"),
@@ -286,7 +295,7 @@ class UnstructuredToArmProcessorTest extends IntegrationBase {
         );
 
         MediaEntity savedMedia = dartsDatabase.save(
-            MediaTestData.createMediaWith(
+            mediaTestData.createMediaWith(
                 hearing.getCourtroom(),
                 OffsetDateTime.parse("2023-09-26T13:00:00Z"),
                 OffsetDateTime.parse("2023-09-26T13:45:00Z"),
@@ -335,7 +344,7 @@ class UnstructuredToArmProcessorTest extends IntegrationBase {
         );
 
         MediaEntity savedMedia = dartsDatabase.save(
-            MediaTestData.createMediaWith(
+            mediaTestData.createMediaWith(
                 hearing.getCourtroom(),
                 OffsetDateTime.parse("2023-09-26T13:00:00Z"),
                 OffsetDateTime.parse("2023-09-26T13:45:00Z"),
@@ -382,7 +391,7 @@ class UnstructuredToArmProcessorTest extends IntegrationBase {
         when(userIdentity.getUserAccount()).thenReturn(testUser);
 
         MediaEntity savedMedia = dartsDatabase.save(
-            MediaTestData.createMediaWith(
+            mediaTestData.createMediaWith(
                 hearing.getCourtroom(),
                 OffsetDateTime.parse("2023-09-26T13:00:00Z"),
                 OffsetDateTime.parse("2023-09-26T13:45:00Z"),

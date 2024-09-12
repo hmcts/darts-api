@@ -14,7 +14,6 @@ import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
 import uk.gov.hmcts.darts.common.helper.SystemUserHelper;
 import uk.gov.hmcts.darts.common.repository.MediaRequestRepository;
 import uk.gov.hmcts.darts.test.common.data.HearingTestData;
-import uk.gov.hmcts.darts.test.common.data.MediaRequestTestData;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 import uk.gov.hmcts.darts.testutils.stubs.SuperAdminUserStub;
 
@@ -35,6 +34,7 @@ import static uk.gov.hmcts.darts.audio.enums.MediaRequestStatus.COMPLETED;
 import static uk.gov.hmcts.darts.audio.enums.MediaRequestStatus.OPEN;
 import static uk.gov.hmcts.darts.audio.enums.MediaRequestStatus.PROCESSING;
 import static uk.gov.hmcts.darts.audiorequests.model.AudioRequestType.DOWNLOAD;
+import static uk.gov.hmcts.darts.test.common.data.PersistableFactory.getMediaRequestEntity;
 
 class MediaRequestServiceTest extends IntegrationBase {
 
@@ -151,7 +151,7 @@ class MediaRequestServiceTest extends IntegrationBase {
 
     @Test
     void shouldUpdateStatusToProcessing() {
-        MediaRequestEntity mediaRequest = new MediaRequestTestData().someMinimal().build();
+        MediaRequestEntity mediaRequest = getMediaRequestEntity().someMinimal().build();
         dartsPersistence.save(mediaRequest);
 
         MediaRequestEntity mediaRequestEntity = mediaRequestService.updateAudioRequestStatus(mediaRequest.getId(), PROCESSING);
@@ -180,7 +180,7 @@ class MediaRequestServiceTest extends IntegrationBase {
 
     @Test
     void shouldDeleteAudioRequestById() {
-        MediaRequestEntity mediaRequest = new MediaRequestTestData().someMinimal().build();
+        MediaRequestEntity mediaRequest = getMediaRequestEntity().someMinimal().build();
         dartsPersistence.save(mediaRequest);
 
         MediaRequestEntity mediaRequestEntity = mediaRequestService.getMediaRequestEntityById(mediaRequest.getId());
@@ -192,7 +192,7 @@ class MediaRequestServiceTest extends IntegrationBase {
 
     @Test
     void updateAudioRequestCompleted() {
-        MediaRequestEntity mediaRequest = new MediaRequestTestData().someMinimal().build();
+        MediaRequestEntity mediaRequest = getMediaRequestEntity().someMinimal().build();
         dartsPersistence.save(mediaRequest);
         final OffsetDateTime originalLastModifiedDateTime = mediaRequest.getLastModifiedDateTime();
 
@@ -231,7 +231,7 @@ class MediaRequestServiceTest extends IntegrationBase {
 
     @Test
     void getsMediaRequestById() {
-        MediaRequestEntity persistedMediaRequest = dartsPersistence.save(new MediaRequestTestData().someMaximal().build());
+        MediaRequestEntity persistedMediaRequest = dartsPersistence.save(getMediaRequestEntity().someMaximal().build());
 
         var mediaRequestResponse = mediaRequestService.getMediaRequestById(persistedMediaRequest.getId());
 

@@ -19,6 +19,7 @@ import java.util.function.Consumer;
 
 @Component
 @RequiredArgsConstructor
+@Deprecated
 public class CourtCaseStub {
 
     private static final LocalDateTime D_2020_10_1 = LocalDateTime.of(2020, 10, 1, 12, 0, 0);

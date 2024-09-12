@@ -25,6 +25,7 @@ import static uk.gov.hmcts.darts.event.enums.EventStatus.MODERNISED;
 
 @Component
 @RequiredArgsConstructor
+@Deprecated
 public class EventStub {
 
     private final EventRepository eventRepository;

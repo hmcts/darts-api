@@ -13,6 +13,7 @@ import java.util.UUID;
 
 @Component
 @RequiredArgsConstructor
+@Deprecated
 public class TransientObjectDirectoryStub {
 
     private final TransientObjectDirectoryRepository transientObjectDirectoryRepository;

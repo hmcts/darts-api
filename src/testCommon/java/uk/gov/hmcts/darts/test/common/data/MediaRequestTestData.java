@@ -44,9 +44,12 @@ public class MediaRequestTestData implements Persistable<CustomMediaRequestEntit
 
     private OffsetDateTime lastModifiedAt = NOW;
 
-    private CustomMediaRequestEntity.CustomMediaBuilderRetrieve builder = new CustomMediaRequestEntity.CustomMediaBuilderRetrieve();
+    MediaRequestTestData() {
+
+    }
 
     public CustomMediaRequestEntity.CustomMediaBuilderRetrieve someMinimal() {
+        CustomMediaRequestEntity.CustomMediaBuilderRetrieve builder = new CustomMediaRequestEntity.CustomMediaBuilderRetrieve();
         builder.getBuilder().hearing(hearing).currentOwner(currentOwner).requestor(requestor)
             .attempts(attempts).startTime(startTime)
             .endTime(endTime).createdBy(createdBy).lastModifiedBy(lastModifiedBy).createdAt(createdAt)
@@ -64,18 +67,20 @@ public class MediaRequestTestData implements Persistable<CustomMediaRequestEntit
      * @deprecated do not use. Instead, use someMinimal().
      */
     @Deprecated
-    public static CustomMediaRequestEntity.CustomMediaBuilderRetrieve someMinimalRequestData() {
-        return new MediaRequestTestData().someMinimal();
+    public CustomMediaRequestEntity.CustomMediaBuilderRetrieve someMinimalRequestData() {
+        return someMinimal();
     }
 
     /**
      * @deprecated do not use. Instead, use fromSpec() to create an object with the desired state.
      */
     @Deprecated
-    public static MediaRequestEntity createCurrentMediaRequest(HearingEntity hearingEntity, UserAccountEntity requestor,
+    public MediaRequestEntity createCurrentMediaRequest(HearingEntity hearingEntity, UserAccountEntity requestor,
                                                                OffsetDateTime startTime, OffsetDateTime endTime,
                                                                AudioRequestType audioRequestType, MediaRequestStatus status) {
-        return someMinimalRequestData().getBuilder()
+        CustomMediaRequestEntity.CustomMediaBuilderRetrieve builder = someMinimalRequestData();
+
+        builder.getBuilder()
                    .hearing(hearingEntity)
                    .requestor(requestor)
                    .currentOwner(requestor)
@@ -84,26 +89,32 @@ public class MediaRequestTestData implements Persistable<CustomMediaRequestEntit
                    .requestType(audioRequestType)
                    .status(status)
                    .build();
+
+        return builder.build();
 }
 
     /**
      * @deprecated do not use. Instead, use fromSpec() to create an object with the desired state.
      */
     @Deprecated
-    public static MediaRequestEntity createCurrentMediaRequest(HearingEntity hearingEntity, UserAccountEntity owner, UserAccountEntity requestor,
+    public MediaRequestEntity createCurrentMediaRequest(HearingEntity hearingEntity, UserAccountEntity owner, UserAccountEntity requestor,
                                                                OffsetDateTime startTime, OffsetDateTime endTime,
                                                                AudioRequestType audioRequestType, MediaRequestStatus status, OffsetDateTime requestedDate) {
-        return CustomMediaRequestEntity.builder()
-                   .hearing(hearingEntity)
-                   .requestor(requestor)
-                   .currentOwner(owner)
-                   .startTime(startTime)
-                   .endTime(endTime)
-                   .requestType(audioRequestType)
-                   .status(status)
-                   .createdBy(requestor)
-                   .createdAt(requestedDate)
-                   .lastModifiedBy(requestor)
-                   .build();
+        CustomMediaRequestEntity.CustomMediaBuilderRetrieve builder = new CustomMediaRequestEntity.CustomMediaBuilderRetrieve();
+
+         builder.getBuilder()
+           .hearing(hearingEntity)
+           .requestor(requestor)
+           .currentOwner(owner)
+           .startTime(startTime)
+           .endTime(endTime)
+           .requestType(audioRequestType)
+           .status(status)
+           .createdBy(requestor)
+           .createdAt(requestedDate)
+           .lastModifiedBy(requestor)
+           .build();
+
+         return builder.build();
     }
 }

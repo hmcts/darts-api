@@ -24,6 +24,7 @@ import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionUrgencyEnum.S
 
 @Component
 @RequiredArgsConstructor
+@Deprecated
 public class TranscriptionStubComposable {
 
     private final TranscriptionRepository transcriptionRepository;

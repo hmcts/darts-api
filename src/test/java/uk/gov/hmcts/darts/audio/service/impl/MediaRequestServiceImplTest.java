@@ -46,6 +46,8 @@ import uk.gov.hmcts.darts.hearings.exception.HearingApiError;
 import uk.gov.hmcts.darts.hearings.service.HearingsService;
 import uk.gov.hmcts.darts.notification.api.NotificationApi;
 import uk.gov.hmcts.darts.notification.dto.SaveNotificationToDbRequest;
+import uk.gov.hmcts.darts.test.common.data.MediaTestData;
+import uk.gov.hmcts.darts.test.common.data.PersistableFactory;
 
 import java.io.IOException;
 import java.time.OffsetDateTime;
@@ -83,8 +85,6 @@ import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.FAILURE_CHE
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.STORED;
 import static uk.gov.hmcts.darts.notification.api.NotificationApi.NotificationTemplate.AUDIO_REQUEST_PROCESSING;
 import static uk.gov.hmcts.darts.notification.api.NotificationApi.NotificationTemplate.AUDIO_REQUEST_PROCESSING_ARCHIVE;
-import static uk.gov.hmcts.darts.test.common.data.MediaRequestTestData.someMinimalRequestData;
-import static uk.gov.hmcts.darts.test.common.data.MediaTestData.someMinimalMedia;
 import static uk.gov.hmcts.darts.test.common.data.ObjectHiddenReasonTestData.classified;
 import static uk.gov.hmcts.darts.util.EntityIdPopulator.withIdsPopulated;
 
@@ -155,6 +155,8 @@ class MediaRequestServiceImplTest {
     @Mock
     private CurrentTimeHelper currentTimeHelper;
 
+    private MediaTestData mediaTestData;
+
     @BeforeEach
     void beforeEach() {
         mockHearingEntity = new HearingEntity();
@@ -176,6 +178,8 @@ class MediaRequestServiceImplTest {
 
         mockTransformedMediaEntity = new TransformedMediaEntity();
         mockTransformedMediaEntity.setMediaRequest(mockMediaRequestEntity);
+
+        mediaTestData = PersistableFactory.getMediaEntity();
     }
 
     @Test
@@ -760,7 +764,7 @@ class MediaRequestServiceImplTest {
 
     @Test
     void auditsWhenOwnerChanged() {
-        var mediaRequest = withIdsPopulated(someMinimalRequestData().build());
+        var mediaRequest = withIdsPopulated(PersistableFactory.getMediaRequestEntity().someMinimalRequestData().build());
         when(mockMediaRequestRepository.findById(any())).thenReturn(Optional.of(mediaRequest));
         when(mockUserAccountRepository.findById(any())).thenReturn(Optional.of(mediaRequest.getCurrentOwner()));
 
@@ -771,7 +775,7 @@ class MediaRequestServiceImplTest {
 
     @Test
     void doesNotAuditWhenOwnerNotChanged() {
-        var mediaRequest = withIdsPopulated(someMinimalRequestData().build());
+        var mediaRequest = withIdsPopulated(PersistableFactory.getMediaRequestEntity().someMinimalRequestData().build());
         when(mockMediaRequestRepository.findById(any())).thenReturn(Optional.of(mediaRequest));
 
         mediaRequestService.patchMediaRequest(
@@ -783,7 +787,7 @@ class MediaRequestServiceImplTest {
 
     @Test
     void auditsWhenAudioHidden() {
-        var media = withIdsPopulated(someMinimalMedia());
+        var media = withIdsPopulated(mediaTestData.someMinimalMedia());
         media.setHidden(false);
         when(mediaRepository.findById(any())).thenReturn(Optional.of(media));
         when(objectHiddenReasonRepository.findById(any())).thenReturn(Optional.of(classified()));
@@ -799,7 +803,7 @@ class MediaRequestServiceImplTest {
 
     @Test
     void doesNotAuditWhenAudioMadeVisible() {
-        var media = withIdsPopulated(someMinimalMedia());
+        var media = withIdsPopulated(mediaTestData.someMinimalMedia());
         media.setHidden(true);
         when(mediaRepository.findById(any())).thenReturn(Optional.of(media));
 
