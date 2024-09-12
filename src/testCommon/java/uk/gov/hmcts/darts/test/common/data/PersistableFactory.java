@@ -19,11 +19,11 @@ public class PersistableFactory {
         return new ExternalObjectDirectoryTestData();
     }
 
-    public static MediaTestData getMediaEntity() {
+    public static MediaTestData getMediaTestData() {
         return new MediaTestData();
     }
 
-    public static MediaRequestTestData getMediaRequestEntity() {
+    public static MediaRequestTestData getMediaRequestTestData() {
         return new MediaRequestTestData();
     }
 }

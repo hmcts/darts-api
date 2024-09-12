@@ -460,7 +460,7 @@ public class DartsDatabaseStub {
         HearingEntity hearing = createHearing("NEWCASTLE", "Int Test Courtroom 2", "2", LocalDateTime.of(2023, 6, 10, 10, 0, 0));
 
         return dartsPersistence.save(
-            PersistableFactory.getMediaRequestEntity().createCurrentMediaRequest(
+            PersistableFactory.getMediaRequestTestData().createCurrentMediaRequest(
                 hearing,
                 requestor,
                 OffsetDateTime.parse("2023-06-26T13:00:00Z"),
@@ -474,7 +474,7 @@ public class DartsDatabaseStub {
     public MediaRequestEntity createAndLoadNonAccessedCurrentMediaRequestEntity(UserAccountEntity requestor,
                                                                                 AudioRequestType audioRequestType) {
 
-        CustomMediaRequestEntity.CustomMediaBuilderRetrieve mediaRequestEntity = PersistableFactory.getMediaRequestEntity().someMinimal();
+        CustomMediaRequestEntity.CustomMediaBuilderRetrieve mediaRequestEntity = PersistableFactory.getMediaRequestTestData().someMinimal();
 
         mediaRequestEntity.getBuilder().requestor(requestor)
             .currentOwner(requestor)

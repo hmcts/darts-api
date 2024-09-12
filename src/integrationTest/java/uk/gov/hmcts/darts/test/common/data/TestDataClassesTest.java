@@ -7,7 +7,7 @@ import org.springframework.beans.factory.support.SimpleBeanDefinitionRegistry;
 import org.springframework.context.annotation.ClassPathBeanDefinitionScanner;
 import org.springframework.core.type.filter.AssignableTypeFilter;
 import org.springframework.core.type.filter.TypeFilter;
-import uk.gov.hmcts.darts.test.common.data.builder.BuilderRetrieve;
+import uk.gov.hmcts.darts.test.common.data.builder.BuilderHolder;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 import uk.gov.hmcts.darts.testutils.stubs.DartsPersistence;
 
@@ -29,7 +29,7 @@ class TestDataClassesTest extends IntegrationBase {
         List<Class<?>> classList = getPersistableClasses();
         for (Class<?> cls : classList) {
             Persistable<?> obj = (Persistable<?>) cls.getDeclaredConstructors()[0].newInstance();
-            BuilderRetrieve<?,?> retrieve = obj.someMinimal();
+            BuilderHolder<?,?> retrieve = obj.someMinimal();
             Object entity = retrieve.build();
 
             dartsPersistence.getClass()
@@ -43,7 +43,7 @@ class TestDataClassesTest extends IntegrationBase {
         List<Class<?>> classList = getPersistableClasses();
         for (Class<?> cls : classList) {
             Persistable<?> obj = (Persistable<?>) cls.getDeclaredConstructors()[0].newInstance();
-            BuilderRetrieve<?,?> retrieve = obj.someMaximal();
+            BuilderHolder<?,?> retrieve = obj.someMaximal();
             Object entity = retrieve.build();
             dartsPersistence.getClass()
                 .getMethod("save", entity.getClass()).invoke(dartsPersistence,

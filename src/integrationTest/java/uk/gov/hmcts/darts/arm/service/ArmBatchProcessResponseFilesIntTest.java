@@ -1594,7 +1594,7 @@ class ArmBatchProcessResponseFilesIntTest extends IntegrationBase {
 
     private MediaEntity createMediaEntity(HearingEntity hearing, OffsetDateTime startTime, OffsetDateTime endTime, int channel) {
         return dartsDatabase.save(
-            PersistableFactory.getMediaEntity().createMediaWith(
+            PersistableFactory.getMediaTestData().createMediaWith(
                 hearing.getCourtroom(),
                 startTime,
                 endTime,

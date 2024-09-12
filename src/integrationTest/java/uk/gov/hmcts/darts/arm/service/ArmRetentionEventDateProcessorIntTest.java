@@ -55,7 +55,7 @@ import static uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum.ARM;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_DROP_ZONE;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_INGESTION;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.STORED;
-import static uk.gov.hmcts.darts.test.common.data.PersistableFactory.getMediaEntity;
+import static uk.gov.hmcts.darts.test.common.data.PersistableFactory.getMediaTestData;
 
 @Slf4j
 class ArmRetentionEventDateProcessorIntTest extends IntegrationBase {
@@ -142,7 +142,7 @@ class ArmRetentionEventDateProcessorIntTest extends IntegrationBase {
         );
 
         MediaEntity savedMedia = dartsDatabase.save(
-            getMediaEntity().createMediaWith(
+            getMediaTestData().createMediaWith(
                 hearing.getCourtroom(),
                 START_TIME,
                 END_TIME,
@@ -212,7 +212,7 @@ class ArmRetentionEventDateProcessorIntTest extends IntegrationBase {
         String confReason = "reason";
         Integer confScore = 100;
         MediaEntity savedMedia = dartsDatabase.save(
-            getMediaEntity().createMediaWith(
+            getMediaTestData().createMediaWith(
                 hearing.getCourtroom(),
                 START_TIME,
                 END_TIME,
@@ -546,7 +546,7 @@ class ArmRetentionEventDateProcessorIntTest extends IntegrationBase {
         String confReason = "reason";
         Integer confScore = 100;
         MediaEntity savedMedia = dartsDatabase.save(
-            getMediaEntity().createMediaWith(
+            getMediaTestData().createMediaWith(
                 hearing.getCourtroom(),
                 START_TIME,
                 END_TIME,

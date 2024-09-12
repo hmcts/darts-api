@@ -21,7 +21,7 @@ import java.util.List;
 import static org.springframework.beans.factory.config.ConfigurableBeanFactory.SCOPE_PROTOTYPE;
 import static uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum.UNSTRUCTURED;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.STORED;
-import static uk.gov.hmcts.darts.test.common.data.PersistableFactory.getMediaEntity;
+import static uk.gov.hmcts.darts.test.common.data.PersistableFactory.getMediaTestData;
 
 @Transactional
 @Service
@@ -49,10 +49,10 @@ public class AudioTransformationServiceGivenBuilder {
         hearingEntityWithMedia2 = HearingTestData.someMinimalHearing();
         hearingEntityWithMedia4 = HearingTestData.someMinimalHearing();
         hearingEntityWithoutMedia = HearingTestData.someMinimalHearing();
-        CustomMediaEntity.CustomMediaBuilderRetrieve mediaTestData1 = getMediaEntity().someMinimal();
-        CustomMediaEntity.CustomMediaBuilderRetrieve mediaTestData2 = getMediaEntity().someMinimal();
-        CustomMediaEntity.CustomMediaBuilderRetrieve mediaTestData3 = getMediaEntity().someMinimal();
-        CustomMediaEntity.CustomMediaBuilderRetrieve mediaTestData4 = getMediaEntity().someMinimal();
+        CustomMediaEntity.CustomMediaBuilderRetrieve mediaTestData1 = getMediaTestData().someMinimal();
+        CustomMediaEntity.CustomMediaBuilderRetrieve mediaTestData2 = getMediaTestData().someMinimal();
+        CustomMediaEntity.CustomMediaBuilderRetrieve mediaTestData3 = getMediaTestData().someMinimal();
+        CustomMediaEntity.CustomMediaBuilderRetrieve mediaTestData4 = getMediaTestData().someMinimal();
 
         int channel = 1;
         mediaTestData1.getBuilder().hearingList(List.of(hearingEntityWithMedia1)).channel(1);

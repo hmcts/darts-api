@@ -58,7 +58,7 @@ class UnstructuredToArmProcessorTest extends IntegrationBase {
 
     @BeforeEach
     void setUp() {
-        mediaTestData = PersistableFactory.getMediaEntity();
+        mediaTestData = PersistableFactory.getMediaTestData();
     }
 
     @Test

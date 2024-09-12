@@ -179,7 +179,7 @@ class MediaRequestServiceImplTest {
         mockTransformedMediaEntity = new TransformedMediaEntity();
         mockTransformedMediaEntity.setMediaRequest(mockMediaRequestEntity);
 
-        mediaTestData = PersistableFactory.getMediaEntity();
+        mediaTestData = PersistableFactory.getMediaTestData();
     }
 
     @Test
@@ -764,7 +764,7 @@ class MediaRequestServiceImplTest {
 
     @Test
     void auditsWhenOwnerChanged() {
-        var mediaRequest = withIdsPopulated(PersistableFactory.getMediaRequestEntity().someMinimalRequestData().build());
+        var mediaRequest = withIdsPopulated(PersistableFactory.getMediaRequestTestData().someMinimalRequestData().build());
         when(mockMediaRequestRepository.findById(any())).thenReturn(Optional.of(mediaRequest));
         when(mockUserAccountRepository.findById(any())).thenReturn(Optional.of(mediaRequest.getCurrentOwner()));
 
@@ -775,7 +775,7 @@ class MediaRequestServiceImplTest {
 
     @Test
     void doesNotAuditWhenOwnerNotChanged() {
-        var mediaRequest = withIdsPopulated(PersistableFactory.getMediaRequestEntity().someMinimalRequestData().build());
+        var mediaRequest = withIdsPopulated(PersistableFactory.getMediaRequestTestData().someMinimalRequestData().build());
         when(mockMediaRequestRepository.findById(any())).thenReturn(Optional.of(mediaRequest));
 
         mediaRequestService.patchMediaRequest(

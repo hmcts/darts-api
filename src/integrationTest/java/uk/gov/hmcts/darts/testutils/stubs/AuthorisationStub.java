@@ -86,7 +86,7 @@ public class AuthorisationStub {
 
         createHearing();
 
-        mediaRequestEntity = PersistableFactory.getMediaRequestEntity().someMinimalRequestData().build();
+        mediaRequestEntity = PersistableFactory.getMediaRequestTestData().someMinimalRequestData().build();
         mediaRequestEntity.setHearing(hearingEntity);
         mediaRequestEntity.setRequestor(testUser);
         mediaRequestEntity.setCurrentOwner(testUser);
@@ -98,7 +98,7 @@ public class AuthorisationStub {
 
         transformedMediaEntity = dartsDatabaseStub.getTransformedMediaStub().createTransformedMediaEntity(mediaRequestEntity);
 
-        mediaRequestEntitySystemUser = PersistableFactory.getMediaRequestEntity().someMinimalRequestData().build();
+        mediaRequestEntitySystemUser = PersistableFactory.getMediaRequestTestData().someMinimalRequestData().build();
         mediaRequestEntitySystemUser.setHearing(hearingEntity);
         mediaRequestEntitySystemUser.setRequestor(systemUser);
         mediaRequestEntitySystemUser.setCurrentOwner(systemUser);
@@ -108,7 +108,7 @@ public class AuthorisationStub {
         mediaRequestEntitySystemUser.setEndTime(YESTERDAY.plusHours(1));
         dartsPersistence.save(mediaRequestEntitySystemUser);
 
-        mediaEntity = PersistableFactory.getMediaEntity().someMinimalMedia();
+        mediaEntity = PersistableFactory.getMediaTestData().someMinimalMedia();
         mediaEntity.setChannel(1);
         mediaEntity.setTotalChannels(2);
         mediaEntity.setCourtroom(courtroomEntity);

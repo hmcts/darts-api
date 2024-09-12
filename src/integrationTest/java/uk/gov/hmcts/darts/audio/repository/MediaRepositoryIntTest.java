@@ -54,9 +54,9 @@ class MediaRepositoryIntTest extends PostgresIntegrationBase {
         var caseB = createSomeMinimalCase();
         var hearB = createHearingFor(caseB);
 
-        var media0 = PersistableFactory.getMediaEntity().someMinimalMedia();
-        var media1 = PersistableFactory.getMediaEntity().someMinimalMedia();
-        var media2 = PersistableFactory.getMediaEntity().someMinimalMedia();
+        var media0 = PersistableFactory.getMediaTestData().someMinimalMedia();
+        var media1 = PersistableFactory.getMediaTestData().someMinimalMedia();
+        var media2 = PersistableFactory.getMediaTestData().someMinimalMedia();
         hearA1.addMedia(media0);
         hearA1.addMedia(media1);
         hearA2.addMedia(media2);

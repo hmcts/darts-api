@@ -56,8 +56,8 @@ public class CustomExternalObjectDirectoryEntity extends ExternalObjectDirectory
     }
 
     public static class CustomExternalObjectDirectoryuilderRetrieve
-        implements BuilderRetrieve<ExternalObjectDirectoryEntity,
-        CustomExternalObjectDirectoryEntity.CustomExternalObjectDirectoryEntityBuilder> {
+        implements BuilderHolder<ExternalObjectDirectoryEntity,
+                CustomExternalObjectDirectoryEntityBuilder> {
         public CustomExternalObjectDirectoryuilderRetrieve() {
         }
 

@@ -24,7 +24,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static uk.gov.hmcts.darts.test.common.data.CourtroomTestData.someMinimalCourtRoom;
 import static uk.gov.hmcts.darts.test.common.data.HearingTestData.someMinimalHearing;
 import static uk.gov.hmcts.darts.test.common.data.PersistableFactory.getExternalObjectDirectoryTestData;
-import static uk.gov.hmcts.darts.test.common.data.PersistableFactory.getMediaEntity;
+import static uk.gov.hmcts.darts.test.common.data.PersistableFactory.getMediaTestData;
 
 @AutoConfigureMockMvc
 @SuppressWarnings("VariableDeclarationUsageDistance")
@@ -43,11 +43,11 @@ class AudioControllerGetMetadataIntTest extends IntegrationBase {
     @Test
     void getAudioMetadataGetShouldReturnMediaChannel1MetadataAssociatedWithProvidedHearing() throws Exception {
         var courtroomEntity = someMinimalCourtRoom();
-        var mediaChannel1 = getMediaEntity().createMediaWith(courtroomEntity, MEDIA_START_TIME, MEDIA_END_TIME, 1);
-        var mediaChannel2 = getMediaEntity().createMediaWith(courtroomEntity, MEDIA_START_TIME, MEDIA_END_TIME, 2);
-        var mediaChannel3 = getMediaEntity().createMediaWith(courtroomEntity, MEDIA_START_TIME, MEDIA_END_TIME, 3);
-        var mediaChannel4 = getMediaEntity().createMediaWith(courtroomEntity, MEDIA_START_TIME, MEDIA_END_TIME, 4);
-        var mediaChannel5NotCurrent = getMediaEntity().createMediaWith(courtroomEntity, MEDIA_START_TIME, MEDIA_END_TIME, 5);
+        var mediaChannel1 = getMediaTestData().createMediaWith(courtroomEntity, MEDIA_START_TIME, MEDIA_END_TIME, 1);
+        var mediaChannel2 = getMediaTestData().createMediaWith(courtroomEntity, MEDIA_START_TIME, MEDIA_END_TIME, 2);
+        var mediaChannel3 = getMediaTestData().createMediaWith(courtroomEntity, MEDIA_START_TIME, MEDIA_END_TIME, 3);
+        var mediaChannel4 = getMediaTestData().createMediaWith(courtroomEntity, MEDIA_START_TIME, MEDIA_END_TIME, 4);
+        var mediaChannel5NotCurrent = getMediaTestData().createMediaWith(courtroomEntity, MEDIA_START_TIME, MEDIA_END_TIME, 5);
         mediaChannel5NotCurrent.setIsCurrent(false);
 
         dartsPersistence.save(getExternalObjectDirectoryTestData().eodStoredInUnstructuredLocationForMedia(mediaChannel1));
@@ -113,13 +113,13 @@ class AudioControllerGetMetadataIntTest extends IntegrationBase {
     @Test
     void getAudioMetadataGetShouldNotReturnHiddenMediaChannel1() throws Exception {
         var courtroomEntity = someMinimalCourtRoom();
-        var mediaChannel1 = getMediaEntity().createMediaWith(courtroomEntity, MEDIA_START_TIME, MEDIA_END_TIME, 1);
+        var mediaChannel1 = getMediaTestData().createMediaWith(courtroomEntity, MEDIA_START_TIME, MEDIA_END_TIME, 1);
         mediaChannel1.setIsCurrent(false);
         dartsPersistence.save(mediaChannel1);
 
-        var mediaChannel2 = getMediaEntity().createMediaWith(courtroomEntity, MEDIA_START_TIME, MEDIA_END_TIME, 2);
-        var mediaChannel3 = getMediaEntity().createMediaWith(courtroomEntity, MEDIA_START_TIME, MEDIA_END_TIME, 3);
-        var mediaChannel4 = getMediaEntity().createMediaWith(courtroomEntity, MEDIA_START_TIME, MEDIA_END_TIME, 4);
+        var mediaChannel2 = getMediaTestData().createMediaWith(courtroomEntity, MEDIA_START_TIME, MEDIA_END_TIME, 2);
+        var mediaChannel3 = getMediaTestData().createMediaWith(courtroomEntity, MEDIA_START_TIME, MEDIA_END_TIME, 3);
+        var mediaChannel4 = getMediaTestData().createMediaWith(courtroomEntity, MEDIA_START_TIME, MEDIA_END_TIME, 4);
 
         dartsPersistence.save(getExternalObjectDirectoryTestData().eodStoredInUnstructuredLocationForMedia(mediaChannel1));
 

@@ -41,7 +41,7 @@ class UnstructuredAudioDeleterProcessorTest extends IntegrationBase {
         dartsPersistence.save(hearing);
 
         MediaEntity savedMedia = dartsPersistence.save(
-            PersistableFactory.getMediaEntity().createMediaWith(
+            PersistableFactory.getMediaTestData().createMediaWith(
                 hearing.getCourtroom(),
                 OffsetDateTime.parse("2023-09-26T13:00:00Z"),
                 OffsetDateTime.parse("2023-09-26T13:45:00Z"),
@@ -87,7 +87,7 @@ class UnstructuredAudioDeleterProcessorTest extends IntegrationBase {
         dartsPersistence.save(hearing);
 
         MediaEntity savedMedia = dartsPersistence.save(
-            PersistableFactory.getMediaEntity().createMediaWith(
+            PersistableFactory.getMediaTestData().createMediaWith(
                 hearing.getCourtroom(),
                 OffsetDateTime.parse("2023-09-26T13:00:00Z"),
                 OffsetDateTime.parse("2023-09-26T13:45:00Z"),

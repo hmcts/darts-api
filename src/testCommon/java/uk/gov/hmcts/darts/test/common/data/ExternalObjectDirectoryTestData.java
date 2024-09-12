@@ -14,7 +14,7 @@ import static uk.gov.hmcts.darts.test.common.data.UserAccountTestData.minimalUse
 @SuppressWarnings({"HideUtilityClassConstructor"})
 public class ExternalObjectDirectoryTestData implements Persistable<CustomExternalObjectDirectoryEntity.CustomExternalObjectDirectoryuilderRetrieve> {
 
-    private MediaEntity mediaEntity = PersistableFactory.getMediaEntity().someMinimalMedia();
+    private MediaEntity mediaEntity = PersistableFactory.getMediaTestData().someMinimalMedia();
 
     ExternalObjectDirectoryTestData() {
 

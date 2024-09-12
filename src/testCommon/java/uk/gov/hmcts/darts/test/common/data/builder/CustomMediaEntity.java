@@ -66,7 +66,7 @@ public class CustomMediaEntity extends MediaEntity {
         setLastModifiedBy(lastModifiedBy);
     }
 
-    public static class CustomMediaBuilderRetrieve implements BuilderRetrieve<MediaEntity, CustomMediaEntity.CustomMediaEntityBuilder> {
+    public static class CustomMediaBuilderRetrieve implements BuilderHolder<MediaEntity, CustomMediaEntityBuilder> {
         public CustomMediaBuilderRetrieve() {
         }
 

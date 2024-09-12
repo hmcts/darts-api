@@ -53,7 +53,7 @@ import static uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum.INBOUND;
 import static uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum.UNSTRUCTURED;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.MARKED_FOR_DELETION;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.STORED;
-import static uk.gov.hmcts.darts.test.common.data.PersistableFactory.getMediaRequestEntity;
+import static uk.gov.hmcts.darts.test.common.data.PersistableFactory.getMediaRequestTestData;
 
 @Disabled("Impacted by V1_367__adding_not_null_constraints_part_4.sql")
 @SuppressWarnings({"PMD.ExcessiveImports"})
@@ -149,7 +149,7 @@ class ExternalDataStoreDeleterTest extends IntegrationBase {
         Mockito.when(dataManagementFactory.getBlobContainerClient(anyString(), eq(blobServiceClient))).thenReturn(blobContainerClient);
         Mockito.when(dataManagementFactory.getBlobClient(any(), any())).thenReturn(blobClient);
 
-        MediaRequestEntity currentMediaRequest = getMediaRequestEntity().createCurrentMediaRequest(
+        MediaRequestEntity currentMediaRequest = getMediaRequestTestData().createCurrentMediaRequest(
             hearing,
             requestor,
             OffsetDateTime.parse("2023-06-26T13:00:00Z"),
@@ -190,7 +190,7 @@ class ExternalDataStoreDeleterTest extends IntegrationBase {
         Mockito.when(dataManagementFactory.getBlobContainerClient(anyString(), eq(blobServiceClient))).thenReturn(blobContainerClient);
         Mockito.when(dataManagementFactory.getBlobClient(any(), any())).thenReturn(blobClient);
 
-        MediaRequestEntity currentMediaRequest = getMediaRequestEntity().createCurrentMediaRequest(
+        MediaRequestEntity currentMediaRequest = getMediaRequestTestData().createCurrentMediaRequest(
             hearing,
             requestor,
             OffsetDateTime.parse("2023-06-26T13:00:00Z"),

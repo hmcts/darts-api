@@ -35,7 +35,7 @@ public class CustomMediaRequestEntity extends MediaRequestEntity {
         setLastModifiedDateTime(lastModifiedAt);
     }
 
-    public static class CustomMediaBuilderRetrieve implements BuilderRetrieve<MediaRequestEntity, CustomMediaRequestEntity.CustomMediaRequestEntityBuilder> {
+    public static class CustomMediaBuilderRetrieve implements BuilderHolder<MediaRequestEntity, CustomMediaRequestEntityBuilder> {
 
         private CustomMediaRequestEntity.CustomMediaRequestEntityBuilder builder = CustomMediaRequestEntity.builder();
 

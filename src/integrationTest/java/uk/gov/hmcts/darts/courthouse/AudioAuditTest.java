@@ -20,7 +20,7 @@ import java.util.List;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.data.history.RevisionMetadata.RevisionType.UPDATE;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.SUPER_ADMIN;
-import static uk.gov.hmcts.darts.test.common.data.PersistableFactory.getMediaRequestEntity;
+import static uk.gov.hmcts.darts.test.common.data.PersistableFactory.getMediaRequestTestData;
 import static uk.gov.hmcts.darts.test.common.data.UserAccountTestData.minimalUserAccount;
 
 class AudioAuditTest extends IntegrationBase {
@@ -38,7 +38,7 @@ class AudioAuditTest extends IntegrationBase {
     @Disabled("Impacted by V1_364_*.sql")
     void performsStandardAndAdvancedAuditsWhenAudioOwnershipIsChanged() {
         var activeUser = given.anAuthenticatedUserWithGlobalAccessAndRole(SUPER_ADMIN);
-        MediaRequestEntity mediaRequest = entityGraphPersistence.persist(getMediaRequestEntity().someMinimalRequestData().build());
+        MediaRequestEntity mediaRequest = entityGraphPersistence.persist(getMediaRequestTestData().someMinimalRequestData().build());
         UserAccountEntity newOwner = entityGraphPersistence.persist(minimalUserAccount());
 
         mediaRequestService.patchMediaRequest(
@@ -56,7 +56,7 @@ class AudioAuditTest extends IntegrationBase {
     @Test
     void performsStandardAuditWhenAudioIsChangedToHidden() {
         var activeUser = given.anAuthenticatedUserWithGlobalAccessAndRole(SUPER_ADMIN);
-        var media = PersistableFactory.getMediaEntity().someMinimalMedia();
+        var media = PersistableFactory.getMediaTestData().someMinimalMedia();
         media.setHidden(false);
         entityGraphPersistence.persist(media);
 

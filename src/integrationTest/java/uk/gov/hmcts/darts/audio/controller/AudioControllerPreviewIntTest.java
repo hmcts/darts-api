@@ -136,7 +136,7 @@ class AudioControllerPreviewIntTest extends IntegrationBase {
 
     private HearingEntity hearingWithMedia() {
         var hearing = someMinimalHearing();
-        var media = PersistableFactory.getMediaEntity().createMediaWith(hearing.getCourtroom(), MEDIA_START_TIME, MEDIA_END_TIME, 1);
+        var media = PersistableFactory.getMediaTestData().createMediaWith(hearing.getCourtroom(), MEDIA_START_TIME, MEDIA_END_TIME, 1);
         hearing.addMedia(media);
         return hearing;
     }

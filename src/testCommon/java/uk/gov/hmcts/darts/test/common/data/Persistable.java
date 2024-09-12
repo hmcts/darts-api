@@ -1,8 +1,8 @@
 package uk.gov.hmcts.darts.test.common.data;
 
-import uk.gov.hmcts.darts.test.common.data.builder.BuilderRetrieve;
+import uk.gov.hmcts.darts.test.common.data.builder.BuilderHolder;
 
-public interface Persistable<M extends BuilderRetrieve<?,?>> {
+public interface Persistable<M extends BuilderHolder<?,?>> {
 
     /**
      * Return an entity that has only its non-null fields populated. All other fields should be expected to be null.

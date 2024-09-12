@@ -88,7 +88,7 @@ class AudioPreviewTest extends IntegrationBase {
     }
 
     private MediaEntity givenSomeStoredMedia() {
-        var mediaEntity = PersistableFactory.getMediaEntity().someMinimalMedia();
+        var mediaEntity = PersistableFactory.getMediaTestData().someMinimalMedia();
         hearing.addMedia(mediaEntity);
         dartsPersistence.save(hearing);
 

@@ -43,7 +43,7 @@ public class MediaRequestStub {
         HearingEntity hearing = hearingStub.createHearing(courtName, "Int Test Courtroom 2",
                                                           caseNumber, hearingDate);
 
-        var currentMediaRequest = PersistableFactory.getMediaRequestEntity().createCurrentMediaRequest(
+        var currentMediaRequest = PersistableFactory.getMediaRequestTestData().createCurrentMediaRequest(
             hearing,
             owner,
             requestor,
