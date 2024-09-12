@@ -132,7 +132,6 @@ public class AutomatedTaskServiceImpl implements AutomatedTaskService {
         }
         boolean found = false;
         for (AutoloadingAutomatedTask autoloadingAutomatedTask : autoloadingAutomatedTasks) {
-            System.out.println("TMP: " + autoloadingAutomatedTask.getAutomatedTaskName() + " -- " + automatedTaskName);
             if (automatedTaskName.equals(autoloadingAutomatedTask.getAutomatedTaskName())) {
                 found = true;
                 TriggerAndAutomatedTask triggerAndAutomatedTask = getTriggerAndAutomatedTask(autoloadingAutomatedTask.getTaskName());
