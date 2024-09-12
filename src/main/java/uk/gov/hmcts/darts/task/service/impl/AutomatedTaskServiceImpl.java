@@ -132,6 +132,7 @@ public class AutomatedTaskServiceImpl implements AutomatedTaskService {
         }
         boolean found = false;
         for (AutoloadingAutomatedTask autoloadingAutomatedTask : autoloadingAutomatedTasks) {
+            System.out.println("TMP: " + autoloadingAutomatedTask.getAutomatedTaskName() + " -- " + automatedTaskName);
             if (automatedTaskName.equals(autoloadingAutomatedTask.getAutomatedTaskName())) {
                 found = true;
                 TriggerAndAutomatedTask triggerAndAutomatedTask = getTriggerAndAutomatedTask(autoloadingAutomatedTask.getTaskName());
@@ -145,7 +146,7 @@ public class AutomatedTaskServiceImpl implements AutomatedTaskService {
                 break;
             }
         }
-        if (found) {
+        if (!found) {
             throw new DartsApiException(FAILED_TO_FIND_AUTOMATED_TASK);
         }
     }
