@@ -23,7 +23,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.when;
 
 @Slf4j
-@Disabled("temporarily disabling since some of the tests are flaky. Will fix soon")
 class SetReportingRestrictionEventHandlerTest extends HandlerTestData {
     public static final String TEST_REPORTING_RESTRICTION = "Reporting Restriction Test";
 
@@ -47,6 +46,7 @@ class SetReportingRestrictionEventHandlerTest extends HandlerTestData {
     }
 
     @Test
+    @Disabled("temporarily disabling since some of the tests are flaky. Will fix soon")
     void givenSetReportingRestrictionEventReceivedAndCourtCaseAndHearingDoesNotExist_thenNotifyDarUpdate() {
 
         var result = WireMock.listAllStubMappings();
