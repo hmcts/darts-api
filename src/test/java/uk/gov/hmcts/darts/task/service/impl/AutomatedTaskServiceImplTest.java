@@ -53,7 +53,7 @@ class AutomatedTaskServiceImplTest {
 
 
     @Spy
-    private List<AutoloadingAutomatedTask> autoloadingAutomatedTasks = new ArrayList<>();
+    private final List<AutoloadingAutomatedTask> autoloadingAutomatedTasks = new ArrayList<>();
 
     @Mock
     private AutomatedTaskRepository mockAutomatedTaskRepository;
