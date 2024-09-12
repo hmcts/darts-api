@@ -37,6 +37,7 @@ class SetReportingRestrictionEventHandlerTest extends HandlerTestData {
 
     @BeforeEach
     public void setupStubs() {
+        WireMock.reset();
         UserAccountEntity testUser = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
         when(mockUserIdentity.getUserAccount()).thenReturn(testUser);
 
