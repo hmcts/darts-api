@@ -209,6 +209,7 @@ public class CourtCaseEntity extends CreatedModifiedBaseEntity implements CanAno
         this.getDefenceList().forEach(defenceEntity -> defenceEntity.anonymize(userAccount, uuid));
         this.getProsecutorList().forEach(prosecutorEntity -> prosecutorEntity.anonymize(userAccount, uuid));
         this.getHearings().forEach(hearingEntity -> hearingEntity.anonymize(userAccount, uuid));
+        //Required for Dynatrace dashboards
         log.info("Case expired: cas_id={}, case_number={}", this.getId(), this.getCaseNumber());
     }
 }
