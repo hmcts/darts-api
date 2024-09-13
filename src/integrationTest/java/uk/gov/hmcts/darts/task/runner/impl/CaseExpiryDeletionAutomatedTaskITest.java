@@ -12,6 +12,7 @@ import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.ProsecutorEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionCommentEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionEntity;
+import uk.gov.hmcts.darts.common.entity.TranscriptionWorkflowEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.entity.base.CreatedModifiedBaseEntity;
 import uk.gov.hmcts.darts.common.util.DateConverterUtil;
@@ -140,9 +141,20 @@ class CaseExpiryDeletionAutomatedTaskITest extends PostgresIntegrationBase {
 
     private void assertTranscription(TranscriptionEntity transcriptionEntity, boolean isAnonymized) {
         assertThat(transcriptionEntity.getTranscriptionCommentEntities()).hasSizeGreaterThan(0);
+        assertThat(transcriptionEntity.getTranscriptionWorkflowEntities()).hasSizeGreaterThan(0);
         transcriptionEntity.getTranscriptionCommentEntities().forEach(
             transcriptionCommentEntity -> assertTranscriptionComment(transcriptionCommentEntity, isAnonymized));
+        transcriptionEntity.getTranscriptionWorkflowEntities().forEach(
+            transcriptionWorkflowEntity -> assertTranscriptionWorkflowEntities(transcriptionWorkflowEntity, isAnonymized));
 
+    }
+
+    private void assertTranscriptionWorkflowEntities(TranscriptionWorkflowEntity transcriptionWorkflowEntity, boolean isAnonymized) {
+        if (isAnonymized) {
+            assertThat(transcriptionWorkflowEntity.getTranscriptionStatus().getId()).isEqualTo(TranscriptionStatusEnum.CLOSED.getId());
+        } else {
+            assertThat(transcriptionWorkflowEntity.getTranscriptionStatus().getId()).isNotEqualTo(TranscriptionStatusEnum.CLOSED.getId());
+        }
     }
 
     private void assertEvent(EventEntity eventEntity, boolean isAnonymized) {

@@ -249,5 +249,6 @@ public class TranscriptionEntity extends CreatedModifiedBaseEntity implements Ca
     @Override
     public void anonymize(UserAccountEntity userAccount, UUID uuid) {
         this.getTranscriptionCommentEntities().forEach(transcriptionCommentEntity -> transcriptionCommentEntity.anonymize(userAccount, uuid));
+        this.getTranscriptionWorkflowEntities().forEach(TranscriptionWorkflowEntity::close);
     }
 }

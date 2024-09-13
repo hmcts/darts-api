@@ -17,19 +17,28 @@ class TranscriptionEntityTest {
     void positiveAnonymize() {
         TranscriptionEntity transcriptionEntity = new TranscriptionEntity();
 
-        TranscriptionCommentEntity transcriptionCommentEntity = mock(TranscriptionCommentEntity.class);
+        TranscriptionCommentEntity transcriptionCommentEntity1 = mock(TranscriptionCommentEntity.class);
         TranscriptionCommentEntity transcriptionCommentEntity2 = mock(TranscriptionCommentEntity.class);
+        transcriptionEntity.setTranscriptionCommentEntities(List.of(transcriptionCommentEntity1, transcriptionCommentEntity2));
 
-        transcriptionEntity.setTranscriptionCommentEntities(List.of(transcriptionCommentEntity, transcriptionCommentEntity2));
+        TranscriptionWorkflowEntity transcriptionWorkflowEntity1 = mock(TranscriptionWorkflowEntity.class);
+        TranscriptionWorkflowEntity transcriptionWorkflowEntity2 = mock(TranscriptionWorkflowEntity.class);
+        transcriptionEntity.setTranscriptionWorkflowEntities(List.of(transcriptionWorkflowEntity1, transcriptionWorkflowEntity2));
+
 
         UserAccountEntity userAccount = new UserAccountEntity();
         UUID uuid = UUID.randomUUID();
         transcriptionEntity.anonymize(userAccount, uuid);
 
-        verify(transcriptionCommentEntity, times(1))
+        verify(transcriptionCommentEntity1, times(1))
             .anonymize(userAccount, uuid);
         verify(transcriptionCommentEntity2, times(1))
             .anonymize(userAccount, uuid);
+
+        verify(transcriptionWorkflowEntity1, times(1))
+            .close();
+        verify(transcriptionWorkflowEntity2, times(1))
+            .close();
     }
 
     @Test
