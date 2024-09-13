@@ -1,19 +1,30 @@
 package uk.gov.hmcts.darts.retention.service.impl;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.text.StringEscapeUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.cases.service.CaseService;
+import uk.gov.hmcts.darts.common.entity.AnnotationDocumentEntity;
+import uk.gov.hmcts.darts.common.entity.CaseDocumentEntity;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
+import uk.gov.hmcts.darts.common.entity.MediaEntity;
+import uk.gov.hmcts.darts.common.entity.TranscriptionDocumentEntity;
 import uk.gov.hmcts.darts.common.exception.DartsException;
+import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
 import uk.gov.hmcts.darts.common.repository.AnnotationDocumentRepository;
 import uk.gov.hmcts.darts.common.repository.CaseDocumentRepository;
 import uk.gov.hmcts.darts.common.repository.CaseRetentionRepository;
 import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
 import uk.gov.hmcts.darts.common.repository.MediaRepository;
+import uk.gov.hmcts.darts.common.repository.TranscriptionDocumentRepository;
 import uk.gov.hmcts.darts.common.util.EodHelper;
+import uk.gov.hmcts.darts.retention.mapper.CaseRetentionConfidenceReasonMapper;
 import uk.gov.hmcts.darts.retention.service.ApplyRetentionCaseAssociatedObjectsSingleCaseProcessor;
 import uk.gov.hmcts.darts.transcriptions.service.TranscriptionService;
 
@@ -21,6 +32,8 @@ import java.time.OffsetDateTime;
 import java.util.List;
 
 import static java.lang.String.format;
+import static uk.gov.hmcts.darts.retention.enums.RetentionConfidenceScoreEnum.CASE_NOT_PERFECTLY_CLOSED;
+import static uk.gov.hmcts.darts.retention.enums.RetentionConfidenceScoreEnum.CASE_PERFECTLY_CLOSED;
 
 @Service
 @RequiredArgsConstructor
@@ -34,6 +47,14 @@ public class ApplyRetentionCaseAssociatedObjectsSingleCaseProcessorImpl implemen
     private final AnnotationDocumentRepository annotationDocumentRepository;
     private final TranscriptionService transcriptionService;
     private final CaseDocumentRepository caseDocumentRepository;
+    private final TranscriptionDocumentRepository transcriptionDocumentRepository;
+
+    private final CaseRetentionConfidenceReasonMapper caseRetentionConfidenceReasonMapper;
+
+    private final UserIdentity userIdentity;
+    private final CurrentTimeHelper currentTimeHelper;
+    private final ObjectMapper objectMapper;
+
 
     @Transactional
     @Override
@@ -56,17 +77,8 @@ public class ApplyRetentionCaseAssociatedObjectsSingleCaseProcessorImpl implemen
         for (var media : medias) {
             var cases = media.associatedCourtCases();
             if (allClosed(cases)) {
-                var longestRetentionDate = findLongestRetentionDate(cases);
-                if (longestRetentionDate != null) {
-                    media.setRetainUntilTs(longestRetentionDate);
-                    var armEods = eodRepository.findByMediaAndExternalLocationType(media, EodHelper.armLocation());
-                    updateArmEodRetention(
-                        armEods,
-                        format("Expecting one arm EOD for media '%s' but found zero or more than one", media.getId())
-                    );
-                } else {
-                    throw new DartsException(format("No retentions found on cases for media '%s'", media.getId()));
-                }
+                setLongestRetentionDateForMedia(media, cases);
+                setRetentionConfidenceScoreAndReasonForMedia(media, cases);
             }
         }
     }
@@ -78,17 +90,8 @@ public class ApplyRetentionCaseAssociatedObjectsSingleCaseProcessorImpl implemen
         for (var annotationDoc : annotationDocuments) {
             var cases = annotationDoc.associatedCourtCases();
             if (allClosed(cases)) {
-                var longestRetentionDate = findLongestRetentionDate(cases);
-                if (longestRetentionDate != null) {
-                    annotationDoc.setRetainUntilTs(longestRetentionDate);
-                    var armEods = eodRepository.findByAnnotationDocumentEntityAndExternalLocationType(annotationDoc, EodHelper.armLocation());
-                    updateArmEodRetention(
-                        armEods,
-                        format("Expecting one arm EOD for annotationDocument '%s' but found zero or more than one", annotationDoc.getId())
-                    );
-                } else {
-                    throw new DartsException(format("No retentions found on cases for annotationDocument '%s'", annotationDoc.getId()));
-                }
+                setLongestRetentionDateForAnnotationDocument(annotationDoc, cases);
+                setRetentionConfidenceScoreAndReasonForAnnotationDocument(annotationDoc, cases);
             }
         }
     }
@@ -100,44 +103,167 @@ public class ApplyRetentionCaseAssociatedObjectsSingleCaseProcessorImpl implemen
         for (var transcriptionDoc : transcriptionDocuments) {
             var cases = transcriptionDoc.getTranscription().getAssociatedCourtCases();
             if (allClosed(cases)) {
-                var longestRetentionDate = findLongestRetentionDate(cases);
-                if (longestRetentionDate != null) {
-                    transcriptionDoc.setRetainUntilTs(longestRetentionDate);
-                    var armEods = eodRepository.findByTranscriptionDocumentEntityAndExternalLocationType(transcriptionDoc, EodHelper.armLocation());
-                    updateArmEodRetention(
-                        armEods,
-                        format("Expecting one arm EOD for transcriptionDocument '%s' but found zero or more than one", transcriptionDoc.getId())
-                    );
-                } else {
-                    throw new DartsException(format("No retentions found on cases for transcriptionDocument '%s'", transcriptionDoc.getId()));
-                }
+                setLongestRetentionDateForTranscriptionDocument(transcriptionDoc, cases);
+                setRetentionConfidenceScoreAndReasonForTranscriptionDocument(transcriptionDoc, cases);
             }
         }
     }
 
     private void applyRetentionToCaseDocuments(CourtCaseEntity courtCase) {
-
         var caseDocuments = caseDocumentRepository.findByCourtCase(courtCase);
 
         for (var caseDocument : caseDocuments) {
             if (allClosed(List.of(courtCase))) {
-                var longestRetentionDate = findLongestRetentionDate(List.of(courtCase));
-                if (longestRetentionDate != null) {
-                    caseDocument.setRetainUntilTs(longestRetentionDate);
-                    var armEods = eodRepository.findByCaseDocumentAndExternalLocationType(caseDocument, EodHelper.armLocation());
-                    updateArmEodRetention(
-                        armEods,
-                        format("Expecting one arm EOD for caseDocument '%s' but found zero or more than one", caseDocument.getId())
-                    );
-                } else {
-                    throw new DartsException(format("No retentions found on courtCase for caseDocument '%s'", caseDocument.getId()));
-                }
+                setLongestRetentionDateForCaseDocument(courtCase, caseDocument);
+                setRetentionConfidenceScoreAndReasonForCaseDocument(courtCase, caseDocument);
             }
         }
     }
 
+    private void setLongestRetentionDateForMedia(MediaEntity media, List<CourtCaseEntity> cases) {
+        var longestRetentionDate = findLongestRetentionDate(cases);
+        if (longestRetentionDate != null) {
+            media.setRetainUntilTs(longestRetentionDate);
+            media.setLastModifiedBy(userIdentity.getUserAccount());
+            var armEods = eodRepository.findByMediaAndExternalLocationType(media, EodHelper.armLocation());
+            updateArmEodRetention(
+                armEods,
+                format("Expecting one arm EOD for media '%s' but found zero or more than one", media.getId())
+            );
+        } else {
+            throw new DartsException(format("No retentions found on cases for media '%s'", media.getId()));
+        }
+    }
+
+    private void setLongestRetentionDateForAnnotationDocument(AnnotationDocumentEntity annotationDoc, List<CourtCaseEntity> cases) {
+        var longestRetentionDate = findLongestRetentionDate(cases);
+        if (longestRetentionDate != null) {
+            annotationDoc.setRetainUntilTs(longestRetentionDate);
+            annotationDoc.setLastModifiedBy(userIdentity.getUserAccount());
+            var armEods = eodRepository.findByAnnotationDocumentEntityAndExternalLocationType(annotationDoc, EodHelper.armLocation());
+            updateArmEodRetention(
+                armEods,
+                format("Expecting one arm EOD for annotationDocument '%s' but found zero or more than one", annotationDoc.getId())
+            );
+        } else {
+            throw new DartsException(format("No retentions found on cases for annotationDocument '%s'", annotationDoc.getId()));
+        }
+    }
+
+    private void setLongestRetentionDateForTranscriptionDocument(TranscriptionDocumentEntity transcriptionDoc, List<CourtCaseEntity> cases) {
+        var longestRetentionDate = findLongestRetentionDate(cases);
+        if (longestRetentionDate != null) {
+            transcriptionDoc.setRetainUntilTs(longestRetentionDate);
+            transcriptionDoc.setLastModifiedBy(userIdentity.getUserAccount());
+            var armEods = eodRepository.findByTranscriptionDocumentEntityAndExternalLocationType(transcriptionDoc, EodHelper.armLocation());
+            updateArmEodRetention(
+                armEods,
+                format("Expecting one arm EOD for transcriptionDocument '%s' but found zero or more than one", transcriptionDoc.getId())
+            );
+        } else {
+            throw new DartsException(format("No retentions found on cases for transcriptionDocument '%s'", transcriptionDoc.getId()));
+        }
+    }
+
+    private void setLongestRetentionDateForCaseDocument(CourtCaseEntity courtCase, CaseDocumentEntity caseDocument) {
+        var longestRetentionDate = findLongestRetentionDate(List.of(courtCase));
+        if (longestRetentionDate != null) {
+            caseDocument.setRetainUntilTs(longestRetentionDate);
+            caseDocument.setLastModifiedBy(userIdentity.getUserAccount());
+            var armEods = eodRepository.findByCaseDocumentAndExternalLocationType(caseDocument, EodHelper.armLocation());
+            updateArmEodRetention(
+                armEods,
+                format("Expecting one arm EOD for caseDocument '%s' but found zero or more than one", caseDocument.getId())
+            );
+        } else {
+            throw new DartsException(format("No retentions found on courtCase for caseDocument '%s'", caseDocument.getId()));
+        }
+    }
+
+    private void setRetentionConfidenceScoreAndReasonForMedia(MediaEntity media, List<CourtCaseEntity> cases) {
+        if (areAllCasesPerfectlyClosed(cases)) {
+            media.setRetConfScore(CASE_PERFECTLY_CLOSED.getId());
+        } else {
+            var notPerfectlyClosedCases = filterCasesNotPerfectlyClosed(cases);
+            media.setRetConfScore(CASE_NOT_PERFECTLY_CLOSED.getId());
+            String retentionConfidenceReasonJson = generateRetentionConfidenceReasonJson(
+                notPerfectlyClosedCases,
+                format("Unable to generate retention confidence reason for media %s", media.getId()));
+            media.setRetConfReason(StringEscapeUtils.escapeJson(retentionConfidenceReasonJson));
+        }
+        media.setLastModifiedBy(userIdentity.getUserAccount());
+        mediaRepository.saveAndFlush(media);
+
+    }
+
+    private void setRetentionConfidenceScoreAndReasonForAnnotationDocument(AnnotationDocumentEntity annotationDoc, List<CourtCaseEntity> cases) {
+        if (areAllCasesPerfectlyClosed(cases)) {
+            annotationDoc.setRetConfScore(CASE_PERFECTLY_CLOSED.getId());
+        } else {
+            var notPerfectlyClosedCases = filterCasesNotPerfectlyClosed(cases);
+            annotationDoc.setRetConfScore(CASE_NOT_PERFECTLY_CLOSED.getId());
+            String retentionConfidenceReasonJson = generateRetentionConfidenceReasonJson(
+                notPerfectlyClosedCases,
+                format("Unable to generate retention confidence reason for annotation document %s", annotationDoc.getId()));
+            annotationDoc.setRetConfReason(StringEscapeUtils.escapeJson(retentionConfidenceReasonJson));
+        }
+        annotationDoc.setLastModifiedBy(userIdentity.getUserAccount());
+        annotationDocumentRepository.saveAndFlush(annotationDoc);
+    }
+
+    private void setRetentionConfidenceScoreAndReasonForTranscriptionDocument(TranscriptionDocumentEntity transcriptionDoc, List<CourtCaseEntity> cases) {
+
+        if (areAllCasesPerfectlyClosed(cases)) {
+            transcriptionDoc.setRetConfScore(CASE_PERFECTLY_CLOSED.getId());
+        } else {
+            var notPerfectlyClosedCases = filterCasesNotPerfectlyClosed(cases);
+            transcriptionDoc.setRetConfScore(CASE_NOT_PERFECTLY_CLOSED.getId());
+            String retentionConfidenceReasonJson = generateRetentionConfidenceReasonJson(
+                notPerfectlyClosedCases,
+                format("Unable to generate retention confidence reason for transcription document %s", transcriptionDoc.getId()));
+            transcriptionDoc.setRetConfReason(StringEscapeUtils.escapeJson(retentionConfidenceReasonJson));
+        }
+        transcriptionDoc.setLastModifiedBy(userIdentity.getUserAccount());
+        transcriptionDocumentRepository.saveAndFlush(transcriptionDoc);
+    }
+
+    private void setRetentionConfidenceScoreAndReasonForCaseDocument(CourtCaseEntity courtCase, CaseDocumentEntity caseDocument) {
+        var courtCases = List.of(courtCase);
+        if (areAllCasesPerfectlyClosed(courtCases)) {
+            caseDocument.setRetConfScore(CASE_PERFECTLY_CLOSED.getId());
+        } else {
+            caseDocument.setRetConfScore(CASE_NOT_PERFECTLY_CLOSED.getId());
+            String retentionConfidenceReasonJson = generateRetentionConfidenceReasonJson(
+                courtCases,
+                format("Unable to generate retention confidence reason for annotation document %s", caseDocument.getId()));
+            caseDocument.setRetConfReason(StringEscapeUtils.escapeJson(retentionConfidenceReasonJson));
+        }
+        caseDocumentRepository.save(caseDocument);
+    }
+
+    private String generateRetentionConfidenceReasonJson(List<CourtCaseEntity> notPerfectlyClosedCases, String errorMessage) {
+        String retentionConfidenceReason = null;
+        var caseRetentionConfidenceReason = caseRetentionConfidenceReasonMapper.mapToCaseRetentionConfidenceReason(
+            currentTimeHelper.currentOffsetDateTime(), notPerfectlyClosedCases);
+
+        try {
+            retentionConfidenceReason = objectMapper.writeValueAsString(caseRetentionConfidenceReason);
+        } catch (JsonProcessingException e) {
+            throw new DartsException(errorMessage);
+        }
+        return retentionConfidenceReason;
+    }
+
     private boolean allClosed(List<CourtCaseEntity> cases) {
         return cases.stream().allMatch(CourtCaseEntity::getClosed);
+    }
+
+    private boolean areAllCasesPerfectlyClosed(List<CourtCaseEntity> cases) {
+        return cases.stream().allMatch(courtCase -> CASE_PERFECTLY_CLOSED.equals(courtCase.getRetConfScore()));
+    }
+
+    private List<CourtCaseEntity> filterCasesNotPerfectlyClosed(List<CourtCaseEntity> cases) {
+        return cases.stream().filter(courtCase -> !(CASE_PERFECTLY_CLOSED.equals(courtCase.getRetConfScore()))).toList();
     }
 
     private OffsetDateTime findLongestRetentionDate(List<CourtCaseEntity> cases) {
