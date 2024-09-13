@@ -3,7 +3,6 @@ package uk.gov.hmcts.darts.event.service.impl;
 import com.github.tomakehurst.wiremock.client.WireMock;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -37,7 +36,7 @@ class SetReportingRestrictionEventHandlerTest extends HandlerTestData {
 
     @BeforeEach
     public void setupStubs() {
-        WireMock.reset();
+        dartsGateway.clearStubs();
         UserAccountEntity testUser = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
         when(mockUserIdentity.getUserAccount()).thenReturn(testUser);
 
@@ -47,7 +46,6 @@ class SetReportingRestrictionEventHandlerTest extends HandlerTestData {
     }
 
     @Test
-    @Disabled("temporarily disabling since some of the tests are flaky. Will fix soon")
     void givenSetReportingRestrictionEventReceivedAndCourtCaseAndHearingDoesNotExist_thenNotifyDarUpdate() {
 
         var result = WireMock.listAllStubMappings();
