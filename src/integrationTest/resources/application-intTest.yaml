@@ -83,6 +83,8 @@ darts:
   automated:
     task:
       system-user-email: dartssystemuser@hmcts.net
+      expiry-deletion:
+        enabled: true
 logging:
   level:
     root: DEBUG
