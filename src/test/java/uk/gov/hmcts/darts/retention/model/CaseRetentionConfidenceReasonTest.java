@@ -70,22 +70,14 @@ class CaseRetentionConfidenceReasonTest {
         String escapedExpectedResponse = "{\\\"ret_conf_applied_ts\\\":\\\"2024-06-26 12:10:00\\\",\\\"cases\\\":[{\\\"courthouse\\\":\\\"Swansea\\\",\\\"case_number\\\":\\\"T1234558\\\",\\\"ret_conf_updated_ts\\\":\\\"2024-06-26 12:10:00\\\",\\\"ret_conf_reason\\\":\\\"AGED_CASE\\\"},{\\\"courthouse\\\":\\\"Swansea\\\",\\\"case_number\\\":\\\"T12341234\\\",\\\"ret_conf_updated_ts\\\":\\\"2024-06-26 12:10:00\\\",\\\"ret_conf_reason\\\":\\\"AGED_CASE\\\"}]}";
         log.info("escapedActualResponse   {}", escapedActualResponse);
         log.info("escapedExpectedResponse {}", escapedExpectedResponse);
-<<<<<<< HEAD
         Assertions.assertEquals(escapedExpectedResponse, escapedActualResponse);
-=======
-        Assert.assertEquals(escapedExpectedResponse, escapedActualResponse);
->>>>>>> 157933cd0 (DMP-3544 RCC - Confidence Reason - JSON structure)
 
     }
 
     @Test
     void getCaseRetentionConfidenceReasonWithNullReason() throws JsonProcessingException {
 
-<<<<<<< HEAD
         CaseRetentionConfidenceReason caseRetentionConfidenceReason = CaseRetentionConfidenceReason.builder()
-=======
-        caseRetentionConfidenceReason = CaseRetentionConfidenceReason.builder()
->>>>>>> 157933cd0 (DMP-3544 RCC - Confidence Reason - JSON structure)
             .retentionConfidenceAppliedTimestamp("2024-06-26 12:10:00")
             .retentionCases(List.of(buildRetentionCase("Swansea",
                                                        "T1234558",
@@ -124,11 +116,7 @@ class CaseRetentionConfidenceReasonTest {
         String escapedExpectedResponse = "{\\\"ret_conf_applied_ts\\\":\\\"2024-06-26 12:10:00\\\",\\\"cases\\\":[{\\\"courthouse\\\":\\\"Swansea\\\",\\\"case_number\\\":\\\"T1234558\\\",\\\"ret_conf_updated_ts\\\":\\\"2024-06-26 12:10:00\\\"},{\\\"courthouse\\\":\\\"Swansea\\\",\\\"case_number\\\":\\\"T12341234\\\",\\\"ret_conf_updated_ts\\\":\\\"2024-06-26 12:10:00\\\"}]}";
         log.info("escapedActualResponse   {}", escapedActualResponse);
         log.info("escapedExpectedResponse {}", escapedExpectedResponse);
-<<<<<<< HEAD
         Assertions.assertEquals(escapedExpectedResponse, escapedActualResponse);
-=======
-        Assert.assertEquals(escapedExpectedResponse, escapedActualResponse);
->>>>>>> 157933cd0 (DMP-3544 RCC - Confidence Reason - JSON structure)
 
     }
 
