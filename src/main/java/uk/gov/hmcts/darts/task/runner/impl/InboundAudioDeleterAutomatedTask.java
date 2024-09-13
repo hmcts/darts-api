@@ -1,10 +1,12 @@
 package uk.gov.hmcts.darts.task.runner.impl;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.darts.audio.service.InboundAudioDeleterProcessor;
 import uk.gov.hmcts.darts.common.repository.AutomatedTaskRepository;
 import uk.gov.hmcts.darts.log.api.LogApi;
+import uk.gov.hmcts.darts.task.api.AutomatedTaskName;
 import uk.gov.hmcts.darts.task.config.AutomatedTaskConfigurationProperties;
 import uk.gov.hmcts.darts.task.runner.AutoloadingManualTask;
 import uk.gov.hmcts.darts.task.service.LockService;
@@ -16,9 +18,9 @@ import static uk.gov.hmcts.darts.task.api.AutomatedTaskName.INBOUND_AUDIO_DELETE
 public class InboundAudioDeleterAutomatedTask extends AbstractLockableAutomatedTask
     implements AutoloadingManualTask {
 
-    protected String taskName = INBOUND_AUDIO_DELETER_TASK_NAME.getTaskName();
     private final InboundAudioDeleterProcessor inboundAudioDeleterProcessor;
 
+    @Autowired
     public InboundAudioDeleterAutomatedTask(AutomatedTaskRepository automatedTaskRepository,
                                             AutomatedTaskConfigurationProperties automatedTaskConfigurationProperties,
                                             InboundAudioDeleterProcessor processor,
@@ -28,8 +30,8 @@ public class InboundAudioDeleterAutomatedTask extends AbstractLockableAutomatedT
     }
 
     @Override
-    public String getTaskName() {
-        return taskName;
+    public AutomatedTaskName getAutomatedTaskName() {
+        return INBOUND_AUDIO_DELETER_TASK_NAME;
     }
 
     @Override

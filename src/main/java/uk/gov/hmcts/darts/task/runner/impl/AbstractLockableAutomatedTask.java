@@ -9,7 +9,9 @@ import org.springframework.security.oauth2.server.resource.authentication.JwtAut
 import uk.gov.hmcts.darts.common.entity.AutomatedTaskEntity;
 import uk.gov.hmcts.darts.common.repository.AutomatedTaskRepository;
 import uk.gov.hmcts.darts.log.api.LogApi;
+import uk.gov.hmcts.darts.task.api.AutomatedTaskName;
 import uk.gov.hmcts.darts.task.config.AutomatedTaskConfigurationProperties;
+import uk.gov.hmcts.darts.task.runner.AutoloadingAutomatedTask;
 import uk.gov.hmcts.darts.task.runner.AutomatedTask;
 import uk.gov.hmcts.darts.task.service.LockService;
 import uk.gov.hmcts.darts.task.status.AutomatedTaskStatus;
@@ -33,7 +35,7 @@ import static uk.gov.hmcts.darts.task.status.AutomatedTaskStatus.SKIPPED;
 
 
 @Slf4j
-public abstract class AbstractLockableAutomatedTask implements AutomatedTask {
+public abstract class AbstractLockableAutomatedTask implements AutomatedTask, AutoloadingAutomatedTask {
 
     private AutomatedTaskStatus automatedTaskStatus = NOT_STARTED;
 
@@ -211,9 +213,19 @@ public abstract class AbstractLockableAutomatedTask implements AutomatedTask {
         }
     }
 
+    @Override
     public AbstractLockableAutomatedTask getAbstractLockableAutomatedTask() {
         return this;
     }
+
+    @Override
+    public String getTaskName() {
+        return getAutomatedTaskName().getTaskName();
+    }
+
+    @Override
+    public abstract AutomatedTaskName getAutomatedTaskName();
+
 
     class LockedTask implements Runnable {
         @Override

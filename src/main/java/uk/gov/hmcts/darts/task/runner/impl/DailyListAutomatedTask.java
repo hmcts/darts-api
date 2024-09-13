@@ -1,10 +1,12 @@
 package uk.gov.hmcts.darts.task.runner.impl;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.darts.common.repository.AutomatedTaskRepository;
 import uk.gov.hmcts.darts.dailylist.service.DailyListService;
 import uk.gov.hmcts.darts.log.api.LogApi;
+import uk.gov.hmcts.darts.task.api.AutomatedTaskName;
 import uk.gov.hmcts.darts.task.config.AutomatedTaskConfigurationProperties;
 import uk.gov.hmcts.darts.task.runner.AutoloadingManualTask;
 import uk.gov.hmcts.darts.task.service.LockService;
@@ -18,6 +20,7 @@ public class DailyListAutomatedTask extends AbstractLockableAutomatedTask
 
     private final DailyListService dailyListService;
 
+    @Autowired
     public DailyListAutomatedTask(AutomatedTaskRepository automatedTaskRepository,
                                   AutomatedTaskConfigurationProperties automatedTaskConfigurationProperties,
                                   DailyListService dailyListService,
@@ -27,8 +30,8 @@ public class DailyListAutomatedTask extends AbstractLockableAutomatedTask
     }
 
     @Override
-    public String getTaskName() {
-        return DAILY_LIST_HOUSEKEEPING_TASK_NAME.getTaskName();
+    public AutomatedTaskName getAutomatedTaskName() {
+        return DAILY_LIST_HOUSEKEEPING_TASK_NAME;
     }
 
     @Override

@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.Trigger;
@@ -15,17 +16,20 @@ import uk.gov.hmcts.darts.common.entity.AutomatedTaskEntity;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.common.repository.AutomatedTaskRepository;
 import uk.gov.hmcts.darts.log.api.LogApi;
+import uk.gov.hmcts.darts.task.api.AutomatedTaskName;
 import uk.gov.hmcts.darts.task.config.AutomatedTaskConfigurationProperties;
+import uk.gov.hmcts.darts.task.runner.AutoloadingAutomatedTask;
 import uk.gov.hmcts.darts.task.runner.AutomatedTask;
 import uk.gov.hmcts.darts.task.runner.impl.AbstractLockableAutomatedTask;
-import uk.gov.hmcts.darts.task.runner.impl.DailyListAutomatedTask;
 import uk.gov.hmcts.darts.task.runner.impl.ProcessDailyListAutomatedTask;
 import uk.gov.hmcts.darts.task.service.LockService;
 import uk.gov.hmcts.darts.task.status.AutomatedTaskStatus;
 
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
@@ -46,6 +50,10 @@ class AutomatedTaskServiceImplTest {
 
     @InjectMocks
     private AutomatedTaskServiceImpl automatedTaskService;
+
+
+    @Spy
+    private final List<AutoloadingAutomatedTask> autoloadingAutomatedTasks = new ArrayList<>();
 
     @Mock
     private AutomatedTaskRepository mockAutomatedTaskRepository;
@@ -115,7 +123,6 @@ class AutomatedTaskServiceImplTest {
         ScheduledTask scheduledTask = mock(ScheduledTask.class);
         Set<ScheduledTask> scheduledTaskList = new HashSet<>();
         scheduledTaskList.add(scheduledTask);
-
         AbstractLockableAutomatedTask automatedTask = new AbstractLockableAutomatedTask(
             mockAutomatedTaskRepository,
             mockAutomatedTaskConfigurationProperties,
@@ -130,10 +137,11 @@ class AutomatedTaskServiceImplTest {
             }
 
             @Override
-            public String getTaskName() {
-                return "ProcessDailyList";
+            public AutomatedTaskName getAutomatedTaskName() {
+                return AutomatedTaskName.PROCESS_DAILY_LIST_TASK_NAME;
             }
         };
+        autoloadingAutomatedTasks.add(automatedTask);
         Trigger trigger = triggerContext -> null;
         TriggerTask task = new TriggerTask(automatedTask, trigger);
         when(scheduledTaskHolder.getScheduledTasks()).thenReturn(scheduledTaskList);
@@ -164,10 +172,11 @@ class AutomatedTaskServiceImplTest {
             }
 
             @Override
-            public String getTaskName() {
-                return "ApplyRetention";
+            public AutomatedTaskName getAutomatedTaskName() {
+                return AutomatedTaskName.APPLY_RETENTION_TASK_NAME;
             }
         };
+        autoloadingAutomatedTasks.add(automatedTask);
         Trigger trigger = triggerContext -> null;
         TriggerTask task = new TriggerTask(automatedTask, trigger);
         when(scheduledTaskHolder.getScheduledTasks()).thenReturn(scheduledTaskList);
@@ -198,10 +207,11 @@ class AutomatedTaskServiceImplTest {
             }
 
             @Override
-            public String getTaskName() {
-                return "DailyListHousekeeping";
+            public AutomatedTaskName getAutomatedTaskName() {
+                return AutomatedTaskName.DAILY_LIST_HOUSEKEEPING_TASK_NAME;
             }
         };
+        autoloadingAutomatedTasks.add(automatedTask);
         Trigger trigger = triggerContext -> null;
         TriggerTask task = new TriggerTask(automatedTask, trigger);
         when(scheduledTaskHolder.getScheduledTasks()).thenReturn(scheduledTaskList);
@@ -235,6 +245,11 @@ class AutomatedTaskServiceImplTest {
             public String getTaskName() {
                 return "StandardTask";
             }
+
+            @Override
+            public AutomatedTaskName getAutomatedTaskName() {
+                return null;
+            }
         };
         var overriddenAutomatedTask = new AbstractLockableAutomatedTask(
             mockAutomatedTaskRepository,
@@ -262,6 +277,11 @@ class AutomatedTaskServiceImplTest {
             @Override
             public String getTaskName() {
                 return "TaskWithOverriddenLockTimes";
+            }
+
+            @Override
+            public AutomatedTaskName getAutomatedTaskName() {
+                return null;
             }
         };
 
@@ -293,6 +313,11 @@ class AutomatedTaskServiceImplTest {
             }
 
             @Override
+            public AutomatedTaskName getAutomatedTaskName() {
+                return null;
+            }
+
+            @Override
             public String getLastCronExpression() {
                 return "*/7 * * * * *";
             }
@@ -308,10 +333,30 @@ class AutomatedTaskServiceImplTest {
 
     @Test
     void createsNewTaskOnReloadWhenNonExists() {
+        var automatedTask = new AbstractLockableAutomatedTask(
+            mockAutomatedTaskRepository,
+            mockAutomatedTaskConfigurationProperties,
+            logApi,
+            lockService) {
+            @Override
+            protected void runTask() {
+            }
+
+            @Override
+            protected void handleException(Exception exception) {
+            }
+
+            @Override
+            public AutomatedTaskName getAutomatedTaskName() {
+                return AutomatedTaskName.DAILY_LIST_HOUSEKEEPING_TASK_NAME;
+            }
+        };
+        autoloadingAutomatedTasks.add(automatedTask);
         when(scheduledTaskHolder.getScheduledTasks()).thenReturn(new HashSet<>());
+
         automatedTaskService.reloadTaskByName("DailyListHousekeeping");
 
-        verify(taskScheduler).schedule(any(DailyListAutomatedTask.class), any(Trigger.class));
+        verify(taskScheduler).schedule(any(AbstractLockableAutomatedTask.class), any(Trigger.class));
     }
 
 
@@ -352,6 +397,11 @@ class AutomatedTaskServiceImplTest {
             public String getTaskName() {
                 return "ProcessDailyList";
             }
+
+            @Override
+            public AutomatedTaskName getAutomatedTaskName() {
+                return AutomatedTaskName.PROCESS_DAILY_LIST_TASK_NAME;
+            }
         };
         Trigger trigger = triggerContext -> null;
         return new TriggerTask(automatedTask, trigger);
@@ -386,6 +436,11 @@ class AutomatedTaskServiceImplTest {
             @Override
             public String getTaskName() {
                 return "Test";
+            }
+
+            @Override
+            public AutomatedTaskName getAutomatedTaskName() {
+                return null;
             }
 
             @Override

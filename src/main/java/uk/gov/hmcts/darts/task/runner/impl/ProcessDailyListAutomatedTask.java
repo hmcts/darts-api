@@ -6,6 +6,7 @@ import org.springframework.stereotype.Component;
 import uk.gov.hmcts.darts.common.repository.AutomatedTaskRepository;
 import uk.gov.hmcts.darts.dailylist.service.DailyListProcessor;
 import uk.gov.hmcts.darts.log.api.LogApi;
+import uk.gov.hmcts.darts.task.api.AutomatedTaskName;
 import uk.gov.hmcts.darts.task.config.AutomatedTaskConfigurationProperties;
 import uk.gov.hmcts.darts.task.runner.AutoloadingManualTask;
 import uk.gov.hmcts.darts.task.service.LockService;
@@ -23,8 +24,7 @@ public class ProcessDailyListAutomatedTask
     extends AbstractLockableAutomatedTask
     implements AutoloadingManualTask {
 
-    protected String taskName = PROCESS_DAILY_LIST_TASK_NAME.getTaskName();
-    private DailyListProcessor dailyListProcessor;
+    private final DailyListProcessor dailyListProcessor;
 
     private final List<AutomatedTaskStatus> trackedStateChanges = new ArrayList<>();
 
@@ -37,8 +37,8 @@ public class ProcessDailyListAutomatedTask
     }
 
     @Override
-    public String getTaskName() {
-        return taskName;
+    public AutomatedTaskName getAutomatedTaskName() {
+        return PROCESS_DAILY_LIST_TASK_NAME;
     }
 
     @Override
