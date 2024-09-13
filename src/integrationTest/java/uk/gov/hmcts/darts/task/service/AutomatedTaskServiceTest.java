@@ -7,7 +7,6 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.scheduling.config.CronTask;
@@ -21,7 +20,6 @@ import org.springframework.scheduling.support.CronExpression;
 import uk.gov.hmcts.darts.arm.component.AutomatedTaskProcessorFactory;
 import uk.gov.hmcts.darts.arm.service.ArmRetentionEventDateProcessor;
 import uk.gov.hmcts.darts.arm.service.CleanupArmResponseFilesService;
-import uk.gov.hmcts.darts.arm.service.InboundAnnotationTranscriptionDeleterProcessor;
 import uk.gov.hmcts.darts.arm.service.impl.UnstructuredToArmBatchProcessorImpl;
 import uk.gov.hmcts.darts.arm.service.impl.UnstructuredToArmProcessorImpl;
 import uk.gov.hmcts.darts.audio.deleter.impl.inbound.ExternalInboundDataStoreDeleter;
@@ -38,6 +36,7 @@ import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.common.repository.AutomatedTaskRepository;
 import uk.gov.hmcts.darts.common.repository.CaseRepository;
 import uk.gov.hmcts.darts.dailylist.service.DailyListService;
+import uk.gov.hmcts.darts.datamanagement.service.InboundAnnotationTranscriptionDeleterProcessor;
 import uk.gov.hmcts.darts.datamanagement.service.InboundToUnstructuredProcessor;
 import uk.gov.hmcts.darts.event.service.RemoveDuplicateEventsProcessor;
 import uk.gov.hmcts.darts.log.api.LogApi;
@@ -163,9 +162,6 @@ class AutomatedTaskServiceTest extends IntegrationPerClassBase {
     private UserIdentity userIdentity;
 
     private UserAccountEntity testUser;
-
-    @Value("${darts.data-management.retention-period.inbound.arm-minimum}")
-    private int hoursArmStorage;
 
     @BeforeEach
     void setupData() {

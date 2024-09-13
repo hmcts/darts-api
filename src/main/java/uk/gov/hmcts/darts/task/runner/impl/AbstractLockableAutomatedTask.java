@@ -162,17 +162,19 @@ public abstract class AbstractLockableAutomatedTask implements AutomatedTask, Au
         return false;
     }
 
+    protected Integer getAutomatedTaskBatchSize() {
+        return this.getAutomatedTaskBatchSize(this.getTaskName());
+    }
+
     protected Integer getAutomatedTaskBatchSize(String taskName) {
         Integer batchSize = 0;
         Optional<AutomatedTaskEntity> automatedTaskEntity = getAutomatedTaskDetails(taskName);
-
         if (automatedTaskEntity.isPresent()) {
             AutomatedTaskEntity automatedTask = automatedTaskEntity.get();
             if (nonNull(automatedTask.getBatchSize())) {
                 batchSize = automatedTask.getBatchSize();
             }
         }
-
         return batchSize;
     }
 
@@ -185,7 +187,7 @@ public abstract class AbstractLockableAutomatedTask implements AutomatedTask, Au
         );
     }
 
-    private void preRunTask() {
+    void preRunTask() {
         setupUserAuthentication();
         start = Instant.now();
         log.info("Task: {} potential candidate for execution at: {}", getTaskName(), LocalDateTime.now());

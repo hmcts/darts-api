@@ -2,8 +2,8 @@ package uk.gov.hmcts.darts.task.runner.impl;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import uk.gov.hmcts.darts.arm.service.InboundAnnotationTranscriptionDeleterProcessor;
 import uk.gov.hmcts.darts.common.repository.AutomatedTaskRepository;
+import uk.gov.hmcts.darts.datamanagement.service.InboundAnnotationTranscriptionDeleterProcessor;
 import uk.gov.hmcts.darts.log.api.LogApi;
 import uk.gov.hmcts.darts.task.api.AutomatedTaskName;
 import uk.gov.hmcts.darts.task.config.AutomatedTaskConfigurationProperties;
@@ -16,16 +16,16 @@ import static uk.gov.hmcts.darts.task.api.AutomatedTaskName.INBOUND_TRANSCRIPTIO
 public class InboundAnnotationTranscriptionDeleterAutomatedTask extends AbstractLockableAutomatedTask
     implements AutoloadingManualTask {
 
-    private final InboundAnnotationTranscriptionDeleterProcessor armDeletionProcessor;
+    private final InboundAnnotationTranscriptionDeleterProcessor annotationTranscriptionDeleterProcessor;
 
     @Autowired
     public InboundAnnotationTranscriptionDeleterAutomatedTask(AutomatedTaskRepository automatedTaskRepository,
                                                               AutomatedTaskConfigurationProperties automatedTaskConfigurationProperties,
-                                                              InboundAnnotationTranscriptionDeleterProcessor armDeletionProcessor,
+                                                              InboundAnnotationTranscriptionDeleterProcessor annotationTranscriptionDeleterProcessor,
                                                               LogApi logApi,
                                                               LockService lockService) {
         super(automatedTaskRepository, automatedTaskConfigurationProperties, logApi, lockService);
-        this.armDeletionProcessor = armDeletionProcessor;
+        this.annotationTranscriptionDeleterProcessor = annotationTranscriptionDeleterProcessor;
     }
 
     @Override
@@ -35,6 +35,6 @@ public class InboundAnnotationTranscriptionDeleterAutomatedTask extends Abstract
 
     @Override
     protected void runTask() {
-        armDeletionProcessor.markForDeletion();
+        annotationTranscriptionDeleterProcessor.markForDeletion();
     }
 }

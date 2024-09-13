@@ -21,17 +21,19 @@ import org.apache.commons.collections4.CollectionUtils;
 import uk.gov.hmcts.darts.audio.entity.MediaRequestEntity;
 import uk.gov.hmcts.darts.audio.entity.MediaRequestEntity_;
 import uk.gov.hmcts.darts.common.entity.base.CreatedModifiedBaseEntity;
+import uk.gov.hmcts.darts.task.runner.CanAnonymized;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 @Entity
 @Table(name = "hearing")
 @Getter
 @Setter
-public class HearingEntity extends CreatedModifiedBaseEntity {
+public class HearingEntity extends CreatedModifiedBaseEntity implements CanAnonymized {
 
     public static final String HEA_ID = "hea_id";
     @Id
@@ -74,8 +76,6 @@ public class HearingEntity extends CreatedModifiedBaseEntity {
     @Transient
     private boolean isNew; //helper flag to indicate that the entity was just created, and so to notify DAR PC
 
-    //TODO look to remove this
-    @Deprecated()
     @ManyToMany
     @JoinTable(name = "hearing_event_ae",
         joinColumns = {@JoinColumn(name = HEA_ID)},
@@ -122,5 +122,11 @@ public class HearingEntity extends CreatedModifiedBaseEntity {
 
     public void addAnnotation(AnnotationEntity annotationEntity) {
         annotations.add(annotationEntity);
+    }
+
+    @Override
+    public void anonymize(UserAccountEntity userAccount, UUID uuid) {
+        this.getTranscriptions().forEach(transcriptionEntity -> transcriptionEntity.anonymize(userAccount, uuid));
+        this.getEventList().forEach(eventEntity -> eventEntity.anonymize(userAccount, uuid));
     }
 }
