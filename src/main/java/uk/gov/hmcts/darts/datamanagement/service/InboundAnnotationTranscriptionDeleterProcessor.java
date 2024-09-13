@@ -1,4 +1,4 @@
-package uk.gov.hmcts.darts.arm.service;
+package uk.gov.hmcts.darts.datamanagement.service;
 
 import java.util.List;
 

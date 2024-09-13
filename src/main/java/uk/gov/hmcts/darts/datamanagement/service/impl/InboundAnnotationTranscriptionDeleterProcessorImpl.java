@@ -1,11 +1,10 @@
-package uk.gov.hmcts.darts.arm.service.impl;
+package uk.gov.hmcts.darts.datamanagement.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
-import uk.gov.hmcts.darts.arm.service.InboundAnnotationTranscriptionDeleterProcessor;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
 import uk.gov.hmcts.darts.common.helper.SystemUserHelper;
@@ -13,6 +12,7 @@ import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryQueryTypeEnum
 import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
 import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
 import uk.gov.hmcts.darts.common.util.EodHelper;
+import uk.gov.hmcts.darts.datamanagement.service.InboundAnnotationTranscriptionDeleterProcessor;
 
 import java.time.OffsetDateTime;
 import java.time.temporal.ChronoUnit;
@@ -29,11 +29,11 @@ public class InboundAnnotationTranscriptionDeleterProcessorImpl implements Inbou
     private final UserAccountRepository userAccountRepository;
     private final EodHelper eodHelper;
 
-    @Value("${darts.data-management.retention-period.inbound.arm-minimum}")
-    int hoursInArm;
+    @Value("${darts.data-management.retention-period.inbound.unstructured-minimum.hours}")
+    int hoursInUnstructured;
 
     public List<Integer> markForDeletion() {
-        return markForDeletion(hoursInArm);
+        return markForDeletion(hoursInUnstructured);
     }
 
     @Override
@@ -46,10 +46,10 @@ public class InboundAnnotationTranscriptionDeleterProcessorImpl implements Inbou
         List<Integer> recordsMarkedForDeletion
             = externalObjectDirectoryRepository
             .findIdsIn2StorageLocationsBeforeTime(EodHelper.storedStatus(),
-                                                                EodHelper.storedStatus(),
-                                                                EodHelper.inboundLocation(),
-                                                                EodHelper.armLocation(),
-                                                                lastModifiedBefore, ExternalObjectDirectoryQueryTypeEnum.ANNOTATION_QUERY.getIndex());
+                                                  EodHelper.storedStatus(),
+                                                  EodHelper.inboundLocation(),
+                                                  EodHelper.unstructuredLocation(),
+                                                  lastModifiedBefore, ExternalObjectDirectoryQueryTypeEnum.ANNOTATION_QUERY.getIndex());
 
         log.debug("Identified records to be marked for deletion  {}", StringUtils.join(recordsMarkedForDeletion, ","));
 
@@ -61,7 +61,7 @@ public class InboundAnnotationTranscriptionDeleterProcessorImpl implements Inbou
             currentTimeHelper.currentOffsetDateTime()
         );
 
-        log.debug("Records have been marked for deletion");
+        recordsMarkedForDeletion.stream().forEach(eodId -> log.info("Set status of unstructured EOD {} to be marked for deletion", eodId));
 
         return recordsMarkedForDeletion;
     }

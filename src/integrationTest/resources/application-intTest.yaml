@@ -3,6 +3,8 @@ spring:
     retention-period:
       inbound:
         arm-minimum: 24
+        unstructured-minimum:
+          hours: 24
   security:
     oauth2:
       resourceserver:
