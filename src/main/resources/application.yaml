@@ -332,6 +332,8 @@ darts:
         dailylist-processor: f6f71122-ff85-4ebe-93d9-1706460dbea5
       unstructured-to-arm-batch-processor:
         max-result-size: 100000
+      expiry-deletion:
+        enabled: ${CASE_EXPIRY_DELETION_ENABLED:false}
   annotations:
     allowed-extensions:
       - "docx"

@@ -20,12 +20,14 @@ import org.hibernate.envers.AuditTable;
 import org.hibernate.envers.Audited;
 import org.hibernate.envers.NotAudited;
 import uk.gov.hmcts.darts.common.entity.base.CreatedModifiedBaseEntity;
+import uk.gov.hmcts.darts.task.runner.CanAnonymized;
 
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 import static jakarta.persistence.CascadeType.MERGE;
 import static jakarta.persistence.CascadeType.PERSIST;
@@ -38,7 +40,7 @@ import static org.hibernate.envers.RelationTargetAuditMode.NOT_AUDITED;
 @Setter
 @Audited
 @AuditTable("transcription_aud")
-public class TranscriptionEntity extends CreatedModifiedBaseEntity {
+public class TranscriptionEntity extends CreatedModifiedBaseEntity implements CanAnonymized {
 
     @Id
     @Column(name = "tra_id")
@@ -242,5 +244,10 @@ public class TranscriptionEntity extends CreatedModifiedBaseEntity {
     public Optional<TranscriptionWorkflowEntity> getLatestTranscriptionWorkflow() {
         return transcriptionWorkflowEntities.stream()
             .min(comparing(TranscriptionWorkflowEntity::getWorkflowTimestamp));
+    }
+
+    @Override
+    public void anonymize(UserAccountEntity userAccount, UUID uuid) {
+        this.getTranscriptionCommentEntities().forEach(transcriptionCommentEntity -> transcriptionCommentEntity.anonymize(userAccount, uuid));
     }
 }

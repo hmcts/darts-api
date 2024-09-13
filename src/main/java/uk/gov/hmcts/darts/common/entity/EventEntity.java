@@ -16,17 +16,19 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 import uk.gov.hmcts.darts.common.entity.base.CreatedModifiedBaseEntity;
+import uk.gov.hmcts.darts.task.runner.CanAnonymized;
 
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 @Entity
 @Table(name = "event")
 @Getter
 @Setter
 @EqualsAndHashCode(callSuper = false)
-public class EventEntity extends CreatedModifiedBaseEntity {
+public class EventEntity extends CreatedModifiedBaseEntity implements CanAnonymized {
 
     @Id
     @Column(name = "eve_id")
@@ -88,5 +90,8 @@ public class EventEntity extends CreatedModifiedBaseEntity {
         hearingEntities.add(hearingEntity);
     }
 
-
+    @Override
+    public void anonymize(UserAccountEntity userAccount, UUID uuid) {
+        this.setEventText(uuid.toString());
+    }
 }
