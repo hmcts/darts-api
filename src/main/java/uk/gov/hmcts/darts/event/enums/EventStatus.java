@@ -8,8 +8,9 @@ import lombok.Getter;
 @Getter
 public enum EventStatus {
 
-    HERITAGE(1),
-    MODERNISED(2);
+    AUDIO_LINK_NOT_DONE_HERITAGE(1),
+    AUDIO_LINK_NOT_DONE_MODERNISED(2),
+    AUDIO_LINKED(3);
 
     private final Integer statusNumber;
 

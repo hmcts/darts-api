@@ -11,7 +11,7 @@ import java.util.List;
 import java.util.Random;
 
 import static java.util.Arrays.asList;
-import static uk.gov.hmcts.darts.event.enums.EventStatus.MODERNISED;
+import static uk.gov.hmcts.darts.event.enums.EventStatus.AUDIO_LINK_NOT_DONE_MODERNISED;
 import static uk.gov.hmcts.darts.test.common.data.CourtroomTestData.someMinimalCourtRoom;
 
 
@@ -47,7 +47,7 @@ public class EventTestData {
         event.setLogEntry(LOG_ENTRY_EVENT_NAME.equals(eventName));
         event.setEventType(createTestEventHandlerEntity(eventName));
         event.setIsCurrent(true);
-        event.setEventStatus(MODERNISED.getStatusNumber());
+        event.setEventStatus(AUDIO_LINK_NOT_DONE_MODERNISED.getStatusNumber());
         return event;
     }
 
