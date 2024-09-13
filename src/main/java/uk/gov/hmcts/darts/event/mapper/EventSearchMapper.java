@@ -18,7 +18,10 @@ public class EventSearchMapper {
             .chronicleId(evr.chronicleId())
             .antecedentId(evr.antecedentId())
             .courthouse(buildCourthouse(evr))
-            .courtroom(buildCourtroom(evr));
+            .courtroom(buildCourtroom(evr))
+            .isManuallyAnonymised(evr.isDataAnonymised())
+            .isCaseExpired(evr.isDataAnonymisedForCase())
+            .caseExpiredAt(evr.dataAnonymisedTs());
     }
 
     private static AdminSearchEventResponseResultCourtroom buildCourtroom(EventSearchResult evr) {
