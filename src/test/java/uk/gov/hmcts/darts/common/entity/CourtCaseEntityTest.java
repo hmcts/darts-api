@@ -40,7 +40,7 @@ class CourtCaseEntityTest {
 
         courtCase.anonymize(userAccount, uuid);
         assertThat(courtCase.isDataAnonymised()).isTrue();
-        assertThat(courtCase.getDataAnonymisedBy()).isEqualTo(123L);
+        assertThat(courtCase.getDataAnonymisedBy()).isEqualTo(123);
         assertThat(courtCase.getDataAnonymisedTs()).isCloseToUtcNow(within(5, SECONDS));
 
         verify(defendantEntity1, times(1)).anonymize(userAccount, uuid);

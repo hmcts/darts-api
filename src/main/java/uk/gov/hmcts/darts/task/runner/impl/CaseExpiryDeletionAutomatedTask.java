@@ -54,7 +54,7 @@ public class CaseExpiryDeletionAutomatedTask
 
     @Override
     @Transactional
-    protected void runTask() {
+    public void runTask() {
         final UUID uuid = UUID.randomUUID();
         final UserAccountEntity userAccount = userIdentity.getUserAccount();
         final List<CourtCaseEntity> courtCaseEntities = new ArrayList<>();
