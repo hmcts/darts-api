@@ -16,8 +16,10 @@ import org.hibernate.envers.AuditTable;
 import org.hibernate.envers.Audited;
 import org.hibernate.envers.NotAudited;
 import uk.gov.hmcts.darts.common.entity.base.CreatedModifiedBaseEntity;
+import uk.gov.hmcts.darts.task.runner.CanAnonymized;
 
 import java.time.OffsetDateTime;
+import java.util.UUID;
 
 import static org.hibernate.envers.RelationTargetAuditMode.NOT_AUDITED;
 
@@ -27,7 +29,7 @@ import static org.hibernate.envers.RelationTargetAuditMode.NOT_AUDITED;
 @Setter
 @Audited
 @AuditTable("transcription_comment_aud")
-public class TranscriptionCommentEntity extends CreatedModifiedBaseEntity {
+public class TranscriptionCommentEntity extends CreatedModifiedBaseEntity implements CanAnonymized {
 
     @Id
     @Column(name = "trc_id")
@@ -64,4 +66,9 @@ public class TranscriptionCommentEntity extends CreatedModifiedBaseEntity {
     @Column(name = "is_data_anonymised")
     private boolean isDataAnonymised;
 
+    @Override
+    public void anonymize(UserAccountEntity userAccount, UUID uuid) {
+        this.setComment(uuid.toString());
+        this.setLastModifiedBy(userAccount);
+    }
 }

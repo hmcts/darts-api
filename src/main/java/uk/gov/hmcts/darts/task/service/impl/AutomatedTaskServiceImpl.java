@@ -61,6 +61,7 @@ public class AutomatedTaskServiceImpl implements AutomatedTaskService {
         log.info("Automated tasks are loading");
         autoloadingAutomatedTasks.forEach(autoloadingAutomatedTask -> {
             AbstractLockableAutomatedTask task = autoloadingAutomatedTask.getAbstractLockableAutomatedTask();
+            log.info("Loading task: {}", task.getTaskName());
             task.setLastCronExpression(getAutomatedTaskCronExpression(task));
             Trigger trigger = createAutomatedTaskTrigger(task);
             taskRegistrar.addTriggerTask(task, trigger);
@@ -240,5 +241,4 @@ public class AutomatedTaskServiceImpl implements AutomatedTaskService {
             return crontrigger.nextExecution(triggerContext);
         };
     }
-
 }

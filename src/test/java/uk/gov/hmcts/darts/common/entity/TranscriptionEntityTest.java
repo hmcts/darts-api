@@ -3,11 +3,34 @@ package uk.gov.hmcts.darts.common.entity;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
+import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
 class TranscriptionEntityTest {
+
+    @Test
+    void positiveAnonymize() {
+        TranscriptionEntity transcriptionEntity = new TranscriptionEntity();
+
+        TranscriptionCommentEntity transcriptionCommentEntity = mock(TranscriptionCommentEntity.class);
+        TranscriptionCommentEntity transcriptionCommentEntity2 = mock(TranscriptionCommentEntity.class);
+
+        transcriptionEntity.setTranscriptionCommentEntities(List.of(transcriptionCommentEntity, transcriptionCommentEntity2));
+
+        UserAccountEntity userAccount = new UserAccountEntity();
+        UUID uuid = UUID.randomUUID();
+        transcriptionEntity.anonymize(userAccount, uuid);
+
+        verify(transcriptionCommentEntity, times(1))
+            .anonymize(userAccount, uuid);
+        verify(transcriptionCommentEntity2, times(1))
+            .anonymize(userAccount, uuid);
+    }
 
     @Test
     void testGetCourtCaseViaHearing() {

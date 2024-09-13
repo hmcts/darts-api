@@ -82,4 +82,14 @@ public interface CaseRepository extends JpaRepository<CourtCaseEntity, Integer> 
                                                                                  OffsetDateTime caseDocumentCreatedAfterTimestamp,
                                                                                  Pageable pageable);
 
+    @Query(value = """
+        select cc.* from darts.darts.court_case cc
+        join darts.darts.case_retention cr
+        on cr.cas_id = cc.cas_id and cr.current_state = 'COMPLETE'
+        where cc.is_data_anonymised = false
+        and cr.retain_until_ts < :maxRetentionDate
+        limit :limit
+        """,
+        nativeQuery = true)
+    List<CourtCaseEntity> findCasesToBeAnonymized(OffsetDateTime maxRetentionDate, long limit);
 }
