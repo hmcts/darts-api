@@ -240,7 +240,7 @@ class AutomatedTaskServiceTest extends IntegrationPerClassBase {
     @Test
     void givenAutomatedTaskVerifyStatusBeforeAndAfterRunning() {
         ProcessDailyListAutomatedTask automatedTask = new ProcessDailyListAutomatedTask(
-            automatedTaskRepository, automatedTaskConfigurationProperties, logApi, lockService
+            automatedTaskRepository, automatedTaskConfigurationProperties, null,logApi, lockService
         );
 
         Optional<AutomatedTaskEntity> originalAutomatedTaskEntity =
@@ -271,7 +271,7 @@ class AutomatedTaskServiceTest extends IntegrationPerClassBase {
     @Test
     void givenConfiguredTaskCancelProcessDailyList() {
         AutomatedTask automatedTask = new ProcessDailyListAutomatedTask(
-            automatedTaskRepository, automatedTaskConfigurationProperties, logApi, lockService
+            automatedTaskRepository, automatedTaskConfigurationProperties, null,logApi, lockService
         );
 
         Set<ScheduledTask> scheduledTasks = scheduledTaskHolder.getScheduledTasks();
@@ -288,7 +288,7 @@ class AutomatedTaskServiceTest extends IntegrationPerClassBase {
     @Test
     void givenConfiguredTasksUpdateCronExpressionAndResetCronExpression() {
         AutomatedTask automatedTask = new ProcessDailyListAutomatedTask(
-            automatedTaskRepository, automatedTaskConfigurationProperties, logApi, lockService
+            automatedTaskRepository, automatedTaskConfigurationProperties, null,logApi, lockService
         );
         Optional<AutomatedTaskEntity> originalAutomatedTaskEntity =
             automatedTaskService.getAutomatedTaskEntityByTaskName(automatedTask.getTaskName());
@@ -313,7 +313,7 @@ class AutomatedTaskServiceTest extends IntegrationPerClassBase {
     @Test
     void cancelAutomatedTaskAndUpdateCronExpression() {
         AutomatedTask automatedTask = new ProcessDailyListAutomatedTask(
-            automatedTaskRepository, automatedTaskConfigurationProperties, logApi, lockService
+            automatedTaskRepository, automatedTaskConfigurationProperties, null,logApi, lockService
         );
         Optional<AutomatedTaskEntity> originalAutomatedTaskEntity =
             automatedTaskService.getAutomatedTaskEntityByTaskName(automatedTask.getTaskName());
@@ -349,7 +349,7 @@ class AutomatedTaskServiceTest extends IntegrationPerClassBase {
     @SuppressWarnings("PMD.LawOfDemeter")
     void givenExistingAutomatedTaskNameAndInvalidCronExpressionThrowsDartsApiException() {
         AutomatedTask automatedTask = new ProcessDailyListAutomatedTask(
-            automatedTaskRepository, automatedTaskConfigurationProperties, logApi, lockService
+            automatedTaskRepository, automatedTaskConfigurationProperties, null,logApi, lockService
         );
 
         var exception = assertThrows(
@@ -366,7 +366,7 @@ class AutomatedTaskServiceTest extends IntegrationPerClassBase {
     @Test
     void updateCronExpressionWithoutRescheduleForcingTaskToSkipRunning() {
         AutomatedTask automatedTask = new ProcessDailyListAutomatedTask(
-            automatedTaskRepository, automatedTaskConfigurationProperties, logApi, lockService
+            automatedTaskRepository, automatedTaskConfigurationProperties, null,logApi, lockService
         );
         Optional<AutomatedTaskEntity> originalAutomatedTaskEntity =
             automatedTaskService.getAutomatedTaskEntityByTaskName(automatedTask.getTaskName());

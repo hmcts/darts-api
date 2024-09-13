@@ -133,6 +133,14 @@ public abstract class AbstractLockableAutomatedTask implements AutomatedTask {
 
     protected abstract void runTask();
 
+    public Duration getLockAtMostFor() {
+        return lockService.getLockAtMostFor();
+    }
+
+    public Duration getLockAtLeastFor() {
+        return lockService.getLockAtLeastFor();
+    }
+
     protected void handleException(Exception exception) {
         log.error("Task: {} exception during execution of the task business logic", getTaskName(), exception);
     }
@@ -170,8 +178,8 @@ public abstract class AbstractLockableAutomatedTask implements AutomatedTask {
         return new LockConfiguration(
             Instant.now(),
             getTaskName(),
-            lockService.getLockAtMostFor(),
-            lockService.getLockAtLeastFor()
+            this.getLockAtMostFor(),
+            this.getLockAtLeastFor()
         );
     }
 
@@ -203,6 +211,10 @@ public abstract class AbstractLockableAutomatedTask implements AutomatedTask {
         }
     }
 
+    public AbstractLockableAutomatedTask getAbstractLockableAutomatedTask() {
+        return this;
+    }
+
     class LockedTask implements Runnable {
         @Override
         public void run() {
@@ -218,5 +230,4 @@ public abstract class AbstractLockableAutomatedTask implements AutomatedTask {
             }
         }
     }
-
 }
