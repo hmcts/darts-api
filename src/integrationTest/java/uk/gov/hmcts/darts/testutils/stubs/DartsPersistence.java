@@ -8,8 +8,10 @@ import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.darts.audio.entity.MediaRequestEntity;
+import uk.gov.hmcts.darts.casedocument.model.CourtCaseDocument;
 import uk.gov.hmcts.darts.common.entity.AnnotationDocumentEntity;
 import uk.gov.hmcts.darts.common.entity.AnnotationEntity;
+import uk.gov.hmcts.darts.common.entity.CaseDocumentEntity;
 import uk.gov.hmcts.darts.common.entity.CaseManagementRetentionEntity;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
@@ -326,6 +328,11 @@ public class DartsPersistence {
 
     public MediaEntity save(MediaEntity media) {
         return save(media, true);
+    }
+
+    public CaseDocumentEntity save(CaseDocumentEntity caseDocumentEntity) {
+        save(caseDocumentEntity.getCourtCase());
+        return caseDocumentRepository.save(caseDocumentEntity);
     }
 
     @Transactional

@@ -16,6 +16,7 @@ import uk.gov.hmcts.darts.common.entity.TranscriptionEntity;
 import uk.gov.hmcts.darts.common.entity.TransformedMediaEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.repository.SecurityGroupRepository;
+import uk.gov.hmcts.darts.test.common.data.CourtroomTestData;
 import uk.gov.hmcts.darts.test.common.data.PersistableFactory;
 
 import java.time.LocalTime;
@@ -62,10 +63,7 @@ public class AuthorisationStub {
 
     @Transactional
     public void givenTestSchema() {
-        courtroomEntity = dartsDatabaseStub.givenTheDatabaseContainsCourthouseWithRoom(
-            "Bristol",
-            "Court 1"
-        );
+        courtroomEntity = CourtroomTestData.someMinimalCourtRoom();
 
         courthouseEntity = dartsDatabaseStub.getCourthouseRepository()
             .findById(courtroomEntity.getCourthouse().getId()).orElseThrow();

@@ -15,7 +15,7 @@ public class CaseManagementRetentionTestData {
     public static CaseManagementRetentionEntity someMinimalCaseManagementRetention() {
         var caseManagementRetention = new CaseManagementRetentionEntity();
         caseManagementRetention.setEventEntity(someMinimalEvent());
-        caseManagementRetention.setCourtCase(someMinimalCase());
+        caseManagementRetention.setCourtCase(PersistableFactory.getCourtCaseTestData().someMinimalCase());
         caseManagementRetention.setRetentionPolicyTypeEntity(someMinimalRetentionPolicyType());
         return caseManagementRetention;
     }

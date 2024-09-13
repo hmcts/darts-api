@@ -17,7 +17,7 @@ import java.time.OffsetDateTime;
 import java.util.UUID;
 
 @RequiredArgsConstructor
-public class CustomExternalObjectDirectoryEntity extends ExternalObjectDirectoryEntity {
+public class CustomExternalObjectDirectoryEntity extends ExternalObjectDirectoryEntity implements DbInsertable<ExternalObjectDirectoryEntity>{
     @lombok.Builder
     public CustomExternalObjectDirectoryEntity(Integer id, MediaEntity media, TranscriptionDocumentEntity transcriptionDocumentEntity,
                                                AnnotationDocumentEntity annotationDocumentEntity, CaseDocumentEntity caseDocument,
@@ -55,8 +55,19 @@ public class CustomExternalObjectDirectoryEntity extends ExternalObjectDirectory
         setLastModifiedBy(lastModifiedBy);
     }
 
+    @Override
+    public ExternalObjectDirectoryEntity getDbInsertable() {
+        try {
+            ExternalObjectDirectoryEntity annotationEntity = new ExternalObjectDirectoryEntity();
+            BeanUtils.copyProperties(annotationEntity, this);
+            return annotationEntity;
+        } catch (IllegalAccessException | InvocationTargetException e) {
+            throw new AssertionFailure("Assumed that there would be no error on mapping data", e);
+        }
+    }
+
     public static class CustomExternalObjectDirectoryuilderRetrieve
-        implements BuilderHolder<ExternalObjectDirectoryEntity,
+        implements BuilderHolder<CustomExternalObjectDirectoryEntity,
                 CustomExternalObjectDirectoryEntityBuilder> {
         public CustomExternalObjectDirectoryuilderRetrieve() {
         }
@@ -64,14 +75,8 @@ public class CustomExternalObjectDirectoryEntity extends ExternalObjectDirectory
         private CustomExternalObjectDirectoryEntity.CustomExternalObjectDirectoryEntityBuilder builder = CustomExternalObjectDirectoryEntity.builder();
 
         @Override
-        public ExternalObjectDirectoryEntity build() {
-            try {
-                ExternalObjectDirectoryEntity externalObjectDirectory = new ExternalObjectDirectoryEntity();
-                BeanUtils.copyProperties(externalObjectDirectory, builder.build());
-                return externalObjectDirectory;
-            } catch (IllegalAccessException | InvocationTargetException e) {
-                throw new AssertionFailure("Assumed that there would be no error on mapping data", e);
-            }
+        public CustomExternalObjectDirectoryEntity build() {
+            return builder.build();
         }
 
         @Override

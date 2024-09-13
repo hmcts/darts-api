@@ -1,52 +1,58 @@
 package uk.gov.hmcts.darts.test.common.data;
 
-import lombok.experimental.UtilityClass;
-import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionStatusEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionTypeEntity;
+import uk.gov.hmcts.darts.test.common.data.builder.CustomTranscriptionEntity;
 
-import java.util.Arrays;
+import java.util.ArrayList;
+import java.util.List;
 
-import static uk.gov.hmcts.darts.test.common.data.CaseTestData.createSomeMinimalCase;
 import static uk.gov.hmcts.darts.test.common.data.UserAccountTestData.minimalUserAccount;
 import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum.REQUESTED;
 import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionTypeEnum.SENTENCING_REMARKS;
 
-@UtilityClass
 @SuppressWarnings({"HideUtilityClassConstructor"})
-public class TranscriptionTestData {
+public class TranscriptionTestData implements Persistable<CustomTranscriptionEntity.CustomTranscriptionEntityBuilderRetrieve> {
 
-    public static TranscriptionEntity minimalTranscription() {
-        var minimalTranscription = new TranscriptionEntity();
-        var someMinimalCase = createSomeMinimalCase();
-        minimalTranscription.addCase(someMinimalCase);
-        minimalTranscription.setTranscriptionType(someTranscriptionType());
-        minimalTranscription.setTranscriptionStatus(someTranscriptionStatus());
-        minimalTranscription.setHideRequestFromRequestor(false);
-        minimalTranscription.setIsManualTranscription(false);
-        var userAccount = minimalUserAccount();
-        minimalTranscription.setLastModifiedBy(userAccount);
-        minimalTranscription.setCreatedBy(userAccount);
-        return minimalTranscription;
+    TranscriptionTestData() {
     }
 
-    public static TranscriptionEntity someTranscriptionForHearing(HearingEntity hearingEntity) {
-        var transcription = minimalTranscription();
-        transcription.addHearing(hearingEntity);
-        transcription.setCourtCases(Arrays.asList(hearingEntity.getCourtCase()));
-        return transcription;
+    public TranscriptionEntity minimalTranscription() {
+        return someMinimal().build();
     }
 
-    public static TranscriptionTypeEntity someTranscriptionType() {
+    public TranscriptionTypeEntity someTranscriptionType() {
         var transcriptionType = new TranscriptionTypeEntity();
         transcriptionType.setId(SENTENCING_REMARKS.getId());
         return transcriptionType;
     }
 
-    public static TranscriptionStatusEntity someTranscriptionStatus() {
+    public TranscriptionStatusEntity someTranscriptionStatus() {
         var transcriptionStatus = new TranscriptionStatusEntity();
         transcriptionStatus.setId(REQUESTED.getId());
         return transcriptionStatus;
+    }
+
+    @Override
+    public CustomTranscriptionEntity.CustomTranscriptionEntityBuilderRetrieve someMinimal() {
+        CustomTranscriptionEntity.CustomTranscriptionEntityBuilderRetrieve builder = new CustomTranscriptionEntity.CustomTranscriptionEntityBuilderRetrieve();
+        var userAccount = minimalUserAccount();
+
+        var someMinimalCase = PersistableFactory.getCourtCaseTestData().createSomeMinimalCase();
+        builder.getBuilder().courtCases(new ArrayList<>(List.of(someMinimalCase)))
+            .transcriptionType(someTranscriptionType())
+            .transcriptionStatus(someTranscriptionStatus())
+            .hideRequestFromRequestor(false)
+            .isManualTranscription(false)
+            .lastModifiedBy(userAccount)
+            .createdBy(userAccount);
+
+        return builder;
+    }
+
+    @Override
+    public CustomTranscriptionEntity.CustomTranscriptionEntityBuilderRetrieve someMaximal() {
+        return someMinimal();
     }
 }

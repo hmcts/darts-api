@@ -9,7 +9,6 @@ import uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 
-import static uk.gov.hmcts.darts.test.common.data.TranscriptionTestData.minimalTranscription;
 import static uk.gov.hmcts.darts.test.common.data.UserAccountTestData.minimalUserAccount;
 
 @UtilityClass
@@ -18,7 +17,7 @@ public class TranscriptionWorkflowTestData {
 
     public static TranscriptionWorkflowEntity minimalTranscriptionWorkflow() {
         var transcriptionWorkflow = new TranscriptionWorkflowEntity();
-        transcriptionWorkflow.setTranscription(minimalTranscription());
+        transcriptionWorkflow.setTranscription(PersistableFactory.getTranscriptionTestData().minimalTranscription());
         transcriptionWorkflow.setWorkflowActor(minimalUserAccount());
         transcriptionWorkflow.setTranscriptionStatus(
             new TranscriptionStatusEntity(TranscriptionStatusEnum.REQUESTED.getId()));

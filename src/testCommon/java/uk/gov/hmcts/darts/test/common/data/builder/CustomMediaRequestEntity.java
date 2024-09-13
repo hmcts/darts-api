@@ -13,7 +13,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.time.OffsetDateTime;
 
 @RequiredArgsConstructor
-public class CustomMediaRequestEntity extends MediaRequestEntity {
+public class CustomMediaRequestEntity extends MediaRequestEntity implements DbInsertable<MediaRequestEntity> {
 
     @lombok.Builder
     public CustomMediaRequestEntity(Integer id, HearingEntity hearing, UserAccountEntity currentOwner, UserAccountEntity requestor,
@@ -35,19 +35,24 @@ public class CustomMediaRequestEntity extends MediaRequestEntity {
         setLastModifiedDateTime(lastModifiedAt);
     }
 
-    public static class CustomMediaBuilderRetrieve implements BuilderHolder<MediaRequestEntity, CustomMediaRequestEntityBuilder> {
+    @Override
+    public MediaRequestEntity getDbInsertable() {
+        try {
+            MediaRequestEntity mediaRequestEntity = new MediaRequestEntity();
+            BeanUtils.copyProperties(mediaRequestEntity, this);
+            return mediaRequestEntity;
+        } catch (IllegalAccessException | InvocationTargetException e) {
+            throw new AssertionFailure("Assumed that there would be no error on mapping data", e);
+        }
+    }
 
-        private CustomMediaRequestEntity.CustomMediaRequestEntityBuilder builder = CustomMediaRequestEntity.builder();
+    public static class CustomMediaBuilderRetrieve implements BuilderHolder<CustomMediaRequestEntity, CustomMediaRequestEntityBuilder> {
+
+        private final CustomMediaRequestEntity.CustomMediaRequestEntityBuilder builder = CustomMediaRequestEntity.builder();
 
         @Override
-        public MediaRequestEntity build() {
-            try {
-                MediaRequestEntity mediaRequestEntity = new MediaRequestEntity();
-                BeanUtils.copyProperties(mediaRequestEntity, builder.build());
-                return mediaRequestEntity;
-            } catch (IllegalAccessException | InvocationTargetException e) {
-                throw new AssertionFailure("Assumed that there would be no error on mapping data", e);
-            }
+        public CustomMediaRequestEntity build() {
+            return builder.build();
         }
 
         @Override
