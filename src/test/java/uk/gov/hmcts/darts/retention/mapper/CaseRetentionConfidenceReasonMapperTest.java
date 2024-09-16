@@ -7,6 +7,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.darts.arm.config.ArmDataManagementConfiguration;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.retention.enums.RetentionConfidenceReasonEnum;
+import uk.gov.hmcts.darts.retention.model.CaseRetentionConfidenceReason;
 import uk.gov.hmcts.darts.test.common.data.CaseTestData;
 
 import java.time.OffsetDateTime;
@@ -49,15 +50,17 @@ class CaseRetentionConfidenceReasonMapperTest {
         assertEquals("2023-05-31T10:00:00+01", result.getRetentionConfidenceAppliedTimestamp());
         assertEquals(2, result.getRetentionCases().size());
 
-        assertEquals(courtCase1.getCaseNumber(), result.getRetentionCases().get(0).getCaseNumber());
-        assertEquals(courtCase1.getCourthouse().getCourthouseName(), result.getRetentionCases().get(0).getCourthouse());
-        assertEquals("CASE_CLOSED", result.getRetentionCases().get(0).getRetentionConfidenceReason());
-        assertEquals("2030-05-31T10:00:00+01", result.getRetentionCases().get(0).getRetentionConfidenceUpdatedTimestamp());
+        CaseRetentionConfidenceReason.RetentionCase retentionCase1 = result.getRetentionCases().get(0);
+        assertEquals(courtCase1.getCaseNumber(), retentionCase1.getCaseNumber());
+        assertEquals(courtCase1.getCourthouse().getCourthouseName(), retentionCase1.getCourthouse());
+        assertEquals("CASE_CLOSED", retentionCase1.getRetentionConfidenceReason());
+        assertEquals("2030-05-31T10:00:00+01", retentionCase1.getRetentionConfidenceUpdatedTimestamp());
 
-        assertEquals(courtCase2.getCaseNumber(), result.getRetentionCases().get(1).getCaseNumber());
-        assertEquals(courtCase2.getCourthouse().getCourthouseName(), result.getRetentionCases().get(1).getCourthouse());
-        assertEquals("AGED_CASE", result.getRetentionCases().get(1).getRetentionConfidenceReason());
-        assertEquals("2030-05-31T10:00:00+01", result.getRetentionCases().get(1).getRetentionConfidenceUpdatedTimestamp());
+        CaseRetentionConfidenceReason.RetentionCase retentionCase2 = result.getRetentionCases().get(1);
+        assertEquals(courtCase2.getCaseNumber(), retentionCase2.getCaseNumber());
+        assertEquals(courtCase2.getCourthouse().getCourthouseName(), retentionCase2.getCourthouse());
+        assertEquals("AGED_CASE", retentionCase2.getRetentionConfidenceReason());
+        assertEquals("2030-05-31T10:00:00+01", retentionCase2.getRetentionConfidenceUpdatedTimestamp());
 
     }
 }
