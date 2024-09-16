@@ -5,6 +5,8 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.data.domain.Limit;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
+import uk.gov.hmcts.darts.audit.api.AuditActivity;
+import uk.gov.hmcts.darts.audit.api.AuditApi;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
@@ -34,17 +36,20 @@ public class CaseExpiryDeletionAutomatedTask
     private final CurrentTimeHelper currentTimeHelper;
     private final UserIdentity userIdentity;
     private final CaseRepository caseRepository;
+    private final AuditApi auditApi;
 
     public CaseExpiryDeletionAutomatedTask(AutomatedTaskRepository automatedTaskRepository,
                                            AutomatedTaskConfigurationProperties automatedTaskConfigurationProperties,
                                            CurrentTimeHelper currentTimeHelper,
                                            UserIdentity userIdentity,
                                            CaseRepository caseRepository,
+                                           AuditApi auditApi,
                                            LogApi logApi, LockService lockService) {
         super(automatedTaskRepository, automatedTaskConfigurationProperties, logApi, lockService);
         this.currentTimeHelper = currentTimeHelper;
         this.userIdentity = userIdentity;
         this.caseRepository = caseRepository;
+        this.auditApi = auditApi;
     }
 
     @Override
@@ -63,6 +68,8 @@ public class CaseExpiryDeletionAutomatedTask
             .forEach(courtCase -> {
                 log.info("Anonymising case with id: {} because the criteria for retention has been met.", courtCase.getId());
                 courtCase.anonymize(userAccount);
+                auditApi.record(AuditActivity.CASE_EXPIRED, userAccount, courtCase);
+
                 courtCaseEntities.add(courtCase);
             });
         //This also saves defendant, defence and prosecutor entities

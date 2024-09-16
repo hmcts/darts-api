@@ -4,6 +4,8 @@ import lombok.RequiredArgsConstructor;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import uk.gov.hmcts.darts.audit.api.AuditActivity;
+import uk.gov.hmcts.darts.common.entity.AuditEntity;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.DefenceEntity;
 import uk.gov.hmcts.darts.common.entity.DefendantEntity;
@@ -30,6 +32,7 @@ import uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.time.temporal.ChronoUnit;
+import java.util.List;
 import java.util.regex.Pattern;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -128,7 +131,23 @@ class CaseExpiryDeletionAutomatedTaskITest extends PostgresIntegrationBase {
             courtCase.getProsecutorList().forEach(prosecutorEntity -> assertProsecutor(prosecutorEntity, isAnonymized));
 
             courtCase.getHearings().forEach(hearingEntity -> assertHearing(hearingEntity, isAnonymized));
+            assertAuditEntries(courtCase, isAnonymized);
         });
+    }
+
+    private void assertAuditEntries(CourtCaseEntity courtCase, boolean isAnonymized) {
+        List<AuditEntity> caseExpiredAuditEntries = dartsDatabase.getAuditRepository()
+            .getAuditEntitiesByCaseAndActivityForDateRange(
+                courtCase.getId(),
+                AuditActivity.CASE_EXPIRED.getId(),
+                OffsetDateTime.now().minusMinutes(1),
+                OffsetDateTime.now().plusMinutes(1)
+            );
+        if (isAnonymized) {
+            assertThat(caseExpiredAuditEntries).hasSize(1);
+        } else {
+            assertThat(caseExpiredAuditEntries).isEmpty();
+        }
     }
 
 
