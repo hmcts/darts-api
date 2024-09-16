@@ -27,7 +27,6 @@ import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 
 import static jakarta.persistence.CascadeType.MERGE;
 import static jakarta.persistence.CascadeType.PERSIST;
@@ -247,8 +246,8 @@ public class TranscriptionEntity extends CreatedModifiedBaseEntity implements Ca
     }
 
     @Override
-    public void anonymize(UserAccountEntity userAccount, UUID uuid) {
-        this.getTranscriptionCommentEntities().forEach(transcriptionCommentEntity -> transcriptionCommentEntity.anonymize(userAccount, uuid));
+    public void anonymize(UserAccountEntity userAccount) {
+        this.getTranscriptionCommentEntities().forEach(transcriptionCommentEntity -> transcriptionCommentEntity.anonymize(userAccount));
         this.getTranscriptionWorkflowEntities().forEach(TranscriptionWorkflowEntity::close);
     }
 }

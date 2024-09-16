@@ -91,7 +91,7 @@ public class EventEntity extends CreatedModifiedBaseEntity implements CanAnonymi
     }
 
     @Override
-    public void anonymize(UserAccountEntity userAccount, UUID uuid) {
-        this.setEventText(uuid.toString());
+    public void anonymize(UserAccountEntity userAccount) {
+        this.setEventText(UUID.randomUUID().toString());
     }
 }

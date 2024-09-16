@@ -3,7 +3,6 @@ package uk.gov.hmcts.darts.common.entity;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
-import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -27,13 +26,12 @@ class TranscriptionEntityTest {
 
 
         UserAccountEntity userAccount = new UserAccountEntity();
-        UUID uuid = UUID.randomUUID();
-        transcriptionEntity.anonymize(userAccount, uuid);
+        transcriptionEntity.anonymize(userAccount);
 
         verify(transcriptionCommentEntity1, times(1))
-            .anonymize(userAccount, uuid);
+            .anonymize(userAccount);
         verify(transcriptionCommentEntity2, times(1))
-            .anonymize(userAccount, uuid);
+            .anonymize(userAccount);
 
         verify(transcriptionWorkflowEntity1, times(1))
             .close();
