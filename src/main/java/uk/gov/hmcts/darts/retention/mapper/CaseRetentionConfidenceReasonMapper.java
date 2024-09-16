@@ -38,15 +38,23 @@ public class CaseRetentionConfidenceReasonMapper {
         }
         return retentionCases;
     }
-    
+
     private CaseRetentionConfidenceReason.RetentionCase buildRetentionCase(CourtCaseEntity courtCase) {
-        CaseRetentionConfidenceReason.RetentionCase retentionCase = CaseRetentionConfidenceReason.RetentionCase.builder()
+        var retentionCase = CaseRetentionConfidenceReason.RetentionCase.builder()
             .courthouse(courtCase.getCourthouse().getCourthouseName())
             .caseNumber(courtCase.getCaseNumber())
             .retentionConfidenceUpdatedTimestamp(formatDateTime(courtCase.getRetConfUpdatedTs()))
-            .retentionConfidenceReason(courtCase.getRetConfReason().name())
+            .retentionConfidenceReason(getCaseRetentionConfidenceReason(courtCase))
             .build();
         return retentionCase;
+    }
+
+    private static String getCaseRetentionConfidenceReason(CourtCaseEntity courtCase) {
+        String caseRetentionConfidenceReason = null;
+        if (nonNull(courtCase.getRetConfReason())) {
+            caseRetentionConfidenceReason = courtCase.getRetConfReason().name();
+        }
+        return caseRetentionConfidenceReason;
     }
 
     private String formatDateTime(OffsetDateTime offsetDateTime) {

@@ -284,7 +284,9 @@ public class ApplyRetentionCaseAssociatedObjectsSingleCaseProcessorImpl implemen
 
     private void updateArmEodRetention(List<ExternalObjectDirectoryEntity> armEods, String errorMessage) {
         if (armEods.size() == 1) {
-            armEods.get(0).setUpdateRetention(true);
+            ExternalObjectDirectoryEntity eod = armEods.get(0);
+            eod.setUpdateRetention(true);
+            eodRepository.save(eod);
         } else {
             throw new DartsException(errorMessage);
         }
