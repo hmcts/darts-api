@@ -7,6 +7,8 @@ import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Limit;
+import uk.gov.hmcts.darts.audit.api.AuditActivity;
+import uk.gov.hmcts.darts.audit.api.AuditApi;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
@@ -45,6 +47,8 @@ class CaseExpiryDeletionAutomatedTaskTest {
     private LogApi logApi;
     @Mock
     private LockService lockService;
+    @Mock
+    private AuditApi auditApi;
 
     @InjectMocks
     @Spy
@@ -82,6 +86,13 @@ class CaseExpiryDeletionAutomatedTaskTest {
             .anonymize(eq(userAccount));
         verify(courtCase3, times(1))
             .anonymize(eq(userAccount));
+
+        verify(auditApi, times(1))
+            .record(AuditActivity.CASE_EXPIRED, userAccount, courtCase1);
+        verify(auditApi, times(1))
+            .record(AuditActivity.CASE_EXPIRED, userAccount, courtCase2);
+        verify(auditApi, times(1))
+            .record(AuditActivity.CASE_EXPIRED, userAccount, courtCase3);
 
         verify(caseRepository, times(1))
             .findCasesToBeAnonymized(offsetDateTime, Limit.of(5));
