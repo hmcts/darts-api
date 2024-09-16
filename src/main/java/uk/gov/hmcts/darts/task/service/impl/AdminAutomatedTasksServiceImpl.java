@@ -1,5 +1,6 @@
 package uk.gov.hmcts.darts.task.service.impl;
 
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -37,7 +38,7 @@ public class AdminAutomatedTasksServiceImpl implements AdminAutomatedTaskService
     private final AuditApi auditApi;
     private final LockService lockService;
 
-    @Value("${automated.task.expiry-deletion}")
+    @Value("${automated.task.expiry-deletion:false}")
     private final boolean caseExpiryDeletionEnabled;
 
     @Override
