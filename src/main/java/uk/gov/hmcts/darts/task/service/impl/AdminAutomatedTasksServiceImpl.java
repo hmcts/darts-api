@@ -38,7 +38,7 @@ public class AdminAutomatedTasksServiceImpl implements AdminAutomatedTaskService
     private final AuditApi auditApi;
     private final LockService lockService;
 
-    @Value("${automated.task.expiry-deletion:false}")
+    @Value("${darts.automated.task.expiry-deletion.enabled:false}")
     private final boolean caseExpiryDeletionEnabled;
 
     @Override
