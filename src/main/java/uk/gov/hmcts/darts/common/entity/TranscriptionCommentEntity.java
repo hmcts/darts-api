@@ -67,8 +67,8 @@ public class TranscriptionCommentEntity extends CreatedModifiedBaseEntity implem
     private boolean isDataAnonymised;
 
     @Override
-    public void anonymize(UserAccountEntity userAccount, UUID uuid) {
-        this.setComment(uuid.toString());
+    public void anonymize(UserAccountEntity userAccount) {
+        this.setComment(UUID.randomUUID().toString());
         this.setLastModifiedBy(userAccount);
     }
 }

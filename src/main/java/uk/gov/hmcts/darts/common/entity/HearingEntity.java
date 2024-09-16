@@ -27,7 +27,6 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 
 @Entity
 @Table(name = "hearing")
@@ -125,8 +124,8 @@ public class HearingEntity extends CreatedModifiedBaseEntity implements CanAnony
     }
 
     @Override
-    public void anonymize(UserAccountEntity userAccount, UUID uuid) {
-        this.getTranscriptions().forEach(transcriptionEntity -> transcriptionEntity.anonymize(userAccount, uuid));
-        this.getEventList().forEach(eventEntity -> eventEntity.anonymize(userAccount, uuid));
+    public void anonymize(UserAccountEntity userAccount) {
+        this.getTranscriptions().forEach(transcriptionEntity -> transcriptionEntity.anonymize(userAccount));
+        this.getEventList().forEach(eventEntity -> eventEntity.anonymize(userAccount));
     }
 }

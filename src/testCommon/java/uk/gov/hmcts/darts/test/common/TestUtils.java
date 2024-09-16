@@ -35,6 +35,8 @@ import static org.junit.jupiter.api.Assertions.fail;
 @SuppressWarnings({"PMD.TestClassWithoutTestCases", "PMD.CognitiveComplexity"})
 public final class TestUtils {
 
+    public static final String UUID_REGEX = "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$";
+
     private TestUtils() {
         throw new UnsupportedOperationException("This is a utility class and cannot be instantiated");
     }

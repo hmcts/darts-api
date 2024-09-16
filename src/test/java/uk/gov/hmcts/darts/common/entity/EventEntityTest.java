@@ -1,8 +1,7 @@
 package uk.gov.hmcts.darts.common.entity;
 
 import org.junit.jupiter.api.Test;
-
-import java.util.UUID;
+import uk.gov.hmcts.darts.test.common.TestUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -14,10 +13,8 @@ class EventEntityTest {
         eventEntity.setEventText("event text");
 
         UserAccountEntity userAccount = new UserAccountEntity();
-        UUID uuid = UUID.randomUUID();
-
-        eventEntity.anonymize(userAccount, uuid);
-        assertThat(eventEntity.getEventText()).isEqualTo(uuid.toString());
+        eventEntity.anonymize(userAccount);
+        assertThat(eventEntity.getEventText()).matches(TestUtils.UUID_REGEX);
         assertThat(eventEntity.isDataAnonymised()).isFalse();//This is only set for manual anonymization
     }
 }

@@ -19,6 +19,7 @@ import uk.gov.hmcts.darts.common.entity.base.CreatedModifiedBaseEntity;
 import uk.gov.hmcts.darts.common.util.DateConverterUtil;
 import uk.gov.hmcts.darts.retention.enums.CaseRetentionStatus;
 import uk.gov.hmcts.darts.retention.enums.RetentionPolicyEnum;
+import uk.gov.hmcts.darts.test.common.TestUtils;
 import uk.gov.hmcts.darts.test.common.data.DefenceTestData;
 import uk.gov.hmcts.darts.test.common.data.DefendantTestData;
 import uk.gov.hmcts.darts.test.common.data.ProsecutorTestData;
@@ -41,8 +42,7 @@ import static org.assertj.core.api.BDDAssertions.within;
 class CaseExpiryDeletionAutomatedTaskITest extends PostgresIntegrationBase {
 
     private final CaseExpiryDeletionAutomatedTask caseExpiryDeletionAutomatedTask;
-    private static final Pattern UUID_REGEX =
-        Pattern.compile("^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$");
+    private static final Pattern UUID_REGEX = Pattern.compile(TestUtils.UUID_REGEX);
     private static final int AUTOMATION_USER_ID = 0;
     private int caseIndex;
 
