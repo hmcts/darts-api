@@ -16,7 +16,7 @@ import uk.gov.hmcts.darts.common.repository.EventRepository;
 import uk.gov.hmcts.darts.common.service.RetrieveCoreObjectService;
 import uk.gov.hmcts.darts.event.model.DartsEvent;
 
-import static uk.gov.hmcts.darts.event.enums.EventStatus.MODERNISED;
+import static uk.gov.hmcts.darts.event.enums.EventStatus.AUDIO_LINK_NOT_DONE_MODERNISED;
 
 @Component
 @RequiredArgsConstructor
@@ -71,7 +71,7 @@ public class EventPersistenceService {
         event.setCreatedBy(currentUser);
         event.setLastModifiedBy(currentUser);
         event.setIsCurrent(true);
-        event.setEventStatus(MODERNISED.getStatusNumber());
+        event.setEventStatus(AUDIO_LINK_NOT_DONE_MODERNISED.getStatusNumber());
         return event;
     }
 }
