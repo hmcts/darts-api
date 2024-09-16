@@ -3,7 +3,6 @@ package uk.gov.hmcts.darts.common.entity;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
-import java.util.UUID;
 
 import static java.time.temporal.ChronoUnit.SECONDS;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -36,21 +35,19 @@ class CourtCaseEntityTest {
 
         UserAccountEntity userAccount = new UserAccountEntity();
         userAccount.setId(123);
-        UUID uuid = UUID.randomUUID();
-
-        courtCase.anonymize(userAccount, uuid);
+        courtCase.anonymize(userAccount);
         assertThat(courtCase.isDataAnonymised()).isTrue();
         assertThat(courtCase.getDataAnonymisedBy()).isEqualTo(123);
         assertThat(courtCase.getDataAnonymisedTs()).isCloseToUtcNow(within(5, SECONDS));
 
-        verify(defendantEntity1, times(1)).anonymize(userAccount, uuid);
-        verify(defendantEntity2, times(1)).anonymize(userAccount, uuid);
+        verify(defendantEntity1, times(1)).anonymize(userAccount);
+        verify(defendantEntity2, times(1)).anonymize(userAccount);
 
-        verify(defenceEntity1, times(1)).anonymize(userAccount, uuid);
-        verify(defenceEntity2, times(1)).anonymize(userAccount, uuid);
-        verify(prosecutorEntity1, times(1)).anonymize(userAccount, uuid);
-        verify(prosecutorEntity2, times(1)).anonymize(userAccount, uuid);
-        verify(hearingEntity1, times(1)).anonymize(userAccount, uuid);
-        verify(hearingEntity2, times(1)).anonymize(userAccount, uuid);
+        verify(defenceEntity1, times(1)).anonymize(userAccount);
+        verify(defenceEntity2, times(1)).anonymize(userAccount);
+        verify(prosecutorEntity1, times(1)).anonymize(userAccount);
+        verify(prosecutorEntity2, times(1)).anonymize(userAccount);
+        verify(hearingEntity1, times(1)).anonymize(userAccount);
+        verify(hearingEntity2, times(1)).anonymize(userAccount);
     }
 }

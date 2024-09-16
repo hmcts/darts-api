@@ -1,8 +1,7 @@
 package uk.gov.hmcts.darts.common.entity;
 
 import org.junit.jupiter.api.Test;
-
-import java.util.UUID;
+import uk.gov.hmcts.darts.test.common.TestUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -14,9 +13,8 @@ class DefenceEntityTest {
         defenceEntity.setName("name");
 
         UserAccountEntity userAccount = new UserAccountEntity();
-        UUID uuid = UUID.randomUUID();
 
-        defenceEntity.anonymize(userAccount, uuid);
-        assertThat(defenceEntity.getName()).isEqualTo(uuid.toString());
+        defenceEntity.anonymize(userAccount);
+        assertThat(defenceEntity.getName()).matches(TestUtils.UUID_REGEX);
     }
 }

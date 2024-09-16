@@ -1,11 +1,14 @@
 package uk.gov.hmcts.darts.task.api;
 
+import lombok.Getter;
+
 import java.util.HashMap;
 import java.util.Map;
 
 /**
  * The task names map directly to the task names in the table automated_tasks, so there should only be one task per name.
  */
+@Getter
 public enum AutomatedTaskName {
     PROCESS_DAILY_LIST_TASK_NAME("ProcessDailyList"),
     CLOSE_OLD_UNFINISHED_TRANSCRIPTIONS_TASK_NAME("CloseOldUnfinishedTranscriptions"),
@@ -45,9 +48,6 @@ public enum AutomatedTaskName {
         this.taskName = taskName;
     }
 
-    public String getTaskName() {
-        return taskName;
-    }
 
     public static AutomatedTaskName valueOfTaskName(String taskName) {
         return BY_TASK_NAME.get(taskName);
