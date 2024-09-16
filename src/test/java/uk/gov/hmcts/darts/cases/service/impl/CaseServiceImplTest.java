@@ -370,7 +370,7 @@ class CaseServiceImplTest {
         List<EventEntity> events = Lists.newArrayList(createEventWith("eventName", "event", hearing, hearingDate));
 
         when(eventRepository.findAllByCaseId(courtCaseEntity.getId())).thenReturn(events);
-
+        when(caseRepository.findById(courtCaseEntity.getId())).thenReturn(Optional.of(courtCaseEntity));
         List<Event> result = service.getEventsByCaseId(courtCaseEntity.getId());
 
         String actualResponse = objectMapper.writeValueAsString(result);
