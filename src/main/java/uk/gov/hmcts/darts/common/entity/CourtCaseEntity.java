@@ -18,6 +18,7 @@ import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import uk.gov.hmcts.darts.common.entity.base.CreatedModifiedBaseEntity;
 import uk.gov.hmcts.darts.retention.enums.RetentionConfidenceReasonEnum;
@@ -33,6 +34,7 @@ import java.util.List;
 @SuppressWarnings({"PMD.ShortClassName"})
 @Getter
 @Setter
+@Slf4j
 public class CourtCaseEntity extends CreatedModifiedBaseEntity implements CanAnonymized {
 
     public static final String COURT_CASE = "courtCase";
@@ -202,9 +204,12 @@ public class CourtCaseEntity extends CreatedModifiedBaseEntity implements CanAno
         this.setDataAnonymised(true);
         this.setDataAnonymisedBy(userAccount.getId());
         this.setDataAnonymisedTs(OffsetDateTime.now());
+
         this.getDefendantList().forEach(defendantEntity -> defendantEntity.anonymize(userAccount));
         this.getDefenceList().forEach(defenceEntity -> defenceEntity.anonymize(userAccount));
         this.getProsecutorList().forEach(prosecutorEntity -> prosecutorEntity.anonymize(userAccount));
         this.getHearings().forEach(hearingEntity -> hearingEntity.anonymize(userAccount));
+        //Required for Dynatrace dashboards
+        log.info("Case expired: cas_id={}, case_number={}", this.getId(), this.getCaseNumber());
     }
 }
