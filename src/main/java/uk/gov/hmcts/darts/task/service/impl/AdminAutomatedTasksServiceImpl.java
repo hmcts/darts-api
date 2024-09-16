@@ -1,11 +1,15 @@
 package uk.gov.hmcts.darts.task.service.impl;
 
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.darts.audit.api.AuditApi;
+import uk.gov.hmcts.darts.common.entity.AutomatedTaskEntity;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.common.repository.AutomatedTaskRepository;
+import uk.gov.hmcts.darts.task.api.AutomatedTaskName;
 import uk.gov.hmcts.darts.task.exception.AutomatedTaskApiError;
 import uk.gov.hmcts.darts.task.service.AdminAutomatedTaskService;
 import uk.gov.hmcts.darts.task.service.LockService;
@@ -23,6 +27,7 @@ import static uk.gov.hmcts.darts.task.exception.AutomatedTaskApiError.AUTOMATED_
 @Service
 @RequiredArgsConstructor
 @Slf4j
+@Getter
 public class AdminAutomatedTasksServiceImpl implements AdminAutomatedTaskService {
 
     private final AutomatedTaskRepository automatedTaskRepository;
@@ -32,26 +37,27 @@ public class AdminAutomatedTasksServiceImpl implements AdminAutomatedTaskService
     private final AuditApi auditApi;
     private final LockService lockService;
 
+    @Value("${automated.task.expiry-deletion}")
+    private final boolean caseExpiryDeletionEnabled;
+
     @Override
     public List<AutomatedTaskSummary> getAllAutomatedTasks() {
-        var automatedTask = automatedTaskRepository.findAll();
+        var automatedTask = automatedTaskRepository.findAll()
+            .stream()
+            .filter(this::shouldIncludeAutomatedTask)
+            .toList();
         return mapper.mapEntitiesToModel(automatedTask);
     }
 
     @Override
     public DetailedAutomatedTask getAutomatedTaskById(Integer taskId) {
-        var maybeAutomatedTask = automatedTaskRepository.findById(taskId);
-        if (maybeAutomatedTask.isEmpty()) {
-            throw new DartsApiException(AUTOMATED_TASK_NOT_FOUND);
-        }
-
-        return mapper.mapEntityToDetailedAutomatedTask(maybeAutomatedTask.get());
+        return mapper.mapEntityToDetailedAutomatedTask(getAutomatedTaskEntityById(taskId));
     }
+
 
     @Override
     public void runAutomatedTask(Integer taskId) {
-        var automatedTaskEntity = automatedTaskRepository.findById(taskId)
-            .orElseThrow(() -> new DartsApiException(AUTOMATED_TASK_NOT_FOUND));
+        var automatedTaskEntity = getAutomatedTaskEntityById(taskId);
 
         if (lockService.isLocked(automatedTaskEntity)) {
             log.info("Manual running of {} failed as it is locked", automatedTaskEntity.getTaskName());
@@ -74,8 +80,7 @@ public class AdminAutomatedTasksServiceImpl implements AdminAutomatedTaskService
 
     @Override
     public DetailedAutomatedTask updateAutomatedTask(Integer taskId, AutomatedTaskPatch automatedTaskPatch) {
-        var automatedTask = automatedTaskRepository.findById(taskId)
-            .orElseThrow(() -> new DartsApiException(AUTOMATED_TASK_NOT_FOUND));
+        var automatedTask = getAutomatedTaskEntityById(taskId);
 
         automatedTask.setTaskEnabled(automatedTaskPatch.getIsActive());
 
@@ -84,5 +89,17 @@ public class AdminAutomatedTasksServiceImpl implements AdminAutomatedTaskService
         var updatedTask = automatedTaskRepository.save(automatedTask);
 
         return mapper.mapEntityToDetailedAutomatedTask(updatedTask);
+    }
+
+    private boolean shouldIncludeAutomatedTask(AutomatedTaskEntity automatedTaskEntity) {
+        return this.isCaseExpiryDeletionEnabled() || !automatedTaskEntity.getTaskName().equals(AutomatedTaskName.CASE_EXPIRY_DELETION_TASK_NAME.getTaskName());
+    }
+
+    private AutomatedTaskEntity getAutomatedTaskEntityById(Integer taskId) {
+        var maybeAutomatedTask = automatedTaskRepository.findById(taskId);
+        if (maybeAutomatedTask.isEmpty() || !shouldIncludeAutomatedTask(maybeAutomatedTask.get())) {
+            throw new DartsApiException(AUTOMATED_TASK_NOT_FOUND);
+        }
+        return maybeAutomatedTask.get();
     }
 }
