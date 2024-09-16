@@ -86,7 +86,7 @@ public class DailyListProcessorImpl implements DailyListProcessor {
     @Override
     public void processAllDailyListForListingCourthouse(String listingCourthouse) {
         stream(SourceType.values()).forEach(sourceType -> {
-            var dailyLists = dailyListRepository.findByListingCourthouseAndStatusAndStartDateAndSourceOrderByPublishedTimestampDesc(
+            var dailyLists = dailyListRepository.findByListingCourthouseAndStatusAndStartDateAndSourceOrderByPublishedTimestampDescCreatedDateTimeDesc(
                 listingCourthouse,
                 JobStatusType.NEW,
                 now(),

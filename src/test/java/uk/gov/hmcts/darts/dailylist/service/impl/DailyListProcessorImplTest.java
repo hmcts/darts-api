@@ -70,12 +70,12 @@ class DailyListProcessorImplTest {
     @ParameterizedTest
     @EnumSource(SourceType.class)
     void handlesScenarioWhereNoDailyListsAreFound(SourceType sourceType) {
-        lenient().when(dailyListRepository.findByListingCourthouseAndStatusAndStartDateAndSourceOrderByPublishedTimestampDesc(
+        lenient().when(dailyListRepository.findByListingCourthouseAndStatusAndStartDateAndSourceOrderByPublishedTimestampDescCreatedDateTimeDesc(
                 "Swansea", NEW, NOW, sourceType.name())).thenReturn(emptyList());
 
         dailyListProcessor.processAllDailyListForListingCourthouse("Swansea");
 
-        verify(dailyListRepository).findByListingCourthouseAndStatusAndStartDateAndSourceOrderByPublishedTimestampDesc(
+        verify(dailyListRepository).findByListingCourthouseAndStatusAndStartDateAndSourceOrderByPublishedTimestampDescCreatedDateTimeDesc(
             "Swansea", NEW, NOW, sourceType.name());
         verifyNoInteractions(dailyListUpdater);
         verify(logApi, times(2)).processedDailyListJob(Mockito.notNull());
@@ -85,9 +85,9 @@ class DailyListProcessorImplTest {
     void handlesSingleDailyListItemForOneSourceType() throws JsonProcessingException {
         when(dailyListEntityForSwansea.getStatus()).thenReturn(JobStatusType.PROCESSED);
 
-        when(dailyListRepository.findByListingCourthouseAndStatusAndStartDateAndSourceOrderByPublishedTimestampDesc(
+        when(dailyListRepository.findByListingCourthouseAndStatusAndStartDateAndSourceOrderByPublishedTimestampDescCreatedDateTimeDesc(
                 "Swansea", NEW, NOW, SourceType.XHB.name())).thenReturn(emptyList());
-        when(dailyListRepository.findByListingCourthouseAndStatusAndStartDateAndSourceOrderByPublishedTimestampDesc(
+        when(dailyListRepository.findByListingCourthouseAndStatusAndStartDateAndSourceOrderByPublishedTimestampDescCreatedDateTimeDesc(
                 "Swansea", NEW, NOW, SourceType.CPP.name())).thenReturn(List.of(dailyListEntityForSwansea));
 
         dailyListProcessor.processAllDailyListForListingCourthouse("Swansea");
@@ -107,10 +107,10 @@ class DailyListProcessorImplTest {
         when(oldDailyListEntityForLeeds.getStatus()).thenReturn(JobStatusType.PROCESSED);
         when(latestDailyListEntityForLeeds.getStatus()).thenReturn(JobStatusType.PROCESSED);
 
-        when(dailyListRepository.findByListingCourthouseAndStatusAndStartDateAndSourceOrderByPublishedTimestampDesc(
+        when(dailyListRepository.findByListingCourthouseAndStatusAndStartDateAndSourceOrderByPublishedTimestampDescCreatedDateTimeDesc(
                 "Leeds", NEW, NOW, SourceType.XHB.name())).thenReturn(List.of(oldDailyListEntityForLeeds));
 
-        when(dailyListRepository.findByListingCourthouseAndStatusAndStartDateAndSourceOrderByPublishedTimestampDesc(
+        when(dailyListRepository.findByListingCourthouseAndStatusAndStartDateAndSourceOrderByPublishedTimestampDescCreatedDateTimeDesc(
             "Leeds", NEW, NOW, SourceType.CPP.name())).thenReturn(List.of(latestDailyListEntityForLeeds, oldestDailyListEntityForLeeds));
 
         dailyListProcessor.processAllDailyListForListingCourthouse("Leeds");
