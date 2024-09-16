@@ -3,6 +3,7 @@ package uk.gov.hmcts.darts.arm.service;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.tomakehurst.wiremock.client.WireMock;
 import com.github.tomakehurst.wiremock.matching.RegexPattern;
+import feign.FeignException;
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -34,6 +35,7 @@ import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlPathMatching;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -43,6 +45,9 @@ class ArmApiServiceIntTest extends IntegrationBase {
     private static final String EXTERNAL_RECORD_ID = "7683ee65-c7a7-7343-be80-018b8ac13602";
     private static final String EXTERNAL_FILE_ID = "075987ea-b34d-49c7-b8db-439bfbe2496c";
     private static final String CABINET_ID = "100";
+    private static final String ARM_ERROR_BODY = """
+        { "itemId": "00000000-0000-0000-0000-000000000000", "cabinetId": 0, ...}
+        """;
 
     ArmTokenRequest armTokenRequest;
 
@@ -132,6 +137,37 @@ class ArmApiServiceIntTest extends IntegrationBase {
     }
 
     @Test
+    void updateMetadataFailureResultsInAnExceptionBeingThrown() throws Exception {
+
+        // Given
+        var eventTimestamp = OffsetDateTime.parse("2024-01-31T11:29:56.101701Z").plusYears(7);
+        var reasonConf = "reason";
+        var scoreConfId = 23;
+        var updateMetadataRequest = UpdateMetadataRequest.builder()
+            .itemId(EXTERNAL_RECORD_ID)
+            .manifest(UpdateMetadataRequest.Manifest.builder()
+                          .eventDate(eventTimestamp)
+                          .retConfScore(scoreConfId)
+                          .retConfReason(reasonConf)
+                          .build())
+            .useGuidsForFields(false)
+            .build();
+
+        String dummyRequest = objectMapper.writeValueAsString(updateMetadataRequest);
+
+        stubFor(
+            WireMock.post(urlPathMatching(uploadPath)).withRequestBody(equalToJson(dummyRequest))
+                .willReturn(
+                    aResponse()
+                        .withHeader("Content-Type", "application/json")
+                        .withBody(ARM_ERROR_BODY)
+                        .withStatus(400)));
+
+        // When/Then
+        assertThrows(FeignException.class, () -> armApiService.updateMetadata(EXTERNAL_RECORD_ID, eventTimestamp, scoreConfId, reasonConf));
+    }
+
+    @Test
     @SneakyThrows
     void downloadArmData() {
         // Given
@@ -163,7 +199,117 @@ class ArmApiServiceIntTest extends IntegrationBase {
         stubFor(
             WireMock.get(urlPathMatching(getDownloadPath(downloadPath, CABINET_ID, EXTERNAL_RECORD_ID, EXTERNAL_FILE_ID)))
                 .willReturn(
-                    aResponse().withStatus(400)));
+                    aResponse()
+                        .withStatus(400)
+                        .withBody("""
+                                      {
+                                          "itemId": "7683ee65-c7a7-7343-be80-018b8ac13602",
+                                          "cabinetId": 101,
+                                          "objectId": "4bfe4fc7-4e2f-4086-8a0e-146cc4556260",
+                                          "objectType": 1,
+                                          "fileName": "UpdateMetadata-20241801-122819.json",
+                                          "isError": false,
+                                          "responseStatus": 0,
+                                          "responseStatusMessages": null,
+                                          "itemId": "7683ee65-c7a7-7343-be80-018b8ac13602",
+                                          "cabinetId": 101,
+                                          "objectId": "4bfe4fc7-4e2f-4086-8a0e-146cc4556260",
+                                          "objectType": 1,
+                                          "fileName": "UpdateMetadata-20241801-122819.json",
+                                          "isError": false,
+                                          "responseStatus": 0,
+                                          "responseStatusMessages": null,
+                                          "itemId": "7683ee65-c7a7-7343-be80-018b8ac13602",
+                                          "cabinetId": 101,
+                                          "objectId": "4bfe4fc7-4e2f-4086-8a0e-146cc4556260",
+                                          "objectType": 1,
+                                          "fileName": "UpdateMetadata-20241801-122819.json",
+                                          "isError": false,
+                                          "responseStatus": 0,
+                                          "responseStatusMessages": null,
+                                          "itemId": "7683ee65-c7a7-7343-be80-018b8ac13602",
+                                          "cabinetId": 101,
+                                          "objectId": "4bfe4fc7-4e2f-4086-8a0e-146cc4556260",
+                                          "objectType": 1,
+                                          "fileName": "UpdateMetadata-20241801-122819.json",
+                                          "isError": false,
+                                          "responseStatus": 0,
+                                          "responseStatusMessages": null,
+                                          "itemId": "7683ee65-c7a7-7343-be80-018b8ac13602",
+                                          "cabinetId": 101,
+                                          "objectId": "4bfe4fc7-4e2f-4086-8a0e-146cc4556260",
+                                          "objectType": 1,
+                                          "fileName": "UpdateMetadata-20241801-122819.json",
+                                          "isError": false,
+                                          "responseStatus": 0,
+                                          "responseStatusMessages": null,
+                                          "itemId": "7683ee65-c7a7-7343-be80-018b8ac13602",
+                                          "cabinetId": 101,
+                                          "objectId": "4bfe4fc7-4e2f-4086-8a0e-146cc4556260",
+                                          "objectType": 1,
+                                          "fileName": "UpdateMetadata-20241801-122819.json",
+                                          "isError": false,
+                                          "responseStatus": 0,
+                                          "responseStatusMessages": null,
+                                          "itemId": "7683ee65-c7a7-7343-be80-018b8ac13602",
+                                          "cabinetId": 101,
+                                          "objectId": "4bfe4fc7-4e2f-4086-8a0e-146cc4556260",
+                                          "objectType": 1,
+                                          "fileName": "UpdateMetadata-20241801-122819.json",
+                                          "isError": false,
+                                          "responseStatus": 0,
+                                          "responseStatusMessages": null,
+                                          "itemId": "7683ee65-c7a7-7343-be80-018b8ac13602",
+                                          "cabinetId": 101,
+                                          "objectId": "4bfe4fc7-4e2f-4086-8a0e-146cc4556260",
+                                          "objectType": 1,
+                                          "fileName": "UpdateMetadata-20241801-122819.json",
+                                          "isError": false,
+                                          "responseStatus": 0,
+                                          "responseStatusMessages": null,
+                                          "itemId": "7683ee65-c7a7-7343-be80-018b8ac13602",
+                                          "cabinetId": 101,
+                                          "objectId": "4bfe4fc7-4e2f-4086-8a0e-146cc4556260",
+                                          "objectType": 1,
+                                          "fileName": "UpdateMetadata-20241801-122819.json",
+                                          "isError": false,
+                                          "responseStatus": 0,
+                                          "responseStatusMessages": null,
+                                          "itemId": "7683ee65-c7a7-7343-be80-018b8ac13602",
+                                          "cabinetId": 101,
+                                          "objectId": "4bfe4fc7-4e2f-4086-8a0e-146cc4556260",
+                                          "objectType": 1,
+                                          "fileName": "UpdateMetadata-20241801-122819.json",
+                                          "isError": false,
+                                          "responseStatus": 0,
+                                          "responseStatusMessages": null,
+                                          "itemId": "7683ee65-c7a7-7343-be80-018b8ac13602",
+                                          "cabinetId": 101,
+                                          "objectId": "4bfe4fc7-4e2f-4086-8a0e-146cc4556260",
+                                          "objectType": 1,
+                                          "fileName": "UpdateMetadata-20241801-122819.json",
+                                          "isError": false,
+                                          "responseStatus": 0,
+                                          "responseStatusMessages": null,
+                                          "itemId": "7683ee65-c7a7-7343-be80-018b8ac13602",
+                                          "cabinetId": 101,
+                                          "objectId": "4bfe4fc7-4e2f-4086-8a0e-146cc4556260",
+                                          "objectType": 1,
+                                          "fileName": "UpdateMetadata-20241801-122819.json",
+                                          "isError": false,
+                                          "responseStatus": 0,
+                                          "responseStatusMessages": null,
+                                          "itemId": "7683ee65-c7a7-7343-be80-018b8ac13602",
+                                          "cabinetId": 101,
+                                          "objectId": "4bfe4fc7-4e2f-4086-8a0e-146cc4556260",
+                                          "objectType": 1,
+                                          "fileName": "UpdateMetadata-20241801-122819.json",
+                                          "isError": false,
+                                          "responseStatus": 0,
+                                          "responseStatusMessages": null
+                                      }
+                                      """
+                        )));
         // When
         FileNotDownloadedException exception
             = Assertions.assertThrows(FileNotDownloadedException.class, () -> armApiService.downloadArmData(EXTERNAL_RECORD_ID, EXTERNAL_FILE_ID));

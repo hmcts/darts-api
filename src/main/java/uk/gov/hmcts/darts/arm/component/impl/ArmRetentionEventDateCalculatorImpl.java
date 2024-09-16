@@ -74,7 +74,7 @@ public class ArmRetentionEventDateCalculatorImpl implements ArmRetentionEventDat
                     externalObjectDirectory.getExternalRecordId(), armRetentionDate, confidenceScore, confidenceReason);
 
                 if (updateMetadataResponseMedia.isError()) {
-                    log.error("Unable set retention date for ARM EOD {} due to error(s) {}",
+                    log.error("Unable to set retention date for ARM EOD {} due to error(s) {}",
                               externalObjectDirectoryId, StringUtils.join(updateMetadataResponseMedia.getResponseStatusMessages(), ", "));
                 } else {
                     externalObjectDirectory.setEventDateTs(armRetentionDate);
@@ -84,6 +84,8 @@ public class ArmRetentionEventDateCalculatorImpl implements ArmRetentionEventDat
                     log.info("Retention date is successfully applied on ARM for EOD {} ", externalObjectDirectoryId);
                     return true;
                 }
+            } else {
+                log.info("ARM event date calculation is skipped as no Retention Score is available");
             }
         }
         return false;
