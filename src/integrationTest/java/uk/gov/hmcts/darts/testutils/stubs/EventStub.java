@@ -21,7 +21,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-import static uk.gov.hmcts.darts.event.enums.EventStatus.MODERNISED;
+import static uk.gov.hmcts.darts.event.enums.EventStatus.AUDIO_LINK_NOT_DONE_MODERNISED;
 
 @Component
 @RequiredArgsConstructor
@@ -71,7 +71,7 @@ public class EventStub {
         eventEntity.setLogEntry(false);
         eventEntity.setCourtroom(hearing.getCourtroom());
         eventEntity.setIsCurrent(true);
-        eventEntity.setEventStatus(MODERNISED.getStatusNumber());
+        eventEntity.setEventStatus(AUDIO_LINK_NOT_DONE_MODERNISED.getStatusNumber());
         eventEntity.setEventId(eventId);
         eventRepository.saveAndFlush(eventEntity);
         return eventEntity;
@@ -95,7 +95,7 @@ public class EventStub {
         eventEntity.setLogEntry(false);
         eventEntity.setCourtroom(courtroom);
         eventEntity.setIsCurrent(true);
-        eventEntity.setEventStatus(MODERNISED.getStatusNumber());
+        eventEntity.setEventStatus(AUDIO_LINK_NOT_DONE_MODERNISED.getStatusNumber());
         eventEntity.setEventId(eventId);
         eventRepository.saveAndFlush(eventEntity);
         return eventEntity;
