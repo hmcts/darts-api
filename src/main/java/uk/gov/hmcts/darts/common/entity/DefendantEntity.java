@@ -43,8 +43,8 @@ public class DefendantEntity extends CreatedModifiedBaseEntity implements CanAno
     private String name;
 
     @Override
-    public void anonymize(UserAccountEntity userAccount, UUID uuid) {
-        this.setName(uuid.toString());
+    public void anonymize(UserAccountEntity userAccount) {
+        this.setName(UUID.randomUUID().toString());
         this.setLastModifiedBy(userAccount);
     }
 }
