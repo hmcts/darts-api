@@ -2,6 +2,7 @@ package uk.gov.hmcts.darts.task.runner.impl;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.data.domain.Limit;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
@@ -59,8 +60,8 @@ public class CaseExpiryDeletionAutomatedTask
         final UserAccountEntity userAccount = userIdentity.getUserAccount();
         final List<CourtCaseEntity> courtCaseEntities = new ArrayList<>();
 
-
-        caseRepository.findCasesToBeAnonymized(currentTimeHelper.currentOffsetDateTime(), getAutomatedTaskBatchSize())
+        caseRepository.findCasesToBeAnonymized(currentTimeHelper.currentOffsetDateTime(),
+                                               Limit.of(getAutomatedTaskBatchSize()))
             .forEach(courtCase -> {
                 log.info("Anonymising case with id: {} using uuid: {} because the criteria for retention has been met.",
                          courtCase.getId(), uuid);
