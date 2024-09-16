@@ -14,7 +14,7 @@ import java.util.Optional;
 public interface DailyListRepository extends JpaRepository<DailyListEntity, Integer> {
     Optional<DailyListEntity> findByUniqueId(String uniqueId);
 
-    List<DailyListEntity> findByListingCourthouseAndStatusAndStartDateAndSourceOrderByPublishedTimestampDesc(
+    List<DailyListEntity> findByListingCourthouseAndStatusAndStartDateAndSourceOrderByPublishedTimestampDescCreatedDateTimeDesc(
         String listingCourthouse, JobStatusType status, LocalDate date, String source);
 
     List<DailyListEntity> findByStatusAndStartDateAndSourceOrderByPublishedTimestampDescCreatedDateTimeDesc(

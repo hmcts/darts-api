@@ -7,7 +7,9 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import lombok.extern.slf4j.Slf4j;
 import org.assertj.core.api.Assertions;
 import org.hamcrest.Matchers;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,12 +20,14 @@ import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.repository.CaseRepository;
 import uk.gov.hmcts.darts.common.repository.DailyListRepository;
 import uk.gov.hmcts.darts.common.repository.HearingRepository;
+import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
 import uk.gov.hmcts.darts.dailylist.enums.JobStatusType;
 import uk.gov.hmcts.darts.dailylist.enums.SourceType;
 import uk.gov.hmcts.darts.log.util.DailyListLogJobReport;
 import uk.gov.hmcts.darts.test.common.TestUtils;
 import uk.gov.hmcts.darts.test.common.data.DailyListTestData;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
+import uk.gov.hmcts.darts.testutils.OpenInViewUtil;
 
 import java.io.IOException;
 import java.time.LocalDate;
@@ -41,7 +45,6 @@ import static uk.gov.hmcts.darts.dailylist.enums.JobStatusType.PROCESSED;
 import static uk.gov.hmcts.darts.test.common.TestUtils.getContentsFromFile;
 
 @Slf4j
-@Disabled("Impacted by V1_364_*.sql")
 class DailyListProcessorTest extends IntegrationBase {
 
     public static final String SWANSEA = "SWANSEA";
@@ -52,6 +55,9 @@ class DailyListProcessorTest extends IntegrationBase {
     public static final String CASE_NUMBER_1 = "Case1";
     public static final String CASE_NUMBER_2 = "Case2";
     static final ObjectMapper MAPPER = new ObjectMapper();
+
+    @Autowired
+    protected OpenInViewUtil openInViewUtil;
 
     @Autowired
     DailyListProcessor dailyListProcessor;
@@ -65,12 +71,27 @@ class DailyListProcessorTest extends IntegrationBase {
     @Autowired
     HearingRepository hearingRepository;
 
+    @Autowired
+    UserAccountRepository userAccountRepository;
+
     @BeforeAll
     static void beforeAll() {
         MAPPER.registerModule(new JavaTimeModule());
         MAPPER.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
     }
 
+    @BeforeEach
+    void startHibernateSession() {
+        openInViewUtil.openEntityManager();
+    }
+
+    @AfterEach
+    void closeHibernateSession() {
+        openInViewUtil.closeEntityManager();
+    }
+
+
+    @Disabled("Impacted by V1_364_*.sql")
     @Test
     void dailyListProcessorMultipleDailyList() throws IOException {
         log.info("start dailyListProcessorMultipleDailyList");
@@ -138,6 +159,93 @@ class DailyListProcessorTest extends IntegrationBase {
     }
 
     @Test
+    void dailyListWithSamePublishedDateTime() throws IOException {
+        var listingCourthouse = "TEST COURTHOUSE";
+        var userAccount = userAccountRepository.getReferenceById(0);
+        var createdDateTime = OffsetDateTime.now();
+        LocalTime dailyListTime = LocalTime.of(13, 0);
+        DailyListEntity dailyListEntity1 = DailyListTestData.createDailyList(
+            dailyListTime,
+            String.valueOf(SourceType.CPP),
+            listingCourthouse,
+            "tests/dailyListProcessorTest/dailyListCPP.json"
+        );
+
+        dailyListEntity1.setCreatedBy(userAccount);
+        dailyListEntity1.setCreatedDateTime(createdDateTime);
+        dailyListEntity1.setLastModifiedBy(userAccount);
+
+        DailyListEntity dailyListEntity2 = DailyListTestData.createDailyList(
+            dailyListTime,
+            String.valueOf(SourceType.CPP),
+            listingCourthouse,
+            "tests/dailyListProcessorTest/dailyListCPP.json"
+        );
+
+        dailyListEntity2.setCreatedBy(userAccount);
+        dailyListEntity2.setLastModifiedBy(userAccount);
+
+        dartsDatabase.saveAll(dailyListEntity1, dailyListEntity2);
+
+        // set the created dates
+        dailyListEntity1.setCreatedDateTime(createdDateTime.plusSeconds(1));
+        dailyListEntity2.setCreatedDateTime(createdDateTime);
+        dartsDatabase.saveAll(dailyListEntity1, dailyListEntity2);
+
+        dailyListProcessor.processAllDailyLists();
+
+        DailyListEntity savedDailyList1 = dailyListRepository.getReferenceById(dailyListEntity1.getId());
+        DailyListEntity savedDailyList2 = dailyListRepository.getReferenceById(dailyListEntity2.getId());
+
+        assertEquals(PARTIALLY_PROCESSED, savedDailyList1.getStatus());
+        assertEquals(IGNORED, savedDailyList2.getStatus());
+    }
+
+    @Test
+    void dailyListForListingCourthouseWithSamePublishedDateTime() throws IOException {
+        var listingCourthouse = "TEST COURTHOUSE";
+        var userAccount = userAccountRepository.getReferenceById(0);
+        var createdDateTime = OffsetDateTime.now();
+        LocalTime dailyListTime = LocalTime.of(13, 0);
+        DailyListEntity dailyListEntity1 = DailyListTestData.createDailyList(
+            dailyListTime,
+            String.valueOf(SourceType.CPP),
+            listingCourthouse,
+            "tests/dailyListProcessorTest/dailyListCPP.json"
+        );
+
+        dailyListEntity1.setCreatedBy(userAccount);
+        dailyListEntity1.setCreatedDateTime(createdDateTime);
+        dailyListEntity1.setLastModifiedBy(userAccount);
+
+        DailyListEntity dailyListEntity2 = DailyListTestData.createDailyList(
+            dailyListTime,
+            String.valueOf(SourceType.CPP),
+            listingCourthouse,
+            "tests/dailyListProcessorTest/dailyListCPP.json"
+        );
+
+        dailyListEntity2.setCreatedBy(userAccount);
+        dailyListEntity2.setLastModifiedBy(userAccount);
+
+        dartsDatabase.saveAll(dailyListEntity1, dailyListEntity2);
+
+        // set the created dates
+        dailyListEntity1.setCreatedDateTime(createdDateTime.plusSeconds(1));
+        dailyListEntity2.setCreatedDateTime(createdDateTime);
+        dartsDatabase.saveAll(dailyListEntity1, dailyListEntity2);
+
+        dailyListProcessor.processAllDailyListForListingCourthouse(listingCourthouse);
+
+        DailyListEntity savedDailyList1 = dailyListRepository.getReferenceById(dailyListEntity1.getId());
+        DailyListEntity savedDailyList2 = dailyListRepository.getReferenceById(dailyListEntity2.getId());
+
+        assertEquals(PARTIALLY_PROCESSED, savedDailyList1.getStatus());
+        assertEquals(IGNORED, savedDailyList2.getStatus());
+    }
+
+    @Disabled("Impacted by V1_364_*.sql")
+    @Test
     void dailyListForListingCourthouseWithIgnore() throws IOException {
         log.info("start dailyListProcessorMultipleDailyList");
         CourthouseEntity swanseaCourtEntity = dartsDatabase.createCourthouseWithTwoCourtrooms();
@@ -199,6 +307,7 @@ class DailyListProcessorTest extends IntegrationBase {
 
     }
 
+    @Disabled("Impacted by V1_364_*.sql")
     @Test
     void dailyListProcessorCppAndXhbDailyLists() throws IOException {
         CourthouseEntity swanseaCourtEntity = dartsDatabase.createCourthouseWithTwoCourtrooms();
@@ -270,6 +379,7 @@ class DailyListProcessorTest extends IntegrationBase {
 
     }
 
+    @Disabled("Impacted by V1_364_*.sql")
     @Test
     void setsDailyListStatusToFailedIfUpdateFails() {
         var dailyListEntity = DailyListTestData.minimalDailyList();
@@ -294,6 +404,7 @@ class DailyListProcessorTest extends IntegrationBase {
         Assertions.assertThat(dailyListStatus).isEqualTo(FAILED);
     }
 
+    @Disabled("Impacted by V1_364_*.sql")
     @Test
     void setsDailyListStatusToIgnoredIfNotLatest() throws IOException {
         var latestDailyList = DailyListTestData.minimalDailyList();
@@ -325,6 +436,7 @@ class DailyListProcessorTest extends IntegrationBase {
         Assertions.assertThat(dailyListStatus).isEqualTo(IGNORED);
     }
 
+    @Disabled("Impacted by V1_364_*.sql")
     @Test
     void dailyListProcessorWithLock() throws IOException {
         CourthouseEntity swanseaCourtEntity = dartsDatabase.createCourthouseWithTwoCourtrooms();
