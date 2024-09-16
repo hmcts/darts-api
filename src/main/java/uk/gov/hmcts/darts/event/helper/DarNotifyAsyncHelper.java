@@ -53,9 +53,9 @@ public class DarNotifyAsyncHelper {
 
         try {
             dartsGatewayClient.darNotify(darNotifyEvent);
-            log.info("DarNotify successful: event_id={}, notification_url={}", event.getDartsEvent().getEventId(), notificationUrl);
+            log.info("DarNotify request sent successfully: event_id={}, notification_url={}", event.getDartsEvent().getEventId(), notificationUrl);
         } catch (Exception ex) {
-            log.error("DarNotify failed: event_id={}, notification_url={}", event.getDartsEvent().getEventId(), notificationUrl, ex);
+            log.error("DarNotify request failed to send: event_id={}, notification_url={}", event.getDartsEvent().getEventId(), notificationUrl, ex);
         }
     }
 }
