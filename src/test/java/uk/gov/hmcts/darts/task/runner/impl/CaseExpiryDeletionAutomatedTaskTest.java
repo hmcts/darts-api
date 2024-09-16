@@ -19,7 +19,6 @@ import uk.gov.hmcts.darts.task.service.LockService;
 
 import java.time.OffsetDateTime;
 import java.util.List;
-import java.util.UUID;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -78,11 +77,11 @@ class CaseExpiryDeletionAutomatedTaskTest {
             .currentOffsetDateTime();
 
         verify(courtCase1, times(1))
-            .anonymize(eq(userAccount), any(UUID.class));
+            .anonymize(eq(userAccount));
         verify(courtCase2, times(1))
-            .anonymize(eq(userAccount), any(UUID.class));
+            .anonymize(eq(userAccount));
         verify(courtCase3, times(1))
-            .anonymize(eq(userAccount), any(UUID.class));
+            .anonymize(eq(userAccount));
 
         verify(caseRepository, times(1))
             .findCasesToBeAnonymized(offsetDateTime, Limit.of(5));

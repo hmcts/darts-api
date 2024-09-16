@@ -20,7 +20,6 @@ import uk.gov.hmcts.darts.task.service.LockService;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 
 @Component
 @ConditionalOnProperty(
@@ -56,16 +55,14 @@ public class CaseExpiryDeletionAutomatedTask
     @Override
     @Transactional
     public void runTask() {
-        final UUID uuid = UUID.randomUUID();
         final UserAccountEntity userAccount = userIdentity.getUserAccount();
         final List<CourtCaseEntity> courtCaseEntities = new ArrayList<>();
 
         caseRepository.findCasesToBeAnonymized(currentTimeHelper.currentOffsetDateTime(),
                                                Limit.of(getAutomatedTaskBatchSize()))
             .forEach(courtCase -> {
-                log.info("Anonymising case with id: {} using uuid: {} because the criteria for retention has been met.",
-                         courtCase.getId(), uuid);
-                courtCase.anonymize(userAccount, uuid);
+                log.info("Anonymising case with id: {} because the criteria for retention has been met.", courtCase.getId());
+                courtCase.anonymize(userAccount);
                 courtCaseEntities.add(courtCase);
             });
         //This also saves defendant, defence and prosecutor entities
