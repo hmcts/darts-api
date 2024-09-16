@@ -45,7 +45,7 @@ class InterpreterUsedHandlerTest extends HandlerTestData {
 
         CourtroomEntity courtroom = dartsDatabase.createCourtroomUnlessExists(SOME_COURTHOUSE, SOME_ROOM);
         nodeRegisterStub.setupNodeRegistry(courtroom);
-        dartsGateway.darNotificationReturnsSuccess();
+        dartsGatewayStub.darNotificationReturnsSuccess();
     }
 
     @Test
@@ -67,8 +67,8 @@ class InterpreterUsedHandlerTest extends HandlerTestData {
                                     .courtroom(SOME_ROOM)
                                     .dateTime(HEARING_DATE_ODT));
 
-        dartsGateway.verifyReceivedNotificationType(3);
-        dartsGateway.verifyNotificationUrl("http://1.2.3.4/VIQDARNotifyEvent/DARNotifyEvent.asmx", 1);
+        dartsGatewayStub.verifyReceivedNotificationType(3);
+        dartsGatewayStub.verifyNotificationUrl("http://1.2.3.4/VIQDARNotifyEvent/DARNotifyEvent.asmx", 1);
 
         var persistedCase = dartsDatabase.findByCaseByCaseNumberAndCourtHouseName(
             SOME_CASE_NUMBER,
@@ -102,8 +102,8 @@ class InterpreterUsedHandlerTest extends HandlerTestData {
                                     .courtroom(SOME_ROOM)
                                     .dateTime(HEARING_DATE_ODT));
 
-        dartsGateway.verifyReceivedNotificationType(3);
-        dartsGateway.verifyNotificationUrl("http://1.2.3.4/VIQDARNotifyEvent/DARNotifyEvent.asmx", 1);
+        dartsGatewayStub.verifyReceivedNotificationType(3);
+        dartsGatewayStub.verifyNotificationUrl("http://1.2.3.4/VIQDARNotifyEvent/DARNotifyEvent.asmx", 1);
 
         var persistedCase = dartsDatabase.findByCaseByCaseNumberAndCourtHouseName(
             SOME_CASE_NUMBER,
@@ -140,8 +140,8 @@ class InterpreterUsedHandlerTest extends HandlerTestData {
                                     .courtroom(SOME_OTHER_ROOM)
                                     .dateTime(HEARING_DATE_ODT));
 
-        dartsGateway.verifyReceivedNotificationType(3);
-        dartsGateway.verifyNotificationUrl("http://1.2.3.4/VIQDARNotifyEvent/DARNotifyEvent.asmx", 1);
+        dartsGatewayStub.verifyReceivedNotificationType(3);
+        dartsGatewayStub.verifyNotificationUrl("http://1.2.3.4/VIQDARNotifyEvent/DARNotifyEvent.asmx", 1);
 
         var persistedCase = dartsDatabase.findByCaseByCaseNumberAndCourtHouseName(
             SOME_CASE_NUMBER,
@@ -195,7 +195,7 @@ class InterpreterUsedHandlerTest extends HandlerTestData {
 
         assertThat(persistedCase.getInterpreterUsed()).isTrue();
 
-        dartsGateway.verifyDoesntReceiveDarEvent();
+        dartsGatewayStub.verifyDoesntReceiveDarEvent();
     }
 
     private static DartsEvent someMinimalDartsEvent() {

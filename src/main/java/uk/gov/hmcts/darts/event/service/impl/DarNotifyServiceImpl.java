@@ -31,8 +31,9 @@ public class DarNotifyServiceImpl {
 
         List<String> openCaseNumbers = caseRepository.findOpenCaseNumbers(dartsEvent.getCourthouse(), dartsEvent.getCaseNumbers());
         if (openCaseNumbers.isEmpty()) {
-            log.info("DarNotify ignored, no open cases: event_id={}, courthouse={}", dartsEvent.getCourthouse(), event.getDartsEvent().getEventId());
+            log.info("DarNotify ignored, no open cases: event_id={}, courthouse={}", event.getDartsEvent().getEventId(), dartsEvent.getCourthouse());
         } else {
+            log.info("DarNotify sent to async method: courthouse={}, caseNumbers={}", dartsEvent.getCourthouse(), dartsEvent.getCaseNumbers());
             darNotifyAsyncHelper.notifyDarPcAsync(event, openCaseNumbers);
         }
     }

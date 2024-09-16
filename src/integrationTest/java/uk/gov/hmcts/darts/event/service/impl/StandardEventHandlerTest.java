@@ -51,7 +51,7 @@ class StandardEventHandlerTest extends HandlerTestData {
 
         CourtroomEntity courtroom = dartsDatabase.createCourtroomUnlessExists(SOME_COURTHOUSE, SOME_ROOM);
         nodeRegisterStub.setupNodeRegistry(courtroom);
-        dartsGateway.darNotificationReturnsSuccess();
+        dartsGatewayStub.darNotificationReturnsSuccess();
     }
 
     @Test
@@ -95,8 +95,8 @@ class StandardEventHandlerTest extends HandlerTestData {
         assertThat(hearingsForCase.get(0).getHearingIsActual()).isEqualTo(true);
         assertThat(persistedEvent.getEventStatus()).isEqualTo(MODERNISED.getStatusNumber());
 
-        dartsGateway.verifyReceivedNotificationType(3);
-        dartsGateway.verifyNotificationUrl("http://1.2.3.4/VIQDARNotifyEvent/DARNotifyEvent.asmx", 1);
+        dartsGatewayStub.verifyReceivedNotificationType(3);
+        dartsGatewayStub.verifyNotificationUrl("http://1.2.3.4/VIQDARNotifyEvent/DARNotifyEvent.asmx", 1);
     }
 
     @Test
@@ -129,8 +129,8 @@ class StandardEventHandlerTest extends HandlerTestData {
         assertThat(hearingsForCase.size()).isEqualTo(1);
         assertThat(hearingsForCase.get(0).getHearingIsActual()).isEqualTo(true);
 
-        dartsGateway.verifyReceivedNotificationType(3);
-        dartsGateway.verifyNotificationUrl("http://1.2.3.4/VIQDARNotifyEvent/DARNotifyEvent.asmx", 1);
+        dartsGatewayStub.verifyReceivedNotificationType(3);
+        dartsGatewayStub.verifyNotificationUrl("http://1.2.3.4/VIQDARNotifyEvent/DARNotifyEvent.asmx", 1);
     }
 
     @Test
@@ -168,8 +168,8 @@ class StandardEventHandlerTest extends HandlerTestData {
 
         assertTrue(dartsDatabase.findByCourthouseCourtroomAndDate(SOME_COURTHOUSE, SOME_ROOM, HEARING_DATE_ODT.toLocalDate()).isEmpty());
 
-        dartsGateway.verifyReceivedNotificationType(3);
-        dartsGateway.verifyNotificationUrl("http://1.2.3.4/VIQDARNotifyEvent/DARNotifyEvent.asmx", 1);
+        dartsGatewayStub.verifyReceivedNotificationType(3);
+        dartsGatewayStub.verifyNotificationUrl("http://1.2.3.4/VIQDARNotifyEvent/DARNotifyEvent.asmx", 1);
     }
 
     @Test
@@ -203,7 +203,7 @@ class StandardEventHandlerTest extends HandlerTestData {
         assertThat(hearingsForCase.size()).isEqualTo(1);
         assertThat(hearingsForCase.get(0).getHearingIsActual()).isEqualTo(true);
 
-        dartsGateway.verifyDoesntReceiveDarEvent();
+        dartsGatewayStub.verifyDoesntReceiveDarEvent();
     }
 
     private static DartsEvent someMinimalDartsEvent() {
@@ -222,7 +222,7 @@ class StandardEventHandlerTest extends HandlerTestData {
     void testSummationWithConcurrency() throws InterruptedException, ExecutionException {
 
         dartsDatabase.createCourthouseUnlessExists(SOME_COURTHOUSE);
-        dartsGateway.darNotificationReturnsSuccess();
+        dartsGatewayStub.darNotificationReturnsSuccess();
 
         int numberOfThreads = 100;
         try (ExecutorService service = Executors.newFixedThreadPool(5)) {

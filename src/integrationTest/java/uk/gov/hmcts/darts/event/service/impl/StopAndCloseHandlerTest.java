@@ -81,7 +81,7 @@ class StopAndCloseHandlerTest extends HandlerTestData {
 
         CourtroomEntity courtroom = dartsDatabase.createCourtroomUnlessExists(SOME_COURTHOUSE, SOME_ROOM);
         nodeRegisterStub.setupNodeRegistry(courtroom);
-        dartsGateway.darNotificationReturnsSuccess();
+        dartsGatewayStub.darNotificationReturnsSuccess();
     }
 
     @Test
@@ -117,9 +117,9 @@ class StopAndCloseHandlerTest extends HandlerTestData {
         assertThat(persistedCase.getClosed()).isTrue();
         assertEquals(HEARING_DATE_ODT, persistedCase.getCaseClosedTimestamp());
 
-        dartsGateway.verifyReceivedNotificationType(2);
-        dartsGateway.verifyReceivedNotificationType(3);
-        dartsGateway.verifyNotificationUrl("http://1.2.3.4/VIQDARNotifyEvent/DARNotifyEvent.asmx", 2);
+        dartsGatewayStub.verifyReceivedNotificationType(2);
+        dartsGatewayStub.verifyReceivedNotificationType(3);
+        dartsGatewayStub.verifyNotificationUrl("http://1.2.3.4/VIQDARNotifyEvent/DARNotifyEvent.asmx", 2);
     }
 
     @Test
@@ -149,9 +149,9 @@ class StopAndCloseHandlerTest extends HandlerTestData {
         assertThat(persistedCase.getClosed()).isTrue();
         assertEquals(HEARING_DATE_ODT, persistedCase.getCaseClosedTimestamp());
 
-        dartsGateway.verifyReceivedNotificationType(2);
-        dartsGateway.verifyReceivedNotificationType(3);
-        dartsGateway.verifyNotificationUrl("http://1.2.3.4/VIQDARNotifyEvent/DARNotifyEvent.asmx", 2);
+        dartsGatewayStub.verifyReceivedNotificationType(2);
+        dartsGatewayStub.verifyReceivedNotificationType(3);
+        dartsGatewayStub.verifyNotificationUrl("http://1.2.3.4/VIQDARNotifyEvent/DARNotifyEvent.asmx", 2);
     }
 
 
@@ -187,9 +187,9 @@ class StopAndCloseHandlerTest extends HandlerTestData {
         assertThat(persistedCase.getClosed()).isTrue();
         assertEquals(HEARING_DATE_ODT, persistedCase.getCaseClosedTimestamp());
 
-        dartsGateway.verifyReceivedNotificationType(2);
-        dartsGateway.verifyReceivedNotificationType(3);
-        dartsGateway.verifyNotificationUrl("http://1.2.3.4/VIQDARNotifyEvent/DARNotifyEvent.asmx", 2);
+        dartsGatewayStub.verifyReceivedNotificationType(2);
+        dartsGatewayStub.verifyReceivedNotificationType(3);
+        dartsGatewayStub.verifyNotificationUrl("http://1.2.3.4/VIQDARNotifyEvent/DARNotifyEvent.asmx", 2);
     }
 
     @Test
@@ -221,13 +221,13 @@ class StopAndCloseHandlerTest extends HandlerTestData {
         assertThat(persistedCase.getClosed()).isTrue();
         assertEquals(HEARING_DATE_ODT, persistedCase.getCaseClosedTimestamp());
 
-        dartsGateway.verifyReceivedNotificationType(2);
-        dartsGateway.verifyNotificationUrl("http://1.2.3.4/VIQDARNotifyEvent/DARNotifyEvent.asmx", 1);
+        dartsGatewayStub.verifyReceivedNotificationType(2);
+        dartsGatewayStub.verifyNotificationUrl("http://1.2.3.4/VIQDARNotifyEvent/DARNotifyEvent.asmx", 1);
     }
 
     @Test
     void givenDarStopAndCloseEventReceivedAndDartsGatewayIsDown_whenDarNotifyOccurs_thenEventIsStillPersisted() {
-        dartsGateway.darNotificationReturnsGatewayTimeoutError();
+        dartsGatewayStub.darNotificationReturnsGatewayTimeoutError();
 
         dartsDatabase.givenTheDatabaseContainsCourtCaseWithHearingAndCourthouseWithRoom(
             SOME_CASE_NUMBER,
@@ -248,8 +248,8 @@ class StopAndCloseHandlerTest extends HandlerTestData {
         var persistedEvent = allEvents.get(0);
         assertThat(persistedEvent.getCourtroom().getName()).isEqualTo(SOME_ROOM.toUpperCase(Locale.ROOT));
 
-        dartsGateway.verifyReceivedNotificationType(2);
-        dartsGateway.verifyNotificationUrl("http://1.2.3.4/VIQDARNotifyEvent/DARNotifyEvent.asmx", 1);
+        dartsGatewayStub.verifyReceivedNotificationType(2);
+        dartsGatewayStub.verifyNotificationUrl("http://1.2.3.4/VIQDARNotifyEvent/DARNotifyEvent.asmx", 1);
     }
 
     @Test

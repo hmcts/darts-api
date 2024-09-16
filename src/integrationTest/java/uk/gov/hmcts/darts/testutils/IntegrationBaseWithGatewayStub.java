@@ -7,13 +7,13 @@ import uk.gov.hmcts.darts.testutils.stubs.wiremock.DartsGatewayStub;
 
 public class IntegrationBaseWithGatewayStub extends IntegrationBase {
 
-    protected DartsGatewayStub dartsGateway = new DartsGatewayStub();
+    protected DartsGatewayStub dartsGatewayStub = new DartsGatewayStub();
 
     @Autowired
     protected ObjectMapper objectMapper;
 
     @BeforeEach
     void clearStubs() {
-        dartsGateway.clearStubs();
+        dartsGatewayStub.clearStubs();
     }
 }

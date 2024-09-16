@@ -26,7 +26,7 @@ import java.util.List;
 /**
  * Base class for integration tests running with H2 in Postgres compatibility mode.<br>
  * This class also starts a containerised Redis instance.<br>
- *<br>
+ * <br>
  * To optimise tests total execution time, the below setup has been introduced:
  * <ul>
  *  <li>
@@ -41,7 +41,7 @@ import java.util.List;
  *     sequences are reset to either SEQUENCE_START_VALUE or their initial value (depending on the type of data, if predefined or not) before each test
  *  </li>
  * </ul>
- *<br>
+ * <br>
  * Based on the above, please follow the following recommendations when writing integration tests:
  * <ul>
  *  <li>
@@ -60,7 +60,7 @@ import java.util.List;
  *  </li>
  * </ul>
  */
-@AutoConfigureWireMock(port = 0, files = "file:src/integrationTest/resources/wiremock")
+@AutoConfigureWireMock(port = 11_188, files = "file:src/integrationTest/resources/wiremock")
 @SpringBootTest
 @Slf4j
 @ActiveProfiles({"intTest", "h2db", "in-memory-caching"})

@@ -42,7 +42,7 @@ class DarStopHandlerTest extends HandlerTestData {
 
         CourtroomEntity courtroom = dartsDatabase.createCourtroomUnlessExists(SOME_COURTHOUSE, SOME_ROOM);
         nodeRegisterStub.setupNodeRegistry(courtroom);
-        dartsGateway.darNotificationReturnsSuccess();
+        dartsGatewayStub.darNotificationReturnsSuccess();
     }
 
     @Test
@@ -75,9 +75,9 @@ class DarStopHandlerTest extends HandlerTestData {
         assertThat(hearingsForCase.size()).isEqualTo(1);
         assertThat(hearingsForCase.get(0).getHearingIsActual()).isEqualTo(true);
 
-        dartsGateway.verifyReceivedNotificationType(2);
-        dartsGateway.verifyReceivedNotificationType(3);
-        dartsGateway.verifyNotificationUrl("http://1.2.3.4/VIQDARNotifyEvent/DARNotifyEvent.asmx", 2);
+        dartsGatewayStub.verifyReceivedNotificationType(2);
+        dartsGatewayStub.verifyReceivedNotificationType(3);
+        dartsGatewayStub.verifyNotificationUrl("http://1.2.3.4/VIQDARNotifyEvent/DARNotifyEvent.asmx", 2);
     }
 
     @Test
@@ -101,9 +101,9 @@ class DarStopHandlerTest extends HandlerTestData {
         assertThat(hearingsForCase.size()).isEqualTo(1);
         assertThat(hearingsForCase.get(0).getHearingIsActual()).isEqualTo(true);
 
-        dartsGateway.verifyReceivedNotificationType(2);
-        dartsGateway.verifyReceivedNotificationType(3);
-        dartsGateway.verifyNotificationUrl("http://1.2.3.4/VIQDARNotifyEvent/DARNotifyEvent.asmx", 2);
+        dartsGatewayStub.verifyReceivedNotificationType(2);
+        dartsGatewayStub.verifyReceivedNotificationType(3);
+        dartsGatewayStub.verifyNotificationUrl("http://1.2.3.4/VIQDARNotifyEvent/DARNotifyEvent.asmx", 2);
     }
 
 
@@ -133,9 +133,9 @@ class DarStopHandlerTest extends HandlerTestData {
 
         assertTrue(dartsDatabase.findByCourthouseCourtroomAndDate(SOME_COURTHOUSE, SOME_ROOM, HEARING_DATE_ODT.toLocalDate()).isEmpty());
 
-        dartsGateway.verifyReceivedNotificationType(2);
-        dartsGateway.verifyReceivedNotificationType(3);
-        dartsGateway.verifyNotificationUrl("http://1.2.3.4/VIQDARNotifyEvent/DARNotifyEvent.asmx", 2);
+        dartsGatewayStub.verifyReceivedNotificationType(2);
+        dartsGatewayStub.verifyReceivedNotificationType(3);
+        dartsGatewayStub.verifyNotificationUrl("http://1.2.3.4/VIQDARNotifyEvent/DARNotifyEvent.asmx", 2);
     }
 
     @Test
@@ -164,8 +164,8 @@ class DarStopHandlerTest extends HandlerTestData {
         assertThat(hearingsForCase.size()).isEqualTo(1);
         assertThat(hearingsForCase.get(0).getHearingIsActual()).isEqualTo(true);
 
-        dartsGateway.verifyReceivedNotificationType(2);
-        dartsGateway.verifyNotificationUrl("http://1.2.3.4/VIQDARNotifyEvent/DARNotifyEvent.asmx", 1);
+        dartsGatewayStub.verifyReceivedNotificationType(2);
+        dartsGatewayStub.verifyNotificationUrl("http://1.2.3.4/VIQDARNotifyEvent/DARNotifyEvent.asmx", 1);
     }
 
     private static DartsEvent someMinimalDartsEvent() {
