@@ -99,7 +99,8 @@ public class HearingsServiceImpl implements HearingsService {
 
     private void validateCaseIsNotExpiredFromHearingId(Integer hearingId) {
         Optional<HearingEntity> hearingEntity = hearingRepository.findById(hearingId);
-        hearingEntity.map(HearingEntity::getCourtCase)
+        hearingEntity
+            .map(HearingEntity::getCourtCase)
             .ifPresent(CourtCaseEntity::validateIsExpired);
     }
 }
