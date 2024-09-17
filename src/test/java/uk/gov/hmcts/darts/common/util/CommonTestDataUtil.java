@@ -5,6 +5,7 @@ import lombok.experimental.UtilityClass;
 import uk.gov.hmcts.darts.cases.model.AddCaseRequest;
 import uk.gov.hmcts.darts.common.entity.AnnotationDocumentEntity;
 import uk.gov.hmcts.darts.common.entity.AnnotationEntity;
+import uk.gov.hmcts.darts.common.entity.CaseDocumentEntity;
 import uk.gov.hmcts.darts.common.entity.CaseRetentionEntity;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
@@ -538,20 +539,10 @@ public class CommonTestDataUtil {
         for (TranscriptionUrgencyEnum transcriptionUrgencyEnum : TranscriptionUrgencyEnum.values()) {
             switch (transcriptionUrgencyEnum.getId()) {
                 case 2:
-                    transcriptionUrgencyEntities.add(createTranscriptionUrgencyEntityFromEnum(transcriptionUrgencyEnum));
-                    break;
                 case 3:
-                    transcriptionUrgencyEntities.add(createTranscriptionUrgencyEntityFromEnum(transcriptionUrgencyEnum));
-                    break;
                 case 4:
-                    transcriptionUrgencyEntities.add(createTranscriptionUrgencyEntityFromEnum(transcriptionUrgencyEnum));
-                    break;
                 case 5:
-                    transcriptionUrgencyEntities.add(createTranscriptionUrgencyEntityFromEnum(transcriptionUrgencyEnum));
-                    break;
                 case 6:
-                    transcriptionUrgencyEntities.add(createTranscriptionUrgencyEntityFromEnum(transcriptionUrgencyEnum));
-                    break;
                 case 7:
                     transcriptionUrgencyEntities.add(createTranscriptionUrgencyEntityFromEnum(transcriptionUrgencyEnum));
                     break;
@@ -636,4 +627,19 @@ public class CommonTestDataUtil {
 
         return retentionPolicyTypeEntity;
     }
+
+    public CaseDocumentEntity createCaseDocumentEntity(CourtCaseEntity courtCaseEntity, UserAccountEntity uploadedBy) {
+        CaseDocumentEntity caseDocumentEntity = new CaseDocumentEntity();
+        caseDocumentEntity.setCourtCase(courtCaseEntity);
+        caseDocumentEntity.setFileName("test_filename");
+        caseDocumentEntity.setFileType("docx");
+        caseDocumentEntity.setFileSize(1234);
+        caseDocumentEntity.setChecksum("xC3CCA7021CF79B42F245AF350601C284");
+        caseDocumentEntity.setHidden(false);
+        caseDocumentEntity.setCreatedBy(uploadedBy);
+        caseDocumentEntity.setCreatedDateTime(OffsetDateTime.now(UTC));
+        caseDocumentEntity.setLastModifiedBy(uploadedBy);
+        return caseDocumentEntity;
+    }
+
 }

@@ -13,6 +13,8 @@ import uk.gov.hmcts.darts.cases.service.CaseService;
 import uk.gov.hmcts.darts.common.config.ObjectMapperConfig;
 import uk.gov.hmcts.darts.common.entity.CaseRetentionEntity;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
+import uk.gov.hmcts.darts.common.entity.TranscriptionEntity;
+import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum;
 import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
 import uk.gov.hmcts.darts.common.repository.AnnotationDocumentRepository;
@@ -21,6 +23,7 @@ import uk.gov.hmcts.darts.common.repository.CaseRetentionRepository;
 import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
 import uk.gov.hmcts.darts.common.repository.MediaRepository;
 import uk.gov.hmcts.darts.common.repository.TranscriptionDocumentRepository;
+import uk.gov.hmcts.darts.common.util.CommonTestDataUtil;
 import uk.gov.hmcts.darts.common.util.EodHelper;
 import uk.gov.hmcts.darts.retention.enums.RetentionConfidenceReasonEnum;
 import uk.gov.hmcts.darts.retention.enums.RetentionConfidenceScoreEnum;
@@ -40,11 +43,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.darts.common.util.CommonTestDataUtil.createCaseRetention;
-import static uk.gov.hmcts.darts.common.util.CommonTestDataUtil.createCaseWithId;
-import static uk.gov.hmcts.darts.common.util.CommonTestDataUtil.createHearingsForCase;
-import static uk.gov.hmcts.darts.common.util.CommonTestDataUtil.createMedia;
 import static uk.gov.hmcts.darts.common.util.CommonTestDataUtil.createRetentionPolicyType;
-import static uk.gov.hmcts.darts.common.util.CommonTestDataUtil.createUserAccount;
 import static uk.gov.hmcts.darts.retention.enums.CaseRetentionStatus.COMPLETE;
 
 @ExtendWith(MockitoExtension.class)
@@ -99,6 +98,8 @@ class ApplyRetentionCaseAssociatedObjectsSingleCaseProcessorImplTest {
     private CaseRetentionEntity caseRetentionC1;
     private CaseRetentionEntity caseRetentionD1;
 
+    private UserAccountEntity testUser;
+
     private ApplyRetentionCaseAssociatedObjectsSingleCaseProcessor caseObjectsProcessor;
 
     @BeforeEach
@@ -113,41 +114,41 @@ class ApplyRetentionCaseAssociatedObjectsSingleCaseProcessorImplTest {
             caseDocumentRepository, transcriptionDocumentRepository, caseRetentionConfidenceReasonMapper, userIdentity,
             currentTimeHelper, objectMapper);
 
-        case1PerfectlyClosed = createCaseWithId("case1", 101);
+        case1PerfectlyClosed = CommonTestDataUtil.createCaseWithId("case1", 101);
         case1PerfectlyClosed.setRetentionUpdated(true);
         case1PerfectlyClosed.setRetentionRetries(1);
         case1PerfectlyClosed.setClosed(true);
         case1PerfectlyClosed.setRetConfScore(RetentionConfidenceScoreEnum.CASE_PERFECTLY_CLOSED);
         case1PerfectlyClosed.setRetConfReason(RetentionConfidenceReasonEnum.CASE_CLOSED);
         case1PerfectlyClosed.setRetConfUpdatedTs(RETENTION_UPDATED_DATE);
-        createHearingsForCase(case1PerfectlyClosed, 1, 3);
+        CommonTestDataUtil.createHearingsForCase(case1PerfectlyClosed, 1, 3);
 
-        case2PerfectlyClosed = createCaseWithId("case1", 102);
+        case2PerfectlyClosed = CommonTestDataUtil.createCaseWithId("case1", 102);
         case2PerfectlyClosed.setRetentionUpdated(true);
         case2PerfectlyClosed.setRetentionRetries(2);
         case2PerfectlyClosed.setClosed(true);
         case2PerfectlyClosed.setRetConfScore(RetentionConfidenceScoreEnum.CASE_PERFECTLY_CLOSED);
         case2PerfectlyClosed.setRetConfReason(RetentionConfidenceReasonEnum.CASE_CLOSED);
         case2PerfectlyClosed.setRetConfUpdatedTs(RETENTION_UPDATED_DATE);
-        createHearingsForCase(case2PerfectlyClosed, 1, 1);
+        CommonTestDataUtil.createHearingsForCase(case2PerfectlyClosed, 1, 1);
 
-        case3NotPerfectlyClosed = createCaseWithId("case3", 103);
+        case3NotPerfectlyClosed = CommonTestDataUtil.createCaseWithId("case3", 103);
         case3NotPerfectlyClosed.setRetentionUpdated(true);
         case3NotPerfectlyClosed.setRetentionRetries(1);
         case3NotPerfectlyClosed.setClosed(true);
         case3NotPerfectlyClosed.setRetConfScore(RetentionConfidenceScoreEnum.CASE_NOT_PERFECTLY_CLOSED);
         case3NotPerfectlyClosed.setRetConfReason(RetentionConfidenceReasonEnum.AGED_CASE);
         case3NotPerfectlyClosed.setRetConfUpdatedTs(RETENTION_UPDATED_DATE);
-        createHearingsForCase(case3NotPerfectlyClosed, 1, 3);
+        CommonTestDataUtil.createHearingsForCase(case3NotPerfectlyClosed, 1, 3);
 
-        case4NotPerfectlyClosed = createCaseWithId("case4", 104);
+        case4NotPerfectlyClosed = CommonTestDataUtil.createCaseWithId("case4", 104);
         case4NotPerfectlyClosed.setRetentionUpdated(true);
         case4NotPerfectlyClosed.setRetentionRetries(2);
         case4NotPerfectlyClosed.setClosed(true);
         case4NotPerfectlyClosed.setRetConfScore(RetentionConfidenceScoreEnum.CASE_NOT_PERFECTLY_CLOSED);
         case4NotPerfectlyClosed.setRetConfReason(RetentionConfidenceReasonEnum.AGED_CASE);
         case4NotPerfectlyClosed.setRetConfUpdatedTs(RETENTION_UPDATED_DATE);
-        createHearingsForCase(case4NotPerfectlyClosed, 1, 1);
+        CommonTestDataUtil.createHearingsForCase(case4NotPerfectlyClosed, 1, 1);
 
         var hearA1 = case1PerfectlyClosed.getHearings().get(0);
         hearA1.setScheduledStartTime(LocalTime.NOON);
@@ -171,7 +172,7 @@ class ApplyRetentionCaseAssociatedObjectsSingleCaseProcessorImplTest {
 
         var retentionPolicyTypeEntity1 = createRetentionPolicyType(POLICY_A_NAME, SOME_PAST_DATE_TIME, SOME_FUTURE_DATE_TIME, DATETIME_2025);
 
-        var testUser = createUserAccount();
+        testUser = CommonTestDataUtil.createUserAccount();
 
         caseRetentionA1 = createCaseRetention(case1PerfectlyClosed, retentionPolicyTypeEntity1, DATETIME_2025, COMPLETE, testUser);
         var caseRetentionA2 = createCaseRetention(case1PerfectlyClosed, retentionPolicyTypeEntity1, DATETIME_2026, COMPLETE, testUser);
@@ -194,12 +195,12 @@ class ApplyRetentionCaseAssociatedObjectsSingleCaseProcessorImplTest {
     @Test
     void processApplyRetentionToCaseAssociatedObjectsForMediaWhereMultipleCasesIsPerfectlyClosed() {
         // given
-        var mediaA1 = createMedia(case1PerfectlyClosed.getHearings().getFirst());
-        var mediaA2 = createMedia(case1PerfectlyClosed.getHearings().get(1));
+        var mediaA1 = CommonTestDataUtil.createMedia(case1PerfectlyClosed.getHearings().getFirst());
+        var mediaA2 = CommonTestDataUtil.createMedia(case1PerfectlyClosed.getHearings().get(1));
         mediaA2.setId(mediaA2.getId() + 1);
-        var mediaB1 = createMedia(List.of(case1PerfectlyClosed.getHearings().getFirst(),
-                                          case2PerfectlyClosed.getHearings().getFirst()),
-                                  456);
+        var mediaB1 = CommonTestDataUtil.createMedia(List.of(case1PerfectlyClosed.getHearings().getFirst(),
+                                                             case2PerfectlyClosed.getHearings().getFirst()),
+                                                     456);
 
         var eodA1 = ExternalObjectDirectoryTestData.eodStoredInExternalLocationTypeForMedia(ExternalLocationTypeEnum.ARM, mediaA1);
         var eodA2 = ExternalObjectDirectoryTestData.eodStoredInExternalLocationTypeForMedia(ExternalLocationTypeEnum.ARM, mediaA2);
@@ -234,12 +235,12 @@ class ApplyRetentionCaseAssociatedObjectsSingleCaseProcessorImplTest {
     @Test
     void processApplyRetentionToCaseAssociatedObjectsForMediaWhereMultipleCasesIsNotPerfectlyClosed() {
         // given
-        var mediaA1 = createMedia(case3NotPerfectlyClosed.getHearings().getFirst());
-        var mediaA2 = createMedia(case3NotPerfectlyClosed.getHearings().get(1));
+        var mediaA1 = CommonTestDataUtil.createMedia(case3NotPerfectlyClosed.getHearings().getFirst());
+        var mediaA2 = CommonTestDataUtil.createMedia(case3NotPerfectlyClosed.getHearings().get(1));
         mediaA2.setId(mediaA2.getId() + 1);
-        var mediaB1 = createMedia(List.of(case3NotPerfectlyClosed.getHearings().getFirst(),
-                                          case4NotPerfectlyClosed.getHearings().getFirst()),
-                                  456);
+        var mediaB1 = CommonTestDataUtil.createMedia(List.of(case3NotPerfectlyClosed.getHearings().getFirst(),
+                                                             case4NotPerfectlyClosed.getHearings().getFirst()),
+                                                     456);
 
         var eodA1 = ExternalObjectDirectoryTestData.eodStoredInExternalLocationTypeForMedia(ExternalLocationTypeEnum.ARM, mediaA1);
         var eodA2 = ExternalObjectDirectoryTestData.eodStoredInExternalLocationTypeForMedia(ExternalLocationTypeEnum.ARM, mediaA2);
@@ -278,12 +279,12 @@ class ApplyRetentionCaseAssociatedObjectsSingleCaseProcessorImplTest {
     @Test
     void processApplyRetentionToCaseAssociatedObjectsForMediaWhereOneCaseIsPerfectlyClosedAndOneCaseIsNotPerfectlyClosed() {
         // given
-        var mediaA1 = createMedia(case1PerfectlyClosed.getHearings().getFirst());
-        var mediaA2 = createMedia(case1PerfectlyClosed.getHearings().get(1));
+        var mediaA1 = CommonTestDataUtil.createMedia(case1PerfectlyClosed.getHearings().getFirst());
+        var mediaA2 = CommonTestDataUtil.createMedia(case1PerfectlyClosed.getHearings().get(1));
         mediaA2.setId(mediaA2.getId() + 1);
-        var mediaB1 = createMedia(List.of(case1PerfectlyClosed.getHearings().getFirst(),
-                                          case4NotPerfectlyClosed.getHearings().getFirst()),
-                                  456);
+        var mediaB1 = CommonTestDataUtil.createMedia(List.of(case1PerfectlyClosed.getHearings().getFirst(),
+                                                             case4NotPerfectlyClosed.getHearings().getFirst()),
+                                                     456);
 
         var eodA1 = ExternalObjectDirectoryTestData.eodStoredInExternalLocationTypeForMedia(ExternalLocationTypeEnum.ARM, mediaA1);
         var eodA2 = ExternalObjectDirectoryTestData.eodStoredInExternalLocationTypeForMedia(ExternalLocationTypeEnum.ARM, mediaA2);
@@ -316,5 +317,143 @@ class ApplyRetentionCaseAssociatedObjectsSingleCaseProcessorImplTest {
 
     }
 
+    @Test
+    void processApplyRetentionToCaseAssociatedObjectsForAnnotationDocumentWhereOneCaseIsPerfectlyClosedAndOneCaseIsNotPerfectlyClosed() {
+        // given
+        var annotationA1 = CommonTestDataUtil.createAnnotationEntity(111);
+        var annotationB1 = CommonTestDataUtil.createAnnotationEntity(222);
+        annotationA1.setHearingList(List.of(case1PerfectlyClosed.getHearings().getFirst()));
+        annotationB1.setHearingList(List.of(case1PerfectlyClosed.getHearings().getFirst(),
+                                            case4NotPerfectlyClosed.getHearings().getFirst()));
 
+        var annotationDocumentA1 = annotationA1.getAnnotationDocuments().getFirst();
+        var annotationDocumentB1 = annotationB1.getAnnotationDocuments().getFirst();
+        annotationDocumentA1.setAnnotation(annotationA1);
+        annotationDocumentB1.setAnnotation(annotationB1);
+
+        var eodA1 = ExternalObjectDirectoryTestData.eodStoredInExternalLocationTypeForAnnotationDocument(ExternalLocationTypeEnum.ARM, annotationDocumentA1);
+        var eodB1 = ExternalObjectDirectoryTestData.eodStoredInExternalLocationTypeForAnnotationDocument(ExternalLocationTypeEnum.ARM, annotationDocumentB1);
+
+        when(caseService.getCourtCaseById(case1PerfectlyClosed.getId())).thenReturn(case1PerfectlyClosed);
+
+        when(annotationDocumentRepository.findAllByCaseId(case1PerfectlyClosed.getId())).thenReturn(List.of(annotationDocumentA1, annotationDocumentB1));
+
+        when(caseRetentionRepository.findTopByCourtCaseOrderByRetainUntilAppliedOnDesc(case1PerfectlyClosed)).thenReturn(Optional.of(caseRetentionA1));
+        when(caseRetentionRepository.findTopByCourtCaseOrderByRetainUntilAppliedOnDesc(case4NotPerfectlyClosed)).thenReturn(Optional.of(caseRetentionD1));
+
+        when(eodRepository.findByAnnotationDocumentEntityAndExternalLocationType(annotationDocumentA1, EodHelper.armLocation())).thenReturn(List.of(eodA1));
+        when(eodRepository.findByAnnotationDocumentEntityAndExternalLocationType(annotationDocumentB1, EodHelper.armLocation())).thenReturn(List.of(eodB1));
+
+        when(currentTimeHelper.currentOffsetDateTime()).thenReturn(RETENTION_UPDATED_DATE);
+
+        // when
+        caseObjectsProcessor.processApplyRetentionToCaseAssociatedObjects(case1PerfectlyClosed.getId());
+
+        // then
+        assertEquals(1, annotationDocumentA1.getRetConfScore());
+
+        assertEquals(2, annotationDocumentB1.getRetConfScore());
+        String expectedResult = "{\\\"ret_conf_applied_ts\\\":\\\"2024-06-20T10:00:00Z\\\",\\\"cases\\\":[{\\\"courthouse\\\":\\\"CASE_COURTHOUSE\\\",\\\"case_number\\\":\\\"case4\\\",\\\"ret_conf_updated_ts\\\":\\\"2024-06-20T10:00:00Z\\\",\\\"ret_conf_reason\\\":\\\"AGED_CASE\\\"}]}";
+        assertEquals(expectedResult, annotationDocumentB1.getRetConfReason());
+
+    }
+
+    @Test
+    void processApplyRetentionToCaseAssociatedObjectsForTranscriptionDocumentWhereOneCaseIsPerfectlyClosedAndOneCaseIsNotPerfectlyClosed() {
+        // given
+        List<TranscriptionEntity> transcriptionsA1 = CommonTestDataUtil.createTranscriptionList(case1PerfectlyClosed.getHearings().getFirst());
+        List<TranscriptionEntity> transcriptionsB1 = CommonTestDataUtil.createTranscriptionList(case4NotPerfectlyClosed.getHearings().getFirst());
+        var transcriptionA1 = transcriptionsA1.getFirst();
+        var transcriptionB1 = transcriptionsB1.getFirst();
+        transcriptionB1.setHearings(List.of(case1PerfectlyClosed.getHearings().getFirst(),
+                                            case4NotPerfectlyClosed.getHearings().getFirst()));
+
+        var transcriptionDocumentA1 = transcriptionA1.getTranscriptionDocumentEntities().getFirst();
+        var transcriptionDocumentB1 = transcriptionB1.getTranscriptionDocumentEntities().getFirst();
+        transcriptionDocumentA1.setTranscription(transcriptionA1);
+        transcriptionDocumentB1.setTranscription(transcriptionB1);
+
+        var eodA1 = ExternalObjectDirectoryTestData.eodStoredInExternalLocationTypeForTranscriptionDocument(ExternalLocationTypeEnum.ARM,
+                                                                                                            transcriptionDocumentA1);
+        var eodB1 = ExternalObjectDirectoryTestData.eodStoredInExternalLocationTypeForTranscriptionDocument(ExternalLocationTypeEnum.ARM,
+                                                                                                            transcriptionDocumentB1);
+
+        when(caseService.getCourtCaseById(case1PerfectlyClosed.getId())).thenReturn(case1PerfectlyClosed);
+
+        when(transcriptionService.getAllCaseTranscriptionDocuments(case1PerfectlyClosed.getId())).thenReturn(
+            List.of(transcriptionDocumentA1, transcriptionDocumentB1));
+
+        when(caseRetentionRepository.findTopByCourtCaseOrderByRetainUntilAppliedOnDesc(case1PerfectlyClosed)).thenReturn(Optional.of(caseRetentionA1));
+        when(caseRetentionRepository.findTopByCourtCaseOrderByRetainUntilAppliedOnDesc(case4NotPerfectlyClosed)).thenReturn(Optional.of(caseRetentionD1));
+
+        when(eodRepository.findByTranscriptionDocumentEntityAndExternalLocationType(transcriptionDocumentA1, EodHelper.armLocation())).thenReturn(
+            List.of(eodA1));
+        when(eodRepository.findByTranscriptionDocumentEntityAndExternalLocationType(transcriptionDocumentB1, EodHelper.armLocation())).thenReturn(
+            List.of(eodB1));
+
+        when(currentTimeHelper.currentOffsetDateTime()).thenReturn(RETENTION_UPDATED_DATE);
+
+        // when
+        caseObjectsProcessor.processApplyRetentionToCaseAssociatedObjects(case1PerfectlyClosed.getId());
+
+        // then
+        assertEquals(1, transcriptionDocumentA1.getRetConfScore());
+
+        assertEquals(2, transcriptionDocumentB1.getRetConfScore());
+        String expectedResult = "{\\\"ret_conf_applied_ts\\\":\\\"2024-06-20T10:00:00Z\\\",\\\"cases\\\":[{\\\"courthouse\\\":\\\"CASE_COURTHOUSE\\\",\\\"case_number\\\":\\\"case4\\\",\\\"ret_conf_updated_ts\\\":\\\"2024-06-20T10:00:00Z\\\",\\\"ret_conf_reason\\\":\\\"AGED_CASE\\\"}]}";
+        assertEquals(expectedResult, transcriptionDocumentB1.getRetConfReason());
+
+    }
+
+    @Test
+    void processApplyRetentionToCaseAssociatedObjectsForCaseDocumentWhereCaseIsPerfectlyClosed() {
+        // given
+        var caseDocument = CommonTestDataUtil.createCaseDocumentEntity(case1PerfectlyClosed, testUser);
+
+        var eod = ExternalObjectDirectoryTestData.eodStoredInExternalLocationTypeForCaseDocument(ExternalLocationTypeEnum.ARM, caseDocument);
+
+        when(caseService.getCourtCaseById(case1PerfectlyClosed.getId())).thenReturn(case1PerfectlyClosed);
+
+        when(caseDocumentRepository.findByCourtCase(case1PerfectlyClosed)).thenReturn(List.of(caseDocument));
+
+        when(caseRetentionRepository.findTopByCourtCaseOrderByRetainUntilAppliedOnDesc(case1PerfectlyClosed)).thenReturn(Optional.of(caseRetentionA1));
+
+        when(eodRepository.findByCaseDocumentAndExternalLocationType(caseDocument, EodHelper.armLocation())).thenReturn(List.of(eod));
+
+        // when
+        caseObjectsProcessor.processApplyRetentionToCaseAssociatedObjects(case1PerfectlyClosed.getId());
+
+        // then
+        assertEquals(1, caseDocument.getRetConfScore());
+        assertNull(caseDocument.getRetConfReason());
+
+    }
+
+    @Test
+    void processApplyRetentionToCaseAssociatedObjectsForCaseDocumentWhereCaseIsNotPerfectlyClosed() {
+        // given
+        var caseDocument = CommonTestDataUtil.createCaseDocumentEntity(case4NotPerfectlyClosed, testUser);
+
+        var eod = ExternalObjectDirectoryTestData.eodStoredInExternalLocationTypeForCaseDocument(ExternalLocationTypeEnum.ARM, caseDocument);
+
+        when(caseService.getCourtCaseById(case4NotPerfectlyClosed.getId())).thenReturn(case4NotPerfectlyClosed);
+
+        when(caseDocumentRepository.findByCourtCase(case4NotPerfectlyClosed)).thenReturn(List.of(caseDocument));
+
+        when(caseRetentionRepository.findTopByCourtCaseOrderByRetainUntilAppliedOnDesc(case4NotPerfectlyClosed)).thenReturn(Optional.of(caseRetentionA1));
+
+        when(eodRepository.findByCaseDocumentAndExternalLocationType(caseDocument, EodHelper.armLocation())).thenReturn(List.of(eod));
+
+        when(currentTimeHelper.currentOffsetDateTime()).thenReturn(RETENTION_UPDATED_DATE);
+
+
+        // when
+        caseObjectsProcessor.processApplyRetentionToCaseAssociatedObjects(case4NotPerfectlyClosed.getId());
+
+        // then
+        assertEquals(2, caseDocument.getRetConfScore());
+        String expectedResult = "{\\\"ret_conf_applied_ts\\\":\\\"2024-06-20T10:00:00Z\\\",\\\"cases\\\":[{\\\"courthouse\\\":\\\"CASE_COURTHOUSE\\\",\\\"case_number\\\":\\\"case4\\\",\\\"ret_conf_updated_ts\\\":\\\"2024-06-20T10:00:00Z\\\",\\\"ret_conf_reason\\\":\\\"AGED_CASE\\\"}]}";
+        assertEquals(expectedResult, caseDocument.getRetConfReason());
+
+    }
 }
