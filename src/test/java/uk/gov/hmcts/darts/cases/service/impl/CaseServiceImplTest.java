@@ -11,7 +11,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.skyscreamer.jsonassert.JSONAssert;
 import org.skyscreamer.jsonassert.JSONCompareMode;
-import org.springframework.beans.factory.annotation.Value;
 import uk.gov.hmcts.darts.authorisation.api.AuthorisationApi;
 import uk.gov.hmcts.darts.cases.exception.CaseApiError;
 import uk.gov.hmcts.darts.cases.helper.AdminCasesSearchRequestHelper;
