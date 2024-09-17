@@ -50,7 +50,7 @@ public class ArmApiServiceImpl implements ArmApiService {
         try {
             return armApiClient.updateMetadata(getArmBearerToken(), armUpdateMetadataRequest);
         } catch (FeignException e) {
-            // this ensures the full error body containing the error detail is logged rather than a truncated version
+            // this ensures the full error body containing the ARM error detail is logged rather than a truncated version
             log.error("Error during ARM update metadata: Detail: {}", e.contentUTF8());
             throw e;
         }
