@@ -2,6 +2,7 @@ package uk.gov.hmcts.darts.transcriptions.service.impl;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -23,6 +24,7 @@ import uk.gov.hmcts.darts.common.repository.TranscriptionRepository;
 import uk.gov.hmcts.darts.transcriptions.exception.TranscriptionApiError;
 import uk.gov.hmcts.darts.transcriptions.mapper.TranscriptionResponseMapper;
 import uk.gov.hmcts.darts.transcriptions.model.AdminActionRequest;
+import uk.gov.hmcts.darts.transcriptions.model.AdminApproveDeletionResponse;
 import uk.gov.hmcts.darts.transcriptions.model.GetTranscriptionDetailAdminResponse;
 import uk.gov.hmcts.darts.transcriptions.model.GetTranscriptionDocumentByIdResponse;
 import uk.gov.hmcts.darts.transcriptions.model.TranscriptionDocumentHideRequest;
@@ -45,6 +47,10 @@ import java.util.Set;
 import static java.util.stream.Collectors.toSet;
 import static java.util.stream.IntStream.rangeClosed;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
@@ -102,7 +108,7 @@ class AdminTranscriptionServiceTest {
                                                 objectAdminActionRepository,
                                                 objectHiddenReasonRepository,
                                                 userIdentity);
-  }
+    }
 
     @Test
     void returnsEmptyIfOwnerFilterProvidedWithNoMatches() {
@@ -140,13 +146,13 @@ class AdminTranscriptionServiceTest {
         assertThat(searchResponses).extracting("caseNumber").containsExactly("case-number-1", "case-number-2", "case-number-3");
         assertThat(searchResponses).extracting("courthouseId").containsExactly(11, 12, 13);
         assertThat(searchResponses).extracting("hearingDate").containsExactly(
-                LocalDate.parse("2020-01-02"),
-                LocalDate.parse("2020-01-03"),
-                LocalDate.parse("2020-01-04"));
+            LocalDate.parse("2020-01-02"),
+            LocalDate.parse("2020-01-03"),
+            LocalDate.parse("2020-01-04"));
         assertThat(searchResponses).extracting("requestedAt").containsExactly(
-                OffsetDateTime.parse("2021-02-03T00:00:00Z"),
-                OffsetDateTime.parse("2021-02-04T00:00:00Z"),
-                OffsetDateTime.parse("2021-02-05T00:00:00Z"));
+            OffsetDateTime.parse("2021-02-03T00:00:00Z"),
+            OffsetDateTime.parse("2021-02-04T00:00:00Z"),
+            OffsetDateTime.parse("2021-02-05T00:00:00Z"));
         assertThat(searchResponses).extracting("transcriptionStatusId").containsExactly(21, 22, 23);
         assertThat(searchResponses).extracting("isManualTranscription").containsExactly(false, true, false);
 
@@ -176,9 +182,9 @@ class AdminTranscriptionServiceTest {
         List<GetTranscriptionDetailAdminResponse> fndTranscriptions = adminTranscriptionSearchService
             .getTranscriptionsForUser(userId, dateTimeOfSearch);
 
-        Assertions.assertEquals(transcriptionEntityList.size(), fndTranscriptions.size());
-        Assertions.assertTrue(fndTranscriptions.contains(response));
-        Assertions.assertTrue(fndTranscriptions.contains(response1));
+        assertEquals(transcriptionEntityList.size(), fndTranscriptions.size());
+        assertTrue(fndTranscriptions.contains(response));
+        assertTrue(fndTranscriptions.contains(response1));
     }
 
     @Test
@@ -190,9 +196,9 @@ class AdminTranscriptionServiceTest {
             .thenReturn(new ArrayList<>());
 
         List<GetTranscriptionDetailAdminResponse> fndTranscriptions = adminTranscriptionSearchService
-                .getTranscriptionsForUser(userId, dateTimeOfSearch);
+            .getTranscriptionsForUser(userId, dateTimeOfSearch);
 
-        Assertions.assertTrue(fndTranscriptions.isEmpty());
+        assertTrue(fndTranscriptions.isEmpty());
     }
 
     @Test
@@ -202,11 +208,11 @@ class AdminTranscriptionServiceTest {
 
         Mockito.doThrow(new DartsApiException(UserManagementError.USER_NOT_FOUND)).when(userAccountExistsValidator).validate(userId);
 
-        DartsApiException exception = Assertions.assertThrows(DartsApiException.class, () -> {
+        DartsApiException exception = assertThrows(DartsApiException.class, () -> {
             adminTranscriptionSearchService
                 .getTranscriptionsForUser(userId, dateTimeOfSearch);
         });
-        Assertions.assertEquals(UserManagementError.USER_NOT_FOUND, exception.getError());
+        assertEquals(UserManagementError.USER_NOT_FOUND, exception.getError());
     }
 
     @Test
@@ -215,10 +221,10 @@ class AdminTranscriptionServiceTest {
 
         when(transcriptionDocumentRepository.findById(transDocId)).thenReturn(Optional.empty());
 
-        DartsApiException exception = Assertions.assertThrows(DartsApiException.class,
-                        () -> adminTranscriptionSearchService.getTranscriptionDocumentById(transDocId));
+        DartsApiException exception = assertThrows(DartsApiException.class,
+                                                   () -> adminTranscriptionSearchService.getTranscriptionDocumentById(transDocId));
 
-        Assertions.assertEquals(TranscriptionApiError.TRANSCRIPTION_DOCUMENT_ID_NOT_FOUND, exception.getError());
+        assertEquals(TranscriptionApiError.TRANSCRIPTION_DOCUMENT_ID_NOT_FOUND, exception.getError());
     }
 
     @Test
@@ -232,7 +238,7 @@ class AdminTranscriptionServiceTest {
 
         GetTranscriptionDocumentByIdResponse actualResponse = adminTranscriptionSearchService.getTranscriptionDocumentById(transDocId);
 
-        Assertions.assertEquals(expectedResponse, actualResponse);
+        assertEquals(expectedResponse, actualResponse);
     }
 
     @Test
@@ -285,15 +291,15 @@ class AdminTranscriptionServiceTest {
 
 
         // make the assertion
-        Assertions.assertTrue(transcriptionDocumentEntityArgumentCaptor.getValue().isHidden());
-        Assertions.assertEquals(expectedResponse, actualResponse);
-        Assertions.assertEquals(request.getAdminAction().getComments(), objectAdminActionEntityArgumentCaptor.getValue().getComments());
-        Assertions.assertEquals(request.getAdminAction().getReasonId(), reasonId);
+        assertTrue(transcriptionDocumentEntityArgumentCaptor.getValue().isHidden());
+        assertEquals(expectedResponse, actualResponse);
+        assertEquals(request.getAdminAction().getComments(), objectAdminActionEntityArgumentCaptor.getValue().getComments());
+        assertEquals(request.getAdminAction().getReasonId(), reasonId);
         Assertions.assertFalse(objectAdminActionEntityArgumentCaptor.getValue().isMarkedForManualDeletion());
-        Assertions.assertNotNull(objectAdminActionEntityArgumentCaptor.getValue().getHiddenBy());
-        Assertions.assertNotNull(objectAdminActionEntityArgumentCaptor.getValue().getHiddenDateTime());
-        Assertions.assertNotNull(objectAdminActionEntityArgumentCaptor.getValue().getMarkedForManualDelBy());
-        Assertions.assertNotNull(objectAdminActionEntityArgumentCaptor.getValue().getMarkedForManualDelDateTime());
+        assertNotNull(objectAdminActionEntityArgumentCaptor.getValue().getHiddenBy());
+        assertNotNull(objectAdminActionEntityArgumentCaptor.getValue().getHiddenDateTime());
+        assertNotNull(objectAdminActionEntityArgumentCaptor.getValue().getMarkedForManualDelBy());
+        assertNotNull(objectAdminActionEntityArgumentCaptor.getValue().getMarkedForManualDelDateTime());
     }
 
     @Test
@@ -333,7 +339,7 @@ class AdminTranscriptionServiceTest {
 
         // make the assertion
         Assertions.assertFalse(transcriptionDocumentEntityArgumentCaptor.getValue().isHidden());
-        Assertions.assertEquals(expectedResponse, actualResponse);
+        assertEquals(expectedResponse, actualResponse);
         verify(objectAdminActionRepository, times(1)).deleteById(objectAdminActionEntityId);
         verify(objectAdminActionRepository, times(1)).deleteById(objectAdminActionEntityId1);
     }
@@ -353,4 +359,96 @@ class AdminTranscriptionServiceTest {
             seed % 2 == 0);
     }
 
+    @Nested
+    class ApproveDeletionOfTranscriptionDocumentById {
+        @Test
+        void testApproveDeletionOfTranscriptionDocumentByIdSuccess() {
+
+            Integer transcriptionDocumentId = 1;
+            TranscriptionDocumentEntity documentEntity = new TranscriptionDocumentEntity();
+            ObjectAdminActionEntity objectAdminActionEntity = new ObjectAdminActionEntity();
+            UserAccountEntity userAccount = new UserAccountEntity();
+            AdminApproveDeletionResponse expectedResponse = new AdminApproveDeletionResponse();
+
+            when(transcriptionDocumentRepository.findById(transcriptionDocumentId)).thenReturn(Optional.of(documentEntity));
+            when(objectAdminActionRepository.findByTranscriptionDocumentIdHiddenAndMarkedForDeletion(transcriptionDocumentId))
+                .thenReturn(Optional.of(objectAdminActionEntity));
+            when(userIdentity.getUserAccount()).thenReturn(userAccount);
+            when(transcriptionResponseMapper.mapAdminApproveDeletionResponse(documentEntity, objectAdminActionEntity)).thenReturn(expectedResponse);
+
+            AdminApproveDeletionResponse response = adminTranscriptionSearchService.approveDeletionOfTranscriptionDocumentById(transcriptionDocumentId);
+
+            assertNotNull(response);
+            assertEquals(expectedResponse, response);
+            assertTrue(objectAdminActionEntity.isMarkedForManualDeletion());
+            assertEquals(userAccount, objectAdminActionEntity.getMarkedForManualDelBy());
+            assertNotNull(objectAdminActionEntity.getMarkedForManualDelDateTime());
+            verify(objectAdminActionRepository).save(objectAdminActionEntity);
+        }
+
+        @Test
+        void testApproveDeletionOfTranscriptionDocumentByIdWhenDocumentNotFound() {
+
+            Integer transcriptionDocumentId = 1;
+            when(transcriptionDocumentRepository.findById(transcriptionDocumentId)).thenReturn(Optional.empty());
+
+            assertThrows(DartsApiException.class, () ->
+                adminTranscriptionSearchService.approveDeletionOfTranscriptionDocumentById(transcriptionDocumentId)
+            );
+        }
+
+        @Test
+        void testApproveDeletionOfTranscriptionDocumentByIdWhenDeleteNotSupported() {
+
+            Integer transcriptionDocumentId = 1;
+            TranscriptionDocumentEntity documentEntity = new TranscriptionDocumentEntity();
+            when(transcriptionDocumentRepository.findById(transcriptionDocumentId)).thenReturn(Optional.of(documentEntity));
+            when(objectAdminActionRepository.findByTranscriptionDocumentIdHiddenAndMarkedForDeletion(transcriptionDocumentId))
+                .thenReturn(Optional.empty());
+
+            DartsApiException exception = assertThrows(DartsApiException.class, () ->
+                adminTranscriptionSearchService.approveDeletionOfTranscriptionDocumentById(transcriptionDocumentId)
+            );
+            assertEquals(TranscriptionApiError.TRANSCRIPTION_DOCUMENT_DELETE_NOT_SUPPORTED, exception.getError());
+        }
+
+        @Test
+        void testApproveDeletionOfTranscriptionDocumentByIdWhenAlreadyApproved() {
+
+            Integer transcriptionDocumentId = 1;
+            TranscriptionDocumentEntity documentEntity = new TranscriptionDocumentEntity();
+            ObjectAdminActionEntity objectAdminActionEntity = new ObjectAdminActionEntity();
+            objectAdminActionEntity.setMarkedForManualDeletion(true);
+
+            when(transcriptionDocumentRepository.findById(transcriptionDocumentId)).thenReturn(Optional.of(documentEntity));
+            when(objectAdminActionRepository.findByTranscriptionDocumentIdHiddenAndMarkedForDeletion(transcriptionDocumentId))
+                .thenReturn(Optional.of(objectAdminActionEntity));
+
+            DartsApiException exception = assertThrows(DartsApiException.class, () ->
+                adminTranscriptionSearchService.approveDeletionOfTranscriptionDocumentById(transcriptionDocumentId)
+            );
+            assertEquals(TranscriptionApiError.TRANSCRIPTION_DOCUMENT_DELETION_ALREADY_APPROVED, exception.getError());
+        }
+
+        @Test
+        void testApproveDeletionOfTranscriptionDocumentByIdWhenCannotApproveOwnRequest() {
+
+            Integer transcriptionDocumentId = 1;
+            TranscriptionDocumentEntity documentEntity = new TranscriptionDocumentEntity();
+            ObjectAdminActionEntity objectAdminActionEntity = new ObjectAdminActionEntity();
+            UserAccountEntity userAccount = new UserAccountEntity();
+
+            when(transcriptionDocumentRepository.findById(transcriptionDocumentId)).thenReturn(Optional.of(documentEntity));
+            when(objectAdminActionRepository.findByTranscriptionDocumentIdHiddenAndMarkedForDeletion(transcriptionDocumentId))
+                .thenReturn(Optional.of(objectAdminActionEntity));
+            when(userIdentity.getUserAccount()).thenReturn(userAccount);
+            objectAdminActionEntity.setHiddenBy(userAccount);
+
+            DartsApiException exception = assertThrows(DartsApiException.class, () ->
+                adminTranscriptionSearchService.approveDeletionOfTranscriptionDocumentById(transcriptionDocumentId)
+            );
+
+            assertEquals(TranscriptionApiError.TRANSCRIPTION_DOCUMENT_DELETION_CAN_NOT_APPROVE_OWN_REQUEST, exception.getError());
+        }
+    }
 }

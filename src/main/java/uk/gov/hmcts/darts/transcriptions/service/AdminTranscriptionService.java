@@ -1,5 +1,6 @@
 package uk.gov.hmcts.darts.transcriptions.service;
 
+import uk.gov.hmcts.darts.transcriptions.model.AdminApproveDeletionResponse;
 import uk.gov.hmcts.darts.transcriptions.model.GetTranscriptionDetailAdminResponse;
 import uk.gov.hmcts.darts.transcriptions.model.GetTranscriptionDocumentByIdResponse;
 import uk.gov.hmcts.darts.transcriptions.model.SearchTranscriptionDocumentRequest;
@@ -24,4 +25,6 @@ public interface AdminTranscriptionService {
 
     TranscriptionDocumentHideResponse hideOrShowTranscriptionDocumentById(Integer transcriptionDocumentId,
                                                                           TranscriptionDocumentHideRequest transcriptionDocumentHideRequest);
+
+    AdminApproveDeletionResponse approveDeletionOfTranscriptionDocumentById(Integer transcriptionDocumentId);
 }

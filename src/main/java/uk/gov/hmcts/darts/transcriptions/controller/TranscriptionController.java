@@ -16,6 +16,7 @@ import uk.gov.hmcts.darts.authorisation.util.AuthorisationUnitOfWork;
 import uk.gov.hmcts.darts.common.component.validation.Validator;
 import uk.gov.hmcts.darts.common.enums.SecurityRoleEnum;
 import uk.gov.hmcts.darts.transcriptions.http.api.TranscriptionApi;
+import uk.gov.hmcts.darts.transcriptions.model.AdminApproveDeletionResponse;
 import uk.gov.hmcts.darts.transcriptions.model.AdminMarkedForDeletionResponseItem;
 import uk.gov.hmcts.darts.transcriptions.model.AttachTranscriptResponse;
 import uk.gov.hmcts.darts.transcriptions.model.DownloadTranscriptResponse;
@@ -78,7 +79,7 @@ public class TranscriptionController implements TranscriptionApi {
     @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
     @Authorisation(contextId = TRANSCRIPTION_ID,
         globalAccessSecurityRoles = {SUPER_ADMIN, SUPER_USER})
-    public ResponseEntity<List<GetTranscriptionWorkflowsResponse>> adminTranscriptionWorkflowsGet(Integer transcriptionId, Boolean isCurrent)  {
+    public ResponseEntity<List<GetTranscriptionWorkflowsResponse>> adminTranscriptionWorkflowsGet(Integer transcriptionId, Boolean isCurrent) {
         return ResponseEntity.ok(transcriptionService.getTranscriptionWorkflows(transcriptionId, isCurrent));
     }
 
@@ -214,7 +215,7 @@ public class TranscriptionController implements TranscriptionApi {
 
     @Override
     @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
-        public ResponseEntity<TranscriptionTranscriberCountsResponse> getTranscriptionTranscriberCounts(Integer userId) {
+    public ResponseEntity<TranscriptionTranscriberCountsResponse> getTranscriptionTranscriberCounts(Integer userId) {
         return ResponseEntity.ok(transcriptionService.getTranscriptionTranscriberCounts(userId));
     }
 
@@ -243,7 +244,7 @@ public class TranscriptionController implements TranscriptionApi {
     @Authorisation(contextId = ANY_ENTITY_ID, globalAccessSecurityRoles = {SUPER_ADMIN, SUPER_USER})
     public ResponseEntity<List<GetTranscriptionDetailAdminResponse>> getTranscriptionsForUser(Integer userId, OffsetDateTime requestedAtFrom) {
         return new ResponseEntity<>(adminTranscriptionSearchService.getTranscriptionsForUser(userId, requestedAtFrom),
-        HttpStatus.OK);
+                                    HttpStatus.OK);
     }
 
     @Override
@@ -275,6 +276,15 @@ public class TranscriptionController implements TranscriptionApi {
                                                                                          TranscriptionDocumentHideRequest transcriptionDocumentHideRequest) {
         TranscriptionDocumentHideResponse response
             = adminTranscriptionSearchService.hideOrShowTranscriptionDocumentById(transcriptionDocumentId, transcriptionDocumentHideRequest);
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    @Override
+    @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
+    @Authorisation(contextId = TRANSCRIPTION_ID,
+        globalAccessSecurityRoles = {SUPER_ADMIN})
+    public ResponseEntity<AdminApproveDeletionResponse> approveDeletionOfTranscriptionDocumentId(Integer transcriptionDocumentId) {
+        var response = adminTranscriptionSearchService.approveDeletionOfTranscriptionDocumentById(transcriptionDocumentId);
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 

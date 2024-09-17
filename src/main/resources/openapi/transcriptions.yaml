@@ -951,6 +951,57 @@ paths:
               schema:
                 allOf:
                   - $ref: './problem.yaml'
+
+  /admin/transcription-documents/{transcription_document_id}/approve-deletion:
+    post:
+      tags:
+        - Transcription
+      summary: Approve deletion of a hidden transcription document file. Also known as "soft delete".
+      operationId: approveDeletionOfTranscriptionDocumentId
+      parameters:
+        - name: transcription_document_id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdminApproveDeletionResponse'
+        '400':
+          description: User cannot approve their own deletion
+          content:
+            application/json+problem:
+              schema:
+                allOf:
+                  - $ref: './problem.yaml'
+        '401':
+          description: Unauthorised Error
+        '403':
+          description: Forbidden Error
+          content:
+            application/json+problem:
+              schema:
+                allOf:
+                  - $ref: './problem.yaml'
+        '409':
+          description: Delete not supported for this media or Already marked for deletion
+          content:
+            application/json+problem:
+              schema:
+                allOf:
+                  - $ref: './problem.yaml'
+        '404':
+          description: Not Found Error
+          content:
+            application/json+problem:
+              schema:
+                allOf:
+                  - $ref: './problem.yaml'
+
   /admin/transcription-documents/marked-for-deletion:
     get:
       tags:
@@ -1685,6 +1736,18 @@ components:
         admin_action:
           $ref: '#/components/schemas/AdminActionResponse'
           description: 'The transcription document admin action data when the request was made'
+    AdminApproveDeletionResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: 'The transcription document id'
+        is_hidden:
+          type: boolean
+          description: 'The transcription document hidden state'
+        admin_action:
+          $ref: '#/components/schemas/AdminActionResponse'
+          description: 'The transcription document admin action data when the request was made'
 
     AdminActionResponse:
       type: object
@@ -1803,8 +1866,10 @@ components:
         - "TRANSCRIPTION_116"
         - "TRANSCRIPTION_117"
         - "TRANSCRIPTION_118"
+        - "TRANSCRIPTION_119"
+        - "TRANSCRIPTION_120"
       x-enum-varnames: [ FAILED_TO_VALIDATE_TRANSCRIPTION_REQUEST, TRANSCRIPTION_NOT_FOUND,  BAD_REQUEST_TRANSCRIPTION_STATUS, BAD_REQUEST_WORKFLOW_COMMENT, BAD_REQUEST_TRANSCRIPTION_TYPE, TRANSCRIPTION_WORKFLOW_ACTION_INVALID, BAD_REQUEST_TRANSCRIPTION_URGENCY, DUPLICATE_TRANSCRIPTION, FAILED_TO_ATTACH_TRANSCRIPT, FAILED_TO_DOWNLOAD_TRANSCRIPT, AUDIO_NOT_FOUND, FAILED_TO_UPDATE_TRANSCRIPTIONS, TRANSCRIPTION_DOCUMENT_NOT_FOUND, TRANSCRIPTION_DOCUMENT_ALREADY_HIDDEN, TRANSCRIPTION_DOCUMENT_HIDE_ACTION_PAYLOAD_INCORRECT_USAGE, TRANSCRIPTION_DOCUMENT_SHOW_ACTION_PAYLOAD_INCORRECT_USAGE, TRANSCRIPTION_DOCUMENT_HIDE_ACTION_REASON_NOT_FOUND,
-                         TRANSCRIPTION_DOCUMENT_HIDE_ACTION_REASON_MARKED_FOR_DELETION]
+                         TRANSCRIPTION_DOCUMENT_HIDE_ACTION_REASON_MARKED_FOR_DELETION, TRANSCRIPTION_DOCUMENT_DELETE_NOT_SUPPORTED, TRANSCRIPTION_DOCUMENT_DELETION_ALREADY_APPROVED, TRANSCRIPTION_DOCUMENT_DELETION_CAN_NOT_APPROVE_OWN_REQUEST]
 
     TranscriptionsTitleErrors:
       type: string
@@ -1827,5 +1892,9 @@ components:
         - "Showing transcription action payload not correct"
         - "Hide reason is incorrect"
         - "Reason has been marked for deletion"
+        - "The transcription document does not support deletion"
+        - "The transcription document is already marked for deletion"
+        - "Approval attempted by the same user who marked the transcription document as hidden"
+
       x-enum-varnames: [ FAILED_TO_VALIDATE_TRANSCRIPTION_REQUEST, TRANSCRIPTION_NOT_FOUND,  BAD_REQUEST_TRANSCRIPTION_STATUS, BAD_REQUEST_WORKFLOW_COMMENT, BAD_REQUEST_TRANSCRIPTION_TYPE, TRANSCRIPTION_WORKFLOW_ACTION_INVALID, BAD_REQUEST_TRANSCRIPTION_URGENCY, DUPLICATE_TRANSCRIPTION, FAILED_TO_ATTACH_TRANSCRIPT, FAILED_TO_DOWNLOAD_TRANSCRIPT, AUDIO_NOT_FOUND, FAILED_TO_UPDATE_TRANSCRIPTIONS, TRANSCRIPTION_DOCUMENT_NOT_FOUND,  TRANSCRIPTION_DOCUMENT_ALREADY_HIDDEN, TRANSCRIPTION_DOCUMENT_HIDE_ACTION_PAYLOAD_INCORRECT_USAGE, TRANSCRIPTION_DOCUMENT_SHOW_ACTION_PAYLOAD_INCORRECT_USAGE,
-                         TRANSCRIPTION_DOCUMENT_HIDE_ACTION_REASON_NOT_FOUND, TRANSCRIPTION_DOCUMENT_HIDE_ACTION_REASON_MARKED_FOR_DELETION]
+                         TRANSCRIPTION_DOCUMENT_HIDE_ACTION_REASON_NOT_FOUND, TRANSCRIPTION_DOCUMENT_HIDE_ACTION_REASON_MARKED_FOR_DELETION, TRANSCRIPTION_DOCUMENT_DELETE_NOT_SUPPORTED, TRANSCRIPTION_DOCUMENT_DELETION_ALREADY_APPROVED, TRANSCRIPTION_DOCUMENT_DELETION_CAN_NOT_APPROVE_OWN_REQUEST]

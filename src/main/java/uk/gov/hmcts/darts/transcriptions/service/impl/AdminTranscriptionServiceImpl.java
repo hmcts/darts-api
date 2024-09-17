@@ -8,6 +8,7 @@ import uk.gov.hmcts.darts.common.entity.ObjectAdminActionEntity;
 import uk.gov.hmcts.darts.common.entity.ObjectHiddenReasonEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionDocumentEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionEntity;
+import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.common.repository.ObjectAdminActionRepository;
 import uk.gov.hmcts.darts.common.repository.ObjectHiddenReasonRepository;
@@ -16,6 +17,7 @@ import uk.gov.hmcts.darts.common.repository.TranscriptionRepository;
 import uk.gov.hmcts.darts.common.validation.IdRequest;
 import uk.gov.hmcts.darts.transcriptions.exception.TranscriptionApiError;
 import uk.gov.hmcts.darts.transcriptions.mapper.TranscriptionResponseMapper;
+import uk.gov.hmcts.darts.transcriptions.model.AdminApproveDeletionResponse;
 import uk.gov.hmcts.darts.transcriptions.model.GetTranscriptionDetailAdminResponse;
 import uk.gov.hmcts.darts.transcriptions.model.GetTranscriptionDocumentByIdResponse;
 import uk.gov.hmcts.darts.transcriptions.model.SearchTranscriptionDocumentRequest;
@@ -207,6 +209,41 @@ public class AdminTranscriptionServiceImpl implements AdminTranscriptionService 
             throw new DartsApiException(TranscriptionApiError.TRANSCRIPTION_DOCUMENT_ID_NOT_FOUND);
         }
 
+        return response;
+    }
+
+    @Transactional
+    public AdminApproveDeletionResponse approveDeletionOfTranscriptionDocumentById(Integer transcriptionDocumentId) {
+
+        AdminApproveDeletionResponse response;
+
+        Optional<TranscriptionDocumentEntity> transcriptionDocumentEntity = transcriptionDocumentRepository.findById(transcriptionDocumentId);
+        if (transcriptionDocumentEntity.isPresent()) {
+
+            ObjectAdminActionEntity objectAdminActionEntity = objectAdminActionRepository
+                .findByTranscriptionDocumentIdHiddenAndMarkedForDeletion(transcriptionDocumentId)
+                .orElseThrow(() -> new DartsApiException(TranscriptionApiError.TRANSCRIPTION_DOCUMENT_DELETE_NOT_SUPPORTED));
+
+            if (objectAdminActionEntity.isMarkedForManualDeletion()) {
+                throw new DartsApiException(TranscriptionApiError.TRANSCRIPTION_DOCUMENT_DELETION_ALREADY_APPROVED);
+            }
+
+            UserAccountEntity userAccount = userIdentity.getUserAccount();
+            if (userAccount.equals(objectAdminActionEntity.getHiddenBy())) {
+                throw new DartsApiException(TranscriptionApiError.TRANSCRIPTION_DOCUMENT_DELETION_CAN_NOT_APPROVE_OWN_REQUEST);
+            }
+
+            objectAdminActionEntity.setMarkedForManualDeletion(true);
+            objectAdminActionEntity.setMarkedForManualDelBy(userAccount);
+            objectAdminActionEntity.setMarkedForManualDelDateTime(OffsetDateTime.now());
+
+            objectAdminActionRepository.save(objectAdminActionEntity);
+            TranscriptionDocumentEntity documentEntity = transcriptionDocumentEntity.get();
+            response = transcriptionMapper.mapAdminApproveDeletionResponse(documentEntity, objectAdminActionEntity);
+
+        } else {
+            throw new DartsApiException(TranscriptionApiError.TRANSCRIPTION_DOCUMENT_ID_NOT_FOUND);
+        }
         return response;
     }
 }
