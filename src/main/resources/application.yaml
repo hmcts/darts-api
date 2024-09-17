@@ -83,7 +83,7 @@ spring:
       maximum-pool-size: 50
   jpa:
     database: postgresql
-    show-sql: false
+    show-sql: true
     hibernate:
       ddl-auto: none
     properties:
@@ -324,6 +324,7 @@ darts:
   portal:
     url: ${DARTS_PORTAL_URL:https://darts.staging.apps.hmcts.net}
   automated:
+    allow-automated-tasks: ${ENABLE_AUTOMATED_TASKS:true}
     task:
       thread-pool-size: 5
       system-user-email: ${SYSTEM_USER_EMAIL:}

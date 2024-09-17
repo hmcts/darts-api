@@ -11,7 +11,9 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.skyscreamer.jsonassert.JSONAssert;
 import org.skyscreamer.jsonassert.JSONCompareMode;
+import org.springframework.beans.factory.annotation.Value;
 import uk.gov.hmcts.darts.authorisation.api.AuthorisationApi;
+import uk.gov.hmcts.darts.cases.exception.CaseApiError;
 import uk.gov.hmcts.darts.cases.helper.AdminCasesSearchRequestHelper;
 import uk.gov.hmcts.darts.cases.helper.AdvancedSearchRequestHelper;
 import uk.gov.hmcts.darts.cases.mapper.CaseTranscriptionMapper;
@@ -55,6 +57,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.regex.Pattern;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -86,7 +89,6 @@ class CaseServiceImplTest {
 
     @Mock
     EventRepository eventRepository;
-
 
     @Mock
     HearingReportingRestrictionsRepository hearingReportingRestrictionsRepository;
@@ -354,10 +356,27 @@ class CaseServiceImplTest {
     }
 
     @Test
+    void testGetCaseHearingsWhenCaseIsExpiredThrowsException() {
+        CourthouseEntity courthouseEntity = CommonTestDataUtil.createCourthouse(SWANSEA);
+        CourtCaseEntity existingCaseEntity = CommonTestDataUtil.createCase("case1", courthouseEntity);
+        existingCaseEntity.setId(1);
+        existingCaseEntity.setDataAnonymised(true);
+
+        when(caseRepository.findById(existingCaseEntity.getId())).thenReturn(Optional.of(existingCaseEntity));
+        var exception = assertThrows(DartsApiException.class, () ->
+            service.getCaseHearings(1));
+
+        assertThat(exception.getMessage()).isEqualTo("Case has expired.");
+        assertThat(exception.getError()).isEqualTo(CaseApiError.CASE_EXPIRED);
+    }
+
+    @Test
     void testGetEventsByCaseId() throws Exception {
         CourthouseEntity courthouseEntity = CommonTestDataUtil.createCourthouse(SWANSEA);
         CourtroomEntity courtroomEntity = CommonTestDataUtil.createCourtroom(courthouseEntity, "1");
         CourtCaseEntity courtCaseEntity = CommonTestDataUtil.createCase("1");
+
+        when(caseRepository.findById(courtCaseEntity.getId())).thenReturn(Optional.of(courtCaseEntity));
         OffsetDateTime hearingDate = OffsetDateTime.parse("2024-07-01T12:00Z");
 
         HearingEntity hearing = CommonTestDataUtil.createHearing(
@@ -378,6 +397,17 @@ class CaseServiceImplTest {
         String expectedResponse = getContentsFromFile(
             "Tests/cases/CaseServiceTest/testGetEventsByCase/expectedResponse.json");
         JSONAssert.assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
+    }
+
+    @Test
+    void testGetEventsByCaseIdIsAnonymous() {
+        CourtCaseEntity courtCaseEntity = CommonTestDataUtil.createCase("1");
+        courtCaseEntity.setDataAnonymised(true);
+        when(caseRepository.findById(courtCaseEntity.getId())).thenReturn(Optional.of(courtCaseEntity));
+
+        DartsApiException exception = assertThrows(DartsApiException.class, () -> service.getEventsByCaseId(courtCaseEntity.getId()));
+        assertThat(exception.getMessage()).isEqualTo("Case has expired.");
+        assertThat(exception.getError()).isEqualTo(CaseApiError.CASE_EXPIRED);
     }
 
     @Test
@@ -408,6 +438,24 @@ class CaseServiceImplTest {
         assertEquals(3, updatedCaseEntity.getProsecutorList().size());
         assertEquals(3, updatedCaseEntity.getDefenceList().size());
 
+
+    }
+
+    @Test
+    void testUpdateCaseWithExpiredCase() {
+        CourthouseEntity courthouseEntity = CommonTestDataUtil.createCourthouse(SWANSEA);
+        CourtCaseEntity existingCaseEntity = CommonTestDataUtil.createCase("case1", courthouseEntity);
+        existingCaseEntity.setId(1);
+        existingCaseEntity.setDataAnonymised(true);
+
+        when(retrieveCoreObjectService.retrieveOrCreateCase(anyString(), anyString())).thenReturn(existingCaseEntity);
+
+        AddCaseRequest request = CommonTestDataUtil.createUpdateCaseRequest();
+
+        DartsApiException exception = assertThrows(DartsApiException.class, () -> service.addCaseOrUpdate(request));
+
+        assertThat(exception.getMessage()).isEqualTo("Case has expired.");
+        assertThat(exception.getError()).isEqualTo(CaseApiError.CASE_EXPIRED);
 
     }
 
