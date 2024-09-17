@@ -191,7 +191,7 @@ class ApplyRetentionCaseAssociatedObjectsSingleCaseProcessorImplTest {
     }
 
     @Test
-    void processApplyRetentionToCaseAssociatedObjectsForMediaWhereCaseIsPerfectlyClosed() {
+    void processApplyRetentionToCaseAssociatedObjectsForMediaWhereMultipleCasesIsPerfectlyClosed() {
         // given
         var mediaA1 = CommonTestDataUtil.createMedia(case1PerfectlyClosed.getHearings().getFirst());
         var mediaA2 = CommonTestDataUtil.createMedia(case1PerfectlyClosed.getHearings().get(1));
@@ -231,7 +231,7 @@ class ApplyRetentionCaseAssociatedObjectsSingleCaseProcessorImplTest {
     }
 
     @Test
-    void processApplyRetentionToCaseAssociatedObjectsForMediaWhereCaseIsNotPerfectlyClosed() {
+    void processApplyRetentionToCaseAssociatedObjectsForMediaWhereMultipleCasesIsNotPerfectlyClosed() {
         // given
         var mediaA1 = CommonTestDataUtil.createMedia(case3NotPerfectlyClosed.getHearings().getFirst());
         var mediaA2 = CommonTestDataUtil.createMedia(case3NotPerfectlyClosed.getHearings().get(1));
@@ -271,6 +271,47 @@ class ApplyRetentionCaseAssociatedObjectsSingleCaseProcessorImplTest {
         assertEquals(2, mediaB1.getRetConfScore());
         String expectedResult2 = "{\\\"ret_conf_applied_ts\\\":\\\"2024-06-20T10:00:00Z\\\",\\\"cases\\\":[{\\\"courthouse\\\":\\\"CASE_COURTHOUSE\\\",\\\"case_number\\\":\\\"case3\\\",\\\"ret_conf_updated_ts\\\":\\\"2024-06-20T10:00:00Z\\\",\\\"ret_conf_reason\\\":\\\"AGED_CASE\\\"},{\\\"courthouse\\\":\\\"CASE_COURTHOUSE\\\",\\\"case_number\\\":\\\"case4\\\",\\\"ret_conf_updated_ts\\\":\\\"2024-06-20T10:00:00Z\\\",\\\"ret_conf_reason\\\":\\\"AGED_CASE\\\"}]}";
         assertEquals(expectedResult2, mediaB1.getRetConfReason());
+
+    }
+
+    @Test
+    void processApplyRetentionToCaseAssociatedObjectsForMediaWhereOneCaseIsPerfectlyClosedAndOneCaseIsNotPerfectlyClosed() {
+        // given
+        var mediaA1 = CommonTestDataUtil.createMedia(case1PerfectlyClosed.getHearings().getFirst());
+        var mediaA2 = CommonTestDataUtil.createMedia(case1PerfectlyClosed.getHearings().get(1));
+        mediaA2.setId(mediaA2.getId() + 1);
+        var mediaB1 = createMedia(List.of(case1PerfectlyClosed.getHearings().getFirst(),
+                                          case4NotPerfectlyClosed.getHearings().getFirst()),
+                                  456);
+
+        var eodA1 = ExternalObjectDirectoryTestData.eodStoredInExternalLocationTypeForMedia(ExternalLocationTypeEnum.ARM, mediaA1);
+        var eodA2 = ExternalObjectDirectoryTestData.eodStoredInExternalLocationTypeForMedia(ExternalLocationTypeEnum.ARM, mediaA2);
+        var eodB1 = ExternalObjectDirectoryTestData.eodStoredInExternalLocationTypeForMedia(ExternalLocationTypeEnum.ARM, mediaB1);
+
+        when(caseService.getCourtCaseById(case1PerfectlyClosed.getId())).thenReturn(case1PerfectlyClosed);
+
+        when(mediaRepository.findAllByCaseId(case1PerfectlyClosed.getId())).thenReturn(List.of(mediaA1, mediaA2, mediaB1));
+
+        when(caseRetentionRepository.findTopByCourtCaseOrderByRetainUntilAppliedOnDesc(case1PerfectlyClosed)).thenReturn(Optional.of(caseRetentionA1));
+        when(caseRetentionRepository.findTopByCourtCaseOrderByRetainUntilAppliedOnDesc(case4NotPerfectlyClosed)).thenReturn(Optional.of(caseRetentionD1));
+
+        when(eodRepository.findByMediaAndExternalLocationType(mediaA1, EodHelper.armLocation())).thenReturn(List.of(eodA1));
+        when(eodRepository.findByMediaAndExternalLocationType(mediaA2, EodHelper.armLocation())).thenReturn(List.of(eodA2));
+        when(eodRepository.findByMediaAndExternalLocationType(mediaB1, EodHelper.armLocation())).thenReturn(List.of(eodB1));
+
+        when(currentTimeHelper.currentOffsetDateTime()).thenReturn(RETENTION_UPDATED_DATE);
+
+        // when
+        caseObjectsProcessor.processApplyRetentionToCaseAssociatedObjects(case1PerfectlyClosed.getId());
+
+        // then
+        assertEquals(1, mediaA1.getRetConfScore());
+
+        assertEquals(1, mediaA2.getRetConfScore());
+        
+        assertEquals(2, mediaB1.getRetConfScore());
+        String expectedResult = "{\\\"ret_conf_applied_ts\\\":\\\"2024-06-20T10:00:00Z\\\",\\\"cases\\\":[{\\\"courthouse\\\":\\\"CASE_COURTHOUSE\\\",\\\"case_number\\\":\\\"case4\\\",\\\"ret_conf_updated_ts\\\":\\\"2024-06-20T10:00:00Z\\\",\\\"ret_conf_reason\\\":\\\"AGED_CASE\\\"}]}";
+        assertEquals(expectedResult, mediaB1.getRetConfReason());
 
     }
 
