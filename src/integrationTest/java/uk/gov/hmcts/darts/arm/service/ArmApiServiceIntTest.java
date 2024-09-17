@@ -5,7 +5,6 @@ import com.github.tomakehurst.wiremock.client.WireMock;
 import com.github.tomakehurst.wiremock.matching.RegexPattern;
 import feign.FeignException;
 import lombok.SneakyThrows;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,6 +35,7 @@ import static com.github.tomakehurst.wiremock.client.WireMock.urlPathMatching;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -201,13 +201,13 @@ class ArmApiServiceIntTest extends IntegrationBase {
                     aResponse().withStatus(400)));
         // When
         FileNotDownloadedException exception
-            = Assertions.assertThrows(FileNotDownloadedException.class, () -> armApiService.downloadArmData(EXTERNAL_RECORD_ID, EXTERNAL_FILE_ID));
+            = assertThrows(FileNotDownloadedException.class, () -> armApiService.downloadArmData(EXTERNAL_RECORD_ID, EXTERNAL_FILE_ID));
 
         // Then
         verify(armTokenClient).getToken(armTokenRequest);
-        Assertions.assertTrue(exception.getMessage().contains(CABINET_ID));
-        Assertions.assertTrue(exception.getMessage().contains(EXTERNAL_RECORD_ID));
-        Assertions.assertTrue(exception.getMessage().contains(EXTERNAL_FILE_ID));
+        assertTrue(exception.getMessage().contains(CABINET_ID));
+        assertTrue(exception.getMessage().contains(EXTERNAL_RECORD_ID));
+        assertTrue(exception.getMessage().contains(EXTERNAL_FILE_ID));
     }
 
     private AvailableEntitlementProfile getAvailableEntitlementProfile() {
