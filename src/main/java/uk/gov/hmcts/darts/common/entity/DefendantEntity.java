@@ -13,16 +13,15 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 import uk.gov.hmcts.darts.common.entity.base.CreatedModifiedBaseEntity;
-import uk.gov.hmcts.darts.task.runner.CanAnonymized;
-
-import java.util.UUID;
+import uk.gov.hmcts.darts.task.runner.HasName;
 
 @Entity
 @Table(name = DefendantEntity.TABLE_NAME)
 @Getter
 @Setter
 @EqualsAndHashCode(callSuper = false)
-public class DefendantEntity extends CreatedModifiedBaseEntity implements CanAnonymized {
+public class DefendantEntity extends CreatedModifiedBaseEntity
+    implements HasName {
 
     public static final String TABLE_NAME = "defendant";
     public static final String ID = "dfd_id";
@@ -41,10 +40,4 @@ public class DefendantEntity extends CreatedModifiedBaseEntity implements CanAno
 
     @Column(name = DEFENDANT_NAME)
     private String name;
-
-    @Override
-    public void anonymize(UserAccountEntity userAccount) {
-        this.setName(UUID.randomUUID().toString());
-        this.setLastModifiedBy(userAccount);
-    }
 }

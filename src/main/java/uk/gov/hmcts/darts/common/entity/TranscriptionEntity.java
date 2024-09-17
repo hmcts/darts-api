@@ -20,7 +20,6 @@ import org.hibernate.envers.AuditTable;
 import org.hibernate.envers.Audited;
 import org.hibernate.envers.NotAudited;
 import uk.gov.hmcts.darts.common.entity.base.CreatedModifiedBaseEntity;
-import uk.gov.hmcts.darts.task.runner.CanAnonymized;
 
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
@@ -39,7 +38,7 @@ import static org.hibernate.envers.RelationTargetAuditMode.NOT_AUDITED;
 @Setter
 @Audited
 @AuditTable("transcription_aud")
-public class TranscriptionEntity extends CreatedModifiedBaseEntity implements CanAnonymized {
+public class TranscriptionEntity extends CreatedModifiedBaseEntity {
 
     @Id
     @Column(name = "tra_id")
@@ -243,11 +242,5 @@ public class TranscriptionEntity extends CreatedModifiedBaseEntity implements Ca
     public Optional<TranscriptionWorkflowEntity> getLatestTranscriptionWorkflow() {
         return transcriptionWorkflowEntities.stream()
             .min(comparing(TranscriptionWorkflowEntity::getWorkflowTimestamp));
-    }
-
-    @Override
-    public void anonymize(UserAccountEntity userAccount) {
-        this.getTranscriptionCommentEntities().forEach(transcriptionCommentEntity -> transcriptionCommentEntity.anonymize(userAccount));
-        this.getTranscriptionWorkflowEntities().forEach(TranscriptionWorkflowEntity::close);
     }
 }
