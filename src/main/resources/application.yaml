@@ -80,7 +80,7 @@ spring:
     schema: ${DARTS_API_DB_SCHEMA:darts}
     type: com.zaxxer.hikari.HikariDataSource
     hikari:
-      maximum-pool-size: 50
+      maximum-pool-size: ${DARTS_API_DB_POOL_SIZE:50}
   jpa:
     database: postgresql
     show-sql: false
