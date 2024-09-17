@@ -43,6 +43,7 @@ import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.List;
 
+import static java.time.ZoneOffset.UTC;
 import static java.util.Arrays.asList;
 import static uk.gov.hmcts.darts.test.common.TestUtils.getContentsFromFile;
 
@@ -273,6 +274,19 @@ public class CommonTestDataUtil {
     public MediaEntity createMedia(String caseNumber) {
         HearingEntity hearing = createHearing(caseNumber, TEN_AM);
         return createMedia(hearing);
+    }
+
+    public MediaEntity createMedia(List<HearingEntity> hearings, int mediaId) {
+        var hearing = hearings.getFirst();
+        MediaEntity mediaEntity = new MediaEntity();
+        OffsetDateTime startTime = OffsetDateTime.of(hearing.getHearingDate(), hearing.getScheduledStartTime(), UTC);
+        mediaEntity.setStart(startTime);
+        mediaEntity.setEnd(startTime.plusHours(1));
+        mediaEntity.setChannel(1);
+        mediaEntity.setHearingList(hearings);
+        mediaEntity.setCourtroom(hearing.getCourtroom());
+        mediaEntity.setId(mediaId);
+        return mediaEntity;
     }
 
     public List<TranscriptionEntity> createTranscriptionList(HearingEntity hearing) {

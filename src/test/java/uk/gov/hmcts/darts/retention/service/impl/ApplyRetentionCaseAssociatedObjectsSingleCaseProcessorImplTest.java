@@ -13,8 +13,6 @@ import uk.gov.hmcts.darts.cases.service.CaseService;
 import uk.gov.hmcts.darts.common.config.ObjectMapperConfig;
 import uk.gov.hmcts.darts.common.entity.CaseRetentionEntity;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
-import uk.gov.hmcts.darts.common.entity.HearingEntity;
-import uk.gov.hmcts.darts.common.entity.MediaEntity;
 import uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum;
 import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
 import uk.gov.hmcts.darts.common.repository.AnnotationDocumentRepository;
@@ -23,7 +21,6 @@ import uk.gov.hmcts.darts.common.repository.CaseRetentionRepository;
 import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
 import uk.gov.hmcts.darts.common.repository.MediaRepository;
 import uk.gov.hmcts.darts.common.repository.TranscriptionDocumentRepository;
-import uk.gov.hmcts.darts.common.util.CommonTestDataUtil;
 import uk.gov.hmcts.darts.common.util.EodHelper;
 import uk.gov.hmcts.darts.retention.enums.RetentionConfidenceReasonEnum;
 import uk.gov.hmcts.darts.retention.enums.RetentionConfidenceScoreEnum;
@@ -43,7 +40,11 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.darts.common.util.CommonTestDataUtil.createCaseRetention;
+import static uk.gov.hmcts.darts.common.util.CommonTestDataUtil.createCaseWithId;
+import static uk.gov.hmcts.darts.common.util.CommonTestDataUtil.createHearingsForCase;
+import static uk.gov.hmcts.darts.common.util.CommonTestDataUtil.createMedia;
 import static uk.gov.hmcts.darts.common.util.CommonTestDataUtil.createRetentionPolicyType;
+import static uk.gov.hmcts.darts.common.util.CommonTestDataUtil.createUserAccount;
 import static uk.gov.hmcts.darts.retention.enums.CaseRetentionStatus.COMPLETE;
 
 @ExtendWith(MockitoExtension.class)
@@ -112,41 +113,41 @@ class ApplyRetentionCaseAssociatedObjectsSingleCaseProcessorImplTest {
             caseDocumentRepository, transcriptionDocumentRepository, caseRetentionConfidenceReasonMapper, userIdentity,
             currentTimeHelper, objectMapper);
 
-        case1PerfectlyClosed = CommonTestDataUtil.createCaseWithId("case1", 101);
+        case1PerfectlyClosed = createCaseWithId("case1", 101);
         case1PerfectlyClosed.setRetentionUpdated(true);
         case1PerfectlyClosed.setRetentionRetries(1);
         case1PerfectlyClosed.setClosed(true);
         case1PerfectlyClosed.setRetConfScore(RetentionConfidenceScoreEnum.CASE_PERFECTLY_CLOSED);
         case1PerfectlyClosed.setRetConfReason(RetentionConfidenceReasonEnum.CASE_CLOSED);
         case1PerfectlyClosed.setRetConfUpdatedTs(RETENTION_UPDATED_DATE);
-        CommonTestDataUtil.createHearingsForCase(case1PerfectlyClosed, 1, 3);
+        createHearingsForCase(case1PerfectlyClosed, 1, 3);
 
-        case2PerfectlyClosed = CommonTestDataUtil.createCaseWithId("case1", 102);
+        case2PerfectlyClosed = createCaseWithId("case1", 102);
         case2PerfectlyClosed.setRetentionUpdated(true);
         case2PerfectlyClosed.setRetentionRetries(2);
         case2PerfectlyClosed.setClosed(true);
         case2PerfectlyClosed.setRetConfScore(RetentionConfidenceScoreEnum.CASE_PERFECTLY_CLOSED);
         case2PerfectlyClosed.setRetConfReason(RetentionConfidenceReasonEnum.CASE_CLOSED);
         case2PerfectlyClosed.setRetConfUpdatedTs(RETENTION_UPDATED_DATE);
-        CommonTestDataUtil.createHearingsForCase(case2PerfectlyClosed, 1, 1);
+        createHearingsForCase(case2PerfectlyClosed, 1, 1);
 
-        case3NotPerfectlyClosed = CommonTestDataUtil.createCaseWithId("case3", 103);
+        case3NotPerfectlyClosed = createCaseWithId("case3", 103);
         case3NotPerfectlyClosed.setRetentionUpdated(true);
         case3NotPerfectlyClosed.setRetentionRetries(1);
         case3NotPerfectlyClosed.setClosed(true);
         case3NotPerfectlyClosed.setRetConfScore(RetentionConfidenceScoreEnum.CASE_NOT_PERFECTLY_CLOSED);
         case3NotPerfectlyClosed.setRetConfReason(RetentionConfidenceReasonEnum.AGED_CASE);
         case3NotPerfectlyClosed.setRetConfUpdatedTs(RETENTION_UPDATED_DATE);
-        CommonTestDataUtil.createHearingsForCase(case3NotPerfectlyClosed, 1, 3);
+        createHearingsForCase(case3NotPerfectlyClosed, 1, 3);
 
-        case4NotPerfectlyClosed = CommonTestDataUtil.createCaseWithId("case4", 104);
+        case4NotPerfectlyClosed = createCaseWithId("case4", 104);
         case4NotPerfectlyClosed.setRetentionUpdated(true);
         case4NotPerfectlyClosed.setRetentionRetries(2);
         case4NotPerfectlyClosed.setClosed(true);
         case4NotPerfectlyClosed.setRetConfScore(RetentionConfidenceScoreEnum.CASE_NOT_PERFECTLY_CLOSED);
         case4NotPerfectlyClosed.setRetConfReason(RetentionConfidenceReasonEnum.AGED_CASE);
         case4NotPerfectlyClosed.setRetConfUpdatedTs(RETENTION_UPDATED_DATE);
-        CommonTestDataUtil.createHearingsForCase(case4NotPerfectlyClosed, 1, 1);
+        createHearingsForCase(case4NotPerfectlyClosed, 1, 1);
 
         var hearA1 = case1PerfectlyClosed.getHearings().get(0);
         hearA1.setScheduledStartTime(LocalTime.NOON);
@@ -170,7 +171,7 @@ class ApplyRetentionCaseAssociatedObjectsSingleCaseProcessorImplTest {
 
         var retentionPolicyTypeEntity1 = createRetentionPolicyType(POLICY_A_NAME, SOME_PAST_DATE_TIME, SOME_FUTURE_DATE_TIME, DATETIME_2025);
 
-        var testUser = CommonTestDataUtil.createUserAccount();
+        var testUser = createUserAccount();
 
         caseRetentionA1 = createCaseRetention(case1PerfectlyClosed, retentionPolicyTypeEntity1, DATETIME_2025, COMPLETE, testUser);
         var caseRetentionA2 = createCaseRetention(case1PerfectlyClosed, retentionPolicyTypeEntity1, DATETIME_2026, COMPLETE, testUser);
@@ -193,8 +194,8 @@ class ApplyRetentionCaseAssociatedObjectsSingleCaseProcessorImplTest {
     @Test
     void processApplyRetentionToCaseAssociatedObjectsForMediaWhereMultipleCasesIsPerfectlyClosed() {
         // given
-        var mediaA1 = CommonTestDataUtil.createMedia(case1PerfectlyClosed.getHearings().getFirst());
-        var mediaA2 = CommonTestDataUtil.createMedia(case1PerfectlyClosed.getHearings().get(1));
+        var mediaA1 = createMedia(case1PerfectlyClosed.getHearings().getFirst());
+        var mediaA2 = createMedia(case1PerfectlyClosed.getHearings().get(1));
         mediaA2.setId(mediaA2.getId() + 1);
         var mediaB1 = createMedia(List.of(case1PerfectlyClosed.getHearings().getFirst(),
                                           case2PerfectlyClosed.getHearings().getFirst()),
@@ -233,8 +234,8 @@ class ApplyRetentionCaseAssociatedObjectsSingleCaseProcessorImplTest {
     @Test
     void processApplyRetentionToCaseAssociatedObjectsForMediaWhereMultipleCasesIsNotPerfectlyClosed() {
         // given
-        var mediaA1 = CommonTestDataUtil.createMedia(case3NotPerfectlyClosed.getHearings().getFirst());
-        var mediaA2 = CommonTestDataUtil.createMedia(case3NotPerfectlyClosed.getHearings().get(1));
+        var mediaA1 = createMedia(case3NotPerfectlyClosed.getHearings().getFirst());
+        var mediaA2 = createMedia(case3NotPerfectlyClosed.getHearings().get(1));
         mediaA2.setId(mediaA2.getId() + 1);
         var mediaB1 = createMedia(List.of(case3NotPerfectlyClosed.getHearings().getFirst(),
                                           case4NotPerfectlyClosed.getHearings().getFirst()),
@@ -277,8 +278,8 @@ class ApplyRetentionCaseAssociatedObjectsSingleCaseProcessorImplTest {
     @Test
     void processApplyRetentionToCaseAssociatedObjectsForMediaWhereOneCaseIsPerfectlyClosedAndOneCaseIsNotPerfectlyClosed() {
         // given
-        var mediaA1 = CommonTestDataUtil.createMedia(case1PerfectlyClosed.getHearings().getFirst());
-        var mediaA2 = CommonTestDataUtil.createMedia(case1PerfectlyClosed.getHearings().get(1));
+        var mediaA1 = createMedia(case1PerfectlyClosed.getHearings().getFirst());
+        var mediaA2 = createMedia(case1PerfectlyClosed.getHearings().get(1));
         mediaA2.setId(mediaA2.getId() + 1);
         var mediaB1 = createMedia(List.of(case1PerfectlyClosed.getHearings().getFirst(),
                                           case4NotPerfectlyClosed.getHearings().getFirst()),
@@ -308,7 +309,7 @@ class ApplyRetentionCaseAssociatedObjectsSingleCaseProcessorImplTest {
         assertEquals(1, mediaA1.getRetConfScore());
 
         assertEquals(1, mediaA2.getRetConfScore());
-        
+
         assertEquals(2, mediaB1.getRetConfScore());
         String expectedResult = "{\\\"ret_conf_applied_ts\\\":\\\"2024-06-20T10:00:00Z\\\",\\\"cases\\\":[{\\\"courthouse\\\":\\\"CASE_COURTHOUSE\\\",\\\"case_number\\\":\\\"case4\\\",\\\"ret_conf_updated_ts\\\":\\\"2024-06-20T10:00:00Z\\\",\\\"ret_conf_reason\\\":\\\"AGED_CASE\\\"}]}";
         assertEquals(expectedResult, mediaB1.getRetConfReason());
@@ -316,16 +317,4 @@ class ApplyRetentionCaseAssociatedObjectsSingleCaseProcessorImplTest {
     }
 
 
-    public MediaEntity createMedia(List<HearingEntity> hearings, int mediaId) {
-        var hearing = hearings.getFirst();
-        MediaEntity mediaEntity = new MediaEntity();
-        OffsetDateTime startTime = OffsetDateTime.of(hearing.getHearingDate(), hearing.getScheduledStartTime(), UTC);
-        mediaEntity.setStart(startTime);
-        mediaEntity.setEnd(startTime.plusHours(1));
-        mediaEntity.setChannel(1);
-        mediaEntity.setHearingList(hearings);
-        mediaEntity.setCourtroom(hearing.getCourtroom());
-        mediaEntity.setId(mediaId);
-        return mediaEntity;
-    }
 }
