@@ -6,14 +6,14 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.http.HttpHeaders;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
-import uk.gov.hmcts.darts.testutils.IntegrationBase;
+import uk.gov.hmcts.darts.testutils.IntegrationBaseWithGatewayStub;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @AutoConfigureMockMvc
-class LogoutIntTest extends IntegrationBase {
+class LogoutIntTest extends IntegrationBaseWithGatewayStub {
 
     private static final String EXTERNAL_USER_LOGOUT_ENDPOINT = "/external-user/logout";
     private static final String EXTERNAL_USER_LOGOUT_ENDPOINT_WITH_OVERRIDE = "/external-user/logout?redirect_uri=https://darts-portal.com/auth/logout-callback";

@@ -1,5 +1,6 @@
 package uk.gov.hmcts.darts.event.service.impl;
 
+import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,6 +22,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.when;
 
+@Slf4j
 class InterpreterUsedHandlerTest extends HandlerTestData {
 
     private static final String INTERPRETER_USED_EVENT_TYPE = "2917";
@@ -40,6 +42,8 @@ class InterpreterUsedHandlerTest extends HandlerTestData {
 
     @BeforeEach
     public void setupStubs() {
+        log.info("wiremock port: {}", wiremockPort);
+
         UserAccountEntity testUser = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
         when(mockUserIdentity.getUserAccount()).thenReturn(testUser);
 
@@ -209,4 +213,3 @@ class InterpreterUsedHandlerTest extends HandlerTestData {
             .messageId("some-message-id");
     }
 }
-

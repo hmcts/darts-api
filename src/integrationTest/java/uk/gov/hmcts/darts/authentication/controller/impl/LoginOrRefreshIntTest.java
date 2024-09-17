@@ -6,7 +6,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.http.HttpHeaders;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
-import uk.gov.hmcts.darts.testutils.IntegrationBase;
+import uk.gov.hmcts.darts.testutils.IntegrationBaseWithGatewayStub;
 
 import java.util.UUID;
 
@@ -15,7 +15,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @AutoConfigureMockMvc
-class LoginOrRefreshIntTest extends IntegrationBase {
+class LoginOrRefreshIntTest extends IntegrationBaseWithGatewayStub {
 
     private static final String EXPECTED_LOGIN_REDIRECT_URL = "http://localhost:<wiremockPort>/oauth2/v2.0/authorize?client_id=dummy_client_id&redirect_uri=https%3A%2F%2Fexample.com%2Fhandle-oauth-code&scope=openid&prompt=login&response_mode=form_post&response_type=code";
     private static final String EXTERNAL_USER_LOGIN_OR_REFRESH_ENDPOINT = "/external-user/login-or-refresh";
@@ -63,4 +63,3 @@ class LoginOrRefreshIntTest extends IntegrationBase {
     }
 
 }
-
