@@ -324,7 +324,6 @@ darts:
   portal:
     url: ${DARTS_PORTAL_URL:https://darts.staging.apps.hmcts.net}
   automated:
-    allow-automated-tasks: ${ENABLE_AUTOMATED_TASKS:true}
     task:
       thread-pool-size: 5
       system-user-email: ${SYSTEM_USER_EMAIL:}

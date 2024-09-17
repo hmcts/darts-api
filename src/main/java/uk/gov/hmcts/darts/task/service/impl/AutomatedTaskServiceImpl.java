@@ -57,7 +57,7 @@ public class AutomatedTaskServiceImpl implements AutomatedTaskService {
     private final UserIdentity userIdentity;
     private final List<AutoloadingAutomatedTask> autoloadingAutomatedTasks;
 
-    @Value("${darts.automated.allow-automated-tasks:true}")
+    @Value("${darts.automated-tasks-pod:true}")
     private final boolean allowAutomatedTasks;
 
     @Override
