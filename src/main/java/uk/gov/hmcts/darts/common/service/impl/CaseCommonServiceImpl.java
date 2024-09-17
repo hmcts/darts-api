@@ -27,8 +27,7 @@ public class CaseCommonServiceImpl implements CaseCommonService {
         Optional<CourtCaseEntity> foundCase = caseRepository.findByCaseNumberAndCourthouse_CourthouseName(caseNumber, courthouseNameUC);
         return foundCase
             .map(entity -> setCourtCaseLastDateModifiedBy(entity, userAccount))
-            .orElseGet(() -> createCase(courthouseName, caseNumber, userAccount))
-            .validateIsExpired();
+            .orElseGet(() -> createCase(courthouseName, caseNumber, userAccount));
     }
 
     @Override
@@ -37,8 +36,7 @@ public class CaseCommonServiceImpl implements CaseCommonService {
         Optional<CourtCaseEntity> foundCase = caseRepository.findByCaseNumberAndCourthouse(caseNumber, courthouse);
         return foundCase
             .map(entity -> setCourtCaseLastDateModifiedBy(entity, userAccount))
-            .orElseGet(() -> createCase(courthouse, caseNumber, userAccount))
-            .validateIsExpired();
+            .orElseGet(() -> createCase(courthouse, caseNumber, userAccount));
     }
 
     private CourtCaseEntity createCase(String courthouseName, String caseNumber, UserAccountEntity userAccount) {

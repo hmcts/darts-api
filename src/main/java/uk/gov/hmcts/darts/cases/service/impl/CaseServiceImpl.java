@@ -145,7 +145,7 @@ public class CaseServiceImpl implements CaseService {
         CourtCaseEntity courtCase = retrieveCoreObjectService.retrieveOrCreateCase(
             addCaseRequest.getCourthouse(),
             addCaseRequest.getCaseNumber()
-        ).validateIsExpired();
+        );
         return updateCase(addCaseRequest, courtCase);
     }
 
@@ -153,7 +153,7 @@ public class CaseServiceImpl implements CaseService {
         CourtCaseEntity updatedCaseEntity = casesMapper.addDefendantProsecutorDefenderJudgeType(
             existingCase,
             addCaseRequest
-        ).validateIsExpired();
+        );
         caseRepository.saveAndFlush(updatedCaseEntity);
         return casesMapper.mapToPostCaseResponse(updatedCaseEntity);
     }

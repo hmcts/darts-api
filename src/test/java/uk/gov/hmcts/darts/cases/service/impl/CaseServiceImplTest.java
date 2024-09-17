@@ -441,24 +441,6 @@ class CaseServiceImplTest {
     }
 
     @Test
-    void testUpdateCaseWithExpiredCase() {
-        CourthouseEntity courthouseEntity = CommonTestDataUtil.createCourthouse(SWANSEA);
-        CourtCaseEntity existingCaseEntity = CommonTestDataUtil.createCase("case1", courthouseEntity);
-        existingCaseEntity.setId(1);
-        existingCaseEntity.setDataAnonymised(true);
-
-        when(retrieveCoreObjectService.retrieveOrCreateCase(anyString(), anyString())).thenReturn(existingCaseEntity);
-
-        AddCaseRequest request = CommonTestDataUtil.createUpdateCaseRequest();
-
-        DartsApiException exception = assertThrows(DartsApiException.class, () -> service.addCaseOrUpdate(request));
-
-        assertThat(exception.getMessage()).isEqualTo("Case has expired.");
-        assertThat(exception.getError()).isEqualTo(CaseApiError.CASE_EXPIRED);
-
-    }
-
-    @Test
     void testUpdateCaseWithMultipleHearingsWithOldHearingDateWithCourtroomInRequest() {
         CourthouseEntity courthouseEntity = CommonTestDataUtil.createCourthouse(SWANSEA);
         CourtCaseEntity existingCaseEntity = CommonTestDataUtil.createCase("case1", courthouseEntity);
