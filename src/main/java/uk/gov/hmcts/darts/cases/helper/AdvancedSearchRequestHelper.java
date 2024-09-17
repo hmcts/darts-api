@@ -102,7 +102,6 @@ public class AdvancedSearchRequestHelper {
                 surroundWithPercentages(request.getCaseNumber())
             ));
         }
-        predicateList.add(criteriaBuilder.isFalse(caseRoot.get(CourtCaseEntity_.isDataAnonymised)));
         return predicateList;
     }
 

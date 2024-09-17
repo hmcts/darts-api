@@ -129,8 +129,7 @@ public class CaseServiceImpl implements CaseService {
     @Override
     public CourtCaseEntity getCourtCaseById(Integer caseId) {
         return caseRepository.findById(caseId)
-            .orElseThrow(() -> new DartsApiException(CaseApiError.CASE_NOT_FOUND))
-            .validateIsExpired();
+            .orElseThrow(() -> new DartsApiException(CaseApiError.CASE_NOT_FOUND));
     }
 
     private void createCourtroomIfMissing(List<HearingEntity> hearings, GetCasesRequest request, UserAccountEntity userAccount) {
@@ -199,7 +198,7 @@ public class CaseServiceImpl implements CaseService {
 
     @Override
     public List<Annotation> getAnnotations(Integer caseId) {
-        CourtCaseEntity courtCaseEntity = getCourtCaseById(caseId);
+        CourtCaseEntity courtCaseEntity = getCourtCaseById(caseId).validateIsExpired();
         List<HearingEntity> hearingEntities = courtCaseEntity.getHearings();
 
         if (authorisationApi.userHasOneOfRoles(List.of(SecurityRoleEnum.SUPER_ADMIN))) {
