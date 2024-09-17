@@ -40,7 +40,6 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.OffsetDateTime;
-import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -48,7 +47,7 @@ import static java.time.ZoneOffset.UTC;
 import static java.util.Arrays.asList;
 import static uk.gov.hmcts.darts.test.common.TestUtils.getContentsFromFile;
 
-@SuppressWarnings({"PMD.GodClass", "PMD.ExcessivePublicCount", "PMD.ExcessiveImports", "PMD.CouplingBetweenObjects"})
+@SuppressWarnings({"PMD.GodClass", "PMD.ExcessivePublicCount", "PMD.ExcessiveImports", "PMD.CouplingBetweenObjects", "PMD.CyclomaticComplexity"})
 @UtilityClass
 public class CommonTestDataUtil {
 
@@ -262,7 +261,7 @@ public class CommonTestDataUtil {
     public MediaEntity createMedia(HearingEntity hearing) {
         String caseNumber = hearing.getCourtCase().getCaseNumber();
         MediaEntity mediaEntity = new MediaEntity();
-        OffsetDateTime startTime = OffsetDateTime.of(hearing.getHearingDate(), hearing.getScheduledStartTime(), ZoneOffset.UTC);
+        OffsetDateTime startTime = OffsetDateTime.of(hearing.getHearingDate(), hearing.getScheduledStartTime(), UTC);
         mediaEntity.setStart(startTime);
         mediaEntity.setEnd(startTime.plusHours(1));
         mediaEntity.setChannel(1);
@@ -328,7 +327,7 @@ public class CommonTestDataUtil {
             transcription.setCourtroom(courtroom);
         }
 
-        transcription.setCreatedDateTime(OffsetDateTime.of(2020, 6, 20, 10, 10, 0, 0, ZoneOffset.UTC));
+        transcription.setCreatedDateTime(OffsetDateTime.of(2020, 6, 20, 10, 10, 0, 0, UTC));
         transcription.setLegacyObjectId("legacyObjectId");
         transcription.setId(1);
         if (generateRequestor) {
@@ -368,7 +367,7 @@ public class CommonTestDataUtil {
     private static List<TranscriptionWorkflowEntity> createTranscriptionWorkflow() {
         TranscriptionWorkflowEntity transcriptionWorkflowEntity = new TranscriptionWorkflowEntity();
         transcriptionWorkflowEntity.setTranscriptionComments(createTranscriptionComments("workflowcommenta"));
-        transcriptionWorkflowEntity.setWorkflowTimestamp(OffsetDateTime.of(2020, 6, 20, 10, 10, 0, 0, ZoneOffset.UTC));
+        transcriptionWorkflowEntity.setWorkflowTimestamp(OffsetDateTime.of(2020, 6, 20, 10, 10, 0, 0, UTC));
         transcriptionWorkflowEntity.setWorkflowActor(createUserAccount("workflow user"));
         transcriptionWorkflowEntity.setTranscriptionStatus(createTranscriptionStatus(TranscriptionStatusEnum.REQUESTED));
 
@@ -493,7 +492,7 @@ public class CommonTestDataUtil {
         dailyListEntity.setStatus(JobStatusType.NEW);
         dailyListEntity.setListingCourthouse("SWANSEA");
         dailyListEntity.setContent(TestUtils.substituteHearingDateWithToday(getContentsFromFile(filelocation)));
-        dailyListEntity.setPublishedTimestamp(OffsetDateTime.of(LocalDate.now(), time, ZoneOffset.UTC));
+        dailyListEntity.setPublishedTimestamp(OffsetDateTime.of(LocalDate.now(), time, UTC));
         dailyListEntity.setSource(source);
         return dailyListEntity;
     }
@@ -504,7 +503,7 @@ public class CommonTestDataUtil {
         dailyListEntity.setStatus(JobStatusType.NEW);
         dailyListEntity.setListingCourthouse("SWANSEA");
         dailyListEntity.setContent("blah");
-        dailyListEntity.setPublishedTimestamp(OffsetDateTime.of(LocalDate.now(), time, ZoneOffset.UTC));
+        dailyListEntity.setPublishedTimestamp(OffsetDateTime.of(LocalDate.now(), time, UTC));
         dailyListEntity.setSource(String.valueOf(SourceType.XHB));
         return dailyListEntity;
     }
@@ -514,7 +513,7 @@ public class CommonTestDataUtil {
         dailyListEntity.setStatus(JobStatusType.NEW);
         dailyListEntity.setListingCourthouse("SWANSEA");
         dailyListEntity.setXmlContent("blah");
-        dailyListEntity.setPublishedTimestamp(OffsetDateTime.of(LocalDate.now(), time, ZoneOffset.UTC));
+        dailyListEntity.setPublishedTimestamp(OffsetDateTime.of(LocalDate.now(), time, UTC));
         dailyListEntity.setSource(String.valueOf(SourceType.XHB));
         return dailyListEntity;
     }
