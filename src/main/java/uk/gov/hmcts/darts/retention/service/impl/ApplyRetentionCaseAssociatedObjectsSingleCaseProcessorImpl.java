@@ -25,6 +25,7 @@ import uk.gov.hmcts.darts.common.repository.MediaRepository;
 import uk.gov.hmcts.darts.common.repository.TranscriptionDocumentRepository;
 import uk.gov.hmcts.darts.common.util.EodHelper;
 import uk.gov.hmcts.darts.retention.mapper.CaseRetentionConfidenceReasonMapper;
+import uk.gov.hmcts.darts.retention.model.CaseRetentionConfidenceReason;
 import uk.gov.hmcts.darts.retention.service.ApplyRetentionCaseAssociatedObjectsSingleCaseProcessor;
 import uk.gov.hmcts.darts.transcriptions.service.TranscriptionService;
 
@@ -32,6 +33,7 @@ import java.time.OffsetDateTime;
 import java.util.List;
 
 import static java.lang.String.format;
+import static java.util.Objects.nonNull;
 import static uk.gov.hmcts.darts.retention.enums.RetentionConfidenceScoreEnum.CASE_NOT_PERFECTLY_CLOSED;
 import static uk.gov.hmcts.darts.retention.enums.RetentionConfidenceScoreEnum.CASE_PERFECTLY_CLOSED;
 
@@ -186,10 +188,14 @@ public class ApplyRetentionCaseAssociatedObjectsSingleCaseProcessorImpl implemen
         } else {
             var notPerfectlyClosedCases = filterCasesNotPerfectlyClosed(cases);
             media.setRetConfScore(CASE_NOT_PERFECTLY_CLOSED.getId());
-            String retentionConfidenceReasonJson = generateRetentionConfidenceReasonJson(
-                notPerfectlyClosedCases,
-                format("Unable to generate retention confidence reason for media %s", media.getId()));
-            media.setRetConfReason(StringEscapeUtils.escapeJson(retentionConfidenceReasonJson));
+            try {
+                String retentionConfidenceReasonJson = generateRetentionConfidenceReasonJson(
+                    notPerfectlyClosedCases,
+                    format("Unable to generate retention confidence reason for media %s", media.getId()));
+                media.setRetConfReason(StringEscapeUtils.escapeJson(retentionConfidenceReasonJson));
+            } catch (Exception e) {
+                log.error("Unable to generate case retention confidence reason for media {}", media.getId());
+            }
         }
         media.setLastModifiedBy(userIdentity.getUserAccount());
         mediaRepository.saveAndFlush(media);
@@ -242,16 +248,20 @@ public class ApplyRetentionCaseAssociatedObjectsSingleCaseProcessorImpl implemen
     }
 
     private String generateRetentionConfidenceReasonJson(List<CourtCaseEntity> notPerfectlyClosedCases, String errorMessage) {
-        String retentionConfidenceReason = null;
-        var caseRetentionConfidenceReason = caseRetentionConfidenceReasonMapper.mapToCaseRetentionConfidenceReason(
-            currentTimeHelper.currentOffsetDateTime(), notPerfectlyClosedCases);
+        String retentionConfidenceReasonJson = null;
+        CaseRetentionConfidenceReason caseRetentionConfidenceReason = null;
 
         try {
-            retentionConfidenceReason = objectMapper.writeValueAsString(caseRetentionConfidenceReason);
+            caseRetentionConfidenceReason = caseRetentionConfidenceReasonMapper.mapToCaseRetentionConfidenceReason(
+                currentTimeHelper.currentOffsetDateTime(), notPerfectlyClosedCases);
+
+            if (nonNull(caseRetentionConfidenceReason)) {
+                retentionConfidenceReasonJson = objectMapper.writeValueAsString(caseRetentionConfidenceReason);
+            }
         } catch (JsonProcessingException e) {
-            throw new DartsException(errorMessage);
+            throw new DartsException(errorMessage + " with reason " + caseRetentionConfidenceReason);
         }
-        return retentionConfidenceReason;
+        return retentionConfidenceReasonJson;
     }
 
     private boolean allClosed(List<CourtCaseEntity> cases) {

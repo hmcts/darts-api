@@ -5,6 +5,7 @@ import lombok.experimental.UtilityClass;
 import uk.gov.hmcts.darts.cases.model.AddCaseRequest;
 import uk.gov.hmcts.darts.common.entity.AnnotationDocumentEntity;
 import uk.gov.hmcts.darts.common.entity.AnnotationEntity;
+import uk.gov.hmcts.darts.common.entity.CaseRetentionEntity;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
@@ -17,6 +18,7 @@ import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.JudgeEntity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
 import uk.gov.hmcts.darts.common.entity.ProsecutorEntity;
+import uk.gov.hmcts.darts.common.entity.RetentionPolicyTypeEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionCommentEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionDocumentEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionEntity;
@@ -27,6 +29,7 @@ import uk.gov.hmcts.darts.common.entity.TranscriptionWorkflowEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.dailylist.enums.JobStatusType;
 import uk.gov.hmcts.darts.dailylist.enums.SourceType;
+import uk.gov.hmcts.darts.retention.enums.CaseRetentionStatus;
 import uk.gov.hmcts.darts.test.common.TestUtils;
 import uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum;
 import uk.gov.hmcts.darts.transcriptions.enums.TranscriptionTypeEnum;
@@ -48,6 +51,9 @@ import static uk.gov.hmcts.darts.test.common.TestUtils.getContentsFromFile;
 public class CommonTestDataUtil {
 
     public static final LocalTime TEN_AM = LocalTime.of(10, 0);
+
+    private static final String SOME_POLICY_DESCRIPTION = "Policy description";
+    private static final String SOME_POLICY_DURATION = "1Y0M0D";
 
     public static EventEntity createEventWith(String eventName, String eventText, HearingEntity hearingEntity) {
 
@@ -579,5 +585,41 @@ public class CommonTestDataUtil {
         annotationDocumentEntity.setUploadedBy(userAccountEntity);
         annotationDocumentEntity.setUploadedDateTime(OffsetDateTime.now());
         return annotationDocumentEntity;
+    }
+
+    public static CaseRetentionEntity createCaseRetention(CourtCaseEntity courtCase, RetentionPolicyTypeEntity policy,
+                                                          OffsetDateTime retainUntil, CaseRetentionStatus retentionStatus,
+                                                          UserAccountEntity submittedBy) {
+        CaseRetentionEntity caseRetentionEntity = new CaseRetentionEntity();
+        caseRetentionEntity.setCourtCase(courtCase);
+        caseRetentionEntity.setRetentionPolicyType(policy);
+        caseRetentionEntity.setTotalSentence("10y0m0d");
+        caseRetentionEntity.setRetainUntil(retainUntil);
+        caseRetentionEntity.setRetainUntilAppliedOn(OffsetDateTime.now().plusYears(1));
+        caseRetentionEntity.setCurrentState(retentionStatus.name());
+        caseRetentionEntity.setComments("a comment");
+        caseRetentionEntity.setCreatedDateTime(OffsetDateTime.now());
+        caseRetentionEntity.setCreatedBy(submittedBy);
+        caseRetentionEntity.setLastModifiedDateTime(OffsetDateTime.now());
+        caseRetentionEntity.setLastModifiedBy(submittedBy);
+        caseRetentionEntity.setSubmittedBy(submittedBy);
+        return caseRetentionEntity;
+    }
+
+    public static RetentionPolicyTypeEntity createRetentionPolicyType(String fixedPolicyKey, String name, String displayName, OffsetDateTime startDateTime) {
+        RetentionPolicyTypeEntity retentionPolicyTypeEntity = new RetentionPolicyTypeEntity();
+        retentionPolicyTypeEntity.setFixedPolicyKey(fixedPolicyKey);
+        retentionPolicyTypeEntity.setPolicyName(name);
+        retentionPolicyTypeEntity.setDisplayName(displayName);
+        retentionPolicyTypeEntity.setDescription(SOME_POLICY_DESCRIPTION);
+        retentionPolicyTypeEntity.setDuration(SOME_POLICY_DURATION);
+        retentionPolicyTypeEntity.setPolicyStart(startDateTime);
+        retentionPolicyTypeEntity.setPolicyEnd(null);
+
+        UserAccountEntity userAccountEntity = createUserAccount();
+        retentionPolicyTypeEntity.setCreatedBy(userAccountEntity);
+        retentionPolicyTypeEntity.setLastModifiedBy(userAccountEntity);
+
+        return retentionPolicyTypeEntity;
     }
 }
