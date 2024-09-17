@@ -34,7 +34,6 @@ import uk.gov.hmcts.darts.transcriptions.service.TranscriptionService;
 
 import java.time.LocalTime;
 import java.time.OffsetDateTime;
-import java.time.ZoneOffset;
 import java.util.List;
 import java.util.Optional;
 
@@ -49,7 +48,7 @@ import static uk.gov.hmcts.darts.retention.enums.CaseRetentionStatus.COMPLETE;
 
 @ExtendWith(MockitoExtension.class)
 @Slf4j
-@SuppressWarnings("checkstyle:LineLength")
+@SuppressWarnings({"checkstyle:LineLength", "PMD.NcssCount"})
 class ApplyRetentionCaseAssociatedObjectsSingleCaseProcessorImplTest {
 
     private static final OffsetDateTime DATETIME_2025 = OffsetDateTime.of(2025, 1, 1, 10, 10, 0, 0, UTC);
@@ -57,7 +56,7 @@ class ApplyRetentionCaseAssociatedObjectsSingleCaseProcessorImplTest {
     private static final OffsetDateTime DATETIME_2027 = OffsetDateTime.of(2027, 1, 1, 10, 10, 0, 0, UTC);
     private static final OffsetDateTime DATETIME_2028 = OffsetDateTime.of(2028, 1, 1, 10, 10, 0, 0, UTC);
 
-    private static final OffsetDateTime RETENTION_UPDATED_DATE = OffsetDateTime.of(2024, 6, 20, 10, 0, 0, 0, ZoneOffset.UTC);
+    private static final OffsetDateTime RETENTION_UPDATED_DATE = OffsetDateTime.of(2024, 6, 20, 10, 0, 0, 0, UTC);
     private static final String POLICY_A_NAME = "Policy A";
     private static final String SOME_PAST_DATE_TIME = "2000-01-01T00:00:00Z";
     private static final String SOME_FUTURE_DATE_TIME = "2100-01-01T00:00:00Z";
@@ -279,7 +278,7 @@ class ApplyRetentionCaseAssociatedObjectsSingleCaseProcessorImplTest {
     public MediaEntity createMedia(List<HearingEntity> hearings, int mediaId) {
         var hearing = hearings.getFirst();
         MediaEntity mediaEntity = new MediaEntity();
-        OffsetDateTime startTime = OffsetDateTime.of(hearing.getHearingDate(), hearing.getScheduledStartTime(), ZoneOffset.UTC);
+        OffsetDateTime startTime = OffsetDateTime.of(hearing.getHearingDate(), hearing.getScheduledStartTime(), UTC);
         mediaEntity.setStart(startTime);
         mediaEntity.setEnd(startTime.plusHours(1));
         mediaEntity.setChannel(1);
