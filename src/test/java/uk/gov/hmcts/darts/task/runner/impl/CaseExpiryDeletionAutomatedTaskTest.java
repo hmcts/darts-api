@@ -6,6 +6,9 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Limit;
+import uk.gov.hmcts.darts.audit.api.AuditActivity;
+import uk.gov.hmcts.darts.audit.api.AuditApi;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
@@ -18,10 +21,8 @@ import uk.gov.hmcts.darts.task.service.LockService;
 
 import java.time.OffsetDateTime;
 import java.util.List;
-import java.util.UUID;
 
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
@@ -46,6 +47,8 @@ class CaseExpiryDeletionAutomatedTaskTest {
     private LogApi logApi;
     @Mock
     private LockService lockService;
+    @Mock
+    private AuditApi auditApi;
 
     @InjectMocks
     @Spy
@@ -64,7 +67,7 @@ class CaseExpiryDeletionAutomatedTaskTest {
         CourtCaseEntity courtCase2 = mock(CourtCaseEntity.class);
         CourtCaseEntity courtCase3 = mock(CourtCaseEntity.class);
 
-        when(caseRepository.findCasesToBeAnonymized(any(), anyLong()))
+        when(caseRepository.findCasesToBeAnonymized(any(), any()))
             .thenReturn(List.of(courtCase1, courtCase2, courtCase3));
 
         doReturn(5).when(caseExpiryDeletionAutomatedTask)
@@ -78,14 +81,21 @@ class CaseExpiryDeletionAutomatedTaskTest {
             .currentOffsetDateTime();
 
         verify(courtCase1, times(1))
-            .anonymize(eq(userAccount), any(UUID.class));
+            .anonymize(eq(userAccount));
         verify(courtCase2, times(1))
-            .anonymize(eq(userAccount), any(UUID.class));
+            .anonymize(eq(userAccount));
         verify(courtCase3, times(1))
-            .anonymize(eq(userAccount), any(UUID.class));
+            .anonymize(eq(userAccount));
+
+        verify(auditApi, times(1))
+            .record(AuditActivity.CASE_EXPIRED, userAccount, courtCase1);
+        verify(auditApi, times(1))
+            .record(AuditActivity.CASE_EXPIRED, userAccount, courtCase2);
+        verify(auditApi, times(1))
+            .record(AuditActivity.CASE_EXPIRED, userAccount, courtCase3);
 
         verify(caseRepository, times(1))
-            .findCasesToBeAnonymized(offsetDateTime, 5);
+            .findCasesToBeAnonymized(offsetDateTime, Limit.of(5));
 
         verify(caseExpiryDeletionAutomatedTask, times(1))
             .getAutomatedTaskBatchSize();

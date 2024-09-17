@@ -1,5 +1,6 @@
 package uk.gov.hmcts.darts.common.repository;
 
+import org.springframework.data.domain.Limit;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -83,13 +84,11 @@ public interface CaseRepository extends JpaRepository<CourtCaseEntity, Integer> 
                                                                                  Pageable pageable);
 
     @Query(value = """
-        select cc.* from darts.darts.court_case cc
-        join darts.darts.case_retention cr
-        on cr.cas_id = cc.cas_id and cr.current_state = 'COMPLETE'
-        where cc.is_data_anonymised = false
-        and cr.retain_until_ts < :maxRetentionDate
-        limit :limit
-        """,
-        nativeQuery = true)
-    List<CourtCaseEntity> findCasesToBeAnonymized(OffsetDateTime maxRetentionDate, long limit);
+        select cc from CourtCaseEntity cc
+        join CaseRetentionEntity cr
+        on cr.courtCase.id = cc.id and cr.currentState = 'COMPLETE'
+        where cc.isDataAnonymised = false
+        and cr.retainUntil < :maxRetentionDate
+        """)
+    List<CourtCaseEntity> findCasesToBeAnonymized(OffsetDateTime maxRetentionDate, Limit limit);
 }

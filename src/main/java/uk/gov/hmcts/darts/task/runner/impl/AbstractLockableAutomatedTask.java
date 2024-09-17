@@ -6,6 +6,7 @@ import net.javacrumbs.shedlock.core.LockConfiguration;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
+import org.springframework.transaction.annotation.Transactional;
 import uk.gov.hmcts.darts.common.entity.AutomatedTaskEntity;
 import uk.gov.hmcts.darts.common.repository.AutomatedTaskRepository;
 import uk.gov.hmcts.darts.log.api.LogApi;
@@ -79,6 +80,7 @@ public abstract class AbstractLockableAutomatedTask implements AutomatedTask, Au
     }
 
     @Override
+    @Transactional
     public void run() {
         executionId = ThreadLocal.withInitial(UUID::randomUUID);
         preRunTask();

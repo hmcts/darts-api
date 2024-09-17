@@ -16,10 +16,12 @@ import lombok.Setter;
 import org.hibernate.envers.AuditTable;
 import org.hibernate.envers.Audited;
 import org.hibernate.envers.NotAudited;
+import uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum;
 
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import static org.hibernate.envers.RelationTargetAuditMode.NOT_AUDITED;
 
@@ -57,4 +59,10 @@ public class TranscriptionWorkflowEntity {
     @NotAudited
     @OneToMany(mappedBy = TranscriptionCommentEntity_.TRANSCRIPTION_WORKFLOW)
     private List<TranscriptionCommentEntity> transcriptionComments = new ArrayList<>();
+
+    public void close() {
+        if (!Objects.equals(this.getTranscriptionStatus().getId(), TranscriptionStatusEnum.CLOSED.getId())) {
+            this.setTranscriptionStatus(new TranscriptionStatusEntity(TranscriptionStatusEnum.CLOSED.getId()));
+        }
+    }
 }

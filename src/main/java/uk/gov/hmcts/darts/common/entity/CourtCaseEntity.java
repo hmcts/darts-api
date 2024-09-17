@@ -18,6 +18,7 @@ import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import uk.gov.hmcts.darts.common.entity.base.CreatedModifiedBaseEntity;
 import uk.gov.hmcts.darts.retention.enums.RetentionConfidenceReasonEnum;
@@ -27,13 +28,13 @@ import uk.gov.hmcts.darts.task.runner.CanAnonymized;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 
 @Entity
 @Table(name = CourtCaseEntity.TABLE_NAME)
 @SuppressWarnings({"PMD.ShortClassName"})
 @Getter
 @Setter
+@Slf4j
 public class CourtCaseEntity extends CreatedModifiedBaseEntity implements CanAnonymized {
 
     public static final String COURT_CASE = "courtCase";
@@ -199,13 +200,16 @@ public class CourtCaseEntity extends CreatedModifiedBaseEntity implements CanAno
     }
 
     @Override
-    public void anonymize(UserAccountEntity userAccount, UUID uuid) {
+    public void anonymize(UserAccountEntity userAccount) {
         this.setDataAnonymised(true);
         this.setDataAnonymisedBy(userAccount.getId());
         this.setDataAnonymisedTs(OffsetDateTime.now());
-        this.getDefendantList().forEach(defendantEntity -> defendantEntity.anonymize(userAccount, uuid));
-        this.getDefenceList().forEach(defenceEntity -> defenceEntity.anonymize(userAccount, uuid));
-        this.getProsecutorList().forEach(prosecutorEntity -> prosecutorEntity.anonymize(userAccount, uuid));
-        this.getHearings().forEach(hearingEntity -> hearingEntity.anonymize(userAccount, uuid));
+
+        this.getDefendantList().forEach(defendantEntity -> defendantEntity.anonymize(userAccount));
+        this.getDefenceList().forEach(defenceEntity -> defenceEntity.anonymize(userAccount));
+        this.getProsecutorList().forEach(prosecutorEntity -> prosecutorEntity.anonymize(userAccount));
+        this.getHearings().forEach(hearingEntity -> hearingEntity.anonymize(userAccount));
+        //Required for Dynatrace dashboards
+        log.info("Case expired: cas_id={}, case_number={}", this.getId(), this.getCaseNumber());
     }
 }

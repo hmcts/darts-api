@@ -4,6 +4,8 @@ import lombok.RequiredArgsConstructor;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import uk.gov.hmcts.darts.audit.api.AuditActivity;
+import uk.gov.hmcts.darts.common.entity.AuditEntity;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.DefenceEntity;
 import uk.gov.hmcts.darts.common.entity.DefendantEntity;
@@ -12,11 +14,13 @@ import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.ProsecutorEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionCommentEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionEntity;
+import uk.gov.hmcts.darts.common.entity.TranscriptionWorkflowEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.entity.base.CreatedModifiedBaseEntity;
 import uk.gov.hmcts.darts.common.util.DateConverterUtil;
 import uk.gov.hmcts.darts.retention.enums.CaseRetentionStatus;
 import uk.gov.hmcts.darts.retention.enums.RetentionPolicyEnum;
+import uk.gov.hmcts.darts.test.common.TestUtils;
 import uk.gov.hmcts.darts.test.common.data.DefenceTestData;
 import uk.gov.hmcts.darts.test.common.data.DefendantTestData;
 import uk.gov.hmcts.darts.test.common.data.ProsecutorTestData;
@@ -28,6 +32,7 @@ import uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.time.temporal.ChronoUnit;
+import java.util.List;
 import java.util.regex.Pattern;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -38,8 +43,7 @@ import static org.assertj.core.api.BDDAssertions.within;
 class CaseExpiryDeletionAutomatedTaskITest extends PostgresIntegrationBase {
 
     private final CaseExpiryDeletionAutomatedTask caseExpiryDeletionAutomatedTask;
-    private static final Pattern UUID_REGEX =
-        Pattern.compile("^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$");
+    private static final Pattern UUID_REGEX = Pattern.compile(TestUtils.UUID_REGEX);
     private static final int AUTOMATION_USER_ID = 0;
     private int caseIndex;
 
@@ -127,7 +131,23 @@ class CaseExpiryDeletionAutomatedTaskITest extends PostgresIntegrationBase {
             courtCase.getProsecutorList().forEach(prosecutorEntity -> assertProsecutor(prosecutorEntity, isAnonymized));
 
             courtCase.getHearings().forEach(hearingEntity -> assertHearing(hearingEntity, isAnonymized));
+            assertAuditEntries(courtCase, isAnonymized);
         });
+    }
+
+    private void assertAuditEntries(CourtCaseEntity courtCase, boolean isAnonymized) {
+        List<AuditEntity> caseExpiredAuditEntries = dartsDatabase.getAuditRepository()
+            .getAuditEntitiesByCaseAndActivityForDateRange(
+                courtCase.getId(),
+                AuditActivity.CASE_EXPIRED.getId(),
+                OffsetDateTime.now().minusMinutes(1),
+                OffsetDateTime.now().plusMinutes(1)
+            );
+        if (isAnonymized) {
+            assertThat(caseExpiredAuditEntries).hasSize(1);
+        } else {
+            assertThat(caseExpiredAuditEntries).isEmpty();
+        }
     }
 
 
@@ -140,9 +160,20 @@ class CaseExpiryDeletionAutomatedTaskITest extends PostgresIntegrationBase {
 
     private void assertTranscription(TranscriptionEntity transcriptionEntity, boolean isAnonymized) {
         assertThat(transcriptionEntity.getTranscriptionCommentEntities()).hasSizeGreaterThan(0);
+        assertThat(transcriptionEntity.getTranscriptionWorkflowEntities()).hasSizeGreaterThan(0);
         transcriptionEntity.getTranscriptionCommentEntities().forEach(
             transcriptionCommentEntity -> assertTranscriptionComment(transcriptionCommentEntity, isAnonymized));
+        transcriptionEntity.getTranscriptionWorkflowEntities().forEach(
+            transcriptionWorkflowEntity -> assertTranscriptionWorkflowEntities(transcriptionWorkflowEntity, isAnonymized));
 
+    }
+
+    private void assertTranscriptionWorkflowEntities(TranscriptionWorkflowEntity transcriptionWorkflowEntity, boolean isAnonymized) {
+        if (isAnonymized) {
+            assertThat(transcriptionWorkflowEntity.getTranscriptionStatus().getId()).isEqualTo(TranscriptionStatusEnum.CLOSED.getId());
+        } else {
+            assertThat(transcriptionWorkflowEntity.getTranscriptionStatus().getId()).isNotEqualTo(TranscriptionStatusEnum.CLOSED.getId());
+        }
     }
 
     private void assertEvent(EventEntity eventEntity, boolean isAnonymized) {
