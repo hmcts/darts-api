@@ -25,7 +25,8 @@ public class CaseCommonServiceImpl implements CaseCommonService {
     public CourtCaseEntity retrieveOrCreateCase(String courthouseName, String caseNumber, UserAccountEntity userAccount) {
         String courthouseNameUC = StringUtils.toRootUpperCase(courthouseName);
         Optional<CourtCaseEntity> foundCase = caseRepository.findByCaseNumberAndCourthouse_CourthouseName(caseNumber, courthouseNameUC);
-        return foundCase.map(entity -> setCourtCaseLastDateModifiedBy(entity, userAccount))
+        return foundCase
+            .map(entity -> setCourtCaseLastDateModifiedBy(entity, userAccount))
             .orElseGet(() -> createCase(courthouseName, caseNumber, userAccount));
     }
 
@@ -33,7 +34,8 @@ public class CaseCommonServiceImpl implements CaseCommonService {
     @Transactional
     public CourtCaseEntity retrieveOrCreateCase(CourthouseEntity courthouse, String caseNumber, UserAccountEntity userAccount) {
         Optional<CourtCaseEntity> foundCase = caseRepository.findByCaseNumberAndCourthouse(caseNumber, courthouse);
-        return foundCase.map(entity -> setCourtCaseLastDateModifiedBy(entity, userAccount))
+        return foundCase
+            .map(entity -> setCourtCaseLastDateModifiedBy(entity, userAccount))
             .orElseGet(() -> createCase(courthouse, caseNumber, userAccount));
     }
 

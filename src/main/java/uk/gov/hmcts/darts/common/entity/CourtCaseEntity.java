@@ -20,7 +20,9 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
+import uk.gov.hmcts.darts.cases.exception.CaseApiError;
 import uk.gov.hmcts.darts.common.entity.base.CreatedModifiedBaseEntity;
+import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.retention.enums.RetentionConfidenceReasonEnum;
 import uk.gov.hmcts.darts.retention.enums.RetentionConfidenceScoreEnum;
 import uk.gov.hmcts.darts.task.runner.CanAnonymized;
@@ -211,5 +213,12 @@ public class CourtCaseEntity extends CreatedModifiedBaseEntity implements CanAno
         this.getHearings().forEach(hearingEntity -> hearingEntity.anonymize(userAccount));
         //Required for Dynatrace dashboards
         log.info("Case expired: cas_id={}, case_number={}", this.getId(), this.getCaseNumber());
+    }
+
+    public CourtCaseEntity validateIsExpired() {
+        if (this.isDataAnonymised()) {
+            throw new DartsApiException(CaseApiError.CASE_EXPIRED);
+        }
+        return this;
     }
 }
