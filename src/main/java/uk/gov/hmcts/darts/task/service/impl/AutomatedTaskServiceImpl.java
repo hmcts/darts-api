@@ -3,6 +3,7 @@ package uk.gov.hmcts.darts.task.service.impl;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.Trigger;
 import org.springframework.scheduling.config.ScheduledTask;
@@ -56,8 +57,15 @@ public class AutomatedTaskServiceImpl implements AutomatedTaskService {
     private final UserIdentity userIdentity;
     private final List<AutoloadingAutomatedTask> autoloadingAutomatedTasks;
 
+    @Value("${darts.automated-tasks-pod:true}")
+    private final boolean allowAutomatedTasks;
+
     @Override
     public void configureAndLoadAutomatedTasks(ScheduledTaskRegistrar taskRegistrar) {
+        if (!allowAutomatedTasks) {
+            log.info("Automated tasks are disabled");
+            return;
+        }
         log.info("Automated tasks are loading");
         autoloadingAutomatedTasks.forEach(autoloadingAutomatedTask -> {
             AbstractLockableAutomatedTask task = autoloadingAutomatedTask.getAbstractLockableAutomatedTask();

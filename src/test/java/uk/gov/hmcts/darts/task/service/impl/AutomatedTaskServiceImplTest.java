@@ -1,9 +1,9 @@
 package uk.gov.hmcts.darts.task.service.impl;
 
 import lombok.extern.slf4j.Slf4j;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -12,6 +12,7 @@ import org.springframework.scheduling.Trigger;
 import org.springframework.scheduling.config.ScheduledTask;
 import org.springframework.scheduling.config.ScheduledTaskHolder;
 import org.springframework.scheduling.config.TriggerTask;
+import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.AutomatedTaskEntity;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.common.repository.AutomatedTaskRepository;
@@ -48,10 +49,6 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 class AutomatedTaskServiceImplTest {
 
-    @InjectMocks
-    private AutomatedTaskServiceImpl automatedTaskService;
-
-
     @Spy
     private final List<AutoloadingAutomatedTask> autoloadingAutomatedTasks = new ArrayList<>();
 
@@ -72,6 +69,20 @@ class AutomatedTaskServiceImplTest {
 
     @Mock
     private LockService lockService;
+
+    private AutomatedTaskServiceImpl automatedTaskService;
+
+    @BeforeEach
+    void before() {
+        this.automatedTaskService = new AutomatedTaskServiceImpl(
+            mockAutomatedTaskRepository,
+            scheduledTaskHolder,
+            taskScheduler,
+            mock(UserIdentity.class),
+            autoloadingAutomatedTasks,
+            true
+        );
+    }
 
     @Test
     void getAutomatedTaskUsingProcessDailyListAutomatedTask() {

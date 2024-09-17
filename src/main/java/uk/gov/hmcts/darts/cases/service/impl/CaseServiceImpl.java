@@ -90,7 +90,6 @@ public class CaseServiceImpl implements CaseService {
             request.getCourtroom(),
             request.getDate()
         );
-
         UserAccountEntity currentUser = authorisationApi.getCurrentUser();
         createCourtroomIfMissing(hearings, request, currentUser);
 
@@ -99,10 +98,12 @@ public class CaseServiceImpl implements CaseService {
 
     @Override
     public List<Hearing> getCaseHearings(Integer caseId) {
+        Optional<CourtCaseEntity> courtCaseEntityOptional = caseRepository.findById(caseId);
+        courtCaseEntityOptional.ifPresent(CourtCaseEntity::validateIsExpired);
 
         List<HearingEntity> hearingList = hearingRepository.findByCaseIds(List.of(caseId));
 
-        if (hearingList.isEmpty() && !caseRepository.existsById(caseId)) {
+        if (hearingList.isEmpty() && courtCaseEntityOptional.isEmpty()) {
             throw new DartsApiException(CaseApiError.CASE_NOT_FOUND);
         }
 
@@ -127,7 +128,8 @@ public class CaseServiceImpl implements CaseService {
 
     @Override
     public CourtCaseEntity getCourtCaseById(Integer caseId) {
-        return caseRepository.findById(caseId).orElseThrow(() -> new DartsApiException(CaseApiError.CASE_NOT_FOUND));
+        return caseRepository.findById(caseId)
+            .orElseThrow(() -> new DartsApiException(CaseApiError.CASE_NOT_FOUND));
     }
 
     private void createCourtroomIfMissing(List<HearingEntity> hearings, GetCasesRequest request, UserAccountEntity userAccount) {
@@ -180,6 +182,7 @@ public class CaseServiceImpl implements CaseService {
     @Override
     @Transactional
     public List<Event> getEventsByCaseId(Integer caseId) {
+        getCourtCaseById(caseId).validateIsExpired();
         List<EventEntity> eventEntities = eventRepository.findAllByCaseId(caseId);
         return EventMapper.mapToEvents(eventEntities);
     }
@@ -187,6 +190,7 @@ public class CaseServiceImpl implements CaseService {
     @Override
     @Transactional
     public List<Transcript> getTranscriptsByCaseId(Integer caseId) {
+        getCourtCaseById(caseId).validateIsExpired();
         List<TranscriptionEntity> transcriptionEntities = transcriptionRepository.findByCaseIdManualOrLegacy(caseId, false);
         List<CaseTranscriptModel> caseTranscriptModelList = transcriptionMapper.mapResponse(transcriptionEntities);
         return transcriptionMapper.getTranscriptList(caseTranscriptModelList);
@@ -194,11 +198,8 @@ public class CaseServiceImpl implements CaseService {
 
     @Override
     public List<Annotation> getAnnotations(Integer caseId) {
-        Optional<CourtCaseEntity> courtCaseEntity = caseRepository.findById(caseId);
-        if (courtCaseEntity.isEmpty()) {
-            throw new DartsApiException(CaseApiError.CASE_NOT_FOUND);
-        }
-        List<HearingEntity> hearingEntities = courtCaseEntity.get().getHearings();
+        CourtCaseEntity courtCaseEntity = getCourtCaseById(caseId).validateIsExpired();
+        List<HearingEntity> hearingEntities = courtCaseEntity.getHearings();
 
         if (authorisationApi.userHasOneOfRoles(List.of(SecurityRoleEnum.SUPER_ADMIN))) {
             List<AnnotationEntity> annotationsEntities =

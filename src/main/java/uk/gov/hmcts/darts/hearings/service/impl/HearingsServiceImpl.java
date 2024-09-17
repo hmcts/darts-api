@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.darts.authorisation.api.AuthorisationApi;
 import uk.gov.hmcts.darts.common.entity.AnnotationEntity;
+import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.EventEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionEntity;
@@ -56,27 +57,34 @@ public class HearingsServiceImpl implements HearingsService {
         Optional<HearingEntity> foundHearingOpt = hearingRepository.findById(hearingId);
         if (foundHearingOpt.isEmpty()) {
             throw new DartsApiException(HearingApiError.HEARING_NOT_FOUND);
-        } else if (!foundHearingOpt.get().getHearingIsActual()) {
+        }
+        HearingEntity hearingEntity = foundHearingOpt.get();
+        if (!hearingEntity.getHearingIsActual()) {
             throw new DartsApiException(HearingApiError.HEARING_NOT_ACTUAL);
         }
-        return foundHearingOpt.get();
+        hearingEntity.getCourtCase().validateIsExpired();
+        return hearingEntity;
     }
 
     @Override
     public List<EventResponse> getEvents(Integer hearingId) {
+        validateCaseIsNotExpiredFromHearingId(hearingId);
         List<EventEntity> eventEntities = eventRepository.findAllByHearingId(hearingId);
         return GetEventsResponseMapper.mapToEvents(eventEntities);
     }
 
+
     @Override
     public List<Transcript> getTranscriptsByHearingId(Integer hearingId) {
+        validateCaseIsNotExpiredFromHearingId(hearingId);
         List<TranscriptionEntity> transcriptionEntities = transcriptionRepository.findByHearingIdManualOrLegacy(hearingId);
-        List<HearingTranscriptModel> hearingTranscriptModel =  transcriptionMapper.mapResponse(transcriptionEntities);
+        List<HearingTranscriptModel> hearingTranscriptModel = transcriptionMapper.mapResponse(transcriptionEntities);
         return transcriptionMapper.getTranscriptList(hearingTranscriptModel);
     }
 
     @Override
     public List<Annotation> getAnnotationsByHearingId(Integer hearingId) {
+        validateCaseIsNotExpiredFromHearingId(hearingId);
         List<AnnotationEntity> annotations;
         if (authorisationApi.userHasOneOfRoles(SUPER_ADMIN_ROLE)) {
             //admin will see all annotations
@@ -87,5 +95,12 @@ public class HearingsServiceImpl implements HearingsService {
         }
 
         return GetAnnotationsResponseMapper.mapToAnnotations(annotations, hearingId);
+    }
+
+    private void validateCaseIsNotExpiredFromHearingId(Integer hearingId) {
+        Optional<HearingEntity> hearingEntity = hearingRepository.findById(hearingId);
+        hearingEntity
+            .map(HearingEntity::getCourtCase)
+            .ifPresent(CourtCaseEntity::validateIsExpired);
     }
 }
