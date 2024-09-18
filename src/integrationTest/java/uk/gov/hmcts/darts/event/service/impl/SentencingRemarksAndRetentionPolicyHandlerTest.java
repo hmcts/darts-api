@@ -1,8 +1,5 @@
 package uk.gov.hmcts.darts.event.service.impl;
 
-import com.github.tomakehurst.wiremock.client.WireMock;
-import com.github.tomakehurst.wiremock.verification.LoggedRequest;
-import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,7 +21,6 @@ import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Locale;
 
-import static com.github.tomakehurst.wiremock.client.WireMock.urlMatching;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -35,7 +31,6 @@ import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum.AP
 import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum.REQUESTED;
 import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionUrgencyEnum.STANDARD;
 
-@Slf4j
 class SentencingRemarksAndRetentionPolicyHandlerTest extends HandlerTestData {
 
     @Autowired
@@ -49,10 +44,6 @@ class SentencingRemarksAndRetentionPolicyHandlerTest extends HandlerTestData {
 
     @BeforeEach
     void setUp() {
-        List<LoggedRequest> requests = wireMockServer.findAll(WireMock.postRequestedFor(urlMatching(".*/events/dar-notify")));
-
-
-        log.info("wiremock port: {}", wiremockPort);
         UserAccountEntity testUser = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
         when(mockUserIdentity.getUserAccount()).thenReturn(testUser);
 
@@ -154,8 +145,7 @@ class SentencingRemarksAndRetentionPolicyHandlerTest extends HandlerTestData {
     }
 
     @Test
-    void
-    createsTranscriptionWithCorrectValues() {
+    void createsTranscriptionWithCorrectValues() {
         dartsDatabase.createCourthouseUnlessExists(SOME_COURTHOUSE);
         var sentencingRemarksDartsEvent = createSentencingRemarksDartsEventFor(SOME_COURTHOUSE);
 

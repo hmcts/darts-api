@@ -1,6 +1,5 @@
 package uk.gov.hmcts.darts.event.service.impl;
 
-import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
@@ -23,7 +22,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.darts.test.common.data.CaseTestData.someMinimalCase;
 
-@Slf4j
 class DarStopHandlerTest extends HandlerTestData {
 
     private static final String HEARING_ENDED_EVENT_TYPE = "1200";
@@ -39,7 +37,6 @@ class DarStopHandlerTest extends HandlerTestData {
 
     @BeforeEach
     public void setupStubs() {
-        log.info("wiremock port: {}", wiremockPort);
         UserAccountEntity testUser = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
         when(mockUserIdentity.getUserAccount()).thenReturn(testUser);
 

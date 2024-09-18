@@ -65,7 +65,7 @@ import uk.gov.hmcts.darts.task.runner.impl.RemoveDuplicatedEventsAutomatedTask;
 import uk.gov.hmcts.darts.task.runner.impl.UnstructuredAudioDeleterAutomatedTask;
 import uk.gov.hmcts.darts.task.runner.impl.UnstructuredToArmAutomatedTask;
 import uk.gov.hmcts.darts.task.status.AutomatedTaskStatus;
-import uk.gov.hmcts.darts.testutils.IntegrationPerClassBase;
+import uk.gov.hmcts.darts.testutils.IntegrationBase;
 import uk.gov.hmcts.darts.transcriptions.service.TranscriptionsProcessor;
 
 import java.time.LocalDateTime;
@@ -87,7 +87,7 @@ import static uk.gov.hmcts.darts.test.common.AwaitabilityUtil.waitForMax10Second
 
 @Slf4j
 @SuppressWarnings({"PMD.ExcessiveImports"})
-class AutomatedTaskServiceTest extends IntegrationPerClassBase {
+class AutomatedTaskServiceTest extends IntegrationBase {
 
     @Autowired
     private AutomatedTaskService automatedTaskService;

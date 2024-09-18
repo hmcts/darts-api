@@ -5,7 +5,6 @@ spring:
         arm-minimum: 24
         unstructured-minimum:
           hours: 24
-#  wiremock.reset-mappings-after-each-test: true
   security:
     oauth2:
       resourceserver:
@@ -31,12 +30,6 @@ spring:
             jwk-set-uri: http://localhost:${wiremock.server.port}/discovery/v2.0/keys
             logout-uri: http://localhost:${wiremock.server.port}/B2C_1_darts_externaluser_signin/oauth2/v2.0/logout
             reset-password-uri: http://localhost:${wiremock.server.port}/B2C_1_darts_externaluser_password_reset/oauth2/v2.0/authorize
-  cloud:
-    openfeign:
-      client:
-        config:
-          darts-gateway-client:
-            loggerLevel: full
   autoconfigure:
     exclude:
       - org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration
@@ -49,18 +42,11 @@ spring:
   datasource:
     hikari:
       maximum-pool-size: 10 # Overrides the value in `application.yaml` to a smaller value more appropriate for integration tests, sized below the `max_connections` limit specified in PostgresIntegrationBase.
-  jpa:
-    properties:
-      hibernate:
-        id:
-          optimizer:
-            pooled:
-              preferred: NONE
 darts:
   hearings:
     admin-search:
       max-results: 5
-  automated-tasks-pod: ${AUTOMATED_TASK_MODE:false}
+  automated-tasks-pod: ${AUTOMATED_TASK_MODE:true}
   api-pod: ${API_MODE:true}
   data-management:
     inbound-to-unstructured-limit: 100
@@ -103,39 +89,15 @@ darts:
         enabled: true
 logging:
   level:
-    ROOT: WARN
+    root: DEBUG
     uk:
       gov:
         hmcts:
-          darts: INFO
-          darts.event.client.DartsGatewayClient: DEBUG
-    org.apache.http: WARN
-    com.github.dockerjava: WARN
-    org.zeroturnaround.exec: WARN
-    org.flywaydb: INFO
-    org.springframework: INFO
-    org:
-      springframework:
-        jdbc.datasource: DEBUG
-#        logs 'Releasing JDBC Connection'
-#        jdbc.datasource.DataSourceTransactionManager: DEBUG
-        cloud:
-          contract:
-            wiremock: TRACE
-        test:
-          context:
-            support: TRACE
-    org.springframework.test.context.cache: TRACE
-    org.hibernate: WARN
-    org.rnorth: WARN
-    com.github.dockerjava.zerodep: INFO
-    com:
-      github:
-        tomakehurst:
-          wiremock: TRACE
-      zaxxer:
-        hikari: WARN
+          darts: DEBUG
   config: classpath:logback-test.xml
 
   darts:
     storage:
+
+wiremock:
+  reset-mappings-after-each-test: true

@@ -1,6 +1,5 @@
 package uk.gov.hmcts.darts.event.service.impl;
 
-import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
@@ -19,7 +18,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static uk.gov.hmcts.darts.test.common.data.CourtroomTestData.someMinimalCourtRoom;
 import static uk.gov.hmcts.darts.test.common.data.HearingTestData.someMinimalHearing;
 
-@Slf4j
 @TestPropertySource(properties = {"darts.events.admin-search.max-results=5"})
 @Disabled("Impacted by V1_363__not_null_constraints_part3.sql")
 class AdminEventSearchTest extends IntegrationBaseWithGatewayStub {
@@ -37,7 +35,6 @@ class AdminEventSearchTest extends IntegrationBaseWithGatewayStub {
 
     @AfterEach
     void tearDown() {
-        log.info("wiremock port: {}", wiremockPort);
         openInViewUtil.closeEntityManager();
     }
 

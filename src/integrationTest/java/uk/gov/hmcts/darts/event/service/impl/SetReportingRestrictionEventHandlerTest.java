@@ -1,12 +1,10 @@
 package uk.gov.hmcts.darts.event.service.impl;
 
-import com.github.tomakehurst.wiremock.client.WireMock;
-import lombok.extern.slf4j.Slf4j;
+import lombok.SneakyThrows;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.core.env.Environment;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
@@ -17,13 +15,11 @@ import uk.gov.hmcts.darts.testutils.stubs.NodeRegisterStub;
 import java.util.List;
 import java.util.Locale;
 
-import static com.github.tomakehurst.wiremock.client.WireMock.configureFor;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.when;
 
-@Slf4j
 class SetReportingRestrictionEventHandlerTest extends HandlerTestData {
     public static final String TEST_REPORTING_RESTRICTION = "Reporting Restriction Test";
 
@@ -36,21 +32,8 @@ class SetReportingRestrictionEventHandlerTest extends HandlerTestData {
     @MockBean
     private UserIdentity mockUserIdentity;
 
-    @Autowired
-    private Environment environment;
-
-    private String getWiremockServerPort() {
-        // Get the auto configured port property from the current Spring contexts environment
-        return environment.getProperty("wiremock.server.port");
-    }
-
     @BeforeEach
     public void setupStubs() {
-        int contextEnvironmentPort = Integer.parseInt(getWiremockServerPort());
-        log.info("contextEnvironmentPort: {}", contextEnvironmentPort);
-
-        configureFor(contextEnvironmentPort);
-        log.info("wiremock port: {}", wiremockPort);
         UserAccountEntity testUser = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
         when(mockUserIdentity.getUserAccount()).thenReturn(testUser);
 
@@ -59,11 +42,12 @@ class SetReportingRestrictionEventHandlerTest extends HandlerTestData {
         dartsGateway.darNotificationReturnsSuccess();
     }
 
+    @SneakyThrows
     @Test
     void givenSetReportingRestrictionEventReceivedAndCourtCaseAndHearingDoesNotExist_thenNotifyDarUpdate() {
 
-        var result = WireMock.listAllStubMappings();
-        log.info("mappings: {}", result.getMappings());
+        // fixes flaky test. Allows setup of Wiremock to complete when a new application context is used before requests are sent to it
+        Thread.sleep(3000L);
 
         dartsDatabase.createCase(SOME_COURTHOUSE, SOME_CASE_NUMBER);
 
@@ -93,10 +77,8 @@ class SetReportingRestrictionEventHandlerTest extends HandlerTestData {
             persistedCase.getReportingRestrictions().getEventName()
         );
 
-        log.info("server events: {}", WireMock.getAllServeEvents().size());
         dartsGateway.verifyReceivedNotificationType(3);
         dartsGateway.verifyNotificationUrl("http://1.2.3.4/VIQDARNotifyEvent/DARNotifyEvent.asmx", 1);
-
     }
 
     @Test

@@ -76,8 +76,6 @@ public class IntegrationBase {
     @Autowired
     protected TransactionalUtil transactionalUtil;
 
-
-
     protected MemoryLogAppender logAppender = LogUtil.getMemoryLogger();
 
     private static final GenericContainer<?> REDIS = new GenericContainer<>(

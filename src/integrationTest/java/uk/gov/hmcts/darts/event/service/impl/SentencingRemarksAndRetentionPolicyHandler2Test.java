@@ -1,6 +1,5 @@
 package uk.gov.hmcts.darts.event.service.impl;
 
-import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,7 +24,6 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.Mockito.when;
 
-@Slf4j
 class SentencingRemarksAndRetentionPolicyHandler2Test extends IntegrationBaseWithGatewayStub {
 
     private static final String SOME_CASE_NUMBER = "CASE1";
@@ -42,8 +40,6 @@ class SentencingRemarksAndRetentionPolicyHandler2Test extends IntegrationBaseWit
 
     @BeforeEach
     void setUp() {
-        log.info("wiremock port: {}", wiremockPort);
-
         Jwt jwt = Jwt.withTokenValue("test")
             .header("alg", "RS256")
             .claim("sub", UUID.randomUUID().toString())
