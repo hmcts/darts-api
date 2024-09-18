@@ -322,7 +322,7 @@ public class TranscriptionResponseMapper {
         }
 
         // prioritise the courthouse that is connected to the hearing
-        if  (transcriptionDocumentResponse.hearingCourthouseId() != null) {
+        if (transcriptionDocumentResponse.hearingCourthouseId() != null) {
             SearchTranscriptionDocumentResponseCourthouse courthouseResponse = new SearchTranscriptionDocumentResponseCourthouse();
             courthouseResponse.setId(transcriptionDocumentResponse.hearingCourthouseId());
             courthouseResponse.setDisplayName(transcriptionDocumentResponse.hearingCourthouseDisplayName());
@@ -405,17 +405,7 @@ public class TranscriptionResponseMapper {
         response.setIsHidden(entity.isHidden());
 
         if (objectAdminActionEntity != null) {
-            AdminActionResponse adminActionResponse = new AdminActionResponse();
-            adminActionResponse.setId(objectAdminActionEntity.getId());
-            adminActionResponse.setReasonId(objectAdminActionEntity.getObjectHiddenReason().getId());
-            adminActionResponse.setHiddenById(objectAdminActionEntity.getHiddenBy().getId());
-            adminActionResponse.setHiddenAt(objectAdminActionEntity.getHiddenDateTime());
-            adminActionResponse.setIsMarkedForManualDeletion(objectAdminActionEntity.isMarkedForManualDeletion());
-            adminActionResponse.setMarkedForManualDeletionById(objectAdminActionEntity.getMarkedForManualDelBy().getId());
-            adminActionResponse.setMarkedForManualDeletionAt(objectAdminActionEntity.getMarkedForManualDelDateTime());
-            adminActionResponse.setTicketReference(objectAdminActionEntity.getTicketReference());
-            adminActionResponse.setComments(objectAdminActionEntity.getComments());
-
+            AdminActionResponse adminActionResponse = mapAdminActionResponse(objectAdminActionEntity);
             response.setAdminAction(adminActionResponse);
         }
 
@@ -428,21 +418,26 @@ public class TranscriptionResponseMapper {
         response.setIsHidden(entity.isHidden());
 
         if (objectAdminActionEntity != null) {
-            AdminActionResponse adminActionResponse = new AdminActionResponse();
-            adminActionResponse.setId(objectAdminActionEntity.getId());
-            adminActionResponse.setReasonId(objectAdminActionEntity.getObjectHiddenReason().getId());
-            adminActionResponse.setHiddenById(objectAdminActionEntity.getHiddenBy().getId());
-            adminActionResponse.setHiddenAt(objectAdminActionEntity.getHiddenDateTime());
-            adminActionResponse.setIsMarkedForManualDeletion(objectAdminActionEntity.isMarkedForManualDeletion());
-            adminActionResponse.setMarkedForManualDeletionById(objectAdminActionEntity.getMarkedForManualDelBy().getId());
-            adminActionResponse.setMarkedForManualDeletionAt(objectAdminActionEntity.getMarkedForManualDelDateTime());
-            adminActionResponse.setTicketReference(objectAdminActionEntity.getTicketReference());
-            adminActionResponse.setComments(objectAdminActionEntity.getComments());
-
+            AdminActionResponse adminActionResponse = mapAdminActionResponse(objectAdminActionEntity);
             response.setAdminAction(adminActionResponse);
         }
 
         return response;
+    }
+
+    private AdminActionResponse mapAdminActionResponse(ObjectAdminActionEntity objectAdminActionEntity) {
+        AdminActionResponse adminActionResponse = new AdminActionResponse();
+        adminActionResponse.setId(objectAdminActionEntity.getId());
+        adminActionResponse.setReasonId(objectAdminActionEntity.getObjectHiddenReason().getId());
+        adminActionResponse.setHiddenById(objectAdminActionEntity.getHiddenBy().getId());
+        adminActionResponse.setHiddenAt(objectAdminActionEntity.getHiddenDateTime());
+        adminActionResponse.setIsMarkedForManualDeletion(objectAdminActionEntity.isMarkedForManualDeletion());
+        adminActionResponse.setMarkedForManualDeletionById(objectAdminActionEntity.getMarkedForManualDelBy().getId());
+        adminActionResponse.setMarkedForManualDeletionAt(objectAdminActionEntity.getMarkedForManualDelDateTime());
+        adminActionResponse.setTicketReference(objectAdminActionEntity.getTicketReference());
+        adminActionResponse.setComments(objectAdminActionEntity.getComments());
+
+        return adminActionResponse;
     }
 
     public AdminMarkedForDeletionResponseItem mapTranscriptionDocumentMarkedForDeletion(TranscriptionDocumentEntity transcriptionDocumentEntity) {
