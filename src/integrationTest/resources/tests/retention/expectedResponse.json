@@ -79,5 +79,23 @@
     "fixed_policy_key": "MANUAL",
     "duration": "0Y0M0D",
     "policy_start_at": "2024-01-01T00:00:00Z"
+  },
+  {
+    "id": 10,
+    "name": "DARTS Archive Permanent Retention",
+    "display_name": "Archive Permanent",
+    "description": "DARTS Archive Permanent Retention",
+    "fixed_policy_key": "-3",
+    "duration": "30Y0M0D",
+    "policy_start_at": "2024-01-01T00:00:00Z"
+  },
+  {
+    "id": 11,
+    "name": "DARTS Archive Standard Retention",
+    "display_name": "Archive Standard",
+    "description": "DARTS Archive Standard Retention",
+    "fixed_policy_key": "-4",
+    "duration": "7Y0M0D",
+    "policy_start_at": "2024-01-01T00:00:00Z"
   }
 ]
