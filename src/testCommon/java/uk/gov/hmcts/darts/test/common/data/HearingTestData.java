@@ -1,14 +1,16 @@
 package uk.gov.hmcts.darts.test.common.data;
 
-import lombok.experimental.UtilityClass;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.JudgeEntity;
+import uk.gov.hmcts.darts.test.common.data.builder.CustomHearingEntity;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.OffsetDateTime;
+import java.util.ArrayList;
 import java.util.Objects;
 
 import static uk.gov.hmcts.darts.test.common.data.CourthouseTestData.createCourthouseWithName;
@@ -16,42 +18,32 @@ import static uk.gov.hmcts.darts.test.common.data.CourtroomTestData.createCourtR
 import static uk.gov.hmcts.darts.test.common.data.CourtroomTestData.someMinimalCourtRoom;
 import static uk.gov.hmcts.darts.test.common.data.UserAccountTestData.minimalUserAccount;
 
-@UtilityClass
 @SuppressWarnings({"HideUtilityClassConstructor"})
-public class HearingTestData {
+public class HearingTestData  implements Persistable<CustomHearingEntity.CustomHearingEntityBuilderRetrieve> {
+
+    HearingTestData() {
+    }
 
     private static final LocalDate HEARING_DATE = LocalDate.of(2023, 6, 20);
 
-    public static HearingEntity someMinimalHearing() {
-        var minimalCase = PersistableFactory.getCourtCaseTestData().createSomeMinimalCase();
-        var minimalCourtRoom = someMinimalCourtRoom();
-        minimalCourtRoom.setCourthouse(minimalCase.getCourthouse());
-
-        var hearingEntity = new HearingEntity();
-        hearingEntity.setCourtCase(minimalCase);
-        hearingEntity.setCourtroom(minimalCourtRoom);
-        hearingEntity.setHearingIsActual(true);
-        hearingEntity.setHearingDate(LocalDate.now().plusWeeks(1));
-        var userAccount = minimalUserAccount();
-        hearingEntity.setCreatedBy(userAccount);
-        hearingEntity.setLastModifiedBy(userAccount);
-        return hearingEntity;
+    public HearingEntity someMinimalHearing() {
+        return someMinimal().getBuilder().build().getEntity();
     }
 
-    public static HearingEntity createHearingFor(CourtCaseEntity courtCase) {
+    public HearingEntity createHearingFor(CourtCaseEntity courtCase) {
         var minimalHearing = someMinimalHearing();
         minimalHearing.setCourtCase(courtCase);
         return minimalHearing;
     }
 
-    public static HearingEntity createHearingWith(CourtCaseEntity courtCase, CourtroomEntity courtroom, LocalDate hearingDate) {
+    public HearingEntity createHearingWith(CourtCaseEntity courtCase, CourtroomEntity courtroom, LocalDate hearingDate) {
         var hearing = createHearingFor(courtCase);
         hearing.setCourtroom(courtroom);
         hearing.setHearingDate(hearingDate);
         return hearing;
     }
 
-    public static HearingEntity createHearingWith(String caseNumber, LocalTime scheduledStartTime) {
+    public HearingEntity createHearingWith(String caseNumber, LocalTime scheduledStartTime) {
         HearingEntity hearing1 = createHearingWithDefaults(
             PersistableFactory.getCourtCaseTestData().createCaseWithCaseNumber(caseNumber),
             createCourtRoomWithNameAtCourthouse(
@@ -65,7 +57,7 @@ public class HearingTestData {
         return hearing1;
     }
 
-    public static HearingEntity createHearingWith(CourtCaseEntity caseEntity, CourtroomEntity courtroomEntity) {
+    public HearingEntity createHearingWith(CourtCaseEntity caseEntity, CourtroomEntity courtroomEntity) {
         HearingEntity hearingEntity = someMinimalHearing();
         hearingEntity.setCourtCase(caseEntity);
         hearingEntity.setCourtroom(courtroomEntity);
@@ -73,12 +65,12 @@ public class HearingTestData {
         return hearingEntity;
     }
 
-    public static HearingEntity createHearingWithDefaults(CourtCaseEntity courtCase, CourtroomEntity courtroom, LocalDate hearingDate, JudgeEntity judge) {
+    public HearingEntity createHearingWithDefaults(CourtCaseEntity courtCase, CourtroomEntity courtroom, LocalDate hearingDate, JudgeEntity judge) {
         return createHearingWithDefaults(courtCase, courtroom, hearingDate, judge, true);
     }
 
 
-    public static HearingEntity createHearingWithDefaults(CourtCaseEntity courtCase, CourtroomEntity courtroom, LocalDate hearingDate, JudgeEntity judge,
+    public HearingEntity createHearingWithDefaults(CourtCaseEntity courtCase, CourtroomEntity courtroom, LocalDate hearingDate, JudgeEntity judge,
                                                           boolean isHearingActual) {
         HearingEntity hearing = someMinimalHearing();
         hearing.setCourtCase(Objects.requireNonNullElseGet(courtCase, () -> PersistableFactory.getCourtCaseTestData().someMinimal().build()));
@@ -93,7 +85,7 @@ public class HearingTestData {
         return hearing;
     }
 
-    public static HearingEntity hearingWith(String caseNumber, String courthouseName, String courtroomName, String hearingDatetime) {
+    public HearingEntity hearingWith(String caseNumber, String courthouseName, String courtroomName, String hearingDatetime) {
         var courtroom =
             createCourtRoomWithNameAtCourthouse(
                 createCourthouseWithName(courthouseName),
@@ -105,5 +97,31 @@ public class HearingTestData {
         hearing.setScheduledStartTime(hearingStartDateTime.toLocalTime());
         hearing.setCourtroom(courtroom);
         return hearing;
+    }
+
+    @Override
+    public CustomHearingEntity.CustomHearingEntityBuilderRetrieve  someMinimal() {
+        CustomHearingEntity.CustomHearingEntityBuilderRetrieve builder = new CustomHearingEntity.CustomHearingEntityBuilderRetrieve();
+
+        CourtCaseEntity courtCaseEntity = PersistableFactory.getCourtCaseTestData().createSomeMinimalCase();
+
+        var minimalCourtRoom = someMinimalCourtRoom();
+        minimalCourtRoom.setCourthouse(courtCaseEntity.getCourthouse());
+
+        builder.getBuilder().courtCase(courtCaseEntity).courtroom(minimalCourtRoom)
+            .hearingIsActual(true)
+            .hearingDate(LocalDate.now().plusWeeks(1))
+            .createdBy(minimalUserAccount())
+            .lastModifiedBy(minimalUserAccount())
+            .createdDateTime(OffsetDateTime.now())
+            .lastModifiedDateTime(OffsetDateTime.now()).judges(new ArrayList<>())
+            .mediaList(new ArrayList<>());
+
+        return builder;
+    }
+
+    @Override
+    public CustomHearingEntity.CustomHearingEntityBuilderRetrieve  someMaximal() {
+        return someMinimal();
     }
 }

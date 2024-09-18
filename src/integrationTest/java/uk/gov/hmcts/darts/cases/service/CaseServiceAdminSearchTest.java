@@ -22,6 +22,7 @@ import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.common.repository.SecurityGroupRepository;
 import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
 import uk.gov.hmcts.darts.test.common.TestUtils;
+import uk.gov.hmcts.darts.test.common.data.PersistableFactory;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 import uk.gov.hmcts.darts.testutils.stubs.CourtCaseStub;
 
@@ -34,13 +35,12 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static uk.gov.hmcts.darts.test.common.TestUtils.getContentsFromFile;
-import static uk.gov.hmcts.darts.test.common.data.CaseTestData.createCaseAt;
 import static uk.gov.hmcts.darts.test.common.data.CourthouseTestData.someMinimalCourthouse;
 import static uk.gov.hmcts.darts.test.common.data.CourtroomTestData.createCourtRoomWithNameAtCourthouse;
 import static uk.gov.hmcts.darts.test.common.data.DefendantTestData.createDefendantForCaseWithName;
 import static uk.gov.hmcts.darts.test.common.data.EventTestData.createEventWith;
-import static uk.gov.hmcts.darts.test.common.data.HearingTestData.createHearingWithDefaults;
 import static uk.gov.hmcts.darts.test.common.data.JudgeTestData.createJudgeWithName;
+import static uk.gov.hmcts.darts.test.common.data.PersistableFactory.getCourtCaseTestData;
 
 @Slf4j
 @TestPropertySource(properties = {
@@ -74,89 +74,89 @@ class CaseServiceAdminSearchTest extends IntegrationBase {
         londonCourthouse.setCourthouseName("LONDON");
         londonCourthouse.setDisplayName("LONDON");
 
-        CourtCaseEntity case1 = createCaseAt(swanseaCourthouse);
+        CourtCaseEntity case1 = getCourtCaseTestData().createCaseAt(swanseaCourthouse);
         case1.setCaseNumber("Case1");
 
-        CourtCaseEntity case2 = createCaseAt(swanseaCourthouse);
+        CourtCaseEntity case2 = getCourtCaseTestData().createCaseAt(swanseaCourthouse);
         case2.setCaseNumber("Case2");
         case2.setDefendantList(Arrays.asList(createDefendantForCaseWithName(case2, "Defendant2")));
 
-        CourtCaseEntity case3 = createCaseAt(swanseaCourthouse);
+        CourtCaseEntity case3 = getCourtCaseTestData().createCaseAt(swanseaCourthouse);
         case3.setCaseNumber("Case3");
 
-        CourtCaseEntity case4 = createCaseAt(swanseaCourthouse);
+        CourtCaseEntity case4 = getCourtCaseTestData().createCaseAt(swanseaCourthouse);
         case4.setCaseNumber("Case4");
 
-        CourtCaseEntity case5 = createCaseAt(swanseaCourthouse);
+        CourtCaseEntity case5 = getCourtCaseTestData().createCaseAt(swanseaCourthouse);
         case5.setCaseNumber("case5");
 
-        CourtCaseEntity case6 = createCaseAt(swanseaCourthouse);
+        CourtCaseEntity case6 = getCourtCaseTestData().createCaseAt(swanseaCourthouse);
         case6.setCaseNumber("case6");
 
-        CourtCaseEntity case7 = createCaseAt(swanseaCourthouse);
+        CourtCaseEntity case7 = getCourtCaseTestData(). createCaseAt(swanseaCourthouse);
         case7.setCaseNumber("case7");
 
-        CourtCaseEntity case8 = createCaseAt(swanseaCourthouse);
+        CourtCaseEntity case8 = getCourtCaseTestData().createCaseAt(swanseaCourthouse);
         case8.setCaseNumber("case8");
 
-        CourtCaseEntity case9 = createCaseAt(londonCourthouse);
+        CourtCaseEntity case9 = getCourtCaseTestData().createCaseAt(londonCourthouse);
         case9.setCaseNumber("Case9");
 
-        CourtCaseEntity case10 = createCaseAt(swanseaCourthouse);
+        CourtCaseEntity case10 = getCourtCaseTestData().createCaseAt(swanseaCourthouse);
         case10.setCaseNumber("case10");
 
         JudgeEntity judge = createJudgeWithName("aJudge");
         courtroom1 = createCourtRoomWithNameAtCourthouse(swanseaCourthouse, "courtroom1");
-        HearingEntity hearing1a = createHearingWithDefaults(case1, courtroom1, LocalDate.of(2023, 5, 20), judge);
+        HearingEntity hearing1a = PersistableFactory.getHearingTestData().createHearingWithDefaults(case1, courtroom1, LocalDate.of(2023, 5, 20), judge);
 
-        HearingEntity hearing1b = createHearingWithDefaults(case1, courtroom1, LocalDate.of(2023, 5, 21), judge);
+        HearingEntity hearing1b = PersistableFactory.getHearingTestData().createHearingWithDefaults(case1, courtroom1, LocalDate.of(2023, 5, 21), judge);
 
-        HearingEntity hearing1c = createHearingWithDefaults(case1, courtroom1, LocalDate.of(2023, 5, 22), judge);
+        HearingEntity hearing1c = PersistableFactory.getHearingTestData().createHearingWithDefaults(case1, courtroom1, LocalDate.of(2023, 5, 22), judge);
 
-        HearingEntity hearing2a = createHearingWithDefaults(case2, courtroom1, LocalDate.of(2023, 6, 20), judge);
+        HearingEntity hearing2a = PersistableFactory.getHearingTestData().createHearingWithDefaults(case2, courtroom1, LocalDate.of(2023, 6, 20), judge);
 
-        HearingEntity hearing2b = createHearingWithDefaults(case2, courtroom1, LocalDate.of(2023, 6, 21), judge);
+        HearingEntity hearing2b = PersistableFactory.getHearingTestData().createHearingWithDefaults(case2, courtroom1, LocalDate.of(2023, 6, 21), judge);
 
-        HearingEntity hearing2c = createHearingWithDefaults(case2, courtroom1, LocalDate.of(2023, 6, 22), judge);
+        HearingEntity hearing2c = PersistableFactory.getHearingTestData().createHearingWithDefaults(case2, courtroom1, LocalDate.of(2023, 6, 22), judge);
 
-        HearingEntity hearing3a = createHearingWithDefaults(case3, courtroom1, LocalDate.of(2023, 7, 20), judge);
+        HearingEntity hearing3a = PersistableFactory.getHearingTestData().createHearingWithDefaults(case3, courtroom1, LocalDate.of(2023, 7, 20), judge);
         JudgeEntity judge3a = createJudgeWithName("Judge3a");
         hearing3a.addJudge(judge3a, false);
 
-        HearingEntity hearing3b = createHearingWithDefaults(case3, courtroom1, LocalDate.of(2023, 7, 21), judge);
+        HearingEntity hearing3b = PersistableFactory.getHearingTestData().createHearingWithDefaults(case3, courtroom1, LocalDate.of(2023, 7, 21), judge);
 
-        HearingEntity hearing3c = createHearingWithDefaults(case3, courtroom1, LocalDate.of(2023, 7, 22), judge);
+        HearingEntity hearing3c = PersistableFactory.getHearingTestData().createHearingWithDefaults(case3, courtroom1, LocalDate.of(2023, 7, 22), judge);
 
         CourtroomEntity courtroom2 = createCourtRoomWithNameAtCourthouse(swanseaCourthouse, "courtroom2");
-        HearingEntity hearing4a = createHearingWithDefaults(case4, courtroom2, LocalDate.of(2023, 8, 20), judge);
+        HearingEntity hearing4a = PersistableFactory.getHearingTestData().createHearingWithDefaults(case4, courtroom2, LocalDate.of(2023, 8, 20), judge);
 
-        HearingEntity hearing4b = createHearingWithDefaults(case4, courtroom1, LocalDate.of(2023, 8, 21), judge);
+        HearingEntity hearing4b = PersistableFactory.getHearingTestData().createHearingWithDefaults(case4, courtroom1, LocalDate.of(2023, 8, 21), judge);
 
-        HearingEntity hearing4c = createHearingWithDefaults(case4, courtroom1, LocalDate.of(2023, 8, 22), judge);
+        HearingEntity hearing4c = PersistableFactory.getHearingTestData().createHearingWithDefaults(case4, courtroom1, LocalDate.of(2023, 8, 22), judge);
 
-        HearingEntity hearing5a = createHearingWithDefaults(case5, courtroom2, LocalDate.of(2023, 9, 20), judge);
+        HearingEntity hearing5a = PersistableFactory.getHearingTestData().createHearingWithDefaults(case5, courtroom2, LocalDate.of(2023, 9, 20), judge);
 
-        HearingEntity hearing5b = createHearingWithDefaults(case5, courtroom1, LocalDate.of(2023, 9, 21), judge);
+        HearingEntity hearing5b = PersistableFactory.getHearingTestData().createHearingWithDefaults(case5, courtroom1, LocalDate.of(2023, 9, 21), judge);
 
         CourtroomEntity courtroom3 = createCourtRoomWithNameAtCourthouse(swanseaCourthouse, "courtroom3");
-        HearingEntity hearing5c = createHearingWithDefaults(case5, courtroom3, LocalDate.of(2023, 9, 22), judge);
+        HearingEntity hearing5c = PersistableFactory.getHearingTestData().createHearingWithDefaults(case5, courtroom3, LocalDate.of(2023, 9, 22), judge);
 
-        HearingEntity hearing6a = createHearingWithDefaults(case6, courtroom2, LocalDate.of(2023, 9, 20), judge);
+        HearingEntity hearing6a = PersistableFactory.getHearingTestData().createHearingWithDefaults(case6, courtroom2, LocalDate.of(2023, 9, 20), judge);
 
-        HearingEntity hearing6b = createHearingWithDefaults(case6, courtroom3, LocalDate.of(2023, 9, 21), judge);
+        HearingEntity hearing6b = PersistableFactory.getHearingTestData().createHearingWithDefaults(case6, courtroom3, LocalDate.of(2023, 9, 21), judge);
         hearing6b.addJudge(createJudgeWithName("Judge6b"), false);
 
-        HearingEntity hearing6c = createHearingWithDefaults(case6, courtroom1, LocalDate.of(2023, 9, 22), judge);
+        HearingEntity hearing6c = PersistableFactory.getHearingTestData().createHearingWithDefaults(case6, courtroom1, LocalDate.of(2023, 9, 22), judge);
 
-        HearingEntity hearing7a = createHearingWithDefaults(case7, courtroom1, LocalDate.of(2023, 10, 21), judge);
-        HearingEntity hearing7b = createHearingWithDefaults(case7, courtroom1, LocalDate.of(2023, 10, 23), judge);
-        HearingEntity hearing8 = createHearingWithDefaults(case8, courtroom1, LocalDate.of(2023, 10, 22), judge);
+        HearingEntity hearing7a = PersistableFactory.getHearingTestData().createHearingWithDefaults(case7, courtroom1, LocalDate.of(2023, 10, 21), judge);
+        HearingEntity hearing7b = PersistableFactory.getHearingTestData().createHearingWithDefaults(case7, courtroom1, LocalDate.of(2023, 10, 23), judge);
+        HearingEntity hearing8 = PersistableFactory.getHearingTestData().createHearingWithDefaults(case8, courtroom1, LocalDate.of(2023, 10, 22), judge);
 
         courtroomLondon = createCourtRoomWithNameAtCourthouse(londonCourthouse, "courtroomLondon");
-        HearingEntity hearing9 = createHearingWithDefaults(case9, courtroomLondon, LocalDate.of(2023, 5, 20), judge3a);
+        HearingEntity hearing9 = PersistableFactory.getHearingTestData().createHearingWithDefaults(case9, courtroomLondon, LocalDate.of(2023, 5, 20), judge3a);
 
         CourtroomEntity courtroom4 = createCourtRoomWithNameAtCourthouse(swanseaCourthouse, "courtroom4");
-        HearingEntity hearing10a = createHearingWithDefaults(case10, courtroom4, LocalDate.of(2023, 10, 23), judge);
+        HearingEntity hearing10a =  PersistableFactory.getHearingTestData().createHearingWithDefaults(case10, courtroom4, LocalDate.of(2023, 10, 23), judge);
 
         dartsDatabase.saveAll(hearing1a, hearing1b, hearing1c,
                               hearing2a, hearing2b, hearing2c,

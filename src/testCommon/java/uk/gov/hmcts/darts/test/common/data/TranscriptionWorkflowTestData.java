@@ -1,6 +1,5 @@
 package uk.gov.hmcts.darts.test.common.data;
 
-import lombok.experimental.UtilityClass;
 import uk.gov.hmcts.darts.common.entity.TranscriptionEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionStatusEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionWorkflowEntity;
@@ -11,21 +10,18 @@ import java.util.ArrayList;
 
 import static uk.gov.hmcts.darts.test.common.data.UserAccountTestData.minimalUserAccount;
 
-@UtilityClass
 @SuppressWarnings({"HideUtilityClassConstructor"})
-public class TranscriptionWorkflowTestData {
+public class TranscriptionWorkflowTestData  implements Persistable<CustomTranscriptionWorkflowEntity.CustomTranscriptionWorkflowEntityBuilderRetrieve> {
 
-    public static TranscriptionWorkflowEntity minimalTranscriptionWorkflow() {
-        var transcriptionWorkflow = new TranscriptionWorkflowEntity();
-        transcriptionWorkflow.setTranscription(PersistableFactory.getTranscriptionTestData().minimalTranscription());
-        transcriptionWorkflow.setWorkflowActor(minimalUserAccount());
-        transcriptionWorkflow.setTranscriptionStatus(
-            new TranscriptionStatusEntity(TranscriptionStatusEnum.REQUESTED.getId()));
-        transcriptionWorkflow.setWorkflowTimestamp(OffsetDateTime.now());
-        return transcriptionWorkflow;
+    TranscriptionWorkflowTestData() {
+
     }
 
-    public static TranscriptionWorkflowEntity workflowForTranscription(TranscriptionEntity transcription) {
+    public TranscriptionWorkflowEntity minimalTranscriptionWorkflow() {
+        return someMinimal().build();
+    }
+
+    public TranscriptionWorkflowEntity workflowForTranscription(TranscriptionEntity transcription) {
         var transcriptionWorkflow = minimalTranscriptionWorkflow();
         transcription.setTranscriptionStatus(transcription.getTranscriptionStatus());
         transcriptionWorkflow.setTranscription(transcription);
@@ -35,10 +31,27 @@ public class TranscriptionWorkflowTestData {
         return transcriptionWorkflow;
     }
 
-    public static TranscriptionWorkflowEntity workflowForTranscriptionWithStatus(TranscriptionEntity transcription, TranscriptionStatusEnum status) {
+    public TranscriptionWorkflowEntity workflowForTranscriptionWithStatus(TranscriptionEntity transcription, TranscriptionStatusEnum status) {
         var transcriptionWorkflow = workflowForTranscription(transcription);
         transcriptionWorkflow.setTranscriptionStatus(new TranscriptionStatusEntity(status.getId()));
         return transcriptionWorkflow;
     }
 
+    @Override
+    public CustomTranscriptionWorkflowEntity.CustomTranscriptionWorkflowEntityBuilderRetrieve someMinimal() {
+        CustomTranscriptionWorkflowEntity.CustomTranscriptionWorkflowEntityBuilderRetrieve retrieve =
+            new CustomTranscriptionWorkflowEntity.CustomTranscriptionWorkflowEntityBuilderRetrieve();
+
+        retrieve.getBuilder().transcription(PersistableFactory.getTranscriptionTestData().minimalTranscription())
+            .workflowActor(minimalUserAccount())
+            .transcriptionStatus(new TranscriptionStatusEntity(TranscriptionStatusEnum.REQUESTED.getId()))
+            .workflowTimestamp(OffsetDateTime.now());
+
+        return retrieve;
+   }
+
+    @Override
+    public CustomTranscriptionWorkflowEntity.CustomTranscriptionWorkflowEntityBuilderRetrieve someMaximal() {
+        return someMinimal();
+    }
 }

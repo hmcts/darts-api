@@ -20,7 +20,7 @@ public class MediaRequestTestData implements Persistable<CustomMediaRequestEntit
 
     private Integer id;
 
-    private HearingEntity hearing = HearingTestData.someMinimalHearing();
+    private HearingEntity hearing = PersistableFactory.getHearingTestData().someMinimalHearing();
 
     private UserAccountEntity currentOwner = UserAccountTestData.minimalUserAccount();
 
@@ -90,7 +90,7 @@ public class MediaRequestTestData implements Persistable<CustomMediaRequestEntit
                    .status(status)
                    .build();
 
-        return builder.build();
+        return builder.build().getEntity();
 }
 
     /**
@@ -115,6 +115,6 @@ public class MediaRequestTestData implements Persistable<CustomMediaRequestEntit
            .lastModifiedBy(requestor)
            .build();
 
-         return builder.build();
+         return builder.build().getEntity();
     }
 }

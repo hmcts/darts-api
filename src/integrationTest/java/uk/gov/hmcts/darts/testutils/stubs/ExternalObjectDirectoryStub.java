@@ -363,7 +363,7 @@ public class ExternalObjectDirectoryStub {
 
             ExternalObjectDirectoryEntity newExternalObjectDirectory
                 = createAndSaveEod(externalObjectDirectory.getAnnotationDocumentEntity(),
-                                    externalObjectDirectory.getTranscriptionDocumentEntity(), STORED, ARM, e -> { });
+                                   externalObjectDirectory.getTranscriptionDocumentEntity(), STORED, ARM, e -> { });
 
             if (dateToSet.isPresent()) {
                 dateConfigurer.setLastModifiedDate(newExternalObjectDirectory, dateToSet.get());

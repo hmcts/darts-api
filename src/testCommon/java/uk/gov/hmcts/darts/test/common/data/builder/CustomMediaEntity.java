@@ -12,10 +12,11 @@ import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 
 import java.lang.reflect.InvocationTargetException;
 import java.time.OffsetDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @RequiredArgsConstructor
-public class CustomMediaEntity extends MediaEntity {
+public class CustomMediaEntity extends MediaEntity implements DbInsertable<MediaEntity> {
 
     @lombok.Builder
     public CustomMediaEntity(Integer id, CourtroomEntity courtroom,
@@ -55,9 +56,9 @@ public class CustomMediaEntity extends MediaEntity {
         setDeletedBy(deletedBy);
         setDeletedTimestamp(deletedTimestamp);
         setMediaStatus(mediaStatus);
-        setHearingList(hearingList);
+        setHearingList(hearingList != null ? hearingList : new ArrayList<>());
         setRetainUntilTs(retainUntilTs);
-        setAdminActionReasons(adminActionReasons);
+        setAdminActionReasons(adminActionReasons != null ? adminActionReasons : new ArrayList<>());
         setRetConfScore(retConfScore);
         setRetConfReason(retConfReason);
         setCreatedDateTime(createdDateTime);
@@ -66,21 +67,26 @@ public class CustomMediaEntity extends MediaEntity {
         setLastModifiedBy(lastModifiedBy);
     }
 
-    public static class CustomMediaBuilderRetrieve implements BuilderHolder<MediaEntity, CustomMediaEntityBuilder> {
+    @Override
+    public MediaEntity getEntity() {
+        try {
+            MediaEntity mediaRequestEntity = new MediaEntity();
+            BeanUtils.copyProperties(mediaRequestEntity, this);
+            return mediaRequestEntity;
+        } catch (IllegalAccessException | InvocationTargetException e) {
+            throw new AssertionFailure("Assumed that there would be no error on mapping data", e);
+        }
+    }
+
+    public static class CustomMediaBuilderRetrieve implements BuilderHolder<CustomMediaEntity, CustomMediaEntityBuilder> {
         public CustomMediaBuilderRetrieve() {
         }
 
         private CustomMediaEntity.CustomMediaEntityBuilder builder = CustomMediaEntity.builder();
 
         @Override
-        public MediaEntity build() {
-            try {
-                MediaEntity mediaRequestEntity = new MediaEntity();
-                BeanUtils.copyProperties(mediaRequestEntity, builder.build());
-                return mediaRequestEntity;
-            } catch (IllegalAccessException | InvocationTargetException e) {
-                throw new AssertionFailure("Assumed that there would be no error on mapping data", e);
-            }
+        public CustomMediaEntity build() {
+            return builder.build();
         }
 
         @Override

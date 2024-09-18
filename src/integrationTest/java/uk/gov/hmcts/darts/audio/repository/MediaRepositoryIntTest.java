@@ -17,8 +17,6 @@ import java.time.OffsetDateTime;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static uk.gov.hmcts.darts.test.common.data.CaseTestData.createSomeMinimalCase;
-import static uk.gov.hmcts.darts.test.common.data.HearingTestData.createHearingFor;
 
 class MediaRepositoryIntTest extends PostgresIntegrationBase {
 
@@ -46,21 +44,23 @@ class MediaRepositoryIntTest extends PostgresIntegrationBase {
     @Test
     void testFindMediasByCaseId() {
         // given
-        var caseA = createSomeMinimalCase();
-        var hearA1 = createHearingFor(caseA);
-        var hearA2 = createHearingFor(caseA);
-        var hearA3 = createHearingFor(caseA);
+        var caseA = PersistableFactory.getCourtCaseTestData().createSomeMinimalCase();
+        var hearA1 = PersistableFactory.getHearingTestData().createHearingFor(caseA);
+        var hearA2 = PersistableFactory.getHearingTestData().createHearingFor(caseA);
+        var hearA3 = PersistableFactory.getHearingTestData().createHearingFor(caseA);
 
-        var caseB = createSomeMinimalCase();
-        var hearB = createHearingFor(caseB);
+        var caseB = PersistableFactory.getCourtCaseTestData().createSomeMinimalCase();
+        var hearB = PersistableFactory.getHearingTestData().createHearingFor(caseB);
 
         var media0 = PersistableFactory.getMediaTestData().someMinimalMedia();
         var media1 = PersistableFactory.getMediaTestData().someMinimalMedia();
         var media2 = PersistableFactory.getMediaTestData().someMinimalMedia();
+
         hearA1.addMedia(media0);
         hearA1.addMedia(media1);
         hearA2.addMedia(media2);
         hearB.addMedia(media0);
+
         dartsPersistence.saveAll(hearA1, hearA2, hearA3, hearB);
 
         // when

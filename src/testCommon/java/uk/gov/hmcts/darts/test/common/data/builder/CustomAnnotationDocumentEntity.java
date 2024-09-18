@@ -5,15 +5,13 @@ import org.apache.commons.beanutils.BeanUtils;
 import org.hibernate.AssertionFailure;
 import uk.gov.hmcts.darts.common.entity.AnnotationDocumentEntity;
 import uk.gov.hmcts.darts.common.entity.AnnotationEntity;
-import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 
 import java.lang.reflect.InvocationTargetException;
 import java.time.OffsetDateTime;
-import java.util.List;
 
 @RequiredArgsConstructor
-public class CustomAnnotationDocumentEntity extends AnnotationDocumentEntity implements DbInsertable <AnnotationDocumentEntity> {
+public class CustomAnnotationDocumentEntity extends AnnotationDocumentEntity implements DbInsertable<AnnotationDocumentEntity> {
 
     @lombok.Builder
     public CustomAnnotationDocumentEntity(Integer id, String fileName, String fileType, Integer fileSize,
@@ -45,7 +43,7 @@ public class CustomAnnotationDocumentEntity extends AnnotationDocumentEntity imp
     }
 
     @Override
-    public AnnotationDocumentEntity getDbInsertable() {
+    public AnnotationDocumentEntity getEntity() {
         try {
             AnnotationDocumentEntity annotationEntity = new AnnotationDocumentEntity();
             BeanUtils.copyProperties(annotationEntity, this);
@@ -55,7 +53,8 @@ public class CustomAnnotationDocumentEntity extends AnnotationDocumentEntity imp
         }
     }
 
-    public static class CustomAnnotationDocumentEntityRetrieve implements BuilderHolder<CustomAnnotationDocumentEntity, CustomAnnotationDocumentEntity.CustomAnnotationDocumentEntityBuilder> {
+    public static class CustomAnnotationDocumentEntityRetrieve implements
+        BuilderHolder<CustomAnnotationDocumentEntity, CustomAnnotationDocumentEntity.CustomAnnotationDocumentEntityBuilder> {
         public CustomAnnotationDocumentEntityRetrieve() {
         }
 

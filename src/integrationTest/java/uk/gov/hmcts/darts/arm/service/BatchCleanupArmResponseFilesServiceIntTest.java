@@ -3,7 +3,6 @@ package uk.gov.hmcts.darts.arm.service;
 
 import com.azure.core.util.BinaryData;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -12,7 +11,6 @@ import uk.gov.hmcts.darts.arm.config.ArmBatchCleanupConfiguration;
 import uk.gov.hmcts.darts.arm.config.ArmDataManagementConfiguration;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
-import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
@@ -38,7 +36,6 @@ import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum.ARM;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.STORED;
 import static uk.gov.hmcts.darts.test.common.TestUtils.getContentsFromFile;
-import static uk.gov.hmcts.darts.test.common.data.PersistableFactory.getMediaTestData;
 
 @SuppressWarnings({"PMD.NcssCount"})
 class BatchCleanupArmResponseFilesServiceIntTest extends IntegrationBase {
@@ -66,8 +63,8 @@ class BatchCleanupArmResponseFilesServiceIntTest extends IntegrationBase {
 
     @BeforeEach
     void setupData() {
-        savedMedia = PersistableFactory.getMediaTestData().
-            someMinimal().build();
+        savedMedia = PersistableFactory.getMediaTestData()
+        .someMinimal().build().getEntity();
         dartsPersistence.save(savedMedia);
 
         when(armDataManagementConfiguration.getManifestFilePrefix()).thenReturn("DARTS_");

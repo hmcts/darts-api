@@ -20,7 +20,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.MARKED_FOR_DELETION;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.STORED;
-import static uk.gov.hmcts.darts.test.common.data.HearingTestData.someMinimalHearing;
 
 class UnstructuredAudioDeleterProcessorTest extends IntegrationBase {
 
@@ -37,7 +36,7 @@ class UnstructuredAudioDeleterProcessorTest extends IntegrationBase {
         when(currentTimeHelper.currentOffsetDateTime())
             .thenReturn(OffsetDateTime.now().plusWeeks(35));
 
-        HearingEntity hearing = someMinimalHearing();
+        HearingEntity hearing = PersistableFactory.getHearingTestData().someMinimalHearing();
         dartsPersistence.save(hearing);
 
         MediaEntity savedMedia = dartsPersistence.save(
@@ -83,7 +82,7 @@ class UnstructuredAudioDeleterProcessorTest extends IntegrationBase {
         when(currentTimeHelper.currentOffsetDateTime())
             .thenReturn(OffsetDateTime.now().plusWeeks(25));
 
-        HearingEntity hearing = someMinimalHearing();
+        HearingEntity hearing = PersistableFactory.getHearingTestData().someMinimalHearing();
         dartsPersistence.save(hearing);
 
         MediaEntity savedMedia = dartsPersistence.save(

@@ -17,12 +17,12 @@ public class AnnotationDocumentTestData implements Persistable<CustomAnnotationD
     @Override
     public CustomAnnotationDocumentEntity.CustomAnnotationDocumentEntityRetrieve someMinimal() {
         CustomAnnotationDocumentEntity.CustomAnnotationDocumentEntityRetrieve retrieve =
-            PersistableFactory.getAnnotationDocumentTestData().someMinimal();
+            new CustomAnnotationDocumentEntity.CustomAnnotationDocumentEntityRetrieve();
 
         var postfix = random(10, false, true);
         var userAccount = minimalUserAccount();
 
-        retrieve.getBuilder().annotation(PersistableFactory.getAnnotationTestData().someMinimal().build())
+        retrieve.getBuilder().annotation(PersistableFactory.getAnnotationTestData().someMinimal().build().getEntity())
                     .fileType("some-file-type")
                     .fileName("some-file-name-" + postfix)
                     .fileSize(1024)
@@ -42,13 +42,13 @@ public class AnnotationDocumentTestData implements Persistable<CustomAnnotationD
     }
 
     public AnnotationDocumentEntity minimalAnnotationDocument() {
-       return someMinimal().build();
+       return someMinimal().build().getEntity();
 
     }
 
     public AnnotationDocumentEntity createAnnotationDocumentForHearings(List<HearingEntity> hearingEntities) {
         var annotationDocumentEntityRetrieve = someMinimal();
-        AnnotationDocumentEntity annotationDocument = annotationDocumentEntityRetrieve.getBuilder().build();
+        AnnotationDocumentEntity annotationDocument = annotationDocumentEntityRetrieve.getBuilder().build().getEntity();
         annotationDocument.getAnnotation().setHearingList(hearingEntities);
         return annotationDocument;
     }

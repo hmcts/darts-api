@@ -2,7 +2,6 @@ package uk.gov.hmcts.darts.arm.service;
 
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,28 +22,19 @@ import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.AnnotationDocumentEntity;
 import uk.gov.hmcts.darts.common.entity.AnnotationEntity;
 import uk.gov.hmcts.darts.common.entity.CaseDocumentEntity;
-import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
-import uk.gov.hmcts.darts.common.entity.ExternalLocationTypeEntity;
 import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
-import uk.gov.hmcts.darts.common.entity.ObjectRecordStatusEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionDocumentEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
-import uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum;
-import uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum;
 import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
-import uk.gov.hmcts.darts.test.common.data.HearingTestData;
 import uk.gov.hmcts.darts.test.common.data.PersistableFactory;
 import uk.gov.hmcts.darts.test.common.data.builder.CustomAnnotationEntity;
 import uk.gov.hmcts.darts.test.common.data.builder.CustomExternalObjectDirectoryEntity;
 import uk.gov.hmcts.darts.test.common.data.builder.CustomTranscriptionDocumentEntity;
-import uk.gov.hmcts.darts.test.common.data.builder.CustomTranscriptionEntity;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 import uk.gov.hmcts.darts.testutils.stubs.AuthorisationStub;
-import uk.gov.hmcts.darts.testutils.stubs.DartsPersistence;
-import uk.gov.hmcts.darts.testutils.stubs.TranscriptionStub;
 
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
@@ -144,7 +134,7 @@ class ArmRetentionEventDateProcessorIntTest extends IntegrationBase {
         // given
         when(armDataManagementConfiguration.getEventDateAdjustmentYears()).thenReturn(EVENT_DATE_ADJUSTMENT_YEARS);
 
-        HearingEntity hearing = HearingTestData.someMinimalHearing();
+        HearingEntity hearing = PersistableFactory.getHearingTestData().someMinimalHearing();
 
         MediaEntity savedMedia = dartsPersistence.save(
             getMediaTestData().createMediaWith(
@@ -163,7 +153,7 @@ class ArmRetentionEventDateProcessorIntTest extends IntegrationBase {
         ).getBuilder().media(savedMedia)
             .status(dartsDatabase.getExternalObjectDirectoryStub().getStatus(STORED))
             .externalLocationType(dartsDatabase.getExternalObjectDirectoryStub().getLocation(ARM))
-            .externalLocation(UUID.randomUUID()).build();
+            .externalLocation(UUID.randomUUID()).build().getEntity();
 
         armEod.setExternalRecordId(externalRecordId);
         armEod.setEventDateTs(END_TIME);
@@ -204,7 +194,7 @@ class ArmRetentionEventDateProcessorIntTest extends IntegrationBase {
         // given
         when(armDataManagementConfiguration.getEventDateAdjustmentYears()).thenReturn(EVENT_DATE_ADJUSTMENT_YEARS);
 
-        HearingEntity hearing = HearingTestData.someMinimalHearing();
+        HearingEntity hearing = PersistableFactory.getHearingTestData().someMinimalHearing();
 
         String confReason = "reason";
         Integer confScore = 100;
@@ -230,7 +220,7 @@ class ArmRetentionEventDateProcessorIntTest extends IntegrationBase {
             .externalLocation(UUID.randomUUID());
 
         externalObjectDirectoryuilderRetrieve.getBuilder().eventDateTs(RETENTION_DATE_TIME).updateRetention(true);
-        ExternalObjectDirectoryEntity armEod = dartsPersistence.save(externalObjectDirectoryuilderRetrieve.build());
+        ExternalObjectDirectoryEntity armEod = dartsPersistence.save(externalObjectDirectoryuilderRetrieve.build().getEntity());
 
         UserAccountEntity testUser = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
         when(userIdentity.getUserAccount()).thenReturn(testUser);
@@ -258,7 +248,6 @@ class ArmRetentionEventDateProcessorIntTest extends IntegrationBase {
 
         final String fileName = "Test Document.docx";
         final String fileType = "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
-        final int fileSize = 11_937;
         final UserAccountEntity testUser = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
         final String checksum = "123";
         final String confidenceReason = "reason";
@@ -279,24 +268,24 @@ class ArmRetentionEventDateProcessorIntTest extends IntegrationBase {
                 .retConfScore(confidenceScore)
                 .retConfReason(confidenceReason)
                 .retainUntilTs(DOCUMENT_RETENTION_DATE_TIME);
-        TranscriptionDocumentEntity transcriptionDocumentEntity = transcriptionEntityBuilderRetrieve.build();
+        TranscriptionDocumentEntity transcriptionDocumentEntity = transcriptionEntityBuilderRetrieve.build().getEntity();
         when(userIdentity.getUserAccount()).thenReturn(testUser);
-        dartsDatabase.getTranscriptionDocumentRepository().save(transcriptionDocumentEntity);
+        dartsPersistence.save(transcriptionDocumentEntity);
 
         CustomExternalObjectDirectoryEntity.CustomExternalObjectDirectoryuilderRetrieve externalObjectDirectoryuilderRetrieve
             = PersistableFactory.getExternalObjectDirectoryTestData().someMinimal();
 
         externalObjectDirectoryuilderRetrieve.getBuilder().transcriptionDocumentEntity(transcriptionDocumentEntity)
-            .status(dartsDatabase.getExternalObjectDirectoryStub().getStatus(STORED))
+            .status(dartsDatabase.getExternalObjectDirectoryStub().getStatus(STORED)).media(null)
             .externalLocationType(dartsDatabase.getExternalObjectDirectoryStub().getLocation(ARM))
             .externalLocation(UUID.randomUUID());
 
-        ExternalObjectDirectoryEntity armEod = externalObjectDirectoryuilderRetrieve.build();
+        ExternalObjectDirectoryEntity armEod = externalObjectDirectoryuilderRetrieve.getBuilder()
+            .transcriptionDocumentEntity(transcriptionDocumentEntity).build().getEntity();
         armEod.setExternalRecordId(externalRecordId);
         armEod.setEventDateTs(END_TIME);
         armEod.setUpdateRetention(true);
-        dartsDatabase.getExternalObjectDirectoryRepository().save(armEod);
-
+        dartsPersistence.save(armEod);
 
         UpdateMetadataResponse response = UpdateMetadataResponse.builder().responseStatus(200).isError(false).build();
         when(armApiClient.updateMetadata(any(), any())).thenReturn(response);
@@ -337,7 +326,7 @@ class ArmRetentionEventDateProcessorIntTest extends IntegrationBase {
         CustomAnnotationEntity.CustomAnnotationEntityRetrieve annotationEntityRetrieve
             = PersistableFactory.getAnnotationTestData().someMinimal();
 
-        AnnotationEntity annotation = annotationEntityRetrieve.getBuilder().text(testAnnotation).build();
+        AnnotationEntity annotation = annotationEntityRetrieve.getBuilder().text(testAnnotation).build().getEntity();
 
         when(userIdentity.getUserAccount()).thenReturn(testUser);
         final String fileName = "judges-notes.txt";
@@ -349,8 +338,8 @@ class ArmRetentionEventDateProcessorIntTest extends IntegrationBase {
         final Integer confidenceScore = 232;
         final String externalRecordId = "recordId";
 
-        AnnotationDocumentEntity annotationDocument = PersistableFactory.
-            getAnnotationDocumentTestData().someMinimal().getBuilder().annotation(annotation)
+        AnnotationDocumentEntity annotationDocument = PersistableFactory
+            .getAnnotationDocumentTestData().someMinimal().getBuilder().annotation(annotation)
             .fileName(fileName)
             .fileType(fileType)
             .fileSize(fileSize)
@@ -359,15 +348,15 @@ class ArmRetentionEventDateProcessorIntTest extends IntegrationBase {
             .checksum(checksum)
             .retConfScore(confidenceScore)
             .retConfReason(confidenceReason)
-            .retainUntilTs(DOCUMENT_RETENTION_DATE_TIME).build().getDbInsertable();
+            .retainUntilTs(DOCUMENT_RETENTION_DATE_TIME).build().getEntity();
 
         dartsPersistence.save(annotationDocument);
 
         ExternalObjectDirectoryEntity armEod = PersistableFactory.getExternalObjectDirectoryTestData().someMinimal()
-            .getBuilder().annotationDocumentEntity(annotationDocument)
+            .getBuilder().annotationDocumentEntity(annotationDocument).media(null)
             .status(dartsDatabase.getObjectRecordStatusEntity(STORED))
             .externalLocationType(dartsDatabase.getExternalLocationTypeEntity(ARM))
-            .externalLocation(UUID.randomUUID()).build().getDbInsertable();
+            .externalLocation(UUID.randomUUID()).build().getEntity();
 
         armEod.setExternalRecordId(externalRecordId);
         armEod.setEventDateTs(END_TIME);
@@ -405,32 +394,31 @@ class ArmRetentionEventDateProcessorIntTest extends IntegrationBase {
         // given
         when(armDataManagementConfiguration.getEventDateAdjustmentYears()).thenReturn(EVENT_DATE_ADJUSTMENT_YEARS);
 
-        CourtCaseEntity courtCaseEntity = PersistableFactory.getCourtCaseTestData().someMinimal().build();
         UserAccountEntity testUser = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
         when(userIdentity.getUserAccount()).thenReturn(testUser);
 
         String confidenceReason = "reason";
         Integer confidenceScore = 232;
 
-        CaseDocumentEntity caseDocument = PersistableFactory.
-            getCaseDocumentTestData().someMinimal().getBuilder().fileName("test_case_document.docx")
+        CaseDocumentEntity caseDocument = PersistableFactory
+            .getCaseDocumentTestData().someMinimal().getBuilder().fileName("test_case_document.docx")
             .retainUntilTs(DOCUMENT_RETENTION_DATE_TIME)
             .retConfReason(confidenceReason)
-            .retConfScore(confidenceScore).build().getDbInsertable();
+            .retConfScore(confidenceScore).build().getEntity();
 
         dartsPersistence.save(caseDocument);
 
         String externalRecordId = "recordId";
 
         ExternalObjectDirectoryEntity armEod = PersistableFactory.getExternalObjectDirectoryTestData().someMinimal()
-            .getBuilder().caseDocument(caseDocument)
+            .getBuilder().media(null).caseDocument(caseDocument)
             .status(dartsDatabase.getObjectRecordStatusEntity(STORED))
             .externalLocationType(dartsDatabase.getExternalLocationTypeEntity(ARM))
             .externalLocation(UUID.randomUUID())
             .externalRecordId(externalRecordId)
-            .updateRetention(true).build().getDbInsertable();
+            .updateRetention(true).build().getEntity();
 
-        dartsPersistence.getExternalObjectDirectoryRepository().save(armEod);
+        dartsPersistence.save(armEod);
 
         UpdateMetadataResponse response = UpdateMetadataResponse.builder().responseStatus(200).isError(false).build();
         when(armApiClient.updateMetadata(any(), any())).thenReturn(response);
@@ -463,17 +451,16 @@ class ArmRetentionEventDateProcessorIntTest extends IntegrationBase {
         // given
         when(armDataManagementConfiguration.getEventDateAdjustmentYears()).thenReturn(EVENT_DATE_ADJUSTMENT_YEARS);
 
-        CourtCaseEntity courtCaseEntity = dartsDatabase.createCase("Bristol", "Case1");
         UserAccountEntity testUser = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
         when(userIdentity.getUserAccount()).thenReturn(testUser);
 
         String confidenceReason = "reason";
 
-        CaseDocumentEntity caseDocument = PersistableFactory.
-            getCaseDocumentTestData().someMinimal().getBuilder().fileName("test_case_document.docx")
+        CaseDocumentEntity caseDocument = PersistableFactory
+            .getCaseDocumentTestData().someMinimal().getBuilder().fileName("test_case_document.docx")
             .retainUntilTs(DOCUMENT_RETENTION_DATE_TIME)
             .retConfReason(confidenceReason)
-            .retConfScore(null).build().getDbInsertable();
+            .retConfScore(null).build().getEntity();
 
         dartsPersistence.save(caseDocument);
 
@@ -485,7 +472,7 @@ class ArmRetentionEventDateProcessorIntTest extends IntegrationBase {
             .externalLocationType(dartsDatabase.getExternalLocationTypeEntity(ARM))
             .externalLocation(UUID.randomUUID())
             .externalRecordId(externalRecordId)
-            .updateRetention(true).build().getDbInsertable();
+            .updateRetention(true).build().getEntity();
 
         armEod.setExternalRecordId(externalRecordId);
         armEod.setEventDateTs(END_TIME);
@@ -512,17 +499,16 @@ class ArmRetentionEventDateProcessorIntTest extends IntegrationBase {
         // given
         when(armDataManagementConfiguration.getEventDateAdjustmentYears()).thenReturn(EVENT_DATE_ADJUSTMENT_YEARS);
 
-        CourtCaseEntity courtCaseEntity = PersistableFactory.getCourtCaseTestData().someMinimal().build();
         UserAccountEntity testUser = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
         when(userIdentity.getUserAccount()).thenReturn(testUser);
 
         String confidenceReason = "reason";
 
-        CaseDocumentEntity caseDocument = PersistableFactory.
-            getCaseDocumentTestData().someMinimal().getBuilder().fileName("test_case_document.docx")
+        CaseDocumentEntity caseDocument = PersistableFactory
+            .getCaseDocumentTestData().someMinimal().getBuilder().fileName("test_case_document.docx")
             .retainUntilTs(DOCUMENT_RETENTION_DATE_TIME)
             .retConfReason(confidenceReason)
-            .retConfScore(0).build().getDbInsertable();
+            .retConfScore(0).build().getEntity();
 
         dartsPersistence.save(caseDocument);
 
@@ -534,7 +520,7 @@ class ArmRetentionEventDateProcessorIntTest extends IntegrationBase {
             .externalLocation(UUID.randomUUID())
             .externalRecordId(externalRecordId)
             .eventDateTs(END_TIME)
-            .updateRetention(true).build().getDbInsertable();
+            .updateRetention(true).build().getEntity();
 
         dartsPersistence.save(armEod);
 
@@ -559,11 +545,11 @@ class ArmRetentionEventDateProcessorIntTest extends IntegrationBase {
         // given
         when(armDataManagementConfiguration.getEventDateAdjustmentYears()).thenReturn(EVENT_DATE_ADJUSTMENT_YEARS);
 
-        HearingEntity hearing = HearingTestData.someMinimalHearing();
+        HearingEntity hearing = PersistableFactory.getHearingTestData().someMinimalHearing();
 
         String confReason = "reason";
         Integer confScore = 100;
-        MediaEntity savedMedia = dartsDatabase.save(
+        MediaEntity savedMedia = dartsPersistence.save(
             getMediaTestData().createMediaWith(
                 hearing.getCourtroom(),
                 START_TIME,
@@ -581,7 +567,7 @@ class ArmRetentionEventDateProcessorIntTest extends IntegrationBase {
             .status(dartsDatabase.getObjectRecordStatusEntity(ARM_INGESTION))
             .externalLocationType(dartsDatabase.getExternalLocationTypeEntity(ARM))
             .externalLocation(UUID.randomUUID())
-            .build().getDbInsertable();
+            .build().getEntity();
 
         armEod.setUpdateRetention(true);
         dartsPersistence.save(armEod);

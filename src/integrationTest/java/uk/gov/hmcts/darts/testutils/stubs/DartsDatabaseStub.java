@@ -483,13 +483,13 @@ public class DartsDatabaseStub {
             .requestType(audioRequestType)
             .status(MediaRequestStatus.COMPLETED)
             .build();
-        dartsPersistence.save(mediaRequestEntity.build());
+        dartsPersistence.save(mediaRequestEntity.build().getEntity());
 
         OffsetDateTime expiryTime = OffsetDateTime.of(2023, 7, 2, 13, 0, 0, 0, UTC);
         OffsetDateTime lastAccessed = OffsetDateTime.of(2023, 6, 30, 13, 0, 0, 0, UTC);
-        transformedMediaStub.createTransformedMediaEntity(mediaRequestEntity.build(), "T20231010_0", expiryTime, lastAccessed);
+        transformedMediaStub.createTransformedMediaEntity(mediaRequestEntity.build().getEntity(), "T20231010_0", expiryTime, lastAccessed);
 
-        return mediaRequestEntity.build();
+        return mediaRequestEntity.build().getEntity();
     }
 
     @Transactional

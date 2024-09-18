@@ -9,6 +9,7 @@ import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionDocumentEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionEntity;
 import uk.gov.hmcts.darts.common.util.DateConverterUtil;
+import uk.gov.hmcts.darts.test.common.data.PersistableFactory;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 import uk.gov.hmcts.darts.testutils.stubs.TranscriptionDocumentStub;
 import uk.gov.hmcts.darts.testutils.stubs.TranscriptionStub;
@@ -19,7 +20,6 @@ import java.util.List;
 import static java.util.Arrays.asList;
 import static java.util.stream.IntStream.range;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static uk.gov.hmcts.darts.test.common.data.CaseTestData.createSomeMinimalCase;
 import static uk.gov.hmcts.darts.test.common.data.TranscriptionDocumentTestData.minimalTranscriptionDocument;
 
 class TranscriptionRepositoryTest extends IntegrationBase {
@@ -87,7 +87,7 @@ class TranscriptionRepositoryTest extends IntegrationBase {
     @Test
     @Disabled("Impacted by V1_364_*.sql")
     void excludesHidden() {
-        var courtCase = createSomeMinimalCase();
+        var courtCase = PersistableFactory.getCourtCaseTestData().createSomeMinimalCase();
         persistTwoHiddenTwoNotHiddenTranscriptionsFor(courtCase);
 
         var transcriptionEntities = transcriptionRepository.findByCaseIdManualOrLegacy(courtCase.getId(), false);

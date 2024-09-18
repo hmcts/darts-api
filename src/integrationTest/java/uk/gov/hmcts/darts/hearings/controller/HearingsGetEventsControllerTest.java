@@ -17,17 +17,16 @@ import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.EventEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
+import uk.gov.hmcts.darts.test.common.data.PersistableFactory;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 
 import java.time.LocalDate;
 
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static uk.gov.hmcts.darts.test.common.data.CaseTestData.createSomeMinimalCase;
 import static uk.gov.hmcts.darts.test.common.data.CourtroomTestData.someMinimalCourtRoom;
 import static uk.gov.hmcts.darts.test.common.data.DefenceTestData.createDefenceForCase;
 import static uk.gov.hmcts.darts.test.common.data.DefendantTestData.createDefendantForCase;
-import static uk.gov.hmcts.darts.test.common.data.HearingTestData.createHearingWith;
 import static uk.gov.hmcts.darts.test.common.data.ProsecutorTestData.createProsecutorForCase;
 
 @AutoConfigureMockMvc
@@ -54,11 +53,11 @@ class HearingsGetEventsControllerTest extends IntegrationBase {
     @BeforeEach
     void setUp() {
 
-        var courtCase = createSomeMinimalCase();
+        var courtCase = PersistableFactory.getCourtCaseTestData().createSomeMinimalCase();
         courtCase.addProsecutor(createProsecutorForCase(courtCase));
         courtCase.addDefendant(createDefendantForCase(courtCase));
         courtCase.addDefence(createDefenceForCase(courtCase));
-        var hearing = createHearingWith(courtCase, someMinimalCourtRoom(), LocalDate.parse(SOME_DATE));
+        var hearing =  PersistableFactory.getHearingTestData().createHearingWith(courtCase, someMinimalCourtRoom(), LocalDate.parse(SOME_DATE));
 
         dartsPersistence.save(hearing);
 

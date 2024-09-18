@@ -21,7 +21,6 @@ import static uk.gov.hmcts.darts.audio.enums.AudioPreviewStatus.ENCODING;
 import static uk.gov.hmcts.darts.audio.enums.AudioPreviewStatus.FAILED;
 import static uk.gov.hmcts.darts.audio.enums.AudioPreviewStatus.READY;
 import static uk.gov.hmcts.darts.test.common.AwaitabilityUtil.waitForMax10SecondsWithOneSecondPoll;
-import static uk.gov.hmcts.darts.test.common.data.HearingTestData.someMinimalHearing;
 
 @TestPropertySource(properties = {"darts.audio.transformation.service.audio.file=tests/audio/WithViqHeader/viq0001min.mp2"})
 class AudioPreviewTest extends IntegrationBase {
@@ -42,7 +41,7 @@ class AudioPreviewTest extends IntegrationBase {
 
     @BeforeEach
     void setUp() {
-        hearing = someMinimalHearing();
+        hearing = PersistableFactory.getHearingTestData().someMinimalHearing();
     }
 
     @AfterEach

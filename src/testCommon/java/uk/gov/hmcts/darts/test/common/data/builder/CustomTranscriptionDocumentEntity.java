@@ -3,30 +3,34 @@ package uk.gov.hmcts.darts.test.common.data.builder;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.beanutils.BeanUtils;
 import org.hibernate.AssertionFailure;
-import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
-import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
 import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
-import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.ObjectAdminActionEntity;
-import uk.gov.hmcts.darts.common.entity.TranscriptionCommentEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionDocumentEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionEntity;
-import uk.gov.hmcts.darts.common.entity.TranscriptionStatusEntity;
-import uk.gov.hmcts.darts.common.entity.TranscriptionTypeEntity;
-import uk.gov.hmcts.darts.common.entity.TranscriptionUrgencyEntity;
-import uk.gov.hmcts.darts.common.entity.TranscriptionWorkflowEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
-import uk.gov.hmcts.darts.test.common.data.Persistable;
 
 import java.lang.reflect.InvocationTargetException;
-import java.time.LocalDate;
 import java.time.OffsetDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @RequiredArgsConstructor
 public class CustomTranscriptionDocumentEntity extends TranscriptionDocumentEntity implements DbInsertable<TranscriptionDocumentEntity> {
     @lombok.Builder
-    public CustomTranscriptionDocumentEntity(Integer id, TranscriptionEntity transcription, String clipId, String fileName, String fileType, Integer fileSize, UserAccountEntity uploadedBy, OffsetDateTime uploadedDateTime, List<ExternalObjectDirectoryEntity> externalObjectDirectoryEntities, String checksum, boolean isDeleted, UserAccountEntity deletedBy, OffsetDateTime deletedTs, String contentObjectId, boolean isHidden, OffsetDateTime retainUntilTs, Integer retConfScore, String retConfReason, List<ObjectAdminActionEntity> adminActions, OffsetDateTime createdDateTime, UserAccountEntity createdBy, OffsetDateTime lastModifiedDateTime, UserAccountEntity lastModifiedBy) {
+    public CustomTranscriptionDocumentEntity(Integer id,
+                                             TranscriptionEntity transcription,
+                                             String clipId, String fileName, String fileType,
+                                             Integer fileSize, UserAccountEntity uploadedBy,
+                                             OffsetDateTime uploadedDateTime,
+                                             List<ExternalObjectDirectoryEntity> externalObjectDirectoryEntities,
+                                             String checksum, boolean isDeleted,
+                                             UserAccountEntity deletedBy, OffsetDateTime deletedTs,
+                                             String contentObjectId, boolean isHidden,
+                                             OffsetDateTime retainUntilTs, Integer retConfScore,
+                                             String retConfReason,
+                                             List<ObjectAdminActionEntity> adminActions,
+                                             UserAccountEntity createdBy, OffsetDateTime lastModifiedDateTime,
+                                             UserAccountEntity lastModifiedBy) {
         setId(id);
         setTranscription(transcription);
         setClipId(clipId);
@@ -35,7 +39,8 @@ public class CustomTranscriptionDocumentEntity extends TranscriptionDocumentEnti
         setFileSize(fileSize);
         setUploadedBy(uploadedBy);
         setUploadedDateTime(uploadedDateTime);
-        setExternalObjectDirectoryEntities(externalObjectDirectoryEntities);
+        setExternalObjectDirectoryEntities(externalObjectDirectoryEntities != null
+                                               ? externalObjectDirectoryEntities : new ArrayList<>());
         setChecksum(checksum);
         setDeleted(isDeleted);
         setDeletedBy(deletedBy);
@@ -45,14 +50,14 @@ public class CustomTranscriptionDocumentEntity extends TranscriptionDocumentEnti
         setRetainUntilTs(retainUntilTs);
         setRetConfScore(retConfScore);
         setRetConfReason(retConfReason);
-        setAdminActions(adminActions);
+        setAdminActions(adminActions != null ? adminActions : new ArrayList<>());
         setLastModifiedBy(createdBy);
         setLastModifiedTimestamp(lastModifiedDateTime);
         setLastModifiedBy(lastModifiedBy);
     }
 
     @Override
-    public TranscriptionDocumentEntity getDbInsertable() {
+    public TranscriptionDocumentEntity getEntity() {
         try {
             TranscriptionDocumentEntity transcriptionEntity = new TranscriptionDocumentEntity();
             BeanUtils.copyProperties(transcriptionEntity, this);
@@ -62,7 +67,8 @@ public class CustomTranscriptionDocumentEntity extends TranscriptionDocumentEnti
         }
     }
 
-    public static class TranscriptionDocumentEntityBuilderRetrieve implements BuilderHolder<CustomTranscriptionDocumentEntity, CustomTranscriptionDocumentEntity.CustomTranscriptionDocumentEntityBuilder> {
+    public static class TranscriptionDocumentEntityBuilderRetrieve
+        implements BuilderHolder<CustomTranscriptionDocumentEntity, CustomTranscriptionDocumentEntity.CustomTranscriptionDocumentEntityBuilder> {
 
         private CustomTranscriptionDocumentEntity.CustomTranscriptionDocumentEntityBuilder builder = CustomTranscriptionDocumentEntity.builder();
 

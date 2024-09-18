@@ -1,12 +1,12 @@
 package uk.gov.hmcts.darts.test.common.data;
 
+import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionStatusEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionTypeEntity;
 import uk.gov.hmcts.darts.test.common.data.builder.CustomTranscriptionEntity;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Arrays;
 
 import static uk.gov.hmcts.darts.test.common.data.UserAccountTestData.minimalUserAccount;
 import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum.REQUESTED;
@@ -19,7 +19,7 @@ public class TranscriptionTestData implements Persistable<CustomTranscriptionEnt
     }
 
     public TranscriptionEntity minimalTranscription() {
-        return someMinimal().build();
+        return someMinimal().build().getEntity();
     }
 
     public TranscriptionTypeEntity someTranscriptionType() {
@@ -34,13 +34,20 @@ public class TranscriptionTestData implements Persistable<CustomTranscriptionEnt
         return transcriptionStatus;
     }
 
+    public TranscriptionEntity someTranscriptionForHearing(HearingEntity hearingEntity) {
+        var transcription = minimalTranscription();
+        transcription.addHearing(hearingEntity);
+        transcription.setCourtCases(Arrays.asList(hearingEntity.getCourtCase()));
+        return transcription;
+    }
+
     @Override
     public CustomTranscriptionEntity.CustomTranscriptionEntityBuilderRetrieve someMinimal() {
         CustomTranscriptionEntity.CustomTranscriptionEntityBuilderRetrieve builder = new CustomTranscriptionEntity.CustomTranscriptionEntityBuilderRetrieve();
         var userAccount = minimalUserAccount();
 
         var someMinimalCase = PersistableFactory.getCourtCaseTestData().createSomeMinimalCase();
-        builder.getBuilder().courtCases(new ArrayList<>(List.of(someMinimalCase)))
+        builder.getBuilder()
             .transcriptionType(someTranscriptionType())
             .transcriptionStatus(someTranscriptionStatus())
             .hideRequestFromRequestor(false)

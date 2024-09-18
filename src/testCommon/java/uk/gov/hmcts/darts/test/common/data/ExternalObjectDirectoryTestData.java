@@ -4,6 +4,8 @@ import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
 import uk.gov.hmcts.darts.test.common.data.builder.CustomExternalObjectDirectoryEntity;
 
+import java.time.OffsetDateTime;
+
 import static java.util.UUID.randomUUID;
 import static uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum.UNSTRUCTURED;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.STORED;
@@ -13,8 +15,6 @@ import static uk.gov.hmcts.darts.test.common.data.UserAccountTestData.minimalUse
 
 @SuppressWarnings({"HideUtilityClassConstructor"})
 public class ExternalObjectDirectoryTestData implements Persistable<CustomExternalObjectDirectoryEntity.CustomExternalObjectDirectoryuilderRetrieve> {
-
-    private MediaEntity mediaEntity = PersistableFactory.getMediaTestData().someMinimalMedia();
 
     ExternalObjectDirectoryTestData() {
 
@@ -27,7 +27,15 @@ public class ExternalObjectDirectoryTestData implements Persistable<CustomExtern
     @SuppressWarnings("SummaryJavadoc")
     @Deprecated
     public ExternalObjectDirectoryEntity minimalExternalObjectDirectory() {
-        return someMinimal().build();
+        var externalObjectDirectory = new ExternalObjectDirectoryEntity();
+        externalObjectDirectory.setStatus(statusOf(STORED));
+        externalObjectDirectory.setExternalLocationType(locationTypeOf(UNSTRUCTURED));
+        externalObjectDirectory.setExternalLocation(randomUUID());
+        externalObjectDirectory.setVerificationAttempts(1);
+        var userAccount = minimalUserAccount();
+        externalObjectDirectory.setCreatedBy(userAccount);
+        externalObjectDirectory.setLastModifiedBy(userAccount);
+        return externalObjectDirectory;
     }
 
     @Override
@@ -37,13 +45,15 @@ public class ExternalObjectDirectoryTestData implements Persistable<CustomExtern
         var userAccount = minimalUserAccount();
 
         builder.getBuilder()
+            .media(PersistableFactory.getMediaTestData().someMinimal().build())
             .status(ObjectRecordStatusTestData.statusOf(STORED))
             .externalLocationType(locationTypeOf(UNSTRUCTURED))
             .externalLocation(randomUUID())
-            .verificationAttempts(1)
+            .verificationAttempts(0)
             .createdBy(userAccount)
             .lastModifiedBy(userAccount)
-            .media(mediaEntity);
+            .createdDateTime(OffsetDateTime.now())
+            .lastModifiedDateTime(OffsetDateTime.now());
 
         return builder;
     }
@@ -60,6 +70,6 @@ public class ExternalObjectDirectoryTestData implements Persistable<CustomExtern
         builder.media(media).status(statusOf(STORED))
             .externalLocationType(locationTypeOf(UNSTRUCTURED))
             .externalLocation(randomUUID());
-        return eod.build();
+        return eod.build().getEntity();
     }
 }

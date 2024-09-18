@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import uk.gov.hmcts.darts.common.entity.EventEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionEntity;
+import uk.gov.hmcts.darts.test.common.data.PersistableFactory;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 
 import java.time.OffsetDateTime;
@@ -17,11 +18,9 @@ import static java.time.temporal.ChronoUnit.SECONDS;
 import static java.util.Comparator.naturalOrder;
 import static java.util.stream.IntStream.rangeClosed;
 import static org.assertj.core.api.Assertions.assertThat;
-import static uk.gov.hmcts.darts.test.common.data.CaseTestData.createSomeMinimalCase;
 import static uk.gov.hmcts.darts.test.common.data.EventTestData.REPORTING_RESTRICTIONS_LIFTED_DB_ID;
 import static uk.gov.hmcts.darts.test.common.data.EventTestData.SECTION_11_1981_DB_ID;
 import static uk.gov.hmcts.darts.test.common.data.EventTestData.someReportingRestrictionId;
-import static uk.gov.hmcts.darts.test.common.data.HearingTestData.someMinimalHearing;
 
 @SuppressWarnings("VariableDeclarationUsageDistance")
 class TranscriptionReportingRestrictionsMapperTest extends IntegrationBase {
@@ -130,7 +129,7 @@ class TranscriptionReportingRestrictionsMapperTest extends IntegrationBase {
         var reappliedReportingRestriction = dartsDatabase.addHandlerToEvent(event3, SECTION_11_1981_DB_ID);
 
         HearingEntity hearingEntity = dartsDatabase.saveEventsForHearing(
-            someMinimalHearing(),
+            PersistableFactory.getHearingTestData().someMinimalHearing(),
             reportingRestriction,
             reportingRestrictionLifted,
             reappliedReportingRestriction
@@ -148,8 +147,10 @@ class TranscriptionReportingRestrictionsMapperTest extends IntegrationBase {
     @Test
     @Disabled("Impacted by V1_364_*.sql")
     void includesMigratedCaseWithRestrictionPersistedOnCaseTable() {
-        var caseWithReportingRestrictions = dartsDatabase.addHandlerToCase(createSomeMinimalCase(), someReportingRestrictionId());
-        var transcriptionEntity = dartsDatabase.getTranscriptionStub().createTranscription(caseWithReportingRestrictions);
+        var caseWithReportingRestrictions = dartsDatabase
+            .addHandlerToCase(PersistableFactory.getCourtCaseTestData().createSomeMinimalCase(), someReportingRestrictionId());
+        var transcriptionEntity = dartsDatabase
+            .getTranscriptionStub().createTranscription(caseWithReportingRestrictions);
 
         var transcriptionResponse = transcriptionService.getTranscription(transcriptionEntity.getId());
 

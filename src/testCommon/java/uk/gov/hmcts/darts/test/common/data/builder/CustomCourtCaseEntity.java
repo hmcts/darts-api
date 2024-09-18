@@ -3,11 +3,9 @@ package uk.gov.hmcts.darts.test.common.data.builder;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.beanutils.BeanUtils;
 import org.hibernate.AssertionFailure;
-import uk.gov.hmcts.darts.common.entity.AnnotationDocumentEntity;
 import uk.gov.hmcts.darts.common.entity.CaseRetentionEntity;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
-import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
 import uk.gov.hmcts.darts.common.entity.DefenceEntity;
 import uk.gov.hmcts.darts.common.entity.DefendantEntity;
 import uk.gov.hmcts.darts.common.entity.EventHandlerEntity;
@@ -15,20 +13,13 @@ import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.JudgeEntity;
 import uk.gov.hmcts.darts.common.entity.MediaLinkedCaseEntity;
 import uk.gov.hmcts.darts.common.entity.ProsecutorEntity;
-import uk.gov.hmcts.darts.common.entity.TranscriptionCommentEntity;
-import uk.gov.hmcts.darts.common.entity.TranscriptionDocumentEntity;
-import uk.gov.hmcts.darts.common.entity.TranscriptionEntity;
-import uk.gov.hmcts.darts.common.entity.TranscriptionStatusEntity;
-import uk.gov.hmcts.darts.common.entity.TranscriptionTypeEntity;
-import uk.gov.hmcts.darts.common.entity.TranscriptionUrgencyEntity;
-import uk.gov.hmcts.darts.common.entity.TranscriptionWorkflowEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.retention.enums.RetentionConfidenceReasonEnum;
 import uk.gov.hmcts.darts.retention.enums.RetentionConfidenceScoreEnum;
 
 import java.lang.reflect.InvocationTargetException;
-import java.time.LocalDate;
 import java.time.OffsetDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @RequiredArgsConstructor
@@ -79,16 +70,16 @@ public class CustomCourtCaseEntity extends CourtCaseEntity implements DbInsertab
         setCaseClosedTimestamp(caseClosedTimestamp);
         setRetentionUpdated(retentionUpdated);
         setRetentionRetries(retentionRetries);
-        setDefendantList(defendantList);
-        setProsecutorList(prosecutorList);
-        setDefenceList(defenceList);
+        setDefendantList(defendantList != null ? defendantList : new ArrayList<>());
+        setProsecutorList(prosecutorList != null ? prosecutorList : new ArrayList<>());
+        setDefenceList(defenceList != null ? defenceList : new ArrayList<>());
         setDeleted(deleted);
         setDeletedBy(deletedBy);
         setDeletedTimestamp(deletedTimestamp);
-        setHearings(hearings);
-        setCaseRetentionEntities(caseRetentionEntities);
-        setJudges(judges);
-        setMediaLinkedCaseList(mediaLinkedCaseList);
+        setHearings(hearings != null ? hearings : new ArrayList<>());
+        setCaseRetentionEntities(caseRetentionEntities != null ? caseRetentionEntities : new ArrayList<>());
+        setJudges(judges != null ? judges : new ArrayList<>());
+        setMediaLinkedCaseList(mediaLinkedCaseList != null ? mediaLinkedCaseList : new ArrayList<>());
         setDataAnonymised(dataAnonymised);
         setDataAnonymisedBy(dataAnonymisedBy);
         setDataAnonymisedTs(dataAnonymisedTs);
@@ -104,7 +95,7 @@ public class CustomCourtCaseEntity extends CourtCaseEntity implements DbInsertab
     }
 
     @Override
-    public CourtCaseEntity getDbInsertable() {
+    public CourtCaseEntity getEntity() {
         try {
             CourtCaseEntity courtCaseEntity = new CourtCaseEntity();
             BeanUtils.copyProperties(courtCaseEntity, this);
@@ -114,7 +105,8 @@ public class CustomCourtCaseEntity extends CourtCaseEntity implements DbInsertab
         }
     }
 
-    public static class CustomTranscriptionEntityBuilderRetrieve implements BuilderHolder<CustomCourtCaseEntity, CustomCourtCaseEntity.CustomCourtCaseEntityBuilder> {
+    public static class CustomTranscriptionEntityBuilderRetrieve
+        implements BuilderHolder<CustomCourtCaseEntity, CustomCourtCaseEntity.CustomCourtCaseEntityBuilder> {
 
         private final CustomCourtCaseEntity.CustomCourtCaseEntityBuilder builder = CustomCourtCaseEntity.builder();
 

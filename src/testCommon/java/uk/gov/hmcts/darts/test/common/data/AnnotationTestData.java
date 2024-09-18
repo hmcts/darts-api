@@ -3,7 +3,9 @@ package uk.gov.hmcts.darts.test.common.data;
 import uk.gov.hmcts.darts.common.entity.AnnotationEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.test.common.data.builder.CustomAnnotationEntity;
-import uk.gov.hmcts.darts.test.common.data.builder.CustomMediaRequestEntity;
+
+import java.time.OffsetDateTime;
+import java.util.ArrayList;
 
 import static uk.gov.hmcts.darts.test.common.data.UserAccountTestData.minimalUserAccount;
 
@@ -14,7 +16,7 @@ public class AnnotationTestData  implements Persistable<CustomAnnotationEntity.C
     }
 
     public AnnotationEntity minimalAnnotationEntity() {
-        return someMinimal().getBuilder().build();
+        return someMinimal().getBuilder().build().getEntity();
     }
 
     @Override
@@ -23,7 +25,9 @@ public class AnnotationTestData  implements Persistable<CustomAnnotationEntity.C
             CustomAnnotationEntity.CustomAnnotationEntityRetrieve();
         UserAccountEntity userAccount = minimalUserAccount();
         retrieve.getBuilder().currentOwner(userAccount).lastModifiedBy(userAccount)
-            .createdBy(userAccount);
+            .createdBy(userAccount).createdTimestamp(OffsetDateTime.now())
+            .lastModifiedDateTime(OffsetDateTime.now())
+            .hearingList(new ArrayList<>());
         return retrieve;
     }
 

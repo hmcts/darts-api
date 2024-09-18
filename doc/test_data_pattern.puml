@@ -1,0 +1,21 @@
+@startuml
+interface BuilderHolder {
+ Entity build()
+ Object getBuilder()
+}
+
+interface Persistable {
+ BuilderHolder someMaximal()
+ BuilderHolder someMinimal()
+}
+
+interface DbInsertable {
+ Entity getEntity()
+}
+
+class TestData implements Persistable {
+ BuilderHolder someMaximal()
+ someMinimal()
+}
+
+@enduml

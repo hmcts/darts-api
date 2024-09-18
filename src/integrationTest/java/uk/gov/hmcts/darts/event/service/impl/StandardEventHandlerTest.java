@@ -12,6 +12,7 @@ import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.event.model.DartsEvent;
 import uk.gov.hmcts.darts.event.service.EventDispatcher;
+import uk.gov.hmcts.darts.test.common.data.PersistableFactory;
 import uk.gov.hmcts.darts.testutils.stubs.NodeRegisterStub;
 
 import java.util.ArrayList;
@@ -30,7 +31,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.darts.event.enums.EventStatus.MODERNISED;
-import static uk.gov.hmcts.darts.test.common.data.CaseTestData.someMinimalCase;
 
 @SuppressWarnings({"PMD.DoNotUseThreads"})
 class StandardEventHandlerTest extends HandlerTestData {
@@ -57,7 +57,7 @@ class StandardEventHandlerTest extends HandlerTestData {
     @Test
     @Disabled("Impacted by V1_363__not_null_constraints_part3.sql")
     void throwsOnUnknownCourthouse() {
-        dartsDatabase.save(someMinimalCase());
+        dartsDatabase.save(PersistableFactory.getCourtCaseTestData().someMinimalCase());
         DartsEvent dartsEvent = someMinimalDartsEvent().courthouse(UNKNOWN_COURTHOUSE);
         dartsEvent.setCaseNumbers(List.of("123"));
         dartsEvent.setDateTime(HEARING_DATE_ODT);
@@ -326,4 +326,3 @@ class StandardEventHandlerTest extends HandlerTestData {
         return eventEntities.get(0).getId();
     }
 }
-

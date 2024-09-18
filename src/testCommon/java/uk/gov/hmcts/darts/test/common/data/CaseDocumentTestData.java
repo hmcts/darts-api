@@ -1,11 +1,11 @@
 package uk.gov.hmcts.darts.test.common.data;
 
-import uk.gov.hmcts.darts.common.entity.CaseDocumentEntity;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.test.common.data.builder.CustomCaseDocumentEntity;
-import uk.gov.hmcts.darts.test.common.data.builder.CustomCourtCaseEntity;
 
-public class CaseDocumentTestData implements Persistable< CustomCaseDocumentEntity.CustomCaseDocumentEntityBuilderRetrieve>  {
+import java.time.OffsetDateTime;
+
+public class CaseDocumentTestData implements Persistable<CustomCaseDocumentEntity.CustomCaseDocumentEntityBuilderRetrieve>  {
 
     private CourtCaseEntity courtCaseEntity = PersistableFactory.getCourtCaseTestData().someMinimalCase();
 
@@ -18,7 +18,14 @@ public class CaseDocumentTestData implements Persistable< CustomCaseDocumentEnti
         CustomCaseDocumentEntity.CustomCaseDocumentEntityBuilderRetrieve retrieve = new  CustomCaseDocumentEntity.CustomCaseDocumentEntityBuilderRetrieve();
         retrieve.getBuilder().courtCase(courtCaseEntity)
             .createdBy(UserAccountTestData.minimalUserAccount())
-            .lastModifiedBy(UserAccountTestData.minimalUserAccount());
+            .lastModifiedBy(UserAccountTestData.minimalUserAccount())
+            .fileName("some-file-name")
+            .fileType("some-file-type")
+            .fileSize(1024)
+            .hidden(false)
+            .lastModifiedDateTime(OffsetDateTime.now())
+            .isDeleted(false);
+
         return retrieve;
     }
 

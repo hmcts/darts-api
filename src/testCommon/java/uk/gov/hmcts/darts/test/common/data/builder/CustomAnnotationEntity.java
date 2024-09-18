@@ -5,15 +5,12 @@ import org.apache.commons.beanutils.BeanUtils;
 import org.hibernate.AssertionFailure;
 import uk.gov.hmcts.darts.common.entity.AnnotationDocumentEntity;
 import uk.gov.hmcts.darts.common.entity.AnnotationEntity;
-import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
-import uk.gov.hmcts.darts.common.entity.MediaEntity;
-import uk.gov.hmcts.darts.common.entity.MediaLinkedCaseEntity;
-import uk.gov.hmcts.darts.common.entity.ObjectAdminActionEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 
 import java.lang.reflect.InvocationTargetException;
 import java.time.OffsetDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @RequiredArgsConstructor
@@ -35,7 +32,7 @@ public class CustomAnnotationEntity extends AnnotationEntity implements DbInsert
         setDeleted(deleted);
         setDeletedBy(deletedBy);
         setDeletedTimestamp(deletedTimestamp);
-        setAnnotationDocuments(annotationDocuments);
+        setAnnotationDocuments(annotationDocuments != null ? annotationDocuments : new ArrayList<>());
         setHearingList(hearingList);
         setCreatedDateTime(createdTimestamp);
         setCreatedBy(createdBy);
@@ -44,7 +41,7 @@ public class CustomAnnotationEntity extends AnnotationEntity implements DbInsert
     }
 
     @Override
-    public AnnotationEntity getDbInsertable() {
+    public AnnotationEntity getEntity() {
         try {
             AnnotationEntity annotationEntity = new AnnotationEntity();
             BeanUtils.copyProperties(annotationEntity, this);

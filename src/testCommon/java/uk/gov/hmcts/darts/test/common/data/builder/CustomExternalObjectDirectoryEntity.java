@@ -17,7 +17,7 @@ import java.time.OffsetDateTime;
 import java.util.UUID;
 
 @RequiredArgsConstructor
-public class CustomExternalObjectDirectoryEntity extends ExternalObjectDirectoryEntity implements DbInsertable<ExternalObjectDirectoryEntity>{
+public class CustomExternalObjectDirectoryEntity extends ExternalObjectDirectoryEntity implements DbInsertable<ExternalObjectDirectoryEntity> {
     @lombok.Builder
     public CustomExternalObjectDirectoryEntity(Integer id, MediaEntity media, TranscriptionDocumentEntity transcriptionDocumentEntity,
                                                AnnotationDocumentEntity annotationDocumentEntity, CaseDocumentEntity caseDocument,
@@ -56,7 +56,7 @@ public class CustomExternalObjectDirectoryEntity extends ExternalObjectDirectory
     }
 
     @Override
-    public ExternalObjectDirectoryEntity getDbInsertable() {
+    public ExternalObjectDirectoryEntity getEntity() {
         try {
             ExternalObjectDirectoryEntity annotationEntity = new ExternalObjectDirectoryEntity();
             BeanUtils.copyProperties(annotationEntity, this);

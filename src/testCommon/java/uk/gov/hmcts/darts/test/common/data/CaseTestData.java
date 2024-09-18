@@ -1,25 +1,22 @@
 package uk.gov.hmcts.darts.test.common.data;
 
-import lombok.experimental.UtilityClass;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
-import uk.gov.hmcts.darts.test.common.data.builder.CustomAnnotationDocumentEntity;
 import uk.gov.hmcts.darts.test.common.data.builder.CustomCourtCaseEntity;
 
+import java.time.OffsetDateTime;
+import java.util.ArrayList;
 import java.util.function.Consumer;
 
 import static org.apache.commons.lang3.RandomStringUtils.random;
 import static uk.gov.hmcts.darts.test.common.data.CourthouseTestData.someMinimalCourthouse;
-import static uk.gov.hmcts.darts.test.common.data.DefenceTestData.createDefenceForCaseWithName;
-import static uk.gov.hmcts.darts.test.common.data.DefendantTestData.createDefendantForCaseWithName;
-import static uk.gov.hmcts.darts.test.common.data.ProsecutorTestData.createProsecutorForCaseWithName;
 import static uk.gov.hmcts.darts.test.common.data.UserAccountTestData.minimalUserAccount;
 
 @SuppressWarnings({"HideUtilityClassConstructor"})
 public class CaseTestData  implements Persistable<CustomCourtCaseEntity.CustomTranscriptionEntityBuilderRetrieve>  {
 
     public  CourtCaseEntity createSomeMinimalCase() {
-        return someMinimal().getBuilder().build();
+        return someMinimal().getBuilder().build().getEntity();
     }
 
     public  CourtCaseEntity caseWithCaseNumber(String caseNumber) {
@@ -46,31 +43,14 @@ public class CaseTestData  implements Persistable<CustomCourtCaseEntity.CustomTr
     @Deprecated
     // Not a minimal case. refactor
     public CourtCaseEntity someMinimalCase() {
-        var courtCaseEntity = new CourtCaseEntity();
-        courtCaseEntity.setCaseNumber("case-1");
-        courtCaseEntity.setCourthouse(someMinimalCourthouse());
-        courtCaseEntity.addDefendant(createDefendantForCaseWithName(courtCaseEntity, "aDefendant"));
-        courtCaseEntity.addDefence(createDefenceForCaseWithName(courtCaseEntity, "aDefence"));
-        courtCaseEntity.addProsecutor(createProsecutorForCaseWithName(courtCaseEntity, "aProsecutor"));
-        courtCaseEntity.setClosed(false);
-        courtCaseEntity.setInterpreterUsed(false);
-        courtCaseEntity.setCreatedBy(UserAccountTestData.minimalUserAccount());
-        courtCaseEntity.setLastModifiedBy(UserAccountTestData.minimalUserAccount());
-        return courtCaseEntity;
+        return someMinimal().build().getEntity();
     }
 
     /**
      * Creates a CourtCaseEntity. Passes the created case to the client for further customisations
      */
     public CourtCaseEntity someMinimalCase(Consumer<CourtCaseEntity> createdCaseConsumer) {
-        var courtCaseEntity = new CourtCaseEntity();
-        courtCaseEntity.setCaseNumber("case-1");
-        courtCaseEntity.setCourthouse(someMinimalCourthouse());
-        courtCaseEntity.addDefendant(createDefendantForCaseWithName(courtCaseEntity, "aDefendant"));
-        courtCaseEntity.addDefence(createDefenceForCaseWithName(courtCaseEntity, "aDefence"));
-        courtCaseEntity.addProsecutor(createProsecutorForCaseWithName(courtCaseEntity, "aProsecutor"));
-        courtCaseEntity.setClosed(false);
-        courtCaseEntity.setInterpreterUsed(false);
+        CourtCaseEntity courtCaseEntity = someMinimal().getBuilder().build().getEntity();
         createdCaseConsumer.accept(courtCaseEntity);
         return courtCaseEntity;
     }
@@ -97,6 +77,7 @@ public class CaseTestData  implements Persistable<CustomCourtCaseEntity.CustomTr
     @Override
     public CustomCourtCaseEntity.CustomTranscriptionEntityBuilderRetrieve someMinimal() {
         CustomCourtCaseEntity.CustomTranscriptionEntityBuilderRetrieve retrieve = new CustomCourtCaseEntity.CustomTranscriptionEntityBuilderRetrieve();
+
         var postfix = random(10, false, true);
         var userAccount = minimalUserAccount();
         retrieve.getBuilder().courthouse(someMinimalCourthouse())
@@ -104,7 +85,12 @@ public class CaseTestData  implements Persistable<CustomCourtCaseEntity.CustomTr
             .closed(false)
             .interpreterUsed(false)
             .createdBy(userAccount)
-            .lastModifiedBy(userAccount);
+            .lastModifiedBy(userAccount)
+            .retentionUpdated(false)
+            .deleted(false)
+            .dataAnonymised(false).defenceList(new ArrayList<>())
+            .defendantList(new ArrayList<>()).prosecutorList(new ArrayList<>())
+            .createdDateTime(OffsetDateTime.now());
         return retrieve;
     }
 

@@ -36,7 +36,7 @@ public class CustomMediaRequestEntity extends MediaRequestEntity implements DbIn
     }
 
     @Override
-    public MediaRequestEntity getDbInsertable() {
+    public MediaRequestEntity getEntity() {
         try {
             MediaRequestEntity mediaRequestEntity = new MediaRequestEntity();
             BeanUtils.copyProperties(mediaRequestEntity, this);

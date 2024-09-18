@@ -18,6 +18,7 @@ import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import java.lang.reflect.InvocationTargetException;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @RequiredArgsConstructor
@@ -48,7 +49,7 @@ public class CustomTranscriptionEntity extends TranscriptionEntity implements Db
         setTranscriptionType(transcriptionType);
         setCourtroom(courtroom);
         setTranscriptionUrgency(transcriptionUrgency);
-        setHearings(hearings);
+        setHearings(hearings != null ? hearings : new ArrayList<>());
         setTranscriptionStatus(transcriptionStatus);
         setLegacyObjectId(legacyObjectId);
         setRequestedBy(requestedBy);
@@ -64,9 +65,9 @@ public class CustomTranscriptionEntity extends TranscriptionEntity implements Db
         setDeletedTimestamp(deletedTimestamp);
         setChronicleId(chronicleId);
         setAntecedentId(antecedentId);
-        setTranscriptionCommentEntities(transcriptionCommentEntities);
-        setTranscriptionWorkflowEntities(transcriptionWorkflowEntities);
-        setTranscriptionDocumentEntities(transcriptionDocumentEntities);
+        setTranscriptionCommentEntities(transcriptionCommentEntities != null ? transcriptionCommentEntities : new ArrayList<>());
+        setTranscriptionWorkflowEntities(transcriptionWorkflowEntities != null ? transcriptionWorkflowEntities : new ArrayList<>());
+        setTranscriptionDocumentEntities(transcriptionDocumentEntities != null ? transcriptionDocumentEntities : new ArrayList<>());
         setTranscriptionObjectName(transcriptionObjectName);
         setCreatedDateTime(createdDateTime);
         setCreatedBy(createdBy);
@@ -75,7 +76,7 @@ public class CustomTranscriptionEntity extends TranscriptionEntity implements Db
     }
 
     @Override
-    public TranscriptionEntity getDbInsertable() {
+    public TranscriptionEntity getEntity() {
         try {
             TranscriptionEntity transcriptionEntity = new TranscriptionEntity();
             BeanUtils.copyProperties(transcriptionEntity, this);

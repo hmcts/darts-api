@@ -3,7 +3,6 @@ package uk.gov.hmcts.darts.arm.service;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.skyscreamer.jsonassert.JSONCompareMode;
@@ -18,12 +17,17 @@ import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
+import uk.gov.hmcts.darts.common.entity.TranscriptionCommentEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionDocumentEntity;
+import uk.gov.hmcts.darts.common.entity.TranscriptionEntity;
+import uk.gov.hmcts.darts.common.entity.TranscriptionWorkflowEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
+import uk.gov.hmcts.darts.test.common.data.CourthouseTestData;
+import uk.gov.hmcts.darts.test.common.data.PersistableFactory;
+import uk.gov.hmcts.darts.testutils.DatabaseDateSetter;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 import uk.gov.hmcts.darts.testutils.stubs.AuthorisationStub;
-import uk.gov.hmcts.darts.testutils.stubs.TranscriptionStub;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -33,8 +37,11 @@ import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
+import static java.time.OffsetDateTime.now;
 import static java.time.ZoneOffset.UTC;
 import static java.time.format.DateTimeFormatter.BASIC_ISO_DATE;
 import static org.mockito.Mockito.when;
@@ -43,12 +50,14 @@ import static uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum.ARM;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_DROP_ZONE;
 import static uk.gov.hmcts.darts.test.common.TestUtils.getContentsFromFile;
 import static uk.gov.hmcts.darts.test.common.data.PersistableFactory.getMediaTestData;
+import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum.AWAITING_AUTHORISATION;
+import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionTypeEnum.SPECIFIED_TIMES;
+import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionUrgencyEnum.STANDARD;
 
-@Disabled("Impacted by V1_367__adding_not_null_constraints_part_4.sql")
 @Slf4j
 @SuppressWarnings({"PMD.ExcessiveImports", "VariableDeclarationUsageDistance", "PMD.AssignmentInOperand"})
 class ArchiveRecordServiceIntTest extends IntegrationBase {
-    private static final OffsetDateTime YESTERDAY = OffsetDateTime.now(UTC).minusDays(1).withHour(9).withMinute(0)
+    private static final OffsetDateTime YESTERDAY = now(UTC).minusDays(1).withHour(9).withMinute(0)
         .withSecond(0).withNano(0);
 
     private static final String REQUESTED_TRANSCRIPTION_COMMENT = "Requested transcription";
@@ -85,21 +94,21 @@ class ArchiveRecordServiceIntTest extends IntegrationBase {
     @Autowired
     private ArchiveRecordService archiveRecordService;
 
+    @Autowired
+    private DatabaseDateSetter dateConfigurer;
 
     @BeforeEach
     void setUp() {
-
         hearing = dartsDatabase.givenTheDatabaseContainsCourtCaseWithHearingAndCourthouseWithRoom(
             "Case1",
             "NEWCASTLE",
             "Int Test Courtroom 2",
             HEARING_DATE
         );
-
     }
 
     @Test
-    void generateArchiveRecord_WithLiveMediaProperties_ReturnFileSuccess() throws IOException {
+    void generateArchiveRecord_WithLiveMediaProperties_ReturnFileSuccess() throws Exception {
         OffsetDateTime startedAt = OffsetDateTime.of(2023, 9, 23, 13, 0, 0, 0, UTC);
         when(currentTimeHelper.currentOffsetDateTime()).thenReturn(startedAt);
         OffsetDateTime endedAt = OffsetDateTime.of(2023, 9, 23, 13, 45, 0, 0, UTC);
@@ -110,24 +119,29 @@ class ArchiveRecordServiceIntTest extends IntegrationBase {
             endedAt,
             1
         );
-        MediaEntity savedMedia = dartsDatabase.getMediaRepository().saveAndFlush(media);
+        MediaEntity savedMedia = dartsPersistence.save(media);
+
+        savedMedia.setCourtroom(hearing.getCourtroom());
         savedMedia.setMediaFile("a-media-file.mp2");
         savedMedia.setCreatedDateTime(startedAt);
         savedMedia.setRetConfReason(RETENTION_CONFIDENCE_REASON);
         savedMedia.setRetConfScore(RETENTION_CONFIDENCE_SCORE);
-        dartsDatabase.save(savedMedia);
+        savedMedia = dartsPersistence.save(savedMedia);
 
-        ExternalObjectDirectoryEntity armEod = dartsDatabase.getExternalObjectDirectoryStub().createExternalObjectDirectory(
-            savedMedia,
-            ARM_DROP_ZONE,
-            ARM,
-            UUID.randomUUID()
-        );
-        hearing.addMedia(savedMedia);
+
+        hearing.addMedia(media);
         dartsDatabase.getHearingRepository().saveAndFlush(hearing);
 
+        ExternalObjectDirectoryEntity armEod = PersistableFactory.getExternalObjectDirectoryTestData().someMinimal().getBuilder()
+                .media(savedMedia)
+                .status(dartsDatabase.getObjectRecordStatusEntity(ARM_DROP_ZONE))
+                .externalLocationType(dartsDatabase.getExternalLocationTypeEntity(ARM))
+                .externalLocation(UUID.randomUUID())
+                .updateRetention(true).build().getEntity();
+
+
         armEod.setTransferAttempts(1);
-        dartsDatabase.getExternalObjectDirectoryRepository().saveAndFlush(armEod);
+        armEod = dartsPersistence.save(armEod);
 
         when(armDataManagementConfiguration.getMediaRecordClass()).thenReturn(DARTS);
         when(armDataManagementConfiguration.getMediaRecordPropertiesFile()).thenReturn("tests/arm/properties/media-record.properties");
@@ -156,13 +170,20 @@ class ArchiveRecordServiceIntTest extends IntegrationBase {
         expectedResponse = expectedResponse.replaceAll("<START_DATE_TIME>", media.getStart().format(formatter));
         expectedResponse = expectedResponse.replaceAll("<END_DATE_TIME>", media.getEnd().format(formatter));
         expectedResponse = expectedResponse.replaceAll("<EVENT_DATE_TIME>", media.getCreatedDateTime().format(formatter));
+        expectedResponse = expectedResponse.replaceAll("<HEARING_DATE>", hearing.getHearingDate().atTime(0, 0, 0)
+            .atZone(ZoneId.of("UTC")).format(formatter));
+        expectedResponse = expectedResponse.replaceAll("<CREATE_DATE>", media.getCreatedDateTime().format(formatter));
+        expectedResponse = expectedResponse.replaceAll("<START_DATE>", media.getStart().format(formatter));
+        expectedResponse = expectedResponse.replaceAll("<END_DATE>", media.getEnd().format(formatter));
+        expectedResponse = expectedResponse.replaceAll("<COURTROOM>", media.getCourtroom().getName());
+        expectedResponse = expectedResponse.replaceAll("<COURTHOUSE>", media.getCourtroom().getCourthouse().getDisplayName());
 
         log.info("expect Response {}", expectedResponse);
         assertEquals(expectedResponse, actualResponse, JSONCompareMode.STRICT);
     }
 
     @Test
-    void generateArchiveRecord_WithLiveMediaPropertiesAndRetentionDate_ReturnFileSuccess() throws IOException {
+    void generateArchiveRecord_WithLiveMediaPropertiesAndRetentionDate_ReturnFileSuccess() throws Exception {
         OffsetDateTime startedAt = OffsetDateTime.of(2023, 9, 23, 13, 0, 0, 0, UTC);
         OffsetDateTime retainUntil = OffsetDateTime.of(2024, 9, 23, 13, 45, 0, 0, UTC);
         when(currentTimeHelper.currentOffsetDateTime()).thenReturn(startedAt);
@@ -175,24 +196,27 @@ class ArchiveRecordServiceIntTest extends IntegrationBase {
             1
         );
         media.setRetainUntilTs(retainUntil);
-        MediaEntity savedMedia = dartsDatabase.getMediaRepository().saveAndFlush(media);
-        savedMedia.setMediaFile("a-media-file.mp2");
-        savedMedia.setCreatedDateTime(startedAt);
-        savedMedia.setRetConfReason(RETENTION_CONFIDENCE_REASON);
-        savedMedia.setRetConfScore(RETENTION_CONFIDENCE_SCORE);
-        dartsDatabase.save(savedMedia);
 
-        ExternalObjectDirectoryEntity armEod = dartsDatabase.getExternalObjectDirectoryStub().createExternalObjectDirectory(
-            savedMedia,
-            ARM_DROP_ZONE,
-            ARM,
-            UUID.randomUUID()
-        );
-        hearing.addMedia(savedMedia);
+        media.setMediaFile("a-media-file.mp2");
+        media.setCreatedDateTime(startedAt);
+        media.setRetConfReason(RETENTION_CONFIDENCE_REASON);
+        media.setRetConfScore(RETENTION_CONFIDENCE_SCORE);
+
+        media = dartsPersistence.save(media);
+        dartsDatabase.getHearingRepository().saveAndFlush(hearing);
+
+        ExternalObjectDirectoryEntity armEod = PersistableFactory.getExternalObjectDirectoryTestData().someMinimal().getBuilder()
+            .media(media)
+            .status(dartsDatabase.getObjectRecordStatusEntity(ARM_DROP_ZONE))
+            .externalLocationType(dartsDatabase.getExternalLocationTypeEntity(ARM))
+            .externalLocation(UUID.randomUUID())
+            .updateRetention(true).build().getEntity();
+
+        hearing.addMedia(media);
         dartsDatabase.getHearingRepository().saveAndFlush(hearing);
 
         armEod.setTransferAttempts(1);
-        dartsDatabase.getExternalObjectDirectoryRepository().saveAndFlush(armEod);
+        armEod = dartsPersistence.save(armEod);
 
         when(armDataManagementConfiguration.getMediaRecordClass()).thenReturn(DARTS);
         when(armDataManagementConfiguration.getMediaRecordPropertiesFile()).thenReturn("tests/arm/properties/media-record.properties");
@@ -204,7 +228,7 @@ class ArchiveRecordServiceIntTest extends IntegrationBase {
         when(armDataManagementConfiguration.getRegion()).thenReturn(REGION);
         when(armDataManagementConfiguration.getFileExtension()).thenReturn(FILE_EXTENSION);
 
-        String prefix = String.format("%d_%d_1", armEod.getId(), savedMedia.getId());
+        String prefix = String.format("%d_%d_1", armEod.getId(), media.getId());
         ArchiveRecordFileInfo archiveRecordFileInfo = archiveRecordService.generateArchiveRecord(armEod.getId(), prefix);
 
         log.info("Reading file {}", archiveRecordFileInfo.getArchiveRecordFile().getAbsoluteFile());
@@ -216,11 +240,18 @@ class ArchiveRecordServiceIntTest extends IntegrationBase {
         String expectedResponse = getContentsFromFile("tests/arm/service/testGenerateMediaArchiveRecord/expectedResponse.a360");
         expectedResponse = expectedResponse.replaceAll("<PREFIX>", prefix);
         expectedResponse = expectedResponse.replaceAll("<EODID>", String.valueOf(armEod.getId()));
-        expectedResponse = expectedResponse.replaceAll("<OBJECT_ID>", String.valueOf(savedMedia.getId()));
-        expectedResponse = expectedResponse.replaceAll("<PARENT_ID>", String.valueOf(savedMedia.getId()));
+        expectedResponse = expectedResponse.replaceAll("<OBJECT_ID>", String.valueOf(media.getId()));
+        expectedResponse = expectedResponse.replaceAll("<PARENT_ID>", String.valueOf(media.getId()));
         expectedResponse = expectedResponse.replaceAll("<START_DATE_TIME>", media.getStart().format(formatter));
         expectedResponse = expectedResponse.replaceAll("<END_DATE_TIME>", media.getEnd().format(formatter));
         expectedResponse = expectedResponse.replaceAll("<EVENT_DATE_TIME>", media.getRetainUntilTs().format(formatter));
+        expectedResponse = expectedResponse.replaceAll("<HEARING_DATE>", hearing.getHearingDate().atTime(0, 0, 0)
+            .atZone(ZoneId.of("UTC")).format(formatter));
+        expectedResponse = expectedResponse.replaceAll("<CREATE_DATE>", media.getCreatedDateTime().format(formatter));
+        expectedResponse = expectedResponse.replaceAll("<START_DATE>", media.getStart().format(formatter));
+        expectedResponse = expectedResponse.replaceAll("<END_DATE>", media.getEnd().format(formatter));
+        expectedResponse = expectedResponse.replaceAll("<COURTROOM>", media.getCourtroom().getName());
+        expectedResponse = expectedResponse.replaceAll("<COURTHOUSE>", media.getCourtroom().getCourthouse().getDisplayName());
 
         log.info("expect Response {}", expectedResponse);
         assertEquals(expectedResponse, actualResponse, JSONCompareMode.STRICT);
@@ -239,24 +270,27 @@ class ArchiveRecordServiceIntTest extends IntegrationBase {
             endedAt,
             1
         );
-        MediaEntity savedMedia = dartsDatabase.getMediaRepository().saveAndFlush(media);
+        MediaEntity savedMedia = dartsPersistence.save(media);
         savedMedia.setMediaFile("a-media-file.mp2");
         savedMedia.setCreatedDateTime(startedAt);
         savedMedia.setRetConfReason(RETENTION_CONFIDENCE_REASON);
         savedMedia.setRetConfScore(RETENTION_CONFIDENCE_SCORE);
-        dartsDatabase.save(savedMedia);
+        savedMedia.setHearingList(new ArrayList<>(List.of(hearing)));
 
-        ExternalObjectDirectoryEntity armEod = dartsDatabase.getExternalObjectDirectoryStub().createExternalObjectDirectory(
-            savedMedia,
-            ARM_DROP_ZONE,
-            ARM,
-            UUID.randomUUID()
-        );
-        hearing.addMedia(savedMedia);
+        savedMedia = dartsPersistence.save(savedMedia);
+
+        hearing.addMedia(media);
         dartsDatabase.getHearingRepository().saveAndFlush(hearing);
 
+        ExternalObjectDirectoryEntity armEod = PersistableFactory.getExternalObjectDirectoryTestData().someMinimal().getBuilder()
+            .media(media)
+            .status(dartsDatabase.getObjectRecordStatusEntity(ARM_DROP_ZONE))
+            .externalLocationType(dartsDatabase.getExternalLocationTypeEntity(ARM))
+            .externalLocation(UUID.randomUUID())
+            .updateRetention(true).build().getEntity();
+
         armEod.setTransferAttempts(1);
-        dartsDatabase.getExternalObjectDirectoryRepository().saveAndFlush(armEod);
+        armEod = dartsPersistence.save(armEod);
 
         when(armDataManagementConfiguration.getMediaRecordClass()).thenReturn(DARTS);
         when(armDataManagementConfiguration.getMediaRecordPropertiesFile()).thenReturn("tests/arm/properties/all_properties/media-record.properties");
@@ -282,12 +316,19 @@ class ArchiveRecordServiceIntTest extends IntegrationBase {
         expectedResponse = expectedResponse.replaceAll("<EODID>", String.valueOf(armEod.getId()));
         expectedResponse = expectedResponse.replaceAll("<OBJECT_ID>", String.valueOf(savedMedia.getId()));
         expectedResponse = expectedResponse.replaceAll("<PARENT_ID>", String.valueOf(savedMedia.getId()));
+        expectedResponse = expectedResponse.replaceAll("<HEARING_DATE>", hearing.getHearingDate().atTime(0, 0, 0)
+            .atZone(ZoneId.of("UTC")).format(formatter));
+        expectedResponse = expectedResponse.replaceAll("<CREATE_DATE>", media.getCreatedDateTime().format(formatter));
+        expectedResponse = expectedResponse.replaceAll("<START_DATE>", media.getStart().format(formatter));
+        expectedResponse = expectedResponse.replaceAll("<END_DATE>", media.getEnd().format(formatter));
+        expectedResponse = expectedResponse.replaceAll("<COURTROOM>", media.getCourtroom().getName());
+        expectedResponse = expectedResponse.replaceAll("<COURTHOUSE>", media.getCourtroom().getCourthouse().getDisplayName());
+
         log.info("expect Response {}", expectedResponse);
         assertEquals(expectedResponse, actualResponse, JSONCompareMode.STRICT);
     }
 
     @Test
-    @Disabled("Impacted by V1_364_*.sql")
     void generateArchiveRecord_WithLiveTranscriptionProperties_ReturnFileSuccess() throws IOException {
         OffsetDateTime startedAt = OffsetDateTime.of(2023, 9, 23, 13, 0, 0, 0, UTC);
         when(currentTimeHelper.currentOffsetDateTime()).thenReturn(startedAt);
@@ -296,32 +337,70 @@ class ArchiveRecordServiceIntTest extends IntegrationBase {
         var testUser = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
         var courtCase = authorisationStub.getCourtCaseEntity();
         courtCase.setCaseNumber("Case2");
-        dartsDatabase.getCaseRepository().save(courtCase);
-        var transcriptionEntity = dartsDatabase.getTranscriptionStub().createAndSaveAwaitingAuthorisationTranscription(
-            testUser,
-            courtCase,
-            hearing,
-            REQUESTED_TRANSCRIPTION_COMMENT,
-            startedAt);
+        courtCase = dartsPersistence.save(courtCase);
+
+        OffsetDateTime now = now(UTC);
+        OffsetDateTime yesterday = now(UTC).minusDays(1).withHour(0).withMinute(0).withSecond(0).withNano(0);
+
+        TranscriptionEntity transcriptionEntity = PersistableFactory.getTranscriptionTestData().someMinimal().getBuilder()
+            .createdBy(testUser).lastModifiedBy(testUser).requestedBy(testUser)
+            .courtCases(new ArrayList<>(List.of(courtCase)))
+            .hearings(new ArrayList<>(List.of(hearing)))
+            .transcriptionStatus(dartsDatabase.getTranscriptionStub().getTranscriptionStatusByEnum(AWAITING_AUTHORISATION))
+            .transcriptionUrgency(dartsDatabase.getTranscriptionStub().getTranscriptionUrgencyByEnum(STANDARD))
+            .transcriptionType(dartsDatabase.getTranscriptionStub().getTranscriptionTypeByEnum(SPECIFIED_TIMES))
+            .isManualTranscription(true)
+            .startTime(now)
+            .endTime(yesterday)
+            .transcriptionStatus(dartsDatabase.getTranscriptionStub()
+                                     .getTranscriptionStatusByEnum(AWAITING_AUTHORISATION))
+            .build();
+        transcriptionEntity = dartsPersistence.save(transcriptionEntity);
+
+        TranscriptionWorkflowEntity transcriptionWorkflowEntity = dartsPersistence.save(PersistableFactory.getTranscriptionWorkflowTestData()
+                                  .someMinimal().getBuilder()
+                                  .transcription(transcriptionEntity).build());
+
+        transcriptionWorkflowEntity = dartsPersistence.save(transcriptionWorkflowEntity);
+        TranscriptionCommentEntity commentEntity = dartsPersistence
+            .save(PersistableFactory.getTranscriptionCommentTestData()
+                                  .someMinimal().getBuilder()
+                      .comment(REQUESTED_TRANSCRIPTION_COMMENT).transcription(transcriptionEntity).transcriptionWorkflow(transcriptionWorkflowEntity).build());
+
+
+        transcriptionWorkflowEntity.setTranscriptionComments(
+            new ArrayList<>(List.of(commentEntity)));
+        transcriptionWorkflowEntity = dartsPersistence.save(transcriptionWorkflowEntity);
+
+        transcriptionEntity.setTranscriptionWorkflowEntities(
+            new ArrayList<>(List.of(transcriptionWorkflowEntity)));
+        transcriptionEntity.setTranscriptionCommentEntities(
+            new ArrayList<>(List.of(commentEntity)));
+        transcriptionEntity = dartsPersistence.save(transcriptionEntity);
 
         final String fileName = "Test Document.docx";
         final String fileType = "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
         final int fileSize = 11_937;
         final String checksum = "C3CCA7021CF79B42F245AF350601C284";
-        TranscriptionDocumentEntity transcriptionDocumentEntity = TranscriptionStub.createTranscriptionDocumentEntity(
-            transcriptionEntity, fileName, fileType, fileSize, testUser, checksum, startedAt);
+
+        TranscriptionDocumentEntity transcriptionDocumentEntity = PersistableFactory.getTranscriptionDocument().someMinimal()
+            .getBuilder().transcription(transcriptionEntity).fileName(fileName).fileType(fileType)
+            .fileSize(fileSize).uploadedBy(testUser).lastModifiedBy(testUser).checksum(checksum).uploadedDateTime(startedAt)
+            .retConfScore(100).retConfReason("confidence reason")
+            .build();
         transcriptionDocumentEntity.setRetConfReason(RETENTION_CONFIDENCE_REASON);
         transcriptionDocumentEntity.setRetConfScore(RETENTION_CONFIDENCE_SCORE);
-        dartsDatabase.getTranscriptionDocumentRepository().save(transcriptionDocumentEntity);
+        transcriptionDocumentEntity = dartsPersistence.save(transcriptionDocumentEntity);
 
-        ExternalObjectDirectoryEntity armEod = dartsDatabase.getExternalObjectDirectoryStub().createExternalObjectDirectory(
-            transcriptionDocumentEntity,
-            dartsDatabase.getObjectRecordStatusEntity(ARM_DROP_ZONE),
-            dartsDatabase.getExternalLocationTypeEntity(ARM),
-            UUID.randomUUID()
-        );
+        ExternalObjectDirectoryEntity armEod = PersistableFactory.getExternalObjectDirectoryTestData().someMinimal().getBuilder()
+            .transcriptionDocumentEntity(transcriptionDocumentEntity)
+            .status(dartsDatabase.getObjectRecordStatusEntity(ARM_DROP_ZONE))
+            .externalLocationType(dartsDatabase.getExternalLocationTypeEntity(ARM))
+            .externalLocation(UUID.randomUUID())
+            .media(null)
+            .updateRetention(true).build().getEntity();
         armEod.setTransferAttempts(1);
-        dartsDatabase.save(armEod);
+        armEod = dartsPersistence.save(armEod);
 
         when(armDataManagementConfiguration.getTranscriptionRecordClass()).thenReturn(DARTS);
         when(armDataManagementConfiguration.getTranscriptionRecordPropertiesFile()).thenReturn(
@@ -354,11 +433,9 @@ class ArchiveRecordServiceIntTest extends IntegrationBase {
         expectedResponse = expectedResponse.replaceAll("<EVENT_DATE_TIME>", transcriptionDocumentEntity.getUploadedDateTime().format(formatter));
         log.info("expect response {}", expectedResponse);
         assertEquals(expectedResponse, actualResponse, JSONCompareMode.STRICT);
-
     }
 
     @Test
-    @Disabled("Impacted by V1_364_*.sql")
     void generateArchiveRecord_WithLiveTranscriptionPropertiesRetentionDate_ReturnFileSuccess() throws IOException {
         OffsetDateTime startedAt = OffsetDateTime.of(2023, 9, 23, 13, 0, 0, 0, UTC);
         when(currentTimeHelper.currentOffsetDateTime()).thenReturn(startedAt);
@@ -368,33 +445,61 @@ class ArchiveRecordServiceIntTest extends IntegrationBase {
         var testUser = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
         var courtCase = authorisationStub.getCourtCaseEntity();
         courtCase.setCaseNumber("Case2");
-        dartsDatabase.getCaseRepository().save(courtCase);
-        var transcriptionEntity = dartsDatabase.getTranscriptionStub().createAndSaveAwaitingAuthorisationTranscription(
-            testUser,
-            courtCase,
-            hearing,
-            REQUESTED_TRANSCRIPTION_COMMENT,
-            startedAt);
+        dartsPersistence.save(courtCase);
+        TranscriptionEntity transcriptionEntity = PersistableFactory.getTranscriptionTestData().someMinimal().getBuilder()
+            .createdBy(testUser).lastModifiedBy(testUser).requestedBy(testUser)
+            .courtCases(new ArrayList<>(List.of(courtCase)))
+            .hearings(new ArrayList<>(List.of(hearing)))
+            .transcriptionStatus(dartsDatabase.getTranscriptionStub().getTranscriptionStatusByEnum(AWAITING_AUTHORISATION))
+            .transcriptionUrgency(dartsDatabase.getTranscriptionStub().getTranscriptionUrgencyByEnum(STANDARD))
+            .transcriptionType(dartsDatabase.getTranscriptionStub().getTranscriptionTypeByEnum(SPECIFIED_TIMES))
+            .isManualTranscription(true)
+            .build();
+        transcriptionEntity = dartsPersistence.save(transcriptionEntity);
+
+        TranscriptionWorkflowEntity transcriptionWorkflowEntity = dartsPersistence.save(PersistableFactory.getTranscriptionWorkflowTestData()
+                                                                                            .someMinimal().getBuilder()
+                                                                                            .transcription(transcriptionEntity).build());
+
+        TranscriptionCommentEntity commentEntity = dartsPersistence
+            .save(PersistableFactory.getTranscriptionCommentTestData()
+            .someMinimal().getBuilder().comment(REQUESTED_TRANSCRIPTION_COMMENT)
+                      .transcription(transcriptionEntity).transcriptionWorkflow(transcriptionWorkflowEntity).build());
+
+
+        transcriptionWorkflowEntity.setTranscriptionComments(
+            new ArrayList<>(List.of(commentEntity)));
+        transcriptionWorkflowEntity = dartsPersistence.save(transcriptionWorkflowEntity);
+
+        transcriptionEntity.setTranscriptionWorkflowEntities(
+            new ArrayList<>(List.of(transcriptionWorkflowEntity)));
+        transcriptionEntity.setTranscriptionCommentEntities(
+            new ArrayList<>(List.of(commentEntity)));
+        transcriptionEntity = dartsPersistence.save(transcriptionEntity);
 
         final String fileName = "Test Document.docx";
         final String fileType = "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
         final int fileSize = 11_937;
         final String checksum = "C3CCA7021CF79B42F245AF350601C284";
-        TranscriptionDocumentEntity transcriptionDocumentEntity = TranscriptionStub.createTranscriptionDocumentEntity(
-            transcriptionEntity, fileName, fileType, fileSize, testUser, checksum, startedAt);
+        TranscriptionDocumentEntity transcriptionDocumentEntity = PersistableFactory.getTranscriptionDocument().someMinimal()
+            .getBuilder().transcription(transcriptionEntity).fileName(fileName).fileType(fileType)
+            .fileSize(fileSize).uploadedBy(testUser).lastModifiedBy(testUser).checksum(checksum).uploadedDateTime(startedAt)
+            .retConfScore(100).retConfReason("confidence reason")
+            .build();
         transcriptionDocumentEntity.setRetainUntilTs(retainUntil);
         transcriptionDocumentEntity.setRetConfReason(RETENTION_CONFIDENCE_REASON);
         transcriptionDocumentEntity.setRetConfScore(RETENTION_CONFIDENCE_SCORE);
-        dartsDatabase.getTranscriptionDocumentRepository().save(transcriptionDocumentEntity);
+        transcriptionDocumentEntity = dartsPersistence.save(transcriptionDocumentEntity);
 
-        ExternalObjectDirectoryEntity armEod = dartsDatabase.getExternalObjectDirectoryStub().createExternalObjectDirectory(
-            transcriptionDocumentEntity,
-            dartsDatabase.getObjectRecordStatusEntity(ARM_DROP_ZONE),
-            dartsDatabase.getExternalLocationTypeEntity(ARM),
-            UUID.randomUUID()
-        );
+        ExternalObjectDirectoryEntity armEod = PersistableFactory.getExternalObjectDirectoryTestData().someMinimal().getBuilder()
+            .transcriptionDocumentEntity(transcriptionDocumentEntity)
+            .status(dartsDatabase.getObjectRecordStatusEntity(ARM_DROP_ZONE))
+            .externalLocationType(dartsDatabase.getExternalLocationTypeEntity(ARM))
+            .externalLocation(UUID.randomUUID())
+            .media(null)
+            .updateRetention(true).build().getEntity();
         armEod.setTransferAttempts(1);
-        dartsDatabase.save(armEod);
+        armEod = dartsPersistence.save(armEod);
 
         when(armDataManagementConfiguration.getTranscriptionRecordClass()).thenReturn(DARTS);
         when(armDataManagementConfiguration.getTranscriptionRecordPropertiesFile()).thenReturn(
@@ -431,7 +536,6 @@ class ArchiveRecordServiceIntTest extends IntegrationBase {
     }
 
     @Test
-    @Disabled("Impacted by V1_364_*.sql")
     void generateArchiveRecord_WithAllPropertiesTranscription_ReturnFileSuccess() throws IOException {
         OffsetDateTime startedAt = OffsetDateTime.of(2023, 9, 23, 13, 0, 0, 0, UTC);
         when(currentTimeHelper.currentOffsetDateTime()).thenReturn(startedAt);
@@ -441,31 +545,63 @@ class ArchiveRecordServiceIntTest extends IntegrationBase {
         var courtCase = authorisationStub.getCourtCaseEntity();
         courtCase.setCaseNumber("Case2");
         dartsDatabase.getCaseRepository().save(courtCase);
-        var transcriptionEntity = dartsDatabase.getTranscriptionStub().createAndSaveAwaitingAuthorisationTranscription(
-            testUser,
-            courtCase,
-            hearing,
-            REQUESTED_TRANSCRIPTION_COMMENT,
-            startedAt);
+
+        TranscriptionEntity transcriptionEntity = PersistableFactory.getTranscriptionTestData().someMinimal().getBuilder()
+            .createdBy(testUser).lastModifiedBy(testUser).requestedBy(testUser)
+            .courtCases(new ArrayList<>(List.of(courtCase)))
+            .hearings(new ArrayList<>(List.of(hearing)))
+            .transcriptionStatus(dartsDatabase.getTranscriptionStub().getTranscriptionStatusByEnum(AWAITING_AUTHORISATION))
+            .transcriptionUrgency(dartsDatabase.getTranscriptionStub().getTranscriptionUrgencyByEnum(STANDARD))
+            .transcriptionType(dartsDatabase.getTranscriptionStub().getTranscriptionTypeByEnum(SPECIFIED_TIMES))
+            .isManualTranscription(true)
+            .startTime(startedAt)
+            .endTime(startedAt)
+            .transcriptionStatus(dartsDatabase.getTranscriptionStub()
+                                     .getTranscriptionStatusByEnum(AWAITING_AUTHORISATION))
+            .build();
+
+        transcriptionEntity = dartsPersistence.save(transcriptionEntity);
 
         final String fileName = "Test Document.docx";
         final String fileType = "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
         final int fileSize = 11_937;
         final String checksum = "C3CCA7021CF79B42F245AF350601C284";
-        TranscriptionDocumentEntity transcriptionDocumentEntity = TranscriptionStub.createTranscriptionDocumentEntity(
-            transcriptionEntity, fileName, fileType, fileSize, testUser, checksum, startedAt);
+        TranscriptionDocumentEntity transcriptionDocumentEntity = PersistableFactory.getTranscriptionDocument().someMinimal()
+            .getBuilder().transcription(transcriptionEntity).fileName(fileName).fileType(fileType)
+            .fileSize(fileSize).uploadedBy(testUser).lastModifiedBy(testUser).checksum(checksum).uploadedDateTime(startedAt)
+            .retConfScore(100).retConfReason("confidence reason")
+            .build();
         transcriptionDocumentEntity.setRetConfReason(RETENTION_CONFIDENCE_REASON);
         transcriptionDocumentEntity.setRetConfScore(RETENTION_CONFIDENCE_SCORE);
-        dartsDatabase.getTranscriptionDocumentRepository().save(transcriptionDocumentEntity);
+        transcriptionDocumentEntity = dartsPersistence.save(transcriptionDocumentEntity);
 
-        ExternalObjectDirectoryEntity armEod = dartsDatabase.getExternalObjectDirectoryStub().createExternalObjectDirectory(
-            transcriptionDocumentEntity,
-            dartsDatabase.getObjectRecordStatusEntity(ARM_DROP_ZONE),
-            dartsDatabase.getExternalLocationTypeEntity(ARM),
-            UUID.randomUUID()
-        );
+        TranscriptionWorkflowEntity transcriptionWorkflowEntity = dartsPersistence.save(PersistableFactory.getTranscriptionWorkflowTestData()
+                                                                                            .someMinimal().getBuilder()
+                                                                                            .transcription(transcriptionEntity).build());
+
+        TranscriptionCommentEntity commentEntity = dartsPersistence
+            .save(PersistableFactory.getTranscriptionCommentTestData()
+                        .someMinimal()
+                        .getBuilder().comment(REQUESTED_TRANSCRIPTION_COMMENT)
+                        .transcription(transcriptionEntity).transcriptionWorkflow(transcriptionWorkflowEntity).build());
+
+
+        transcriptionWorkflowEntity.setTranscriptionComments(new ArrayList<>(List.of(commentEntity)));
+        transcriptionWorkflowEntity = dartsPersistence.save(transcriptionWorkflowEntity);
+
+        transcriptionEntity.setTranscriptionWorkflowEntities(new ArrayList<>(List.of(transcriptionWorkflowEntity)));
+        transcriptionEntity.setTranscriptionCommentEntities(new ArrayList<>(List.of(commentEntity)));
+        transcriptionEntity = dartsPersistence.save(transcriptionEntity);
+
+        ExternalObjectDirectoryEntity armEod = PersistableFactory.getExternalObjectDirectoryTestData().someMinimal().getBuilder()
+            .transcriptionDocumentEntity(transcriptionDocumentEntity)
+            .status(dartsDatabase.getObjectRecordStatusEntity(ARM_DROP_ZONE))
+            .externalLocationType(dartsDatabase.getExternalLocationTypeEntity(ARM))
+            .externalLocation(UUID.randomUUID())
+            .media(null)
+            .updateRetention(true).build().getEntity();
         armEod.setTransferAttempts(1);
-        dartsDatabase.save(armEod);
+        armEod = dartsPersistence.save(armEod);
 
         when(armDataManagementConfiguration.getTranscriptionRecordClass()).thenReturn(DARTS);
         when(armDataManagementConfiguration.getTranscriptionRecordPropertiesFile()).thenReturn(
@@ -500,11 +636,9 @@ class ArchiveRecordServiceIntTest extends IntegrationBase {
 
         log.info("expect response {}", expectedResponse);
         assertEquals(expectedResponse, actualResponse, JSONCompareMode.STRICT);
-
     }
 
     @Test
-    @Disabled("Impacted by V1_364_*.sql")
     void generateArchiveRecord_WithLiveAnnotationProperties_ReturnFileSuccess() throws IOException {
         OffsetDateTime startedAt = OffsetDateTime.of(2023, 9, 23, 13, 0, 0, 0, UTC);
         when(currentTimeHelper.currentOffsetDateTime()).thenReturn(startedAt);
@@ -512,28 +646,32 @@ class ArchiveRecordServiceIntTest extends IntegrationBase {
 
         UserAccountEntity testUser = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
         String testAnnotation = "TestAnnotation";
-        AnnotationEntity annotation = dartsDatabase.getAnnotationStub().createAndSaveAnnotationEntityWith(testUser, testAnnotation, hearing);
-        dartsDatabase.getAnnotationRepository().save(annotation);
+        AnnotationEntity annotation = PersistableFactory.getAnnotationTestData().someMinimal()
+            .getBuilder().text(testAnnotation).currentOwner(testUser).hearingList(new ArrayList<>(List.of(hearing))).build();
+        annotation = dartsPersistence.save(annotation);
 
         final String fileName = "judges-notes.txt";
         final String fileType = "text/plain";
         final int fileSize = 123;
-        final OffsetDateTime uploadedDateTime = OffsetDateTime.now();
+        final OffsetDateTime uploadedDateTime = now();
         final String checksum = "C3CCA7021CF79B42F245AF350601C284";
-        AnnotationDocumentEntity annotationDocument = dartsDatabase.getAnnotationStub()
-            .createAnnotationDocumentEntity(annotation, fileName, fileType, fileSize, testUser, uploadedDateTime, checksum);
+        AnnotationDocumentEntity annotationDocument = PersistableFactory.getAnnotationDocumentTestData().someMinimal().getBuilder()
+            .annotation(annotation).fileType(fileType).fileName(fileName)
+            .fileSize(fileSize).uploadedBy(testUser).uploadedDateTime(uploadedDateTime).checksum(checksum).build();
+
         annotationDocument.setRetConfReason(RETENTION_CONFIDENCE_REASON);
         annotationDocument.setRetConfScore(RETENTION_CONFIDENCE_SCORE);
-        dartsDatabase.save(annotationDocument);
+        annotationDocument = dartsPersistence.save(annotationDocument);
 
-        ExternalObjectDirectoryEntity armEod = dartsDatabase.getExternalObjectDirectoryStub().createExternalObjectDirectory(
-            annotationDocument,
-            dartsDatabase.getObjectRecordStatusEntity(ARM_DROP_ZONE),
-            dartsDatabase.getExternalLocationTypeEntity(ARM),
-            UUID.randomUUID()
-        );
+        ExternalObjectDirectoryEntity armEod = PersistableFactory.getExternalObjectDirectoryTestData().someMinimal().getBuilder()
+            .annotationDocumentEntity(annotationDocument)
+            .status(dartsDatabase.getObjectRecordStatusEntity(ARM_DROP_ZONE))
+            .externalLocationType(dartsDatabase.getExternalLocationTypeEntity(ARM))
+            .externalLocation(UUID.randomUUID())
+            .media(null)
+            .updateRetention(true).build().getEntity();
         armEod.setTransferAttempts(1);
-        dartsDatabase.save(armEod);
+        armEod = dartsPersistence.save(armEod);
 
         when(armDataManagementConfiguration.getAnnotationRecordClass()).thenReturn(DARTS);
         when(armDataManagementConfiguration.getAnnotationRecordPropertiesFile()).thenReturn(
@@ -562,13 +700,13 @@ class ArchiveRecordServiceIntTest extends IntegrationBase {
         expectedResponse = expectedResponse.replaceAll("<PARENT_ID>", String.valueOf(annotationDocument.getAnnotation().getId()));
         expectedResponse = expectedResponse.replaceAll("<UPLOADED_DATE_TIME>", annotationDocument.getUploadedDateTime().format(formatter));
         expectedResponse = expectedResponse.replaceAll("<EVENT_DATE_TIME>", annotationDocument.getUploadedDateTime().format(formatter));
+        expectedResponse = expectedResponse.replaceAll("<USER_ID>", testUser.getId().toString());
 
         log.info("expect response {}", expectedResponse);
         assertEquals(expectedResponse, actualResponse, JSONCompareMode.STRICT);
     }
 
     @Test
-    @Disabled("Impacted by V1_364_*.sql")
     void generateArchiveRecord_WithLiveAnnotationPropertiesRetentionDate_ReturnFileSuccess() throws IOException {
         OffsetDateTime startedAt = OffsetDateTime.of(2023, 9, 23, 13, 0, 0, 0, UTC);
         OffsetDateTime retainUntil = OffsetDateTime.of(2024, 9, 23, 13, 0, 0, 0, UTC);
@@ -577,29 +715,33 @@ class ArchiveRecordServiceIntTest extends IntegrationBase {
 
         UserAccountEntity testUser = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
         String testAnnotation = "TestAnnotation";
-        AnnotationEntity annotation = dartsDatabase.getAnnotationStub().createAndSaveAnnotationEntityWith(testUser, testAnnotation, hearing);
-        dartsDatabase.getAnnotationRepository().save(annotation);
+        AnnotationEntity annotation = PersistableFactory.getAnnotationTestData().someMinimal()
+            .getBuilder().text(testAnnotation).currentOwner(testUser).hearingList(new ArrayList<>(List.of(hearing))).build();
+        annotation = dartsPersistence.save(annotation);
 
         final String fileName = "judges-notes.txt";
         final String fileType = "text/plain";
         final int fileSize = 123;
-        final OffsetDateTime uploadedDateTime = OffsetDateTime.now();
+        final OffsetDateTime uploadedDateTime = now();
         final String checksum = "C3CCA7021CF79B42F245AF350601C284";
-        AnnotationDocumentEntity annotationDocument = dartsDatabase.getAnnotationStub()
-            .createAnnotationDocumentEntity(annotation, fileName, fileType, fileSize, testUser, uploadedDateTime, checksum);
+        AnnotationDocumentEntity annotationDocument = PersistableFactory
+            .getAnnotationDocumentTestData().someMinimal().getBuilder()
+            .annotation(annotation).retainUntilTs(retainUntil)
+            .fileType(fileType).fileName(fileName).fileSize(fileSize).uploadedBy(testUser).uploadedDateTime(uploadedDateTime).checksum(checksum).build();
+
         annotationDocument.setRetConfReason(RETENTION_CONFIDENCE_REASON);
         annotationDocument.setRetConfScore(RETENTION_CONFIDENCE_SCORE);
-        annotationDocument.setRetainUntilTs(retainUntil);
-        dartsDatabase.save(annotationDocument);
+        annotationDocument = dartsPersistence.save(annotationDocument);
 
-        ExternalObjectDirectoryEntity armEod = dartsDatabase.getExternalObjectDirectoryStub().createExternalObjectDirectory(
-            annotationDocument,
-            dartsDatabase.getObjectRecordStatusEntity(ARM_DROP_ZONE),
-            dartsDatabase.getExternalLocationTypeEntity(ARM),
-            UUID.randomUUID()
-        );
+        ExternalObjectDirectoryEntity armEod = PersistableFactory.getExternalObjectDirectoryTestData().someMinimal().getBuilder()
+            .annotationDocumentEntity(annotationDocument)
+            .status(dartsDatabase.getObjectRecordStatusEntity(ARM_DROP_ZONE))
+            .externalLocationType(dartsDatabase.getExternalLocationTypeEntity(ARM))
+            .externalLocation(UUID.randomUUID())
+            .media(null)
+            .updateRetention(true).build().getEntity();
         armEod.setTransferAttempts(1);
-        dartsDatabase.save(armEod);
+        armEod = dartsPersistence.save(armEod);
 
         when(armDataManagementConfiguration.getAnnotationRecordClass()).thenReturn(DARTS);
         when(armDataManagementConfiguration.getAnnotationRecordPropertiesFile()).thenReturn(
@@ -628,13 +770,13 @@ class ArchiveRecordServiceIntTest extends IntegrationBase {
         expectedResponse = expectedResponse.replaceAll("<PARENT_ID>", String.valueOf(annotationDocument.getAnnotation().getId()));
         expectedResponse = expectedResponse.replaceAll("<UPLOADED_DATE_TIME>", annotationDocument.getUploadedDateTime().format(formatter));
         expectedResponse = expectedResponse.replaceAll("<EVENT_DATE_TIME>", annotationDocument.getRetainUntilTs().format(formatter));
+        expectedResponse = expectedResponse.replaceAll("<USER_ID>", testUser.getId().toString());
 
         log.info("expect response {}", expectedResponse);
         assertEquals(expectedResponse, actualResponse, JSONCompareMode.STRICT);
     }
 
     @Test
-    @Disabled("Impacted by V1_364_*.sql")
     void generateArchiveRecord_WithAllAnnotationProperties_ReturnFileSuccess() throws IOException {
         OffsetDateTime startedAt = OffsetDateTime.of(2023, 9, 23, 13, 0, 0, 0, UTC);
         when(currentTimeHelper.currentOffsetDateTime()).thenReturn(startedAt);
@@ -642,29 +784,34 @@ class ArchiveRecordServiceIntTest extends IntegrationBase {
 
         UserAccountEntity testUser = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
         String testAnnotation = "TestAnnotation";
-        AnnotationEntity annotation = dartsDatabase.getAnnotationStub().createAndSaveAnnotationEntityWith(testUser, testAnnotation, hearing);
-        dartsDatabase.getAnnotationRepository().save(annotation);
-
+        AnnotationEntity annotation = PersistableFactory.getAnnotationTestData().someMinimal()
+            .getBuilder().currentOwner(testUser).text(testAnnotation)
+                .hearingList(new ArrayList<>(List.of(hearing))).build();
+        annotation = dartsPersistence.save(annotation);
 
         final String fileName = "judges-notes.txt";
         final String fileType = "text/plain";
         final int fileSize = 123;
-        final OffsetDateTime uploadedDateTime = OffsetDateTime.now();
+        final OffsetDateTime uploadedDateTime = now();
         final String checksum = "C3CCA7021CF79B42F245AF350601C284";
-        AnnotationDocumentEntity annotationDocument = dartsDatabase.getAnnotationStub()
-            .createAnnotationDocumentEntity(annotation, fileName, fileType, fileSize, testUser, uploadedDateTime, checksum);
+        AnnotationDocumentEntity annotationDocument = PersistableFactory.getAnnotationDocumentTestData().someMinimal().getBuilder()
+            .annotation(annotation).fileName(fileName)
+            .fileType(fileType).fileSize(fileSize).uploadedBy(testUser)
+            .lastModifiedBy(testUser).checksum(checksum)
+            .uploadedDateTime(uploadedDateTime).build();
         annotationDocument.setRetConfReason(RETENTION_CONFIDENCE_REASON);
         annotationDocument.setRetConfScore(RETENTION_CONFIDENCE_SCORE);
-        dartsDatabase.save(annotationDocument);
+        annotationDocument = dartsPersistence.save(annotationDocument);
 
-        ExternalObjectDirectoryEntity armEod = dartsDatabase.getExternalObjectDirectoryStub().createExternalObjectDirectory(
-            annotationDocument,
-            dartsDatabase.getObjectRecordStatusEntity(ARM_DROP_ZONE),
-            dartsDatabase.getExternalLocationTypeEntity(ARM),
-            UUID.randomUUID()
-        );
+        ExternalObjectDirectoryEntity armEod = PersistableFactory.getExternalObjectDirectoryTestData().someMinimal().getBuilder()
+            .annotationDocumentEntity(annotationDocument)
+            .status(dartsDatabase.getObjectRecordStatusEntity(ARM_DROP_ZONE))
+            .externalLocationType(dartsDatabase.getExternalLocationTypeEntity(ARM))
+            .externalLocation(UUID.randomUUID())
+            .media(null)
+            .updateRetention(true).build().getEntity();
         armEod.setTransferAttempts(1);
-        dartsDatabase.save(armEod);
+        armEod = dartsPersistence.save(armEod);
 
         when(armDataManagementConfiguration.getAnnotationRecordClass()).thenReturn(DARTS);
         when(armDataManagementConfiguration.getAnnotationRecordPropertiesFile()).thenReturn(
@@ -692,6 +839,7 @@ class ArchiveRecordServiceIntTest extends IntegrationBase {
         expectedResponse = expectedResponse.replaceAll("<OBJECT_ID>", String.valueOf(annotationDocument.getId()));
         expectedResponse = expectedResponse.replaceAll("<PARENT_ID>", String.valueOf(annotationDocument.getAnnotation().getId()));
         expectedResponse = expectedResponse.replaceAll("<UPLOADED_DATE_TIME>", annotationDocument.getUploadedDateTime().format(formatter));
+        expectedResponse = expectedResponse.replaceAll("<USER_ID>", testUser.getId().toString());
 
         log.info("expect response {}", expectedResponse);
         assertEquals(expectedResponse, actualResponse, JSONCompareMode.STRICT);
@@ -702,14 +850,21 @@ class ArchiveRecordServiceIntTest extends IntegrationBase {
         OffsetDateTime startedAt = OffsetDateTime.of(2023, 9, 23, 13, 0, 0, 0, UTC);
         when(currentTimeHelper.currentOffsetDateTime()).thenReturn(startedAt);
 
-        CourtCaseEntity courtCaseEntity = dartsDatabase.createCase("Bristol", "Case1");
+        CourtCaseEntity courtCaseEntity = PersistableFactory.getCourtCaseTestData().someMinimal().getBuilder()
+            .caseNumber("Case1").courthouse(CourthouseTestData.someMinimalCourthouse()).build();
         UserAccountEntity uploadedBy = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
 
-        CaseDocumentEntity caseDocument = dartsDatabase.getCaseDocumentStub().createAndSaveCaseDocumentEntity(courtCaseEntity, uploadedBy);
+        courtCaseEntity = dartsPersistence.save(courtCaseEntity);
+
+        CaseDocumentEntity caseDocument = PersistableFactory.getCaseDocumentTestData()
+            .someMinimal().getBuilder().courtCase(courtCaseEntity)
+            .lastModifiedBy(uploadedBy).checksum("xC3CCA7021CF79B42F245AF350601C284").fileType("docx").build();
+
+        caseDocument = dartsPersistence.save(caseDocument);
         caseDocument.setFileName("test_case_document.docx");
         caseDocument.setRetConfReason(RETENTION_CONFIDENCE_REASON);
         caseDocument.setRetConfScore(RETENTION_CONFIDENCE_SCORE);
-        dartsDatabase.save(caseDocument);
+        caseDocument = dartsPersistence.save(caseDocument);
 
         ExternalObjectDirectoryEntity armEod = dartsDatabase.getExternalObjectDirectoryStub().createExternalObjectDirectory(
             caseDocument,
@@ -750,6 +905,7 @@ class ArchiveRecordServiceIntTest extends IntegrationBase {
         expectedResponse = expectedResponse.replaceAll("<UPLOADED_BY>", String.valueOf(uploadedBy.getId()));
         expectedResponse = expectedResponse.replaceAll("<UPLOADED_DATE_TIME>", caseDocument.getCreatedDateTime().format(formatter));
         expectedResponse = expectedResponse.replaceAll("<EVENT_DATE_TIME>", caseDocument.getCreatedDateTime().format(formatter));
+        expectedResponse = expectedResponse.replaceAll("<COURTHOUSE>", courtCaseEntity.getCourthouse().getDisplayName());
 
         log.info("expect Response {}", expectedResponse);
         assertEquals(expectedResponse, actualResponse, JSONCompareMode.STRICT);
@@ -761,25 +917,30 @@ class ArchiveRecordServiceIntTest extends IntegrationBase {
         OffsetDateTime retainUntil = OffsetDateTime.of(2024, 9, 23, 13, 0, 0, 0, UTC);
         when(currentTimeHelper.currentOffsetDateTime()).thenReturn(startedAt);
 
-        CourtCaseEntity courtCaseEntity = dartsDatabase.createCase("Bristol", "Case1");
+        CourtCaseEntity courtCaseEntity = PersistableFactory.getCourtCaseTestData().someMinimal().getBuilder()
+            .caseNumber("Case1").courthouse(CourthouseTestData.someMinimalCourthouse()).build();
         UserAccountEntity uploadedBy = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
 
-        CaseDocumentEntity caseDocument = dartsDatabase.getCaseDocumentStub().createAndSaveCaseDocumentEntity(courtCaseEntity, uploadedBy);
+        courtCaseEntity = dartsPersistence.save(courtCaseEntity);
+
+        CaseDocumentEntity caseDocument = PersistableFactory.getCaseDocumentTestData()
+            .someMinimal().getBuilder().courtCase(courtCaseEntity)
+            .lastModifiedBy(uploadedBy).checksum("xC3CCA7021CF79B42F245AF350601C284").fileType("docx").build();
+
+        caseDocument = dartsPersistence.save(caseDocument);
+
         caseDocument.setFileName("test_case_document.docx");
         caseDocument.setRetainUntilTs(retainUntil);
         caseDocument.setRetConfReason(RETENTION_CONFIDENCE_REASON);
         caseDocument.setRetConfScore(RETENTION_CONFIDENCE_SCORE);
-        dartsDatabase.save(caseDocument);
+        caseDocument = dartsPersistence.save(caseDocument);
 
-        ExternalObjectDirectoryEntity armEod = dartsDatabase.getExternalObjectDirectoryStub().createExternalObjectDirectory(
-            caseDocument,
-            ARM_DROP_ZONE,
-            ARM,
-            UUID.randomUUID()
-        );
+        ExternalObjectDirectoryEntity armEod = PersistableFactory.getExternalObjectDirectoryTestData().someMinimal()
+            .getBuilder().caseDocument(caseDocument).status(dartsDatabase.getExternalObjectDirectoryStub().getStatus(ARM_DROP_ZONE))
+            .media(null).externalLocationType(dartsDatabase.getExternalObjectDirectoryStub().getLocation(ARM)).externalLocation(UUID.randomUUID()).build();
 
         armEod.setTransferAttempts(1);
-        dartsDatabase.save(armEod);
+        armEod = dartsPersistence.save(armEod);
 
         when(armDataManagementConfiguration.getCaseRecordClass()).thenReturn(DARTS);
         when(armDataManagementConfiguration.getCaseRecordPropertiesFile()).thenReturn(
@@ -810,6 +971,7 @@ class ArchiveRecordServiceIntTest extends IntegrationBase {
         expectedResponse = expectedResponse.replaceAll("<UPLOADED_BY>", String.valueOf(uploadedBy.getId()));
         expectedResponse = expectedResponse.replaceAll("<UPLOADED_DATE_TIME>", caseDocument.getCreatedDateTime().format(formatter));
         expectedResponse = expectedResponse.replaceAll("<EVENT_DATE_TIME>", caseDocument.getRetainUntilTs().format(formatter));
+        expectedResponse = expectedResponse.replaceAll("<COURTHOUSE>", courtCaseEntity.getCourthouse().getDisplayName());
 
         log.info("expect Response {}", expectedResponse);
         assertEquals(expectedResponse, actualResponse, JSONCompareMode.STRICT);
@@ -820,23 +982,25 @@ class ArchiveRecordServiceIntTest extends IntegrationBase {
         OffsetDateTime startedAt = OffsetDateTime.of(2023, 9, 23, 13, 0, 0, 0, UTC);
         when(currentTimeHelper.currentOffsetDateTime()).thenReturn(startedAt);
 
-        CourtCaseEntity courtCaseEntity = dartsDatabase.createCase("Bristol", "Case1");
+        CourtCaseEntity courtCaseEntity = PersistableFactory.getCourtCaseTestData().someMinimal().getBuilder()
+            .caseNumber("Case1").courthouse(CourthouseTestData.someMinimalCourthouse()).build();
+
+        courtCaseEntity = dartsPersistence.save(courtCaseEntity);
         UserAccountEntity uploadedBy = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
 
-        CaseDocumentEntity caseDocument = dartsDatabase.getCaseDocumentStub().createAndSaveCaseDocumentEntity(courtCaseEntity, uploadedBy);
+        CaseDocumentEntity caseDocument = PersistableFactory.getCaseDocumentTestData()
+            .someMinimal().getBuilder().courtCase(courtCaseEntity)
+            .lastModifiedBy(uploadedBy).checksum("xC3CCA7021CF79B42F245AF350601C284").fileType("docx").build();
         caseDocument.setRetConfReason(RETENTION_CONFIDENCE_REASON);
         caseDocument.setRetConfScore(RETENTION_CONFIDENCE_SCORE);
-        dartsDatabase.save(caseDocument);
+        caseDocument = dartsPersistence.save(caseDocument);
 
-        ExternalObjectDirectoryEntity armEod = dartsDatabase.getExternalObjectDirectoryStub().createExternalObjectDirectory(
-            caseDocument,
-            ARM_DROP_ZONE,
-            ARM,
-            UUID.randomUUID()
-        );
+        ExternalObjectDirectoryEntity armEod = PersistableFactory.getExternalObjectDirectoryTestData().someMinimal()
+            .getBuilder().caseDocument(caseDocument).status(dartsDatabase.getExternalObjectDirectoryStub().getStatus(ARM_DROP_ZONE))
+            .media(null).externalLocationType(dartsDatabase.getExternalObjectDirectoryStub().getLocation(ARM)).externalLocation(UUID.randomUUID()).build();
 
         armEod.setTransferAttempts(1);
-        dartsDatabase.save(armEod);
+        armEod = dartsPersistence.save(armEod);
 
         when(armDataManagementConfiguration.getCaseRecordClass()).thenReturn(DARTS);
         when(armDataManagementConfiguration.getCaseRecordPropertiesFile()).thenReturn(
@@ -866,6 +1030,8 @@ class ArchiveRecordServiceIntTest extends IntegrationBase {
         expectedResponse = expectedResponse.replaceAll("<CASE_NUMBERS>", String.format("T%s", YESTERDAY.format(BASIC_ISO_DATE)) + "|Case1");
         expectedResponse = expectedResponse.replaceAll("<UPLOADED_BY>", String.valueOf(uploadedBy.getId()));
         expectedResponse = expectedResponse.replaceAll("<UPLOADED_DATE_TIME>", caseDocument.getCreatedDateTime().format(formatter));
+        expectedResponse = expectedResponse.replaceAll("<COURTHOUSE>", courtCaseEntity.getCourthouse().getDisplayName());
+        expectedResponse = expectedResponse.replaceAll("<TITLE>", caseDocument.getFileName());
 
         log.info("expect response {}", expectedResponse);
         assertEquals(expectedResponse, actualResponse, JSONCompareMode.STRICT);

@@ -30,7 +30,7 @@ class TestDataClassesTest extends IntegrationBase {
         for (Class<?> cls : classList) {
             Persistable<?> obj = (Persistable<?>) cls.getDeclaredConstructors()[0].newInstance();
             BuilderHolder<?,?> retrieve = obj.someMinimal();
-            Object entity = retrieve.build();
+            Object entity = retrieve.build().getEntity();
 
             dartsPersistence.getClass()
                 .getMethod("save", entity.getClass()).invoke(dartsPersistence,
@@ -44,7 +44,7 @@ class TestDataClassesTest extends IntegrationBase {
         for (Class<?> cls : classList) {
             Persistable<?> obj = (Persistable<?>) cls.getDeclaredConstructors()[0].newInstance();
             BuilderHolder<?,?> retrieve = obj.someMaximal();
-            Object entity = retrieve.build();
+            Object entity = retrieve.build().getEntity();
             dartsPersistence.getClass()
                 .getMethod("save", entity.getClass()).invoke(dartsPersistence,
                                                              entity);

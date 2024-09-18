@@ -1,10 +1,5 @@
 package uk.gov.hmcts.darts.test.common.data;
 
-
-import uk.gov.hmcts.darts.common.entity.CaseDocumentEntity;
-import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
-import uk.gov.hmcts.darts.common.entity.TranscriptionEntity;
-
 public class PersistableFactory {
     private static PersistableFactory instance;
 
@@ -53,5 +48,17 @@ public class PersistableFactory {
 
     public static CaseDocumentTestData getCaseDocumentTestData() {
         return new CaseDocumentTestData();
+    }
+
+    public static TranscriptionCommentTestData getTranscriptionCommentTestData() {
+        return new TranscriptionCommentTestData();
+    }
+
+    public static TranscriptionWorkflowTestData getTranscriptionWorkflowTestData() {
+        return new TranscriptionWorkflowTestData();
+    }
+
+    public static HearingTestData getHearingTestData() {
+        return new HearingTestData();
     }
 }

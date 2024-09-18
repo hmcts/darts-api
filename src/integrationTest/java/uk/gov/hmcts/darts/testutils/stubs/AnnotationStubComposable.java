@@ -9,6 +9,7 @@ import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.repository.AnnotationDocumentRepository;
 import uk.gov.hmcts.darts.common.repository.AnnotationRepository;
+import uk.gov.hmcts.darts.test.common.data.PersistableFactory;
 
 import java.time.OffsetDateTime;
 
@@ -80,7 +81,7 @@ public class AnnotationStubComposable {
     }
 
     public static AnnotationEntity createAnnotationEntity(UserAccountEntity currentOwner, String annotationText) {
-        AnnotationEntity annotationEntity = new AnnotationEntity();
+        AnnotationEntity annotationEntity = PersistableFactory.getAnnotationTestData().someMinimal().build().getEntity();
         annotationEntity.setCurrentOwner(currentOwner);
         annotationEntity.setText(annotationText);
         annotationEntity.setTimestamp(OffsetDateTime.now());
@@ -95,7 +96,7 @@ public class AnnotationStubComposable {
                                                                    UserAccountEntity uploadedBy, OffsetDateTime uploadedDateTime,
                                                                    String checksum, Integer confScore,
                                                                    String confReason) {
-        AnnotationDocumentEntity annotationDocument = new AnnotationDocumentEntity();
+        AnnotationDocumentEntity annotationDocument = PersistableFactory.getAnnotationDocumentTestData().someMinimal().build().getEntity();
         annotationDocument.setAnnotation(annotationEntity);
         annotationDocument.setFileName(fileName);
         annotationDocument.setFileType(fileType);

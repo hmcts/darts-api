@@ -9,7 +9,7 @@
     "event_date": "<EVENT_DATE_TIME>",
     "title": "test_case_document.docx",
     "client_identifier": "<EODID>",
-    "contributor": "Bristol",
+    "contributor": "<COURTHOUSE>",
     "rtn_score":2,
     "rtn_reason":"RetentionConfidenceReason",
     "bf_001": "Case",
@@ -19,7 +19,7 @@
     "bf_010": "<UPLOADED_DATE_TIME>",
     "bf_012": <OBJECT_ID>,
     "bf_013": <PARENT_ID>,
-    "bf_019": "Bristol"
+    "bf_019": "<COURTHOUSE>"
   }
 }
 {

@@ -39,7 +39,7 @@ public class MediaTestData implements Persistable<CustomMediaEntity.CustomMediaB
     @Deprecated
     public MediaEntity someMinimalMedia() {
         CustomMediaEntity.CustomMediaBuilderRetrieve retrieve = someMinimal();
-        return retrieve.build();
+        return retrieve.build().getEntity();
     }
 
     public MediaEntity createMediaWith(CourtroomEntity courtroomEntity, OffsetDateTime startTime, OffsetDateTime endTime, int channel) {
@@ -58,7 +58,7 @@ public class MediaTestData implements Persistable<CustomMediaEntity.CustomMediaB
         mediaEntity.setChecksum(getChecksum());
         mediaEntity.setRetConfScore(refConfScore);
         mediaEntity.setRetConfReason(reFConfReason);
-
+        mediaEntity.setIsCurrent(true);
         return mediaEntity;
     }
 
@@ -91,7 +91,8 @@ public class MediaTestData implements Persistable<CustomMediaEntity.CustomMediaB
             .createdBy(userAccount).lastModifiedDateTime(NOW)
             .createdDateTime(NOW).courtroom(courtroomTestData)
             .createdDateTime(createdAt)
-            .lastModifiedDateTime(lastModifiedAt).hearingList(new ArrayList<>());
+            .lastModifiedDateTime(lastModifiedAt)
+            .hearingList(new ArrayList<>());
         return builder;
     }
 

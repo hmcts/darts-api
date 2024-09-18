@@ -4,7 +4,7 @@ import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import uk.gov.hmcts.darts.common.entity.AuditEntity;
-import uk.gov.hmcts.darts.test.common.data.HearingTestData;
+import uk.gov.hmcts.darts.test.common.data.PersistableFactory;
 import uk.gov.hmcts.darts.testutils.GivenBuilder;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 import uk.gov.hmcts.darts.transcriptions.enums.TranscriptionTypeEnum;
@@ -68,7 +68,7 @@ class TranscriptionWorkflowAuditTest extends IntegrationBase {
     }
 
     private TranscriptionRequestDetails createTranscriptionRequestDetailsWithDefaults() {
-        var hearing = dartsDatabase.save(HearingTestData.someMinimalHearing());
+        var hearing = dartsDatabase.save(PersistableFactory.getHearingTestData().someMinimalHearing());
         var startTime = OffsetDateTime.now();
 
         return new TranscriptionRequestDetails()

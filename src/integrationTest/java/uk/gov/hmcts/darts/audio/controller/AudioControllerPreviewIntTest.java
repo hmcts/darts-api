@@ -36,7 +36,6 @@ import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.REQUESTER;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.TRANSCRIBER;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.TRANSLATION_QA;
 import static uk.gov.hmcts.darts.test.common.AwaitabilityUtil.waitForMaxWithOneSecondPoll;
-import static uk.gov.hmcts.darts.test.common.data.HearingTestData.someMinimalHearing;
 
 @AutoConfigureMockMvc
 @TestPropertySource(properties = {"darts.audio.transformation.service.audio.file=tests/audio/WithViqHeader/viq0001min.mp2"})
@@ -135,7 +134,7 @@ class AudioControllerPreviewIntTest extends IntegrationBase {
     }
 
     private HearingEntity hearingWithMedia() {
-        var hearing = someMinimalHearing();
+        var hearing = PersistableFactory.getHearingTestData().someMinimalHearing();
         var media = PersistableFactory.getMediaTestData().createMediaWith(hearing.getCourtroom(), MEDIA_START_TIME, MEDIA_END_TIME, 1);
         hearing.addMedia(media);
         return hearing;

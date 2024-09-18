@@ -2,7 +2,6 @@ package uk.gov.hmcts.darts.arm.service;
 
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -62,15 +61,14 @@ class CleanupArmResponseFilesServiceIntTest extends IntegrationBase {
             HEARING_DATE
         );
 
-        savedMedia = dartsDatabase.save(
+        savedMedia = dartsPersistence.save(
             getMediaTestData().createMediaWith(
                 hearing.getCourtroom(),
                 OffsetDateTime.parse("2023-09-26T13:00:00Z"),
                 OffsetDateTime.parse("2023-09-26T13:45:00Z"),
                 1
             ));
-        dartsDatabase.save(savedMedia);
-
+        savedMedia = dartsDatabase.save(savedMedia);
     }
 
     @Test

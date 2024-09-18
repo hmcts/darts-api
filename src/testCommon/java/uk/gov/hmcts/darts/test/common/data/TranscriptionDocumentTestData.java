@@ -6,17 +6,59 @@ import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.ObjectAdminActionEntity;
 import uk.gov.hmcts.darts.common.entity.ObjectHiddenReasonEntity;
+import uk.gov.hmcts.darts.common.entity.TranscriptionDocumentEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.test.common.data.builder.CustomTranscriptionDocumentEntity;
 import uk.gov.hmcts.darts.test.common.data.builder.CustomTranscriptionEntity;
 
 import java.time.OffsetDateTime;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+
+import static uk.gov.hmcts.darts.test.common.data.ObjectAdminActionTestData.objectAdminActionWithDefaults;
+import static uk.gov.hmcts.darts.test.common.data.UserAccountTestData.minimalUserAccount;
 
 @SuppressWarnings({"HideUtilityClassConstructor"})
 public class TranscriptionDocumentTestData implements Persistable<CustomTranscriptionDocumentEntity.TranscriptionDocumentEntityBuilderRetrieve> {
 
     TranscriptionDocumentTestData() {
+    }
+
+
+    public static TranscriptionDocumentEntity minimalTranscriptionDocument() {
+        CustomTranscriptionDocumentEntity.TranscriptionDocumentEntityBuilderRetrieve builder =
+            new CustomTranscriptionDocumentEntity.TranscriptionDocumentEntityBuilderRetrieve();
+
+        builder.getBuilder().id(1)
+            .fileName("some-file-name")
+            .fileType("some-file-type").fileSize(1024)
+            .uploadedDateTime(OffsetDateTime.now())
+            .uploadedBy(minimalUserAccount())
+            .isHidden(false)
+            .lastModifiedBy(minimalUserAccount())
+            .lastModifiedDateTime(OffsetDateTime.now())
+            .lastModifiedDateTime(OffsetDateTime.now());
+
+        TranscriptionDocumentEntity transcriptionDocumentEntity = builder.build().getEntity();
+        setupBidirectionalTranscriptionDocuments(transcriptionDocumentEntity);
+
+        return transcriptionDocumentEntity;
+    }
+
+    public static TranscriptionDocumentEntity transcriptionDocumentWithAdminAction() {
+        var transcriptionDocument = minimalTranscriptionDocument();
+        transcriptionDocument.setHidden(true);
+        transcriptionDocument.setAdminActions(Arrays.asList(objectAdminActionWithDefaults()));
+        return transcriptionDocument;
+    }
+
+    private static void setupBidirectionalTranscriptionDocuments(TranscriptionDocumentEntity transcriptionDocument) {
+        var transcriptionDocList = new ArrayList<TranscriptionDocumentEntity>();
+        transcriptionDocList.add(transcriptionDocument);
+        var transcription = PersistableFactory.getTranscriptionTestData().minimalTranscription();
+        transcription.setTranscriptionDocumentEntities(transcriptionDocList);
+        transcriptionDocument.setTranscription(transcription);
     }
 
     public CustomTranscriptionDocumentEntity.TranscriptionDocumentEntityBuilderRetrieve complexTranscriptionDocument() {
@@ -42,11 +84,11 @@ public class TranscriptionDocumentTestData implements Persistable<CustomTranscri
         courthouseEntity.setDisplayName("Dummy Courthouse");
         courtroomEntity.setCourthouse(courthouseEntity);
 
-        CustomTranscriptionEntity.CustomTranscriptionEntityBuilderRetrieve transcriptionEntityBuilderRetrieve = PersistableFactory.getTranscriptionTestData().someMinimal();
+        CustomTranscriptionEntity.CustomTranscriptionEntityBuilderRetrieve
+            transcriptionEntityBuilderRetrieve = PersistableFactory.getTranscriptionTestData().someMinimal();
         transcriptionEntityBuilderRetrieve.getBuilder().id(1)
             .isManualTranscription(true).courtroom(courtroomEntity);
 
-        builder.getBuilder().transcription(transcriptionEntityBuilderRetrieve.build());
         ObjectAdminActionEntity adminActionEntity = ObjectAdminActionTestData.minimalObjectAdminAction();
         adminActionEntity.setId(1);
         adminActionEntity.setComments("Dummy comments");
@@ -78,14 +120,31 @@ public class TranscriptionDocumentTestData implements Persistable<CustomTranscri
         hearingEntity.setCourtroom(courtroomEntity);
         hearingEntity.setCourtCase(caseEntity);
 
-        transcriptionEntityBuilderRetrieve.getBuilder().hearings(List.of(hearingEntity));
+        transcriptionEntityBuilderRetrieve.getBuilder().hearings(List.of(hearingEntity)).build();
+        builder.getBuilder().transcription(transcriptionEntityBuilderRetrieve.build());
 
         return builder;
     }
 
     @Override
     public CustomTranscriptionDocumentEntity.TranscriptionDocumentEntityBuilderRetrieve someMinimal() {
-        return someMinimal();
+        CustomTranscriptionDocumentEntity.TranscriptionDocumentEntityBuilderRetrieve builder =
+            new CustomTranscriptionDocumentEntity.TranscriptionDocumentEntityBuilderRetrieve();
+
+        var transcription = PersistableFactory.getTranscriptionTestData().minimalTranscription();
+
+        builder.getBuilder()
+            .fileName("some-file-name")
+            .fileType("some-file-type").fileSize(1024)
+            .uploadedDateTime(OffsetDateTime.now())
+            .uploadedBy(minimalUserAccount())
+            .isHidden(false)
+            .lastModifiedBy(minimalUserAccount())
+            .lastModifiedDateTime(OffsetDateTime.now())
+            .lastModifiedDateTime(OffsetDateTime.now())
+            .transcription(transcription);
+
+        return builder;
     }
 
     @Override

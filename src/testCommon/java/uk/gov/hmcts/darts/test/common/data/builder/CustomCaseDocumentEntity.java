@@ -4,23 +4,11 @@ import lombok.RequiredArgsConstructor;
 import org.apache.commons.beanutils.BeanUtils;
 import org.hibernate.AssertionFailure;
 import uk.gov.hmcts.darts.common.entity.CaseDocumentEntity;
-import uk.gov.hmcts.darts.common.entity.CaseRetentionEntity;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
-import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
-import uk.gov.hmcts.darts.common.entity.DefenceEntity;
-import uk.gov.hmcts.darts.common.entity.DefendantEntity;
-import uk.gov.hmcts.darts.common.entity.EventHandlerEntity;
-import uk.gov.hmcts.darts.common.entity.HearingEntity;
-import uk.gov.hmcts.darts.common.entity.JudgeEntity;
-import uk.gov.hmcts.darts.common.entity.MediaLinkedCaseEntity;
-import uk.gov.hmcts.darts.common.entity.ProsecutorEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
-import uk.gov.hmcts.darts.retention.enums.RetentionConfidenceReasonEnum;
-import uk.gov.hmcts.darts.retention.enums.RetentionConfidenceScoreEnum;
 
 import java.lang.reflect.InvocationTargetException;
 import java.time.OffsetDateTime;
-import java.util.List;
 
 @RequiredArgsConstructor
 public class CustomCaseDocumentEntity extends CaseDocumentEntity implements DbInsertable<CaseDocumentEntity> {
@@ -66,7 +54,7 @@ public class CustomCaseDocumentEntity extends CaseDocumentEntity implements DbIn
     }
 
     @Override
-    public CaseDocumentEntity getDbInsertable() {
+    public CaseDocumentEntity getEntity() {
         try {
             CaseDocumentEntity entity = new CaseDocumentEntity();
             BeanUtils.copyProperties(entity, this);
@@ -76,13 +64,14 @@ public class CustomCaseDocumentEntity extends CaseDocumentEntity implements DbIn
         }
     }
 
-    public static class CustomCaseDocumentEntityBuilderRetrieve implements BuilderHolder<CaseDocumentEntity, CustomCaseDocumentEntity.CustomCaseDocumentEntityBuilder> {
+    public static class CustomCaseDocumentEntityBuilderRetrieve
+        implements BuilderHolder<CustomCaseDocumentEntity, CustomCaseDocumentEntity.CustomCaseDocumentEntityBuilder> {
 
         private CustomCaseDocumentEntity.CustomCaseDocumentEntityBuilder builder = CustomCaseDocumentEntity.builder();
 
         @Override
-        public CaseDocumentEntity build() {
-           return builder.build().getDbInsertable();
+        public CustomCaseDocumentEntity build() {
+           return builder.build();
         }
 
         @Override

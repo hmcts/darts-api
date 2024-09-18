@@ -25,6 +25,7 @@ import uk.gov.hmcts.darts.event.service.EventDispatcher;
 import uk.gov.hmcts.darts.retention.enums.CaseRetentionStatus;
 import uk.gov.hmcts.darts.retention.enums.RetentionConfidenceReasonEnum;
 import uk.gov.hmcts.darts.retention.enums.RetentionConfidenceScoreEnum;
+import uk.gov.hmcts.darts.test.common.data.PersistableFactory;
 import uk.gov.hmcts.darts.testutils.stubs.NodeRegisterStub;
 
 import java.time.OffsetDateTime;
@@ -46,7 +47,6 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.darts.retention.enums.RetentionConfidenceCategoryEnum.CASE_CLOSED;
-import static uk.gov.hmcts.darts.test.common.data.CaseTestData.someMinimalCase;
 
 @Disabled("Impacted by V1_366__add_missing_constraints_part5b.sql")
 class StopAndCloseHandlerTest extends HandlerTestData {
@@ -87,7 +87,7 @@ class StopAndCloseHandlerTest extends HandlerTestData {
     @Test
     @Disabled("Impacted by V1_363__not_null_constraints_part3.sql")
     void throwsOnUnknownCourthouse() {
-        dartsDatabase.save(someMinimalCase());
+        dartsDatabase.save(PersistableFactory.getCourtCaseTestData().someMinimalCase());
         DartsEvent event = someMinimalDartsEvent().courthouse(SOME_ROOM);
         event.setCaseNumbers(List.of("123"));
         event.setDateTime(HEARING_DATE_ODT);
