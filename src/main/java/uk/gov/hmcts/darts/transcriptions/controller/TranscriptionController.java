@@ -61,6 +61,7 @@ import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.REQUESTER;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.SUPER_ADMIN;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.SUPER_USER;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.TRANSCRIBER;
+import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.TRANSLATION_QA;
 
 
 @RestController
@@ -131,7 +132,7 @@ public class TranscriptionController implements TranscriptionApi {
     @Override
     @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
     @Authorisation(contextId = TRANSCRIPTION_ID,
-        securityRoles = {JUDICIARY, REQUESTER, APPROVER, TRANSCRIBER},
+        securityRoles = {JUDICIARY, REQUESTER, APPROVER, TRANSCRIBER, TRANSLATION_QA},
         globalAccessSecurityRoles = {JUDICIARY, SUPER_ADMIN, SUPER_USER, RCJ_APPEALS})
     public ResponseEntity<Resource> downloadTranscript(Integer transcriptionId) {
         final DownloadTranscriptResponse downloadTranscriptResponse = transcriptionService.downloadTranscript(
@@ -182,7 +183,7 @@ public class TranscriptionController implements TranscriptionApi {
     @Override
     @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
     @Authorisation(contextId = TRANSCRIPTION_ID,
-        securityRoles = {JUDICIARY, APPROVER, REQUESTER, TRANSCRIBER},
+        securityRoles = {JUDICIARY, APPROVER, REQUESTER, TRANSCRIBER, TRANSLATION_QA},
         globalAccessSecurityRoles = {JUDICIARY, SUPER_ADMIN, SUPER_USER, RCJ_APPEALS, DARTS})
     public ResponseEntity<GetTranscriptionByIdResponse> getTranscription(Integer transcriptionId) {
         return new ResponseEntity<>(
