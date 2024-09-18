@@ -18,7 +18,7 @@ import uk.gov.hmcts.darts.common.entity.TranscriptionEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionWorkflowEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.entity.base.CreatedModifiedBaseEntity;
-import uk.gov.hmcts.darts.task.runner.HasName;
+import uk.gov.hmcts.darts.task.runner.IsNamedEntity;
 
 import java.util.UUID;
 
@@ -103,7 +103,7 @@ public class DataAnonymisationServiceImpl implements DataAnonymisationService {
         return userIdentity.getUserAccount();
     }
 
-    private <T extends CreatedModifiedBaseEntity & HasName> void anonymizeName(UserAccountEntity userAccount, T entity) {
+    private <T extends CreatedModifiedBaseEntity & IsNamedEntity> void anonymizeName(UserAccountEntity userAccount, T entity) {
         entity.setName(UUID.randomUUID().toString());
         entity.setLastModifiedBy(userAccount);
     }

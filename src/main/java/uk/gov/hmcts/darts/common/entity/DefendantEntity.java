@@ -13,7 +13,7 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 import uk.gov.hmcts.darts.common.entity.base.CreatedModifiedBaseEntity;
-import uk.gov.hmcts.darts.task.runner.HasName;
+import uk.gov.hmcts.darts.task.runner.IsNamedEntity;
 
 @Entity
 @Table(name = DefendantEntity.TABLE_NAME)
@@ -21,7 +21,7 @@ import uk.gov.hmcts.darts.task.runner.HasName;
 @Setter
 @EqualsAndHashCode(callSuper = false)
 public class DefendantEntity extends CreatedModifiedBaseEntity
-    implements HasName {
+    implements IsNamedEntity {
 
     public static final String TABLE_NAME = "defendant";
     public static final String ID = "dfd_id";
