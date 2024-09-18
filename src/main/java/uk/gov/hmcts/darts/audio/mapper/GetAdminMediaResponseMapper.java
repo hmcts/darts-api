@@ -8,6 +8,7 @@ import uk.gov.hmcts.darts.audio.model.GetAdminMediaResponseCourthouse;
 import uk.gov.hmcts.darts.audio.model.GetAdminMediaResponseCourtroom;
 import uk.gov.hmcts.darts.audio.model.GetAdminMediaResponseHearing;
 import uk.gov.hmcts.darts.audio.model.GetAdminMediaResponseItem;
+import uk.gov.hmcts.darts.audio.model.MediaApproveMarkedForDeletionResponse;
 import uk.gov.hmcts.darts.audio.model.MediaHideResponse;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
@@ -78,6 +79,32 @@ public class GetAdminMediaResponseMapper {
 
     public MediaHideResponse mapHideOrShowResponse(MediaEntity entity, ObjectAdminActionEntity objectAdminActionEntity) {
         MediaHideResponse response = new MediaHideResponse();
+        response.setId(entity.getId());
+        response.setIsHidden(entity.isHidden());
+        response.setIsDeleted(entity.isDeleted());
+
+        if (objectAdminActionEntity != null) {
+            AdminActionResponse aaResponse = new AdminActionResponse();
+            aaResponse.setId(objectAdminActionEntity.getId());
+            aaResponse.setReasonId(objectAdminActionEntity.getObjectHiddenReason().getId());
+            aaResponse.setHiddenById(objectAdminActionEntity.getHiddenBy().getId());
+            aaResponse.setHiddenAt(objectAdminActionEntity.getHiddenDateTime());
+            aaResponse.setIsMarkedForManualDeletion(objectAdminActionEntity.isMarkedForManualDeletion());
+            aaResponse.setMarkedForManualDeletionById(
+                objectAdminActionEntity.getMarkedForManualDelBy() == null ? null : objectAdminActionEntity.getMarkedForManualDelBy().getId());
+            aaResponse.setMarkedForManualDeletionAt(
+                objectAdminActionEntity.getMarkedForManualDelDateTime() == null ? null : objectAdminActionEntity.getMarkedForManualDelDateTime());
+            aaResponse.setTicketReference(objectAdminActionEntity.getTicketReference());
+            aaResponse.setComments(objectAdminActionEntity.getComments());
+
+            response.setAdminAction(aaResponse);
+        }
+
+        return response;
+    }
+
+    public MediaApproveMarkedForDeletionResponse mapMediaApproveMarkedForDeletionResponse(MediaEntity entity, ObjectAdminActionEntity objectAdminActionEntity) {
+        MediaApproveMarkedForDeletionResponse response = new MediaApproveMarkedForDeletionResponse();
         response.setId(entity.getId());
         response.setIsHidden(entity.isHidden());
         response.setIsDeleted(entity.isDeleted());
