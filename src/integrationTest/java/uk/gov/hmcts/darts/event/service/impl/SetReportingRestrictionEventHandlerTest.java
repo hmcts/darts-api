@@ -43,10 +43,12 @@ class SetReportingRestrictionEventHandlerTest extends HandlerTestData {
     }
 
     @SneakyThrows
+    @SuppressWarnings({"PMD.DoNotUseThreads"})
     @Test
     void givenSetReportingRestrictionEventReceivedAndCourtCaseAndHearingDoesNotExist_thenNotifyDarUpdate() {
 
-        // fixes flaky test. Allows setup of Wiremock to complete when a new application context is used before requests are sent to it
+        // fixes flaky test when a previous cached application context is re-used.
+        // Gives Spring some additional time for completing Wiremock setup before requests are sent to Wiremock.
         Thread.sleep(3000L);
 
         dartsDatabase.createCase(SOME_COURTHOUSE, SOME_CASE_NUMBER);

@@ -8,7 +8,7 @@ import uk.gov.hmcts.darts.testutils.stubs.wiremock.DartsGatewayStub;
 
 // port = 0 enables random ports as recommended by Wiremock. Tests will be faster and more reliable
 @AutoConfigureWireMock(port = 0, files = "file:src/integrationTest/resources/wiremock")
-public class IntegrationBaseWithGatewayStub extends IntegrationBase {
+public class IntegrationBaseWithWiremock extends IntegrationBase {
 
     @Value("${wiremock.server.port}")
     protected String wiremockPort;

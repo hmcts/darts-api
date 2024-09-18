@@ -10,7 +10,7 @@ import org.springframework.security.oauth2.server.resource.authentication.JwtAut
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.event.model.DartsEvent;
 import uk.gov.hmcts.darts.event.service.EventDispatcher;
-import uk.gov.hmcts.darts.testutils.IntegrationBaseWithGatewayStub;
+import uk.gov.hmcts.darts.testutils.IntegrationBaseWithWiremock;
 import uk.gov.hmcts.darts.transcriptions.api.TranscriptionsApi;
 import uk.gov.hmcts.darts.transcriptions.exception.TranscriptionApiError;
 import uk.gov.hmcts.darts.transcriptions.model.TranscriptionRequestDetails;
@@ -24,7 +24,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.Mockito.when;
 
-class SentencingRemarksAndRetentionPolicyHandler2Test extends IntegrationBaseWithGatewayStub {
+class SentencingRemarksAndRetentionPolicyHandler2Test extends IntegrationBaseWithWiremock {
 
     private static final String SOME_CASE_NUMBER = "CASE1";
     private static final String SWANSEA_COURTHOUSE = "SWANSEA";

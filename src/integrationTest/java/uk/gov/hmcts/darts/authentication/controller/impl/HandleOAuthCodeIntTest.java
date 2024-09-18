@@ -24,7 +24,7 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import uk.gov.hmcts.darts.authorisation.api.AuthorisationApi;
 import uk.gov.hmcts.darts.authorisation.model.UserState;
 import uk.gov.hmcts.darts.authorisation.model.UserStateRole;
-import uk.gov.hmcts.darts.testutils.IntegrationBaseWithGatewayStub;
+import uk.gov.hmcts.darts.testutils.IntegrationBaseWithWiremock;
 
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
@@ -53,7 +53,7 @@ import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.TRANSCRIBER;
 
 @AutoConfigureMockMvc
 @SuppressWarnings("PMD.ExcessiveImports")
-class HandleOAuthCodeIntTest extends IntegrationBaseWithGatewayStub {
+class HandleOAuthCodeIntTest extends IntegrationBaseWithWiremock {
 
     private static final String EXTERNAL_USER_HANDLE_OAUTH_CODE_ENDPOINT_WITH_CODE =
         "/external-user/handle-oauth-code?code=abc";

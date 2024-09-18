@@ -6,14 +6,14 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.http.HttpHeaders;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
-import uk.gov.hmcts.darts.testutils.IntegrationBaseWithGatewayStub;
+import uk.gov.hmcts.darts.testutils.IntegrationBaseWithWiremock;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @AutoConfigureMockMvc
-class ResetPasswordIntTest extends IntegrationBaseWithGatewayStub {
+class ResetPasswordIntTest extends IntegrationBaseWithWiremock {
 
     private static final String EXPECTED_REDIRECT_URL =
         "http://localhost:<wiremockPort>/" +

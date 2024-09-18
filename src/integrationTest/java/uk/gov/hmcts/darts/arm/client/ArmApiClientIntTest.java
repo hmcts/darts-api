@@ -9,7 +9,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.TestPropertySource;
 import uk.gov.hmcts.darts.arm.client.model.UpdateMetadataRequest;
 import uk.gov.hmcts.darts.arm.client.model.UpdateMetadataResponse;
-import uk.gov.hmcts.darts.testutils.IntegrationBaseWithGatewayStub;
+import uk.gov.hmcts.darts.testutils.IntegrationBaseWithWiremock;
 
 import java.io.InputStream;
 import java.nio.file.Files;
@@ -35,7 +35,7 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
     "darts.storage.arm-api.url=http://localhost:${wiremock.server.port}"
 })
 @SuppressWarnings("PMD.CloseResource")
-class ArmApiClientIntTest extends IntegrationBaseWithGatewayStub {
+class ArmApiClientIntTest extends IntegrationBaseWithWiremock {
 
     private static final String EXTERNAL_RECORD_ID = "7683ee65-c7a7-7343-be80-018b8ac13602";
     private static final String EXTERNAL_FILE_ID = "075987ea-b34d-49c7-b8db-439bfbe2496c";

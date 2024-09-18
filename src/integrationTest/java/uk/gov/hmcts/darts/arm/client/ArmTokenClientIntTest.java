@@ -10,7 +10,7 @@ import org.springframework.test.context.TestPropertySource;
 import uk.gov.hmcts.darts.arm.client.model.ArmTokenRequest;
 import uk.gov.hmcts.darts.arm.client.model.ArmTokenResponse;
 import uk.gov.hmcts.darts.arm.enums.GrantType;
-import uk.gov.hmcts.darts.testutils.IntegrationBaseWithGatewayStub;
+import uk.gov.hmcts.darts.testutils.IntegrationBaseWithWiremock;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
 import static com.github.tomakehurst.wiremock.client.WireMock.equalTo;
@@ -31,7 +31,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 @TestPropertySource(properties = {
     "darts.storage.arm-api.url=http://localhost:${wiremock.server.port}"
 })
-class ArmTokenClientIntTest extends IntegrationBaseWithGatewayStub {
+class ArmTokenClientIntTest extends IntegrationBaseWithWiremock {
 
     @Autowired
     private ArmTokenClient armTokenClient;

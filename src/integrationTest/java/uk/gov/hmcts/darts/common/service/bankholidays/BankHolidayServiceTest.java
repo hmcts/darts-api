@@ -2,13 +2,13 @@ package uk.gov.hmcts.darts.common.service.bankholidays;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import uk.gov.hmcts.darts.testutils.IntegrationBaseWithGatewayStub;
+import uk.gov.hmcts.darts.testutils.IntegrationBaseWithWiremock;
 import uk.gov.hmcts.darts.testutils.stubs.wiremock.BankHolidayApiStub;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 
-class BankHolidayServiceTest extends IntegrationBaseWithGatewayStub {
+class BankHolidayServiceTest extends IntegrationBaseWithWiremock {
 
     public static final String VALID_BANK_HOLIDAY_JSON = """
         {
