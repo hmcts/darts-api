@@ -371,7 +371,7 @@ class AdminTranscriptionServiceTest {
             AdminApproveDeletionResponse expectedResponse = new AdminApproveDeletionResponse();
 
             when(transcriptionDocumentRepository.findById(transcriptionDocumentId)).thenReturn(Optional.of(documentEntity));
-            when(objectAdminActionRepository.findByTranscriptionDocumentIdHiddenAndMarkedForDeletion(transcriptionDocumentId))
+            when(objectAdminActionRepository.findByTranscriptionDocumentId(transcriptionDocumentId))
                 .thenReturn(Optional.of(objectAdminActionEntity));
             when(userIdentity.getUserAccount()).thenReturn(userAccount);
             when(transcriptionResponseMapper.mapAdminApproveDeletionResponse(documentEntity, objectAdminActionEntity)).thenReturn(expectedResponse);
@@ -403,7 +403,7 @@ class AdminTranscriptionServiceTest {
             Integer transcriptionDocumentId = 1;
             TranscriptionDocumentEntity documentEntity = new TranscriptionDocumentEntity();
             when(transcriptionDocumentRepository.findById(transcriptionDocumentId)).thenReturn(Optional.of(documentEntity));
-            when(objectAdminActionRepository.findByTranscriptionDocumentIdHiddenAndMarkedForDeletion(transcriptionDocumentId))
+            when(objectAdminActionRepository.findByTranscriptionDocumentId(transcriptionDocumentId))
                 .thenReturn(Optional.empty());
 
             DartsApiException exception = assertThrows(DartsApiException.class, () ->
@@ -421,7 +421,7 @@ class AdminTranscriptionServiceTest {
             objectAdminActionEntity.setMarkedForManualDeletion(true);
 
             when(transcriptionDocumentRepository.findById(transcriptionDocumentId)).thenReturn(Optional.of(documentEntity));
-            when(objectAdminActionRepository.findByTranscriptionDocumentIdHiddenAndMarkedForDeletion(transcriptionDocumentId))
+            when(objectAdminActionRepository.findByTranscriptionDocumentId(transcriptionDocumentId))
                 .thenReturn(Optional.of(objectAdminActionEntity));
 
             DartsApiException exception = assertThrows(DartsApiException.class, () ->
@@ -439,7 +439,7 @@ class AdminTranscriptionServiceTest {
             UserAccountEntity userAccount = new UserAccountEntity();
 
             when(transcriptionDocumentRepository.findById(transcriptionDocumentId)).thenReturn(Optional.of(documentEntity));
-            when(objectAdminActionRepository.findByTranscriptionDocumentIdHiddenAndMarkedForDeletion(transcriptionDocumentId))
+            when(objectAdminActionRepository.findByTranscriptionDocumentId(transcriptionDocumentId))
                 .thenReturn(Optional.of(objectAdminActionEntity));
             when(userIdentity.getUserAccount()).thenReturn(userAccount);
             objectAdminActionEntity.setHiddenBy(userAccount);

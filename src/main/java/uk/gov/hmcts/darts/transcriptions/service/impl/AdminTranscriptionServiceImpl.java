@@ -221,7 +221,7 @@ public class AdminTranscriptionServiceImpl implements AdminTranscriptionService 
         if (transcriptionDocumentEntity.isPresent()) {
 
             ObjectAdminActionEntity objectAdminActionEntity = objectAdminActionRepository
-                .findByTranscriptionDocumentIdHiddenAndMarkedForDeletion(transcriptionDocumentId)
+                .findByTranscriptionDocumentId(transcriptionDocumentId)
                 .orElseThrow(() -> new DartsApiException(TranscriptionApiError.TRANSCRIPTION_DOCUMENT_DELETE_NOT_SUPPORTED));
 
             if (objectAdminActionEntity.isMarkedForManualDeletion()) {
