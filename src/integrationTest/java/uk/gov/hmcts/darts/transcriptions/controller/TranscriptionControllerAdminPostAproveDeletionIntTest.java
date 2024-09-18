@@ -92,14 +92,13 @@ class TranscriptionControllerAdminPostAproveDeletionIntTest extends IntegrationB
         TranscriptionDocumentEntity transcriptionDocumentEntity = transactionDocumentStub
             .createTranscriptionDocument(fileName, fileBytes, fileType, hidden, transcriptionEntity);
 
-        var objectAdminActionEntityCreated = objectAdminActionStub.createAndSave(ObjectAdminActionStub.ObjectAdminActionSpec.builder()
-                                                                                     .transcriptionDocument(transcriptionDocumentEntity)
-                                                                                     .objectHiddenReason(
-                                                                                         objectHiddenReasonStub.getAnyWithMarkedForDeletion(true))
-                                                                                     .markedForManualDeletion(false)
-                                                                                     .markedForManualDelBy(null)
-                                                                                     .markedForManualDelDateTime(null)
-                                                                                     .build());
+        objectAdminActionStub.createAndSave(ObjectAdminActionStub.ObjectAdminActionSpec.builder()
+                                                .transcriptionDocument(transcriptionDocumentEntity)
+                                                .objectHiddenReason(objectHiddenReasonStub.getAnyWithMarkedForDeletion(true))
+                                                .markedForManualDeletion(false)
+                                                .markedForManualDelBy(null)
+                                                .markedForManualDelDateTime(null)
+                                                .build());
         // run the test
         MvcResult mvcResult = mockMvc.perform(post(ENDPOINT_URL.replace(
                 "${TRANSACTION_DOCUMENT_ID}", transcriptionDocumentEntity.getId().toString()))
