@@ -7,14 +7,11 @@ import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Limit;
-import uk.gov.hmcts.darts.audit.api.AuditActivity;
-import uk.gov.hmcts.darts.audit.api.AuditApi;
-import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
-import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
 import uk.gov.hmcts.darts.common.repository.AutomatedTaskRepository;
 import uk.gov.hmcts.darts.common.repository.CaseRepository;
+import uk.gov.hmcts.darts.common.service.DataAnonymisationService;
 import uk.gov.hmcts.darts.log.api.LogApi;
 import uk.gov.hmcts.darts.task.config.AutomatedTaskConfigurationProperties;
 import uk.gov.hmcts.darts.task.service.LockService;
@@ -23,7 +20,6 @@ import java.time.OffsetDateTime;
 import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
@@ -40,15 +36,14 @@ class CaseExpiryDeletionAutomatedTaskTest {
     @Mock
     private CurrentTimeHelper currentTimeHelper;
     @Mock
-    private UserIdentity userIdentity;
-    @Mock
     private CaseRepository caseRepository;
     @Mock
     private LogApi logApi;
     @Mock
     private LockService lockService;
     @Mock
-    private AuditApi auditApi;
+    private DataAnonymisationService dataAnonymisationService;
+
 
     @InjectMocks
     @Spy
@@ -56,9 +51,6 @@ class CaseExpiryDeletionAutomatedTaskTest {
 
     @Test
     void runTask() {
-        UserAccountEntity userAccount = new UserAccountEntity();
-        userAccount.setId(123);
-        when(userIdentity.getUserAccount()).thenReturn(userAccount);
 
         OffsetDateTime offsetDateTime = OffsetDateTime.now();
         when(currentTimeHelper.currentOffsetDateTime()).thenReturn(offsetDateTime);
@@ -75,24 +67,16 @@ class CaseExpiryDeletionAutomatedTaskTest {
 
         caseExpiryDeletionAutomatedTask.runTask();
 
-        verify(userIdentity, times(1))
-            .getUserAccount();
         verify(currentTimeHelper, times(1))
             .currentOffsetDateTime();
 
-        verify(courtCase1, times(1))
-            .anonymize(eq(userAccount));
-        verify(courtCase2, times(1))
-            .anonymize(eq(userAccount));
-        verify(courtCase3, times(1))
-            .anonymize(eq(userAccount));
+        verify(dataAnonymisationService, times(1))
+            .anonymizeCourtCaseEntity(courtCase1, false);
+        verify(dataAnonymisationService, times(1))
+            .anonymizeCourtCaseEntity(courtCase2, false);
+        verify(dataAnonymisationService, times(1))
+            .anonymizeCourtCaseEntity(courtCase3, false);
 
-        verify(auditApi, times(1))
-            .record(AuditActivity.CASE_EXPIRED, userAccount, courtCase1);
-        verify(auditApi, times(1))
-            .record(AuditActivity.CASE_EXPIRED, userAccount, courtCase2);
-        verify(auditApi, times(1))
-            .record(AuditActivity.CASE_EXPIRED, userAccount, courtCase3);
 
         verify(caseRepository, times(1))
             .findCasesToBeAnonymized(offsetDateTime, Limit.of(5));

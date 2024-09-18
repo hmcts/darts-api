@@ -6,38 +6,9 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
 
 class TranscriptionEntityTest {
 
-    @Test
-    void positiveAnonymize() {
-        TranscriptionEntity transcriptionEntity = new TranscriptionEntity();
-
-        TranscriptionCommentEntity transcriptionCommentEntity1 = mock(TranscriptionCommentEntity.class);
-        TranscriptionCommentEntity transcriptionCommentEntity2 = mock(TranscriptionCommentEntity.class);
-        transcriptionEntity.setTranscriptionCommentEntities(List.of(transcriptionCommentEntity1, transcriptionCommentEntity2));
-
-        TranscriptionWorkflowEntity transcriptionWorkflowEntity1 = mock(TranscriptionWorkflowEntity.class);
-        TranscriptionWorkflowEntity transcriptionWorkflowEntity2 = mock(TranscriptionWorkflowEntity.class);
-        transcriptionEntity.setTranscriptionWorkflowEntities(List.of(transcriptionWorkflowEntity1, transcriptionWorkflowEntity2));
-
-
-        UserAccountEntity userAccount = new UserAccountEntity();
-        transcriptionEntity.anonymize(userAccount);
-
-        verify(transcriptionCommentEntity1, times(1))
-            .anonymize(userAccount);
-        verify(transcriptionCommentEntity2, times(1))
-            .anonymize(userAccount);
-
-        verify(transcriptionWorkflowEntity1, times(1))
-            .close();
-        verify(transcriptionWorkflowEntity2, times(1))
-            .close();
-    }
 
     @Test
     void testGetCourtCaseViaHearing() {
