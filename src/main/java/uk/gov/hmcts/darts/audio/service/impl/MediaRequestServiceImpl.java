@@ -599,6 +599,7 @@ public class MediaRequestServiceImpl implements MediaRequestService {
     }
 
     @Override
+    @Transactional
     public MediaApproveMarkedForDeletionResponse adminApproveMediaMarkedForDeletion(Integer mediaId) {
         MediaApproveMarkedForDeletionResponse response;
 
