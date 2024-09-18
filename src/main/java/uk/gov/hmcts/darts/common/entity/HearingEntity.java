@@ -21,7 +21,6 @@ import org.apache.commons.collections4.CollectionUtils;
 import uk.gov.hmcts.darts.audio.entity.MediaRequestEntity;
 import uk.gov.hmcts.darts.audio.entity.MediaRequestEntity_;
 import uk.gov.hmcts.darts.common.entity.base.CreatedModifiedBaseEntity;
-import uk.gov.hmcts.darts.task.runner.CanAnonymized;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -32,7 +31,7 @@ import java.util.List;
 @Table(name = "hearing")
 @Getter
 @Setter
-public class HearingEntity extends CreatedModifiedBaseEntity implements CanAnonymized {
+public class HearingEntity extends CreatedModifiedBaseEntity {
 
     public static final String HEA_ID = "hea_id";
     @Id
@@ -121,11 +120,5 @@ public class HearingEntity extends CreatedModifiedBaseEntity implements CanAnony
 
     public void addAnnotation(AnnotationEntity annotationEntity) {
         annotations.add(annotationEntity);
-    }
-
-    @Override
-    public void anonymize(UserAccountEntity userAccount) {
-        this.getTranscriptions().forEach(transcriptionEntity -> transcriptionEntity.anonymize(userAccount));
-        this.getEventList().forEach(eventEntity -> eventEntity.anonymize(userAccount));
     }
 }
