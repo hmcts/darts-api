@@ -29,7 +29,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @AutoConfigureMockMvc
 @Transactional
-@Disabled("Impacted by V1_364_*.sql")
+@Disabled("Impacted by V1_364_*.sql - fix needed")
 class TranscriptionControllerGetYourTranscriptsIntTest extends IntegrationBase {
 
     private static final URI ENDPOINT_URI = URI.create("/transcriptions");

@@ -33,7 +33,7 @@ import static uk.gov.hmcts.darts.test.common.data.ProsecutorTestData.createProse
 
 @AutoConfigureMockMvc
 @Slf4j
-@Disabled("Impacted by V1_363__not_null_constraints_part3.sql")
+@Disabled("Impacted by V1_363__not_null_constraints_part3.sql - fix needed")
 class HearingsGetControllerTest extends IntegrationBase {
 
     @Autowired
@@ -46,7 +46,7 @@ class HearingsGetControllerTest extends IntegrationBase {
 
     private HearingEntity hearingEntity;
 
-    private static final String SOME_DATE_TIME = "2023-01-01T12:00Z";
+    private static final String SOME_DATE_TIME = "2023-01-01";
     private static final String SOME_COURTHOUSE = "SOME-COURTHOUSE";
     private static final String SOME_COURTROOM = "some-courtroom";
     private static final String SOME_CASE_NUMBER = "1";

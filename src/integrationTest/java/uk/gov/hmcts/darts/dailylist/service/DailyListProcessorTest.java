@@ -91,8 +91,8 @@ class DailyListProcessorTest extends IntegrationBase {
     }
 
 
-    @Disabled("Impacted by V1_364_*.sql")
     @Test
+    @Disabled("Impacted by V1_364_*.sql - fix needed")
     void dailyListProcessorMultipleDailyList() throws IOException {
         log.info("start dailyListProcessorMultipleDailyList");
         CourthouseEntity swanseaCourtEntity = dartsDatabase.createCourthouseWithTwoCourtrooms();
@@ -244,8 +244,8 @@ class DailyListProcessorTest extends IntegrationBase {
         assertEquals(IGNORED, savedDailyList2.getStatus());
     }
 
-    @Disabled("Impacted by V1_364_*.sql")
     @Test
+    @Disabled("Impacted by V1_364_*.sql - fix needed")
     void dailyListForListingCourthouseWithIgnore() throws IOException {
         log.info("start dailyListProcessorMultipleDailyList");
         CourthouseEntity swanseaCourtEntity = dartsDatabase.createCourthouseWithTwoCourtrooms();
@@ -307,8 +307,8 @@ class DailyListProcessorTest extends IntegrationBase {
 
     }
 
-    @Disabled("Impacted by V1_364_*.sql")
     @Test
+    @Disabled("Impacted by V1_364_*.sql - fix needed")
     void dailyListProcessorCppAndXhbDailyLists() throws IOException {
         CourthouseEntity swanseaCourtEntity = dartsDatabase.createCourthouseWithTwoCourtrooms();
 
@@ -379,8 +379,8 @@ class DailyListProcessorTest extends IntegrationBase {
 
     }
 
-    @Disabled("Impacted by V1_364_*.sql")
     @Test
+    @Disabled("Impacted by V1_364_*.sql - fix needed")
     void setsDailyListStatusToFailedIfUpdateFails() {
         var dailyListEntity = DailyListTestData.minimalDailyList();
         dailyListEntity.setListingCourthouse("SOME-COURTHOUSE");
@@ -404,8 +404,8 @@ class DailyListProcessorTest extends IntegrationBase {
         Assertions.assertThat(dailyListStatus).isEqualTo(FAILED);
     }
 
-    @Disabled("Impacted by V1_364_*.sql")
     @Test
+    @Disabled("Impacted by V1_364_*.sql - fix needed")
     void setsDailyListStatusToIgnoredIfNotLatest() throws IOException {
         var latestDailyList = DailyListTestData.minimalDailyList();
         latestDailyList.setListingCourthouse("SOME-COURTHOUSE");
@@ -436,8 +436,8 @@ class DailyListProcessorTest extends IntegrationBase {
         Assertions.assertThat(dailyListStatus).isEqualTo(IGNORED);
     }
 
-    @Disabled("Impacted by V1_364_*.sql")
     @Test
+    @Disabled("Impacted by V1_364_*.sql - fix needed")
     void dailyListProcessorWithLock() throws IOException {
         CourthouseEntity swanseaCourtEntity = dartsDatabase.createCourthouseWithTwoCourtrooms();
         dartsDatabase.createDailyLists(swanseaCourtEntity.getCourthouseName());

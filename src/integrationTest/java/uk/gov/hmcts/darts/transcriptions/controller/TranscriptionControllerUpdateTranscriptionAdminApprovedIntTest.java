@@ -43,7 +43,7 @@ import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum.WI
 @AutoConfigureMockMvc
 @Transactional
 @SuppressWarnings({"PMD.ExcessiveImports"})
-@Disabled("Impacted by V1_364_*.sql")
+@Disabled("Impacted by V1_364_*.sql - fix needed")
 class TranscriptionControllerUpdateTranscriptionAdminApprovedIntTest extends IntegrationBase {
 
     public static final String ENDPOINT_URL = "/admin/transcriptions/%d";

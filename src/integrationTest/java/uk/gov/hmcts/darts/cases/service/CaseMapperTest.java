@@ -27,7 +27,7 @@ import static uk.gov.hmcts.darts.test.common.data.EventTestData.someReportingRes
 import static uk.gov.hmcts.darts.test.common.data.HearingTestData.someMinimalHearing;
 
 @SuppressWarnings("VariableDeclarationUsageDistance")
-@Disabled("Impacted by V1_364_*.sql")
+@Disabled("Impacted by V1_364_*.sql - fix needed")
 class CaseMapperTest extends IntegrationBase {
 
     @Autowired

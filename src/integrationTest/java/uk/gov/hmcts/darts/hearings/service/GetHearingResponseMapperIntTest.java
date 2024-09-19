@@ -1,7 +1,6 @@
 package uk.gov.hmcts.darts.hearings.service;
 
 
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import uk.gov.hmcts.darts.cases.mapper.CasesMapper;
@@ -28,7 +27,6 @@ import static uk.gov.hmcts.darts.test.common.data.EventTestData.SECTION_4_1981_D
 import static uk.gov.hmcts.darts.test.common.data.EventTestData.someReportingRestrictionId;
 import static uk.gov.hmcts.darts.test.common.data.HearingTestData.someMinimalHearing;
 
-@Disabled("Impacted by V1_364_*.sql")
 class GetHearingResponseMapperIntTest extends IntegrationBase {
 
     @Autowired

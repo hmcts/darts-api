@@ -29,7 +29,7 @@ import static uk.gov.hmcts.darts.test.common.data.DefendantTestData.someMinimalD
 import static uk.gov.hmcts.darts.test.common.data.ProsecutorTestData.createProsecutorForCase;
 
 @AutoConfigureMockMvc
-@Disabled("Impacted by V1_363__not_null_constraints_part3.sql")
+@Disabled("Impacted by V1_363__not_null_constraints_part3.sql - fix needed")
 class CaseControllerGetCaseByIdTest extends IntegrationBase {
 
     @Autowired

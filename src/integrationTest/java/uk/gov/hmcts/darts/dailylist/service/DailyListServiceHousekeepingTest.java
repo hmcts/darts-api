@@ -18,7 +18,7 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-@Disabled("Impacted by V1_364_*.sql")
+@Disabled("Impacted by V1_364_*.sql - fix needed")
 class DailyListServiceHousekeepingTest extends IntegrationBase {
 
     static final ObjectMapper MAPPER = new ObjectMapper();

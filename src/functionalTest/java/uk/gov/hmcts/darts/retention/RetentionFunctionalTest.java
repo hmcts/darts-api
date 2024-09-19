@@ -20,7 +20,7 @@ class RetentionFunctionalTest extends FunctionalTest {
     }
 
     @Test
-    @Disabled("Impacted by V1_364_*.sql")
+    @Disabled("Impacted by V1_364_*.sql - needs to be fixed")
     void testGetCaseRetention() {
         String caseId = createCaseRetentions();
 

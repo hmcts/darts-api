@@ -6,9 +6,11 @@ import org.junit.platform.commons.JUnitException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import uk.gov.hmcts.darts.common.entity.CaseManagementRetentionEntity;
+import uk.gov.hmcts.darts.common.entity.NodeRegisterEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.entity.base.CreatedModifiedBaseEntity;
 import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
+import uk.gov.hmcts.darts.testutils.TransactionalUtil;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -21,29 +23,41 @@ public class DartsDatabaseSaveStub {
 
     private final UserAccountRepository userAccountRepository;
     private final EntityManager entityManager;
+    private final TransactionalUtil transactionalUtil;
 
 
     @Transactional
     public <T> T save(T entity) {
-        if (entity instanceof CreatedModifiedBaseEntity createdModifiedBaseEntity) {
-            updateCreatedByLastModifiedBy(createdModifiedBaseEntity);
-        }
-        Method getIdInstanceMethod;
-        try {
-            getIdInstanceMethod = entity.getClass().getMethod("getId");
-            Integer id = (Integer) getIdInstanceMethod.invoke(entity);
-            if (id == null) {
-                this.entityManager.persist(entity);
-                return entity;
-            } else {
-                return this.entityManager.merge(entity);
+        return transactionalUtil.executeInTransaction(() -> {
+            if (entity instanceof CreatedModifiedBaseEntity createdModifiedBaseEntity) {
+                updateCreatedByLastModifiedBy(createdModifiedBaseEntity);
             }
-        } catch (NoSuchMethodException | InvocationTargetException | IllegalAccessException e) {
-            throw new JUnitException("Failed to save entity", e);
-        }
+            Method getIdInstanceMethod;
+            try {
+                getIdInstanceMethod = getIdMethod(entity.getClass());
+                Integer id = (Integer) getIdInstanceMethod.invoke(entity);
+                if (id == null) {
+                    this.entityManager.persist(entity);
+                    return entity;
+                } else {
+                    return this.entityManager.merge(entity);
+                }
+            } catch (NoSuchMethodException | InvocationTargetException | IllegalAccessException e) {
+                throw new JUnitException("Failed to save entity", e);
+            }
+        });
     }
 
-    private void updateCreatedByLastModifiedBy(CreatedModifiedBaseEntity createdModifiedBaseEntity) {
+    private Method getIdMethod(Class<?> clazz) throws NoSuchMethodException {
+        String methodName = "getId";
+        if (NodeRegisterEntity.class.equals(clazz)) {
+            methodName = "getNodeId";
+        }
+        return clazz.getMethod(methodName);
+    }
+
+
+    public void updateCreatedByLastModifiedBy(CreatedModifiedBaseEntity createdModifiedBaseEntity) {
         if (createdModifiedBaseEntity.getCreatedBy() == null) {
             createdModifiedBaseEntity.setCreatedBy(userAccountRepository.getReferenceById(0));
             createdModifiedBaseEntity.setCreatedDateTime(OffsetDateTime.now());
@@ -51,9 +65,9 @@ public class DartsDatabaseSaveStub {
             UserAccountEntity userAccount = createdModifiedBaseEntity.getCreatedBy();
             updateCreatedByLastModifiedBy(userAccount);
             createdModifiedBaseEntity.setCreatedBy(userAccountRepository.save(userAccount));
-            if (createdModifiedBaseEntity.getCreatedDateTime() == null) {
-                createdModifiedBaseEntity.setCreatedDateTime(OffsetDateTime.now());
-            }
+        }
+        if (createdModifiedBaseEntity.getCreatedDateTime() == null) {
+            createdModifiedBaseEntity.setCreatedDateTime(OffsetDateTime.now());
         }
 
         if (createdModifiedBaseEntity.getLastModifiedBy() == null) {
@@ -63,9 +77,9 @@ public class DartsDatabaseSaveStub {
             UserAccountEntity userAccount = createdModifiedBaseEntity.getLastModifiedBy();
             updateCreatedByLastModifiedBy(userAccount);
             createdModifiedBaseEntity.setLastModifiedBy(userAccountRepository.save(userAccount));
-            if (createdModifiedBaseEntity.getLastModifiedDateTime() == null) {
-                createdModifiedBaseEntity.setLastModifiedDateTime(OffsetDateTime.now());
-            }
+        }
+        if (createdModifiedBaseEntity.getLastModifiedDateTime() == null) {
+            createdModifiedBaseEntity.setLastModifiedDateTime(OffsetDateTime.now());
         }
     }
 

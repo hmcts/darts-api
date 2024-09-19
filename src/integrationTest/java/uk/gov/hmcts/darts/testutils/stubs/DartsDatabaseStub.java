@@ -126,6 +126,7 @@ import static uk.gov.hmcts.darts.test.common.data.EventHandlerTestData.createEve
     "PMD.ExcessiveImports", "PMD.ExcessivePublicCount", "PMD.GodClass", "PMD.CouplingBetweenObjects", "PMD.CyclomaticComplexity"})
 @Getter
 @Slf4j
+@Transactional
 public class DartsDatabaseStub {
 
     private static final int SEQUENCE_START_VALUE = 15_000;
@@ -329,6 +330,7 @@ public class DartsDatabaseStub {
         return retrieveCoreObjectService.retrieveOrCreateCourtroom(courthouse, roomName, userAccountRepository.getReferenceById(0));
     }
 
+    @Transactional
     public HearingEntity givenTheDatabaseContainsCourtCaseWithHearingAndCourthouseWithRoom(
         String caseNumber, String courthouseName, String courtroomName, LocalDateTime hearingDate) {
 
@@ -533,6 +535,7 @@ public class DartsDatabaseStub {
     public HearingEntity save(HearingEntity hearingEntity) {
         save(hearingEntity.getCourtroom().getCourthouse());
         save(hearingEntity.getCourtroom());
+        save(hearingEntity.getCourtCase());
         return dartsDatabaseSaveStub.save(hearingEntity);
     }
 
@@ -551,6 +554,9 @@ public class DartsDatabaseStub {
     @Transactional
     public CourtCaseEntity save(CourtCaseEntity courtCase) {
         save(courtCase.getCourthouse());
+        courtCase.getDefenceList().forEach(dartsDatabaseSaveStub::updateCreatedByLastModifiedBy);
+        courtCase.getDefendantList().forEach(dartsDatabaseSaveStub::updateCreatedByLastModifiedBy);
+        courtCase.getProsecutorList().forEach(dartsDatabaseSaveStub::updateCreatedByLastModifiedBy);
         return dartsDatabaseSaveStub.save(courtCase);
     }
 
@@ -622,24 +628,7 @@ public class DartsDatabaseStub {
         if (entities == null || entities.length == 0) {
             return;
         }
-
-        var getIdInstanceMethod = entities[0].getClass().getMethod("getId");
-
-        stream(entities).forEach(entity -> {
-            Integer id;
-
-            try {
-                id = (Integer) getIdInstanceMethod.invoke(entity);
-            } catch (IllegalAccessException | InvocationTargetException e) {
-                throw new JUnitException("Failed to save entity", e);
-            }
-
-            if (id == null) {
-                this.entityManager.persist(entity);
-            } else {
-                this.entityManager.merge(entity);
-            }
-        });
+        stream(entities).forEach(this::save);
     }
 
     @Transactional

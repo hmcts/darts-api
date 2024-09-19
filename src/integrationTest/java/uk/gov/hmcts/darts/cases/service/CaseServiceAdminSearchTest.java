@@ -47,7 +47,7 @@ import static uk.gov.hmcts.darts.test.common.data.JudgeTestData.createJudgeWithN
     "darts.cases.admin-search.max-results=20"
 })
 @SuppressWarnings({"PMD.VariableDeclarationUsageDistance", "PMD.NcssCount", "PMD.ExcessiveImports"})
-@Disabled("Impacted by V1_363__not_null_constraints_part3.sql")
+@Disabled("Impacted by V1_363__not_null_constraints_part3.sql - fix needed")
 class CaseServiceAdminSearchTest extends IntegrationBase {
 
     @Autowired

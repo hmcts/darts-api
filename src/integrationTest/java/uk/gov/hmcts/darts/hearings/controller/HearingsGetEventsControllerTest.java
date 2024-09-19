@@ -2,7 +2,6 @@ package uk.gov.hmcts.darts.hearings.controller;
 
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.skyscreamer.jsonassert.JSONAssert;
 import org.skyscreamer.jsonassert.JSONCompareMode;
@@ -32,7 +31,6 @@ import static uk.gov.hmcts.darts.test.common.data.ProsecutorTestData.createProse
 
 @AutoConfigureMockMvc
 @Slf4j
-@Disabled("Impacted by V1_363__not_null_constraints_part3.sql")
 class HearingsGetEventsControllerTest extends IntegrationBase {
 
     @Autowired
@@ -46,7 +44,7 @@ class HearingsGetEventsControllerTest extends IntegrationBase {
     private HearingEntity hearingEntity;
     private EventEntity event;
 
-    private static final String SOME_DATE = "2023-01-01T12:00Z";
+    private static final String SOME_DATE = "2023-01-01";
     private static final String SOME_COURTHOUSE = "SOME-COURTHOUSE";
     private static final String SOME_COURTROOM = "some-courtroom";
     private static final String SOME_CASE_NUMBER = "1";

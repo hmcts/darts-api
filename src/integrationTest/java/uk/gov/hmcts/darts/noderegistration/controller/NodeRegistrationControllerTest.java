@@ -46,7 +46,7 @@ class NodeRegistrationControllerTest extends IntegrationBase {
 
 
     @Test
-    @Disabled("Impacted by V1_364_*.sql")
+    @Disabled("Impacted by V1_364_*.sql - fix needed")
     void testPostRegisterDevices() throws Exception {
         dartsDatabase.createCourthouseWithTwoCourtrooms();
         UserAccountEntity userCreated = setupExternalUserForCourthouse(null);
@@ -99,7 +99,7 @@ class NodeRegistrationControllerTest extends IntegrationBase {
     }
 
     @Test
-    @Disabled("Impacted by V1_364_*.sql")
+    @Disabled("Impacted by V1_364_*.sql - fix needed")
     void testAcceptNonDarDevices() throws Exception {
         dartsDatabase.createCourthouseWithTwoCourtrooms();
 
@@ -115,7 +115,7 @@ class NodeRegistrationControllerTest extends IntegrationBase {
     }
 
     @Test
-    @Disabled("Impacted by V1_364_*.sql")
+    @Disabled("Impacted by V1_364_*.sql - fix needed")
     void testAcceptsDuplicates() throws Exception {
         dartsDatabase.createCourthouseWithTwoCourtrooms();
 
@@ -136,7 +136,7 @@ class NodeRegistrationControllerTest extends IntegrationBase {
     }
 
     @Test
-    @Disabled("Impacted by V1_364_*.sql")
+    @Disabled("Impacted by V1_364_*.sql - fix needed")
     void testEmptyStrings() throws Exception {
         dartsDatabase.createCourthouseWithTwoCourtrooms();
         setupExternalUserForCourthouse(null);

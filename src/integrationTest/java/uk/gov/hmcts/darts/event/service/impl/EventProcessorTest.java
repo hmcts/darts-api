@@ -2,7 +2,6 @@ package uk.gov.hmcts.darts.event.service.impl;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import uk.gov.hmcts.darts.arm.component.AutomatedTaskProcessorFactory;
@@ -16,7 +15,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
-@Disabled("Impacted by V1_363__not_null_constraints_part3.sql")
 class EventProcessorTest extends PostgresIntegrationBase {
 
     @Autowired

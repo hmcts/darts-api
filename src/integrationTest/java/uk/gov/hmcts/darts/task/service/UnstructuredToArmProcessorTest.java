@@ -138,7 +138,6 @@ class UnstructuredToArmProcessorTest extends IntegrationBase {
     }
 
     @Test
-    @Disabled("Impacted by V1_364_*.sql")
     void movePendingTranscriptionDataFromUnstructuredToArmStorage() {
 
         authorisationStub.givenTestSchema();

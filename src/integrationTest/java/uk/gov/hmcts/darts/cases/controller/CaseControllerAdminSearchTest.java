@@ -45,7 +45,7 @@ import static uk.gov.hmcts.darts.testutils.stubs.UserAccountStub.INTEGRATION_TES
 
 @AutoConfigureMockMvc
 @SuppressWarnings({"PMD.VariableDeclarationUsageDistance", "PMD.NcssCount", "PMD.ExcessiveImports"})
-@Disabled("Impacted by V1_363__not_null_constraints_part3.sql")
+@Disabled("Impacted by V1_363__not_null_constraints_part3.sql - fix needed")
 class CaseControllerAdminSearchTest extends IntegrationBase {
 
     private static final String ENDPOINT_URL = "/admin/cases/search";
@@ -150,7 +150,6 @@ class CaseControllerAdminSearchTest extends IntegrationBase {
     }
 
     @Test
-    @Disabled("Impacted by V1_364_*.sql")
     void testOk() throws Exception {
 
         String requestBody = """

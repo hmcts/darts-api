@@ -2,7 +2,6 @@ package uk.gov.hmcts.darts.transcriptions.controller;
 
 import com.jayway.jsonpath.JsonPath;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
@@ -60,7 +59,6 @@ import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum.RE
 @AutoConfigureMockMvc
 @SuppressWarnings({"PMD.ExcessiveImports"})
 @Transactional
-@Disabled("Impacted by V1_364_*.sql")
 class TranscriptionControllerRequestTranscriptionIntTest extends IntegrationBase {
 
     private static final URI ENDPOINT_URI = URI.create("/transcriptions");

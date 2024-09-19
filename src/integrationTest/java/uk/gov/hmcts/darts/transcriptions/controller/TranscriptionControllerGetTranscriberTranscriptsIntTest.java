@@ -27,7 +27,7 @@ import static uk.gov.hmcts.darts.testutils.DateHelper.convertSqlDateTimeToLocalD
 import static uk.gov.hmcts.darts.testutils.DateHelper.todaysDateMinusDaysFormattedForSql;
 
 @AutoConfigureMockMvc
-@Disabled("Impacted by V1_364_*.sql")
+@Disabled("Impacted by V1_364_*.sql - fix needed")
 class TranscriptionControllerGetTranscriberTranscriptsIntTest extends IntegrationBase {
 
     private static final URI ENDPOINT_URI = URI.create("/transcriptions/transcriber-view");

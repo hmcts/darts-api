@@ -1,6 +1,5 @@
 package uk.gov.hmcts.darts.task.service;
 
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.SpyBean;
@@ -25,7 +24,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum.ARM;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_DROP_ZONE;
 
-@Disabled("Impacted by V1_364_*.sql")
 class GenerateCaseDocumentProcessorIntTest extends IntegrationBase {
 
     private static final OffsetDateTime DT_2025 = OffsetDateTime.of(2025, 1, 1, 1, 0, 0, 0, UTC);
@@ -60,14 +58,14 @@ class GenerateCaseDocumentProcessorIntTest extends IntegrationBase {
         var hearing = courtCase.getHearings().get(0);
         hearing.addMedia(medias.get(0));
 
-        hearingRepository.save(hearing);
+        dartsDatabase.save(hearing);
         dartsDatabase.getCaseRetentionStub().createCaseRetentionObject(courtCase, DT_2025);
 
         dartsDatabase.getExternalObjectDirectoryStub().createAndSaveEod(medias.get(0), ARM_DROP_ZONE, ARM, eod -> { });
 
         var testUser = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
         var annotation = dartsDatabase.getAnnotationStub().createAndSaveAnnotationEntityWith(testUser, "TestAnnotation", hearing);
-        annotationRepository.save(annotation);
+        dartsDatabase.save(annotation);
 
         // when
         processor.processGenerateCaseDocument(courtCase.getId());

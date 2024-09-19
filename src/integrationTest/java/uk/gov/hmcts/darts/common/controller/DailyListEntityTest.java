@@ -41,7 +41,7 @@ class DailyListEntityTest extends IntegrationBase {
     UserIdentity mockUserIdentity;
 
     @Test
-    @Disabled("Impacted by V1_364_*.sql")
+    @Disabled("Impacted by V1_364_*.sql - fix needed")
     void dailyListAddDailyListEndpoint() throws Exception {
         when(mockUserIdentity.userHasGlobalAccess(Set.of(XHIBIT, CPP))).thenReturn(true);
 
@@ -120,7 +120,7 @@ class DailyListEntityTest extends IntegrationBase {
     }
 
     @Test
-    @Disabled("Impacted by V1_364_*.sql")
+    @Disabled("Impacted by V1_364_*.sql - fix needed")
     void dailyListPatchDailyListEndpoint() throws Exception {
         when(mockUserIdentity.userHasGlobalAccess(Set.of(XHIBIT, CPP))).thenReturn(true);
 

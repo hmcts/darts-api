@@ -248,7 +248,7 @@ public class TranscriptionStub {
                                                                 TranscriptionStatusEntity transcriptionStatus,
                                                                 TranscriptionUrgencyEntity transcriptionUrgency,
                                                                 UserAccountEntity testUser,
-                                                                List<TranscriptionWorkflowEntity>  workflowEntity,
+                                                                List<TranscriptionWorkflowEntity> workflowEntity,
                                                                 boolean isManualTranscription) {
         TranscriptionEntity transcription = new TranscriptionEntity();
         for (CourtCaseEntity caseEntity : courtCase) {
@@ -345,7 +345,7 @@ public class TranscriptionStub {
                                                                                OffsetDateTime workflowTimestamp,
                                                                                boolean associatedUrgency) {
         return createAndSaveAwaitingAuthorisationTranscription(userAccountEntity, courtCaseEntity,
-                                                               hearingEntity, workflowTimestamp, associatedUrgency,true);
+                                                               hearingEntity, workflowTimestamp, associatedUrgency, true);
     }
 
     @Transactional
@@ -565,7 +565,7 @@ public class TranscriptionStub {
                                                                String checksum,
                                                                Integer confScore,
                                                                String confReason
-                                                               ) {
+    ) {
 
         TranscriptionDocumentEntity transcriptionDocumentEntity = createTranscriptionDocumentEntity(transcriptionEntity, fileName,
                                                                                                     fileType, fileSize, testUser,
@@ -660,7 +660,7 @@ public class TranscriptionStub {
                                                               String comment, boolean associateUrgency) {
 
         return createTranscriptionWithStatus(userAccountEntity, courtCaseEntity, hearingEntity, workflowTimestamp,
-                                      status, comment, associateUrgency, true);
+                                             status, comment, associateUrgency, true);
     }
 
     private TranscriptionEntity createTranscriptionWithStatus(UserAccountEntity userAccountEntity,
