@@ -16,6 +16,10 @@ public final class AwaitabilityUtil {
         waitForMaxWithOneSecondPoll(callable, Duration.ofSeconds(10));
     }
 
+    public static void waitForMax10SecondsWithOneSecondPoll(Runnable runnable) {
+        waitForMaxWithOneSecondPoll(runnable, Duration.ofSeconds(10));
+    }
+
     public static void waitForMaxWithOneSecondPoll(Callable<Boolean> callable, Duration duration) {
         var awaitAlias = random(4);
         await(awaitAlias).atMost(duration)
@@ -29,6 +33,21 @@ public final class AwaitabilityUtil {
                     verified = false;
                 }
                 return verified;
+            });
+    }
+
+    public static void waitForMaxWithOneSecondPoll(Runnable runnable, Duration duration) {
+        var awaitAlias = random(4);
+        await(awaitAlias).atMost(duration)
+            .with().pollInterval(Duration.ofSeconds(1))
+            .until(() -> {
+                try {
+                    runnable.run();
+                } catch (Exception e) {
+                    // ignore the error for now
+                    return false;
+                }
+                return true;
             });
     }
 }

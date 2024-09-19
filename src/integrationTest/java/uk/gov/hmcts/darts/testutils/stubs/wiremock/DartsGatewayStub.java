@@ -36,20 +36,16 @@ public class DartsGatewayStub {
 
     public void verifyReceivedNotificationType(int type) {
         var notificationType = "\"notification_type\":\"" + type + "\"";
-        waitForMax10SecondsWithOneSecondPoll(() -> {
-            verify(exactly(1), postRequestedFor(urlEqualTo(DAR_NOTIFY_PATH))
-                    .withRequestBody(containing(notificationType)));
-            return true;
-        });
+        waitForMax10SecondsWithOneSecondPoll(() ->
+             verify(exactly(1), postRequestedFor(urlEqualTo(DAR_NOTIFY_PATH))
+                 .withRequestBody(containing(notificationType))));
     }
 
     public void verifyNotificationUrl(String url, int count) {
         var notificationType = "\"notification_url\":\"" + url + "\"";
-        waitForMax10SecondsWithOneSecondPoll(() -> {
+        waitForMax10SecondsWithOneSecondPoll(() ->
             verify(exactly(count), postRequestedFor(urlEqualTo(DAR_NOTIFY_PATH))
-                    .withRequestBody(containing(notificationType)));
-            return true;
-        });
+                    .withRequestBody(containing(notificationType))));
     }
 
     public void clearStubs() {

@@ -78,7 +78,6 @@ class SetReportingRestrictionEventHandlerTest extends HandlerTestData {
 
             dartsGateway.verifyReceivedNotificationType(3);
             dartsGateway.verifyNotificationUrl("http://1.2.3.4/VIQDARNotifyEvent/DARNotifyEvent.asmx", 1);
-            return true;
         });
     }
 
