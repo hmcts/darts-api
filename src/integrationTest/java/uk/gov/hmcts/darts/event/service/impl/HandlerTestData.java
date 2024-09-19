@@ -1,6 +1,6 @@
 package uk.gov.hmcts.darts.event.service.impl;
 
-import uk.gov.hmcts.darts.testutils.IntegrationBaseWithGatewayStub;
+import uk.gov.hmcts.darts.testutils.IntegrationBaseWithWiremock;
 
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
@@ -8,7 +8,7 @@ import java.time.ZoneOffset;
 
 import static java.time.OffsetDateTime.now;
 
-class HandlerTestData extends IntegrationBaseWithGatewayStub {
+class HandlerTestData extends IntegrationBaseWithWiremock {
 
     protected static final String SOME_COURTHOUSE = "SOME-COURTHOUSE";
     protected static final String UNKNOWN_COURTHOUSE = "UNKNOWN-COURTHOUSE";

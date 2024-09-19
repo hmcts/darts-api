@@ -108,5 +108,8 @@ class EventSearchControllerTest extends IntegrationBase {
         assertThat(response).hasJsonPathStringValue("[0].courthouse.display_name");
         assertThat(response).hasJsonPathNumberValue("[0].courtroom.id");
         assertThat(response).hasJsonPathStringValue("[0].courtroom.name");
+        assertThat(response).hasJsonPathStringValue("[0].isManuallyAnonymised");
+        assertThat(response).hasJsonPathStringValue("[0].isCaseExpired");
+        assertThat(response).hasJsonPathStringValue("[0].caseExpiredAt");
     }
 }

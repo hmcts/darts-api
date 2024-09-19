@@ -57,10 +57,13 @@ public interface EventRepository extends JpaRepository<EventEntity, Integer> {
             e.eventText,
             e.chronicleId,
             e.antecedentId,
+            e.isDataAnonymised,
             ch.id,
             ch.displayName,
             c.id,
-            c.name)
+            c.name,
+            cc.isDataAnonymised,
+            cc.dataAnonymisedTs)
          FROM EventEntity e
          JOIN e.eventType et
          JOIN e.hearingEntities h
