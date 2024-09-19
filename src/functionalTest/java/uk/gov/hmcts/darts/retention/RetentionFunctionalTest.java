@@ -3,7 +3,6 @@ package uk.gov.hmcts.darts.retention;
 import io.restassured.http.ContentType;
 import io.restassured.response.Response;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import uk.gov.hmcts.darts.FunctionalTest;
 
