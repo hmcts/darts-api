@@ -22,7 +22,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static uk.gov.hmcts.darts.test.common.data.CaseManagementRetentionTestData.someMinimalCaseManagementRetention;
 import static uk.gov.hmcts.darts.test.common.data.CaseRetentionTestData.createCaseRetentionFor;
 
-@Disabled("Impacted by V1_364_*.sql")
 class CaseRetentionRepositoryIntTest extends IntegrationBase {
 
     private static final OffsetDateTime DT_2025 = OffsetDateTime.of(2025, 1, 1, 1, 0, 0, 0, UTC);
@@ -58,7 +57,7 @@ class CaseRetentionRepositoryIntTest extends IntegrationBase {
     }
 
     @Test
-    @Disabled("Impacted by V1_362__constraint_transcription_part6.sql")
+    @Disabled("Impacted by V1_362__constraint_transcription_part6.sql - to fix")
     void deleteCaseRetentionsByCaseManagementId() {
         var caseRetentionsWithCmr = entityGraphPersistence.persistAll(someCaseRetentionsWithCmr(3));
 

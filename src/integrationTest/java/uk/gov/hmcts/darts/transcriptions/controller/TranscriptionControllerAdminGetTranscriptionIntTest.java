@@ -124,7 +124,6 @@ class TranscriptionControllerAdminGetTranscriptionIntTest extends IntegrationBas
     }
 
     @Test
-    @Disabled("Impacted by V1_362__constraint_transcription_part6.sql")
     void getTransactionsForUserWithoutDateAndWithoutHearing() throws Exception {
         superAdminUserStub.givenUserIsAuthorised(userIdentity);
 

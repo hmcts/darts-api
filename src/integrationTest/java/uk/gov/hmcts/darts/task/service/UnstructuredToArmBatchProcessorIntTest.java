@@ -310,7 +310,7 @@ class UnstructuredToArmBatchProcessorIntTest extends IntegrationBase {
         assertThat(armDropZoneEodsMedia1.get(0).getManifestFile()).isEqualTo(manifestFile.getName());
     }
 
-    @Disabled("Impacted by V1_367__adding_not_null_constraints_part_4.sql")
+    @Disabled("Impacted by V1_367__adding_not_null_constraints_part_4.sql - Fix needed")
     @Test
     void movePreviousArmFailedFromUnstructuredToArmStorage() throws IOException {
 

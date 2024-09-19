@@ -697,7 +697,7 @@ class ArchiveRecordServiceIntTest extends IntegrationBase {
     }
 
     @Test
-    @Disabled("Impacted by V1_367__adding_not_null_constraints_part_4.sql")
+    @Disabled("Impacted by V1_367__adding_not_null_constraints_part_4.sql - Fix needed")
     void generateArchiveRecord_WithLiveCaseProperties_ReturnFileSuccess() throws IOException {
         OffsetDateTime startedAt = OffsetDateTime.of(2023, 9, 23, 13, 0, 0, 0, UTC);
         when(currentTimeHelper.currentOffsetDateTime()).thenReturn(startedAt);
@@ -756,7 +756,7 @@ class ArchiveRecordServiceIntTest extends IntegrationBase {
     }
 
     @Test
-    @Disabled("Impacted by V1_367__adding_not_null_constraints_part_4.sql")
+    @Disabled("Impacted by V1_367__adding_not_null_constraints_part_4.sql - Fix needed")
     void generateArchiveRecord_WithLiveCasePropertiesRetentionDate_ReturnFileSuccess() throws IOException {
         OffsetDateTime startedAt = OffsetDateTime.of(2023, 9, 23, 13, 0, 0, 0, UTC);
         OffsetDateTime retainUntil = OffsetDateTime.of(2024, 9, 23, 13, 0, 0, 0, UTC);
@@ -817,7 +817,7 @@ class ArchiveRecordServiceIntTest extends IntegrationBase {
     }
 
     @Test
-    @Disabled("Impacted by V1_367__adding_not_null_constraints_part_4.sql")
+    @Disabled("Impacted by V1_367__adding_not_null_constraints_part_4.sql - Fix needed")
     void generateArchiveRecord_WithAllCaseProperties_ReturnFileSuccess() throws IOException {
         OffsetDateTime startedAt = OffsetDateTime.of(2023, 9, 23, 13, 0, 0, 0, UTC);
         when(currentTimeHelper.currentOffsetDateTime()).thenReturn(startedAt);

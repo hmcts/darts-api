@@ -23,7 +23,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
-@Disabled("Impacted by V1_367__adding_not_null_constraints_part_4.sql")
 @SuppressWarnings({"PMD.ExcessiveImports"})
 class AudioTransformationServiceTest extends IntegrationBase {
 
@@ -41,6 +40,7 @@ class AudioTransformationServiceTest extends IntegrationBase {
     FileOperationService mockFileOperationService;
 
     @Test
+    @Disabled("Impacted by V1_367__adding_not_null_constraints_part_4.sql - Fix needed")
     void getMediaByHearingIdShouldReturnExpectedMediaEntitiesWhenHearingIdHasRelatedMedia() {
         given.setupTest();
         given.externalObjectDirForMedia(given.getMediaEntity1());
@@ -58,6 +58,7 @@ class AudioTransformationServiceTest extends IntegrationBase {
     }
 
     @Test
+    @Disabled("Impacted by V1_367__adding_not_null_constraints_part_4.sql - Fix needed")
     void getMediaByHearingIdShouldNotReturnMediaEntitiesWhenMediaIsHidden() {
         given.setupTest();
         given.externalObjectDirForMedia(given.getMediaEntity4());
@@ -73,6 +74,7 @@ class AudioTransformationServiceTest extends IntegrationBase {
     }
 
     @Test
+    @Disabled("Impacted by V1_367__adding_not_null_constraints_part_4.sql - Fix needed")
     void getMediaByHearingIdShouldReturnEmptyListWhenHearingIdHasNoRelatedMedia() {
         given.setupTest();
         given.externalObjectDirForMedia(given.getMediaEntity1());
@@ -84,6 +86,7 @@ class AudioTransformationServiceTest extends IntegrationBase {
     }
 
     @Test
+    @Disabled("Impacted by V1_367__adding_not_null_constraints_part_4.sql - Fix needed")
     void getMediaByHearingIdShouldReturnEmptyListWhenHearingIdDoesNotExist() {
         given.setupTest();
         given.externalObjectDirForMedia(given.getMediaEntity1());

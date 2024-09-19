@@ -17,7 +17,6 @@ import java.time.OffsetDateTime;
 
 import static org.mockito.Mockito.when;
 
-@Disabled("Impacted by V1_367__adding_not_null_constraints_part_4.sql")
 @SuppressWarnings("VariableDeclarationUsageDistance")
 class RetentionPolicyTest extends IntegrationBase {
 
@@ -109,6 +108,7 @@ class RetentionPolicyTest extends IntegrationBase {
     }
 
     @Test
+    @Disabled("Impacted by V1_367__adding_not_null_constraints_part_4.sql - Fix needed")
     void onePolicyWithCurrentStatePending() {
         CourtCaseEntity courtCase = dartsDatabase.createCase("Swansea", "aCaseNumber");
         courtCase.setCaseClosedTimestamp(OffsetDateTime.now());

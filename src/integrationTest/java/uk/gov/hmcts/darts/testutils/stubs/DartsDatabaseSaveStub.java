@@ -5,12 +5,15 @@ import lombok.AllArgsConstructor;
 import org.junit.platform.commons.JUnitException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import uk.gov.hmcts.darts.common.entity.CaseManagementRetentionEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.entity.base.CreatedModifiedBaseEntity;
 import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.time.OffsetDateTime;
+import java.util.List;
 
 @Service
 @AllArgsConstructor
@@ -43,18 +46,31 @@ public class DartsDatabaseSaveStub {
     private void updateCreatedByLastModifiedBy(CreatedModifiedBaseEntity createdModifiedBaseEntity) {
         if (createdModifiedBaseEntity.getCreatedBy() == null) {
             createdModifiedBaseEntity.setCreatedBy(userAccountRepository.getReferenceById(0));
+            createdModifiedBaseEntity.setCreatedDateTime(OffsetDateTime.now());
         } else if (createdModifiedBaseEntity.getCreatedBy().getId() == null) {
             UserAccountEntity userAccount = createdModifiedBaseEntity.getCreatedBy();
             updateCreatedByLastModifiedBy(userAccount);
             createdModifiedBaseEntity.setCreatedBy(userAccountRepository.save(userAccount));
+            if (createdModifiedBaseEntity.getCreatedDateTime() == null) {
+                createdModifiedBaseEntity.setCreatedDateTime(OffsetDateTime.now());
+            }
         }
 
         if (createdModifiedBaseEntity.getLastModifiedBy() == null) {
             createdModifiedBaseEntity.setLastModifiedBy(userAccountRepository.getReferenceById(0));
+            createdModifiedBaseEntity.setLastModifiedDateTime(OffsetDateTime.now());
         } else if (createdModifiedBaseEntity.getLastModifiedBy().getId() == null) {
             UserAccountEntity userAccount = createdModifiedBaseEntity.getLastModifiedBy();
             updateCreatedByLastModifiedBy(userAccount);
             createdModifiedBaseEntity.setLastModifiedBy(userAccountRepository.save(userAccount));
+            if (createdModifiedBaseEntity.getLastModifiedDateTime() == null) {
+                createdModifiedBaseEntity.setLastModifiedDateTime(OffsetDateTime.now());
+            }
         }
+    }
+
+    @Transactional
+    public void saveAll(List<CaseManagementRetentionEntity> caseManagementRetentionsWithEvents) {
+        caseManagementRetentionsWithEvents.forEach(this::save);
     }
 }
