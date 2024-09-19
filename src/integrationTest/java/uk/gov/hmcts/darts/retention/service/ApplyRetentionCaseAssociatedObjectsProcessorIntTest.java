@@ -346,7 +346,7 @@ class ApplyRetentionCaseAssociatedObjectsProcessorIntTest extends IntegrationBas
     }
 
     @Test
-    @Disabled("Impacted by V1_364_*.sql - fix needed (Validation)")
+    @Disabled("Failed Validation")
     void testExceptionOnOneObjectCausesRollbackOfAllChangesToAllObjectsAndProcessingOfOtherCasesContinues() {
 
         // given

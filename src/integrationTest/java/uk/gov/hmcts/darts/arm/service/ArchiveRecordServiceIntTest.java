@@ -225,7 +225,7 @@ class ArchiveRecordServiceIntTest extends IntegrationBase {
     }
 
     @Test
-    @Disabled("Impacted by V1_364_*.sql - fix needed (Validation)")
+    @Disabled("Failed Validation")
     void generateArchiveRecord_WithAllMediaProperties_ReturnFileSuccess() throws IOException {
 
         OffsetDateTime startedAt = OffsetDateTime.of(2023, 9, 23, 14, 0, 0, 0, UTC);

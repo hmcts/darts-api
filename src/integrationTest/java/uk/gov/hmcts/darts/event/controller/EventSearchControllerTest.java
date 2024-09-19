@@ -89,7 +89,7 @@ class EventSearchControllerTest extends IntegrationBase {
     }
 
     @Test
-    @Disabled("Impacted by V1_363__not_null_constraints_part3.sql - fix needed (Validation)")
+    @Disabled("Failed Validation")
     void returnsAllFieldsCorrectly() throws Exception {
         given.anAuthenticatedUserWithGlobalAccessAndRole(SUPER_ADMIN);
         eventsGivensBuilder.persistedEvents(1);

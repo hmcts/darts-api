@@ -280,7 +280,7 @@ class CaseRepositoryIntTest extends IntegrationBase {
     }
 
     @Test
-    @Disabled("Impacted by V1_364_*.sql - fix needed (Validation)")
+    @Disabled("Failed Validation")
     void testFindOpenCasesToClosePaged() {
         // given
         caseStub.createAndSaveCourtCase(courtCase -> {
