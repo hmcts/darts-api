@@ -5,9 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.cloud.contract.wiremock.AutoConfigureWireMock;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
@@ -60,7 +58,6 @@ import java.util.List;
  *  </li>
  * </ul>
  */
-@AutoConfigureWireMock(port = 0, files = "file:src/integrationTest/resources/wiremock")
 @SpringBootTest
 @Slf4j
 @ActiveProfiles({"intTest", "h2db", "in-memory-caching"})
@@ -78,9 +75,6 @@ public class IntegrationBase {
     protected ObjectMapper objectMapper;
     @Autowired
     protected TransactionalUtil transactionalUtil;
-
-    @Value("${wiremock.server.port}")
-    protected String wiremockPort;
 
     protected MemoryLogAppender logAppender = LogUtil.getMemoryLogger();
 

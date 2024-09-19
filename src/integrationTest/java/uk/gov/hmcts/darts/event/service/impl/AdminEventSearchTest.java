@@ -9,7 +9,7 @@ import org.springframework.test.context.TestPropertySource;
 import uk.gov.hmcts.darts.common.entity.EventEntity;
 import uk.gov.hmcts.darts.event.model.AdminEventSearch;
 import uk.gov.hmcts.darts.event.service.EventSearchService;
-import uk.gov.hmcts.darts.testutils.IntegrationBase;
+import uk.gov.hmcts.darts.testutils.IntegrationBaseWithWiremock;
 
 import java.util.List;
 
@@ -20,7 +20,7 @@ import static uk.gov.hmcts.darts.test.common.data.HearingTestData.someMinimalHea
 
 @TestPropertySource(properties = {"darts.events.admin-search.max-results=5"})
 @Disabled("Impacted by V1_363__not_null_constraints_part3.sql")
-class AdminEventSearchTest extends IntegrationBase {
+class AdminEventSearchTest extends IntegrationBaseWithWiremock {
 
     @Autowired
     private AdminEventsSearchGivensBuilder given;
