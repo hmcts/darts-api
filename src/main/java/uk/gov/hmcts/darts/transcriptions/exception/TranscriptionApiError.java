@@ -122,6 +122,15 @@ public enum TranscriptionApiError implements DartsApiError {
         HttpStatus.BAD_REQUEST,
         TranscriptionsTitleErrors.TRANSCRIPTION_DOCUMENT_HIDE_ACTION_REASON_NOT_FOUND.getValue()
     ),
+    TRANSCRIPTION_DOCUMENT_MARKED_FOR_DELETION_REASON_NOT_FOUND(
+        TranscriptionsErrorCode.TRANSCRIPTION_DOCUMENT_MARKED_FOR_DELETION_REASON_NOT_FOUND.getValue(),
+        HttpStatus.BAD_REQUEST,
+        TranscriptionsTitleErrors.TRANSCRIPTION_DOCUMENT_MARKED_FOR_DELETION_REASON_NOT_FOUND.getValue()
+    ),
+    TOO_MANY_RESULTS(
+        TranscriptionsErrorCode.TOO_MANY_RESULTS.getValue(),
+        HttpStatus.BAD_REQUEST,
+        TranscriptionsTitleErrors.TOO_MANY_RESULTS.getValue()),
     TRANSCRIPTION_DOCUMENT_REASON_IS_MARKED_FOR_DELETION(
         TranscriptionsErrorCode.TRANSCRIPTION_DOCUMENT_HIDE_ACTION_REASON_MARKED_FOR_DELETION.getValue(),
         HttpStatus.NOT_IMPLEMENTED,

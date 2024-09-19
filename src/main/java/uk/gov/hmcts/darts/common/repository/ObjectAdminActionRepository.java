@@ -24,6 +24,7 @@ public interface ObjectAdminActionRepository extends JpaRepository<ObjectAdminAc
         """)
     List<ObjectAdminActionEntity> findAllMediaActionsWithAnyDeletionReason();
 
-    Optional<ObjectAdminActionEntity> findByTranscriptionDocumentId(Integer transcriptionDocumentId);
+    Optional<ObjectAdminActionEntity> findByTranscriptionDocument_IdAndObjectHiddenReasonIsNotNullAndObjectHiddenReason_MarkedForDeletionTrue(
+        Integer transcriptionDocumentId);
 
 }

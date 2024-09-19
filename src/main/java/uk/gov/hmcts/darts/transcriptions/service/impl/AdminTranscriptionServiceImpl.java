@@ -30,6 +30,7 @@ import uk.gov.hmcts.darts.transcriptions.model.TranscriptionSearchResponse;
 import uk.gov.hmcts.darts.transcriptions.model.TranscriptionSearchResult;
 import uk.gov.hmcts.darts.transcriptions.service.AdminTranscriptionService;
 import uk.gov.hmcts.darts.transcriptions.service.TranscriptionSearchQuery;
+import uk.gov.hmcts.darts.transcriptions.validator.TranscriptionApproveMarkForDeletionValidator;
 import uk.gov.hmcts.darts.transcriptions.validator.TranscriptionDocumentHideOrShowValidator;
 import uk.gov.hmcts.darts.usermanagement.service.validation.UserAccountExistsValidator;
 
@@ -64,6 +65,8 @@ public class AdminTranscriptionServiceImpl implements AdminTranscriptionService 
     private final ObjectHiddenReasonRepository objectHiddenReasonRepository;
 
     private final UserIdentity userIdentity;
+
+    private final TranscriptionApproveMarkForDeletionValidator transcriptionApproveMarkForDeletionValidator;
 
     @Override
     @SuppressWarnings({"PMD.NullAssignment"})
@@ -215,24 +218,18 @@ public class AdminTranscriptionServiceImpl implements AdminTranscriptionService 
     @Transactional
     public AdminApproveDeletionResponse approveDeletionOfTranscriptionDocumentById(Integer transcriptionDocumentId) {
 
+        transcriptionApproveMarkForDeletionValidator.validate(transcriptionDocumentId);
+
         AdminApproveDeletionResponse response;
 
         Optional<TranscriptionDocumentEntity> transcriptionDocumentEntity = transcriptionDocumentRepository.findById(transcriptionDocumentId);
         if (transcriptionDocumentEntity.isPresent()) {
 
             ObjectAdminActionEntity objectAdminActionEntity = objectAdminActionRepository
-                .findByTranscriptionDocumentId(transcriptionDocumentId)
+                .findByTranscriptionDocument_IdAndObjectHiddenReasonIsNotNullAndObjectHiddenReason_MarkedForDeletionTrue(transcriptionDocumentId)
                 .orElseThrow(() -> new DartsApiException(TranscriptionApiError.TRANSCRIPTION_DOCUMENT_DELETE_NOT_SUPPORTED));
 
-            if (objectAdminActionEntity.isMarkedForManualDeletion()) {
-                throw new DartsApiException(TranscriptionApiError.TRANSCRIPTION_DOCUMENT_DELETION_ALREADY_APPROVED);
-            }
-
             UserAccountEntity userAccount = userIdentity.getUserAccount();
-            if (userAccount.equals(objectAdminActionEntity.getHiddenBy())) {
-                throw new DartsApiException(TranscriptionApiError.TRANSCRIPTION_DOCUMENT_DELETION_CAN_NOT_APPROVE_OWN_REQUEST);
-            }
-
             objectAdminActionEntity.setMarkedForManualDeletion(true);
             objectAdminActionEntity.setMarkedForManualDelBy(userAccount);
             objectAdminActionEntity.setMarkedForManualDelDateTime(OffsetDateTime.now());
@@ -240,7 +237,6 @@ public class AdminTranscriptionServiceImpl implements AdminTranscriptionService 
             objectAdminActionRepository.save(objectAdminActionEntity);
             TranscriptionDocumentEntity documentEntity = transcriptionDocumentEntity.get();
             response = transcriptionMapper.mapAdminApproveDeletionResponse(documentEntity, objectAdminActionEntity);
-
         } else {
             throw new DartsApiException(TranscriptionApiError.TRANSCRIPTION_DOCUMENT_ID_NOT_FOUND);
         }
