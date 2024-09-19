@@ -10,10 +10,10 @@ import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import java.lang.reflect.InvocationTargetException;
 import java.time.OffsetDateTime;
 
-public class CustomTranscriptionCommentEntity extends TranscriptionCommentEntity implements DbInsertable<TranscriptionCommentEntity> {
+public class TestTranscriptionCommentEntity extends TranscriptionCommentEntity implements DbInsertable<TranscriptionCommentEntity> {
 
     @lombok.Builder
-    public CustomTranscriptionCommentEntity(
+    public TestTranscriptionCommentEntity(
         Integer id,
         TranscriptionWorkflowEntity transcriptionWorkflow,
         TranscriptionEntity transcription,
@@ -55,18 +55,18 @@ public class CustomTranscriptionCommentEntity extends TranscriptionCommentEntity
         }
     }
 
-    public static class CustomTranscriptionCommentEntityBuilderRetrieve
-        implements BuilderHolder<CustomTranscriptionCommentEntity, CustomTranscriptionCommentEntity.CustomTranscriptionCommentEntityBuilder> {
+    public static class TestTranscriptionCommentEntityBuilderRetrieve
+        implements BuilderHolder<TestTranscriptionCommentEntity, TestTranscriptionCommentEntity.TestTranscriptionCommentEntityBuilder> {
 
-        private CustomTranscriptionCommentEntity.CustomTranscriptionCommentEntityBuilder builder = CustomTranscriptionCommentEntity.builder();
+        private TestTranscriptionCommentEntity.TestTranscriptionCommentEntityBuilder builder = TestTranscriptionCommentEntity.builder();
 
         @Override
-        public CustomTranscriptionCommentEntity build() {
+        public TestTranscriptionCommentEntity build() {
             return builder.build();
         }
 
         @Override
-        public CustomTranscriptionCommentEntity.CustomTranscriptionCommentEntityBuilder getBuilder() {
+        public TestTranscriptionCommentEntity.TestTranscriptionCommentEntityBuilder getBuilder() {
             return builder;
         }
     }

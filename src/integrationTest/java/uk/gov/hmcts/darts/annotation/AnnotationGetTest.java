@@ -132,7 +132,7 @@ class AnnotationGetTest extends IntegrationBase {
     }
 
     private AnnotationEntity someAnnotationCreatedBy(UserAccountEntity userAccount) {
-        var annotation = PersistableFactory.getAnnotationTestData().someMinimal().getBuilder()
+        var annotation = PersistableFactory.getAnnotationTestData().someMinimalBuilder()
                 .deleted(false).currentOwner(userAccount)
                 .createdBy(userAccount)
                 .lastModifiedBy(userAccount)

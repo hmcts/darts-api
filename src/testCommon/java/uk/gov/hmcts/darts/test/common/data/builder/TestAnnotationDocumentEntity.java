@@ -11,16 +11,16 @@ import java.lang.reflect.InvocationTargetException;
 import java.time.OffsetDateTime;
 
 @RequiredArgsConstructor
-public class CustomAnnotationDocumentEntity extends AnnotationDocumentEntity implements DbInsertable<AnnotationDocumentEntity> {
+public class TestAnnotationDocumentEntity extends AnnotationDocumentEntity implements DbInsertable<AnnotationDocumentEntity> {
 
     @lombok.Builder
-    public CustomAnnotationDocumentEntity(Integer id, String fileName, String fileType, Integer fileSize,
-                                          UserAccountEntity uploadedBy, OffsetDateTime uploadedDateTime,
-                                          String checksum, boolean isDeleted, UserAccountEntity deletedBy,
-                                          OffsetDateTime deletedTs, String contentObjectId, String clipId,
-                                          boolean isHidden, OffsetDateTime retainUntilTs, Integer retConfScore,
-                                          String retConfReason, AnnotationEntity annotation,
-                                          OffsetDateTime lastModifiedTimestamp, UserAccountEntity lastModifiedBy) {
+    public TestAnnotationDocumentEntity(Integer id, String fileName, String fileType, Integer fileSize,
+                                        UserAccountEntity uploadedBy, OffsetDateTime uploadedDateTime,
+                                        String checksum, boolean isDeleted, UserAccountEntity deletedBy,
+                                        OffsetDateTime deletedTs, String contentObjectId, String clipId,
+                                        boolean isHidden, OffsetDateTime retainUntilTs, Integer retConfScore,
+                                        String retConfReason, AnnotationEntity annotation,
+                                        OffsetDateTime lastModifiedTimestamp, UserAccountEntity lastModifiedBy) {
         setId(id);
         setFileName(fileName);
         setFileType(fileType);
@@ -53,20 +53,20 @@ public class CustomAnnotationDocumentEntity extends AnnotationDocumentEntity imp
         }
     }
 
-    public static class CustomAnnotationDocumentEntityRetrieve implements
-        BuilderHolder<CustomAnnotationDocumentEntity, CustomAnnotationDocumentEntity.CustomAnnotationDocumentEntityBuilder> {
-        public CustomAnnotationDocumentEntityRetrieve() {
+    public static class TestAnnotationDocumentEntityRetrieve implements
+        BuilderHolder<TestAnnotationDocumentEntity, TestAnnotationDocumentEntity.TestAnnotationDocumentEntityBuilder> {
+        public TestAnnotationDocumentEntityRetrieve() {
         }
 
-        private CustomAnnotationDocumentEntity.CustomAnnotationDocumentEntityBuilder builder = CustomAnnotationDocumentEntity.builder();
+        private TestAnnotationDocumentEntity.TestAnnotationDocumentEntityBuilder builder = TestAnnotationDocumentEntity.builder();
 
         @Override
-        public CustomAnnotationDocumentEntity build() {
+        public TestAnnotationDocumentEntity build() {
             return builder.build();
         }
 
         @Override
-        public CustomAnnotationDocumentEntity.CustomAnnotationDocumentEntityBuilder getBuilder() {
+        public TestAnnotationDocumentEntity.TestAnnotationDocumentEntityBuilder getBuilder() {
             return builder;
         }
     }

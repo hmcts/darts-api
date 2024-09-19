@@ -10,8 +10,8 @@ import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
 import uk.gov.hmcts.darts.test.common.data.ExternalObjectDirectoryTestData;
 import uk.gov.hmcts.darts.test.common.data.PersistableFactory;
-import uk.gov.hmcts.darts.test.common.data.builder.CustomExternalObjectDirectoryEntity;
-import uk.gov.hmcts.darts.test.common.data.builder.CustomMediaEntity;
+import uk.gov.hmcts.darts.test.common.data.builder.TestExternalObjectDirectoryEntity;
+import uk.gov.hmcts.darts.test.common.data.builder.TestMediaEntity;
 import uk.gov.hmcts.darts.testutils.stubs.DartsPersistence;
 
 import java.time.OffsetDateTime;
@@ -50,10 +50,10 @@ public class AudioTransformationServiceGivenBuilder {
         hearingEntityWithMedia3 = PersistableFactory.getHearingTestData().someMinimalHearing();
         hearingEntityWithMedia4 = PersistableFactory.getHearingTestData().someMinimalHearing();
         hearingEntityWithoutMedia = PersistableFactory.getHearingTestData().someMinimalHearing();
-        CustomMediaEntity.CustomMediaBuilderRetrieve mediaTestData1 = getMediaTestData().someMinimal();
-        CustomMediaEntity.CustomMediaBuilderRetrieve mediaTestData2 = getMediaTestData().someMinimal();
-        CustomMediaEntity.CustomMediaBuilderRetrieve mediaTestData3 = getMediaTestData().someMinimal();
-        CustomMediaEntity.CustomMediaBuilderRetrieve mediaTestData4 = getMediaTestData().someMinimal();
+        TestMediaEntity.TestMediaBuilderRetrieve mediaTestData1 = getMediaTestData().someMinimalBuilderHolder();
+        TestMediaEntity.TestMediaBuilderRetrieve mediaTestData2 = getMediaTestData().someMinimalBuilderHolder();
+        TestMediaEntity.TestMediaBuilderRetrieve mediaTestData3 = getMediaTestData().someMinimalBuilderHolder();
+        TestMediaEntity.TestMediaBuilderRetrieve mediaTestData4 = getMediaTestData().someMinimalBuilderHolder();
 
         int channel = 1;
         mediaTestData1.getBuilder().channel(1);
@@ -78,7 +78,7 @@ public class AudioTransformationServiceGivenBuilder {
 
     public ExternalObjectDirectoryEntity externalObjectDirForMedia(MediaEntity mediaEntity) {
         ExternalObjectDirectoryTestData externalObjectDirectoryTestData = PersistableFactory.getExternalObjectDirectoryTestData();
-        CustomExternalObjectDirectoryEntity.CustomExternalObjectDirectoryuilderRetrieve retrieve = externalObjectDirectoryTestData.someMinimal();
+        TestExternalObjectDirectoryEntity.TestExternalObjectDirectoryuilderRetrieve retrieve = externalObjectDirectoryTestData.someMinimalBuilderHolder();
 
         retrieve.getBuilder().media(mediaEntity).status(dartsDatabase
                                                             .getObjectRecordStatusRepository()

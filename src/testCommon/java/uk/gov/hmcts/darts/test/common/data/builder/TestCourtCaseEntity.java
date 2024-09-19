@@ -23,10 +23,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 @RequiredArgsConstructor
-public class CustomCourtCaseEntity extends CourtCaseEntity implements DbInsertable<CourtCaseEntity> {
+public class TestCourtCaseEntity extends CourtCaseEntity implements DbInsertable<CourtCaseEntity> {
 
     @lombok.Builder
-    public CustomCourtCaseEntity(
+    public TestCourtCaseEntity(
         Integer id,
         EventHandlerEntity reportingRestrictions,
         String legacyCaseObjectId,
@@ -105,18 +105,18 @@ public class CustomCourtCaseEntity extends CourtCaseEntity implements DbInsertab
         }
     }
 
-    public static class CustomTranscriptionEntityBuilderRetrieve
-        implements BuilderHolder<CustomCourtCaseEntity, CustomCourtCaseEntity.CustomCourtCaseEntityBuilder> {
+    public static class TestCourtCaseBuilderRetrieve
+        implements BuilderHolder<TestCourtCaseEntity, TestCourtCaseEntity.TestCourtCaseEntityBuilder> {
 
-        private final CustomCourtCaseEntity.CustomCourtCaseEntityBuilder builder = CustomCourtCaseEntity.builder();
+        private final TestCourtCaseEntity.TestCourtCaseEntityBuilder builder = TestCourtCaseEntity.builder();
 
         @Override
-        public CustomCourtCaseEntity build() {
+        public TestCourtCaseEntity build() {
            return builder.build();
         }
 
         @Override
-        public CustomCourtCaseEntity.CustomCourtCaseEntityBuilder getBuilder() {
+        public TestCourtCaseEntity.TestCourtCaseEntityBuilder getBuilder() {
             return builder;
         }
     }

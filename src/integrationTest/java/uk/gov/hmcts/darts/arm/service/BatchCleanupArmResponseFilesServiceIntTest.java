@@ -64,7 +64,7 @@ class BatchCleanupArmResponseFilesServiceIntTest extends IntegrationBase {
     @BeforeEach
     void setupData() {
         savedMedia = PersistableFactory.getMediaTestData()
-        .someMinimal().build().getEntity();
+        .someMinimal();
         dartsPersistence.save(savedMedia);
 
         when(armDataManagementConfiguration.getManifestFilePrefix()).thenReturn("DARTS_");

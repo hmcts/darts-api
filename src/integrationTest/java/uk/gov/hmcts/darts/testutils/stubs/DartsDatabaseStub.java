@@ -97,7 +97,7 @@ import uk.gov.hmcts.darts.retention.enums.RetentionPolicyEnum;
 import uk.gov.hmcts.darts.test.common.data.CourthouseTestData;
 import uk.gov.hmcts.darts.test.common.data.DailyListTestData;
 import uk.gov.hmcts.darts.test.common.data.PersistableFactory;
-import uk.gov.hmcts.darts.test.common.data.builder.CustomMediaRequestEntity;
+import uk.gov.hmcts.darts.test.common.data.builder.TestMediaRequestEntity;
 import uk.gov.hmcts.darts.testutils.TransactionalUtil;
 
 import java.io.IOException;
@@ -474,7 +474,7 @@ public class DartsDatabaseStub {
     public MediaRequestEntity createAndLoadNonAccessedCurrentMediaRequestEntity(UserAccountEntity requestor,
                                                                                 AudioRequestType audioRequestType) {
 
-        CustomMediaRequestEntity.CustomMediaBuilderRetrieve mediaRequestEntity = PersistableFactory.getMediaRequestTestData().someMinimal();
+        TestMediaRequestEntity.TestMediaBuilderRetrieve mediaRequestEntity = PersistableFactory.getMediaRequestTestData().someMinimalBuilderHolder();
 
         mediaRequestEntity.getBuilder().requestor(requestor)
             .currentOwner(requestor)

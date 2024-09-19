@@ -8,8 +8,8 @@ import uk.gov.hmcts.darts.common.entity.ObjectAdminActionEntity;
 import uk.gov.hmcts.darts.common.entity.ObjectHiddenReasonEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionDocumentEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
-import uk.gov.hmcts.darts.test.common.data.builder.CustomTranscriptionDocumentEntity;
-import uk.gov.hmcts.darts.test.common.data.builder.CustomTranscriptionEntity;
+import uk.gov.hmcts.darts.test.common.data.builder.TestTranscriptionDocumentEntity;
+import uk.gov.hmcts.darts.test.common.data.builder.TestTranscriptionEntity;
 
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
@@ -20,15 +20,17 @@ import static uk.gov.hmcts.darts.test.common.data.ObjectAdminActionTestData.obje
 import static uk.gov.hmcts.darts.test.common.data.UserAccountTestData.minimalUserAccount;
 
 @SuppressWarnings({"HideUtilityClassConstructor"})
-public class TranscriptionDocumentTestData implements Persistable<CustomTranscriptionDocumentEntity.TranscriptionDocumentEntityBuilderRetrieve> {
+public class TranscriptionDocumentTestData
+    implements Persistable<TestTranscriptionDocumentEntity.TranscriptionDocumentEntityBuilderRetrieve,
+    TranscriptionDocumentEntity, TestTranscriptionDocumentEntity.TestTranscriptionDocumentEntityBuilder> {
 
     TranscriptionDocumentTestData() {
     }
 
 
     public static TranscriptionDocumentEntity minimalTranscriptionDocument() {
-        CustomTranscriptionDocumentEntity.TranscriptionDocumentEntityBuilderRetrieve builder =
-            new CustomTranscriptionDocumentEntity.TranscriptionDocumentEntityBuilderRetrieve();
+        TestTranscriptionDocumentEntity.TranscriptionDocumentEntityBuilderRetrieve builder =
+            new TestTranscriptionDocumentEntity.TranscriptionDocumentEntityBuilderRetrieve();
 
         builder.getBuilder().id(1)
             .fileName("some-file-name")
@@ -61,9 +63,9 @@ public class TranscriptionDocumentTestData implements Persistable<CustomTranscri
         transcriptionDocument.setTranscription(transcription);
     }
 
-    public CustomTranscriptionDocumentEntity.TranscriptionDocumentEntityBuilderRetrieve complexTranscriptionDocument() {
-        CustomTranscriptionDocumentEntity.TranscriptionDocumentEntityBuilderRetrieve builder =
-            new CustomTranscriptionDocumentEntity.TranscriptionDocumentEntityBuilderRetrieve();
+    public TestTranscriptionDocumentEntity.TranscriptionDocumentEntityBuilderRetrieve complexTranscriptionDocument() {
+        TestTranscriptionDocumentEntity.TranscriptionDocumentEntityBuilderRetrieve builder =
+            new TestTranscriptionDocumentEntity.TranscriptionDocumentEntityBuilderRetrieve();
 
         builder.getBuilder().id(1)
             .fileName("dummyFileName.txt")
@@ -84,8 +86,8 @@ public class TranscriptionDocumentTestData implements Persistable<CustomTranscri
         courthouseEntity.setDisplayName("Dummy Courthouse");
         courtroomEntity.setCourthouse(courthouseEntity);
 
-        CustomTranscriptionEntity.CustomTranscriptionEntityBuilderRetrieve
-            transcriptionEntityBuilderRetrieve = PersistableFactory.getTranscriptionTestData().someMinimal();
+        TestTranscriptionEntity.TestTranscriptionEntityBuilderRetrieve
+            transcriptionEntityBuilderRetrieve = PersistableFactory.getTranscriptionTestData().someMinimalBuilderHolder();
         transcriptionEntityBuilderRetrieve.getBuilder().id(1)
             .isManualTranscription(true).courtroom(courtroomEntity);
 
@@ -127,9 +129,14 @@ public class TranscriptionDocumentTestData implements Persistable<CustomTranscri
     }
 
     @Override
-    public CustomTranscriptionDocumentEntity.TranscriptionDocumentEntityBuilderRetrieve someMinimal() {
-        CustomTranscriptionDocumentEntity.TranscriptionDocumentEntityBuilderRetrieve builder =
-            new CustomTranscriptionDocumentEntity.TranscriptionDocumentEntityBuilderRetrieve();
+    public TranscriptionDocumentEntity someMinimal() {
+        return someMinimalBuilder().build().getEntity();
+    }
+
+    @Override
+    public TestTranscriptionDocumentEntity.TranscriptionDocumentEntityBuilderRetrieve someMinimalBuilderHolder() {
+        TestTranscriptionDocumentEntity.TranscriptionDocumentEntityBuilderRetrieve builder =
+            new TestTranscriptionDocumentEntity.TranscriptionDocumentEntityBuilderRetrieve();
 
         var transcription = PersistableFactory.getTranscriptionTestData().minimalTranscription();
 
@@ -148,7 +155,7 @@ public class TranscriptionDocumentTestData implements Persistable<CustomTranscri
     }
 
     @Override
-    public CustomTranscriptionDocumentEntity.TranscriptionDocumentEntityBuilderRetrieve someMaximal() {
-        return someMinimal();
+    public TestTranscriptionDocumentEntity.TestTranscriptionDocumentEntityBuilder someMinimalBuilder() {
+        return someMinimalBuilderHolder().getBuilder();
     }
 }

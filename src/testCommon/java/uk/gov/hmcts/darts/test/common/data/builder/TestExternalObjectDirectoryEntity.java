@@ -17,18 +17,18 @@ import java.time.OffsetDateTime;
 import java.util.UUID;
 
 @RequiredArgsConstructor
-public class CustomExternalObjectDirectoryEntity extends ExternalObjectDirectoryEntity implements DbInsertable<ExternalObjectDirectoryEntity> {
+public class TestExternalObjectDirectoryEntity extends ExternalObjectDirectoryEntity implements DbInsertable<ExternalObjectDirectoryEntity> {
     @lombok.Builder
-    public CustomExternalObjectDirectoryEntity(Integer id, MediaEntity media, TranscriptionDocumentEntity transcriptionDocumentEntity,
-                                               AnnotationDocumentEntity annotationDocumentEntity, CaseDocumentEntity caseDocument,
-                                               ObjectRecordStatusEntity status,
-                                               ExternalLocationTypeEntity externalLocationType, UUID externalLocation,
-                                               String externalFileId, String externalRecordId,
-                                               String checksum, Integer transferAttempts, Integer verificationAttempts,
-                                               OffsetDateTime dataIngestionTs, String manifestFile,
-                                               OffsetDateTime eventDateTs, String errorCode, boolean responseCleaned, Long osrUuid,
-                                               boolean updateRetention, OffsetDateTime createdDateTime,
-                                               UserAccountEntity createdBy, OffsetDateTime lastModifiedDateTime, UserAccountEntity lastModifiedBy) {
+    public TestExternalObjectDirectoryEntity(Integer id, MediaEntity media, TranscriptionDocumentEntity transcriptionDocumentEntity,
+                                             AnnotationDocumentEntity annotationDocumentEntity, CaseDocumentEntity caseDocument,
+                                             ObjectRecordStatusEntity status,
+                                             ExternalLocationTypeEntity externalLocationType, UUID externalLocation,
+                                             String externalFileId, String externalRecordId,
+                                             String checksum, Integer transferAttempts, Integer verificationAttempts,
+                                             OffsetDateTime dataIngestionTs, String manifestFile,
+                                             OffsetDateTime eventDateTs, String errorCode, boolean responseCleaned, Long osrUuid,
+                                             boolean updateRetention, OffsetDateTime createdDateTime,
+                                             UserAccountEntity createdBy, OffsetDateTime lastModifiedDateTime, UserAccountEntity lastModifiedBy) {
         setId(id);
         setMedia(media);
         setTranscriptionDocumentEntity(transcriptionDocumentEntity);
@@ -66,21 +66,21 @@ public class CustomExternalObjectDirectoryEntity extends ExternalObjectDirectory
         }
     }
 
-    public static class CustomExternalObjectDirectoryuilderRetrieve
-        implements BuilderHolder<CustomExternalObjectDirectoryEntity,
-                CustomExternalObjectDirectoryEntityBuilder> {
-        public CustomExternalObjectDirectoryuilderRetrieve() {
+    public static class TestExternalObjectDirectoryuilderRetrieve
+        implements BuilderHolder<TestExternalObjectDirectoryEntity,
+        TestExternalObjectDirectoryEntityBuilder> {
+        public TestExternalObjectDirectoryuilderRetrieve() {
         }
 
-        private CustomExternalObjectDirectoryEntity.CustomExternalObjectDirectoryEntityBuilder builder = CustomExternalObjectDirectoryEntity.builder();
+        private TestExternalObjectDirectoryEntity.TestExternalObjectDirectoryEntityBuilder builder = TestExternalObjectDirectoryEntity.builder();
 
         @Override
-        public CustomExternalObjectDirectoryEntity build() {
+        public TestExternalObjectDirectoryEntity build() {
             return builder.build();
         }
 
         @Override
-        public CustomExternalObjectDirectoryEntity.CustomExternalObjectDirectoryEntityBuilder getBuilder() {
+        public TestExternalObjectDirectoryEntity.TestExternalObjectDirectoryEntityBuilder getBuilder() {
             return builder;
         }
     }

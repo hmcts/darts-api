@@ -11,7 +11,7 @@ import uk.gov.hmcts.darts.audio.model.AudioFileInfo;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
 import uk.gov.hmcts.darts.test.common.TestUtils;
 import uk.gov.hmcts.darts.test.common.data.PersistableFactory;
-import uk.gov.hmcts.darts.test.common.data.builder.CustomCourtCaseEntity;
+import uk.gov.hmcts.darts.test.common.data.builder.TestCourtCaseEntity;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 
 import java.io.File;
@@ -70,7 +70,7 @@ class OutboundFileProcessorIntTest extends IntegrationBase {
         File audioFileTest = TestUtils.getFile(AUDIO_FILENAME);
         audioPath = Files.copy(audioFileTest.toPath(), createFile(tempDirectory, "audio-test.mp2"), REPLACE_EXISTING);
 
-        CustomCourtCaseEntity.CustomTranscriptionEntityBuilderRetrieve courtCase = PersistableFactory.getCourtCaseTestData().someMinimal();
+        TestCourtCaseEntity.TestCourtCaseBuilderRetrieve courtCase = PersistableFactory.getCourtCaseTestData().someMinimalBuilderHolder();
         var hearing = PersistableFactory.getHearingTestData()
             .createHearingWith(courtCase.getBuilder().build().getEntity(), someMinimalCourtRoom(), LocalDate.parse(HEARING_DATETIME));
 

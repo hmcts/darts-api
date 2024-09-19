@@ -2,7 +2,7 @@ package uk.gov.hmcts.darts.test.common.data;
 
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
-import uk.gov.hmcts.darts.test.common.data.builder.CustomCourtCaseEntity;
+import uk.gov.hmcts.darts.test.common.data.builder.TestCourtCaseEntity;
 
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
@@ -13,10 +13,11 @@ import static uk.gov.hmcts.darts.test.common.data.CourthouseTestData.someMinimal
 import static uk.gov.hmcts.darts.test.common.data.UserAccountTestData.minimalUserAccount;
 
 @SuppressWarnings({"HideUtilityClassConstructor"})
-public class CaseTestData  implements Persistable<CustomCourtCaseEntity.CustomTranscriptionEntityBuilderRetrieve>  {
+public class CaseTestData  implements Persistable<TestCourtCaseEntity.TestCourtCaseBuilderRetrieve,
+    CourtCaseEntity, TestCourtCaseEntity.TestCourtCaseEntityBuilder>  {
 
     public  CourtCaseEntity createSomeMinimalCase() {
-        return someMinimal().getBuilder().build().getEntity();
+        return someMinimalBuilder().build().getEntity();
     }
 
     public  CourtCaseEntity caseWithCaseNumber(String caseNumber) {
@@ -43,14 +44,14 @@ public class CaseTestData  implements Persistable<CustomCourtCaseEntity.CustomTr
     @Deprecated
     // Not a minimal case. refactor
     public CourtCaseEntity someMinimalCase() {
-        return someMinimal().build().getEntity();
+        return someMinimalBuilder().build().getEntity();
     }
 
     /**
      * Creates a CourtCaseEntity. Passes the created case to the client for further customisations
      */
     public CourtCaseEntity someMinimalCase(Consumer<CourtCaseEntity> createdCaseConsumer) {
-        CourtCaseEntity courtCaseEntity = someMinimal().getBuilder().build().getEntity();
+        CourtCaseEntity courtCaseEntity = someMinimalBuilder().build().getEntity();
         createdCaseConsumer.accept(courtCaseEntity);
         return courtCaseEntity;
     }
@@ -75,8 +76,19 @@ public class CaseTestData  implements Persistable<CustomCourtCaseEntity.CustomTr
     }
 
     @Override
-    public CustomCourtCaseEntity.CustomTranscriptionEntityBuilderRetrieve someMinimal() {
-        CustomCourtCaseEntity.CustomTranscriptionEntityBuilderRetrieve retrieve = new CustomCourtCaseEntity.CustomTranscriptionEntityBuilderRetrieve();
+    public CourtCaseEntity someMinimal() {
+        return someMinimalBuilder().build().getEntity();
+    }
+
+    @Override
+    public TestCourtCaseEntity.TestCourtCaseEntityBuilder someMinimalBuilder() {
+        return someMinimalBuilderHolder().getBuilder();
+    }
+
+    @Override
+    public TestCourtCaseEntity.TestCourtCaseBuilderRetrieve someMinimalBuilderHolder() {
+        TestCourtCaseEntity.TestCourtCaseBuilderRetrieve retrieve
+            = new TestCourtCaseEntity.TestCourtCaseBuilderRetrieve();
 
         var postfix = random(10, false, true);
         var userAccount = minimalUserAccount();
@@ -95,7 +107,7 @@ public class CaseTestData  implements Persistable<CustomCourtCaseEntity.CustomTr
     }
 
     @Override
-    public CustomCourtCaseEntity.CustomTranscriptionEntityBuilderRetrieve someMaximal() {
+    public CourtCaseEntity someMaximal() {
         return someMinimal();
     }
 }

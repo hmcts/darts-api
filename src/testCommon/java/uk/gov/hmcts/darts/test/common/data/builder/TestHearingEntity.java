@@ -22,10 +22,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 @RequiredArgsConstructor
-public class CustomHearingEntity extends HearingEntity implements DbInsertable<HearingEntity> {
+public class TestHearingEntity extends HearingEntity implements DbInsertable<HearingEntity> {
 
     @lombok.Builder
-    public CustomHearingEntity(
+    public TestHearingEntity(
         Integer id,
         CourtroomEntity courtroom,
         LocalDate hearingDate,
@@ -75,19 +75,19 @@ public class CustomHearingEntity extends HearingEntity implements DbInsertable<H
         }
     }
 
-    public static class CustomHearingEntityBuilderRetrieve implements BuilderHolder<CustomHearingEntity, CustomHearingEntity.CustomHearingEntityBuilder> {
-        public CustomHearingEntityBuilderRetrieve() {
+    public static class TestHearingEntityBuilderRetrieve implements BuilderHolder<TestHearingEntity, TestHearingEntity.TestHearingEntityBuilder> {
+        public TestHearingEntityBuilderRetrieve() {
         }
 
-        private CustomHearingEntity.CustomHearingEntityBuilder builder = CustomHearingEntity.builder();
+        private TestHearingEntity.TestHearingEntityBuilder builder = TestHearingEntity.builder();
 
         @Override
-        public CustomHearingEntity build() {
+        public TestHearingEntity build() {
             return builder.build();
         }
 
         @Override
-        public CustomHearingEntity.CustomHearingEntityBuilder getBuilder() {
+        public TestHearingEntity.TestHearingEntityBuilder getBuilder() {
             return builder;
         }
     }

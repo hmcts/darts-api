@@ -1,19 +1,26 @@
 package uk.gov.hmcts.darts.test.common.data;
 
-import uk.gov.hmcts.darts.test.common.data.builder.CustomTranscriptionCommentEntity;
+import uk.gov.hmcts.darts.common.entity.TranscriptionCommentEntity;
+import uk.gov.hmcts.darts.test.common.data.builder.TestTranscriptionCommentEntity;
 
 import static uk.gov.hmcts.darts.test.common.data.UserAccountTestData.minimalUserAccount;
 
-@SuppressWarnings({"HideUtilityClassConstructor"})
-public class TranscriptionCommentTestData implements Persistable<CustomTranscriptionCommentEntity.CustomTranscriptionCommentEntityBuilderRetrieve> {
+public class TranscriptionCommentTestData
+    implements Persistable<TestTranscriptionCommentEntity.TestTranscriptionCommentEntityBuilderRetrieve, TranscriptionCommentEntity,
+    TestTranscriptionCommentEntity.TestTranscriptionCommentEntityBuilder> {
 
     TranscriptionCommentTestData() {
     }
 
     @Override
-    public CustomTranscriptionCommentEntity.CustomTranscriptionCommentEntityBuilderRetrieve someMinimal() {
-        CustomTranscriptionCommentEntity.CustomTranscriptionCommentEntityBuilderRetrieve retrieve
-            = new CustomTranscriptionCommentEntity.CustomTranscriptionCommentEntityBuilderRetrieve();
+    public TranscriptionCommentEntity someMinimal() {
+        return someMinimalBuilderHolder().getBuilder().build().getEntity();
+    }
+
+    @Override
+    public TestTranscriptionCommentEntity.TestTranscriptionCommentEntityBuilderRetrieve someMinimalBuilderHolder() {
+        TestTranscriptionCommentEntity.TestTranscriptionCommentEntityBuilderRetrieve retrieve
+            = new TestTranscriptionCommentEntity.TestTranscriptionCommentEntityBuilderRetrieve();
         retrieve.getBuilder().lastModifiedBy(minimalUserAccount());
         retrieve.getBuilder().createdBy(minimalUserAccount());
         retrieve.getBuilder().transcription(PersistableFactory.getTranscriptionTestData().minimalTranscription());
@@ -21,7 +28,7 @@ public class TranscriptionCommentTestData implements Persistable<CustomTranscrip
     }
 
     @Override
-    public CustomTranscriptionCommentEntity.CustomTranscriptionCommentEntityBuilderRetrieve someMaximal() {
-        return someMinimal();
+    public TestTranscriptionCommentEntity.TestTranscriptionCommentEntityBuilder someMinimalBuilder() {
+        return someMinimalBuilderHolder().getBuilder();
     }
 }

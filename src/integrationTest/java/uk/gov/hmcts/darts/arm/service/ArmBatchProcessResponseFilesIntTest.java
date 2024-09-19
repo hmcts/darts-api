@@ -133,7 +133,7 @@ class ArmBatchProcessResponseFilesIntTest extends IntegrationBase {
     void batchProcessResponseFiles_WithMediaReturnsSuccess() throws IOException {
 
         // given
-        HearingEntity hearing = PersistableFactory.getHearingTestData().someMinimal().build();
+        HearingEntity hearing = PersistableFactory.getHearingTestData().someMinimal();
 
         OffsetDateTime startTime = OffsetDateTime.parse(T_13_00_00_Z);
         OffsetDateTime endTime = OffsetDateTime.parse(T_13_45_00_Z);
@@ -152,8 +152,8 @@ class ArmBatchProcessResponseFilesIntTest extends IntegrationBase {
 
         String manifestFile1 = "DARTS_" + manifest1Uuid + ".a360";
 
-        ExternalObjectDirectoryEntity armEod1 = PersistableFactory.getExternalObjectDirectoryTestData().someMinimal()
-            .getBuilder().media(media1).status(dartsDatabase.getObjectRecordStatusEntity(ARM_DROP_ZONE))
+        ExternalObjectDirectoryEntity armEod1 = PersistableFactory.getExternalObjectDirectoryTestData().someMinimalBuilder()
+            .media(media1).status(dartsDatabase.getObjectRecordStatusEntity(ARM_DROP_ZONE))
             .externalLocationType(dartsDatabase.getExternalLocationTypeEntity(ARM)).externalLocation(UUID.randomUUID()).build();
         armEod1.setTransferAttempts(1);
         armEod1.setVerificationAttempts(1);
@@ -161,8 +161,8 @@ class ArmBatchProcessResponseFilesIntTest extends IntegrationBase {
         armEod1.setChecksum("7017013d05bcc5032e142049081821d6");
         armEod1 = dartsPersistence.save(armEod1);
 
-        ExternalObjectDirectoryEntity armEod2 = PersistableFactory.getExternalObjectDirectoryTestData().someMinimal()
-            .getBuilder().media(media2).status(dartsDatabase.getObjectRecordStatusEntity(ARM_DROP_ZONE))
+        ExternalObjectDirectoryEntity armEod2 = PersistableFactory.getExternalObjectDirectoryTestData().someMinimalBuilder()
+            .media(media2).status(dartsDatabase.getObjectRecordStatusEntity(ARM_DROP_ZONE))
             .externalLocationType(dartsDatabase.getExternalLocationTypeEntity(ARM)).externalLocation(UUID.randomUUID()).build();
         armEod2.setTransferAttempts(1);
         armEod2.setManifestFile(manifestFile1);
@@ -170,8 +170,8 @@ class ArmBatchProcessResponseFilesIntTest extends IntegrationBase {
         armEod2.setVerificationAttempts(1);
         armEod2 = dartsPersistence.save(armEod2);
 
-        ExternalObjectDirectoryEntity armEod3 = PersistableFactory.getExternalObjectDirectoryTestData().someMinimal()
-            .getBuilder().media(media3).status(dartsDatabase
+        ExternalObjectDirectoryEntity armEod3 = PersistableFactory.getExternalObjectDirectoryTestData().someMinimalBuilder()
+            .media(media3).status(dartsDatabase
                                                    .getObjectRecordStatusEntity(ARM_DROP_ZONE))
             .verificationAttempts(1).transferAttempts(1)
             .externalLocationType(dartsDatabase.getExternalLocationTypeEntity(ARM)).externalLocation(UUID.randomUUID()).build();
@@ -182,8 +182,8 @@ class ArmBatchProcessResponseFilesIntTest extends IntegrationBase {
 
         String manifestFile2 = "DARTS_" + manifest2Uuid + ".a360";
         ExternalObjectDirectoryEntity armEod5 = PersistableFactory
-            .getExternalObjectDirectoryTestData().someMinimal()
-            .getBuilder().media(media5).status(dartsDatabase
+            .getExternalObjectDirectoryTestData().someMinimalBuilder()
+            .media(media5).status(dartsDatabase
                                                    .getObjectRecordStatusEntity(ARM_DROP_ZONE))
             .externalLocationType(dartsDatabase
                                       .getExternalLocationTypeEntity(ARM)).externalLocation(UUID.randomUUID()).build();
@@ -336,7 +336,7 @@ class ArmBatchProcessResponseFilesIntTest extends IntegrationBase {
     void batchProcessResponseFiles_GetBlobsThrowsException() throws IOException {
 
         // given
-        HearingEntity hearing = PersistableFactory.getHearingTestData().someMinimal().build();
+        HearingEntity hearing = PersistableFactory.getHearingTestData().someMinimal();
 
         OffsetDateTime startTime = OffsetDateTime.parse(T_13_00_00_Z);
         OffsetDateTime endTime = OffsetDateTime.parse(T_13_45_00_Z);
@@ -357,16 +357,17 @@ class ArmBatchProcessResponseFilesIntTest extends IntegrationBase {
 
         String manifestFile1 = "DARTS_" + manifest1Uuid + ".a360";
 
-        ExternalObjectDirectoryEntity armEod1 = PersistableFactory.getExternalObjectDirectoryTestData().someMinimal()
-            .getBuilder().media(media1).status(dartsDatabase.getObjectRecordStatusEntity(ARM_DROP_ZONE))
+        ExternalObjectDirectoryEntity armEod1 =
+            PersistableFactory.getExternalObjectDirectoryTestData()
+                .someMinimalBuilder().media(media1).status(dartsDatabase.getObjectRecordStatusEntity(ARM_DROP_ZONE))
             .verificationAttempts(1).transferAttempts(1)
             .externalLocationType(dartsDatabase.getExternalLocationTypeEntity(ARM)).externalLocation(UUID.randomUUID()).build();
 
         armEod1.setManifestFile(manifestFile1);
         dartsPersistence.save(armEod1);
 
-        ExternalObjectDirectoryEntity armEod2 = PersistableFactory.getExternalObjectDirectoryTestData().someMinimal()
-            .getBuilder().media(media2).status(dartsDatabase
+        ExternalObjectDirectoryEntity armEod2 = PersistableFactory.getExternalObjectDirectoryTestData()
+            .someMinimalBuilder().media(media2).status(dartsDatabase
             .getObjectRecordStatusEntity(ARM_DROP_ZONE))
             .verificationAttempts(1).transferAttempts(1)
             .externalLocationType(dartsDatabase.getExternalLocationTypeEntity(ARM)).externalLocation(UUID.randomUUID()).build();
@@ -375,8 +376,8 @@ class ArmBatchProcessResponseFilesIntTest extends IntegrationBase {
         armEod2.setManifestFile(manifestFile1);
         dartsPersistence.save(armEod2);
 
-        ExternalObjectDirectoryEntity armEod3 = PersistableFactory.getExternalObjectDirectoryTestData().someMinimal()
-            .getBuilder().media(media3).status(dartsDatabase.getObjectRecordStatusEntity(ARM_DROP_ZONE))
+        ExternalObjectDirectoryEntity armEod3 = PersistableFactory.getExternalObjectDirectoryTestData()
+            .someMinimalBuilder().media(media3).status(dartsDatabase.getObjectRecordStatusEntity(ARM_DROP_ZONE))
             .verificationAttempts(1).transferAttempts(1)
             .externalLocationType(dartsDatabase.getExternalLocationTypeEntity(ARM)).externalLocation(UUID.randomUUID()).build();
 
@@ -385,8 +386,8 @@ class ArmBatchProcessResponseFilesIntTest extends IntegrationBase {
         dartsPersistence.save(armEod3);
 
         ExternalObjectDirectoryEntity armEod4 = PersistableFactory
-            .getExternalObjectDirectoryTestData().someMinimal()
-            .getBuilder().media(media4).status(dartsDatabase
+            .getExternalObjectDirectoryTestData()
+            .someMinimalBuilder().media(media4).status(dartsDatabase
                                                    .getObjectRecordStatusEntity(ARM_DROP_ZONE))
             .verificationAttempts(1).transferAttempts(1)
             .externalLocationType(dartsDatabase.getExternalLocationTypeEntity(ARM)).externalLocation(UUID.randomUUID()).build();
@@ -397,8 +398,7 @@ class ArmBatchProcessResponseFilesIntTest extends IntegrationBase {
 
         String manifestFile2 = "DARTS_" + manifest2Uuid + ".a360";
         ExternalObjectDirectoryEntity armEod5 = PersistableFactory
-            .getExternalObjectDirectoryTestData().someMinimal()
-            .getBuilder().media(media5).status(dartsDatabase
+            .getExternalObjectDirectoryTestData().someMinimalBuilder().media(media5).status(dartsDatabase
                                                    .getObjectRecordStatusEntity(ARM_DROP_ZONE))
             .verificationAttempts(1).transferAttempts(1)
             .externalLocationType(dartsDatabase.getExternalLocationTypeEntity(ARM)).externalLocation(UUID.randomUUID()).build();
@@ -514,7 +514,7 @@ class ArmBatchProcessResponseFilesIntTest extends IntegrationBase {
     void batchProcessResponseFiles_WithInvalidJson() throws IOException {
 
         // given
-        HearingEntity hearing = PersistableFactory.getHearingTestData().someMinimal().build();
+        HearingEntity hearing = PersistableFactory.getHearingTestData().someMinimal();
 
         OffsetDateTime startTime = OffsetDateTime.parse(T_13_00_00_Z);
         OffsetDateTime endTime = OffsetDateTime.parse(T_13_45_00_Z);
@@ -535,16 +535,16 @@ class ArmBatchProcessResponseFilesIntTest extends IntegrationBase {
 
         String manifestFile1 = "DARTS_" + manifest1Uuid + ".a360";
 
-        ExternalObjectDirectoryEntity armEod1 = PersistableFactory.getExternalObjectDirectoryTestData().someMinimal()
-            .getBuilder().media(media1).status(dartsDatabase.getObjectRecordStatusEntity(ARM_DROP_ZONE))
+        ExternalObjectDirectoryEntity armEod1 = PersistableFactory.getExternalObjectDirectoryTestData().someMinimalBuilder()
+            .media(media1).status(dartsDatabase.getObjectRecordStatusEntity(ARM_DROP_ZONE))
             .verificationAttempts(1).transferAttempts(1)
             .externalLocationType(dartsDatabase.getExternalLocationTypeEntity(ARM)).externalLocation(UUID.randomUUID()).build();
         armEod1.setTransferAttempts(1);
         armEod1.setManifestFile(manifestFile1);
         armEod1 = dartsPersistence.save(armEod1);
 
-        ExternalObjectDirectoryEntity armEod2 = PersistableFactory.getExternalObjectDirectoryTestData().someMinimal()
-            .getBuilder().media(media2).status(dartsDatabase
+        ExternalObjectDirectoryEntity armEod2 = PersistableFactory.getExternalObjectDirectoryTestData()
+            .someMinimalBuilder().media(media2).status(dartsDatabase
             .getObjectRecordStatusEntity(ARM_DROP_ZONE))
             .verificationAttempts(1).transferAttempts(1)
             .externalLocationType(dartsDatabase.getExternalLocationTypeEntity(ARM)).externalLocation(UUID.randomUUID()).build();
@@ -552,8 +552,8 @@ class ArmBatchProcessResponseFilesIntTest extends IntegrationBase {
         armEod2.setManifestFile(manifestFile1);
         armEod2 = dartsPersistence.save(armEod2);
 
-        ExternalObjectDirectoryEntity armEod3 = PersistableFactory.getExternalObjectDirectoryTestData().someMinimal()
-            .getBuilder().media(media3).status(dartsDatabase
+        ExternalObjectDirectoryEntity armEod3 = PersistableFactory.getExternalObjectDirectoryTestData()
+            .someMinimalBuilder().media(media3).status(dartsDatabase
             .getObjectRecordStatusEntity(ARM_DROP_ZONE))
             .verificationAttempts(1).transferAttempts(1)
             .externalLocationType(dartsDatabase.getExternalLocationTypeEntity(ARM)).externalLocation(UUID.randomUUID()).build();
@@ -562,8 +562,7 @@ class ArmBatchProcessResponseFilesIntTest extends IntegrationBase {
         armEod3 = dartsPersistence.save(armEod3);
 
         ExternalObjectDirectoryEntity armEod4 = PersistableFactory
-            .getExternalObjectDirectoryTestData().someMinimal()
-            .getBuilder().media(media4).status(dartsDatabase
+            .getExternalObjectDirectoryTestData().someMinimalBuilder().media(media4).status(dartsDatabase
             .getObjectRecordStatusEntity(ARM_DROP_ZONE))
             .verificationAttempts(1).transferAttempts(1)
             .externalLocationType(dartsDatabase.getExternalLocationTypeEntity(ARM)).externalLocation(UUID.randomUUID()).build();
@@ -573,8 +572,7 @@ class ArmBatchProcessResponseFilesIntTest extends IntegrationBase {
 
         String manifestFile2 = "DARTS_" + manifest2Uuid + ".a360";
         ExternalObjectDirectoryEntity armEod5 = PersistableFactory
-            .getExternalObjectDirectoryTestData().someMinimal()
-            .getBuilder().media(media5).status(dartsDatabase
+            .getExternalObjectDirectoryTestData().someMinimalBuilder().media(media5).status(dartsDatabase
             .getObjectRecordStatusEntity(ARM_DROP_ZONE))
             .verificationAttempts(1).transferAttempts(1)
             .externalLocationType(dartsDatabase.getExternalLocationTypeEntity(ARM)).externalLocation(UUID.randomUUID()).build();
@@ -716,8 +714,8 @@ class ArmBatchProcessResponseFilesIntTest extends IntegrationBase {
         String manifest1Uuid = UUID.randomUUID().toString();
         String manifestFile1 = "DARTS_" + manifest1Uuid + ".a360";
 
-        ExternalObjectDirectoryEntity armEod1 = PersistableFactory.getExternalObjectDirectoryTestData().someMinimal()
-            .getBuilder().media(media1).status(dartsDatabase.getObjectRecordStatusEntity(ARM_DROP_ZONE))
+        ExternalObjectDirectoryEntity armEod1 = PersistableFactory.getExternalObjectDirectoryTestData()
+            .someMinimalBuilder().media(media1).status(dartsDatabase.getObjectRecordStatusEntity(ARM_DROP_ZONE))
             .verificationAttempts(1).transferAttempts(1)
             .externalLocationType(dartsDatabase.getExternalLocationTypeEntity(ARM)).externalLocation(UUID.randomUUID()).build();
         armEod1.setTransferAttempts(1);
@@ -725,8 +723,7 @@ class ArmBatchProcessResponseFilesIntTest extends IntegrationBase {
         armEod1 = dartsPersistence.save(armEod1);
 
         ExternalObjectDirectoryEntity armEod2 = PersistableFactory
-            .getExternalObjectDirectoryTestData().someMinimal()
-            .getBuilder().media(media2).status(dartsDatabase
+            .getExternalObjectDirectoryTestData().someMinimalBuilder().media(media2).status(dartsDatabase
             .getObjectRecordStatusEntity(ARM_DROP_ZONE))
             .verificationAttempts(1).transferAttempts(1)
             .externalLocationType(dartsDatabase.getExternalLocationTypeEntity(ARM)).externalLocation(UUID.randomUUID()).build();
@@ -818,8 +815,8 @@ class ArmBatchProcessResponseFilesIntTest extends IntegrationBase {
         final int fileSize = 11_937;
         final UserAccountEntity testUser = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
         final String checksum = "C3CCA7021CF79B42F245AF350601C284";
-        TranscriptionDocumentEntity transcriptionDocumentEntity = PersistableFactory.getTranscriptionDocument().someMinimal()
-            .getBuilder().transcription(transcriptionEntity).fileName(fileName).fileType(fileType)
+        TranscriptionDocumentEntity transcriptionDocumentEntity = PersistableFactory.getTranscriptionDocument()
+            .someMinimalBuilder().transcription(transcriptionEntity).fileName(fileName).fileType(fileType)
             .fileSize(fileSize).uploadedBy(testUser).checksum(checksum).build();
 
         when(userIdentity.getUserAccount()).thenReturn(testUser);
@@ -828,8 +825,8 @@ class ArmBatchProcessResponseFilesIntTest extends IntegrationBase {
         String manifest1Uuid = UUID.randomUUID().toString();
         String manifestFile1 = "DARTS_" + manifest1Uuid + ".a360";
 
-        ExternalObjectDirectoryEntity armEod = PersistableFactory.getExternalObjectDirectoryTestData().someMinimal()
-            .getBuilder().transcriptionDocumentEntity(transcriptionDocumentEntity).status(dartsDatabase.getObjectRecordStatusEntity(ARM_DROP_ZONE))
+        ExternalObjectDirectoryEntity armEod = PersistableFactory.getExternalObjectDirectoryTestData()
+            .someMinimalBuilder().transcriptionDocumentEntity(transcriptionDocumentEntity).status(dartsDatabase.getObjectRecordStatusEntity(ARM_DROP_ZONE))
             .externalLocationType(dartsDatabase.getExternalLocationTypeEntity(ARM))
             .externalLocation(UUID.randomUUID()).build();
 
@@ -922,8 +919,8 @@ class ArmBatchProcessResponseFilesIntTest extends IntegrationBase {
         final int fileSize = 11_937;
         final UserAccountEntity testUser = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
         final String checksum = "C3CCA7021CF79B42F245AF350601C284";
-        TranscriptionDocumentEntity transcriptionDocumentEntity = PersistableFactory.getTranscriptionDocument().someMinimal()
-            .getBuilder().transcription(transcriptionEntity).fileName(fileName).fileType(fileType)
+        TranscriptionDocumentEntity transcriptionDocumentEntity = PersistableFactory.getTranscriptionDocument()
+            .someMinimalBuilder().transcription(transcriptionEntity).fileName(fileName).fileType(fileType)
             .fileSize(fileSize).uploadedBy(testUser).checksum(checksum).build();
         when(userIdentity.getUserAccount()).thenReturn(testUser);
         transcriptionDocumentEntity = dartsPersistence.save(transcriptionDocumentEntity);
@@ -931,8 +928,8 @@ class ArmBatchProcessResponseFilesIntTest extends IntegrationBase {
         String manifest1Uuid = UUID.randomUUID().toString();
         String manifestFile1 = "DARTS_" + manifest1Uuid + ".a360";
 
-        ExternalObjectDirectoryEntity armEod = PersistableFactory.getExternalObjectDirectoryTestData().someMinimal()
-            .getBuilder().transcriptionDocumentEntity(transcriptionDocumentEntity).status(dartsDatabase.getObjectRecordStatusEntity(ARM_DROP_ZONE))
+        ExternalObjectDirectoryEntity armEod = PersistableFactory.getExternalObjectDirectoryTestData()
+            .someMinimalBuilder().transcriptionDocumentEntity(transcriptionDocumentEntity).status(dartsDatabase.getObjectRecordStatusEntity(ARM_DROP_ZONE))
             .externalLocationType(dartsDatabase.getExternalLocationTypeEntity(ARM))
             .externalLocation(UUID.randomUUID()).build();
 
@@ -1002,14 +999,14 @@ class ArmBatchProcessResponseFilesIntTest extends IntegrationBase {
         final OffsetDateTime uploadedDateTime = OffsetDateTime.now();
         final String checksum = "C3CCA7021CF79B42F245AF350601C284";
         AnnotationDocumentEntity annotationDocument = PersistableFactory.getAnnotationDocumentTestData()
-            .someMinimal().getBuilder().annotation(annotation).fileName(fileName).fileType(fileType)
+            .someMinimalBuilder().annotation(annotation).fileName(fileName).fileType(fileType)
             .fileSize(fileSize).uploadedBy(testUser).uploadedDateTime(uploadedDateTime).checksum(checksum).build();
 
         String manifest1Uuid = UUID.randomUUID().toString();
         String manifestFile1 = "DARTS_" + manifest1Uuid + ".a360";
 
-        ExternalObjectDirectoryEntity armEod = PersistableFactory.getExternalObjectDirectoryTestData().someMinimal()
-            .getBuilder().annotationDocumentEntity(annotationDocument).status(dartsDatabase.getObjectRecordStatusEntity(ARM_DROP_ZONE))
+        ExternalObjectDirectoryEntity armEod = PersistableFactory.getExternalObjectDirectoryTestData()
+            .someMinimalBuilder().annotationDocumentEntity(annotationDocument).status(dartsDatabase.getObjectRecordStatusEntity(ARM_DROP_ZONE))
             .externalLocationType(dartsDatabase.getExternalLocationTypeEntity(ARM))
             .externalLocation(UUID.randomUUID()).build();
         armEod.setTransferAttempts(1);
@@ -1083,14 +1080,14 @@ class ArmBatchProcessResponseFilesIntTest extends IntegrationBase {
         // given
         UserAccountEntity testUser = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
         when(userIdentity.getUserAccount()).thenReturn(testUser);
-        CourtCaseEntity courtCaseEntity = PersistableFactory.getCourtCaseTestData().someMinimal().getBuilder().caseNumber("Case1")
+        CourtCaseEntity courtCaseEntity = PersistableFactory.getCourtCaseTestData().someMinimalBuilder().caseNumber("Case1")
             .courthouse(dartsDatabase.getCourthouseStub().createCourthouseUnlessExists("Bristol")).build();
         UserAccountEntity uploadedBy = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
         courtCaseEntity = dartsPersistence.save(courtCaseEntity);
 
 
         CaseDocumentEntity caseDocument = PersistableFactory.getCaseDocumentTestData()
-            .someMinimal().getBuilder().courtCase(courtCaseEntity).checksum("C3CCA7021CF79B42F245AF350601C284\")").lastModifiedBy(uploadedBy).build();
+            .someMinimalBuilder().courtCase(courtCaseEntity).checksum("C3CCA7021CF79B42F245AF350601C284\")").lastModifiedBy(uploadedBy).build();
         caseDocument.setCourtCase(courtCaseEntity);
         caseDocument.setFileName("test_filename");
         caseDocument.setFileType("docx");
@@ -1107,8 +1104,8 @@ class ArmBatchProcessResponseFilesIntTest extends IntegrationBase {
         String manifest1Uuid = UUID.randomUUID().toString();
         String manifestFile1 = "DARTS_" + manifest1Uuid + ".a360";
 
-        ExternalObjectDirectoryEntity armEod =  PersistableFactory.getExternalObjectDirectoryTestData().someMinimal()
-            .getBuilder().caseDocument(caseDocument).status(dartsDatabase.getObjectRecordStatusEntity(ARM_DROP_ZONE))
+        ExternalObjectDirectoryEntity armEod =  PersistableFactory.getExternalObjectDirectoryTestData()
+            .someMinimalBuilder().caseDocument(caseDocument).status(dartsDatabase.getObjectRecordStatusEntity(ARM_DROP_ZONE))
             .externalLocationType(dartsDatabase.getExternalLocationTypeEntity(ARM))
             .externalLocation(UUID.randomUUID()).checksum("xC3CCA7021CF79B42F245AF350601C284").build();
 
@@ -1183,13 +1180,13 @@ class ArmBatchProcessResponseFilesIntTest extends IntegrationBase {
         // given
         UserAccountEntity testUser = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
         when(userIdentity.getUserAccount()).thenReturn(testUser);
-        CourtCaseEntity courtCaseEntity = PersistableFactory.getCourtCaseTestData().someMinimal().getBuilder().caseNumber("Case1")
+        CourtCaseEntity courtCaseEntity = PersistableFactory.getCourtCaseTestData().someMinimalBuilder().caseNumber("Case1")
             .courthouse(dartsDatabase.getCourthouseStub().createCourthouseUnlessExists("Bristol")).build();
         courtCaseEntity = dartsPersistence.save(courtCaseEntity);
         UserAccountEntity uploadedBy = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
 
         CaseDocumentEntity caseDocument = PersistableFactory.getCaseDocumentTestData()
-            .someMinimal().getBuilder().checksum("xC3CCA7021CF79B42F245AF350601C284").courtCase(courtCaseEntity).lastModifiedBy(uploadedBy).build();
+            .someMinimalBuilder().checksum("xC3CCA7021CF79B42F245AF350601C284").courtCase(courtCaseEntity).lastModifiedBy(uploadedBy).build();
         caseDocument.setFileName("test_case_document.docx");
 
         caseDocument = dartsPersistence.save(caseDocument);
@@ -1197,8 +1194,8 @@ class ArmBatchProcessResponseFilesIntTest extends IntegrationBase {
         String manifest1Uuid = UUID.randomUUID().toString();
         String manifestFile1 = "DARTS_" + manifest1Uuid + ".a360";
 
-        ExternalObjectDirectoryEntity armEod = PersistableFactory.getExternalObjectDirectoryTestData().someMinimal()
-            .getBuilder().caseDocument(caseDocument).status(dartsDatabase.getObjectRecordStatusEntity(ARM_DROP_ZONE))
+        ExternalObjectDirectoryEntity armEod = PersistableFactory.getExternalObjectDirectoryTestData()
+            .someMinimalBuilder().caseDocument(caseDocument).status(dartsDatabase.getObjectRecordStatusEntity(ARM_DROP_ZONE))
             .externalLocationType(dartsDatabase.getExternalLocationTypeEntity(ARM))
             .externalLocation(UUID.randomUUID()).checksum("xC3CCA7021CF79B42F245AF350601C284").build();
 
@@ -1277,21 +1274,21 @@ class ArmBatchProcessResponseFilesIntTest extends IntegrationBase {
         // given
         UserAccountEntity testUser = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
         when(userIdentity.getUserAccount()).thenReturn(testUser);
-        CourtCaseEntity courtCaseEntity = PersistableFactory.getCourtCaseTestData().someMinimal().getBuilder().caseNumber("Case1")
+        CourtCaseEntity courtCaseEntity = PersistableFactory.getCourtCaseTestData().someMinimalBuilder().caseNumber("Case1")
             .courthouse(dartsDatabase.getCourthouseStub().createCourthouseUnlessExists("Bristol")).build();
         UserAccountEntity uploadedBy = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
         courtCaseEntity = dartsPersistence.save(courtCaseEntity);
 
         CaseDocumentEntity caseDocument = PersistableFactory.getCaseDocumentTestData()
-            .someMinimal().getBuilder().courtCase(courtCaseEntity).lastModifiedBy(uploadedBy).build();
+            .someMinimalBuilder().courtCase(courtCaseEntity).lastModifiedBy(uploadedBy).build();
         caseDocument.setFileName("test_case_document.docx");
         caseDocument = dartsPersistence.save(caseDocument);
 
         String manifest1Uuid = UUID.randomUUID().toString();
         String manifestFile1 = "DARTS_" + manifest1Uuid + ".a360";
 
-        ExternalObjectDirectoryEntity armEod = PersistableFactory.getExternalObjectDirectoryTestData().someMinimal()
-            .getBuilder().caseDocument(caseDocument).status(dartsDatabase.getObjectRecordStatusEntity(ARM_DROP_ZONE))
+        ExternalObjectDirectoryEntity armEod = PersistableFactory.getExternalObjectDirectoryTestData()
+            .someMinimalBuilder().caseDocument(caseDocument).status(dartsDatabase.getObjectRecordStatusEntity(ARM_DROP_ZONE))
             .externalLocationType(dartsDatabase.getExternalLocationTypeEntity(ARM))
             .externalLocation(UUID.randomUUID()).build();
 
@@ -1352,20 +1349,20 @@ class ArmBatchProcessResponseFilesIntTest extends IntegrationBase {
         // given
         UserAccountEntity testUser = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
         when(userIdentity.getUserAccount()).thenReturn(testUser);
-        CourtCaseEntity courtCaseEntity = PersistableFactory.getCourtCaseTestData().someMinimal().getBuilder().caseNumber("Case1")
+        CourtCaseEntity courtCaseEntity = PersistableFactory.getCourtCaseTestData().someMinimalBuilder().caseNumber("Case1")
             .courthouse(dartsDatabase.getCourthouseStub().createCourthouseUnlessExists("Bristol")).build();
         UserAccountEntity uploadedBy = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
 
         CaseDocumentEntity caseDocument = PersistableFactory.getCaseDocumentTestData()
-            .someMinimal().getBuilder().courtCase(courtCaseEntity).lastModifiedBy(uploadedBy).build();
+            .someMinimalBuilder().courtCase(courtCaseEntity).lastModifiedBy(uploadedBy).build();
         caseDocument.setFileName("test_case_document.docx");
         caseDocument = dartsPersistence.save(caseDocument);
 
         String manifest1Uuid = UUID.randomUUID().toString();
         String manifestFile1 = "DARTS_" + manifest1Uuid + ".a360";
 
-        ExternalObjectDirectoryEntity armEod =  PersistableFactory.getExternalObjectDirectoryTestData().someMinimal()
-            .getBuilder().caseDocument(caseDocument).status(dartsDatabase.getObjectRecordStatusEntity(ARM_DROP_ZONE))
+        ExternalObjectDirectoryEntity armEod =  PersistableFactory.getExternalObjectDirectoryTestData()
+            .someMinimalBuilder().caseDocument(caseDocument).status(dartsDatabase.getObjectRecordStatusEntity(ARM_DROP_ZONE))
             .externalLocationType(dartsDatabase.getExternalLocationTypeEntity(ARM))
             .externalLocation(UUID.randomUUID()).build();
 
@@ -1424,7 +1421,7 @@ class ArmBatchProcessResponseFilesIntTest extends IntegrationBase {
     void batchProcessResponseFiles_ReturnsNoRecordsToProcess() {
 
         // given
-        HearingEntity hearing = PersistableFactory.getHearingTestData().someMinimal().build();
+        HearingEntity hearing = PersistableFactory.getHearingTestData().someMinimal();
 
         OffsetDateTime startTime = OffsetDateTime.parse(T_13_00_00_Z);
         OffsetDateTime endTime = OffsetDateTime.parse(T_13_45_00_Z);
@@ -1434,8 +1431,8 @@ class ArmBatchProcessResponseFilesIntTest extends IntegrationBase {
 
         String manifestFile1 = "DARTS_" + manifest1Uuid + ".a360";
 
-        ExternalObjectDirectoryEntity armEod1 = PersistableFactory.getExternalObjectDirectoryTestData().someMinimal()
-            .getBuilder().media(media1).status(dartsDatabase.getObjectRecordStatusEntity(ARM_DROP_ZONE))
+        ExternalObjectDirectoryEntity armEod1 = PersistableFactory.getExternalObjectDirectoryTestData()
+            .someMinimalBuilder().media(media1).status(dartsDatabase.getObjectRecordStatusEntity(ARM_DROP_ZONE))
             .externalLocationType(dartsDatabase.getExternalLocationTypeEntity(ARM))
             .verificationAttempts(1).externalLocation(UUID.randomUUID()).build();
         armEod1.setTransferAttempts(1);
@@ -1473,7 +1470,7 @@ class ArmBatchProcessResponseFilesIntTest extends IntegrationBase {
     void batchProcessResponseFiles_ThrowsExceptionWhenListingPrefix() {
 
         // given
-        HearingEntity hearing = PersistableFactory.getHearingTestData().someMinimal().build();
+        HearingEntity hearing = PersistableFactory.getHearingTestData().someMinimal();
 
         OffsetDateTime startTime = OffsetDateTime.parse(T_13_00_00_Z);
         OffsetDateTime endTime = OffsetDateTime.parse(T_13_45_00_Z);
@@ -1484,8 +1481,7 @@ class ArmBatchProcessResponseFilesIntTest extends IntegrationBase {
         String manifestFile1 = "DARTS_" + manifest1Uuid + ".a360";
 
         ExternalObjectDirectoryEntity armEod1 = PersistableFactory
-            .getExternalObjectDirectoryTestData().someMinimal()
-            .getBuilder().media(media1).status(dartsDatabase
+            .getExternalObjectDirectoryTestData().someMinimalBuilder().media(media1).status(dartsDatabase
             .getObjectRecordStatusEntity(ARM_DROP_ZONE))
             .verificationAttempts(1).transferAttempts(1)
             .externalLocationType(dartsDatabase.getExternalLocationTypeEntity(ARM)).externalLocation(UUID.randomUUID()).build();
@@ -1527,7 +1523,7 @@ class ArmBatchProcessResponseFilesIntTest extends IntegrationBase {
         final int fileSize = 11_937;
         final UserAccountEntity testUser = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
         TranscriptionDocumentEntity transcriptionDocumentEntity = PersistableFactory.getTranscriptionDocument()
-            .someMinimal().getBuilder().transcription(transcriptionEntity)
+            .someMinimalBuilder().transcription(transcriptionEntity)
         .fileName(fileName).fileType(fileType).fileSize(fileSize).uploadedBy(testUser).build();
         when(userIdentity.getUserAccount()).thenReturn(testUser);
         transcriptionDocumentEntity = dartsPersistence.save(transcriptionDocumentEntity);
@@ -1535,8 +1531,8 @@ class ArmBatchProcessResponseFilesIntTest extends IntegrationBase {
         String manifest1Uuid = UUID.randomUUID().toString();
         String manifestFile1 = "DARTS_" + manifest1Uuid + ".a360";
 
-        ExternalObjectDirectoryEntity armEod = PersistableFactory.getExternalObjectDirectoryTestData().someMinimal()
-            .getBuilder().transcriptionDocumentEntity(transcriptionDocumentEntity).status(dartsDatabase.getObjectRecordStatusEntity(ARM_DROP_ZONE))
+        ExternalObjectDirectoryEntity armEod = PersistableFactory.getExternalObjectDirectoryTestData()
+            .someMinimalBuilder().transcriptionDocumentEntity(transcriptionDocumentEntity).status(dartsDatabase.getObjectRecordStatusEntity(ARM_DROP_ZONE))
             .verificationAttempts(1).transferAttempts(1)
             .externalLocationType(dartsDatabase.getExternalLocationTypeEntity(ARM)).externalLocation(UUID.randomUUID()).build();
 
@@ -1605,15 +1601,14 @@ class ArmBatchProcessResponseFilesIntTest extends IntegrationBase {
         final int fileSize = 123;
         final OffsetDateTime uploadedDateTime = OffsetDateTime.now();
         AnnotationDocumentEntity annotationDocument = PersistableFactory.getAnnotationDocumentTestData()
-            .someMinimal().getBuilder().fileSize(fileSize).fileName(fileName).fileType(fileType)
+            .someMinimalBuilder().fileSize(fileSize).fileName(fileName).fileType(fileType)
             .uploadedBy(testUser).uploadedDateTime(uploadedDateTime).annotation(annotation).build();
 
         String manifest1Uuid = UUID.randomUUID().toString();
         String manifestFile1 = "DARTS_" + manifest1Uuid + ".a360";
 
         ExternalObjectDirectoryEntity armEod =  PersistableFactory
-            .getExternalObjectDirectoryTestData().someMinimal()
-            .getBuilder().annotationDocumentEntity(annotationDocument)
+            .getExternalObjectDirectoryTestData().someMinimalBuilder().annotationDocumentEntity(annotationDocument)
             .status(dartsDatabase.getObjectRecordStatusEntity(ARM_DROP_ZONE))
             .verificationAttempts(1).transferAttempts(1)
             .externalLocationType(dartsDatabase.getExternalLocationTypeEntity(ARM)).externalLocation(UUID.randomUUID()).build();

@@ -4,7 +4,7 @@ import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionStatusEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionTypeEntity;
-import uk.gov.hmcts.darts.test.common.data.builder.CustomTranscriptionEntity;
+import uk.gov.hmcts.darts.test.common.data.builder.TestTranscriptionEntity;
 
 import java.util.Arrays;
 
@@ -13,13 +13,15 @@ import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum.RE
 import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionTypeEnum.SENTENCING_REMARKS;
 
 @SuppressWarnings({"HideUtilityClassConstructor"})
-public class TranscriptionTestData implements Persistable<CustomTranscriptionEntity.CustomTranscriptionEntityBuilderRetrieve> {
+public class TranscriptionTestData
+    implements Persistable<TestTranscriptionEntity.TestTranscriptionEntityBuilderRetrieve, TranscriptionEntity,
+    TestTranscriptionEntity.TestTranscriptionEntityBuilder> {
 
     TranscriptionTestData() {
     }
 
     public TranscriptionEntity minimalTranscription() {
-        return someMinimal().build().getEntity();
+        return someMinimal();
     }
 
     public TranscriptionTypeEntity someTranscriptionType() {
@@ -42,11 +44,20 @@ public class TranscriptionTestData implements Persistable<CustomTranscriptionEnt
     }
 
     @Override
-    public CustomTranscriptionEntity.CustomTranscriptionEntityBuilderRetrieve someMinimal() {
-        CustomTranscriptionEntity.CustomTranscriptionEntityBuilderRetrieve builder = new CustomTranscriptionEntity.CustomTranscriptionEntityBuilderRetrieve();
+    public TranscriptionEntity someMinimal() {
+        return someMinimalBuilder().build().getEntity();
+    }
+
+    @Override
+    public TranscriptionEntity someMaximal() {
+        return someMinimal();
+    }
+
+    @Override
+    public TestTranscriptionEntity.TestTranscriptionEntityBuilderRetrieve someMinimalBuilderHolder() {
+        TestTranscriptionEntity.TestTranscriptionEntityBuilderRetrieve builder = new TestTranscriptionEntity.TestTranscriptionEntityBuilderRetrieve();
         var userAccount = minimalUserAccount();
 
-        var someMinimalCase = PersistableFactory.getCourtCaseTestData().createSomeMinimalCase();
         builder.getBuilder()
             .transcriptionType(someTranscriptionType())
             .transcriptionStatus(someTranscriptionStatus())
@@ -59,7 +70,7 @@ public class TranscriptionTestData implements Persistable<CustomTranscriptionEnt
     }
 
     @Override
-    public CustomTranscriptionEntity.CustomTranscriptionEntityBuilderRetrieve someMaximal() {
-        return someMinimal();
+    public TestTranscriptionEntity.TestTranscriptionEntityBuilder someMinimalBuilder() {
+        return someMinimalBuilderHolder().getBuilder();
     }
 }

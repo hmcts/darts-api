@@ -1,5 +1,5 @@
-Use co pilot to generate a new custom entity. See co pilot chat message:-
+Use co pilot to generate a new custom entity builder function. See co pilot chat message:- 
 
-1) Constructor that accepts all parent and child properties for uk.gov.hmcts.darts.common.entity.CaseDocumentEntity and sets the values
+Constructor that accepts all parent and child properties for $FULLY_QUALIFIED_CLASS_NAME and sets the values
 
-add a reference file to give co pilot context
+add a .java reference file to give co pilot context

@@ -3,7 +3,7 @@ package uk.gov.hmcts.darts.test.common.data;
 import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
 import uk.gov.hmcts.darts.test.common.TestUtils;
-import uk.gov.hmcts.darts.test.common.data.builder.CustomMediaEntity;
+import uk.gov.hmcts.darts.test.common.data.builder.TestMediaEntity;
 
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
@@ -15,7 +15,9 @@ import static uk.gov.hmcts.darts.test.common.data.CourtroomTestData.someMinimalC
 import static uk.gov.hmcts.darts.test.common.data.UserAccountTestData.minimalUserAccount;
 
 @SuppressWarnings({"HideUtilityClassConstructor"})
-public class MediaTestData implements Persistable<CustomMediaEntity.CustomMediaBuilderRetrieve> {
+public class MediaTestData implements Persistable<TestMediaEntity.TestMediaBuilderRetrieve,
+    MediaEntity,
+    TestMediaEntity.TestMediaEntityBuilder> {
 
     private static final OffsetDateTime NOW = OffsetDateTime.now();
     private static final OffsetDateTime YESTERDAY = NOW.minusDays(1);
@@ -38,7 +40,7 @@ public class MediaTestData implements Persistable<CustomMediaEntity.CustomMediaB
      */
     @Deprecated
     public MediaEntity someMinimalMedia() {
-        CustomMediaEntity.CustomMediaBuilderRetrieve retrieve = someMinimal();
+        TestMediaEntity.TestMediaBuilderRetrieve retrieve = someMinimalBuilderHolder();
         return retrieve.build().getEntity();
     }
 
@@ -80,14 +82,19 @@ public class MediaTestData implements Persistable<CustomMediaEntity.CustomMediaB
         return TestUtils.encodeToString(md5(MEDIA_TEST_DATA_BINARY_DATA));
     }
 
-    public CustomMediaEntity.CustomMediaBuilderRetrieve someMinimal() {
+    public MediaEntity someMinimal() {
+        return someMinimalBuilder().build().getEntity();
+    }
+
+    @Override
+    public TestMediaEntity.TestMediaBuilderRetrieve someMinimalBuilderHolder() {
         var userAccount = minimalUserAccount();
-        CustomMediaEntity.CustomMediaBuilderRetrieve builder = new CustomMediaEntity.CustomMediaBuilderRetrieve();
+        TestMediaEntity.TestMediaBuilderRetrieve builder = new TestMediaEntity.TestMediaBuilderRetrieve();
         builder.getBuilder().channel(1).totalChannels(1).start(now())
-                .end(now()).mediaFile("a-media-file")
+            .end(now()).mediaFile("a-media-file")
             .fileSize(1000L).mediaFormat("mp2").fileSize(1000L)
-                .mediaType(MEDIA_TYPE_DEFAULT).courtroom(someMinimalCourtRoom())
-                .isCurrent(true).lastModifiedBy(userAccount).deletedBy(userAccount)
+            .mediaType(MEDIA_TYPE_DEFAULT).courtroom(someMinimalCourtRoom())
+            .isCurrent(true).lastModifiedBy(userAccount).deletedBy(userAccount)
             .createdBy(userAccount).lastModifiedDateTime(NOW)
             .createdDateTime(NOW).courtroom(courtroomTestData)
             .createdDateTime(createdAt)
@@ -96,7 +103,8 @@ public class MediaTestData implements Persistable<CustomMediaEntity.CustomMediaB
         return builder;
     }
 
-    public CustomMediaEntity.CustomMediaBuilderRetrieve someMaximal() {
-        return someMinimal();
+    @Override
+    public TestMediaEntity.TestMediaEntityBuilder someMinimalBuilder() {
+        return someMinimalBuilderHolder().getBuilder();
     }
 }

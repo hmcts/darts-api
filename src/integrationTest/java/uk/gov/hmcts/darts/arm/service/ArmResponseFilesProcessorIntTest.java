@@ -96,7 +96,7 @@ class ArmResponseFilesProcessorIntTest extends IntegrationBase {
 
     @Test
     void givenProcessResponseFilesUnableToFindInputUploadFile() {
-        HearingEntity hearing = PersistableFactory.getHearingTestData().someMinimal().build();
+        HearingEntity hearing = PersistableFactory.getHearingTestData().someMinimal();
 
         MediaEntity savedMedia = dartsPersistence.save(
             getMediaTestData().createMediaWith(
@@ -106,8 +106,8 @@ class ArmResponseFilesProcessorIntTest extends IntegrationBase {
                 1
             ));
 
-        ExternalObjectDirectoryEntity armEod = PersistableFactory.getExternalObjectDirectoryTestData().someMinimal()
-            .getBuilder().media(savedMedia).status(dartsDatabase.getObjectRecordStatusEntity(ARM_DROP_ZONE))
+        ExternalObjectDirectoryEntity armEod = PersistableFactory.getExternalObjectDirectoryTestData().someMinimalBuilder()
+            .media(savedMedia).status(dartsDatabase.getObjectRecordStatusEntity(ARM_DROP_ZONE))
             .checksum(null).verificationAttempts(1).externalLocationType(dartsDatabase.getExternalLocationTypeEntity(ARM)).build();
 
         armEod.setTransferAttempts(1);
@@ -135,7 +135,7 @@ class ArmResponseFilesProcessorIntTest extends IntegrationBase {
 
     @Test
     void givenProcessResponseFilesGetInputUploadFileThrowsException() {
-        HearingEntity hearing = PersistableFactory.getHearingTestData().someMinimal().build();
+        HearingEntity hearing = PersistableFactory.getHearingTestData().someMinimal();
 
         MediaEntity savedMedia = dartsPersistence.save(
             getMediaTestData().createMediaWith(
@@ -145,8 +145,8 @@ class ArmResponseFilesProcessorIntTest extends IntegrationBase {
                 1
             ));
 
-        ExternalObjectDirectoryEntity armEod = PersistableFactory.getExternalObjectDirectoryTestData().someMinimal()
-            .getBuilder().media(savedMedia).status(dartsDatabase.getObjectRecordStatusEntity(ARM_DROP_ZONE))
+        ExternalObjectDirectoryEntity armEod = PersistableFactory.getExternalObjectDirectoryTestData()
+          .someMinimalBuilder().media(savedMedia).status(dartsDatabase.getObjectRecordStatusEntity(ARM_DROP_ZONE))
             .checksum(null).verificationAttempts(1).externalLocationType(dartsDatabase.getExternalLocationTypeEntity(ARM)).build();
 
         armEod.setTransferAttempts(1);
@@ -174,8 +174,8 @@ class ArmResponseFilesProcessorIntTest extends IntegrationBase {
 
     @Test
     void givenProcessResponseFilesFoundInputUploadFilenameUnableToParseFilename() {
-        HearingEntity hearing = PersistableFactory.getHearingTestData().someMinimal()
-                .getBuilder().hearingDate(HEARING_DATE.toLocalDate()).build();
+        HearingEntity hearing = PersistableFactory.getHearingTestData().someMinimalBuilder()
+            .hearingDate(HEARING_DATE.toLocalDate()).build();
 
         MediaEntity savedMedia = dartsPersistence.save(
             getMediaTestData().createMediaWith(
@@ -185,8 +185,8 @@ class ArmResponseFilesProcessorIntTest extends IntegrationBase {
                 1
             ));
 
-        ExternalObjectDirectoryEntity armEod = PersistableFactory.getExternalObjectDirectoryTestData().someMinimal()
-            .getBuilder().media(savedMedia).status(dartsDatabase.getObjectRecordStatusEntity(ARM_DROP_ZONE))
+        ExternalObjectDirectoryEntity armEod = PersistableFactory.getExternalObjectDirectoryTestData().someMinimalBuilder()
+            .media(savedMedia).status(dartsDatabase.getObjectRecordStatusEntity(ARM_DROP_ZONE))
             .checksum(null).verificationAttempts(1).externalLocationType(dartsDatabase.getExternalLocationTypeEntity(ARM)).build();
 
         armEod.setTransferAttempts(1);
@@ -220,7 +220,7 @@ class ArmResponseFilesProcessorIntTest extends IntegrationBase {
 
     @Test
     void givenProcessResponseFilesFailOnUnableToParseFilenameAndReachedMaxAttempts() {
-        HearingEntity hearing = PersistableFactory.getHearingTestData().someMinimal().build();
+        HearingEntity hearing = PersistableFactory.getHearingTestData().someMinimal();
 
         MediaEntity savedMedia = dartsPersistence.save(
             getMediaTestData().createMediaWith(
@@ -230,8 +230,8 @@ class ArmResponseFilesProcessorIntTest extends IntegrationBase {
                 1
             ));
 
-        ExternalObjectDirectoryEntity armEod = PersistableFactory.getExternalObjectDirectoryTestData().someMinimal()
-            .getBuilder().media(savedMedia).status(dartsDatabase.getObjectRecordStatusEntity(ARM_DROP_ZONE))
+        ExternalObjectDirectoryEntity armEod = PersistableFactory.getExternalObjectDirectoryTestData().someMinimalBuilder()
+            .media(savedMedia).status(dartsDatabase.getObjectRecordStatusEntity(ARM_DROP_ZONE))
             .checksum(null).verificationAttempts(1).externalLocationType(dartsDatabase.getExternalLocationTypeEntity(ARM)).build();
 
         armEod.setTransferAttempts(1);
@@ -266,7 +266,7 @@ class ArmResponseFilesProcessorIntTest extends IntegrationBase {
 
     @Test
     void givenProcessResponseFilesFoundInputUploadFileUnableToListBlobsForHashcode() {
-        HearingEntity hearing = PersistableFactory.getHearingTestData().someMinimal().build();
+        HearingEntity hearing = PersistableFactory.getHearingTestData().someMinimal();
 
         MediaEntity savedMedia = dartsPersistence.save(
             getMediaTestData().createMediaWith(
@@ -276,8 +276,8 @@ class ArmResponseFilesProcessorIntTest extends IntegrationBase {
                 1
             ));
 
-        ExternalObjectDirectoryEntity armEod = PersistableFactory.getExternalObjectDirectoryTestData().someMinimal()
-            .getBuilder().media(savedMedia).status(dartsDatabase.getObjectRecordStatusEntity(ARM_DROP_ZONE))
+        ExternalObjectDirectoryEntity armEod = PersistableFactory.getExternalObjectDirectoryTestData().someMinimalBuilder()
+            .media(savedMedia).status(dartsDatabase.getObjectRecordStatusEntity(ARM_DROP_ZONE))
             .checksum(null).verificationAttempts(1).externalLocationType(dartsDatabase.getExternalLocationTypeEntity(ARM)).build();
 
         armEod.setTransferAttempts(1);
@@ -308,7 +308,7 @@ class ArmResponseFilesProcessorIntTest extends IntegrationBase {
 
     @Test
     void givenProcessResponseFilesFoundInputUploadFileThrowsExceptionWhenListBlobsForHashcode() {
-        HearingEntity hearing = PersistableFactory.getHearingTestData().someMinimal().build();
+        HearingEntity hearing = PersistableFactory.getHearingTestData().someMinimal();
 
         MediaEntity savedMedia = dartsPersistence.save(
             getMediaTestData().createMediaWith(
@@ -319,8 +319,8 @@ class ArmResponseFilesProcessorIntTest extends IntegrationBase {
             ));
 
 
-        ExternalObjectDirectoryEntity armEod = PersistableFactory.getExternalObjectDirectoryTestData().someMinimal()
-            .getBuilder().media(savedMedia).status(dartsDatabase.getObjectRecordStatusEntity(ARM_DROP_ZONE))
+        ExternalObjectDirectoryEntity armEod = PersistableFactory.getExternalObjectDirectoryTestData().someMinimalBuilder()
+            .media(savedMedia).status(dartsDatabase.getObjectRecordStatusEntity(ARM_DROP_ZONE))
             .checksum(null).verificationAttempts(1).externalLocationType(dartsDatabase.getExternalLocationTypeEntity(ARM)).build();
         armEod.setTransferAttempts(1);
         armEod = dartsPersistence.save(armEod);
@@ -347,7 +347,7 @@ class ArmResponseFilesProcessorIntTest extends IntegrationBase {
 
     @Test
     void givenProcessResponseFilesListsBlobsForHashcodeReturnsNoData() {
-        HearingEntity hearing = PersistableFactory.getHearingTestData().someMinimal().build();
+        HearingEntity hearing = PersistableFactory.getHearingTestData().someMinimal();
 
 
         MediaEntity savedMedia = dartsPersistence.save(
@@ -358,8 +358,8 @@ class ArmResponseFilesProcessorIntTest extends IntegrationBase {
                 1
             ));
 
-        ExternalObjectDirectoryEntity armEod = PersistableFactory.getExternalObjectDirectoryTestData().someMinimal()
-            .getBuilder().media(savedMedia).status(dartsDatabase.getObjectRecordStatusEntity(ARM_DROP_ZONE))
+        ExternalObjectDirectoryEntity armEod = PersistableFactory.getExternalObjectDirectoryTestData().someMinimalBuilder()
+            .media(savedMedia).status(dartsDatabase.getObjectRecordStatusEntity(ARM_DROP_ZONE))
             .checksum(null).verificationAttempts(1).externalLocationType(dartsDatabase.getExternalLocationTypeEntity(ARM)).build();
 
         armEod.setTransferAttempts(1);
@@ -392,7 +392,7 @@ class ArmResponseFilesProcessorIntTest extends IntegrationBase {
 
     @Test
     void givenProcessResponseFilesInputOutputFileReportsFailed() throws IOException {
-        HearingEntity hearing = PersistableFactory.getHearingTestData().someMinimal().build();
+        HearingEntity hearing = PersistableFactory.getHearingTestData().someMinimal();
 
         MediaEntity savedMedia = dartsPersistence.save(
             getMediaTestData().createMediaWith(
@@ -404,8 +404,8 @@ class ArmResponseFilesProcessorIntTest extends IntegrationBase {
         savedMedia.setChecksum("C3CCA7021CF79B42F245AF350601C284");
         savedMedia = dartsPersistence.save(savedMedia);
 
-        ExternalObjectDirectoryEntity armEod = PersistableFactory.getExternalObjectDirectoryTestData().someMinimal()
-            .getBuilder().media(savedMedia).status(dartsDatabase.getObjectRecordStatusEntity(ARM_DROP_ZONE))
+        ExternalObjectDirectoryEntity armEod = PersistableFactory.getExternalObjectDirectoryTestData().someMinimalBuilder()
+            .media(savedMedia).status(dartsDatabase.getObjectRecordStatusEntity(ARM_DROP_ZONE))
             .externalLocationType(dartsDatabase.getExternalLocationTypeEntity(ARM))
             .checksum(null).transferAttempts(1).verificationAttempts(1).build();
 
@@ -456,7 +456,7 @@ class ArmResponseFilesProcessorIntTest extends IntegrationBase {
 
     @Test
     void givenProcessResponseFilesFailsStatusCheck() throws IOException {
-        HearingEntity hearing = PersistableFactory.getHearingTestData().someMinimal().build();
+        HearingEntity hearing = PersistableFactory.getHearingTestData().someMinimal();
 
         MediaEntity savedMedia = dartsPersistence.save(
             getMediaTestData().createMediaWith(
@@ -468,8 +468,8 @@ class ArmResponseFilesProcessorIntTest extends IntegrationBase {
         savedMedia.setChecksum("123");
         savedMedia = dartsPersistence.save(savedMedia);
 
-        ExternalObjectDirectoryEntity armEod = PersistableFactory.getExternalObjectDirectoryTestData().someMinimal()
-            .getBuilder().media(savedMedia).status(dartsDatabase.getObjectRecordStatusEntity(ARM_DROP_ZONE))
+        ExternalObjectDirectoryEntity armEod = PersistableFactory.getExternalObjectDirectoryTestData().someMinimalBuilder()
+            .media(savedMedia).status(dartsDatabase.getObjectRecordStatusEntity(ARM_DROP_ZONE))
             .checksum(null).verificationAttempts(1).externalLocationType(dartsDatabase.getExternalLocationTypeEntity(ARM)).build();
 
         armEod.setTransferAttempts(1);
@@ -519,7 +519,7 @@ class ArmResponseFilesProcessorIntTest extends IntegrationBase {
 
     @Test
     void givenProcessResponseFilesFailsProcessingUploadFile() throws IOException {
-        HearingEntity hearing = PersistableFactory.getHearingTestData().someMinimal().build();
+        HearingEntity hearing = PersistableFactory.getHearingTestData().someMinimal();
 
         MediaEntity savedMedia = dartsPersistence.save(
             getMediaTestData().createMediaWith(
@@ -531,8 +531,8 @@ class ArmResponseFilesProcessorIntTest extends IntegrationBase {
         savedMedia.setChecksum("123");
         savedMedia = dartsPersistence.save(savedMedia);
 
-        ExternalObjectDirectoryEntity armEod = PersistableFactory.getExternalObjectDirectoryTestData().someMinimal()
-            .getBuilder().media(savedMedia).status(dartsDatabase.getObjectRecordStatusEntity(ARM_DROP_ZONE))
+        ExternalObjectDirectoryEntity armEod = PersistableFactory.getExternalObjectDirectoryTestData().someMinimalBuilder()
+            .media(savedMedia).status(dartsDatabase.getObjectRecordStatusEntity(ARM_DROP_ZONE))
             .checksum(null).verificationAttempts(1).externalLocationType(dartsDatabase.getExternalLocationTypeEntity(ARM)).build();
 
         armEod.setTransferAttempts(1);
@@ -582,7 +582,7 @@ class ArmResponseFilesProcessorIntTest extends IntegrationBase {
 
     @Test
     void givenProcessResponseFilesFailsMediaChecksum() throws IOException {
-        HearingEntity hearing = PersistableFactory.getHearingTestData().someMinimal().build();
+        HearingEntity hearing = PersistableFactory.getHearingTestData().someMinimal();
 
         MediaEntity savedMedia = dartsPersistence.save(
             getMediaTestData().createMediaWith(
@@ -594,8 +594,8 @@ class ArmResponseFilesProcessorIntTest extends IntegrationBase {
         savedMedia.setChecksum("123");
         savedMedia = dartsPersistence.save(savedMedia);
 
-        ExternalObjectDirectoryEntity armEod = PersistableFactory.getExternalObjectDirectoryTestData().someMinimal()
-            .getBuilder().media(savedMedia).status(dartsDatabase.getObjectRecordStatusEntity(ARM_DROP_ZONE))
+        ExternalObjectDirectoryEntity armEod = PersistableFactory.getExternalObjectDirectoryTestData().someMinimalBuilder()
+            .media(savedMedia).status(dartsDatabase.getObjectRecordStatusEntity(ARM_DROP_ZONE))
             .checksum(null).verificationAttempts(1).externalLocationType(dartsDatabase.getExternalLocationTypeEntity(ARM)).build();
 
         armEod.setTransferAttempts(1);
@@ -669,8 +669,8 @@ class ArmResponseFilesProcessorIntTest extends IntegrationBase {
                                                        testUser, uploadedDateTime, checksum
             );
 
-        ExternalObjectDirectoryEntity armEod = PersistableFactory.getExternalObjectDirectoryTestData().someMinimal()
-            .getBuilder().annotationDocumentEntity(annotationDocument).status(dartsDatabase.getObjectRecordStatusEntity(ARM_DROP_ZONE))
+        ExternalObjectDirectoryEntity armEod = PersistableFactory.getExternalObjectDirectoryTestData().someMinimalBuilder()
+            .annotationDocumentEntity(annotationDocument).status(dartsDatabase.getObjectRecordStatusEntity(ARM_DROP_ZONE))
             .checksum(null).verificationAttempts(1).externalLocationType(dartsDatabase.getExternalLocationTypeEntity(ARM)).build();
 
         armEod.setTransferAttempts(1);
@@ -730,14 +730,14 @@ class ArmResponseFilesProcessorIntTest extends IntegrationBase {
         final int fileSize = 11_937;
         final UserAccountEntity testUser = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
         final String checksum = "123";
-        TranscriptionDocumentEntity transcriptionDocumentEntity = PersistableFactory.getTranscriptionDocument().someMinimal()
-            .getBuilder().transcription(transcriptionEntity).fileName(fileName).fileType(fileType)
+        TranscriptionDocumentEntity transcriptionDocumentEntity = PersistableFactory.getTranscriptionDocument().someMinimalBuilder()
+            .transcription(transcriptionEntity).fileName(fileName).fileType(fileType)
             .fileSize(fileSize).uploadedBy(testUser).checksum(checksum).build();
         when(userIdentity.getUserAccount()).thenReturn(testUser);
         transcriptionDocumentEntity = dartsPersistence.save(transcriptionDocumentEntity);
 
-        ExternalObjectDirectoryEntity armEod = PersistableFactory.getExternalObjectDirectoryTestData().someMinimal()
-            .getBuilder().transcriptionDocumentEntity(transcriptionDocumentEntity).status(dartsDatabase.getObjectRecordStatusEntity(ARM_DROP_ZONE))
+        ExternalObjectDirectoryEntity armEod = PersistableFactory.getExternalObjectDirectoryTestData().someMinimalBuilder()
+            .transcriptionDocumentEntity(transcriptionDocumentEntity).status(dartsDatabase.getObjectRecordStatusEntity(ARM_DROP_ZONE))
             .media(null)
             .checksum(null).verificationAttempts(1).externalLocationType(dartsDatabase.getExternalLocationTypeEntity(ARM)).build();
 
@@ -791,7 +791,7 @@ class ArmResponseFilesProcessorIntTest extends IntegrationBase {
 
     @Test
     void givenProcessResponseFilesSuccessfullyCompletesForMedia() throws IOException {
-        HearingEntity hearing = PersistableFactory.getHearingTestData().someMinimal().build();
+        HearingEntity hearing = PersistableFactory.getHearingTestData().someMinimal();
 
         MediaEntity savedMedia = dartsPersistence.save(
             getMediaTestData().createMediaWith(
@@ -804,8 +804,8 @@ class ArmResponseFilesProcessorIntTest extends IntegrationBase {
         savedMedia.setChecksum(checksum);
         savedMedia = dartsPersistence.save(savedMedia);
 
-        ExternalObjectDirectoryEntity armEod = PersistableFactory.getExternalObjectDirectoryTestData().someMinimal()
-            .getBuilder().media(savedMedia).status(dartsDatabase.getObjectRecordStatusEntity(ARM_DROP_ZONE))
+        ExternalObjectDirectoryEntity armEod = PersistableFactory.getExternalObjectDirectoryTestData().someMinimalBuilder()
+            .media(savedMedia).status(dartsDatabase.getObjectRecordStatusEntity(ARM_DROP_ZONE))
             .checksum(null).verificationAttempts(1).externalLocationType(dartsDatabase.getExternalLocationTypeEntity(ARM)).build();
 
         armEod.setChecksum(checksum);
@@ -866,8 +866,8 @@ class ArmResponseFilesProcessorIntTest extends IntegrationBase {
     void givenProcessResponseFilesSuccessfullyCompletesForAnnotation() throws IOException {
         UserAccountEntity testUser = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
         String testAnnotation = "TestAnnotation";
-        AnnotationEntity annotation = dartsPersistence.save(PersistableFactory.getAnnotationTestData().someMinimal()
-            .getBuilder().currentOwner(testUser).text(testAnnotation).build());
+        AnnotationEntity annotation = dartsPersistence.save(PersistableFactory.getAnnotationTestData().someMinimalBuilder()
+                                                                .currentOwner(testUser).text(testAnnotation).build());
 
         when(userIdentity.getUserAccount()).thenReturn(testUser);
         final String fileName = "judges-notes.txt";
@@ -876,14 +876,14 @@ class ArmResponseFilesProcessorIntTest extends IntegrationBase {
         final OffsetDateTime uploadedDateTime = OffsetDateTime.now();
         final String checksum = "C3CCA7021CF79B42F245AF350601C284";
         AnnotationDocumentEntity annotationDocument = PersistableFactory.getAnnotationDocumentTestData()
-            .someMinimal().getBuilder().annotation(annotation).fileName(fileName).fileType(fileType)
+            .someMinimalBuilder().annotation(annotation).fileName(fileName).fileType(fileType)
             .fileSize(fileSize).uploadedBy(testUser).uploadedDateTime(uploadedDateTime)
             .lastModifiedBy(testUser).lastModifiedTimestamp(uploadedDateTime).checksum(checksum)
             .retConfScore(1).retConfReason("confidence reason").build();
         annotationDocument = dartsPersistence.save(annotationDocument);
 
-        ExternalObjectDirectoryEntity armEod = PersistableFactory.getExternalObjectDirectoryTestData().someMinimal()
-            .getBuilder().annotationDocumentEntity(annotationDocument).status(dartsDatabase.getObjectRecordStatusEntity(ARM_DROP_ZONE))
+        ExternalObjectDirectoryEntity armEod = PersistableFactory.getExternalObjectDirectoryTestData().someMinimalBuilder()
+            .annotationDocumentEntity(annotationDocument).status(dartsDatabase.getObjectRecordStatusEntity(ARM_DROP_ZONE))
             .checksum(null).verificationAttempts(1).externalLocationType(dartsDatabase.getExternalLocationTypeEntity(ARM)).build();
 
         armEod.setChecksum(checksum);
@@ -946,14 +946,14 @@ class ArmResponseFilesProcessorIntTest extends IntegrationBase {
         final int fileSize = 11_937;
         final UserAccountEntity testUser = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
         final String checksum = "C3CCA7021CF79B42F245AF350601C284";
-        TranscriptionDocumentEntity transcriptionDocumentEntity = PersistableFactory.getTranscriptionDocument().someMinimal()
-            .getBuilder().transcription(transcriptionEntity).fileName(fileName).fileType(fileType)
+        TranscriptionDocumentEntity transcriptionDocumentEntity = PersistableFactory.getTranscriptionDocument().someMinimalBuilder()
+            .transcription(transcriptionEntity).fileName(fileName).fileType(fileType)
             .fileSize(fileSize).uploadedBy(testUser).checksum(checksum).build();
         when(userIdentity.getUserAccount()).thenReturn(testUser);
         transcriptionDocumentEntity = dartsPersistence.save(transcriptionDocumentEntity);
 
-        ExternalObjectDirectoryEntity armEod = PersistableFactory.getExternalObjectDirectoryTestData().someMinimal()
-            .getBuilder().transcriptionDocumentEntity(transcriptionDocumentEntity).status(dartsDatabase.getObjectRecordStatusEntity(ARM_DROP_ZONE))
+        ExternalObjectDirectoryEntity armEod = PersistableFactory.getExternalObjectDirectoryTestData().someMinimalBuilder()
+            .transcriptionDocumentEntity(transcriptionDocumentEntity).status(dartsDatabase.getObjectRecordStatusEntity(ARM_DROP_ZONE))
             .media(null).checksum(null).verificationAttempts(1).externalLocationType(dartsDatabase.getExternalLocationTypeEntity(ARM)).build();
 
         armEod.setChecksum(checksum);
@@ -1015,7 +1015,7 @@ class ArmResponseFilesProcessorIntTest extends IntegrationBase {
 
     @Test
     void givenProcessResponseFilesFailsMediaChecksumNull() throws IOException {
-        HearingEntity hearing = PersistableFactory.getHearingTestData().someMinimal().build();
+        HearingEntity hearing = PersistableFactory.getHearingTestData().someMinimal();
 
         MediaEntity savedMedia = dartsPersistence.save(
             getMediaTestData().createMediaWith(
@@ -1027,8 +1027,8 @@ class ArmResponseFilesProcessorIntTest extends IntegrationBase {
         savedMedia.setChecksum(null);
         savedMedia = dartsPersistence.save(savedMedia);
 
-        ExternalObjectDirectoryEntity armEod = PersistableFactory.getExternalObjectDirectoryTestData().someMinimal()
-            .getBuilder().media(savedMedia).status(dartsDatabase.getObjectRecordStatusEntity(ARM_DROP_ZONE))
+        ExternalObjectDirectoryEntity armEod = PersistableFactory.getExternalObjectDirectoryTestData().someMinimalBuilder()
+            .media(savedMedia).status(dartsDatabase.getObjectRecordStatusEntity(ARM_DROP_ZONE))
             .checksum(null).verificationAttempts(1).externalLocationType(dartsDatabase.getExternalLocationTypeEntity(ARM)).build();
 
         armEod.setTransferAttempts(1);
@@ -1087,7 +1087,7 @@ class ArmResponseFilesProcessorIntTest extends IntegrationBase {
 
     @Test
     void givenProcessResponseFilesFailsWithInvalidLines() throws IOException {
-        HearingEntity hearing = PersistableFactory.getHearingTestData().someMinimal().build();
+        HearingEntity hearing = PersistableFactory.getHearingTestData().someMinimal();
 
         MediaEntity savedMedia = dartsPersistence.save(
             getMediaTestData().createMediaWith(
@@ -1099,8 +1099,8 @@ class ArmResponseFilesProcessorIntTest extends IntegrationBase {
         savedMedia.setChecksum("C3CCA7021CF79B42F245AF350601C284");
         savedMedia = dartsPersistence.save(savedMedia);
 
-        ExternalObjectDirectoryEntity armEod = PersistableFactory.getExternalObjectDirectoryTestData().someMinimal()
-            .getBuilder().media(savedMedia).status(dartsDatabase.getObjectRecordStatusEntity(ARM_DROP_ZONE))
+        ExternalObjectDirectoryEntity armEod = PersistableFactory.getExternalObjectDirectoryTestData().someMinimalBuilder()
+            .media(savedMedia).status(dartsDatabase.getObjectRecordStatusEntity(ARM_DROP_ZONE))
             .checksum(null).verificationAttempts(1).externalLocationType(dartsDatabase.getExternalLocationTypeEntity(ARM)).build();
 
         armEod.setTransferAttempts(1);
@@ -1165,7 +1165,7 @@ class ArmResponseFilesProcessorIntTest extends IntegrationBase {
 
     @Test
     void givenProcessResponseFilesFailsForInvalidLinesWithInvalidName() {
-        HearingEntity hearing = PersistableFactory.getHearingTestData().someMinimal().build();
+        HearingEntity hearing = PersistableFactory.getHearingTestData().someMinimal();
 
         MediaEntity savedMedia = dartsPersistence.save(
             getMediaTestData().createMediaWith(
@@ -1177,8 +1177,8 @@ class ArmResponseFilesProcessorIntTest extends IntegrationBase {
         savedMedia.setChecksum("C3CCA7021CF79B42F245AF350601C284");
         savedMedia = dartsPersistence.save(savedMedia);
 
-        ExternalObjectDirectoryEntity armEod = PersistableFactory.getExternalObjectDirectoryTestData().someMinimal()
-            .getBuilder().media(savedMedia).status(dartsDatabase.getObjectRecordStatusEntity(ARM_DROP_ZONE))
+        ExternalObjectDirectoryEntity armEod = PersistableFactory.getExternalObjectDirectoryTestData().someMinimalBuilder()
+            .media(savedMedia).status(dartsDatabase.getObjectRecordStatusEntity(ARM_DROP_ZONE))
             .checksum(null).verificationAttempts(1).externalLocationType(dartsDatabase.getExternalLocationTypeEntity(ARM)).build();
 
         armEod.setTransferAttempts(1);

@@ -16,22 +16,22 @@ import java.util.ArrayList;
 import java.util.List;
 
 @RequiredArgsConstructor
-public class CustomMediaEntity extends MediaEntity implements DbInsertable<MediaEntity> {
+public class TestMediaEntity extends MediaEntity implements DbInsertable<MediaEntity> {
 
     @lombok.Builder
-    public CustomMediaEntity(Integer id, CourtroomEntity courtroom,
-                             String legacyObjectId, Integer channel, Integer totalChannels, OffsetDateTime start, OffsetDateTime end,
-                             List<MediaLinkedCaseEntity> mediaLinkedCaseList, String legacyVersionLabel,
-                             String mediaFile, String mediaFormat, Long fileSize, String checksum,
-                             Character mediaType, String contentObjectId, String clipId,
-                             String chronicleId, String antecedentId, boolean isHidden,
-                             boolean isDeleted, Boolean isCurrent, UserAccountEntity deletedBy,
-                             OffsetDateTime deletedTimestamp, String mediaStatus,
-                             List<HearingEntity> hearingList, OffsetDateTime retainUntilTs,
-                             List<ObjectAdminActionEntity> adminActionReasons, Integer retConfScore,
-                             String retConfReason, OffsetDateTime createdDateTime,
-                             UserAccountEntity createdBy, OffsetDateTime lastModifiedDateTime,
-                             UserAccountEntity lastModifiedBy) {
+    public TestMediaEntity(Integer id, CourtroomEntity courtroom,
+                           String legacyObjectId, Integer channel, Integer totalChannels, OffsetDateTime start, OffsetDateTime end,
+                           List<MediaLinkedCaseEntity> mediaLinkedCaseList, String legacyVersionLabel,
+                           String mediaFile, String mediaFormat, Long fileSize, String checksum,
+                           Character mediaType, String contentObjectId, String clipId,
+                           String chronicleId, String antecedentId, boolean isHidden,
+                           boolean isDeleted, Boolean isCurrent, UserAccountEntity deletedBy,
+                           OffsetDateTime deletedTimestamp, String mediaStatus,
+                           List<HearingEntity> hearingList, OffsetDateTime retainUntilTs,
+                           List<ObjectAdminActionEntity> adminActionReasons, Integer retConfScore,
+                           String retConfReason, OffsetDateTime createdDateTime,
+                           UserAccountEntity createdBy, OffsetDateTime lastModifiedDateTime,
+                           UserAccountEntity lastModifiedBy) {
         setId(id);
         setCourtroom(courtroom);
         setLegacyObjectId(legacyObjectId);
@@ -78,19 +78,19 @@ public class CustomMediaEntity extends MediaEntity implements DbInsertable<Media
         }
     }
 
-    public static class CustomMediaBuilderRetrieve implements BuilderHolder<CustomMediaEntity, CustomMediaEntityBuilder> {
-        public CustomMediaBuilderRetrieve() {
+    public static class TestMediaBuilderRetrieve implements BuilderHolder<TestMediaEntity, TestMediaEntityBuilder> {
+        public TestMediaBuilderRetrieve() {
         }
 
-        private CustomMediaEntity.CustomMediaEntityBuilder builder = CustomMediaEntity.builder();
+        private TestMediaEntity.TestMediaEntityBuilder builder = TestMediaEntity.builder();
 
         @Override
-        public CustomMediaEntity build() {
+        public TestMediaEntity build() {
             return builder.build();
         }
 
         @Override
-        public CustomMediaEntity.CustomMediaEntityBuilder getBuilder() {
+        public TestMediaEntity.TestMediaEntityBuilder getBuilder() {
             return builder;
         }
     }

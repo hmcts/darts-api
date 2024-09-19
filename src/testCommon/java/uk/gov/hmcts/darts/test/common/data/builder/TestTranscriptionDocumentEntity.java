@@ -15,22 +15,22 @@ import java.util.ArrayList;
 import java.util.List;
 
 @RequiredArgsConstructor
-public class CustomTranscriptionDocumentEntity extends TranscriptionDocumentEntity implements DbInsertable<TranscriptionDocumentEntity> {
+public class TestTranscriptionDocumentEntity extends TranscriptionDocumentEntity implements DbInsertable<TranscriptionDocumentEntity> {
     @lombok.Builder
-    public CustomTranscriptionDocumentEntity(Integer id,
-                                             TranscriptionEntity transcription,
-                                             String clipId, String fileName, String fileType,
-                                             Integer fileSize, UserAccountEntity uploadedBy,
-                                             OffsetDateTime uploadedDateTime,
-                                             List<ExternalObjectDirectoryEntity> externalObjectDirectoryEntities,
-                                             String checksum, boolean isDeleted,
-                                             UserAccountEntity deletedBy, OffsetDateTime deletedTs,
-                                             String contentObjectId, boolean isHidden,
-                                             OffsetDateTime retainUntilTs, Integer retConfScore,
-                                             String retConfReason,
-                                             List<ObjectAdminActionEntity> adminActions,
-                                             UserAccountEntity createdBy, OffsetDateTime lastModifiedDateTime,
-                                             UserAccountEntity lastModifiedBy) {
+    public TestTranscriptionDocumentEntity(Integer id,
+                                           TranscriptionEntity transcription,
+                                           String clipId, String fileName, String fileType,
+                                           Integer fileSize, UserAccountEntity uploadedBy,
+                                           OffsetDateTime uploadedDateTime,
+                                           List<ExternalObjectDirectoryEntity> externalObjectDirectoryEntities,
+                                           String checksum, boolean isDeleted,
+                                           UserAccountEntity deletedBy, OffsetDateTime deletedTs,
+                                           String contentObjectId, boolean isHidden,
+                                           OffsetDateTime retainUntilTs, Integer retConfScore,
+                                           String retConfReason,
+                                           List<ObjectAdminActionEntity> adminActions,
+                                           UserAccountEntity createdBy, OffsetDateTime lastModifiedDateTime,
+                                           UserAccountEntity lastModifiedBy) {
         setId(id);
         setTranscription(transcription);
         setClipId(clipId);
@@ -68,17 +68,17 @@ public class CustomTranscriptionDocumentEntity extends TranscriptionDocumentEnti
     }
 
     public static class TranscriptionDocumentEntityBuilderRetrieve
-        implements BuilderHolder<CustomTranscriptionDocumentEntity, CustomTranscriptionDocumentEntity.CustomTranscriptionDocumentEntityBuilder> {
+        implements BuilderHolder<TestTranscriptionDocumentEntity, TestTranscriptionDocumentEntity.TestTranscriptionDocumentEntityBuilder> {
 
-        private CustomTranscriptionDocumentEntity.CustomTranscriptionDocumentEntityBuilder builder = CustomTranscriptionDocumentEntity.builder();
+        private TestTranscriptionDocumentEntity.TestTranscriptionDocumentEntityBuilder builder = TestTranscriptionDocumentEntity.builder();
 
         @Override
-        public CustomTranscriptionDocumentEntity build() {
+        public TestTranscriptionDocumentEntity build() {
            return builder.build();
         }
 
         @Override
-        public CustomTranscriptionDocumentEntity.CustomTranscriptionDocumentEntityBuilder getBuilder() {
+        public TestTranscriptionDocumentEntity.TestTranscriptionDocumentEntityBuilder getBuilder() {
             return builder;
         }
     }

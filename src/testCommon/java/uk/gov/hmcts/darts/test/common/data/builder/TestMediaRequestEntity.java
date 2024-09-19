@@ -13,13 +13,13 @@ import java.lang.reflect.InvocationTargetException;
 import java.time.OffsetDateTime;
 
 @RequiredArgsConstructor
-public class CustomMediaRequestEntity extends MediaRequestEntity implements DbInsertable<MediaRequestEntity> {
+public class TestMediaRequestEntity extends MediaRequestEntity implements DbInsertable<MediaRequestEntity> {
 
     @lombok.Builder
-    public CustomMediaRequestEntity(Integer id, HearingEntity hearing, UserAccountEntity currentOwner, UserAccountEntity requestor,
-                                    MediaRequestStatus status, AudioRequestType requestType, Integer attempts, OffsetDateTime startTime,
-                                    OffsetDateTime endTime, UserAccountEntity createdBy, UserAccountEntity lastModifiedBy,
-                                    OffsetDateTime createdAt, OffsetDateTime lastModifiedAt) {
+    public TestMediaRequestEntity(Integer id, HearingEntity hearing, UserAccountEntity currentOwner, UserAccountEntity requestor,
+                                  MediaRequestStatus status, AudioRequestType requestType, Integer attempts, OffsetDateTime startTime,
+                                  OffsetDateTime endTime, UserAccountEntity createdBy, UserAccountEntity lastModifiedBy,
+                                  OffsetDateTime createdAt, OffsetDateTime lastModifiedAt) {
         setId(id);
         setHearing(hearing);
         setCurrentOwner(currentOwner);
@@ -46,17 +46,17 @@ public class CustomMediaRequestEntity extends MediaRequestEntity implements DbIn
         }
     }
 
-    public static class CustomMediaBuilderRetrieve implements BuilderHolder<CustomMediaRequestEntity, CustomMediaRequestEntityBuilder> {
+    public static class TestMediaBuilderRetrieve implements BuilderHolder<TestMediaRequestEntity,TestMediaRequestEntityBuilder> {
 
-        private final CustomMediaRequestEntity.CustomMediaRequestEntityBuilder builder = CustomMediaRequestEntity.builder();
+        private final TestMediaRequestEntity.TestMediaRequestEntityBuilder builder = TestMediaRequestEntity.builder();
 
         @Override
-        public CustomMediaRequestEntity build() {
+        public TestMediaRequestEntity build() {
             return builder.build();
         }
 
         @Override
-        public CustomMediaRequestEntity.CustomMediaRequestEntityBuilder getBuilder() {
+        public TestMediaRequestEntity.TestMediaRequestEntityBuilder getBuilder() {
              return builder;
         }
     }

@@ -81,7 +81,7 @@ public class AnnotationStubComposable {
     }
 
     public static AnnotationEntity createAnnotationEntity(UserAccountEntity currentOwner, String annotationText) {
-        AnnotationEntity annotationEntity = PersistableFactory.getAnnotationTestData().someMinimal().build().getEntity();
+        AnnotationEntity annotationEntity = PersistableFactory.getAnnotationTestData().someMinimal();
         annotationEntity.setCurrentOwner(currentOwner);
         annotationEntity.setText(annotationText);
         annotationEntity.setTimestamp(OffsetDateTime.now());
@@ -96,7 +96,7 @@ public class AnnotationStubComposable {
                                                                    UserAccountEntity uploadedBy, OffsetDateTime uploadedDateTime,
                                                                    String checksum, Integer confScore,
                                                                    String confReason) {
-        AnnotationDocumentEntity annotationDocument = PersistableFactory.getAnnotationDocumentTestData().someMinimal().build().getEntity();
+        AnnotationDocumentEntity annotationDocument = PersistableFactory.getAnnotationDocumentTestData().someMinimal();
         annotationDocument.setAnnotation(annotationEntity);
         annotationDocument.setFileName(fileName);
         annotationDocument.setFileType(fileType);

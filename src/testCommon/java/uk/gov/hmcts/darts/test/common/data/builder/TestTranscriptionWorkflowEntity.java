@@ -1,4 +1,4 @@
-package uk.gov.hmcts.darts.test.common.data;
+package uk.gov.hmcts.darts.test.common.data.builder;
 
 import org.apache.commons.beanutils.BeanUtils;
 import org.hibernate.AssertionFailure;
@@ -7,17 +7,15 @@ import uk.gov.hmcts.darts.common.entity.TranscriptionEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionStatusEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionWorkflowEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
-import uk.gov.hmcts.darts.test.common.data.builder.BuilderHolder;
-import uk.gov.hmcts.darts.test.common.data.builder.DbInsertable;
 
 import java.lang.reflect.InvocationTargetException;
 import java.time.OffsetDateTime;
 import java.util.List;
 
-public class CustomTranscriptionWorkflowEntity extends TranscriptionWorkflowEntity implements DbInsertable<TranscriptionWorkflowEntity> {
+public class TestTranscriptionWorkflowEntity extends TranscriptionWorkflowEntity implements DbInsertable<TranscriptionWorkflowEntity> {
 
     @lombok.Builder
-    public CustomTranscriptionWorkflowEntity(
+    public TestTranscriptionWorkflowEntity(
         Integer id,
         TranscriptionEntity transcription,
         TranscriptionStatusEntity transcriptionStatus,
@@ -45,18 +43,18 @@ public class CustomTranscriptionWorkflowEntity extends TranscriptionWorkflowEnti
         }
     }
 
-    public static class CustomTranscriptionWorkflowEntityBuilderRetrieve
-        implements BuilderHolder<CustomTranscriptionWorkflowEntity, CustomTranscriptionWorkflowEntity.CustomTranscriptionWorkflowEntityBuilder> {
+    public static class TestTranscriptionWorkflowEntityBuilderRetrieve
+        implements BuilderHolder<TestTranscriptionWorkflowEntity, TestTranscriptionWorkflowEntity.TestTranscriptionWorkflowEntityBuilder> {
 
-        private CustomTranscriptionWorkflowEntity.CustomTranscriptionWorkflowEntityBuilder builder = CustomTranscriptionWorkflowEntity.builder();
+        private TestTranscriptionWorkflowEntity.TestTranscriptionWorkflowEntityBuilder builder = TestTranscriptionWorkflowEntity.builder();
 
         @Override
-        public CustomTranscriptionWorkflowEntity build() {
+        public TestTranscriptionWorkflowEntity build() {
             return builder.build();
         }
 
         @Override
-        public CustomTranscriptionWorkflowEntity.CustomTranscriptionWorkflowEntityBuilder getBuilder() {
+        public TestTranscriptionWorkflowEntity.TestTranscriptionWorkflowEntityBuilder getBuilder() {
             return builder;
         }
     }

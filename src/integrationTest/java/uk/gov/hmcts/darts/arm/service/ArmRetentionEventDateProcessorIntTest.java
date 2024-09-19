@@ -30,9 +30,9 @@ import uk.gov.hmcts.darts.common.entity.TranscriptionEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
 import uk.gov.hmcts.darts.test.common.data.PersistableFactory;
-import uk.gov.hmcts.darts.test.common.data.builder.CustomAnnotationEntity;
-import uk.gov.hmcts.darts.test.common.data.builder.CustomExternalObjectDirectoryEntity;
-import uk.gov.hmcts.darts.test.common.data.builder.CustomTranscriptionDocumentEntity;
+import uk.gov.hmcts.darts.test.common.data.builder.TestAnnotationEntity;
+import uk.gov.hmcts.darts.test.common.data.builder.TestExternalObjectDirectoryEntity;
+import uk.gov.hmcts.darts.test.common.data.builder.TestTranscriptionDocumentEntity;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 import uk.gov.hmcts.darts.testutils.stubs.AuthorisationStub;
 
@@ -149,8 +149,8 @@ class ArmRetentionEventDateProcessorIntTest extends IntegrationBase {
         savedMedia.setRetainUntilTs(DOCUMENT_RETENTION_DATE_TIME);
         dartsPersistence.save(savedMedia);
 
-        ExternalObjectDirectoryEntity armEod = PersistableFactory.getExternalObjectDirectoryTestData().someMinimal(
-        ).getBuilder().media(savedMedia)
+        ExternalObjectDirectoryEntity armEod = PersistableFactory.getExternalObjectDirectoryTestData()
+            .someMinimalBuilder().media(savedMedia)
             .status(dartsDatabase.getExternalObjectDirectoryStub().getStatus(STORED))
             .externalLocationType(dartsDatabase.getExternalObjectDirectoryStub().getLocation(ARM))
             .externalLocation(UUID.randomUUID()).build().getEntity();
@@ -211,8 +211,8 @@ class ArmRetentionEventDateProcessorIntTest extends IntegrationBase {
         savedMedia.setRetainUntilTs(DOCUMENT_RETENTION_DATE_TIME);
         dartsPersistence.save(savedMedia);
 
-        CustomExternalObjectDirectoryEntity.CustomExternalObjectDirectoryuilderRetrieve externalObjectDirectoryuilderRetrieve
-            = PersistableFactory.getExternalObjectDirectoryTestData().someMinimal();
+        TestExternalObjectDirectoryEntity.TestExternalObjectDirectoryuilderRetrieve externalObjectDirectoryuilderRetrieve
+            = PersistableFactory.getExternalObjectDirectoryTestData().someMinimalBuilderHolder();
 
         externalObjectDirectoryuilderRetrieve.getBuilder().media(savedMedia)
             .status(dartsDatabase.getExternalObjectDirectoryStub().getStatus(ARM_DROP_ZONE))
@@ -254,9 +254,9 @@ class ArmRetentionEventDateProcessorIntTest extends IntegrationBase {
         final Integer confidenceScore = 232;
         final String externalRecordId = "recordId";
 
-        CustomTranscriptionDocumentEntity.TranscriptionDocumentEntityBuilderRetrieve
+        TestTranscriptionDocumentEntity.TranscriptionDocumentEntityBuilderRetrieve
             transcriptionEntityBuilderRetrieve =
-            PersistableFactory.getTranscriptionDocument().someMinimal();
+            PersistableFactory.getTranscriptionDocument().someMinimalBuilderHolder();
 
             transcriptionEntityBuilderRetrieve
                 .getBuilder().transcription(transcriptionEntity)
@@ -272,8 +272,8 @@ class ArmRetentionEventDateProcessorIntTest extends IntegrationBase {
         when(userIdentity.getUserAccount()).thenReturn(testUser);
         dartsPersistence.save(transcriptionDocumentEntity);
 
-        CustomExternalObjectDirectoryEntity.CustomExternalObjectDirectoryuilderRetrieve externalObjectDirectoryuilderRetrieve
-            = PersistableFactory.getExternalObjectDirectoryTestData().someMinimal();
+        TestExternalObjectDirectoryEntity.TestExternalObjectDirectoryuilderRetrieve externalObjectDirectoryuilderRetrieve
+            = PersistableFactory.getExternalObjectDirectoryTestData().someMinimalBuilderHolder();
 
         externalObjectDirectoryuilderRetrieve.getBuilder().transcriptionDocumentEntity(transcriptionDocumentEntity)
             .status(dartsDatabase.getExternalObjectDirectoryStub().getStatus(STORED)).media(null)
@@ -323,8 +323,8 @@ class ArmRetentionEventDateProcessorIntTest extends IntegrationBase {
         UserAccountEntity testUser = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
         String testAnnotation = "TestAnnotation";
 
-        CustomAnnotationEntity.CustomAnnotationEntityRetrieve annotationEntityRetrieve
-            = PersistableFactory.getAnnotationTestData().someMinimal();
+        TestAnnotationEntity.TestAnnotationEntityRetrieve annotationEntityRetrieve
+            = PersistableFactory.getAnnotationTestData().someMinimalBuilderHolder();
 
         AnnotationEntity annotation = annotationEntityRetrieve.getBuilder().text(testAnnotation).build().getEntity();
 
@@ -339,7 +339,7 @@ class ArmRetentionEventDateProcessorIntTest extends IntegrationBase {
         final String externalRecordId = "recordId";
 
         AnnotationDocumentEntity annotationDocument = PersistableFactory
-            .getAnnotationDocumentTestData().someMinimal().getBuilder().annotation(annotation)
+            .getAnnotationDocumentTestData().someMinimalBuilder().annotation(annotation)
             .fileName(fileName)
             .fileType(fileType)
             .fileSize(fileSize)
@@ -352,8 +352,8 @@ class ArmRetentionEventDateProcessorIntTest extends IntegrationBase {
 
         dartsPersistence.save(annotationDocument);
 
-        ExternalObjectDirectoryEntity armEod = PersistableFactory.getExternalObjectDirectoryTestData().someMinimal()
-            .getBuilder().annotationDocumentEntity(annotationDocument).media(null)
+        ExternalObjectDirectoryEntity armEod = PersistableFactory.getExternalObjectDirectoryTestData()
+            .someMinimalBuilder().annotationDocumentEntity(annotationDocument).media(null)
             .status(dartsDatabase.getObjectRecordStatusEntity(STORED))
             .externalLocationType(dartsDatabase.getExternalLocationTypeEntity(ARM))
             .externalLocation(UUID.randomUUID()).build().getEntity();
@@ -401,7 +401,7 @@ class ArmRetentionEventDateProcessorIntTest extends IntegrationBase {
         Integer confidenceScore = 232;
 
         CaseDocumentEntity caseDocument = PersistableFactory
-            .getCaseDocumentTestData().someMinimal().getBuilder().fileName("test_case_document.docx")
+            .getCaseDocumentTestData().someMinimalBuilder().fileName("test_case_document.docx")
             .retainUntilTs(DOCUMENT_RETENTION_DATE_TIME)
             .retConfReason(confidenceReason)
             .retConfScore(confidenceScore).build().getEntity();
@@ -410,8 +410,8 @@ class ArmRetentionEventDateProcessorIntTest extends IntegrationBase {
 
         String externalRecordId = "recordId";
 
-        ExternalObjectDirectoryEntity armEod = PersistableFactory.getExternalObjectDirectoryTestData().someMinimal()
-            .getBuilder().media(null).caseDocument(caseDocument)
+        ExternalObjectDirectoryEntity armEod = PersistableFactory.getExternalObjectDirectoryTestData().someMinimalBuilder()
+        .media(null).caseDocument(caseDocument)
             .status(dartsDatabase.getObjectRecordStatusEntity(STORED))
             .externalLocationType(dartsDatabase.getExternalLocationTypeEntity(ARM))
             .externalLocation(UUID.randomUUID())
@@ -457,7 +457,7 @@ class ArmRetentionEventDateProcessorIntTest extends IntegrationBase {
         String confidenceReason = "reason";
 
         CaseDocumentEntity caseDocument = PersistableFactory
-            .getCaseDocumentTestData().someMinimal().getBuilder().fileName("test_case_document.docx")
+            .getCaseDocumentTestData().someMinimalBuilder().fileName("test_case_document.docx")
             .retainUntilTs(DOCUMENT_RETENTION_DATE_TIME)
             .retConfReason(confidenceReason)
             .retConfScore(null).build().getEntity();
@@ -466,8 +466,8 @@ class ArmRetentionEventDateProcessorIntTest extends IntegrationBase {
 
         String externalRecordId = "recordId";
 
-        ExternalObjectDirectoryEntity armEod = PersistableFactory.getExternalObjectDirectoryTestData().someMinimal()
-            .getBuilder().caseDocument(caseDocument)
+        ExternalObjectDirectoryEntity armEod = PersistableFactory.getExternalObjectDirectoryTestData()
+            .someMinimalBuilder().caseDocument(caseDocument)
             .status(dartsDatabase.getObjectRecordStatusEntity(STORED))
             .externalLocationType(dartsDatabase.getExternalLocationTypeEntity(ARM))
             .externalLocation(UUID.randomUUID())
@@ -505,7 +505,7 @@ class ArmRetentionEventDateProcessorIntTest extends IntegrationBase {
         String confidenceReason = "reason";
 
         CaseDocumentEntity caseDocument = PersistableFactory
-            .getCaseDocumentTestData().someMinimal().getBuilder().fileName("test_case_document.docx")
+            .getCaseDocumentTestData().someMinimalBuilder().fileName("test_case_document.docx")
             .retainUntilTs(DOCUMENT_RETENTION_DATE_TIME)
             .retConfReason(confidenceReason)
             .retConfScore(0).build().getEntity();
@@ -513,8 +513,8 @@ class ArmRetentionEventDateProcessorIntTest extends IntegrationBase {
         dartsPersistence.save(caseDocument);
 
         String externalRecordId = "recordId";
-        ExternalObjectDirectoryEntity armEod = PersistableFactory.getExternalObjectDirectoryTestData().someMinimal()
-            .getBuilder().caseDocument(caseDocument)
+        ExternalObjectDirectoryEntity armEod = PersistableFactory.getExternalObjectDirectoryTestData()
+            .someMinimalBuilder().caseDocument(caseDocument)
             .status(dartsDatabase.getObjectRecordStatusEntity(STORED))
             .externalLocationType(dartsDatabase.getExternalLocationTypeEntity(ARM))
             .externalLocation(UUID.randomUUID())
@@ -562,8 +562,8 @@ class ArmRetentionEventDateProcessorIntTest extends IntegrationBase {
         savedMedia.setRetainUntilTs(DOCUMENT_RETENTION_DATE_TIME);
         dartsPersistence.save(savedMedia);
 
-        ExternalObjectDirectoryEntity armEod = PersistableFactory.getExternalObjectDirectoryTestData().someMinimal()
-            .getBuilder().media(savedMedia)
+        ExternalObjectDirectoryEntity armEod = PersistableFactory.getExternalObjectDirectoryTestData()
+            .someMinimalBuilder().media(savedMedia)
             .status(dartsDatabase.getObjectRecordStatusEntity(ARM_INGESTION))
             .externalLocationType(dartsDatabase.getExternalLocationTypeEntity(ARM))
             .externalLocation(UUID.randomUUID())

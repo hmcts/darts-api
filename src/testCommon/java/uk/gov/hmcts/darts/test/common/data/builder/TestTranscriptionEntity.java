@@ -22,28 +22,28 @@ import java.util.ArrayList;
 import java.util.List;
 
 @RequiredArgsConstructor
-public class CustomTranscriptionEntity extends TranscriptionEntity implements DbInsertable<TranscriptionEntity> {
+public class TestTranscriptionEntity extends TranscriptionEntity implements DbInsertable<TranscriptionEntity> {
     @lombok.Builder
-    public CustomTranscriptionEntity(Integer id, List<CourtCaseEntity> courtCases,
-                                     TranscriptionTypeEntity transcriptionType,
-                                     CourtroomEntity courtroom,
-                                     TranscriptionUrgencyEntity transcriptionUrgency,
-                                     List<HearingEntity> hearings,
-                                     TranscriptionStatusEntity transcriptionStatus,
-                                     String legacyObjectId, UserAccountEntity requestedBy,
-                                     LocalDate hearingDate, OffsetDateTime startTime,
-                                     OffsetDateTime endTime, String legacyVersionLabel,
-                                     Boolean isManualTranscription, Boolean isCurrent,
-                                     Boolean hideRequestFromRequestor, boolean isDeleted,
-                                     UserAccountEntity deletedBy, OffsetDateTime deletedTimestamp,
-                                     String chronicleId, String antecedentId,
-                                     List<TranscriptionCommentEntity> transcriptionCommentEntities,
-                                     List<TranscriptionWorkflowEntity> transcriptionWorkflowEntities,
-                                     List<TranscriptionDocumentEntity> transcriptionDocumentEntities,
-                                     String transcriptionObjectName, OffsetDateTime createdDateTime,
-                                     UserAccountEntity createdBy,
-                                     OffsetDateTime lastModifiedDateTime,
-                                     UserAccountEntity lastModifiedBy) {
+    public TestTranscriptionEntity(Integer id, List<CourtCaseEntity> courtCases,
+                                   TranscriptionTypeEntity transcriptionType,
+                                   CourtroomEntity courtroom,
+                                   TranscriptionUrgencyEntity transcriptionUrgency,
+                                   List<HearingEntity> hearings,
+                                   TranscriptionStatusEntity transcriptionStatus,
+                                   String legacyObjectId, UserAccountEntity requestedBy,
+                                   LocalDate hearingDate, OffsetDateTime startTime,
+                                   OffsetDateTime endTime, String legacyVersionLabel,
+                                   Boolean isManualTranscription, Boolean isCurrent,
+                                   Boolean hideRequestFromRequestor, boolean isDeleted,
+                                   UserAccountEntity deletedBy, OffsetDateTime deletedTimestamp,
+                                   String chronicleId, String antecedentId,
+                                   List<TranscriptionCommentEntity> transcriptionCommentEntities,
+                                   List<TranscriptionWorkflowEntity> transcriptionWorkflowEntities,
+                                   List<TranscriptionDocumentEntity> transcriptionDocumentEntities,
+                                   String transcriptionObjectName, OffsetDateTime createdDateTime,
+                                   UserAccountEntity createdBy,
+                                   OffsetDateTime lastModifiedDateTime,
+                                   UserAccountEntity lastModifiedBy) {
         setId(id);
         setCourtCases(courtCases);
         setTranscriptionType(transcriptionType);
@@ -86,17 +86,17 @@ public class CustomTranscriptionEntity extends TranscriptionEntity implements Db
         }
     }
 
-    public static class CustomTranscriptionEntityBuilderRetrieve implements BuilderHolder<CustomTranscriptionEntity, CustomTranscriptionEntityBuilder> {
+    public static class TestTranscriptionEntityBuilderRetrieve implements BuilderHolder<TestTranscriptionEntity,TestTranscriptionEntityBuilder> {
 
-        private final CustomTranscriptionEntity.CustomTranscriptionEntityBuilder builder = CustomTranscriptionEntity.builder();
+        private final TestTranscriptionEntity.TestTranscriptionEntityBuilder builder = TestTranscriptionEntity.builder();
 
         @Override
-        public CustomTranscriptionEntity build() {
+        public TestTranscriptionEntity build() {
             return builder.build();
         }
 
         @Override
-        public CustomTranscriptionEntity.CustomTranscriptionEntityBuilder getBuilder() {
+        public TestTranscriptionEntity.TestTranscriptionEntityBuilder getBuilder() {
             return builder;
         }
     }

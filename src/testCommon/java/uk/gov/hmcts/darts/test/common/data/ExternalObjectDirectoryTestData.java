@@ -6,7 +6,7 @@ import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionDocumentEntity;
 import uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum;
-import uk.gov.hmcts.darts.test.common.data.builder.CustomExternalObjectDirectoryEntity;
+import uk.gov.hmcts.darts.test.common.data.builder.TestExternalObjectDirectoryEntity;
 
 import java.time.OffsetDateTime;
 
@@ -18,7 +18,9 @@ import static uk.gov.hmcts.darts.test.common.data.ObjectRecordStatusTestData.sta
 import static uk.gov.hmcts.darts.test.common.data.UserAccountTestData.minimalUserAccount;
 
 @SuppressWarnings({"HideUtilityClassConstructor"})
-public class ExternalObjectDirectoryTestData implements Persistable<CustomExternalObjectDirectoryEntity.CustomExternalObjectDirectoryuilderRetrieve> {
+public class ExternalObjectDirectoryTestData implements
+    Persistable<TestExternalObjectDirectoryEntity.TestExternalObjectDirectoryuilderRetrieve, ExternalObjectDirectoryEntity,
+        TestExternalObjectDirectoryEntity.TestExternalObjectDirectoryEntityBuilder> {
 
     ExternalObjectDirectoryTestData() {
 
@@ -26,9 +28,9 @@ public class ExternalObjectDirectoryTestData implements Persistable<CustomExtern
 
     /**
      * Deprectated.
+     * Gets a minimal object directory
      * @deprecated do not use. Instead, use fromSpec() to create an object with the desired state.
      */
-    @SuppressWarnings("SummaryJavadoc")
     @Deprecated
     public ExternalObjectDirectoryEntity minimalExternalObjectDirectory() {
         var externalObjectDirectory = new ExternalObjectDirectoryEntity();
@@ -43,33 +45,18 @@ public class ExternalObjectDirectoryTestData implements Persistable<CustomExtern
     }
 
     @Override
-    public CustomExternalObjectDirectoryEntity.CustomExternalObjectDirectoryuilderRetrieve someMinimal() {
-        CustomExternalObjectDirectoryEntity.CustomExternalObjectDirectoryuilderRetrieve builder
-            = new CustomExternalObjectDirectoryEntity.CustomExternalObjectDirectoryuilderRetrieve();
-        var userAccount = minimalUserAccount();
-
-        builder.getBuilder()
-            .media(PersistableFactory.getMediaTestData().someMinimal().build())
-            .status(ObjectRecordStatusTestData.statusOf(STORED))
-            .externalLocationType(locationTypeOf(UNSTRUCTURED))
-            .externalLocation(randomUUID())
-            .verificationAttempts(0)
-            .createdBy(userAccount)
-            .lastModifiedBy(userAccount)
-            .createdDateTime(OffsetDateTime.now())
-            .lastModifiedDateTime(OffsetDateTime.now());
-
-        return builder;
+    public ExternalObjectDirectoryEntity someMinimal() {
+        return someMinimalBuilder().build().getEntity();
     }
 
     @Override
-    public CustomExternalObjectDirectoryEntity.CustomExternalObjectDirectoryuilderRetrieve someMaximal() {
+    public ExternalObjectDirectoryEntity someMaximal() {
         return someMinimal();
     }
 
     public ExternalObjectDirectoryEntity eodStoredInUnstructuredLocationForMedia(MediaEntity media) {
-        CustomExternalObjectDirectoryEntity.CustomExternalObjectDirectoryuilderRetrieve eod = someMinimal();
-        CustomExternalObjectDirectoryEntity.CustomExternalObjectDirectoryEntityBuilder builder = eod.getBuilder();
+        TestExternalObjectDirectoryEntity.TestExternalObjectDirectoryuilderRetrieve eod = someMinimalBuilderHolder();
+        TestExternalObjectDirectoryEntity.TestExternalObjectDirectoryEntityBuilder builder = eod.getBuilder();
 
         builder.media(media).status(statusOf(STORED))
             .externalLocationType(locationTypeOf(UNSTRUCTURED))
@@ -116,5 +103,30 @@ public class ExternalObjectDirectoryTestData implements Persistable<CustomExtern
         eod.setExternalLocationType(locationTypeOf(locationTypeEnum));
         eod.setExternalLocation(randomUUID());
         return eod;
+    }
+
+    @Override
+    public TestExternalObjectDirectoryEntity.TestExternalObjectDirectoryuilderRetrieve someMinimalBuilderHolder() {
+        TestExternalObjectDirectoryEntity.TestExternalObjectDirectoryuilderRetrieve builder
+            = new TestExternalObjectDirectoryEntity.TestExternalObjectDirectoryuilderRetrieve();
+        var userAccount = minimalUserAccount();
+
+        builder.getBuilder()
+            .media(PersistableFactory.getMediaTestData().someMinimal())
+            .status(ObjectRecordStatusTestData.statusOf(STORED))
+            .externalLocationType(locationTypeOf(UNSTRUCTURED))
+            .externalLocation(randomUUID())
+            .verificationAttempts(0)
+            .createdBy(userAccount)
+            .lastModifiedBy(userAccount)
+            .createdDateTime(OffsetDateTime.now())
+            .lastModifiedDateTime(OffsetDateTime.now());
+
+        return builder;
+    }
+
+    @Override
+    public TestExternalObjectDirectoryEntity.TestExternalObjectDirectoryEntityBuilder someMinimalBuilder() {
+        return someMinimalBuilderHolder().getBuilder();
     }
 }

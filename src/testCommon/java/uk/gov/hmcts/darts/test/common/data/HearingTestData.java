@@ -4,7 +4,7 @@ import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.JudgeEntity;
-import uk.gov.hmcts.darts.test.common.data.builder.CustomHearingEntity;
+import uk.gov.hmcts.darts.test.common.data.builder.TestHearingEntity;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -19,7 +19,8 @@ import static uk.gov.hmcts.darts.test.common.data.CourtroomTestData.someMinimalC
 import static uk.gov.hmcts.darts.test.common.data.UserAccountTestData.minimalUserAccount;
 
 @SuppressWarnings({"HideUtilityClassConstructor"})
-public class HearingTestData  implements Persistable<CustomHearingEntity.CustomHearingEntityBuilderRetrieve> {
+public class HearingTestData
+    implements Persistable<TestHearingEntity.TestHearingEntityBuilderRetrieve, HearingEntity, TestHearingEntity.TestHearingEntityBuilder> {
 
     HearingTestData() {
     }
@@ -27,7 +28,7 @@ public class HearingTestData  implements Persistable<CustomHearingEntity.CustomH
     private static final LocalDate HEARING_DATE = LocalDate.of(2023, 6, 20);
 
     public HearingEntity someMinimalHearing() {
-        return someMinimal().getBuilder().build().getEntity();
+        return someMinimal();
     }
 
     public HearingEntity createHearingFor(CourtCaseEntity courtCase) {
@@ -73,7 +74,7 @@ public class HearingTestData  implements Persistable<CustomHearingEntity.CustomH
     public HearingEntity createHearingWithDefaults(CourtCaseEntity courtCase, CourtroomEntity courtroom, LocalDate hearingDate, JudgeEntity judge,
                                                           boolean isHearingActual) {
         HearingEntity hearing = someMinimalHearing();
-        hearing.setCourtCase(Objects.requireNonNullElseGet(courtCase, () -> PersistableFactory.getCourtCaseTestData().someMinimal().build()));
+        hearing.setCourtCase(Objects.requireNonNullElseGet(courtCase, () -> PersistableFactory.getCourtCaseTestData().someMinimal()));
 
         hearing.setCourtroom(Objects.requireNonNullElseGet(courtroom, CourtroomTestData::someMinimalCourtRoom));
 
@@ -100,8 +101,18 @@ public class HearingTestData  implements Persistable<CustomHearingEntity.CustomH
     }
 
     @Override
-    public CustomHearingEntity.CustomHearingEntityBuilderRetrieve  someMinimal() {
-        CustomHearingEntity.CustomHearingEntityBuilderRetrieve builder = new CustomHearingEntity.CustomHearingEntityBuilderRetrieve();
+    public HearingEntity someMinimal() {
+        return someMinimalBuilder().build().getEntity();
+    }
+
+    @Override
+    public HearingEntity someMaximal() {
+        return someMinimal();
+    }
+
+    @Override
+    public TestHearingEntity.TestHearingEntityBuilderRetrieve someMinimalBuilderHolder() {
+        TestHearingEntity.TestHearingEntityBuilderRetrieve builder = new TestHearingEntity.TestHearingEntityBuilderRetrieve();
 
         CourtCaseEntity courtCaseEntity = PersistableFactory.getCourtCaseTestData().createSomeMinimalCase();
 
@@ -121,7 +132,7 @@ public class HearingTestData  implements Persistable<CustomHearingEntity.CustomH
     }
 
     @Override
-    public CustomHearingEntity.CustomHearingEntityBuilderRetrieve  someMaximal() {
-        return someMinimal();
+    public TestHearingEntity.TestHearingEntityBuilder someMinimalBuilder() {
+        return someMinimalBuilderHolder().getBuilder();
     }
 }

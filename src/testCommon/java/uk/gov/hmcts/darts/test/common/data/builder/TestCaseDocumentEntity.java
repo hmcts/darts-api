@@ -11,10 +11,10 @@ import java.lang.reflect.InvocationTargetException;
 import java.time.OffsetDateTime;
 
 @RequiredArgsConstructor
-public class CustomCaseDocumentEntity extends CaseDocumentEntity implements DbInsertable<CaseDocumentEntity> {
+public class TestCaseDocumentEntity extends CaseDocumentEntity implements DbInsertable<CaseDocumentEntity> {
 
     @lombok.Builder
-    public CustomCaseDocumentEntity(
+    public TestCaseDocumentEntity(
         Integer id,
         CourtCaseEntity courtCase,
         String fileName,
@@ -64,18 +64,18 @@ public class CustomCaseDocumentEntity extends CaseDocumentEntity implements DbIn
         }
     }
 
-    public static class CustomCaseDocumentEntityBuilderRetrieve
-        implements BuilderHolder<CustomCaseDocumentEntity, CustomCaseDocumentEntity.CustomCaseDocumentEntityBuilder> {
+    public static class TestCaseDocumentEntityBuilderRetrieve
+        implements BuilderHolder<TestCaseDocumentEntity, TestCaseDocumentEntity.TestCaseDocumentEntityBuilder> {
 
-        private CustomCaseDocumentEntity.CustomCaseDocumentEntityBuilder builder = CustomCaseDocumentEntity.builder();
+        private TestCaseDocumentEntity.TestCaseDocumentEntityBuilder builder = TestCaseDocumentEntity.builder();
 
         @Override
-        public CustomCaseDocumentEntity build() {
+        public TestCaseDocumentEntity build() {
            return builder.build();
         }
 
         @Override
-        public CustomCaseDocumentEntity.CustomCaseDocumentEntityBuilder getBuilder() {
+        public TestCaseDocumentEntity.TestCaseDocumentEntityBuilder getBuilder() {
             return builder;
         }
     }

@@ -1,11 +1,13 @@
 package uk.gov.hmcts.darts.test.common.data;
 
+import uk.gov.hmcts.darts.common.entity.CaseDocumentEntity;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
-import uk.gov.hmcts.darts.test.common.data.builder.CustomCaseDocumentEntity;
+import uk.gov.hmcts.darts.test.common.data.builder.TestCaseDocumentEntity;
 
 import java.time.OffsetDateTime;
 
-public class CaseDocumentTestData implements Persistable<CustomCaseDocumentEntity.CustomCaseDocumentEntityBuilderRetrieve>  {
+public class CaseDocumentTestData implements Persistable<TestCaseDocumentEntity.TestCaseDocumentEntityBuilderRetrieve,
+    CaseDocumentEntity, TestCaseDocumentEntity.TestCaseDocumentEntityBuilder>  {
 
     private CourtCaseEntity courtCaseEntity = PersistableFactory.getCourtCaseTestData().someMinimalCase();
 
@@ -14,8 +16,24 @@ public class CaseDocumentTestData implements Persistable<CustomCaseDocumentEntit
     }
 
     @Override
-    public CustomCaseDocumentEntity.CustomCaseDocumentEntityBuilderRetrieve someMinimal() {
-        CustomCaseDocumentEntity.CustomCaseDocumentEntityBuilderRetrieve retrieve = new  CustomCaseDocumentEntity.CustomCaseDocumentEntityBuilderRetrieve();
+    public CaseDocumentEntity someMinimal() {
+        return someMinimalBuilder().build().getEntity();
+    }
+
+    @Override
+    public CaseDocumentEntity someMaximal() {
+        return someMinimal();
+    }
+
+    @Override
+    public TestCaseDocumentEntity.TestCaseDocumentEntityBuilder someMinimalBuilder() {
+        return someMinimalBuilderHolder().getBuilder();
+    }
+
+    @Override
+    public TestCaseDocumentEntity.TestCaseDocumentEntityBuilderRetrieve someMinimalBuilderHolder() {
+        TestCaseDocumentEntity.TestCaseDocumentEntityBuilderRetrieve retrieve =
+            new TestCaseDocumentEntity.TestCaseDocumentEntityBuilderRetrieve();
         retrieve.getBuilder().courtCase(courtCaseEntity)
             .createdBy(UserAccountTestData.minimalUserAccount())
             .lastModifiedBy(UserAccountTestData.minimalUserAccount())
@@ -25,12 +43,6 @@ public class CaseDocumentTestData implements Persistable<CustomCaseDocumentEntit
             .hidden(false)
             .lastModifiedDateTime(OffsetDateTime.now())
             .isDeleted(false);
-
         return retrieve;
-    }
-
-    @Override
-    public CustomCaseDocumentEntity.CustomCaseDocumentEntityBuilderRetrieve someMaximal() {
-        return someMinimal();
     }
 }

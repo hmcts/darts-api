@@ -2,7 +2,7 @@ package uk.gov.hmcts.darts.test.common.data;
 
 import uk.gov.hmcts.darts.common.entity.AnnotationDocumentEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
-import uk.gov.hmcts.darts.test.common.data.builder.CustomAnnotationDocumentEntity;
+import uk.gov.hmcts.darts.test.common.data.builder.TestAnnotationDocumentEntity;
 
 import java.time.OffsetDateTime;
 import java.util.List;
@@ -13,42 +13,25 @@ import static org.apache.commons.lang3.RandomStringUtils.random;
 import static uk.gov.hmcts.darts.test.common.data.UserAccountTestData.minimalUserAccount;
 
 @SuppressWarnings({"HideUtilityClassConstructor"})
-public class AnnotationDocumentTestData implements Persistable<CustomAnnotationDocumentEntity.CustomAnnotationDocumentEntityRetrieve> {
+public class AnnotationDocumentTestData implements Persistable<TestAnnotationDocumentEntity.TestAnnotationDocumentEntityRetrieve,
+    AnnotationDocumentEntity, TestAnnotationDocumentEntity.TestAnnotationDocumentEntityBuilder> {
     @Override
-    public CustomAnnotationDocumentEntity.CustomAnnotationDocumentEntityRetrieve someMinimal() {
-        CustomAnnotationDocumentEntity.CustomAnnotationDocumentEntityRetrieve retrieve =
-            new CustomAnnotationDocumentEntity.CustomAnnotationDocumentEntityRetrieve();
-
-        var postfix = random(10, false, true);
-        var userAccount = minimalUserAccount();
-
-        retrieve.getBuilder().annotation(PersistableFactory.getAnnotationTestData().someMinimal().build().getEntity())
-                    .fileType("some-file-type")
-                    .fileName("some-file-name-" + postfix)
-                    .fileSize(1024)
-                    .uploadedDateTime(OffsetDateTime.now())
-                    .lastModifiedTimestamp(OffsetDateTime.now())
-                    .isHidden(false)
-                    .isDeleted(false)
-                    .uploadedBy(userAccount)
-                    .lastModifiedBy(userAccount);
-
-        return retrieve;
+    public AnnotationDocumentEntity someMinimal() {
+        return someMinimalBuilder().build().getEntity();
     }
 
     @Override
-    public CustomAnnotationDocumentEntity.CustomAnnotationDocumentEntityRetrieve someMaximal() {
+    public AnnotationDocumentEntity someMaximal() {
         return someMinimal();
     }
 
     public AnnotationDocumentEntity minimalAnnotationDocument() {
-       return someMinimal().build().getEntity();
-
+       return someMinimal();
     }
 
     public AnnotationDocumentEntity createAnnotationDocumentForHearings(List<HearingEntity> hearingEntities) {
-        var annotationDocumentEntityRetrieve = someMinimal();
-        AnnotationDocumentEntity annotationDocument = annotationDocumentEntityRetrieve.getBuilder().build().getEntity();
+        var annotationDocumentEntityRetrieve = someMinimalBuilder();
+        AnnotationDocumentEntity annotationDocument = annotationDocumentEntityRetrieve.build().getEntity();
         annotationDocument.getAnnotation().setHearingList(hearingEntities);
         return annotationDocument;
     }
@@ -57,5 +40,30 @@ public class AnnotationDocumentTestData implements Persistable<CustomAnnotationD
         return createAnnotationDocumentForHearings(stream(hearingEntities).collect(toList()));
     }
 
+    @Override
+    public TestAnnotationDocumentEntity.TestAnnotationDocumentEntityBuilder someMinimalBuilder() {
+        return someMinimalBuilderHolder().getBuilder();
+    }
 
+    @Override
+    public TestAnnotationDocumentEntity.TestAnnotationDocumentEntityRetrieve someMinimalBuilderHolder() {
+        TestAnnotationDocumentEntity.TestAnnotationDocumentEntityRetrieve retrieve =
+            new TestAnnotationDocumentEntity.TestAnnotationDocumentEntityRetrieve();
+
+        var postfix = random(10, false, true);
+        var userAccount = minimalUserAccount();
+
+        retrieve.getBuilder().annotation(PersistableFactory.getAnnotationTestData().someMinimal())
+            .fileType("some-file-type")
+            .fileName("some-file-name-" + postfix)
+            .fileSize(1024)
+            .uploadedDateTime(OffsetDateTime.now())
+            .lastModifiedTimestamp(OffsetDateTime.now())
+            .isHidden(false)
+            .isDeleted(false)
+            .uploadedBy(userAccount)
+            .lastModifiedBy(userAccount);
+
+        return retrieve;
+    }
 }

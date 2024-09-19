@@ -5,7 +5,7 @@ import uk.gov.hmcts.darts.audio.enums.MediaRequestStatus;
 import uk.gov.hmcts.darts.audiorequests.model.AudioRequestType;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
-import uk.gov.hmcts.darts.test.common.data.builder.CustomMediaRequestEntity;
+import uk.gov.hmcts.darts.test.common.data.builder.TestMediaRequestEntity;
 
 import java.time.OffsetDateTime;
 
@@ -13,7 +13,8 @@ import static uk.gov.hmcts.darts.audio.enums.MediaRequestStatus.OPEN;
 import static uk.gov.hmcts.darts.audiorequests.model.AudioRequestType.DOWNLOAD;
 
 @SuppressWarnings("SummaryJavadoc")
-public class MediaRequestTestData implements Persistable<CustomMediaRequestEntity.CustomMediaBuilderRetrieve> {
+public class MediaRequestTestData implements Persistable<TestMediaRequestEntity.TestMediaBuilderRetrieve, MediaRequestEntity,
+    TestMediaRequestEntity.TestMediaRequestEntityBuilder> {
 
     private static final OffsetDateTime NOW = OffsetDateTime.now();
     private static final OffsetDateTime YESTERDAY = NOW.minusDays(1);
@@ -48,27 +49,16 @@ public class MediaRequestTestData implements Persistable<CustomMediaRequestEntit
 
     }
 
-    public CustomMediaRequestEntity.CustomMediaBuilderRetrieve someMinimal() {
-        CustomMediaRequestEntity.CustomMediaBuilderRetrieve builder = new CustomMediaRequestEntity.CustomMediaBuilderRetrieve();
-        builder.getBuilder().hearing(hearing).currentOwner(currentOwner).requestor(requestor)
-            .attempts(attempts).startTime(startTime)
-            .endTime(endTime).createdBy(createdBy).lastModifiedBy(lastModifiedBy).createdAt(createdAt)
-            .lastModifiedAt(lastModifiedAt)
-            .status(MediaRequestStatus.PROCESSING)
-            .requestType(AudioRequestType.PLAYBACK);
-        return builder;
-    }
-
-    public CustomMediaRequestEntity.CustomMediaBuilderRetrieve someMaximal() {
-        return someMinimalRequestData();
+    public MediaRequestEntity someMinimal() {
+        return someMinimalBuilder().build().getEntity();
     }
 
     /**
      * @deprecated do not use. Instead, use someMinimal().
      */
     @Deprecated
-    public CustomMediaRequestEntity.CustomMediaBuilderRetrieve someMinimalRequestData() {
-        return someMinimal();
+    public TestMediaRequestEntity.TestMediaBuilderRetrieve someMinimalRequestData() {
+        return someMinimalBuilderHolder();
     }
 
     /**
@@ -78,7 +68,7 @@ public class MediaRequestTestData implements Persistable<CustomMediaRequestEntit
     public MediaRequestEntity createCurrentMediaRequest(HearingEntity hearingEntity, UserAccountEntity requestor,
                                                                OffsetDateTime startTime, OffsetDateTime endTime,
                                                                AudioRequestType audioRequestType, MediaRequestStatus status) {
-        CustomMediaRequestEntity.CustomMediaBuilderRetrieve builder = someMinimalRequestData();
+        TestMediaRequestEntity.TestMediaBuilderRetrieve builder = someMinimalRequestData();
 
         builder.getBuilder()
                    .hearing(hearingEntity)
@@ -100,7 +90,7 @@ public class MediaRequestTestData implements Persistable<CustomMediaRequestEntit
     public MediaRequestEntity createCurrentMediaRequest(HearingEntity hearingEntity, UserAccountEntity owner, UserAccountEntity requestor,
                                                                OffsetDateTime startTime, OffsetDateTime endTime,
                                                                AudioRequestType audioRequestType, MediaRequestStatus status, OffsetDateTime requestedDate) {
-        CustomMediaRequestEntity.CustomMediaBuilderRetrieve builder = new CustomMediaRequestEntity.CustomMediaBuilderRetrieve();
+        TestMediaRequestEntity.TestMediaBuilderRetrieve builder = new TestMediaRequestEntity.TestMediaBuilderRetrieve();
 
          builder.getBuilder()
            .hearing(hearingEntity)
@@ -116,5 +106,22 @@ public class MediaRequestTestData implements Persistable<CustomMediaRequestEntit
            .build();
 
          return builder.build().getEntity();
+    }
+
+    @Override
+    public TestMediaRequestEntity.TestMediaBuilderRetrieve someMinimalBuilderHolder() {
+        TestMediaRequestEntity.TestMediaBuilderRetrieve builder = new TestMediaRequestEntity.TestMediaBuilderRetrieve();
+        builder.getBuilder().hearing(hearing).currentOwner(currentOwner).requestor(requestor)
+            .attempts(attempts).startTime(startTime)
+            .endTime(endTime).createdBy(createdBy).lastModifiedBy(lastModifiedBy).createdAt(createdAt)
+            .lastModifiedAt(lastModifiedAt)
+            .status(MediaRequestStatus.PROCESSING)
+            .requestType(AudioRequestType.PLAYBACK);
+        return builder;
+    }
+
+    @Override
+    public TestMediaRequestEntity.TestMediaRequestEntityBuilder someMinimalBuilder() {
+        return someMinimalBuilderHolder().getBuilder();
     }
 }

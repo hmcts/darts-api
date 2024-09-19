@@ -14,15 +14,15 @@ import java.util.ArrayList;
 import java.util.List;
 
 @RequiredArgsConstructor
-public class CustomAnnotationEntity extends AnnotationEntity implements DbInsertable<AnnotationEntity> {
+public class TestAnnotationEntity extends AnnotationEntity implements DbInsertable<AnnotationEntity> {
 
     @lombok.Builder
-    public CustomAnnotationEntity(Integer id, String text, OffsetDateTime timestamp, String legacyObjectId,
-                                  String legacyVersionLabel, UserAccountEntity currentOwner, boolean deleted,
-                                  UserAccountEntity deletedBy, OffsetDateTime deletedTimestamp,
-                                  List<AnnotationDocumentEntity> annotationDocuments, List<HearingEntity> hearingList,
-                                  OffsetDateTime createdTimestamp,
-                                  OffsetDateTime lastModifiedDateTime, UserAccountEntity lastModifiedBy, UserAccountEntity createdBy) {
+    public TestAnnotationEntity(Integer id, String text, OffsetDateTime timestamp, String legacyObjectId,
+                                String legacyVersionLabel, UserAccountEntity currentOwner, boolean deleted,
+                                UserAccountEntity deletedBy, OffsetDateTime deletedTimestamp,
+                                List<AnnotationDocumentEntity> annotationDocuments, List<HearingEntity> hearingList,
+                                OffsetDateTime createdTimestamp,
+                                OffsetDateTime lastModifiedDateTime, UserAccountEntity lastModifiedBy, UserAccountEntity createdBy) {
         setId(id);
         setText(text);
         setTimestamp(timestamp);
@@ -51,19 +51,19 @@ public class CustomAnnotationEntity extends AnnotationEntity implements DbInsert
         }
     }
 
-    public static class CustomAnnotationEntityRetrieve implements BuilderHolder<CustomAnnotationEntity, CustomAnnotationEntity.CustomAnnotationEntityBuilder> {
-        public CustomAnnotationEntityRetrieve() {
+    public static class TestAnnotationEntityRetrieve implements BuilderHolder<TestAnnotationEntity, TestAnnotationEntity.TestAnnotationEntityBuilder> {
+        public TestAnnotationEntityRetrieve() {
         }
 
-        private CustomAnnotationEntity.CustomAnnotationEntityBuilder builder = CustomAnnotationEntity.builder();
+        private TestAnnotationEntity.TestAnnotationEntityBuilder builder = TestAnnotationEntity.builder();
 
         @Override
-        public CustomAnnotationEntity build() {
+        public TestAnnotationEntity build() {
             return builder.build();
         }
 
         @Override
-        public CustomAnnotationEntity.CustomAnnotationEntityBuilder getBuilder() {
+        public TestAnnotationEntity.TestAnnotationEntityBuilder getBuilder() {
             return builder;
         }
     }
