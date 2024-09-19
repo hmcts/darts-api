@@ -267,20 +267,30 @@ public class TranscriberTranscriptsQueryImpl implements TranscriberTranscriptsQu
 
     @Override
     public Integer getTranscriptionsCountForCourthouses(List<Integer> courthouseIds, Integer transcriptionStatusId, int userId) {
+        // only the latest "APPROVED" OR "WITH_TRANSCRIBER" transcription_workflow for a given transcription
+        String workflowSubQuery = """
+                SELECT trw.tra_id, MAX(trw.workflow_ts) as workflow_ts
+                FROM darts.transcription_workflow trw
+                WHERE trw.trs_id = :trs_id
+            """;
+        if (transcriptionStatusId.equals(WITH_TRANSCRIBER.getId())) {
+            workflowSubQuery += " AND trw.workflow_actor = " + userId;
+        }
+        workflowSubQuery += " GROUP BY tra_id";
+
         String sql = """
             SELECT count(*)
             FROM darts.transcription transcription
             JOIN darts.case_transcription_ae case_transcription ON transcription.tra_id = case_transcription.tra_id
             JOIN darts.court_case court_case ON case_transcription.cas_id = court_case.cas_id
             JOIN darts.courthouse courthouse ON courthouse.cth_id=court_case.cth_id
-            JOIN darts.transcription_workflow trw ON transcription.tra_id = trw.tra_id
-            AND trw.trs_id = :trs_id
+            JOIN (""";
+            sql += workflowSubQuery;
+            sql += """
+            ) trw ON trw.tra_id = transcription.tra_id
             WHERE court_case.cth_id IN (:cth_ids)
             AND transcription.trs_id=:trs_id
             """;
-        if (transcriptionStatusId.equals(WITH_TRANSCRIBER.getId())) {
-            sql += " AND trw.workflow_actor = " + userId;
-        }
 
         return jdbcTemplate.queryForObject(
             sql,
