@@ -12,11 +12,11 @@ import uk.gov.hmcts.darts.common.entity.TranscriptionWorkflowEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 
 public interface DataAnonymisationService {
-    default void anonymizeCourtCaseEntity(CourtCaseEntity courtCase, boolean isManual) {
-        anonymizeCourtCaseEntity(getUserAccount(), courtCase, isManual);
+    default void anonymizeCourtCaseEntity(CourtCaseEntity courtCase) {
+        anonymizeCourtCaseEntity(getUserAccount(), courtCase);
     }
 
-    void anonymizeCourtCaseEntity(UserAccountEntity userAccount, CourtCaseEntity courtCase, boolean isManual);
+    void anonymizeCourtCaseEntity(UserAccountEntity userAccount, CourtCaseEntity courtCase);
 
     void anonymizeDefenceEntity(UserAccountEntity userAccount, DefenceEntity entity);
 
@@ -24,15 +24,13 @@ public interface DataAnonymisationService {
 
     void anonymizeProsecutorEntity(UserAccountEntity userAccount, ProsecutorEntity entity);
 
-    void anonymizeHearingEntity(UserAccountEntity userAccount, HearingEntity hearingEntity, boolean isManual);
+    void anonymizeHearingEntity(UserAccountEntity userAccount, HearingEntity hearingEntity);
 
-    void anonymizeEventEntity(UserAccountEntity userAccount, EventEntity eventEntity, boolean isManual);
+    void anonymizeEventEntity(UserAccountEntity userAccount, EventEntity eventEntity);
 
-    void anonymizeTranscriptionEntity(UserAccountEntity userAccount, TranscriptionEntity transcriptionEntity,
-                                      boolean isManual);
+    void anonymizeTranscriptionEntity(UserAccountEntity userAccount, TranscriptionEntity transcriptionEntity);
 
-    void anonymizeTranscriptionCommentEntity(UserAccountEntity userAccount, TranscriptionCommentEntity transcriptionCommentEntity,
-                                             boolean isManual);
+    void anonymizeTranscriptionCommentEntity(UserAccountEntity userAccount, TranscriptionCommentEntity transcriptionCommentEntity);
 
     void anonymizeTranscriptionWorkflowEntity(TranscriptionWorkflowEntity transcriptionWorkflowEntity);
 
