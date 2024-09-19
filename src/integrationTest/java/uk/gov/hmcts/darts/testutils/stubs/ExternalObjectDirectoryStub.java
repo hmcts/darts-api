@@ -41,7 +41,6 @@ import static uk.gov.hmcts.darts.common.helper.SystemUserHelper.HOUSEKEEPING;
 
 @Component
 @RequiredArgsConstructor
-@Deprecated
 public class ExternalObjectDirectoryStub {
 
     private final UserAccountStubComposable userAccountStub;
@@ -299,7 +298,8 @@ public class ExternalObjectDirectoryStub {
             }
 
             ExternalObjectDirectoryEntity externalObjectDirectory = createAndSaveEod(
-                annotationDocumentEntity, transcriptionDocumentEntity, objectRecordStatusEnum, externalLocationTypeEnum, e -> { });
+                annotationDocumentEntity, transcriptionDocumentEntity, objectRecordStatusEnum, externalLocationTypeEnum, e -> {
+                });
 
             if (dateToSet.isPresent()) {
                 dateConfigurer.setLastModifiedDate(externalObjectDirectory, dateToSet.get());
@@ -352,6 +352,32 @@ public class ExternalObjectDirectoryStub {
     }
 
     @Transactional
+    public List<ExternalObjectDirectoryEntity> generateWithStatusAndTranscriptionAndAnnotationAndLocation(
+        List<ExternalObjectDirectoryEntity> externalObjectDirectoryEntities,
+        Optional<OffsetDateTime> dateToSet, ExternalLocationTypeEnum externalLocationType)
+
+        throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
+        List<ExternalObjectDirectoryEntity> entityListResult = new ArrayList<>();
+
+        for (ExternalObjectDirectoryEntity externalObjectDirectory : externalObjectDirectoryEntities) {
+
+            ExternalObjectDirectoryEntity newExternalObjectDirectory
+                = createAndSaveEod(externalObjectDirectory.getAnnotationDocumentEntity(),
+                                   externalObjectDirectory.getTranscriptionDocumentEntity(), STORED, externalLocationType, e -> {
+                });
+
+            if (dateToSet.isPresent()) {
+                dateConfigurer.setLastModifiedDate(newExternalObjectDirectory, dateToSet.get());
+            }
+
+            newExternalObjectDirectory = eodRepository.getReferenceById(newExternalObjectDirectory.getId());
+
+            entityListResult.add(newExternalObjectDirectory);
+        }
+        return entityListResult;
+    }
+
+    @Transactional
     public List<ExternalObjectDirectoryEntity> generateWithStatusAndTranscriptionAndAnnotationAndArmLocation(
         List<ExternalObjectDirectoryEntity> externalObjectDirectoryEntities,
         Optional<OffsetDateTime> dateToSet)
@@ -363,7 +389,8 @@ public class ExternalObjectDirectoryStub {
 
             ExternalObjectDirectoryEntity newExternalObjectDirectory
                 = createAndSaveEod(externalObjectDirectory.getAnnotationDocumentEntity(),
-                                   externalObjectDirectory.getTranscriptionDocumentEntity(), STORED, ARM, e -> { });
+                                   externalObjectDirectory.getTranscriptionDocumentEntity(), STORED, ARM, e -> {
+                });
 
             if (dateToSet.isPresent()) {
                 dateConfigurer.setLastModifiedDate(newExternalObjectDirectory, dateToSet.get());

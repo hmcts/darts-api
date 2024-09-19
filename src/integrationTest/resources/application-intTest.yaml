@@ -3,6 +3,8 @@ spring:
     retention-period:
       inbound:
         arm-minimum: 24
+        unstructured-minimum:
+          hours: 24
   security:
     oauth2:
       resourceserver:
@@ -83,6 +85,8 @@ darts:
   automated:
     task:
       system-user-email: dartssystemuser@hmcts.net
+      expiry-deletion:
+        enabled: true
 logging:
   level:
     root: DEBUG

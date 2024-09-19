@@ -18,8 +18,11 @@ import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
+import uk.gov.hmcts.darts.cases.exception.CaseApiError;
 import uk.gov.hmcts.darts.common.entity.base.CreatedModifiedBaseEntity;
+import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.retention.enums.RetentionConfidenceReasonEnum;
 import uk.gov.hmcts.darts.retention.enums.RetentionConfidenceScoreEnum;
 
@@ -32,6 +35,7 @@ import java.util.List;
 @SuppressWarnings({"PMD.ShortClassName"})
 @Getter
 @Setter
+@Slf4j
 public class CourtCaseEntity extends CreatedModifiedBaseEntity {
 
     public static final String COURT_CASE = "courtCase";
@@ -196,4 +200,16 @@ public class CourtCaseEntity extends CreatedModifiedBaseEntity {
         return CollectionUtils.emptyIfNull(judges).stream().map(JudgeEntity::getName).sorted().distinct().toList();
     }
 
+    public CourtCaseEntity validateIsExpired() {
+        if (this.isDataAnonymised()) {
+            throw new DartsApiException(CaseApiError.CASE_EXPIRED);
+        }
+        return this;
+    }
+
+    public void markAsExpired(UserAccountEntity userAccount) {
+        this.setDataAnonymised(true);
+        this.setDataAnonymisedBy(userAccount.getId());
+        this.setDataAnonymisedTs(OffsetDateTime.now());
+    }
 }

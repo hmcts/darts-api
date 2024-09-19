@@ -111,4 +111,8 @@ public class CourtCaseStub {
         EasyRandom generator = new EasyRandom(parameters);
         return generator.nextObject(CourtCaseEntity.class);
     }
+
+    public CourtCaseEntity getCourtCase(int id) {
+        return caseRepository.findById(id).orElseThrow();
+    }
 }

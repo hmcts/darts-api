@@ -57,10 +57,13 @@ public interface EventRepository extends JpaRepository<EventEntity, Integer> {
             e.eventText,
             e.chronicleId,
             e.antecedentId,
+            e.isDataAnonymised,
             ch.id,
             ch.displayName,
             c.id,
-            c.name)
+            c.name,
+            cc.isDataAnonymised,
+            cc.dataAnonymisedTs)
          FROM EventEntity e
          JOIN e.eventType et
          JOIN e.hearingEntities h
@@ -82,26 +85,33 @@ public interface EventRepository extends JpaRepository<EventEntity, Integer> {
         Pageable pageable);
 
     @Query(value = """
-        SELECT event_id
-        FROM  darts.event
-        WHERE is_current=true
-        AND event_id <> 0
-        AND event_id IS NOT NULL
-        GROUP BY event_id
-        HAVING count(event_id) > 1
+        SELECT distinct e2.event_id
+        from (
+          SELECT e.event_id, he.eve_id, string_agg(he.hea_id::varchar, ',' order by he.hea_id) as hearing_ids FROM darts.event e
+          LEFT JOIN darts.hearing_event_ae he
+          ON he.eve_id = e.eve_id
+          where e.is_current = true
+          AND e.event_id <> 0
+          AND e.event_id IS NOT null
+          GROUP by he.eve_id, e.event_id
+        ) e2
+        GROUP BY e2.event_id, e2.hearing_ids
+        having count(e2.event_id) > 1
+        limit :limit
         """, nativeQuery = true)
-    List<Integer> getCurrentEventIdsToBeProcessed(Pageable pageable);
+    List<Integer> getCurrentEventIdsToBeProcessed(long limit);
 
     @Query(value = """
-         SELECT e.eve_id, event_id, string_agg(he.hea_id::varchar, ',' order by he.hea_id) as hearing_ids FROM darts.event e
-         left join darts.hearing_event_ae he
-         on he.eve_id = e.eve_id
-         WHERE e.event_id=:eventId
-         group by e.eve_id, event_id
-         ORDER BY created_ts desc
-         LIMIT 1
+        select distinct on (event_id, hearing_ids) e.* from (
+            SELECT e.eve_id, event_id, string_agg(he.hea_id::varchar, ',' order by he.hea_id) as hearing_ids FROM darts.event e
+            left join darts.hearing_event_ae he
+            on he.eve_id = e.eve_id
+            WHERE e.event_id=:eventId
+            group by e.eve_id, event_id
+            ORDER BY created_ts desc
+        ) e
         """, nativeQuery = true)
-    EventIdAndHearingIds getTheLatestCreatedEventPrimaryKeyForTheEventId(Integer eventId);
+    List<EventIdAndHearingIds> getTheLatestCreatedEventPrimaryKeyForTheEventId(Integer eventId);
 
     /**
      *  string_agg(he.hea_id::varchar, ',' order by he.hea_id) to ensure we only update the events that have the same hearing ids

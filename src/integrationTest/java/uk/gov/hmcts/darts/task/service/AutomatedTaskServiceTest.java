@@ -7,7 +7,6 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.scheduling.config.CronTask;
@@ -21,7 +20,6 @@ import org.springframework.scheduling.support.CronExpression;
 import uk.gov.hmcts.darts.arm.component.AutomatedTaskProcessorFactory;
 import uk.gov.hmcts.darts.arm.service.ArmRetentionEventDateProcessor;
 import uk.gov.hmcts.darts.arm.service.CleanupArmResponseFilesService;
-import uk.gov.hmcts.darts.arm.service.InboundAnnotationTranscriptionDeleterProcessor;
 import uk.gov.hmcts.darts.arm.service.impl.UnstructuredToArmBatchProcessorImpl;
 import uk.gov.hmcts.darts.arm.service.impl.UnstructuredToArmProcessorImpl;
 import uk.gov.hmcts.darts.audio.deleter.impl.inbound.ExternalInboundDataStoreDeleter;
@@ -38,6 +36,7 @@ import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.common.repository.AutomatedTaskRepository;
 import uk.gov.hmcts.darts.common.repository.CaseRepository;
 import uk.gov.hmcts.darts.dailylist.service.DailyListService;
+import uk.gov.hmcts.darts.datamanagement.service.InboundAnnotationTranscriptionDeleterProcessor;
 import uk.gov.hmcts.darts.datamanagement.service.InboundToUnstructuredProcessor;
 import uk.gov.hmcts.darts.event.service.RemoveDuplicateEventsProcessor;
 import uk.gov.hmcts.darts.log.api.LogApi;
@@ -164,9 +163,6 @@ class AutomatedTaskServiceTest extends IntegrationPerClassBase {
 
     private UserAccountEntity testUser;
 
-    @Value("${darts.data-management.retention-period.inbound.arm-minimum}")
-    private int hoursArmStorage;
-
     @BeforeEach
     void setupData() {
         testUser = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
@@ -240,7 +236,7 @@ class AutomatedTaskServiceTest extends IntegrationPerClassBase {
     @Test
     void givenAutomatedTaskVerifyStatusBeforeAndAfterRunning() {
         ProcessDailyListAutomatedTask automatedTask = new ProcessDailyListAutomatedTask(
-            automatedTaskRepository, automatedTaskConfigurationProperties, logApi, lockService
+            automatedTaskRepository, automatedTaskConfigurationProperties, null,logApi, lockService
         );
 
         Optional<AutomatedTaskEntity> originalAutomatedTaskEntity =
@@ -271,7 +267,7 @@ class AutomatedTaskServiceTest extends IntegrationPerClassBase {
     @Test
     void givenConfiguredTaskCancelProcessDailyList() {
         AutomatedTask automatedTask = new ProcessDailyListAutomatedTask(
-            automatedTaskRepository, automatedTaskConfigurationProperties, logApi, lockService
+            automatedTaskRepository, automatedTaskConfigurationProperties, null,logApi, lockService
         );
 
         Set<ScheduledTask> scheduledTasks = scheduledTaskHolder.getScheduledTasks();
@@ -288,7 +284,7 @@ class AutomatedTaskServiceTest extends IntegrationPerClassBase {
     @Test
     void givenConfiguredTasksUpdateCronExpressionAndResetCronExpression() {
         AutomatedTask automatedTask = new ProcessDailyListAutomatedTask(
-            automatedTaskRepository, automatedTaskConfigurationProperties, logApi, lockService
+            automatedTaskRepository, automatedTaskConfigurationProperties, null,logApi, lockService
         );
         Optional<AutomatedTaskEntity> originalAutomatedTaskEntity =
             automatedTaskService.getAutomatedTaskEntityByTaskName(automatedTask.getTaskName());
@@ -313,7 +309,7 @@ class AutomatedTaskServiceTest extends IntegrationPerClassBase {
     @Test
     void cancelAutomatedTaskAndUpdateCronExpression() {
         AutomatedTask automatedTask = new ProcessDailyListAutomatedTask(
-            automatedTaskRepository, automatedTaskConfigurationProperties, logApi, lockService
+            automatedTaskRepository, automatedTaskConfigurationProperties, null,logApi, lockService
         );
         Optional<AutomatedTaskEntity> originalAutomatedTaskEntity =
             automatedTaskService.getAutomatedTaskEntityByTaskName(automatedTask.getTaskName());
@@ -349,7 +345,7 @@ class AutomatedTaskServiceTest extends IntegrationPerClassBase {
     @SuppressWarnings("PMD.LawOfDemeter")
     void givenExistingAutomatedTaskNameAndInvalidCronExpressionThrowsDartsApiException() {
         AutomatedTask automatedTask = new ProcessDailyListAutomatedTask(
-            automatedTaskRepository, automatedTaskConfigurationProperties, logApi, lockService
+            automatedTaskRepository, automatedTaskConfigurationProperties, null,logApi, lockService
         );
 
         var exception = assertThrows(
@@ -366,7 +362,7 @@ class AutomatedTaskServiceTest extends IntegrationPerClassBase {
     @Test
     void updateCronExpressionWithoutRescheduleForcingTaskToSkipRunning() {
         AutomatedTask automatedTask = new ProcessDailyListAutomatedTask(
-            automatedTaskRepository, automatedTaskConfigurationProperties, logApi, lockService
+            automatedTaskRepository, automatedTaskConfigurationProperties, null,logApi, lockService
         );
         Optional<AutomatedTaskEntity> originalAutomatedTaskEntity =
             automatedTaskService.getAutomatedTaskEntityByTaskName(automatedTask.getTaskName());

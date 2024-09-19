@@ -8,7 +8,6 @@ import uk.gov.hmcts.darts.audio.service.InboundAudioDeleterProcessor;
 import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
-import uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum;
 import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 
@@ -19,6 +18,8 @@ import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum.INBOUND;
+import static uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum.UNSTRUCTURED;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.MARKED_FOR_DELETION;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.STORED;
 import static uk.gov.hmcts.darts.test.common.data.PersistableFactory.getMediaTestData;
@@ -59,24 +60,24 @@ class InboundAudioDeleterProcessorTest extends IntegrationBase {
         ExternalObjectDirectoryEntity inboundEod = dartsDatabase.getExternalObjectDirectoryStub().createExternalObjectDirectory(
             savedMedia,
             dartsDatabase.getObjectRecordStatusEntity(STORED),
-            dartsDatabase.getExternalLocationTypeEntity(ExternalLocationTypeEnum.INBOUND),
+            dartsDatabase.getExternalLocationTypeEntity(INBOUND),
             uuid
         );
         dartsDatabase.save(inboundEod);
 
-        ExternalObjectDirectoryEntity armEod = dartsDatabase.getExternalObjectDirectoryStub().createExternalObjectDirectory(
+        ExternalObjectDirectoryEntity unstructuredEod = dartsDatabase.getExternalObjectDirectoryStub().createExternalObjectDirectory(
             savedMedia,
             dartsDatabase.getObjectRecordStatusEntity(STORED),
-            dartsDatabase.getExternalLocationTypeEntity(ExternalLocationTypeEnum.ARM),
+            dartsDatabase.getExternalLocationTypeEntity(UNSTRUCTURED),
             uuid
         );
-        dartsDatabase.save(armEod);
+        dartsDatabase.save(unstructuredEod);
 
         inboundAudioDeleterProcessor.markForDeletion();
 
         List<ExternalObjectDirectoryEntity> foundMediaList = dartsDatabase.getExternalObjectDirectoryRepository().findByMediaAndExternalLocationType(
             savedMedia,
-            dartsDatabase.getExternalLocationTypeEntity(ExternalLocationTypeEnum.INBOUND)
+            dartsDatabase.getExternalLocationTypeEntity(INBOUND)
         );
 
         assertEquals(1, foundMediaList.size());
@@ -109,24 +110,24 @@ class InboundAudioDeleterProcessorTest extends IntegrationBase {
         ExternalObjectDirectoryEntity inboundEod = dartsDatabase.getExternalObjectDirectoryStub().createExternalObjectDirectory(
             savedMedia,
             dartsDatabase.getObjectRecordStatusEntity(STORED),
-            dartsDatabase.getExternalLocationTypeEntity(ExternalLocationTypeEnum.INBOUND),
+            dartsDatabase.getExternalLocationTypeEntity(INBOUND),
             uuid
         );
         dartsDatabase.save(inboundEod);
 
-        ExternalObjectDirectoryEntity armEod = dartsDatabase.getExternalObjectDirectoryStub().createExternalObjectDirectory(
+        ExternalObjectDirectoryEntity unstructuredEod = dartsDatabase.getExternalObjectDirectoryStub().createExternalObjectDirectory(
             savedMedia,
             dartsDatabase.getObjectRecordStatusEntity(STORED),
-            dartsDatabase.getExternalLocationTypeEntity(ExternalLocationTypeEnum.ARM),
+            dartsDatabase.getExternalLocationTypeEntity(UNSTRUCTURED),
             uuid
         );
-        dartsDatabase.save(armEod);
+        dartsDatabase.save(unstructuredEod);
 
         inboundAudioDeleterProcessor.markForDeletion();
 
         List<ExternalObjectDirectoryEntity> foundMediaList = dartsDatabase.getExternalObjectDirectoryRepository().findByMediaAndExternalLocationType(
             savedMedia,
-            dartsDatabase.getExternalLocationTypeEntity(ExternalLocationTypeEnum.INBOUND)
+            dartsDatabase.getExternalLocationTypeEntity(INBOUND)
         );
 
 

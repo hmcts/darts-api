@@ -152,7 +152,7 @@ public class CaseController implements CasesApi {
     @Override
     @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
     @Authorisation(contextId = CASE_ID,
-        securityRoles = {JUDICIARY, REQUESTER, APPROVER, TRANSCRIBER},
+        securityRoles = {JUDICIARY, REQUESTER, APPROVER, TRANSCRIBER, TRANSLATION_QA},
         globalAccessSecurityRoles = {JUDICIARY, SUPER_ADMIN, SUPER_USER, RCJ_APPEALS, DARTS})
     public ResponseEntity<List<Transcript>> casesCaseIdTranscriptsGet(Integer caseId) {
         return new ResponseEntity<>(caseService.getTranscriptsByCaseId(caseId), HttpStatus.OK);

@@ -1,5 +1,6 @@
 package uk.gov.hmcts.darts.arm.service.impl;
 
+import feign.FeignException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -46,10 +47,13 @@ public class ArmApiServiceImpl implements ArmApiService {
             .useGuidsForFields(false)
             .build();
 
-        return armApiClient.updateMetadata(
-            getArmBearerToken(),
-            armUpdateMetadataRequest
-        );
+        try {
+            return armApiClient.updateMetadata(getArmBearerToken(), armUpdateMetadataRequest);
+        } catch (FeignException e) {
+            // this ensures the full error body containing the ARM error detail is logged rather than a truncated version
+            log.error("Error during ARM update metadata: Detail: {}", e.contentUTF8());
+            throw e;
+        }
     }
 
     @Override

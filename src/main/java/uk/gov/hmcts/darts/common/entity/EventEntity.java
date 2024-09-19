@@ -87,6 +87,4 @@ public class EventEntity extends CreatedModifiedBaseEntity {
     public void addHearing(HearingEntity hearingEntity) {
         hearingEntities.add(hearingEntity);
     }
-
-
 }

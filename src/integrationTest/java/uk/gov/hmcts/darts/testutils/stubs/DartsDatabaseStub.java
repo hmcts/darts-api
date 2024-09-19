@@ -726,12 +726,18 @@ public class DartsDatabaseStub {
         return save(caseEntity);
     }
 
-    @Transactional
-    public void createCaseRetention(CourtCaseEntity courtCase) {
-        RetentionPolicyTypeEntity retentionPolicyTypeEntity = retentionPolicyTypeRepository.findCurrentWithFixedPolicyKey(
-            RetentionPolicyEnum.MANUAL.getPolicyKey(),
+
+    public RetentionPolicyTypeEntity getRetentionPolicyTypeEntity(RetentionPolicyEnum retentionPolicyEnum) {
+        return retentionPolicyTypeRepository.findCurrentWithFixedPolicyKey(
+            retentionPolicyEnum.getPolicyKey(),
             currentTimeHelper.currentOffsetDateTime()
         ).get(0);
+    }
+
+    @Transactional
+    public void createCaseRetention(CourtCaseEntity courtCase) {
+        RetentionPolicyTypeEntity retentionPolicyTypeEntity =
+            getRetentionPolicyTypeEntity(RetentionPolicyEnum.MANUAL);
 
         CaseRetentionEntity caseRetentionEntity1 = createCaseRetentionObject(1, courtCase, retentionPolicyTypeEntity, "a_state");
         caseRetentionRepository.save(caseRetentionEntity1);
@@ -739,17 +745,26 @@ public class DartsDatabaseStub {
         caseRetentionRepository.save(caseRetentionEntity2);
         CaseRetentionEntity caseRetentionEntity3 = createCaseRetentionObject(3, courtCase, retentionPolicyTypeEntity, "c_state");
         caseRetentionRepository.saveAndFlush(caseRetentionEntity3);
-
     }
 
-    private CaseRetentionEntity createCaseRetentionObject(Integer id, CourtCaseEntity courtCase,
-                                                          RetentionPolicyTypeEntity retentionPolicyTypeEntity, String state) {
+    public CaseRetentionEntity createCaseRetentionObject(Integer id, CourtCaseEntity courtCase,
+                                                         RetentionPolicyTypeEntity retentionPolicyTypeEntity, String state) {
+
+        return createCaseRetentionObject(id, courtCase,
+                                         OffsetDateTime.now().plusYears(7),
+                                         retentionPolicyTypeEntity, state, false);
+    }
+
+    public CaseRetentionEntity createCaseRetentionObject(Integer id, CourtCaseEntity courtCase,
+                                                         OffsetDateTime retainUntil,
+                                                         RetentionPolicyTypeEntity retentionPolicyTypeEntity, String state,
+                                                         boolean save) {
         CaseRetentionEntity caseRetentionEntity = new CaseRetentionEntity();
         caseRetentionEntity.setCourtCase(courtCase);
         caseRetentionEntity.setId(id);
         caseRetentionEntity.setRetentionPolicyType(retentionPolicyTypeEntity);
         caseRetentionEntity.setTotalSentence("10y0m0d");
-        caseRetentionEntity.setRetainUntil(OffsetDateTime.now().plusYears(7));
+        caseRetentionEntity.setRetainUntil(retainUntil);
         caseRetentionEntity.setRetainUntilAppliedOn(OffsetDateTime.now().plusYears(1));
         caseRetentionEntity.setCurrentState(state);
         caseRetentionEntity.setComments("a comment");
@@ -758,6 +773,9 @@ public class DartsDatabaseStub {
         caseRetentionEntity.setLastModifiedDateTime(OffsetDateTime.now());
         caseRetentionEntity.setLastModifiedBy(userAccountRepository.getReferenceById(0));
         caseRetentionEntity.setSubmittedBy(userAccountRepository.getReferenceById(0));
+        if (save) {
+            return caseRetentionRepository.saveAndFlush(caseRetentionEntity);
+        }
         return caseRetentionEntity;
     }
 

@@ -721,6 +721,13 @@ components:
           type: string
         antecedent_id:
           type: string
+        is_manually_anonymised:
+          type: boolean
+        is_case_expired:
+          type: boolean
+        case_expired_at:
+          type: string
+          format: date-time
         courthouse:
           type: object
           properties:

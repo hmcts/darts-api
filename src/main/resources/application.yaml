@@ -37,7 +37,7 @@ spring:
             response-type: code
             response-mode: form_post
             prompt: login
-            issuer-uri: ${ACTIVE_DIRECTORY_B2C_BASE_URI}/${AAD_B2C_TENANT_ID:00000000-0000-0000-0000-000000000000}/v2.0/
+            issuer-uri: ${ACTIVE_DIRECTORY_B2C_BASE_URI:https://hmctsstgextid.b2clogin.com}/${AAD_B2C_TENANT_ID:00000000-0000-0000-0000-000000000000}/v2.0/
             claims: emails
             provider: external-azure-ad-provider
           internal-azure-ad:
@@ -80,7 +80,7 @@ spring:
     schema: ${DARTS_API_DB_SCHEMA:darts}
     type: com.zaxxer.hikari.HikariDataSource
     hikari:
-      maximum-pool-size: 50
+      maximum-pool-size: ${DARTS_API_DB_POOL_SIZE:50}
   jpa:
     database: postgresql
     show-sql: false
@@ -166,7 +166,7 @@ darts:
     temp-blob-workspace: ${user.home}/audiotransform/tempworkspace
     trim-workspace: ${user.home}/audiotransform/trim
   azure:
-    active-directory-b2c-base-uri: ${ACTIVE_DIRECTORY_B2C_BASE_URI}
+    active-directory-b2c-base-uri: ${ACTIVE_DIRECTORY_B2C_BASE_URI:https://hmctsstgextid.b2clogin.com}
     active-directory-b2c-auth-uri: ${ACTIVE_DIRECTORY_B2C_AUTH_URI}
     active-directory-b2c-external-user-signin-policy: "B2C_1_darts_externaluser_signin"
     active-directory-b2c-external-user-passwordreset-policy: "B2C_1_darts_externaluser_password_reset"
@@ -181,6 +181,8 @@ darts:
     retention-period:
       inbound:
         arm-minimum: 24
+        unstructured-minimum:
+          hours: 24
       unstructured:
         arm-minimum:
           weeks: 30
@@ -330,6 +332,8 @@ darts:
         dailylist-processor: f6f71122-ff85-4ebe-93d9-1706460dbea5
       unstructured-to-arm-batch-processor:
         max-result-size: 100000
+      expiry-deletion:
+        enabled: ${CASE_EXPIRY_DELETION_ENABLED:false}
   annotations:
     allowed-extensions:
       - "docx"

@@ -9,6 +9,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 
 class TranscriptionEntityTest {
 
+
     @Test
     void testGetCourtCaseViaHearing() {
         var courtCase = new CourtCaseEntity();

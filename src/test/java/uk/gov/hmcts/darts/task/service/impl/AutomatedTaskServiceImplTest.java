@@ -1,31 +1,36 @@
 package uk.gov.hmcts.darts.task.service.impl;
 
 import lombok.extern.slf4j.Slf4j;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.Trigger;
 import org.springframework.scheduling.config.ScheduledTask;
 import org.springframework.scheduling.config.ScheduledTaskHolder;
 import org.springframework.scheduling.config.TriggerTask;
+import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.AutomatedTaskEntity;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.common.repository.AutomatedTaskRepository;
 import uk.gov.hmcts.darts.log.api.LogApi;
+import uk.gov.hmcts.darts.task.api.AutomatedTaskName;
 import uk.gov.hmcts.darts.task.config.AutomatedTaskConfigurationProperties;
+import uk.gov.hmcts.darts.task.runner.AutoloadingAutomatedTask;
 import uk.gov.hmcts.darts.task.runner.AutomatedTask;
 import uk.gov.hmcts.darts.task.runner.impl.AbstractLockableAutomatedTask;
-import uk.gov.hmcts.darts.task.runner.impl.DailyListAutomatedTask;
 import uk.gov.hmcts.darts.task.runner.impl.ProcessDailyListAutomatedTask;
 import uk.gov.hmcts.darts.task.service.LockService;
 import uk.gov.hmcts.darts.task.status.AutomatedTaskStatus;
 
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
@@ -44,8 +49,8 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 class AutomatedTaskServiceImplTest {
 
-    @InjectMocks
-    private AutomatedTaskServiceImpl automatedTaskService;
+    @Spy
+    private final List<AutoloadingAutomatedTask> autoloadingAutomatedTasks = new ArrayList<>();
 
     @Mock
     private AutomatedTaskRepository mockAutomatedTaskRepository;
@@ -65,11 +70,26 @@ class AutomatedTaskServiceImplTest {
     @Mock
     private LockService lockService;
 
+    private AutomatedTaskServiceImpl automatedTaskService;
+
+    @BeforeEach
+    void before() {
+        this.automatedTaskService = new AutomatedTaskServiceImpl(
+            mockAutomatedTaskRepository,
+            scheduledTaskHolder,
+            taskScheduler,
+            mock(UserIdentity.class),
+            autoloadingAutomatedTasks,
+            true
+        );
+    }
+
     @Test
     void getAutomatedTaskUsingProcessDailyListAutomatedTask() {
         AutomatedTask processDailyListAutomatedTask = new ProcessDailyListAutomatedTask(
             mockAutomatedTaskRepository,
             mockAutomatedTaskConfigurationProperties,
+            null,
             logApi,
             lockService
         );
@@ -91,6 +111,7 @@ class AutomatedTaskServiceImplTest {
         AutomatedTask processDailyListAutomatedTask = new ProcessDailyListAutomatedTask(
             mockAutomatedTaskRepository,
             mockAutomatedTaskConfigurationProperties,
+            null,
             logApi,
             lockService
         );
@@ -113,7 +134,6 @@ class AutomatedTaskServiceImplTest {
         ScheduledTask scheduledTask = mock(ScheduledTask.class);
         Set<ScheduledTask> scheduledTaskList = new HashSet<>();
         scheduledTaskList.add(scheduledTask);
-
         AbstractLockableAutomatedTask automatedTask = new AbstractLockableAutomatedTask(
             mockAutomatedTaskRepository,
             mockAutomatedTaskConfigurationProperties,
@@ -128,10 +148,11 @@ class AutomatedTaskServiceImplTest {
             }
 
             @Override
-            public String getTaskName() {
-                return "ProcessDailyList";
+            public AutomatedTaskName getAutomatedTaskName() {
+                return AutomatedTaskName.PROCESS_DAILY_LIST_TASK_NAME;
             }
         };
+        autoloadingAutomatedTasks.add(automatedTask);
         Trigger trigger = triggerContext -> null;
         TriggerTask task = new TriggerTask(automatedTask, trigger);
         when(scheduledTaskHolder.getScheduledTasks()).thenReturn(scheduledTaskList);
@@ -162,10 +183,11 @@ class AutomatedTaskServiceImplTest {
             }
 
             @Override
-            public String getTaskName() {
-                return "ApplyRetention";
+            public AutomatedTaskName getAutomatedTaskName() {
+                return AutomatedTaskName.APPLY_RETENTION_TASK_NAME;
             }
         };
+        autoloadingAutomatedTasks.add(automatedTask);
         Trigger trigger = triggerContext -> null;
         TriggerTask task = new TriggerTask(automatedTask, trigger);
         when(scheduledTaskHolder.getScheduledTasks()).thenReturn(scheduledTaskList);
@@ -196,10 +218,11 @@ class AutomatedTaskServiceImplTest {
             }
 
             @Override
-            public String getTaskName() {
-                return "DailyListHousekeeping";
+            public AutomatedTaskName getAutomatedTaskName() {
+                return AutomatedTaskName.DAILY_LIST_HOUSEKEEPING_TASK_NAME;
             }
         };
+        autoloadingAutomatedTasks.add(automatedTask);
         Trigger trigger = triggerContext -> null;
         TriggerTask task = new TriggerTask(automatedTask, trigger);
         when(scheduledTaskHolder.getScheduledTasks()).thenReturn(scheduledTaskList);
@@ -208,6 +231,76 @@ class AutomatedTaskServiceImplTest {
         automatedTaskService.reloadTaskByName("DailyListHousekeeping");
 
         verify(taskScheduler).schedule(automatedTask, trigger);
+    }
+
+
+    @Test
+    void overrideTaskLockDurations() {
+        when(lockService.getLockAtMostFor()).thenReturn(Duration.ofMinutes(20));
+        when(lockService.getLockAtLeastFor()).thenReturn(Duration.ofMinutes(1));
+
+        var automatedTask = new AbstractLockableAutomatedTask(
+            mockAutomatedTaskRepository,
+            mockAutomatedTaskConfigurationProperties,
+            logApi,
+            lockService) {
+            @Override
+            protected void runTask() {
+            }
+
+            @Override
+            protected void handleException(Exception exception) {
+            }
+
+            @Override
+            public String getTaskName() {
+                return "StandardTask";
+            }
+
+            @Override
+            public AutomatedTaskName getAutomatedTaskName() {
+                return null;
+            }
+        };
+        var overriddenAutomatedTask = new AbstractLockableAutomatedTask(
+            mockAutomatedTaskRepository,
+            mockAutomatedTaskConfigurationProperties,
+            logApi,
+            lockService) {
+            @Override
+            protected void runTask() {
+            }
+
+            @Override
+            protected void handleException(Exception exception) {
+            }
+
+            @Override
+            public Duration getLockAtMostFor() {
+                return Duration.ofDays(1);
+            }
+
+            @Override
+            public Duration getLockAtLeastFor() {
+                return Duration.ofSeconds(1);
+            }
+
+            @Override
+            public String getTaskName() {
+                return "TaskWithOverriddenLockTimes";
+            }
+
+            @Override
+            public AutomatedTaskName getAutomatedTaskName() {
+                return null;
+            }
+        };
+
+        assertEquals(Duration.ofMinutes(1), automatedTask.getLockAtLeastFor());
+        assertEquals(Duration.ofMinutes(20), automatedTask.getLockAtMostFor());
+
+        assertEquals(Duration.ofSeconds(1), overriddenAutomatedTask.getLockAtLeastFor());
+        assertEquals(Duration.ofDays(1), overriddenAutomatedTask.getLockAtMostFor());
     }
 
     @Test
@@ -231,6 +324,11 @@ class AutomatedTaskServiceImplTest {
             }
 
             @Override
+            public AutomatedTaskName getAutomatedTaskName() {
+                return null;
+            }
+
+            @Override
             public String getLastCronExpression() {
                 return "*/7 * * * * *";
             }
@@ -246,10 +344,30 @@ class AutomatedTaskServiceImplTest {
 
     @Test
     void createsNewTaskOnReloadWhenNonExists() {
+        var automatedTask = new AbstractLockableAutomatedTask(
+            mockAutomatedTaskRepository,
+            mockAutomatedTaskConfigurationProperties,
+            logApi,
+            lockService) {
+            @Override
+            protected void runTask() {
+            }
+
+            @Override
+            protected void handleException(Exception exception) {
+            }
+
+            @Override
+            public AutomatedTaskName getAutomatedTaskName() {
+                return AutomatedTaskName.DAILY_LIST_HOUSEKEEPING_TASK_NAME;
+            }
+        };
+        autoloadingAutomatedTasks.add(automatedTask);
         when(scheduledTaskHolder.getScheduledTasks()).thenReturn(new HashSet<>());
+
         automatedTaskService.reloadTaskByName("DailyListHousekeeping");
 
-        verify(taskScheduler).schedule(any(DailyListAutomatedTask.class), any(Trigger.class));
+        verify(taskScheduler).schedule(any(AbstractLockableAutomatedTask.class), any(Trigger.class));
     }
 
 
@@ -290,6 +408,11 @@ class AutomatedTaskServiceImplTest {
             public String getTaskName() {
                 return "ProcessDailyList";
             }
+
+            @Override
+            public AutomatedTaskName getAutomatedTaskName() {
+                return AutomatedTaskName.PROCESS_DAILY_LIST_TASK_NAME;
+            }
         };
         Trigger trigger = triggerContext -> null;
         return new TriggerTask(automatedTask, trigger);
@@ -324,6 +447,11 @@ class AutomatedTaskServiceImplTest {
             @Override
             public String getTaskName() {
                 return "Test";
+            }
+
+            @Override
+            public AutomatedTaskName getAutomatedTaskName() {
+                return null;
             }
 
             @Override

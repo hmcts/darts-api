@@ -10,10 +10,13 @@ public record EventSearchResult(
     String eventText,
     String chronicleId,
     String antecedentId,
+    Boolean isDataAnonymised,
     Integer courtHouseId,
     String courtHouseDisplayName,
     Integer courtroomId,
-    String courtroomName
+    String courtroomName,
+    Boolean isDataAnonymisedForCase,
+    OffsetDateTime dataAnonymisedTs
 ) {
 
     @Override

@@ -6,6 +6,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.darts.authorisation.api.AuthorisationApi;
+import uk.gov.hmcts.darts.cases.exception.CaseApiError;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
@@ -27,6 +28,7 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -89,6 +91,18 @@ class HearingsServiceImplTest {
     }
 
     @Test
+    void testGetHearingsByIdCaseIsExpired() {
+        HearingEntity hearingEntity = createHearingEntity(true);
+        hearingEntity.getCourtCase().setDataAnonymised(true);
+        when(hearingRepository.findById(hearingEntity.getId())).thenReturn(Optional.of(hearingEntity));
+
+        DartsApiException exception = assertThrows(DartsApiException.class, () -> service.getHearingById(1));
+
+        assertThat(exception.getError()).isEqualTo(CaseApiError.CASE_EXPIRED);
+        assertThat(exception.getMessage()).isEqualTo("Case has expired.");
+    }
+
+    @Test
     void testGetHearingsByIdHearingNotActual() {
         HearingEntity hearingEntity = createHearingEntity(false);
         when(hearingRepository.findById(hearingEntity.getId())).thenReturn(Optional.of(hearingEntity));
@@ -116,6 +130,19 @@ class HearingsServiceImplTest {
         assertEquals("TestEvent", eventResponses.get(0).getName());
         assertNotNull(eventResponses.get(0).getTimestamp());
 
+    }
+
+    @Test
+    void testGetEventsResponseCaseIsExpired() {
+        HearingEntity hearingEntity = createHearingEntity(true);
+        hearingEntity.getCourtCase().setDataAnonymised(true);
+
+        when(hearingRepository.findById(hearingEntity.getId())).thenReturn(Optional.of(hearingEntity));
+
+        DartsApiException exception = assertThrows(DartsApiException.class, () -> service.getEvents(hearingEntity.getId()));
+
+        assertThat(exception.getError()).isEqualTo(CaseApiError.CASE_EXPIRED);
+        assertThat(exception.getMessage()).isEqualTo("Case has expired.");
     }
 
     private HearingEntity createHearingEntity(boolean isHearingActual) {

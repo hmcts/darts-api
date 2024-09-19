@@ -3,8 +3,8 @@ package uk.gov.hmcts.darts.arm.service;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.tomakehurst.wiremock.client.WireMock;
 import com.github.tomakehurst.wiremock.matching.RegexPattern;
+import feign.FeignException;
 import lombok.SneakyThrows;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,6 +34,8 @@ import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlPathMatching;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -43,6 +45,9 @@ class ArmApiServiceIntTest extends IntegrationBase {
     private static final String EXTERNAL_RECORD_ID = "7683ee65-c7a7-7343-be80-018b8ac13602";
     private static final String EXTERNAL_FILE_ID = "075987ea-b34d-49c7-b8db-439bfbe2496c";
     private static final String CABINET_ID = "100";
+    private static final String ARM_ERROR_BODY = """
+        { "itemId": "00000000-0000-0000-0000-000000000000", "cabinetId": 0, ...}
+        """;
 
     ArmTokenRequest armTokenRequest;
 
@@ -132,6 +137,37 @@ class ArmApiServiceIntTest extends IntegrationBase {
     }
 
     @Test
+    void updateMetadataFailureResultsInAnExceptionBeingThrown() throws Exception {
+
+        // Given
+        var eventTimestamp = OffsetDateTime.parse("2024-01-31T11:29:56.101701Z").plusYears(7);
+        var reasonConf = "reason";
+        var scoreConfId = 23;
+        var updateMetadataRequest = UpdateMetadataRequest.builder()
+            .itemId(EXTERNAL_RECORD_ID)
+            .manifest(UpdateMetadataRequest.Manifest.builder()
+                          .eventDate(eventTimestamp)
+                          .retConfScore(scoreConfId)
+                          .retConfReason(reasonConf)
+                          .build())
+            .useGuidsForFields(false)
+            .build();
+
+        String dummyRequest = objectMapper.writeValueAsString(updateMetadataRequest);
+
+        stubFor(
+            WireMock.post(urlPathMatching(uploadPath)).withRequestBody(equalToJson(dummyRequest))
+                .willReturn(
+                    aResponse()
+                        .withHeader("Content-Type", "application/json")
+                        .withBody(ARM_ERROR_BODY)
+                        .withStatus(400)));
+
+        // When/Then
+        assertThrows(FeignException.class, () -> armApiService.updateMetadata(EXTERNAL_RECORD_ID, eventTimestamp, scoreConfId, reasonConf));
+    }
+
+    @Test
     @SneakyThrows
     void downloadArmData() {
         // Given
@@ -155,7 +191,6 @@ class ArmApiServiceIntTest extends IntegrationBase {
         assertThat(downloadResponseMetaData.getInputStream().readAllBytes()).isEqualTo(binaryData);
     }
 
-
     @Test
     @SneakyThrows
     void downloadFailureExceptionFromFeign() {
@@ -166,13 +201,13 @@ class ArmApiServiceIntTest extends IntegrationBase {
                     aResponse().withStatus(400)));
         // When
         FileNotDownloadedException exception
-            = Assertions.assertThrows(FileNotDownloadedException.class, () -> armApiService.downloadArmData(EXTERNAL_RECORD_ID, EXTERNAL_FILE_ID));
+            = assertThrows(FileNotDownloadedException.class, () -> armApiService.downloadArmData(EXTERNAL_RECORD_ID, EXTERNAL_FILE_ID));
 
         // Then
         verify(armTokenClient).getToken(armTokenRequest);
-        Assertions.assertTrue(exception.getMessage().contains(CABINET_ID));
-        Assertions.assertTrue(exception.getMessage().contains(EXTERNAL_RECORD_ID));
-        Assertions.assertTrue(exception.getMessage().contains(EXTERNAL_FILE_ID));
+        assertTrue(exception.getMessage().contains(CABINET_ID));
+        assertTrue(exception.getMessage().contains(EXTERNAL_RECORD_ID));
+        assertTrue(exception.getMessage().contains(EXTERNAL_FILE_ID));
     }
 
     private AvailableEntitlementProfile getAvailableEntitlementProfile() {

@@ -6,7 +6,7 @@ package uk.gov.hmcts.darts.test.common.data.builder;
 public interface DbInsertable<M> {
 
     /**
-     * The entity that can be inserted directly into the database
+     * The entity that can be inserted directly into the database.
      * @return The entity that can be inserted directly into the database
      */
     M getEntity();

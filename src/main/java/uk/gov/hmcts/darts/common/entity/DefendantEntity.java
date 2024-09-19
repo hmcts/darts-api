@@ -13,13 +13,15 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 import uk.gov.hmcts.darts.common.entity.base.CreatedModifiedBaseEntity;
+import uk.gov.hmcts.darts.task.runner.IsNamedEntity;
 
 @Entity
 @Table(name = DefendantEntity.TABLE_NAME)
 @Getter
 @Setter
 @EqualsAndHashCode(callSuper = false)
-public class DefendantEntity extends CreatedModifiedBaseEntity {
+public class DefendantEntity extends CreatedModifiedBaseEntity
+    implements IsNamedEntity {
 
     public static final String TABLE_NAME = "defendant";
     public static final String ID = "dfd_id";
@@ -38,5 +40,4 @@ public class DefendantEntity extends CreatedModifiedBaseEntity {
 
     @Column(name = DEFENDANT_NAME)
     private String name;
-
 }

@@ -28,20 +28,20 @@ public class InboundAudioDeleterProcessorImpl implements InboundAudioDeleterProc
     private final EodHelper eodHelper;
 
 
-    @Value("${darts.data-management.retention-period.inbound.arm-minimum}")
-    int hoursInArm;
+    @Value("${darts.data-management.retention-period.inbound.unstructured-minimum.hours}")
+    int hoursInUnstructured;
 
     @Override
     public void markForDeletion() {
         OffsetDateTime lastModifiedBefore = currentTimeHelper.currentOffsetDateTime().minus(
-            hoursInArm,
+            hoursInUnstructured,
             ChronoUnit.HOURS
         );
         List<Integer> audioFileIdsToBeMarked = externalObjectDirectoryRepository.findIdsIn2StorageLocationsBeforeTime(
             EodHelper.storedStatus(),
             EodHelper.storedStatus(),
             EodHelper.inboundLocation(),
-            EodHelper.armLocation(),
+            EodHelper.unstructuredLocation(),
             lastModifiedBefore,
             ExternalObjectDirectoryQueryTypeEnum.MEDIA_QUERY.getIndex()
         );

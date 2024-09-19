@@ -5,6 +5,8 @@ import lombok.experimental.UtilityClass;
 import uk.gov.hmcts.darts.cases.model.AddCaseRequest;
 import uk.gov.hmcts.darts.common.entity.AnnotationDocumentEntity;
 import uk.gov.hmcts.darts.common.entity.AnnotationEntity;
+import uk.gov.hmcts.darts.common.entity.CaseDocumentEntity;
+import uk.gov.hmcts.darts.common.entity.CaseRetentionEntity;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
@@ -17,6 +19,7 @@ import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.JudgeEntity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
 import uk.gov.hmcts.darts.common.entity.ProsecutorEntity;
+import uk.gov.hmcts.darts.common.entity.RetentionPolicyTypeEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionCommentEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionDocumentEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionEntity;
@@ -27,6 +30,7 @@ import uk.gov.hmcts.darts.common.entity.TranscriptionWorkflowEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.dailylist.enums.JobStatusType;
 import uk.gov.hmcts.darts.dailylist.enums.SourceType;
+import uk.gov.hmcts.darts.retention.enums.CaseRetentionStatus;
 import uk.gov.hmcts.darts.test.common.TestUtils;
 import uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum;
 import uk.gov.hmcts.darts.transcriptions.enums.TranscriptionTypeEnum;
@@ -36,18 +40,21 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.OffsetDateTime;
-import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.List;
 
+import static java.time.ZoneOffset.UTC;
 import static java.util.Arrays.asList;
 import static uk.gov.hmcts.darts.test.common.TestUtils.getContentsFromFile;
 
-@SuppressWarnings({"PMD.GodClass", "PMD.ExcessivePublicCount", "PMD.ExcessiveImports", "PMD.CouplingBetweenObjects"})
+@SuppressWarnings({"PMD.GodClass", "PMD.ExcessivePublicCount", "PMD.ExcessiveImports", "PMD.CouplingBetweenObjects", "PMD.CyclomaticComplexity"})
 @UtilityClass
 public class CommonTestDataUtil {
 
     public static final LocalTime TEN_AM = LocalTime.of(10, 0);
+
+    private static final String SOME_POLICY_DESCRIPTION = "Policy description";
+    private static final String SOME_POLICY_DURATION = "1Y0M0D";
 
     public static EventEntity createEventWith(String eventName, String eventText, HearingEntity hearingEntity) {
 
@@ -254,7 +261,7 @@ public class CommonTestDataUtil {
     public MediaEntity createMedia(HearingEntity hearing) {
         String caseNumber = hearing.getCourtCase().getCaseNumber();
         MediaEntity mediaEntity = new MediaEntity();
-        OffsetDateTime startTime = OffsetDateTime.of(hearing.getHearingDate(), hearing.getScheduledStartTime(), ZoneOffset.UTC);
+        OffsetDateTime startTime = OffsetDateTime.of(hearing.getHearingDate(), hearing.getScheduledStartTime(), UTC);
         mediaEntity.setStart(startTime);
         mediaEntity.setEnd(startTime.plusHours(1));
         mediaEntity.setChannel(1);
@@ -267,6 +274,19 @@ public class CommonTestDataUtil {
     public MediaEntity createMedia(String caseNumber) {
         HearingEntity hearing = createHearing(caseNumber, TEN_AM);
         return createMedia(hearing);
+    }
+
+    public MediaEntity createMedia(List<HearingEntity> hearings, int mediaId) {
+        var hearing = hearings.getFirst();
+        MediaEntity mediaEntity = new MediaEntity();
+        OffsetDateTime startTime = OffsetDateTime.of(hearing.getHearingDate(), hearing.getScheduledStartTime(), UTC);
+        mediaEntity.setStart(startTime);
+        mediaEntity.setEnd(startTime.plusHours(1));
+        mediaEntity.setChannel(1);
+        mediaEntity.setHearingList(hearings);
+        mediaEntity.setCourtroom(hearing.getCourtroom());
+        mediaEntity.setId(mediaId);
+        return mediaEntity;
     }
 
     public List<TranscriptionEntity> createTranscriptionList(HearingEntity hearing) {
@@ -307,7 +327,7 @@ public class CommonTestDataUtil {
             transcription.setCourtroom(courtroom);
         }
 
-        transcription.setCreatedDateTime(OffsetDateTime.of(2020, 6, 20, 10, 10, 0, 0, ZoneOffset.UTC));
+        transcription.setCreatedDateTime(OffsetDateTime.of(2020, 6, 20, 10, 10, 0, 0, UTC));
         transcription.setLegacyObjectId("legacyObjectId");
         transcription.setId(1);
         if (generateRequestor) {
@@ -347,7 +367,7 @@ public class CommonTestDataUtil {
     private static List<TranscriptionWorkflowEntity> createTranscriptionWorkflow() {
         TranscriptionWorkflowEntity transcriptionWorkflowEntity = new TranscriptionWorkflowEntity();
         transcriptionWorkflowEntity.setTranscriptionComments(createTranscriptionComments("workflowcommenta"));
-        transcriptionWorkflowEntity.setWorkflowTimestamp(OffsetDateTime.of(2020, 6, 20, 10, 10, 0, 0, ZoneOffset.UTC));
+        transcriptionWorkflowEntity.setWorkflowTimestamp(OffsetDateTime.of(2020, 6, 20, 10, 10, 0, 0, UTC));
         transcriptionWorkflowEntity.setWorkflowActor(createUserAccount("workflow user"));
         transcriptionWorkflowEntity.setTranscriptionStatus(createTranscriptionStatus(TranscriptionStatusEnum.REQUESTED));
 
@@ -472,7 +492,7 @@ public class CommonTestDataUtil {
         dailyListEntity.setStatus(JobStatusType.NEW);
         dailyListEntity.setListingCourthouse("SWANSEA");
         dailyListEntity.setContent(TestUtils.substituteHearingDateWithToday(getContentsFromFile(filelocation)));
-        dailyListEntity.setPublishedTimestamp(OffsetDateTime.of(LocalDate.now(), time, ZoneOffset.UTC));
+        dailyListEntity.setPublishedTimestamp(OffsetDateTime.of(LocalDate.now(), time, UTC));
         dailyListEntity.setSource(source);
         return dailyListEntity;
     }
@@ -483,7 +503,7 @@ public class CommonTestDataUtil {
         dailyListEntity.setStatus(JobStatusType.NEW);
         dailyListEntity.setListingCourthouse("SWANSEA");
         dailyListEntity.setContent("blah");
-        dailyListEntity.setPublishedTimestamp(OffsetDateTime.of(LocalDate.now(), time, ZoneOffset.UTC));
+        dailyListEntity.setPublishedTimestamp(OffsetDateTime.of(LocalDate.now(), time, UTC));
         dailyListEntity.setSource(String.valueOf(SourceType.XHB));
         return dailyListEntity;
     }
@@ -493,7 +513,7 @@ public class CommonTestDataUtil {
         dailyListEntity.setStatus(JobStatusType.NEW);
         dailyListEntity.setListingCourthouse("SWANSEA");
         dailyListEntity.setXmlContent("blah");
-        dailyListEntity.setPublishedTimestamp(OffsetDateTime.of(LocalDate.now(), time, ZoneOffset.UTC));
+        dailyListEntity.setPublishedTimestamp(OffsetDateTime.of(LocalDate.now(), time, UTC));
         dailyListEntity.setSource(String.valueOf(SourceType.XHB));
         return dailyListEntity;
     }
@@ -518,20 +538,10 @@ public class CommonTestDataUtil {
         for (TranscriptionUrgencyEnum transcriptionUrgencyEnum : TranscriptionUrgencyEnum.values()) {
             switch (transcriptionUrgencyEnum.getId()) {
                 case 2:
-                    transcriptionUrgencyEntities.add(createTranscriptionUrgencyEntityFromEnum(transcriptionUrgencyEnum));
-                    break;
                 case 3:
-                    transcriptionUrgencyEntities.add(createTranscriptionUrgencyEntityFromEnum(transcriptionUrgencyEnum));
-                    break;
                 case 4:
-                    transcriptionUrgencyEntities.add(createTranscriptionUrgencyEntityFromEnum(transcriptionUrgencyEnum));
-                    break;
                 case 5:
-                    transcriptionUrgencyEntities.add(createTranscriptionUrgencyEntityFromEnum(transcriptionUrgencyEnum));
-                    break;
                 case 6:
-                    transcriptionUrgencyEntities.add(createTranscriptionUrgencyEntityFromEnum(transcriptionUrgencyEnum));
-                    break;
                 case 7:
                     transcriptionUrgencyEntities.add(createTranscriptionUrgencyEntityFromEnum(transcriptionUrgencyEnum));
                     break;
@@ -580,4 +590,55 @@ public class CommonTestDataUtil {
         annotationDocumentEntity.setUploadedDateTime(OffsetDateTime.now());
         return annotationDocumentEntity;
     }
+
+    public static CaseRetentionEntity createCaseRetention(CourtCaseEntity courtCase, RetentionPolicyTypeEntity policy,
+                                                          OffsetDateTime retainUntil, CaseRetentionStatus retentionStatus,
+                                                          UserAccountEntity submittedBy) {
+        CaseRetentionEntity caseRetentionEntity = new CaseRetentionEntity();
+        caseRetentionEntity.setCourtCase(courtCase);
+        caseRetentionEntity.setRetentionPolicyType(policy);
+        caseRetentionEntity.setTotalSentence("10y0m0d");
+        caseRetentionEntity.setRetainUntil(retainUntil);
+        caseRetentionEntity.setRetainUntilAppliedOn(OffsetDateTime.now().plusYears(1));
+        caseRetentionEntity.setCurrentState(retentionStatus.name());
+        caseRetentionEntity.setComments("a comment");
+        caseRetentionEntity.setCreatedDateTime(OffsetDateTime.now());
+        caseRetentionEntity.setCreatedBy(submittedBy);
+        caseRetentionEntity.setLastModifiedDateTime(OffsetDateTime.now());
+        caseRetentionEntity.setLastModifiedBy(submittedBy);
+        caseRetentionEntity.setSubmittedBy(submittedBy);
+        return caseRetentionEntity;
+    }
+
+    public static RetentionPolicyTypeEntity createRetentionPolicyType(String fixedPolicyKey, String name, String displayName, OffsetDateTime startDateTime) {
+        RetentionPolicyTypeEntity retentionPolicyTypeEntity = new RetentionPolicyTypeEntity();
+        retentionPolicyTypeEntity.setFixedPolicyKey(fixedPolicyKey);
+        retentionPolicyTypeEntity.setPolicyName(name);
+        retentionPolicyTypeEntity.setDisplayName(displayName);
+        retentionPolicyTypeEntity.setDescription(SOME_POLICY_DESCRIPTION);
+        retentionPolicyTypeEntity.setDuration(SOME_POLICY_DURATION);
+        retentionPolicyTypeEntity.setPolicyStart(startDateTime);
+        retentionPolicyTypeEntity.setPolicyEnd(null);
+
+        UserAccountEntity userAccountEntity = createUserAccount();
+        retentionPolicyTypeEntity.setCreatedBy(userAccountEntity);
+        retentionPolicyTypeEntity.setLastModifiedBy(userAccountEntity);
+
+        return retentionPolicyTypeEntity;
+    }
+
+    public CaseDocumentEntity createCaseDocumentEntity(CourtCaseEntity courtCaseEntity, UserAccountEntity uploadedBy) {
+        CaseDocumentEntity caseDocumentEntity = new CaseDocumentEntity();
+        caseDocumentEntity.setCourtCase(courtCaseEntity);
+        caseDocumentEntity.setFileName("test_filename");
+        caseDocumentEntity.setFileType("docx");
+        caseDocumentEntity.setFileSize(1234);
+        caseDocumentEntity.setChecksum("xC3CCA7021CF79B42F245AF350601C284");
+        caseDocumentEntity.setHidden(false);
+        caseDocumentEntity.setCreatedBy(uploadedBy);
+        caseDocumentEntity.setCreatedDateTime(OffsetDateTime.now(UTC));
+        caseDocumentEntity.setLastModifiedBy(uploadedBy);
+        return caseDocumentEntity;
+    }
+
 }

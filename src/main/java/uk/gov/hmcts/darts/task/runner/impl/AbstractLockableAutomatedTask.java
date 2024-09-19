@@ -6,10 +6,13 @@ import net.javacrumbs.shedlock.core.LockConfiguration;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
+import org.springframework.transaction.annotation.Transactional;
 import uk.gov.hmcts.darts.common.entity.AutomatedTaskEntity;
 import uk.gov.hmcts.darts.common.repository.AutomatedTaskRepository;
 import uk.gov.hmcts.darts.log.api.LogApi;
+import uk.gov.hmcts.darts.task.api.AutomatedTaskName;
 import uk.gov.hmcts.darts.task.config.AutomatedTaskConfigurationProperties;
+import uk.gov.hmcts.darts.task.runner.AutoloadingAutomatedTask;
 import uk.gov.hmcts.darts.task.runner.AutomatedTask;
 import uk.gov.hmcts.darts.task.service.LockService;
 import uk.gov.hmcts.darts.task.status.AutomatedTaskStatus;
@@ -33,7 +36,7 @@ import static uk.gov.hmcts.darts.task.status.AutomatedTaskStatus.SKIPPED;
 
 
 @Slf4j
-public abstract class AbstractLockableAutomatedTask implements AutomatedTask {
+public abstract class AbstractLockableAutomatedTask implements AutomatedTask, AutoloadingAutomatedTask {
 
     private AutomatedTaskStatus automatedTaskStatus = NOT_STARTED;
 
@@ -77,6 +80,7 @@ public abstract class AbstractLockableAutomatedTask implements AutomatedTask {
     }
 
     @Override
+    @Transactional
     public void run() {
         executionId = ThreadLocal.withInitial(UUID::randomUUID);
         preRunTask();
@@ -133,6 +137,14 @@ public abstract class AbstractLockableAutomatedTask implements AutomatedTask {
 
     protected abstract void runTask();
 
+    public Duration getLockAtMostFor() {
+        return lockService.getLockAtMostFor();
+    }
+
+    public Duration getLockAtLeastFor() {
+        return lockService.getLockAtLeastFor();
+    }
+
     protected void handleException(Exception exception) {
         log.error("Task: {} exception during execution of the task business logic", getTaskName(), exception);
     }
@@ -152,17 +164,19 @@ public abstract class AbstractLockableAutomatedTask implements AutomatedTask {
         return false;
     }
 
+    protected Integer getAutomatedTaskBatchSize() {
+        return this.getAutomatedTaskBatchSize(this.getTaskName());
+    }
+
     protected Integer getAutomatedTaskBatchSize(String taskName) {
         Integer batchSize = 0;
         Optional<AutomatedTaskEntity> automatedTaskEntity = getAutomatedTaskDetails(taskName);
-
         if (automatedTaskEntity.isPresent()) {
             AutomatedTaskEntity automatedTask = automatedTaskEntity.get();
             if (nonNull(automatedTask.getBatchSize())) {
                 batchSize = automatedTask.getBatchSize();
             }
         }
-
         return batchSize;
     }
 
@@ -170,12 +184,12 @@ public abstract class AbstractLockableAutomatedTask implements AutomatedTask {
         return new LockConfiguration(
             Instant.now(),
             getTaskName(),
-            lockService.getLockAtMostFor(),
-            lockService.getLockAtLeastFor()
+            this.getLockAtMostFor(),
+            this.getLockAtLeastFor()
         );
     }
 
-    private void preRunTask() {
+    void preRunTask() {
         setupUserAuthentication();
         start = Instant.now();
         log.info("Task: {} potential candidate for execution at: {}", getTaskName(), LocalDateTime.now());
@@ -203,6 +217,20 @@ public abstract class AbstractLockableAutomatedTask implements AutomatedTask {
         }
     }
 
+    @Override
+    public AbstractLockableAutomatedTask getAbstractLockableAutomatedTask() {
+        return this;
+    }
+
+    @Override
+    public String getTaskName() {
+        return getAutomatedTaskName().getTaskName();
+    }
+
+    @Override
+    public abstract AutomatedTaskName getAutomatedTaskName();
+
+
     class LockedTask implements Runnable {
         @Override
         public void run() {
@@ -218,5 +246,4 @@ public abstract class AbstractLockableAutomatedTask implements AutomatedTask {
             }
         }
     }
-
 }

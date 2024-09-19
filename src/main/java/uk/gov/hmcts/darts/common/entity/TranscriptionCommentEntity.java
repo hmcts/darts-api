@@ -63,5 +63,4 @@ public class TranscriptionCommentEntity extends CreatedModifiedBaseEntity {
 
     @Column(name = "is_data_anonymised")
     private boolean isDataAnonymised;
-
 }

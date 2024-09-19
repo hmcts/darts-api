@@ -16,13 +16,13 @@ import lombok.Setter;
 public class TranscriptionStatusEntity {
 
     @Id
-    @Column(name = "trs_id", nullable = false)
+    @Column(name = "trs_id", nullable = false, updatable = false)
     private Integer id;
 
-    @Column(name = "status_type", nullable = false)
+    @Column(name = "status_type", nullable = false, updatable = false)
     private String statusType;
 
-    @Column(name = "display_name", nullable = false)
+    @Column(name = "display_name", nullable = false, updatable = false)
     private String displayName;
 
     public TranscriptionStatusEntity(Integer id) {
