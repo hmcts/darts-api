@@ -2,7 +2,6 @@ package uk.gov.hmcts.darts.testutils.stubs;
 
 import jakarta.persistence.EntityManager;
 import lombok.AllArgsConstructor;
-import lombok.Setter;
 import org.junit.platform.commons.JUnitException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

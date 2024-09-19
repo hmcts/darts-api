@@ -569,6 +569,9 @@ public class DartsDatabaseStub {
         return transcription;
     }
 
+    public <T> T save(T entity) {
+        return dartsDatabaseSaveStub.save(entity);
+    }
 
     @SuppressWarnings({"PMD.CognitiveComplexity", "PMD.AvoidAccessibilityAlteration"})
     @Transactional
@@ -934,9 +937,5 @@ public class DartsDatabaseStub {
     @Transactional
     public SecurityRoleEntity findSecurityRole(SecurityRoleEnum role) {
         return securityRoleRepository.findById(role.getId()).orElseThrow();
-    }
-
-    public <T> T save(T entity) {
-        return dartsDatabaseSaveStub.save(entity);
     }
 }

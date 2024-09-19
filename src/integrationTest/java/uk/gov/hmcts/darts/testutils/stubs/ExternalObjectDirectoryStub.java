@@ -115,7 +115,8 @@ public class ExternalObjectDirectoryStub {
             eod.setTranscriptionDocumentEntity(transcriptionDocumentEntity);
         }
         createdEodConsumer.accept(eod);
-        dartsDatabaseSaveStub.save(eod);
+        eodRepository.save(eod);
+        eodRepository.flush();
         return eod;
     }
 
@@ -137,7 +138,8 @@ public class ExternalObjectDirectoryStub {
         );
 
         externalObjectDirectory.setMedia(mediaEntity);
-        dartsDatabaseSaveStub.save(externalObjectDirectory);
+        eodRepository.save(externalObjectDirectory);
+        eodRepository.flush();
 
         return externalObjectDirectory;
     }
@@ -153,7 +155,9 @@ public class ExternalObjectDirectoryStub {
         );
 
         externalObjectDirectory.setCaseDocument(caseDocumentEntity);
-        dartsDatabaseSaveStub.save(externalObjectDirectory);
+        eodRepository.save(externalObjectDirectory);
+        eodRepository.flush();
+
         return externalObjectDirectory;
     }
 
@@ -222,7 +226,7 @@ public class ExternalObjectDirectoryStub {
 
         externalObjectDirectory.setTranscriptionDocumentEntity(transcriptionDocument);
 
-        return dartsDatabaseSaveStub.save(externalObjectDirectory);
+        return eodRepository.saveAndFlush(externalObjectDirectory);
     }
 
     public List<ExternalObjectDirectoryEntity> findByMediaStatusAndType(MediaEntity media,

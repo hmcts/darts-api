@@ -23,7 +23,6 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@Disabled("Impacted by V1_367__adding_not_null_constraints_part_4.sql")
 @AutoConfigureMockMvc
 class TranscriptionControllerGetTranscriptionTranscriberCountsIntTest extends IntegrationBase {
 
@@ -141,7 +140,7 @@ class TranscriptionControllerGetTranscriptionTranscriberCountsIntTest extends In
 
 
     @Test
-    @Disabled("Impacted by V1_364_*.sql")
+    @Disabled("Impacted by V1_364_*.sql - Needs fix")
     void getTranscriberCountsShouldReturnOk() throws Exception {
         MockHttpServletRequestBuilder requestBuilder = get(ENDPOINT_URI)
             .header(
@@ -164,7 +163,7 @@ class TranscriptionControllerGetTranscriptionTranscriberCountsIntTest extends In
     }
 
     @Test
-    @Disabled("Impacted by V1_364_*.sql")
+    @Disabled("Impacted by V1_364_*.sql - Needs fix")
     void getTranscriberCountsShouldReturnOkWithInactive() throws Exception {
 
         UserAccountEntity userAccountEntity = userAccountRepository.findById(-10).get();
@@ -184,7 +183,7 @@ class TranscriptionControllerGetTranscriptionTranscriberCountsIntTest extends In
     }
 
     @Test
-    @Disabled("Impacted by V1_364_*.sql")
+    @Disabled("Impacted by V1_364_*.sql - Needs fix")
     void getTranscriberCountsShouldReturnForbiddenWhenUserNotTranscriber() throws Exception {
         MockHttpServletRequestBuilder requestBuilder = get(ENDPOINT_URI)
             .header(

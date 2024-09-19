@@ -1,7 +1,6 @@
 package uk.gov.hmcts.darts.common.repository;
 
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -46,7 +45,6 @@ class ExternalObjectDirectoryRepositoryTest extends PostgresIntegrationBase {
 
     private List<ExternalObjectDirectoryEntity> entitiesToBeMarkedWithMediaOrAnnotationOutsideOfArmHours;
 
-    @Disabled("Impacted by V1_367__adding_not_null_constraints_part_4.sql")
     @Test
     void testGetDirectoryIfMediaDate24Hours() throws Exception {
 
@@ -69,7 +67,6 @@ class ExternalObjectDirectoryRepositoryTest extends PostgresIntegrationBase {
                               entitiesToBeMarkedWithMediaOrAnnotationOutsideOfArmHours.size());
     }
 
-    @Disabled("Impacted by V1_367__adding_not_null_constraints_part_4.sql")
     @Test
     void testGetDirectoryIfMediaDateBeyond24Hours() throws Exception {
 
@@ -157,7 +154,6 @@ class ExternalObjectDirectoryRepositoryTest extends PostgresIntegrationBase {
         Assertions.assertTrue(results.isEmpty());
     }
 
-    @Disabled("Impacted by V1_367__adding_not_null_constraints_part_4.sql")
     @Test
     void testGetDirectoryIfMediaDateNotBeyondThreshold() throws Exception {
 
