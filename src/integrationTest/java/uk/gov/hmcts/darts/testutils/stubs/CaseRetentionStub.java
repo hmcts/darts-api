@@ -20,8 +20,8 @@ import java.time.OffsetDateTime;
 public class CaseRetentionStub {
     private final UserAccountRepository userAccountRepository;
     private final RetentionPolicyTypeRepository retentionPolicyTypeRepository;
-    private final CaseRetentionRepository caseRetentionRepository;
     private final CurrentTimeHelper currentTimeHelper;
+    private final DartsDatabaseSaveStub dartsDatabaseSaveStub;
 
     @Transactional
     public CaseRetentionEntity createCaseRetentionObject(CourtCaseEntity courtCase,
@@ -51,7 +51,7 @@ public class CaseRetentionStub {
         caseRetentionEntity.setLastModifiedDateTime(currentTimeHelper.currentOffsetDateTime());
         caseRetentionEntity.setLastModifiedBy(userAccountRepository.getReferenceById(0));
         caseRetentionEntity.setSubmittedBy(userAccountRepository.getReferenceById(0));
-        caseRetentionRepository.saveAndFlush(caseRetentionEntity);
+        dartsDatabaseSaveStub.save(caseRetentionEntity);
         return caseRetentionEntity;
     }
 

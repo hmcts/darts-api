@@ -26,6 +26,8 @@ public class ObjectAdminActionStub {
 
     @Autowired
     private ObjectAdminActionRepository objectAdminActionRepository;
+    @Autowired
+    private DartsDatabaseSaveStub dartsDatabaseSaveStub;
 
     private static UserAccountEntity defaultUser;
     private static ObjectHiddenReasonEntity defaultReason;
@@ -57,7 +59,7 @@ public class ObjectAdminActionStub {
     }
 
     public ObjectAdminActionEntity createAndSave(ObjectAdminActionEntity objectAdminActionEntity) {
-        return objectAdminActionRepository.save(objectAdminActionEntity);
+        return dartsDatabaseSaveStub.save(objectAdminActionEntity);
     }
 
     @Builder

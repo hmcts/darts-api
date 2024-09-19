@@ -142,6 +142,7 @@ public class DartsDatabaseStub {
         "evh_seq"
     );
 
+    private final DartsDatabaseSaveStub dartsDatabaseSaveStub;
     private final EntityManagerFactory entityManagerFactory;
     private final AnnotationDocumentRepository annotationDocumentRepository;
     private final AnnotationRepository annotationRepository;
@@ -341,7 +342,7 @@ public class DartsDatabaseStub {
         );
         hearing.setHearingIsActual(true);
         hearing.addJudge(createSimpleJudge(caseNumber + "judge1"), false);
-        return hearingRepository.saveAndFlush(hearing);
+        return dartsDatabaseSaveStub.save(hearing);
     }
 
     @Transactional
@@ -400,14 +401,14 @@ public class DartsDatabaseStub {
         UserAccountEntity defaultUser = userAccountRepository.getReferenceById(0);
         courthouse.setCreatedBy(defaultUser);
         courthouse.setLastModifiedBy(defaultUser);
-        return courthouseRepository.save(courthouse);
+        return dartsDatabaseSaveStub.save(courthouse);
     }
 
     @Transactional
     public CourthouseEntity createCourthouseWithTwoCourtrooms() {
         CourthouseEntity swanseaCourtEntity = createCourthouseWithNameAndCode("SWANSEA", 457, "Swansea");
-        courtroomRepository.saveAndFlush(createCourtRoomWithNameAtCourthouse(swanseaCourtEntity, "1"));
-        courtroomRepository.saveAndFlush(createCourtRoomWithNameAtCourthouse(swanseaCourtEntity, "2"));
+        dartsDatabaseSaveStub.save(createCourtRoomWithNameAtCourthouse(swanseaCourtEntity, "1"));
+        dartsDatabaseSaveStub.save(createCourtRoomWithNameAtCourthouse(swanseaCourtEntity, "2"));
         return swanseaCourtEntity;
 
     }
@@ -494,8 +495,8 @@ public class DartsDatabaseStub {
         hearing.addMedia(mediaEntity);
         mediaEntity.setCourtroom(hearing.getCourtroom());
         save(hearing);
-        mediaRepository.saveAndFlush(mediaEntity);
-        hearingRepository.saveAndFlush(hearing);
+        dartsDatabaseSaveStub.save(mediaEntity);
+        dartsDatabaseSaveStub.save(hearing);
         return mediaEntity;
     }
 
@@ -503,10 +504,10 @@ public class DartsDatabaseStub {
         hearing.addMedia(mediaEntity);
         mediaEntity.setCourtroom(hearing.getCourtroom());
         mediaEntity.setIsCurrent(true);
-        mediaRepository.saveAndFlush(mediaEntity);
-        courthouseRepository.saveAndFlush(hearing.getCourtroom().getCourthouse());
-        courtroomRepository.saveAndFlush(hearing.getCourtroom());
-        hearingRepository.saveAndFlush(hearing);
+        dartsDatabaseSaveStub.save(mediaEntity);
+        dartsDatabaseSaveStub.save(hearing.getCourtroom().getCourthouse());
+        dartsDatabaseSaveStub.save(hearing.getCourtroom());
+        dartsDatabaseSaveStub.save(hearing);
         return mediaEntity;
     }
 
@@ -525,65 +526,49 @@ public class DartsDatabaseStub {
     @Transactional
     public AnnotationEntity save(AnnotationEntity annotationEntity) {
         save(annotationEntity.getCurrentOwner());
-        return annotationRepository.save(annotationEntity);
+        return dartsDatabaseSaveStub.save(annotationEntity);
     }
 
     @Transactional
     public HearingEntity save(HearingEntity hearingEntity) {
         save(hearingEntity.getCourtroom().getCourthouse());
         save(hearingEntity.getCourtroom());
-        return hearingRepository.save(hearingEntity);
+        return dartsDatabaseSaveStub.save(hearingEntity);
     }
 
     @Transactional
     public CourthouseEntity save(CourthouseEntity courthouse) {
-        userAccountRepository.save(courthouse.getCreatedBy());
-        return courthouseRepository.save(courthouse);
+        dartsDatabaseSaveStub.save(courthouse.getCreatedBy());
+        return dartsDatabaseSaveStub.save(courthouse);
     }
 
     @Transactional
     public CourtroomEntity save(CourtroomEntity courtroom) {
-        userAccountRepository.save(courtroom.getCreatedBy());
-        return courtroomRepository.save(courtroom);
+        dartsDatabaseSaveStub.save(courtroom.getCreatedBy());
+        return dartsDatabaseSaveStub.save(courtroom);
     }
 
     @Transactional
     public CourtCaseEntity save(CourtCaseEntity courtCase) {
         save(courtCase.getCourthouse());
-        return caseRepository.save(courtCase);
+        return dartsDatabaseSaveStub.save(courtCase);
     }
 
     @Transactional
     public TranscriptionEntity save(TranscriptionEntity transcriptionEntity) {
         save(transcriptionEntity.getCourtCase());
-        userAccountRepository.save(transcriptionEntity.getCreatedBy());
-        userAccountRepository.save(transcriptionEntity.getLastModifiedBy());
-        var transcription = transcriptionRepository.save(transcriptionEntity);
-        userAccountRepository.save(transcription.getCreatedBy());
+        dartsDatabaseSaveStub.save(transcriptionEntity.getCreatedBy());
+        dartsDatabaseSaveStub.save(transcriptionEntity.getLastModifiedBy());
+        var transcription = dartsDatabaseSaveStub.save(transcriptionEntity);
+        dartsDatabaseSaveStub.save(transcription.getCreatedBy());
         transcription.getTranscriptionDocumentEntities().forEach(td -> {
-            userAccountRepository.save(td.getUploadedBy());
-            userAccountRepository.save(td.getLastModifiedBy());
-            transcriptionDocumentRepository.save(td);
+            dartsDatabaseSaveStub.save(td.getUploadedBy());
+            dartsDatabaseSaveStub.save(td.getLastModifiedBy());
+            dartsDatabaseSaveStub.save(td);
         });
         return transcription;
     }
 
-    @Transactional
-    public <T> T save(T entity) {
-        Method getIdInstanceMethod;
-        try {
-            getIdInstanceMethod = entity.getClass().getMethod("getId");
-            Integer id = (Integer) getIdInstanceMethod.invoke(entity);
-            if (id == null) {
-                this.entityManager.persist(entity);
-                return entity;
-            } else {
-                return this.entityManager.merge(entity);
-            }
-        } catch (NoSuchMethodException | InvocationTargetException | IllegalAccessException e) {
-            throw new JUnitException("Failed to save entity", e);
-        }
-    }
 
     @SuppressWarnings({"PMD.CognitiveComplexity", "PMD.AvoidAccessibilityAlteration"})
     @Transactional
@@ -704,14 +689,14 @@ public class DartsDatabaseStub {
 
     private void saveSingleEventForHearing(HearingEntity hearing, EventEntity event) {
         event.setHearingEntities(List.of(hearingRepository.getReferenceById(hearing.getId())));
-        eventRepository.save(event);
+        dartsDatabaseSaveStub.save(event);
     }
 
     public EventEntity addHandlerToEvent(EventEntity event, int handlerId) {
         var handler = eventHandlerRepository.getReferenceById(handlerId);
         event.setEventType(handler);
         event.setLogEntry(false);
-        return eventRepository.save(event);
+        return dartsDatabaseSaveStub.save(event);
     }
 
     @Transactional
@@ -737,11 +722,11 @@ public class DartsDatabaseStub {
             getRetentionPolicyTypeEntity(RetentionPolicyEnum.MANUAL);
 
         CaseRetentionEntity caseRetentionEntity1 = createCaseRetentionObject(1, courtCase, retentionPolicyTypeEntity, "a_state");
-        caseRetentionRepository.save(caseRetentionEntity1);
+        dartsDatabaseSaveStub.save(caseRetentionEntity1);
         CaseRetentionEntity caseRetentionEntity2 = createCaseRetentionObject(2, courtCase, retentionPolicyTypeEntity, "b_state");
-        caseRetentionRepository.save(caseRetentionEntity2);
+        dartsDatabaseSaveStub.save(caseRetentionEntity2);
         CaseRetentionEntity caseRetentionEntity3 = createCaseRetentionObject(3, courtCase, retentionPolicyTypeEntity, "c_state");
-        caseRetentionRepository.saveAndFlush(caseRetentionEntity3);
+        dartsDatabaseSaveStub.save(caseRetentionEntity3);
     }
 
     public CaseRetentionEntity createCaseRetentionObject(Integer id, CourtCaseEntity courtCase,
@@ -771,7 +756,7 @@ public class DartsDatabaseStub {
         caseRetentionEntity.setLastModifiedBy(userAccountRepository.getReferenceById(0));
         caseRetentionEntity.setSubmittedBy(userAccountRepository.getReferenceById(0));
         if (save) {
-            return caseRetentionRepository.saveAndFlush(caseRetentionEntity);
+            return dartsDatabaseSaveStub.save(caseRetentionEntity);
         }
         return caseRetentionEntity;
     }
@@ -783,7 +768,7 @@ public class DartsDatabaseStub {
 
     public UserAccountEntity saveUserWithGroup(UserAccountEntity user) {
         securityGroupRepository.saveAll(user.getSecurityGroupEntities());
-        return userAccountRepository.save(user);
+        return dartsDatabaseSaveStub.save(user);
     }
 
     public List<NotificationEntity> getNotificationFor(String someCaseNumber) {
@@ -823,8 +808,8 @@ public class DartsDatabaseStub {
     public void addUserToGroup(UserAccountEntity userAccount, SecurityGroupEntity securityGroup) {
         securityGroup.getUsers().add(userAccount);
         userAccount.getSecurityGroupEntities().add(securityGroup);
-        securityGroupRepository.save(securityGroup);
-        userAccountRepository.save(userAccount);
+        dartsDatabaseSaveStub.save(securityGroup);
+        dartsDatabaseSaveStub.save(userAccount);
     }
 
     @Transactional
@@ -949,6 +934,9 @@ public class DartsDatabaseStub {
     @Transactional
     public SecurityRoleEntity findSecurityRole(SecurityRoleEnum role) {
         return securityRoleRepository.findById(role.getId()).orElseThrow();
+    }
 
+    public <T> T save(T entity) {
+        return dartsDatabaseSaveStub.save(entity);
     }
 }

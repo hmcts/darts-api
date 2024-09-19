@@ -38,24 +38,26 @@ public class CourtCaseStub {
 
     @Autowired
     CourthouseStub courthouseStub;
+    @Autowired
+    DartsDatabaseSaveStub dartsDatabaseSaveStub;
 
     @Transactional
     public CourtCaseEntity createAndSaveMinimalCourtCase() {
 
         var courtCase = CaseTestData.createSomeMinimalCase();
         courtCase.getCourthouse().getCreatedBy().setId(0);
-        return caseRepository.save(courtCase);
+        return dartsDatabaseSaveStub.save(courtCase);
     }
 
     @Transactional
     public CourtCaseEntity createAndSaveMinimalCourtCase(String caseNumber, Integer courthouseId) {
         var courtCase = CaseTestData.createCaseWith(caseNumber, courthouseRepository.findById(courthouseId).get());
-        return caseRepository.save(courtCase);
+        return dartsDatabaseSaveStub.save(courtCase);
     }
 
     public CourtCaseEntity createAndSaveMinimalCourtCase(String caseNumber, CourthouseEntity courthouse) {
         var courtCase = CaseTestData.createCaseWith(caseNumber, courthouse);
-        return caseRepository.save(courtCase);
+        return dartsDatabaseSaveStub.save(courtCase);
     }
 
     /**
@@ -66,7 +68,7 @@ public class CourtCaseStub {
 
         var courtCase = createAndSaveMinimalCourtCase();
         caseConsumer.accept(courtCase);
-        return caseRepository.save(courtCase);
+        return dartsDatabaseSaveStub.save(courtCase);
     }
 
     /**
@@ -83,7 +85,7 @@ public class CourtCaseStub {
         var hear3 = hearingStub.createHearing(courthouseName, "testCourtroom", courtCase.getCaseNumber(), D_2020_10_2, courthouseStub, userAccountStub);
         courtCase.getHearings().addAll(List.of(hear1, hear2, hear3));
 
-        return caseRepository.save(courtCase);
+        return dartsDatabaseSaveStub.save(courtCase);
     }
 
     @Transactional

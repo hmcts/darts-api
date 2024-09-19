@@ -119,7 +119,6 @@ class ArmBatchProcessResponseFilesIntTest extends IntegrationBase {
 
     }
 
-    @Disabled("Impacted by V1_367__adding_not_null_constraints_part_4.sql")
     @Test
     void batchProcessResponseFiles_WithMediaReturnsSuccess() throws IOException {
 
@@ -310,7 +309,6 @@ class ArmBatchProcessResponseFilesIntTest extends IntegrationBase {
         verify(armDataManagementApi).getBlobData(createRecordFilename5);
     }
 
-    @Disabled("Impacted by V1_367__adding_not_null_constraints_part_4.sql")
     @Test
     void batchProcessResponseFiles_GetBlobsThrowsException() throws IOException {
 
@@ -471,7 +469,6 @@ class ArmBatchProcessResponseFilesIntTest extends IntegrationBase {
         assertFalse(foundMedia5.isResponseCleaned());
     }
 
-    @Disabled("Impacted by V1_367__adding_not_null_constraints_part_4.sql")
     @Test
     void batchProcessResponseFiles_WithInvalidJson() throws IOException {
 
@@ -647,7 +644,6 @@ class ArmBatchProcessResponseFilesIntTest extends IntegrationBase {
         assertFalse(foundMedia5.isResponseCleaned());
     }
 
-    @Disabled("Impacted by V1_367__adding_not_null_constraints_part_4.sql")
     @Test
     void batchProcessResponseFiles_WithInvalidFilenameStatus() throws IOException {
 
@@ -748,7 +744,6 @@ class ArmBatchProcessResponseFilesIntTest extends IntegrationBase {
     }
 
     @Test
-    @Disabled("Impacted by V1_364_*.sql")
     void batchProcessResponseFiles_WithTranscriptionReturnsSuccess() throws IOException {
 
         // given
@@ -852,7 +847,6 @@ class ArmBatchProcessResponseFilesIntTest extends IntegrationBase {
     }
 
     @Test
-    @Disabled("Impacted by V1_364_*.sql")
     void batchProcessResponseFiles_WithInvalidTranscriptionChecksum() throws IOException {
 
         // given
@@ -1346,7 +1340,6 @@ class ArmBatchProcessResponseFilesIntTest extends IntegrationBase {
         assertNotNull(foundCaseDocEod.getErrorCode());
     }
 
-    @Disabled("Impacted by V1_367__adding_not_null_constraints_part_4.sql")
     @Test
     void batchProcessResponseFiles_ReturnsNoRecordsToProcess() {
 
@@ -1394,7 +1387,6 @@ class ArmBatchProcessResponseFilesIntTest extends IntegrationBase {
         verifyNoMoreInteractions(armDataManagementApi);
     }
 
-    @Disabled("Impacted by V1_367__adding_not_null_constraints_part_4.sql")
     @Test
     void batchProcessResponseFiles_ThrowsExceptionWhenListingPrefix() {
 
@@ -1438,7 +1430,6 @@ class ArmBatchProcessResponseFilesIntTest extends IntegrationBase {
     }
 
     @Test
-    @Disabled("Impacted by V1_364_*.sql")
     void batchProcessResponseFiles_WithNullTranscriptionChecksum() throws IOException {
 
         // given
