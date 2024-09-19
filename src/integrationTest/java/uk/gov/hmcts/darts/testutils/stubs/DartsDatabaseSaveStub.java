@@ -2,6 +2,7 @@ package uk.gov.hmcts.darts.testutils.stubs;
 
 import jakarta.persistence.EntityManager;
 import lombok.AllArgsConstructor;
+import org.hibernate.proxy.HibernateProxy;
 import org.junit.platform.commons.JUnitException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -57,7 +58,13 @@ public class DartsDatabaseSaveStub {
     }
 
 
+    @Transactional
     public void updateCreatedByLastModifiedBy(CreatedModifiedBaseEntity createdModifiedBaseEntity) {
+        //No need to update values if the entity is a proxy and is not initialized
+        if (createdModifiedBaseEntity instanceof HibernateProxy proxy
+            && proxy.getHibernateLazyInitializer().isUninitialized()) {
+            return;
+        }
         if (createdModifiedBaseEntity.getCreatedBy() == null) {
             createdModifiedBaseEntity.setCreatedBy(userAccountRepository.getReferenceById(0));
             createdModifiedBaseEntity.setCreatedDateTime(OffsetDateTime.now());

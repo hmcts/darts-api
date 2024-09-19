@@ -218,12 +218,16 @@ public class TestSupportController {
         courtCase.setClosed(false);
         courtCase.setInterpreterUsed(false);
 
-        Optional<CourthouseEntity> foundCourthouse = courthouseRepository.findByCourthouseName(
-            courthouseName);
+        courtCase.setCreatedBy(userAccountRepository.getReferenceById(0));
+        courtCase.setCreatedDateTime(OffsetDateTime.now());
+        courtCase.setLastModifiedBy(userAccountRepository.getReferenceById(0));
+        courtCase.setLastModifiedDateTime(OffsetDateTime.now());
+
+        Optional<CourthouseEntity> foundCourthouse = courthouseRepository.findByCourthouseName(StringUtils.toRootUpperCase(courthouseName));
         if (foundCourthouse.isPresent()) {
             courtCase.setCourthouse(foundCourthouse.get());
         } else {
-            return new ResponseEntity<>(BAD_REQUEST);
+            return new ResponseEntity<>("Court house not found", BAD_REQUEST);
         }
 
         CourtCaseEntity savedCase = caseRepository.saveAndFlush(courtCase);
@@ -437,6 +441,11 @@ public class TestSupportController {
         courtCase.setCaseNumber(caseNumber);
         courtCase.setClosed(false);
         courtCase.setInterpreterUsed(false);
+
+        courtCase.setCreatedBy(userAccountRepository.getReferenceById(0));
+        courtCase.setCreatedDateTime(OffsetDateTime.now());
+        courtCase.setLastModifiedBy(userAccountRepository.getReferenceById(0));
+        courtCase.setLastModifiedDateTime(OffsetDateTime.now());
 
         String courtroomName = "func-" + randomAlphanumeric(7);
         String courthouseName = "func-" + randomAlphanumeric(7);

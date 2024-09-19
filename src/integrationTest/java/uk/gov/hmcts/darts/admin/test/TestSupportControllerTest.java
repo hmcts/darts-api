@@ -95,7 +95,6 @@ class TestSupportControllerTest extends IntegrationBase {
 
 
     @Test
-    @Disabled("Impacted by V1_364_*.sql - fix needed")
     void createsAudit() throws Exception {
         mockMvc.perform(post(ENDPOINT_URL + "/courthouse/func-swansea/courtroom/cr1"))
             .andExpect(status().isCreated());
@@ -139,7 +138,6 @@ class TestSupportControllerTest extends IntegrationBase {
     }
 
     @Test
-    @Disabled("Impacted by V1_364_*.sql - fix needed")
     void createRetention() throws Exception {
         MvcResult response = mockMvc.perform(post(ENDPOINT_URL + "/case-retentions/caseNumber/func-case-a"))
             .andExpect(status().isOk())

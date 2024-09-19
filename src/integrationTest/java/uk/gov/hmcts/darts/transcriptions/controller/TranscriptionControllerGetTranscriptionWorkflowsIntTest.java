@@ -65,7 +65,7 @@ class TranscriptionControllerGetTranscriptionWorkflowsIntTest extends Integratio
         transcription.setCreatedDateTime(OffsetDateTime.of(2024, 4, 24, 10, 0, 0, 0, ZoneOffset.UTC));
         transcription.setStartTime(SOME_DATE_TIME);
         transcription.setEndTime(SOME_DATE_TIME);
-        transcription = dartsDatabase.save(transcription);
+        transcription = dartsDatabase.getTranscriptionRepository().save(transcription);
 
         var transcriptionWorkflow1 = transcriptionStub.createAndSaveTranscriptionWorkflow(transcription,
                                                                                           OffsetDateTime.of(2024, 4, 23, 10, 0, 0, 0, ZoneOffset.UTC),
@@ -127,7 +127,7 @@ class TranscriptionControllerGetTranscriptionWorkflowsIntTest extends Integratio
         transcription2.setCreatedDateTime(OffsetDateTime.of(2024, 4, 24, 10, 0, 0, 0, ZoneOffset.UTC));
         transcription2.setStartTime(SOME_DATE_TIME);
         transcription2.setEndTime(SOME_DATE_TIME);
-        transcription2 = dartsDatabase.save(transcription2);
+        transcription2 = dartsDatabase.getTranscriptionRepository().save(transcription2);
 
         MockHttpServletRequestBuilder requestBuilder = get(ENDPOINT_URI)
             .queryParam("transcription_id", transcription2.getId().toString())
