@@ -27,6 +27,7 @@ import uk.gov.hmcts.darts.testutils.IntegrationBase;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -45,7 +46,6 @@ import static uk.gov.hmcts.darts.test.common.data.JudgeTestData.createJudgeWithN
 import static uk.gov.hmcts.darts.testutils.stubs.UserAccountStub.INTEGRATION_TEST_USER_EMAIL;
 
 @Slf4j
-@Disabled("Impacted by V1_363__not_null_constraints_part3.sql - fix needed (UnsupportedOperationException)")
 @SuppressWarnings({"PMD.VariableDeclarationUsageDistance", "PMD.NcssCount", "PMD.ExcessiveImports"})
 class CaseServiceAdvancedSearchTest extends IntegrationBase {
     @Autowired
@@ -75,7 +75,7 @@ class CaseServiceAdvancedSearchTest extends IntegrationBase {
 
         CourtCaseEntity case2 = createCaseAt(swanseaCourthouse);
         case2.setCaseNumber("Case2");
-        case2.setDefendantList(Arrays.asList(createDefendantForCaseWithName(case2, "Defendant2")));
+        case2.setDefendantList(new ArrayList<>(List.of(createDefendantForCaseWithName(case2, "Defendant2"))));
 
         CourtCaseEntity case3 = createCaseAt(swanseaCourthouse);
         case3.setCaseNumber("Case3");

@@ -537,6 +537,7 @@ public class DartsDatabaseStub {
         save(hearingEntity.getCourtroom().getCourthouse());
         save(hearingEntity.getCourtroom());
         save(hearingEntity.getCourtCase());
+        saveAllList(hearingEntity.getJudges());
         return dartsDatabaseSaveStub.save(hearingEntity);
     }
 
@@ -562,6 +563,7 @@ public class DartsDatabaseStub {
             return null;
         }
         save(courtCase.getCourthouse());
+        saveAllList(courtCase.getJudges());
         courtCase.getDefenceList().forEach(dartsDatabaseSaveStub::updateCreatedByLastModifiedBy);
         courtCase.getDefendantList().forEach(dartsDatabaseSaveStub::updateCreatedByLastModifiedBy);
         courtCase.getProsecutorList().forEach(dartsDatabaseSaveStub::updateCreatedByLastModifiedBy);
