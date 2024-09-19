@@ -1,9 +1,6 @@
 package uk.gov.hmcts.darts.event.service.impl;
 
-import com.github.tomakehurst.wiremock.client.WireMock;
-import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -21,9 +18,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.darts.test.common.AwaitabilityUtil.waitForMax10SecondsWithOneSecondPoll;
 
-@Slf4j
-@Disabled("temporarily disabling since some of the tests are flaky. Will fix soon")
 class SetReportingRestrictionEventHandlerTest extends HandlerTestData {
     public static final String TEST_REPORTING_RESTRICTION = "Reporting Restriction Test";
 
@@ -49,39 +45,40 @@ class SetReportingRestrictionEventHandlerTest extends HandlerTestData {
     @Test
     void givenSetReportingRestrictionEventReceivedAndCourtCaseAndHearingDoesNotExist_thenNotifyDarUpdate() {
 
-        var result = WireMock.listAllStubMappings();
-        log.info("mappings: {}", result.getMappings());
+        // Fixes test failing when a previous cached Spring application context is re-used.
+        // Gives Spring some additional time for completing Wiremock setup before requests are sent to Wiremock server.
+        waitForMax10SecondsWithOneSecondPoll(() -> {
+            dartsDatabase.createCase(SOME_COURTHOUSE, SOME_CASE_NUMBER);
 
-        dartsDatabase.createCase(SOME_COURTHOUSE, SOME_CASE_NUMBER);
+            eventDispatcher.receive(someMinimalDartsEvent()
+                                        .caseNumbers(List.of(SOME_CASE_NUMBER))
+                                        .courthouse(SOME_COURTHOUSE)
+                                        .courtroom(SOME_ROOM)
+                                        .dateTime(HEARING_DATE_ODT));
 
-        eventDispatcher.receive(someMinimalDartsEvent()
-                                    .caseNumbers(List.of(SOME_CASE_NUMBER))
-                                    .courthouse(SOME_COURTHOUSE)
-                                    .courtroom(SOME_ROOM)
-                                    .dateTime(HEARING_DATE_ODT));
+            var persistedCase = dartsDatabase.findByCaseByCaseNumberAndCourtHouseName(
+                SOME_CASE_NUMBER,
+                SOME_COURTHOUSE
+            ).get();
 
-        var persistedCase = dartsDatabase.findByCaseByCaseNumberAndCourtHouseName(
-            SOME_CASE_NUMBER,
-            SOME_COURTHOUSE
-        ).get();
+            var hearingsForCase = dartsDatabase.findByCourthouseCourtroomAndDate(
+                SOME_COURTHOUSE, SOME_ROOM, HEARING_DATE_ODT.toLocalDate());
 
-        var hearingsForCase = dartsDatabase.findByCourthouseCourtroomAndDate(
-            SOME_COURTHOUSE, SOME_ROOM, HEARING_DATE_ODT.toLocalDate());
+            var persistedEvent = dartsDatabase.getAllEvents().get(0);
 
-        var persistedEvent = dartsDatabase.getAllEvents().get(0);
+            assertThat(persistedEvent.getCourtroom().getName()).isEqualTo(SOME_ROOM.toUpperCase(Locale.ROOT));
+            assertThat(persistedCase.getCourthouse().getCourthouseName()).isEqualTo(SOME_COURTHOUSE.toUpperCase(Locale.ROOT));
+            assertThat(hearingsForCase.size()).isEqualTo(1);
+            assertThat(hearingsForCase.get(0).getHearingIsActual()).isEqualTo(true);
 
-        assertThat(persistedEvent.getCourtroom().getName()).isEqualTo(SOME_ROOM.toUpperCase(Locale.ROOT));
-        assertThat(persistedCase.getCourthouse().getCourthouseName()).isEqualTo(SOME_COURTHOUSE.toUpperCase(Locale.ROOT));
-        assertThat(hearingsForCase.size()).isEqualTo(1);
-        assertThat(hearingsForCase.get(0).getHearingIsActual()).isEqualTo(true);
+            assertEquals(
+                "Judge directed on reporting restrictions",
+                persistedCase.getReportingRestrictions().getEventName()
+            );
 
-        assertEquals(
-            "Judge directed on reporting restrictions",
-            persistedCase.getReportingRestrictions().getEventName()
-        );
-
-        dartsGateway.verifyReceivedNotificationType(3);
-        dartsGateway.verifyNotificationUrl("http://1.2.3.4/VIQDARNotifyEvent/DARNotifyEvent.asmx", 1);
+            dartsGateway.verifyReceivedNotificationType(3);
+            dartsGateway.verifyNotificationUrl("http://1.2.3.4/VIQDARNotifyEvent/DARNotifyEvent.asmx", 1);
+        });
     }
 
     @Test

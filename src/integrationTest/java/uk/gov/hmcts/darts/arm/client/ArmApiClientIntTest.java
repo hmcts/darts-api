@@ -1,6 +1,5 @@
 package uk.gov.hmcts.darts.arm.client;
 
-import com.github.tomakehurst.wiremock.WireMockServer;
 import com.github.tomakehurst.wiremock.client.WireMock;
 import lombok.SneakyThrows;
 import org.apache.commons.io.IOUtils;
@@ -10,7 +9,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.TestPropertySource;
 import uk.gov.hmcts.darts.arm.client.model.UpdateMetadataRequest;
 import uk.gov.hmcts.darts.arm.client.model.UpdateMetadataResponse;
-import uk.gov.hmcts.darts.testutils.IntegrationBase;
+import uk.gov.hmcts.darts.testutils.IntegrationBaseWithWiremock;
 
 import java.io.InputStream;
 import java.nio.file.Files;
@@ -25,6 +24,7 @@ import static com.github.tomakehurst.wiremock.client.WireMock.postRequestedFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlPathMatching;
+import static com.github.tomakehurst.wiremock.client.WireMock.verify;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.http.HttpHeaders.AUTHORIZATION;
@@ -35,7 +35,7 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
     "darts.storage.arm-api.url=http://localhost:${wiremock.server.port}"
 })
 @SuppressWarnings("PMD.CloseResource")
-class ArmApiClientIntTest extends IntegrationBase {
+class ArmApiClientIntTest extends IntegrationBaseWithWiremock {
 
     private static final String EXTERNAL_RECORD_ID = "7683ee65-c7a7-7343-be80-018b8ac13602";
     private static final String EXTERNAL_FILE_ID = "075987ea-b34d-49c7-b8db-439bfbe2496c";
@@ -45,9 +45,6 @@ class ArmApiClientIntTest extends IntegrationBase {
 
     @Autowired
     private ArmApiClient armApiClient;
-    @Autowired
-    private WireMockServer wireMockServer;
-
 
     @Test
     void updateMetadataShouldSucceedIfServerReturns200Success() {
@@ -88,7 +85,7 @@ class ArmApiClientIntTest extends IntegrationBase {
         UpdateMetadataResponse updateMetadataResponse = armApiClient.updateMetadata(bearerAuth, updateMetadataRequest);
 
         // Then
-        wireMockServer.verify(postRequestedFor(urlEqualTo(UPDATE_METADATA_PATH))
+        verify(postRequestedFor(urlEqualTo(UPDATE_METADATA_PATH))
                                   .withHeader(AUTHORIZATION, equalTo(bearerAuth))
                                   .withHeader(CONTENT_TYPE, equalTo(APPLICATION_JSON_VALUE))
                                   .withRequestBody(
