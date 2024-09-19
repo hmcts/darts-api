@@ -10,7 +10,6 @@ import org.hamcrest.Matchers;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
@@ -92,7 +91,6 @@ class DailyListProcessorTest extends IntegrationBase {
 
 
     @Test
-    @Disabled("Impacted by V1_364_*.sql - fix needed")
     void dailyListProcessorMultipleDailyList() throws IOException {
         log.info("start dailyListProcessorMultipleDailyList");
         CourthouseEntity swanseaCourtEntity = dartsDatabase.createCourthouseWithTwoCourtrooms();
@@ -111,7 +109,8 @@ class DailyListProcessorTest extends IntegrationBase {
             "tests/dailyListProcessorTest/dailyListCPP.json"
         );
 
-        dailyListRepository.saveAllAndFlush(List.of(dailyListEntity, oldDailyListEntity));
+        dartsDatabase.save(dailyListEntity);
+        dartsDatabase.save(oldDailyListEntity);
 
         dailyListProcessor.processAllDailyLists();
 
@@ -245,7 +244,6 @@ class DailyListProcessorTest extends IntegrationBase {
     }
 
     @Test
-    @Disabled("Impacted by V1_364_*.sql - fix needed")
     void dailyListForListingCourthouseWithIgnore() throws IOException {
         log.info("start dailyListProcessorMultipleDailyList");
         CourthouseEntity swanseaCourtEntity = dartsDatabase.createCourthouseWithTwoCourtrooms();
@@ -264,7 +262,8 @@ class DailyListProcessorTest extends IntegrationBase {
             "tests/dailyListProcessorTest/dailyListCPP.json"
         );
 
-        dailyListRepository.saveAllAndFlush(List.of(dailyListEntity, oldDailyListEntity));
+        dartsDatabase.save(dailyListEntity);
+        dartsDatabase.save(oldDailyListEntity);
 
         dailyListProcessor.processAllDailyListForListingCourthouse(swanseaCourtEntity.getCourthouseName());
 
@@ -308,7 +307,6 @@ class DailyListProcessorTest extends IntegrationBase {
     }
 
     @Test
-    @Disabled("Impacted by V1_364_*.sql - fix needed")
     void dailyListProcessorCppAndXhbDailyLists() throws IOException {
         CourthouseEntity swanseaCourtEntity = dartsDatabase.createCourthouseWithTwoCourtrooms();
 
@@ -380,18 +378,17 @@ class DailyListProcessorTest extends IntegrationBase {
     }
 
     @Test
-    @Disabled("Impacted by V1_364_*.sql - fix needed")
     void setsDailyListStatusToFailedIfUpdateFails() {
         var dailyListEntity = DailyListTestData.minimalDailyList();
         dailyListEntity.setListingCourthouse("SOME-COURTHOUSE");
         dailyListEntity.setStartDate(LocalDate.now());
         dailyListEntity.setSource("CPP");
 
-        var dailyListEntities = dartsDatabase.saveAll(dailyListEntity);
+        var dailyListEntities = dartsDatabase.save(dailyListEntity);
 
         dailyListProcessor.processAllDailyLists();
 
-        int id = dailyListEntities.get(0).getId();
+        int id = dailyListEntities.getId();
 
         DailyListLogJobReport report = new DailyListLogJobReport(1, SourceType.CPP);
         report.registerResult(FAILED);
@@ -405,7 +402,6 @@ class DailyListProcessorTest extends IntegrationBase {
     }
 
     @Test
-    @Disabled("Impacted by V1_364_*.sql - fix needed")
     void setsDailyListStatusToIgnoredIfNotLatest() throws IOException {
         var latestDailyList = DailyListTestData.minimalDailyList();
         latestDailyList.setListingCourthouse("SOME-COURTHOUSE");
@@ -419,7 +415,8 @@ class DailyListProcessorTest extends IntegrationBase {
         oldDailyList.setPublishedTimestamp(OffsetDateTime.now().minusHours(1));
         oldDailyList.setStartDate(LocalDate.now());
         oldDailyList.setSource("CPP");
-        dartsDatabase.saveAll(latestDailyList, oldDailyList);
+        dartsDatabase.save(latestDailyList);
+        dartsDatabase.save(oldDailyList);
 
         dailyListProcessor.processAllDailyLists();
 
@@ -437,7 +434,6 @@ class DailyListProcessorTest extends IntegrationBase {
     }
 
     @Test
-    @Disabled("Impacted by V1_364_*.sql - fix needed")
     void dailyListProcessorWithLock() throws IOException {
         CourthouseEntity swanseaCourtEntity = dartsDatabase.createCourthouseWithTwoCourtrooms();
         dartsDatabase.createDailyLists(swanseaCourtEntity.getCourthouseName());

@@ -1,6 +1,5 @@
 package uk.gov.hmcts.darts.common.repository;
 
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import uk.gov.hmcts.darts.common.entity.CaseManagementRetentionEntity;
@@ -15,7 +14,6 @@ import static java.util.stream.IntStream.range;
 import static org.assertj.core.api.Assertions.assertThat;
 import static uk.gov.hmcts.darts.test.common.data.CaseManagementRetentionTestData.someMinimalCaseManagementRetention;
 
-@Disabled("Impacted by V1_362__constraint_transcription_part6.sql - fix needed")
 class CaseManagementRetentionRepositoryTest extends PostgresIntegrationBase {
 
     @Autowired
@@ -26,7 +24,7 @@ class CaseManagementRetentionRepositoryTest extends PostgresIntegrationBase {
 
     @Test
     void getCaseManagementRetentionIdsForEvents() {
-        var caseManagementRetention = entityGraphPersistence.persist(someMinimalCaseManagementRetention());
+        var caseManagementRetention = dartsDatabase.save(someMinimalCaseManagementRetention());
 
         var cmrIds = caseManagementRetentionRepository.getIdsForEvents(List.of(caseManagementRetention.getEventEntity()));
 
@@ -37,7 +35,6 @@ class CaseManagementRetentionRepositoryTest extends PostgresIntegrationBase {
     @Test
     void deletesCaseManagementRetentionsForAssociatedWithEvents() {
         var caseManagementRetentionsWithEvents = createSomeCmrWithEvents(3);
-        entityGraphPersistence.persistAll(caseManagementRetentionsWithEvents);
 
         caseManagementRetentionRepository.deleteAllByEventEntityIn(
             asList(
@@ -52,6 +49,7 @@ class CaseManagementRetentionRepositoryTest extends PostgresIntegrationBase {
     private List<CaseManagementRetentionEntity> createSomeCmrWithEvents(int quantity) {
         return range(0, quantity)
             .mapToObj(i -> someMinimalCaseManagementRetention())
+            .map(caseManagementRetentionEntity -> dartsDatabase.save(caseManagementRetentionEntity))
             .collect(toList());
     }
 }

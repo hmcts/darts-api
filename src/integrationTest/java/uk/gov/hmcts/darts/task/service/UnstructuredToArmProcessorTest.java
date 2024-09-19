@@ -324,7 +324,7 @@ class UnstructuredToArmProcessorTest extends IntegrationBase {
     }
 
     @Test
-    @Disabled("Impacted by V1_367__adding_not_null_constraints_part_4.sql - Fix needed")
+    @Disabled("Impacted by V1_367__adding_not_null_constraints_part_4.sql - Fix needed (Validation)")
     void updateTransferAttemptIfUnableToFindUnstructuredRecordFromFailedArmEod() {
         HearingEntity hearing = dartsDatabase.createHearing(
             "NEWCASTLE",

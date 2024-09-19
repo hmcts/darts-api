@@ -6,7 +6,6 @@ import jakarta.persistence.EntityManagerFactory;
 import jakarta.persistence.Query;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
-import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.platform.commons.JUnitException;
 import org.springframework.data.history.Revisions;
@@ -19,6 +18,7 @@ import uk.gov.hmcts.darts.common.entity.AnnotationDocumentEntity;
 import uk.gov.hmcts.darts.common.entity.AnnotationEntity;
 import uk.gov.hmcts.darts.common.entity.AuditEntity;
 import uk.gov.hmcts.darts.common.entity.AutomatedTaskEntity;
+import uk.gov.hmcts.darts.common.entity.CaseManagementRetentionEntity;
 import uk.gov.hmcts.darts.common.entity.CaseRetentionEntity;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
@@ -403,14 +403,14 @@ public class DartsDatabaseStub {
         UserAccountEntity defaultUser = userAccountRepository.getReferenceById(0);
         courthouse.setCreatedBy(defaultUser);
         courthouse.setLastModifiedBy(defaultUser);
-        return dartsDatabaseSaveStub.save(courthouse);
+        return save(courthouse);
     }
 
     @Transactional
     public CourthouseEntity createCourthouseWithTwoCourtrooms() {
         CourthouseEntity swanseaCourtEntity = createCourthouseWithNameAndCode("SWANSEA", 457, "Swansea");
-        dartsDatabaseSaveStub.save(createCourtRoomWithNameAtCourthouse(swanseaCourtEntity, "1"));
-        dartsDatabaseSaveStub.save(createCourtRoomWithNameAtCourthouse(swanseaCourtEntity, "2"));
+        save(createCourtRoomWithNameAtCourthouse(swanseaCourtEntity, "1"));
+        save(createCourtRoomWithNameAtCourthouse(swanseaCourtEntity, "2"));
         return swanseaCourtEntity;
 
     }
@@ -431,7 +431,8 @@ public class DartsDatabaseStub {
             "tests/dailyListProcessorTest/dailyListCPP.json"
         );
 
-        dailyListRepository.saveAllAndFlush(List.of(xhbDailyList, cppDailyList));
+        save(xhbDailyList);
+        save(cppDailyList);
     }
 
     @Transactional
@@ -541,23 +542,61 @@ public class DartsDatabaseStub {
 
     @Transactional
     public CourthouseEntity save(CourthouseEntity courthouse) {
+        if (courthouse == null) {
+            return null;
+        }
         dartsDatabaseSaveStub.save(courthouse.getCreatedBy());
         return dartsDatabaseSaveStub.save(courthouse);
     }
 
     @Transactional
     public CourtroomEntity save(CourtroomEntity courtroom) {
+        save(courtroom.getCourthouse());
         dartsDatabaseSaveStub.save(courtroom.getCreatedBy());
         return dartsDatabaseSaveStub.save(courtroom);
     }
 
     @Transactional
     public CourtCaseEntity save(CourtCaseEntity courtCase) {
+        if (courtCase == null) {
+            return null;
+        }
         save(courtCase.getCourthouse());
         courtCase.getDefenceList().forEach(dartsDatabaseSaveStub::updateCreatedByLastModifiedBy);
         courtCase.getDefendantList().forEach(dartsDatabaseSaveStub::updateCreatedByLastModifiedBy);
         courtCase.getProsecutorList().forEach(dartsDatabaseSaveStub::updateCreatedByLastModifiedBy);
         return dartsDatabaseSaveStub.save(courtCase);
+    }
+
+    @Transactional
+    public CaseManagementRetentionEntity save(CaseManagementRetentionEntity caseManagementRetentionEntity) {
+        if (caseManagementRetentionEntity == null) {
+            return null;
+        }
+        save(caseManagementRetentionEntity.getRetentionPolicyTypeEntity());
+        save(caseManagementRetentionEntity.getCourtCase());
+        save(caseManagementRetentionEntity.getEventEntity());
+        return dartsDatabaseSaveStub.save(caseManagementRetentionEntity);
+    }
+
+
+    @Transactional
+    public RetentionPolicyTypeEntity save(RetentionPolicyTypeEntity retentionPolicyTypeEntity) {
+        if (retentionPolicyTypeEntity == null) {
+            return null;
+        }
+        save(retentionPolicyTypeEntity.getCreatedBy());
+        return dartsDatabaseSaveStub.save(retentionPolicyTypeEntity);
+    }
+
+
+    @Transactional
+    public EventEntity save(EventEntity eventEntity) {
+        if (eventEntity == null) {
+            return null;
+        }
+        save(eventEntity.getCourtroom());
+        return dartsDatabaseSaveStub.save(eventEntity);
     }
 
     @Transactional
@@ -574,6 +613,15 @@ public class DartsDatabaseStub {
         });
         return transcription;
     }
+
+    @Transactional
+    public CaseRetentionEntity save(CaseRetentionEntity caseRetentionEntity) {
+        save(caseRetentionEntity.getSubmittedBy());
+        save(caseRetentionEntity.getRetentionPolicyType());
+        save(caseRetentionEntity.getCaseManagementRetention());
+        return dartsDatabaseSaveStub.save(caseRetentionEntity);
+    }
+
 
     public <T> T save(T entity) {
         return dartsDatabaseSaveStub.save(entity);
@@ -622,7 +670,14 @@ public class DartsDatabaseStub {
         return obj.getClass().isAnnotationPresent(Entity.class);
     }
 
-    @SneakyThrows
+    @Transactional
+    public <T> void saveAllList(List<T> entities) {
+        if (entities == null || entities.isEmpty()) {
+            return;
+        }
+        entities.forEach(this::save);
+    }
+
     @Transactional
     public void saveAll(Object... entities) {
         if (entities == null || entities.length == 0) {

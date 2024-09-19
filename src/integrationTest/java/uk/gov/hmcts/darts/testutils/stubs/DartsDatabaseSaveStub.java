@@ -29,6 +29,9 @@ public class DartsDatabaseSaveStub {
 
     @Transactional
     public <T> T save(T entity) {
+        if (entity == null) {
+            return null;
+        }
         return transactionalUtil.executeInTransaction(() -> {
             if (entity instanceof CreatedModifiedBaseEntity createdModifiedBaseEntity) {
                 updateCreatedByLastModifiedBy(createdModifiedBaseEntity);
@@ -72,6 +75,8 @@ public class DartsDatabaseSaveStub {
             UserAccountEntity userAccount = createdModifiedBaseEntity.getCreatedBy();
             updateCreatedByLastModifiedBy(userAccount);
             createdModifiedBaseEntity.setCreatedBy(userAccountRepository.save(userAccount));
+        } else {
+            userAccountRepository.save(createdModifiedBaseEntity.getCreatedBy());
         }
         if (createdModifiedBaseEntity.getCreatedDateTime() == null) {
             createdModifiedBaseEntity.setCreatedDateTime(OffsetDateTime.now());
@@ -84,6 +89,8 @@ public class DartsDatabaseSaveStub {
             UserAccountEntity userAccount = createdModifiedBaseEntity.getLastModifiedBy();
             updateCreatedByLastModifiedBy(userAccount);
             createdModifiedBaseEntity.setLastModifiedBy(userAccountRepository.save(userAccount));
+        } else {
+            userAccountRepository.save(createdModifiedBaseEntity.getLastModifiedBy());
         }
         if (createdModifiedBaseEntity.getLastModifiedDateTime() == null) {
             createdModifiedBaseEntity.setLastModifiedDateTime(OffsetDateTime.now());

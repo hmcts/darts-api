@@ -97,7 +97,6 @@ class ArchiveRecordServiceIntTest extends IntegrationBase {
     }
 
     @Test
-    @Disabled("Impacted by V1_364_*.sql - fix needed")
     void generateArchiveRecord_WithLiveMediaProperties_ReturnFileSuccess() throws IOException {
         OffsetDateTime startedAt = OffsetDateTime.of(2023, 9, 23, 13, 0, 0, 0, UTC);
         when(currentTimeHelper.currentOffsetDateTime()).thenReturn(startedAt);
@@ -161,7 +160,6 @@ class ArchiveRecordServiceIntTest extends IntegrationBase {
     }
 
     @Test
-    @Disabled("Impacted by V1_364_*.sql - fix needed")
     void generateArchiveRecord_WithLiveMediaPropertiesAndRetentionDate_ReturnFileSuccess() throws IOException {
         OffsetDateTime startedAt = OffsetDateTime.of(2023, 9, 23, 13, 0, 0, 0, UTC);
         OffsetDateTime retainUntil = OffsetDateTime.of(2024, 9, 23, 13, 45, 0, 0, UTC);
@@ -227,7 +225,7 @@ class ArchiveRecordServiceIntTest extends IntegrationBase {
     }
 
     @Test
-    @Disabled("Impacted by V1_364_*.sql - fix needed")
+    @Disabled("Impacted by V1_364_*.sql - fix needed (Validation)")
     void generateArchiveRecord_WithAllMediaProperties_ReturnFileSuccess() throws IOException {
 
         OffsetDateTime startedAt = OffsetDateTime.of(2023, 9, 23, 14, 0, 0, 0, UTC);
@@ -693,7 +691,6 @@ class ArchiveRecordServiceIntTest extends IntegrationBase {
     }
 
     @Test
-    @Disabled("Impacted by V1_367__adding_not_null_constraints_part_4.sql - Fix needed")
     void generateArchiveRecord_WithLiveCaseProperties_ReturnFileSuccess() throws IOException {
         OffsetDateTime startedAt = OffsetDateTime.of(2023, 9, 23, 13, 0, 0, 0, UTC);
         when(currentTimeHelper.currentOffsetDateTime()).thenReturn(startedAt);
@@ -752,7 +749,6 @@ class ArchiveRecordServiceIntTest extends IntegrationBase {
     }
 
     @Test
-    @Disabled("Impacted by V1_367__adding_not_null_constraints_part_4.sql - Fix needed")
     void generateArchiveRecord_WithLiveCasePropertiesRetentionDate_ReturnFileSuccess() throws IOException {
         OffsetDateTime startedAt = OffsetDateTime.of(2023, 9, 23, 13, 0, 0, 0, UTC);
         OffsetDateTime retainUntil = OffsetDateTime.of(2024, 9, 23, 13, 0, 0, 0, UTC);
@@ -813,7 +809,6 @@ class ArchiveRecordServiceIntTest extends IntegrationBase {
     }
 
     @Test
-    @Disabled("Impacted by V1_367__adding_not_null_constraints_part_4.sql - Fix needed")
     void generateArchiveRecord_WithAllCaseProperties_ReturnFileSuccess() throws IOException {
         OffsetDateTime startedAt = OffsetDateTime.of(2023, 9, 23, 13, 0, 0, 0, UTC);
         when(currentTimeHelper.currentOffsetDateTime()).thenReturn(startedAt);
@@ -864,6 +859,7 @@ class ArchiveRecordServiceIntTest extends IntegrationBase {
         expectedResponse = expectedResponse.replaceAll("<CASE_NUMBERS>", String.format("T%s", YESTERDAY.format(BASIC_ISO_DATE)) + "|Case1");
         expectedResponse = expectedResponse.replaceAll("<UPLOADED_BY>", String.valueOf(uploadedBy.getId()));
         expectedResponse = expectedResponse.replaceAll("<UPLOADED_DATE_TIME>", caseDocument.getCreatedDateTime().format(formatter));
+        expectedResponse = expectedResponse.replaceAll("<bf_011>", caseDocument.getCreatedDateTime().format(formatter));
 
         log.info("expect response {}", expectedResponse);
         assertEquals(expectedResponse, actualResponse, JSONCompareMode.STRICT);

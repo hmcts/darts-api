@@ -2,7 +2,6 @@ package uk.gov.hmcts.darts.cases.controller;
 
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.skyscreamer.jsonassert.JSONAssert;
 import org.skyscreamer.jsonassert.JSONCompareMode;
@@ -25,11 +24,10 @@ import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import static uk.gov.hmcts.darts.test.common.data.DefendantTestData.someMinimalDefendant;
+import static uk.gov.hmcts.darts.test.common.data.DefendantTestData.createDefendantForCase;
 import static uk.gov.hmcts.darts.test.common.data.ProsecutorTestData.createProsecutorForCase;
 
 @AutoConfigureMockMvc
-@Disabled("Impacted by V1_363__not_null_constraints_part3.sql - fix needed")
 class CaseControllerGetCaseByIdTest extends IntegrationBase {
 
     @Autowired
@@ -57,7 +55,7 @@ class CaseControllerGetCaseByIdTest extends IntegrationBase {
         );
         CourtCaseEntity courtCase = hearingEntity.getCourtCase();
         courtCase.addProsecutor(createProsecutorForCase(courtCase));
-        courtCase.addDefendant(someMinimalDefendant());
+        courtCase.addDefendant(createDefendantForCase(courtCase));
         courtCase.addDefence("aDefence");
         dartsDatabase.save(courtCase);
 
@@ -86,13 +84,14 @@ class CaseControllerGetCaseByIdTest extends IntegrationBase {
         String expectedJson = """
             {"case_id":<case-id>,
             "courthouse_id":<courthouse-id>,
-            "courthouse":"some-courthouse",
+            "courthouse":"SOME-COURTHOUSE",
             "case_number":"1",
-            "defendants":["aDefendant"],
+            "defendants":["some-defendant"],
             "judges":["1JUDGE1"],
-            "prosecutors":["aProsecutor"],
+            "prosecutors":["some-prosecutor"],
             "defenders":["aDefence"],
-            "reporting_restrictions":[]
+            "reporting_restrictions":[],
+            "is_data_anonymised":false
             }
             """;
 
@@ -114,9 +113,9 @@ class CaseControllerGetCaseByIdTest extends IntegrationBase {
             .andExpect(jsonPath("$.judges", Matchers.hasSize(1)))
             .andExpect(jsonPath("$.judges[0]", Matchers.is("1JUDGE1")))
             .andExpect(jsonPath("$.prosecutors", Matchers.hasSize(1)))
-            .andExpect(jsonPath("$.prosecutors[0]", Matchers.is("aProsecutor")))
+            .andExpect(jsonPath("$.prosecutors[0]", Matchers.is("some-prosecutor")))
             .andExpect(jsonPath("$.defendants", Matchers.hasSize(1)))
-            .andExpect(jsonPath("$.defendants[0]", Matchers.is("aDefendant")))
+            .andExpect(jsonPath("$.defendants[0]", Matchers.is("some-defendant")))
             .andExpect(jsonPath("$.defenders", Matchers.hasSize(1)))
             .andExpect(jsonPath("$.defenders[0]", Matchers.is("aDefence")));
 

@@ -2,7 +2,6 @@ package uk.gov.hmcts.darts.transcriptions.controller;
 
 import com.jayway.jsonpath.JsonPath;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.skyscreamer.jsonassert.JSONAssert;
 import org.skyscreamer.jsonassert.JSONCompareMode;
@@ -29,6 +28,7 @@ import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
@@ -43,7 +43,6 @@ import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum.WI
 @AutoConfigureMockMvc
 @Transactional
 @SuppressWarnings({"PMD.ExcessiveImports"})
-@Disabled("Impacted by V1_364_*.sql - fix needed")
 class TranscriptionControllerUpdateTranscriptionAdminApprovedIntTest extends IntegrationBase {
 
     public static final String ENDPOINT_URL = "/admin/transcriptions/%d";
@@ -81,7 +80,7 @@ class TranscriptionControllerUpdateTranscriptionAdminApprovedIntTest extends Int
 
         testUser = dartsDatabase.getUserAccountStub().createSuperAdminUser();
         when(mockUserIdentity.getUserAccount()).thenReturn(testUser);
-        when(mockUserIdentity.userHasGlobalAccess(Set.of(SUPER_ADMIN))).thenReturn(true);
+        when(mockUserIdentity.userHasGlobalAccess(any())).thenReturn(true);
         transcriptCreatorId = authorisationStub.getTestUser().getId();
 
         doNothing().when(mockAuditApi)

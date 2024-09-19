@@ -1,6 +1,5 @@
 package uk.gov.hmcts.darts.audio.service;
 
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -40,7 +39,6 @@ class AudioTransformationServiceTest extends IntegrationBase {
     FileOperationService mockFileOperationService;
 
     @Test
-    @Disabled("Impacted by V1_367__adding_not_null_constraints_part_4.sql - Fix needed")
     void getMediaByHearingIdShouldReturnExpectedMediaEntitiesWhenHearingIdHasRelatedMedia() {
         given.setupTest();
         given.externalObjectDirForMedia(given.getMediaEntity1());
@@ -58,7 +56,6 @@ class AudioTransformationServiceTest extends IntegrationBase {
     }
 
     @Test
-    @Disabled("Impacted by V1_367__adding_not_null_constraints_part_4.sql - Fix needed")
     void getMediaByHearingIdShouldNotReturnMediaEntitiesWhenMediaIsHidden() {
         given.setupTest();
         given.externalObjectDirForMedia(given.getMediaEntity4());
@@ -74,7 +71,6 @@ class AudioTransformationServiceTest extends IntegrationBase {
     }
 
     @Test
-    @Disabled("Impacted by V1_367__adding_not_null_constraints_part_4.sql - Fix needed")
     void getMediaByHearingIdShouldReturnEmptyListWhenHearingIdHasNoRelatedMedia() {
         given.setupTest();
         given.externalObjectDirForMedia(given.getMediaEntity1());
@@ -86,7 +82,6 @@ class AudioTransformationServiceTest extends IntegrationBase {
     }
 
     @Test
-    @Disabled("Impacted by V1_367__adding_not_null_constraints_part_4.sql - Fix needed")
     void getMediaByHearingIdShouldReturnEmptyListWhenHearingIdDoesNotExist() {
         given.setupTest();
         given.externalObjectDirForMedia(given.getMediaEntity1());

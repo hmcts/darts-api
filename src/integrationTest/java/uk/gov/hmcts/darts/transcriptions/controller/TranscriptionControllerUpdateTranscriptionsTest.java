@@ -5,7 +5,6 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.jayway.jsonpath.JsonPath;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -47,7 +46,6 @@ import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum.AW
 @AutoConfigureMockMvc
 @Transactional
 @SuppressWarnings({"PMD.ExcessiveImports"})
-@Disabled("Impacted by V1_364_*.sql - fix needed")
 class TranscriptionControllerUpdateTranscriptionsTest extends IntegrationBase {
 
     @MockBean

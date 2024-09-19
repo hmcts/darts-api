@@ -9,7 +9,7 @@
     "event_date": "<UPLOADED_DATE_TIME>",
     "title": "test_filename",
     "client_identifier": "<EODID>",
-    "contributor": "Bristol",
+    "contributor": "BRISTOL",
     "rtn_score":2,
     "rtn_reason":"RetentionConfidenceReason",
     "bf_001": "Case",
@@ -17,9 +17,10 @@
     "bf_003": "docx",
     "bf_005": "xC3CCA7021CF79B42F245AF350601C284",
     "bf_010": "<UPLOADED_DATE_TIME>",
+    "bf_011": "<bf_011>",
     "bf_012": <OBJECT_ID>,
     "bf_013": <PARENT_ID>,
-    "bf_019": "Bristol"
+    "bf_019": "BRISTOL"
   }
 }
 {

@@ -2,7 +2,6 @@ package uk.gov.hmcts.darts.cases.service;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -108,7 +107,6 @@ class RetentionPolicyTest extends IntegrationBase {
     }
 
     @Test
-    @Disabled("Impacted by V1_367__adding_not_null_constraints_part_4.sql - Fix needed")
     void onePolicyWithCurrentStatePending() {
         CourtCaseEntity courtCase = dartsDatabase.createCase("Swansea", "aCaseNumber");
         courtCase.setCaseClosedTimestamp(OffsetDateTime.now());

@@ -16,6 +16,7 @@ public class RetentionPolicyTestData {
         minimalRetentionPolicy.setFixedPolicyKey("some-fixed-policy-key");
         minimalRetentionPolicy.setPolicyName("some-policy-name");
         minimalRetentionPolicy.setDuration("some-duration");
+        minimalRetentionPolicy.setDisplayName("some-display-name");
         minimalRetentionPolicy.setPolicyStart(OffsetDateTime.now());
         minimalRetentionPolicy.setCreatedBy(minimalUserAccount());
         minimalRetentionPolicy.setLastModifiedBy(minimalUserAccount());

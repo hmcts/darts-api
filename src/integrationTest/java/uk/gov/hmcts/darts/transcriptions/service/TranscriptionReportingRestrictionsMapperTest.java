@@ -1,6 +1,5 @@
 package uk.gov.hmcts.darts.transcriptions.service;
 
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import uk.gov.hmcts.darts.common.entity.EventEntity;
@@ -39,7 +38,6 @@ class TranscriptionReportingRestrictionsMapperTest extends IntegrationBase {
     }
 
     @Test
-    @Disabled("Impacted by V1_364_*.sql - fix needed")
     void mapsOneReportingRestrictionsCorrectly() {
         var reportingRestrictions = createEventsWithDefaults(1).stream()
             .map(eve -> dartsDatabase.addHandlerToEvent(eve, someReportingRestrictionId()))
@@ -58,7 +56,6 @@ class TranscriptionReportingRestrictionsMapperTest extends IntegrationBase {
     }
 
     @Test
-    @Disabled("Impacted by V1_364_*.sql - fix needed")
     void mapsMultipleReportingRestrictionsValuesCorrectly() {
         var reportingRestrictions = createEventsWithDifferentTimestamps(3).stream()
             .map(eve -> dartsDatabase.addHandlerToEvent(eve, someReportingRestrictionId()))
@@ -77,7 +74,6 @@ class TranscriptionReportingRestrictionsMapperTest extends IntegrationBase {
     }
 
     @Test
-    @Disabled("Impacted by V1_364_*.sql - fix needed")
     void ordersMultipleReportingRestrictionsElementCorrectly() {
         var reportingRestrictions = createEventsWithDifferentTimestamps(10).stream()
             .map(eve -> dartsDatabase.addHandlerToEvent(eve, someReportingRestrictionId()))
@@ -95,7 +91,6 @@ class TranscriptionReportingRestrictionsMapperTest extends IntegrationBase {
     }
 
     @Test
-    @Disabled("Impacted by V1_364_*.sql - fix needed")
     void includesReportingRestrictionsLifted() {
         var event1 = dartsDatabase.getEventStub().createDefaultEvent();
         event1.setTimestamp(now().minusDays(1));

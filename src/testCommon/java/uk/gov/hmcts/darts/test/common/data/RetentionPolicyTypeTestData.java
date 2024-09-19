@@ -18,6 +18,7 @@ public class RetentionPolicyTypeTestData {
         var retentionPolicyType = new RetentionPolicyTypeEntity();
         retentionPolicyType.setFixedPolicyKey("some-fixed-policy-key-" + postfix);
         retentionPolicyType.setPolicyName("some-policy-name-" + postfix);
+        retentionPolicyType.setDisplayName("some-display-name-" + postfix);
         retentionPolicyType.setDuration("some-duration");
         retentionPolicyType.setPolicyStart(OffsetDateTime.now());
         retentionPolicyType.setCreatedBy(minimalUserAccount());

@@ -45,7 +45,7 @@ import static uk.gov.hmcts.darts.test.common.data.JudgeTestData.createJudgeWithN
 import static uk.gov.hmcts.darts.testutils.stubs.UserAccountStub.INTEGRATION_TEST_USER_EMAIL;
 
 @Slf4j
-@Disabled("Impacted by V1_363__not_null_constraints_part3.sql - fix needed")
+@Disabled("Impacted by V1_363__not_null_constraints_part3.sql - fix needed (UnsupportedOperationException)")
 @SuppressWarnings({"PMD.VariableDeclarationUsageDistance", "PMD.NcssCount", "PMD.ExcessiveImports"})
 class CaseServiceAdvancedSearchTest extends IntegrationBase {
     @Autowired

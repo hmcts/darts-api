@@ -3,8 +3,8 @@ package uk.gov.hmcts.darts.dailylist.service;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import lombok.SneakyThrows;
 import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.skyscreamer.jsonassert.JSONAssert;
 import org.skyscreamer.jsonassert.JSONCompareMode;
@@ -19,6 +19,7 @@ import uk.gov.hmcts.darts.dailylist.model.DailyListJsonObject;
 import uk.gov.hmcts.darts.dailylist.model.DailyListPatchRequestInternal;
 import uk.gov.hmcts.darts.dailylist.model.DailyListPostRequestInternal;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
+import uk.gov.hmcts.darts.testutils.TransactionalUtil;
 
 import java.io.IOException;
 import java.time.LocalDate;
@@ -31,9 +32,9 @@ import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.darts.test.common.TestUtils.getContentsFromFile;
 
-@Disabled("Impacted by V1_364_*.sql - fix needed")
 class DailyListServiceTest extends IntegrationBase {
 
     static final ObjectMapper MAPPER = new ObjectMapper();
@@ -46,6 +47,8 @@ class DailyListServiceTest extends IntegrationBase {
 
     @Autowired
     DailyListRepository dailyListRepository;
+    @Autowired
+    TransactionalUtil transactionalUtil;
 
     @MockBean
     UserIdentity mockUserIdentity;
@@ -57,8 +60,8 @@ class DailyListServiceTest extends IntegrationBase {
     }
 
     @Test
-    @Disabled("Impacted by V1_362__constraint_transcription_part6.sql - fix needed")
     void insert1OkJson() throws IOException {
+        when(mockUserIdentity.getUserAccount()).thenReturn(dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity());
         dartsDatabase.createCourthouseWithNameAndCode("SWANSEA", 457, "Swansea");
         String dailyListJsonStr = getContentsFromFile(
             "tests/dailylist/DailyListServiceTest/insert1_ok/DailyListRequest.json");
@@ -77,8 +80,8 @@ class DailyListServiceTest extends IntegrationBase {
     }
 
     @Test
-    @Disabled("Impacted by V1_362__constraint_transcription_part6.sql - fix needed")
     void insert1OkJsonAndXml() throws IOException {
+        when(mockUserIdentity.getUserAccount()).thenReturn(dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity());
         dartsDatabase.createCourthouseWithNameAndCode("SWANSEA", 457, "Swansea");
         String dailyListJsonStr = getContentsFromFile(
             "tests/dailylist/DailyListServiceTest/insert1OkJsonAndXml/DailyListRequest.json");
@@ -97,8 +100,8 @@ class DailyListServiceTest extends IntegrationBase {
     }
 
     @Test
-    @Disabled("Impacted by V1_362__constraint_transcription_part6.sql - fix needed")
     void updateOkJsonWithXml() throws IOException {
+        when(mockUserIdentity.getUserAccount()).thenReturn(dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity());
         dartsDatabase.createCourthouseWithNameAndCode("SWANSEA", 457, "Swansea");
         String dailyListJsonStr = getContentsFromFile(
             "tests/dailylist/DailyListServiceTest/insert1OkJsonAndXml/DailyListRequest.json");
@@ -123,8 +126,8 @@ class DailyListServiceTest extends IntegrationBase {
     }
 
     @Test
-    @Disabled("Impacted by V1_362__constraint_transcription_part6.sql - fix needed")
     void insert1DuplicateOk() throws IOException {
+        when(mockUserIdentity.getUserAccount()).thenReturn(dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity());
         dartsDatabase.createCourthouseWithNameAndCode("SWANSEA", 457, "Swansea");
 
         String requestBody = getContentsFromFile(
@@ -145,16 +148,20 @@ class DailyListServiceTest extends IntegrationBase {
         List<DailyListEntity> resultList = dailyListRepository.findAll();
         assertEquals(2, resultList.size());
         DailyListEntity dailyListEntity = resultList.get(0);
-
         checkExpectedResponse(
             dailyListEntity,
             "tests/dailylist/DailyListServiceTest/insert1_duplicate_ok/expectedResponse.json"
         );
+
+
     }
 
-    private void checkExpectedResponse(DailyListEntity dailyListEntity, String expectedResponseLocation) throws IOException {
+    @SneakyThrows
+    private void checkExpectedResponse(DailyListEntity dailyListEntity, String expectedResponseLocation) {
         dailyListEntity.setCreatedDateTime(null);
         dailyListEntity.setLastModifiedDateTime(null);
+        dailyListEntity.setCreatedBy(null);
+        dailyListEntity.setLastModifiedBy(null);
         dailyListEntity.setId(null);
         String actualResponse = MAPPER.writeValueAsString(dailyListEntity);
         String expectedResponse = getContentsFromFile(expectedResponseLocation);
@@ -164,7 +171,7 @@ class DailyListServiceTest extends IntegrationBase {
     @Test
     void ok_saveDl_xml_then_json() throws IOException {
         dartsDatabase.createCourthouseWithNameAndCode("SWANSEA", 457, "Swansea");
-
+        when(mockUserIdentity.getUserAccount()).thenReturn(dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity());
         DailyListPostRequestInternal requestWithXml = new DailyListPostRequestInternal(
             SourceType.CPP.toString(),
             "SWANSEA",
