@@ -366,6 +366,24 @@ public class TranscriptionStub {
     }
 
     @Transactional
+    public TranscriptionEntity createAndSaveApprovedTranscription(UserAccountEntity userAccountEntity,
+                                                                  CourtCaseEntity courtCaseEntity,
+                                                                  HearingEntity hearingEntity,
+                                                                  OffsetDateTime workflowTimestamp,
+                                                                  Boolean hideRequestFromRequester) {
+        var transcriptionEntity = this.createTranscriptionWithStatus(
+            userAccountEntity,
+            courtCaseEntity,
+            hearingEntity,
+            workflowTimestamp,
+            getTranscriptionStatusByEnum(APPROVED),
+            null
+        );
+        transcriptionEntity.setHideRequestFromRequestor(hideRequestFromRequester);
+        return transcriptionRepository.saveAndFlush(transcriptionEntity);
+    }
+
+    @Transactional
     public TranscriptionEntity createAndSaveWithTranscriberTranscription(UserAccountEntity userAccountEntity,
                                                                          CourtCaseEntity courtCaseEntity,
                                                                          HearingEntity hearingEntity,

@@ -8,6 +8,8 @@ import lombok.RequiredArgsConstructor;
 public enum RetentionPolicyEnum {
     LEGACY_PERMANENT("-1"),
     LEGACY_STANDARD("-2"),
+    ARCHIVE_PERMANENT("-3"),
+    ARCHIVE_STANDARD("-4"),
     NOT_GUILTY("1"),
     NON_CUSTODIAL("2"),
     CUSTODIAL("3"),
