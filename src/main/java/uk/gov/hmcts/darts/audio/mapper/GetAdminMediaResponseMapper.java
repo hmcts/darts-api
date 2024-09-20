@@ -84,23 +84,26 @@ public class GetAdminMediaResponseMapper {
         response.setIsDeleted(entity.isDeleted());
 
         if (objectAdminActionEntity != null) {
-            AdminActionResponse aaResponse = new AdminActionResponse();
-            aaResponse.setId(objectAdminActionEntity.getId());
-            aaResponse.setReasonId(objectAdminActionEntity.getObjectHiddenReason().getId());
-            aaResponse.setHiddenById(objectAdminActionEntity.getHiddenBy().getId());
-            aaResponse.setHiddenAt(objectAdminActionEntity.getHiddenDateTime());
-            aaResponse.setIsMarkedForManualDeletion(objectAdminActionEntity.isMarkedForManualDeletion());
-            aaResponse.setMarkedForManualDeletionById(
-                objectAdminActionEntity.getMarkedForManualDelBy() == null ? null : objectAdminActionEntity.getMarkedForManualDelBy().getId());
-            aaResponse.setMarkedForManualDeletionAt(
-                objectAdminActionEntity.getMarkedForManualDelDateTime() == null ? null : objectAdminActionEntity.getMarkedForManualDelDateTime());
-            aaResponse.setTicketReference(objectAdminActionEntity.getTicketReference());
-            aaResponse.setComments(objectAdminActionEntity.getComments());
-
-            response.setAdminAction(aaResponse);
+            response.setAdminAction(buildAdminActionResponse(objectAdminActionEntity));
         }
 
         return response;
+    }
+
+    private static AdminActionResponse buildAdminActionResponse(ObjectAdminActionEntity objectAdminActionEntity) {
+        AdminActionResponse aaResponse = new AdminActionResponse();
+        aaResponse.setId(objectAdminActionEntity.getId());
+        aaResponse.setReasonId(objectAdminActionEntity.getObjectHiddenReason().getId());
+        aaResponse.setHiddenById(objectAdminActionEntity.getHiddenBy().getId());
+        aaResponse.setHiddenAt(objectAdminActionEntity.getHiddenDateTime());
+        aaResponse.setIsMarkedForManualDeletion(objectAdminActionEntity.isMarkedForManualDeletion());
+        aaResponse.setMarkedForManualDeletionById(
+            objectAdminActionEntity.getMarkedForManualDelBy() == null ? null : objectAdminActionEntity.getMarkedForManualDelBy().getId());
+        aaResponse.setMarkedForManualDeletionAt(
+            objectAdminActionEntity.getMarkedForManualDelDateTime() == null ? null : objectAdminActionEntity.getMarkedForManualDelDateTime());
+        aaResponse.setTicketReference(objectAdminActionEntity.getTicketReference());
+        aaResponse.setComments(objectAdminActionEntity.getComments());
+        return aaResponse;
     }
 
     public MediaApproveMarkedForDeletionResponse mapMediaApproveMarkedForDeletionResponse(MediaEntity entity, ObjectAdminActionEntity objectAdminActionEntity) {
@@ -110,20 +113,7 @@ public class GetAdminMediaResponseMapper {
         response.setIsDeleted(entity.isDeleted());
 
         if (objectAdminActionEntity != null) {
-            AdminActionResponse aaResponse = new AdminActionResponse();
-            aaResponse.setId(objectAdminActionEntity.getId());
-            aaResponse.setReasonId(objectAdminActionEntity.getObjectHiddenReason().getId());
-            aaResponse.setHiddenById(objectAdminActionEntity.getHiddenBy().getId());
-            aaResponse.setHiddenAt(objectAdminActionEntity.getHiddenDateTime());
-            aaResponse.setIsMarkedForManualDeletion(objectAdminActionEntity.isMarkedForManualDeletion());
-            aaResponse.setMarkedForManualDeletionById(
-                objectAdminActionEntity.getMarkedForManualDelBy() == null ? null : objectAdminActionEntity.getMarkedForManualDelBy().getId());
-            aaResponse.setMarkedForManualDeletionAt(
-                objectAdminActionEntity.getMarkedForManualDelDateTime() == null ? null : objectAdminActionEntity.getMarkedForManualDelDateTime());
-            aaResponse.setTicketReference(objectAdminActionEntity.getTicketReference());
-            aaResponse.setComments(objectAdminActionEntity.getComments());
-
-            response.setAdminAction(aaResponse);
+            response.setAdminAction(buildAdminActionResponse(objectAdminActionEntity));
         }
 
         return response;
