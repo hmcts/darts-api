@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import uk.gov.hmcts.darts.audio.entity.MediaRequestEntity;
 import uk.gov.hmcts.darts.audio.exception.AudioApiError;
 import uk.gov.hmcts.darts.audio.helper.PostAdminMediasSearchHelper;
@@ -13,17 +14,21 @@ import uk.gov.hmcts.darts.audio.mapper.GetAdminMediaResponseMapper;
 import uk.gov.hmcts.darts.audio.mapper.PostAdminMediaSearchResponseMapper;
 import uk.gov.hmcts.darts.audio.model.AdminMediaResponse;
 import uk.gov.hmcts.darts.audio.model.GetAdminMediaResponseItem;
+import uk.gov.hmcts.darts.audio.model.MediaApproveMarkedForDeletionResponse;
 import uk.gov.hmcts.darts.audio.model.MediaSearchData;
 import uk.gov.hmcts.darts.audio.model.PostAdminMediasMarkedForDeletionItem;
 import uk.gov.hmcts.darts.audio.model.PostAdminMediasSearchRequest;
 import uk.gov.hmcts.darts.audio.model.PostAdminMediasSearchResponseItem;
 import uk.gov.hmcts.darts.audio.service.AdminMediaService;
+import uk.gov.hmcts.darts.audio.validation.MediaApproveMarkForDeletionValidator;
 import uk.gov.hmcts.darts.audio.validation.SearchMediaValidator;
+import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
 import uk.gov.hmcts.darts.common.entity.ObjectAdminActionEntity;
 import uk.gov.hmcts.darts.common.entity.TransformedMediaEntity;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
+import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
 import uk.gov.hmcts.darts.common.repository.MediaRepository;
 import uk.gov.hmcts.darts.common.repository.ObjectAdminActionRepository;
 import uk.gov.hmcts.darts.common.repository.TransformedMediaRepository;
@@ -48,6 +53,9 @@ public class AdminMediaServiceImpl implements AdminMediaService {
     private final SearchMediaValidator searchMediaValidator;
     private final TransformedMediaRepository transformedMediaRepository;
     private final ObjectAdminActionRepository objectAdminActionRepository;
+    private final MediaApproveMarkForDeletionValidator mediaApproveMarkForDeletionValidator;
+    private final UserIdentity userIdentity;
+    private final CurrentTimeHelper currentTimeHelper;
 
     public AdminMediaResponse getMediasById(Integer id) {
         var mediaEntity = mediaRepository.findById(id)
@@ -122,5 +130,30 @@ public class AdminMediaServiceImpl implements AdminMediaService {
         }
 
         return hearingEntityList;
+    }
+
+    @Override
+    @Transactional
+    public MediaApproveMarkedForDeletionResponse adminApproveMediaMarkedForDeletion(Integer mediaId) {
+        MediaApproveMarkedForDeletionResponse response;
+
+        mediaApproveMarkForDeletionValidator.validate(mediaId);
+        List<ObjectAdminActionEntity> objectAdminActionEntityList = objectAdminActionRepository.findByMedia_Id(mediaId);
+
+        Optional<MediaEntity> mediaEntityOptional = mediaRepository.findById(mediaId);
+        if (mediaEntityOptional.isPresent()) {
+            MediaEntity mediaEntity = mediaEntityOptional.get();
+            var currentUser = userIdentity.getUserAccount();
+            var objectAdminActionEntity = objectAdminActionEntityList.getFirst();
+            objectAdminActionEntity.setMarkedForManualDeletion(true);
+            objectAdminActionEntity.setMarkedForManualDelBy(currentUser);
+            objectAdminActionEntity.setMarkedForManualDelDateTime(currentTimeHelper.currentOffsetDateTime());
+            objectAdminActionRepository.save(objectAdminActionEntity);
+
+            response = GetAdminMediaResponseMapper.mapMediaApproveMarkedForDeletionResponse(mediaEntity, objectAdminActionEntity);
+        } else {
+            throw new DartsApiException(AudioApiError.MEDIA_NOT_FOUND);
+        }
+        return response;
     }
 }

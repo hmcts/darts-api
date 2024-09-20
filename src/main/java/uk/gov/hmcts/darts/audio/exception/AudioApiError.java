@@ -93,13 +93,13 @@ public enum AudioApiError implements DartsApiError {
     ),
     MEDIA_ALREADY_MARKED_FOR_DELETION(
         AddAudioErrorCode.MEDIA_ALREADY_MARKED_FOR_DELETION.getValue(),
-        HttpStatus.BAD_REQUEST,
+        HttpStatus.CONFLICT,
         AddAudioTitleErrors.MEDIA_ALREADY_MARKED_FOR_DELETION.getValue()
     ),
-    MEDIA_MARKED_FOR_DELETION_REASON_NOT_FOUND(
-        AddAudioErrorCode.MEDIA_ALREADY_MARKED_FOR_DELETION_REASON_NOT_FOUND.getValue(),
+    MEDIA_ALREADY_MARKED_FOR_DELETION_REASON_NOT_FOUND(
+        AddAudioErrorCode.MARKED_FOR_DELETION_REASON_NOT_FOUND.getValue(),
         HttpStatus.BAD_REQUEST,
-        AddAudioTitleErrors.MEDIA_ALREADY_MARKED_FOR_DELETION_REASON_NOT_FOUND.getValue()
+        AddAudioTitleErrors.MARKED_FOR_DELETION_REASON_NOT_FOUND.getValue()
     ),
     USER_CANNOT_APPROVE_THEIR_OWN_DELETION(
         AddAudioErrorCode.USER_CANT_APPROVE_THEIR_OWN_DELETION.getValue(),

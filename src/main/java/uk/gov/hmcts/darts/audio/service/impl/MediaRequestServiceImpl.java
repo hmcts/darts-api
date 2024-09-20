@@ -23,13 +23,11 @@ import uk.gov.hmcts.darts.audio.mapper.GetTransformedMediaDetailsMapper;
 import uk.gov.hmcts.darts.audio.mapper.MediaRequestDetailsMapper;
 import uk.gov.hmcts.darts.audio.mapper.TransformedMediaMapper;
 import uk.gov.hmcts.darts.audio.model.EnhancedMediaRequestInfo;
-import uk.gov.hmcts.darts.audio.model.MediaApproveMarkedForDeletionResponse;
 import uk.gov.hmcts.darts.audio.model.MediaHideRequest;
 import uk.gov.hmcts.darts.audio.model.MediaHideResponse;
 import uk.gov.hmcts.darts.audio.model.TransformedMediaDetailsDto;
 import uk.gov.hmcts.darts.audio.service.MediaRequestService;
 import uk.gov.hmcts.darts.audio.validation.AudioMediaPatchRequestValidator;
-import uk.gov.hmcts.darts.audio.validation.MediaApproveMarkForDeletionValidator;
 import uk.gov.hmcts.darts.audio.validation.MediaHideOrShowValidator;
 import uk.gov.hmcts.darts.audiorequests.model.AudioNonAccessedResponse;
 import uk.gov.hmcts.darts.audiorequests.model.AudioRequestDetails;
@@ -128,8 +126,6 @@ public class MediaRequestServiceImpl implements MediaRequestService {
     private final ObjectAdminActionRepository objectAdminActionRepository;
     private final ObjectHiddenReasonRepository objectHiddenReasonRepository;
     private final SystemUserHelper systemUserHelper;
-
-    private final MediaApproveMarkForDeletionValidator mediaApproveMarkForDeletionValidator;
 
     @Override
     public Optional<MediaRequestEntity> getOldestMediaRequestByStatus(MediaRequestStatus status) {
@@ -598,28 +594,4 @@ public class MediaRequestServiceImpl implements MediaRequestService {
         return response;
     }
 
-    @Override
-    @Transactional
-    public MediaApproveMarkedForDeletionResponse adminApproveMediaMarkedForDeletion(Integer mediaId) {
-        MediaApproveMarkedForDeletionResponse response;
-
-        mediaApproveMarkForDeletionValidator.validate(mediaId);
-        List<ObjectAdminActionEntity> objectAdminActionEntityList = objectAdminActionRepository.findByMedia_Id(mediaId);
-
-        Optional<MediaEntity> mediaEntityOptional = mediaRepository.findById(mediaId);
-        if (mediaEntityOptional.isPresent()) {
-            MediaEntity mediaEntity = mediaEntityOptional.get();
-            var currentUser = userIdentity.getUserAccount();
-            var objectAdminActionEntity = objectAdminActionEntityList.getFirst();
-            objectAdminActionEntity.setMarkedForManualDeletion(true);
-            objectAdminActionEntity.setMarkedForManualDelBy(currentUser);
-            objectAdminActionEntity.setMarkedForManualDelDateTime(currentTimeHelper.currentOffsetDateTime());
-            objectAdminActionRepository.save(objectAdminActionEntity);
-
-            response = GetAdminMediaResponseMapper.mapMediaApproveMarkedForDeletionResponse(mediaEntity, objectAdminActionEntity);
-        } else {
-            throw new DartsApiException(AudioApiError.MEDIA_NOT_FOUND);
-        }
-        return response;
-    }
 }

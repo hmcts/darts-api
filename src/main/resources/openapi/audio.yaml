@@ -370,22 +370,16 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/MediaApproveMarkedForDeletionResponse'
-        '401':
-          description: Unauthorised Error
-        '403':
-          description: Forbidden Error
-          content:
-            application/json+problem:
-              schema:
-                allOf:
-                  - $ref: './problem.yaml'
+        '400':
+          description: A required parameter is missing or an invalid datatype or value was provided for property.
         '409':
           description: Data conflicting
           content:
             application/json+problem:
               schema:
                 allOf:
-                  - $ref: './problem.yaml'
+                  - $ref:
+                      './problem.yaml'
         '404':
           description: Not Found Error
           content:
@@ -1022,7 +1016,7 @@ components:
                          ADMIN_SEARCH_CRITERIA_NOT_SUITABLE,
                          TOO_MANY_RESULTS,
                          MEDIA_ALREADY_MARKED_FOR_DELETION,
-                         MEDIA_ALREADY_MARKED_FOR_DELETION_REASON_NOT_FOUND,
+                         MARKED_FOR_DELETION_REASON_NOT_FOUND,
                          USER_CANT_APPROVE_THEIR_OWN_DELETION
       ]
 
@@ -1068,6 +1062,6 @@ components:
                          ADMIN_SEARCH_CRITERIA_NOT_SUITABLE,
                          TOO_MANY_RESULTS,
                          MEDIA_ALREADY_MARKED_FOR_DELETION,
-                         MEDIA_ALREADY_MARKED_FOR_DELETION_REASON_NOT_FOUND,
+                         MARKED_FOR_DELETION_REASON_NOT_FOUND,
                          USER_CANT_APPROVE_THEIR_OWN_DELETION
       ]

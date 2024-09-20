@@ -152,7 +152,7 @@ public class AudioController implements AudioApi {
     @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
     @Authorisation(contextId = ANY_ENTITY_ID, globalAccessSecurityRoles = {SUPER_ADMIN})
     public ResponseEntity<MediaApproveMarkedForDeletionResponse> postAdminApproveMediaMarkedForDeletion(Integer mediaId) {
-        MediaApproveMarkedForDeletionResponse audioResponse = mediaRequestService.adminApproveMediaMarkedForDeletion(mediaId);
+        MediaApproveMarkedForDeletionResponse audioResponse = adminMediaService.adminApproveMediaMarkedForDeletion(mediaId);
         return new ResponseEntity<>(audioResponse, HttpStatus.OK);
     }
 
