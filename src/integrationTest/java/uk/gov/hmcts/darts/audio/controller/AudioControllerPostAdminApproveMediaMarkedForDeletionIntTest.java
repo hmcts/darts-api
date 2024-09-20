@@ -39,7 +39,6 @@ class AudioControllerPostAdminApproveMediaMarkedForDeletionIntTest extends Integ
     private static final OffsetDateTime START_TIME = OffsetDateTime.parse("2024-01-01T10:00:00Z");
     private static final OffsetDateTime END_TIME = OffsetDateTime.parse("2024-01-01T00:12:00Z");
 
-
     @Autowired
     private MockMvc mockMvc;
 
@@ -244,7 +243,7 @@ class AudioControllerPostAdminApproveMediaMarkedForDeletionIntTest extends Integ
 
         // when
         MvcResult mvcResult = mockMvc.perform(post(endpoint))
-            .andExpect(status().isBadRequest())
+            .andExpect(status().isConflict())
             .andReturn();
 
         // then
