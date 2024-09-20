@@ -59,7 +59,7 @@ public class CaseExpiryDeletionAutomatedTask
         caseRepository.findCasesToBeAnonymized(currentTimeHelper.currentOffsetDateTime(), Limit.of(getAutomatedTaskBatchSize()))
             .forEach(courtCase -> {
                 log.info("Anonymising case with id: {} because the criteria for retention has been met.", courtCase.getId());
-                dataAnonymisationService.anonymizeCourtCaseEntity(courtCase, false);
+                dataAnonymisationService.anonymizeCourtCaseEntity(courtCase);
                 courtCaseEntities.add(courtCase);
             });
         //This also saves defendant, defence and prosecutor entities
