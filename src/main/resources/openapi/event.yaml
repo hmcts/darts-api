@@ -721,7 +721,7 @@ components:
           type: string
         antecedent_id:
           type: string
-        is_manually_anonymised:
+        is_event_anonymised:
           type: boolean
         is_case_expired:
           type: boolean
