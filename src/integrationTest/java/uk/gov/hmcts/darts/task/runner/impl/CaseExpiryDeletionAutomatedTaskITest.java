@@ -104,7 +104,7 @@ class CaseExpiryDeletionAutomatedTaskITest extends PostgresIntegrationBase {
 
 
     private void assertCase(int caseId, boolean isAnonymized) {
-        executeInTransaction(() -> {
+        transactionalUtil.executeInTransaction(() -> {
             CourtCaseEntity courtCase = dartsDatabase.getCourtCaseStub().getCourtCase(caseId);
             assertThat(courtCase.isDataAnonymised())
                 .isEqualTo(isAnonymized);
@@ -228,7 +228,7 @@ class CaseExpiryDeletionAutomatedTaskITest extends PostgresIntegrationBase {
 
 
     private CourtCaseEntity createCase(final long daysUntilRetention, final CaseRetentionStatus caseRetentionStatus) {
-        return executeInTransaction(() -> {
+        return transactionalUtil.executeInTransaction(() -> {
             caseIndex++;
             CourtCaseEntity caseEntity = dartsDatabase.createCase("Bristol", "case" + caseIndex);
             caseEntity.addDefendant(createDefendantEntity(caseEntity));

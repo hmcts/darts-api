@@ -1,7 +1,6 @@
 package uk.gov.hmcts.darts.cases.controller;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.skyscreamer.jsonassert.JSONCompareMode;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,7 +26,8 @@ import uk.gov.hmcts.darts.testutils.IntegrationBase;
 
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
-import java.util.Arrays;
+import java.util.ArrayList;
+import java.util.List;
 
 import static org.skyscreamer.jsonassert.JSONAssert.assertEquals;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -47,7 +47,6 @@ import static uk.gov.hmcts.darts.testutils.stubs.UserAccountStub.INTEGRATION_TES
 
 @AutoConfigureMockMvc
 @SuppressWarnings({"PMD.VariableDeclarationUsageDistance", "PMD.NcssCount", "PMD.ExcessiveImports"})
-@Disabled("Impacted by V1_363__not_null_constraints_part3.sql")
 class CaseControllerSearchPostTest extends IntegrationBase {
 
     @Autowired
@@ -68,7 +67,7 @@ class CaseControllerSearchPostTest extends IntegrationBase {
 
         CourtCaseEntity case2 = createCaseAt(swanseaCourthouse);
         case2.setCaseNumber("Case2");
-        case2.setDefendantList(Arrays.asList(createDefendantForCaseWithName(case2, "Defendant2")));
+        case2.setDefendantList(new ArrayList<>(List.of(createDefendantForCaseWithName(case2, "Defendant2"))));
 
         CourtCaseEntity case3 = createCaseAt(swanseaCourthouse);
         case3.setCaseNumber("Case3");
@@ -241,7 +240,8 @@ class CaseControllerSearchPostTest extends IntegrationBase {
                       "AJUDGE"
                     ]
                   }
-                ]
+                ],
+                "is_data_anonymised": false
               }
             ]
             """;
@@ -299,7 +299,8 @@ class CaseControllerSearchPostTest extends IntegrationBase {
                       "AJUDGE"
                     ]
                   }
-                ]
+                ],
+                "is_data_anonymised": false
               }
             ]
             """;

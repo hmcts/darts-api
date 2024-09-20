@@ -14,7 +14,8 @@
     ],
     "defendants": [
       "aDefendant"
-    ]
+    ],
+    "is_data_anonymised": false
   },
   {
     "case_number": "Case9",
@@ -31,6 +32,7 @@
     ],
     "defendants": [
       "aDefendant"
-    ]
+    ],
+    "is_data_anonymised": false
   }
 ]

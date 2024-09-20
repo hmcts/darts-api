@@ -1,7 +1,6 @@
 package uk.gov.hmcts.darts.task.service;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -69,7 +68,6 @@ class OutboundAudioDeleterProcessorTest extends IntegrationBase {
     }
 
     @Test
-    @Disabled("Impacted by V1_362__constraint_transcription_part6.sql")
     void whereLastAccessed2DaysAgoAndStatusIsCompleted() {
         HearingEntity hearing = dartsDatabase.createHearing(
             "NEWCASTLE",
@@ -86,8 +84,8 @@ class OutboundAudioDeleterProcessorTest extends IntegrationBase {
             AudioRequestType.PLAYBACK,
             COMPLETED
         );
-        dartsDatabase.save(
-            unchangedMediaRequest);
+
+        dartsDatabase.save(unchangedMediaRequest);
 
         //This media request should be deleted as its 3 days old
         MediaRequestEntity currentMediaRequest = MediaRequestTestData.createCurrentMediaRequest(
@@ -98,8 +96,7 @@ class OutboundAudioDeleterProcessorTest extends IntegrationBase {
             AudioRequestType.DOWNLOAD,
             COMPLETED
         );
-        dartsDatabase.save(
-            currentMediaRequest);
+        dartsDatabase.save(currentMediaRequest);
 
         TransientObjectDirectoryEntity notMarkedForDeletion = createStoredTransientDirectory(
             unchangedMediaRequest,
@@ -127,7 +124,6 @@ class OutboundAudioDeleterProcessorTest extends IntegrationBase {
     }
 
     @Test
-    @Disabled("Impacted by V1_362__constraint_transcription_part6.sql")
     void whereLastAccessed2DaysAgoAndStatusIsCompletedAndMarkedForDeletion() {
         HearingEntity hearing = dartsDatabase.createHearing(
             "NEWCASTLE",
@@ -186,7 +182,6 @@ class OutboundAudioDeleterProcessorTest extends IntegrationBase {
      * The deleter task should not be using hours to calculate last accessed time but days.
      */
     @Test
-    @Disabled("Impacted by V1_362__constraint_transcription_part6.sql")
     void shouldNotTakeIntoAccountTimeWhenCalculatingLastAccessed() {
         HearingEntity hearing = dartsDatabase.createHearing(
             "NEWCASTLE",
@@ -221,7 +216,6 @@ class OutboundAudioDeleterProcessorTest extends IntegrationBase {
 
 
     @Test
-    @Disabled("Impacted by V1_362__constraint_transcription_part6.sql")
     void whereLastAccessedDoesNotIncludesNonBusinessDays() {
         HearingEntity hearing = dartsDatabase.createHearing(
             "NEWCASTLE",
@@ -255,7 +249,6 @@ class OutboundAudioDeleterProcessorTest extends IntegrationBase {
 
 
     @Test
-    @Disabled("Impacted by V1_362__constraint_transcription_part6.sql")
     void shouldNotDeleteIfLastAccessWas10DaysAgoWith3BankHoliday() {
         outboundAudioDeleterProcessor.setDeletionDays(10);
         HearingEntity hearing = dartsDatabase.createHearing(
@@ -299,7 +292,6 @@ class OutboundAudioDeleterProcessorTest extends IntegrationBase {
     }
 
     @Test
-    @Disabled("Impacted by V1_362__constraint_transcription_part6.sql")
     void deleteWithTwoTransformedMediaDefaultLastAccessedDays() {
         HearingEntity hearing = dartsDatabase.createHearing(
             "NEWCASTLE",
@@ -345,7 +337,6 @@ class OutboundAudioDeleterProcessorTest extends IntegrationBase {
     }
 
     @Test
-    @Disabled("Impacted by V1_362__constraint_transcription_part6.sql")
     void ifMediaRequestLastAccessedIsOnAWeekendThenTreatItAsItWasAccessedOnAFriday() {
         HearingEntity hearing = dartsDatabase.createHearing(
             "NEWCASTLE",
@@ -404,7 +395,6 @@ class OutboundAudioDeleterProcessorTest extends IntegrationBase {
 
 
     @Test
-    @Disabled("Impacted by V1_362__constraint_transcription_part6.sql")
     void whereLastAccessedIsNullUseCreatedAtAndInProgressStatus() {
         TransientObjectDirectoryEntity markedForDeletion = createMediaRequestsAndTransientObjectDirectoryWithHearingWithLastAccessedTimeIsNull();
 
@@ -416,13 +406,13 @@ class OutboundAudioDeleterProcessorTest extends IntegrationBase {
 
 
     private TransientObjectDirectoryEntity createMediaRequestsAndTransientObjectDirectoryWithHearingWithLastAccessedTimeIsNull() {
+
         HearingEntity hearing = dartsDatabase.createHearing(
             "NEWCASTLE",
             "Int Test Courtroom 2",
             "2",
             HEARING_DATE
         );
-
 
         // Non Matching request
         MediaRequestEntity currentMediaRequest2 = MediaRequestTestData.createCurrentMediaRequest(
@@ -432,10 +422,7 @@ class OutboundAudioDeleterProcessorTest extends IntegrationBase {
             OffsetDateTime.parse("2023-06-26T13:45:00Z"),
             AudioRequestType.DOWNLOAD, PROCESSING
         );
-
-        MediaRequestEntity savedValue = dartsDatabase.save(
-            currentMediaRequest2);
-
+        MediaRequestEntity savedValue = dartsDatabase.save(currentMediaRequest2);
 
         createTransientDirectoryWithTransformedMediaNullLastAccessedDate(savedValue, OffsetDateTime.parse("2023-06-26T13:45:00Z"));
 
@@ -445,9 +432,7 @@ class OutboundAudioDeleterProcessorTest extends IntegrationBase {
             OffsetDateTime.parse("2023-06-26T13:00:00Z"),
             OffsetDateTime.parse("2023-06-26T13:45:00Z"), AudioRequestType.DOWNLOAD, OPEN
         );
-        savedValue = dartsDatabase.save(
-            currentMediaRequest3);
-
+        savedValue = dartsDatabase.save(currentMediaRequest3);
         createTransientDirectoryWithTransformedMediaNullLastAccessedDate(savedValue, currentTimeHelper.currentOffsetDateTime());
 
 
@@ -460,9 +445,7 @@ class OutboundAudioDeleterProcessorTest extends IntegrationBase {
             AudioRequestType.DOWNLOAD, OPEN
         );
 
-        savedValue = dartsDatabase.save(
-            mediaRequestThatShouldMatch);
-
+        savedValue = dartsDatabase.save(mediaRequestThatShouldMatch);
         return createTransientDirectoryWithTransformedMediaNullLastAccessedDate(
             savedValue,
             OffsetDateTime.parse(
@@ -538,12 +521,10 @@ class OutboundAudioDeleterProcessorTest extends IntegrationBase {
         transformedMediaEntity.setCreatedDateTime(createdAt);
         TransformedMediaEntity savedTM = dartsDatabase.save(transformedMediaEntity);
 
-        return dartsDatabase.getTransientObjectDirectoryRepository().saveAndFlush(transientObjectDirectoryStub.createTransientObjectDirectoryEntity(
+        return dartsDatabase.save(transientObjectDirectoryStub.createTransientObjectDirectoryEntity(
             savedTM,
             objectDirectoryStatusEntity,
             UUID.randomUUID()
         ));
-
-
     }
 }

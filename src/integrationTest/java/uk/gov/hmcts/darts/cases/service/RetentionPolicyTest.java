@@ -2,7 +2,6 @@ package uk.gov.hmcts.darts.cases.service;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -17,7 +16,6 @@ import java.time.OffsetDateTime;
 
 import static org.mockito.Mockito.when;
 
-@Disabled("Impacted by V1_367__adding_not_null_constraints_part_4.sql")
 @SuppressWarnings("VariableDeclarationUsageDistance")
 class RetentionPolicyTest extends IntegrationBase {
 

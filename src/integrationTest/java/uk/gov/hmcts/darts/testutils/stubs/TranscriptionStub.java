@@ -72,6 +72,7 @@ public class TranscriptionStub {
     private final UserAccountStubComposable userAccountStub;
     private final HearingStub hearingStub;
     private final TranscriptionStubComposable transcriptionStubComposable;
+    private final DartsDatabaseSaveStub dartsDatabaseSaveStub;
 
     public TranscriptionEntity createMinimalTranscription() {
         return createTranscription(hearingStub.createMinimalHearing());
@@ -237,7 +238,7 @@ public class TranscriptionStub {
             hearing.getTranscriptions().add(transcription);
         }
 
-        return transcriptionRepository.saveAndFlush(transcription);
+        return dartsDatabaseSaveStub.save(transcription);
     }
 
 
@@ -247,7 +248,7 @@ public class TranscriptionStub {
                                                                 TranscriptionStatusEntity transcriptionStatus,
                                                                 TranscriptionUrgencyEntity transcriptionUrgency,
                                                                 UserAccountEntity testUser,
-                                                                List<TranscriptionWorkflowEntity>  workflowEntity,
+                                                                List<TranscriptionWorkflowEntity> workflowEntity,
                                                                 boolean isManualTranscription) {
         TranscriptionEntity transcription = new TranscriptionEntity();
         for (CourtCaseEntity caseEntity : courtCase) {
@@ -282,7 +283,7 @@ public class TranscriptionStub {
         transcription.setIsManualTranscription(isManualTranscription);
         transcription.setHideRequestFromRequestor(false);
         transcription.setIsCurrent(true);
-        return transcriptionRepository.saveAndFlush(transcription);
+        return dartsDatabaseSaveStub.save(transcription);
     }
 
     public TranscriptionEntity createAndSaveTranscriptionEntity(CourtCaseEntity courtCase,
@@ -301,7 +302,7 @@ public class TranscriptionStub {
         transcription.setIsManualTranscription(true);
         transcription.setHideRequestFromRequestor(false);
         transcription.setIsCurrent(true);
-        return transcriptionRepository.saveAndFlush(transcription);
+        return dartsDatabaseSaveStub.save(transcription);
     }
 
     @Transactional
@@ -317,7 +318,7 @@ public class TranscriptionStub {
             getTranscriptionStatusByEnum(AWAITING_AUTHORISATION),
             null
         );
-        return transcriptionRepository.saveAndFlush(transcriptionEntity);
+        return dartsDatabaseSaveStub.save(transcriptionEntity);
     }
 
     @Transactional
@@ -334,7 +335,7 @@ public class TranscriptionStub {
             getTranscriptionStatusByEnum(AWAITING_AUTHORISATION),
             comment
         );
-        return transcriptionRepository.saveAndFlush(transcriptionEntity);
+        return dartsDatabaseSaveStub.save(transcriptionEntity);
     }
 
     @Transactional
@@ -344,7 +345,7 @@ public class TranscriptionStub {
                                                                                OffsetDateTime workflowTimestamp,
                                                                                boolean associatedUrgency) {
         return createAndSaveAwaitingAuthorisationTranscription(userAccountEntity, courtCaseEntity,
-                                                               hearingEntity, workflowTimestamp, associatedUrgency,true);
+                                                               hearingEntity, workflowTimestamp, associatedUrgency, true);
     }
 
     @Transactional
@@ -380,7 +381,7 @@ public class TranscriptionStub {
             null
         );
         transcriptionEntity.setHideRequestFromRequestor(hideRequestFromRequester);
-        return transcriptionRepository.saveAndFlush(transcriptionEntity);
+        return dartsDatabaseSaveStub.save(transcriptionEntity);
     }
 
     @Transactional
@@ -398,7 +399,7 @@ public class TranscriptionStub {
             null
         );
         transcriptionEntity.setHideRequestFromRequestor(hideRequestFromRequester);
-        return transcriptionRepository.saveAndFlush(transcriptionEntity);
+        return dartsDatabaseSaveStub.save(transcriptionEntity);
     }
 
     @Transactional
@@ -416,7 +417,7 @@ public class TranscriptionStub {
             null
         );
         transcriptionEntity.setHideRequestFromRequestor(hideRequestFromRequester);
-        return transcriptionRepository.saveAndFlush(transcriptionEntity);
+        return dartsDatabaseSaveStub.save(transcriptionEntity);
     }
 
     @Transactional
@@ -438,7 +439,7 @@ public class TranscriptionStub {
         transcriptionEntity.setHideRequestFromRequestor(hideRequestFromRequester);
         transcriptionEntity.setStartTime(startDate);
         transcriptionEntity.setEndTime(endDate);
-        return transcriptionRepository.saveAndFlush(transcriptionEntity);
+        return dartsDatabaseSaveStub.save(transcriptionEntity);
     }
 
     @Transactional
@@ -463,7 +464,7 @@ public class TranscriptionStub {
         transcriptionEntity.setEndTime(endDate);
         transcriptionEntity.setTranscriptionType(transcriptionType);
         transcriptionEntity.setIsCurrent(true);
-        return transcriptionRepository.saveAndFlush(transcriptionEntity);
+        return dartsDatabaseSaveStub.save(transcriptionEntity);
     }
 
     @Transactional
@@ -504,7 +505,7 @@ public class TranscriptionStub {
 
         var transcriptionWorkflow = createTranscriptionWorkflowEntity(transcription, transcription.getCreatedBy(), workflowTimestamp, transcriptionStatus);
 
-        return transcriptionWorkflowRepository.save(transcriptionWorkflow);
+        return dartsDatabaseSaveStub.save(transcriptionWorkflow);
     }
 
     public TranscriptionEntity updateTranscriptionWithDocument(TranscriptionEntity transcriptionEntity,
@@ -519,10 +520,10 @@ public class TranscriptionStub {
         transcriptionDocumentEntity.setHidden(hideDocument);
         transcriptionDocumentEntity.setUploadedBy(userAccountEntity);
         transcriptionDocumentEntity.setLastModifiedBy(userAccountEntity);
-        transcriptionDocumentRepository.saveAndFlush(transcriptionDocumentEntity);
+        dartsDatabaseSaveStub.save(transcriptionDocumentEntity);
 
         transcriptionEntity.getTranscriptionDocumentEntities().add(transcriptionDocumentEntity);
-        transcriptionRepository.saveAndFlush(transcriptionEntity);
+        dartsDatabaseSaveStub.save(transcriptionEntity);
 
         return transcriptionEntity;
     }
@@ -564,14 +565,14 @@ public class TranscriptionStub {
                                                                String checksum,
                                                                Integer confScore,
                                                                String confReason
-                                                               ) {
+    ) {
 
         TranscriptionDocumentEntity transcriptionDocumentEntity = createTranscriptionDocumentEntity(transcriptionEntity, fileName,
                                                                                                     fileType, fileSize, testUser,
                                                                                                     checksum, confScore, confReason);
-        transcriptionDocumentRepository.save(transcriptionDocumentEntity);
+        dartsDatabaseSaveStub.save(transcriptionDocumentEntity);
         transcriptionEntity.getTranscriptionDocumentEntities().add(transcriptionDocumentEntity);
-        transcriptionRepository.save(transcriptionEntity);
+        dartsDatabaseSaveStub.save(transcriptionEntity);
 
         ExternalObjectDirectoryEntity externalObjectDirectoryEntity = new ExternalObjectDirectoryEntity();
         externalObjectDirectoryEntity.setStatus(objectRecordStatusEntity);
@@ -583,10 +584,10 @@ public class TranscriptionStub {
         externalObjectDirectoryEntity.setCreatedBy(testUser);
         externalObjectDirectoryEntity.setLastModifiedBy(testUser);
         externalObjectDirectoryEntity.setTranscriptionDocumentEntity(transcriptionDocumentEntity);
-        externalObjectDirectoryEntity = externalObjectDirectoryRepository.save(externalObjectDirectoryEntity);
+        externalObjectDirectoryEntity = dartsDatabaseSaveStub.save(externalObjectDirectoryEntity);
 
         transcriptionDocumentEntity.getExternalObjectDirectoryEntities().add(externalObjectDirectoryEntity);
-        return transcriptionRepository.save(transcriptionEntity);
+        return dartsDatabaseSaveStub.save(transcriptionEntity);
     }
 
     private String getChecksum() {
@@ -659,7 +660,7 @@ public class TranscriptionStub {
                                                               String comment, boolean associateUrgency) {
 
         return createTranscriptionWithStatus(userAccountEntity, courtCaseEntity, hearingEntity, workflowTimestamp,
-                                      status, comment, associateUrgency, true);
+                                             status, comment, associateUrgency, true);
     }
 
     private TranscriptionEntity createTranscriptionWithStatus(UserAccountEntity userAccountEntity,
@@ -688,7 +689,7 @@ public class TranscriptionStub {
         transcriptionEntity.setIsManualTranscription(true);
         transcriptionEntity.setHideRequestFromRequestor(false);
         transcriptionEntity.setIsCurrent(isCurrent);
-        transcriptionRepository.save(transcriptionEntity);
+        dartsDatabaseSaveStub.save(transcriptionEntity);
 
         final var requestedTranscriptionWorkflowEntity = createTranscriptionWorkflowEntity(
             transcriptionEntity,
@@ -696,11 +697,11 @@ public class TranscriptionStub {
             workflowTimestamp,
             getTranscriptionStatusByEnum(REQUESTED)
         );
-        transcriptionWorkflowRepository.saveAndFlush(requestedTranscriptionWorkflowEntity);
+        dartsDatabaseSaveStub.save(requestedTranscriptionWorkflowEntity);
 
         if (nonNull(comment)) {
             final var transcriptionComment = createTranscriptionWorkflowComment(requestedTranscriptionWorkflowEntity, comment, userAccountEntity);
-            transcriptionCommentRepository.save(transcriptionComment);
+            dartsDatabaseSaveStub.save(transcriptionComment);
 
             requestedTranscriptionWorkflowEntity.getTranscriptionComments().add(transcriptionComment);
         }
@@ -711,11 +712,11 @@ public class TranscriptionStub {
             workflowTimestamp,
             status
         );
-        transcriptionWorkflowRepository.saveAndFlush(transcriptionWorkflowEntity);
+        dartsDatabaseSaveStub.save(transcriptionWorkflowEntity);
 
         transcriptionEntity.getTranscriptionWorkflowEntities()
             .addAll(List.of(requestedTranscriptionWorkflowEntity, transcriptionWorkflowEntity));
-        return transcriptionRepository.saveAndFlush(transcriptionEntity);
+        return dartsDatabaseSaveStub.save(transcriptionEntity);
     }
 
     public TranscriptionCommentEntity createTranscriptionWorkflowComment(TranscriptionWorkflowEntity workflowEntity, String comment,
@@ -734,7 +735,7 @@ public class TranscriptionStub {
     public TranscriptionCommentEntity createAndSaveTranscriptionWorkflowComment(TranscriptionWorkflowEntity workflowEntity,
                                                                                 String comment, UserAccountEntity userAccount) {
         var transcriptionComment = createTranscriptionWorkflowComment(workflowEntity, comment, userAccount);
-        return transcriptionCommentRepository.save(transcriptionComment);
+        return dartsDatabaseSaveStub.save(transcriptionComment);
     }
 
     public TranscriptionCommentEntity createAndSaveTranscriptionCommentNotAssociatedToWorkflow(TranscriptionEntity transcription,
@@ -747,7 +748,7 @@ public class TranscriptionStub {
         transcriptionComment.setAuthorUserId(transcription.getCreatedBy().getId());
         transcriptionComment.setLastModifiedBy(transcription.getCreatedBy());
         transcriptionComment.setCreatedBy(transcription.getCreatedBy());
-        return transcriptionCommentRepository.save(transcriptionComment);
+        return dartsDatabaseSaveStub.save(transcriptionComment);
     }
 
     private ExternalLocationTypeEntity getLocationEntity(ExternalLocationTypeEnum externalLocationTypeEnum) {

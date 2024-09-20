@@ -32,7 +32,8 @@
           "AJUDGE"
         ]
       }
-    ]
+    ],
+    "is_data_anonymised": false
   },
   {
     "case_number": "Case9",
@@ -51,6 +52,7 @@
           "JUDGE3A"
         ]
       }
-    ]
+    ],
+    "is_data_anonymised": false
   }
 ]

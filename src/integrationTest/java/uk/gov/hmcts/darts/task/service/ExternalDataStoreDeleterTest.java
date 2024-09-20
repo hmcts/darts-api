@@ -4,7 +4,6 @@ import com.azure.storage.blob.BlobClient;
 import com.azure.storage.blob.BlobContainerClient;
 import com.azure.storage.blob.BlobServiceClient;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.Mockito;
@@ -55,7 +54,6 @@ import static uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum.UNSTRUCTU
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.MARKED_FOR_DELETION;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.STORED;
 
-@Disabled("Impacted by V1_367__adding_not_null_constraints_part_4.sql")
 @SuppressWarnings({"PMD.ExcessiveImports"})
 class ExternalDataStoreDeleterTest extends IntegrationBase {
     @Autowired
@@ -142,7 +140,6 @@ class ExternalDataStoreDeleterTest extends IntegrationBase {
 
     @SuppressWarnings("checkstyle:VariableDeclarationUsageDistance")
     @Test
-    @Disabled("Impacted by V1_362__constraint_transcription_part6.sql")
     void deleteMarkedForDeletionDataFromDataStores() {
         audioBuilder.setupTest();
         Mockito.when(dataManagementFactory.getBlobServiceClient(anyString())).thenReturn(blobServiceClient);
@@ -183,7 +180,6 @@ class ExternalDataStoreDeleterTest extends IntegrationBase {
 
     @SuppressWarnings("checkstyle:VariableDeclarationUsageDistance")
     @Test
-    @Disabled("Impacted by V1_362__constraint_transcription_part6.sql")
     void dontDeleteWhenStatusIsNotMarkedForDeletionDataFromDataStores() {
         audioBuilder.setupTest();
         Mockito.when(dataManagementFactory.getBlobServiceClient(anyString())).thenReturn(blobServiceClient);

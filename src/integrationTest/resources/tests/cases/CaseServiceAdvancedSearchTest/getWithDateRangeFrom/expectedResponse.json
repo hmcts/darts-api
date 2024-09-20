@@ -32,7 +32,8 @@
           "AJUDGE"
         ]
       }
-    ]
+    ],
+    "is_data_anonymised": false
   },
   {
     "case_number": "Case4",
@@ -65,7 +66,8 @@
           "AJUDGE"
         ]
       }
-    ]
+    ],
+    "is_data_anonymised": false
   },
   {
     "case_number": "case5",
@@ -98,7 +100,8 @@
           "AJUDGE"
         ]
       }
-    ]
+    ],
+    "is_data_anonymised": false
   },
   {
     "case_number": "case6",
@@ -133,7 +136,8 @@
           "AJUDGE"
         ]
       }
-    ]
+    ],
+    "is_data_anonymised": false
   },
   {
     "case_number": "case7",
@@ -159,7 +163,8 @@
           "AJUDGE"
         ]
       }
-    ]
+    ],
+    "is_data_anonymised": false
   },
   {
     "case_number": "case8",
@@ -178,7 +183,8 @@
           "AJUDGE"
         ]
       }
-    ]
+    ],
+    "is_data_anonymised": false
   },
   {
     "case_number": "case10",
@@ -197,6 +203,7 @@
           "AJUDGE"
         ]
       }
-    ]
+    ],
+    "is_data_anonymised": false
   }
 ]

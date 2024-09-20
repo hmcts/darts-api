@@ -2,7 +2,6 @@ package uk.gov.hmcts.darts.transcriptions.controller;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.skyscreamer.jsonassert.JSONAssert;
 import org.skyscreamer.jsonassert.JSONCompareMode;
@@ -23,7 +22,6 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@Disabled("Impacted by V1_367__adding_not_null_constraints_part_4.sql")
 @AutoConfigureMockMvc
 class TranscriptionControllerGetTranscriptionTranscriberCountsIntTest extends IntegrationBase {
 
@@ -47,28 +45,30 @@ class TranscriptionControllerGetTranscriptionTranscriberCountsIntTest extends In
                                 last_modified_by, display_name)
                                 VALUES (-1, NULL, 'BRISTOL', '2023-11-17 15:06:15.859244+00', '2023-11-17 15:06:15.859244+00', 0, 0, 'Bristol');
                                 INSERT INTO darts.courtroom (ctr_id, cth_id, courtroom_name, created_ts, created_by)
-                                VALUES (-1, -1, 'COURT 1', NULL, 0);
+                                VALUES (-1, -1, 'COURT 1', current_timestamp, 0);
                                 INSERT INTO darts.court_case (cas_id, cth_id, evh_id, case_object_id, case_number, case_closed, interpreter_used,
                                 case_closed_ts, created_ts, created_by, last_modified_ts, last_modified_by)
-                                VALUES (-1, -1, NULL, NULL, 'T20231009-1', false, false, NULL, NULL, NULL, NULL, NULL);
+                                VALUES (-1, -1, NULL, NULL, 'T20231009-1', false, false, NULL, current_timestamp, 0, current_timestamp, 0);
                                 INSERT INTO darts.hearing (hea_id, cas_id, ctr_id, hearing_date, scheduled_start_time, hearing_is_actual,
                                 created_ts, created_by, last_modified_ts, last_modified_by)
-                                VALUES (-1, -1, -1, '2023-11-17', NULL, true, NULL, NULL, NULL, NULL);
-
+                                VALUES (-1, -1, -1, '2023-11-17', NULL, true, current_timestamp, 0, current_timestamp, 0);
+                                
                                 INSERT INTO darts.user_account (usr_id, dm_user_s_object_id, user_name, user_full_name, user_email_address, description,
                                 is_active, created_ts,
                                 last_modified_ts, last_login_ts, last_modified_by, created_by, account_guid, is_system_user)
-                                VALUES (-10, NULL, 'John R', 'John R', 'John.R@example.com', NULL, true, NULL, NULL, NULL, NULL, NULL, NULL, false);
+                                VALUES (-10, NULL, 'John R', 'John R', 'John.R@example.com', NULL, true, current_timestamp,
+                                current_timestamp, NULL, 0, 0, NULL, false);
                                 INSERT INTO darts.security_group_user_account_ae (usr_id, grp_id)
                                 VALUES (-10, -4);
                                 INSERT INTO darts.security_group_courthouse_ae (grp_id, cth_id)
                                 VALUES (-4, -1);
-
+                                
                                 INSERT INTO darts.user_account (usr_id, dm_user_s_object_id, user_name, user_full_name, user_email_address, description,
                                 is_active, created_ts,
                                 last_modified_ts, last_login_ts, last_modified_by, created_by, account_guid, is_system_user)
-                                VALUES (-20, NULL, 'John R', 'John R', 'John.R@example.com', NULL, true, NULL, NULL, NULL, NULL, NULL, NULL, false);
-
+                                VALUES (-20, NULL, 'John R', 'John R', 'John.R@example.com', NULL, true, current_timestamp,
+                                current_timestamp, NULL, 0, 0, NULL, false);
+                                
                                 -- Transcript Requests: Approved
                                 INSERT INTO darts.transcription (tra_id, ctr_id, trt_id, transcription_object_id, requested_by, start_ts, end_ts,
                                 created_ts, last_modified_ts, last_modified_by, created_by, tru_id, trs_id, hearing_date,
@@ -83,7 +83,7 @@ class TranscriptionControllerGetTranscriptionTranscriberCountsIntTest extends In
                                 VALUES (42, 41, 2, -10, '2023-11-23 16:25:55.338405+00');
                                 INSERT INTO darts.transcription_workflow (trw_id, tra_id, trs_id, workflow_actor, workflow_ts)
                                 VALUES (43, 41, 3, -10, '2023-11-23 16:26:20.441633+00');
-
+                                
                                 -- Transcript Requests: With Transcriber
                                 INSERT INTO darts.transcription (tra_id, ctr_id, trt_id, transcription_object_id, requested_by, start_ts, end_ts,
                                 created_ts, last_modified_ts, last_modified_by, created_by, tru_id, trs_id, hearing_date,
@@ -100,7 +100,7 @@ class TranscriptionControllerGetTranscriptionTranscriberCountsIntTest extends In
                                 VALUES (101, 81, 3, -10, '2023-11-23 17:45:27.069655+00');
                                 INSERT INTO darts.transcription_workflow (trw_id, tra_id, trs_id, workflow_actor, workflow_ts)
                                 VALUES (102, 81, 5, -10, '2023-11-23 17:45:51.151621+00');
-
+                                
                                 -- Transcript Requests: Approved
                                 INSERT INTO darts.transcription (tra_id, ctr_id, trt_id, transcription_object_id, requested_by, start_ts, end_ts,
                                 created_ts, last_modified_ts, last_modified_by, created_by, tru_id, trs_id, hearing_date,
@@ -123,15 +123,15 @@ class TranscriptionControllerGetTranscriptionTranscriberCountsIntTest extends In
         jdbcTemplate.update("""
                                 DELETE FROM darts.case_transcription_ae WHERE tra_id IN (41, 81, 101);
                                 DELETE FROM darts.hearing_transcription_ae WHERE tra_id IN (41, 81, 101);
-
+                                
                                 DELETE FROM darts.transcription_workflow WHERE tra_id IN (41, 81, 101);
                                 DELETE FROM darts.transcription WHERE tra_id IN (41, 81, 101);
-
+                                
                                 DELETE FROM darts.security_group_courthouse_ae WHERE grp_id=-4 AND cth_id=-1;
                                 DELETE FROM darts.security_group_user_account_ae WHERE usr_id=-10 AND grp_id=-4;
                                 DELETE FROM darts.user_account WHERE usr_id=-10;
                                 DELETE FROM darts.user_account WHERE usr_id=-20;
-
+                                
                                 DELETE FROM darts.hearing WHERE hea_id=-1;
                                 DELETE FROM darts.court_case WHERE cas_id=-1;
                                 DELETE FROM darts.courtroom WHERE ctr_id=-1;
@@ -141,7 +141,6 @@ class TranscriptionControllerGetTranscriptionTranscriberCountsIntTest extends In
 
 
     @Test
-    @Disabled("Impacted by V1_364_*.sql")
     void getTranscriberCountsShouldReturnOk() throws Exception {
         MockHttpServletRequestBuilder requestBuilder = get(ENDPOINT_URI)
             .header(
@@ -164,7 +163,6 @@ class TranscriptionControllerGetTranscriptionTranscriberCountsIntTest extends In
     }
 
     @Test
-    @Disabled("Impacted by V1_364_*.sql")
     void getTranscriberCountsShouldReturnOkWithInactive() throws Exception {
 
         UserAccountEntity userAccountEntity = userAccountRepository.findById(-10).get();
@@ -184,7 +182,6 @@ class TranscriptionControllerGetTranscriptionTranscriberCountsIntTest extends In
     }
 
     @Test
-    @Disabled("Impacted by V1_364_*.sql")
     void getTranscriberCountsShouldReturnForbiddenWhenUserNotTranscriber() throws Exception {
         MockHttpServletRequestBuilder requestBuilder = get(ENDPOINT_URI)
             .header(

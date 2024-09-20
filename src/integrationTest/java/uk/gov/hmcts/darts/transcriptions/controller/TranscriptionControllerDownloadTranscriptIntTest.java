@@ -2,7 +2,6 @@ package uk.gov.hmcts.darts.transcriptions.controller;
 
 import org.apache.commons.io.IOUtils;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.skyscreamer.jsonassert.JSONAssert;
 import org.skyscreamer.jsonassert.JSONCompareMode;
@@ -54,7 +53,6 @@ import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum.WI
 @AutoConfigureMockMvc
 @Transactional
 @SuppressWarnings({"PMD.ExcessiveImports"})
-@Disabled("Impacted by V1_364_*.sql")
 class TranscriptionControllerDownloadTranscriptIntTest extends IntegrationBase {
 
     private static final String URL_TEMPLATE = "/transcriptions/{transcription_id}/document";

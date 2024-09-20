@@ -2,7 +2,6 @@ package uk.gov.hmcts.darts.cases.service;
 
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import uk.gov.hmcts.darts.cases.model.AdvancedSearchResult;
@@ -29,7 +28,6 @@ import static uk.gov.hmcts.darts.test.common.data.HearingTestData.createHearingW
 import static uk.gov.hmcts.darts.testutils.stubs.UserAccountStub.INTEGRATION_TEST_USER_EMAIL;
 
 @Slf4j
-@Disabled("Impacted by V1_363__not_null_constraints_part3.sql")
 class CaseServiceAdvancedSearchUseInterpreterTest extends IntegrationBase {
 
     @Autowired

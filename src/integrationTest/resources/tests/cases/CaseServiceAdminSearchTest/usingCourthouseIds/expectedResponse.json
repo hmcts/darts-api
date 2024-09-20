@@ -14,7 +14,8 @@
     ],
     "defendants": [
       "aDefendant"
-    ]
+    ],
+    "is_data_anonymised": false
   },
   {
     "case_number": "Case2",
@@ -31,7 +32,8 @@
     ],
     "defendants": [
       "Defendant2"
-    ]
+    ],
+    "is_data_anonymised": false
   },
   {
     "case_number": "Case3",
@@ -49,7 +51,8 @@
     ],
     "defendants": [
       "aDefendant"
-    ]
+    ],
+    "is_data_anonymised": false
   },
   {
     "case_number": "Case4",
@@ -69,7 +72,8 @@
     ],
     "defendants": [
       "aDefendant"
-    ]
+    ],
+    "is_data_anonymised": false
   },
   {
     "case_number": "case5",
@@ -92,7 +96,8 @@
     ],
     "defendants": [
       "aDefendant"
-    ]
+    ],
+    "is_data_anonymised": false
   },
   {
     "case_number": "case6",
@@ -116,7 +121,8 @@
     ],
     "defendants": [
       "aDefendant"
-    ]
+    ],
+    "is_data_anonymised": false
   },
   {
     "case_number": "case7",
@@ -133,7 +139,8 @@
     ],
     "defendants": [
       "aDefendant"
-    ]
+    ],
+    "is_data_anonymised": false
   },
   {
     "case_number": "case8",
@@ -150,7 +157,8 @@
     ],
     "defendants": [
       "aDefendant"
-    ]
+    ],
+    "is_data_anonymised": false
   },
   {
     "case_number": "Case9",
@@ -167,7 +175,8 @@
     ],
     "defendants": [
       "aDefendant"
-    ]
+    ],
+    "is_data_anonymised": false
   },
   {
     "case_number": "case10",
@@ -184,6 +193,7 @@
     ],
     "defendants": [
       "aDefendant"
-    ]
+    ],
+    "is_data_anonymised": false
   }
 ]

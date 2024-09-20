@@ -30,6 +30,7 @@ public class UserAccountStubComposable {
     private final SecurityGroupRepository securityGroupRepository;
 
     private final DartsPersistence dartsPersistence;
+    private final DartsDatabaseSaveStub dartsDatabaseSaveStub;
 
     @Transactional
     public UserAccountEntity createAuthorisedIntegrationTestUser(CourthouseStubComposable courthouseStubComposable, String courthouse) {
@@ -172,7 +173,7 @@ public class UserAccountStubComposable {
                 addCourthouseToSecurityGroup(securityGroupEntity, courthouseEntity);
             }
             testUser.getSecurityGroupEntities().add(securityGroupEntity);
-            testUser = userAccountRepository.saveAndFlush(testUser);
+            testUser = dartsDatabaseSaveStub.save(testUser);
         }
 
         return testUser;
