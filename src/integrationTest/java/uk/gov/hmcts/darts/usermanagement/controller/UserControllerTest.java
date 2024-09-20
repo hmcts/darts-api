@@ -90,7 +90,15 @@ class UserControllerTest extends IntegrationBase {
         UserAccountEntity userAccountEntity = UserAccountTestData.minimalUserAccount();
         userAccountEntity = userAccountRepository.save(userAccountEntity);
 
-        dartsDatabase.addUserToGroup(userAccountEntity, SecurityGroupEnum.SUPER_ADMIN);
+
+        Optional<SecurityGroupEntity> groupEntity
+            = securityGroupRepository.findByGroupNameIgnoreCase(SecurityGroupEnum.SUPER_ADMIN.getName());
+
+
+        userAccountEntity.getSecurityGroupEntities().add(groupEntity.get());
+        userAccountEntity = dartsDatabaseStub.save(userAccountEntity);
+
+
 
         HearingEntity hearingEntity = dartsDatabase.givenTheDatabaseContainsCourtCaseWithHearingAndCourthouseWithRoom(
             SOME_CASE_ID,
@@ -148,11 +156,10 @@ class UserControllerTest extends IntegrationBase {
         // add user to the super user group
         Optional<SecurityGroupEntity> groupEntity
             = securityGroupRepository.findByGroupNameIgnoreCase(SecurityGroupEnum.SUPER_USER.getName());
-        Set<UserAccountEntity> entitiesSet = new HashSet<>();
-        entitiesSet.add(userAccountEntity);
 
-        groupEntity.get().setUsers(entitiesSet);
-        dartsDatabase.addUserToGroup(userAccountEntity, groupEntity.get());
+
+        userAccountEntity.getSecurityGroupEntities().add(groupEntity.get());
+        userAccountEntity = dartsDatabaseStub.save(userAccountEntity);
 
         HearingEntity hearingEntity = dartsDatabase.givenTheDatabaseContainsCourtCaseWithHearingAndCourthouseWithRoom(
             SOME_CASE_ID,
@@ -213,11 +220,10 @@ class UserControllerTest extends IntegrationBase {
         // add user to the super admin group
         Optional<SecurityGroupEntity> groupEntity
             = securityGroupRepository.findByGroupNameIgnoreCase(SecurityGroupEnum.SUPER_ADMIN.getName());
-        Set<UserAccountEntity> entitiesSet = new HashSet<>();
-        entitiesSet.add(userAccountEntity);
 
-        groupEntity.get().setUsers(entitiesSet);
-        dartsDatabase.addUserToGroup(userAccountEntity, groupEntity.get());
+
+        userAccountEntity.getSecurityGroupEntities().add(groupEntity.get());
+        userAccountEntity = dartsDatabaseStub.save(userAccountEntity);
 
         HearingEntity hearingEntity
             = dartsDatabase.givenTheDatabaseContainsCourtCaseWithHearingAndCourthouseWithRoom(
@@ -275,11 +281,10 @@ class UserControllerTest extends IntegrationBase {
         // add user to the super admin group
         Optional<SecurityGroupEntity> groupEntity
             = securityGroupRepository.findByGroupNameIgnoreCase(SecurityGroupEnum.SUPER_ADMIN.getName());
-        Set<UserAccountEntity> entitiesSet = new HashSet<>();
-        entitiesSet.add(userAccountEntity);
 
-        groupEntity.get().setUsers(entitiesSet);
-        dartsDatabase.addUserToGroup(userAccountEntity, groupEntity.get());
+
+        userAccountEntity.getSecurityGroupEntities().add(groupEntity.get());
+        userAccountEntity = dartsDatabaseStub.save(userAccountEntity);
 
         HearingEntity hearingEntity
             = dartsDatabase.givenTheDatabaseContainsCourtCaseWithHearingAndCourthouseWithRoom(
@@ -325,11 +330,10 @@ class UserControllerTest extends IntegrationBase {
         // add user to the super admin group
         Optional<SecurityGroupEntity> groupEntity
             = securityGroupRepository.findByGroupNameIgnoreCase(SecurityGroupEnum.SUPER_ADMIN.getName());
-        Set<UserAccountEntity> entitiesSet = new HashSet<>();
-        entitiesSet.add(userAccountEntity);
 
-        groupEntity.get().setUsers(entitiesSet);
-        dartsDatabase.addUserToGroup(userAccountEntity, groupEntity.get());
+
+        userAccountEntity.getSecurityGroupEntities().add(groupEntity.get());
+        userAccountEntity = dartsDatabaseStub.save(userAccountEntity);
 
         HearingEntity hearingEntity
             = dartsDatabase.givenTheDatabaseContainsCourtCaseWithHearingAndCourthouseWithRoom(
@@ -373,11 +377,10 @@ class UserControllerTest extends IntegrationBase {
         // add user to the super admin group
         Optional<SecurityGroupEntity> groupEntity
             = securityGroupRepository.findByGroupNameIgnoreCase(SecurityGroupEnum.SUPER_ADMIN.getName());
-        Set<UserAccountEntity> entitiesSet = new HashSet<>();
-        entitiesSet.add(userAccountEntity);
 
-        groupEntity.get().setUsers(entitiesSet);
-        dartsDatabase.addUserToGroup(userAccountEntity, groupEntity.get());
+
+        userAccountEntity.getSecurityGroupEntities().add(groupEntity.get());
+        userAccountEntity = dartsDatabaseStub.save(userAccountEntity);
 
         HearingEntity hearingEntity
             = dartsDatabase.givenTheDatabaseContainsCourtCaseWithHearingAndCourthouseWithRoom(
@@ -420,7 +423,13 @@ class UserControllerTest extends IntegrationBase {
         // clear all users that are associated with the super admin group
         securityGroupStub.clearUsers(SecurityGroupEnum.SUPER_ADMIN);
 
-        dartsDatabaseStub.addUserToGroup(userAccountEntity, SecurityGroupEnum.SUPER_ADMIN);
+        Optional<SecurityGroupEntity> groupEntity
+            = securityGroupRepository.findByGroupNameIgnoreCase(SecurityGroupEnum.SUPER_ADMIN.getName());
+        Set<UserAccountEntity> entitiesSet = new HashSet<>();
+        entitiesSet.add(userAccountEntity);
+
+        userAccountEntity.getSecurityGroupEntities().add(groupEntity.get());
+        userAccountEntity = dartsDatabaseStub.save(userAccountEntity);
 
         HearingEntity hearingEntity = dartsDatabase.givenTheDatabaseContainsCourtCaseWithHearingAndCourthouseWithRoom(
             SOME_CASE_ID,
