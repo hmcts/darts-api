@@ -1,5 +1,6 @@
 package uk.gov.hmcts.darts.test.common.data;
 
+import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
@@ -18,6 +19,7 @@ import java.util.List;
  * A test to test the integrity of our data insertion classes. This class is useful to ensure we fail fast on
  * the test data classes being incompatible with the database constraints
  */
+@Slf4j
 class TestDataClassesTest extends IntegrationBase {
 
     @Autowired
@@ -39,7 +41,6 @@ class TestDataClassesTest extends IntegrationBase {
     }
 
     @Test
-    @SuppressWarnings("PMD.EmptyCatchBlock")
     void testRequestMaximal() throws Exception {
         List<Class<?>> classList = getPersistableClasses();
         for (Class<?> cls : classList) {
@@ -53,6 +54,7 @@ class TestDataClassesTest extends IntegrationBase {
                                                                  entity);
             } catch (UnsupportedOperationException unsupportedOperationException) {
                 // lets pass if the maximal method is not yet implemented
+                log.error("Method not implemented", unsupportedOperationException);
             }
         }
     }
