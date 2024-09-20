@@ -2,6 +2,8 @@ package uk.gov.hmcts.darts.audio.controller;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -14,6 +16,7 @@ import uk.gov.hmcts.darts.audio.model.Problem;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
+import uk.gov.hmcts.darts.common.enums.SecurityRoleEnum;
 import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 import uk.gov.hmcts.darts.testutils.stubs.CourtroomStub;
@@ -252,6 +255,19 @@ class AudioControllerPostAdminApproveMediaMarkedForDeletionIntTest extends Integ
         Problem problem = objectMapper.readValue(actualJson, Problem.class);
         assertEquals(problem.getType(), AudioApiError.ADMIN_MEDIA_MARKED_FOR_DELETION_NOT_FOUND.getType());
         assertEquals(problem.getTitle(), AudioApiError.ADMIN_MEDIA_MARKED_FOR_DELETION_NOT_FOUND.getTitle());
+
+    }
+
+    @ParameterizedTest
+    @EnumSource(value = SecurityRoleEnum.class, names = {"SUPER_ADMIN"}, mode = EnumSource.Mode.EXCLUDE)
+    void testForbidden(SecurityRoleEnum role) throws Exception {
+        // given
+        superAdminUserStub.givenUserIsAuthorised(userIdentity, role);
+
+        // when then
+        mockMvc.perform(post(endpoint))
+            .andExpect(status().isForbidden())
+            .andReturn();
 
     }
 
