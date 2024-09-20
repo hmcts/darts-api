@@ -227,15 +227,17 @@ class OutboundAudioDeleterProcessorTest extends IntegrationBase {
         );
 
         // Last accessed on a 2023-10-20 friday
-        MediaRequestEntity currentMediaRequest = MediaRequestTestData.createCurrentMediaRequest(
-            hearing,
-            requestor,
-            OffsetDateTime.parse("2023-06-26T13:00:00Z"),
-            OffsetDateTime.parse("2023-06-26T13:45:00Z"),
-            AudioRequestType.DOWNLOAD, COMPLETED
-        );
-        dartsDatabase.save(
-            currentMediaRequest);
+        MediaRequestEntity currentMediaRequest = new MediaRequestTestData()
+            .fromSpec(MediaRequestTestData.TestSpec.builder()
+                          .hearing(hearing)
+                          .requestor(requestor)
+                          .currentOwner(requestor)
+                          .startTime(OffsetDateTime.parse("2023-06-26T13:00:00Z"))
+                          .endTime(OffsetDateTime.parse("2023-06-26T13:45:00Z"))
+                          .requestType(AudioRequestType.DOWNLOAD)
+                          .status(COMPLETED)
+                          .build());
+        dartsDatabase.save(currentMediaRequest);
 
         TransientObjectDirectoryEntity notMarkedForDeletion = createStoredTransientDirectory(
             currentMediaRequest,
