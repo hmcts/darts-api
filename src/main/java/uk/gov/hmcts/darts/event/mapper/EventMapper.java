@@ -48,6 +48,8 @@ public class EventMapper {
             adminGetEventsForIdResponse.setLastModifiedAt(eventEntity.getLastModifiedDateTime());
             adminGetEventsForIdResponse.setLastModifiedBy(eventEntity.getLastModifiedBy().getId());
             adminGetEventsForIdResponse.setIsDataAnonymised(eventEntity.isDataAnonymised());
+            adminGetEventsForIdResponse.setIsEventAnonymised(eventEntity.isDataAnonymised());
+            adminGetEventsForIdResponse.setIsCaseExpired(eventEntity.associatedHearing().getCourtCase().isDataAnonymised());
         }
 
         return adminGetEventsForIdResponse;

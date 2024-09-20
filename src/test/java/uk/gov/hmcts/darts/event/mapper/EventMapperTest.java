@@ -5,10 +5,12 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
+import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
 import uk.gov.hmcts.darts.common.entity.EventEntity;
 import uk.gov.hmcts.darts.common.entity.EventHandlerEntity;
+import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.event.model.AdminGetEventForIdResponseResult;
 
@@ -39,6 +41,7 @@ class EventMapperTest {
         eventHandlerEntity.setId(300);
         eventEntity.setEventType(eventHandlerEntity);
         eventEntity.setLogEntry(false);
+        eventEntity.setDataAnonymised(true);
 
         CourtroomEntity courtroom = new CourtroomEntity();
         courtroom.setId(500);
@@ -62,6 +65,12 @@ class EventMapperTest {
         eventEntity.setLastModifiedDateTime(OffsetDateTime.now());
         eventEntity.setLastModifiedBy(uaLastModifiedEntity);
 
+        HearingEntity hearing = new HearingEntity();
+        CourtCaseEntity courtCase = new CourtCaseEntity();
+        courtCase.setDataAnonymised(true);
+        hearing.setCourtCase(courtCase);
+        eventEntity.addHearing(hearing);
+
         // Given
         AdminGetEventForIdResponseResult responseResult = eventMapper.mapToAdminGetEventsResponseForId(Optional.of(eventEntity));
 
@@ -84,6 +93,7 @@ class EventMapperTest {
         Assertions.assertEquals(eventEntity.getCreatedBy().getId(), responseResult.getCreatedBy());
         Assertions.assertEquals(eventEntity.getLastModifiedDateTime(), responseResult.getLastModifiedAt());
         Assertions.assertEquals(eventEntity.getLastModifiedBy().getId(), responseResult.getLastModifiedBy());
-        Assertions.assertEquals(eventEntity.isDataAnonymised(), responseResult.getIsDataAnonymised());
+        Assertions.assertEquals(true, responseResult.getIsDataAnonymised());
+        Assertions.assertEquals(true, responseResult.getIsEventAnonymised());
     }
 }

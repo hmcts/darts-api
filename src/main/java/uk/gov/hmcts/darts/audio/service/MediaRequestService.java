@@ -26,8 +26,6 @@ public interface MediaRequestService {
 
     MediaRequestEntity updateAudioRequestStatus(Integer id, MediaRequestStatus mediaRequestStatus);
 
-    MediaRequestEntity updateAudioRequestStatus(MediaRequestEntity mediaRequestEntity, MediaRequestStatus mediaRequestStatus);
-
     boolean isUserDuplicateAudioRequest(AudioRequestDetails audioRequestDetails);
 
     MediaRequestEntity saveAudioRequest(AudioRequestDetails audioRequestDetails);

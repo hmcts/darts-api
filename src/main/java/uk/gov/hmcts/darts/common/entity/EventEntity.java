@@ -87,4 +87,9 @@ public class EventEntity extends CreatedModifiedBaseEntity {
     public void addHearing(HearingEntity hearingEntity) {
         hearingEntities.add(hearingEntity);
     }
+
+    public HearingEntity associatedHearing() {
+        // Events can only be associated with one hearing at this stage
+        return this.hearingEntities.getFirst();
+    }
 }

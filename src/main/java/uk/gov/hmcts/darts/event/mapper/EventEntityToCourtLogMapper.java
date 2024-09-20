@@ -25,8 +25,8 @@ public class EventEntityToCourtLogMapper {
 
         CourtLog log = new CourtLog();
 
-        log.setCourthouse(eventEntity.getHearingEntities().getFirst().getCourtroom().getCourthouse().getDisplayName());
-        log.setCaseNumber(eventEntity.getHearingEntities().getFirst().getCourtCase().getCaseNumber());
+        log.setCourthouse(eventEntity.associatedHearing().getCourtroom().getCourthouse().getDisplayName());
+        log.setCaseNumber(eventEntity.associatedHearing().getCourtCase().getCaseNumber());
         log.setEventText(eventEntity.getEventText());
         log.setTimestamp(eventEntity.getTimestamp());
 

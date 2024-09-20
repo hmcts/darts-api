@@ -27,7 +27,7 @@ public class EventMapper {
     private Event map(EventEntity eventEntity) {
         // Events can only be associated with one hearing at this stage, but will need to update this logic if that changes in future
         // e.g. single events for linked cases
-        HearingEntity hearingEntity = eventEntity.getHearingEntities().get(0);
+        HearingEntity hearingEntity = eventEntity.associatedHearing();
 
         Event event = new Event();
         event.setId(eventEntity.getId());

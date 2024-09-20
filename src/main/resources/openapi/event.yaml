@@ -811,6 +811,10 @@ components:
           type: string
         is_data_anonymised:
           type: boolean
+        is_event_anonymised:
+          type: boolean
+        is_case_expired:
+          type: boolean
         created_at:
           type: string
           format: date-time
