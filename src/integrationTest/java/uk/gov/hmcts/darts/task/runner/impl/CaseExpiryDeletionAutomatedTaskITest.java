@@ -177,19 +177,21 @@ class CaseExpiryDeletionAutomatedTaskITest extends PostgresIntegrationBase {
     }
 
     private void assertEvent(EventEntity eventEntity, boolean isAnonymized) {
-        assertThat(eventEntity.isDataAnonymised()).isFalse();
         if (isAnonymized) {
+            assertThat(eventEntity.isDataAnonymised()).isTrue();
             assertThat(eventEntity.getEventText()).matches(UUID_REGEX);
         } else {
+            assertThat(eventEntity.isDataAnonymised()).isFalse();
             assertThat(eventEntity.getEventText()).doesNotMatch(UUID_REGEX);
         }
     }
 
     private void assertTranscriptionComment(TranscriptionCommentEntity transcriptionCommentEntity, boolean isAnonymized) {
-        assertThat(transcriptionCommentEntity.isDataAnonymised()).isFalse();
         if (isAnonymized) {
+            assertThat(transcriptionCommentEntity.isDataAnonymised()).isTrue();
             assertThat(transcriptionCommentEntity.getComment()).matches(UUID_REGEX);
         } else {
+            assertThat(transcriptionCommentEntity.isDataAnonymised()).isFalse();
             assertThat(transcriptionCommentEntity.getComment()).doesNotMatch(UUID_REGEX);
         }
     }
