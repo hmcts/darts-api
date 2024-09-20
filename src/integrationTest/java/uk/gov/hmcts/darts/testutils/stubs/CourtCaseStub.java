@@ -48,7 +48,6 @@ public class CourtCaseStub {
     @Transactional
     public CourtCaseEntity createAndSaveMinimalCourtCase() {
         var courtCase = PersistableFactory.getCourtCaseTestData().createSomeMinimalCase();
-        courtCase.getCourthouse().getCreatedBy().setId(0);
         return dartsPersistence.save(courtCase);
     }
 

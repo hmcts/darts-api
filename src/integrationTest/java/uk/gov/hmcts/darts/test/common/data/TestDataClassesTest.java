@@ -34,7 +34,7 @@ class TestDataClassesTest extends IntegrationBase {
             BuilderHolder<?,?> retrieve = obj.someMinimalBuilderHolder();
             Object entity = retrieve.build().getEntity();
 
-            log.info("TESTING DATA CLASS "+ cls.getName());
+            log.info("TESTING DATA CLASS " + cls.getName());
             dartsPersistence.getClass()
                 .getMethod("save", entity.getClass()).invoke(dartsPersistence,
                                                                              entity);

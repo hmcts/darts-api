@@ -409,13 +409,18 @@ public class DartsPersistence {
                 transcription.setCourtroom(save(transcription.getCourtroom()));
             }
 
-            if (transcription.getCourtCase() != null) {
-                transcription.setCourtCases(new ArrayList<>(List.of(save(transcription.getCourtCase()))));
+            if (transcription.getCourtCases() != null) {
+                List<CourtCaseEntity> listOfCases = new ArrayList<>();
+                for (CourtCaseEntity courtCase : transcription.getCourtCases()) {
+                    listOfCases.add(save(courtCase));
+                }
+                transcription.setCourtCases(listOfCases);
             }
 
             transcription.setCreatedBy(save(transcription.getCreatedBy()));
             transcription.setLastModifiedBy(save(transcription.getLastModifiedBy()));
             transcription = transcriptionRepository.save(transcription);
+
         } else {
             transcription = entityManager.merge(transcription);
         }
