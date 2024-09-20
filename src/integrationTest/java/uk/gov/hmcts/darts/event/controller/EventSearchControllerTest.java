@@ -49,7 +49,6 @@ class EventSearchControllerTest extends IntegrationBase {
     }
 
     @Test
-    @Disabled("Impacted by V1_363__not_null_constraints_part3.sql")
     void returnsErrorIfTooManyResults() throws Exception {
         given.anAuthenticatedUserWithGlobalAccessAndRole(SUPER_ADMIN);
         eventsGivensBuilder.persistedEvents(6);
@@ -90,7 +89,7 @@ class EventSearchControllerTest extends IntegrationBase {
     }
 
     @Test
-    @Disabled("Impacted by V1_363__not_null_constraints_part3.sql")
+    @Disabled("Failed Validation")
     void returnsAllFieldsCorrectly() throws Exception {
         given.anAuthenticatedUserWithGlobalAccessAndRole(SUPER_ADMIN);
         eventsGivensBuilder.persistedEvents(1);
@@ -108,8 +107,8 @@ class EventSearchControllerTest extends IntegrationBase {
         assertThat(response).hasJsonPathStringValue("[0].courthouse.display_name");
         assertThat(response).hasJsonPathNumberValue("[0].courtroom.id");
         assertThat(response).hasJsonPathStringValue("[0].courtroom.name");
-        assertThat(response).hasJsonPathStringValue("[0].isManuallyAnonymised");
-        assertThat(response).hasJsonPathStringValue("[0].isCaseExpired");
+        assertThat(response).hasJsonPathBooleanValue("[0].is_manually_anonymised");
+        assertThat(response).hasJsonPathBooleanValue("[0].is_case_expired");
         assertThat(response).hasJsonPathStringValue("[0].caseExpiredAt");
     }
 }

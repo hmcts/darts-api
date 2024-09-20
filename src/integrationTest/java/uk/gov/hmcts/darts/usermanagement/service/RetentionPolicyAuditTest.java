@@ -1,6 +1,5 @@
 package uk.gov.hmcts.darts.usermanagement.service;
 
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import uk.gov.hmcts.darts.common.entity.AuditEntity;
@@ -19,7 +18,6 @@ import static org.springframework.data.history.RevisionMetadata.RevisionType.UPD
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.SUPER_ADMIN;
 import static uk.gov.hmcts.darts.test.common.data.RetentionPolicyTestData.minimalRetentionPolicy;
 
-@Disabled("Impacted by V1_362__constraint_transcription_part6.sql")
 class RetentionPolicyAuditTest extends IntegrationBase {
 
     @Autowired
@@ -50,7 +48,7 @@ class RetentionPolicyAuditTest extends IntegrationBase {
         var userAccountEntity = given.anAuthenticatedUserWithGlobalAccessAndRole(SUPER_ADMIN);
         var priorPolicyEntity = minimalRetentionPolicy();
         priorPolicyEntity.setPolicyStart(OffsetDateTime.now().minusWeeks(1));
-        dartsDatabase.saveWithTransientEntities(priorPolicyEntity);
+        dartsDatabase.save(priorPolicyEntity);
 
         // When
         var adminPostRetentionRevision = adminPostRetentionRequestWithDefaults();
@@ -77,7 +75,7 @@ class RetentionPolicyAuditTest extends IntegrationBase {
         var userAccountEntity = given.anAuthenticatedUserWithGlobalAccessAndRole(SUPER_ADMIN);
         var retentionPolicyType = minimalRetentionPolicy();
         retentionPolicyType.setPolicyStart(OffsetDateTime.now().plusWeeks(1));
-        dartsDatabase.saveWithTransientEntities(retentionPolicyType);
+        dartsDatabase.save(retentionPolicyType);
 
         // When
         var adminPatchRetentionPolicy = new AdminPatchRetentionRequest().name("some-new-patched-name");
@@ -98,6 +96,7 @@ class RetentionPolicyAuditTest extends IntegrationBase {
             .name("some-retention-policy-name")
             .fixedPolicyKey("some-fixed-policy-key")
             .description("some-description")
+            .displayName("some-display-name")
             .policyStartAt(OffsetDateTime.now().plusWeeks(1))
             .duration("1Y2M3D");
     }

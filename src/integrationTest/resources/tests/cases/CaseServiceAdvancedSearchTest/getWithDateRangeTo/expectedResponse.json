@@ -30,7 +30,8 @@
           "AJUDGE"
         ]
       }
-    ]
+    ],
+    "is_data_anonymised": false
   },
   {
     "case_number": "Case2",
@@ -63,6 +64,7 @@
           "AJUDGE"
         ]
       }
-    ]
+    ],
+    "is_data_anonymised": false
   }
 ]

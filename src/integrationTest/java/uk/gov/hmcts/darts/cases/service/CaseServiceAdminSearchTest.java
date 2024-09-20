@@ -2,7 +2,6 @@ package uk.gov.hmcts.darts.cases.service;
 
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.skyscreamer.jsonassert.JSONAssert;
 import org.skyscreamer.jsonassert.JSONCompareMode;
@@ -28,7 +27,7 @@ import uk.gov.hmcts.darts.testutils.stubs.CourtCaseStub;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -47,7 +46,6 @@ import static uk.gov.hmcts.darts.test.common.data.JudgeTestData.createJudgeWithN
     "darts.cases.admin-search.max-results=20"
 })
 @SuppressWarnings({"PMD.VariableDeclarationUsageDistance", "PMD.NcssCount", "PMD.ExcessiveImports"})
-@Disabled("Impacted by V1_363__not_null_constraints_part3.sql")
 class CaseServiceAdminSearchTest extends IntegrationBase {
 
     @Autowired
@@ -79,7 +77,7 @@ class CaseServiceAdminSearchTest extends IntegrationBase {
 
         CourtCaseEntity case2 = createCaseAt(swanseaCourthouse);
         case2.setCaseNumber("Case2");
-        case2.setDefendantList(Arrays.asList(createDefendantForCaseWithName(case2, "Defendant2")));
+        case2.setDefendantList(new ArrayList<>(List.of(createDefendantForCaseWithName(case2, "Defendant2"))));
 
         CourtCaseEntity case3 = createCaseAt(swanseaCourthouse);
         case3.setCaseNumber("Case3");
