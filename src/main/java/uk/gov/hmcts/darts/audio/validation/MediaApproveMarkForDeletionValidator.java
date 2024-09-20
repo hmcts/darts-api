@@ -37,7 +37,7 @@ public class MediaApproveMarkForDeletionValidator implements Validator<Integer> 
             throw new DartsApiException(AudioApiError.MEDIA_ALREADY_MARKED_FOR_DELETION);
         }
 
-        if (objectAdminActionEntity != null && objectAdminActionEntity.getObjectHiddenReason() != null) {
+        if (objectAdminActionEntity.getObjectHiddenReason() != null) {
             ObjectHiddenReasonEntity objectHiddenReasonEntity =
                 objectHiddenReasonRepository.findById(objectAdminActionEntity.getObjectHiddenReason().getId())
                     .orElseThrow(() -> new DartsApiException(AudioApiError.MEDIA_ALREADY_MARKED_FOR_DELETION_REASON_NOT_FOUND));
