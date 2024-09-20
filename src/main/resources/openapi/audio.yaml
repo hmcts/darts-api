@@ -999,6 +999,7 @@ components:
         - "AUDIO_117"
         - "AUDIO_118"
         - "AUDIO_119"
+        - "AUDIO_120"
       x-enum-varnames: [ FAILED_TO_PROCESS_AUDIO_REQUEST,
                          REQUESTED_DATA_CANNOT_BE_LOCATED,
                          MEDIA_NOT_FOUND,
@@ -1016,6 +1017,7 @@ components:
                          ADMIN_SEARCH_CRITERIA_NOT_SUITABLE,
                          TOO_MANY_RESULTS,
                          MEDIA_ALREADY_MARKED_FOR_DELETION,
+                         ADMIN_MEDIA_MARKED_FOR_DELETION_NOT_FOUND,
                          MARKED_FOR_DELETION_REASON_NOT_FOUND,
                          USER_CANT_APPROVE_THEIR_OWN_DELETION
       ]
@@ -1039,10 +1041,8 @@ components:
         - "Hide reason is incorrect"
         - "transformed_media_id OR one of hearing_id, start_at or end_at must be provided"
         - "Too many results"
-        - "Hide reason is incorrect"
-        - "transformed_media_id OR one of hearing_id, start_at or end_at must be provided"
-        - "Too many results"
         - "Already marked for deletion"
+        - "Media marked for deletion not found"
         - "Media marked for deletion reason not found"
         - "User cannot approve their own deletion"
       x-enum-varnames: [ FAILED_TO_PROCESS_AUDIO_REQUEST,
@@ -1062,6 +1062,7 @@ components:
                          ADMIN_SEARCH_CRITERIA_NOT_SUITABLE,
                          TOO_MANY_RESULTS,
                          MEDIA_ALREADY_MARKED_FOR_DELETION,
+                         ADMIN_MEDIA_MARKED_FOR_DELETION_NOT_FOUND,
                          MARKED_FOR_DELETION_REASON_NOT_FOUND,
                          USER_CANT_APPROVE_THEIR_OWN_DELETION
       ]

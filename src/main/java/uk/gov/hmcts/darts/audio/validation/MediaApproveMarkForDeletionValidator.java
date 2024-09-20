@@ -27,7 +27,7 @@ public class MediaApproveMarkForDeletionValidator implements Validator<Integer> 
         mediaIdValidator.validate(mediaId);
         var objectAdminActionEntityList = objectAdminActionRepository.findByMedia_Id(mediaId);
         if (objectAdminActionEntityList.isEmpty()) {
-            throw new DartsApiException(AudioApiError.MEDIA_ALREADY_MARKED_FOR_DELETION_REASON_NOT_FOUND);
+            throw new DartsApiException(AudioApiError.ADMIN_MEDIA_MARKED_FOR_DELETION_NOT_FOUND);
         } else if (objectAdminActionEntityList.size() > 1) {
             throw new DartsApiException(AudioApiError.TOO_MANY_RESULTS);
         }
@@ -46,9 +46,12 @@ public class MediaApproveMarkForDeletionValidator implements Validator<Integer> 
             }
             UserAccountEntity currentUser = userIdentity.getUserAccount();
             UserAccountEntity hiddenBy = objectAdminActionEntity.getHiddenBy();
-            if (nonNull(hiddenBy) && currentUser.getId().equals(hiddenBy.getId())) {
+            if (!nonNull(hiddenBy)
+                || hiddenBy.getId().equals(currentUser.getId())) {
                 throw new DartsApiException(AudioApiError.USER_CANNOT_APPROVE_THEIR_OWN_DELETION);
             }
+        } else {
+            throw new DartsApiException(AudioApiError.MEDIA_ALREADY_MARKED_FOR_DELETION_REASON_NOT_FOUND);
         }
     }
 }
