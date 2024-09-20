@@ -20,6 +20,7 @@ public class AnnotationStubComposable {
 
     private final AnnotationRepository annotationRepository;
     private final AnnotationDocumentRepository annotationDocumentRepository;
+    private final DartsDatabaseSaveStub dartsDatabaseSaveStub;
 
     public AnnotationEntity createAndSaveAnnotationEntityWith(UserAccountEntity currentOwner,
                                                               String annotationText) {
@@ -28,7 +29,7 @@ public class AnnotationStubComposable {
         annotationEntity.setText(annotationText);
         annotationEntity.setCreatedBy(currentOwner);
         annotationEntity.setLastModifiedBy(currentOwner);
-        return annotationRepository.save(annotationEntity);
+        return dartsDatabaseSaveStub.save(annotationEntity);
     }
 
     @Transactional
@@ -37,7 +38,7 @@ public class AnnotationStubComposable {
                                                               HearingEntity hearingEntity) {
         AnnotationEntity annotationEntity = createAnnotationEntity(currentOwner, annotationText);
         annotationEntity.addHearing(hearingEntity);
-        return annotationRepository.save(annotationEntity);
+        return dartsDatabaseSaveStub.save(annotationEntity);
     }
 
     @Transactional
@@ -76,7 +77,7 @@ public class AnnotationStubComposable {
                                                                                      uploadedBy, uploadedDateTime, checksum, confScore, confReason);
         annotationDocument.setAnnotation(annotationRepository.getReferenceById(annotationEntity.getId()));
         annotationDocument.setLastModifiedBy(uploadedBy);
-        annotationDocument = annotationDocumentRepository.saveAndFlush(annotationDocument);
+        annotationDocument = dartsDatabaseSaveStub.save(annotationDocument);
         return annotationDocument;
     }
 

@@ -19,7 +19,6 @@ import java.util.function.Consumer;
 
 @Component
 @RequiredArgsConstructor
-@Deprecated
 public class CourtCaseStub {
 
     private static final LocalDateTime D_2020_10_1 = LocalDateTime.of(2020, 10, 1, 12, 0, 0);
@@ -40,23 +39,28 @@ public class CourtCaseStub {
     @Autowired
     CourthouseStub courthouseStub;
 
+    @Autowired
+    DartsDatabaseSaveStub dartsDatabaseSaveStub;
+
+    @Autowired
+    DartsPersistence dartsPersistence;
+
     @Transactional
     public CourtCaseEntity createAndSaveMinimalCourtCase() {
-
         var courtCase = PersistableFactory.getCourtCaseTestData().createSomeMinimalCase();
         courtCase.getCourthouse().getCreatedBy().setId(0);
-        return caseRepository.save(courtCase);
+        return dartsPersistence.save(courtCase);
     }
 
     @Transactional
     public CourtCaseEntity createAndSaveMinimalCourtCase(String caseNumber, Integer courthouseId) {
         var courtCase = PersistableFactory.getCourtCaseTestData().createCaseWith(caseNumber, courthouseRepository.findById(courthouseId).get());
-        return caseRepository.save(courtCase);
+        return dartsPersistence.save(courtCase);
     }
 
     public CourtCaseEntity createAndSaveMinimalCourtCase(String caseNumber, CourthouseEntity courthouse) {
         var courtCase = PersistableFactory.getCourtCaseTestData().createCaseWith(caseNumber, courthouse);
-        return caseRepository.save(courtCase);
+        return dartsPersistence.save(courtCase);
     }
 
     /**
@@ -67,7 +71,7 @@ public class CourtCaseStub {
 
         var courtCase = createAndSaveMinimalCourtCase();
         caseConsumer.accept(courtCase);
-        return caseRepository.save(courtCase);
+        return dartsDatabaseSaveStub.save(courtCase);
     }
 
     /**
@@ -84,7 +88,7 @@ public class CourtCaseStub {
         var hear3 = hearingStub.createHearing(courthouseName, "testCourtroom", courtCase.getCaseNumber(), D_2020_10_2, courthouseStub, userAccountStub);
         courtCase.getHearings().addAll(List.of(hear1, hear2, hear3));
 
-        return caseRepository.save(courtCase);
+        return dartsDatabaseSaveStub.save(courtCase);
     }
 
     @Transactional

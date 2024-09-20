@@ -10,22 +10,34 @@ import java.util.function.Consumer;
 
 import static org.apache.commons.lang3.RandomStringUtils.random;
 import static uk.gov.hmcts.darts.test.common.data.CourthouseTestData.someMinimalCourthouse;
+import static uk.gov.hmcts.darts.test.common.data.DefenceTestData.createDefenceForCaseWithName;
+import static uk.gov.hmcts.darts.test.common.data.DefendantTestData.createDefendantForCaseWithName;
+import static uk.gov.hmcts.darts.test.common.data.ProsecutorTestData.createProsecutorForCaseWithName;
 import static uk.gov.hmcts.darts.test.common.data.UserAccountTestData.minimalUserAccount;
 
 public class CaseTestData  implements Persistable<TestCourtCaseEntity.TestCourtCaseBuilderRetrieve,
     CourtCaseEntity, TestCourtCaseEntity.TestCourtCaseEntityBuilder>  {
 
-    public  CourtCaseEntity createSomeMinimalCase() {
-        return someMinimalBuilder().build().getEntity();
+    public CourtCaseEntity createSomeMinimalCase() {
+        var postfix = random(10, false, true);
+        var courtCaseEntity = new CourtCaseEntity();
+        courtCaseEntity.setCourthouse(someMinimalCourthouse());
+        courtCaseEntity.setCaseNumber("case-1-" + postfix);
+        courtCaseEntity.setClosed(false);
+        courtCaseEntity.setInterpreterUsed(false);
+        var userAccount = minimalUserAccount();
+        courtCaseEntity.setCreatedBy(userAccount);
+        courtCaseEntity.setLastModifiedBy(userAccount);
+        return courtCaseEntity;
     }
 
-    public  CourtCaseEntity caseWithCaseNumber(String caseNumber) {
+    public CourtCaseEntity caseWithCaseNumber(String caseNumber) {
         var someMinimalCase = createSomeMinimalCase();
         someMinimalCase.setCaseNumber(caseNumber);
         return someMinimalCase;
     }
 
-    public  CourtCaseEntity createCaseWith(String caseNumber, CourthouseEntity courthouseEntity) {
+    public CourtCaseEntity createCaseWith(String caseNumber, CourthouseEntity courthouseEntity) {
         var courtCaseEntity = createSomeMinimalCase();
 
         if (courthouseEntity == null) {
@@ -43,14 +55,31 @@ public class CaseTestData  implements Persistable<TestCourtCaseEntity.TestCourtC
     @Deprecated
     // Not a minimal case. refactor
     public CourtCaseEntity someMinimalCase() {
-        return someMinimalBuilder().build().getEntity();
+        var courtCaseEntity = new CourtCaseEntity();
+        courtCaseEntity.setCaseNumber("case-1");
+        courtCaseEntity.setCourthouse(someMinimalCourthouse());
+        courtCaseEntity.addDefendant(createDefendantForCaseWithName(courtCaseEntity, "aDefendant"));
+        courtCaseEntity.addDefence(createDefenceForCaseWithName(courtCaseEntity, "aDefence"));
+        courtCaseEntity.addProsecutor(createProsecutorForCaseWithName(courtCaseEntity, "aProsecutor"));
+        courtCaseEntity.setClosed(false);
+        courtCaseEntity.setInterpreterUsed(false);
+        courtCaseEntity.setCreatedBy(UserAccountTestData.minimalUserAccount());
+        courtCaseEntity.setLastModifiedBy(UserAccountTestData.minimalUserAccount());
+        return courtCaseEntity;
     }
 
     /**
      * Creates a CourtCaseEntity. Passes the created case to the client for further customisations
      */
     public CourtCaseEntity someMinimalCase(Consumer<CourtCaseEntity> createdCaseConsumer) {
-        CourtCaseEntity courtCaseEntity = someMinimalBuilder().build().getEntity();
+        var courtCaseEntity = new CourtCaseEntity();
+        courtCaseEntity.setCaseNumber("case-1");
+        courtCaseEntity.setCourthouse(someMinimalCourthouse());
+        courtCaseEntity.addDefendant(createDefendantForCaseWithName(courtCaseEntity, "aDefendant"));
+        courtCaseEntity.addDefence(createDefenceForCaseWithName(courtCaseEntity, "aDefence"));
+        courtCaseEntity.addProsecutor(createProsecutorForCaseWithName(courtCaseEntity, "aProsecutor"));
+        courtCaseEntity.setClosed(false);
+        courtCaseEntity.setInterpreterUsed(false);
         createdCaseConsumer.accept(courtCaseEntity);
         return courtCaseEntity;
     }

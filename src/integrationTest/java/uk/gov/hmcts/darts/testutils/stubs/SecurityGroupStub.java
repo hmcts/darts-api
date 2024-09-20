@@ -26,6 +26,7 @@ public class SecurityGroupStub {
     private final SecurityGroupRepository securityGroupRepository;
     private final UserAccountRepository userAccountRepository;
     private final SecurityRoleRepository securityRoleRepository;
+    private final DartsDatabaseSaveStub dartsDatabaseSaveStub;
 
     private static SecurityRoleEntity defaultRole;
 
@@ -59,12 +60,12 @@ public class SecurityGroupStub {
         Optional<SecurityGroupEntity> entity = securityGroupRepository.findByGroupNameIgnoreCase(groupEnum.getName());
         for (UserAccountEntity accountEntity : entity.get().getUsers()) {
             accountEntity.getSecurityGroupEntities().remove(entity.get());
-            userAccountRepository.save(accountEntity);
+            dartsDatabaseSaveStub.save(accountEntity);
         }
 
         entity.get().getUsers().clear();
 
-        securityGroupRepository.saveAndFlush(entity.get());
+        dartsDatabaseSaveStub.save(entity.get());
     }
 
     public SecurityGroupEntity createAndSave(SecurityGroupEntitySpec spec, UserAccountEntity user) {
@@ -86,7 +87,7 @@ public class SecurityGroupStub {
         securityGroup.setCreatedDateTime(OffsetDateTime.now());
         securityGroup.setLastModifiedDateTime(OffsetDateTime.now());
 
-        return securityGroupRepository.save(securityGroup);
+        return dartsDatabaseSaveStub.save(securityGroup);
     }
 
     @Builder

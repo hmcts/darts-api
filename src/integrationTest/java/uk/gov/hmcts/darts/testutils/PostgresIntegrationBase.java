@@ -7,15 +7,11 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
-import org.springframework.transaction.PlatformTransactionManager;
-import org.springframework.transaction.support.TransactionTemplate;
 import org.testcontainers.containers.PostgreSQLContainer;
 import uk.gov.hmcts.darts.test.common.LogUtil;
 import uk.gov.hmcts.darts.test.common.MemoryLogAppender;
 import uk.gov.hmcts.darts.testutils.stubs.DartsDatabaseStub;
 import uk.gov.hmcts.darts.testutils.stubs.DartsPersistence;
-
-import java.util.function.Supplier;
 
 /**
  * Base class for integration tests running against a containerized Postgres with Testcontainers.
@@ -34,8 +30,7 @@ public class PostgresIntegrationBase {
     protected OpenInViewUtil openInViewUtil;
 
     @Autowired
-    private PlatformTransactionManager transactionManager;
-    private TransactionTemplate transactionTemplate;
+    protected TransactionalUtil transactionalUtil;
 
     protected MemoryLogAppender logAppender = LogUtil.getMemoryLogger();
 
@@ -75,19 +70,5 @@ public class PostgresIntegrationBase {
     @AfterEach
     void clearTestData() {
         logAppender.reset();
-    }
-
-    protected void executeInTransaction(Runnable supplier) {
-        executeInTransaction(() -> {
-            supplier.run();
-            return null;
-        });
-    }
-
-    protected <R> R executeInTransaction(Supplier<R> supplier) {
-        if (transactionTemplate == null) {
-            transactionTemplate = new TransactionTemplate(transactionManager);
-        }
-        return transactionTemplate.execute(status -> supplier.get());
     }
 }

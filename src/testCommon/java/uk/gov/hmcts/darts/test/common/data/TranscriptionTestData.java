@@ -20,7 +20,17 @@ public class TranscriptionTestData
     }
 
     public TranscriptionEntity minimalTranscription() {
-        return someMinimal();
+        var minimalTranscription = new TranscriptionEntity();
+        var someMinimalCase = PersistableFactory.getCourtCaseTestData().createSomeMinimalCase();
+        minimalTranscription.addCase(someMinimalCase);
+        minimalTranscription.setTranscriptionType(someTranscriptionType());
+        minimalTranscription.setTranscriptionStatus(someTranscriptionStatus());
+        minimalTranscription.setHideRequestFromRequestor(false);
+        minimalTranscription.setIsManualTranscription(false);
+        var userAccount = minimalUserAccount();
+        minimalTranscription.setLastModifiedBy(userAccount);
+        minimalTranscription.setCreatedBy(userAccount);
+        return minimalTranscription;
     }
 
     public TranscriptionTypeEntity someTranscriptionType() {

@@ -24,11 +24,12 @@ public class CaseDocumentStub {
 
     private final CaseDocumentRepository caseDocumentRepository;
     private final UserAccountStub userAccountStub;
+    private final DartsDatabaseSaveStub dartsDatabaseSaveStub;
 
     @Transactional
     public CaseDocumentEntity createAndSaveCaseDocumentEntity(CourtCaseEntity courtCaseEntity, UserAccountEntity uploadedBy) {
         CaseDocumentEntity caseDocumentEntity = createCaseDocumentEntity(courtCaseEntity, uploadedBy);
-        caseDocumentEntity = caseDocumentRepository.saveAndFlush(caseDocumentEntity);
+        caseDocumentEntity = dartsDatabaseSaveStub.save(caseDocumentEntity);
         return caseDocumentEntity;
     }
 
@@ -36,7 +37,7 @@ public class CaseDocumentStub {
     public CaseDocumentEntity createAndSaveCaseDocumentEntity(CourtCaseEntity courtCaseEntity) {
         UserAccountEntity testUser = userAccountStub.getIntegrationTestUserAccountEntity();
         CaseDocumentEntity caseDocumentEntity = createCaseDocumentEntity(courtCaseEntity, testUser);
-        caseDocumentEntity = caseDocumentRepository.save(caseDocumentEntity);
+        caseDocumentEntity = dartsDatabaseSaveStub.save(caseDocumentEntity);
         return caseDocumentEntity;
     }
 

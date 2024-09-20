@@ -23,6 +23,7 @@ public class MediaRequestStub {
     private final HearingStub hearingStub;
     private final MediaRequestRepository mediaRequestRepository;
     private final UserAccountStub userAccountStub;
+    private final DartsDatabaseSaveStub dartsDatabaseSaveStub;
 
     @Transactional
     public MediaRequestEntity createAndLoadMediaRequestEntity(UserAccountEntity requestor,
@@ -52,8 +53,7 @@ public class MediaRequestStub {
             audioRequestType, status, requestedDate
         );
         currentMediaRequest.setCreatedDateTime(requestedDate);
-        return  mediaRequestRepository.save(
-            currentMediaRequest);
+        return dartsDatabaseSaveStub.save(currentMediaRequest);
     }
 
     @Transactional

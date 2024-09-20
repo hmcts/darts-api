@@ -4,7 +4,9 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.test.mock.mockito.SpyBean;
+import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
@@ -37,12 +39,12 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.refEq;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum.ARM;
 import static uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum.INBOUND;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_DROP_ZONE;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.STORED;
 
-@Disabled("Impacted by V1_364_*.sql")
 class ApplyRetentionCaseAssociatedObjectsProcessorIntTest extends IntegrationBase {
 
     private static final OffsetDateTime DT_2025 = OffsetDateTime.of(2025, 1, 1, 1, 0, 0, 0, UTC);
@@ -86,6 +88,8 @@ class ApplyRetentionCaseAssociatedObjectsProcessorIntTest extends IntegrationBas
     CaseDocumentRepository caseDocumentRepository;
     @SpyBean
     ApplyRetentionCaseAssociatedObjectsSingleCaseProcessorImpl singleCaseProcessor;
+    @MockBean
+    UserIdentity userIdentity;
 
     @Autowired
     ApplyRetentionCaseAssociatedObjectsProcessor processor;
@@ -145,6 +149,7 @@ class ApplyRetentionCaseAssociatedObjectsProcessorIntTest extends IntegrationBas
         eodStub.createAndSaveEod(medias.get(2), ARM_DROP_ZONE, ARM, eod -> eod.setUpdateRetention(false));
 
         testUser = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
+        when(userIdentity.getUserAccount()).thenReturn(testUser);
     }
 
     @Test
@@ -341,7 +346,7 @@ class ApplyRetentionCaseAssociatedObjectsProcessorIntTest extends IntegrationBas
     }
 
     @Test
-    @Disabled("Impacted by V1_362__constraint_transcription_part6.sql")
+    @Disabled("Failed Validation")
     void testExceptionOnOneObjectCausesRollbackOfAllChangesToAllObjectsAndProcessingOfOtherCasesContinues() {
 
         // given

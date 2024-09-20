@@ -1,7 +1,6 @@
 package uk.gov.hmcts.darts.common.repository;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
@@ -85,7 +84,6 @@ class TranscriptionRepositoryTest extends IntegrationBase {
     }
 
     @Test
-    @Disabled("Impacted by V1_364_*.sql")
     void excludesHidden() {
         var courtCase = PersistableFactory.getCourtCaseTestData().createSomeMinimalCase();
         persistTwoHiddenTwoNotHiddenTranscriptionsFor(courtCase);

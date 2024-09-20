@@ -2,7 +2,6 @@ package uk.gov.hmcts.darts.cases.service;
 
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import uk.gov.hmcts.darts.cases.model.AdvancedSearchResult;
@@ -28,7 +27,6 @@ import static uk.gov.hmcts.darts.test.common.data.CourtroomTestData.createCourtR
 import static uk.gov.hmcts.darts.testutils.stubs.UserAccountStub.INTEGRATION_TEST_USER_EMAIL;
 
 @Slf4j
-@Disabled("Impacted by V1_363__not_null_constraints_part3.sql")
 class CaseServiceAdvancedSearchUseInterpreterTest extends IntegrationBase {
 
     @Autowired
@@ -49,9 +47,9 @@ class CaseServiceAdvancedSearchUseInterpreterTest extends IntegrationBase {
         swanseaCourthouse = CourthouseTestData.createCourthouseWithName("SWANSEA");
 
         CourtCaseEntity case1 = PersistableFactory.getCourtCaseTestData()
-            .someMinimalBuilder().courthouse(swanseaCourthouse).caseNumber("Case1").build().getEntity();
+            .createCaseAt(swanseaCourthouse, "Case1");
         CourtCaseEntity case2 = PersistableFactory.getCourtCaseTestData()
-            .someMinimalBuilder().courthouse(swanseaCourthouse).caseNumber("Case2").build().getEntity();
+            .createCaseAt(swanseaCourthouse, "Case2");
         case2.setInterpreterUsed(true);
 
         CourtroomEntity courtroom1 = createCourtRoomWithNameAtCourthouse(swanseaCourthouse, "courtroom1");
@@ -64,9 +62,9 @@ class CaseServiceAdvancedSearchUseInterpreterTest extends IntegrationBase {
         cardiffCourthouse = CourthouseTestData.createCourthouseWithName("CARDIFF");
 
         CourtCaseEntity case3 = PersistableFactory.getCourtCaseTestData()
-            .someMinimalBuilder().courthouse(cardiffCourthouse).caseNumber("Case3").build().getEntity();
+            .createCaseAt(cardiffCourthouse, "Case3");
         CourtCaseEntity case4 = PersistableFactory.getCourtCaseTestData()
-            .someMinimalBuilder().courthouse(swanseaCourthouse).caseNumber("Case4").build().getEntity();
+            .createCaseAt(cardiffCourthouse, "Case4");
         case4.setInterpreterUsed(true);
 
         CourtroomEntity courtroom2 = createCourtRoomWithNameAtCourthouse(cardiffCourthouse, "courtroom2");

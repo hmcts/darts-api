@@ -4,7 +4,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
 import uk.gov.hmcts.darts.common.entity.NodeRegisterEntity;
-import uk.gov.hmcts.darts.common.repository.NodeRegisterRepository;
 import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
 
 import java.time.OffsetDateTime;
@@ -14,7 +13,7 @@ import java.time.OffsetDateTime;
 @Deprecated
 @SuppressWarnings({"PMD.AvoidUsingHardCodedIP"})
 public class NodeRegisterStub {
-    private final NodeRegisterRepository nodeRegisterRepository;
+    private final DartsDatabaseSaveStub dartsDatabaseSaveStub;
     private final UserAccountRepository userAccountRepository;
 
     public void setupNodeRegistry(CourtroomEntity courtroom) {
@@ -26,7 +25,7 @@ public class NodeRegisterStub {
         nodeRegisterEntity.setMacAddress("theMacAddress");
         nodeRegisterEntity.setCreatedBy(userAccountRepository.getReferenceById(0));
         nodeRegisterEntity.setCreatedDateTime(OffsetDateTime.now());
-        nodeRegisterRepository.save(nodeRegisterEntity);
+        dartsDatabaseSaveStub.save(nodeRegisterEntity);
     }
 
 }

@@ -20,7 +20,13 @@ public class TranscriptionWorkflowTestData implements Persistable<
     }
 
     public TranscriptionWorkflowEntity minimalTranscriptionWorkflow() {
-        return someMinimal();
+        var transcriptionWorkflow = new TranscriptionWorkflowEntity();
+        transcriptionWorkflow.setTranscription(PersistableFactory.getTranscriptionTestData().minimalTranscription());
+        transcriptionWorkflow.setWorkflowActor(minimalUserAccount());
+        transcriptionWorkflow.setTranscriptionStatus(
+            new TranscriptionStatusEntity(TranscriptionStatusEnum.REQUESTED.getId()));
+        transcriptionWorkflow.setWorkflowTimestamp(OffsetDateTime.now());
+        return transcriptionWorkflow;
     }
 
     public TranscriptionWorkflowEntity workflowForTranscription(TranscriptionEntity transcription) {

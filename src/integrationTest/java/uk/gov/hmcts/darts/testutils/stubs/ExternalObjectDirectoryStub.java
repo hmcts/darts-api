@@ -58,6 +58,7 @@ public class ExternalObjectDirectoryStub {
     private final TranscriptionDocumentStubComposable transcriptionDocumentStub;
     private final DartsDatabaseComposable dartsDatabaseComposable;
     private final TranscriptionStubComposable transcriptionStubComposable;
+    private final DartsDatabaseSaveStub dartsDatabaseSaveStub;
 
     public ExternalObjectDirectoryEntity createAndSaveEod(MediaEntity media,
                                                           ObjectRecordStatusEnum objectRecordStatusEnum,
@@ -65,7 +66,7 @@ public class ExternalObjectDirectoryStub {
     ) {
         UUID uuid = UUID.randomUUID();
         var eod = createExternalObjectDirectory(media, objectRecordStatusEnum, externalLocationTypeEnum, uuid);
-        return eodRepository.save(eod);
+        return dartsDatabaseSaveStub.save(eod);
     }
 
     public ExternalObjectDirectoryEntity createAndSaveEod(MediaEntity media,
@@ -76,7 +77,7 @@ public class ExternalObjectDirectoryStub {
         UUID uuid = UUID.randomUUID();
         var eod = createExternalObjectDirectory(media, objectRecordStatusEnum, externalLocationTypeEnum, uuid);
         eod.setLastModifiedDateTime(lastModified);
-        return eodRepository.save(eod);
+        return dartsDatabaseSaveStub.save(eod);
     }
 
     /**
@@ -89,7 +90,7 @@ public class ExternalObjectDirectoryStub {
         UUID uuid = UUID.randomUUID();
         var eod = createExternalObjectDirectory(media, objectRecordStatusEnum, externalLocationTypeEnum, uuid);
         createdEodConsumer.accept(eod);
-        return eodRepository.save(eod);
+        return dartsDatabaseSaveStub.save(eod);
     }
 
     public ExternalObjectDirectoryEntity createAndSaveEod(AnnotationDocumentEntity annotationDocument,
@@ -99,7 +100,7 @@ public class ExternalObjectDirectoryStub {
         UUID uuid = UUID.randomUUID();
         var eod = createExternalObjectDirectory(annotationDocument, getStatus(objectRecordStatus), getLocation(externalLocationType), uuid);
         createdEodConsumer.accept(eod);
-        return eodRepository.save(eod);
+        return dartsDatabaseSaveStub.save(eod);
     }
 
     public ExternalObjectDirectoryEntity createAndSaveEod(AnnotationDocumentEntity annotationDocument,
@@ -137,7 +138,7 @@ public class ExternalObjectDirectoryStub {
         );
 
         externalObjectDirectory.setMedia(mediaEntity);
-        eodRepository.save(externalObjectDirectory);
+        externalObjectDirectory = eodRepository.save(externalObjectDirectory);
         eodRepository.flush();
 
         return externalObjectDirectory;

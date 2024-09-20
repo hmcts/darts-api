@@ -44,6 +44,7 @@ public class UserAccountStub {
     private final CourthouseRepository courthouseRepository;
     private final SecurityGroupStub securityGroupStub;
     private final UserAccountStubComposable userAccountStubComposable;
+    private final DartsDatabaseSaveStub dartsDatabaseSaveStub;
 
     public UserAccountEntity getSystemUserAccountEntity() {
         return userAccountStubComposable.getSystemUserAccountEntity();
@@ -97,7 +98,7 @@ public class UserAccountStub {
         newUser.setCreatedDateTime(CREATED_DATE_TIME);
         newUser.setLastModifiedDateTime(LAST_MODIFIED_DATE_TIME);
         newUser.setLastLoginTime(LAST_LOGIN_TIME);
-        return userAccountRepository.saveAndFlush(newUser);
+        return dartsDatabaseSaveStub.save(newUser);
     }
 
     @Transactional
@@ -143,7 +144,7 @@ public class UserAccountStub {
                 addCourthouseToSecurityGroup(securityGroupEntity, courthouseEntity);
             }
             testUser.getSecurityGroupEntities().add(securityGroupEntity);
-            testUser = userAccountRepository.saveAndFlush(testUser);
+            testUser = dartsDatabaseSaveStub.save(testUser);
         }
 
         return testUser;
@@ -153,7 +154,7 @@ public class UserAccountStub {
                                               CourthouseEntity courthouseEntity) {
         if (!securityGroupEntity.getCourthouseEntities().contains(courthouseEntity)) {
             securityGroupEntity.getCourthouseEntities().add(courthouseEntity);
-            securityGroupRepository.saveAndFlush(securityGroupEntity);
+            dartsDatabaseSaveStub.save(securityGroupEntity);
         }
     }
 
@@ -161,11 +162,11 @@ public class UserAccountStub {
     public UserAccountEntity createUnauthorisedIntegrationTestUser() {
         SecurityGroupEntity securityGroupEntity = securityGroupRepository.getReferenceById(-4);
         securityGroupEntity.getCourthouseEntities().clear();
-        securityGroupRepository.saveAndFlush(securityGroupEntity);
+        dartsDatabaseSaveStub.save(securityGroupEntity);
 
         var testUser = getIntegrationTestUserAccountEntity();
         testUser.getSecurityGroupEntities().clear();
-        testUser = userAccountRepository.saveAndFlush(testUser);
+        testUser = dartsDatabaseSaveStub.save(testUser);
         return testUser;
     }
 
@@ -173,12 +174,12 @@ public class UserAccountStub {
     public UserAccountEntity createTranscriptionCompanyUser(CourthouseEntity courthouseEntity) {
         SecurityGroupEntity securityGroupEntity = securityGroupRepository.findById(-4).get();
         securityGroupEntity.getCourthouseEntities().add(courthouseEntity);
-        securityGroupEntity = securityGroupRepository.saveAndFlush(securityGroupEntity);
+        securityGroupEntity = dartsDatabaseSaveStub.save(securityGroupEntity);
 
         var testUser = getIntegrationTestUserAccountEntity();
         testUser.getSecurityGroupEntities().clear();
         testUser.getSecurityGroupEntities().add(securityGroupEntity);
-        testUser = userAccountRepository.saveAndFlush(testUser);
+        testUser = dartsDatabaseSaveStub.save(testUser);
         return testUser;
     }
 
@@ -186,12 +187,12 @@ public class UserAccountStub {
     public UserAccountEntity createJudgeUser(CourthouseEntity courthouseEntity) {
         SecurityGroupEntity securityGroupEntity = securityGroupRepository.getReferenceById(-3);
         securityGroupEntity.getCourthouseEntities().add(courthouseEntity);
-        securityGroupEntity = securityGroupRepository.saveAndFlush(securityGroupEntity);
+        securityGroupEntity = dartsDatabaseSaveStub.save(securityGroupEntity);
 
         var testUser = getIntegrationTestUserAccountEntity();
         testUser.getSecurityGroupEntities().clear();
         testUser.getSecurityGroupEntities().add(securityGroupEntity);
-        testUser = userAccountRepository.saveAndFlush(testUser);
+        testUser = dartsDatabaseSaveStub.save(testUser);
         return testUser;
     }
 
@@ -204,12 +205,12 @@ public class UserAccountStub {
     public UserAccountEntity createJudgeUser(String identifier) {
         SecurityGroupEntity securityGroupEntity = securityGroupRepository.findById(TEST_JUDGE_GLOBAL_SECURITY_GROUP_ID).get();
         securityGroupEntity.getCourthouseEntities().addAll(courthouseRepository.findAll());
-        securityGroupEntity = securityGroupRepository.saveAndFlush(securityGroupEntity);
+        securityGroupEntity = dartsDatabaseSaveStub.save(securityGroupEntity);
 
         var testUser = getIntegrationTestUserAccountEntity("Judge" + identifier);
         testUser.getSecurityGroupEntities().clear();
         testUser.getSecurityGroupEntities().add(securityGroupEntity);
-        testUser = userAccountRepository.saveAndFlush(testUser);
+        testUser = dartsDatabaseSaveStub.save(testUser);
         return testUser;
     }
 
@@ -217,19 +218,19 @@ public class UserAccountStub {
     public UserAccountEntity createRcjAppealUser(CourthouseEntity courthouseEntity) {
         SecurityGroupEntity securityGroupEntity = SecurityGroupTestData
             .buildGroupForRoleAndCourthouse(SecurityRoleEnum.RCJ_APPEALS, courthouseEntity);
-        securityGroupEntity = securityGroupRepository.saveAndFlush(securityGroupEntity);
+        securityGroupEntity = dartsDatabaseSaveStub.save(securityGroupEntity);
 
         var testUser = getIntegrationTestUserAccountEntity();
         testUser.getSecurityGroupEntities().clear();
         testUser.getSecurityGroupEntities().add(securityGroupEntity);
-        testUser = userAccountRepository.saveAndFlush(testUser);
+        testUser = dartsDatabaseSaveStub.save(testUser);
         return testUser;
     }
 
     public UserAccountEntity createXhibitExternalUser(String guid, CourthouseEntity courthouseEntity) {
         SecurityGroupEntity securityGroupEntity = securityGroupRepository.findById(-14).get();
         securityGroupEntity.setGlobalAccess(true);
-        securityGroupEntity = securityGroupRepository.saveAndFlush(securityGroupEntity);
+        securityGroupEntity = dartsDatabaseSaveStub.save(securityGroupEntity);
 
         return createExternalUser(guid, securityGroupEntity, courthouseEntity);
     }
@@ -237,7 +238,7 @@ public class UserAccountStub {
     public UserAccountEntity createCppExternalUser(String guid, CourthouseEntity courthouseEntity) {
         SecurityGroupEntity securityGroupEntity = securityGroupRepository.getReferenceById(-15);
         securityGroupEntity.setGlobalAccess(true);
-        securityGroupEntity = securityGroupRepository.saveAndFlush(securityGroupEntity);
+        securityGroupEntity = dartsDatabaseSaveStub.save(securityGroupEntity);
 
         return createExternalUser(guid, securityGroupEntity, courthouseEntity);
     }
@@ -246,7 +247,7 @@ public class UserAccountStub {
     public UserAccountEntity createDarPcExternalUser(String guid, CourthouseEntity courthouseEntity) {
         SecurityGroupEntity securityGroupEntity = securityGroupRepository.getReferenceById(-16);
         securityGroupEntity.setGlobalAccess(true);
-        securityGroupEntity = securityGroupRepository.saveAndFlush(securityGroupEntity);
+        securityGroupEntity = dartsDatabaseSaveStub.save(securityGroupEntity);
 
         return createExternalUser(guid, securityGroupEntity, courthouseEntity);
     }
@@ -254,16 +255,13 @@ public class UserAccountStub {
     public UserAccountEntity createMidTierExternalUser(String guid, CourthouseEntity courthouseEntity) {
         SecurityGroupEntity securityGroupEntity = securityGroupRepository.findById(-17).get();
         securityGroupEntity.setGlobalAccess(true);
-        securityGroupEntity = securityGroupRepository.saveAndFlush(securityGroupEntity);
+        securityGroupEntity = dartsDatabaseSaveStub.save(securityGroupEntity);
 
         return createExternalUser(guid, securityGroupEntity, courthouseEntity);
     }
 
     public UserAccountEntity createExternalUser(String guid, SecurityGroupEntity securityGroupEntity,
                                                 CourthouseEntity courthouseEntity) {
-        if (nonNull(courthouseEntity)) {
-            securityGroupStub.addCourthouse(securityGroupEntity, courthouseEntity);
-        }
 
         var testUser = getIntegrationTestUserAccountEntity();
         Set<SecurityGroupEntity> securityGroupEntities = new LinkedHashSet<>();
@@ -271,7 +269,11 @@ public class UserAccountStub {
         testUser.setSecurityGroupEntities(securityGroupEntities);
         testUser.setIsSystemUser(true);
         testUser.setAccountGuid(guid);
-        testUser = userAccountRepository.saveAndFlush(testUser);
+
+        testUser = dartsDatabaseSaveStub.save(testUser);
+        if (nonNull(courthouseEntity)) {
+            securityGroupStub.addCourthouse(securityGroupEntity, courthouseEntity);
+        }
         return testUser;
     }
 
@@ -280,13 +282,13 @@ public class UserAccountStub {
         var adminGroup = securityGroupRepository.findByGroupNameIgnoreCase("SUPER_ADMIN")
             .orElseThrow();
         adminGroup.setGlobalAccess(true);
-        adminGroup = securityGroupRepository.saveAndFlush(adminGroup);
+        adminGroup = dartsDatabaseSaveStub.save(adminGroup);
 
         var user = getIntegrationTestUserAccountEntity("adminUserAccount");
         user.getSecurityGroupEntities().clear();
         user.getSecurityGroupEntities().add(adminGroup);
 
-        return userAccountRepository.saveAndFlush(user);
+        return dartsDatabaseSaveStub.save(user);
     }
 
     @Transactional
@@ -294,13 +296,13 @@ public class UserAccountStub {
         var adminGroup = securityGroupRepository.findByGroupNameIgnoreCase("SUPER_ADMIN")
             .orElseThrow();
         adminGroup.setGlobalAccess(true);
-        adminGroup = securityGroupRepository.saveAndFlush(adminGroup);
+        adminGroup = dartsDatabaseSaveStub.save(adminGroup);
 
         var user = getIntegrationTestUserAccountEntityInactive("adminUserAccount");
         user.getSecurityGroupEntities().clear();
         user.getSecurityGroupEntities().add(adminGroup);
 
-        return userAccountRepository.saveAndFlush(user);
+        return dartsDatabaseSaveStub.save(user);
     }
 
     @Transactional
@@ -308,13 +310,13 @@ public class UserAccountStub {
         var superUserGroup = securityGroupRepository.findByGroupNameIgnoreCase("SUPER_USER")
             .orElseThrow();
         superUserGroup.setGlobalAccess(true);
-        superUserGroup = securityGroupRepository.saveAndFlush(superUserGroup);
+        superUserGroup = dartsDatabaseSaveStub.save(superUserGroup);
 
         var user = getIntegrationTestUserAccountEntity("superUserAccount");
         user.getSecurityGroupEntities().clear();
         user.getSecurityGroupEntities().add(superUserGroup);
 
-        return userAccountRepository.saveAndFlush(user);
+        return dartsDatabaseSaveStub.save(user);
     }
 
     @Transactional
@@ -324,12 +326,12 @@ public class UserAccountStub {
 
         var testUserNonSystem = getIntegrationTestUserAccountEntity();
         testUserNonSystem.getSecurityGroupEntities().add(securityGroupEntity);
-        testUserNonSystem = userAccountRepository.saveAndFlush(testUserNonSystem);
+        testUserNonSystem = dartsDatabaseSaveStub.save(testUserNonSystem);
 
         var testUserSystem = getSeparateIntegrationTestUserAccountEntity();
         testUserSystem.getSecurityGroupEntities().add(securityGroupEntity);
         testUserSystem.setIsSystemUser(true);
-        testUserSystem = userAccountRepository.saveAndFlush(testUserSystem);
+        testUserSystem = dartsDatabaseSaveStub.save(testUserSystem);
 
         return Arrays.asList(testUserNonSystem, testUserSystem);
     }

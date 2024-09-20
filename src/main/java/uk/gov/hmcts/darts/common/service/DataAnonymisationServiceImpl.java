@@ -31,11 +31,11 @@ public class DataAnonymisationServiceImpl implements DataAnonymisationService {
     private final UserIdentity userIdentity;
 
     @Override
-    public void anonymizeCourtCaseEntity(UserAccountEntity userAccount, CourtCaseEntity courtCase, boolean isManual) {
+    public void anonymizeCourtCaseEntity(UserAccountEntity userAccount, CourtCaseEntity courtCase) {
         courtCase.getDefendantList().forEach(defendantEntity -> anonymizeDefendantEntity(userAccount, defendantEntity));
         courtCase.getDefenceList().forEach(defenceEntity -> anonymizeDefenceEntity(userAccount, defenceEntity));
         courtCase.getProsecutorList().forEach(prosecutorEntity -> anonymizeProsecutorEntity(userAccount, prosecutorEntity));
-        courtCase.getHearings().forEach(hearingEntity -> anonymizeHearingEntity(userAccount, hearingEntity, isManual));
+        courtCase.getHearings().forEach(hearingEntity -> anonymizeHearingEntity(userAccount, hearingEntity));
 
         courtCase.markAsExpired(userAccount);
         auditApi.record(AuditActivity.CASE_EXPIRED, userAccount, courtCase);
@@ -60,36 +60,30 @@ public class DataAnonymisationServiceImpl implements DataAnonymisationService {
     }
 
     @Override
-    public void anonymizeHearingEntity(UserAccountEntity userAccount, HearingEntity hearingEntity, boolean isManual) {
-        hearingEntity.getTranscriptions().forEach(transcriptionEntity -> anonymizeTranscriptionEntity(userAccount, transcriptionEntity, isManual));
-        hearingEntity.getEventList().forEach(eventEntity -> anonymizeEventEntity(userAccount, eventEntity, isManual));
+    public void anonymizeHearingEntity(UserAccountEntity userAccount, HearingEntity hearingEntity) {
+        hearingEntity.getTranscriptions().forEach(transcriptionEntity -> anonymizeTranscriptionEntity(userAccount, transcriptionEntity));
+        hearingEntity.getEventList().forEach(eventEntity -> anonymizeEventEntity(userAccount, eventEntity));
     }
 
     @Override
-    public void anonymizeEventEntity(UserAccountEntity userAccount, EventEntity eventEntity, boolean isManual) {
+    public void anonymizeEventEntity(UserAccountEntity userAccount, EventEntity eventEntity) {
         eventEntity.setEventText(UUID.randomUUID().toString());
         eventEntity.setLastModifiedBy(userAccount);
-        if (isManual) {
-            eventEntity.setDataAnonymised(true);
-        }
+        eventEntity.setDataAnonymised(true);
     }
 
     @Override
-    public void anonymizeTranscriptionEntity(UserAccountEntity userAccount, TranscriptionEntity transcriptionEntity,
-                                             boolean isManual) {
+    public void anonymizeTranscriptionEntity(UserAccountEntity userAccount, TranscriptionEntity transcriptionEntity) {
         transcriptionEntity.getTranscriptionCommentEntities().forEach(
-            transcriptionCommentEntity -> anonymizeTranscriptionCommentEntity(userAccount, transcriptionCommentEntity, isManual));
+            transcriptionCommentEntity -> anonymizeTranscriptionCommentEntity(userAccount, transcriptionCommentEntity));
         transcriptionEntity.getTranscriptionWorkflowEntities().forEach(this::anonymizeTranscriptionWorkflowEntity);
     }
 
     @Override
-    public void anonymizeTranscriptionCommentEntity(UserAccountEntity userAccount, TranscriptionCommentEntity transcriptionCommentEntity,
-                                                    boolean isManual) {
+    public void anonymizeTranscriptionCommentEntity(UserAccountEntity userAccount, TranscriptionCommentEntity transcriptionCommentEntity) {
         transcriptionCommentEntity.setComment(UUID.randomUUID().toString());
         transcriptionCommentEntity.setLastModifiedBy(userAccount);
-        if (isManual) {
-            transcriptionCommentEntity.setDataAnonymised(true);
-        }
+        transcriptionCommentEntity.setDataAnonymised(true);
     }
 
     @Override

@@ -29,9 +29,10 @@ public class TranscriptionStubComposable {
 
     private final TranscriptionRepository transcriptionRepository;
     private final TranscriptionUrgencyRepository transcriptionUrgencyRepository;
+    private final DartsDatabaseSaveStub dartsDatabaseSaveStub;
 
     public TranscriptionEntity createTranscription(UserAccountStubComposable userAccountStubComposable, HearingEntity hearing) {
-        return createTranscription(userAccountStubComposable, hearing,null);
+        return createTranscription(userAccountStubComposable, hearing, null);
     }
 
     public TranscriptionEntity createTranscription(
@@ -100,7 +101,7 @@ public class TranscriptionStubComposable {
             hearing.getTranscriptions().add(transcription);
         }
 
-        return transcriptionRepository.saveAndFlush(transcription);
+        return dartsDatabaseSaveStub.save(transcription);
     }
 
     private TranscriptionUrgencyEntity mapToTranscriptionUrgencyEntity(TranscriptionUrgencyEnum urgencyEnum) {

@@ -28,23 +28,19 @@ public class TranscriptionDocumentTestData
 
 
     public static TranscriptionDocumentEntity minimalTranscriptionDocument() {
-        TestTranscriptionDocumentEntity.TranscriptionDocumentEntityBuilderRetrieve builder =
-            new TestTranscriptionDocumentEntity.TranscriptionDocumentEntityBuilderRetrieve();
+        var transcriptionDocument = new TranscriptionDocumentEntity();
+        setupBidirectionalTranscriptionDocuments(transcriptionDocument);
 
-        builder.getBuilder().id(1)
-            .fileName("some-file-name")
-            .fileType("some-file-type").fileSize(1024)
-            .uploadedDateTime(OffsetDateTime.now())
-            .uploadedBy(minimalUserAccount())
-            .isHidden(false)
-            .lastModifiedBy(minimalUserAccount())
-            .lastModifiedDateTime(OffsetDateTime.now())
-            .lastModifiedDateTime(OffsetDateTime.now());
+        transcriptionDocument.setFileName("some-file-name");
+        transcriptionDocument.setFileType("some-file-type");
+        transcriptionDocument.setFileSize(1024);
+        transcriptionDocument.setUploadedBy(minimalUserAccount());
+        transcriptionDocument.setUploadedDateTime(OffsetDateTime.now());
+        transcriptionDocument.setHidden(false);
+        transcriptionDocument.setLastModifiedTimestamp(OffsetDateTime.now());
+        transcriptionDocument.setLastModifiedBy(minimalUserAccount());
 
-        TranscriptionDocumentEntity transcriptionDocumentEntity = builder.build().getEntity();
-        setupBidirectionalTranscriptionDocuments(transcriptionDocumentEntity);
-
-        return transcriptionDocumentEntity;
+        return transcriptionDocument;
     }
 
     public static TranscriptionDocumentEntity transcriptionDocumentWithAdminAction() {
