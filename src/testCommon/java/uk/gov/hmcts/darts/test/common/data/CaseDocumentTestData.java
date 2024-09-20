@@ -20,10 +20,6 @@ public class CaseDocumentTestData implements Persistable<TestCaseDocumentEntity.
         return someMinimalBuilder().build().getEntity();
     }
 
-    @Override
-    public CaseDocumentEntity someMaximal() {
-        return someMinimal();
-    }
 
     @Override
     public TestCaseDocumentEntity.TestCaseDocumentEntityBuilder someMinimalBuilder() {

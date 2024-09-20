@@ -17,7 +17,6 @@ import static uk.gov.hmcts.darts.test.common.data.ExternalLocationTypeTestData.l
 import static uk.gov.hmcts.darts.test.common.data.ObjectRecordStatusTestData.statusOf;
 import static uk.gov.hmcts.darts.test.common.data.UserAccountTestData.minimalUserAccount;
 
-@SuppressWarnings({"HideUtilityClassConstructor"})
 public class ExternalObjectDirectoryTestData implements
     Persistable<TestExternalObjectDirectoryEntity.TestExternalObjectDirectoryuilderRetrieve, ExternalObjectDirectoryEntity,
         TestExternalObjectDirectoryEntity.TestExternalObjectDirectoryEntityBuilder> {
@@ -49,10 +48,6 @@ public class ExternalObjectDirectoryTestData implements
         return someMinimalBuilder().build().getEntity();
     }
 
-    @Override
-    public ExternalObjectDirectoryEntity someMaximal() {
-        return someMinimal();
-    }
 
     public ExternalObjectDirectoryEntity eodStoredInUnstructuredLocationForMedia(MediaEntity media) {
         TestExternalObjectDirectoryEntity.TestExternalObjectDirectoryuilderRetrieve eod = someMinimalBuilderHolder();

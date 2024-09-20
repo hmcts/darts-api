@@ -1,15 +1,16 @@
 package uk.gov.hmcts.darts.test.common.data;
 
-import lombok.experimental.UtilityClass;
 import uk.gov.hmcts.darts.common.entity.EventHandlerEntity;
 
 import java.time.OffsetDateTime;
 
 import static uk.gov.hmcts.darts.test.common.data.UserAccountTestData.minimalUserAccount;
 
-@UtilityClass
-@SuppressWarnings({"HideUtilityClassConstructor"})
 public class EventHandlerTestData {
+
+    private EventHandlerTestData() {
+
+    }
 
     public static EventHandlerEntity someMinimalEventHandler() {
         var entity = new EventHandlerEntity();

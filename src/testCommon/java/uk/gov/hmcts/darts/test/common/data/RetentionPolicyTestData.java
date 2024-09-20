@@ -1,15 +1,17 @@
 package uk.gov.hmcts.darts.test.common.data;
 
-import lombok.experimental.UtilityClass;
 import uk.gov.hmcts.darts.common.entity.RetentionPolicyTypeEntity;
 
 import java.time.OffsetDateTime;
 
 import static uk.gov.hmcts.darts.test.common.data.UserAccountTestData.minimalUserAccount;
 
-@UtilityClass
-@SuppressWarnings({"HideUtilityClassConstructor"})
+
 public class RetentionPolicyTestData {
+
+    private RetentionPolicyTestData() {
+
+    }
 
     public static RetentionPolicyTypeEntity minimalRetentionPolicy() {
         var minimalRetentionPolicy = new RetentionPolicyTypeEntity();

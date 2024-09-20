@@ -12,7 +12,6 @@ import static uk.gov.hmcts.darts.test.common.data.UserAccountTestData.minimalUse
 import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum.REQUESTED;
 import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionTypeEnum.SENTENCING_REMARKS;
 
-@SuppressWarnings({"HideUtilityClassConstructor"})
 public class TranscriptionTestData
     implements Persistable<TestTranscriptionEntity.TestTranscriptionEntityBuilderRetrieve, TranscriptionEntity,
     TestTranscriptionEntity.TestTranscriptionEntityBuilder> {
@@ -46,11 +45,6 @@ public class TranscriptionTestData
     @Override
     public TranscriptionEntity someMinimal() {
         return someMinimalBuilder().build().getEntity();
-    }
-
-    @Override
-    public TranscriptionEntity someMaximal() {
-        return someMinimal();
     }
 
     @Override

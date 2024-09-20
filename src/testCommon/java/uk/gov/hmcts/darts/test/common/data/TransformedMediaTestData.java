@@ -6,8 +6,11 @@ import java.time.OffsetDateTime;
 
 import static uk.gov.hmcts.darts.test.common.data.UserAccountTestData.minimalUserAccount;
 
-@SuppressWarnings({"HideUtilityClassConstructor"})
 public class TransformedMediaTestData {
+
+    private TransformedMediaTestData() {
+
+    }
 
     public static TransformedMediaEntity minimalTransformedMedia() {
         var transformedMedia = new TransformedMediaEntity();

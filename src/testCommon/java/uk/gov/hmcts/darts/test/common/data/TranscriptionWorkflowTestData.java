@@ -11,7 +11,6 @@ import java.util.ArrayList;
 
 import static uk.gov.hmcts.darts.test.common.data.UserAccountTestData.minimalUserAccount;
 
-@SuppressWarnings({"HideUtilityClassConstructor"})
 public class TranscriptionWorkflowTestData implements Persistable<
     TestTranscriptionWorkflowEntity.TestTranscriptionWorkflowEntityBuilderRetrieve,
     TranscriptionWorkflowEntity, TestTranscriptionWorkflowEntity.TestTranscriptionWorkflowEntityBuilder> {
@@ -44,12 +43,6 @@ public class TranscriptionWorkflowTestData implements Persistable<
     public TranscriptionWorkflowEntity someMinimal() {
         return someMinimalBuilder().build().getEntity();
     }
-
-    @Override
-    public TranscriptionWorkflowEntity someMaximal() {
-        return someMinimal();
-    }
-
 
     @Override
     public TestTranscriptionWorkflowEntity.TestTranscriptionWorkflowEntityBuilderRetrieve someMinimalBuilderHolder() {

@@ -5,8 +5,10 @@ import uk.gov.hmcts.darts.common.enums.SecurityRoleEnum;
 
 import static org.apache.commons.lang3.RandomStringUtils.random;
 
-@SuppressWarnings({"HideUtilityClassConstructor"})
 public class SecurityRoleTestData {
+    private SecurityRoleTestData() {
+
+    }
 
     public static SecurityRoleEntity createSecurityRoleFor(SecurityRoleEnum role) {
         var postfix = random(10, false, true);

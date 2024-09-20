@@ -14,7 +14,6 @@ import static uk.gov.hmcts.darts.common.entity.MediaEntity.MEDIA_TYPE_DEFAULT;
 import static uk.gov.hmcts.darts.test.common.data.CourtroomTestData.someMinimalCourtRoom;
 import static uk.gov.hmcts.darts.test.common.data.UserAccountTestData.minimalUserAccount;
 
-@SuppressWarnings({"HideUtilityClassConstructor"})
 public class MediaTestData implements Persistable<TestMediaEntity.TestMediaBuilderRetrieve,
     MediaEntity,
     TestMediaEntity.TestMediaEntityBuilder> {

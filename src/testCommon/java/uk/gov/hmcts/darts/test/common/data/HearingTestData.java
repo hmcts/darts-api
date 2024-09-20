@@ -18,7 +18,6 @@ import static uk.gov.hmcts.darts.test.common.data.CourtroomTestData.createCourtR
 import static uk.gov.hmcts.darts.test.common.data.CourtroomTestData.someMinimalCourtRoom;
 import static uk.gov.hmcts.darts.test.common.data.UserAccountTestData.minimalUserAccount;
 
-@SuppressWarnings({"HideUtilityClassConstructor"})
 public class HearingTestData
     implements Persistable<TestHearingEntity.TestHearingEntityBuilderRetrieve, HearingEntity, TestHearingEntity.TestHearingEntityBuilder> {
 
@@ -103,11 +102,6 @@ public class HearingTestData
     @Override
     public HearingEntity someMinimal() {
         return someMinimalBuilder().build().getEntity();
-    }
-
-    @Override
-    public HearingEntity someMaximal() {
-        return someMinimal();
     }
 
     @Override

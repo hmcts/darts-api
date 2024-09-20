@@ -12,17 +12,11 @@ import static java.util.stream.Collectors.toList;
 import static org.apache.commons.lang3.RandomStringUtils.random;
 import static uk.gov.hmcts.darts.test.common.data.UserAccountTestData.minimalUserAccount;
 
-@SuppressWarnings({"HideUtilityClassConstructor"})
 public class AnnotationDocumentTestData implements Persistable<TestAnnotationDocumentEntity.TestAnnotationDocumentEntityRetrieve,
     AnnotationDocumentEntity, TestAnnotationDocumentEntity.TestAnnotationDocumentEntityBuilder> {
     @Override
     public AnnotationDocumentEntity someMinimal() {
         return someMinimalBuilder().build().getEntity();
-    }
-
-    @Override
-    public AnnotationDocumentEntity someMaximal() {
-        return someMinimal();
     }
 
     public AnnotationDocumentEntity minimalAnnotationDocument() {

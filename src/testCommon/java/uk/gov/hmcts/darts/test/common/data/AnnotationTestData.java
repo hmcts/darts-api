@@ -9,7 +9,6 @@ import java.util.ArrayList;
 
 import static uk.gov.hmcts.darts.test.common.data.UserAccountTestData.minimalUserAccount;
 
-@SuppressWarnings({"HideUtilityClassConstructor"})
 public class AnnotationTestData  implements Persistable<TestAnnotationEntity.TestAnnotationEntityRetrieve,
     AnnotationEntity, TestAnnotationEntity.TestAnnotationEntityBuilder> {
 
@@ -23,11 +22,6 @@ public class AnnotationTestData  implements Persistable<TestAnnotationEntity.Tes
     @Override
     public AnnotationEntity someMinimal() {
         return someMinimalBuilder().build().getEntity();
-    }
-
-    @Override
-    public AnnotationEntity someMaximal() {
-        return someMinimal();
     }
 
     @Override

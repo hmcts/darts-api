@@ -12,7 +12,6 @@ import java.time.OffsetDateTime;
 import static uk.gov.hmcts.darts.audio.enums.MediaRequestStatus.OPEN;
 import static uk.gov.hmcts.darts.audiorequests.model.AudioRequestType.DOWNLOAD;
 
-@SuppressWarnings("SummaryJavadoc")
 public class MediaRequestTestData implements Persistable<TestMediaRequestEntity.TestMediaBuilderRetrieve, MediaRequestEntity,
     TestMediaRequestEntity.TestMediaRequestEntityBuilder> {
 
@@ -54,6 +53,7 @@ public class MediaRequestTestData implements Persistable<TestMediaRequestEntity.
     }
 
     /**
+     * gets a minimal set of data.
      * @deprecated do not use. Instead, use someMinimal().
      */
     @Deprecated
@@ -62,6 +62,7 @@ public class MediaRequestTestData implements Persistable<TestMediaRequestEntity.
     }
 
     /**
+     * creates a current media reqyest.
      * @deprecated do not use. Instead, use fromSpec() to create an object with the desired state.
      */
     @Deprecated
@@ -84,6 +85,7 @@ public class MediaRequestTestData implements Persistable<TestMediaRequestEntity.
 }
 
     /**
+     * Create the media request.
      * @deprecated do not use. Instead, use fromSpec() to create an object with the desired state.
      */
     @Deprecated

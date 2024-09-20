@@ -12,7 +12,6 @@ import static org.apache.commons.lang3.RandomStringUtils.random;
 import static uk.gov.hmcts.darts.test.common.data.CourthouseTestData.someMinimalCourthouse;
 import static uk.gov.hmcts.darts.test.common.data.UserAccountTestData.minimalUserAccount;
 
-@SuppressWarnings({"HideUtilityClassConstructor"})
 public class CaseTestData  implements Persistable<TestCourtCaseEntity.TestCourtCaseBuilderRetrieve,
     CourtCaseEntity, TestCourtCaseEntity.TestCourtCaseEntityBuilder>  {
 
@@ -106,8 +105,4 @@ public class CaseTestData  implements Persistable<TestCourtCaseEntity.TestCourtC
         return retrieve;
     }
 
-    @Override
-    public CourtCaseEntity someMaximal() {
-        return someMinimal();
-    }
 }
