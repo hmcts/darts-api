@@ -19,7 +19,7 @@ public class EventSearchMapper {
             .antecedentId(evr.antecedentId())
             .courthouse(buildCourthouse(evr))
             .courtroom(buildCourtroom(evr))
-            .isManuallyAnonymised(evr.isDataAnonymised())
+            .isEventAnonymised(evr.isDataAnonymised())
             .isCaseExpired(evr.isDataAnonymisedForCase())
             .caseExpiredAt(evr.dataAnonymisedTs());
     }
