@@ -11,7 +11,7 @@ import uk.gov.hmcts.darts.common.repository.ObjectAdminActionRepository;
 import uk.gov.hmcts.darts.common.repository.ObjectHiddenReasonRepository;
 import uk.gov.hmcts.darts.transcriptions.exception.TranscriptionApiError;
 
-import static java.util.Objects.nonNull;
+import static java.util.Objects.isNull;
 
 @Component
 @RequiredArgsConstructor
@@ -49,7 +49,7 @@ public class TranscriptionApproveMarkForDeletionValidator implements Validator<I
             }
             UserAccountEntity currentUser = userIdentity.getUserAccount();
             UserAccountEntity hiddenBy = objectAdminActionEntity.getHiddenBy();
-            if (nonNull(hiddenBy) && currentUser.getId().equals(hiddenBy.getId())) {
+            if (isNull(hiddenBy) || currentUser.getId().equals(hiddenBy.getId())) {
                 throw new DartsApiException(TranscriptionApiError.TRANSCRIPTION_DOCUMENT_DELETION_CAN_NOT_APPROVE_OWN_REQUEST);
             }
         }
