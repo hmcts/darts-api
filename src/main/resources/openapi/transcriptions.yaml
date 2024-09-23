@@ -1001,7 +1001,13 @@ paths:
               schema:
                 allOf:
                   - $ref: './problem.yaml'
-
+        '422':
+          description: Unprocessable approve request
+          content:
+            application/json+problem:
+              schema:
+                allOf:
+                  - $ref: './problem.yaml'
   /admin/transcription-documents/marked-for-deletion:
     get:
       tags:

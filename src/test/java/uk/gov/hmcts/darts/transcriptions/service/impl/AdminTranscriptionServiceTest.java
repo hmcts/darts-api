@@ -371,27 +371,32 @@ class AdminTranscriptionServiceTest {
         void shouldApproveDeletionWhenDocumentExists() {
             // Given
             Integer documentId = 1;
-            TranscriptionDocumentEntity documentEntity = mock(TranscriptionDocumentEntity.class);
-            ObjectAdminActionEntity objectAdminActionEntity = mock(ObjectAdminActionEntity.class);
+            TranscriptionDocumentEntity documentEntity = new TranscriptionDocumentEntity();
+            ObjectAdminActionEntity objectAdminActionEntity = new ObjectAdminActionEntity();
             UserAccountEntity userAccount = mock(UserAccountEntity.class);
             AdminApproveDeletionResponse expectedResponse = mock(AdminApproveDeletionResponse.class);
+
+            ArgumentCaptor<ObjectAdminActionEntity> objectAdminActionEntityArgumentCaptor = ArgumentCaptor.forClass(ObjectAdminActionEntity.class);
 
             when(transcriptionDocumentRepository.findById(documentId)).thenReturn(Optional.of(documentEntity));
             when(objectAdminActionRepository
                      .findByTranscriptionDocument_IdAndObjectHiddenReasonIsNotNullAndObjectHiddenReason_MarkedForDeletionTrue(documentId))
                 .thenReturn(Optional.of(objectAdminActionEntity));
             when(userIdentity.getUserAccount()).thenReturn(userAccount);
-            when(transcriptionResponseMapper.mapAdminApproveDeletionResponse(documentEntity, objectAdminActionEntity)).thenReturn(expectedResponse);
+            when(transcriptionResponseMapper.mapAdminApproveDeletionResponse(documentEntity, objectAdminActionEntity))
+                .thenReturn(expectedResponse);
 
             // When
             AdminApproveDeletionResponse actualResponse = adminTranscriptionService.approveDeletionOfTranscriptionDocumentById(documentId);
 
             // Then
             verify(transcriptionApproveMarkForDeletionValidator).validate(documentId);
-            verify(objectAdminActionEntity).setMarkedForManualDeletion(true);
-            verify(objectAdminActionEntity).setMarkedForManualDelBy(userAccount);
-            verify(objectAdminActionEntity).setMarkedForManualDelDateTime(any(OffsetDateTime.class));
             verify(objectAdminActionRepository).save(objectAdminActionEntityArgumentCaptor.capture());
+
+            ObjectAdminActionEntity capturedEntity = objectAdminActionEntityArgumentCaptor.getValue();
+            assertTrue(capturedEntity.isMarkedForManualDeletion(), "Entity should be marked for manual deletion");
+            assertEquals(userAccount, capturedEntity.getMarkedForManualDelBy(), "Entity's deletion should be marked by the correct user");
+            assertNotNull(capturedEntity.getMarkedForManualDelDateTime(), "Entity's deletion datetime should be set");
 
             assertEquals(expectedResponse, actualResponse);
         }

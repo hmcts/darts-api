@@ -24,6 +24,9 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -144,6 +147,14 @@ class TranscriptionApproveMarkForDeletionValidatorTest {
         when(userIdentity.getUserAccount()).thenReturn(currentUser);
 
         assertDoesNotThrow(() -> validator.validate(TRANSCRIPTION_DOCUMENT_ID));
+
+        verify(objectAdminActionRepository, times(1))
+            .findByTranscriptionDocument_Id(TRANSCRIPTION_DOCUMENT_ID);
+        verify(objectHiddenReasonRepository, times(1))
+            .findById(any());
+        verify(userIdentity, times(1))
+            .getUserAccount();
+        verifyNoMoreInteractions(objectAdminActionRepository, objectHiddenReasonRepository, userIdentity);
     }
 
     @Test
