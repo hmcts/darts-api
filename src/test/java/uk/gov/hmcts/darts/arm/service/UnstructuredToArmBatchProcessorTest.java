@@ -149,17 +149,17 @@ class UnstructuredToArmBatchProcessorTest {
         when(externalObjectDirectoryRepository.findNotFinishedAndNotExceededRetryInStorageLocation(any(), any(), any(), any())).thenReturn(List.of(eod10));
         when(externalObjectDirectoryRepository.findEodsNotInOtherStorage(any(), any(), any(), any())).thenReturn(emptyList());
         EOD_HELPER_MOCKS.givenIsEqualLocationReturns(true);
-        when(unstructuredToArmProcessorConfiguration.getMaxResultSize()).thenReturn(1000);
+        when(unstructuredToArmProcessorConfiguration.getMaxArmManifestItems()).thenReturn(10);
         when(armDataManagementConfiguration.getMaxRetryAttempts()).thenReturn(3);
 
         //when
-        unstructuredToArmBatchProcessor.processUnstructuredToArm(5);
+        unstructuredToArmBatchProcessor.processUnstructuredToArm(200);
 
         //then
         verify(externalObjectDirectoryRepository).findEodsNotInOtherStorage(
             storedStatus(),
             unstructuredLocation(),
-            armLocation(), 999
+            armLocation(), 9
         );
 
         verify(logApi).armPushFailed(anyInt());
@@ -170,7 +170,7 @@ class UnstructuredToArmBatchProcessorTest {
         //given
         when(armDataManagementConfiguration.getArmClient()).thenReturn("dets");
         when(externalObjectDirectoryRepository.findEodsNotInOtherStorage(any(), any(), any(), any())).thenReturn(emptyList());
-        when(unstructuredToArmProcessorConfiguration.getMaxResultSize()).thenReturn(1000);
+        when(unstructuredToArmProcessorConfiguration.getMaxArmManifestItems()).thenReturn(1000);
         when(armDataManagementConfiguration.getMaxRetryAttempts()).thenReturn(3);
 
         EOD_HELPER_MOCKS.givenIsEqualLocationReturns(true);
@@ -182,7 +182,7 @@ class UnstructuredToArmBatchProcessorTest {
         verify(externalObjectDirectoryRepository).findEodsNotInOtherStorage(
             storedStatus(),
             detsLocation(),
-            armLocation(), 1000
+            armLocation(), 5
         );
 
     }
@@ -202,24 +202,25 @@ class UnstructuredToArmBatchProcessorTest {
         when(armDataManagementConfiguration.getArmClient()).thenReturn("darts");
         when(externalObjectDirectoryRepository.findNotFinishedAndNotExceededRetryInStorageLocation(any(), any(), any(), any())).thenReturn(List.of(eod1, eod2));
         when(externalObjectDirectoryRepository.findEodsNotInOtherStorage(any(), any(), any(), any())).thenReturn(emptyList());
-        when(unstructuredToArmProcessorConfiguration.getMaxResultSize()).thenReturn(1000);
+        when(unstructuredToArmProcessorConfiguration.getMaxArmManifestItems()).thenReturn(100);
         when(armDataManagementConfiguration.getMaxRetryAttempts()).thenReturn(3);
 
         when(fileOperationService.createFile(any(), any(), anyBoolean())).thenReturn(manifestFilePath);
 
         //when
-        unstructuredToArmBatchProcessor.processUnstructuredToArm(5);
+        unstructuredToArmBatchProcessor.processUnstructuredToArm(5000);
 
         //then
         verify(externalObjectDirectoryRepository).findNotFinishedAndNotExceededRetryInStorageLocation(
             any(),
             any(ExternalLocationTypeEntity.class),
             eq(3),
-            eq(Pageable.ofSize(1000)));
+            eq(Pageable.ofSize(100)));
+
         verify(externalObjectDirectoryRepository).findEodsNotInOtherStorage(
             storedStatus(),
             unstructuredLocation(),
-            armLocation(), 998
+            armLocation(), 98
         );
 
         verifyNoMoreInteractions(logApi);
@@ -233,7 +234,7 @@ class UnstructuredToArmBatchProcessorTest {
         when(armDataManagementConfiguration.getFileExtension()).thenReturn("a360");
         when(armDataManagementConfiguration.getTempBlobWorkspace()).thenReturn("/temp_workspace");
         when(externalObjectDirectoryRepository.findEodsNotInOtherStorage(any(), any(), any(), any())).thenReturn(List.of(eod1));
-        when(unstructuredToArmProcessorConfiguration.getMaxResultSize()).thenReturn(1000);
+        when(unstructuredToArmProcessorConfiguration.getMaxArmManifestItems()).thenReturn(1000);
         when(armDataManagementConfiguration.getMaxRetryAttempts()).thenReturn(3);
 
         //when

@@ -6,7 +6,6 @@ import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.collections4.ListUtils;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.darts.arm.api.ArmDataManagementApi;
 import uk.gov.hmcts.darts.arm.component.ArchiveRecordFileGenerator;
@@ -67,23 +66,29 @@ public class UnstructuredToArmBatchProcessorImpl implements UnstructuredToArmBat
         log.info("Started running ARM Batch Push processing at: {}", OffsetDateTime.now());
         ExternalLocationTypeEntity eodSourceLocation = getEodSourceLocation();
 
-        List<ExternalObjectDirectoryEntity> eodsForTransfer = unstructuredToArmHelper
-            .getEodEntitiesToSendToArm(eodSourceLocation,
-                                       EodHelper.armLocation(),
-                                       unstructuredToArmProcessorConfiguration.getMaxResultSize());
+        int querySize = unstructuredToArmProcessorConfiguration.getMaxArmManifestItems();
+        if (armBatchSize < unstructuredToArmProcessorConfiguration.getMaxArmManifestItems()) {
+            querySize = armBatchSize;
+        }
 
+        UserAccountEntity userAccount = userIdentity.getUserAccount();
 
-        log.info("Found {} pending entities to process from source '{}'", eodsForTransfer.size(), eodSourceLocation.getDescription());
-        if (!eodsForTransfer.isEmpty()) {
-            //ARM has a max batch size, so lets loop through the big list creating lots of individual batches for ARM to process separately
-            List<List<ExternalObjectDirectoryEntity>> batchesForArm = ListUtils.partition(eodsForTransfer, armBatchSize);
-            int batchCounter = 1;
-            UserAccountEntity userAccount = userIdentity.getUserAccount();
-            for (List<ExternalObjectDirectoryEntity> eodsForBatch : batchesForArm) {
-                log.info("Creating batch {} out of {}", batchCounter++, batchesForArm.size());
-                createAndSendBatchFile(eodsForBatch, userAccount);
+        for (int batchCounter = 1; batchCounter <= armBatchSize; batchCounter += querySize) {
+            log.info("Batching rows from {} out of a potential rows {}", batchCounter, armBatchSize);
+            List<ExternalObjectDirectoryEntity> batchedEods =
+                unstructuredToArmHelper.getEodEntitiesToSendToArm(eodSourceLocation, EodHelper.armLocation(), querySize);
+            log.info("Number of EODs found {}", batchedEods.size());
+
+            if (!batchedEods.isEmpty()) {
+                createAndSendBatchFile(batchedEods, userAccount);
+                if (batchedEods.size() <= (batchCounter + querySize)) {
+                    break;
+                }
+            } else {
+                break;
             }
         }
+
         log.info("Finished running ARM Batch Push processing at: {}", OffsetDateTime.now());
     }
 
