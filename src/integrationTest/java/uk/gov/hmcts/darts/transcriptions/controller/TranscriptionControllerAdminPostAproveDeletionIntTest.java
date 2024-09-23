@@ -100,8 +100,7 @@ class TranscriptionControllerAdminPostAproveDeletionIntTest extends IntegrationB
                                                 .markedForManualDelDateTime(null)
                                                 .build());
         // run the test
-        MvcResult mvcResult = mockMvc.perform(post(ENDPOINT_URL.replace(
-                "${TRANSACTION_DOCUMENT_ID}", transcriptionDocumentEntity.getId().toString()))
+        MvcResult mvcResult = mockMvc.perform(post(getUrl(transcriptionDocumentEntity.getId().toString()))
                                                   .header("Content-Type", "application/json"))
             .andExpect(status().is2xxSuccessful())
             .andReturn();
@@ -135,8 +134,7 @@ class TranscriptionControllerAdminPostAproveDeletionIntTest extends IntegrationB
     void testTranscriptionDocumentApproveDeletionForbidden() throws Exception {
         superAdminUserStub.givenUserIsAuthorised(userIdentity, SecurityRoleEnum.SUPER_USER);
 
-        mockMvc.perform(post(ENDPOINT_URL.replace(
-                "${TRANSACTION_DOCUMENT_ID}", Integer.valueOf(-12).toString()))
+        mockMvc.perform(post(getUrl("-12"))
                             .header("Content-Type", "application/json"))
             .andExpect(status().isForbidden())
             .andReturn();
@@ -154,8 +152,7 @@ class TranscriptionControllerAdminPostAproveDeletionIntTest extends IntegrationB
             LocalDateTime.of(2020, 6, 20, 10, 0, 0)
         );
 
-        MvcResult mvcResult = mockMvc.perform(post(ENDPOINT_URL.replace(
-                "${TRANSACTION_DOCUMENT_ID}", Integer.valueOf(-12).toString()))
+        MvcResult mvcResult = mockMvc.perform(post(getUrl("-12"))
                                                   .header("Content-Type", "application/json"))
             .andExpect(status().isNotFound())
             .andReturn();
@@ -163,6 +160,10 @@ class TranscriptionControllerAdminPostAproveDeletionIntTest extends IntegrationB
         String content = mvcResult.getResponse().getContentAsString();
         Problem problemResponse = objectMapper.readValue(content, Problem.class);
         assertEquals(TranscriptionApiError.TRANSCRIPTION_DOCUMENT_ID_NOT_FOUND.getType(), problemResponse.getType());
+    }
+
+    private static String getUrl(String documentId) {
+        return ENDPOINT_URL.replace("${TRANSACTION_DOCUMENT_ID}", Integer.valueOf(documentId).toString());
     }
 
 }

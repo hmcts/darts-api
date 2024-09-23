@@ -29,7 +29,9 @@ public class TranscriptionApproveMarkForDeletionValidator implements Validator<I
         var objectAdminActionEntityList = objectAdminActionRepository.findByTranscriptionDocument_Id(transcriptionDocumentId);
         if (objectAdminActionEntityList.isEmpty()) {
             throw new DartsApiException(TranscriptionApiError.TRANSCRIPTION_DOCUMENT_ID_NOT_FOUND);
-        } else if (objectAdminActionEntityList.size() > 1) {
+        }
+
+        if (objectAdminActionEntityList.size() > 1) {
             throw new DartsApiException(TranscriptionApiError.TOO_MANY_RESULTS);
         }
 

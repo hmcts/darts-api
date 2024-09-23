@@ -220,26 +220,23 @@ public class AdminTranscriptionServiceImpl implements AdminTranscriptionService 
 
         transcriptionApproveMarkForDeletionValidator.validate(transcriptionDocumentId);
 
-        AdminApproveDeletionResponse response;
+        TranscriptionDocumentEntity transcriptionDocumentEntity = getTranscriptionDocumentEntity(transcriptionDocumentId);
 
-        Optional<TranscriptionDocumentEntity> transcriptionDocumentEntity = transcriptionDocumentRepository.findById(transcriptionDocumentId);
-        if (transcriptionDocumentEntity.isPresent()) {
+        ObjectAdminActionEntity objectAdminActionEntity = objectAdminActionRepository
+            .findByTranscriptionDocument_IdAndObjectHiddenReasonIsNotNullAndObjectHiddenReason_MarkedForDeletionTrue(transcriptionDocumentId)
+            .orElseThrow(() -> new DartsApiException(TranscriptionApiError.TRANSCRIPTION_DOCUMENT_DELETE_NOT_SUPPORTED));
 
-            ObjectAdminActionEntity objectAdminActionEntity = objectAdminActionRepository
-                .findByTranscriptionDocument_IdAndObjectHiddenReasonIsNotNullAndObjectHiddenReason_MarkedForDeletionTrue(transcriptionDocumentId)
-                .orElseThrow(() -> new DartsApiException(TranscriptionApiError.TRANSCRIPTION_DOCUMENT_DELETE_NOT_SUPPORTED));
+        UserAccountEntity userAccount = userIdentity.getUserAccount();
+        objectAdminActionEntity.setMarkedForManualDeletion(true);
+        objectAdminActionEntity.setMarkedForManualDelBy(userAccount);
+        objectAdminActionEntity.setMarkedForManualDelDateTime(OffsetDateTime.now());
 
-            UserAccountEntity userAccount = userIdentity.getUserAccount();
-            objectAdminActionEntity.setMarkedForManualDeletion(true);
-            objectAdminActionEntity.setMarkedForManualDelBy(userAccount);
-            objectAdminActionEntity.setMarkedForManualDelDateTime(OffsetDateTime.now());
+        objectAdminActionRepository.save(objectAdminActionEntity);
+        return transcriptionMapper.mapAdminApproveDeletionResponse(transcriptionDocumentEntity, objectAdminActionEntity);
+    }
 
-            objectAdminActionRepository.save(objectAdminActionEntity);
-            TranscriptionDocumentEntity documentEntity = transcriptionDocumentEntity.get();
-            response = transcriptionMapper.mapAdminApproveDeletionResponse(documentEntity, objectAdminActionEntity);
-        } else {
-            throw new DartsApiException(TranscriptionApiError.TRANSCRIPTION_DOCUMENT_ID_NOT_FOUND);
-        }
-        return response;
+    private TranscriptionDocumentEntity getTranscriptionDocumentEntity(Integer transcriptionDocumentId) {
+        return transcriptionDocumentRepository.findById(transcriptionDocumentId)
+            .orElseThrow(() -> new DartsApiException(TranscriptionApiError.TRANSCRIPTION_DOCUMENT_ID_NOT_FOUND));
     }
 }
