@@ -36,7 +36,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-public class AdminMediaServiceImplApproveMarkedForDeletionTest {
+class AdminMediaServiceImplApproveMarkedForDeletionTest {
     @Mock
     private MediaRepository mediaRepository;
 
