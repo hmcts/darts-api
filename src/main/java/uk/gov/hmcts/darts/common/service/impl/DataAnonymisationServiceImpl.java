@@ -1,9 +1,13 @@
-package uk.gov.hmcts.darts.common.service;
+package uk.gov.hmcts.darts.common.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import uk.gov.hmcts.darts.audio.deleter.impl.outbound.ExternalOutboundDataStoreDeleter;
+import uk.gov.hmcts.darts.audio.entity.MediaRequestEntity;
+import uk.gov.hmcts.darts.audio.enums.MediaRequestStatus;
 import uk.gov.hmcts.darts.audit.api.AuditActivity;
 import uk.gov.hmcts.darts.audit.api.AuditApi;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
@@ -16,19 +20,35 @@ import uk.gov.hmcts.darts.common.entity.ProsecutorEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionCommentEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionWorkflowEntity;
+import uk.gov.hmcts.darts.common.entity.TransformedMediaEntity;
+import uk.gov.hmcts.darts.common.entity.TransientObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.entity.base.CreatedModifiedBaseEntity;
+import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
+import uk.gov.hmcts.darts.common.repository.CaseRepository;
+import uk.gov.hmcts.darts.common.repository.TransformedMediaRepository;
+import uk.gov.hmcts.darts.common.repository.TransientObjectDirectoryRepository;
+import uk.gov.hmcts.darts.common.service.DataAnonymisationService;
 import uk.gov.hmcts.darts.task.runner.IsNamedEntity;
 
+import java.util.Collection;
 import java.util.UUID;
 
 @Service
 @Slf4j
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
+@Transactional
 public class DataAnonymisationServiceImpl implements DataAnonymisationService {
 
     private final AuditApi auditApi;
     private final UserIdentity userIdentity;
+
+    private final CurrentTimeHelper currentTimeHelper;
+    private final ExternalOutboundDataStoreDeleter outboundDataStoreDeleter;
+    private final CaseRepository caseRepository;
+    private final TransformedMediaRepository transformedMediaRepository;
+    private final TransientObjectDirectoryRepository transientObjectDirectoryRepository;
+
 
     @Override
     public void anonymizeCourtCaseEntity(UserAccountEntity userAccount, CourtCaseEntity courtCase) {
@@ -38,10 +58,15 @@ public class DataAnonymisationServiceImpl implements DataAnonymisationService {
         courtCase.getHearings().forEach(hearingEntity -> anonymizeHearingEntity(userAccount, hearingEntity));
 
         courtCase.markAsExpired(userAccount);
+        //This also saves defendant, defence and prosecutor entities
+        tidyUpTransformedMediaEntities(userAccount, courtCase);
         auditApi.record(AuditActivity.CASE_EXPIRED, userAccount, courtCase);
+        anonymizeCreatedModifiedBaseEntity(userAccount, courtCase);
+        caseRepository.save(courtCase);
 
         //Required for Dynatrace dashboards
         log.info("Case expired: cas_id={}, case_number={}", courtCase.getId(), courtCase.getCaseNumber());
+
     }
 
     @Override
@@ -68,22 +93,22 @@ public class DataAnonymisationServiceImpl implements DataAnonymisationService {
     @Override
     public void anonymizeEventEntity(UserAccountEntity userAccount, EventEntity eventEntity) {
         eventEntity.setEventText(UUID.randomUUID().toString());
-        eventEntity.setLastModifiedBy(userAccount);
         eventEntity.setDataAnonymised(true);
+        anonymizeCreatedModifiedBaseEntity(userAccount, eventEntity);
     }
 
     @Override
     public void anonymizeTranscriptionEntity(UserAccountEntity userAccount, TranscriptionEntity transcriptionEntity) {
-        transcriptionEntity.getTranscriptionCommentEntities().forEach(
-            transcriptionCommentEntity -> anonymizeTranscriptionCommentEntity(userAccount, transcriptionCommentEntity));
+        transcriptionEntity.getTranscriptionCommentEntities()
+            .forEach(transcriptionCommentEntity -> anonymizeTranscriptionCommentEntity(userAccount, transcriptionCommentEntity));
         transcriptionEntity.getTranscriptionWorkflowEntities().forEach(this::anonymizeTranscriptionWorkflowEntity);
     }
 
     @Override
     public void anonymizeTranscriptionCommentEntity(UserAccountEntity userAccount, TranscriptionCommentEntity transcriptionCommentEntity) {
         transcriptionCommentEntity.setComment(UUID.randomUUID().toString());
-        transcriptionCommentEntity.setLastModifiedBy(userAccount);
         transcriptionCommentEntity.setDataAnonymised(true);
+        anonymizeCreatedModifiedBaseEntity(userAccount, transcriptionCommentEntity);
     }
 
     @Override
@@ -97,8 +122,51 @@ public class DataAnonymisationServiceImpl implements DataAnonymisationService {
         return userIdentity.getUserAccount();
     }
 
+    void tidyUpTransformedMediaEntities(UserAccountEntity userAccount, CourtCaseEntity courtCase) {
+        courtCase
+            .getHearings()
+            .stream()
+            .map(HearingEntity::getMediaRequests)
+            .flatMap(Collection::stream)
+            .distinct()
+            .peek(mediaRequestEntity -> expiredMediaRequest(userAccount, mediaRequestEntity))
+            .map(MediaRequestEntity::getTransformedMediaEntities)
+            .flatMap(Collection::stream)
+            .distinct()
+            .forEach(this::deleteTransformedMediaEntity)
+        ;
+    }
+
+    void deleteTransformedMediaEntity(TransformedMediaEntity transformedMediaEntity) {
+        if (transformedMediaEntity.getTransientObjectDirectoryEntities().stream()
+            .peek(transientObjectDirectoryEntity -> transientObjectDirectoryEntity.setTransformedMedia(null))
+            .filter(transientObjectDirectoryEntity -> !deleteTransientObjectDirectoryEntity(transientObjectDirectoryEntity))
+            .count() == 0) {
+            transformedMediaRepository.delete(transformedMediaEntity);
+        }
+    }
+
+    boolean deleteTransientObjectDirectoryEntity(TransientObjectDirectoryEntity transientObjectDirectoryEntity) {
+        if (outboundDataStoreDeleter.delete(transientObjectDirectoryEntity)) {
+            transientObjectDirectoryRepository.delete(transientObjectDirectoryEntity);
+            return true;
+        }
+        return false;
+    }
+
+    void expiredMediaRequest(UserAccountEntity userAccount, MediaRequestEntity mediaRequestEntity) {
+        mediaRequestEntity.setStatus(MediaRequestStatus.EXPIRED);
+        anonymizeCreatedModifiedBaseEntity(userAccount, mediaRequestEntity);
+    }
+
+
     private <T extends CreatedModifiedBaseEntity & IsNamedEntity> void anonymizeName(UserAccountEntity userAccount, T entity) {
         entity.setName(UUID.randomUUID().toString());
+        anonymizeCreatedModifiedBaseEntity(userAccount, entity);
+    }
+
+    private void anonymizeCreatedModifiedBaseEntity(UserAccountEntity userAccount, CreatedModifiedBaseEntity entity) {
         entity.setLastModifiedBy(userAccount);
+        entity.setLastModifiedDateTime(currentTimeHelper.currentOffsetDateTime());
     }
 }

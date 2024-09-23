@@ -3,6 +3,7 @@ package uk.gov.hmcts.darts.audio.deleter.impl;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.transaction.annotation.Transactional;
 import uk.gov.hmcts.darts.audio.deleter.DataStoreDeleter;
 import uk.gov.hmcts.darts.audio.deleter.ExternalDataStoreDeleter;
 import uk.gov.hmcts.darts.audio.deleter.ObjectDirectoryDeletedFinder;
@@ -28,32 +29,39 @@ public class ExternalDataStoreDeleterImpl<T extends ObjectDirectory> implements 
         List<T> toBeDeleted = finder.findMarkedForDeletion();
 
         for (T entityToBeDeleted : toBeDeleted) {
-            UUID externalLocation = entityToBeDeleted.getLocation();
-            Integer entityId = entityToBeDeleted.getId();
-            int statusId = entityToBeDeleted.getStatusId();
-            log.info(
-                "Deleting storage data with externalLocation={} for entityId={} and statusId={}",
-                externalLocation, entityId, statusId
-            );
-
-            try {
-                deleter.delete(externalLocation);
-            } catch (AzureDeleteBlobException e) {
-                log.error(
-                    "Failed to delete storage data with externalLocation={} for entityId={} and statusId={}",
-                    externalLocation, entityId, statusId, e
-                );
-            }
-
-            repository.delete(entityToBeDeleted);
-            if (entityToBeDeleted instanceof TransientObjectDirectoryEntity transientObjectDirectoryEntity) {
-                log.debug("Deleting transformed media {} with transient object directory id={}",
-                          transientObjectDirectoryEntity.getTransformedMedia().getId(), transientObjectDirectoryEntity.getId());
-                transformedMediaRepository.delete(transientObjectDirectoryEntity.getTransformedMedia());
-            }
-
+            delete(entityToBeDeleted);
         }
         return toBeDeleted;
     }
 
+    @Override
+    @Transactional
+    public boolean delete(T entityToBeDeleted) {
+        UUID externalLocation = entityToBeDeleted.getLocation();
+        Integer entityId = entityToBeDeleted.getId();
+        boolean deleted = false;
+        int statusId = entityToBeDeleted.getStatusId();
+        log.info(
+            "Deleting storage data with externalLocation={} for entityId={} and statusId={}",
+            externalLocation, entityId, statusId
+        );
+
+        try {
+            deleter.delete(externalLocation);
+            deleted = true;
+        } catch (AzureDeleteBlobException e) {
+            log.error(
+                "Failed to delete storage data with externalLocation={} for entityId={} and statusId={}",
+                externalLocation, entityId, statusId, e
+            );
+        }
+        repository.delete(entityToBeDeleted);
+        if (entityToBeDeleted instanceof TransientObjectDirectoryEntity transientObjectDirectoryEntity
+            && transientObjectDirectoryEntity.getTransformedMedia() != null) {
+            log.debug("Deleting transformed media {} with transient object directory id={}",
+                      transientObjectDirectoryEntity.getTransformedMedia().getId(), transientObjectDirectoryEntity.getId());
+            transformedMediaRepository.delete(transientObjectDirectoryEntity.getTransformedMedia());
+        }
+        return deleted;
+    }
 }
