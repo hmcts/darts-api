@@ -1,5 +1,6 @@
 package uk.gov.hmcts.darts.common.repository;
 
+import org.springframework.data.domain.Limit;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
@@ -216,7 +217,7 @@ public interface ExternalObjectDirectoryRepository extends JpaRepository<Externa
 
     @Query(
         """
-
+            
             SELECT eod FROM ExternalObjectDirectoryEntity eod
                   JOIN eod.annotationDocumentEntity ade
                   JOIN ade.annotation ann
@@ -225,7 +226,7 @@ public interface ExternalObjectDirectoryRepository extends JpaRepository<Externa
                   AND eod.status = :status
                   AND annD.id = :annotationDocumentId
                   ORDER BY eod.createdDateTime DESC
-                  """
+            """
     )
     List<ExternalObjectDirectoryEntity> findByAnnotationIdAndAnnotationDocumentId(Integer annotationId,
                                                                                   Integer annotationDocumentId,
@@ -385,4 +386,68 @@ public interface ExternalObjectDirectoryRepository extends JpaRepository<Externa
 
 
     List<ExternalObjectDirectoryEntity> findByManifestFile(String manifestName);
+
+    @Query("""
+               SELECT eod
+               FROM ExternalObjectDirectoryEntity eod
+               JOIN TranscriptionDocumentEntity t ON eod.transcriptionDocumentEntity = t
+               WHERE t.retainUntilTs < :maxRetentionDate
+               AND t.isDeleted = false
+               AND eod.externalLocationType.id in (1,2,3)
+               AND EXISTS (
+                SELECT 1 FROM ExternalObjectDirectoryEntity eod2
+                WHERE eod2.externalLocationType.id = 3
+                AND eod2.status.id = 2
+                AND eod2.transcriptionDocumentEntity = eod.transcriptionDocumentEntity
+               )
+        """)
+    List<ExternalObjectDirectoryEntity> findExpiredTranscriptionDocuments(OffsetDateTime maxRetentionDate, Limit batchSize);
+
+    @Query("""
+               SELECT eod
+               FROM ExternalObjectDirectoryEntity eod
+               JOIN AnnotationDocumentEntity a ON eod.annotationDocumentEntity = a
+               WHERE a.retainUntilTs < :maxRetentionDate
+               AND a.isDeleted = false
+               AND eod.externalLocationType.id in (1,2,3)
+               AND EXISTS (
+                SELECT 1 FROM ExternalObjectDirectoryEntity eod2
+                WHERE eod2.externalLocationType.id = 3
+                AND eod2.status.id = 2
+                AND eod2.transcriptionDocumentEntity = eod.transcriptionDocumentEntity
+               )
+        """)
+    List<ExternalObjectDirectoryEntity> findExpiredAnnotationDocuments(OffsetDateTime maxRetentionDate, Limit batchSize);
+
+    @Query("""
+               SELECT eod
+               FROM ExternalObjectDirectoryEntity eod
+               JOIN CaseDocumentEntity c ON eod.caseDocument = c
+               WHERE c.retainUntilTs < :maxRetentionDate
+               AND c.isDeleted = false
+               AND eod.externalLocationType.id in (1,2,3)
+               AND EXISTS (
+                SELECT 1 FROM ExternalObjectDirectoryEntity eod2
+                WHERE eod2.externalLocationType.id = 3
+                AND eod2.status.id = 2
+                AND eod2.transcriptionDocumentEntity = eod.transcriptionDocumentEntity
+               )
+        """)
+    List<ExternalObjectDirectoryEntity> findExpiredCaseDocuments(OffsetDateTime maxRetentionDate, Limit batchSize);
+
+    @Query("""
+               SELECT eod
+               FROM ExternalObjectDirectoryEntity eod
+               JOIN MediaEntity m ON eod.media = m
+               WHERE m.retainUntilTs < :maxRetentionDate
+               AND m.isDeleted = false
+               AND eod.externalLocationType.id in (1,2,3)
+               AND EXISTS (
+                SELECT 1 FROM ExternalObjectDirectoryEntity eod2
+                WHERE eod2.externalLocationType.id = 3
+                AND eod2.status.id = 2
+                AND eod2.transcriptionDocumentEntity = eod.transcriptionDocumentEntity
+               )
+        """)
+    List<ExternalObjectDirectoryEntity> findExpiredMediaEntries(OffsetDateTime maxRetentionDate, Limit batchSize);
 }

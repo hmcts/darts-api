@@ -72,12 +72,12 @@ class DataAnonymisationServiceImplTest {
 
     private OffsetDateTime offsetDateTime;
 
-    void setupOffsetDateTime() {
+    private void setupOffsetDateTime() {
         offsetDateTime = OffsetDateTime.now();
         when(currentTimeHelper.currentOffsetDateTime()).thenReturn(offsetDateTime);
     }
 
-    void assertLastModifiedByAndAt(CreatedModifiedBaseEntity entity, UserAccountEntity userAccount) {
+    private void assertLastModifiedByAndAt(CreatedModifiedBaseEntity entity, UserAccountEntity userAccount) {
         assertThat(entity.getLastModifiedBy()).isEqualTo(userAccount);
         assertThat(entity.getLastModifiedDateTime()).isEqualTo(offsetDateTime);
     }

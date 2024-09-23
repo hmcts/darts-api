@@ -138,4 +138,9 @@ public class MediaEntity extends CreatedModifiedBaseEntity
     public void setDeletedTs(OffsetDateTime deletedTs) {
         setDeletedTimestamp(deletedTs);
     }
+
+    @Override
+    public OffsetDateTime getDeletedTs() {
+        return getDeletedTimestamp();
+    }
 }

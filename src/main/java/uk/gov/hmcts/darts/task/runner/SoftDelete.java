@@ -14,7 +14,14 @@ public interface SoftDelete {
 
     void setDeleted(boolean deleted);
 
+    boolean isDeleted();
+
     void setDeletedTs(OffsetDateTime deletedTs);
 
+    OffsetDateTime getDeletedTs();
+
     void setDeletedBy(UserAccountEntity userAccount);
+
+    UserAccountEntity getDeletedBy();
+
 }
