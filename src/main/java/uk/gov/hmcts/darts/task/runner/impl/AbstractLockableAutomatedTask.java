@@ -95,7 +95,7 @@ public abstract class AbstractLockableAutomatedTask implements AutomatedTask, Au
                     if (TRUE.equals(automatedTask.getTaskEnabled())) {
                         logApi.taskStarted(executionId.get(), this.getTaskName());
 
-                        if (AutomatedTaskName.PROCESS_DAILY_LIST_TASK_NAME.getTaskName().equals(this.getTaskName())) {
+                        if (AutomatedTaskName.DAILY_LIST_HOUSEKEEPING_TASK_NAME.getTaskName().equals(this.getTaskName())) {
                             throw new RuntimeException("This is for DMP-2666 testing");
                         }
 
