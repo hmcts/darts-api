@@ -56,6 +56,7 @@ import static uk.gov.hmcts.darts.audiorequests.model.AudioRequestType.DOWNLOAD;
 @Slf4j
 @SuppressWarnings({"PMD.ExceptionAsFlowControl"})
 public class AudioTransformationServiceImpl implements AudioTransformationService {
+    public static final int MAX_LOOPS = 200;//Arbitrary high number, just a glass ceiling which we wouldn't expect the loop to reach unless there is a problem.
     private final MediaRequestService mediaRequestService;
     private final OutboundFileProcessor outboundFileProcessor;
     private final OutboundFileZipGenerator outboundFileZipGenerator;
@@ -95,10 +96,14 @@ public class AudioTransformationServiceImpl implements AudioTransformationServic
     @Override
     public void handleKedaInvocationForMediaRequests() {
         int counter = 1;
+        /*
+        store list of IDs we have already tried to process, as in scenario where audio is only in the incoming datastore,
+        the requests status is reset back to OPEN, and so this code would pick up the request again in quick succession if not omitted.
+         */
         List<Integer> mediaRequestIdsProcessed = new ArrayList<>();
         OffsetDateTime cutoffTime = currentTimeHelper.currentOffsetDateTime().plusMinutes(config.getLoopCutoffMinutes());
         while (currentTimeHelper.currentOffsetDateTime().isBefore(cutoffTime)) {
-            if (counter++ > 200) {
+            if (counter++ > MAX_LOOPS) {
                 throw new RuntimeException("ATS potentially stuck in a loop.");
             }
             Optional<MediaRequestEntity> mediaRequestOpt = mediaRequestService.retrieveMediaRequestForProcessing(mediaRequestIdsProcessed);
