@@ -81,6 +81,7 @@ public abstract class AbstractLockableAutomatedTask implements AutomatedTask, Au
 
     @Override
     @Transactional
+    @SuppressWarnings("squid:S112")
     public void run() {
         executionId = ThreadLocal.withInitial(UUID::randomUUID);
         preRunTask();
