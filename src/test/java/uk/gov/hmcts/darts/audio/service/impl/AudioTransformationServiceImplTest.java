@@ -1,6 +1,7 @@
 package uk.gov.hmcts.darts.audio.service.impl;
 
 import com.azure.core.util.BinaryData;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -8,6 +9,7 @@ import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import uk.gov.hmcts.darts.audio.config.AudioTransformationServiceProperties;
 import uk.gov.hmcts.darts.audio.entity.MediaRequestEntity;
 import uk.gov.hmcts.darts.audio.enums.AudioRequestOutputFormat;
 import uk.gov.hmcts.darts.audio.helper.TransformedMediaHelper;
@@ -21,6 +23,7 @@ import uk.gov.hmcts.darts.common.entity.MediaEntity;
 import uk.gov.hmcts.darts.common.entity.TransformedMediaEntity;
 import uk.gov.hmcts.darts.common.entity.TransientObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
+import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
 import uk.gov.hmcts.darts.common.repository.MediaRepository;
 import uk.gov.hmcts.darts.common.repository.TransformedMediaRepository;
 import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
@@ -35,6 +38,7 @@ import java.io.ByteArrayInputStream;
 import java.nio.file.Path;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -46,6 +50,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -134,8 +139,18 @@ class AudioTransformationServiceImplTest {
 
     @Mock
     private NotificationApi mockNotificationApi;
+    @Mock
+    private CurrentTimeHelper currentTimeHelper;
+    @Mock
+    private AudioTransformationServiceProperties audioTransformationServiceProperties;
     @Captor
     private ArgumentCaptor<SaveNotificationToDbRequest> dbNotificationRequestCaptor;
+
+    @BeforeEach
+    void beforeEach() {
+        lenient().when(currentTimeHelper.currentOffsetDateTime()).thenReturn(OffsetDateTime.of(2020, 10, 10, 10, 0, 0, 0, ZoneOffset.UTC));
+        lenient().when(audioTransformationServiceProperties.getLoopCutoffMinutes()).thenReturn(15);
+    }
 
     @Test
     void getMediaByHearingIdShouldReturnRepositoryResultsUnmodifiedWhenRepositoryHasResult() {
@@ -212,7 +227,7 @@ class AudioTransformationServiceImplTest {
     void testHandleKedaInvocationForMediaRequestsRequestTypeNull() {
         when(mockMediaRequestEntity.getId()).thenReturn(1);
         when(mockMediaRequestEntity.getStatus()).thenReturn(PROCESSING);
-        when(mockMediaRequestService.retrieveMediaRequestForProcessing()).thenReturn(Optional.of(mockMediaRequestEntity));
+        when(mockMediaRequestService.retrieveMediaRequestForProcessing(new ArrayList<>())).thenReturn(Optional.of(mockMediaRequestEntity));
         when(mockMediaRequestEntity.getHearing()).thenReturn(mockHearing);
 
         assertThrows(NullPointerException.class, () -> audioTransformationService.handleKedaInvocationForMediaRequests());
@@ -223,7 +238,7 @@ class AudioTransformationServiceImplTest {
         when(mockMediaRequestEntity.getId()).thenReturn(1);
         when(mockMediaRequestEntity.getStatus()).thenReturn(PROCESSING);
         when(mockMediaRequestEntity.getRequestType()).thenReturn(DOWNLOAD);
-        when(mockMediaRequestService.retrieveMediaRequestForProcessing()).thenReturn(Optional.of(mockMediaRequestEntity));
+        when(mockMediaRequestService.retrieveMediaRequestForProcessing(new ArrayList<>())).thenReturn(Optional.of(mockMediaRequestEntity));
         when(mockMediaRequestEntity.getHearing()).thenReturn(mockHearing);
 
         assertThrows(NullPointerException.class, () -> audioTransformationService.handleKedaInvocationForMediaRequests());

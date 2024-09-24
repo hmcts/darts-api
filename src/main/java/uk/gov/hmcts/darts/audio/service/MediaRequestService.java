@@ -20,6 +20,8 @@ import java.util.Optional;
 
 public interface MediaRequestService {
 
+    Optional<MediaRequestEntity> retrieveMediaRequestForProcessing(List<Integer> mediaRequestIdsToIgnore);
+
     AudioNonAccessedResponse countNonAccessedAudioForUser(Integer userId);
 
     MediaRequestEntity getMediaRequestEntityById(Integer id);
@@ -39,8 +41,6 @@ public interface MediaRequestService {
     void deleteTransformedMedia(Integer transformedMediaId);
 
     Optional<MediaRequestEntity> getOldestMediaRequestByStatus(MediaRequestStatus status);
-
-    Optional<MediaRequestEntity> retrieveMediaRequestForProcessing();
 
     GetAudioRequestResponse getAudioRequests(Integer userId, Boolean expired);
 

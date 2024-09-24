@@ -12,16 +12,11 @@
 -- * hearings
 -- * case people - defence, defendant, prosecutor, judge
 --
--- It also removes most courthouses and associated courtrooms, node register entries and security group courthouse links. The courthouses and associations that will remain are as follows:
+-- It removes courthouses that are not included with the "prod" data.
+-- It removes all courtrooms except for YORK 1, 2 and 199 and SWANSEA 31 and 32.
+-- It removes associated all other courtrooms, node register entries and security group courthouse links.
 --
--- * BATH
--- * BRISTOL
--- * SWANSEA
--- * LONDON
--- * READING
--- * YORK
---
--- It also re-sets the event_handler and retention_policy_type tables to the baseline set by the flyway scripts, as of 13 Jun 2024
+-- It also re-sets the event_handler and retention_policy_type tables to the baseline set by the flyway scripts, as of 24 Sept 2024
 --
 -- Not deleted - the following are not deleted by this script
 --
@@ -118,41 +113,56 @@ DELETE FROM darts.node_register
 WHERE ctr_id IN (
 	SELECT ctr_id
 	FROM darts.courtroom
-	WHERE cth_id NOT IN (
-		SELECT cth_id
-		FROM darts.courthouse
-		WHERE UPPER(courthouse_name) IN ('BATH', 'BRISTOL', 'SWANSEA', 'LONDON', 'READING', 'YORK')
+	WHERE cth_id < 1 OR cth_id > 155
+);
+
+DELETE FROM darts.node_register
+WHERE ctr_id IN (
+	SELECT ctr_id
+	FROM darts.courtroom
+	WHERE cth_id NOT IN (127, 151) -- YORK/SWANSEA
+);
+
+DELETE FROM darts.node_register
+WHERE ctr_id IN (
+	SELECT ctr_id
+	FROM darts.courtroom
+	WHERE (
+		(
+			cth_id = 151 AND courtroom_name NOT IN ('1', '2', '199') -- YORK
+		) OR (
+			cth_id = 127 AND courtroom_name NOT IN ('31', '32') -- SWANSEA
+		)
 	)
 );
 
 -- remove courtrooms
 DELETE FROM darts.courtroom
-WHERE cth_id NOT IN (
-	SELECT cth_id
-	FROM darts.courthouse
-	WHERE UPPER(courthouse_name) IN ('BATH', 'BRISTOL', 'SWANSEA', 'LONDON', 'READING', 'YORK')
-);
+WHERE cth_id < 1 OR cth_id > 155;
+
+DELETE FROM darts.courtroom
+WHERE cth_id NOT IN (127, 151); -- YORK/SWANSEA
+
+DELETE FROM darts.courtroom
+WHERE cth_id = 151 -- YORK
+AND courtroom_name NOT IN ('1', '2', '199');
+
+DELETE FROM darts.courtroom
+WHERE cth_id = 127 -- SWANSEA
+AND courtroom_name NOT IN ('31', '32');
 
 -- remove security_group_courthouse_ae
 DELETE FROM darts.security_group_courthouse_ae
-WHERE cth_id NOT IN (
-	SELECT cth_id
-	FROM darts.courthouse
-	WHERE UPPER(courthouse_name) IN ('BATH', 'BRISTOL', 'SWANSEA', 'LONDON', 'READING', 'YORK')
-);
+WHERE cth_id < 1 OR cth_id > 155;
 
 -- remove courthouse region
 DELETE FROM darts.courthouse_region_ae_aud;
 DELETE FROM darts.courthouse_region_ae
-WHERE cth_id NOT IN (
-	SELECT cth_id
-	FROM darts.courthouse
-	WHERE UPPER(courthouse_name) IN ('BATH', 'BRISTOL', 'SWANSEA', 'LONDON', 'READING', 'YORK')
-);
+WHERE cth_id < 1 OR cth_id > 155;
 
 -- remove courthouses
 DELETE FROM darts.courthouse
-WHERE UPPER(courthouse_name) NOT IN ('BATH', 'BRISTOL', 'SWANSEA', 'LONDON', 'READING', 'YORK');
+WHERE cth_id < 1 OR cth_id > 155;
 
 -- reset retention policy types
 DELETE FROM darts.retention_policy_type;

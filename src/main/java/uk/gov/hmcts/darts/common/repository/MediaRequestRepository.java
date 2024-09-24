@@ -32,12 +32,14 @@ public interface MediaRequestRepository extends
           SELECT mr2.mer_id
           FROM darts.media_request mr2
           WHERE mr2.request_status = 'OPEN'
+          AND mr2.mer_id NOT IN ( :mediaRequestIdsToIgnore )
           ORDER BY mr2.last_modified_ts ASC
           LIMIT 1
           )
+         
         RETURNING *
         """, nativeQuery = true)
-    MediaRequestEntity updateAndRetrieveMediaRequestToProcessing(int userModifiedId);
+    MediaRequestEntity updateAndRetrieveMediaRequestToProcessing(int userModifiedId, List<Integer> mediaRequestIdsToIgnore);
 
     @Query("""
         SELECT count(distinct(tm.id)) FROM MediaRequestEntity mr, TransformedMediaEntity tm
