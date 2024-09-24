@@ -35,7 +35,6 @@ public class ExternalDataStoreDeleterImpl<T extends ObjectDirectory> implements 
     }
 
     @Override
-    @Transactional
     public boolean delete(T entityToBeDeleted) {
         UUID externalLocation = entityToBeDeleted.getLocation();
         Integer entityId = entityToBeDeleted.getId();
