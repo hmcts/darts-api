@@ -414,7 +414,7 @@ public interface ExternalObjectDirectoryRepository extends JpaRepository<Externa
                 SELECT 1 FROM ExternalObjectDirectoryEntity eod2
                 WHERE eod2.externalLocationType.id = 3
                 AND eod2.status.id = 2
-                AND eod2.transcriptionDocumentEntity = eod.transcriptionDocumentEntity
+                AND eod2.annotationDocumentEntity = eod.annotationDocumentEntity
                )
         """)
     List<ExternalObjectDirectoryEntity> findExpiredAnnotationDocuments(OffsetDateTime maxRetentionDate, Limit batchSize);
@@ -430,7 +430,7 @@ public interface ExternalObjectDirectoryRepository extends JpaRepository<Externa
                 SELECT 1 FROM ExternalObjectDirectoryEntity eod2
                 WHERE eod2.externalLocationType.id = 3
                 AND eod2.status.id = 2
-                AND eod2.transcriptionDocumentEntity = eod.transcriptionDocumentEntity
+                AND eod2.caseDocument = eod.caseDocument
                )
         """)
     List<ExternalObjectDirectoryEntity> findExpiredCaseDocuments(OffsetDateTime maxRetentionDate, Limit batchSize);
@@ -446,7 +446,7 @@ public interface ExternalObjectDirectoryRepository extends JpaRepository<Externa
                 SELECT 1 FROM ExternalObjectDirectoryEntity eod2
                 WHERE eod2.externalLocationType.id = 3
                 AND eod2.status.id = 2
-                AND eod2.transcriptionDocumentEntity = eod.transcriptionDocumentEntity
+                AND eod2.media = eod.media
                )
         """)
     List<ExternalObjectDirectoryEntity> findExpiredMediaEntries(OffsetDateTime maxRetentionDate, Limit batchSize);
