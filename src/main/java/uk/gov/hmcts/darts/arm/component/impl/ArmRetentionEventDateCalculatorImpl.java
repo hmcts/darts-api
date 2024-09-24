@@ -85,7 +85,7 @@ public class ArmRetentionEventDateCalculatorImpl implements ArmRetentionEventDat
                     return true;
                 }
             } else {
-                log.info("ARM event date calculation is skipped as no Retention Score is available");
+                log.info("ARM event date calculation is skipped for EOD {} as no Retention Score is available", externalObjectDirectoryId);
             }
         }
         return false;

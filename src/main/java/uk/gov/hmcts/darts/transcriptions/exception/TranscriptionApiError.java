@@ -93,6 +93,21 @@ public enum TranscriptionApiError implements DartsApiError {
         HttpStatus.CONFLICT,
         TranscriptionsTitleErrors.TRANSCRIPTION_DOCUMENT_ALREADY_HIDDEN.getValue()
     ),
+    TRANSCRIPTION_DOCUMENT_DELETE_NOT_SUPPORTED(
+        TranscriptionsErrorCode.TRANSCRIPTION_DOCUMENT_DELETE_NOT_SUPPORTED.getValue(),
+        HttpStatus.CONFLICT,
+        TranscriptionsTitleErrors.TRANSCRIPTION_DOCUMENT_DELETE_NOT_SUPPORTED.getValue()
+    ),
+    TRANSCRIPTION_DOCUMENT_DELETION_ALREADY_APPROVED(
+        TranscriptionsErrorCode.TRANSCRIPTION_DOCUMENT_DELETION_ALREADY_APPROVED.getValue(),
+        HttpStatus.CONFLICT,
+        TranscriptionsTitleErrors.TRANSCRIPTION_DOCUMENT_DELETION_ALREADY_APPROVED.getValue()
+    ),
+    TRANSCRIPTION_DOCUMENT_DELETION_CAN_NOT_APPROVE_OWN_REQUEST(
+        TranscriptionsErrorCode.TRANSCRIPTION_DOCUMENT_DELETION_CAN_NOT_APPROVE_OWN_REQUEST.getValue(),
+        HttpStatus.UNPROCESSABLE_ENTITY,
+        TranscriptionsTitleErrors.TRANSCRIPTION_DOCUMENT_DELETION_CAN_NOT_APPROVE_OWN_REQUEST.getValue()
+    ),
     TRANSCRIPTION_DOCUMENT_HIDE_ACTION_PAYLOAD_INCORRECT_USAGE(
         TranscriptionsErrorCode.TRANSCRIPTION_DOCUMENT_HIDE_ACTION_PAYLOAD_INCORRECT_USAGE.getValue(),
         HttpStatus.BAD_REQUEST,
@@ -107,6 +122,15 @@ public enum TranscriptionApiError implements DartsApiError {
         HttpStatus.BAD_REQUEST,
         TranscriptionsTitleErrors.TRANSCRIPTION_DOCUMENT_HIDE_ACTION_REASON_NOT_FOUND.getValue()
     ),
+    TRANSCRIPTION_DOCUMENT_MARKED_FOR_DELETION_REASON_NOT_FOUND(
+        TranscriptionsErrorCode.TRANSCRIPTION_DOCUMENT_MARKED_FOR_DELETION_REASON_NOT_FOUND.getValue(),
+        HttpStatus.UNPROCESSABLE_ENTITY,
+        TranscriptionsTitleErrors.TRANSCRIPTION_DOCUMENT_MARKED_FOR_DELETION_REASON_NOT_FOUND.getValue()
+    ),
+    TOO_MANY_RESULTS(
+        TranscriptionsErrorCode.TOO_MANY_RESULTS.getValue(),
+        HttpStatus.UNPROCESSABLE_ENTITY,
+        TranscriptionsTitleErrors.TOO_MANY_RESULTS.getValue()),
     TRANSCRIPTION_DOCUMENT_REASON_IS_MARKED_FOR_DELETION(
         TranscriptionsErrorCode.TRANSCRIPTION_DOCUMENT_HIDE_ACTION_REASON_MARKED_FOR_DELETION.getValue(),
         HttpStatus.NOT_IMPLEMENTED,
