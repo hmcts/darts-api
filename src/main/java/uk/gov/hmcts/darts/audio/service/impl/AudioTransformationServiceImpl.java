@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import uk.gov.hmcts.darts.arm.service.ExternalObjectDirectoryService;
 import uk.gov.hmcts.darts.audio.component.OutboundFileProcessor;
 import uk.gov.hmcts.darts.audio.component.OutboundFileZipGenerator;
+import uk.gov.hmcts.darts.audio.config.AudioTransformationServiceProperties;
 import uk.gov.hmcts.darts.audio.entity.MediaRequestEntity;
 import uk.gov.hmcts.darts.audio.enums.AudioRequestOutputFormat;
 import uk.gov.hmcts.darts.audio.exception.AudioApiError;
@@ -21,6 +22,7 @@ import uk.gov.hmcts.darts.common.datamanagement.component.impl.DownloadResponseM
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
+import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
 import uk.gov.hmcts.darts.common.repository.MediaRepository;
 import uk.gov.hmcts.darts.common.service.FileOperationService;
 import uk.gov.hmcts.darts.datamanagement.exception.FileNotDownloadedException;
@@ -32,7 +34,9 @@ import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
+import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.LinkedHashMap;
@@ -52,6 +56,7 @@ import static uk.gov.hmcts.darts.audiorequests.model.AudioRequestType.DOWNLOAD;
 @Slf4j
 @SuppressWarnings({"PMD.ExceptionAsFlowControl"})
 public class AudioTransformationServiceImpl implements AudioTransformationService {
+    public static final int MAX_LOOPS = 200;//Arbitrary high number, just a glass ceiling which we wouldn't expect the loop to reach unless there is a problem.
     private final MediaRequestService mediaRequestService;
     private final OutboundFileProcessor outboundFileProcessor;
     private final OutboundFileZipGenerator outboundFileZipGenerator;
@@ -62,6 +67,9 @@ public class AudioTransformationServiceImpl implements AudioTransformationServic
     private final LogApi logApi;
     private final DataManagementFacade dataManagementFacade;
     private final UnstructuredDataHelper unstructuredDataHelper;
+    private final CurrentTimeHelper currentTimeHelper;
+    private final AudioTransformationServiceProperties config;
+
 
     private static final Comparator<MediaEntity> MEDIA_START_TIME_CHANNEL_COMPARATOR = (media1, media2) -> {
         if (media1.getStart().equals(media2.getStart())) {
@@ -87,12 +95,28 @@ public class AudioTransformationServiceImpl implements AudioTransformationServic
 
     @Override
     public void handleKedaInvocationForMediaRequests() {
-        Optional<MediaRequestEntity> mediaRequest = mediaRequestService.retrieveMediaRequestForProcessing();
+        int counter = 1;
+        /*
+        store list of IDs we have already tried to process, as in scenario where audio is only in the incoming datastore,
+        the requests status is reset back to OPEN, and so this code would pick up the request again in quick succession if not omitted.
+         */
+        List<Integer> mediaRequestIdsProcessed = new ArrayList<>();
+        OffsetDateTime cutoffTime = currentTimeHelper.currentOffsetDateTime().plusMinutes(config.getLoopCutoffMinutes());
+        while (currentTimeHelper.currentOffsetDateTime().isBefore(cutoffTime)) {
+            if (counter++ > MAX_LOOPS) {
+                throw new RuntimeException("ATS potentially stuck in a loop.");
+            }
+            Optional<MediaRequestEntity> mediaRequestOpt = mediaRequestService.retrieveMediaRequestForProcessing(mediaRequestIdsProcessed);
 
-        mediaRequest.ifPresentOrElse(
-            this::processAudioRequest,
-            () -> log.info("No open requests found for ATS to process.")
-        );
+            if (mediaRequestOpt.isPresent()) {
+                MediaRequestEntity mediaRequestEntity = mediaRequestOpt.get();
+                mediaRequestIdsProcessed.add(mediaRequestEntity.getId());
+                processAudioRequest(mediaRequestEntity);
+            } else {
+                log.info("No more open requests found for ATS to process.");
+                return;
+            }
+        }
     }
 
     /**

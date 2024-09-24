@@ -13,6 +13,7 @@ import uk.gov.hmcts.darts.testutils.PostgresIntegrationBase;
 
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
+import java.util.List;
 
 import static uk.gov.hmcts.darts.audiorequests.model.AudioRequestType.DOWNLOAD;
 
@@ -48,7 +49,8 @@ class MediaRequestRepositoryTest extends PostgresIntegrationBase {
         OffsetDateTime createdTime = request.getLastModifiedDateTime();
 
         mediaRequestService.getMediaRequestEntityById(request.getId());
-        MediaRequestEntity mediaRequestEntity = mediaRequestRepository.updateAndRetrieveMediaRequestToProcessing(request.getLastModifiedBy().getId());
+        MediaRequestEntity mediaRequestEntity = mediaRequestRepository.updateAndRetrieveMediaRequestToProcessing(request.getLastModifiedBy().getId(),
+                                                                                                                 List.of(0));
 
         // prove an update happened on the date and time
         Assertions.assertNotEquals(createdTime.atZoneSameInstant(ZoneOffset.UTC),
