@@ -94,6 +94,11 @@ public abstract class AbstractLockableAutomatedTask implements AutomatedTask, Au
                 if (isManualTask || getLastCronExpression().equals(dbCronExpression)) {
                     if (TRUE.equals(automatedTask.getTaskEnabled())) {
                         logApi.taskStarted(executionId.get(), this.getTaskName());
+
+                        if (AutomatedTaskName.PROCESS_DAILY_LIST_TASK_NAME.getTaskName().equals(this.getTaskName())) {
+                            throw new RuntimeException("This is for DMP-2666 testing");
+                        }
+
                         lockService.getLockingTaskExecutor().executeWithLock(new LockedTask(), getLockConfiguration());
                     } else {
                         setAutomatedTaskStatus(SKIPPED);
