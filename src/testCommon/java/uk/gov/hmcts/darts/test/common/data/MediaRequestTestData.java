@@ -7,10 +7,14 @@ import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.test.common.data.builder.TestMediaRequestEntity;
 
+import java.time.LocalDate;
+import java.time.LocalTime;
 import java.time.OffsetDateTime;
 
+import static java.time.ZoneOffset.UTC;
 import static uk.gov.hmcts.darts.audio.enums.MediaRequestStatus.OPEN;
 import static uk.gov.hmcts.darts.audiorequests.model.AudioRequestType.DOWNLOAD;
+import static uk.gov.hmcts.darts.test.common.data.UserAccountTestData.minimalUserAccount;
 
 public class MediaRequestTestData implements Persistable<TestMediaRequestEntity.TestMediaBuilderRetrieve, MediaRequestEntity,
     TestMediaRequestEntity.TestMediaRequestEntityBuilder> {
@@ -49,7 +53,7 @@ public class MediaRequestTestData implements Persistable<TestMediaRequestEntity.
     }
 
     public MediaRequestEntity someMinimal() {
-        return someMinimalBuilder().build().getEntity();
+       return someMinimalBuilder().build().getEntity();
     }
 
     /**
@@ -57,8 +61,19 @@ public class MediaRequestTestData implements Persistable<TestMediaRequestEntity.
      * @deprecated do not use. Instead, use someMinimal().
      */
     @Deprecated
-    public TestMediaRequestEntity.TestMediaBuilderRetrieve someMinimalRequestData() {
-        return someMinimalBuilderHolder();
+    public MediaRequestEntity someMinimalRequestData() {
+        var mediaRequest = new MediaRequestEntity();
+        mediaRequest.setHearing(PersistableFactory.getHearingTestData().someMinimalHearing());
+        mediaRequest.setStatus(OPEN);
+        mediaRequest.setRequestType(DOWNLOAD);
+        mediaRequest.setStartTime(middayToday());
+        mediaRequest.setEndTime(middayToday().plusHours(1));
+        var userAccount = minimalUserAccount();
+        mediaRequest.setRequestor(userAccount);
+        mediaRequest.setCurrentOwner(userAccount);
+        mediaRequest.setCreatedBy(userAccount);
+        mediaRequest.setLastModifiedBy(userAccount);
+        return mediaRequest;
     }
 
     /**
@@ -69,20 +84,8 @@ public class MediaRequestTestData implements Persistable<TestMediaRequestEntity.
     public MediaRequestEntity createCurrentMediaRequest(HearingEntity hearingEntity, UserAccountEntity requestor,
                                                                OffsetDateTime startTime, OffsetDateTime endTime,
                                                                AudioRequestType audioRequestType, MediaRequestStatus status) {
-        TestMediaRequestEntity.TestMediaBuilderRetrieve builder = someMinimalRequestData();
-
-        builder.getBuilder()
-                   .hearing(hearingEntity)
-                   .requestor(requestor)
-                   .currentOwner(requestor)
-                   .startTime(startTime)
-                   .endTime(endTime)
-                   .requestType(audioRequestType)
-                   .status(status)
-                   .build();
-
-        return builder.build().getEntity();
-}
+        return createCurrentMediaRequest(hearingEntity, requestor, requestor, startTime, endTime, audioRequestType, status, OffsetDateTime.now());
+    }
 
     /**
      * Create the media request.
@@ -92,22 +95,19 @@ public class MediaRequestTestData implements Persistable<TestMediaRequestEntity.
     public MediaRequestEntity createCurrentMediaRequest(HearingEntity hearingEntity, UserAccountEntity owner, UserAccountEntity requestor,
                                                                OffsetDateTime startTime, OffsetDateTime endTime,
                                                                AudioRequestType audioRequestType, MediaRequestStatus status, OffsetDateTime requestedDate) {
-        TestMediaRequestEntity.TestMediaBuilderRetrieve builder = new TestMediaRequestEntity.TestMediaBuilderRetrieve();
-
-         builder.getBuilder()
-           .hearing(hearingEntity)
-           .requestor(requestor)
-           .currentOwner(owner)
-           .startTime(startTime)
-           .endTime(endTime)
-           .requestType(audioRequestType)
-           .status(status)
-           .createdBy(requestor)
-           .createdAt(requestedDate)
-           .lastModifiedBy(requestor)
-           .build();
-
-         return builder.build().getEntity();
+        MediaRequestEntity mediaRequestEntity = someMinimalRequestData();
+        mediaRequestEntity.setHearing(hearingEntity);
+        mediaRequestEntity.setRequestor(requestor);
+        mediaRequestEntity.setCurrentOwner(owner);
+        mediaRequestEntity.setStatus(status);
+        mediaRequestEntity.setRequestType(audioRequestType);
+        mediaRequestEntity.setAttempts(0);
+        mediaRequestEntity.setStartTime(startTime);
+        mediaRequestEntity.setEndTime(endTime);
+        mediaRequestEntity.setCreatedBy(requestor);
+        mediaRequestEntity.setLastModifiedBy(requestor);
+        mediaRequestEntity.setCreatedDateTime(requestedDate);
+        return mediaRequestEntity;
     }
 
     @Override
@@ -125,5 +125,9 @@ public class MediaRequestTestData implements Persistable<TestMediaRequestEntity.
     @Override
     public TestMediaRequestEntity.TestMediaRequestEntityBuilder someMinimalBuilder() {
         return someMinimalBuilderHolder().getBuilder();
+    }
+
+    private static OffsetDateTime middayToday() {
+        return OffsetDateTime.of(LocalDate.now(), LocalTime.of(12, 0), UTC);
     }
 }

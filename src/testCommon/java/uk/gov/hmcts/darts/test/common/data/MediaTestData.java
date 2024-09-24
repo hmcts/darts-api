@@ -39,8 +39,22 @@ public class MediaTestData implements Persistable<TestMediaEntity.TestMediaBuild
      */
     @Deprecated
     public MediaEntity someMinimalMedia() {
-        TestMediaEntity.TestMediaBuilderRetrieve retrieve = someMinimalBuilderHolder();
-        return retrieve.build().getEntity();
+        var media = new MediaEntity();
+        media.setChannel(1);
+        media.setTotalChannels(1);
+        media.setStart(now());
+        media.setEnd(now());
+        media.setMediaFile("a-media-file");
+        media.setFileSize(1000L);
+        media.setMediaFormat("mp2");
+        media.setMediaType(MEDIA_TYPE_DEFAULT);
+        media.setCourtroom(someMinimalCourtRoom());
+        media.setIsCurrent(true);
+
+        var userAccount = minimalUserAccount();
+        media.setCreatedBy(userAccount);
+        media.setLastModifiedBy(userAccount);
+        return media;
     }
 
     public MediaEntity createMediaWith(CourtroomEntity courtroomEntity, OffsetDateTime startTime, OffsetDateTime endTime, int channel) {
@@ -59,7 +73,6 @@ public class MediaTestData implements Persistable<TestMediaEntity.TestMediaBuild
         mediaEntity.setChecksum(getChecksum());
         mediaEntity.setRetConfScore(refConfScore);
         mediaEntity.setRetConfReason(reFConfReason);
-        mediaEntity.setIsCurrent(true);
         return mediaEntity;
     }
 

@@ -36,7 +36,7 @@ class AudioAuditTest extends IntegrationBase {
     @Test
     void performsStandardAndAdvancedAuditsWhenAudioOwnershipIsChanged() {
         var activeUser = given.anAuthenticatedUserWithGlobalAccessAndRole(SUPER_ADMIN);
-        MediaRequestEntity mediaRequest = entityGraphPersistence.persist(getMediaRequestTestData().someMinimalRequestData().build().getEntity());
+        MediaRequestEntity mediaRequest = entityGraphPersistence.persist(getMediaRequestTestData().someMinimalRequestData());
         UserAccountEntity newOwner = entityGraphPersistence.persist(minimalUserAccount());
 
         mediaRequestService.patchMediaRequest(

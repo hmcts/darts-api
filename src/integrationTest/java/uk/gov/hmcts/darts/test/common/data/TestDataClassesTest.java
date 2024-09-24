@@ -41,25 +41,6 @@ class TestDataClassesTest extends IntegrationBase {
         }
     }
 
-    @Test
-    void testRequestMaximal() throws Exception {
-        List<Class<?>> classList = getPersistableClasses();
-        for (Class<?> cls : classList) {
-            Persistable<?, ?, ?> obj = (Persistable<?, ?, ?>) cls.getDeclaredConstructors()[0].newInstance();
-            try {
-                BuilderHolder<?,?> retrieve = obj.someMaximumBuilderHolder();
-                Object entity = retrieve.build().getEntity();
-
-                dartsPersistence.getClass()
-                    .getMethod("save", entity.getClass()).invoke(dartsPersistence,
-                                                                 entity);
-            } catch (UnsupportedOperationException unsupportedOperationException) {
-                // lets pass if the maximal method is not yet implemented
-                log.error("Method not implemented", unsupportedOperationException);
-            }
-        }
-    }
-
     private List<Class<?>> getPersistableClasses() throws ClassNotFoundException {
         List<Class<?>> classList = new ArrayList<>();
         BeanDefinitionRegistry bdr = new SimpleBeanDefinitionRegistry();

@@ -14,7 +14,7 @@ public class TransformedMediaTestData {
 
     public static TransformedMediaEntity minimalTransformedMedia() {
         var transformedMedia = new TransformedMediaEntity();
-        transformedMedia.setMediaRequest(PersistableFactory.getMediaRequestTestData().someMinimalRequestData().build());
+        transformedMedia.setMediaRequest(PersistableFactory.getMediaRequestTestData().someMinimalRequestData());
         transformedMedia.setStartTime(OffsetDateTime.now());
         transformedMedia.setEndTime(OffsetDateTime.now().plusHours(1));
         transformedMedia.setCreatedBy(minimalUserAccount());

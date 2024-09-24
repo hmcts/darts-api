@@ -54,11 +54,19 @@ public interface TransformedMediaRepository extends JpaRepository<TransformedMed
 
     @EntityGraph(attributePaths = {"mediaRequest.currentOwner.securityGroupEntities"})
     @Query("""
-        SELECT tm FROM MediaRequestEntity mr, TransformedMediaEntity tm
+        SELECT tm FROM TransformedMediaEntity tm
         JOIN tm.transientObjectDirectoryEntities tod
-        WHERE tm.mediaRequest = mr
-        AND ((tm.lastAccessed < :createdAtOrLastAccessedDateTime AND mr.status = 'COMPLETED')
-             OR (tm.createdDateTime < :createdAtOrLastAccessedDateTime AND  mr.status <> 'PROCESSING' AND tm.lastAccessed IS NULL))
+        JOIN tm.mediaRequest mr
+        JOIN mr.hearing he
+        LEFT JOIN he.mediaList me on me.start >= mr.startTime and me.end <= mr.endTime
+        WHERE (
+            (tm.lastAccessed < :createdAtOrLastAccessedDateTime AND mr.status = 'COMPLETED')
+            OR (tm.createdDateTime < :createdAtOrLastAccessedDateTime AND  mr.status <> 'PROCESSING' AND tm.lastAccessed IS NULL)
+            OR (
+                me is NOT NULL
+                AND (me.isDeleted = true OR me.isHidden = true)
+           )
+        )
         AND upper(tod.status.description) <> 'MARKED FOR DELETION'
         """)
     List<TransformedMediaEntity> findAllDeletableTransformedMedia(OffsetDateTime createdAtOrLastAccessedDateTime);

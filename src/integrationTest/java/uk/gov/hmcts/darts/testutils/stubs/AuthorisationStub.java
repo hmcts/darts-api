@@ -83,7 +83,7 @@ public class AuthorisationStub {
 
         createHearing();
 
-        mediaRequestEntity = PersistableFactory.getMediaRequestTestData().someMinimalRequestData().build().getEntity();
+        mediaRequestEntity = PersistableFactory.getMediaRequestTestData().someMinimalRequestData();
         mediaRequestEntity.setHearing(hearingEntity);
         mediaRequestEntity.setRequestor(testUser);
         mediaRequestEntity.setCurrentOwner(testUser);
@@ -95,7 +95,7 @@ public class AuthorisationStub {
 
         transformedMediaEntity = dartsDatabaseStub.getTransformedMediaStub().createTransformedMediaEntity(mediaRequestEntity);
 
-        mediaRequestEntitySystemUser = PersistableFactory.getMediaRequestTestData().someMinimalRequestData().build().getEntity();
+        mediaRequestEntitySystemUser = PersistableFactory.getMediaRequestTestData().someMinimalRequestData();
         mediaRequestEntitySystemUser.setHearing(hearingEntity);
         mediaRequestEntitySystemUser.setRequestor(systemUser);
         mediaRequestEntitySystemUser.setCurrentOwner(systemUser);
