@@ -32,7 +32,9 @@ import uk.gov.hmcts.darts.common.service.DataAnonymisationService;
 import uk.gov.hmcts.darts.task.runner.IsNamedEntity;
 
 import java.util.Collection;
+import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -123,18 +125,22 @@ public class DataAnonymisationServiceImpl implements DataAnonymisationService {
     }
 
     void tidyUpTransformedMediaEntities(UserAccountEntity userAccount, CourtCaseEntity courtCase) {
-        courtCase
+        Set<MediaRequestEntity> mediaRequests = courtCase
             .getHearings()
             .stream()
             .map(HearingEntity::getMediaRequests)
             .flatMap(Collection::stream)
-            .distinct()
-            .peek(mediaRequestEntity -> expiredMediaRequest(userAccount, mediaRequestEntity))
-            .map(MediaRequestEntity::getTransformedMediaEntities)
-            .flatMap(Collection::stream)
-            .distinct()
-            .forEach(this::deleteTransformedMediaEntity)
-        ;
+            .collect(Collectors.toSet());
+
+
+        Set<TransformedMediaEntity> transformedMediaEntities =
+            mediaRequests.stream()
+                .peek(mediaRequestEntity -> expiredMediaRequest(userAccount, mediaRequestEntity))
+                .map(MediaRequestEntity::getTransformedMediaEntities)
+                .flatMap(Collection::stream)
+                .collect(Collectors.toSet());
+
+        transformedMediaEntities.forEach(this::deleteTransformedMediaEntity);
     }
 
     void deleteTransformedMediaEntity(TransformedMediaEntity transformedMediaEntity) {

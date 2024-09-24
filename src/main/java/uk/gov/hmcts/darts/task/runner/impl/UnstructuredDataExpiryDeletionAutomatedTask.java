@@ -4,7 +4,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Limit;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
 import uk.gov.hmcts.darts.audio.deleter.impl.inbound.ExternalInboundDataStoreDeleter;
 import uk.gov.hmcts.darts.audio.deleter.impl.unstructured.ExternalUnstructuredDataStoreDeleter;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
@@ -79,7 +78,6 @@ public class UnstructuredDataExpiryDeletionAutomatedTask
     }
 
     @Override
-    @Transactional
     public void runTask() {
         final UserAccountEntity userAccount = userIdentity.getUserAccount();
         OffsetDateTime maxRetentionDate = currentTimeHelper.currentOffsetDateTime();
