@@ -29,6 +29,8 @@ import uk.gov.hmcts.darts.test.common.data.TranscriptionDocumentTestData;
 import uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum;
 import uk.gov.hmcts.darts.transcriptions.enums.TranscriptionTypeEnum;
 import uk.gov.hmcts.darts.transcriptions.exception.TranscriptionApiError;
+import uk.gov.hmcts.darts.transcriptions.model.AdminActionResponse;
+import uk.gov.hmcts.darts.transcriptions.model.AdminApproveDeletionResponse;
 import uk.gov.hmcts.darts.transcriptions.model.AdminMarkedForDeletionResponseItem;
 import uk.gov.hmcts.darts.transcriptions.model.GetTranscriptionByIdResponse;
 import uk.gov.hmcts.darts.transcriptions.model.GetTranscriptionDetailAdminResponse;
@@ -46,8 +48,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.darts.test.common.TestUtils.getContentsFromFile;
@@ -193,7 +197,6 @@ class TranscriptionResponseMapperTest {
 
         assertEquals(TranscriptionApiError.TRANSCRIPTION_NOT_FOUND, exception.getError());
     }
-
 
 
     @Test
@@ -731,7 +734,7 @@ class TranscriptionResponseMapperTest {
 
         assertEquals(response.getId(), documentEntity.getId());
         assertEquals(response.getIsHidden(), documentEntity.isHidden());
-     }
+    }
 
     @Test
     void mapTranscriptionDocumentMarkedForDeletion() {
@@ -772,5 +775,57 @@ class TranscriptionResponseMapperTest {
         assertEquals(caseEntity.getCaseNumber(), response.getCase().getCaseNumber());
     }
 
+
+    @Test
+    void mapAdminApproveDeletionResponseShouldReturnFullResponse() {
+        // Arrange
+        Integer documentId = 100;
+        boolean isHidden = true;
+
+        TranscriptionDocumentEntity documentEntity = new TranscriptionDocumentEntity();
+        documentEntity.setId(documentId);
+        documentEntity.setHidden(isHidden);
+
+        Integer objectAdminActionId = 101;
+        String comments = "Test comment";
+        String reference = "Reference-123";
+
+        UserAccountEntity userAccountEntity = new UserAccountEntity();
+        userAccountEntity.setId(102);
+
+        ObjectHiddenReasonEntity reasonEntity = mock(ObjectHiddenReasonEntity.class);
+        when(reasonEntity.getId()).thenReturn(103);
+
+        OffsetDateTime creationDate = OffsetDateTime.now();
+        ObjectAdminActionEntity objectAdminActionEntity = new ObjectAdminActionEntity();
+        objectAdminActionEntity.setId(objectAdminActionId);
+        objectAdminActionEntity.setComments(comments);
+        objectAdminActionEntity.setTicketReference(reference);
+        objectAdminActionEntity.setHiddenBy(userAccountEntity);
+        objectAdminActionEntity.setHiddenDateTime(creationDate);
+        objectAdminActionEntity.setMarkedForManualDeletion(true);
+        objectAdminActionEntity.setMarkedForManualDelBy(userAccountEntity);
+        objectAdminActionEntity.setMarkedForManualDelDateTime(creationDate);
+        objectAdminActionEntity.setObjectHiddenReason(reasonEntity);
+
+        // Act
+        AdminApproveDeletionResponse response = transcriptionResponseMapper.mapAdminApproveDeletionResponse(documentEntity, objectAdminActionEntity);
+
+        // Assert
+        assertEquals(documentId, response.getId());
+        assertTrue(response.getIsHidden());
+
+        AdminActionResponse adminAction = response.getAdminAction();
+        assertNotNull(adminAction);
+        assertEquals(objectAdminActionId, adminAction.getId());
+        assertEquals(reasonEntity.getId(), adminAction.getReasonId());
+        assertEquals(comments, adminAction.getComments());
+        assertEquals(reference, adminAction.getTicketReference());
+        assertEquals(creationDate, adminAction.getHiddenAt());
+        assertEquals(userAccountEntity.getId(), adminAction.getHiddenById());
+        assertTrue(adminAction.getIsMarkedForManualDeletion());
+        assertEquals(userAccountEntity.getId(), adminAction.getMarkedForManualDeletionById());
+        assertEquals(creationDate, adminAction.getMarkedForManualDeletionAt());
+    }
 
 }
