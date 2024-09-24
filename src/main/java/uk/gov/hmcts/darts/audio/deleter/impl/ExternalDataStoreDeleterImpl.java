@@ -3,7 +3,6 @@ package uk.gov.hmcts.darts.audio.deleter.impl;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.transaction.annotation.Transactional;
 import uk.gov.hmcts.darts.audio.deleter.DataStoreDeleter;
 import uk.gov.hmcts.darts.audio.deleter.ExternalDataStoreDeleter;
 import uk.gov.hmcts.darts.audio.deleter.ObjectDirectoryDeletedFinder;
