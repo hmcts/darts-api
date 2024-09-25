@@ -228,6 +228,13 @@ public class TranscriptionResponseMapper {
             transcriptionResponse.setReportingRestriction(reportingRestriction.getEventName());
         }
 
+        List<String> legacyComments = transcriptionEntity.getTranscriptionCommentEntities().stream()
+            .filter(transcriptionCommentEntity -> transcriptionCommentEntity.getTranscriptionWorkflow() == null)
+            .map(TranscriptionCommentEntity::getComment)
+            .toList();
+
+        transcriptionResponse.setLegacyComments(legacyComments.isEmpty() ? null : legacyComments);
+
         return transcriptionResponse;
     }
 

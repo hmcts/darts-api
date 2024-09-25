@@ -20,6 +20,7 @@ import uk.gov.hmcts.darts.common.entity.TranscriptionEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionStatusEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionTypeEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionUrgencyEntity;
+import uk.gov.hmcts.darts.common.entity.TranscriptionWorkflowEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.common.repository.HearingReportingRestrictionsRepository;
@@ -228,6 +229,27 @@ class TranscriptionResponseMapperTest {
             "Tests/transcriptions/mapper/TranscriptionResponseMapper/expectedResponseSingleEntity.json");
         JSONAssert.assertEquals(expectedResponse, actualResponse, JSONCompareMode.STRICT);
     }
+
+    @Test
+    void mapToTranscriptionResponseWithOutLegacyComments() throws Exception {
+        HearingEntity hearing1 = CommonTestDataUtil.createHearing("case1", LocalTime.NOON);
+        List<TranscriptionEntity> transcriptionList = CommonTestDataUtil.createTranscriptionList(hearing1, true, false, true);
+        TranscriptionEntity transcriptionEntity = transcriptionList.getFirst();
+
+        transcriptionEntity.getTranscriptionCommentEntities()
+            .forEach(transcriptionCommentEntity -> {
+                transcriptionCommentEntity.setTranscriptionWorkflow(new TranscriptionWorkflowEntity());
+            });
+
+        GetTranscriptionByIdResponse transcriptionResponse =
+            transcriptionResponseMapper.mapToTranscriptionResponse(transcriptionEntity);
+        String actualResponse = objectMapper.writeValueAsString(transcriptionResponse);
+
+        String expectedResponse = getContentsFromFile(
+            "Tests/transcriptions/mapper/TranscriptionResponseMapper/expectedResponseSingleEntityWithoutLegacyComments.json");
+        JSONAssert.assertEquals(expectedResponse, actualResponse, JSONCompareMode.STRICT);
+    }
+
 
     @Test
     void mapToTranscriptionResponseIsAutomated() throws Exception {
