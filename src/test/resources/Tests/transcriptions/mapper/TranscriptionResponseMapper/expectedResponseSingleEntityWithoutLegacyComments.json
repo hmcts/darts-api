@@ -31,6 +31,5 @@
     "priority_order": 999
   },
   "courtroom":"1",
-  "transcription_object_id":"legacyObjectId",
-  "legacy_comments":[]
+  "transcription_object_id":"legacyObjectId"
 }
