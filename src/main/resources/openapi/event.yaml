@@ -710,9 +710,6 @@ components:
       properties:
         id:
           type: integer
-        created_at:
-          type: string
-          format: date-time
         event_ts:
           type: string
           format: date-time
@@ -810,9 +807,6 @@ components:
           type: string
         is_data_anonymised:
           type: boolean
-        created_at:
-          type: string
-          format: date-time
         event_ts:
           type: string
           format: date-time

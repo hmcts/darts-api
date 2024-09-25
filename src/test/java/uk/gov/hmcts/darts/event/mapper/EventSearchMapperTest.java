@@ -18,7 +18,6 @@ class EventSearchMapperTest {
         var result = eventSearchMapper.adminSearchEventResponseResultFrom(eventSearchResult);
 
         assertThat(result.getId()).isEqualTo(eventSearchResult.id());
-        assertThat(result.getCreatedAt()).isEqualTo(eventSearchResult.createdAt());
         assertThat(result.getName()).isEqualTo(eventSearchResult.eventTypeName());
         assertThat(result.getText()).isEqualTo(eventSearchResult.eventText());
         assertThat(result.getCourthouse().getId()).isEqualTo(eventSearchResult.courtHouseId());
@@ -34,7 +33,6 @@ class EventSearchMapperTest {
         return new EventSearchResult(
             1,
             OffsetDateTime.now(),
-            OffsetDateTime.now().minusHours(1),
             "eventTypeName",
             "eventText",
             true,

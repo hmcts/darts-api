@@ -5,7 +5,6 @@ import java.util.Objects;
 
 public record EventSearchResult(
     Integer id,
-    OffsetDateTime createdAt,
     OffsetDateTime eventTs,
     String eventTypeName,
     String eventText,
