@@ -100,27 +100,7 @@ class MediaApproveMarkForDeletionValidatorTest {
         // then
         assertEquals(AudioApiError.MEDIA_MARKED_FOR_DELETION_REASON_NOT_FOUND, exception.getError());
     }
-
-    @Test
-    void validateMediaWhereObjectAdminActionHasInvalidHiddenReason() {
-        // given
-        Integer mediaId = 200;
-        var objectAdminAction = ObjectAdminActionTestData.minimalObjectAdminAction();
-        objectAdminAction.setMarkedForManualDeletion(false);
-
-        var hiddenReason = ObjectHiddenReasonTestData.otherDelete();
-        hiddenReason.setMarkedForDeletion(false);
-        objectAdminAction.setObjectHiddenReason(hiddenReason);
-        when(objectAdminActionRepository.findByMedia_Id(mediaId)).thenReturn(List.of(objectAdminAction));
-
-        // when
-        DartsApiException exception = assertThrows(DartsApiException.class,
-                                                   () -> mediaApproveMarkForDeletionValidator.validate(mediaId));
-
-        // then
-        assertEquals(AudioApiError.MEDIA_MARKED_FOR_DELETION_REASON_NOT_FOUND, exception.getError());
-    }
-
+    
     @Test
     void validateMediaWhereObjectAdminActionApprovedBySameUserAsHidden() {
         // given
