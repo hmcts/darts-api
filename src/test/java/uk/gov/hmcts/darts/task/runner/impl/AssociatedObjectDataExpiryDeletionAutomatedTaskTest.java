@@ -27,12 +27,10 @@ import uk.gov.hmcts.darts.common.repository.MediaRepository;
 import uk.gov.hmcts.darts.common.repository.TranscriptionDocumentRepository;
 
 import java.time.OffsetDateTime;
-import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.function.Supplier;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.within;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
@@ -43,7 +41,7 @@ import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-class UnstructuredDataExpiryDeletionAutomatedTaskTest {
+class AssociatedObjectDataExpiryDeletionAutomatedTaskTest {
     @Mock
     private UserIdentity userIdentity;
     @Mock
@@ -64,15 +62,16 @@ class UnstructuredDataExpiryDeletionAutomatedTaskTest {
     private ExternalUnstructuredDataStoreDeleter unstructuredDeleter;
 
 
-    private UnstructuredDataExpiryDeletionAutomatedTask unstructuredDataExpiryDeletionAutomatedTask;
+    private AssociatedObjectDataExpiryDeletionAutomatedTask associatedObjectDataExpiryDeletionAutomatedTask;
 
     @BeforeEach
     void beforeEach() {
-        this.unstructuredDataExpiryDeletionAutomatedTask = spy(
-            new UnstructuredDataExpiryDeletionAutomatedTask(null, null, userIdentity, null, null, currentTimeHelper,
-                                                            transcriptionDocumentRepository, mediaRepository, annotationDocumentRepository,
-                                                            caseDocumentRepository,
-                                                            externalObjectDirectoryRepository, inboundDeleter, unstructuredDeleter)
+        this.associatedObjectDataExpiryDeletionAutomatedTask = spy(
+            new AssociatedObjectDataExpiryDeletionAutomatedTask(
+                null, null, userIdentity, null, null, currentTimeHelper,
+                transcriptionDocumentRepository, mediaRepository, annotationDocumentRepository,
+                caseDocumentRepository,
+                externalObjectDirectoryRepository, inboundDeleter, unstructuredDeleter)
         );
     }
 
@@ -82,31 +81,31 @@ class UnstructuredDataExpiryDeletionAutomatedTaskTest {
         when(userIdentity.getUserAccount()).thenReturn(userAccount);
         OffsetDateTime time = OffsetDateTime.now();
         when(currentTimeHelper.currentOffsetDateTime()).thenReturn(time);
-        doReturn(5).when(unstructuredDataExpiryDeletionAutomatedTask)
+        doReturn(5).when(associatedObjectDataExpiryDeletionAutomatedTask)
             .getAutomatedTaskBatchSize();
 
-        doNothing().when(unstructuredDataExpiryDeletionAutomatedTask)
+        doNothing().when(associatedObjectDataExpiryDeletionAutomatedTask)
             .deleteTranscriptionDocumentEntity(any(), any(), any());
-        doNothing().when(unstructuredDataExpiryDeletionAutomatedTask)
+        doNothing().when(associatedObjectDataExpiryDeletionAutomatedTask)
             .deleteMediaEntity(any(), any(), any());
-        doNothing().when(unstructuredDataExpiryDeletionAutomatedTask)
+        doNothing().when(associatedObjectDataExpiryDeletionAutomatedTask)
             .deleteAnnotationDocumentEntity(any(), any(), any());
-        doNothing().when(unstructuredDataExpiryDeletionAutomatedTask)
+        doNothing().when(associatedObjectDataExpiryDeletionAutomatedTask)
             .deleteCaseDocumentEntity(any(), any(), any());
 
-        unstructuredDataExpiryDeletionAutomatedTask.runTask();
+        associatedObjectDataExpiryDeletionAutomatedTask.runTask();
 
         Limit limit = Limit.of(5);
-        verify(unstructuredDataExpiryDeletionAutomatedTask, times(1))
+        verify(associatedObjectDataExpiryDeletionAutomatedTask, times(1))
             .deleteTranscriptionDocumentEntity(userAccount, time, limit);
-        verify(unstructuredDataExpiryDeletionAutomatedTask, times(1))
+        verify(associatedObjectDataExpiryDeletionAutomatedTask, times(1))
             .deleteMediaEntity(userAccount, time, limit);
-        verify(unstructuredDataExpiryDeletionAutomatedTask, times(1))
+        verify(associatedObjectDataExpiryDeletionAutomatedTask, times(1))
             .deleteAnnotationDocumentEntity(userAccount, time, limit);
-        verify(unstructuredDataExpiryDeletionAutomatedTask, times(1))
+        verify(associatedObjectDataExpiryDeletionAutomatedTask, times(1))
             .deleteCaseDocumentEntity(userAccount, time, limit);
 
-        verify(unstructuredDataExpiryDeletionAutomatedTask, times(1))
+        verify(associatedObjectDataExpiryDeletionAutomatedTask, times(1))
             .getAutomatedTaskBatchSize();
 
         verify(userIdentity, times(1)).getUserAccount();
@@ -138,13 +137,13 @@ class UnstructuredDataExpiryDeletionAutomatedTaskTest {
             maxRetentionDate, batchSize)).thenReturn(data);
 
 
-        doReturn(true).when(unstructuredDataExpiryDeletionAutomatedTask)
+        doReturn(true).when(associatedObjectDataExpiryDeletionAutomatedTask)
             .deleteFromExternalDataStore(any());
 
-        unstructuredDataExpiryDeletionAutomatedTask.deleteTranscriptionDocumentEntity(userAccount, maxRetentionDate, batchSize);
+        associatedObjectDataExpiryDeletionAutomatedTask.deleteTranscriptionDocumentEntity(userAccount, maxRetentionDate, batchSize);
 
 
-        data.forEach(externalObjectDirectoryEntity -> verify(unstructuredDataExpiryDeletionAutomatedTask, times(1))
+        data.forEach(externalObjectDirectoryEntity -> verify(associatedObjectDataExpiryDeletionAutomatedTask, times(1))
             .deleteFromExternalDataStore(externalObjectDirectoryEntity));
 
         verify(externalObjectDirectoryRepository, times(1))
@@ -178,13 +177,13 @@ class UnstructuredDataExpiryDeletionAutomatedTaskTest {
             maxRetentionDate, batchSize)).thenReturn(data);
 
 
-        doReturn(true).when(unstructuredDataExpiryDeletionAutomatedTask)
+        doReturn(true).when(associatedObjectDataExpiryDeletionAutomatedTask)
             .deleteFromExternalDataStore(any());
 
-        unstructuredDataExpiryDeletionAutomatedTask.deleteMediaEntity(userAccount, maxRetentionDate, batchSize);
+        associatedObjectDataExpiryDeletionAutomatedTask.deleteMediaEntity(userAccount, maxRetentionDate, batchSize);
 
 
-        data.forEach(externalObjectDirectoryEntity -> verify(unstructuredDataExpiryDeletionAutomatedTask, times(1))
+        data.forEach(externalObjectDirectoryEntity -> verify(associatedObjectDataExpiryDeletionAutomatedTask, times(1))
             .deleteFromExternalDataStore(externalObjectDirectoryEntity));
 
         verify(externalObjectDirectoryRepository, times(1))
@@ -218,13 +217,13 @@ class UnstructuredDataExpiryDeletionAutomatedTaskTest {
             maxRetentionDate, batchSize)).thenReturn(data);
 
 
-        doReturn(true).when(unstructuredDataExpiryDeletionAutomatedTask)
+        doReturn(true).when(associatedObjectDataExpiryDeletionAutomatedTask)
             .deleteFromExternalDataStore(any());
 
-        unstructuredDataExpiryDeletionAutomatedTask.deleteAnnotationDocumentEntity(userAccount, maxRetentionDate, batchSize);
+        associatedObjectDataExpiryDeletionAutomatedTask.deleteAnnotationDocumentEntity(userAccount, maxRetentionDate, batchSize);
 
 
-        data.forEach(externalObjectDirectoryEntity -> verify(unstructuredDataExpiryDeletionAutomatedTask, times(1))
+        data.forEach(externalObjectDirectoryEntity -> verify(associatedObjectDataExpiryDeletionAutomatedTask, times(1))
             .deleteFromExternalDataStore(externalObjectDirectoryEntity));
 
         verify(externalObjectDirectoryRepository, times(1))
@@ -258,13 +257,13 @@ class UnstructuredDataExpiryDeletionAutomatedTaskTest {
             maxRetentionDate, batchSize)).thenReturn(data);
 
 
-        doReturn(true).when(unstructuredDataExpiryDeletionAutomatedTask)
+        doReturn(true).when(associatedObjectDataExpiryDeletionAutomatedTask)
             .deleteFromExternalDataStore(any());
 
-        unstructuredDataExpiryDeletionAutomatedTask.deleteCaseDocumentEntity(userAccount, maxRetentionDate, batchSize);
+        associatedObjectDataExpiryDeletionAutomatedTask.deleteCaseDocumentEntity(userAccount, maxRetentionDate, batchSize);
 
 
-        data.forEach(externalObjectDirectoryEntity -> verify(unstructuredDataExpiryDeletionAutomatedTask, times(1))
+        data.forEach(externalObjectDirectoryEntity -> verify(associatedObjectDataExpiryDeletionAutomatedTask, times(1))
             .deleteFromExternalDataStore(externalObjectDirectoryEntity));
 
         verify(externalObjectDirectoryRepository, times(1))
@@ -298,18 +297,18 @@ class UnstructuredDataExpiryDeletionAutomatedTaskTest {
             maxRetentionDate, batchSize)).thenReturn(data);
 
 
-        doReturn(true).when(unstructuredDataExpiryDeletionAutomatedTask)
+        doReturn(true).when(associatedObjectDataExpiryDeletionAutomatedTask)
             .deleteFromExternalDataStore(data.get(0));
 
-        doReturn(false).when(unstructuredDataExpiryDeletionAutomatedTask)
+        doReturn(false).when(associatedObjectDataExpiryDeletionAutomatedTask)
             .deleteFromExternalDataStore(data.get(1));
 
-        doReturn(true).when(unstructuredDataExpiryDeletionAutomatedTask)
+        doReturn(true).when(associatedObjectDataExpiryDeletionAutomatedTask)
             .deleteFromExternalDataStore(data.get(2));
 
-        unstructuredDataExpiryDeletionAutomatedTask.deleteCaseDocumentEntity(userAccount, maxRetentionDate, batchSize);
+        associatedObjectDataExpiryDeletionAutomatedTask.deleteCaseDocumentEntity(userAccount, maxRetentionDate, batchSize);
 
-        data.forEach(externalObjectDirectoryEntity -> verify(unstructuredDataExpiryDeletionAutomatedTask, times(1))
+        data.forEach(externalObjectDirectoryEntity -> verify(associatedObjectDataExpiryDeletionAutomatedTask, times(1))
             .deleteFromExternalDataStore(externalObjectDirectoryEntity));
 
         verify(externalObjectDirectoryRepository, times(1))
@@ -329,7 +328,7 @@ class UnstructuredDataExpiryDeletionAutomatedTaskTest {
 
         doReturn(true).when(inboundDeleter).delete(any());
 
-        assertThat(unstructuredDataExpiryDeletionAutomatedTask.deleteFromExternalDataStore(externalObjectDirectoryEntity))
+        assertThat(associatedObjectDataExpiryDeletionAutomatedTask.deleteFromExternalDataStore(externalObjectDirectoryEntity))
             .isTrue();
         verify(inboundDeleter, times(1)).delete(externalObjectDirectoryEntity);
         verifyNoInteractions(unstructuredDeleter);
@@ -345,7 +344,7 @@ class UnstructuredDataExpiryDeletionAutomatedTaskTest {
 
         doReturn(true).when(unstructuredDeleter).delete(any());
 
-        assertThat(unstructuredDataExpiryDeletionAutomatedTask.deleteFromExternalDataStore(externalObjectDirectoryEntity))
+        assertThat(associatedObjectDataExpiryDeletionAutomatedTask.deleteFromExternalDataStore(externalObjectDirectoryEntity))
             .isTrue();
         verify(unstructuredDeleter, times(1)).delete(externalObjectDirectoryEntity);
         verifyNoInteractions(inboundDeleter);
@@ -360,7 +359,7 @@ class UnstructuredDataExpiryDeletionAutomatedTaskTest {
         ExternalObjectDirectoryEntity externalObjectDirectoryEntity = new ExternalObjectDirectoryEntity();
         externalObjectDirectoryEntity.setExternalLocationType(externalLocationTypeEntity);
 
-        assertThat(unstructuredDataExpiryDeletionAutomatedTask.deleteFromExternalDataStore(externalObjectDirectoryEntity))
+        assertThat(associatedObjectDataExpiryDeletionAutomatedTask.deleteFromExternalDataStore(externalObjectDirectoryEntity))
             .isTrue();
         verifyNoInteractions(inboundDeleter, unstructuredDeleter);
     }
@@ -375,7 +374,7 @@ class UnstructuredDataExpiryDeletionAutomatedTaskTest {
         ExternalObjectDirectoryEntity externalObjectDirectoryEntity = new ExternalObjectDirectoryEntity();
         externalObjectDirectoryEntity.setExternalLocationType(externalLocationTypeEntity);
 
-        assertThat(unstructuredDataExpiryDeletionAutomatedTask.deleteFromExternalDataStore(externalObjectDirectoryEntity))
+        assertThat(associatedObjectDataExpiryDeletionAutomatedTask.deleteFromExternalDataStore(externalObjectDirectoryEntity))
             .isFalse();
         verifyNoInteractions(inboundDeleter, unstructuredDeleter);
     }

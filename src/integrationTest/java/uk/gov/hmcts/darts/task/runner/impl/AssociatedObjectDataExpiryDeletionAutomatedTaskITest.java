@@ -32,8 +32,8 @@ import static org.assertj.core.api.Assertions.within;
 
 @DisplayName("UnstructuredDataExpiryDeletionAutomatedTask test")
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
-class UnstructuredDataExpiryDeletionAutomatedTaskITest extends PostgresIntegrationBase {
-    private final UnstructuredDataExpiryDeletionAutomatedTask unstructuredDataExpiryDeletionAutomatedTask;
+class AssociatedObjectDataExpiryDeletionAutomatedTaskITest extends PostgresIntegrationBase {
+    private final AssociatedObjectDataExpiryDeletionAutomatedTask associatedObjectDataExpiryDeletionAutomatedTask;
 
     //TranscriptionDocumentEntity
     @Test
@@ -411,8 +411,8 @@ class UnstructuredDataExpiryDeletionAutomatedTaskITest extends PostgresIntegrati
 
     private void runTask() {
         dartsDatabase.getTransactionalUtil().executeInTransaction(() -> {
-            unstructuredDataExpiryDeletionAutomatedTask.preRunTask();
-            unstructuredDataExpiryDeletionAutomatedTask.runTask();
+            associatedObjectDataExpiryDeletionAutomatedTask.preRunTask();
+            associatedObjectDataExpiryDeletionAutomatedTask.runTask();
         });
     }
 

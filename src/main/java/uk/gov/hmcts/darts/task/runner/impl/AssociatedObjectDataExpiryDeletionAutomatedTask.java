@@ -31,7 +31,7 @@ import java.util.function.Function;
 
 @Component
 @Slf4j
-public class UnstructuredDataExpiryDeletionAutomatedTask
+public class AssociatedObjectDataExpiryDeletionAutomatedTask
     extends AbstractLockableAutomatedTask
     implements AutoloadingAutomatedTask, AutoloadingManualTask {
 
@@ -47,7 +47,7 @@ public class UnstructuredDataExpiryDeletionAutomatedTask
     private final ExternalInboundDataStoreDeleter inboundDeleter;
     private final ExternalUnstructuredDataStoreDeleter unstructuredDeleter;
 
-    public UnstructuredDataExpiryDeletionAutomatedTask(
+    public AssociatedObjectDataExpiryDeletionAutomatedTask(
         AutomatedTaskRepository automatedTaskRepository,
         AutomatedTaskConfigurationProperties automatedTaskConfigurationProperties,
         UserIdentity userIdentity,
@@ -74,7 +74,7 @@ public class UnstructuredDataExpiryDeletionAutomatedTask
 
     @Override
     public AutomatedTaskName getAutomatedTaskName() {
-        return AutomatedTaskName.UNSTRUCTURED_DATA_EXPIRY_DELETION_TASK_NAME;
+        return AutomatedTaskName.ASSOCIATED_OBJECT_DATA_EXPIRY_DELETION_TASK_NAME;
     }
 
     @Override

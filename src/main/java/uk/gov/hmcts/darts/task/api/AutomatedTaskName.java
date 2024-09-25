@@ -33,7 +33,7 @@ public enum AutomatedTaskName {
     REMOVE_DUPLICATED_EVENTS_TASK_NAME("RemoveDuplicatedEvents"),
     GENERATE_CASE_DOCUMENT_FOR_RETENTION_DATE_TASK_NAME("GenerateCaseDocumentForRetentionDate"),
     CASE_EXPIRY_DELETION_TASK_NAME("CaseExpiryDeletion"),
-    UNSTRUCTURED_DATA_EXPIRY_DELETION_TASK_NAME("UnstructuredDataExpiryDeletion"),
+    ASSOCIATED_OBJECT_DATA_EXPIRY_DELETION_TASK_NAME("AssociatedObjectDataExpiryDeletion"),
     ;
     private final String taskName;
 
