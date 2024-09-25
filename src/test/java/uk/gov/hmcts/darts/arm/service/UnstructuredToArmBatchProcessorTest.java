@@ -47,11 +47,7 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_MANIFEST_FAILED;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_RAW_DATA_FAILED;
-import static uk.gov.hmcts.darts.common.util.EodHelper.armLocation;
-import static uk.gov.hmcts.darts.common.util.EodHelper.detsLocation;
-import static uk.gov.hmcts.darts.common.util.EodHelper.failedArmManifestFileStatus;
-import static uk.gov.hmcts.darts.common.util.EodHelper.storedStatus;
-import static uk.gov.hmcts.darts.common.util.EodHelper.unstructuredLocation;
+
 
 @ExtendWith(MockitoExtension.class)
 class UnstructuredToArmBatchProcessorTest {
@@ -122,6 +118,7 @@ class UnstructuredToArmBatchProcessorTest {
             armDataManagementApi,
             unstructuredToArmProcessorConfiguration,
             eodHelper
+
         );
 
         lenient().when(fileOperationService.createFile(any(), any(), anyBoolean())).thenReturn(manifestFilePath);
@@ -142,8 +139,8 @@ class UnstructuredToArmBatchProcessorTest {
     void testDartsArmClientConfigInBatchQuery() {
         ExternalObjectDirectoryEntity eod10 = new ExternalObjectDirectoryEntity();
         eod10.setId(10);
-        eod10.setExternalLocationType(armLocation());
-        eod10.setStatus(failedArmManifestFileStatus());
+        eod10.setExternalLocationType(EodHelper.armLocation());
+        eod10.setStatus(EodHelper.failedArmManifestFileStatus());
         //given
         when(armDataManagementConfiguration.getArmClient()).thenReturn("darts");
         when(externalObjectDirectoryRepository.findNotFinishedAndNotExceededRetryInStorageLocation(any(), any(), any(), any())).thenReturn(List.of(eod10));
@@ -157,9 +154,9 @@ class UnstructuredToArmBatchProcessorTest {
 
         //then
         verify(externalObjectDirectoryRepository).findEodsNotInOtherStorage(
-            storedStatus(),
-            unstructuredLocation(),
-            armLocation(), 9
+            EodHelper.storedStatus(),
+            EodHelper.unstructuredLocation(),
+            EodHelper.armLocation(), 199
         );
 
         verify(logApi).armPushFailed(anyInt());
@@ -170,7 +167,7 @@ class UnstructuredToArmBatchProcessorTest {
         //given
         when(armDataManagementConfiguration.getArmClient()).thenReturn("dets");
         when(externalObjectDirectoryRepository.findEodsNotInOtherStorage(any(), any(), any(), any())).thenReturn(emptyList());
-        when(unstructuredToArmProcessorConfiguration.getMaxArmManifestItems()).thenReturn(1000);
+        //when(unstructuredToArmProcessorConfiguration.getMaxArmManifestItems()).thenReturn(5);
         when(armDataManagementConfiguration.getMaxRetryAttempts()).thenReturn(3);
 
         EOD_HELPER_MOCKS.givenIsEqualLocationReturns(true);
@@ -180,9 +177,9 @@ class UnstructuredToArmBatchProcessorTest {
 
         //then
         verify(externalObjectDirectoryRepository).findEodsNotInOtherStorage(
-            storedStatus(),
-            detsLocation(),
-            armLocation(), 5
+            EodHelper.storedStatus(),
+            EodHelper.detsLocation(),
+            EodHelper.armLocation(), 5
         );
 
     }
@@ -215,12 +212,12 @@ class UnstructuredToArmBatchProcessorTest {
             any(),
             any(ExternalLocationTypeEntity.class),
             eq(3),
-            eq(Pageable.ofSize(100)));
+            eq(Pageable.ofSize(5000)));
 
         verify(externalObjectDirectoryRepository).findEodsNotInOtherStorage(
-            storedStatus(),
-            unstructuredLocation(),
-            armLocation(), 98
+            EodHelper.storedStatus(),
+            EodHelper.unstructuredLocation(),
+            EodHelper.armLocation(), 4998
         );
 
         verifyNoMoreInteractions(logApi);

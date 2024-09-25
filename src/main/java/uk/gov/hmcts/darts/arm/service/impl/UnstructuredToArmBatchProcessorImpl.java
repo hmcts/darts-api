@@ -6,6 +6,7 @@ import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.ListUtils;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.darts.arm.api.ArmDataManagementApi;
 import uk.gov.hmcts.darts.arm.component.ArchiveRecordFileGenerator;
@@ -61,34 +62,29 @@ public class UnstructuredToArmBatchProcessorImpl implements UnstructuredToArmBat
 
     @Override
     @SuppressWarnings({"PMD.AvoidInstantiatingObjectsInLoops", "PMD.CognitiveComplexity", "PMD.CyclomaticComplexity"})
-    public void processUnstructuredToArm(int armBatchSize) {
+    public void processUnstructuredToArm(int taskBatchSize) {
 
         log.info("Started running ARM Batch Push processing at: {}", OffsetDateTime.now());
         ExternalLocationTypeEntity eodSourceLocation = getEodSourceLocation();
 
-        int querySize = unstructuredToArmProcessorConfiguration.getMaxArmManifestItems();
-        if (armBatchSize < unstructuredToArmProcessorConfiguration.getMaxArmManifestItems()) {
-            querySize = armBatchSize;
-        }
+        // Because the query is long-running, get all the EODs that need to be processed in one go
+        List<ExternalObjectDirectoryEntity> eodsForTransfer = unstructuredToArmHelper
+            .getEodEntitiesToSendToArm(eodSourceLocation,
+                                       EodHelper.armLocation(),
+                                       taskBatchSize);
 
-        UserAccountEntity userAccount = userIdentity.getUserAccount();
-
-        for (int batchCounter = 1; batchCounter <= armBatchSize; batchCounter += querySize) {
-            log.info("Batching rows from {} out of a potential rows {}", batchCounter, armBatchSize);
-            List<ExternalObjectDirectoryEntity> batchedEods =
-                unstructuredToArmHelper.getEodEntitiesToSendToArm(eodSourceLocation, EodHelper.armLocation(), querySize);
-            log.info("Number of EODs found {}", batchedEods.size());
-
-            if (!batchedEods.isEmpty()) {
-                createAndSendBatchFile(batchedEods, userAccount);
-                if (batchedEods.size() <= (batchCounter + querySize)) {
-                    break;
-                }
-            } else {
-                break;
+        log.info("Found {} pending entities to process from source '{}'", eodsForTransfer.size(), eodSourceLocation.getDescription());
+        if (!eodsForTransfer.isEmpty()) {
+            //ARM has a max batch size for manifest items, so lets loop through the big list creating lots of individual batches for ARM to process separately
+            List<List<ExternalObjectDirectoryEntity>> batchesForArm = ListUtils.partition(eodsForTransfer,
+                                                                                          unstructuredToArmProcessorConfiguration.getMaxArmManifestItems());
+            int batchCounter = 1;
+            UserAccountEntity userAccount = userIdentity.getUserAccount();
+            for (List<ExternalObjectDirectoryEntity> eodsForBatch : batchesForArm) {
+                log.info("Creating batch {} out of {}", batchCounter++, batchesForArm.size());
+                createAndSendBatchFile(eodsForBatch, userAccount);
             }
         }
-
         log.info("Finished running ARM Batch Push processing at: {}", OffsetDateTime.now());
     }
 
@@ -195,7 +191,7 @@ public class UnstructuredToArmBatchProcessorImpl implements UnstructuredToArmBat
     }
 
     private boolean shouldPushRawDataToArm(BatchItem batchItem) {
-        return equalsAnyStatus(batchItem.getPreviousStatus(), EodHelper.armIngestionStatus(), eodHelper.failedArmRawDataStatus());
+        return equalsAnyStatus(batchItem.getPreviousStatus(), EodHelper.armIngestionStatus(), EodHelper.failedArmRawDataStatus());
     }
 
     private void pushRawDataAndCreateArchiveRecordIfSuccess(BatchItem batchItem, String rawFilename, UserAccountEntity userAccount) {
@@ -215,7 +211,7 @@ public class UnstructuredToArmBatchProcessorImpl implements UnstructuredToArmBat
         } else {
             batchItem.setRawFilePushSuccessful(false);
             batchItem.undoManifestFileChange();
-            unstructuredToArmHelper.updateExternalObjectDirectoryStatusToFailed(batchItem.getArmEod(), eodHelper.failedArmRawDataStatus(), userAccount);
+            unstructuredToArmHelper.updateExternalObjectDirectoryStatusToFailed(batchItem.getArmEod(), EodHelper.failedArmRawDataStatus(), userAccount);
         }
     }
 
@@ -250,7 +246,7 @@ public class UnstructuredToArmBatchProcessorImpl implements UnstructuredToArmBat
             logApi.armPushFailed(batchItem.getArmEod().getId());
             batchItem.undoManifestFileChange();
             if (!batchItem.isRawFilePushNotNeededOrSuccessfulWhenNeeded()) {
-                unstructuredToArmHelper.updateExternalObjectDirectoryStatusToFailed(batchItem.getArmEod(), eodHelper.failedArmRawDataStatus(), userAccount);
+                unstructuredToArmHelper.updateExternalObjectDirectoryStatusToFailed(batchItem.getArmEod(), EodHelper.failedArmRawDataStatus(), userAccount);
             } else {
                 unstructuredToArmHelper.updateExternalObjectDirectoryStatusToFailed(batchItem.getArmEod(), EodHelper.failedArmManifestFileStatus(),
                                                                                     userAccount);

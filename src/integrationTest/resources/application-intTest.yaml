@@ -73,9 +73,6 @@ darts:
     api:
       baseurl: http://localhost:${wiremock.server.port}
   storage:
-    arm:
-      max-arm-manifest-items: 5
-      max-arm-single-mode-items: 3
     arm-api:
       arm-username: some-username
       arm-password: some-password

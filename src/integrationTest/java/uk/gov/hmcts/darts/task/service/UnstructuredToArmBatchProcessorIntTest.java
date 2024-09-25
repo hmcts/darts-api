@@ -212,7 +212,7 @@ class UnstructuredToArmBatchProcessorIntTest extends IntegrationBase {
             armDropZoneStatus(),
             armLocation()
         );
-        assertThat(foundMediaList.size()).isEqualTo(3);
+        assertThat(foundMediaList.size()).isEqualTo(5);
         assertThat(
             eodRepository.findMediaIdsByInMediaIdStatusAndType(List.of(medias.get(0).getId()), storedStatus(), unstructuredLocation())
         )
