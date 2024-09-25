@@ -710,16 +710,12 @@ components:
       properties:
         id:
           type: integer
-        created_at:
+        event_ts:
           type: string
           format: date-time
         name:
           type: string
         text:
-          type: string
-        chronicle_id:
-          type: string
-        antecedent_id:
           type: string
         is_event_anonymised:
           type: boolean
@@ -811,9 +807,11 @@ components:
           type: string
         is_data_anonymised:
           type: boolean
-        created_at:
+        event_ts:
           type: string
           format: date-time
+        is_current:
+          type: boolean
         created_by:
           type: integer
         last_modified_at:
