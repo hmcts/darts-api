@@ -12,11 +12,9 @@ public class EventSearchMapper {
     public AdminSearchEventResponseResult adminSearchEventResponseResultFrom(EventSearchResult evr) {
         return new AdminSearchEventResponseResult()
             .id(evr.id())
-            .createdAt(evr.createdAt())
+            .eventTs(evr.eventTs())
             .name(evr.eventTypeName())
             .text(evr.eventText())
-            .chronicleId(evr.chronicleId())
-            .antecedentId(evr.antecedentId())
             .courthouse(buildCourthouse(evr))
             .courtroom(buildCourtroom(evr))
             .isEventAnonymised(evr.isDataAnonymised())
