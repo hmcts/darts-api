@@ -2,7 +2,6 @@ package uk.gov.hmcts.darts.task.runner.impl;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Limit;
-import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.darts.audio.deleter.impl.inbound.ExternalInboundDataStoreDeleter;
 import uk.gov.hmcts.darts.audio.deleter.impl.unstructured.ExternalUnstructuredDataStoreDeleter;
@@ -23,6 +22,7 @@ import uk.gov.hmcts.darts.task.config.AutomatedTaskConfigurationProperties;
 import uk.gov.hmcts.darts.task.runner.AutoloadingAutomatedTask;
 import uk.gov.hmcts.darts.task.runner.AutoloadingManualTask;
 import uk.gov.hmcts.darts.task.runner.SoftDelete;
+import uk.gov.hmcts.darts.task.runner.SoftDeleteRepository;
 import uk.gov.hmcts.darts.task.service.LockService;
 
 import java.time.OffsetDateTime;
@@ -129,7 +129,7 @@ public class UnstructuredDataExpiryDeletionAutomatedTask
 
     <T extends SoftDelete> void deleteExternalObjectDirectoryEntity(
         UserAccountEntity userAccount,
-        JpaRepository<T, Integer> repository,
+        SoftDeleteRepository<T, ?> repository,
         List<ExternalObjectDirectoryEntity> externalObjectDirectoryEntities,
         Function<ExternalObjectDirectoryEntity, T> entityMapper) {
 
@@ -139,12 +139,12 @@ public class UnstructuredDataExpiryDeletionAutomatedTask
             .filter(this::deleteFromExternalDataStore)
             .toList();
 
-        repository.saveAll(
+        repository.softDeleteAll(
             deletedEntities
                 .stream()
                 .map(entityMapper)
-                .peek(entity -> entity.markAsDeleted(userAccount))
-                .toList()
+                .toList(),
+            userAccount
         );
         externalObjectDirectoryRepository.deleteAll(deletedEntities);
     }

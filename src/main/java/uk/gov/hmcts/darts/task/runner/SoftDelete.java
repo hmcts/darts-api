@@ -4,6 +4,10 @@ import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 
 import java.time.OffsetDateTime;
 
+/**
+ * Interface for entities that support soft delete.
+ * To support abstraction of deletion logic
+ */
 public interface SoftDelete {
 
     default void markAsDeleted(UserAccountEntity userAccount) {

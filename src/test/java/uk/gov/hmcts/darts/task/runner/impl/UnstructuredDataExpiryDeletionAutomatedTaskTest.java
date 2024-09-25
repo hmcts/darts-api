@@ -151,13 +151,7 @@ class UnstructuredDataExpiryDeletionAutomatedTaskTest {
             .deleteAll(data);
 
         verify(transcriptionDocumentRepository, times(1))
-            .saveAll(transcriptionDocumentEntities);
-
-        transcriptionDocumentEntities.forEach(transcriptionDocumentEntity -> {
-            assertThat(transcriptionDocumentEntity.isDeleted()).isTrue();
-            assertThat(transcriptionDocumentEntity.getDeletedBy()).isEqualTo(userAccount);
-            assertThat(transcriptionDocumentEntity.getDeletedTs()).isCloseTo(OffsetDateTime.now(), within(4, ChronoUnit.SECONDS));
-        });
+            .softDeleteAll(transcriptionDocumentEntities, userAccount);
     }
 
     @Test
@@ -197,13 +191,7 @@ class UnstructuredDataExpiryDeletionAutomatedTaskTest {
             .deleteAll(data);
 
         verify(mediaRepository, times(1))
-            .saveAll(mediaEntities);
-
-        mediaEntities.forEach(transcriptionDocumentEntity -> {
-            assertThat(transcriptionDocumentEntity.isDeleted()).isTrue();
-            assertThat(transcriptionDocumentEntity.getDeletedBy()).isEqualTo(userAccount);
-            assertThat(transcriptionDocumentEntity.getDeletedTs()).isCloseTo(OffsetDateTime.now(), within(4, ChronoUnit.SECONDS));
-        });
+            .softDeleteAll(mediaEntities, userAccount);
     }
 
     @Test
@@ -243,13 +231,7 @@ class UnstructuredDataExpiryDeletionAutomatedTaskTest {
             .deleteAll(data);
 
         verify(annotationDocumentRepository, times(1))
-            .saveAll(annotationDocumentEntities);
-
-        annotationDocumentEntities.forEach(transcriptionDocumentEntity -> {
-            assertThat(transcriptionDocumentEntity.isDeleted()).isTrue();
-            assertThat(transcriptionDocumentEntity.getDeletedBy()).isEqualTo(userAccount);
-            assertThat(transcriptionDocumentEntity.getDeletedTs()).isCloseTo(OffsetDateTime.now(), within(4, ChronoUnit.SECONDS));
-        });
+            .softDeleteAll(annotationDocumentEntities, userAccount);
     }
 
     @Test
@@ -289,13 +271,7 @@ class UnstructuredDataExpiryDeletionAutomatedTaskTest {
             .deleteAll(data);
 
         verify(caseDocumentRepository, times(1))
-            .saveAll(caseDocumentEntities);
-
-        caseDocumentEntities.forEach(transcriptionDocumentEntity -> {
-            assertThat(transcriptionDocumentEntity.isDeleted()).isTrue();
-            assertThat(transcriptionDocumentEntity.getDeletedBy()).isEqualTo(userAccount);
-            assertThat(transcriptionDocumentEntity.getDeletedTs()).isCloseTo(OffsetDateTime.now(), within(4, ChronoUnit.SECONDS));
-        });
+            .softDeleteAll(caseDocumentEntities, userAccount);
     }
 
     @Test
@@ -339,15 +315,8 @@ class UnstructuredDataExpiryDeletionAutomatedTaskTest {
         verify(externalObjectDirectoryRepository, times(1))
             .deleteAll(List.of(data.get(0), data.get(2)));
 
-
-        List.of(caseDocumentEntities.get(0), caseDocumentEntities.get(2)).forEach(transcriptionDocumentEntity -> {
-            assertThat(transcriptionDocumentEntity.isDeleted()).isTrue();
-            assertThat(transcriptionDocumentEntity.getDeletedBy()).isEqualTo(userAccount);
-            assertThat(transcriptionDocumentEntity.getDeletedTs()).isCloseTo(OffsetDateTime.now(), within(4, ChronoUnit.SECONDS));
-        });
-        assertThat(caseDocumentEntities.get(1).isDeleted()).isFalse();
-        assertThat(caseDocumentEntities.get(1).getDeletedBy()).isNull();
-        assertThat(caseDocumentEntities.get(1).getDeletedTs()).isNull();
+        verify(caseDocumentRepository, times(1))
+            .softDeleteAll(List.of(caseDocumentEntities.get(0), caseDocumentEntities.get(2)), userAccount);
     }
 
     @Test
