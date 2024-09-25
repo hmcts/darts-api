@@ -1,32 +1,8 @@
 -- Update existing rows in the object_hidden_reason table
 
 UPDATE darts.object_hidden_reason
-SET display_name = 'Public interest immunity',
-    display_state = true,
-    display_order = 1,
-    marked_for_deletion = true
-WHERE ohr_reason = 'PUBLIC_INTEREST_IMMUNITY';
-
-UPDATE darts.object_hidden_reason
-SET display_name = 'Classified above official',
-    display_state = true,
-    display_order = 2,
-    marked_for_deletion = true
-WHERE ohr_reason = 'CLASSIFIED';
-
-UPDATE darts.object_hidden_reason
-SET display_name = 'Other reason to delete',
-    display_state = true,
-    display_order = 3,
-    marked_for_deletion = true
-WHERE ohr_reason = 'OTHER_DELETE';
-
-UPDATE darts.object_hidden_reason
-SET display_name = 'Other reason to hide only',
-    display_state = true,
-    display_order = 4,
-    marked_for_deletion = false
-WHERE ohr_reason = 'OTHER_HIDE';
+SET display_state = true
+WHERE ohr_reason IN (1, 2, 3, 4);
 
 -- Optionally insert new values if they don't already exist
 INSERT INTO darts.object_hidden_reason (ohr_id, ohr_reason, display_name, display_state, display_order, marked_for_deletion)
