@@ -115,8 +115,8 @@ class ArmBatchProcessResponseFilesImplTest {
             .blobNamesAndPaths(blobNamesAndPaths)
             .build();
 
-        when(armDataManagementApi.listResponseBlobsUsingMarker(PREFIX, BATCH_SIZE, continuationToken)).thenReturn(continuationTokenBlobs);
-
+        when(armDataManagementConfiguration.getMaxContinuationBatchSize()).thenReturn(2);
+        when(armDataManagementApi.listResponseBlobsUsingMarker(PREFIX, 2, continuationToken)).thenReturn(continuationTokenBlobs);
         List<ExternalObjectDirectoryEntity> inboundList = new ArrayList<>(Collections.singletonList(externalObjectDirectoryArmDropZone));
 
         when(externalObjectDirectoryRepository.findAllByStatusAndManifestFile(any(), any()))
