@@ -47,6 +47,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
+import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 import static uk.gov.hmcts.darts.arm.util.ArchiveConstants.ArchiveResponseFileAttributes.ARM_CREATE_RECORD_FILENAME_KEY;
 import static uk.gov.hmcts.darts.arm.util.ArchiveConstants.ArchiveResponseFileAttributes.ARM_INVALID_LINE_FILENAME_KEY;
@@ -77,6 +78,7 @@ public class ArmBatchProcessResponseFilesImpl implements ArmResponseFilesProcess
     private final LogApi logApi;
 
     private UserAccountEntity userAccount;
+    private String continuationToken;
 
     public ArmBatchProcessResponseFilesImpl(ExternalObjectDirectoryRepository externalObjectDirectoryRepository, ArmDataManagementApi armDataManagementApi,
                                             FileOperationService fileOperationService, ArmDataManagementConfiguration armDataManagementConfiguration,
@@ -100,11 +102,27 @@ public class ArmBatchProcessResponseFilesImpl implements ArmResponseFilesProcess
         userAccount = userIdentity.getUserAccount();
         ContinuationTokenBlobs continuationTokenBlobs = null;
         String prefix = armDataManagementConfiguration.getManifestFilePrefix();
+        int maxContinuationBatchSize = armDataManagementConfiguration.getMaxContinuationBatchSize();
 
         try {
             log.info("About to look for files starting with prefix: {}", prefix);
-            String continuationToken = getContinuationToken();
-            continuationTokenBlobs = armDataManagementApi.listResponseBlobsUsingMarker(prefix, batchSize, continuationToken);
+            String continuationToken = null;
+            for (int pageSize = 0; pageSize < batchSize; pageSize += maxContinuationBatchSize) {
+
+                ContinuationTokenBlobs continuationTokenData = armDataManagementApi.listResponseBlobsUsingMarker(prefix, maxContinuationBatchSize, continuationToken);
+                if (nonNull(continuationTokenData)) {
+                    if (isNull(continuationToken)) {
+                        continuationTokenBlobs = continuationTokenData;
+                    } else {
+                        continuationTokenBlobs.getBlobNamesAndPaths().addAll(continuationTokenData.getBlobNamesAndPaths());
+                    }
+                    continuationToken = continuationTokenData.getContinuationToken();
+                }
+                // if no more data found break out of loop
+                if (isNull(continuationToken)) {
+                    break;
+                }
+            }
         } catch (Exception e) {
             log.error("Unable to find response file for prefix: {} - {}", prefix, e.getMessage());
         }
@@ -577,7 +595,7 @@ public class ArmBatchProcessResponseFilesImpl implements ArmResponseFilesProcess
                     updateExternalObjectDirectoryStatus(externalObjectDirectory, EodHelper.armResponseManifestFailedStatus());
                 } else {
                     String error = String.format("Incorrect status [%s] for invalid line file %s", invalidLineFileFilenameProcessor.getStatus(),
-                                  invalidLineFileFilenameProcessor.getInvalidLineFileFilenameAndPath());
+                                                 invalidLineFileFilenameProcessor.getInvalidLineFileFilenameAndPath());
                     log.warn(error);
                     externalObjectDirectory.setErrorCode(error);
                     updateExternalObjectDirectoryStatus(externalObjectDirectory, EodHelper.armResponseProcessingFailedStatus());
@@ -627,11 +645,6 @@ public class ArmBatchProcessResponseFilesImpl implements ArmResponseFilesProcess
             responseBlobsToBeDeleted.add(armResponseBatchData.getInvalidLineFileFilenameProcessor().getInvalidLineFileFilenameAndPath());
         }
         return responseBlobsToBeDeleted;
-    }
-
-
-    private String getContinuationToken() {
-        return null;
     }
 
     private ExternalObjectDirectoryEntity getExternalObjectDirectoryEntity(Integer eodId) {

@@ -37,6 +37,7 @@ public class ArmDataManagementConfiguration extends StorageConfiguration {
     private String armClient;
     private String continuationTokenDuration;
     private Integer eventDateAdjustmentYears;
+    private Integer maxContinuationBatchSize;
 
     @Getter
     @Setter
