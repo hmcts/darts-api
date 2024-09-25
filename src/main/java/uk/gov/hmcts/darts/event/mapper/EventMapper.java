@@ -41,9 +41,9 @@ public class EventMapper {
             adminGetEventsForIdResponse.setCourtroom(courtroomResponseDetails);
 
             adminGetEventsForIdResponse.setVersion(eventEntity.getLegacyVersionLabel());
-            adminGetEventsForIdResponse.setChronicleId(eventEntity.getChronicleId());
-            adminGetEventsForIdResponse.setAntecedentId(eventEntity.getAntecedentId());
             adminGetEventsForIdResponse.setCreatedAt(eventEntity.getCreatedDateTime());
+            adminGetEventsForIdResponse.setEventTs(eventEntity.getTimestamp());
+            adminGetEventsForIdResponse.isCurrent(eventEntity.getIsCurrent());
             adminGetEventsForIdResponse.setCreatedBy(eventEntity.getCreatedBy().getId());
             adminGetEventsForIdResponse.setLastModifiedAt(eventEntity.getLastModifiedDateTime());
             adminGetEventsForIdResponse.setLastModifiedBy(eventEntity.getLastModifiedBy().getId());

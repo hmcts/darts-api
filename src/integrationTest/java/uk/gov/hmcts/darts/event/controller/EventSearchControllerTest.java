@@ -103,6 +103,7 @@ class EventSearchControllerTest extends IntegrationBase {
         var response = json.from(mvcResult.getResponse().getContentAsString());
         assertThat(response).hasJsonPathNumberValue("[0].id");
         assertThat(response).hasJsonPathStringValue("[0].created_at");
+        assertThat(response).hasJsonPathStringValue("[0].event_ts");
         assertThat(response).hasJsonPathNumberValue("[0].courthouse.id");
         assertThat(response).hasJsonPathStringValue("[0].courthouse.display_name");
         assertThat(response).hasJsonPathNumberValue("[0].courtroom.id");

@@ -53,6 +53,7 @@ public interface EventRepository extends JpaRepository<EventEntity, Integer> {
          SELECT new uk.gov.hmcts.darts.event.model.EventSearchResult(
             e.id,
             e.createdDateTime,
+            e.timestamp,
             et.eventName,
             e.eventText,
             e.chronicleId,
