@@ -81,6 +81,7 @@ public abstract class AbstractLockableAutomatedTask implements AutomatedTask, Au
 
     @Override
     @Transactional
+    @SuppressWarnings("squid:S112")
     public void run() {
         executionId = ThreadLocal.withInitial(UUID::randomUUID);
         preRunTask();
@@ -94,6 +95,11 @@ public abstract class AbstractLockableAutomatedTask implements AutomatedTask, Au
                 if (isManualTask || getLastCronExpression().equals(dbCronExpression)) {
                     if (TRUE.equals(automatedTask.getTaskEnabled())) {
                         logApi.taskStarted(executionId.get(), this.getTaskName());
+
+                        if (AutomatedTaskName.DAILY_LIST_HOUSEKEEPING_TASK_NAME.getTaskName().equals(this.getTaskName())) {
+                            throw new RuntimeException("This is for DMP-2666 testing");
+                        }
+
                         lockService.getLockingTaskExecutor().executeWithLock(new LockedTask(), getLockConfiguration());
                     } else {
                         setAutomatedTaskStatus(SKIPPED);
