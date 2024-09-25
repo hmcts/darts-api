@@ -17,6 +17,7 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 import uk.gov.hmcts.darts.common.entity.base.CreatedModifiedBaseEntity;
+import uk.gov.hmcts.darts.task.runner.SoftDelete;
 
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
@@ -27,7 +28,8 @@ import java.util.List;
 @Getter
 @Setter
 @EqualsAndHashCode(callSuper = false)
-public class MediaEntity extends CreatedModifiedBaseEntity implements ConfidenceAware {
+public class MediaEntity extends CreatedModifiedBaseEntity
+    implements ConfidenceAware, SoftDelete {
     public static final Character MEDIA_TYPE_DEFAULT = 'A';
 
     @Id
@@ -130,5 +132,15 @@ public class MediaEntity extends CreatedModifiedBaseEntity implements Confidence
 
     public void removeHearing(HearingEntity hearing) {
         hearing.getMediaList().remove(this);
+    }
+
+    @Override
+    public void setDeletedTs(OffsetDateTime deletedTs) {
+        setDeletedTimestamp(deletedTs);
+    }
+
+    @Override
+    public OffsetDateTime getDeletedTs() {
+        return getDeletedTimestamp();
     }
 }

@@ -5,7 +5,6 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.data.domain.Limit;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
-import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
 import uk.gov.hmcts.darts.common.repository.AutomatedTaskRepository;
 import uk.gov.hmcts.darts.common.repository.CaseRepository;
@@ -16,9 +15,6 @@ import uk.gov.hmcts.darts.task.config.AutomatedTaskConfigurationProperties;
 import uk.gov.hmcts.darts.task.runner.AutoloadingAutomatedTask;
 import uk.gov.hmcts.darts.task.runner.AutoloadingManualTask;
 import uk.gov.hmcts.darts.task.service.LockService;
-
-import java.util.ArrayList;
-import java.util.List;
 
 @Component
 @ConditionalOnProperty(
@@ -54,15 +50,10 @@ public class CaseExpiryDeletionAutomatedTask
     @Override
     @Transactional
     public void runTask() {
-        final List<CourtCaseEntity> courtCaseEntities = new ArrayList<>();
-
         caseRepository.findCasesToBeAnonymized(currentTimeHelper.currentOffsetDateTime(), Limit.of(getAutomatedTaskBatchSize()))
             .forEach(courtCase -> {
                 log.info("Anonymising case with id: {} because the criteria for retention has been met.", courtCase.getId());
                 dataAnonymisationService.anonymizeCourtCaseEntity(courtCase);
-                courtCaseEntities.add(courtCase);
             });
-        //This also saves defendant, defence and prosecutor entities
-        caseRepository.saveAll(courtCaseEntities);
     }
 }

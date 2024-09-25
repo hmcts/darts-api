@@ -66,7 +66,15 @@ public class MediaRequestStub {
     }
 
     @Transactional
+    public MediaRequestEntity createAndSaveMediaRequestEntity(UserAccountEntity createdBy, HearingEntity hearingEntity) {
+        MediaRequestEntity mediaRequestEntity = createAndSaveMediaRequestEntity(createdBy);
+        mediaRequestEntity.setHearing(hearingEntity);
+        return mediaRequestRepository.save(mediaRequestEntity);
+    }
+
+    @Transactional
     public Optional<MediaRequestEntity> getFindId(MediaRequestEntity mediaRequestEntity) {
         return mediaRequestRepository.findById(mediaRequestEntity.getId());
     }
+
 }
