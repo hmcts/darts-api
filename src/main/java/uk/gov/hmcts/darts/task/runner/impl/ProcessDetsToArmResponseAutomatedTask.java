@@ -33,6 +33,6 @@ public class ProcessDetsToArmResponseAutomatedTask extends AbstractLockableAutom
 
     @Override
     protected void runTask() {
-
+        Integer batchSize = getAutomatedTaskBatchSize();
     }
 }
