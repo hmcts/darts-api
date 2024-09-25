@@ -5,12 +5,14 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
+import uk.gov.hmcts.darts.task.runner.SoftDeleteRepository;
 
 import java.time.OffsetDateTime;
 import java.util.List;
 
 @Repository
-public interface MediaRepository extends JpaRepository<MediaEntity, Integer> {
+public interface MediaRepository extends JpaRepository<MediaEntity, Integer>,
+    SoftDeleteRepository<MediaEntity, Integer> {
 
     //Warning - This deliberately does not filter on me.isCurrent. Admin may want to see the old media.
     @Query("""
@@ -78,7 +80,7 @@ public interface MediaRepository extends JpaRepository<MediaEntity, Integer> {
             (:hearingIds IS NULL OR (:hearingIds IS NOT NULL AND hearing.id in (:hearingIds)))
             AND (cast(:endAt as TIMESTAMP) IS NULL OR (me.end <= :endAt))
             AND (cast(:startAt as TIMESTAMP) IS NULL OR (me.start >= :startAt))
-           """)
+        """)
     List<MediaEntity> findMediaByDetails(List<Integer> hearingIds, OffsetDateTime startAt,
                                          OffsetDateTime endAt);
 

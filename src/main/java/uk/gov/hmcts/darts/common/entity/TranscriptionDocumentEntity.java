@@ -16,6 +16,7 @@ import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
 import uk.gov.hmcts.darts.common.entity.base.ModifiedBaseEntity;
+import uk.gov.hmcts.darts.task.runner.SoftDelete;
 
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
@@ -25,7 +26,8 @@ import java.util.List;
 @Table(name = "transcription_document")
 @Getter
 @Setter
-public class TranscriptionDocumentEntity extends ModifiedBaseEntity implements ConfidenceAware {
+public class TranscriptionDocumentEntity extends ModifiedBaseEntity
+    implements ConfidenceAware, SoftDelete {
 
     @Id
     @Column(name = "trd_id")
@@ -90,5 +92,4 @@ public class TranscriptionDocumentEntity extends ModifiedBaseEntity implements C
 
     @OneToMany(mappedBy = ObjectAdminActionEntity_.TRANSCRIPTION_DOCUMENT)
     private List<ObjectAdminActionEntity> adminActions = new ArrayList<>();
-
 }

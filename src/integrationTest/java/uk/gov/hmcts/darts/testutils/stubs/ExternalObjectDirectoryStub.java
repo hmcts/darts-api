@@ -41,6 +41,7 @@ import static uk.gov.hmcts.darts.common.helper.SystemUserHelper.HOUSEKEEPING;
 
 @Component
 @RequiredArgsConstructor
+@SuppressWarnings("PMD.GodClass")
 public class ExternalObjectDirectoryStub {
 
     private final UserAccountStubComposable userAccountStub;
@@ -182,6 +183,20 @@ public class ExternalObjectDirectoryStub {
         return externalObjectDirectory;
     }
 
+
+    public ExternalObjectDirectoryEntity createExternalObjectDirectory(AnnotationDocumentEntity annotationDocumentEntity,
+                                                                       ObjectRecordStatusEnum objectRecordStatusEnum,
+                                                                       ExternalLocationTypeEnum externalLocationTypeEnum,
+                                                                       UUID externalLocation) {
+
+        ExternalObjectDirectoryEntity externalObjectDirectory = createExternalObjectDirectory(
+            annotationDocumentEntity, getStatus(objectRecordStatusEnum), getLocation(externalLocationTypeEnum), externalLocation);
+
+        externalObjectDirectory.setAnnotationDocumentEntity(annotationDocumentEntity);
+
+        return eodRepository.save(externalObjectDirectory);
+    }
+
     public ExternalObjectDirectoryEntity createExternalObjectDirectory(AnnotationDocumentEntity annotationDocumentEntity,
                                                                        ObjectRecordStatusEntity objectRecordStatusEntity,
                                                                        ExternalLocationTypeEntity externalLocationTypeEntity,
@@ -196,6 +211,20 @@ public class ExternalObjectDirectoryStub {
             externalObjectDirectory.setAnnotationDocumentEntity(annotationDocumentEntity);
         }
         return externalObjectDirectory;
+    }
+
+
+    public ExternalObjectDirectoryEntity createExternalObjectDirectory(TranscriptionDocumentEntity transcriptionDocumentEntity,
+                                                                       ObjectRecordStatusEnum objectRecordStatusEnum,
+                                                                       ExternalLocationTypeEnum externalLocationTypeEnum,
+                                                                       UUID externalLocation) {
+
+        ExternalObjectDirectoryEntity externalObjectDirectory = createExternalObjectDirectory(
+            transcriptionDocumentEntity, getStatus(objectRecordStatusEnum), getLocation(externalLocationTypeEnum), externalLocation);
+
+        externalObjectDirectory.setTranscriptionDocumentEntity(transcriptionDocumentEntity);
+
+        return eodRepository.save(externalObjectDirectory);
     }
 
     public ExternalObjectDirectoryEntity createExternalObjectDirectory(TranscriptionDocumentEntity transcriptionDocumentEntity,
@@ -440,5 +469,21 @@ public class ExternalObjectDirectoryStub {
         }
 
         return true;
+    }
+
+    public List<ExternalObjectDirectoryEntity> findAllFor(CaseDocumentEntity caseDocumentEntity) {
+        return eodRepository.findByCaseDocument(caseDocumentEntity);
+    }
+
+    public List<ExternalObjectDirectoryEntity> findAllFor(AnnotationDocumentEntity annotationDocument) {
+        return eodRepository.findByAnnotationDocumentEntity(annotationDocument);
+    }
+
+    public List<ExternalObjectDirectoryEntity> findAllFor(MediaEntity mediaEntity) {
+        return eodRepository.findByMedia(mediaEntity);
+    }
+
+    public List<ExternalObjectDirectoryEntity> findAllFor(TranscriptionDocumentEntity transcriptionDocumentEntity) {
+        return eodRepository.findByTranscriptionDocumentEntity(transcriptionDocumentEntity);
     }
 }

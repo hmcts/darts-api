@@ -4,6 +4,8 @@ import lombok.RequiredArgsConstructor;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import uk.gov.hmcts.darts.audio.entity.MediaRequestEntity;
+import uk.gov.hmcts.darts.audio.enums.MediaRequestStatus;
 import uk.gov.hmcts.darts.audit.api.AuditActivity;
 import uk.gov.hmcts.darts.common.entity.AuditEntity;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
@@ -15,8 +17,10 @@ import uk.gov.hmcts.darts.common.entity.ProsecutorEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionCommentEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionWorkflowEntity;
+import uk.gov.hmcts.darts.common.entity.TransformedMediaEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.entity.base.CreatedModifiedBaseEntity;
+import uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum;
 import uk.gov.hmcts.darts.common.util.DateConverterUtil;
 import uk.gov.hmcts.darts.retention.enums.CaseRetentionStatus;
 import uk.gov.hmcts.darts.retention.enums.RetentionPolicyEnum;
@@ -33,6 +37,7 @@ import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
+import java.util.UUID;
 import java.util.regex.Pattern;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -154,8 +159,20 @@ class CaseExpiryDeletionAutomatedTaskITest extends PostgresIntegrationBase {
     private void assertHearing(HearingEntity hearingEntity, boolean isAnonymized) {
         assertThat(hearingEntity.getTranscriptions()).hasSizeGreaterThan(0);
         assertThat(hearingEntity.getEventList()).hasSizeGreaterThan(0);
+        assertThat(hearingEntity.getMediaRequests()).hasSizeGreaterThan(0);
         hearingEntity.getTranscriptions().forEach(transcriptionEntity -> assertTranscription(transcriptionEntity, isAnonymized));
+        hearingEntity.getMediaRequests().forEach(mediaRequestEntity -> assertMediaRequest(mediaRequestEntity, isAnonymized));
         hearingEntity.getEventList().forEach(eventEntity -> assertEvent(eventEntity, isAnonymized));
+    }
+
+    private void assertMediaRequest(MediaRequestEntity mediaRequestEntity, boolean isAnonymized) {
+        if (isAnonymized) {
+            assertThat(mediaRequestEntity.getStatus()).isEqualTo(MediaRequestStatus.EXPIRED);
+            assertThat(mediaRequestEntity.getTransformedMediaEntities()).isEmpty();
+        } else {
+            assertThat(mediaRequestEntity.getStatus()).isNotEqualTo(MediaRequestStatus.EXPIRED);
+            assertThat(mediaRequestEntity.getTransformedMediaEntities()).isNotEmpty();
+        }
     }
 
     private void assertTranscription(TranscriptionEntity transcriptionEntity, boolean isAnonymized) {
@@ -271,7 +288,33 @@ class CaseExpiryDeletionAutomatedTaskITest extends PostgresIntegrationBase {
         createTranscription(hearingEntity);
         createTranscription(hearingEntity);
 
+        createMediaRequest(hearingEntity);
+        createMediaRequest(hearingEntity);
+
         caseEntity.getHearings().add(hearingEntity);
+    }
+
+    private void createMediaRequest(HearingEntity hearingEntity) {
+        MediaRequestEntity mediaRequestEntity = dartsDatabase.getMediaRequestStub()
+            .createAndSaveMediaRequestEntity(hearingEntity.getCreatedBy(), hearingEntity);
+        createTransformedMediaEntry(mediaRequestEntity);
+        createTransformedMediaEntry(mediaRequestEntity);
+    }
+
+    private void createTransformedMediaEntry(MediaRequestEntity mediaRequestEntity) {
+        TransformedMediaEntity transformedMediaEntity = dartsDatabase.getTransformedMediaStub()
+            .createTransformedMediaEntity(mediaRequestEntity);
+        createTransientObjectDirectoryEntity(transformedMediaEntity);
+        createTransientObjectDirectoryEntity(transformedMediaEntity);
+    }
+
+    private void createTransientObjectDirectoryEntity(TransformedMediaEntity transformedMediaEntity) {
+        dartsDatabase.getTransientObjectDirectoryStub()
+            .createTransientObjectDirectoryEntity(
+                transformedMediaEntity,
+                dartsDatabase.getObjectRecordStatusEntity(ObjectRecordStatusEnum.STORED),
+                UUID.randomUUID()
+            );
     }
 
     private void createTranscription(HearingEntity hearingEntity) {
