@@ -18,6 +18,7 @@ import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
 import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
 import uk.gov.hmcts.darts.common.service.FileOperationService;
 import uk.gov.hmcts.darts.common.service.impl.EodHelperMocks;
+import uk.gov.hmcts.darts.common.util.EodHelper;
 import uk.gov.hmcts.darts.log.api.LogApi;
 
 import java.util.ArrayList;
@@ -29,8 +30,6 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
-import static uk.gov.hmcts.darts.common.util.EodHelper.armDropZoneStatus;
-import static uk.gov.hmcts.darts.common.util.EodHelper.armProcessingResponseFilesStatus;
 
 @ExtendWith(MockitoExtension.class)
 @SuppressWarnings("VariableDeclarationUsageDistance")
@@ -127,10 +126,10 @@ class ArmBatchProcessResponseFilesImplTest {
         armBatchProcessResponseFiles.processResponseFiles();
 
         // then
-        verify(externalObjectDirectoryRepository).findAllByStatusAndManifestFile(armDropZoneStatus(), manifestFile1);
-        verify(externalObjectDirectoryRepository).findAllByStatusAndManifestFile(armProcessingResponseFilesStatus(), manifestFile1);
-        verify(externalObjectDirectoryRepository).findAllByStatusAndManifestFile(armDropZoneStatus(), manifestFile2);
-        verify(externalObjectDirectoryRepository).findAllByStatusAndManifestFile(armProcessingResponseFilesStatus(), manifestFile2);
+        verify(externalObjectDirectoryRepository).findAllByStatusAndManifestFile(EodHelper.armDropZoneStatus(), manifestFile1);
+        verify(externalObjectDirectoryRepository).findAllByStatusAndManifestFile(EodHelper.armProcessingResponseFilesStatus(), manifestFile1);
+        verify(externalObjectDirectoryRepository).findAllByStatusAndManifestFile(EodHelper.armDropZoneStatus(), manifestFile2);
+        verify(externalObjectDirectoryRepository).findAllByStatusAndManifestFile(EodHelper.armProcessingResponseFilesStatus(), manifestFile2);
 
         verifyNoMoreInteractions(logApi);
     }

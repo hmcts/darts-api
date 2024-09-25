@@ -109,7 +109,8 @@ public class ArmBatchProcessResponseFilesImpl implements ArmResponseFilesProcess
             String continuationToken = null;
             for (int pageSize = 0; pageSize < batchSize; pageSize += maxContinuationBatchSize) {
 
-                ContinuationTokenBlobs continuationTokenData = armDataManagementApi.listResponseBlobsUsingMarker(prefix, maxContinuationBatchSize, continuationToken);
+                ContinuationTokenBlobs continuationTokenData =
+                    armDataManagementApi.listResponseBlobsUsingMarker(prefix, maxContinuationBatchSize, continuationToken);
                 if (nonNull(continuationTokenData)) {
                     if (isNull(continuationToken)) {
                         continuationTokenBlobs = continuationTokenData;
