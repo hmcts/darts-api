@@ -71,50 +71,42 @@ public class DataAnonymisationServiceImpl implements DataAnonymisationService {
 
     }
 
-    @Override
-    public void anonymizeDefenceEntity(UserAccountEntity userAccount, DefenceEntity entity) {
+    void anonymizeDefenceEntity(UserAccountEntity userAccount, DefenceEntity entity) {
         anonymizeName(userAccount, entity);
     }
 
-    @Override
-    public void anonymizeDefendantEntity(UserAccountEntity userAccount, DefendantEntity entity) {
+    void anonymizeDefendantEntity(UserAccountEntity userAccount, DefendantEntity entity) {
         anonymizeName(userAccount, entity);
     }
 
-    @Override
-    public void anonymizeProsecutorEntity(UserAccountEntity userAccount, ProsecutorEntity entity) {
+    void anonymizeProsecutorEntity(UserAccountEntity userAccount, ProsecutorEntity entity) {
         anonymizeName(userAccount, entity);
     }
 
-    @Override
-    public void anonymizeHearingEntity(UserAccountEntity userAccount, HearingEntity hearingEntity) {
+    void anonymizeHearingEntity(UserAccountEntity userAccount, HearingEntity hearingEntity) {
         hearingEntity.getTranscriptions().forEach(transcriptionEntity -> anonymizeTranscriptionEntity(userAccount, transcriptionEntity));
         hearingEntity.getEventList().forEach(eventEntity -> anonymizeEventEntity(userAccount, eventEntity));
     }
 
-    @Override
-    public void anonymizeEventEntity(UserAccountEntity userAccount, EventEntity eventEntity) {
+    void anonymizeEventEntity(UserAccountEntity userAccount, EventEntity eventEntity) {
         eventEntity.setEventText(UUID.randomUUID().toString());
         eventEntity.setDataAnonymised(true);
         anonymizeCreatedModifiedBaseEntity(userAccount, eventEntity);
     }
 
-    @Override
-    public void anonymizeTranscriptionEntity(UserAccountEntity userAccount, TranscriptionEntity transcriptionEntity) {
+    void anonymizeTranscriptionEntity(UserAccountEntity userAccount, TranscriptionEntity transcriptionEntity) {
         transcriptionEntity.getTranscriptionCommentEntities()
             .forEach(transcriptionCommentEntity -> anonymizeTranscriptionCommentEntity(userAccount, transcriptionCommentEntity));
         transcriptionEntity.getTranscriptionWorkflowEntities().forEach(this::anonymizeTranscriptionWorkflowEntity);
     }
 
-    @Override
-    public void anonymizeTranscriptionCommentEntity(UserAccountEntity userAccount, TranscriptionCommentEntity transcriptionCommentEntity) {
+    void anonymizeTranscriptionCommentEntity(UserAccountEntity userAccount, TranscriptionCommentEntity transcriptionCommentEntity) {
         transcriptionCommentEntity.setComment(UUID.randomUUID().toString());
         transcriptionCommentEntity.setDataAnonymised(true);
         anonymizeCreatedModifiedBaseEntity(userAccount, transcriptionCommentEntity);
     }
 
-    @Override
-    public void anonymizeTranscriptionWorkflowEntity(TranscriptionWorkflowEntity transcriptionWorkflowEntity) {
+    void anonymizeTranscriptionWorkflowEntity(TranscriptionWorkflowEntity transcriptionWorkflowEntity) {
         transcriptionWorkflowEntity.close();
 
     }
