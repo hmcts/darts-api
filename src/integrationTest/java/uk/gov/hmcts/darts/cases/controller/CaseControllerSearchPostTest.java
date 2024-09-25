@@ -308,6 +308,73 @@ class CaseControllerSearchPostTest extends IntegrationBase {
     }
 
     @Test
+    void courthouseAndDateRangeIsAnonymised() throws Exception {
+        user = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
+        CourtCaseEntity caseEntity = dartsDatabase.getCaseRepository()
+            .findByCaseNumberAndCourthouse_CourthouseName("Case1", "SWANSEA").orElseThrow();
+        OffsetDateTime dataAnonymisedTs = OffsetDateTime.parse("2023-01-01T12:00:00Z");
+        caseEntity.setDataAnonymisedTs(dataAnonymisedTs);
+        caseEntity.setDataAnonymised(true);
+        dartsDatabase.getCaseRepository().save(caseEntity);
+
+        setupUserAccountAndSecurityGroup();
+        String requestBody = """
+            {
+              "courthouse": "SWANSEA",
+              "date_from": "2023-05-19",
+              "date_to": "2023-05-20"
+            }""";
+
+        MockHttpServletRequestBuilder requestBuilder = post(ENDPOINT_URL)
+            .contentType(MediaType.APPLICATION_JSON_VALUE)
+            .content(requestBody);
+        MvcResult response = mockMvc.perform(requestBuilder).andExpect(status().isOk()).andReturn();
+
+        String actualResponse = TestUtils.removeIds(response.getResponse().getContentAsString());
+
+        String expectedResponse = """
+            [
+              {
+                "case_number": "Case1",
+                "courthouse": "SWANSEA",
+                "defendants": [
+                  "aDefendant"
+                ],
+                "judges": [
+                  "AJUDGE"
+                ],
+                "hearings": [
+                  {
+                    "date": "2023-05-20",
+                    "courtroom": "COURTROOM1",
+                    "judges": [
+                      "AJUDGE"
+                    ]
+                  },
+                  {
+                    "date": "2023-05-21",
+                    "courtroom": "COURTROOM1",
+                    "judges": [
+                      "AJUDGE"
+                    ]
+                  },
+                  {
+                    "date": "2023-05-22",
+                    "courtroom": "COURTROOM1",
+                    "judges": [
+                      "AJUDGE"
+                    ]
+                  }
+                ],
+                "is_data_anonymised": true,
+                "data_anonymised_at":"2023-01-01T12:00:00Z"
+              }
+            ]
+            """;
+        assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
+    }
+
+    @Test
     void casesSearchPostEndpointEventText() throws Exception {
         user = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
         setupUserAccountAndSecurityGroup();
