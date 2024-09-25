@@ -6,6 +6,7 @@ import org.springframework.stereotype.Repository;
 import uk.gov.hmcts.darts.common.entity.ObjectAdminActionEntity;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface ObjectAdminActionRepository extends JpaRepository<ObjectAdminActionEntity, Integer> {
@@ -22,5 +23,8 @@ public interface ObjectAdminActionRepository extends JpaRepository<ObjectAdminAc
         AND objectAdminActionEntity.media IS NOT null
         """)
     List<ObjectAdminActionEntity> findAllMediaActionsWithAnyDeletionReason();
+
+    Optional<ObjectAdminActionEntity> findByTranscriptionDocument_IdAndObjectHiddenReasonIsNotNullAndObjectHiddenReason_MarkedForDeletionTrue(
+        Integer transcriptionDocumentId);
 
 }

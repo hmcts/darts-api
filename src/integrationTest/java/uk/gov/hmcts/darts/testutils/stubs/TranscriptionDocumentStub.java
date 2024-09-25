@@ -169,6 +169,11 @@ public class TranscriptionDocumentStub {
         return transcriptionDocumentStubComposable.createTranscriptionDocumentForTranscription(transcriptionEntity);
     }
 
+    public TranscriptionDocumentEntity createTranscriptionDocumentForTranscription(TranscriptionEntity transcriptionEntity,
+                                                                                   UserAccountEntity userAccount) {
+        return transcriptionDocumentStubComposable.createTranscriptionDocumentForTranscription(transcriptionEntity, userAccount);
+    }
+
     private TranscriptionStatusEntity mapToTranscriptionStatusEntity(TranscriptionStatusEnum statusEnum) {
         TranscriptionStatusEntity transcriptionStatus = new TranscriptionStatusEntity();
         transcriptionStatus.setId(statusEnum.getId());

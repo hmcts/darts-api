@@ -10,6 +10,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
 import lombok.Getter;
@@ -20,10 +21,14 @@ import org.hibernate.envers.RelationTargetAuditMode;
 import uk.gov.hmcts.darts.audio.enums.MediaRequestStatus;
 import uk.gov.hmcts.darts.audiorequests.model.AudioRequestType;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
+import uk.gov.hmcts.darts.common.entity.TransformedMediaEntity;
+import uk.gov.hmcts.darts.common.entity.TransformedMediaEntity_;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.entity.base.CreatedModifiedBaseEntity;
 
 import java.time.OffsetDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = MediaRequestEntity.TABLE_NAME)
@@ -89,4 +94,6 @@ public class MediaRequestEntity extends CreatedModifiedBaseEntity {
     @Column(name = END_TIME_COLUMN_NAME, nullable = false)
     private OffsetDateTime endTime;
 
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = TransformedMediaEntity_.MEDIA_REQUEST)
+    private List<TransformedMediaEntity> transformedMediaEntities = new ArrayList<>();
 }

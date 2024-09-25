@@ -13,6 +13,7 @@ import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.repository.CaseDocumentRepository;
 
 import java.time.OffsetDateTime;
+import java.util.function.Consumer;
 
 import static java.time.ZoneOffset.UTC;
 
@@ -37,6 +38,16 @@ public class CaseDocumentStub {
     public CaseDocumentEntity createAndSaveCaseDocumentEntity(CourtCaseEntity courtCaseEntity) {
         UserAccountEntity testUser = userAccountStub.getIntegrationTestUserAccountEntity();
         CaseDocumentEntity caseDocumentEntity = createCaseDocumentEntity(courtCaseEntity, testUser);
+        caseDocumentEntity = dartsDatabaseSaveStub.save(caseDocumentEntity);
+        return caseDocumentEntity;
+    }
+
+    @Transactional
+    public CaseDocumentEntity createAndSaveCaseDocumentEntity(CourtCaseEntity courtCaseEntity,
+                                                              Consumer<CaseDocumentEntity> preSaveConsumer) {
+        UserAccountEntity testUser = userAccountStub.getIntegrationTestUserAccountEntity();
+        CaseDocumentEntity caseDocumentEntity = createCaseDocumentEntity(courtCaseEntity, testUser);
+        preSaveConsumer.accept(caseDocumentEntity);
         caseDocumentEntity = dartsDatabaseSaveStub.save(caseDocumentEntity);
         return caseDocumentEntity;
     }

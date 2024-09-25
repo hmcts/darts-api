@@ -174,6 +174,39 @@ class CaseControllerAdminSearchTest extends IntegrationBase {
         assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
     }
 
+    @Test
+    void testOkIsAnonymised() throws Exception {
+        CourtCaseEntity caseEntity = dartsDatabase.getCaseRepository()
+            .findByCaseNumberAndCourthouse_CourthouseName("Case1", "SWANSEA").orElseThrow();
+        OffsetDateTime dataAnonymisedTs = OffsetDateTime.parse("2023-01-01T12:00:00Z");
+        caseEntity.setDataAnonymisedTs(dataAnonymisedTs);
+        caseEntity.setDataAnonymised(true);
+        dartsDatabase.getCaseRepository().save(caseEntity);
+
+        String requestBody = """
+            {
+              "courthouse_ids": [
+                <<courthouseId>>
+              ],
+              "case_number": "Case1",
+              "courtroom_name": "courtroom1",
+              "hearing_start_at": "2020-06-18",
+              "hearing_end_at": "2024-06-18"
+            }""";
+
+        requestBody = requestBody.replace("<<courthouseId>>", swanseaCourthouse.getId().toString());
+        MockHttpServletRequestBuilder requestBuilder = post(ENDPOINT_URL)
+            .contentType(MediaType.APPLICATION_JSON_VALUE)
+            .content(requestBody);
+        MvcResult response = mockMvc.perform(requestBuilder).andExpect(status().isOk()).andReturn();
+
+        String actualResponse = TestUtils.removeIds(response.getResponse().getContentAsString());
+
+        String expectedResponse = getContentsFromFile(
+            "tests/cases/CaseControllerAdminSearchTest/testOkIsAnonymised/expectedResponse.json");
+        assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
+    }
+
     private void setupUserAccountAndSecurityGroup() {
         var securityGroup = SecurityGroupTestData.createGroupForRole(SUPER_ADMIN);
         securityGroup.setGlobalAccess(true);

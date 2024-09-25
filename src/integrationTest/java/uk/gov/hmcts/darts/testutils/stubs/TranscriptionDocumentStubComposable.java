@@ -52,6 +52,11 @@ public class TranscriptionDocumentStubComposable {
     }
 
     public TranscriptionDocumentEntity createTranscriptionDocumentForTranscription(TranscriptionEntity transcriptionEntity) {
+        return createTranscriptionDocumentForTranscription(transcriptionEntity, userAccountRepository.getReferenceById(0));
+    }
+
+    public TranscriptionDocumentEntity createTranscriptionDocumentForTranscription(
+        TranscriptionEntity transcriptionEntity, UserAccountEntity userAccount) {
         TranscriptionDocumentEntity transcriptionDocument = new TranscriptionDocumentEntity();
         transcriptionDocument.setTranscription(transcriptionEntity);
         transcriptionDocument.setFileName("aFilename");
@@ -59,11 +64,9 @@ public class TranscriptionDocumentStubComposable {
         transcriptionDocument.setFileSize(100);
         transcriptionDocument.setChecksum("");
 
-        UserAccountEntity userAccount = userAccountRepository.getReferenceById(0);
         transcriptionDocument.setUploadedBy(userAccount);
         transcriptionDocument.setLastModifiedBy(userAccount);
 
-        transcriptionDocumentRepository.saveAndFlush(transcriptionDocument);
-        return transcriptionDocument;
+        return transcriptionDocumentRepository.saveAndFlush(transcriptionDocument);
     }
 }
