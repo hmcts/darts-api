@@ -2,7 +2,7 @@
 
 UPDATE darts.object_hidden_reason
 SET display_state = true
-WHERE ohr_reason IN (1, 2, 3);
+WHERE ohr_id IN (1, 2, 3);
 
 -- Optionally insert new values if they don't already exist
 INSERT INTO darts.object_hidden_reason (ohr_id, ohr_reason, display_name, display_state, display_order, marked_for_deletion)
