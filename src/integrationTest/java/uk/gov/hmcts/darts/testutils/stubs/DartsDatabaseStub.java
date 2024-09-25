@@ -206,6 +206,7 @@ public class DartsDatabaseStub {
     private final TranscriptionDocumentStub transcriptionDocumentStub;
     private final TransformedMediaStub transformedMediaStub;
     private final UserAccountStub userAccountStub;
+    private final TransientObjectDirectoryStub transientObjectDirectoryStub;
 
     private final EntityManager entityManager;
     private final CurrentTimeHelper currentTimeHelper;
