@@ -9,8 +9,6 @@ public record EventSearchResult(
     OffsetDateTime eventTs,
     String eventTypeName,
     String eventText,
-    String chronicleId,
-    String antecedentId,
     Boolean isDataAnonymised,
     Integer courtHouseId,
     String courtHouseDisplayName,

@@ -37,8 +37,6 @@ class EventSearchMapperTest {
             OffsetDateTime.now().minusHours(1),
             "eventTypeName",
             "eventText",
-            "chronicleId",
-            "antecedentId",
             true,
             2,
             "courtHouseDisplayName",

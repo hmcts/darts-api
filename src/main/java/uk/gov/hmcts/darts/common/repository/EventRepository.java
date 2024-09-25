@@ -56,8 +56,6 @@ public interface EventRepository extends JpaRepository<EventEntity, Integer> {
             e.timestamp,
             et.eventName,
             e.eventText,
-            e.chronicleId,
-            e.antecedentId,
             e.isDataAnonymised,
             ch.id,
             ch.displayName,
