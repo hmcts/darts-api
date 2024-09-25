@@ -208,8 +208,8 @@ class AudioControllerPostAdminApproveMediaMarkedForDeletionIntTest extends Integ
         String actualJson = mvcResult.getResponse().getContentAsString();
 
         Problem problem = objectMapper.readValue(actualJson, Problem.class);
-        assertEquals(problem.getType(), AudioApiError.MEDIA_ALREADY_MARKED_FOR_DELETION_REASON_NOT_FOUND.getType());
-        assertEquals(problem.getTitle(), AudioApiError.MEDIA_ALREADY_MARKED_FOR_DELETION_REASON_NOT_FOUND.getTitle());
+        assertEquals(problem.getType(), AudioApiError.MEDIA_MARKED_FOR_DELETION_REASON_NOT_FOUND.getType());
+        assertEquals(problem.getTitle(), AudioApiError.MEDIA_MARKED_FOR_DELETION_REASON_NOT_FOUND.getTitle());
     }
 
     @Test

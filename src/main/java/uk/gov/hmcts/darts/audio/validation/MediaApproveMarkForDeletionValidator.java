@@ -11,7 +11,7 @@ import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.common.repository.ObjectAdminActionRepository;
 import uk.gov.hmcts.darts.common.repository.ObjectHiddenReasonRepository;
 
-import static java.util.Objects.nonNull;
+import static java.util.Objects.isNull;
 
 @Component
 @RequiredArgsConstructor
@@ -37,21 +37,19 @@ public class MediaApproveMarkForDeletionValidator implements Validator<Integer> 
             throw new DartsApiException(AudioApiError.MEDIA_ALREADY_MARKED_FOR_DELETION);
         }
 
-        if (objectAdminActionEntity.getObjectHiddenReason() != null) {
-            ObjectHiddenReasonEntity objectHiddenReasonEntity =
-                objectHiddenReasonRepository.findById(objectAdminActionEntity.getObjectHiddenReason().getId())
-                    .orElseThrow(() -> new DartsApiException(AudioApiError.MEDIA_ALREADY_MARKED_FOR_DELETION_REASON_NOT_FOUND));
-            if (!objectHiddenReasonEntity.isMarkedForDeletion()) {
-                throw new DartsApiException(AudioApiError.MEDIA_ALREADY_MARKED_FOR_DELETION_REASON_NOT_FOUND);
-            }
-            UserAccountEntity currentUser = userIdentity.getUserAccount();
-            UserAccountEntity hiddenBy = objectAdminActionEntity.getHiddenBy();
-            if (!nonNull(hiddenBy)
-                || hiddenBy.getId().equals(currentUser.getId())) {
-                throw new DartsApiException(AudioApiError.USER_CANNOT_APPROVE_THEIR_OWN_DELETION);
-            }
-        } else {
-            throw new DartsApiException(AudioApiError.MEDIA_ALREADY_MARKED_FOR_DELETION_REASON_NOT_FOUND);
+        if (objectAdminActionEntity.getObjectHiddenReason() == null) {
+            throw new DartsApiException(AudioApiError.MEDIA_MARKED_FOR_DELETION_REASON_NOT_FOUND);
+        }
+        ObjectHiddenReasonEntity objectHiddenReasonEntity =
+            objectHiddenReasonRepository.findById(objectAdminActionEntity.getObjectHiddenReason().getId()).get();
+        if (!objectHiddenReasonEntity.isMarkedForDeletion()) {
+            throw new DartsApiException(AudioApiError.MEDIA_MARKED_FOR_DELETION_REASON_NOT_FOUND);
+        }
+        UserAccountEntity currentUser = userIdentity.getUserAccount();
+        UserAccountEntity hiddenBy = objectAdminActionEntity.getHiddenBy();
+        if (isNull(hiddenBy)
+            || hiddenBy.getId().equals(currentUser.getId())) {
+            throw new DartsApiException(AudioApiError.USER_CANNOT_APPROVE_THEIR_OWN_DELETION);
         }
     }
 }

@@ -135,25 +135,22 @@ public class AdminMediaServiceImpl implements AdminMediaService {
     @Override
     @Transactional
     public MediaApproveMarkedForDeletionResponse adminApproveMediaMarkedForDeletion(Integer mediaId) {
-        MediaApproveMarkedForDeletionResponse response;
 
         mediaApproveMarkForDeletionValidator.validate(mediaId);
         List<ObjectAdminActionEntity> objectAdminActionEntityList = objectAdminActionRepository.findByMedia_Id(mediaId);
 
         Optional<MediaEntity> mediaEntityOptional = mediaRepository.findById(mediaId);
-        if (mediaEntityOptional.isPresent()) {
-            MediaEntity mediaEntity = mediaEntityOptional.get();
-            var currentUser = userIdentity.getUserAccount();
-            var objectAdminActionEntity = objectAdminActionEntityList.getFirst();
-            objectAdminActionEntity.setMarkedForManualDeletion(true);
-            objectAdminActionEntity.setMarkedForManualDelBy(currentUser);
-            objectAdminActionEntity.setMarkedForManualDelDateTime(currentTimeHelper.currentOffsetDateTime());
-            objectAdminActionRepository.save(objectAdminActionEntity);
-
-            response = GetAdminMediaResponseMapper.mapMediaApproveMarkedForDeletionResponse(mediaEntity, objectAdminActionEntity);
-        } else {
+        if (mediaEntityOptional.isEmpty()) {
             throw new DartsApiException(AudioApiError.MEDIA_NOT_FOUND);
         }
-        return response;
+        MediaEntity mediaEntity = mediaEntityOptional.get();
+        var currentUser = userIdentity.getUserAccount();
+        var objectAdminActionEntity = objectAdminActionEntityList.getFirst();
+        objectAdminActionEntity.setMarkedForManualDeletion(true);
+        objectAdminActionEntity.setMarkedForManualDelBy(currentUser);
+        objectAdminActionEntity.setMarkedForManualDelDateTime(currentTimeHelper.currentOffsetDateTime());
+        objectAdminActionRepository.save(objectAdminActionEntity);
+
+        return GetAdminMediaResponseMapper.mapMediaApproveMarkedForDeletionResponse(mediaEntity, objectAdminActionEntity);
     }
 }

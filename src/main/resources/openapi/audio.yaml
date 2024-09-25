@@ -355,7 +355,7 @@ paths:
     post:
       tags:
         - Audio
-      summary: Approves deletion of media Media
+      summary: Approves deletion of media
       operationId: postAdminApproveMediaMarkedForDeletion
       parameters:
         - name: media_id

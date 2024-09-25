@@ -98,7 +98,7 @@ class MediaApproveMarkForDeletionValidatorTest {
                                                    () -> mediaApproveMarkForDeletionValidator.validate(mediaId));
 
         // then
-        assertEquals(AudioApiError.MEDIA_ALREADY_MARKED_FOR_DELETION_REASON_NOT_FOUND, exception.getError());
+        assertEquals(AudioApiError.MEDIA_MARKED_FOR_DELETION_REASON_NOT_FOUND, exception.getError());
     }
 
     @Test
@@ -118,7 +118,7 @@ class MediaApproveMarkForDeletionValidatorTest {
                                                    () -> mediaApproveMarkForDeletionValidator.validate(mediaId));
 
         // then
-        assertEquals(AudioApiError.MEDIA_ALREADY_MARKED_FOR_DELETION_REASON_NOT_FOUND, exception.getError());
+        assertEquals(AudioApiError.MEDIA_MARKED_FOR_DELETION_REASON_NOT_FOUND, exception.getError());
     }
 
     @Test
