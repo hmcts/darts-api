@@ -12,6 +12,7 @@ import java.time.OffsetDateTime;
 
 @Component
 @RequiredArgsConstructor
+@Deprecated
 public class AnnotationStub {
     private final UserAccountStubComposable userAccountStub;
     private final AnnotationStubComposable annotationStubComposable;

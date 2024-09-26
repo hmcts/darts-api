@@ -28,6 +28,7 @@ import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum.AP
 
 @Component
 @RequiredArgsConstructor
+@Deprecated
 public class TranscriptionDocumentStub {
 
     private final TranscriptionStub transcriptionStub;

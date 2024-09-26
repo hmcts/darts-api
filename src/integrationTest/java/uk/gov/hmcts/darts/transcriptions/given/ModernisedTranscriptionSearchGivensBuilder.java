@@ -2,13 +2,12 @@ package uk.gov.hmcts.darts.transcriptions.given;
 
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.darts.common.entity.TranscriptionEntity;
+import uk.gov.hmcts.darts.test.common.data.PersistableFactory;
 
 import java.time.LocalDate;
 import java.util.List;
 
 import static java.util.stream.IntStream.range;
-import static uk.gov.hmcts.darts.test.common.data.HearingTestData.someMinimalHearing;
-import static uk.gov.hmcts.darts.test.common.data.TranscriptionTestData.someTranscriptionForHearing;
 
 @Component
 public class ModernisedTranscriptionSearchGivensBuilder extends TranscriptionSearchGivensBuilder {
@@ -75,8 +74,8 @@ public class ModernisedTranscriptionSearchGivensBuilder extends TranscriptionSea
 
     @Override
     public TranscriptionEntity createTranscription() {
-        var hearing = dartsDatabase.save(someMinimalHearing());
-        var transcription = someTranscriptionForHearing(hearing);
+        var hearing = dartsDatabase.save(PersistableFactory.getHearingTestData().someMinimalHearing());
+        var transcription = PersistableFactory.getTranscriptionTestData().someTranscriptionForHearing(hearing);
         dartsDatabase.save(transcription.getCreatedBy());
         return dartsDatabase.save(transcription);
     }

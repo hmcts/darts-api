@@ -94,6 +94,7 @@ import static java.util.Comparator.comparing;
     "PMD.ExcessiveImports", "PMD.ExcessivePublicCount", "PMD.GodClass", "PMD.CouplingBetweenObjects", "PMD.CyclomaticComplexity"})
 @Getter
 @Slf4j
+@Deprecated
 public class DartsDatabaseRetrieval {
 
     private final EntityManagerFactory entityManagerFactory;

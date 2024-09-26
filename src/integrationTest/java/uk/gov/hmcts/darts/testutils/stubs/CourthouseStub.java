@@ -9,6 +9,7 @@ import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
 
 @Component
 @RequiredArgsConstructor
+@Deprecated
 public class CourthouseStub {
     private final CourthouseRepository courthouseRepository;
     private final UserAccountRepository userAccountRepository;

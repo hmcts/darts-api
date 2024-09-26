@@ -1,14 +1,8 @@
 package uk.gov.hmcts.darts.test.common.data;
 
-public interface Persistable<M, T> {
+import uk.gov.hmcts.darts.test.common.data.builder.BuilderHolder;
 
-    /**
-     * NOTE: Objects created by this method will never populate the id field, as this is expected to be populated by the persistence layer upon save.
-     *
-     * @param testSpec a specification that defines the expected entity data
-     * @return an entity that has state specified by the supplied test specification.
-     */
-    M fromSpec(T testSpec);
+public interface Persistable<M extends BuilderHolder<?,?>, T, B> {
 
     /**
      * Return an entity that has only its non-null fields populated. All other fields should be expected to be null.
@@ -19,7 +13,7 @@ public interface Persistable<M, T> {
      *
      * @return a minimally persistent instance of M
      */
-    M someMinimal();
+    T someMinimal();
 
     /**
      * Return an entity that has all of its fields populated.
@@ -31,6 +25,37 @@ public interface Persistable<M, T> {
      *
      * @return a maximally persistent instance of M
      */
-    M someMaximal();
+    default T someMaximal() {
+        throw new UnsupportedOperationException("Not implemented");
+    }
 
+    /**
+     * Returns a builder holder with the minimal builder.
+     * @return The minimal builder holder
+     */
+    M someMinimalBuilderHolder();
+
+    /**
+     * Returns a builder holder with the maximum builder.
+     * @return The minimal builder holder
+     */
+    //TODO: Remove this once implemented in each sub class
+    default M someMaximumBuilderHolder() {
+        throw new UnsupportedOperationException("Not implemented");
+    }
+
+    /**
+     * Returns a the minimum builder.
+     * @return The minimal builder holder
+     */
+    B someMinimalBuilder();
+
+    /**
+     * Returns a the maximum builder.
+     * @return The minimal builder holder
+     */
+    //TODO: Remove this once implemented in each sub class
+    default B someMaximumBuilder() {
+        throw new UnsupportedOperationException("Not implemented");
+    }
 }

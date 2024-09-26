@@ -133,7 +133,7 @@ class BatchCleanupArmResponseFilesServiceImplTest {
             anyInt()
         )).thenReturn(List.of("DARTS_6a374f19a9ce7dc9cc480ea8d4eca0fb.a360"));
 
-        ExternalObjectDirectoryEntity eodEntityGroup1 = ExternalObjectDirectoryTestData.createExternalObjectDirectory(
+        ExternalObjectDirectoryEntity eodEntityGroup1 = new ExternalObjectDirectoryTestData().createExternalObjectDirectory(
             media,
             ExternalLocationTypeEnum.ARM,
             ObjectRecordStatusEnum.STORED,
@@ -152,7 +152,7 @@ class BatchCleanupArmResponseFilesServiceImplTest {
         String createRecordFilename = "6a374f19a9ce7dc9cc480ea8d4eca0fb_a17b9015-e6ad-77c5-8d1e-13259aae1895_1_cr.rsp";
         String uploadFileFilename = "6a374f19a9ce7dc9cc480ea8d4eca0fb_04e6bc3b-952a-79b6-8362-13259aae1895_1_uf.rsp";
 
-        ExternalObjectDirectoryEntity eodEntityForAssociatedFiles1 = ExternalObjectDirectoryTestData.createExternalObjectDirectory(
+        ExternalObjectDirectoryEntity eodEntityForAssociatedFiles1 = new ExternalObjectDirectoryTestData().createExternalObjectDirectory(
             media,
             ExternalLocationTypeEnum.ARM,
             ObjectRecordStatusEnum.STORED,

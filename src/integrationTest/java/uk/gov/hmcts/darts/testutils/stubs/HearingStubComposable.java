@@ -19,6 +19,7 @@ import static uk.gov.hmcts.darts.test.common.data.CourtroomTestData.createCourtR
  */
 @Component
 @RequiredArgsConstructor
+@Deprecated
 public class HearingStubComposable {
     private final RetrieveCoreObjectService retrieveCoreObjectService;
 

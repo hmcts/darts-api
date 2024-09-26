@@ -2,6 +2,7 @@ package uk.gov.hmcts.darts.transcriptions.given;
 
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.darts.common.entity.TranscriptionEntity;
+import uk.gov.hmcts.darts.test.common.data.PersistableFactory;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -9,7 +10,6 @@ import java.util.List;
 
 import static java.util.stream.IntStream.range;
 import static uk.gov.hmcts.darts.test.common.data.CourtroomTestData.someMinimalCourtRoom;
-import static uk.gov.hmcts.darts.test.common.data.TranscriptionTestData.minimalTranscription;
 
 @Component
 @SuppressWarnings("VariableDeclarationUsageDistance")
@@ -73,7 +73,7 @@ public class MigratedTranscriptionSearchGivensBuilder extends TranscriptionSearc
 
     @Override
     public TranscriptionEntity createTranscription() {
-        var transcription = minimalTranscription();
+        var transcription = PersistableFactory.getTranscriptionTestData().minimalTranscription();
         var courtroom = someMinimalCourtRoom();
         dartsDatabase.save(courtroom.getCourthouse());
         dartsDatabase.save(courtroom);

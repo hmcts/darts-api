@@ -1,6 +1,5 @@
 package uk.gov.hmcts.darts.test.common.data;
 
-import lombok.experimental.UtilityClass;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.ProsecutorEntity;
 
@@ -8,16 +7,17 @@ import java.util.List;
 
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.IntStream.rangeClosed;
-import static uk.gov.hmcts.darts.test.common.data.CaseTestData.createSomeMinimalCase;
 import static uk.gov.hmcts.darts.test.common.data.UserAccountTestData.minimalUserAccount;
 
-@UtilityClass
-@SuppressWarnings({"HideUtilityClassConstructor"})
 public class ProsecutorTestData {
+
+    private ProsecutorTestData() {
+
+    }
 
     public static ProsecutorEntity someMinimalProsecutor() {
         var prosecutor = new ProsecutorEntity();
-        prosecutor.setCourtCase(createSomeMinimalCase());
+        prosecutor.setCourtCase(PersistableFactory.getCourtCaseTestData().createSomeMinimalCase());
         prosecutor.setName("some-prosecutor");
         var accountEntity = minimalUserAccount();
         prosecutor.setCreatedBy(accountEntity);
