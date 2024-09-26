@@ -34,6 +34,7 @@ public enum AutomatedTaskName {
     GENERATE_CASE_DOCUMENT_FOR_RETENTION_DATE_TASK_NAME("GenerateCaseDocumentForRetentionDate"),
     CASE_EXPIRY_DELETION_TASK_NAME("CaseExpiryDeletion"),
     ASSOCIATED_OBJECT_DATA_EXPIRY_DELETION_TASK_NAME("AssociatedObjectDataExpiryDeletion"),
+    MANUAL_DELETION("ManualDeletion"),
     ;
     private final String taskName;
 

@@ -335,6 +335,8 @@ darts:
         max-arm-single-mode-items: 100
       expiry-deletion:
         enabled: ${CASE_EXPIRY_DELETION_ENABLED:false}
+      manual-deletion:
+        enabled: ${MANUAL_DELETION_ENABLED:false}
   annotations:
     allowed-extensions:
       - "docx"
