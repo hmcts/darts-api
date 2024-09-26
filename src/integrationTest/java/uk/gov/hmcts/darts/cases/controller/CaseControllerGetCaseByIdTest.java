@@ -1,7 +1,6 @@
 package uk.gov.hmcts.darts.cases.controller;
 
 import org.hamcrest.Matchers;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.skyscreamer.jsonassert.JSONAssert;
 import org.skyscreamer.jsonassert.JSONCompareMode;
@@ -45,8 +44,7 @@ class CaseControllerGetCaseByIdTest extends IntegrationBase {
     @MockBean
     private UserIdentity mockUserIdentity;
 
-    @BeforeEach
-    void setUp() {
+    private void setupData() {
         hearingEntity = dartsDatabase.givenTheDatabaseContainsCourtCaseWithHearingAndCourthouseWithRoom(
             SOME_CASE_NUMBER,
             SOME_COURTHOUSE,
@@ -66,6 +64,7 @@ class CaseControllerGetCaseByIdTest extends IntegrationBase {
 
     @Test
     void casesSearchGetEndpointShouldReturnForbiddenError() throws Exception {
+        setupData();
         when(mockUserIdentity.getUserAccount()).thenReturn(null);
 
         MockHttpServletRequestBuilder requestBuilder = get(endpointUrl, getCaseId(SOME_CASE_NUMBER, SOME_COURTHOUSE));
@@ -75,7 +74,7 @@ class CaseControllerGetCaseByIdTest extends IntegrationBase {
 
     @Test
     void casesSearchGetEndpoint() throws Exception {
-
+        setupData();
         MockHttpServletRequestBuilder requestBuilder = get(endpointUrl, getCaseId(SOME_CASE_NUMBER, SOME_COURTHOUSE));
 
         MvcResult mvcResult = mockMvc.perform(requestBuilder).andExpect(status().isOk()).andReturn();
@@ -102,8 +101,54 @@ class CaseControllerGetCaseByIdTest extends IntegrationBase {
     }
 
     @Test
-    void casesSearchGetEndpointCheckListsAreCorrectSize() throws Exception {
+    void casesSearchGetEndpointIsAnonymised() throws Exception {
+        hearingEntity = dartsDatabase.givenTheDatabaseContainsCourtCaseWithHearingAndCourthouseWithRoom(
+            "123",
+            SOME_COURTHOUSE,
+            SOME_COURTROOM,
+            DateConverterUtil.toLocalDateTime(SOME_DATE_TIME)
+        );
+        CourtCaseEntity courtCase = hearingEntity.getCourtCase();
+        courtCase.setDataAnonymised(true);
+        OffsetDateTime dataAnonymisedTs = OffsetDateTime.parse("2023-01-01T12:00:00Z");
+        courtCase.setDataAnonymisedTs(dataAnonymisedTs);
+        courtCase.addProsecutor(createProsecutorForCase(courtCase));
+        courtCase.addDefendant(createDefendantForCase(courtCase));
+        courtCase.addDefence("aDefence");
+        dartsDatabase.save(courtCase);
 
+        UserAccountEntity testUser = dartsDatabase.getUserAccountStub()
+            .createAuthorisedIntegrationTestUser(hearingEntity.getCourtroom().getCourthouse());
+        when(mockUserIdentity.getUserAccount()).thenReturn(testUser);
+
+        MockHttpServletRequestBuilder requestBuilder = get(endpointUrl, getCaseId("123", SOME_COURTHOUSE));
+
+        MvcResult mvcResult = mockMvc.perform(requestBuilder).andExpect(status().isOk()).andReturn();
+
+        String actualJson = mvcResult.getResponse().getContentAsString();
+        String expectedJson = """
+            {"case_id":<case-id>,
+            "courthouse_id":<courthouse-id>,
+            "courthouse":"SOME-COURTHOUSE",
+            "case_number":"123",
+            "defendants":["some-defendant"],
+            "judges":["123JUDGE1"],
+            "prosecutors":["some-prosecutor"],
+            "defenders":["aDefence"],
+            "reporting_restrictions":[],
+            "is_data_anonymised":true,
+            "data_anonymised_at":"2023-01-01T12:00:00Z"
+            }
+            """;
+
+        expectedJson = expectedJson.replace("<case-id>", hearingEntity.getCourtCase().getId().toString());
+        expectedJson = expectedJson.replace("<courthouse-id>", hearingEntity.getCourtCase().getCourthouse().getId().toString());
+        JSONAssert.assertEquals(expectedJson, actualJson, JSONCompareMode.NON_EXTENSIBLE);
+    }
+
+    @Test
+    void casesSearchGetEndpointCheckListsAreCorrectSize() throws Exception {
+        setupData();
         final Integer caseId = getCaseId(SOME_CASE_NUMBER, SOME_COURTHOUSE);
         MockHttpServletRequestBuilder requestBuilder = get(endpointUrl, caseId);
 
@@ -123,6 +168,7 @@ class CaseControllerGetCaseByIdTest extends IntegrationBase {
 
     @Test
     void casesSearchGetEndpointCaseNotFound() throws Exception {
+        setupData();
         mockMvc.perform(get(endpointUrl, 25))
             .andExpect(status().isNotFound());
     }

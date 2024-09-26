@@ -83,7 +83,5 @@ class CaseExpiryDeletionAutomatedTaskTest {
 
         verify(caseExpiryDeletionAutomatedTask, times(1))
             .getAutomatedTaskBatchSize();
-        verify(caseRepository, times(1))
-            .saveAll(List.of(courtCase1, courtCase2, courtCase3));
     }
 }

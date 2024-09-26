@@ -6,6 +6,9 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
+import uk.gov.hmcts.darts.audio.deleter.impl.outbound.ExternalOutboundDataStoreDeleter;
+import uk.gov.hmcts.darts.audio.entity.MediaRequestEntity;
+import uk.gov.hmcts.darts.audio.enums.MediaRequestStatus;
 import uk.gov.hmcts.darts.audit.api.AuditApi;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
@@ -17,10 +20,17 @@ import uk.gov.hmcts.darts.common.entity.ProsecutorEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionCommentEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionWorkflowEntity;
+import uk.gov.hmcts.darts.common.entity.TransformedMediaEntity;
+import uk.gov.hmcts.darts.common.entity.TransientObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
-import uk.gov.hmcts.darts.common.service.DataAnonymisationServiceImpl;
+import uk.gov.hmcts.darts.common.entity.base.CreatedModifiedBaseEntity;
+import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
+import uk.gov.hmcts.darts.common.repository.CaseRepository;
+import uk.gov.hmcts.darts.common.repository.TransformedMediaRepository;
+import uk.gov.hmcts.darts.common.repository.TransientObjectDirectoryRepository;
 import uk.gov.hmcts.darts.test.common.TestUtils;
 
+import java.time.OffsetDateTime;
 import java.util.List;
 
 import static java.time.temporal.ChronoUnit.SECONDS;
@@ -28,9 +38,12 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.within;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class DataAnonymisationServiceImplTest {
@@ -39,13 +52,40 @@ class DataAnonymisationServiceImplTest {
     private AuditApi auditApi;
     @Mock
     private UserIdentity userIdentity;
+
+    @Mock
+    private CurrentTimeHelper currentTimeHelper;
+    @Mock
+    private ExternalOutboundDataStoreDeleter outboundDataStoreDeleter;
+    @Mock
+    private CaseRepository caseRepository;
+    @Mock
+    private TransformedMediaRepository transformedMediaRepository;
+    @Mock
+    private TransientObjectDirectoryRepository transientObjectDirectoryRepository;
+
+
     @InjectMocks
     @Spy
     private DataAnonymisationServiceImpl dataAnonymisationService;
 
 
+    private OffsetDateTime offsetDateTime;
+
+    private void setupOffsetDateTime() {
+        offsetDateTime = OffsetDateTime.now();
+        when(currentTimeHelper.currentOffsetDateTime()).thenReturn(offsetDateTime);
+    }
+
+    private void assertLastModifiedByAndAt(CreatedModifiedBaseEntity entity, UserAccountEntity userAccount) {
+        assertThat(entity.getLastModifiedBy()).isEqualTo(userAccount);
+        assertThat(entity.getLastModifiedDateTime()).isEqualTo(offsetDateTime);
+    }
+
+
     @Test
     void positiveEventEntityAnonymize() {
+        setupOffsetDateTime();
         EventEntity eventEntity = new EventEntity();
         eventEntity.setEventText("event text");
 
@@ -53,11 +93,12 @@ class DataAnonymisationServiceImplTest {
         dataAnonymisationService.anonymizeEventEntity(userAccount, eventEntity);
         assertThat(eventEntity.getEventText()).matches(TestUtils.UUID_REGEX);
         assertThat(eventEntity.isDataAnonymised()).isTrue();
-        assertThat(eventEntity.getLastModifiedBy()).isEqualTo(userAccount);
+        assertLastModifiedByAndAt(eventEntity, userAccount);
     }
 
     @Test
     void positiveAnonymizeDefenceEntity() {
+        setupOffsetDateTime();
         DefenceEntity defenceEntity = new DefenceEntity();
         defenceEntity.setName("name");
 
@@ -65,22 +106,24 @@ class DataAnonymisationServiceImplTest {
 
         dataAnonymisationService.anonymizeDefenceEntity(userAccount, defenceEntity);
         assertThat(defenceEntity.getName()).matches(TestUtils.UUID_REGEX);
-        assertThat(defenceEntity.getLastModifiedBy()).isEqualTo(userAccount);
+        assertLastModifiedByAndAt(defenceEntity, userAccount);
     }
 
     @Test
     void positiveAnonymizeDefendantEntity() {
+        setupOffsetDateTime();
         DefendantEntity defendantEntity = new DefendantEntity();
         defendantEntity.setName("name");
 
         UserAccountEntity userAccount = new UserAccountEntity();
         dataAnonymisationService.anonymizeDefendantEntity(userAccount, defendantEntity);
         assertThat(defendantEntity.getName()).matches(TestUtils.UUID_REGEX);
-        assertThat(defendantEntity.getLastModifiedBy()).isEqualTo(userAccount);
+        assertLastModifiedByAndAt(defendantEntity, userAccount);
     }
 
     @Test
     void positiveAnonymizeProsecutorEntity() {
+        setupOffsetDateTime();
         ProsecutorEntity prosecutorEntity = new ProsecutorEntity();
         prosecutorEntity.setName("name");
 
@@ -88,11 +131,12 @@ class DataAnonymisationServiceImplTest {
         dataAnonymisationService.anonymizeProsecutorEntity(userAccount, prosecutorEntity);
 
         assertThat(prosecutorEntity.getName()).matches(TestUtils.UUID_REGEX);
-        assertThat(prosecutorEntity.getLastModifiedBy()).isEqualTo(userAccount);
+        assertLastModifiedByAndAt(prosecutorEntity, userAccount);
     }
 
     @Test
     void positiveAnonymizeTranscriptionCommentEntity() {
+        setupOffsetDateTime();
         TranscriptionCommentEntity transcriptionCommentEntity = new TranscriptionCommentEntity();
         transcriptionCommentEntity.setComment("comment");
 
@@ -100,13 +144,14 @@ class DataAnonymisationServiceImplTest {
         dataAnonymisationService.anonymizeTranscriptionCommentEntity(userAccount, transcriptionCommentEntity);
         assertThat(transcriptionCommentEntity.getComment()).matches(TestUtils.UUID_REGEX);
         assertThat(transcriptionCommentEntity.getLastModifiedBy()).isEqualTo(userAccount);
-        assertThat(transcriptionCommentEntity.isDataAnonymised()).isTrue();//This is only set for manual anonymization
-        assertThat(transcriptionCommentEntity.getLastModifiedBy()).isEqualTo(userAccount);
+        assertThat(transcriptionCommentEntity.isDataAnonymised()).isTrue();
+        assertLastModifiedByAndAt(transcriptionCommentEntity, userAccount);
     }
 
 
     @Test
     void assertPositiveAnonymizeCourtCaseEntity() {
+        setupOffsetDateTime();
         CourtCaseEntity courtCase = new CourtCaseEntity();
 
         DefendantEntity defendantEntity1 = mock(DefendantEntity.class);
@@ -132,6 +177,7 @@ class DataAnonymisationServiceImplTest {
         doNothing().when(dataAnonymisationService).anonymizeDefenceEntity(any(), any());
         doNothing().when(dataAnonymisationService).anonymizeProsecutorEntity(any(), any());
         doNothing().when(dataAnonymisationService).anonymizeHearingEntity(any(), any());
+        doNothing().when(dataAnonymisationService).tidyUpTransformedMediaEntities(any(), any());
 
         dataAnonymisationService.anonymizeCourtCaseEntity(userAccount, courtCase);
 
@@ -151,6 +197,8 @@ class DataAnonymisationServiceImplTest {
 
         verify(dataAnonymisationService, times(1)).anonymizeHearingEntity(userAccount, hearingEntity1);
         verify(dataAnonymisationService, times(1)).anonymizeHearingEntity(userAccount, hearingEntity2);
+
+        verify(dataAnonymisationService, times(1)).tidyUpTransformedMediaEntities(userAccount, courtCase);
     }
 
 
@@ -203,6 +251,142 @@ class DataAnonymisationServiceImplTest {
 
         verify(dataAnonymisationService, times(1)).anonymizeEventEntity(userAccount, entityEntity1);
         verify(dataAnonymisationService, times(1)).anonymizeEventEntity(userAccount, entityEntity2);
+    }
+
+
+    @Test
+    void positiveExpireMediaRequest() {
+        setupOffsetDateTime();
+        MediaRequestEntity mediaRequestEntity = new MediaRequestEntity();
+        UserAccountEntity userAccount = new UserAccountEntity();
+
+        dataAnonymisationService.expiredMediaRequest(userAccount, mediaRequestEntity);
+
+        assertThat(mediaRequestEntity.getStatus()).isEqualTo(MediaRequestStatus.EXPIRED);
+        assertLastModifiedByAndAt(mediaRequestEntity, userAccount);
+    }
+
+    @Test
+    void positiveDeleteTransientObjectDirectoryEntrySuccess() {
+        TransientObjectDirectoryEntity transientObjectDirectoryEntity = new TransientObjectDirectoryEntity();
+        when(outboundDataStoreDeleter.delete(any())).thenReturn(true);
+
+        dataAnonymisationService.deleteTransientObjectDirectoryEntity(transientObjectDirectoryEntity);
+
+        verify(outboundDataStoreDeleter, times(1)).delete(transientObjectDirectoryEntity);
+        verify(transientObjectDirectoryRepository, times(1)).delete(transientObjectDirectoryEntity);
+    }
+
+    @Test
+    void negativeDeleteTransientObjectDirectoryEntryFailure() {
+        TransientObjectDirectoryEntity transientObjectDirectoryEntity = new TransientObjectDirectoryEntity();
+        when(outboundDataStoreDeleter.delete(any())).thenReturn(false);
+
+        dataAnonymisationService.deleteTransientObjectDirectoryEntity(transientObjectDirectoryEntity);
+
+        verify(outboundDataStoreDeleter, times(1)).delete(transientObjectDirectoryEntity);
+        verify(transientObjectDirectoryRepository, never()).delete(transientObjectDirectoryEntity);
+
+    }
+
+    @Test
+    void positiveDeleteTransformedMediaEntity() {
+        TransformedMediaEntity transformedMediaEntity = new TransformedMediaEntity();
+        TransientObjectDirectoryEntity transientObjectDirectoryEntity1 = mock(TransientObjectDirectoryEntity.class);
+        TransientObjectDirectoryEntity transientObjectDirectoryEntity2 = mock(TransientObjectDirectoryEntity.class);
+        TransientObjectDirectoryEntity transientObjectDirectoryEntity3 = mock(TransientObjectDirectoryEntity.class);
+        transformedMediaEntity.setTransientObjectDirectoryEntities(
+            List.of(transientObjectDirectoryEntity1, transientObjectDirectoryEntity2, transientObjectDirectoryEntity3));
+
+        doReturn(true).when(dataAnonymisationService).deleteTransientObjectDirectoryEntity(any());
+
+        dataAnonymisationService.deleteTransformedMediaEntity(transformedMediaEntity);
+
+        verify(dataAnonymisationService, times(1)).deleteTransientObjectDirectoryEntity(transientObjectDirectoryEntity1);
+        verify(dataAnonymisationService, times(1)).deleteTransientObjectDirectoryEntity(transientObjectDirectoryEntity2);
+        verify(dataAnonymisationService, times(1)).deleteTransientObjectDirectoryEntity(transientObjectDirectoryEntity3);
+        verify(transformedMediaRepository, times(1)).delete(transformedMediaEntity);
+    }
+
+    @Test
+    void positiveTidyUpTransformedMediaEntities() {
+        CourtCaseEntity courtCase = new CourtCaseEntity();
+        HearingEntity hearingEntity1 = new HearingEntity();
+        HearingEntity hearingEntity2 = new HearingEntity();
+        HearingEntity hearingEntity3 = new HearingEntity();
+        courtCase.setHearings(List.of(hearingEntity1, hearingEntity2, hearingEntity3));
+
+        MediaRequestEntity hearing1MediaRequestEntity1 = new MediaRequestEntity();
+        MediaRequestEntity hearing1MediaRequestEntity2 = new MediaRequestEntity();
+        MediaRequestEntity hearing1MediaRequestEntity3 = new MediaRequestEntity();
+        hearingEntity1.setMediaRequests(List.of(hearing1MediaRequestEntity1, hearing1MediaRequestEntity2, hearing1MediaRequestEntity3));
+
+        MediaRequestEntity hearing2MediaRequestEntity1 = new MediaRequestEntity();
+        MediaRequestEntity hearing2MediaRequestEntity2 = new MediaRequestEntity();
+        MediaRequestEntity hearing2MediaRequestEntity3 = new MediaRequestEntity();
+        hearingEntity2.setMediaRequests(List.of(hearing2MediaRequestEntity1, hearing2MediaRequestEntity2, hearing2MediaRequestEntity3));
+
+        MediaRequestEntity hearing3MediaRequestEntity1 = new MediaRequestEntity();
+        hearingEntity3.setMediaRequests(List.of(hearing3MediaRequestEntity1, hearing1MediaRequestEntity1, hearing2MediaRequestEntity2));
+
+        doNothing().when(dataAnonymisationService).expiredMediaRequest(any(), any());
+        doNothing().when(dataAnonymisationService).deleteTransformedMediaEntity(any());
+
+        UserAccountEntity userAccount = new UserAccountEntity();
+
+
+        TransformedMediaEntity transformedMediaEntity1 = new TransformedMediaEntity();
+        TransformedMediaEntity transformedMediaEntity2 = new TransformedMediaEntity();
+        TransformedMediaEntity transformedMediaEntity3 = new TransformedMediaEntity();
+        TransformedMediaEntity transformedMediaEntity4 = new TransformedMediaEntity();
+        TransformedMediaEntity transformedMediaEntity5 = new TransformedMediaEntity();
+
+        hearing1MediaRequestEntity1.setTransformedMediaEntities(List.of(
+            transformedMediaEntity1, transformedMediaEntity2, transformedMediaEntity3
+        ));
+
+        hearing1MediaRequestEntity1.setTransformedMediaEntities(List.of(
+            transformedMediaEntity1, transformedMediaEntity2, transformedMediaEntity3
+        ));
+
+        hearing1MediaRequestEntity2.setTransformedMediaEntities(List.of(
+            transformedMediaEntity1, transformedMediaEntity3
+        ));
+
+        hearing2MediaRequestEntity1.setTransformedMediaEntities(List.of(
+            transformedMediaEntity4, transformedMediaEntity5
+        ));
+
+        hearing3MediaRequestEntity1.setTransformedMediaEntities(List.of(
+            transformedMediaEntity4
+        ));
+
+
+        dataAnonymisationService.tidyUpTransformedMediaEntities(userAccount, courtCase);
+
+        verify(dataAnonymisationService, times(1)).expiredMediaRequest(userAccount, hearing1MediaRequestEntity1);
+        verify(dataAnonymisationService, times(1)).expiredMediaRequest(userAccount, hearing1MediaRequestEntity2);
+        verify(dataAnonymisationService, times(1)).expiredMediaRequest(userAccount, hearing1MediaRequestEntity3);
+
+
+        verify(dataAnonymisationService, times(1)).expiredMediaRequest(userAccount, hearing2MediaRequestEntity1);
+        verify(dataAnonymisationService, times(1)).expiredMediaRequest(userAccount, hearing2MediaRequestEntity2);
+        verify(dataAnonymisationService, times(1)).expiredMediaRequest(userAccount, hearing2MediaRequestEntity3);
+
+        verify(dataAnonymisationService, times(1)).expiredMediaRequest(userAccount, hearing3MediaRequestEntity1);
+
+
+        verify(dataAnonymisationService, times(1))
+            .deleteTransformedMediaEntity(transformedMediaEntity1);
+        verify(dataAnonymisationService, times(1))
+            .deleteTransformedMediaEntity(transformedMediaEntity2);
+        verify(dataAnonymisationService, times(1))
+            .deleteTransformedMediaEntity(transformedMediaEntity3);
+        verify(dataAnonymisationService, times(1))
+            .deleteTransformedMediaEntity(transformedMediaEntity4);
+        verify(dataAnonymisationService, times(1))
+            .deleteTransformedMediaEntity(transformedMediaEntity5);
+
 
     }
 }

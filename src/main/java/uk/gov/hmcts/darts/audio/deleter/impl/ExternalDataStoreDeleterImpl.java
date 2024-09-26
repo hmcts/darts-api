@@ -28,32 +28,38 @@ public class ExternalDataStoreDeleterImpl<T extends ObjectDirectory> implements 
         List<T> toBeDeleted = finder.findMarkedForDeletion();
 
         for (T entityToBeDeleted : toBeDeleted) {
-            UUID externalLocation = entityToBeDeleted.getLocation();
-            Integer entityId = entityToBeDeleted.getId();
-            int statusId = entityToBeDeleted.getStatusId();
-            log.info(
-                "Deleting storage data with externalLocation={} for entityId={} and statusId={}",
-                externalLocation, entityId, statusId
-            );
-
-            try {
-                deleter.delete(externalLocation);
-            } catch (AzureDeleteBlobException e) {
-                log.error(
-                    "Failed to delete storage data with externalLocation={} for entityId={} and statusId={}",
-                    externalLocation, entityId, statusId, e
-                );
-            }
-
-            repository.delete(entityToBeDeleted);
-            if (entityToBeDeleted instanceof TransientObjectDirectoryEntity transientObjectDirectoryEntity) {
-                log.debug("Deleting transformed media {} with transient object directory id={}",
-                          transientObjectDirectoryEntity.getTransformedMedia().getId(), transientObjectDirectoryEntity.getId());
-                transformedMediaRepository.delete(transientObjectDirectoryEntity.getTransformedMedia());
-            }
-
+            delete(entityToBeDeleted);
         }
         return toBeDeleted;
     }
 
+    @Override
+    public boolean delete(T entityToBeDeleted) {
+        UUID externalLocation = entityToBeDeleted.getLocation();
+        Integer entityId = entityToBeDeleted.getId();
+        boolean deleted = false;
+        int statusId = entityToBeDeleted.getStatusId();
+        log.info(
+            "Deleting storage data with externalLocation={} for entityId={} and statusId={}",
+            externalLocation, entityId, statusId
+        );
+
+        try {
+            deleter.delete(externalLocation);
+            deleted = true;
+        } catch (AzureDeleteBlobException e) {
+            log.error(
+                "Failed to delete storage data with externalLocation={} for entityId={} and statusId={}",
+                externalLocation, entityId, statusId, e
+            );
+        }
+        repository.delete(entityToBeDeleted);
+        if (entityToBeDeleted instanceof TransientObjectDirectoryEntity transientObjectDirectoryEntity
+            && transientObjectDirectoryEntity.getTransformedMedia() != null) {
+            log.debug("Deleting transformed media {} with transient object directory id={}",
+                      transientObjectDirectoryEntity.getTransformedMedia().getId(), transientObjectDirectoryEntity.getId());
+            transformedMediaRepository.delete(transientObjectDirectoryEntity.getTransformedMedia());
+        }
+        return deleted;
+    }
 }

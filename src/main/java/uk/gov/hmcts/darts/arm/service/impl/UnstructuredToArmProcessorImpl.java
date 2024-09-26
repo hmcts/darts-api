@@ -38,7 +38,6 @@ public class UnstructuredToArmProcessorImpl implements UnstructuredToArmProcesso
     private final LogApi logApi;
     private final FileOperationService fileOperationService;
     private final ArmDataManagementApi armDataManagementApi;
-    private final EodHelper eodHelper;
     private final UnstructuredToArmProcessorConfiguration unstructuredToArmProcessorConfiguration;
 
     private static final int BLOB_ALREADY_EXISTS_STATUS_CODE = 409;
@@ -54,7 +53,7 @@ public class UnstructuredToArmProcessorImpl implements UnstructuredToArmProcesso
         List<ExternalObjectDirectoryEntity> allPendingUnstructuredToArmEntities = unstructuredToArmHelper.getEodEntitiesToSendToArm(
             inboundLocation,
             armLocation,
-            unstructuredToArmProcessorConfiguration.getMaxResultSize());
+            unstructuredToArmProcessorConfiguration.getMaxArmSingleModeItems());
 
         for (var currentExternalObjectDirectory : allPendingUnstructuredToArmEntities) {
             try {
@@ -73,7 +72,7 @@ public class UnstructuredToArmProcessorImpl implements UnstructuredToArmProcesso
                         unstructuredExternalObjectDirectory = matchingEntity.get();
                     } else {
                         log.error("Unable to find matching external object directory for {}", armExternalObjectDirectory.getId());
-                        unstructuredToArmHelper.updateExternalObjectDirectoryStatusToFailed(armExternalObjectDirectory, eodHelper.failedArmRawDataStatus(),
+                        unstructuredToArmHelper.updateExternalObjectDirectoryStatusToFailed(armExternalObjectDirectory, EodHelper.failedArmRawDataStatus(),
                                                                                             userAccount);
                         continue;
                     }
@@ -97,7 +96,7 @@ public class UnstructuredToArmProcessorImpl implements UnstructuredToArmProcesso
                 if (!copyRawDataToArmSuccessful) {
                     unstructuredToArmHelper.updateExternalObjectDirectoryStatusToFailed(
                         armExternalObjectDirectory,
-                        eodHelper.failedArmRawDataStatus(), userAccount);
+                        EodHelper.failedArmRawDataStatus(), userAccount);
                 }
                 if (copyRawDataToArmSuccessful && generateAndCopyMetadataToArm(armExternalObjectDirectory, rawFilename, userAccount)) {
                     unstructuredToArmHelper.updateExternalObjectDirectoryStatus(armExternalObjectDirectory, EodHelper.armDropZoneStatus(), userAccount);

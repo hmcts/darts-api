@@ -45,8 +45,7 @@ public class TransientObjectDirectoryStub {
         transientObjectDirectoryEntity.setStatus(objectRecordStatusEntity);
         transientObjectDirectoryEntity.setExternalLocation(externalLocation);
         transientObjectDirectoryEntity.setLastModifiedDateTime(OffsetDateTime.parse("2024-02-12T13:45:00Z"));
-        transientObjectDirectoryRepository.saveAndFlush(transientObjectDirectoryEntity);
-        return transientObjectDirectoryEntity;
+        return transientObjectDirectoryRepository.saveAndFlush(transientObjectDirectoryEntity);
     }
 
 }

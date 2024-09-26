@@ -13,9 +13,11 @@ import uk.gov.hmcts.darts.testutils.PostgresIntegrationBase;
 import uk.gov.hmcts.darts.testutils.stubs.EventStub;
 import uk.gov.hmcts.darts.testutils.stubs.HearingStub;
 
+import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Map;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
@@ -42,7 +44,6 @@ class CleanupCurrentFlagEventProcessorImplTest extends PostgresIntegrationBase {
         assertOnlyOneCurrentPerEventId(eventIdMap);
     }
 
-
     @Test
     void givenEventCleanUpProcessor_whenVersionedEventsAreFound_thenOlderVersionsAreNotMarkedAsNonCurrentWhenHearingsDoNotMatch() {
         dartsDatabase.createCase("Bristol", "case1");
@@ -57,24 +58,61 @@ class CleanupCurrentFlagEventProcessorImplTest extends PostgresIntegrationBase {
         assertOnlyOneCurrentPerEventId(eventIdMap, newEventEntity.getId());
     }
 
+    @Test
+    void givenEventCleanUpProcessor_whenVersionedEventsAreFound_thenOlderVersionsAreMarkedAsNonCurrentWhenHearingsMatchNewEventsInsertedOutOfOrder() {
+        dartsDatabase.createCase("Bristol", "case1");
+        dartsDatabase.createCase("Bristol", "case2");
+        dartsDatabase.createCase("Bristol", "case3");
+        Map<Integer, List<EventEntity>> eventIdMap = eventStub.generateEventIdEventsIncludingZeroEventId(3, 3, false);
+
+        //Update the created at time of the first event to be in the future to simulate out of order event inserts
+        eventIdMap.keySet().forEach(
+            eventId -> {
+                List<EventEntity> eventEntities = eventIdMap.get(eventId);
+                eventEntities.getFirst().setCreatedDateTime(OffsetDateTime.now().plusDays(1));
+                dartsDatabase.save(eventEntities.getFirst());
+            }
+        );
+
+        assertAllEventsAreCurrent(eventIdMap);
+        cleanupCurrentFlagEventProcessor.processCurrentEvent();
+        assertOnlyOneCurrentPerEventId(eventIdMap);
+    }
+
     private void assertOnlyOneCurrentPerEventId(Map<Integer, List<EventEntity>> eventIdMap, Integer... eveIdsToExclude) {
-        List<Integer> eventIds = List.of(eveIdsToExclude);
         eventIdMap.keySet()
             .stream()
             .filter(eventId -> eventId != 0)
-            .forEach(eventId -> Assertions.assertEquals(
-                1, eventRepository.findAllByEventId(eventId)
-                    .stream()
-                    .filter(eventEntity -> {
-                        if (eventIds.contains(eventEntity.getId())) {
-                            assertTrue(eventEntity.getIsCurrent());
-                            return false;
-                        }
-                        return true;
-                    })
-                    .filter(EventEntity::getIsCurrent)
-                    .count())
+            .forEach(
+                eventId -> {
+                    List<EventEntity> eventEntities = eventRepository.findAllByEventId(eventId);
+                    assertOnlyOneCurrentPerEventId(eventEntities, eveIdsToExclude);
+                }
             );
+    }
+
+    private void assertOnlyOneCurrentPerEventId(List<EventEntity> eventEntities, Integer... eveIdsToExclude) {
+        List<Integer> eventIdsToExclude = List.of(eveIdsToExclude);
+        assertThat(eventEntities).hasSizeGreaterThanOrEqualTo(3);
+        OffsetDateTime maxCreatedDateTime = eventEntities
+            .stream()
+            .map(EventEntity::getCreatedDateTime)
+            .max(OffsetDateTime::compareTo)
+            .orElseThrow();
+
+        List<EventEntity> currentEvents = eventEntities
+            .stream()
+            .filter(eventEntity -> {
+                if (eventIdsToExclude.contains(eventEntity.getId())) {
+                    assertTrue(eventEntity.getIsCurrent());
+                    return false;
+                }
+                return true;
+            })
+            .filter(EventEntity::getIsCurrent)
+            .toList();
+        Assertions.assertEquals(1, currentEvents.size());
+        Assertions.assertEquals(maxCreatedDateTime, currentEvents.getFirst().getCreatedDateTime());
     }
 
     private void assertAllEventsAreCurrent(Map<Integer, List<EventEntity>> eventIdMap) {

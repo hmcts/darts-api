@@ -1,0 +1,21 @@
+[
+  {
+    "case_number": "Case1",
+    "courthouse": {
+      "display_name": "SWANSEA"
+    },
+    "courtrooms": [
+      {
+        "name": "COURTROOM1"
+      }
+    ],
+    "judges": [
+      "AJUDGE"
+    ],
+    "defendants": [
+      "aDefendant"
+    ],
+    "is_data_anonymised": true,
+    "data_anonymised_at":"2023-01-01T12:00:00Z"
+  }
+]

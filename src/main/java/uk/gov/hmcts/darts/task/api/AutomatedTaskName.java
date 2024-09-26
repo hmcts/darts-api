@@ -33,8 +33,8 @@ public enum AutomatedTaskName {
     REMOVE_DUPLICATED_EVENTS_TASK_NAME("RemoveDuplicatedEvents"),
     GENERATE_CASE_DOCUMENT_FOR_RETENTION_DATE_TASK_NAME("GenerateCaseDocumentForRetentionDate"),
     CASE_EXPIRY_DELETION_TASK_NAME("CaseExpiryDeletion"),
-    DETS_TO_ARM_TASK_NAME("DetsToArmAutomatedTask");
-
+    DETS_TO_ARM_TASK_NAME("DetsToArmAutomatedTask"),
+    ASSOCIATED_OBJECT_DATA_EXPIRY_DELETION_TASK_NAME("AssociatedObjectDataExpiryDeletion");
     private final String taskName;
 
     private static final Map<String, AutomatedTaskName> BY_TASK_NAME = new HashMap<>();
