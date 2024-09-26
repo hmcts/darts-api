@@ -168,6 +168,7 @@ class ArmServiceFunctionalTest {
             }
         }
         assertFalse(allBlobs.isEmpty());
+        assertFalse(true);
     }
 
     private void uploadBatchedSubmissionBlobs(BinaryData data) {
