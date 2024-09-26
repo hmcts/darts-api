@@ -41,7 +41,8 @@ public class MediaApproveMarkForDeletionValidator implements Validator<Integer> 
             throw new DartsApiException(AudioApiError.MEDIA_MARKED_FOR_DELETION_REASON_NOT_FOUND);
         }
         ObjectHiddenReasonEntity objectHiddenReasonEntity =
-            objectHiddenReasonRepository.findById(objectAdminActionEntity.getObjectHiddenReason().getId()).get();
+            objectHiddenReasonRepository.findById(objectAdminActionEntity.getObjectHiddenReason().getId())
+                .orElseThrow(() -> new DartsApiException(AudioApiError.MEDIA_MARKED_FOR_DELETION_REASON_NOT_FOUND));
         if (!objectHiddenReasonEntity.isMarkedForDeletion()) {
             throw new DartsApiException(AudioApiError.MEDIA_MARKED_FOR_DELETION_REASON_NOT_FOUND);
         }

@@ -89,7 +89,6 @@ class AdminMediaServiceImplApproveMarkedForDeletionTest {
         when(userIdentity.getUserAccount()).thenReturn(userAccount);
 
         when(objectAdminActionRepository.findByMedia_Id(mediaId)).thenReturn(List.of(objectAdminAction));
-        //when(objectHiddenReasonRepository.findById(hiddenReason.getId())).thenReturn(Optional.of(hiddenReason));
         when(userIdentity.getUserAccount()).thenReturn(authorisedByUserAccount);
 
         MediaApproveMarkedForDeletionResponse response = adminMediaService.adminApproveMediaMarkedForDeletion(mediaId);
@@ -107,9 +106,7 @@ class AdminMediaServiceImplApproveMarkedForDeletionTest {
         when(mediaRepository.findById(mediaId)).thenReturn(Optional.empty());
 
         // when
-        DartsApiException exception = assertThrows(DartsApiException.class, () -> {
-            adminMediaService.adminApproveMediaMarkedForDeletion(mediaId);
-        });
+        DartsApiException exception = assertThrows(DartsApiException.class, () -> adminMediaService.adminApproveMediaMarkedForDeletion(mediaId));
 
         //then
         assertEquals(AudioApiError.MEDIA_NOT_FOUND, exception.getError());
