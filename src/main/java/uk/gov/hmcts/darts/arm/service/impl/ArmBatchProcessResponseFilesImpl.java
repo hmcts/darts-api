@@ -100,23 +100,21 @@ public class ArmBatchProcessResponseFilesImpl implements ArmResponseFilesProcess
     @Override
     public void processResponseFiles() {
         userAccount = userIdentity.getUserAccount();
-        ContinuationTokenBlobs continuationTokenBlobs = null;
+        ArrayList<String> inputUploadResponseFiles = new ArrayList<>();
         String prefix = armDataManagementConfiguration.getManifestFilePrefix();
         int maxContinuationBatchSize = armDataManagementConfiguration.getMaxContinuationBatchSize();
 
         try {
-            log.info("About to look for files starting with prefix: {}", prefix);
+            log.info("About to look for IU files starting with prefix: {}", prefix);
             String continuationToken = null;
+            // Iterate through the continuation token until no more data is found. First time round continuation token is null
+            // which sets up the session and when there are no more results the result from listResponseBlobsUsingMarker will be null
             for (int pageSize = 0; pageSize < batchSize; pageSize += maxContinuationBatchSize) {
 
                 ContinuationTokenBlobs continuationTokenData =
                     armDataManagementApi.listResponseBlobsUsingMarker(prefix, maxContinuationBatchSize, continuationToken);
                 if (nonNull(continuationTokenData)) {
-                    if (isNull(continuationToken)) {
-                        continuationTokenBlobs = continuationTokenData;
-                    } else {
-                        continuationTokenBlobs.getBlobNamesAndPaths().addAll(continuationTokenData.getBlobNamesAndPaths());
-                    }
+                    inputUploadResponseFiles.addAll(continuationTokenData.getBlobNamesAndPaths());
                     continuationToken = continuationTokenData.getContinuationToken();
                 }
                 // if no more data found break out of loop
@@ -127,8 +125,8 @@ public class ArmBatchProcessResponseFilesImpl implements ArmResponseFilesProcess
         } catch (Exception e) {
             log.error("Unable to find response file for prefix: {} - {}", prefix, e.getMessage());
         }
-        if (nonNull(continuationTokenBlobs) && CollectionUtils.isNotEmpty(continuationTokenBlobs.getBlobNamesAndPaths())) {
-            for (String inputUploadBlob : continuationTokenBlobs.getBlobNamesAndPaths()) {
+        if (CollectionUtils.isNotEmpty(inputUploadResponseFiles)) {
+            for (String inputUploadBlob : inputUploadResponseFiles) {
                 Instant start = Instant.now();
                 log.info("ARM PERFORMANCE PULL START for manifest {} started at {}", inputUploadBlob, start);
                 processInputUploadBlob(inputUploadBlob);
