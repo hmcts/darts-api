@@ -1,10 +1,9 @@
-package uk.gov.hmcts.darts.audio.validator;
+package uk.gov.hmcts.darts.audio.validation;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import uk.gov.hmcts.darts.audio.exception.AudioApiError;
 import uk.gov.hmcts.darts.audio.model.MediaSearchData;
-import uk.gov.hmcts.darts.audio.validation.SearchMediaValidator;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
 
 import java.time.OffsetDateTime;

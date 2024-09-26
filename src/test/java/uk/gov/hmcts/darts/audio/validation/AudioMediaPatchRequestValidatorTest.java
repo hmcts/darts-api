@@ -1,4 +1,4 @@
-package uk.gov.hmcts.darts.audio.validator;
+package uk.gov.hmcts.darts.audio.validation;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -9,7 +9,6 @@ import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.darts.audio.entity.MediaRequestEntity;
 import uk.gov.hmcts.darts.audio.exception.AudioRequestsApiError;
-import uk.gov.hmcts.darts.audio.validation.AudioMediaPatchRequestValidator;
 import uk.gov.hmcts.darts.audiorequests.model.MediaPatchRequest;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
@@ -18,8 +17,6 @@ import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
 import uk.gov.hmcts.darts.common.validation.IdRequest;
 
 import java.util.Optional;
-
-import static org.mockito.ArgumentMatchers.eq;
 
 @ExtendWith(MockitoExtension.class)
 class AudioMediaPatchRequestValidatorTest {
@@ -40,7 +37,7 @@ class AudioMediaPatchRequestValidatorTest {
         IdRequest<MediaPatchRequest> mediaPatchRequest = new IdRequest<>(mediaPatchRequestId, mediaRequestId);
 
         MediaRequestEntity entityResponse = new MediaRequestEntity();
-        Mockito.when(mediaRequestRepository.findById(eq(mediaRequestId))).thenReturn(Optional.of(entityResponse));
+        Mockito.when(mediaRequestRepository.findById(mediaRequestId)).thenReturn(Optional.of(entityResponse));
 
         audioMediaPatchRequestValidator.validate(mediaPatchRequest);
     }
@@ -57,8 +54,8 @@ class AudioMediaPatchRequestValidatorTest {
         MediaRequestEntity entityResponse = new MediaRequestEntity();
         UserAccountEntity userAccountEntity = new UserAccountEntity();
 
-        Mockito.when(mediaRequestRepository.findById(eq(mediaRequestId))).thenReturn(Optional.of(entityResponse));
-        Mockito.when(userAccountRepository.findById(eq(ownerIntger))).thenReturn(Optional.of(userAccountEntity));
+        Mockito.when(mediaRequestRepository.findById(mediaRequestId)).thenReturn(Optional.of(entityResponse));
+        Mockito.when(userAccountRepository.findById(ownerIntger)).thenReturn(Optional.of(userAccountEntity));
 
         audioMediaPatchRequestValidator.validate(mediaPatchRequest);
     }
@@ -72,7 +69,7 @@ class AudioMediaPatchRequestValidatorTest {
         mediaPatchRequestId.setOwnerId(ownerIntger);
         IdRequest<MediaPatchRequest> mediaPatchRequest = new IdRequest<>(mediaPatchRequestId, mediaRequestId);
 
-        Mockito.when(mediaRequestRepository.findById(eq(mediaRequestId))).thenReturn(Optional.empty());
+        Mockito.when(mediaRequestRepository.findById(mediaRequestId)).thenReturn(Optional.empty());
 
         DartsApiException exception = Assertions.assertThrows(DartsApiException.class,
                                                               () -> audioMediaPatchRequestValidator.validate(mediaPatchRequest));
@@ -90,8 +87,8 @@ class AudioMediaPatchRequestValidatorTest {
 
         MediaRequestEntity entityResponse = new MediaRequestEntity();
 
-        Mockito.when(mediaRequestRepository.findById(eq(mediaRequestId))).thenReturn(Optional.of(entityResponse));
-        Mockito.when(userAccountRepository.findById(eq(ownerIntger))).thenReturn(Optional.empty());
+        Mockito.when(mediaRequestRepository.findById(mediaRequestId)).thenReturn(Optional.of(entityResponse));
+        Mockito.when(userAccountRepository.findById(ownerIntger)).thenReturn(Optional.empty());
 
         DartsApiException exception = Assertions.assertThrows(DartsApiException.class,
                                                               () -> audioMediaPatchRequestValidator.validate(mediaPatchRequest));
