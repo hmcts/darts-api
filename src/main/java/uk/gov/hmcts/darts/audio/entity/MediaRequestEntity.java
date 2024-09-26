@@ -96,6 +96,4 @@ public class MediaRequestEntity extends CreatedModifiedBaseEntity {
 
     @OneToMany(fetch = FetchType.LAZY, mappedBy = TransformedMediaEntity_.MEDIA_REQUEST)
     private List<TransformedMediaEntity> transformedMediaEntities = new ArrayList<>();
-
 }
-

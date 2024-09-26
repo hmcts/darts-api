@@ -9,8 +9,11 @@ import java.util.Set;
 import static org.apache.commons.lang3.RandomStringUtils.random;
 import static uk.gov.hmcts.darts.test.common.data.SecurityGroupTestData.buildGroupForRoleAndCourthouse;
 
-@SuppressWarnings({"HideUtilityClassConstructor"})
 public class UserAccountTestData {
+
+    private UserAccountTestData() {
+
+    }
 
     public static UserAccountEntity minimalUserAccount() {
         var postfix = random(10, false, true);

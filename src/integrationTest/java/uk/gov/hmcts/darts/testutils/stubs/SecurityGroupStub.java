@@ -21,6 +21,7 @@ import java.util.Set;
 
 @RequiredArgsConstructor
 @Component
+@Deprecated
 public class SecurityGroupStub {
     private final SecurityGroupRepository securityGroupRepository;
     private final UserAccountRepository userAccountRepository;

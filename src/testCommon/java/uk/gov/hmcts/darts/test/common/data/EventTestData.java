@@ -1,6 +1,5 @@
 package uk.gov.hmcts.darts.test.common.data;
 
-import lombok.experimental.UtilityClass;
 import uk.gov.hmcts.darts.common.entity.EventEntity;
 import uk.gov.hmcts.darts.common.entity.EventHandlerEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
@@ -15,8 +14,6 @@ import static uk.gov.hmcts.darts.event.enums.EventStatus.AUDIO_LINK_NOT_DONE_MOD
 import static uk.gov.hmcts.darts.test.common.data.CourtroomTestData.someMinimalCourtRoom;
 
 
-@UtilityClass
-@SuppressWarnings({"HideUtilityClassConstructor"})
 public class EventTestData {
 
     public static final int REPORTING_RESTRICTIONS_LIFTED_DB_ID = 192;
@@ -27,6 +24,10 @@ public class EventTestData {
     public static final List<Integer> REPORTING_RESTRICTIONS_DB_IDS = List.of(54, 183, 184, 185, 186, 187, 188, 189, 190, 191);
 
     private static final String LOG_ENTRY_EVENT_NAME = "LOG";
+
+    private EventTestData() {
+
+    }
 
     public static EventEntity someMinimalEvent() {
         var eventEntity = new EventEntity();
@@ -56,7 +57,7 @@ public class EventTestData {
             new Random().nextInt(REPORTING_RESTRICTIONS_DB_IDS.size()));
     }
 
-    private EventHandlerEntity createTestEventHandlerEntity(String eventName) {
+    private static EventHandlerEntity createTestEventHandlerEntity(String eventName) {
         EventHandlerEntity entity = new EventHandlerEntity();
         entity.setId(1);
         entity.setEventName(eventName);

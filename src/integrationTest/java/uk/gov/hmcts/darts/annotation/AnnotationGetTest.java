@@ -13,11 +13,14 @@ import uk.gov.hmcts.darts.common.entity.AnnotationDocumentEntity;
 import uk.gov.hmcts.darts.common.entity.AnnotationEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum;
+import uk.gov.hmcts.darts.test.common.data.PersistableFactory;
 import uk.gov.hmcts.darts.testutils.GivenBuilder;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 
 import java.io.InputStream;
 import java.time.OffsetDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 import static org.mockito.ArgumentMatchers.anyList;
@@ -30,8 +33,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.STORED;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.JUDICIARY;
-import static uk.gov.hmcts.darts.test.common.data.AnnotationTestData.minimalAnnotationEntity;
-import static uk.gov.hmcts.darts.test.common.data.HearingTestData.someMinimalHearing;
 
 @AutoConfigureMockMvc
 class AnnotationGetTest extends IntegrationBase {
@@ -131,14 +132,13 @@ class AnnotationGetTest extends IntegrationBase {
     }
 
     private AnnotationEntity someAnnotationCreatedBy(UserAccountEntity userAccount) {
-        var annotation = minimalAnnotationEntity();
-        annotation.setDeleted(false);
-        annotation.setCurrentOwner(userAccount);
-        annotation.setCreatedBy(userAccount);
-        annotation.setLastModifiedBy(userAccount);
-        annotation.addHearing(someMinimalHearing());
-        dartsPersistence.save(annotation);
-        return annotation;
+        var annotation = PersistableFactory.getAnnotationTestData().someMinimalBuilder()
+                .deleted(false).currentOwner(userAccount)
+                .createdBy(userAccount)
+                .lastModifiedBy(userAccount)
+                .hearingList(new ArrayList<>(List.of(PersistableFactory.getHearingTestData().someMinimalHearing())));
+
+        return dartsPersistence.save(annotation.build().getEntity());
     }
 
 }

@@ -10,6 +10,7 @@ import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.event.model.DartsEvent;
 import uk.gov.hmcts.darts.event.service.EventDispatcher;
+import uk.gov.hmcts.darts.test.common.data.PersistableFactory;
 import uk.gov.hmcts.darts.testutils.stubs.NodeRegisterStub;
 
 import java.util.List;
@@ -19,7 +20,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.when;
-import static uk.gov.hmcts.darts.test.common.data.CaseTestData.someMinimalCase;
 
 class DarStopHandlerTest extends HandlerTestData {
 
@@ -46,7 +46,7 @@ class DarStopHandlerTest extends HandlerTestData {
 
     @Test
     void throwsOnUnknownCourthouse() {
-        dartsDatabase.save(someMinimalCase());
+        dartsDatabase.save(PersistableFactory.getCourtCaseTestData().someMinimalCase());
         DartsEvent event = someMinimalDartsEvent().courthouse(SOME_ROOM);
         event.setCaseNumbers(List.of("123"));
         event.setDateTime(today);

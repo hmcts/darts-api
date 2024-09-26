@@ -96,7 +96,7 @@ import uk.gov.hmcts.darts.retention.enums.CaseRetentionStatus;
 import uk.gov.hmcts.darts.retention.enums.RetentionPolicyEnum;
 import uk.gov.hmcts.darts.test.common.data.CourthouseTestData;
 import uk.gov.hmcts.darts.test.common.data.DailyListTestData;
-import uk.gov.hmcts.darts.test.common.data.MediaRequestTestData;
+import uk.gov.hmcts.darts.test.common.data.PersistableFactory;
 import uk.gov.hmcts.darts.testutils.TransactionalUtil;
 
 import java.io.IOException;
@@ -463,7 +463,7 @@ public class DartsDatabaseStub {
         HearingEntity hearing = createHearing("NEWCASTLE", "Int Test Courtroom 2", "2", LocalDateTime.of(2023, 6, 10, 10, 0, 0));
 
         return dartsPersistence.save(
-            MediaRequestTestData.createCurrentMediaRequest(
+            PersistableFactory.getMediaRequestTestData().createCurrentMediaRequest(
                 hearing,
                 requestor,
                 OffsetDateTime.parse("2023-06-26T13:00:00Z"),
@@ -477,14 +477,14 @@ public class DartsDatabaseStub {
     public MediaRequestEntity createAndLoadNonAccessedCurrentMediaRequestEntity(UserAccountEntity requestor,
                                                                                 AudioRequestType audioRequestType) {
 
-        MediaRequestEntity mediaRequestEntity = new MediaRequestTestData().fromSpec(MediaRequestTestData.TestSpec.builder()
+        MediaRequestEntity mediaRequestEntity =  PersistableFactory.getMediaRequestTestData().someMinimalBuilder()
                                                                                         .requestor(requestor)
                                                                                         .currentOwner(requestor)
                                                                                         .startTime(OffsetDateTime.parse("2023-06-26T13:00:00Z"))
                                                                                         .endTime(OffsetDateTime.parse("2023-06-26T14:00:00Z"))
                                                                                         .requestType(audioRequestType)
                                                                                         .status(MediaRequestStatus.COMPLETED)
-                                                                                        .build());
+                                                                                        .build().getEntity();
         dartsPersistence.save(mediaRequestEntity);
 
         OffsetDateTime expiryTime = OffsetDateTime.of(2023, 7, 2, 13, 0, 0, 0, UTC);
