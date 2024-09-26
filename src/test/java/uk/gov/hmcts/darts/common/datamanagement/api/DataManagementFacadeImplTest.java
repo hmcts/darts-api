@@ -12,6 +12,7 @@ import org.junit.jupiter.api.io.TempDir;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.core.io.Resource;
 import uk.gov.hmcts.darts.arm.service.impl.ArmApiServiceImpl;
 import uk.gov.hmcts.darts.audio.helper.UnstructuredDataHelper;
 import uk.gov.hmcts.darts.common.datamanagement.component.impl.DownloadResponseMetaData;
@@ -39,10 +40,12 @@ import uk.gov.hmcts.darts.datamanagement.config.DataManagementConfiguration;
 import uk.gov.hmcts.darts.datamanagement.exception.FileNotDownloadedException;
 import uk.gov.hmcts.darts.datamanagement.model.BlobClientUploadResponseImpl;
 import uk.gov.hmcts.darts.datamanagement.service.DataManagementService;
+import uk.gov.hmcts.darts.test.common.FileStore;
 
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -64,7 +67,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-@ExtendWith(MockitoExtension.class)
+@ExtendWith({MockitoExtension.class})
 class DataManagementFacadeImplTest {
 
     @Mock
@@ -139,18 +142,30 @@ class DataManagementFacadeImplTest {
         storedStatus.setId(2);
         lenient().when(objectRecordStatusRepository.getReferenceById(anyInt())).thenReturn(storedStatus);
 
-        lenient().when(downloadResponseMetaDataMock.getInputStream()).thenReturn(toInputStream("testInputStream", UTF_8));
+        Resource resource = mock(Resource.class);
+
+        lenient().when(objectRecordStatusRepository.getReferenceById(anyInt())).thenReturn(storedStatus);
+
+        lenient().when(dataManagementConfiguration.getTempBlobWorkspace()).thenReturn("/tmp");
+        lenient().when(resource.getInputStream()).thenReturn(toInputStream("testInputStream", UTF_8));
+        lenient().when(downloadResponseMetaDataMock.getResource()).thenReturn(resource);
         lenient().when(downloadResponseMetaDataMock.getContainerTypeUsedToDownload()).thenReturn(DatastoreContainerType.ARM);
     }
 
     @AfterEach
+    @SuppressWarnings("SignatureDeclareThrowsException")
     public void teardown() throws IOException {
         fileBasedDownloadResponseMetaData.close();
         downloadResponseMetaData.close();
+
+        FileStore.getFileStore().remove();
+
+        assertEquals(0, Files.list(tempDirectory.toPath()).count());
     }
 
     @Test
     void testDownloadOfFacadeWithArm() throws Exception {
+
         final List<BlobContainerDownloadable> blobContainerDownloadables = new ArrayList<>();
 
         BlobContainerDownloadable downloadable = mock(BlobContainerDownloadable.class);
@@ -175,7 +190,6 @@ class DataManagementFacadeImplTest {
         try (DownloadResponseMetaData downloadResponseMetaData = dmFacade.retrieveFileFromStorage(entitiesToDownload)) {
             assertEquals(DatastoreContainerType.ARM, downloadResponseMetaData.getContainerTypeUsedToDownload());
         }
-
     }
 
     @Test
@@ -659,12 +673,12 @@ class DataManagementFacadeImplTest {
     }
 
     private BlobContainerDownloadable setupDownloadableContainer(DatastoreContainerType containerType,
-                                                                 boolean processSuccess) throws FileNotDownloadedException {
+                                                                 boolean processSuccess) throws IOException, FileNotDownloadedException {
         BlobContainerDownloadable downloadable = mock(BlobContainerDownloadable.class);
 
         BinaryData data = BinaryData.fromString("Test String");
 
-        fileBasedDownloadResponseMetaData.markInputStream(data.toStream());
+        fileBasedDownloadResponseMetaData.setInputStream(data.toStream(), dataManagementConfiguration);
 
         lenient().when(downloadable.getContainerName(containerType)).thenReturn(Optional.of("test"));
         if (processSuccess) {

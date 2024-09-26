@@ -10,6 +10,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.darts.audio.component.impl.SystemCommandExecutorImpl;
 import uk.gov.hmcts.darts.audio.config.AudioConfigurationProperties;
 import uk.gov.hmcts.darts.audio.model.AudioFileInfo;
+import uk.gov.hmcts.darts.test.common.FileStore;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -157,7 +158,7 @@ class AudioOperationServiceImplTest {
         when(audioConfigurationProperties.getTrimWorkspace()).thenReturn(tempDirectory.toString());
 
         when(systemCommandExecutor.execute(any())).thenReturn(Boolean.TRUE);
-        Path file = Files.createFile(tempDirectory.resolve("original.mp2"));
+        Path file = FileStore.getFileStore().create(tempDirectory.resolve("original.mp2")).toPath();
 
         AudioFileInfo audioFileInfo = audioOperationService.trim(
             WORKSPACE_DIR,
@@ -245,7 +246,7 @@ class AudioOperationServiceImplTest {
     }
 
     private Path createFile(Path path, String name) throws IOException {
-        return Files.createFile(path.resolve(name));
+        return FileStore.getFileStore().create(path, Path.of(name)).toPath();
     }
 
     @Test

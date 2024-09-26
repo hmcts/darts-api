@@ -13,6 +13,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.testcontainers.containers.GenericContainer;
+import uk.gov.hmcts.darts.test.common.FileStore;
 import uk.gov.hmcts.darts.test.common.LogUtil;
 import uk.gov.hmcts.darts.test.common.MemoryLogAppender;
 import uk.gov.hmcts.darts.testutils.stubs.DartsDatabaseRetrieval;
@@ -102,8 +103,16 @@ public class IntegrationBase {
     }
 
     @AfterEach
-    void clearTestData() {
+    @SuppressWarnings("PMD.SignatureDeclareThrowsException")
+    void clearTestData() throws Exception {
         logAppender.reset();
+        FileStore.getFileStore().remove();
+        checkCleanup();
+    }
+
+    @SuppressWarnings("PMD.SignatureDeclareThrowsException")
+    protected void checkCleanup() throws Exception{
+
     }
 
     protected void givenBearerTokenExists(String email) {
