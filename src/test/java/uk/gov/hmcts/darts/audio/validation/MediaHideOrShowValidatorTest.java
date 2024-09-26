@@ -1,4 +1,4 @@
-package uk.gov.hmcts.darts.audio.validator;
+package uk.gov.hmcts.darts.audio.validation;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -10,8 +10,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.darts.audio.exception.AudioApiError;
 import uk.gov.hmcts.darts.audio.model.AdminActionRequest;
 import uk.gov.hmcts.darts.audio.model.MediaHideRequest;
-import uk.gov.hmcts.darts.audio.validation.MediaHideOrShowValidator;
-import uk.gov.hmcts.darts.audio.validation.MediaIdValidator;
 import uk.gov.hmcts.darts.common.entity.ObjectAdminActionEntity;
 import uk.gov.hmcts.darts.common.entity.ObjectHiddenReasonEntity;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
@@ -132,7 +130,7 @@ class MediaHideOrShowValidatorTest {
 
         Mockito.verify(mediaIdValidator, times(1)).validate(mediaId);
     }
-    
+
     @Test
     void failWhenHideWithActionRequestAndWithoutCorrectReason() {
         Integer mediaId = 200;
