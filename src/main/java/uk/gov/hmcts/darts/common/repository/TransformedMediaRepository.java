@@ -36,7 +36,7 @@ public interface TransformedMediaRepository extends JpaRepository<TransformedMed
         tm.outputFilename,
         tm.outputFormat,
         tm.lastAccessed)
-        
+
         FROM TransformedMediaEntity tm, MediaRequestEntity mr, HearingEntity he, CourtCaseEntity case, CourthouseEntity ch
         WHERE tm.mediaRequest = mr
         and mr.hearing = he
@@ -89,7 +89,7 @@ public interface TransformedMediaRepository extends JpaRepository<TransformedMed
            (:requestedBy IS NULL OR (tm.createdBy.userFullName ILIKE CONCAT('%', cast (:requestedBy as text), '%'))) AND
            ((cast(:requestedAtFrom as TIMESTAMP)) IS NULL OR media.createdDateTime >= :requestedAtFrom) AND
            ((cast(:requestedAtTo as TIMESTAMP)) IS NULL OR (media.createdDateTime <= :requestedAtTo))
-        """)
+           """)
     List<TransformedMediaEntity> findTransformedMedia(Integer mediaId,
                                                       String caseNumber,
                                                       String courtHouseDisplayName,

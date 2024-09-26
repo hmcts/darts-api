@@ -8,6 +8,7 @@ import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 
 @Component
 @RequiredArgsConstructor
+@Deprecated
 public class CourtroomStub {
     private final CourtroomStubComposable courtroomStubComposable;
     private final CourthouseStubComposable courthouseStubComposable;

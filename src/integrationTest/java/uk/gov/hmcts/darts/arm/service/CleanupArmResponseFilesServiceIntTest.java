@@ -13,7 +13,6 @@ import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
-import uk.gov.hmcts.darts.test.common.data.MediaTestData;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 
 import java.time.LocalDateTime;
@@ -33,6 +32,7 @@ import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_RESPONS
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_RESPONSE_MANIFEST_FAILED;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_RESPONSE_PROCESSING_FAILED;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.STORED;
+import static uk.gov.hmcts.darts.test.common.data.PersistableFactory.getMediaTestData;
 
 class CleanupArmResponseFilesServiceIntTest extends IntegrationBase {
 
@@ -61,15 +61,14 @@ class CleanupArmResponseFilesServiceIntTest extends IntegrationBase {
             HEARING_DATE
         );
 
-        savedMedia = dartsDatabase.save(
-            MediaTestData.createMediaWith(
+        savedMedia = dartsPersistence.save(
+            getMediaTestData().createMediaWith(
                 hearing.getCourtroom(),
                 OffsetDateTime.parse("2023-09-26T13:00:00Z"),
                 OffsetDateTime.parse("2023-09-26T13:45:00Z"),
                 1
             ));
-        dartsDatabase.save(savedMedia);
-
+        savedMedia = dartsDatabase.save(savedMedia);
     }
 
     @Test

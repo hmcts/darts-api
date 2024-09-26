@@ -2,6 +2,7 @@ package uk.gov.hmcts.darts.arm.service;
 
 import com.azure.core.util.BinaryData;
 import com.azure.storage.blob.models.BlobStorageException;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -22,10 +23,9 @@ import uk.gov.hmcts.darts.common.entity.TranscriptionEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
 import uk.gov.hmcts.darts.test.common.TestUtils;
-import uk.gov.hmcts.darts.test.common.data.MediaTestData;
+import uk.gov.hmcts.darts.test.common.data.PersistableFactory;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 import uk.gov.hmcts.darts.testutils.stubs.AuthorisationStub;
-import uk.gov.hmcts.darts.testutils.stubs.TranscriptionStub;
 
 import java.io.File;
 import java.io.IOException;
@@ -33,7 +33,6 @@ import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -48,6 +47,7 @@ import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_RESPONS
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_RESPONSE_MANIFEST_FAILED;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_RESPONSE_PROCESSING_FAILED;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.STORED;
+import static uk.gov.hmcts.darts.test.common.data.PersistableFactory.getMediaTestData;
 
 
 class ArmResponseFilesProcessorIntTest extends IntegrationBase {
@@ -84,32 +84,34 @@ class ArmResponseFilesProcessorIntTest extends IntegrationBase {
         );
     }
 
+    @BeforeEach
+    void startHibernateSession() {
+        openInViewUtil.openEntityManager();
+    }
+
+    @AfterEach
+    void closeHibernateSession() {
+        openInViewUtil.closeEntityManager();
+    }
+
     @Test
     void givenProcessResponseFilesUnableToFindInputUploadFile() {
-        HearingEntity hearing = dartsDatabase.createHearing(
-            "NEWCASTLE",
-            "Int Test Courtroom 2",
-            "2",
-            HEARING_DATE
-        );
+        HearingEntity hearing = PersistableFactory.getHearingTestData().someMinimal();
 
-        MediaEntity savedMedia = dartsDatabase.save(
-            MediaTestData.createMediaWith(
+        MediaEntity savedMedia = dartsPersistence.save(
+            getMediaTestData().createMediaWith(
                 hearing.getCourtroom(),
                 OffsetDateTime.parse("2023-09-26T13:00:00Z"),
                 OffsetDateTime.parse("2023-09-26T13:45:00Z"),
                 1
             ));
 
-        ExternalObjectDirectoryEntity armEod = dartsDatabase.getExternalObjectDirectoryStub().createExternalObjectDirectory(
-            savedMedia,
-            ARM_DROP_ZONE,
-            ARM,
-            UUID.randomUUID()
-        );
+        ExternalObjectDirectoryEntity armEod = PersistableFactory.getExternalObjectDirectoryTestData().someMinimalBuilder()
+            .media(savedMedia).status(dartsDatabase.getObjectRecordStatusEntity(ARM_DROP_ZONE))
+            .checksum(null).verificationAttempts(1).externalLocationType(dartsDatabase.getExternalLocationTypeEntity(ARM)).build();
 
         armEod.setTransferAttempts(1);
-        dartsDatabase.save(armEod);
+        armEod = dartsPersistence.save(armEod);
 
         String prefix = String.format("%d_%d_1", armEod.getId(), savedMedia.getId());
         List<String> responseBlobs = new ArrayList<>();
@@ -133,30 +135,22 @@ class ArmResponseFilesProcessorIntTest extends IntegrationBase {
 
     @Test
     void givenProcessResponseFilesGetInputUploadFileThrowsException() {
-        HearingEntity hearing = dartsDatabase.createHearing(
-            "NEWCASTLE",
-            "Int Test Courtroom 2",
-            "2",
-            HEARING_DATE
-        );
+        HearingEntity hearing = PersistableFactory.getHearingTestData().someMinimal();
 
-        MediaEntity savedMedia = dartsDatabase.save(
-            MediaTestData.createMediaWith(
+        MediaEntity savedMedia = dartsPersistence.save(
+            getMediaTestData().createMediaWith(
                 hearing.getCourtroom(),
                 OffsetDateTime.parse("2023-09-26T13:00:00Z"),
                 OffsetDateTime.parse("2023-09-26T13:45:00Z"),
                 1
             ));
 
-        ExternalObjectDirectoryEntity armEod = dartsDatabase.getExternalObjectDirectoryStub().createExternalObjectDirectory(
-            savedMedia,
-            ARM_DROP_ZONE,
-            ARM,
-            UUID.randomUUID()
-        );
+        ExternalObjectDirectoryEntity armEod = PersistableFactory.getExternalObjectDirectoryTestData()
+          .someMinimalBuilder().media(savedMedia).status(dartsDatabase.getObjectRecordStatusEntity(ARM_DROP_ZONE))
+            .checksum(null).verificationAttempts(1).externalLocationType(dartsDatabase.getExternalLocationTypeEntity(ARM)).build();
 
         armEod.setTransferAttempts(1);
-        dartsDatabase.save(armEod);
+        armEod = dartsPersistence.save(armEod);
 
         String prefix = String.format("%d_%d_1", armEod.getId(), savedMedia.getId());
         when(armDataManagementApi.listResponseBlobs(prefix)).thenThrow(new BlobStorageException("Failed", null, null));
@@ -180,30 +174,23 @@ class ArmResponseFilesProcessorIntTest extends IntegrationBase {
 
     @Test
     void givenProcessResponseFilesFoundInputUploadFilenameUnableToParseFilename() {
-        HearingEntity hearing = dartsDatabase.createHearing(
-            "NEWCASTLE",
-            "Int Test Courtroom 2",
-            "2",
-            HEARING_DATE
-        );
+        HearingEntity hearing = PersistableFactory.getHearingTestData().someMinimalBuilder()
+            .hearingDate(HEARING_DATE.toLocalDate()).build();
 
-        MediaEntity savedMedia = dartsDatabase.save(
-            MediaTestData.createMediaWith(
+        MediaEntity savedMedia = dartsPersistence.save(
+            getMediaTestData().createMediaWith(
                 hearing.getCourtroom(),
                 OffsetDateTime.parse("2023-09-26T13:00:00Z"),
                 OffsetDateTime.parse("2023-09-26T13:45:00Z"),
                 1
             ));
 
-        ExternalObjectDirectoryEntity armEod = dartsDatabase.getExternalObjectDirectoryStub().createExternalObjectDirectory(
-            savedMedia,
-            ARM_DROP_ZONE,
-            ARM,
-            UUID.randomUUID()
-        );
+        ExternalObjectDirectoryEntity armEod = PersistableFactory.getExternalObjectDirectoryTestData().someMinimalBuilder()
+            .media(savedMedia).status(dartsDatabase.getObjectRecordStatusEntity(ARM_DROP_ZONE))
+            .checksum(null).verificationAttempts(1).externalLocationType(dartsDatabase.getExternalLocationTypeEntity(ARM)).build();
 
         armEod.setTransferAttempts(1);
-        dartsDatabase.save(armEod);
+        armEod = dartsPersistence.save(armEod);
 
         String prefix = String.format("%d_%d_1", armEod.getId(), savedMedia.getId());
         String responseFilename = prefix + "_1_iu.rsp";
@@ -233,31 +220,23 @@ class ArmResponseFilesProcessorIntTest extends IntegrationBase {
 
     @Test
     void givenProcessResponseFilesFailOnUnableToParseFilenameAndReachedMaxAttempts() {
-        HearingEntity hearing = dartsDatabase.createHearing(
-            "NEWCASTLE",
-            "Int Test Courtroom 2",
-            "2",
-            HEARING_DATE
-        );
+        HearingEntity hearing = PersistableFactory.getHearingTestData().someMinimal();
 
-        MediaEntity savedMedia = dartsDatabase.save(
-            MediaTestData.createMediaWith(
+        MediaEntity savedMedia = dartsPersistence.save(
+            getMediaTestData().createMediaWith(
                 hearing.getCourtroom(),
                 OffsetDateTime.parse("2023-09-26T13:00:00Z"),
                 OffsetDateTime.parse("2023-09-26T13:45:00Z"),
                 1
             ));
 
-        ExternalObjectDirectoryEntity armEod = dartsDatabase.getExternalObjectDirectoryStub().createExternalObjectDirectory(
-            savedMedia,
-            ARM_DROP_ZONE,
-            ARM,
-            UUID.randomUUID()
-        );
+        ExternalObjectDirectoryEntity armEod = PersistableFactory.getExternalObjectDirectoryTestData().someMinimalBuilder()
+            .media(savedMedia).status(dartsDatabase.getObjectRecordStatusEntity(ARM_DROP_ZONE))
+            .checksum(null).verificationAttempts(1).externalLocationType(dartsDatabase.getExternalLocationTypeEntity(ARM)).build();
 
         armEod.setTransferAttempts(1);
         armEod.setVerificationAttempts(3);
-        dartsDatabase.save(armEod);
+        armEod = dartsPersistence.save(armEod);
 
         String prefix = String.format("%d_%d_1", armEod.getId(), savedMedia.getId());
         String responseFilename = prefix + "_1_iu.rsp";
@@ -287,30 +266,22 @@ class ArmResponseFilesProcessorIntTest extends IntegrationBase {
 
     @Test
     void givenProcessResponseFilesFoundInputUploadFileUnableToListBlobsForHashcode() {
-        HearingEntity hearing = dartsDatabase.createHearing(
-            "NEWCASTLE",
-            "Int Test Courtroom 2",
-            "2",
-            HEARING_DATE
-        );
+        HearingEntity hearing = PersistableFactory.getHearingTestData().someMinimal();
 
-        MediaEntity savedMedia = dartsDatabase.save(
-            MediaTestData.createMediaWith(
+        MediaEntity savedMedia = dartsPersistence.save(
+            getMediaTestData().createMediaWith(
                 hearing.getCourtroom(),
                 OffsetDateTime.parse("2023-09-26T13:00:00Z"),
                 OffsetDateTime.parse("2023-09-26T13:45:00Z"),
                 1
             ));
 
-        ExternalObjectDirectoryEntity armEod = dartsDatabase.getExternalObjectDirectoryStub().createExternalObjectDirectory(
-            savedMedia,
-            ARM_DROP_ZONE,
-            ARM,
-            UUID.randomUUID()
-        );
+        ExternalObjectDirectoryEntity armEod = PersistableFactory.getExternalObjectDirectoryTestData().someMinimalBuilder()
+            .media(savedMedia).status(dartsDatabase.getObjectRecordStatusEntity(ARM_DROP_ZONE))
+            .checksum(null).verificationAttempts(1).externalLocationType(dartsDatabase.getExternalLocationTypeEntity(ARM)).build();
 
         armEod.setTransferAttempts(1);
-        dartsDatabase.save(armEod);
+        armEod = dartsPersistence.save(armEod);
 
         String prefix = String.format("%d_%d_1", armEod.getId(), savedMedia.getId());
         String responseFilename = prefix + "_6a374f19a9ce7dc9cc480ea8d4eca0fb_1_iu.rsp";
@@ -337,30 +308,22 @@ class ArmResponseFilesProcessorIntTest extends IntegrationBase {
 
     @Test
     void givenProcessResponseFilesFoundInputUploadFileThrowsExceptionWhenListBlobsForHashcode() {
-        HearingEntity hearing = dartsDatabase.createHearing(
-            "NEWCASTLE",
-            "Int Test Courtroom 2",
-            "2",
-            HEARING_DATE
-        );
+        HearingEntity hearing = PersistableFactory.getHearingTestData().someMinimal();
 
-        MediaEntity savedMedia = dartsDatabase.save(
-            MediaTestData.createMediaWith(
+        MediaEntity savedMedia = dartsPersistence.save(
+            getMediaTestData().createMediaWith(
                 hearing.getCourtroom(),
                 OffsetDateTime.parse("2023-09-26T13:00:00Z"),
                 OffsetDateTime.parse("2023-09-26T13:45:00Z"),
                 1
             ));
 
-        ExternalObjectDirectoryEntity armEod = dartsDatabase.getExternalObjectDirectoryStub().createExternalObjectDirectory(
-            savedMedia,
-            ARM_DROP_ZONE,
-            ARM,
-            UUID.randomUUID()
-        );
 
+        ExternalObjectDirectoryEntity armEod = PersistableFactory.getExternalObjectDirectoryTestData().someMinimalBuilder()
+            .media(savedMedia).status(dartsDatabase.getObjectRecordStatusEntity(ARM_DROP_ZONE))
+            .checksum(null).verificationAttempts(1).externalLocationType(dartsDatabase.getExternalLocationTypeEntity(ARM)).build();
         armEod.setTransferAttempts(1);
-        dartsDatabase.save(armEod);
+        armEod = dartsPersistence.save(armEod);
 
         String prefix = String.format("%d_%d_1", armEod.getId(), savedMedia.getId());
         when(armDataManagementApi.listResponseBlobs(prefix)).thenThrow(new BlobStorageException("Failed", null, null));
@@ -384,30 +347,23 @@ class ArmResponseFilesProcessorIntTest extends IntegrationBase {
 
     @Test
     void givenProcessResponseFilesListsBlobsForHashcodeReturnsNoData() {
-        HearingEntity hearing = dartsDatabase.createHearing(
-            "NEWCASTLE",
-            "Int Test Courtroom 2",
-            "2",
-            HEARING_DATE
-        );
+        HearingEntity hearing = PersistableFactory.getHearingTestData().someMinimal();
 
-        MediaEntity savedMedia = dartsDatabase.save(
-            MediaTestData.createMediaWith(
+
+        MediaEntity savedMedia = dartsPersistence.save(
+            getMediaTestData().createMediaWith(
                 hearing.getCourtroom(),
                 OffsetDateTime.parse("2023-09-26T13:00:00Z"),
                 OffsetDateTime.parse("2023-09-26T13:45:00Z"),
                 1
             ));
 
-        ExternalObjectDirectoryEntity armEod = dartsDatabase.getExternalObjectDirectoryStub().createExternalObjectDirectory(
-            savedMedia,
-            ARM_DROP_ZONE,
-            ARM,
-            UUID.randomUUID()
-        );
+        ExternalObjectDirectoryEntity armEod = PersistableFactory.getExternalObjectDirectoryTestData().someMinimalBuilder()
+            .media(savedMedia).status(dartsDatabase.getObjectRecordStatusEntity(ARM_DROP_ZONE))
+            .checksum(null).verificationAttempts(1).externalLocationType(dartsDatabase.getExternalLocationTypeEntity(ARM)).build();
 
         armEod.setTransferAttempts(1);
-        dartsDatabase.save(armEod);
+        armEod = dartsPersistence.save(armEod);
 
         String prefix = String.format("%d_%d_1", armEod.getId(), savedMedia.getId());
         String inputUploadFilename = prefix + "_6a374f19a9ce7dc9cc480ea8d4eca0fb_1_iu.rsp";
@@ -436,32 +392,25 @@ class ArmResponseFilesProcessorIntTest extends IntegrationBase {
 
     @Test
     void givenProcessResponseFilesInputOutputFileReportsFailed() throws IOException {
-        HearingEntity hearing = dartsDatabase.createHearing(
-            "NEWCASTLE",
-            "Int Test Courtroom 2",
-            "2",
-            HEARING_DATE
-        );
+        HearingEntity hearing = PersistableFactory.getHearingTestData().someMinimal();
 
-        MediaEntity savedMedia = dartsDatabase.save(
-            MediaTestData.createMediaWith(
+        MediaEntity savedMedia = dartsPersistence.save(
+            getMediaTestData().createMediaWith(
                 hearing.getCourtroom(),
                 OffsetDateTime.parse("2023-09-26T13:00:00Z"),
                 OffsetDateTime.parse("2023-09-26T13:45:00Z"),
                 1
             ));
         savedMedia.setChecksum("C3CCA7021CF79B42F245AF350601C284");
-        dartsDatabase.save(savedMedia);
+        savedMedia = dartsPersistence.save(savedMedia);
 
-        ExternalObjectDirectoryEntity armEod = dartsDatabase.getExternalObjectDirectoryStub().createExternalObjectDirectory(
-            savedMedia,
-            ARM_DROP_ZONE,
-            ARM,
-            UUID.randomUUID()
-        );
+        ExternalObjectDirectoryEntity armEod = PersistableFactory.getExternalObjectDirectoryTestData().someMinimalBuilder()
+            .media(savedMedia).status(dartsDatabase.getObjectRecordStatusEntity(ARM_DROP_ZONE))
+            .externalLocationType(dartsDatabase.getExternalLocationTypeEntity(ARM))
+            .checksum(null).transferAttempts(1).verificationAttempts(1).build();
 
         armEod.setTransferAttempts(1);
-        dartsDatabase.save(armEod);
+        armEod = dartsPersistence.save(armEod);
 
         String prefix = String.format("%d_%d_1", armEod.getId(), savedMedia.getId());
         String inputUploadFilename = prefix + "_6a374f19a9ce7dc9cc480ea8d4eca0fb_0_iu.rsp";
@@ -507,32 +456,24 @@ class ArmResponseFilesProcessorIntTest extends IntegrationBase {
 
     @Test
     void givenProcessResponseFilesFailsStatusCheck() throws IOException {
-        HearingEntity hearing = dartsDatabase.createHearing(
-            "NEWCASTLE",
-            "Int Test Courtroom 2",
-            "2",
-            HEARING_DATE
-        );
+        HearingEntity hearing = PersistableFactory.getHearingTestData().someMinimal();
 
-        MediaEntity savedMedia = dartsDatabase.save(
-            MediaTestData.createMediaWith(
+        MediaEntity savedMedia = dartsPersistence.save(
+            getMediaTestData().createMediaWith(
                 hearing.getCourtroom(),
                 OffsetDateTime.parse("2023-09-26T13:00:00Z"),
                 OffsetDateTime.parse("2023-09-26T13:45:00Z"),
                 1
             ));
         savedMedia.setChecksum("123");
-        dartsDatabase.save(savedMedia);
+        savedMedia = dartsPersistence.save(savedMedia);
 
-        ExternalObjectDirectoryEntity armEod = dartsDatabase.getExternalObjectDirectoryStub().createExternalObjectDirectory(
-            savedMedia,
-            ARM_DROP_ZONE,
-            ARM,
-            UUID.randomUUID()
-        );
+        ExternalObjectDirectoryEntity armEod = PersistableFactory.getExternalObjectDirectoryTestData().someMinimalBuilder()
+            .media(savedMedia).status(dartsDatabase.getObjectRecordStatusEntity(ARM_DROP_ZONE))
+            .checksum(null).verificationAttempts(1).externalLocationType(dartsDatabase.getExternalLocationTypeEntity(ARM)).build();
 
         armEod.setTransferAttempts(1);
-        dartsDatabase.save(armEod);
+        armEod = dartsPersistence.save(armEod);
 
         String prefix = String.format("%d_%d_1", armEod.getId(), savedMedia.getId());
         String inputUploadFilename = prefix + "_6a374f19a9ce7dc9cc480ea8d4eca0fb_0_iu.rsp";
@@ -578,32 +519,24 @@ class ArmResponseFilesProcessorIntTest extends IntegrationBase {
 
     @Test
     void givenProcessResponseFilesFailsProcessingUploadFile() throws IOException {
-        HearingEntity hearing = dartsDatabase.createHearing(
-            "NEWCASTLE",
-            "Int Test Courtroom 2",
-            "2",
-            HEARING_DATE
-        );
+        HearingEntity hearing = PersistableFactory.getHearingTestData().someMinimal();
 
-        MediaEntity savedMedia = dartsDatabase.save(
-            MediaTestData.createMediaWith(
+        MediaEntity savedMedia = dartsPersistence.save(
+            getMediaTestData().createMediaWith(
                 hearing.getCourtroom(),
                 OffsetDateTime.parse("2023-09-26T13:00:00Z"),
                 OffsetDateTime.parse("2023-09-26T13:45:00Z"),
                 1
             ));
         savedMedia.setChecksum("123");
-        dartsDatabase.save(savedMedia);
+        savedMedia = dartsPersistence.save(savedMedia);
 
-        ExternalObjectDirectoryEntity armEod = dartsDatabase.getExternalObjectDirectoryStub().createExternalObjectDirectory(
-            savedMedia,
-            ARM_DROP_ZONE,
-            ARM,
-            UUID.randomUUID()
-        );
+        ExternalObjectDirectoryEntity armEod = PersistableFactory.getExternalObjectDirectoryTestData().someMinimalBuilder()
+            .media(savedMedia).status(dartsDatabase.getObjectRecordStatusEntity(ARM_DROP_ZONE))
+            .checksum(null).verificationAttempts(1).externalLocationType(dartsDatabase.getExternalLocationTypeEntity(ARM)).build();
 
         armEod.setTransferAttempts(1);
-        dartsDatabase.save(armEod);
+        armEod = dartsPersistence.save(armEod);
 
         String prefix = String.format("%d_%d_1", armEod.getId(), savedMedia.getId());
         String inputUploadFilename = prefix + "_6a374f19a9ce7dc9cc480ea8d4eca0fb_1_iu.rsp";
@@ -649,32 +582,24 @@ class ArmResponseFilesProcessorIntTest extends IntegrationBase {
 
     @Test
     void givenProcessResponseFilesFailsMediaChecksum() throws IOException {
-        HearingEntity hearing = dartsDatabase.createHearing(
-            "NEWCASTLE",
-            "Int Test Courtroom 2",
-            "2",
-            HEARING_DATE
-        );
+        HearingEntity hearing = PersistableFactory.getHearingTestData().someMinimal();
 
-        MediaEntity savedMedia = dartsDatabase.save(
-            MediaTestData.createMediaWith(
+        MediaEntity savedMedia = dartsPersistence.save(
+            getMediaTestData().createMediaWith(
                 hearing.getCourtroom(),
                 OffsetDateTime.parse("2023-09-26T13:00:00Z"),
                 OffsetDateTime.parse("2023-09-26T13:45:00Z"),
                 1
             ));
         savedMedia.setChecksum("123");
-        dartsDatabase.save(savedMedia);
+        savedMedia = dartsPersistence.save(savedMedia);
 
-        ExternalObjectDirectoryEntity armEod = dartsDatabase.getExternalObjectDirectoryStub().createExternalObjectDirectory(
-            savedMedia,
-            ARM_DROP_ZONE,
-            ARM,
-            UUID.randomUUID()
-        );
+        ExternalObjectDirectoryEntity armEod = PersistableFactory.getExternalObjectDirectoryTestData().someMinimalBuilder()
+            .media(savedMedia).status(dartsDatabase.getObjectRecordStatusEntity(ARM_DROP_ZONE))
+            .checksum(null).verificationAttempts(1).externalLocationType(dartsDatabase.getExternalLocationTypeEntity(ARM)).build();
 
         armEod.setTransferAttempts(1);
-        dartsDatabase.save(armEod);
+        armEod = dartsPersistence.save(armEod);
 
         String prefix = String.format("%d_%d_1", armEod.getId(), savedMedia.getId());
         String inputUploadFilename = prefix + "_6a374f19a9ce7dc9cc480ea8d4eca0fb_1_iu.rsp";
@@ -744,14 +669,12 @@ class ArmResponseFilesProcessorIntTest extends IntegrationBase {
                                                        testUser, uploadedDateTime, checksum
             );
 
-        ExternalObjectDirectoryEntity armEod = dartsDatabase.getExternalObjectDirectoryStub().createExternalObjectDirectory(
-            annotationDocument,
-            dartsDatabase.getObjectRecordStatusEntity(ARM_DROP_ZONE),
-            dartsDatabase.getExternalLocationTypeEntity(ARM),
-            UUID.randomUUID()
-        );
+        ExternalObjectDirectoryEntity armEod = PersistableFactory.getExternalObjectDirectoryTestData().someMinimalBuilder()
+            .annotationDocumentEntity(annotationDocument).status(dartsDatabase.getObjectRecordStatusEntity(ARM_DROP_ZONE))
+            .checksum(null).verificationAttempts(1).externalLocationType(dartsDatabase.getExternalLocationTypeEntity(ARM)).build();
+
         armEod.setTransferAttempts(1);
-        dartsDatabase.save(armEod);
+        armEod = dartsPersistence.save(armEod);
 
         String prefix = String.format("%d_%d_1", armEod.getId(), annotationDocument.getId());
         String inputUploadFilename = prefix + "_6a374f19a9ce7dc9cc480ea8d4eca0fb_1_iu.rsp";
@@ -807,19 +730,19 @@ class ArmResponseFilesProcessorIntTest extends IntegrationBase {
         final int fileSize = 11_937;
         final UserAccountEntity testUser = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
         final String checksum = "123";
-        TranscriptionDocumentEntity transcriptionDocumentEntity = TranscriptionStub.createTranscriptionDocumentEntity(
-            transcriptionEntity, fileName, fileType, fileSize, testUser, checksum);
+        TranscriptionDocumentEntity transcriptionDocumentEntity = PersistableFactory.getTranscriptionDocument().someMinimalBuilder()
+            .transcription(transcriptionEntity).fileName(fileName).fileType(fileType)
+            .fileSize(fileSize).uploadedBy(testUser).checksum(checksum).build();
         when(userIdentity.getUserAccount()).thenReturn(testUser);
-        dartsDatabase.getTranscriptionDocumentRepository().save(transcriptionDocumentEntity);
+        transcriptionDocumentEntity = dartsPersistence.save(transcriptionDocumentEntity);
 
-        ExternalObjectDirectoryEntity armEod = dartsDatabase.getExternalObjectDirectoryStub().createExternalObjectDirectory(
-            transcriptionDocumentEntity,
-            dartsDatabase.getObjectRecordStatusEntity(ARM_DROP_ZONE),
-            dartsDatabase.getExternalLocationTypeEntity(ARM),
-            UUID.randomUUID()
-        );
+        ExternalObjectDirectoryEntity armEod = PersistableFactory.getExternalObjectDirectoryTestData().someMinimalBuilder()
+            .transcriptionDocumentEntity(transcriptionDocumentEntity).status(dartsDatabase.getObjectRecordStatusEntity(ARM_DROP_ZONE))
+            .media(null)
+            .checksum(null).verificationAttempts(1).externalLocationType(dartsDatabase.getExternalLocationTypeEntity(ARM)).build();
+
         armEod.setTransferAttempts(1);
-        dartsDatabase.getExternalObjectDirectoryRepository().save(armEod);
+        armEod = dartsPersistence.save(armEod);
 
         String prefix = String.format("%d_%d_1", armEod.getId(), transcriptionDocumentEntity.getId());
         String inputUploadFilename = prefix + "_6a374f19a9ce7dc9cc480ea8d4eca0fb_1_iu.rsp";
@@ -868,15 +791,10 @@ class ArmResponseFilesProcessorIntTest extends IntegrationBase {
 
     @Test
     void givenProcessResponseFilesSuccessfullyCompletesForMedia() throws IOException {
-        HearingEntity hearing = dartsDatabase.createHearing(
-            "NEWCASTLE",
-            "Int Test Courtroom 2",
-            "2",
-            HEARING_DATE
-        );
+        HearingEntity hearing = PersistableFactory.getHearingTestData().someMinimal();
 
-        MediaEntity savedMedia = dartsDatabase.save(
-            MediaTestData.createMediaWith(
+        MediaEntity savedMedia = dartsPersistence.save(
+            getMediaTestData().createMediaWith(
                 hearing.getCourtroom(),
                 OffsetDateTime.parse("2023-09-26T13:00:00Z"),
                 OffsetDateTime.parse("2023-09-26T13:45:00Z"),
@@ -884,17 +802,15 @@ class ArmResponseFilesProcessorIntTest extends IntegrationBase {
             ));
         String checksum = "C3CCA7021CF79B42F245AF350601C284";
         savedMedia.setChecksum(checksum);
-        dartsDatabase.save(savedMedia);
+        savedMedia = dartsPersistence.save(savedMedia);
 
-        ExternalObjectDirectoryEntity armEod = dartsDatabase.getExternalObjectDirectoryStub().createExternalObjectDirectory(
-            savedMedia,
-            ARM_DROP_ZONE,
-            ARM,
-            UUID.randomUUID()
-        );
+        ExternalObjectDirectoryEntity armEod = PersistableFactory.getExternalObjectDirectoryTestData().someMinimalBuilder()
+            .media(savedMedia).status(dartsDatabase.getObjectRecordStatusEntity(ARM_DROP_ZONE))
+            .checksum(null).verificationAttempts(1).externalLocationType(dartsDatabase.getExternalLocationTypeEntity(ARM)).build();
+
         armEod.setChecksum(checksum);
         armEod.setTransferAttempts(1);
-        dartsDatabase.save(armEod);
+        armEod = dartsPersistence.save(armEod);
 
         String prefix = String.format("%d_%d_1", armEod.getId(), savedMedia.getId());
         String inputUploadFilename = prefix + "_6a374f19a9ce7dc9cc480ea8d4eca0fb_1_iu.rsp";
@@ -950,7 +866,8 @@ class ArmResponseFilesProcessorIntTest extends IntegrationBase {
     void givenProcessResponseFilesSuccessfullyCompletesForAnnotation() throws IOException {
         UserAccountEntity testUser = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
         String testAnnotation = "TestAnnotation";
-        AnnotationEntity annotation = dartsDatabase.getAnnotationStub().createAndSaveAnnotationEntityWith(testUser, testAnnotation);
+        AnnotationEntity annotation = dartsPersistence.save(PersistableFactory.getAnnotationTestData().someMinimalBuilder()
+                                                                .currentOwner(testUser).text(testAnnotation).build());
 
         when(userIdentity.getUserAccount()).thenReturn(testUser);
         final String fileName = "judges-notes.txt";
@@ -958,20 +875,20 @@ class ArmResponseFilesProcessorIntTest extends IntegrationBase {
         final int fileSize = 123;
         final OffsetDateTime uploadedDateTime = OffsetDateTime.now();
         final String checksum = "C3CCA7021CF79B42F245AF350601C284";
-        AnnotationDocumentEntity annotationDocument = dartsDatabase.getAnnotationStub()
-            .createAndSaveAnnotationDocumentEntityWith(annotation, fileName, fileType, fileSize,
-                                                       testUser, uploadedDateTime, checksum
-            );
+        AnnotationDocumentEntity annotationDocument = PersistableFactory.getAnnotationDocumentTestData()
+            .someMinimalBuilder().annotation(annotation).fileName(fileName).fileType(fileType)
+            .fileSize(fileSize).uploadedBy(testUser).uploadedDateTime(uploadedDateTime)
+            .lastModifiedBy(testUser).lastModifiedTimestamp(uploadedDateTime).checksum(checksum)
+            .retConfScore(1).retConfReason("confidence reason").build();
+        annotationDocument = dartsPersistence.save(annotationDocument);
 
-        ExternalObjectDirectoryEntity armEod = dartsDatabase.getExternalObjectDirectoryStub().createExternalObjectDirectory(
-            annotationDocument,
-            dartsDatabase.getObjectRecordStatusEntity(ARM_DROP_ZONE),
-            dartsDatabase.getExternalLocationTypeEntity(ARM),
-            UUID.randomUUID()
-        );
+        ExternalObjectDirectoryEntity armEod = PersistableFactory.getExternalObjectDirectoryTestData().someMinimalBuilder()
+            .annotationDocumentEntity(annotationDocument).status(dartsDatabase.getObjectRecordStatusEntity(ARM_DROP_ZONE))
+            .checksum(null).verificationAttempts(1).externalLocationType(dartsDatabase.getExternalLocationTypeEntity(ARM)).build();
+
         armEod.setChecksum(checksum);
         armEod.setTransferAttempts(1);
-        dartsDatabase.save(armEod);
+        armEod = dartsPersistence.save(armEod);
 
         String prefix = String.format("%d_%d_1", armEod.getId(), annotationDocument.getId());
         String inputUploadFilename = prefix + "_6a374f19a9ce7dc9cc480ea8d4eca0fb_1_iu.rsp";
@@ -1029,20 +946,19 @@ class ArmResponseFilesProcessorIntTest extends IntegrationBase {
         final int fileSize = 11_937;
         final UserAccountEntity testUser = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
         final String checksum = "C3CCA7021CF79B42F245AF350601C284";
-        TranscriptionDocumentEntity transcriptionDocumentEntity = TranscriptionStub.createTranscriptionDocumentEntity(
-            transcriptionEntity, fileName, fileType, fileSize, testUser, checksum);
+        TranscriptionDocumentEntity transcriptionDocumentEntity = PersistableFactory.getTranscriptionDocument().someMinimalBuilder()
+            .transcription(transcriptionEntity).fileName(fileName).fileType(fileType)
+            .fileSize(fileSize).uploadedBy(testUser).checksum(checksum).build();
         when(userIdentity.getUserAccount()).thenReturn(testUser);
-        dartsDatabase.getTranscriptionDocumentRepository().save(transcriptionDocumentEntity);
+        transcriptionDocumentEntity = dartsPersistence.save(transcriptionDocumentEntity);
 
-        ExternalObjectDirectoryEntity armEod = dartsDatabase.getExternalObjectDirectoryStub().createExternalObjectDirectory(
-            transcriptionDocumentEntity,
-            dartsDatabase.getObjectRecordStatusEntity(ARM_DROP_ZONE),
-            dartsDatabase.getExternalLocationTypeEntity(ARM),
-            UUID.randomUUID()
-        );
+        ExternalObjectDirectoryEntity armEod = PersistableFactory.getExternalObjectDirectoryTestData().someMinimalBuilder()
+            .transcriptionDocumentEntity(transcriptionDocumentEntity).status(dartsDatabase.getObjectRecordStatusEntity(ARM_DROP_ZONE))
+            .media(null).checksum(null).verificationAttempts(1).externalLocationType(dartsDatabase.getExternalLocationTypeEntity(ARM)).build();
+
         armEod.setChecksum(checksum);
         armEod.setTransferAttempts(1);
-        dartsDatabase.save(armEod);
+        armEod = dartsPersistence.save(armEod);
 
         String prefix = String.format("%d_%d_1", armEod.getId(), transcriptionDocumentEntity.getId());
         String inputUploadFilename = prefix + "_6a374f19a9ce7dc9cc480ea8d4eca0fb_1_iu.rsp";
@@ -1099,32 +1015,24 @@ class ArmResponseFilesProcessorIntTest extends IntegrationBase {
 
     @Test
     void givenProcessResponseFilesFailsMediaChecksumNull() throws IOException {
-        HearingEntity hearing = dartsDatabase.createHearing(
-            "NEWCASTLE",
-            "Int Test Courtroom 2",
-            "2",
-            HEARING_DATE
-        );
+        HearingEntity hearing = PersistableFactory.getHearingTestData().someMinimal();
 
-        MediaEntity savedMedia = dartsDatabase.save(
-            MediaTestData.createMediaWith(
+        MediaEntity savedMedia = dartsPersistence.save(
+            getMediaTestData().createMediaWith(
                 hearing.getCourtroom(),
                 OffsetDateTime.parse("2023-09-26T13:00:00Z"),
                 OffsetDateTime.parse("2023-09-26T13:45:00Z"),
                 1
             ));
         savedMedia.setChecksum(null);
-        dartsDatabase.save(savedMedia);
+        savedMedia = dartsPersistence.save(savedMedia);
 
-        ExternalObjectDirectoryEntity armEod = dartsDatabase.getExternalObjectDirectoryStub().createExternalObjectDirectory(
-            savedMedia,
-            ARM_DROP_ZONE,
-            ARM,
-            UUID.randomUUID()
-        );
+        ExternalObjectDirectoryEntity armEod = PersistableFactory.getExternalObjectDirectoryTestData().someMinimalBuilder()
+            .media(savedMedia).status(dartsDatabase.getObjectRecordStatusEntity(ARM_DROP_ZONE))
+            .checksum(null).verificationAttempts(1).externalLocationType(dartsDatabase.getExternalLocationTypeEntity(ARM)).build();
 
         armEod.setTransferAttempts(1);
-        dartsDatabase.save(armEod);
+        armEod = dartsPersistence.save(armEod);
 
         String prefix = String.format("%d_%d_1", armEod.getId(), savedMedia.getId());
         String inputUploadFilename = prefix + "_6a374f19a9ce7dc9cc480ea8d4eca0fb_1_iu.rsp";
@@ -1179,32 +1087,24 @@ class ArmResponseFilesProcessorIntTest extends IntegrationBase {
 
     @Test
     void givenProcessResponseFilesFailsWithInvalidLines() throws IOException {
-        HearingEntity hearing = dartsDatabase.createHearing(
-            "NEWCASTLE",
-            "Int Test Courtroom 2",
-            "2",
-            HEARING_DATE
-        );
+        HearingEntity hearing = PersistableFactory.getHearingTestData().someMinimal();
 
-        MediaEntity savedMedia = dartsDatabase.save(
-            MediaTestData.createMediaWith(
+        MediaEntity savedMedia = dartsPersistence.save(
+            getMediaTestData().createMediaWith(
                 hearing.getCourtroom(),
                 OffsetDateTime.parse("2023-09-26T13:00:00Z"),
                 OffsetDateTime.parse("2023-09-26T13:45:00Z"),
                 1
             ));
         savedMedia.setChecksum("C3CCA7021CF79B42F245AF350601C284");
-        dartsDatabase.save(savedMedia);
+        savedMedia = dartsPersistence.save(savedMedia);
 
-        ExternalObjectDirectoryEntity armEod = dartsDatabase.getExternalObjectDirectoryStub().createExternalObjectDirectory(
-            savedMedia,
-            ARM_DROP_ZONE,
-            ARM,
-            UUID.randomUUID()
-        );
+        ExternalObjectDirectoryEntity armEod = PersistableFactory.getExternalObjectDirectoryTestData().someMinimalBuilder()
+            .media(savedMedia).status(dartsDatabase.getObjectRecordStatusEntity(ARM_DROP_ZONE))
+            .checksum(null).verificationAttempts(1).externalLocationType(dartsDatabase.getExternalLocationTypeEntity(ARM)).build();
 
         armEod.setTransferAttempts(1);
-        dartsDatabase.save(armEod);
+        armEod = dartsPersistence.save(armEod);
 
         String prefix = String.format("%d_%d_1", armEod.getId(), savedMedia.getId());
         String inputUploadFilename = prefix + "_6a374f19a9ce7dc9cc480ea8d4eca0fb_1_iu.rsp";
@@ -1265,32 +1165,24 @@ class ArmResponseFilesProcessorIntTest extends IntegrationBase {
 
     @Test
     void givenProcessResponseFilesFailsForInvalidLinesWithInvalidName() {
-        HearingEntity hearing = dartsDatabase.createHearing(
-            "NEWCASTLE",
-            "Int Test Courtroom 2",
-            "2",
-            HEARING_DATE
-        );
+        HearingEntity hearing = PersistableFactory.getHearingTestData().someMinimal();
 
-        MediaEntity savedMedia = dartsDatabase.save(
-            MediaTestData.createMediaWith(
+        MediaEntity savedMedia = dartsPersistence.save(
+            getMediaTestData().createMediaWith(
                 hearing.getCourtroom(),
                 OffsetDateTime.parse("2023-09-26T13:00:00Z"),
                 OffsetDateTime.parse("2023-09-26T13:45:00Z"),
                 1
             ));
         savedMedia.setChecksum("C3CCA7021CF79B42F245AF350601C284");
-        dartsDatabase.save(savedMedia);
+        savedMedia = dartsPersistence.save(savedMedia);
 
-        ExternalObjectDirectoryEntity armEod = dartsDatabase.getExternalObjectDirectoryStub().createExternalObjectDirectory(
-            savedMedia,
-            ARM_DROP_ZONE,
-            ARM,
-            UUID.randomUUID()
-        );
+        ExternalObjectDirectoryEntity armEod = PersistableFactory.getExternalObjectDirectoryTestData().someMinimalBuilder()
+            .media(savedMedia).status(dartsDatabase.getObjectRecordStatusEntity(ARM_DROP_ZONE))
+            .checksum(null).verificationAttempts(1).externalLocationType(dartsDatabase.getExternalLocationTypeEntity(ARM)).build();
 
         armEod.setTransferAttempts(1);
-        dartsDatabase.save(armEod);
+        armEod = dartsPersistence.save(armEod);
 
         String prefix = String.format("%d_%d_1", armEod.getId(), savedMedia.getId());
         String inputUploadFilename = prefix + "_6a374f19a9ce7dc9cc480ea8d4eca0fb_1_iu.rsp";

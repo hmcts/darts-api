@@ -10,6 +10,7 @@ import uk.gov.hmcts.darts.common.service.RetrieveCoreObjectService;
 
 @Component
 @RequiredArgsConstructor
+@Deprecated
 public class CourtroomStubComposable {
     @Autowired
     private RetrieveCoreObjectService retrieveCoreObjectService;

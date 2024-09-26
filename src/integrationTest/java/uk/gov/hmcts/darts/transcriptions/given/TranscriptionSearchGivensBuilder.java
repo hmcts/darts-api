@@ -3,6 +3,7 @@ package uk.gov.hmcts.darts.transcriptions.given;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.darts.common.entity.TranscriptionEntity;
+import uk.gov.hmcts.darts.test.common.data.PersistableFactory;
 import uk.gov.hmcts.darts.testutils.stubs.DartsDatabaseStub;
 
 import java.time.LocalDate;
@@ -15,7 +16,6 @@ import java.util.Random;
 
 import static java.util.stream.IntStream.range;
 import static java.util.stream.Stream.generate;
-import static uk.gov.hmcts.darts.test.common.data.TranscriptionWorkflowTestData.workflowForTranscription;
 
 @Component
 abstract class TranscriptionSearchGivensBuilder {
@@ -40,7 +40,7 @@ abstract class TranscriptionSearchGivensBuilder {
 
     public void allOwnedBy(List<TranscriptionEntity> transcriptions, String owner) {
         transcriptions.forEach(t -> {
-            var workflow = workflowForTranscription(t);
+            var workflow = PersistableFactory.getTranscriptionWorkflowTestData().workflowForTranscription(t);
             workflow.setWorkflowTimestamp(middayToday());
 
             var workflowActor = workflow.getWorkflowActor();
@@ -120,7 +120,7 @@ abstract class TranscriptionSearchGivensBuilder {
             var transcription = transcriptions.get(i);
             // create workflows
             range(0, 3).forEach(j -> {
-                var workflow = workflowForTranscription(transcription);
+                var workflow = PersistableFactory.getTranscriptionWorkflowTestData().workflowForTranscription(transcription);
                 workflow.setWorkflowTimestamp(middayToday().minusDays(j));
 
                 var workflowActor = workflow.getWorkflowActor();

@@ -10,6 +10,7 @@ import uk.gov.hmcts.darts.common.entity.AnnotationEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.enums.SecurityRoleEnum;
+import uk.gov.hmcts.darts.test.common.data.PersistableFactory;
 import uk.gov.hmcts.darts.testutils.GivenBuilder;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 
@@ -21,9 +22,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.JUDICIARY;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.SUPER_ADMIN;
-import static uk.gov.hmcts.darts.test.common.data.AnnotationTestData.minimalAnnotationEntity;
 import static uk.gov.hmcts.darts.test.common.data.CourthouseTestData.someMinimalCourthouse;
-import static uk.gov.hmcts.darts.test.common.data.HearingTestData.someMinimalHearing;
 import static uk.gov.hmcts.darts.test.common.data.UserAccountTestData.minimalUserAccount;
 
 @AutoConfigureMockMvc
@@ -55,7 +54,7 @@ class AnnotationDeleteTest extends IntegrationBase {
 
     @Test
     void judgeWithCourthouseAccessCanDeleteTheirOwnAnnotation() throws Exception {
-        var hearing = dartsPersistence.save(someMinimalHearing());
+        var hearing = dartsPersistence.save(PersistableFactory.getHearingTestData().someMinimalHearing());
         var judge = given.anAuthenticatedUserAuthorizedForCourthouse(JUDICIARY, hearing.getCourtroom().getCourthouse());
         var annotation = someAnnotationForHearingNotMarkedForDeletionCreatedBy(judge, hearing);
 
@@ -67,7 +66,7 @@ class AnnotationDeleteTest extends IntegrationBase {
 
     @Test
     void preventsJudgeNotAuthorizedForCourthouseDeletingAnnotationAssociatedWithThatCourthouse() throws Exception {
-        var annotationHearing = dartsPersistence.save(someMinimalHearing());
+        var annotationHearing = dartsPersistence.save(PersistableFactory.getHearingTestData().someMinimalHearing());
         var someOtherCourthouse = dartsPersistence.save(someMinimalCourthouse());
         var judge = given.anAuthenticatedUserAuthorizedForCourthouse(JUDICIARY, someOtherCourthouse);
         var annotation = someAnnotationForHearingNotMarkedForDeletionCreatedBy(judge, annotationHearing);
@@ -126,11 +125,11 @@ class AnnotationDeleteTest extends IntegrationBase {
     }
 
     private AnnotationEntity someAnnotationNotMarkedForDeletionCreatedBy(UserAccountEntity userAccount) {
-        return someAnnotationForHearingNotMarkedForDeletionCreatedBy(userAccount, someMinimalHearing());
+        return someAnnotationForHearingNotMarkedForDeletionCreatedBy(userAccount,  PersistableFactory.getHearingTestData().someMinimalHearing());
     }
 
     private AnnotationEntity someAnnotationForHearingNotMarkedForDeletionCreatedBy(UserAccountEntity userAccount, HearingEntity hearing) {
-        var annotation = minimalAnnotationEntity();
+        var annotation = PersistableFactory.getAnnotationTestData().minimalAnnotationEntity();
         annotation.setDeleted(false);
         annotation.setCurrentOwner(userAccount);
         annotation.setCreatedBy(userAccount);

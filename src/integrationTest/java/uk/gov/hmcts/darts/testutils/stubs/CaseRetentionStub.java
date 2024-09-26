@@ -16,6 +16,7 @@ import java.time.OffsetDateTime;
 
 @Component
 @RequiredArgsConstructor
+@Deprecated
 public class CaseRetentionStub {
     private final UserAccountRepository userAccountRepository;
     private final RetentionPolicyTypeRepository retentionPolicyTypeRepository;

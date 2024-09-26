@@ -10,6 +10,8 @@ import org.springframework.test.context.TestPropertySource;
 import uk.gov.hmcts.darts.audio.model.AudioFileInfo;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
 import uk.gov.hmcts.darts.test.common.TestUtils;
+import uk.gov.hmcts.darts.test.common.data.PersistableFactory;
+import uk.gov.hmcts.darts.test.common.data.builder.TestCourtCaseEntity;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 
 import java.io.File;
@@ -26,12 +28,7 @@ import java.util.concurrent.ExecutionException;
 
 import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static uk.gov.hmcts.darts.test.common.data.CaseTestData.createSomeMinimalCase;
 import static uk.gov.hmcts.darts.test.common.data.CourtroomTestData.someMinimalCourtRoom;
-import static uk.gov.hmcts.darts.test.common.data.DefenceTestData.createDefenceForCase;
-import static uk.gov.hmcts.darts.test.common.data.DefendantTestData.createDefendantForCase;
-import static uk.gov.hmcts.darts.test.common.data.HearingTestData.createHearingWith;
-import static uk.gov.hmcts.darts.test.common.data.ProsecutorTestData.createProsecutorForCase;
 
 @TestPropertySource(properties = {"darts.audio.transformation.service.audio.file=tests/audio/WithViqHeader/viq0001min.mp2"})
 @Slf4j
@@ -73,11 +70,9 @@ class OutboundFileProcessorIntTest extends IntegrationBase {
         File audioFileTest = TestUtils.getFile(AUDIO_FILENAME);
         audioPath = Files.copy(audioFileTest.toPath(), createFile(tempDirectory, "audio-test.mp2"), REPLACE_EXISTING);
 
-        var courtCase = createSomeMinimalCase();
-        courtCase.addProsecutor(createProsecutorForCase(courtCase));
-        courtCase.addDefendant(createDefendantForCase(courtCase));
-        courtCase.addDefence(createDefenceForCase(courtCase));
-        var hearing = createHearingWith(courtCase, someMinimalCourtRoom(), LocalDate.parse(HEARING_DATETIME));
+        TestCourtCaseEntity.TestCourtCaseBuilderRetrieve courtCase = PersistableFactory.getCourtCaseTestData().someMinimalBuilderHolder();
+        var hearing = PersistableFactory.getHearingTestData()
+            .createHearingWith(courtCase.getBuilder().build().getEntity(), someMinimalCourtRoom(), LocalDate.parse(HEARING_DATETIME));
 
         dartsPersistence.save(hearing);
     }

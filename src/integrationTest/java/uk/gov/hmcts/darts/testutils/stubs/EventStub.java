@@ -25,6 +25,7 @@ import static uk.gov.hmcts.darts.event.enums.EventStatus.AUDIO_LINK_NOT_DONE_MOD
 
 @Component
 @RequiredArgsConstructor
+@Deprecated
 public class EventStub {
 
     private final EventRepository eventRepository;

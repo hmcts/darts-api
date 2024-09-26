@@ -10,8 +10,11 @@ import static uk.gov.hmcts.darts.test.common.data.ObjectRecordStatusTestData.sta
 import static uk.gov.hmcts.darts.test.common.data.TransformedMediaTestData.minimalTransformedMedia;
 import static uk.gov.hmcts.darts.test.common.data.UserAccountTestData.minimalUserAccount;
 
-@SuppressWarnings({"HideUtilityClassConstructor"})
 public class TransientObjectDirectoryTestData {
+
+    private TransientObjectDirectoryTestData() {
+
+    }
 
     public static TransientObjectDirectoryEntity minimalTransientObjectDirectory() {
         var externalObjectDirectory = new TransientObjectDirectoryEntity();

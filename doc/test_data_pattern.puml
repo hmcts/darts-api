@@ -1,0 +1,42 @@
+@startuml
+interface BuilderHolder {
+ Entity build()
+ Object getBuilder()
+}
+
+interface Persistable {
+ BuilderHolder someMaximal()
+ BuilderHolder someMinimal()
+}
+
+interface DbInsertable {
+ Entity getEntity()
+}
+
+class MediaEntityTestData implements Persistable {
+ BuilderHolder someMaximal()
+ someMinimal()
+}
+
+class MediaEntityBuilder extends MediaEntity implements DbInsertable {
+ Entity getEntity()
+}
+
+class MediaEntityBuilderHolder  implements BuilderHolder<Builder, Entity> {
+ Entity build()
+ Builder getBuilder()
+}
+
+MediaEntityTestData -> MediaEntityBuilderHolder : create
+MediaEntityBuilderHolder -> MediaEntityBuilder : create
+
+class DartsPersistance {
+ save(MediaEntity media)
+}
+
+class PersistableFactory {
+ MediaTestData getMediaTestData()
+}
+
+PersistableFactory -> MediaEntityTestData : create
+@enduml

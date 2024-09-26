@@ -20,6 +20,7 @@ import static java.time.ZoneOffset.UTC;
 @Component
 @RequiredArgsConstructor
 @Getter
+@Deprecated
 public class CaseDocumentStub {
 
     private final CaseDocumentRepository caseDocumentRepository;
