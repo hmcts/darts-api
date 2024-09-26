@@ -763,7 +763,7 @@ class MediaRequestServiceImplTest {
     }
 
     @Test
-    @SuppressWarnings("PMD.java:S1874")
+    @SuppressWarnings("java:S1874")
     void auditsWhenOwnerChanged() {
         var mediaRequest = withIdsPopulated(PersistableFactory.getMediaRequestTestData().someMinimalRequestData());
         when(mockMediaRequestRepository.findById(any())).thenReturn(Optional.of(mediaRequest));
@@ -775,7 +775,7 @@ class MediaRequestServiceImplTest {
     }
 
     @Test
-    @SuppressWarnings("PMD.java:S1874")
+    @SuppressWarnings("java:S1874")
     void doesNotAuditWhenOwnerNotChanged() {
         var mediaRequest = withIdsPopulated(PersistableFactory.getMediaRequestTestData().someMinimalRequestData());
         when(mockMediaRequestRepository.findById(any())).thenReturn(Optional.of(mediaRequest));
@@ -788,7 +788,7 @@ class MediaRequestServiceImplTest {
     }
 
     @Test
-    @SuppressWarnings("PMD.java:S1874")
+    @SuppressWarnings("java:S1874")
     void auditsWhenAudioHidden() {
         var media = withIdsPopulated(mediaTestData.someMinimalMedia());
         media.setHidden(false);
@@ -805,7 +805,7 @@ class MediaRequestServiceImplTest {
     }
 
     @Test
-    @SuppressWarnings("PMD.java:S1874")
+    @SuppressWarnings("java:S1874")
     void doesNotAuditWhenAudioMadeVisible() {
         var media = withIdsPopulated(mediaTestData.someMinimalMedia());
         media.setHidden(true);
