@@ -83,6 +83,7 @@ public class ArmApiServiceImpl implements ArmApiService {
             responseMetaData.setContainerTypeUsedToDownload(DatastoreContainerType.ARM);
             responseMetaData.setInputStream(response.body().asInputStream(), armDataManagementConfiguration);
         } catch (Exception e) {
+            e.printStackTrace();
             String message = ("Arm file failed to download due to body stream, " +
                 "cabinet: %s, " +
                 "record id: %s, file id: %s. Failure response: %s")
