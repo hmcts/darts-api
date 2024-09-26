@@ -89,7 +89,29 @@ public enum AudioApiError implements DartsApiError {
     TOO_MANY_RESULTS(
         AddAudioErrorCode.TOO_MANY_RESULTS.getValue(),
         HttpStatus.BAD_REQUEST,
-        AddAudioTitleErrors.TOO_MANY_RESULTS.getValue());
+        AddAudioTitleErrors.TOO_MANY_RESULTS.getValue()
+    ),
+    MEDIA_ALREADY_MARKED_FOR_DELETION(
+        AddAudioErrorCode.MEDIA_ALREADY_MARKED_FOR_DELETION.getValue(),
+        HttpStatus.CONFLICT,
+        AddAudioTitleErrors.MEDIA_ALREADY_MARKED_FOR_DELETION.getValue()
+    ),
+    ADMIN_MEDIA_MARKED_FOR_DELETION_NOT_FOUND(
+        AddAudioErrorCode.ADMIN_MEDIA_MARKED_FOR_DELETION_NOT_FOUND.getValue(),
+        HttpStatus.NOT_FOUND,
+        AddAudioTitleErrors.ADMIN_MEDIA_MARKED_FOR_DELETION_NOT_FOUND.getValue()
+    ),
+    MEDIA_MARKED_FOR_DELETION_REASON_NOT_FOUND(
+        AddAudioErrorCode.MARKED_FOR_DELETION_REASON_NOT_FOUND.getValue(),
+        HttpStatus.BAD_REQUEST,
+        AddAudioTitleErrors.MARKED_FOR_DELETION_REASON_NOT_FOUND.getValue()
+    ),
+    USER_CANNOT_APPROVE_THEIR_OWN_DELETION(
+        AddAudioErrorCode.USER_CANT_APPROVE_THEIR_OWN_DELETION.getValue(),
+        HttpStatus.BAD_REQUEST,
+        AddAudioTitleErrors.USER_CANT_APPROVE_THEIR_OWN_DELETION.getValue()
+    );
+
 
     private static final String ERROR_TYPE_PREFIX = "AUDIO";
 
