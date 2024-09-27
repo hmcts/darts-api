@@ -122,7 +122,7 @@ public class UserIdentityImpl implements UserIdentity {
                 userHasGlobalAccess = true;
             }
         } else {
-            log.debug("Unable to get email address or guid from token");
+            log.warn("Unable to get email address or guid from token");
         }
         return userHasGlobalAccess;
     }
