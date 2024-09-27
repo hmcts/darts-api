@@ -33,7 +33,7 @@ import java.util.function.Function;
 @Slf4j
 public class AssociatedObjectDataExpiryDeletionAutomatedTask
     extends AbstractLockableAutomatedTask
-    implements AutoloadingAutomatedTask, AutoloadingManualTask {
+    implements AutoloadingManualTask {
 
     private final UserIdentity userIdentity;
     private final CurrentTimeHelper currentTimeHelper;
