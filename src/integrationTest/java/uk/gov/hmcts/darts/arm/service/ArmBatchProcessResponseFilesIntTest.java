@@ -274,7 +274,7 @@ class ArmBatchProcessResponseFilesIntTest extends IntegrationBase {
             .findByMediaAndExternalLocationType(media1, dartsDatabase.getExternalLocationTypeEntity(ARM));
 
         assertEquals(1, foundMediaList.size());
-        ExternalObjectDirectoryEntity foundMedia = foundMediaList.get(0);
+        ExternalObjectDirectoryEntity foundMedia = foundMediaList.getFirst();
         assertEquals(STORED.getId(), foundMedia.getStatus().getId());
         assertEquals(1, foundMedia.getVerificationAttempts());
         assertNotNull(foundMedia.getDataIngestionTs());
@@ -284,7 +284,7 @@ class ArmBatchProcessResponseFilesIntTest extends IntegrationBase {
             .findByMediaAndExternalLocationType(media2, dartsDatabase.getExternalLocationTypeEntity(ARM));
 
         assertEquals(1, foundMediaList2.size());
-        ExternalObjectDirectoryEntity foundMedia2 = foundMediaList2.get(0);
+        ExternalObjectDirectoryEntity foundMedia2 = foundMediaList2.getFirst();
         assertEquals(ARM_RESPONSE_MANIFEST_FAILED.getId(), foundMedia2.getStatus().getId());
         assertEquals(1, foundMedia2.getVerificationAttempts());
         assertEquals(2, foundMedia2.getTransferAttempts());
@@ -294,7 +294,7 @@ class ArmBatchProcessResponseFilesIntTest extends IntegrationBase {
             .findByMediaAndExternalLocationType(media3, dartsDatabase.getExternalLocationTypeEntity(ARM));
 
         assertEquals(1, foundMediaList3.size());
-        ExternalObjectDirectoryEntity foundMedia3 = foundMediaList3.get(0);
+        ExternalObjectDirectoryEntity foundMedia3 = foundMediaList3.getFirst();
         assertEquals(ARM_RESPONSE_MANIFEST_FAILED.getId(), foundMedia3.getStatus().getId());
         assertEquals(1, foundMedia3.getVerificationAttempts());
         assertEquals(2, foundMedia3.getTransferAttempts());
@@ -304,7 +304,7 @@ class ArmBatchProcessResponseFilesIntTest extends IntegrationBase {
             .findByMediaAndExternalLocationType(media5, dartsDatabase.getExternalLocationTypeEntity(ARM));
 
         assertEquals(1, foundMediaList5.size());
-        ExternalObjectDirectoryEntity foundMedia5 = foundMediaList5.get(0);
+        ExternalObjectDirectoryEntity foundMedia5 = foundMediaList5.getFirst();
         assertEquals(ARM_DROP_ZONE.getId(), foundMedia5.getStatus().getId());
         assertEquals(1, foundMedia5.getVerificationAttempts());
         assertFalse(foundMedia5.isResponseCleaned());
@@ -667,7 +667,7 @@ class ArmBatchProcessResponseFilesIntTest extends IntegrationBase {
             .findByMediaAndExternalLocationType(media1, dartsDatabase.getExternalLocationTypeEntity(ARM));
 
         assertEquals(1, foundMediaList.size());
-        ExternalObjectDirectoryEntity foundMedia = foundMediaList.get(0);
+        ExternalObjectDirectoryEntity foundMedia = foundMediaList.getFirst();
         assertEquals(ARM_DROP_ZONE.getId(), foundMedia.getStatus().getId());
         assertEquals(1, foundMedia.getVerificationAttempts());
         assertFalse(foundMedia.isResponseCleaned());
@@ -676,7 +676,7 @@ class ArmBatchProcessResponseFilesIntTest extends IntegrationBase {
             .findByMediaAndExternalLocationType(media2, dartsDatabase.getExternalLocationTypeEntity(ARM));
 
         assertEquals(1, foundMediaList2.size());
-        ExternalObjectDirectoryEntity foundMedia2 = foundMediaList2.get(0);
+        ExternalObjectDirectoryEntity foundMedia2 = foundMediaList2.getFirst();
         assertEquals(ARM_DROP_ZONE.getId(), foundMedia2.getStatus().getId());
         assertEquals(1, foundMedia2.getVerificationAttempts());
         assertFalse(foundMedia2.isResponseCleaned());
@@ -686,7 +686,7 @@ class ArmBatchProcessResponseFilesIntTest extends IntegrationBase {
             .findByMediaAndExternalLocationType(media3, dartsDatabase.getExternalLocationTypeEntity(ARM));
 
         assertEquals(1, foundMediaList3.size());
-        ExternalObjectDirectoryEntity foundMedia3 = foundMediaList3.get(0);
+        ExternalObjectDirectoryEntity foundMedia3 = foundMediaList3.getFirst();
         assertEquals(ARM_DROP_ZONE.getId(), foundMedia3.getStatus().getId());
         assertEquals(1, foundMedia3.getVerificationAttempts());
         assertFalse(foundMedia3.isResponseCleaned());
@@ -695,7 +695,7 @@ class ArmBatchProcessResponseFilesIntTest extends IntegrationBase {
             .findByMediaAndExternalLocationType(media4, dartsDatabase.getExternalLocationTypeEntity(ARM));
 
         assertEquals(1, foundMediaList4.size());
-        ExternalObjectDirectoryEntity foundMedia4 = foundMediaList4.get(0);
+        ExternalObjectDirectoryEntity foundMedia4 = foundMediaList4.getFirst();
         assertEquals(ARM_DROP_ZONE.getId(), foundMedia4.getStatus().getId());
         assertEquals(1, foundMedia4.getVerificationAttempts());
         assertFalse(foundMedia4.isResponseCleaned());
@@ -704,7 +704,7 @@ class ArmBatchProcessResponseFilesIntTest extends IntegrationBase {
             .findByMediaAndExternalLocationType(media5, dartsDatabase.getExternalLocationTypeEntity(ARM));
 
         assertEquals(1, foundMediaList5.size());
-        ExternalObjectDirectoryEntity foundMedia5 = foundMediaList5.get(0);
+        ExternalObjectDirectoryEntity foundMedia5 = foundMediaList5.getFirst();
         assertEquals(ARM_DROP_ZONE.getId(), foundMedia5.getStatus().getId());
         assertEquals(1, foundMedia5.getVerificationAttempts());
         assertFalse(foundMedia5.isResponseCleaned());
@@ -856,7 +856,7 @@ class ArmBatchProcessResponseFilesIntTest extends IntegrationBase {
             .findByMediaAndExternalLocationType(media1, dartsDatabase.getExternalLocationTypeEntity(ARM));
 
         assertEquals(1, foundMediaList.size());
-        ExternalObjectDirectoryEntity foundMedia = foundMediaList.get(0);
+        ExternalObjectDirectoryEntity foundMedia = foundMediaList.getFirst();
         assertEquals(ARM_DROP_ZONE.getId(), foundMedia.getStatus().getId());
         assertEquals(1, foundMedia.getVerificationAttempts());
         assertFalse(foundMedia.isResponseCleaned());
@@ -865,7 +865,7 @@ class ArmBatchProcessResponseFilesIntTest extends IntegrationBase {
             .findByMediaAndExternalLocationType(media2, dartsDatabase.getExternalLocationTypeEntity(ARM));
 
         assertEquals(1, foundMediaList2.size());
-        ExternalObjectDirectoryEntity foundMedia2 = foundMediaList2.get(0);
+        ExternalObjectDirectoryEntity foundMedia2 = foundMediaList2.getFirst();
         assertEquals(ARM_DROP_ZONE.getId(), foundMedia2.getStatus().getId());
         assertEquals(1, foundMedia2.getVerificationAttempts());
         assertFalse(foundMedia2.isResponseCleaned());
@@ -875,7 +875,7 @@ class ArmBatchProcessResponseFilesIntTest extends IntegrationBase {
             .findByMediaAndExternalLocationType(media3, dartsDatabase.getExternalLocationTypeEntity(ARM));
 
         assertEquals(1, foundMediaList3.size());
-        ExternalObjectDirectoryEntity foundMedia3 = foundMediaList3.get(0);
+        ExternalObjectDirectoryEntity foundMedia3 = foundMediaList3.getFirst();
         assertEquals(ARM_DROP_ZONE.getId(), foundMedia3.getStatus().getId());
         assertEquals(1, foundMedia3.getVerificationAttempts());
         assertFalse(foundMedia3.isResponseCleaned());
@@ -884,7 +884,7 @@ class ArmBatchProcessResponseFilesIntTest extends IntegrationBase {
             .findByMediaAndExternalLocationType(media4, dartsDatabase.getExternalLocationTypeEntity(ARM));
 
         assertEquals(1, foundMediaList4.size());
-        ExternalObjectDirectoryEntity foundMedia4 = foundMediaList4.get(0);
+        ExternalObjectDirectoryEntity foundMedia4 = foundMediaList4.getFirst();
         assertEquals(ARM_DROP_ZONE.getId(), foundMedia4.getStatus().getId());
         assertEquals(1, foundMedia4.getVerificationAttempts());
         assertFalse(foundMedia4.isResponseCleaned());
@@ -893,7 +893,7 @@ class ArmBatchProcessResponseFilesIntTest extends IntegrationBase {
             .findByMediaAndExternalLocationType(media5, dartsDatabase.getExternalLocationTypeEntity(ARM));
 
         assertEquals(1, foundMediaList5.size());
-        ExternalObjectDirectoryEntity foundMedia5 = foundMediaList5.get(0);
+        ExternalObjectDirectoryEntity foundMedia5 = foundMediaList5.getFirst();
         assertEquals(ARM_DROP_ZONE.getId(), foundMedia5.getStatus().getId());
         assertEquals(1, foundMedia5.getVerificationAttempts());
         assertFalse(foundMedia5.isResponseCleaned());
@@ -987,7 +987,7 @@ class ArmBatchProcessResponseFilesIntTest extends IntegrationBase {
             .findByMediaAndExternalLocationType(media1, dartsDatabase.getExternalLocationTypeEntity(ARM));
 
         assertEquals(1, foundMediaList.size());
-        ExternalObjectDirectoryEntity foundMedia = foundMediaList.get(0);
+        ExternalObjectDirectoryEntity foundMedia = foundMediaList.getFirst();
         assertEquals(ARM_RESPONSE_PROCESSING_FAILED.getId(), foundMedia.getStatus().getId());
         assertEquals(1, foundMedia.getVerificationAttempts());
         assertTrue(foundMedia.isResponseCleaned());
@@ -996,7 +996,7 @@ class ArmBatchProcessResponseFilesIntTest extends IntegrationBase {
             .findByMediaAndExternalLocationType(media2, dartsDatabase.getExternalLocationTypeEntity(ARM));
 
         assertEquals(1, foundMediaList2.size());
-        ExternalObjectDirectoryEntity foundMedia2 = foundMediaList2.get(0);
+        ExternalObjectDirectoryEntity foundMedia2 = foundMediaList2.getFirst();
         assertEquals(ARM_RESPONSE_PROCESSING_FAILED.getId(), foundMedia2.getStatus().getId());
         assertEquals(1, foundMedia2.getVerificationAttempts());
         assertTrue(foundMedia2.isResponseCleaned());
@@ -1757,7 +1757,7 @@ class ArmBatchProcessResponseFilesIntTest extends IntegrationBase {
             .findByMediaAndExternalLocationType(media1, dartsDatabase.getExternalLocationTypeEntity(ARM));
 
         assertEquals(1, foundMediaList.size());
-        ExternalObjectDirectoryEntity foundMedia = foundMediaList.get(0);
+        ExternalObjectDirectoryEntity foundMedia = foundMediaList.getFirst();
         assertEquals(ARM_DROP_ZONE.getId(), foundMedia.getStatus().getId());
         assertEquals(1, foundMedia.getVerificationAttempts());
         assertFalse(foundMedia.isResponseCleaned());
@@ -1802,7 +1802,7 @@ class ArmBatchProcessResponseFilesIntTest extends IntegrationBase {
             .findByMediaAndExternalLocationType(media1, dartsDatabase.getExternalLocationTypeEntity(ARM));
 
         assertEquals(1, foundMediaList.size());
-        ExternalObjectDirectoryEntity foundMedia = foundMediaList.get(0);
+        ExternalObjectDirectoryEntity foundMedia = foundMediaList.getFirst();
         assertEquals(ARM_DROP_ZONE.getId(), foundMedia.getStatus().getId());
         assertEquals(1, foundMedia.getVerificationAttempts());
         assertFalse(foundMedia.isResponseCleaned());
