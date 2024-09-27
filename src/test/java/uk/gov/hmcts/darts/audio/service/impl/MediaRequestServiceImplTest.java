@@ -58,7 +58,6 @@ import java.util.UUID;
 
 import static java.util.Collections.emptyList;
 import static org.apache.commons.io.IOUtils.toInputStream;
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -66,9 +65,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
@@ -183,12 +180,6 @@ class MediaRequestServiceImplTest {
         mockTransformedMediaEntity.setMediaRequest(mockMediaRequestEntity);
 
         mediaTestData = PersistableFactory.getMediaTestData();
-    }
-
-
-    private void updateManualDeletion(boolean manualDeletionEnabled) {
-        this.mediaRequestService = spy(mediaRequestService);
-        when(mediaRequestService.isManualDeletionEnabled()).thenReturn(manualDeletionEnabled);
     }
 
     @Test
@@ -799,7 +790,6 @@ class MediaRequestServiceImplTest {
     @Test
     @SuppressWarnings("java:S1874")
     void auditsWhenAudioHidden() {
-        updateManualDeletion(true);
         var media = withIdsPopulated(mediaTestData.someMinimalMedia());
         media.setHidden(false);
         when(mediaRepository.findById(any())).thenReturn(Optional.of(media));
@@ -817,7 +807,6 @@ class MediaRequestServiceImplTest {
     @Test
     @SuppressWarnings("java:S1874")
     void doesNotAuditWhenAudioMadeVisible() {
-        updateManualDeletion(true);
         var media = withIdsPopulated(mediaTestData.someMinimalMedia());
         media.setHidden(true);
         when(mediaRepository.findById(any())).thenReturn(Optional.of(media));
@@ -825,16 +814,5 @@ class MediaRequestServiceImplTest {
         mediaRequestService.adminHideOrShowMediaById(media.getId(), new MediaHideRequest().isHidden(false));
 
         verifyNoInteractions(auditApi);
-    }
-
-    @Test
-    @SuppressWarnings("java:S1874")
-    void adminHideOrShowMediaByIdManualDeletionDisabled() {
-        updateManualDeletion(false);
-
-        DartsApiException dartsApiException = assertThrows(
-            DartsApiException.class, () -> mediaRequestService.adminHideOrShowMediaById(1, mock(MediaHideRequest.class)));
-        assertThat(dartsApiException.getError()).isEqualTo(DartsApiException.DartsApiErrorCommon.FEATURE_FLAG_NOT_ENABLED);
-
     }
 }

@@ -168,10 +168,6 @@ public class AdminTranscriptionServiceImpl implements AdminTranscriptionService 
     @Transactional
     public TranscriptionDocumentHideResponse hideOrShowTranscriptionDocumentById(Integer transcriptionDocumentId,
                                                                                  TranscriptionDocumentHideRequest transcriptionDocumentHideRequest) {
-        if (!this.isManualDeletionEnabled()) {
-            throw new DartsApiException(DartsApiException.DartsApiErrorCommon.FEATURE_FLAG_NOT_ENABLED);
-        }
-
         TranscriptionDocumentHideResponse response;
 
         IdRequest<TranscriptionDocumentHideRequest> request = new IdRequest<>(transcriptionDocumentHideRequest, transcriptionDocumentId);

@@ -2,7 +2,6 @@ package uk.gov.hmcts.darts.audio.service.impl;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -36,7 +35,6 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -81,12 +79,6 @@ class MediaRequestServiceImplAdminMediaSearchTest {
     ArgumentCaptor<MediaEntity> mediaEntityArgumentCaptor;
 
     private MockedStatic<GetAdminMediaResponseMapper> adminMediaSearchResponseMapperMockedStatic;
-
-    @BeforeEach
-    void setUp() {
-        this.mediaRequestService = spy(mediaRequestService);
-        when(mediaRequestService.isManualDeletionEnabled()).thenReturn(true);
-    }
 
     @AfterEach
     void finish() {

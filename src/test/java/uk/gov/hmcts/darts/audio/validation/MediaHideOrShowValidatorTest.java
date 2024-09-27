@@ -20,7 +20,9 @@ import uk.gov.hmcts.darts.common.validation.IdRequest;
 import java.util.List;
 import java.util.Optional;
 
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class MediaHideOrShowValidatorTest {
@@ -36,6 +38,11 @@ class MediaHideOrShowValidatorTest {
 
     @InjectMocks
     private MediaHideOrShowValidator mediaHideOrShowValidator;
+
+    private void setManualDeletionEnabled(boolean enabled) {
+        this.mediaHideOrShowValidator = spy(mediaHideOrShowValidator);
+        when(mediaHideOrShowValidator.isManualDeletionEnabled()).thenReturn(enabled);
+    }
 
     @Test
     void successfullyShow() {
@@ -81,8 +88,8 @@ class MediaHideOrShowValidatorTest {
 
         ObjectHiddenReasonEntity hiddenReasonEntity = new ObjectHiddenReasonEntity();
 
-        Mockito.when(objectHiddenReasonRepository.findById(reasonId)).thenReturn(Optional.of(hiddenReasonEntity));
-        Mockito.when(objectAdminActionRepository.findByMedia_Id(mediaId)).thenReturn(List.of());
+        when(objectHiddenReasonRepository.findById(reasonId)).thenReturn(Optional.of(hiddenReasonEntity));
+        when(objectAdminActionRepository.findByMedia_Id(mediaId)).thenReturn(List.of());
 
         IdRequest<MediaHideRequest> mediaHideRequestIdRequest = new
             IdRequest<>(mediaHideRequest, mediaId);
@@ -119,7 +126,7 @@ class MediaHideOrShowValidatorTest {
 
         ObjectAdminActionEntity objectAdminActionEntity = new ObjectAdminActionEntity();
 
-        Mockito.when(objectAdminActionRepository.findByMedia_Id(mediaId)).thenReturn(List.of(objectAdminActionEntity));
+        when(objectAdminActionRepository.findByMedia_Id(mediaId)).thenReturn(List.of(objectAdminActionEntity));
 
         IdRequest<MediaHideRequest> mediaHideRequestIdRequest = new
             IdRequest<>(mediaHideRequest, mediaId);
@@ -143,8 +150,8 @@ class MediaHideOrShowValidatorTest {
         Integer reasonId = 949;
         adminActionResponse.setReasonId(reasonId);
 
-        Mockito.when(objectHiddenReasonRepository.findById(reasonId)).thenReturn(Optional.empty());
-        Mockito.when(objectAdminActionRepository.findByMedia_Id(mediaId)).thenReturn(List.of());
+        when(objectHiddenReasonRepository.findById(reasonId)).thenReturn(Optional.empty());
+        when(objectAdminActionRepository.findByMedia_Id(mediaId)).thenReturn(List.of());
 
         IdRequest<MediaHideRequest> mediaHideRequestIdRequest = new
             IdRequest<>(mediaHideRequest, mediaId);
@@ -155,4 +162,60 @@ class MediaHideOrShowValidatorTest {
 
         Mockito.verify(mediaIdValidator, times(1)).validate(mediaId);
     }
+
+
+    @Test
+    void successfullyHideWithMarkedForDeletionActionRequestAndFlagEnabled() {
+        setManualDeletionEnabled(true);
+        Integer mediaId = 200;
+        MediaHideRequest mediaHideRequest = new MediaHideRequest();
+        mediaHideRequest.setIsHidden(true);
+
+        Integer reasonId = 949;
+        AdminActionRequest request = new AdminActionRequest();
+        mediaHideRequest.setAdminAction(request);
+        request.setReasonId(reasonId);
+
+        ObjectHiddenReasonEntity hiddenReasonEntity = new ObjectHiddenReasonEntity();
+        hiddenReasonEntity.setMarkedForDeletion(true);
+
+        when(objectHiddenReasonRepository.findById(reasonId)).thenReturn(Optional.of(hiddenReasonEntity));
+        when(objectAdminActionRepository.findByMedia_Id(mediaId)).thenReturn(List.of());
+
+        IdRequest<MediaHideRequest> mediaHideRequestIdRequest = new
+            IdRequest<>(mediaHideRequest, mediaId);
+
+        mediaHideOrShowValidator.validate(mediaHideRequestIdRequest);
+
+        Mockito.verify(mediaIdValidator, times(1)).validate(mediaId);
+    }
+
+    @Test
+    void successfullyHideWithMarkedForDeletionActionRequestAndFlagDisabled() {
+        setManualDeletionEnabled(false);
+        Integer mediaId = 200;
+        MediaHideRequest mediaHideRequest = new MediaHideRequest();
+        mediaHideRequest.setIsHidden(true);
+
+        Integer reasonId = 949;
+        AdminActionRequest request = new AdminActionRequest();
+        mediaHideRequest.setAdminAction(request);
+        request.setReasonId(reasonId);
+
+        ObjectHiddenReasonEntity hiddenReasonEntity = new ObjectHiddenReasonEntity();
+        hiddenReasonEntity.setMarkedForDeletion(true);
+
+        when(objectHiddenReasonRepository.findById(reasonId)).thenReturn(Optional.of(hiddenReasonEntity));
+        when(objectAdminActionRepository.findByMedia_Id(mediaId)).thenReturn(List.of());
+
+        IdRequest<MediaHideRequest> mediaHideRequestIdRequest = new
+            IdRequest<>(mediaHideRequest, mediaId);
+
+        DartsApiException exception
+            = Assertions.assertThrows(DartsApiException.class, () -> mediaHideOrShowValidator.validate(mediaHideRequestIdRequest));
+        Assertions.assertEquals(DartsApiException.DartsApiErrorCommon.FEATURE_FLAG_NOT_ENABLED, exception.getError());
+
+        Mockito.verify(mediaIdValidator, times(1)).validate(mediaId);
+    }
+
 }

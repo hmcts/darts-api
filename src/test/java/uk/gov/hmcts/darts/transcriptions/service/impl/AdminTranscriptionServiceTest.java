@@ -253,7 +253,6 @@ class AdminTranscriptionServiceTest {
 
     @Test
     void testTranscriptionDocumentHide() {
-        updateManualDeletion(true);
         TranscriptionDocumentHideRequest request = new TranscriptionDocumentHideRequest();
         request.setIsHidden(true);
         setupTestTranscriptionDocumentHide(request);
@@ -261,7 +260,6 @@ class AdminTranscriptionServiceTest {
 
     @Test
     void testTranscriptionDocumentHideDefaultIsHidden() {
-        updateManualDeletion(true);
         TranscriptionDocumentHideRequest request = new TranscriptionDocumentHideRequest();
         setupTestTranscriptionDocumentHide(request);
     }
@@ -316,7 +314,6 @@ class AdminTranscriptionServiceTest {
 
     @Test
     void testTranscriptionDocumentShow() {
-        updateManualDeletion(true);
         TranscriptionDocumentHideRequest request = new TranscriptionDocumentHideRequest();
         request.setIsHidden(false);
 
@@ -445,14 +442,6 @@ class AdminTranscriptionServiceTest {
             // Then
             assertEquals(TranscriptionApiError.TRANSCRIPTION_DOCUMENT_DELETE_NOT_SUPPORTED, exception.getError());
         }
-    }
-
-    @Test
-    void hideOrShowTranscriptionDocumentByIdManualDeletionDisabled() {
-        updateManualDeletion(false);
-        DartsApiException dartsApiException = assertThrows(
-            DartsApiException.class, () -> adminTranscriptionService.hideOrShowTranscriptionDocumentById(1, mock(TranscriptionDocumentHideRequest.class)));
-        assertThat(dartsApiException.getError()).isEqualTo(DartsApiException.DartsApiErrorCommon.FEATURE_FLAG_NOT_ENABLED);
     }
 
     @Test
