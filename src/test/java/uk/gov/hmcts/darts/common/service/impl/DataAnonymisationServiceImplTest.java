@@ -28,7 +28,7 @@ import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
 import uk.gov.hmcts.darts.common.repository.CaseRepository;
 import uk.gov.hmcts.darts.common.repository.TransformedMediaRepository;
 import uk.gov.hmcts.darts.common.repository.TransientObjectDirectoryRepository;
-import uk.gov.hmcts.darts.log.service.CasesLoggerService;
+import uk.gov.hmcts.darts.log.api.LogApi;
 import uk.gov.hmcts.darts.test.common.TestUtils;
 
 import java.time.OffsetDateTime;
@@ -38,8 +38,6 @@ import static java.time.temporal.ChronoUnit.SECONDS;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.within;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
@@ -67,7 +65,7 @@ class DataAnonymisationServiceImplTest {
     @Mock
     private TransientObjectDirectoryRepository transientObjectDirectoryRepository;
     @Mock
-    private CasesLoggerService casesLoggerService;
+    private LogApi logApi;
 
     @InjectMocks
     @Spy
@@ -179,13 +177,6 @@ class DataAnonymisationServiceImplTest {
         UserAccountEntity userAccount = new UserAccountEntity();
         userAccount.setId(123);
 
-        doNothing().when(dataAnonymisationService).anonymizeDefendantEntity(any(), any());
-        doNothing().when(dataAnonymisationService).anonymizeDefenceEntity(any(), any());
-        doNothing().when(dataAnonymisationService).anonymizeProsecutorEntity(any(), any());
-        doNothing().when(dataAnonymisationService).anonymizeHearingEntity(any(), any());
-        doNothing().when(dataAnonymisationService).tidyUpTransformedMediaEntities(any(), any());
-        doNothing().when(casesLoggerService).caseDeletedDueToExpiry(anyInt(), anyString());
-
         dataAnonymisationService.anonymizeCourtCaseEntity(userAccount, courtCase);
 
         assertThat(courtCase.isDataAnonymised()).isTrue();
@@ -206,7 +197,7 @@ class DataAnonymisationServiceImplTest {
         verify(dataAnonymisationService, times(1)).anonymizeHearingEntity(userAccount, hearingEntity2);
 
         verify(dataAnonymisationService, times(1)).tidyUpTransformedMediaEntities(userAccount, courtCase);
-        verify(casesLoggerService, times(1)).caseDeletedDueToExpiry(123, "caseNo123");
+        verify(logApi, times(1)).caseDeletedDueToExpiry(123, "caseNo123");
 
     }
 
