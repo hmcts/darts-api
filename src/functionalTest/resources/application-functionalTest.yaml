@@ -33,6 +33,8 @@ azure-ad-b2c-darpc-midtier-global-auth:
 deployed-application-uri: ${TEST_URL:http://localhost:4550}
 
 darts:
+  manual-deletion:
+    enabled: true
   testing-support-endpoints:
     enabled: ${TESTING_SUPPORT_ENDPOINTS_ENABLED:true}
   storage:
