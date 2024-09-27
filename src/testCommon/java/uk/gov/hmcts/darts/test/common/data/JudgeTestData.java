@@ -1,6 +1,5 @@
 package uk.gov.hmcts.darts.test.common.data;
 
-import lombok.experimental.UtilityClass;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.JudgeEntity;
 
@@ -11,9 +10,11 @@ import java.util.stream.Collectors;
 import static java.util.stream.IntStream.rangeClosed;
 import static uk.gov.hmcts.darts.test.common.data.UserAccountTestData.minimalUserAccount;
 
-@UtilityClass
-@SuppressWarnings({"HideUtilityClassConstructor"})
 public class JudgeTestData {
+
+    private JudgeTestData() {
+
+    }
 
     public static JudgeEntity someMinimalJudge() {
         var judge = new JudgeEntity();

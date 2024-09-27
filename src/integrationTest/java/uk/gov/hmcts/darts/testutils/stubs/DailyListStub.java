@@ -9,6 +9,7 @@ import java.time.LocalDate;
 
 @Component
 @RequiredArgsConstructor
+@Deprecated
 public class DailyListStub {
     private final DartsDatabaseStub dartsDatabaseStub;
 

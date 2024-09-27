@@ -9,6 +9,7 @@ import uk.gov.hmcts.darts.audio.service.MediaRequestService;
 import uk.gov.hmcts.darts.audiorequests.model.MediaPatchRequest;
 import uk.gov.hmcts.darts.common.entity.AuditEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
+import uk.gov.hmcts.darts.test.common.data.PersistableFactory;
 import uk.gov.hmcts.darts.testutils.GivenBuilder;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 import uk.gov.hmcts.darts.testutils.stubs.EntityGraphPersistence;
@@ -18,8 +19,7 @@ import java.util.List;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.data.history.RevisionMetadata.RevisionType.UPDATE;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.SUPER_ADMIN;
-import static uk.gov.hmcts.darts.test.common.data.MediaRequestTestData.someMinimalRequestData;
-import static uk.gov.hmcts.darts.test.common.data.MediaTestData.someMinimalMedia;
+import static uk.gov.hmcts.darts.test.common.data.PersistableFactory.getMediaRequestTestData;
 import static uk.gov.hmcts.darts.test.common.data.UserAccountTestData.minimalUserAccount;
 
 class AudioAuditTest extends IntegrationBase {
@@ -36,7 +36,7 @@ class AudioAuditTest extends IntegrationBase {
     @Test
     void performsStandardAndAdvancedAuditsWhenAudioOwnershipIsChanged() {
         var activeUser = given.anAuthenticatedUserWithGlobalAccessAndRole(SUPER_ADMIN);
-        MediaRequestEntity mediaRequest = entityGraphPersistence.persist(someMinimalRequestData());
+        MediaRequestEntity mediaRequest = entityGraphPersistence.persist(getMediaRequestTestData().someMinimalRequestData());
         UserAccountEntity newOwner = entityGraphPersistence.persist(minimalUserAccount());
 
         mediaRequestService.patchMediaRequest(
@@ -53,7 +53,7 @@ class AudioAuditTest extends IntegrationBase {
     @Test
     void performsStandardAuditWhenAudioIsChangedToHidden() {
         var activeUser = given.anAuthenticatedUserWithGlobalAccessAndRole(SUPER_ADMIN);
-        var media = someMinimalMedia();
+        var media = PersistableFactory.getMediaTestData().someMinimalMedia();
         media.setHidden(false);
         entityGraphPersistence.persist(media);
 

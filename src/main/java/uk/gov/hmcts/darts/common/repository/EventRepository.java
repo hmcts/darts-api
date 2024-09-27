@@ -52,11 +52,9 @@ public interface EventRepository extends JpaRepository<EventEntity, Integer> {
     @Query("""
          SELECT new uk.gov.hmcts.darts.event.model.EventSearchResult(
             e.id,
-            e.createdDateTime,
+            e.timestamp,
             et.eventName,
             e.eventText,
-            e.chronicleId,
-            e.antecedentId,
             e.isDataAnonymised,
             ch.id,
             ch.displayName,
@@ -103,13 +101,12 @@ public interface EventRepository extends JpaRepository<EventEntity, Integer> {
 
     @Query(value = """
         select distinct on (event_id, hearing_ids) e.* from (
-            SELECT e.eve_id, event_id, string_agg(he.hea_id::varchar, ',' order by he.hea_id) as hearing_ids FROM darts.event e
+            SELECT e.eve_id, event_id, e.created_ts, string_agg(he.hea_id::varchar, ',' order by he.hea_id) as hearing_ids FROM darts.event e
             left join darts.hearing_event_ae he
             on he.eve_id = e.eve_id
             WHERE e.event_id=:eventId
             group by e.eve_id, event_id
-            ORDER BY created_ts desc
-        ) e
+        ) e order by event_id, hearing_ids, e.created_ts DESC
         """, nativeQuery = true)
     List<EventIdAndHearingIds> getTheLatestCreatedEventPrimaryKeyForTheEventId(Integer eventId);
 

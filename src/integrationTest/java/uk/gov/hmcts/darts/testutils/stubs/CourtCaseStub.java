@@ -11,7 +11,7 @@ import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 import uk.gov.hmcts.darts.common.repository.CaseRepository;
 import uk.gov.hmcts.darts.common.repository.CourthouseRepository;
-import uk.gov.hmcts.darts.test.common.data.CaseTestData;
+import uk.gov.hmcts.darts.test.common.data.PersistableFactory;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -38,26 +38,28 @@ public class CourtCaseStub {
 
     @Autowired
     CourthouseStub courthouseStub;
+
     @Autowired
     DartsDatabaseSaveStub dartsDatabaseSaveStub;
 
+    @Autowired
+    DartsPersistence dartsPersistence;
+
     @Transactional
     public CourtCaseEntity createAndSaveMinimalCourtCase() {
-
-        var courtCase = CaseTestData.createSomeMinimalCase();
-        courtCase.getCourthouse().getCreatedBy().setId(0);
-        return dartsDatabaseSaveStub.save(courtCase);
+        var courtCase = PersistableFactory.getCourtCaseTestData().createSomeMinimalCase();
+        return dartsPersistence.save(courtCase);
     }
 
     @Transactional
     public CourtCaseEntity createAndSaveMinimalCourtCase(String caseNumber, Integer courthouseId) {
-        var courtCase = CaseTestData.createCaseWith(caseNumber, courthouseRepository.findById(courthouseId).get());
-        return dartsDatabaseSaveStub.save(courtCase);
+        var courtCase = PersistableFactory.getCourtCaseTestData().createCaseWith(caseNumber, courthouseRepository.findById(courthouseId).get());
+        return dartsPersistence.save(courtCase);
     }
 
     public CourtCaseEntity createAndSaveMinimalCourtCase(String caseNumber, CourthouseEntity courthouse) {
-        var courtCase = CaseTestData.createCaseWith(caseNumber, courthouse);
-        return dartsDatabaseSaveStub.save(courtCase);
+        var courtCase = PersistableFactory.getCourtCaseTestData().createCaseWith(caseNumber, courthouse);
+        return dartsPersistence.save(courtCase);
     }
 
     /**

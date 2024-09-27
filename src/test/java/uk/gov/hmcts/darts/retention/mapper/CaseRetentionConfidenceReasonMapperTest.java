@@ -8,7 +8,7 @@ import uk.gov.hmcts.darts.arm.config.ArmDataManagementConfiguration;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.retention.enums.RetentionConfidenceReasonEnum;
 import uk.gov.hmcts.darts.retention.model.CaseRetentionConfidenceReason;
-import uk.gov.hmcts.darts.test.common.data.CaseTestData;
+import uk.gov.hmcts.darts.test.common.data.PersistableFactory;
 
 import java.time.OffsetDateTime;
 import java.util.List;
@@ -29,11 +29,11 @@ class CaseRetentionConfidenceReasonMapperTest {
         OffsetDateTime currentTime = OffsetDateTime.parse("2023-05-31T10:00:00+01:00");
         OffsetDateTime retentionDate = currentTime.plusYears(7);
 
-        var courtCase1 = CaseTestData.createSomeMinimalCase();
+        var courtCase1 = PersistableFactory.getCourtCaseTestData().createSomeMinimalCase();
         courtCase1.setRetConfUpdatedTs(retentionDate);
         courtCase1.setRetConfReason(RetentionConfidenceReasonEnum.CASE_CLOSED);
 
-        var courtCase2 = CaseTestData.createSomeMinimalCase();
+        var courtCase2 = PersistableFactory.getCourtCaseTestData().createSomeMinimalCase();
         courtCase2.setRetConfUpdatedTs(retentionDate);
         courtCase2.setRetConfReason(RetentionConfidenceReasonEnum.AGED_CASE);
 

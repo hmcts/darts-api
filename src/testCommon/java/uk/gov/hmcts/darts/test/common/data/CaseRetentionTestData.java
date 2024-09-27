@@ -1,24 +1,23 @@
 package uk.gov.hmcts.darts.test.common.data;
 
-import lombok.experimental.UtilityClass;
 import uk.gov.hmcts.darts.common.entity.CaseManagementRetentionEntity;
 import uk.gov.hmcts.darts.common.entity.CaseRetentionEntity;
 
 import java.time.OffsetDateTime;
 
-import static uk.gov.hmcts.darts.test.common.data.CaseTestData.someMinimalCase;
 import static uk.gov.hmcts.darts.test.common.data.RetentionPolicyTypeTestData.someMinimalRetentionPolicyType;
 import static uk.gov.hmcts.darts.test.common.data.UserAccountTestData.minimalUserAccount;
 
-
-@UtilityClass
-@SuppressWarnings({"HideUtilityClassConstructor"})
 public class CaseRetentionTestData {
+
+    private CaseRetentionTestData() {
+
+    }
 
     public static CaseRetentionEntity someMinimalCaseRetention() {
 
         var caseRetention = new CaseRetentionEntity();
-        caseRetention.setCourtCase(someMinimalCase());
+        caseRetention.setCourtCase(PersistableFactory.getCourtCaseTestData().someMinimalCase());
         caseRetention.setRetentionPolicyType(someMinimalRetentionPolicyType());
         caseRetention.setRetainUntil(OffsetDateTime.now().plusYears(7));
         caseRetention.setCurrentState("some-state");

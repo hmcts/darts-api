@@ -4,6 +4,7 @@ import jakarta.persistence.Column;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.hibernate.annotations.UpdateTimestamp;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,6 +32,8 @@ public class DatabaseDateSetter {
     private final EntityManager em;
 
     public <T extends CreatedModifiedBaseEntity>
+
+    @Transactional
     void setLastModifiedDate(T baseEntity, OffsetDateTime timeToSet)  throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
         String sql = "UPDATE " + getTable(baseEntity) + " SET last_modified_ts='" + timeToSet.toString()
             + "' where " + getIdColumn(baseEntity) + "=" + getIdValue(baseEntity);
@@ -40,6 +43,7 @@ public class DatabaseDateSetter {
     }
 
     public <T extends CreatedModifiedBaseEntity>
+    @Transactional
     void setCreateDate(T baseEntity, OffsetDateTime timeToSet)  throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
         String sql = "UPDATE " + getTable(baseEntity) + " SET last_modified_ts='" + timeToSet.toString()
             + "' where " + getIdColumn(baseEntity) + "=" + getIdValue(baseEntity);

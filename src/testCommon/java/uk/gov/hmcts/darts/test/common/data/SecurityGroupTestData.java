@@ -11,8 +11,11 @@ import static org.apache.commons.lang3.RandomStringUtils.random;
 import static uk.gov.hmcts.darts.test.common.data.SecurityRoleTestData.createSecurityRoleFor;
 import static uk.gov.hmcts.darts.test.common.data.UserAccountTestData.minimalUserAccount;
 
-@SuppressWarnings({"HideUtilityClassConstructor"})
 public class SecurityGroupTestData {
+
+    private SecurityGroupTestData() {
+
+    }
 
     public static SecurityGroupEntity minimalSecurityGroup(UserAccountEntity userAccountEntity) {
         var postfix = random(10, false, true);
