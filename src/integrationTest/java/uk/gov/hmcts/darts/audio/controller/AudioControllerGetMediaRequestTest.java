@@ -16,7 +16,7 @@ import static org.junit.jupiter.params.provider.EnumSource.Mode.EXCLUDE;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.SUPER_ADMIN;
-import static uk.gov.hmcts.darts.test.common.data.MediaRequestTestData.someMinimalRequestData;
+import static uk.gov.hmcts.darts.test.common.data.PersistableFactory.getMediaRequestTestData;
 
 @AutoConfigureMockMvc
 class AudioControllerGetMediaRequestTest extends IntegrationBase {
@@ -43,7 +43,7 @@ class AudioControllerGetMediaRequestTest extends IntegrationBase {
     @Test
     void allowsSuperAdmin() throws Exception {
         given.anAuthenticatedUserWithGlobalAccessAndRole(SUPER_ADMIN);
-        var persistedMediaRequest = dartsPersistence.save(someMinimalRequestData());
+        var persistedMediaRequest = dartsPersistence.save(getMediaRequestTestData().someMinimalRequestData());
 
         mockMvc.perform(
                 get(ENDPOINT + String.valueOf(persistedMediaRequest.getId()))

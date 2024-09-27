@@ -1,14 +1,15 @@
 package uk.gov.hmcts.darts.test.common.data;
 
-import lombok.experimental.UtilityClass;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 
 import static org.apache.commons.lang3.RandomStringUtils.random;
 import static uk.gov.hmcts.darts.test.common.data.UserAccountTestData.minimalUserAccount;
 
-@UtilityClass
-@SuppressWarnings({"HideUtilityClassConstructor"})
 public class CourthouseTestData {
+
+    private CourthouseTestData() {
+
+    }
 
     public static CourthouseEntity someMinimalCourthouse() {
         var postfix = random(10, false, true);

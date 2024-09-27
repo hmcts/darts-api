@@ -4,15 +4,17 @@ import uk.gov.hmcts.darts.common.entity.TransformedMediaEntity;
 
 import java.time.OffsetDateTime;
 
-import static uk.gov.hmcts.darts.test.common.data.MediaRequestTestData.someMinimalRequestData;
 import static uk.gov.hmcts.darts.test.common.data.UserAccountTestData.minimalUserAccount;
 
-@SuppressWarnings({"HideUtilityClassConstructor"})
 public class TransformedMediaTestData {
+
+    private TransformedMediaTestData() {
+
+    }
 
     public static TransformedMediaEntity minimalTransformedMedia() {
         var transformedMedia = new TransformedMediaEntity();
-        transformedMedia.setMediaRequest(someMinimalRequestData());
+        transformedMedia.setMediaRequest(PersistableFactory.getMediaRequestTestData().someMinimalRequestData());
         transformedMedia.setStartTime(OffsetDateTime.now());
         transformedMedia.setEndTime(OffsetDateTime.now().plusHours(1));
         transformedMedia.setCreatedBy(minimalUserAccount());

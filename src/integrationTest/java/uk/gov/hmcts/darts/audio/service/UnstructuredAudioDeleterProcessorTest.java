@@ -8,7 +8,7 @@ import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
 import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
 import uk.gov.hmcts.darts.common.util.EodHelper;
-import uk.gov.hmcts.darts.test.common.data.MediaTestData;
+import uk.gov.hmcts.darts.test.common.data.PersistableFactory;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 
 import java.time.LocalDateTime;
@@ -20,7 +20,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.MARKED_FOR_DELETION;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.STORED;
-import static uk.gov.hmcts.darts.test.common.data.HearingTestData.someMinimalHearing;
 
 class UnstructuredAudioDeleterProcessorTest extends IntegrationBase {
 
@@ -37,11 +36,11 @@ class UnstructuredAudioDeleterProcessorTest extends IntegrationBase {
         when(currentTimeHelper.currentOffsetDateTime())
             .thenReturn(OffsetDateTime.now().plusWeeks(35));
 
-        HearingEntity hearing = someMinimalHearing();
+        HearingEntity hearing = PersistableFactory.getHearingTestData().someMinimalHearing();
         dartsPersistence.save(hearing);
 
         MediaEntity savedMedia = dartsPersistence.save(
-            MediaTestData.createMediaWith(
+            PersistableFactory.getMediaTestData().createMediaWith(
                 hearing.getCourtroom(),
                 OffsetDateTime.parse("2023-09-26T13:00:00Z"),
                 OffsetDateTime.parse("2023-09-26T13:45:00Z"),
@@ -83,11 +82,11 @@ class UnstructuredAudioDeleterProcessorTest extends IntegrationBase {
         when(currentTimeHelper.currentOffsetDateTime())
             .thenReturn(OffsetDateTime.now().plusWeeks(25));
 
-        HearingEntity hearing = someMinimalHearing();
+        HearingEntity hearing = PersistableFactory.getHearingTestData().someMinimalHearing();
         dartsPersistence.save(hearing);
 
         MediaEntity savedMedia = dartsPersistence.save(
-            MediaTestData.createMediaWith(
+            PersistableFactory.getMediaTestData().createMediaWith(
                 hearing.getCourtroom(),
                 OffsetDateTime.parse("2023-09-26T13:00:00Z"),
                 OffsetDateTime.parse("2023-09-26T13:45:00Z"),

@@ -14,6 +14,7 @@ import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.repository.SecurityGroupRepository;
 import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
 import uk.gov.hmcts.darts.test.common.data.CourthouseTestData;
+import uk.gov.hmcts.darts.test.common.data.PersistableFactory;
 import uk.gov.hmcts.darts.test.common.data.SecurityGroupTestData;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 
@@ -22,9 +23,7 @@ import java.util.List;
 import static org.assertj.core.api.Assertions.assertThat;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.APPROVER;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.TRANSLATION_QA;
-import static uk.gov.hmcts.darts.test.common.data.CaseTestData.createCaseAt;
 import static uk.gov.hmcts.darts.test.common.data.CourtroomTestData.createCourtRoomWithNameAtCourthouse;
-import static uk.gov.hmcts.darts.test.common.data.HearingTestData.createHearingWith;
 import static uk.gov.hmcts.darts.testutils.stubs.UserAccountStub.INTEGRATION_TEST_USER_EMAIL;
 
 @Slf4j
@@ -47,42 +46,46 @@ class CaseServiceAdvancedSearchUseInterpreterTest extends IntegrationBase {
         // swansea cases
         swanseaCourthouse = CourthouseTestData.createCourthouseWithName("SWANSEA");
 
-        CourtCaseEntity case1 = createCaseAt(swanseaCourthouse, "Case1");
-        CourtCaseEntity case2 = createCaseAt(swanseaCourthouse, "Case2");
+        CourtCaseEntity case1 = PersistableFactory.getCourtCaseTestData()
+            .createCaseAt(swanseaCourthouse, "Case1");
+        CourtCaseEntity case2 = PersistableFactory.getCourtCaseTestData()
+            .createCaseAt(swanseaCourthouse, "Case2");
         case2.setInterpreterUsed(true);
 
         CourtroomEntity courtroom1 = createCourtRoomWithNameAtCourthouse(swanseaCourthouse, "courtroom1");
-        var hearing1 = createHearingWith(case1, courtroom1);
-        var hearing2 = createHearingWith(case2, courtroom1);
+        var hearing1 = PersistableFactory.getHearingTestData().createHearingWith(case1, courtroom1);
+        var hearing2 = PersistableFactory.getHearingTestData().createHearingWith(case2, courtroom1);
 
         dartsDatabase.saveAll(hearing1, hearing2);
 
         // cardiff cases
         cardiffCourthouse = CourthouseTestData.createCourthouseWithName("CARDIFF");
 
-        CourtCaseEntity case3 = createCaseAt(cardiffCourthouse, "Case3");
-        CourtCaseEntity case4 = createCaseAt(cardiffCourthouse, "Case4");
+        CourtCaseEntity case3 = PersistableFactory.getCourtCaseTestData()
+            .createCaseAt(cardiffCourthouse, "Case3");
+        CourtCaseEntity case4 = PersistableFactory.getCourtCaseTestData()
+            .createCaseAt(cardiffCourthouse, "Case4");
         case4.setInterpreterUsed(true);
 
         CourtroomEntity courtroom2 = createCourtRoomWithNameAtCourthouse(cardiffCourthouse, "courtroom2");
-        var hearing3 = createHearingWith(case3, courtroom2);
-        var hearing4 = createHearingWith(case4, courtroom2);
+        var hearing3 = PersistableFactory.getHearingTestData().createHearingWith(case3, courtroom2);
+        var hearing4 = PersistableFactory.getHearingTestData().createHearingWith(case4, courtroom2);
 
-        dartsDatabase.saveAll(hearing3, hearing4);
+        dartsPersistence.saveAll(hearing3, hearing4);
 
         // liverpool cases
         liverpoolCourthouse = CourthouseTestData.createCourthouseWithName("LIVERPOOL");
 
-        CourtCaseEntity case5 = createCaseAt(liverpoolCourthouse, "Case5");
+        CourtCaseEntity case5 = PersistableFactory.getCourtCaseTestData().createCaseAt(liverpoolCourthouse, "Case5");
 
-        CourtCaseEntity case6 = createCaseAt(liverpoolCourthouse, "Case6");
+        CourtCaseEntity case6 = PersistableFactory.getCourtCaseTestData().createCaseAt(liverpoolCourthouse, "Case6");
         case6.setInterpreterUsed(true);
 
         CourtroomEntity courtroom3 = createCourtRoomWithNameAtCourthouse(liverpoolCourthouse, "courtroom3");
-        var hearing5 = createHearingWith(case5, courtroom3);
-        var hearing6 = createHearingWith(case6, courtroom3);
+        var hearing5 = PersistableFactory.getHearingTestData().createHearingWith(case5, courtroom3);
+        var hearing6 = PersistableFactory.getHearingTestData().createHearingWith(case6, courtroom3);
 
-        dartsDatabase.saveAll(hearing5, hearing6);
+        dartsPersistence.saveAll(hearing5, hearing6);
 
         givenBearerTokenExists(INTEGRATION_TEST_USER_EMAIL);
         user = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();

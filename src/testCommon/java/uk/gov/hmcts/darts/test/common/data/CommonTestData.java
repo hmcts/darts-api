@@ -1,16 +1,16 @@
 package uk.gov.hmcts.darts.test.common.data;
 
-import lombok.experimental.UtilityClass;
-
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 
-@UtilityClass
-@SuppressWarnings({"HideUtilityClassConstructor"})
 public class CommonTestData {
+
+    private CommonTestData() {
+
+    }
 
     // Can probably be simplified
     public static OffsetDateTime createOffsetDateTime(String timestamp) {

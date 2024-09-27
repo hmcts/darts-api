@@ -21,6 +21,7 @@ import static org.mockito.ArgumentMatchers.argThat;
 
 @Component
 @RequiredArgsConstructor
+@Deprecated
 public class SuperAdminUserStub {
 
     private final UserAccountStub userAccountStub;

@@ -40,6 +40,7 @@ import static uk.gov.hmcts.darts.test.common.TestUtils.getFile;
 @Slf4j
 @RequiredArgsConstructor
 @Profile("intTest")
+@Deprecated
 public class DataManagementServiceStubImpl implements DataManagementService {
 
     // use this UUID to request stub throwing an exception

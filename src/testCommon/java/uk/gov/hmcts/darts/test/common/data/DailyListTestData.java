@@ -13,8 +13,10 @@ import java.time.ZoneOffset;
 import static uk.gov.hmcts.darts.test.common.TestUtils.getContentsFromFile;
 
 
-@SuppressWarnings({"HideUtilityClassConstructor"})
 public class DailyListTestData {
+
+    private DailyListTestData() {
+    }
 
     public static DailyListEntity createDailyList(LocalTime time, String source, String listingCourthouse, String fileLocation) throws IOException {
         DailyListEntity dailyListEntity = new DailyListEntity();

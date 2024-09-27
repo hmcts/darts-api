@@ -13,6 +13,7 @@ import java.util.Optional;
 
 @Component
 @RequiredArgsConstructor
+@Deprecated
 public class CourthouseStubComposable {
     @Autowired
     private CourthouseRepository courthouseRepository;
