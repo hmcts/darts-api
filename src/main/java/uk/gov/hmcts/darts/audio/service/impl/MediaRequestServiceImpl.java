@@ -8,8 +8,11 @@ import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.ParameterExpression;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
+import lombok.AccessLevel;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import uk.gov.hmcts.darts.audio.component.AudioRequestBeingProcessedFromArchiveQuery;
@@ -126,6 +129,10 @@ public class MediaRequestServiceImpl implements MediaRequestService {
     private final ObjectAdminActionRepository objectAdminActionRepository;
     private final ObjectHiddenReasonRepository objectHiddenReasonRepository;
     private final SystemUserHelper systemUserHelper;
+
+    @Value("${darts.manual-deletion.enabled:false}")
+    @Getter(AccessLevel.PACKAGE)
+    private boolean manualDeletionEnabled;
 
     @Override
     public Optional<MediaRequestEntity> getOldestMediaRequestByStatus(MediaRequestStatus status) {
@@ -541,6 +548,9 @@ public class MediaRequestServiceImpl implements MediaRequestService {
     @Override
     @Transactional
     public MediaHideResponse adminHideOrShowMediaById(Integer mediaId, MediaHideRequest mediaHideRequest) {
+        if (!this.isManualDeletionEnabled()) {
+            throw new DartsApiException(DartsApiException.DartsApiErrorCommon.FEATURE_FLAG_NOT_ENABLED);
+        }
         MediaHideResponse response;
 
         IdRequest<MediaHideRequest> request = new IdRequest<>(mediaHideRequest, mediaId);

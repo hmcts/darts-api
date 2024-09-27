@@ -31,7 +31,6 @@ import uk.gov.hmcts.darts.transcriptions.model.TranscriptionDocumentHideRequest;
 import uk.gov.hmcts.darts.transcriptions.model.TranscriptionDocumentHideResponse;
 import uk.gov.hmcts.darts.transcriptions.model.TranscriptionSearchRequest;
 import uk.gov.hmcts.darts.transcriptions.model.TranscriptionSearchResult;
-import uk.gov.hmcts.darts.transcriptions.service.AdminTranscriptionService;
 import uk.gov.hmcts.darts.transcriptions.service.TranscriptionSearchQuery;
 import uk.gov.hmcts.darts.transcriptions.validator.TranscriptionApproveMarkForDeletionValidator;
 import uk.gov.hmcts.darts.transcriptions.validator.TranscriptionDocumentHideOrShowValidator;
@@ -54,6 +53,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
@@ -62,7 +62,7 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 class AdminTranscriptionServiceTest {
 
-    private AdminTranscriptionService adminTranscriptionService;
+    private AdminTranscriptionServiceImpl adminTranscriptionService;
 
     @Mock
     private TranscriptionSearchQuery transcriptionSearchQuery;
@@ -113,6 +113,11 @@ class AdminTranscriptionServiceTest {
                                                 objectHiddenReasonRepository,
                                                 userIdentity,
                                                 transcriptionApproveMarkForDeletionValidator);
+    }
+
+    private void updateManualDeletion(boolean manualDeletionEnabled) {
+        this.adminTranscriptionService = spy(adminTranscriptionService);
+        when(adminTranscriptionService.isManualDeletionEnabled()).thenReturn(manualDeletionEnabled);
     }
 
     @Test
@@ -248,6 +253,7 @@ class AdminTranscriptionServiceTest {
 
     @Test
     void testTranscriptionDocumentHide() {
+        updateManualDeletion(true);
         TranscriptionDocumentHideRequest request = new TranscriptionDocumentHideRequest();
         request.setIsHidden(true);
         setupTestTranscriptionDocumentHide(request);
@@ -255,6 +261,7 @@ class AdminTranscriptionServiceTest {
 
     @Test
     void testTranscriptionDocumentHideDefaultIsHidden() {
+        updateManualDeletion(true);
         TranscriptionDocumentHideRequest request = new TranscriptionDocumentHideRequest();
         setupTestTranscriptionDocumentHide(request);
     }
@@ -309,6 +316,7 @@ class AdminTranscriptionServiceTest {
 
     @Test
     void testTranscriptionDocumentShow() {
+        updateManualDeletion(true);
         TranscriptionDocumentHideRequest request = new TranscriptionDocumentHideRequest();
         request.setIsHidden(false);
 
@@ -369,6 +377,7 @@ class AdminTranscriptionServiceTest {
 
         @Test
         void shouldApproveDeletionWhenDocumentExists() {
+            updateManualDeletion(true);
             // Given
             Integer documentId = 1;
             TranscriptionDocumentEntity documentEntity = new TranscriptionDocumentEntity();
@@ -403,6 +412,7 @@ class AdminTranscriptionServiceTest {
 
         @Test
         void shouldThrowExceptionWhenDocumentNotFound() {
+            updateManualDeletion(true);
             // Given
             Integer documentId = 1;
 
@@ -418,6 +428,7 @@ class AdminTranscriptionServiceTest {
 
         @Test
         void shouldThrowExceptionWhenDeletionNotSupported() {
+            updateManualDeletion(true);
             // Given
             Integer documentId = 1;
             TranscriptionDocumentEntity documentEntity = mock(TranscriptionDocumentEntity.class);
@@ -434,5 +445,21 @@ class AdminTranscriptionServiceTest {
             // Then
             assertEquals(TranscriptionApiError.TRANSCRIPTION_DOCUMENT_DELETE_NOT_SUPPORTED, exception.getError());
         }
+    }
+
+    @Test
+    void hideOrShowTranscriptionDocumentByIdManualDeletionDisabled() {
+        updateManualDeletion(false);
+        DartsApiException dartsApiException = assertThrows(
+            DartsApiException.class, () -> adminTranscriptionService.hideOrShowTranscriptionDocumentById(1, mock(TranscriptionDocumentHideRequest.class)));
+        assertThat(dartsApiException.getError()).isEqualTo(DartsApiException.DartsApiErrorCommon.FEATURE_FLAG_NOT_ENABLED);
+    }
+
+    @Test
+    void approveDeletionOfTranscriptionDocumentByIdManualDeletionDisabled() {
+        updateManualDeletion(false);
+        DartsApiException dartsApiException = assertThrows(
+            DartsApiException.class, () -> adminTranscriptionService.approveDeletionOfTranscriptionDocumentById(1));
+        assertThat(dartsApiException.getError()).isEqualTo(DartsApiException.DartsApiErrorCommon.FEATURE_FLAG_NOT_ENABLED);
     }
 }

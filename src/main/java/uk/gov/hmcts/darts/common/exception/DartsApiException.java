@@ -1,7 +1,10 @@
 package uk.gov.hmcts.darts.common.exception;
 
 import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
+import uk.gov.hmcts.darts.audio.model.AddAudioTitleErrors;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -57,6 +60,27 @@ public class DartsApiException extends RuntimeException {
 
         this.error = error;
         this.detail = detail;
+    }
+
+    @Getter
+    @RequiredArgsConstructor
+    public enum DartsApiErrorCommon implements DartsApiError {
+        FEATURE_FLAG_NOT_ENABLED(
+            "FEATURE_FLAG_NOT_ENABLED",
+            HttpStatus.NOT_IMPLEMENTED,
+            AddAudioTitleErrors.USER_CANT_APPROVE_THEIR_OWN_DELETION.getValue()
+        );
+        private static final String ERROR_TYPE_PREFIX = "COMMON";
+
+        private final String errorTypeNumeric;
+        private final HttpStatus httpStatus;
+        private final String title;
+
+        @Override
+        public String getErrorTypePrefix() {
+            return ERROR_TYPE_PREFIX;
+        }
+
     }
 
 }

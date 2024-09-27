@@ -1,6 +1,5 @@
 package uk.gov.hmcts.darts.audio.service.impl;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -30,7 +29,6 @@ import uk.gov.hmcts.darts.common.repository.MediaRepository;
 import uk.gov.hmcts.darts.common.repository.ObjectAdminActionRepository;
 import uk.gov.hmcts.darts.common.repository.ObjectHiddenReasonRepository;
 import uk.gov.hmcts.darts.common.repository.TransformedMediaRepository;
-import uk.gov.hmcts.darts.test.common.TestUtils;
 
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
@@ -38,6 +36,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -81,13 +80,12 @@ class MediaRequestServiceImplAdminMediaSearchTest {
     @Captor
     ArgumentCaptor<MediaEntity> mediaEntityArgumentCaptor;
 
-    private ObjectMapper objectMapper;
-
     private MockedStatic<GetAdminMediaResponseMapper> adminMediaSearchResponseMapperMockedStatic;
 
     @BeforeEach
     void setUp() {
-        this.objectMapper = TestUtils.getObjectMapper();
+        this.mediaRequestService = spy(mediaRequestService);
+        when(mediaRequestService.isManualDeletionEnabled()).thenReturn(true);
     }
 
     @AfterEach
