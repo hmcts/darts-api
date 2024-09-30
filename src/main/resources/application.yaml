@@ -250,6 +250,7 @@ darts:
       date-format: yyyy-MM-dd
       file-extension: a360
       list-blobs-timeout-duration: 60s
+      max-continuation-batch-size: 5000
       media-record-properties-file: properties/arm/media-record.properties
       transcription-record-properties-file: properties/arm/transcription-record.properties
       annotation-record-properties-file: properties/arm/annotation-record.properties
