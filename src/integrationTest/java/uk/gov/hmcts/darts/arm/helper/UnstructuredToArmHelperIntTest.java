@@ -22,7 +22,7 @@ import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.STORED;
 class UnstructuredToArmHelperIntTest extends IntegrationBase {
 
     @Autowired
-    private UnstructuredToArmHelper unstructuredToArmHelper;
+    private DataStoreToArmHelper unstructuredToArmHelper;
 
     @Autowired
     private EodHelper eodHelper;
