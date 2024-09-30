@@ -38,7 +38,7 @@ import uk.gov.hmcts.darts.common.service.RetrieveCoreObjectService;
 import uk.gov.hmcts.darts.common.util.FileContentChecksum;
 import uk.gov.hmcts.darts.datamanagement.api.DataManagementApi;
 import uk.gov.hmcts.darts.log.api.LogApi;
-import uk.gov.hmcts.darts.test.common.data.HearingTestData;
+import uk.gov.hmcts.darts.test.common.data.PersistableFactory;
 
 import java.io.InputStream;
 import java.time.OffsetDateTime;
@@ -315,7 +315,7 @@ class AudioUploadServiceImplTest {
         AddAudioMetadataRequest addAudioMetadataRequest = createAddAudioRequest(STARTED_AT, ENDED_AT);
         MediaEntity mediaEntity = createMediaEntity(STARTED_AT, ENDED_AT);
 
-        HearingEntity hearing1 = HearingTestData.someMinimalHearing();
+        HearingEntity hearing1 = PersistableFactory.getHearingTestData().someMinimalHearing();
         when(retrieveCoreObjectService.retrieveOrCreateHearing(
             anyString(),
             anyString(),
@@ -324,7 +324,7 @@ class AudioUploadServiceImplTest {
             any()
         )).thenReturn(hearing1);
 
-        HearingEntity hearing2 = HearingTestData.someMinimalHearing();
+        HearingEntity hearing2 = PersistableFactory.getHearingTestData().someMinimalHearing();
         when(retrieveCoreObjectService.retrieveOrCreateHearing(
             anyString(),
             anyString(),
@@ -333,7 +333,7 @@ class AudioUploadServiceImplTest {
             any()
         )).thenReturn(hearing2);
 
-        HearingEntity hearing3 = HearingTestData.someMinimalHearing();
+        HearingEntity hearing3 = PersistableFactory.getHearingTestData().someMinimalHearing();
         when(retrieveCoreObjectService.retrieveOrCreateHearing(
             anyString(),
             anyString(),
@@ -353,7 +353,7 @@ class AudioUploadServiceImplTest {
         AddAudioMetadataRequest addAudioMetadataRequest = createAddAudioRequest(STARTED_AT, ENDED_AT);
         MediaEntity mediaEntity = createMediaEntity(STARTED_AT, ENDED_AT);
 
-        HearingEntity hearing1 = HearingTestData.someMinimalHearing();
+        HearingEntity hearing1 = PersistableFactory.getHearingTestData().someMinimalHearing();
         when(retrieveCoreObjectService.retrieveOrCreateHearing(
             anyString(),
             anyString(),
@@ -362,7 +362,7 @@ class AudioUploadServiceImplTest {
             any()
         )).thenReturn(hearing1);
 
-        HearingEntity hearing2 = HearingTestData.someMinimalHearing();
+        HearingEntity hearing2 = PersistableFactory.getHearingTestData().someMinimalHearing();
         hearing2.setHearingIsActual(false);
         when(retrieveCoreObjectService.retrieveOrCreateHearing(
             anyString(),
@@ -372,7 +372,7 @@ class AudioUploadServiceImplTest {
             any()
         )).thenReturn(hearing2);
 
-        HearingEntity hearing3 = HearingTestData.someMinimalHearing();
+        HearingEntity hearing3 = PersistableFactory.getHearingTestData().someMinimalHearing();
         when(retrieveCoreObjectService.retrieveOrCreateHearing(
             anyString(),
             anyString(),
@@ -394,7 +394,7 @@ class AudioUploadServiceImplTest {
         addAudioMetadataRequest.setCases(List.of("1", "2", "1"));
         createMediaEntity(STARTED_AT, ENDED_AT);
 
-        HearingEntity hearing1 = HearingTestData.someMinimalHearing();
+        HearingEntity hearing1 = PersistableFactory.getHearingTestData().someMinimalHearing();
         when(retrieveCoreObjectService.retrieveOrCreateHearing(
             anyString(),
             anyString(),
@@ -403,7 +403,7 @@ class AudioUploadServiceImplTest {
             any()
         )).thenReturn(hearing1);
 
-        HearingEntity hearing2 = HearingTestData.someMinimalHearing();
+        HearingEntity hearing2 = PersistableFactory.getHearingTestData().someMinimalHearing();
         when(retrieveCoreObjectService.retrieveOrCreateHearing(
             anyString(),
             anyString(),

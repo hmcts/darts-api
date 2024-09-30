@@ -21,7 +21,7 @@
     "bf_010": "<UPLOADED_DATE_TIME>",
     "bf_012": <OBJECT_ID>,
     "bf_013": <PARENT_ID>,
-    "bf_016": "15000",
+    "bf_016": "<USER_ID>",
     "bf_019": "NEWCASTLE",
     "bf_020": "INT TEST COURTROOM 2"
   }

@@ -5,8 +5,11 @@ import uk.gov.hmcts.darts.common.entity.RegionEntity;
 import static org.apache.commons.lang3.RandomStringUtils.random;
 
 
-@SuppressWarnings({"HideUtilityClassConstructor"})
 public class RegionTestData {
+
+    private RegionTestData() {
+
+    }
 
     public static RegionEntity minimalRegion() {
         var postfix = random(10);

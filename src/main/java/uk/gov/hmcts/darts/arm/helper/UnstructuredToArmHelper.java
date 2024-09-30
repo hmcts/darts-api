@@ -58,14 +58,18 @@ public class UnstructuredToArmHelper {
             Pageable.ofSize(maxResultSize)
         );
 
-        var pendingUnstructuredExternalObjectDirectoryEntities = externalObjectDirectoryRepository.findEodsNotInOtherStorage(
-            EodHelper.storedStatus(), sourceLocation,
-            EodHelper.armLocation(),
-            maxResultSize - failedArmExternalObjectDirectoryEntities.size());
-
         List<ExternalObjectDirectoryEntity> returnList = new ArrayList<>();
-        returnList.addAll(pendingUnstructuredExternalObjectDirectoryEntities);
         returnList.addAll(failedArmExternalObjectDirectoryEntities);
+
+        int remainingBatchSizeEods = maxResultSize - failedArmExternalObjectDirectoryEntities.size();
+        if (remainingBatchSizeEods > 0) {
+            var pendingUnstructuredExternalObjectDirectoryEntities = externalObjectDirectoryRepository.findEodsNotInOtherStorage(
+                EodHelper.storedStatus(), sourceLocation,
+                EodHelper.armLocation(),
+                remainingBatchSizeEods);
+            returnList.addAll(pendingUnstructuredExternalObjectDirectoryEntities);
+        }
+
         return returnList;
     }
 

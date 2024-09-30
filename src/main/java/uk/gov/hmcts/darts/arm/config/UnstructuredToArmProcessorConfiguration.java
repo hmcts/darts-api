@@ -13,6 +13,7 @@ import org.springframework.validation.annotation.Validated;
 @Configuration
 public class UnstructuredToArmProcessorConfiguration {
 
-    private int maxResultSize;
+    private int maxArmManifestItems;
+    private int maxArmSingleModeItems;
 
 }

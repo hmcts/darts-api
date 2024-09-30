@@ -13,6 +13,7 @@ import java.time.LocalDateTime;
 
 @Component
 @RequiredArgsConstructor
+@Deprecated
 public class DartsDatabaseComposable {
 
     private final RetrieveCoreObjectService retrieveCoreObjectService;

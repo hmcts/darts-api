@@ -562,8 +562,7 @@ public class MediaRequestServiceImpl implements MediaRequestService {
                 objectHiddenReasonEntity = objectHiddenReasonRepository.findById(mediaHideRequest.getAdminAction().getReasonId());
 
                 if (objectHiddenReasonEntity.isEmpty()) {
-                    throw new DartsApiException(AudioApiError
-                                                    .MEDIA_HIDE_ACTION_REASON_NOT_FOUND);
+                    throw new DartsApiException(AudioApiError.MEDIA_HIDE_ACTION_REASON_NOT_FOUND);
                 }
 
                 // on hiding add the relevant hide record
@@ -594,4 +593,5 @@ public class MediaRequestServiceImpl implements MediaRequestService {
 
         return response;
     }
+
 }

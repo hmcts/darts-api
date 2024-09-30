@@ -101,6 +101,31 @@ class ObjectAdminActionRepositoryTest extends PostgresIntegrationBase {
         Assertions.assertEquals(expectedObjectAdminActionEntity.getId(), result.getFirst().getId());
     }
 
+    @Test
+    void findByMediaIdAndMarkedForManualDeletionTrue() {
+        var media = dartsDatabase.getMediaStub().createAndSaveMedia();
+        var markedForManualDeletionAction = objectAdminActionStub.createAndSave(ObjectAdminActionStub.ObjectAdminActionSpec.builder()
+                                                                                    .media(media)
+                                                                                    .objectHiddenReason(
+                                                                                        objectHiddenReasonStub.getAnyWithMarkedForDeletion(true))
+                                                                                    .markedForManualDeletion(true)
+                                                                                    .build());
+        objectAdminActionStub.createAndSave(ObjectAdminActionStub.ObjectAdminActionSpec.builder()
+                                                .media(media)
+                                                .objectHiddenReason(
+                                                    objectHiddenReasonStub.getAnyWithMarkedForDeletion(true))
+                                                .markedForManualDeletion(false)
+                                                .build());
+
+
+        // When
+        List<ObjectAdminActionEntity> result = repository.findByMediaIdAndMarkedForManualDeletionTrue(media.getId());
+
+        // Then
+        Assertions.assertEquals(1, result.size());
+        Assertions.assertEquals(markedForManualDeletionAction.getId(), result.getFirst().getId());
+    }
+
     private MediaEntity createAndSaveMediaEntity(CourtroomEntity courtroomEntity) {
         return mediaStub.createMediaEntity(courtroomEntity.getCourthouse().getCourthouseName(),
                                            courtroomEntity.getName(),

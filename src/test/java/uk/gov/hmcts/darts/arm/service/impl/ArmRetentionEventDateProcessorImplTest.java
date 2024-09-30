@@ -53,7 +53,7 @@ class ArmRetentionEventDateProcessorImplTest {
         armRetentionEventDateProcessor = new ArmRetentionEventDateProcessorImpl(
             externalObjectDirectoryRepository, armRetentionEventDateCalculator);
 
-        externalObjectDirectoryEntity = ExternalObjectDirectoryTestData.createExternalObjectDirectory(
+        externalObjectDirectoryEntity = new ExternalObjectDirectoryTestData().createExternalObjectDirectory(
             media,
             ARM,
             STORED,

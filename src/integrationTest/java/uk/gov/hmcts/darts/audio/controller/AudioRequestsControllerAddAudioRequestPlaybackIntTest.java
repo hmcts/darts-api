@@ -20,6 +20,7 @@ import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.notification.api.NotificationApi;
 import uk.gov.hmcts.darts.notification.entity.NotificationEntity;
 import uk.gov.hmcts.darts.notification.enums.NotificationStatus;
+import uk.gov.hmcts.darts.test.common.data.PersistableFactory;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 
 import java.net.URI;
@@ -35,7 +36,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static uk.gov.hmcts.darts.test.common.data.DefenceTestData.createDefenceForCaseWithName;
 import static uk.gov.hmcts.darts.test.common.data.DefendantTestData.createDefendantForCaseWithName;
-import static uk.gov.hmcts.darts.test.common.data.HearingTestData.hearingWith;
 import static uk.gov.hmcts.darts.test.common.data.ProsecutorTestData.createProsecutorForCaseWithName;
 
 @AutoConfigureMockMvc
@@ -67,17 +67,18 @@ class AudioRequestsControllerAddAudioRequestPlaybackIntTest extends IntegrationB
 
     @BeforeEach
     void beforeEach() {
-        hearingEntity = hearingWith(
+        hearingEntity = PersistableFactory.getHearingTestData().hearingWith(
             SOME_CASE_NUMBER,
             SOME_COURTHOUSE,
             SOME_COURTROOM,
             HEARING_DATETIME
         );
         var courtCase = hearingEntity.getCourtCase();
-        courtCase.addProsecutor(createProsecutorForCaseWithName(courtCase, "aProsecutor"));
-        courtCase.addDefendant(createDefendantForCaseWithName(courtCase, "aDefendant"));
-        courtCase.addDefence(createDefenceForCaseWithName(courtCase, "aDefence"));
         dartsPersistence.save(hearingEntity);
+
+        dartsPersistence.save(createProsecutorForCaseWithName(courtCase, "aProsecutor"));
+        dartsPersistence.save(createDefendantForCaseWithName(courtCase, "aDefendant"));
+        dartsPersistence.save(createDefenceForCaseWithName(courtCase, "aDefence"));
 
         testUser = dartsDatabase.getUserAccountStub()
             .createAuthorisedIntegrationTestUser(hearingEntity.getCourtroom().getCourthouse());

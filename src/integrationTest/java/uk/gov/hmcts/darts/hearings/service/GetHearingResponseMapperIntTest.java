@@ -8,6 +8,7 @@ import uk.gov.hmcts.darts.common.entity.EventEntity;
 import uk.gov.hmcts.darts.common.entity.EventHandlerEntity;
 import uk.gov.hmcts.darts.hearings.mapper.GetHearingResponseMapper;
 import uk.gov.hmcts.darts.hearings.model.GetHearingResponse;
+import uk.gov.hmcts.darts.test.common.data.PersistableFactory;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 
 import java.time.OffsetDateTime;
@@ -25,7 +26,6 @@ import static uk.gov.hmcts.darts.test.common.data.EventTestData.SECTION_11_1981_
 import static uk.gov.hmcts.darts.test.common.data.EventTestData.SECTION_39_1933_DB_ID;
 import static uk.gov.hmcts.darts.test.common.data.EventTestData.SECTION_4_1981_DB_ID;
 import static uk.gov.hmcts.darts.test.common.data.EventTestData.someReportingRestrictionId;
-import static uk.gov.hmcts.darts.test.common.data.HearingTestData.someMinimalHearing;
 
 class GetHearingResponseMapperIntTest extends IntegrationBase {
 
@@ -37,7 +37,7 @@ class GetHearingResponseMapperIntTest extends IntegrationBase {
 
     @Test
     void getHearingWithNoReportingRestrictions() {
-        var minimalHearing = someMinimalHearing();
+        var minimalHearing = PersistableFactory.getHearingTestData().someMinimalHearing();
         var hearingEntity = dartsDatabase.save(minimalHearing);
 
         GetHearingResponse getHearingResponse = getHearingResponseMapper.map(hearingEntity);
@@ -49,7 +49,7 @@ class GetHearingResponseMapperIntTest extends IntegrationBase {
         var reportingRestrictions = createEventsWithDefaults(1).stream()
             .map(eve -> dartsDatabase.addHandlerToEvent(eve, SECTION_11_1981_DB_ID))
             .toList();
-        var minimalHearing = someMinimalHearing();
+        var minimalHearing = PersistableFactory.getHearingTestData().someMinimalHearing();
         dartsDatabase.saveEventsForHearing(minimalHearing, reportingRestrictions);
 
         GetHearingResponse getHearingResponse = getHearingResponseMapper.map(minimalHearing);
@@ -67,7 +67,7 @@ class GetHearingResponseMapperIntTest extends IntegrationBase {
         dartsDatabase.addHandlerToEvent(reportingRestrictions.get(1), SECTION_11_1981_DB_ID);
         dartsDatabase.addHandlerToEvent(reportingRestrictions.get(2), SECTION_39_1933_DB_ID);
 
-        var minimalHearing = someMinimalHearing();
+        var minimalHearing = PersistableFactory.getHearingTestData().someMinimalHearing();
         dartsDatabase.saveEventsForHearing(minimalHearing, reportingRestrictions);
 
         GetHearingResponse getHearingResponse = getHearingResponseMapper.map(minimalHearing);
@@ -83,7 +83,7 @@ class GetHearingResponseMapperIntTest extends IntegrationBase {
             .map(eve -> dartsDatabase.addHandlerToEvent(eve, someReportingRestrictionId()))
             .toList();
         List<OffsetDateTime> expectedOrderedTs = orderedTsFrom(reportingRestrictions);
-        var minimalHearing = someMinimalHearing();
+        var minimalHearing = PersistableFactory.getHearingTestData().someMinimalHearing();
         dartsDatabase.saveEventsForHearing(minimalHearing, reportingRestrictions);
 
         GetHearingResponse getHearingResponse = getHearingResponseMapper.map(minimalHearing);
@@ -96,7 +96,7 @@ class GetHearingResponseMapperIntTest extends IntegrationBase {
 
     @Test
     void includesMigratedCaseWithRestrictionPersistedOnCaseTable() {
-        var hearing = someMinimalHearing();
+        var hearing = PersistableFactory.getHearingTestData().someMinimalHearing();
         dartsDatabase.addHandlerToCase(hearing.getCourtCase(), someReportingRestrictionId());
 
         GetHearingResponse getHearingResponse = getHearingResponseMapper.map(hearing);
