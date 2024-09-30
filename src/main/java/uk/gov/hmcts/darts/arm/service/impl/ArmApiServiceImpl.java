@@ -88,7 +88,7 @@ public class ArmApiServiceImpl implements ArmApiService {
                 "record id: %s, file id: %s. Failure response: %s")
                 .formatted(armApiConfigurationProperties.getCabinetId(), externalRecordId, externalFileId, response.status());
             log.error(message, e);
-            throw new FileNotDownloadReadingBodyException(message);
+            throw new FileNotDownloadReadingBodyException(message, e);
         }
 
         log.debug("Successfully downloaded ARM data for recordId: {}, fileId: {}", externalRecordId, externalFileId);
