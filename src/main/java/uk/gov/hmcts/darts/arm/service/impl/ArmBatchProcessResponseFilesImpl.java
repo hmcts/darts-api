@@ -47,7 +47,6 @@ import java.util.List;
 import java.util.Optional;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
-import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 import static uk.gov.hmcts.darts.arm.util.ArchiveConstants.ArchiveResponseFileAttributes.ARM_CREATE_RECORD_FILENAME_KEY;
 import static uk.gov.hmcts.darts.arm.util.ArchiveConstants.ArchiveResponseFileAttributes.ARM_INVALID_LINE_FILENAME_KEY;
@@ -186,6 +185,23 @@ public class ArmBatchProcessResponseFilesImpl implements ArmResponseFilesProcess
                          batchUploadFileFilenameProcessor.getBatchMetadataFilename(),
                          externalObjectDirectoryEntities.size(), completedExternalObjectDirectoryEntities.size());
             }
+        } else {
+            // If no EODs are found for the manifest, delete the input upload blob and any linked response files as they are dangling
+            deleteDanglingResponses(batchUploadFileFilenameProcessor);
+        }
+
+    }
+
+    private void deleteDanglingResponses(BatchInputUploadFileFilenameProcessor batchUploadFileFilenameProcessor) {
+        List<String> responseFiles = new ArrayList<>();
+        responseFiles.add(batchUploadFileFilenameProcessor.getBatchMetadataFilenameAndPath());
+        try {
+            responseFiles.addAll(armDataManagementApi.listResponseBlobs(batchUploadFileFilenameProcessor.getHashcode()));
+        } catch (Exception e) {
+            log.error("Unable to find dangling response files for hashcode {}", batchUploadFileFilenameProcessor.getHashcode(), e);
+        }
+        if (CollectionUtils.isNotEmpty(responseFiles)) {
+            deleteResponseBlobs(responseFiles);
         }
     }
 
@@ -597,45 +613,45 @@ public class ArmBatchProcessResponseFilesImpl implements ArmResponseFilesProcess
                                               UploadFileFilenameProcessor uploadFileFilenameProcessor) {
         try {
             ExternalObjectDirectoryEntity externalObjectDirectory = getExternalObjectDirectoryEntity(externalObjectDirectoryId);
-            if (nonNull(externalObjectDirectory) && nonNull(armResponseInvalidLineRecord)) {
+            if (nonNull(externalObjectDirectory)) {
+                if (nonNull(armResponseInvalidLineRecord)) {
+                    //If the filename contains 0
+                    if (ARM_RESPONSE_INVALID_STATUS_CODE.equals(invalidLineFileFilenameProcessor.getStatus())) {
 
-                //If the filename contains 0
-                if (ARM_RESPONSE_INVALID_STATUS_CODE.equals(invalidLineFileFilenameProcessor.getStatus())) {
-
-                    //Read the invalid lines file and log the error code and description with EOD
-                    log.warn(
-                        "ARM invalid line for external object id {}. ARM error description: {} ARM error status: {}",
-                        externalObjectDirectory.getId(),
-                        armResponseInvalidLineRecord.getExceptionDescription(),
-                        armResponseInvalidLineRecord.getErrorStatus()
-                    );
-                    updateTransferAttempts(externalObjectDirectory);
-                    externalObjectDirectory.setErrorCode(armResponseInvalidLineRecord.getExceptionDescription());
-                    updateExternalObjectDirectoryStatus(externalObjectDirectory, EodHelper.armResponseManifestFailedStatus());
-                } else {
-                    String error = String.format("Incorrect status [%s] for invalid line file %s", invalidLineFileFilenameProcessor.getStatus(),
-                                                 invalidLineFileFilenameProcessor.getInvalidLineFileFilenameAndPath());
-                    log.warn(error);
-                    externalObjectDirectory.setErrorCode(error);
-                    updateExternalObjectDirectoryStatus(externalObjectDirectory, EodHelper.armResponseProcessingFailedStatus());
-                }
-            } else {
-                if (isNull(externalObjectDirectory)) {
-                    String armResponseFile = getOtherFailedArmResponseFile(createRecordFilenameProcessor, uploadFileFilenameProcessor);
-
-                    log.warn("Unable to find external object directory with ID {} for ARM batch responses with IL file {}, other response file{}",
-                             externalObjectDirectoryId,
-                             invalidLineFileFilenameProcessor.getInvalidLineFileFilenameAndPath(),
-                             armResponseFile);
-                    List<String> invalidResponseFiles = getInvalidResponseFiles(invalidLineFileFilenameProcessor, armResponseFile);
-                    deleteResponseBlobs(invalidResponseFiles);
+                        // Read the invalid lines file and log the error code and description with EOD
+                        log.warn(
+                            "ARM invalid line for external object id {}. ARM error description: {} ARM error status: {}",
+                            externalObjectDirectory.getId(),
+                            armResponseInvalidLineRecord.getExceptionDescription(),
+                            armResponseInvalidLineRecord.getErrorStatus()
+                        );
+                        updateTransferAttempts(externalObjectDirectory);
+                        externalObjectDirectory.setErrorCode(armResponseInvalidLineRecord.getExceptionDescription());
+                        updateExternalObjectDirectoryStatus(externalObjectDirectory, EodHelper.armResponseManifestFailedStatus());
+                    } else {
+                        String error = String.format("Incorrect status [%s] for invalid line file %s", invalidLineFileFilenameProcessor.getStatus(),
+                                                     invalidLineFileFilenameProcessor.getInvalidLineFileFilenameAndPath());
+                        log.warn(error);
+                        externalObjectDirectory.setErrorCode(error);
+                        updateExternalObjectDirectoryStatus(externalObjectDirectory, EodHelper.armResponseProcessingFailedStatus());
+                    }
                 } else {
                     log.warn("Unable to read invalid line file {}", invalidLineFileFilenameProcessor.getInvalidLineFileFilenameAndPath());
                     updateExternalObjectDirectoryStatus(externalObjectDirectory, EodHelper.armResponseProcessingFailedStatus());
                 }
+            } else {
+
+                String armResponseFile = getOtherFailedArmResponseFile(createRecordFilenameProcessor, uploadFileFilenameProcessor);
+
+                log.warn("Unable to find external object directory with ID {} for ARM batch responses with IL file {}, other response file{}",
+                         externalObjectDirectoryId,
+                         invalidLineFileFilenameProcessor.getInvalidLineFileFilenameAndPath(),
+                         armResponseFile);
+                List<String> invalidResponseFiles = getInvalidResponseFiles(invalidLineFileFilenameProcessor, armResponseFile);
+                deleteResponseBlobs(invalidResponseFiles);
             }
         } catch (Exception e) {
-            log.error(UNABLE_TO_UPDATE_EOD, e);
+            log.error("Unable to update invalid line responses", e);
         }
     }
 

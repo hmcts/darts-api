@@ -39,7 +39,9 @@ import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 import static java.time.ZoneOffset.UTC;
@@ -48,6 +50,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
@@ -1500,7 +1503,7 @@ class ArmBatchProcessResponseFilesIntTest extends IntegrationBase {
                                                  createRecordFilename2, invalidLineFileFilename2,
                                                  uploadFileFilename3, invalidLineFileFilename3);
 
-        when(armDataManagementApi.listResponseBlobs(hashcode1)).thenReturn(hashcodeResponses);
+        when(armDataManagementApi.listResponseBlobs(hashcode1)).thenReturn(hashcodeResponses).thenReturn(Collections.emptyList());
 
         String createRecordFileTest1 = "tests/arm/service/ArmBatchResponseFilesProcessorTest/ValidResponses/CreateRecord.rsp";
         String validUploadFileTest1 = "tests/arm/service/ArmBatchResponseFilesProcessorTest/ValidResponses/UploadFile.rsp";
@@ -1548,7 +1551,7 @@ class ArmBatchProcessResponseFilesIntTest extends IntegrationBase {
         assertTrue(notFoundCaseEod.isEmpty());
 
         verify(armDataManagementApi).listResponseBlobsUsingMarker(PREFIX, BATCH_SIZE, continuationToken);
-        verify(armDataManagementApi).listResponseBlobs(hashcode1);
+        verify(armDataManagementApi, times(2)).listResponseBlobs(hashcode1);
 
         verify(armDataManagementApi).getBlobData(createRecordFilename2);
         verify(armDataManagementApi).getBlobData(invalidLineFileFilename2);
@@ -1562,7 +1565,7 @@ class ArmBatchProcessResponseFilesIntTest extends IntegrationBase {
         verify(armDataManagementApi).deleteBlobData(uploadFileFilename3);
         verify(armDataManagementApi).deleteBlobData(invalidLineFileFilename3);
 
-        verify(armDataManagementApi, never()).deleteBlobData(blobNameAndPath1);
+        verify(armDataManagementApi).deleteBlobData(blobNameAndPath1);
     }
 
     @Test
@@ -1959,6 +1962,7 @@ class ArmBatchProcessResponseFilesIntTest extends IntegrationBase {
             .findById(armEod.getId()).orElseThrow();
         assertEquals(ARM_RESPONSE_CHECKSUM_VERIFICATION_FAILED.getId(), foundAnnotationEod.getStatus().getId());
         assertTrue(foundAnnotationEod.isResponseCleaned());
+        verify(armDataManagementApi).deleteBlobData(blobNameAndPath1);
     }
 
     @Test
@@ -1996,7 +2000,7 @@ class ArmBatchProcessResponseFilesIntTest extends IntegrationBase {
         String uploadFileFilename1 = String.format("dropzone/DARTS/response/%s_04e6bc3b-952a-79b6-8362-13259aae1895_1_uf.rsp", hashcode1);
         List<String> hashcodeResponses = getHashcodeResponses(hashcode1, createRecordFilename1, uploadFileFilename1);
 
-        when(armDataManagementApi.listResponseBlobs(hashcode1)).thenReturn(hashcodeResponses);
+        when(armDataManagementApi.listResponseBlobs(hashcode1)).thenReturn(hashcodeResponses).thenReturn(Collections.emptyList());
 
         String createRecordFileTest1 = "tests/arm/service/ArmBatchResponseFilesProcessorTest/ValidResponses/CreateRecord.rsp";
         String validUploadFileTest1 = "tests/arm/service/ArmBatchResponseFilesProcessorTest/ValidResponses/UploadFile.rsp";
@@ -2028,7 +2032,7 @@ class ArmBatchProcessResponseFilesIntTest extends IntegrationBase {
         assertTrue(notFoundAnnotationEod.isEmpty());
 
         verify(armDataManagementApi).listResponseBlobsUsingMarker(PREFIX, BATCH_SIZE, continuationToken);
-        verify(armDataManagementApi).listResponseBlobs(hashcode1);
+        verify(armDataManagementApi, times(2)).listResponseBlobs(hashcode1);
 
         verify(armDataManagementApi).getBlobData(createRecordFilename1);
         verify(armDataManagementApi).getBlobData(uploadFileFilename1);
@@ -2036,7 +2040,7 @@ class ArmBatchProcessResponseFilesIntTest extends IntegrationBase {
         verify(armDataManagementApi).deleteBlobData(createRecordFilename1);
         verify(armDataManagementApi).deleteBlobData(uploadFileFilename1);
 
-        verify(armDataManagementApi, never()).deleteBlobData(blobNameAndPath1);
+        verify(armDataManagementApi).deleteBlobData(blobNameAndPath1);
     }
 
 
