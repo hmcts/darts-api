@@ -12,7 +12,6 @@ import uk.gov.hmcts.darts.common.service.DataAnonymisationService;
 import uk.gov.hmcts.darts.log.api.LogApi;
 import uk.gov.hmcts.darts.task.api.AutomatedTaskName;
 import uk.gov.hmcts.darts.task.config.AutomatedTaskConfigurationProperties;
-import uk.gov.hmcts.darts.task.runner.AutoloadingAutomatedTask;
 import uk.gov.hmcts.darts.task.runner.AutoloadingManualTask;
 import uk.gov.hmcts.darts.task.service.LockService;
 
@@ -24,7 +23,7 @@ import uk.gov.hmcts.darts.task.service.LockService;
 @Slf4j
 public class CaseExpiryDeletionAutomatedTask
     extends AbstractLockableAutomatedTask
-    implements AutoloadingAutomatedTask, AutoloadingManualTask {
+    implements AutoloadingManualTask {
 
     private final CurrentTimeHelper currentTimeHelper;
     private final DataAnonymisationService dataAnonymisationService;

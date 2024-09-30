@@ -19,6 +19,7 @@ public enum AutomatedTaskName {
     UNSTRUCTURED_AUDIO_DELETER_TASK_NAME("UnstructuredAudioDeleter"),
     UNSTRUCTURED_TO_ARM_TASK_NAME("UnstructuredToArmDataStore"),
     PROCESS_ARM_RESPONSE_FILES_TASK_NAME("ProcessArmResponseFiles"),
+    PROCESS_DETS_TO_ARM_RESPONSE("ProcessDETSToArmResponse"),
     APPLY_RETENTION_TASK_NAME("ApplyRetention"),
     APPLY_RETENTION_CASE_ASSOCIATED_OBJECTS_TASK_NAME("ApplyRetentionCaseAssociatedObjects"),
     CLEANUP_ARM_RESPONSE_FILES_TASK_NAME("CleanupArmResponseFiles"),

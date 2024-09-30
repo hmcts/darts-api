@@ -53,4 +53,6 @@ public interface LogApi {
     void archiveToArmSuccessful(Integer eodId);
 
     void archiveToArmFailed(Integer eodId);
+
+    void caseDeletedDueToExpiry(Integer caseId, String caseNumber);
 }

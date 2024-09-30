@@ -77,7 +77,7 @@ class CasesLoggerServiceImplTest {
                                         SOME_CASE_NUMBER, SOME_COURTHOUSE);
 
         assertEquals(1, logs.size());
-        assertEquals(logEntry, logs.get(0));
+        assertEquals(logEntry, logs.getFirst());
     }
 
     @Test
@@ -87,6 +87,16 @@ class CasesLoggerServiceImplTest {
 
         List<String> logs = logCaptor.getInfoLogs();
         assertEquals(1, logs.size());
-        assertEquals(String.format("Defendant not added to case: defendant=%s, case_number=%s", defendant, SOME_CASE_NUMBER), logs.get(0));
+        assertEquals(String.format("Defendant not added to case: defendant=%s, case_number=%s", defendant, SOME_CASE_NUMBER), logs.getFirst());
+    }
+
+    @Test
+    void testCaseDeletedDueToExpiry() {
+        var caseId = 123;
+        casesLoggerService.caseDeletedDueToExpiry(caseId, SOME_CASE_NUMBER);
+
+        List<String> logs = logCaptor.getInfoLogs();
+        assertEquals(1, logs.size());
+        assertEquals(String.format("Case expired: cas_id=%s, case_number=%s", caseId, SOME_CASE_NUMBER), logs.getFirst());
     }
 }

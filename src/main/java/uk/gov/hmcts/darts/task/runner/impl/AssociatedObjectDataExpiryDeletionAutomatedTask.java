@@ -19,7 +19,6 @@ import uk.gov.hmcts.darts.common.repository.TranscriptionDocumentRepository;
 import uk.gov.hmcts.darts.log.api.LogApi;
 import uk.gov.hmcts.darts.task.api.AutomatedTaskName;
 import uk.gov.hmcts.darts.task.config.AutomatedTaskConfigurationProperties;
-import uk.gov.hmcts.darts.task.runner.AutoloadingAutomatedTask;
 import uk.gov.hmcts.darts.task.runner.AutoloadingManualTask;
 import uk.gov.hmcts.darts.task.runner.SoftDelete;
 import uk.gov.hmcts.darts.task.runner.SoftDeleteRepository;
@@ -33,7 +32,7 @@ import java.util.function.Function;
 @Slf4j
 public class AssociatedObjectDataExpiryDeletionAutomatedTask
     extends AbstractLockableAutomatedTask
-    implements AutoloadingAutomatedTask, AutoloadingManualTask {
+    implements AutoloadingManualTask {
 
     private final UserIdentity userIdentity;
     private final CurrentTimeHelper currentTimeHelper;

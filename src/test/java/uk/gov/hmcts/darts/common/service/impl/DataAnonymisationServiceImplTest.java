@@ -28,6 +28,7 @@ import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
 import uk.gov.hmcts.darts.common.repository.CaseRepository;
 import uk.gov.hmcts.darts.common.repository.TransformedMediaRepository;
 import uk.gov.hmcts.darts.common.repository.TransientObjectDirectoryRepository;
+import uk.gov.hmcts.darts.log.api.LogApi;
 import uk.gov.hmcts.darts.test.common.TestUtils;
 
 import java.time.OffsetDateTime;
@@ -63,7 +64,8 @@ class DataAnonymisationServiceImplTest {
     private TransformedMediaRepository transformedMediaRepository;
     @Mock
     private TransientObjectDirectoryRepository transientObjectDirectoryRepository;
-
+    @Mock
+    private LogApi logApi;
 
     @InjectMocks
     @Spy
@@ -153,6 +155,8 @@ class DataAnonymisationServiceImplTest {
     void assertPositiveAnonymizeCourtCaseEntity() {
         setupOffsetDateTime();
         CourtCaseEntity courtCase = new CourtCaseEntity();
+        courtCase.setCaseNumber("caseNo123");
+        courtCase.setId(123);
 
         DefendantEntity defendantEntity1 = mock(DefendantEntity.class);
         DefendantEntity defendantEntity2 = mock(DefendantEntity.class);
@@ -172,12 +176,6 @@ class DataAnonymisationServiceImplTest {
 
         UserAccountEntity userAccount = new UserAccountEntity();
         userAccount.setId(123);
-
-        doNothing().when(dataAnonymisationService).anonymizeDefendantEntity(any(), any());
-        doNothing().when(dataAnonymisationService).anonymizeDefenceEntity(any(), any());
-        doNothing().when(dataAnonymisationService).anonymizeProsecutorEntity(any(), any());
-        doNothing().when(dataAnonymisationService).anonymizeHearingEntity(any(), any());
-        doNothing().when(dataAnonymisationService).tidyUpTransformedMediaEntities(any(), any());
 
         dataAnonymisationService.anonymizeCourtCaseEntity(userAccount, courtCase);
 
@@ -199,6 +197,8 @@ class DataAnonymisationServiceImplTest {
         verify(dataAnonymisationService, times(1)).anonymizeHearingEntity(userAccount, hearingEntity2);
 
         verify(dataAnonymisationService, times(1)).tidyUpTransformedMediaEntities(userAccount, courtCase);
+        verify(logApi, times(1)).caseDeletedDueToExpiry(123, "caseNo123");
+
     }
 
 
