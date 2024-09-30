@@ -60,6 +60,7 @@ public class FileBasedDownloadResponseMetaData extends DownloadResponseMetaData 
     }
 
     public void setInputStream(InputStream inputStream, StorageConfiguration configuration)  throws IOException {
+        Files.createDirectories(Path.of(configuration.getTempBlobWorkspace()));
         fileToBeDownloadedTo = Files.createFile(Path.of(configuration.getTempBlobWorkspace(), UUID.randomUUID().toString())).toFile();
         FileUtils.copyInputStreamToFile(inputStream, fileToBeDownloadedTo);
     }
