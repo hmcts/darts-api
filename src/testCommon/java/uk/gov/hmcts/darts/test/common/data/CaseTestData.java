@@ -4,10 +4,10 @@ import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 import uk.gov.hmcts.darts.test.common.data.builder.TestCourtCaseEntity;
 
-import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.function.Consumer;
 
+import static java.time.OffsetDateTime.now;
 import static org.apache.commons.lang3.RandomStringUtils.random;
 import static uk.gov.hmcts.darts.test.common.data.CourthouseTestData.someMinimalCourthouse;
 import static uk.gov.hmcts.darts.test.common.data.DefenceTestData.createDefenceForCaseWithName;
@@ -25,6 +25,8 @@ public class CaseTestData  implements Persistable<TestCourtCaseEntity.TestCourtC
         courtCaseEntity.setCaseNumber("case-1-" + postfix);
         courtCaseEntity.setClosed(false);
         courtCaseEntity.setInterpreterUsed(false);
+        //courtCaseEntity.setDataAnonymised(true);
+        //courtCaseEntity.setDataAnonymisedTs(now());
         var userAccount = minimalUserAccount();
         courtCaseEntity.setCreatedBy(userAccount);
         courtCaseEntity.setLastModifiedBy(userAccount);
@@ -130,7 +132,7 @@ public class CaseTestData  implements Persistable<TestCourtCaseEntity.TestCourtC
             .deleted(false)
             .dataAnonymised(false).defenceList(new ArrayList<>())
             .defendantList(new ArrayList<>()).prosecutorList(new ArrayList<>())
-            .createdDateTime(OffsetDateTime.now());
+            .createdDateTime(now());
         return retrieve;
     }
 
