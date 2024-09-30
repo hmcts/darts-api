@@ -13,6 +13,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.testcontainers.containers.GenericContainer;
+<<<<<<< HEAD
 import uk.gov.hmcts.darts.common.entity.AutomatedTaskEntity;
 import uk.gov.hmcts.darts.task.api.AutomatedTasksApi;
 import uk.gov.hmcts.darts.task.runner.AutomatedOnDemandTask;
@@ -24,15 +25,15 @@ import uk.gov.hmcts.darts.task.api.AutomatedTasksApi;
 import uk.gov.hmcts.darts.task.runner.AutomatedOnDemandTask;
 import uk.gov.hmcts.darts.task.status.AutomatedTaskStatus;
 import uk.gov.hmcts.darts.test.common.AwaitabilityUtil;
+=======
+>>>>>>> db1c4ecb1 (Merge master)
 import uk.gov.hmcts.darts.test.common.LogUtil;
 import uk.gov.hmcts.darts.test.common.MemoryLogAppender;
 import uk.gov.hmcts.darts.testutils.stubs.DartsDatabaseRetrieval;
 import uk.gov.hmcts.darts.testutils.stubs.DartsDatabaseStub;
 import uk.gov.hmcts.darts.testutils.stubs.DartsPersistence;
 
-import java.time.Duration;
 import java.util.List;
-import java.util.Optional;
 
 /**
  * Base class for integration tests running with H2 in Postgres compatibility mode.<br>
@@ -88,10 +89,6 @@ public class IntegrationBase {
     protected ObjectMapper objectMapper;
     @Autowired
     protected TransactionalUtil transactionalUtil;
-    @Autowired
-    private List<AutomatedOnDemandTask> automatedOnDemandTask;
-    @Autowired
-    private AutomatedTasksApi automatedTasksApi;
 
     protected MemoryLogAppender logAppender = LogUtil.getMemoryLogger();
 
@@ -119,16 +116,8 @@ public class IntegrationBase {
     }
 
     @AfterEach
-    @SuppressWarnings("PMD.SignatureDeclareThrowsException")
-    void clearTestData() throws Exception {
+    void clearTestData() {
         logAppender.reset();
-        FileStore.getFileStore().remove();
-        checkCleanup();
-    }
-
-    @SuppressWarnings("PMD.SignatureDeclareThrowsException")
-    protected void checkCleanup() throws Exception{
-
     }
 
     protected void givenBearerTokenExists(String email) {
@@ -138,31 +127,4 @@ public class IntegrationBase {
             .build();
         SecurityContextHolder.getContext().setAuthentication(new JwtAuthenticationToken(jwt));
     }
-
-    protected void waitForOnDemandTaskToReady() {
-        AwaitabilityUtil.waitForMaxWithOneSecondPoll(() -> {
-            for (AutomatedOnDemandTask onDemandTask : automatedOnDemandTask) {
-                var taskName = onDemandTask.getTaskName();
-                Optional<AutomatedTaskEntity> automatedTaskEntity = automatedTasksApi.getTaskByName(taskName);
-                if (automatedTaskEntity.isPresent() && !automatedTasksApi.isLocked(automatedTaskEntity.get())) {
-                    return true;
-                }
-            }
-
-            return false;
-        }, Duration.ofSeconds(30));
-    }
-
-    protected void waitForOnDemandToComplete() {
-        AwaitabilityUtil.waitForMaxWithOneSecondPoll(() -> {
-            for (AutomatedOnDemandTask onDemandTask : automatedOnDemandTask) {
-                if (onDemandTask.getAutomatedTaskStatus().equals(AutomatedTaskStatus.COMPLETED)) {
-                    return true;
-                }
-            }
-
-            return false;
-        }, Duration.ofSeconds(30));
-    }
-
 }
