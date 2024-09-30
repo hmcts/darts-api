@@ -1,7 +1,7 @@
 package uk.gov.hmcts.darts.task.runner.impl;
 
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.data.domain.Limit;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -16,9 +16,8 @@ import uk.gov.hmcts.darts.task.runner.AutoloadingManualTask;
 import uk.gov.hmcts.darts.task.service.LockService;
 
 @Component
-@ConditionalOnProperty(
-    value = "darts.automated.task.expiry-deletion.enabled",
-    havingValue = "true"
+@ConditionalOnExpression(
+    value = "#{T(java.lang.Boolean).parseBoolean(T(uk.gov.hmcts.darts.task.api.AutomatedTaskName).CASE_EXPIRY_DELETION_TASK_NAME.getConditionalOnSpEL())}"
 )
 @Slf4j
 public class CaseExpiryDeletionAutomatedTask
