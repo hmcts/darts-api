@@ -56,12 +56,8 @@ public class TranscriptionDocumentHideOrShowValidator implements Validator<IdReq
                                                 .TRANSCRIPTION_DOCUMENT_HIDE_ACTION_REASON_NOT_FOUND);
             } else {
                 ObjectHiddenReasonEntity objectHiddenReasonEntity = optionalObjectHiddenReasonEntity.get();
-                if (objectHiddenReasonEntity.isMarkedForDeletion()) {
-                    if (isManualDeletionEnabled()) {
-                        throw new DartsApiException(TranscriptionApiError.TRANSCRIPTION_DOCUMENT_REASON_IS_MARKED_FOR_DELETION);
-                    } else {
-                        throw new DartsApiException(DartsApiException.DartsApiErrorCommon.FEATURE_FLAG_NOT_ENABLED);
-                    }
+                if (objectHiddenReasonEntity.isMarkedForDeletion() && !isManualDeletionEnabled()) {
+                    throw new DartsApiException(DartsApiException.DartsApiErrorCommon.FEATURE_FLAG_NOT_ENABLED);
                 }
             }
         }
