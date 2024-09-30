@@ -193,6 +193,7 @@ public class ArmBatchProcessResponseFilesImpl implements ArmResponseFilesProcess
 
     }
 
+    // Delete the response files if they are not linked to any EODs
     private void deleteDanglingResponses(BatchInputUploadFileFilenameProcessor batchUploadFileFilenameProcessor) {
         List<String> responseFiles = new ArrayList<>();
         try {
@@ -200,16 +201,20 @@ public class ArmBatchProcessResponseFilesImpl implements ArmResponseFilesProcess
         } catch (Exception e) {
             log.error("Unable to find dangling response files for hashcode {}", batchUploadFileFilenameProcessor.getHashcode(), e);
         }
+        
         if (CollectionUtils.isNotEmpty(responseFiles)) {
             List<Boolean> deletedResponseBlobStatuses = deleteResponseBlobs(responseFiles);
 
-            if (deletedResponseBlobStatuses.size() == 2 && !deletedResponseBlobStatuses.contains(false)) {
+            if (!deletedResponseBlobStatuses.contains(false)) {
                 log.info("About to delete ARM input upload file {}", batchUploadFileFilenameProcessor.getBatchMetadataFilename());
                 armDataManagementApi.deleteBlobData(batchUploadFileFilenameProcessor.getBatchMetadataFilenameAndPath());
             } else {
                 log.warn("Unable to delete ARM batch input upload file {} as referenced data is not all deleted",
                          batchUploadFileFilenameProcessor.getBatchMetadataFilename());
             }
+        } else {
+            log.info("About to delete dangling ARM input upload file {}", batchUploadFileFilenameProcessor.getBatchMetadataFilename());
+            armDataManagementApi.deleteBlobData(batchUploadFileFilenameProcessor.getBatchMetadataFilenameAndPath());
         }
     }
 

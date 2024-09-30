@@ -50,6 +50,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
@@ -334,6 +335,8 @@ class ArmBatchProcessResponseFilesIntTest extends IntegrationBase {
 
         verify(armDataManagementApi).listResponseBlobs(hashcode2);
         verify(armDataManagementApi).getBlobData(createRecordFilename5);
+
+        verify(armDataManagementApi, never()).deleteBlobData(blobNameAndPath2);
     }
 
     @Test
@@ -2015,6 +2018,7 @@ class ArmBatchProcessResponseFilesIntTest extends IntegrationBase {
 
         when(armDataManagementApi.deleteBlobData(createRecordFilename1)).thenReturn(true);
         when(armDataManagementApi.deleteBlobData(uploadFileFilename1)).thenReturn(true);
+        when(armDataManagementApi.deleteBlobData(blobNameAndPath1)).thenReturn(true);
 
         when(currentTimeHelper.currentOffsetDateTime()).thenReturn(annotationDocument.getUploadedDateTime());
 
