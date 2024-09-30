@@ -139,5 +139,10 @@ public class LogApiImpl implements LogApi {
     public void archiveToArmFailed(Integer eodId) {
         armLoggerService.archiveToArmFailed(eodId);
     }
+
+    @Override
+    public void caseDeletedDueToExpiry(Integer caseId, String caseNumber) {
+        casesLoggerService.caseDeletedDueToExpiry(caseId, caseNumber);
+    }
 }
 

@@ -18,7 +18,7 @@ import uk.gov.hmcts.darts.common.entity.TranscriptionEntity;
 import uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum;
 import uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum;
 import uk.gov.hmcts.darts.test.common.TestUtils;
-import uk.gov.hmcts.darts.test.common.data.MediaTestData;
+import uk.gov.hmcts.darts.test.common.data.PersistableFactory;
 import uk.gov.hmcts.darts.testutils.PostgresIntegrationBase;
 
 import java.time.LocalDateTime;
@@ -363,17 +363,17 @@ class AssociatedObjectDataExpiryDeletionAutomatedTaskITest extends PostgresInteg
 
 
     private MediaEntries setupMediaEntries(HearingEntity hearingEntity) {
-        MediaEntity mediaEntity1 = MediaTestData
+        MediaEntity mediaEntity1 = PersistableFactory.getMediaTestData()
             .createMediaWith(hearingEntity.getCourtroom(), OffsetDateTime.now().minusDays(1), OffsetDateTime.now().plusDays(1), 1);
         mediaEntity1.setDeleted(false);
         mediaEntity1.setRetainUntilTs(OffsetDateTime.now().minusHours(1));
 
-        MediaEntity mediaEntity2 = MediaTestData
+        MediaEntity mediaEntity2 = PersistableFactory.getMediaTestData()
             .createMediaWith(hearingEntity.getCourtroom(), OffsetDateTime.now().minusDays(1), OffsetDateTime.now().plusDays(1), 1);
         mediaEntity2.setDeleted(false);
         mediaEntity2.setRetainUntilTs(OffsetDateTime.now().plusDays(1));
 
-        MediaEntity mediaEntity3 = MediaTestData
+        MediaEntity mediaEntity3 = PersistableFactory.getMediaTestData()
             .createMediaWith(hearingEntity.getCourtroom(), OffsetDateTime.now().minusDays(1), OffsetDateTime.now().plusDays(1), 1);
         mediaEntity3.setDeleted(false);
         mediaEntity3.setRetainUntilTs(OffsetDateTime.now().minusHours(1));

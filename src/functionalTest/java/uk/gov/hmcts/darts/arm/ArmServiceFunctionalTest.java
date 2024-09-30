@@ -138,6 +138,39 @@ class ArmServiceFunctionalTest {
         assertFalse(allBlobs.isEmpty());
     }
 
+    @Test
+    void listBlobsUsingMarkerTestContinuationToken() {
+        log.info("------------------  listBlobsUsingMarkerTestContinuationToken test");
+
+        byte[] testStringInBytes = TEST_BINARY_STRING.getBytes(StandardCharsets.UTF_8);
+        BinaryData data = BinaryData.fromBytes(testStringInBytes);
+
+        uploadBatchedSubmissionBlobs(data);
+        Integer batchSize = 10;
+        String continuationToken = null;
+        List<String> allBlobs = new ArrayList<>();
+
+        int maxContinuationBatchSize = 3;
+        for (int pageSize = 0; pageSize < batchSize; pageSize += maxContinuationBatchSize) {
+            ContinuationTokenBlobs continuationTokenBlobs = armService.listSubmissionBlobsWithMarker(
+                armContainerName, FUNCTIONAL_TEST, maxContinuationBatchSize, continuationToken);
+            continuationToken = continuationTokenBlobs.getContinuationToken();
+            log.info("continuationToken: \n{}", continuationToken);
+            log.info("Total blobs {}", continuationTokenBlobs.getBlobNamesAndPaths().size());
+            allBlobs.addAll(continuationTokenBlobs.getBlobNamesAndPaths());
+        }
+
+        for (String blobPathAndName : allBlobs) {
+            try {
+                armTestUtil.deleteBlobData(armContainerName, blobPathAndName);
+            } catch (AzureDeleteBlobException e) {
+                fail("Exception " + e);
+            }
+        }
+        assertFalse(allBlobs.isEmpty());
+        
+    }
+
     private void uploadBatchedSubmissionBlobs(BinaryData data) {
         for (int counter = 0; counter < 11; counter++) {
             String filename = String.format("functional_test_%s", UUID.randomUUID());

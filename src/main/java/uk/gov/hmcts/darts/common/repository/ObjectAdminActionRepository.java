@@ -12,7 +12,9 @@ import java.util.Optional;
 public interface ObjectAdminActionRepository extends JpaRepository<ObjectAdminActionEntity, Integer> {
     List<ObjectAdminActionEntity> findByTranscriptionDocument_Id(Integer transcriptionDocumentId);
 
-    List<ObjectAdminActionEntity> findByMedia_Id(Integer transcriptionDocumentId);
+    List<ObjectAdminActionEntity> findByMedia_Id(Integer mediaId);
+
+    List<ObjectAdminActionEntity> findByMediaIdAndMarkedForManualDeletionTrue(Integer mediaId);
 
     @Query("""
         SELECT objectAdminActionEntity

@@ -13,6 +13,7 @@ import java.util.Optional;
 
 @Component
 @RequiredArgsConstructor
+@Deprecated
 public class AuditStub {
 
     private final AuditActivityRepository auditActivityRepository;

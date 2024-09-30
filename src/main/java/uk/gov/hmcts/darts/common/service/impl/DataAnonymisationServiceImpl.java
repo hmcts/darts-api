@@ -29,6 +29,7 @@ import uk.gov.hmcts.darts.common.repository.CaseRepository;
 import uk.gov.hmcts.darts.common.repository.TransformedMediaRepository;
 import uk.gov.hmcts.darts.common.repository.TransientObjectDirectoryRepository;
 import uk.gov.hmcts.darts.common.service.DataAnonymisationService;
+import uk.gov.hmcts.darts.log.api.LogApi;
 import uk.gov.hmcts.darts.task.runner.IsNamedEntity;
 
 import java.util.Collection;
@@ -50,7 +51,7 @@ public class DataAnonymisationServiceImpl implements DataAnonymisationService {
     private final CaseRepository caseRepository;
     private final TransformedMediaRepository transformedMediaRepository;
     private final TransientObjectDirectoryRepository transientObjectDirectoryRepository;
-
+    private final LogApi logApi;
 
     @Override
     public void anonymizeCourtCaseEntity(UserAccountEntity userAccount, CourtCaseEntity courtCase) {
@@ -67,8 +68,7 @@ public class DataAnonymisationServiceImpl implements DataAnonymisationService {
         caseRepository.save(courtCase);
 
         //Required for Dynatrace dashboards
-        log.info("Case expired: cas_id={}, case_number={}", courtCase.getId(), courtCase.getCaseNumber());
-
+        logApi.caseDeletedDueToExpiry(courtCase.getId(), courtCase.getCaseNumber());
     }
 
     void anonymizeDefenceEntity(UserAccountEntity userAccount, DefenceEntity entity) {

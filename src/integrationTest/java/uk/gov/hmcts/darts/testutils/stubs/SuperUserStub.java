@@ -12,6 +12,7 @@ import static org.mockito.ArgumentMatchers.any;
 
 @Component
 @RequiredArgsConstructor
+@Deprecated
 public class SuperUserStub {
 
     private final UserAccountStub userAccountStub;

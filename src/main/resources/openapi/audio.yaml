@@ -351,6 +351,42 @@ paths:
                 allOf:
                   - $ref: './problem.yaml'
 
+  /admin/medias/{media_id}/approve-deletion:
+    post:
+      tags:
+        - Audio
+      summary: Approves deletion of media
+      operationId: postAdminApproveMediaMarkedForDeletion
+      parameters:
+        - name: media_id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MediaApproveMarkedForDeletionResponse'
+        '400':
+          description: A required parameter is missing or an invalid datatype or value was provided for property.
+        '409':
+          description: Data conflicting
+          content:
+            application/json+problem:
+              schema:
+                allOf:
+                  - $ref:
+                      './problem.yaml'
+        '404':
+          description: Not Found Error
+          content:
+            application/json+problem:
+              schema:
+                allOf:
+                  - $ref: './problem.yaml'
 
   /admin/medias/search:
     post:
@@ -463,6 +499,7 @@ components:
           $ref: '#/components/schemas/AdminMediaCourtroomResponse'
         admin_action:
           $ref: '#/components/schemas/AdminActionResponse'
+
 
     CourthouseResponseObject:
       type: object
@@ -756,6 +793,10 @@ components:
           $ref: '#/components/schemas/AdminActionResponse'
           description: 'The media admin action data when the request was made'
 
+    MediaApproveMarkedForDeletionResponse:
+      allOf:
+        - $ref: '#/components/schemas/MediaHideResponse'
+    
     AdminActionResponse:
       type: object
       properties:
@@ -955,6 +996,10 @@ components:
         - "AUDIO_113"
         - "AUDIO_115"
         - "AUDIO_116"
+        - "AUDIO_117"
+        - "AUDIO_118"
+        - "AUDIO_119"
+        - "AUDIO_120"
       x-enum-varnames: [ FAILED_TO_PROCESS_AUDIO_REQUEST,
                          REQUESTED_DATA_CANNOT_BE_LOCATED,
                          MEDIA_NOT_FOUND,
@@ -970,7 +1015,12 @@ components:
                          MEDIA_SHOW_ACTION_PAYLOAD_INCORRECT_USAGE,
                          MEDIA_HIDE_ACTION_REASON_NOT_FOUND,
                          ADMIN_SEARCH_CRITERIA_NOT_SUITABLE,
-                         TOO_MANY_RESULTS ]
+                         TOO_MANY_RESULTS,
+                         MEDIA_ALREADY_MARKED_FOR_DELETION,
+                         ADMIN_MEDIA_MARKED_FOR_DELETION_NOT_FOUND,
+                         MARKED_FOR_DELETION_REASON_NOT_FOUND,
+                         USER_CANT_APPROVE_THEIR_OWN_DELETION
+      ]
 
     AddAudioTitleErrors:
       type: string
@@ -991,6 +1041,10 @@ components:
         - "Hide reason is incorrect"
         - "transformed_media_id OR one of hearing_id, start_at or end_at must be provided"
         - "Too many results"
+        - "Already marked for deletion"
+        - "Media marked for deletion not found"
+        - "Media marked for deletion reason not found"
+        - "User cannot approve their own deletion"
       x-enum-varnames: [ FAILED_TO_PROCESS_AUDIO_REQUEST,
                          REQUESTED_DATA_CANNOT_BE_LOCATED,
                          MEDIA_NOT_FOUND,
@@ -1006,4 +1060,9 @@ components:
                          MEDIA_SHOW_ACTION_PAYLOAD_INCORRECT_USAGE,
                          MEDIA_HIDE_ACTION_REASON_NOT_FOUND,
                          ADMIN_SEARCH_CRITERIA_NOT_SUITABLE,
-                         TOO_MANY_RESULTS ]
+                         TOO_MANY_RESULTS,
+                         MEDIA_ALREADY_MARKED_FOR_DELETION,
+                         ADMIN_MEDIA_MARKED_FOR_DELETION_NOT_FOUND,
+                         MARKED_FOR_DELETION_REASON_NOT_FOUND,
+                         USER_CANT_APPROVE_THEIR_OWN_DELETION
+      ]

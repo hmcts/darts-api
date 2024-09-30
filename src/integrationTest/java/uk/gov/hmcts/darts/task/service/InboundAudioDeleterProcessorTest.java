@@ -8,7 +8,6 @@ import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
 import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
-import uk.gov.hmcts.darts.test.common.data.MediaTestData;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 
 import java.time.LocalDateTime;
@@ -22,6 +21,7 @@ import static uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum.INBOUND;
 import static uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum.UNSTRUCTURED;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.MARKED_FOR_DELETION;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.STORED;
+import static uk.gov.hmcts.darts.test.common.data.PersistableFactory.getMediaTestData;
 
 @SuppressWarnings("PMD.ExcessiveImports")
 class InboundAudioDeleterProcessorTest extends IntegrationBase {
@@ -46,7 +46,7 @@ class InboundAudioDeleterProcessorTest extends IntegrationBase {
         );
 
         MediaEntity savedMedia = dartsDatabase.save(
-            MediaTestData.createMediaWith(
+            getMediaTestData().createMediaWith(
                 hearing.getCourtroom(),
                 OffsetDateTime.parse("2023-09-26T13:00:00Z"),
                 OffsetDateTime.parse("2023-09-26T13:45:00Z"),
@@ -96,7 +96,7 @@ class InboundAudioDeleterProcessorTest extends IntegrationBase {
         );
 
         MediaEntity savedMedia = dartsDatabase.save(
-            MediaTestData.createMediaWith(
+            getMediaTestData().createMediaWith(
                 hearing.getCourtroom(),
                 OffsetDateTime.parse("2023-09-26T13:00:00Z"),
                 OffsetDateTime.parse("2023-09-26T13:45:00Z"),

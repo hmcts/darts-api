@@ -9,6 +9,7 @@ import uk.gov.hmcts.darts.common.repository.TranscriptionDocumentRepository;
 
 @Component
 @RequiredArgsConstructor
+@Deprecated
 public class TransactionDocumentStub {
 
     @Autowired
