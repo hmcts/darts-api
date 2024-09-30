@@ -12,7 +12,7 @@ import uk.gov.hmcts.darts.arm.api.ArmDataManagementApi;
 import uk.gov.hmcts.darts.arm.component.ArchiveRecordFileGenerator;
 import uk.gov.hmcts.darts.arm.config.ArmDataManagementConfiguration;
 import uk.gov.hmcts.darts.arm.config.UnstructuredToArmProcessorConfiguration;
-import uk.gov.hmcts.darts.arm.helper.UnstructuredToArmHelper;
+import uk.gov.hmcts.darts.arm.helper.DataStoreToArmHelper;
 import uk.gov.hmcts.darts.arm.service.impl.UnstructuredToArmBatchProcessorImpl;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.ExternalLocationTypeEntity;
@@ -81,7 +81,7 @@ class UnstructuredToArmBatchProcessorTest {
     @Mock
     private ArchiveRecordFileGenerator archiveRecordFileGenerator;
     @InjectMocks
-    private UnstructuredToArmHelper unstructuredToArmHelper;
+    private DataStoreToArmHelper unstructuredToArmHelper;
 
     @Mock
     UnstructuredToArmProcessorConfiguration unstructuredToArmProcessorConfiguration;
