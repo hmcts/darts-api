@@ -11,12 +11,11 @@ import uk.gov.hmcts.darts.arm.config.ArmBatchCleanupConfiguration;
 import uk.gov.hmcts.darts.arm.config.ArmDataManagementConfiguration;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
-import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
 import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
-import uk.gov.hmcts.darts.test.common.data.MediaTestData;
+import uk.gov.hmcts.darts.test.common.data.PersistableFactory;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 
 import java.io.IOException;
@@ -64,27 +63,13 @@ class BatchCleanupArmResponseFilesServiceIntTest extends IntegrationBase {
 
     @BeforeEach
     void setupData() {
-        HearingEntity hearing = dartsDatabase.createHearing(
-            "Bristol",
-            "Int Test Courtroom 1",
-            "1",
-            HEARING_DATE
-        );
-
-        savedMedia = dartsDatabase.save(
-            MediaTestData.createMediaWith(
-                hearing.getCourtroom(),
-                OffsetDateTime.parse("2023-09-26T13:00:00Z"),
-                OffsetDateTime.parse("2023-09-26T13:45:00Z"),
-                1
-            ));
-        dartsDatabase.save(savedMedia);
+        savedMedia = PersistableFactory.getMediaTestData()
+        .someMinimal();
+        dartsPersistence.save(savedMedia);
 
         when(armDataManagementConfiguration.getManifestFilePrefix()).thenReturn("DARTS_");
         when(batchCleanupConfiguration.getManifestFileSuffix()).thenReturn(".a360");
         when(batchCleanupConfiguration.getBufferMinutes()).thenReturn(15);
-
-
     }
 
     @Test

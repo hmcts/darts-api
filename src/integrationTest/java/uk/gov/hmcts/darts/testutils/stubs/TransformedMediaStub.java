@@ -20,6 +20,7 @@ import java.util.stream.Collectors;
 
 @Component
 @RequiredArgsConstructor
+@Deprecated
 public class TransformedMediaStub {
 
     private final DartsPersistence dartsPersistence;

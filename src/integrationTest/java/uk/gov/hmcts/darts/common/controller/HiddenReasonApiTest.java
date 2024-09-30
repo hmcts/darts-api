@@ -49,7 +49,7 @@ class HiddenReasonApiTest extends IntegrationBase {
                                         "id": 1,
                                         "reason": "PUBLIC_INTEREST_IMMUNITY",
                                         "display_name": "Public interest immunity",
-                                        "display_state": false,
+                                        "display_state": true,
                                         "display_order": 1,
                                         "marked_for_deletion": true
                                       },
@@ -57,7 +57,7 @@ class HiddenReasonApiTest extends IntegrationBase {
                                         "id": 2,
                                         "reason": "CLASSIFIED",
                                         "display_name": "Classified above official",
-                                        "display_state": false,
+                                        "display_state": true,
                                         "display_order": 2,
                                         "marked_for_deletion": true
                                       },
@@ -65,7 +65,7 @@ class HiddenReasonApiTest extends IntegrationBase {
                                         "id": 3,
                                         "reason": "OTHER_DELETE",
                                         "display_name": "Other reason to delete",
-                                        "display_state": false,
+                                        "display_state": true,
                                         "display_order": 3,
                                         "marked_for_deletion": true
                                       },

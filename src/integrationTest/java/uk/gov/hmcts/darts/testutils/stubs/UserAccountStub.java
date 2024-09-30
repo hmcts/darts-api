@@ -28,6 +28,7 @@ import static uk.gov.hmcts.darts.PredefinedPrimaryKeys.TEST_JUDGE_GLOBAL_SECURIT
 
 @Component
 @RequiredArgsConstructor
+@Deprecated
 public class UserAccountStub {
 
     private static final int SYSTEM_USER_ID = 0;

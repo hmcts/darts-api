@@ -1,6 +1,8 @@
 package uk.gov.hmcts.darts.audio.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -44,6 +46,16 @@ class AudioControllerAdminGetTransformedMediaIntTest extends IntegrationBase {
 
     @Autowired
     private ObjectMapper objectMapper;
+
+    @BeforeEach
+    void openHibernateSession() {
+        openInViewUtil.openEntityManager();
+    }
+
+    @AfterEach
+    void closeHibernateSession() {
+        openInViewUtil.closeEntityManager();
+    }
 
     @Test
     void testSearchForTransformedMediaWithCaseNumberAndReturnApplicableResults() throws Exception {
@@ -145,7 +157,7 @@ class AudioControllerAdminGetTransformedMediaIntTest extends IntegrationBase {
         assertEquals(0, transformedMediaResponses.length);
     }
 
-    @Test
+     @Test
      void testSearchForTransformedMediaUsingAllSearchCriteria() throws Exception {
         List<TransformedMediaEntity> transformedMediaEntityList = transformedMediaStub.generateTransformedMediaEntities(4);
 

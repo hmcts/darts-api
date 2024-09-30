@@ -107,8 +107,9 @@ public class UserIdentityImpl implements UserIdentity {
         try {
             emailAddress = getEmailAddressFromToken();
         } catch (IllegalStateException e) {
-
-            log.debug("Unable to get email address from token ending ''.....{}'': {}", StringUtils.right(guid, 5), e.getMessage());
+            if (nonNull(guid)) {
+                log.debug("Guid is present but unable to get email address from token ending ''.....{}'': {}", StringUtils.right(guid, 5), e.getMessage());
+            }
         }
 
         if (nonNull(guid) || nonNull(emailAddress)) {
@@ -120,6 +121,8 @@ public class UserIdentityImpl implements UserIdentity {
             if (!userAccountEntities.isEmpty()) {
                 userHasGlobalAccess = true;
             }
+        } else {
+            log.warn("Unable to get email address or guid from token");
         }
         return userHasGlobalAccess;
     }

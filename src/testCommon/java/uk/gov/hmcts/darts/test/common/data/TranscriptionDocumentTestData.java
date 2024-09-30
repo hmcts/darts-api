@@ -1,6 +1,5 @@
 package uk.gov.hmcts.darts.test.common.data;
 
-import lombok.experimental.UtilityClass;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
@@ -8,8 +7,9 @@ import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.ObjectAdminActionEntity;
 import uk.gov.hmcts.darts.common.entity.ObjectHiddenReasonEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionDocumentEntity;
-import uk.gov.hmcts.darts.common.entity.TranscriptionEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
+import uk.gov.hmcts.darts.test.common.data.builder.TestTranscriptionDocumentEntity;
+import uk.gov.hmcts.darts.test.common.data.builder.TestTranscriptionEntity;
 
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
@@ -17,12 +17,15 @@ import java.util.Arrays;
 import java.util.List;
 
 import static uk.gov.hmcts.darts.test.common.data.ObjectAdminActionTestData.objectAdminActionWithDefaults;
-import static uk.gov.hmcts.darts.test.common.data.TranscriptionTestData.minimalTranscription;
 import static uk.gov.hmcts.darts.test.common.data.UserAccountTestData.minimalUserAccount;
 
-@UtilityClass
-@SuppressWarnings({"HideUtilityClassConstructor"})
-public class TranscriptionDocumentTestData {
+public class TranscriptionDocumentTestData
+    implements Persistable<TestTranscriptionDocumentEntity.TranscriptionDocumentEntityBuilderRetrieve,
+    TranscriptionDocumentEntity, TestTranscriptionDocumentEntity.TestTranscriptionDocumentEntityBuilder> {
+
+    TranscriptionDocumentTestData() {
+    }
+
 
     public static TranscriptionDocumentEntity minimalTranscriptionDocument() {
         var transcriptionDocument = new TranscriptionDocumentEntity();
@@ -50,40 +53,40 @@ public class TranscriptionDocumentTestData {
     private static void setupBidirectionalTranscriptionDocuments(TranscriptionDocumentEntity transcriptionDocument) {
         var transcriptionDocList = new ArrayList<TranscriptionDocumentEntity>();
         transcriptionDocList.add(transcriptionDocument);
-        var transcription = minimalTranscription();
+        var transcription = PersistableFactory.getTranscriptionTestData().minimalTranscription();
         transcription.setTranscriptionDocumentEntities(transcriptionDocList);
         transcriptionDocument.setTranscription(transcription);
     }
 
-    public static TranscriptionDocumentEntity complexTranscriptionDocument() {
-        TranscriptionDocumentEntity documentEntity = new TranscriptionDocumentEntity();
-        documentEntity.setId(1);
-        documentEntity.setFileName("dummyFileName.txt");
-        documentEntity.setFileType("text/plain");
-        documentEntity.setFileSize(1024);
-        documentEntity.setUploadedDateTime(OffsetDateTime.now());
-        documentEntity.setHidden(false);
-        documentEntity.setContentObjectId("dummyContentObjectId");
-        documentEntity.setClipId("dummyClipId");
-        documentEntity.setChecksum("dummyChecksum");
-        documentEntity.setLastModifiedTimestamp(OffsetDateTime.now());
+    public TestTranscriptionDocumentEntity.TranscriptionDocumentEntityBuilderRetrieve complexTranscriptionDocument() {
+        TestTranscriptionDocumentEntity.TranscriptionDocumentEntityBuilderRetrieve builder =
+            new TestTranscriptionDocumentEntity.TranscriptionDocumentEntityBuilderRetrieve();
 
-        CourtroomEntity courtroomEntity = new CourtroomEntity();
+        builder.getBuilder().id(1)
+            .fileName("dummyFileName.txt")
+            .fileType("text/plain").fileSize(1024)
+            .uploadedDateTime(OffsetDateTime.now())
+            .isHidden(false)
+            .contentObjectId("dummyContentObjectId")
+            .clipId("dummyClipId")
+            .checksum("dummyChecksum")
+            .lastModifiedDateTime(OffsetDateTime.now());
+
+        CourtroomEntity courtroomEntity = CourtroomTestData.someMinimalCourtRoom();
         courtroomEntity.setId(1);
         courtroomEntity.setName("Dummy Courtroom");
 
-        CourthouseEntity courthouseEntity = new CourthouseEntity();
+        CourthouseEntity courthouseEntity = CourthouseTestData.someMinimalCourthouse();
         courthouseEntity.setId(1);
         courthouseEntity.setDisplayName("Dummy Courthouse");
         courtroomEntity.setCourthouse(courthouseEntity);
 
-        TranscriptionEntity transcription = new TranscriptionEntity();
-        transcription.setId(1);
-        transcription.setIsManualTranscription(true);
-        documentEntity.setTranscription(transcription);
-        transcription.setCourtroom(courtroomEntity);
+        TestTranscriptionEntity.TestTranscriptionEntityBuilderRetrieve
+            transcriptionEntityBuilderRetrieve = PersistableFactory.getTranscriptionTestData().someMinimalBuilderHolder();
+        transcriptionEntityBuilderRetrieve.getBuilder().id(1)
+            .isManualTranscription(true).courtroom(courtroomEntity);
 
-        ObjectAdminActionEntity adminActionEntity = new ObjectAdminActionEntity();
+        ObjectAdminActionEntity adminActionEntity = ObjectAdminActionTestData.minimalObjectAdminAction();
         adminActionEntity.setId(1);
         adminActionEntity.setComments("Dummy comments");
         adminActionEntity.setTicketReference("Dummy reference");
@@ -103,7 +106,7 @@ public class TranscriptionDocumentTestData {
         objectHiddenReasonEntity.setId(200);
         adminActionEntity.setObjectHiddenReason(objectHiddenReasonEntity);
 
-        documentEntity.setAdminActions(List.of(adminActionEntity));
+        builder.getBuilder().adminActions(List.of(adminActionEntity));
 
         CourtCaseEntity caseEntity = new CourtCaseEntity();
         caseEntity.setId(1);
@@ -114,8 +117,40 @@ public class TranscriptionDocumentTestData {
         hearingEntity.setCourtroom(courtroomEntity);
         hearingEntity.setCourtCase(caseEntity);
 
-        transcription.setHearings(List.of(hearingEntity));
+        transcriptionEntityBuilderRetrieve.getBuilder().hearings(List.of(hearingEntity)).build();
+        builder.getBuilder().transcription(transcriptionEntityBuilderRetrieve.build());
 
-        return documentEntity;
+        return builder;
+    }
+
+    @Override
+    public TranscriptionDocumentEntity someMinimal() {
+        return someMinimalBuilder().build().getEntity();
+    }
+
+    @Override
+    public TestTranscriptionDocumentEntity.TranscriptionDocumentEntityBuilderRetrieve someMinimalBuilderHolder() {
+        TestTranscriptionDocumentEntity.TranscriptionDocumentEntityBuilderRetrieve builder =
+            new TestTranscriptionDocumentEntity.TranscriptionDocumentEntityBuilderRetrieve();
+
+        var transcription = PersistableFactory.getTranscriptionTestData().minimalTranscription();
+
+        builder.getBuilder()
+            .fileName("some-file-name")
+            .fileType("some-file-type").fileSize(1024)
+            .uploadedDateTime(OffsetDateTime.now())
+            .uploadedBy(minimalUserAccount())
+            .isHidden(false)
+            .lastModifiedBy(minimalUserAccount())
+            .lastModifiedDateTime(OffsetDateTime.now())
+            .lastModifiedDateTime(OffsetDateTime.now())
+            .transcription(transcription);
+
+        return builder;
+    }
+
+    @Override
+    public TestTranscriptionDocumentEntity.TestTranscriptionDocumentEntityBuilder someMinimalBuilder() {
+        return someMinimalBuilderHolder().getBuilder();
     }
 }
