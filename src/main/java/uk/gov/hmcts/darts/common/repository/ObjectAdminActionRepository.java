@@ -2,9 +2,11 @@ package uk.gov.hmcts.darts.common.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import uk.gov.hmcts.darts.common.entity.ObjectAdminActionEntity;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -28,5 +30,17 @@ public interface ObjectAdminActionRepository extends JpaRepository<ObjectAdminAc
 
     Optional<ObjectAdminActionEntity> findByTranscriptionDocument_IdAndObjectHiddenReasonIsNotNullAndObjectHiddenReason_MarkedForDeletionTrue(
         Integer transcriptionDocumentId);
+
+    @Query("SELECT o FROM ObjectAdminActionEntity o WHERE o.markedForManualDelDateTime < :deletionThreshold")
+    List<ObjectAdminActionEntity> findAllMarkedForManualDeletion(@Param("deletionThreshold") LocalDateTime deletionThreshold);
+
+    @Query("""
+        SELECT o FROM ObjectAdminActionEntity o
+                WHERE o.markedForManualDelDateTime < :deletionThreshold
+                AND ((o.media IS NOT NULL AND o.media.isDeleted = false)
+                      OR (o.transcriptionDocument IS NOT NULL AND o.transcriptionDocument.isDeleted = false)
+                     )
+        """)
+    List<ObjectAdminActionEntity> findFilesForManualDeletion(@Param("deletionThreshold") LocalDateTime deletionThreshold);
 
 }

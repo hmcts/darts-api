@@ -17,7 +17,7 @@ import static uk.gov.hmcts.darts.task.api.AutomatedTaskName.MANUAL_DELETION;
 @Slf4j
 @Component
 @ConditionalOnProperty(
-    value = "darts.automated.task.manual-deletion.enabled",
+    value = "darts.manual-deletion.enabled",
     havingValue = "true"
 )
 public class ManualDeletionAutomatedTask extends AbstractLockableAutomatedTask

@@ -5,6 +5,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import uk.gov.hmcts.darts.common.entity.AnnotationDocumentEntity;
 import uk.gov.hmcts.darts.common.entity.CaseDocumentEntity;
@@ -217,7 +218,7 @@ public interface ExternalObjectDirectoryRepository extends JpaRepository<Externa
 
     @Query(
         """
-            
+                        
             SELECT eod FROM ExternalObjectDirectoryEntity eod
                   JOIN eod.annotationDocumentEntity ade
                   JOIN ade.annotation ann
@@ -450,4 +451,20 @@ public interface ExternalObjectDirectoryRepository extends JpaRepository<Externa
                )
         """)
     List<ExternalObjectDirectoryEntity> findExpiredMediaEntries(OffsetDateTime maxRetentionDate, Limit batchSize);
+
+    @Query("""
+        SELECT eod FROM ExternalObjectDirectoryEntity eod
+                WHERE eod.media.id = :mediaId
+                AND eod.status.id = 2
+                AND eod.externalLocationType.id IN (1, 2)
+        """)
+    List<ExternalObjectDirectoryEntity> findByMediaStatusAndLocation(@Param("mediaId") Integer mediaId);
+
+    @Query("""
+        SELECT eod FROM ExternalObjectDirectoryEntity eod
+                WHERE eod.transcriptionDocumentEntity.id = :transcriptionDocumentId
+                AND eod.status.id = 2
+                AND eod.externalLocationType.id IN (1, 2)
+        """)
+    List<ExternalObjectDirectoryEntity> findByTranscriptionStatusAndLocation(@Param("transcriptionDocumentId") Integer id);
 }
