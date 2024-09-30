@@ -51,6 +51,7 @@ public class UnstructuredToArmBatchProcessorImpl implements UnstructuredToArmBat
 
     private static final int BLOB_ALREADY_EXISTS_STATUS_CODE = 409;
 
+
     @Override
     @SuppressWarnings({"PMD.AvoidInstantiatingObjectsInLoops", "PMD.CognitiveComplexity", "PMD.CyclomaticComplexity"})
 
@@ -146,20 +147,6 @@ public class UnstructuredToArmBatchProcessorImpl implements UnstructuredToArmBat
         }
     }
 
-//    private ExternalObjectDirectoryEntity createArmEodWithArmIngestionStatus(ExternalObjectDirectoryEntity currentEod,
-//                                                                             ArmBatchItem batchItem,
-//                                                                             ArmBatchItems batchItems,
-//                                                                             File archiveRecordsFile, UserAccountEntity userAccount) {
-//        ExternalObjectDirectoryEntity armEod;
-//        armEod = unstructuredToArmHelper.createArmExternalObjectDirectoryEntity(currentEod, EodHelper.armIngestionStatus(), userAccount);
-//        batchItem.setArmEod(armEod);
-//        batchItem.setSourceEod(currentEod);
-//        batchItems.add(batchItem);
-//        armEod.setManifestFile(archiveRecordsFile.getName());
-//        externalObjectDirectoryRepository.saveAndFlush(armEod);
-//        return armEod;
-//    }
-
     private boolean shouldPushRawDataToArm(ArmBatchItem batchItem) {
         return equalsAnyStatus(batchItem.getPreviousStatus(), EodHelper.armIngestionStatus(), EodHelper.failedArmRawDataStatus());
     }
@@ -223,51 +210,5 @@ public class UnstructuredToArmBatchProcessorImpl implements UnstructuredToArmBat
             }
         }
     }
-
-//    /**
-//     * Contains info related to the processing of a batch item.
-//     */
-//    @Data
-//    static class BatchItem {
-//
-//        private ExternalObjectDirectoryEntity sourceEod;
-//        private ExternalObjectDirectoryEntity armEod;
-//        private String previousManifestFile;
-//        private ObjectRecordStatusEntity previousStatus;
-//        private Boolean rawFilePushSuccessful;
-//        private ArchiveRecord archiveRecord;
-//
-//        public void setArmEod(ExternalObjectDirectoryEntity armEod) {
-//            this.armEod = armEod;
-//            this.previousManifestFile = armEod.getManifestFile();
-//            this.previousStatus = armEod.getStatus();
-//        }
-//
-//        public void undoManifestFileChange() {
-//            this.armEod.setManifestFile(this.previousManifestFile);
-//        }
-//
-//        public boolean isRawFilePushNotNeededOrSuccessfulWhenNeeded() {
-//            return rawFilePushSuccessful == null || rawFilePushSuccessful;
-//        }
-//    }
-//
-//    static class BatchItems {
-//
-//        private final List<BatchItem> items = new ArrayList<>();
-//
-//        public void add(BatchItem batchItem) {
-//            items.add(batchItem);
-//        }
-//
-//        public List<BatchItem> getSuccessful() {
-//            return items.stream().filter(
-//                batchItem -> batchItem.isRawFilePushNotNeededOrSuccessfulWhenNeeded() && batchItem.getArchiveRecord() != null).toList();
-//        }
-//
-//        public List<ArchiveRecord> getArchiveRecords() {
-//            return getSuccessful().stream().map(BatchItem::getArchiveRecord).toList();
-//        }
-//    }
-
+    
 }
