@@ -47,6 +47,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
+import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 import static uk.gov.hmcts.darts.arm.util.ArchiveConstants.ArchiveResponseFileAttributes.ARM_CREATE_RECORD_FILENAME_KEY;
 import static uk.gov.hmcts.darts.arm.util.ArchiveConstants.ArchiveResponseFileAttributes.ARM_INVALID_LINE_FILENAME_KEY;
@@ -194,14 +195,21 @@ public class ArmBatchProcessResponseFilesImpl implements ArmResponseFilesProcess
 
     private void deleteDanglingResponses(BatchInputUploadFileFilenameProcessor batchUploadFileFilenameProcessor) {
         List<String> responseFiles = new ArrayList<>();
-        responseFiles.add(batchUploadFileFilenameProcessor.getBatchMetadataFilenameAndPath());
         try {
             responseFiles.addAll(armDataManagementApi.listResponseBlobs(batchUploadFileFilenameProcessor.getHashcode()));
         } catch (Exception e) {
             log.error("Unable to find dangling response files for hashcode {}", batchUploadFileFilenameProcessor.getHashcode(), e);
         }
         if (CollectionUtils.isNotEmpty(responseFiles)) {
-            deleteResponseBlobs(responseFiles);
+            List<Boolean> deletedResponseBlobStatuses = deleteResponseBlobs(responseFiles);
+
+            if (deletedResponseBlobStatuses.size() == 2 && !deletedResponseBlobStatuses.contains(false)) {
+                log.info("About to delete ARM input upload file {}", batchUploadFileFilenameProcessor.getBatchMetadataFilename());
+                armDataManagementApi.deleteBlobData(batchUploadFileFilenameProcessor.getBatchMetadataFilenameAndPath());
+            } else {
+                log.warn("Unable to delete ARM batch input upload file {} as referenced data is not all deleted",
+                         batchUploadFileFilenameProcessor.getBatchMetadataFilename());
+            }
         }
     }
 
@@ -295,6 +303,7 @@ public class ArmBatchProcessResponseFilesImpl implements ArmResponseFilesProcess
                             getExternalObjectDirectoryEntity(armResponseBatchData.getExternalObjectDirectoryId());
 
                         updateExternalObjectDirectoryStatus(externalObjectDirectory, EodHelper.armDropZoneStatus());
+
                     } catch (Exception e) {
                         log.error(UNABLE_TO_UPDATE_EOD, e);
                     }
