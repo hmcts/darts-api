@@ -2,7 +2,6 @@ package uk.gov.hmcts.darts.event.controller;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
@@ -11,11 +10,16 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.json.BasicJsonTester;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
+import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
+import uk.gov.hmcts.darts.common.entity.EventEntity;
 import uk.gov.hmcts.darts.common.enums.SecurityRoleEnum;
 import uk.gov.hmcts.darts.event.service.impl.AdminEventsSearchGivensBuilder;
 import uk.gov.hmcts.darts.testutils.GivenBuilder;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 
+import java.util.List;
+
+import static java.time.OffsetDateTime.now;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -89,10 +93,13 @@ class EventSearchControllerTest extends IntegrationBase {
     }
 
     @Test
-    @Disabled("Failed Validation")
     void returnsAllFieldsCorrectly() throws Exception {
         given.anAuthenticatedUserWithGlobalAccessAndRole(SUPER_ADMIN);
-        eventsGivensBuilder.persistedEvents(1);
+        List<EventEntity> entity = eventsGivensBuilder.persistedEvents(1);
+
+        CourtCaseEntity courtCaseEntity = entity.get(0).getHearingEntities().get(0).getCourtCase();
+        courtCaseEntity.setDataAnonymisedTs(now());
+        dartsDatabase.save(courtCaseEntity);
 
         var mvcResult = mockMvc.perform(post(EVENT_SEARCH_ENDPOINT)
                                             .content("{}")
@@ -107,8 +114,8 @@ class EventSearchControllerTest extends IntegrationBase {
         assertThat(response).hasJsonPathStringValue("[0].courthouse.display_name");
         assertThat(response).hasJsonPathNumberValue("[0].courtroom.id");
         assertThat(response).hasJsonPathStringValue("[0].courtroom.name");
-        assertThat(response).hasJsonPathBooleanValue("[0].is_manually_anonymised");
+        assertThat(response).hasJsonPathBooleanValue("[0].is_event_anonymised");
         assertThat(response).hasJsonPathBooleanValue("[0].is_case_expired");
-        assertThat(response).hasJsonPathStringValue("[0].caseExpiredAt");
+        assertThat(response).hasJsonPathStringValue("[0].case_expired_at");
     }
 }
