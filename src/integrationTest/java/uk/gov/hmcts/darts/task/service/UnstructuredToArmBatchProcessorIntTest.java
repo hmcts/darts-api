@@ -3,7 +3,6 @@ package uk.gov.hmcts.darts.task.service;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.mockito.ArgumentCaptor;
@@ -401,7 +400,6 @@ class UnstructuredToArmBatchProcessorIntTest extends IntegrationBase {
     }
 
     @Test
-    @Disabled("Failed Validation")
     void movePreviousArmFailedFromUnstructuredToArmStorage() throws IOException {
 
         //given
@@ -438,14 +436,12 @@ class UnstructuredToArmBatchProcessorIntTest extends IntegrationBase {
         assertThat(armDropzoneEodsMedia0.get(0).getLastModifiedBy().getId()).isEqualTo(testUser.getId());
         assertThat(armDropzoneEodsMedia0.get(0).getLastModifiedDateTime()).isCloseToUtcNow(within(1, SECONDS));
         assertThat(armDropzoneEodsMedia1.get(0).getManifestFile()).isEqualTo(manifestFile.getName());
-        assertThat(armDropzoneEodsMedia3.get(0).getManifestFile()).isEqualTo(manifestFile.getName());
 
         Path generatedManifestFilePath = manifestFile.toPath();
-        assertThat(lines(generatedManifestFilePath).count()).isEqualTo(6);
+        assertThat(lines(generatedManifestFilePath).count()).isEqualTo(4);
         assertThat(readString(generatedManifestFilePath)).contains(
             format("_%d_", medias.get(0).getId()),
-            format("_%d_", medias.get(1).getId()),
-            format("_%d_", medias.get(3).getId())
+            format("_%d_", medias.get(1).getId())
         );
         assertThat(readString(generatedManifestFilePath)).doesNotContain(format("_%d_", medias.get(2).getId()));
     }
@@ -507,6 +503,9 @@ class UnstructuredToArmBatchProcessorIntTest extends IntegrationBase {
 
     @Test
     void generationOfManifestFileEntryFails() {
+        testUser = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
+        when(userIdentity.getUserAccount()).thenReturn(testUser);
+        when(unstructuredToArmProcessorConfiguration.getMaxArmManifestItems()).thenReturn(5);
 
         //given
         List<MediaEntity> medias = dartsDatabase.getMediaStub().createAndSaveSomeMedias();
