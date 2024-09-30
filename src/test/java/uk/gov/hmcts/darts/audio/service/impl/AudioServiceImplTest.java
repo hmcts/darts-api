@@ -1,7 +1,6 @@
 package uk.gov.hmcts.darts.audio.service.impl;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
@@ -86,7 +85,6 @@ class AudioServiceImplTest {
     }
 
     @Test
-    @Disabled("temporarily replaced by test isArchivedFeatureIsTemporarilyDisabledAndSetToAlwaysReturnsFalse")
     void whenAudioMetadataListContainsMediaIdsReturnedByQuery_thenIsArchivedWillBeTrue() {
         int mediaId = 1;
         AudioMetadata audioMetadata = new AudioMetadata();

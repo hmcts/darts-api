@@ -12,7 +12,6 @@ import uk.gov.hmcts.darts.common.entity.DailyListEntity;
 import uk.gov.hmcts.darts.common.repository.DailyListRepository;
 import uk.gov.hmcts.darts.dailylist.enums.SourceType;
 import uk.gov.hmcts.darts.log.api.LogApi;
-import uk.gov.hmcts.darts.task.api.AutomatedTasksApi;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -49,11 +48,11 @@ class ProcessAllDailyListsTest {
     @Mock
     private LogApi logApi;
     @Mock
-    private AutomatedTasksApi automatedTasksApi;
+    private ProcessDailyListOnDemandTask dailyListOnDemandTask;
 
     @BeforeEach
     void setUp() {
-        dailyListProcessor = new DailyListProcessorImpl(dailyListRepository, dailyListUpdater, logApi, automatedTasksApi);
+        dailyListProcessor = new DailyListProcessorImpl(dailyListRepository, dailyListUpdater, logApi, dailyListOnDemandTask);
         setCourthouseForStubs("Swansea", dailyListForSwansea);
         setCourthouseForStubs("Leeds",
                               oldestDailyListForLeeds,

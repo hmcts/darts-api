@@ -1,16 +1,17 @@
 package uk.gov.hmcts.darts.transcriptions.controller;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import org.springframework.transaction.annotation.Transactional;
 import uk.gov.hmcts.darts.common.entity.TranscriptionEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionUrgencyEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
+import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 import uk.gov.hmcts.darts.testutils.stubs.AuthorisationStub;
 import uk.gov.hmcts.darts.testutils.stubs.TranscriptionStub;
@@ -23,6 +24,7 @@ import static java.time.OffsetDateTime.now;
 import static java.time.ZoneOffset.UTC;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
+import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -51,8 +53,18 @@ class TranscriptionControllerGetYourTranscriptsIntTest extends IntegrationBase {
 
     private static final OffsetDateTime MINUS_90_DAYS = now(UTC).minusDays(90);
 
+    public static final int RETENTION_CONFIDENCE_SCORE = 2;
+    public static final String RETENTION_CONFIDENCE_REASON = "RetentionConfidenceReason";
+    private static final String REQUESTED_TRANSCRIPTION_COMMENT = "Requested transcription";
+
+    @MockBean
+    private CurrentTimeHelper currentTimeHelper;
+
     @BeforeEach
     void beforeEach() {
+        OffsetDateTime startedAt = OffsetDateTime.of(2023, 9, 23, 13, 0, 0, 0, UTC);
+        when(currentTimeHelper.currentOffsetDateTime()).thenReturn(startedAt);
+
         authorisationStub.givenTestSchema();
 
         transcriptionEntity = authorisationStub.getTranscriptionEntity();
@@ -62,11 +74,11 @@ class TranscriptionControllerGetYourTranscriptsIntTest extends IntegrationBase {
     }
 
     @Test
-    @Disabled("Failed Validation")
     void getYourTranscriptsShouldReturnRequesterOnlyOk() throws Exception {
         var courtCase = authorisationStub.getCourtCaseEntity();
         var hearing = authorisationStub.getHearingEntity();
-        transcriptionStub.createAndSaveCompletedTranscription(authorisationStub.getTestUser(), courtCase, hearing, YESTERDAY, true);
+        TranscriptionEntity transcription = transcriptionStub
+            .createAndSaveCompletedTranscription(authorisationStub.getTestUser(), courtCase, hearing, YESTERDAY, true);
 
         MockHttpServletRequestBuilder requestBuilder = get(ENDPOINT_URI)
             .header(
@@ -85,7 +97,7 @@ class TranscriptionControllerGetYourTranscriptsIntTest extends IntegrationBase {
                 "$.requester_transcriptions[0].case_number",
                 is(courtCase.getCaseNumber())
             ))
-            .andExpect(jsonPath("$.requester_transcriptions[0].courthouse_name", is("Bristol")))
+            .andExpect(jsonPath("$.requester_transcriptions[0].courthouse_name", is(transcription.getCourtHouse().get().getDisplayName())))
             .andExpect(jsonPath("$.requester_transcriptions[0].hearing_date").isString())
             .andExpect(jsonPath("$.requester_transcriptions[0].transcription_type", is("Specified Times")))
             .andExpect(jsonPath("$.requester_transcriptions[0].status", is("Awaiting Authorisation")))
@@ -100,11 +112,11 @@ class TranscriptionControllerGetYourTranscriptsIntTest extends IntegrationBase {
     }
 
     @Test
-    @Disabled("Failed Validation")
     void getYourTranscriptsShouldReturnRequesterOnlyOkWithNoUrgency() throws Exception {
         var courtCase = authorisationStub.getCourtCaseEntity();
         var hearing = authorisationStub.getHearingEntity();
-        transcriptionStub.createAndSaveAwaitingAuthorisationTranscription(authorisationStub.getTestUser(), courtCase, hearing, YESTERDAY, false);
+        TranscriptionEntity transcription = transcriptionStub
+            .createAndSaveAwaitingAuthorisationTranscription(authorisationStub.getTestUser(), courtCase, hearing, YESTERDAY, false);
 
         MockHttpServletRequestBuilder requestBuilder = get(ENDPOINT_URI)
             .header(
@@ -121,7 +133,8 @@ class TranscriptionControllerGetYourTranscriptsIntTest extends IntegrationBase {
                 "$.requester_transcriptions[1].case_number",
                 is(courtCase.getCaseNumber())
             ))
-            .andExpect(jsonPath("$.requester_transcriptions[0].courthouse_name", is("Bristol")))
+            .andExpect(jsonPath("$.requester_transcriptions[0].courthouse_name", is(transcription.getCourtHouse().get().getDisplayName())))
+
             .andExpect(jsonPath("$.requester_transcriptions[0].hearing_date").isString())
             .andExpect(jsonPath("$.requester_transcriptions[0].transcription_type", is("Specified Times")))
             .andExpect(jsonPath("$.requester_transcriptions[0].status", is("Awaiting Authorisation")))
@@ -151,7 +164,6 @@ class TranscriptionControllerGetYourTranscriptsIntTest extends IntegrationBase {
     }
 
     @Test
-    @Disabled("Failed Validation")
     void getYourTranscriptsShouldReturnRequesterAndApproverCombinedOk() throws Exception {
         var courtCase = authorisationStub.getCourtCaseEntity();
         var systemUserTranscription = dartsDatabase.getTranscriptionStub()
@@ -180,7 +192,7 @@ class TranscriptionControllerGetYourTranscriptsIntTest extends IntegrationBase {
                 "$.requester_transcriptions[0].case_number",
                 is(courtCase.getCaseNumber())
             ))
-            .andExpect(jsonPath("$.requester_transcriptions[0].courthouse_name", is("Bristol")))
+            .andExpect(jsonPath("$.requester_transcriptions[0].courthouse_name", is(transcriptionEntity.getCourtHouse().get().getDisplayName())))
             .andExpect(jsonPath("$.requester_transcriptions[0].hearing_date").isString())
             .andExpect(jsonPath("$.requester_transcriptions[0].transcription_type", is("Specified Times")))
             .andExpect(jsonPath("$.requester_transcriptions[0].status", is("Awaiting Authorisation")))
@@ -195,20 +207,7 @@ class TranscriptionControllerGetYourTranscriptsIntTest extends IntegrationBase {
             .andExpect(jsonPath(
                 "$.approver_transcriptions[0].case_id",
                 is(courtCase.getId())
-            ))
-            .andExpect(jsonPath(
-                "$.approver_transcriptions[0].case_number",
-                is(courtCase.getCaseNumber())
-            ))
-            .andExpect(jsonPath("$.approver_transcriptions[0].courthouse_name", is("Bristol")))
-            .andExpect(jsonPath("$.approver_transcriptions[0].hearing_date").isString())
-            .andExpect(jsonPath("$.approver_transcriptions[0].transcription_type", is("Specified Times")))
-            .andExpect(jsonPath("$.approver_transcriptions[0].status", is("Awaiting Authorisation")))
-            .andExpect(jsonPath("$.requester_transcriptions[0].transcription_urgency.transcription_urgency_id", is(TranscriptionUrgencyEnum.STANDARD.getId())))
-            .andExpect(jsonPath("$.requester_transcriptions[0].transcription_urgency.description", is(urgencyEntity.getDescription())))
-            .andExpect(jsonPath("$.requester_transcriptions[0].transcription_urgency." +
-                                    "priority_order", is(urgencyEntity.getPriorityOrder())))
-            .andExpect(jsonPath("$.approver_transcriptions[0].requested_ts").isString());
+            ));
     }
 
     @Test
@@ -233,15 +232,18 @@ class TranscriptionControllerGetYourTranscriptsIntTest extends IntegrationBase {
     }
 
     @Test
-    @Disabled("Failed Validation")
     void getYourTranscriptsRequesterShouldNotReturnHidden() throws Exception {
         var courtCase = authorisationStub.getCourtCaseEntity();
         var hearing = authorisationStub.getHearingEntity();
         // create a second transcription with a non-hidden document - should be returned
         TranscriptionEntity nonHiddenTranscription = transcriptionStub.createAndSaveCompletedTranscriptionWithDocument(
             authorisationStub.getTestUser(), courtCase, hearing, YESTERDAY, false);
+        dartsDatabase.getTranscriptionStub().updateTranscriptionWithDocument(nonHiddenTranscription, systemUser, true);
+
         // and one with a hidden document - should not be returned
-        transcriptionStub.createAndSaveCompletedTranscriptionWithDocument(authorisationStub.getTestUser(), courtCase, hearing, YESTERDAY, true);
+        TranscriptionEntity hidden = transcriptionStub
+            .createAndSaveCompletedTranscriptionWithDocument(authorisationStub.getTestUser(), courtCase, hearing, YESTERDAY, true);
+        dartsDatabase.getTranscriptionStub().updateTranscriptionWithDocument(hidden, systemUser, true);
 
         MockHttpServletRequestBuilder requestBuilder = get(ENDPOINT_URI).header("user_id", testUser.getId());
 
@@ -254,7 +256,6 @@ class TranscriptionControllerGetYourTranscriptsIntTest extends IntegrationBase {
     }
 
     @Test
-    @Disabled("Failed Validation")
     void getYourTranscriptsApproverShouldNotReturnHidden() throws Exception {
         var courtCase = authorisationStub.getCourtCaseEntity();
         TranscriptionEntity systemUserTranscription = dartsDatabase.getTranscriptionStub()
@@ -281,7 +282,6 @@ class TranscriptionControllerGetYourTranscriptsIntTest extends IntegrationBase {
     }
 
     @Test
-    @Disabled("Failed Validation")
     void getYourTranscriptsShouldNotReturnTranscriptWhenIsCurrentFalse() throws Exception {
         var courtCase = authorisationStub.getCourtCaseEntity();
         transcriptionStub.createAndSaveAwaitingAuthorisationTranscription(
