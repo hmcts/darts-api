@@ -191,7 +191,7 @@ class MediaHideOrShowValidatorTest {
     }
 
     @Test
-    void successfullyHideWithMarkedForDeletionActionRequestAndFlagDisabled() {
+    void unsuccessfullyHideWithMarkedForDeletionActionRequestAndFlagDisabled() {
         setManualDeletionEnabled(false);
         Integer mediaId = 200;
         MediaHideRequest mediaHideRequest = new MediaHideRequest();

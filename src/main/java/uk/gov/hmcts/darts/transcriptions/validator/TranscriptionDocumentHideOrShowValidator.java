@@ -58,8 +58,7 @@ public class TranscriptionDocumentHideOrShowValidator implements Validator<IdReq
                 ObjectHiddenReasonEntity objectHiddenReasonEntity = optionalObjectHiddenReasonEntity.get();
                 if (objectHiddenReasonEntity.isMarkedForDeletion()) {
                     if (isManualDeletionEnabled()) {
-                        throw new DartsApiException(TranscriptionApiError
-                                                        .TRANSCRIPTION_DOCUMENT_REASON_IS_MARKED_FOR_DELETION);
+                        throw new DartsApiException(TranscriptionApiError.TRANSCRIPTION_DOCUMENT_REASON_IS_MARKED_FOR_DELETION);
                     } else {
                         throw new DartsApiException(DartsApiException.DartsApiErrorCommon.FEATURE_FLAG_NOT_ENABLED);
                     }
