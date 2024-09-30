@@ -24,6 +24,7 @@ import static java.time.ZoneOffset.UTC;
 
 @Component
 @RequiredArgsConstructor
+@Deprecated
 public class HearingStub {
 
     private final CourthouseStub courthouseStub;

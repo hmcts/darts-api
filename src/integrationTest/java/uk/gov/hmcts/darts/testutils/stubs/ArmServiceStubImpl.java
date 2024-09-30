@@ -15,6 +15,7 @@ import java.util.List;
 @Slf4j
 @RequiredArgsConstructor
 @Profile("intTest")
+@Deprecated
 public class ArmServiceStubImpl implements ArmService {
     @Override
     public String saveBlobData(String containerName, String filename, BinaryData binaryData) {

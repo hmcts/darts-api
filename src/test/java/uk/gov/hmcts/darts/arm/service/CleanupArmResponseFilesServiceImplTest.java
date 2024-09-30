@@ -89,7 +89,7 @@ class CleanupArmResponseFilesServiceImplTest {
             currentTimeHelper
         );
 
-        externalObjectDirectoryEntity = ExternalObjectDirectoryTestData.createExternalObjectDirectory(
+        externalObjectDirectoryEntity = new ExternalObjectDirectoryTestData().createExternalObjectDirectory(
             media,
             ExternalLocationTypeEnum.ARM,
             ObjectRecordStatusEnum.STORED,

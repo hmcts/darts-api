@@ -6,6 +6,7 @@ import uk.gov.hmcts.darts.common.entity.ObjectHiddenReasonEntity;
 import uk.gov.hmcts.darts.common.repository.ObjectHiddenReasonRepository;
 
 @Component
+@Deprecated
 public class ObjectHiddenReasonStub {
 
     @Autowired

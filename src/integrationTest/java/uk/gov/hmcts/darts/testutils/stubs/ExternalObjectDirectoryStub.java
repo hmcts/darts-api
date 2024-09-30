@@ -282,11 +282,11 @@ public class ExternalObjectDirectoryStub {
         return externalObjectDirectory;
     }
 
-    private ExternalLocationTypeEntity getLocation(ExternalLocationTypeEnum externalLocationTypeEnum) {
+    public ExternalLocationTypeEntity getLocation(ExternalLocationTypeEnum externalLocationTypeEnum) {
         return externalLocationTypeRepository.getReferenceById(externalLocationTypeEnum.getId());
     }
 
-    private ObjectRecordStatusEntity getStatus(ObjectRecordStatusEnum objectRecordStatusEnum) {
+    public ObjectRecordStatusEntity getStatus(ObjectRecordStatusEnum objectRecordStatusEnum) {
         return objectRecordStatusRepository.getReferenceById(objectRecordStatusEnum.getId());
     }
 

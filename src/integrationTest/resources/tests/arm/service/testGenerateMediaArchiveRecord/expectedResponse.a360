@@ -9,23 +9,23 @@
     "event_date": "<EVENT_DATE_TIME>",
     "title": "a-media-file.mp2",
     "client_identifier": "<EODID>",
-    "contributor": "NEWCASTLE & INT TEST COURTROOM 2",
+    "contributor": "<COURTHOUSE> & <COURTROOM>",
     "rtn_score":2,
     "rtn_reason":"RetentionConfidenceReason",
     "bf_001": "Media",
     "bf_002": "Case1",
     "bf_003": "mp2",
-    "bf_004": "2023-09-23T00:00:00Z",
+    "bf_004": "<HEARING_DATE>",
     "bf_005": "7017013d05bcc5032e142049081821d6",
-    "bf_010": "2023-09-23T13:00:00Z",
-    "bf_011": "2023-09-23T13:00:00Z",
+    "bf_010": "<CREATE_DATE>",
+    "bf_011": "<START_DATE>",
     "bf_012": <OBJECT_ID>,
     "bf_013": <PARENT_ID>,
     "bf_014": 1,
     "bf_015": 2,
-    "bf_017": "2023-09-23T13:45:00Z",
-    "bf_019": "NEWCASTLE",
-    "bf_020": "INT TEST COURTROOM 2"
+    "bf_017": "<END_DATE>",
+    "bf_019": "<COURTHOUSE>",
+    "bf_020": "<COURTROOM>"
   }
 }
 {

@@ -1,11 +1,12 @@
 package uk.gov.hmcts.darts.test.common.data;
 
-import lombok.experimental.UtilityClass;
 import uk.gov.hmcts.darts.common.entity.ObjectHiddenReasonEntity;
 
-@UtilityClass
-@SuppressWarnings({"HideUtilityClassConstructor"})
 public class ObjectHiddenReasonTestData {
+
+    private ObjectHiddenReasonTestData() {
+
+    }
 
     public static ObjectHiddenReasonEntity publicInterestImmunity() {
         var reason = new ObjectHiddenReasonEntity();

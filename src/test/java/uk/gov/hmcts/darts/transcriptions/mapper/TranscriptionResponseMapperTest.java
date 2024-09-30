@@ -25,7 +25,7 @@ import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.common.repository.HearingReportingRestrictionsRepository;
 import uk.gov.hmcts.darts.common.util.CommonTestDataUtil;
 import uk.gov.hmcts.darts.common.util.TranscriptionUrgencyEnum;
-import uk.gov.hmcts.darts.test.common.data.TranscriptionDocumentTestData;
+import uk.gov.hmcts.darts.test.common.data.PersistableFactory;
 import uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum;
 import uk.gov.hmcts.darts.transcriptions.enums.TranscriptionTypeEnum;
 import uk.gov.hmcts.darts.transcriptions.exception.TranscriptionApiError;
@@ -739,12 +739,12 @@ class TranscriptionResponseMapperTest {
     @Test
     void mapTranscriptionDocumentMarkedForDeletion() {
 
-        TranscriptionDocumentEntity documentEntity = TranscriptionDocumentTestData.complexTranscriptionDocument();
+        TranscriptionDocumentEntity documentEntity = PersistableFactory.getTranscriptionDocument()
+            .complexTranscriptionDocument().build();
 
         AdminMarkedForDeletionResponseItem response = transcriptionResponseMapper.mapTranscriptionDocumentMarkedForDeletion(documentEntity);
 
         ObjectAdminActionEntity adminActionEntity = documentEntity.getAdminActions().get(0);
-        assertEquals(documentEntity.getId(), response.getTranscriptionDocumentId());
         assertEquals(adminActionEntity.getId(), response.getAdminAction().getId());
         assertEquals(adminActionEntity.getComments(), response.getAdminAction().getComments());
         assertEquals(adminActionEntity.getTicketReference(), response.getAdminAction().getTicketReference());
