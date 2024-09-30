@@ -1,5 +1,9 @@
 package uk.gov.hmcts.darts.test.common;
 
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+import org.hibernate.AssertionFailure;
+
 import java.time.Duration;
 import java.util.concurrent.Callable;
 
@@ -20,20 +24,32 @@ public final class AwaitabilityUtil {
         waitForMaxWithOneSecondPoll(runnable, Duration.ofSeconds(10));
     }
 
-    public static void waitForMaxWithOneSecondPoll(Callable<Boolean> callable, Duration duration) {
+    public static boolean waitForMaxWithOneSecondPoll(Callable<Boolean> callable, Duration duration) {
+        WaitingResult waitingResult = new WaitingResult(callable);
+
         var awaitAlias = random(4);
         await(awaitAlias).atMost(duration)
             .with().pollInterval(Duration.ofSeconds(1))
-            .until(() -> {
-                boolean verified;
-                try {
-                    verified = callable.call();
-                } catch (Exception e) {
-                    // ignore the error for now
-                    verified = false;
-                }
-                return verified;
-            });
+            .until(waitingResult);
+
+        if (!waitingResult.isCriteriaMet()) {
+            throw new AssertionFailure("Criteria not met within the specified time");
+        }
+        return waitingResult.isCriteriaMet();
+    }
+
+    @RequiredArgsConstructor
+    @Getter
+    static class WaitingResult implements Callable<Boolean> {
+        public final Callable<Boolean> criteria;
+
+        public boolean criteriaMet;
+
+        @Override
+        public Boolean call() throws Exception {
+            criteriaMet = criteria.call();
+            return criteriaMet;
+        }
     }
 
     public static void waitForMaxWithOneSecondPoll(Runnable runnable, Duration duration) {

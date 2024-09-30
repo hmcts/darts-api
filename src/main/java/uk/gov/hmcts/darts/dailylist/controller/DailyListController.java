@@ -29,7 +29,6 @@ import uk.gov.hmcts.darts.dailylist.validation.DailyListPostValidator;
 import uk.gov.hmcts.darts.task.api.AutomatedTasksApi;
 
 import java.util.Optional;
-import java.util.concurrent.CompletableFuture;
 
 import static uk.gov.hmcts.darts.authorisation.constants.AuthorisationConstants.SECURITY_SCHEMES_BEARER_AUTH;
 import static uk.gov.hmcts.darts.authorisation.enums.ContextIdEnum.ANY_ENTITY_ID;
@@ -100,7 +99,8 @@ public class DailyListController implements DailyListsApi {
         if (automatedTaskEntity.isPresent() && automatedTasksApi.isLocked(automatedTaskEntity.get())) {
             throw new DartsApiException(DAILY_LIST_ALREADY_PROCESSING);
         }
-        CompletableFuture.runAsync(() -> processor.processAllDailyListsWithLock(listingCourthouse));
+        processor.processAllDailyListsWithLock(listingCourthouse, true);
         return new ResponseEntity<>(HttpStatus.ACCEPTED);
     }
+
 }
