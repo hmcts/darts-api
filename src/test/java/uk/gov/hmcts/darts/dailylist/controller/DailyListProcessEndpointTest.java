@@ -27,13 +27,13 @@ class DailyListProcessEndpointTest {
     void dailyListRun() {
         ResponseEntity<Void> response = controller.dailylistsRunPost(null);
         assertEquals(HttpStatus.ACCEPTED, response.getStatusCode());
-        Mockito.verify(processor, Mockito.timeout(100).times(1)).processAllDailyListsWithLock(null, false);
+        Mockito.verify(processor, Mockito.timeout(100).times(1)).processAllDailyListsWithLock(null, true);
     }
 
     @Test
     void dailyListRunWithCourthouse() {
         ResponseEntity<Void> response = controller.dailylistsRunPost("Swansea");
         assertEquals(HttpStatus.ACCEPTED, response.getStatusCode());
-        Mockito.verify(processor, Mockito.timeout(100).times(1)).processAllDailyListsWithLock("Swansea", false);
+        Mockito.verify(processor, Mockito.timeout(100).times(1)).processAllDailyListsWithLock("Swansea", true);
     }
 }
