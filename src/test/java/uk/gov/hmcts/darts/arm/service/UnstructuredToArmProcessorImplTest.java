@@ -18,7 +18,7 @@ import org.springframework.data.domain.Pageable;
 import uk.gov.hmcts.darts.arm.api.ArmDataManagementApi;
 import uk.gov.hmcts.darts.arm.config.ArmDataManagementConfiguration;
 import uk.gov.hmcts.darts.arm.config.UnstructuredToArmProcessorConfiguration;
-import uk.gov.hmcts.darts.arm.helper.UnstructuredToArmHelper;
+import uk.gov.hmcts.darts.arm.helper.DataStoreToArmHelper;
 import uk.gov.hmcts.darts.arm.model.record.ArchiveRecordFileInfo;
 import uk.gov.hmcts.darts.arm.service.impl.UnstructuredToArmProcessorImpl;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
@@ -118,7 +118,7 @@ class UnstructuredToArmProcessorImplTest {
     @Mock
     private ObjectRecordStatusEntity objectRecordStatusEntityArmDropZone;
     @InjectMocks
-    private UnstructuredToArmHelper unstructuredToArmHelper;
+    private DataStoreToArmHelper unstructuredToArmHelper;
     @Captor
     private ArgumentCaptor<ExternalObjectDirectoryEntity> externalObjectDirectoryEntityCaptor;
 

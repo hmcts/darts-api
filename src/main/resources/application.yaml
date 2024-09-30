@@ -337,6 +337,8 @@ darts:
       unstructured-to-arm-batch-processor:
         max-arm-manifest-items: 100
         max-arm-single-mode-items: 100
+      dets-to-arm-batch-processor:
+        max-arm-manifest-items: 100
       expiry-deletion:
         enabled: ${CASE_EXPIRY_DELETION_ENABLED:false}
       audio-linking:

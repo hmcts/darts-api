@@ -100,12 +100,27 @@ public interface ExternalObjectDirectoryRepository extends JpaRepository<Externa
             WHERE eod.status in :failedStatuses
             AND eod.externalLocationType = :type
             AND eod.transferAttempts <= :transferAttempts
+            AND eod.osrUuid is null
             """
     )
     List<ExternalObjectDirectoryEntity> findNotFinishedAndNotExceededRetryInStorageLocation(List<ObjectRecordStatusEntity> failedStatuses,
                                                                                             ExternalLocationTypeEntity type,
                                                                                             Integer transferAttempts,
                                                                                             Pageable pageable);
+
+    @Query(
+        """
+            SELECT eod FROM ExternalObjectDirectoryEntity eod,
+            WHERE eod.status in :failedStatuses
+            AND eod.externalLocationType = :type
+            AND eod.transferAttempts <= :transferAttempts
+            AND eod.osrUuid is not null
+            """
+    )
+    List<ExternalObjectDirectoryEntity> findNotFinishedAndNotExceededRetryInStorageLocationForDets(List<ObjectRecordStatusEntity> failedStatuses,
+                                                                                                   ExternalLocationTypeEntity type,
+                                                                                                   Integer transferAttempts,
+                                                                                                   Pageable pageable);
 
     default List<ExternalObjectDirectoryEntity> findNotFinishedAndNotExceededRetryInStorageLocation(List<ObjectRecordStatusEntity> failedStatuses,
                                                                                                     ExternalLocationTypeEntity type,
