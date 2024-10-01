@@ -10,6 +10,7 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import jakarta.xml.bind.JAXBContext;
 import jakarta.xml.bind.JAXBException;
 import org.apache.commons.io.FileUtils;
+import org.assertj.core.data.TemporalUnitOffset;
 import org.skyscreamer.jsonassert.JSONAssert;
 import org.skyscreamer.jsonassert.JSONCompareMode;
 import org.zalando.problem.jackson.ProblemModule;
@@ -22,6 +23,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.text.MessageFormat;
 import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
@@ -30,6 +32,7 @@ import static java.lang.Character.isLetter;
 import static java.lang.Character.isUpperCase;
 import static java.lang.Character.toLowerCase;
 import static java.lang.Character.toUpperCase;
+import static org.assertj.core.api.Assertions.within;
 import static org.junit.jupiter.api.Assertions.fail;
 
 @SuppressWarnings({"PMD.TestClassWithoutTestCases", "PMD.CognitiveComplexity"})
@@ -37,6 +40,7 @@ public final class TestUtils {
 
     public static final String UUID_REGEX = "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$";
     public static final int AUTOMATION_USER_ID = 0;
+    public static final TemporalUnitOffset TIME_TOLERANCE = within(5, ChronoUnit.SECONDS);
 
     private TestUtils() {
         throw new UnsupportedOperationException("This is a utility class and cannot be instantiated");
