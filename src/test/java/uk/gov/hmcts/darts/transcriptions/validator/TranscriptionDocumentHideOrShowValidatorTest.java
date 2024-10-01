@@ -20,6 +20,7 @@ import uk.gov.hmcts.darts.transcriptions.model.TranscriptionDocumentHideRequest;
 import java.util.List;
 import java.util.Optional;
 
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
 
@@ -37,6 +38,12 @@ class TranscriptionDocumentHideOrShowValidatorTest {
 
     @InjectMocks
     private TranscriptionDocumentHideOrShowValidator transcriptionDocumentHideOrShowValidator;
+
+
+    private void setManualDeletionEnabled(boolean enabled) {
+        this.transcriptionDocumentHideOrShowValidator = spy(transcriptionDocumentHideOrShowValidator);
+        when(transcriptionDocumentHideOrShowValidator.isManualDeletionEnabled()).thenReturn(enabled);
+    }
 
     @Test
     void successfullyShow() {
@@ -133,7 +140,7 @@ class TranscriptionDocumentHideOrShowValidatorTest {
 
         Mockito.verify(transcriptionDocumentIdValidator, times(1)).validate(documentId);
     }
-    
+
     @Test
     void failWhenHideWithActionRequestAndWithoutCorrectReason() {
         Integer documentId = 200;
@@ -160,7 +167,8 @@ class TranscriptionDocumentHideOrShowValidatorTest {
     }
 
     @Test
-    void failWhenHideWithActionRequestAndWithReasonMarkedForDeletion() {
+    void failWhenHideWithActionRequestAndWithReasonMarkedForDeletionButManualDeletionIsDisabled() {
+        setManualDeletionEnabled(false);
         Integer documentId = 200;
         AdminActionRequest adminActionResponse = new AdminActionRequest();
 
@@ -182,8 +190,33 @@ class TranscriptionDocumentHideOrShowValidatorTest {
 
         DartsApiException exception
             = Assertions.assertThrows(DartsApiException.class, () -> transcriptionDocumentHideOrShowValidator.validate(transcriptionDocumentEntityUserId));
-        Assertions.assertEquals(TranscriptionApiError.TRANSCRIPTION_DOCUMENT_REASON_IS_MARKED_FOR_DELETION, exception.getError());
+        Assertions.assertEquals(DartsApiException.DartsApiErrorCommon.FEATURE_FLAG_NOT_ENABLED, exception.getError());
 
         Mockito.verify(transcriptionDocumentIdValidator, times(1)).validate(documentId);
+    }
+
+    @Test
+    void successfullyHideWithActionRequestAndWithReasonMarkedForDeletionButManualDeletionIsEnabled() {
+        setManualDeletionEnabled(true);
+        Integer documentId = 200;
+        AdminActionRequest adminActionResponse = new AdminActionRequest();
+
+        TranscriptionDocumentHideRequest transcriptionDocumentHideRequest = new TranscriptionDocumentHideRequest();
+        transcriptionDocumentHideRequest.setIsHidden(true);
+        transcriptionDocumentHideRequest.setAdminAction(adminActionResponse);
+
+        Integer reasonId = 949;
+        adminActionResponse.setReasonId(reasonId);
+
+        ObjectHiddenReasonEntity reasonEntity = Mockito.mock(ObjectHiddenReasonEntity.class);
+        when(reasonEntity.isMarkedForDeletion()).thenReturn(true);
+
+        when(objectHiddenReasonRepository.findById(reasonId)).thenReturn(Optional.of(reasonEntity));
+        when(objectAdminActionRepository.findByTranscriptionDocument_Id(documentId)).thenReturn(List.of());
+
+        IdRequest<TranscriptionDocumentHideRequest> transcriptionDocumentEntityUserId = new
+            IdRequest<>(transcriptionDocumentHideRequest, documentId);
+
+        Assertions.assertDoesNotThrow(() -> transcriptionDocumentHideOrShowValidator.validate(transcriptionDocumentEntityUserId));
     }
 }

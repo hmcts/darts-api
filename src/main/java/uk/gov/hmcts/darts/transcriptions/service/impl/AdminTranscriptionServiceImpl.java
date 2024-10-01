@@ -1,6 +1,9 @@
 package uk.gov.hmcts.darts.transcriptions.service.impl;
 
+import lombok.AccessLevel;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
@@ -67,6 +70,10 @@ public class AdminTranscriptionServiceImpl implements AdminTranscriptionService 
     private final UserIdentity userIdentity;
 
     private final TranscriptionApproveMarkForDeletionValidator transcriptionApproveMarkForDeletionValidator;
+
+    @Value("${darts.manual-deletion.enabled:false}")
+    @Getter(AccessLevel.PACKAGE)
+    private boolean manualDeletionEnabled;
 
     @Override
     @SuppressWarnings({"PMD.NullAssignment"})
@@ -161,7 +168,6 @@ public class AdminTranscriptionServiceImpl implements AdminTranscriptionService 
     @Transactional
     public TranscriptionDocumentHideResponse hideOrShowTranscriptionDocumentById(Integer transcriptionDocumentId,
                                                                                  TranscriptionDocumentHideRequest transcriptionDocumentHideRequest) {
-
         TranscriptionDocumentHideResponse response;
 
         IdRequest<TranscriptionDocumentHideRequest> request = new IdRequest<>(transcriptionDocumentHideRequest, transcriptionDocumentId);
@@ -217,6 +223,9 @@ public class AdminTranscriptionServiceImpl implements AdminTranscriptionService 
 
     @Transactional
     public AdminApproveDeletionResponse approveDeletionOfTranscriptionDocumentById(Integer transcriptionDocumentId) {
+        if (!this.isManualDeletionEnabled()) {
+            throw new DartsApiException(DartsApiException.DartsApiErrorCommon.FEATURE_FLAG_NOT_ENABLED);
+        }
 
         transcriptionApproveMarkForDeletionValidator.validate(transcriptionDocumentId);
 

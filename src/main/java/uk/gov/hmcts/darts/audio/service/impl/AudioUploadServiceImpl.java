@@ -7,8 +7,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import uk.gov.hmcts.darts.audio.component.AddAudioRequestMapper;
-import uk.gov.hmcts.darts.audio.component.AudioMessageDigest;
-import uk.gov.hmcts.darts.audio.config.AudioConfigurationProperties;
+import uk.gov.hmcts.darts.audio.helper.AudioAsyncHelper;
 import uk.gov.hmcts.darts.audio.model.AddAudioMetadataRequest;
 import uk.gov.hmcts.darts.audio.service.AudioUploadService;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
@@ -21,7 +20,6 @@ import uk.gov.hmcts.darts.common.entity.MediaLinkedCaseEntity;
 import uk.gov.hmcts.darts.common.entity.ObjectRecordStatusEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
-import uk.gov.hmcts.darts.common.repository.CourtLogEventRepository;
 import uk.gov.hmcts.darts.common.repository.ExternalLocationTypeRepository;
 import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
 import uk.gov.hmcts.darts.common.repository.HearingRepository;
@@ -38,7 +36,6 @@ import uk.gov.hmcts.darts.log.api.LogApi;
 
 import java.io.BufferedInputStream;
 import java.io.IOException;
-import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -67,11 +64,9 @@ public class AudioUploadServiceImpl implements AudioUploadService {
     private final DataManagementApi dataManagementApi;
     private final UserIdentity userIdentity;
     private final FileContentChecksum fileContentChecksum;
-    private final CourtLogEventRepository courtLogEventRepository;
-    private final AudioConfigurationProperties audioConfigurationProperties;
     private final LogApi logApi;
-    private final AudioMessageDigest audioDigest;
     private final MediaLinkedCaseRepository mediaLinkedCaseRepository;
+    private final AudioAsyncHelper audioAsyncHelper;
 
     @Override
     @Transactional
@@ -154,7 +149,7 @@ public class AudioUploadServiceImpl implements AudioUploadService {
         log.info("Saved media id {}", newMediaEntity.getId());
 
         linkAudioToHearingInMetadata(addAudioMetadataRequest, newMediaEntity);
-        linkAudioToHearingByEvent(addAudioMetadataRequest, newMediaEntity);
+        audioAsyncHelper.linkAudioToHearingByEvent(addAudioMetadataRequest, newMediaEntity);
 
         saveExternalObjectDirectory(
             externalLocation,
@@ -247,40 +242,6 @@ public class AudioUploadServiceImpl implements AudioUploadService {
         }
         mediaEntity.setIsCurrent(false);
         mediaRepository.save(mediaEntity);
-    }
-
-
-    @Override
-    public void linkAudioToHearingByEvent(AddAudioMetadataRequest addAudioMetadataRequest, MediaEntity savedMedia) {
-
-        if (addAudioMetadataRequest.getTotalChannels() == 1
-            && audioConfigurationProperties.getHandheldAudioCourtroomNumbers().contains(addAudioMetadataRequest.getCourtroom())) {
-            return;
-        }
-
-        String courthouse = addAudioMetadataRequest.getCourthouse();
-        String courtroom = addAudioMetadataRequest.getCourtroom();
-        OffsetDateTime start = addAudioMetadataRequest.getStartedAt().minusMinutes(audioConfigurationProperties.getPreAmbleDuration());
-        OffsetDateTime end = addAudioMetadataRequest.getEndedAt().plusMinutes(audioConfigurationProperties.getPostAmbleDuration());
-        var courtLogs = courtLogEventRepository.findByCourthouseAndCourtroomBetweenStartAndEnd(
-            courthouse,
-            courtroom,
-            start,
-            end
-        );
-
-        var associatedHearings = courtLogs.stream()
-            .flatMap(h -> h.getHearingEntities().stream())
-            .distinct()
-            .toList();
-
-        for (var hearing : associatedHearings) {
-            if (!hearing.getMediaList().contains(savedMedia)) {
-                hearing.addMedia(savedMedia);
-                hearing.setHearingIsActual(true);
-                hearingRepository.saveAndFlush(hearing);
-            }
-        }
     }
 
     private void saveExternalObjectDirectory(UUID externalLocation,
