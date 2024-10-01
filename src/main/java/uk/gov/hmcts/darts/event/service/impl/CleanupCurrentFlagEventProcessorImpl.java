@@ -3,6 +3,8 @@ package uk.gov.hmcts.darts.event.service.impl;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
+import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.repository.EventRepository;
 import uk.gov.hmcts.darts.event.service.CleanupCurrentFlagEventProcessor;
 
@@ -16,6 +18,7 @@ import java.util.stream.Collectors;
 public class CleanupCurrentFlagEventProcessorImpl implements CleanupCurrentFlagEventProcessor {
     private final Integer batchSize;
     private final EventRepository eventRepository;
+    private final UserIdentity userIdentity;
 
     @Override
     public List<Integer> processCurrentEvent() {
@@ -29,12 +32,14 @@ public class CleanupCurrentFlagEventProcessorImpl implements CleanupCurrentFlagE
                 .collect(Collectors.joining(",")));
         }
 
+        UserAccountEntity userAccount = userIdentity.getUserAccount();
         eventEntityReturned.forEach(event -> {
             log.debug("Processing event id {}", event);
             eventRepository.getTheLatestCreatedEventPrimaryKeyForTheEventId(event)
                 .forEach(eventIdAndHearingIds -> {
                     eventRepository.updateAllEventIdEventsToNotCurrentWithTheExclusionOfTheCurrentEventPrimaryKey(
-                        eventIdAndHearingIds.getEveId(), eventIdAndHearingIds.getEventId(), eventIdAndHearingIds.getHearingIds());
+                        eventIdAndHearingIds.getEveId(), eventIdAndHearingIds.getEventId(),
+                        eventIdAndHearingIds.getHearingIds(), userAccount.getId());
 
                     log.debug("Updated all events for event id {} excluding primary key {} where hearings match {}",
                               eventIdAndHearingIds.getEventId(),

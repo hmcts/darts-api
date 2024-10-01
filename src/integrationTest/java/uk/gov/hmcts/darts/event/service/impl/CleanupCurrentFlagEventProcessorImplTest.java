@@ -4,33 +4,44 @@ import lombok.RequiredArgsConstructor;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
+import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.EventEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
+import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.repository.EventRepository;
 import uk.gov.hmcts.darts.common.util.DateConverterUtil;
+import uk.gov.hmcts.darts.test.common.TestUtils;
 import uk.gov.hmcts.darts.testutils.PostgresIntegrationBase;
 import uk.gov.hmcts.darts.testutils.stubs.EventStub;
 import uk.gov.hmcts.darts.testutils.stubs.HearingStub;
 
 import java.time.OffsetDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.when;
 
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 class CleanupCurrentFlagEventProcessorImplTest extends PostgresIntegrationBase {
     private final EventRepository eventRepository;
     private final EventStub eventStub;
     private final HearingStub hearingStub;
+    @Mock
+    private UserIdentity userIdentity;
 
     private CleanupCurrentFlagEventProcessorImpl cleanupCurrentFlagEventProcessor;
 
     @BeforeEach
     void beforeEach() {
-        this.cleanupCurrentFlagEventProcessor = new CleanupCurrentFlagEventProcessorImpl(20, eventRepository);
+        UserAccountEntity userAccount = new UserAccountEntity();
+        userAccount.setId(TestUtils.AUTOMATION_USER_ID);
+        when(userIdentity.getUserAccount()).thenReturn(userAccount);
+        this.cleanupCurrentFlagEventProcessor = new CleanupCurrentFlagEventProcessorImpl(20, eventRepository, userIdentity);
     }
 
     @Test
@@ -111,8 +122,16 @@ class CleanupCurrentFlagEventProcessorImplTest extends PostgresIntegrationBase {
             })
             .filter(EventEntity::getIsCurrent)
             .toList();
+
         Assertions.assertEquals(1, currentEvents.size());
         Assertions.assertEquals(maxCreatedDateTime, currentEvents.getFirst().getCreatedDateTime());
+        List<EventEntity> editedEvents = new ArrayList<>(currentEvents);
+        editedEvents.remove(currentEvents.getFirst());
+        editedEvents.forEach(eventEntity -> {
+            assertThat(eventEntity.getLastModifiedBy().getId()).isEqualTo(TestUtils.AUTOMATION_USER_ID);
+            assertThat(eventEntity.getLastModifiedDateTime())
+                .isCloseTo(OffsetDateTime.now(), TestUtils.TIME_TOLERANCE);
+        });
     }
 
     private void assertAllEventsAreCurrent(Map<Integer, List<EventEntity>> eventIdMap) {
