@@ -59,6 +59,7 @@ public class AdminEventsSearchGivensBuilder {
         var hearing = PersistableFactory.getHearingTestData().someMinimalHearing();
         saveWithTransients(hearing.getCourtroom());
         var eventForHearing = createEventForHearing(hearing);
+
         dartsDatabase.saveEventsForHearing(hearing, eventForHearing);
         return eventForHearing;
     }

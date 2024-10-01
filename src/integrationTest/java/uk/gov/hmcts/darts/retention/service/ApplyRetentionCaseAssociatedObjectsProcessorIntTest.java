@@ -1,7 +1,6 @@
 package uk.gov.hmcts.darts.retention.service;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -22,6 +21,7 @@ import uk.gov.hmcts.darts.common.repository.TranscriptionDocumentRepository;
 import uk.gov.hmcts.darts.common.repository.TranscriptionRepository;
 import uk.gov.hmcts.darts.common.util.EodHelper;
 import uk.gov.hmcts.darts.retention.service.impl.ApplyRetentionCaseAssociatedObjectsSingleCaseProcessorImpl;
+import uk.gov.hmcts.darts.test.common.MediaIdMatcher;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 import uk.gov.hmcts.darts.testutils.stubs.AnnotationStub;
 import uk.gov.hmcts.darts.testutils.stubs.CaseDocumentStub;
@@ -36,6 +36,7 @@ import java.util.UUID;
 
 import static java.time.ZoneOffset.UTC;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.refEq;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
@@ -346,11 +347,11 @@ class ApplyRetentionCaseAssociatedObjectsProcessorIntTest extends IntegrationBas
     }
 
     @Test
-    @Disabled("Failed Validation")
     void testExceptionOnOneObjectCausesRollbackOfAllChangesToAllObjectsAndProcessingOfOtherCasesContinues() {
 
         // given
-        doThrow(RuntimeException.class).when(eodRepository).findByMediaAndExternalLocationType(reflectionEquals(medias.get(0)), refEq(EodHelper.armLocation()));
+        doThrow(RuntimeException.class).when(eodRepository).findByMediaAndExternalLocationType(argThat(
+            new MediaIdMatcher(medias.get(0).getId())), refEq(EodHelper.armLocation()));
 
         // when
         processor.processApplyRetentionToCaseAssociatedObjects();
@@ -439,11 +440,5 @@ class ApplyRetentionCaseAssociatedObjectsProcessorIntTest extends IntegrationBas
         assertThat(actualCaseA.get().getRetentionRetries()).isEqualTo(2);
 
         verify(singleCaseProcessor).processApplyRetentionToCaseAssociatedObjects(caseB.getId());
-    }
-
-
-    private static MediaEntity reflectionEquals(MediaEntity media) {
-        return refEq(media, "courtroom", "hearingList", "retainUntilTs", "lastModifiedDateTime", "createdDateTime", "adminActionReasons",
-                     "mediaLinkedCaseList");
     }
 }

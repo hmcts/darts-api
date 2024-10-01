@@ -54,6 +54,7 @@ public class MediaTestData implements Persistable<TestMediaEntity.TestMediaBuild
         var userAccount = minimalUserAccount();
         media.setCreatedBy(userAccount);
         media.setLastModifiedBy(userAccount);
+
         return media;
     }
 

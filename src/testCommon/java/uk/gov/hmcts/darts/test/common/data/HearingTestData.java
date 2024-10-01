@@ -9,10 +9,10 @@ import uk.gov.hmcts.darts.test.common.data.builder.TestHearingEntity;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.Objects;
 
+import static java.time.OffsetDateTime.now;
 import static uk.gov.hmcts.darts.test.common.data.CourthouseTestData.createCourthouseWithName;
 import static uk.gov.hmcts.darts.test.common.data.CourtroomTestData.createCourtRoomWithNameAtCourthouse;
 import static uk.gov.hmcts.darts.test.common.data.CourtroomTestData.someMinimalCourtRoom;
@@ -27,7 +27,23 @@ public class HearingTestData
     private static final LocalDate HEARING_DATE = LocalDate.of(2023, 6, 20);
 
     public HearingEntity someMinimalHearing() {
-        return someMinimal();
+        var minimalCase = PersistableFactory.getCourtCaseTestData().createSomeMinimalCase();
+        var minimalCourtRoom = someMinimalCourtRoom();
+        minimalCourtRoom.setCourthouse(minimalCase.getCourthouse());
+
+        var hearingEntity = new HearingEntity();
+        hearingEntity.setCourtCase(minimalCase);
+        hearingEntity.setCourtroom(minimalCourtRoom);
+        hearingEntity.setHearingIsActual(true);
+        hearingEntity.setHearingDate(LocalDate.now().plusWeeks(1));
+        var userAccount = minimalUserAccount();
+        hearingEntity.setCreatedBy(userAccount);
+        hearingEntity.setLastModifiedBy(userAccount);
+
+        hearingEntity.setLastModifiedDateTime(now());
+        hearingEntity.setCreatedDateTime(now());
+
+        return hearingEntity;
     }
 
     public HearingEntity createHearingFor(CourtCaseEntity courtCase) {
@@ -118,8 +134,8 @@ public class HearingTestData
             .hearingDate(LocalDate.now().plusWeeks(1))
             .createdBy(minimalUserAccount())
             .lastModifiedBy(minimalUserAccount())
-            .createdDateTime(OffsetDateTime.now())
-            .lastModifiedDateTime(OffsetDateTime.now()).judges(new ArrayList<>())
+            .createdDateTime(now())
+            .lastModifiedDateTime(now()).judges(new ArrayList<>())
             .mediaList(new ArrayList<>());
 
         return builder;
