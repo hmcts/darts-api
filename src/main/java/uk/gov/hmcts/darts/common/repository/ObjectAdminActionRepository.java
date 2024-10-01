@@ -6,7 +6,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import uk.gov.hmcts.darts.common.entity.ObjectAdminActionEntity;
 
-import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -34,10 +34,7 @@ public interface ObjectAdminActionRepository extends JpaRepository<ObjectAdminAc
     @Query("""
         SELECT o FROM ObjectAdminActionEntity o
                 WHERE o.markedForManualDelDateTime < :deletionThreshold
-                AND ((o.media IS NOT NULL AND o.media.isDeleted = false)
-                      OR (o.transcriptionDocument IS NOT NULL AND o.transcriptionDocument.isDeleted = false)
-                     )
         """)
-    List<ObjectAdminActionEntity> findFilesForManualDeletion(@Param("deletionThreshold") LocalDateTime deletionThreshold);
+    List<ObjectAdminActionEntity> findFilesForManualDeletion(@Param("deletionThreshold") OffsetDateTime deletionThreshold);
 
 }

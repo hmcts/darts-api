@@ -20,6 +20,7 @@ import uk.gov.hmcts.darts.common.repository.ObjectAdminActionRepository;
 import uk.gov.hmcts.darts.common.repository.TranscriptionDocumentRepository;
 
 import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -114,7 +115,7 @@ class ManualDeletionProcessorImplTest {
     void getDeletionThresholdShouldReturnCorrectThreshold() {
         LocalDateTime now = LocalDateTime.now();
 
-        LocalDateTime threshold = manualDeletionProcessor.getDeletionThreshold();
+        OffsetDateTime threshold = manualDeletionProcessor.getDeletionThreshold();
 
         assertEquals(now.minusHours(24).getDayOfYear(), threshold.getDayOfYear());
         assertEquals(now.minusHours(24).getHour(), threshold.getHour());

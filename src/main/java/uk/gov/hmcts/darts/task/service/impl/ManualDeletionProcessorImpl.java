@@ -18,7 +18,7 @@ import uk.gov.hmcts.darts.common.repository.TranscriptionDocumentRepository;
 import uk.gov.hmcts.darts.task.service.ManualDeletionProcessor;
 
 import java.time.Duration;
-import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import java.util.List;
 
 @Service
@@ -38,7 +38,7 @@ public class ManualDeletionProcessorImpl implements ManualDeletionProcessor {
 
     @Override
     public void process() {
-        LocalDateTime deletionThreshold = getDeletionThreshold();
+        OffsetDateTime deletionThreshold = getDeletionThreshold();
         List<ObjectAdminActionEntity> actionsToDelete = objectAdminActionRepository.findFilesForManualDeletion(deletionThreshold);
 
         for (ObjectAdminActionEntity objectAdminAction : actionsToDelete) {
@@ -93,7 +93,7 @@ public class ManualDeletionProcessorImpl implements ManualDeletionProcessor {
         return action.getMedia() != null && !action.getMedia().isDeleted();
     }
 
-    public LocalDateTime getDeletionThreshold() {
-        return LocalDateTime.now().minus(Duration.parse("PT" + gracePeriod));
+    public OffsetDateTime getDeletionThreshold() {
+        return OffsetDateTime.now().minus(Duration.parse("PT" + gracePeriod));
     }
 }
