@@ -97,6 +97,34 @@ class TranscriptionControllerGetTranscriptionTest extends IntegrationBase {
     }
 
     @Test
+    void getTranscriptionWithLegacyComments() throws Exception {
+        HearingEntity hearingEntity = dartsDatabase.getHearingRepository().findAll().get(0);
+        TranscriptionEntity transcription = dartsDatabase.getTranscriptionStub().createTranscription(hearingEntity);
+        transcription.setCreatedDateTime(OffsetDateTime.of(2023, 6, 20, 10, 0, 0, 0, ZoneOffset.UTC));
+        transcription.setStartTime(SOME_DATE_TIME);
+        transcription.setEndTime(SOME_DATE_TIME);
+        transcription = dartsDatabase.save(transcription);
+
+
+        UserAccountEntity userAccount = transcription.getCreatedBy();
+
+        addComment(transcription, null, "comment1", userAccount);
+        addComment(transcription, null, "comment2", userAccount);
+
+        MockHttpServletRequestBuilder requestBuilder = get(ENDPOINT_URL_TRANSCRIPTION, transcription.getId());
+        String expected = TestUtils.removeTags(
+            TAGS_TO_IGNORE,
+            getContentsFromFile(
+                "tests/transcriptions/transcription/expectedResponseWithLegacyComment.json")
+                .replace("$COURTHOUSE_ID", hearingEntity.getCourtroom().getCourthouse().getId().toString())
+                .replace("$USER_ACCOUNT_ID", userAccount.getId().toString())
+        );
+        MvcResult mvcResult = mockMvc.perform(requestBuilder).andExpect(status().isOk()).andReturn();
+        String actualResponse = TestUtils.removeTags(TAGS_TO_IGNORE, mvcResult.getResponse().getContentAsString());
+        JSONAssert.assertEquals(expected, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
+    }
+
+    @Test
     void getTranscriptionNoHearing() throws Exception {
         superAdminUserStub.givenUserIsAuthorised(mockUserIdentity);
 
@@ -217,8 +245,14 @@ class TranscriptionControllerGetTranscriptionTest extends IntegrationBase {
     }
 
     private void addCommentToWorkflow(TranscriptionWorkflowEntity workflowEntity, String comment, UserAccountEntity userAccount) {
+        addComment(workflowEntity.getTranscription(), workflowEntity, comment, userAccount);
+    }
+
+    private void addComment(TranscriptionEntity transcriptionEntity,
+                            TranscriptionWorkflowEntity workflowEntity,
+                            String comment, UserAccountEntity userAccount) {
         TranscriptionCommentEntity commentEntity = new TranscriptionCommentEntity();
-        commentEntity.setTranscription(workflowEntity.getTranscription());
+        commentEntity.setTranscription(transcriptionEntity);
         commentEntity.setTranscriptionWorkflow(workflowEntity);
         commentEntity.setComment(comment);
         commentEntity.setLastModifiedBy(userAccount);
