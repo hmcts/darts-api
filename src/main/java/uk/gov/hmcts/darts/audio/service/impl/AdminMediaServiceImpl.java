@@ -1,5 +1,7 @@
 package uk.gov.hmcts.darts.audio.service.impl;
 
+import lombok.AccessLevel;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Value;
@@ -47,15 +49,18 @@ public class AdminMediaServiceImpl implements AdminMediaService {
     private final AdminMediaMapper adminMediaMapper;
     private final AdminMarkedForDeletionMapper adminMarkedForDeletionMapper;
     private final PostAdminMediasSearchHelper postAdminMediasSearchHelper;
-
-    @Value("${darts.audio.admin-search.max-results}")
-    private Integer adminSearchMaxResults;
     private final SearchMediaValidator searchMediaValidator;
     private final TransformedMediaRepository transformedMediaRepository;
     private final ObjectAdminActionRepository objectAdminActionRepository;
     private final MediaApproveMarkForDeletionValidator mediaApproveMarkForDeletionValidator;
     private final UserIdentity userIdentity;
     private final CurrentTimeHelper currentTimeHelper;
+
+    @Value("${darts.audio.admin-search.max-results}")
+    private Integer adminSearchMaxResults;
+    @Value("${darts.manual-deletion.enabled:false}")
+    @Getter(AccessLevel.PACKAGE)
+    private boolean manualDeletionEnabled;
 
     public AdminMediaResponse getMediasById(Integer id) {
         var mediaEntity = mediaRepository.findById(id)
@@ -111,6 +116,10 @@ public class AdminMediaServiceImpl implements AdminMediaService {
 
     @Override
     public List<PostAdminMediasMarkedForDeletionItem> getMediasMarkedForDeletion() {
+        if (!this.isManualDeletionEnabled()) {
+            throw new DartsApiException(DartsApiException.DartsApiErrorCommon.FEATURE_FLAG_NOT_ENABLED);
+        }
+
         return objectAdminActionRepository.findAllMediaActionsWithAnyDeletionReason().stream()
             .map(ObjectAdminActionEntity::getMedia)
             .map(adminMarkedForDeletionMapper::toApiModel)
@@ -135,6 +144,9 @@ public class AdminMediaServiceImpl implements AdminMediaService {
     @Override
     @Transactional
     public MediaApproveMarkedForDeletionResponse adminApproveMediaMarkedForDeletion(Integer mediaId) {
+        if (!this.isManualDeletionEnabled()) {
+            throw new DartsApiException(DartsApiException.DartsApiErrorCommon.FEATURE_FLAG_NOT_ENABLED);
+        }
 
         mediaApproveMarkForDeletionValidator.validate(mediaId);
         List<ObjectAdminActionEntity> objectAdminActionEntityList = objectAdminActionRepository.findByMedia_Id(mediaId);
