@@ -28,8 +28,6 @@ import uk.gov.hmcts.darts.log.api.LogApi;
 import java.io.File;
 import java.nio.file.Path;
 import java.text.MessageFormat;
-import java.time.Duration;
-import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -38,7 +36,6 @@ import java.util.UUID;
 
 import static java.util.Objects.nonNull;
 import static uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum.ARM;
-import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_INGESTION;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_MANIFEST_FAILED;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_RAW_DATA_FAILED;
 import static uk.gov.hmcts.darts.common.util.EodHelper.equalsAnyStatus;
@@ -211,42 +208,6 @@ public class DataStoreToArmHelper {
         return String.format("%s_%s_%s", entityId, documentId, transferAttempts);
     }
 
-    public boolean copyRawDataToArm(ExternalObjectDirectoryEntity unstructuredExternalObjectDirectory,
-                                    ExternalObjectDirectoryEntity armExternalObjectDirectory,
-                                    String filename,
-                                    ObjectRecordStatusEntity previousStatus, UserAccountEntity userAccount) {
-        try {
-            if (previousStatus == null
-                || ARM_RAW_DATA_FAILED.getId().equals(previousStatus.getId())
-                || ARM_INGESTION.getId().equals(previousStatus.getId())) {
-                Instant start = Instant.now();
-                log.info("ARM PERFORMANCE PUSH START for EOD {} started at {}", armExternalObjectDirectory.getId(), start);
-
-                log.info("About to push raw data to ARM for EOD {}", armExternalObjectDirectory.getId());
-                armDataManagementApi.copyBlobDataToArm(unstructuredExternalObjectDirectory.getExternalLocation().toString(), filename);
-                log.info("Pushed raw data to ARM for EOD {}", armExternalObjectDirectory.getId());
-
-                Instant finish = Instant.now();
-                long timeElapsed = Duration.between(start, finish).toMillis();
-                log.info("ARM PERFORMANCE PUSH END for EOD {} ended at {}", armExternalObjectDirectory.getId(), finish);
-                log.info("ARM PERFORMANCE PUSH ELAPSED TIME for EOD {} took {} ms", armExternalObjectDirectory.getId(), timeElapsed);
-
-                armExternalObjectDirectory.setChecksum(unstructuredExternalObjectDirectory.getChecksum());
-                armExternalObjectDirectory.setExternalLocation(UUID.randomUUID());
-                armExternalObjectDirectory.setLastModifiedBy(userAccount);
-                externalObjectDirectoryRepository.saveAndFlush(armExternalObjectDirectory);
-            }
-        } catch (Exception e) {
-            log.error(
-                "Error copying BLOB data for file {}",
-                unstructuredExternalObjectDirectory.getExternalLocation(),
-                e
-            );
-            return false;
-        }
-
-        return true;
-    }
 
     public void updateExternalObjectDirectoryFailedTransferAttempts(ExternalObjectDirectoryEntity externalObjectDirectoryEntity,
                                                                     UserAccountEntity userAccount) {
@@ -306,26 +267,6 @@ public class DataStoreToArmHelper {
         return equalsAnyStatus(batchItem.getPreviousStatus(), EodHelper.armIngestionStatus(), EodHelper.failedArmRawDataStatus());
     }
 
-    public void pushRawDataAndCreateArchiveRecordIfSuccess(ArmBatchItem batchItem, String rawFilename, UserAccountEntity userAccount) {
-        log.info("Start of batch ARM Push processing for EOD {} running at: {}", batchItem.getArmEod().getId(), OffsetDateTime.now());
-        boolean copyRawDataToArmSuccessful = copyRawDataToArm(
-            batchItem.getSourceEod(),
-            batchItem.getArmEod(),
-            rawFilename,
-            batchItem.getPreviousStatus(),
-            userAccount
-        );
-
-        if (copyRawDataToArmSuccessful) {
-            batchItem.setRawFilePushSuccessful(true);
-            var archiveRecord = archiveRecordService.generateArchiveRecordInfo(batchItem.getArmEod().getId(), rawFilename);
-            batchItem.setArchiveRecord(archiveRecord);
-        } else {
-            batchItem.setRawFilePushSuccessful(false);
-            batchItem.undoManifestFileChange();
-            updateExternalObjectDirectoryStatusToFailed(batchItem.getArmEod(), EodHelper.failedArmRawDataStatus(), userAccount);
-        }
-    }
 
     public boolean shouldAddEntryToManifestFile(ArmBatchItem batchItem) {
         return equalsAnyStatus(batchItem.getPreviousStatus(), EodHelper.failedArmManifestFileStatus(), EodHelper.failedArmResponseManifestFileStatus());
