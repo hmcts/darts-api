@@ -1,6 +1,5 @@
 package uk.gov.hmcts.darts.cases.repository;
 
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
@@ -280,29 +279,27 @@ class CaseRepositoryIntTest extends IntegrationBase {
     }
 
     @Test
-    @Disabled("Failed Validation")
     void testFindOpenCasesToClosePaged() {
         // given
         caseStub.createAndSaveCourtCase(courtCase -> {
             courtCase.setClosed(false);
-            courtCase.setCreatedDateTime(OffsetDateTime.now().minusDays(27));
+            courtCase.setCaseClosedTimestamp(OffsetDateTime.now().minusDays(27));
         });
 
         caseStub.createAndSaveCourtCase(courtCase -> {
             courtCase.setClosed(true);
-            courtCase.setCreatedDateTime(OffsetDateTime.now().minusDays(27));
+            courtCase.setCaseClosedTimestamp(OffsetDateTime.now().minusDays(27));
+        });
+
+        caseStub.createAndSaveCourtCase(courtCase -> {
+            courtCase.setClosed(false);
+            courtCase.setCaseClosedTimestamp(OffsetDateTime.now().minusDays(30));
         });
 
         var foundCourtCase1 = caseStub.createAndSaveCourtCase(courtCase -> {
-            courtCase.setClosed(false);
-            courtCase.setCreatedDateTime(OffsetDateTime.now().minusDays(30));
-        });
-
-        caseStub.createAndSaveCourtCase(courtCase -> {
             courtCase.setClosed(true);
-            courtCase.setCreatedDateTime(OffsetDateTime.now().minusDays(30));
+            courtCase.setCaseClosedTimestamp(OffsetDateTime.now().minusDays(30));
         });
-
 
         // when
         List<CourtCaseEntity> result = caseRepository.findCasesNeedingCaseDocumentGenerated(

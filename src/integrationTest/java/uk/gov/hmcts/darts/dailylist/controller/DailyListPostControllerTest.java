@@ -12,7 +12,9 @@ import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.enums.SecurityRoleEnum;
+import uk.gov.hmcts.darts.common.repository.DailyListRepository;
 import uk.gov.hmcts.darts.dailylist.model.PostDailyListRequest;
+import uk.gov.hmcts.darts.dailylist.service.impl.ProcessDailyListOnDemandTask;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 import uk.gov.hmcts.darts.testutils.stubs.SuperAdminUserStub;
 
@@ -40,7 +42,13 @@ class DailyListPostControllerTest extends IntegrationBase {
     private UserIdentity mockUserIdentity;
 
     @Autowired
+    private DailyListRepository dailyListRepository;
+
+    @Autowired
     private SuperAdminUserStub superAdminUserStub;
+
+    @Autowired
+    private ProcessDailyListOnDemandTask dailyListAutomatedTask;
 
     private static String getExpectedResponse() {
         return "{\"type\":\"DAILYLIST_101\",\"title\":\"Either xml_document or json_document or both needs to be provided.\",\"status\":400}";
@@ -240,15 +248,20 @@ class DailyListPostControllerTest extends IntegrationBase {
 
     @Test
     void callDailylistRunSuccess() throws Exception {
+        waitForOnDemandTaskToReady();
+
         superAdminUserStub.givenUserIsAuthorised(mockUserIdentity);
 
         String courthouseName = "func-swansea-house-" + randomAlphanumeric(7);
 
         MockHttpServletRequestBuilder requestBuilder = post(DAILYLIST_URL_RUN)
-            .queryParam("listing_courthouse", courthouseName)
+           .queryParam("listing_courthouse", courthouseName)
             .contentType(MediaType.APPLICATION_JSON_VALUE);
 
         mockMvc.perform(requestBuilder).andExpect(status().is2xxSuccessful());
+
+        // wait until max 20 seconds
+        waitForOnDemandToComplete();
     }
 
     @Test

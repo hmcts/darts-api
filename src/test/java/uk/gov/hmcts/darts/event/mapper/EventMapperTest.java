@@ -83,6 +83,7 @@ class EventMapperTest {
         Assertions.assertEquals(eventEntity.getAntecedentId(), responseResult.getAntecedentId());
         Assertions.assertEquals(eventEntity.getTimestamp(), responseResult.getEventTs());
         Assertions.assertEquals(eventEntity.getIsCurrent(), responseResult.getIsCurrent());
+        Assertions.assertEquals(eventEntity.getCreatedDateTime(), responseResult.getCreatedAt());
         Assertions.assertEquals(eventEntity.getCreatedBy().getId(), responseResult.getCreatedBy());
         Assertions.assertEquals(eventEntity.getLastModifiedDateTime(), responseResult.getLastModifiedAt());
         Assertions.assertEquals(eventEntity.getLastModifiedBy().getId(), responseResult.getLastModifiedBy());
