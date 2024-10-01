@@ -4,9 +4,13 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import uk.gov.hmcts.darts.arm.component.AutomatedTaskProcessorFactory;
+import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.EventEntity;
+import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.repository.EventRepository;
+import uk.gov.hmcts.darts.test.common.TestUtils;
 import uk.gov.hmcts.darts.testutils.PostgresIntegrationBase;
 import uk.gov.hmcts.darts.testutils.stubs.EventStub;
 import uk.gov.hmcts.darts.testutils.stubs.HearingStub;
@@ -14,6 +18,8 @@ import uk.gov.hmcts.darts.testutils.stubs.HearingStub;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+
+import static org.mockito.Mockito.when;
 
 class EventProcessorTest extends PostgresIntegrationBase {
 
@@ -28,9 +34,15 @@ class EventProcessorTest extends PostgresIntegrationBase {
 
     @Autowired
     private AutomatedTaskProcessorFactory eventProcessorFactory;
+    @MockBean
+    private UserIdentity userIdentity;
 
     @Test
     void testProcess() {
+        UserAccountEntity userAccount = new UserAccountEntity();
+        userAccount.setId(TestUtils.AUTOMATION_USER_ID);
+        when(userIdentity.getUserAccount()).thenReturn(userAccount);
+
         dartsDatabase.createCase("Bristol", "case1");
         dartsDatabase.createCase("Bristol", "case2");
         dartsDatabase.createCase("Bristol", "case3");
@@ -67,7 +79,7 @@ class EventProcessorTest extends PostgresIntegrationBase {
     }
 
     private void assertAllEventsThatShouldRemainUntounchedAreUntouched(Map<Integer, List<EventEntity>> generatedEventIds,
-                                                       List<Integer> processedCurrentEventIds) {
+                                                                       List<Integer> processedCurrentEventIds) {
 
         // gets the diff i.e. what should not have been processed
         Collection<Integer> eventsThatShouldNotBeProcessed
@@ -75,9 +87,9 @@ class EventProcessorTest extends PostgresIntegrationBase {
 
         // assert that each event mapped to an event id that should NOT be processed remains untouched
         eventsThatShouldNotBeProcessed.forEach(event ->
-               generatedEventIds.get(event).forEach(eventEntity ->
-                    // assert that the current value is still the current value
-                    Assertions.assertTrue(eventEntity.getIsCurrent())));
+                                                   generatedEventIds.get(event).forEach(eventEntity ->
+                                                                                            // assert that the current value is still the current value
+                                                                                            Assertions.assertTrue(eventEntity.getIsCurrent())));
     }
 
     private void assertThatWeOnlyProcessEventIdsWhichCorrespondToMoreThanOneEvent(Map<Integer,
