@@ -125,6 +125,7 @@ class EventsControllerTest extends IntegrationBase {
         Assertions.assertEquals(eventEntity.getLegacyVersionLabel(), responseResult.getVersion());
         Assertions.assertEquals(eventEntity.getTimestamp(), responseResult.getEventTs());
         Assertions.assertEquals(eventEntity.getIsCurrent(), responseResult.getIsCurrent());
+        Assertions.assertEquals(eventEntity.getCreatedDateTime(), responseResult.getCreatedAt());
         Assertions.assertEquals(eventEntity.getCreatedBy().getId(), responseResult.getCreatedBy());
         Assertions.assertEquals(eventEntity.getLastModifiedDateTime().atZoneSameInstant(ZoneOffset.UTC).toOffsetDateTime(), responseResult.getLastModifiedAt());
         Assertions.assertEquals(eventEntity.getLastModifiedBy().getId(), responseResult.getLastModifiedBy());

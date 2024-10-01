@@ -812,6 +812,9 @@ components:
           format: date-time
         is_current:
           type: boolean
+        created_at:
+          type: string
+          format: date-time
         created_by:
           type: integer
         last_modified_at:
