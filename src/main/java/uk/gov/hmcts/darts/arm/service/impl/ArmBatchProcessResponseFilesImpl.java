@@ -47,6 +47,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
+import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 import static uk.gov.hmcts.darts.arm.util.ArchiveConstants.ArchiveResponseFileAttributes.ARM_CREATE_RECORD_FILENAME_KEY;
 import static uk.gov.hmcts.darts.arm.util.ArchiveConstants.ArchiveResponseFileAttributes.ARM_INVALID_LINE_FILENAME_KEY;
@@ -77,6 +78,7 @@ public class ArmBatchProcessResponseFilesImpl implements ArmResponseFilesProcess
     private final LogApi logApi;
 
     private UserAccountEntity userAccount;
+    private String continuationToken;
 
     public ArmBatchProcessResponseFilesImpl(ExternalObjectDirectoryRepository externalObjectDirectoryRepository, ArmDataManagementApi armDataManagementApi,
                                             FileOperationService fileOperationService, ArmDataManagementConfiguration armDataManagementConfiguration,
@@ -98,18 +100,33 @@ public class ArmBatchProcessResponseFilesImpl implements ArmResponseFilesProcess
     @Override
     public void processResponseFiles() {
         userAccount = userIdentity.getUserAccount();
-        ContinuationTokenBlobs continuationTokenBlobs = null;
+        ArrayList<String> inputUploadResponseFiles = new ArrayList<>();
         String prefix = armDataManagementConfiguration.getManifestFilePrefix();
+        int maxContinuationBatchSize = armDataManagementConfiguration.getMaxContinuationBatchSize();
 
         try {
-            log.info("About to look for files starting with prefix: {}", prefix);
-            String continuationToken = getContinuationToken();
-            continuationTokenBlobs = armDataManagementApi.listResponseBlobsUsingMarker(prefix, batchSize, continuationToken);
+            log.info("About to look for IU files starting with prefix: {}", prefix);
+            String continuationToken = null;
+            // Iterate through the continuation token until no more data is found. First time round continuation token is null
+            // which sets up the session and when there are no more results the result from listResponseBlobsUsingMarker will be null
+            for (int pageSize = 0; pageSize < batchSize; pageSize += maxContinuationBatchSize) {
+
+                ContinuationTokenBlobs continuationTokenData =
+                    armDataManagementApi.listResponseBlobsUsingMarker(prefix, maxContinuationBatchSize, continuationToken);
+                if (nonNull(continuationTokenData)) {
+                    inputUploadResponseFiles.addAll(continuationTokenData.getBlobNamesAndPaths());
+                    continuationToken = continuationTokenData.getContinuationToken();
+                }
+                // if no more data found break out of loop
+                if (isNull(continuationToken)) {
+                    break;
+                }
+            }
         } catch (Exception e) {
             log.error("Unable to find response file for prefix: {} - {}", prefix, e.getMessage());
         }
-        if (nonNull(continuationTokenBlobs) && CollectionUtils.isNotEmpty(continuationTokenBlobs.getBlobNamesAndPaths())) {
-            for (String inputUploadBlob : continuationTokenBlobs.getBlobNamesAndPaths()) {
+        if (CollectionUtils.isNotEmpty(inputUploadResponseFiles)) {
+            for (String inputUploadBlob : inputUploadResponseFiles) {
                 Instant start = Instant.now();
                 log.info("ARM PERFORMANCE PULL START for manifest {} started at {}", inputUploadBlob, start);
                 processInputUploadBlob(inputUploadBlob);
@@ -169,6 +186,35 @@ public class ArmBatchProcessResponseFilesImpl implements ArmResponseFilesProcess
                          batchUploadFileFilenameProcessor.getBatchMetadataFilename(),
                          externalObjectDirectoryEntities.size(), completedExternalObjectDirectoryEntities.size());
             }
+        } else {
+            // If no EODs are found for the manifest, delete the input upload blob and any linked response files as they are dangling
+            deleteDanglingResponses(batchUploadFileFilenameProcessor);
+        }
+
+    }
+
+    // Delete the response files if they are not linked to any EODs
+    private void deleteDanglingResponses(BatchInputUploadFileFilenameProcessor batchUploadFileFilenameProcessor) {
+        List<String> responseFiles = new ArrayList<>();
+        try {
+            responseFiles.addAll(armDataManagementApi.listResponseBlobs(batchUploadFileFilenameProcessor.getHashcode()));
+        } catch (Exception e) {
+            log.error("Unable to find dangling response files for hashcode {}", batchUploadFileFilenameProcessor.getHashcode(), e);
+        }
+        
+        if (CollectionUtils.isNotEmpty(responseFiles)) {
+            List<Boolean> deletedResponseBlobStatuses = deleteResponseBlobs(responseFiles);
+
+            if (!deletedResponseBlobStatuses.contains(false)) {
+                log.info("About to delete ARM input upload file {}", batchUploadFileFilenameProcessor.getBatchMetadataFilename());
+                armDataManagementApi.deleteBlobData(batchUploadFileFilenameProcessor.getBatchMetadataFilenameAndPath());
+            } else {
+                log.warn("Unable to delete ARM batch input upload file {} as referenced data is not all deleted",
+                         batchUploadFileFilenameProcessor.getBatchMetadataFilename());
+            }
+        } else {
+            log.info("About to delete dangling ARM input upload file {}", batchUploadFileFilenameProcessor.getBatchMetadataFilename());
+            armDataManagementApi.deleteBlobData(batchUploadFileFilenameProcessor.getBatchMetadataFilenameAndPath());
         }
     }
 
@@ -243,14 +289,17 @@ public class ArmBatchProcessResponseFilesImpl implements ArmResponseFilesProcess
 
                     processInvalidLineFileObject(armResponseBatchData.getExternalObjectDirectoryId(),
                                                  armResponseBatchData.getInvalidLineFileFilenameProcessor(),
-                                                 armResponseBatchData.getArmResponseInvalidLineRecord());
+                                                 armResponseBatchData.getArmResponseInvalidLineRecord(),
+                                                 armResponseBatchData.getCreateRecordFilenameProcessor(),
+                                                 armResponseBatchData.getUploadFileFilenameProcessor());
                     deleteResponseBlobs(armResponseBatchData);
                 } else if (nonNull(armResponseBatchData.getCreateRecordFilenameProcessor())
                     && nonNull(armResponseBatchData.getUploadFileFilenameProcessor())) {
 
                     processUploadFileObject(armResponseBatchData.getExternalObjectDirectoryId(),
                                             armResponseBatchData.getUploadFileFilenameProcessor(),
-                                            armResponseBatchData.getArmResponseUploadFileRecord());
+                                            armResponseBatchData.getArmResponseUploadFileRecord(),
+                                            armResponseBatchData.getCreateRecordFilenameProcessor());
                     deleteResponseBlobs(armResponseBatchData);
                 } else {
                     log.info("Unable to find response files for external object {}", armResponseBatchData.getExternalObjectDirectoryId());
@@ -259,6 +308,7 @@ public class ArmBatchProcessResponseFilesImpl implements ArmResponseFilesProcess
                             getExternalObjectDirectoryEntity(armResponseBatchData.getExternalObjectDirectoryId());
 
                         updateExternalObjectDirectoryStatus(externalObjectDirectory, EodHelper.armDropZoneStatus());
+
                     } catch (Exception e) {
                         log.error(UNABLE_TO_UPDATE_EOD, e);
                     }
@@ -391,38 +441,38 @@ public class ArmBatchProcessResponseFilesImpl implements ArmResponseFilesProcess
         }
     }
 
-    private void processUploadFileObject(int externalObjectDirectoryId, UploadFileFilenameProcessor uploadFileFilenameProcessor,
-                                         ArmResponseUploadFileRecord armResponseUploadFileRecord) {
+    private void processUploadFileObject(int externalObjectDirectoryId,
+                                         UploadFileFilenameProcessor uploadFileFilenameProcessor,
+                                         ArmResponseUploadFileRecord armResponseUploadFileRecord,
+                                         CreateRecordFilenameProcessor createRecordFilenameProcessor) {
         try {
             ExternalObjectDirectoryEntity externalObjectDirectory = getExternalObjectDirectoryEntity(externalObjectDirectoryId);
             if (nonNull(armResponseUploadFileRecord)) {
+                if (nonNull(externalObjectDirectory)) {
+                    //If the filename contains 1
+                    if (ARM_RESPONSE_SUCCESS_STATUS_CODE.equals(uploadFileFilenameProcessor.getStatus())) {
 
-                //If the filename contains 1
-                if (ARM_RESPONSE_SUCCESS_STATUS_CODE.equals(uploadFileFilenameProcessor.getStatus())) {
-                    if (nonNull(externalObjectDirectory)) {
                         processUploadFileDataSuccess(externalObjectDirectory, armResponseUploadFileRecord);
+
                     } else {
+                        //Read the upload file and log the error code and description with EOD
+                        String errorDescription = StringUtils.isNotEmpty(armResponseUploadFileRecord.getExceptionDescription())
+                            ? armResponseUploadFileRecord.getExceptionDescription() : "No error details found in response file";
+
                         log.warn(
-                            "Unable to process upload file {} with EOD record {}, file Id {}", uploadFileFilenameProcessor.getUploadFileFilenameAndPath(),
-                            armResponseUploadFileRecord.getA360RecordId(), armResponseUploadFileRecord.getA360FileId());
+                            "ARM status reports failed for upload file {}. ARM error description: {} ARM error status: {} for record {}, file Id {}",
+                            uploadFileFilenameProcessor.getUploadFileFilenameAndPath(),
+                            errorDescription,
+                            armResponseUploadFileRecord.getErrorStatus(),
+                            armResponseUploadFileRecord.getA360RecordId(),
+                            armResponseUploadFileRecord.getA360FileId()
+                        );
+                        externalObjectDirectory.setErrorCode(errorDescription);
+                        updateExternalObjectDirectoryStatus(externalObjectDirectory, EodHelper.armResponseProcessingFailedStatus());
                     }
                 } else {
-                    //Read the upload file and log the error code and description with EOD
-                    String errorDescription = StringUtils.isNotEmpty(armResponseUploadFileRecord.getExceptionDescription())
-                        ? armResponseUploadFileRecord.getExceptionDescription() : "No error details found in response file";
-
-                    log.warn(
-                        "ARM status reports failed for upload file {}. ARM error description: {} ARM error status: {} for record {}, file Id {}",
-                        uploadFileFilenameProcessor.getUploadFileFilenameAndPath(),
-                        errorDescription,
-                        armResponseUploadFileRecord.getErrorStatus(),
-                        armResponseUploadFileRecord.getA360RecordId(),
-                        armResponseUploadFileRecord.getA360FileId()
-                    );
-                    if (nonNull(externalObjectDirectory)) {
-                        externalObjectDirectory.setErrorCode(errorDescription);
-                    }
-                    updateExternalObjectDirectoryStatus(externalObjectDirectory, EodHelper.armResponseProcessingFailedStatus());
+                    processNoEodFoundFromSuccessResponses(externalObjectDirectoryId, uploadFileFilenameProcessor, armResponseUploadFileRecord,
+                                                          createRecordFilenameProcessor);
                 }
             } else {
                 log.warn("Unable to read upload file {}", uploadFileFilenameProcessor.getUploadFileFilenameAndPath());
@@ -430,6 +480,21 @@ public class ArmBatchProcessResponseFilesImpl implements ArmResponseFilesProcess
         } catch (Exception e) {
             log.error(UNABLE_TO_UPDATE_EOD, e);
         }
+    }
+
+    private void processNoEodFoundFromSuccessResponses(int externalObjectDirectoryId, UploadFileFilenameProcessor uploadFileFilenameProcessor,
+                                                       ArmResponseUploadFileRecord armResponseUploadFileRecord,
+                                                       CreateRecordFilenameProcessor createRecordFilenameProcessor) {
+        log.warn("Unable to find external object directory with ID {} for ARM batch responses with CR file {}, UF file {}",
+                 externalObjectDirectoryId,
+                 createRecordFilenameProcessor.getCreateRecordFilenameAndPath(),
+                 uploadFileFilenameProcessor.getUploadFileFilenameAndPath());
+        List<String> validResponseFiles = List.of(createRecordFilenameProcessor.getCreateRecordFilenameAndPath(),
+                                                  uploadFileFilenameProcessor.getUploadFileFilenameAndPath());
+        deleteResponseBlobs(validResponseFiles);
+        log.warn(
+            "Unable to process upload file {} with EOD record {}, IU file {}", uploadFileFilenameProcessor.getUploadFileFilenameAndPath(),
+            armResponseUploadFileRecord.getA360RecordId(), armResponseUploadFileRecord.getA360FileId());
     }
 
 
@@ -557,38 +622,71 @@ public class ArmBatchProcessResponseFilesImpl implements ArmResponseFilesProcess
     }
 
     private void processInvalidLineFileObject(int externalObjectDirectoryId, InvalidLineFileFilenameProcessor invalidLineFileFilenameProcessor,
-                                              ArmResponseInvalidLineRecord armResponseInvalidLineRecord) {
+                                              ArmResponseInvalidLineRecord armResponseInvalidLineRecord,
+                                              CreateRecordFilenameProcessor createRecordFilenameProcessor,
+                                              UploadFileFilenameProcessor uploadFileFilenameProcessor) {
         try {
             ExternalObjectDirectoryEntity externalObjectDirectory = getExternalObjectDirectoryEntity(externalObjectDirectoryId);
-            if (nonNull(externalObjectDirectory) && nonNull(armResponseInvalidLineRecord)) {
+            if (nonNull(externalObjectDirectory)) {
+                if (nonNull(armResponseInvalidLineRecord)) {
+                    //If the filename contains 0
+                    if (ARM_RESPONSE_INVALID_STATUS_CODE.equals(invalidLineFileFilenameProcessor.getStatus())) {
 
-                //If the filename contains 0
-                if (ARM_RESPONSE_INVALID_STATUS_CODE.equals(invalidLineFileFilenameProcessor.getStatus())) {
-
-                    //Read the invalid lines file and log the error code and description with EOD
-                    log.warn(
-                        "ARM invalid line for external object id {}. ARM error description: {} ARM error status: {}",
-                        externalObjectDirectory.getId(),
-                        armResponseInvalidLineRecord.getExceptionDescription(),
-                        armResponseInvalidLineRecord.getErrorStatus()
-                    );
-                    updateTransferAttempts(externalObjectDirectory);
-                    externalObjectDirectory.setErrorCode(armResponseInvalidLineRecord.getExceptionDescription());
-                    updateExternalObjectDirectoryStatus(externalObjectDirectory, EodHelper.armResponseManifestFailedStatus());
+                        // Read the invalid lines file and log the error code and description with EOD
+                        log.warn(
+                            "ARM invalid line for external object id {}. ARM error description: {} ARM error status: {}",
+                            externalObjectDirectory.getId(),
+                            armResponseInvalidLineRecord.getExceptionDescription(),
+                            armResponseInvalidLineRecord.getErrorStatus()
+                        );
+                        updateTransferAttempts(externalObjectDirectory);
+                        externalObjectDirectory.setErrorCode(armResponseInvalidLineRecord.getExceptionDescription());
+                        updateExternalObjectDirectoryStatus(externalObjectDirectory, EodHelper.armResponseManifestFailedStatus());
+                    } else {
+                        String error = String.format("Incorrect status [%s] for invalid line file %s", invalidLineFileFilenameProcessor.getStatus(),
+                                                     invalidLineFileFilenameProcessor.getInvalidLineFileFilenameAndPath());
+                        log.warn(error);
+                        externalObjectDirectory.setErrorCode(error);
+                        updateExternalObjectDirectoryStatus(externalObjectDirectory, EodHelper.armResponseProcessingFailedStatus());
+                    }
                 } else {
-                    String error = String.format("Incorrect status [%s] for invalid line file %s", invalidLineFileFilenameProcessor.getStatus(),
-                                  invalidLineFileFilenameProcessor.getInvalidLineFileFilenameAndPath());
-                    log.warn(error);
-                    externalObjectDirectory.setErrorCode(error);
+                    log.warn("Unable to read invalid line file {}", invalidLineFileFilenameProcessor.getInvalidLineFileFilenameAndPath());
                     updateExternalObjectDirectoryStatus(externalObjectDirectory, EodHelper.armResponseProcessingFailedStatus());
                 }
             } else {
-                log.warn("Unable to read invalid line file {}", invalidLineFileFilenameProcessor.getInvalidLineFileFilenameAndPath());
-                updateExternalObjectDirectoryStatus(externalObjectDirectory, EodHelper.armResponseProcessingFailedStatus());
+
+                String armResponseFile = getOtherFailedArmResponseFile(createRecordFilenameProcessor, uploadFileFilenameProcessor);
+
+                log.warn("Unable to find external object directory with ID {} for ARM batch responses with IL file {}, other response file{}",
+                         externalObjectDirectoryId,
+                         invalidLineFileFilenameProcessor.getInvalidLineFileFilenameAndPath(),
+                         armResponseFile);
+                List<String> invalidResponseFiles = getInvalidResponseFiles(invalidLineFileFilenameProcessor, armResponseFile);
+                deleteResponseBlobs(invalidResponseFiles);
             }
         } catch (Exception e) {
-            log.error(UNABLE_TO_UPDATE_EOD, e);
+            log.error("Unable to update invalid line responses", e);
         }
+    }
+
+    private static List<String> getInvalidResponseFiles(InvalidLineFileFilenameProcessor invalidLineFileFilenameProcessor, String armResponseFile) {
+        List<String> invalidResponseFiles = new ArrayList<>();
+        invalidResponseFiles.add(invalidLineFileFilenameProcessor.getInvalidLineFileFilenameAndPath());
+        if (StringUtils.isNotEmpty(armResponseFile)) {
+            invalidResponseFiles.add(armResponseFile);
+        }
+        return invalidResponseFiles;
+    }
+
+    private static String getOtherFailedArmResponseFile(CreateRecordFilenameProcessor createRecordFilenameProcessor,
+                                                        UploadFileFilenameProcessor uploadFileFilenameProcessor) {
+        String armResponseFile = "";
+        if (nonNull(createRecordFilenameProcessor) && nonNull(createRecordFilenameProcessor.getCreateRecordFilenameAndPath())) {
+            armResponseFile = createRecordFilenameProcessor.getCreateRecordFilenameAndPath();
+        } else if (nonNull(uploadFileFilenameProcessor) && nonNull(uploadFileFilenameProcessor.getUploadFileFilenameAndPath())) {
+            armResponseFile = uploadFileFilenameProcessor.getUploadFileFilenameAndPath();
+        }
+        return armResponseFile;
     }
 
     void deleteResponseBlobs(ArmResponseBatchData armResponseBatchData) {
@@ -601,9 +699,7 @@ public class ArmBatchProcessResponseFilesImpl implements ArmResponseFilesProcess
                 || ARM_RESPONSE_MANIFEST_FAILED.equals(status)
                 || ARM_RESPONSE_CHECKSUM_VERIFICATION_FAILED.equals(status)) {
                 log.info("About to  delete ARM responses for EOD {}", externalObjectDirectory.getId());
-                List<Boolean> deletedResponseBlobStatuses = responseBlobsToBeDeleted.stream()
-                    .map(armDataManagementApi::deleteBlobData)
-                    .toList();
+                List<Boolean> deletedResponseBlobStatuses = deleteResponseBlobs(responseBlobsToBeDeleted);
 
                 if (deletedResponseBlobStatuses.size() == 2 && !deletedResponseBlobStatuses.contains(false)) {
                     externalObjectDirectory.setResponseCleaned(true);
@@ -613,6 +709,13 @@ public class ArmBatchProcessResponseFilesImpl implements ArmResponseFilesProcess
                 }
             }
         }
+    }
+
+    private List<Boolean> deleteResponseBlobs(List<String> responseBlobsToBeDeleted) {
+        List<Boolean> deletedResponseBlobStatuses = responseBlobsToBeDeleted.stream()
+            .map(armDataManagementApi::deleteBlobData)
+            .toList();
+        return deletedResponseBlobStatuses;
     }
 
     private static List<String> getResponseBlobsToBeDeleted(ArmResponseBatchData armResponseBatchData) {

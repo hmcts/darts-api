@@ -10,7 +10,6 @@ import org.hamcrest.Matchers;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
@@ -23,7 +22,9 @@ import uk.gov.hmcts.darts.common.repository.HearingRepository;
 import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
 import uk.gov.hmcts.darts.dailylist.enums.JobStatusType;
 import uk.gov.hmcts.darts.dailylist.enums.SourceType;
+import uk.gov.hmcts.darts.dailylist.service.impl.ProcessDailyListOnDemandTask;
 import uk.gov.hmcts.darts.log.util.DailyListLogJobReport;
+import uk.gov.hmcts.darts.task.api.AutomatedTasksApi;
 import uk.gov.hmcts.darts.test.common.TestUtils;
 import uk.gov.hmcts.darts.test.common.data.DailyListTestData;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
@@ -73,6 +74,12 @@ class DailyListProcessorTest extends IntegrationBase {
 
     @Autowired
     UserAccountRepository userAccountRepository;
+
+    @Autowired
+    private ProcessDailyListOnDemandTask dailyListAutomatedTask;
+
+    @Autowired
+    private AutomatedTasksApi automatedTasksApi;
 
     @BeforeAll
     static void beforeAll() {
@@ -435,12 +442,13 @@ class DailyListProcessorTest extends IntegrationBase {
     }
 
     @Test
-    @Disabled("Failed Validation (Only on Jenkins)")
-    void dailyListProcessorWithLock() throws IOException {
+    void dailyListProcessorWithLock() throws Exception {
+        waitForOnDemandTaskToReady();
+
         CourthouseEntity swanseaCourtEntity = dartsDatabase.createCourthouseWithTwoCourtrooms();
         dartsDatabase.createDailyLists(swanseaCourtEntity.getCourthouseName());
 
-        dailyListProcessor.processAllDailyListsWithLock(null);
+        dailyListProcessor.processAllDailyListsWithLock(null, false);
 
         List<DailyListEntity> savedDailyLists = dailyListRepository.findAll();
         List<JobStatusType> dailyListStatuses = savedDailyLists.stream().map(dailyList -> dailyList.getStatus()).toList();

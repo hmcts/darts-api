@@ -9,4 +9,6 @@ public interface CasesLoggerService {
     void defendantNameOverflow(AddCaseRequest addCaseRequest);
 
     void defendantNotAdded(String defendant, String caseNumber);
+
+    void caseDeletedDueToExpiry(Integer caseId, String caseNumber);
 }

@@ -7,6 +7,7 @@ import uk.gov.hmcts.darts.audio.config.AudioConfigurationProperties;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
 import uk.gov.hmcts.darts.common.service.FileOperationService;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
+import uk.gov.hmcts.darts.testutils.stubs.DartsPersistence;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -37,6 +38,9 @@ class AudioTransformationServiceTest extends IntegrationBase {
 
     @MockBean
     FileOperationService mockFileOperationService;
+
+    @Autowired
+    DartsPersistence dartsPersistence;
 
     @Test
     void getMediaByHearingIdShouldReturnExpectedMediaEntitiesWhenHearingIdHasRelatedMedia() {

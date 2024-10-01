@@ -28,4 +28,9 @@ public class CasesLoggerServiceImpl implements CasesLoggerService {
     public void defendantNotAdded(String defendant, String caseNumber) {
         log.info("Defendant not added to case: defendant={}, case_number={}", defendant, caseNumber);
     }
+
+    @Override
+    public void caseDeletedDueToExpiry(Integer caseId, String caseNumber) {
+        log.info("Case expired: cas_id={}, case_number={}", caseId, caseNumber);
+    }
 }

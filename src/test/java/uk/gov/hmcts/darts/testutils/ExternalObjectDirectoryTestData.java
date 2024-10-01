@@ -1,6 +1,5 @@
 package uk.gov.hmcts.darts.testutils;
 
-import lombok.experimental.UtilityClass;
 import uk.gov.hmcts.darts.common.entity.AnnotationDocumentEntity;
 import uk.gov.hmcts.darts.common.entity.ExternalLocationTypeEntity;
 import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
@@ -14,7 +13,6 @@ import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.UUID;
 
-@UtilityClass
 @SuppressWarnings({"HideUtilityClassConstructor", "OverloadMethodsDeclarationOrder"})
 public class ExternalObjectDirectoryTestData {
 
@@ -25,7 +23,7 @@ public class ExternalObjectDirectoryTestData {
     public static final OffsetDateTime LAST_MODIFIED_DATE_TIME = OffsetDateTime.of(2023, 6, 20, 11, 0, 0, 0, ZoneOffset.UTC);
 
 
-    public static ExternalObjectDirectoryEntity createExternalObjectDirectory(AnnotationDocumentEntity annotationDocumentEntity,
+    public ExternalObjectDirectoryEntity createExternalObjectDirectory(AnnotationDocumentEntity annotationDocumentEntity,
                                                                               ObjectRecordStatusEntity objectRecordStatusEntity,
                                                                               ExternalLocationTypeEntity externalLocationTypeEntity,
                                                                               UUID externalLocation) {
@@ -45,7 +43,7 @@ public class ExternalObjectDirectoryTestData {
                                                                               ObjectRecordStatusEntity objectRecordStatusEntity,
                                                                               ExternalLocationTypeEntity externalLocationTypeEntity,
                                                                               UUID externalLocation) {
-        ExternalObjectDirectoryEntity externalObjectDirectory = createMinimalExternalObjectDirectory(
+        ExternalObjectDirectoryEntity externalObjectDirectory = new ExternalObjectDirectoryTestData().createMinimalExternalObjectDirectory(
             objectRecordStatusEntity,
             externalLocationTypeEntity,
             externalLocation
@@ -56,7 +54,7 @@ public class ExternalObjectDirectoryTestData {
         return externalObjectDirectory;
     }
 
-    public static ExternalObjectDirectoryEntity createExternalObjectDirectory(MediaEntity media,
+    public ExternalObjectDirectoryEntity createExternalObjectDirectory(MediaEntity media,
                                                                               ExternalLocationTypeEnum externalLocationTypeEnum,
                                                                               ObjectRecordStatusEnum objectRecordStatusEnum,
                                                                               UUID externalLocation) {
@@ -67,7 +65,7 @@ public class ExternalObjectDirectoryTestData {
                                              externalLocation);
     }
 
-    public static ExternalObjectDirectoryEntity createMinimalExternalObjectDirectory(ObjectRecordStatusEntity objectRecordStatusEntity,
+    public ExternalObjectDirectoryEntity createMinimalExternalObjectDirectory(ObjectRecordStatusEntity objectRecordStatusEntity,
                                                                                      ExternalLocationTypeEntity externalLocationTypeEntity,
                                                                                      UUID externalLocation) {
         var externalObjectDirectory = new ExternalObjectDirectoryEntity();

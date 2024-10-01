@@ -54,6 +54,7 @@ import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionUrgencyEnum.S
 
 @Component
 @RequiredArgsConstructor
+@Deprecated
 @SuppressWarnings("PMD.GodClass")
 public class TranscriptionStub {
 

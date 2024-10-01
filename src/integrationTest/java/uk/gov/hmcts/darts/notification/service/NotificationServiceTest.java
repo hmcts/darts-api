@@ -12,6 +12,7 @@ import uk.gov.hmcts.darts.notification.entity.NotificationEntity;
 import uk.gov.hmcts.darts.notification.enums.NotificationStatus;
 import uk.gov.hmcts.darts.notification.exception.TemplateNotFoundException;
 import uk.gov.hmcts.darts.notification.helper.TemplateIdHelper;
+import uk.gov.hmcts.darts.test.common.data.PersistableFactory;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 import uk.gov.service.notify.NotificationClientException;
 
@@ -28,7 +29,6 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.darts.notification.api.NotificationApi.NotificationTemplate.REQUEST_TO_TRANSCRIBER;
-import static uk.gov.hmcts.darts.test.common.data.CaseTestData.someMinimalCase;
 
 @SuppressWarnings("checkstyle:VariableDeclarationUsageDistance")
 class NotificationServiceTest extends IntegrationBase {
@@ -48,7 +48,7 @@ class NotificationServiceTest extends IntegrationBase {
 
     @Test
     void scheduleNotificationOkConfirmEntryInDb() {
-        var caseId = dartsDatabase.save(someMinimalCase()).getId();
+        var caseId = dartsDatabase.save(PersistableFactory.getCourtCaseTestData().someMinimalCase()).getId();
 
         SaveNotificationToDbRequest request = SaveNotificationToDbRequest.builder()
             .eventId("An eventId")
@@ -71,7 +71,7 @@ class NotificationServiceTest extends IntegrationBase {
 
     @Test
     void saveNotificationToDbMultipleEmails() {
-        var caseId = dartsDatabase.save(someMinimalCase()).getId();
+        var caseId = dartsDatabase.save(PersistableFactory.getCourtCaseTestData().someMinimalCase()).getId();
         SaveNotificationToDbRequest request = SaveNotificationToDbRequest.builder()
             .eventId("An eventId")
             .caseId(caseId)
@@ -88,7 +88,7 @@ class NotificationServiceTest extends IntegrationBase {
 
     @Test
     void sendNotificationToGovNotifyNow() throws TemplateNotFoundException {
-        var caseId = dartsDatabase.save(someMinimalCase()).getId();
+        var caseId = dartsDatabase.save(PersistableFactory.getCourtCaseTestData().someMinimalCase()).getId();
         when(templateIdHelper.findTemplateId(REQUEST_TO_TRANSCRIBER.toString())).thenReturn(
             "976bf288-705d-4cbb-b24f-c5529abf14cf");
         Map<String, String> templateParams = new HashMap<>();
@@ -118,7 +118,7 @@ class NotificationServiceTest extends IntegrationBase {
 
     @Test
     void sendNotificationToGovNotifyInvalidTemplateId() throws TemplateNotFoundException, NotificationClientException {
-        var caseId = dartsDatabase.save(someMinimalCase()).getId();
+        var caseId = dartsDatabase.save(PersistableFactory.getCourtCaseTestData().someMinimalCase()).getId();
         when(templateIdHelper.findTemplateId(REQUEST_TO_TRANSCRIBER.toString()))
             .thenReturn("INVALID-TEMPLATE-ID");
         when(govNotifyService.sendNotification(any(GovNotifyRequest.class)))
@@ -144,7 +144,7 @@ class NotificationServiceTest extends IntegrationBase {
 
     @Test
     void sendNotificationToGovNotifyFailureRetryExceeded() throws TemplateNotFoundException, NotificationClientException {
-        var caseId = dartsDatabase.save(someMinimalCase()).getId();
+        var caseId = dartsDatabase.save(PersistableFactory.getCourtCaseTestData().someMinimalCase()).getId();
         when(templateIdHelper.findTemplateId(REQUEST_TO_TRANSCRIBER.toString()))
             .thenReturn("976bf288-1234-1234-1234-c5529abf14cf");
         when(govNotifyService.sendNotification(any(GovNotifyRequest.class)))
@@ -174,7 +174,7 @@ class NotificationServiceTest extends IntegrationBase {
 
     @Test
     void sendNotificationToGovNotifyInvalidTemplateName() throws TemplateNotFoundException {
-        var caseId = dartsDatabase.save(someMinimalCase()).getId();
+        var caseId = dartsDatabase.save(PersistableFactory.getCourtCaseTestData().someMinimalCase()).getId();
         when(templateIdHelper.findTemplateId("invalid"))
             .thenThrow(new TemplateNotFoundException("oh no"));
         SaveNotificationToDbRequest request = SaveNotificationToDbRequest.builder()
@@ -197,7 +197,7 @@ class NotificationServiceTest extends IntegrationBase {
     void sendNotificationUsingUserAccounts() {
         var userAccountEntities = generateUserAccountEntities();
 
-        var caseId = dartsDatabase.save(someMinimalCase()).getId();
+        var caseId = dartsDatabase.save(PersistableFactory.getCourtCaseTestData().someMinimalCase()).getId();
         SaveNotificationToDbRequest request = SaveNotificationToDbRequest.builder()
             .eventId("An eventId")
             .caseId(caseId)
@@ -216,7 +216,7 @@ class NotificationServiceTest extends IntegrationBase {
         var userAccountEntities = generateUserAccountEntities();
         userAccountEntities.get(0).setActive(false);
 
-        var caseId = dartsDatabase.save(someMinimalCase()).getId();
+        var caseId = dartsDatabase.save(PersistableFactory.getCourtCaseTestData().someMinimalCase()).getId();
         SaveNotificationToDbRequest request = SaveNotificationToDbRequest.builder()
             .eventId("An eventId")
             .caseId(caseId)
@@ -234,7 +234,7 @@ class NotificationServiceTest extends IntegrationBase {
     void sendNotificationUsingUserAccountsAnEmails() {
         var userAccountEntities = generateUserAccountEntities();
 
-        var caseId = dartsDatabase.save(someMinimalCase()).getId();
+        var caseId = dartsDatabase.save(PersistableFactory.getCourtCaseTestData().someMinimalCase()).getId();
         SaveNotificationToDbRequest request = SaveNotificationToDbRequest.builder()
             .eventId("An eventId")
             .caseId(caseId)
@@ -253,7 +253,7 @@ class NotificationServiceTest extends IntegrationBase {
 
     @Test
     void sendWrongTypeOfMap() throws TemplateNotFoundException {
-        var caseId = dartsDatabase.save(someMinimalCase()).getId();
+        var caseId = dartsDatabase.save(PersistableFactory.getCourtCaseTestData().someMinimalCase()).getId();
         when(templateIdHelper.findTemplateId(REQUEST_TO_TRANSCRIBER.toString())).thenReturn(
             "976bf288-705d-4cbb-b24f-c5529abf14cf");
         Map<String, String> templateParams = new LinkedMap<>();

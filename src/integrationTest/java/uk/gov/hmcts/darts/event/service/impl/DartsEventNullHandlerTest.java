@@ -10,11 +10,11 @@ import uk.gov.hmcts.darts.event.model.DartsEvent;
 import uk.gov.hmcts.darts.event.service.EventDispatcher;
 import uk.gov.hmcts.darts.event.service.handler.DartsEventNullHandler;
 import uk.gov.hmcts.darts.log.api.LogApi;
+import uk.gov.hmcts.darts.test.common.data.PersistableFactory;
 
 import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
-import static uk.gov.hmcts.darts.test.common.data.CaseTestData.someMinimalCase;
 
 class DartsEventNullHandlerTest extends HandlerTestData {
 
@@ -39,7 +39,7 @@ class DartsEventNullHandlerTest extends HandlerTestData {
 
     @Test
     void shouldDoNothingForNullMappedEvent() {
-        dartsDatabase.save(someMinimalCase());
+        dartsPersistence.save(PersistableFactory.getCourtCaseTestData().someMinimalCase());
 
         DartsEvent event = someMinimalDartsEvent().courthouse(SOME_ROOM);
         event.setCaseNumbers(List.of("123"));

@@ -1,5 +1,6 @@
 package uk.gov.hmcts.darts.audio.repository;
 
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -27,7 +28,13 @@ class TransformedMediaRepositoryTest extends PostgresIntegrationBase {
 
     @BeforeEach
     public void before() {
+        openInViewUtil.openEntityManager();
         generatedMediaEntities = transformedMediaStub.generateTransformedMediaEntities(GENERATION_COUNT);
+    }
+
+    @AfterEach
+    void closeHibernateSession() {
+        openInViewUtil.closeEntityManager();
     }
 
     @Test

@@ -63,4 +63,5 @@ public interface MediaRequestService {
     MediaPatchResponse patchMediaRequest(Integer mediaRequestId, MediaPatchRequest request);
 
     MediaHideResponse adminHideOrShowMediaById(Integer mediaId, MediaHideRequest mediaHideRequest);
+    
 }

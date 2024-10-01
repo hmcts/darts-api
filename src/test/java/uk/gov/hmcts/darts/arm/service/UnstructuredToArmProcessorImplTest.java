@@ -116,8 +116,6 @@ class UnstructuredToArmProcessorImplTest {
     private ObjectRecordStatusEntity objectRecordStatusEntityArmDropZone;
     @InjectMocks
     private UnstructuredToArmHelper unstructuredToArmHelper;
-    @Mock
-    private EodHelper eodHelper;
     @Captor
     private ArgumentCaptor<ExternalObjectDirectoryEntity> externalObjectDirectoryEntityCaptor;
 
@@ -143,14 +141,13 @@ class UnstructuredToArmProcessorImplTest {
             logApi,
             fileOperationService,
             armDataManagementApi,
-            eodHelper,
             unstructuredToArmProcessorConfiguration
         );
-        lenient().when(objectRecordStatusRepository.findById(2)).thenReturn(Optional.ofNullable(objectRecordStatusEntityStored));
-        lenient().when(objectRecordStatusRepository.findById(12)).thenReturn(Optional.ofNullable(objectRecordStatusEntityArmIngestion));
-        lenient().when(objectRecordStatusRepository.findById(14)).thenReturn(Optional.ofNullable(objectRecordStatusEntityRawDataFailed));
-        lenient().when(objectRecordStatusRepository.findById(15)).thenReturn(Optional.ofNullable(objectRecordStatusEntityManifestFailed));
-        lenient().when(objectRecordStatusRepository.findById(13)).thenReturn(Optional.ofNullable(objectRecordStatusEntityArmDropZone));
+        lenient().when(objectRecordStatusRepository.findById(2)).thenReturn(Optional.of(objectRecordStatusEntityStored));
+        lenient().when(objectRecordStatusRepository.findById(12)).thenReturn(Optional.of(objectRecordStatusEntityArmIngestion));
+        lenient().when(objectRecordStatusRepository.findById(14)).thenReturn(Optional.of(objectRecordStatusEntityRawDataFailed));
+        lenient().when(objectRecordStatusRepository.findById(15)).thenReturn(Optional.of(objectRecordStatusEntityManifestFailed));
+        lenient().when(objectRecordStatusRepository.findById(13)).thenReturn(Optional.of(objectRecordStatusEntityArmDropZone));
         lenient().when(externalLocationTypeUnstructured.getId()).thenReturn(ExternalLocationTypeEnum.UNSTRUCTURED.getId());
         lenient().when(objectRecordStatusRepository.getReferenceById(ARM_RAW_DATA_FAILED.getId())).thenReturn(objectRecordStatusEntityRawDataFailed);
         lenient().when(objectRecordStatusRepository.getReferenceById(ARM_MANIFEST_FAILED.getId())).thenReturn(objectRecordStatusEntityManifestFailed);
@@ -160,8 +157,8 @@ class UnstructuredToArmProcessorImplTest {
 
         lenient().when(externalObjectDirectoryEntityArm.getId()).thenReturn(123);
         lenient().when(externalObjectDirectoryEntityUnstructured.getExternalLocation()).thenReturn(UNSTRUCTURED_UUID);
-        lenient().when(unstructuredToArmProcessorConfiguration.getMaxResultSize()).thenReturn(5);
-        lenient().when(eodHelper.failedArmRawDataStatus()).thenReturn(objectRecordStatusEntityRawDataFailed);
+        lenient().when(unstructuredToArmProcessorConfiguration.getMaxArmSingleModeItems()).thenReturn(5);
+        lenient().when(EodHelper.failedArmRawDataStatus()).thenReturn(objectRecordStatusEntityRawDataFailed);
 
     }
 
@@ -274,7 +271,7 @@ class UnstructuredToArmProcessorImplTest {
             externalObjectDirectoryEntityArm.getTranscriptionDocumentEntity(),
             externalObjectDirectoryEntityArm.getAnnotationDocumentEntity(),
             externalObjectDirectoryEntityArm.getCaseDocument()
-        )).thenReturn(Optional.ofNullable(externalObjectDirectoryEntityUnstructured));
+        )).thenReturn(Optional.of(externalObjectDirectoryEntityUnstructured));
 
         BinaryData manifest = BinaryData.fromFile(Path.of(archiveRecordFile.getAbsolutePath()));
         when(fileOperationService.convertFileToBinaryData(any())).thenReturn(manifest);
@@ -409,7 +406,7 @@ class UnstructuredToArmProcessorImplTest {
             externalObjectDirectoryEntityArm.getTranscriptionDocumentEntity(),
             externalObjectDirectoryEntityArm.getAnnotationDocumentEntity(),
             externalObjectDirectoryEntityArm.getCaseDocument()
-        )).thenReturn(Optional.ofNullable(externalObjectDirectoryEntityUnstructured));
+        )).thenReturn(Optional.of(externalObjectDirectoryEntityUnstructured));
 
         unstructuredToArmProcessor.processUnstructuredToArm();
 

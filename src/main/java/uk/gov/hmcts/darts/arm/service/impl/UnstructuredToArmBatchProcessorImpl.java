@@ -62,21 +62,23 @@ public class UnstructuredToArmBatchProcessorImpl implements UnstructuredToArmBat
 
     @Override
     @SuppressWarnings({"PMD.AvoidInstantiatingObjectsInLoops", "PMD.CognitiveComplexity", "PMD.CyclomaticComplexity"})
-    public void processUnstructuredToArm(int armBatchSize) {
+
+    public void processUnstructuredToArm(int taskBatchSize) {
 
         log.info("Started running ARM Batch Push processing at: {}", OffsetDateTime.now());
         ExternalLocationTypeEntity eodSourceLocation = getEodSourceLocation();
 
+        // Because the query is long-running, get all the EODs that need to be processed in one go
         List<ExternalObjectDirectoryEntity> eodsForTransfer = unstructuredToArmHelper
             .getEodEntitiesToSendToArm(eodSourceLocation,
                                        EodHelper.armLocation(),
-                                       unstructuredToArmProcessorConfiguration.getMaxResultSize());
-
+                                       taskBatchSize);
 
         log.info("Found {} pending entities to process from source '{}'", eodsForTransfer.size(), eodSourceLocation.getDescription());
         if (!eodsForTransfer.isEmpty()) {
-            //ARM has a max batch size, so lets loop through the big list creating lots of individual batches for ARM to process separately
-            List<List<ExternalObjectDirectoryEntity>> batchesForArm = ListUtils.partition(eodsForTransfer, armBatchSize);
+            //ARM has a max batch size for manifest items, so lets loop through the big list creating lots of individual batches for ARM to process separately
+            List<List<ExternalObjectDirectoryEntity>> batchesForArm = ListUtils.partition(eodsForTransfer,
+                                                                                          unstructuredToArmProcessorConfiguration.getMaxArmManifestItems());
             int batchCounter = 1;
             UserAccountEntity userAccount = userIdentity.getUserAccount();
             for (List<ExternalObjectDirectoryEntity> eodsForBatch : batchesForArm) {
@@ -190,7 +192,7 @@ public class UnstructuredToArmBatchProcessorImpl implements UnstructuredToArmBat
     }
 
     private boolean shouldPushRawDataToArm(BatchItem batchItem) {
-        return equalsAnyStatus(batchItem.getPreviousStatus(), EodHelper.armIngestionStatus(), eodHelper.failedArmRawDataStatus());
+        return equalsAnyStatus(batchItem.getPreviousStatus(), EodHelper.armIngestionStatus(), EodHelper.failedArmRawDataStatus());
     }
 
     private void pushRawDataAndCreateArchiveRecordIfSuccess(BatchItem batchItem, String rawFilename, UserAccountEntity userAccount) {
@@ -210,7 +212,7 @@ public class UnstructuredToArmBatchProcessorImpl implements UnstructuredToArmBat
         } else {
             batchItem.setRawFilePushSuccessful(false);
             batchItem.undoManifestFileChange();
-            unstructuredToArmHelper.updateExternalObjectDirectoryStatusToFailed(batchItem.getArmEod(), eodHelper.failedArmRawDataStatus(), userAccount);
+            unstructuredToArmHelper.updateExternalObjectDirectoryStatusToFailed(batchItem.getArmEod(), EodHelper.failedArmRawDataStatus(), userAccount);
         }
     }
 
@@ -245,7 +247,7 @@ public class UnstructuredToArmBatchProcessorImpl implements UnstructuredToArmBat
             logApi.armPushFailed(batchItem.getArmEod().getId());
             batchItem.undoManifestFileChange();
             if (!batchItem.isRawFilePushNotNeededOrSuccessfulWhenNeeded()) {
-                unstructuredToArmHelper.updateExternalObjectDirectoryStatusToFailed(batchItem.getArmEod(), eodHelper.failedArmRawDataStatus(), userAccount);
+                unstructuredToArmHelper.updateExternalObjectDirectoryStatusToFailed(batchItem.getArmEod(), EodHelper.failedArmRawDataStatus(), userAccount);
             } else {
                 unstructuredToArmHelper.updateExternalObjectDirectoryStatusToFailed(batchItem.getArmEod(), EodHelper.failedArmManifestFileStatus(),
                                                                                     userAccount);

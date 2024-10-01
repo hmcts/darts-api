@@ -9,6 +9,7 @@ import java.util.Optional;
 
 @Component
 @RequiredArgsConstructor
+@Deprecated
 public class RegionStub {
     private final RegionRepository regionRepository;
 

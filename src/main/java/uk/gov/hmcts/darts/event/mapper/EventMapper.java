@@ -45,6 +45,7 @@ public class EventMapper {
             adminGetEventsForIdResponse.setAntecedentId(eventEntity.getAntecedentId());
             adminGetEventsForIdResponse.setEventTs(eventEntity.getTimestamp());
             adminGetEventsForIdResponse.isCurrent(eventEntity.getIsCurrent());
+            adminGetEventsForIdResponse.setCreatedAt(eventEntity.getCreatedDateTime());
             adminGetEventsForIdResponse.setCreatedBy(eventEntity.getCreatedBy().getId());
             adminGetEventsForIdResponse.setLastModifiedAt(eventEntity.getLastModifiedDateTime());
             adminGetEventsForIdResponse.setLastModifiedBy(eventEntity.getLastModifiedBy().getId());

@@ -455,6 +455,7 @@ public class TranscriptionServiceImpl implements TranscriptionService {
     @Override
     public GetYourTranscriptsResponse getYourTranscripts(Integer userId, Boolean includeHiddenFromRequester) {
         final var getYourTranscriptsResponse = new GetYourTranscriptsResponse();
+        transcriptionRepository.findAll();
         getYourTranscriptsResponse.setRequesterTranscriptions(yourTranscriptsQuery.getRequesterTranscriptions(userId, includeHiddenFromRequester));
         getYourTranscriptsResponse.setApproverTranscriptions(yourTranscriptsQuery.getApproverTranscriptions(userId));
         return getYourTranscriptsResponse;

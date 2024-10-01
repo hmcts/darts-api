@@ -29,7 +29,6 @@ import uk.gov.hmcts.darts.retention.enums.RetentionConfidenceReasonEnum;
 import uk.gov.hmcts.darts.retention.enums.RetentionConfidenceScoreEnum;
 import uk.gov.hmcts.darts.retention.mapper.CaseRetentionConfidenceReasonMapper;
 import uk.gov.hmcts.darts.retention.service.ApplyRetentionCaseAssociatedObjectsSingleCaseProcessor;
-import uk.gov.hmcts.darts.test.common.data.ExternalObjectDirectoryTestData;
 import uk.gov.hmcts.darts.transcriptions.service.TranscriptionService;
 
 import java.time.LocalTime;
@@ -45,6 +44,7 @@ import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.darts.common.util.CommonTestDataUtil.createCaseRetention;
 import static uk.gov.hmcts.darts.common.util.CommonTestDataUtil.createRetentionPolicyType;
 import static uk.gov.hmcts.darts.retention.enums.CaseRetentionStatus.COMPLETE;
+import static uk.gov.hmcts.darts.test.common.data.PersistableFactory.getExternalObjectDirectoryTestData;
 
 @ExtendWith(MockitoExtension.class)
 @Slf4j
@@ -202,9 +202,9 @@ class ApplyRetentionCaseAssociatedObjectsSingleCaseProcessorImplTest {
                                                              case2PerfectlyClosed.getHearings().getFirst()),
                                                      456);
 
-        var eodA1 = ExternalObjectDirectoryTestData.eodStoredInExternalLocationTypeForMedia(ExternalLocationTypeEnum.ARM, mediaA1);
-        var eodA2 = ExternalObjectDirectoryTestData.eodStoredInExternalLocationTypeForMedia(ExternalLocationTypeEnum.ARM, mediaA2);
-        var eodB1 = ExternalObjectDirectoryTestData.eodStoredInExternalLocationTypeForMedia(ExternalLocationTypeEnum.ARM, mediaB1);
+        var eodA1 = getExternalObjectDirectoryTestData().eodStoredInExternalLocationTypeForMedia(ExternalLocationTypeEnum.ARM, mediaA1);
+        var eodA2 = getExternalObjectDirectoryTestData().eodStoredInExternalLocationTypeForMedia(ExternalLocationTypeEnum.ARM, mediaA2);
+        var eodB1 = getExternalObjectDirectoryTestData().eodStoredInExternalLocationTypeForMedia(ExternalLocationTypeEnum.ARM, mediaB1);
 
         when(caseService.getCourtCaseById(case1PerfectlyClosed.getId())).thenReturn(case1PerfectlyClosed);
 
@@ -242,9 +242,9 @@ class ApplyRetentionCaseAssociatedObjectsSingleCaseProcessorImplTest {
                                                              case4NotPerfectlyClosed.getHearings().getFirst()),
                                                      456);
 
-        var eodA1 = ExternalObjectDirectoryTestData.eodStoredInExternalLocationTypeForMedia(ExternalLocationTypeEnum.ARM, mediaA1);
-        var eodA2 = ExternalObjectDirectoryTestData.eodStoredInExternalLocationTypeForMedia(ExternalLocationTypeEnum.ARM, mediaA2);
-        var eodB1 = ExternalObjectDirectoryTestData.eodStoredInExternalLocationTypeForMedia(ExternalLocationTypeEnum.ARM, mediaB1);
+        var eodA1 = getExternalObjectDirectoryTestData().eodStoredInExternalLocationTypeForMedia(ExternalLocationTypeEnum.ARM, mediaA1);
+        var eodA2 = getExternalObjectDirectoryTestData().eodStoredInExternalLocationTypeForMedia(ExternalLocationTypeEnum.ARM, mediaA2);
+        var eodB1 = getExternalObjectDirectoryTestData().eodStoredInExternalLocationTypeForMedia(ExternalLocationTypeEnum.ARM, mediaB1);
 
         when(caseService.getCourtCaseById(case3NotPerfectlyClosed.getId())).thenReturn(case3NotPerfectlyClosed);
 
@@ -286,9 +286,9 @@ class ApplyRetentionCaseAssociatedObjectsSingleCaseProcessorImplTest {
                                                              case4NotPerfectlyClosed.getHearings().getFirst()),
                                                      456);
 
-        var eodA1 = ExternalObjectDirectoryTestData.eodStoredInExternalLocationTypeForMedia(ExternalLocationTypeEnum.ARM, mediaA1);
-        var eodA2 = ExternalObjectDirectoryTestData.eodStoredInExternalLocationTypeForMedia(ExternalLocationTypeEnum.ARM, mediaA2);
-        var eodB1 = ExternalObjectDirectoryTestData.eodStoredInExternalLocationTypeForMedia(ExternalLocationTypeEnum.ARM, mediaB1);
+        var eodA1 = getExternalObjectDirectoryTestData().eodStoredInExternalLocationTypeForMedia(ExternalLocationTypeEnum.ARM, mediaA1);
+        var eodA2 = getExternalObjectDirectoryTestData().eodStoredInExternalLocationTypeForMedia(ExternalLocationTypeEnum.ARM, mediaA2);
+        var eodB1 = getExternalObjectDirectoryTestData().eodStoredInExternalLocationTypeForMedia(ExternalLocationTypeEnum.ARM, mediaB1);
 
         when(caseService.getCourtCaseById(case1PerfectlyClosed.getId())).thenReturn(case1PerfectlyClosed);
 
@@ -331,8 +331,8 @@ class ApplyRetentionCaseAssociatedObjectsSingleCaseProcessorImplTest {
         annotationDocumentA1.setAnnotation(annotationA1);
         annotationDocumentB1.setAnnotation(annotationB1);
 
-        var eodA1 = ExternalObjectDirectoryTestData.eodStoredInExternalLocationTypeForAnnotationDocument(ExternalLocationTypeEnum.ARM, annotationDocumentA1);
-        var eodB1 = ExternalObjectDirectoryTestData.eodStoredInExternalLocationTypeForAnnotationDocument(ExternalLocationTypeEnum.ARM, annotationDocumentB1);
+        var eodA1 = getExternalObjectDirectoryTestData().eodStoredInExternalLocationTypeForAnnotationDocument(ExternalLocationTypeEnum.ARM, annotationDocumentA1);
+        var eodB1 = getExternalObjectDirectoryTestData().eodStoredInExternalLocationTypeForAnnotationDocument(ExternalLocationTypeEnum.ARM, annotationDocumentB1);
 
         when(caseService.getCourtCaseById(case1PerfectlyClosed.getId())).thenReturn(case1PerfectlyClosed);
 
@@ -373,9 +373,9 @@ class ApplyRetentionCaseAssociatedObjectsSingleCaseProcessorImplTest {
         transcriptionDocumentA1.setTranscription(transcriptionA1);
         transcriptionDocumentB1.setTranscription(transcriptionB1);
 
-        var eodA1 = ExternalObjectDirectoryTestData.eodStoredInExternalLocationTypeForTranscriptionDocument(ExternalLocationTypeEnum.ARM,
+        var eodA1 = getExternalObjectDirectoryTestData().eodStoredInExternalLocationTypeForTranscriptionDocument(ExternalLocationTypeEnum.ARM,
                                                                                                             transcriptionDocumentA1);
-        var eodB1 = ExternalObjectDirectoryTestData.eodStoredInExternalLocationTypeForTranscriptionDocument(ExternalLocationTypeEnum.ARM,
+        var eodB1 = getExternalObjectDirectoryTestData().eodStoredInExternalLocationTypeForTranscriptionDocument(ExternalLocationTypeEnum.ARM,
                                                                                                             transcriptionDocumentB1);
 
         when(caseService.getCourtCaseById(case1PerfectlyClosed.getId())).thenReturn(case1PerfectlyClosed);
@@ -410,7 +410,7 @@ class ApplyRetentionCaseAssociatedObjectsSingleCaseProcessorImplTest {
         // given
         var caseDocument = CommonTestDataUtil.createCaseDocumentEntity(case1PerfectlyClosed, testUser);
 
-        var eod = ExternalObjectDirectoryTestData.eodStoredInExternalLocationTypeForCaseDocument(ExternalLocationTypeEnum.ARM, caseDocument);
+        var eod = getExternalObjectDirectoryTestData().eodStoredInExternalLocationTypeForCaseDocument(ExternalLocationTypeEnum.ARM, caseDocument);
 
         when(caseService.getCourtCaseById(case1PerfectlyClosed.getId())).thenReturn(case1PerfectlyClosed);
 
@@ -434,7 +434,7 @@ class ApplyRetentionCaseAssociatedObjectsSingleCaseProcessorImplTest {
         // given
         var caseDocument = CommonTestDataUtil.createCaseDocumentEntity(case4NotPerfectlyClosed, testUser);
 
-        var eod = ExternalObjectDirectoryTestData.eodStoredInExternalLocationTypeForCaseDocument(ExternalLocationTypeEnum.ARM, caseDocument);
+        var eod = getExternalObjectDirectoryTestData().eodStoredInExternalLocationTypeForCaseDocument(ExternalLocationTypeEnum.ARM, caseDocument);
 
         when(caseService.getCourtCaseById(case4NotPerfectlyClosed.getId())).thenReturn(case4NotPerfectlyClosed);
 
