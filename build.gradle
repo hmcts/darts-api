@@ -417,13 +417,13 @@ dependencies {
   implementation group: 'org.apache.tomcat.embed', name: 'tomcat-embed-core', version: tomcatEmbedVersion
   implementation group: 'org.apache.tomcat.embed', name: 'tomcat-embed-websocket', version: tomcatEmbedVersion
 
-  implementation platform('com.azure:azure-sdk-bom:1.2.27')
+  implementation platform('com.azure:azure-sdk-bom:1.2.28')
   implementation 'com.azure:azure-storage-blob'
 
   implementation group: 'io.rest-assured', name: 'rest-assured'
   implementation group: 'org.flywaydb', name: 'flyway-core', version: '10.18.2'
   implementation group: 'org.flywaydb', name: 'flyway-database-postgresql', version: '10.18.2'
-  implementation group: 'io.hypersistence', name: 'hypersistence-utils-hibernate-63', version: '3.8.2'
+  implementation group: 'io.hypersistence', name: 'hypersistence-utils-hibernate-63', version: '3.8.3'
 
   //database
   implementation 'org.postgresql:postgresql:42.7.4'
@@ -450,7 +450,7 @@ dependencies {
   // Ref: https://github.com/spring-cloud/spring-cloud-openfeign/issues/832
   implementation group: 'io.github.openfeign', name: 'feign-hc5', version: '13.4'
 
-  testImplementation 'org.testcontainers:postgresql:1.20.1'
+  testImplementation 'org.testcontainers:postgresql:1.20.2'
   testImplementation 'com.h2database:h2:2.3.232'
   testImplementation group: 'org.postgresql', name: 'postgresql', version: '42.7.4'
   testImplementation 'org.mockito:mockito-inline:5.2.0'
@@ -469,7 +469,7 @@ dependencies {
   // https://mvnrepository.com/artifact/org.awaitility/awaitility-proxy
   testImplementation group: 'org.awaitility', name: 'awaitility-proxy', version: '3.1.6'
   testImplementation 'io.github.hakky54:logcaptor:2.9.3'
-  testImplementation 'org.testcontainers:testcontainers:1.20.1'
+  testImplementation 'org.testcontainers:testcontainers:1.20.2'
 
   testImplementation group: 'org.jeasy', name: 'easy-random-core', version: '5.0.0'
 
