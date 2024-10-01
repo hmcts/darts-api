@@ -34,7 +34,7 @@ deployed-application-uri: ${TEST_URL:http://localhost:4550}
 
 darts:
   manual-deletion:
-    enabled: true
+    enabled: ${MANUAL_DELETION_ENABLED:true}
   testing-support-endpoints:
     enabled: ${TESTING_SUPPORT_ENDPOINTS_ENABLED:true}
   storage:
