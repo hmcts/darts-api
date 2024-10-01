@@ -25,8 +25,6 @@ public class CaseTestData  implements Persistable<TestCourtCaseEntity.TestCourtC
         courtCaseEntity.setCaseNumber("case-1-" + postfix);
         courtCaseEntity.setClosed(false);
         courtCaseEntity.setInterpreterUsed(false);
-        courtCaseEntity.setDataAnonymised(true);
-        courtCaseEntity.setDataAnonymisedTs(now());
         var userAccount = minimalUserAccount();
         courtCaseEntity.setCreatedBy(userAccount);
         courtCaseEntity.setLastModifiedBy(userAccount);
