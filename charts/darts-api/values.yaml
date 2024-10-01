@@ -208,7 +208,6 @@ function:
   environment:
     ATS_MODE: true
     API_MODE: false
-    MANUAL_DELETION_ENABLED: true
     NOTIFICATION_SCHEDULER_ENABLED: false
     AUTOMATED_TASK_MODE: false
     POSTGRES_SSL_MODE: require
