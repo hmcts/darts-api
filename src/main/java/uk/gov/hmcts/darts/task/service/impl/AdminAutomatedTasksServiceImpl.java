@@ -3,7 +3,7 @@ package uk.gov.hmcts.darts.task.service.impl;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.darts.audit.api.AuditApi;
 import uk.gov.hmcts.darts.common.entity.AutomatedTaskEntity;
@@ -37,8 +37,7 @@ public class AdminAutomatedTasksServiceImpl implements AdminAutomatedTaskService
     private final AuditApi auditApi;
     private final LockService lockService;
 
-    @Value("${darts.automated.task.expiry-deletion.enabled:false}")
-    private final boolean caseExpiryDeletionEnabled;
+    private final ConfigurableBeanFactory configurableBeanFactory;
 
     @Override
     public List<AutomatedTaskSummary> getAllAutomatedTasks() {
@@ -92,7 +91,11 @@ public class AdminAutomatedTasksServiceImpl implements AdminAutomatedTaskService
     }
 
     private boolean shouldIncludeAutomatedTask(AutomatedTaskEntity automatedTaskEntity) {
-        return this.isCaseExpiryDeletionEnabled() || !automatedTaskEntity.getTaskName().equals(AutomatedTaskName.CASE_EXPIRY_DELETION_TASK_NAME.getTaskName());
+        AutomatedTaskName automatedTaskName = AutomatedTaskName.valueOfTaskName(automatedTaskEntity.getTaskName());
+        if (automatedTaskName == null || automatedTaskName.getConditionalOnSpEL() == null) {
+            return true;
+        }
+        return Boolean.parseBoolean(configurableBeanFactory.resolveEmbeddedValue(automatedTaskName.getConditionalOnSpEL()));
     }
 
     private AutomatedTaskEntity getAutomatedTaskEntityById(Integer taskId) {
