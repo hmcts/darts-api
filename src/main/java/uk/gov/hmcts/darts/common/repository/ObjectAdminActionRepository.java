@@ -31,9 +31,6 @@ public interface ObjectAdminActionRepository extends JpaRepository<ObjectAdminAc
     Optional<ObjectAdminActionEntity> findByTranscriptionDocument_IdAndObjectHiddenReasonIsNotNullAndObjectHiddenReason_MarkedForDeletionTrue(
         Integer transcriptionDocumentId);
 
-    @Query("SELECT o FROM ObjectAdminActionEntity o WHERE o.markedForManualDelDateTime < :deletionThreshold")
-    List<ObjectAdminActionEntity> findAllMarkedForManualDeletion(@Param("deletionThreshold") LocalDateTime deletionThreshold);
-
     @Query("""
         SELECT o FROM ObjectAdminActionEntity o
                 WHERE o.markedForManualDelDateTime < :deletionThreshold

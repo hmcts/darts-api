@@ -1,6 +1,5 @@
 package uk.gov.hmcts.darts.common.repository;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
@@ -16,6 +15,8 @@ import uk.gov.hmcts.darts.testutils.stubs.UserAccountStub;
 
 import java.time.OffsetDateTime;
 import java.util.List;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class ObjectAdminActionRepositoryTest extends PostgresIntegrationBase {
 
@@ -46,7 +47,7 @@ class ObjectAdminActionRepositoryTest extends PostgresIntegrationBase {
         List<ObjectAdminActionEntity> allWithAnyDeletionReason = repository.findAllMediaActionsWithAnyDeletionReason();
 
         // Then
-        Assertions.assertEquals(0, allWithAnyDeletionReason.size());
+        assertEquals(0, allWithAnyDeletionReason.size());
     }
 
     @Test
@@ -97,8 +98,8 @@ class ObjectAdminActionRepositoryTest extends PostgresIntegrationBase {
         List<ObjectAdminActionEntity> result = repository.findAllMediaActionsWithAnyDeletionReason();
 
         // Then
-        Assertions.assertEquals(1, result.size());
-        Assertions.assertEquals(expectedObjectAdminActionEntity.getId(), result.getFirst().getId());
+        assertEquals(1, result.size());
+        assertEquals(expectedObjectAdminActionEntity.getId(), result.getFirst().getId());
     }
 
     @Test
@@ -122,8 +123,8 @@ class ObjectAdminActionRepositoryTest extends PostgresIntegrationBase {
         List<ObjectAdminActionEntity> result = repository.findByMediaIdAndMarkedForManualDeletionTrue(media.getId());
 
         // Then
-        Assertions.assertEquals(1, result.size());
-        Assertions.assertEquals(markedForManualDeletionAction.getId(), result.getFirst().getId());
+        assertEquals(1, result.size());
+        assertEquals(markedForManualDeletionAction.getId(), result.getFirst().getId());
     }
 
     private MediaEntity createAndSaveMediaEntity(CourtroomEntity courtroomEntity) {
