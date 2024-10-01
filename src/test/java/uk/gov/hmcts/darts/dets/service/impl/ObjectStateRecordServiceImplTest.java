@@ -13,7 +13,6 @@ import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -38,7 +37,7 @@ class ObjectStateRecordServiceImplTest {
 
         assertNotNull(result);
         assertEquals(objectStateRecordId, result.getUuid());
-        verify(objectStateRecordRepository, times(1)).findById(objectStateRecordId);
+        verify(objectStateRecordRepository).findById(objectStateRecordId);
     }
 
     @Test
@@ -52,6 +51,6 @@ class ObjectStateRecordServiceImplTest {
         });
 
         assertEquals("ObjectStateRecordEntity with id " + objectStateRecordId + " not found", exception.getMessage());
-        verify(objectStateRecordRepository, times(1)).findById(objectStateRecordId);
+        verify(objectStateRecordRepository).findById(objectStateRecordId);
     }
 }
