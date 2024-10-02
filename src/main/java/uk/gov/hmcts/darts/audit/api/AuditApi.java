@@ -8,7 +8,7 @@ import java.util.Optional;
 public interface AuditApi {
 
     default void record(AuditActivity activity, UserAccountEntity userAccountEntity, String additionalData) {
-        record(activity, userAccountEntity, Optional.empty(), Optional.of(additionalData));
+        record(activity, userAccountEntity, Optional.empty(), Optional.ofNullable(additionalData));
     }
 
     default void record(AuditActivity activity, UserAccountEntity userAccountEntity) {
@@ -16,7 +16,7 @@ public interface AuditApi {
     }
 
     default void record(AuditActivity activity, UserAccountEntity userAccountEntity, CourtCaseEntity courtCase) {
-        record(activity, userAccountEntity, Optional.of(courtCase), Optional.empty());
+        record(activity, userAccountEntity, Optional.ofNullable(courtCase), Optional.empty());
     }
 
     void record(AuditActivity activity, UserAccountEntity userAccountEntity, Optional<CourtCaseEntity> courtCase, Optional<String> additionalData);
