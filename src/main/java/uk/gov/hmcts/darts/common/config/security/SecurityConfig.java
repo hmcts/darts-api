@@ -9,6 +9,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -17,11 +18,13 @@ import org.springframework.security.oauth2.client.web.OAuth2LoginAuthenticationF
 import org.springframework.security.oauth2.core.OAuth2TokenValidator;
 import org.springframework.security.oauth2.jose.jws.SignatureAlgorithm;
 import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.jwt.JwtValidators;
 import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationProvider;
 import org.springframework.security.oauth2.server.resource.authentication.JwtIssuerAuthenticationManagerResolver;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.context.SecurityContextHolderFilter;
 import org.springframework.web.filter.OncePerRequestFilter;
 import uk.gov.hmcts.darts.authentication.config.AuthStrategySelector;
 import uk.gov.hmcts.darts.authentication.config.DefaultAuthConfigurationPropertiesStrategy;
@@ -29,6 +32,8 @@ import uk.gov.hmcts.darts.authentication.config.external.ExternalAuthConfigurati
 import uk.gov.hmcts.darts.authentication.config.external.ExternalAuthProviderConfigurationProperties;
 import uk.gov.hmcts.darts.authentication.config.internal.InternalAuthConfigurationProperties;
 import uk.gov.hmcts.darts.authentication.config.internal.InternalAuthProviderConfigurationProperties;
+import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
+import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 
 import java.io.IOException;
 import java.util.Map;
@@ -48,6 +53,8 @@ public class SecurityConfig {
     private final ExternalAuthProviderConfigurationProperties externalAuthProviderConfigurationProperties;
     private final InternalAuthConfigurationProperties internalAuthConfigurationProperties;
     private final InternalAuthProviderConfigurationProperties internalAuthProviderConfigurationProperties;
+    private final UserIdentity userIdentity;
+    private final JwtDecoder jwtDecoder;
 
     @Bean
     @SuppressWarnings("PMD.SignatureDeclareThrowsException")
@@ -81,6 +88,7 @@ public class SecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         applyCommonConfig(http)
             .addFilterBefore(new AuthorisationTokenExistenceFilter(), OAuth2LoginAuthenticationFilter.class)
+            .addFilterAfter(new InactiveUserCheck(), SecurityContextHolderFilter.class)
             .authorizeHttpRequests().anyRequest().authenticated()
             .and()
             .oauth2ResourceServer().authenticationManagerResolver(jwtIssuerAuthenticationManagerResolver());
@@ -129,6 +137,7 @@ public class SecurityConfig {
             throws ServletException, IOException {
 
             String authHeader = request.getHeader("Authorization");
+
             if (authHeader != null && authHeader.startsWith("Bearer")) {
                 filterChain.doFilter(request, response);
                 return;
@@ -138,4 +147,33 @@ public class SecurityConfig {
         }
     }
 
+    private final class InactiveUserCheck extends OncePerRequestFilter {
+
+        @Override
+        protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
+            throws ServletException, IOException {
+
+            try {
+                String authHeader = request.getHeader("Authorization");
+
+                var jwtDecoder = NimbusJwtDecoder.withJwkSetUri(externalAuthProviderConfigurationProperties.getJwkSetUri())
+                    .jwsAlgorithm(SignatureAlgorithm.RS256)
+                    .build();
+
+                OAuth2TokenValidator<Jwt> jwtValidator = JwtValidators.createDefaultWithIssuer(externalAuthConfigurationProperties.getIssuerUri());
+                jwtDecoder.setJwtValidator(jwtValidator);
+                Jwt jwt = jwtDecoder.decode(authHeader.replace("Bearer ", ""));
+
+                UserAccountEntity userAccountEntity = userIdentity.getUserAccount(jwt);
+
+                if (!userAccountEntity.isActive()) {
+                    response.setStatus(HttpStatus.UNAUTHORIZED.value());
+                } else {
+                    filterChain.doFilter(request, response);
+                }
+            } catch (Exception exception) {
+                    response.setStatus(HttpStatus.UNAUTHORIZED.value());
+            }
+        }
+    }
 }
