@@ -134,4 +134,16 @@ class ArmDataManagementApiImplTest {
         verify(dataManagementService).copyBlobData(
             UNSTRUCTURED_CONTAINER_NAME, ARM_BLOB_CONTAINER_NAME, unstructuredUuid.toString(), "DARTS/submission/" + filename);
     }
+
+    @Test
+    void copyDetsBlobDataToArm() {
+
+        UUID detsUuid = UUID.randomUUID();
+        String filename = "someFile";
+        when(armDataManagementConfiguration.getFolders().getSubmission()).thenReturn("DARTS/submission/");
+
+        armDataManagementApi.copyDetsBlobDataToArm(detsUuid.toString(), filename);
+
+        verify(detsDataManagementApi).copyDetsBlobDataToArm(detsUuid.toString(), "DARTS/submission/" + filename);
+    }
 }
