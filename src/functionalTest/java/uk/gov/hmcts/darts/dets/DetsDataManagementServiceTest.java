@@ -6,10 +6,12 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ActiveProfiles;
 import uk.gov.hmcts.darts.common.datamanagement.component.impl.DownloadResponseMetaData;
 import uk.gov.hmcts.darts.datamanagement.exception.FileNotDownloadedException;
 import uk.gov.hmcts.darts.dets.service.impl.DetsApiServiceImpl;
+import uk.gov.hmcts.darts.util.AzureCopyUtil;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -26,6 +28,8 @@ class DetsDataManagementServiceTest {
 
     @Autowired
     private DetsApiServiceImpl dataManagementService;
+    @MockBean
+    private AzureCopyUtil azureCopyUtil;
 
     @Test
     void fetchBinaryDataFromBlobStorage() throws IOException, FileNotDownloadedException {
@@ -34,12 +38,10 @@ class DetsDataManagementServiceTest {
 
         var uuid = dataManagementService.saveBlobData(data);
 
-        try (DownloadResponseMetaData downloadResponseMetaData = dataManagementService.downloadData(
-            uuid
-        )) {
+        try (DownloadResponseMetaData downloadResponseMetaData = dataManagementService.downloadData(uuid)) {
             assertEquals(TEST_BINARY_STRING, new String(downloadResponseMetaData.getResource().getInputStream().readAllBytes()));
         }
     }
 
-    
+
 }
