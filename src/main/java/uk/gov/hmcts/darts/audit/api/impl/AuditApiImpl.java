@@ -21,7 +21,8 @@ public class AuditApiImpl implements AuditApi {
 
     @Override
     public void record(AuditActivity activity, UserAccountEntity userAccountEntity, CourtCaseEntity courtCase, String additionalData) {
-        auditService.recordAudit(activity, userAccountEntity, courtCase == null ? Optional.empty() : Optional.of(courtCase), additionalData == null ? Optional.empty() : Optional.of(additionalData));
+        auditService.recordAudit(activity, userAccountEntity, courtCase == null ? Optional.empty() : Optional.of(courtCase),
+                                 additionalData == null ? Optional.empty() : Optional.of(additionalData));
     }
 
     @Override

@@ -31,6 +31,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.notNull;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.never;
@@ -87,7 +88,7 @@ class AdminMediaServiceImplApproveMarkedForDeletionTest {
         objectAdminAction.setMedia(mediaEntity);
         objectAdminAction.setMarkedForManualDeletion(false);
         objectAdminAction.setHiddenBy(hiddenByUserAccount);
-
+        objectAdminAction.setId(1);
         var hiddenReason = ObjectHiddenReasonTestData.otherDelete();
         objectAdminAction.setObjectHiddenReason(hiddenReason);
 
@@ -102,7 +103,7 @@ class AdminMediaServiceImplApproveMarkedForDeletionTest {
 
         MediaApproveMarkedForDeletionResponse response = adminMediaService.adminApproveMediaMarkedForDeletion(mediaId);
 
-        verify(auditApi).record(AuditActivity.MANUAL_DELETION, notNull(), objectAdminAction.getId().toString());
+        verify(auditApi).record(eq(AuditActivity.MANUAL_DELETION), notNull(), eq(objectAdminAction.getId().toString()));
 
         assertNotNull(response);
         verify(mediaApproveMarkForDeletionValidator, times(1)).validate(mediaId);

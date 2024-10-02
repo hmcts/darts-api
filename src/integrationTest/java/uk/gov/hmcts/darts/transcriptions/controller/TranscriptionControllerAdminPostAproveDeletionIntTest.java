@@ -116,6 +116,14 @@ class TranscriptionControllerAdminPostAproveDeletionIntTest extends IntegrationB
         TranscriptionDocumentHideResponse transcriptionResponse
             = objectMapper.readValue(mvcResult.getResponse().getContentAsByteArray(), TranscriptionDocumentHideResponse.class);
 
+        List<AuditEntity> caseExpiredAuditEntries = dartsDatabase.getAuditRepository()
+            .findAll((Specification<AuditEntity>) (root, query, criteriaBuilder) -> criteriaBuilder.and(
+                criteriaBuilder.equal(root.get(AuditEntity_.additionalData), String.valueOf(adminActionEntity.getId())),
+                criteriaBuilder.equal(root.get(AuditEntity_.auditActivity).get("id"), AuditActivity.MANUAL_DELETION.getId())
+            ));
+
+        assertFalse(caseExpiredAuditEntries.isEmpty());
+
         // ensure that the database data is contained in the response
         assertEquals(documentEntity.getId(), transcriptionResponse.getId());
         assertEquals(documentEntity.isHidden(), transcriptionResponse.getIsHidden());
@@ -133,14 +141,6 @@ class TranscriptionControllerAdminPostAproveDeletionIntTest extends IntegrationB
         assertEquals(objectAdminActionEntity.getFirst().getMarkedForManualDelDateTime()
                          .truncatedTo(ChronoUnit.SECONDS), transcriptionResponse.getAdminAction()
                          .getMarkedForManualDeletionAt().truncatedTo(ChronoUnit.SECONDS));
-
-        List<AuditEntity> caseExpiredAuditEntries = dartsDatabase.getAuditRepository()
-            .findAll((Specification<AuditEntity>) (root, query, criteriaBuilder) -> criteriaBuilder.and(
-                criteriaBuilder.equal(root.get(AuditEntity_.additionalData), String.valueOf(adminActionEntity.getId())),
-                criteriaBuilder.equal(root.get(AuditEntity_.auditActivity).get("id"), AuditActivity.MANUAL_DELETION.getId())
-            ));
-
-        assertFalse(caseExpiredAuditEntries.isEmpty());
     }
 
     @Test
