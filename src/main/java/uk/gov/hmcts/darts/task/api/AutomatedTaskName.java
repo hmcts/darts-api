@@ -36,8 +36,7 @@ public enum AutomatedTaskName {
     DETS_TO_ARM_TASK_NAME("DetsToArm"),
     CASE_EXPIRY_DELETION_TASK_NAME("CaseExpiryDeletion", "${darts.automated.task.expiry-deletion.enabled:false}"),
     ASSOCIATED_OBJECT_DATA_EXPIRY_DELETION_TASK_NAME("AssociatedObjectDataExpiryDeletion"),
-    MANUAL_DELETION("ManualDeletion");
-
+    MANUAL_DELETION("ManualDeletion", "${darts.manual-deletion.enabled:false}");
     private final String taskName;
     private final String conditionalOnSpEL;
 
