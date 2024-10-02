@@ -2,9 +2,12 @@ package uk.gov.hmcts.darts.transcriptions.service.impl;
 
 import com.azure.core.util.BinaryData;
 import com.azure.storage.blob.BlobClient;
+import lombok.AccessLevel;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -144,6 +147,10 @@ public class TranscriptionServiceImpl implements TranscriptionService {
     private final List<TranscriptionsUpdateValidator> updateTranscriptionsValidator;
     private final TranscriptionResponseMapper transcriptionResponseMapper;
     private final TranscriptionDownloader transcriptionDownloader;
+
+    @Value("${darts.manual-deletion.enabled:false}")
+    @Getter(AccessLevel.PACKAGE)
+    private boolean manualDeletionEnabled;
 
     private static final String OWNER_DISABLED_COMMENT_MESSAGE = "Owner was disabled";
 
@@ -455,7 +462,6 @@ public class TranscriptionServiceImpl implements TranscriptionService {
     @Override
     public GetYourTranscriptsResponse getYourTranscripts(Integer userId, Boolean includeHiddenFromRequester) {
         final var getYourTranscriptsResponse = new GetYourTranscriptsResponse();
-        transcriptionRepository.findAll();
         getYourTranscriptsResponse.setRequesterTranscriptions(yourTranscriptsQuery.getRequesterTranscriptions(userId, includeHiddenFromRequester));
         getYourTranscriptsResponse.setApproverTranscriptions(yourTranscriptsQuery.getApproverTranscriptions(userId));
         return getYourTranscriptsResponse;
@@ -616,6 +622,9 @@ public class TranscriptionServiceImpl implements TranscriptionService {
 
     @Override
     public List<AdminMarkedForDeletionResponseItem> adminGetTranscriptionDocumentsMarkedForDeletion() {
+        if (!this.isManualDeletionEnabled()) {
+            throw new DartsApiException(DartsApiException.DartsApiErrorCommon.FEATURE_FLAG_NOT_ENABLED);
+        }
         List<TranscriptionDocumentEntity> transcriptionDocumentEntities = transcriptionDocumentRepository.getMarkedForDeletion();
         List<AdminMarkedForDeletionResponseItem> transcriptionResponsesLst = new ArrayList<>();
         for (TranscriptionDocumentEntity entity : transcriptionDocumentEntities) {

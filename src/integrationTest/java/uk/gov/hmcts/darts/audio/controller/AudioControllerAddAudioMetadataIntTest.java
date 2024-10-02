@@ -58,6 +58,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static uk.gov.hmcts.darts.test.common.AwaitabilityUtil.waitForMax10SecondsWithOneSecondPoll;
 
 @AutoConfigureMockMvc
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -220,8 +221,14 @@ class AudioControllerAddAudioMetadataIntTest extends IntegrationBase {
             .andExpect(status().isOk())
             .andReturn();
 
-        mediaList = dartsDatabase.getMediaRepository().findAllByHearingId(eventHearing.getId());
-        assertEquals(1, mediaList.size());
+
+        waitForMax10SecondsWithOneSecondPoll(() -> {
+                                                 var foundMediaList = dartsDatabase.getMediaRepository().findAllByHearingId(eventHearing.getId());
+                                                 assertEquals(1, foundMediaList.size());
+                                                 assertEquals(4, dartsDatabase.getMediaLinkedCaseRepository().findByMedia(foundMediaList.getFirst()).size());
+                                             }
+        );
+
     }
 
     @Test

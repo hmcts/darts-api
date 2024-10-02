@@ -247,8 +247,9 @@ public class AudioTransformationServiceImpl implements AudioTransformationServic
         try (DownloadResponseMetaData downloadResponseMetaData = dataManagementFacade.retrieveFileFromStorage(mediaEntity)) {
             UUID id = downloadResponseMetaData.getEodEntity().getExternalLocation();
 
-            var mediaData = downloadResponseMetaData.getInputStream();
-            return saveBlobDataToTempWorkspace(mediaData, id.toString());
+            try (var mediaData = downloadResponseMetaData.getResource().getInputStream()) {
+                return saveBlobDataToTempWorkspace(mediaData, id.toString());
+            }
         } catch (FileNotDownloadedException e) {
             throw new RuntimeException("Retrieval from storage failed for MediaId " + mediaEntity.getId(), e);
         }

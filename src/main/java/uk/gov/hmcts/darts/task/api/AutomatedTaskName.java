@@ -35,8 +35,12 @@ public enum AutomatedTaskName {
     GENERATE_CASE_DOCUMENT_FOR_RETENTION_DATE_TASK_NAME("GenerateCaseDocumentForRetentionDate"),
     CASE_EXPIRY_DELETION_TASK_NAME("CaseExpiryDeletion"),
     DETS_TO_ARM_TASK_NAME("DetsToArm"),
-    ASSOCIATED_OBJECT_DATA_EXPIRY_DELETION_TASK_NAME("AssociatedObjectDataExpiryDeletion");
+    CASE_EXPIRY_DELETION_TASK_NAME("CaseExpiryDeletion", "${darts.automated.task.expiry-deletion.enabled:false}"),
+    ASSOCIATED_OBJECT_DATA_EXPIRY_DELETION_TASK_NAME("AssociatedObjectDataExpiryDeletion"),
+    MANUAL_DELETION("ManualDeletion");
+
     private final String taskName;
+    private final String conditionalOnSpEL;
 
     private static final Map<String, AutomatedTaskName> BY_TASK_NAME = new HashMap<>();
 
@@ -47,7 +51,12 @@ public enum AutomatedTaskName {
     }
 
     AutomatedTaskName(String taskName) {
+        this(taskName, null);
+    }
+
+    AutomatedTaskName(String taskName, String conditionalOnSpEL) {
         this.taskName = taskName;
+        this.conditionalOnSpEL = conditionalOnSpEL;
     }
 
 

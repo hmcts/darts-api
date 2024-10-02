@@ -1,4 +1,4 @@
-package uk.gov.hmcts.darts.dets;
+package uk.gov.hmcts.darts.dets.service.impl;
 
 import com.azure.storage.blob.BlobClient;
 import com.azure.storage.blob.BlobContainerClient;
@@ -13,7 +13,6 @@ import uk.gov.hmcts.darts.common.datamanagement.component.DataManagementAzureCli
 import uk.gov.hmcts.darts.common.datamanagement.component.impl.DownloadResponseMetaData;
 import uk.gov.hmcts.darts.common.datamanagement.enums.DatastoreContainerType;
 import uk.gov.hmcts.darts.dets.config.DetsDataManagementConfiguration;
-import uk.gov.hmcts.darts.dets.service.impl.DetsApiServiceImpl;
 
 import java.util.UUID;
 

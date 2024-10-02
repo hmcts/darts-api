@@ -132,7 +132,7 @@ class AnnotationDataManagementTest {
         var mockFileBasedDownloadResponseMetaData = mock(FileBasedDownloadResponseMetaData.class);
         when(dataManagementFacade.retrieveFileFromStorage(anyList())).thenReturn(mockFileBasedDownloadResponseMetaData);
 
-        when(mockFileBasedDownloadResponseMetaData.getInputStream()).thenThrow(new IOException());
+        when(mockFileBasedDownloadResponseMetaData.getResource()).thenThrow(new IOException());
 
         assertThatThrownBy(() -> annotationDataManagement.download(Arrays.asList(someExternalObjectDirectoryEntity())))
             .isInstanceOf(DartsApiException.class)
