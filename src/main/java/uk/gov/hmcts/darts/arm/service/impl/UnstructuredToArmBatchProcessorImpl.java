@@ -210,5 +210,5 @@ public class UnstructuredToArmBatchProcessorImpl implements UnstructuredToArmBat
             }
         }
     }
-    
+
 }

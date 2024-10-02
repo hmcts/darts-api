@@ -40,4 +40,6 @@ class DetsDataManagementServiceTest {
             assertEquals(TEST_BINARY_STRING, new String(downloadResponseMetaData.getResource().getInputStream().readAllBytes()));
         }
     }
+
+    
 }

@@ -10,4 +10,6 @@ public interface DetsApiService {
     DownloadResponseMetaData downloadData(UUID blobId) throws FileNotDownloadedException;
 
     UUID saveBlobData(BinaryData binaryData);
+
+    void copyDetsBlobDataToArm(String detsUuid, String blobPathAndName);
 }
