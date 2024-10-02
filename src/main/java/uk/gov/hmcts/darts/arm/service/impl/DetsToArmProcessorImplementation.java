@@ -35,6 +35,7 @@ import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.UUID;
 
+import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_INGESTION;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_RAW_DATA_FAILED;
@@ -130,8 +131,10 @@ public class DetsToArmProcessorImplementation {
         try {
             if (!batchItems.getSuccessful().isEmpty()) {
                 dataStoreToArmHelper.writeManifestFile(batchItems, archiveRecordsFile);
-
+                updateObjectStateRecordManifestSuccessOrFailure(batchItems, archiveRecordsFile);
                 copyMetadataToArm(archiveRecordsFile);
+            } else {
+                log.warn("No EODs were able to be processed, skipping manifest file creation");
             }
         } catch (Exception e) {
             log.error("Error during generation of DETS batch manifest file {}", archiveRecordsFile.getName(), e);
@@ -143,6 +146,30 @@ public class DetsToArmProcessorImplementation {
             dataStoreToArmHelper.updateExternalObjectDirectoryStatus(batchItem.getArmEod(), EodHelper.armDropZoneStatus(), userAccount);
             logApi.armPushSuccessful(batchItem.getArmEod().getId());
         }
+    }
+
+    private void updateObjectStateRecordManifestSuccessOrFailure(ArmBatchItems batchItems, File archiveRecordsFile) {
+        for (var batchItem : batchItems.getSuccessful()) {
+            ObjectStateRecordEntity objectStateRecord = getObjectStateRecordEntity(batchItem.getArmEod());
+            if (isNull(objectStateRecord.getObjectStatus())) {
+                objectStateRecord.setFlagFileMfstCreated(true);
+                objectStateRecord.setDateFileMfstCreated(currentTimeHelper.currentOffsetDateTime());
+                objectStateRecord.setIdManifestFile(archiveRecordsFile.getName());
+                objectStateRecord.setFlagMfstTransfToArml(true);
+                objectStateRecord.setDateMfstTransfToArml(currentTimeHelper.currentOffsetDateTime());
+                objectStateRecordRepository.save(objectStateRecord);
+            }
+            objectStateRecordRepository.save(objectStateRecord);
+        }
+        for (var batchItem : batchItems.getFailed()) {
+            ObjectStateRecordEntity objectStateRecord = getObjectStateRecordEntity(batchItem.getArmEod());
+            if (isNull(objectStateRecord.getObjectStatus())) {
+                objectStateRecord.setObjectStatus("Manifest file creation failed");
+                objectStateRecordRepository.save(objectStateRecord);
+            }
+
+        }
+
     }
 
     private ObjectStateRecordEntity getObjectStateRecordEntity(ExternalObjectDirectoryEntity externalObjectDirectory) {
