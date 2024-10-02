@@ -53,10 +53,13 @@ public class ManualDeletionProcessorImpl implements ManualDeletionProcessor {
 
     private void deleteMedia(MediaEntity mediaEntity) {
 
-        externalObjectDirectoryRepository.findByMediaStatusAndLocation(mediaEntity.getId())
-            .stream()
-            .peek(this::deleteFromExternalDataStore)
-            .forEach(externalObjectDirectoryRepository::delete);
+        List<ExternalObjectDirectoryEntity> objectsToDelete = externalObjectDirectoryRepository.findStoredInInboundAndUnstructuredByMediaId(
+            mediaEntity.getId());
+
+        for (ExternalObjectDirectoryEntity externalObjectDirectoryEntity : objectsToDelete) {
+            deleteFromExternalDataStore(externalObjectDirectoryEntity);
+            externalObjectDirectoryRepository.delete(externalObjectDirectoryEntity);
+        }
 
         mediaEntity.setDeleted(true);
         mediaRepository.save(mediaEntity);
@@ -64,10 +67,14 @@ public class ManualDeletionProcessorImpl implements ManualDeletionProcessor {
     }
 
     private void deleteTranscriptionDocument(TranscriptionDocumentEntity transcription) {
-        externalObjectDirectoryRepository.findByTranscriptionStatusAndLocation(transcription.getId())
-            .stream()
-            .peek(this::deleteFromExternalDataStore)
-            .forEach(externalObjectDirectoryRepository::delete);
+
+        List<ExternalObjectDirectoryEntity> objectsToDelete =
+            externalObjectDirectoryRepository.findStoredInInboundAndUnstructuredByTranscriptionId(transcription.getId());
+
+        for (ExternalObjectDirectoryEntity externalObjectDirectoryEntity : objectsToDelete) {
+            deleteFromExternalDataStore(externalObjectDirectoryEntity);
+            externalObjectDirectoryRepository.delete(externalObjectDirectoryEntity);
+        }
 
         transcription.setDeleted(true);
         transcriptionDocumentRepository.save(transcription);

@@ -180,7 +180,7 @@ class ExternalObjectDirectoryRepositoryTest extends PostgresIntegrationBase {
     }
 
     @Test
-    void testFindByMediaStatusAndLocation() throws Exception {
+    void testFindStoredInInboundAndUnstructuredByMediaId() throws Exception {
         // Setup
         int hoursBeforeCurrentTime = 24;
         generateDataWithMediaForInbound(hoursBeforeCurrentTime);
@@ -195,7 +195,8 @@ class ExternalObjectDirectoryRepositoryTest extends PostgresIntegrationBase {
             .orElseThrow(() -> new AssertionError("No suitable test entity found"));
 
         // Exercise
-        List<ExternalObjectDirectoryEntity> result = externalObjectDirectoryRepository.findByMediaStatusAndLocation(testEntity.getMedia().getId());
+        List<ExternalObjectDirectoryEntity> result = externalObjectDirectoryRepository.findStoredInInboundAndUnstructuredByMediaId(
+            testEntity.getMedia().getId());
 
         // Verify
         assertFalse(result.isEmpty(), "Result should not be empty");
@@ -209,7 +210,7 @@ class ExternalObjectDirectoryRepositoryTest extends PostgresIntegrationBase {
     }
 
     @Test
-    void testFindByTranscriptionStatusAndLocation() throws Exception {
+    void testFindStoredInInboundAndUnstructuredByTranscriptionId() throws Exception {
         // Setup
         int hoursBeforeCurrentTime = 24;
         generateDataWithAnnotationForInbound(hoursBeforeCurrentTime);
@@ -224,7 +225,7 @@ class ExternalObjectDirectoryRepositoryTest extends PostgresIntegrationBase {
             .orElseThrow(() -> new AssertionError("No suitable test entity found"));
 
         // Exercise
-        List<ExternalObjectDirectoryEntity> result = externalObjectDirectoryRepository.findByTranscriptionStatusAndLocation(
+        List<ExternalObjectDirectoryEntity> result = externalObjectDirectoryRepository.findStoredInInboundAndUnstructuredByTranscriptionId(
             testEntity.getTranscriptionDocumentEntity().getId());
 
         // Verify

@@ -68,9 +68,9 @@ class ManualDeletionProcessorImplTest {
         List<ObjectAdminActionEntity> actionsToDelete = Arrays.asList(mediaAction, transcriptionAction);
 
         when(objectAdminActionRepository.findFilesForManualDeletion(any())).thenReturn(actionsToDelete);
-        when(externalObjectDirectoryRepository.findByMediaStatusAndLocation(any())).thenReturn(
+        when(externalObjectDirectoryRepository.findStoredInInboundAndUnstructuredByMediaId(any())).thenReturn(
             Collections.singletonList(createExternalObjectDirectoryEntity(ExternalLocationTypeEnum.INBOUND)));
-        when(externalObjectDirectoryRepository.findByTranscriptionStatusAndLocation(any())).thenReturn(
+        when(externalObjectDirectoryRepository.findStoredInInboundAndUnstructuredByTranscriptionId(any())).thenReturn(
             Collections.singletonList(createExternalObjectDirectoryEntity(ExternalLocationTypeEnum.UNSTRUCTURED)));
 
         manualDeletionProcessor.process();

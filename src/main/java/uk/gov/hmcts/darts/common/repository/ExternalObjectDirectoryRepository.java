@@ -217,8 +217,7 @@ public interface ExternalObjectDirectoryRepository extends JpaRepository<Externa
 
 
     @Query(
-        """
-                        
+        """                       
             SELECT eod FROM ExternalObjectDirectoryEntity eod
                   JOIN eod.annotationDocumentEntity ade
                   JOIN ade.annotation ann
@@ -458,7 +457,7 @@ public interface ExternalObjectDirectoryRepository extends JpaRepository<Externa
                 AND eod.status.id = 2
                 AND eod.externalLocationType.id IN (1, 2)
         """)
-    List<ExternalObjectDirectoryEntity> findByMediaStatusAndLocation(@Param("mediaId") Integer mediaId);
+    List<ExternalObjectDirectoryEntity> findStoredInInboundAndUnstructuredByMediaId(@Param("mediaId") Integer mediaId);
 
     @Query("""
         SELECT eod FROM ExternalObjectDirectoryEntity eod
@@ -466,5 +465,5 @@ public interface ExternalObjectDirectoryRepository extends JpaRepository<Externa
                 AND eod.status.id = 2
                 AND eod.externalLocationType.id IN (1, 2)
         """)
-    List<ExternalObjectDirectoryEntity> findByTranscriptionStatusAndLocation(@Param("transcriptionDocumentId") Integer id);
+    List<ExternalObjectDirectoryEntity> findStoredInInboundAndUnstructuredByTranscriptionId(@Param("transcriptionDocumentId") Integer id);
 }
