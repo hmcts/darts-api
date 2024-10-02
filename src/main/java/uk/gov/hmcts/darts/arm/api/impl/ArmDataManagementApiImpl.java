@@ -16,6 +16,7 @@ import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
 import uk.gov.hmcts.darts.datamanagement.config.DataManagementConfiguration;
 import uk.gov.hmcts.darts.datamanagement.exception.FileNotDownloadedException;
 import uk.gov.hmcts.darts.datamanagement.service.DataManagementService;
+import uk.gov.hmcts.darts.dets.api.impl.DetsDataManagementApiImpl;
 
 import java.time.OffsetDateTime;
 import java.util.List;
@@ -31,6 +32,7 @@ public class ArmDataManagementApiImpl implements ArmDataManagementApi {
     private final ArmApiService armApiService;
     private final DataManagementConfiguration dataManagementConfiguration;
     private final DataManagementService dataManagementService;
+    private final DetsDataManagementApiImpl detsDataManagementApi;
 
     @Override
     public String saveBlobDataToArm(String filename, BinaryData binaryData) {
@@ -43,6 +45,12 @@ public class ArmDataManagementApiImpl implements ArmDataManagementApi {
         String blobPathAndName = armDataManagementConfiguration.getFolders().getSubmission() + filename;
         dataManagementService.copyBlobData(
             dataManagementConfiguration.getUnstructuredContainerName(), armDataManagementConfiguration.getContainerName(), unstructuredUuid, blobPathAndName);
+    }
+
+    public void copyDetsBlobDataToArm(String detsUuid, String filename) {
+
+        String blobPathAndName = armDataManagementConfiguration.getFolders().getSubmission() + filename;
+        detsDataManagementApi.copyDetsBlobDataToArm(detsUuid, blobPathAndName);
     }
 
     @Override
