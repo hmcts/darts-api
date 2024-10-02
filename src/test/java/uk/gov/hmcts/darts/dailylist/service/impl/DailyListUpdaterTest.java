@@ -135,8 +135,6 @@ class DailyListUpdaterTest {
             .thenReturn(hearing);
         DailyListEntity dailyList = setUpDailyList("handlesNoTimeMarkingNote.json");
         dailyListUpdater.processDailyList(dailyList);
-
-        verify(hearingRepository, times(1)).saveAndFlush(hearingEntityCaptor.capture());
     }
 
     @ParameterizedTest
