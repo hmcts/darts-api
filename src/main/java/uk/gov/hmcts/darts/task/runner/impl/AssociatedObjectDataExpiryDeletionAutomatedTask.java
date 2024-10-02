@@ -163,10 +163,9 @@ public class AssociatedObjectDataExpiryDeletionAutomatedTask
             .distinct()
             .toList();
 
-        entitiesToDelete.forEach(t -> auditApi.record(auditActivity, userAccount, String.valueOf(t.getId())));
-
         externalObjectDirectoryRepository.deleteAll(externalObjectDirectoryEntitiesToDelete);
         repository.softDeleteAll(entitiesToDelete, userAccount);
+        entitiesToDelete.forEach(t -> auditApi.record(auditActivity, userAccount, String.valueOf(t.getId())));
     }
 
     boolean deleteFromExternalDataStore(ExternalObjectDirectoryEntity externalObjectDirectoryEntity) {
