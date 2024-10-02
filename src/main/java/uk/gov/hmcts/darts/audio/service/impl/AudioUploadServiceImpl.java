@@ -7,8 +7,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import uk.gov.hmcts.darts.audio.component.AddAudioRequestMapper;
-import uk.gov.hmcts.darts.audio.helper.AudioAsyncHelper;
 import uk.gov.hmcts.darts.audio.model.AddAudioMetadataRequest;
+import uk.gov.hmcts.darts.audio.service.AudioAsyncService;
 import uk.gov.hmcts.darts.audio.service.AudioUploadService;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
@@ -66,7 +66,7 @@ public class AudioUploadServiceImpl implements AudioUploadService {
     private final FileContentChecksum fileContentChecksum;
     private final LogApi logApi;
     private final MediaLinkedCaseRepository mediaLinkedCaseRepository;
-    private final AudioAsyncHelper audioAsyncHelper;
+    private final AudioAsyncService audioAsyncService;
 
     @Override
     @Transactional
@@ -149,7 +149,7 @@ public class AudioUploadServiceImpl implements AudioUploadService {
         log.info("Saved media id {}", newMediaEntity.getId());
 
         linkAudioToHearingInMetadata(addAudioMetadataRequest, newMediaEntity);
-        audioAsyncHelper.linkAudioToHearingByEvent(addAudioMetadataRequest, newMediaEntity);
+        audioAsyncService.linkAudioToHearingByEvent(addAudioMetadataRequest, newMediaEntity);
 
         saveExternalObjectDirectory(
             externalLocation,

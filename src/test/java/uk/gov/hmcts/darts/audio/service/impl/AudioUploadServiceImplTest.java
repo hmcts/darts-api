@@ -12,8 +12,8 @@ import org.springframework.mock.web.MockMultipartFile;
 import uk.gov.hmcts.darts.audio.component.AddAudioRequestMapper;
 import uk.gov.hmcts.darts.audio.component.impl.AddAudioRequestMapperImpl;
 import uk.gov.hmcts.darts.audio.config.AudioConfigurationProperties;
-import uk.gov.hmcts.darts.audio.helper.AudioAsyncHelper;
 import uk.gov.hmcts.darts.audio.model.AddAudioMetadataRequest;
+import uk.gov.hmcts.darts.audio.service.AudioAsyncService;
 import uk.gov.hmcts.darts.audio.service.AudioUploadService;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
@@ -90,7 +90,7 @@ class AudioUploadServiceImplTest {
     private LogApi logApi;
     private AudioUploadService audioService;
     @InjectMocks
-    private AudioAsyncHelper audioAsyncHelper;
+    private AudioAsyncService audioAsyncService;
     @Mock
     private MediaLinkedCaseHelper mediaLinkedCaseHelper;
     @Mock
@@ -113,7 +113,7 @@ class AudioUploadServiceImplTest {
             fileContentChecksum,
             logApi,
             mediaLinkedCaseRepository,
-            audioAsyncHelper);
+            audioAsyncService);
     }
 
     @Test
@@ -194,7 +194,7 @@ class AudioUploadServiceImplTest {
         when(audioConfigurationProperties.getHandheldAudioCourtroomNumbers())
             .thenReturn(List.of(addAudioMetadataRequest.getCourtroom()));
 
-        audioAsyncHelper.linkAudioToHearingByEvent(addAudioMetadataRequest, mediaEntity);
+        audioAsyncService.linkAudioToHearingByEvent(addAudioMetadataRequest, mediaEntity);
         verify(hearingRepository, times(0)).saveAndFlush(any());
         assertEquals(0, hearing.getMediaList().size());
     }
@@ -216,7 +216,7 @@ class AudioUploadServiceImplTest {
             any()
         )).thenReturn(List.of(eventEntity));
 
-        audioAsyncHelper.linkAudioToHearingByEvent(addAudioMetadataRequest, mediaEntity);
+        audioAsyncService.linkAudioToHearingByEvent(addAudioMetadataRequest, mediaEntity);
         verify(hearingRepository, times(1)).saveAndFlush(any());
         assertEquals(1, hearing.getMediaList().size());
     }
@@ -238,7 +238,7 @@ class AudioUploadServiceImplTest {
             any()
         )).thenReturn(List.of(eventEntity));
 
-        audioAsyncHelper.linkAudioToHearingByEvent(addAudioMetadataRequest, mediaEntity);
+        audioAsyncService.linkAudioToHearingByEvent(addAudioMetadataRequest, mediaEntity);
         verify(hearingRepository, times(1)).saveAndFlush(any());
         assertEquals(1, hearing.getMediaList().size());
         assertTrue(hearing.getHearingIsActual());
@@ -265,7 +265,7 @@ class AudioUploadServiceImplTest {
             any()
         )).thenReturn(Arrays.asList(firstEventEntity, secondEventEntity));
 
-        audioAsyncHelper.linkAudioToHearingByEvent(addAudioMetadataRequest, mediaEntity);
+        audioAsyncService.linkAudioToHearingByEvent(addAudioMetadataRequest, mediaEntity);
         verify(hearingRepository, times(1)).saveAndFlush(any());
         assertEquals(1, hearing.getMediaList().size());
     }
