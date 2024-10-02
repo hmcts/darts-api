@@ -135,6 +135,7 @@ class DailyListUpdaterTest {
             .thenReturn(hearing);
         DailyListEntity dailyList = setUpDailyList("handlesNoTimeMarkingNote.json");
         dailyListUpdater.processDailyList(dailyList);
+        verify(retrieveCoreObjectService, times(1)).retrieveOrCreateHearing("SWANSEA", "1A", "42GD2391421", expectedHearingDate, dailyListUser);
     }
 
     @ParameterizedTest
