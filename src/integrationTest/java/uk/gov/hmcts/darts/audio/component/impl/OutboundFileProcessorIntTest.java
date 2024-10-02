@@ -2,13 +2,14 @@ package uk.gov.hmcts.darts.audio.component.impl;
 
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.TestPropertySource;
 import uk.gov.hmcts.darts.audio.model.AudioFileInfo;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
+import uk.gov.hmcts.darts.test.common.FileStore;
 import uk.gov.hmcts.darts.test.common.TestUtils;
 import uk.gov.hmcts.darts.test.common.data.PersistableFactory;
 import uk.gov.hmcts.darts.test.common.data.builder.TestCourtCaseEntity;
@@ -23,7 +24,6 @@ import java.time.OffsetDateTime;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 
 import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
@@ -56,19 +56,18 @@ class OutboundFileProcessorIntTest extends IntegrationBase {
     private static final OffsetDateTime TIME_12_30_30 = OffsetDateTime.parse("2023-01-01T12:30:30Z");
     private static final OffsetDateTime TIME_12_31 = OffsetDateTime.parse("2023-01-01T12:31Z");
     private static final OffsetDateTime TIME_13_00 = OffsetDateTime.parse("2023-01-01T13:00Z");
-    private Path tempDirectory;
     private Path audioPath;
 
     @Autowired
     private OutboundFileProcessorImpl outboundFileProcessor;
 
+    @TempDir
+    private File tempDirectory;
+
     @BeforeEach
     void setUp() throws IOException {
-        UUID externalLocation = UUID.randomUUID();
-        tempDirectory = Files.createTempDirectory(externalLocation + "darts_api_unit_test");
-
         File audioFileTest = TestUtils.getFile(AUDIO_FILENAME);
-        audioPath = Files.copy(audioFileTest.toPath(), createFile(tempDirectory, "audio-test.mp2"), REPLACE_EXISTING);
+        audioPath = Files.copy(audioFileTest.toPath(), createFile(tempDirectory.toPath(), "audio-test.mp2"), REPLACE_EXISTING);
 
         TestCourtCaseEntity.TestCourtCaseBuilderRetrieve courtCase = PersistableFactory.getCourtCaseTestData().someMinimalBuilderHolder();
         var hearing = PersistableFactory.getHearingTestData()
@@ -77,15 +76,10 @@ class OutboundFileProcessorIntTest extends IntegrationBase {
         dartsPersistence.save(hearing);
     }
 
-    @AfterEach
-    void deleteFile() {
-        if (tempDirectory != null) {
-            try {
-                FileUtils.forceDelete(tempDirectory.toFile());
-            } catch (IOException e) {
-                log.error("Unable to delete directory {}", tempDirectory);
-            }
-        }
+    @Override
+    protected void checkCleanup() throws Exception {
+        FileStore.getFileStore().remove();
+        assertEquals(0, FileUtils.listFiles(tempDirectory.toPath().toFile(), null, true).size());
     }
 
     @Test
@@ -144,7 +138,7 @@ class OutboundFileProcessorIntTest extends IntegrationBase {
             1
         );
         File audioFileTest2 = TestUtils.getFile(AUDIO_FILENAME);
-        Path audioPath2 = Files.copy(audioFileTest2.toPath(), createFile(tempDirectory, "audio-test2.mp2"), REPLACE_EXISTING);
+        Path audioPath2 = Files.copy(audioFileTest2.toPath(), createFile(tempDirectory.toPath(), "audio-test2.mp2"), REPLACE_EXISTING);
 
         var mediaEntityToDownloadLocation = Map.of(mediaEntity1, audioPath,
                                                    mediaEntity2, audioPath2
@@ -184,7 +178,7 @@ class OutboundFileProcessorIntTest extends IntegrationBase {
             2
         );
         File audioFileTest2 = TestUtils.getFile(AUDIO_FILENAME);
-        Path audioPath2 = Files.copy(audioFileTest2.toPath(), createFile(tempDirectory, "audio-test2.mp2"), REPLACE_EXISTING);
+        Path audioPath2 = Files.copy(audioFileTest2.toPath(), createFile(tempDirectory.toPath(), "audio-test2.mp2"), REPLACE_EXISTING);
 
         var mediaEntityToDownloadLocation = Map.of(mediaEntity1, audioPath,
                                                    mediaEntity2, audioPath2
@@ -223,7 +217,7 @@ class OutboundFileProcessorIntTest extends IntegrationBase {
             1
         );
         File audioFileTest2 = TestUtils.getFile(AUDIO_FILENAME);
-        Path audioPath2 = Files.copy(audioFileTest2.toPath(), createFile(tempDirectory, "audio-test2.mp2"), REPLACE_EXISTING);
+        Path audioPath2 = Files.copy(audioFileTest2.toPath(), createFile(tempDirectory.toPath(), "audio-test2.mp2"), REPLACE_EXISTING);
 
         var mediaEntityToDownloadLocation = Map.of(mediaEntity1, audioPath,
                                                    mediaEntity2, audioPath2
@@ -326,17 +320,17 @@ class OutboundFileProcessorIntTest extends IntegrationBase {
         );
 
         File audioFileTest = TestUtils.getFile(AUDIO_FILENAME);
-        Path audioPath2 = Files.copy(audioFileTest.toPath(), createFile(tempDirectory, "audio-test2.mp2"), REPLACE_EXISTING);
-        Path audioPath3 = Files.copy(audioFileTest.toPath(), createFile(tempDirectory, "audio-test3.mp2"), REPLACE_EXISTING);
-        Path audioPath4 = Files.copy(audioFileTest.toPath(), createFile(tempDirectory, "audio-test4.mp2"), REPLACE_EXISTING);
-        Path audioPath5 = Files.copy(audioFileTest.toPath(), createFile(tempDirectory, "audio-test5.mp2"), REPLACE_EXISTING);
-        Path audioPath6 = Files.copy(audioFileTest.toPath(), createFile(tempDirectory, "audio-test6.mp2"), REPLACE_EXISTING);
-        Path audioPath7 = Files.copy(audioFileTest.toPath(), createFile(tempDirectory, "audio-test7.mp2"), REPLACE_EXISTING);
-        Path audioPath8 = Files.copy(audioFileTest.toPath(), createFile(tempDirectory, "audio-test8.mp2"), REPLACE_EXISTING);
-        Path audioPath9 = Files.copy(audioFileTest.toPath(), createFile(tempDirectory, "audio-test9.mp2"), REPLACE_EXISTING);
-        Path audioPath10 = Files.copy(audioFileTest.toPath(), createFile(tempDirectory, "audio-test10.mp2"), REPLACE_EXISTING);
-        Path audioPath11 = Files.copy(audioFileTest.toPath(), createFile(tempDirectory, "audio-test11.mp2"), REPLACE_EXISTING);
-        Path audioPath12 = Files.copy(audioFileTest.toPath(), createFile(tempDirectory, "audio-test12.mp2"), REPLACE_EXISTING);
+        Path audioPath2 = Files.copy(audioFileTest.toPath(), createFile(tempDirectory.toPath(), "audio-test2.mp2"), REPLACE_EXISTING);
+        Path audioPath3 = Files.copy(audioFileTest.toPath(), createFile(tempDirectory.toPath(), "audio-test3.mp2"), REPLACE_EXISTING);
+        Path audioPath4 = Files.copy(audioFileTest.toPath(), createFile(tempDirectory.toPath(), "audio-test4.mp2"), REPLACE_EXISTING);
+        Path audioPath5 = Files.copy(audioFileTest.toPath(), createFile(tempDirectory.toPath(), "audio-test5.mp2"), REPLACE_EXISTING);
+        Path audioPath6 = Files.copy(audioFileTest.toPath(), createFile(tempDirectory.toPath(), "audio-test6.mp2"), REPLACE_EXISTING);
+        Path audioPath7 = Files.copy(audioFileTest.toPath(), createFile(tempDirectory.toPath(), "audio-test7.mp2"), REPLACE_EXISTING);
+        Path audioPath8 = Files.copy(audioFileTest.toPath(), createFile(tempDirectory.toPath(), "audio-test8.mp2"), REPLACE_EXISTING);
+        Path audioPath9 = Files.copy(audioFileTest.toPath(), createFile(tempDirectory.toPath(), "audio-test9.mp2"), REPLACE_EXISTING);
+        Path audioPath10 = Files.copy(audioFileTest.toPath(), createFile(tempDirectory.toPath(), "audio-test10.mp2"), REPLACE_EXISTING);
+        Path audioPath11 = Files.copy(audioFileTest.toPath(), createFile(tempDirectory.toPath(), "audio-test11.mp2"), REPLACE_EXISTING);
+        Path audioPath12 = Files.copy(audioFileTest.toPath(), createFile(tempDirectory.toPath(), "audio-test12.mp2"), REPLACE_EXISTING);
 
         Map<MediaEntity, Path> mediaEntityToDownloadLocation = new LinkedHashMap<>();
         mediaEntityToDownloadLocation.put(mediaEntity1, audioPath);
@@ -442,7 +436,7 @@ class OutboundFileProcessorIntTest extends IntegrationBase {
             1
         );
         File audioFileTest = TestUtils.getFile(AUDIO_FILENAME);
-        Path audioPath2 = Files.copy(audioFileTest.toPath(), createFile(tempDirectory, "audio-test2.mp2"), REPLACE_EXISTING);
+        Path audioPath2 = Files.copy(audioFileTest.toPath(), createFile(tempDirectory.toPath(), "audio-test2.mp2"), REPLACE_EXISTING);
         var mediaEntityToDownloadLocation = Map.of(mediaEntity1, audioPath,
                                                    mediaEntity2, audioPath2
         );
@@ -526,7 +520,7 @@ class OutboundFileProcessorIntTest extends IntegrationBase {
             1
         );
         File audioFileTest = TestUtils.getFile(AUDIO_FILENAME);
-        Path audioPath2 = Files.copy(audioFileTest.toPath(), createFile(tempDirectory, "audio-test2.mp2"), REPLACE_EXISTING);
+        Path audioPath2 = Files.copy(audioFileTest.toPath(), createFile(tempDirectory.toPath(), "audio-test2.mp2"), REPLACE_EXISTING);
 
         var mediaEntityToPlaybackLocation = Map.of(mediaEntity1, audioPath,
                                                    mediaEntity2, audioPath2
@@ -562,6 +556,6 @@ class OutboundFileProcessorIntTest extends IntegrationBase {
 
 
     private Path createFile(Path path, String name) throws IOException {
-        return Files.createFile(path.resolve(name));
+        return FileStore.getFileStore().create(path, Path.of(name)).toPath();
     }
 }

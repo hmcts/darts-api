@@ -2,9 +2,11 @@ package uk.gov.hmcts.darts.annotation;
 
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.core.io.Resource;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import uk.gov.hmcts.darts.common.datamanagement.api.DataManagementFacade;
@@ -74,7 +76,11 @@ class AnnotationGetTest extends IntegrationBase {
     void shouldDownloadAnnotationDocument() throws Exception {
 
         var judge = given.anAuthenticatedUserWithGlobalAccessAndRole(JUDICIARY);
-        when(downloadResponseMetaData.getInputStream()).thenReturn(inputStreamResource);
+
+        Resource resource = Mockito.mock(Resource.class);
+        when(downloadResponseMetaData.getResource()).thenReturn(resource);
+
+        when(downloadResponseMetaData.getResource()).thenReturn(resource);
         when(dataManagementFacade.retrieveFileFromStorage(anyList())).thenReturn(downloadResponseMetaData);
 
         var annotationDocument = createValidAnnotationDocumentForDownload(judge);

@@ -206,17 +206,14 @@ public class DataManagementFacadeImpl implements DataManagementFacade {
 
             String tempBlobPath = dataManagementConfiguration.getTempBlobWorkspace() + "/" + UUID.randomUUID();
             File targetFile = new File(tempBlobPath);
-            FileUtils.copyInputStreamToFile(downloadResponseMetaData.getInputStream(), targetFile);
+            FileUtils.copyInputStreamToFile(downloadResponseMetaData.getResource().getInputStream(), targetFile);
 
-            InputStream inputStreamOriginal = new FileInputStream(targetFile);
-            downloadResponseMetaData.markInputStream(inputStreamOriginal);
-
-            InputStream inputStreamUnstructured = new FileInputStream(targetFile);
-            DownloadResponseMetaData downloadResponseMetaDataUnstructured = new FileBasedDownloadResponseMetaData();
-            downloadResponseMetaDataUnstructured.setEodEntity(eodEntity);
-            downloadResponseMetaDataUnstructured.setContainerTypeUsedToDownload(downloadResponseMetaData.getContainerTypeUsedToDownload());
-            downloadResponseMetaDataUnstructured.markInputStream(inputStreamUnstructured);
-            createCopyInUnstructuredDatastore(downloadResponseMetaDataUnstructured, eodEntityToDelete, targetFile);
+            try (FileBasedDownloadResponseMetaData downloadResponseMetaDataUnstructured = new FileBasedDownloadResponseMetaData()) {
+                downloadResponseMetaDataUnstructured.setEodEntity(eodEntity);
+                downloadResponseMetaDataUnstructured.setContainerTypeUsedToDownload(downloadResponseMetaData.getContainerTypeUsedToDownload());
+                downloadResponseMetaDataUnstructured.setInputStream(new FileInputStream(targetFile), dataManagementConfiguration);
+                createCopyInUnstructuredDatastore(downloadResponseMetaDataUnstructured, eodEntityToDelete, targetFile);
+            }
         }
     }
 
@@ -226,9 +223,9 @@ public class DataManagementFacadeImpl implements DataManagementFacade {
     private void createCopyInUnstructuredDatastore(
         DownloadResponseMetaData downloadResponseMetaData,
         ExternalObjectDirectoryEntity eodEntityToDelete,
-        File targetFile) {
-        try {
-            InputStream inputStream = new BufferedInputStream(downloadResponseMetaData.getInputStream());
+        File targetFile) throws IOException {
+
+        try (InputStream inputStream = new BufferedInputStream(downloadResponseMetaData.getResource().getInputStream())) {
             unstructuredDataHelper.createUnstructuredDataFromEod(
                 eodEntityToDelete,
                 downloadResponseMetaData.getEodEntity(),
