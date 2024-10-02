@@ -194,7 +194,7 @@ public class ArmServiceImpl implements ArmService {
                                                        String blobPathAndName,
                                                        Integer batchSize,
                                                        String continuationToken) {
-        log.debug("About to list files for {} with continuationToken {}", blobPathAndName, continuationToken);
+        log.debug("About to list files for {} batchSize {} with continuationToken {}", blobPathAndName, batchSize, continuationToken);
         ListBlobsOptions options = new ListBlobsOptions()
             .setPrefix(blobPathAndName)
             .setMaxResultsPerPage(batchSize)
@@ -228,6 +228,8 @@ public class ArmServiceImpl implements ArmService {
 
             blobs.forEach(blob -> blobsWithPaths.add(blob.getName()));
             continuationTokenBlobs.setBlobNamesAndPaths(blobsWithPaths);
+            log.debug("Prefix {} found {} blobs for continuation token {}",
+                      continuationTokenBlobs.getContinuationToken(), blobPathAndName, blobsWithPaths.size());
         } catch (NoSuchElementException | IOException ioe) {
             log.error("Unable to get next response for prefix {}", blobPathAndName, ioe);
         }
