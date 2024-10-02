@@ -2,13 +2,13 @@ package uk.gov.hmcts.darts.audio.service;
 
 import com.azure.core.util.BinaryData;
 import lombok.extern.slf4j.Slf4j;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.springframework.beans.factory.annotation.Autowired;
 import uk.gov.hmcts.darts.common.service.FileOperationService;
+import uk.gov.hmcts.darts.test.common.FileStore;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 
 import java.io.ByteArrayInputStream;
@@ -34,7 +34,6 @@ class FileOperationServiceTest extends IntegrationBase {
 
     @TempDir
     private File tempDirectory;
-    private Path filePath;
     private InputStream mediaFile;
     private String fileName;
 
@@ -49,14 +48,14 @@ class FileOperationServiceTest extends IntegrationBase {
     @Test
     @DisplayName("Test-1: Check if file is created in temporary folder")
     void saveBlobDataToTempWorkspaceTestOne() throws IOException {
-        filePath = fileOperationService.saveFileToTempWorkspace(mediaFile, fileName);
+        Path filePath = fileOperationService.saveFileToTempWorkspace(mediaFile, fileName);
         assertTrue(Files.exists(filePath));
     }
 
     @Test
     @DisplayName("Test-2: Check if file is empty")
     void saveBlobDataToTempWorkspaceTestTwo() throws IOException {
-        filePath = fileOperationService.saveFileToTempWorkspace(mediaFile, fileName);
+        Path filePath = fileOperationService.saveFileToTempWorkspace(mediaFile, fileName);
         assertNotEquals(0L, Files.size(filePath));
     }
 
@@ -64,7 +63,7 @@ class FileOperationServiceTest extends IntegrationBase {
     @DisplayName("Test-3: Check if the saved file is equal to the original BinaryData file")
     void saveBlobDataToTempWorkspaceTestThree() throws IOException {
         mediaFile.mark(0);
-        filePath = fileOperationService.saveFileToTempWorkspace(mediaFile, fileName);
+        Path filePath = fileOperationService.saveFileToTempWorkspace(mediaFile, fileName);
         mediaFile.reset();
         assertArrayEquals(mediaFile.readAllBytes(), Files.readAllBytes(filePath));
     }
@@ -80,7 +79,7 @@ class FileOperationServiceTest extends IntegrationBase {
     @Test
     @DisplayName("Test-5: Test converting file to binary data")
     void convertFileToBinaryData() throws IOException {
-        filePath = createDummyFile();
+        Path filePath = createDummyFile();
         log.debug("Created file {}", filePath);
         BinaryData binaryData = fileOperationService.convertFileToBinaryData(filePath.toFile().getAbsolutePath());
         assertNotNull(binaryData);
@@ -91,7 +90,7 @@ class FileOperationServiceTest extends IntegrationBase {
     void saveBinaryDataToSpecifiedWorkspace() throws IOException {
         var tempFilename = UUID.randomUUID().toString();
 
-        filePath = fileOperationService.saveBinaryDataToSpecifiedWorkspace(
+        Path filePath = fileOperationService.saveBinaryDataToSpecifiedWorkspace(
             BinaryData.fromStream(mediaFile),
             tempFilename,
             tempDirectory.getAbsolutePath(),
@@ -103,22 +102,16 @@ class FileOperationServiceTest extends IntegrationBase {
     @Test
     @DisplayName("Test-7: createFile")
     void createFile() throws IOException {
-        filePath = fileOperationService.createFile(fileName, tempDirectory.getAbsolutePath(), true);
+        Path filePath = fileOperationService.createFile(fileName, tempDirectory.getAbsolutePath(), true);
         assertTrue(Files.exists(filePath));
         assertEquals(0L, Files.size(filePath));
-    }
-
-    @AfterEach
-    void deleteFile() throws IOException {
-        if (filePath != null) {
-            Files.delete(filePath);
-        }
     }
 
     private Path createDummyFile() throws IOException {
         var tempFilename = UUID.randomUUID().toString();
         var tempDirectoryName = UUID.randomUUID().toString();
         Path tempDirectory = Files.createTempDirectory(tempDirectoryName);
-        return Files.write(tempDirectory.resolve(tempFilename), new byte[1024]);
+
+        return FileStore.getFileStore().create(tempDirectory, Path.of(tempFilename)).toPath();
     }
 }
