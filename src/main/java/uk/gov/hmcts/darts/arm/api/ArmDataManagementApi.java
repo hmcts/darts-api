@@ -14,6 +14,8 @@ public interface ArmDataManagementApi extends BlobContainerDownloadable {
 
     void copyBlobDataToArm(String unstructuredUuid, String filename);
 
+    void copyDetsBlobDataToArm(String detsUuid, String filename);
+
     List<String> listResponseBlobs(String prefix);
 
     List<String> listResponseBlobsUsingBatch(String prefix, int batchSize);

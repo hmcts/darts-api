@@ -44,4 +44,10 @@ public class DetsDataManagementApiImpl implements DetsDataManagementApi {
     public StorageConfiguration getConfiguration() {
         return detsManagementConfiguration;
     }
+
+
+    @Override
+    public void copyDetsBlobDataToArm(String detsUuid, String blobPathAndName) {
+        service.copyDetsBlobDataToArm(detsUuid, blobPathAndName);
+    }
 }
