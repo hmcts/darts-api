@@ -5,9 +5,13 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
+import uk.gov.hmcts.darts.audit.api.AuditActivity;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
+import uk.gov.hmcts.darts.common.entity.AuditEntity;
+import uk.gov.hmcts.darts.common.entity.AuditEntity_;
 import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.ObjectAdminActionEntity;
@@ -31,6 +35,7 @@ import java.time.temporal.ChronoUnit;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -92,7 +97,7 @@ class TranscriptionControllerAdminPostAproveDeletionIntTest extends IntegrationB
         TranscriptionDocumentEntity transcriptionDocumentEntity = transactionDocumentStub
             .createTranscriptionDocument(fileName, fileBytes, fileType, hidden, transcriptionEntity);
 
-        objectAdminActionStub.createAndSave(ObjectAdminActionStub.ObjectAdminActionSpec.builder()
+        ObjectAdminActionEntity adminActionEntity = objectAdminActionStub.createAndSave(ObjectAdminActionStub.ObjectAdminActionSpec.builder()
                                                 .transcriptionDocument(transcriptionDocumentEntity)
                                                 .objectHiddenReason(objectHiddenReasonStub.getAnyWithMarkedForDeletion(true))
                                                 .markedForManualDeletion(false)
@@ -128,6 +133,14 @@ class TranscriptionControllerAdminPostAproveDeletionIntTest extends IntegrationB
         assertEquals(objectAdminActionEntity.getFirst().getMarkedForManualDelDateTime()
                          .truncatedTo(ChronoUnit.SECONDS), transcriptionResponse.getAdminAction()
                          .getMarkedForManualDeletionAt().truncatedTo(ChronoUnit.SECONDS));
+
+        List<AuditEntity> caseExpiredAuditEntries = dartsDatabase.getAuditRepository()
+            .findAll((Specification<AuditEntity>) (root, query, criteriaBuilder) -> criteriaBuilder.and(
+                criteriaBuilder.equal(root.get(AuditEntity_.additionalData), String.valueOf(adminActionEntity.getId())),
+                criteriaBuilder.equal(root.get(AuditEntity_.auditActivity).get("id"), AuditActivity.MANUAL_DELETION.getId())
+            ));
+
+        assertFalse(caseExpiredAuditEntries.isEmpty());
     }
 
     @Test
