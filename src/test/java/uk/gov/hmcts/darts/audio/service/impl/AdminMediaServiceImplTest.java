@@ -28,6 +28,7 @@ import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
 import uk.gov.hmcts.darts.common.entity.ObjectAdminActionEntity;
 import uk.gov.hmcts.darts.common.entity.TransformedMediaEntity;
+import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
 import uk.gov.hmcts.darts.common.repository.MediaRepository;
 import uk.gov.hmcts.darts.common.repository.ObjectAdminActionRepository;
@@ -41,6 +42,9 @@ import java.time.ZoneOffset;
 import java.util.List;
 import java.util.Optional;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -87,6 +91,25 @@ class AdminMediaServiceImplTest {
     @BeforeEach
     void setUp() {
         this.objectMapper = TestUtils.getObjectMapper();
+    }
+
+    private void disableManualDeletion() {
+        this.mediaRequestService = spy(mediaRequestService);
+        when(mediaRequestService.isManualDeletionEnabled()).thenReturn(false);
+    }
+
+    @Test
+    void getMediasMarkedForDeletionManualDeletionDisabled() {
+        disableManualDeletion();
+        DartsApiException dartsApiException = assertThrows(DartsApiException.class, () -> mediaRequestService.getMediasMarkedForDeletion());
+        assertThat(dartsApiException.getError()).isEqualTo(DartsApiException.DartsApiErrorCommon.FEATURE_FLAG_NOT_ENABLED);
+    }
+
+    @Test
+    void adminApproveMediaMarkedForDeletionManualDeletionDisabled() {
+        disableManualDeletion();
+        DartsApiException dartsApiException = assertThrows(DartsApiException.class, () -> mediaRequestService.adminApproveMediaMarkedForDeletion(1));
+        assertThat(dartsApiException.getError()).isEqualTo(DartsApiException.DartsApiErrorCommon.FEATURE_FLAG_NOT_ENABLED);
     }
 
     @Test

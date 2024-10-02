@@ -3,6 +3,8 @@ package uk.gov.hmcts.darts.arm.service;
 import com.azure.core.util.BinaryData;
 import com.azure.storage.blob.models.BlobStorageException;
 import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -35,6 +37,7 @@ import uk.gov.hmcts.darts.common.service.impl.EodHelperMocks;
 import uk.gov.hmcts.darts.common.util.EodHelper;
 import uk.gov.hmcts.darts.datamanagement.api.DataManagementApi;
 import uk.gov.hmcts.darts.log.api.LogApi;
+import uk.gov.hmcts.darts.test.common.FileStore;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -162,6 +165,13 @@ class UnstructuredToArmProcessorImplTest {
 
     }
 
+    @AfterEach
+    @SuppressWarnings("PMD.SignatureDeclareThrowsException")
+    public void clean() throws Exception {
+        FileStore.getFileStore().remove();
+        Assertions.assertEquals(0, Files.list(tempDirectory.toPath()).count());
+    }
+
     @Test
     void processMovingDataFromUnstructuredStorageToArm() {
 
@@ -225,8 +235,8 @@ class UnstructuredToArmProcessorImplTest {
 
         String fileLocation = tempDirectory.getAbsolutePath();
         File archiveRecordFile = new File(fileLocation, "1_1_1.a360");
-        archiveRecordFile.createNewFile();
         String content = "Test data";
+        FileStore.getFileStore().create(archiveRecordFile.toPath());
         try (BufferedWriter fileWriter = Files.newBufferedWriter(archiveRecordFile.toPath());
              PrintWriter printWriter = new PrintWriter(fileWriter)) {
             printWriter.write(content);
@@ -292,7 +302,8 @@ class UnstructuredToArmProcessorImplTest {
 
         String fileLocation = tempDirectory.getAbsolutePath();
         File archiveRecordFile = new File(fileLocation, "1_1_1.a360");
-        archiveRecordFile.createNewFile();
+
+        FileStore.getFileStore().create(archiveRecordFile.toPath());
         ArchiveRecordFileInfo archiveRecordFileInfo = ArchiveRecordFileInfo.builder()
             .fileGenerationSuccessful(true)
             .archiveRecordFile(archiveRecordFile)
@@ -329,7 +340,7 @@ class UnstructuredToArmProcessorImplTest {
 
         String fileLocation = tempDirectory.getAbsolutePath();
         File archiveRecordFile = new File(fileLocation, "1_1_1.a360");
-        archiveRecordFile.createNewFile();
+        FileStore.getFileStore().create(archiveRecordFile.toPath());
         ArchiveRecordFileInfo archiveRecordFileInfo = ArchiveRecordFileInfo.builder()
             .fileGenerationSuccessful(true)
             .archiveRecordFile(archiveRecordFile)

@@ -1,21 +1,28 @@
 package uk.gov.hmcts.darts.common.datamanagement.component;
 
+import org.apache.commons.io.IOUtils;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
+import org.junit.jupiter.api.io.TempDir;
 import uk.gov.hmcts.darts.common.datamanagement.StorageConfiguration;
 import uk.gov.hmcts.darts.common.datamanagement.component.impl.FileBasedDownloadResponseMetaData;
 import uk.gov.hmcts.darts.common.datamanagement.enums.DatastoreContainerType;
 
+import java.io.ByteArrayInputStream;
 import java.io.File;
-import java.io.FileInputStream;
+import java.io.InputStream;
 import java.io.OutputStream;
+import java.nio.charset.StandardCharsets;
 
 class FileBasedDownloadResponseMetaDataTest {
+
+    @TempDir
+    private File tempDirectory;
+
     @Test
     void testFileMetaData() throws Exception {
         StorageConfiguration configuration = new StorageConfiguration();
-        configuration.setTempBlobWorkspace(System.getenv("java.home") + "/" + "temp");
+        configuration.setTempBlobWorkspace(tempDirectory.getAbsolutePath());
 
         int fileCount;
         String byteToWrite = "test";
@@ -30,21 +37,35 @@ class FileBasedDownloadResponseMetaDataTest {
                 Assertions.assertEquals(DatastoreContainerType.ARM, fileBasedDownloadResponseMetaData.getContainerTypeUsedToDownload());
 
                 // ensure we do not generate new is or os
-                Assertions.assertSame(fileBasedDownloadResponseMetaData.getInputStream(),
-                                      fileBasedDownloadResponseMetaData.getInputStream());
                 Assertions.assertSame(fileBasedDownloadResponseMetaData.getOutputStream(configuration),
                                       fileBasedDownloadResponseMetaData.getOutputStream(configuration));
-                Assertions.assertEquals(byteToWrite, new String(fileBasedDownloadResponseMetaData.getInputStream().readAllBytes()));
-
-                try (FileInputStream fis = Mockito.mock(FileInputStream.class)) {
-                    fileBasedDownloadResponseMetaData.markInputStream(fis);
-                    Assertions.assertSame(fis, fileBasedDownloadResponseMetaData.getInputStream());
-                }
+                Assertions.assertEquals(byteToWrite, new String(fileBasedDownloadResponseMetaData.getResource().getInputStream().readAllBytes()));
             }
         }
 
         // assert the file gets cleared up
         int fileCountPostCleanup = new File(configuration.getTempBlobWorkspace()).list().length;
         Assertions.assertEquals(fileCount - 1, fileCountPostCleanup);
+    }
+
+    @Test
+    void testFileMetaDataSetInputStream() throws Exception {
+
+        try (FileBasedDownloadResponseMetaData fileBasedDownloadResponseMetaData = new FileBasedDownloadResponseMetaData()) {
+            StorageConfiguration configuration = new StorageConfiguration();
+            configuration.setTempBlobWorkspace(tempDirectory.getAbsolutePath());
+            int fileCountPostCleanupBefore = new File(configuration.getTempBlobWorkspace()).list().length;
+            fileBasedDownloadResponseMetaData.setInputStream(new ByteArrayInputStream("test".getBytes()), configuration);
+
+            Assertions.assertEquals(fileCountPostCleanupBefore + 1, new File(configuration.getTempBlobWorkspace()).list().length);
+
+            try (InputStream inputStream = fileBasedDownloadResponseMetaData.getResource().getInputStream()) {
+                String content = IOUtils.toString(inputStream, StandardCharsets.UTF_8);
+                Assertions.assertEquals("test", content);
+            }
+
+            int fileCountPostCleanup = new File(configuration.getTempBlobWorkspace()).list().length;
+            Assertions.assertEquals(fileCountPostCleanupBefore, fileCountPostCleanup);
+        }
     }
 }

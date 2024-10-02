@@ -1,9 +1,7 @@
 package uk.gov.hmcts.darts.audio.service.impl;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -30,7 +28,6 @@ import uk.gov.hmcts.darts.common.repository.MediaRepository;
 import uk.gov.hmcts.darts.common.repository.ObjectAdminActionRepository;
 import uk.gov.hmcts.darts.common.repository.ObjectHiddenReasonRepository;
 import uk.gov.hmcts.darts.common.repository.TransformedMediaRepository;
-import uk.gov.hmcts.darts.test.common.TestUtils;
 
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
@@ -81,14 +78,7 @@ class MediaRequestServiceImplAdminMediaSearchTest {
     @Captor
     ArgumentCaptor<MediaEntity> mediaEntityArgumentCaptor;
 
-    private ObjectMapper objectMapper;
-
     private MockedStatic<GetAdminMediaResponseMapper> adminMediaSearchResponseMapperMockedStatic;
-
-    @BeforeEach
-    void setUp() {
-        this.objectMapper = TestUtils.getObjectMapper();
-    }
 
     @AfterEach
     void finish() {

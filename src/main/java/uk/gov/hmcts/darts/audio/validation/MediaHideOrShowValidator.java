@@ -1,6 +1,9 @@
 package uk.gov.hmcts.darts.audio.validation;
 
+import lombok.AccessLevel;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.darts.audio.exception.AudioApiError;
 import uk.gov.hmcts.darts.audio.model.AdminActionRequest;
@@ -23,6 +26,10 @@ public class MediaHideOrShowValidator implements Validator<IdRequest<MediaHideRe
     private final ObjectAdminActionRepository objectAdminActionRepository;
     private final MediaIdValidator mediaIdValidator;
     private final ObjectHiddenReasonRepository objectHiddenReasonRepository;
+
+    @Value("${darts.manual-deletion.enabled:false}")
+    @Getter(AccessLevel.PACKAGE)
+    private boolean manualDeletionEnabled;
 
     @Override
     @SuppressWarnings("java:S5411")
@@ -49,6 +56,8 @@ public class MediaHideOrShowValidator implements Validator<IdRequest<MediaHideRe
                 adminActionRequest.getReasonId());
             if (optionalObjectHiddenReasonEntity.isEmpty()) {
                 throw new DartsApiException(AudioApiError.MEDIA_HIDE_ACTION_REASON_NOT_FOUND);
+            } else if (!isManualDeletionEnabled() && optionalObjectHiddenReasonEntity.get().isMarkedForDeletion()) {
+                throw new DartsApiException(DartsApiException.DartsApiErrorCommon.FEATURE_FLAG_NOT_ENABLED);
             }
         }
     }
