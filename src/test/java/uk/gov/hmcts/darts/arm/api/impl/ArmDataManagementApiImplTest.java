@@ -18,6 +18,7 @@ import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
 import uk.gov.hmcts.darts.datamanagement.config.DataManagementConfiguration;
 import uk.gov.hmcts.darts.datamanagement.exception.FileNotDownloadedException;
 import uk.gov.hmcts.darts.datamanagement.service.DataManagementService;
+import uk.gov.hmcts.darts.dets.api.impl.DetsDataManagementApiImpl;
 
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -55,12 +56,14 @@ class ArmDataManagementApiImplTest {
     private ArmApiService armApiService;
     @Mock
     private DataManagementService dataManagementService;
+    @Mock
+    private DetsDataManagementApiImpl detsDataManagementApi;
 
     @BeforeEach
     void setUp() {
         lenient().when(armDataManagementConfiguration.getContainerName()).thenReturn(ARM_BLOB_CONTAINER_NAME);
         armDataManagementApi = new ArmDataManagementApiImpl(
-            armService, armDataManagementConfiguration, armApiService, dataManagementConfiguration, dataManagementService);
+            armService, armDataManagementConfiguration, armApiService, dataManagementConfiguration, dataManagementService, detsDataManagementApi);
     }
 
     @Test

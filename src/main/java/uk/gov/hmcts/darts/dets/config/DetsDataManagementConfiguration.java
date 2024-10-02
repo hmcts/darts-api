@@ -13,4 +13,6 @@ import uk.gov.hmcts.darts.common.datamanagement.StorageConfiguration;
 public class DetsDataManagementConfiguration extends StorageConfiguration {
     private String containerName;
     private String sasEndpoint;
+    private String armDropzoneSasEndpoint;
+
 }

@@ -1,5 +1,7 @@
 package uk.gov.hmcts.darts.arm.service.impl;
 
+import com.azure.core.util.BinaryData;
+import com.azure.storage.blob.models.BlobStorageException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.ListUtils;
@@ -18,6 +20,7 @@ import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.entity.ObjectRecordStatusEntity;
 import uk.gov.hmcts.darts.common.entity.ObjectStateRecordEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
+import uk.gov.hmcts.darts.common.exception.DartsException;
 import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
 import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
 import uk.gov.hmcts.darts.common.repository.ObjectStateRecordRepository;
@@ -30,7 +33,6 @@ import java.time.Duration;
 import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 
 import static java.util.Objects.nonNull;
@@ -56,6 +58,7 @@ public class DetsToArmProcessorImplementation {
     private final ObjectStateRecordRepository objectStateRecordRepository;
     private final CurrentTimeHelper currentTimeHelper;
 
+    private static final int BLOB_ALREADY_EXISTS_STATUS_CODE = 409;
 
     public void processDetsToArm(int taskBatchSize) {
         log.info("Started running DETS ARM Batch Push processing at: {}", OffsetDateTime.now());
@@ -97,13 +100,14 @@ public class DetsToArmProcessorImplementation {
                     batchItem.setArmEod(armEod);
                     dataStoreToArmHelper.updateArmEodToArmIngestionStatus(
                         currentEod, batchItem, batchItems, archiveRecordsFile, userAccount);
-                    objectStateRecord = getObjectStateRecordEntity(currentEod, armEod);
+                    getObjectStateRecordEntity(currentEod);
 
                 } else {
 
                     armEod = dataStoreToArmHelper.createArmEodWithArmIngestionStatus(
                         currentEod, batchItem, batchItems, archiveRecordsFile, userAccount);
-                    objectStateRecord = getObjectStateRecordEntity(currentEod, armEod);
+                    objectStateRecord = getObjectStateRecordEntity(currentEod);
+                    // Save the new ARM EOD to the object state record
                     if (objectStateRecord != null) {
                         objectStateRecord.setArmEodId(String.valueOf(armEod.getId()));
                         objectStateRecordRepository.save(objectStateRecord);
@@ -126,7 +130,8 @@ public class DetsToArmProcessorImplementation {
         try {
             if (!batchItems.getSuccessful().isEmpty()) {
                 dataStoreToArmHelper.writeManifestFile(batchItems, archiveRecordsFile);
-                dataStoreToArmHelper.copyMetadataToArm(archiveRecordsFile);
+
+                copyMetadataToArm(archiveRecordsFile);
             }
         } catch (Exception e) {
             log.error("Error during generation of DETS batch manifest file {}", archiveRecordsFile.getName(), e);
@@ -140,32 +145,17 @@ public class DetsToArmProcessorImplementation {
         }
     }
 
-    private ObjectStateRecordEntity getObjectStateRecordEntity(ExternalObjectDirectoryEntity currentEod,
-                                                               ExternalObjectDirectoryEntity armEod) {
-        if (nonNull(armEod.getOsrUuid())) {
-            return objectStateRecordRepository.findById(armEod.getOsrUuid())
-                .orElseGet(() -> findObjectStateRecordByEodId(currentEod, armEod));
+    private ObjectStateRecordEntity getObjectStateRecordEntity(ExternalObjectDirectoryEntity externalObjectDirectory) {
+        if (nonNull(externalObjectDirectory.getOsrUuid())) {
+            return objectStateRecordRepository.findById(externalObjectDirectory.getOsrUuid())
+                .orElseThrow(() -> new DartsException(
+                    "Unable to find ObjectStateRecordEntity for ARM EOD ID: " + externalObjectDirectory.getId()
+                        + " for OSR UUID " + externalObjectDirectory.getOsrUuid()));
         } else {
-            log.warn("Unable to find ObjectStateRecordEntity for ARM EOD ID: {} for OSR UUID {}", armEod.getId(), armEod.getOsrUuid());
-            return findObjectStateRecordByEodId(currentEod, armEod);
+            throw new DartsException(
+                "Unable to find ObjectStateRecordEntity for ARM EOD ID: " + externalObjectDirectory.getId()
+                    + " for OSR UUID " + externalObjectDirectory.getOsrUuid());
         }
-    }
-
-    private ObjectStateRecordEntity findObjectStateRecordByEodId(ExternalObjectDirectoryEntity currentEod,
-                                                                 ExternalObjectDirectoryEntity armEod) {
-        Optional<ObjectStateRecordEntity> objectStateRecordEntities = objectStateRecordRepository.findByEodId(String.valueOf(currentEod.getId()));
-        if (objectStateRecordEntities.isPresent()) {
-            return objectStateRecordEntities.get();
-        } else {
-            log.error("Unable to find ObjectStateRecordEntity for DETS EOD ID: {} ", currentEod.getId());
-            objectStateRecordEntities = objectStateRecordRepository.findByArmEodId(String.valueOf(armEod.getId()));
-            if (objectStateRecordEntities.isPresent()) {
-                return objectStateRecordEntities.get();
-            } else {
-                log.error("Unable to find ObjectStateRecordEntity for ARM EOD ID: {} ", armEod.getId());
-            }
-        }
-        return null;
     }
 
     private void pushRawDataAndCreateArchiveRecordIfSuccess(ArmBatchItem batchItem, String rawFilename, UserAccountEntity userAccount,
@@ -204,7 +194,7 @@ public class DetsToArmProcessorImplementation {
                 log.info("ARM PERFORMANCE PUSH START for EOD {} started at {}", armExternalObjectDirectory.getId(), start);
 
                 log.info("About to push raw data to ARM for EOD {}", armExternalObjectDirectory.getId());
-                armDataManagementApi.copyBlobDataToArm(detsExternalObjectDirectory.getExternalLocation().toString(), filename);
+                armDataManagementApi.copyDetsBlobDataToArm(detsExternalObjectDirectory.getExternalLocation().toString(), filename);
                 log.info("Pushed raw data to ARM for EOD {}", armExternalObjectDirectory.getId());
 
                 Instant finish = Instant.now();
@@ -235,6 +225,23 @@ public class DetsToArmProcessorImplementation {
         }
 
         return true;
+    }
+
+    public void copyMetadataToArm(File manifestFile) {
+        try {
+            BinaryData metadataFileBinary = fileOperationService.convertFileToBinaryData(manifestFile.getAbsolutePath());
+            armDataManagementApi.saveBlobDataToArm(manifestFile.getName(), metadataFileBinary);
+        } catch (BlobStorageException e) {
+            if (e.getStatusCode() == BLOB_ALREADY_EXISTS_STATUS_CODE) {
+                log.info("Metadata BLOB already exists", e);
+            } else {
+                log.error("Failed to move BLOB metadata for file {}", manifestFile.getAbsolutePath(), e);
+                throw e;
+            }
+        } catch (Exception e) {
+            log.error("Unable to move BLOB metadata for file {}", manifestFile.getAbsolutePath(), e);
+            throw e;
+        }
     }
 
     private static void setFileSize(ExternalObjectDirectoryEntity detsExternalObjectDirectory, ObjectStateRecordEntity objectStateRecord) {

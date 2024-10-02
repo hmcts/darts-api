@@ -1,7 +1,5 @@
 package uk.gov.hmcts.darts.arm.helper;
 
-import com.azure.core.util.BinaryData;
-import com.azure.storage.blob.models.BlobStorageException;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -13,7 +11,6 @@ import uk.gov.hmcts.darts.arm.component.ArchiveRecordFileGenerator;
 import uk.gov.hmcts.darts.arm.config.ArmDataManagementConfiguration;
 import uk.gov.hmcts.darts.arm.model.batch.ArmBatchItem;
 import uk.gov.hmcts.darts.arm.model.batch.ArmBatchItems;
-import uk.gov.hmcts.darts.arm.service.ArchiveRecordService;
 import uk.gov.hmcts.darts.common.entity.ExternalLocationTypeEntity;
 import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.entity.ObjectRecordStatusEntity;
@@ -28,6 +25,8 @@ import uk.gov.hmcts.darts.log.api.LogApi;
 import java.io.File;
 import java.nio.file.Path;
 import java.text.MessageFormat;
+import java.time.Duration;
+import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -36,6 +35,7 @@ import java.util.UUID;
 
 import static java.util.Objects.nonNull;
 import static uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum.ARM;
+import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_INGESTION;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_MANIFEST_FAILED;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_RAW_DATA_FAILED;
 import static uk.gov.hmcts.darts.common.util.EodHelper.equalsAnyStatus;
@@ -50,12 +50,9 @@ public class DataStoreToArmHelper {
     private final ExternalLocationTypeRepository externalLocationTypeRepository;
     private final LogApi logApi;
     private final ArmDataManagementApi armDataManagementApi;
-    private final EodHelper eodHelper;
     private final FileOperationService fileOperationService;
-    private final ArchiveRecordService archiveRecordService;
     private final ArchiveRecordFileGenerator archiveRecordFileGenerator;
 
-    private static final int BLOB_ALREADY_EXISTS_STATUS_CODE = 409;
 
     public List<ExternalObjectDirectoryEntity> getEodEntitiesToSendToArm(ExternalLocationTypeEntity sourceLocation,
                                                                          ExternalLocationTypeEntity armLocation, int maxResultSize) {
@@ -208,6 +205,42 @@ public class DataStoreToArmHelper {
         return String.format("%s_%s_%s", entityId, documentId, transferAttempts);
     }
 
+    public boolean copyRawDataToArm(ExternalObjectDirectoryEntity unstructuredExternalObjectDirectory,
+                                    ExternalObjectDirectoryEntity armExternalObjectDirectory,
+                                    String filename,
+                                    ObjectRecordStatusEntity previousStatus, UserAccountEntity userAccount) {
+        try {
+            if (previousStatus == null
+                || ARM_RAW_DATA_FAILED.getId().equals(previousStatus.getId())
+                || ARM_INGESTION.getId().equals(previousStatus.getId())) {
+                Instant start = Instant.now();
+                log.info("ARM PERFORMANCE PUSH START for EOD {} started at {}", armExternalObjectDirectory.getId(), start);
+
+                log.info("About to push raw data to ARM for EOD {}", armExternalObjectDirectory.getId());
+                armDataManagementApi.copyBlobDataToArm(unstructuredExternalObjectDirectory.getExternalLocation().toString(), filename);
+                log.info("Pushed raw data to ARM for EOD {}", armExternalObjectDirectory.getId());
+
+                Instant finish = Instant.now();
+                long timeElapsed = Duration.between(start, finish).toMillis();
+                log.info("ARM PERFORMANCE PUSH END for EOD {} ended at {}", armExternalObjectDirectory.getId(), finish);
+                log.info("ARM PERFORMANCE PUSH ELAPSED TIME for EOD {} took {} ms", armExternalObjectDirectory.getId(), timeElapsed);
+
+                armExternalObjectDirectory.setChecksum(unstructuredExternalObjectDirectory.getChecksum());
+                armExternalObjectDirectory.setExternalLocation(UUID.randomUUID());
+                armExternalObjectDirectory.setLastModifiedBy(userAccount);
+                externalObjectDirectoryRepository.saveAndFlush(armExternalObjectDirectory);
+            }
+        } catch (Exception e) {
+            log.error(
+                "Error copying BLOB data for file {}",
+                unstructuredExternalObjectDirectory.getExternalLocation(),
+                e
+            );
+            return false;
+        }
+
+        return true;
+    }
 
     public void updateExternalObjectDirectoryFailedTransferAttempts(ExternalObjectDirectoryEntity externalObjectDirectoryEntity,
                                                                     UserAccountEntity userAccount) {
@@ -288,20 +321,5 @@ public class DataStoreToArmHelper {
         }
     }
 
-    public void copyMetadataToArm(File manifestFile) {
-        try {
-            BinaryData metadataFileBinary = fileOperationService.convertFileToBinaryData(manifestFile.getAbsolutePath());
-            armDataManagementApi.saveBlobDataToArm(manifestFile.getName(), metadataFileBinary);
-        } catch (BlobStorageException e) {
-            if (e.getStatusCode() == BLOB_ALREADY_EXISTS_STATUS_CODE) {
-                log.info("Metadata BLOB already exists", e);
-            } else {
-                log.error("Failed to move BLOB metadata for file {}", manifestFile.getAbsolutePath(), e);
-                throw e;
-            }
-        } catch (Exception e) {
-            log.error("Unable to move BLOB metadata for file {}", manifestFile.getAbsolutePath(), e);
-            throw e;
-        }
-    }
+
 }

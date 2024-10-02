@@ -4,4 +4,5 @@ import uk.gov.hmcts.darts.common.datamanagement.api.BlobContainerDownloadable;
 
 public interface DetsDataManagementApi extends BlobContainerDownloadable {
 
+    void copyDetsBlobDataToArm(String detsUuid, String blobPathAndName);
 }
