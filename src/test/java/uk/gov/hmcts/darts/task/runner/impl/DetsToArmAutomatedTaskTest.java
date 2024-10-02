@@ -5,7 +5,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
-import uk.gov.hmcts.darts.arm.service.DetsToArmProcessor;
+import uk.gov.hmcts.darts.arm.service.DetsToArmBatchPushProcessor;
 import uk.gov.hmcts.darts.common.entity.AutomatedTaskEntity;
 import uk.gov.hmcts.darts.common.repository.AutomatedTaskRepository;
 import uk.gov.hmcts.darts.log.api.LogApi;
@@ -28,7 +28,7 @@ class DetsToArmAutomatedTaskTest {
     @Mock
     private LockService lockService;
     @Mock
-    DetsToArmProcessor detsToArmProcessor;
+    DetsToArmBatchPushProcessor detsToArmProcessor;
 
     @Test
     void runTask() {
@@ -38,8 +38,8 @@ class DetsToArmAutomatedTaskTest {
         int batchSize = 10_000;
         automatedTask.setBatchSize(batchSize);
 
-        DetsToArmAutomatedTask detsToArmAutomatedTask =
-            new DetsToArmAutomatedTask(
+        DetsToArmPushAutomatedTask detsToArmAutomatedTask =
+            new DetsToArmPushAutomatedTask(
                 automatedTaskRepository,
                 automatedTaskConfigurationProperties,
                 detsToArmProcessor,
