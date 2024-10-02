@@ -3,21 +3,23 @@ package uk.gov.hmcts.darts.audit.api;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 
+import java.util.Optional;
+
 public interface AuditApi {
 
     default void record(AuditActivity activity, UserAccountEntity userAccountEntity, String additionalData) {
-        record(activity, userAccountEntity, null, additionalData);
+        record(activity, userAccountEntity, Optional.empty(), Optional.of(additionalData));
     }
 
     default void record(AuditActivity activity, UserAccountEntity userAccountEntity) {
-        record(activity, userAccountEntity, null, null);
+        record(activity, userAccountEntity, Optional.empty(), Optional.empty());
     }
-
-    void record(AuditActivity activity, UserAccountEntity userAccountEntity, CourtCaseEntity courtCase, String additionalData);
 
     default void record(AuditActivity activity, UserAccountEntity userAccountEntity, CourtCaseEntity courtCase) {
-        record(activity, userAccountEntity, courtCase, null);
+        record(activity, userAccountEntity, Optional.of(courtCase), Optional.empty());
     }
+
+    void record(AuditActivity activity, UserAccountEntity userAccountEntity, Optional<CourtCaseEntity> courtCase, Optional<String> additionalData);
 
     void record(AuditActivity activity);
 
