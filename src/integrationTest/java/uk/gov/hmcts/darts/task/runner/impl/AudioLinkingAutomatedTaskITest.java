@@ -21,7 +21,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 class AudioLinkingAutomatedTaskITest extends PostgresIntegrationBase {
 
     private final AudioLinkingAutomatedTask audioLinkingAutomatedTask;
-    private static int caseNumberIterator = 0;
+    private static int caseNumberIterator;
 
     @Test
     void positiveMixOfValidMediaAndInvalidMedia() {
