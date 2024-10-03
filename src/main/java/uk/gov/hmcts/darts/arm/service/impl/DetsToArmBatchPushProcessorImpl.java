@@ -135,8 +135,10 @@ public class DetsToArmBatchPushProcessorImpl implements DetsToArmBatchPushProces
                 log.warn("No EODs were able to be processed, skipping manifest file creation");
             }
         } catch (Exception e) {
-            log.error("Error during generation of DETS batch manifest file {}", archiveRecordsFile.getName(), e);
+            String errorMessage = String.format("Error during generation of DETS batch manifest file %s - %s", archiveRecordsFile.getName(), e.getMessage());
+            log.error(errorMessage, e);
             batchItems.getSuccessful().forEach(batchItem -> dataStoreToArmHelper.recoverByUpdatingEodToFailedArmStatus(batchItem, userAccount));
+            batchItems.getFailed().forEach(batchItem -> updateObjectStateRecordStatus(batchItem.getArmEod(), errorMessage));
             return;
         }
 
@@ -160,14 +162,22 @@ public class DetsToArmBatchPushProcessorImpl implements DetsToArmBatchPushProces
             objectStateRecordRepository.save(objectStateRecord);
         }
         for (var batchItem : batchItems.getFailed()) {
-            ObjectStateRecordEntity objectStateRecord = getObjectStateRecordEntity(batchItem.getArmEod());
-            if (isNull(objectStateRecord.getObjectStatus())) {
-                objectStateRecord.setObjectStatus("Manifest file creation failed");
-                objectStateRecordRepository.save(objectStateRecord);
-            }
-
+            String errorMessage = "Manifest file creation failed";
+            updateObjectStateRecordStatus(batchItem.getArmEod(), errorMessage);
         }
 
+    }
+
+    private void updateObjectStateRecordStatus(ExternalObjectDirectoryEntity externalObjectDirectory, String errorMessage) {
+        ObjectStateRecordEntity objectStateRecord = getObjectStateRecordEntity(externalObjectDirectory);
+        if (isNull(objectStateRecord)) {
+            if (nonNull(objectStateRecord.getObjectStatus())) {
+                objectStateRecord.setObjectStatus(objectStateRecord.getObjectStatus() + " " + errorMessage);
+            } else {
+                objectStateRecord.setObjectStatus(errorMessage);
+            }
+            objectStateRecordRepository.save(objectStateRecord);
+        }
     }
 
     private ObjectStateRecordEntity getObjectStateRecordEntity(ExternalObjectDirectoryEntity externalObjectDirectory) {
@@ -177,9 +187,7 @@ public class DetsToArmBatchPushProcessorImpl implements DetsToArmBatchPushProces
                     "Unable to find ObjectStateRecordEntity for ARM EOD ID: " + externalObjectDirectory.getId()
                         + " for OSR UUID " + externalObjectDirectory.getOsrUuid()));
         } else {
-            throw new DartsException(
-                "Unable to find ObjectStateRecordEntity for ARM EOD ID: " + externalObjectDirectory.getId()
-                    + " for OSR UUID " + externalObjectDirectory.getOsrUuid());
+            throw new DartsException("Unable to find ObjectStateRecordEntity for ARM EOD ID: " + externalObjectDirectory.getId() + " as OSR UUID is null");
         }
     }
 
@@ -241,18 +249,16 @@ public class DetsToArmBatchPushProcessorImpl implements DetsToArmBatchPushProces
                 }
             }
         } catch (Exception e) {
-            log.error(
-                "Error copying BLOB data for file {}",
-                detsExternalObjectDirectory.getExternalLocation(),
-                e
-            );
+            String errorMessage = String.format("Error copying BLOB data for file %s - %s", detsExternalObjectDirectory.getExternalLocation(), e.getMessage());
+            log.error("Error copying BLOB data for file {}", detsExternalObjectDirectory.getExternalLocation(), e);
+            updateObjectStateRecordStatus(armExternalObjectDirectory, errorMessage);
             return false;
         }
 
         return true;
     }
 
-    public void copyMetadataToArm(File manifestFile) {
+    private void copyMetadataToArm(File manifestFile) {
         try {
             BinaryData metadataFileBinary = fileOperationService.convertFileToBinaryData(manifestFile.getAbsolutePath());
             armDataManagementApi.saveBlobDataToArm(manifestFile.getName(), metadataFileBinary);
@@ -270,17 +276,13 @@ public class DetsToArmBatchPushProcessorImpl implements DetsToArmBatchPushProces
     }
 
     private static void setFileSize(ExternalObjectDirectoryEntity detsExternalObjectDirectory, ObjectStateRecordEntity objectStateRecord) {
-        if (nonNull(detsExternalObjectDirectory.getMedia())
-            && nonNull(detsExternalObjectDirectory.getMedia().getFileSize())) {
+        if (nonNull(detsExternalObjectDirectory.getMedia())) {
             objectStateRecord.setFileSizeBytesArml(detsExternalObjectDirectory.getMedia().getFileSize());
-        } else if (nonNull(detsExternalObjectDirectory.getAnnotationDocumentEntity())
-            && nonNull(detsExternalObjectDirectory.getAnnotationDocumentEntity().getFileSize())) {
+        } else if (nonNull(detsExternalObjectDirectory.getAnnotationDocumentEntity())) {
             objectStateRecord.setFileSizeBytesArml(Long.valueOf(detsExternalObjectDirectory.getAnnotationDocumentEntity().getFileSize()));
-        } else if (nonNull(detsExternalObjectDirectory.getTranscriptionDocumentEntity())
-            && nonNull(detsExternalObjectDirectory.getTranscriptionDocumentEntity().getFileSize())) {
+        } else if (nonNull(detsExternalObjectDirectory.getTranscriptionDocumentEntity())) {
             objectStateRecord.setFileSizeBytesArml(Long.valueOf(detsExternalObjectDirectory.getTranscriptionDocumentEntity().getFileSize()));
-        } else if (nonNull(detsExternalObjectDirectory.getCaseDocument())
-            && nonNull(detsExternalObjectDirectory.getCaseDocument().getFileSize())) {
+        } else if (nonNull(detsExternalObjectDirectory.getCaseDocument())) {
             objectStateRecord.setFileSizeBytesArml(Long.valueOf(detsExternalObjectDirectory.getCaseDocument().getFileSize()));
         }
 

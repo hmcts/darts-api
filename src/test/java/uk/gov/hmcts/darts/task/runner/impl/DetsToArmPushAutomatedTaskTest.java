@@ -18,7 +18,7 @@ import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.darts.task.api.AutomatedTaskName.DETS_TO_ARM_TASK_NAME;
 
 @ExtendWith(MockitoExtension.class)
-class DetsToArmAutomatedTaskTest {
+class DetsToArmPushAutomatedTaskTest {
     @Mock
     private AutomatedTaskRepository automatedTaskRepository;
     @Mock
@@ -28,7 +28,7 @@ class DetsToArmAutomatedTaskTest {
     @Mock
     private LockService lockService;
     @Mock
-    DetsToArmBatchPushProcessor detsToArmProcessor;
+    DetsToArmBatchPushProcessor detsToArmBatchPushProcessor;
 
     @Test
     void runTask() {
@@ -42,7 +42,7 @@ class DetsToArmAutomatedTaskTest {
             new DetsToArmPushAutomatedTask(
                 automatedTaskRepository,
                 automatedTaskConfigurationProperties,
-                detsToArmProcessor,
+                detsToArmBatchPushProcessor,
                 logApi,
                 lockService
             );
@@ -52,6 +52,6 @@ class DetsToArmAutomatedTaskTest {
         detsToArmAutomatedTask.runTask();
 
         //then
-        Mockito.verify(detsToArmProcessor, Mockito.times(1)).processDetsToArm(batchSize);
+        Mockito.verify(detsToArmBatchPushProcessor, Mockito.times(1)).processDetsToArm(batchSize);
     }
 }
