@@ -5,20 +5,18 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.mock.web.MockMultipartFile;
 import uk.gov.hmcts.darts.audio.component.AddAudioRequestMapper;
 import uk.gov.hmcts.darts.audio.component.impl.AddAudioRequestMapperImpl;
 import uk.gov.hmcts.darts.audio.config.AudioConfigurationProperties;
-import uk.gov.hmcts.darts.audio.helper.AudioAsyncHelper;
 import uk.gov.hmcts.darts.audio.model.AddAudioMetadataRequest;
+import uk.gov.hmcts.darts.audio.service.AudioAsyncService;
 import uk.gov.hmcts.darts.audio.service.AudioUploadService;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
-import uk.gov.hmcts.darts.common.entity.EventEntity;
 import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
@@ -39,7 +37,6 @@ import uk.gov.hmcts.darts.test.common.data.PersistableFactory;
 
 import java.io.InputStream;
 import java.time.OffsetDateTime;
-import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
@@ -89,8 +86,8 @@ class AudioUploadServiceImplTest {
     @Mock
     private LogApi logApi;
     private AudioUploadService audioService;
-    @InjectMocks
-    private AudioAsyncHelper audioAsyncHelper;
+    @Mock
+    private AudioAsyncService audioAsyncService;
     @Mock
     private MediaLinkedCaseHelper mediaLinkedCaseHelper;
     @Mock
@@ -113,7 +110,7 @@ class AudioUploadServiceImplTest {
             fileContentChecksum,
             logApi,
             mediaLinkedCaseRepository,
-            audioAsyncHelper);
+            audioAsyncService);
     }
 
     @Test
@@ -177,97 +174,6 @@ class AudioUploadServiceImplTest {
         assertEquals(savedMedia.getChecksum(), externalObjectDirectoryEntity.getChecksum());
         assertNotNull(externalObjectDirectoryEntity.getChecksum());
         assertEquals(externalLocation, externalObjectDirectoryEntity.getExternalLocation());
-    }
-
-    @Test
-    void handheldAudioShouldNotLinkAudioToHearingByEvent() {
-
-        AddAudioMetadataRequest addAudioMetadataRequest = createAddAudioRequest(STARTED_AT, ENDED_AT);
-        addAudioMetadataRequest.setTotalChannels(1);
-
-        HearingEntity hearing = new HearingEntity();
-        EventEntity eventEntity = new EventEntity();
-        eventEntity.addHearing(hearing);
-
-        MediaEntity mediaEntity = createMediaEntity(STARTED_AT, ENDED_AT);
-
-        when(audioConfigurationProperties.getHandheldAudioCourtroomNumbers())
-            .thenReturn(List.of(addAudioMetadataRequest.getCourtroom()));
-
-        audioAsyncHelper.linkAudioToHearingByEvent(addAudioMetadataRequest, mediaEntity);
-        verify(hearingRepository, times(0)).saveAndFlush(any());
-        assertEquals(0, hearing.getMediaList().size());
-    }
-
-    @Test
-    void linkAudioToHearingByEvent() {
-        HearingEntity hearing = new HearingEntity();
-        EventEntity eventEntity = new EventEntity();
-        eventEntity.setTimestamp(STARTED_AT.minusMinutes(30));
-        eventEntity.addHearing(hearing);
-
-        AddAudioMetadataRequest addAudioMetadataRequest = createAddAudioRequest(STARTED_AT, ENDED_AT);
-        MediaEntity mediaEntity = createMediaEntity(STARTED_AT, ENDED_AT);
-
-        when(courtLogEventRepository.findByCourthouseAndCourtroomBetweenStartAndEnd(
-            anyString(),
-            anyString(),
-            any(),
-            any()
-        )).thenReturn(List.of(eventEntity));
-
-        audioAsyncHelper.linkAudioToHearingByEvent(addAudioMetadataRequest, mediaEntity);
-        verify(hearingRepository, times(1)).saveAndFlush(any());
-        assertEquals(1, hearing.getMediaList().size());
-    }
-
-    @Test
-    void linkAudioToInactiveHearingByEvent() {
-        HearingEntity hearing = new HearingEntity();
-        EventEntity eventEntity = new EventEntity();
-        eventEntity.setTimestamp(STARTED_AT.minusMinutes(30));
-        eventEntity.addHearing(hearing);
-
-        AddAudioMetadataRequest addAudioMetadataRequest = createAddAudioRequest(STARTED_AT, ENDED_AT);
-        MediaEntity mediaEntity = createMediaEntity(STARTED_AT, ENDED_AT);
-
-        when(courtLogEventRepository.findByCourthouseAndCourtroomBetweenStartAndEnd(
-            anyString(),
-            anyString(),
-            any(),
-            any()
-        )).thenReturn(List.of(eventEntity));
-
-        audioAsyncHelper.linkAudioToHearingByEvent(addAudioMetadataRequest, mediaEntity);
-        verify(hearingRepository, times(1)).saveAndFlush(any());
-        assertEquals(1, hearing.getMediaList().size());
-        assertTrue(hearing.getHearingIsActual());
-    }
-
-    @Test
-    void linkAudioToHearingByEventShouldOnlyLinkOncePerHearing() {
-        HearingEntity hearing = new HearingEntity();
-        EventEntity firstEventEntity = new EventEntity();
-        firstEventEntity.setTimestamp(STARTED_AT.plusMinutes(15));
-        firstEventEntity.addHearing(hearing);
-
-        EventEntity secondEventEntity = new EventEntity();
-        secondEventEntity.setTimestamp(STARTED_AT.plusMinutes(20));
-        secondEventEntity.addHearing(hearing);
-
-        AddAudioMetadataRequest addAudioMetadataRequest = createAddAudioRequest(STARTED_AT, ENDED_AT);
-        MediaEntity mediaEntity = createMediaEntity(STARTED_AT, ENDED_AT);
-
-        when(courtLogEventRepository.findByCourthouseAndCourtroomBetweenStartAndEnd(
-            anyString(),
-            anyString(),
-            any(),
-            any()
-        )).thenReturn(Arrays.asList(firstEventEntity, secondEventEntity));
-
-        audioAsyncHelper.linkAudioToHearingByEvent(addAudioMetadataRequest, mediaEntity);
-        verify(hearingRepository, times(1)).saveAndFlush(any());
-        assertEquals(1, hearing.getMediaList().size());
     }
 
     private MediaEntity createMediaEntity(OffsetDateTime startedAt, OffsetDateTime endedAt) {

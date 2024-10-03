@@ -1,4 +1,4 @@
-package uk.gov.hmcts.darts.audio.helper;
+package uk.gov.hmcts.darts.audio.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -7,6 +7,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import uk.gov.hmcts.darts.audio.config.AudioConfigurationProperties;
 import uk.gov.hmcts.darts.audio.model.AddAudioMetadataRequest;
+import uk.gov.hmcts.darts.audio.service.AudioAsyncService;
 import uk.gov.hmcts.darts.common.entity.EventEntity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
 import uk.gov.hmcts.darts.common.helper.MediaLinkedCaseHelper;
@@ -19,7 +20,7 @@ import java.util.List;
 @Component
 @Slf4j
 @RequiredArgsConstructor
-public class AudioAsyncHelper {
+public class AudioAsyncServiceImpl implements AudioAsyncService {
 
     private final AudioConfigurationProperties audioConfigurationProperties;
     private final CourtLogEventRepository courtLogEventRepository;

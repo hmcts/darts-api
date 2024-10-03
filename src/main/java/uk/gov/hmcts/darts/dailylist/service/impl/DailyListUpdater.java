@@ -135,7 +135,7 @@ class DailyListUpdater {
                              + sitting.getSittingAt(), dateTimeException);
             }
         }
-        return null;
+        return LocalTime.of(9, 0);
     }
 
     private LocalTime getTimeFromSittingAt(Sitting sitting) {
