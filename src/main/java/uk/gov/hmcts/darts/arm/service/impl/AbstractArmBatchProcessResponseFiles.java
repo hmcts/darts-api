@@ -526,53 +526,14 @@ public abstract class AbstractArmBatchProcessResponseFiles implements ArmRespons
                                                ExternalObjectDirectoryEntity externalObjectDirectory,
                                                String objectChecksum) {
         if (objectChecksum.equalsIgnoreCase(armResponseUploadFileRecord.getMd5())) {
-            onUfChecksumValidationSuccess(batchUploadFileFilenameProcessor,
-                                          armResponseBatchData,
-                                          armResponseUploadFileRecord,
-                                          externalObjectDirectory,
-                                          objectChecksum);
+            onUploadFileChecksumValidationSuccess(batchUploadFileFilenameProcessor,
+                                                  armResponseBatchData,
+                                                  armResponseUploadFileRecord,
+                                                  externalObjectDirectory,
+                                                  objectChecksum);
         } else {
-            onUfChecksumValidationFailure(armResponseUploadFileRecord, externalObjectDirectory, objectChecksum);
+            onUploadFileChecksumValidationFailure(armResponseUploadFileRecord, externalObjectDirectory, objectChecksum);
         }
-    }
-
-    protected abstract String getManifestFilePrefix();
-
-    protected abstract void beforeProcessingResponseFiles(int armEodId);
-
-    protected void onUfChecksumValidationSuccess(BatchInputUploadFileFilenameProcessor batchUploadFileFilenameProcessor,
-                                                 ArmResponseBatchData armResponseBatchData,
-                                                 ArmResponseUploadFileRecord armResponseUploadFileRecord,
-                                                 ExternalObjectDirectoryEntity externalObjectDirectory,
-                                                 String objectChecksum) {
-        externalObjectDirectory.setExternalFileId(armResponseUploadFileRecord.getA360FileId());
-        externalObjectDirectory.setExternalRecordId(armResponseUploadFileRecord.getA360RecordId());
-        externalObjectDirectory.setDataIngestionTs(OffsetDateTime.now());
-        updateExternalObjectDirectoryStatus(externalObjectDirectory, EodHelper.storedStatus());
-    }
-
-    protected void onUfChecksumValidationFailure(ArmResponseUploadFileRecord armResponseUploadFileRecord,
-                                                 ExternalObjectDirectoryEntity externalObjectDirectory,
-                                                 String objectChecksum) {
-        log.warn("External object id {} checksum differs. Arm checksum: {} Object Checksum: {}",
-                 externalObjectDirectory.getId(),
-                 armResponseUploadFileRecord.getMd5(), objectChecksum);
-        externalObjectDirectory.setErrorCode(armResponseUploadFileRecord.getErrorStatus());
-        updateExternalObjectDirectoryStatus(externalObjectDirectory, EodHelper.armResponseChecksumVerificationFailedStatus());
-    }
-
-    protected void processInvalidLineFile(ArmResponseInvalidLineRecord armResponseInvalidLineRecord,
-                                          ExternalObjectDirectoryEntity externalObjectDirectory) {
-        // Read the invalid lines file and log the error code and description with EOD
-        log.warn(
-            "ARM invalid line for external object id {}. ARM error description: {} ARM error status: {}",
-            externalObjectDirectory.getId(),
-            armResponseInvalidLineRecord.getExceptionDescription(),
-            armResponseInvalidLineRecord.getErrorStatus()
-        );
-        updateTransferAttempts(externalObjectDirectory);
-        externalObjectDirectory.setErrorCode(armResponseInvalidLineRecord.getExceptionDescription());
-        updateExternalObjectDirectoryStatus(externalObjectDirectory, EodHelper.armResponseManifestFailedStatus());
     }
 
     private UploadNewFileRecord readInputJson(String input) {
@@ -831,6 +792,45 @@ public abstract class AbstractArmBatchProcessResponseFiles implements ArmRespons
         } else {
             log.warn("EOD is null");
         }
+    }
+
+    protected abstract String getManifestFilePrefix();
+
+    protected abstract void beforeProcessingResponseFiles(int armEodId);
+
+    protected void onUploadFileChecksumValidationSuccess(BatchInputUploadFileFilenameProcessor batchUploadFileFilenameProcessor,
+                                                         ArmResponseBatchData armResponseBatchData,
+                                                         ArmResponseUploadFileRecord armResponseUploadFileRecord,
+                                                         ExternalObjectDirectoryEntity externalObjectDirectory,
+                                                         String objectChecksum) {
+        externalObjectDirectory.setExternalFileId(armResponseUploadFileRecord.getA360FileId());
+        externalObjectDirectory.setExternalRecordId(armResponseUploadFileRecord.getA360RecordId());
+        externalObjectDirectory.setDataIngestionTs(OffsetDateTime.now());
+        updateExternalObjectDirectoryStatus(externalObjectDirectory, EodHelper.storedStatus());
+    }
+
+    protected void onUploadFileChecksumValidationFailure(ArmResponseUploadFileRecord armResponseUploadFileRecord,
+                                                         ExternalObjectDirectoryEntity externalObjectDirectory,
+                                                         String objectChecksum) {
+        log.warn("External object id {} checksum differs. Arm checksum: {} Object Checksum: {}",
+                 externalObjectDirectory.getId(),
+                 armResponseUploadFileRecord.getMd5(), objectChecksum);
+        externalObjectDirectory.setErrorCode(armResponseUploadFileRecord.getErrorStatus());
+        updateExternalObjectDirectoryStatus(externalObjectDirectory, EodHelper.armResponseChecksumVerificationFailedStatus());
+    }
+
+    protected void processInvalidLineFile(ArmResponseInvalidLineRecord armResponseInvalidLineRecord,
+                                          ExternalObjectDirectoryEntity externalObjectDirectory) {
+        // Read the invalid lines file and log the error code and description with EOD
+        log.warn(
+            "ARM invalid line for external object id {}. ARM error description: {} ARM error status: {}",
+            externalObjectDirectory.getId(),
+            armResponseInvalidLineRecord.getExceptionDescription(),
+            armResponseInvalidLineRecord.getErrorStatus()
+        );
+        updateTransferAttempts(externalObjectDirectory);
+        externalObjectDirectory.setErrorCode(armResponseInvalidLineRecord.getExceptionDescription());
+        updateExternalObjectDirectoryStatus(externalObjectDirectory, EodHelper.armResponseManifestFailedStatus());
     }
 
 }
