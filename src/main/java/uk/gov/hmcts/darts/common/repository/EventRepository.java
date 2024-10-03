@@ -1,6 +1,7 @@
 package uk.gov.hmcts.darts.common.repository;
 
 import jakarta.persistence.Column;
+import org.springframework.data.domain.Limit;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -145,6 +146,8 @@ public interface EventRepository extends JpaRepository<EventEntity, Integer> {
         AND ee.timestamp <= :endDateTime
         """)
     List<EventEntity> findAllBetweenDateTimesInclusive(OffsetDateTime startDateTime, OffsetDateTime endDateTime);
+
+    List<EventEntity> findAllByEventStatus(Integer statusNumber, Limit limit);
 
     interface EventIdAndHearingIds {
 
