@@ -24,6 +24,7 @@ import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.List;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -92,6 +93,7 @@ class CloseOldCasesProcessorImplTest {
 
         // then
         assertTrue(courtCase.getClosed());
+        assertEquals(CURRENT_DATE_TIME, courtCase.getRetConfUpdatedTs());
     }
 
     public static CaseRetentionEntity createRetentionEntity(CourtCaseEntity courtCase, UserAccountEntity userAccount) {
