@@ -288,11 +288,11 @@ public abstract class AbstractArmBatchProcessResponseFiles implements ArmRespons
 
                     beforeProcessingResponseFiles(armResponseBatchData.getExternalObjectDirectoryId());
 
-                    tryProcessInvalidLineFile(armResponseBatchData.getExternalObjectDirectoryId(),
-                                              armResponseBatchData.getInvalidLineFileFilenameProcessor(),
-                                              armResponseBatchData.getArmResponseInvalidLineRecord(),
-                                              armResponseBatchData.getCreateRecordFilenameProcessor(),
-                                              armResponseBatchData.getUploadFileFilenameProcessor());
+                    processInvalidLineFile(armResponseBatchData.getExternalObjectDirectoryId(),
+                                           armResponseBatchData.getInvalidLineFileFilenameProcessor(),
+                                           armResponseBatchData.getArmResponseInvalidLineRecord(),
+                                           armResponseBatchData.getCreateRecordFilenameProcessor(),
+                                           armResponseBatchData.getUploadFileFilenameProcessor());
                     deleteResponseBlobs(armResponseBatchData);
                 } else if (nonNull(armResponseBatchData.getCreateRecordFilenameProcessor())
                     && nonNull(armResponseBatchData.getUploadFileFilenameProcessor())) {
@@ -461,20 +461,7 @@ public abstract class AbstractArmBatchProcessResponseFiles implements ArmRespons
                                                      armResponseUploadFileRecord);
 
                     } else {
-                        //Read the upload file and log the error code and description with EOD
-                        String errorDescription = StringUtils.isNotEmpty(armResponseUploadFileRecord.getExceptionDescription())
-                            ? armResponseUploadFileRecord.getExceptionDescription() : "No error details found in response file";
-
-                        log.warn(
-                            "ARM status reports failed for upload file {}. ARM error description: {} ARM error status: {} for record {}, file Id {}",
-                            uploadFileFilenameProcessor.getUploadFileFilenameAndPath(),
-                            errorDescription,
-                            armResponseUploadFileRecord.getErrorStatus(),
-                            armResponseUploadFileRecord.getA360RecordId(),
-                            armResponseUploadFileRecord.getA360FileId()
-                        );
-                        externalObjectDirectory.setErrorCode(errorDescription);
-                        updateExternalObjectDirectoryStatus(externalObjectDirectory, EodHelper.armResponseProcessingFailedStatus());
+                        processUploadFileDataFailure(armResponseUploadFileRecord, uploadFileFilenameProcessor, externalObjectDirectory);
                     }
                 } else {
                     processNoEodFoundFromSuccessResponses(externalObjectDirectoryId, uploadFileFilenameProcessor, armResponseUploadFileRecord,
@@ -632,10 +619,10 @@ public abstract class AbstractArmBatchProcessResponseFiles implements ArmRespons
         }
     }
 
-    private void tryProcessInvalidLineFile(int externalObjectDirectoryId, InvalidLineFileFilenameProcessor invalidLineFileFilenameProcessor,
-                                           ArmResponseInvalidLineRecord armResponseInvalidLineRecord,
-                                           CreateRecordFilenameProcessor createRecordFilenameProcessor,
-                                           UploadFileFilenameProcessor uploadFileFilenameProcessor) {
+    private void processInvalidLineFile(int externalObjectDirectoryId, InvalidLineFileFilenameProcessor invalidLineFileFilenameProcessor,
+                                        ArmResponseInvalidLineRecord armResponseInvalidLineRecord,
+                                        CreateRecordFilenameProcessor createRecordFilenameProcessor,
+                                        UploadFileFilenameProcessor uploadFileFilenameProcessor) {
         try {
             ExternalObjectDirectoryEntity externalObjectDirectory = getExternalObjectDirectoryEntity(externalObjectDirectoryId);
             if (nonNull(externalObjectDirectory)) {
@@ -643,7 +630,7 @@ public abstract class AbstractArmBatchProcessResponseFiles implements ArmRespons
                     //If the filename contains 0
                     if (ARM_RESPONSE_INVALID_STATUS_CODE.equals(invalidLineFileFilenameProcessor.getStatus())) {
 
-                        processInvalidLineFile(armResponseInvalidLineRecord, externalObjectDirectory);
+                        processInvalidLineFileActions(armResponseInvalidLineRecord, externalObjectDirectory);
                     } else {
                         String error = String.format("Incorrect status [%s] for invalid line file %s", invalidLineFileFilenameProcessor.getStatus(),
                                                      invalidLineFileFilenameProcessor.getInvalidLineFileFilenameAndPath());
@@ -819,8 +806,27 @@ public abstract class AbstractArmBatchProcessResponseFiles implements ArmRespons
         updateExternalObjectDirectoryStatus(externalObjectDirectory, EodHelper.armResponseChecksumVerificationFailedStatus());
     }
 
-    protected void processInvalidLineFile(ArmResponseInvalidLineRecord armResponseInvalidLineRecord,
-                                          ExternalObjectDirectoryEntity externalObjectDirectory) {
+    protected void processUploadFileDataFailure(ArmResponseUploadFileRecord armResponseUploadFileRecord,
+                                                UploadFileFilenameProcessor uploadFileFilenameProcessor,
+                                                ExternalObjectDirectoryEntity externalObjectDirectory) {
+        //Read the upload file and log the error code and description with EOD
+        String errorDescription = StringUtils.isNotEmpty(armResponseUploadFileRecord.getExceptionDescription())
+            ? armResponseUploadFileRecord.getExceptionDescription() : "No error details found in response file";
+
+        log.warn(
+            "ARM status reports failed for upload file {}. ARM error description: {} ARM error status: {} for record {}, file Id {}",
+            uploadFileFilenameProcessor.getUploadFileFilenameAndPath(),
+            errorDescription,
+            armResponseUploadFileRecord.getErrorStatus(),
+            armResponseUploadFileRecord.getA360RecordId(),
+            armResponseUploadFileRecord.getA360FileId()
+        );
+        externalObjectDirectory.setErrorCode(errorDescription);
+        updateExternalObjectDirectoryStatus(externalObjectDirectory, EodHelper.armResponseProcessingFailedStatus());
+    }
+
+    protected void processInvalidLineFileActions(ArmResponseInvalidLineRecord armResponseInvalidLineRecord,
+                                                 ExternalObjectDirectoryEntity externalObjectDirectory) {
         // Read the invalid lines file and log the error code and description with EOD
         log.warn(
             "ARM invalid line for external object id {}. ARM error description: {} ARM error status: {}",

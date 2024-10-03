@@ -38,5 +38,6 @@ public class ArmBatchProcessResponseFilesImpl extends AbstractArmBatchProcessRes
     }
 
     protected void beforeProcessingResponseFiles(int armEodId) {
+        // in the DARTS to ARM flow this is meant to do nothing
     }
 }
