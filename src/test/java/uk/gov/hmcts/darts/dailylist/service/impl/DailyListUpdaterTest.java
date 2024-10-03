@@ -119,6 +119,25 @@ class DailyListUpdaterTest {
         assertThat(dailyList.getStatus()).isEqualTo(PROCESSED);
     }
 
+    @Test
+    void handlesNoTimeMarkingNote() throws IOException {
+
+        var dailyListUser = new UserAccountEntity();
+        OffsetDateTime testTime = DateConverterUtil.toOffsetDateTime(HEARING_DATE);
+        when(currentTimeHelper.currentOffsetDateTime()).thenReturn(testTime);
+        when(systemUserHelper.getDailyListProcessorUser()).thenReturn(dailyListUser);
+        when(courthouseRepository.findByCourthouseName("SWANSEA")).thenReturn(Optional.of(new CourthouseEntity()));
+        HearingEntity hearing = new HearingEntity();
+        CourtCaseEntity courtCase = new CourtCaseEntity();
+        hearing.setCourtCase(courtCase);
+        LocalDateTime expectedHearingDate = LocalDateTime.of(2023, 9, 23, 9, 0, 0);
+        when(retrieveCoreObjectService.retrieveOrCreateHearing("SWANSEA", "1A", "42GD2391421", expectedHearingDate, dailyListUser))
+            .thenReturn(hearing);
+        DailyListEntity dailyList = setUpDailyList("handlesNoTimeMarkingNote.json");
+        dailyListUpdater.processDailyList(dailyList);
+        verify(retrieveCoreObjectService, times(1)).retrieveOrCreateHearing("SWANSEA", "1A", "42GD2391421", expectedHearingDate, dailyListUser);
+    }
+
     @ParameterizedTest
     @CsvSource({
         "NOT BEFORE 10:00 am, 10:00",

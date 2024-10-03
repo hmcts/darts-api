@@ -111,7 +111,7 @@ class TranscriptionControllerAdminPostTranscriptionIntTest extends IntegrationBa
 
         // run the test
         MvcResult mvcResult = mockMvc.perform(post(ENDPOINT_URL.replace(
-            "${TRANSACTION_DOCUMENT_ID}", transcriptionDocumentEntity.getId().toString()))
+                "${TRANSACTION_DOCUMENT_ID}", transcriptionDocumentEntity.getId().toString()))
                                                   .header("Content-Type", "application/json")
                                                   .content(objectMapper.writeValueAsString(transcriptionDocumentHideRequest)))
             .andExpect(status().is2xxSuccessful())
@@ -138,7 +138,7 @@ class TranscriptionControllerAdminPostTranscriptionIntTest extends IntegrationBa
         assertEquals(objectAdminActionEntity.get(0).getMarkedForManualDelBy().getId(), transcriptionResponse.getAdminAction().getMarkedForManualDeletionById());
         assertEquals(objectAdminActionEntity.get(0).getMarkedForManualDelDateTime()
                          .truncatedTo(ChronoUnit.SECONDS), transcriptionResponse.getAdminAction()
-            .getMarkedForManualDeletionAt().truncatedTo(ChronoUnit.SECONDS));
+                         .getMarkedForManualDeletionAt().truncatedTo(ChronoUnit.SECONDS));
     }
 
     @Test
@@ -177,15 +177,15 @@ class TranscriptionControllerAdminPostTranscriptionIntTest extends IntegrationBa
         // run the test
         mockMvc.perform(post(ENDPOINT_URL.replace(
                 "${TRANSACTION_DOCUMENT_ID}", transcriptionDocumentEntity.getId().toString()))
-                                                  .header("Content-Type", "application/json")
-                                                  .content(objectMapper.writeValueAsString(transcriptionDocumentHideRequest)))
+                            .header("Content-Type", "application/json")
+                            .content(objectMapper.writeValueAsString(transcriptionDocumentHideRequest)))
             .andExpect(status().is2xxSuccessful())
             .andReturn();
 
         MvcResult hideSecondCall = mockMvc.perform(post(ENDPOINT_URL.replace(
                 "${TRANSACTION_DOCUMENT_ID}", transcriptionDocumentEntity.getId().toString()))
-                                                  .header("Content-Type", "application/json")
-                                                  .content(objectMapper.writeValueAsString(transcriptionDocumentHideRequest)))
+                                                       .header("Content-Type", "application/json")
+                                                       .content(objectMapper.writeValueAsString(transcriptionDocumentHideRequest)))
             .andExpect(status().isConflict())
             .andReturn();
 
@@ -229,28 +229,28 @@ class TranscriptionControllerAdminPostTranscriptionIntTest extends IntegrationBa
 
         // hide the transcription document
         mockMvc.perform(post(ENDPOINT_URL.replace(
-            "${TRANSACTION_DOCUMENT_ID}", transcriptionDocumentEntity.getId().toString()))
-                                              .header("Content-Type", "application/json")
-                                              .content(objectMapper.writeValueAsString(transcriptionDocumentHideRequest)))
-        .andExpect(status().is2xxSuccessful())
-        .andReturn();
+                "${TRANSACTION_DOCUMENT_ID}", transcriptionDocumentEntity.getId().toString()))
+                            .header("Content-Type", "application/json")
+                            .content(objectMapper.writeValueAsString(transcriptionDocumentHideRequest)))
+            .andExpect(status().is2xxSuccessful())
+            .andReturn();
 
         transcriptionDocumentHideRequest.setAdminAction(null);
         transcriptionDocumentHideRequest.setIsHidden(false);
 
         // now show the transcription document
         MvcResult showResult = mockMvc.perform(post(ENDPOINT_URL.replace(
-            "${TRANSACTION_DOCUMENT_ID}", transcriptionDocumentEntity.getId().toString()))
-                                              .header("Content-Type", "application/json")
-                                              .content(objectMapper.writeValueAsString(transcriptionDocumentHideRequest)))
-        .andExpect(status().is2xxSuccessful())
-        .andReturn();
+                "${TRANSACTION_DOCUMENT_ID}", transcriptionDocumentEntity.getId().toString()))
+                                                   .header("Content-Type", "application/json")
+                                                   .content(objectMapper.writeValueAsString(transcriptionDocumentHideRequest)))
+            .andExpect(status().is2xxSuccessful())
+            .andReturn();
 
         // a follow up show even if already shown will not error
         mockMvc.perform(post(ENDPOINT_URL.replace(
                 "${TRANSACTION_DOCUMENT_ID}", transcriptionDocumentEntity.getId().toString()))
-                                                   .header("Content-Type", "application/json")
-                                                   .content(objectMapper.writeValueAsString(transcriptionDocumentHideRequest)))
+                            .header("Content-Type", "application/json")
+                            .content(objectMapper.writeValueAsString(transcriptionDocumentHideRequest)))
             .andExpect(status().is2xxSuccessful())
             .andReturn();
 
@@ -266,7 +266,7 @@ class TranscriptionControllerAdminPostTranscriptionIntTest extends IntegrationBa
         assertEquals(documentEntity.getId(), transcriptionResponse.getId());
         assertEquals(documentEntity.isHidden(), transcriptionResponse.getIsHidden());
         assertNull(transcriptionResponse.getAdminAction());
-   }
+    }
 
     @Test
     void testTranscriptionDocumentShowForbidden() throws Exception {
@@ -298,10 +298,10 @@ class TranscriptionControllerAdminPostTranscriptionIntTest extends IntegrationBa
         transcriptionDocumentHideRequest.setIsHidden(true);
 
 
-        MvcResult mvcResult =  mockMvc.perform(post(ENDPOINT_URL.replace(
+        MvcResult mvcResult = mockMvc.perform(post(ENDPOINT_URL.replace(
                 "${TRANSACTION_DOCUMENT_ID}", Integer.valueOf(-12).toString()))
-                                                    .header("Content-Type", "application/json")
-                                                    .content(objectMapper.writeValueAsString(transcriptionDocumentHideRequest)))
+                                                  .header("Content-Type", "application/json")
+                                                  .content(objectMapper.writeValueAsString(transcriptionDocumentHideRequest)))
             .andExpect(status().isNotFound())
             .andReturn();
 
@@ -421,17 +421,13 @@ class TranscriptionControllerAdminPostTranscriptionIntTest extends IntegrationBa
         adminActionRequest.setTicketReference("");
         transcriptionDocumentHideRequest.setAdminAction(adminActionRequest);
 
-
-        MvcResult mvcResult = mockMvc.perform(post(ENDPOINT_URL.replace(
+        mockMvc.perform(post(ENDPOINT_URL.replace(
                 "${TRANSACTION_DOCUMENT_ID}", transcriptionDocumentEntity.getId().toString()))
-                                                  .content(objectMapper.writeValueAsString(transcriptionDocumentHideRequest))
-                                                  .header("Content-Type", "application/json"))
+                            .content(objectMapper.writeValueAsString(transcriptionDocumentHideRequest))
+                            .header("Content-Type", "application/json"))
 
-            .andExpect(status().isNotImplemented())
+            .andExpect(status().is2xxSuccessful())
             .andReturn();
-        String content = mvcResult.getResponse().getContentAsString();
-        Problem problemResponse = objectMapper.readValue(content, Problem.class);
-        assertEquals(TranscriptionApiError.TRANSCRIPTION_DOCUMENT_REASON_IS_MARKED_FOR_DELETION.getType(), problemResponse.getType());
     }
 
     @Test
@@ -470,8 +466,8 @@ class TranscriptionControllerAdminPostTranscriptionIntTest extends IntegrationBa
         // hide the transcription document
         mockMvc.perform(post(ENDPOINT_URL.replace(
                 "${TRANSACTION_DOCUMENT_ID}", transcriptionDocumentEntity.getId().toString()))
-                                                   .header("Content-Type", "application/json")
-                                                   .content(objectMapper.writeValueAsString(transcriptionDocumentHideRequest)))
+                            .header("Content-Type", "application/json")
+                            .content(objectMapper.writeValueAsString(transcriptionDocumentHideRequest)))
             .andExpect(status().is2xxSuccessful())
             .andReturn();
 

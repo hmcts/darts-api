@@ -136,7 +136,7 @@ public class AudioRequestsController implements AudioRequestsApi {
     public ResponseEntity<byte[]> playback(Integer transformedMediaId, String httpRangeList) {
         DownloadResponseMetaData downloadResponseMetadata = mediaRequestService.playback(transformedMediaId);
 
-        return StreamingResponseEntityUtil.createResponseEntity(downloadResponseMetadata.getInputStream(), httpRangeList);
+        return StreamingResponseEntityUtil.createResponseEntity(downloadResponseMetadata.getResource().getInputStream(), httpRangeList);
     }
 
     @Override

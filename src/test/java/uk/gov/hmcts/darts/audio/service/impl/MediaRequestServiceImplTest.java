@@ -6,7 +6,9 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.core.io.Resource;
 import uk.gov.hmcts.darts.audio.component.AudioRequestBeingProcessedFromArchiveQuery;
 import uk.gov.hmcts.darts.audio.entity.MediaRequestEntity;
 import uk.gov.hmcts.darts.audio.exception.AudioApiError;
@@ -461,11 +463,14 @@ class MediaRequestServiceImplTest {
         when(mockUserIdentity.getUserAccount()).thenReturn(mockUserAccountEntity);
         doNothing().when(auditApi).record(any(), any(), any());
 
+        Resource resource = Mockito.mock(Resource.class);
+        when(responseMetaData.getResource()).thenReturn(resource);
+
         when(dataManagementApi.getBlobDataFromOutboundContainer(blobUuid)).thenReturn(responseMetaData);
-        when(responseMetaData.getInputStream()).thenReturn(toInputStream(DUMMY_FILE_CONTENT, "UTF-8"));
+        when(resource.getInputStream()).thenReturn(toInputStream(DUMMY_FILE_CONTENT, "UTF-8"));
 
         try (DownloadResponseMetaData downloadResponseMetaData = mediaRequestService.download(transformedMediaId)) {
-            byte[] bytes = downloadResponseMetaData.getInputStream().readAllBytes();
+            byte[] bytes = downloadResponseMetaData.getResource().getInputStream().readAllBytes();
             assertEquals(DUMMY_FILE_CONTENT, new String(bytes));
         }
 
@@ -590,10 +595,13 @@ class MediaRequestServiceImplTest {
         doNothing().when(auditApi).record(any(), any(), any());
 
         when(dataManagementApi.getBlobDataFromOutboundContainer(blobUuid)).thenReturn(responseMetaData);
-        when(responseMetaData.getInputStream()).thenReturn(toInputStream(DUMMY_FILE_CONTENT, "UTF-8"));
+
+        Resource resource = Mockito.mock(Resource.class);
+        when(responseMetaData.getResource()).thenReturn(resource);
+        when(resource.getInputStream()).thenReturn(toInputStream(DUMMY_FILE_CONTENT, "UTF-8"));
 
         try (DownloadResponseMetaData downloadResponseMetaData = mediaRequestService.playback(transformedMediaId)) {
-            byte[] bytes = downloadResponseMetaData.getInputStream().readAllBytes();
+            byte[] bytes = downloadResponseMetaData.getResource().getInputStream().readAllBytes();
             assertEquals(DUMMY_FILE_CONTENT, new String(bytes));
         }
 

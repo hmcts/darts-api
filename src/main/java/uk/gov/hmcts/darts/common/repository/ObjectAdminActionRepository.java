@@ -5,6 +5,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 import uk.gov.hmcts.darts.common.entity.ObjectAdminActionEntity;
 
+import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -29,4 +30,9 @@ public interface ObjectAdminActionRepository extends JpaRepository<ObjectAdminAc
     Optional<ObjectAdminActionEntity> findByTranscriptionDocument_IdAndObjectHiddenReasonIsNotNullAndObjectHiddenReason_MarkedForDeletionTrue(
         Integer transcriptionDocumentId);
 
+    @Query("""
+        SELECT o FROM ObjectAdminActionEntity o
+                WHERE o.markedForManualDelDateTime < :deletionThreshold
+        """)
+    List<ObjectAdminActionEntity> findFilesForManualDeletion(OffsetDateTime deletionThreshold);
 }

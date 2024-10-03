@@ -35,7 +35,7 @@ class EventRepositoryTest extends PostgresIntegrationBase {
         EventRepository.EventIdAndHearingIds eventPkid = eventRepository.getTheLatestCreatedEventPrimaryKeyForTheEventId(eventIdsToBeProcessed1.getFirst())
             .getFirst();
         eventRepository.updateAllEventIdEventsToNotCurrentWithTheExclusionOfTheCurrentEventPrimaryKey(
-            eventPkid.getEveId(), eventPkid.getEventId(), eventPkid.getHearingIds());
+            eventPkid.getEveId(), eventPkid.getEventId(), eventPkid.getHearingIds(), 0);
         Assertions.assertTrue(eventStub.isOnlyOneOfTheEventIdSetToCurrent(eventIdMap.get(eventIdsToBeProcessed1.getFirst())));
 
         List<Integer> eventIdsToBeProcessed2 = eventRepository.getCurrentEventIdsToBeProcessed(1);
@@ -43,7 +43,7 @@ class EventRepositoryTest extends PostgresIntegrationBase {
             eventRepository.getTheLatestCreatedEventPrimaryKeyForTheEventId(eventIdsToBeProcessed2.getFirst())
                 .getFirst();
         eventRepository.updateAllEventIdEventsToNotCurrentWithTheExclusionOfTheCurrentEventPrimaryKey(
-            eventPkidSecond.getEveId(), eventPkidSecond.getEventId(), eventPkidSecond.getHearingIds());
+            eventPkidSecond.getEveId(), eventPkidSecond.getEventId(), eventPkidSecond.getHearingIds(), 0);
 
         Assertions.assertEquals(1, eventIdsToBeProcessed1.size());
         Assertions.assertTrue(eventIdMap.containsKey(eventIdsToBeProcessed2.getFirst()));
@@ -74,7 +74,7 @@ class EventRepositoryTest extends PostgresIntegrationBase {
         EventRepository.EventIdAndHearingIds eventPkid = eventRepository.getTheLatestCreatedEventPrimaryKeyForTheEventId(eventIdsToBeProcessed1.getFirst())
             .getFirst();
         eventRepository.updateAllEventIdEventsToNotCurrentWithTheExclusionOfTheCurrentEventPrimaryKey(
-            eventPkid.getEveId(), eventPkid.getEventId(), eventPkid.getHearingIds());
+            eventPkid.getEveId(), eventPkid.getEventId(), eventPkid.getHearingIds(), 0);
         Assertions.assertFalse(eventStub.isOnlyOneOfTheEventIdSetToCurrent(eventEntities));
     }
 }

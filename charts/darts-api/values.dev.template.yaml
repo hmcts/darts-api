@@ -97,6 +97,7 @@ java:
           alias: DARTS_UNSTRUCTURED_STORAGE_SAS_URL
   environment:
     ENABLE_FLYWAY: true
+    MANUAL_DELETION_ENABLED: true
     RUN_DB_MIGRATION_ON_STARTUP: true
     DARTS_API_DB_HOST: "darts-modernisation-dev.postgres.database.azure.com"
     DARTS_API_DB_NAME: "pr-${CHANGE_ID}-darts"

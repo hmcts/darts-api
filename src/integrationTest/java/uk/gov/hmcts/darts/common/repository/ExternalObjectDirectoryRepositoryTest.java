@@ -19,8 +19,11 @@ import java.time.OffsetDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.STORED;
 
 class ExternalObjectDirectoryRepositoryTest extends PostgresIntegrationBase {
@@ -151,7 +154,7 @@ class ExternalObjectDirectoryRepositoryTest extends PostgresIntegrationBase {
                 getCurrentDateTimeWithHoursBefore(setupArmHoursBeforeCurrentTime + 1));
 
         // assert the logic
-        Assertions.assertTrue(results.isEmpty());
+        assertTrue(results.isEmpty());
     }
 
     @Test
@@ -173,7 +176,67 @@ class ExternalObjectDirectoryRepositoryTest extends PostgresIntegrationBase {
                 ExternalObjectDirectoryQueryTypeEnum.MEDIA_QUERY.getIndex());
 
         // assert the logic
-        Assertions.assertTrue(results.isEmpty());
+        assertTrue(results.isEmpty());
+    }
+
+    @Test
+    void testFindStoredInInboundAndUnstructuredByMediaId() throws Exception {
+        // Setup
+        int hoursBeforeCurrentTime = 24;
+        generateDataWithMediaForInbound(hoursBeforeCurrentTime);
+
+        // Get a media entity to test with
+        List<ExternalObjectDirectoryEntity> allEntities = externalObjectDirectoryRepository.findAll();
+        ExternalObjectDirectoryEntity testEntity = allEntities.stream()
+            .filter(e -> e.getMedia() != null && Objects.equals(e.getStatus().getId(), STORED.getId())
+                && (Objects.equals(e.getExternalLocationType().getId(), ExternalLocationTypeEnum.INBOUND.getId())
+                || Objects.equals(e.getExternalLocationType().getId(), ExternalLocationTypeEnum.UNSTRUCTURED.getId())))
+            .findFirst()
+            .orElseThrow(() -> new AssertionError("No suitable test entity found"));
+
+        // Exercise
+        List<ExternalObjectDirectoryEntity> result = externalObjectDirectoryRepository.findStoredInInboundAndUnstructuredByMediaId(
+            testEntity.getMedia().getId());
+
+        // Verify
+        assertFalse(result.isEmpty(), "Result should not be empty");
+        assertTrue(result.stream().allMatch(e -> e.getMedia().getId().equals(testEntity.getMedia().getId())),
+                   "All results should have the correct media ID");
+        assertTrue(result.stream().allMatch(e -> Objects.equals(e.getStatus().getId(), STORED.getId())),
+                   "All results should have the STORED status");
+        assertTrue(result.stream().allMatch(e -> Objects.equals(e.getExternalLocationType().getId(), ExternalLocationTypeEnum.INBOUND.getId())
+                       || Objects.equals(e.getExternalLocationType().getId(), ExternalLocationTypeEnum.UNSTRUCTURED.getId())),
+                   "All results should have either INBOUND or UNSTRUCTURED location type");
+    }
+
+    @Test
+    void testFindStoredInInboundAndUnstructuredByTranscriptionId() throws Exception {
+        // Setup
+        int hoursBeforeCurrentTime = 24;
+        generateDataWithAnnotationForInbound(hoursBeforeCurrentTime);
+
+        // Get a transcription document entity to test with
+        List<ExternalObjectDirectoryEntity> allEntities = externalObjectDirectoryRepository.findAll();
+        ExternalObjectDirectoryEntity testEntity = allEntities.stream()
+            .filter(e -> e.getTranscriptionDocumentEntity() != null && Objects.equals(e.getStatus().getId(), STORED.getId())
+                && (Objects.equals(e.getExternalLocationType().getId(), ExternalLocationTypeEnum.INBOUND.getId())
+                || Objects.equals(e.getExternalLocationType().getId(), ExternalLocationTypeEnum.UNSTRUCTURED.getId())))
+            .findFirst()
+            .orElseThrow(() -> new AssertionError("No suitable test entity found"));
+
+        // Exercise
+        List<ExternalObjectDirectoryEntity> result = externalObjectDirectoryRepository.findStoredInInboundAndUnstructuredByTranscriptionId(
+            testEntity.getTranscriptionDocumentEntity().getId());
+
+        // Verify
+        assertFalse(result.isEmpty(), "Result should not be empty");
+        assertTrue(result.stream().allMatch(e -> e.getTranscriptionDocumentEntity().getId().equals(testEntity.getTranscriptionDocumentEntity().getId())),
+                   "All results should have the correct transcription document ID");
+        assertTrue(result.stream().allMatch(e -> Objects.equals(e.getStatus().getId(), STORED.getId())),
+                   "All results should have the STORED status");
+        assertTrue(result.stream().allMatch(e -> Objects.equals(e.getExternalLocationType().getId(), ExternalLocationTypeEnum.INBOUND.getId())
+                       || Objects.equals(e.getExternalLocationType().getId(), ExternalLocationTypeEnum.UNSTRUCTURED.getId())),
+                   "All results should have either INBOUND or UNSTRUCTURED location type");
     }
 
     private void assertExpectedResults(List<Integer> actualResults, List<ExternalObjectDirectoryEntity> expectedResults, int resultCount) {
@@ -184,33 +247,20 @@ class ExternalObjectDirectoryRepositoryTest extends PostgresIntegrationBase {
     }
 
     private OffsetDateTime getCurrentDateTimeWithHoursBefore(int hours) {
-        return currentTimeHelper.currentOffsetDateTime().minus(
-            hours,
-            ChronoUnit.HOURS
-        );
+        return currentTimeHelper.currentOffsetDateTime().minusHours(hours);
     }
 
     private OffsetDateTime getCurrentDateTimeWithWeeksBefore(int hours) {
-        return currentTimeHelper.currentOffsetDateTime().minus(
-            hours,
-            ChronoUnit.HOURS
-        );
+        return currentTimeHelper.currentOffsetDateTime().minusHours(hours);
     }
 
     private void generateDataWithAnnotationForInbound(int hoursBeforeCurrentTime)
         throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
         int numberOfRecordsToGenerate = 10;
-        int setupHoursBeforeCurrentTime = hoursBeforeCurrentTime;
 
-        OffsetDateTime lastModifiedBeforeCurrentTime = currentTimeHelper.currentOffsetDateTime().minus(
-            setupHoursBeforeCurrentTime,
-            ChronoUnit.HOURS
-        );
+        OffsetDateTime lastModifiedBeforeCurrentTime = currentTimeHelper.currentOffsetDateTime().minusHours(hoursBeforeCurrentTime);
 
-        OffsetDateTime lastModifiedNotBeforeThreshold = currentTimeHelper.currentOffsetDateTime().minus(
-            1,
-            ChronoUnit.HOURS
-        );
+        OffsetDateTime lastModifiedNotBeforeThreshold = currentTimeHelper.currentOffsetDateTime().minusHours(1);
         List<ExternalObjectDirectoryEntity> externalObjectDirectoryEntitiesNotRelevant;
         List<ExternalObjectDirectoryEntity> externalObjectDirectoryEntities;
         List<ExternalObjectDirectoryEntity> expectedArmRecordsResultOutsideHours;
@@ -248,22 +298,15 @@ class ExternalObjectDirectoryRepositoryTest extends PostgresIntegrationBase {
                                                            int weeksBeforeCurrentTimeForUnstructured)
         throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
         int numberOfRecordsToGenerate = 10;
-        int setupHoursBeforeCurrentTime = hoursBeforeCurrentTimeForArm;
 
-        OffsetDateTime lastModifiedBeforeCurrentTimeForArm = currentTimeHelper.currentOffsetDateTime().minus(
-            setupHoursBeforeCurrentTime,
-            ChronoUnit.HOURS
-        );
+        OffsetDateTime lastModifiedBeforeCurrentTimeForArm = currentTimeHelper.currentOffsetDateTime().minusHours(hoursBeforeCurrentTimeForArm);
 
         OffsetDateTime lastModifiedBeforeCurrentTimeForUnstructured = currentTimeHelper.currentOffsetDateTime().minus(
             weeksBeforeCurrentTimeForUnstructured,
             ChronoUnit.WEEKS
         );
 
-        OffsetDateTime lastModifiedNotBeforeThreshold = currentTimeHelper.currentOffsetDateTime().minus(
-            1,
-            ChronoUnit.HOURS
-        );
+        OffsetDateTime lastModifiedNotBeforeThreshold = currentTimeHelper.currentOffsetDateTime().minusHours(1);
 
         List<ExternalObjectDirectoryEntity> externalObjectDirectoryEntitiesNotRelevant;
         List<ExternalObjectDirectoryEntity> externalObjectDirectoryEntities;
@@ -299,17 +342,10 @@ class ExternalObjectDirectoryRepositoryTest extends PostgresIntegrationBase {
     private void generateDataWithMediaForInbound(int hoursBeforeCurrentTime)
         throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
         int numberOfRecordsToGenerate = 10;
-        int setupHoursBeforeCurrentTime = hoursBeforeCurrentTime;
 
-        OffsetDateTime lastModifiedBeforeCurrentTime = currentTimeHelper.currentOffsetDateTime().minus(
-            setupHoursBeforeCurrentTime,
-            ChronoUnit.HOURS
-        );
+        OffsetDateTime lastModifiedBeforeCurrentTime = currentTimeHelper.currentOffsetDateTime().minusHours(hoursBeforeCurrentTime);
 
-        OffsetDateTime lastModifiedNotBeforeThreshold = currentTimeHelper.currentOffsetDateTime().minus(
-            1,
-            ChronoUnit.HOURS
-        );
+        OffsetDateTime lastModifiedNotBeforeThreshold = currentTimeHelper.currentOffsetDateTime().minusHours(1);
 
         List<ExternalObjectDirectoryEntity> externalObjectDirectoryEntitiesNotRelevant;
         List<ExternalObjectDirectoryEntity> externalObjectDirectoryEntities;

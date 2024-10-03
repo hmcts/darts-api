@@ -53,6 +53,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -160,6 +161,12 @@ class TranscriptionServiceImplTest {
 
         lenient().when(authorisationApi.getUsersWithRoleAtCourthouse(eq(SecurityRoleEnum.APPROVER), any())).thenReturn(approvers);
     }
+
+    private void updateManualDeletion(boolean manualDeletionEnabled) {
+        this.transcriptionService = spy(transcriptionService);
+        when(transcriptionService.isManualDeletionEnabled()).thenReturn(manualDeletionEnabled);
+    }
+
 
     @Test
     void saveTranscriptionRequestWithValidValuesAndCourtLogTypeReturnSuccess() {
@@ -583,7 +590,7 @@ class TranscriptionServiceImplTest {
 
         when(mockTranscriptionStatusRepository.getReferenceById(TranscriptionStatusEnum.APPROVED.getId())).thenReturn(transcriptionStatusEntity);
         when(mockTranscriptionWorkflowRepository
-                         .findWorkflowForUserWithTranscriptionState(entity.getId(), TranscriptionStatusEnum.WITH_TRANSCRIBER.getId()))
+                 .findWorkflowForUserWithTranscriptionState(entity.getId(), TranscriptionStatusEnum.WITH_TRANSCRIBER.getId()))
             .thenReturn(Arrays.asList(transcriptionEntity));
 
         when(mockTranscriptionWorkflowRepository.saveAndFlush(Mockito.notNull()))
@@ -595,6 +602,14 @@ class TranscriptionServiceImplTest {
         TranscriptionWorkflowEntity workflowEntity = transcriptionWorkflowEntityArgumentCaptor.getValue();
         assertEquals(transcriptionId, allCaseTranscriptionDocuments.get(0));
         assertEquals(transcriptionStatusEntity, workflowEntity.getTranscriptionStatus());
+    }
+
+    @Test
+    void adminGetTranscriptionDocumentsMarkedForDeletionManualDeletionDisabled() {
+        updateManualDeletion(false);
+        DartsApiException dartsApiException = assertThrows(
+            DartsApiException.class, () -> transcriptionService.adminGetTranscriptionDocumentsMarkedForDeletion());
+        assertThat(dartsApiException.getError()).isEqualTo(DartsApiException.DartsApiErrorCommon.FEATURE_FLAG_NOT_ENABLED);
     }
 
     private TranscriptionRequestDetails createTranscriptionRequestDetails(Integer hearingId,

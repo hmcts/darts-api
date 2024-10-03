@@ -121,7 +121,9 @@ public interface EventRepository extends JpaRepository<EventEntity, Integer> {
     @Modifying
     @Query(value = """
         UPDATE darts.event e
-            SET is_current = false
+            SET is_current = false,
+            last_modified_ts = current_timestamp,
+            last_modified_by = :userId
         FROM (
            SELECT he.eve_id, string_agg(he.hea_id::varchar, ',' order by he.hea_id) as hearing_ids FROM darts.event e
            LEFT JOIN darts.hearing_event_ae he
@@ -134,7 +136,7 @@ public interface EventRepository extends JpaRepository<EventEntity, Integer> {
                 AND h.eve_id = e.eve_id
         """, nativeQuery = true)
     void updateAllEventIdEventsToNotCurrentWithTheExclusionOfTheCurrentEventPrimaryKey(
-        Integer eventIdsPrimaryKey, Integer eventId, String hearingIds);
+        Integer eventIdsPrimaryKey, Integer eventId, String hearingIds, int userId);
 
     @Query("""
         SELECT ee

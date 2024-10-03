@@ -9,18 +9,14 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.mock.web.MockMultipartFile;
 import uk.gov.hmcts.darts.audio.component.AddAudioRequestMapper;
-import uk.gov.hmcts.darts.audio.component.AudioBeingProcessedFromArchiveQuery;
-import uk.gov.hmcts.darts.audio.component.AudioMessageDigest;
 import uk.gov.hmcts.darts.audio.component.impl.AddAudioRequestMapperImpl;
 import uk.gov.hmcts.darts.audio.config.AudioConfigurationProperties;
 import uk.gov.hmcts.darts.audio.model.AddAudioMetadataRequest;
-import uk.gov.hmcts.darts.audio.service.AudioOperationService;
-import uk.gov.hmcts.darts.audio.service.AudioTransformationService;
+import uk.gov.hmcts.darts.audio.service.AudioAsyncService;
 import uk.gov.hmcts.darts.audio.service.AudioUploadService;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
-import uk.gov.hmcts.darts.common.entity.EventEntity;
 import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
@@ -33,7 +29,6 @@ import uk.gov.hmcts.darts.common.repository.HearingRepository;
 import uk.gov.hmcts.darts.common.repository.MediaLinkedCaseRepository;
 import uk.gov.hmcts.darts.common.repository.MediaRepository;
 import uk.gov.hmcts.darts.common.repository.ObjectRecordStatusRepository;
-import uk.gov.hmcts.darts.common.service.FileOperationService;
 import uk.gov.hmcts.darts.common.service.RetrieveCoreObjectService;
 import uk.gov.hmcts.darts.common.util.FileContentChecksum;
 import uk.gov.hmcts.darts.datamanagement.api.DataManagementApi;
@@ -42,7 +37,6 @@ import uk.gov.hmcts.darts.test.common.data.PersistableFactory;
 
 import java.io.InputStream;
 import java.time.OffsetDateTime;
-import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
@@ -70,13 +64,7 @@ class AudioUploadServiceImplTest {
     @Captor
     ArgumentCaptor<ExternalObjectDirectoryEntity> externalObjectDirectoryEntityArgumentCaptor;
     @Mock
-    private AudioTransformationService audioTransformationService;
-    @Mock
-    private AudioOperationService audioOperationService;
-    @Mock
     private MediaRepository mediaRepository;
-    @Mock
-    private FileOperationService fileOperationService;
     @Mock
     private RetrieveCoreObjectService retrieveCoreObjectService;
     @Mock
@@ -96,12 +84,10 @@ class AudioUploadServiceImplTest {
     @Mock
     private DataManagementApi dataManagementApi;
     @Mock
-    private AudioMessageDigest audioDigest;
-    @Mock
-    AudioBeingProcessedFromArchiveQuery audioBeingProcessedFromArchiveQuery;
-    @Mock
     private LogApi logApi;
     private AudioUploadService audioService;
+    @Mock
+    private AudioAsyncService audioAsyncService;
     @Mock
     private MediaLinkedCaseHelper mediaLinkedCaseHelper;
     @Mock
@@ -122,11 +108,9 @@ class AudioUploadServiceImplTest {
             dataManagementApi,
             userIdentity,
             fileContentChecksum,
-            courtLogEventRepository,
-            audioConfigurationProperties,
             logApi,
-            audioDigest,
-            mediaLinkedCaseRepository);
+            mediaLinkedCaseRepository,
+            audioAsyncService);
     }
 
     @Test
@@ -190,97 +174,6 @@ class AudioUploadServiceImplTest {
         assertEquals(savedMedia.getChecksum(), externalObjectDirectoryEntity.getChecksum());
         assertNotNull(externalObjectDirectoryEntity.getChecksum());
         assertEquals(externalLocation, externalObjectDirectoryEntity.getExternalLocation());
-    }
-
-    @Test
-    void handheldAudioShouldNotLinkAudioToHearingByEvent() {
-
-        AddAudioMetadataRequest addAudioMetadataRequest = createAddAudioRequest(STARTED_AT, ENDED_AT);
-        addAudioMetadataRequest.setTotalChannels(1);
-
-        HearingEntity hearing = new HearingEntity();
-        EventEntity eventEntity = new EventEntity();
-        eventEntity.addHearing(hearing);
-
-        MediaEntity mediaEntity = createMediaEntity(STARTED_AT, ENDED_AT);
-
-        when(audioConfigurationProperties.getHandheldAudioCourtroomNumbers())
-            .thenReturn(List.of(addAudioMetadataRequest.getCourtroom()));
-
-        audioService.linkAudioToHearingByEvent(addAudioMetadataRequest, mediaEntity);
-        verify(hearingRepository, times(0)).saveAndFlush(any());
-        assertEquals(0, hearing.getMediaList().size());
-    }
-
-    @Test
-    void linkAudioToHearingByEvent() {
-        HearingEntity hearing = new HearingEntity();
-        EventEntity eventEntity = new EventEntity();
-        eventEntity.setTimestamp(STARTED_AT.minusMinutes(30));
-        eventEntity.addHearing(hearing);
-
-        AddAudioMetadataRequest addAudioMetadataRequest = createAddAudioRequest(STARTED_AT, ENDED_AT);
-        MediaEntity mediaEntity = createMediaEntity(STARTED_AT, ENDED_AT);
-
-        when(courtLogEventRepository.findByCourthouseAndCourtroomBetweenStartAndEnd(
-            anyString(),
-            anyString(),
-            any(),
-            any()
-        )).thenReturn(List.of(eventEntity));
-
-        audioService.linkAudioToHearingByEvent(addAudioMetadataRequest, mediaEntity);
-        verify(hearingRepository, times(1)).saveAndFlush(any());
-        assertEquals(1, hearing.getMediaList().size());
-    }
-
-    @Test
-    void linkAudioToInactiveHearingByEvent() {
-        HearingEntity hearing = new HearingEntity();
-        EventEntity eventEntity = new EventEntity();
-        eventEntity.setTimestamp(STARTED_AT.minusMinutes(30));
-        eventEntity.addHearing(hearing);
-
-        AddAudioMetadataRequest addAudioMetadataRequest = createAddAudioRequest(STARTED_AT, ENDED_AT);
-        MediaEntity mediaEntity = createMediaEntity(STARTED_AT, ENDED_AT);
-
-        when(courtLogEventRepository.findByCourthouseAndCourtroomBetweenStartAndEnd(
-            anyString(),
-            anyString(),
-            any(),
-            any()
-        )).thenReturn(List.of(eventEntity));
-
-        audioService.linkAudioToHearingByEvent(addAudioMetadataRequest, mediaEntity);
-        verify(hearingRepository, times(1)).saveAndFlush(any());
-        assertEquals(1, hearing.getMediaList().size());
-        assertTrue(hearing.getHearingIsActual());
-    }
-
-    @Test
-    void linkAudioToHearingByEventShouldOnlyLinkOncePerHearing() {
-        HearingEntity hearing = new HearingEntity();
-        EventEntity firstEventEntity = new EventEntity();
-        firstEventEntity.setTimestamp(STARTED_AT.plusMinutes(15));
-        firstEventEntity.addHearing(hearing);
-
-        EventEntity secondEventEntity = new EventEntity();
-        secondEventEntity.setTimestamp(STARTED_AT.plusMinutes(20));
-        secondEventEntity.addHearing(hearing);
-
-        AddAudioMetadataRequest addAudioMetadataRequest = createAddAudioRequest(STARTED_AT, ENDED_AT);
-        MediaEntity mediaEntity = createMediaEntity(STARTED_AT, ENDED_AT);
-
-        when(courtLogEventRepository.findByCourthouseAndCourtroomBetweenStartAndEnd(
-            anyString(),
-            anyString(),
-            any(),
-            any()
-        )).thenReturn(Arrays.asList(firstEventEntity, secondEventEntity));
-
-        audioService.linkAudioToHearingByEvent(addAudioMetadataRequest, mediaEntity);
-        verify(hearingRepository, times(1)).saveAndFlush(any());
-        assertEquals(1, hearing.getMediaList().size());
     }
 
     private MediaEntity createMediaEntity(OffsetDateTime startedAt, OffsetDateTime endedAt) {

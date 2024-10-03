@@ -1,8 +1,9 @@
 package uk.gov.hmcts.darts.arm.component.impl;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -24,11 +25,13 @@ import uk.gov.hmcts.darts.arm.model.record.operation.MediaCreateArchiveRecordOpe
 import uk.gov.hmcts.darts.arm.model.record.operation.TranscriptionCreateArchiveRecordOperation;
 import uk.gov.hmcts.darts.common.config.ObjectMapperConfig;
 import uk.gov.hmcts.darts.common.exception.DartsException;
+import uk.gov.hmcts.darts.test.common.FileStore;
 
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
@@ -64,11 +67,19 @@ class ArchiveRecordFileGeneratorImplTest {
         archiveRecordFileGenerator = new ArchiveRecordFileGeneratorImpl(objectMapper);
     }
 
+    @AfterEach
+    @SuppressWarnings("PMD.SignatureDeclareThrowsException")
+    public void clean() throws Exception {
+        FileStore.getFileStore().remove();
+        Assertions.assertEquals(0, Files.list(tempDirectory.toPath()).count());
+    }
+
     @Test
     void generateArchiveRecordWithMedia() throws IOException {
         String fileLocation = tempDirectory.getAbsolutePath();
         String relationId = "1234";
-        File archiveFile = new File(fileLocation, "1234-1-1.a360");
+        File archiveFile = FileStore.getFileStore().create(Path.of(fileLocation), Path.of("1234-1-1.a360"));
+
         archiveRecordFileGenerator.generateArchiveRecord(createMediaArchiveRecord(relationId), archiveFile, ArchiveRecordType.MEDIA_ARCHIVE_TYPE);
 
         log.info("Reading file {}", archiveFile.getAbsolutePath());
@@ -84,7 +95,8 @@ class ArchiveRecordFileGeneratorImplTest {
     void generateArchiveRecordWithTranscription() throws IOException {
         String fileLocation = tempDirectory.getAbsolutePath();
         String relationId = "1234";
-        File archiveFile = new File(fileLocation, "1234-1-1.a360");
+        File archiveFile = FileStore.getFileStore().create(Path.of(fileLocation), Path.of("1234-1-1.a360"));
+
         archiveRecordFileGenerator.generateArchiveRecord(createTranscriptionArchiveRecord(relationId), archiveFile,
                                                          ArchiveRecordType.TRANSCRIPTION_ARCHIVE_TYPE);
 
@@ -101,7 +113,8 @@ class ArchiveRecordFileGeneratorImplTest {
     void generateArchiveRecordWithAnnotation() throws IOException {
         String fileLocation = tempDirectory.getAbsolutePath();
         String relationId = "1234";
-        File archiveFile = new File(fileLocation, "1234-1-1.a360");
+        File archiveFile = FileStore.getFileStore().create(Path.of(fileLocation), Path.of("1234-1-1.a360"));
+
         archiveRecordFileGenerator.generateArchiveRecord(createAnnotationArchiveRecord(relationId), archiveFile, ArchiveRecordType.ANNOTATION_ARCHIVE_TYPE);
 
         log.info("Reading file {}", archiveFile.getAbsolutePath());
@@ -117,7 +130,9 @@ class ArchiveRecordFileGeneratorImplTest {
     void generateArchiveRecordWithCase() throws IOException {
         String fileLocation = tempDirectory.getAbsolutePath();
         String relationId = "1234";
-        File archiveFile = new File(fileLocation, "1234-1-1.a360");
+        File archiveFile = FileStore.getFileStore().create(Path.of(fileLocation), Path.of("1234-1-1.a360"));
+
+
         archiveRecordFileGenerator.generateArchiveRecord(createCaseArchiveRecord(relationId), archiveFile, ArchiveRecordType.CASE_ARCHIVE_TYPE);
 
         log.info("Reading file {}", archiveFile.getAbsolutePath());
@@ -130,19 +145,21 @@ class ArchiveRecordFileGeneratorImplTest {
     }
 
     @Test
-    void generateArchiveRecordWithNullArchiveRecord() {
+    void generateArchiveRecordWithNullArchiveRecord() throws Exception {
         String fileLocation = tempDirectory.getAbsolutePath();
-        File archiveFile = new File(fileLocation, "test-media-arm.a360");
+        File archiveFile = FileStore.getFileStore().create(Path.of(fileLocation), Path.of("test-media-arm.a360"));
+
         ArchiveRecord archiveRecord = null;
         boolean result = archiveRecordFileGenerator.generateArchiveRecord(archiveRecord, archiveFile, ArchiveRecordType.MEDIA_ARCHIVE_TYPE);
         assertFalse(result);
     }
 
     @Test
-    void generateArchiveRecords() {
+    void generateArchiveRecords() throws Exception {
         String fileLocation = tempDirectory.getAbsolutePath();
         String relationId = "1234";
-        File archiveFile = new File(fileLocation, "archive-records.a360");
+        File archiveFile = FileStore.getFileStore().create(Path.of(fileLocation), Path.of("archive-records.a360"));
+
         var archiveRecord = createMediaArchiveRecord(relationId);
         List<ArchiveRecord> archiveRecords = List.of(archiveRecord, archiveRecord);
 
@@ -156,6 +173,7 @@ class ArchiveRecordFileGeneratorImplTest {
     void generateArchiveRecordsEmptyArchiveRecords() {
         String fileLocation = tempDirectory.getAbsolutePath();
         File archiveFile = new File(fileLocation, "archive-records.a360");
+
         List<ArchiveRecord> archiveRecords = Collections.emptyList();
 
         archiveRecordFileGenerator.generateArchiveRecords(archiveRecords, archiveFile);
@@ -164,13 +182,14 @@ class ArchiveRecordFileGeneratorImplTest {
     }
 
     @Test
-    void generateArchiveRecordsArchiveRecordError() throws JsonProcessingException {
+    void generateArchiveRecordsArchiveRecordError() throws Exception {
         var objectMapper = mock(ObjectMapper.class);
         archiveRecordFileGenerator = new ArchiveRecordFileGeneratorImpl(objectMapper);
         when(objectMapper.writeValueAsString(any())).thenThrow(RuntimeException.class);
 
         String fileLocation = tempDirectory.getAbsolutePath();
-        File archiveFile = new File(fileLocation, "archive-records.a360");
+        File archiveFile = FileStore.getFileStore().create(Path.of(fileLocation), Path.of("archive-records.a360"));
+
         String relationId = "1234";
         var archiveRecord = createMediaArchiveRecord(relationId);
         List<ArchiveRecord> archiveRecords = List.of(archiveRecord);
@@ -183,6 +202,7 @@ class ArchiveRecordFileGeneratorImplTest {
 
         String fileLocation = tempDirectory.getAbsolutePath();
         File invalidFile = new File(fileLocation, "archive-recor/ds.a360");
+
         String relationId = "1234";
         var archiveRecord = createMediaArchiveRecord(relationId);
         List<ArchiveRecord> archiveRecords = List.of(archiveRecord);

@@ -109,8 +109,7 @@ public class AutomatedTaskProcessorFactoryImpl implements AutomatedTaskProcessor
 
     @Override
     public CleanupCurrentFlagEventProcessor createCleanupCurrentFlagEventProcessor(int batchSize) {
-        return new CleanupCurrentFlagEventProcessorImpl(
-            batchSize, eventRepository);
+        return new CleanupCurrentFlagEventProcessorImpl(batchSize, eventRepository, userIdentity);
     }
 
     @Override

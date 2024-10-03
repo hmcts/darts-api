@@ -109,7 +109,7 @@ class DataManagementServiceTest {
         try (DownloadResponseMetaData downloadResponseMetaData = dataManagementService.downloadData(DatastoreContainerType.UNSTRUCTURED,
                                                                                                     unstructuredStorageContainerName,
                                                                                                     uniqueBlobName)) {
-            assertEquals(TEST_BINARY_STRING, new String(downloadResponseMetaData.getInputStream().readAllBytes()));
+            assertEquals(TEST_BINARY_STRING, new String(downloadResponseMetaData.getResource().getInputStream().readAllBytes()));
         }
     }
 

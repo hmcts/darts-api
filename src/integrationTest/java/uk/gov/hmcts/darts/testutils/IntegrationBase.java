@@ -18,6 +18,7 @@ import uk.gov.hmcts.darts.task.api.AutomatedTasksApi;
 import uk.gov.hmcts.darts.task.runner.AutomatedOnDemandTask;
 import uk.gov.hmcts.darts.task.status.AutomatedTaskStatus;
 import uk.gov.hmcts.darts.test.common.AwaitabilityUtil;
+import uk.gov.hmcts.darts.test.common.FileStore;
 import uk.gov.hmcts.darts.test.common.LogUtil;
 import uk.gov.hmcts.darts.test.common.MemoryLogAppender;
 import uk.gov.hmcts.darts.testutils.stubs.DartsDatabaseRetrieval;
@@ -113,8 +114,16 @@ public class IntegrationBase {
     }
 
     @AfterEach
-    void clearTestData() {
+    @SuppressWarnings("PMD.SignatureDeclareThrowsException")
+    void clearTestData() throws Exception {
         logAppender.reset();
+        FileStore.getFileStore().remove();
+        checkCleanup();
+    }
+
+    @SuppressWarnings("PMD.SignatureDeclareThrowsException")
+    protected void checkCleanup() throws Exception{
+
     }
 
     protected void givenBearerTokenExists(String email) {

@@ -3,6 +3,7 @@ package uk.gov.hmcts.darts.task.runner.impl;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Limit;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 import uk.gov.hmcts.darts.audio.deleter.impl.inbound.ExternalInboundDataStoreDeleter;
 import uk.gov.hmcts.darts.audio.deleter.impl.unstructured.ExternalUnstructuredDataStoreDeleter;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
@@ -71,6 +72,13 @@ public class AssociatedObjectDataExpiryDeletionAutomatedTask
         this.unstructuredDeleter = unstructuredDeleter;
     }
 
+
+    @Override
+    @Transactional
+    public void run() {
+        super.run();
+    }
+
     @Override
     public AutomatedTaskName getAutomatedTaskName() {
         return AutomatedTaskName.ASSOCIATED_OBJECT_DATA_EXPIRY_DELETION_TASK_NAME;
@@ -133,19 +141,18 @@ public class AssociatedObjectDataExpiryDeletionAutomatedTask
         Function<ExternalObjectDirectoryEntity, T> entityMapper) {
 
 
-        List<ExternalObjectDirectoryEntity> deletedEntities = externalObjectDirectoryEntities
+        List<ExternalObjectDirectoryEntity> externalObjectDirectoryEntitiesToDelete = externalObjectDirectoryEntities
             .stream()
             .filter(this::deleteFromExternalDataStore)
             .toList();
 
-        repository.softDeleteAll(
-            deletedEntities
-                .stream()
-                .map(entityMapper)
-                .toList(),
-            userAccount
-        );
-        externalObjectDirectoryRepository.deleteAll(deletedEntities);
+        List<T> entitiesToDelete = externalObjectDirectoryEntitiesToDelete
+            .stream()
+            .map(entityMapper)
+            .toList();
+
+        externalObjectDirectoryRepository.deleteAll(externalObjectDirectoryEntitiesToDelete);
+        repository.softDeleteAll(entitiesToDelete, userAccount);
     }
 
     boolean deleteFromExternalDataStore(ExternalObjectDirectoryEntity externalObjectDirectoryEntity) {

@@ -29,5 +29,6 @@
     "description": "STANDARD",
     "priority_order": 999
   },
-  "transcription_object_id":"legacyObjectId"
+  "transcription_object_id":"legacyObjectId",
+  "legacy_comments":["comment1","comment2"]
 }

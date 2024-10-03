@@ -2,7 +2,7 @@ package uk.gov.hmcts.darts.transcriptions.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.core.io.InputStreamResource;
+import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.darts.audit.api.AuditApi;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
@@ -55,10 +55,10 @@ public class TranscriptionDownloader {
     }
 
     @SuppressWarnings({"PMD.CloseResource"})
-    private InputStreamResource getResourceStreamFor(TranscriptionDocumentEntity latestTranscriptionDocument) {
+    private Resource getResourceStreamFor(TranscriptionDocumentEntity latestTranscriptionDocument) {
         try {
             DownloadResponseMetaData downloadResponseMetaData = dataManagementFacade.retrieveFileFromStorage(latestTranscriptionDocument);
-            return new InputStreamResource(downloadResponseMetaData.getInputStream());
+            return downloadResponseMetaData.getResource();
         } catch (IOException | FileNotDownloadedException ex) {
             log.error("Failed to download transcript file using latestTranscriptionDocument ID {}",
                       latestTranscriptionDocument.getId(),

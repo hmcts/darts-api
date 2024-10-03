@@ -1,10 +1,11 @@
 package uk.gov.hmcts.darts.task.service.impl;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import uk.gov.hmcts.darts.audit.api.AuditActivity;
 import uk.gov.hmcts.darts.audit.api.AuditApi;
 import uk.gov.hmcts.darts.common.entity.AutomatedTaskEntity;
@@ -24,9 +25,8 @@ import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.Mockito.doReturn;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -49,31 +49,16 @@ class AdminAutomatedTasksServiceImplTest {
 
     @Mock
     private AuditApi auditApi;
+    @Mock
+    private ConfigurableBeanFactory configurableBeanFactory;
 
+    @InjectMocks
     private AdminAutomatedTasksServiceImpl adminAutomatedTaskService;
 
-    @BeforeEach
-    void setUp() {
-        adminAutomatedTaskService = spy(new AdminAutomatedTasksServiceImpl(
-            automatedTaskRepository,
-            mapper,
-            manualTaskService,
-            automatedTaskRunner,
-            auditApi,
-            lockService,
-            true
-        ));
-    }
-
-    private void setCaseExpiryDeletionFalse() {
-        doReturn(false)
-            .when(adminAutomatedTaskService)
-            .isCaseExpiryDeletionEnabled();
-    }
 
     @Test
     void invokesTaskWhenTaskIsNotLocked() {
-        var automatedTask = anAutomatedTaskEntityWithName("some-task-name");
+        var automatedTask = anAutomatedTaskEntityWithName("some-task-name", null);
         when(someAutomatedTask.getTaskName()).thenReturn("some-task-name");
         when(lockService.isLocked(automatedTask.get())).thenReturn(false);
 
@@ -88,7 +73,7 @@ class AdminAutomatedTasksServiceImplTest {
 
     @Test
     void updateAutomatedTask() {
-        Optional<AutomatedTaskEntity> automatedTaskEntity = anAutomatedTaskEntityWithName("some-task-name");
+        Optional<AutomatedTaskEntity> automatedTaskEntity = anAutomatedTaskEntityWithName("some-task-name", null);
         when(automatedTaskRepository.findById(1)).thenReturn(automatedTaskEntity);
 
         AutomatedTaskPatch automatedTaskPatch = new AutomatedTaskPatch();
@@ -110,11 +95,11 @@ class AdminAutomatedTasksServiceImplTest {
     @Test
     void positiveGetAllAutomatedTasks() {
         AutomatedTaskEntity automatedTaskEntity1 =
-            createAutomatedTaskEntity("task1");
+            createAutomatedTaskEntity("task1", true);
         AutomatedTaskEntity automatedTaskEntity2 =
-            createAutomatedTaskEntity("task2");
+            createAutomatedTaskEntity("task2", true);
         AutomatedTaskEntity automatedTaskEntity3 =
-            createAutomatedTaskEntity("CaseExpiryDeletion");
+            createAutomatedTaskEntity("CaseExpiryDeletion", true);
 
         when(automatedTaskRepository.findAll()).thenReturn(List.of(automatedTaskEntity1, automatedTaskEntity2, automatedTaskEntity3));
 
@@ -128,14 +113,13 @@ class AdminAutomatedTasksServiceImplTest {
 
 
     @Test
-    void positiveGetAllAutomatedTasksWithExpiryDeletionExcludeFlag() {
-        setCaseExpiryDeletionFalse();
+    void positiveGetAllAutomatedTasksDisabledExcludeFlag() {
         AutomatedTaskEntity automatedTaskEntity1 =
-            createAutomatedTaskEntity("task1");
+            createAutomatedTaskEntity("task1", true);
         AutomatedTaskEntity automatedTaskEntity2 =
-            createAutomatedTaskEntity("task2");
+            createAutomatedTaskEntity("task2", true);
         AutomatedTaskEntity automatedTaskEntity3 =
-            createAutomatedTaskEntity("CaseExpiryDeletion");
+            createAutomatedTaskEntity("CaseExpiryDeletion", false);
 
         when(automatedTaskRepository.findAll()).thenReturn(List.of(automatedTaskEntity1, automatedTaskEntity2, automatedTaskEntity3));
 
@@ -149,7 +133,7 @@ class AdminAutomatedTasksServiceImplTest {
 
     @Test
     void positiveGetAutomatedTaskById() {
-        AutomatedTaskEntity automatedTaskEntity = createAutomatedTaskEntity("CaseExpiryDeletion");
+        AutomatedTaskEntity automatedTaskEntity = createAutomatedTaskEntity("CaseExpiryDeletion", true);
         when(automatedTaskRepository.findById(1234)).thenReturn(Optional.of(automatedTaskEntity));
         DetailedAutomatedTask expectedDetailedAutomatedTask = mock(DetailedAutomatedTask.class);
         when(mapper.mapEntityToDetailedAutomatedTask(automatedTaskEntity)).thenReturn(expectedDetailedAutomatedTask);
@@ -160,10 +144,8 @@ class AdminAutomatedTasksServiceImplTest {
     }
 
     @Test
-    void positiveGetAutomatedTaskByIdWithExpiryDeletionExcludeFlag() {
-        setCaseExpiryDeletionFalse();
-
-        AutomatedTaskEntity automatedTaskEntity = createAutomatedTaskEntity("CaseExpiryDeletion");
+    void positiveGetAutomatedTaskByIdWithDisabledFlag() {
+        AutomatedTaskEntity automatedTaskEntity = createAutomatedTaskEntity("CaseExpiryDeletion", false);
         when(automatedTaskRepository.findById(1234)).thenReturn(Optional.of(automatedTaskEntity));
 
         DartsApiException exception = assertThrows(DartsApiException.class, () -> adminAutomatedTaskService.getAutomatedTaskById(1234));
@@ -171,10 +153,8 @@ class AdminAutomatedTasksServiceImplTest {
     }
 
     @Test
-    void positiveRunAutomatedTaskWithExpiryDeletionExcludeFlag() {
-        setCaseExpiryDeletionFalse();
-
-        AutomatedTaskEntity automatedTaskEntity = createAutomatedTaskEntity("CaseExpiryDeletion");
+    void positiveRunAutomatedTaskWithDisabledFlag() {
+        AutomatedTaskEntity automatedTaskEntity = createAutomatedTaskEntity("CaseExpiryDeletion", false);
         when(automatedTaskRepository.findById(1234)).thenReturn(Optional.of(automatedTaskEntity));
 
         DartsApiException exception = assertThrows(DartsApiException.class, () -> adminAutomatedTaskService.runAutomatedTask(1234));
@@ -182,10 +162,8 @@ class AdminAutomatedTasksServiceImplTest {
     }
 
     @Test
-    void positiveUpdateAutomatedTaskWithExpiryDeletionExcludeFlag() {
-        setCaseExpiryDeletionFalse();
-
-        AutomatedTaskEntity automatedTaskEntity = createAutomatedTaskEntity("CaseExpiryDeletion");
+    void positiveUpdateAutomatedTaskWithDisabledTaskFlag() {
+        AutomatedTaskEntity automatedTaskEntity = createAutomatedTaskEntity("CaseExpiryDeletion", false);
         when(automatedTaskRepository.findById(1234)).thenReturn(Optional.of(automatedTaskEntity));
 
         DartsApiException exception = assertThrows(
@@ -194,11 +172,11 @@ class AdminAutomatedTasksServiceImplTest {
     }
 
 
-    private AutomatedTaskEntity createAutomatedTaskEntity(String taskName) {
-        return anAutomatedTaskEntityWithName(taskName).orElseThrow();
+    private AutomatedTaskEntity createAutomatedTaskEntity(String taskName, boolean enabled) {
+        return anAutomatedTaskEntityWithName(taskName, enabled).orElseThrow();
     }
 
-    private Optional<AutomatedTaskEntity> anAutomatedTaskEntityWithName(String taskName) {
+    private Optional<AutomatedTaskEntity> anAutomatedTaskEntityWithName(String taskName, Boolean enabled) {
         var automatedTaskEntity = new AutomatedTaskEntity();
         automatedTaskEntity.setTaskName(taskName);
         automatedTaskEntity.setId(1234);
@@ -207,6 +185,9 @@ class AdminAutomatedTasksServiceImplTest {
         automatedTaskEntity.setTaskDescription("task description");
         automatedTaskEntity.setTaskName(taskName != null ? taskName : "task name");
         automatedTaskEntity.setCronExpression("");
+        if (enabled != null) {
+            when(configurableBeanFactory.resolveEmbeddedValue(any())).thenReturn(enabled.toString());
+        }
         UserAccountEntity accountEntity = new UserAccountEntity();
         accountEntity.setId(999);
 

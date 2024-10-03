@@ -1,13 +1,16 @@
 package uk.gov.hmcts.darts.transcriptions.controller;
 
 import org.apache.commons.io.IOUtils;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 import org.skyscreamer.jsonassert.JSONAssert;
 import org.skyscreamer.jsonassert.JSONCompareMode;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.core.io.Resource;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
@@ -15,6 +18,7 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.transaction.annotation.Transactional;
 import uk.gov.hmcts.darts.audit.api.AuditApi;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
+import uk.gov.hmcts.darts.common.datamanagement.StorageConfiguration;
 import uk.gov.hmcts.darts.common.datamanagement.api.DataManagementFacade;
 import uk.gov.hmcts.darts.common.datamanagement.component.impl.FileBasedDownloadResponseMetaData;
 import uk.gov.hmcts.darts.common.entity.ExternalLocationTypeEntity;
@@ -27,7 +31,10 @@ import uk.gov.hmcts.darts.testutils.IntegrationBase;
 import uk.gov.hmcts.darts.testutils.stubs.AuthorisationStub;
 import uk.gov.hmcts.darts.testutils.stubs.TranscriptionStub;
 
+import java.io.File;
+import java.io.OutputStream;
 import java.nio.charset.Charset;
+import java.nio.file.NoSuchFileException;
 import java.util.List;
 import java.util.UUID;
 
@@ -52,7 +59,6 @@ import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum.WI
 
 @AutoConfigureMockMvc
 @Transactional
-@SuppressWarnings({"PMD.ExcessiveImports"})
 class TranscriptionControllerDownloadTranscriptIntTest extends IntegrationBase {
 
     private static final String URL_TEMPLATE = "/transcriptions/{transcription_id}/document";
@@ -72,6 +78,9 @@ class TranscriptionControllerDownloadTranscriptIntTest extends IntegrationBase {
     private AuditApi mockAuditApi;
     @MockBean
     private DataManagementFacade mockDataManagementFacade;
+
+    @TempDir
+    private File tempDirectory;
 
     private TranscriptionEntity transcriptionEntity;
     private UserAccountEntity testUser;
@@ -189,9 +198,15 @@ class TranscriptionControllerDownloadTranscriptIntTest extends IntegrationBase {
         final String confidenceReason = "reason";
         final Integer confidenceScore = 232;
 
-        var mockFileBasedDownloadResponseMetaData = mock(FileBasedDownloadResponseMetaData.class);
+        // setup a real file so we can assert against its processing
+        StorageConfiguration configuration = new StorageConfiguration();
+        configuration.setTempBlobWorkspace(tempDirectory.getAbsolutePath());
+        var mockFileBasedDownloadResponseMetaData = new FileBasedDownloadResponseMetaData();
+        try (OutputStream outputStream = mockFileBasedDownloadResponseMetaData.getOutputStream(configuration)) {
+            outputStream.write("test-transcription".getBytes());
+        }
+
         when(mockDataManagementFacade.retrieveFileFromStorage(any(TranscriptionDocumentEntity.class))).thenReturn(mockFileBasedDownloadResponseMetaData);
-        when(mockFileBasedDownloadResponseMetaData.getInputStream()).thenReturn(IOUtils.toInputStream("test-transcription", Charset.defaultCharset()));
 
         transcriptionEntity = transcriptionStub.updateTranscriptionWithDocument(
             transcriptionEntity,
@@ -228,6 +243,16 @@ class TranscriptionControllerDownloadTranscriptIntTest extends IntegrationBase {
                 String.valueOf(transcriptionEntity.getTranscriptionDocumentEntities().get(0).getId())
             ));
 
+        // ensure that the input stream is closed
+        try {
+            mockFileBasedDownloadResponseMetaData.getResource().getInputStream().read();
+            Assertions.fail();
+        } catch (Exception closedConnectionException) {
+            Assertions.assertInstanceOf(NoSuchFileException.class, closedConnectionException);
+        }
+
+        // ensure the source file is removed
+        assertEquals(0, new File(configuration.getTempBlobWorkspace()).list().length);
         verify(mockAuditApi).record(DOWNLOAD_TRANSCRIPTION, testUser, transcriptionEntity.getCourtCase());
 
     }
@@ -263,7 +288,10 @@ class TranscriptionControllerDownloadTranscriptIntTest extends IntegrationBase {
 
         var mockFileBasedDownloadResponseMetaData = mock(FileBasedDownloadResponseMetaData.class);
         when(mockDataManagementFacade.retrieveFileFromStorage(any(TranscriptionDocumentEntity.class))).thenReturn(mockFileBasedDownloadResponseMetaData);
-        when(mockFileBasedDownloadResponseMetaData.getInputStream()).thenReturn(IOUtils.toInputStream("test-transcription", Charset.defaultCharset()));
+
+        Resource resource = mock(Resource.class);
+        when(mockFileBasedDownloadResponseMetaData.getResource()).thenReturn(resource);
+        when(resource.getInputStream()).thenReturn(IOUtils.toInputStream("test-transcription", Charset.defaultCharset()));
 
         MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders.get(URL_TEMPLATE, transcriptionId)
             .header(
@@ -288,7 +316,8 @@ class TranscriptionControllerDownloadTranscriptIntTest extends IntegrationBase {
 
         verify(mockAuditApi).record(DOWNLOAD_TRANSCRIPTION, testUser, transcriptionEntity.getCourtCase());
         verify(mockDataManagementFacade).retrieveFileFromStorage(any(TranscriptionDocumentEntity.class));
-        verify(mockFileBasedDownloadResponseMetaData).getInputStream();
+        verify(mockFileBasedDownloadResponseMetaData).getResource();
+        verify(resource).getInputStream();
         verifyNoMoreInteractions(mockAuditApi, mockDataManagementFacade, mockFileBasedDownloadResponseMetaData);
     }
 
