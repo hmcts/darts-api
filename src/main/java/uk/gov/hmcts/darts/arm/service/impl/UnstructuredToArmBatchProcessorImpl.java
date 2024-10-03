@@ -153,7 +153,7 @@ public class UnstructuredToArmBatchProcessorImpl implements UnstructuredToArmBat
 
     private void pushRawDataAndCreateArchiveRecordIfSuccess(ArmBatchItem batchItem, String rawFilename, UserAccountEntity userAccount) {
         log.info("Start of batch ARM Push processing for EOD {} running at: {}", batchItem.getArmEod().getId(), OffsetDateTime.now());
-        boolean copyRawDataToArmSuccessful = unstructuredToArmHelper.copyRawDataToArm(
+        boolean copyRawDataToArmSuccessful = unstructuredToArmHelper.copyUnstructuredRawDataToArm(
             batchItem.getSourceEod(),
             batchItem.getArmEod(),
             rawFilename,

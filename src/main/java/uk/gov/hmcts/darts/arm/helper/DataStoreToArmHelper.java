@@ -36,7 +36,6 @@ import java.util.UUID;
 import static java.util.Objects.nonNull;
 import static uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum.ARM;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_INGESTION;
-import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_MANIFEST_FAILED;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_RAW_DATA_FAILED;
 import static uk.gov.hmcts.darts.common.util.EodHelper.equalsAnyStatus;
 
@@ -56,8 +55,8 @@ public class DataStoreToArmHelper {
 
     public List<ExternalObjectDirectoryEntity> getEodEntitiesToSendToArm(ExternalLocationTypeEntity sourceLocation,
                                                                          ExternalLocationTypeEntity armLocation, int maxResultSize) {
-        ObjectRecordStatusEntity armRawStatusFailed = objectRecordStatusRepository.getReferenceById(ARM_RAW_DATA_FAILED.getId());
-        ObjectRecordStatusEntity armManifestFailed = objectRecordStatusRepository.getReferenceById(ARM_MANIFEST_FAILED.getId());
+        ObjectRecordStatusEntity armRawStatusFailed = EodHelper.failedArmRawDataStatus();
+        ObjectRecordStatusEntity armManifestFailed = EodHelper.failedArmManifestFileStatus();
 
         List<ObjectRecordStatusEntity> failedArmStatuses = List.of(armRawStatusFailed, armManifestFailed);
 
@@ -82,33 +81,6 @@ public class DataStoreToArmHelper {
         return returnList;
     }
 
-    public List<ExternalObjectDirectoryEntity> getDetsEodEntitiesToSendToArm(ExternalLocationTypeEntity sourceLocation,
-                                                                             ExternalLocationTypeEntity armLocation, int maxResultSize) {
-        ObjectRecordStatusEntity armRawStatusFailed = objectRecordStatusRepository.getReferenceById(ARM_RAW_DATA_FAILED.getId());
-        ObjectRecordStatusEntity armManifestFailed = objectRecordStatusRepository.getReferenceById(ARM_MANIFEST_FAILED.getId());
-
-        List<ObjectRecordStatusEntity> failedArmStatuses = List.of(armRawStatusFailed, armManifestFailed);
-
-        var failedArmExternalObjectDirectoryEntities = externalObjectDirectoryRepository.findNotFinishedAndNotExceededRetryInStorageLocationForDets(
-            failedArmStatuses,
-            armLocation,
-            armDataManagementConfiguration.getMaxRetryAttempts(),
-            Pageable.ofSize(maxResultSize)
-        );
-
-        List<ExternalObjectDirectoryEntity> returnList = new ArrayList<>(failedArmExternalObjectDirectoryEntities);
-
-        int remainingBatchSizeEods = maxResultSize - failedArmExternalObjectDirectoryEntities.size();
-        if (remainingBatchSizeEods > 0) {
-            var pendingUnstructuredExternalObjectDirectoryEntities = externalObjectDirectoryRepository.findEodsNotInOtherStorage(
-                EodHelper.storedStatus(), sourceLocation,
-                EodHelper.armLocation(),
-                remainingBatchSizeEods);
-            returnList.addAll(pendingUnstructuredExternalObjectDirectoryEntities);
-        }
-
-        return returnList;
-    }
 
     public Optional<ExternalObjectDirectoryEntity> getExternalObjectDirectoryEntity(
         ExternalObjectDirectoryEntity externalObjectDirectoryEntity, ExternalLocationTypeEntity eodSourceLocation, ObjectRecordStatusEntity status) {
@@ -205,10 +177,10 @@ public class DataStoreToArmHelper {
         return String.format("%s_%s_%s", entityId, documentId, transferAttempts);
     }
 
-    public boolean copyRawDataToArm(ExternalObjectDirectoryEntity unstructuredExternalObjectDirectory,
-                                    ExternalObjectDirectoryEntity armExternalObjectDirectory,
-                                    String filename,
-                                    ObjectRecordStatusEntity previousStatus, UserAccountEntity userAccount) {
+    public boolean copyUnstructuredRawDataToArm(ExternalObjectDirectoryEntity unstructuredExternalObjectDirectory,
+                                                ExternalObjectDirectoryEntity armExternalObjectDirectory,
+                                                String filename,
+                                                ObjectRecordStatusEntity previousStatus, UserAccountEntity userAccount) {
         try {
             if (previousStatus == null
                 || ARM_RAW_DATA_FAILED.getId().equals(previousStatus.getId())

@@ -5,6 +5,8 @@ import com.azure.storage.blob.models.BlobStorageException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.ListUtils;
+import org.apache.commons.lang3.exception.ExceptionUtils;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.darts.arm.api.ArmDataManagementApi;
 import uk.gov.hmcts.darts.arm.config.ArmDataManagementConfiguration;
@@ -32,6 +34,7 @@ import java.io.File;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.OffsetDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -64,10 +67,9 @@ public class DetsToArmBatchPushProcessorImpl implements DetsToArmBatchPushProces
         ExternalLocationTypeEntity eodSourceLocation = EodHelper.detsLocation();
 
         // Because the query is long-running, get all the EODs that need to be processed in one go
-        List<ExternalObjectDirectoryEntity> eodsForTransfer = dataStoreToArmHelper
-            .getDetsEodEntitiesToSendToArm(eodSourceLocation,
-                                           EodHelper.armLocation(),
-                                           taskBatchSize);
+        List<ExternalObjectDirectoryEntity> eodsForTransfer = getDetsEodEntitiesToSendToArm(eodSourceLocation,
+                                                                                            EodHelper.armLocation(),
+                                                                                            taskBatchSize);
 
         log.info("Found {} DETS pending entities to process from source '{}'", eodsForTransfer.size(), eodSourceLocation.getDescription());
         if (!eodsForTransfer.isEmpty()) {
@@ -84,8 +86,36 @@ public class DetsToArmBatchPushProcessorImpl implements DetsToArmBatchPushProces
         log.info("Finished running DETS ARM Batch Push processing at: {}", OffsetDateTime.now());
     }
 
+    private List<ExternalObjectDirectoryEntity> getDetsEodEntitiesToSendToArm(ExternalLocationTypeEntity sourceLocation,
+                                                                              ExternalLocationTypeEntity armLocation, int maxResultSize) {
+        ObjectRecordStatusEntity armRawStatusFailed = EodHelper.failedArmRawDataStatus();
+        ObjectRecordStatusEntity armManifestFailed = EodHelper.failedArmManifestFileStatus();
+
+        List<ObjectRecordStatusEntity> failedArmStatuses = List.of(armRawStatusFailed, armManifestFailed);
+
+        var failedArmExternalObjectDirectoryEntities = externalObjectDirectoryRepository.findNotFinishedAndNotExceededRetryInStorageLocationForDets(
+            failedArmStatuses,
+            armLocation,
+            armDataManagementConfiguration.getMaxRetryAttempts(),
+            Pageable.ofSize(maxResultSize)
+        );
+
+        List<ExternalObjectDirectoryEntity> returnList = new ArrayList<>(failedArmExternalObjectDirectoryEntities);
+
+        int remainingBatchSizeEods = maxResultSize - failedArmExternalObjectDirectoryEntities.size();
+        if (remainingBatchSizeEods > 0) {
+            var pendingUnstructuredExternalObjectDirectoryEntities = externalObjectDirectoryRepository.findEodsNotInOtherStorage(
+                EodHelper.storedStatus(), sourceLocation,
+                EodHelper.armLocation(),
+                remainingBatchSizeEods);
+            returnList.addAll(pendingUnstructuredExternalObjectDirectoryEntities);
+        }
+
+        return returnList;
+    }
+
     private void createAndSendBatchFile(List<ExternalObjectDirectoryEntity> eodsForBatch, UserAccountEntity userAccount) {
-        File archiveRecordsFile = dataStoreToArmHelper.createEmptyArchiveRecordsFile(armDataManagementConfiguration.getManifestFilePrefix());
+        File archiveRecordsFile = dataStoreToArmHelper.createEmptyArchiveRecordsFile("DETS");
         var batchItems = new ArmBatchItems();
 
         for (var currentEod : eodsForBatch) {
@@ -121,8 +151,11 @@ public class DetsToArmBatchPushProcessorImpl implements DetsToArmBatchPushProces
                     batchItem.setArchiveRecord(archiveRecordService.generateArchiveRecordInfo(batchItem.getArmEod().getId(), rawFilename));
                 }
             } catch (Exception e) {
-                log.error("Unable to batch push DETS EOD {} to ARM", currentEod.getId(), e);
+                String errorMessage = String.format("Error during batch push DETS EOD %s to ARM", currentEod.getId());
+                log.error(errorMessage, e);
                 dataStoreToArmHelper.recoverByUpdatingEodToFailedArmStatus(batchItem, userAccount);
+                errorMessage = errorMessage + " - " + ExceptionUtils.getStackTrace(e);
+                updateObjectStateRecordStatus(batchItem.getArmEod(), errorMessage);
             }
         }
 
@@ -135,10 +168,11 @@ public class DetsToArmBatchPushProcessorImpl implements DetsToArmBatchPushProces
                 log.warn("No EODs were able to be processed, skipping manifest file creation");
             }
         } catch (Exception e) {
-            String errorMessage = String.format("Error during generation of DETS batch manifest file %s - %s", archiveRecordsFile.getName(), e.getMessage());
+            String errorMessage = String.format("Error during generation of DETS batch manifest file %s", archiveRecordsFile.getName());
             log.error(errorMessage, e);
             batchItems.getSuccessful().forEach(batchItem -> dataStoreToArmHelper.recoverByUpdatingEodToFailedArmStatus(batchItem, userAccount));
-            batchItems.getFailed().forEach(batchItem -> updateObjectStateRecordStatus(batchItem.getArmEod(), errorMessage));
+            final String errorMessageWithStackTrace = errorMessage + " - " + ExceptionUtils.getStackTrace(e);
+            batchItems.getFailed().forEach(batchItem -> updateObjectStateRecordStatus(batchItem.getArmEod(), errorMessageWithStackTrace));
             return;
         }
 
