@@ -134,12 +134,12 @@ class ManualDeletionProcessorImplTest {
         ObjectAdminActionEntity action = new ObjectAdminActionEntity();
         if (isMedia) {
             MediaEntity media = new MediaEntity();
-            media.setId(100);
+            media.setId(MEDIA_ID);
             action.setMedia(media);
         }
         if (isTranscription) {
             TranscriptionDocumentEntity transcriptionDocument = new TranscriptionDocumentEntity();
-            transcriptionDocument.setId(200);
+            transcriptionDocument.setId(TRANSCRIPTION_ID);
             action.setTranscriptionDocument(transcriptionDocument);
         }
         return action;
