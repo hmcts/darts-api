@@ -1,5 +1,6 @@
 package uk.gov.hmcts.darts.retention.controller;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.skyscreamer.jsonassert.JSONAssert;
 import org.skyscreamer.jsonassert.JSONCompareMode;
@@ -49,6 +50,10 @@ class RetentionControllerPostRetentionIntTest extends IntegrationBase {
     private static final String SOME_CASE_NUMBER = "12345";
     private static final OffsetDateTime CURRENT_DATE_TIME = OffsetDateTime.of(2024, 10, 1, 10, 0, 0, 0, ZoneOffset.UTC);
 
+    @BeforeEach
+    void setUp() {
+        when(currentTimeHelper.currentOffsetDateTime()).thenReturn(CURRENT_DATE_TIME);
+    }
 
     @Test
     void happyPath() throws Exception {
@@ -64,8 +69,6 @@ class RetentionControllerPostRetentionIntTest extends IntegrationBase {
         courtCase.setCaseClosedTimestamp(OffsetDateTime.of(2020, 10, 10, 10, 0, 0, 0, ZoneOffset.UTC));
         courtCase.setClosed(true);
         dartsDatabase.save(courtCase);
-        when(currentTimeHelper.currentOffsetDateTime()).thenReturn(CURRENT_DATE_TIME);
-
         OffsetDateTime retainUntilDate = OffsetDateTime.parse("2023-01-01T12:00Z");
 
         dartsDatabase.createCaseRetentionObject(courtCase, CaseRetentionStatus.COMPLETE, retainUntilDate, false);
