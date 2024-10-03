@@ -84,4 +84,11 @@ public interface MediaRepository extends JpaRepository<MediaEntity, Integer>,
     List<MediaEntity> findMediaByDetails(List<Integer> hearingIds, OffsetDateTime startAt,
                                          OffsetDateTime endAt);
 
+
+    @Query(value = """
+           select me
+             from MediaEntity me
+             where me.start <= :maxStartTime and me.end >= :minEndTime
+        """)
+    List<MediaEntity> findAllByMediaTimeContains(OffsetDateTime maxStartTime, OffsetDateTime minEndTime);
 }
