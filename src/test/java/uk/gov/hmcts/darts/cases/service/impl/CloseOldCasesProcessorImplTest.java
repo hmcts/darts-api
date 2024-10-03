@@ -11,6 +11,7 @@ import uk.gov.hmcts.darts.common.entity.CaseRetentionEntity;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
+import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
 import uk.gov.hmcts.darts.common.repository.CaseRepository;
 import uk.gov.hmcts.darts.common.repository.CaseRetentionRepository;
 import uk.gov.hmcts.darts.common.util.CommonTestDataUtil;
@@ -20,15 +21,18 @@ import uk.gov.hmcts.darts.retention.helper.RetentionDateHelper;
 
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 import java.util.List;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class CloseOldCasesProcessorImplTest {
+    public static final OffsetDateTime CURRENT_DATE_TIME = OffsetDateTime.of(2024, 10, 1, 10, 0, 0, 0, ZoneOffset.UTC);
 
     @Mock
     private CaseRepository caseRepository;
@@ -40,6 +44,9 @@ class CloseOldCasesProcessorImplTest {
     private RetentionDateHelper retentionDateHelper;
     @Mock
     private AuthorisationApi authorisationApi;
+
+    @Mock
+    private CurrentTimeHelper currentTimeHelper;
 
     private UserAccountEntity userAccountEntity;
 
@@ -54,7 +61,11 @@ class CloseOldCasesProcessorImplTest {
                                                                 caseRetentionRepository,
                                                                 retentionApi,
                                                                 retentionDateHelper,
-                                                                authorisationApi);
+                                                                authorisationApi,
+                                                                currentTimeHelper);
+
+        lenient().when(currentTimeHelper.currentOffsetDateTime()).thenReturn(CURRENT_DATE_TIME);
+
     }
 
     @Test

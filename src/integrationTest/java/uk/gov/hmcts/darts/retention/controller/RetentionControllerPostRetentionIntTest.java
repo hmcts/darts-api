@@ -14,6 +14,7 @@ import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.CaseRetentionEntity;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
+import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
 import uk.gov.hmcts.darts.retention.enums.CaseRetentionStatus;
 import uk.gov.hmcts.darts.retention.enums.RetentionConfidenceReasonEnum;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
@@ -39,10 +40,15 @@ class RetentionControllerPostRetentionIntTest extends IntegrationBase {
     @MockBean
     private UserIdentity mockUserIdentity;
 
+    @MockBean
+    private CurrentTimeHelper currentTimeHelper;
+
     public static final String ENDPOINT_URL = "/retentions";
 
     private static final String SOME_COURTHOUSE = "SOME-COURTHOUSE";
     private static final String SOME_CASE_NUMBER = "12345";
+    private static final OffsetDateTime CURRENT_DATE_TIME = OffsetDateTime.of(2024, 10, 1, 10, 0, 0, 0, ZoneOffset.UTC);
+
 
     @Test
     void happyPath() throws Exception {
@@ -58,6 +64,7 @@ class RetentionControllerPostRetentionIntTest extends IntegrationBase {
         courtCase.setCaseClosedTimestamp(OffsetDateTime.of(2020, 10, 10, 10, 0, 0, 0, ZoneOffset.UTC));
         courtCase.setClosed(true);
         dartsDatabase.save(courtCase);
+        when(currentTimeHelper.currentOffsetDateTime()).thenReturn(CURRENT_DATE_TIME);
 
         OffsetDateTime retainUntilDate = OffsetDateTime.parse("2023-01-01T12:00Z");
 
@@ -91,6 +98,7 @@ class RetentionControllerPostRetentionIntTest extends IntegrationBase {
         CourtCaseEntity actualCourtCase = dartsDatabase.getCaseRepository().findById(courtCase.getId()).get();
         assertThat(actualCourtCase.getRetConfScore()).isEqualTo(CASE_PERFECTLY_CLOSED);
         assertThat(actualCourtCase.getRetConfReason()).isEqualTo(RetentionConfidenceReasonEnum.MANUAL_OVERRIDE);
+        assertThat(actualCourtCase.getRetConfUpdatedTs()).isEqualTo(CURRENT_DATE_TIME);
     }
 
     @Test
