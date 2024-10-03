@@ -236,7 +236,7 @@ public abstract class AbstractArmBatchProcessResponseFiles implements ArmRespons
     private String generateManifestName(String uuid) {
         var fileNameFormat = "%s_%s.%s";
         return String.format(fileNameFormat,
-                             armDataManagementConfiguration.getManifestFilePrefix(),
+                             getManifestFilePrefix(),
                              uuid,
                              armDataManagementConfiguration.getFileExtension()
         );
