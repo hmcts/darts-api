@@ -26,6 +26,7 @@ import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.lenient;
@@ -87,6 +88,7 @@ class CloseOldCasesProcessorImplTest {
         CaseRetentionEntity caseRetention = createRetentionEntity(courtCase, userAccountEntity);
         when(retentionApi.createRetention(any(), any(), any(), any(), any())).thenReturn(caseRetention);
         assertFalse(courtCase.getClosed());
+        assertNull(courtCase.getRetConfUpdatedTs());
 
         // when
         closeOldCasesProcessor.closeCases(2);
