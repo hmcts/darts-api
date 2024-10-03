@@ -231,11 +231,7 @@ public class DataStoreToArmHelper {
                 externalObjectDirectoryRepository.saveAndFlush(armExternalObjectDirectory);
             }
         } catch (Exception e) {
-            log.error(
-                "Error copying BLOB data for file {}",
-                unstructuredExternalObjectDirectory.getExternalLocation(),
-                e
-            );
+            log.error("Error copying BLOB data for file {}", unstructuredExternalObjectDirectory.getExternalLocation(), e);
             return false;
         }
 
