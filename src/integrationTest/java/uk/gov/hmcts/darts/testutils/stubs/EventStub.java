@@ -166,7 +166,7 @@ public class EventStub {
         return currentFnd;
     }
 
-    public boolean isOnlyOneOfTheEventIdGotHearings(List<EventEntity> eventEntityList) {
+    public boolean hasOnlyOneOfTheEventIdsGotHearings(List<EventEntity> eventEntityList) {
         int numWithHearings = 0;
         for (EventEntity event : eventEntityList) {
             Optional<EventEntity> readEventEntity = eventRepository.findById(event.getId());

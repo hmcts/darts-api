@@ -75,7 +75,7 @@ class EventProcessorTest extends PostgresIntegrationBase {
 
         // assert that only one of the event ids has hearings
         for (Integer eventId : processedCurrentEventIds2) {
-            Assertions.assertTrue(eventStub.isOnlyOneOfTheEventIdGotHearings(eventIdMap.get(eventId)));
+            Assertions.assertTrue(eventStub.hasOnlyOneOfTheEventIdsGotHearings(eventIdMap.get(eventId)));
         }
 
         // process third batch which is expected to be empty
