@@ -36,8 +36,4 @@ public class ArmBatchProcessResponseFilesImpl extends AbstractArmBatchProcessRes
     public String getManifestFilePrefix() {
         return armDataManagementConfiguration.getManifestFilePrefix();
     }
-
-    protected void beforeProcessingResponseFiles(int armEodId) {
-        // in the DARTS to ARM flow this is meant to do nothing
-    }
 }

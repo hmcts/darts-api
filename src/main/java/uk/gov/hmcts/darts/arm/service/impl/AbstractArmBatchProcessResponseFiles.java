@@ -286,7 +286,7 @@ public abstract class AbstractArmBatchProcessResponseFiles implements ArmRespons
                     && (nonNull(armResponseBatchData.getCreateRecordFilenameProcessor())
                     || nonNull(armResponseBatchData.getArmResponseUploadFileRecord()))) {
 
-                    beforeProcessingResponseFiles(armResponseBatchData.getExternalObjectDirectoryId());
+                    preProcessResponseFilesActions(armResponseBatchData.getExternalObjectDirectoryId());
 
                     processInvalidLineFile(armResponseBatchData.getExternalObjectDirectoryId(),
                                            armResponseBatchData.getInvalidLineFileFilenameProcessor(),
@@ -297,7 +297,7 @@ public abstract class AbstractArmBatchProcessResponseFiles implements ArmRespons
                 } else if (nonNull(armResponseBatchData.getCreateRecordFilenameProcessor())
                     && nonNull(armResponseBatchData.getUploadFileFilenameProcessor())) {
 
-                    beforeProcessingResponseFiles(armResponseBatchData.getExternalObjectDirectoryId());
+                    preProcessResponseFilesActions(armResponseBatchData.getExternalObjectDirectoryId());
 
                     processUploadFileObject(batchUploadFileFilenameProcessor, armResponseBatchData);
                     deleteResponseBlobs(armResponseBatchData);
@@ -783,7 +783,9 @@ public abstract class AbstractArmBatchProcessResponseFiles implements ArmRespons
 
     protected abstract String getManifestFilePrefix();
 
-    protected abstract void beforeProcessingResponseFiles(int armEodId);
+    protected void preProcessResponseFilesActions(int armEodId) {
+        // in the DARTS to ARM flow no pre-processing actions are needed
+    }
 
     protected void onUploadFileChecksumValidationSuccess(BatchInputUploadFileFilenameProcessor batchUploadFileFilenameProcessor,
                                                          ArmResponseBatchData armResponseBatchData,
