@@ -148,6 +148,10 @@ public class DetsToArmBatchProcessResponseFilesImpl extends AbstractArmBatchProc
                 osr.setFlagFileDetsCleanupStatus(true);
                 osr.setDateFileDetsCleanup(timeHelper.currentOffsetDateTime());
                 osrRepository.save(osr);
+            } else {
+                String errorMessage = String.format("Unable to delete DETS blob for ARM EDO %s", armEod.getId());
+                log.error(errorMessage);
+                updateOsrIngestStatusToFailure(osr, errorMessage);
             }
         } else {
             String errorMessage = String.format("Unable to delete DETS blob because no DETS EOD for ARM EDO %s found or more than one found", armEod.getId());
@@ -160,7 +164,7 @@ public class DetsToArmBatchProcessResponseFilesImpl extends AbstractArmBatchProc
                                                     ArmResponseBatchData armResponseBatchData,
                                                     String objectChecksum,
                                                     ObjectStateRecordEntity osr) {
-
+        // tested
         osr.setFlagFileIngestStatus(true);
         osr.setDateFileIngestToArm(timeHelper.currentOffsetDateTime());
         osr.setMd5FileIngestToArm(objectChecksum);
