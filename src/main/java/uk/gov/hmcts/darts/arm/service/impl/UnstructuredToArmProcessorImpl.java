@@ -83,7 +83,6 @@ public class UnstructuredToArmProcessorImpl implements UnstructuredToArmProcesso
                     unstructuredToArmHelper.updateExternalObjectDirectoryStatus(armExternalObjectDirectory, EodHelper.armIngestionStatus(), userAccount);
                 }
 
-
                 String rawFilename = unstructuredToArmHelper.generateRawFilename(armExternalObjectDirectory);
                 log.info("Start of ARM Push processing for EOD {} running at: {}", armExternalObjectDirectory.getId(), OffsetDateTime.now());
                 boolean copyRawDataToArmSuccessful = unstructuredToArmHelper.copyUnstructuredRawDataToArm(

@@ -128,7 +128,7 @@ class DetsToArmBatchPushProcessorImplTest {
     private DataStoreToArmHelper dataStoreToArmHelper;
     @Captor
     private ArgumentCaptor<ExternalObjectDirectoryEntity> externalObjectDirectoryEntityCaptor;
-
+    @InjectMocks
     private DetsToArmBatchPushProcessor detsToArmBatchPushProcessor;
 
 
@@ -185,8 +185,8 @@ class DetsToArmBatchPushProcessorImplTest {
     }
 
     @Test
-    void processMovingDataFromUnstructuredStorageToArm() {
-
+    void processMovingDataFromDetsStorageToArm() {
+        // given
         String fileLocation = tempDirectory.getAbsolutePath();
         ArchiveRecordFileInfo archiveRecordFileInfo = ArchiveRecordFileInfo.builder()
             .fileGenerationSuccessful(true)
@@ -194,23 +194,22 @@ class DetsToArmBatchPushProcessorImplTest {
             .build();
         when(archiveRecordService.generateArchiveRecord(any(), any())).thenReturn(archiveRecordFileInfo);
 
-        when(externalLocationTypeRepository.getReferenceById(2)).thenReturn(externalLocationTypeDets);
-        when(externalLocationTypeRepository.getReferenceById(3)).thenReturn(externalLocationTypeArm);
-
         List<ExternalObjectDirectoryEntity> inboundList = new ArrayList<>(Collections.singletonList(externalObjectDirectoryEntityDets));
         when(externalObjectDirectoryRepository.findEodsNotInOtherStorage(
             EodHelper.storedStatus(),
-            externalLocationTypeDets,
+            EodHelper.detsLocation(),
             EodHelper.armLocation(), 5
         )).thenReturn(inboundList);
 
         when(externalObjectDirectoryEntityDets.getExternalLocationType()).thenReturn(externalLocationTypeDets);
-        when(externalLocationTypeDets.getId()).thenReturn(ExternalLocationTypeEnum.UNSTRUCTURED.getId());
+        when(externalLocationTypeDets.getId()).thenReturn(ExternalLocationTypeEnum.DETS.getId());
         when(externalObjectDirectoryEntityDets.getExternalLocationType()).thenReturn(externalLocationTypeDets);
         lenient().when(externalObjectDirectoryEntityDets.getExternalLocation()).thenReturn(DETS_UUID);
 
+        // when
         detsToArmBatchPushProcessor.processDetsToArm(5);
 
+        // then
         verify(externalObjectDirectoryRepository, times(3)).saveAndFlush(externalObjectDirectoryEntityCaptor.capture());
         verify(armDataManagementApi).copyBlobDataToArm(eq(DETS_UUID.toString()), any());
 
@@ -218,33 +217,35 @@ class DetsToArmBatchPushProcessorImplTest {
     }
 
     @Test
-    void processMovingDataFromUnstructuredStorageToArmThrowsException() {
-
-        when(externalLocationTypeRepository.getReferenceById(2)).thenReturn(externalLocationTypeDets);
-        when(externalLocationTypeRepository.getReferenceById(3)).thenReturn(externalLocationTypeArm);
+    void processMovingDataFromDetsStorageToArmThrowsException() {
+        // given
+//        when(externalLocationTypeRepository.getReferenceById(2)).thenReturn(externalLocationTypeDets);
+//        when(externalLocationTypeRepository.getReferenceById(3)).thenReturn(externalLocationTypeArm);
 
         List<ExternalObjectDirectoryEntity> inboundList = new ArrayList<>(Collections.singletonList(externalObjectDirectoryEntityDets));
         when(externalObjectDirectoryRepository.findEodsNotInOtherStorage(
             EodHelper.storedStatus(),
-            externalLocationTypeDets,
+            EodHelper.detsLocation(),
             EodHelper.armLocation(),
             5
         )).thenReturn(inboundList);
 
-        when(externalLocationTypeDets.getId()).thenReturn(ExternalLocationTypeEnum.UNSTRUCTURED.getId());
+        when(externalLocationTypeDets.getId()).thenReturn(ExternalLocationTypeEnum.DETS.getId());
         when(externalObjectDirectoryEntityDets.getExternalLocationType()).thenReturn(externalLocationTypeDets);
 
         NullPointerException genericException = new NullPointerException();
         doThrow(genericException).when(armDataManagementApi).copyBlobDataToArm(any(), any());
 
+        // when
         detsToArmBatchPushProcessor.processDetsToArm(5);
 
+        // then
         verify(externalObjectDirectoryRepository, times(2)).saveAndFlush(externalObjectDirectoryEntityCaptor.capture());
     }
 
     @Test
-    void processMovingDataFromUnstructuredStorageToArmThrowsBlobExceptionWhenSendingManifestFile() throws IOException {
-
+    void processMovingDataFromDetsStorageToArmThrowsBlobExceptionWhenSendingManifestFile() throws IOException {
+        // given
         String fileLocation = tempDirectory.getAbsolutePath();
         File archiveRecordFile = new File(fileLocation, "1_1_1.a360");
         String content = "Test data";
@@ -260,13 +261,13 @@ class DetsToArmBatchPushProcessorImplTest {
             .build();
         when(archiveRecordService.generateArchiveRecord(any(), any())).thenReturn(archiveRecordFileInfo);
 
-        when(externalLocationTypeRepository.getReferenceById(2)).thenReturn(externalLocationTypeDets);
-        when(externalLocationTypeRepository.getReferenceById(3)).thenReturn(externalLocationTypeArm);
+//        when(externalLocationTypeRepository.getReferenceById(2)).thenReturn(externalLocationTypeDets);
+//        when(externalLocationTypeRepository.getReferenceById(3)).thenReturn(externalLocationTypeArm);
 
         List<ExternalObjectDirectoryEntity> pendingUnstructuredStorageItems = new ArrayList<>(Collections.emptyList());
         when(externalObjectDirectoryRepository.findEodsNotInOtherStorage(
             EodHelper.storedStatus(),
-            externalLocationTypeDets,
+            EodHelper.detsLocation(),
             EodHelper.armLocation(),
             4
         )).thenReturn(pendingUnstructuredStorageItems);
@@ -302,16 +303,18 @@ class DetsToArmBatchPushProcessorImplTest {
         when(blobStorageException.getMessage()).thenReturn("Copying blob failed");
         when(armDataManagementApi.saveBlobDataToArm("1_1_1.a360", manifest)).thenThrow(blobStorageException);
 
+        // when
         detsToArmBatchPushProcessor.processDetsToArm(5);
 
+        // then
         verify(externalObjectDirectoryRepository).saveAndFlush(externalObjectDirectoryEntityCaptor.capture());
 
         verify(logApi).armPushSuccessful(anyInt());
     }
 
     @Test
-    void processMovingDataFromUnstructuredStorageToArmThrowsGenericExceptionWhenSendingManifestFile() throws IOException {
-
+    void processMovingDataFromDetsStorageToArmThrowsGenericExceptionWhenSendingManifestFile() throws IOException {
+        // given
         String fileLocation = tempDirectory.getAbsolutePath();
         File archiveRecordFile = new File(fileLocation, "1_1_1.a360");
 
@@ -322,34 +325,35 @@ class DetsToArmBatchPushProcessorImplTest {
             .build();
         when(archiveRecordService.generateArchiveRecord(any(), any())).thenReturn(archiveRecordFileInfo);
 
-        when(externalLocationTypeRepository.getReferenceById(2)).thenReturn(externalLocationTypeDets);
-        when(externalLocationTypeRepository.getReferenceById(3)).thenReturn(externalLocationTypeArm);
+//        when(externalLocationTypeRepository.getReferenceById(2)).thenReturn(externalLocationTypeDets);
+//        when(externalLocationTypeRepository.getReferenceById(3)).thenReturn(externalLocationTypeArm);
 
         List<ExternalObjectDirectoryEntity> inboundList = new ArrayList<>(Collections.singletonList(externalObjectDirectoryEntityDets));
         when(externalObjectDirectoryRepository.findEodsNotInOtherStorage(
             EodHelper.storedStatus(),
-            externalLocationTypeDets,
+            EodHelper.detsLocation(),
             EodHelper.armLocation(),
             5
         )).thenReturn(inboundList);
 
-        when(externalObjectDirectoryEntityDets.getExternalLocationType()).thenReturn(externalLocationTypeDets);
-        when(externalLocationTypeDets.getId()).thenReturn(ExternalLocationTypeEnum.UNSTRUCTURED.getId());
+        when(externalLocationTypeDets.getId()).thenReturn(ExternalLocationTypeEnum.DETS.getId());
         when(externalObjectDirectoryEntityDets.getExternalLocationType()).thenReturn(externalLocationTypeDets);
 
         NullPointerException genericException = new NullPointerException();
         when(armDataManagementApi.saveBlobDataToArm(any(), any())).thenThrow(genericException);
 
+        // when
         detsToArmBatchPushProcessor.processDetsToArm(5);
 
+        // then
         verify(externalObjectDirectoryRepository, times(3)).saveAndFlush(externalObjectDirectoryEntityCaptor.capture());
 
         verifyNoMoreInteractions(logApi);
     }
 
     @Test
-    void processMovingDataFromUnstructuredStorageToArmThrowsExceptionWhenSendingManifestFile() throws IOException {
-
+    void processMovingDataFromDetsStorageToArmThrowsExceptionWhenSendingManifestFile() throws IOException {
+        // given
         String fileLocation = tempDirectory.getAbsolutePath();
         File archiveRecordFile = new File(fileLocation, "1_1_1.a360");
         FileStore.getFileStore().create(archiveRecordFile.toPath());
@@ -359,33 +363,36 @@ class DetsToArmBatchPushProcessorImplTest {
             .build();
         when(archiveRecordService.generateArchiveRecord(any(), any())).thenReturn(archiveRecordFileInfo);
 
-        when(externalLocationTypeRepository.getReferenceById(2)).thenReturn(externalLocationTypeDets);
-        when(externalLocationTypeRepository.getReferenceById(3)).thenReturn(externalLocationTypeArm);
+//        when(externalLocationTypeRepository.getReferenceById(2)).thenReturn(externalLocationTypeDets);
+//        when(externalLocationTypeRepository.getReferenceById(3)).thenReturn(externalLocationTypeArm);
 
         List<ExternalObjectDirectoryEntity> inboundList = new ArrayList<>(Collections.singletonList(externalObjectDirectoryEntityDets));
         when(externalObjectDirectoryRepository.findEodsNotInOtherStorage(
             EodHelper.storedStatus(),
-            externalLocationTypeDets,
+            EodHelper.detsLocation(),
             EodHelper.armLocation(),
             5
         )).thenReturn(inboundList);
 
         when(externalObjectDirectoryEntityDets.getExternalLocationType()).thenReturn(externalLocationTypeDets);
-        when(externalLocationTypeDets.getId()).thenReturn(ExternalLocationTypeEnum.UNSTRUCTURED.getId());
+        when(externalLocationTypeDets.getId()).thenReturn(ExternalLocationTypeEnum.DETS.getId());
         when(externalObjectDirectoryEntityDets.getExternalLocationType()).thenReturn(externalLocationTypeDets);
 
         NullPointerException genericException = new NullPointerException();
         when(armDataManagementApi.saveBlobDataToArm(any(), any())).thenThrow(genericException);
 
+        // when
         detsToArmBatchPushProcessor.processDetsToArm(5);
 
+        // then
         verify(externalObjectDirectoryRepository, times(3)).saveAndFlush(externalObjectDirectoryEntityCaptor.capture());
 
         verifyNoMoreInteractions(logApi);
     }
 
     @Test
-    void processPreviousFailedAttemptMovingFromUnstructuredStorageToArm() {
+    void processPreviousFailedAttemptMovingFromDetsStorageToArm() {
+        // given
         when(objectRecordStatusEntityRawDataFailed.getDescription()).thenReturn("FAILURE_ARM_RAW_DATA_FAILED");
 
         String fileLocation = tempDirectory.getAbsolutePath();
@@ -395,13 +402,13 @@ class DetsToArmBatchPushProcessorImplTest {
             .build();
         when(archiveRecordService.generateArchiveRecord(any(), any())).thenReturn(archiveRecordFileInfo);
 
-        when(externalLocationTypeRepository.getReferenceById(2)).thenReturn(externalLocationTypeDets);
-        when(externalLocationTypeRepository.getReferenceById(3)).thenReturn(externalLocationTypeArm);
+//        when(externalLocationTypeRepository.getReferenceById(2)).thenReturn(externalLocationTypeDets);
+//        when(externalLocationTypeRepository.getReferenceById(3)).thenReturn(externalLocationTypeArm);
 
         List<ExternalObjectDirectoryEntity> pendingUnstructuredStorageItems = new ArrayList<>(Collections.emptyList());
         when(externalObjectDirectoryRepository.findEodsNotInOtherStorage(
             EodHelper.storedStatus(),
-            externalLocationTypeDets,
+            EodHelper.detsLocation(),
             EodHelper.armLocation(),
             4
         )).thenReturn(pendingUnstructuredStorageItems);
@@ -431,8 +438,10 @@ class DetsToArmBatchPushProcessorImplTest {
             externalObjectDirectoryEntityArm.getCaseDocument()
         )).thenReturn(Optional.of(externalObjectDirectoryEntityDets));
 
+        // when
         detsToArmBatchPushProcessor.processDetsToArm(5);
 
+        // then
         verify(externalObjectDirectoryRepository).saveAndFlush(externalObjectDirectoryEntityCaptor.capture());
 
         verifyNoMoreInteractions(logApi);
@@ -440,17 +449,17 @@ class DetsToArmBatchPushProcessorImplTest {
 
     @Test
     void processPreviousFailedAttempt() {
-
+        // given
         when(objectRecordStatusEntityRawDataFailed.getDescription()).thenReturn("FAILURE_ARM_RAW_DATA_FAILED");
 
-        when(externalLocationTypeRepository.getReferenceById(2)).thenReturn(externalLocationTypeDets);
-        when(externalLocationTypeRepository.getReferenceById(3)).thenReturn(externalLocationTypeArm);
+//        when(externalLocationTypeRepository.getReferenceById(2)).thenReturn(externalLocationTypeDets);
+//        when(externalLocationTypeRepository.getReferenceById(3)).thenReturn(externalLocationTypeArm);
 
         List<ExternalObjectDirectoryEntity> pendingUnstructuredStorageItems = new ArrayList<>(Collections.emptyList());
 
         when(externalObjectDirectoryRepository.findEodsNotInOtherStorage(
             EodHelper.storedStatus(),
-            externalLocationTypeDets,
+            EodHelper.detsLocation(),
             EodHelper.armLocation(),
             4
         )).thenReturn(pendingUnstructuredStorageItems);
@@ -480,8 +489,10 @@ class DetsToArmBatchPushProcessorImplTest {
             externalObjectDirectoryEntityArm.getCaseDocument()
         )).thenReturn(Optional.empty());
 
+        // when
         detsToArmBatchPushProcessor.processDetsToArm(5);
 
+        // then
         verify(externalObjectDirectoryRepository, times(1)).saveAndFlush(externalObjectDirectoryEntityCaptor.capture());
 
         verifyNoMoreInteractions(logApi);

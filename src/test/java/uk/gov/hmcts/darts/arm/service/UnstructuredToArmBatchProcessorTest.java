@@ -116,7 +116,6 @@ class UnstructuredToArmBatchProcessorTest {
             armDataManagementApi,
             unstructuredToArmProcessorConfiguration,
             eodHelper
-
         );
 
         lenient().when(fileOperationService.createFile(any(), any(), anyBoolean())).thenReturn(manifestFilePath);

@@ -115,7 +115,7 @@ public class DetsToArmBatchPushProcessorImpl implements DetsToArmBatchPushProces
     }
 
     private void createAndSendBatchFile(List<ExternalObjectDirectoryEntity> eodsForBatch, UserAccountEntity userAccount) {
-        File archiveRecordsFile = dataStoreToArmHelper.createEmptyArchiveRecordsFile("DETS");
+        File archiveRecordsFile = dataStoreToArmHelper.createEmptyArchiveRecordsFile(getManifestFilePrefix());
         var batchItems = new ArmBatchItems();
 
         for (var currentEod : eodsForBatch) {
@@ -159,6 +159,15 @@ public class DetsToArmBatchPushProcessorImpl implements DetsToArmBatchPushProces
             }
         }
 
+        if (writeManifestAndCopyToArm(userAccount, batchItems, archiveRecordsFile)) return;
+
+        for (var batchItem : batchItems.getSuccessful()) {
+            dataStoreToArmHelper.updateExternalObjectDirectoryStatus(batchItem.getArmEod(), EodHelper.armDropZoneStatus(), userAccount);
+            logApi.armPushSuccessful(batchItem.getArmEod().getId());
+        }
+    }
+
+    private boolean writeManifestAndCopyToArm(UserAccountEntity userAccount, ArmBatchItems batchItems, File archiveRecordsFile) {
         try {
             if (!batchItems.getSuccessful().isEmpty()) {
                 dataStoreToArmHelper.writeManifestFile(batchItems, archiveRecordsFile);
@@ -173,13 +182,13 @@ public class DetsToArmBatchPushProcessorImpl implements DetsToArmBatchPushProces
             batchItems.getSuccessful().forEach(batchItem -> dataStoreToArmHelper.recoverByUpdatingEodToFailedArmStatus(batchItem, userAccount));
             final String errorMessageWithStackTrace = errorMessage + " - " + ExceptionUtils.getStackTrace(e);
             batchItems.getFailed().forEach(batchItem -> updateObjectStateRecordStatus(batchItem.getArmEod(), errorMessageWithStackTrace));
-            return;
+            return true;
         }
+        return false;
+    }
 
-        for (var batchItem : batchItems.getSuccessful()) {
-            dataStoreToArmHelper.updateExternalObjectDirectoryStatus(batchItem.getArmEod(), EodHelper.armDropZoneStatus(), userAccount);
-            logApi.armPushSuccessful(batchItem.getArmEod().getId());
-        }
+    private static String getManifestFilePrefix() {
+        return "DETS";
     }
 
     private void updateObjectStateRecordManifestSuccessOrFailure(ArmBatchItems batchItems, File archiveRecordsFile) {
