@@ -8,7 +8,7 @@ import java.util.UUID;
 public interface DetsDataManagementApi extends BlobContainerDownloadable {
 
     void deleteBlobDataFromContainer(UUID blobId) throws AzureDeleteBlobException;
-    
+
     void copyDetsBlobDataToArm(String detsUuid, String blobPathAndName);
 
 }

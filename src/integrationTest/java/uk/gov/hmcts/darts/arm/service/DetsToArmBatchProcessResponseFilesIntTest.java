@@ -4,6 +4,7 @@ import com.azure.core.exception.AzureException;
 import com.azure.core.util.BinaryData;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.jetbrains.annotations.NotNull;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -13,7 +14,8 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import uk.gov.hmcts.darts.arm.api.ArmDataManagementApi;
 import uk.gov.hmcts.darts.arm.config.ArmDataManagementConfiguration;
 import uk.gov.hmcts.darts.arm.model.blobs.ContinuationTokenBlobs;
-import uk.gov.hmcts.darts.arm.service.impl.ArmBatchProcessResponseFilesImpl;
+import uk.gov.hmcts.darts.arm.service.impl.DetsToArmBatchProcessResponseFilesImpl;
+import uk.gov.hmcts.darts.audio.deleter.impl.dets.ExternalDetsDataStoreDeleter;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.AnnotationDocumentEntity;
 import uk.gov.hmcts.darts.common.entity.AnnotationEntity;
@@ -22,12 +24,15 @@ import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
+import uk.gov.hmcts.darts.common.entity.ObjectStateRecordEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionDocumentEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
 import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
+import uk.gov.hmcts.darts.common.repository.ObjectStateRecordRepository;
 import uk.gov.hmcts.darts.common.service.FileOperationService;
+import uk.gov.hmcts.darts.dets.config.DetsDataManagementConfiguration;
 import uk.gov.hmcts.darts.log.api.LogApi;
 import uk.gov.hmcts.darts.test.common.data.PersistableFactory;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
@@ -44,6 +49,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 import static java.time.ZoneOffset.UTC;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -59,14 +65,14 @@ import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_DROP_ZO
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_RESPONSE_CHECKSUM_VERIFICATION_FAILED;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_RESPONSE_MANIFEST_FAILED;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_RESPONSE_PROCESSING_FAILED;
-import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_RPO_PENDING;
+import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.STORED;
 import static uk.gov.hmcts.darts.test.common.TestUtils.getContentsFromFile;
 
 @SuppressWarnings({"VariableDeclarationUsageDistance", "PMD.NcssCount", "ExcessiveImports"})
-class ArmBatchProcessResponseFilesIntTest extends IntegrationBase {
+class DetsToArmBatchProcessResponseFilesIntTest extends IntegrationBase {
 
     public static final String HASHCODE_2 = "7a374f19a9ce7dc9cc480ea8d4eca0fc";
-    private static final String PREFIX = "DARTS";
+    private static final String PREFIX = "DETS";
     private static final LocalDateTime HEARING_DATETIME = LocalDateTime.of(2023, 6, 10, 10, 0, 0);
     public static final String T_13_00_00_Z = "2023-06-10T13:00:00Z";
     public static final String T_13_45_00_Z = "2023-06-10T13:45:00Z";
@@ -92,6 +98,12 @@ class ArmBatchProcessResponseFilesIntTest extends IntegrationBase {
     private AuthorisationStub authorisationStub;
     @Autowired
     private LogApi logApi;
+    @Autowired
+    private DetsDataManagementConfiguration detsDataManagementConfiguration;
+    @Autowired
+    private ObjectStateRecordRepository osrRepository;
+    @Autowired
+    private ExternalDetsDataStoreDeleter detsDataStoreDeleter;
 
     @TempDir
     private File tempDirectory;
@@ -105,7 +117,7 @@ class ArmBatchProcessResponseFilesIntTest extends IntegrationBase {
     @BeforeEach
     void setupData() {
 
-        armBatchProcessResponseFiles = new ArmBatchProcessResponseFilesImpl(
+        armBatchProcessResponseFiles = new DetsToArmBatchProcessResponseFilesImpl(
             externalObjectDirectoryRepository,
             armDataManagementApi,
             fileOperationService,
@@ -115,12 +127,25 @@ class ArmBatchProcessResponseFilesIntTest extends IntegrationBase {
             currentTimeHelper,
             externalObjectDirectoryService,
             BATCH_SIZE,
-            logApi
+            logApi,
+            detsDataManagementConfiguration,
+            osrRepository,
+            detsDataStoreDeleter
         );
 
         UserAccountEntity testUser = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
         when(userIdentity.getUserAccount()).thenReturn(testUser);
         lenient().when(armDataManagementConfiguration.getMaxContinuationBatchSize()).thenReturn(10);
+    }
+
+    @BeforeEach
+    void startHibernateSession() {
+        openInViewUtil.openEntityManager();
+    }
+
+    @AfterEach
+    void closeHibernateSession() {
+        openInViewUtil.closeEntityManager();
     }
 
     @Test
@@ -144,7 +169,7 @@ class ArmBatchProcessResponseFilesIntTest extends IntegrationBase {
         String manifest1Uuid = UUID.randomUUID().toString();
         String manifest2Uuid = UUID.randomUUID().toString();
 
-        String manifestFile1 = "DARTS_" + manifest1Uuid + ".a360";
+        String manifestFile1 = "DETS_" + manifest1Uuid + ".a360";
 
         ExternalObjectDirectoryEntity armEod1 = PersistableFactory.getExternalObjectDirectoryTestData().someMinimalBuilder()
             .media(media1).status(dartsDatabase.getObjectRecordStatusEntity(ARM_DROP_ZONE))
@@ -155,6 +180,11 @@ class ArmBatchProcessResponseFilesIntTest extends IntegrationBase {
         armEod1.setChecksum("7017013d05bcc5032e142049081821d6");
         armEod1 = dartsPersistence.save(armEod1);
 
+        ObjectStateRecordEntity osr1 = new ObjectStateRecordEntity();
+        osr1.setUuid(1L);
+        osr1.setArmEodId(String.valueOf(armEod1.getId()));
+        osrRepository.save(osr1);
+
         ExternalObjectDirectoryEntity armEod2 = PersistableFactory.getExternalObjectDirectoryTestData().someMinimalBuilder()
             .media(media2).status(dartsDatabase.getObjectRecordStatusEntity(ARM_DROP_ZONE))
             .externalLocationType(dartsDatabase.getExternalLocationTypeEntity(ARM)).externalLocation(UUID.randomUUID()).build();
@@ -163,6 +193,11 @@ class ArmBatchProcessResponseFilesIntTest extends IntegrationBase {
         armEod2.setChecksum("7017013d05bcc5032e142049081821d6");
         armEod2.setVerificationAttempts(1);
         armEod2 = dartsPersistence.save(armEod2);
+
+        ObjectStateRecordEntity osr2 = new ObjectStateRecordEntity();
+        osr2.setUuid(2L);
+        osr2.setArmEodId(String.valueOf(armEod2.getId()));
+        osrRepository.save(osr2);
 
         ExternalObjectDirectoryEntity armEod3 = PersistableFactory.getExternalObjectDirectoryTestData().someMinimalBuilder()
             .media(media3).status(dartsDatabase
@@ -174,7 +209,12 @@ class ArmBatchProcessResponseFilesIntTest extends IntegrationBase {
         armEod3.setVerificationAttempts(1);
         armEod3 = dartsPersistence.save(armEod3);
 
-        String manifestFile2 = "DARTS_" + manifest2Uuid + ".a360";
+        ObjectStateRecordEntity osr3 = new ObjectStateRecordEntity();
+        osr3.setUuid(3L);
+        osr3.setArmEodId(String.valueOf(armEod3.getId()));
+        osrRepository.save(osr3);
+
+        String manifestFile2 = "DETS_" + manifest2Uuid + ".a360";
         ExternalObjectDirectoryEntity armEod5 = PersistableFactory
             .getExternalObjectDirectoryTestData().someMinimalBuilder()
             .media(media5).status(dartsDatabase
@@ -186,9 +226,14 @@ class ArmBatchProcessResponseFilesIntTest extends IntegrationBase {
         armEod5.setVerificationAttempts(1);
         armEod5 = dartsPersistence.save(armEod5);
 
+        ObjectStateRecordEntity osr5 = new ObjectStateRecordEntity();
+        osr5.setUuid(5L);
+        osr5.setArmEodId(String.valueOf(armEod5.getId()));
+        osrRepository.save(osr5);
+
         List<String> blobNamesAndPaths = new ArrayList<>();
-        String blobNameAndPath1 = String.format("dropzone/DARTS/response/DARTS_%s_6a374f19a9ce7dc9cc480ea8d4eca0fb_1_iu.rsp", manifest1Uuid);
-        String blobNameAndPath2 = String.format("dropzone/DARTS/response/DARTS_%s_7a374f19a9ce7dc9cc480ea8d4eca0fc_1_iu.rsp", manifest2Uuid);
+        String blobNameAndPath1 = String.format("dropzone/DARTS/response/DETS_%s_6a374f19a9ce7dc9cc480ea8d4eca0fb_1_iu.rsp", manifest1Uuid);
+        String blobNameAndPath2 = String.format("dropzone/DARTS/response/DETS_%s_7a374f19a9ce7dc9cc480ea8d4eca0fc_1_iu.rsp", manifest2Uuid);
         blobNamesAndPaths.add(blobNameAndPath1);
         blobNamesAndPaths.add(blobNameAndPath2);
 
@@ -265,7 +310,7 @@ class ArmBatchProcessResponseFilesIntTest extends IntegrationBase {
 
         assertEquals(1, foundMediaList.size());
         ExternalObjectDirectoryEntity foundMedia = foundMediaList.getFirst();
-        assertEquals(ARM_RPO_PENDING.getId(), foundMedia.getStatus().getId());
+        assertEquals(STORED.getId(), foundMedia.getStatus().getId());
         assertEquals(1, foundMedia.getVerificationAttempts());
         assertNotNull(foundMedia.getDataIngestionTs());
         assertTrue(foundMedia.isResponseCleaned());
@@ -298,6 +343,58 @@ class ArmBatchProcessResponseFilesIntTest extends IntegrationBase {
         assertEquals(ARM_DROP_ZONE.getId(), foundMedia5.getStatus().getId());
         assertEquals(1, foundMedia5.getVerificationAttempts());
         assertFalse(foundMedia5.isResponseCleaned());
+
+        ObjectStateRecordEntity dbOsr1 = osrRepository.findByArmEodId(String.valueOf(armEod1.getId())).orElseThrow();
+        assertThat(dbOsr1.getFlagRspnRecvdFromArml()).isTrue();
+        assertThat(dbOsr1.getDateRspnRecvdFromArml()).isEqualTo(endTime2);
+        assertThat(dbOsr1.getFlagFileIngestStatus()).isTrue();
+        assertThat(dbOsr1.getDateFileIngestToArm()).isEqualTo(endTime2);
+        assertThat(dbOsr1.getMd5FileIngestToArm()).isEqualTo("7017013d05bcc5032e142049081821d6");
+        assertThat(dbOsr1.getIdResponseFile()).isEqualTo(
+            String.format("DETS_%s_6a374f19a9ce7dc9cc480ea8d4eca0fb_1_iu.rsp", manifest1Uuid));
+        assertThat(dbOsr1.getIdResponseCrFile()).isEqualTo("6a374f19a9ce7dc9cc480ea8d4eca0fb_a17b9015-e6ad-77c5-8d1e-13259aae1895_1_cr.rsp");
+        assertThat(dbOsr1.getIdResponseUfFile()).isEqualTo("6a374f19a9ce7dc9cc480ea8d4eca0fb_04e6bc3b-952a-79b6-8362-13259aae1895_1_uf.rsp");
+        assertThat(dbOsr1.getFlagFileDetsCleanupStatus()).isTrue();
+        assertThat(dbOsr1.getDateFileDetsCleanup()).isEqualTo(endTime2);
+
+        ObjectStateRecordEntity dbOsr2 = osrRepository.findByArmEodId(String.valueOf(armEod2.getId())).orElseThrow();
+        assertThat(dbOsr2.getFlagRspnRecvdFromArml()).isTrue();
+        assertThat(dbOsr2.getDateRspnRecvdFromArml()).isEqualTo(endTime2);
+        assertThat(dbOsr2.getFlagFileIngestStatus()).isFalse();
+        assertThat(dbOsr2.getDateFileIngestToArm()).isEqualTo(endTime2);
+        assertThat(dbOsr2.getObjectStatus()).isEqualTo("PS.20023:INVALID_PARAMETERS:Invalid line: invalid json");
+        assertThat(dbOsr2.getMd5FileIngestToArm()).isNull();
+        assertThat(dbOsr2.getIdResponseFile()).isNull();
+        assertThat(dbOsr2.getIdResponseCrFile()).isNull();
+        assertThat(dbOsr2.getIdResponseUfFile()).isNull();
+        assertThat(dbOsr2.getFlagFileDetsCleanupStatus()).isNull();
+        assertThat(dbOsr2.getDateFileDetsCleanup()).isNull();
+
+        ObjectStateRecordEntity dbOsr3 = osrRepository.findByArmEodId(String.valueOf(armEod3.getId())).orElseThrow();
+        assertThat(dbOsr3.getFlagRspnRecvdFromArml()).isTrue();
+        assertThat(dbOsr3.getDateRspnRecvdFromArml()).isEqualTo(endTime2);
+        assertThat(dbOsr3.getFlagFileIngestStatus()).isFalse();
+        assertThat(dbOsr3.getDateFileIngestToArm()).isEqualTo(endTime2);
+        assertThat(dbOsr3.getObjectStatus()).isEqualTo("PS.20023:INVALID_PARAMETERS:Invalid line: invalid json");
+        assertThat(dbOsr3.getMd5FileIngestToArm()).isNull();
+        assertThat(dbOsr3.getIdResponseFile()).isNull();
+        assertThat(dbOsr3.getIdResponseCrFile()).isNull();
+        assertThat(dbOsr3.getIdResponseUfFile()).isNull();
+        assertThat(dbOsr3.getFlagFileDetsCleanupStatus()).isNull();
+        assertThat(dbOsr3.getDateFileDetsCleanup()).isNull();
+
+        ObjectStateRecordEntity dbOsr5 = osrRepository.findByArmEodId(String.valueOf(armEod5.getId())).orElseThrow();
+        assertThat(dbOsr5.getFlagRspnRecvdFromArml()).isNull();
+        assertThat(dbOsr5.getDateRspnRecvdFromArml()).isNull();
+        assertThat(dbOsr5.getFlagFileIngestStatus()).isNull();
+        assertThat(dbOsr5.getDateFileIngestToArm()).isNull();
+        assertThat(dbOsr5.getObjectStatus()).isNull();
+        assertThat(dbOsr5.getMd5FileIngestToArm()).isNull();
+        assertThat(dbOsr5.getIdResponseFile()).isNull();
+        assertThat(dbOsr5.getIdResponseCrFile()).isNull();
+        assertThat(dbOsr5.getIdResponseUfFile()).isNull();
+        assertThat(dbOsr5.getFlagFileDetsCleanupStatus()).isNull();
+        assertThat(dbOsr5.getDateFileDetsCleanup()).isNull();
 
         verify(armDataManagementApi).listResponseBlobsUsingMarker(PREFIX, BATCH_SIZE, continuationToken);
         verify(armDataManagementApi).listResponseBlobs(hashcode1);
@@ -349,7 +446,7 @@ class ArmBatchProcessResponseFilesIntTest extends IntegrationBase {
         String manifest1Uuid = UUID.randomUUID().toString();
         String manifest2Uuid = UUID.randomUUID().toString();
 
-        String manifestFile1 = "DARTS_" + manifest1Uuid + ".a360";
+        String manifestFile1 = "DETS_" + manifest1Uuid + ".a360";
 
         ExternalObjectDirectoryEntity armEod1 = dartsDatabase.getExternalObjectDirectoryStub().createExternalObjectDirectory(
             media1, ARM_DROP_ZONE, ARM, UUID.randomUUID());
@@ -371,7 +468,7 @@ class ArmBatchProcessResponseFilesIntTest extends IntegrationBase {
         armEod3.setManifestFile(manifestFile1);
         dartsDatabase.save(armEod3);
 
-        String manifestFile2 = "DARTS_" + manifest2Uuid + ".a360";
+        String manifestFile2 = "DETS_" + manifest2Uuid + ".a360";
         ExternalObjectDirectoryEntity armEod5 = dartsDatabase.getExternalObjectDirectoryStub().createExternalObjectDirectory(
             media5, ARM_DROP_ZONE, ARM, UUID.randomUUID());
         armEod5.setTransferAttempts(1);
@@ -380,8 +477,8 @@ class ArmBatchProcessResponseFilesIntTest extends IntegrationBase {
 
         List<String> blobNamesAndPaths1 = new ArrayList<>();
         List<String> blobNamesAndPaths2 = new ArrayList<>();
-        String blobNameAndPath1 = String.format("dropzone/DARTS/response/DARTS_%s_6a374f19a9ce7dc9cc480ea8d4eca0fb_1_iu.rsp", manifest1Uuid);
-        String blobNameAndPath2 = String.format("dropzone/DARTS/response/DARTS_%s_7a374f19a9ce7dc9cc480ea8d4eca0fc_1_iu.rsp", manifest2Uuid);
+        String blobNameAndPath1 = String.format("dropzone/DARTS/response/DETS_%s_6a374f19a9ce7dc9cc480ea8d4eca0fb_1_iu.rsp", manifest1Uuid);
+        String blobNameAndPath2 = String.format("dropzone/DARTS/response/DETS_%s_7a374f19a9ce7dc9cc480ea8d4eca0fc_1_iu.rsp", manifest2Uuid);
         blobNamesAndPaths1.add(blobNameAndPath1);
         blobNamesAndPaths2.add(blobNameAndPath2);
 
@@ -463,7 +560,7 @@ class ArmBatchProcessResponseFilesIntTest extends IntegrationBase {
 
         assertEquals(1, foundMediaList.size());
         ExternalObjectDirectoryEntity foundMedia = foundMediaList.get(0);
-        assertEquals(ARM_RPO_PENDING.getId(), foundMedia.getStatus().getId());
+        assertEquals(STORED.getId(), foundMedia.getStatus().getId());
         assertEquals(1, foundMedia.getVerificationAttempts());
         assertNotNull(foundMedia.getDataIngestionTs());
         assertTrue(foundMedia.isResponseCleaned());
@@ -547,7 +644,7 @@ class ArmBatchProcessResponseFilesIntTest extends IntegrationBase {
         String manifest1Uuid = UUID.randomUUID().toString();
         String manifest2Uuid = UUID.randomUUID().toString();
 
-        String manifestFile1 = "DARTS_" + manifest1Uuid + ".a360";
+        String manifestFile1 = "DETS_" + manifest1Uuid + ".a360";
 
         ExternalObjectDirectoryEntity armEod1 =
             PersistableFactory.getExternalObjectDirectoryTestData()
@@ -588,7 +685,7 @@ class ArmBatchProcessResponseFilesIntTest extends IntegrationBase {
         armEod4.setManifestFile(manifestFile1);
         dartsPersistence.save(armEod4);
 
-        String manifestFile2 = "DARTS_" + manifest2Uuid + ".a360";
+        String manifestFile2 = "DETS_" + manifest2Uuid + ".a360";
         ExternalObjectDirectoryEntity armEod5 = PersistableFactory
             .getExternalObjectDirectoryTestData().someMinimalBuilder().media(media5).status(dartsDatabase
                                                                                                 .getObjectRecordStatusEntity(ARM_DROP_ZONE))
@@ -599,8 +696,8 @@ class ArmBatchProcessResponseFilesIntTest extends IntegrationBase {
         dartsPersistence.save(armEod5);
 
         List<String> blobNamesAndPaths = new ArrayList<>();
-        String blobNameAndPath1 = String.format("dropzone/DARTS/response/DARTS_%s_6a374f19a9ce7dc9cc480ea8d4eca0fb_1_iu.rsp", manifest1Uuid);
-        String blobNameAndPath2 = String.format("dropzone/DARTS/response/DARTS_%s_7a374f19a9ce7dc9cc480ea8d4eca0fc_1_iu.rsp", manifest2Uuid);
+        String blobNameAndPath1 = String.format("dropzone/DARTS/response/DETS_%s_6a374f19a9ce7dc9cc480ea8d4eca0fb_1_iu.rsp", manifest1Uuid);
+        String blobNameAndPath2 = String.format("dropzone/DARTS/response/DETS_%s_7a374f19a9ce7dc9cc480ea8d4eca0fc_1_iu.rsp", manifest2Uuid);
         blobNamesAndPaths.add(blobNameAndPath1);
         blobNamesAndPaths.add(blobNameAndPath2);
 
@@ -725,7 +822,7 @@ class ArmBatchProcessResponseFilesIntTest extends IntegrationBase {
         String manifest1Uuid = UUID.randomUUID().toString();
         String manifest2Uuid = UUID.randomUUID().toString();
 
-        String manifestFile1 = "DARTS_" + manifest1Uuid + ".a360";
+        String manifestFile1 = "DETS_" + manifest1Uuid + ".a360";
 
         ExternalObjectDirectoryEntity armEod1 = PersistableFactory.getExternalObjectDirectoryTestData().someMinimalBuilder()
             .media(media1).status(dartsDatabase.getObjectRecordStatusEntity(ARM_DROP_ZONE))
@@ -762,7 +859,7 @@ class ArmBatchProcessResponseFilesIntTest extends IntegrationBase {
         armEod4.setManifestFile(manifestFile1);
         armEod4 = dartsPersistence.save(armEod4);
 
-        String manifestFile2 = "DARTS_" + manifest2Uuid + ".a360";
+        String manifestFile2 = "DETS_" + manifest2Uuid + ".a360";
         ExternalObjectDirectoryEntity armEod5 = PersistableFactory
             .getExternalObjectDirectoryTestData().someMinimalBuilder().media(media5).status(dartsDatabase
                                                                                                 .getObjectRecordStatusEntity(ARM_DROP_ZONE))
@@ -773,8 +870,8 @@ class ArmBatchProcessResponseFilesIntTest extends IntegrationBase {
         dartsPersistence.save(armEod5);
 
         List<String> blobNamesAndPaths = new ArrayList<>();
-        String blobNameAndPath1 = String.format("dropzone/DARTS/response/DARTS_%s_6a374f19a9ce7dc9cc480ea8d4eca0fb_1_iu.rsp", manifest1Uuid);
-        String blobNameAndPath2 = String.format("dropzone/DARTS/response/DARTS_%s_7a374f19a9ce7dc9cc480ea8d4eca0fc_1_iu.rsp", manifest2Uuid);
+        String blobNameAndPath1 = String.format("dropzone/DARTS/response/DETS_%s_6a374f19a9ce7dc9cc480ea8d4eca0fb_1_iu.rsp", manifest1Uuid);
+        String blobNameAndPath2 = String.format("dropzone/DARTS/response/DETS_%s_7a374f19a9ce7dc9cc480ea8d4eca0fc_1_iu.rsp", manifest2Uuid);
         blobNamesAndPaths.add(blobNameAndPath1);
         blobNamesAndPaths.add(blobNameAndPath2);
 
@@ -904,7 +1001,7 @@ class ArmBatchProcessResponseFilesIntTest extends IntegrationBase {
         MediaEntity media2 = createMediaEntity(hearing, startTime, endTime, 2);
 
         String manifest1Uuid = UUID.randomUUID().toString();
-        String manifestFile1 = "DARTS_" + manifest1Uuid + ".a360";
+        String manifestFile1 = "DETS_" + manifest1Uuid + ".a360";
 
         ExternalObjectDirectoryEntity armEod1 = PersistableFactory.getExternalObjectDirectoryTestData()
             .someMinimalBuilder().media(media1).status(dartsDatabase.getObjectRecordStatusEntity(ARM_DROP_ZONE))
@@ -924,7 +1021,7 @@ class ArmBatchProcessResponseFilesIntTest extends IntegrationBase {
         armEod2 = dartsPersistence.save(armEod2);
 
         List<String> blobNamesAndPaths = new ArrayList<>();
-        String blobNameAndPath1 = String.format("dropzone/DARTS/response/DARTS_%s_6a374f19a9ce7dc9cc480ea8d4eca0fb_1_iu.rsp", manifest1Uuid);
+        String blobNameAndPath1 = String.format("dropzone/DARTS/response/DETS_%s_6a374f19a9ce7dc9cc480ea8d4eca0fb_1_iu.rsp", manifest1Uuid);
         blobNamesAndPaths.add(blobNameAndPath1);
 
         ContinuationTokenBlobs continuationTokenBlobs = ContinuationTokenBlobs.builder()
@@ -1015,7 +1112,7 @@ class ArmBatchProcessResponseFilesIntTest extends IntegrationBase {
         transcriptionDocumentEntity = dartsPersistence.save(transcriptionDocumentEntity);
 
         String manifest1Uuid = UUID.randomUUID().toString();
-        String manifestFile1 = "DARTS_" + manifest1Uuid + ".a360";
+        String manifestFile1 = "DETS_" + manifest1Uuid + ".a360";
 
         ExternalObjectDirectoryEntity armEod = PersistableFactory.getExternalObjectDirectoryTestData()
             .someMinimalBuilder().transcriptionDocumentEntity(transcriptionDocumentEntity).status(dartsDatabase.getObjectRecordStatusEntity(ARM_DROP_ZONE))
@@ -1028,7 +1125,7 @@ class ArmBatchProcessResponseFilesIntTest extends IntegrationBase {
         armEod = dartsPersistence.save(armEod);
 
         List<String> blobNamesAndPaths = new ArrayList<>();
-        String blobNameAndPath1 = String.format("dropzone/DARTS/response/DARTS_%s_6a374f19a9ce7dc9cc480ea8d4eca0fb_1_iu.rsp", manifest1Uuid);
+        String blobNameAndPath1 = String.format("dropzone/DARTS/response/DETS_%s_6a374f19a9ce7dc9cc480ea8d4eca0fb_1_iu.rsp", manifest1Uuid);
         blobNamesAndPaths.add(blobNameAndPath1);
 
         ContinuationTokenBlobs continuationTokenBlobs = ContinuationTokenBlobs.builder()
@@ -1070,7 +1167,7 @@ class ArmBatchProcessResponseFilesIntTest extends IntegrationBase {
         // then
         ExternalObjectDirectoryEntity foundTranscriptionEod = dartsDatabase.getExternalObjectDirectoryRepository()
             .findById(armEod.getId()).orElseThrow();
-        assertEquals(ARM_RPO_PENDING.getId(), foundTranscriptionEod.getStatus().getId());
+        assertEquals(STORED.getId(), foundTranscriptionEod.getStatus().getId());
         assertEquals("e7cde7c6-15d7-4c7e-a85d-a468c7ea72b9", foundTranscriptionEod.getExternalFileId());
         assertEquals("1cf976c7-cedd-703f-ab70-01588bd56d50", foundTranscriptionEod.getExternalRecordId());
         assertTrue(foundTranscriptionEod.isResponseCleaned());
@@ -1118,7 +1215,7 @@ class ArmBatchProcessResponseFilesIntTest extends IntegrationBase {
         transcriptionDocumentEntity = dartsPersistence.save(transcriptionDocumentEntity);
 
         String manifest1Uuid = UUID.randomUUID().toString();
-        String manifestFile1 = "DARTS_" + manifest1Uuid + ".a360";
+        String manifestFile1 = "DETS_" + manifest1Uuid + ".a360";
 
         ExternalObjectDirectoryEntity armEod = PersistableFactory.getExternalObjectDirectoryTestData()
             .someMinimalBuilder().transcriptionDocumentEntity(transcriptionDocumentEntity).status(dartsDatabase.getObjectRecordStatusEntity(ARM_DROP_ZONE))
@@ -1130,7 +1227,7 @@ class ArmBatchProcessResponseFilesIntTest extends IntegrationBase {
         armEod = dartsPersistence.save(armEod);
 
         List<String> blobNamesAndPaths = new ArrayList<>();
-        String blobNameAndPath1 = String.format("dropzone/DARTS/response/DARTS_%s_6a374f19a9ce7dc9cc480ea8d4eca0fb_1_iu.rsp", manifest1Uuid);
+        String blobNameAndPath1 = String.format("dropzone/DARTS/response/DETS_%s_6a374f19a9ce7dc9cc480ea8d4eca0fb_1_iu.rsp", manifest1Uuid);
         blobNamesAndPaths.add(blobNameAndPath1);
 
         ContinuationTokenBlobs continuationTokenBlobs = ContinuationTokenBlobs.builder()
@@ -1195,7 +1292,7 @@ class ArmBatchProcessResponseFilesIntTest extends IntegrationBase {
             .fileSize(fileSize).uploadedBy(testUser).uploadedDateTime(uploadedDateTime).checksum(checksum).build();
 
         String manifest1Uuid = UUID.randomUUID().toString();
-        String manifestFile1 = "DARTS_" + manifest1Uuid + ".a360";
+        String manifestFile1 = "DETS_" + manifest1Uuid + ".a360";
 
         ExternalObjectDirectoryEntity armEod = PersistableFactory.getExternalObjectDirectoryTestData()
             .someMinimalBuilder().annotationDocumentEntity(annotationDocument).status(dartsDatabase.getObjectRecordStatusEntity(ARM_DROP_ZONE))
@@ -1207,7 +1304,7 @@ class ArmBatchProcessResponseFilesIntTest extends IntegrationBase {
         armEod = dartsPersistence.save(armEod);
 
         List<String> blobNamesAndPaths = new ArrayList<>();
-        String blobNameAndPath1 = String.format("dropzone/DARTS/response/DARTS_%s_6a374f19a9ce7dc9cc480ea8d4eca0fb_1_iu.rsp", manifest1Uuid);
+        String blobNameAndPath1 = String.format("dropzone/DARTS/response/DETS_%s_6a374f19a9ce7dc9cc480ea8d4eca0fb_1_iu.rsp", manifest1Uuid);
         blobNamesAndPaths.add(blobNameAndPath1);
 
         ContinuationTokenBlobs continuationTokenBlobs = ContinuationTokenBlobs.builder()
@@ -1249,7 +1346,7 @@ class ArmBatchProcessResponseFilesIntTest extends IntegrationBase {
         // then
         ExternalObjectDirectoryEntity foundAnnotationEod = dartsDatabase.getExternalObjectDirectoryRepository()
             .findById(armEod.getId()).orElseThrow();
-        assertEquals(ARM_RPO_PENDING.getId(), foundAnnotationEod.getStatus().getId());
+        assertEquals(STORED.getId(), foundAnnotationEod.getStatus().getId());
         assertEquals("e7cde7c6-15d7-4c7e-a85d-a468c7ea72b9", foundAnnotationEod.getExternalFileId());
         assertEquals("1cf976c7-cedd-703f-ab70-01588bd56d50", foundAnnotationEod.getExternalRecordId());
         assertTrue(foundAnnotationEod.isResponseCleaned());
@@ -1294,7 +1391,7 @@ class ArmBatchProcessResponseFilesIntTest extends IntegrationBase {
         caseDocument = dartsPersistence.save(caseDocument);
 
         String manifest1Uuid = UUID.randomUUID().toString();
-        String manifestFile1 = "DARTS_" + manifest1Uuid + ".a360";
+        String manifestFile1 = "DETS_" + manifest1Uuid + ".a360";
 
         ExternalObjectDirectoryEntity armEod = PersistableFactory.getExternalObjectDirectoryTestData()
             .someMinimalBuilder().caseDocument(caseDocument).status(dartsDatabase.getObjectRecordStatusEntity(ARM_DROP_ZONE))
@@ -1307,7 +1404,7 @@ class ArmBatchProcessResponseFilesIntTest extends IntegrationBase {
         armEod = dartsPersistence.save(armEod);
 
         List<String> blobNamesAndPaths = new ArrayList<>();
-        String blobNameAndPath1 = String.format("dropzone/DARTS/response/DARTS_%s_6a374f19a9ce7dc9cc480ea8d4eca0fb_1_iu.rsp", manifest1Uuid);
+        String blobNameAndPath1 = String.format("dropzone/DARTS/response/DETS_%s_6a374f19a9ce7dc9cc480ea8d4eca0fb_1_iu.rsp", manifest1Uuid);
         blobNamesAndPaths.add(blobNameAndPath1);
 
         ContinuationTokenBlobs continuationTokenBlobs = ContinuationTokenBlobs.builder()
@@ -1349,7 +1446,7 @@ class ArmBatchProcessResponseFilesIntTest extends IntegrationBase {
         // then
         ExternalObjectDirectoryEntity foundAnnotationEod = dartsDatabase.getExternalObjectDirectoryRepository()
             .findById(armEod.getId()).orElseThrow();
-        assertEquals(ARM_RPO_PENDING.getId(), foundAnnotationEod.getStatus().getId());
+        assertEquals(STORED.getId(), foundAnnotationEod.getStatus().getId());
         assertEquals("e7cde7c6-15d7-4c7e-a85d-a468c7ea72b9", foundAnnotationEod.getExternalFileId());
         assertEquals("1cf976c7-cedd-703f-ab70-01588bd56d50", foundAnnotationEod.getExternalRecordId());
         assertTrue(foundAnnotationEod.isResponseCleaned());
@@ -1384,7 +1481,7 @@ class ArmBatchProcessResponseFilesIntTest extends IntegrationBase {
         caseDocument = dartsPersistence.save(caseDocument);
 
         String manifest1Uuid = UUID.randomUUID().toString();
-        String manifestFile1 = "DARTS_" + manifest1Uuid + ".a360";
+        String manifestFile1 = "DETS_" + manifest1Uuid + ".a360";
 
         ExternalObjectDirectoryEntity armEod = PersistableFactory.getExternalObjectDirectoryTestData()
             .someMinimalBuilder().caseDocument(caseDocument).status(dartsDatabase.getObjectRecordStatusEntity(ARM_DROP_ZONE))
@@ -1396,7 +1493,7 @@ class ArmBatchProcessResponseFilesIntTest extends IntegrationBase {
         armEod = dartsPersistence.save(armEod);
 
         List<String> blobNamesAndPaths = new ArrayList<>();
-        String blobNameAndPath1 = String.format("dropzone/DARTS/response/DARTS_%s_6a374f19a9ce7dc9cc480ea8d4eca0fb_1_iu.rsp", manifest1Uuid);
+        String blobNameAndPath1 = String.format("dropzone/DARTS/response/DETS_%s_6a374f19a9ce7dc9cc480ea8d4eca0fb_1_iu.rsp", manifest1Uuid);
         blobNamesAndPaths.add(blobNameAndPath1);
 
         ContinuationTokenBlobs continuationTokenBlobs = ContinuationTokenBlobs.builder()
@@ -1476,7 +1573,7 @@ class ArmBatchProcessResponseFilesIntTest extends IntegrationBase {
         String manifest1Uuid = UUID.randomUUID().toString();
 
         List<String> blobNamesAndPaths = new ArrayList<>();
-        String blobNameAndPath1 = String.format("dropzone/DARTS/response/DARTS_%s_6a374f19a9ce7dc9cc480ea8d4eca0fb_1_iu.rsp", manifest1Uuid);
+        String blobNameAndPath1 = String.format("dropzone/DARTS/response/DETS_%s_6a374f19a9ce7dc9cc480ea8d4eca0fb_1_iu.rsp", manifest1Uuid);
         blobNamesAndPaths.add(blobNameAndPath1);
 
         ContinuationTokenBlobs continuationTokenBlobs = ContinuationTokenBlobs.builder()
@@ -1577,7 +1674,7 @@ class ArmBatchProcessResponseFilesIntTest extends IntegrationBase {
         caseDocument = dartsPersistence.save(caseDocument);
 
         String manifest1Uuid = UUID.randomUUID().toString();
-        String manifestFile1 = "DARTS_" + manifest1Uuid + ".a360";
+        String manifestFile1 = "DETS_" + manifest1Uuid + ".a360";
 
         ExternalObjectDirectoryEntity armEod = PersistableFactory.getExternalObjectDirectoryTestData()
             .someMinimalBuilder().caseDocument(caseDocument).status(dartsDatabase.getObjectRecordStatusEntity(ARM_DROP_ZONE))
@@ -1589,7 +1686,7 @@ class ArmBatchProcessResponseFilesIntTest extends IntegrationBase {
         armEod = dartsPersistence.save(armEod);
 
         List<String> blobNamesAndPaths = new ArrayList<>();
-        String blobNameAndPath1 = String.format("dropzone/DARTS/response/DARTS_%s_6a374f19a9ce7dc9cc480ea8d4eca0fb_1_iu.rsp", manifest1Uuid);
+        String blobNameAndPath1 = String.format("dropzone/DARTS/response/DETS_%s_6a374f19a9ce7dc9cc480ea8d4eca0fb_1_iu.rsp", manifest1Uuid);
         blobNamesAndPaths.add(blobNameAndPath1);
 
         ContinuationTokenBlobs continuationTokenBlobs = ContinuationTokenBlobs.builder()
@@ -1651,7 +1748,7 @@ class ArmBatchProcessResponseFilesIntTest extends IntegrationBase {
         caseDocument = dartsPersistence.save(caseDocument);
 
         String manifest1Uuid = UUID.randomUUID().toString();
-        String manifestFile1 = "DARTS_" + manifest1Uuid + ".a360";
+        String manifestFile1 = "DETS_" + manifest1Uuid + ".a360";
 
         ExternalObjectDirectoryEntity armEod = PersistableFactory.getExternalObjectDirectoryTestData()
             .someMinimalBuilder().caseDocument(caseDocument).status(dartsDatabase.getObjectRecordStatusEntity(ARM_DROP_ZONE))
@@ -1663,7 +1760,7 @@ class ArmBatchProcessResponseFilesIntTest extends IntegrationBase {
         armEod = dartsPersistence.save(armEod);
 
         List<String> blobNamesAndPaths = new ArrayList<>();
-        String blobNameAndPath1 = String.format("dropzone/DARTS/response/DARTS_%s_6a374f19a9ce7dc9cc480ea8d4eca0fb_1_iu.rsp", manifest1Uuid);
+        String blobNameAndPath1 = String.format("dropzone/DARTS/response/DETS_%s_6a374f19a9ce7dc9cc480ea8d4eca0fb_1_iu.rsp", manifest1Uuid);
         blobNamesAndPaths.add(blobNameAndPath1);
 
         ContinuationTokenBlobs continuationTokenBlobs = ContinuationTokenBlobs.builder()
@@ -1721,7 +1818,7 @@ class ArmBatchProcessResponseFilesIntTest extends IntegrationBase {
 
         String manifest1Uuid = UUID.randomUUID().toString();
 
-        String manifestFile1 = "DARTS_" + manifest1Uuid + ".a360";
+        String manifestFile1 = "DETS_" + manifest1Uuid + ".a360";
 
         ExternalObjectDirectoryEntity armEod1 = PersistableFactory.getExternalObjectDirectoryTestData()
             .someMinimalBuilder().media(media1).status(dartsDatabase.getObjectRecordStatusEntity(ARM_DROP_ZONE))
@@ -1770,7 +1867,7 @@ class ArmBatchProcessResponseFilesIntTest extends IntegrationBase {
 
         String manifest1Uuid = UUID.randomUUID().toString();
 
-        String manifestFile1 = "DARTS_" + manifest1Uuid + ".a360";
+        String manifestFile1 = "DETS_" + manifest1Uuid + ".a360";
 
         ExternalObjectDirectoryEntity armEod1 = PersistableFactory
             .getExternalObjectDirectoryTestData().someMinimalBuilder().media(media1).status(dartsDatabase
@@ -1821,7 +1918,7 @@ class ArmBatchProcessResponseFilesIntTest extends IntegrationBase {
         transcriptionDocumentEntity = dartsPersistence.save(transcriptionDocumentEntity);
 
         String manifest1Uuid = UUID.randomUUID().toString();
-        String manifestFile1 = "DARTS_" + manifest1Uuid + ".a360";
+        String manifestFile1 = "DETS_" + manifest1Uuid + ".a360";
 
         ExternalObjectDirectoryEntity armEod = PersistableFactory.getExternalObjectDirectoryTestData()
             .someMinimalBuilder().transcriptionDocumentEntity(transcriptionDocumentEntity).status(dartsDatabase.getObjectRecordStatusEntity(ARM_DROP_ZONE))
@@ -1833,7 +1930,7 @@ class ArmBatchProcessResponseFilesIntTest extends IntegrationBase {
         armEod = dartsPersistence.save(armEod);
 
         List<String> blobNamesAndPaths = new ArrayList<>();
-        String blobNameAndPath1 = String.format("dropzone/DARTS/response/DARTS_%s_6a374f19a9ce7dc9cc480ea8d4eca0fb_1_iu.rsp", manifest1Uuid);
+        String blobNameAndPath1 = String.format("dropzone/DARTS/response/DETS_%s_6a374f19a9ce7dc9cc480ea8d4eca0fb_1_iu.rsp", manifest1Uuid);
         blobNamesAndPaths.add(blobNameAndPath1);
 
         ContinuationTokenBlobs continuationTokenBlobs = ContinuationTokenBlobs.builder()
@@ -1897,7 +1994,7 @@ class ArmBatchProcessResponseFilesIntTest extends IntegrationBase {
             .uploadedBy(testUser).uploadedDateTime(uploadedDateTime).annotation(annotation).build();
 
         String manifest1Uuid = UUID.randomUUID().toString();
-        String manifestFile1 = "DARTS_" + manifest1Uuid + ".a360";
+        String manifestFile1 = "DETS_" + manifest1Uuid + ".a360";
 
         ExternalObjectDirectoryEntity armEod = PersistableFactory
             .getExternalObjectDirectoryTestData().someMinimalBuilder().annotationDocumentEntity(annotationDocument)
@@ -1910,7 +2007,7 @@ class ArmBatchProcessResponseFilesIntTest extends IntegrationBase {
         armEod = dartsPersistence.save(armEod);
 
         List<String> blobNamesAndPaths = new ArrayList<>();
-        String blobNameAndPath1 = String.format("dropzone/DARTS/response/DARTS_%s_6a374f19a9ce7dc9cc480ea8d4eca0fb_1_iu.rsp", manifest1Uuid);
+        String blobNameAndPath1 = String.format("dropzone/DARTS/response/DETS_%s_6a374f19a9ce7dc9cc480ea8d4eca0fb_1_iu.rsp", manifest1Uuid);
         blobNamesAndPaths.add(blobNameAndPath1);
 
         ContinuationTokenBlobs continuationTokenBlobs = ContinuationTokenBlobs.builder()
@@ -1979,7 +2076,7 @@ class ArmBatchProcessResponseFilesIntTest extends IntegrationBase {
         String manifest1Uuid = UUID.randomUUID().toString();
 
         List<String> blobNamesAndPaths = new ArrayList<>();
-        String blobNameAndPath1 = String.format("dropzone/DARTS/response/DARTS_%s_6a374f19a9ce7dc9cc480ea8d4eca0fb_1_iu.rsp", manifest1Uuid);
+        String blobNameAndPath1 = String.format("dropzone/DARTS/response/DETS_%s_6a374f19a9ce7dc9cc480ea8d4eca0fb_1_iu.rsp", manifest1Uuid);
         blobNamesAndPaths.add(blobNameAndPath1);
 
         ContinuationTokenBlobs continuationTokenBlobs = ContinuationTokenBlobs.builder()
