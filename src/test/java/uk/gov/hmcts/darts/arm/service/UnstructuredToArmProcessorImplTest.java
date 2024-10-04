@@ -210,7 +210,6 @@ class UnstructuredToArmProcessorImplTest {
         when(externalLocationTypeRepository.getReferenceById(2)).thenReturn(externalLocationTypeUnstructured);
         when(externalLocationTypeRepository.getReferenceById(3)).thenReturn(externalLocationTypeArm);
 
-
         List<ExternalObjectDirectoryEntity> inboundList = new ArrayList<>(Collections.singletonList(externalObjectDirectoryEntityUnstructured));
         when(externalObjectDirectoryRepository.findEodsNotInOtherStorage(
             EodHelper.storedStatus(),
