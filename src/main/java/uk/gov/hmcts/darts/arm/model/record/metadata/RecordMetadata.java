@@ -30,9 +30,9 @@ public class RecordMetadata implements ArchiveMetadata {
     private String clientId;
     @JsonProperty("contributor")
     private String contributor;
-    @JsonProperty("rtn_score")
+    @JsonProperty("ret_conf_score")
     private Integer retentionConfidenceScore;
-    @JsonProperty("rtn_reason")
+    @JsonProperty("ret_conf_reason")
     private String retentionConfidenceReason;
 
     @JsonProperty("bf_001")

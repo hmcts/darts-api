@@ -1,5 +1,6 @@
 package uk.gov.hmcts.darts.arm.client.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Builder;
 import lombok.Data;
@@ -24,14 +25,15 @@ public class UpdateMetadataRequest {
     @Data
     @Builder
     @Jacksonized
+    @JsonIgnoreProperties(ignoreUnknown = true)
     public static class Manifest {
         @JsonProperty("event_date")
         private OffsetDateTime eventDate;
 
-        @JsonProperty("rtn_score")
+        @JsonProperty("ret_conf_score")
         private int retConfScore;
 
-        @JsonProperty("rtn_reason")
+        @JsonProperty("ret_conf_reason")
         private String retConfReason;
     }
 }
