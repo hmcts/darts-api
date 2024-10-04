@@ -473,6 +473,9 @@ dependencies {
 
   testImplementation group: 'org.jeasy', name: 'easy-random-core', version: '5.0.0'
 
+  //workaround for issue on 04/10/2024 - DTSPO-19241
+  implementation 'com.github.jknack:handlebars:4.3.1'
+
   compileJava.dependsOn = openApiGenerateTaskList
 }
 
