@@ -150,8 +150,9 @@ public class DetsToArmBatchProcessResponseFilesImpl extends AbstractArmBatchProc
                 osrRepository.save(osr);
             }
         } else {
-            log.error("Unable to delete DETS blob because no DETS EOD for ARM EDO {} found or more than one found", armEod.getId());
-            //TODO update status
+            String errorMessage = String.format("Unable to delete DETS blob because no DETS EOD for ARM EDO %s found or more than one found", armEod.getId());
+            log.error(errorMessage);
+            updateOsrIngestStatusToFailure(osr, errorMessage);
         }
     }
 
