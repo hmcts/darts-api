@@ -10,7 +10,7 @@
     "title": "case.",
     "client_identifier": "1234",
     "contributor": "Swansea",
-    "rtn_reason":"RetentionConfidenceReason"
+    "ret_conf_reason":"RetentionConfidenceReason"
   }
 }
 {

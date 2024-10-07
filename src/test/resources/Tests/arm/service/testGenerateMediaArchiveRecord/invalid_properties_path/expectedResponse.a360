@@ -10,8 +10,8 @@
     "title": "1234-1-1.a360",
     "client_identifier": "1234",
     "contributor": "Swansea & Room1",
-    "rtn_score":2,
-    "rtn_reason":"RetentionConfidenceReason"
+    "ret_conf_score":2,
+    "ret_conf_reason":"RetentionConfidenceReason"
   }
 }
 {
