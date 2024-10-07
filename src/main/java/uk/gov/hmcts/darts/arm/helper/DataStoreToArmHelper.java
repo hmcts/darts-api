@@ -6,6 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 import uk.gov.hmcts.darts.arm.api.ArmDataManagementApi;
 import uk.gov.hmcts.darts.arm.component.ArchiveRecordFileGenerator;
 import uk.gov.hmcts.darts.arm.config.ArmDataManagementConfiguration;
@@ -15,6 +16,7 @@ import uk.gov.hmcts.darts.common.entity.ExternalLocationTypeEntity;
 import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.entity.ObjectRecordStatusEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
+import uk.gov.hmcts.darts.common.exception.DartsException;
 import uk.gov.hmcts.darts.common.repository.ExternalLocationTypeRepository;
 import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
 import uk.gov.hmcts.darts.common.repository.ObjectRecordStatusRepository;
@@ -33,6 +35,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+import static java.lang.String.format;
 import static java.util.Objects.nonNull;
 import static uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum.ARM;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_INGESTION;
@@ -290,5 +293,20 @@ public class DataStoreToArmHelper {
         }
     }
 
+    @Transactional
+    public Long getFileSize(int externalObjectDirectoryId) {
+        ExternalObjectDirectoryEntity externalObjectDirectory = externalObjectDirectoryRepository.findById(externalObjectDirectoryId)
+            .orElseThrow(() -> new DartsException(format("external object directory not found with id: %d", externalObjectDirectoryId)));
 
+        if (nonNull(externalObjectDirectory.getMedia())) {
+            return externalObjectDirectory.getMedia().getFileSize();
+        } else if (nonNull(externalObjectDirectory.getAnnotationDocumentEntity())) {
+            return Long.valueOf(externalObjectDirectory.getAnnotationDocumentEntity().getFileSize());
+        } else if (nonNull(externalObjectDirectory.getTranscriptionDocumentEntity())) {
+            return Long.valueOf(externalObjectDirectory.getTranscriptionDocumentEntity().getFileSize());
+        } else if (nonNull(externalObjectDirectory.getCaseDocument())) {
+            return Long.valueOf(externalObjectDirectory.getCaseDocument().getFileSize());
+        }
+        return null;
+    }
 }
