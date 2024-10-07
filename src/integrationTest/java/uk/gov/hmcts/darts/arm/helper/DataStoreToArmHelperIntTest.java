@@ -19,10 +19,10 @@ import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_RAW_DAT
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.NEW;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.STORED;
 
-class UnstructuredToArmHelperIntTest extends IntegrationBase {
+class DataStoreToArmHelperIntTest extends IntegrationBase {
 
     @Autowired
-    private DataStoreToArmHelper unstructuredToArmHelper;
+    private DataStoreToArmHelper dataStoreToArmHelper;
 
     @Autowired
     private EodHelper eodHelper;
@@ -38,8 +38,8 @@ class UnstructuredToArmHelperIntTest extends IntegrationBase {
         externalObjectDirectoryStub.createAndSaveEod(medias.get(1), STORED, UNSTRUCTURED);
         externalObjectDirectoryStub.createAndSaveEod(medias.get(1), ARM_DROP_ZONE, ARM);
 
-        List<ExternalObjectDirectoryEntity> eodEntitiesToSendToArm = unstructuredToArmHelper.getEodEntitiesToSendToArm(EodHelper.unstructuredLocation(),
-                                                                                                                       EodHelper.armLocation(), 5);
+        List<ExternalObjectDirectoryEntity> eodEntitiesToSendToArm = dataStoreToArmHelper.getEodEntitiesToSendToArm(EodHelper.unstructuredLocation(),
+                                                                                                                    EodHelper.armLocation(), 5);
         assertEquals(1, eodEntitiesToSendToArm.size());
 
     }
@@ -58,8 +58,8 @@ class UnstructuredToArmHelperIntTest extends IntegrationBase {
         failedTooManyTimesEod.setTransferAttempts(4);
         dartsDatabase.save(failedTooManyTimesEod);
 
-        List<ExternalObjectDirectoryEntity> eodEntitiesToSendToArm = unstructuredToArmHelper.getEodEntitiesToSendToArm(EodHelper.unstructuredLocation(),
-                                                                                                                       EodHelper.armLocation(), 5);
+        List<ExternalObjectDirectoryEntity> eodEntitiesToSendToArm = dataStoreToArmHelper.getEodEntitiesToSendToArm(EodHelper.unstructuredLocation(),
+                                                                                                                    EodHelper.armLocation(), 5);
         assertEquals(3, eodEntitiesToSendToArm.size());
 
     }

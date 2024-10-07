@@ -75,6 +75,7 @@ import uk.gov.hmcts.darts.common.repository.NotificationRepository;
 import uk.gov.hmcts.darts.common.repository.ObjectAdminActionRepository;
 import uk.gov.hmcts.darts.common.repository.ObjectHiddenReasonRepository;
 import uk.gov.hmcts.darts.common.repository.ObjectRecordStatusRepository;
+import uk.gov.hmcts.darts.common.repository.ObjectStateRecordRepository;
 import uk.gov.hmcts.darts.common.repository.ProsecutorRepository;
 import uk.gov.hmcts.darts.common.repository.RegionRepository;
 import uk.gov.hmcts.darts.common.repository.RetentionPolicyTypeRepository;
@@ -171,6 +172,7 @@ public class DartsDatabaseStub {
     private final NodeRegisterRepository nodeRegisterRepository;
     private final NotificationRepository notificationRepository;
     private final ObjectRecordStatusRepository objectRecordStatusRepository;
+    private final ObjectStateRecordRepository objectStateRecordRepository;
     private final ProsecutorRepository prosecutorRepository;
     private final RetentionPolicyTypeRepository retentionPolicyTypeRepository;
     private final RetrieveCoreObjectService retrieveCoreObjectService;
@@ -477,14 +479,14 @@ public class DartsDatabaseStub {
     public MediaRequestEntity createAndLoadNonAccessedCurrentMediaRequestEntity(UserAccountEntity requestor,
                                                                                 AudioRequestType audioRequestType) {
 
-        MediaRequestEntity mediaRequestEntity =  PersistableFactory.getMediaRequestTestData().someMinimalBuilder()
-                                                                                        .requestor(requestor)
-                                                                                        .currentOwner(requestor)
-                                                                                        .startTime(OffsetDateTime.parse("2023-06-26T13:00:00Z"))
-                                                                                        .endTime(OffsetDateTime.parse("2023-06-26T14:00:00Z"))
-                                                                                        .requestType(audioRequestType)
-                                                                                        .status(MediaRequestStatus.COMPLETED)
-                                                                                        .build().getEntity();
+        MediaRequestEntity mediaRequestEntity = PersistableFactory.getMediaRequestTestData().someMinimalBuilder()
+            .requestor(requestor)
+            .currentOwner(requestor)
+            .startTime(OffsetDateTime.parse("2023-06-26T13:00:00Z"))
+            .endTime(OffsetDateTime.parse("2023-06-26T14:00:00Z"))
+            .requestType(audioRequestType)
+            .status(MediaRequestStatus.COMPLETED)
+            .build().getEntity();
         dartsPersistence.save(mediaRequestEntity);
 
         OffsetDateTime expiryTime = OffsetDateTime.of(2023, 7, 2, 13, 0, 0, 0, UTC);
