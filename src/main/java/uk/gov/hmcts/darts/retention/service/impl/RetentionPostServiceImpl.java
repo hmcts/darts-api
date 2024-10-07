@@ -234,6 +234,7 @@ public class RetentionPostServiceImpl implements RetentionPostService {
     private void updateCourtCaseConfidenceAttributesForRetention(CourtCaseEntity courtCase) {
         courtCase.setRetConfScore(CASE_PERFECTLY_CLOSED);
         courtCase.setRetConfReason(MANUAL_OVERRIDE);
+        courtCase.setRetConfUpdatedTs(currentTimeHelper.currentOffsetDateTime());
         caseRepository.save(courtCase);
     }
 
