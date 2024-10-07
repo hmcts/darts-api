@@ -1242,11 +1242,18 @@ class DetsToArmBatchProcessResponseFilesIntTest extends IntegrationBase {
         ExternalObjectDirectoryEntity armEod = PersistableFactory.getExternalObjectDirectoryTestData()
             .someMinimalBuilder().transcriptionDocumentEntity(transcriptionDocumentEntity).status(dartsDatabase.getObjectRecordStatusEntity(ARM_DROP_ZONE))
             .externalLocationType(dartsDatabase.getExternalLocationTypeEntity(ARM))
-            .externalLocation(UUID.randomUUID()).build();
+            .externalLocation(UUID.randomUUID())
+            .checksum("55555555")
+            .build();
 
         armEod.setTransferAttempts(1);
         armEod.setManifestFile(manifestFile1);
         armEod = dartsPersistence.save(armEod);
+
+        ObjectStateRecordEntity osr = new ObjectStateRecordEntity();
+        osr.setUuid(1L);
+        osr.setArmEodId(String.valueOf(armEod.getId()));
+        osrRepository.save(osr);
 
         List<String> blobNamesAndPaths = new ArrayList<>();
         String blobNameAndPath1 = String.format("dropzone/DARTS/response/DETS_%s_6a374f19a9ce7dc9cc480ea8d4eca0fb_1_iu.rsp", manifest1Uuid);
@@ -1277,7 +1284,8 @@ class DetsToArmBatchProcessResponseFilesIntTest extends IntegrationBase {
         when(armDataManagementApi.deleteBlobData(createRecordFilename1)).thenReturn(true);
         when(armDataManagementApi.deleteBlobData(uploadFileFilename1)).thenReturn(true);
 
-        when(currentTimeHelper.currentOffsetDateTime()).thenReturn(transcriptionEntity.getEndTime());
+        OffsetDateTime currentDateTime = transcriptionEntity.getEndTime();
+        when(currentTimeHelper.currentOffsetDateTime()).thenReturn(currentDateTime);
 
         String fileLocation = tempDirectory.getAbsolutePath();
         when(armDataManagementConfiguration.getTempBlobWorkspace()).thenReturn(fileLocation);
@@ -1293,6 +1301,19 @@ class DetsToArmBatchProcessResponseFilesIntTest extends IntegrationBase {
             .findById(armEod.getId()).orElseThrow();
         assertEquals(ARM_RESPONSE_CHECKSUM_VERIFICATION_FAILED.getId(), foundTranscriptionEod.getStatus().getId());
         assertTrue(foundTranscriptionEod.isResponseCleaned());
+
+        ObjectStateRecordEntity dbOsr = osrRepository.findByArmEodId(String.valueOf(armEod.getId())).orElseThrow();
+        assertThat(dbOsr.getFlagRspnRecvdFromArml()).isTrue();
+        assertThat(dbOsr.getDateRspnRecvdFromArml()).isEqualTo(currentDateTime);
+        assertThat(dbOsr.getFlagFileIngestStatus()).isFalse();
+        assertThat(dbOsr.getDateFileIngestToArm()).isEqualTo(currentDateTime);
+        assertThat(dbOsr.getObjectStatus()).isEqualTo("External object id 1 checksum differs. Arm checksum: 1234 Object Checksum: 55555555");
+        assertThat(dbOsr.getMd5FileIngestToArm()).isNull();
+        assertThat(dbOsr.getIdResponseFile()).isNull();
+        assertThat(dbOsr.getIdResponseCrFile()).isNull();
+        assertThat(dbOsr.getIdResponseUfFile()).isNull();
+        assertThat(dbOsr.getFlagFileDetsCleanupStatus()).isNull();
+        assertThat(dbOsr.getDateFileDetsCleanup()).isNull();
     }
 
     @Test
@@ -1781,6 +1802,11 @@ class DetsToArmBatchProcessResponseFilesIntTest extends IntegrationBase {
         armEod.setManifestFile(manifestFile1);
         armEod = dartsPersistence.save(armEod);
 
+        ObjectStateRecordEntity osr1 = new ObjectStateRecordEntity();
+        osr1.setUuid(1L);
+        osr1.setArmEodId(String.valueOf(armEod.getId()));
+        osrRepository.save(osr1);
+
         List<String> blobNamesAndPaths = new ArrayList<>();
         String blobNameAndPath1 = String.format("dropzone/DARTS/response/DETS_%s_6a374f19a9ce7dc9cc480ea8d4eca0fb_1_iu.rsp", manifest1Uuid);
         blobNamesAndPaths.add(blobNameAndPath1);
@@ -1809,7 +1835,8 @@ class DetsToArmBatchProcessResponseFilesIntTest extends IntegrationBase {
         when(armDataManagementApi.deleteBlobData(createRecordFilename2)).thenReturn(true);
         when(armDataManagementApi.deleteBlobData(uploadFileFileFilename2)).thenReturn(true);
 
-        when(currentTimeHelper.currentOffsetDateTime()).thenReturn(caseDocument.getCreatedDateTime());
+        OffsetDateTime currentDateTime = caseDocument.getCreatedDateTime();
+        when(currentTimeHelper.currentOffsetDateTime()).thenReturn(currentDateTime);
 
         String fileLocation = tempDirectory.getAbsolutePath();
         when(armDataManagementConfiguration.getTempBlobWorkspace()).thenReturn(fileLocation);
@@ -1826,6 +1853,19 @@ class DetsToArmBatchProcessResponseFilesIntTest extends IntegrationBase {
         assertEquals(ARM_RESPONSE_PROCESSING_FAILED.getId(), foundCaseDocEod.getStatus().getId());
         assertTrue(foundCaseDocEod.isResponseCleaned());
         assertNotNull(foundCaseDocEod.getErrorCode());
+
+        ObjectStateRecordEntity dbOsr = osrRepository.findByArmEodId(String.valueOf(armEod.getId())).orElseThrow();
+        assertThat(dbOsr.getFlagRspnRecvdFromArml()).isTrue();
+        assertThat(dbOsr.getDateRspnRecvdFromArml()).isEqualTo(currentDateTime);
+        assertThat(dbOsr.getFlagFileIngestStatus()).isFalse();
+        assertThat(dbOsr.getDateFileIngestToArm()).isEqualTo(currentDateTime);
+        assertThat(dbOsr.getObjectStatus()).isEqualTo("Exception Description");
+        assertThat(dbOsr.getMd5FileIngestToArm()).isNull();
+        assertThat(dbOsr.getIdResponseFile()).isNull();
+        assertThat(dbOsr.getIdResponseCrFile()).isNull();
+        assertThat(dbOsr.getIdResponseUfFile()).isNull();
+        assertThat(dbOsr.getFlagFileDetsCleanupStatus()).isNull();
+        assertThat(dbOsr.getDateFileDetsCleanup()).isNull();
     }
 
     @Test
