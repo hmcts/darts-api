@@ -8,6 +8,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Limit;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
+import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
 import uk.gov.hmcts.darts.common.entity.EventEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
@@ -110,11 +111,15 @@ class AudioLinkingAutomatedTaskTest {
         when(event.getHearingEntities()).thenReturn(hearingEntities);
         OffsetDateTime timestamp = OffsetDateTime.now();
         when(event.getTimestamp()).thenReturn(timestamp);
+        CourtroomEntity courtroomEntity = mock(CourtroomEntity.class);
+        when(courtroomEntity.getId()).thenReturn(123);
+        when(event.getCourtroom()).thenReturn(courtroomEntity);
+
 
         List<MediaEntity> mediaEntities = List.of(
             mock(MediaEntity.class), mock(MediaEntity.class), mock(MediaEntity.class));
         doReturn(mediaEntities).when(mediaRepository)
-            .findAllByMediaTimeContains(any(), any());
+            .findAllByMediaTimeContains(any(), any(), any());
 
 
         Set<HearingEntity> editedHearingEntities = new HashSet<>();
@@ -130,7 +135,7 @@ class AudioLinkingAutomatedTaskTest {
         verify(audioLinkingAutomatedTask, times(1))
             .processMedia(hearingEntities, mediaEntities.get(2), mediaLinkedCaseEntities, editedHearingEntities);
         verify(mediaRepository, times(1))
-            .findAllByMediaTimeContains(timestamp, timestamp);
+            .findAllByMediaTimeContains(123, timestamp, timestamp);
         verify(event, times(1))
             .setEventStatus(3);
     }
@@ -145,11 +150,14 @@ class AudioLinkingAutomatedTaskTest {
         when(event.getHearingEntities()).thenReturn(hearingEntities);
         OffsetDateTime timestamp = OffsetDateTime.now();
         when(event.getTimestamp()).thenReturn(timestamp);
+        CourtroomEntity courtroomEntity = mock(CourtroomEntity.class);
+        when(courtroomEntity.getId()).thenReturn(123);
+        when(event.getCourtroom()).thenReturn(courtroomEntity);
 
         List<MediaEntity> mediaEntities = List.of(
             mock(MediaEntity.class), mock(MediaEntity.class), mock(MediaEntity.class));
         doReturn(mediaEntities).when(mediaRepository)
-            .findAllByMediaTimeContains(any(), any());
+            .findAllByMediaTimeContains(any(), any(), any());
 
 
         Set<HearingEntity> editedHearingEntities = new HashSet<>();
@@ -165,7 +173,7 @@ class AudioLinkingAutomatedTaskTest {
         verify(audioLinkingAutomatedTask, times(1))
             .processMedia(hearingEntities, mediaEntities.get(2), mediaLinkedCaseEntities, editedHearingEntities);
         verify(mediaRepository, times(1))
-            .findAllByMediaTimeContains(timestamp.plusSeconds(10), timestamp.minusSeconds(10));
+            .findAllByMediaTimeContains(123, timestamp.plusSeconds(10), timestamp.minusSeconds(10));
         verify(event, times(1))
             .setEventStatus(3);
 
