@@ -616,4 +616,5 @@ class AssociatedObjectDataExpiryDeletionAutomatedTaskITest extends PostgresInteg
             assertThat(caseExpiredAuditEntries).isEmpty();
         }
     }
+
 }
