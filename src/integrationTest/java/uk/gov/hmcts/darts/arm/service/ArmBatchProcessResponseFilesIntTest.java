@@ -3,6 +3,7 @@ package uk.gov.hmcts.darts.arm.service;
 import org.junit.jupiter.api.BeforeEach;
 import uk.gov.hmcts.darts.arm.service.impl.ArmBatchProcessResponseFilesImpl;
 
+@SuppressWarnings({"PMD.TestClassWithoutTestCases"})
 class ArmBatchProcessResponseFilesIntTest extends AbstractArmBatchProcessResponseFilesIntTest {
 
     @BeforeEach
