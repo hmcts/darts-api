@@ -164,7 +164,6 @@ public class DetsToArmBatchProcessResponseFilesImpl extends AbstractArmBatchProc
                                                     ArmResponseBatchData armResponseBatchData,
                                                     String objectChecksum,
                                                     ObjectStateRecordEntity osr) {
-        // tested
         osr.setFlagFileIngestStatus(true);
         osr.setDateFileIngestToArm(timeHelper.currentOffsetDateTime());
         osr.setMd5FileIngestToArm(objectChecksum);

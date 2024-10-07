@@ -37,6 +37,7 @@ import static uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum.ARM;
 import static uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum.DETS;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_DROP_ZONE;
 
+@SuppressWarnings({"VariableDeclarationUsageDistance", "PMD.NcssCount"})
 class DetsToArmBatchProcessResponseFilesIntTest extends AbstractArmBatchProcessResponseFilesIntTest {
 
     @Autowired
