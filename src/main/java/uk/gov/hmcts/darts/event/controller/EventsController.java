@@ -18,6 +18,7 @@ import uk.gov.hmcts.darts.event.component.DartsEventMapper;
 import uk.gov.hmcts.darts.event.http.api.EventApi;
 import uk.gov.hmcts.darts.event.model.AdminEventSearch;
 import uk.gov.hmcts.darts.event.model.AdminGetEventForIdResponseResult;
+import uk.gov.hmcts.darts.event.model.AdminObfuscateEventByIdRequest;
 import uk.gov.hmcts.darts.event.model.AdminSearchEventResponseResult;
 import uk.gov.hmcts.darts.event.model.CourtLog;
 import uk.gov.hmcts.darts.event.model.CourtLogsPostRequestBody;
@@ -168,6 +169,15 @@ public class EventsController implements EventApi {
     @Authorisation(contextId = ANY_ENTITY_ID,
         globalAccessSecurityRoles = {SUPER_ADMIN, SUPER_USER})
     public ResponseEntity<AdminGetEventForIdResponseResult> adminGetEventById(Integer eventId) {
-        return  new ResponseEntity<>(eventService.adminGetEventById(eventId), HttpStatus.OK);
+        return new ResponseEntity<>(eventService.adminGetEventById(eventId), HttpStatus.OK);
+    }
+
+    @Override
+    @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
+    @Authorisation(contextId = ANY_ENTITY_ID,
+        globalAccessSecurityRoles = {SUPER_ADMIN})
+    public ResponseEntity<Void> adminObfuscateEveByIds(AdminObfuscateEventByIdRequest adminObfuscateEventByIdRequest) {
+        eventService.adminObfuscateEveByIds(adminObfuscateEventByIdRequest.getEveIds());
+        return ResponseEntity.noContent().build();
     }
 }

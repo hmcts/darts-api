@@ -88,6 +88,12 @@ public class DataAnonymisationServiceImpl implements DataAnonymisationService {
         hearingEntity.getEventList().forEach(eventEntity -> anonymizeEventEntity(userAccount, eventEntity));
     }
 
+
+    @Override
+    public void anonymizeEvent(EventEntity eventEntity) {
+        anonymizeEventEntity(getUserAccount(), eventEntity);
+    }
+
     void anonymizeEventEntity(UserAccountEntity userAccount, EventEntity eventEntity) {
         eventEntity.setEventText(UUID.randomUUID().toString());
         eventEntity.setDataAnonymised(true);
