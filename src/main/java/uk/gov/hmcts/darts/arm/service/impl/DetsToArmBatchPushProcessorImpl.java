@@ -129,7 +129,7 @@ public class DetsToArmBatchPushProcessorImpl implements DetsToArmBatchPushProces
                     batchItem.setArmEod(armEod);
                     dataStoreToArmHelper.updateArmEodToArmIngestionStatus(
                         currentEod, batchItem, batchItems, archiveRecordsFile, userAccount);
-                    getObjectStateRecordEntity(currentEod);
+                    getObjectStateRecordEntity(armEod);
 
                 } else {
 
@@ -137,7 +137,7 @@ public class DetsToArmBatchPushProcessorImpl implements DetsToArmBatchPushProces
                         currentEod, batchItem, batchItems, archiveRecordsFile, userAccount);
                     objectStateRecord = getObjectStateRecordEntity(currentEod);
                     // Save the new ARM EOD to the object state record
-                    if (objectStateRecord != null) {
+                    if (nonNull(objectStateRecord)) {
                         objectStateRecord.setArmEodId(String.valueOf(armEod.getId()));
                         objectStateRecordRepository.save(objectStateRecord);
                     }
@@ -267,38 +267,43 @@ public class DetsToArmBatchPushProcessorImpl implements DetsToArmBatchPushProces
                 || ARM_RAW_DATA_FAILED.getId().equals(previousStatus.getId())
                 || ARM_INGESTION.getId().equals(previousStatus.getId())) {
                 Instant start = Instant.now();
-                log.info("ARM PERFORMANCE PUSH START for EOD {} started at {}", armExternalObjectDirectory.getId(), start);
+                log.info("ARM PERFORMANCE PUSH START for DETS EOD {} started at {}", armExternalObjectDirectory.getId(), start);
 
-                log.info("About to push raw data to ARM for EOD {}", armExternalObjectDirectory.getId());
+                log.info("About to push raw data to ARM for DETS EOD {}", armExternalObjectDirectory.getId());
                 armDataManagementApi.copyDetsBlobDataToArm(detsExternalObjectDirectory.getExternalLocation().toString(), filename);
-                log.info("Pushed raw data to ARM for EOD {}", armExternalObjectDirectory.getId());
+                log.info("Pushed raw data to ARM for DETS EOD {}", armExternalObjectDirectory.getId());
 
                 Instant finish = Instant.now();
                 long timeElapsed = Duration.between(start, finish).toMillis();
-                log.info("ARM PERFORMANCE PUSH END for EOD {} ended at {}", armExternalObjectDirectory.getId(), finish);
-                log.info("ARM PERFORMANCE PUSH ELAPSED TIME for EOD {} took {} ms", armExternalObjectDirectory.getId(), timeElapsed);
+                log.info("ARM PERFORMANCE PUSH END for DETS EOD {} ended at {}", armExternalObjectDirectory.getId(), finish);
+                log.info("ARM PERFORMANCE PUSH ELAPSED TIME for DETS EOD {} took {} ms", armExternalObjectDirectory.getId(), timeElapsed);
 
                 armExternalObjectDirectory.setChecksum(detsExternalObjectDirectory.getChecksum());
                 armExternalObjectDirectory.setExternalLocation(UUID.randomUUID());
                 armExternalObjectDirectory.setLastModifiedBy(userAccount);
                 externalObjectDirectoryRepository.saveAndFlush(armExternalObjectDirectory);
 
-                if (nonNull(objectStateRecord)) {
-                    objectStateRecord.setFlagFileTransferToDets(true);
-                    objectStateRecord.setDateFileTransferToDets(currentTimeHelper.currentOffsetDateTime());
-                    objectStateRecord.setMd5FileTransfArml(detsExternalObjectDirectory.getChecksum());
-                    setFileSize(detsExternalObjectDirectory, objectStateRecord);
-                    objectStateRecordRepository.save(objectStateRecord);
-                }
+                setRawDataPushed(detsExternalObjectDirectory, objectStateRecord);
             }
         } catch (Exception e) {
-            String errorMessage = String.format("Error copying BLOB data for file %s - %s", detsExternalObjectDirectory.getExternalLocation(), e.getMessage());
-            log.error("Error copying BLOB data for file {}", detsExternalObjectDirectory.getExternalLocation(), e);
+            String errorMessage = String.format("Error copying DETS BLOB data for file %s - %s", detsExternalObjectDirectory.getExternalLocation(),
+                                                e.getMessage());
+            log.error("Error copying DETS BLOB data for file {}", detsExternalObjectDirectory.getExternalLocation(), e);
             updateObjectStateRecordStatus(armExternalObjectDirectory, errorMessage);
             return false;
         }
 
         return true;
+    }
+
+    private void setRawDataPushed(ExternalObjectDirectoryEntity detsExternalObjectDirectory, ObjectStateRecordEntity objectStateRecord) {
+        if (nonNull(objectStateRecord)) {
+            objectStateRecord.setFlagFileTransferToDets(true);
+            objectStateRecord.setDateFileTransferToDets(currentTimeHelper.currentOffsetDateTime());
+            objectStateRecord.setMd5FileTransfArml(detsExternalObjectDirectory.getChecksum());
+            setFileSize(detsExternalObjectDirectory, objectStateRecord);
+            objectStateRecordRepository.save(objectStateRecord);
+        }
     }
 
     private void copyMetadataToArm(File manifestFile) {
@@ -319,15 +324,11 @@ public class DetsToArmBatchPushProcessorImpl implements DetsToArmBatchPushProces
     }
 
     private static void setFileSize(ExternalObjectDirectoryEntity detsExternalObjectDirectory, ObjectStateRecordEntity objectStateRecord) {
-        if (nonNull(detsExternalObjectDirectory.getMedia())) {
-            objectStateRecord.setFileSizeBytesArml(detsExternalObjectDirectory.getMedia().getFileSize());
-        } else if (nonNull(detsExternalObjectDirectory.getAnnotationDocumentEntity())) {
-            objectStateRecord.setFileSizeBytesArml(Long.valueOf(detsExternalObjectDirectory.getAnnotationDocumentEntity().getFileSize()));
-        } else if (nonNull(detsExternalObjectDirectory.getTranscriptionDocumentEntity())) {
-            objectStateRecord.setFileSizeBytesArml(Long.valueOf(detsExternalObjectDirectory.getTranscriptionDocumentEntity().getFileSize()));
-        } else if (nonNull(detsExternalObjectDirectory.getCaseDocument())) {
-            objectStateRecord.setFileSizeBytesArml(Long.valueOf(detsExternalObjectDirectory.getCaseDocument().getFileSize()));
+        Long fileSize = getFileSize(detsExternalObjectDirectory);
+        if (fileSize != null) {
+            objectStateRecord.setFileSizeBytesArml(fileSize);
         }
-
     }
+
+    
 }
