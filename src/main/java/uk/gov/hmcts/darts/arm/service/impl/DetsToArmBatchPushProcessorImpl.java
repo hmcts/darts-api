@@ -159,7 +159,7 @@ public class DetsToArmBatchPushProcessorImpl implements DetsToArmBatchPushProces
             }
         }
 
-        if (writeManifestAndCopyToArm(userAccount, batchItems, archiveRecordsFile)) return;
+        if (!writeManifestAndCopyToArm(userAccount, batchItems, archiveRecordsFile)) return;
 
         for (var batchItem : batchItems.getSuccessful()) {
             dataStoreToArmHelper.updateExternalObjectDirectoryStatus(batchItem.getArmEod(), EodHelper.armDropZoneStatus(), userAccount);
@@ -182,9 +182,9 @@ public class DetsToArmBatchPushProcessorImpl implements DetsToArmBatchPushProces
             batchItems.getSuccessful().forEach(batchItem -> dataStoreToArmHelper.recoverByUpdatingEodToFailedArmStatus(batchItem, userAccount));
             final String errorMessageWithStackTrace = errorMessage + " - " + ExceptionUtils.getStackTrace(e);
             batchItems.getFailed().forEach(batchItem -> updateObjectStateRecordStatus(batchItem.getArmEod(), errorMessageWithStackTrace));
-            return true;
+            return false;
         }
-        return false;
+        return true;
     }
 
     private static String getManifestFilePrefix() {
@@ -323,12 +323,12 @@ public class DetsToArmBatchPushProcessorImpl implements DetsToArmBatchPushProces
         }
     }
 
-    private static void setFileSize(ExternalObjectDirectoryEntity detsExternalObjectDirectory, ObjectStateRecordEntity objectStateRecord) {
-        Long fileSize = getFileSize(detsExternalObjectDirectory);
+    private void setFileSize(ExternalObjectDirectoryEntity detsExternalObjectDirectory, ObjectStateRecordEntity objectStateRecord) {
+        Long fileSize = dataStoreToArmHelper.getFileSize(detsExternalObjectDirectory.getId());
         if (fileSize != null) {
             objectStateRecord.setFileSizeBytesArml(fileSize);
         }
     }
 
-    
+
 }
