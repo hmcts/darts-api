@@ -105,6 +105,9 @@ java:
     spring.profiles.active: dev
     TESTING_SUPPORT_ENDPOINTS_ENABLED: true
     DARTS_GATEWAY_URL: http://darts-gateway.staging.platform.hmcts.net
+    DARTS_PORTAL_URL: https://darts.staging.apps.hmcts.net
+    AUTOMATED_TASK_MODE: true
+    API_MODE: true
 
   secrets:
     DARTS_API_DB_PASSWORD:
