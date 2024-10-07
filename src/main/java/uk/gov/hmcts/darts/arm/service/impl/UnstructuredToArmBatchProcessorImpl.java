@@ -54,7 +54,6 @@ public class UnstructuredToArmBatchProcessorImpl implements UnstructuredToArmBat
 
     @Override
     @SuppressWarnings({"PMD.AvoidInstantiatingObjectsInLoops", "PMD.CognitiveComplexity", "PMD.CyclomaticComplexity"})
-
     public void processUnstructuredToArm(int taskBatchSize) {
 
         log.info("Started running ARM Batch Push processing at: {}", OffsetDateTime.now());
