@@ -27,6 +27,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum.DETS;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_MANIFEST_FAILED;
@@ -71,13 +72,15 @@ class DetsToArmBatchPushProcessorIntTest extends IntegrationBase {
             ));
         savedMedia.setFileSize(1000L);
         savedMedia = dartsDatabase.save(savedMedia);
+
+        lenient().when(detsToArmProcessorConfiguration)
     }
 
     @Test
     void processDetsToArmWithDetsEodReturnsSuccess() {
         // given
         ObjectStateRecordEntity objectStateRecordEntity = dartsDatabase.getObjectStateRecordRepository()
-            .save(createObjectStateRecordEntity(111l));
+            .save(createObjectStateRecordEntity(111L));
         dartsDatabase.getObjectStateRecordRepository().save(objectStateRecordEntity);
 
         ExternalObjectDirectoryEntity detsEod = dartsDatabase.getExternalObjectDirectoryStub().createExternalObjectDirectory(
@@ -137,7 +140,7 @@ class DetsToArmBatchPushProcessorIntTest extends IntegrationBase {
     void processDetsToArmWithFailedRawDataArmEodSuccess() {
         // given
         ObjectStateRecordEntity objectStateRecordEntity = dartsDatabase.getObjectStateRecordRepository()
-            .save(createObjectStateRecordEntity(111l));
+            .save(createObjectStateRecordEntity(111L));
         dartsDatabase.getObjectStateRecordRepository().save(objectStateRecordEntity);
 
         ExternalObjectDirectoryEntity detsEod = dartsDatabase.getExternalObjectDirectoryStub().createExternalObjectDirectory(
@@ -208,7 +211,7 @@ class DetsToArmBatchPushProcessorIntTest extends IntegrationBase {
     void processDetsToArmWithFailedManifestFileArmEodSuccess() {
         // given
         ObjectStateRecordEntity objectStateRecordEntity = dartsDatabase.getObjectStateRecordRepository()
-            .save(createObjectStateRecordEntity(111l));
+            .save(createObjectStateRecordEntity(111L));
         dartsDatabase.getObjectStateRecordRepository().save(objectStateRecordEntity);
 
         ExternalObjectDirectoryEntity detsEod = dartsDatabase.getExternalObjectDirectoryStub().createExternalObjectDirectory(

@@ -159,7 +159,9 @@ public class DetsToArmBatchPushProcessorImpl implements DetsToArmBatchPushProces
             }
         }
 
-        if (!writeManifestAndCopyToArm(userAccount, batchItems, archiveRecordsFile)) return;
+        if (!writeManifestAndCopyToArm(userAccount, batchItems, archiveRecordsFile)) {
+            return;
+        }
 
         for (var batchItem : batchItems.getSuccessful()) {
             dataStoreToArmHelper.updateExternalObjectDirectoryStatus(batchItem.getArmEod(), EodHelper.armDropZoneStatus(), userAccount);
@@ -187,8 +189,8 @@ public class DetsToArmBatchPushProcessorImpl implements DetsToArmBatchPushProces
         return true;
     }
 
-    private static String getManifestFilePrefix() {
-        return "DETS";
+    private String getManifestFilePrefix() {
+        return detsToArmProcessorConfiguration.getManifestFilePrefix();
     }
 
     private void updateObjectStateRecordManifestSuccessOrFailure(ArmBatchItems batchItems, File archiveRecordsFile) {
