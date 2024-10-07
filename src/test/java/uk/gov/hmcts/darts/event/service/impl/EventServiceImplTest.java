@@ -22,7 +22,6 @@ import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -46,53 +45,23 @@ class EventServiceImplTest {
         EventEntity event1 = mock(EventEntity.class);
         EventEntity event2 = mock(EventEntity.class);
         EventEntity event3 = mock(EventEntity.class);
-        EventEntity event4 = mock(EventEntity.class);
 
 
-        doReturn(List.of(event1, event2)).when(eventService).getEventsToObfuscate(1);
-        doReturn(List.of(event2, event3)).when(eventService).getEventsToObfuscate(2);
-        doReturn(List.of(event4)).when(eventService).getEventsToObfuscate(3);
+        doReturn(event1).when(eventService).getEventEntityById(1);
+        doReturn(event2).when(eventService).getEventEntityById(2);
+        doReturn(event3).when(eventService).getEventEntityById(3);
+        doReturn(event1).when(eventService).getEventEntityById(4);
 
-        eventService.adminObfuscateEveByIds(List.of(1, 2, 3));
+        eventService.adminObfuscateEveByIds(List.of(1, 2, 3, 4));
 
 
         verify(dataAnonymisationService, times(1)).anonymizeEvent(event1);
         verify(dataAnonymisationService, times(1)).anonymizeEvent(event2);
         verify(dataAnonymisationService, times(1)).anonymizeEvent(event3);
-        verify(dataAnonymisationService, times(1)).anonymizeEvent(event4);
 
-        verify(eventService, times(1)).getEventsToObfuscate(1);
-        verify(eventService, times(1)).getEventsToObfuscate(2);
-        verify(eventService, times(1)).getEventsToObfuscate(3);
-    }
-
-
-    @Test
-    void positiveGetEventsToObfuscateZeroEventId() {
-        EventEntity event = mock(EventEntity.class);
-        when(event.getEventId()).thenReturn(0);
-        doReturn(event).when(eventService).getEventEntityById(123);
-
-        assertThat(eventService.getEventsToObfuscate(123)).containsExactly(event);
-        verify(eventService, times(1)).getEventEntityById(123);
-        verifyNoInteractions(eventRepository);
-    }
-
-    @Test
-    void positiveGetEventsToObfuscateNoneZeroEventId() {
-        EventEntity event1 = mock(EventEntity.class);
-        EventEntity event2 = mock(EventEntity.class);
-        EventEntity event3 = mock(EventEntity.class);
-        EventEntity event4 = mock(EventEntity.class);
-
-        when(event1.getEventId()).thenReturn(1234);
-        doReturn(event1).when(eventService).getEventEntityById(123);
-        doReturn(List.of(event2, event3, event4)).when(eventRepository).findAllByEventId(1234);
-
-        assertThat(eventService.getEventsToObfuscate(123)).containsExactly(event2, event3, event4);
-
-        verify(eventService, times(1)).getEventEntityById(123);
-        verify(eventRepository,times(1)).findAllByEventId(1234);
+        verify(eventService, times(1)).getEventEntityById(1);
+        verify(eventService, times(1)).getEventEntityById(2);
+        verify(eventService, times(1)).getEventEntityById(3);
     }
 
 

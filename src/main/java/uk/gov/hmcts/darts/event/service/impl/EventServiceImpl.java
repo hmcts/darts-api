@@ -13,8 +13,6 @@ import uk.gov.hmcts.darts.event.model.AdminGetEventForIdResponseResult;
 import uk.gov.hmcts.darts.event.service.EventService;
 import uk.gov.hmcts.darts.event.validation.EventIdValidator;
 
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -38,18 +36,9 @@ public class EventServiceImpl implements EventService {
     @Transactional
     public void adminObfuscateEveByIds(List<Integer> eveIds) {
         eveIds.stream()
-            .map(this::getEventsToObfuscate)
-            .flatMap(List::stream)
+            .map(this::getEventEntityById)
             .distinct()
             .forEach(dataAnonymisationService::anonymizeEvent);
-    }
-
-    List<EventEntity> getEventsToObfuscate(Integer eveId) {
-        EventEntity event = getEventEntityById(eveId);
-        if (event.getEventId() == 0) {
-            return Collections.singletonList(event);
-        }
-        return new ArrayList<>(eventRepository.findAllByEventId(event.getEventId()));
     }
 
     EventEntity getEventEntityById(Integer eveId) {
