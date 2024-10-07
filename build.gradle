@@ -357,12 +357,12 @@ dependencyCheck {
   ]
 }
 
-repositories {
-  mavenLocal()
-  mavenCentral()
-  maven { url 'https://jitpack.io' }
-  maven { url  'https://repo.spring.io/milestone/'}
-}
+// repositories {
+//   mavenLocal()
+//   mavenCentral()
+//   maven { url 'https://jitpack.io' }
+//   maven { url  'https://repo.spring.io/milestone/'}
+// }
 
 ext {
   log4JVersion = "2.24.1"
