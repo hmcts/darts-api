@@ -340,6 +340,7 @@ darts:
         max-arm-single-mode-items: 100
       dets-to-arm-batch-processor:
         max-arm-manifest-items: 100
+        manifest-file-prefix: DETS
       expiry-deletion:
         enabled: ${CASE_EXPIRY_DELETION_ENABLED:false}
       audio-linking:

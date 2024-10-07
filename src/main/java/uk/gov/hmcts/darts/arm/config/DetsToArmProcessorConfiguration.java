@@ -14,4 +14,5 @@ import org.springframework.validation.annotation.Validated;
 public class DetsToArmProcessorConfiguration {
 
     private int maxArmManifestItems;
+    private String manifestFilePrefix;
 }
