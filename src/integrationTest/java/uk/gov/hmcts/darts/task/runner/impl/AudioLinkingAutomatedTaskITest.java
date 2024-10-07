@@ -5,6 +5,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
+import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
 import uk.gov.hmcts.darts.common.entity.EventEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
@@ -30,20 +31,21 @@ class AudioLinkingAutomatedTaskITest extends PostgresIntegrationBase {
         MediaEntity media1 = dartsDatabase.getMediaStub().createMediaEntity(
             courtCaseEntity.getCourthouse(), "room 1", OffsetDateTime.now(), OffsetDateTime.now().plusHours(1), 1);
         MediaEntity media2 = dartsDatabase.getMediaStub().createMediaEntity(
-            courtCaseEntity.getCourthouse(), "room 2", OffsetDateTime.now().plusMinutes(10), OffsetDateTime.now().plusHours(2), 1);
+            courtCaseEntity.getCourthouse(), "room 1", OffsetDateTime.now().plusMinutes(10), OffsetDateTime.now().plusHours(2), 1);
 
         MediaEntity media3 = dartsDatabase.getMediaStub().createMediaEntity(
-            courtCaseEntity.getCourthouse(), "room 3", OffsetDateTime.now().plusHours(2), OffsetDateTime.now().plusHours(4), 1);
+            courtCaseEntity.getCourthouse(), "room 1", OffsetDateTime.now().plusHours(2), OffsetDateTime.now().plusHours(4), 1);
         MediaEntity media4 = dartsDatabase.getMediaStub().createMediaEntity(
-            courtCaseEntity.getCourthouse(), "room 4", OffsetDateTime.now().plusHours(3), OffsetDateTime.now().plusHours(5), 1);
+            courtCaseEntity.getCourthouse(), "room 1", OffsetDateTime.now().plusHours(3), OffsetDateTime.now().plusHours(5), 1);
 
         HearingEntity hearing1 = createHearing();
         HearingEntity hearing2 = createHearing();
         HearingEntity hearing3 = createHearing();
 
-        EventEntity event1 = createEvent(EventStatus.AUDIO_LINK_NOT_DONE_MODERNISED, hearing1, OffsetDateTime.now());
-        EventEntity event2 = createEvent(EventStatus.AUDIO_LINK_NOT_DONE_MODERNISED, hearing2, OffsetDateTime.now().plusMinutes(20));
-        EventEntity event3 = createEvent(EventStatus.AUDIO_LINK_NOT_DONE_MODERNISED, hearing3, OffsetDateTime.now().plusHours(2));
+        CourtroomEntity courtroomEntity = dartsDatabase.createCourtroomUnlessExists("Bristol", "room 1");
+        EventEntity event1 = createEvent(EventStatus.AUDIO_LINK_NOT_DONE_MODERNISED,courtroomEntity, hearing1, OffsetDateTime.now());
+        EventEntity event2 = createEvent(EventStatus.AUDIO_LINK_NOT_DONE_MODERNISED,courtroomEntity, hearing2, OffsetDateTime.now().plusMinutes(20));
+        EventEntity event3 = createEvent(EventStatus.AUDIO_LINK_NOT_DONE_MODERNISED,courtroomEntity, hearing3, OffsetDateTime.now().plusHours(2));
 
         audioLinkingAutomatedTask.run();
 
@@ -87,8 +89,9 @@ class AudioLinkingAutomatedTaskITest extends PostgresIntegrationBase {
     }
 
 
-    private EventEntity createEvent(EventStatus eventStatus, HearingEntity hearing, OffsetDateTime timestamp) {
+    private EventEntity createEvent(EventStatus eventStatus,CourtroomEntity courtroomEntity, HearingEntity hearing, OffsetDateTime timestamp) {
         EventEntity event = dartsDatabase.createEvent(hearing);
+        event.setCourtroom(courtroomEntity);
         event.setEventStatus(eventStatus.getStatusNumber());
         event.setTimestamp(timestamp);
         return dartsDatabase.getEventRepository().save(event);

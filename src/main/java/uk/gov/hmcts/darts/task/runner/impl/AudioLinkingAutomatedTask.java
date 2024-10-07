@@ -68,7 +68,6 @@ public class AudioLinkingAutomatedTask extends AbstractLockableAutomatedTask
 
 
     @Override
-    @Transactional
     protected void runTask() {
         List<EventEntity> events = eventRepository.findAllByEventStatus(EventStatus.AUDIO_LINK_NOT_DONE_MODERNISED.getStatusNumber(),
                                                                         Limit.of(getAutomatedTaskBatchSize()));
@@ -83,15 +82,17 @@ public class AudioLinkingAutomatedTask extends AbstractLockableAutomatedTask
     }
 
     void processEvent(EventEntity event, Set<HearingEntity> editedHearingEntities, Set<MediaLinkedCaseEntity> mediaLinkedCaseEntities) {
-        List<MediaEntity> mediaEntities = mediaRepository.findAllByMediaTimeContains(event.getTimestamp().plusSeconds(getAudioBufferSeconds()),
-                                                                                     event.getTimestamp().minusSeconds(getAudioBufferSeconds()));
+        List<MediaEntity> mediaEntities = mediaRepository.findAllByMediaTimeContains(
+            event.getCourtroom().getId(),
+            event.getTimestamp().plusSeconds(getAudioBufferSeconds()),
+            event.getTimestamp().minusSeconds(getAudioBufferSeconds()));
         mediaEntities.forEach(mediaEntity -> processMedia(event.getHearingEntities(), mediaEntity, mediaLinkedCaseEntities, editedHearingEntities));
         event.setEventStatus(EventStatus.AUDIO_LINKED.getStatusNumber());
     }
 
     void processMedia(List<HearingEntity> hearingEntities, MediaEntity mediaEntity,
-                              Set<MediaLinkedCaseEntity> mediaLinkedCaseEntities,
-                              Set<HearingEntity> hearingsToSave) {
+                      Set<MediaLinkedCaseEntity> mediaLinkedCaseEntities,
+                      Set<HearingEntity> hearingsToSave) {
         hearingEntities.forEach(hearingEntity -> {
             if (!hearingEntity.containsMedia(mediaEntity)) {
                 hearingEntity.addMedia(mediaEntity);
