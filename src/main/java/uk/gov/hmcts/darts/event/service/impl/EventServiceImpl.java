@@ -34,7 +34,7 @@ public class EventServiceImpl implements EventService {
 
     @Override
     @Transactional
-    public void adminObfuscateEveByIds(List<Integer> eveIds) {
+    public void obfuscateEventByIds(List<Integer> eveIds) {
         eveIds.stream()
             .map(this::getEventEntityById)
             .distinct()

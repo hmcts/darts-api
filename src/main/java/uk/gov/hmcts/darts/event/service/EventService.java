@@ -7,5 +7,5 @@ import java.util.List;
 public interface EventService {
     AdminGetEventForIdResponseResult adminGetEventById(Integer eventId);
 
-    void adminObfuscateEveByIds(List<Integer> eveIds);
+    void obfuscateEventByIds(List<Integer> eveIds);
 }

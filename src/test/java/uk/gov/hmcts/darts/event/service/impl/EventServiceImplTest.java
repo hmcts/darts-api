@@ -42,7 +42,7 @@ class EventServiceImplTest {
 
 
     @Test
-    void positiveAdminObfuscateEveByIds() {
+    void positiveObfuscateEventByIds() {
         EventEntity event1 = mock(EventEntity.class);
         EventEntity event2 = mock(EventEntity.class);
         EventEntity event3 = mock(EventEntity.class);
@@ -53,7 +53,7 @@ class EventServiceImplTest {
         doReturn(event3).when(eventService).getEventEntityById(3);
         doReturn(event1).when(eventService).getEventEntityById(4);
 
-        eventService.adminObfuscateEveByIds(List.of(1, 2, 3, 4));
+        eventService.obfuscateEventByIds(List.of(1, 2, 3, 4));
 
 
         verify(dataAnonymisationService, times(1)).anonymizeEvent(event1);

@@ -558,7 +558,7 @@ paths:
                   items:
                     type: integer
       responses:
-        '201':
+        '204':
           description: NO_CONTENT
         '404':
           description: Not Found - Event id

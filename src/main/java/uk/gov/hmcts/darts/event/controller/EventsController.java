@@ -177,7 +177,7 @@ public class EventsController implements EventApi {
     @Authorisation(contextId = ANY_ENTITY_ID,
         globalAccessSecurityRoles = {SUPER_ADMIN})
     public ResponseEntity<Void> adminObfuscateEveByIds(AdminObfuscateEveByIdsRequest adminObfuscateEveByIdsRequest) {
-        eventService.adminObfuscateEveByIds(adminObfuscateEveByIdsRequest.getEveIds());
+        eventService.obfuscateEventByIds(adminObfuscateEveByIdsRequest.getEveIds());
         return ResponseEntity.noContent().build();
     }
 }
