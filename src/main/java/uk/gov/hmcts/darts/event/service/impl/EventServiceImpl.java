@@ -6,7 +6,6 @@ import org.springframework.stereotype.Service;
 import uk.gov.hmcts.darts.common.entity.EventEntity;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.common.repository.EventRepository;
-import uk.gov.hmcts.darts.common.service.DataAnonymisationService;
 import uk.gov.hmcts.darts.event.mapper.EventMapper;
 import uk.gov.hmcts.darts.event.model.AdminGetEventForIdResponseResult;
 import uk.gov.hmcts.darts.event.service.EventService;
@@ -21,7 +20,6 @@ public class EventServiceImpl implements EventService {
     private final EventMapper eventMapper;
     private final EventIdValidator eventIdValidator;
     private final EventRepository eventRepository;
-    private final DataAnonymisationService dataAnonymisationService;
 
     @Override
     public AdminGetEventForIdResponseResult adminGetEventById(Integer eventId) {
