@@ -717,10 +717,6 @@ components:
           type: string
         text:
           type: string
-        chronicle_id:
-          type: string
-        antecedent_id:
-          type: string
         is_data_anonymised:
           type: boolean
         is_case_expired:
@@ -742,7 +738,6 @@ components:
               type: integer
             name:
               type: string
-
 
     ###################################################################################################################
     # PRIMITIVES
