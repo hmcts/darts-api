@@ -53,7 +53,6 @@ class AuthenticationServiceImplTest {
     private ExternalAuthConfigurationProperties externalAuthConfigurationProperties;
 
     @Test
-    @SuppressWarnings("unchecked")
     void loginOrRefreshShouldReturnAuthUriWhenNoAuthHeaderExists() {
 
         AuthenticationConfigurationPropertiesStrategy authStrategyMock = Mockito.mock(AuthenticationConfigurationPropertiesStrategy.class);
@@ -68,7 +67,6 @@ class AuthenticationServiceImplTest {
     }
 
     @Test
-    @SuppressWarnings("unchecked")
     void loginOrRefreshShouldReturnAuthUriWhenInvalidAccessTokenExists() {
 
         AuthenticationConfigurationPropertiesStrategy authStrategyMock = Mockito.mock(AuthenticationConfigurationPropertiesStrategy.class);
@@ -85,7 +83,6 @@ class AuthenticationServiceImplTest {
     }
 
     @Test
-    @SuppressWarnings("unchecked")
     void loginOrRefreshShouldReturnLandingPageUriWhenValidAccessTokenExists() {
 
         AuthenticationConfigurationPropertiesStrategy authStrategyMock = Mockito.mock(AuthenticationConfigurationPropertiesStrategy.class);
@@ -102,7 +99,6 @@ class AuthenticationServiceImplTest {
     }
 
     @Test
-    @SuppressWarnings("unchecked")
     void handleOauthCodeShouldReturnLandingPageUriWhenTokenIsObtainedAndValid() throws AzureDaoException {
         when(azureDao.fetchAccessToken(anyString(), notNull(), notNull(), isNull()))
             .thenReturn(new OAuthProviderRawResponse(null, 0, DUMMY_ID_TOKEN, 0));
@@ -118,7 +114,6 @@ class AuthenticationServiceImplTest {
     }
 
     @Test
-    @SuppressWarnings("")
     void handleOauthCodeShouldThrowExceptionWhenFetchAccessTokenThrowsException() throws AzureDaoException {
         when(azureDao.fetchAccessToken(anyString(), notNull(), notNull(), isNull()))
             .thenThrow(AzureDaoException.class);
@@ -135,7 +130,6 @@ class AuthenticationServiceImplTest {
     }
 
     @Test
-    @SuppressWarnings("unchecked")
     void handleOauthCodeShouldThrowExceptionWhenValidationFails() throws AzureDaoException {
         when(azureDao.fetchAccessToken(anyString(), notNull(), notNull(), isNull()))
             .thenReturn(new OAuthProviderRawResponse(null, 0, DUMMY_ID_TOKEN, 0));
@@ -156,7 +150,6 @@ class AuthenticationServiceImplTest {
     }
 
     @Test
-    @SuppressWarnings("unchecked")
     void logoutShouldReturnLogoutPageUriWhenSessionExists() {
 
         AuthenticationConfigurationPropertiesStrategy authStrategyMock = Mockito.mock(AuthenticationConfigurationPropertiesStrategy.class);
@@ -172,7 +165,6 @@ class AuthenticationServiceImplTest {
     }
 
     @Test
-    @SuppressWarnings("unchecked")
     void resetPasswordShouldReturnResetPasswordUri() {
 
 
