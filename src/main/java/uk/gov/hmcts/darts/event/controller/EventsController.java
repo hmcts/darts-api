@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.darts.authorisation.annotation.Authorisation;
+import uk.gov.hmcts.darts.common.service.DataAnonymisationService;
 import uk.gov.hmcts.darts.event.component.DartsEventMapper;
 import uk.gov.hmcts.darts.event.http.api.EventApi;
 import uk.gov.hmcts.darts.event.model.AdminEventSearch;
@@ -58,6 +59,7 @@ public class EventsController implements EventApi {
     private final EventHandlerEnumerator eventHandlers;
     private final EventSearchService eventSearchService;
     private final EventService eventService;
+    private final DataAnonymisationService dataAnonymisationService;
 
     @Override
     @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
@@ -177,7 +179,7 @@ public class EventsController implements EventApi {
     @Authorisation(contextId = ANY_ENTITY_ID,
         globalAccessSecurityRoles = {SUPER_ADMIN})
     public ResponseEntity<Void> adminObfuscateEveByIds(AdminObfuscateEveByIdsRequest adminObfuscateEveByIdsRequest) {
-        eventService.obfuscateEventByIds(adminObfuscateEveByIdsRequest.getEveIds());
+        this.dataAnonymisationService.obfuscateEventByIds(adminObfuscateEveByIdsRequest.getEveIds());
         return ResponseEntity.noContent().build();
     }
 }

@@ -3,7 +3,6 @@ package uk.gov.hmcts.darts.event.service.impl;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import uk.gov.hmcts.darts.common.entity.EventEntity;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.common.repository.EventRepository;
@@ -13,7 +12,6 @@ import uk.gov.hmcts.darts.event.model.AdminGetEventForIdResponseResult;
 import uk.gov.hmcts.darts.event.service.EventService;
 import uk.gov.hmcts.darts.event.validation.EventIdValidator;
 
-import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -33,16 +31,13 @@ public class EventServiceImpl implements EventService {
     }
 
     @Override
-    @Transactional
-    public void obfuscateEventByIds(List<Integer> eveIds) {
-        eveIds.stream()
-            .map(this::getEventEntityById)
-            .distinct()
-            .forEach(dataAnonymisationService::anonymizeEvent);
-    }
-
-    EventEntity getEventEntityById(Integer eveId) {
+    public EventEntity getEventEntityById(Integer eveId) {
         return eventRepository.findById(eveId)
             .orElseThrow(() -> new DartsApiException(DartsApiException.DartsApiErrorCommon.NOT_FOUND));
+    }
+
+    @Override
+    public EventEntity saveEvent(EventEntity eventEntity) {
+        return eventRepository.save(eventEntity);
     }
 }
