@@ -193,6 +193,7 @@ class EventsControllerTest extends IntegrationBase {
 
         EventEntity editedEventEntity2 = dartsDatabaseStub.getEventRepository().findById(event2.getId()).orElseThrow();
         assertThat(editedEventEntity2.getEventText()).matches(UUID_REGEX);
+        assertThat(editedEventEntity2.getEventText()).isNotEqualTo(editedEventEntity.getEventText());
     }
 
     @Test
@@ -207,5 +208,20 @@ class EventsControllerTest extends IntegrationBase {
 
         Problem responseResult = objectMapper.readValue(response.getResponse().getContentAsString(), Problem.class);
         Assertions.assertEquals(DartsApiException.DartsApiErrorCommon.NOT_FOUND.getType(), responseResult.getType());
+    }
+
+    @ParameterizedTest(name = "User with role {0} should not be able to obfuscate events")
+    @EnumSource(value = SecurityRoleEnum.class, names = {"SUPER_ADMIN"}, mode = EnumSource.Mode.EXCLUDE)
+    void adminObfuscateEveByIdsNotSuperAdmin(SecurityRoleEnum securityRoleEnum) throws Exception {
+        given.anAuthenticatedUserWithGlobalAccessAndRole(securityRoleEnum);
+        MockHttpServletRequestBuilder requestBuilder = post("/admin/events/obfuscate")
+            .contentType(MediaType.APPLICATION_JSON_VALUE)
+            .content("{\"eve_ids\":[1]}");
+
+        MvcResult response = mockMvc.perform(requestBuilder).andExpect(status().isForbidden())
+            .andReturn();
+
+        Assertions.assertEquals("{\"type\":\"AUTHORISATION_109\",\"title\":\"User is not authorised for this endpoint\",\"status\":403}",
+                                response.getResponse().getContentAsString());
     }
 }
