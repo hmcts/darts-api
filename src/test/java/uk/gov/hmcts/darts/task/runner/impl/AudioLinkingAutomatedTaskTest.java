@@ -192,9 +192,6 @@ class AudioLinkingAutomatedTaskTest {
         List<HearingEntity> hearingEntities = List.of(hearingEntity1, hearingEntity2, hearingEntity3);
 
         MediaEntity mediaEntity = mock(MediaEntity.class);
-        Set<MediaLinkedCaseEntity> mediaLinkedCaseEntities = new HashSet<>();
-        Set<HearingEntity> editedHearingEntities = new HashSet<>();
-
         audioLinkingAutomatedTask.processMedia(hearingEntities, mediaEntity);
 
 
@@ -213,14 +210,14 @@ class AudioLinkingAutomatedTaskTest {
         verify(mediaLinkedCaseRepository, times(2)).existsByMediaAndCourtCase(mediaEntity, courtCaseEntity1);
         verify(mediaLinkedCaseRepository, times(1)).existsByMediaAndCourtCase(mediaEntity, courtCaseEntity2);
 
-        HashSet<HearingEntity> savedHearingEntities = new HashSet<>();
+        Set<HearingEntity> savedHearingEntities = new HashSet<>();
         savedHearingEntities.add(hearingEntity1);
         savedHearingEntities.add(hearingEntity2);
         savedHearingEntities.add(hearingEntity3);
         verify(hearingRepository, times(1))
             .saveAll(savedHearingEntities);
 
-        HashSet<MediaLinkedCaseEntity> savedMediaLinkedCaseEntity = new HashSet<>();
+        Set<MediaLinkedCaseEntity> savedMediaLinkedCaseEntity = new HashSet<>();
         savedMediaLinkedCaseEntity.add(new MediaLinkedCaseEntity(mediaEntity, courtCaseEntity1));
         savedMediaLinkedCaseEntity.add(new MediaLinkedCaseEntity(mediaEntity, courtCaseEntity2));
         verify(mediaLinkedCaseRepository, times(1))
@@ -265,12 +262,12 @@ class AudioLinkingAutomatedTaskTest {
 
         verify(mediaLinkedCaseRepository, times(1)).existsByMediaAndCourtCase(mediaEntity, courtCaseEntity1);
 
-        HashSet<HearingEntity> savedHearingEntities = new HashSet<>();
+        Set<HearingEntity> savedHearingEntities = new HashSet<>();
         savedHearingEntities.add(hearingEntity1);
         verify(hearingRepository, times(1))
             .saveAll(savedHearingEntities);
 
-        HashSet<MediaLinkedCaseEntity> savedMediaLinkedCaseEntity = new HashSet<>();
+        Set<MediaLinkedCaseEntity> savedMediaLinkedCaseEntity = new HashSet<>();
         savedMediaLinkedCaseEntity.add(new MediaLinkedCaseEntity(mediaEntity, courtCaseEntity1));
         verify(mediaLinkedCaseRepository, times(1))
             .saveAll(savedMediaLinkedCaseEntity);
@@ -299,8 +296,6 @@ class AudioLinkingAutomatedTaskTest {
         List<HearingEntity> hearingEntities = List.of(hearingEntity1, hearingEntity2, hearingEntity3);
 
         MediaEntity mediaEntity = mock(MediaEntity.class);
-        Set<MediaLinkedCaseEntity> mediaLinkedCaseEntities = new HashSet<>();
-        Set<HearingEntity> editedHearingEntities = new HashSet<>();
 
         when(mediaLinkedCaseRepository.existsByMediaAndCourtCase(mediaEntity, courtCaseEntity1))
             .thenReturn(false);
@@ -328,14 +323,14 @@ class AudioLinkingAutomatedTaskTest {
         verify(mediaLinkedCaseRepository, times(1)).existsByMediaAndCourtCase(mediaEntity, courtCaseEntity2);
 
 
-        HashSet<HearingEntity> savedHearingEntities = new HashSet<>();
+        Set<HearingEntity> savedHearingEntities = new HashSet<>();
         savedHearingEntities.add(hearingEntity1);
         savedHearingEntities.add(hearingEntity2);
         savedHearingEntities.add(hearingEntity3);
         verify(hearingRepository, times(1))
             .saveAll(savedHearingEntities);
 
-        HashSet<MediaLinkedCaseEntity> savedMediaLinkedCaseEntity = new HashSet<>();
+        Set<MediaLinkedCaseEntity> savedMediaLinkedCaseEntity = new HashSet<>();
         savedMediaLinkedCaseEntity.add(new MediaLinkedCaseEntity(mediaEntity, courtCaseEntity1));
         verify(mediaLinkedCaseRepository, times(1))
             .saveAll(savedMediaLinkedCaseEntity);
