@@ -72,38 +72,46 @@ public class AudioLinkingAutomatedTask extends AbstractLockableAutomatedTask
         log.info("Running AudioLinkingAutomatedTask");
         List<EventEntity> events = eventRepository.findAllByEventStatus(EventStatus.AUDIO_LINK_NOT_DONE_MODERNISED.getStatusNumber(),
                                                                         Limit.of(getAutomatedTaskBatchSize()));
-        final Set<MediaLinkedCaseEntity> mediaLinkedCaseEntities = new HashSet<>();
-        final Set<HearingEntity> editedHearingEntities = new HashSet<>();
-
-        events.forEach(event -> processEvent(event, editedHearingEntities, mediaLinkedCaseEntities));
-
-        hearingRepository.saveAll(editedHearingEntities);
-        mediaLinkedCaseRepository.saveAll(mediaLinkedCaseEntities);
-        eventRepository.saveAll(events);
+        List<EventEntity> editedEvents = events.stream()
+            .filter(this::processEvent)
+            .toList();
+        eventRepository.saveAll(editedEvents);
     }
 
-    void processEvent(EventEntity event, Set<HearingEntity> editedHearingEntities, Set<MediaLinkedCaseEntity> mediaLinkedCaseEntities) {
-        List<MediaEntity> mediaEntities = mediaRepository.findAllByMediaTimeContains(
-            event.getCourtroom().getId(),
-            event.getTimestamp().plusSeconds(getAudioBufferSeconds()),
-            event.getTimestamp().minusSeconds(getAudioBufferSeconds()));
-        mediaEntities.forEach(mediaEntity -> processMedia(event.getHearingEntities(), mediaEntity, mediaLinkedCaseEntities, editedHearingEntities));
-        event.setEventStatus(EventStatus.AUDIO_LINKED.getStatusNumber());
+    boolean processEvent(EventEntity event) {
+        try {
+            List<MediaEntity> mediaEntities = mediaRepository.findAllByMediaTimeContains(
+                event.getCourtroom().getId(),
+                event.getTimestamp().plusSeconds(getAudioBufferSeconds()),
+                event.getTimestamp().minusSeconds(getAudioBufferSeconds()));
+            mediaEntities.forEach(mediaEntity -> processMedia(event.getHearingEntities(), mediaEntity));
+            event.setEventStatus(EventStatus.AUDIO_LINKED.getStatusNumber());
+            return true;
+        } catch (Exception e) {
+            log.error("Error processing event {}", event.getId(), e);
+            return false;
+        }
     }
 
-    void processMedia(List<HearingEntity> hearingEntities, MediaEntity mediaEntity,
-                      Set<MediaLinkedCaseEntity> mediaLinkedCaseEntities,
-                      Set<HearingEntity> hearingsToSave) {
+    void processMedia(List<HearingEntity> hearingEntities, MediaEntity mediaEntity) {
+        Set<HearingEntity> hearingsToSave = new HashSet<>();
+        Set<MediaLinkedCaseEntity> mediaLinkedCaseEntities = new HashSet<>();
         hearingEntities.forEach(hearingEntity -> {
-            if (!hearingEntity.containsMedia(mediaEntity)) {
-                hearingEntity.addMedia(mediaEntity);
-                hearingsToSave.add(hearingEntity);
-                CourtCaseEntity courtCase = hearingEntity.getCourtCase();
-                if (!mediaLinkedCaseRepository.existsByMediaAndCourtCase(mediaEntity, courtCase)) {
-                    mediaLinkedCaseEntities.add(new MediaLinkedCaseEntity(mediaEntity, courtCase));
+            try {
+                if (!hearingEntity.containsMedia(mediaEntity)) {
+                    hearingEntity.addMedia(mediaEntity);
+                    hearingsToSave.add(hearingEntity);
+                    CourtCaseEntity courtCase = hearingEntity.getCourtCase();
+                    if (!mediaLinkedCaseRepository.existsByMediaAndCourtCase(mediaEntity, courtCase)) {
+                        mediaLinkedCaseEntities.add(new MediaLinkedCaseEntity(mediaEntity, courtCase));
+                    }
+                    log.info("Linking media {} to hearing {}", mediaEntity.getId(), hearingEntity.getId());
                 }
-                log.info("Linking media {} to hearing {}", mediaEntity.getId(), hearingEntity.getId());
+            } catch (Exception e) {
+                log.error("Error linking media {} to hearing {}", mediaEntity.getId(), hearingEntity.getId(), e);
             }
         });
+        hearingRepository.saveAll(hearingsToSave);
+        mediaLinkedCaseRepository.saveAll(mediaLinkedCaseEntities);
     }
 }
