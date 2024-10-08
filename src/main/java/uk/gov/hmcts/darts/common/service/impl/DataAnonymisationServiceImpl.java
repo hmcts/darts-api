@@ -26,6 +26,7 @@ import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.entity.base.CreatedModifiedBaseEntity;
 import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
 import uk.gov.hmcts.darts.common.repository.CaseRepository;
+import uk.gov.hmcts.darts.common.repository.EventRepository;
 import uk.gov.hmcts.darts.common.repository.TransformedMediaRepository;
 import uk.gov.hmcts.darts.common.repository.TransientObjectDirectoryRepository;
 import uk.gov.hmcts.darts.common.service.DataAnonymisationService;
@@ -52,6 +53,7 @@ public class DataAnonymisationServiceImpl implements DataAnonymisationService {
     private final TransformedMediaRepository transformedMediaRepository;
     private final TransientObjectDirectoryRepository transientObjectDirectoryRepository;
     private final LogApi logApi;
+    private final EventRepository eventRepository;
 
     @Override
     public void anonymizeCourtCaseEntity(UserAccountEntity userAccount, CourtCaseEntity courtCase) {
@@ -92,6 +94,7 @@ public class DataAnonymisationServiceImpl implements DataAnonymisationService {
     @Override
     public void anonymizeEvent(EventEntity eventEntity) {
         anonymizeEventEntity(getUserAccount(), eventEntity);
+        eventRepository.save(eventEntity);
     }
 
     void anonymizeEventEntity(UserAccountEntity userAccount, EventEntity eventEntity) {
