@@ -1,6 +1,6 @@
 #!groovy
 
-@Library("Infrastructure@DTSPO-19241/jknack-artifactory-issue")
+@Library("Infrastructure")
 
 import uk.gov.hmcts.contino.GradleBuilder
 
