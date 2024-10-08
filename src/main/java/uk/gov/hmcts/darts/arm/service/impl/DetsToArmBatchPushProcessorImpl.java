@@ -38,7 +38,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_INGESTION;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_RAW_DATA_FAILED;
@@ -196,7 +195,7 @@ public class DetsToArmBatchPushProcessorImpl implements DetsToArmBatchPushProces
     private void updateObjectStateRecordManifestSuccessOrFailure(ArmBatchItems batchItems, File archiveRecordsFile) {
         for (var batchItem : batchItems.getSuccessful()) {
             ObjectStateRecordEntity objectStateRecord = getObjectStateRecordEntity(batchItem.getArmEod());
-            if (isNull(objectStateRecord.getObjectStatus())) {
+            if (nonNull(objectStateRecord)) {
                 objectStateRecord.setFlagFileMfstCreated(true);
                 objectStateRecord.setDateFileMfstCreated(currentTimeHelper.currentOffsetDateTime());
                 objectStateRecord.setIdManifestFile(archiveRecordsFile.getName());
@@ -204,7 +203,7 @@ public class DetsToArmBatchPushProcessorImpl implements DetsToArmBatchPushProces
                 objectStateRecord.setDateMfstTransfToArml(currentTimeHelper.currentOffsetDateTime());
                 objectStateRecordRepository.save(objectStateRecord);
             }
-            objectStateRecordRepository.save(objectStateRecord);
+
         }
         for (var batchItem : batchItems.getFailed()) {
             String errorMessage = "Manifest file creation failed";
@@ -215,7 +214,7 @@ public class DetsToArmBatchPushProcessorImpl implements DetsToArmBatchPushProces
 
     private void updateObjectStateRecordStatus(ExternalObjectDirectoryEntity externalObjectDirectory, String errorMessage) {
         ObjectStateRecordEntity objectStateRecord = getObjectStateRecordEntity(externalObjectDirectory);
-        if (isNull(objectStateRecord)) {
+        if (nonNull(objectStateRecord)) {
             if (nonNull(objectStateRecord.getObjectStatus())) {
                 objectStateRecord.setObjectStatus(objectStateRecord.getObjectStatus() + " " + errorMessage);
             } else {
@@ -327,7 +326,7 @@ public class DetsToArmBatchPushProcessorImpl implements DetsToArmBatchPushProces
 
     private void setFileSize(ExternalObjectDirectoryEntity detsExternalObjectDirectory, ObjectStateRecordEntity objectStateRecord) {
         Long fileSize = dataStoreToArmHelper.getFileSize(detsExternalObjectDirectory.getId());
-        if (fileSize != null) {
+        if (nonNull(fileSize)) {
             objectStateRecord.setFileSizeBytesArml(fileSize);
         }
     }
