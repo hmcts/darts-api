@@ -22,6 +22,7 @@ import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -58,10 +59,12 @@ class EventServiceImplTest {
         verify(dataAnonymisationService, times(1)).anonymizeEvent(event1);
         verify(dataAnonymisationService, times(1)).anonymizeEvent(event2);
         verify(dataAnonymisationService, times(1)).anonymizeEvent(event3);
+        verifyNoMoreInteractions(dataAnonymisationService);
 
         verify(eventService, times(1)).getEventEntityById(1);
         verify(eventService, times(1)).getEventEntityById(2);
         verify(eventService, times(1)).getEventEntityById(3);
+        verify(eventService, times(1)).getEventEntityById(4);
     }
 
 
