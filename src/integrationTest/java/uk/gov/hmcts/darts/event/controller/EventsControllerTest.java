@@ -174,6 +174,28 @@ class EventsControllerTest extends IntegrationBase {
     }
 
     @Test
+    void adminObfuscateEveByIdsMultiple() throws Exception {
+        HearingEntity hearing = dartsDatabaseStub.createHearing("Courthouse", "1", "12345", LocalDateTime.now());
+
+        EventEntity event = dartsDatabaseStub.createEvent(hearing);
+        EventEntity event2 = dartsDatabaseStub.createEvent(hearing);
+
+
+        given.anAuthenticatedUserWithGlobalAccessAndRole(SUPER_ADMIN);
+        MockHttpServletRequestBuilder requestBuilder = post("/admin/events/obfuscate")
+            .contentType(MediaType.APPLICATION_JSON_VALUE)
+            .content("{\"eve_ids\":[" + event.getId() + "," + event2.getId() + "]}");
+
+        mockMvc.perform(requestBuilder).andExpect(status().isNoContent());
+
+        EventEntity editedEventEntity = dartsDatabaseStub.getEventRepository().findById(event.getId()).orElseThrow();
+        assertThat(editedEventEntity.getEventText()).matches(UUID_REGEX);
+
+        EventEntity editedEventEntity2 = dartsDatabaseStub.getEventRepository().findById(event2.getId()).orElseThrow();
+        assertThat(editedEventEntity2.getEventText()).matches(UUID_REGEX);
+    }
+
+    @Test
     void adminObfuscateEveByIdsNotFound() throws Exception {
         given.anAuthenticatedUserWithGlobalAccessAndRole(SUPER_ADMIN);
         MockHttpServletRequestBuilder requestBuilder = post("/admin/events/obfuscate")
