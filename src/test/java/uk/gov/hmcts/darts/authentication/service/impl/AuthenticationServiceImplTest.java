@@ -103,7 +103,7 @@ class AuthenticationServiceImplTest {
     @Test
     @SuppressWarnings("unchecked")
     void handleOauthCodeShouldReturnLandingPageUriWhenTokenIsObtainedAndValid() throws AzureDaoException {
-        when(azureDao.fetchAccessToken(anyString(), notNull(), notNull()))
+        when(azureDao.fetchAccessToken(anyString(), notNull(), notNull(), null))
             .thenReturn(new OAuthProviderRawResponse(null, 0, DUMMY_ID_TOKEN, 0));
         when(tokenValidator.validate(anyString(), notNull(), notNull()))
             .thenReturn(new JwtValidationResult(true, null));
@@ -111,7 +111,7 @@ class AuthenticationServiceImplTest {
             new ExternalAuthConfigurationPropertiesStrategy(externalAuthConfigurationProperties,
                                                             new ExternalAuthProviderConfigurationProperties()));
 
-        String token = authenticationService.handleOauthCode(DUMMY_CODE);
+        String token = authenticationService.handleOauthCode(DUMMY_CODE, null);
 
         assertEquals(DUMMY_ID_TOKEN, token);
     }
@@ -119,7 +119,7 @@ class AuthenticationServiceImplTest {
     @Test
     @SuppressWarnings("")
     void handleOauthCodeShouldThrowExceptionWhenFetchAccessTokenThrowsException() throws AzureDaoException {
-        when(azureDao.fetchAccessToken(anyString(), notNull(), notNull()))
+        when(azureDao.fetchAccessToken(anyString(), notNull(), notNull(), null))
             .thenThrow(AzureDaoException.class);
 
         when(uriProvider.locateAuthenticationConfiguration()).thenReturn(new ExternalAuthConfigurationPropertiesStrategy(
@@ -127,7 +127,7 @@ class AuthenticationServiceImplTest {
 
         DartsApiException exception = assertThrows(
             DartsApiException.class,
-            () -> authenticationService.handleOauthCode(DUMMY_CODE)
+            () -> authenticationService.handleOauthCode(DUMMY_CODE, null)
         );
 
         assertEquals("AUTHENTICATION_100", exception.getError().getErrorTypeNumeric());
@@ -136,7 +136,7 @@ class AuthenticationServiceImplTest {
     @Test
     @SuppressWarnings("unchecked")
     void handleOauthCodeShouldThrowExceptionWhenValidationFails() throws AzureDaoException {
-        when(azureDao.fetchAccessToken(anyString(), notNull(), notNull()))
+        when(azureDao.fetchAccessToken(anyString(), notNull(), notNull(), null))
             .thenReturn(new OAuthProviderRawResponse(null, 0, DUMMY_ID_TOKEN, 0));
         when(tokenValidator.validate(anyString(), notNull(), notNull()))
             .thenReturn(new JwtValidationResult(false, "validation failure reason"));
@@ -148,7 +148,7 @@ class AuthenticationServiceImplTest {
 
         DartsApiException exception = assertThrows(
             DartsApiException.class,
-            () -> authenticationService.handleOauthCode(DUMMY_CODE)
+            () -> authenticationService.handleOauthCode(DUMMY_CODE, null)
         );
 
         assertEquals("AUTHENTICATION_101", exception.getError().getErrorTypeNumeric());
