@@ -4,12 +4,14 @@ import lombok.RequiredArgsConstructor;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import uk.gov.hmcts.darts.common.entity.AutomatedTaskEntity;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
 import uk.gov.hmcts.darts.common.entity.EventEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
 import uk.gov.hmcts.darts.event.enums.EventStatus;
+import uk.gov.hmcts.darts.task.api.AutomatedTaskName;
 import uk.gov.hmcts.darts.testutils.PostgresIntegrationBase;
 
 import java.time.LocalDateTime;
@@ -26,6 +28,11 @@ class AudioLinkingAutomatedTaskITest extends PostgresIntegrationBase {
 
     @Test
     void positiveMixOfValidMediaAndInvalidMedia() {
+        // Enable the task (Can be removed once task is enabled by default)
+        AutomatedTaskEntity automatedTask = dartsDatabase.getAutomatedTaskRepository().findByTaskName(AutomatedTaskName.AUDIO_LINKING_TASK_NAME.getTaskName()).orElseThrow();
+        automatedTask.setTaskEnabled(true);
+        dartsDatabase.getAutomatedTaskRepository().save(automatedTask);
+
         CourtCaseEntity courtCaseEntity = dartsDatabase.createCase("Bristol", "Case1");
 
         MediaEntity media1 = dartsDatabase.getMediaStub().createMediaEntity(
