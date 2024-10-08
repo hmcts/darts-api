@@ -29,7 +29,8 @@ class AudioLinkingAutomatedTaskITest extends PostgresIntegrationBase {
     @Test
     void positiveMixOfValidMediaAndInvalidMedia() {
         // Enable the task (Can be removed once task is enabled by default)
-        AutomatedTaskEntity automatedTask = dartsDatabase.getAutomatedTaskRepository().findByTaskName(AutomatedTaskName.AUDIO_LINKING_TASK_NAME.getTaskName()).orElseThrow();
+        AutomatedTaskEntity automatedTask = dartsDatabase.getAutomatedTaskRepository()
+            .findByTaskName(AutomatedTaskName.AUDIO_LINKING_TASK_NAME.getTaskName()).orElseThrow();
         automatedTask.setTaskEnabled(true);
         dartsDatabase.getAutomatedTaskRepository().save(automatedTask);
 
@@ -50,9 +51,9 @@ class AudioLinkingAutomatedTaskITest extends PostgresIntegrationBase {
         HearingEntity hearing3 = createHearing();
 
         CourtroomEntity courtroomEntity = dartsDatabase.createCourtroomUnlessExists("Bristol", "room 1");
-        EventEntity event1 = createEvent(EventStatus.AUDIO_LINK_NOT_DONE_MODERNISED,courtroomEntity, hearing1, OffsetDateTime.now());
-        EventEntity event2 = createEvent(EventStatus.AUDIO_LINK_NOT_DONE_MODERNISED,courtroomEntity, hearing2, OffsetDateTime.now().plusMinutes(20));
-        EventEntity event3 = createEvent(EventStatus.AUDIO_LINK_NOT_DONE_MODERNISED,courtroomEntity, hearing3, OffsetDateTime.now().plusHours(2));
+        EventEntity event1 = createEvent(EventStatus.AUDIO_LINK_NOT_DONE_MODERNISED, courtroomEntity, hearing1, OffsetDateTime.now());
+        EventEntity event2 = createEvent(EventStatus.AUDIO_LINK_NOT_DONE_MODERNISED, courtroomEntity, hearing2, OffsetDateTime.now().plusMinutes(20));
+        EventEntity event3 = createEvent(EventStatus.AUDIO_LINK_NOT_DONE_MODERNISED, courtroomEntity, hearing3, OffsetDateTime.now().plusHours(2));
 
         audioLinkingAutomatedTask.run();
 
@@ -96,7 +97,7 @@ class AudioLinkingAutomatedTaskITest extends PostgresIntegrationBase {
     }
 
 
-    private EventEntity createEvent(EventStatus eventStatus,CourtroomEntity courtroomEntity, HearingEntity hearing, OffsetDateTime timestamp) {
+    private EventEntity createEvent(EventStatus eventStatus, CourtroomEntity courtroomEntity, HearingEntity hearing, OffsetDateTime timestamp) {
         EventEntity event = dartsDatabase.createEvent(hearing);
         event.setCourtroom(courtroomEntity);
         event.setEventStatus(eventStatus.getStatusNumber());
