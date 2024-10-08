@@ -117,20 +117,9 @@ class DetsToArmBatchPushProcessorIntTest extends IntegrationBase {
         assertTrue(foundArmEodOptional.isPresent());
         ExternalObjectDirectoryEntity foundArmEod = foundArmEodOptional.get();
         assertNotNull(foundArmEod.getOsrUuid());
-
-        ObjectStateRecordEntity objectStateRecordEntityModified = dartsDatabase.getObjectStateRecordRepository()
-            .findById(foundArmEod.getOsrUuid()).orElseThrow();
-        assertEquals(detsEod.getId(), Integer.parseInt(objectStateRecordEntityModified.getEodId()));
-        assertEquals(foundArmEod.getId(), Integer.parseInt(objectStateRecordEntityModified.getArmEodId()));
-        assertTrue(objectStateRecordEntityModified.getFlagFileTransferToDets());
-        assertNotNull(objectStateRecordEntityModified.getDateFileTransferToDets());
-        assertEquals(detsEod.getChecksum(), objectStateRecordEntityModified.getMd5FileTransfArml());
-        assertEquals(savedMedia.getFileSize(), objectStateRecordEntity.getFileSizeBytesArml());
-        assertTrue(objectStateRecordEntityModified.getFlagFileMfstCreated());
-        assertNotNull(objectStateRecordEntityModified.getDateFileMfstCreated());
-        assertNotNull(objectStateRecordEntityModified.getIdManifestFile());
-        assertTrue(objectStateRecordEntityModified.getFlagMfstTransfToArml());
-        assertNotNull(objectStateRecordEntityModified.getDateMfstTransfToArml());
+        ObjectStateRecordEntity objectStateRecord = dartsDatabase.getObjectStateRecordRepository()
+            .findById(objectStateRecordEntity.getUuid()).orElseThrow();
+        verifyObjectStateRecordSuccessfullyUpdated(foundArmEod, detsEod, objectStateRecord);
 
     }
 
@@ -188,20 +177,9 @@ class DetsToArmBatchPushProcessorIntTest extends IntegrationBase {
         assertTrue(foundArmEodOptional.isPresent());
         ExternalObjectDirectoryEntity foundArmEod = foundArmEodOptional.get();
         assertNotNull(foundArmEod.getOsrUuid());
-
-        ObjectStateRecordEntity objectStateRecordEntityModified = dartsDatabase.getObjectStateRecordRepository()
-            .findById(foundArmEod.getOsrUuid()).orElseThrow();
-        assertEquals(detsEod.getId(), Integer.parseInt(objectStateRecordEntityModified.getEodId()));
-        assertEquals(foundArmEod.getId(), Integer.parseInt(objectStateRecordEntityModified.getArmEodId()));
-        assertTrue(objectStateRecordEntityModified.getFlagFileTransferToDets());
-        assertNotNull(objectStateRecordEntityModified.getDateFileTransferToDets());
-        assertEquals(detsEod.getChecksum(), objectStateRecordEntityModified.getMd5FileTransfArml());
-        assertEquals(savedMedia.getFileSize(), objectStateRecordEntity.getFileSizeBytesArml());
-        assertTrue(objectStateRecordEntityModified.getFlagFileMfstCreated());
-        assertNotNull(objectStateRecordEntityModified.getDateFileMfstCreated());
-        assertNotNull(objectStateRecordEntityModified.getIdManifestFile());
-        assertTrue(objectStateRecordEntityModified.getFlagMfstTransfToArml());
-        assertNotNull(objectStateRecordEntityModified.getDateMfstTransfToArml());
+        ObjectStateRecordEntity objectStateRecord = dartsDatabase.getObjectStateRecordRepository()
+            .findById(objectStateRecordEntity.getUuid()).orElseThrow();
+        verifyObjectStateRecordSuccessfullyUpdated(foundArmEod, detsEod, objectStateRecord);
 
     }
 
@@ -260,6 +238,14 @@ class DetsToArmBatchPushProcessorIntTest extends IntegrationBase {
         ExternalObjectDirectoryEntity foundArmEod = foundArmEodOptional.get();
         assertNotNull(foundArmEod.getOsrUuid());
 
+        ObjectStateRecordEntity objectStateRecord = dartsDatabase.getObjectStateRecordRepository()
+            .findById(objectStateRecordEntity.getUuid()).orElseThrow();
+        verifyObjectStateRecordSuccessfullyUpdated(foundArmEod, detsEod, objectStateRecord);
+
+    }
+
+    private void verifyObjectStateRecordSuccessfullyUpdated(ExternalObjectDirectoryEntity foundArmEod, ExternalObjectDirectoryEntity detsEod,
+                                                            ObjectStateRecordEntity objectStateRecordEntity) {
         ObjectStateRecordEntity objectStateRecordEntityModified = dartsDatabase.getObjectStateRecordRepository()
             .findById(foundArmEod.getOsrUuid()).orElseThrow();
         assertEquals(detsEod.getId(), Integer.parseInt(objectStateRecordEntityModified.getEodId()));
@@ -273,7 +259,6 @@ class DetsToArmBatchPushProcessorIntTest extends IntegrationBase {
         assertNotNull(objectStateRecordEntityModified.getIdManifestFile());
         assertTrue(objectStateRecordEntityModified.getFlagMfstTransfToArml());
         assertNotNull(objectStateRecordEntityModified.getDateMfstTransfToArml());
-
     }
 
     @Test
