@@ -95,10 +95,13 @@ class EventSearchControllerTest extends IntegrationBase {
     @Test
     void returnsAllFieldsCorrectly() throws Exception {
         given.anAuthenticatedUserWithGlobalAccessAndRole(SUPER_ADMIN);
-        List<EventEntity> entity = eventsGivensBuilder.persistedEvents(1);
+        List<EventEntity> entity = eventsGivensBuilder.persistedEventWithHearings(1, 3);
 
         CourtCaseEntity courtCaseEntity = entity.get(0).getHearingEntities().get(0).getCourtCase();
         courtCaseEntity.setDataAnonymisedTs(now());
+
+        // associated another hearing to the event
+
         dartsDatabase.save(courtCaseEntity);
 
         var mvcResult = mockMvc.perform(post(EVENT_SEARCH_ENDPOINT)
