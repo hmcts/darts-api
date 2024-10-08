@@ -75,7 +75,7 @@ class AudioLinkingAutomatedTaskTest {
         List<EventEntity> events = List.of(mock(EventEntity.class), mock(EventEntity.class), mock(EventEntity.class));
 
         doReturn(events).when(eventRepository).findAllByEventStatus(anyInt(), any());
-        doReturn(true).when(audioLinkingAutomatedTask).processEvent(any());
+        doNothing().when(audioLinkingAutomatedTask).processEvent(any());
         doReturn(5).when(audioLinkingAutomatedTask).getAutomatedTaskBatchSize();
 
         audioLinkingAutomatedTask.runTask();
@@ -85,9 +85,6 @@ class AudioLinkingAutomatedTaskTest {
             .getAutomatedTaskBatchSize();
         verify(eventRepository, times(1))
             .findAllByEventStatus(2, Limit.of(5));
-
-        verify(eventRepository, times(1))
-            .saveAll(events);
 
         verify(audioLinkingAutomatedTask, times(1))
             .processEvent(events.get(0));
@@ -129,6 +126,9 @@ class AudioLinkingAutomatedTaskTest {
             .findAllByMediaTimeContains(123, timestamp, timestamp);
         verify(event, times(1))
             .setEventStatus(3);
+
+        verify(eventRepository, times(1))
+            .save(event);
     }
 
     @Test
