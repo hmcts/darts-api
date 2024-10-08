@@ -237,8 +237,9 @@ public class DataStoreToArmHelper {
 
     public void updateArmEodToArmIngestionStatus(ExternalObjectDirectoryEntity armEod, ArmBatchItem batchItem,
                                                  ArmBatchItems batchItems,
-                                                 File archiveRecordsFile, UserAccountEntity userAccount) {
-        var matchingEntity = getExternalObjectDirectoryEntity(armEod, EodHelper.unstructuredLocation(), EodHelper.storedStatus());
+                                                 File archiveRecordsFile, UserAccountEntity userAccount,
+                                                 ExternalLocationTypeEntity eodSourceLocation) {
+        var matchingEntity = getExternalObjectDirectoryEntity(armEod, eodSourceLocation, EodHelper.storedStatus());
         if (matchingEntity.isPresent()) {
             batchItem.setSourceEod(matchingEntity.get());
             batchItems.add(batchItem);
