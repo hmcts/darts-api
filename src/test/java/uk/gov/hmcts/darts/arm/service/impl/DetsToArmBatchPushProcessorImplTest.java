@@ -155,7 +155,6 @@ class DetsToArmBatchPushProcessorImplTest {
         lenient().when(detsToArmProcessorConfiguration.getMaxArmManifestItems()).thenReturn(5);
         String fileLocation = tempDirectory.getAbsolutePath();
         lenient().when(armDataManagementConfiguration.getTempBlobWorkspace()).thenReturn(fileLocation);
-        lenient().when(armDataManagementConfiguration.getManifestFilePrefix()).thenReturn("DETS");
         lenient().when(armDataManagementConfiguration.getFileExtension()).thenReturn("a360");
 
         mediaEntity1 = new MediaEntity();
@@ -172,8 +171,13 @@ class DetsToArmBatchPushProcessorImplTest {
             ExternalLocationTypeEnum.ARM,
             ObjectRecordStatusEnum.ARM_RAW_DATA_FAILED,
             UUID.randomUUID());
-
         externalObjectDirectoryEntityArm.setId(345);
+
+        ObjectStateRecordEntity objectStateRecordEntity = createObjectStateRecordEntity(888L,
+                                                                                        externalObjectDirectoryEntityDets.getId(),
+                                                                                        externalObjectDirectoryEntityArm.getId());
+        externalObjectDirectoryEntityDets.setOsrUuid(objectStateRecordEntity.getUuid());
+        lenient().when(objectStateRecordRepository.findById(objectStateRecordEntity.getUuid())).thenReturn(Optional.of(objectStateRecordEntity));
 
         String filename = String.format("DETS_%s.a360", DETS_UUID);
         manifestFile = new File(fileLocation, filename);
@@ -260,18 +264,18 @@ class DetsToArmBatchPushProcessorImplTest {
     @Test
     void processMovingDataFromDetsStorageToArmThrowsBlobExceptionWhenSendingManifestFile() throws IOException {
         // given
-        String fileLocation = tempDirectory.getAbsolutePath();
-        String filename = String.format("DETS_%s.a360", DETS_UUID);
-        File archiveRecordFile = new File(fileLocation, filename);
-        String content = "Test data";
-        FileStore.getFileStore().create(archiveRecordFile.toPath());
-        try (BufferedWriter fileWriter = Files.newBufferedWriter(archiveRecordFile.toPath()); PrintWriter printWriter = new PrintWriter(fileWriter)) {
-            printWriter.write(content);
-        }
+//        String fileLocation = tempDirectory.getAbsolutePath();
+//        String filename = String.format("DETS_%s.a360", DETS_UUID);
+//        File archiveRecordFile = new File(fileLocation, filename);
+//        String content = "Test data";
+//        FileStore.getFileStore().create(archiveRecordFile.toPath());
+//        try (BufferedWriter fileWriter = Files.newBufferedWriter(archiveRecordFile.toPath()); PrintWriter printWriter = new PrintWriter(fileWriter)) {
+//            printWriter.write(content);
+//        }
 
         ArchiveRecordFileInfo archiveRecordFileInfo = ArchiveRecordFileInfo.builder()
             .fileGenerationSuccessful(true)
-            .archiveRecordFile(archiveRecordFile)
+            .archiveRecordFile(manifestFile)
             .build();
         when(archiveRecordService.generateArchiveRecord(any(), any())).thenReturn(archiveRecordFileInfo);
 
@@ -304,7 +308,7 @@ class DetsToArmBatchPushProcessorImplTest {
             externalObjectDirectoryEntityArm.getCaseDocument()
         )).thenReturn(Optional.of(externalObjectDirectoryEntityDets));
 
-        BinaryData manifest = BinaryData.fromFile(Path.of(archiveRecordFile.getAbsolutePath()));
+        BinaryData manifest = BinaryData.fromFile(Path.of(manifestFile.getAbsolutePath()));
         when(fileOperationService.convertFileToBinaryData(any())).thenReturn(manifest);
         BlobStorageException blobStorageException = mock(BlobStorageException.class);
         when(blobStorageException.getStatusCode()).thenReturn(409);
@@ -415,7 +419,7 @@ class DetsToArmBatchPushProcessorImplTest {
         when(externalObjectDirectoryRepository.findNotFinishedAndNotExceededRetryInStorageLocationForDets(
             failedStatusesList,
             externalLocationTypeRepository.getReferenceById(3),
-            armDataManagementConfiguration.getMaxRetryAttempts(), Pageable.ofSize(5)
+            3, Pageable.ofSize(5)
         )).thenReturn(pendingFailureList);
 
         doReturn(EodHelper.armLocation()).when(externalObjectDirectoryEntityArm).getExternalLocationType();
@@ -460,7 +464,7 @@ class DetsToArmBatchPushProcessorImplTest {
         when(externalObjectDirectoryRepository.findNotFinishedAndNotExceededRetryInStorageLocationForDets(
             failedStatusesList,
             externalLocationTypeRepository.getReferenceById(3),
-            armDataManagementConfiguration.getMaxRetryAttempts(), Pageable.ofSize(5)
+            3, Pageable.ofSize(5)
         )).thenReturn(pendingFailureList);
 
         doReturn(EodHelper.armLocation()).when(externalObjectDirectoryEntityArm).getExternalLocationType();
@@ -500,10 +504,11 @@ class DetsToArmBatchPushProcessorImplTest {
         eod10.setExternalLocationType(EodHelper.armLocation());
         eod10.setStatus(EodHelper.failedArmManifestFileStatus());
         //given
-        when(externalObjectDirectoryRepository.findNotFinishedAndNotExceededRetryInStorageLocation(any(), any(), any(), any())).thenReturn(List.of(eod10));
+        when(externalObjectDirectoryRepository.findNotFinishedAndNotExceededRetryInStorageLocationForDets(any(), any(), any(), any())).thenReturn(
+            List.of(eod10));
         when(externalObjectDirectoryRepository.findEodsNotInOtherStorage(any(), any(), any(), any())).thenReturn(emptyList());
         EOD_HELPER_MOCKS.givenIsEqualLocationReturns(true);
-        when(detsToArmProcessorConfiguration.getMaxArmManifestItems()).thenReturn(10);
+        //when(detsToArmProcessorConfiguration.getMaxArmManifestItems()).thenReturn(10);
         when(armDataManagementConfiguration.getMaxRetryAttempts()).thenReturn(3);
 
         //when
@@ -522,10 +527,10 @@ class DetsToArmBatchPushProcessorImplTest {
     @Test
     void testPaginatedBatchQuery() throws IOException {
         //given
-        when(externalObjectDirectoryRepository.findNotFinishedAndNotExceededRetryInStorageLocation(any(), any(), any(), any())).thenReturn(
+        when(externalObjectDirectoryRepository.findNotFinishedAndNotExceededRetryInStorageLocationForDets(any(), any(), any(), any())).thenReturn(
             List.of(externalObjectDirectoryEntityDets));
         when(externalObjectDirectoryRepository.findEodsNotInOtherStorage(any(), any(), any(), any())).thenReturn(emptyList());
-        when(detsToArmProcessorConfiguration.getMaxArmManifestItems()).thenReturn(100);
+        //when(detsToArmProcessorConfiguration.getMaxArmManifestItems()).thenReturn(100);
         when(armDataManagementConfiguration.getMaxRetryAttempts()).thenReturn(3);
 
         when(fileOperationService.createFile(any(), any(), anyBoolean())).thenReturn(manifestFile.toPath());
@@ -534,7 +539,7 @@ class DetsToArmBatchPushProcessorImplTest {
         detsToArmBatchPushProcessor.processDetsToArm(5000);
 
         //then
-        verify(externalObjectDirectoryRepository).findNotFinishedAndNotExceededRetryInStorageLocation(
+        verify(externalObjectDirectoryRepository).findNotFinishedAndNotExceededRetryInStorageLocationForDets(
             any(),
             any(ExternalLocationTypeEntity.class),
             eq(3),
@@ -552,12 +557,15 @@ class DetsToArmBatchPushProcessorImplTest {
     @Test
     void testManifestFileName() throws IOException {
         //given
-        when(detsToArmProcessorConfiguration.getManifestFilePrefix()).thenReturn("DETS");
-        when(armDataManagementConfiguration.getFileExtension()).thenReturn("a360");
-        when(armDataManagementConfiguration.getTempBlobWorkspace()).thenReturn("/temp_workspace");
+        //when(detsToArmProcessorConfiguration.getManifestFilePrefix()).thenReturn("DETS");
+        //when(armDataManagementConfiguration.getFileExtension()).thenReturn("a360");
+        //when(armDataManagementConfiguration.getTempBlobWorkspace()).thenReturn("/temp_workspace");
         when(externalObjectDirectoryRepository.findEodsNotInOtherStorage(any(), any(), any(), any())).thenReturn(List.of(externalObjectDirectoryEntityArm));
         when(detsToArmProcessorConfiguration.getMaxArmManifestItems()).thenReturn(1000);
         when(armDataManagementConfiguration.getMaxRetryAttempts()).thenReturn(3);
+
+        List<ExternalObjectDirectoryEntity> inboundList = new ArrayList<>(Collections.singletonList(externalObjectDirectoryEntityDets));
+
 
         //when
         detsToArmBatchPushProcessor.processDetsToArm(5);
@@ -569,11 +577,11 @@ class DetsToArmBatchPushProcessorImplTest {
     }
 
 
-    public ObjectStateRecordEntity createObjectStateRecordEntity(Long uuid) {
+    public ObjectStateRecordEntity createObjectStateRecordEntity(Long uuid, int detsEodId, int armEodId) {
         ObjectStateRecordEntity objectStateRecordEntity = new ObjectStateRecordEntity();
         objectStateRecordEntity.setUuid(uuid);
-        objectStateRecordEntity.setEodId("EOD123");
-        objectStateRecordEntity.setArmEodId("ARM123");
+        objectStateRecordEntity.setEodId(String.valueOf(detsEodId));
+        objectStateRecordEntity.setArmEodId(String.valueOf(armEodId));
         objectStateRecordEntity.setParentId("Parent123");
         objectStateRecordEntity.setParentObjectId("ParentObject123");
         objectStateRecordEntity.setContentObjectId("ContentObject123");
@@ -585,35 +593,35 @@ class DetsToArmBatchPushProcessorImplTest {
         objectStateRecordEntity.setDateLastAccessed(OffsetDateTime.now());
         objectStateRecordEntity.setRelationId("Relation123");
         objectStateRecordEntity.setDetsLocation("DetsLocation123");
-        objectStateRecordEntity.setFlagFileTransferToDets(true);
-        objectStateRecordEntity.setDateFileTransferToDets(OffsetDateTime.now());
-        objectStateRecordEntity.setMd5DocTransferToDets("MD5123");
-        objectStateRecordEntity.setFileSizeBytesCentera(123L);
-        objectStateRecordEntity.setFileSizeBytesDets(123L);
-        objectStateRecordEntity.setFlagFileAvScanPass(true);
-        objectStateRecordEntity.setDateFileAvScanPass(OffsetDateTime.now());
-        objectStateRecordEntity.setFlagFileTransfToarml(true);
-        objectStateRecordEntity.setDateFileTransfToarml(OffsetDateTime.now());
-        objectStateRecordEntity.setMd5FileTransfArml("MD5ARML123");
-        objectStateRecordEntity.setFileSizeBytesArml(123L);
-        objectStateRecordEntity.setFlagFileMfstCreated(true);
-        objectStateRecordEntity.setDateFileMfstCreated(OffsetDateTime.now());
-        objectStateRecordEntity.setIdManifestFile("Manifest123");
-        objectStateRecordEntity.setFlagMfstTransfToArml(true);
-        objectStateRecordEntity.setDateMfstTransfToArml(OffsetDateTime.now());
-        objectStateRecordEntity.setFlagRspnRecvdFromArml(true);
-        objectStateRecordEntity.setDateRspnRecvdFromArml(OffsetDateTime.now());
-        objectStateRecordEntity.setFlagFileIngestStatus(true);
-        objectStateRecordEntity.setDateFileIngestToArm(OffsetDateTime.now());
-        objectStateRecordEntity.setMd5FileIngestToArm("MD5Ingest123");
-        objectStateRecordEntity.setFileSizeIngestToArm(123L);
-        objectStateRecordEntity.setIdResponseFile("ResponseFile123");
-        objectStateRecordEntity.setIdResponseCrFile("ResponseCrFile123");
-        objectStateRecordEntity.setIdResponseUfFile("ResponseUfFile123");
-        objectStateRecordEntity.setFlagFileDetsCleanupStatus(true);
-        objectStateRecordEntity.setDateFileDetsCleanup(OffsetDateTime.now());
-        objectStateRecordEntity.setFlagFileRetainedInOds(true);
-        objectStateRecordEntity.setObjectStatus("Status123");
+        objectStateRecordEntity.setFlagFileTransferToDets(false);
+        objectStateRecordEntity.setDateFileTransferToDets(null);
+        objectStateRecordEntity.setMd5DocTransferToDets(null);
+        objectStateRecordEntity.setFileSizeBytesCentera(null);
+        objectStateRecordEntity.setFileSizeBytesDets(null);
+        objectStateRecordEntity.setFlagFileAvScanPass(false);
+        objectStateRecordEntity.setDateFileAvScanPass(null);
+        objectStateRecordEntity.setFlagFileTransfToarml(false);
+        objectStateRecordEntity.setDateFileTransfToarml(null);
+        objectStateRecordEntity.setMd5FileTransfArml(null);
+        objectStateRecordEntity.setFileSizeBytesArml(null);
+        objectStateRecordEntity.setFlagFileMfstCreated(false);
+        objectStateRecordEntity.setDateFileMfstCreated(null);
+        objectStateRecordEntity.setIdManifestFile(null);
+        objectStateRecordEntity.setFlagMfstTransfToArml(false);
+        objectStateRecordEntity.setDateMfstTransfToArml(null);
+        objectStateRecordEntity.setFlagRspnRecvdFromArml(false);
+        objectStateRecordEntity.setDateRspnRecvdFromArml(null);
+        objectStateRecordEntity.setFlagFileIngestStatus(false);
+        objectStateRecordEntity.setDateFileIngestToArm(null);
+        objectStateRecordEntity.setMd5FileIngestToArm(null);
+        objectStateRecordEntity.setFileSizeIngestToArm(null);
+        objectStateRecordEntity.setIdResponseFile(null);
+        objectStateRecordEntity.setIdResponseCrFile(null);
+        objectStateRecordEntity.setIdResponseUfFile(null);
+        objectStateRecordEntity.setFlagFileDetsCleanupStatus(false);
+        objectStateRecordEntity.setDateFileDetsCleanup(null);
+        objectStateRecordEntity.setFlagFileRetainedInOds(false);
+        objectStateRecordEntity.setObjectStatus(null);
         return objectStateRecordEntity;
     }
 }
