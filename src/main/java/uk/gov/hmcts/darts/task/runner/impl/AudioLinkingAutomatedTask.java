@@ -69,6 +69,7 @@ public class AudioLinkingAutomatedTask extends AbstractLockableAutomatedTask
 
     @Override
     protected void runTask() {
+        log.info("Running AudioLinkingAutomatedTask");
         List<EventEntity> events = eventRepository.findAllByEventStatus(EventStatus.AUDIO_LINK_NOT_DONE_MODERNISED.getStatusNumber(),
                                                                         Limit.of(getAutomatedTaskBatchSize()));
         final Set<MediaLinkedCaseEntity> mediaLinkedCaseEntities = new HashSet<>();
