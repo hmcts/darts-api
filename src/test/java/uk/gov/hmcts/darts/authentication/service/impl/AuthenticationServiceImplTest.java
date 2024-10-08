@@ -24,6 +24,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.ArgumentMatchers.notNull;
 import static org.mockito.Mockito.when;
 
@@ -103,7 +104,7 @@ class AuthenticationServiceImplTest {
     @Test
     @SuppressWarnings("unchecked")
     void handleOauthCodeShouldReturnLandingPageUriWhenTokenIsObtainedAndValid() throws AzureDaoException {
-        when(azureDao.fetchAccessToken(anyString(), notNull(), notNull(), null))
+        when(azureDao.fetchAccessToken(anyString(), notNull(), notNull(), isNull()))
             .thenReturn(new OAuthProviderRawResponse(null, 0, DUMMY_ID_TOKEN, 0));
         when(tokenValidator.validate(anyString(), notNull(), notNull()))
             .thenReturn(new JwtValidationResult(true, null));
@@ -119,7 +120,7 @@ class AuthenticationServiceImplTest {
     @Test
     @SuppressWarnings("")
     void handleOauthCodeShouldThrowExceptionWhenFetchAccessTokenThrowsException() throws AzureDaoException {
-        when(azureDao.fetchAccessToken(anyString(), notNull(), notNull(), null))
+        when(azureDao.fetchAccessToken(anyString(), notNull(), notNull(), isNull()))
             .thenThrow(AzureDaoException.class);
 
         when(uriProvider.locateAuthenticationConfiguration()).thenReturn(new ExternalAuthConfigurationPropertiesStrategy(
@@ -136,7 +137,7 @@ class AuthenticationServiceImplTest {
     @Test
     @SuppressWarnings("unchecked")
     void handleOauthCodeShouldThrowExceptionWhenValidationFails() throws AzureDaoException {
-        when(azureDao.fetchAccessToken(anyString(), notNull(), notNull(), null))
+        when(azureDao.fetchAccessToken(anyString(), notNull(), notNull(), isNull()))
             .thenReturn(new OAuthProviderRawResponse(null, 0, DUMMY_ID_TOKEN, 0));
         when(tokenValidator.validate(anyString(), notNull(), notNull()))
             .thenReturn(new JwtValidationResult(false, "validation failure reason"));

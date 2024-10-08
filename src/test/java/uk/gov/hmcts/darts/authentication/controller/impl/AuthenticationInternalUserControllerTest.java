@@ -37,6 +37,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
@@ -80,7 +81,7 @@ class AuthenticationInternalUserControllerTest {
     @Test
     void handleOauthCodeFromAzureWhenCodeIsReturnedWithAccessTokenAndUserState() throws JOSEException {
         final String emailAddress = "test.user@example.com";
-        when(authenticationService.handleOauthCode(anyString(), null))
+        when(authenticationService.handleOauthCode(anyString(), isNull()))
             .thenReturn(createDummyAccessToken(emailAddress));
         when(locator.locateAuthenticationConfiguration()).thenReturn(new InternalAuthConfigurationPropertiesStrategy(
             internalAuthConfigurationProperties, new InternalAuthProviderConfigurationProperties()));
@@ -115,7 +116,7 @@ class AuthenticationInternalUserControllerTest {
     @Test
     void handleOauthCodeFromAzureWhenCodeIsReturnedWithAccessTokenAndNoUserState() throws JOSEException {
         final String emailAddress = "test.missing@example.com";
-        when(authenticationService.handleOauthCode(anyString(), null))
+        when(authenticationService.handleOauthCode(anyString(), isNull()))
             .thenReturn(createDummyAccessToken(emailAddress));
         when(locator.locateAuthenticationConfiguration()).thenReturn(new InternalAuthConfigurationPropertiesStrategy(
             internalAuthConfigurationProperties, new InternalAuthProviderConfigurationProperties()));
@@ -155,7 +156,7 @@ class AuthenticationInternalUserControllerTest {
 
     @Test
     void handleOauthCodeFromAzureWhenCodeIsReturnedWithoutClaim() throws JOSEException {
-        when(authenticationService.handleOauthCode(anyString(), null))
+        when(authenticationService.handleOauthCode(anyString(), isNull()))
             .thenReturn(createDummyAccessToken("test.missing@example.com"));
         when(locator.locateAuthenticationConfiguration()).thenReturn(new InternalAuthConfigurationPropertiesStrategy(
             internalAuthConfigurationProperties, new InternalAuthProviderConfigurationProperties()));

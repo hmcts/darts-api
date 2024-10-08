@@ -39,6 +39,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
@@ -83,7 +84,7 @@ class AuthenticationExternalUserControllerTest {
     @Test
     void handleOauthCodeFromAzureWhenCodeIsReturnedWithAccessTokenAndUserState() throws JOSEException {
         final String emailAddress = "test.user@example.com";
-        when(authenticationService.handleOauthCode(anyString(), null))
+        when(authenticationService.handleOauthCode(anyString(), isNull()))
             .thenReturn(createDummyAccessToken(List.of(emailAddress)));
         when(locator.locateAuthenticationConfiguration()).thenReturn(new ExternalAuthConfigurationPropertiesStrategy(
             externalAuthConfigurationProperties, new ExternalAuthProviderConfigurationProperties()));
@@ -118,7 +119,7 @@ class AuthenticationExternalUserControllerTest {
     @Test
     void handleOauthCodeFromAzureWhenCodeIsReturnedWithAccessTokenAndNoUserState() throws JOSEException {
         String accessToken = createDummyAccessToken(List.of("test.missing@example.com"));
-        when(authenticationService.handleOauthCode(anyString(), null))
+        when(authenticationService.handleOauthCode(anyString(), isNull()))
             .thenReturn(accessToken);
 
         when(authorisationApi.getAuthorisation(anyString())).thenReturn(Optional.empty());
@@ -160,7 +161,7 @@ class AuthenticationExternalUserControllerTest {
 
     @Test
     void handleOauthCodeFromAzureWhenCodeIsReturnedWithNullClaim() throws JOSEException {
-        when(authenticationService.handleOauthCode(anyString(), null))
+        when(authenticationService.handleOauthCode(anyString(), isNull()))
             .thenReturn(createDummyAccessToken(List.of("test.user@example.com")));
         when(locator.locateAuthenticationConfiguration()).thenReturn(new ExternalAuthConfigurationPropertiesStrategy(
             externalAuthConfigurationProperties, new ExternalAuthProviderConfigurationProperties()));
@@ -176,7 +177,7 @@ class AuthenticationExternalUserControllerTest {
 
     @Test
     void handleOauthCodeFromAzureWhenCodeIsReturnedWithEmptyClaim() throws JOSEException {
-        when(authenticationService.handleOauthCode(anyString(), null))
+        when(authenticationService.handleOauthCode(anyString(), isNull()))
             .thenReturn(createDummyAccessToken(new ArrayList<>()));
         when(locator.locateAuthenticationConfiguration()).thenReturn(new ExternalAuthConfigurationPropertiesStrategy(
             externalAuthConfigurationProperties, new ExternalAuthProviderConfigurationProperties()));
