@@ -23,6 +23,9 @@ PR_PASSWORD="$(kubectl -n darts-modernisation get secret postgres -o json | jq .
 PR_DATABASE="pr-${PR_NUMBER}-darts"
 PR_BASE_DATABASE="pr-base-darts"
 
+echo "Using Database password: ***${PR_PASSWORD: -3}"
+echo "Using PR_NUMBER: $PR_NUMBER"
+
 echo "Dumping PR base database..."
 
 # make the password available for pg_dump / psql

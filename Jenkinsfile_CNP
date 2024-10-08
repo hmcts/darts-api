@@ -141,7 +141,7 @@ withPipeline(type, product, component) {
         sh("./gradlew --no-daemon --init-script init.gradle assemble")
     }
 
-    before('smoketest:dev') {
+    before('build') {
         sh("./bin/ci/db-pr-base-to-pr.sh")
     }
 }
