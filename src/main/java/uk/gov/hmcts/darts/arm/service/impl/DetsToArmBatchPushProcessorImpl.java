@@ -128,7 +128,7 @@ public class DetsToArmBatchPushProcessorImpl implements DetsToArmBatchPushProces
                     armEod = currentEod;
                     batchItem.setArmEod(armEod);
                     dataStoreToArmHelper.updateArmEodToArmIngestionStatus(
-                        currentEod, batchItem, batchItems, archiveRecordsFile, userAccount);
+                        currentEod, batchItem, batchItems, archiveRecordsFile, userAccount, EodHelper.detsLocation());
                     getObjectStateRecordEntity(armEod);
 
                 } else {
