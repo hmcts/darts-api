@@ -9,6 +9,9 @@ command -v az >/dev/null 2>&1 || { echo >&2 "I require \"az\" but it's not insta
 command -v pg_dump >/dev/null 2>&1 || { echo >&2 "I require \"pg_dump\" but it's not installed. Aborting."; exit 1; }
 command -v psql >/dev/null 2>&1 || { echo >&2 "I require \"psql\" but it's not installed. Aborting."; exit 1; }
 
+# set k8s context to SDS dev
+az aks get-credentials --resource-group ss-dev-01-rg --name ss-dev-01-aks --subscription DTS-SHAREDSERVICES-DEV
+
 PR_NUMBER=$CHANGE_ID
 
 DUMP_FILE="/tmp/darts-api-prbase-dump.sql"
