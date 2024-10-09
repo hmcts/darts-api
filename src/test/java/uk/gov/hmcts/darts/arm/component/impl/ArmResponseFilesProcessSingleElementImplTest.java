@@ -45,6 +45,7 @@ import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
@@ -54,6 +55,7 @@ import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_PROCESS
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_RESPONSE_CHECKSUM_VERIFICATION_FAILED;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_RESPONSE_MANIFEST_FAILED;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_RESPONSE_PROCESSING_FAILED;
+import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_RPO_PENDING;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.STORED;
 
 @ExtendWith(MockitoExtension.class)
@@ -61,6 +63,7 @@ import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.STORED;
 class ArmResponseFilesProcessSingleElementImplTest {
 
     public static final String STORED_DESCRIPTION = "Stored";
+    public static final String ARM_RPO_PENDING_DESCRIPTION = "Arm RPO Pending";
     public static final String ARM_DROP_ZONE_DESCRIPTION = "Arm Drop Zone";
     public static final String ARM_PROCESSING_RESPONSE_FILES_DESCRIPTION = "Arm Processing Response Files";
     public static final String ARM_RESPONSE_PROCESS_FAILED_DESCRIPTION = "Arm Response Process Failed";
@@ -94,6 +97,7 @@ class ArmResponseFilesProcessSingleElementImplTest {
     private ArgumentCaptor<ExternalObjectDirectoryEntity> externalObjectDirectoryEntityCaptor;
 
     private ObjectRecordStatusEntity objectRecordStatusStored;
+    private ObjectRecordStatusEntity objectRecordStatusArmRpoPending;
     private ObjectRecordStatusEntity objectRecordStatusArmDropZone;
     private ObjectRecordStatusEntity objectRecordStatusArmResponseProcessingFailed;
     private ExternalObjectDirectoryEntity externalObjectDirectoryArmResponseProcessing;
@@ -109,6 +113,10 @@ class ArmResponseFilesProcessSingleElementImplTest {
         objectRecordStatusStored = new ObjectRecordStatusEntity();
         objectRecordStatusStored.setId(STORED.getId());
         objectRecordStatusStored.setDescription(STORED_DESCRIPTION);
+
+        objectRecordStatusArmRpoPending = new ObjectRecordStatusEntity();
+        objectRecordStatusArmRpoPending.setId(ARM_RPO_PENDING.getId());
+        objectRecordStatusArmRpoPending.setDescription(ARM_RPO_PENDING_DESCRIPTION);
 
         objectRecordStatusArmDropZone = new ObjectRecordStatusEntity();
         objectRecordStatusArmDropZone.setId(ARM_DROP_ZONE.getId());
@@ -142,6 +150,8 @@ class ArmResponseFilesProcessSingleElementImplTest {
             .thenReturn(Optional.of(objectRecordStatusArmChecksumFailed));
         when(objectRecordStatusRepository.findById(ARM_RESPONSE_MANIFEST_FAILED.getId()))
             .thenReturn(Optional.of(objectRecordStatusArmResponseManifestFailed));
+        when(objectRecordStatusRepository.findById(ARM_RPO_PENDING.getId()))
+            .thenReturn(Optional.of(objectRecordStatusArmRpoPending));
 
         lenient().when(userIdentity.getUserAccount()).thenReturn(userAccountEntity);
 
@@ -1049,7 +1059,7 @@ class ArmResponseFilesProcessSingleElementImplTest {
         armResponseFilesProcessSingleElement.processResponseFilesFor(1);
 
         verify(externalObjectDirectoryRepository).saveAndFlush(externalObjectDirectoryEntityCaptor.capture());
-        assertEquals(objectRecordStatusStored, externalObjectDirectoryArmResponseProcessing.getStatus());
+        assertEquals(objectRecordStatusArmRpoPending, externalObjectDirectoryArmResponseProcessing.getStatus());
 
         verify(armDataManagementApi).listResponseBlobs(prefix);
         verify(armDataManagementApi).listResponseBlobs(hashcode);
@@ -1060,6 +1070,6 @@ class ArmResponseFilesProcessSingleElementImplTest {
         verify(armDataManagementApi).deleteBlobData(createRecordFileFilename);
         verifyNoMoreInteractions(armDataManagementApi);
 
-        verify(logApi).archiveToArmSuccessful(anyInt());
+        verify(logApi, never()).archiveToArmSuccessful(anyInt());
     }
 }

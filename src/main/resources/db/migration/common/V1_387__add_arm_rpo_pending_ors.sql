@@ -1,0 +1,1 @@
+INSERT INTO object_record_status (ors_id,ors_description) VALUES (nextval('ors_seq'),'Arm RPO Pending');

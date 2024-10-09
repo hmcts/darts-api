@@ -58,6 +58,7 @@ import static uk.gov.hmcts.darts.arm.util.ArmResponseFilesUtil.generateSuffix;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_RESPONSE_CHECKSUM_VERIFICATION_FAILED;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_RESPONSE_MANIFEST_FAILED;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_RESPONSE_PROCESSING_FAILED;
+import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_RPO_PENDING;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.STORED;
 
 @Slf4j
@@ -225,7 +226,7 @@ public abstract class AbstractArmBatchProcessResponseFiles implements ArmRespons
     private boolean isCompletedStatus(ObjectRecordStatusEntity status) {
         if (nonNull(status)) {
             ObjectRecordStatusEnum statusEnum = ObjectRecordStatusEnum.valueOfId(status.getId());
-            return STORED.equals(statusEnum)
+            return ARM_RPO_PENDING.equals(statusEnum)
                 || ARM_RESPONSE_PROCESSING_FAILED.equals(statusEnum)
                 || ARM_RESPONSE_MANIFEST_FAILED.equals(statusEnum)
                 || ARM_RESPONSE_CHECKSUM_VERIFICATION_FAILED.equals(statusEnum);
@@ -683,7 +684,7 @@ public abstract class AbstractArmBatchProcessResponseFiles implements ArmRespons
         ExternalObjectDirectoryEntity externalObjectDirectory = getExternalObjectDirectoryEntity(armResponseBatchData.getExternalObjectDirectoryId());
         if (nonNull(externalObjectDirectory) && responseBlobsToBeDeleted.size() == 2) {
             ObjectRecordStatusEnum status = ObjectRecordStatusEnum.valueOfId(externalObjectDirectory.getStatus().getId());
-            if (STORED.equals(status)
+            if (ARM_RPO_PENDING.equals(status)
                 || ARM_RESPONSE_PROCESSING_FAILED.equals(status)
                 || ARM_RESPONSE_MANIFEST_FAILED.equals(status)
                 || ARM_RESPONSE_CHECKSUM_VERIFICATION_FAILED.equals(status)) {
@@ -795,7 +796,7 @@ public abstract class AbstractArmBatchProcessResponseFiles implements ArmRespons
         externalObjectDirectory.setExternalFileId(armResponseUploadFileRecord.getA360FileId());
         externalObjectDirectory.setExternalRecordId(armResponseUploadFileRecord.getA360RecordId());
         externalObjectDirectory.setDataIngestionTs(OffsetDateTime.now());
-        updateExternalObjectDirectoryStatus(externalObjectDirectory, EodHelper.storedStatus());
+        updateExternalObjectDirectoryStatus(externalObjectDirectory, EodHelper.armRpoPendingStatus());
     }
 
     protected void onUploadFileChecksumValidationFailure(ArmResponseUploadFileRecord armResponseUploadFileRecord,
