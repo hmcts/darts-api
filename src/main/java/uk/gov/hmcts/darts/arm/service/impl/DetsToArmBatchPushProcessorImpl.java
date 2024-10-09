@@ -221,6 +221,10 @@ public class DetsToArmBatchPushProcessorImpl implements DetsToArmBatchPushProces
                 objectStateRecord.setObjectStatus(errorMessage);
             }
             objectStateRecordRepository.save(objectStateRecord);
+        } else {
+            if (nonNull(externalObjectDirectory)) {
+                log.error("Unable to find ObjectStateRecordEntity for ARM EOD ID: {}", externalObjectDirectory.getId());
+            }
         }
     }
 

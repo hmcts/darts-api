@@ -1,21 +1,15 @@
 package uk.gov.hmcts.darts.arm.service.impl;
 
-import com.azure.core.util.BinaryData;
-import com.azure.storage.blob.models.BlobStorageException;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.io.TempDir;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.data.domain.Pageable;
 import uk.gov.hmcts.darts.arm.api.ArmDataManagementApi;
 import uk.gov.hmcts.darts.arm.config.ArmDataManagementConfiguration;
 import uk.gov.hmcts.darts.arm.config.DetsToArmProcessorConfiguration;
@@ -24,17 +18,12 @@ import uk.gov.hmcts.darts.arm.model.record.ArchiveRecordFileInfo;
 import uk.gov.hmcts.darts.arm.service.ArchiveRecordService;
 import uk.gov.hmcts.darts.arm.service.DetsToArmBatchPushProcessor;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
-import uk.gov.hmcts.darts.common.entity.AnnotationDocumentEntity;
-import uk.gov.hmcts.darts.common.entity.ExternalLocationTypeEntity;
 import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
-import uk.gov.hmcts.darts.common.entity.ObjectRecordStatusEntity;
 import uk.gov.hmcts.darts.common.entity.ObjectStateRecordEntity;
-import uk.gov.hmcts.darts.common.entity.TranscriptionDocumentEntity;
 import uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum;
 import uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum;
 import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
-import uk.gov.hmcts.darts.common.repository.ExternalLocationTypeRepository;
 import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
 import uk.gov.hmcts.darts.common.repository.ObjectStateRecordRepository;
 import uk.gov.hmcts.darts.common.service.FileOperationService;
@@ -49,7 +38,6 @@ import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -58,23 +46,18 @@ import java.util.UUID;
 
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
-import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.matches;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.lenient;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 @Slf4j
-@Disabled
 class DetsToArmBatchPushProcessorImplTest {
 
     private static final Integer MAX_RETRY_ATTEMPTS = 3;
@@ -84,19 +67,11 @@ class DetsToArmBatchPushProcessorImplTest {
     @Mock
     private ExternalObjectDirectoryRepository externalObjectDirectoryRepository;
     @Mock
-    private ExternalLocationTypeRepository externalLocationTypeRepository;
-    @Mock
     private ArmDataManagementApi armDataManagementApi;
     @Mock
     private UserIdentity userIdentity;
     @Mock
     private ArmDataManagementConfiguration armDataManagementConfiguration;
-    @Mock
-    private MediaEntity mediaEntity;
-    @Mock
-    private TranscriptionDocumentEntity transcriptionDocumentEntity;
-    @Mock
-    private AnnotationDocumentEntity annotationDocumentEntity;
 
     private ExternalObjectDirectoryEntity externalObjectDirectoryEntityDets;
 
@@ -116,9 +91,6 @@ class DetsToArmBatchPushProcessorImplTest {
     private CurrentTimeHelper currentTimeHelper;
     @InjectMocks
     private DataStoreToArmHelper dataStoreToArmHelper;
-    @Captor
-    private ArgumentCaptor<ExternalObjectDirectoryEntity> externalObjectDirectoryEntityCaptor;
-
 
     private DetsToArmBatchPushProcessor detsToArmBatchPushProcessor;
 
@@ -126,6 +98,7 @@ class DetsToArmBatchPushProcessorImplTest {
     private File tempDirectory;
 
     private File manifestFile;
+    private ObjectStateRecordEntity objectStateRecordEntity;
 
     private static final EodHelperMocks EOD_HELPER_MOCKS = new EodHelperMocks();
 
@@ -166,17 +139,16 @@ class DetsToArmBatchPushProcessorImplTest {
             DETS_UUID);
         externalObjectDirectoryEntityDets.setOsrUuid(OSR_UUID);
 
-        MediaEntity mediaEntity2 = new MediaEntity();
         externalObjectDirectoryEntityArm = new ExternalObjectDirectoryTestData().createExternalObjectDirectory(
-            mediaEntity2,
+            mediaEntity1,
             ExternalLocationTypeEnum.ARM,
             ObjectRecordStatusEnum.ARM_INGESTION,
             UUID.randomUUID());
         externalObjectDirectoryEntityArm.setId(345);
         externalObjectDirectoryEntityArm.setStatus(EodHelper.armIngestionStatus());
-        ObjectStateRecordEntity objectStateRecordEntity = createMaxObjectStateRecordEntity(888L,
-                                                                                           externalObjectDirectoryEntityDets.getId(),
-                                                                                           externalObjectDirectoryEntityArm.getId());
+        objectStateRecordEntity = createMaxObjectStateRecordEntity(888L,
+                                                                   externalObjectDirectoryEntityDets.getId(),
+                                                                   externalObjectDirectoryEntityArm.getId());
         externalObjectDirectoryEntityDets.setOsrUuid(objectStateRecordEntity.getUuid());
         lenient().when(objectStateRecordRepository.findById(objectStateRecordEntity.getUuid())).thenReturn(Optional.of(objectStateRecordEntity));
 
@@ -196,6 +168,7 @@ class DetsToArmBatchPushProcessorImplTest {
             .archiveRecordFile(manifestFile)
             .build();
         lenient().when(archiveRecordService.generateArchiveRecord(any(), any())).thenReturn(archiveRecordFileInfo);
+
     }
 
     @AfterEach
@@ -208,352 +181,31 @@ class DetsToArmBatchPushProcessorImplTest {
         }
     }
 
-    @Test
-    void processMovingDataFromDetsStorageToArm() {
-        // given
-        ArchiveRecordFileInfo archiveRecordFileInfo = ArchiveRecordFileInfo.builder()
-            .fileGenerationSuccessful(true)
-            .archiveRecordFile(manifestFile)
-            .build();
-        when(archiveRecordService.generateArchiveRecord(any(), any())).thenReturn(archiveRecordFileInfo);
-
-        List<ExternalObjectDirectoryEntity> inboundList = new ArrayList<>(singletonList(externalObjectDirectoryEntityDets));
-        when(externalObjectDirectoryRepository.findEodsNotInOtherStorage(
-            EodHelper.storedStatus(),
-            EodHelper.detsLocation(),
-            EodHelper.armLocation(), 5
-        )).thenReturn(inboundList);
-
-        when(externalObjectDirectoryRepository.findMatchingExternalObjectDirectoryEntityByLocation(
-            EodHelper.storedStatus(),
-            EodHelper.detsLocation(),
-            externalObjectDirectoryEntityArm.getMedia(),
-            externalObjectDirectoryEntityArm.getTranscriptionDocumentEntity(),
-            externalObjectDirectoryEntityArm.getAnnotationDocumentEntity(),
-            externalObjectDirectoryEntityArm.getCaseDocument()
-        )).thenReturn(Optional.of(externalObjectDirectoryEntityDets));
-
-        EOD_HELPER_MOCKS.givenIsEqualLocationReturns(true);
-        EOD_HELPER_MOCKS.givenIsEqualStatusReturns(true);
-        when(objectStateRecordRepository.findById(OSR_UUID)).thenReturn(Optional.of(createMinObjectStateRecordEntity()));
-        when(externalObjectDirectoryRepository.saveAndFlush(any())).thenReturn(externalObjectDirectoryEntityArm);
-        externalObjectDirectoryEntityArm.setStatus(EodHelper.armIngestionStatus());
-
-        // when
-        detsToArmBatchPushProcessor.processDetsToArm(5);
-
-        // then
-        verify(externalObjectDirectoryRepository, times(3)).saveAndFlush(externalObjectDirectoryEntityCaptor.capture());
-        verify(armDataManagementApi).copyBlobDataToArm(eq(DETS_UUID.toString()), any());
-
-        verifyNoMoreInteractions(logApi);
-    }
 
     @Test
-    void processMovingDataFromDetsStorageToArmThrowsException() throws IOException {
-        // given
-        ArchiveRecordFileInfo archiveRecordFileInfo = ArchiveRecordFileInfo.builder()
-            .fileGenerationSuccessful(true)
-            .archiveRecordFile(manifestFile)
-            .build();
-        when(archiveRecordService.generateArchiveRecord(any(), any())).thenReturn(archiveRecordFileInfo);
-
-        List<ExternalObjectDirectoryEntity> inboundList = new ArrayList<>(singletonList(externalObjectDirectoryEntityDets));
-        when(externalObjectDirectoryRepository.findEodsNotInOtherStorage(
-            EodHelper.storedStatus(),
-            EodHelper.detsLocation(),
-            EodHelper.armLocation(),
-            5
-        )).thenReturn(inboundList);
-
-        doReturn(EodHelper.armLocation()).when(externalObjectDirectoryEntityDets).getExternalLocationType();
-
-        NullPointerException genericException = new NullPointerException();
-        doThrow(genericException).when(armDataManagementApi).copyBlobDataToArm(any(), any());
-
-        // when
-        detsToArmBatchPushProcessor.processDetsToArm(5);
-
-        // then
-        verify(externalObjectDirectoryRepository, times(2)).saveAndFlush(externalObjectDirectoryEntityCaptor.capture());
-    }
-
-    @Test
-    void processMovingDataFromDetsStorageToArmThrowsBlobExceptionWhenSendingManifestFile() throws IOException {
-        // given
-        ArchiveRecordFileInfo archiveRecordFileInfo = ArchiveRecordFileInfo.builder()
-            .fileGenerationSuccessful(true)
-            .archiveRecordFile(manifestFile)
-            .build();
-        when(archiveRecordService.generateArchiveRecord(any(), any())).thenReturn(archiveRecordFileInfo);
-
-        List<ExternalObjectDirectoryEntity> pendingUnstructuredStorageItems = new ArrayList<>(emptyList());
-        when(externalObjectDirectoryRepository.findEodsNotInOtherStorage(
-            EodHelper.storedStatus(),
-            EodHelper.detsLocation(),
-            EodHelper.armLocation(),
-            4
-        )).thenReturn(pendingUnstructuredStorageItems);
-
-        List<ObjectRecordStatusEntity> failedStatusesList = new ArrayList<>();
-        failedStatusesList.add(EodHelper.failedArmRawDataStatus());
-        failedStatusesList.add(EodHelper.failedArmManifestFileStatus());
-
-        List<ExternalObjectDirectoryEntity> pendingFailureList = new ArrayList<>(singletonList(externalObjectDirectoryEntityArm));
-        when(externalObjectDirectoryRepository.findNotFinishedAndNotExceededRetryInStorageLocationForDets(
-            failedStatusesList,
-            externalLocationTypeRepository.getReferenceById(3),
-            armDataManagementConfiguration.getMaxRetryAttempts(), Pageable.ofSize(5)
-        )).thenReturn(pendingFailureList);
-
-        when(externalObjectDirectoryEntityArm.getAnnotationDocumentEntity()).thenReturn(annotationDocumentEntity);
-        when(externalObjectDirectoryRepository.findMatchingExternalObjectDirectoryEntityByLocation(
-            EodHelper.storedStatus(),
-            EodHelper.detsLocation(),
-            externalObjectDirectoryEntityArm.getMedia(),
-            externalObjectDirectoryEntityArm.getTranscriptionDocumentEntity(),
-            externalObjectDirectoryEntityArm.getAnnotationDocumentEntity(),
-            externalObjectDirectoryEntityArm.getCaseDocument()
-        )).thenReturn(Optional.of(externalObjectDirectoryEntityDets));
-
-        BinaryData manifest = BinaryData.fromFile(Path.of(manifestFile.getAbsolutePath()));
-        when(fileOperationService.convertFileToBinaryData(any())).thenReturn(manifest);
-        BlobStorageException blobStorageException = mock(BlobStorageException.class);
-        when(blobStorageException.getStatusCode()).thenReturn(409);
-        when(blobStorageException.getMessage()).thenReturn("Copying blob failed");
-        when(armDataManagementApi.saveBlobDataToArm("1_1_1.a360", manifest)).thenThrow(blobStorageException);
-
-        // when
-        detsToArmBatchPushProcessor.processDetsToArm(5);
-
-        // then
-        verify(externalObjectDirectoryRepository).saveAndFlush(externalObjectDirectoryEntityCaptor.capture());
-
-        verify(logApi).armPushSuccessful(anyInt());
-    }
-
-    @Test
-    void processMovingDataFromDetsStorageToArmThrowsGenericExceptionWhenSendingManifestFile() throws IOException {
-        // given
-        String fileLocation = tempDirectory.getAbsolutePath();
-        File archiveRecordFile = new File(fileLocation, "1_1_1.a360");
-
-        FileStore.getFileStore().create(archiveRecordFile.toPath());
-        ArchiveRecordFileInfo archiveRecordFileInfo = ArchiveRecordFileInfo.builder()
-            .fileGenerationSuccessful(true)
-            .archiveRecordFile(archiveRecordFile)
-            .build();
-        when(archiveRecordService.generateArchiveRecord(any(), any())).thenReturn(archiveRecordFileInfo);
-
-        List<ExternalObjectDirectoryEntity> inboundList = new ArrayList<>(singletonList(externalObjectDirectoryEntityDets));
-        when(externalObjectDirectoryRepository.findEodsNotInOtherStorage(
-            EodHelper.storedStatus(),
-            EodHelper.detsLocation(),
-            EodHelper.armLocation(),
-            5
-        )).thenReturn(inboundList);
-
-        doReturn(EodHelper.armLocation()).when(externalObjectDirectoryEntityDets).getExternalLocationType();
-
-        NullPointerException genericException = new NullPointerException();
-        when(armDataManagementApi.saveBlobDataToArm(any(), any())).thenThrow(genericException);
-
-        // when
-        detsToArmBatchPushProcessor.processDetsToArm(5);
-
-        // then
-        verify(externalObjectDirectoryRepository, times(3)).saveAndFlush(externalObjectDirectoryEntityCaptor.capture());
-
-        verifyNoMoreInteractions(logApi);
-    }
-
-    @Test
-    void processMovingDataFromDetsStorageToArmThrowsExceptionWhenSendingManifestFile() throws IOException {
-        // given
-        String fileLocation = tempDirectory.getAbsolutePath();
-        File archiveRecordFile = new File(fileLocation, "1_1_1.a360");
-        FileStore.getFileStore().create(archiveRecordFile.toPath());
-        ArchiveRecordFileInfo archiveRecordFileInfo = ArchiveRecordFileInfo.builder()
-            .fileGenerationSuccessful(true)
-            .archiveRecordFile(archiveRecordFile)
-            .build();
-        when(archiveRecordService.generateArchiveRecord(any(), any())).thenReturn(archiveRecordFileInfo);
-
-        List<ExternalObjectDirectoryEntity> inboundList = new ArrayList<>(singletonList(externalObjectDirectoryEntityDets));
-        when(externalObjectDirectoryRepository.findEodsNotInOtherStorage(
-            EodHelper.storedStatus(),
-            EodHelper.detsLocation(),
-            EodHelper.armLocation(),
-            5
-        )).thenReturn(inboundList);
-
-        doReturn(EodHelper.armLocation()).when(externalObjectDirectoryEntityDets).getExternalLocationType();
-
-        NullPointerException genericException = new NullPointerException();
-        when(armDataManagementApi.saveBlobDataToArm(any(), any())).thenThrow(genericException);
-
-        // when
-        detsToArmBatchPushProcessor.processDetsToArm(5);
-
-        // then
-        verify(externalObjectDirectoryRepository, times(3)).saveAndFlush(externalObjectDirectoryEntityCaptor.capture());
-
-        verifyNoMoreInteractions(logApi);
-    }
-
-    @Test
-    void processPreviousFailedAttemptMovingFromDetsStorageToArm() {
-        // given
-        String fileLocation = tempDirectory.getAbsolutePath();
-        ArchiveRecordFileInfo archiveRecordFileInfo = ArchiveRecordFileInfo.builder()
-            .fileGenerationSuccessful(true)
-            .archiveRecordFile(new File(fileLocation, "1_1_1.a360"))
-            .build();
-        when(archiveRecordService.generateArchiveRecord(any(), any())).thenReturn(archiveRecordFileInfo);
-
-        List<ExternalObjectDirectoryEntity> pendingUnstructuredStorageItems = new ArrayList<>(emptyList());
-        when(externalObjectDirectoryRepository.findEodsNotInOtherStorage(
-            EodHelper.storedStatus(),
-            EodHelper.detsLocation(),
-            EodHelper.armLocation(),
-            4
-        )).thenReturn(pendingUnstructuredStorageItems);
-
-        List<ObjectRecordStatusEntity> failedStatusesList = new ArrayList<>();
-        failedStatusesList.add(EodHelper.failedArmRawDataStatus());
-        failedStatusesList.add(EodHelper.failedArmManifestFileStatus());
-
-        List<ExternalObjectDirectoryEntity> pendingFailureList = new ArrayList<>(singletonList(externalObjectDirectoryEntityArm));
-        when(externalObjectDirectoryRepository.findNotFinishedAndNotExceededRetryInStorageLocationForDets(
-            failedStatusesList,
-            externalLocationTypeRepository.getReferenceById(3),
-            3, Pageable.ofSize(5)
-        )).thenReturn(pendingFailureList);
-
-        doReturn(EodHelper.armLocation()).when(externalObjectDirectoryEntityArm).getExternalLocationType();
-        when(externalObjectDirectoryEntityArm.getMedia()).thenReturn(mediaEntity);
-        doReturn(EodHelper.failedArmRawDataStatus()).when(externalObjectDirectoryEntityArm).getStatus();
-
-        when(externalObjectDirectoryRepository.findMatchingExternalObjectDirectoryEntityByLocation(
-            EodHelper.storedStatus(),
-            EodHelper.detsLocation(),
-            externalObjectDirectoryEntityArm.getMedia(),
-            externalObjectDirectoryEntityArm.getTranscriptionDocumentEntity(),
-            externalObjectDirectoryEntityArm.getAnnotationDocumentEntity(),
-            externalObjectDirectoryEntityArm.getCaseDocument()
-        )).thenReturn(Optional.of(externalObjectDirectoryEntityDets));
-
-        // when
-        detsToArmBatchPushProcessor.processDetsToArm(5);
-
-        // then
-        verify(externalObjectDirectoryRepository).saveAndFlush(externalObjectDirectoryEntityCaptor.capture());
-
-        verifyNoMoreInteractions(logApi);
-    }
-
-    @Test
-    void processPreviousFailedAttempt() {
-        // given
-        List<ExternalObjectDirectoryEntity> pendingUnstructuredStorageItems = new ArrayList<>(emptyList());
-
-        when(externalObjectDirectoryRepository.findEodsNotInOtherStorage(
-            EodHelper.storedStatus(),
-            EodHelper.detsLocation(),
-            EodHelper.armLocation(),
-            4
-        )).thenReturn(pendingUnstructuredStorageItems);
-
-        List<ObjectRecordStatusEntity> failedStatusesList = new ArrayList<>();
-        failedStatusesList.add(EodHelper.failedArmRawDataStatus());
-        failedStatusesList.add(EodHelper.failedArmManifestFileStatus());
-
-        List<ExternalObjectDirectoryEntity> pendingFailureList = new ArrayList<>(singletonList(externalObjectDirectoryEntityArm));
-        when(externalObjectDirectoryRepository.findNotFinishedAndNotExceededRetryInStorageLocationForDets(
-            failedStatusesList,
-            externalLocationTypeRepository.getReferenceById(3),
-            3, Pageable.ofSize(5)
-        )).thenReturn(pendingFailureList);
-
-        doReturn(EodHelper.armLocation()).when(externalObjectDirectoryEntityArm).getExternalLocationType();
-        when(externalObjectDirectoryEntityArm.getMedia()).thenReturn(mediaEntity);
-        when(externalObjectDirectoryEntityArm.getTranscriptionDocumentEntity()).thenReturn(transcriptionDocumentEntity);
-        when(externalObjectDirectoryEntityArm.getAnnotationDocumentEntity()).thenReturn(annotationDocumentEntity);
-        doReturn(EodHelper.failedArmRawDataStatus()).when(externalObjectDirectoryEntityArm).getStatus();
-        when(externalObjectDirectoryRepository.findMatchingExternalObjectDirectoryEntityByLocation(
-            EodHelper.storedStatus(),
-            EodHelper.detsLocation(),
-            externalObjectDirectoryEntityArm.getMedia(),
-            externalObjectDirectoryEntityArm.getTranscriptionDocumentEntity(),
-            externalObjectDirectoryEntityArm.getAnnotationDocumentEntity(),
-            externalObjectDirectoryEntityArm.getCaseDocument()
-        )).thenReturn(Optional.empty());
-
-        // when
-        detsToArmBatchPushProcessor.processDetsToArm(5);
-
-        // then
-        verify(externalObjectDirectoryRepository, times(1)).saveAndFlush(externalObjectDirectoryEntityCaptor.capture());
-
-        verifyNoMoreInteractions(logApi);
-    }
-
-    @Test
-    void testDartsArmClientConfigInBatchQuery() {
-        ExternalObjectDirectoryEntity eod10 = new ExternalObjectDirectoryEntity();
-        eod10.setId(10);
-        eod10.setExternalLocationType(EodHelper.armLocation());
-        eod10.setStatus(EodHelper.failedArmManifestFileStatus());
+    void processDetsToArmSetObjectStatusErrorMessage() {
         //given
-        when(externalObjectDirectoryRepository.findNotFinishedAndNotExceededRetryInStorageLocationForDets(any(), any(), any(), any())).thenReturn(
-            List.of(eod10));
         when(externalObjectDirectoryRepository.findEodsNotInOtherStorage(any(), any(), any(), any())).thenReturn(emptyList());
         EOD_HELPER_MOCKS.givenIsEqualLocationReturns(true);
         EOD_HELPER_MOCKS.givenIsEqualStatusReturns(true);
-        //when(detsToArmProcessorConfiguration.getMaxArmManifestItems()).thenReturn(10);
+        when(detsToArmProcessorConfiguration.getMaxArmManifestItems()).thenReturn(10);
         when(armDataManagementConfiguration.getMaxRetryAttempts()).thenReturn(3);
+        List<ExternalObjectDirectoryEntity> inboundList = new ArrayList<>(singletonList(externalObjectDirectoryEntityDets));
+        when(externalObjectDirectoryRepository.findEodsNotInOtherStorage(
+            EodHelper.storedStatus(),
+            EodHelper.detsLocation(),
+            EodHelper.armLocation(), 200
+        )).thenReturn(inboundList);
 
         //when
         detsToArmBatchPushProcessor.processDetsToArm(200);
 
         //then
-        verify(externalObjectDirectoryRepository).findEodsNotInOtherStorage(
-            EodHelper.storedStatus(),
-            EodHelper.unstructuredLocation(),
-            EodHelper.armLocation(), 199
-        );
+        assertTrue(
+            objectStateRecordEntity
+                .getObjectStatus()
+                .startsWith("Error during batch push DETS EOD 123 to ARM - java.lang.RuntimeException: Unable to find matching external object directory"));
 
-        verify(logApi).armPushFailed(anyInt());
-    }
-
-    @Test
-    void testPaginatedBatchQuery() throws IOException {
-        //given
-        when(externalObjectDirectoryRepository.findNotFinishedAndNotExceededRetryInStorageLocationForDets(any(), any(), any(), any())).thenReturn(
-            List.of(externalObjectDirectoryEntityDets));
-        when(externalObjectDirectoryRepository.findEodsNotInOtherStorage(any(), any(), any(), any())).thenReturn(emptyList());
-        //when(detsToArmProcessorConfiguration.getMaxArmManifestItems()).thenReturn(100);
-        when(armDataManagementConfiguration.getMaxRetryAttempts()).thenReturn(3);
-
-        when(fileOperationService.createFile(any(), any(), anyBoolean())).thenReturn(manifestFile.toPath());
-
-        //when
-        detsToArmBatchPushProcessor.processDetsToArm(5000);
-
-        //then
-        verify(externalObjectDirectoryRepository).findNotFinishedAndNotExceededRetryInStorageLocationForDets(
-            any(),
-            any(ExternalLocationTypeEntity.class),
-            eq(3),
-            eq(Pageable.ofSize(5000)));
-
-        verify(externalObjectDirectoryRepository).findEodsNotInOtherStorage(
-            EodHelper.storedStatus(),
-            EodHelper.unstructuredLocation(),
-            EodHelper.armLocation(), 4998
-        );
-
-        verifyNoMoreInteractions(logApi);
     }
 
     @Test
@@ -570,7 +222,6 @@ class DetsToArmBatchPushProcessorImplTest {
             EodHelper.armLocation(), 5
         )).thenReturn(inboundList);
 
-        when(objectStateRecordRepository.findById(OSR_UUID)).thenReturn(Optional.of(createMinObjectStateRecordEntity()));
         when(externalObjectDirectoryRepository.saveAndFlush(any())).thenReturn(externalObjectDirectoryEntityArm);
         externalObjectDirectoryEntityArm.setStatus(EodHelper.armIngestionStatus());
 
@@ -579,15 +230,8 @@ class DetsToArmBatchPushProcessorImplTest {
 
         //then
         verify(fileOperationService).createFile(matches("DETS_.+\\.a360"), eq(tempDirectory.getAbsolutePath()), eq(true));
+        assertNotNull(objectStateRecordEntity.getObjectStatus());
 
-        verifyNoMoreInteractions(logApi);
-    }
-
-    private ObjectStateRecordEntity createMinObjectStateRecordEntity() {
-        ObjectStateRecordEntity objectStateRecordEntity = new ObjectStateRecordEntity();
-        objectStateRecordEntity.setUuid(OSR_UUID);
-        objectStateRecordEntity.setEodId(DETS_UUID.toString());
-        return objectStateRecordEntity;
     }
 
     public ObjectStateRecordEntity createMaxObjectStateRecordEntity(Long uuid, int detsEodId, int armEodId) {
@@ -607,34 +251,14 @@ class DetsToArmBatchPushProcessorImplTest {
         objectStateRecordEntity.setRelationId("Relation123");
         objectStateRecordEntity.setDetsLocation("DetsLocation123");
         objectStateRecordEntity.setFlagFileTransferToDets(false);
-        objectStateRecordEntity.setDateFileTransferToDets(null);
-        objectStateRecordEntity.setMd5DocTransferToDets(null);
-        objectStateRecordEntity.setFileSizeBytesCentera(null);
-        objectStateRecordEntity.setFileSizeBytesDets(null);
         objectStateRecordEntity.setFlagFileAvScanPass(false);
-        objectStateRecordEntity.setDateFileAvScanPass(null);
         objectStateRecordEntity.setFlagFileTransfToarml(false);
-        objectStateRecordEntity.setDateFileTransfToarml(null);
-        objectStateRecordEntity.setMd5FileTransfArml(null);
-        objectStateRecordEntity.setFileSizeBytesArml(null);
         objectStateRecordEntity.setFlagFileMfstCreated(false);
-        objectStateRecordEntity.setDateFileMfstCreated(null);
-        objectStateRecordEntity.setIdManifestFile(null);
         objectStateRecordEntity.setFlagMfstTransfToArml(false);
-        objectStateRecordEntity.setDateMfstTransfToArml(null);
         objectStateRecordEntity.setFlagRspnRecvdFromArml(false);
-        objectStateRecordEntity.setDateRspnRecvdFromArml(null);
         objectStateRecordEntity.setFlagFileIngestStatus(false);
-        objectStateRecordEntity.setDateFileIngestToArm(null);
-        objectStateRecordEntity.setMd5FileIngestToArm(null);
-        objectStateRecordEntity.setFileSizeIngestToArm(null);
-        objectStateRecordEntity.setIdResponseFile(null);
-        objectStateRecordEntity.setIdResponseCrFile(null);
-        objectStateRecordEntity.setIdResponseUfFile(null);
         objectStateRecordEntity.setFlagFileDetsCleanupStatus(false);
-        objectStateRecordEntity.setDateFileDetsCleanup(null);
         objectStateRecordEntity.setFlagFileRetainedInOds(false);
-        objectStateRecordEntity.setObjectStatus(null);
         return objectStateRecordEntity;
     }
 }
