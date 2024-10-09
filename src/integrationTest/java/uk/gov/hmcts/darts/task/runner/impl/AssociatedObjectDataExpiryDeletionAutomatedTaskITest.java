@@ -609,13 +609,13 @@ class AssociatedObjectDataExpiryDeletionAutomatedTaskITest extends PostgresInteg
             assignArm, storeArm);
     }
 
-    private void assertAuditEntries(AuditActivity auditActivity, HasIntegerId hasIntegerId, boolean isAnonymized) {
+    private void assertAuditEntries(AuditActivity auditActivity, HasIntegerId hasIntegerId, boolean isAnonymised) {
         List<AuditEntity> caseExpiredAuditEntries = dartsDatabase.getAuditRepository()
             .findAll((Specification<AuditEntity>) (root, query, criteriaBuilder) -> criteriaBuilder.and(
                 criteriaBuilder.equal(root.get(AuditEntity_.additionalData), String.valueOf(hasIntegerId.getId())),
                 criteriaBuilder.equal(root.get(AuditEntity_.auditActivity).get("id"), auditActivity.getId())
             ));
-        if (isAnonymized) {
+        if (isAnonymised) {
             assertThat(caseExpiredAuditEntries).hasSize(1);
         } else {
             assertThat(caseExpiredAuditEntries).isEmpty();
