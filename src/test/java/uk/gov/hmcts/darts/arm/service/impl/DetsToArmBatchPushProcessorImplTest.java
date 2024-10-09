@@ -182,7 +182,7 @@ class DetsToArmBatchPushProcessorImplTest {
 
 
     @Test
-    void processDetsToArmSetObjectStatusErrorMessage() {
+    void processDetsToArmSetObjectStatusNoMatchingDetsRecordErrorMessage() {
         //given
         when(externalObjectDirectoryRepository.findEodsNotInOtherStorage(any(), any(), any(), any())).thenReturn(emptyList());
         EOD_HELPER_MOCKS.givenIsEqualLocationReturns(true);
