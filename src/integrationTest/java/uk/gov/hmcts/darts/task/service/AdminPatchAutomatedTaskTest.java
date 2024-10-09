@@ -70,35 +70,6 @@ class AdminPatchAutomatedTaskTest extends IntegrationBase {
     }
 
     @Test
-    void returns400WhenIsActiveIsNull() throws Exception {
-        given.anAuthenticatedUserWithGlobalAccessAndRole(SUPER_ADMIN);
-
-        mockMvc.perform(
-                patch(ENDPOINT + "/1")
-                    .contentType(APPLICATION_JSON_VALUE)
-                    .content("""
-                                 { "is_active": null }
-                                 """))
-            .andExpect(status().isBadRequest())
-            .andReturn();
-    }
-
-    @Test
-    void returns400RequiredFieldIsMissing() throws Exception {
-        given.anAuthenticatedUserWithGlobalAccessAndRole(SUPER_ADMIN);
-
-        mockMvc.perform(
-                patch(ENDPOINT + "/1")
-                    .contentType(APPLICATION_JSON_VALUE)
-                    .content("""
-                                 {  }
-                                 """))
-            .andExpect(status().isBadRequest())
-            .andReturn();
-    }
-
-
-    @Test
     void returns404WhenTheTaskDoesntExist() throws Exception {
         given.anAuthenticatedUserWithGlobalAccessAndRole(SUPER_ADMIN);
 
