@@ -33,7 +33,7 @@ class CaseControllerGetEventByCaseIdTest extends IntegrationBase {
     @Autowired
     private transient MockMvc mockMvc;
 
-    private static final String endpointUrl = "/cases/{case_id}/events";
+    private static final String ENDPOINT_URL = "/cases/{case_id}/events";
 
     private static final OffsetDateTime SOME_DATE_TIME = OffsetDateTime.parse("2023-01-01T12:00Z");
     private static final String SOME_COURTHOUSE = "SOME-COURTHOUSE";
@@ -74,7 +74,7 @@ class CaseControllerGetEventByCaseIdTest extends IntegrationBase {
 
         when(mockUserIdentity.getUserAccount()).thenReturn(null);
 
-        MockHttpServletRequestBuilder requestBuilder = get(endpointUrl, getCaseId(SOME_CASE_NUMBER, SOME_COURTHOUSE));
+        MockHttpServletRequestBuilder requestBuilder = get(ENDPOINT_URL, getCaseId(SOME_CASE_NUMBER, SOME_COURTHOUSE));
 
         mockMvc.perform(requestBuilder).andExpect(MockMvcResultMatchers.status().isForbidden());
     }
@@ -82,7 +82,7 @@ class CaseControllerGetEventByCaseIdTest extends IntegrationBase {
     @Test
     void casesGetEventsEndpoint() throws Exception {
 
-        MockHttpServletRequestBuilder requestBuilder = get(endpointUrl, getCaseId(SOME_CASE_NUMBER, SOME_COURTHOUSE));
+        MockHttpServletRequestBuilder requestBuilder = get(ENDPOINT_URL, getCaseId(SOME_CASE_NUMBER, SOME_COURTHOUSE));
 
         MvcResult mvcResult = mockMvc.perform(requestBuilder).andExpect(MockMvcResultMatchers.status().isOk()).andReturn();
 
@@ -107,7 +107,7 @@ class CaseControllerGetEventByCaseIdTest extends IntegrationBase {
     @Test
     void casesGetEventsEndpointCaseNotFound() throws Exception {
 
-        MockHttpServletRequestBuilder requestBuilder = get(endpointUrl, 25);
+        MockHttpServletRequestBuilder requestBuilder = get(ENDPOINT_URL, 25);
 
         mockMvc.perform(requestBuilder).andExpect(MockMvcResultMatchers.status().isNotFound());
 
