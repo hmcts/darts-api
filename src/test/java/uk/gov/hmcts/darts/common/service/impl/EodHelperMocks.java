@@ -20,6 +20,7 @@ import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_INGESTI
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_MANIFEST_FAILED;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_PROCESSING_RESPONSE_FILES;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_RAW_DATA_FAILED;
+import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_RPO_PENDING;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.AWAITING_VERIFICATION;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.FAILURE;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.MARKED_FOR_DELETION;
@@ -57,6 +58,8 @@ public class EodHelperMocks {
     private ObjectRecordStatusEntity failedArmManifestFileStatus;
     @Mock
     private ObjectRecordStatusEntity awaitingVerificationStatus;
+    @Mock
+    private ObjectRecordStatusEntity armRpoPendingStatus;
 
     private MockedStatic<EodHelper> mockedEodHelper;
     private AutoCloseable closeable;
@@ -121,6 +124,9 @@ public class EodHelperMocks {
         mockedEodHelper.when(EodHelper::awaitingVerificationStatus).thenReturn(awaitingVerificationStatus);
         lenient().when(awaitingVerificationStatus.getId()).thenReturn(AWAITING_VERIFICATION.getId());
         lenient().when(awaitingVerificationStatus.getDescription()).thenReturn("Awaiting Verification");
+        mockedEodHelper.when(EodHelper::armRpoPendingStatus).thenReturn(armRpoPendingStatus);
+        lenient().when(armRpoPendingStatus.getId()).thenReturn(ARM_RPO_PENDING.getId());
+        lenient().when(armRpoPendingStatus.getDescription()).thenReturn("Arm RPO Pending");
     }
 
     public void givenIsEqualLocationReturns(boolean result) {
