@@ -97,7 +97,6 @@ class DetsToArmBatchPushProcessorImplTest {
     @TempDir
     private File tempDirectory;
 
-    private File manifestFile;
     private ObjectStateRecordEntity objectStateRecordEntity;
 
     private static final EodHelperMocks EOD_HELPER_MOCKS = new EodHelperMocks();
@@ -153,7 +152,7 @@ class DetsToArmBatchPushProcessorImplTest {
         lenient().when(objectStateRecordRepository.findById(objectStateRecordEntity.getUuid())).thenReturn(Optional.of(objectStateRecordEntity));
 
         String filename = String.format("DETS_%s.a360", DETS_UUID);
-        manifestFile = new File(fileLocation, filename);
+        File manifestFile = new File(fileLocation, filename);
         String content = "Test data";
         try (BufferedWriter fileWriter = Files.newBufferedWriter(manifestFile.toPath());
              PrintWriter printWriter = new PrintWriter(fileWriter)) {
