@@ -35,6 +35,7 @@ public class MediaTestData implements Persistable<TestMediaEntity.TestMediaBuild
 
     /**
      * Deprecated.
+     *
      * @deprecated do not use. Instead, use Persistable to create an object with the desired state.
      */
     @Deprecated
@@ -63,7 +64,7 @@ public class MediaTestData implements Persistable<TestMediaEntity.TestMediaBuild
     }
 
     public MediaEntity createMediaWith(CourtroomEntity courtroomEntity, OffsetDateTime startTime, OffsetDateTime endTime, int channel,
-                                              String mediaType, Integer refConfScore, String reFConfReason) {
+                                       String mediaType, Integer refConfScore, String reFConfReason) {
         var mediaEntity = someMinimalMedia();
         mediaEntity.setCourtroom(courtroomEntity);
         mediaEntity.setStart(startTime);
@@ -78,7 +79,7 @@ public class MediaTestData implements Persistable<TestMediaEntity.TestMediaBuild
     }
 
     public MediaEntity createMediaWith(CourtroomEntity courtroomEntity, OffsetDateTime startTime, OffsetDateTime endTime, int channel,
-                                              String mediaType) {
+                                       String mediaType) {
         var mediaEntity = someMinimalMedia();
         mediaEntity.setCourtroom(courtroomEntity);
         mediaEntity.setStart(startTime);

@@ -1,15 +1,11 @@
 package uk.gov.hmcts.darts.common.repository;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.data.auditing.DateTimeProvider;
 import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum;
 import uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum;
 import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
-import uk.gov.hmcts.darts.common.helper.SystemUserHelper;
 import uk.gov.hmcts.darts.common.util.EodHelper;
 import uk.gov.hmcts.darts.testutils.PostgresIntegrationBase;
 import uk.gov.hmcts.darts.testutils.stubs.ExternalObjectDirectoryStub;
@@ -22,6 +18,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.STORED;
@@ -33,15 +30,6 @@ class ExternalObjectDirectoryRepositoryTest extends PostgresIntegrationBase {
 
     @Autowired
     private ExternalObjectDirectoryStub externalObjectDirectoryStub;
-
-    @Autowired
-    private SystemUserHelper systemUserHelper;
-
-    @MockBean
-    private DateTimeProvider dateTimeProvider;
-
-    @Autowired
-    private ObjectRecordStatusRepository objectRecordStatusRepository;
 
     @Autowired
     private CurrentTimeHelper currentTimeHelper;
@@ -58,7 +46,7 @@ class ExternalObjectDirectoryRepositoryTest extends PostgresIntegrationBase {
 
         int hourDurationBeyondHours = setupHoursBeforeCurrentTime; // which no records are
 
-        // excerise the logic
+        // exercise the logic
         List<Integer> results = externalObjectDirectoryRepository
             .findIdsIn2StorageLocationsBeforeTime(
                 EodHelper.storedStatus(), EodHelper.storedStatus(),
@@ -102,7 +90,7 @@ class ExternalObjectDirectoryRepositoryTest extends PostgresIntegrationBase {
 
         int hourDurationBeyondHours = setupHoursBeforeCurrentTime; // which no records are
 
-        // excerise the logic
+        // exercise the logic
         List<Integer> results = externalObjectDirectoryRepository
             .findIdsIn2StorageLocationsBeforeTime(
                 EodHelper.storedStatus(), EodHelper.storedStatus(),
@@ -243,7 +231,7 @@ class ExternalObjectDirectoryRepositoryTest extends PostgresIntegrationBase {
         List<Integer> matchesEntity = new ArrayList<>(
             actualResults.stream().filter(expectedResult -> expectedResults.stream().anyMatch(result -> expectedResult.equals(result.getId()))).toList());
 
-        Assertions.assertEquals(resultCount, matchesEntity.size());
+        assertEquals(resultCount, matchesEntity.size());
     }
 
     private OffsetDateTime getCurrentDateTimeWithHoursBefore(int hours) {
@@ -291,7 +279,7 @@ class ExternalObjectDirectoryRepositoryTest extends PostgresIntegrationBase {
             + expectedArmRecordsResultOutsideHours.size() + expectedArmRecordsResultWithinTheHour.size();
 
         // assert that the test has inserted the data into the database
-        Assertions.assertEquals(expectedRecords, externalObjectDirectoryRepository.findAll().size());
+        assertEquals(expectedRecords, externalObjectDirectoryRepository.findAll().size());
     }
 
     private void generateDataWithAnnotationForUnstructured(int hoursBeforeCurrentTimeForArm,
@@ -336,7 +324,7 @@ class ExternalObjectDirectoryRepositoryTest extends PostgresIntegrationBase {
             + expectedArmRecordsResultOutsideHours.size() + expectedArmRecordsResultWithinTheHour.size();
 
         // assert that the test has inserted the data into the database
-        Assertions.assertEquals(expectedRecords, externalObjectDirectoryRepository.findAll().size());
+        assertEquals(expectedRecords, externalObjectDirectoryRepository.findAll().size());
     }
 
     private void generateDataWithMediaForInbound(int hoursBeforeCurrentTime)
@@ -374,6 +362,23 @@ class ExternalObjectDirectoryRepositoryTest extends PostgresIntegrationBase {
             + expectedArmRecordsResultOutsideHours.size() + expectedArmRecordsResultWithinTheHour.size();
 
         // assert that the test has inserted the data into the database
-        Assertions.assertEquals(expectedRecords, externalObjectDirectoryRepository.findAll().size());
+        assertEquals(expectedRecords, externalObjectDirectoryRepository.findAll().size());
     }
+
+    @Test
+    void findFileSizeForMedia() throws InvocationTargetException, NoSuchMethodException, IllegalAccessException {
+
+        // given
+        List<ExternalObjectDirectoryEntity> eods = externalObjectDirectoryStub.generateWithStatusAndMediaLocation(
+            ExternalLocationTypeEnum.INBOUND, STORED, 1, Optional.empty());
+
+        ExternalObjectDirectoryEntity eod = eods.getFirst();
+
+        // when
+        Long fileSize = externalObjectDirectoryRepository.findFileSize(eod.getId());
+
+        // then
+        assertEquals(1000L, fileSize);
+    }
+
 }
