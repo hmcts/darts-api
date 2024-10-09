@@ -19,7 +19,7 @@ SCHEMA="darts"
 
 PR_HOST="darts-modernisation-dev.postgres.database.azure.com"
 PR_USER="hmcts"
-PR_PASSWORD="$(kubectl --context ss-dev-01-aks -n darts-modernisation get secret postgres -o json | jq .data.PASSWORD -r | base64 -d)"
+PR_PASSWORD="$(kubectl -n darts-modernisation get secret postgres -o json | jq .data.PASSWORD -r | base64 -d)"
 PR_DATABASE="pr-${PR_NUMBER}-darts"
 PR_BASE_DATABASE="pr-base-darts"
 
