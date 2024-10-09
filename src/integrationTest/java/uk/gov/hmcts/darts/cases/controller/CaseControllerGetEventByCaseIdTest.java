@@ -33,7 +33,7 @@ class CaseControllerGetEventByCaseIdTest extends IntegrationBase {
     @Autowired
     private transient MockMvc mockMvc;
 
-    private static String endpointUrl = "/cases/{case_id}/events";
+    private static final String endpointUrl = "/cases/{case_id}/events";
 
     private static final OffsetDateTime SOME_DATE_TIME = OffsetDateTime.parse("2023-01-01T12:00Z");
     private static final String SOME_COURTHOUSE = "SOME-COURTHOUSE";
@@ -94,6 +94,7 @@ class CaseControllerGetEventByCaseIdTest extends IntegrationBase {
             "timestamp":"2023-01-01T12:00:00Z",
             "name":"Section 11 of the Contempt of Court Act 1981",
             "text":"some-event-text-1",
+            "is_data_anonymised": false
             }]
             """;
 
