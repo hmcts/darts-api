@@ -351,8 +351,7 @@ class DataStoreToArmHelperIntTest extends IntegrationBase {
             .recordMetadata(createMediaArchiveRecordMetadata())
             .build();
     }
-
-
+    
     private RecordMetadata createMediaArchiveRecordMetadata() {
         OffsetDateTime recordTime = OffsetDateTime.of(2024, 1, 23, 10, 0, 0, 0, ZoneOffset.UTC);
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern(DATE_TIME_FORMAT);
