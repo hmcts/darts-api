@@ -72,7 +72,7 @@ public class AudioLinkingAutomatedTask extends AbstractLockableAutomatedTask
         private final MediaLinkedCaseRepository mediaLinkedCaseRepository;
         private final EventService eventService;
         @Getter
-        @Value("${darts.automated-tasks.audio-linking.audio-buffer-seconds:0s}")
+        @Value("${darts.automated-tasks.audio-linking.audio-buffer:0s}")
         private final Duration audioBuffer;
 
 

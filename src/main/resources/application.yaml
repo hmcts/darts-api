@@ -340,7 +340,7 @@ darts:
       expiry-deletion:
         enabled: ${CASE_EXPIRY_DELETION_ENABLED:false}
       audio-linking:
-        audio-buffer-seconds: 0s
+        audio-buffer: 0s
   annotations:
     allowed-extensions:
       - "docx"
