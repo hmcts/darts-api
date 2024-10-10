@@ -738,7 +738,16 @@ public class DartsDatabaseStub {
     }
 
     private void saveSingleEventForHearing(HearingEntity hearing, EventEntity event) {
-        event.setHearingEntities(List.of(hearingRepository.getReferenceById(hearing.getId())));
+        List<HearingEntity> list = event.getHearingEntities();
+        if (list != null) {
+            boolean match = event.getHearingEntities().stream().anyMatch(hearingEntity -> hearingEntity.getId().equals(hearing.getId()));
+            if (!match) {
+                list.add(hearingRepository.getReferenceById(hearing.getId()));
+            }
+        } else {
+            event.setHearingEntities(List.of(hearingRepository.getReferenceById(hearing.getId())));
+        }
+
         dartsDatabaseSaveStub.save(event);
     }
 

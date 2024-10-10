@@ -10,7 +10,6 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.json.BasicJsonTester;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
-import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.EventEntity;
 import uk.gov.hmcts.darts.common.enums.SecurityRoleEnum;
 import uk.gov.hmcts.darts.event.service.impl.AdminEventsSearchGivensBuilder;
@@ -19,7 +18,6 @@ import uk.gov.hmcts.darts.testutils.IntegrationBase;
 
 import java.util.List;
 
-import static java.time.OffsetDateTime.now;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -94,12 +92,10 @@ class EventSearchControllerTest extends IntegrationBase {
 
     @Test
     void returnsAllFieldsCorrectly() throws Exception {
+        int eventHearingsCount = 2;
+        int eventsCount = 2;
         given.anAuthenticatedUserWithGlobalAccessAndRole(SUPER_ADMIN);
-        List<EventEntity> entity = eventsGivensBuilder.persistedEvents(1);
-
-        CourtCaseEntity courtCaseEntity = entity.get(0).getHearingEntities().get(0).getCourtCase();
-        courtCaseEntity.setDataAnonymisedTs(now());
-        dartsDatabase.save(courtCaseEntity);
+        List<EventEntity> entity = eventsGivensBuilder.persistedEventsWithHearings(eventsCount, eventHearingsCount);
 
         var mvcResult = mockMvc.perform(post(EVENT_SEARCH_ENDPOINT)
                                             .content("{}")
@@ -108,14 +104,22 @@ class EventSearchControllerTest extends IntegrationBase {
             .andReturn();
 
         var response = json.from(mvcResult.getResponse().getContentAsString());
-        assertThat(response).hasJsonPathNumberValue("[0].id");
-        assertThat(response).hasJsonPathStringValue("[0].event_ts");
-        assertThat(response).hasJsonPathNumberValue("[0].courthouse.id");
-        assertThat(response).hasJsonPathStringValue("[0].courthouse.display_name");
-        assertThat(response).hasJsonPathNumberValue("[0].courtroom.id");
-        assertThat(response).hasJsonPathStringValue("[0].courtroom.name");
-        assertThat(response).hasJsonPathBooleanValue("[0].is_event_anonymised");
-        assertThat(response).hasJsonPathBooleanValue("[0].is_case_expired");
-        assertThat(response).hasJsonPathStringValue("[0].case_expired_at");
+        assertThat(response).hasJsonPathNumberValue("$.length()", eventHearingsCount + eventsCount);
+
+        // assert the event and hearings
+        for (int i = 0; i < eventsCount; i++) {
+            for (int j = 0; j < eventHearingsCount; j++) {
+                assertThat(response).hasJsonPathNumberValue("[" + i + "].id", entity.get(i).getId());
+                assertThat(response).hasJsonPathStringValue("[" + i + "].event_ts", entity.get(i).getTimestamp().toString());
+                assertThat(response).hasJsonPathNumberValue("[" + i + "].courthouse.id", entity.get(i).getCourtroom().getCourthouse().getId());
+                assertThat(response).hasJsonPathStringValue("[" + i + "].courthouse.display_name",
+                                                            entity.get(i).getCourtroom().getCourthouse().getDisplayName());
+                assertThat(response).hasJsonPathNumberValue("[" + i + "].courtroom.id", entity.get(i).getCourtroom().getId());
+                assertThat(response).hasJsonPathStringValue("[" + i + "].courtroom.name", entity.get(i).getCourtroom().getName());
+                assertThat(response).hasJsonPathBooleanValue("[" + i + "].is_data_anonymised", entity.get(i).isDataAnonymised());
+                assertThat(response).hasJsonPathBooleanValue("[" + i + "].is_case_expired",
+                                                             entity.get(i).getHearingEntities().get(j).getCourtCase().isDataAnonymised());
+            }
+        }
     }
 }
