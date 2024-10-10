@@ -18,6 +18,7 @@ import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
 import uk.gov.hmcts.darts.datamanagement.config.DataManagementConfiguration;
 import uk.gov.hmcts.darts.datamanagement.exception.FileNotDownloadedException;
 import uk.gov.hmcts.darts.datamanagement.service.DataManagementService;
+import uk.gov.hmcts.darts.dets.api.impl.DetsDataManagementApiImpl;
 
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -55,12 +56,14 @@ class ArmDataManagementApiImplTest {
     private ArmApiService armApiService;
     @Mock
     private DataManagementService dataManagementService;
+    @Mock
+    private DetsDataManagementApiImpl detsDataManagementApi;
 
     @BeforeEach
     void setUp() {
         lenient().when(armDataManagementConfiguration.getContainerName()).thenReturn(ARM_BLOB_CONTAINER_NAME);
         armDataManagementApi = new ArmDataManagementApiImpl(
-            armService, armDataManagementConfiguration, armApiService, dataManagementConfiguration, dataManagementService);
+            armService, armDataManagementConfiguration, armApiService, dataManagementConfiguration, dataManagementService, detsDataManagementApi);
     }
 
     @Test
@@ -130,5 +133,17 @@ class ArmDataManagementApiImplTest {
 
         verify(dataManagementService).copyBlobData(
             UNSTRUCTURED_CONTAINER_NAME, ARM_BLOB_CONTAINER_NAME, unstructuredUuid.toString(), "DARTS/submission/" + filename);
+    }
+
+    @Test
+    void copyDetsBlobDataToArm() {
+
+        UUID detsUuid = UUID.randomUUID();
+        String filename = "someFile";
+        when(armDataManagementConfiguration.getFolders().getSubmission()).thenReturn("DARTS/submission/");
+
+        armDataManagementApi.copyDetsBlobDataToArm(detsUuid.toString(), filename);
+
+        verify(detsDataManagementApi).copyDetsBlobDataToArm(detsUuid.toString(), "DARTS/submission/" + filename);
     }
 }

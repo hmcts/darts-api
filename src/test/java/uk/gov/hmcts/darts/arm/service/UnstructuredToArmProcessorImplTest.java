@@ -18,7 +18,7 @@ import org.springframework.data.domain.Pageable;
 import uk.gov.hmcts.darts.arm.api.ArmDataManagementApi;
 import uk.gov.hmcts.darts.arm.config.ArmDataManagementConfiguration;
 import uk.gov.hmcts.darts.arm.config.UnstructuredToArmProcessorConfiguration;
-import uk.gov.hmcts.darts.arm.helper.UnstructuredToArmHelper;
+import uk.gov.hmcts.darts.arm.helper.DataStoreToArmHelper;
 import uk.gov.hmcts.darts.arm.model.record.ArchiveRecordFileInfo;
 import uk.gov.hmcts.darts.arm.service.impl.UnstructuredToArmProcessorImpl;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
@@ -35,7 +35,6 @@ import uk.gov.hmcts.darts.common.repository.ObjectRecordStatusRepository;
 import uk.gov.hmcts.darts.common.service.FileOperationService;
 import uk.gov.hmcts.darts.common.service.impl.EodHelperMocks;
 import uk.gov.hmcts.darts.common.util.EodHelper;
-import uk.gov.hmcts.darts.datamanagement.api.DataManagementApi;
 import uk.gov.hmcts.darts.log.api.LogApi;
 import uk.gov.hmcts.darts.test.common.FileStore;
 
@@ -77,8 +76,6 @@ class UnstructuredToArmProcessorImplTest {
     @Mock
     private ExternalLocationTypeRepository externalLocationTypeRepository;
     @Mock
-    private DataManagementApi dataManagementApi;
-    @Mock
     private ArmDataManagementApi armDataManagementApi;
     @Mock
     private UserIdentity userIdentity;
@@ -118,7 +115,7 @@ class UnstructuredToArmProcessorImplTest {
     @Mock
     private ObjectRecordStatusEntity objectRecordStatusEntityArmDropZone;
     @InjectMocks
-    private UnstructuredToArmHelper unstructuredToArmHelper;
+    private DataStoreToArmHelper unstructuredToArmHelper;
     @Captor
     private ArgumentCaptor<ExternalObjectDirectoryEntity> externalObjectDirectoryEntityCaptor;
 
@@ -169,7 +166,9 @@ class UnstructuredToArmProcessorImplTest {
     @SuppressWarnings("PMD.SignatureDeclareThrowsException")
     public void clean() throws Exception {
         FileStore.getFileStore().remove();
-        Assertions.assertEquals(0, Files.list(tempDirectory.toPath()).count());
+        try (var filesStream = Files.list(tempDirectory.toPath())) {
+            Assertions.assertEquals(0, filesStream.count());
+        }
     }
 
     @Test
@@ -209,7 +208,6 @@ class UnstructuredToArmProcessorImplTest {
 
         when(externalLocationTypeRepository.getReferenceById(2)).thenReturn(externalLocationTypeUnstructured);
         when(externalLocationTypeRepository.getReferenceById(3)).thenReturn(externalLocationTypeArm);
-
 
         List<ExternalObjectDirectoryEntity> inboundList = new ArrayList<>(Collections.singletonList(externalObjectDirectoryEntityUnstructured));
         when(externalObjectDirectoryRepository.findEodsNotInOtherStorage(

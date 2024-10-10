@@ -26,6 +26,7 @@ class DetsDataManagementServiceTest {
 
     @Autowired
     private DetsApiServiceImpl dataManagementService;
+    
 
     @Test
     void fetchBinaryDataFromBlobStorage() throws IOException, FileNotDownloadedException {
@@ -34,10 +35,10 @@ class DetsDataManagementServiceTest {
 
         var uuid = dataManagementService.saveBlobData(data);
 
-        try (DownloadResponseMetaData downloadResponseMetaData = dataManagementService.downloadData(
-            uuid
-        )) {
+        try (DownloadResponseMetaData downloadResponseMetaData = dataManagementService.downloadData(uuid)) {
             assertEquals(TEST_BINARY_STRING, new String(downloadResponseMetaData.getResource().getInputStream().readAllBytes()));
         }
     }
+
+
 }

@@ -7,13 +7,16 @@ import com.azure.storage.blob.BlobServiceClient;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import uk.gov.hmcts.darts.arm.config.ArmDataManagementConfiguration;
 import uk.gov.hmcts.darts.common.datamanagement.component.DataManagementAzureClientFactory;
 import uk.gov.hmcts.darts.common.datamanagement.component.impl.DownloadResponseMetaData;
 import uk.gov.hmcts.darts.common.datamanagement.component.impl.FileBasedDownloadResponseMetaData;
 import uk.gov.hmcts.darts.common.datamanagement.enums.DatastoreContainerType;
+import uk.gov.hmcts.darts.common.exception.DartsException;
 import uk.gov.hmcts.darts.datamanagement.exception.FileNotDownloadedException;
 import uk.gov.hmcts.darts.dets.config.DetsDataManagementConfiguration;
 import uk.gov.hmcts.darts.dets.service.DetsApiService;
+import uk.gov.hmcts.darts.util.AzureCopyUtil;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -28,6 +31,10 @@ public class DetsApiServiceImpl implements DetsApiService {
     private final DataManagementAzureClientFactory blobServiceFactory;
 
     private final DetsDataManagementConfiguration configuration;
+
+    private final ArmDataManagementConfiguration armDataManagementConfiguration;
+
+    private final AzureCopyUtil azureCopyUtil;
 
     @Override
     @SuppressWarnings({"PMD.CloseResource"})
@@ -65,4 +72,32 @@ public class DetsApiServiceImpl implements DetsApiService {
         client.upload(binaryData);
         return uniqueBlobId;
     }
+
+    @Override
+    public void copyDetsBlobDataToArm(String detsUuid, String blobPathAndName) {
+        try {
+            String sourceContainerSasUrl = configuration.getSasEndpoint();
+            String destinationContainerSasUrl = armDataManagementConfiguration.getSasEndpoint();
+            String sourceBlobSasUrl = buildBlobSasUrl(configuration.getContainerName(), sourceContainerSasUrl, detsUuid);
+            String destinationBlobSasUrl = buildBlobSasUrl(armDataManagementConfiguration.getContainerName(), destinationContainerSasUrl, blobPathAndName);
+
+            azureCopyUtil.copy(sourceBlobSasUrl, destinationBlobSasUrl);
+
+            log.info("Copy completed from '{}' to '{}'. Source location: {}, destination location: {}",
+                     configuration.getContainerName(), armDataManagementConfiguration.getContainerName(), detsUuid, blobPathAndName);
+        } catch (Exception e) {
+            throw new DartsException(String.format("Exception copying file from '%s' to '%s'. Source location: %s",
+                                                   configuration.getContainerName(), armDataManagementConfiguration.getContainerName(), detsUuid), e);
+        }
+    }
+
+    private String buildBlobSasUrl(String containerName, String containerSasUrl, String location) {
+        if (containerName.equals(armDataManagementConfiguration.getSasEndpoint())) {
+            // arm sas url contains folder 'DARTS' in the url, so replacing it to avoid 'DARTS' being present twice in the generated blob sas url
+            return containerSasUrl.replace(containerName + "/DARTS", containerName + "/" + location);
+        } else {
+            return containerSasUrl.replace(containerName, containerName + "/" + location);
+        }
+    }
+    
 }
