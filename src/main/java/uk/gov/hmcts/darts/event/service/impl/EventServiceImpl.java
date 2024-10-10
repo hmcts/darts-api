@@ -4,7 +4,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.darts.common.entity.EventEntity;
+import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.common.repository.EventRepository;
+import uk.gov.hmcts.darts.event.exception.EventError;
 import uk.gov.hmcts.darts.event.mapper.EventMapper;
 import uk.gov.hmcts.darts.event.model.AdminGetEventForIdResponseResult;
 import uk.gov.hmcts.darts.event.service.EventService;
@@ -25,5 +27,16 @@ public class EventServiceImpl implements EventService {
         eventIdValidator.validate(eventId);
         Optional<EventEntity> eventEntityOptional = eventRepository.findById(eventId);
         return eventMapper.mapToAdminGetEventsResponseForId(eventEntityOptional);
+    }
+
+    @Override
+    public EventEntity getEventById(Integer eventId) {
+        return eventRepository.findById(eventId)
+            .orElseThrow(() -> new DartsApiException(EventError.EVENT_ID_NOT_FOUND_RESULTS));
+    }
+
+    @Override
+    public EventEntity saveEventEntity(EventEntity event) {
+        return eventRepository.save(event);
     }
 }
