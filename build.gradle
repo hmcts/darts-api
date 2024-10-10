@@ -366,7 +366,7 @@ repositories {
 
 ext {
   log4JVersion = "2.24.1"
-  tomcatEmbedVersion = "10.1.30"
+  tomcatEmbedVersion = "10.1.31"
 }
 
 ext['snakeyaml.version'] = '2.0'
@@ -431,7 +431,7 @@ dependencies {
   implementation 'uk.gov.service.notify:notifications-java-client:5.2.0-RELEASE'
 
   implementation group: 'ch.qos.logback', name: 'logback-classic', version: '1.5.9'
-  implementation group: 'ch.qos.logback', name: 'logback-core', version: '1.5.8'
+  implementation group: 'ch.qos.logback', name: 'logback-core', version: '1.5.9'
 
   implementation group: 'io.vavr', name: 'vavr', version: '0.10.4'
 

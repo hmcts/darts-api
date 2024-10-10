@@ -3,6 +3,7 @@ package uk.gov.hmcts.darts.common.repository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import uk.gov.hmcts.darts.common.entity.EventEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.testutils.PostgresIntegrationBase;
 import uk.gov.hmcts.darts.testutils.stubs.HearingStub;
@@ -35,8 +36,8 @@ class HearingRepositoryIntTest extends PostgresIntegrationBase {
     @Test
     void testGetAllHearingNoSearchCriteria() {
         List<HearingEntity> hearingEntityList = hearingRepository.findHearingDetails(null, null,
-                                             null, null,
-                                             null, RESULT_LIMIT);
+                                                                                     null, null,
+                                                                                     null, RESULT_LIMIT);
         assertEquals(generatedHearingEntities.size(), hearingEntityList.size());
         for (int i = 0; i < generatedHearingEntities.size(); i++) {
             assertEquals(generatedHearingEntities.get(i).getId(), hearingEntityList.get(i).getId());
@@ -65,13 +66,13 @@ class HearingRepositoryIntTest extends PostgresIntegrationBase {
         List<HearingEntity> hearingEntityList = hearingRepository
             .findHearingDetails(List.of(generatedHearingEntities
                                             .get(recordIndexToFind).getCourtroom().getCourthouse().getId()),
-                                                                                     generatedHearingEntities
-                                                                                         .get(recordIndexToFind).getCourtCase().getCaseNumber(),
-                                                                                     generatedHearingEntities
+                                generatedHearingEntities
+                                    .get(recordIndexToFind).getCourtCase().getCaseNumber(),
+                                generatedHearingEntities
                                     .get(recordIndexToFind).getCourtroom().getName(),
-                                                                                     generatedHearingEntities
+                                generatedHearingEntities
                                     .get(recordIndexToFind).getHearingDate(),
-                                                                                     generatedHearingEntities
+                                generatedHearingEntities
                                     .get(recordIndexToFind).getHearingDate(), RESULT_LIMIT);
         assertEquals(1, hearingEntityList.size());
         assertEquals(generatedHearingEntities.get(recordIndexToFind).getId(),
@@ -118,11 +119,11 @@ class HearingRepositoryIntTest extends PostgresIntegrationBase {
 
         List<HearingEntity> hearingEntityList = hearingRepository
             .findHearingDetails(null,
-                                                                                     HearingSubStringQueryEnum.CASE_NUMBER
-                                                                                         .getQueryStringPrefix(recordIndexToFind.toString()),
-                                                                                     null,
-                                                                                     null,
-                                                                                     null, RESULT_LIMIT);
+                                HearingSubStringQueryEnum.CASE_NUMBER
+                                    .getQueryStringPrefix(recordIndexToFind.toString()),
+                                null,
+                                null,
+                                null, RESULT_LIMIT);
         assertEquals(1, hearingEntityList.size());
         assertEquals(generatedHearingEntities.get(recordIndexToFind).getId(), hearingEntityList.get(0).getId());
     }
@@ -210,7 +211,7 @@ class HearingRepositoryIntTest extends PostgresIntegrationBase {
                                                                                      null,
                                                                                      null,
                                                                                      generatedHearingEntities.get(recordIndexToFindTo).getHearingDate(),
-                                                                                      RESULT_LIMIT);
+                                                                                     RESULT_LIMIT);
 
         List<HearingEntity> expectedHearings = generatedHearingEntities.subList(0, recordIndexToFindTo + 1);
         assertEquals(expectedHearings.size(), hearingEntityList.size());
@@ -240,4 +241,14 @@ class HearingRepositoryIntTest extends PostgresIntegrationBase {
             assertEquals(expectedHearings.get(i).getId(), hearingEntityList.get(i).getId());
         }
     }
+
+    @Test
+    void testFindHearingIdsByEventId() {
+        EventEntity event = dartsDatabase.getEventStub().createEvent(generatedHearingEntities.getFirst());
+
+        List<Integer> hearingIdList = hearingRepository.findHearingIdsByEventId(event.getId());
+        assertEquals(1, hearingIdList.size());
+        assertEquals(1, hearingIdList.getFirst());
+    }
+
 }

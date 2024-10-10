@@ -32,6 +32,14 @@ public interface HearingRepository extends JpaRepository<HearingEntity, Integer>
     List<HearingEntity> findByCaseIds(List<Integer> caseIds);
 
     @Query("""
+        SELECT h.id FROM HearingEntity h
+        JOIN h.eventList event
+        WHERE event.id = :eventId
+        """
+    )
+    List<Integer> findHearingIdsByEventId(Integer eventId);
+
+    @Query("""
         SELECT h FROM HearingEntity h, CourthouseEntity ch, CourtroomEntity cr, CourtCaseEntity case
         WHERE ch.courthouseName = upper(:courthouse)
         AND cr.name = upper(:courtroom)
