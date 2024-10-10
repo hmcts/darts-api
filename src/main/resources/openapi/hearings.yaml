@@ -259,7 +259,7 @@ components:
 
     events_response:
       type: array
-      default: []
+      default: [ ]
       items:
         $ref: '#/components/schemas/event_response'
     event_response:
@@ -278,6 +278,9 @@ components:
         text:
           type: string
           example: Record:New Case
+        is_data_anonymised:
+          type: boolean
+          example: false
 
     HearingsSearchRequest:
       type: object
@@ -429,7 +432,7 @@ components:
         - "HEARING_100"
         - "HEARING_101"
         - "HEARING_102"
-      x-enum-varnames: [HEARING_NOT_FOUND, TOO_MANY_RESULTS, HEARING_NOT_ACTUAL]
+      x-enum-varnames: [ HEARING_NOT_FOUND, TOO_MANY_RESULTS, HEARING_NOT_ACTUAL ]
 
     HearingsTitleErrors:
       type: string
@@ -437,4 +440,4 @@ components:
         - "The requested hearing cannot be found"
         - "Too many results have been returned. Please change search criteria."
         - "The requested hearing is not an actual hearing."
-      x-enum-varnames: [HEARING_NOT_FOUND, TOO_MANY_RESULTS, HEARING_NOT_ACTUAL]
+      x-enum-varnames: [ HEARING_NOT_FOUND, TOO_MANY_RESULTS, HEARING_NOT_ACTUAL ]

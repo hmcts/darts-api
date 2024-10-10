@@ -12,6 +12,8 @@ import java.time.OffsetDateTime;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static uk.gov.hmcts.darts.common.util.CommonTestDataUtil.createEventWith;
 
 class EventMapperTest {
@@ -30,7 +32,27 @@ class EventMapperTest {
         assertEquals("eventName", event.getName());
         assertEquals("event text", event.getText());
         assertEquals(hearingDate, event.getTimestamp());
+        assertFalse(event.getIsDataAnonymised());
     }
+
+    @Test
+    void testMapGetEventsByCaseIdDataAnonymised() {
+        OffsetDateTime hearingDate = OffsetDateTime.parse("2024-07-01T12:00Z");
+        HearingEntity hearing = CommonTestDataUtil.createHearing("case1", hearingDate.toLocalDate());
+        EventEntity eventEntity = createEventWith("eventName", "event text", hearing, hearingDate);
+        eventEntity.setDataAnonymised(true);
+        List<EventEntity> eventEntityList = Lists.newArrayList(eventEntity);
+        List<Event> events = EventMapper.mapToEvents(eventEntityList);
+        Event event = events.get(0);
+        assertEquals(1, event.getId());
+        assertEquals(102, event.getHearingId());
+        assertEquals(hearingDate.toLocalDate(), event.getHearingDate());
+        assertEquals("eventName", event.getName());
+        assertEquals("event text", event.getText());
+        assertEquals(hearingDate, event.getTimestamp());
+        assertTrue(event.getIsDataAnonymised());
+    }
+
 
     @Test
     void testMapGetVersionedEventsByCaseId() {
