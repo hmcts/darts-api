@@ -97,7 +97,7 @@ public interface EventRepository extends JpaRepository<EventEntity, Integer> {
         having count(e2.event_id) > 1
         limit :limit
         """, nativeQuery = true)
-    List<Integer> getCurrentEventIdsToBeProcessed(long limit);
+    List<Integer> findCurrentEventIdsWithDuplicates(long limit);
 
     @Query(value = """
         select distinct on (event_id, hearing_ids) e.* from (
@@ -111,11 +111,12 @@ public interface EventRepository extends JpaRepository<EventEntity, Integer> {
     List<EventIdAndHearingIds> getTheLatestCreatedEventPrimaryKeyForTheEventId(Integer eventId);
 
     /**
-     *  string_agg(he.hea_id::varchar, ',' order by he.hea_id) to ensure we only update the events that have the same hearing ids
-     *  This is done by reading the hearing ids from the latest event created and only updating the events that have the same hearing ids
+     * string_agg(he.hea_id::varchar, ',' order by he.hea_id) to ensure we only update the events that have the same hearing ids
+     * This is done by reading the hearing ids from the latest event created and only updating the events that have the same hearing ids
+     *
      * @param eventIdsPrimaryKey the primary key of the event that is the latest created
-     * @param eventId the event id that we want to close old events for
-     * @param hearingIds the hearing ids that we want to close old events for (Should match hearing ids of the latest event created)
+     * @param eventId            the event id that we want to close old events for
+     * @param hearingIds         the hearing ids that we want to close old events for (Should match hearing ids of the latest event created)
      */
     @Transactional
     @Modifying

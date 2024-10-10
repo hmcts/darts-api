@@ -37,6 +37,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
@@ -80,7 +81,7 @@ class AuthenticationInternalUserControllerTest {
     @Test
     void handleOauthCodeFromAzureWhenCodeIsReturnedWithAccessTokenAndUserState() throws JOSEException {
         final String emailAddress = "test.user@example.com";
-        when(authenticationService.handleOauthCode(anyString()))
+        when(authenticationService.handleOauthCode(anyString(), isNull()))
             .thenReturn(createDummyAccessToken(emailAddress));
         when(locator.locateAuthenticationConfiguration()).thenReturn(new InternalAuthConfigurationPropertiesStrategy(
             internalAuthConfigurationProperties, new InternalAuthProviderConfigurationProperties()));
@@ -101,12 +102,12 @@ class AuthenticationInternalUserControllerTest {
         );
         doNothing().when(userAccountService).updateLastLoginTime(-1);
 
-        SecurityToken securityToken = controller.handleOauthCode(DUMMY_CODE);
+        SecurityToken securityToken = controller.handleOauthCode(DUMMY_CODE, null);
         assertNotNull(securityToken);
         assertNotNull(securityToken.getAccessToken());
         assertNotNull(securityToken.getUserState());
 
-        verify(authenticationService).handleOauthCode(DUMMY_CODE);
+        verify(authenticationService).handleOauthCode(DUMMY_CODE, null);
         verify(authorisationApi).getAuthorisation(emailAddress);
         verify(userAccountService).updateLastLoginTime(-1);
         verifyNoMoreInteractions(authenticationService, authorisationApi, userAccountService);
@@ -115,18 +116,18 @@ class AuthenticationInternalUserControllerTest {
     @Test
     void handleOauthCodeFromAzureWhenCodeIsReturnedWithAccessTokenAndNoUserState() throws JOSEException {
         final String emailAddress = "test.missing@example.com";
-        when(authenticationService.handleOauthCode(anyString()))
+        when(authenticationService.handleOauthCode(anyString(), isNull()))
             .thenReturn(createDummyAccessToken(emailAddress));
         when(locator.locateAuthenticationConfiguration()).thenReturn(new InternalAuthConfigurationPropertiesStrategy(
             internalAuthConfigurationProperties, new InternalAuthProviderConfigurationProperties()));
         when(internalAuthConfigurationProperties.getClaims()).thenReturn("preferred_username");
 
-        SecurityToken securityToken = controller.handleOauthCode(DUMMY_CODE);
+        SecurityToken securityToken = controller.handleOauthCode(DUMMY_CODE, null);
         assertNotNull(securityToken);
         assertNotNull(securityToken.getAccessToken());
         assertNull(securityToken.getUserState());
 
-        verify(authenticationService).handleOauthCode(DUMMY_CODE);
+        verify(authenticationService).handleOauthCode(DUMMY_CODE, null);
         verify(authorisationApi).getAuthorisation(emailAddress);
         verifyNoMoreInteractions(authenticationService, authorisationApi, userAccountService);
     }
@@ -155,17 +156,17 @@ class AuthenticationInternalUserControllerTest {
 
     @Test
     void handleOauthCodeFromAzureWhenCodeIsReturnedWithoutClaim() throws JOSEException {
-        when(authenticationService.handleOauthCode(anyString()))
+        when(authenticationService.handleOauthCode(anyString(), isNull()))
             .thenReturn(createDummyAccessToken("test.missing@example.com"));
         when(locator.locateAuthenticationConfiguration()).thenReturn(new InternalAuthConfigurationPropertiesStrategy(
             internalAuthConfigurationProperties, new InternalAuthProviderConfigurationProperties()));
 
-        SecurityToken securityToken = controller.handleOauthCode(DUMMY_CODE);
+        SecurityToken securityToken = controller.handleOauthCode(DUMMY_CODE, null);
         assertNotNull(securityToken);
         assertNotNull(securityToken.getAccessToken());
         assertNull(securityToken.getUserState());
 
-        verify(authenticationService).handleOauthCode(DUMMY_CODE);
+        verify(authenticationService).handleOauthCode(DUMMY_CODE, null);
         verifyNoMoreInteractions(authenticationService, authorisationApi, userAccountService);
     }
 
