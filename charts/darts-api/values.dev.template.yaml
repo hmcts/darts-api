@@ -128,7 +128,6 @@ nodejs:
   keyVaults:
     darts:
       secrets:
-        - AppInsightsInstrumentationKey
         - redis-connection-string
         - darts-portal-session-secret
   environment:
