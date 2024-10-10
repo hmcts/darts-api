@@ -14,6 +14,7 @@ import uk.gov.hmcts.darts.log.service.AudioLoggerService;
 import uk.gov.hmcts.darts.log.service.AutomatedTaskLoggerService;
 import uk.gov.hmcts.darts.log.service.CasesLoggerService;
 import uk.gov.hmcts.darts.log.service.DailyListLoggerService;
+import uk.gov.hmcts.darts.log.service.DeletionLoggerService;
 import uk.gov.hmcts.darts.log.service.EventLoggerService;
 import uk.gov.hmcts.darts.log.service.impl.NotificationLoggerService;
 import uk.gov.hmcts.darts.log.util.DailyListLogJobReport;
@@ -34,6 +35,7 @@ public class LogApiImpl implements LogApi {
     private final DailyListLoggerService logJobService;
     private final AutomatedTaskLoggerService automatedTaskLoggerService;
     private final ArmLoggerService armLoggerService;
+    private final DeletionLoggerService deletionLoggerService;
 
     @Override
     public void eventReceived(DartsEvent event) {
@@ -143,6 +145,16 @@ public class LogApiImpl implements LogApi {
     @Override
     public void caseDeletedDueToExpiry(Integer caseId, String caseNumber) {
         casesLoggerService.caseDeletedDueToExpiry(caseId, caseNumber);
+    }
+
+    @Override
+    public void mediaDeleted(Integer mediaId) {
+        deletionLoggerService.mediaDeleted(mediaId);
+    }
+
+    @Override
+    public void transcriptionDeleted(Integer transcriptionId) {
+        deletionLoggerService.transcriptionDeleted(transcriptionId);
     }
 }
 
