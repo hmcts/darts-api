@@ -479,31 +479,31 @@ public interface ExternalObjectDirectoryRepository extends JpaRepository<Externa
 
     @Query(value = """
         select fileSize from
+        (
             (
-               (
-               select file_size as fileSize from darts.media as med
-                   join darts.external_object_directory as eod on eod.med_id = med.med_id
-                   where eod.eod_id = :externalObjectDirectoryId
-               )
-               union
-               (
-               select file_size as fileSize from darts.annotation_document as ado
-                   join darts.external_object_directory as eod on eod.ado_id = ado.ado_id
-                   where eod.eod_id = :externalObjectDirectoryId
-               )
-           union
-               (
-               select file_size as fileSize from darts.case_document as cad
-                   join darts.external_object_directory as eod on eod.cad_id = cad.cad_id
-                   where eod.eod_id = :externalObjectDirectoryId
-               )
-           union
-               (
-               select file_size as fileSize from darts.transcription_document as trd
-                   join darts.external_object_directory as eod on eod.trd_id = trd.trd_id
-                   where eod.eod_id = :externalObjectDirectoryId
-               )
-        )a
+                select file_size as fileSize from darts.media as med
+                join darts.external_object_directory as eod on eod.med_id = med.med_id
+                where eod.eod_id = :externalObjectDirectoryId
+            )
+            union
+            (
+                select file_size as fileSize from darts.annotation_document as ado
+                join darts.external_object_directory as eod on eod.ado_id = ado.ado_id
+                where eod.eod_id = :externalObjectDirectoryId
+            )
+            union
+            (
+                select file_size as fileSize from darts.case_document as cad
+                join darts.external_object_directory as eod on eod.cad_id = cad.cad_id
+                where eod.eod_id = :externalObjectDirectoryId
+            )
+            union
+            (
+                select file_size as fileSize from darts.transcription_document as trd
+                join darts.external_object_directory as eod on eod.trd_id = trd.trd_id
+                where eod.eod_id = :externalObjectDirectoryId
+            )
+        ) a
         """, nativeQuery = true)
     Long findFileSize(Integer externalObjectDirectoryId);
 
