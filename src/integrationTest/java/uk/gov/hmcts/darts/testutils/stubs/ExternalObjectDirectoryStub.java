@@ -352,11 +352,8 @@ public class ExternalObjectDirectoryStub {
         for (int i = 0; i < numberOfObjectDirectory; i++) {
             var user = userAccountStub.getIntegrationTestUserAccountEntity();
 
-            AnnotationEntity annotationEntity;
-            AnnotationDocumentEntity annotationDocumentEntity = null;
-
-            annotationEntity = annotationStub.createAndSaveAnnotationEntityWith(user, "test annotation");
-            annotationDocumentEntity = annotationStub.createAndSaveAnnotationDocumentEntity(
+            AnnotationEntity annotationEntity = annotationStub.createAndSaveAnnotationEntityWith(user, "test annotation");
+            AnnotationDocumentEntity annotationDocumentEntity = annotationStub.createAndSaveAnnotationDocumentEntity(
                 userAccountStub, annotationEntity);
 
             ExternalObjectDirectoryEntity externalObjectDirectory = createAndSaveEod(
