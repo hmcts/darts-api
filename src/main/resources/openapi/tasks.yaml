@@ -132,6 +132,8 @@ components:
           $ref: '#/components/schemas/CronExpression'
         is_active:
           $ref: '#/components/schemas/IsActive'
+        batchSize:
+          $ref: '#/components/schemas/batchSize'
     DetailedAutomatedTask:
       type: object
       properties:
@@ -164,6 +166,8 @@ components:
       maxLength: 256
     IsActive:
       type: boolean
+    batchSize:
+      type: integer
     IsCronEditable:
       type: boolean
     CreatedAt:

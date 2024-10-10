@@ -21,7 +21,8 @@ public class AutomatedTasksMapper {
             .createdBy(automatedTaskEntity.getCreatedBy().getId())
             .lastModifiedAt(automatedTaskEntity.getLastModifiedDateTime())
             .lastModifiedBy(automatedTaskEntity.getLastModifiedBy().getId())
-            .isCronEditable(automatedTaskEntity.getCronEditable());
+            .isCronEditable(automatedTaskEntity.getCronEditable())
+            .batchSize(automatedTaskEntity.getBatchSize());
     }
 
     public List<AutomatedTaskSummary> mapEntitiesToModel(List<AutomatedTaskEntity> automatedTaskEntities) {
