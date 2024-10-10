@@ -10,6 +10,7 @@ import uk.gov.hmcts.darts.common.entity.EventHandlerEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.repository.EventHandlerRepository;
 import uk.gov.hmcts.darts.common.repository.EventRepository;
+import uk.gov.hmcts.darts.common.repository.HearingRepository;
 import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
 import uk.gov.hmcts.darts.common.util.DateConverterUtil;
 
@@ -39,6 +40,8 @@ public class EventStub {
 
     @Autowired
     private HearingStub hearingStub;
+    @Autowired
+    private HearingRepository hearingRepository;
 
     public EventEntity createEvent(HearingEntity hearing) {
         return createEvent(hearing, 10);
@@ -98,7 +101,7 @@ public class EventStub {
         eventEntity.setIsCurrent(true);
         eventEntity.setEventStatus(AUDIO_LINK_NOT_DONE_MODERNISED.getStatusNumber());
         eventEntity.setEventId(eventId);
-       return dartsDatabaseSaveStub.save(eventEntity);
+        return dartsDatabaseSaveStub.save(eventEntity);
     }
 
     public EventEntity createDefaultEvent() {
@@ -161,5 +164,18 @@ public class EventStub {
         }
 
         return currentFnd;
+    }
+
+    public boolean hasOnlyOneOfTheEventIdsGotHearings(List<EventEntity> eventEntityList) {
+        int numWithHearings = 0;
+        for (EventEntity event : eventEntityList) {
+            Optional<EventEntity> readEventEntity = eventRepository.findById(event.getId());
+
+            if (readEventEntity.isPresent() && !hearingRepository.findHearingIdsByEventId(readEventEntity.get().getId()).isEmpty()) {
+                numWithHearings++;
+            }
+        }
+
+        return numWithHearings == 1;
     }
 }

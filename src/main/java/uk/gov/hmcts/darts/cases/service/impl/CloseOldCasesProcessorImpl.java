@@ -15,6 +15,7 @@ import uk.gov.hmcts.darts.common.entity.EventEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
+import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
 import uk.gov.hmcts.darts.common.repository.CaseRepository;
 import uk.gov.hmcts.darts.common.repository.CaseRetentionRepository;
 import uk.gov.hmcts.darts.retention.api.RetentionApi;
@@ -46,6 +47,7 @@ public class CloseOldCasesProcessorImpl implements CloseOldCasesProcessor {
     private final RetentionApi retentionApi;
     private final RetentionDateHelper retentionDateHelper;
     private final AuthorisationApi authorisationApi;
+    private final CurrentTimeHelper currentTimeHelper;
 
     private UserAccountEntity userAccount;
 
@@ -122,6 +124,7 @@ public class CloseOldCasesProcessorImpl implements CloseOldCasesProcessor {
         courtCase.setCaseClosedTimestamp(caseClosedDate);
         courtCase.setRetConfReason(AGED_CASE);
         courtCase.setRetConfScore(CASE_NOT_PERFECTLY_CLOSED);
+        courtCase.setRetConfUpdatedTs(currentTimeHelper.currentOffsetDateTime());
         caseRepository.save(courtCase);
         log.info("Closed court case id {}", courtCase.getId());
 
