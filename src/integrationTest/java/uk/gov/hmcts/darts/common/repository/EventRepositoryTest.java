@@ -30,7 +30,7 @@ class EventRepositoryTest extends PostgresIntegrationBase {
 
         Map<Integer, List<EventEntity>> eventIdMap = eventStub.generateEventIdEventsIncludingZeroEventId(3);
 
-        List<Integer> eventIdsToBeProcessed1 = eventRepository.getCurrentEventIdsToBeProcessed(1);
+        List<Integer> eventIdsToBeProcessed1 = eventRepository.findCurrentEventIdsWithDuplicates(1);
         Assertions.assertEquals(1, eventIdsToBeProcessed1.size());
         EventRepository.EventIdAndHearingIds eventPkid = eventRepository.getTheLatestCreatedEventPrimaryKeyForTheEventId(eventIdsToBeProcessed1.getFirst())
             .getFirst();
@@ -38,7 +38,7 @@ class EventRepositoryTest extends PostgresIntegrationBase {
             eventPkid.getEveId(), eventPkid.getEventId(), eventPkid.getHearingIds(), 0);
         Assertions.assertTrue(eventStub.isOnlyOneOfTheEventIdSetToCurrent(eventIdMap.get(eventIdsToBeProcessed1.getFirst())));
 
-        List<Integer> eventIdsToBeProcessed2 = eventRepository.getCurrentEventIdsToBeProcessed(1);
+        List<Integer> eventIdsToBeProcessed2 = eventRepository.findCurrentEventIdsWithDuplicates(1);
         EventRepository.EventIdAndHearingIds eventPkidSecond =
             eventRepository.getTheLatestCreatedEventPrimaryKeyForTheEventId(eventIdsToBeProcessed2.getFirst())
                 .getFirst();
@@ -50,7 +50,7 @@ class EventRepositoryTest extends PostgresIntegrationBase {
         Assertions.assertNotEquals(eventIdsToBeProcessed1, eventIdsToBeProcessed2);
 
         // ENSURE WE DONT PROCESS THE THIRD BATCH I.E. THE ZERO EVENT ID
-        List<Integer> eventIdsToBeProcessed3 = eventRepository.getCurrentEventIdsToBeProcessed(1);
+        List<Integer> eventIdsToBeProcessed3 = eventRepository.findCurrentEventIdsWithDuplicates(1);
         Assertions.assertTrue(eventIdsToBeProcessed3.isEmpty());
     }
 
@@ -62,7 +62,7 @@ class EventRepositoryTest extends PostgresIntegrationBase {
 
         Map<Integer, List<EventEntity>> eventIdMap = eventStub.generateEventIdEventsIncludingZeroEventId(3);
 
-        List<Integer> eventIdsToBeProcessed1 = eventRepository.getCurrentEventIdsToBeProcessed(1);
+        List<Integer> eventIdsToBeProcessed1 = eventRepository.findCurrentEventIdsWithDuplicates(1);
         Assertions.assertEquals(1, eventIdsToBeProcessed1.size());
         List<EventEntity> eventEntities = eventIdMap.get(eventIdsToBeProcessed1.getFirst());
         EventEntity eventEntity = eventEntities.getFirst();

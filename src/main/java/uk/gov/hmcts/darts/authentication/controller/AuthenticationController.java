@@ -20,7 +20,10 @@ public interface AuthenticationController {
         tags = {"Authentication"}
     )
     @PostMapping("/handle-oauth-code")
-    SecurityToken handleOauthCode(@RequestParam("code") String code);
+    SecurityToken handleOauthCode(
+        @RequestParam("code") String code,
+        @RequestParam(value = "redirect_uri", required = false) String redirectUri
+    );
 
     @GetMapping("/logout")
     ModelAndView logout(
