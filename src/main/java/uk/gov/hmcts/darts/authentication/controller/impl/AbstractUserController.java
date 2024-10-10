@@ -41,8 +41,8 @@ public abstract class AbstractUserController implements AuthenticationController
     }
 
     @Override
-    public SecurityToken handleOauthCode(String code) {
-        String accessToken = authenticationService.handleOauthCode(code);
+    public SecurityToken handleOauthCode(String code, String redirectUri) {
+        String accessToken = authenticationService.handleOauthCode(code, redirectUri);
         var securityTokenBuilder = SecurityToken.builder()
             .accessToken(accessToken);
 

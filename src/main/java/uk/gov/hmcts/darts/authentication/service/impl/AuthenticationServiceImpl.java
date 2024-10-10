@@ -44,14 +44,14 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     }
 
     @Override
-    public String handleOauthCode(String code) {
+    public String handleOauthCode(String code, String redirectUri) {
         AuthenticationConfigurationPropertiesStrategy configStrategy = locator.locateAuthenticationConfiguration();
 
         log.debug("Presented authorization code {}", code);
 
         OAuthProviderRawResponse tokenResponse;
         try {
-            tokenResponse = azureDao.fetchAccessToken(code, configStrategy.getProviderConfiguration(), configStrategy.getConfiguration());
+            tokenResponse = azureDao.fetchAccessToken(code, configStrategy.getProviderConfiguration(), configStrategy.getConfiguration(), redirectUri);
         } catch (AzureDaoException e) {
             throw new DartsApiException(AuthenticationError.FAILED_TO_OBTAIN_ACCESS_TOKEN, e);
         }

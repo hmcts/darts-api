@@ -13,6 +13,8 @@ import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.skyscreamer.jsonassert.JSONAssert;
 import org.skyscreamer.jsonassert.JSONCompareMode;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -57,6 +59,8 @@ class HandleOAuthCodeIntTest extends IntegrationBaseWithWiremock {
 
     private static final String EXTERNAL_USER_HANDLE_OAUTH_CODE_ENDPOINT_WITH_CODE =
         "/external-user/handle-oauth-code?code=abc";
+    private static final String EXTERNAL_USER_HANDLE_OAUTH_CODE_ENDPOINT_WITH_CODE_AND_OVERRIDE =
+        "/external-user/handle-oauth-code?code=abc&redirect_uri=https://darts-portal.com/auth/callback";
     private static final String KEY_ID_VALUE = "dummy_key_id";
     private static final String CONFIGURED_ISSUER_VALUE = "dummy_issuer_uri";
     private static final String CONFIGURED_AUDIENCE_VALUE = "dummy_client_id";
@@ -72,8 +76,9 @@ class HandleOAuthCodeIntTest extends IntegrationBaseWithWiremock {
     @MockBean
     private AuthorisationApi mockAuthorisationApi;
 
-    @Test
-    void handleOAuthCodeShouldReturnAccessTokenWhenValidAuthTokenIsObtainedForProvidedAuthCode() throws Exception {
+    @ParameterizedTest
+    @ValueSource(strings = {EXTERNAL_USER_HANDLE_OAUTH_CODE_ENDPOINT_WITH_CODE, EXTERNAL_USER_HANDLE_OAUTH_CODE_ENDPOINT_WITH_CODE_AND_OVERRIDE})
+    void handleOAuthCodeShouldReturnAccessTokenWhenValidAuthTokenIsObtainedForProvidedAuthCode(String endpoint) throws Exception {
         when(mockAuthorisationApi.getAuthorisation(VALID_EMAIL_VALUE))
             .thenReturn(Optional.ofNullable(UserState.builder()
                                                 .userId(-1)
@@ -91,8 +96,7 @@ class HandleOAuthCodeIntTest extends IntegrationBaseWithWiremock {
         KeyPair keyPair = setTokenStub(List.of(VALID_EMAIL_VALUE));
         setKeyStoreStub(keyPair);
 
-        mockMvc.perform(MockMvcRequestBuilders.post(
-                EXTERNAL_USER_HANDLE_OAUTH_CODE_ENDPOINT_WITH_CODE))
+        mockMvc.perform(MockMvcRequestBuilders.post(endpoint))
             .andExpect(status().is2xxSuccessful())
             .andExpect(jsonPath("$.accessToken").isString())
             .andExpect(jsonPath("$.userState").exists());
