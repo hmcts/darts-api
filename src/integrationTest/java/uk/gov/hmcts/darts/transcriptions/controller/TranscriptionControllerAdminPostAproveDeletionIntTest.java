@@ -112,28 +112,14 @@ class TranscriptionControllerAdminPostAproveDeletionIntTest extends IntegrationB
             .andExpect(status().is2xxSuccessful())
             .andReturn();
 
-        TranscriptionDocumentEntity documentEntity = transcriptionDocumentRepository.findById(transcriptionDocumentEntity.getId()).get();
-        List<ObjectAdminActionEntity> objectAdminActionEntity = objectAdminActionRepository.findByTranscriptionDocument_Id(transcriptionDocumentEntity.getId());
+
+        assertAudit(adminActionEntity);
 
         TranscriptionDocumentHideResponse transcriptionResponse
             = objectMapper.readValue(mvcResult.getResponse().getContentAsByteArray(), TranscriptionDocumentHideResponse.class);
 
-        List<AuditEntity> caseExpiredAuditEntries = dartsDatabase.getAuditRepository()
-            .findAll((Specification<AuditEntity>) (root, query, criteriaBuilder) -> criteriaBuilder.and(
-                criteriaBuilder.equal(root.get(AuditEntity_.additionalData), String.valueOf(adminActionEntity.getId())),
-                criteriaBuilder.equal(root.get(AuditEntity_.auditActivity).get("id"), AuditActivity.MANUAL_DELETION.getId())
-            ));
-
-        // assert additional audit data
-        assertFalse(caseExpiredAuditEntries.isEmpty());
-        assertNotNull(caseExpiredAuditEntries.get(0).getCreatedBy());
-        assertNotNull(caseExpiredAuditEntries.get(0).getLastModifiedBy());
-        assertNotNull(caseExpiredAuditEntries.get(0).getCreatedDateTime());
-        assertNotNull(caseExpiredAuditEntries.get(0).getLastModifiedDateTime());
-        assertNotNull(caseExpiredAuditEntries.get(0).getLastModifiedDateTime());
-        assertEquals(userIdentity.getUserAccount().getId(), caseExpiredAuditEntries.get(0).getUser().getId());
-        assertNull(caseExpiredAuditEntries.get(0).getCourtCase());
-
+        TranscriptionDocumentEntity documentEntity = transcriptionDocumentRepository.findById(transcriptionDocumentEntity.getId()).get();
+        List<ObjectAdminActionEntity> objectAdminActionEntity = objectAdminActionRepository.findByTranscriptionDocument_Id(transcriptionDocumentEntity.getId());
 
         // ensure that the database data is contained in the response
         assertEquals(documentEntity.getId(), transcriptionResponse.getId());
@@ -188,6 +174,24 @@ class TranscriptionControllerAdminPostAproveDeletionIntTest extends IntegrationB
 
     private static String getUrl(String documentId) {
         return ENDPOINT_URL.replace("${TRANSACTION_DOCUMENT_ID}", Integer.valueOf(documentId).toString());
+    }
+
+    private void assertAudit(ObjectAdminActionEntity objectAdminActionEntity) {
+        List<AuditEntity> caseExpiredAuditEntries = dartsDatabase.getAuditRepository()
+            .findAll((Specification<AuditEntity>) (root, query, criteriaBuilder) -> criteriaBuilder.and(
+                criteriaBuilder.equal(root.get(AuditEntity_.additionalData), String.valueOf(objectAdminActionEntity.getId())),
+                criteriaBuilder.equal(root.get(AuditEntity_.auditActivity).get("id"), AuditActivity.MANUAL_DELETION.getId())
+            ));
+
+        // assert additional audit data
+        assertFalse(caseExpiredAuditEntries.isEmpty());
+        assertNotNull(caseExpiredAuditEntries.get(0).getCreatedBy());
+        assertNotNull(caseExpiredAuditEntries.get(0).getLastModifiedBy());
+        assertNotNull(caseExpiredAuditEntries.get(0).getCreatedDateTime());
+        assertNotNull(caseExpiredAuditEntries.get(0).getLastModifiedDateTime());
+        assertNotNull(caseExpiredAuditEntries.get(0).getLastModifiedDateTime());
+        assertEquals(userIdentity.getUserAccount().getId(), caseExpiredAuditEntries.get(0).getUser().getId());
+        assertNull(caseExpiredAuditEntries.get(0).getCourtCase());
     }
 
 }

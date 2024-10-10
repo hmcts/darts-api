@@ -114,6 +114,8 @@ class AudioControllerPostAdminApproveMediaMarkedForDeletionIntTest extends Integ
             .andExpect(status().isOk())
             .andReturn();
 
+        assertAudit(adminActionEntity);
+
         // then
         MediaApproveMarkedForDeletionResponse mediaApproveMarkedForDeletionResponse
             = objectMapper.readValue(mvcResult.getResponse().getContentAsByteArray(), MediaApproveMarkedForDeletionResponse.class);
@@ -122,23 +124,6 @@ class AudioControllerPostAdminApproveMediaMarkedForDeletionIntTest extends Integ
         assertEquals(superAdminUser.getId(), actionResponse.getMarkedForManualDeletionById());
         assertTrue(actionResponse.getIsMarkedForManualDeletion());
 
-        List<AuditEntity> caseExpiredAuditEntries = dartsDatabase.getAuditRepository()
-            .findAll((Specification<AuditEntity>) (root, query, criteriaBuilder) -> criteriaBuilder.and(
-                criteriaBuilder.equal(root.get(AuditEntity_.additionalData), String.valueOf(adminActionEntity.getId())),
-                criteriaBuilder.equal(root.get(AuditEntity_.auditActivity).get("id"), AuditActivity.MANUAL_DELETION.getId())
-            ));
-
-        // assert additional audit data
-        assertFalse(caseExpiredAuditEntries.isEmpty());
-        assertNotNull(caseExpiredAuditEntries.get(0).getCreatedBy());
-        assertNotNull(caseExpiredAuditEntries.get(0).getLastModifiedBy());
-        assertNotNull(caseExpiredAuditEntries.get(0).getCreatedDateTime());
-        assertNotNull(caseExpiredAuditEntries.get(0).getLastModifiedDateTime());
-        assertNotNull(caseExpiredAuditEntries.get(0).getLastModifiedDateTime());
-        assertEquals(userIdentity.getUserAccount().getId(), caseExpiredAuditEntries.get(0).getUser().getId());
-        assertNull(caseExpiredAuditEntries.get(0).getCourtCase());
-
-        assertFalse(caseExpiredAuditEntries.isEmpty());
     }
 
     @Test
@@ -303,6 +288,24 @@ class AudioControllerPostAdminApproveMediaMarkedForDeletionIntTest extends Integ
                                            END_TIME,
                                            1,
                                            "MP2");
+    }
+
+    private void assertAudit(ObjectAdminActionEntity objectAdminActionEntity) {
+        List<AuditEntity> caseExpiredAuditEntries = dartsDatabase.getAuditRepository()
+            .findAll((Specification<AuditEntity>) (root, query, criteriaBuilder) -> criteriaBuilder.and(
+                criteriaBuilder.equal(root.get(AuditEntity_.additionalData), String.valueOf(objectAdminActionEntity.getId())),
+                criteriaBuilder.equal(root.get(AuditEntity_.auditActivity).get("id"), AuditActivity.MANUAL_DELETION.getId())
+            ));
+
+        // assert additional audit data
+        assertFalse(caseExpiredAuditEntries.isEmpty());
+        assertNotNull(caseExpiredAuditEntries.get(0).getCreatedBy());
+        assertNotNull(caseExpiredAuditEntries.get(0).getLastModifiedBy());
+        assertNotNull(caseExpiredAuditEntries.get(0).getCreatedDateTime());
+        assertNotNull(caseExpiredAuditEntries.get(0).getLastModifiedDateTime());
+        assertNotNull(caseExpiredAuditEntries.get(0).getLastModifiedDateTime());
+        assertEquals(userIdentity.getUserAccount().getId(), caseExpiredAuditEntries.get(0).getUser().getId());
+        assertNull(caseExpiredAuditEntries.get(0).getCourtCase());
     }
 
 }
