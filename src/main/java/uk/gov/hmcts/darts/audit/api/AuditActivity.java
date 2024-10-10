@@ -41,7 +41,8 @@ public enum AuditActivity {
     CHANGE_EVENT_MAPPING(32),
     CHANGE_AUDIO_OWNERSHIP(33),
     HIDE_AUDIO(34),
-    CASE_EXPIRED(35);
+    CASE_EXPIRED(35),
+    MANUAL_DELETION(36);
 
     private final Integer id;
 }

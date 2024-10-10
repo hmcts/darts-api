@@ -213,7 +213,7 @@ class MediaRequestServiceImplTest {
         when(mockHearingService.getHearingById(hearingId)).thenReturn(mockHearingEntity);
         when(mockMediaRequestRepository.saveAndFlush(any(MediaRequestEntity.class))).thenReturn(mockMediaRequestEntity);
         when(mockUserAccountRepository.getReferenceById(TEST_REQUESTER)).thenReturn(mockUserAccountEntity);
-        doNothing().when(auditApi).record(any(), any(), any());
+        doNothing().when(auditApi).record(any(), any(), any(CourtCaseEntity.class));
         var request = mediaRequestService.saveAudioRequest(requestDetails);
 
         assertEquals(request.getId(), mockMediaRequestEntity.getId());
@@ -244,7 +244,7 @@ class MediaRequestServiceImplTest {
 
         assertEquals(HearingApiError.HEARING_NOT_FOUND, exception.getError());
         verify(mockMediaRequestRepository, never()).getReferenceById(any());
-        verify(auditApi, never()).record(any(), any(), any());
+        verify(auditApi, never()).record(any(), any(), any(CourtCaseEntity.class));
     }
 
 
@@ -461,7 +461,7 @@ class MediaRequestServiceImplTest {
             .thenReturn(Optional.ofNullable(mockTransformedMediaEntity));
 
         when(mockUserIdentity.getUserAccount()).thenReturn(mockUserAccountEntity);
-        doNothing().when(auditApi).record(any(), any(), any());
+        doNothing().when(auditApi).record(any(), any(), any(CourtCaseEntity.class));
 
         Resource resource = Mockito.mock(Resource.class);
         when(responseMetaData.getResource()).thenReturn(resource);
@@ -592,7 +592,7 @@ class MediaRequestServiceImplTest {
             .thenReturn(Optional.ofNullable(mockTransformedMediaEntity));
 
         when(mockUserIdentity.getUserAccount()).thenReturn(mockUserAccountEntity);
-        doNothing().when(auditApi).record(any(), any(), any());
+        doNothing().when(auditApi).record(any(), any(), any(CourtCaseEntity.class));
 
         when(dataManagementApi.getBlobDataFromOutboundContainer(blobUuid)).thenReturn(responseMetaData);
 
