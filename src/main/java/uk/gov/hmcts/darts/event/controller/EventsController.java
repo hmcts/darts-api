@@ -180,6 +180,6 @@ public class EventsController implements EventApi {
         globalAccessSecurityRoles = {SUPER_ADMIN})
     public ResponseEntity<Void> adminObfuscateEveByIds(AdminObfuscateEveByIdsRequest adminObfuscateEveByIdsRequest) {
         this.dataAnonymisationService.obfuscateEventByIds(adminObfuscateEveByIdsRequest.getEveIds());
-        return ResponseEntity.noContent().build();
+        return ResponseEntity.ok().build();
     }
 }

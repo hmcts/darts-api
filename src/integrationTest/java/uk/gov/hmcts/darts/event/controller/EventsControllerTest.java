@@ -186,7 +186,7 @@ class EventsControllerTest extends IntegrationBase {
             .contentType(MediaType.APPLICATION_JSON_VALUE)
             .content("{\"eve_ids\":[" + event.getId() + "," + event2.getId() + "]}");
 
-        mockMvc.perform(requestBuilder).andExpect(status().isNoContent());
+        mockMvc.perform(requestBuilder).andExpect(status().isOk());
 
         EventEntity editedEventEntity = dartsDatabaseStub.getEventRepository().findById(event.getId()).orElseThrow();
         assertThat(editedEventEntity.getEventText()).matches(UUID_REGEX);

@@ -558,8 +558,8 @@ paths:
                   items:
                     type: integer
       responses:
-        '204':
-          description: NO_CONTENT
+        '200':
+          description: OK
         '404':
           description: Not Found - Event id
           content:
