@@ -81,10 +81,9 @@ class GenerateCaseDocumentProcessorIntTest extends IntegrationBase {
         List<ExternalObjectDirectoryEntity> eodCaseDocument = eodRepository.findByCaseDocument(caseDocument);
         assertThat(eodCaseDocument.size()).isEqualTo(1);
 
-        caseRepository.findById(courtCase.getId()).ifPresent(c -> {
-            assertThat(c.isRetentionUpdated()).isTrue();
-            assertThat(c.getRetentionRetries()).isEqualTo(0);
-        });
+        CourtCaseEntity courtCaseEntity = caseRepository.findById(caseDocument.getCourtCase().getId()).orElseThrow();
+        assertThat(courtCaseEntity.isRetentionUpdated()).isTrue();
+        assertThat(courtCaseEntity.getRetentionRetries()).isEqualTo(0);
     }
 
 }
