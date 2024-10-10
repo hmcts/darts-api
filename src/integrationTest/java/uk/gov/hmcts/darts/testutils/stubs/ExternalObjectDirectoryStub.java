@@ -354,13 +354,13 @@ public class ExternalObjectDirectoryStub {
 
             AnnotationEntity annotationEntity;
             AnnotationDocumentEntity annotationDocumentEntity = null;
-            TranscriptionDocumentEntity transcriptionDocumentEntity = null;
+
             annotationEntity = annotationStub.createAndSaveAnnotationEntityWith(user, "test annotation");
             annotationDocumentEntity = annotationStub.createAndSaveAnnotationDocumentEntity(
                 userAccountStub, annotationEntity);
 
             ExternalObjectDirectoryEntity externalObjectDirectory = createAndSaveEod(
-                annotationDocumentEntity, transcriptionDocumentEntity, objectRecordStatusEnum, externalLocationTypeEnum, e -> {
+                annotationDocumentEntity, null, objectRecordStatusEnum, externalLocationTypeEnum, e -> {
                 });
 
             if (dateToSet.isPresent()) {
