@@ -226,7 +226,8 @@ public abstract class AbstractArmBatchProcessResponseFiles implements ArmRespons
     private boolean isCompletedStatus(ObjectRecordStatusEntity status) {
         if (nonNull(status)) {
             ObjectRecordStatusEnum statusEnum = ObjectRecordStatusEnum.valueOfId(status.getId());
-            return ARM_RPO_PENDING.equals(statusEnum)
+            return STORED.equals(statusEnum)
+                || ARM_RPO_PENDING.equals(statusEnum)
                 || ARM_RESPONSE_PROCESSING_FAILED.equals(statusEnum)
                 || ARM_RESPONSE_MANIFEST_FAILED.equals(statusEnum)
                 || ARM_RESPONSE_CHECKSUM_VERIFICATION_FAILED.equals(statusEnum);
@@ -684,8 +685,9 @@ public abstract class AbstractArmBatchProcessResponseFiles implements ArmRespons
         ExternalObjectDirectoryEntity externalObjectDirectory = getExternalObjectDirectoryEntity(armResponseBatchData.getExternalObjectDirectoryId());
         if (nonNull(externalObjectDirectory) && responseBlobsToBeDeleted.size() == 2) {
             ObjectRecordStatusEnum status = ObjectRecordStatusEnum.valueOfId(externalObjectDirectory.getStatus().getId());
-            if (ARM_RPO_PENDING.equals(status)
+            if (STORED.equals(status)
                 || ARM_RESPONSE_PROCESSING_FAILED.equals(status)
+                || ARM_RPO_PENDING.equals(status)
                 || ARM_RESPONSE_MANIFEST_FAILED.equals(status)
                 || ARM_RESPONSE_CHECKSUM_VERIFICATION_FAILED.equals(status)) {
                 log.info("About to  delete ARM responses for EOD {}", externalObjectDirectory.getId());
