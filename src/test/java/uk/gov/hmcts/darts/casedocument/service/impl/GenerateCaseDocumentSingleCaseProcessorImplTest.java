@@ -145,6 +145,9 @@ class GenerateCaseDocumentSingleCaseProcessorImplTest {
         assertThat(savedCaseDocument.isHidden()).isEqualTo(false);
 
         verify(caseRepository).save(courtCaseCaptor.capture());
+        CourtCaseEntity savedCase = courtCaseCaptor.getValue();
+        verify(savedCase).setRetentionUpdated(true);
+        verify(savedCase).setRetentionRetries(0);
     }
 
 }
