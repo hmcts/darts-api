@@ -37,6 +37,7 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -126,6 +127,16 @@ class AudioControllerPostAdminApproveMediaMarkedForDeletionIntTest extends Integ
                 criteriaBuilder.equal(root.get(AuditEntity_.additionalData), String.valueOf(adminActionEntity.getId())),
                 criteriaBuilder.equal(root.get(AuditEntity_.auditActivity).get("id"), AuditActivity.MANUAL_DELETION.getId())
             ));
+
+        // assert additional audit data
+        assertFalse(caseExpiredAuditEntries.isEmpty());
+        assertNotNull(caseExpiredAuditEntries.get(0).getCreatedBy());
+        assertNotNull(caseExpiredAuditEntries.get(0).getLastModifiedBy());
+        assertNotNull(caseExpiredAuditEntries.get(0).getCreatedDateTime());
+        assertNotNull(caseExpiredAuditEntries.get(0).getLastModifiedDateTime());
+        assertNotNull(caseExpiredAuditEntries.get(0).getLastModifiedDateTime());
+        assertEquals(userIdentity.getUserAccount().getId(), caseExpiredAuditEntries.get(0).getUser().getId());
+        assertNull(caseExpiredAuditEntries.get(0).getCourtCase());
 
         assertFalse(caseExpiredAuditEntries.isEmpty());
     }
