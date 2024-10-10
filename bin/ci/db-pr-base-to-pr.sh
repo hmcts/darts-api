@@ -39,6 +39,8 @@ echo "Restoring PR database ($PR_DATABASE)..."
 psql -h $PR_HOST -U $PR_USER -d $PR_DATABASE -c "DROP SCHEMA IF EXISTS $SCHEMA CASCADE" &> /dev/null
 # restore from the dump file
 psql -h $PR_HOST -U $PR_USER -d $PR_DATABASE -L $RESTORE_LOG_FILE < $DUMP_FILE &> $RESTORE_OUTPUT
+# disabled all automated tasks
+psql -h $PR_HOST -U $PR_USER -d $PR_DATABASE -c "UPDATE darts.automated_task SET task_enabled = false;"
 
 echo "Restore complete, stdout: $RESTORE_OUTPUT  log file: $RESTORE_LOG_FILE"
 echo "Output: $RESTORE_OUTPUT"
