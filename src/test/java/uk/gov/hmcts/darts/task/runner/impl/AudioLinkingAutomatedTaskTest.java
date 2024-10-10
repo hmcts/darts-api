@@ -1,10 +1,12 @@
 package uk.gov.hmcts.darts.task.runner.impl;
 
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Limit;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
@@ -17,8 +19,10 @@ import uk.gov.hmcts.darts.common.repository.EventRepository;
 import uk.gov.hmcts.darts.common.repository.HearingRepository;
 import uk.gov.hmcts.darts.common.repository.MediaLinkedCaseRepository;
 import uk.gov.hmcts.darts.common.repository.MediaRepository;
+import uk.gov.hmcts.darts.event.service.EventService;
 import uk.gov.hmcts.darts.task.api.AutomatedTaskName;
 
+import java.time.Duration;
 import java.time.OffsetDateTime;
 import java.util.HashSet;
 import java.util.List;
@@ -42,26 +46,11 @@ class AudioLinkingAutomatedTaskTest {
     @Mock
     private EventRepository eventRepository;
     @Mock
-    private MediaRepository mediaRepository;
-    @Mock
-    private MediaLinkedCaseRepository mediaLinkedCaseRepository;
-    @Mock
-    private HearingRepository hearingRepository;
+    private AudioLinkingAutomatedTask.EventProcessor eventProcessor;
 
     @InjectMocks
+    @Spy
     private AudioLinkingAutomatedTask audioLinkingAutomatedTask;
-
-
-    @BeforeEach
-    void beforeEach() {
-        this.audioLinkingAutomatedTask = spy(
-            new AudioLinkingAutomatedTask(
-                null, null, null, null,
-                eventRepository, mediaRepository, mediaLinkedCaseRepository,
-                0, hearingRepository
-            )
-        );
-    }
 
     @Test
     void positiveGetAutomatedTaskName() {
@@ -72,10 +61,10 @@ class AudioLinkingAutomatedTaskTest {
     @Test
     void positiveRunTask() {
 
-        List<EventEntity> events = List.of(mock(EventEntity.class), mock(EventEntity.class), mock(EventEntity.class));
+        List<Integer> eventIds = List.of(1, 2, 3);
 
-        doReturn(events).when(eventRepository).findAllByEventStatus(anyInt(), any());
-        doNothing().when(audioLinkingAutomatedTask).processEvent(any());
+        doReturn(eventIds).when(eventRepository).findAllByEventStatus(anyInt(), any());
+        doNothing().when(eventProcessor).processEvent(any());
         doReturn(5).when(audioLinkingAutomatedTask).getAutomatedTaskBatchSize();
 
         audioLinkingAutomatedTask.runTask();
@@ -86,253 +75,283 @@ class AudioLinkingAutomatedTaskTest {
         verify(eventRepository, times(1))
             .findAllByEventStatus(2, Limit.of(5));
 
-        verify(audioLinkingAutomatedTask, times(1))
-            .processEvent(events.get(0));
-        verify(audioLinkingAutomatedTask, times(1))
-            .processEvent(events.get(1));
-        verify(audioLinkingAutomatedTask, times(1))
-            .processEvent(events.get(2));
+        verify(eventProcessor, times(1))
+            .processEvent(1);
+        verify(eventProcessor, times(1))
+            .processEvent(2);
+        verify(eventProcessor, times(1))
+            .processEvent(3);
     }
 
-    @Test
-    void positiveProcessEvent() {
-        doNothing().when(audioLinkingAutomatedTask)
-            .processMedia(any(), any());
-
-        EventEntity event = mock(EventEntity.class);
-        List<HearingEntity> hearingEntities = List.of(mock(HearingEntity.class), mock(HearingEntity.class));
-        when(event.getHearingEntities()).thenReturn(hearingEntities);
-        OffsetDateTime timestamp = OffsetDateTime.now();
-        when(event.getTimestamp()).thenReturn(timestamp);
-        CourtroomEntity courtroomEntity = mock(CourtroomEntity.class);
-        when(courtroomEntity.getId()).thenReturn(123);
-        when(event.getCourtroom()).thenReturn(courtroomEntity);
-
-
-        List<MediaEntity> mediaEntities = List.of(
-            mock(MediaEntity.class), mock(MediaEntity.class), mock(MediaEntity.class));
-        doReturn(mediaEntities).when(mediaRepository)
-            .findAllByMediaTimeContains(any(), any(), any());
-
-        audioLinkingAutomatedTask.processEvent(event);
-
-        verify(audioLinkingAutomatedTask, times(1))
-            .processMedia(hearingEntities, mediaEntities.get(0));
-        verify(audioLinkingAutomatedTask, times(1))
-            .processMedia(hearingEntities, mediaEntities.get(1));
-        verify(audioLinkingAutomatedTask, times(1))
-            .processMedia(hearingEntities, mediaEntities.get(2));
-        verify(mediaRepository, times(1))
-            .findAllByMediaTimeContains(123, timestamp, timestamp);
-        verify(event, times(1))
-            .setEventStatus(3);
-
-        verify(eventRepository, times(1))
-            .save(event);
-    }
-
-    @Test
-    void positiveProcessEventWithBuffer() {
-        doNothing().when(audioLinkingAutomatedTask)
-            .processMedia(any(), any());
-        doReturn(10).when(audioLinkingAutomatedTask).getAudioBufferSeconds();
-        EventEntity event = mock(EventEntity.class);
-        List<HearingEntity> hearingEntities = List.of(mock(HearingEntity.class), mock(HearingEntity.class));
-        when(event.getHearingEntities()).thenReturn(hearingEntities);
-        OffsetDateTime timestamp = OffsetDateTime.now();
-        when(event.getTimestamp()).thenReturn(timestamp);
-        CourtroomEntity courtroomEntity = mock(CourtroomEntity.class);
-        when(courtroomEntity.getId()).thenReturn(123);
-        when(event.getCourtroom()).thenReturn(courtroomEntity);
-
-        List<MediaEntity> mediaEntities = List.of(
-            mock(MediaEntity.class), mock(MediaEntity.class), mock(MediaEntity.class));
-        doReturn(mediaEntities).when(mediaRepository)
-            .findAllByMediaTimeContains(any(), any(), any());
+    @Nested
+    @ExtendWith(MockitoExtension.class)
+    class EventProcessorTest {
+        @Mock
+        private MediaRepository mediaRepository;
+        @Mock
+        private HearingRepository hearingRepository;
+        @Mock
+        private MediaLinkedCaseRepository mediaLinkedCaseRepository;
+        @Mock
+        private EventService eventService;
+
+        private AudioLinkingAutomatedTask.EventProcessor eventProcessor;
+
+        @BeforeEach
+        void beforeEach() {
+            this.eventProcessor = spy(
+                new AudioLinkingAutomatedTask.EventProcessor(
+                    mediaRepository, hearingRepository, mediaLinkedCaseRepository,
+                    eventService, Duration.ofSeconds(0)
+                )
+            );
+        }
+
+        @Test
+        void positiveProcessEvent() {
+            doNothing().when(eventProcessor)
+                .processMedia(any(), any());
+
+            EventEntity event = mock(EventEntity.class);
+            when(eventService.getEventById(1)).thenReturn(event);
+            List<HearingEntity> hearingEntities = List.of(mock(HearingEntity.class), mock(HearingEntity.class));
+            when(event.getHearingEntities()).thenReturn(hearingEntities);
+            OffsetDateTime timestamp = OffsetDateTime.now();
+            when(event.getTimestamp()).thenReturn(timestamp);
+            CourtroomEntity courtroomEntity = mock(CourtroomEntity.class);
+            when(courtroomEntity.getId()).thenReturn(123);
+            when(event.getCourtroom()).thenReturn(courtroomEntity);
+
+
+            List<MediaEntity> mediaEntities = List.of(
+                mock(MediaEntity.class), mock(MediaEntity.class), mock(MediaEntity.class));
+            doReturn(mediaEntities).when(mediaRepository)
+                .findAllByMediaTimeContains(any(), any(), any());
+
+            eventProcessor.processEvent(1);
+
+            verify(eventProcessor, times(1))
+                .processMedia(hearingEntities, mediaEntities.get(0));
+            verify(eventProcessor, times(1))
+                .processMedia(hearingEntities, mediaEntities.get(1));
+            verify(eventProcessor, times(1))
+                .processMedia(hearingEntities, mediaEntities.get(2));
+            verify(mediaRepository, times(1))
+                .findAllByMediaTimeContains(123, timestamp, timestamp);
+            verify(event, times(1))
+                .setEventStatus(3);
+
+            verify(eventService, times(1))
+                .saveEventEntity(event);
+            verify(eventService, times(1))
+                .getEventById(1);
+        }
+
+        @Test
+        void positiveProcessEventWithBuffer() {
+            doNothing().when(eventProcessor)
+                .processMedia(any(), any());
+            doReturn(Duration.ofSeconds(10)).when(eventProcessor).getAudioBuffer();
+            EventEntity event = mock(EventEntity.class);
+            when(eventService.getEventById(2)).thenReturn(event);
+            List<HearingEntity> hearingEntities = List.of(mock(HearingEntity.class), mock(HearingEntity.class));
+            when(event.getHearingEntities()).thenReturn(hearingEntities);
+            OffsetDateTime timestamp = OffsetDateTime.now();
+            when(event.getTimestamp()).thenReturn(timestamp);
+            CourtroomEntity courtroomEntity = mock(CourtroomEntity.class);
+            when(courtroomEntity.getId()).thenReturn(123);
+            when(event.getCourtroom()).thenReturn(courtroomEntity);
+
+            List<MediaEntity> mediaEntities = List.of(
+                mock(MediaEntity.class), mock(MediaEntity.class), mock(MediaEntity.class));
+            doReturn(mediaEntities).when(mediaRepository)
+                .findAllByMediaTimeContains(any(), any(), any());
+
+            eventProcessor.processEvent(2);
+
+
+            verify(eventProcessor, times(1))
+                .processMedia(hearingEntities, mediaEntities.get(0));
+            verify(eventProcessor, times(1))
+                .processMedia(hearingEntities, mediaEntities.get(1));
+            verify(eventProcessor, times(1))
+                .processMedia(hearingEntities, mediaEntities.get(2));
+            verify(mediaRepository, times(1))
+                .findAllByMediaTimeContains(123, timestamp.plusSeconds(10), timestamp.minusSeconds(10));
+            verify(event, times(1))
+                .setEventStatus(3);
+            verify(eventService, times(1))
+                .getEventById(2);
+        }
+
+        @Test
+        void positiveProcessMedia() {
+            HearingEntity hearingEntity1 = mock(HearingEntity.class);
+            HearingEntity hearingEntity2 = mock(HearingEntity.class);
+            HearingEntity hearingEntity3 = mock(HearingEntity.class);
 
-        audioLinkingAutomatedTask.processEvent(event);
-
 
-        verify(audioLinkingAutomatedTask, times(1))
-            .processMedia(hearingEntities, mediaEntities.get(0));
-        verify(audioLinkingAutomatedTask, times(1))
-            .processMedia(hearingEntities, mediaEntities.get(1));
-        verify(audioLinkingAutomatedTask, times(1))
-            .processMedia(hearingEntities, mediaEntities.get(2));
-        verify(mediaRepository, times(1))
-            .findAllByMediaTimeContains(123, timestamp.plusSeconds(10), timestamp.minusSeconds(10));
-        verify(event, times(1))
-            .setEventStatus(3);
+            when(hearingEntity1.containsMedia(any())).thenReturn(false);
+            when(hearingEntity2.containsMedia(any())).thenReturn(false);
+            when(hearingEntity3.containsMedia(any())).thenReturn(false);
 
-    }
+            when(mediaLinkedCaseRepository.existsByMediaAndCourtCase(any(), any()))
+                .thenReturn(false);
 
-    @Test
-    void positiveProcessMedia() {
-        HearingEntity hearingEntity1 = mock(HearingEntity.class);
-        HearingEntity hearingEntity2 = mock(HearingEntity.class);
-        HearingEntity hearingEntity3 = mock(HearingEntity.class);
-
-
-        when(hearingEntity1.containsMedia(any())).thenReturn(false);
-        when(hearingEntity2.containsMedia(any())).thenReturn(false);
-        when(hearingEntity3.containsMedia(any())).thenReturn(false);
-
-        when(mediaLinkedCaseRepository.existsByMediaAndCourtCase(any(), any()))
-            .thenReturn(false);
-
 
-        CourtCaseEntity courtCaseEntity1 = mock(CourtCaseEntity.class);
-        CourtCaseEntity courtCaseEntity2 = mock(CourtCaseEntity.class);
-
-        when(hearingEntity1.getCourtCase()).thenReturn(courtCaseEntity1);
-        when(hearingEntity2.getCourtCase()).thenReturn(courtCaseEntity1);
-        when(hearingEntity3.getCourtCase()).thenReturn(courtCaseEntity2);
+            CourtCaseEntity courtCaseEntity1 = mock(CourtCaseEntity.class);
+            CourtCaseEntity courtCaseEntity2 = mock(CourtCaseEntity.class);
 
+            when(hearingEntity1.getCourtCase()).thenReturn(courtCaseEntity1);
+            when(hearingEntity2.getCourtCase()).thenReturn(courtCaseEntity1);
+            when(hearingEntity3.getCourtCase()).thenReturn(courtCaseEntity2);
 
-        List<HearingEntity> hearingEntities = List.of(hearingEntity1, hearingEntity2, hearingEntity3);
 
-        MediaEntity mediaEntity = mock(MediaEntity.class);
-        audioLinkingAutomatedTask.processMedia(hearingEntities, mediaEntity);
+            List<HearingEntity> hearingEntities = List.of(hearingEntity1, hearingEntity2, hearingEntity3);
 
+            MediaEntity mediaEntity = mock(MediaEntity.class);
+            eventProcessor.processMedia(hearingEntities, mediaEntity);
 
-        verify(hearingEntity1, times(1)).containsMedia(mediaEntity);
-        verify(hearingEntity2, times(1)).containsMedia(mediaEntity);
-        verify(hearingEntity3, times(1)).containsMedia(mediaEntity);
 
-        verify(hearingEntity1, times(1)).addMedia(mediaEntity);
-        verify(hearingEntity2, times(1)).addMedia(mediaEntity);
-        verify(hearingEntity3, times(1)).addMedia(mediaEntity);
+            verify(hearingEntity1, times(1)).containsMedia(mediaEntity);
+            verify(hearingEntity2, times(1)).containsMedia(mediaEntity);
+            verify(hearingEntity3, times(1)).containsMedia(mediaEntity);
 
-        verify(hearingEntity1, times(1)).getCourtCase();
-        verify(hearingEntity2, times(1)).getCourtCase();
-        verify(hearingEntity3, times(1)).getCourtCase();
+            verify(hearingEntity1, times(1)).addMedia(mediaEntity);
+            verify(hearingEntity2, times(1)).addMedia(mediaEntity);
+            verify(hearingEntity3, times(1)).addMedia(mediaEntity);
 
-        verify(mediaLinkedCaseRepository, times(2)).existsByMediaAndCourtCase(mediaEntity, courtCaseEntity1);
-        verify(mediaLinkedCaseRepository, times(1)).existsByMediaAndCourtCase(mediaEntity, courtCaseEntity2);
+            verify(hearingEntity1, times(1)).getCourtCase();
+            verify(hearingEntity2, times(1)).getCourtCase();
+            verify(hearingEntity3, times(1)).getCourtCase();
 
-        Set<HearingEntity> savedHearingEntities = new HashSet<>();
-        savedHearingEntities.add(hearingEntity1);
-        savedHearingEntities.add(hearingEntity2);
-        savedHearingEntities.add(hearingEntity3);
-        verify(hearingRepository, times(1))
-            .saveAll(savedHearingEntities);
+            verify(mediaLinkedCaseRepository, times(2)).existsByMediaAndCourtCase(mediaEntity, courtCaseEntity1);
+            verify(mediaLinkedCaseRepository, times(1)).existsByMediaAndCourtCase(mediaEntity, courtCaseEntity2);
 
-        Set<MediaLinkedCaseEntity> savedMediaLinkedCaseEntity = new HashSet<>();
-        savedMediaLinkedCaseEntity.add(new MediaLinkedCaseEntity(mediaEntity, courtCaseEntity1));
-        savedMediaLinkedCaseEntity.add(new MediaLinkedCaseEntity(mediaEntity, courtCaseEntity2));
-        verify(mediaLinkedCaseRepository, times(1))
-            .saveAll(savedMediaLinkedCaseEntity);
+            Set<HearingEntity> savedHearingEntities = new HashSet<>();
+            savedHearingEntities.add(hearingEntity1);
+            savedHearingEntities.add(hearingEntity2);
+            savedHearingEntities.add(hearingEntity3);
+            verify(hearingRepository, times(1))
+                .saveAll(savedHearingEntities);
 
-    }
+            Set<MediaLinkedCaseEntity> savedMediaLinkedCaseEntity = new HashSet<>();
+            savedMediaLinkedCaseEntity.add(new MediaLinkedCaseEntity(mediaEntity, courtCaseEntity1));
+            savedMediaLinkedCaseEntity.add(new MediaLinkedCaseEntity(mediaEntity, courtCaseEntity2));
+            verify(mediaLinkedCaseRepository, times(1))
+                .saveAll(savedMediaLinkedCaseEntity);
 
-    @Test
-    void positiveProcessMediaHearingAlreadyContainsMedia() {
-        HearingEntity hearingEntity1 = mock(HearingEntity.class);
-        HearingEntity hearingEntity2 = mock(HearingEntity.class);
-        HearingEntity hearingEntity3 = mock(HearingEntity.class);
+        }
 
+        @Test
+        void positiveProcessMediaHearingAlreadyContainsMedia() {
+            HearingEntity hearingEntity1 = mock(HearingEntity.class);
+            HearingEntity hearingEntity2 = mock(HearingEntity.class);
+            HearingEntity hearingEntity3 = mock(HearingEntity.class);
 
-        when(hearingEntity1.containsMedia(any())).thenReturn(false);
-        when(hearingEntity2.containsMedia(any())).thenReturn(true);
-        when(hearingEntity3.containsMedia(any())).thenReturn(true);
 
-        when(mediaLinkedCaseRepository.existsByMediaAndCourtCase(any(), any()))
-            .thenReturn(false);
+            when(hearingEntity1.containsMedia(any())).thenReturn(false);
+            when(hearingEntity2.containsMedia(any())).thenReturn(true);
+            when(hearingEntity3.containsMedia(any())).thenReturn(true);
 
-        CourtCaseEntity courtCaseEntity1 = mock(CourtCaseEntity.class);
-        when(hearingEntity1.getCourtCase()).thenReturn(courtCaseEntity1);
+            when(mediaLinkedCaseRepository.existsByMediaAndCourtCase(any(), any()))
+                .thenReturn(false);
 
-        List<HearingEntity> hearingEntities = List.of(hearingEntity1, hearingEntity2, hearingEntity3);
+            CourtCaseEntity courtCaseEntity1 = mock(CourtCaseEntity.class);
+            when(hearingEntity1.getCourtCase()).thenReturn(courtCaseEntity1);
 
-        MediaEntity mediaEntity = mock(MediaEntity.class);
+            List<HearingEntity> hearingEntities = List.of(hearingEntity1, hearingEntity2, hearingEntity3);
 
-        audioLinkingAutomatedTask.processMedia(hearingEntities, mediaEntity);
+            MediaEntity mediaEntity = mock(MediaEntity.class);
 
-        verify(hearingEntity1, times(1)).containsMedia(mediaEntity);
-        verify(hearingEntity2, times(1)).containsMedia(mediaEntity);
-        verify(hearingEntity3, times(1)).containsMedia(mediaEntity);
+            eventProcessor.processMedia(hearingEntities, mediaEntity);
 
-        verify(hearingEntity1, times(1)).addMedia(mediaEntity);
-        verify(hearingEntity2, never()).addMedia(mediaEntity);
-        verify(hearingEntity3, never()).addMedia(mediaEntity);
+            verify(hearingEntity1, times(1)).containsMedia(mediaEntity);
+            verify(hearingEntity2, times(1)).containsMedia(mediaEntity);
+            verify(hearingEntity3, times(1)).containsMedia(mediaEntity);
 
-        verify(hearingEntity1, times(1)).getCourtCase();
-        verify(hearingEntity2, never()).getCourtCase();
-        verify(hearingEntity3, never()).getCourtCase();
+            verify(hearingEntity1, times(1)).addMedia(mediaEntity);
+            verify(hearingEntity2, never()).addMedia(mediaEntity);
+            verify(hearingEntity3, never()).addMedia(mediaEntity);
 
-        verify(mediaLinkedCaseRepository, times(1)).existsByMediaAndCourtCase(mediaEntity, courtCaseEntity1);
+            verify(hearingEntity1, times(1)).getCourtCase();
+            verify(hearingEntity2, never()).getCourtCase();
+            verify(hearingEntity3, never()).getCourtCase();
 
-        Set<HearingEntity> savedHearingEntities = new HashSet<>();
-        savedHearingEntities.add(hearingEntity1);
-        verify(hearingRepository, times(1))
-            .saveAll(savedHearingEntities);
+            verify(mediaLinkedCaseRepository, times(1)).existsByMediaAndCourtCase(mediaEntity, courtCaseEntity1);
 
-        Set<MediaLinkedCaseEntity> savedMediaLinkedCaseEntity = new HashSet<>();
-        savedMediaLinkedCaseEntity.add(new MediaLinkedCaseEntity(mediaEntity, courtCaseEntity1));
-        verify(mediaLinkedCaseRepository, times(1))
-            .saveAll(savedMediaLinkedCaseEntity);
-    }
+            Set<HearingEntity> savedHearingEntities = new HashSet<>();
+            savedHearingEntities.add(hearingEntity1);
+            verify(hearingRepository, times(1))
+                .saveAll(savedHearingEntities);
 
-    @Test
-    void positiveProcessMediaHearingDoesNotContainsMediaButMediaLinkedCaseExists() {
-        HearingEntity hearingEntity1 = mock(HearingEntity.class);
-        HearingEntity hearingEntity2 = mock(HearingEntity.class);
-        HearingEntity hearingEntity3 = mock(HearingEntity.class);
+            Set<MediaLinkedCaseEntity> savedMediaLinkedCaseEntity = new HashSet<>();
+            savedMediaLinkedCaseEntity.add(new MediaLinkedCaseEntity(mediaEntity, courtCaseEntity1));
+            verify(mediaLinkedCaseRepository, times(1))
+                .saveAll(savedMediaLinkedCaseEntity);
+        }
 
+        @Test
+        void positiveProcessMediaHearingDoesNotContainsMediaButMediaLinkedCaseExists() {
+            HearingEntity hearingEntity1 = mock(HearingEntity.class);
+            HearingEntity hearingEntity2 = mock(HearingEntity.class);
+            HearingEntity hearingEntity3 = mock(HearingEntity.class);
 
-        when(hearingEntity1.containsMedia(any())).thenReturn(false);
-        when(hearingEntity2.containsMedia(any())).thenReturn(false);
-        when(hearingEntity3.containsMedia(any())).thenReturn(false);
 
+            when(hearingEntity1.containsMedia(any())).thenReturn(false);
+            when(hearingEntity2.containsMedia(any())).thenReturn(false);
+            when(hearingEntity3.containsMedia(any())).thenReturn(false);
 
-        CourtCaseEntity courtCaseEntity1 = mock(CourtCaseEntity.class);
-        CourtCaseEntity courtCaseEntity2 = mock(CourtCaseEntity.class);
 
-        when(hearingEntity1.getCourtCase()).thenReturn(courtCaseEntity1);
-        when(hearingEntity2.getCourtCase()).thenReturn(courtCaseEntity1);
-        when(hearingEntity3.getCourtCase()).thenReturn(courtCaseEntity2);
+            CourtCaseEntity courtCaseEntity1 = mock(CourtCaseEntity.class);
+            CourtCaseEntity courtCaseEntity2 = mock(CourtCaseEntity.class);
 
+            when(hearingEntity1.getCourtCase()).thenReturn(courtCaseEntity1);
+            when(hearingEntity2.getCourtCase()).thenReturn(courtCaseEntity1);
+            when(hearingEntity3.getCourtCase()).thenReturn(courtCaseEntity2);
 
-        List<HearingEntity> hearingEntities = List.of(hearingEntity1, hearingEntity2, hearingEntity3);
 
-        MediaEntity mediaEntity = mock(MediaEntity.class);
+            List<HearingEntity> hearingEntities = List.of(hearingEntity1, hearingEntity2, hearingEntity3);
 
-        when(mediaLinkedCaseRepository.existsByMediaAndCourtCase(mediaEntity, courtCaseEntity1))
-            .thenReturn(false);
+            MediaEntity mediaEntity = mock(MediaEntity.class);
 
-        when(mediaLinkedCaseRepository.existsByMediaAndCourtCase(mediaEntity, courtCaseEntity2))
-            .thenReturn(true);
+            when(mediaLinkedCaseRepository.existsByMediaAndCourtCase(mediaEntity, courtCaseEntity1))
+                .thenReturn(false);
 
+            when(mediaLinkedCaseRepository.existsByMediaAndCourtCase(mediaEntity, courtCaseEntity2))
+                .thenReturn(true);
 
-        audioLinkingAutomatedTask.processMedia(hearingEntities, mediaEntity);
 
+            eventProcessor.processMedia(hearingEntities, mediaEntity);
 
-        verify(hearingEntity1, times(1)).containsMedia(mediaEntity);
-        verify(hearingEntity2, times(1)).containsMedia(mediaEntity);
-        verify(hearingEntity3, times(1)).containsMedia(mediaEntity);
 
-        verify(hearingEntity1, times(1)).addMedia(mediaEntity);
-        verify(hearingEntity2, times(1)).addMedia(mediaEntity);
-        verify(hearingEntity3, times(1)).addMedia(mediaEntity);
+            verify(hearingEntity1, times(1)).containsMedia(mediaEntity);
+            verify(hearingEntity2, times(1)).containsMedia(mediaEntity);
+            verify(hearingEntity3, times(1)).containsMedia(mediaEntity);
 
-        verify(hearingEntity1, times(1)).getCourtCase();
-        verify(hearingEntity2, times(1)).getCourtCase();
-        verify(hearingEntity3, times(1)).getCourtCase();
+            verify(hearingEntity1, times(1)).addMedia(mediaEntity);
+            verify(hearingEntity2, times(1)).addMedia(mediaEntity);
+            verify(hearingEntity3, times(1)).addMedia(mediaEntity);
 
-        verify(mediaLinkedCaseRepository, times(2)).existsByMediaAndCourtCase(mediaEntity, courtCaseEntity1);
-        verify(mediaLinkedCaseRepository, times(1)).existsByMediaAndCourtCase(mediaEntity, courtCaseEntity2);
+            verify(hearingEntity1, times(1)).getCourtCase();
+            verify(hearingEntity2, times(1)).getCourtCase();
+            verify(hearingEntity3, times(1)).getCourtCase();
 
+            verify(mediaLinkedCaseRepository, times(2)).existsByMediaAndCourtCase(mediaEntity, courtCaseEntity1);
+            verify(mediaLinkedCaseRepository, times(1)).existsByMediaAndCourtCase(mediaEntity, courtCaseEntity2);
 
-        Set<HearingEntity> savedHearingEntities = new HashSet<>();
-        savedHearingEntities.add(hearingEntity1);
-        savedHearingEntities.add(hearingEntity2);
-        savedHearingEntities.add(hearingEntity3);
-        verify(hearingRepository, times(1))
-            .saveAll(savedHearingEntities);
 
-        Set<MediaLinkedCaseEntity> savedMediaLinkedCaseEntity = new HashSet<>();
-        savedMediaLinkedCaseEntity.add(new MediaLinkedCaseEntity(mediaEntity, courtCaseEntity1));
-        verify(mediaLinkedCaseRepository, times(1))
-            .saveAll(savedMediaLinkedCaseEntity);
+            Set<HearingEntity> savedHearingEntities = new HashSet<>();
+            savedHearingEntities.add(hearingEntity1);
+            savedHearingEntities.add(hearingEntity2);
+            savedHearingEntities.add(hearingEntity3);
+            verify(hearingRepository, times(1))
+                .saveAll(savedHearingEntities);
+
+            Set<MediaLinkedCaseEntity> savedMediaLinkedCaseEntity = new HashSet<>();
+            savedMediaLinkedCaseEntity.add(new MediaLinkedCaseEntity(mediaEntity, courtCaseEntity1));
+            verify(mediaLinkedCaseRepository, times(1))
+                .saveAll(savedMediaLinkedCaseEntity);
+        }
     }
 }

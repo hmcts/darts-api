@@ -2,10 +2,13 @@ package uk.gov.hmcts.darts.task.runner.impl;
 
 import jakarta.transaction.Transactional;
 import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Limit;
 import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.EventEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
@@ -17,12 +20,14 @@ import uk.gov.hmcts.darts.common.repository.HearingRepository;
 import uk.gov.hmcts.darts.common.repository.MediaLinkedCaseRepository;
 import uk.gov.hmcts.darts.common.repository.MediaRepository;
 import uk.gov.hmcts.darts.event.enums.EventStatus;
+import uk.gov.hmcts.darts.event.service.EventService;
 import uk.gov.hmcts.darts.log.api.LogApi;
 import uk.gov.hmcts.darts.task.api.AutomatedTaskName;
 import uk.gov.hmcts.darts.task.config.AutomatedTaskConfigurationProperties;
 import uk.gov.hmcts.darts.task.runner.AutoloadingManualTask;
 import uk.gov.hmcts.darts.task.service.LockService;
 
+import java.time.Duration;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -33,26 +38,16 @@ public class AudioLinkingAutomatedTask extends AbstractLockableAutomatedTask
     implements AutoloadingManualTask {
 
     private final EventRepository eventRepository;
-    private final MediaRepository mediaRepository;
-    private final MediaLinkedCaseRepository mediaLinkedCaseRepository;
-
-    @Getter
-    private final Integer audioBufferSeconds;
-    private final HearingRepository hearingRepository;
+    private final EventProcessor eventProcessor;
 
     protected AudioLinkingAutomatedTask(AutomatedTaskRepository automatedTaskRepository,
                                         AutomatedTaskConfigurationProperties automatedTaskConfigurationProperties,
                                         LogApi logApi, LockService lockService,
                                         EventRepository eventRepository,
-                                        MediaRepository mediaRepository, MediaLinkedCaseRepository mediaLinkedCaseRepository,
-                                        @Value("${darts.automated-tasks.audio-linking.audio-buffer-seconds:0}")
-                                        Integer audioBufferSeconds, HearingRepository hearingRepository) {
+                                        EventProcessor eventProcessor) {
         super(automatedTaskRepository, automatedTaskConfigurationProperties, logApi, lockService);
         this.eventRepository = eventRepository;
-        this.mediaRepository = mediaRepository;
-        this.mediaLinkedCaseRepository = mediaLinkedCaseRepository;
-        this.audioBufferSeconds = audioBufferSeconds;
-        this.hearingRepository = hearingRepository;
+        this.eventProcessor = eventProcessor;
     }
 
     @Override
@@ -61,53 +56,62 @@ public class AudioLinkingAutomatedTask extends AbstractLockableAutomatedTask
     }
 
     @Override
-    @Transactional
-    public void run() {
-        super.run();
-    }
-
-
-    @Override
     protected void runTask() {
         log.info("Running AudioLinkingAutomatedTask");
-        List<EventEntity> events = eventRepository.findAllByEventStatus(EventStatus.AUDIO_LINK_NOT_DONE_MODERNISED.getStatusNumber(),
-                                                                        Limit.of(getAutomatedTaskBatchSize()));
-        events.forEach(this::processEvent);
+        List<Integer> eventIds = eventRepository.findAllByEventStatus(EventStatus.AUDIO_LINK_NOT_DONE_MODERNISED.getStatusNumber(),
+                                                                      Limit.of(getAutomatedTaskBatchSize()));
+        eventIds.forEach(eventProcessor::processEvent);
     }
 
-    void processEvent(EventEntity event) {
-        try {
-            List<MediaEntity> mediaEntities = mediaRepository.findAllByMediaTimeContains(
-                event.getCourtroom().getId(),
-                event.getTimestamp().plusSeconds(getAudioBufferSeconds()),
-                event.getTimestamp().minusSeconds(getAudioBufferSeconds()));
-            mediaEntities.forEach(mediaEntity -> processMedia(event.getHearingEntities(), mediaEntity));
-            event.setEventStatus(EventStatus.AUDIO_LINKED.getStatusNumber());
-            eventRepository.save(event);
-        } catch (Exception e) {
-            log.error("Error processing event {}", event.getId(), e);
-        }
-    }
 
-    void processMedia(List<HearingEntity> hearingEntities, MediaEntity mediaEntity) {
-        Set<HearingEntity> hearingsToSave = new HashSet<>();
-        Set<MediaLinkedCaseEntity> mediaLinkedCaseEntities = new HashSet<>();
-        hearingEntities.forEach(hearingEntity -> {
+    @Service
+    @RequiredArgsConstructor(onConstructor = @__(@Autowired))
+    public static class EventProcessor {
+        private final MediaRepository mediaRepository;
+        private final HearingRepository hearingRepository;
+        private final MediaLinkedCaseRepository mediaLinkedCaseRepository;
+        private final EventService eventService;
+        @Getter
+        @Value("${darts.automated-tasks.audio-linking.audio-buffer-seconds:0s}")
+        private final Duration audioBuffer;
+
+
+        @Transactional(value = Transactional.TxType.REQUIRES_NEW)
+        void processEvent(Integer eventId) {
             try {
-                if (!hearingEntity.containsMedia(mediaEntity)) {
-                    hearingEntity.addMedia(mediaEntity);
-                    hearingsToSave.add(hearingEntity);
-                    CourtCaseEntity courtCase = hearingEntity.getCourtCase();
-                    if (!mediaLinkedCaseRepository.existsByMediaAndCourtCase(mediaEntity, courtCase)) {
-                        mediaLinkedCaseEntities.add(new MediaLinkedCaseEntity(mediaEntity, courtCase));
-                    }
-                    log.info("Linking media {} to hearing {}", mediaEntity.getId(), hearingEntity.getId());
-                }
+                EventEntity event = eventService.getEventById(eventId);
+                List<MediaEntity> mediaEntities = mediaRepository.findAllByMediaTimeContains(
+                    event.getCourtroom().getId(),
+                    event.getTimestamp().plus(getAudioBuffer()),
+                    event.getTimestamp().minus(getAudioBuffer()));
+                mediaEntities.forEach(mediaEntity -> processMedia(event.getHearingEntities(), mediaEntity));
+                event.setEventStatus(EventStatus.AUDIO_LINKED.getStatusNumber());
+                eventService.saveEventEntity(event);
             } catch (Exception e) {
-                log.error("Error linking media {} to hearing {}", mediaEntity.getId(), hearingEntity.getId(), e);
+                log.error("Error processing event {}", eventId, e);
             }
-        });
-        hearingRepository.saveAll(hearingsToSave);
-        mediaLinkedCaseRepository.saveAll(mediaLinkedCaseEntities);
+        }
+
+        void processMedia(List<HearingEntity> hearingEntities, MediaEntity mediaEntity) {
+            Set<HearingEntity> hearingsToSave = new HashSet<>();
+            Set<MediaLinkedCaseEntity> mediaLinkedCaseEntities = new HashSet<>();
+            hearingEntities.forEach(hearingEntity -> {
+                try {
+                    if (!hearingEntity.containsMedia(mediaEntity)) {
+                        hearingEntity.addMedia(mediaEntity);
+                        hearingsToSave.add(hearingEntity);
+                        CourtCaseEntity courtCase = hearingEntity.getCourtCase();
+                        if (!mediaLinkedCaseRepository.existsByMediaAndCourtCase(mediaEntity, courtCase)) {
+                            mediaLinkedCaseEntities.add(new MediaLinkedCaseEntity(mediaEntity, courtCase));
+                        }
+                        log.info("Linking media {} to hearing {}", mediaEntity.getId(), hearingEntity.getId());
+                    }
+                } catch (Exception e) {
+                    log.error("Error linking media {} to hearing {}", mediaEntity.getId(), hearingEntity.getId(), e);
+                }
+            });
+            hearingRepository.saveAll(hearingsToSave);
+            mediaLinkedCaseRepository.saveAll(mediaLinkedCaseEntities);
+        }
     }
 }

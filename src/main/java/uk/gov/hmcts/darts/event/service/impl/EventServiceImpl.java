@@ -30,7 +30,7 @@ public class EventServiceImpl implements EventService {
     }
 
     @Override
-    public EventEntity getEventEntityById(Integer eveId) {
+    public EventEntity getEventByEveId(Integer eveId) {
         return eventRepository.findById(eveId)
             .orElseThrow(() -> new DartsApiException(CommonApiError.NOT_FOUND,
                                                      String.format("Event with id %s not found", eveId)));
