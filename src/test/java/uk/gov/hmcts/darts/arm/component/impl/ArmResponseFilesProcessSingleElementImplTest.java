@@ -95,8 +95,6 @@ class ArmResponseFilesProcessSingleElementImplTest {
 
     @Captor
     private ArgumentCaptor<ExternalObjectDirectoryEntity> externalObjectDirectoryEntityCaptor;
-
-    private ObjectRecordStatusEntity objectRecordStatusStored;
     private ObjectRecordStatusEntity objectRecordStatusArmRpoPending;
     private ObjectRecordStatusEntity objectRecordStatusArmDropZone;
     private ObjectRecordStatusEntity objectRecordStatusArmResponseProcessingFailed;
@@ -110,7 +108,7 @@ class ArmResponseFilesProcessSingleElementImplTest {
     @BeforeEach
     void setupData() {
 
-        objectRecordStatusStored = new ObjectRecordStatusEntity();
+        ObjectRecordStatusEntity objectRecordStatusStored = new ObjectRecordStatusEntity();
         objectRecordStatusStored.setId(STORED.getId());
         objectRecordStatusStored.setDescription(STORED_DESCRIPTION);
 
