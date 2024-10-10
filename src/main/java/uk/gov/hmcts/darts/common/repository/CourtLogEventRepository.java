@@ -16,7 +16,7 @@ public interface CourtLogEventRepository extends JpaRepository<EventEntity, Inte
            FROM EventEntity ee, CourtroomEntity cr, CourthouseEntity ch, CourtCaseEntity ce
            JOIN ee.hearingEntities hearing
            WHERE ch.courthouseName = upper(:courtHouse)
-           AND upper(ce.caseNumber) = upper(:caseNumber)
+           AND ce.caseNumber = :caseNumber
            AND ee.isLogEntry = true
            AND ee.timestamp between :start AND :end
            AND cr.courthouse = ch

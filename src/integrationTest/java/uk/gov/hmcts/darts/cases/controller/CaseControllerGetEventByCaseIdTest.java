@@ -1,5 +1,6 @@
 package uk.gov.hmcts.darts.cases.controller;
 
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.skyscreamer.jsonassert.JSONAssert;
@@ -39,6 +40,7 @@ class CaseControllerGetEventByCaseIdTest extends IntegrationBase {
     private static final String SOME_COURTHOUSE = "SOME-COURTHOUSE";
     private static final String SOME_COURTROOM = "some-courtroom";
     private static final String SOME_CASE_NUMBER = "1";
+    private static final String SOME_CASE_NUMBER_TWO = "2";
 
     private HearingEntity hearingEntity;
 
@@ -63,6 +65,17 @@ class CaseControllerGetEventByCaseIdTest extends IntegrationBase {
             .toList();
 
         dartsDatabase.saveEventsForHearing(hearingEntity, eventEntityList);
+
+        HearingEntity hearingEntity2 = dartsDatabase.givenTheDatabaseContainsCourtCaseWithHearingAndCourthouseWithRoom(
+            SOME_CASE_NUMBER_TWO,
+            SOME_COURTHOUSE,
+            SOME_COURTROOM,
+            DateConverterUtil.toLocalDateTime(SOME_DATE_TIME)
+        );
+        courtCase = hearingEntity2.getCourtCase();
+        dartsDatabase.save(courtCase);
+
+        dartsDatabase.saveEventsForHearing(hearingEntity2, eventEntityList);
 
         UserAccountEntity testUser = dartsDatabase.getUserAccountStub()
             .createAuthorisedIntegrationTestUser(hearingEntity.getCourtroom().getCourthouse());
@@ -101,6 +114,8 @@ class CaseControllerGetEventByCaseIdTest extends IntegrationBase {
         expectedJson = expectedJson.replace("<hearing-id>", hearingEntity.getId().toString());
         JSONAssert.assertEquals(expectedJson, actualJson, JSONCompareMode.NON_EXTENSIBLE);
 
+        // assert that we only ever got one event. The one that was associated to the first case hearing
+        Assertions.assertEquals(1, eventEntityList.size());
     }
 
     @Test
