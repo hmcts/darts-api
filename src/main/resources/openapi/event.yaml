@@ -891,8 +891,7 @@ components:
         MAPPING_INACTIVE,
         MAPPING_IN_USE,
         TOO_MANY_RESULTS,
-        EVENT_ID_NOT_FOUND,
-        ALREADY_OBFUSCATED
+        EVENT_ID_NOT_FOUND
       ]
 
     EventTitleErrors:
@@ -907,7 +906,6 @@ components:
         - "The mapping has already processed events, so cannot be deleted"
         - "The search resulted in too many results"
         - "Event id does not exist"
-        - "This event is already obfuscated"
       x-enum-varnames: [
         EVENT_DATA_NOT_FOUND,
         EVENT_HANDLER_NOT_FOUND_IN_DB,
@@ -917,5 +915,4 @@ components:
         MAPPING_INACTIVE,
         MAPPING_IN_USE,
         TOO_MANY_RESULTS,
-        EVENT_ID_NOT_FOUND,
-        ALREADY_OBFUSCATED ]
+        EVENT_ID_NOT_FOUND]
