@@ -719,11 +719,6 @@ components:
           type: string
         is_data_anonymised:
           type: boolean
-        is_case_expired:
-          type: boolean
-        case_expired_at:
-          type: string
-          format: date-time
         courthouse:
           type: object
           properties:
