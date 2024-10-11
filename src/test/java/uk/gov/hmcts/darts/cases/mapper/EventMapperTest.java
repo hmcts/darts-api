@@ -2,6 +2,8 @@ package uk.gov.hmcts.darts.cases.mapper;
 
 import com.google.common.collect.Lists;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import uk.gov.hmcts.darts.cases.model.Event;
 import uk.gov.hmcts.darts.common.entity.EventEntity;
 import uk.gov.hmcts.darts.common.entity.EventHandlerEntity;
@@ -12,35 +14,20 @@ import java.time.OffsetDateTime;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static uk.gov.hmcts.darts.common.util.CommonTestDataUtil.createEventWith;
 
 class EventMapperTest {
 
-    @Test
-    void testMapGetEventsByCaseId() {
-        OffsetDateTime hearingDate = OffsetDateTime.parse("2024-07-01T12:00Z");
-        HearingEntity hearing = CommonTestDataUtil.createHearing("case1", hearingDate.toLocalDate());
-        List<EventEntity> eventEntityList = Lists.newArrayList(createEventWith("eventName", "event text", hearing, hearingDate));
 
-        List<Event> events = EventMapper.mapToEvents(eventEntityList);
-        Event event = events.get(0);
-        assertEquals(1, event.getId());
-        assertEquals(102, event.getHearingId());
-        assertEquals(hearingDate.toLocalDate(), event.getHearingDate());
-        assertEquals("eventName", event.getName());
-        assertEquals("event text", event.getText());
-        assertEquals(hearingDate, event.getTimestamp());
-        assertFalse(event.getIsDataAnonymised());
-    }
-
-    @Test
-    void testMapGetEventsByCaseIdDataAnonymised() {
+    @ParameterizedTest(name = "testMapGetEventsByCaseId isAnonymised={0}")
+    @ValueSource(booleans = {true, false})
+    void testMapGetEventsByCaseId(boolean isAnonymised) {
         OffsetDateTime hearingDate = OffsetDateTime.parse("2024-07-01T12:00Z");
         HearingEntity hearing = CommonTestDataUtil.createHearing("case1", hearingDate.toLocalDate());
         EventEntity eventEntity = createEventWith("eventName", "event text", hearing, hearingDate);
-        eventEntity.setDataAnonymised(true);
+        if (isAnonymised) {
+            eventEntity.setDataAnonymised(true);
+        }
         List<EventEntity> eventEntityList = Lists.newArrayList(eventEntity);
         List<Event> events = EventMapper.mapToEvents(eventEntityList);
         Event event = events.get(0);
@@ -50,7 +37,8 @@ class EventMapperTest {
         assertEquals("eventName", event.getName());
         assertEquals("event text", event.getText());
         assertEquals(hearingDate, event.getTimestamp());
-        assertTrue(event.getIsDataAnonymised());
+        assertEquals(isAnonymised, event.getIsDataAnonymised());
+
     }
 
 
