@@ -21,6 +21,7 @@ import uk.gov.hmcts.darts.common.repository.AnnotationDocumentRepository;
 import uk.gov.hmcts.darts.common.repository.CaseDocumentRepository;
 import uk.gov.hmcts.darts.common.repository.CaseRetentionRepository;
 import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
+import uk.gov.hmcts.darts.common.repository.MediaLinkedCaseRepository;
 import uk.gov.hmcts.darts.common.repository.MediaRepository;
 import uk.gov.hmcts.darts.common.repository.TranscriptionDocumentRepository;
 import uk.gov.hmcts.darts.common.util.CommonTestDataUtil;
@@ -87,6 +88,9 @@ class ApplyRetentionCaseAssociatedObjectsSingleCaseProcessorImplTest {
     @Mock
     private CurrentTimeHelper currentTimeHelper;
 
+    @Mock
+    private MediaLinkedCaseRepository mediaLinkedCaseRepository;
+
     private CourtCaseEntity case1PerfectlyClosed;
     private CourtCaseEntity case2PerfectlyClosed;
     private CourtCaseEntity case3NotPerfectlyClosed;
@@ -112,7 +116,7 @@ class ApplyRetentionCaseAssociatedObjectsSingleCaseProcessorImplTest {
         caseObjectsProcessor = new ApplyRetentionCaseAssociatedObjectsSingleCaseProcessorImpl(
             caseRetentionRepository, caseService, eodRepository, mediaRepository, annotationDocumentRepository, transcriptionService,
             caseDocumentRepository, transcriptionDocumentRepository, caseRetentionConfidenceReasonMapper, userIdentity,
-            currentTimeHelper, objectMapper);
+            currentTimeHelper, objectMapper, mediaLinkedCaseRepository);
 
         case1PerfectlyClosed = CommonTestDataUtil.createCaseWithId("case1", 101);
         case1PerfectlyClosed.setRetentionUpdated(true);
@@ -331,8 +335,10 @@ class ApplyRetentionCaseAssociatedObjectsSingleCaseProcessorImplTest {
         annotationDocumentA1.setAnnotation(annotationA1);
         annotationDocumentB1.setAnnotation(annotationB1);
 
-        var eodA1 = getExternalObjectDirectoryTestData().eodStoredInExternalLocationTypeForAnnotationDocument(ExternalLocationTypeEnum.ARM, annotationDocumentA1);
-        var eodB1 = getExternalObjectDirectoryTestData().eodStoredInExternalLocationTypeForAnnotationDocument(ExternalLocationTypeEnum.ARM, annotationDocumentB1);
+        var eodA1 = getExternalObjectDirectoryTestData().eodStoredInExternalLocationTypeForAnnotationDocument(ExternalLocationTypeEnum.ARM,
+                                                                                                              annotationDocumentA1);
+        var eodB1 = getExternalObjectDirectoryTestData().eodStoredInExternalLocationTypeForAnnotationDocument(ExternalLocationTypeEnum.ARM,
+                                                                                                              annotationDocumentB1);
 
         when(caseService.getCourtCaseById(case1PerfectlyClosed.getId())).thenReturn(case1PerfectlyClosed);
 
@@ -374,9 +380,9 @@ class ApplyRetentionCaseAssociatedObjectsSingleCaseProcessorImplTest {
         transcriptionDocumentB1.setTranscription(transcriptionB1);
 
         var eodA1 = getExternalObjectDirectoryTestData().eodStoredInExternalLocationTypeForTranscriptionDocument(ExternalLocationTypeEnum.ARM,
-                                                                                                            transcriptionDocumentA1);
+                                                                                                                 transcriptionDocumentA1);
         var eodB1 = getExternalObjectDirectoryTestData().eodStoredInExternalLocationTypeForTranscriptionDocument(ExternalLocationTypeEnum.ARM,
-                                                                                                            transcriptionDocumentB1);
+                                                                                                                 transcriptionDocumentB1);
 
         when(caseService.getCourtCaseById(case1PerfectlyClosed.getId())).thenReturn(case1PerfectlyClosed);
 
