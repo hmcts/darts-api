@@ -30,10 +30,10 @@ public class CleanupCurrentFlagEventProcessorImpl implements CleanupCurrentFlagE
     @Override
     @Async
     public void processEvent(Integer eventId) {
-        log.info("Cleaning up event id {}", eventId);
-        if (eventId == 0) {
+        if (eventId == null || eventId == 0) {
             return;
         }
+        log.info("Cleaning up event id {}", eventId);
         List<EventRepository.EventIdAndHearingIds> theLatestCreatedEventPrimaryKeyForTheEventId =
             eventRepository.getTheLatestCreatedEventPrimaryKeyForTheEventId(eventId);
 
