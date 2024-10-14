@@ -6,7 +6,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
-import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.EventEntity;
 import uk.gov.hmcts.darts.common.repository.EventRepository;
 import uk.gov.hmcts.darts.common.repository.HearingRepository;
@@ -22,13 +21,11 @@ import java.util.stream.Collectors;
 @Slf4j
 @Component
 public class CleanupCurrentFlagEventProcessorImpl implements CleanupCurrentFlagEventProcessor {
-    private final Integer batchSize = 20;
     private final EventRepository eventRepository;
     private final HearingRepository hearingRepository;
-    private final UserIdentity userIdentity;
 
     @Override
-    @Async
+    @Async("eventTaskExecutor")
     public void processEvent(Integer eventId) {
         if (eventId == null || eventId == 0) {
             return;

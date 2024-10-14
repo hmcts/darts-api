@@ -29,4 +29,15 @@ public class AsyncEventsConfig {
         executor.initialize();
         return executor;
     }
+
+    @Bean
+    public TaskExecutor eventTaskExecutor() {
+        var executor = new ThreadPoolTaskExecutor();
+        executor.setCorePoolSize(10);
+        executor.setMaxPoolSize(30);
+        executor.setQueueCapacity(20);
+        executor.setThreadNamePrefix("Async-Event-");
+        executor.initialize();
+        return executor;
+    }
 }
