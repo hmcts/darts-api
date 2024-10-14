@@ -2,7 +2,6 @@ package uk.gov.hmcts.darts.event.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.darts.common.entity.EventEntity;
 import uk.gov.hmcts.darts.common.exception.CommonApiError;
@@ -34,11 +33,5 @@ public class EventServiceImpl implements EventService {
     @Override
     public EventEntity saveEvent(EventEntity eventEntity) {
         return eventRepository.save(eventEntity);
-    }
-
-    @Override
-    @Async
-    public void cleanUpOldEvents(String eventId) {
-
     }
 }
