@@ -1,0 +1,88 @@
+---
+name: PR Tasks
+on:
+  pull_request:
+    types:
+      - opened
+      - reopened
+      - synchronize
+permissions:
+  id-token: write
+  contents: read
+jobs:
+  set-internal-ad-callback-urls:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Set Internal AD callback URLs
+        run: |
+          authCallbackUrl="https://darts-portal-pr-${PR_NUMBER}.dev.platform.hmcts.net/auth/internal/callback"
+          logoutUrl="https://darts-portal-pr-${PR_NUMBER}.dev.platform.hmcts.net/auth/internal/logout-callback"
+          targetAppName="darts-stg"
+          appId="dec3be30-6325-4335-b898-eb01985d6c90"
+
+          az login --service-principal --username ${{ secrets.SP_CLIENT_ID}} -p=${{ secrets.SP_SECRET_KEY}} --tenant ${{ secrets.SP_TENANT_ID}} --allow-no-subscriptions
+          
+          replyUrls=$(az ad app show --id "$appId" --query "web.redirectUris" -o json --only-show-errors)
+          echo "Found callback URLs"
+          echo $replyUrls
+
+          if [[ "${replyUrls}" =~ "${authCallbackUrl}" && -n "${replyUrls}" ]]; then
+            echo "Callback URLs contain $authCallbackUrl"
+          elif [ -z $replyUrls ]; then
+            echo "No callback URLs Found. ISSUE!!"
+          else
+            readarray -t my_array < <(echo "$replyUrls" | jq -c '.[]')
+            for item in "${my_array[@]}"; do
+              replyUrlString+="$item,"
+            done
+
+            replyUrlString+="\"$authCallbackUrl\", \"$logoutUrl\""
+            echo "Setting callback URLs: $replyUrlString"
+
+            objectId=$(az ad app list --all --filter "displayname eq '${targetAppName}'" --query "[0].id" -o tsv --only-show-errors)
+            objectId=${objectId//[$'\t\r\n']/}
+            echo "Object ID: $objectId"
+            restUrl="https://graph.microsoft.com/v1.0/applications/${objectId//[$'\t\r\n']/}"
+            echo "Calling: $restUrl"
+            az rest --method PATCH --header "Content-Type=application/json" --uri $restUrl --body "{\"web\":{\"redirectUris\":[$replyUrlString]}}"
+          fi
+        env:
+          PR_NUMBER: ${{ github.event.number }}
+  set-external-ad-b2c-callback-urls:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Set External AD B2C callback URLs
+        run: |
+          authCallbackUrl="https://darts-portal-pr-${PR_NUMBER}.dev.platform.hmcts.net/auth/callback"
+          logoutUrl="https://darts-portal-pr-${PR_NUMBER}.dev.platform.hmcts.net/auth/logout-callback"
+          targetAppName="darts"
+          appId="363c11cb-48b9-44bf-9d06-9a3973f6f413"
+
+          az login --service-principal --username ${{ secrets.SP_CLIENT_ID_B2C}} -p=${{ secrets.SP_SECRET_KEY_B2C}} --tenant ${{ secrets.SP_TENANT_ID_B2C}} --allow-no-subscriptions
+          
+          replyUrls=$(az ad app show --id "$appId" --query "web.redirectUris" -o json --only-show-errors)
+          echo "Found Reply URLs"
+          echo $replyUrls
+
+          if [[ "${replyUrls}" =~ "${authCallbackUrl}" && -n "${replyUrls}" ]]; then
+            echo "Callback URLs contain $authCallbackUrl"
+          elif [ -z $replyUrls ]; then
+            echo "No callback URLs Found. ISSUE!!"
+          else
+            readarray -t my_array < <(echo "$replyUrls" | jq -c '.[]')
+            for item in "${my_array[@]}"; do
+              replyUrlString+="$item,"
+            done
+
+            replyUrlString+="\"$authCallbackUrl\", \"$logoutUrl\""
+            echo "Setting callback URLs: $replyUrlString"
+
+            objectId=$(az ad app list --all --filter "displayname eq '${targetAppName}'" --query "[0].id" -o tsv --only-show-errors)
+            objectId=${objectId//[$'\t\r\n']/}
+            echo "Object ID: $objectId"
+            restUrl="https://graph.microsoft.com/v1.0/applications/${objectId//[$'\t\r\n']/}"
+            echo "Calling: $restUrl"
+            az rest --method PATCH --header "Content-Type=application/json" --uri $restUrl --body "{\"web\":{\"redirectUris\":[$replyUrlString]}}" #--debug
+          fi
+        env:
+          PR_NUMBER: ${{ github.event.number }}
