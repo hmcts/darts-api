@@ -132,13 +132,13 @@ components:
           $ref: '#/components/schemas/CronExpression'
         is_active:
           $ref: '#/components/schemas/IsActive'
-        batchSize:
-          $ref: '#/components/schemas/batchSize'
     DetailedAutomatedTask:
       type: object
       properties:
         is_cron_editable:
           $ref: '#/components/schemas/IsCronEditable'
+        batchSize:
+          $ref: '#/components/schemas/BatchSize'
         created_at:
           $ref: '#/components/schemas/CreatedAt'
         created_by:
@@ -166,7 +166,7 @@ components:
       maxLength: 256
     IsActive:
       type: boolean
-    batchSize:
+    BatchSize:
       type: integer
     IsCronEditable:
       type: boolean
