@@ -10,4 +10,6 @@ public interface EventService {
     EventEntity getEventByEveId(Integer eveId);
 
     EventEntity saveEvent(EventEntity eventEntity);
+
+    void cleanUpOldEvents(String eventId);
 }
