@@ -43,7 +43,7 @@ class CleanupCurrentFlagEventProcessorImplTest extends PostgresIntegrationBase {
         UserAccountEntity userAccount = new UserAccountEntity();
         userAccount.setId(TestUtils.AUTOMATION_USER_ID);
         when(userIdentity.getUserAccount()).thenReturn(userAccount);
-        this.cleanupCurrentFlagEventProcessor = new CleanupCurrentFlagEventProcessorImpl(eventRepository, hearingRepository, userIdentity);
+        this.cleanupCurrentFlagEventProcessor = new CleanupCurrentFlagEventProcessorImpl(eventRepository, hearingRepository);
     }
 
     @Test
