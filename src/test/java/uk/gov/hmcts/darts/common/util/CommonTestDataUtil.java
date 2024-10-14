@@ -561,6 +561,14 @@ public class CommonTestDataUtil {
         return transcriptionUrgencyEntity;
     }
 
+    public TranscriptionStatusEntity createTranscriptionStatusEntityFromEnum(TranscriptionStatusEnum statusEnum) {
+        TranscriptionStatusEntity transcriptionStatusEntity = new TranscriptionStatusEntity();
+        transcriptionStatusEntity.setId(statusEnum.getId());
+        transcriptionStatusEntity.setDisplayName(statusEnum.name());
+
+        return transcriptionStatusEntity;
+    }
+
     public static AnnotationEntity createAnnotationEntity(Integer id) {
         AnnotationEntity annotationEntity = new AnnotationEntity();
         annotationEntity.setId(id);
