@@ -90,5 +90,5 @@ public interface MediaRepository extends JpaRepository<MediaEntity, Integer>,
             JOIN MediaLinkedCaseEntity mlce ON me.id = mlce.media.id
             WHERE mlce.courtCase.id = :caseId
         """)
-    List<MediaEntity> findAllLinkedByMediaLinkedCaseByCaseId(Integer caseId);
+    List<MediaEntity> findAllLinkedByMediaLinkedCaseAndCaseId(Integer caseId);
 }
