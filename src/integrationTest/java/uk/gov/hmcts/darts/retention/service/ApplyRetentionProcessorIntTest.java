@@ -5,16 +5,13 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import uk.gov.hmcts.darts.common.entity.CaseRetentionEntity;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
-import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
 import uk.gov.hmcts.darts.common.repository.CaseRetentionRepository;
 import uk.gov.hmcts.darts.retention.enums.CaseRetentionStatus;
 import uk.gov.hmcts.darts.retention.service.impl.ApplyRetentionProcessorImpl;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
-import uk.gov.hmcts.darts.testutils.stubs.DartsDatabaseStub;
 
 import java.time.OffsetDateTime;
 import java.time.temporal.ChronoUnit;
-import java.util.Comparator;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -70,7 +67,7 @@ class ApplyRetentionProcessorIntTest extends IntegrationBase {
     }
 
     @Test
-    void testCaseRetentionChangeStateWithRecordInsideCoolOff() {
+    void testCaseCloseDateWithRecordInsideCoolOff() {
         OffsetDateTime caseClosedTime = OffsetDateTime.now().minusDays(6);
         courtCase.setCaseClosedTimestamp(caseClosedTime);
         dartsDatabase.save(courtCase);
@@ -89,7 +86,7 @@ class ApplyRetentionProcessorIntTest extends IntegrationBase {
         assertEquals(CaseRetentionStatus.PENDING.name(), caseRetentionEntity.getCurrentState());
 
         assertFalse(caseRetentionEntity.getCourtCase().isRetentionUpdated());
-        assertNull( caseRetentionEntity.getCourtCase().getRetentionRetries());
+        assertNull(caseRetentionEntity.getCourtCase().getRetentionRetries());
     }
 
     @Test
