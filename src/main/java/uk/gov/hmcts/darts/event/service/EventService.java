@@ -4,4 +4,6 @@ import uk.gov.hmcts.darts.event.model.AdminGetEventForIdResponseResult;
 
 public interface EventService {
     AdminGetEventForIdResponseResult adminGetEventById(Integer eventId);
+
+    void cleanUpOldEvents(String eventId);
 }

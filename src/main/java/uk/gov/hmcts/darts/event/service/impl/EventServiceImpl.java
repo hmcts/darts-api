@@ -2,6 +2,7 @@ package uk.gov.hmcts.darts.event.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.darts.common.entity.EventEntity;
 import uk.gov.hmcts.darts.common.repository.EventRepository;
@@ -25,5 +26,11 @@ public class EventServiceImpl implements EventService {
         eventIdValidator.validate(eventId);
         Optional<EventEntity> eventEntityOptional = eventRepository.findById(eventId);
         return eventMapper.mapToAdminGetEventsResponseForId(eventEntityOptional);
+    }
+
+    @Override
+    @Async
+    public void cleanUpOldEvents(String eventId) {
+
     }
 }
