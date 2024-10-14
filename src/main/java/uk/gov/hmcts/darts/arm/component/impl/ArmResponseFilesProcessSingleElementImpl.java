@@ -2,6 +2,7 @@ package uk.gov.hmcts.darts.arm.component.impl;
 
 import com.azure.core.util.BinaryData;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
@@ -75,10 +76,20 @@ public class ArmResponseFilesProcessSingleElementImpl implements ArmResponseFile
     private ObjectRecordStatusEntity armResponseChecksumVerificationFailedStatus;
     private UserAccountEntity userAccount;
 
+    @PostConstruct
+    public void initialisePreloadedObjects() {
+        storedStatus = objectRecordStatusRepository.findById(STORED.getId()).get();
+        armDropZoneStatus = objectRecordStatusRepository.findById(ARM_DROP_ZONE.getId()).get();
+        armProcessingResponseFilesStatus = objectRecordStatusRepository.findById(ARM_PROCESSING_RESPONSE_FILES.getId()).get();
+        armResponseManifestFailedStatus = objectRecordStatusRepository.findById(ARM_RESPONSE_MANIFEST_FAILED.getId()).get();
+        armResponseProcessingFailedStatus = objectRecordStatusRepository.findById(ARM_RESPONSE_PROCESSING_FAILED.getId()).get();
+        armResponseChecksumVerificationFailedStatus = objectRecordStatusRepository.findById(ARM_RESPONSE_CHECKSUM_VERIFICATION_FAILED.getId()).get();
+    }
+
     @Transactional
     @Override
     public void processResponseFilesFor(Integer externalObjectDirectoryId) {
-        initialisePreloadedObjects();
+        userAccount = userIdentity.getUserAccount();
         ExternalObjectDirectoryEntity externalObjectDirectoryEntity = externalObjectDirectoryRepository.findById(externalObjectDirectoryId).get();
         try {
             processInputUploadFile(externalObjectDirectoryEntity);
@@ -86,18 +97,6 @@ public class ArmResponseFilesProcessSingleElementImpl implements ArmResponseFile
             log.error("Unable to process response files for external object directory.", e);
             updateExternalObjectDirectoryStatusAndVerificationAttempt(externalObjectDirectoryEntity, armDropZoneStatus);
         }
-    }
-
-    @SuppressWarnings("java:S3655")
-    private void initialisePreloadedObjects() {
-        storedStatus = objectRecordStatusRepository.findById(STORED.getId()).get();
-        armDropZoneStatus = objectRecordStatusRepository.findById(ARM_DROP_ZONE.getId()).get();
-        armProcessingResponseFilesStatus = objectRecordStatusRepository.findById(ARM_PROCESSING_RESPONSE_FILES.getId()).get();
-        armResponseManifestFailedStatus = objectRecordStatusRepository.findById(ARM_RESPONSE_MANIFEST_FAILED.getId()).get();
-        armResponseProcessingFailedStatus = objectRecordStatusRepository.findById(ARM_RESPONSE_PROCESSING_FAILED.getId()).get();
-        armResponseChecksumVerificationFailedStatus = objectRecordStatusRepository.findById(ARM_RESPONSE_CHECKSUM_VERIFICATION_FAILED.getId()).get();
-
-        userAccount = userIdentity.getUserAccount();
     }
 
     private void processInputUploadFile(ExternalObjectDirectoryEntity externalObjectDirectory) {
