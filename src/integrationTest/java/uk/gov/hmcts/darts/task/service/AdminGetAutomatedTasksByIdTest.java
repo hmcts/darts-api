@@ -38,7 +38,7 @@ class AdminGetAutomatedTasksByIdTest extends IntegrationBase {
                 get(ENDPOINT + "/8"))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.is_cron_editable").value(true))
-            .andExpect(jsonPath("$.batch_size").value(100000))
+            .andExpect(jsonPath("$.batch_size").value(100_000))
             .andExpect(jsonPath("$.created_at").isNotEmpty())
             .andExpect(jsonPath("$.created_by").value(0))
             .andExpect(jsonPath("$.last_modified_at").isNotEmpty())
