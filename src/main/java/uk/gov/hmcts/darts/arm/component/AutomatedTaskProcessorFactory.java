@@ -5,7 +5,6 @@ import uk.gov.hmcts.darts.arm.service.impl.DetsToArmBatchProcessResponseFilesImp
 import uk.gov.hmcts.darts.casedocument.service.GenerateCaseDocumentForRetentionDateProcessor;
 import uk.gov.hmcts.darts.casedocument.service.GenerateCaseDocumentProcessor;
 import uk.gov.hmcts.darts.cases.service.CloseOldCasesProcessor;
-import uk.gov.hmcts.darts.event.service.CleanupCurrentFlagEventProcessor;
 
 public interface AutomatedTaskProcessorFactory {
 
@@ -14,8 +13,6 @@ public interface AutomatedTaskProcessorFactory {
     DetsToArmBatchProcessResponseFilesImpl createDetsToArmResponseFilesProcessor(int batchSize);
 
     GenerateCaseDocumentProcessor createGenerateCaseDocumentProcessor(int batchSize);
-
-    CleanupCurrentFlagEventProcessor createCleanupCurrentFlagEventProcessor(int batchSize);
 
     GenerateCaseDocumentForRetentionDateProcessor createGenerateCaseDocumentForRetentionDateProcessor(int batchSize);
 
