@@ -31,14 +31,15 @@ DUMP_FILE="/tmp/darts-api-stg-dump.sql"
 RESTORE_LOG_FILE="/tmp/darts-api-pr-restore.log"
 RESTORE_OUTPUT="/tmp/darts-api-pr-stdout.log"
 
-SCHEMA="$(az keyvault secret show --vault-name darts-stg --name api-POSTGRES-SCHEMA | jq .value -r)"
-DATABASE="$(az keyvault secret show --vault-name darts-stg --name api-POSTGRES-DATABASE | jq .value -r)"
+SCHEMA=$STAGING_DB_DATABASE
+DATABASE=$STAGING_DB_SCHEMA
 
-STG_HOST="$(az keyvault secret show --vault-name darts-stg --name api-POSTGRES-HOST | jq .value -r)"
-STG_USER="$(az keyvault secret show --vault-name darts-stg --name api-POSTGRES-USER | jq .value -r)"
-STG_PASSWORD="$(az keyvault secret show --vault-name darts-stg --name api-POSTGRES-PASS | jq .value -r)"
-STG_PORT="$(az keyvault secret show --vault-name darts-stg --name api-POSTGRES-PORT | jq .value -r)"
+STG_HOST=$STAGING_DB_HOST
+STG_USER=$STAGING_DB_USER
+STG_PASSWORD=$STAGING_DB_PASS
+STG_PORT=$STAGING_DB_PORT
 
+echo "Using Staging Database host: ${STG_HOST}"
 echo "Dumping staging database..."
 
 # make the password available for pg_dump
