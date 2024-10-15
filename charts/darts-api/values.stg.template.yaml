@@ -8,5 +8,3 @@ java:
     DARTS_GATEWAY_URL: http://darts-gateway.staging.platform.hmcts.net
     ARM_URL: http://darts-stub-services.staging.platform.hmcts.net
     FEIGN_LOG_LEVEL: none
-function:
-  image: ${IMAGE_NAME}
