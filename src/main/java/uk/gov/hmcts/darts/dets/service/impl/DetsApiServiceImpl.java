@@ -119,7 +119,7 @@ public class DetsApiServiceImpl implements DetsApiService {
             String sourceBlobSasUrl = buildBlobSasUrl(configuration.getContainerName(), sourceContainerSasUrl, detsUuid);
             String destinationBlobSasUrl = buildBlobSasUrl(armDataManagementConfiguration.getContainerName(), destinationContainerSasUrl, blobPathAndName);
 
-            log.debug("Copy from '{}' to '{}'", sourceBlobSasUrl, destinationBlobSasUrl);
+            log.info("Copy from '{}' to '{}'", sourceBlobSasUrl, destinationBlobSasUrl);
             //azureCopyUtil.copy(sourceBlobSasUrl, destinationBlobSasUrl);
             log.info("Copy completed from '{}' to '{}'. Source location: {}, destination location: {}",
                      configuration.getContainerName(), armDataManagementConfiguration.getContainerName(), detsUuid, blobPathAndName);
