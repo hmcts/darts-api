@@ -19,6 +19,9 @@ PR_DATABASE="pr-${PR_NUMBER}-darts"
 echo "Using Database password: ***${PR_PASSWORD: -3}"
 echo "Using PR_NUMBER: $PR_NUMBER"
 
+# make the password available for psql
+export PGPASSWORD="$PR_PASSWORD"
+
 RESTORE_COUNT=$(psql -h $PR_HOST -U $PR_USER -d $PR_DATABASE -c "SELECT count(*) FROM darts.pipeline_restore;" -t -q || echo 0 | jq -r)
 if [ "$RESTORE_COUNT" -gt 0 ]; then
   echo "Database has already been restored, exiting..."
