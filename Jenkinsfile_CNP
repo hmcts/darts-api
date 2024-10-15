@@ -141,7 +141,8 @@ withPipeline(type, product, component) {
         sh("./gradlew --no-daemon --init-script init.gradle assemble")
     }
 
-    before('smoketest:dev') {
+    afterAlways('deploy:dev') {
+        // restore the PR DB from staging
         sh("./bin/ci/db-stg-to-pr.sh")
     }
 }
