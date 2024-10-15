@@ -42,7 +42,6 @@ STG_USER=$STAGING_DB_USER
 STG_PASSWORD=$STAGING_DB_PASS
 STG_PORT=$STAGING_DB_PORT
 
-echo "Using Staging Database host: ${STG_HOST}"
 echo "Dumping staging database..."
 
 # make the password available for pg_dump

@@ -152,6 +152,8 @@ withPipeline(type, product, component) {
         onPR {
             // restore the PR DB from staging
             sh("./bin/ci/db-stg-to-pr.sh")
+            // run flyway migrate on PR DB
+            sh("./bin/ci/run-flyway-pr-db.sh")
         }
     }
 }
