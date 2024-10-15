@@ -4,7 +4,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.data.domain.Limit;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
 import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
 import uk.gov.hmcts.darts.common.repository.AutomatedTaskRepository;
 import uk.gov.hmcts.darts.common.repository.CaseRepository;
@@ -47,12 +46,11 @@ public class CaseExpiryDeletionAutomatedTask
     }
 
     @Override
-    @Transactional
     public void runTask() {
-        caseRepository.findCasesToBeAnonymized(currentTimeHelper.currentOffsetDateTime(), Limit.of(getAutomatedTaskBatchSize()))
-            .forEach(courtCase -> {
-                log.info("Anonymising case with id: {} because the criteria for retention has been met.", courtCase.getId());
-                dataAnonymisationService.anonymizeCourtCaseEntity(courtCase);
+        caseRepository.findCasesIdsToBeAnonymized(currentTimeHelper.currentOffsetDateTime(), Limit.of(getAutomatedTaskBatchSize()))
+            .forEach(courtCaseId -> {
+                log.info("Anonymising case with id: {} because the criteria for retention has been met.", courtCaseId);
+                dataAnonymisationService.anonymizeCourtCaseById(courtCaseId);
             });
     }
 }

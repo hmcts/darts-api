@@ -11,6 +11,7 @@ import uk.gov.hmcts.darts.audio.entity.MediaRequestEntity;
 import uk.gov.hmcts.darts.audio.enums.MediaRequestStatus;
 import uk.gov.hmcts.darts.audit.api.AuditApi;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
+import uk.gov.hmcts.darts.cases.service.CaseService;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.DefenceEntity;
 import uk.gov.hmcts.darts.common.entity.DefendantEntity;
@@ -25,7 +26,6 @@ import uk.gov.hmcts.darts.common.entity.TransientObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.entity.base.CreatedModifiedBaseEntity;
 import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
-import uk.gov.hmcts.darts.common.repository.CaseRepository;
 import uk.gov.hmcts.darts.common.repository.TransformedMediaRepository;
 import uk.gov.hmcts.darts.common.repository.TransientObjectDirectoryRepository;
 import uk.gov.hmcts.darts.log.api.LogApi;
@@ -59,7 +59,7 @@ class DataAnonymisationServiceImplTest {
     @Mock
     private ExternalOutboundDataStoreDeleter outboundDataStoreDeleter;
     @Mock
-    private CaseRepository caseRepository;
+    private CaseService caseService;
     @Mock
     private TransformedMediaRepository transformedMediaRepository;
     @Mock
@@ -197,6 +197,7 @@ class DataAnonymisationServiceImplTest {
         verify(dataAnonymisationService, times(1)).anonymizeHearingEntity(userAccount, hearingEntity2);
 
         verify(dataAnonymisationService, times(1)).tidyUpTransformedMediaEntities(userAccount, courtCase);
+        verify(caseService, times(1)).saveCase(courtCase);
         verify(logApi, times(1)).caseDeletedDueToExpiry(123, "caseNo123");
 
     }

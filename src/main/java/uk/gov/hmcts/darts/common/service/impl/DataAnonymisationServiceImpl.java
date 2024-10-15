@@ -11,6 +11,7 @@ import uk.gov.hmcts.darts.audio.enums.MediaRequestStatus;
 import uk.gov.hmcts.darts.audit.api.AuditActivity;
 import uk.gov.hmcts.darts.audit.api.AuditApi;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
+import uk.gov.hmcts.darts.cases.service.CaseService;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.DefenceEntity;
 import uk.gov.hmcts.darts.common.entity.DefendantEntity;
@@ -25,7 +26,6 @@ import uk.gov.hmcts.darts.common.entity.TransientObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.entity.base.CreatedModifiedBaseEntity;
 import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
-import uk.gov.hmcts.darts.common.repository.CaseRepository;
 import uk.gov.hmcts.darts.common.repository.TransformedMediaRepository;
 import uk.gov.hmcts.darts.common.repository.TransientObjectDirectoryRepository;
 import uk.gov.hmcts.darts.common.service.DataAnonymisationService;
@@ -48,13 +48,19 @@ public class DataAnonymisationServiceImpl implements DataAnonymisationService {
 
     private final CurrentTimeHelper currentTimeHelper;
     private final ExternalOutboundDataStoreDeleter outboundDataStoreDeleter;
-    private final CaseRepository caseRepository;
     private final TransformedMediaRepository transformedMediaRepository;
     private final TransientObjectDirectoryRepository transientObjectDirectoryRepository;
     private final LogApi logApi;
+    private final CaseService caseService;
+
 
     @Override
-    public void anonymizeCourtCaseEntity(UserAccountEntity userAccount, CourtCaseEntity courtCase) {
+    @Transactional
+    public void anonymizeCourtCaseById(Integer courtCaseId) {
+        anonymizeCourtCaseEntity(getUserAccount(), caseService.getCourtCaseById(courtCaseId));
+    }
+
+    void anonymizeCourtCaseEntity(UserAccountEntity userAccount, CourtCaseEntity courtCase) {
         courtCase.getDefendantList().forEach(defendantEntity -> anonymizeDefendantEntity(userAccount, defendantEntity));
         courtCase.getDefenceList().forEach(defenceEntity -> anonymizeDefenceEntity(userAccount, defenceEntity));
         courtCase.getProsecutorList().forEach(prosecutorEntity -> anonymizeProsecutorEntity(userAccount, prosecutorEntity));
@@ -65,7 +71,7 @@ public class DataAnonymisationServiceImpl implements DataAnonymisationService {
         tidyUpTransformedMediaEntities(userAccount, courtCase);
         auditApi.record(AuditActivity.CASE_EXPIRED, userAccount, courtCase);
         anonymizeCreatedModifiedBaseEntity(userAccount, courtCase);
-        caseRepository.save(courtCase);
+        caseService.saveCase(courtCase);
 
         //Required for Dynatrace dashboards
         logApi.caseDeletedDueToExpiry(courtCase.getId(), courtCase.getCaseNumber());

@@ -38,4 +38,6 @@ public interface CaseService {
     List<Annotation> getAnnotations(Integer caseId);
 
     List<AdminCasesSearchResponseItem> adminCaseSearch(AdminCasesSearchRequest request);
+
+    void saveCase(CourtCaseEntity courtCase);
 }
