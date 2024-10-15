@@ -2,7 +2,6 @@ package uk.gov.hmcts.darts.testutils.stubs;
 
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
@@ -15,11 +14,9 @@ import java.util.Optional;
 @RequiredArgsConstructor
 @Deprecated
 public class CourthouseStubComposable {
-    @Autowired
-    private CourthouseRepository courthouseRepository;
+    private final CourthouseRepository courthouseRepository;
 
-    @Autowired
-    private UserAccountRepository userAccountRepository;
+    private final UserAccountRepository userAccountRepository;
 
     public CourthouseEntity createCourthouseUnlessExists(String name) {
         String nameUC = StringUtils.toRootUpperCase(name);
