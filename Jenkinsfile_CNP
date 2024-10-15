@@ -142,6 +142,6 @@ withPipeline(type, product, component) {
     }
 
     before('smoketest:dev') {
-        sh("./bin/ci/db-pr-base-to-pr.sh")
+        sh("./bin/ci/db-stg-to-pr.sh")
     }
 }
