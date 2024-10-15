@@ -4,7 +4,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import uk.gov.hmcts.darts.audio.component.AddAudioRequestMapper;
 import uk.gov.hmcts.darts.audio.model.AddAudioMetadataRequest;
@@ -69,7 +68,6 @@ public class AudioUploadServiceImpl implements AudioUploadService {
     private final AudioAsyncService audioAsyncService;
 
     @Override
-    @Transactional
     public void addAudio(MultipartFile audioMultipartFile, AddAudioMetadataRequest addAudioMetadataRequest) {
 
         log.info("Adding audio using metadata {}", addAudioMetadataRequest.toString());
