@@ -141,8 +141,10 @@ withPipeline(type, product, component) {
         sh("./gradlew --no-daemon --init-script init.gradle assemble")
     }
 
-    afterAlways('deploy:dev') {
-        // restore the PR DB from staging
-        sh("./bin/ci/db-stg-to-pr.sh")
+    afterSuccess('akschartsinstall') {
+        onPR {
+            // restore the PR DB from staging
+            sh("./bin/ci/db-pr-to-stg.sh")
+        }
     }
 }
