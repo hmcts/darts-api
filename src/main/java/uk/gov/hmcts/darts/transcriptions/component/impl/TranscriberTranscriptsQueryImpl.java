@@ -50,9 +50,9 @@ public class TranscriberTranscriptsQueryImpl implements TranscriberTranscriptsQu
                     tru.description                  as transcription_urgency_description,
                     tru.tru_id                       as transcription_urgency_id,
                     tru.priority_order               as transcription_urgency_priority_order,
-                    requested_trw.workflow_ts        as requested_ts,
-                    latest_trw.latest_ts             as state_change_ts,
-                    tra.is_manual_transcription      as is_manual
+                    tra.is_manual_transcription      as is_manual,
+                    (SELECT MAX(workflow_ts) FROM darts.transcription_workflow w WHERE w.tra_id = tra.tra_id AND w.trs_id = 1) as requested_ts,
+                    (SELECT MAX(workflow_ts) FROM darts.transcription_workflow w WHERE w.tra_id = tra.tra_id AND w.trs_id = tra.trs_id) as state_change_ts
                 FROM darts.transcription tra
                 JOIN darts.case_transcription_ae case_transcription ON tra.tra_id = case_transcription.tra_id
                 JOIN darts.court_case cas ON case_transcription.cas_id = cas.cas_id
@@ -72,18 +72,9 @@ public class TranscriberTranscriptsQueryImpl implements TranscriberTranscriptsQu
                 JOIN darts.transcription_type trt ON tra.trt_id = trt.trt_id
                 JOIN darts.transcription_status trs ON tra.trs_id = trs.trs_id
                 LEFT JOIN darts.transcription_urgency tru ON tra.tru_id = tru.tru_id
-                JOIN darts.transcription_workflow requested_trw ON tra.tra_id = requested_trw.tra_id AND requested_trw.trs_id = 1
-                JOIN darts.transcription_workflow approved_trw ON tra.tra_id = approved_trw.tra_id AND tra.trs_id = 3
-
-                -- Only the latest transcription_workflow for a given transcription represents the current status of that transcription
-                -- Implementation ref: https://dev.mysql.com/doc/refman/8.4/en/example-maximum-column-group-row.html
-                INNER JOIN (
-                    SELECT tra_id, MAX(workflow_ts) as latest_ts
-                    FROM darts.transcription_workflow
-                    GROUP BY tra_id
-                ) latest_trw ON tra.tra_id = latest_trw.tra_id AND approved_trw.workflow_ts = latest_trw.latest_ts
-                WHERE latest_trw.latest_ts >= :date_limit
+                WHERE (SELECT MAX(workflow_ts) FROM darts.transcription_workflow w WHERE w.tra_id = tra.tra_id AND w.trs_id = tra.trs_id) >= :date_limit
                 AND tra.is_current = true
+                AND tra.trs_id = 3
                 ORDER BY transcription_id desc
                 LIMIT :max_result_size
                 """,
