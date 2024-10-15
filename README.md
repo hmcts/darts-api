@@ -375,3 +375,4 @@ _Disclaimer: The script has been written to work using `bash`._
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details
 
+ 
