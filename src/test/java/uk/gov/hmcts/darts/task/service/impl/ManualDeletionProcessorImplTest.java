@@ -18,6 +18,7 @@ import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
 import uk.gov.hmcts.darts.common.repository.MediaRepository;
 import uk.gov.hmcts.darts.common.repository.ObjectAdminActionRepository;
 import uk.gov.hmcts.darts.common.repository.TranscriptionDocumentRepository;
+import uk.gov.hmcts.darts.log.api.LogApi;
 
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
@@ -35,6 +36,9 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 class ManualDeletionProcessorImplTest {
 
+    public static final int MEDIA_ID = 100;
+    public static final int TRANSCRIPTION_ID = 200;
+
     @Mock
     private ObjectAdminActionRepository objectAdminActionRepository;
     @Mock
@@ -47,6 +51,8 @@ class ManualDeletionProcessorImplTest {
     private ExternalInboundDataStoreDeleter inboundDeleter;
     @Mock
     private ExternalUnstructuredDataStoreDeleter unstructuredDeleter;
+    @Mock
+    private LogApi logApi;
 
     private ManualDeletionProcessorImpl manualDeletionProcessor;
 
@@ -57,7 +63,8 @@ class ManualDeletionProcessorImplTest {
                                                                   mediaRepository,
                                                                   transcriptionDocumentRepository,
                                                                   inboundDeleter,
-                                                                  unstructuredDeleter);
+                                                                  unstructuredDeleter,
+                                                                  logApi);
         ReflectionTestUtils.setField(manualDeletionProcessor, "gracePeriod", "24h");
     }
 
@@ -80,6 +87,8 @@ class ManualDeletionProcessorImplTest {
         verify(externalObjectDirectoryRepository, times(2)).delete(any(ExternalObjectDirectoryEntity.class));
         verify(inboundDeleter).delete(any(ExternalObjectDirectoryEntity.class));
         verify(unstructuredDeleter).delete(any(ExternalObjectDirectoryEntity.class));
+        verify(logApi, times(1)).mediaDeleted(MEDIA_ID);
+        verify(logApi, times(1)).transcriptionDeleted(TRANSCRIPTION_ID);
     }
 
     @Test
@@ -124,10 +133,14 @@ class ManualDeletionProcessorImplTest {
     private ObjectAdminActionEntity createObjectAdminAction(boolean isMedia, boolean isTranscription) {
         ObjectAdminActionEntity action = new ObjectAdminActionEntity();
         if (isMedia) {
-            action.setMedia(new MediaEntity());
+            MediaEntity media = new MediaEntity();
+            media.setId(MEDIA_ID);
+            action.setMedia(media);
         }
         if (isTranscription) {
-            action.setTranscriptionDocument(new TranscriptionDocumentEntity());
+            TranscriptionDocumentEntity transcriptionDocument = new TranscriptionDocumentEntity();
+            transcriptionDocument.setId(TRANSCRIPTION_ID);
+            action.setTranscriptionDocument(transcriptionDocument);
         }
         return action;
     }
