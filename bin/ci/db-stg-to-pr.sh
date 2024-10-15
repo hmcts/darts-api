@@ -11,6 +11,20 @@ command -v psql >/dev/null 2>&1 || { echo >&2 "I require \"psql\" but it's not i
 
 PR_NUMBER=$CHANGE_ID
 
+PR_HOST="darts-modernisation-dev.postgres.database.azure.com"
+PR_USER="hmcts"
+PR_PASSWORD="$(kubectl -n darts-modernisation get secret postgres -o json | jq .data.PASSWORD -r | base64 -d)"
+PR_DATABASE="pr-${PR_NUMBER}-darts"
+
+echo "Using Database password: ***${PR_PASSWORD: -3}"
+echo "Using PR_NUMBER: $PR_NUMBER"
+
+RESTORE_COUNT=$(psql -h $PR_HOST -U $PR_USER -d $PR_DATABASE -c "SELECT count(*) FROM darts.pipeline_restore;" -t -q || echo 0 | jq -r)
+if [ "$RESTORE_COUNT" -gt 0 ]; then
+  echo "Database has already been restored, exiting..."
+  exit 0
+fi
+
 echo "Fetching secrets from staging key-vault..."
 
 DUMP_FILE="/tmp/darts-api-stg-dump.sql"
@@ -20,18 +34,10 @@ RESTORE_OUTPUT="/tmp/darts-api-pr-stdout.log"
 SCHEMA="$(az keyvault secret show --vault-name darts-stg --name api-POSTGRES-SCHEMA | jq .value -r)"
 DATABASE="$(az keyvault secret show --vault-name darts-stg --name api-POSTGRES-DATABASE | jq .value -r)"
 
-PR_HOST="darts-modernisation-dev.postgres.database.azure.com"
-PR_USER="hmcts"
-PR_PASSWORD="$(kubectl -n darts-modernisation get secret postgres -o json | jq .data.PASSWORD -r | base64 -d)"
-PR_DATABASE="pr-${PR_NUMBER}-darts"
-
 STG_HOST="$(az keyvault secret show --vault-name darts-stg --name api-POSTGRES-HOST | jq .value -r)"
 STG_USER="$(az keyvault secret show --vault-name darts-stg --name api-POSTGRES-USER | jq .value -r)"
 STG_PASSWORD="$(az keyvault secret show --vault-name darts-stg --name api-POSTGRES-PASS | jq .value -r)"
 STG_PORT="$(az keyvault secret show --vault-name darts-stg --name api-POSTGRES-PORT | jq .value -r)"
-
-echo "Using Database password: ***${PR_PASSWORD: -3}"
-echo "Using PR_NUMBER: $PR_NUMBER"
 
 echo "Dumping staging database..."
 
@@ -50,6 +56,8 @@ psql -h $PR_HOST -U $PR_USER -d $PR_DATABASE -c "DROP SCHEMA IF EXISTS $SCHEMA C
 psql -h $PR_HOST -U $PR_USER -d $PR_DATABASE -L $RESTORE_LOG_FILE < $DUMP_FILE &> $RESTORE_OUTPUT
 # disabled all automated tasks
 psql -h $PR_HOST -U $PR_USER -d $PR_DATABASE -c "UPDATE darts.automated_task SET task_enabled = false;"
+# set the time of database restore, in order to check it was restored on another run of this script
+psql -h $PR_HOST -U $PR_USER -d $PR_DATABASE -c "CREATE TABLE IF NOT EXISTS darts.pipeline_restore ( restore_ts timestamp with time zone NOT NULL ) TABLESPACE pg_default; INSERT INTO darts.pipeline_restore (restore_ts) VALUES (now());"
 
 echo "Restore complete, stdout: $RESTORE_OUTPUT  log file: $RESTORE_LOG_FILE"
 echo "Output: $RESTORE_OUTPUT"
