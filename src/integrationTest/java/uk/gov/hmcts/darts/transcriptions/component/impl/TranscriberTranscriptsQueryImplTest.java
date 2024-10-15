@@ -50,6 +50,19 @@ class TranscriberTranscriptsQueryImplTest extends IntegrationBase {
     }
 
     @Test
+    void getTranscriptRequestsWithMultipleWorkflowsWithSameWorkflowTimestamp() {
+        var yesterday = NOW.minusDays(1);
+        TranscriptionEntity transcriptionEntity = dartsDatabase.getTranscriptionStub().createAndSaveApprovedTranscription(
+            userAccountEntity, courtCaseEntity, hearingEntity, yesterday, false
+        );
+        dartsDatabase.getTranscriptionRepository().saveAndFlush(transcriptionEntity);
+
+        List<TranscriberViewSummary> transcriberTranscriptions = transcriberTranscriptsQuery.getTranscriptRequests(userAccountEntity.getId());
+
+        assertThat(transcriberTranscriptions.size()).isEqualTo(1);
+    }
+
+    @Test
     void getTranscriberTranscriptions() {
         TranscriptionEntity transcriptionWithoutDocument = dartsDatabase.getTranscriptionStub().createAndSaveCompletedTranscription(
             userAccountEntity, courtCaseEntity, hearingEntity, NOW, false
