@@ -4,7 +4,5 @@ import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 
 public interface DataAnonymisationService {
 
-    void anonymizeCourtCaseById(Integer courtCaseId);
-
-    UserAccountEntity getUserAccount();
+    void anonymizeCourtCaseById(UserAccountEntity userAccount, Integer courtCaseId);
 }

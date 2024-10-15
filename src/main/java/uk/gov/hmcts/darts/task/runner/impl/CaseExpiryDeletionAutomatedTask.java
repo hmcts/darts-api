@@ -4,6 +4,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.data.domain.Limit;
 import org.springframework.stereotype.Component;
+import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
+import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
 import uk.gov.hmcts.darts.common.repository.AutomatedTaskRepository;
 import uk.gov.hmcts.darts.common.repository.CaseRepository;
@@ -27,17 +29,19 @@ public class CaseExpiryDeletionAutomatedTask
     private final CurrentTimeHelper currentTimeHelper;
     private final DataAnonymisationService dataAnonymisationService;
     private final CaseRepository caseRepository;
+    private final UserIdentity userAccountService;
 
     public CaseExpiryDeletionAutomatedTask(AutomatedTaskRepository automatedTaskRepository,
                                            AutomatedTaskConfigurationProperties automatedTaskConfigurationProperties,
                                            CurrentTimeHelper currentTimeHelper,
                                            CaseRepository caseRepository,
                                            LogApi logApi, LockService lockService,
-                                           DataAnonymisationService dataAnonymisationService) {
+                                           DataAnonymisationService dataAnonymisationService, UserIdentity userAccountService) {
         super(automatedTaskRepository, automatedTaskConfigurationProperties, logApi, lockService);
         this.currentTimeHelper = currentTimeHelper;
         this.caseRepository = caseRepository;
         this.dataAnonymisationService = dataAnonymisationService;
+        this.userAccountService = userAccountService;
     }
 
     @Override
@@ -47,10 +51,11 @@ public class CaseExpiryDeletionAutomatedTask
 
     @Override
     public void runTask() {
+        final UserAccountEntity userAccount = userAccountService.getUserAccount();
         caseRepository.findCasesIdsToBeAnonymized(currentTimeHelper.currentOffsetDateTime(), Limit.of(getAutomatedTaskBatchSize()))
             .forEach(courtCaseId -> {
                 log.info("Anonymising case with id: {} because the criteria for retention has been met.", courtCaseId);
-                dataAnonymisationService.anonymizeCourtCaseById(courtCaseId);
+                dataAnonymisationService.anonymizeCourtCaseById(userAccount, courtCaseId);
             });
     }
 }

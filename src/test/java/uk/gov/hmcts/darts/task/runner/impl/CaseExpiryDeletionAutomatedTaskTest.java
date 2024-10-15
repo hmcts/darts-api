@@ -7,6 +7,8 @@ import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Limit;
+import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
+import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
 import uk.gov.hmcts.darts.common.repository.AutomatedTaskRepository;
 import uk.gov.hmcts.darts.common.repository.CaseRepository;
@@ -20,6 +22,7 @@ import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -41,6 +44,8 @@ class CaseExpiryDeletionAutomatedTaskTest {
     private LockService lockService;
     @Mock
     private DataAnonymisationService dataAnonymisationService;
+    @Mock
+    private UserIdentity userIdentity;
 
 
     @InjectMocks
@@ -49,7 +54,8 @@ class CaseExpiryDeletionAutomatedTaskTest {
 
     @Test
     void runTask() {
-
+        UserAccountEntity userAccount = mock(UserAccountEntity.class);
+        when(userIdentity.getUserAccount()).thenReturn(userAccount);
         OffsetDateTime offsetDateTime = OffsetDateTime.now();
         when(currentTimeHelper.currentOffsetDateTime()).thenReturn(offsetDateTime);
 
@@ -65,11 +71,11 @@ class CaseExpiryDeletionAutomatedTaskTest {
             .currentOffsetDateTime();
 
         verify(dataAnonymisationService, times(1))
-            .anonymizeCourtCaseById(1);
+            .anonymizeCourtCaseById(userAccount, 1);
         verify(dataAnonymisationService, times(1))
-            .anonymizeCourtCaseById(2);
+            .anonymizeCourtCaseById(userAccount, 2);
         verify(dataAnonymisationService, times(1))
-            .anonymizeCourtCaseById(3);
+            .anonymizeCourtCaseById(userAccount, 3);
 
 
         verify(caseRepository, times(1))
@@ -77,5 +83,7 @@ class CaseExpiryDeletionAutomatedTaskTest {
 
         verify(caseExpiryDeletionAutomatedTask, times(1))
             .getAutomatedTaskBatchSize();
+        verify(userIdentity, times(1))
+            .getUserAccount();
     }
 }

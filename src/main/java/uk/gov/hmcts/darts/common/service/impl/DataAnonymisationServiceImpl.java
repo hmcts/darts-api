@@ -44,7 +44,6 @@ import java.util.stream.Collectors;
 public class DataAnonymisationServiceImpl implements DataAnonymisationService {
 
     private final AuditApi auditApi;
-    private final UserIdentity userIdentity;
 
     private final CurrentTimeHelper currentTimeHelper;
     private final ExternalOutboundDataStoreDeleter outboundDataStoreDeleter;
@@ -56,8 +55,8 @@ public class DataAnonymisationServiceImpl implements DataAnonymisationService {
 
     @Override
     @Transactional
-    public void anonymizeCourtCaseById(Integer courtCaseId) {
-        anonymizeCourtCaseEntity(getUserAccount(), caseService.getCourtCaseById(courtCaseId));
+    public void anonymizeCourtCaseById(UserAccountEntity userAccount, Integer courtCaseId) {
+        anonymizeCourtCaseEntity(userAccount, caseService.getCourtCaseById(courtCaseId));
     }
 
     void anonymizeCourtCaseEntity(UserAccountEntity userAccount, CourtCaseEntity courtCase) {
@@ -115,11 +114,6 @@ public class DataAnonymisationServiceImpl implements DataAnonymisationService {
     void anonymizeTranscriptionWorkflowEntity(TranscriptionWorkflowEntity transcriptionWorkflowEntity) {
         transcriptionWorkflowEntity.close();
 
-    }
-
-    @Override
-    public UserAccountEntity getUserAccount() {
-        return userIdentity.getUserAccount();
     }
 
     void tidyUpTransformedMediaEntities(UserAccountEntity userAccount, CourtCaseEntity courtCase) {
