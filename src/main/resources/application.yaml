@@ -284,6 +284,7 @@ darts:
       sas-endpoint: ${DETS_SAS_URL_ENDPOINT:}
       container-name: darts-migration
       temp-blob-workspace: ${user.home}/dets/tempworkspace
+      delete-timeout: 60
       arm-dropzone-sas-endpoint: ${ARM_SAS_ENDPOINT}
     blob:
       client:
