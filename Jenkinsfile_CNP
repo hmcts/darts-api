@@ -142,6 +142,8 @@ withPipeline(type, product, component) {
     }
 
     after('deploy:dev') {
+        // restore the PR DB from staging and run any flyway changes within the PR
         sh("./bin/ci/db-stg-to-pr.sh")
+        sh("./gradlew --no-daemon --init-script init.gradle migratePostgresDatabase")
     }
 }
