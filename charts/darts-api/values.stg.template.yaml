@@ -1,6 +1,6 @@
 # Don't modify this file, it is only needed for the pipeline to set the image and ingressHost
 java:
-  image: ${IMAGE_NAME}
+  image: 'sdshmctspublic.azurecr.io/darts/api:staging'
   ingressHost: ${SERVICE_FQDN}
   environment:
     MANUAL_DELETION_ENABLED: true
@@ -9,4 +9,4 @@ java:
     ARM_URL: http://darts-stub-services.staging.platform.hmcts.net
     FEIGN_LOG_LEVEL: none
 function:
-  image: ${IMAGE_NAME}
+  image: 'sdshmctspublic.azurecr.io/darts/api:staging'
