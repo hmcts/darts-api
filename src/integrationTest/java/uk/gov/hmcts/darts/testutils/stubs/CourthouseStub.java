@@ -4,15 +4,11 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
-import uk.gov.hmcts.darts.common.repository.CourthouseRepository;
-import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
 
 @Component
 @RequiredArgsConstructor
 @Deprecated
 public class CourthouseStub {
-    private final CourthouseRepository courthouseRepository;
-    private final UserAccountRepository userAccountRepository;
     private final CourthouseStubComposable courthouseStubComposable;
 
     @Transactional
