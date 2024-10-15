@@ -10,3 +10,4 @@ java:
     FEIGN_LOG_LEVEL: none
 function:
   image: 'sdshmctspublic.azurecr.io/darts/api:staging'
+  
