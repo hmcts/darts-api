@@ -80,9 +80,9 @@ class TokenValidatorTest extends IntegrationBaseWithWiremock {
 
     @Test
     void checkTokenExpiry() throws Exception {
-        DartsTokenGenerator token = DartsTokenGenerator.builder().useGlobalKey(true.)issuer(configurationProperties.getIssuerUri()).useExpiredToken(true)
+        DartsTokenGenerator token = DartsTokenGenerator.builder().useGlobalKey(true).issuer(configurationProperties.getIssuerUri()).useExpiredToken(true)
             .audience(configurationProperties.getClientId()).build();
-        DartsTokenAndJwksKey tokenDetails = token.fetchTokenForEmail("$EMAIL");
+        DartsTokenAndJwksKey tokenDetails = token.fetchTokenWithGlobalUser();
 
         mockMvc.perform(get(ENDPOINT_URL).header("Authorization", "Bearer " + tokenDetails.getToken()))
             .andExpect(status().isUnauthorized())
