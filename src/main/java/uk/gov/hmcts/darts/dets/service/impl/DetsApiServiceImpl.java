@@ -133,12 +133,11 @@ public class DetsApiServiceImpl implements DetsApiService {
     }
 
     private String buildBlobSasUrl(String containerName, String containerSasUrl, String location) {
-        if (containerName.equals(armDataManagementConfiguration.getSasEndpoint())) {
+        if (containerName.equals(configuration.getArmContainerName())) {
             // arm sas url contains folder 'DARTS' in the url, so replacing it to avoid 'DARTS' being present twice in the generated blob sas url
             return containerSasUrl.replace(containerName + "/DARTS", containerName + "/" + location);
         } else {
             return containerSasUrl.replace(containerName, containerName + "/" + location);
         }
     }
-
 }
