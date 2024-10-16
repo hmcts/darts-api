@@ -286,6 +286,7 @@ darts:
       temp-blob-workspace: ${user.home}/dets/tempworkspace
       delete-timeout: 60
       arm-dropzone-sas-endpoint: ${ARM_SAS_ENDPOINT}
+      arm-container-name: dropzone
     blob:
       client:
         connection-string: ${AZURE_STORAGE_CONNECTION_STRING:}

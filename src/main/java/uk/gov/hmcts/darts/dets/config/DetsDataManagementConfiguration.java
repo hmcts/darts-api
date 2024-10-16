@@ -16,5 +16,6 @@ public class DetsDataManagementConfiguration extends StorageConfiguration {
     private String detsManifestFilePrefix;
     private int deleteTimeout;
     private String armDropzoneSasEndpoint;
+    private String armContainerName;
 
 }
