@@ -39,6 +39,34 @@ class EmailAddressFromTokenUtilTest {
 
     }
 
+    @Test
+    void getFromEmailsClaimWhenMultiple() {
+        Jwt jwt = Jwt.withTokenValue("test")
+            .header("alg", "RS256")
+            .claim("sub", UUID.randomUUID().toString())
+            .claim("email", "email1@test.com")
+            .claim("preferred_username", "email2@test.com")
+            .claim("emails", List.of("email3@test.com"))
+            .build();
+        SecurityContextHolder.getContext().setAuthentication(new JwtAuthenticationToken(jwt));
+
+        assertEquals("email3@test.com", EmailAddressFromTokenUtil.getEmailAddressFromToken());
+
+    }
+
+    @Test
+    void getFromPreferredUsernameClaimWhenMultiple() {
+        Jwt jwt = Jwt.withTokenValue("test")
+            .header("alg", "RS256")
+            .claim("sub", UUID.randomUUID().toString())
+            .claim("email", "email1@test.com")
+            .claim("preferred_username", "email2@test.com")
+            .build();
+        SecurityContextHolder.getContext().setAuthentication(new JwtAuthenticationToken(jwt));
+
+        assertEquals("email2@test.com", EmailAddressFromTokenUtil.getEmailAddressFromToken());
+
+    }
 
     @Test
     void getUserAccountShouldThrowExceptionWhenUnexpectedNumberOfEmails() {

@@ -15,10 +15,11 @@ public class EmailAddressFromTokenUtil {
     private static final String EMAIL = "email";
     private static final String EMAILS = "emails";
     private static final String PREFERRED_USERNAME = "preferred_username";
+    private static final List<String> CLAIM_ORDER = List.of(EMAILS, PREFERRED_USERNAME, EMAIL);
 
     public String getEmailAddressFromToken() {
         Jwt jwt = getJwtFromSecurityContext();
-        Object claimFromJwt = getClaimFromJwt(jwt, List.of(EMAILS, PREFERRED_USERNAME, EMAIL));
+        Object claimFromJwt = getClaimFromJwt(jwt, CLAIM_ORDER);
         String emailAddressFromObject = getEmailAddressFromObject(claimFromJwt);
         if (emailAddressFromObject == null) {
             throw new IllegalStateException("Could not obtain email address from principal");
