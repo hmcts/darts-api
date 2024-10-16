@@ -12,6 +12,7 @@ import uk.gov.hmcts.darts.common.entity.CaseRetentionEntity;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.EventHandlerEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
+import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
 import uk.gov.hmcts.darts.common.repository.CaseRepository;
 import uk.gov.hmcts.darts.common.repository.CaseRetentionRepository;
 import uk.gov.hmcts.darts.common.repository.EventRepository;
@@ -53,6 +54,7 @@ public class StopAndCloseHandler extends EventHandlerBase {
     private final RetentionApi retentionApi;
     private final CaseManagementRetentionService caseManagementRetentionService;
     private final AuthorisationApi authorisationApi;
+    private final CurrentTimeHelper currentTimeHelper;
 
 
     @Value("${darts.retention.overridable-fixed-policy-keys}")
@@ -70,13 +72,15 @@ public class StopAndCloseHandler extends EventHandlerBase {
                                AuthorisationApi authorisationApi,
                                LogApi logApi,
                                CaseManagementRetentionService caseManagementRetentionService,
-                               EventPersistenceService eventPersistenceService) {
+                               EventPersistenceService eventPersistenceService,
+                               CurrentTimeHelper currentTimeHelper) {
         super(retrieveCoreObjectService, eventRepository, hearingRepository, caseRepository, eventPublisher, logApi, eventPersistenceService);
         this.darNotifyService = darNotifyService;
         this.caseRetentionRepository = caseRetentionRepository;
         this.caseManagementRetentionService = caseManagementRetentionService;
         this.retentionApi = retentionApi;
         this.authorisationApi = authorisationApi;
+        this.currentTimeHelper = currentTimeHelper;
     }
 
 
@@ -97,9 +101,9 @@ public class StopAndCloseHandler extends EventHandlerBase {
         setDefaultPolicyIfNotDefined(dartsEvent);
 
         CaseManagementRetentionEntity caseManagementRetentionEntity = caseManagementRetentionService.createCaseManagementRetention(
-                                                                                                          hearingAndEvent.getEventEntity(),
-                                                                                                          hearingAndEvent.getHearingEntity().getCourtCase(),
-                                                                                                          dartsEvent.getRetentionPolicy());
+            hearingAndEvent.getEventEntity(),
+            hearingAndEvent.getHearingEntity().getCourtCase(),
+            dartsEvent.getRetentionPolicy());
 
         Optional<CaseRetentionEntity> latestCompletedManualRetention = caseRetentionRepository.findLatestCompletedManualRetention(courtCase);
         if (latestCompletedManualRetention.isPresent()) {
@@ -145,6 +149,7 @@ public class StopAndCloseHandler extends EventHandlerBase {
             courtCase.setLastModifiedBy(authorisationApi.getCurrentUser());
             courtCase.setRetConfScore(CASE_PERFECTLY_CLOSED);
             courtCase.setRetConfReason(RetentionConfidenceReasonEnum.CASE_CLOSED);
+            courtCase.setRetConfUpdatedTs(currentTimeHelper.currentOffsetDateTime());
             caseRepository.saveAndFlush(courtCase);
         }
     }

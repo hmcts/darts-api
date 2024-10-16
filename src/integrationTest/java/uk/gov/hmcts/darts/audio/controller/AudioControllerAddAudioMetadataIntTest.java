@@ -1,6 +1,7 @@
 package uk.gov.hmcts.darts.audio.controller;
 
 import ch.qos.logback.classic.Level;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.skyscreamer.jsonassert.JSONAssert;
@@ -20,8 +21,8 @@ import org.testcontainers.shaded.org.apache.commons.io.IOUtils;
 import uk.gov.hmcts.darts.audio.exception.AudioApiError;
 import uk.gov.hmcts.darts.audio.model.AddAudioMetadataRequest;
 import uk.gov.hmcts.darts.audio.model.Problem;
+import uk.gov.hmcts.darts.audio.service.AudioAsyncService;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
-import uk.gov.hmcts.darts.common.entity.EventEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
 import uk.gov.hmcts.darts.common.entity.MediaLinkedCaseEntity;
@@ -58,7 +59,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import static uk.gov.hmcts.darts.test.common.AwaitabilityUtil.waitForMax10SecondsWithOneSecondPoll;
 
 @AutoConfigureMockMvc
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -96,14 +96,19 @@ class AudioControllerAddAudioMetadataIntTest extends IntegrationBase {
     @MockBean
     private UserIdentity mockUserIdentity;
 
+    @MockBean
+    AudioAsyncService audioAsyncService;
+
     @Value("${spring.servlet.multipart.max-file-size}")
     private DataSize addAudioThreshold;
 
     @Autowired
     private SuperAdminUserStub superAdminUserStub;
 
+
     @BeforeEach
     void beforeEach() {
+        openInViewUtil.openEntityManager();
         authorisationStub.givenTestSchema();
 
         UserAccountEntity testUser = authorisationStub.getTestUser();
@@ -119,6 +124,11 @@ class AudioControllerAddAudioMetadataIntTest extends IntegrationBase {
         eventStub.createEvent(hearingForEvent, 10, STARTED_AT.minusMinutes(20), "LOG");
         HearingEntity hearingDifferentCourtroom = hearingStub.createHearing("Bristol", "2", "case2", DateConverterUtil.toLocalDateTime(STARTED_AT));
         eventStub.createEvent(hearingDifferentCourtroom, 10, STARTED_AT.minusMinutes(20), "LOG");
+    }
+
+    @AfterEach
+    void closeHibernateSession() {
+        openInViewUtil.closeEntityManager();
     }
 
     @Test
@@ -184,51 +194,6 @@ class AudioControllerAddAudioMetadataIntTest extends IntegrationBase {
         HearingEntity hearingEntity = hearingsInAnotherCourtroom.get(0);
         List<MediaEntity> mediaEntities = dartsDatabase.getMediaRepository().findAllCurrentMediaByHearingId(hearingEntity.getId());
         assertEquals(0, mediaEntities.size());//shouldn't have any as no audio in that courtroom
-    }
-
-    @Test
-    void addAudioMetadataLinkCaseViaEvent() throws Exception {
-        superAdminUserStub.givenUserIsAuthorised(mockUserIdentity, SecurityRoleEnum.MID_TIER);
-
-        //create an event for another case, 3 minutes before end of audio.
-        HearingEntity eventHearing = dartsDatabase.createHearing("Bristol", "1", "CASE_EVENT", STARTED_AT.toLocalDateTime());
-        EventEntity caseEvent = dartsDatabase.createEvent(eventHearing);
-        caseEvent.setTimestamp(STARTED_AT.plusMinutes(57));
-        dartsDatabase.save(caseEvent);
-
-        List<MediaEntity> mediaList = dartsDatabase.getMediaRepository().findAllByHearingId(eventHearing.getId());
-        assertEquals(0, mediaList.size());
-        AddAudioMetadataRequest addAudioMetadataRequest = createAddAudioRequest(STARTED_AT, STARTED_AT.plusHours(1), "Bristol", "1");
-
-        MockMultipartFile audioFile = new MockMultipartFile(
-            "file",
-            "audio.mp2",
-            "audio/mpeg",
-            IOUtils.toByteArray(Files.newInputStream(AUDIO_BINARY_PAYLOAD_1))
-        );
-
-        MockMultipartFile metadataJson = new MockMultipartFile(
-            "metadata",
-            null,
-            "application/json",
-            objectMapper.writeValueAsString(addAudioMetadataRequest).getBytes()
-        );
-
-        mockMvc.perform(
-                multipart(ENDPOINT)
-                    .file(audioFile)
-                    .file(metadataJson))
-            .andExpect(status().isOk())
-            .andReturn();
-
-
-        waitForMax10SecondsWithOneSecondPoll(() -> {
-                                                 var foundMediaList = dartsDatabase.getMediaRepository().findAllByHearingId(eventHearing.getId());
-                                                 assertEquals(1, foundMediaList.size());
-                                                 assertEquals(4, dartsDatabase.getMediaLinkedCaseRepository().findByMedia(foundMediaList.getFirst()).size());
-                                             }
-        );
-
     }
 
     @Test

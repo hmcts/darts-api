@@ -49,7 +49,8 @@ class AzureDaoImplTest {
         OAuthProviderRawResponse rawResponse = azureDaoImpl.fetchAccessToken(
             "CODE",
             authenticationProviderConfiguration,
-            authenticationConfiguration
+            authenticationConfiguration,
+            null
         );
 
         assertEquals(
@@ -65,7 +66,7 @@ class AzureDaoImplTest {
     @NullAndEmptySource
     void fetchAccessTokenShouldThrowExceptionWhenProvidedCodeIsBlankOrNull(String code) {
         AzureDaoException exception = assertThrows(AzureDaoException.class, () -> azureDaoImpl.fetchAccessToken(
-            code, authenticationProviderConfiguration, authenticationConfiguration));
+            code, authenticationProviderConfiguration, authenticationConfiguration, null));
 
         assertEquals("Null code not permitted", exception.getMessage());
     }
@@ -77,7 +78,7 @@ class AzureDaoImplTest {
 
         AzureDaoException exception = assertThrows(
             AzureDaoException.class,
-            () -> azureDaoImpl.fetchAccessToken("CODE", authenticationProviderConfiguration, authenticationConfiguration)
+            () -> azureDaoImpl.fetchAccessToken("CODE", authenticationProviderConfiguration, authenticationConfiguration, null)
         );
 
         assertEquals("Unexpected HTTP response code received from Azure: body", exception.getMessage());

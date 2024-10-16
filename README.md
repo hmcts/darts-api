@@ -87,6 +87,11 @@ active for the secrets to be visible.
 > source bin/secrets-stg.sh
 > ```
 
+>If you want to set the environment properties at project level instead of system level (for example using InteliJ Edit configurations) you can run
+>```bash
+> source bin/secrets-stg-environment.sh
+>```
+
 Once you have obtained the values, set the environment variables on your system. E.g. On Mac, you may run this command
 in the terminal, replacing `<<env var name>>` and `<<secret value>>` as necessary:
 
@@ -96,7 +101,8 @@ launchctl setenv <<env var name>> <<secret value>>
 
 You will then need to restart intellij/terminal windows for it to take effect.
 
-to make the changes permanent, make a `.zshrc` file in your users folder and populate it with this and their values:
+The below step only required if you use system level environment properties and want to make the changes permanent, make a `.zshrc` file in your users folder and populate it with this and their values:
+
 
 ```
 export GOVUK_NOTIFY_API_KEY=

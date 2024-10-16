@@ -49,8 +49,8 @@ import static uk.gov.hmcts.darts.retention.enums.RetentionConfidenceCategoryEnum
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.LENIENT)
 class RetentionPostServiceImplTest {
-
-
+    
+    public static final OffsetDateTime CURRENT_DATE_TIME = OffsetDateTime.of(2024, 10, 1, 10, 0, 0, 0, ZoneOffset.UTC);
     @InjectMocks
     private RetentionPostServiceImpl retentionPostService;
 
@@ -84,7 +84,7 @@ class RetentionPostServiceImplTest {
         CaseRetentionEntity caseRetention = new CaseRetentionEntity();
         caseRetention.setCourtCase(courtCase);
         caseRetention.setCurrentState(CaseRetentionStatus.COMPLETE.name());
-        caseRetention.setCreatedDateTime(OffsetDateTime.of(2024, 10, 1, 10, 0, 0, 0, ZoneOffset.UTC));
+        caseRetention.setCreatedDateTime(CURRENT_DATE_TIME);
         caseRetention.setRetainUntil(OffsetDateTime.of(2025, 10, 1, 10, 0, 0, 0, ZoneOffset.UTC));
         when(caseRetentionRepository.findLatestCompletedAutomatedRetention(any())).thenReturn(Optional.of(caseRetention));
 
@@ -99,7 +99,7 @@ class RetentionPostServiceImplTest {
         retentionPolicyTypeManual.setFixedPolicyKey("MANUAL");
         caseRetentionLater.setRetentionPolicyType(retentionPolicyTypeManual);
         when(caseRetentionRepository.findLatestCompletedRetention(any())).thenReturn(Optional.of(caseRetentionLater));
-        when(currentTimeHelper.currentOffsetDateTime()).thenReturn(OffsetDateTime.of(2024, 10, 1, 10, 0, 0, 0, ZoneOffset.UTC));
+        when(currentTimeHelper.currentOffsetDateTime()).thenReturn(CURRENT_DATE_TIME);
 
         when(retentionPolicyTypeRepository.findCurrentWithFixedPolicyKey(eq(RetentionPolicyEnum.MANUAL.getPolicyKey()), any(OffsetDateTime.class))).thenReturn(
             List.of(retentionPolicyTypeManual));
@@ -309,6 +309,7 @@ class RetentionPostServiceImplTest {
         CourtCaseEntity savedCourtCase = courtCaseEntityArgumentCaptor.getValue();
         assertEquals(RetentionConfidenceReasonEnum.MANUAL_OVERRIDE, savedCourtCase.getRetConfReason());
         assertEquals(RetentionConfidenceScoreEnum.CASE_PERFECTLY_CLOSED, savedCourtCase.getRetConfScore());
+        assertEquals(CURRENT_DATE_TIME, savedCourtCase.getRetConfUpdatedTs());
     }
 
     @Test
@@ -335,6 +336,7 @@ class RetentionPostServiceImplTest {
         CourtCaseEntity savedCourtCase = courtCaseEntityArgumentCaptor.getValue();
         assertEquals(RetentionConfidenceReasonEnum.MANUAL_OVERRIDE, savedCourtCase.getRetConfReason());
         assertEquals(RetentionConfidenceScoreEnum.CASE_PERFECTLY_CLOSED, savedCourtCase.getRetConfScore());
+        assertEquals(CURRENT_DATE_TIME, savedCourtCase.getRetConfUpdatedTs());
     }
 
     @Test
@@ -362,6 +364,7 @@ class RetentionPostServiceImplTest {
         CourtCaseEntity savedCourtCase = courtCaseEntityArgumentCaptor.getValue();
         assertEquals(RetentionConfidenceReasonEnum.MANUAL_OVERRIDE, savedCourtCase.getRetConfReason());
         assertEquals(RetentionConfidenceScoreEnum.CASE_PERFECTLY_CLOSED, savedCourtCase.getRetConfScore());
+        assertEquals(CURRENT_DATE_TIME, savedCourtCase.getRetConfUpdatedTs());
     }
 
     @Test
@@ -404,6 +407,7 @@ class RetentionPostServiceImplTest {
         CourtCaseEntity savedCourtCase = courtCaseEntityArgumentCaptor.getValue();
         assertEquals(RetentionConfidenceReasonEnum.MANUAL_OVERRIDE, savedCourtCase.getRetConfReason());
         assertEquals(RetentionConfidenceScoreEnum.CASE_PERFECTLY_CLOSED, savedCourtCase.getRetConfScore());
+        assertEquals(CURRENT_DATE_TIME, savedCourtCase.getRetConfUpdatedTs());
     }
 
 }
