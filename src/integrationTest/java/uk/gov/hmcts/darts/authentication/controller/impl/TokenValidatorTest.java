@@ -132,4 +132,21 @@ class TokenValidatorTest extends IntegrationBaseWithWiremock {
         mockMvc.perform(get(ENDPOINT_URL).header("Authorization", "Bearer " + tokenDetails.getToken()))
             .andExpect(status().is2xxSuccessful());
     }
+
+    // TODO: We need to enable audience checking in our security layer
+    @SuppressWarnings({"PMD.DetachedTestCase", "PMD.SignatureDeclareThrowsException"})
+    //@Test
+    void testInvalidAudience() throws Exception {
+        DartsTokenGenerator token = DartsTokenGenerator.builder().issuer(configurationProperties.getIssuerUri())
+            .audience("client").build();
+        DartsTokenAndJwksKey tokenDetails = token.fetchTokenWithGlobalUser();
+
+        tokenStub.stubExternalJwksKeys(tokenDetails.getJwksKey());
+
+        mockMvc.perform(get(ENDPOINT_URL).header("Authorization", "Bearer " + tokenDetails.getToken()))
+            .andExpect(status().isUnauthorized())
+            .andExpect(header().string("WWW-Authenticate",
+                                       Matchers.containsString("An error occurred while attempting to decode the Jwt: The aud claim is not valid")))
+            .andReturn();
+    }
 }
