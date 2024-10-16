@@ -11,8 +11,8 @@ PR_DATABASE="pr-${PR_NUMBER}-darts"
 echo "Using Database password: ***${PR_PASSWORD: -3}"
 echo "Using PR_NUMBER: $PR_NUMBER"
 
-export FLYWAY_URL="jdbc:postgresql://${PR_HOST}:5432/${PR_DATABASE}"
-export FLYWAY_USER=$PR_USER
-export FLYWAY_PASSWORD=$PR_PASSWORD
+FLYWAY_URL="jdbc:postgresql://${PR_HOST}:5432/${PR_DATABASE}"
+FLYWAY_USER=$PR_USER
+FLYWAY_PASSWORD=$PR_PASSWORD
 
-./gradlew --no-daemon --init-script init.gradle assemble migratePostgresDatabase
+./gradlew --no-daemon --init-script init.gradle assemble migratePostgresDatabase -Dflyway.url=$FLYWAY_URL -Dflyway.user=$FLYWAY_USER -Dflyway.password=$FLYWAY_PASSWORD
