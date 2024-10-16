@@ -448,7 +448,7 @@ dependencies {
 
   // Added to resolve issue where the default Feign client will silently convert GET requests to POST if the request contains a body
   // Ref: https://github.com/spring-cloud/spring-cloud-openfeign/issues/832
-  implementation group: 'io.github.openfeign', name: 'feign-hc5', version: '13.4'
+  implementation group: 'io.github.openfeign', name: 'feign-hc5', version: '13.5'
 
   testImplementation 'org.testcontainers:postgresql:1.20.2'
   testImplementation 'com.h2database:h2:2.3.232'
@@ -501,7 +501,7 @@ dependencyManagement {
       entry 'netty-transport-native-unix-common'
     }
     //temporary fix for vulnerability https://spring.io/security/cve-2023-34062
-    dependencySet(group: 'io.projectreactor.netty', version: '1.1.22') {
+    dependencySet(group: 'io.projectreactor.netty', version: '1.1.23') {
       entry 'reactor-netty-http'
       entry 'reactor-netty-core'
     }
