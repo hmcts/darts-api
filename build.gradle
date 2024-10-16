@@ -16,7 +16,7 @@ plugins {
   id 'com.github.ben-manes.versions' version '0.51.0'
   id 'org.sonarqube' version '5.1.0.4882'
   id "io.freefair.lombok" version "8.10.2"
-  id "org.openapi.generator" version "7.8.0"
+  id "org.openapi.generator" version "7.9.0"
   id "org.flywaydb.flyway" version "10.19.0"
   id 'maven-publish'
   id("com.dorongold.task-tree") version "4.0.0"
@@ -366,7 +366,7 @@ repositories {
 
 ext {
   log4JVersion = "2.24.1"
-  tomcatEmbedVersion = "10.1.30"
+  tomcatEmbedVersion = "10.1.31"
 }
 
 ext['snakeyaml.version'] = '2.0'
@@ -430,10 +430,10 @@ dependencies {
 
   implementation 'uk.gov.service.notify:notifications-java-client:5.2.0-RELEASE'
 
-  implementation group: 'ch.qos.logback', name: 'logback-classic', version: '1.5.8'
-  implementation group: 'ch.qos.logback', name: 'logback-core', version: '1.5.8'
+  implementation group: 'ch.qos.logback', name: 'logback-classic', version: '1.5.11'
+  implementation group: 'ch.qos.logback', name: 'logback-core', version: '1.5.10'
 
-  implementation group: 'io.vavr', name: 'vavr', version: '0.10.4'
+  implementation group: 'io.vavr', name: 'vavr', version: '0.10.5'
 
   implementation group: 'com.google.guava', name: 'guava', version: '33.3.1-jre'
 
@@ -448,7 +448,7 @@ dependencies {
 
   // Added to resolve issue where the default Feign client will silently convert GET requests to POST if the request contains a body
   // Ref: https://github.com/spring-cloud/spring-cloud-openfeign/issues/832
-  implementation group: 'io.github.openfeign', name: 'feign-hc5', version: '13.4'
+  implementation group: 'io.github.openfeign', name: 'feign-hc5', version: '13.5'
 
   testImplementation 'org.testcontainers:postgresql:1.20.2'
   testImplementation 'com.h2database:h2:2.3.232'
@@ -501,7 +501,7 @@ dependencyManagement {
       entry 'netty-transport-native-unix-common'
     }
     //temporary fix for vulnerability https://spring.io/security/cve-2023-34062
-    dependencySet(group: 'io.projectreactor.netty', version: '1.1.22') {
+    dependencySet(group: 'io.projectreactor.netty', version: '1.1.23') {
       entry 'reactor-netty-http'
       entry 'reactor-netty-core'
     }

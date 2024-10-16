@@ -27,8 +27,6 @@ java:
           alias: AAD_B2C_CLIENT_ID
         - name: AzureAdB2CClientSecret
           alias: AAD_B2C_CLIENT_SECRET
-        - name: app-insights-connection-string
-          alias: app-insights-connection-string
         - name: AzureAdB2CFuncTestROPCUsername
           alias: FUNC_TEST_ROPC_USERNAME
         - name: AzureAdB2CFuncTestROPCPassword
@@ -105,6 +103,9 @@ java:
     spring.profiles.active: dev
     TESTING_SUPPORT_ENDPOINTS_ENABLED: true
     DARTS_GATEWAY_URL: http://darts-gateway.staging.platform.hmcts.net
+    DARTS_PORTAL_URL: "https://darts.staging.apps.hmcts.net"
+    AUTOMATED_TASK_MODE: true
+    API_MODE: true
 
   secrets:
     DARTS_API_DB_PASSWORD:
@@ -118,6 +119,23 @@ postgresql:
   setup:
     databases:
       - name: "pr-${CHANGE_ID}-darts"
+
+#nodejs:
+#  applicationPort: 3000
+#  image: 'sdshmctspublic.azurecr.io/darts/portal:latest'
+#  ingressHost: "darts-portal-pr-${CHANGE_ID}.dev.platform.hmcts.net"
+#  aadIdentityName: darts
+#  keyVaults:
+#    darts:
+#      secrets:
+#        - redis-connection-string
+#        - darts-portal-session-secret
+#  environment:
+#    ALLOW_CONFIG_MUTATIONS: true
+#    DARTS_PORTAL_URL: "https://darts-portal-pr-${CHANGE_ID}.dev.platform.hmcts.net"
+#    DARTS_API_URL: "https://darts-api-pr-${CHANGE_ID}.dev.platform.hmcts.net"
+#    DARTS_AZUREAD_B2C_ORIGIN_HOST: https://hmctsstgextid.b2clogin.com
+#    DARTS_AZUREAD_B2C_HOSTNAME: https://darts.staging.apps.hmcts.net
 
 # function:
 #   scaleType: Job

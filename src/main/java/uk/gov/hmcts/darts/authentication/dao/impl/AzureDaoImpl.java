@@ -25,7 +25,7 @@ public class AzureDaoImpl implements AzureDao {
 
     @Override
     public OAuthProviderRawResponse fetchAccessToken(String code, AuthProviderConfigurationProperties providerConfig,
-                                                     AuthConfigurationProperties configuration)
+                                                     AuthConfigurationProperties configuration, String redirectUriOverride)
         throws AzureDaoException {
         log.debug("Fetching access token(s) for authorization code: {}", code);
 
@@ -33,13 +33,18 @@ public class AzureDaoImpl implements AzureDao {
             throw new AzureDaoException("Null code not permitted");
         }
 
+        var redirectUri = configuration.getRedirectUri();
+        if (redirectUriOverride != null) {
+            redirectUri = redirectUriOverride;
+        }
+
         try {
             HTTPResponse response = azureActiveDirectoryClient.fetchAccessToken(providerConfig,
-                                                                                   configuration.getRedirectUri(),
-                                                                                   code,
-                                                                                   configuration.getClientId(),
-                                                                                   configuration.getClientSecret(),
-                                                                                   configuration.getScope());
+                                                                                redirectUri,
+                                                                                code,
+                                                                                configuration.getClientId(),
+                                                                                configuration.getClientSecret(),
+                                                                                configuration.getScope());
             String parsedResponse = response.getContent();
 
             if (HttpStatus.SC_OK != response.getStatusCode()) {

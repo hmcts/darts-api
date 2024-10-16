@@ -11,6 +11,7 @@ import uk.gov.hmcts.darts.common.entity.EventEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.repository.EventRepository;
+import uk.gov.hmcts.darts.common.repository.HearingRepository;
 import uk.gov.hmcts.darts.common.util.DateConverterUtil;
 import uk.gov.hmcts.darts.test.common.TestUtils;
 import uk.gov.hmcts.darts.testutils.PostgresIntegrationBase;
@@ -29,6 +30,7 @@ import static org.mockito.Mockito.when;
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 class CleanupCurrentFlagEventProcessorImplTest extends PostgresIntegrationBase {
     private final EventRepository eventRepository;
+    private final HearingRepository hearingRepository;
     private final EventStub eventStub;
     private final HearingStub hearingStub;
     @Mock
@@ -41,7 +43,7 @@ class CleanupCurrentFlagEventProcessorImplTest extends PostgresIntegrationBase {
         UserAccountEntity userAccount = new UserAccountEntity();
         userAccount.setId(TestUtils.AUTOMATION_USER_ID);
         when(userIdentity.getUserAccount()).thenReturn(userAccount);
-        this.cleanupCurrentFlagEventProcessor = new CleanupCurrentFlagEventProcessorImpl(20, eventRepository, userIdentity);
+        this.cleanupCurrentFlagEventProcessor = new CleanupCurrentFlagEventProcessorImpl(20, eventRepository, hearingRepository, userIdentity);
     }
 
     @Test
