@@ -325,8 +325,14 @@ class OutboundFileZipGeneratorHelperImplTest {
 
         Path viqFile = outboundFileZipGeneratorHelper.generateViqFile(audioFileInfo, outputFile);
 
-        assertEquals(viqFile, sourceFile);
-        assertTrue(Files.isSameFile(sourceFile, viqFile));
+        assertEquals(viqFile, outputFile);
+        byte[] expectedViqHeader = new ViqHeader(audioFileInfo.getStartTime()).getViqHeaderBytes();
+        int expectedViqHeaderOffset = 0;
+        assertEquals(expectedViqHeaderOffset, searchBytePattern(Files.readAllBytes(viqFile), expectedViqHeader));
+        int expectedSourceFileOffset = expectedViqHeader.length;
+        assertEquals(expectedSourceFileOffset, searchBytePattern(Files.readAllBytes(viqFile), Files.readAllBytes(sourceFile)));
+        long expectedViqFileSize = expectedViqHeader.length + Files.size(sourceFile);
+        assertEquals(expectedViqFileSize, Files.size(viqFile));
     }
 
 
