@@ -116,6 +116,9 @@ public class DetsApiServiceImpl implements DetsApiService {
         try {
             String sourceContainerSasUrl = configuration.getSasEndpoint();
             String destinationContainerSasUrl = armDataManagementConfiguration.getSasEndpoint();
+            log.info("Containers source      '{}' dets container name '{}' dets uuid '{}'", sourceContainerSasUrl, configuration.getContainerName(), detsUuid);
+            log.info("Containers destination '{}' arm container name  '{}' arm location '{}'", sourceContainerSasUrl,
+                     armDataManagementConfiguration.getContainerName(), blobPathAndName);
             String sourceBlobSasUrl = buildBlobSasUrl(configuration.getContainerName(), sourceContainerSasUrl, detsUuid);
             String destinationBlobSasUrl = buildBlobSasUrl(armDataManagementConfiguration.getContainerName(), destinationContainerSasUrl, blobPathAndName);
 
@@ -132,7 +135,7 @@ public class DetsApiServiceImpl implements DetsApiService {
     private String buildBlobSasUrl(String containerName, String containerSasUrl, String location) {
         if (containerName.equals(armDataManagementConfiguration.getSasEndpoint())) {
             // arm sas url contains folder 'DARTS' in the url, so replacing it to avoid 'DARTS' being present twice in the generated blob sas url
-            return containerSasUrl.replace(containerName + "/DARTS", containerName + "/" + location);
+            return containerSasUrl.replace(containerName, containerName + "/" + location);
         } else {
             return containerSasUrl.replace(containerName, containerName + "/" + location);
         }
