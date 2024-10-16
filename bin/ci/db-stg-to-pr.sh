@@ -28,8 +28,6 @@ if [ "$RESTORE_COUNT" -gt 0 ]; then
   exit 0
 fi
 
-echo "Fetching secrets from staging key-vault..."
-
 DUMP_FILE="/tmp/darts-api-stg-dump.sql"
 RESTORE_LOG_FILE="/tmp/darts-api-pr-restore.log"
 RESTORE_OUTPUT="/tmp/darts-api-pr-stdout.log"
