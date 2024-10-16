@@ -10,6 +10,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.json.BasicJsonTester;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
+import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.EventEntity;
 import uk.gov.hmcts.darts.common.enums.SecurityRoleEnum;
 import uk.gov.hmcts.darts.event.service.impl.AdminEventsSearchGivensBuilder;
@@ -18,6 +19,7 @@ import uk.gov.hmcts.darts.testutils.IntegrationBase;
 
 import java.util.List;
 
+import static java.time.OffsetDateTime.now;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -95,7 +97,11 @@ class EventSearchControllerTest extends IntegrationBase {
         int eventHearingsCount = 2;
         int eventsCount = 2;
         given.anAuthenticatedUserWithGlobalAccessAndRole(SUPER_ADMIN);
+
         List<EventEntity> entity = eventsGivensBuilder.persistedEventsWithHearings(eventsCount, eventHearingsCount);
+        CourtCaseEntity courtCaseEntity = entity.get(0).getHearingEntities().get(0).getCourtCase();
+        courtCaseEntity.setDataAnonymisedTs(now());
+        dartsDatabase.save(courtCaseEntity);
 
         var mvcResult = mockMvc.perform(post(EVENT_SEARCH_ENDPOINT)
                                             .content("{}")
