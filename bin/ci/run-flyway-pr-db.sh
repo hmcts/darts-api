@@ -15,5 +15,4 @@ export FLYWAY_URL="jdbc:postgresql://${PR_HOST}:5432/${PR_DATABASE}"
 export FLYWAY_USER=$PR_USER
 export FLYWAY_PASSWORD=$PR_PASSWORD
 
-./gradlew --no-daemon --init-script init.gradle assemble
-./gradlew --no-daemon --init-script init.gradle migratePostgresDatabase
+./gradlew --no-daemon --init-script init.gradle assemble migratePostgresDatabase
