@@ -28,6 +28,7 @@ import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
 import uk.gov.hmcts.darts.common.repository.CaseRepository;
 import uk.gov.hmcts.darts.common.repository.TransformedMediaRepository;
 import uk.gov.hmcts.darts.common.repository.TransientObjectDirectoryRepository;
+import uk.gov.hmcts.darts.event.service.EventService;
 import uk.gov.hmcts.darts.log.api.LogApi;
 import uk.gov.hmcts.darts.test.common.TestUtils;
 
@@ -44,6 +45,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -66,6 +68,8 @@ class DataAnonymisationServiceImplTest {
     private TransientObjectDirectoryRepository transientObjectDirectoryRepository;
     @Mock
     private LogApi logApi;
+    @Mock
+    private EventService eventService;
 
     @InjectMocks
     @Spy
@@ -386,7 +390,35 @@ class DataAnonymisationServiceImplTest {
             .deleteTransformedMediaEntity(transformedMediaEntity4);
         verify(dataAnonymisationService, times(1))
             .deleteTransformedMediaEntity(transformedMediaEntity5);
+    }
+
+    @Test
+    void positiveObfuscateEventByIds() {
+        EventEntity event1 = mock(EventEntity.class);
+        EventEntity event2 = mock(EventEntity.class);
+        EventEntity event3 = mock(EventEntity.class);
 
 
+        doReturn(event1).when(eventService).getEventEntityById(1);
+        doReturn(event2).when(eventService).getEventEntityById(2);
+        doReturn(event3).when(eventService).getEventEntityById(3);
+        doReturn(event1).when(eventService).getEventEntityById(4);
+
+        dataAnonymisationService.obfuscateEventByIds(List.of(1, 2, 3, 4));
+
+
+        verify(dataAnonymisationService, times(1)).anonymizeEvent(event1);
+        verify(dataAnonymisationService, times(1)).anonymizeEvent(event2);
+        verify(dataAnonymisationService, times(1)).anonymizeEvent(event3);
+
+        verify(eventService, times(1)).getEventEntityById(1);
+        verify(eventService, times(1)).getEventEntityById(2);
+        verify(eventService, times(1)).getEventEntityById(3);
+        verify(eventService, times(1)).getEventEntityById(4);
+
+        verify(eventService, times(1)).saveEvent(event1);
+        verify(eventService, times(1)).saveEvent(event2);
+        verify(eventService, times(1)).saveEvent(event3);
+        verifyNoMoreInteractions(eventService);
     }
 }
