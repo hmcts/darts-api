@@ -4,6 +4,7 @@ import uk.gov.hmcts.darts.audio.entity.MediaRequestEntity;
 import uk.gov.hmcts.darts.audio.model.AddAudioMetadataRequest;
 import uk.gov.hmcts.darts.cases.model.AddCaseRequest;
 import uk.gov.hmcts.darts.cases.model.GetCasesRequest;
+import uk.gov.hmcts.darts.common.entity.EventEntity;
 import uk.gov.hmcts.darts.event.model.DartsEvent;
 import uk.gov.hmcts.darts.log.util.DailyListLogJobReport;
 import uk.gov.hmcts.darts.notification.entity.NotificationEntity;
@@ -56,8 +57,9 @@ public interface LogApi {
 
     void caseDeletedDueToExpiry(Integer caseId, String caseNumber);
 
+    void manualObfuscation(EventEntity eventEntity);
+
     void mediaDeleted(Integer mediaId);
 
     void transcriptionDeleted(Integer transcriptionId);
-
 }
