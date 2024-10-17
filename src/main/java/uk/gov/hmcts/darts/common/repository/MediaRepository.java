@@ -92,4 +92,5 @@ public interface MediaRepository extends JpaRepository<MediaEntity, Integer>,
              and me.courtroom.id = :courtroomId
         """)
     List<MediaEntity> findAllByMediaTimeContains(Integer courtroomId, OffsetDateTime maxStartTime, OffsetDateTime minEndTime);
+
 }
