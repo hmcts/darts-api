@@ -114,11 +114,11 @@ components:
   schemas:
     AutomatedTaskPatch:
       type: object
-      required:
-        - is_active
       properties:
         is_active:
           $ref: '#/components/schemas/IsActive'
+        batch_size:
+          type: integer
     AutomatedTaskSummary:
       type: object
       properties:
@@ -205,7 +205,3 @@ components:
       required: true
       schema:
         type: integer
-
-
-
-

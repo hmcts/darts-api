@@ -68,6 +68,11 @@ public class DartsApiException extends RuntimeException {
             "FEATURE_FLAG_NOT_ENABLED",
             HttpStatus.NOT_IMPLEMENTED,
             "Feature flag not enabled"
+        ),
+        NOT_FOUND(
+            "NOT_FOUND",
+            HttpStatus.NOT_FOUND,
+            "Resource not found"
         );
 
         private static final String ERROR_TYPE_PREFIX = "COMMON";
