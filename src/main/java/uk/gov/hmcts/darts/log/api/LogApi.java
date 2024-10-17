@@ -55,4 +55,9 @@ public interface LogApi {
     void archiveToArmFailed(Integer eodId);
 
     void caseDeletedDueToExpiry(Integer caseId, String caseNumber);
+
+    void mediaDeleted(Integer mediaId);
+
+    void transcriptionDeleted(Integer transcriptionId);
+
 }
