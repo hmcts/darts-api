@@ -49,6 +49,20 @@ class GetEventsResponseMapperTest {
     }
 
     @Test
+    void testMapToEventsEventAnonymised() throws IOException {
+        HearingEntity hearingEntity = CommonTestDataUtil.createHearing("TEST_1", LocalTime.NOON);
+        EventEntity eventEntity = CommonTestDataUtil.createEventWith("Test", hearingEntity, eventType);
+        eventEntity.setDataAnonymised(true);
+        List<EventResponse> eventResponses = GetEventsResponseMapper.mapToEvents(List.of(eventEntity));
+
+        String actualResponse = objectMapper.writeValueAsString(eventResponses);
+        String expectedResponse = getContentsFromFile(
+            "Tests/cases/CasesMapperTest/testMapToEvents/expectedResponseAnonymised.json");
+
+        JSONAssert.assertEquals(expectedResponse, actualResponse, JSONCompareMode.STRICT);
+    }
+
+    @Test
     void testVersionedEventsFilteredOut() throws IOException {
         OffsetDateTime eventDate = OffsetDateTime.parse("2024-07-01T12:00Z");
 
