@@ -59,7 +59,7 @@ class CaseExpiryDeletionAutomatedTaskTest {
         CourtCaseEntity courtCase2 = mock(CourtCaseEntity.class);
         CourtCaseEntity courtCase3 = mock(CourtCaseEntity.class);
 
-        when(caseRepository.findCasesToBeAnonymized(any(), any()))
+        when(caseRepository.findCasesToBeAnonymised(any(), any()))
             .thenReturn(List.of(courtCase1, courtCase2, courtCase3));
 
         doReturn(5).when(caseExpiryDeletionAutomatedTask)
@@ -79,7 +79,7 @@ class CaseExpiryDeletionAutomatedTaskTest {
 
 
         verify(caseRepository, times(1))
-            .findCasesToBeAnonymized(offsetDateTime, Limit.of(5));
+            .findCasesToBeAnonymised(offsetDateTime, Limit.of(5));
 
         verify(caseExpiryDeletionAutomatedTask, times(1))
             .getAutomatedTaskBatchSize();
