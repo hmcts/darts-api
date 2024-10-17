@@ -15,7 +15,7 @@ public class EmailAddressFromTokenUtil {
     private static final String EMAIL = "email";
     private static final String EMAILS = "emails";
     private static final String PREFERRED_USERNAME = "preferred_username";
-    private static final List<String> CLAIM_ORDER = List.of(EMAILS, PREFERRED_USERNAME, EMAIL);
+    private static final List<String> CLAIM_ORDER = List.of(EMAILS, EMAIL, PREFERRED_USERNAME);
 
     public String getEmailAddressFromToken() {
         Jwt jwt = getJwtFromSecurityContext();
