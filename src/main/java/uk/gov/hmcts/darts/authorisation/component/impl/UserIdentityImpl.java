@@ -27,8 +27,6 @@ import static uk.gov.hmcts.darts.authorisation.exception.AuthorisationError.USER
 @Slf4j
 public class UserIdentityImpl implements UserIdentity {
 
-    private static final String EMAILS = "emails";
-    private static final String PREFERRED_USERNAME = "preferred_username";
     private static final String OID = "oid";
 
     private final UserAccountRepository userAccountRepository;

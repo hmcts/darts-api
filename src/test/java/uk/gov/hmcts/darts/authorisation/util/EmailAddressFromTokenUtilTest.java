@@ -55,7 +55,7 @@ class EmailAddressFromTokenUtilTest {
     }
 
     @Test
-    void getFromPreferredUsernameClaimWhenMultiple() {
+    void getFromEmailClaimWhenMultiple() {
         Jwt jwt = Jwt.withTokenValue("test")
             .header("alg", "RS256")
             .claim("sub", UUID.randomUUID().toString())
@@ -64,7 +64,7 @@ class EmailAddressFromTokenUtilTest {
             .build();
         SecurityContextHolder.getContext().setAuthentication(new JwtAuthenticationToken(jwt));
 
-        assertEquals("email2@test.com", EmailAddressFromTokenUtil.getEmailAddressFromToken());
+        assertEquals("email1@test.com", EmailAddressFromTokenUtil.getEmailAddressFromToken());
 
     }
 
