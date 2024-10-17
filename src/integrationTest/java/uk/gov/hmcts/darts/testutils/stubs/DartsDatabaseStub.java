@@ -744,7 +744,11 @@ public class DartsDatabaseStub {
         } else {
             List<HearingEntity> hearingEntities = new ArrayList<>();
             hearingEntities.addAll(event.getHearingEntities());
-            hearingEntities.add(hearingRepository.getReferenceById(hearing.getId()));
+            boolean alreadyExists = hearingEntities.stream().anyMatch(hearingEntity -> hearingEntity.getId().equals(hearing.getId()));
+            if (!alreadyExists) {
+                hearingEntities.add(hearingRepository.getReferenceById(hearing.getId()));
+            }
+
             event.setHearingEntities(hearingEntities);
             dartsDatabaseSaveStub.save(event);
         }
