@@ -1,6 +1,6 @@
 #!groovy
 
-@Library("Infrastructure@cakeben-patch-1")
+@Library("Infrastructure")
 
 import uk.gov.hmcts.contino.GradleBuilder
 

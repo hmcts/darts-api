@@ -86,7 +86,7 @@ public class TranscriptionNotifications {
     public void notifyRequestor(TranscriptionEntity transcription, String templateName, Map<String, String> templateParams) {
         SaveNotificationToDbRequest request = SaveNotificationToDbRequest.builder()
             .eventId(templateName)
-            .userAccountsToEmail(List.of(transcription.getCreatedBy()))
+            .userAccountsToEmail(List.of(transcription.getRequestedBy()))
             .caseId(transcription.getCourtCase().getId())
             .templateValues(templateParams)
             .build();
