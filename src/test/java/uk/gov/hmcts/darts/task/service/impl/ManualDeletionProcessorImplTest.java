@@ -8,11 +8,13 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 import uk.gov.hmcts.darts.audio.deleter.impl.inbound.ExternalInboundDataStoreDeleter;
 import uk.gov.hmcts.darts.audio.deleter.impl.unstructured.ExternalUnstructuredDataStoreDeleter;
+import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.ExternalLocationTypeEntity;
 import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
 import uk.gov.hmcts.darts.common.entity.ObjectAdminActionEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionDocumentEntity;
+import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum;
 import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
 import uk.gov.hmcts.darts.common.repository.MediaRepository;
@@ -28,7 +30,9 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -53,12 +57,15 @@ class ManualDeletionProcessorImplTest {
     private ExternalUnstructuredDataStoreDeleter unstructuredDeleter;
     @Mock
     private LogApi logApi;
+    @Mock
+    private UserIdentity userIdentity;
 
     private ManualDeletionProcessorImpl manualDeletionProcessor;
 
     @BeforeEach
     void setUp() {
-        manualDeletionProcessor = new ManualDeletionProcessorImpl(objectAdminActionRepository,
+        manualDeletionProcessor = new ManualDeletionProcessorImpl(userIdentity,
+                                                                  objectAdminActionRepository,
                                                                   externalObjectDirectoryRepository,
                                                                   mediaRepository,
                                                                   transcriptionDocumentRepository,
@@ -80,6 +87,8 @@ class ManualDeletionProcessorImplTest {
         when(externalObjectDirectoryRepository.findStoredInInboundAndUnstructuredByTranscriptionId(any())).thenReturn(
             Collections.singletonList(createExternalObjectDirectoryEntity(ExternalLocationTypeEnum.UNSTRUCTURED)));
 
+        UserAccountEntity userAccount = mock(UserAccountEntity.class);
+        when(userIdentity.getUserAccount()).thenReturn(userAccount);
         manualDeletionProcessor.process();
 
         verify(mediaRepository).save(any(MediaEntity.class));
@@ -89,6 +98,10 @@ class ManualDeletionProcessorImplTest {
         verify(unstructuredDeleter).delete(any(ExternalObjectDirectoryEntity.class));
         verify(logApi, times(1)).mediaDeleted(MEDIA_ID);
         verify(logApi, times(1)).transcriptionDeleted(TRANSCRIPTION_ID);
+        verify(userIdentity, times(1)).getUserAccount();
+
+        verify(mediaAction.getMedia(), times(1)).markAsDeleted(userAccount);
+        verify(transcriptionAction.getTranscriptionDocument(), times(1)).markAsDeleted(userAccount);
     }
 
     @Test
@@ -106,6 +119,7 @@ class ManualDeletionProcessorImplTest {
         verify(mediaRepository, never()).save(any(MediaEntity.class));
         verify(transcriptionDocumentRepository, never()).save(any(TranscriptionDocumentEntity.class));
         verify(externalObjectDirectoryRepository, never()).delete(any(ExternalObjectDirectoryEntity.class));
+        verify(userIdentity, times(1)).getUserAccount();
     }
 
     @Test
@@ -133,12 +147,12 @@ class ManualDeletionProcessorImplTest {
     private ObjectAdminActionEntity createObjectAdminAction(boolean isMedia, boolean isTranscription) {
         ObjectAdminActionEntity action = new ObjectAdminActionEntity();
         if (isMedia) {
-            MediaEntity media = new MediaEntity();
+            MediaEntity media = spy(new MediaEntity());
             media.setId(MEDIA_ID);
             action.setMedia(media);
         }
         if (isTranscription) {
-            TranscriptionDocumentEntity transcriptionDocument = new TranscriptionDocumentEntity();
+            TranscriptionDocumentEntity transcriptionDocument = spy(new TranscriptionDocumentEntity());
             transcriptionDocument.setId(TRANSCRIPTION_ID);
             action.setTranscriptionDocument(transcriptionDocument);
         }
