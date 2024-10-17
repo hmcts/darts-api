@@ -14,6 +14,7 @@ import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
 import uk.gov.hmcts.darts.common.repository.UserRolesCourthousesRepository;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -35,12 +36,10 @@ public class UserIdentityImpl implements UserIdentity {
 
     @SuppressWarnings({"PMD.AvoidDeeplyNestedIfStmts", "PMD.CyclomaticComplexity", "PMD.CognitiveComplexity"})
     private String getEmailAddressFromToken(Jwt token) {
-        Object principalObject = token;
-
-        if (principalObject instanceof Jwt jwt) {
-            Object emailsAddressesObject = jwt.getClaims().get(EMAILS);
+        if (token != null) {
+            Object emailsAddressesObject = token.getClaims().get(EMAILS);
             if (emailsAddressesObject == null) {
-                emailsAddressesObject = jwt.getClaims().get(PREFERRED_USERNAME);
+                emailsAddressesObject = token.getClaims().get(PREFERRED_USERNAME);
             }
             if (emailsAddressesObject instanceof List<?> emails) {
                 if (emails.size() != 1) {
@@ -59,29 +58,36 @@ public class UserIdentityImpl implements UserIdentity {
             }
         }
 
-        return "";
+        throw new IllegalStateException("Could not obtain email address from principal");
     }
 
     private String getGuidFromToken(Jwt token) {
-        Object principalObject = token;
+        if (token != null) {
+            Object principalObject = token;
 
-        Object oid = null;
-        if (principalObject instanceof Jwt jwt) {
-            oid = jwt.getClaims().get(OID);
-        }
-        if (nonNull(oid) && oid instanceof String guid && StringUtils.isNotBlank(guid)) {
-            return guid;
+            Object oid = null;
+            if (principalObject instanceof Jwt jwt) {
+                oid = jwt.getClaims().get(OID);
+            }
+            if (nonNull(oid) && oid instanceof String guid && StringUtils.isNotBlank(guid)) {
+                return guid;
+            }
         }
         return null;
     }
 
     @Override
     public UserAccountEntity getUserAccount() {
-        if (!(SecurityContextHolder.getContext().getAuthentication().getPrincipal() instanceof Jwt)) {
-            throw new IllegalStateException("Could not obtain user from token");
+        UserAccountEntity entity = null;
+        if (getJwt().isPresent()) {
+            entity = getUserAccount(getJwt().get());
         }
 
-        return getUserAccount((Jwt)SecurityContextHolder.getContext().getAuthentication().getPrincipal());
+        if (isNull(entity)) {
+            throw new IllegalStateException("Could not obtain email address from principal");
+        }
+
+        return entity;
     }
 
     @Override
@@ -100,17 +106,20 @@ public class UserIdentityImpl implements UserIdentity {
         return userAccount;
     }
 
-    private Jwt getJwt() {
-        if (SecurityContextHolder.getContext().getAuthentication().getPrincipal() instanceof Jwt) {
-            return (Jwt)SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+    private Optional<Jwt> getJwt() {
+        if (SecurityContextHolder.getContext().getAuthentication() != null) {
+            if (SecurityContextHolder.getContext().getAuthentication().getPrincipal() instanceof Jwt jwt) {
+                return Optional.of(jwt);
+            }
         }
-        return (Jwt)SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+
+        return Optional.empty();
     }
 
     @Override
     public boolean userHasGlobalAccess(Set<SecurityRoleEnum> globalAccessRoles) {
         boolean userHasGlobalAccess = false;
-        Jwt token = getJwt();
+        Jwt token = getJwt().orElse(null);
         String emailAddress = null;
         String guid = getGuidFromToken(token);
 

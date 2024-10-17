@@ -114,9 +114,6 @@ public class IntegrationBase {
         dartsDatabase.resetSequences();
         dartsDatabase.clearDatabaseInThisOrder();
         dartsDatabase.resetTablesWithPredefinedTestData();
-
-        // populate the jkws keys endpoint with a global public key
-        tokenStub.stubExternalJwksKeys(DartsTokenGenerator.getGlobalKey());
     }
 
     @AfterEach
