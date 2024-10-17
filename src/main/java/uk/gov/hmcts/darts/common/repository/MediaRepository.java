@@ -5,10 +5,12 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
+import uk.gov.hmcts.darts.common.entity.TranscriptionDocumentEntity;
 import uk.gov.hmcts.darts.task.runner.SoftDeleteRepository;
 
 import java.time.OffsetDateTime;
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface MediaRepository extends JpaRepository<MediaEntity, Integer>,
@@ -83,5 +85,14 @@ public interface MediaRepository extends JpaRepository<MediaEntity, Integer>,
         """)
     List<MediaEntity> findMediaByDetails(List<Integer> hearingIds, OffsetDateTime startAt,
                                          OffsetDateTime endAt);
+
+    @Query("""
+        SELECT m
+        FROM MediaEntity m
+        WHERE m.id = :id
+        AND m.isDeleted = false
+        """)
+    @Override
+    Optional<MediaEntity> findById(Integer id);
 
 }
