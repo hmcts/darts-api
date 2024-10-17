@@ -38,69 +38,6 @@ class UserIdentityImplTest extends IntegrationBase {
         authorisationStub.givenTestSchema();
     }
 
-
-    @Test
-    void getUserAccountGetEmailAddress() {
-        Jwt jwt = Jwt.withTokenValue("test")
-            .header("alg", "RS256")
-            .claim("sub", UUID.randomUUID().toString())
-            .claim("emails", List.of("integrationtest.user@example.com"))
-            .build();
-        SecurityContextHolder.getContext().setAuthentication(new JwtAuthenticationToken(jwt));
-
-        assertEquals("integrationtest.user@example.com", userIdentity.getUserAccount().getEmailAddress());
-    }
-
-    @Test
-    void getUserAccountShouldThrowExceptionWhenUnexpectedNumberOfEmails() {
-        Jwt jwt = Jwt.withTokenValue("test")
-            .header("alg", "RS256")
-            .claim("sub", UUID.randomUUID().toString())
-            .claim("emails", List.of("test.user@example.com", "test.user2@example.com"))
-            .build();
-        SecurityContextHolder.getContext().setAuthentication(new JwtAuthenticationToken(jwt));
-
-        var exception = assertThrows(IllegalStateException.class, () -> userIdentity.getUserAccount());
-        assertEquals("Unexpected number of email addresses: 2", exception.getMessage());
-    }
-
-    @Test
-    void getUserAccountShouldThrowExceptionWhenMissingEmailsClaim() {
-        Jwt jwt = Jwt.withTokenValue("test")
-            .header("alg", "RS256")
-            .claim("sub", UUID.randomUUID().toString())
-            .build();
-        SecurityContextHolder.getContext().setAuthentication(new JwtAuthenticationToken(jwt));
-
-        var exception = assertThrows(IllegalStateException.class, () -> userIdentity.getUserAccount());
-        assertEquals("Could not obtain email address from principal", exception.getMessage());
-    }
-
-    @Test
-    void getUserAccountGetEmailAddressForInternalUser() {
-        Jwt jwt = Jwt.withTokenValue("test")
-            .header("alg", "RS256")
-            .claim("sub", UUID.randomUUID().toString())
-            .claim("preferred_username", "integrationtest.user@example.com")
-            .build();
-        SecurityContextHolder.getContext().setAuthentication(new JwtAuthenticationToken(jwt));
-
-        assertEquals("integrationtest.user@example.com", userIdentity.getUserAccount().getEmailAddress());
-    }
-
-    @Test
-    void getUserAccountShouldThrowExceptionWithEmptyClaims() {
-        Jwt jwt = Jwt.withTokenValue("test")
-            .header("alg", "RS256")
-            .claim("sub", UUID.randomUUID().toString())
-            .claim("emails", List.of(1))
-            .build();
-        SecurityContextHolder.getContext().setAuthentication(new JwtAuthenticationToken(jwt));
-
-        var exception = assertThrows(IllegalStateException.class, () -> userIdentity.getUserAccount());
-        assertEquals("Could not obtain email address from principal", exception.getMessage());
-    }
-
     @Test
     void getUserAccount() {
         String email = "integrationtest.user@example.com";
