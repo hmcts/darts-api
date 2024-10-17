@@ -2,6 +2,7 @@ package uk.gov.hmcts.darts.transcriptions.mapper;
 
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
@@ -48,6 +49,7 @@ import uk.gov.hmcts.darts.transcriptions.model.TranscriptionUrgencyResponse;
 import uk.gov.hmcts.darts.transcriptions.model.TranscriptionWorkflowsComment;
 import uk.gov.hmcts.darts.transcriptions.util.TranscriptionUtil;
 
+import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -149,7 +151,7 @@ public class TranscriptionResponseMapper {
     }
 
     private Comparator<GetTranscriptionWorkflowsResponse> byTranscriptionWorkflowTs() {
-        return Comparator.comparing(GetTranscriptionWorkflowsResponse::getWorkflowTs);
+        return Comparator.comparing(workflow -> ObjectUtils.defaultIfNull(workflow.getWorkflowTs(), OffsetDateTime.MIN));
     }
 
     public GetTranscriptionByIdResponse mapToTranscriptionResponse(TranscriptionEntity transcriptionEntity) {

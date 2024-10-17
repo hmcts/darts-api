@@ -15,6 +15,7 @@ import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.ObjectAdminActionEntity;
 import uk.gov.hmcts.darts.common.entity.ObjectHiddenReasonEntity;
+import uk.gov.hmcts.darts.common.entity.TranscriptionCommentEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionDocumentEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionStatusEntity;
@@ -36,15 +37,18 @@ import uk.gov.hmcts.darts.transcriptions.model.AdminMarkedForDeletionResponseIte
 import uk.gov.hmcts.darts.transcriptions.model.GetTranscriptionByIdResponse;
 import uk.gov.hmcts.darts.transcriptions.model.GetTranscriptionDetailAdminResponse;
 import uk.gov.hmcts.darts.transcriptions.model.GetTranscriptionDocumentByIdResponse;
+import uk.gov.hmcts.darts.transcriptions.model.GetTranscriptionWorkflowsResponse;
 import uk.gov.hmcts.darts.transcriptions.model.SearchTranscriptionDocumentResponse;
 import uk.gov.hmcts.darts.transcriptions.model.TranscriptionDocumentHideResponse;
 import uk.gov.hmcts.darts.transcriptions.model.TranscriptionDocumentResult;
 import uk.gov.hmcts.darts.transcriptions.model.TranscriptionTypeResponse;
 import uk.gov.hmcts.darts.transcriptions.model.TranscriptionUrgencyResponse;
+import uk.gov.hmcts.darts.transcriptions.model.TranscriptionWorkflowsComment;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -848,6 +852,68 @@ class TranscriptionResponseMapperTest {
         assertTrue(adminAction.getIsMarkedForManualDeletion());
         assertEquals(userAccountEntity.getId(), adminAction.getMarkedForManualDeletionById());
         assertEquals(creationDate, adminAction.getMarkedForManualDeletionAt());
+    }
+
+    @Test
+    void mapToTranscriptionWorkflowsResponseWithLegacyComment() {
+        HearingEntity hearing = CommonTestDataUtil.createHearing("1", LocalDate.of(2020, 10, 10));
+        List<TranscriptionEntity> transcriptionList = CommonTestDataUtil.createTranscriptionList(hearing);
+
+        TranscriptionCommentEntity comment1a = new TranscriptionCommentEntity();
+        comment1a.setComment("1a");
+        comment1a.setCommentTimestamp(OffsetDateTime.of(2020, 10, 10, 10, 1, 0, 0, ZoneOffset.UTC));
+
+        TranscriptionCommentEntity comment1b = new TranscriptionCommentEntity();
+        comment1b.setComment("1b");
+        comment1b.setCommentTimestamp(OffsetDateTime.of(2020, 10, 10, 10, 0, 0, 0, ZoneOffset.UTC));
+
+
+        UserAccountEntity userAccount = CommonTestDataUtil.createUserAccount();
+        TranscriptionWorkflowEntity transcriptionWorkflow1 = new TranscriptionWorkflowEntity();
+        transcriptionWorkflow1.setTranscription(transcriptionList.getFirst());
+        transcriptionWorkflow1.setTranscriptionStatus(CommonTestDataUtil.createTranscriptionStatusEntityFromEnum(TranscriptionStatusEnum.APPROVED));
+        transcriptionWorkflow1.setId(1);
+        transcriptionWorkflow1.setWorkflowTimestamp(OffsetDateTime.of(2020, 10, 10, 11, 0, 0, 0, ZoneOffset.UTC));
+        transcriptionWorkflow1.setTranscriptionComments(List.of(comment1a, comment1b));
+        transcriptionWorkflow1.setWorkflowActor(userAccount);
+
+        TranscriptionCommentEntity comment2a = new TranscriptionCommentEntity();
+        comment2a.setComment("2a");
+        comment2a.setCommentTimestamp(OffsetDateTime.of(2020, 10, 10, 11, 0, 0, 0, ZoneOffset.UTC));
+
+        TranscriptionCommentEntity comment2b = new TranscriptionCommentEntity();
+        comment2b.setComment("2b");
+        comment2b.setCommentTimestamp(OffsetDateTime.of(2020, 10, 10, 11, 1, 0, 0, ZoneOffset.UTC));
+
+        TranscriptionWorkflowEntity transcriptionWorkflow2 = new TranscriptionWorkflowEntity();
+        transcriptionWorkflow2.setTranscription(transcriptionList.getFirst());
+        transcriptionWorkflow2.setTranscriptionStatus(CommonTestDataUtil.createTranscriptionStatusEntityFromEnum(TranscriptionStatusEnum.APPROVED));
+        transcriptionWorkflow2.setId(2);
+        transcriptionWorkflow2.setWorkflowTimestamp(OffsetDateTime.of(2020, 10, 11, 10, 0, 0, 0, ZoneOffset.UTC));
+        transcriptionWorkflow2.setTranscriptionComments(List.of(comment2a, comment2b));
+        transcriptionWorkflow2.setWorkflowActor(userAccount);
+
+        List<TranscriptionWorkflowEntity> transcriptionWorkflowEntities = List.of(transcriptionWorkflow1, transcriptionWorkflow2);
+
+        TranscriptionCommentEntity comment3a = new TranscriptionCommentEntity();
+        comment3a.setComment("3a");
+        TranscriptionCommentEntity comment3b = new TranscriptionCommentEntity();
+        comment3b.setComment("3b");
+        List<TranscriptionCommentEntity> migratedTranscriptionComment = List.of(comment3a, comment3b);
+
+        List<GetTranscriptionWorkflowsResponse> getTranscriptionWorkflowsResponses = transcriptionResponseMapper.mapToTranscriptionWorkflowsResponse(
+            transcriptionWorkflowEntities, migratedTranscriptionComment);
+
+        List<String> responseCommentList = getTranscriptionWorkflowsResponses.stream().flatMap(
+            response -> response.getComments().stream().map(TranscriptionWorkflowsComment::getComment)).toList();
+
+        assertEquals(6, responseCommentList.size());
+        assertEquals("2a", responseCommentList.get(0));
+        assertEquals("2b", responseCommentList.get(1));
+        assertEquals("1a", responseCommentList.get(2));
+        assertEquals("1b", responseCommentList.get(3));
+        assertEquals("3a", responseCommentList.get(4));
+        assertEquals("3b", responseCommentList.get(5));
     }
 
 }

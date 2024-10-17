@@ -28,6 +28,7 @@ import uk.gov.hmcts.darts.common.repository.CaseRepository;
 import uk.gov.hmcts.darts.common.repository.EventRepository;
 import uk.gov.hmcts.darts.common.repository.ExternalLocationTypeRepository;
 import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
+import uk.gov.hmcts.darts.common.repository.HearingRepository;
 import uk.gov.hmcts.darts.common.repository.ObjectRecordStatusRepository;
 import uk.gov.hmcts.darts.common.service.FileOperationService;
 import uk.gov.hmcts.darts.datamanagement.api.DataManagementApi;
@@ -39,6 +40,7 @@ import uk.gov.hmcts.darts.log.api.LogApi;
 @RequiredArgsConstructor
 @Slf4j
 public class AutomatedTaskProcessorFactoryImpl implements AutomatedTaskProcessorFactory {
+    private final HearingRepository hearingRepository;
 
     private final ExternalObjectDirectoryRepository externalObjectDirectoryRepository;
     private final ObjectRecordStatusRepository objectRecordStatusRepository;
@@ -109,7 +111,7 @@ public class AutomatedTaskProcessorFactoryImpl implements AutomatedTaskProcessor
 
     @Override
     public CleanupCurrentFlagEventProcessor createCleanupCurrentFlagEventProcessor(int batchSize) {
-        return new CleanupCurrentFlagEventProcessorImpl(batchSize, eventRepository, userIdentity);
+        return new CleanupCurrentFlagEventProcessorImpl(batchSize, eventRepository, hearingRepository, userIdentity);
     }
 
     @Override
