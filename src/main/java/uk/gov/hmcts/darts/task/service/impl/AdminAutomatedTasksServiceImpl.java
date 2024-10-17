@@ -19,7 +19,6 @@ import uk.gov.hmcts.darts.tasks.model.DetailedAutomatedTask;
 
 import java.util.List;
 
-import static uk.gov.hmcts.darts.audit.api.AuditActivity.CHANGE_JOB_BATCH_SIZE;
 import static uk.gov.hmcts.darts.audit.api.AuditActivity.ENABLE_DISABLE_JOB;
 import static uk.gov.hmcts.darts.audit.api.AuditActivity.RUN_JOB_MANUALLY;
 import static uk.gov.hmcts.darts.task.exception.AutomatedTaskApiError.AUTOMATED_TASK_ALREADY_RUNNING;
@@ -89,7 +88,7 @@ public class AdminAutomatedTasksServiceImpl implements AdminAutomatedTaskService
 
         if (automatedTaskPatch.getBatchSize() != null) {
             automatedTask.setBatchSize(automatedTaskPatch.getBatchSize());
-            auditApi.record(CHANGE_JOB_BATCH_SIZE);
+            log.info("Batch size for {} updated to {}", automatedTask.getTaskName(), automatedTaskPatch.getBatchSize());
         }
 
         var updatedTask = automatedTaskRepository.save(automatedTask);

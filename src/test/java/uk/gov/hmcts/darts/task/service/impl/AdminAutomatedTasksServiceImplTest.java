@@ -32,6 +32,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -95,7 +96,7 @@ class AdminAutomatedTasksServiceImplTest {
         assertEquals(100, automatedTaskEntity.getBatchSize());
         assertEquals(expectedReturnTask, task);
         verify(auditApi).record(AuditActivity.ENABLE_DISABLE_JOB);
-        verify(auditApi).record(AuditActivity.CHANGE_JOB_BATCH_SIZE);
+        verifyNoMoreInteractions(auditApi);
     }
 
     @Test
