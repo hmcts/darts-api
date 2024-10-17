@@ -1,5 +1,6 @@
 package uk.gov.hmcts.darts.event.controller;
 
+import ch.qos.logback.classic.Level;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -7,27 +8,39 @@ import org.junit.jupiter.params.provider.EnumSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import uk.gov.hmcts.darts.audio.api.AudioApi;
+import uk.gov.hmcts.darts.audit.api.AuditActivity;
+import uk.gov.hmcts.darts.common.entity.AuditEntity;
+import uk.gov.hmcts.darts.common.entity.AuditEntity_;
 import uk.gov.hmcts.darts.common.entity.EventEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.enums.SecurityRoleEnum;
+import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.event.component.DartsEventMapper;
 import uk.gov.hmcts.darts.event.exception.EventError;
 import uk.gov.hmcts.darts.event.model.AdminGetEventForIdResponseResult;
 import uk.gov.hmcts.darts.event.model.DartsEvent;
 import uk.gov.hmcts.darts.event.model.Problem;
 import uk.gov.hmcts.darts.event.service.EventDispatcher;
+import uk.gov.hmcts.darts.log.service.impl.EventLoggerServiceImpl;
+import uk.gov.hmcts.darts.test.common.LogUtil;
 import uk.gov.hmcts.darts.testutils.GivenBuilder;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 import uk.gov.hmcts.darts.testutils.stubs.DartsDatabaseStub;
 
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
+import java.util.List;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.hibernate.validator.internal.util.Contracts.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.verify;
 import static org.skyscreamer.jsonassert.JSONAssert.assertEquals;
@@ -37,6 +50,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.CPP;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.SUPER_ADMIN;
+import static uk.gov.hmcts.darts.test.common.TestUtils.UUID_REGEX;
 
 @AutoConfigureMockMvc
 class EventsControllerTest extends IntegrationBase {
@@ -145,5 +159,96 @@ class EventsControllerTest extends IntegrationBase {
 
         // Then
         Assertions.assertEquals(EventError.EVENT_ID_NOT_FOUND_RESULTS.getType(), responseResult.getType());
+    }
+
+    @Test
+    void adminObfuscateEveByIdsSingle() throws Exception {
+        HearingEntity hearing = dartsDatabaseStub.createHearing("Courthouse", "1", "12345", LocalDateTime.now());
+
+        EventEntity event = dartsDatabaseStub.createEvent(hearing);
+        EventEntity event2 = dartsDatabaseStub.createEvent(hearing);
+
+
+        given.anAuthenticatedUserWithGlobalAccessAndRole(SUPER_ADMIN);
+        MockHttpServletRequestBuilder requestBuilder = post("/admin/events/obfuscate")
+            .contentType(MediaType.APPLICATION_JSON_VALUE)
+            .content("{\"eve_ids\":[" + event.getId() + "]}");
+
+        mockMvc.perform(requestBuilder).andExpect(status().isNoContent());
+
+        EventEntity editedEventEntity = dartsDatabaseStub.getEventRepository().findById(event.getId()).orElseThrow();
+        assertThat(editedEventEntity.getEventText()).matches(UUID_REGEX);
+
+        EventEntity notEditedEventEntity = dartsDatabaseStub.getEventRepository().findById(event2.getId()).orElseThrow();
+        assertThat(notEditedEventEntity.getEventText()).isEqualTo(event2.getEventText());
+        assertThat(notEditedEventEntity.getEventText()).doesNotMatch(UUID_REGEX);
+
+        assertAudit(editedEventEntity);
+        assertFalse(
+            LogUtil.getMemoryLogger()
+                .searchLogApiLogs(EventLoggerServiceImpl.manualObfuscationMessage(editedEventEntity), Level.INFO).isEmpty());
+    }
+
+    @Test
+    void adminObfuscateEveByIdsMultiple() throws Exception {
+        HearingEntity hearing = dartsDatabaseStub.createHearing("Courthouse", "1", "12345", LocalDateTime.now());
+
+        EventEntity event = dartsDatabaseStub.createEvent(hearing);
+        EventEntity event2 = dartsDatabaseStub.createEvent(hearing);
+
+
+        given.anAuthenticatedUserWithGlobalAccessAndRole(SUPER_ADMIN);
+        MockHttpServletRequestBuilder requestBuilder = post("/admin/events/obfuscate")
+            .contentType(MediaType.APPLICATION_JSON_VALUE)
+            .content("{\"eve_ids\":[" + event.getId() + "," + event2.getId() + "]}");
+
+        mockMvc.perform(requestBuilder).andExpect(status().isNoContent());
+
+        EventEntity editedEventEntity = dartsDatabaseStub.getEventRepository().findById(event.getId()).orElseThrow();
+        assertThat(editedEventEntity.getEventText()).matches(UUID_REGEX);
+
+        EventEntity editedEventEntity2 = dartsDatabaseStub.getEventRepository().findById(event2.getId()).orElseThrow();
+        assertThat(editedEventEntity2.getEventText()).matches(UUID_REGEX);
+
+        assertAudit(editedEventEntity);
+        assertFalse(
+            LogUtil.getMemoryLogger()
+                .searchLogApiLogs(EventLoggerServiceImpl.manualObfuscationMessage(editedEventEntity), Level.INFO).isEmpty());
+
+        assertAudit(editedEventEntity2);
+        assertFalse(
+            LogUtil.getMemoryLogger()
+                .searchLogApiLogs(EventLoggerServiceImpl.manualObfuscationMessage(editedEventEntity2), Level.INFO).isEmpty());
+    }
+
+    @Test
+    void adminObfuscateEveByIdsNotFound() throws Exception {
+        given.anAuthenticatedUserWithGlobalAccessAndRole(SUPER_ADMIN);
+        MockHttpServletRequestBuilder requestBuilder = post("/admin/events/obfuscate")
+            .contentType(MediaType.APPLICATION_JSON_VALUE)
+            .content("{\"eve_ids\":[1]}");
+
+        MvcResult response = mockMvc.perform(requestBuilder).andExpect(status().isNotFound())
+            .andReturn();
+
+        Problem responseResult = objectMapper.readValue(response.getResponse().getContentAsString(), Problem.class);
+        Assertions.assertEquals(DartsApiException.DartsApiErrorCommon.NOT_FOUND.getType(), responseResult.getType());
+    }
+
+    private void assertAudit(EventEntity eventEntity) {
+        List<AuditEntity> caseExpiredAuditEntries = dartsDatabase.getAuditRepository()
+            .findAll((Specification<AuditEntity>) (root, query, criteriaBuilder) -> criteriaBuilder.and(
+                criteriaBuilder.equal(root.get(AuditEntity_.additionalData), String.valueOf(eventEntity.getId())),
+                criteriaBuilder.equal(root.get(AuditEntity_.auditActivity).get("id"), AuditActivity.MANUAL_OBFUSCATION.getId())
+            ));
+
+        // assert additional audit data
+        assertFalse(caseExpiredAuditEntries.isEmpty());
+        assertNotNull(caseExpiredAuditEntries.get(0).getCreatedBy());
+        assertNotNull(caseExpiredAuditEntries.get(0).getCreatedDateTime());
+        assertNotNull(caseExpiredAuditEntries.get(0).getLastModifiedBy());
+        assertNotNull(caseExpiredAuditEntries.get(0).getLastModifiedDateTime());
+        Assertions.assertEquals(caseExpiredAuditEntries.get(0).getUser().getId(), eventEntity.getLastModifiedBy().getId());
+        assertNull(caseExpiredAuditEntries.get(0).getCourtCase());
     }
 }

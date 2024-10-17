@@ -6,6 +6,7 @@ import uk.gov.hmcts.darts.audio.entity.MediaRequestEntity;
 import uk.gov.hmcts.darts.audio.model.AddAudioMetadataRequest;
 import uk.gov.hmcts.darts.cases.model.AddCaseRequest;
 import uk.gov.hmcts.darts.cases.model.GetCasesRequest;
+import uk.gov.hmcts.darts.common.entity.EventEntity;
 import uk.gov.hmcts.darts.event.model.DartsEvent;
 import uk.gov.hmcts.darts.log.api.LogApi;
 import uk.gov.hmcts.darts.log.service.ArmLoggerService;
@@ -156,5 +157,9 @@ public class LogApiImpl implements LogApi {
     public void transcriptionDeleted(Integer transcriptionId) {
         deletionLoggerService.transcriptionDeleted(transcriptionId);
     }
-}
 
+    @Override
+    public void manualObfuscation(EventEntity eventEntity) {
+        eventLoggerService.manualObfuscation(eventEntity);
+    }
+}

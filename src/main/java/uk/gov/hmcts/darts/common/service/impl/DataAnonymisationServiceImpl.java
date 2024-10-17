@@ -67,6 +67,7 @@ public class DataAnonymisationServiceImpl implements DataAnonymisationService {
         anonymizeCreatedModifiedBaseEntity(userAccount, courtCase);
         caseRepository.save(courtCase);
 
+
         //Required for Dynatrace dashboards
         logApi.caseDeletedDueToExpiry(courtCase.getId(), courtCase.getCaseNumber());
     }
@@ -88,10 +89,20 @@ public class DataAnonymisationServiceImpl implements DataAnonymisationService {
         hearingEntity.getEventList().forEach(eventEntity -> anonymizeEventEntity(userAccount, eventEntity));
     }
 
+
+    @Override
+    public void anonymizeEvent(EventEntity eventEntity) {
+        anonymizeEventEntity(getUserAccount(), eventEntity);
+
+        auditApi.record(AuditActivity.MANUAL_OBFUSCATION, getUserAccount(), eventEntity.getId().toString());
+        logApi.manualObfuscation(eventEntity);
+    }
+
     void anonymizeEventEntity(UserAccountEntity userAccount, EventEntity eventEntity) {
         eventEntity.setEventText(UUID.randomUUID().toString());
         eventEntity.setDataAnonymised(true);
         anonymizeCreatedModifiedBaseEntity(userAccount, eventEntity);
+
     }
 
     void anonymizeTranscriptionEntity(UserAccountEntity userAccount, TranscriptionEntity transcriptionEntity) {

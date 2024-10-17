@@ -147,7 +147,7 @@ public class CourthouseServiceImpl implements CourthouseService {
         UserAccountEntity currentUser = authorisationApi.getCurrentUser();
         var courthouseEntity = createAndSaveCourthouseEntity(courthousePost, validatedRegionEntity, validatedSecurityGroupEntities, currentUser);
 
-        auditApi.record(CREATE_COURTHOUSE, currentUser, null);
+        auditApi.record(CREATE_COURTHOUSE, currentUser);
 
         return mapToPostResponse(courthouseEntity);
     }
