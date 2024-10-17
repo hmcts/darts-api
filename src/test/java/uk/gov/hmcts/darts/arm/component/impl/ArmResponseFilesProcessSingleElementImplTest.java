@@ -14,7 +14,6 @@ import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.darts.arm.api.ArmDataManagementApi;
-import uk.gov.hmcts.darts.arm.component.ArmResponseFilesProcessSingleElement;
 import uk.gov.hmcts.darts.arm.config.ArmDataManagementConfiguration;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.config.ObjectMapperConfig;
@@ -45,6 +44,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
@@ -100,7 +100,7 @@ class ArmResponseFilesProcessSingleElementImplTest {
 
     private ExternalObjectDirectoryEntity externalObjectDirectoryArmDropZone;
 
-    private ArmResponseFilesProcessSingleElement armResponseFilesProcessSingleElement;
+    private ArmResponseFilesProcessSingleElementImpl armResponseFilesProcessSingleElement;
 
 
     @BeforeEach
@@ -143,6 +143,8 @@ class ArmResponseFilesProcessSingleElementImplTest {
         when(objectRecordStatusRepository.findById(ARM_RESPONSE_MANIFEST_FAILED.getId()))
             .thenReturn(Optional.of(objectRecordStatusArmResponseManifestFailed));
 
+        lenient().when(userIdentity.getUserAccount()).thenReturn(userAccountEntity);
+
         externalObjectDirectoryArmResponseProcessing = new ExternalObjectDirectoryEntity();
         externalObjectDirectoryArmResponseProcessing.setId(1);
         externalObjectDirectoryArmResponseProcessing.setStatus(objectRecordStatusArmProcessingFiles);
@@ -167,6 +169,8 @@ class ArmResponseFilesProcessSingleElementImplTest {
             userIdentity,
             logApi
         );
+
+        armResponseFilesProcessSingleElement.initialisePreloadedObjects();
     }
 
     @AfterEach
@@ -187,8 +191,6 @@ class ArmResponseFilesProcessSingleElementImplTest {
         List<String> responseBlobs = new ArrayList<>();
         responseBlobs.add(responseBlobFilename);
         when(armDataManagementApi.listResponseBlobs(prefix)).thenReturn(responseBlobs);
-
-        when(userIdentity.getUserAccount()).thenReturn(userAccountEntity);
 
         armResponseFilesProcessSingleElement.processResponseFilesFor(1);
 
@@ -216,8 +218,6 @@ class ArmResponseFilesProcessSingleElementImplTest {
         String prefix = "1_1_1";
         when(armDataManagementApi.listResponseBlobs(prefix)).thenThrow(new AzureException());
 
-        when(userIdentity.getUserAccount()).thenReturn(userAccountEntity);
-
         when(armDataManagementConfiguration.getMaxRetryAttempts()).thenReturn(3);
 
         armResponseFilesProcessSingleElement.processResponseFilesFor(1);
@@ -243,8 +243,6 @@ class ArmResponseFilesProcessSingleElementImplTest {
         List<String> responseBlobs = new ArrayList<>();
         responseBlobs.add(responseBlobFilename);
         when(armDataManagementApi.listResponseBlobs(prefix)).thenReturn(responseBlobs);
-
-        when(userIdentity.getUserAccount()).thenReturn(userAccountEntity);
 
         armResponseFilesProcessSingleElement.processResponseFilesFor(1);
 
@@ -280,8 +278,6 @@ class ArmResponseFilesProcessSingleElementImplTest {
         hashcodeResponseBlobs.add(uploadFileFilename);
         when(armDataManagementApi.listResponseBlobs(hashcode)).thenReturn(hashcodeResponseBlobs);
 
-        when(userIdentity.getUserAccount()).thenReturn(userAccountEntity);
-
         armResponseFilesProcessSingleElement.processResponseFilesFor(1);
 
         verify(externalObjectDirectoryRepository).saveAndFlush(externalObjectDirectoryEntityCaptor.capture());
@@ -312,8 +308,6 @@ class ArmResponseFilesProcessSingleElementImplTest {
         hashcodeResponseBlobs.add(createRecordFilename);
         hashcodeResponseBlobs.add(invalidLineFilename);
         when(armDataManagementApi.listResponseBlobs(hashcode)).thenReturn(hashcodeResponseBlobs);
-
-        when(userIdentity.getUserAccount()).thenReturn(userAccountEntity);
 
         armResponseFilesProcessSingleElement.processResponseFilesFor(1);
 
@@ -346,8 +340,6 @@ class ArmResponseFilesProcessSingleElementImplTest {
         hashcodeResponseBlobs.add(uploadFileFilename);
         when(armDataManagementApi.listResponseBlobs(hashcode)).thenReturn(hashcodeResponseBlobs).thenThrow(new AzureException());
 
-        when(userIdentity.getUserAccount()).thenReturn(userAccountEntity);
-
         armResponseFilesProcessSingleElement.processResponseFilesFor(1);
 
         verify(externalObjectDirectoryRepository).saveAndFlush(externalObjectDirectoryEntityCaptor.capture());
@@ -369,8 +361,6 @@ class ArmResponseFilesProcessSingleElementImplTest {
 
         String prefix = "1_1_1";
         when(armDataManagementApi.listResponseBlobs(prefix)).thenThrow(new AzureException());
-
-        when(userIdentity.getUserAccount()).thenReturn(userAccountEntity);
 
         armResponseFilesProcessSingleElement.processResponseFilesFor(1);
 
@@ -431,8 +421,6 @@ class ArmResponseFilesProcessSingleElementImplTest {
         when(armDataManagementApi.deleteBlobData(createRecordFilename)).thenReturn(true);
         when(armDataManagementApi.deleteBlobData(responseBlobFilename)).thenReturn(true);
 
-        when(userIdentity.getUserAccount()).thenReturn(userAccountEntity);
-
         armResponseFilesProcessSingleElement.processResponseFilesFor(1);
 
         verify(externalObjectDirectoryRepository).saveAndFlush(externalObjectDirectoryEntityCaptor.capture());
@@ -464,8 +452,6 @@ class ArmResponseFilesProcessSingleElementImplTest {
         String invalidLineFileFilename = "6a374f19a9ce7dc9cc480ea8d4eca0fb_04e6bc3b-952a-79b6-8362-13259aae1895_0_abc.rsp";
         hashcodeResponseBlobs.add(invalidLineFileFilename);
         when(armDataManagementApi.listResponseBlobs(hashcode)).thenReturn(hashcodeResponseBlobs);
-
-        when(userIdentity.getUserAccount()).thenReturn(userAccountEntity);
 
         armResponseFilesProcessSingleElement.processResponseFilesFor(1);
 
@@ -502,8 +488,6 @@ class ArmResponseFilesProcessSingleElementImplTest {
         String invalidFileJson = TestUtils.getContentsFromFile(invalidLineJsonFile);
         BinaryData invalidLineFileBinaryData = BinaryData.fromString(invalidFileJson);
         when(armDataManagementApi.getBlobData(invalidLineFileFilename)).thenReturn(invalidLineFileBinaryData);
-
-        when(userIdentity.getUserAccount()).thenReturn(userAccountEntity);
 
         armResponseFilesProcessSingleElement.processResponseFilesFor(1);
 
@@ -551,8 +535,6 @@ class ArmResponseFilesProcessSingleElementImplTest {
         when(armDataManagementApi.getBlobData(invalidLineFileFilename)).thenReturn(invalidLineFileBinaryData);
         when(fileOperationService.saveBinaryDataToSpecifiedWorkspace(any(BinaryData.class), anyString(), anyString(), anyBoolean()))
             .thenReturn(Path.of("Tests/arm/component/ArmResponseFilesProcessSingleElement/nosuchpath"));
-
-        when(userIdentity.getUserAccount()).thenReturn(userAccountEntity);
 
         when(armDataManagementApi.deleteBlobData(invalidLineFileFilename)).thenReturn(false);
         when(armDataManagementApi.deleteBlobData(failedUploadFileFilename)).thenReturn(true);
@@ -606,8 +588,6 @@ class ArmResponseFilesProcessSingleElementImplTest {
         when(armDataManagementApi.getBlobData(invalidLineFileFilename)).thenReturn(invalidLineFileBinaryData);
         when(fileOperationService.saveBinaryDataToSpecifiedWorkspace(any(BinaryData.class), anyString(), anyString(), anyBoolean()))
             .thenThrow(new IOException());
-
-        when(userIdentity.getUserAccount()).thenReturn(userAccountEntity);
 
         when(armDataManagementApi.deleteBlobData(invalidLineFileFilename)).thenReturn(false);
         when(armDataManagementApi.deleteBlobData(failedUploadFileFilename)).thenReturn(true);
@@ -666,8 +646,6 @@ class ArmResponseFilesProcessSingleElementImplTest {
         when(armDataManagementApi.deleteBlobData(failedUploadFileFilename)).thenReturn(true);
         when(armDataManagementApi.deleteBlobData(responseBlobFilename)).thenReturn(true);
 
-        when(userIdentity.getUserAccount()).thenReturn(userAccountEntity);
-
         armResponseFilesProcessSingleElement.processResponseFilesFor(1);
 
         assertEquals(objectRecordStatusArmResponseProcessingFailed, externalObjectDirectoryArmResponseProcessing.getStatus());
@@ -722,8 +700,6 @@ class ArmResponseFilesProcessSingleElementImplTest {
         when(armDataManagementApi.deleteBlobData(invalidLineFileFilename)).thenReturn(true);
         when(armDataManagementApi.deleteBlobData(failedUploadFileFilename)).thenReturn(true);
         when(armDataManagementApi.deleteBlobData(responseBlobFilename)).thenReturn(true);
-
-        when(userIdentity.getUserAccount()).thenReturn(userAccountEntity);
 
         armResponseFilesProcessSingleElement.processResponseFilesFor(1);
 
@@ -780,8 +756,6 @@ class ArmResponseFilesProcessSingleElementImplTest {
         when(armDataManagementApi.deleteBlobData(failedUploadFileFilename)).thenReturn(true);
         when(armDataManagementApi.deleteBlobData(responseBlobFilename)).thenReturn(true);
 
-        when(userIdentity.getUserAccount()).thenReturn(userAccountEntity);
-
         armResponseFilesProcessSingleElement.processResponseFilesFor(1);
 
         verify(externalObjectDirectoryRepository).saveAndFlush(externalObjectDirectoryEntityCaptor.capture());
@@ -826,8 +800,6 @@ class ArmResponseFilesProcessSingleElementImplTest {
         when(armDataManagementApi.getBlobData(failedUploadFileFilename)).thenThrow(new AzureException());
 
         when(armDataManagementApi.getBlobData(invalidLineFileFilename)).thenThrow(new AzureException());
-
-        when(userIdentity.getUserAccount()).thenReturn(userAccountEntity);
 
         armResponseFilesProcessSingleElement.processResponseFilesFor(1);
 
@@ -881,8 +853,6 @@ class ArmResponseFilesProcessSingleElementImplTest {
         when(armDataManagementApi.deleteBlobData(invalidLineFileFilename)).thenReturn(true);
         when(armDataManagementApi.deleteBlobData(failedUploadFileFilename)).thenReturn(true);
         when(armDataManagementApi.deleteBlobData(responseBlobFilename)).thenReturn(true);
-
-        when(userIdentity.getUserAccount()).thenReturn(userAccountEntity);
 
         armResponseFilesProcessSingleElement.processResponseFilesFor(1);
 
@@ -939,8 +909,6 @@ class ArmResponseFilesProcessSingleElementImplTest {
         when(armDataManagementApi.deleteBlobData(invalidLineFileFilename)).thenReturn(true);
         when(armDataManagementApi.deleteBlobData(createRecordFileFilename)).thenReturn(true);
         when(armDataManagementApi.deleteBlobData(responseBlobFilename)).thenReturn(true);
-
-        when(userIdentity.getUserAccount()).thenReturn(userAccountEntity);
 
         armResponseFilesProcessSingleElement.processResponseFilesFor(1);
 
@@ -1011,8 +979,6 @@ class ArmResponseFilesProcessSingleElementImplTest {
             .thenReturn(createRecordPath)
             .thenReturn(uploadFilePath);
 
-        when(userIdentity.getUserAccount()).thenReturn(userAccountEntity);
-
         armResponseFilesProcessSingleElement.processResponseFilesFor(1);
 
         verify(externalObjectDirectoryRepository).saveAndFlush(externalObjectDirectoryEntityCaptor.capture());
@@ -1079,8 +1045,6 @@ class ArmResponseFilesProcessSingleElementImplTest {
         when(armDataManagementApi.deleteBlobData(createRecordFileFilename)).thenReturn(true);
         when(armDataManagementApi.deleteBlobData(uploadFileFilename)).thenReturn(true);
         when(armDataManagementApi.deleteBlobData(responseBlobFilename)).thenReturn(true);
-
-        when(userIdentity.getUserAccount()).thenReturn(userAccountEntity);
 
         armResponseFilesProcessSingleElement.processResponseFilesFor(1);
 

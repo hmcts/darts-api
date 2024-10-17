@@ -150,10 +150,6 @@ public class OutboundFileZipGeneratorHelperImpl implements OutboundFileZipGenera
     @Override
     public Path generateViqFile(AudioFileInfo audioFileInfo, Path viqOutputFile) {
 
-        if (!audioFileInfo.isTrimmed()) {
-            return audioFileInfo.getPath();
-        }
-
         ViqHeader viqHeader = new ViqHeader(audioFileInfo.getStartTime());
 
         try {
