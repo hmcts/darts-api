@@ -107,6 +107,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.OffsetDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -737,8 +738,20 @@ public class DartsDatabaseStub {
     }
 
     private void saveSingleEventForHearing(HearingEntity hearing, EventEntity event) {
-        event.setHearingEntities(List.of(hearingRepository.getReferenceById(hearing.getId())));
-        dartsDatabaseSaveStub.save(event);
+        if (event.getHearingEntities().isEmpty()) {
+            event.setHearingEntities(List.of(hearingRepository.getReferenceById(hearing.getId())));
+            dartsDatabaseSaveStub.save(event);
+        } else {
+            List<HearingEntity> hearingEntities = new ArrayList<>();
+            hearingEntities.addAll(event.getHearingEntities());
+            boolean alreadyExists = hearingEntities.stream().anyMatch(hearingEntity -> hearingEntity.getId().equals(hearing.getId()));
+            if (!alreadyExists) {
+                hearingEntities.add(hearingRepository.getReferenceById(hearing.getId()));
+            }
+
+            event.setHearingEntities(hearingEntities);
+            dartsDatabaseSaveStub.save(event);
+        }
     }
 
     public EventEntity addHandlerToEvent(EventEntity event, int handlerId) {
