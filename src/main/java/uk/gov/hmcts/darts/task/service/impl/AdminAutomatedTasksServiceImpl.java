@@ -81,9 +81,15 @@ public class AdminAutomatedTasksServiceImpl implements AdminAutomatedTaskService
     public DetailedAutomatedTask updateAutomatedTask(Integer taskId, AutomatedTaskPatch automatedTaskPatch) {
         var automatedTask = getAutomatedTaskEntityById(taskId);
 
-        automatedTask.setTaskEnabled(automatedTaskPatch.getIsActive());
+        if (automatedTaskPatch.getIsActive() != null) {
+            automatedTask.setTaskEnabled(automatedTaskPatch.getIsActive());
+            auditApi.record(ENABLE_DISABLE_JOB);
+        }
 
-        auditApi.record(ENABLE_DISABLE_JOB);
+        if (automatedTaskPatch.getBatchSize() != null) {
+            automatedTask.setBatchSize(automatedTaskPatch.getBatchSize());
+            log.info("Batch size for {} updated to {}", automatedTask.getTaskName(), automatedTaskPatch.getBatchSize());
+        }
 
         var updatedTask = automatedTaskRepository.save(automatedTask);
 
