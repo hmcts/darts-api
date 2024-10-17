@@ -12,7 +12,6 @@ import uk.gov.hmcts.darts.transcriptions.model.TranscriptionSearchResult;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.util.List;
-import java.util.Optional;
 
 @Repository
 public interface TranscriptionRepository extends RevisionRepository<TranscriptionEntity, Integer, Long>, JpaRepository<TranscriptionEntity, Integer> {
@@ -182,14 +181,4 @@ public interface TranscriptionRepository extends RevisionRepository<Transcriptio
         AND ((cast(:onOrAfterCreatedDate as TIMESTAMP)) IS NULL OR trans.createdDateTime >= :onOrAfterCreatedDate)
         """)
     List<TranscriptionEntity> findTranscriptionForUserOnOrAfterDate(Integer userId, OffsetDateTime onOrAfterCreatedDate);
-
-
-    @Query("""
-        SELECT t
-        FROM TranscriptionEntity t
-        WHERE t.id = :id
-        AND t.isDeleted = false
-        """)
-    @Override
-    Optional<TranscriptionEntity> findById(Integer id);
 }

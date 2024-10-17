@@ -10,7 +10,6 @@ import uk.gov.hmcts.darts.transcriptions.model.TranscriptionDocumentResult;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.util.List;
-import java.util.Optional;
 
 @Repository
 public interface TranscriptionDocumentRepository extends JpaRepository<TranscriptionDocumentEntity, Integer>,
@@ -68,13 +67,4 @@ public interface TranscriptionDocumentRepository extends JpaRepository<Transcrip
                WHERE ae.markedForManualDeletion = false AND hr.markedForDeletion = true
         """)
     List<TranscriptionDocumentEntity> getMarkedForDeletion();
-
-    @Query("""
-        SELECT t
-        FROM TranscriptionDocumentEntity t
-        WHERE t.id = :id
-        AND t.isDeleted = false
-        """)
-    @Override
-    Optional<TranscriptionDocumentEntity> findById(Integer id);
 }

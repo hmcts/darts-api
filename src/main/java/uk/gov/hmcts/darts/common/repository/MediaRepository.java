@@ -84,14 +84,4 @@ public interface MediaRepository extends JpaRepository<MediaEntity, Integer>,
         """)
     List<MediaEntity> findMediaByDetails(List<Integer> hearingIds, OffsetDateTime startAt,
                                          OffsetDateTime endAt);
-
-    @Query("""
-        SELECT m
-        FROM MediaEntity m
-        WHERE m.id = :id
-        AND m.isDeleted = false
-        """)
-    @Override
-    Optional<MediaEntity> findById(Integer id);
-
 }
