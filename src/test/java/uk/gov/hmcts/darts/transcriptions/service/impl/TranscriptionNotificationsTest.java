@@ -72,7 +72,7 @@ class TranscriptionNotificationsTest {
         requester = new UserAccountEntity();
         requester.setEmailAddress("test.user@example.com");
         transcriptionEntity.setCreatedBy(requester);
-        Mockito.lenient().when(transcriptionEntity.getCreatedBy()).thenReturn(requester);
+        Mockito.lenient().when(transcriptionEntity.getRequestedBy()).thenReturn(requester);
         Mockito.lenient().when(transcriptionEntity.getIsManualTranscription()).thenReturn(true);
 
         courthouseEntity = new CourthouseEntity();
