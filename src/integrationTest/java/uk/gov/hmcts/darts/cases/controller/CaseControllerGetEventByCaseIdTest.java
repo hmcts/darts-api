@@ -114,7 +114,8 @@ class CaseControllerGetEventByCaseIdTest extends IntegrationBase {
         expectedJson = expectedJson.replace("<hearing-id>", hearingEntity.getId().toString());
         JSONAssert.assertEquals(expectedJson, actualJson, JSONCompareMode.NON_EXTENSIBLE);
 
-        // assert that we only ever got one event. The one that was associated to the first case hearing
+        // assert that we only ever got one event. The one that was associated to the first case hearing.
+        // Relates to verification of https://tools.hmcts.net/jira/browse/DMP-3967
         Assertions.assertEquals(1, eventEntityList.size());
     }
 

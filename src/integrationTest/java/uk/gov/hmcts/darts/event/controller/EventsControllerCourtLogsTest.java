@@ -176,7 +176,8 @@ class EventsControllerCourtLogsTest extends IntegrationBase {
         var event = createEventWith(LOG, "test", hearingEntity, createOffsetDateTime("2023-07-01T10:00:00"));
         dartsDatabase.save(event);
 
-        // generate a hearing that we do not expect to be returned
+        // generate a hearing that we do not expect to be returned. This test is to validate that we only return the applicable hearings.
+        // // Relates to verification of https://tools.hmcts.net/jira/browse/DMP-3967
         HearingEntity hearingEntityNotToBeReturned = dartsDatabase.givenTheDatabaseContainsCourtCaseWithHearingAndCourthouseWithRoom(
             "casenumbernotreturned",
             SOME_COURTHOUSE,
