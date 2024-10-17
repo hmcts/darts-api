@@ -79,8 +79,10 @@ public class UserIdentityImpl implements UserIdentity {
     @Override
     public UserAccountEntity getUserAccount() {
         UserAccountEntity entity = null;
-        if (getJwt().isPresent()) {
-            entity = getUserAccount(getJwt().get());
+        Optional<Jwt> jwt = getJwt();
+
+        if (jwt.isPresent()) {
+            entity = getUserAccount(jwt.get());
         }
 
         if (isNull(entity)) {
