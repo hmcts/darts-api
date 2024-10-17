@@ -12,6 +12,7 @@ import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.annotations.SQLRestriction;
 import uk.gov.hmcts.darts.common.entity.base.CreatedModifiedBaseEntity;
 import uk.gov.hmcts.darts.task.runner.SoftDelete;
 
@@ -21,6 +22,7 @@ import java.time.OffsetDateTime;
 @Table(name = CaseDocumentEntity.TABLE_NAME)
 @Getter
 @Setter
+@SQLRestriction("is_deleted = false")
 public class CaseDocumentEntity extends CreatedModifiedBaseEntity
     implements ConfidenceAware, SoftDelete {
 
