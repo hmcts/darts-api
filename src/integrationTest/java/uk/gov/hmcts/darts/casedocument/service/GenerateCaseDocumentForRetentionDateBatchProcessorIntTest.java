@@ -20,6 +20,7 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.when;
 
 class GenerateCaseDocumentForRetentionDateBatchProcessorIntTest extends IntegrationBase {
@@ -80,12 +81,18 @@ class GenerateCaseDocumentForRetentionDateBatchProcessorIntTest extends Integrat
         generateCaseDocumentForRetentionDateBatchProcessor.processGenerateCaseDocumentForRetentionDate(2);
 
         // then
-        CourtCaseEntity courtCaseEntity1 = dartsDatabase.getCaseRepository().getReferenceById(courtCaseEntityWithNoCaseDocuments.getId());
+        CourtCaseEntity courtCaseEntity1 = dartsDatabase.getCaseRepository().findById(courtCaseEntityWithNoCaseDocuments.getId()).get();
+        assertTrue(courtCaseEntity1.isRetentionUpdated());
+        assertEquals(0, courtCaseEntity1.getRetentionRetries());
+
         List<CaseDocumentEntity> caseDocumentEntities1 =
             dartsDatabase.getCaseDocumentStub().getCaseDocumentRepository().findByCourtCase(courtCaseEntity1);
         assertEquals(1, caseDocumentEntities1.size());
 
-        CourtCaseEntity courtCaseEntity2 = dartsDatabase.getCaseRepository().getReferenceById(courtCaseEntityWithCaseDocument.getId());
+        CourtCaseEntity courtCaseEntity2 = dartsDatabase.getCaseRepository().findById(courtCaseEntityWithCaseDocument.getId()).get();
+        assertTrue(courtCaseEntity2.isRetentionUpdated());
+        assertEquals(0, courtCaseEntity2.getRetentionRetries());
+
         List<CaseDocumentEntity> caseDocumentEntities2 =
             dartsDatabase.getCaseDocumentStub().getCaseDocumentRepository().findByCourtCase(courtCaseEntity2);
         assertEquals(2, caseDocumentEntities2.size());
