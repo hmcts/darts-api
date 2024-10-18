@@ -21,6 +21,7 @@ import uk.gov.hmcts.darts.common.repository.MediaRepository;
 import uk.gov.hmcts.darts.common.repository.ObjectAdminActionRepository;
 import uk.gov.hmcts.darts.common.repository.TranscriptionDocumentRepository;
 import uk.gov.hmcts.darts.log.api.LogApi;
+import uk.gov.hmcts.darts.test.common.TestUtils;
 
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
@@ -28,6 +29,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
@@ -100,6 +102,15 @@ class ManualDeletionProcessorImplTest {
         verify(logApi, times(1)).transcriptionDeleted(TRANSCRIPTION_ID);
         verify(userIdentity, times(1)).getUserAccount();
 
+        MediaEntity media = mediaAction.getMedia();
+        assertThat(media.isDeleted()).isTrue();
+        assertThat(media.getDeletedBy()).isEqualTo(userAccount);
+        assertThat(media.getDeletedTs()).isCloseTo(OffsetDateTime.now(), TestUtils.TIME_TOLERANCE);
+
+        TranscriptionDocumentEntity transcriptionDocument = transcriptionAction.getTranscriptionDocument();
+        assertThat(transcriptionDocument.isDeleted()).isTrue();
+        assertThat(transcriptionDocument.getDeletedBy()).isEqualTo(userAccount);
+        assertThat(transcriptionDocument.getDeletedTs()).isCloseTo(OffsetDateTime.now(), TestUtils.TIME_TOLERANCE);
         verify(mediaAction.getMedia(), times(1)).markAsDeleted(userAccount);
         verify(transcriptionAction.getTranscriptionDocument(), times(1)).markAsDeleted(userAccount);
     }
