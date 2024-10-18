@@ -5,7 +5,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -28,7 +27,6 @@ import uk.gov.hmcts.darts.audiorequests.model.SearchTransformedMediaRequest;
 import uk.gov.hmcts.darts.audiorequests.model.SearchTransformedMediaResponse;
 import uk.gov.hmcts.darts.authorisation.annotation.Authorisation;
 import uk.gov.hmcts.darts.common.datamanagement.component.impl.DownloadResponseMetaData;
-import uk.gov.hmcts.darts.common.datamanagement.component.impl.FileBasedDownloadResponseMetaData;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.log.api.LogApi;
 
@@ -77,14 +75,15 @@ public class AudioRequestsController implements AudioRequestsApi {
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
+    @SneakyThrows
     @Override
     @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
     @Authorisation(contextId = TRANSFORMED_MEDIA_ID,
         securityRoles = {TRANSCRIBER},
         globalAccessSecurityRoles = {SUPER_ADMIN, SUPER_USER, DARTS})
     public ResponseEntity<Resource> download(Integer transformedMediaId) {
-        FileBasedDownloadResponseMetaData downloadResponseMetadata = (FileBasedDownloadResponseMetaData) mediaRequestService.download(transformedMediaId);
-        return ResponseEntity.ok().body(new FileSystemResource(downloadResponseMetadata.getFileToBeDownloadedTo()));
+        DownloadResponseMetaData downloadResponseMetadata = mediaRequestService.download(transformedMediaId);
+        return ResponseEntity.ok().body(downloadResponseMetadata.getResource());
     }
 
     @Override
