@@ -26,6 +26,7 @@ import uk.gov.hmcts.darts.common.entity.TranscriptionUrgencyEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionWorkflowEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.enums.SecurityRoleEnum;
+import uk.gov.hmcts.darts.common.exception.CommonApiError;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.common.repository.TranscriptionCommentRepository;
 import uk.gov.hmcts.darts.common.repository.TranscriptionRepository;
@@ -609,7 +610,7 @@ class TranscriptionServiceImplTest {
         updateManualDeletion(false);
         DartsApiException dartsApiException = assertThrows(
             DartsApiException.class, () -> transcriptionService.adminGetTranscriptionDocumentsMarkedForDeletion());
-        assertThat(dartsApiException.getError()).isEqualTo(DartsApiException.DartsApiErrorCommon.FEATURE_FLAG_NOT_ENABLED);
+        assertThat(dartsApiException.getError()).isEqualTo(CommonApiError.FEATURE_FLAG_NOT_ENABLED);
     }
 
     private TranscriptionRequestDetails createTranscriptionRequestDetails(Integer hearingId,

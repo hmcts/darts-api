@@ -12,6 +12,7 @@ import uk.gov.hmcts.darts.audio.model.AdminActionRequest;
 import uk.gov.hmcts.darts.audio.model.MediaHideRequest;
 import uk.gov.hmcts.darts.common.entity.ObjectAdminActionEntity;
 import uk.gov.hmcts.darts.common.entity.ObjectHiddenReasonEntity;
+import uk.gov.hmcts.darts.common.exception.CommonApiError;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.common.repository.ObjectAdminActionRepository;
 import uk.gov.hmcts.darts.common.repository.ObjectHiddenReasonRepository;
@@ -213,7 +214,7 @@ class MediaHideOrShowValidatorTest {
 
         DartsApiException exception
             = Assertions.assertThrows(DartsApiException.class, () -> mediaHideOrShowValidator.validate(mediaHideRequestIdRequest));
-        Assertions.assertEquals(DartsApiException.DartsApiErrorCommon.FEATURE_FLAG_NOT_ENABLED, exception.getError());
+        Assertions.assertEquals(CommonApiError.FEATURE_FLAG_NOT_ENABLED, exception.getError());
 
         Mockito.verify(mediaIdValidator, times(1)).validate(mediaId);
     }
