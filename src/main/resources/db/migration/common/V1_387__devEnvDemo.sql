@@ -1,0 +1,3 @@
+CREATE TABLE IF NOT EXISTS dev_env_demo (
+    id INTEGER NOT NULL
+);
