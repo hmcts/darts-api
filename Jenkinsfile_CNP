@@ -52,7 +52,9 @@ def secrets = [
         secret('api-POSTGRES-PASS', 'STAGING_DB_PASS'),
         secret('api-POSTGRES-PORT', 'STAGING_DB_PORT'),
         secret('api-POSTGRES-SCHEMA', 'STAGING_DB_SCHEMA'),
-        secret('api-POSTGRES-DATABASE', 'STAGING_DB_DATABASE')
+        secret('api-POSTGRES-DATABASE', 'STAGING_DB_DATABASE'),
+        // secret for GitHub CLI
+        secret('GithubApiToken', 'GITHUB_API_TOKEN')
     ],
 ]
 
@@ -148,7 +150,7 @@ withPipeline(type, product, component) {
         sh("./gradlew --no-daemon --init-script init.gradle assemble")
     }
 
-    afterAlways('build') {
+    before('build') {
         sh("./bin/ci/pr-labels.sh")
     }
 
