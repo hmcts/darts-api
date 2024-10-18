@@ -128,7 +128,6 @@ public class DetsToArmBatchProcessResponseFilesImpl extends AbstractArmBatchProc
     }
 
     private void updateOsrResponseReceivedAttributes(ObjectStateRecordEntity osr) {
-        //tested
         osr.setFlagRspnRecvdFromArml(true);
         osr.setDateRspnRecvdFromArml(timeHelper.currentOffsetDateTime());
         osrRepository.save(osr);
@@ -154,7 +153,7 @@ public class DetsToArmBatchProcessResponseFilesImpl extends AbstractArmBatchProc
                 updateOsrIngestStatusToFailure(osr, errorMessage);
             }
         } else {
-            String errorMessage = String.format("Unable to delete DETS blob because no DETS EOD for ARM EDO %s found or more than one found", armEod.getId());
+            String errorMessage = String.format("Unable to delete DETS blob because either no DETS EOD for ARM EDO %s found or more than one DETS EOD found", armEod.getId());
             log.error(errorMessage);
             updateOsrIngestStatusToFailure(osr, errorMessage);
         }
