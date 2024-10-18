@@ -81,6 +81,7 @@ public class ArmResponseFilesProcessSingleElementImpl implements ArmResponseFile
     @PostConstruct
     public void initialisePreloadedObjects() {
         storedStatus = objectRecordStatusRepository.findById(STORED.getId()).orElseThrow();
+        armRpoPendingStatus = objectRecordStatusRepository.findById(ARM_RPO_PENDING.getId()).orElseThrow();
         armDropZoneStatus = objectRecordStatusRepository.findById(ARM_DROP_ZONE.getId()).orElseThrow();
         armProcessingResponseFilesStatus = objectRecordStatusRepository.findById(ARM_PROCESSING_RESPONSE_FILES.getId()).orElseThrow();
         armResponseManifestFailedStatus = objectRecordStatusRepository.findById(ARM_RESPONSE_MANIFEST_FAILED.getId()).orElseThrow();
