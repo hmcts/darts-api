@@ -39,7 +39,7 @@ import static uk.gov.hmcts.darts.test.common.TestUtils.getFile;
 @Component
 @Slf4j
 @RequiredArgsConstructor
-@Profile("intTest")
+@Profile("intTest && !blobTest")
 @Deprecated
 public class DataManagementServiceStubImpl implements DataManagementService {
 

@@ -42,7 +42,7 @@ import static org.springframework.http.HttpStatus.valueOf;
 
 @Service
 @Slf4j
-@Profile("!intTest")
+@Profile("!intTest| || blobTest")
 @RequiredArgsConstructor
 @SuppressWarnings("checkstyle:SummaryJavadoc")
 public class DataManagementServiceImpl implements DataManagementService {
@@ -244,4 +244,5 @@ public class DataManagementServiceImpl implements DataManagementService {
             return containerSasUrl.replace(containerName, containerName + "/" + location);
         }
     }
+
 }
