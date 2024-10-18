@@ -14,6 +14,7 @@ import java.net.URI;
 
 import static org.junit.jupiter.params.provider.EnumSource.Mode;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.SUPER_ADMIN;
 
@@ -34,9 +35,21 @@ class AdminGetAutomatedTasksByIdTest extends IntegrationBase {
         given.anAuthenticatedUserWithGlobalAccessAndRole(role);
 
         mockMvc.perform(
-                get(ENDPOINT + "/1"))
+                get(ENDPOINT + "/8"))
             .andExpect(status().isOk())
+            .andExpect(jsonPath("$.is_cron_editable").value(true))
+            .andExpect(jsonPath("$.batch_size").value(100_000))
+            .andExpect(jsonPath("$.created_at").isNotEmpty())
+            .andExpect(jsonPath("$.created_by").value(0))
+            .andExpect(jsonPath("$.last_modified_at").isNotEmpty())
+            .andExpect(jsonPath("$.last_modified_by").value(0))
+            .andExpect(jsonPath("$.id").value(8))
+            .andExpect(jsonPath("$.name").value("UnstructuredToArmDataStore"))
+            .andExpect(jsonPath("$.description").value("Move files from Unstructured to ARM data store"))
+            .andExpect(jsonPath("$.cron_expression").value("0 7 * * * *"))
+            .andExpect(jsonPath("$.is_active").value(false))
             .andReturn();
+
     }
 
     @ParameterizedTest

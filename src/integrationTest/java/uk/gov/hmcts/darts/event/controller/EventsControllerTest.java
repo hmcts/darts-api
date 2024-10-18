@@ -174,7 +174,7 @@ class EventsControllerTest extends IntegrationBase {
             .contentType(MediaType.APPLICATION_JSON_VALUE)
             .content("{\"eve_ids\":[" + event.getId() + "]}");
 
-        mockMvc.perform(requestBuilder).andExpect(status().isNoContent());
+        mockMvc.perform(requestBuilder).andExpect(status().isOk());
 
         EventEntity editedEventEntity = dartsDatabaseStub.getEventRepository().findById(event.getId()).orElseThrow();
         assertThat(editedEventEntity.getEventText()).matches(UUID_REGEX);
@@ -202,7 +202,7 @@ class EventsControllerTest extends IntegrationBase {
             .contentType(MediaType.APPLICATION_JSON_VALUE)
             .content("{\"eve_ids\":[" + event.getId() + "," + event2.getId() + "]}");
 
-        mockMvc.perform(requestBuilder).andExpect(status().isNoContent());
+        mockMvc.perform(requestBuilder).andExpect(status().isOk());
 
         EventEntity editedEventEntity = dartsDatabaseStub.getEventRepository().findById(event.getId()).orElseThrow();
         assertThat(editedEventEntity.getEventText()).matches(UUID_REGEX);
@@ -219,6 +219,7 @@ class EventsControllerTest extends IntegrationBase {
         assertFalse(
             LogUtil.getMemoryLogger()
                 .searchLogApiLogs(EventLoggerServiceImpl.manualObfuscationMessage(editedEventEntity2), Level.INFO).isEmpty());
+        assertThat(editedEventEntity2.getEventText()).isNotEqualTo(editedEventEntity.getEventText());
     }
 
     @Test
@@ -250,5 +251,20 @@ class EventsControllerTest extends IntegrationBase {
         assertNotNull(caseExpiredAuditEntries.get(0).getLastModifiedDateTime());
         Assertions.assertEquals(caseExpiredAuditEntries.get(0).getUser().getId(), eventEntity.getLastModifiedBy().getId());
         assertNull(caseExpiredAuditEntries.get(0).getCourtCase());
+    }
+
+    @ParameterizedTest(name = "User with role {0} should not be able to obfuscate events")
+    @EnumSource(value = SecurityRoleEnum.class, names = {"SUPER_ADMIN"}, mode = EnumSource.Mode.EXCLUDE)
+    void adminObfuscateEveByIdsNotSuperAdmin(SecurityRoleEnum securityRoleEnum) throws Exception {
+        given.anAuthenticatedUserWithGlobalAccessAndRole(securityRoleEnum);
+        MockHttpServletRequestBuilder requestBuilder = post("/admin/events/obfuscate")
+            .contentType(MediaType.APPLICATION_JSON_VALUE)
+            .content("{\"eve_ids\":[1]}");
+
+        MvcResult response = mockMvc.perform(requestBuilder).andExpect(status().isForbidden())
+            .andReturn();
+
+        Assertions.assertEquals("{\"type\":\"AUTHORISATION_109\",\"title\":\"User is not authorised for this endpoint\",\"status\":403}",
+                                response.getResponse().getContentAsString());
     }
 }

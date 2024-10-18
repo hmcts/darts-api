@@ -29,10 +29,12 @@ import uk.gov.hmcts.darts.common.repository.CaseRepository;
 import uk.gov.hmcts.darts.common.repository.TransformedMediaRepository;
 import uk.gov.hmcts.darts.common.repository.TransientObjectDirectoryRepository;
 import uk.gov.hmcts.darts.common.service.DataAnonymisationService;
+import uk.gov.hmcts.darts.event.service.EventService;
 import uk.gov.hmcts.darts.log.api.LogApi;
 import uk.gov.hmcts.darts.task.runner.IsNamedEntity;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -52,6 +54,7 @@ public class DataAnonymisationServiceImpl implements DataAnonymisationService {
     private final TransformedMediaRepository transformedMediaRepository;
     private final TransientObjectDirectoryRepository transientObjectDirectoryRepository;
     private final LogApi logApi;
+    private final EventService eventService;
 
     @Override
     public void anonymizeCourtCaseEntity(UserAccountEntity userAccount, CourtCaseEntity courtCase) {
@@ -66,7 +69,6 @@ public class DataAnonymisationServiceImpl implements DataAnonymisationService {
         auditApi.record(AuditActivity.CASE_EXPIRED, userAccount, courtCase);
         anonymizeCreatedModifiedBaseEntity(userAccount, courtCase);
         caseRepository.save(courtCase);
-
 
         //Required for Dynatrace dashboards
         logApi.caseDeletedDueToExpiry(courtCase.getId(), courtCase.getCaseNumber());
@@ -91,10 +93,19 @@ public class DataAnonymisationServiceImpl implements DataAnonymisationService {
 
 
     @Override
+    @Transactional
+    public void obfuscateEventByIds(List<Integer> eveIds) {
+        eveIds.stream()
+            .map(eventService::getEventEntityById)
+            .distinct()
+            .forEach(this::anonymizeEvent);
+    }
+
+    @Override
     public void anonymizeEvent(EventEntity eventEntity) {
         anonymizeEventEntity(getUserAccount(), eventEntity);
-
-        auditApi.record(AuditActivity.MANUAL_OBFUSCATION, getUserAccount(), eventEntity.getId().toString());
+        eventService.saveEvent(eventEntity);
+        auditApi.record(AuditActivity.MANUAL_OBFUSCATION, userIdentity.getUserAccount(), eventEntity.getId().toString());
         logApi.manualObfuscation(eventEntity);
     }
 
@@ -102,7 +113,6 @@ public class DataAnonymisationServiceImpl implements DataAnonymisationService {
         eventEntity.setEventText(UUID.randomUUID().toString());
         eventEntity.setDataAnonymised(true);
         anonymizeCreatedModifiedBaseEntity(userAccount, eventEntity);
-
     }
 
     void anonymizeTranscriptionEntity(UserAccountEntity userAccount, TranscriptionEntity transcriptionEntity) {
