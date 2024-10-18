@@ -121,7 +121,8 @@ class TranscriptionNotificationsTest {
         approver1.setEmailAddress("approver1@example.com");
         var approver2 = new UserAccountEntity();
         approver2.setEmailAddress("approver2@example.com");
-        when(authorisationApi.getUsersWithRoleAtCourthouse(SecurityRoleEnum.APPROVER, courthouseEntity)).thenReturn(List.of(approver1, approver2));
+        when(authorisationApi.getUsersWithRoleAtCourthouse(SecurityRoleEnum.APPROVER, courthouseEntity, transcriptionEntity.getRequestedBy())).thenReturn(
+            List.of(approver1, approver2));
 
         transcriptionNotifications.notifyApprovers(transcriptionEntity);
 
