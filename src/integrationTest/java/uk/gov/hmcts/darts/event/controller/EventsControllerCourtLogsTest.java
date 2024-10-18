@@ -176,6 +176,15 @@ class EventsControllerCourtLogsTest extends IntegrationBase {
         var event = createEventWith(LOG, "test", hearingEntity, createOffsetDateTime("2023-07-01T10:00:00"));
         dartsDatabase.save(event);
 
+        // generate a hearing that we do not expect to be returned. This test is to validate that we only return the applicable hearings.
+        // // Relates to verification of https://tools.hmcts.net/jira/browse/DMP-3967
+        HearingEntity hearingEntityNotToBeReturned = dartsDatabase.givenTheDatabaseContainsCourtCaseWithHearingAndCourthouseWithRoom(
+            "casenumbernotreturned",
+            SOME_COURTHOUSE,
+            SOME_COURTROOM,
+            DateConverterUtil.toLocalDateTime(SOME_DATE_TIME));
+        dartsDatabase.saveEventsForHearing(hearingEntityNotToBeReturned, event);
+
         String courthouseName = hearingEntity.getCourtCase().getCourthouse().getDisplayName();
         String caseNumber = hearingEntity.getCourtCase().getCaseNumber();
 
@@ -188,7 +197,9 @@ class EventsControllerCourtLogsTest extends IntegrationBase {
             .queryParam(END_DATE_TIME, "2024-07-01T12:00:00+01")
             .contentType(MediaType.APPLICATION_JSON_VALUE);
 
+        // assert that the returned details only relates to the case number for the first hearing
         mockMvc.perform(requestBuilder).andExpect(MockMvcResultMatchers.status().isOk())
+            .andExpect(MockMvcResultMatchers.jsonPath("$", Matchers.hasSize(1)))
             .andExpect(MockMvcResultMatchers.jsonPath("$[0].courthouse", Matchers.is(courthouseName)))
             .andExpect(MockMvcResultMatchers.jsonPath("$[0].caseNumber", Matchers.is(caseNumber)))
             .andExpect(MockMvcResultMatchers.jsonPath("$[0].timestamp", Matchers.is(Matchers.notNullValue())))
