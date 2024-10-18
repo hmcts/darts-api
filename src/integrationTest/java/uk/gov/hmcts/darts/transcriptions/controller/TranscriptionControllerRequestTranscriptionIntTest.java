@@ -44,6 +44,7 @@ import static java.time.OffsetDateTime.now;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.when;
@@ -153,7 +154,10 @@ class TranscriptionControllerRequestTranscriptionIntTest extends IntegrationBase
             .containsExactly(TEST_COMMENT);
 
         List<NotificationEntity> notificationEntities = dartsDatabase.getNotificationRepository().findAll();
-        List<String> templateList = notificationEntities.stream().map(NotificationEntity::getEventId).toList();
+        List<String> templateList = notificationEntities.stream()
+            .peek(notificationEntity -> assertNotEquals(transcriptionEntity.getRequestedBy().getEmailAddress(), notificationEntity.getEmailAddress()))
+            .map(NotificationEntity::getEventId)
+            .toList();
         assertTrue(templateList.contains(COURT_MANAGER_APPROVE_TRANSCRIPT.toString()));
 
         assertAudit(1);

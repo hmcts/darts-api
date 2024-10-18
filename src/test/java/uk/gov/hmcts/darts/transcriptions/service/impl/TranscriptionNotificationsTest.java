@@ -121,7 +121,12 @@ class TranscriptionNotificationsTest {
         approver1.setEmailAddress("approver1@example.com");
         var approver2 = new UserAccountEntity();
         approver2.setEmailAddress("approver2@example.com");
-        when(authorisationApi.getUsersWithRoleAtCourthouse(SecurityRoleEnum.APPROVER, courthouseEntity)).thenReturn(List.of(approver1, approver2));
+        var approver3 = new UserAccountEntity();
+        approver3.setEmailAddress("approver3@example.com");
+        when(transcriptionEntity.getRequestedBy()).thenReturn(approver3);
+
+        when(authorisationApi.getUsersWithRoleAtCourthouse(SecurityRoleEnum.APPROVER, courthouseEntity, approver3)).thenReturn(
+            List.of(approver1, approver2));
 
         transcriptionNotifications.notifyApprovers(transcriptionEntity);
 
@@ -132,6 +137,10 @@ class TranscriptionNotificationsTest {
         assertEquals(actual.getUserAccountsToEmail().size(), 2);
         assertEquals(actual.getUserAccountsToEmail().get(0).getEmailAddress(), approver1.getEmailAddress());
         assertEquals(actual.getUserAccountsToEmail().get(1).getEmailAddress(), approver2.getEmailAddress());
+        verify(authorisationApi, times(1))
+            .getUsersWithRoleAtCourthouse(SecurityRoleEnum.APPROVER, courthouseEntity, approver3);
+        verify(transcriptionEntity, times(1))
+            .getRequestedBy();
     }
 
     @Test
