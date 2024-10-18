@@ -49,7 +49,6 @@ import uk.gov.hmcts.darts.task.runner.impl.AbstractLockableAutomatedTask;
 import uk.gov.hmcts.darts.task.runner.impl.ApplyRetentionCaseAssociatedObjectsAutomatedTask;
 import uk.gov.hmcts.darts.task.runner.impl.ArmRetentionEventDateCalculatorAutomatedTask;
 import uk.gov.hmcts.darts.task.runner.impl.CleanupArmResponseFilesAutomatedTask;
-import uk.gov.hmcts.darts.task.runner.impl.CleanupCurrentEventTask;
 import uk.gov.hmcts.darts.task.runner.impl.CloseOldCasesAutomatedTask;
 import uk.gov.hmcts.darts.task.runner.impl.CloseUnfinishedTranscriptionsAutomatedTask;
 import uk.gov.hmcts.darts.task.runner.impl.DailyListAutomatedTask;
@@ -1140,30 +1139,6 @@ class AutomatedTaskServiceTest extends IntegrationBase {
                 armRetentionEventDateProcessor,
                 logApi,
                 lockService
-            );
-
-        Set<ScheduledTask> scheduledTasks = scheduledTaskHolder.getScheduledTasks();
-        displayTasks(scheduledTasks);
-
-        boolean mayInterruptIfRunning = false;
-        boolean taskCancelled = automatedTaskService.cancelAutomatedTask(
-            automatedTask.getTaskName(),
-            mayInterruptIfRunning
-        );
-        assertTrue(taskCancelled);
-
-        log.info("About to reload task {}", automatedTask.getTaskName());
-        automatedTaskService.reloadTaskByName(automatedTask.getTaskName());
-
-    }
-
-    @Test
-    void givenConfiguredTaskCleanEventAutomatedTask() {
-        AutomatedTask automatedTask =
-            new CleanupCurrentEventTask(automatedTaskRepository,
-                                        automatedTaskConfigurationProperties,
-                                        taskProcessorFactory,
-                                        logApi, lockService
             );
 
         Set<ScheduledTask> scheduledTasks = scheduledTaskHolder.getScheduledTasks();
