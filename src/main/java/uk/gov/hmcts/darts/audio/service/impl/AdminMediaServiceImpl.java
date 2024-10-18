@@ -24,7 +24,6 @@ import uk.gov.hmcts.darts.audio.model.PostAdminMediasSearchResponseItem;
 import uk.gov.hmcts.darts.audio.service.AdminMediaService;
 import uk.gov.hmcts.darts.audio.validation.MediaApproveMarkForDeletionValidator;
 import uk.gov.hmcts.darts.audio.validation.SearchMediaValidator;
-import uk.gov.hmcts.darts.audit.api.AuditActivity;
 import uk.gov.hmcts.darts.audit.api.AuditApi;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
@@ -165,8 +164,6 @@ public class AdminMediaServiceImpl implements AdminMediaService {
         objectAdminActionEntity.setMarkedForManualDelBy(currentUser);
         objectAdminActionEntity.setMarkedForManualDelDateTime(currentTimeHelper.currentOffsetDateTime());
         objectAdminActionRepository.save(objectAdminActionEntity);
-
-        auditApi.record(AuditActivity.MANUAL_DELETION, currentUser, objectAdminActionEntity.getId().toString());
 
         return GetAdminMediaResponseMapper.mapMediaApproveMarkedForDeletionResponse(mediaEntity, objectAdminActionEntity);
     }

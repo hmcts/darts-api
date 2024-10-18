@@ -42,8 +42,7 @@ public enum AuditActivity {
     CHANGE_AUDIO_OWNERSHIP(33),
     HIDE_AUDIO(34),
     CASE_EXPIRED(35),
-    MANUAL_DELETION(36),
-    MANUAL_OBFUSCATION(37);
+    MANUAL_OBFUSCATION(36);
 
     private final Integer id;
 }
