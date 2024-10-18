@@ -49,7 +49,7 @@ import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_DROP_ZO
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_RESPONSE_CHECKSUM_VERIFICATION_FAILED;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_RESPONSE_MANIFEST_FAILED;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_RESPONSE_PROCESSING_FAILED;
-import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.STORED;
+import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_RPO_PENDING;
 import static uk.gov.hmcts.darts.test.common.data.PersistableFactory.getMediaTestData;
 
 
@@ -876,7 +876,7 @@ class ArmResponseFilesProcessorIntTest extends IntegrationBase {
 
         assertEquals(1, foundMediaList.size());
         ExternalObjectDirectoryEntity foundMedia = foundMediaList.get(0);
-        assertEquals(STORED.getId(), foundMedia.getStatus().getId());
+        assertEquals(ARM_RPO_PENDING.getId(), foundMedia.getStatus().getId());
         assertEquals("e7cde7c6-15d7-4c7e-a85d-a468c7ea72b9", foundMedia.getExternalFileId());
         assertEquals("1cf976c7-cedd-703f-ab70-01588bd56d50", foundMedia.getExternalRecordId());
         assertTrue(foundMedia.isResponseCleaned());
@@ -942,7 +942,7 @@ class ArmResponseFilesProcessorIntTest extends IntegrationBase {
 
         ExternalObjectDirectoryEntity foundAnnotationEod = dartsDatabase.getExternalObjectDirectoryRepository()
             .findById(armEod.getId()).orElseThrow();
-        assertEquals(STORED.getId(), foundAnnotationEod.getStatus().getId());
+        assertEquals(ARM_RPO_PENDING.getId(), foundAnnotationEod.getStatus().getId());
         assertEquals("e7cde7c6-15d7-4c7e-a85d-a468c7ea72b9", foundAnnotationEod.getExternalFileId());
         assertEquals("1cf976c7-cedd-703f-ab70-01588bd56d50", foundAnnotationEod.getExternalRecordId());
         assertTrue(foundAnnotationEod.isResponseCleaned());
@@ -1018,7 +1018,7 @@ class ArmResponseFilesProcessorIntTest extends IntegrationBase {
 
         ExternalObjectDirectoryEntity foundTranscriptionEod = dartsDatabase.getExternalObjectDirectoryRepository()
             .findById(armEod.getId()).orElseThrow();
-        assertEquals(STORED.getId(), foundTranscriptionEod.getStatus().getId());
+        assertEquals(ARM_RPO_PENDING.getId(), foundTranscriptionEod.getStatus().getId());
         assertEquals("e7cde7c6-15d7-4c7e-a85d-a468c7ea72b9", foundTranscriptionEod.getExternalFileId());
         assertEquals("1cf976c7-cedd-703f-ab70-01588bd56d50", foundTranscriptionEod.getExternalRecordId());
         assertTrue(foundTranscriptionEod.isResponseCleaned());

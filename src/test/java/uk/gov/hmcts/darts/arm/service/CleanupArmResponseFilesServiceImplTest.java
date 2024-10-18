@@ -58,6 +58,8 @@ class CleanupArmResponseFilesServiceImplTest {
     @Mock
     private ObjectRecordStatusEntity objectRecordStatusStored;
     @Mock
+    private ObjectRecordStatusEntity objectRecordStatusArmRpoPending;
+    @Mock
     private ObjectRecordStatusEntity objectRecordStatusArmResponseChecksumFailed;
     @Mock
     private ObjectRecordStatusEntity objectRecordStatusArmResponseProcessingFailed;
@@ -75,7 +77,6 @@ class CleanupArmResponseFilesServiceImplTest {
 
     @Captor
     private ArgumentCaptor<ExternalObjectDirectoryEntity> externalObjectDirectoryEntityCaptor;
-
 
     @BeforeEach
     void setUp() {
@@ -104,6 +105,7 @@ class CleanupArmResponseFilesServiceImplTest {
         when(objectRecordStatusRepository.getReferenceById(17)).thenReturn(objectRecordStatusArmResponseProcessingFailed);
         when(objectRecordStatusRepository.getReferenceById(18)).thenReturn(objectRecordStatusArmResponseChecksumFailed);
         when(objectRecordStatusRepository.getReferenceById(19)).thenReturn(objectRecordStatusArmResponseManifestFailed);
+        when(objectRecordStatusRepository.getReferenceById(21)).thenReturn(objectRecordStatusArmRpoPending);
 
         when(armDataManagementConfiguration.getResponseCleanupBufferDays()).thenReturn(0);
 
@@ -114,6 +116,7 @@ class CleanupArmResponseFilesServiceImplTest {
 
         when(externalObjectDirectoryRepository.findSingleArmResponseFiles(
             List.of(objectRecordStatusStored,
+                    objectRecordStatusArmRpoPending,
                     objectRecordStatusArmResponseManifestFailed,
                     objectRecordStatusArmResponseProcessingFailed,
                     objectRecordStatusArmResponseChecksumFailed),
@@ -151,6 +154,7 @@ class CleanupArmResponseFilesServiceImplTest {
         when(objectRecordStatusRepository.getReferenceById(17)).thenReturn(objectRecordStatusArmResponseProcessingFailed);
         when(objectRecordStatusRepository.getReferenceById(18)).thenReturn(objectRecordStatusArmResponseChecksumFailed);
         when(objectRecordStatusRepository.getReferenceById(19)).thenReturn(objectRecordStatusArmResponseManifestFailed);
+        when(objectRecordStatusRepository.getReferenceById(21)).thenReturn(objectRecordStatusArmRpoPending);
 
         when(armDataManagementConfiguration.getResponseCleanupBufferDays()).thenReturn(0);
 
@@ -161,6 +165,7 @@ class CleanupArmResponseFilesServiceImplTest {
 
         when(externalObjectDirectoryRepository.findSingleArmResponseFiles(
             List.of(objectRecordStatusStored,
+                    objectRecordStatusArmRpoPending,
                     objectRecordStatusArmResponseManifestFailed,
                     objectRecordStatusArmResponseProcessingFailed,
                     objectRecordStatusArmResponseChecksumFailed),
