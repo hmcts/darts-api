@@ -43,7 +43,8 @@ public class AuthorisationApiImpl implements AuthorisationApi {
     }
 
     @Override
-    public List<UserAccountEntity> getUsersWithRoleAtCourthouse(SecurityRoleEnum securityRole, CourthouseEntity courthouse, UserAccountEntity... excludingUsers) {
+    public List<UserAccountEntity> getUsersWithRoleAtCourthouse(SecurityRoleEnum securityRole, CourthouseEntity courthouse,
+                                                                UserAccountEntity... excludingUsers) {
         return authorisationService.getUsersWithRoleAtCourthouse(securityRole, courthouse, excludingUsers);
     }
 
