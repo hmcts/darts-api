@@ -155,8 +155,9 @@ class TranscriptionControllerRequestTranscriptionIntTest extends IntegrationBase
 
         List<NotificationEntity> notificationEntities = dartsDatabase.getNotificationRepository().findAll();
         List<String> templateList = notificationEntities.stream()
-            .peek(notificationEntity -> assertNotEquals(transcriptionEntity.getRequestedBy().getEmailAddress(), notificationEntity.getEmailAddress())).map(
-                NotificationEntity::getEventId).toList();
+            .peek(notificationEntity -> assertNotEquals(transcriptionEntity.getRequestedBy().getEmailAddress(), notificationEntity.getEmailAddress()))
+            .map(NotificationEntity::getEventId)
+            .toList();
         assertTrue(templateList.contains(COURT_MANAGER_APPROVE_TRANSCRIPT.toString()));
 
         assertAudit(1);
