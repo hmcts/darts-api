@@ -150,6 +150,10 @@ withPipeline(type, product, component) {
         sh("./gradlew --no-daemon --init-script init.gradle assemble")
     }
 
+    afterAlways('build') {
+        sh("./bin/ci/pr-labels.sh")
+    }
+
     afterSuccess('akschartsinstall') {
         onPR {
             // restore the PR DB from staging
