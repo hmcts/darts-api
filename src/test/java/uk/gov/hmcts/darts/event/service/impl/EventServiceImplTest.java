@@ -7,6 +7,7 @@ import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.darts.common.entity.EventEntity;
+import uk.gov.hmcts.darts.common.exception.CommonApiError;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.common.repository.EventRepository;
 import uk.gov.hmcts.darts.common.service.DataAnonymisationService;
@@ -54,7 +55,7 @@ class EventServiceImplTest {
 
         assertThatThrownBy(() -> eventService.getEventEntityById(1))
             .isInstanceOf(DartsApiException.class)
-            .hasFieldOrPropertyWithValue("error", DartsApiException.DartsApiErrorCommon.NOT_FOUND);
+            .hasFieldOrPropertyWithValue("error", CommonApiError.NOT_FOUND);
         verify(eventRepository, times(1)).findById(1);
     }
 

@@ -9,6 +9,7 @@ import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.darts.common.entity.ObjectAdminActionEntity;
 import uk.gov.hmcts.darts.common.entity.ObjectHiddenReasonEntity;
+import uk.gov.hmcts.darts.common.exception.CommonApiError;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.common.repository.ObjectAdminActionRepository;
 import uk.gov.hmcts.darts.common.repository.ObjectHiddenReasonRepository;
@@ -190,7 +191,7 @@ class TranscriptionDocumentHideOrShowValidatorTest {
 
         DartsApiException exception
             = Assertions.assertThrows(DartsApiException.class, () -> transcriptionDocumentHideOrShowValidator.validate(transcriptionDocumentEntityUserId));
-        Assertions.assertEquals(DartsApiException.DartsApiErrorCommon.FEATURE_FLAG_NOT_ENABLED, exception.getError());
+        Assertions.assertEquals(CommonApiError.FEATURE_FLAG_NOT_ENABLED, exception.getError());
 
         Mockito.verify(transcriptionDocumentIdValidator, times(1)).validate(documentId);
     }

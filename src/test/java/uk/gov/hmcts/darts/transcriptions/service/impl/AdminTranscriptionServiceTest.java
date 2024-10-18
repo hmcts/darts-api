@@ -16,6 +16,7 @@ import uk.gov.hmcts.darts.common.entity.ObjectHiddenReasonEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionDocumentEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
+import uk.gov.hmcts.darts.common.exception.CommonApiError;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.common.repository.ObjectAdminActionRepository;
 import uk.gov.hmcts.darts.common.repository.ObjectHiddenReasonRepository;
@@ -449,6 +450,6 @@ class AdminTranscriptionServiceTest {
         updateManualDeletion(false);
         DartsApiException dartsApiException = assertThrows(
             DartsApiException.class, () -> adminTranscriptionService.approveDeletionOfTranscriptionDocumentById(1));
-        assertThat(dartsApiException.getError()).isEqualTo(DartsApiException.DartsApiErrorCommon.FEATURE_FLAG_NOT_ENABLED);
+        assertThat(dartsApiException.getError()).isEqualTo(CommonApiError.FEATURE_FLAG_NOT_ENABLED);
     }
 }
