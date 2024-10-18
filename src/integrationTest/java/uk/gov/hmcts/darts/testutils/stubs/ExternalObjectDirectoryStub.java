@@ -342,6 +342,64 @@ public class ExternalObjectDirectoryStub {
     }
 
     @Transactional
+    public List<ExternalObjectDirectoryEntity> generateWithStatusAndAnnotationAndLocation(
+        ExternalLocationTypeEnum externalLocationTypeEnum, ObjectRecordStatusEnum objectRecordStatusEnum,
+        int numberOfObjectDirectory, Optional<OffsetDateTime> dateToSet)
+        throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
+
+        List<ExternalObjectDirectoryEntity> entityListResult = new ArrayList<>();
+
+        for (int i = 0; i < numberOfObjectDirectory; i++) {
+            var user = userAccountStub.getIntegrationTestUserAccountEntity();
+
+            AnnotationEntity annotationEntity = annotationStub.createAndSaveAnnotationEntityWith(user, "test annotation");
+            AnnotationDocumentEntity annotationDocumentEntity = annotationStub.createAndSaveAnnotationDocumentEntity(
+                userAccountStub, annotationEntity);
+
+            ExternalObjectDirectoryEntity externalObjectDirectory = createAndSaveEod(
+                annotationDocumentEntity, null, objectRecordStatusEnum, externalLocationTypeEnum, e -> {
+                });
+
+            if (dateToSet.isPresent()) {
+                dateConfigurer.setLastModifiedDate(externalObjectDirectory, dateToSet.get());
+            }
+
+            entityListResult.add(externalObjectDirectory);
+        }
+
+        return entityListResult;
+    }
+
+    @Transactional
+    public List<ExternalObjectDirectoryEntity> generateWithStatusAndTranscriptionAndLocation(
+        ExternalLocationTypeEnum externalLocationTypeEnum, ObjectRecordStatusEnum objectRecordStatusEnum,
+        int numberOfObjectDirectory, Optional<OffsetDateTime> dateToSet)
+        throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
+
+        List<ExternalObjectDirectoryEntity> entityListResult = new ArrayList<>();
+
+        for (int i = 0; i < numberOfObjectDirectory; i++) {
+            var user = userAccountStub.getIntegrationTestUserAccountEntity();
+
+            TranscriptionDocumentEntity transcriptionDocumentEntity
+                = transcriptionDocumentStub.createTranscriptionDocumentForTranscription(userAccountStub, dartsDatabaseComposable,
+                                                                                        transcriptionStubComposable, courthouseStubComposable, user);
+
+            ExternalObjectDirectoryEntity externalObjectDirectory = createAndSaveEod(
+                null, transcriptionDocumentEntity, objectRecordStatusEnum, externalLocationTypeEnum, e -> {
+                });
+
+            if (dateToSet.isPresent()) {
+                dateConfigurer.setLastModifiedDate(externalObjectDirectory, dateToSet.get());
+            }
+
+            entityListResult.add(externalObjectDirectory);
+        }
+
+        return entityListResult;
+    }
+
+    @Transactional
     public List<ExternalObjectDirectoryEntity> generateWithStatusAndMediaLocation(ExternalLocationTypeEnum externalLocationTypeEnum,
                                                                                   ObjectRecordStatusEnum objectRecordStatusEnum,
                                                                                   int numberOfObjectDirectory, Optional<OffsetDateTime> dateToSet)
