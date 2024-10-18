@@ -55,7 +55,7 @@ def secrets = [
         secret('api-POSTGRES-PORT', 'STAGING_DB_PORT'),
         secret('api-POSTGRES-SCHEMA', 'STAGING_DB_SCHEMA'),
         secret('api-POSTGRES-DATABASE', 'STAGING_DB_DATABASE'),
-        // secret for GitHub CLI
+        // secret for GitHub API
         secret('GithubApiToken', 'GITHUB_API_TOKEN')
     ],
 ]
@@ -150,6 +150,13 @@ withPipeline(type, product, component) {
 
     before('dbmigrate:ithc') {
         sh("./gradlew --no-daemon --init-script init.gradle assemble")
+    }
+
+    before('akschartsinstall') {
+        onPR {
+            // determine what to deploy on the dev env
+            sh("./bin/ci/pr-labels.sh")
+        }
     }
 
     afterSuccess('akschartsinstall') {

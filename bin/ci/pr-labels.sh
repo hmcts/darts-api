@@ -1,6 +1,7 @@
 #!/bin/bash
 set -e
 
+echo "env=${env}"
 echo "Using token: ***${GITHUB_API_TOKEN: -3}"
 echo "Using PR_NUMBER: $CHANGE_ID"
 
