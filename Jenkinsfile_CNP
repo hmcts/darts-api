@@ -11,51 +11,53 @@ def component = "api"
 def branchesToSync = ['demo', 'perftest', 'ithc']
 
 def secrets = [
-        'darts-${env}': [
-                secret('GovukNotifyTestApiKey', 'GOVUK_NOTIFY_API_KEY'),
-                secret('app-insights-connection-string', 'app-insights-connection-string'),
-                secret('AzureAdB2CTenantId', 'AAD_B2C_TENANT_ID'),
-                secret('AzureAdB2CClientId', 'AAD_B2C_CLIENT_ID'),
-                secret('AzureAdB2CClientSecret', 'AAD_B2C_CLIENT_SECRET'),
-                secret('AzureAdB2CFuncTestROPCUsername', 'FUNC_TEST_ROPC_USERNAME'),
-                secret('AzureAdB2CFuncTestROPCPassword', 'FUNC_TEST_ROPC_PASSWORD'),
-                secret('AzureAdB2CFuncTestROPCClientId', 'AAD_B2C_ROPC_CLIENT_ID'),
-                secret('AzureAdB2CFuncTestROPCClientSecret', 'AAD_B2C_ROPC_CLIENT_SECRET'),
-                secret('api-POSTGRES-SCHEMA', 'DARTS_API_DB_SCHEMA'),
-                secret('AzureStorageConnectionString', 'AZURE_STORAGE_CONNECTION_STRING'),
-                secret('AzureADTenantId', 'AAD_TENANT_ID'),
-                secret('AzureADClientId', 'AAD_CLIENT_ID'),
-                secret('AzureADClientSecret', 'AAD_CLIENT_SECRET'),
-                secret('AzureADTenantIdJustice', 'AAD_TENANT_ID_JUSTICE'),
-                secret('AzureADClientIdJustice', 'AAD_CLIENT_ID_JUSTICE'),
-                secret('AzureADClientSecretJustice', 'AAD_CLIENT_SECRET_JUSTICE'),
-                secret('XhibitUserName', 'XHIBIT_USER_NAME'),
-                secret('XhibitPassword', 'XHIBIT_PASSWORD'),
-                secret('CppUserName', 'CPP_USER_NAME'),
-                secret('CppPassword', 'CPP_PASSWORD'),
-                secret('DarPcUserName', 'DARPC_USER_NAME'),
-                secret('DarPcPassword', 'DARPC_PASSWORD'),
-                secret('DarMidTierUserName', 'DAR_MIDTIER_USER_NAME'),
-                secret('DarMidTierPassword', 'DAR_MIDTIER_PASSWORD'),
-                secret('AzureADFunctionalTestUsername', 'AZURE_AD_FUNCTIONAL_TEST_USERNAME'),
-                secret('AzureADFunctionalTestPassword', 'AZURE_AD_FUNCTIONAL_TEST_PASSWORD'),
-                secret('DartsSystemUserEmail', 'SYSTEM_USER_EMAIL'),
-                secret('AzureAdB2CFuncTestROPCGlobalUsername', 'AZURE_AD_FUNCTIONAL_TEST_GLOBAL_USERNAME'),
-                secret('AzureAdB2CFuncTestROPCGlobalPassword', 'AZURE_AD_FUNCTIONAL_TEST_GLOBAL_PASSWORD'),
-                secret('ARMSasEndpoint', 'ARM_SAS_ENDPOINT'),
-                secret('DETSSasURLEndpoint', 'DETS_SAS_URL_ENDPOINT'),
-                secret('DartsInboundStorageSasUrl', 'DARTS_INBOUND_STORAGE_SAS_URL'),
-                secret('DartsUnstructuredStorageSasUrl', 'DARTS_UNSTRUCTURED_STORAGE_SAS_URL'),
-                secret('ArmServiceEntitlement', 'ARM_SERVICE_ENTITLEMENT'),
-                secret('ArmStorageAccountName', 'ARM_STORAGE_ACCOUNT_NAME'),
-                // secrets for staging DB
-                secret('api-POSTGRES-HOST', 'STAGING_DB_HOST'),
-                secret('api-POSTGRES-USER', 'STAGING_DB_USER'),
-                secret('api-POSTGRES-PASS', 'STAGING_DB_PASS'),
-                secret('api-POSTGRES-PORT', 'STAGING_DB_PORT'),
-                secret('api-POSTGRES-SCHEMA', 'STAGING_DB_SCHEMA'),
-                secret('api-POSTGRES-DATABASE', 'STAGING_DB_DATABASE')
-        ],
+    'darts-${env}': [
+        secret('GovukNotifyTestApiKey', 'GOVUK_NOTIFY_API_KEY'),
+        secret('app-insights-connection-string', 'app-insights-connection-string'),
+        secret('AzureAdB2CTenantId', 'AAD_B2C_TENANT_ID'),
+        secret('AzureAdB2CClientId', 'AAD_B2C_CLIENT_ID'),
+        secret('AzureAdB2CClientSecret', 'AAD_B2C_CLIENT_SECRET'),
+        secret('AzureAdB2CFuncTestROPCUsername', 'FUNC_TEST_ROPC_USERNAME'),
+        secret('AzureAdB2CFuncTestROPCPassword', 'FUNC_TEST_ROPC_PASSWORD'),
+        secret('AzureAdB2CFuncTestROPCClientId', 'AAD_B2C_ROPC_CLIENT_ID'),
+        secret('AzureAdB2CFuncTestROPCClientSecret', 'AAD_B2C_ROPC_CLIENT_SECRET'),
+        secret('api-POSTGRES-SCHEMA', 'DARTS_API_DB_SCHEMA'),
+        secret('AzureStorageConnectionString', 'AZURE_STORAGE_CONNECTION_STRING'),
+        secret('AzureADTenantId', 'AAD_TENANT_ID'),
+        secret('AzureADClientId', 'AAD_CLIENT_ID'),
+        secret('AzureADClientSecret', 'AAD_CLIENT_SECRET'),
+        secret('AzureADTenantIdJustice', 'AAD_TENANT_ID_JUSTICE'),
+        secret('AzureADClientIdJustice', 'AAD_CLIENT_ID_JUSTICE'),
+        secret('AzureADClientSecretJustice', 'AAD_CLIENT_SECRET_JUSTICE'),
+        secret('XhibitUserName', 'XHIBIT_USER_NAME'),
+        secret('XhibitPassword', 'XHIBIT_PASSWORD'),
+        secret('CppUserName', 'CPP_USER_NAME'),
+        secret('CppPassword', 'CPP_PASSWORD'),
+        secret('DarPcUserName', 'DARPC_USER_NAME'),
+        secret('DarPcPassword', 'DARPC_PASSWORD'),
+        secret('DarMidTierUserName', 'DAR_MIDTIER_USER_NAME'),
+        secret('DarMidTierPassword', 'DAR_MIDTIER_PASSWORD'),
+        secret('AzureADFunctionalTestUsername', 'AZURE_AD_FUNCTIONAL_TEST_USERNAME'),
+        secret('AzureADFunctionalTestPassword', 'AZURE_AD_FUNCTIONAL_TEST_PASSWORD'),
+        secret('DartsSystemUserEmail', 'SYSTEM_USER_EMAIL'),
+        secret('AzureAdB2CFuncTestROPCGlobalUsername', 'AZURE_AD_FUNCTIONAL_TEST_GLOBAL_USERNAME'),
+        secret('AzureAdB2CFuncTestROPCGlobalPassword', 'AZURE_AD_FUNCTIONAL_TEST_GLOBAL_PASSWORD'),
+        secret('ARMSasEndpoint', 'ARM_SAS_ENDPOINT'),
+        secret('DETSSasURLEndpoint', 'DETS_SAS_URL_ENDPOINT'),
+        secret('DartsInboundStorageSasUrl', 'DARTS_INBOUND_STORAGE_SAS_URL'),
+        secret('DartsUnstructuredStorageSasUrl', 'DARTS_UNSTRUCTURED_STORAGE_SAS_URL'),
+        secret('ArmServiceEntitlement', 'ARM_SERVICE_ENTITLEMENT'),
+        secret('ArmStorageAccountName', 'ARM_STORAGE_ACCOUNT_NAME'),
+        // secrets for staging DB
+        secret('api-POSTGRES-HOST', 'STAGING_DB_HOST'),
+        secret('api-POSTGRES-USER', 'STAGING_DB_USER'),
+        secret('api-POSTGRES-PASS', 'STAGING_DB_PASS'),
+        secret('api-POSTGRES-PORT', 'STAGING_DB_PORT'),
+        secret('api-POSTGRES-SCHEMA', 'STAGING_DB_SCHEMA'),
+        secret('api-POSTGRES-DATABASE', 'STAGING_DB_DATABASE'),
+        // secret for GitHub CLI
+        secret('GithubApiToken', 'GITHUB_API_TOKEN')
+    ],
 ]
 
 static LinkedHashMap<String, Object> secret(String secretName, String envVar) {
@@ -80,57 +82,57 @@ withPipeline(type, product, component) {
         builder.gradle('jacocoTestReport')
 
         publishHTML target: [
-                allowMissing         : true,
-                alwaysLinkToLastBuild: true,
-                keepAll              : true,
-                reportDir            : "build/reports/checkstyle",
-                reportFiles          : "main.html",
-                reportName           : "Checkstyle Main Report"
+            allowMissing         : true,
+            alwaysLinkToLastBuild: true,
+            keepAll              : true,
+            reportDir            : "build/reports/checkstyle",
+            reportFiles          : "main.html",
+            reportName           : "Checkstyle Main Report"
         ]
 
         publishHTML target: [
-                allowMissing         : true,
-                alwaysLinkToLastBuild: true,
-                keepAll              : true,
-                reportDir            : "build/reports/checkstyle",
-                reportFiles          : "test.html",
-                reportName           : "Checkstyle Test Report"
+            allowMissing         : true,
+            alwaysLinkToLastBuild: true,
+            keepAll              : true,
+            reportDir            : "build/reports/checkstyle",
+            reportFiles          : "test.html",
+            reportName           : "Checkstyle Test Report"
         ]
 
         publishHTML target: [
-                allowMissing         : true,
-                alwaysLinkToLastBuild: true,
-                keepAll              : true,
-                reportDir            : "build/reports/checkstyle",
-                reportFiles          : "functionalTest.html",
-                reportName           : "Checkstyle Functional Test Report"
+            allowMissing         : true,
+            alwaysLinkToLastBuild: true,
+            keepAll              : true,
+            reportDir            : "build/reports/checkstyle",
+            reportFiles          : "functionalTest.html",
+            reportName           : "Checkstyle Functional Test Report"
         ]
 
         publishHTML target: [
-                allowMissing         : true,
-                alwaysLinkToLastBuild: true,
-                keepAll              : true,
-                reportDir            : "build/reports/checkstyle",
-                reportFiles          : "integrationTest.html",
-                reportName           : "Checkstyle Integration Test Report"
+            allowMissing         : true,
+            alwaysLinkToLastBuild: true,
+            keepAll              : true,
+            reportDir            : "build/reports/checkstyle",
+            reportFiles          : "integrationTest.html",
+            reportName           : "Checkstyle Integration Test Report"
         ]
 
         publishHTML target: [
-                allowMissing         : true,
-                alwaysLinkToLastBuild: true,
-                keepAll              : true,
-                reportDir            : "build/reports/tests/test",
-                reportFiles          : "index.html",
-                reportName           : "Unit Tests Report"
+            allowMissing         : true,
+            alwaysLinkToLastBuild: true,
+            keepAll              : true,
+            reportDir            : "build/reports/tests/test",
+            reportFiles          : "index.html",
+            reportName           : "Unit Tests Report"
         ]
 
         publishHTML target: [
-                allowMissing         : true,
-                alwaysLinkToLastBuild: true,
-                keepAll              : true,
-                reportDir            : "build/reports/pmd",
-                reportFiles          : "main.html",
-                reportName           : "PMD Report"
+            allowMissing         : true,
+            alwaysLinkToLastBuild: true,
+            keepAll              : true,
+            reportDir            : "build/reports/pmd",
+            reportFiles          : "main.html",
+            reportName           : "PMD Report"
         ]
     }
 
@@ -148,10 +150,6 @@ withPipeline(type, product, component) {
 
     before('dbmigrate:ithc') {
         sh("./gradlew --no-daemon --init-script init.gradle assemble")
-    }
-
-    afterAlways('build') {
-        sh("./bin/ci/pr-labels.sh")
     }
 
     afterSuccess('akschartsinstall') {
