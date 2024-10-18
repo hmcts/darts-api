@@ -49,7 +49,7 @@ public class CaseExpiryDeletionAutomatedTask
     @Override
     @Transactional
     public void runTask() {
-        caseRepository.findCasesToBeAnonymized(currentTimeHelper.currentOffsetDateTime(), Limit.of(getAutomatedTaskBatchSize()))
+        caseRepository.findCasesToBeAnonymised(currentTimeHelper.currentOffsetDateTime(), Limit.of(getAutomatedTaskBatchSize()))
             .forEach(courtCase -> {
                 log.info("Anonymising case with id: {} because the criteria for retention has been met.", courtCase.getId());
                 dataAnonymisationService.anonymizeCourtCaseEntity(courtCase);

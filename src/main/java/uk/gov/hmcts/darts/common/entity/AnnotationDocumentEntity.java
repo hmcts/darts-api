@@ -14,6 +14,7 @@ import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
 import uk.gov.hmcts.darts.common.entity.base.ModifiedBaseEntity;
+import uk.gov.hmcts.darts.task.runner.HasIntegerId;
 import uk.gov.hmcts.darts.task.runner.SoftDelete;
 
 import java.time.OffsetDateTime;
@@ -24,7 +25,7 @@ import java.util.List;
 @Getter
 @Table(name = "annotation_document")
 public class AnnotationDocumentEntity extends ModifiedBaseEntity
-    implements ConfidenceAware, SoftDelete {
+    implements ConfidenceAware, SoftDelete, HasIntegerId {
 
     @Id
     @Column(name = "ado_id")
