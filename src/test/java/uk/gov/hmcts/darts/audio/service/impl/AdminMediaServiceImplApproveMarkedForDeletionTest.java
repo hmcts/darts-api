@@ -85,7 +85,6 @@ class AdminMediaServiceImplApproveMarkedForDeletionTest {
         objectAdminAction.setMedia(mediaEntity);
         objectAdminAction.setMarkedForManualDeletion(false);
         objectAdminAction.setHiddenBy(hiddenByUserAccount);
-        objectAdminAction.setId(1);
         var hiddenReason = ObjectHiddenReasonTestData.otherDelete();
         objectAdminAction.setObjectHiddenReason(hiddenReason);
 

@@ -384,7 +384,6 @@ class AdminTranscriptionServiceTest {
             Integer documentId = 1;
             TranscriptionDocumentEntity documentEntity = new TranscriptionDocumentEntity();
             ObjectAdminActionEntity objectAdminActionEntity = new ObjectAdminActionEntity();
-            objectAdminActionEntity.setId(1);
             UserAccountEntity userAccount = mock(UserAccountEntity.class);
             AdminApproveDeletionResponse expectedResponse = mock(AdminApproveDeletionResponse.class);
 
