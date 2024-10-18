@@ -3,6 +3,7 @@
     "id": 3,
     "timestamp": "2024-07-01T12:00:00Z",
     "name": "TestName",
-    "text": "Event3"
+    "text": "Event3",
+    "is_data_anonymised": false
   }
 ]
