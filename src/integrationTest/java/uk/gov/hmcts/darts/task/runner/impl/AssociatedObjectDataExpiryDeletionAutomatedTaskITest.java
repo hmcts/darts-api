@@ -417,8 +417,9 @@ class AssociatedObjectDataExpiryDeletionAutomatedTaskITest extends PostgresInteg
     }
 
     private void assertCaseDocument(CaseDocumentEntity providedCaseDocumentEntity, boolean isExpired) {
-        CaseDocumentEntity foundCaseDocumentEntity = dartsDatabase.getCaseDocumentRepository()
-            .findById(providedCaseDocumentEntity.getId()).orElseThrow();
+        CaseDocumentEntity foundCaseDocumentEntity = (CaseDocumentEntity) dartsDatabase.getEntityManager()
+            .createNativeQuery("SELECT * FROM case_document WHERE cad_id = " + providedCaseDocumentEntity.getId(), CaseDocumentEntity.class)
+            .getSingleResult();
 
         if (isExpired) {
             assertThat(foundCaseDocumentEntity.isDeleted())
@@ -444,8 +445,9 @@ class AssociatedObjectDataExpiryDeletionAutomatedTaskITest extends PostgresInteg
     }
 
     private void assertAnnotationDocument(AnnotationDocumentEntity providedDocumentEntity, boolean isExpired) {
-        AnnotationDocumentEntity foundDocumentEntity = dartsDatabase.getAnnotationDocumentRepository()
-            .findById(providedDocumentEntity.getId()).orElseThrow();
+        AnnotationDocumentEntity foundDocumentEntity = (AnnotationDocumentEntity) dartsDatabase.getEntityManager()
+            .createNativeQuery("SELECT * FROM annotation_document WHERE ado_id = " + providedDocumentEntity.getId(), AnnotationDocumentEntity.class)
+            .getSingleResult();
 
         if (isExpired) {
             assertThat(foundDocumentEntity.isDeleted())
@@ -471,8 +473,9 @@ class AssociatedObjectDataExpiryDeletionAutomatedTaskITest extends PostgresInteg
     }
 
     private void assertMediaEntity(MediaEntity providedDocumentEntity, boolean isExpired) {
-        MediaEntity foundDocumentEntity = dartsDatabase.getMediaRepository()
-            .findById(providedDocumentEntity.getId()).orElseThrow();
+        MediaEntity foundDocumentEntity = (MediaEntity) dartsDatabase.getEntityManager()
+            .createNativeQuery("SELECT * FROM media WHERE med_id = " + providedDocumentEntity.getId(), MediaEntity.class)
+            .getSingleResult();
 
         if (isExpired) {
             assertThat(foundDocumentEntity.isDeleted())
@@ -498,8 +501,9 @@ class AssociatedObjectDataExpiryDeletionAutomatedTaskITest extends PostgresInteg
     }
 
     private void assertTranscriptionDocument(TranscriptionDocumentEntity providedDocumentEntity, boolean isExpired) {
-        TranscriptionDocumentEntity foundDocumentEntity = dartsDatabase.getTranscriptionDocumentRepository()
-            .findById(providedDocumentEntity.getId()).orElseThrow();
+        TranscriptionDocumentEntity foundDocumentEntity = (TranscriptionDocumentEntity) dartsDatabase.getEntityManager()
+            .createNativeQuery("SELECT * FROM transcription_document WHERE trd_id = " + providedDocumentEntity.getId(), TranscriptionDocumentEntity.class)
+            .getSingleResult();
 
         if (isExpired) {
             assertThat(foundDocumentEntity.isDeleted())
