@@ -127,7 +127,7 @@ postgresql:
 nodejs:
   applicationPort: 3000
   image: 'sdshmctspublic.azurecr.io/darts/portal:latest'
-  replicas: ${DARTS_PORTAL_REPLICAS:0}
+  replicas: ${DARTS_PORTAL_REPLICAS}
   ingressHost: "darts-portal-pr-${CHANGE_ID}.dev.platform.hmcts.net"
   aadIdentityName: darts
   keyVaults:
