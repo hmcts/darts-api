@@ -3,18 +3,14 @@ package uk.gov.hmcts.darts.testutils.stubs;
 import com.azure.core.util.BinaryData;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.context.annotation.Profile;
-import org.springframework.stereotype.Component;
 import uk.gov.hmcts.darts.arm.model.blobs.ContinuationTokenBlobs;
 import uk.gov.hmcts.darts.arm.service.ArmService;
 
 import java.util.ArrayList;
 import java.util.List;
 
-@Component
 @Slf4j
 @RequiredArgsConstructor
-@Profile("intTest")
 @Deprecated
 public class ArmServiceStubImpl implements ArmService {
     @Override
