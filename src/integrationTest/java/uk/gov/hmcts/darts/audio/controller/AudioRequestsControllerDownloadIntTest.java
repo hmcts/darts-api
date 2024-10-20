@@ -1,27 +1,35 @@
 package uk.gov.hmcts.darts.audio.controller;
 
+import com.azure.storage.blob.BlobAsyncClient;
+import com.azure.storage.blob.BlobClient;
+import com.azure.storage.blob.BlobContainerClient;
+import com.azure.storage.blob.BlobServiceClient;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.boot.test.mock.mockito.SpyBean;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import uk.gov.hmcts.darts.audiorequests.model.AudioRequestType;
 import uk.gov.hmcts.darts.audit.api.AuditActivity;
 import uk.gov.hmcts.darts.authorisation.component.Authorisation;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
-import uk.gov.hmcts.darts.common.datamanagement.enums.DatastoreContainerType;
+import uk.gov.hmcts.darts.common.datamanagement.component.DataManagementAzureClientFactory;
 import uk.gov.hmcts.darts.common.entity.AuditEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.repository.AuditRepository;
-import uk.gov.hmcts.darts.datamanagement.exception.FileNotDownloadedException;
-import uk.gov.hmcts.darts.datamanagement.service.DataManagementService;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 import uk.gov.hmcts.darts.testutils.stubs.AuthorisationStub;
 import uk.gov.hmcts.darts.testutils.stubs.TransientObjectDirectoryStub;
 
+import java.io.File;
+import java.io.IOException;
+import java.io.OutputStream;
 import java.net.URI;
 import java.time.OffsetDateTime;
 import java.util.List;
@@ -29,9 +37,10 @@ import java.util.Set;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.notNull;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
@@ -45,6 +54,7 @@ import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.TRANSCRIBER;
 
 @AutoConfigureMockMvc
 @SuppressWarnings({"PMD.ExcessiveImports"})
+@ActiveProfiles("blobTest")
 class AudioRequestsControllerDownloadIntTest extends IntegrationBase {
 
     private static final URI ENDPOINT = URI.create("/audio-requests/download");
@@ -65,16 +75,27 @@ class AudioRequestsControllerDownloadIntTest extends IntegrationBase {
     @Autowired
     private MockMvc mockMvc;
 
-    @SpyBean
-    private DataManagementService dataManagementService;
-
     @Autowired
     private AuditRepository auditRepository;
+
+    @MockBean
+    private DataManagementAzureClientFactory factory;
+
+    @Value("${darts.storage.blob.temp-blob-workspace}")
+    private String tempBlobWorkspace;
 
     @BeforeEach
     void setUp() {
         UserAccountEntity testUser = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
         when(mockUserIdentity.getUserAccount()).thenReturn(testUser);
+
+        BlobServiceClient client = Mockito.mock(BlobServiceClient.class);
+        BlobContainerClient containerClient = Mockito.mock(BlobContainerClient.class);
+        BlobClient blobClient = new DownloadableBlobClient(Mockito.mock(BlobAsyncClient.class));
+
+        when(factory.getBlobServiceClient(notNull())).thenReturn(client);
+        when(factory.getBlobContainerClient(notNull(), eq(client))).thenReturn(containerClient);
+        when(factory.getBlobClient(eq(containerClient), notNull())).thenReturn(blobClient);
     }
 
     @Test
@@ -100,11 +121,14 @@ class AudioRequestsControllerDownloadIntTest extends IntegrationBase {
         MockHttpServletRequestBuilder requestBuilder = get(ENDPOINT)
             .queryParam("transformed_media_id", String.valueOf(transformedMediaId));
 
-        mockMvc.perform(requestBuilder)
+        int fileCountBefore = new File(tempBlobWorkspace).listFiles().length;
+        ResultActions resultActions = mockMvc.perform(requestBuilder)
             .andExpect(status().isOk())
             .andExpect(header().exists("Content-Length"));
 
-        verify(dataManagementService).downloadData(eq(DatastoreContainerType.OUTBOUND), eq("darts-outbound"), any());
+        // ensure the file content is as it was before
+        assertEquals(DownloadableBlobClient.DOWLOADED_BLOB_CONTENTS, resultActions.andReturn().getResponse().getContentAsString());
+        assertEquals(fileCountBefore, new File(tempBlobWorkspace).listFiles().length);
 
         verify(mockAuthorisation).authoriseByTransformedMediaId(
             transformedMediaId,
@@ -130,6 +154,16 @@ class AudioRequestsControllerDownloadIntTest extends IntegrationBase {
         var mediaRequestEntity = dartsDatabase.createAndLoadOpenMediaRequestEntity(requestor, AudioRequestType.DOWNLOAD);
         var objectRecordStatusEntity = dartsDatabase.getObjectRecordStatusEntity(STORED);
 
+        BlobServiceClient client = Mockito.mock(BlobServiceClient.class);
+        BlobContainerClient containerClient = Mockito.mock(BlobContainerClient.class);
+        BlobClient blobClient = Mockito.mock(BlobClient.class);
+
+        when(factory.getBlobServiceClient(notNull())).thenReturn(client);
+        when(factory.getBlobContainerClient(notNull(), eq(client))).thenReturn(containerClient);
+        when(factory.getBlobClient(eq(containerClient), notNull())).thenReturn(blobClient);
+
+        doThrow(new RuntimeException())
+            .when(blobClient).downloadStream(notNull());
         var transientObjectDirectoryEntity = dartsDatabase.getTransientObjectDirectoryRepository()
             .saveAndFlush(transientObjectDirectoryStub.createTransientObjectDirectoryEntity(
                 mediaRequestEntity,
@@ -144,8 +178,6 @@ class AudioRequestsControllerDownloadIntTest extends IntegrationBase {
 
         MockHttpServletRequestBuilder requestBuilder = get(ENDPOINT)
             .queryParam("transformed_media_id", String.valueOf(transformedMediaId));
-
-        when(dataManagementService.downloadData(any(), any(), any())).thenThrow(new FileNotDownloadedException("Bom!"));
 
         mockMvc.perform(requestBuilder)
             .andExpect(status().isInternalServerError());
@@ -223,4 +255,28 @@ class AudioRequestsControllerDownloadIntTest extends IntegrationBase {
         verifyNoInteractions(mockAuthorisation);
     }
 
+    /**
+     * A blob client that writes a random set of bytes to the outputstream.
+     */
+    static class DownloadableBlobClient extends BlobClient {
+        public static final String DOWLOADED_BLOB_CONTENTS = "this is the test contents of the downloaded file";
+
+        public DownloadableBlobClient(BlobAsyncClient client) {
+            super(client);
+        }
+
+        @Override
+        public void downloadStream(OutputStream stream) {
+            try {
+                stream.write(DOWLOADED_BLOB_CONTENTS.getBytes());
+            } catch (IOException e) {
+                throw new UnsupportedOperationException("Download error", e);
+            }
+        }
+
+        @Override
+        public Boolean exists() {
+            return true;
+        }
+    }
 }
