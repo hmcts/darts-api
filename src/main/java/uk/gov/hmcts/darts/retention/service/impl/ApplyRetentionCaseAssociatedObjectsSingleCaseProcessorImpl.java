@@ -287,8 +287,8 @@ public class ApplyRetentionCaseAssociatedObjectsSingleCaseProcessorImpl implemen
 
     private OffsetDateTime findLongestRetentionDate(List<CourtCaseEntity> cases) {
         OffsetDateTime longestRetentionDate = null;
-        for (var courCase : cases) {
-            var mostRecentRetentionRecordOpt = caseRetentionRepository.findTopByCourtCaseOrderByRetainUntilAppliedOnDesc(courCase);
+        for (var courtCase : cases) {
+            var mostRecentRetentionRecordOpt = caseRetentionRepository.findTopByCourtCaseOrderByRetainUntilAppliedOnDesc(courtCase);
             if (mostRecentRetentionRecordOpt.isPresent()) {
                 var retention = mostRecentRetentionRecordOpt.get().getRetainUntil();
                 if (longestRetentionDate == null) {
