@@ -30,6 +30,7 @@ import uk.gov.hmcts.darts.datamanagement.model.BlobClientUploadResponseImpl;
 
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
+import java.util.Optional;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -87,6 +88,9 @@ class GenerateCaseDocumentSingleCaseProcessorImplTest {
     @Captor
     ArgumentCaptor<CaseDocumentEntity> caseDocumentCaptor;
 
+    @Captor
+    ArgumentCaptor<CourtCaseEntity> courtCaseCaptor;
+
     private static final EodHelperMocks EOD_HELPER_MOCKS = new EodHelperMocks();
 
     @AfterAll
@@ -113,6 +117,8 @@ class GenerateCaseDocumentSingleCaseProcessorImplTest {
         when(caseDocumentRepository.save(any())).thenReturn(caseDocumentEntity);
         when(checksumCalculator.calculate(any(InputStream.class))).thenReturn(CHECKSUM);
         when(caseRepository.getReferenceById(CASE_ID)).thenReturn(caseEntity);
+        when(caseRepository.findById(CASE_ID)).thenReturn(Optional.ofNullable(caseEntity));
+        when(caseRepository.save(any())).thenReturn(caseEntity);
         var fileName = String.format(FILE_NAME_FORMAT,
                                      FILE_NAME_PREFIX,
                                      UNSTRUCTURED_BLOB_UUID.toString(),
@@ -137,6 +143,11 @@ class GenerateCaseDocumentSingleCaseProcessorImplTest {
         assertThat(savedCaseDocument.getCreatedBy()).isEqualTo(user);
         assertThat(savedCaseDocument.getLastModifiedBy()).isEqualTo(user);
         assertThat(savedCaseDocument.isHidden()).isEqualTo(false);
+
+        verify(caseRepository).save(courtCaseCaptor.capture());
+        CourtCaseEntity savedCase = courtCaseCaptor.getValue();
+        verify(savedCase).setRetentionUpdated(true);
+        verify(savedCase).setRetentionRetries(0);
     }
 
 }
