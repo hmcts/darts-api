@@ -21,7 +21,6 @@ import java.util.List;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.springframework.test.util.AssertionErrors.assertTrue;
 
 @SpringBootTest
@@ -61,7 +60,6 @@ class DetsDataManagementServiceTest {
     }
 
 
-    @SuppressWarnings("PMD.UnnecessaryBooleanAssertion")
     @Test
     void copyDetsBlobDataToArm() throws AzureDeleteBlobException {
         byte[] testStringInBytes = TEST_BINARY_STRING.getBytes(StandardCharsets.UTF_8);
@@ -78,8 +76,7 @@ class DetsDataManagementServiceTest {
 
         armTestUtil.deleteBlobData(armContainerName, blobPathAndName);
         assertTrue("Failed to delete DETS blob " + uuid, deleted);
-        //make it fail to see what is in the console
-        assertFalse(true);
+        
     }
 
 
