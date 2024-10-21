@@ -12,8 +12,10 @@ import uk.gov.hmcts.darts.common.repository.CaseRetentionRepository;
 import uk.gov.hmcts.darts.retention.enums.CaseRetentionStatus;
 import uk.gov.hmcts.darts.retention.service.ApplyRetentionProcessor;
 
-import java.util.ArrayList;
+import java.time.Duration;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Service
 @Slf4j
@@ -24,23 +26,22 @@ public class ApplyRetentionProcessorImpl implements ApplyRetentionProcessor {
     private final CurrentTimeHelper currentTimeHelper;
     private final CaseRepository caseRepository;
 
-
-    @Value("${darts.data-management.pending-retention-days: 7}")
-    long pendingRetentionDays;
+    @Value("${darts.data-management.pending-retention-duration: 7d}")
+    private final Duration pendingRetentionDuration;
 
     @Override
     public void processApplyRetention() {
         List<CaseRetentionEntity> caseRetentionEntities =
-                caseRetentionRepository.findPendingRetention(currentTimeHelper.currentOffsetDateTime().minusDays(pendingRetentionDays));
+            caseRetentionRepository.findPendingRetention(currentTimeHelper.currentOffsetDateTime().minus(pendingRetentionDuration));
         processList(caseRetentionEntities);
 
     }
 
     protected void processList(List<CaseRetentionEntity> caseRetentionEntities) {
-        List<Integer> processedCases = new ArrayList<>();
+        Set<Integer> processedCases = new HashSet<>();
 
         //List is ordered in createdDateTime desc order
-        for (CaseRetentionEntity caseRetentionEntity: caseRetentionEntities) {
+        for (CaseRetentionEntity caseRetentionEntity : caseRetentionEntities) {
             CourtCaseEntity courtCaseEntity = caseRetentionEntity.getCourtCase();
             if (processedCases.contains(courtCaseEntity.getId())) {
                 caseRetentionEntity.setCurrentState(CaseRetentionStatus.IGNORED.name());
