@@ -70,6 +70,8 @@ class BatchCleanupArmResponseFilesServiceImplTest {
     @Mock
     private ObjectRecordStatusEntity objectRecordStatusStored;
     @Mock
+    private ObjectRecordStatusEntity objectRecordStatusArmRpoPending;
+    @Mock
     private ObjectRecordStatusEntity objectRecordStatusArmResponseChecksumFailed;
     @Mock
     private ObjectRecordStatusEntity objectRecordStatusArmResponseProcessingFailed;
@@ -105,6 +107,7 @@ class BatchCleanupArmResponseFilesServiceImplTest {
 
 
         when(objectRecordStatusRepository.getReferencesByStatus(anyList())).thenReturn(List.of(objectRecordStatusStored,
+                                                                                               objectRecordStatusArmRpoPending,
                                                                                                objectRecordStatusArmResponseManifestFailed,
                                                                                                objectRecordStatusArmResponseProcessingFailed,
                                                                                                objectRecordStatusArmResponseChecksumFailed
@@ -123,6 +126,7 @@ class BatchCleanupArmResponseFilesServiceImplTest {
     void cleanupResponseFilesSuccess() throws UnableToReadArmFileException {
         when(externalObjectDirectoryRepository.findBatchCleanupManifestFilenames(
             eq(List.of(objectRecordStatusStored,
+                       objectRecordStatusArmRpoPending,
                        objectRecordStatusArmResponseManifestFailed,
                        objectRecordStatusArmResponseProcessingFailed,
                        objectRecordStatusArmResponseChecksumFailed)),
@@ -186,6 +190,7 @@ class BatchCleanupArmResponseFilesServiceImplTest {
 
         when(externalObjectDirectoryRepository.findBatchCleanupManifestFilenames(
             eq(List.of(objectRecordStatusStored,
+                       objectRecordStatusArmRpoPending,
                        objectRecordStatusArmResponseManifestFailed,
                        objectRecordStatusArmResponseProcessingFailed,
                        objectRecordStatusArmResponseChecksumFailed)),
