@@ -108,7 +108,7 @@ data "azurerm_subnet" "private_endpoints" {
 }
 
 module "armsa" {
-  source                   = "git@github.com:hmcts/cnp-module-storage-account?ref=master"
+  source                   = "git@github.com:hmcts/cnp-module-storage-account?ref=4.x"
   env                      = var.env
   storage_account_name     = "${var.product}arm${var.env}"
   resource_group_name      = local.rg_name
