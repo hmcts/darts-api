@@ -117,6 +117,6 @@ module "armsa" {
   enable_hns               = true
   account_replication_type = "ZRS"
   common_tags              = var.common_tags
-
+  defender_enabled         = false
   private_endpoint_subnet_id = data.azurerm_subnet.private_endpoints.id
 }
