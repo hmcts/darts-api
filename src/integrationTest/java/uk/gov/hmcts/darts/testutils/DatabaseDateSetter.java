@@ -41,7 +41,8 @@ public class DatabaseDateSetter {
 
 
     public <T extends CreatedModifiedBaseEntity> void setLastModifiedDateNoRefresh(T baseEntity,
-                                                                                   OffsetDateTime timeToSet) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
+                                                                                   OffsetDateTime timeToSet)
+        throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
         String sql = "UPDATE " + getTable(baseEntity) + " SET last_modified_ts='" + timeToSet.toString()
             + "' where " + getIdColumn(baseEntity) + "=" + getIdValue(baseEntity);
 
