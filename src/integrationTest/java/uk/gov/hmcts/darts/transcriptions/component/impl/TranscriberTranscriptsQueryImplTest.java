@@ -50,6 +50,37 @@ class TranscriberTranscriptsQueryImplTest extends IntegrationBase {
     }
 
     @Test
+    void getTranscriptRequestsWithMultipleWorkflows() {
+        TranscriptionEntity transcriptionEntity = dartsDatabase.getTranscriptionStub().createAndSaveAwaitingAuthorisationTranscription(
+            userAccountEntity, courtCaseEntity, hearingEntity, NOW.minusDays(2), false
+        );
+
+        var approved = dartsDatabase.getTranscriptionStub().createAndSaveTranscriptionWorkflow(
+            transcriptionEntity,  NOW.minusDays(1), dartsDatabase.getTranscriptionStub().getTranscriptionStatusByEnum(APPROVED)
+        );
+        transcriptionEntity.getTranscriptionWorkflowEntities().add(approved);
+        transcriptionEntity.setTranscriptionStatus(approved.getTranscriptionStatus());
+        dartsDatabase.getTranscriptionRepository().saveAndFlush(transcriptionEntity);
+
+        List<TranscriberViewSummary> transcriberTranscriptions = transcriberTranscriptsQuery.getTranscriptRequests(userAccountEntity.getId());
+
+        assertThat(transcriberTranscriptions.size()).isEqualTo(1);
+    }
+
+    @Test
+    void getTranscriptRequestsWithMultipleWorkflowsWithSameWorkflowTimestamp() {
+        var yesterday = NOW.minusDays(1);
+        TranscriptionEntity transcriptionEntity = dartsDatabase.getTranscriptionStub().createAndSaveApprovedTranscription(
+            userAccountEntity, courtCaseEntity, hearingEntity, yesterday, false
+        );
+        dartsDatabase.getTranscriptionRepository().saveAndFlush(transcriptionEntity);
+
+        List<TranscriberViewSummary> transcriberTranscriptions = transcriberTranscriptsQuery.getTranscriptRequests(userAccountEntity.getId());
+
+        assertThat(transcriberTranscriptions.size()).isEqualTo(1);
+    }
+
+    @Test
     void getTranscriberTranscriptions() {
         TranscriptionEntity transcriptionWithoutDocument = dartsDatabase.getTranscriptionStub().createAndSaveCompletedTranscription(
             userAccountEntity, courtCaseEntity, hearingEntity, NOW, false
@@ -95,6 +126,41 @@ class TranscriberTranscriptsQueryImplTest extends IntegrationBase {
         assertThat(transcriberTranscriptions.size()).isEqualTo(1);
         var format = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
         assertThat(transcriberTranscriptions.get(0).getStateChangeTs().format(format)).isEqualTo(yesterday.format(format));
+    }
+
+    @Test
+    void getTranscriberTranscriptionsWithMultipleWorkflowsWithSameWorkflowTimestamp() {
+        var yesterday = NOW.minusDays(1);
+        TranscriptionEntity transcriptionEntity = dartsDatabase.getTranscriptionStub().createAndSaveApprovedTranscription(
+            userAccountEntity, courtCaseEntity, hearingEntity, yesterday, false
+        );
+        var withTranscriber = dartsDatabase.getTranscriptionStub().createAndSaveTranscriptionWorkflow(
+            transcriptionEntity, yesterday, dartsDatabase.getTranscriptionStub().getTranscriptionStatusByEnum(WITH_TRANSCRIBER)
+        );
+        transcriptionEntity.getTranscriptionWorkflowEntities().add(withTranscriber);
+        transcriptionEntity.setTranscriptionStatus(withTranscriber.getTranscriptionStatus());
+        dartsDatabase.getTranscriptionRepository().saveAndFlush(transcriptionEntity);
+
+        List<TranscriberViewSummary> transcriberTranscriptions = transcriberTranscriptsQuery.getTranscriberTranscriptions(userAccountEntity.getId());
+
+        assertThat(transcriberTranscriptions.size()).isEqualTo(1);
+    }
+
+    @Test
+    void getTranscriberTranscriptionsWithMultipleWithTranscriberWorkflowsWithSameWorkflowTimestamp() {
+        var yesterday = NOW.minusDays(1);
+        TranscriptionEntity transcriptionEntity = dartsDatabase.getTranscriptionStub().createAndSaveWithTranscriberTranscription(
+            userAccountEntity, courtCaseEntity, hearingEntity, yesterday, false
+        );
+        var withTranscriber = dartsDatabase.getTranscriptionStub().createAndSaveTranscriptionWorkflow(
+            transcriptionEntity, yesterday, dartsDatabase.getTranscriptionStub().getTranscriptionStatusByEnum(WITH_TRANSCRIBER)
+        );
+        transcriptionEntity.getTranscriptionWorkflowEntities().add(withTranscriber);
+        dartsDatabase.getTranscriptionRepository().saveAndFlush(transcriptionEntity);
+
+        List<TranscriberViewSummary> transcriberTranscriptions = transcriberTranscriptsQuery.getTranscriberTranscriptions(userAccountEntity.getId());
+
+        assertThat(transcriberTranscriptions.size()).isEqualTo(1);
     }
 
     @Test

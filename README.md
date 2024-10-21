@@ -163,7 +163,7 @@ docker run -p 10000:10000 -p 10001:10001 -p 10002:10002 \
 
 #### Install ffmpeg
 
-This is used to trim and convert audio files, so run this in a mac terminal:-
+This is used to trim, merge, concatenate and convert audio files, so run this in a mac terminal:-
 
 brew install ffmpeg
 

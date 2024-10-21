@@ -114,11 +114,11 @@ components:
   schemas:
     AutomatedTaskPatch:
       type: object
-      required:
-        - is_active
       properties:
         is_active:
           $ref: '#/components/schemas/IsActive'
+        batch_size:
+          type: integer
     AutomatedTaskSummary:
       type: object
       properties:
@@ -137,6 +137,8 @@ components:
       properties:
         is_cron_editable:
           $ref: '#/components/schemas/IsCronEditable'
+        batch_size:
+          $ref: '#/components/schemas/BatchSize'
         created_at:
           $ref: '#/components/schemas/CreatedAt'
         created_by:
@@ -164,6 +166,8 @@ components:
       maxLength: 256
     IsActive:
       type: boolean
+    BatchSize:
+      type: integer
     IsCronEditable:
       type: boolean
     CreatedAt:
@@ -201,7 +205,3 @@ components:
       required: true
       schema:
         type: integer
-
-
-
-

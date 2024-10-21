@@ -2,11 +2,13 @@ package uk.gov.hmcts.darts.arm.service;
 
 import com.azure.core.util.BinaryData;
 import com.azure.storage.blob.models.BlobStorageException;
+import jakarta.annotation.PostConstruct;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import uk.gov.hmcts.darts.arm.api.ArmDataManagementApi;
 import uk.gov.hmcts.darts.arm.component.ArmResponseFilesProcessSingleElement;
@@ -26,6 +28,7 @@ import uk.gov.hmcts.darts.test.common.TestUtils;
 import uk.gov.hmcts.darts.test.common.data.PersistableFactory;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 import uk.gov.hmcts.darts.testutils.stubs.AuthorisationStub;
+import uk.gov.hmcts.darts.testutils.stubs.DartsDatabaseStub;
 
 import java.io.File;
 import java.io.IOException;
@@ -62,7 +65,7 @@ class ArmResponseFilesProcessorIntTest extends IntegrationBase {
     private ArmDataManagementApi armDataManagementApi;
     @MockBean
     private ArmDataManagementConfiguration armDataManagementConfiguration;
-    @MockBean
+    @Autowired
     private UserIdentity userIdentity;
 
     @Autowired
@@ -73,6 +76,24 @@ class ArmResponseFilesProcessorIntTest extends IntegrationBase {
 
     @TempDir
     private File tempDirectory;
+
+    @SuppressWarnings("PMD.TestClassWithoutTestCases")
+    @TestConfiguration
+    public static class TestConfig {
+
+        @Autowired
+        private DartsDatabaseStub dartsDatabase;
+
+        @MockBean
+        private UserIdentity userIdentity;
+
+        @PostConstruct
+        public UserIdentity mockUserIdentity() {
+            UserAccountEntity testUser = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
+            when(userIdentity.getUserAccount()).thenReturn(testUser);
+            return userIdentity;
+        }
+    }
 
     @BeforeEach
     void setupData() {
