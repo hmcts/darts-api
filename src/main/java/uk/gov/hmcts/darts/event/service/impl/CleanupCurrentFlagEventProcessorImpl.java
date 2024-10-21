@@ -4,9 +4,9 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
-import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
+import org.springframework.scheduling.annotation.Async;
+import org.springframework.stereotype.Component;
 import uk.gov.hmcts.darts.common.entity.EventEntity;
-import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.repository.EventRepository;
 import uk.gov.hmcts.darts.common.repository.HearingRepository;
 import uk.gov.hmcts.darts.event.service.CleanupCurrentFlagEventProcessor;
@@ -19,36 +19,24 @@ import java.util.stream.Collectors;
 @Getter
 @RequiredArgsConstructor
 @Slf4j
+@Component
 public class CleanupCurrentFlagEventProcessorImpl implements CleanupCurrentFlagEventProcessor {
-    private final Integer batchSize;
     private final EventRepository eventRepository;
     private final HearingRepository hearingRepository;
-    private final UserIdentity userIdentity;
 
     @Override
-    public List<Integer> processCurrentEvent() {
-        List<Integer> processedEventIdLst = new ArrayList<>();
-        log.debug("Batch size to process event ids for {}", batchSize);
-        List<Integer> eventEntityReturned = eventRepository.findCurrentEventIdsWithDuplicates(batchSize);
-        if (log.isDebugEnabled()) {
-            log.debug("Event ids being processed {}", eventEntityReturned
-                .stream()
-                .map(Object::toString)
-                .collect(Collectors.joining(",")));
+    @Async("eventTaskExecutor")
+    public void processEvent(Integer eventId) {
+        if (eventId == null || eventId == 0) {
+            return;
         }
+        log.info("Cleaning up event id {} so that only one event_id is marked as current per hearing group", eventId);
+        List<EventRepository.EventIdAndHearingIds> theLatestCreatedEventPrimaryKeyForTheEventId =
+            eventRepository.getTheLatestCreatedEventPrimaryKeyForTheEventId(eventId);
 
-        UserAccountEntity userAccount = userIdentity.getUserAccount();
-        for (Integer event : eventEntityReturned) {
-            log.debug("Processing event id {}", event);
-            List<EventRepository.EventIdAndHearingIds> theLatestCreatedEventPrimaryKeyForTheEventId =
-                eventRepository.getTheLatestCreatedEventPrimaryKeyForTheEventId(event);
-            for (EventRepository.EventIdAndHearingIds eventIdAndHearingIds : theLatestCreatedEventPrimaryKeyForTheEventId) {
-                supersedeOldEvents(eventIdAndHearingIds);
-
-                processedEventIdLst.add(event);
-            }
+        for (EventRepository.EventIdAndHearingIds eventIdAndHearingIds : theLatestCreatedEventPrimaryKeyForTheEventId) {
+            supersedeOldEvents(eventIdAndHearingIds);
         }
-        return processedEventIdLst;
     }
 
     /*

@@ -43,7 +43,7 @@ class CleanupCurrentFlagEventProcessorImplTest extends PostgresIntegrationBase {
         UserAccountEntity userAccount = new UserAccountEntity();
         userAccount.setId(TestUtils.AUTOMATION_USER_ID);
         when(userIdentity.getUserAccount()).thenReturn(userAccount);
-        this.cleanupCurrentFlagEventProcessor = new CleanupCurrentFlagEventProcessorImpl(20, eventRepository, hearingRepository, userIdentity);
+        this.cleanupCurrentFlagEventProcessor = new CleanupCurrentFlagEventProcessorImpl(eventRepository, hearingRepository);
     }
 
     @Test
@@ -53,7 +53,10 @@ class CleanupCurrentFlagEventProcessorImplTest extends PostgresIntegrationBase {
         dartsDatabase.createCase("Bristol", "case3");
         Map<Integer, List<EventEntity>> eventIdMap = eventStub.generateEventIdEventsIncludingZeroEventId(3, 3, false);
         assertAllEventsAreCurrent(eventIdMap);
-        cleanupCurrentFlagEventProcessor.processCurrentEvent();
+        eventIdMap.keySet().forEach(eventId -> {
+            cleanupCurrentFlagEventProcessor.processEvent(eventId);
+            assertOnlyOneCurrentPerEventId(eventId);
+        });
         assertOnlyOneCurrentPerEventId(eventIdMap);
     }
 
@@ -67,7 +70,10 @@ class CleanupCurrentFlagEventProcessorImplTest extends PostgresIntegrationBase {
         Map<Integer, List<EventEntity>> eventIdMap = eventStub.generateEventIdEventsIncludingZeroEventId(3, 3, false);
         eventIdMap.get(2).add(newEventEntity);
         assertAllEventsAreCurrent(eventIdMap);
-        cleanupCurrentFlagEventProcessor.processCurrentEvent();
+        eventIdMap.keySet().forEach(eventId -> {
+            cleanupCurrentFlagEventProcessor.processEvent(eventId);
+            assertOnlyOneCurrentPerEventId(eventId, newEventEntity.getId());
+        });
         assertOnlyOneCurrentPerEventId(eventIdMap, newEventEntity.getId());
     }
 
@@ -88,20 +94,24 @@ class CleanupCurrentFlagEventProcessorImplTest extends PostgresIntegrationBase {
         );
 
         assertAllEventsAreCurrent(eventIdMap);
-        cleanupCurrentFlagEventProcessor.processCurrentEvent();
+        eventIdMap.keySet().forEach(eventId -> {
+            cleanupCurrentFlagEventProcessor.processEvent(eventId);
+            assertOnlyOneCurrentPerEventId(eventId);
+        });
         assertOnlyOneCurrentPerEventId(eventIdMap);
     }
 
     private void assertOnlyOneCurrentPerEventId(Map<Integer, List<EventEntity>> eventIdMap, Integer... eveIdsToExclude) {
         eventIdMap.keySet()
-            .stream()
-            .filter(eventId -> eventId != 0)
-            .forEach(
-                eventId -> {
-                    List<EventEntity> eventEntities = eventRepository.findAllByEventId(eventId);
-                    assertOnlyOneCurrentPerEventId(eventEntities, eveIdsToExclude);
-                }
-            );
+            .forEach(eventId -> assertOnlyOneCurrentPerEventId(eventId, eveIdsToExclude));
+    }
+
+    private void assertOnlyOneCurrentPerEventId(Integer eventId, Integer... eveIdsToExclude) {
+        if (eventId == 0) {
+            return;
+        }
+        List<EventEntity> eventEntities = eventRepository.findAllByEventId(eventId);
+        assertOnlyOneCurrentPerEventId(eventEntities, eveIdsToExclude);
     }
 
     private void assertOnlyOneCurrentPerEventId(List<EventEntity> eventEntities, Integer... eveIdsToExclude) {
