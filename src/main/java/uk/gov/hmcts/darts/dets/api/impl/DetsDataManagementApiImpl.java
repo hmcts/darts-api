@@ -6,6 +6,7 @@ import uk.gov.hmcts.darts.common.datamanagement.StorageConfiguration;
 import uk.gov.hmcts.darts.common.datamanagement.component.impl.DownloadResponseMetaData;
 import uk.gov.hmcts.darts.common.datamanagement.enums.DatastoreContainerType;
 import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
+import uk.gov.hmcts.darts.common.exception.AzureDeleteBlobException;
 import uk.gov.hmcts.darts.datamanagement.exception.FileNotDownloadedException;
 import uk.gov.hmcts.darts.dets.api.DetsDataManagementApi;
 import uk.gov.hmcts.darts.dets.config.DetsDataManagementConfiguration;
@@ -13,6 +14,7 @@ import uk.gov.hmcts.darts.dets.service.DetsApiService;
 
 import java.util.Objects;
 import java.util.Optional;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -43,5 +45,15 @@ public class DetsDataManagementApiImpl implements DetsDataManagementApi {
     @Override
     public StorageConfiguration getConfiguration() {
         return detsManagementConfiguration;
+    }
+
+    @Override
+    public void deleteBlobDataFromContainer(UUID blobId) throws AzureDeleteBlobException {
+        service.deleteBlobDataFromContainer(blobId);
+    }
+
+    @Override
+    public void copyDetsBlobDataToArm(String detsUuid, String blobPathAndName) {
+        service.copyDetsBlobDataToArm(detsUuid, blobPathAndName);
     }
 }

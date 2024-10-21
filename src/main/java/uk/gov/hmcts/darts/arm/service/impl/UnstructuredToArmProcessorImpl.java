@@ -7,7 +7,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.darts.arm.api.ArmDataManagementApi;
 import uk.gov.hmcts.darts.arm.config.UnstructuredToArmProcessorConfiguration;
-import uk.gov.hmcts.darts.arm.helper.UnstructuredToArmHelper;
+import uk.gov.hmcts.darts.arm.helper.DataStoreToArmHelper;
 import uk.gov.hmcts.darts.arm.model.record.ArchiveRecordFileInfo;
 import uk.gov.hmcts.darts.arm.service.ArchiveRecordService;
 import uk.gov.hmcts.darts.arm.service.UnstructuredToArmProcessor;
@@ -32,7 +32,7 @@ import java.util.List;
 public class UnstructuredToArmProcessorImpl implements UnstructuredToArmProcessor {
 
     private final ArchiveRecordService archiveRecordService;
-    private final UnstructuredToArmHelper unstructuredToArmHelper;
+    private final DataStoreToArmHelper unstructuredToArmHelper;
     private final UserIdentity userIdentity;
     private final ExternalLocationTypeRepository externalLocationTypeRepository;
     private final LogApi logApi;
@@ -83,10 +83,9 @@ public class UnstructuredToArmProcessorImpl implements UnstructuredToArmProcesso
                     unstructuredToArmHelper.updateExternalObjectDirectoryStatus(armExternalObjectDirectory, EodHelper.armIngestionStatus(), userAccount);
                 }
 
-
                 String rawFilename = unstructuredToArmHelper.generateRawFilename(armExternalObjectDirectory);
                 log.info("Start of ARM Push processing for EOD {} running at: {}", armExternalObjectDirectory.getId(), OffsetDateTime.now());
-                boolean copyRawDataToArmSuccessful = unstructuredToArmHelper.copyRawDataToArm(
+                boolean copyRawDataToArmSuccessful = unstructuredToArmHelper.copyUnstructuredRawDataToArm(
                     unstructuredExternalObjectDirectory,
                     armExternalObjectDirectory,
                     rawFilename,
