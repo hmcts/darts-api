@@ -116,18 +116,15 @@ public class DetsApiServiceImpl implements DetsApiService {
         try {
             String sourceContainerSasUrl = configuration.getSasEndpoint();
             String destinationContainerSasUrl = armDataManagementConfiguration.getSasEndpoint();
-            log.info("Containers source      '{}' dets container name '{}' dets uuid '{}'", sourceContainerSasUrl, configuration.getContainerName(), detsUuid);
-            log.info("Containers destination '{}' arm container name  '{}' arm location '{}'", destinationContainerSasUrl,
-                     armDataManagementConfiguration.getContainerName(), blobPathAndName);
             String sourceBlobSasUrl = buildBlobSasUrl(configuration.getContainerName(), sourceContainerSasUrl, detsUuid);
             String destinationBlobSasUrl = buildBlobSasUrl(armDataManagementConfiguration.getContainerName(), destinationContainerSasUrl, blobPathAndName);
 
-            log.info("Copy from '{}' to '{}'", sourceBlobSasUrl, destinationBlobSasUrl);
+            log.info("Dets copy from '{}' to '{}'", sourceBlobSasUrl, destinationBlobSasUrl);
             azureCopyUtil.copy(sourceBlobSasUrl, destinationBlobSasUrl);
-            log.info("Copy completed from '{}' to '{}'. Source location: {}, destination location: {}",
+            log.info("Dets copy completed from '{}' to '{}'. Source location: {}, destination location: {}",
                      configuration.getContainerName(), armDataManagementConfiguration.getContainerName(), detsUuid, blobPathAndName);
         } catch (Exception e) {
-            throw new DartsException(String.format("Exception copying file from '%s' to '%s'. Source location: %s",
+            throw new DartsException(String.format("Exception DETS copying file from '%s' to '%s'. Source location: %s",
                                                    configuration.getContainerName(), armDataManagementConfiguration.getContainerName(), detsUuid), e);
         }
     }

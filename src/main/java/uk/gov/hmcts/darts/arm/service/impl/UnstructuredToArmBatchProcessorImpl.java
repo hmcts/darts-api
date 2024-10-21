@@ -61,10 +61,9 @@ public class UnstructuredToArmBatchProcessorImpl implements UnstructuredToArmBat
         ExternalLocationTypeEntity eodSourceLocation = EodHelper.unstructuredLocation();
 
         // Because the query is long-running, get all the EODs that need to be processed in one go
-        List<ExternalObjectDirectoryEntity> eodsForTransfer = unstructuredToArmHelper
-            .getEodEntitiesToSendToArm(eodSourceLocation,
-                                       EodHelper.armLocation(),
-                                       taskBatchSize);
+        List<ExternalObjectDirectoryEntity> eodsForTransfer = unstructuredToArmHelper.getEodEntitiesToSendToArm(eodSourceLocation,
+                                                                                                                EodHelper.armLocation(),
+                                                                                                                taskBatchSize);
 
         log.info("Found {} pending entities to process from source '{}'", eodsForTransfer.size(), eodSourceLocation.getDescription());
         if (!eodsForTransfer.isEmpty()) {
