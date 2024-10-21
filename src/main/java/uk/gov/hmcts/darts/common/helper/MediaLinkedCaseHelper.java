@@ -20,12 +20,14 @@ public class MediaLinkedCaseHelper {
     public void addCase(MediaEntity mediaEntity, CourtCaseEntity courtCase) {
         List<MediaLinkedCaseEntity> mediaLinkedCaseEntities = mediaLinkedCaseRepository.findByMedia(mediaEntity);
         List<CourtCaseEntity> linkedCases = mediaLinkedCaseEntities.stream().map(MediaLinkedCaseEntity::getCourtCase).toList();
-        log.debug("Handling med_id {} and cas_id {}. Currently the media has the following cas_ids linked: {}",
-                  mediaEntity.getId(),
-                  courtCase.getId(),
-                  linkedCases.stream()
-                      .map(CourtCaseEntity::getId)
-                      .toList());
+        if (log.isDebugEnabled()) {
+            log.debug("Handling med_id {} and cas_id {}. Currently the media has the following cas_ids linked: {}",
+                      mediaEntity.getId(),
+                      courtCase.getId(),
+                      linkedCases.stream()
+                          .map(CourtCaseEntity::getId)
+                          .toList());
+        }
         if (!linkedCases.contains(courtCase)) {
             MediaLinkedCaseEntity mediaLinkedCaseEntity = new MediaLinkedCaseEntity();
             mediaLinkedCaseEntity.setMedia(mediaEntity);
