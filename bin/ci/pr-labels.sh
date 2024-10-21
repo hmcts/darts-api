@@ -14,4 +14,4 @@ LABELS_ARRAY=$(curl -L \
 export DARTS_PORTAL_REPLICAS=$(echo $LABELS_ARRAY | jq | grep '"name": "enable_darts_portal"' | wc -l | jq)
 echo "Required DARTS Portal replicas: $DARTS_PORTAL_REPLICAS"
 # replace the replicas value in the values.dev.template.yaml file
-sed -i '' "s/replicas: 0 #DARTS_PORTAL_REPLICAS/replicas: ${DARTS_PORTAL_REPLICAS}/g" ./charts/darts-api/values.dev.template.yaml
+sed -i "s/replicas: 0 #DARTS_PORTAL_REPLICAS/replicas: ${DARTS_PORTAL_REPLICAS}/g" ./charts/darts-api/values.dev.template.yaml
