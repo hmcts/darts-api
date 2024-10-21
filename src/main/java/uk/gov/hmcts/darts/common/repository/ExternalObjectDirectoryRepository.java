@@ -466,4 +466,14 @@ public interface ExternalObjectDirectoryRepository extends JpaRepository<Externa
                 AND eod.externalLocationType.id IN (1, 2)
         """)
     List<ExternalObjectDirectoryEntity> findStoredInInboundAndUnstructuredByTranscriptionId(@Param("transcriptionDocumentId") Integer id);
+
+    @Modifying
+    @Query("""
+        update ExternalObjectDirectoryEntity eod
+        set eod.status = :newStatus
+        where eod.status = :status
+        and eod.dataIngestionTs <= :dataIngestionTs
+        """)
+    void updateByStatusEqualsAndDataIngestionTsBefore(ObjectRecordStatusEntity currentStatus, OffsetDateTime maxDataIngestionTs,
+                                                      ObjectRecordStatusEntity newStatus, Limit limit);
 }
