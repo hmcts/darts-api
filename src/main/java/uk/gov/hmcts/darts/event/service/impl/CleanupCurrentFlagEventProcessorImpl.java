@@ -30,7 +30,7 @@ public class CleanupCurrentFlagEventProcessorImpl implements CleanupCurrentFlagE
         if (eventId == null || eventId == 0) {
             return;
         }
-        log.info("Cleaning up event id {}", eventId);
+        log.info("Cleaning up event id {} so that only one event_id is marked as current per hearing group", eventId);
         List<EventRepository.EventIdAndHearingIds> theLatestCreatedEventPrimaryKeyForTheEventId =
             eventRepository.getTheLatestCreatedEventPrimaryKeyForTheEventId(eventId);
 
