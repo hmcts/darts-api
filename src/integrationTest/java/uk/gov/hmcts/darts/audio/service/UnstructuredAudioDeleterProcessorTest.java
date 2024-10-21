@@ -2,22 +2,21 @@ package uk.gov.hmcts.darts.audio.service;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
-import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
 import uk.gov.hmcts.darts.common.util.EodHelper;
 import uk.gov.hmcts.darts.test.common.data.PersistableFactory;
+import uk.gov.hmcts.darts.testutils.DatabaseDateSetter;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 
+import java.lang.reflect.InvocationTargetException;
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.MARKED_FOR_DELETION;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.STORED;
 
@@ -28,13 +27,11 @@ class UnstructuredAudioDeleterProcessorTest extends IntegrationBase {
     @Autowired
     private UnstructuredAudioDeleterProcessor unstructuredAudioDeleterProcessor;
 
-    @MockBean
-    private CurrentTimeHelper currentTimeHelper;
+    @Autowired
+    private DatabaseDateSetter dateConfigurer;
 
     @Test
-    void storedInArmAndLastUpdatedInUnstructuredMoreThan30WeeksAgo() {
-        when(currentTimeHelper.currentOffsetDateTime())
-            .thenReturn(OffsetDateTime.now().plusWeeks(35));
+    void storedInArmAndLastUpdatedInUnstructuredMoreThan30WeeksAgo() throws InvocationTargetException, NoSuchMethodException, IllegalAccessException {
 
         HearingEntity hearing = PersistableFactory.getHearingTestData().someMinimalHearing();
         dartsPersistence.save(hearing);
@@ -55,7 +52,8 @@ class UnstructuredAudioDeleterProcessorTest extends IntegrationBase {
             EodHelper.unstructuredLocation(),
             uuid
         );
-        dartsDatabase.save(unstructuredEod);
+        dartsDatabase.getExternalObjectDirectoryRepository().saveAndFlush(unstructuredEod);
+        dateConfigurer.setLastModifiedDateNoRefresh(unstructuredEod, OffsetDateTime.now().minusWeeks(35));
 
         ExternalObjectDirectoryEntity armEod = dartsDatabase.getExternalObjectDirectoryStub().createExternalObjectDirectory(
             savedMedia,
@@ -78,9 +76,7 @@ class UnstructuredAudioDeleterProcessorTest extends IntegrationBase {
     }
 
     @Test
-    void storedInArmAndLastUpdatedInUnstructuredLessThan30WeeksAgo() {
-        when(currentTimeHelper.currentOffsetDateTime())
-            .thenReturn(OffsetDateTime.now().plusWeeks(25));
+    void storedInArmAndLastUpdatedInUnstructuredLessThan30WeeksAgo() throws InvocationTargetException, NoSuchMethodException, IllegalAccessException {
 
         HearingEntity hearing = PersistableFactory.getHearingTestData().someMinimalHearing();
         dartsPersistence.save(hearing);
@@ -101,7 +97,8 @@ class UnstructuredAudioDeleterProcessorTest extends IntegrationBase {
             EodHelper.unstructuredLocation(),
             uuid
         );
-        dartsDatabase.save(unstructuredEod);
+        dartsDatabase.getExternalObjectDirectoryRepository().saveAndFlush(unstructuredEod);
+        dateConfigurer.setLastModifiedDateNoRefresh(unstructuredEod, OffsetDateTime.now().minusWeeks(25));
 
         ExternalObjectDirectoryEntity armEod = dartsDatabase.getExternalObjectDirectoryStub().createExternalObjectDirectory(
             savedMedia,

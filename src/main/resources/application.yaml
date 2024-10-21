@@ -117,6 +117,9 @@ darts:
     enabled: ${MANUAL_DELETION_ENABLED:false}
     grace-period: ${MANUAL_DELETION_GRACE_PERIOD:24h}
   automated-tasks-pod: ${AUTOMATED_TASK_MODE:true}
+  automated-task:
+    unstructured-audio-deleter:
+      minimum-duration-in-unstructured: 210d #10 weeks
   api-pod: ${API_MODE:true}
   audio:
     allowed-media-mime-types:
