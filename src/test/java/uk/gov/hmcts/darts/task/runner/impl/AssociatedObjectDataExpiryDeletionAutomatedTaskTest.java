@@ -10,6 +10,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Limit;
 import uk.gov.hmcts.darts.audio.deleter.impl.inbound.ExternalInboundDataStoreDeleter;
 import uk.gov.hmcts.darts.audio.deleter.impl.unstructured.ExternalUnstructuredDataStoreDeleter;
+import uk.gov.hmcts.darts.audit.api.AuditActivity;
+import uk.gov.hmcts.darts.audit.api.AuditApi;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.AnnotationDocumentEntity;
 import uk.gov.hmcts.darts.common.entity.CaseDocumentEntity;
@@ -28,6 +30,7 @@ import uk.gov.hmcts.darts.common.repository.TranscriptionDocumentRepository;
 
 import java.time.OffsetDateTime;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Supplier;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -38,6 +41,7 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -60,6 +64,10 @@ class AssociatedObjectDataExpiryDeletionAutomatedTaskTest {
     private ExternalInboundDataStoreDeleter inboundDeleter;
     @Mock
     private ExternalUnstructuredDataStoreDeleter unstructuredDeleter;
+    @Mock
+    private AuditApi auditApi;
+
+    private final AtomicInteger idAddition = new AtomicInteger(123);
 
 
     private AssociatedObjectDataExpiryDeletionAutomatedTask associatedObjectDataExpiryDeletionAutomatedTask;
@@ -71,7 +79,8 @@ class AssociatedObjectDataExpiryDeletionAutomatedTaskTest {
                 null, null, userIdentity, null, null, currentTimeHelper,
                 transcriptionDocumentRepository, mediaRepository, annotationDocumentRepository,
                 caseDocumentRepository,
-                externalObjectDirectoryRepository, inboundDeleter, unstructuredDeleter)
+                externalObjectDirectoryRepository, inboundDeleter, unstructuredDeleter,
+                auditApi)
         );
     }
 
@@ -121,7 +130,9 @@ class AssociatedObjectDataExpiryDeletionAutomatedTaskTest {
 
         Supplier<ExternalObjectDirectoryEntity> externalObjectDirectoryEntitySupplier = () -> {
             ExternalObjectDirectoryEntity externalObjectDirectoryEntity = new ExternalObjectDirectoryEntity();
-            externalObjectDirectoryEntity.setTranscriptionDocumentEntity(new TranscriptionDocumentEntity());
+            TranscriptionDocumentEntity transcriptionDocumentEntity = new TranscriptionDocumentEntity();
+            transcriptionDocumentEntity.setId(getNextId());
+            externalObjectDirectoryEntity.setTranscriptionDocumentEntity(transcriptionDocumentEntity);
             return externalObjectDirectoryEntity;
         };
 
@@ -151,6 +162,9 @@ class AssociatedObjectDataExpiryDeletionAutomatedTaskTest {
 
         verify(transcriptionDocumentRepository, times(1))
             .softDeleteAll(transcriptionDocumentEntities, userAccount);
+
+        verify(auditApi, times(1))
+            .record(AuditActivity.TRANSCRIPT_EXPIRED, userAccount, "123");
     }
 
     @Test
@@ -161,7 +175,9 @@ class AssociatedObjectDataExpiryDeletionAutomatedTaskTest {
 
         Supplier<ExternalObjectDirectoryEntity> externalObjectDirectoryEntitySupplier = () -> {
             ExternalObjectDirectoryEntity externalObjectDirectoryEntity = new ExternalObjectDirectoryEntity();
-            externalObjectDirectoryEntity.setMedia(new MediaEntity());
+            MediaEntity mediaEntity = new MediaEntity();
+            mediaEntity.setId(getNextId());
+            externalObjectDirectoryEntity.setMedia(mediaEntity);
             return externalObjectDirectoryEntity;
         };
 
@@ -191,6 +207,13 @@ class AssociatedObjectDataExpiryDeletionAutomatedTaskTest {
 
         verify(mediaRepository, times(1))
             .softDeleteAll(mediaEntities, userAccount);
+
+        verify(auditApi, times(1))
+            .record(AuditActivity.AUDIO_EXPIRED, userAccount, "123");
+    }
+
+    private Integer getNextId() {
+        return idAddition.getAndIncrement();
     }
 
     @Test
@@ -201,7 +224,9 @@ class AssociatedObjectDataExpiryDeletionAutomatedTaskTest {
 
         Supplier<ExternalObjectDirectoryEntity> externalObjectDirectoryEntitySupplier = () -> {
             ExternalObjectDirectoryEntity externalObjectDirectoryEntity = new ExternalObjectDirectoryEntity();
-            externalObjectDirectoryEntity.setAnnotationDocumentEntity(new AnnotationDocumentEntity());
+            AnnotationDocumentEntity annotationDocumentEntity = new AnnotationDocumentEntity();
+            annotationDocumentEntity.setId(getNextId());
+            externalObjectDirectoryEntity.setAnnotationDocumentEntity(annotationDocumentEntity);
             return externalObjectDirectoryEntity;
         };
 
@@ -231,6 +256,9 @@ class AssociatedObjectDataExpiryDeletionAutomatedTaskTest {
 
         verify(annotationDocumentRepository, times(1))
             .softDeleteAll(annotationDocumentEntities, userAccount);
+
+        verify(auditApi, times(1))
+            .record(AuditActivity.ANNOTATION_EXPIRED, userAccount, "123");
     }
 
     @Test
@@ -241,7 +269,9 @@ class AssociatedObjectDataExpiryDeletionAutomatedTaskTest {
 
         Supplier<ExternalObjectDirectoryEntity> externalObjectDirectoryEntitySupplier = () -> {
             ExternalObjectDirectoryEntity externalObjectDirectoryEntity = new ExternalObjectDirectoryEntity();
-            externalObjectDirectoryEntity.setCaseDocument(new CaseDocumentEntity());
+            CaseDocumentEntity caseDocumentEntity = new CaseDocumentEntity();
+            caseDocumentEntity.setId(getNextId());
+            externalObjectDirectoryEntity.setCaseDocument(caseDocumentEntity);
             return externalObjectDirectoryEntity;
         };
 
@@ -271,6 +301,9 @@ class AssociatedObjectDataExpiryDeletionAutomatedTaskTest {
 
         verify(caseDocumentRepository, times(1))
             .softDeleteAll(caseDocumentEntities, userAccount);
+
+        verify(auditApi, times(1))
+            .record(AuditActivity.CASE_DOCUMENT_EXPIRED, userAccount, "123");
     }
 
     @Test
@@ -281,7 +314,9 @@ class AssociatedObjectDataExpiryDeletionAutomatedTaskTest {
 
         Supplier<ExternalObjectDirectoryEntity> externalObjectDirectoryEntitySupplier = () -> {
             ExternalObjectDirectoryEntity externalObjectDirectoryEntity = new ExternalObjectDirectoryEntity();
-            externalObjectDirectoryEntity.setCaseDocument(new CaseDocumentEntity());
+            CaseDocumentEntity caseDocumentEntity = new CaseDocumentEntity();
+            caseDocumentEntity.setId(getNextId());
+            externalObjectDirectoryEntity.setCaseDocument(caseDocumentEntity);
             return externalObjectDirectoryEntity;
         };
 
@@ -316,6 +351,12 @@ class AssociatedObjectDataExpiryDeletionAutomatedTaskTest {
 
         verify(caseDocumentRepository, times(1))
             .softDeleteAll(List.of(caseDocumentEntities.get(0), caseDocumentEntities.get(2)), userAccount);
+
+        verify(auditApi, times(1))
+            .record(AuditActivity.CASE_DOCUMENT_EXPIRED, userAccount, "123");
+        verify(auditApi, times(1))
+            .record(AuditActivity.CASE_DOCUMENT_EXPIRED, userAccount, "125");
+        verifyNoMoreInteractions(auditApi);
     }
 
     @Test
@@ -331,7 +372,7 @@ class AssociatedObjectDataExpiryDeletionAutomatedTaskTest {
         assertThat(associatedObjectDataExpiryDeletionAutomatedTask.deleteFromExternalDataStore(externalObjectDirectoryEntity))
             .isTrue();
         verify(inboundDeleter, times(1)).delete(externalObjectDirectoryEntity);
-        verifyNoInteractions(unstructuredDeleter);
+        verifyNoInteractions(unstructuredDeleter, auditApi);
     }
 
     @Test
@@ -347,7 +388,7 @@ class AssociatedObjectDataExpiryDeletionAutomatedTaskTest {
         assertThat(associatedObjectDataExpiryDeletionAutomatedTask.deleteFromExternalDataStore(externalObjectDirectoryEntity))
             .isTrue();
         verify(unstructuredDeleter, times(1)).delete(externalObjectDirectoryEntity);
-        verifyNoInteractions(inboundDeleter);
+        verifyNoInteractions(inboundDeleter, auditApi);
 
     }
 
@@ -361,7 +402,7 @@ class AssociatedObjectDataExpiryDeletionAutomatedTaskTest {
 
         assertThat(associatedObjectDataExpiryDeletionAutomatedTask.deleteFromExternalDataStore(externalObjectDirectoryEntity))
             .isTrue();
-        verifyNoInteractions(inboundDeleter, unstructuredDeleter);
+        verifyNoInteractions(inboundDeleter, unstructuredDeleter, auditApi);
     }
 
     @ParameterizedTest
@@ -376,6 +417,6 @@ class AssociatedObjectDataExpiryDeletionAutomatedTaskTest {
 
         assertThat(associatedObjectDataExpiryDeletionAutomatedTask.deleteFromExternalDataStore(externalObjectDirectoryEntity))
             .isFalse();
-        verifyNoInteractions(inboundDeleter, unstructuredDeleter);
+        verifyNoInteractions(inboundDeleter, unstructuredDeleter, auditApi);
     }
 }

@@ -85,7 +85,7 @@ public class UserManagementServiceImpl implements UserManagementService {
         userEntity.setLastModifiedDateTime(now);
 
         var createdUserEntity = userAccountRepository.save(userEntity);
-        auditApi.record(AuditActivity.CREATE_USER, authorisationApi.getCurrentUser(), null);
+        auditApi.record(AuditActivity.CREATE_USER, authorisationApi.getCurrentUser());
 
         UserWithId userWithId = userAccountMapper.mapToUserWithIdModel(createdUserEntity);
         List<Integer> securityGroupIds = securityGroupIdMapper.mapSecurityGroupEntitiesToIds(createdUserEntity.getSecurityGroupEntities());
