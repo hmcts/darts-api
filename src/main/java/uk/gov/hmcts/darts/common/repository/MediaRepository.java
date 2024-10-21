@@ -84,4 +84,11 @@ public interface MediaRepository extends JpaRepository<MediaEntity, Integer>,
     List<MediaEntity> findMediaByDetails(List<Integer> hearingIds, OffsetDateTime startAt,
                                          OffsetDateTime endAt);
 
+    @Query("""
+            SELECT me
+            FROM MediaEntity me
+            JOIN MediaLinkedCaseEntity mlce ON me.id = mlce.media.id
+            WHERE mlce.courtCase.id = :caseId
+        """)
+    List<MediaEntity> findAllLinkedByMediaLinkedCaseAndCaseId(Integer caseId);
 }
