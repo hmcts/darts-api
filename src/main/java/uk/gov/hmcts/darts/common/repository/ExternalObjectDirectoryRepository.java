@@ -1,5 +1,6 @@
 package uk.gov.hmcts.darts.common.repository;
 
+import jakarta.transaction.Transactional;
 import org.springframework.data.domain.Limit;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -471,9 +472,10 @@ public interface ExternalObjectDirectoryRepository extends JpaRepository<Externa
     @Query("""
         update ExternalObjectDirectoryEntity eod
         set eod.status = :newStatus
-        where eod.status = :status
-        and eod.dataIngestionTs <= :dataIngestionTs
+        where eod.status = :currentStatus
+        and eod.dataIngestionTs <= :maxDataIngestionTs
         """)
+    @Transactional
     void updateByStatusEqualsAndDataIngestionTsBefore(ObjectRecordStatusEntity currentStatus, OffsetDateTime maxDataIngestionTs,
                                                       ObjectRecordStatusEntity newStatus, Limit limit);
 }
