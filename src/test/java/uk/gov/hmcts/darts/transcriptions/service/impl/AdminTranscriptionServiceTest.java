@@ -10,6 +10,7 @@ import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+import uk.gov.hmcts.darts.audit.api.AuditApi;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.ObjectAdminActionEntity;
 import uk.gov.hmcts.darts.common.entity.ObjectHiddenReasonEntity;
@@ -95,6 +96,9 @@ class AdminTranscriptionServiceTest {
     @Mock
     private UserIdentity userIdentity;
 
+    @Mock
+    private AuditApi auditApi;
+
     @Captor
     ArgumentCaptor<ObjectAdminActionEntity> objectAdminActionEntityArgumentCaptor;
 
@@ -113,7 +117,8 @@ class AdminTranscriptionServiceTest {
                                                 objectAdminActionRepository,
                                                 objectHiddenReasonRepository,
                                                 userIdentity,
-                                                transcriptionApproveMarkForDeletionValidator);
+                                                transcriptionApproveMarkForDeletionValidator,
+                                                auditApi);
     }
 
     private void updateManualDeletion(boolean manualDeletionEnabled) {
@@ -401,11 +406,11 @@ class AdminTranscriptionServiceTest {
             verify(objectAdminActionRepository).save(objectAdminActionEntityArgumentCaptor.capture());
 
             ObjectAdminActionEntity capturedEntity = objectAdminActionEntityArgumentCaptor.getValue();
+            assertEquals(expectedResponse, actualResponse);
             assertTrue(capturedEntity.isMarkedForManualDeletion(), "Entity should be marked for manual deletion");
             assertEquals(userAccount, capturedEntity.getMarkedForManualDelBy(), "Entity's deletion should be marked by the correct user");
-            assertNotNull(capturedEntity.getMarkedForManualDelDateTime(), "Entity's deletion datetime should be set");
 
-            assertEquals(expectedResponse, actualResponse);
+            assertNotNull(capturedEntity.getMarkedForManualDelDateTime(), "Entity's deletion datetime should be set");
         }
 
         @Test

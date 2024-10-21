@@ -13,6 +13,8 @@ import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.repository.AuditActivityRepository;
 import uk.gov.hmcts.darts.common.repository.AuditRepository;
 
+import java.util.Optional;
+
 @RequiredArgsConstructor
 @Service
 @Slf4j
@@ -25,16 +27,14 @@ public class AuditServiceImpl implements AuditService {
 
     @Transactional
     @Override
-    public void recordAudit(AuditActivity activity, UserAccountEntity userAccountEntity, CourtCaseEntity courtCase) {
+    public void recordAudit(AuditActivity activity, UserAccountEntity userAccountEntity, Optional<CourtCaseEntity> courtCase, Optional<String> additionalData) {
         AuditEntity auditEntity = new AuditEntity();
-        auditEntity.setCourtCase(courtCase);
+        courtCase.ifPresent(auditEntity::setCourtCase);
         auditEntity.setAuditActivity(auditActivityRepository.getReferenceById(activity.getId()));
         auditEntity.setUser(userAccountEntity);
-        auditEntity.setAdditionalData(null);
+        additionalData.ifPresent(auditEntity::setAdditionalData);
         auditEntity.setCreatedBy(userAccountEntity);
         auditEntity.setLastModifiedBy(userAccountEntity);
         auditRepository.saveAndFlush(auditEntity);
     }
-
-
 }

@@ -9,6 +9,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.darts.audio.exception.AudioApiError;
 import uk.gov.hmcts.darts.audio.model.MediaApproveMarkedForDeletionResponse;
 import uk.gov.hmcts.darts.audio.validation.MediaApproveMarkForDeletionValidator;
+import uk.gov.hmcts.darts.audit.api.AuditApi;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
@@ -61,6 +62,9 @@ class AdminMediaServiceImplApproveMarkedForDeletionTest {
     @Mock
     private UserAccountEntity userAccount;
 
+    @Mock
+    private AuditApi auditApi;
+
     @BeforeEach
     void setUp() {
         lenient().when(currentTimeHelper.currentOffsetDateTime()).thenReturn(OffsetDateTime.now());
@@ -81,7 +85,6 @@ class AdminMediaServiceImplApproveMarkedForDeletionTest {
         objectAdminAction.setMedia(mediaEntity);
         objectAdminAction.setMarkedForManualDeletion(false);
         objectAdminAction.setHiddenBy(hiddenByUserAccount);
-
         var hiddenReason = ObjectHiddenReasonTestData.otherDelete();
         objectAdminAction.setObjectHiddenReason(hiddenReason);
 
