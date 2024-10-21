@@ -103,7 +103,6 @@ class ApplyRetentionCaseAssociatedObjectsSingleCaseProcessorImplTest {
     private CaseRetentionEntity caseRetentionB1;
     private CaseRetentionEntity caseRetentionC1;
     private CaseRetentionEntity caseRetentionD1;
-    private CaseRetentionEntity caseRetentionE1;
 
     private UserAccountEntity testUser;
 
@@ -201,7 +200,7 @@ class ApplyRetentionCaseAssociatedObjectsSingleCaseProcessorImplTest {
         var caseRetentionC2 = createCaseRetention(case3NotPerfectlyClosed, retentionPolicyTypeEntity1, DATETIME_2026, COMPLETE, testUser);
         var caseRetentionC3 = createCaseRetention(case3NotPerfectlyClosed, retentionPolicyTypeEntity1, DATETIME_2027, COMPLETE, testUser);
         caseRetentionD1 = createCaseRetention(case4NotPerfectlyClosed, retentionPolicyTypeEntity1, DATETIME_2025, COMPLETE, testUser);
-        caseRetentionE1 = createCaseRetention(case5PerfectlyClosed, retentionPolicyTypeEntity1, DATETIME_2025, COMPLETE, testUser);
+        var caseRetentionE1 = createCaseRetention(case5PerfectlyClosed, retentionPolicyTypeEntity1, DATETIME_2025, COMPLETE, testUser);
 
         case1PerfectlyClosed.setCaseRetentionEntities(List.of(caseRetentionA1, caseRetentionA2, caseRetentionA3));
         case2PerfectlyClosed.setCaseRetentionEntities(List.of(caseRetentionB1));
