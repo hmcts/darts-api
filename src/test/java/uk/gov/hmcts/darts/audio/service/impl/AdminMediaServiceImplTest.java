@@ -28,6 +28,7 @@ import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
 import uk.gov.hmcts.darts.common.entity.ObjectAdminActionEntity;
 import uk.gov.hmcts.darts.common.entity.TransformedMediaEntity;
+import uk.gov.hmcts.darts.common.exception.CommonApiError;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
 import uk.gov.hmcts.darts.common.repository.MediaRepository;
@@ -102,14 +103,14 @@ class AdminMediaServiceImplTest {
     void getMediasMarkedForDeletionManualDeletionDisabled() {
         disableManualDeletion();
         DartsApiException dartsApiException = assertThrows(DartsApiException.class, () -> mediaRequestService.getMediasMarkedForDeletion());
-        assertThat(dartsApiException.getError()).isEqualTo(DartsApiException.DartsApiErrorCommon.FEATURE_FLAG_NOT_ENABLED);
+        assertThat(dartsApiException.getError()).isEqualTo(CommonApiError.FEATURE_FLAG_NOT_ENABLED);
     }
 
     @Test
     void adminApproveMediaMarkedForDeletionManualDeletionDisabled() {
         disableManualDeletion();
         DartsApiException dartsApiException = assertThrows(DartsApiException.class, () -> mediaRequestService.adminApproveMediaMarkedForDeletion(1));
-        assertThat(dartsApiException.getError()).isEqualTo(DartsApiException.DartsApiErrorCommon.FEATURE_FLAG_NOT_ENABLED);
+        assertThat(dartsApiException.getError()).isEqualTo(CommonApiError.FEATURE_FLAG_NOT_ENABLED);
     }
 
     @Test
