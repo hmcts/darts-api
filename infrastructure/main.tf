@@ -115,6 +115,7 @@ module "armsa" {
   location                 = var.location
   account_kind             = var.account_kind
   enable_hns               = true
+  enable_sftp              = true
   account_replication_type = "ZRS"
   common_tags              = var.common_tags
 
