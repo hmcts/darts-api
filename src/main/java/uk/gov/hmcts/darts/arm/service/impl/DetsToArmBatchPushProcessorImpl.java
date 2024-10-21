@@ -166,6 +166,7 @@ public class DetsToArmBatchPushProcessorImpl implements DetsToArmBatchPushProces
             dataStoreToArmHelper.updateExternalObjectDirectoryStatus(batchItem.getArmEod(), EodHelper.armDropZoneStatus(), userAccount);
             logApi.armPushSuccessful(batchItem.getArmEod().getId());
         }
+        
     }
 
     private boolean writeManifestAndCopyToArm(UserAccountEntity userAccount, ArmBatchItems batchItems, File archiveRecordsFile) {
