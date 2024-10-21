@@ -34,6 +34,7 @@ public class EventMapper {
         event.setTimestamp(eventEntity.getTimestamp());
         event.setName(eventEntity.getEventType().getEventName());
         event.setText(eventEntity.getEventText());
+        event.isDataAnonymised(eventEntity.isDataAnonymised());
 
         return event;
     }
