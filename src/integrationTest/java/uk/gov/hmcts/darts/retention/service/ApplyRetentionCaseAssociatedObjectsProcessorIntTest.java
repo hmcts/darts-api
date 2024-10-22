@@ -116,7 +116,7 @@ class ApplyRetentionCaseAssociatedObjectsProcessorIntTest extends IntegrationBas
         media 0 -> hearing B  -> case B
         media 1 -> hearing A1 -> case A
         media 2 -> hearing A2 -> case A
-        media 3 -> hearing C  -> case C 
+        media 3 -> hearing C  -> case C
         */
 
         // given
@@ -200,8 +200,10 @@ class ApplyRetentionCaseAssociatedObjectsProcessorIntTest extends IntegrationBas
         // given
         MediaLinkedCaseEntity mediaLinkedCase1 = createMediaLinkedCase(medias.get(3), caseA);
         dartsDatabase.getMediaLinkedCaseRepository().save(mediaLinkedCase1);
-        MediaLinkedCaseEntity mediaLinkedCase2 = createMediaLinkedCase(medias.get(1), caseC);
+        MediaLinkedCaseEntity mediaLinkedCase2 = createMediaLinkedCase(medias.get(3), caseC);
         dartsDatabase.getMediaLinkedCaseRepository().save(mediaLinkedCase2);
+        MediaLinkedCaseEntity mediaLinkedCase3 = createMediaLinkedCase(medias.get(1), caseC);
+        dartsDatabase.getMediaLinkedCaseRepository().save(mediaLinkedCase3);
 
         // when
         processor.processApplyRetentionToCaseAssociatedObjects();
