@@ -33,6 +33,7 @@ import static uk.gov.hmcts.darts.arm.util.ArchiveConstants.ArchiveResponseFileAt
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_RESPONSE_CHECKSUM_VERIFICATION_FAILED;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_RESPONSE_MANIFEST_FAILED;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_RESPONSE_PROCESSING_FAILED;
+import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_RPO_PENDING;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.STORED;
 
 @Service
@@ -58,6 +59,7 @@ public class CleanupArmResponseFilesServiceImpl implements CleanupArmResponseFil
     @Override
     public void cleanupResponseFiles() {
         ObjectRecordStatusEntity storedStatus = objectRecordStatusRepository.getReferenceById(STORED.getId());
+        ObjectRecordStatusEntity armRpoPendingStatus = objectRecordStatusRepository.getReferenceById(ARM_RPO_PENDING.getId());
         ObjectRecordStatusEntity failedArmResponseManifestFileStatus = objectRecordStatusRepository.getReferenceById(ARM_RESPONSE_MANIFEST_FAILED.getId());
         ObjectRecordStatusEntity failedArmResponseProcessing = objectRecordStatusRepository.getReferenceById(ARM_RESPONSE_PROCESSING_FAILED.getId());
         ObjectRecordStatusEntity failedArmResponseChecksum = objectRecordStatusRepository.getReferenceById(ARM_RESPONSE_CHECKSUM_VERIFICATION_FAILED.getId());
@@ -66,6 +68,7 @@ public class CleanupArmResponseFilesServiceImpl implements CleanupArmResponseFil
 
         ExternalLocationTypeEntity armLocation = externalLocationTypeRepository.getReferenceById(ExternalLocationTypeEnum.ARM.getId());
         List<ObjectRecordStatusEntity> statuses = List.of(storedStatus,
+                                                          armRpoPendingStatus,
                                                           failedArmResponseManifestFileStatus,
                                                           failedArmResponseProcessing,
                                                           failedArmResponseChecksum);

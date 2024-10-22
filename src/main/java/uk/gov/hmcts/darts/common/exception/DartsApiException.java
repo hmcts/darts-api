@@ -1,9 +1,7 @@
 package uk.gov.hmcts.darts.common.exception;
 
 import lombok.Getter;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpStatus;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -60,31 +58,4 @@ public class DartsApiException extends RuntimeException {
         this.error = error;
         this.detail = detail;
     }
-
-    @Getter
-    @RequiredArgsConstructor
-    public enum DartsApiErrorCommon implements DartsApiError {
-        FEATURE_FLAG_NOT_ENABLED(
-            "FEATURE_FLAG_NOT_ENABLED",
-            HttpStatus.NOT_IMPLEMENTED,
-            "Feature flag not enabled"
-        ),
-        NOT_FOUND(
-            "NOT_FOUND",
-            HttpStatus.NOT_FOUND,
-            "Resource not found"
-        );
-
-        private static final String ERROR_TYPE_PREFIX = "COMMON";
-        private final String errorTypeNumeric;
-        private final HttpStatus httpStatus;
-        private final String title;
-
-        @Override
-        public String getErrorTypePrefix() {
-            return ERROR_TYPE_PREFIX;
-        }
-
-    }
-
 }

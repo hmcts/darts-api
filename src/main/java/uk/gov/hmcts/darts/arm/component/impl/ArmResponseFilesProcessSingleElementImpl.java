@@ -51,6 +51,7 @@ import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_PROCESS
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_RESPONSE_CHECKSUM_VERIFICATION_FAILED;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_RESPONSE_MANIFEST_FAILED;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_RESPONSE_PROCESSING_FAILED;
+import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_RPO_PENDING;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.STORED;
 
 @Service
@@ -73,12 +74,14 @@ public class ArmResponseFilesProcessSingleElementImpl implements ArmResponseFile
     private ObjectRecordStatusEntity armResponseProcessingFailedStatus;
     private ObjectRecordStatusEntity armResponseManifestFailedStatus;
     private ObjectRecordStatusEntity storedStatus;
+    private ObjectRecordStatusEntity armRpoPendingStatus;
     private ObjectRecordStatusEntity armResponseChecksumVerificationFailedStatus;
     private UserAccountEntity userAccount;
 
     @PostConstruct
     public void initialisePreloadedObjects() {
         storedStatus = objectRecordStatusRepository.findById(STORED.getId()).orElseThrow();
+        armRpoPendingStatus = objectRecordStatusRepository.findById(ARM_RPO_PENDING.getId()).orElseThrow();
         armDropZoneStatus = objectRecordStatusRepository.findById(ARM_DROP_ZONE.getId()).orElseThrow();
         armProcessingResponseFilesStatus = objectRecordStatusRepository.findById(ARM_PROCESSING_RESPONSE_FILES.getId()).orElseThrow();
         armResponseManifestFailedStatus = objectRecordStatusRepository.findById(ARM_RESPONSE_MANIFEST_FAILED.getId()).orElseThrow();
@@ -214,6 +217,7 @@ public class ArmResponseFilesProcessSingleElementImpl implements ArmResponseFile
             BinaryData uploadFileBinary = armDataManagementApi.getBlobData(uploadFilename);
             ObjectRecordStatusEnum status = readUploadFile(externalObjectDirectory, uploadFileBinary, uploadFileFilenameProcessor);
             if (STORED.equals(status)
+                || ARM_RPO_PENDING.equals(status)
                 || ARM_RESPONSE_PROCESSING_FAILED.equals(status)
                 || ARM_RESPONSE_CHECKSUM_VERIFICATION_FAILED.equals(status)) {
                 log.info("About to delete blob responses for EOD {}", externalObjectDirectory.getId());
@@ -482,7 +486,7 @@ public class ArmResponseFilesProcessSingleElementImpl implements ArmResponseFile
             externalObjectDirectory.setExternalFileId(armResponseUploadFileRecord.getA360FileId());
             externalObjectDirectory.setExternalRecordId(armResponseUploadFileRecord.getA360RecordId());
             externalObjectDirectory.setDataIngestionTs(OffsetDateTime.now());
-            updateExternalObjectDirectoryStatus(externalObjectDirectory, storedStatus);
+            updateExternalObjectDirectoryStatus(externalObjectDirectory, armRpoPendingStatus);
         } else {
             log.warn("External object id {} checksum differs. Arm checksum: {} Object Checksum: {}",
                      externalObjectDirectory.getId(),

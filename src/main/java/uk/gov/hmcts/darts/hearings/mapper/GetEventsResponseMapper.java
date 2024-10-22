@@ -30,6 +30,7 @@ public class GetEventsResponseMapper {
         eventResponse.setTimestamp(eventEntity.getTimestamp());
         eventResponse.setName(eventEntity.getEventType().getEventName());
         eventResponse.setText(eventEntity.getEventText());
+        eventResponse.isDataAnonymised(eventEntity.isDataAnonymised());
         return eventResponse;
     }
 

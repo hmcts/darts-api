@@ -27,6 +27,7 @@ import uk.gov.hmcts.darts.common.entity.TranscriptionWorkflowEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum;
 import uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum;
+import uk.gov.hmcts.darts.common.exception.CommonApiError;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.common.exception.PartialFailureException;
 import uk.gov.hmcts.darts.common.repository.ExternalLocationTypeRepository;
@@ -623,7 +624,7 @@ public class TranscriptionServiceImpl implements TranscriptionService {
     @Override
     public List<AdminMarkedForDeletionResponseItem> adminGetTranscriptionDocumentsMarkedForDeletion() {
         if (!this.isManualDeletionEnabled()) {
-            throw new DartsApiException(DartsApiException.DartsApiErrorCommon.FEATURE_FLAG_NOT_ENABLED);
+            throw new DartsApiException(CommonApiError.FEATURE_FLAG_NOT_ENABLED, "Manual deletion is not enabled");
         }
         List<TranscriptionDocumentEntity> transcriptionDocumentEntities = transcriptionDocumentRepository.getMarkedForDeletion();
         List<AdminMarkedForDeletionResponseItem> transcriptionResponsesLst = new ArrayList<>();
