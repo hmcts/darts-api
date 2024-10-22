@@ -657,6 +657,8 @@ components:
         name:
           type: string
           example: "Case called on"
+        is_data_anonymised:
+            $ref: '#/components/schemas/IsDataAnonymised'
         text:
           type: string
           example: "Record:New Case"
