@@ -94,9 +94,11 @@ class EventSearchControllerTest extends IntegrationBase {
 
     @Test
     void returnsAllFieldsCorrectly() throws Exception {
+        int eventHearingsCount = 2;
+        int eventsCount = 2;
         given.anAuthenticatedUserWithGlobalAccessAndRole(SUPER_ADMIN);
-        List<EventEntity> entity = eventsGivensBuilder.persistedEvents(1);
 
+        List<EventEntity> entity = eventsGivensBuilder.persistedEventsWithHearings(eventsCount, eventHearingsCount);
         CourtCaseEntity courtCaseEntity = entity.get(0).getHearingEntities().get(0).getCourtCase();
         courtCaseEntity.setDataAnonymisedTs(now());
         dartsDatabase.save(courtCaseEntity);
@@ -114,8 +116,6 @@ class EventSearchControllerTest extends IntegrationBase {
         assertThat(response).hasJsonPathStringValue("[0].courthouse.display_name");
         assertThat(response).hasJsonPathNumberValue("[0].courtroom.id");
         assertThat(response).hasJsonPathStringValue("[0].courtroom.name");
-        assertThat(response).hasJsonPathBooleanValue("[0].is_event_anonymised");
-        assertThat(response).hasJsonPathBooleanValue("[0].is_case_expired");
-        assertThat(response).hasJsonPathStringValue("[0].case_expired_at");
+        assertThat(response).hasJsonPathBooleanValue("[0].is_data_anonymised");
     }
 }
