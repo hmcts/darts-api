@@ -187,7 +187,7 @@ class MediaRepositoryIntTest extends PostgresIntegrationBase {
     }
 
     @Test
-    void findAllLinkedByMediaLinkedCaseAndCaseId() {
+    void findAllLinkedByMediaLinkedCaseByCaseId() {
         // given
         var caseA = PersistableFactory.getCourtCaseTestData().createSomeMinimalCase();
         var hearA1 = PersistableFactory.getHearingTestData().createHearingFor(caseA);
