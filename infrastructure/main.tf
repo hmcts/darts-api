@@ -86,6 +86,8 @@ module "postgresql_flexible" {
   auto_grow_enabled    = true
   common_tags          = var.common_tags
   admin_user_object_id = var.jenkins_AAD_objectId
+  enable_qpi           = true
+  auto_grow_enabled    = true
   pgsql_databases = [
     {
       name : local.db_name
@@ -97,7 +99,7 @@ module "postgresql_flexible" {
       value = "pg_stat_statements, pg_trgm"
     }
   ]
-  pgsql_version = "15"
+  pgsql_version = "16"
 }
 
 
