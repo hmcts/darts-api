@@ -1,5 +1,6 @@
 package uk.gov.hmcts.darts.authorisation.component;
 
+import org.springframework.security.oauth2.jwt.Jwt;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.enums.SecurityRoleEnum;
 
@@ -10,7 +11,9 @@ public interface UserIdentity {
 
     UserAccountEntity getUserAccount();
 
-    boolean userHasGlobalAccess(Set<SecurityRoleEnum> globalAccessRoles);
+    UserAccountEntity getUserAccount(Jwt jwt);
+
+    boolean userHasGlobalAccess(Set<SecurityRoleEnum> globalAccessRolest);
 
     List<Integer> getListOfCourthouseIdsUserHasAccessTo();
 }
