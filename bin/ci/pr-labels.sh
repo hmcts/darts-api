@@ -9,11 +9,23 @@ LABELS_ARRAY=$(curl -L \
   -H "X-GitHub-Api-Version: 2022-11-28" \
   https://api.github.com/repos/hmcts/darts-api/pulls/$CHANGE_ID | jq .labels)
 
-# if "enable_darts_portal" label is set on the PR, then set the DARTS_PORTAL_REPLICAS to 1, otherwise set it to 0
-# DARTS_PORTAL_REPLICAS is used in charts/darts-api/values.dev.template.yaml to set the number of replicas for the DARTS Portal
-export DARTS_PORTAL_REPLICAS=$(echo $LABELS_ARRAY | jq | grep '"name": "enable_darts_portal"' | wc -l | jq)
-echo "Required DARTS Portal replicas: $DARTS_PORTAL_REPLICAS"
-# replace the replicas value in the values.dev.template.yaml file
-sed -i "s/replicas: 0 #DARTS_PORTAL_REPLICAS/replicas: ${DARTS_PORTAL_REPLICAS} #DARTS_PORTAL_REPLICAS/g" ./charts/darts-api/values.dev.template.yaml
-echo "Setting DARTS Portal replicas in values.dev.template.yaml"
-cat ./charts/darts-api/values.dev.template.yaml | grep nodejs -A3
+# used to override files within the charts directory, depends on labels set on the PR
+CHART_OVERRIDE=''
+
+# check for known labels on the PR, setting the value to 1 or 0 depending on whether the label is present or not
+ENABLE_DARTS_FULLSTACK=$(echo $LABELS_ARRAY | jq | grep '"name": "enable_darts_fullstack"' | wc -l | jq)
+ENABLE_DARTS_PORTAL=$(echo $LABELS_ARRAY | jq | grep '"name": "enable_darts_portal"' | wc -l | jq)
+
+if [[ ENABLE_DARTS_FULLSTACK -eq 1 ]]; then
+  echo "Using DARTS fullstack dev deployment is not yet supported, using deployment with portal"
+  CHART_OVERRIDE='enable_darts_portal' # set to enable_darts_fullstack when supported
+elif [[ ENABLE_DARTS_PORTAL -eq 1 ]]; then
+  CHART_OVERRIDE='enable_darts_portal'
+fi
+
+if [[ ! -z "${CHART_OVERRIDE}" ]]; then
+  echo "Using chart override: $CHART_OVERRIDE"
+  cp ./charts-dev-overrides/$CHART_OVERRIDE/*.* ./charts/darts-api/
+else
+  echo "Using default dev deployment chart"
+fi
