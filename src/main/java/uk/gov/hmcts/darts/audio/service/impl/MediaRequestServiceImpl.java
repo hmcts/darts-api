@@ -534,7 +534,7 @@ public class MediaRequestServiceImpl implements MediaRequestService {
         mediaHideOrShowValidator.validate(request);
 
         Optional<MediaEntity> mediaEntityOptional
-            = mediaRepository.findById(mediaId);
+            = mediaRepository.findByIdIncludeDeleted(mediaId);
         if (mediaEntityOptional.isPresent()) {
             MediaEntity mediaEntity = mediaEntityOptional.get();
 

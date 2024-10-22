@@ -88,7 +88,7 @@ class AdminMediaServiceImplApproveMarkedForDeletionTest {
         var authorisedByUserAccount = UserAccountTestData.minimalUserAccount();
         authorisedByUserAccount.setId(345);
 
-        when(mediaRepository.findById(mediaId)).thenReturn(Optional.of(mediaEntity));
+        when(mediaRepository.findByIdIncludeDeleted(mediaId)).thenReturn(Optional.of(mediaEntity));
         when(userIdentity.getUserAccount()).thenReturn(userAccount);
 
         when(objectAdminActionRepository.findByMedia_Id(mediaId)).thenReturn(List.of(objectAdminAction));
@@ -106,7 +106,7 @@ class AdminMediaServiceImplApproveMarkedForDeletionTest {
         // given
         Integer mediaId = 1;
 
-        when(mediaRepository.findById(mediaId)).thenReturn(Optional.empty());
+        when(mediaRepository.findByIdIncludeDeleted(mediaId)).thenReturn(Optional.empty());
 
         // when
         DartsApiException exception = assertThrows(DartsApiException.class, () -> adminMediaService.adminApproveMediaMarkedForDeletion(mediaId));

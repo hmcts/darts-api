@@ -122,7 +122,7 @@ class MediaRequestServiceImplAdminMediaSearchTest {
         UserAccountEntity userAccountEntity = mock(UserAccountEntity.class);
 
         MediaEntity mediaEntity = new MediaEntity();
-        when(mediaRepository.findById(hideOrShowTranscriptionDocument)).thenReturn(Optional.of(mediaEntity));
+        when(mediaRepository.findByIdIncludeDeleted(hideOrShowTranscriptionDocument)).thenReturn(Optional.of(mediaEntity));
         when(userIdentity.getUserAccount()).thenReturn(userAccountEntity);
 
         when(mediaRepository.saveAndFlush(mediaEntityArgumentCaptor.capture())).thenReturn(mediaEntity);
@@ -171,7 +171,7 @@ class MediaRequestServiceImplAdminMediaSearchTest {
         request.setAdminAction(adminActionRequest);
 
         MediaEntity mediaEntity = new MediaEntity();
-        when(mediaRepository.findById(hideOrShowTranscriptionDocument)).thenReturn(Optional.of(mediaEntity));
+        when(mediaRepository.findByIdIncludeDeleted(hideOrShowTranscriptionDocument)).thenReturn(Optional.of(mediaEntity));
 
         Integer objectAdminActionEntityId = 1000;
         Integer objectAdminActionEntityId1 = 1001;
