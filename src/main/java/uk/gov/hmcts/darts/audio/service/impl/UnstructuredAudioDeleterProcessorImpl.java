@@ -21,7 +21,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class UnstructuredAudioDeleterProcessorImpl implements UnstructuredAudioDeleterProcessor {
 
-    @Value("${darts.automated-task.unstructured-audio-deleter.minimum-duration-in-unstructured}")
+    @Value("${darts.automated.task.unstructured-audio-deleter.minimum-duration-in-unstructured}")
     Duration durationInUnstructured;
 
     private final ExternalObjectDirectoryRepository externalObjectDirectoryRepository;
