@@ -9,12 +9,14 @@ import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Limit;
+import uk.gov.hmcts.darts.authorisation.api.AuthorisationApi;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
 import uk.gov.hmcts.darts.common.entity.EventEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
 import uk.gov.hmcts.darts.common.entity.MediaLinkedCaseEntity;
+import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.repository.EventRepository;
 import uk.gov.hmcts.darts.common.repository.HearingRepository;
 import uk.gov.hmcts.darts.common.repository.MediaLinkedCaseRepository;
@@ -94,17 +96,22 @@ class AudioLinkingAutomatedTaskTest {
         private MediaLinkedCaseRepository mediaLinkedCaseRepository;
         @Mock
         private EventService eventService;
+        @Mock
+        private AuthorisationApi authorisationApi;
 
         private AudioLinkingAutomatedTask.EventProcessor eventProcessor;
+        private UserAccountEntity userAccount;
 
         @BeforeEach
         void beforeEach() {
             this.eventProcessor = spy(
                 new AudioLinkingAutomatedTask.EventProcessor(
                     mediaRepository, hearingRepository, mediaLinkedCaseRepository,
-                    eventService, Duration.ofSeconds(0)
+                    eventService, authorisationApi, Duration.ofSeconds(0)
                 )
             );
+
+            this.userAccount = new UserAccountEntity();
         }
 
         @Test
@@ -198,6 +205,7 @@ class AudioLinkingAutomatedTaskTest {
             when(mediaLinkedCaseRepository.existsByMediaAndCourtCase(any(), any()))
                 .thenReturn(false);
 
+            when(authorisationApi.getCurrentUser()).thenReturn(userAccount);
 
             CourtCaseEntity courtCaseEntity1 = mock(CourtCaseEntity.class);
             CourtCaseEntity courtCaseEntity2 = mock(CourtCaseEntity.class);
@@ -236,8 +244,8 @@ class AudioLinkingAutomatedTaskTest {
                 .saveAll(savedHearingEntities);
 
             Set<MediaLinkedCaseEntity> savedMediaLinkedCaseEntity = new HashSet<>();
-            savedMediaLinkedCaseEntity.add(new MediaLinkedCaseEntity(mediaEntity, courtCaseEntity1));
-            savedMediaLinkedCaseEntity.add(new MediaLinkedCaseEntity(mediaEntity, courtCaseEntity2));
+            savedMediaLinkedCaseEntity.add(new MediaLinkedCaseEntity(mediaEntity, courtCaseEntity1, userAccount));
+            savedMediaLinkedCaseEntity.add(new MediaLinkedCaseEntity(mediaEntity, courtCaseEntity2, userAccount));
             verify(mediaLinkedCaseRepository, times(1))
                 .saveAll(savedMediaLinkedCaseEntity);
 
@@ -286,7 +294,7 @@ class AudioLinkingAutomatedTaskTest {
                 .saveAll(savedHearingEntities);
 
             Set<MediaLinkedCaseEntity> savedMediaLinkedCaseEntity = new HashSet<>();
-            savedMediaLinkedCaseEntity.add(new MediaLinkedCaseEntity(mediaEntity, courtCaseEntity1));
+            savedMediaLinkedCaseEntity.add(new MediaLinkedCaseEntity(mediaEntity, courtCaseEntity1, userAccount));
             verify(mediaLinkedCaseRepository, times(1))
                 .saveAll(savedMediaLinkedCaseEntity);
         }
@@ -310,6 +318,7 @@ class AudioLinkingAutomatedTaskTest {
             when(hearingEntity2.getCourtCase()).thenReturn(courtCaseEntity1);
             when(hearingEntity3.getCourtCase()).thenReturn(courtCaseEntity2);
 
+            when(authorisationApi.getCurrentUser()).thenReturn(userAccount);
 
             List<HearingEntity> hearingEntities = List.of(hearingEntity1, hearingEntity2, hearingEntity3);
 
@@ -349,7 +358,7 @@ class AudioLinkingAutomatedTaskTest {
                 .saveAll(savedHearingEntities);
 
             Set<MediaLinkedCaseEntity> savedMediaLinkedCaseEntity = new HashSet<>();
-            savedMediaLinkedCaseEntity.add(new MediaLinkedCaseEntity(mediaEntity, courtCaseEntity1));
+            savedMediaLinkedCaseEntity.add(new MediaLinkedCaseEntity(mediaEntity, courtCaseEntity1, userAccount));
             verify(mediaLinkedCaseRepository, times(1))
                 .saveAll(savedMediaLinkedCaseEntity);
         }

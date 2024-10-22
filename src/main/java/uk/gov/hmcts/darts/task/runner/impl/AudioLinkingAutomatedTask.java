@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Limit;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
+import uk.gov.hmcts.darts.authorisation.api.AuthorisationApi;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.EventEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
@@ -71,6 +72,7 @@ public class AudioLinkingAutomatedTask extends AbstractLockableAutomatedTask
         private final HearingRepository hearingRepository;
         private final MediaLinkedCaseRepository mediaLinkedCaseRepository;
         private final EventService eventService;
+        private final AuthorisationApi authorisationApi;
         @Getter
         @Value("${darts.automated-tasks.audio-linking.audio-buffer:0s}")
         private final Duration audioBuffer;
@@ -101,8 +103,9 @@ public class AudioLinkingAutomatedTask extends AbstractLockableAutomatedTask
                         hearingEntity.addMedia(mediaEntity);
                         hearingsToSave.add(hearingEntity);
                         CourtCaseEntity courtCase = hearingEntity.getCourtCase();
+                        // TODO: This functionality is duplicated in MediaLinkedCaseHelper.addCase(). Consider refactoring under DMP-4157.
                         if (!mediaLinkedCaseRepository.existsByMediaAndCourtCase(mediaEntity, courtCase)) {
-                            mediaLinkedCaseEntities.add(new MediaLinkedCaseEntity(mediaEntity, courtCase));
+                            mediaLinkedCaseEntities.add(new MediaLinkedCaseEntity(mediaEntity, courtCase, authorisationApi.getCurrentUser()));
                         }
                         log.info("Linking media {} to hearing {}", mediaEntity.getId(), hearingEntity.getId());
                     }

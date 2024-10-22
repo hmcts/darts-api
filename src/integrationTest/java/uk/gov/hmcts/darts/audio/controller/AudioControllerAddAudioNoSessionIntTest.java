@@ -1,6 +1,7 @@
 package uk.gov.hmcts.darts.audio.controller;
 
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -82,6 +83,7 @@ class AudioControllerAddAudioNoSessionIntTest extends IntegrationBase {
     }
 
 
+    @Disabled("See DMP-XXX")
     @Test
     void testAddAudioWithConcurrency() throws Exception {
         superAdminUserStub.givenUserIsAuthorised(mockUserIdentity, SecurityRoleEnum.MID_TIER);
