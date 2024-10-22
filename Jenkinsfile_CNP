@@ -155,7 +155,7 @@ withPipeline(type, product, component) {
     before('akschartsinstall') {
         onPR {
             // determine what to deploy on the dev env
-            sh("./bin/ci/pr-labels.sh")
+            sh("./bin/ci/process-pr-labels.sh")
         }
     }
 

@@ -9,6 +9,13 @@ LABELS_ARRAY=$(curl -L \
   -H "X-GitHub-Api-Version: 2022-11-28" \
   https://api.github.com/repos/hmcts/darts-api/pulls/$CHANGE_ID | jq .labels)
 
+# don't override unless the `enable_keep_helm` label is set
+ENABLE_KEEP_HELM=$(echo $LABELS_ARRAY | jq | grep '"name": "enable_keep_helm"' | wc -l | jq)
+if [[ ENABLE_KEEP_HELM -eq 0 ]]; then
+  echo "enable_keep_helm label not found, exiting..."
+  exit 1
+fi
+
 # used to override files within the charts directory, depends on labels set on the PR
 CHART_OVERRIDE=''
 
