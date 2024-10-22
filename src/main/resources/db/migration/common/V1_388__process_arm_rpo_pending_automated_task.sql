@@ -1,3 +1,4 @@
+update darts.automated_task a set aut_id = a.aut_id + 1000; --Required to avoid conflict with existing automated task ids
 update darts.automated_task set aut_id = 1 where task_name = 'ProcessDailyList';
 update darts.automated_task set aut_id = 2 where task_name = 'CloseOldUnfinishedTranscriptions';
 update darts.automated_task set aut_id = 3 where task_name = 'OutboundAudioDeleter';
