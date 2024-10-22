@@ -34,7 +34,7 @@ public enum AutomatedTaskName {
     REMOVE_DUPLICATED_EVENTS_TASK_NAME("RemoveDuplicatedEvents"),
     GENERATE_CASE_DOCUMENT_FOR_RETENTION_DATE_TASK_NAME("GenerateCaseDocumentForRetentionDate"),
     DETS_TO_ARM_TASK_NAME("DetsToArm"),
-    CASE_EXPIRY_DELETION_TASK_NAME("CaseExpiryDeletion", "${darts.automated.task.expiry-deletion.enabled:false}"),
+    CASE_EXPIRY_DELETION_TASK_NAME("CaseExpiryDeletion", "${darts.automated.task.case-expiry-deletion.enabled:false}"),
     ASSOCIATED_OBJECT_DATA_EXPIRY_DELETION_TASK_NAME("AssociatedObjectDataExpiryDeletion"),
     MANUAL_DELETION("ManualDeletion", "${darts.manual-deletion.enabled:false}"),
     AUDIO_LINKING_TASK_NAME("AudioLinking");
