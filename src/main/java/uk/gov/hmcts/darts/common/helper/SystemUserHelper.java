@@ -21,7 +21,7 @@ import java.util.concurrent.ConcurrentMap;
 @Component
 @RequiredArgsConstructor
 @Slf4j
-@ConfigurationProperties(prefix = "darts.automated.task")
+@ConfigurationProperties(prefix = "darts.automated.task.common-config")
 @EnableConfigurationProperties
 @Setter
 public class SystemUserHelper {

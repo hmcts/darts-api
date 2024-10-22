@@ -34,17 +34,24 @@ public class DatabaseDateSetter {
     public <T extends CreatedModifiedBaseEntity>
 
     @Transactional
-    void setLastModifiedDate(T baseEntity, OffsetDateTime timeToSet)  throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
+        void setLastModifiedDate(T baseEntity, OffsetDateTime timeToSet) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
+        setLastModifiedDateNoRefresh(baseEntity, timeToSet);
+        em.refresh(baseEntity);
+    }
+
+
+    public <T extends CreatedModifiedBaseEntity> void setLastModifiedDateNoRefresh(T baseEntity,
+                                                                                   OffsetDateTime timeToSet)
+        throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
         String sql = "UPDATE " + getTable(baseEntity) + " SET last_modified_ts='" + timeToSet.toString()
             + "' where " + getIdColumn(baseEntity) + "=" + getIdValue(baseEntity);
 
         template.update(sql);
-        em.refresh(baseEntity);
     }
 
     public <T extends CreatedModifiedBaseEntity>
     @Transactional
-    void setCreateDate(T baseEntity, OffsetDateTime timeToSet)  throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
+        void setCreateDate(T baseEntity, OffsetDateTime timeToSet) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
         String sql = "UPDATE " + getTable(baseEntity) + " SET last_modified_ts='" + timeToSet.toString()
             + "' where " + getIdColumn(baseEntity) + "=" + getIdValue(baseEntity);
 
@@ -52,7 +59,7 @@ public class DatabaseDateSetter {
         em.refresh(baseEntity);
     }
 
-    private  <T extends CreatedModifiedBaseEntity> String getIdColumn(T  entity) {
+    private <T extends CreatedModifiedBaseEntity> String getIdColumn(T entity) {
         Field[] fields = entity.getClass().getDeclaredFields();
         for (Field field : fields) {
             Id id = field.getAnnotation(Id.class);
@@ -67,7 +74,7 @@ public class DatabaseDateSetter {
         throw new UnsupportedOperationException("No id column found for entity");
     }
 
-    private  <T extends CreatedModifiedBaseEntity> String getId(T  entity) {
+    private <T extends CreatedModifiedBaseEntity> String getId(T entity) {
         Field[] fields = entity.getClass().getDeclaredFields();
         for (Field field : fields) {
             Id id = field.getAnnotation(Id.class);
@@ -79,7 +86,7 @@ public class DatabaseDateSetter {
         throw new UnsupportedOperationException("No id found for entity");
     }
 
-    private <T extends CreatedModifiedBaseEntity>  Method getMethodForId(T  entity, String id) {
+    private <T extends CreatedModifiedBaseEntity> Method getMethodForId(T entity, String id) {
         Method[] methods = entity.getClass().getMethods();
         for (Method method : methods) {
             if (method.getName().equalsIgnoreCase(id)) {
@@ -91,8 +98,8 @@ public class DatabaseDateSetter {
     }
 
     public <T extends CreatedModifiedBaseEntity> Integer
-    getIdValue(T  entity) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
-        String id  = getId(entity);
+    getIdValue(T entity) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
+        String id = getId(entity);
         Method methodId = getMethodForId(entity, "get" + id);
         return (Integer) methodId.invoke(entity);
     }
