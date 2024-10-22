@@ -150,14 +150,10 @@ withPipeline(type, product, component) {
         sh("./gradlew --no-daemon --init-script init.gradle assemble")
     }
 
-    before('build') {
-        sh("./bin/ci/pr-labels.sh")
-    }
-
     before('akschartsinstall') {
         onPR {
             // determine what to deploy on the dev env
-            sh("./bin/ci/pr-labels.sh")
+            sh("./bin/ci/process-pr-labels.sh")
         }
     }
 
