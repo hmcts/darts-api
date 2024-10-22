@@ -21,6 +21,7 @@ import uk.gov.hmcts.darts.common.repository.AnnotationDocumentRepository;
 import uk.gov.hmcts.darts.common.repository.CaseDocumentRepository;
 import uk.gov.hmcts.darts.common.repository.CaseRetentionRepository;
 import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
+import uk.gov.hmcts.darts.common.repository.MediaLinkedCaseRepository;
 import uk.gov.hmcts.darts.common.repository.MediaRepository;
 import uk.gov.hmcts.darts.common.repository.TranscriptionDocumentRepository;
 import uk.gov.hmcts.darts.common.util.EodHelper;
@@ -30,6 +31,7 @@ import uk.gov.hmcts.darts.retention.service.ApplyRetentionCaseAssociatedObjectsS
 import uk.gov.hmcts.darts.transcriptions.service.TranscriptionService;
 
 import java.time.OffsetDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 import static java.lang.String.format;
@@ -57,6 +59,8 @@ public class ApplyRetentionCaseAssociatedObjectsSingleCaseProcessorImpl implemen
     private final CurrentTimeHelper currentTimeHelper;
     private final ObjectMapper objectMapper;
 
+    private final MediaLinkedCaseRepository mediaLinkedCaseRepository;
+
     @Transactional
     @Override
     public void processApplyRetentionToCaseAssociatedObjects(Integer caseId) {
@@ -72,14 +76,18 @@ public class ApplyRetentionCaseAssociatedObjectsSingleCaseProcessorImpl implemen
     }
 
     private void applyRetentionToMedias(CourtCaseEntity courtCase) {
-
-        var medias = mediaRepository.findAllByCaseId(courtCase.getId());
-
-        for (var media : medias) {
-            var cases = media.associatedCourtCases();
-            if (allClosed(cases)) {
-                setLongestRetentionDateForMedia(media, cases);
-                setRetentionConfidenceScoreAndReasonForMedia(media, cases);
+        List<MediaEntity> medias = mediaRepository.findAllByCaseId(courtCase.getId());
+        List<MediaEntity> mediaEntities = new ArrayList<>();
+        mediaEntities.addAll(medias);
+        mediaEntities.addAll(mediaRepository.findAllLinkedByMediaLinkedCaseByCaseId(courtCase.getId()));
+        var allMedia = io.vavr.collection.List.ofAll(mediaEntities).distinctBy(MediaEntity::getId).toJavaList();
+        for (var media : allMedia) {
+            List<CourtCaseEntity> cases = media.associatedCourtCases();
+            mediaLinkedCaseRepository.findByMedia(media).forEach(mediaLinkedCase -> cases.add(mediaLinkedCase.getCourtCase()));
+            var allCases = io.vavr.collection.List.ofAll(cases).distinctBy(CourtCaseEntity::getId).toJavaList();
+            if (allClosed(allCases)) {
+                setLongestRetentionDateForMedia(media, allCases);
+                setRetentionConfidenceScoreAndReasonForMedia(media, allCases);
             }
         }
     }

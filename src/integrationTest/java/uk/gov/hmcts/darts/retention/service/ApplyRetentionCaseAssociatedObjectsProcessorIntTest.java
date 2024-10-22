@@ -127,14 +127,14 @@ class ApplyRetentionCaseAssociatedObjectsProcessorIntTest extends IntegrationBas
 
         medias = dartsDatabase.getMediaStub().createAndSaveSomeMedias();
 
-        var hearA1 = caseA.getHearings().get(0);
+        var hearA1 = caseA.getHearings().getFirst();
         var hearA2 = caseA.getHearings().get(1);
         var hearA3 = caseA.getHearings().get(2);
-        var hearB = caseB.getHearings().get(0);
-        hearA1.addMedia(medias.get(0));
+        var hearB = caseB.getHearings().getFirst();
+        hearA1.addMedia(medias.getFirst());
         hearA1.addMedia(medias.get(1));
         hearA2.addMedia(medias.get(2));
-        hearB.addMedia(medias.get(0));
+        hearB.addMedia(medias.getFirst());
         hearingRepository.save(hearA2);
         hearingRepository.save(hearA3);
         hearingRepository.save(hearA1);
@@ -160,14 +160,14 @@ class ApplyRetentionCaseAssociatedObjectsProcessorIntTest extends IntegrationBas
         processor.processApplyRetentionToCaseAssociatedObjects();
 
         // then
-        var media0 = mediaRepository.findById(medias.get(0).getId()).get();
+        var media0 = mediaRepository.findById(medias.getFirst().getId()).get();
         assertThat(media0.getRetainUntilTs()).isEqualTo(DT_2028);
-        var eodsMedia0 = eodRepository.findByMediaStatusAndType(medias.get(0), EodHelper.armDropZoneStatus(), EodHelper.armLocation());
-        assertThat(eodsMedia0.get(0).isUpdateRetention()).isTrue();
+        var eodsMedia0 = eodRepository.findByMediaStatusAndType(medias.getFirst(), EodHelper.armDropZoneStatus(), EodHelper.armLocation());
+        assertThat(eodsMedia0.getFirst().isUpdateRetention()).isTrue();
         var media1 = mediaRepository.findById(medias.get(1).getId()).get();
         assertThat(media1.getRetainUntilTs()).isEqualTo(DT_2026);
         var eodsMedia1 = eodRepository.findByMediaStatusAndType(medias.get(1), EodHelper.armDropZoneStatus(), EodHelper.armLocation());
-        assertThat(eodsMedia1.get(0).isUpdateRetention()).isTrue();
+        assertThat(eodsMedia1.getFirst().isUpdateRetention()).isTrue();
         var media2 = mediaRepository.findById(medias.get(2).getId()).get();
         assertThat(media2.getRetainUntilTs()).isEqualTo(DT_2026);
 
@@ -201,9 +201,9 @@ class ApplyRetentionCaseAssociatedObjectsProcessorIntTest extends IntegrationBas
         */
 
         // given
-        var hear1A = caseA.getHearings().get(0);
+        var hear1A = caseA.getHearings().getFirst();
         var hear2A = caseA.getHearings().get(1);
-        var hear1B = caseB.getHearings().get(0);
+        var hear1B = caseB.getHearings().getFirst();
 
         var annotation1A = annotationStub.createAndSaveAnnotationEntityWith(testUser, "TestAnnotation", hear1A);
         var annotation2A = annotationStub.createAndSaveAnnotationEntityWith(testUser, "TestAnnotation", hear1A);
@@ -235,12 +235,12 @@ class ApplyRetentionCaseAssociatedObjectsProcessorIntTest extends IntegrationBas
         assertThat(actualAnnotationDoc1.getRetainUntilTs()).isEqualTo(DT_2028);
         var eodsAnnotationDoc1 = eodRepository.findByAnnotationDocumentEntityAndExternalLocationType(
             annotationDoc1, EodHelper.armLocation());
-        assertThat(eodsAnnotationDoc1.get(0).isUpdateRetention()).isTrue();
+        assertThat(eodsAnnotationDoc1.getFirst().isUpdateRetention()).isTrue();
         var actualAnnotationDoc3 = annotationDocumentRepository.findById(annotationDoc3.getId()).get();
         assertThat(actualAnnotationDoc3.getRetainUntilTs()).isEqualTo(DT_2026);
         var eodsAnnotationDoc3 = eodRepository.findByAnnotationDocumentEntityAndExternalLocationType(
             annotationDoc3, EodHelper.armLocation());
-        assertThat(eodsAnnotationDoc3.get(0).isUpdateRetention()).isTrue();
+        assertThat(eodsAnnotationDoc3.getFirst().isUpdateRetention()).isTrue();
         var actualAnnotationDoc4 = annotationDocumentRepository.findById(annotationDoc4.getId()).get();
         assertThat(actualAnnotationDoc4.getRetainUntilTs()).isEqualTo(DT_2026);
         var actualAnnotationDoc5 = annotationDocumentRepository.findById(annotationDoc5.getId()).get();
@@ -267,9 +267,9 @@ class ApplyRetentionCaseAssociatedObjectsProcessorIntTest extends IntegrationBas
         */
 
         // given
-        var hear1 = caseA.getHearings().get(0);
+        var hear1 = caseA.getHearings().getFirst();
         var hear2 = caseA.getHearings().get(1);
-        var hear3 = caseB.getHearings().get(0);
+        var hear3 = caseB.getHearings().getFirst();
 
         var tr1 = transcriptionStub.createTranscription(hear1);
         tr1.addHearing(hear3);
@@ -282,11 +282,11 @@ class ApplyRetentionCaseAssociatedObjectsProcessorIntTest extends IntegrationBas
         transcriptionStub.updateTranscriptionWithDocument(tr1, STORED, INBOUND, UUID.randomUUID());
         transcriptionStub.updateTranscriptionWithDocument(tr2, STORED, INBOUND, UUID.randomUUID());
 
-        var trDoc1 = tr1.getTranscriptionDocumentEntities().get(0);
+        var trDoc1 = tr1.getTranscriptionDocumentEntities().getFirst();
         eodStub.createAndSaveExternalObjectDirectory(trDoc1.getId(), EodHelper.armDropZoneStatus(), EodHelper.armLocation());
         var trDoc2 = tr1.getTranscriptionDocumentEntities().get(1);
         eodStub.createAndSaveExternalObjectDirectory(trDoc2.getId(), EodHelper.armDropZoneStatus(), EodHelper.armLocation());
-        var trDoc3 = tr2.getTranscriptionDocumentEntities().get(0);
+        var trDoc3 = tr2.getTranscriptionDocumentEntities().getFirst();
         eodStub.createAndSaveExternalObjectDirectory(trDoc3.getId(), EodHelper.armDropZoneStatus(), EodHelper.armLocation());
 
         // when
@@ -296,11 +296,11 @@ class ApplyRetentionCaseAssociatedObjectsProcessorIntTest extends IntegrationBas
         var actualTranscriptionDoc1 = transcriptionDocumentRepository.findById(trDoc1.getId()).get();
         assertThat(actualTranscriptionDoc1.getRetainUntilTs()).isEqualTo(DT_2028);
         var eodsTranscriptionDoc1 = eodRepository.findByTranscriptionDocumentEntityAndExternalLocationType(trDoc1, EodHelper.armLocation());
-        assertThat(eodsTranscriptionDoc1.get(0).isUpdateRetention()).isTrue();
+        assertThat(eodsTranscriptionDoc1.getFirst().isUpdateRetention()).isTrue();
         var actualTranscriptionDoc2 = transcriptionDocumentRepository.findById(trDoc2.getId()).get();
         assertThat(actualTranscriptionDoc2.getRetainUntilTs()).isEqualTo(DT_2028);
         var eodsTranscriptionDoc2 = eodRepository.findByTranscriptionDocumentEntityAndExternalLocationType(trDoc2, EodHelper.armLocation());
-        assertThat(eodsTranscriptionDoc2.get(0).isUpdateRetention()).isTrue();
+        assertThat(eodsTranscriptionDoc2.getFirst().isUpdateRetention()).isTrue();
         var actualTranscriptionDoc3 = transcriptionDocumentRepository.findById(trDoc3.getId()).get();
         assertThat(actualTranscriptionDoc3.getRetainUntilTs()).isEqualTo(DT_2026);
 
@@ -335,15 +335,15 @@ class ApplyRetentionCaseAssociatedObjectsProcessorIntTest extends IntegrationBas
         var actualCaseDoc1 = caseDocumentRepository.findById(caseDoc1.getId()).get();
         assertThat(actualCaseDoc1.getRetainUntilTs()).isEqualTo(DT_2026);
         var eodsCaseDoc1 = eodRepository.findByCaseDocumentAndExternalLocationType(actualCaseDoc1, EodHelper.armLocation());
-        assertThat(eodsCaseDoc1.get(0).isUpdateRetention()).isTrue();
+        assertThat(eodsCaseDoc1.getFirst().isUpdateRetention()).isTrue();
         var actualCaseDoc2 = caseDocumentRepository.findById(caseDoc2.getId()).get();
         assertThat(actualCaseDoc2.getRetainUntilTs()).isEqualTo(DT_2026);
         var eodsCaseDoc2 = eodRepository.findByCaseDocumentAndExternalLocationType(actualCaseDoc2, EodHelper.armLocation());
-        assertThat(eodsCaseDoc2.get(0).isUpdateRetention()).isTrue();
+        assertThat(eodsCaseDoc2.getFirst().isUpdateRetention()).isTrue();
         var actualCaseDoc3 = caseDocumentRepository.findById(caseDoc3.getId()).get();
         assertThat(actualCaseDoc3.getRetainUntilTs()).isEqualTo(DT_2028);
         var eodsCaseDoc3 = eodRepository.findByCaseDocumentAndExternalLocationType(actualCaseDoc3, EodHelper.armLocation());
-        assertThat(eodsCaseDoc3.get(0).isUpdateRetention()).isTrue();
+        assertThat(eodsCaseDoc3.getFirst().isUpdateRetention()).isTrue();
     }
 
     @Test
@@ -351,20 +351,20 @@ class ApplyRetentionCaseAssociatedObjectsProcessorIntTest extends IntegrationBas
 
         // given
         doThrow(RuntimeException.class).when(eodRepository).findByMediaAndExternalLocationType(argThat(
-            new MediaIdMatcher(medias.get(0).getId())), refEq(EodHelper.armLocation()));
+            new MediaIdMatcher(medias.getFirst().getId())), refEq(EodHelper.armLocation()));
 
         // when
         processor.processApplyRetentionToCaseAssociatedObjects();
 
         // then
-        var media0 = mediaRepository.findById(medias.get(0).getId()).get();
+        var media0 = mediaRepository.findById(medias.getFirst().getId()).get();
         assertThat(media0.getRetainUntilTs()).isNull();
-        var eodsMedia0 = eodRepository.findByMediaStatusAndType(medias.get(0), EodHelper.armDropZoneStatus(), EodHelper.armLocation());
-        assertThat(eodsMedia0.get(0).isUpdateRetention()).isFalse();
+        var eodsMedia0 = eodRepository.findByMediaStatusAndType(medias.getFirst(), EodHelper.armDropZoneStatus(), EodHelper.armLocation());
+        assertThat(eodsMedia0.getFirst().isUpdateRetention()).isFalse();
         var media1 = mediaRepository.findById(medias.get(1).getId()).get();
         assertThat(media1.getRetainUntilTs()).isNull();
         var eodsMedia1 = eodRepository.findByMediaStatusAndType(medias.get(1), EodHelper.armDropZoneStatus(), EodHelper.armLocation());
-        assertThat(eodsMedia1.get(0).isUpdateRetention()).isFalse();
+        assertThat(eodsMedia1.getFirst().isUpdateRetention()).isFalse();
 
         var actualCaseA = caseRepository.findById(caseA.getId());
         assertThat(actualCaseA.get().isRetentionUpdated()).isTrue();
@@ -384,10 +384,10 @@ class ApplyRetentionCaseAssociatedObjectsProcessorIntTest extends IntegrationBas
         processor.processApplyRetentionToCaseAssociatedObjects();
 
         // then
-        var media0 = mediaRepository.findById(medias.get(0).getId()).get();
+        var media0 = mediaRepository.findById(medias.getFirst().getId()).get();
         assertThat(media0.getRetainUntilTs()).isNull();
-        var eodsMedia0 = eodRepository.findByMediaStatusAndType(medias.get(0), EodHelper.armDropZoneStatus(), EodHelper.armLocation());
-        assertThat(eodsMedia0.get(0).isUpdateRetention()).isFalse();
+        var eodsMedia0 = eodRepository.findByMediaStatusAndType(medias.getFirst(), EodHelper.armDropZoneStatus(), EodHelper.armLocation());
+        assertThat(eodsMedia0.getFirst().isUpdateRetention()).isFalse();
 
         var actualCaseA = caseRepository.findById(caseA.getId());
         assertThat(actualCaseA.get().isRetentionUpdated()).isFalse();
@@ -405,7 +405,7 @@ class ApplyRetentionCaseAssociatedObjectsProcessorIntTest extends IntegrationBas
         processor.processApplyRetentionToCaseAssociatedObjects();
 
         // then
-        var media0 = mediaRepository.findById(medias.get(0).getId()).get();
+        var media0 = mediaRepository.findById(medias.getFirst().getId()).get();
         assertThat(media0.getRetainUntilTs()).isNull();
         var media1 = mediaRepository.findById(medias.get(1).getId()).get();
         assertThat(media1.getRetainUntilTs()).isNull();
@@ -430,10 +430,10 @@ class ApplyRetentionCaseAssociatedObjectsProcessorIntTest extends IntegrationBas
         processor.processApplyRetentionToCaseAssociatedObjects();
 
         // then
-        var media0 = mediaRepository.findById(medias.get(0).getId()).get();
+        var media0 = mediaRepository.findById(medias.getFirst().getId()).get();
         assertThat(media0.getRetainUntilTs()).isNull();
-        var eodsMedia0 = eodRepository.findByMediaStatusAndType(medias.get(0), EodHelper.armDropZoneStatus(), EodHelper.armLocation());
-        assertThat(eodsMedia0.get(0).isUpdateRetention()).isFalse();
+        var eodsMedia0 = eodRepository.findByMediaStatusAndType(medias.getFirst(), EodHelper.armDropZoneStatus(), EodHelper.armLocation());
+        assertThat(eodsMedia0.getFirst().isUpdateRetention()).isFalse();
 
         var actualCaseA = caseRepository.findById(caseA.getId());
         assertThat(actualCaseA.get().isRetentionUpdated()).isTrue();
