@@ -20,7 +20,7 @@ import uk.gov.hmcts.darts.common.entity.AuditEntity_;
 import uk.gov.hmcts.darts.common.entity.EventEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.enums.SecurityRoleEnum;
-import uk.gov.hmcts.darts.common.exception.DartsApiException;
+import uk.gov.hmcts.darts.common.exception.CommonApiError;
 import uk.gov.hmcts.darts.event.component.DartsEventMapper;
 import uk.gov.hmcts.darts.event.exception.EventError;
 import uk.gov.hmcts.darts.event.model.AdminGetEventForIdResponseResult;
@@ -233,7 +233,7 @@ class EventsControllerTest extends IntegrationBase {
             .andReturn();
 
         Problem responseResult = objectMapper.readValue(response.getResponse().getContentAsString(), Problem.class);
-        Assertions.assertEquals(DartsApiException.DartsApiErrorCommon.NOT_FOUND.getType(), responseResult.getType());
+        Assertions.assertEquals(CommonApiError.NOT_FOUND.getType(), responseResult.getType());
     }
 
     private void assertAudit(EventEntity eventEntity) {

@@ -30,6 +30,7 @@ import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
 import uk.gov.hmcts.darts.common.entity.ObjectAdminActionEntity;
 import uk.gov.hmcts.darts.common.entity.TransformedMediaEntity;
+import uk.gov.hmcts.darts.common.exception.CommonApiError;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
 import uk.gov.hmcts.darts.common.repository.MediaRepository;
@@ -119,7 +120,7 @@ public class AdminMediaServiceImpl implements AdminMediaService {
     @Override
     public List<PostAdminMediasMarkedForDeletionItem> getMediasMarkedForDeletion() {
         if (!this.isManualDeletionEnabled()) {
-            throw new DartsApiException(DartsApiException.DartsApiErrorCommon.FEATURE_FLAG_NOT_ENABLED);
+            throw new DartsApiException(CommonApiError.FEATURE_FLAG_NOT_ENABLED, "Manual deletion is not enabled");
         }
 
         return objectAdminActionRepository.findAllMediaActionsWithAnyDeletionReason().stream()
@@ -147,7 +148,7 @@ public class AdminMediaServiceImpl implements AdminMediaService {
     @Transactional
     public MediaApproveMarkedForDeletionResponse adminApproveMediaMarkedForDeletion(Integer mediaId) {
         if (!this.isManualDeletionEnabled()) {
-            throw new DartsApiException(DartsApiException.DartsApiErrorCommon.FEATURE_FLAG_NOT_ENABLED);
+            throw new DartsApiException(CommonApiError.FEATURE_FLAG_NOT_ENABLED, "Manual deletion is not enabled");
         }
 
         mediaApproveMarkForDeletionValidator.validate(mediaId);
