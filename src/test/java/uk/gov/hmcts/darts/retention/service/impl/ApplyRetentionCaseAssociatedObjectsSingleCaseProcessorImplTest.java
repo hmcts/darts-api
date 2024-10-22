@@ -273,7 +273,7 @@ class ApplyRetentionCaseAssociatedObjectsSingleCaseProcessorImplTest {
 
         when(mediaRepository.findAllByCaseId(case1PerfectlyClosed.getId())).thenReturn(List.of(mediaA1, mediaA2, mediaB1));
 
-        when(mediaRepository.findAllLinkedByMediaLinkedCaseAndCaseId(case1PerfectlyClosed.getId())).thenReturn(List.of(mediaC1));
+        when(mediaRepository.findAllLinkedByMediaLinkedCaseByCaseId(case1PerfectlyClosed.getId())).thenReturn(List.of(mediaC1));
 
         var mediaC1LinkedToCase1 = createMediaLinkedCase(mediaC1, case5PerfectlyClosed);
 
