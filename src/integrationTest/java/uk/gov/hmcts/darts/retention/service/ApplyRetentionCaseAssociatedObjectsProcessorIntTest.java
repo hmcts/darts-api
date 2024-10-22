@@ -148,8 +148,8 @@ class ApplyRetentionCaseAssociatedObjectsProcessorIntTest extends IntegrationBas
         hearB.addMedia(medias.getFirst());
         hearC.addMedia(medias.get(3));
 
-        hearingRepository.save(hearA2);
         hearingRepository.save(hearA3);
+        hearingRepository.save(hearA2);
         hearingRepository.save(hearA1);
         hearingRepository.save(hearB);
         hearingRepository.save(hearC);
