@@ -147,7 +147,7 @@ class EventsControllerTest extends IntegrationBase {
                                                         Problem.class);
 
         // Then
-        Assertions.assertEquals(EventError.EVENT_ID_NOT_FOUND_RESULTS.getType(), responseResult.getType());
+        Assertions.assertEquals(CommonApiError.NOT_FOUND.getType(), responseResult.getType());
     }
 
     @Test
