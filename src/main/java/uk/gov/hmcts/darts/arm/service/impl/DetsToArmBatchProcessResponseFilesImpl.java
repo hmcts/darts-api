@@ -166,9 +166,11 @@ public class DetsToArmBatchProcessResponseFilesImpl extends AbstractArmBatchProc
         osr.setFlagFileIngestStatus(true);
         osr.setDateFileIngestToArm(timeHelper.currentOffsetDateTime());
         osr.setMd5FileIngestToArm(objectChecksum);
-        osr.setIdResponseFile(batchUploadFileFilenameProcessor.getInputUploadFilename());
+        osr.setIdResponseFile(batchUploadFileFilenameProcessor.getBatchMetadataFilename());
         osr.setIdResponseCrFile(armResponseBatchData.getCreateRecordFilenameProcessor().getCreateRecordFilename());
         osr.setIdResponseUfFile(armResponseBatchData.getUploadFileFilenameProcessor().getUploadFileFilename());
+        // clearing out any existing error messages
+        osr.setObjectStatus(null);
         osrRepository.save(osr);
     }
 
