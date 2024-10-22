@@ -86,7 +86,7 @@ public interface MediaRepository extends JpaRepository<MediaEntity, Integer>,
                                          OffsetDateTime endAt);
 
     //native query to bypass @SQLRestriction
-    @Query(value = "SELECT me FROM media me WHERE me.med_id = :mediaId", nativeQuery = true)
+    @Query(value = "SELECT me.* FROM darts.media me WHERE me.med_id = :mediaId", nativeQuery = true)
     Optional<MediaEntity> findByIdIncludeDeleted(Integer mediaId);
 
     @Query(value = """
