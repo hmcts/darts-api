@@ -124,24 +124,6 @@ postgresql:
     databases:
       - name: "pr-${CHANGE_ID}-darts"
 
-nodejs:
-  applicationPort: 3000
-  image: 'sdshmctspublic.azurecr.io/darts/portal:latest'
-  replicas: 0 #DARTS_PORTAL_REPLICAS
-  ingressHost: "darts-portal-pr-${CHANGE_ID}.dev.platform.hmcts.net"
-  aadIdentityName: darts
-  keyVaults:
-    darts:
-      secrets:
-        - redis-connection-string
-        - darts-portal-session-secret
-  environment:
-    ALLOW_CONFIG_MUTATIONS: true
-    DARTS_PORTAL_URL: "https://darts-portal-pr-${CHANGE_ID}.dev.platform.hmcts.net"
-    DARTS_API_URL: "https://darts-api-pr-${CHANGE_ID}.dev.platform.hmcts.net"
-    DARTS_AZUREAD_B2C_ORIGIN_HOST: https://hmctsstgextid.b2clogin.com
-    DARTS_AZUREAD_B2C_HOSTNAME: https://darts.staging.apps.hmcts.net
-
 # function:
 #   scaleType: Job
 #   image: ${IMAGE_NAME}
