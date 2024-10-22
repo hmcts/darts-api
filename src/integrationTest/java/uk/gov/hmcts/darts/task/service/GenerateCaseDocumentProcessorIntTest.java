@@ -61,7 +61,9 @@ class GenerateCaseDocumentProcessorIntTest extends IntegrationBase {
         dartsDatabase.save(hearing);
         dartsDatabase.getCaseRetentionStub().createCaseRetentionObject(courtCase, DT_2025);
 
-        dartsDatabase.getExternalObjectDirectoryStub().createAndSaveEod(medias.get(0), ARM_DROP_ZONE, ARM, eod -> { });
+        dartsDatabase.getExternalObjectDirectoryStub().createAndSaveEod(medias.get(0), ARM_DROP_ZONE, ARM,
+                                                                        eod -> {
+                                                                        });
 
         var testUser = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
         var annotation = dartsDatabase.getAnnotationStub().createAndSaveAnnotationEntityWith(testUser, "TestAnnotation", hearing);
@@ -78,6 +80,10 @@ class GenerateCaseDocumentProcessorIntTest extends IntegrationBase {
 
         List<ExternalObjectDirectoryEntity> eodCaseDocument = eodRepository.findByCaseDocument(caseDocument);
         assertThat(eodCaseDocument.size()).isEqualTo(1);
+
+        CourtCaseEntity courtCaseEntity = caseRepository.findById(caseDocument.getCourtCase().getId()).orElseThrow();
+        assertThat(courtCaseEntity.isRetentionUpdated()).isTrue();
+        assertThat(courtCaseEntity.getRetentionRetries()).isEqualTo(0);
     }
 
 }

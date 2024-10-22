@@ -172,10 +172,19 @@ components:
       type: string
       enum:
         - "COMMON_100"
-      x-enum-varnames: [ COURTHOUSE_PROVIDED_DOES_NOT_EXIST ]
+        - "COMMON_101"
+        - "COMMON_102"
+      x-enum-varnames: [ COURTHOUSE_PROVIDED_DOES_NOT_EXIST,
+                         FEATURE_FLAG_NOT_ENABLED,
+                         NOT_FOUND ]
 
     CommonTitleErrors:
       type: string
       enum:
         - "Provided courthouse does not exist"
-      x-enum-varnames: [ COURTHOUSE_PROVIDED_DOES_NOT_EXIST ]
+        - "Feature flag not enabled"
+        - "Resource not found"
+      x-enum-varnames: [ COURTHOUSE_PROVIDED_DOES_NOT_EXIST ,
+                         FEATURE_FLAG_NOT_ENABLED,
+                         NOT_FOUND
+      ]
