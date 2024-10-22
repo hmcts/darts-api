@@ -187,7 +187,7 @@ class MediaRepositoryIntTest extends PostgresIntegrationBase {
     }
 
     @Test
-    void findAllLinkedByMediaLinkedCaseByCaseId() {
+    void findAllLinkedByMediaLinkedCaseAndCaseId() {
         // given
         var caseA = PersistableFactory.getCourtCaseTestData().createSomeMinimalCase();
         var hearA1 = PersistableFactory.getHearingTestData().createHearingFor(caseA);
@@ -224,9 +224,9 @@ class MediaRepositoryIntTest extends PostgresIntegrationBase {
         mediaLinkedCaseRepository.save(createMediaLinkedCase(mediaLinked3, caseC));
 
         // when
-        var linkedMediaForCaseA = mediaRepository.findAllLinkedByMediaLinkedCaseByCaseId(caseA.getId());
-        var linkedMediaForCaseB = mediaRepository.findAllLinkedByMediaLinkedCaseByCaseId(caseB.getId());
-        var linkedMediaForCaseC = mediaRepository.findAllLinkedByMediaLinkedCaseByCaseId(caseC.getId());
+        var linkedMediaForCaseA = mediaRepository.findAllLinkedByMediaLinkedCaseAndCaseId(caseA.getId());
+        var linkedMediaForCaseB = mediaRepository.findAllLinkedByMediaLinkedCaseAndCaseId(caseB.getId());
+        var linkedMediaForCaseC = mediaRepository.findAllLinkedByMediaLinkedCaseAndCaseId(caseC.getId());
 
         // then
         assertEquals(2, linkedMediaForCaseA.size());
