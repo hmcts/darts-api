@@ -25,8 +25,6 @@ public class EventMapper {
     }
 
     private Event map(EventEntity eventEntity) {
-        // Events can only be associated with one hearing at this stage, but will need to update this logic if that changes in future
-        // e.g. single events for linked cases
         HearingEntity hearingEntity = eventEntity.getHearingEntities().get(0);
 
         Event event = new Event();
@@ -36,6 +34,7 @@ public class EventMapper {
         event.setTimestamp(eventEntity.getTimestamp());
         event.setName(eventEntity.getEventType().getEventName());
         event.setText(eventEntity.getEventText());
+        event.isDataAnonymised(eventEntity.isDataAnonymised());
 
         return event;
     }

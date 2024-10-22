@@ -44,9 +44,6 @@ class HearingsGetEventsControllerTest extends IntegrationBase {
     private EventEntity event;
 
     private static final String SOME_DATE = "2023-01-01";
-    private static final String SOME_COURTHOUSE = "SOME-COURTHOUSE";
-    private static final String SOME_COURTROOM = "some-courtroom";
-    private static final String SOME_CASE_NUMBER = "1";
 
     @BeforeEach
     void setUp() {
@@ -55,7 +52,7 @@ class HearingsGetEventsControllerTest extends IntegrationBase {
         courtCase.addProsecutor(createProsecutorForCase(courtCase));
         courtCase.addDefendant(createDefendantForCase(courtCase));
         courtCase.addDefence(createDefenceForCase(courtCase));
-        var hearing =  PersistableFactory.getHearingTestData().createHearingWith(courtCase, someMinimalCourtRoom(), LocalDate.parse(SOME_DATE));
+        var hearing = PersistableFactory.getHearingTestData().createHearingWith(courtCase, someMinimalCourtRoom(), LocalDate.parse(SOME_DATE));
 
         dartsPersistence.save(hearing);
 
@@ -76,7 +73,13 @@ class HearingsGetEventsControllerTest extends IntegrationBase {
         String actualJson = mvcResult.getResponse().getContentAsString();
         log.info("actualJson: {}", actualJson);
         String expectedJson = """
-            [{"id":<<eventId>>,"timestamp":"2020-06-20T10:00:00Z","name":"Defendant recalled","text":"testEventText"}]
+            [{
+              "id":<<eventId>>,
+              "timestamp":"2020-06-20T10:00:00Z",
+              "name":"Defendant recalled",
+              "text":"testEventText",
+              "is_data_anonymised": false
+            }]
             """;
         expectedJson = expectedJson.replace("<<eventId>>", event.getId().toString());
         JSONAssert.assertEquals(expectedJson, actualJson, JSONCompareMode.NON_EXTENSIBLE);

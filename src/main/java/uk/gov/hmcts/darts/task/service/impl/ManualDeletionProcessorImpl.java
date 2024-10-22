@@ -15,6 +15,7 @@ import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
 import uk.gov.hmcts.darts.common.repository.MediaRepository;
 import uk.gov.hmcts.darts.common.repository.ObjectAdminActionRepository;
 import uk.gov.hmcts.darts.common.repository.TranscriptionDocumentRepository;
+import uk.gov.hmcts.darts.log.api.LogApi;
 import uk.gov.hmcts.darts.task.service.ManualDeletionProcessor;
 
 import java.time.Duration;
@@ -35,6 +36,7 @@ public class ManualDeletionProcessorImpl implements ManualDeletionProcessor {
     private final TranscriptionDocumentRepository transcriptionDocumentRepository;
     private final ExternalInboundDataStoreDeleter inboundDeleter;
     private final ExternalUnstructuredDataStoreDeleter unstructuredDeleter;
+    private final LogApi logApi;
 
     @Override
     public void process() {
@@ -52,7 +54,7 @@ public class ManualDeletionProcessorImpl implements ManualDeletionProcessor {
     }
 
     private void deleteMedia(MediaEntity mediaEntity) {
-
+        log.info("Deleting mediaEntity with ID: {}", mediaEntity.getId());
         List<ExternalObjectDirectoryEntity> objectsToDelete = externalObjectDirectoryRepository.findStoredInInboundAndUnstructuredByMediaId(
             mediaEntity.getId());
 
@@ -63,10 +65,11 @@ public class ManualDeletionProcessorImpl implements ManualDeletionProcessor {
 
         mediaEntity.setDeleted(true);
         mediaRepository.save(mediaEntity);
-        log.info("Deleted mediaEntity with ID: {}", mediaEntity.getId());
+        logApi.mediaDeleted(mediaEntity.getId());
     }
 
     private void deleteTranscriptionDocument(TranscriptionDocumentEntity transcription) {
+        log.info("Deleting transcription document with ID: {}", transcription.getId());
 
         List<ExternalObjectDirectoryEntity> objectsToDelete =
             externalObjectDirectoryRepository.findStoredInInboundAndUnstructuredByTranscriptionId(transcription.getId());
@@ -78,7 +81,7 @@ public class ManualDeletionProcessorImpl implements ManualDeletionProcessor {
 
         transcription.setDeleted(true);
         transcriptionDocumentRepository.save(transcription);
-        log.info("Deleted transcription document with ID: {}", transcription.getId());
+        logApi.transcriptionDeleted(transcription.getId());
     }
 
     private void deleteFromExternalDataStore(ExternalObjectDirectoryEntity externalObjectDirectoryEntity) {
