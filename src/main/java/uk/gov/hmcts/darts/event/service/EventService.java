@@ -7,8 +7,7 @@ import uk.gov.hmcts.darts.event.model.AdminGetEventForIdResponseResult;
 public interface EventService {
     AdminGetEventForIdResponseResult adminGetEventById(Integer eventId);
 
-    EventEntity getEventEntityByEveId(Integer eveId);
-    EventEntity getEventByEventId(Integer eventId);
+    EventEntity getEventByEveId(Integer eveId);
 
     EventEntity saveEvent(EventEntity eventEntity);
 }

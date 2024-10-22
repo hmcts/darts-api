@@ -113,7 +113,7 @@ class AudioLinkingAutomatedTaskTest {
                 .processMedia(any(), any());
 
             EventEntity event = mock(EventEntity.class);
-            when(eventService.getEventById(1)).thenReturn(event);
+            when(eventService.getEventByEveId(1)).thenReturn(event);
             List<HearingEntity> hearingEntities = List.of(mock(HearingEntity.class), mock(HearingEntity.class));
             when(event.getHearingEntities()).thenReturn(hearingEntities);
             OffsetDateTime timestamp = OffsetDateTime.now();
@@ -142,9 +142,9 @@ class AudioLinkingAutomatedTaskTest {
                 .setEventStatus(3);
 
             verify(eventService, times(1))
-                .saveEventEntity(event);
+                .saveEvent(event);
             verify(eventService, times(1))
-                .getEventById(1);
+                .getEventByEveId(1);
         }
 
         @Test
@@ -153,7 +153,7 @@ class AudioLinkingAutomatedTaskTest {
                 .processMedia(any(), any());
             doReturn(Duration.ofSeconds(10)).when(eventProcessor).getAudioBuffer();
             EventEntity event = mock(EventEntity.class);
-            when(eventService.getEventById(2)).thenReturn(event);
+            when(eventService.getEventByEveId(2)).thenReturn(event);
             List<HearingEntity> hearingEntities = List.of(mock(HearingEntity.class), mock(HearingEntity.class));
             when(event.getHearingEntities()).thenReturn(hearingEntities);
             OffsetDateTime timestamp = OffsetDateTime.now();
@@ -181,7 +181,7 @@ class AudioLinkingAutomatedTaskTest {
             verify(event, times(1))
                 .setEventStatus(3);
             verify(eventService, times(1))
-                .getEventById(2);
+                .getEventByEveId(2);
         }
 
         @Test

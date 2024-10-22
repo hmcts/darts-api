@@ -79,14 +79,14 @@ public class AudioLinkingAutomatedTask extends AbstractLockableAutomatedTask
         @Transactional(value = Transactional.TxType.REQUIRES_NEW)
         void processEvent(Integer eventId) {
             try {
-                EventEntity event = eventService.getEventById(eventId);
+                EventEntity event = eventService.getEventByEveId(eventId);
                 List<MediaEntity> mediaEntities = mediaRepository.findAllByMediaTimeContains(
                     event.getCourtroom().getId(),
                     event.getTimestamp().plus(getAudioBuffer()),
                     event.getTimestamp().minus(getAudioBuffer()));
                 mediaEntities.forEach(mediaEntity -> processMedia(event.getHearingEntities(), mediaEntity));
                 event.setEventStatus(EventStatus.AUDIO_LINKED.getStatusNumber());
-                eventService.saveEventEntity(event);
+                eventService.saveEvent(event);
             } catch (Exception e) {
                 log.error("Error processing event {}", eventId, e);
             }
