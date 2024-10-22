@@ -17,9 +17,7 @@ public class EventSearchMapper {
             .text(evr.eventText())
             .courthouse(buildCourthouse(evr))
             .courtroom(buildCourtroom(evr))
-            .isEventAnonymised(evr.isDataAnonymised())
-            .isCaseExpired(evr.isDataAnonymisedForCase())
-            .caseExpiredAt(evr.dataAnonymisedTs());
+            .isDataAnonymised(evr.isDataAnonymised());
     }
 
     private static AdminSearchEventResponseResultCourtroom buildCourtroom(EventSearchResult evr) {

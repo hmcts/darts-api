@@ -24,9 +24,7 @@ class EventSearchMapperTest {
         assertThat(result.getCourthouse().getDisplayName()).isEqualTo(eventSearchResult.courtHouseDisplayName());
         assertThat(result.getCourtroom().getId()).isEqualTo(eventSearchResult.courtroomId());
         assertThat(result.getCourtroom().getName()).isEqualTo(eventSearchResult.courtroomName());
-        assertThat(result.getIsEventAnonymised()).isEqualTo(eventSearchResult.isDataAnonymised());
-        assertThat(result.getIsCaseExpired()).isEqualTo(eventSearchResult.isDataAnonymisedForCase());
-        assertThat(result.getCaseExpiredAt()).isEqualTo(eventSearchResult.dataAnonymisedTs());
+        assertThat(result.getIsDataAnonymised()).isEqualTo(eventSearchResult.isDataAnonymised());
     }
 
     private static EventSearchResult someEventSearchResult() {
