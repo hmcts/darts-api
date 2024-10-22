@@ -224,9 +224,9 @@ class MediaRepositoryIntTest extends PostgresIntegrationBase {
         mediaLinkedCaseRepository.save(createMediaLinkedCase(mediaLinked3, caseC));
 
         // when
-        var linkedMediaForCaseA = mediaRepository.findAllLinkedByMediaLinkedCaseAndCaseId(caseA.getId());
-        var linkedMediaForCaseB = mediaRepository.findAllLinkedByMediaLinkedCaseAndCaseId(caseB.getId());
-        var linkedMediaForCaseC = mediaRepository.findAllLinkedByMediaLinkedCaseAndCaseId(caseC.getId());
+        var linkedMediaForCaseA = mediaRepository.findAllLinkedByMediaLinkedCaseByCaseId(caseA.getId());
+        var linkedMediaForCaseB = mediaRepository.findAllLinkedByMediaLinkedCaseByCaseId(caseB.getId());
+        var linkedMediaForCaseC = mediaRepository.findAllLinkedByMediaLinkedCaseByCaseId(caseC.getId());
 
         // then
         assertEquals(2, linkedMediaForCaseA.size());
