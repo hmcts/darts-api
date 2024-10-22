@@ -80,7 +80,7 @@ public class ApplyRetentionCaseAssociatedObjectsSingleCaseProcessorImpl implemen
         // get all current media linked to the case
         mediaEntities.addAll(mediaRepository.findAllByCaseId(courtCase.getId()));
         // get all media linked to the case via media linked case
-        mediaEntities.addAll(mediaRepository.findAllLinkedByMediaLinkedCaseByCaseId(courtCase.getId()));
+        mediaEntities.addAll(mediaRepository.findAllLinkedByMediaLinkedCaseAndCaseId(courtCase.getId()));
         // remove duplicates
         var allMedia = io.vavr.collection.List.ofAll(mediaEntities).distinctBy(MediaEntity::getId).toJavaList();
         for (var media : allMedia) {
