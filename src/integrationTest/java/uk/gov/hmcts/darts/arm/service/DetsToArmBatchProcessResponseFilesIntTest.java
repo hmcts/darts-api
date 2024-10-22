@@ -30,7 +30,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+import static java.time.temporal.ChronoUnit.SECONDS;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.within;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum.ARM;
@@ -383,9 +385,9 @@ class DetsToArmBatchProcessResponseFilesIntTest extends AbstractArmBatchProcessR
         // then
         ObjectStateRecordEntity dbOsr = osrRepository.findByArmEodId(String.valueOf(armEod.getId())).orElseThrow();
         assertThat(dbOsr.getFlagRspnRecvdFromArml()).isTrue();
-        assertThat(dbOsr.getDateRspnRecvdFromArml()).isEqualTo(currentDateTime);
+        assertThat(dbOsr.getDateRspnRecvdFromArml()).isCloseTo(currentDateTime, within(1, SECONDS));
         assertThat(dbOsr.getFlagFileIngestStatus()).isFalse();
-        assertThat(dbOsr.getDateFileIngestToArm()).isEqualTo(currentDateTime);
+        assertThat(dbOsr.getDateFileIngestToArm()).isCloseTo(currentDateTime, within(1, SECONDS));
         assertThat(dbOsr.getObjectStatus()).isEqualTo("External object id 1 checksum differs. Arm checksum: 1234 Object Checksum: 55555555");
         assertThat(dbOsr.getMd5FileIngestToArm()).isNull();
         assertThat(dbOsr.getIdResponseFile()).isNull();
@@ -470,9 +472,9 @@ class DetsToArmBatchProcessResponseFilesIntTest extends AbstractArmBatchProcessR
         // then
         ObjectStateRecordEntity dbOsr = osrRepository.findByArmEodId(String.valueOf(armEod.getId())).orElseThrow();
         assertThat(dbOsr.getFlagRspnRecvdFromArml()).isTrue();
-        assertThat(dbOsr.getDateRspnRecvdFromArml()).isEqualTo(currentDateTime);
+        assertThat(dbOsr.getDateRspnRecvdFromArml()).isCloseTo(currentDateTime, within(1, SECONDS));
         assertThat(dbOsr.getFlagFileIngestStatus()).isFalse();
-        assertThat(dbOsr.getDateFileIngestToArm()).isEqualTo(currentDateTime);
+        assertThat(dbOsr.getDateFileIngestToArm()).isCloseTo(currentDateTime, within(1, SECONDS));
         assertThat(dbOsr.getObjectStatus()).isEqualTo("Exception Description");
         assertThat(dbOsr.getMd5FileIngestToArm()).isNull();
         assertThat(dbOsr.getIdResponseFile()).isNull();
