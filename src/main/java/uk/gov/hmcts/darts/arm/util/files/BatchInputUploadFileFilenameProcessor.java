@@ -49,8 +49,4 @@ public class BatchInputUploadFileFilenameProcessor {
             throw new IllegalArgumentException("Invalid batch input upload filename " + batchMetadataFilenameAndPath);
         }
     }
-
-    public String getInputUploadFilename() {
-        return batchMetadataFilename;
-    }
 }

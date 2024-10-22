@@ -78,7 +78,7 @@ class DetsToArmBatchProcessResponseFilesIntTest extends AbstractArmBatchProcessR
 
     @SneakyThrows
     @Test
-    void batchProcessResponseFiles_WithMediaReturnsSuccess_UpdateObjectStateRecords() throws IOException {
+    void batchProcessResponseFiles_WithMediaReturnsSuccess_UpdateObjectStateRecords() {
 
         // given
         HearingEntity hearing = PersistableFactory.getHearingTestData().someMinimal();
@@ -258,6 +258,7 @@ class DetsToArmBatchProcessResponseFilesIntTest extends AbstractArmBatchProcessR
         assertThat(dbOsr1.getIdResponseUfFile()).isEqualTo("6a374f19a9ce7dc9cc480ea8d4eca0fb_04e6bc3b-952a-79b6-8362-13259aae1895_1_uf.rsp");
         assertThat(dbOsr1.getFlagFileDetsCleanupStatus()).isTrue();
         assertThat(dbOsr1.getDateFileDetsCleanup()).isEqualTo(endTime2);
+        assertThat(dbOsr1.getObjectStatus()).isNull();
         assertThat(externalObjectDirectoryRepository.findById(detsEod1.getId())).isEmpty();
 
         ObjectStateRecordEntity dbOsr2 = osrRepository.findByArmEodId(String.valueOf(armEod2.getId())).orElseThrow();
