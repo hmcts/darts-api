@@ -34,7 +34,7 @@ public class UnstructuredAudioDeleterProcessorImpl implements UnstructuredAudioD
     @Override
     public void markForDeletion() {
 
-        OffsetDateTime unstructuredModifiedBeforeDateTime = currentTimeHelper.currentOffsetDateTime().minusSeconds(durationInUnstructured.getSeconds());
+        OffsetDateTime unstructuredModifiedBeforeDateTime = currentTimeHelper.currentOffsetDateTime().minus(durationInUnstructured);
 
         List<Integer> audioFileIdsToBeMarked = externalObjectDirectoryRepository.findIdsForAudioToBeDeletedFromUnstructured(
             EodHelper.storedStatus(),
