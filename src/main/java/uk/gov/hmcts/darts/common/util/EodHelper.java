@@ -126,10 +126,10 @@ public class EodHelper {
     @Transactional
     public void updateStatus(ObjectRecordStatusEntity newStatus, UserAccountEntity user, List<Integer> idsToBeUpdated, OffsetDateTime timestamp) {
         eodRepository.updateStatus(
-            EodHelper.markForDeletionStatus(),
+            newStatus,
             user,
             idsToBeUpdated,
-            OffsetDateTime.now()
+            timestamp
         );
     }
 }
