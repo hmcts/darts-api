@@ -4,7 +4,13 @@ This directory contains overrides for the files in the `charts` directory.
 
 These overrides are used to replace the files in the development environment, when specific labels are set on the PR.
 
-This happens at the start of the AKS deploy dev stage in the pipeline.
+This happens at the start of the AKS deploy dev stage in the pipeline, where the `./bin/ci/process-pr-labels.sh` script is run. This script requires access to the GitHub API which is granted via a token saved in the DARTS staging key-vault, using secret name and env var below.
+
+| Secret name    | Environment variable |
+|----------------|----------------------|
+| GithubApiToken | GITHUB_API_TOKEN     |
+
+If the GitHub API access stops working please see the [troubleshooting](https://tools.hmcts.net/confluence/pages/viewpage.action?pageId=1725401108#Devenvironment-DARTSAPIoptionaldeploymentshavestoppedworking) section on the [Dev environment](https://tools.hmcts.net/confluence/display/DMP/Dev+environment) confluence page.
 
 _Note: the `enable_keep_helm` label must also be set on the PR for these overrides to be used._
 
