@@ -254,8 +254,8 @@ class DetsToArmBatchPushProcessorIntTest extends IntegrationBase {
             .findById(foundArmEod.getOsrUuid()).orElseThrow();
         assertEquals(detsEod.getId(), Integer.parseInt(objectStateRecordEntityModified.getEodId()));
         assertEquals(foundArmEod.getId(), Integer.parseInt(objectStateRecordEntityModified.getArmEodId()));
-        assertTrue(objectStateRecordEntityModified.getFlagFileTransferToDets());
-        assertNotNull(objectStateRecordEntityModified.getDateFileTransferToDets());
+        assertTrue(objectStateRecordEntityModified.getFlagFileTransfToarml());
+        assertNotNull(objectStateRecordEntityModified.getDateFileTransfToarml());
         assertEquals(detsEod.getChecksum(), objectStateRecordEntityModified.getMd5FileTransfArml());
         assertEquals(savedMedia.getFileSize(), objectStateRecordEntity.getFileSizeBytesArml());
         assertTrue(objectStateRecordEntityModified.getFlagFileMfstCreated());
