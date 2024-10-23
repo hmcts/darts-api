@@ -10,6 +10,9 @@ import java.util.concurrent.TimeUnit;
 
 @Slf4j
 public final class AsyncUtil {
+    private AsyncUtil() {
+
+    }
 
     public static void shutdownAndAwaitTermination(ExecutorService executorService, int timeout, TimeUnit unit) {
         executorService.shutdown();
