@@ -472,7 +472,7 @@ class OutboundAudioDeleterProcessorTest extends IntegrationBase {
         //setting clock to 2023-10-23 on a monday
         when(currentTimeHelper.currentOffsetDateTime()).thenReturn(OffsetDateTime.of(2023, 10, 23, 22, 0, 0, 0, ZoneOffset.UTC));
 
-        if (isHidden || isDeleted) {
+        if (isHidden && !isDeleted) {
             assertEquals(1, outboundAudioDeleterProcessor.markForDeletion().size());
             assertTransientObjectDirectoryStateChanged(notMarkedForDeletion.getId());
         } else {
