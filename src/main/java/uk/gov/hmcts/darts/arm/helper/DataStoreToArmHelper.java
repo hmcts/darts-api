@@ -15,6 +15,7 @@ import uk.gov.hmcts.darts.common.entity.ExternalLocationTypeEntity;
 import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.entity.ObjectRecordStatusEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
+import uk.gov.hmcts.darts.common.exception.DartsException;
 import uk.gov.hmcts.darts.common.repository.ExternalLocationTypeRepository;
 import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
 import uk.gov.hmcts.darts.common.repository.ObjectRecordStatusRepository;
@@ -153,10 +154,8 @@ public class DataStoreToArmHelper {
         armExternalObjectDirectoryEntity.setCreatedBy(userAccount);
         armExternalObjectDirectoryEntity.setLastModifiedBy(userAccount);
         armExternalObjectDirectoryEntity.setTransferAttempts(1);
-        // This is only set for DETS records
-        if (nonNull(externalObjectDirectory.getOsrUuid())) {
-            armExternalObjectDirectoryEntity.setOsrUuid(externalObjectDirectory.getOsrUuid());
-        }
+        // This should only get set for DETS records
+        armExternalObjectDirectoryEntity.setOsrUuid(externalObjectDirectory.getOsrUuid());
         return armExternalObjectDirectoryEntity;
     }
 
@@ -246,7 +245,7 @@ public class DataStoreToArmHelper {
         } else {
             log.error("Unable to find matching external object directory for {}", armEod.getId());
             updateExternalObjectDirectoryFailedTransferAttempts(armEod, userAccount);
-            throw new RuntimeException(MessageFormat.format("Unable to find matching external object directory for {0}", armEod.getId()));
+            throw new DartsException(MessageFormat.format("Unable to find matching external object directory for {0}", armEod.getId()));
         }
     }
 

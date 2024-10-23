@@ -217,6 +217,10 @@ class DataStoreToArmHelperIntTest extends IntegrationBase {
             externalObjectDirectory, status, userAccount);
 
         assertNotNull(result);
+        assertEquals(externalObjectDirectory.getExternalLocation(), result.getExternalLocation());
+        assertEquals(externalObjectDirectory.getOsrUuid(), result.getOsrUuid());
+        assertEquals(status, result.getStatus());
+        assertEquals(userAccount, result.getCreatedBy());
     }
 
     @Test
@@ -351,7 +355,7 @@ class DataStoreToArmHelperIntTest extends IntegrationBase {
             .recordMetadata(createMediaArchiveRecordMetadata())
             .build();
     }
-    
+
     private RecordMetadata createMediaArchiveRecordMetadata() {
         OffsetDateTime recordTime = OffsetDateTime.of(2024, 1, 23, 10, 0, 0, 0, ZoneOffset.UTC);
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern(DATE_TIME_FORMAT);
