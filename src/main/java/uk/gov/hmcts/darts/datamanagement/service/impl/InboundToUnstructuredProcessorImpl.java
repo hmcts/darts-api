@@ -14,8 +14,14 @@ import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
 import uk.gov.hmcts.darts.common.repository.ObjectRecordStatusRepository;
 import uk.gov.hmcts.darts.datamanagement.service.InboundToUnstructuredProcessor;
 import uk.gov.hmcts.darts.datamanagement.service.InboundToUnstructuredProcessorSingleElement;
+import uk.gov.hmcts.darts.util.AsyncUtil;
 
 import java.util.List;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import static uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum.INBOUND;
 import static uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum.UNSTRUCTURED;
@@ -33,15 +39,6 @@ import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.STORED;
 @RequiredArgsConstructor
 @Slf4j
 public class InboundToUnstructuredProcessorImpl implements InboundToUnstructuredProcessor {
-
-    private final ExternalObjectDirectoryRepository externalObjectDirectoryRepository;
-    private final ObjectRecordStatusRepository objectRecordStatusRepository;
-    private final ExternalLocationTypeRepository externalLocationTypeRepository;
-    private final InboundToUnstructuredProcessorSingleElement singleElementProcessor;
-
-    @Value("${darts.data-management.inbound-to-unstructured-limit: 100}")
-    private Integer limit;
-
     public static final List<Integer> FAILURE_STATES_LIST =
         List.of(
             FAILURE.getId(),
@@ -53,24 +50,47 @@ public class InboundToUnstructuredProcessorImpl implements InboundToUnstructured
             FAILURE_EMPTY_FILE.getId()
         );
 
-    @Override
-    public void processInboundToUnstructured() {
-        log.debug("Processing Inbound data store");
-        processAllStoredInboundExternalObjectsOneCall();
-    }
+    private final ExternalObjectDirectoryRepository externalObjectDirectoryRepository;
+    private final ObjectRecordStatusRepository objectRecordStatusRepository;
+    private final ExternalLocationTypeRepository externalLocationTypeRepository;
+    private final InboundToUnstructuredProcessorSingleElement singleElementProcessor;
 
-    private void processAllStoredInboundExternalObjectsOneCall() {
+    @Value("${darts.automated.task.inbound-to-unstructured.threads:20}")
+    private final Integer threads;
+
+
+    @Override
+    public void processInboundToUnstructured(int batchSize) {
+        log.debug("Processing Inbound data store");
         List<ExternalObjectDirectoryEntity> inboundList = externalObjectDirectoryRepository.findEodsForTransfer(getStatus(STORED), getType(INBOUND),
                                                                                                                 getStatus(STORED), getType(UNSTRUCTURED), 3,
-                                                                                                                limit);
-        int count = 1;
-        for (ExternalObjectDirectoryEntity inboundObject : inboundList) {
-            log.debug("Processing Inbound to Unstructured record {} of {} with EOD {}", count++, inboundList.size(), inboundObject);
-            try {
-                singleElementProcessor.processSingleElement(inboundObject);
-            } catch (Exception exception) {
-                log.error("Failed to move from inbound file to unstructured data store for EOD id: {}", inboundObject.getId(), exception);
-            }
+                                                                                                                batchSize);
+        AtomicInteger count = new AtomicInteger();
+
+        System.out.println("TMP: here 1");
+        List<Callable<Void>> tasks = inboundList.stream()
+            .map(inboundObject -> (Callable<Void>) () -> {
+                log.debug("Processing Inbound to Unstructured record {} of {} with EOD {}",
+                          count.getAndIncrement(), inboundList.size(), inboundObject);
+
+                System.out.println("TMP: here 3 - " + count.get());
+                processInboundToUnstructured(inboundObject);
+                return null;
+            }).toList();
+        System.out.println("TMP: here 2 -- " + tasks.size());
+        System.out.println(threads);
+        try {
+            AsyncUtil.invokeAllAwaitTermination(tasks, threads, 1, TimeUnit.HOURS);
+        } catch (Exception e) {
+            log.error("Inbound to Unstructured unexpected exception", e);
+        }
+    }
+
+    private void processInboundToUnstructured(ExternalObjectDirectoryEntity inboundObject) {
+        try {
+            singleElementProcessor.processSingleElement(inboundObject);
+        } catch (Exception exception) {
+            log.error("Failed to move from inbound file to unstructured data store for EOD id: {}", inboundObject.getId(), exception);
         }
     }
 

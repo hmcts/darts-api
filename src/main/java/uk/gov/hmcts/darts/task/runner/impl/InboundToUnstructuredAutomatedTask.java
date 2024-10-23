@@ -37,6 +37,6 @@ public class InboundToUnstructuredAutomatedTask extends AbstractLockableAutomate
 
     @Override
     protected void runTask() {
-        inboundToUnstructuredProcessor.processInboundToUnstructured();
+        inboundToUnstructuredProcessor.processInboundToUnstructured(getAutomatedTaskBatchSize());
     }
 }
