@@ -65,18 +65,14 @@ public class InboundToUnstructuredProcessorImpl implements InboundToUnstructured
                                                                                                                 batchSize);
         AtomicInteger count = new AtomicInteger();
 
-        System.out.println("TMP: here 1");
         List<Callable<Void>> tasks = inboundList.stream()
             .map(inboundObject -> (Callable<Void>) () -> {
                 log.debug("Processing Inbound to Unstructured record {} of {} with EOD {}",
                           count.getAndIncrement(), inboundList.size(), inboundObject);
 
-                System.out.println("TMP: here 3 - " + count.get());
                 processInboundToUnstructured(inboundObject);
                 return null;
             }).toList();
-        System.out.println("TMP: here 2 -- " + tasks.size());
-        System.out.println(threads);
         try {
             AsyncUtil.invokeAllAwaitTermination(tasks, threads, 1, TimeUnit.HOURS);
         } catch (Exception e) {
