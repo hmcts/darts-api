@@ -379,7 +379,7 @@ _Disclaimer: The script has been written to work using `bash`._
 
 Please see the separate [Dev environment](https://tools.hmcts.net/confluence/display/DMP/Dev+environment) page on confluence for details.
 
-This repo contains overrides for the default dev environment configuration. For more details see the  [Dev overrides README](charts-dev-overrides/README.md), within the `charts-dev-overrides` directory.
+This repo contains overrides for the default dev environment configuration. For more details see the  [Dev chart overrides README](charts-dev-overrides/README.md), within the `charts-dev-overrides` directory.
 
 ## License
 
