@@ -203,7 +203,8 @@ class DetsToArmBatchPushProcessorImplTest {
         assertTrue(
             objectStateRecordEntity
                 .getObjectStatus()
-                .startsWith("Error during batch push DETS EOD 123 to ARM - java.lang.RuntimeException: Unable to find matching external object directory"));
+                .startsWith(
+                    "Error during batch push DETS EOD 123 to ARM - uk.gov.hmcts.darts.common.exception.DartsException: Unable to find matching external object directory"));
 
     }
 
