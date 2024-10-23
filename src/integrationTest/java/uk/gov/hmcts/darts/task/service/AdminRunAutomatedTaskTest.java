@@ -50,6 +50,7 @@ class AdminRunAutomatedTaskTest extends IntegrationBase {
         Assertions.assertEquals(1, auditRepository.findAll().size());
         AuditEntity auditEntity = auditRepository.findAll().get(0);
         Assertions.assertEquals(AuditActivity.RUN_JOB_MANUALLY.getId(), auditEntity.getAuditActivity().getId());
+        Assertions.assertEquals("ProcessDailyList", auditEntity.getAdditionalData());
     }
 
     @ParameterizedTest

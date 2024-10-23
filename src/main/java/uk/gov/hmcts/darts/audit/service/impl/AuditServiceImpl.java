@@ -26,11 +26,17 @@ public class AuditServiceImpl implements AuditService {
     @Transactional
     @Override
     public void recordAudit(AuditActivity activity, UserAccountEntity userAccountEntity, CourtCaseEntity courtCase) {
+        recordAudit(activity, userAccountEntity, courtCase, null);
+    }
+
+    @Transactional
+    @Override
+    public void recordAudit(AuditActivity activity, UserAccountEntity userAccountEntity, CourtCaseEntity courtCase, String additionalData) {
         AuditEntity auditEntity = new AuditEntity();
         auditEntity.setCourtCase(courtCase);
         auditEntity.setAuditActivity(auditActivityRepository.getReferenceById(activity.getId()));
         auditEntity.setUser(userAccountEntity);
-        auditEntity.setAdditionalData(null);
+        auditEntity.setAdditionalData(additionalData);
         auditEntity.setCreatedBy(userAccountEntity);
         auditEntity.setLastModifiedBy(userAccountEntity);
         auditRepository.saveAndFlush(auditEntity);
