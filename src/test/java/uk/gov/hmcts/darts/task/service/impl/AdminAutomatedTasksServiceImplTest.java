@@ -72,7 +72,7 @@ class AdminAutomatedTasksServiceImplTest {
         adminAutomatedTaskService.runAutomatedTask(1);
 
         verify(automatedTaskRunner, times(1)).run(someAutomatedTask);
-        verify(auditApi, times(1)).record(AuditActivity.RUN_JOB_MANUALLY);
+        verify(auditApi, times(1)).record(AuditActivity.RUN_JOB_MANUALLY,"some-task-name");
     }
 
     @Test
@@ -95,7 +95,7 @@ class AdminAutomatedTasksServiceImplTest {
         assertFalse(automatedTaskEntity.getTaskEnabled());
         assertEquals(100, automatedTaskEntity.getBatchSize());
         assertEquals(expectedReturnTask, task);
-        verify(auditApi).record(AuditActivity.ENABLE_DISABLE_JOB);
+        verify(auditApi).record(AuditActivity.ENABLE_DISABLE_JOB,"some-task-name disabled");
         verifyNoMoreInteractions(auditApi);
     }
 
