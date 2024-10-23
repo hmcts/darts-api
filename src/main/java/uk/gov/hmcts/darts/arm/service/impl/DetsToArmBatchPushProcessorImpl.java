@@ -128,18 +128,18 @@ public class DetsToArmBatchPushProcessorImpl implements DetsToArmBatchPushProces
                     batchItem.setArmEod(armEod);
                     dataStoreToArmHelper.updateArmEodToArmIngestionStatus(
                         currentEod, batchItem, batchItems, archiveRecordsFile, userAccount, EodHelper.detsLocation());
-                    getObjectStateRecordEntity(armEod);
-
+                    objectStateRecord = getObjectStateRecordEntity(armEod);
+                    // Reset the failed status from previous attempt
+                    objectStateRecord.setObjectStatus(null);
+                    objectStateRecordRepository.save(objectStateRecord);
                 } else {
 
                     armEod = dataStoreToArmHelper.createArmEodWithArmIngestionStatus(
                         currentEod, batchItem, batchItems, archiveRecordsFile, userAccount);
                     objectStateRecord = getObjectStateRecordEntity(currentEod);
                     // Save the new ARM EOD to the object state record
-                    if (nonNull(objectStateRecord)) {
-                        objectStateRecord.setArmEodId(String.valueOf(armEod.getId()));
-                        objectStateRecordRepository.save(objectStateRecord);
-                    }
+                    objectStateRecord.setArmEodId(String.valueOf(armEod.getId()));
+                    objectStateRecordRepository.save(objectStateRecord);
                 }
 
                 String rawFilename = dataStoreToArmHelper.generateRawFilename(armEod);
@@ -166,15 +166,16 @@ public class DetsToArmBatchPushProcessorImpl implements DetsToArmBatchPushProces
             dataStoreToArmHelper.updateExternalObjectDirectoryStatus(batchItem.getArmEod(), EodHelper.armDropZoneStatus(), userAccount);
             logApi.armPushSuccessful(batchItem.getArmEod().getId());
         }
-        
+
     }
 
     private boolean writeManifestAndCopyToArm(UserAccountEntity userAccount, ArmBatchItems batchItems, File archiveRecordsFile) {
         try {
             if (!batchItems.getSuccessful().isEmpty()) {
                 dataStoreToArmHelper.writeManifestFile(batchItems, archiveRecordsFile);
-                updateObjectStateRecordManifestSuccessOrFailure(batchItems, archiveRecordsFile);
+                updateObjectStateRecordManifestCreated(batchItems, archiveRecordsFile);
                 copyMetadataToArm(archiveRecordsFile);
+                updateObjectStateRecordManifestSuccessOrFailure(batchItems, archiveRecordsFile, true);
             } else {
                 log.warn("No EODs were able to be processed, skipping manifest file creation");
             }
@@ -184,33 +185,43 @@ public class DetsToArmBatchPushProcessorImpl implements DetsToArmBatchPushProces
             batchItems.getSuccessful().forEach(batchItem -> dataStoreToArmHelper.recoverByUpdatingEodToFailedArmStatus(batchItem, userAccount));
             final String errorMessageWithStackTrace = errorMessage + " - " + ExceptionUtils.getStackTrace(e);
             batchItems.getFailed().forEach(batchItem -> updateObjectStateRecordStatus(batchItem.getArmEod(), errorMessageWithStackTrace));
+            updateObjectStateRecordManifestSuccessOrFailure(batchItems, archiveRecordsFile, false);
             return false;
         }
         return true;
+    }
+
+    private void updateObjectStateRecordManifestCreated(ArmBatchItems batchItems, File archiveRecordsFile) {
+        for (var batchItem : batchItems.getSuccessful()) {
+            ObjectStateRecordEntity objectStateRecord = getObjectStateRecordEntity(batchItem.getArmEod());
+            objectStateRecord.setFlagFileMfstCreated(true);
+            objectStateRecord.setDateFileMfstCreated(currentTimeHelper.currentOffsetDateTime());
+            objectStateRecord.setIdManifestFile(archiveRecordsFile.getName());
+            objectStateRecordRepository.save(objectStateRecord);
+        }
+
+        for (var batchItem : batchItems.getFailed()) {
+            String errorMessage = "Manifest file creation failed";
+            updateObjectStateRecordStatus(batchItem.getArmEod(), errorMessage);
+        }
     }
 
     private String getManifestFilePrefix() {
         return detsToArmProcessorConfiguration.getManifestFilePrefix();
     }
 
-    private void updateObjectStateRecordManifestSuccessOrFailure(ArmBatchItems batchItems, File archiveRecordsFile) {
+    private void updateObjectStateRecordManifestSuccessOrFailure(ArmBatchItems batchItems, File archiveRecordsFile, boolean successfulTransfer) {
         for (var batchItem : batchItems.getSuccessful()) {
             ObjectStateRecordEntity objectStateRecord = getObjectStateRecordEntity(batchItem.getArmEod());
-            if (nonNull(objectStateRecord)) {
-                objectStateRecord.setFlagFileMfstCreated(true);
-                objectStateRecord.setDateFileMfstCreated(currentTimeHelper.currentOffsetDateTime());
-                objectStateRecord.setIdManifestFile(archiveRecordsFile.getName());
-                objectStateRecord.setFlagMfstTransfToArml(true);
-                objectStateRecord.setDateMfstTransfToArml(currentTimeHelper.currentOffsetDateTime());
-                objectStateRecordRepository.save(objectStateRecord);
-            }
-
+            objectStateRecord.setFlagMfstTransfToArml(successfulTransfer);
+            objectStateRecord.setDateMfstTransfToArml(currentTimeHelper.currentOffsetDateTime());
+            objectStateRecordRepository.save(objectStateRecord);
         }
+
         for (var batchItem : batchItems.getFailed()) {
             String errorMessage = "Manifest file creation failed";
             updateObjectStateRecordStatus(batchItem.getArmEod(), errorMessage);
         }
-
     }
 
     private void updateObjectStateRecordStatus(ExternalObjectDirectoryEntity externalObjectDirectory, String errorMessage) {
@@ -303,13 +314,12 @@ public class DetsToArmBatchPushProcessorImpl implements DetsToArmBatchPushProces
     }
 
     private void setRawDataPushed(ExternalObjectDirectoryEntity detsExternalObjectDirectory, ObjectStateRecordEntity objectStateRecord) {
-        if (nonNull(objectStateRecord)) {
-            objectStateRecord.setFlagFileTransferToDets(true);
-            objectStateRecord.setDateFileTransferToDets(currentTimeHelper.currentOffsetDateTime());
-            objectStateRecord.setMd5FileTransfArml(detsExternalObjectDirectory.getChecksum());
-            setFileSize(detsExternalObjectDirectory, objectStateRecord);
-            objectStateRecordRepository.save(objectStateRecord);
-        }
+        objectStateRecord.setFlagFileTransfToarml(true);
+        objectStateRecord.setDateFileTransfToarml(currentTimeHelper.currentOffsetDateTime());
+        objectStateRecord.setMd5FileTransfArml(detsExternalObjectDirectory.getChecksum());
+        setFileSize(detsExternalObjectDirectory, objectStateRecord);
+        objectStateRecordRepository.save(objectStateRecord);
+
     }
 
     private void copyMetadataToArm(File manifestFile) {
