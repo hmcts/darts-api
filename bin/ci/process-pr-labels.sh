@@ -13,7 +13,7 @@ LABELS_ARRAY=$(curl -L \
 ENABLE_KEEP_HELM=$(echo $LABELS_ARRAY | jq | grep '"name": "enable_keep_helm"' | wc -l | jq)
 if [[ ENABLE_KEEP_HELM -eq 0 ]]; then
   echo "enable_keep_helm label not found, exiting..."
-  exit 1
+  exit 0
 fi
 
 # used to override files within the charts directory, depends on labels set on the PR
