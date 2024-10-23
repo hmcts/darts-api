@@ -192,7 +192,6 @@ darts:
         arm-minimum:
           weeks: 30
     pending-retention-duration: 7d
-    inbound-to-unstructured-limit: 100
   daily-list:
     housekeeping:
       enabled: true
@@ -333,6 +332,8 @@ darts:
     url: ${DARTS_PORTAL_URL:https://darts.staging.apps.hmcts.net}
   automated:
     task:
+      inbound-to-unstructured:
+        threads: 20
       process-e2e-arm-rpo: ${PROCESS_E2E_ARM_RPO:false}
       arm-rpo-duration: ${ARM_RPO_DURATION:1h}
       thread-pool-size: 5
