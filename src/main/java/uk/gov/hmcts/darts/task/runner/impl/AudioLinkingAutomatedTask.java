@@ -1,6 +1,5 @@
 package uk.gov.hmcts.darts.task.runner.impl;
 
-import jakarta.transaction.Transactional;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -9,6 +8,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Limit;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.EventEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
@@ -76,7 +76,7 @@ public class AudioLinkingAutomatedTask extends AbstractLockableAutomatedTask
         private final Duration audioBuffer;
 
 
-        @Transactional(value = Transactional.TxType.REQUIRES_NEW)
+        @Transactional
         void processEvent(Integer eventId) {
             try {
                 EventEntity event = eventService.getEventByEveId(eventId);
