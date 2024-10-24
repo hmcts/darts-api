@@ -12,7 +12,6 @@ import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.common.repository.EventRepository;
 import uk.gov.hmcts.darts.common.service.DataAnonymisationService;
 import uk.gov.hmcts.darts.event.mapper.EventMapper;
-import uk.gov.hmcts.darts.event.validation.EventIdValidator;
 
 import java.util.Optional;
 
@@ -29,8 +28,6 @@ class EventServiceImplTest {
     @Mock
     private EventMapper eventMapper;
     @Mock
-    private EventIdValidator eventIdValidator;
-    @Mock
     private EventRepository eventRepository;
     @Mock
     private DataAnonymisationService dataAnonymisationService;
@@ -44,7 +41,7 @@ class EventServiceImplTest {
     void positiveGetEventEntityById() {
         EventEntity event = mock(EventEntity.class);
         when(eventRepository.findById(1)).thenReturn(Optional.of(event));
-        assertThat(eventService.getEventEntityById(1)).isEqualTo(event);
+        assertThat(eventService.getEventByEveId(1)).isEqualTo(event);
         verify(eventRepository, times(1)).findById(1);
     }
 
@@ -53,7 +50,7 @@ class EventServiceImplTest {
     void positiveGetEventEntityByIdNotFound() {
         when(eventRepository.findById(1)).thenReturn(Optional.empty());
 
-        assertThatThrownBy(() -> eventService.getEventEntityById(1))
+        assertThatThrownBy(() -> eventService.getEventByEveId(1))
             .isInstanceOf(DartsApiException.class)
             .hasFieldOrPropertyWithValue("error", CommonApiError.NOT_FOUND);
         verify(eventRepository, times(1)).findById(1);
