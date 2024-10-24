@@ -3,7 +3,7 @@ package uk.gov.hmcts.darts.armrpo.api.impl;
 import org.apache.commons.lang3.NotImplementedException;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.darts.armrpo.api.ArmRpoApi;
-import uk.gov.hmcts.darts.armrpo.model.ARMAsyncSearchResponse;
+import uk.gov.hmcts.darts.armrpo.model.ArmAsyncSearchResponse;
 import uk.gov.hmcts.darts.armrpo.model.ExtendedProductionsByMatterResponse;
 import uk.gov.hmcts.darts.armrpo.model.ExtendedSearchesByMatterResponse;
 import uk.gov.hmcts.darts.armrpo.model.IndexesByMatterIdResponse;
@@ -44,7 +44,7 @@ public class ArmRpoApiImpl implements ArmRpoApi {
     }
 
     @Override
-    public ARMAsyncSearchResponse addAsyncSearch(String bearerToken, Integer executionId) {
+    public ArmAsyncSearchResponse addAsyncSearch(String bearerToken, Integer executionId) {
         throw new NotImplementedException("Method not implemented");
     }
 

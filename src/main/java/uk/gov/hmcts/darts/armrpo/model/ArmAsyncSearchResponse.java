@@ -1,6 +1,7 @@
 package uk.gov.hmcts.darts.armrpo.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonRootName;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
@@ -9,5 +10,6 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @EqualsAndHashCode(callSuper = true)
-public class ARMAsyncSearchResponse extends AbstractMatterResponse {
+@JsonRootName(value = "ARMAsyncSearchResponse")
+public class ArmAsyncSearchResponse extends AbstractMatterResponse {
 }
