@@ -10,7 +10,7 @@ import uk.gov.hmcts.darts.arm.component.ArchiveRecordFileGenerator;
 import uk.gov.hmcts.darts.arm.component.ArmResponseFilesProcessSingleElement;
 import uk.gov.hmcts.darts.arm.component.AutomatedTaskProcessorFactory;
 import uk.gov.hmcts.darts.arm.config.ArmDataManagementConfiguration;
-import uk.gov.hmcts.darts.arm.helper.UnstructuredToArmHelper;
+import uk.gov.hmcts.darts.arm.helper.DataStoreToArmHelper;
 import uk.gov.hmcts.darts.arm.service.ArchiveRecordService;
 import uk.gov.hmcts.darts.arm.service.ArmResponseFilesProcessor;
 import uk.gov.hmcts.darts.arm.service.ExternalObjectDirectoryService;
@@ -63,7 +63,7 @@ public class AutomatedTaskProcessorFactoryImpl implements AutomatedTaskProcessor
     private final LogApi logApi;
     @Value("${darts.case-document.generation-days}")
     private final int caseDocumentGenerationDays;
-    private final UnstructuredToArmHelper unstructuredToArmHelper;
+    private final DataStoreToArmHelper unstructuredToArmHelper;
     private final CloseOldCasesProcessor closeOldCasesProcessor;
 
     @Override

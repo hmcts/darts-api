@@ -12,13 +12,12 @@ import uk.gov.hmcts.darts.arm.api.ArmDataManagementApi;
 import uk.gov.hmcts.darts.arm.component.ArchiveRecordFileGenerator;
 import uk.gov.hmcts.darts.arm.config.ArmDataManagementConfiguration;
 import uk.gov.hmcts.darts.arm.config.UnstructuredToArmProcessorConfiguration;
-import uk.gov.hmcts.darts.arm.helper.UnstructuredToArmHelper;
+import uk.gov.hmcts.darts.arm.helper.DataStoreToArmHelper;
 import uk.gov.hmcts.darts.arm.service.impl.UnstructuredToArmBatchProcessorImpl;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.ExternalLocationTypeEntity;
 import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.entity.ObjectRecordStatusEntity;
-import uk.gov.hmcts.darts.common.exception.DartsException;
 import uk.gov.hmcts.darts.common.repository.ExternalLocationTypeRepository;
 import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
 import uk.gov.hmcts.darts.common.repository.ObjectRecordStatusRepository;
@@ -34,7 +33,6 @@ import java.nio.file.Path;
 import java.util.List;
 
 import static java.util.Collections.emptyList;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Answers.RETURNS_DEEP_STUBS;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
@@ -81,7 +79,7 @@ class UnstructuredToArmBatchProcessorTest {
     @Mock
     private ArchiveRecordFileGenerator archiveRecordFileGenerator;
     @InjectMocks
-    private UnstructuredToArmHelper unstructuredToArmHelper;
+    private DataStoreToArmHelper unstructuredToArmHelper;
 
     @Mock
     UnstructuredToArmProcessorConfiguration unstructuredToArmProcessorConfiguration;
@@ -118,7 +116,6 @@ class UnstructuredToArmBatchProcessorTest {
             armDataManagementApi,
             unstructuredToArmProcessorConfiguration,
             eodHelper
-
         );
 
         lenient().when(fileOperationService.createFile(any(), any(), anyBoolean())).thenReturn(manifestFilePath);
@@ -142,10 +139,10 @@ class UnstructuredToArmBatchProcessorTest {
         eod10.setExternalLocationType(EodHelper.armLocation());
         eod10.setStatus(EodHelper.failedArmManifestFileStatus());
         //given
-        when(armDataManagementConfiguration.getArmClient()).thenReturn("darts");
         when(externalObjectDirectoryRepository.findNotFinishedAndNotExceededRetryInStorageLocation(any(), any(), any(), any())).thenReturn(List.of(eod10));
         when(externalObjectDirectoryRepository.findEodsNotInOtherStorage(any(), any(), any(), any())).thenReturn(emptyList());
         EOD_HELPER_MOCKS.givenIsEqualLocationReturns(true);
+        EOD_HELPER_MOCKS.givenIsEqualStatusReturns(true);
         when(unstructuredToArmProcessorConfiguration.getMaxArmManifestItems()).thenReturn(10);
         when(armDataManagementConfiguration.getMaxRetryAttempts()).thenReturn(3);
 
@@ -163,40 +160,8 @@ class UnstructuredToArmBatchProcessorTest {
     }
 
     @Test
-    void testDetsArmClientConfigInBatchQuery() {
-        //given
-        when(armDataManagementConfiguration.getArmClient()).thenReturn("dets");
-        when(externalObjectDirectoryRepository.findEodsNotInOtherStorage(any(), any(), any(), any())).thenReturn(emptyList());
-        //when(unstructuredToArmProcessorConfiguration.getMaxArmManifestItems()).thenReturn(5);
-        when(armDataManagementConfiguration.getMaxRetryAttempts()).thenReturn(3);
-
-        EOD_HELPER_MOCKS.givenIsEqualLocationReturns(true);
-
-        //when
-        unstructuredToArmBatchProcessor.processUnstructuredToArm(5);
-
-        //then
-        verify(externalObjectDirectoryRepository).findEodsNotInOtherStorage(
-            EodHelper.storedStatus(),
-            EodHelper.detsLocation(),
-            EodHelper.armLocation(), 5
-        );
-
-    }
-
-    @Test
-    void testUnknownArmClientConfigInBatchQuery() {
-        //given
-        when(armDataManagementConfiguration.getArmClient()).thenReturn("unknown");
-
-        //then
-        assertThrows(DartsException.class, () -> unstructuredToArmBatchProcessor.processUnstructuredToArm(5));
-    }
-
-    @Test
     void testPaginatedBatchQuery() throws IOException {
         //given
-        when(armDataManagementConfiguration.getArmClient()).thenReturn("darts");
         when(externalObjectDirectoryRepository.findNotFinishedAndNotExceededRetryInStorageLocation(any(), any(), any(), any())).thenReturn(List.of(eod1, eod2));
         when(externalObjectDirectoryRepository.findEodsNotInOtherStorage(any(), any(), any(), any())).thenReturn(emptyList());
         when(unstructuredToArmProcessorConfiguration.getMaxArmManifestItems()).thenReturn(100);
@@ -226,7 +191,6 @@ class UnstructuredToArmBatchProcessorTest {
     @Test
     void testManifestFileName() throws IOException {
         //given
-        when(armDataManagementConfiguration.getArmClient()).thenReturn("darts");
         when(armDataManagementConfiguration.getManifestFilePrefix()).thenReturn("DARTS");
         when(armDataManagementConfiguration.getFileExtension()).thenReturn("a360");
         when(armDataManagementConfiguration.getTempBlobWorkspace()).thenReturn("/temp_workspace");
