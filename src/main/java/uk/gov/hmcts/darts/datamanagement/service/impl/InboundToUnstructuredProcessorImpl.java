@@ -77,6 +77,9 @@ public class InboundToUnstructuredProcessorImpl implements InboundToUnstructured
             AsyncUtil.invokeAllAwaitTermination(tasks, threads, 1, TimeUnit.HOURS);
         } catch (Exception e) {
             log.error("Inbound to Unstructured unexpected exception", e);
+            if (e instanceof InterruptedException) {
+                Thread.currentThread().interrupt();
+            }
         }
     }
 
