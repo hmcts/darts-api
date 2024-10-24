@@ -800,7 +800,7 @@ class MediaRequestServiceImplTest {
     void auditsWhenAudioHidden() {
         var media = withIdsPopulated(mediaTestData.someMinimalMedia());
         media.setHidden(false);
-        when(mediaRepository.findById(any())).thenReturn(Optional.of(media));
+        when(mediaRepository.findByIdIncludeDeleted(any())).thenReturn(Optional.of(media));
         when(objectHiddenReasonRepository.findById(any())).thenReturn(Optional.of(classified()));
 
         var mediaHideRequest = new MediaHideRequest()
@@ -817,7 +817,7 @@ class MediaRequestServiceImplTest {
     void doesNotAuditWhenAudioMadeVisible() {
         var media = withIdsPopulated(mediaTestData.someMinimalMedia());
         media.setHidden(true);
-        when(mediaRepository.findById(any())).thenReturn(Optional.of(media));
+        when(mediaRepository.findByIdIncludeDeleted(any())).thenReturn(Optional.of(media));
 
         mediaRequestService.adminHideOrShowMediaById(media.getId(), new MediaHideRequest().isHidden(false));
 
