@@ -1,6 +1,6 @@
 package uk.gov.hmcts.darts.armrpo.api;
 
-import uk.gov.hmcts.darts.armrpo.model.ARMAsyncSearchResponse;
+import uk.gov.hmcts.darts.armrpo.model.ArmAsyncSearchResponse;
 import uk.gov.hmcts.darts.armrpo.model.ExtendedProductionsByMatterResponse;
 import uk.gov.hmcts.darts.armrpo.model.ExtendedSearchesByMatterResponse;
 import uk.gov.hmcts.darts.armrpo.model.IndexesByMatterIdResponse;
@@ -24,7 +24,7 @@ public interface ArmRpoApi {
 
     MasterIndexFieldByRecordClassSchemaResponse getMasterIndexFieldByRecordClassSchema(String bearerToken, Integer executionId);
 
-    ARMAsyncSearchResponse addAsyncSearch(String bearerToken, Integer executionId);
+    ArmAsyncSearchResponse addAsyncSearch(String bearerToken, Integer executionId);
 
     void saveBackgroundSearch(String bearerToken, Integer executionId, String searchName);
 
