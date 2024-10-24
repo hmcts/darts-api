@@ -4,6 +4,7 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
+import org.springframework.expression.spel.standard.SpelExpressionParser;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.darts.audit.api.AuditApi;
 import uk.gov.hmcts.darts.common.entity.AutomatedTaskEntity;
@@ -101,7 +102,9 @@ public class AdminAutomatedTasksServiceImpl implements AdminAutomatedTaskService
         if (automatedTaskName == null || automatedTaskName.getConditionalOnSpEL() == null) {
             return true;
         }
-        return Boolean.parseBoolean(configurableBeanFactory.resolveEmbeddedValue(automatedTaskName.getConditionalOnSpEL()));
+        String embeddedValue = configurableBeanFactory.resolveEmbeddedValue(automatedTaskName.getConditionalOnSpEL());
+        assert embeddedValue != null;
+        return Boolean.TRUE.equals(new SpelExpressionParser().parseExpression(embeddedValue).getValue(Boolean.class));
     }
 
     private AutomatedTaskEntity getAutomatedTaskEntityById(Integer taskId) {

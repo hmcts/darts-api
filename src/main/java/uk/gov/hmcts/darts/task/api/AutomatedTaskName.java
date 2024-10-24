@@ -37,6 +37,7 @@ public enum AutomatedTaskName {
     CASE_EXPIRY_DELETION_TASK_NAME("CaseExpiryDeletion", "${darts.automated.task.expiry-deletion.enabled:false}"),
     ASSOCIATED_OBJECT_DATA_EXPIRY_DELETION_TASK_NAME("AssociatedObjectDataExpiryDeletion"),
     MANUAL_DELETION("ManualDeletion", "${darts.manual-deletion.enabled:false}"),
+    PROCESS_ARM_RPO_PENDING("ProcessARMRPOPending", "!${darts.automated.task.process-e2e-arm-rpo:false}"),
     AUDIO_LINKING_TASK_NAME("AudioLinking");
     private final String taskName;
     private final String conditionalOnSpEL;

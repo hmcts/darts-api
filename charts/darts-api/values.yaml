@@ -104,6 +104,8 @@ java:
     DARTS_PORTAL_URL: https://darts.{{ .Values.global.environment }}.apps.hmcts.net
     TESTING_SUPPORT_ENDPOINTS_ENABLED: false
     AUTOMATED_TASK_MODE: false
+    PROCESS_E2E_ARM_RPO: false
+    ARM_RPO_DURATION: 1h
     API_MODE: true
     ACTIVE_DIRECTORY_B2C_BASE_URI: https://hmctsstgextid.b2clogin.com
     ACTIVE_DIRECTORY_B2C_AUTH_URI: https://hmctsstgextid.b2clogin.com/hmctsstgextid.onmicrosoft.com
