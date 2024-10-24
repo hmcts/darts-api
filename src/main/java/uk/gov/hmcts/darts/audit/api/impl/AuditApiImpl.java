@@ -18,8 +18,8 @@ public class AuditApiImpl implements AuditApi {
     private final AuthorisationApi authorisationApi;
 
     @Override
-    public void record(AuditActivity activity, UserAccountEntity userAccountEntity, CourtCaseEntity courtCase) {
-        auditService.recordAudit(activity, userAccountEntity, courtCase);
+    public void record(AuditActivity activity, UserAccountEntity userAccountEntity, CourtCaseEntity courtCase, String additionalData) {
+        auditService.recordAudit(activity, userAccountEntity, courtCase, additionalData);
     }
 
     @Override
@@ -30,7 +30,7 @@ public class AuditApiImpl implements AuditApi {
     @Override
     public void recordAll(AuditActivityProvider auditActivityProvider) {
         auditActivityProvider.getAuditActivities()
-            .forEach(auditActivity -> record(auditActivity, authorisationApi.getCurrentUser(), null));
+            .forEach(auditActivity -> record(auditActivity, authorisationApi.getCurrentUser()));
     }
 
     @Override

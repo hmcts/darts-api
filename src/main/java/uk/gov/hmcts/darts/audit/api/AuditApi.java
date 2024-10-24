@@ -5,7 +5,20 @@ import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 
 public interface AuditApi {
 
-    void record(AuditActivity activity, UserAccountEntity userAccountEntity, CourtCaseEntity courtCase);
+
+    default void record(AuditActivity activity, UserAccountEntity userAccountEntity) {
+        record(activity, userAccountEntity, null, null);
+    }
+
+    default void record(AuditActivity activity, UserAccountEntity userAccountEntity, CourtCaseEntity courtCase) {
+        record(activity, userAccountEntity, courtCase, null);
+    }
+
+    default void record(AuditActivity activity, UserAccountEntity userAccountEntity, String additionalData) {
+        record(activity, userAccountEntity, null, additionalData);
+    }
+
+    void record(AuditActivity activity, UserAccountEntity userAccountEntity, CourtCaseEntity courtCase, String additionalData);
 
     void record(AuditActivity activity);
 

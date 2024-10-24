@@ -13,6 +13,7 @@ import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
 import uk.gov.hmcts.darts.common.entity.base.CreatedModifiedBaseEntity;
+import uk.gov.hmcts.darts.task.runner.HasIntegerId;
 import uk.gov.hmcts.darts.task.runner.SoftDelete;
 
 import java.time.OffsetDateTime;
@@ -22,7 +23,7 @@ import java.time.OffsetDateTime;
 @Getter
 @Setter
 public class CaseDocumentEntity extends CreatedModifiedBaseEntity
-    implements ConfidenceAware, SoftDelete {
+    implements ConfidenceAware, SoftDelete, HasIntegerId {
 
     public static final String ID = "cad_id";
     public static final String TABLE_NAME = "case_document";

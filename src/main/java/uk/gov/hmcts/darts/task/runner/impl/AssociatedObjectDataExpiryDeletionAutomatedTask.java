@@ -6,6 +6,8 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import uk.gov.hmcts.darts.audio.deleter.impl.inbound.ExternalInboundDataStoreDeleter;
 import uk.gov.hmcts.darts.audio.deleter.impl.unstructured.ExternalUnstructuredDataStoreDeleter;
+import uk.gov.hmcts.darts.audit.api.AuditActivity;
+import uk.gov.hmcts.darts.audit.api.AuditApi;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
@@ -21,6 +23,7 @@ import uk.gov.hmcts.darts.log.api.LogApi;
 import uk.gov.hmcts.darts.task.api.AutomatedTaskName;
 import uk.gov.hmcts.darts.task.config.AutomatedTaskConfigurationProperties;
 import uk.gov.hmcts.darts.task.runner.AutoloadingManualTask;
+import uk.gov.hmcts.darts.task.runner.HasIntegerId;
 import uk.gov.hmcts.darts.task.runner.SoftDelete;
 import uk.gov.hmcts.darts.task.runner.SoftDeleteRepository;
 import uk.gov.hmcts.darts.task.service.LockService;
@@ -46,6 +49,7 @@ public class AssociatedObjectDataExpiryDeletionAutomatedTask
 
     private final ExternalInboundDataStoreDeleter inboundDeleter;
     private final ExternalUnstructuredDataStoreDeleter unstructuredDeleter;
+    private final AuditApi auditApi;
 
     public AssociatedObjectDataExpiryDeletionAutomatedTask(
         AutomatedTaskRepository automatedTaskRepository,
@@ -58,7 +62,8 @@ public class AssociatedObjectDataExpiryDeletionAutomatedTask
         CaseDocumentRepository caseDocumentRepository,
         ExternalObjectDirectoryRepository externalObjectDirectoryRepository,
         ExternalInboundDataStoreDeleter inboundDeleter,
-        ExternalUnstructuredDataStoreDeleter unstructuredDeleter) {
+        ExternalUnstructuredDataStoreDeleter unstructuredDeleter,
+        AuditApi auditApi) {
 
         super(automatedTaskRepository, automatedTaskConfigurationProperties, logApi, lockService);
         this.userIdentity = userIdentity;
@@ -70,6 +75,7 @@ public class AssociatedObjectDataExpiryDeletionAutomatedTask
         this.externalObjectDirectoryRepository = externalObjectDirectoryRepository;
         this.inboundDeleter = inboundDeleter;
         this.unstructuredDeleter = unstructuredDeleter;
+        this.auditApi = auditApi;
     }
 
 
@@ -101,7 +107,8 @@ public class AssociatedObjectDataExpiryDeletionAutomatedTask
             userAccount,
             transcriptionDocumentRepository,
             externalObjectDirectoryRepository.findExpiredTranscriptionDocuments(maxRetentionDate, batchSize),
-            ExternalObjectDirectoryEntity::getTranscriptionDocumentEntity
+            ExternalObjectDirectoryEntity::getTranscriptionDocumentEntity,
+            AuditActivity.TRANSCRIPT_EXPIRED
         );
     }
 
@@ -111,7 +118,8 @@ public class AssociatedObjectDataExpiryDeletionAutomatedTask
             userAccount,
             mediaRepository,
             externalObjectDirectoryRepository.findExpiredMediaEntries(maxRetentionDate, batchSize),
-            ExternalObjectDirectoryEntity::getMedia
+            ExternalObjectDirectoryEntity::getMedia,
+            AuditActivity.AUDIO_EXPIRED
         );
     }
 
@@ -120,7 +128,8 @@ public class AssociatedObjectDataExpiryDeletionAutomatedTask
             userAccount,
             annotationDocumentRepository,
             externalObjectDirectoryRepository.findExpiredAnnotationDocuments(maxRetentionDate, batchSize),
-            ExternalObjectDirectoryEntity::getAnnotationDocumentEntity
+            ExternalObjectDirectoryEntity::getAnnotationDocumentEntity,
+            AuditActivity.ANNOTATION_EXPIRED
         );
     }
 
@@ -129,16 +138,18 @@ public class AssociatedObjectDataExpiryDeletionAutomatedTask
             userAccount,
             caseDocumentRepository,
             externalObjectDirectoryRepository.findExpiredCaseDocuments(maxRetentionDate, batchSize),
-            ExternalObjectDirectoryEntity::getCaseDocument
+            ExternalObjectDirectoryEntity::getCaseDocument,
+            AuditActivity.CASE_DOCUMENT_EXPIRED
         );
     }
 
 
-    <T extends SoftDelete> void deleteExternalObjectDirectoryEntity(
+    <T extends SoftDelete & HasIntegerId> void deleteExternalObjectDirectoryEntity(
         UserAccountEntity userAccount,
         SoftDeleteRepository<T, ?> repository,
         List<ExternalObjectDirectoryEntity> externalObjectDirectoryEntities,
-        Function<ExternalObjectDirectoryEntity, T> entityMapper) {
+        Function<ExternalObjectDirectoryEntity, T> entityMapper,
+        AuditActivity auditActivity) {
 
 
         List<ExternalObjectDirectoryEntity> externalObjectDirectoryEntitiesToDelete = externalObjectDirectoryEntities
@@ -149,10 +160,12 @@ public class AssociatedObjectDataExpiryDeletionAutomatedTask
         List<T> entitiesToDelete = externalObjectDirectoryEntitiesToDelete
             .stream()
             .map(entityMapper)
+            .distinct()
             .toList();
 
         externalObjectDirectoryRepository.deleteAll(externalObjectDirectoryEntitiesToDelete);
         repository.softDeleteAll(entitiesToDelete, userAccount);
+        entitiesToDelete.forEach(t -> auditApi.record(auditActivity, userAccount, String.valueOf(t.getId())));
     }
 
     boolean deleteFromExternalDataStore(ExternalObjectDirectoryEntity externalObjectDirectoryEntity) {
