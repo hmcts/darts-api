@@ -18,7 +18,7 @@ class AudioLoggerServiceImplTest {
 
     private static final OffsetDateTime STARTED_AT = OffsetDateTime.parse("2021-01-01T01:00:00Z");
     private static final OffsetDateTime ENDED_AT = OffsetDateTime.parse("2021-01-01T02:00:00Z");
-    private static final String SOME_COURTHOUSE = "SOME-COURTHOUSE";
+    private static final String SOME_COURTHOUSE = "SOME-CoUrTHoUsE";
     private static final String SOME_COURTROOM = "some-courtroom";
 
     private static LogCaptor logCaptor;
@@ -53,7 +53,7 @@ class AudioLoggerServiceImplTest {
         audioLoggerService.audioUploaded(request);
 
         var expectedLogEntry = format("Audio uploaded: courthouse=%s, courtroom=%s, started_at=%s, ended_at=%s",
-                                      SOME_COURTHOUSE, SOME_COURTROOM, "2021-01-01T01:00:00Z", "2021-01-01T02:00:00Z");
+                                      SOME_COURTHOUSE.toUpperCase(), SOME_COURTROOM.toUpperCase(), "2021-01-01T01:00:00Z", "2021-01-01T02:00:00Z");
         assertThat(logCaptor.getInfoLogs()).containsExactly(expectedLogEntry);
     }
 

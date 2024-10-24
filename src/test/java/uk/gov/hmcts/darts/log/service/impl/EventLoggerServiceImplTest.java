@@ -73,8 +73,8 @@ class EventLoggerServiceImplTest {
         var event = createDartsEvent(123, "Some event text", true);
         eventLoggerService.eventReceived(event);
         var logEntry = String.format("Event received: message_id=%s, event_id=%s, courthouse=%s, courtroom=%s, source=%s, date_time=%s",
-                                     event.getMessageId(), event.getEventId(), event.getCourthouse(),
-                                     event.getCourtroom(), EventSource.MIDTIER, "2024-10-10T10:00:00Z");
+                                     event.getMessageId(), event.getEventId(), event.getCourthouse().toUpperCase(),
+                                     event.getCourtroom().toUpperCase(), EventSource.MIDTIER, "2024-10-10T10:00:00Z");
         List<String> infoLogs = logCaptor.getInfoLogs();
         assertEquals(1, infoLogs.size());
         assertEquals(logEntry, infoLogs.get(0));
@@ -85,8 +85,8 @@ class EventLoggerServiceImplTest {
         var event = createDartsEvent(123, "Some event text", false);
         eventLoggerService.eventReceived(event);
         var logEntry = String.format("Event received: message_id=%s, event_id=%s, courthouse=%s, courtroom=%s, source=%s, date_time=%s",
-                                     event.getMessageId(), event.getEventId(), event.getCourthouse(),
-                                     event.getCourtroom(), EventSource.XHB, "2024-10-10T10:00:00Z");
+                                     event.getMessageId(), event.getEventId(), event.getCourthouse().toUpperCase(),
+                                     event.getCourtroom().toUpperCase(), EventSource.XHB, "2024-10-10T10:00:00Z");
         List<String> infoLogs = logCaptor.getInfoLogs();
         assertEquals(1, infoLogs.size());
         assertEquals(logEntry, infoLogs.get(0));
@@ -97,8 +97,8 @@ class EventLoggerServiceImplTest {
         var event = createDartsEvent(-123, "Some event text", false);
         eventLoggerService.eventReceived(event);
         var logEntry = String.format("Event received: message_id=%s, event_id=%s, courthouse=%s, courtroom=%s, source=%s, date_time=%s",
-                                     event.getMessageId(), event.getEventId(), event.getCourthouse(),
-                                     event.getCourtroom(), EventSource.CPP, "2024-10-10T10:00:00Z");
+                                     event.getMessageId(), event.getEventId(), event.getCourthouse().toUpperCase(),
+                                     event.getCourtroom().toUpperCase(), EventSource.CPP, "2024-10-10T10:00:00Z");
         List<String> infoLogs = logCaptor.getInfoLogs();
         assertEquals(1, infoLogs.size());
         assertEquals(logEntry, infoLogs.get(0));
@@ -109,8 +109,8 @@ class EventLoggerServiceImplTest {
         var event = createDartsEvent(-123, null, false);
         eventLoggerService.eventReceived(event);
         var logEntry = String.format("Event received: message_id=%s, event_id=%s, courthouse=%s, courtroom=%s, source=%s, date_time=%s",
-                                     event.getMessageId(), event.getEventId(), event.getCourthouse(),
-                                     event.getCourtroom(), EventSource.CPP, "2024-10-10T10:00:00Z");
+                                     event.getMessageId(), event.getEventId(), event.getCourthouse().toUpperCase(),
+                                     event.getCourtroom().toUpperCase(), EventSource.CPP, "2024-10-10T10:00:00Z");
         List<String> infoLogs = logCaptor.getInfoLogs();
         assertEquals(1, infoLogs.size());
         assertEquals(logEntry, infoLogs.get(0));
@@ -122,8 +122,8 @@ class EventLoggerServiceImplTest {
         event.setEventId("WRONG");
         eventLoggerService.eventReceived(event);
         var logEntry = String.format("Event received: message_id=%s, event_id=%s, courthouse=%s, courtroom=%s, source=%s, date_time=%s",
-                                     event.getMessageId(), event.getEventId(), event.getCourthouse(),
-                                     event.getCourtroom(), EventSource.UNKNOWN, "2024-10-10T10:00:00Z");
+                                     event.getMessageId(), event.getEventId(), event.getCourthouse().toUpperCase(),
+                                     event.getCourtroom().toUpperCase(), EventSource.UNKNOWN, "2024-10-10T10:00:00Z");
         List<String> infoLogs = logCaptor.getInfoLogs();
         assertEquals(1, infoLogs.size());
         assertEquals(logEntry, infoLogs.get(0));
@@ -136,8 +136,7 @@ class EventLoggerServiceImplTest {
         event.setCourtroom(null);
         eventLoggerService.eventReceived(event);
         var logEntry = String.format("Event received: message_id=%s, event_id=%s, courthouse=%s, courtroom=%s, source=%s, date_time=%s",
-                                     event.getMessageId(), event.getEventId(), event.getCourthouse(),
-                                     event.getCourtroom(), EventSource.XHB, "2024-10-10T10:00:00Z");
+                                     event.getMessageId(), event.getEventId(), null, null, EventSource.XHB, "2024-10-10T10:00:00Z");
         List<String> infoLogs = logCaptor.getInfoLogs();
         assertEquals(1, infoLogs.size());
         assertEquals(logEntry, infoLogs.get(0));
@@ -149,8 +148,8 @@ class EventLoggerServiceImplTest {
         event.setCourthouse("NOT_EXIST");
         eventLoggerService.missingCourthouse(event);
         var logEntry = String.format("Courthouse not found: message_id=%s, event_id=%s, courthouse=%s, courtroom=%s, event_timestamp=%s",
-                                     event.getMessageId(), event.getEventId(), event.getCourthouse(),
-                                     event.getCourtroom(), "2024-10-10T10:00:00Z");
+                                     event.getMessageId(), event.getEventId(), event.getCourthouse().toUpperCase(),
+                                     event.getCourtroom().toUpperCase(), "2024-10-10T10:00:00Z");
         List<String> errorLogs = logCaptor.getErrorLogs();
         assertEquals(1, errorLogs.size());
         assertEquals(logEntry, errorLogs.get(0));
@@ -161,8 +160,8 @@ class EventLoggerServiceImplTest {
         var event = createDartsEvent(123, "Some event text", false);
         eventLoggerService.missingNodeRegistry(event);
         var logEntry = String.format("Unregistered Room: message_id=%s, event_id=%s, courthouse=%s, courtroom=%s, event_timestamp=%s",
-                                     event.getMessageId(), event.getEventId(), event.getCourthouse(),
-                                     event.getCourtroom(), "2024-10-10T10:00:00Z");
+                                     event.getMessageId(), event.getEventId(), event.getCourthouse().toUpperCase(),
+                                     event.getCourtroom().toUpperCase(), "2024-10-10T10:00:00Z");
         List<String> errorLogs = logCaptor.getErrorLogs();
         assertEquals(1, errorLogs.size());
         assertEquals(logEntry, errorLogs.get(0));
@@ -174,8 +173,8 @@ class EventLoggerServiceImplTest {
         event.setType("1000");
         event.setSubType("1002");
         event.setEventId(String.valueOf(eventId));
-        event.setCourthouse("SWANSEA");
-        event.setCourtroom("1");
+        event.setCourthouse("SwAnSeA");
+        event.setCourtroom("RooM1");
         event.setMessageId("test-message-id");
         event.setEventText(eventText);
         event.setDateTime(eventDate);

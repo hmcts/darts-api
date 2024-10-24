@@ -17,7 +17,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class CasesLoggerServiceImplTest {
 
-    private static final String SOME_COURTHOUSE = "SOME-COURTHOUSE";
+    private static final String SOME_COURTHOUSE = "SOME-CoUrTHoUsE";
     private static final String SOME_COURTROOM = "some-courtroom";
     private static final String SOME_CASE_NUMBER = "some-case-number";
 
@@ -52,7 +52,7 @@ class CasesLoggerServiceImplTest {
 
         casesLoggerService.casesRequestedByDarPc(request);
 
-        var expectedLogEntry = String.format("getCases request received: courthouse=%s, courtroom=%s", SOME_COURTHOUSE, SOME_COURTROOM);
+        var expectedLogEntry = String.format("getCases request received: courthouse=%s, courtroom=%s", SOME_COURTHOUSE.toUpperCase(), SOME_COURTROOM.toUpperCase());
         assertThat(logCaptor.getInfoLogs()).containsExactly(expectedLogEntry);
     }
 
@@ -74,7 +74,7 @@ class CasesLoggerServiceImplTest {
 
         List<String> logs = logCaptor.getWarnLogs();
         String logEntry = String.format("Defendant name overflow: case_number=%s, courthouse=%s",
-                                        SOME_CASE_NUMBER, SOME_COURTHOUSE);
+                                        SOME_CASE_NUMBER, SOME_COURTHOUSE.toUpperCase());
 
         assertEquals(1, logs.size());
         assertEquals(logEntry, logs.getFirst());
