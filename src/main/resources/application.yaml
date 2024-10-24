@@ -192,7 +192,6 @@ darts:
         arm-minimum:
           weeks: 30
     pending-retention-duration: 7d
-    inbound-to-unstructured-limit: 100
   daily-list:
     housekeeping:
       enabled: true
@@ -329,6 +328,8 @@ darts:
     url: ${DARTS_PORTAL_URL:https://darts.staging.apps.hmcts.net}
   automated:
     task:
+      inbound-to-unstructured:
+        threads: 20
       thread-pool-size: 5
       system-user-email: ${SYSTEM_USER_EMAIL:}
       system-user-guid-map:
