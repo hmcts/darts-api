@@ -31,7 +31,6 @@ import uk.gov.hmcts.darts.util.DataUtil;
 
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Locale;
 
 import static org.apache.commons.collections4.ListUtils.emptyIfNull;
 import static uk.gov.hmcts.darts.authorisation.constants.AuthorisationConstants.SECURITY_SCHEMES_BEARER_AUTH;

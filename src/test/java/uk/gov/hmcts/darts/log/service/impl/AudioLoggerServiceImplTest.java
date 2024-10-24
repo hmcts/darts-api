@@ -10,6 +10,7 @@ import uk.gov.hmcts.darts.audio.model.AddAudioMetadataRequest;
 import uk.gov.hmcts.darts.log.service.AudioLoggerService;
 
 import java.time.OffsetDateTime;
+import java.util.Locale;
 
 import static java.lang.String.format;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -53,7 +54,10 @@ class AudioLoggerServiceImplTest {
         audioLoggerService.audioUploaded(request);
 
         var expectedLogEntry = format("Audio uploaded: courthouse=%s, courtroom=%s, started_at=%s, ended_at=%s",
-                                      SOME_COURTHOUSE.toUpperCase(), SOME_COURTROOM.toUpperCase(), "2021-01-01T01:00:00Z", "2021-01-01T02:00:00Z");
+                                      SOME_COURTHOUSE.toUpperCase(Locale.ROOT),
+                                      SOME_COURTROOM.toUpperCase(Locale.ROOT),
+                                      "2021-01-01T01:00:00Z",
+                                      "2021-01-01T02:00:00Z");
         assertThat(logCaptor.getInfoLogs()).containsExactly(expectedLogEntry);
     }
 

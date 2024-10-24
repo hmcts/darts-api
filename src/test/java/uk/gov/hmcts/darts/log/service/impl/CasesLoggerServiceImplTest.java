@@ -11,6 +11,7 @@ import uk.gov.hmcts.darts.cases.model.GetCasesRequest;
 import uk.gov.hmcts.darts.log.service.CasesLoggerService;
 
 import java.util.List;
+import java.util.Locale;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -52,7 +53,9 @@ class CasesLoggerServiceImplTest {
 
         casesLoggerService.casesRequestedByDarPc(request);
 
-        var expectedLogEntry = String.format("getCases request received: courthouse=%s, courtroom=%s", SOME_COURTHOUSE.toUpperCase(), SOME_COURTROOM.toUpperCase());
+        var expectedLogEntry = String.format("getCases request received: courthouse=%s, courtroom=%s",
+                                             SOME_COURTHOUSE.toUpperCase(Locale.ROOT),
+                                             SOME_COURTROOM.toUpperCase(Locale.ROOT));
         assertThat(logCaptor.getInfoLogs()).containsExactly(expectedLogEntry);
     }
 
@@ -74,7 +77,7 @@ class CasesLoggerServiceImplTest {
 
         List<String> logs = logCaptor.getWarnLogs();
         String logEntry = String.format("Defendant name overflow: case_number=%s, courthouse=%s",
-                                        SOME_CASE_NUMBER, SOME_COURTHOUSE.toUpperCase());
+                                        SOME_CASE_NUMBER, SOME_COURTHOUSE.toUpperCase(Locale.ROOT));
 
         assertEquals(1, logs.size());
         assertEquals(logEntry, logs.getFirst());
