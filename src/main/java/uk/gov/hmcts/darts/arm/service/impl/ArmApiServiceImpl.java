@@ -74,7 +74,7 @@ public class ArmApiServiceImpl implements ArmApiService {
         if (!HttpStatus.valueOf(response.status()).is2xxSuccessful()) {
             String message = ("Arm file failed to download, cabinet: %s, record id: %s, " +
                 "file id: %s. Failure response: %s").formatted(armApiConfigurationProperties.getCabinetId(),
-            externalRecordId, externalFileId, response.status());
+                                                               externalRecordId, externalFileId, response.status());
             log.error(message);
             throw new FileNotDownloadedException(message);
         }
