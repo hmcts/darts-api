@@ -7,5 +7,6 @@ import java.time.OffsetDateTime;
 
 public interface ArmRpoService {
 
-    void updateArmRpoExecutionDetails(ArmRpoStatusEntity armRpoStatus, OffsetDateTime lastModifiedDateTime, UserAccountEntity lastModifiedBy);
+    void updateArmRpoExecutionDetails(Integer executionId, ArmRpoStatusEntity armRpoStatus, OffsetDateTime lastModifiedDateTime,
+                                      UserAccountEntity lastModifiedBy);
 }

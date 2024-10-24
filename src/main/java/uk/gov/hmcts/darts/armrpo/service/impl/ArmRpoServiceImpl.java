@@ -11,7 +11,8 @@ import java.time.OffsetDateTime;
 public class ArmRpoServiceImpl implements ArmRpoService {
 
     @Override
-    public void updateArmRpoExecutionDetails(ArmRpoStatusEntity armRpoStatus, OffsetDateTime lastModifiedDateTime, UserAccountEntity lastModifiedBy) {
+    public void updateArmRpoExecutionDetails(Integer executionId, ArmRpoStatusEntity armRpoStatus, OffsetDateTime lastModifiedDateTime,
+                                             UserAccountEntity lastModifiedBy) {
 
     }
 }
