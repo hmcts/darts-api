@@ -246,4 +246,9 @@ public class CaseServiceImpl implements CaseService {
         hearingRepository.findByCaseIds(matchingCaseIds);
         return AdminCasesSearchResponseMapper.mapResponse(matchingCases);
     }
+
+    @Override
+    public CourtCaseEntity saveCase(CourtCaseEntity courtCase) {
+        return caseRepository.saveAndFlush(courtCase);
+    }
 }
