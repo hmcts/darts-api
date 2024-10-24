@@ -20,18 +20,18 @@ import static org.springframework.http.MediaType.TEXT_PLAIN_VALUE;
 )
 public interface ArmTokenClient {
 
-    @PostMapping(value = "${darts.storage.arm-api.token-path}",
+    @PostMapping(value = "${darts.storage.arm-api.authentication-url.token-path}",
         consumes = TEXT_PLAIN_VALUE,
         produces = APPLICATION_JSON_VALUE)
     ArmTokenResponse getToken(ArmTokenRequest armTokenRequest);
 
-    @PostMapping(value = "${darts.storage.arm-api.available-entitlement-profiles-path}",
+    @PostMapping(value = "${darts.storage.arm-api.authentication-url.available-entitlement-profiles-path}",
         consumes = APPLICATION_JSON_VALUE,
         produces = APPLICATION_JSON_VALUE)
     @SuppressWarnings({"PMD.UseObjectForClearerAPI"})
     AvailableEntitlementProfile availableEntitlementProfiles(@RequestHeader(AUTHORIZATION) String bearerAuth);
 
-    @PostMapping(value = "${darts.storage.arm-api.select-entitlement-profile-path}",
+    @PostMapping(value = "${darts.storage.arm-api.authentication-url.select-entitlement-profile-path}",
         consumes = APPLICATION_JSON_VALUE,
         produces = APPLICATION_JSON_VALUE)
     @SuppressWarnings({"PMD.UseObjectForClearerAPI"})

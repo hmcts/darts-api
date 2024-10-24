@@ -59,6 +59,8 @@ The required value of each variable is stored in Azure Key Vault as a Secret.
 | DARTS_INBOUND_STORAGE_SAS_URL            | DartsInboundStorageSasUrl                 |
 | DARTS_UNSTRUCTURED_STORAGE_SAS_URL       | DartsUnstructuredStorageSasUrl            |
 | ARM_SERVICE_PROFILE                      | ArmServiceProfile                         |
+| ARM_SERVICE_ENTITLEMENT                  | ArmServiceEntitlement                     |
+| ARM_STORAGE_ACCOUNT_NAME                 | ArmStorageAccountName                     |
 
 There are few attributes which doesn't use Azure Keyvault secrets. Those environment variable values are controlled dynamically via Flux config
 
@@ -87,7 +89,7 @@ active for the secrets to be visible.
 > source bin/secrets-stg.sh
 > ```
 
->If you want to set the environment properties at project level instead of system level (for example using InteliJ Edit configurations) you can run
+> If you want to set the environment properties at project level instead of system level (for example using InteliJ Edit configurations) you can run
 >```bash
 > source bin/secrets-stg-environment.sh
 >```
@@ -101,8 +103,8 @@ launchctl setenv <<env var name>> <<secret value>>
 
 You will then need to restart intellij/terminal windows for it to take effect.
 
-The below step only required if you use system level environment properties and want to make the changes permanent, make a `.zshrc` file in your users folder and populate it with this and their values:
-
+The below step only required if you use system level environment properties and want to make the changes permanent, make a `.zshrc` file in your users folder
+and populate it with this and their values:
 
 ```
 export GOVUK_NOTIFY_API_KEY=
@@ -136,6 +138,8 @@ export ARM_PASSWORD=
 export DARTS_INBOUND_STORAGE_SAS_URL=
 export DARTS_UNSTRUCTURED_STORAGE_SAS_URL=
 export ARM_SERVICE_PROFILE=
+export ARM_SERVICE_ENTITLEMENT=
+export ARM_STORAGE_ACCOUNT_NAME=
 ```
 
 ### Storage Account

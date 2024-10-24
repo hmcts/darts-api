@@ -55,6 +55,8 @@ services:
       - MAX_FILE_UPLOAD_REQUEST_SIZE_MEGABYTES=360
       - DARTS_INBOUND_STORAGE_SAS_URL
       - DARTS_UNSTRUCTURED_STORAGE_SAS_URL
+      - ARM_SERVICE_ENTITLEMENT
+      - ARM_STORAGE_ACCOUNT_NAME
     build:
       context: .
       dockerfile: Dockerfile
