@@ -3,12 +3,16 @@ package uk.gov.hmcts.darts.task.service;
 import com.azure.storage.blob.BlobClient;
 import com.azure.storage.blob.BlobContainerClient;
 import com.azure.storage.blob.BlobServiceClient;
+import lombok.SneakyThrows;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import uk.gov.hmcts.darts.audio.deleter.impl.dets.DetsDataStoreDeleter;
+import uk.gov.hmcts.darts.audio.deleter.impl.dets.DetsExternalObjectDirectoryDeletedFinder;
+import uk.gov.hmcts.darts.audio.deleter.impl.dets.ExternalDetsDataStoreDeleter;
 import uk.gov.hmcts.darts.audio.deleter.impl.inbound.ExternalInboundDataStoreDeleter;
 import uk.gov.hmcts.darts.audio.deleter.impl.inbound.InboundDataStoreDeleter;
 import uk.gov.hmcts.darts.audio.deleter.impl.inbound.InboundExternalObjectDirectoryDeletedFinder;
@@ -31,6 +35,7 @@ import uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum;
 import uk.gov.hmcts.darts.common.enums.SystemUsersAccountUUIDEnum;
 import uk.gov.hmcts.darts.common.helper.SystemUserHelper;
 import uk.gov.hmcts.darts.common.repository.TransformedMediaRepository;
+import uk.gov.hmcts.darts.dets.service.DetsApiService;
 import uk.gov.hmcts.darts.task.config.AutomatedTaskConfigurationProperties;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 import uk.gov.hmcts.darts.testutils.stubs.TransientObjectDirectoryStub;
@@ -47,7 +52,10 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 import static uk.gov.hmcts.darts.audio.enums.MediaRequestStatus.COMPLETED;
+import static uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum.DETS;
 import static uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum.INBOUND;
 import static uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum.UNSTRUCTURED;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.MARKED_FOR_DELETION;
@@ -80,6 +88,8 @@ class ExternalDataStoreDeleterTest extends IntegrationBase {
     @Autowired
     private OutboundExternalObjectDirectoryDeletedFinder outboundExternalObjectDirectoryDeletedFinder;
     @Autowired
+    private DetsExternalObjectDirectoryDeletedFinder detsExternalObjectDirectoryDeletedFinder;
+    @Autowired
     private InboundDataStoreDeleter inboundDataStoreDeleter;
 
     @Autowired
@@ -88,12 +98,19 @@ class ExternalDataStoreDeleterTest extends IntegrationBase {
     @Autowired
     private OutboundDataStoreDeleter outboundDataStoreDeleter;
 
+    @Autowired
+    private DetsDataStoreDeleter detsDataStoreDeleter;
+
+    @MockBean
+    private DetsApiService detsApiService;
+
     private UserAccountEntity requestor;
     private HearingEntity hearing;
 
     private ExternalInboundDataStoreDeleter externalInboundDataStoreDeleter;
     private ExternalUnstructuredDataStoreDeleter externalUnstructuredDataStoreDeleter;
     private ExternalOutboundDataStoreDeleter externalOutboundDataStoreDeleter;
+    private ExternalDetsDataStoreDeleter externalDetsDataStoreDeleter;
 
     @Mock
     private AutomatedTaskConfigurationProperties automatedTaskConfigurationProperties;
@@ -136,8 +153,16 @@ class ExternalDataStoreDeleterTest extends IntegrationBase {
             transformedMediaRepository
         );
 
+        externalDetsDataStoreDeleter = new ExternalDetsDataStoreDeleter(
+            dartsDatabase.getExternalObjectDirectoryRepository(),
+            detsExternalObjectDirectoryDeletedFinder,
+            detsDataStoreDeleter,
+            transformedMediaRepository
+        );
+
     }
 
+    @SneakyThrows
     @SuppressWarnings("checkstyle:VariableDeclarationUsageDistance")
     @Test
     void deleteMarkedForDeletionDataFromDataStores() {
@@ -162,10 +187,14 @@ class ExternalDataStoreDeleterTest extends IntegrationBase {
             UNSTRUCTURED.getId(), MARKED_FOR_DELETION
         );
 
-
         ExternalObjectDirectoryEntity inboundEntity = createExternalObjectDirectory(
             audioBuilder.getMediaEntity2(),
             INBOUND.getId(), MARKED_FOR_DELETION
+        );
+
+        ExternalObjectDirectoryEntity detsEntity = createExternalObjectDirectory(
+            audioBuilder.getMediaEntity1(),
+            DETS.getId(), MARKED_FOR_DELETION
         );
 
         TransientObjectDirectoryEntity outboundEntity = createTransientDirectoryAndObjectStatus(
@@ -174,10 +203,13 @@ class ExternalDataStoreDeleterTest extends IntegrationBase {
         externalInboundDataStoreDeleter.delete();
         externalUnstructuredDataStoreDeleter.delete();
         externalOutboundDataStoreDeleter.delete();
+        externalDetsDataStoreDeleter.delete();
 
-        verifyEntitiesDeleted(List.of(inboundEntity, unstructuredEntity), List.of(outboundEntity));
+        verifyEntitiesDeleted(List.of(inboundEntity, unstructuredEntity, detsEntity), List.of(outboundEntity));
+        verify(detsApiService).deleteBlobDataFromContainer(any(UUID.class));
     }
 
+    @SneakyThrows
     @SuppressWarnings("checkstyle:VariableDeclarationUsageDistance")
     @Test
     void dontDeleteWhenStatusIsNotMarkedForDeletionDataFromDataStores() {
@@ -207,11 +239,18 @@ class ExternalDataStoreDeleterTest extends IntegrationBase {
             INBOUND.getId(), STORED
         );
 
+        ExternalObjectDirectoryEntity detsEntity = createExternalObjectDirectory(
+            audioBuilder.getMediaEntity1(),
+            DETS.getId(), STORED
+        );
+
         externalInboundDataStoreDeleter.delete();
         externalUnstructuredDataStoreDeleter.delete();
         externalOutboundDataStoreDeleter.delete();
+        externalDetsDataStoreDeleter.delete();
 
-        verifyEntitiesNotChanged(List.of(unstructuredEntity, inboundEntity), List.of(outboundEntity));
+        verifyEntitiesNotChanged(List.of(unstructuredEntity, inboundEntity, detsEntity), List.of(outboundEntity));
+        verify(detsApiService, never()).deleteBlobDataFromContainer(any(UUID.class));
     }
 
     private void verifyEntitiesNotChanged(List<ExternalObjectDirectoryEntity> inboundUnstructuredList, List<TransientObjectDirectoryEntity> outboundList) {

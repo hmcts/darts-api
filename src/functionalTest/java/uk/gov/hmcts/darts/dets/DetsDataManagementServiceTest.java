@@ -1,6 +1,7 @@
 package uk.gov.hmcts.darts.dets;
 
 import com.azure.core.util.BinaryData;
+import lombok.SneakyThrows;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -8,13 +9,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import uk.gov.hmcts.darts.common.datamanagement.component.impl.DownloadResponseMetaData;
-import uk.gov.hmcts.darts.datamanagement.exception.FileNotDownloadedException;
 import uk.gov.hmcts.darts.dets.service.impl.DetsApiServiceImpl;
 
-import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @SpringBootTest
 @ActiveProfiles({"dev", "h2db"})
@@ -27,8 +27,9 @@ class DetsDataManagementServiceTest {
     @Autowired
     private DetsApiServiceImpl dataManagementService;
 
+    @SneakyThrows
     @Test
-    void fetchBinaryDataFromBlobStorage() throws IOException, FileNotDownloadedException {
+    void fetchBinaryDataFromBlobStorage() {
         byte[] testStringInBytes = TEST_BINARY_STRING.getBytes(StandardCharsets.UTF_8);
         BinaryData data = BinaryData.fromBytes(testStringInBytes);
 
@@ -39,5 +40,9 @@ class DetsDataManagementServiceTest {
         )) {
             assertEquals(TEST_BINARY_STRING, new String(downloadResponseMetaData.getResource().getInputStream().readAllBytes()));
         }
+
+        boolean deleted = dataManagementService.deleteBlobDataFromContainer(uuid);
+        assertTrue(deleted);
     }
+
 }

@@ -284,6 +284,8 @@ darts:
       sas-endpoint: ${DETS_SAS_URL_ENDPOINT:}
       container-name: darts-migration
       temp-blob-workspace: ${user.home}/dets/tempworkspace
+      dets-manifest-file-prefix: DETS
+      delete-timeout: 60
     blob:
       client:
         connection-string: ${AZURE_STORAGE_CONNECTION_STRING:}
