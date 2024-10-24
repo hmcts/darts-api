@@ -6,6 +6,9 @@ import uk.gov.hmcts.darts.audio.model.AddAudioMetadataRequest;
 import uk.gov.hmcts.darts.cases.model.AddCaseRequest;
 import uk.gov.hmcts.darts.event.model.DartsEvent;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import static org.assertj.core.api.Assertions.assertThat;
 
 @Slf4j
@@ -20,6 +23,37 @@ class DataUtilTest {
     @Test
     void toUpperCaseNullValue() {
         assertThat(DataUtil.toUpperCase(null)).isNull();
+    }
+
+
+    @Test
+    void trimList() {
+        assertThat(DataUtil.trim(
+            List.of(" test ", "  test2  ", "test3  ", "   test4", "   test 5 with more spaces  ")))
+            .containsExactly("test", "test2", "test3", "test4", "test 5 with more spaces");
+    }
+
+    @Test
+    void trimListNullList() {
+        assertThat(DataUtil.trim((List<String>) null)).isNull();
+    }
+
+    @Test
+    void trimListWithNullListValue() {
+        List<String> list = new ArrayList<>(List.of(" test ", "  test2  ", "test3  ", "   test4", "   test 5 with more spaces  "));
+        list.add(null);
+        assertThat(DataUtil.trim(list))
+            .containsExactly("test", "test2", "test3", "test4", "test 5 with more spaces", null);
+    }
+
+    @Test
+    void trim() {
+        assertThat(DataUtil.trim(" test ")).isEqualTo("test");
+    }
+
+    @Test
+    void trimNull() {
+        assertThat(DataUtil.trim((String) null)).isNull();
     }
 
     @Test
@@ -46,8 +80,14 @@ class DataUtilTest {
     void preProcessAddCaseRequest() {
         AddCaseRequest addCaseRequest = new AddCaseRequest();
         addCaseRequest.setCourthouse("courthouse");
+        addCaseRequest.setDefenders(List.of("  defender1   ", "   defender2"));
+        addCaseRequest.setProsecutors(List.of("  prosecutor1   ", "   prosecutor2"));
+        addCaseRequest.setDefendants(List.of("  defendant1   ", "   defendant2"));
         DataUtil.preProcess(addCaseRequest);
         assertThat(addCaseRequest.getCourthouse()).isEqualTo("COURTHOUSE");
+        assertThat(addCaseRequest.getDefenders()).containsExactly("defender1", "defender2");
+        assertThat(addCaseRequest.getProsecutors()).containsExactly("prosecutor1", "prosecutor2");
+        assertThat(addCaseRequest.getDefendants()).containsExactly("defendant1", "defendant2");
     }
 
     @Test

@@ -16,9 +16,9 @@ import uk.gov.hmcts.darts.common.repository.ProsecutorRepository;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class CreateCoreObjectServiceImplTest {
@@ -48,20 +48,15 @@ class CreateCoreObjectServiceImplTest {
     @Test
     void testCreateDefence() {
         // Given
-        String defenceName = "Test Defence";
-        DefenceEntity defenceEntity = new DefenceEntity();
-        defenceEntity.setName(defenceName);
-        defenceEntity.setCourtCase(courtCase);
-        defenceEntity.setCreatedBy(userAccount);
-        defenceEntity.setLastModifiedBy(userAccount);
-
-        when(defenceRepository.saveAndFlush(any(DefenceEntity.class))).thenReturn(defenceEntity);
+        String defenceName = "   Test Defence   ";
+        doAnswer(invocation -> invocation.getArgument(0))
+            .when(defenceRepository).saveAndFlush(any(DefenceEntity.class));
 
         // When
         DefenceEntity createdDefence = createCoreObjectService.createDefence(defenceName, courtCase, userAccount);
 
         // Then
-        assertEquals(defenceName, createdDefence.getName());
+        assertEquals("Test Defence", createdDefence.getName());
         assertEquals(courtCase, createdDefence.getCourtCase());
         assertEquals(userAccount, createdDefence.getCreatedBy());
         assertEquals(userAccount, createdDefence.getLastModifiedBy());
@@ -72,20 +67,15 @@ class CreateCoreObjectServiceImplTest {
     @Test
     void testCreateDefendant() {
         // Given
-        String defendantName = "Test Defendant";
-        DefendantEntity defendantEntity = new DefendantEntity();
-        defendantEntity.setName(defendantName);
-        defendantEntity.setCourtCase(courtCase);
-        defendantEntity.setCreatedBy(userAccount);
-        defendantEntity.setLastModifiedBy(userAccount);
-
-        when(defendantRepository.saveAndFlush(any(DefendantEntity.class))).thenReturn(defendantEntity);
+        String defendantName = "   Test Defendant   ";
+        doAnswer(invocation -> invocation.getArgument(0))
+            .when(defendantRepository).saveAndFlush(any(DefendantEntity.class));
 
         // When
         DefendantEntity createdDefendant = createCoreObjectService.createDefendant(defendantName, courtCase, userAccount);
 
         // Then
-        assertEquals(defendantName, createdDefendant.getName());
+        assertEquals("Test Defendant", createdDefendant.getName());
         assertEquals(courtCase, createdDefendant.getCourtCase());
         assertEquals(userAccount, createdDefendant.getCreatedBy());
         assertEquals(userAccount, createdDefendant.getLastModifiedBy());
@@ -96,20 +86,15 @@ class CreateCoreObjectServiceImplTest {
     @Test
     void testCreateProsecutor() {
         // Given
-        String prosecutorName = "Test Prosecutor";
-        ProsecutorEntity prosecutorEntity = new ProsecutorEntity();
-        prosecutorEntity.setName(prosecutorName);
-        prosecutorEntity.setCourtCase(courtCase);
-        prosecutorEntity.setCreatedBy(userAccount);
-        prosecutorEntity.setLastModifiedBy(userAccount);
-
-        when(prosecutorRepository.saveAndFlush(any(ProsecutorEntity.class))).thenReturn(prosecutorEntity);
+        String prosecutorName = "   Test Prosecutor  ";
+        doAnswer(invocation -> invocation.getArgument(0))
+            .when(prosecutorRepository).saveAndFlush(any(ProsecutorEntity.class));
 
         // When
         ProsecutorEntity createdProsecutor = createCoreObjectService.createProsecutor(prosecutorName, courtCase, userAccount);
 
         // Then
-        assertEquals(prosecutorName, createdProsecutor.getName());
+        assertEquals("Test Prosecutor", createdProsecutor.getName());
         assertEquals(courtCase, createdProsecutor.getCourtCase());
         assertEquals(userAccount, createdProsecutor.getCreatedBy());
         assertEquals(userAccount, createdProsecutor.getLastModifiedBy());
