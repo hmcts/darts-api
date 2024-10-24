@@ -275,16 +275,18 @@ darts:
       arm-service-profile: ${ARM_SERVICE_PROFILE:}
       cabinet-id: 100
       url: ${ARM_URL}
-      token-path: /api/v1/token
-      update-metadata-path: /api/v3/UpdateMetadata
-      download-data-path: /api/v1/downloadBlob/{cabinet_id}/{record_id}/{file_id}
-      available-entitlement-profiles-path: /api/v1/availableEntitlementProfiles
-      select-entitlement-profile-path: /api/v1/selectEntitlementProfile/{profile_id}
-
-    arm-rpo:
       arm-service-entitlement: ${ARM_SERVICE_ENTITLEMENT:}
       arm-storage-account-name: ${:ARM_STORAGE_ACCOUNT_NAME}
 
+      authentication-url:
+        token-path: /api/v1/token
+        available-entitlement-profiles-path: /api/v1/availableEntitlementProfiles
+        select-entitlement-profile-path: /api/v1/selectEntitlementProfile/{profile_id}
+      api-url:
+        update-metadata-path: /api/v3/UpdateMetadata
+        download-data-path: /api/v1/downloadBlob/{cabinet_id}/{record_id}/{file_id}
+      rpo-url:
+      ## place holder for RPO paths
     dets:
       sas-endpoint: ${DETS_SAS_URL_ENDPOINT:}
       container-name: darts-migration

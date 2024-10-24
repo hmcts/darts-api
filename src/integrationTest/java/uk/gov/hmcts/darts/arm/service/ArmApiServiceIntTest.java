@@ -57,10 +57,10 @@ class ArmApiServiceIntTest extends IntegrationBaseWithWiremock {
     @MockBean
     private ArmTokenClient armTokenClient;
 
-    @Value("${darts.storage.arm-api.download-data-path}")
+    @Value("${darts.storage.arm-api.api-url.download-data-path}")
     private String downloadPath;
 
-    @Value("${darts.storage.arm-api.update-metadata-path}")
+    @Value("${darts.storage.arm-api.api-url.update-metadata-path}")
     private String uploadPath;
 
     @Value("${darts.storage.arm-api.url}")
@@ -130,7 +130,7 @@ class ArmApiServiceIntTest extends IntegrationBaseWithWiremock {
         verify(armTokenClient).getToken(armTokenRequest);
 
         WireMock.verify(postRequestedFor(urlPathMatching(uploadPath))
-            .withHeader("Authorization", new RegexPattern(bearerAuth))
+                            .withHeader("Authorization", new RegexPattern(bearerAuth))
                             .withRequestBody(equalToJson(dummyRequest)));
 
         assertEquals(updateMetadataResponse, responseToTest);
@@ -177,7 +177,7 @@ class ArmApiServiceIntTest extends IntegrationBaseWithWiremock {
             WireMock.get(urlPathMatching(getDownloadPath(downloadPath, CABINET_ID, EXTERNAL_RECORD_ID, EXTERNAL_FILE_ID)))
                 .willReturn(
                     aResponse().withBody(binaryData)
-                    .withStatus(200)));
+                        .withStatus(200)));
 
         // When
         DownloadResponseMetaData downloadResponseMetaData = armApiService.downloadArmData(EXTERNAL_RECORD_ID, EXTERNAL_FILE_ID);
@@ -186,7 +186,7 @@ class ArmApiServiceIntTest extends IntegrationBaseWithWiremock {
         verify(armTokenClient).getToken(armTokenRequest);
 
         WireMock.verify(getRequestedFor(urlPathMatching(getDownloadPath(downloadPath, CABINET_ID, EXTERNAL_RECORD_ID, EXTERNAL_FILE_ID)))
-                    .withHeader("Authorization", new RegexPattern("Bearer some-token")));
+                            .withHeader("Authorization", new RegexPattern("Bearer some-token")));
 
         assertThat(downloadResponseMetaData.getResource().getInputStream().readAllBytes()).isEqualTo(binaryData);
     }
@@ -212,9 +212,9 @@ class ArmApiServiceIntTest extends IntegrationBaseWithWiremock {
 
     private AvailableEntitlementProfile getAvailableEntitlementProfile() {
         List<AvailableEntitlementProfile.Profiles> profiles = List.of(AvailableEntitlementProfile.Profiles.builder()
-                        .profileName("some-profile-name")
-                        .profileId("some-profile-id")
-                        .build());
+                                                                          .profileName("some-profile-name")
+                                                                          .profileId("some-profile-id")
+                                                                          .build());
 
         return AvailableEntitlementProfile.builder()
             .profiles(profiles)
