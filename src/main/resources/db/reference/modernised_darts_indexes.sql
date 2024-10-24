@@ -10,6 +10,7 @@
 -- v6 add 3 application team derived indexes
 -- v7 amend all tablespaces to pg_default
 -- v8 add trigram indexes for pattern search suppt
+-- v9 add 2 event and 2 media indexes
 
 SET ROLE DARTS_OWNER;
 SET SEARCH_PATH TO darts;
@@ -184,14 +185,18 @@ CREATE INDEX rpt_cre_by_fk      ON RETENTION_POLICY_TYPE(created_by) TABLESPACE 
 CREATE INDEX rpt_lst_mod_by_fk  ON RETENTION_POLICY_TYPE(last_modified_by) TABLESPACE pg_default;
 
 
---v2
+--v2 
 CREATE INDEX cas_cn_idx         ON COURT_CASE(case_number)                  TABLESPACE pg_default;
-CREATE INDEX cth_cn_idx         ON COURTHOUSE(UPPER(courthouse_name))       TABLESPACE pg_default;
+CREATE INDEX cth_cn_idx         ON COURTHOUSE(UPPER(courthouse_name))       TABLESPACE pg_default;  
 CREATE INDEX ctr_cn_idx         ON COURTROOM(UPPER(courtroom_name))         TABLESPACE pg_default;
 CREATE INDEX dfc_dn_idx         ON DEFENCE(UPPER(defence_name))             TABLESPACE pg_default;
 CREATE INDEX dfd_dn_idx         ON DEFENDANT(UPPER(defendant_name))         TABLESPACE pg_default;
+CREATE INDEX eve_ei_ic_idx      ON EVENT(event_id,is_current)               TABLESPACE pg_default;
+CREATE INDEX eve_ts_idx         ON EVENT(event_ts)                          TABLESPACE pg_default;
 CREATE INDEX hea_hd_idx         ON HEARING(hearing_date)                    TABLESPACE pg_default;
 CREATE INDEX jud_jn_idx         ON JUDGE(UPPER(judge_name))                 TABLESPACE pg_default;
+CREATE INDEX med_mf_idx         ON MEDIA(media_file)                        TABLESPACE pg_default;
+CREATE INDEX med_st_et_idx      ON MEDIA(start_ts,end_ts)                   TABLESPACE pg_default;
 CREATE INDEX prn_pn_idx         ON PROSECUTOR(UPPER(prosecutor_name))       TABLESPACE pg_default;
 CREATE INDEX usr_un_idx         ON USER_ACCOUNT(user_name)                  TABLESPACE pg_default;
 CREATE INDEX usr_upea_idx       ON USER_ACCOUNT(UPPER(user_email_address))  TABLESPACE pg_default;
@@ -214,12 +219,12 @@ CREATE UNIQUE INDEX retention_policy_type_type_unq
     (fixed_policy_key COLLATE pg_catalog."default" ASC NULLS LAST)
     TABLESPACE pg_default
     WHERE policy_end_ts IS NULL;
-
+	
 CREATE INDEX eod_manifest_file_idx
     ON darts.external_object_directory USING btree
     (manifest_file COLLATE pg_catalog."default" text_pattern_ops ASC NULLS LAST)
     TABLESPACE pg_default;
-
+	
 CREATE INDEX dfd_dn_trgm_idx ON defendant USING gin (defendant_name gin_trgm_ops);
 
 CREATE INDEX eve_evt_trgm_idx ON event USING gin (event_text gin_trgm_ops);
