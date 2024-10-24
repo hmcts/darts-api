@@ -27,10 +27,10 @@ import uk.gov.hmcts.darts.cases.model.Transcript;
 import uk.gov.hmcts.darts.cases.service.CaseService;
 import uk.gov.hmcts.darts.cases.util.RequestValidator;
 import uk.gov.hmcts.darts.log.api.LogApi;
+import uk.gov.hmcts.darts.util.DataUtil;
 
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Locale;
 
 import static org.apache.commons.collections4.ListUtils.emptyIfNull;
 import static uk.gov.hmcts.darts.authorisation.constants.AuthorisationConstants.SECURITY_SCHEMES_BEARER_AUTH;
@@ -70,8 +70,8 @@ public class CaseController implements CasesApi {
         LocalDate date
     ) {
         GetCasesRequest request = new GetCasesRequest();
-        request.setCourthouse(courthouse.toUpperCase(Locale.ROOT));
-        request.setCourtroom(courtroom.toUpperCase(Locale.ROOT));
+        request.setCourthouse(DataUtil.toUpperCase(courthouse));
+        request.setCourtroom(DataUtil.toUpperCase(courtroom));
         request.setDate(date);
 
         return new ResponseEntity<>(caseService.getHearings(request), HttpStatus.OK);
@@ -83,6 +83,7 @@ public class CaseController implements CasesApi {
     @Authorisation(contextId = ANY_ENTITY_ID,
         globalAccessSecurityRoles = {MID_TIER})
     public ResponseEntity<PostCaseResponse> casesPost(AddCaseRequest addCaseRequest) {
+        DataUtil.preProcess(addCaseRequest);
         validateRequest(addCaseRequest);
         return new ResponseEntity<>(caseService.addCaseOrUpdate(addCaseRequest), HttpStatus.CREATED);
     }

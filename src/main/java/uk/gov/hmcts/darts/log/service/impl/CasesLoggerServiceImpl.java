@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 import uk.gov.hmcts.darts.cases.model.AddCaseRequest;
 import uk.gov.hmcts.darts.cases.model.GetCasesRequest;
 import uk.gov.hmcts.darts.log.service.CasesLoggerService;
+import uk.gov.hmcts.darts.util.DataUtil;
 
 @Service
 @NoArgsConstructor
@@ -14,14 +15,16 @@ public class CasesLoggerServiceImpl implements CasesLoggerService {
 
     @Override
     public void casesRequestedByDarPc(GetCasesRequest getCasesRequest) {
-        log.info("getCases request received: courthouse={}, courtroom={}", getCasesRequest.getCourthouse(), getCasesRequest.getCourtroom());
+        log.info("getCases request received: courthouse={}, courtroom={}",
+                 DataUtil.toUpperCase(getCasesRequest.getCourthouse()),
+                 DataUtil.toUpperCase(getCasesRequest.getCourtroom()));
     }
 
     @Override
     public void defendantNameOverflow(AddCaseRequest addCaseRequest) {
         log.warn("Defendant name overflow: case_number={}, courthouse={}",
                  addCaseRequest.getCaseNumber(),
-                 addCaseRequest.getCourthouse());
+                 DataUtil.toUpperCase(addCaseRequest.getCourthouse()));
     }
 
     @Override

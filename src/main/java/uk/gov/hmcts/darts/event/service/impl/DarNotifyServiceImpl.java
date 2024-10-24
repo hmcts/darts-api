@@ -9,6 +9,7 @@ import uk.gov.hmcts.darts.common.repository.CaseRepository;
 import uk.gov.hmcts.darts.event.exception.DarNotifyError;
 import uk.gov.hmcts.darts.event.helper.DarNotifyAsyncHelper;
 import uk.gov.hmcts.darts.event.model.DarNotifyApplicationEvent;
+import uk.gov.hmcts.darts.util.DataUtil;
 
 import java.util.List;
 
@@ -28,10 +29,12 @@ public class DarNotifyServiceImpl {
 
     public void notifyDarPc(DarNotifyApplicationEvent event) throws DarNotifyError {
         var dartsEvent = event.getDartsEvent();
-
+        DataUtil.preProcess(dartsEvent);
         List<String> openCaseNumbers = caseRepository.findOpenCaseNumbers(dartsEvent.getCourthouse(), dartsEvent.getCaseNumbers());
         if (openCaseNumbers.isEmpty()) {
-            log.info("DarNotify ignored, no open cases: event_id={}, courthouse={}", dartsEvent.getCourthouse(), event.getDartsEvent().getEventId());
+            log.info("DarNotify ignored, no open cases: event_id={}, courthouse={}",
+                     DataUtil.toUpperCase(dartsEvent.getCourthouse()),
+                     event.getDartsEvent().getEventId());
         } else {
             darNotifyAsyncHelper.notifyDarPcAsync(event, openCaseNumbers);
         }
