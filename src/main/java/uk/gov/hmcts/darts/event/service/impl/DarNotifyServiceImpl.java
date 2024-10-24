@@ -29,7 +29,7 @@ public class DarNotifyServiceImpl {
 
     public void notifyDarPc(DarNotifyApplicationEvent event) throws DarNotifyError {
         var dartsEvent = event.getDartsEvent();
-
+        DataUtil.preProcess(dartsEvent);
         List<String> openCaseNumbers = caseRepository.findOpenCaseNumbers(dartsEvent.getCourthouse(), dartsEvent.getCaseNumbers());
         if (openCaseNumbers.isEmpty()) {
             log.info("DarNotify ignored, no open cases: event_id={}, courthouse={}",
