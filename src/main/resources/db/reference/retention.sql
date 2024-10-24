@@ -25,22 +25,24 @@
 -- v10 switch all tablespaces to pg_default
 -- v11 add table case_retention_audit_heritage
 -- v12 add dm_sysobject_s attributes to case_retention_audit_heritage
+-- v13 add table retention_confidence_category_mapper
 
 
 SET ROLE DARTS_OWNER;
 SET SEARCH_PATH TO darts;
 
 --List of Table Aliases
--- case_management_retention         CMR
--- case_retention                    CAR
--- retention_policy_type             RPT
+-- case_management_retention            CMR
+-- case_retention                       CAR  
+-- retention_confidence_category_mapper RCC
+-- retention_policy_type                RPT
 
 
 CREATE TABLE case_management_retention
 (cmr_id                      INTEGER                       NOT NULL
 ,cas_id                      INTEGER                       NOT NULL
 ,rpt_id                      INTEGER                       NOT NULL
-,eve_id                      INTEGER                       NOT NULL
+,eve_id                      INTEGER                       NOT NULL                
 ,total_sentence              CHARACTER VARYING                       -- < is this integer or the nYnMnD >
 ) TABLESPACE pg_default;
 
@@ -48,14 +50,14 @@ CREATE TABLE case_retention
 (car_id                      INTEGER                       NOT NULL
 ,cas_id                      INTEGER                       NOT NULL
 ,rpt_id                      INTEGER                       NOT NULL
-,cmr_id                      INTEGER
+,cmr_id                      INTEGER            
 ,total_sentence              CHARACTER VARYING                       -- < is this integer or the nYnMnD >
-,retain_until_ts             TIMESTAMP WITH TIME ZONE      NOT NULL
-,retain_until_applied_on_ts  TIMESTAMP WITH TIME ZONE
+,retain_until_ts             TIMESTAMP WITH TIME ZONE      NOT NULL 
+,retain_until_applied_on_ts  TIMESTAMP WITH TIME ZONE       
 ,current_state               CHARACTER VARYING             NOT NULL  -- can we agree on single chars, eg P-pending, E-expired, A-active
-,comments                    CHARACTER VARYING
-,confidence_category         INTEGER
-,retention_object_id         CHARACTER VARYING                       -- PK of legacy source migration table
+,comments                    CHARACTER VARYING 
+,confidence_category         INTEGER                                 -- no FK to RCC.confidence_category
+,retention_object_id         CHARACTER VARYING                       -- PK of legacy source migration table 
 ,submitted_by                INTEGER                       NOT NULL
 ,created_ts                  TIMESTAMP WITH TIME ZONE      NOT NULL
 ,created_by                  INTEGER                       NOT NULL
@@ -66,7 +68,7 @@ CREATE TABLE case_retention
 CREATE TABLE case_retention_audit_heritage
 (r_object_id                 CHARACTER VARYING(16)         NOT NULL
 ,i_partition                 INTEGER
-,c_case_id                   CHARACTER VARYING(32)
+,c_case_id                   CHARACTER VARYING(32)         
 ,c_date_retention_amended    TIMESTAMP WITH TIME ZONE
 ,c_comments                  CHARACTER VARYING
 ,c_date_previous_retention   TIMESTAMP WITH TIME ZONE
@@ -83,16 +85,28 @@ CREATE TABLE case_retention_audit_heritage
 ,owner_name                  CHARACTER VARYING(32)
 ) TABLESPACE pg_default;
 
+CREATE TABLE retention_confidence_category_mapper
+(rcc_id                      INTEGER                       NOT NULL
+,ret_conf_score              INTEGER
+,ret_conf_reason             CHARACTER VARYING
+,confidence_category         INTEGER                                 -- effectively a master list of valid categories found on case_retention
+,description                 CHARACTER VARYING
+,created_ts                  TIMESTAMP WITH TIME ZONE      NOT NULL
+,created_by                  INTEGER                       NOT NULL
+,last_modified_ts            TIMESTAMP WITH TIME ZONE      NOT NULL
+,last_modified_by            INTEGER                       NOT NULL
+) TABLESPACE pg_default;
+
 
 CREATE TABLE retention_policy_type
 (rpt_id                      INTEGER                       NOT NULL
-,fixed_policy_key            CHARACTER VARYING             NOT NULL
+,fixed_policy_key            CHARACTER VARYING             NOT NULL 
 ,policy_name                 CHARACTER VARYING             NOT NULL
 ,display_name                CHARACTER VARYING             NOT NULL
 ,duration                    CHARACTER VARYING             NOT NULL -- changed to accommodate nYnMnD
 ,policy_start_ts             TIMESTAMP WITH TIME ZONE      NOT NULL
-,policy_end_ts               TIMESTAMP WITH TIME ZONE
-,description                 CHARACTER VARYING             NOT NULL
+,policy_end_ts               TIMESTAMP WITH TIME ZONE  
+,description                 CHARACTER VARYING             NOT NULL  
 ,retention_policy_object_id  CHARACTER VARYING                      -- PK of legacy source migration table
 ,created_ts                  TIMESTAMP WITH TIME ZONE      NOT NULL
 ,created_by                  INTEGER                       NOT NULL
@@ -103,14 +117,18 @@ CREATE TABLE retention_policy_type
 CREATE UNIQUE INDEX case_management_retention_pk ON case_management_retention(cmr_id) TABLESPACE pg_default;
 ALTER TABLE case_management_retention ADD PRIMARY KEY USING INDEX case_management_retention_pk;
 
-CREATE UNIQUE INDEX case_retention_pk ON case_retention(car_id) TABLESPACE pg_default;
+CREATE UNIQUE INDEX case_retention_pk ON case_retention(car_id) TABLESPACE pg_default; 
 ALTER TABLE case_retention            ADD PRIMARY KEY USING INDEX case_retention_pk;
 
-CREATE UNIQUE INDEX retention_policy_type_pk ON retention_policy_type(rpt_id) TABLESPACE pg_default;
+CREATE UNIQUE INDEX retention_confidence_category_mapper_pk ON retention_confidence_category_mapper(rcc_id) TABLESPACE pg_default; 
+ALTER TABLE retention_confidence_category_mapper     ADD PRIMARY KEY USING INDEX retention_confidence_category_mapper_pk;
+
+CREATE UNIQUE INDEX retention_policy_type_pk ON retention_policy_type(rpt_id) TABLESPACE pg_default; 
 ALTER TABLE retention_policy_type     ADD PRIMARY KEY USING INDEX retention_policy_type_pk;
 
 CREATE SEQUENCE cmr_seq CACHE 20;
 CREATE SEQUENCE car_seq CACHE 20;
+CREATE SEQUENCE rcc_seq CACHE 20;
 CREATE SEQUENCE rpt_seq CACHE 20;
 
 ALTER TABLE case_retention            
@@ -149,6 +167,14 @@ ALTER TABLE case_management_retention
 ADD CONSTRAINT case_management_retention_event_fk
 FOREIGN KEY (eve_id) REFERENCES event(eve_id);
 
+ALTER TABLE retention_confidence_category_mapper
+ADD CONSTRAINT retention_confidence_category_mapper_created_by_fk
+FOREIGN KEY (created_by) REFERENCES user_account(usr_id);
+
+ALTER TABLE retention_confidence_category_mapper
+ADD CONSTRAINT retention_confidence_category_mapper_last_modified_by_fk
+FOREIGN KEY (last_modified_by) REFERENCES user_account(usr_id);
+
 ALTER TABLE retention_policy_type             
 ADD CONSTRAINT retention_policy_type_created_by_fk
 FOREIGN KEY (created_by) REFERENCES user_account(usr_id);
@@ -161,8 +187,10 @@ FOREIGN KEY (last_modified_by) REFERENCES user_account(usr_id);
 
 GRANT SELECT,INSERT,UPDATE,DELETE ON case_management_retention TO darts_user;
 GRANT SELECT,INSERT,UPDATE,DELETE ON case_retention TO darts_user;
+GRANT SELECT,INSERT,UPDATE,DELETE ON retention_confidence_category_mapper TO darts_user;
 GRANT SELECT,INSERT,UPDATE,DELETE ON retention_policy_type TO darts_user;
 
 GRANT SELECT,UPDATE ON  cmr_seq TO darts_user;
 GRANT SELECT,UPDATE ON  car_seq TO darts_user;
+GRANT SELECT,UPDATE ON  rcc_seq TO darts_user;
 GRANT SELECT,UPDATE ON  rpt_seq TO darts_user;
