@@ -176,8 +176,16 @@ class AudioControllerAddAudioMetadataIntTest extends IntegrationBase {
             assertEquals(STARTED_AT.plus(maxFileDuration), media.getEnd());
             assertEquals(1, media.getChannel());
             assertEquals(2, media.getTotalChannels());
+
             List<MediaLinkedCaseEntity> mediaLinkedCaseEntities = dartsDatabase.getMediaLinkedCaseRepository().findByMedia(media);
             assertEquals(3, mediaLinkedCaseEntities.size());
+            List<UserAccountEntity> linkCreators = mediaLinkedCaseEntities.stream()
+                .map(MediaLinkedCaseEntity::getCreatedBy)
+                .distinct()
+                .toList();
+            assertEquals(1, linkCreators.size());
+            assertEquals("adminUserAccountFullName", linkCreators.get(0).getUserFullName());
+
             assertEquals("1", dartsDatabase.getCourtroomRepository().findById(media.getCourtroom().getId()).get().getName());
             assertEquals(media.getId().toString(), media.getChronicleId());
             assertEquals(true, media.getIsCurrent());
@@ -194,6 +202,7 @@ class AudioControllerAddAudioMetadataIntTest extends IntegrationBase {
         HearingEntity hearingEntity = hearingsInAnotherCourtroom.get(0);
         List<MediaEntity> mediaEntities = dartsDatabase.getMediaRepository().findAllCurrentMediaByHearingId(hearingEntity.getId());
         assertEquals(0, mediaEntities.size());//shouldn't have any as no audio in that courtroom
+
     }
 
     @Test

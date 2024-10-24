@@ -16,6 +16,7 @@ import uk.gov.hmcts.darts.common.entity.MediaEntity;
 import uk.gov.hmcts.darts.common.helper.MediaLinkedCaseHelper;
 import uk.gov.hmcts.darts.common.repository.CourtLogEventRepository;
 import uk.gov.hmcts.darts.common.repository.HearingRepository;
+import uk.gov.hmcts.darts.test.common.data.UserAccountTestData;
 
 import java.time.OffsetDateTime;
 import java.util.Arrays;
@@ -72,7 +73,7 @@ class AudioAsyncServiceImplTest {
         when(audioConfigurationProperties.getHandheldAudioCourtroomNumbers())
             .thenReturn(List.of(addAudioMetadataRequest.getCourtroom()));
 
-        audioAsyncService.linkAudioToHearingByEvent(addAudioMetadataRequest, mediaEntity);
+        audioAsyncService.linkAudioToHearingByEvent(addAudioMetadataRequest, mediaEntity, UserAccountTestData.minimalUserAccount());
         verify(hearingRepository, times(0)).saveAndFlush(any());
         assertEquals(0, hearing.getMediaList().size());
     }
@@ -94,7 +95,7 @@ class AudioAsyncServiceImplTest {
             any()
         )).thenReturn(List.of(eventEntity));
 
-        audioAsyncService.linkAudioToHearingByEvent(addAudioMetadataRequest, mediaEntity);
+        audioAsyncService.linkAudioToHearingByEvent(addAudioMetadataRequest, mediaEntity, UserAccountTestData.minimalUserAccount());
         verify(hearingRepository, times(1)).saveAndFlush(any());
         assertEquals(1, hearing.getMediaList().size());
     }
@@ -116,7 +117,7 @@ class AudioAsyncServiceImplTest {
             any()
         )).thenReturn(List.of(eventEntity));
 
-        audioAsyncService.linkAudioToHearingByEvent(addAudioMetadataRequest, mediaEntity);
+        audioAsyncService.linkAudioToHearingByEvent(addAudioMetadataRequest, mediaEntity, UserAccountTestData.minimalUserAccount());
         verify(hearingRepository, times(1)).saveAndFlush(any());
         assertEquals(1, hearing.getMediaList().size());
         assertTrue(hearing.getHearingIsActual());
@@ -143,7 +144,7 @@ class AudioAsyncServiceImplTest {
             any()
         )).thenReturn(Arrays.asList(firstEventEntity, secondEventEntity));
 
-        audioAsyncService.linkAudioToHearingByEvent(addAudioMetadataRequest, mediaEntity);
+        audioAsyncService.linkAudioToHearingByEvent(addAudioMetadataRequest, mediaEntity, UserAccountTestData.minimalUserAccount());
         verify(hearingRepository, times(1)).saveAndFlush(any());
         assertEquals(1, hearing.getMediaList().size());
     }

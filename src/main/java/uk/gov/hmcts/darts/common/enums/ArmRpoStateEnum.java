@@ -1,0 +1,26 @@
+package uk.gov.hmcts.darts.common.enums;
+
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+
+@Getter
+@RequiredArgsConstructor
+public enum ArmRpoStateEnum {
+
+    GET_RECORD_MANAGEMENT_MATTER(1),
+    GET_INDEXES_BY_MATTERID(2),
+    GET_STORAGE_ACCOUNTS(3),
+    GET_PROFILE_ENTITLEMENTS(4),
+    GET_MASTERINDEXFIELD_BY_RECORDCLASS_SCHEMA(5),
+    ADD_ASYNC_SEARCH(6),
+    SAVE_BACKGROUND_SEARCH(7),
+    GET_EXTENDED_SEARCHES_BY_MATTER(8),
+    CREATE_EXPORT_BASED_ON_SEARCH_RESULTS_TABLE(9),
+    GET_EXTENDED_PRODUCTIONS_BY_MATTER(10),
+    GET_PRODUCTION_OUTPUT_FILES(11),
+    DOWNLOAD_PRODUCTION(12),
+    REMOVE_PRODUCTION(13);
+
+    private final Integer id;
+
+}
