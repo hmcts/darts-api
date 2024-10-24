@@ -13,7 +13,6 @@ import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.event.model.AdminGetEventForIdResponseResult;
 
 import java.time.OffsetDateTime;
-import java.util.Optional;
 
 @ExtendWith(MockitoExtension.class)
 class EventMapperTest {
@@ -64,7 +63,7 @@ class EventMapperTest {
         eventEntity.setTimestamp(OffsetDateTime.now());
         eventEntity.setIsCurrent(true);
         // Given
-        AdminGetEventForIdResponseResult responseResult = eventMapper.mapToAdminGetEventsResponseForId(Optional.of(eventEntity));
+        AdminGetEventForIdResponseResult responseResult = eventMapper.mapToAdminGetEventsResponseForId(eventEntity);
 
         // Then
         Assertions.assertEquals(eventEntity.getId(), responseResult.getId());

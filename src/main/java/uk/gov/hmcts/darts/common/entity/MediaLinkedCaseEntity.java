@@ -9,8 +9,10 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
+import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
@@ -18,6 +20,8 @@ import lombok.Setter;
 @Getter
 @Setter
 @EqualsAndHashCode(callSuper = false)
+@NoArgsConstructor
+@AllArgsConstructor
 public class MediaLinkedCaseEntity {
 
     @Id
@@ -40,4 +44,8 @@ public class MediaLinkedCaseEntity {
     @Column(name = "case_number")
     private String caseNumber;
 
+    public MediaLinkedCaseEntity(MediaEntity mediaEntity, CourtCaseEntity courtCase) {
+        this.media = mediaEntity;
+        this.courtCase = courtCase;
+    }
 }
