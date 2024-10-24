@@ -47,12 +47,12 @@ class DataUtilTest {
     }
 
     @Test
-    void trim(){
+    void trim() {
         assertThat(DataUtil.trim(" test ")).isEqualTo("test");
     }
 
     @Test
-    void trimNull(){
+    void trimNull() {
         assertThat(DataUtil.trim((String) null)).isNull();
     }
 
