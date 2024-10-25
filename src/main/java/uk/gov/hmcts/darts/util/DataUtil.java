@@ -17,11 +17,12 @@ public final class DataUtil {
     }
 
     public static List<String> trim(List<String> list) {
-        return Optional.ofNullable(list)
-            .map(l -> l.stream()
-                .map(DataUtil::trim)
-                .toList())
-            .orElse(null);
+        if (list == null) {
+            return null;
+        }
+        return list.stream()
+            .map(DataUtil::trim)
+            .toList();
     }
 
     public static String trim(String item) {
