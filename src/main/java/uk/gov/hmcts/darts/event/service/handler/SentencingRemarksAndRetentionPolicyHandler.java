@@ -17,7 +17,6 @@ import uk.gov.hmcts.darts.log.api.LogApi;
 import uk.gov.hmcts.darts.transcriptions.api.TranscriptionsApi;
 import uk.gov.hmcts.darts.transcriptions.exception.TranscriptionApiError;
 import uk.gov.hmcts.darts.transcriptions.model.UpdateTranscriptionRequest;
-import uk.gov.hmcts.darts.util.DataUtil;
 
 import static uk.gov.hmcts.darts.event.mapper.TranscriptionRequestDetailsMapper.transcriptionRequestDetailsFrom;
 import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum.APPROVED;
@@ -49,7 +48,6 @@ public class SentencingRemarksAndRetentionPolicyHandler extends EventHandlerBase
 
     @Override
     public void handle(final DartsEvent dartsEvent, EventHandlerEntity eventHandler) {
-        DataUtil.preProcess(dartsEvent);
         var hearingAndEvent = createHearingAndSaveEvent(dartsEvent, eventHandler);
 
         var transcriptionRequestDetails = transcriptionRequestDetailsFrom(

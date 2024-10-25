@@ -15,7 +15,6 @@ import uk.gov.hmcts.darts.event.model.DartsEvent;
 import uk.gov.hmcts.darts.event.service.EventPersistenceService;
 import uk.gov.hmcts.darts.event.service.handler.base.EventHandlerBase;
 import uk.gov.hmcts.darts.log.api.LogApi;
-import uk.gov.hmcts.darts.util.DataUtil;
 
 @Slf4j
 @Service
@@ -34,7 +33,6 @@ public class SetReportingRestrictionEventHandler extends EventHandlerBase {
     @Transactional
     @Override
     public void handle(DartsEvent dartsEvent, EventHandlerEntity eventHandler) {
-        DataUtil.preProcess(dartsEvent);
         CreatedHearingAndEvent createdHearingAndEvent = createHearingAndSaveEvent(dartsEvent, eventHandler);
         CourtCaseEntity courtCaseEntity = createdHearingAndEvent.getHearingEntity().getCourtCase();
         courtCaseEntity.setReportingRestrictions(eventHandler);

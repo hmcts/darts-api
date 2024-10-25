@@ -14,7 +14,6 @@ import uk.gov.hmcts.darts.event.model.DartsEvent;
 import uk.gov.hmcts.darts.event.service.EventPersistenceService;
 import uk.gov.hmcts.darts.event.service.handler.base.EventHandlerBase;
 import uk.gov.hmcts.darts.log.api.LogApi;
-import uk.gov.hmcts.darts.util.DataUtil;
 
 import static uk.gov.hmcts.darts.event.enums.DarNotifyType.STOP_RECORDING;
 
@@ -34,7 +33,6 @@ public class DarStopHandler extends EventHandlerBase {
     @Override
     @Transactional
     public void handle(DartsEvent dartsEvent, EventHandlerEntity eventHandler) {
-        DataUtil.preProcess(dartsEvent);
         CreatedHearingAndEvent hearingAndSaveEvent = createHearingAndSaveEvent(dartsEvent, eventHandler);// saveEvent
         var notifyEvent = new DarNotifyApplicationEvent(this, dartsEvent, STOP_RECORDING, hearingAndSaveEvent.getCourtroomId());
         eventPublisher.publishEvent(notifyEvent);
