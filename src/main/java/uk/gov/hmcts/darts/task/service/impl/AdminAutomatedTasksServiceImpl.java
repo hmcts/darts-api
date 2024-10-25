@@ -19,6 +19,7 @@ import uk.gov.hmcts.darts.tasks.model.AutomatedTaskSummary;
 import uk.gov.hmcts.darts.tasks.model.DetailedAutomatedTask;
 
 import java.util.List;
+import java.util.Objects;
 
 import static uk.gov.hmcts.darts.audit.api.AuditActivity.ENABLE_DISABLE_JOB;
 import static uk.gov.hmcts.darts.audit.api.AuditActivity.RUN_JOB_MANUALLY;
@@ -102,8 +103,7 @@ public class AdminAutomatedTasksServiceImpl implements AdminAutomatedTaskService
         if (automatedTaskName == null || automatedTaskName.getConditionalOnSpEL() == null) {
             return true;
         }
-        String embeddedValue = configurableBeanFactory.resolveEmbeddedValue(automatedTaskName.getConditionalOnSpEL());
-        assert embeddedValue != null;
+        String embeddedValue = Objects.requireNonNull(configurableBeanFactory.resolveEmbeddedValue(automatedTaskName.getConditionalOnSpEL()));
         return Boolean.TRUE.equals(new SpelExpressionParser().parseExpression(embeddedValue).getValue(Boolean.class));
     }
 
