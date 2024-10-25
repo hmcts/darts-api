@@ -221,7 +221,7 @@ public class DetsToArmBatchPushProcessorImpl implements DetsToArmBatchPushProces
         }
 
         for (var batchItem : batchItems.getFailed()) {
-            String errorMessage = "Manifest file creation failed";
+            String errorMessage = "Manifest file transfer to ARM failed";
             updateObjectStateRecordStatus(batchItem.getArmEod(), errorMessage);
         }
     }
