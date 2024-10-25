@@ -10,11 +10,9 @@ import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Limit;
 import uk.gov.hmcts.darts.common.entity.ObjectRecordStatusEntity;
-import uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum;
 import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
 import uk.gov.hmcts.darts.common.repository.AutomatedTaskRepository;
 import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
-import uk.gov.hmcts.darts.common.service.ObjectRecordStatusService;
 import uk.gov.hmcts.darts.common.util.EodHelper;
 import uk.gov.hmcts.darts.log.api.LogApi;
 import uk.gov.hmcts.darts.task.api.AutomatedTaskName;
@@ -46,6 +44,8 @@ class ProcessArmRpoPendingAutomatedTaskTest {
     @Mock
     private CurrentTimeHelper currentTimeHelper;
 
+    private MockedStatic<EodHelper> eodHelperMockedStatic;
+
     private ProcessArmRpoPendingAutomatedTask setupProcessArmRpoPendingAutomatedTask(Duration duration) {
         return spy(new ProcessArmRpoPendingAutomatedTask(
             automatedTaskRepository,
@@ -58,7 +58,6 @@ class ProcessArmRpoPendingAutomatedTaskTest {
         ));
     }
 
-    private MockedStatic<EodHelper> eodHelperMockedStatic;
 
     @BeforeEach
     void before() {
@@ -104,8 +103,8 @@ class ProcessArmRpoPendingAutomatedTaskTest {
             );
 
         verify(currentTimeHelper).currentOffsetDateTime();
-        eodHelperMockedStatic.verify(EodHelper::armRpoPendingStatus,times(1));
-        eodHelperMockedStatic.verify(EodHelper::storedStatus,times(1));
+        eodHelperMockedStatic.verify(EodHelper::armRpoPendingStatus, times(1));
+        eodHelperMockedStatic.verify(EodHelper::storedStatus, times(1));
         verify(processArmRpoPendingAutomatedTask).getAutomatedTaskBatchSize();
     }
 
@@ -134,8 +133,8 @@ class ProcessArmRpoPendingAutomatedTaskTest {
             );
 
         verify(currentTimeHelper).currentOffsetDateTime();
-        eodHelperMockedStatic.verify(EodHelper::armRpoPendingStatus,times(1));
-        eodHelperMockedStatic.verify(EodHelper::storedStatus,times(1));
+        eodHelperMockedStatic.verify(EodHelper::armRpoPendingStatus, times(1));
+        eodHelperMockedStatic.verify(EodHelper::storedStatus, times(1));
         verify(processArmRpoPendingAutomatedTask).getAutomatedTaskBatchSize();
     }
 }
