@@ -16,7 +16,7 @@ class ArmRpoApiGetMasterIndexFieldByRecordClassSchemaTest {
 
     @Test
     void getMasterIndexFieldByRecordClassSchema() {
-        assertThrows(NotImplementedException.class, () -> armRpoApi.getStorageAccounts("token", 1));
+        assertThrows(NotImplementedException.class, () -> armRpoApi.getMasterIndexFieldByRecordClassSchema("token", 1, 1));
     }
 
 }

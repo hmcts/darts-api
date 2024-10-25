@@ -16,7 +16,7 @@ class ArmRpoApiSaveBackgroundSearchTest {
 
     @Test
     void saveBackgroundSearch() {
-        assertThrows(NotImplementedException.class, () -> armRpoApi.getStorageAccounts("token", 1));
+        assertThrows(NotImplementedException.class, () -> armRpoApi.saveBackgroundSearch("token", 1, "searchName"));
     }
 
 }

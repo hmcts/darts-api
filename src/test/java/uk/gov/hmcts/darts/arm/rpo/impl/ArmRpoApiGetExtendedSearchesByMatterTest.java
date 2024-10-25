@@ -16,7 +16,7 @@ class ArmRpoApiGetExtendedSearchesByMatterTest {
 
     @Test
     void getExtendedSearchesByMatter() {
-        assertThrows(NotImplementedException.class, () -> armRpoApi.getStorageAccounts("token", 1));
+        assertThrows(NotImplementedException.class, () -> armRpoApi.getExtendedSearchesByMatter("token", 1));
     }
 
 

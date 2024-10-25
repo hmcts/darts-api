@@ -16,7 +16,7 @@ class ArmRpoApiRemoveProductionTest {
 
     @Test
     void removeProduction() {
-        assertThrows(NotImplementedException.class, () -> armRpoApi.getExtendedProductionsByMatter("token", 1));
+        assertThrows(NotImplementedException.class, () -> armRpoApi.removeProduction("token", 1));
     }
 
 }

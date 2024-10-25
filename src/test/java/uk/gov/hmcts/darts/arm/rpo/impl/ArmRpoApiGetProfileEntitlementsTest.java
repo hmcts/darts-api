@@ -16,7 +16,7 @@ class ArmRpoApiGetProfileEntitlementsTest {
 
     @Test
     void getProfileEntitlements() {
-        assertThrows(NotImplementedException.class, () -> armRpoApi.getStorageAccounts("token", 1));
+        assertThrows(NotImplementedException.class, () -> armRpoApi.getProfileEntitlements("token", 1));
     }
 
 }

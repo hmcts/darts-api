@@ -6,6 +6,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.Collections;
+
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @ExtendWith(MockitoExtension.class)
@@ -16,7 +18,7 @@ class ArmRpoApiCreateExportBasedOnSearchResultsTableTest {
 
     @Test
     void createExportBasedOnSearchResultsTable() {
-        assertThrows(NotImplementedException.class, () -> armRpoApi.getStorageAccounts("token", 1));
+        assertThrows(NotImplementedException.class, () -> armRpoApi.createExportBasedOnSearchResultsTable("token", 1, Collections.emptyList()));
     }
 
 }
