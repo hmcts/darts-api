@@ -24,8 +24,12 @@ import uk.gov.hmcts.darts.common.entity.ObjectStateRecordEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.exception.DartsException;
 import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
+import uk.gov.hmcts.darts.common.repository.AnnotationDocumentRepository;
+import uk.gov.hmcts.darts.common.repository.CaseDocumentRepository;
 import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
+import uk.gov.hmcts.darts.common.repository.MediaRepository;
 import uk.gov.hmcts.darts.common.repository.ObjectStateRecordRepository;
+import uk.gov.hmcts.darts.common.repository.TranscriptionDocumentRepository;
 import uk.gov.hmcts.darts.common.service.FileOperationService;
 import uk.gov.hmcts.darts.common.util.EodHelper;
 import uk.gov.hmcts.darts.log.api.LogApi;
@@ -58,6 +62,10 @@ public class DetsToArmBatchPushProcessorImpl implements DetsToArmBatchPushProces
     private final DetsToArmProcessorConfiguration detsToArmProcessorConfiguration;
     private final ObjectStateRecordRepository objectStateRecordRepository;
     private final CurrentTimeHelper currentTimeHelper;
+    private final MediaRepository mediaRepository;
+    private final AnnotationDocumentRepository annotationDocumentRepository;
+    private final CaseDocumentRepository caseDocumentRepository;
+    private final TranscriptionDocumentRepository transcriptionDocumentRepository;
 
     private static final int BLOB_ALREADY_EXISTS_STATUS_CODE = 409;
 
@@ -340,10 +348,28 @@ public class DetsToArmBatchPushProcessorImpl implements DetsToArmBatchPushProces
     }
 
     private void setFileSize(ExternalObjectDirectoryEntity detsExternalObjectDirectory, ObjectStateRecordEntity objectStateRecord) {
-        Long fileSize = dataStoreToArmHelper.getFileSize(detsExternalObjectDirectory.getId());
+        Long fileSize = getFileSize(detsExternalObjectDirectory);
         if (nonNull(fileSize)) {
             objectStateRecord.setFileSizeBytesArml(fileSize);
         }
+    }
+
+    private Long getFileSize(ExternalObjectDirectoryEntity detsExternalObjectDirectory) {
+        Long fileSize = null;
+        if (nonNull(detsExternalObjectDirectory.getMedia())) {
+            fileSize = mediaRepository.findById(detsExternalObjectDirectory.getMedia().getId()).map(
+                media -> media.getFileSize()).orElse(null);
+        } else if (nonNull(detsExternalObjectDirectory.getAnnotationDocumentEntity())) {
+            fileSize = annotationDocumentRepository.findById(detsExternalObjectDirectory.getAnnotationDocumentEntity().getId()).map(
+                annotationDocument -> Long.valueOf(annotationDocument.getFileSize())).orElse(null);
+        } else if (nonNull(detsExternalObjectDirectory.getCaseDocument())) {
+            fileSize = caseDocumentRepository.findById(detsExternalObjectDirectory.getCaseDocument().getId()).map(
+                caseDocument -> Long.valueOf(caseDocument.getFileSize())).orElse(null);
+        } else if (nonNull(detsExternalObjectDirectory.getTranscriptionDocumentEntity())) {
+            fileSize = transcriptionDocumentRepository.findById(detsExternalObjectDirectory.getTranscriptionDocumentEntity().getId()).map(
+                transcriptionDocument -> Long.valueOf(transcriptionDocument.getFileSize())).orElse(null);
+        }
+        return fileSize;
     }
 
 

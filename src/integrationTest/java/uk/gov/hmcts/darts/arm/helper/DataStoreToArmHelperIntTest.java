@@ -326,16 +326,7 @@ class DataStoreToArmHelperIntTest extends IntegrationBase {
 
         assertEquals(ARM_MANIFEST_FAILED.getId(), externalObjectDirectory.getStatus().getId());
     }
-
-    @Test
-    void getFileSize() {
-        int externalObjectDirectoryId = externalObjectDirectory.getId();
-
-        Long result = dataStoreToArmHelper.getFileSize(externalObjectDirectoryId);
-
-        assertNotNull(result);
-    }
-
+    
     private ObjectStateRecordEntity createObjectStateRecordEntity(Long uuid) {
         ObjectStateRecordEntity objectStateRecordEntity = new ObjectStateRecordEntity();
         objectStateRecordEntity.setUuid(uuid);

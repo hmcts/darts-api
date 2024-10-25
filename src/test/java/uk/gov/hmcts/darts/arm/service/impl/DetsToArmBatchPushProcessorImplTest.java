@@ -24,8 +24,12 @@ import uk.gov.hmcts.darts.common.entity.ObjectStateRecordEntity;
 import uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum;
 import uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum;
 import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
+import uk.gov.hmcts.darts.common.repository.AnnotationDocumentRepository;
+import uk.gov.hmcts.darts.common.repository.CaseDocumentRepository;
 import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
+import uk.gov.hmcts.darts.common.repository.MediaRepository;
 import uk.gov.hmcts.darts.common.repository.ObjectStateRecordRepository;
+import uk.gov.hmcts.darts.common.repository.TranscriptionDocumentRepository;
 import uk.gov.hmcts.darts.common.service.FileOperationService;
 import uk.gov.hmcts.darts.common.service.impl.EodHelperMocks;
 import uk.gov.hmcts.darts.common.util.EodHelper;
@@ -89,6 +93,15 @@ class DetsToArmBatchPushProcessorImplTest {
     private ObjectStateRecordRepository objectStateRecordRepository;
     @Mock
     private CurrentTimeHelper currentTimeHelper;
+    @Mock
+    private MediaRepository mediaRepository;
+    @Mock
+    private CaseDocumentRepository caseDocumentRepository;
+    @Mock
+    private TranscriptionDocumentRepository transcriptionDocumentRepository;
+    @Mock
+    private AnnotationDocumentRepository annotationDocumentRepository;
+
     @InjectMocks
     private DataStoreToArmHelper dataStoreToArmHelper;
 
@@ -120,7 +133,11 @@ class DetsToArmBatchPushProcessorImplTest {
             armDataManagementApi,
             detsToArmProcessorConfiguration,
             objectStateRecordRepository,
-            currentTimeHelper
+            currentTimeHelper,
+            mediaRepository,
+            annotationDocumentRepository,
+            caseDocumentRepository,
+            transcriptionDocumentRepository
         );
 
         lenient().when(armDataManagementConfiguration.getMaxRetryAttempts()).thenReturn(MAX_RETRY_ATTEMPTS);
