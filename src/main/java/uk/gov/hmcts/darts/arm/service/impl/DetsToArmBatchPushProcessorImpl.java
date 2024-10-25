@@ -16,6 +16,7 @@ import uk.gov.hmcts.darts.arm.model.batch.ArmBatchItem;
 import uk.gov.hmcts.darts.arm.model.batch.ArmBatchItems;
 import uk.gov.hmcts.darts.arm.service.ArchiveRecordService;
 import uk.gov.hmcts.darts.arm.service.DetsToArmBatchPushProcessor;
+import uk.gov.hmcts.darts.arm.service.ExternalObjectDirectoryService;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.ExternalLocationTypeEntity;
 import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
@@ -24,12 +25,8 @@ import uk.gov.hmcts.darts.common.entity.ObjectStateRecordEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.exception.DartsException;
 import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
-import uk.gov.hmcts.darts.common.repository.AnnotationDocumentRepository;
-import uk.gov.hmcts.darts.common.repository.CaseDocumentRepository;
 import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
-import uk.gov.hmcts.darts.common.repository.MediaRepository;
 import uk.gov.hmcts.darts.common.repository.ObjectStateRecordRepository;
-import uk.gov.hmcts.darts.common.repository.TranscriptionDocumentRepository;
 import uk.gov.hmcts.darts.common.service.FileOperationService;
 import uk.gov.hmcts.darts.common.util.EodHelper;
 import uk.gov.hmcts.darts.log.api.LogApi;
@@ -62,10 +59,7 @@ public class DetsToArmBatchPushProcessorImpl implements DetsToArmBatchPushProces
     private final DetsToArmProcessorConfiguration detsToArmProcessorConfiguration;
     private final ObjectStateRecordRepository objectStateRecordRepository;
     private final CurrentTimeHelper currentTimeHelper;
-    private final MediaRepository mediaRepository;
-    private final AnnotationDocumentRepository annotationDocumentRepository;
-    private final CaseDocumentRepository caseDocumentRepository;
-    private final TranscriptionDocumentRepository transcriptionDocumentRepository;
+    private final ExternalObjectDirectoryService externalObjectDirectoryService;
 
     private static final int BLOB_ALREADY_EXISTS_STATUS_CODE = 409;
 
@@ -218,10 +212,10 @@ public class DetsToArmBatchPushProcessorImpl implements DetsToArmBatchPushProces
         return detsToArmProcessorConfiguration.getManifestFilePrefix();
     }
 
-    private void updateObjectStateRecordManifestSuccessOrFailure(ArmBatchItems batchItems, File archiveRecordsFile, boolean successfulTransfer) {
+    private void updateObjectStateRecordManifestSuccessOrFailure(ArmBatchItems batchItems, File archiveRecordsFile, boolean isSuccessfulTransfer) {
         for (var batchItem : batchItems.getSuccessful()) {
             ObjectStateRecordEntity objectStateRecord = getObjectStateRecordEntity(batchItem.getArmEod());
-            objectStateRecord.setFlagMfstTransfToArml(successfulTransfer);
+            objectStateRecord.setFlagMfstTransfToArml(isSuccessfulTransfer);
             objectStateRecord.setDateMfstTransfToArml(currentTimeHelper.currentOffsetDateTime());
             objectStateRecordRepository.save(objectStateRecord);
         }
@@ -348,28 +342,10 @@ public class DetsToArmBatchPushProcessorImpl implements DetsToArmBatchPushProces
     }
 
     private void setFileSize(ExternalObjectDirectoryEntity detsExternalObjectDirectory, ObjectStateRecordEntity objectStateRecord) {
-        Long fileSize = getFileSize(detsExternalObjectDirectory);
+        Long fileSize = externalObjectDirectoryService.getFileSize(detsExternalObjectDirectory);
         if (nonNull(fileSize)) {
             objectStateRecord.setFileSizeBytesArml(fileSize);
         }
-    }
-
-    private Long getFileSize(ExternalObjectDirectoryEntity detsExternalObjectDirectory) {
-        Long fileSize = null;
-        if (nonNull(detsExternalObjectDirectory.getMedia())) {
-            fileSize = mediaRepository.findById(detsExternalObjectDirectory.getMedia().getId()).map(
-                media -> media.getFileSize()).orElse(null);
-        } else if (nonNull(detsExternalObjectDirectory.getAnnotationDocumentEntity())) {
-            fileSize = annotationDocumentRepository.findById(detsExternalObjectDirectory.getAnnotationDocumentEntity().getId()).map(
-                annotationDocument -> Long.valueOf(annotationDocument.getFileSize())).orElse(null);
-        } else if (nonNull(detsExternalObjectDirectory.getCaseDocument())) {
-            fileSize = caseDocumentRepository.findById(detsExternalObjectDirectory.getCaseDocument().getId()).map(
-                caseDocument -> Long.valueOf(caseDocument.getFileSize())).orElse(null);
-        } else if (nonNull(detsExternalObjectDirectory.getTranscriptionDocumentEntity())) {
-            fileSize = transcriptionDocumentRepository.findById(detsExternalObjectDirectory.getTranscriptionDocumentEntity().getId()).map(
-                transcriptionDocument -> Long.valueOf(transcriptionDocument.getFileSize())).orElse(null);
-        }
-        return fileSize;
     }
 
 

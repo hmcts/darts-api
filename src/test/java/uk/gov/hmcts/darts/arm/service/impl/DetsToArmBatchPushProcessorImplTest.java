@@ -17,6 +17,7 @@ import uk.gov.hmcts.darts.arm.helper.DataStoreToArmHelper;
 import uk.gov.hmcts.darts.arm.model.record.ArchiveRecordFileInfo;
 import uk.gov.hmcts.darts.arm.service.ArchiveRecordService;
 import uk.gov.hmcts.darts.arm.service.DetsToArmBatchPushProcessor;
+import uk.gov.hmcts.darts.arm.service.ExternalObjectDirectoryService;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
@@ -24,12 +25,8 @@ import uk.gov.hmcts.darts.common.entity.ObjectStateRecordEntity;
 import uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum;
 import uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum;
 import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
-import uk.gov.hmcts.darts.common.repository.AnnotationDocumentRepository;
-import uk.gov.hmcts.darts.common.repository.CaseDocumentRepository;
 import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
-import uk.gov.hmcts.darts.common.repository.MediaRepository;
 import uk.gov.hmcts.darts.common.repository.ObjectStateRecordRepository;
-import uk.gov.hmcts.darts.common.repository.TranscriptionDocumentRepository;
 import uk.gov.hmcts.darts.common.service.FileOperationService;
 import uk.gov.hmcts.darts.common.service.impl.EodHelperMocks;
 import uk.gov.hmcts.darts.common.util.EodHelper;
@@ -94,13 +91,7 @@ class DetsToArmBatchPushProcessorImplTest {
     @Mock
     private CurrentTimeHelper currentTimeHelper;
     @Mock
-    private MediaRepository mediaRepository;
-    @Mock
-    private CaseDocumentRepository caseDocumentRepository;
-    @Mock
-    private TranscriptionDocumentRepository transcriptionDocumentRepository;
-    @Mock
-    private AnnotationDocumentRepository annotationDocumentRepository;
+    private ExternalObjectDirectoryService externalObjectDirectoryService;
 
     @InjectMocks
     private DataStoreToArmHelper dataStoreToArmHelper;
@@ -134,10 +125,7 @@ class DetsToArmBatchPushProcessorImplTest {
             detsToArmProcessorConfiguration,
             objectStateRecordRepository,
             currentTimeHelper,
-            mediaRepository,
-            annotationDocumentRepository,
-            caseDocumentRepository,
-            transcriptionDocumentRepository
+            externalObjectDirectoryService
         );
 
         lenient().when(armDataManagementConfiguration.getMaxRetryAttempts()).thenReturn(MAX_RETRY_ATTEMPTS);
