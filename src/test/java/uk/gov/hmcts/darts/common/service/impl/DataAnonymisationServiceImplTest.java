@@ -197,8 +197,8 @@ class DataAnonymisationServiceImplTest {
         verify(dataAnonymisationService, times(1)).anonymizeProsecutorEntity(userAccount, prosecutorEntity1);
         verify(dataAnonymisationService, times(1)).anonymizeProsecutorEntity(userAccount, prosecutorEntity2);
 
-        verify(dataAnonymisationService, times(1)).anonymizeHearingEntity(userAccount, hearingEntity1);
-        verify(dataAnonymisationService, times(1)).anonymizeHearingEntity(userAccount, hearingEntity2);
+        verify(dataAnonymisationService, times(1)).anonymizeTranscriptionEntities(userAccount, hearingEntity1);
+        verify(dataAnonymisationService, times(1)).anonymizeTranscriptionEntities(userAccount, hearingEntity2);
 
         verify(dataAnonymisationService, times(1)).tidyUpTransformedMediaEntities(userAccount, courtCase);
         verify(logApi, times(1)).caseDeletedDueToExpiry(123, "caseNo123");
@@ -245,16 +245,12 @@ class DataAnonymisationServiceImplTest {
         hearingEntity.setEventList(List.of(entityEntity1, entityEntity2));
 
         doNothing().when(dataAnonymisationService).anonymizeTranscriptionEntity(any(), any());
-        doNothing().when(dataAnonymisationService).anonymizeEventEntity(any(), any());
 
         UserAccountEntity userAccount = new UserAccountEntity();
-        dataAnonymisationService.anonymizeHearingEntity(userAccount, hearingEntity);
+        dataAnonymisationService.anonymizeTranscriptionEntities(userAccount, hearingEntity);
 
         verify(dataAnonymisationService, times(1)).anonymizeTranscriptionEntity(userAccount, transcriptionEntity1);
         verify(dataAnonymisationService, times(1)).anonymizeTranscriptionEntity(userAccount, transcriptionEntity2);
-
-        verify(dataAnonymisationService, times(1)).anonymizeEventEntity(userAccount, entityEntity1);
-        verify(dataAnonymisationService, times(1)).anonymizeEventEntity(userAccount, entityEntity2);
     }
 
 
