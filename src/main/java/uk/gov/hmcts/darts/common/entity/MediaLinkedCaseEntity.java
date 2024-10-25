@@ -14,7 +14,7 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import uk.gov.hmcts.darts.common.entity.base.MandatoryCreatedBaseEntity;
+import uk.gov.hmcts.darts.common.entity.base.CreatedBaseEntity;
 
 @Entity
 @Table(name = "media_linked_case")
@@ -23,7 +23,7 @@ import uk.gov.hmcts.darts.common.entity.base.MandatoryCreatedBaseEntity;
 @EqualsAndHashCode(callSuper = false)
 @NoArgsConstructor
 @AllArgsConstructor
-public class MediaLinkedCaseEntity extends MandatoryCreatedBaseEntity {
+public class MediaLinkedCaseEntity extends CreatedBaseEntity {
 
     @Id
     @Column(name = "mlc_id")

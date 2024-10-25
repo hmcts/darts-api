@@ -40,14 +40,14 @@ public class DataAnonymisationEntity {
     @Column(name = "is_manual_request")
     private Boolean isManualRequest;
 
-    @ManyToOne(optional = false)
+    @ManyToOne(optional = false, fetch = FetchType.LAZY)
     @JoinColumn(name = "requested_by")
     private UserAccountEntity requestedBy;
 
     @Column(name = "requested_ts")
     private OffsetDateTime requestedTs;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "approved_by")
     private UserAccountEntity approvedBy;
 
