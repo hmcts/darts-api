@@ -1,8 +1,12 @@
 package uk.gov.hmcts.darts.task.runner.impl;
 
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
+import org.mockito.MockedStatic;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Limit;
 import uk.gov.hmcts.darts.common.entity.ObjectRecordStatusEntity;
@@ -11,6 +15,7 @@ import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
 import uk.gov.hmcts.darts.common.repository.AutomatedTaskRepository;
 import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
 import uk.gov.hmcts.darts.common.service.ObjectRecordStatusService;
+import uk.gov.hmcts.darts.common.util.EodHelper;
 import uk.gov.hmcts.darts.log.api.LogApi;
 import uk.gov.hmcts.darts.task.api.AutomatedTaskName;
 import uk.gov.hmcts.darts.task.service.LockService;
@@ -22,6 +27,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -35,11 +41,8 @@ class ProcessArmRpoPendingAutomatedTaskTest {
     @Mock
     private AutomatedTaskRepository automatedTaskRepository;
 
-
     @Mock
     private ExternalObjectDirectoryRepository externalObjectDirectoryRepository;
-    @Mock
-    private ObjectRecordStatusService objectRecordStatusService;
     @Mock
     private CurrentTimeHelper currentTimeHelper;
 
@@ -50,10 +53,23 @@ class ProcessArmRpoPendingAutomatedTaskTest {
             logApi,
             lockService,
             externalObjectDirectoryRepository,
-            objectRecordStatusService,
             currentTimeHelper,
             duration
         ));
+    }
+
+    private MockedStatic<EodHelper> eodHelperMockedStatic;
+
+    @BeforeEach
+    void before() {
+        eodHelperMockedStatic = Mockito.mockStatic(EodHelper.class);
+    }
+
+    @AfterEach
+    void after() {
+        if (eodHelperMockedStatic != null) {
+            eodHelperMockedStatic.close();
+        }
     }
 
     @Test
@@ -72,10 +88,8 @@ class ProcessArmRpoPendingAutomatedTaskTest {
         OffsetDateTime currentTime = OffsetDateTime.now();
         when(currentTimeHelper.currentOffsetDateTime()).thenReturn(currentTime);
 
-        when(objectRecordStatusService.getObjectRecordStatusEntity(ObjectRecordStatusEnum.ARM_RPO_PENDING))
-            .thenReturn(objectRecordStatusEntityPending);
-        when(objectRecordStatusService.getObjectRecordStatusEntity(ObjectRecordStatusEnum.STORED))
-            .thenReturn(objectRecordStatusEntityStored);
+        eodHelperMockedStatic.when(EodHelper::armRpoPendingStatus).thenReturn(objectRecordStatusEntityPending);
+        eodHelperMockedStatic.when(EodHelper::storedStatus).thenReturn(objectRecordStatusEntityStored);
 
         doReturn(50).when(processArmRpoPendingAutomatedTask).getAutomatedTaskBatchSize();
 
@@ -90,8 +104,8 @@ class ProcessArmRpoPendingAutomatedTaskTest {
             );
 
         verify(currentTimeHelper).currentOffsetDateTime();
-        verify(objectRecordStatusService).getObjectRecordStatusEntity(ObjectRecordStatusEnum.ARM_RPO_PENDING);
-        verify(objectRecordStatusService).getObjectRecordStatusEntity(ObjectRecordStatusEnum.STORED);
+        eodHelperMockedStatic.verify(EodHelper::armRpoPendingStatus,times(1));
+        eodHelperMockedStatic.verify(EodHelper::storedStatus,times(1));
         verify(processArmRpoPendingAutomatedTask).getAutomatedTaskBatchSize();
     }
 
@@ -104,10 +118,8 @@ class ProcessArmRpoPendingAutomatedTaskTest {
         OffsetDateTime currentTime = OffsetDateTime.now();
         when(currentTimeHelper.currentOffsetDateTime()).thenReturn(currentTime);
 
-        when(objectRecordStatusService.getObjectRecordStatusEntity(ObjectRecordStatusEnum.ARM_RPO_PENDING))
-            .thenReturn(objectRecordStatusEntityPending);
-        when(objectRecordStatusService.getObjectRecordStatusEntity(ObjectRecordStatusEnum.STORED))
-            .thenReturn(objectRecordStatusEntityStored);
+        eodHelperMockedStatic.when(EodHelper::armRpoPendingStatus).thenReturn(objectRecordStatusEntityPending);
+        eodHelperMockedStatic.when(EodHelper::storedStatus).thenReturn(objectRecordStatusEntityStored);
 
         doReturn(75).when(processArmRpoPendingAutomatedTask).getAutomatedTaskBatchSize();
 
@@ -122,8 +134,8 @@ class ProcessArmRpoPendingAutomatedTaskTest {
             );
 
         verify(currentTimeHelper).currentOffsetDateTime();
-        verify(objectRecordStatusService).getObjectRecordStatusEntity(ObjectRecordStatusEnum.ARM_RPO_PENDING);
-        verify(objectRecordStatusService).getObjectRecordStatusEntity(ObjectRecordStatusEnum.STORED);
+        eodHelperMockedStatic.verify(EodHelper::armRpoPendingStatus,times(1));
+        eodHelperMockedStatic.verify(EodHelper::storedStatus,times(1));
         verify(processArmRpoPendingAutomatedTask).getAutomatedTaskBatchSize();
     }
 }

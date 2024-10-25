@@ -9,6 +9,7 @@ import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
 import uk.gov.hmcts.darts.common.repository.AutomatedTaskRepository;
 import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
 import uk.gov.hmcts.darts.common.service.ObjectRecordStatusService;
+import uk.gov.hmcts.darts.common.util.EodHelper;
 import uk.gov.hmcts.darts.log.api.LogApi;
 import uk.gov.hmcts.darts.task.api.AutomatedTaskName;
 import uk.gov.hmcts.darts.task.config.AutomatedTaskConfigurationProperties;
@@ -26,7 +27,6 @@ public class ProcessArmRpoPendingAutomatedTask extends AbstractLockableAutomated
     implements AutoloadingManualTask {
 
     private final ExternalObjectDirectoryRepository externalObjectDirectoryRepository;
-    private final ObjectRecordStatusService objectRecordStatusService;
     private final CurrentTimeHelper currentTimeHelper;
     private final Duration armRpoDuration;
 
@@ -34,13 +34,11 @@ public class ProcessArmRpoPendingAutomatedTask extends AbstractLockableAutomated
                                                 AutomatedTaskConfigurationProperties automatedTaskConfigurationProperties,
                                                 LogApi logApi, LockService lockService,
                                                 ExternalObjectDirectoryRepository externalObjectDirectoryRepository,
-                                                ObjectRecordStatusService objectRecordStatusService,
                                                 CurrentTimeHelper currentTimeHelper,
                                                 @Value("${darts.automated.task.arm-rpo-duration}")
                                                 Duration armRpoDuration) {
         super(automatedTaskRepository, automatedTaskConfigurationProperties, logApi, lockService);
         this.externalObjectDirectoryRepository = externalObjectDirectoryRepository;
-        this.objectRecordStatusService = objectRecordStatusService;
         this.armRpoDuration = armRpoDuration;
         this.currentTimeHelper = currentTimeHelper;
     }
@@ -53,9 +51,9 @@ public class ProcessArmRpoPendingAutomatedTask extends AbstractLockableAutomated
     @Override
     protected void runTask() {
         this.externalObjectDirectoryRepository.updateByStatusEqualsAndDataIngestionTsBefore(
-            this.objectRecordStatusService.getObjectRecordStatusEntity(ObjectRecordStatusEnum.ARM_RPO_PENDING),
+            EodHelper.armRpoPendingStatus(),
             this.currentTimeHelper.currentOffsetDateTime().minus(this.armRpoDuration),
-            this.objectRecordStatusService.getObjectRecordStatusEntity(ObjectRecordStatusEnum.STORED),
+            EodHelper.storedStatus(),
             Limit.of(this.getAutomatedTaskBatchSize())
         );
     }
