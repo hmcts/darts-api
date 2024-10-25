@@ -77,7 +77,7 @@ public class AudioLinkingAutomatedTask extends AbstractLockableAutomatedTask
 
 
         @Transactional
-        void processEvent(Integer eventId) {
+        public void processEvent(Integer eventId) {
             try {
                 EventEntity event = eventService.getEventByEveId(eventId);
                 List<MediaEntity> mediaEntities = mediaRepository.findAllByMediaTimeContains(
