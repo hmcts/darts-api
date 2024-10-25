@@ -45,6 +45,9 @@ public class MediaEntity extends CreatedModifiedBaseEntity
     @Column(name = "media_object_id", length = 16)
     private String legacyObjectId;
 
+    @Column(name = "folder_path")
+    private String folderPath;
+
     @Column(name = "channel", nullable = false)
     private Integer channel;
 
