@@ -171,6 +171,7 @@ class ExternalObjectDirectoryServiceImplTest {
     void getFileSizeReturnsCorrectSizeForMedia(Integer mediaId, Long expectedSize) {
         when(mediaRepository.findById(mediaId)).thenReturn(Optional.of(media1));
         when(media1.getFileSize()).thenReturn(expectedSize);
+        when(media1.getId()).thenReturn(mediaId);
 
         ExternalObjectDirectoryEntity eod = new ExternalObjectDirectoryEntity();
         eod.setMedia(media1);
@@ -186,9 +187,10 @@ class ExternalObjectDirectoryServiceImplTest {
         "2, 2000",
         "3, 3000"
     })
-    void getFileSizeReturnsCorrectSizeForAnnotationDocument(Integer annotationId, Long expectedSize) {
-        when(annotationDocumentRepository.findById(annotationId)).thenReturn(Optional.of(annotationDocument));
+    void getFileSizeReturnsCorrectSizeForAnnotationDocument(Integer annotationDocumentId, Long expectedSize) {
+        when(annotationDocumentRepository.findById(annotationDocumentId)).thenReturn(Optional.of(annotationDocument));
         when(annotationDocument.getFileSize()).thenReturn(expectedSize.intValue());
+        when(annotationDocument.getId()).thenReturn(annotationDocumentId);
 
         ExternalObjectDirectoryEntity eod = new ExternalObjectDirectoryEntity();
         eod.setAnnotationDocumentEntity(annotationDocument);
@@ -207,6 +209,7 @@ class ExternalObjectDirectoryServiceImplTest {
     void getFileSizeReturnsCorrectSizeForCaseDocument(Integer caseDocumentId, Long expectedSize) {
         when(caseDocumentRepository.findById(caseDocumentId)).thenReturn(Optional.of(caseDocumentEntity));
         when(caseDocumentEntity.getFileSize()).thenReturn(expectedSize.intValue());
+        when(caseDocumentEntity.getId()).thenReturn(caseDocumentId);
 
         ExternalObjectDirectoryEntity eod = new ExternalObjectDirectoryEntity();
         eod.setCaseDocument(caseDocumentEntity);
@@ -225,6 +228,7 @@ class ExternalObjectDirectoryServiceImplTest {
     void getFileSizeReturnsCorrectSizeForTranscriptionDocument(Integer transcriptionId, Long expectedSize) {
         when(transcriptionDocumentRepository.findById(transcriptionId)).thenReturn(Optional.of(transcriptionDocument));
         when(transcriptionDocument.getFileSize()).thenReturn(expectedSize.intValue());
+        when(transcriptionDocument.getId()).thenReturn(transcriptionId);
 
         ExternalObjectDirectoryEntity eod = new ExternalObjectDirectoryEntity();
         eod.setTranscriptionDocumentEntity(transcriptionDocument);
