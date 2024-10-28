@@ -5,8 +5,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
 import uk.gov.hmcts.darts.dailylist.model.DailyListJsonObject;
 import uk.gov.hmcts.darts.task.runner.dailylist.mapper.DailyListRequestMapper;
 import uk.gov.hmcts.darts.task.runner.dailylist.mapper.DailyListRequestMapperImpl;
