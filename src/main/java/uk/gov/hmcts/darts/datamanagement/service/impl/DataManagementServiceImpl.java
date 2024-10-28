@@ -11,7 +11,6 @@ import com.azure.storage.blob.options.BlobParallelUploadOptions;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.context.annotation.Profile;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.darts.common.datamanagement.component.DataManagementAzureClientFactory;
@@ -42,7 +41,6 @@ import static org.springframework.http.HttpStatus.valueOf;
 
 @Service
 @Slf4j
-@Profile("!intTest")
 @RequiredArgsConstructor
 @SuppressWarnings("checkstyle:SummaryJavadoc")
 public class DataManagementServiceImpl implements DataManagementService {
@@ -244,4 +242,5 @@ public class DataManagementServiceImpl implements DataManagementService {
             return containerSasUrl.replace(containerName, containerName + "/" + location);
         }
     }
+
 }

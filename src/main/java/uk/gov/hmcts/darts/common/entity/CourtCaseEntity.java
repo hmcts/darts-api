@@ -68,6 +68,12 @@ public class CourtCaseEntity extends CreatedModifiedBaseEntity {
     @Column(name = CASE_OBJECT_ID, length = 16)
     private String legacyCaseObjectId;
 
+    @Column(name = "case_object_name")
+    private String caseObjectName;
+
+    @Column(name = "folder_path")
+    private String folderPath;
+
     @Column(name = CASE_NUMBER, nullable = false)
     private String caseNumber;
 
