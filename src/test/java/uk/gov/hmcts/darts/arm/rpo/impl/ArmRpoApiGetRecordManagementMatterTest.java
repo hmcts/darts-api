@@ -38,15 +38,15 @@ class ArmRpoApiGetRecordManagementMatterTest {
 
     private UserAccountEntity userAccountEntity;
 
-    private final Integer executionId = 1;
+    private static final Integer EXECUTION_ID = 1;
 
     @BeforeEach
     void setUp() {
         userAccountEntity = new UserAccountEntity();
 
         ArmRpoExecutionDetailEntity armRpoExecutionDetailEntity = new ArmRpoExecutionDetailEntity();
-        armRpoExecutionDetailEntity.setId(executionId);
-        when(armRpoService.getArmRpoExecutionDetailEntity(executionId)).thenReturn(armRpoExecutionDetailEntity);
+        armRpoExecutionDetailEntity.setId(EXECUTION_ID);
+        when(armRpoService.getArmRpoExecutionDetailEntity(EXECUTION_ID)).thenReturn(armRpoExecutionDetailEntity);
 
     }
 
@@ -55,7 +55,7 @@ class ArmRpoApiGetRecordManagementMatterTest {
         RecordManagementMatterResponse expectedResponse = new RecordManagementMatterResponse();
         when(armRpoClient.getRecordManagementMatter(anyString())).thenReturn(expectedResponse);
 
-        RecordManagementMatterResponse response = armRpoApi.getRecordManagementMatter("token", executionId, userAccountEntity);
+        RecordManagementMatterResponse response = armRpoApi.getRecordManagementMatter("token", EXECUTION_ID, userAccountEntity);
 
         assertEquals(expectedResponse, response);
         verify(armRpoService).updateArmRpoStatus(any(), eq(armRpoHelper.completedRpoStatus()), eq(userAccountEntity));
@@ -65,14 +65,14 @@ class ArmRpoApiGetRecordManagementMatterTest {
     void getRecordManagementMatterThrowsFeignExceptionWhenClientFails() {
         when(armRpoClient.getRecordManagementMatter(anyString())).thenThrow(FeignException.class);
 
-        assertThrows(FeignException.class, () -> armRpoApi.getRecordManagementMatter("token", executionId, userAccountEntity));
+        assertThrows(FeignException.class, () -> armRpoApi.getRecordManagementMatter("token", EXECUTION_ID, userAccountEntity));
         verify(armRpoService).updateArmRpoStatus(any(), eq(armRpoHelper.failedRpoStatus()), eq(userAccountEntity));
     }
 
     @Test
     void getRecordManagementMatterUpdatesStatusToInProgress() {
         // when
-        armRpoApi.getRecordManagementMatter("token", executionId, userAccountEntity);
+        armRpoApi.getRecordManagementMatter("token", EXECUTION_ID, userAccountEntity);
 
         // then
         verify(armRpoService).updateArmRpoStateAndStatus(any(), eq(armRpoHelper.getRecordManagementMatterRpoState()), eq(armRpoHelper.inProgressRpoStatus()),
