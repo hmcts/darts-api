@@ -75,6 +75,7 @@ import uk.gov.hmcts.darts.common.repository.NotificationRepository;
 import uk.gov.hmcts.darts.common.repository.ObjectAdminActionRepository;
 import uk.gov.hmcts.darts.common.repository.ObjectHiddenReasonRepository;
 import uk.gov.hmcts.darts.common.repository.ObjectRecordStatusRepository;
+import uk.gov.hmcts.darts.common.repository.ObjectStateRecordRepository;
 import uk.gov.hmcts.darts.common.repository.ProsecutorRepository;
 import uk.gov.hmcts.darts.common.repository.RegionRepository;
 import uk.gov.hmcts.darts.common.repository.RetentionPolicyTypeRepository;
@@ -171,6 +172,7 @@ public class DartsDatabaseStub {
     private final NodeRegisterRepository nodeRegisterRepository;
     private final NotificationRepository notificationRepository;
     private final ObjectRecordStatusRepository objectRecordStatusRepository;
+    private final ObjectStateRecordRepository objectStateRecordRepository;
     private final ProsecutorRepository prosecutorRepository;
     private final RetentionPolicyTypeRepository retentionPolicyTypeRepository;
     private final RetrieveCoreObjectService retrieveCoreObjectService;

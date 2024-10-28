@@ -3,7 +3,7 @@ package uk.gov.hmcts.darts.task.runner.impl;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import uk.gov.hmcts.darts.arm.service.DetsToArmProcessor;
+import uk.gov.hmcts.darts.arm.service.DetsToArmBatchPushProcessor;
 import uk.gov.hmcts.darts.common.repository.AutomatedTaskRepository;
 import uk.gov.hmcts.darts.log.api.LogApi;
 import uk.gov.hmcts.darts.task.api.AutomatedTaskName;
@@ -15,18 +15,18 @@ import static uk.gov.hmcts.darts.task.api.AutomatedTaskName.DETS_TO_ARM_TASK_NAM
 
 @Slf4j
 @Component
-public class DetsToArmAutomatedTask extends AbstractLockableAutomatedTask
+public class DetsToArmPushAutomatedTask extends AbstractLockableAutomatedTask
     implements AutoloadingManualTask {
 
-    private final DetsToArmProcessor detsToArmProcessor;
+    private final DetsToArmBatchPushProcessor detsToArmPushProcessor;
 
     @Autowired
-    public DetsToArmAutomatedTask(AutomatedTaskRepository automatedTaskRepository,
-                                  AutomatedTaskConfigurationProperties automatedTaskConfigurationProperties,
-                                  DetsToArmProcessor processor,
-                                  LogApi logApi, LockService lockService) {
+    public DetsToArmPushAutomatedTask(AutomatedTaskRepository automatedTaskRepository,
+                                      AutomatedTaskConfigurationProperties automatedTaskConfigurationProperties,
+                                      DetsToArmBatchPushProcessor processor,
+                                      LogApi logApi, LockService lockService) {
         super(automatedTaskRepository, automatedTaskConfigurationProperties, logApi, lockService);
-        this.detsToArmProcessor = processor;
+        this.detsToArmPushProcessor = processor;
     }
 
     @Override
@@ -37,7 +37,7 @@ public class DetsToArmAutomatedTask extends AbstractLockableAutomatedTask
     @Override
     protected void runTask() {
         Integer batchSize = getAutomatedTaskBatchSize(getTaskName());
-        detsToArmProcessor.processDetsToArm(batchSize);
+        detsToArmPushProcessor.processDetsToArm(batchSize);
 
     }
 }

@@ -12,13 +12,19 @@ import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
 import uk.gov.hmcts.darts.common.entity.ObjectRecordStatusEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
+import uk.gov.hmcts.darts.common.repository.AnnotationDocumentRepository;
+import uk.gov.hmcts.darts.common.repository.CaseDocumentRepository;
 import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
+import uk.gov.hmcts.darts.common.repository.MediaRepository;
+import uk.gov.hmcts.darts.common.repository.TranscriptionDocumentRepository;
 import uk.gov.hmcts.darts.common.util.EodHelper;
 
 import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+
+import static java.util.Objects.nonNull;
 
 @Service
 @RequiredArgsConstructor
@@ -28,6 +34,10 @@ public class ExternalObjectDirectoryServiceImpl implements ExternalObjectDirecto
 
     private final ExternalObjectDirectoryRepository eodRepository;
     private final ArmDataManagementConfiguration armConfig;
+    private final MediaRepository mediaRepository;
+    private final AnnotationDocumentRepository annotationDocumentRepository;
+    private final CaseDocumentRepository caseDocumentRepository;
+    private final TranscriptionDocumentRepository transcriptionDocumentRepository;
 
     @Override
     public List<ExternalObjectDirectoryEntity> findFailedStillRetriableArmEods(Pageable pageable) {
@@ -84,4 +94,22 @@ public class ExternalObjectDirectoryServiceImpl implements ExternalObjectDirecto
         return eodRepository.save(externalObjectDirectoryEntity);
     }
 
+    @Override
+    public Long getFileSize(ExternalObjectDirectoryEntity detsExternalObjectDirectory) {
+        Long fileSize = null;
+        if (nonNull(detsExternalObjectDirectory.getMedia())) {
+            fileSize = mediaRepository.findById(detsExternalObjectDirectory.getMedia().getId()).map(
+                media -> media.getFileSize()).orElse(null);
+        } else if (nonNull(detsExternalObjectDirectory.getAnnotationDocumentEntity())) {
+            fileSize = annotationDocumentRepository.findById(detsExternalObjectDirectory.getAnnotationDocumentEntity().getId()).map(
+                annotationDocument -> Long.valueOf(annotationDocument.getFileSize())).orElse(null);
+        } else if (nonNull(detsExternalObjectDirectory.getCaseDocument())) {
+            fileSize = caseDocumentRepository.findById(detsExternalObjectDirectory.getCaseDocument().getId()).map(
+                caseDocument -> Long.valueOf(caseDocument.getFileSize())).orElse(null);
+        } else if (nonNull(detsExternalObjectDirectory.getTranscriptionDocumentEntity())) {
+            fileSize = transcriptionDocumentRepository.findById(detsExternalObjectDirectory.getTranscriptionDocumentEntity().getId()).map(
+                transcriptionDocument -> Long.valueOf(transcriptionDocument.getFileSize())).orElse(null);
+        }
+        return fileSize;
+    }
 }
