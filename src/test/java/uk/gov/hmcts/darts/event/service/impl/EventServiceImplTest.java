@@ -84,7 +84,7 @@ class EventServiceImplTest {
         EventLinkedCaseEntity eventLinkedCase3 = new EventLinkedCaseEntity();
         EventEntity event3 = mock(EventEntity.class);
         eventLinkedCase3.setEvent(event3);
-        when(eventLinkedCaseRepository.findAllByCourtCase(any())).thenReturn(List.of(eventLinkedCase1));
+        when(eventLinkedCaseRepository.findAllByCourtCase(any())).thenReturn(List.of(eventLinkedCase1, eventLinkedCase2));
         when(eventLinkedCaseRepository.findAllByCaseNumberAndCourthouseName(any(), any())).thenReturn(List.of(eventLinkedCase2, eventLinkedCase3));
         CourtCaseEntity courtCase = mock(CourtCaseEntity.class, RETURNS_DEEP_STUBS);
         when(courtCase.getCaseNumber()).thenReturn("caseNumber");
@@ -92,7 +92,7 @@ class EventServiceImplTest {
 
         Set<EventEntity> result = eventService.getAllCourtCaseEventVersions(courtCase);
 
-        assertThat(result).containsExactly(event1, event2, event3);
+        assertThat(result).containsExactlyInAnyOrder(event1, event2, event3);
         verify(eventLinkedCaseRepository).findAllByCourtCase(courtCase);
         verify(eventLinkedCaseRepository).findAllByCaseNumberAndCourthouseName("caseNumber", "courthouseName");
     }

@@ -34,6 +34,7 @@ import uk.gov.hmcts.darts.test.common.TestUtils;
 
 import java.time.OffsetDateTime;
 import java.util.List;
+import java.util.Set;
 
 import static java.time.temporal.ChronoUnit.SECONDS;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -180,7 +181,7 @@ class DataAnonymisationServiceImplTest {
 
         EventEntity entityEntity1 = mock(EventEntity.class);
         EventEntity entityEntity2 = mock(EventEntity.class);
-        when(eventService.getAllCourtCaseEventVersions(courtCase)).thenReturn(List.of(entityEntity1, entityEntity2));
+        when(eventService.getAllCourtCaseEventVersions(courtCase)).thenReturn(Set.of(entityEntity1, entityEntity2));
 
         UserAccountEntity userAccount = new UserAccountEntity();
         userAccount.setId(123);
