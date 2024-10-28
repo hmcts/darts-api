@@ -98,6 +98,22 @@ public interface ExternalObjectDirectoryRepository extends JpaRepository<Externa
     @Query(
         """
             SELECT eod FROM ExternalObjectDirectoryEntity eod
+            WHERE eod.externalLocationType = :location
+            AND (eod.media = :media
+            or eod.transcriptionDocumentEntity = :transcription
+            or eod.annotationDocumentEntity = :annotation
+            or eod.caseDocument = :caseDocument)
+            """
+    )
+    List<ExternalObjectDirectoryEntity> findExternalObjectDirectoryByLocation(ExternalLocationTypeEntity location,
+                                                                                  MediaEntity media,
+                                                                                  TranscriptionDocumentEntity transcription,
+                                                                                  AnnotationDocumentEntity annotation,
+                                                                                  CaseDocumentEntity caseDocument);
+
+    @Query(
+        """
+            SELECT eod FROM ExternalObjectDirectoryEntity eod
             WHERE eod.status in :failedStatuses
             AND eod.externalLocationType = :type
             AND eod.transferAttempts <= :transferAttempts
