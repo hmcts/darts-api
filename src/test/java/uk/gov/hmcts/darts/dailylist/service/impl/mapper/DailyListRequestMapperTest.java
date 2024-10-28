@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import uk.gov.hmcts.darts.dailylist.model.DailyListJsonObject;
 import uk.gov.hmcts.darts.task.runner.dailylist.mapper.DailyListRequestMapper;
+import uk.gov.hmcts.darts.task.runner.dailylist.mapper.DailyListRequestMapperImpl;
 import uk.gov.hmcts.darts.task.runner.dailylist.schemas.courtservice.DailyListStructure;
 import uk.gov.hmcts.darts.task.runner.dailylist.utilities.XmlParser;
 import uk.gov.hmcts.darts.task.runner.dailylist.utilities.deserializer.LocalDateTimeTypeDeserializer;
@@ -24,13 +25,11 @@ import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.util.List;
 
-@SpringBootTest
 class DailyListRequestMapperTest {
 
     final XmlParser xmlParser = new XmlParser();
 
-    @Autowired
-    DailyListRequestMapper dailyListRequestMapper;
+    final DailyListRequestMapper dailyListRequestMapper = new DailyListRequestMapperImpl();
 
 
     private ObjectMapper getObjMapper() {
