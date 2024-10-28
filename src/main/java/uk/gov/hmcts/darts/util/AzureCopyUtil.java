@@ -22,12 +22,12 @@ public class AzureCopyUtil {
             builder.command(config.getAzCopyExecutable(), "copy", source, destination, config.getAzCopyPreserveAccessTier());
 
             var startTime = Instant.now();
-            log.info("copy of blob started at {}", startTime);
+            log.info("Copy of blob started at {}", startTime);
             builder.redirectErrorStream(true);
             Process p = builder.start();
             int exitValue = p.waitFor();
             var endTime = Instant.now();
-            log.info("copy of blob completed at {}. Total duration in seconds: {}", endTime, Duration.between(startTime, endTime).getSeconds());
+            log.info("Copy of blob completed at {}. Total duration in seconds: {}", endTime, Duration.between(startTime, endTime).getSeconds());
             if (exitValue != 0) {
                 String result = new String(p.getInputStream().readAllBytes());
                 throw new DartsException(
