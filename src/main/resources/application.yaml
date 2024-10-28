@@ -284,6 +284,10 @@ darts:
       sas-endpoint: ${DETS_SAS_URL_ENDPOINT:}
       container-name: darts-migration
       temp-blob-workspace: ${user.home}/dets/tempworkspace
+      dets-manifest-file-prefix: DETS
+      delete-timeout: 60
+      arm-dropzone-sas-endpoint: ${ARM_SAS_ENDPOINT}
+      arm-container-name: dropzone
     blob:
       client:
         connection-string: ${AZURE_STORAGE_CONNECTION_STRING:}
@@ -337,6 +341,9 @@ darts:
       unstructured-to-arm-batch-processor:
         max-arm-manifest-items: 100
         max-arm-single-mode-items: 100
+      dets-to-arm-batch-processor:
+        max-arm-manifest-items: 100
+        manifest-file-prefix: DETS
       expiry-deletion:
         enabled: ${CASE_EXPIRY_DELETION_ENABLED:false}
       audio-linking:
