@@ -18,7 +18,7 @@ class DailyListXmlRequestMapperTest {
     @Test
     void testPublishedTimeBstWithTimeZone() throws Exception {
         String requestXml = TestUtils.getContentsFromFile(
-            "tests/dailylist/DailyListXmlRequestMapperTest/publishedDateBstWithTimeZone.xml");
+            "Tests/dailylist/DailyListXmlRequestMapperTest/publishedDateBstWithTimeZone.xml");
         DailyListStructure dailyList = xmlParser.unmarshal(requestXml, DailyListStructure.class);
         PostDailyListRequest postDailyListRequest = DailyListXmlRequestMapper.mapToPostDailyListRequest(dailyList, requestXml, "XHB", "12345");
 
@@ -29,7 +29,7 @@ class DailyListXmlRequestMapperTest {
     @Test
     void testPublishedTimeBstWithoutTimeZone() throws Exception {
         String requestXml = TestUtils.getContentsFromFile(
-            "tests/dailylist/DailyListXmlRequestMapperTest/publishedDateBstWithoutTimeZone.xml");
+            "Tests/dailylist/DailyListXmlRequestMapperTest/publishedDateBstWithoutTimeZone.xml");
         DailyListStructure dailyList = xmlParser.unmarshal(requestXml, DailyListStructure.class);
         PostDailyListRequest postDailyListRequest = DailyListXmlRequestMapper.mapToPostDailyListRequest(dailyList, requestXml, "XHB", "12345");
 
@@ -40,7 +40,7 @@ class DailyListXmlRequestMapperTest {
     @Test
     void testPublishedTimeGmtWithTimeZone() throws Exception {
         String requestXml = TestUtils.getContentsFromFile(
-            "tests/dailylist/DailyListXmlRequestMapperTest/publishedDateGmtWithTimeZone.xml");
+            "Tests/dailylist/DailyListXmlRequestMapperTest/publishedDateGmtWithTimeZone.xml");
         DailyListStructure dailyList = xmlParser.unmarshal(requestXml, DailyListStructure.class);
         PostDailyListRequest postDailyListRequest = DailyListXmlRequestMapper.mapToPostDailyListRequest(dailyList, requestXml, "XHB", "12345");
 
@@ -51,7 +51,7 @@ class DailyListXmlRequestMapperTest {
     @Test
     void testPublishedTimeGmtWithoutTimeZone() throws Exception {
         String requestXml = TestUtils.getContentsFromFile(
-            "tests/dailylist/DailyListXmlRequestMapperTest/publishedDateGmtWithoutTimeZone.xml");
+            "Tests/dailylist/DailyListXmlRequestMapperTest/publishedDateGmtWithoutTimeZone.xml");
         DailyListStructure dailyList = xmlParser.unmarshal(requestXml, DailyListStructure.class);
         PostDailyListRequest postDailyListRequest = DailyListXmlRequestMapper.mapToPostDailyListRequest(dailyList, requestXml, "XHB", "12345");
 

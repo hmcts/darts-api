@@ -142,6 +142,9 @@ class DailyListUpdater {
         dailyListEntity.setStatus(statusType);
     }
 
+    /**
+     * Temporary change will be reverted downstream
+     */
     boolean validateJsonExistsElseUpdate(DailyListEntity dailyListEntity) {
         if (dailyListEntity.getContent() != null) {
             log.debug("Daily list with id {} has JSON no need to fetch XML", dailyListEntity.getId());
@@ -153,7 +156,9 @@ class DailyListUpdater {
         return mapXmlToJson(dailyListEntity);
     }
 
-
+    /**
+     * Temporary change will be reverted downstream
+     */
     boolean validateXmlElseUpdate(DailyListEntity dailyListEntity) {
         if (dailyListEntity.getExternalLocation() == null) {
             log.error("Daily list with id {} has no external location", dailyListEntity.getId());
@@ -174,6 +179,9 @@ class DailyListUpdater {
         }
     }
 
+    /**
+     * Temporary change will be reverted downstream
+     */
     boolean mapXmlToJson(DailyListEntity dailyListEntity) {
         DailyListStructure legacyDailyListObject;
         try {
@@ -355,7 +363,9 @@ class DailyListUpdater {
         return citizenNameComparator.compare(name1, name2) == 0;
     }
 
-
+    /**
+     * Temporary change will be reverted downstream
+     */
     ObjectMapper getServiceObjectMapper() {
         JavaTimeModule module = new JavaTimeModule();
 

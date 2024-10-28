@@ -47,13 +47,13 @@ class DailyListRequestMapperTest {
     @Test
     void test1() throws Exception {
         String requestXml = TestUtils.getContentsFromFile(
-            "tests/dailylist/DailyListRequestMapperTest/test1/request.xml");
+            "Tests/dailylist/DailyListRequestMapperTest/test1/request.xml");
         DailyListStructure legacyDailyList = xmlParser.unmarshal(requestXml, DailyListStructure.class);
         DailyListJsonObject modernisedDailyList = dailyListRequestMapper.mapToEntity(legacyDailyList);
 
         String actualResponse = getObjMapper().writeValueAsString(modernisedDailyList);
         String expectedResponse = TestUtils.getContentsFromFile(
-            "tests/dailylist/DailyListRequestMapperTest/test1/expectedResponse.json");
+            "Tests/dailylist/DailyListRequestMapperTest/test1/expectedResponse.json");
 
         TestUtils.compareJson(expectedResponse, actualResponse, List.of());
     }
@@ -61,13 +61,13 @@ class DailyListRequestMapperTest {
     @Test
     void test2() throws Exception {
         String requestXml = TestUtils.getContentsFromFile(
-            "tests/dailylist/DailyListRequestMapperTest/test2/request.xml");
+            "Tests/dailylist/DailyListRequestMapperTest/test2/request.xml");
         DailyListStructure legacyDailyList = xmlParser.unmarshal(requestXml, DailyListStructure.class);
         DailyListJsonObject modernisedDailyList = dailyListRequestMapper.mapToEntity(legacyDailyList);
 
         String actualResponse = getObjMapper().writeValueAsString(modernisedDailyList);
         String expectedResponse = TestUtils.getContentsFromFile(
-            "tests/dailylist/DailyListRequestMapperTest/test2/expectedResponse.json");
+            "Tests/dailylist/DailyListRequestMapperTest/test2/expectedResponse.json");
 
         TestUtils.compareJson(expectedResponse, actualResponse, List.of());
     }
