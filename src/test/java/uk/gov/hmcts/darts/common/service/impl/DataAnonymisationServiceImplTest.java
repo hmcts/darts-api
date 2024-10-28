@@ -178,6 +178,10 @@ class DataAnonymisationServiceImplTest {
         HearingEntity hearingEntity2 = mock(HearingEntity.class);
         courtCase.setHearings(List.of(hearingEntity1, hearingEntity2));
 
+        EventEntity entityEntity1 = mock(EventEntity.class);
+        EventEntity entityEntity2 = mock(EventEntity.class);
+        when(eventService.getAllCourtCaseEventVersions(courtCase)).thenReturn(List.of(entityEntity1, entityEntity2));
+
         UserAccountEntity userAccount = new UserAccountEntity();
         userAccount.setId(123);
 
@@ -197,8 +201,11 @@ class DataAnonymisationServiceImplTest {
         verify(dataAnonymisationService, times(1)).anonymizeProsecutorEntity(userAccount, prosecutorEntity1);
         verify(dataAnonymisationService, times(1)).anonymizeProsecutorEntity(userAccount, prosecutorEntity2);
 
-        verify(dataAnonymisationService, times(1)).anonymizeTranscriptionEntities(userAccount, hearingEntity1);
-        verify(dataAnonymisationService, times(1)).anonymizeTranscriptionEntities(userAccount, hearingEntity2);
+        verify(dataAnonymisationService, times(1)).anonymizeHearingEntity(userAccount, hearingEntity1);
+        verify(dataAnonymisationService, times(1)).anonymizeHearingEntity(userAccount, hearingEntity2);
+
+        verify(dataAnonymisationService, times(1)).anonymizeEventEntity(userAccount, entityEntity1);
+        verify(dataAnonymisationService, times(1)).anonymizeEventEntity(userAccount, entityEntity2);
 
         verify(dataAnonymisationService, times(1)).tidyUpTransformedMediaEntities(userAccount, courtCase);
         verify(logApi, times(1)).caseDeletedDueToExpiry(123, "caseNo123");
@@ -240,14 +247,10 @@ class DataAnonymisationServiceImplTest {
         TranscriptionEntity transcriptionEntity2 = mock(TranscriptionEntity.class);
         hearingEntity.setTranscriptions(List.of(transcriptionEntity1, transcriptionEntity2));
 
-        EventEntity entityEntity1 = mock(EventEntity.class);
-        EventEntity entityEntity2 = mock(EventEntity.class);
-        hearingEntity.setEventList(List.of(entityEntity1, entityEntity2));
-
         doNothing().when(dataAnonymisationService).anonymizeTranscriptionEntity(any(), any());
 
         UserAccountEntity userAccount = new UserAccountEntity();
-        dataAnonymisationService.anonymizeTranscriptionEntities(userAccount, hearingEntity);
+        dataAnonymisationService.anonymizeHearingEntity(userAccount, hearingEntity);
 
         verify(dataAnonymisationService, times(1)).anonymizeTranscriptionEntity(userAccount, transcriptionEntity1);
         verify(dataAnonymisationService, times(1)).anonymizeTranscriptionEntity(userAccount, transcriptionEntity2);

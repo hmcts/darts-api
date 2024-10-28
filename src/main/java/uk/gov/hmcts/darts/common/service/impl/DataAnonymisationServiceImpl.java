@@ -61,7 +61,8 @@ public class DataAnonymisationServiceImpl implements DataAnonymisationService {
         courtCase.getDefendantList().forEach(defendantEntity -> anonymizeDefendantEntity(userAccount, defendantEntity));
         courtCase.getDefenceList().forEach(defenceEntity -> anonymizeDefenceEntity(userAccount, defenceEntity));
         courtCase.getProsecutorList().forEach(prosecutorEntity -> anonymizeProsecutorEntity(userAccount, prosecutorEntity));
-        courtCase.getHearings().forEach(hearingEntity -> anonymizeTranscriptionEntities(userAccount, hearingEntity));
+        courtCase.getHearings().forEach(hearingEntity -> anonymizeHearingEntity(userAccount, hearingEntity));
+        eventService.getAllCourtCaseEventVersions(courtCase).forEach(eventEntity -> anonymizeEventEntity(userAccount, eventEntity));
 
         courtCase.markAsExpired(userAccount);
         //This also saves defendant, defence and prosecutor entities
@@ -86,7 +87,7 @@ public class DataAnonymisationServiceImpl implements DataAnonymisationService {
         anonymizeName(userAccount, entity);
     }
 
-    void anonymizeTranscriptionEntities(UserAccountEntity userAccount, HearingEntity hearingEntity) {
+    void anonymizeHearingEntity(UserAccountEntity userAccount, HearingEntity hearingEntity) {
         hearingEntity.getTranscriptions().forEach(transcriptionEntity -> anonymizeTranscriptionEntity(userAccount, transcriptionEntity));
     }
 
