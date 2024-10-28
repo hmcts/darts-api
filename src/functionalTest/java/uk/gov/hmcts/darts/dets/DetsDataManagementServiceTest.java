@@ -1,6 +1,7 @@
 package uk.gov.hmcts.darts.dets;
 
 import com.azure.core.util.BinaryData;
+import lombok.SneakyThrows;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -10,18 +11,16 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import uk.gov.hmcts.darts.common.datamanagement.component.impl.DownloadResponseMetaData;
 import uk.gov.hmcts.darts.common.exception.AzureDeleteBlobException;
-import uk.gov.hmcts.darts.datamanagement.exception.FileNotDownloadedException;
 import uk.gov.hmcts.darts.dets.service.impl.DetsApiServiceImpl;
 import uk.gov.hmcts.darts.testutil.ArmTestUtil;
 
-import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.springframework.test.util.AssertionErrors.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @SpringBootTest
 @ActiveProfiles({"dev", "h2db"})
@@ -47,8 +46,9 @@ class DetsDataManagementServiceTest {
     private String armSubmissionDropZone;
 
 
+    @SneakyThrows
     @Test
-    void fetchBinaryDataFromBlobStorage() throws IOException, FileNotDownloadedException {
+    void fetchBinaryDataFromBlobStorage() {
         byte[] testStringInBytes = TEST_BINARY_STRING.getBytes(StandardCharsets.UTF_8);
         BinaryData data = BinaryData.fromBytes(testStringInBytes);
 
@@ -57,6 +57,9 @@ class DetsDataManagementServiceTest {
         try (DownloadResponseMetaData downloadResponseMetaData = dataManagementService.downloadData(uuid)) {
             assertEquals(TEST_BINARY_STRING, new String(downloadResponseMetaData.getResource().getInputStream().readAllBytes()));
         }
+
+        boolean deleted = dataManagementService.deleteBlobDataFromContainer(uuid);
+        assertTrue(deleted);
     }
 
 
@@ -75,8 +78,8 @@ class DetsDataManagementServiceTest {
         boolean deleted = dataManagementService.deleteBlobDataFromContainer(uuid);
 
         armTestUtil.deleteBlobData(armContainerName, blobPathAndName);
-        assertTrue("Failed to delete DETS blob " + uuid, deleted);
-        
+        assertTrue(deleted, "Failed to delete DETS blob " + uuid);
+
     }
 
 

@@ -16,6 +16,8 @@ import uk.gov.hmcts.darts.arm.service.ArmResponseFilesProcessor;
 import uk.gov.hmcts.darts.arm.service.ExternalObjectDirectoryService;
 import uk.gov.hmcts.darts.arm.service.impl.ArmBatchProcessResponseFilesImpl;
 import uk.gov.hmcts.darts.arm.service.impl.ArmResponseFilesProcessorImpl;
+import uk.gov.hmcts.darts.arm.service.impl.DetsToArmBatchProcessResponseFilesImpl;
+import uk.gov.hmcts.darts.audio.deleter.impl.dets.ExternalDetsDataStoreDeleter;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.casedocument.service.GenerateCaseDocumentForRetentionDateProcessor;
 import uk.gov.hmcts.darts.casedocument.service.GenerateCaseDocumentProcessor;
@@ -30,8 +32,10 @@ import uk.gov.hmcts.darts.common.repository.ExternalLocationTypeRepository;
 import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
 import uk.gov.hmcts.darts.common.repository.HearingRepository;
 import uk.gov.hmcts.darts.common.repository.ObjectRecordStatusRepository;
+import uk.gov.hmcts.darts.common.repository.ObjectStateRecordRepository;
 import uk.gov.hmcts.darts.common.service.FileOperationService;
 import uk.gov.hmcts.darts.datamanagement.api.DataManagementApi;
+import uk.gov.hmcts.darts.dets.config.DetsDataManagementConfiguration;
 import uk.gov.hmcts.darts.event.service.CleanupCurrentFlagEventProcessor;
 import uk.gov.hmcts.darts.event.service.impl.CleanupCurrentFlagEventProcessorImpl;
 import uk.gov.hmcts.darts.log.api.LogApi;
@@ -65,6 +69,9 @@ public class AutomatedTaskProcessorFactoryImpl implements AutomatedTaskProcessor
     private final int caseDocumentGenerationDays;
     private final DataStoreToArmHelper unstructuredToArmHelper;
     private final CloseOldCasesProcessor closeOldCasesProcessor;
+    private final DetsDataManagementConfiguration detsDataManagementConfiguration;
+    private final ObjectStateRecordRepository objectStateRecordRepository;
+    private final ExternalDetsDataStoreDeleter externalDetsDataStoreDeleter;
 
     @Override
     public ArmResponseFilesProcessor createArmResponseFilesProcessor(int batchSize) {
@@ -88,6 +95,29 @@ public class AutomatedTaskProcessorFactoryImpl implements AutomatedTaskProcessor
             userIdentity,
             armResponseFilesProcessSingleElement
         );
+    }
+
+    @Override
+    public DetsToArmBatchProcessResponseFilesImpl createDetsToArmResponseFilesProcessor(int batchSize) {
+        if (batchSize > 0) {
+            return new DetsToArmBatchProcessResponseFilesImpl(
+                externalObjectDirectoryRepository,
+                armDataManagementApi,
+                fileOperationService,
+                armDataManagementConfiguration,
+                objectMapper,
+                userIdentity,
+                currentTimeHelper,
+                eodService,
+                batchSize,
+                logApi,
+                detsDataManagementConfiguration,
+                objectStateRecordRepository,
+                externalDetsDataStoreDeleter
+            );
+        } else {
+            throw new DartsException(String.format("Batch size not supported: '%s'", batchSize));
+        }
     }
 
     @Override
