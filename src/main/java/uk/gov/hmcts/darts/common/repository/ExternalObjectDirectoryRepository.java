@@ -1,5 +1,6 @@
 package uk.gov.hmcts.darts.common.repository;
 
+import jakarta.transaction.Transactional;
 import org.springframework.data.domain.Limit;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -477,6 +478,17 @@ public interface ExternalObjectDirectoryRepository extends JpaRepository<Externa
         """)
     List<ExternalObjectDirectoryEntity> findStoredInInboundAndUnstructuredByTranscriptionId(@Param("transcriptionDocumentId") Integer id);
 
+    @Modifying
+    @Query("""
+        update ExternalObjectDirectoryEntity eod
+        set eod.status = :newStatus
+        where eod.status = :currentStatus
+        and eod.dataIngestionTs <= :maxDataIngestionTs
+        """)
+    @Transactional
+    void updateByStatusEqualsAndDataIngestionTsBefore(ObjectRecordStatusEntity currentStatus, OffsetDateTime maxDataIngestionTs,
+                                                      ObjectRecordStatusEntity newStatus, Limit limit);
+
     @Query(value = """
         select fileSize from
         (
@@ -506,6 +518,4 @@ public interface ExternalObjectDirectoryRepository extends JpaRepository<Externa
         ) a
         """, nativeQuery = true)
     Long findFileSize(Integer externalObjectDirectoryId);
-
-
 }
