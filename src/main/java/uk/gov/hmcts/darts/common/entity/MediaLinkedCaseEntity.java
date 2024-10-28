@@ -9,16 +9,21 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
+import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
+import uk.gov.hmcts.darts.common.entity.base.CreatedBaseEntity;
 
 @Entity
 @Table(name = "media_linked_case")
 @Getter
 @Setter
 @EqualsAndHashCode(callSuper = false)
-public class MediaLinkedCaseEntity {
+@NoArgsConstructor
+@AllArgsConstructor
+public class MediaLinkedCaseEntity extends CreatedBaseEntity {
 
     @Id
     @Column(name = "mlc_id")
@@ -40,4 +45,11 @@ public class MediaLinkedCaseEntity {
     @Column(name = "case_number")
     private String caseNumber;
 
+    @Column(name = "source")
+    private Integer source;
+
+    public MediaLinkedCaseEntity(MediaEntity mediaEntity, CourtCaseEntity courtCase) {
+        this.media = mediaEntity;
+        this.courtCase = courtCase;
+    }
 }

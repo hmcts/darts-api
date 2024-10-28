@@ -191,7 +191,7 @@ darts:
       unstructured:
         arm-minimum:
           weeks: 30
-    pending-retention-days: 7
+    pending-retention-duration: 7d
     inbound-to-unstructured-limit: 100
   daily-list:
     housekeeping:
@@ -284,6 +284,10 @@ darts:
       sas-endpoint: ${DETS_SAS_URL_ENDPOINT:}
       container-name: darts-migration
       temp-blob-workspace: ${user.home}/dets/tempworkspace
+      dets-manifest-file-prefix: DETS
+      delete-timeout: 60
+      arm-dropzone-sas-endpoint: ${ARM_SAS_ENDPOINT}
+      arm-container-name: dropzone
     blob:
       client:
         connection-string: ${AZURE_STORAGE_CONNECTION_STRING:}
@@ -329,6 +333,8 @@ darts:
     url: ${DARTS_PORTAL_URL:https://darts.staging.apps.hmcts.net}
   automated:
     task:
+      process-e2e-arm-rpo: ${PROCESS_E2E_ARM_RPO:false}
+      arm-rpo-duration: ${ARM_RPO_DURATION:1h}
       thread-pool-size: 5
       system-user-email: ${SYSTEM_USER_EMAIL:}
       system-user-guid-map:
@@ -337,8 +343,13 @@ darts:
       unstructured-to-arm-batch-processor:
         max-arm-manifest-items: 100
         max-arm-single-mode-items: 100
+      dets-to-arm-batch-processor:
+        max-arm-manifest-items: 100
+        manifest-file-prefix: DETS
       expiry-deletion:
         enabled: ${CASE_EXPIRY_DELETION_ENABLED:false}
+      audio-linking:
+        audio-buffer: 0s
   annotations:
     allowed-extensions:
       - "docx"

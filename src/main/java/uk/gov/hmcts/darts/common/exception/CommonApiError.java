@@ -14,6 +14,16 @@ public enum CommonApiError implements DartsApiError {
         CommonErrorCode.COURTHOUSE_PROVIDED_DOES_NOT_EXIST.getValue(),
         HttpStatus.BAD_REQUEST,
         CommonTitleErrors.COURTHOUSE_PROVIDED_DOES_NOT_EXIST.toString()
+    ),
+    FEATURE_FLAG_NOT_ENABLED(
+        CommonErrorCode.FEATURE_FLAG_NOT_ENABLED.getValue(),
+        HttpStatus.NOT_IMPLEMENTED,
+        CommonTitleErrors.FEATURE_FLAG_NOT_ENABLED.getValue()
+    ),
+    NOT_FOUND(
+        CommonErrorCode.NOT_FOUND.getValue(),
+        HttpStatus.NOT_FOUND,
+        CommonTitleErrors.NOT_FOUND.getValue()
     );
 
     private static final String ERROR_TYPE_PREFIX = "COMMON";
