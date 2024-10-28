@@ -143,7 +143,7 @@ class DailyListUpdater {
     }
 
     /**
-     * Temporary change will be reverted downstream
+     * Temporary change will be reverted downstream.
      */
     boolean validateJsonExistsElseUpdate(DailyListEntity dailyListEntity) {
         if (dailyListEntity.getContent() != null) {
@@ -157,7 +157,7 @@ class DailyListUpdater {
     }
 
     /**
-     * Temporary change will be reverted downstream
+     * Temporary change will be reverted downstream.
      */
     boolean validateXmlElseUpdate(DailyListEntity dailyListEntity) {
         if (dailyListEntity.getExternalLocation() == null) {
@@ -180,7 +180,7 @@ class DailyListUpdater {
     }
 
     /**
-     * Temporary change will be reverted downstream
+     * Temporary change will be reverted downstream.
      */
     boolean mapXmlToJson(DailyListEntity dailyListEntity) {
         DailyListStructure legacyDailyListObject;
@@ -364,7 +364,7 @@ class DailyListUpdater {
     }
 
     /**
-     * Temporary change will be reverted downstream
+     * Temporary change will be reverted downstream.
      */
     ObjectMapper getServiceObjectMapper() {
         JavaTimeModule module = new JavaTimeModule();
