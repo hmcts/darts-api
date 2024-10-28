@@ -18,6 +18,7 @@ import uk.gov.hmcts.darts.event.mapper.EventMapper;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
@@ -89,7 +90,7 @@ class EventServiceImplTest {
         when(courtCase.getCaseNumber()).thenReturn("caseNumber");
         when(courtCase.getCourthouse().getCourthouseName()).thenReturn("courthouseName");
 
-        List<EventEntity> result = eventService.getAllCourtCaseEventVersions(courtCase);
+        Set<EventEntity> result = eventService.getAllCourtCaseEventVersions(courtCase);
 
         assertThat(result).containsExactly(event1, event2, event3);
         verify(eventLinkedCaseRepository).findAllByCourtCase(courtCase);

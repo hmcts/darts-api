@@ -4,7 +4,7 @@ import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.EventEntity;
 import uk.gov.hmcts.darts.event.model.AdminGetEventForIdResponseResult;
 
-import java.util.List;
+import java.util.Set;
 
 public interface EventService {
     AdminGetEventForIdResponseResult adminGetEventById(Integer eventId);
@@ -13,5 +13,5 @@ public interface EventService {
 
     EventEntity saveEvent(EventEntity eventEntity);
 
-    List<EventEntity> getAllCourtCaseEventVersions(CourtCaseEntity courtCase);
+    Set<EventEntity> getAllCourtCaseEventVersions(CourtCaseEntity courtCase);
 }

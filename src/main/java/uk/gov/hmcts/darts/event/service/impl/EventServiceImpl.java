@@ -14,8 +14,9 @@ import uk.gov.hmcts.darts.event.mapper.EventMapper;
 import uk.gov.hmcts.darts.event.model.AdminGetEventForIdResponseResult;
 import uk.gov.hmcts.darts.event.service.EventService;
 
-import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Service
 @Slf4j
@@ -43,8 +44,8 @@ public class EventServiceImpl implements EventService {
     }
 
     @Override
-    public List<EventEntity> getAllCourtCaseEventVersions(CourtCaseEntity courtCase) {
-        List<EventEntity> allEvents = new ArrayList<>();
+    public Set<EventEntity> getAllCourtCaseEventVersions(CourtCaseEntity courtCase) {
+        Set<EventEntity> allEvents = new HashSet<>();
         List<EventEntity> eventsFromCaseId = eventLinkedCaseRepository
             .findAllByCourtCase(courtCase)
             .stream().map(EventLinkedCaseEntity::getEvent).toList();
