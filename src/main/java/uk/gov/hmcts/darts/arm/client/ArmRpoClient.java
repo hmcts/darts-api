@@ -15,6 +15,7 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 public interface ArmRpoClient {
 
     @PostMapping(value = "${darts.storage.arm-api.rpo-url.get-record-management-matter}",
+        consumes = APPLICATION_JSON_VALUE,
         produces = APPLICATION_JSON_VALUE
     )
     RecordManagementMatterResponse getRecordManagementMatter(@RequestHeader(AUTHORIZATION) String bearerAuth);
