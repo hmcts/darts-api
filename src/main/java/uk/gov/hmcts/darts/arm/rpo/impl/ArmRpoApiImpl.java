@@ -33,15 +33,18 @@ public class ArmRpoApiImpl implements ArmRpoApi {
         armRpoService.updateArmRpoStateAndStatus(armRpoExecutionDetailEntity, armRpoHelper.getRecordManagementMatterRpoState(),
                                                  armRpoHelper.inProgressRpoStatus(), userAccountEntity);
         try {
-            //set status and save
+
             recordManagementMatterResponse = armRpoClient.getRecordManagementMatter(bearerToken);
             if (recordManagementMatterResponse != null
                 && recordManagementMatterResponse.getRecordManagementMatter() != null
                 && recordManagementMatterResponse.getRecordManagementMatter().getMatterId() != null) {
 
                 armRpoExecutionDetailEntity.setMatterId(recordManagementMatterResponse.getRecordManagementMatter().getMatterId());
+                armRpoService.updateArmRpoStatus(armRpoExecutionDetailEntity, armRpoHelper.completedRpoStatus(), userAccountEntity);
+
+            } else {
+                armRpoService.updateArmRpoStatus(armRpoExecutionDetailEntity, armRpoHelper.failedRpoStatus(), userAccountEntity);
             }
-            armRpoService.updateArmRpoStatus(armRpoExecutionDetailEntity, armRpoHelper.completedRpoStatus(), userAccountEntity);
         } catch (FeignException e) {
             // this ensures the full error body containing the ARM error detail is logged rather than a truncated version
             log.error("Error during ARM get record management matter: {}", e.contentUTF8());
