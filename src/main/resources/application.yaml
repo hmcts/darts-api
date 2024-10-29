@@ -284,7 +284,10 @@ darts:
       api-url:
         update-metadata-path: /api/v3/UpdateMetadata
         download-data-path: /api/v1/downloadBlob/{cabinet_id}/{record_id}/{file_id}
-      ## place holder for RPO paths rpo-url:
+      arm-rpo:
+        arm-service-entitlement: ${ARM_SERVICE_ENTITLEMENT:}
+        arm-storage-account-name: ${:ARM_STORAGE_ACCOUNT_NAME}
+
     dets:
       sas-endpoint: ${DETS_SAS_URL_ENDPOINT:}
       container-name: darts-migration
