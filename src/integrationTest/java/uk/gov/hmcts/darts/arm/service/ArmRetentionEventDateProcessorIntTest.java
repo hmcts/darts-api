@@ -258,16 +258,16 @@ class ArmRetentionEventDateProcessorIntTest extends IntegrationBase {
             transcriptionEntityBuilderRetrieve =
             PersistableFactory.getTranscriptionDocument().someMinimalBuilderHolder();
 
-            transcriptionEntityBuilderRetrieve
-                .getBuilder().transcription(transcriptionEntity)
-                .fileName(fileName)
-                .fileType(fileType)
-                .createdBy(testUser)
-                .lastModifiedBy(testUser)
-                .checksum(checksum)
-                .retConfScore(confidenceScore)
-                .retConfReason(confidenceReason)
-                .retainUntilTs(DOCUMENT_RETENTION_DATE_TIME);
+        transcriptionEntityBuilderRetrieve
+            .getBuilder().transcription(transcriptionEntity)
+            .fileName(fileName)
+            .fileType(fileType)
+            .createdBy(testUser)
+            .lastModifiedBy(testUser)
+            .checksum(checksum)
+            .retConfScore(confidenceScore)
+            .retConfReason(confidenceReason)
+            .retainUntilTs(DOCUMENT_RETENTION_DATE_TIME);
         TranscriptionDocumentEntity transcriptionDocumentEntity = transcriptionEntityBuilderRetrieve.build().getEntity();
         when(userIdentity.getUserAccount()).thenReturn(testUser);
         dartsPersistence.save(transcriptionDocumentEntity);
@@ -411,7 +411,7 @@ class ArmRetentionEventDateProcessorIntTest extends IntegrationBase {
         String externalRecordId = "recordId";
 
         ExternalObjectDirectoryEntity armEod = PersistableFactory.getExternalObjectDirectoryTestData().someMinimalBuilder()
-        .media(null).caseDocument(caseDocument)
+            .media(null).caseDocument(caseDocument)
             .status(dartsDatabase.getObjectRecordStatusEntity(STORED))
             .externalLocationType(dartsDatabase.getExternalLocationTypeEntity(ARM))
             .externalLocation(UUID.randomUUID())
