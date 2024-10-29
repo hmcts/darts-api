@@ -288,6 +288,8 @@ darts:
         arm-service-entitlement: ${ARM_SERVICE_ENTITLEMENT:}
         arm-storage-account-name: ${:ARM_STORAGE_ACCOUNT_NAME}
 
+      rpo-url:
+
     dets:
       sas-endpoint: ${DETS_SAS_URL_ENDPOINT:}
       container-name: darts-migration
