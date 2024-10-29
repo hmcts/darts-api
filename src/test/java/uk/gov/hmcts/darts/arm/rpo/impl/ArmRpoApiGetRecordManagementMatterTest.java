@@ -1,6 +1,7 @@
 package uk.gov.hmcts.darts.arm.rpo.impl;
 
-import org.apache.commons.lang3.NotImplementedException;
+import feign.FeignException;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
