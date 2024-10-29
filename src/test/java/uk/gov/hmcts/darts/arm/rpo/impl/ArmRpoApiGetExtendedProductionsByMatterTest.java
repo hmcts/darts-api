@@ -16,7 +16,7 @@ class ArmRpoApiGetExtendedProductionsByMatterTest {
 
     @Test
     void getExtendedProductionsByMatter() {
-        assertThrows(NotImplementedException.class, () -> armRpoApi.getExtendedProductionsByMatter("token", 1));
+        assertThrows(NotImplementedException.class, () -> armRpoApi.getExtendedProductionsByMatter("token", 1, null));
     }
 
 }

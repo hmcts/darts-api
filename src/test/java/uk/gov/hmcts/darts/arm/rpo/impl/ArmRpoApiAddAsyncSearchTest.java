@@ -16,7 +16,7 @@ class ArmRpoApiAddAsyncSearchTest {
 
     @Test
     void addAsyncSearch() {
-        assertThrows(NotImplementedException.class, () -> armRpoApi.addAsyncSearch("token", 1));
+        assertThrows(NotImplementedException.class, () -> armRpoApi.addAsyncSearch("token", 1, null));
     }
 
 }

@@ -16,7 +16,7 @@ class ArmRpoApiGetStorageAccountsTest {
 
     @Test
     void getStorageAccounts() {
-        assertThrows(NotImplementedException.class, () -> armRpoApi.getStorageAccounts("token", 1));
+        assertThrows(NotImplementedException.class, () -> armRpoApi.getStorageAccounts("token", 1, null));
     }
 
 }

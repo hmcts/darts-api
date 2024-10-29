@@ -16,6 +16,6 @@ class ArmRpoApiGetIndexesByMatterIdTest {
 
     @Test
     void getIndexesByMatterId() {
-        assertThrows(NotImplementedException.class, () -> armRpoApi.getIndexesByMatterId("token", 1));
+        assertThrows(NotImplementedException.class, () -> armRpoApi.getIndexesByMatterId("token", 1, null));
     }
 }

@@ -18,7 +18,7 @@ class ArmRpoApiCreateExportBasedOnSearchResultsTableTest {
 
     @Test
     void createExportBasedOnSearchResultsTable() {
-        assertThrows(NotImplementedException.class, () -> armRpoApi.createExportBasedOnSearchResultsTable("token", 1, Collections.emptyList()));
+        assertThrows(NotImplementedException.class, () -> armRpoApi.createExportBasedOnSearchResultsTable("token", 1, Collections.emptyList(), null));
     }
 
 }

@@ -16,7 +16,7 @@ class ArmRpoApiDownloadProductionTest {
 
     @Test
     void downloadProduction() {
-        assertThrows(NotImplementedException.class, () -> armRpoApi.downloadProduction("token", 1, "fileId"));
+        assertThrows(NotImplementedException.class, () -> armRpoApi.downloadProduction("token", 1, "fileId", null));
     }
 
 }

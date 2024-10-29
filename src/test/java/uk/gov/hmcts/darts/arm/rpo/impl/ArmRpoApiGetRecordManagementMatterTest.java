@@ -16,7 +16,7 @@ class ArmRpoApiGetRecordManagementMatterTest {
 
     @Test
     void getRecordManagementMatter() {
-        assertThrows(NotImplementedException.class, () -> armRpoApi.getRecordManagementMatter("token", 1));
+        assertThrows(NotImplementedException.class, () -> armRpoApi.getRecordManagementMatter("token", 1, null));
     }
 
 }

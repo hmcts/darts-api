@@ -16,7 +16,7 @@ class ArmRpoApiGetProductionOutputFilesTest {
 
     @Test
     void getProductionOutputFiles() {
-        assertThrows(NotImplementedException.class, () -> armRpoApi.getProductionOutputFiles("token", 1));
+        assertThrows(NotImplementedException.class, () -> armRpoApi.getProductionOutputFiles("token", 1, null));
     }
 
 }

@@ -10,6 +10,7 @@ import uk.gov.hmcts.darts.arm.model.rpo.ProfileEntitlementResponse;
 import uk.gov.hmcts.darts.arm.model.rpo.RecordManagementMatterResponse;
 import uk.gov.hmcts.darts.arm.model.rpo.StorageAccountResponse;
 import uk.gov.hmcts.darts.arm.rpo.ArmRpoApi;
+import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 
 import java.io.InputStream;
 import java.util.List;
@@ -17,70 +18,72 @@ import java.util.List;
 public class ArmRpoApiImpl implements ArmRpoApi {
 
     @Override
-    public RecordManagementMatterResponse getRecordManagementMatter(String bearerToken, Integer executionId) {
+    public RecordManagementMatterResponse getRecordManagementMatter(String bearerToken, Integer executionId, UserAccountEntity userAccount) {
         throw new NotImplementedException("Method not implemented");
     }
 
     @Override
-    public IndexesByMatterIdResponse getIndexesByMatterId(String bearerToken, Integer executionId) {
+    public IndexesByMatterIdResponse getIndexesByMatterId(String bearerToken, Integer executionId, UserAccountEntity userAccount) {
         throw new NotImplementedException("Method not implemented");
     }
 
     @Override
-    public StorageAccountResponse getStorageAccounts(String bearerToken, Integer executionId) {
+    public StorageAccountResponse getStorageAccounts(String bearerToken, Integer executionId, UserAccountEntity userAccount) {
         throw new NotImplementedException("Method not implemented");
     }
 
     @Override
-    public ProfileEntitlementResponse getProfileEntitlements(String bearerToken, Integer executionId) {
+    public ProfileEntitlementResponse getProfileEntitlements(String bearerToken, Integer executionId, UserAccountEntity userAccount) {
         throw new NotImplementedException("Method not implemented");
     }
 
     @Override
     public MasterIndexFieldByRecordClassSchemaResponse getMasterIndexFieldByRecordClassSchema(String bearerToken,
                                                                                               Integer executionId,
-                                                                                              Integer rpoStageId) {
+                                                                                              Integer rpoStageId,
+                                                                                              UserAccountEntity userAccount) {
         throw new NotImplementedException("Method not implemented");
     }
 
     @Override
-    public ArmAsyncSearchResponse addAsyncSearch(String bearerToken, Integer executionId) {
+    public ArmAsyncSearchResponse addAsyncSearch(String bearerToken, Integer executionId, UserAccountEntity userAccount) {
         throw new NotImplementedException("Method not implemented");
     }
 
     @Override
-    public void saveBackgroundSearch(String bearerToken, Integer executionId, String searchName) {
+    public void saveBackgroundSearch(String bearerToken, Integer executionId, String searchName, UserAccountEntity userAccount) {
         throw new NotImplementedException("Method not implemented");
     }
 
     @Override
-    public ExtendedSearchesByMatterResponse getExtendedSearchesByMatter(String bearerToken, Integer executionId) {
+    public ExtendedSearchesByMatterResponse getExtendedSearchesByMatter(String bearerToken, Integer executionId, UserAccountEntity userAccount) {
         throw new NotImplementedException("Method not implemented");
     }
 
     @Override
     public boolean createExportBasedOnSearchResultsTable(String bearerToken, Integer executionId,
-                                                         List<MasterIndexFieldByRecordClassSchemaResponse> headerColumns) {
+                                                         List<MasterIndexFieldByRecordClassSchemaResponse> headerColumns,
+                                                         UserAccountEntity userAccount) {
         throw new NotImplementedException("Method not implemented");
     }
 
     @Override
-    public ExtendedProductionsByMatterResponse getExtendedProductionsByMatter(String bearerToken, Integer executionId) {
+    public ExtendedProductionsByMatterResponse getExtendedProductionsByMatter(String bearerToken, Integer executionId, UserAccountEntity userAccount) {
         throw new NotImplementedException("Method not implemented");
     }
 
     @Override
-    public List<String> getProductionOutputFiles(String bearerToken, Integer executionId) {
+    public List<String> getProductionOutputFiles(String bearerToken, Integer executionId, UserAccountEntity userAccount) {
         throw new NotImplementedException("Method not implemented");
     }
 
     @Override
-    public InputStream downloadProduction(String bearerToken, Integer executionId, String productionExportFileID) {
+    public InputStream downloadProduction(String bearerToken, Integer executionId, String productionExportFileID, UserAccountEntity userAccount) {
         throw new NotImplementedException("Method not implemented");
     }
 
     @Override
-    public void removeProduction(String bearerToken, Integer executionId) {
+    public void removeProduction(String bearerToken, Integer executionId, UserAccountEntity userAccount) {
         throw new NotImplementedException("Method not implemented");
     }
 }
