@@ -1,6 +1,7 @@
 package uk.gov.hmcts.darts.arm.service.impl;
 
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.darts.arm.service.ArmRpoService;
 import uk.gov.hmcts.darts.common.entity.ArmRpoExecutionDetailEntity;
@@ -13,6 +14,7 @@ import uk.gov.hmcts.darts.common.repository.ArmRpoExecutionDetailRepository;
 
 @Service
 @AllArgsConstructor
+@Slf4j
 public class ArmRpoServiceImpl implements ArmRpoService {
 
     public static final String ARM_RPO_EXECUTION_DETAIL_NOT_FOUND = "ArmRpoExecutionDetail not found";
@@ -27,6 +29,9 @@ public class ArmRpoServiceImpl implements ArmRpoService {
     @Override
     public void updateArmRpoStateAndStatus(ArmRpoExecutionDetailEntity armRpoExecutionDetailEntity, ArmRpoStateEntity armRpoStateEntity,
                                            ArmRpoStatusEntity armRpoStatusEntity, UserAccountEntity userAccountEntity) {
+        log.debug("Setting execution detail {} state from {} to {}", armRpoExecutionDetailEntity.getId(),
+                  armRpoExecutionDetailEntity.getArmRpoState().getDescription(),
+                  armRpoStateEntity.getDescription());
         armRpoExecutionDetailEntity.setArmRpoState(armRpoStateEntity);
         updateArmRpoStatus(armRpoExecutionDetailEntity, armRpoStatusEntity, userAccountEntity);
     }
@@ -34,6 +39,9 @@ public class ArmRpoServiceImpl implements ArmRpoService {
     @Override
     public void updateArmRpoStatus(ArmRpoExecutionDetailEntity armRpoExecutionDetailEntity, ArmRpoStatusEntity armRpoStatusEntity,
                                    UserAccountEntity userAccountEntity) {
+        log.debug("Setting execution detail {} status from {} to {}", armRpoExecutionDetailEntity.getId(),
+                  armRpoExecutionDetailEntity.getArmRpoStatus().getDescription(),
+                  armRpoStatusEntity.getDescription());
         armRpoExecutionDetailEntity.setArmRpoStatus(armRpoStatusEntity);
         armRpoExecutionDetailEntity.setLastModifiedDateTime(currentTimeHelper.currentOffsetDateTime());
         armRpoExecutionDetailEntity.setLastModifiedBy(userAccountEntity);
