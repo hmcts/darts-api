@@ -1,6 +1,7 @@
 package uk.gov.hmcts.darts.arm.client;
 
 import com.github.tomakehurst.wiremock.client.WireMock;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.TestPropertySource;
@@ -27,7 +28,7 @@ class ArmRpoClientIntTest extends IntegrationBaseWithWiremock {
     @Autowired
     private ArmRpoClient armRpoClient;
 
-    //@Disabled("This test is failing other wiremock tests")
+    @Disabled("This test is failing other wiremock tests")
     @Test
     void getRecordManagementMatterShouldSucceedIfServerReturns200Success() {
         // given
