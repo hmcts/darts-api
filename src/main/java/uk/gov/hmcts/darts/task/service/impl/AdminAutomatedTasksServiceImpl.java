@@ -76,7 +76,7 @@ public class AdminAutomatedTasksServiceImpl implements AdminAutomatedTaskService
 
         automatedTaskRunner.run(automatedTask.get());
 
-        auditApi.record(RUN_JOB_MANUALLY);
+        auditApi.record(RUN_JOB_MANUALLY, automatedTaskEntity.getTaskName());
     }
 
     @Override
@@ -85,7 +85,8 @@ public class AdminAutomatedTasksServiceImpl implements AdminAutomatedTaskService
 
         if (automatedTaskPatch.getIsActive() != null) {
             automatedTask.setTaskEnabled(automatedTaskPatch.getIsActive());
-            auditApi.record(ENABLE_DISABLE_JOB);
+            auditApi.record(ENABLE_DISABLE_JOB, automatedTask.getTaskName() + " " + (automatedTaskPatch.getIsActive() ? "enabled" : "disabled"));
+            log.info("Task {} is now {}", automatedTask.getTaskName(), automatedTaskPatch.getIsActive() ? "enabled" : "disabled");
         }
 
         if (automatedTaskPatch.getBatchSize() != null) {
