@@ -40,7 +40,7 @@ class PostEventsFunctionalTest extends FunctionalTest {
                         "case_numbers": [
                           "func-Swansea_case_1"
                         ],
-                        "event_text": "some text for the event",
+                        "event_text": "A temporary event created by functional test",
                         "date_time": "2023-08-08T14:01:06Z"
                       }""";
         bodyText = bodyText.replace("<<courtHouseName>>", courthouseName);
@@ -74,7 +74,7 @@ class PostEventsFunctionalTest extends FunctionalTest {
                         "case_numbers": [
                           "func-Swansea_case_1"
                         ],
-                        "event_text": "some text for the event",
+                        "event_text": "A temporary event created by functional test",
                         "date_time": "2023-08-08T14:01:06Z"
                       }""")
             .when()
