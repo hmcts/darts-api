@@ -147,7 +147,7 @@ public class AudioUploadServiceImpl implements AudioUploadService {
         log.info("Saved media id {}", newMediaEntity.getId());
 
         linkAudioToHearingInMetadata(addAudioMetadataRequest, newMediaEntity);
-        audioAsyncService.linkAudioToHearingByEvent(addAudioMetadataRequest, newMediaEntity);
+        audioAsyncService.linkAudioToHearingByEvent(addAudioMetadataRequest, newMediaEntity, userAccount);
 
         saveExternalObjectDirectory(
             externalLocation,

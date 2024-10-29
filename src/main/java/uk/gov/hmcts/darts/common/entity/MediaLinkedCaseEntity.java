@@ -15,6 +15,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import uk.gov.hmcts.darts.common.entity.base.CreatedBaseEntity;
+import uk.gov.hmcts.darts.common.enums.MediaLinkedCaseSourceType;
 
 @Entity
 @Table(name = "media_linked_case")
@@ -46,10 +47,11 @@ public class MediaLinkedCaseEntity extends CreatedBaseEntity {
     private String caseNumber;
 
     @Column(name = "source")
-    private Integer source;
+    private MediaLinkedCaseSourceType source;
 
-    public MediaLinkedCaseEntity(MediaEntity mediaEntity, CourtCaseEntity courtCase) {
+    public MediaLinkedCaseEntity(MediaEntity mediaEntity, CourtCaseEntity courtCase, UserAccountEntity createdBy) {
         this.media = mediaEntity;
         this.courtCase = courtCase;
+        setCreatedBy(createdBy);
     }
 }
