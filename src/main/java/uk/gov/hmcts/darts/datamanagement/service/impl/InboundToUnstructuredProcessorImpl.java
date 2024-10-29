@@ -63,7 +63,7 @@ public class InboundToUnstructuredProcessorImpl implements InboundToUnstructured
         List<ExternalObjectDirectoryEntity> inboundList = externalObjectDirectoryRepository.findEodsForTransfer(getStatus(STORED), getType(INBOUND),
                                                                                                                 getStatus(STORED), getType(UNSTRUCTURED), 3,
                                                                                                                 batchSize);
-        AtomicInteger count = new AtomicInteger();
+        AtomicInteger count = new AtomicInteger(1);
 
         List<Callable<Void>> tasks = inboundList.stream()
             .map(inboundObject -> (Callable<Void>) () -> {
