@@ -10,6 +10,8 @@ import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.exception.DartsException;
 import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
 import uk.gov.hmcts.darts.common.repository.ArmRpoExecutionDetailRepository;
+import uk.gov.hmcts.darts.common.repository.ArmRpoStateRepository;
+import uk.gov.hmcts.darts.common.repository.ArmRpoStatusRepository;
 
 @Service
 @AllArgsConstructor
@@ -18,6 +20,8 @@ public class ArmRpoServiceImpl implements ArmRpoService {
     public static final String ARM_RPO_EXECUTION_DETAIL_NOT_FOUND = "ArmRpoExecutionDetail not found";
     private final CurrentTimeHelper currentTimeHelper;
     private final ArmRpoExecutionDetailRepository armRpoExecutionDetailRepository;
+    private final ArmRpoStateRepository armRpoStateRepository;
+    private final ArmRpoStatusRepository armRpoStatusRepository;
 
     @Override
     public ArmRpoExecutionDetailEntity getArmRpoExecutionDetailEntity(Integer executionId) {
