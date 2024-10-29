@@ -41,3 +41,5 @@ export MAX_FILE_UPLOAD_REQUEST_SIZE_MEGABYTES="$(az keyvault secret show --vault
 export DARTS_INBOUND_STORAGE_SAS_URL="$(az keyvault secret show --vault-name darts-stg --name DartsInboundStorageSasUrl | jq .value -r)"
 export DARTS_UNSTRUCTURED_STORAGE_SAS_URL="$(az keyvault secret show --vault-name darts-stg --name DartsUnstructuredStorageSasUrl | jq .value -r)"
 export ARM_SERVICE_PROFILE="$(az keyvault secret show --vault-name darts-stg --name ArmServiceProfile | jq .value -r)"
+export ARM_SERVICE_ENTITLEMENT="$(az keyvault secret show --vault-name darts-stg --name ArmServiceEntitlement | jq .value -r)"
+export ARM_STORAGE_ACCOUNT_NAME="$(az keyvault secret show --vault-name darts-stg --name ArmStorageAccountName | jq .value -r)"

@@ -19,17 +19,17 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 @SuppressWarnings({"PMD.UnnecessaryAnnotationValueElement"})
 public interface ArmApiClient {
 
-    @PostMapping(value = "${darts.storage.arm-api.update-metadata-path}",
+    @PostMapping(value = "${darts.storage.arm-api.api-url.update-metadata-path}",
         consumes = APPLICATION_JSON_VALUE,
         produces = APPLICATION_JSON_VALUE
     )
     UpdateMetadataResponse updateMetadata(@RequestHeader(AUTHORIZATION) String bearerAuth,
-                                                          @RequestBody UpdateMetadataRequest updateMetadataRequest);
+                                          @RequestBody UpdateMetadataRequest updateMetadataRequest);
 
-    @GetMapping(value = "${darts.storage.arm-api.download-data-path}")
+    @GetMapping(value = "${darts.storage.arm-api.api-url.download-data-path}")
     @SuppressWarnings({"PMD.UseObjectForClearerAPI"})
     feign.Response downloadArmData(@RequestHeader(AUTHORIZATION) String bearerAuth,
-                                        @PathVariable("cabinet_id") String cabinetId,
-                                        @PathVariable("record_id") String externalRecordId,
-                                        @PathVariable("file_id") String externalFileId);
+                                   @PathVariable("cabinet_id") String cabinetId,
+                                   @PathVariable("record_id") String externalRecordId,
+                                   @PathVariable("file_id") String externalFileId);
 }
