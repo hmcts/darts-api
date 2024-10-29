@@ -21,8 +21,10 @@ import java.util.List;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_DROP_ZONE;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_INGESTION;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_MANIFEST_FAILED;
+import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_MISSING_RESPONSE;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_PROCESSING_RESPONSE_FILES;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_RAW_DATA_FAILED;
+import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_REPLAY;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_RESPONSE_CHECKSUM_VERIFICATION_FAILED;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_RESPONSE_MANIFEST_FAILED;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_RESPONSE_PROCESSING_FAILED;
@@ -82,6 +84,10 @@ public class EodHelper {
 
     @Getter
     private static List<ObjectRecordStatusEntity> failedArmStatuses;
+    @Getter
+    private static ObjectRecordStatusEntity armReplayStatus;
+    @Getter
+    private static ObjectRecordStatusEntity armMissingResponseStatus;
 
 
     @SuppressWarnings("java:S2696")
@@ -106,6 +112,8 @@ public class EodHelper {
         armResponseChecksumVerificationFailedStatus = orsRepository.findById(ARM_RESPONSE_CHECKSUM_VERIFICATION_FAILED.getId()).orElseThrow();
         awaitingVerificationStatus = orsRepository.findById(AWAITING_VERIFICATION.getId()).orElseThrow();
         armRpoPendingStatus = orsRepository.findById(ARM_RPO_PENDING.getId()).orElseThrow();
+        armReplayStatus = orsRepository.findById(ARM_REPLAY.getId()).orElseThrow();
+        armMissingResponseStatus = orsRepository.findById(ARM_MISSING_RESPONSE.getId()).orElseThrow();
 
         failedArmStatuses = List.of(failedArmRawDataStatus, failedArmManifestFileStatus, failedArmResponseManifestFileStatus);
 
