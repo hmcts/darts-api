@@ -1,24 +1,27 @@
 package uk.gov.hmcts.darts.arm.service.impl;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.ArmRpoExecutionDetailEntity;
+import uk.gov.hmcts.darts.common.entity.ArmRpoStateEntity;
 import uk.gov.hmcts.darts.common.entity.ArmRpoStatusEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.exception.DartsException;
 import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
 import uk.gov.hmcts.darts.common.repository.ArmRpoExecutionDetailRepository;
 
-import java.time.OffsetDateTime;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -29,50 +32,69 @@ class ArmRpoServiceImplTest {
     private CurrentTimeHelper currentTimeHelper;
 
     @Mock
-    private UserIdentity userIdentity;
-
-    @Mock
     private ArmRpoExecutionDetailRepository armRpoExecutionDetailRepository;
 
     @InjectMocks
     private ArmRpoServiceImpl armRpoService;
 
+    private ArmRpoExecutionDetailEntity armRpoExecutionDetailEntity;
+    private ArmRpoStateEntity armRpoStateEntity;
+    private ArmRpoStatusEntity armRpoStatusEntity;
+    private UserAccountEntity userAccountEntity;
 
-    @Test
-    void getArmRpoExecutionDetailEntityReturnsEntityWhenFound() {
-        Integer executionId = 1;
-        ArmRpoExecutionDetailEntity expectedEntity = new ArmRpoExecutionDetailEntity();
-        when(armRpoExecutionDetailRepository.findById(executionId)).thenReturn(Optional.of(expectedEntity));
-
-        ArmRpoExecutionDetailEntity result = armRpoService.getArmRpoExecutionDetailEntity(executionId);
-
-        assertEquals(expectedEntity, result);
+    @BeforeEach
+    void setUp() {
+        armRpoExecutionDetailEntity = new ArmRpoExecutionDetailEntity();
+        armRpoStateEntity = new ArmRpoStateEntity();
+        armRpoStatusEntity = new ArmRpoStatusEntity();
+        userAccountEntity = new UserAccountEntity();
     }
 
     @Test
-    void getArmRpoExecutionDetailEntityThrowsExceptionWhenNotFound() {
-        Integer executionId = 1;
-        when(armRpoExecutionDetailRepository.findById(executionId)).thenReturn(Optional.empty());
+    void getArmRpoExecutionDetailEntity_ShouldReturnEntity_WhenFound() {
+        when(armRpoExecutionDetailRepository.findById(anyInt())).thenReturn(Optional.of(armRpoExecutionDetailEntity));
 
-        DartsException exception = assertThrows(DartsException.class, () -> armRpoService.getArmRpoExecutionDetailEntity(executionId));
+        ArmRpoExecutionDetailEntity result = armRpoService.getArmRpoExecutionDetailEntity(1);
 
-        assertEquals("ArmRpoExecutionDetail not found", exception.getMessage());
+        assertNotNull(result);
+        assertEquals(armRpoExecutionDetailEntity, result);
     }
 
     @Test
-    void updateArmRpoExecutionDetailsUpdatesEntity() {
-        Integer executionId = 1;
-        ArmRpoStatusEntity armRpoStatus = new ArmRpoStatusEntity();
-        ArmRpoExecutionDetailEntity entity = new ArmRpoExecutionDetailEntity();
-        when(armRpoExecutionDetailRepository.findById(executionId)).thenReturn(Optional.of(entity));
-        when(currentTimeHelper.currentOffsetDateTime()).thenReturn(OffsetDateTime.now());
-        when(userIdentity.getUserAccount()).thenReturn(new UserAccountEntity());
+    void getArmRpoExecutionDetailEntity_ShouldThrowException_WhenNotFound() {
+        when(armRpoExecutionDetailRepository.findById(anyInt())).thenReturn(Optional.empty());
 
-        armRpoService.updateArmRpoExecutionDetails(executionId, armRpoStatus);
+        assertThrows(DartsException.class, () -> armRpoService.getArmRpoExecutionDetailEntity(1));
+    }
 
-        assertEquals(armRpoStatus, entity.getArmRpoStatus());
-        assertNotNull(entity.getLastModifiedDateTime());
-        assertNotNull(entity.getLastModifiedBy());
-        verify(armRpoExecutionDetailRepository).save(entity);
+    @Test
+    void updateArmRpoStateAndStatus_ShouldUpdateStateAndStatus() {
+        armRpoService.updateArmRpoStateAndStatus(armRpoExecutionDetailEntity, armRpoStateEntity, armRpoStatusEntity, userAccountEntity);
+
+        assertEquals(armRpoStateEntity, armRpoExecutionDetailEntity.getArmRpoState());
+        assertEquals(armRpoStatusEntity, armRpoExecutionDetailEntity.getArmRpoStatus());
+        verify(armRpoExecutionDetailRepository, times(1)).save(armRpoExecutionDetailEntity);
+    }
+
+    @Test
+    void updateArmRpoStatus_ShouldUpdateStatus() {
+        when(currentTimeHelper.currentOffsetDateTime()).thenReturn(null);
+
+        armRpoService.updateArmRpoStatus(armRpoExecutionDetailEntity, armRpoStatusEntity, userAccountEntity);
+
+        assertEquals(armRpoStatusEntity, armRpoExecutionDetailEntity.getArmRpoStatus());
+        assertEquals(userAccountEntity, armRpoExecutionDetailEntity.getLastModifiedBy());
+        verify(armRpoExecutionDetailRepository, times(1)).save(armRpoExecutionDetailEntity);
+    }
+
+    @Test
+    void saveArmRpoExecutionDetailEntity_ShouldSaveEntity() {
+        when(armRpoExecutionDetailRepository.save(any(ArmRpoExecutionDetailEntity.class))).thenReturn(armRpoExecutionDetailEntity);
+
+        ArmRpoExecutionDetailEntity result = armRpoService.saveArmRpoExecutionDetailEntity(armRpoExecutionDetailEntity);
+
+        assertNotNull(result);
+        assertEquals(armRpoExecutionDetailEntity, result);
+        verify(armRpoExecutionDetailRepository, times(1)).save(armRpoExecutionDetailEntity);
     }
 }
