@@ -43,6 +43,7 @@ import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 import static java.lang.Integer.parseInt;
 import static org.apache.commons.lang3.RandomStringUtils.randomAlphanumeric;
@@ -85,6 +86,7 @@ public class TestSupportController {
         var eventIds = eventIdsToBeDeleted(session, hearingIds);
 
         removeHearingEventJoins(session, hearingIds);
+        removeEventLinkedCases(session, caseIds, eventIds);
         removeEvents(session, eventIds);
         removeHearings(session, hearingIds);
 
@@ -359,16 +361,40 @@ public class TestSupportController {
             .executeUpdate();
     }
 
+    private void removeEventLinkedCases(Session session, List<Integer> caseIds, List<Integer> eventIds) {
+        session.createNativeQuery("""
+                                      delete from darts.event_linked_case where cas_id in (?)
+                                      """, Integer.class)
+            .setParameter(1, caseIds)
+            .executeUpdate();
+
+        session.createNativeQuery("""
+                                      delete from darts.event_linked_case where eve_id in (?)
+                                      """, Integer.class)
+            .setParameter(1, eventIds)
+            .executeUpdate();
+    }
+
     private void removeNodeRegisters(List<Integer> nodeIds) {
         nodeRegisterRepository.deleteAllById(nodeIds);
     }
 
     private static List<Integer> eventIdsToBeDeleted(Session session, List<Integer> heaIds) {
-        return session.createNativeQuery("""
-                                             select eve_id from darts.hearing_event_ae where hea_id in (?)
-                                             """, Integer.class)
+        List<Integer> eventsByHearing = session.createNativeQuery("""
+                                                                 select eve_id from darts.hearing_event_ae where hea_id in (?)
+                                                                 """, Integer.class)
             .setParameter(1, heaIds)
             .getResultList();
+
+        List<Integer> eventsByMarker = session.createNativeQuery("""
+                                                                     select event.eve_id from darts.event
+                                                                     where event_text = 'A temporary event created by functional test'
+                                                                     """, Integer.class)
+            .getResultList();
+
+        return Stream.concat(eventsByHearing.stream(), eventsByMarker.stream())
+            .distinct()
+            .toList();
     }
 
     private static List<Integer> hearingIdsToBeDeleted(Session session, List<Integer> casIds) {
