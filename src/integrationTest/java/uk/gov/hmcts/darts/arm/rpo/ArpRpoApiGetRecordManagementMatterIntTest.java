@@ -95,7 +95,7 @@ class ArpRpoApiGetRecordManagementMatterIntTest extends IntegrationBaseWithWirem
     }
 
     @Test
-    void getRecordManagementMatterShouldSucceedIfServerReturns200SuccessMissingMatterId() {
+    void getRecordManagementMatterShouldFailIfServerReturns200SuccessWithMissingMatterId() {
 
         // given
         stubFor(
@@ -155,7 +155,7 @@ class ArpRpoApiGetRecordManagementMatterIntTest extends IntegrationBaseWithWirem
     }
 
     @Test
-    void getRecordManagementMatterFailsReturns400Error() {
+    void getRecordManagementMatterFailsWhenClientReturns400Error() {
 
         // given
         stubFor(

@@ -29,14 +29,13 @@ public class ArmRpoApiImpl implements ArmRpoApi {
 
     private final ArmRpoClient armRpoClient;
     private final ArmRpoService armRpoService;
-    private final ArmRpoHelper armRpoHelper;
 
     @Override
     public RecordManagementMatterResponse getRecordManagementMatter(String bearerToken, Integer executionId, UserAccountEntity userAccount) {
         RecordManagementMatterResponse recordManagementMatterResponse;
         var armRpoExecutionDetailEntity = armRpoService.getArmRpoExecutionDetailEntity(executionId);
-        armRpoService.updateArmRpoStateAndStatus(armRpoExecutionDetailEntity, armRpoHelper.getRecordManagementMatterRpoState(),
-                                                 armRpoHelper.inProgressRpoStatus(), userAccount);
+        armRpoService.updateArmRpoStateAndStatus(armRpoExecutionDetailEntity, ArmRpoHelper.getRecordManagementMatterRpoState(),
+                                                 ArmRpoHelper.inProgressRpoStatus(), userAccount);
         try {
 
             recordManagementMatterResponse = armRpoClient.getRecordManagementMatter(bearerToken);
@@ -45,15 +44,15 @@ public class ArmRpoApiImpl implements ArmRpoApi {
                 && recordManagementMatterResponse.getRecordManagementMatter().getMatterId() != null) {
 
                 armRpoExecutionDetailEntity.setMatterId(recordManagementMatterResponse.getRecordManagementMatter().getMatterId());
-                armRpoService.updateArmRpoStatus(armRpoExecutionDetailEntity, armRpoHelper.completedRpoStatus(), userAccount);
+                armRpoService.updateArmRpoStatus(armRpoExecutionDetailEntity, ArmRpoHelper.completedRpoStatus(), userAccount);
 
             } else {
-                armRpoService.updateArmRpoStatus(armRpoExecutionDetailEntity, armRpoHelper.failedRpoStatus(), userAccount);
+                armRpoService.updateArmRpoStatus(armRpoExecutionDetailEntity, ArmRpoHelper.failedRpoStatus(), userAccount);
             }
         } catch (FeignException e) {
             // this ensures the full error body containing the ARM error detail is logged rather than a truncated version
             log.error("Error during ARM get record management matter: {}", e.contentUTF8());
-            armRpoService.updateArmRpoStatus(armRpoExecutionDetailEntity, armRpoHelper.failedRpoStatus(), userAccount);
+            armRpoService.updateArmRpoStatus(armRpoExecutionDetailEntity, ArmRpoHelper.failedRpoStatus(), userAccount);
             throw e;
         }
         return recordManagementMatterResponse;

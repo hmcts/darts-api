@@ -56,7 +56,7 @@ public class ArmRpoHelper {
     @Getter
     private static ArmRpoStateEntity removeProductionRpoState;
 
-
+    @SuppressWarnings("java:S2696")
     @PostConstruct
     public void init() {
         inProgressRpoStatus = armRpoStatusRepository.findById(ArmRpoStatusEnum.IN_PROGRESS.getId()).orElseThrow();
