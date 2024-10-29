@@ -67,7 +67,7 @@ public class InboundToUnstructuredProcessorImpl implements InboundToUnstructured
 
         List<Callable<Void>> tasks = inboundList.stream()
             .map(inboundObject -> (Callable<Void>) () -> {
-                log.debug("Processing Inbound to Unstructured record {} of {} with EOD {}",
+                log.debug("Processing Inbound to Unstructured record {} of {} with EOD id {}",
                           count.getAndIncrement(), inboundList.size(), inboundObject.getId());
 
                 processInboundToUnstructured(inboundObject);
