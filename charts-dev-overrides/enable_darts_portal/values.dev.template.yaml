@@ -93,6 +93,10 @@ java:
           alias: DARTS_INBOUND_STORAGE_SAS_URL
         - name: DartsUnstructuredStorageSasUrl
           alias: DARTS_UNSTRUCTURED_STORAGE_SAS_URL
+        - name: ArmServiceEntitlement
+          alias: ARM_SERVICE_ENTITLEMENT
+        - name: ArmStorageAccountName
+          alias: ARM_STORAGE_ACCOUNT_NAME
   environment:
     ENABLE_FLYWAY: true
     MANUAL_DELETION_ENABLED: true
