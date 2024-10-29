@@ -289,6 +289,8 @@ darts:
         arm-storage-account-name: ${:ARM_STORAGE_ACCOUNT_NAME}
 
       rpo-url:
+        get-record-management-matter: /api/v1/getRecordManagementMatter
+
 
     dets:
       sas-endpoint: ${DETS_SAS_URL_ENDPOINT:}
