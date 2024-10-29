@@ -14,6 +14,7 @@ import uk.gov.hmcts.darts.common.entity.EventEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
 import uk.gov.hmcts.darts.common.entity.MediaLinkedCaseEntity;
+import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.enums.SystemUsersEnum;
 import uk.gov.hmcts.darts.common.repository.AutomatedTaskRepository;
 import uk.gov.hmcts.darts.common.repository.EventRepository;
@@ -99,6 +100,7 @@ public class AudioLinkingAutomatedTask extends AbstractLockableAutomatedTask
         void processMedia(List<HearingEntity> hearingEntities, MediaEntity mediaEntity) {
             Set<HearingEntity> hearingsToSave = new HashSet<>();
             Set<MediaLinkedCaseEntity> mediaLinkedCaseEntities = new HashSet<>();
+            UserAccountEntity userAccount = userAccountRepository.getReferenceById(SystemUsersEnum.AUDIO_LINKING_AUTOMATED_TASK.getId());
             hearingEntities.forEach(hearingEntity -> {
                 try {
                     if (!hearingEntity.containsMedia(mediaEntity)) {
@@ -106,8 +108,7 @@ public class AudioLinkingAutomatedTask extends AbstractLockableAutomatedTask
                         hearingsToSave.add(hearingEntity);
                         CourtCaseEntity courtCase = hearingEntity.getCourtCase();
                         if (!mediaLinkedCaseRepository.existsByMediaAndCourtCase(mediaEntity, courtCase)) {
-                            mediaLinkedCaseEntities.add(new MediaLinkedCaseEntity(mediaEntity, courtCase, userAccountRepository.getReferenceById(
-                                SystemUsersEnum.AUDIO_LINKING_AUTOMATED_TASK.getId())));
+                            mediaLinkedCaseEntities.add(new MediaLinkedCaseEntity(mediaEntity, courtCase, userAccount));
                         }
                         log.info("Linking media {} to hearing {}", mediaEntity.getId(), hearingEntity.getId());
                     }
