@@ -13,6 +13,8 @@ public interface MediaLinkedCaseRepository extends JpaRepository<MediaLinkedCase
 
     List<MediaLinkedCaseEntity> findByMedia(MediaEntity media);
 
+    List<MediaLinkedCaseEntity> findByMediaAndSource(MediaEntity mediaEntity, int source);
+
     boolean existsByMediaAndCourtCase(MediaEntity media, CourtCaseEntity courtCase);
 
 }

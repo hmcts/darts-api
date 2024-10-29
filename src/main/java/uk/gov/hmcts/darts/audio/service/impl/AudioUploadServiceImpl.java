@@ -172,7 +172,7 @@ public class AudioUploadServiceImpl implements AudioUploadService {
     private List<MediaEntity> filterMediaEntitiesWithIdenticalCaseList(List<String> caseNumbersToLookFor, List<MediaEntity> mediaEntities) {
         ArrayList<MediaEntity> resultList = new ArrayList<>();
         for (MediaEntity mediaEntity : mediaEntities) {
-            List<MediaLinkedCaseEntity> mediaLinkedCaseEntities = mediaLinkedCaseRepository.findByMedia(mediaEntity);
+            List<MediaLinkedCaseEntity> mediaLinkedCaseEntities = mediaLinkedCaseRepository.findByMediaAndSource(mediaEntity, 1);
             List<String> mediaCaseNumbers = mediaLinkedCaseEntities.stream()
                 .map(MediaLinkedCaseEntity::getCourtCase)
                 .filter(Objects::nonNull)
