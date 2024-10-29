@@ -52,25 +52,32 @@ class ArmRpoServiceImplTest {
 
     @Test
     void getArmRpoExecutionDetailEntity_ShouldReturnEntity_WhenFound() {
+        // given
         when(armRpoExecutionDetailRepository.findById(anyInt())).thenReturn(Optional.of(armRpoExecutionDetailEntity));
 
+        // when
         ArmRpoExecutionDetailEntity result = armRpoService.getArmRpoExecutionDetailEntity(1);
 
+        // then
         assertNotNull(result);
         assertEquals(armRpoExecutionDetailEntity, result);
     }
 
     @Test
     void getArmRpoExecutionDetailEntity_ShouldThrowException_WhenNotFound() {
+        // when
         when(armRpoExecutionDetailRepository.findById(anyInt())).thenReturn(Optional.empty());
 
+        // then
         assertThrows(DartsException.class, () -> armRpoService.getArmRpoExecutionDetailEntity(1));
     }
 
     @Test
     void updateArmRpoStateAndStatus_ShouldUpdateStateAndStatus() {
+        // when
         armRpoService.updateArmRpoStateAndStatus(armRpoExecutionDetailEntity, armRpoStateEntity, armRpoStatusEntity, userAccountEntity);
 
+        // then
         assertEquals(armRpoStateEntity, armRpoExecutionDetailEntity.getArmRpoState());
         assertEquals(armRpoStatusEntity, armRpoExecutionDetailEntity.getArmRpoStatus());
         verify(armRpoExecutionDetailRepository, times(1)).save(armRpoExecutionDetailEntity);
@@ -78,10 +85,13 @@ class ArmRpoServiceImplTest {
 
     @Test
     void updateArmRpoStatus_ShouldUpdateStatus() {
+        // given
         when(currentTimeHelper.currentOffsetDateTime()).thenReturn(null);
 
+        // when
         armRpoService.updateArmRpoStatus(armRpoExecutionDetailEntity, armRpoStatusEntity, userAccountEntity);
 
+        // then
         assertEquals(armRpoStatusEntity, armRpoExecutionDetailEntity.getArmRpoStatus());
         assertEquals(userAccountEntity, armRpoExecutionDetailEntity.getLastModifiedBy());
         verify(armRpoExecutionDetailRepository, times(1)).save(armRpoExecutionDetailEntity);
@@ -89,10 +99,13 @@ class ArmRpoServiceImplTest {
 
     @Test
     void saveArmRpoExecutionDetailEntity_ShouldSaveEntity() {
+        // given
         when(armRpoExecutionDetailRepository.save(any(ArmRpoExecutionDetailEntity.class))).thenReturn(armRpoExecutionDetailEntity);
 
+        // when
         ArmRpoExecutionDetailEntity result = armRpoService.saveArmRpoExecutionDetailEntity(armRpoExecutionDetailEntity);
 
+        // then
         assertNotNull(result);
         assertEquals(armRpoExecutionDetailEntity, result);
         verify(armRpoExecutionDetailRepository, times(1)).save(armRpoExecutionDetailEntity);
