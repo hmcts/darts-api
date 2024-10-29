@@ -1,11 +1,6 @@
 package uk.gov.hmcts.darts.arm.rpo.impl;
 
-import lombok.AllArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.NotImplementedException;
-import org.springframework.stereotype.Service;
-import uk.gov.hmcts.darts.arm.client.ArmRpoClient;
-import uk.gov.hmcts.darts.arm.helper.ArmRpoHelper;
 import uk.gov.hmcts.darts.arm.model.rpo.ArmAsyncSearchResponse;
 import uk.gov.hmcts.darts.arm.model.rpo.ExtendedProductionsByMatterResponse;
 import uk.gov.hmcts.darts.arm.model.rpo.ExtendedSearchesByMatterResponse;
@@ -15,8 +10,6 @@ import uk.gov.hmcts.darts.arm.model.rpo.ProfileEntitlementResponse;
 import uk.gov.hmcts.darts.arm.model.rpo.RecordManagementMatterResponse;
 import uk.gov.hmcts.darts.arm.model.rpo.StorageAccountResponse;
 import uk.gov.hmcts.darts.arm.rpo.ArmRpoApi;
-import uk.gov.hmcts.darts.arm.service.ArmRpoService;
-import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 
 import java.io.InputStream;
 import java.util.List;
