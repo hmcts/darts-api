@@ -1,0 +1,1 @@
+INSERT INTO user_account VALUES (-5, NULL, 'AudioLinkingAutomatedTask', NULL, 'AudioLinkingAutomatedTask', '2024-01-01 00:00:00+00', '2024-01-01 00:00:00+00', NULL, 0, 0, NULL, true, true, 'AudioLinkingAutomatedTask');

@@ -15,6 +15,7 @@ import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
 import uk.gov.hmcts.darts.common.entity.MediaLinkedCaseEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
+import uk.gov.hmcts.darts.common.enums.MediaLinkedCaseSourceType;
 import uk.gov.hmcts.darts.common.enums.SystemUsersEnum;
 import uk.gov.hmcts.darts.common.repository.AutomatedTaskRepository;
 import uk.gov.hmcts.darts.common.repository.EventRepository;
@@ -108,7 +109,8 @@ public class AudioLinkingAutomatedTask extends AbstractLockableAutomatedTask
                         hearingsToSave.add(hearingEntity);
                         CourtCaseEntity courtCase = hearingEntity.getCourtCase();
                         if (!mediaLinkedCaseRepository.existsByMediaAndCourtCase(mediaEntity, courtCase)) {
-                            mediaLinkedCaseEntities.add(new MediaLinkedCaseEntity(mediaEntity, courtCase, userAccount));
+                            mediaLinkedCaseEntities.add(new MediaLinkedCaseEntity(
+                                mediaEntity, courtCase, userAccount, MediaLinkedCaseSourceType.AUDIO_LINKING_TASK));
                         }
                         log.info("Linking media {} to hearing {}", mediaEntity.getId(), hearingEntity.getId());
                     }

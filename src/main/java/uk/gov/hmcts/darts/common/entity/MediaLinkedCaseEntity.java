@@ -49,9 +49,10 @@ public class MediaLinkedCaseEntity extends CreatedBaseEntity {
     @Column(name = "source")
     private MediaLinkedCaseSourceType source;
 
-    public MediaLinkedCaseEntity(MediaEntity mediaEntity, CourtCaseEntity courtCase, UserAccountEntity createdBy) {
+    public MediaLinkedCaseEntity(MediaEntity mediaEntity, CourtCaseEntity courtCase, UserAccountEntity createdBy, MediaLinkedCaseSourceType sourceType) {
         this.media = mediaEntity;
         this.courtCase = courtCase;
+        this.source = sourceType;
         setCreatedBy(createdBy);
     }
 }

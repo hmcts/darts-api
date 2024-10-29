@@ -9,10 +9,12 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.darts.audio.model.AddAudioMetadataRequest;
 import uk.gov.hmcts.darts.authorisation.api.AuthorisationApi;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
+import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
+import uk.gov.hmcts.darts.common.enums.MediaLinkedCaseSourceType;
 import uk.gov.hmcts.darts.common.helper.MediaLinkedCaseHelper;
 import uk.gov.hmcts.darts.common.repository.MediaRepository;
 import uk.gov.hmcts.darts.common.service.RetrieveCoreObjectService;
@@ -22,12 +24,14 @@ import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.anyString;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class AddAudioRequestMapperImplTest {
     @Mock
-    RetrieveCoreObjectService courtroomRepository;
+    RetrieveCoreObjectService retrieveCoreObjectService;
     @Mock
     MediaLinkedCaseHelper mediaLinkedCaseHelper;
 
@@ -42,9 +46,12 @@ class AddAudioRequestMapperImplTest {
     AddAudioRequestMapperImpl addAudioRequestMapperImpl;
     UserAccountEntity userAccount;
 
+    @Mock
+    CourtCaseEntity courtCase;
+
     @BeforeEach
     void setUp() {
-        addAudioRequestMapperImpl = new AddAudioRequestMapperImpl(courtroomRepository, userIdentity, mediaLinkedCaseHelper, mediaRepository);
+        addAudioRequestMapperImpl = new AddAudioRequestMapperImpl(retrieveCoreObjectService, userIdentity, mediaLinkedCaseHelper, mediaRepository);
         userAccount = new UserAccountEntity();
         userAccount.setId(0);
     }
@@ -55,9 +62,8 @@ class AddAudioRequestMapperImplTest {
         courthouse.setCourthouseName("SWANSEA");
 
         CourtroomEntity courtroomEntity = new CourtroomEntity(1, "1", courthouse);
-        when(courtroomRepository.retrieveOrCreateCourtroom(anyString(), anyString(), any(UserAccountEntity.class))).thenReturn(
-            courtroomEntity);
-
+        when(retrieveCoreObjectService.retrieveOrCreateCourtroom(anyString(), anyString(), any(UserAccountEntity.class))).thenReturn(courtroomEntity);
+        when(retrieveCoreObjectService.retrieveOrCreateCase(any(CourthouseEntity.class), anyString(), any(UserAccountEntity.class))).thenReturn(courtCase);
         OffsetDateTime start = OffsetDateTime.now().minusHours(1);
         OffsetDateTime endDate = OffsetDateTime.now();
 
@@ -88,6 +94,7 @@ class AddAudioRequestMapperImplTest {
         Assertions.assertEquals(media.getCourtroom().getName(), result.getCourtroom().getName());
         Assertions.assertEquals(media.getCreatedBy(), userIdentity.getUserAccount());
         Assertions.assertEquals(media.getLastModifiedBy(), userIdentity.getUserAccount());
+        verify(mediaLinkedCaseHelper, times(2))
+            .addCase(result, courtCase, MediaLinkedCaseSourceType.ADD_AUDIO_METADATA, userAccount);
     }
 }
-

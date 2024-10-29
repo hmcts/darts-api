@@ -31,11 +31,7 @@ public class MediaLinkedCaseHelper {
                           .toList());
         }
         if (!linkedCases.contains(courtCase)) {
-            MediaLinkedCaseEntity mediaLinkedCaseEntity = new MediaLinkedCaseEntity();
-            mediaLinkedCaseEntity.setMedia(mediaEntity);
-            mediaLinkedCaseEntity.setCourtCase(courtCase);
-            mediaLinkedCaseEntity.setSource(sourceType);
-            mediaLinkedCaseEntity.setCreatedBy(createdBy);
+            MediaLinkedCaseEntity mediaLinkedCaseEntity = new MediaLinkedCaseEntity(mediaEntity, courtCase, createdBy, sourceType);
             mediaLinkedCaseRepository.saveAndFlush(mediaLinkedCaseEntity);
             log.debug("cas_id {} and med_id {} were not linked, Created new link via mlc_id {}",
                       courtCase.getId(), mediaEntity.getId(), mediaLinkedCaseEntity.getId());

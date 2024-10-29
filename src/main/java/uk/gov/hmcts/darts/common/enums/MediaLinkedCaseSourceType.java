@@ -6,6 +6,7 @@ import lombok.RequiredArgsConstructor;
 @Getter
 @RequiredArgsConstructor
 public enum MediaLinkedCaseSourceType {
+    LEGACY(0),
     ADD_AUDIO_METADATA(1),
     ADD_AUDIO_EVENT_LINKING(2),
     AUDIO_LINKING_TASK(3);
