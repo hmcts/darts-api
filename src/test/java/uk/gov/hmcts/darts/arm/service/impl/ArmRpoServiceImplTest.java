@@ -56,7 +56,7 @@ class ArmRpoServiceImplTest {
 
         DartsException exception = assertThrows(DartsException.class, () -> armRpoService.getArmRpoExecutionDetailEntity(executionId));
 
-        assertEquals(ArmRpoServiceImpl.ARM_RPO_EXECUTION_DETAIL_NOT_FOUND, exception.getMessage());
+        assertEquals("ArmRpoExecutionDetail not found", exception.getMessage());
     }
 
     @Test
