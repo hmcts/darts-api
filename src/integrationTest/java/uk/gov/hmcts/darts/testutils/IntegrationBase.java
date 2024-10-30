@@ -6,6 +6,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
@@ -67,9 +68,10 @@ import java.util.Optional;
  *  </li>
  * </ul>
  */
-@SpringBootTest
+@SpringBootTest()
 @Slf4j
 @ActiveProfiles({"intTest", "h2db", "in-memory-caching"})
+@Import(IntegrationTestConfiguration.class)
 public class IntegrationBase {
 
     @Autowired

@@ -151,6 +151,10 @@ public class TranscriptionEntity extends CreatedModifiedBaseEntity {
     @Column(name = "transcription_object_name")
     private String transcriptionObjectName;
 
+    @NotAudited
+    @Column(name = "folder_path")
+    private String folderPath;
+
     public void addCase(CourtCaseEntity courtCase) {
         if (courtCase != null) {
             courtCases.add(courtCase);

@@ -12,6 +12,7 @@ services:
       - DARTS_API_DB_USERNAME=darts
       - DARTS_API_DB_PASSWORD=darts
       - DARTS_API_DB_SCHEMA=darts
+      - SPRING_PROFILES_ACTIVE=local
       - AAD_B2C_CLIENT_ID
       - AAD_B2C_CLIENT_SECRET
       - AAD_B2C_TENANT_ID
@@ -54,14 +55,14 @@ services:
       - MAX_FILE_UPLOAD_REQUEST_SIZE_MEGABYTES=360
       - DARTS_INBOUND_STORAGE_SAS_URL
       - DARTS_UNSTRUCTURED_STORAGE_SAS_URL
-      - JAVA_TOOL_OPTIONS=-agentlib:jdwp=transport=dt_socket,address=*:8003,server=y,suspend=n
+      - ARM_SERVICE_ENTITLEMENT
+      - ARM_STORAGE_ACCOUNT_NAME
     build:
       context: .
       dockerfile: Dockerfile
     image: darts-api:latest
     ports:
       - "4550:4550"
-      - "8003:8003"
     networks:
       - darts-network
 

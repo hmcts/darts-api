@@ -27,4 +27,6 @@ public interface ExternalObjectDirectoryService {
                                                                UserAccountEntity userAccountEntity,
                                                                CaseDocumentEntity caseDocumentEntity,
                                                                ExternalLocationTypeEntity externalLocationType);
+
+    Long getFileSize(ExternalObjectDirectoryEntity detsExternalObjectDirectory);
 }

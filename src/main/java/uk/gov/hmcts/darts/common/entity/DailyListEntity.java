@@ -7,6 +7,8 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
 import lombok.EqualsAndHashCode;
@@ -100,7 +102,8 @@ public class DailyListEntity extends CreatedModifiedBaseEntity {
     @Column(name = "external_location")
     private UUID externalLocation;
 
-    @Column(name = "elt_id")
-    private Integer eltId;
+    @ManyToOne
+    @JoinColumn(name = "elt_id")
+    private ExternalLocationTypeEntity externalLocationTypeEntity;
 
 }

@@ -96,7 +96,7 @@ public class DataAnonymisationServiceImpl implements DataAnonymisationService {
     @Transactional
     public void obfuscateEventByIds(List<Integer> eveIds) {
         eveIds.stream()
-            .map(eventService::getEventEntityById)
+            .map(eventService::getEventByEveId)
             .distinct()
             .forEach(this::anonymizeEvent);
     }

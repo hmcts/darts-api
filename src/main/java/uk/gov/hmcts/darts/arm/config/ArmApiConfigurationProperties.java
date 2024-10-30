@@ -24,14 +24,10 @@ public class ArmApiConfigurationProperties {
     @NotEmpty
     private String cabinetId;
     @NotEmpty
-    private String updateMetadataPath;
-    @NotEmpty
-    private String downloadDataPath;
-    @NotEmpty
-    private String availableEntitlementProfilesPath;
-    @NotEmpty
-    private String selectEntitlementProfilePath;
-    @NotEmpty
     private String armServiceProfile;
+    @NotEmpty
+    private String armServiceEntitlement;
+    @NotEmpty
+    private String armStorageAccountName;
 
 }

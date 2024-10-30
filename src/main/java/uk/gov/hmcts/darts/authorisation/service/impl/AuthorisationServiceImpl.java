@@ -196,8 +196,9 @@ public class AuthorisationServiceImpl implements AuthorisationService {
 
     @Override
     public List<UserAccountEntity> getUsersWithRoleAtCourthouse(SecurityRoleEnum securityRole,
-                                                                CourthouseEntity courthouse) {
-        return userAccountRepository.findByRoleAndCourthouse(securityRole.getId(), courthouse);
+                                                                CourthouseEntity courthouse,
+                                                                UserAccountEntity... excludingUsers) {
+        return userAccountRepository.findByRoleAndCourthouse(securityRole.getId(), courthouse, Set.of(excludingUsers));
     }
 
 }

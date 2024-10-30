@@ -21,11 +21,14 @@ import java.util.List;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_DROP_ZONE;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_INGESTION;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_MANIFEST_FAILED;
+import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_MISSING_RESPONSE;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_PROCESSING_RESPONSE_FILES;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_RAW_DATA_FAILED;
+import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_REPLAY;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_RESPONSE_CHECKSUM_VERIFICATION_FAILED;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_RESPONSE_MANIFEST_FAILED;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_RESPONSE_PROCESSING_FAILED;
+import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_RPO_PENDING;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.AWAITING_VERIFICATION;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.FAILURE;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.MARKED_FOR_DELETION;
@@ -75,10 +78,16 @@ public class EodHelper {
     @Getter
     private static ObjectRecordStatusEntity armResponseChecksumVerificationFailedStatus;
     @Getter
+    private static ObjectRecordStatusEntity armRpoPendingStatus;
+    @Getter
     private static ObjectRecordStatusEntity awaitingVerificationStatus;
 
     @Getter
     private static List<ObjectRecordStatusEntity> failedArmStatuses;
+    @Getter
+    private static ObjectRecordStatusEntity armReplayStatus;
+    @Getter
+    private static ObjectRecordStatusEntity armMissingResponseStatus;
 
 
     @SuppressWarnings("java:S2696")
@@ -102,6 +111,9 @@ public class EodHelper {
         armResponseManifestFailedStatus = orsRepository.findById(ARM_RESPONSE_MANIFEST_FAILED.getId()).orElseThrow();
         armResponseChecksumVerificationFailedStatus = orsRepository.findById(ARM_RESPONSE_CHECKSUM_VERIFICATION_FAILED.getId()).orElseThrow();
         awaitingVerificationStatus = orsRepository.findById(AWAITING_VERIFICATION.getId()).orElseThrow();
+        armRpoPendingStatus = orsRepository.findById(ARM_RPO_PENDING.getId()).orElseThrow();
+        armReplayStatus = orsRepository.findById(ARM_REPLAY.getId()).orElseThrow();
+        armMissingResponseStatus = orsRepository.findById(ARM_MISSING_RESPONSE.getId()).orElseThrow();
 
         failedArmStatuses = List.of(failedArmRawDataStatus, failedArmManifestFileStatus, failedArmResponseManifestFileStatus);
 
@@ -122,10 +134,10 @@ public class EodHelper {
     @Transactional
     public void updateStatus(ObjectRecordStatusEntity newStatus, UserAccountEntity user, List<Integer> idsToBeUpdated, OffsetDateTime timestamp) {
         eodRepository.updateStatus(
-            EodHelper.markForDeletionStatus(),
+            newStatus,
             user,
             idsToBeUpdated,
-            OffsetDateTime.now()
+            timestamp
         );
     }
 }

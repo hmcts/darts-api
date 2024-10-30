@@ -399,10 +399,10 @@ class DataAnonymisationServiceImplTest {
         EventEntity event3 = mock(EventEntity.class);
 
 
-        doReturn(event1).when(eventService).getEventEntityById(1);
-        doReturn(event2).when(eventService).getEventEntityById(2);
-        doReturn(event3).when(eventService).getEventEntityById(3);
-        doReturn(event1).when(eventService).getEventEntityById(4);
+        doReturn(event1).when(eventService).getEventByEveId(1);
+        doReturn(event2).when(eventService).getEventByEveId(2);
+        doReturn(event3).when(eventService).getEventByEveId(3);
+        doReturn(event1).when(eventService).getEventByEveId(4);
 
         dataAnonymisationService.obfuscateEventByIds(List.of(1, 2, 3, 4));
 
@@ -411,10 +411,10 @@ class DataAnonymisationServiceImplTest {
         verify(dataAnonymisationService, times(1)).anonymizeEvent(event2);
         verify(dataAnonymisationService, times(1)).anonymizeEvent(event3);
 
-        verify(eventService, times(1)).getEventEntityById(1);
-        verify(eventService, times(1)).getEventEntityById(2);
-        verify(eventService, times(1)).getEventEntityById(3);
-        verify(eventService, times(1)).getEventEntityById(4);
+        verify(eventService, times(1)).getEventByEveId(1);
+        verify(eventService, times(1)).getEventByEveId(2);
+        verify(eventService, times(1)).getEventByEveId(3);
+        verify(eventService, times(1)).getEventByEveId(4);
 
         verify(eventService, times(1)).saveEvent(event1);
         verify(eventService, times(1)).saveEvent(event2);

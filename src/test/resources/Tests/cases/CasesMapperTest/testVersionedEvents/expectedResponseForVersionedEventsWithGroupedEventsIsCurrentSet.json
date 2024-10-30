@@ -3,12 +3,14 @@
     "id": 2,
     "timestamp": "2024-07-01T12:00:00Z",
     "name": "TestName",
-    "text": "Event2"
+    "text": "Event2",
+    "is_data_anonymised": false
   },
   {
     "id": 5,
     "timestamp": "2024-07-01T12:00:00Z",
     "name": "TestName",
-    "text": "Event5"
+    "text": "Event5",
+    "is_data_anonymised": false
   }
 ]

@@ -57,7 +57,6 @@ public class ApplyRetentionCaseAssociatedObjectsSingleCaseProcessorImpl implemen
     private final CurrentTimeHelper currentTimeHelper;
     private final ObjectMapper objectMapper;
 
-
     @Transactional
     @Override
     public void processApplyRetentionToCaseAssociatedObjects(Integer caseId) {
