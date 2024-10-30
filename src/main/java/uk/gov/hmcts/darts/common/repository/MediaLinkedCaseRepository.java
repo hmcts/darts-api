@@ -5,6 +5,7 @@ import org.springframework.stereotype.Repository;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
 import uk.gov.hmcts.darts.common.entity.MediaLinkedCaseEntity;
+import uk.gov.hmcts.darts.common.enums.MediaLinkedCaseSourceType;
 
 import java.util.List;
 
@@ -13,7 +14,7 @@ public interface MediaLinkedCaseRepository extends JpaRepository<MediaLinkedCase
 
     List<MediaLinkedCaseEntity> findByMedia(MediaEntity media);
 
-    List<MediaLinkedCaseEntity> findByMediaAndSource(MediaEntity mediaEntity, int source);
+    List<MediaLinkedCaseEntity> findByMediaAndSource(MediaEntity mediaEntity, MediaLinkedCaseSourceType source);
 
     boolean existsByMediaAndCourtCase(MediaEntity media, CourtCaseEntity courtCase);
 
