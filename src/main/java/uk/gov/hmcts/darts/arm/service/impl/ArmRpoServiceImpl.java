@@ -12,6 +12,8 @@ import uk.gov.hmcts.darts.common.exception.DartsException;
 import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
 import uk.gov.hmcts.darts.common.repository.ArmRpoExecutionDetailRepository;
 
+import static java.util.Objects.nonNull;
+
 @Service
 @AllArgsConstructor
 @Slf4j
@@ -29,8 +31,9 @@ public class ArmRpoServiceImpl implements ArmRpoService {
     @Override
     public void updateArmRpoStateAndStatus(ArmRpoExecutionDetailEntity armRpoExecutionDetailEntity, ArmRpoStateEntity armRpoStateEntity,
                                            ArmRpoStatusEntity armRpoStatusEntity, UserAccountEntity userAccountEntity) {
+        String previousState = nonNull(armRpoExecutionDetailEntity.getArmRpoState()) ? armRpoExecutionDetailEntity.getArmRpoState().getDescription() : null;
         log.debug("Setting execution detail {} state from {} to {}", armRpoExecutionDetailEntity.getId(),
-                  armRpoExecutionDetailEntity.getArmRpoState().getDescription(),
+                  previousState,
                   armRpoStateEntity.getDescription());
         armRpoExecutionDetailEntity.setArmRpoState(armRpoStateEntity);
         updateArmRpoStatus(armRpoExecutionDetailEntity, armRpoStatusEntity, userAccountEntity);
@@ -39,8 +42,9 @@ public class ArmRpoServiceImpl implements ArmRpoService {
     @Override
     public void updateArmRpoStatus(ArmRpoExecutionDetailEntity armRpoExecutionDetailEntity, ArmRpoStatusEntity armRpoStatusEntity,
                                    UserAccountEntity userAccountEntity) {
+        String previousStatus = nonNull(armRpoExecutionDetailEntity.getArmRpoStatus()) ? armRpoExecutionDetailEntity.getArmRpoStatus().getDescription() : null;
         log.debug("Setting execution detail {} status from {} to {}", armRpoExecutionDetailEntity.getId(),
-                  armRpoExecutionDetailEntity.getArmRpoStatus().getDescription(),
+                  previousStatus,
                   armRpoStatusEntity.getDescription());
         armRpoExecutionDetailEntity.setArmRpoStatus(armRpoStatusEntity);
         armRpoExecutionDetailEntity.setLastModifiedDateTime(currentTimeHelper.currentOffsetDateTime());
