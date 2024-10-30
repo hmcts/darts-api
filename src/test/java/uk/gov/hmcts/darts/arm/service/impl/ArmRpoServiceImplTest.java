@@ -92,7 +92,6 @@ class ArmRpoServiceImplTest {
 
     @Test
     void updateArmRpoStatus_ShouldUpdateStatus() {
-        ArmRpoStatusEntity armRpoStatusEntity = ArmRpoHelper.failedRpoStatus();
         armRpoExecutionDetailEntity.setArmRpoStatus(ArmRpoHelper.inProgressRpoStatus());
 
         // given

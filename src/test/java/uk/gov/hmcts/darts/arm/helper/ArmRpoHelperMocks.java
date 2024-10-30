@@ -11,6 +11,7 @@ import uk.gov.hmcts.darts.common.entity.ArmRpoStatusEntity;
 
 import static org.mockito.Mockito.lenient;
 
+@SuppressWarnings("PMD.NcssCount")
 @Getter
 public class ArmRpoHelperMocks {
 
