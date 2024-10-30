@@ -6,7 +6,6 @@ import uk.gov.hmcts.darts.arm.model.rpo.ExtendedSearchesByMatterResponse;
 import uk.gov.hmcts.darts.arm.model.rpo.IndexesByMatterIdResponse;
 import uk.gov.hmcts.darts.arm.model.rpo.MasterIndexFieldByRecordClassSchemaResponse;
 import uk.gov.hmcts.darts.arm.model.rpo.ProfileEntitlementResponse;
-import uk.gov.hmcts.darts.arm.model.rpo.RecordManagementMatterResponse;
 import uk.gov.hmcts.darts.arm.model.rpo.StorageAccountResponse;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 
@@ -15,7 +14,7 @@ import java.util.List;
 
 public interface ArmRpoApi {
 
-    RecordManagementMatterResponse getRecordManagementMatter(String bearerToken, Integer executionId, UserAccountEntity userAccount);
+    void getRecordManagementMatter(String bearerToken, Integer executionId, UserAccountEntity userAccount);
 
     IndexesByMatterIdResponse getIndexesByMatterId(String bearerToken, Integer executionId, UserAccountEntity userAccount);
 

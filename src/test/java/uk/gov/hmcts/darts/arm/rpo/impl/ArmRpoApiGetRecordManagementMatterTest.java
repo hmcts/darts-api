@@ -8,13 +8,13 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.darts.arm.client.ArmRpoClient;
+import uk.gov.hmcts.darts.arm.exception.ArmRpoException;
 import uk.gov.hmcts.darts.arm.helper.ArmRpoHelper;
 import uk.gov.hmcts.darts.arm.model.rpo.RecordManagementMatterResponse;
 import uk.gov.hmcts.darts.arm.service.ArmRpoService;
 import uk.gov.hmcts.darts.common.entity.ArmRpoExecutionDetailEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -56,24 +56,23 @@ class ArmRpoApiGetRecordManagementMatterTest {
         RecordManagementMatterResponse expectedResponse = new RecordManagementMatterResponse();
         when(armRpoClient.getRecordManagementMatter(anyString())).thenReturn(expectedResponse);
 
-        RecordManagementMatterResponse response = armRpoApi.getRecordManagementMatter("token", EXECUTION_ID, userAccountEntity);
+        assertThrows(ArmRpoException.class, () -> armRpoApi.getRecordManagementMatter("token", EXECUTION_ID, userAccountEntity));
 
-        assertEquals(expectedResponse, response);
         verify(armRpoService).updateArmRpoStatus(any(), eq(armRpoHelper.completedRpoStatus()), eq(userAccountEntity));
     }
 
     @Test
-    void getRecordManagementMatterThrowsFeignExceptionWhenClientFails() {
+    void getRecordManagementMatterThrowsArmRpoExceptionWhenClientFails() {
         when(armRpoClient.getRecordManagementMatter(anyString())).thenThrow(FeignException.class);
 
-        assertThrows(FeignException.class, () -> armRpoApi.getRecordManagementMatter("token", EXECUTION_ID, userAccountEntity));
+        assertThrows(ArmRpoException.class, () -> armRpoApi.getRecordManagementMatter("token", EXECUTION_ID, userAccountEntity));
         verify(armRpoService).updateArmRpoStatus(any(), eq(armRpoHelper.failedRpoStatus()), eq(userAccountEntity));
     }
 
     @Test
     void getRecordManagementMatterUpdatesStatusToInProgress() {
         // when
-        armRpoApi.getRecordManagementMatter("token", EXECUTION_ID, userAccountEntity);
+        assertThrows(ArmRpoException.class, () -> armRpoApi.getRecordManagementMatter("token", EXECUTION_ID, userAccountEntity));
 
         // then
         verify(armRpoService).updateArmRpoStateAndStatus(any(), eq(armRpoHelper.getRecordManagementMatterRpoState()), eq(armRpoHelper.inProgressRpoStatus()),
