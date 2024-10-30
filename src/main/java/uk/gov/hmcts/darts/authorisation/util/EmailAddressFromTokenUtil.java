@@ -27,6 +27,15 @@ public class EmailAddressFromTokenUtil {
         return emailAddressFromObject;
     }
 
+    public String getEmailAddressFromToken(Jwt jwt) {
+        Object claimFromJwt = getClaimFromJwt(jwt, CLAIM_ORDER);
+        String emailAddressFromObject = getEmailAddressFromObject(claimFromJwt);
+        if (emailAddressFromObject == null) {
+            throw new IllegalStateException("Could not obtain email address from principal");
+        }
+        return emailAddressFromObject;
+    }
+
     /*
     Pass in a list of claims to check in the order you want to check them.
      */

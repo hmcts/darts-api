@@ -7,6 +7,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
+import uk.gov.hmcts.darts.authorisation.util.EmailAddressFromTokenUtil;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.enums.SecurityRoleEnum;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
@@ -26,40 +27,10 @@ import static uk.gov.hmcts.darts.authorisation.exception.AuthorisationError.USER
 @AllArgsConstructor
 @Slf4j
 public class UserIdentityImpl implements UserIdentity {
-
-    private static final String EMAILS = "emails";
-    private static final String PREFERRED_USERNAME = "preferred_username";
     private static final String OID = "oid";
 
     private final UserAccountRepository userAccountRepository;
     private final UserRolesCourthousesRepository userRolesCourthousesRepository;
-
-    @SuppressWarnings({"PMD.AvoidDeeplyNestedIfStmts", "PMD.CyclomaticComplexity", "PMD.CognitiveComplexity"})
-    private String getEmailAddressFromToken(Jwt token) {
-        if (token != null) {
-            Object emailsAddressesObject = token.getClaims().get(EMAILS);
-            if (emailsAddressesObject == null) {
-                emailsAddressesObject = token.getClaims().get(PREFERRED_USERNAME);
-            }
-            if (emailsAddressesObject instanceof List<?> emails) {
-                if (emails.size() != 1) {
-                    throw new IllegalStateException(String.format(
-                        "Unexpected number of email addresses: %d",
-                        emails.size()
-                    ));
-                }
-                Object emailAddressObject = emails.get(0);
-
-                if (emailAddressObject instanceof String emailAddress && StringUtils.isNotBlank(emailAddress)) {
-                    return emailAddress;
-                }
-            } else if (emailsAddressesObject instanceof String emailAddress && StringUtils.isNotBlank(emailAddress)) {
-                return emailAddress;
-            }
-        }
-
-        throw new IllegalStateException("Could not obtain email address from principal");
-    }
 
     private String getGuidFromToken(Jwt token) {
         if (token != null) {
@@ -76,20 +47,8 @@ public class UserIdentityImpl implements UserIdentity {
         return null;
     }
 
-    @Override
     public UserAccountEntity getUserAccount() {
-        UserAccountEntity entity = null;
-        Optional<Jwt> jwt = getJwt();
-
-        if (jwt.isPresent()) {
-            entity = getUserAccount(jwt.get());
-        }
-
-        if (isNull(entity)) {
-            throw new IllegalStateException("Could not obtain email address from principal");
-        }
-
-        return entity;
+        return getUserAccount(getJwt().orElse(null));
     }
 
     @Override
@@ -101,7 +60,8 @@ public class UserIdentityImpl implements UserIdentity {
             userAccount = userAccountRepository.findByAccountGuidAndActive(guid, true).orElse(null);
         }
         if (isNull(userAccount)) {
-            userAccount = userAccountRepository.findByEmailAddressIgnoreCaseAndActive(getEmailAddressFromToken(jwt), true).stream()
+            String emailAddressFromToken = EmailAddressFromTokenUtil.getEmailAddressFromToken(jwt);
+            userAccount = userAccountRepository.findByEmailAddressIgnoreCaseAndActive(emailAddressFromToken, true).stream()
                 .findFirst()
                 .orElseThrow(() -> new DartsApiException(USER_DETAILS_INVALID));
         }
@@ -126,7 +86,7 @@ public class UserIdentityImpl implements UserIdentity {
         String guid = getGuidFromToken(token);
 
         try {
-            emailAddress = getEmailAddressFromToken(token);
+            emailAddress = EmailAddressFromTokenUtil.getEmailAddressFromToken();
         } catch (IllegalStateException e) {
             if (nonNull(guid)) {
                 log.debug("Guid is present but unable to get email address from token ending ''.....{}'': {}", StringUtils.right(guid, 5), e.getMessage());
