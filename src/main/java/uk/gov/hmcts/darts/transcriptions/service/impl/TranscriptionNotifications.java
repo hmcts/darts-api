@@ -100,7 +100,8 @@ public class TranscriptionNotifications {
     public void notifyApprovers(TranscriptionEntity transcription) {
         List<UserAccountEntity> usersToNotify = authorisationApi.getUsersWithRoleAtCourthouse(
             SecurityRoleEnum.APPROVER,
-            transcription.getCourtCase().getCourthouse()
+            transcription.getCourtCase().getCourthouse(),
+            transcription.getRequestedBy()
         );
         SaveNotificationToDbRequest request = SaveNotificationToDbRequest.builder()
             .eventId(COURT_MANAGER_APPROVE_TRANSCRIPT.toString())

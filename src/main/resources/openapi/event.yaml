@@ -748,13 +748,8 @@ components:
           type: string
         text:
           type: string
-        is_event_anonymised:
+        is_data_anonymised:
           type: boolean
-        is_case_expired:
-          type: boolean
-        case_expired_at:
-          type: string
-          format: date-time
         courthouse:
           type: object
           properties:
@@ -769,7 +764,6 @@ components:
               type: integer
             name:
               type: string
-
 
     ###################################################################################################################
     # PRIMITIVES
