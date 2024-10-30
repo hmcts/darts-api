@@ -375,6 +375,12 @@ The script will check for required executables and prompt before continuing.
 
 _Disclaimer: The script has been written to work using `bash`._
 
+## Dev/PR environments
+
+Please see the separate [Dev environment](https://tools.hmcts.net/confluence/display/DMP/Dev+environment) page on confluence for details.
+
+This repo contains overrides for the default dev environment configuration. For more details see the  [Dev chart overrides README](charts-dev-overrides/README.md), within the `charts-dev-overrides` directory.
+
 ## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details

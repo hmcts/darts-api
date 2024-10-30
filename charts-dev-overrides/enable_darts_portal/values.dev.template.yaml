@@ -1,4 +1,3 @@
-# Attention: if you are changing values in here, please ensure you also update any corresponding files in the charts-dev-overrides directory
 java:
   # Don't modify below here
   image: ${IMAGE_NAME}
@@ -108,7 +107,7 @@ java:
     spring.profiles.active: dev
     TESTING_SUPPORT_ENDPOINTS_ENABLED: true
     DARTS_GATEWAY_URL: "http://darts-gateway.staging.platform.hmcts.net"
-    DARTS_PORTAL_URL: "https://darts.staging.apps.hmcts.net"
+    DARTS_PORTAL_URL: "https://darts-portal-pr-${CHANGE_ID}.dev.platform.hmcts.net"
     AUTOMATED_TASK_MODE: true
     API_MODE: true
 
@@ -125,72 +124,20 @@ postgresql:
     databases:
       - name: "pr-${CHANGE_ID}-darts"
 
-# function:
-#   scaleType: Job
-#   image: ${IMAGE_NAME}
-#   aadIdentityName: darts
-#   pollingInterval: 300 # every 5 mins, but this should probably be configurable per env
-#   minReplicaCount: 0
-#   maxReplicaCount: 2
-#   scalingStrategy: accurate
-#   keyVaults:
-#     "darts":
-#       secrets:
-#         - name: GovukNotifyApiKey
-#           alias: GOVUK_NOTIFY_API_KEY
-#         - name: api-POSTGRES-USER
-#           alias: DARTS_API_DB_USERNAME
-#         - name: api-POSTGRES-PASS
-#           alias: DARTS_API_DB_PASSWORD
-#         - name: api-POSTGRES-HOST
-#           alias: DARTS_API_DB_HOST
-#         - name: api-POSTGRES-DATABASE
-#           alias: DARTS_API_DB_NAME
-#         - name: api-POSTGRES-SCHEMA
-#           alias: DARTS_API_DB_SCHEMA
-#         - name: AzureAdB2CTenantId
-#           alias: AAD_B2C_TENANT_ID
-#         - name: AzureAdB2CClientId
-#           alias: AAD_B2C_CLIENT_ID
-#         - name: AzureAdB2CClientSecret
-#           alias: AAD_B2C_CLIENT_SECRET
-#         - name: app-insights-connection-string
-#           alias: app-insights-connection-string
-#         - name: AzureAdB2CFuncTestROPCClientId
-#           alias: AAD_B2C_ROPC_CLIENT_ID
-#         - name: AzureAdB2CFuncTestROPCClientSecret
-#           alias: AAD_B2C_ROPC_CLIENT_SECRET
-#         - name: AzureStorageConnectionString
-#           alias: AZURE_STORAGE_CONNECTION_STRING
-#         - name: api-POSTGRES-CONNECTION-STRING
-#           alias: DARTS_API_DB_CONNECTION_STRING
-#         - name: AzureADTenantId
-#           alias: AAD_TENANT_ID
-#         - name: AzureADClientId
-#           alias: AAD_CLIENT_ID
-#         - name: AzureADClientSecret
-#           alias: AAD_CLIENT_SECRET
-#         - name: AzureADTenantIdJustice
-#           alias: AAD_TENANT_ID_JUSTICE
-#         - name: AzureADClientIdJustice
-#           alias: AAD_CLIENT_ID_JUSTICE
-#         - name: AzureADClientSecretJustice
-#           alias: AAD_CLIENT_SECRET_JUSTICE
-#   environment:
-#     ATS_MODE: true
-#     POSTGRES_SSL_MODE: require
-#     RUN_DB_MIGRATION_ON_STARTUP: false
-#     DARTS_GATEWAY_URL: https://darts-gateway.staging.platform.hmcts.net
-#   secrets:
-#     DARTS_API_DB_CONNECTION_STRING:
-#       secretRef: darts-api-{{ .Release.Name }}-postgresql
-#       key: connectionString
-#   job:
-#     activeDeadlineSeconds: 300
-#     parallelism: 1
-#     completions: 1
-#   triggers:
-#     - type: postgres
-#       connectionFromEnv: DARTS_API_DB_CONNECTION_STRING
-#       query: "SELECT count(*) FROM darts.media_request WHERE mer_id = ( SELECT mer_id FROM darts.media_request WHERE request_status = 'OPEN' ORDER BY created_ts LIMIT 1 )"
-#       targetQueryValue: "0.9"
+nodejs:
+  applicationPort: 3000
+  image: 'sdshmctspublic.azurecr.io/darts/portal:latest'
+  replicas: 1
+  ingressHost: "darts-portal-pr-${CHANGE_ID}.dev.platform.hmcts.net"
+  aadIdentityName: darts
+  keyVaults:
+    darts:
+      secrets:
+        - redis-connection-string
+        - darts-portal-session-secret
+  environment:
+    ALLOW_CONFIG_MUTATIONS: true
+    DARTS_PORTAL_URL: "https://darts-portal-pr-${CHANGE_ID}.dev.platform.hmcts.net"
+    DARTS_API_URL: "https://darts-api-pr-${CHANGE_ID}.dev.platform.hmcts.net"
+    DARTS_AZUREAD_B2C_ORIGIN_HOST: https://hmctsstgextid.b2clogin.com
+    DARTS_AZUREAD_B2C_HOSTNAME: https://darts.staging.apps.hmcts.net
