@@ -19,6 +19,7 @@ import uk.gov.hmcts.darts.common.datamanagement.component.impl.DownloadResponseM
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 import uk.gov.hmcts.darts.common.entity.DailyListEntity;
+import uk.gov.hmcts.darts.common.entity.ExternalLocationTypeEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum;
@@ -276,7 +277,9 @@ class DailyListUpdaterTest {
         void missingExternalLocation() {
             DailyListEntity dailyListEntity = new DailyListEntity();
             dailyListEntity.setExternalLocation(null);
-            dailyListEntity.setEltId(4);
+            ExternalLocationTypeEntity externalLocationTypeEntity = new ExternalLocationTypeEntity();
+            externalLocationTypeEntity.setId(4);
+            dailyListEntity.setExternalLocationTypeEntity(externalLocationTypeEntity);
 
             assertThat(dailyListUpdater.validateXmlElseUpdate(dailyListEntity))
                 .isFalse();
@@ -290,7 +293,7 @@ class DailyListUpdaterTest {
         void missingEltId() {
             DailyListEntity dailyListEntity = new DailyListEntity();
             dailyListEntity.setExternalLocation(UUID.randomUUID());
-            dailyListEntity.setEltId(null);
+            dailyListEntity.setExternalLocationTypeEntity(null);
 
             assertThat(dailyListUpdater.validateXmlElseUpdate(dailyListEntity))
                 .isFalse();
@@ -305,7 +308,9 @@ class DailyListUpdaterTest {
         void incorrectEltId(ExternalLocationTypeEnum externalLocationTypeEnum) {
             DailyListEntity dailyListEntity = new DailyListEntity();
             dailyListEntity.setExternalLocation(UUID.randomUUID());
-            dailyListEntity.setEltId(externalLocationTypeEnum.getId());
+            ExternalLocationTypeEntity externalLocationTypeEntity = new ExternalLocationTypeEntity();
+            externalLocationTypeEntity.setId(externalLocationTypeEnum.getId());
+            dailyListEntity.setExternalLocationTypeEntity(externalLocationTypeEntity);
 
             assertThat(dailyListUpdater.validateXmlElseUpdate(dailyListEntity))
                 .isFalse();
@@ -320,7 +325,9 @@ class DailyListUpdaterTest {
             UUID externalLocation = UUID.randomUUID();
             DailyListEntity dailyListEntity = new DailyListEntity();
             dailyListEntity.setExternalLocation(externalLocation);
-            dailyListEntity.setEltId(4);
+            ExternalLocationTypeEntity externalLocationTypeEntity = new ExternalLocationTypeEntity();
+            externalLocationTypeEntity.setId(4);
+            dailyListEntity.setExternalLocationTypeEntity(externalLocationTypeEntity);
 
             doThrow(new RuntimeException()).when(detsApiService).downloadData(any());
 
@@ -340,7 +347,9 @@ class DailyListUpdaterTest {
             UUID externalLocation = UUID.randomUUID();
             DailyListEntity dailyListEntity = new DailyListEntity();
             dailyListEntity.setExternalLocation(externalLocation);
-            dailyListEntity.setEltId(4);
+            ExternalLocationTypeEntity externalLocationTypeEntity = new ExternalLocationTypeEntity();
+            externalLocationTypeEntity.setId(4);
+            dailyListEntity.setExternalLocationTypeEntity(externalLocationTypeEntity);
 
             DownloadResponseMetaData downloadResponseMetaData = mock(DownloadResponseMetaData.class);
             Resource resource = mock(Resource.class);

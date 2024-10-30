@@ -143,7 +143,7 @@ class DailyListUpdater {
     }
 
     /**
-     * Temporary change will be reverted downstream.
+     * Temporary change will be reverted downstream: DMP-4191.
      */
     boolean validateJsonExistsElseUpdate(DailyListEntity dailyListEntity) {
         if (dailyListEntity.getContent() != null) {
@@ -157,15 +157,15 @@ class DailyListUpdater {
     }
 
     /**
-     * Temporary change will be reverted downstream.
+     * Temporary change will be reverted downstream: DMP-4191.
      */
     boolean validateXmlElseUpdate(DailyListEntity dailyListEntity) {
         if (dailyListEntity.getExternalLocation() == null) {
             log.error("Daily list with id {} has no external location", dailyListEntity.getId());
             return false;
         }
-        if (dailyListEntity.getEltId() == null
-            || !dailyListEntity.getEltId().equals(ExternalLocationTypeEnum.DETS.getId())) {
+        if (dailyListEntity.getExternalLocationTypeEntity() == null
+            || !dailyListEntity.getExternalLocationTypeEntity().getId().equals(ExternalLocationTypeEnum.DETS.getId())) {
             log.error("Daily list with id {} has an invalid elt_id", dailyListEntity.getId());
             return false;
         }
@@ -180,7 +180,7 @@ class DailyListUpdater {
     }
 
     /**
-     * Temporary change will be reverted downstream.
+     * Temporary change will be reverted downstream: DMP-4191.
      */
     boolean mapXmlToJson(DailyListEntity dailyListEntity) {
         DailyListStructure legacyDailyListObject;
@@ -364,7 +364,7 @@ class DailyListUpdater {
     }
 
     /**
-     * Temporary change will be reverted downstream.
+     * Temporary change will be reverted downstream: DMP-4191.
      */
     ObjectMapper getServiceObjectMapper() {
         JavaTimeModule module = new JavaTimeModule();
