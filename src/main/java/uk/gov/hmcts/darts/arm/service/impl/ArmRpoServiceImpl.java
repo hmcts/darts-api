@@ -9,7 +9,6 @@ import uk.gov.hmcts.darts.common.entity.ArmRpoStateEntity;
 import uk.gov.hmcts.darts.common.entity.ArmRpoStatusEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.exception.DartsException;
-import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
 import uk.gov.hmcts.darts.common.repository.ArmRpoExecutionDetailRepository;
 
 import static java.util.Objects.nonNull;
@@ -20,7 +19,6 @@ import static java.util.Objects.nonNull;
 public class ArmRpoServiceImpl implements ArmRpoService {
 
     public static final String ARM_RPO_EXECUTION_DETAIL_NOT_FOUND = "ArmRpoExecutionDetail not found";
-    private final CurrentTimeHelper currentTimeHelper;
     private final ArmRpoExecutionDetailRepository armRpoExecutionDetailRepository;
 
     @Override
@@ -47,7 +45,6 @@ public class ArmRpoServiceImpl implements ArmRpoService {
                   previousStatus,
                   armRpoStatusEntity.getDescription());
         armRpoExecutionDetailEntity.setArmRpoStatus(armRpoStatusEntity);
-        armRpoExecutionDetailEntity.setLastModifiedDateTime(currentTimeHelper.currentOffsetDateTime());
         armRpoExecutionDetailEntity.setLastModifiedBy(userAccountEntity);
         saveArmRpoExecutionDetailEntity(armRpoExecutionDetailEntity);
     }

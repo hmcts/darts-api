@@ -6,16 +6,16 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.NotImplementedException;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.darts.arm.client.ArmRpoClient;
+import uk.gov.hmcts.darts.arm.client.model.rpo.ArmAsyncSearchResponse;
+import uk.gov.hmcts.darts.arm.client.model.rpo.ExtendedProductionsByMatterResponse;
+import uk.gov.hmcts.darts.arm.client.model.rpo.ExtendedSearchesByMatterResponse;
+import uk.gov.hmcts.darts.arm.client.model.rpo.IndexesByMatterIdResponse;
+import uk.gov.hmcts.darts.arm.client.model.rpo.MasterIndexFieldByRecordClassSchemaResponse;
+import uk.gov.hmcts.darts.arm.client.model.rpo.ProfileEntitlementResponse;
+import uk.gov.hmcts.darts.arm.client.model.rpo.RecordManagementMatterResponse;
+import uk.gov.hmcts.darts.arm.client.model.rpo.StorageAccountResponse;
 import uk.gov.hmcts.darts.arm.exception.ArmRpoException;
 import uk.gov.hmcts.darts.arm.helper.ArmRpoHelper;
-import uk.gov.hmcts.darts.arm.model.rpo.ArmAsyncSearchResponse;
-import uk.gov.hmcts.darts.arm.model.rpo.ExtendedProductionsByMatterResponse;
-import uk.gov.hmcts.darts.arm.model.rpo.ExtendedSearchesByMatterResponse;
-import uk.gov.hmcts.darts.arm.model.rpo.IndexesByMatterIdResponse;
-import uk.gov.hmcts.darts.arm.model.rpo.MasterIndexFieldByRecordClassSchemaResponse;
-import uk.gov.hmcts.darts.arm.model.rpo.ProfileEntitlementResponse;
-import uk.gov.hmcts.darts.arm.model.rpo.RecordManagementMatterResponse;
-import uk.gov.hmcts.darts.arm.model.rpo.StorageAccountResponse;
 import uk.gov.hmcts.darts.arm.rpo.ArmRpoApi;
 import uk.gov.hmcts.darts.arm.service.ArmRpoService;
 import uk.gov.hmcts.darts.common.entity.ArmRpoExecutionDetailEntity;
@@ -35,29 +35,27 @@ public class ArmRpoApiImpl implements ArmRpoApi {
 
     @Override
     public void getRecordManagementMatter(String bearerToken, Integer executionId, UserAccountEntity userAccount) {
-        RecordManagementMatterResponse recordManagementMatterResponse;
         var armRpoExecutionDetailEntity = armRpoService.getArmRpoExecutionDetailEntity(executionId);
         armRpoService.updateArmRpoStateAndStatus(armRpoExecutionDetailEntity, ArmRpoHelper.getRecordManagementMatterRpoState(),
                                                  ArmRpoHelper.inProgressRpoStatus(), userAccount);
+
+        RecordManagementMatterResponse recordManagementMatterResponse;
         try {
-
             recordManagementMatterResponse = armRpoClient.getRecordManagementMatter(bearerToken);
-
         } catch (FeignException e) {
             // this ensures the full error body containing the ARM error detail is logged rather than a truncated version
             log.error("Error during ARM get record management matter: {}", e.contentUTF8());
             throw handleFailureAndCreateException(ARM_GET_RECORD_MANAGEMENT_MATTER_ERROR, armRpoExecutionDetailEntity, userAccount);
         }
-        if (recordManagementMatterResponse != null
-            && recordManagementMatterResponse.getRecordManagementMatter() != null
-            && recordManagementMatterResponse.getRecordManagementMatter().getMatterId() != null) {
-
-            armRpoExecutionDetailEntity.setMatterId(recordManagementMatterResponse.getRecordManagementMatter().getMatterId());
-            armRpoService.updateArmRpoStatus(armRpoExecutionDetailEntity, ArmRpoHelper.completedRpoStatus(), userAccount);
-
-        } else {
+        
+        if (recordManagementMatterResponse == null
+            || recordManagementMatterResponse.getRecordManagementMatter() == null
+            || recordManagementMatterResponse.getRecordManagementMatter().getMatterId() == null) {
             throw handleFailureAndCreateException(ARM_GET_RECORD_MANAGEMENT_MATTER_ERROR, armRpoExecutionDetailEntity, userAccount);
         }
+
+        armRpoExecutionDetailEntity.setMatterId(recordManagementMatterResponse.getRecordManagementMatter().getMatterId());
+        armRpoService.updateArmRpoStatus(armRpoExecutionDetailEntity, ArmRpoHelper.completedRpoStatus(), userAccount);
     }
 
     @Override

@@ -1,12 +1,12 @@
 package uk.gov.hmcts.darts.arm.rpo;
 
-import uk.gov.hmcts.darts.arm.model.rpo.ArmAsyncSearchResponse;
-import uk.gov.hmcts.darts.arm.model.rpo.ExtendedProductionsByMatterResponse;
-import uk.gov.hmcts.darts.arm.model.rpo.ExtendedSearchesByMatterResponse;
-import uk.gov.hmcts.darts.arm.model.rpo.IndexesByMatterIdResponse;
-import uk.gov.hmcts.darts.arm.model.rpo.MasterIndexFieldByRecordClassSchemaResponse;
-import uk.gov.hmcts.darts.arm.model.rpo.ProfileEntitlementResponse;
-import uk.gov.hmcts.darts.arm.model.rpo.StorageAccountResponse;
+import uk.gov.hmcts.darts.arm.client.model.rpo.ArmAsyncSearchResponse;
+import uk.gov.hmcts.darts.arm.client.model.rpo.ExtendedProductionsByMatterResponse;
+import uk.gov.hmcts.darts.arm.client.model.rpo.ExtendedSearchesByMatterResponse;
+import uk.gov.hmcts.darts.arm.client.model.rpo.IndexesByMatterIdResponse;
+import uk.gov.hmcts.darts.arm.client.model.rpo.MasterIndexFieldByRecordClassSchemaResponse;
+import uk.gov.hmcts.darts.arm.client.model.rpo.ProfileEntitlementResponse;
+import uk.gov.hmcts.darts.arm.client.model.rpo.StorageAccountResponse;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 
 import java.io.InputStream;

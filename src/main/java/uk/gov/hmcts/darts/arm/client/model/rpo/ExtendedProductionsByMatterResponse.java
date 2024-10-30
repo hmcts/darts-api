@@ -1,4 +1,4 @@
-package uk.gov.hmcts.darts.arm.model.rpo;
+package uk.gov.hmcts.darts.arm.client.model.rpo;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.Data;
@@ -9,5 +9,6 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @EqualsAndHashCode(callSuper = true)
-public class MasterIndexFieldByRecordClassSchemaResponse extends AbstractMatterResponse {
+public class ExtendedProductionsByMatterResponse extends AbstractMatterResponse {
+
 }
