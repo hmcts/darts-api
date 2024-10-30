@@ -21,6 +21,7 @@ import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
+import uk.gov.hmcts.darts.common.enums.MediaLinkedCaseSourceType;
 import uk.gov.hmcts.darts.common.helper.MediaLinkedCaseHelper;
 import uk.gov.hmcts.darts.common.repository.CourtLogEventRepository;
 import uk.gov.hmcts.darts.common.repository.ExternalLocationTypeRepository;
@@ -92,6 +93,8 @@ class AudioUploadServiceImplTest {
     private MediaLinkedCaseHelper mediaLinkedCaseHelper;
     @Mock
     private MediaLinkedCaseRepository mediaLinkedCaseRepository;
+    @Mock
+    private MediaEntity mediaEntityMock;
 
     @BeforeEach
     void setUp() {
@@ -128,6 +131,8 @@ class AudioUploadServiceImplTest {
             any(),
             any()
         )).thenReturn(hearingEntity);
+        when(mediaRepository.findMediaByDetails(any(), any(), any(), any(), any()))
+            .thenReturn(List.of(mediaEntityMock));
 
         CourthouseEntity courthouse = new CourthouseEntity();
         courthouse.setCourthouseName("SWANSEA");
@@ -174,6 +179,8 @@ class AudioUploadServiceImplTest {
         assertEquals(savedMedia.getChecksum(), externalObjectDirectoryEntity.getChecksum());
         assertNotNull(externalObjectDirectoryEntity.getChecksum());
         assertEquals(externalLocation, externalObjectDirectoryEntity.getExternalLocation());
+
+        verify(mediaLinkedCaseRepository).findByMediaAndSource(mediaEntityMock, MediaLinkedCaseSourceType.ADD_AUDIO_METADATA);
     }
 
     private MediaEntity createMediaEntity(OffsetDateTime startedAt, OffsetDateTime endedAt) {
