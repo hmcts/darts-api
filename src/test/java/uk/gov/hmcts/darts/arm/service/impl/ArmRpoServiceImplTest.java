@@ -13,7 +13,6 @@ import uk.gov.hmcts.darts.common.entity.ArmRpoStateEntity;
 import uk.gov.hmcts.darts.common.entity.ArmRpoStatusEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.exception.DartsException;
-import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
 import uk.gov.hmcts.darts.common.repository.ArmRpoExecutionDetailRepository;
 
 import java.util.Optional;
@@ -29,10 +28,7 @@ import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class ArmRpoServiceImplTest {
-
-    @Mock
-    private CurrentTimeHelper currentTimeHelper;
-
+    
     @Mock
     private ArmRpoExecutionDetailRepository armRpoExecutionDetailRepository;
 
@@ -92,10 +88,8 @@ class ArmRpoServiceImplTest {
 
     @Test
     void updateArmRpoStatus_ShouldUpdateStatus() {
-        armRpoExecutionDetailEntity.setArmRpoStatus(ArmRpoHelper.inProgressRpoStatus());
-
         // given
-        when(currentTimeHelper.currentOffsetDateTime()).thenReturn(null);
+        armRpoExecutionDetailEntity.setArmRpoStatus(ArmRpoHelper.inProgressRpoStatus());
 
         // when
         armRpoService.updateArmRpoStatus(armRpoExecutionDetailEntity, ArmRpoHelper.failedRpoStatus(), userAccountEntity);
