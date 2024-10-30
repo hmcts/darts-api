@@ -31,6 +31,12 @@ public class AuditApiImpl implements AuditApi {
     }
 
     @Override
+    public void record(AuditActivity activity, String additionalData) {
+        auditService.recordAudit(activity, authorisationApi.getCurrentUser(), null, Optional.of(additionalData));
+    }
+
+
+    @Override
     public void recordAll(AuditActivityProvider auditActivityProvider) {
         auditActivityProvider.getAuditActivities()
             .forEach(auditActivity -> record(auditActivity, authorisationApi.getCurrentUser()));

@@ -1,9 +1,10 @@
+# Attention: if you are changing values in here, please ensure you also update any corresponding files in the charts-dev-overrides directory
 apiVersion: v2
 appVersion: "1.0"
 description: A Helm chart for darts-api App
 name: darts-api
 home: https://github.com/hmcts/darts-api
-version: 0.0.89
+version: 0.0.92
 maintainers:
   - name: HMCTS darts team
 dependencies:
@@ -17,6 +18,4 @@ dependencies:
     version: 1.0.2
     repository: 'https://hmctspublic.azurecr.io/helm/v1/repo/'
     condition: postgresql.enabled
-  - name: nodejs
-    version: 3.1.1
-    repository: 'https://hmctspublic.azurecr.io/helm/v1/repo/'
+

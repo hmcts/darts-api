@@ -50,8 +50,6 @@ darts:
       max-results: 5
   automated-tasks-pod: ${AUTOMATED_TASK_MODE:true}
   api-pod: ${API_MODE:true}
-  data-management:
-    inbound-to-unstructured-limit: 100
   gateway:
     url: ${DARTS_GATEWAY_URL:http://localhost:${wiremock.server.port}}
   audio:
@@ -80,6 +78,8 @@ darts:
       arm-password: some-password
       arm-service-profile: some-profile-name
       url: http://localhost:${wiremock.server.port}
+      arm-service-entitlement: some-entitlement
+      arm-storage-account-name: some-account-name
   transcription:
     max-file-size: 20
   automated:

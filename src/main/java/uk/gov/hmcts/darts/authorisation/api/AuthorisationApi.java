@@ -17,7 +17,7 @@ public interface AuthorisationApi {
 
     void checkCourthouseAuthorisation(List<CourthouseEntity> courthouses, Set<SecurityRoleEnum> securityRoles);
 
-    List<UserAccountEntity> getUsersWithRoleAtCourthouse(SecurityRoleEnum securityRole, CourthouseEntity courthouse);
+    List<UserAccountEntity> getUsersWithRoleAtCourthouse(SecurityRoleEnum securityRole, CourthouseEntity courthouse, UserAccountEntity... excludingUsers);
 
     UserAccountEntity getCurrentUser();
 

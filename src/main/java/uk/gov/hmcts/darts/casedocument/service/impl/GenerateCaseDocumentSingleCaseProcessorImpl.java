@@ -17,6 +17,7 @@ import uk.gov.hmcts.darts.casedocument.service.CaseDocumentService;
 import uk.gov.hmcts.darts.casedocument.service.GenerateCaseDocumentSingleCaseProcessor;
 import uk.gov.hmcts.darts.common.datamanagement.enums.DatastoreContainerType;
 import uk.gov.hmcts.darts.common.entity.CaseDocumentEntity;
+import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.repository.CaseDocumentRepository;
 import uk.gov.hmcts.darts.common.repository.CaseRepository;
@@ -82,6 +83,15 @@ public class GenerateCaseDocumentSingleCaseProcessorImpl implements GenerateCase
             caseDocumentEntity,
             EodHelper.unstructuredLocation()
         );
+        updateCourtCaseRetention(caseId);
+    }
+
+    private void updateCourtCaseRetention(Integer caseId) {
+        CourtCaseEntity courtCaseEntity = caseRepository.findById(caseId).get();
+        courtCaseEntity.setRetentionUpdated(true);
+        courtCaseEntity.setRetentionRetries(0);
+        caseRepository.save(courtCaseEntity);
+        log.debug("Updated retention for case id {} due to case document generation", caseId);
     }
 
     private CaseDocumentEntity createAndSaveCaseDocumentEntity(Integer caseId, String caseDocument, UUID externalLocation, UserAccountEntity user) {
@@ -93,14 +103,14 @@ public class GenerateCaseDocumentSingleCaseProcessorImpl implements GenerateCase
         int fileSize = caseDocument.getBytes().length;
         String checksum = checksumCalculator.calculate(IOUtils.toInputStream(caseDocument, UTF_8));
 
-        CaseDocumentEntity entity = new CaseDocumentEntity();
-        entity.setCourtCase(caseRepository.getReferenceById(caseId));
-        entity.setFileName(fileName);
-        entity.setChecksum(checksum);
-        entity.setFileSize(fileSize);
-        entity.setFileType(MediaType.APPLICATION_JSON_VALUE);
-        entity.setCreatedBy(user);
-        entity.setLastModifiedBy(user);
-        return caseDocumentRepository.save(entity);
+        CaseDocumentEntity caseDocumentEntity = new CaseDocumentEntity();
+        caseDocumentEntity.setCourtCase(caseRepository.getReferenceById(caseId));
+        caseDocumentEntity.setFileName(fileName);
+        caseDocumentEntity.setChecksum(checksum);
+        caseDocumentEntity.setFileSize(fileSize);
+        caseDocumentEntity.setFileType(MediaType.APPLICATION_JSON_VALUE);
+        caseDocumentEntity.setCreatedBy(user);
+        caseDocumentEntity.setLastModifiedBy(user);
+        return caseDocumentRepository.save(caseDocumentEntity);
     }
 }

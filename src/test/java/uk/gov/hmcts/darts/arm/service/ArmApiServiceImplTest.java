@@ -47,14 +47,14 @@ class ArmApiServiceImplTest {
         String externalRecordId = "myexternalrecord";
         OffsetDateTime offsetDateTime = OffsetDateTime.now();
         Integer refConfScope = 2;
-        String  refConfReason = "reason";
+        String refConfReason = "reason";
 
         when(armApiConfigurationProperties.getArmUsername()).thenReturn(username);
         when(armApiConfigurationProperties.getArmPassword()).thenReturn(password);
         when(armApiConfigurationProperties.getArmServiceProfile()).thenReturn(armProfile);
 
         ArmTokenRequest tokenRequest = new ArmTokenRequest(username, password, GrantType.PASSWORD.getValue());
-        ArmTokenResponse response =  ArmTokenResponse.builder().accessToken(bearerToken).build();
+        ArmTokenResponse response = ArmTokenResponse.builder().accessToken(bearerToken).build();
 
         when(armTokenClient.getToken(tokenRequest)).thenReturn(response);
 

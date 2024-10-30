@@ -35,8 +35,9 @@ public interface UserAccountRepository extends
         WHERE courthouse = :courthouse
         AND securityRole.id = :securityRole
         AND userAccount.active = true
+        and userAccount not in :excludingUsers
         """)
-    List<UserAccountEntity> findByRoleAndCourthouse(int securityRole, CourthouseEntity courthouse);
+    List<UserAccountEntity> findByRoleAndCourthouse(int securityRole, CourthouseEntity courthouse, Set<UserAccountEntity> excludingUsers);
 
     @Query("""
         SELECT userAccount

@@ -191,8 +191,7 @@ darts:
       unstructured:
         arm-minimum:
           weeks: 30
-    pending-retention-days: 7
-    inbound-to-unstructured-limit: 100
+    pending-retention-duration: 7d
   daily-list:
     housekeeping:
       enabled: true
@@ -275,15 +274,25 @@ darts:
       arm-service-profile: ${ARM_SERVICE_PROFILE:}
       cabinet-id: 100
       url: ${ARM_URL}
-      token-path: /api/v1/token
-      update-metadata-path: /api/v3/UpdateMetadata
-      download-data-path: /api/v1/downloadBlob/{cabinet_id}/{record_id}/{file_id}
-      available-entitlement-profiles-path: /api/v1/availableEntitlementProfiles
-      select-entitlement-profile-path: /api/v1/selectEntitlementProfile/{profile_id}
+      arm-service-entitlement: ${ARM_SERVICE_ENTITLEMENT:}
+      arm-storage-account-name: ${ARM_STORAGE_ACCOUNT_NAME:}
+
+      authentication-url:
+        token-path: /api/v1/token
+        available-entitlement-profiles-path: /api/v1/availableEntitlementProfiles
+        select-entitlement-profile-path: /api/v1/selectEntitlementProfile/{profile_id}
+      api-url:
+        update-metadata-path: /api/v3/UpdateMetadata
+        download-data-path: /api/v1/downloadBlob/{cabinet_id}/{record_id}/{file_id}
+      ## place holder for RPO paths rpo-url:
     dets:
       sas-endpoint: ${DETS_SAS_URL_ENDPOINT:}
       container-name: darts-migration
       temp-blob-workspace: ${user.home}/dets/tempworkspace
+      dets-manifest-file-prefix: DETS
+      delete-timeout: 60
+      arm-dropzone-sas-endpoint: ${ARM_SAS_ENDPOINT}
+      arm-container-name: dropzone
     blob:
       client:
         connection-string: ${AZURE_STORAGE_CONNECTION_STRING:}
@@ -329,6 +338,10 @@ darts:
     url: ${DARTS_PORTAL_URL:https://darts.staging.apps.hmcts.net}
   automated:
     task:
+      inbound-to-unstructured:
+        threads: 20
+      process-e2e-arm-rpo: ${PROCESS_E2E_ARM_RPO:false}
+      arm-rpo-duration: ${ARM_RPO_DURATION:1h}
       thread-pool-size: 5
       system-user-email: ${SYSTEM_USER_EMAIL:}
       system-user-guid-map:
@@ -337,8 +350,13 @@ darts:
       unstructured-to-arm-batch-processor:
         max-arm-manifest-items: 100
         max-arm-single-mode-items: 100
+      dets-to-arm-batch-processor:
+        max-arm-manifest-items: 100
+        manifest-file-prefix: DETS
       expiry-deletion:
         enabled: ${CASE_EXPIRY_DELETION_ENABLED:false}
+      audio-linking:
+        audio-buffer: 0s
   annotations:
     allowed-extensions:
       - "docx"
