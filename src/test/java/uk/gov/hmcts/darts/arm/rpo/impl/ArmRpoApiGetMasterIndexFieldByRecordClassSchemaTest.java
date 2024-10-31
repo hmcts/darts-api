@@ -58,15 +58,21 @@ class ArmRpoApiGetMasterIndexFieldByRecordClassSchemaTest {
     @Test
     void getMasterIndexFieldByRecordClassSchemaSuccess() {
         // given
-        MasterIndexFieldByRecordClassSchemaResponse.MasterIndexField masterIndexField = new MasterIndexFieldByRecordClassSchemaResponse.MasterIndexField();
-        masterIndexField.setMasterIndexFieldId("1");
-        masterIndexField.setDisplayName("displayName");
-        masterIndexField.setPropertyName("propertyName");
-        masterIndexField.setPropertyType("propertyType");
-        masterIndexField.setIsMasked(true);
+        MasterIndexFieldByRecordClassSchemaResponse.MasterIndexField masterIndexField1 = new MasterIndexFieldByRecordClassSchemaResponse.MasterIndexField();
+        masterIndexField1.setMasterIndexFieldId("1");
+        masterIndexField1.setDisplayName("displayName");
+        masterIndexField1.setPropertyName("propertyName");
+        masterIndexField1.setPropertyType("propertyType");
+        masterIndexField1.setIsMasked(true);
+        MasterIndexFieldByRecordClassSchemaResponse.MasterIndexField masterIndexField2 = new MasterIndexFieldByRecordClassSchemaResponse.MasterIndexField();
+        masterIndexField2.setMasterIndexFieldId("2");
+        masterIndexField2.setDisplayName("displayName");
+        masterIndexField2.setPropertyName("ingestionDate");
+        masterIndexField2.setPropertyType("propertyType");
+        masterIndexField2.setIsMasked(false);
 
         MasterIndexFieldByRecordClassSchemaResponse response = new MasterIndexFieldByRecordClassSchemaResponse();
-        response.setMasterIndexFields(List.of(masterIndexField));
+        response.setMasterIndexFields(List.of(masterIndexField1, masterIndexField2));
 
         when(armRpoService.getArmRpoExecutionDetailEntity(anyInt())).thenReturn(armRpoExecutionDetailEntity);
         when(armRpoClient.getMasterIndexFieldByRecordClassSchema(anyString(), any())).thenReturn(response);
