@@ -26,7 +26,7 @@ class ArmRpoClientIntTest extends IntegrationBaseWithWiremock {
 
     private static final String GET_RECORD_MANAGEMENT_MATTER_PATH = "/api/v1/getRecordManagementMatter";
 
-    private static final String GET_STORAGE_ACCOUNTS_PATH = "/api/v1/getRecordManagementMatter";
+    private static final String GET_STORAGE_ACCOUNTS_PATH = "/api/v1/getStorageAccounts";
 
     @Autowired
     private ArmRpoClient armRpoClient;
@@ -83,7 +83,7 @@ class ArmRpoClientIntTest extends IntegrationBaseWithWiremock {
     }
 
 
-    @Disabled("This test is failing other wiremock tests")
+    @Disabled("This test is failing other wiremock tests but works locally")
     @Test
     void getStorageAccountsShouldSucceedIfServerReturns200Success() {
         // given
@@ -215,9 +215,9 @@ class ArmRpoClientIntTest extends IntegrationBaseWithWiremock {
                    .withHeader(CONTENT_TYPE, equalTo(APPLICATION_JSON_VALUE))
         );
 
-        assertEquals("Failed to get storage account index name", "cb70c7fa-8972-4400-af1d-ff5dd76d2104",
+        assertEquals("Failed to get storage account index name", "rm5",
                      getStorageAccountsResponse.getIndexes().getFirst().getIndex().getName());
-        assertEquals("Failed to get storage account index id", "rm5",
+        assertEquals("Failed to get storage account index id", "c19454c6-c378-43c1-ae59-d0d013e30915",
                      getStorageAccountsResponse.getIndexes().getFirst().getIndex().getIndexId());
 
     }
