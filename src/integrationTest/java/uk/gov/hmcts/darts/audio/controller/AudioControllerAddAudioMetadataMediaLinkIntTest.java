@@ -24,7 +24,6 @@ import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.enums.MediaLinkedCaseSourceType;
 import uk.gov.hmcts.darts.common.enums.SecurityRoleEnum;
 import uk.gov.hmcts.darts.common.util.DateConverterUtil;
-import uk.gov.hmcts.darts.test.common.AwaitabilityUtil;
 import uk.gov.hmcts.darts.test.common.DataGenerator;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 import uk.gov.hmcts.darts.testutils.stubs.AuthorisationStub;
@@ -44,6 +43,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static uk.gov.hmcts.darts.test.common.AwaitabilityUtil.waitForMax10SecondsWithOneSecondPoll;
 
 @AutoConfigureMockMvc
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -119,26 +119,25 @@ class AudioControllerAddAudioMetadataMediaLinkIntTest extends IntegrationBase {
             dartsDatabase.getHearingRepository().findByCourthouseCourtroomAndDate("bristol", "1", STARTED_AT.toLocalDate());
 
         HearingEntity caseAHearing = allHearings.stream()
-            .filter(hearingEntity -> hearingEntity.getCourtCase().getCaseNumber().equals("case1")).findFirst().orElseThrow();
+            .filter(hearingEntity -> "case1".equals(hearingEntity.getCourtCase().getCaseNumber())).findFirst().orElseThrow();
 
+        List<MediaEntity> mediaEntities = dartsDatabase.getMediaRepository().findAllCurrentMediaByHearingId(caseAHearing.getId());
+        assertEquals(1, mediaEntities.size());
+        MediaEntity media = mediaEntities.getFirst();
+        assertEquals(STARTED_AT, media.getStart());
+        assertEquals(STARTED_AT, media.getEnd());
 
-            List<MediaEntity> mediaEntities = dartsDatabase.getMediaRepository().findAllCurrentMediaByHearingId(caseAHearing.getId());
-            assertEquals(1, mediaEntities.size());
-            MediaEntity media = mediaEntities.getFirst();
-            assertEquals(STARTED_AT, media.getStart());
-            assertEquals(STARTED_AT, media.getEnd());
+        List<MediaLinkedCaseEntity> mediaLinkedCaseEntities = dartsDatabase.getMediaLinkedCaseRepository().findByMedia(media);
+        waitForMax10SecondsWithOneSecondPoll(
+            () -> assertEquals(2, mediaLinkedCaseEntities.size())
+        );
+        MediaLinkedCaseEntity case1Link = mediaLinkedCaseEntities.getFirst();
+        assertEquals(MediaLinkedCaseSourceType.ADD_AUDIO_METADATA, case1Link.getSource());
+        assertEquals("case1", case1Link.getCourtCase().getCaseNumber());
 
-            List<MediaLinkedCaseEntity> mediaLinkedCaseEntities = dartsDatabase.getMediaLinkedCaseRepository().findByMedia(media);
-            AwaitabilityUtil.waitForMax10SecondsWithOneSecondPoll(
-                () -> assertEquals(2, mediaLinkedCaseEntities.size())
-            );
-            MediaLinkedCaseEntity case1Link = mediaLinkedCaseEntities.getFirst();
-            assertEquals(MediaLinkedCaseSourceType.ADD_AUDIO_METADATA, case1Link.getSource());
-            assertEquals("case1", case1Link.getCourtCase().getCaseNumber());
-
-            MediaLinkedCaseEntity case3Link = mediaLinkedCaseEntities.get(1);
-            assertEquals(MediaLinkedCaseSourceType.ADD_AUDIO_EVENT_LINKING, case3Link.getSource());
-            assertEquals("case3", case3Link.getCourtCase().getCaseNumber());
+        MediaLinkedCaseEntity case3Link = mediaLinkedCaseEntities.get(1);
+        assertEquals(MediaLinkedCaseSourceType.ADD_AUDIO_EVENT_LINKING, case3Link.getSource());
+        assertEquals("case3", case3Link.getCourtCase().getCaseNumber());
     }
 
     private AddAudioMetadataRequest createAddAudioRequest(OffsetDateTime startedAt, OffsetDateTime endedAt,
