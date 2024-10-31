@@ -24,6 +24,7 @@ import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.enums.MediaLinkedCaseSourceType;
 import uk.gov.hmcts.darts.common.enums.SecurityRoleEnum;
 import uk.gov.hmcts.darts.common.util.DateConverterUtil;
+import uk.gov.hmcts.darts.test.common.AwaitabilityUtil;
 import uk.gov.hmcts.darts.test.common.DataGenerator;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 import uk.gov.hmcts.darts.testutils.stubs.AuthorisationStub;
@@ -37,7 +38,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
-import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -55,8 +55,8 @@ class AudioControllerAddAudioMetadataMediaLinkIntTest extends IntegrationBase {
 
     private static final URI ENDPOINT = URI.create("/audios");
     private static final OffsetDateTime STARTED_AT =
-        OffsetDateTime.of(2024, 10, 10, 10, 0, 0, 0, ZoneOffset.UTC);
-    private static final Path AUDIO_BINARY_PAYLOAD_1 = DataGenerator.createUniqueFile(DataSize.ofBytes(10), DataGenerator.FileType.MP2);
+        OffsetDateTime.of(2025, 10, 10, 10, 0, 0, 0, ZoneOffset.UTC);
+    private static final Path AUDIO_BINARY_PAYLOAD_1 = DataGenerator.createUniqueFile(DataSize.ofBytes(20), DataGenerator.FileType.MP2);
 
     @Autowired
     private MockMvc mockMvc;
@@ -115,25 +115,23 @@ class AudioControllerAddAudioMetadataMediaLinkIntTest extends IntegrationBase {
             .andExpect(status().isOk());
 
         // then
-        List<HearingEntity> allHearings = dartsDatabase.getHearingRepository().findByCourthouseCourtroomAndDate("bristol", "1", STARTED_AT.toLocalDate());
+        List<HearingEntity> allHearings =
+            dartsDatabase.getHearingRepository().findByCourthouseCourtroomAndDate("bristol", "1", STARTED_AT.toLocalDate());
 
-        List<HearingEntity> addAudioLinkedHearings = new ArrayList<>();
-        for (HearingEntity hearing : allHearings) {
-            if (hearing.getCourtCase().getCaseNumber().contains("case1")) {
-                addAudioLinkedHearings.add(hearing);
-            }
-        }
-        assertEquals(1, addAudioLinkedHearings.size());
+        HearingEntity caseAHearing = allHearings.stream()
+            .filter(hearingEntity -> hearingEntity.getCourtCase().getCaseNumber().equals("case1")).findFirst().orElseThrow();
 
-        for (HearingEntity hearing : addAudioLinkedHearings) {
-            List<MediaEntity> mediaEntities = dartsDatabase.getMediaRepository().findAllCurrentMediaByHearingId(hearing.getId());
-            MediaEntity media = mediaEntities.getFirst();
+
+            List<MediaEntity> mediaEntities = dartsDatabase.getMediaRepository().findAllCurrentMediaByHearingId(caseAHearing.getId());
             assertEquals(1, mediaEntities.size());
+            MediaEntity media = mediaEntities.getFirst();
             assertEquals(STARTED_AT, media.getStart());
             assertEquals(STARTED_AT, media.getEnd());
 
             List<MediaLinkedCaseEntity> mediaLinkedCaseEntities = dartsDatabase.getMediaLinkedCaseRepository().findByMedia(media);
-            assertEquals(2, mediaLinkedCaseEntities.size());
+            AwaitabilityUtil.waitForMax10SecondsWithOneSecondPoll(
+                () -> assertEquals(2, mediaLinkedCaseEntities.size())
+            );
             MediaLinkedCaseEntity case1Link = mediaLinkedCaseEntities.getFirst();
             assertEquals(MediaLinkedCaseSourceType.ADD_AUDIO_METADATA, case1Link.getSource());
             assertEquals("case1", case1Link.getCourtCase().getCaseNumber());
@@ -141,7 +139,6 @@ class AudioControllerAddAudioMetadataMediaLinkIntTest extends IntegrationBase {
             MediaLinkedCaseEntity case3Link = mediaLinkedCaseEntities.get(1);
             assertEquals(MediaLinkedCaseSourceType.ADD_AUDIO_EVENT_LINKING, case3Link.getSource());
             assertEquals("case3", case3Link.getCourtCase().getCaseNumber());
-        }
     }
 
     private AddAudioMetadataRequest createAddAudioRequest(OffsetDateTime startedAt, OffsetDateTime endedAt,
@@ -174,11 +171,12 @@ class AudioControllerAddAudioMetadataMediaLinkIntTest extends IntegrationBase {
     @SneakyThrows
     private ResultActions makeAddAudioCall(Path audioBinaryPayload, String... casesToMapTo) {
 
-        AddAudioMetadataRequest addAudioMetadataRequest = createAddAudioRequest(STARTED_AT, STARTED_AT, "Bristol", "1", audioBinaryPayload, casesToMapTo);
+        AddAudioMetadataRequest addAudioMetadataRequest =
+            createAddAudioRequest(STARTED_AT, STARTED_AT, "Bristol", "1", audioBinaryPayload, casesToMapTo);
 
         MockMultipartFile audioFile = new MockMultipartFile(
             "file",
-            "audio.mp2",
+            "test_audio.mp2",
             "audio/mpeg",
             IOUtils.toByteArray(Files.newInputStream(audioBinaryPayload)));
 
