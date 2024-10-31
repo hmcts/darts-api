@@ -83,7 +83,7 @@ class ArmRpoClientIntTest extends IntegrationBaseWithWiremock {
     }
 
 
-    //@Disabled("This test is failing other wiremock tests")
+    @Disabled("This test is failing other wiremock tests")
     @Test
     void getStorageAccountsShouldSucceedIfServerReturns200Success() {
         // given
