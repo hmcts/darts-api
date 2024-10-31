@@ -14,19 +14,22 @@ import java.util.List;
 @EqualsAndHashCode(callSuper = true)
 public class MasterIndexFieldByRecordClassSchemaResponse extends AbstractMatterResponse {
 
+    private List<MasterIndexField> masterIndexFields;
+
     @JsonIgnoreProperties(ignoreUnknown = true)
     @Data
     @NoArgsConstructor
-    public class MasterIndexField {
+    @EqualsAndHashCode
+    public static class MasterIndexField {
 
-        private boolean isRecordClass;
-        private boolean isPublisher;
-        private boolean isRegion;
+        private Boolean isRecordClass;
+        private Boolean isPublisher;
+        private Boolean isRegion;
         private List<DropDownOption> dropDownOptions;
         private String watermark;
-        private boolean defaultVisible;
-        private boolean defaultRequireField;
-        private boolean hasHistory;
+        private Boolean defaultVisible;
+        private Boolean defaultRequireField;
+        private Boolean hasHistory;
         @JsonProperty("masterIndexFieldID")
         private String masterIndexFieldId;
         private String propertyName;
@@ -34,45 +37,45 @@ public class MasterIndexFieldByRecordClassSchemaResponse extends AbstractMatterR
         private String jsonPropertyType;
         private String displayName;
         private String inputType;
-        private int order;
-        private boolean isSearchable;
-        private boolean isRetrievable;
-        private boolean isSortable;
-        private boolean isFilterable;
+        private Integer order;
+        private Boolean isSearchable;
+        private Boolean isRetrievable;
+        private Boolean isSortable;
+        private Boolean isFilterable;
         private String insertExtension;
-        private boolean highlight;
-        private boolean isSimpleSearch;
-        private boolean isAllFields;
-        private boolean isAdvancedSearch;
-        private boolean isLiteSearch;
-        private boolean isSystem;
-        private boolean isMandatory;
-        private boolean isMandatoryForIndexing;
-        private boolean isFromBlob;
-        private boolean isFromParser;
-        private boolean isDbSearch;
+        private Boolean highlight;
+        private Boolean isSimpleSearch;
+        private Boolean isAllFields;
+        private Boolean isAdvancedSearch;
+        private Boolean isLiteSearch;
+        private Boolean isSystem;
+        private Boolean isMandatory;
+        private Boolean isMandatoryForIndexing;
+        private Boolean isFromBlob;
+        private Boolean isFromParser;
+        private Boolean isDbSearch;
         @JsonProperty("onlyForDBSearch")
-        private boolean onlyForDbSearch;
-        private boolean isCriteriaLogic;
-        private boolean isContent;
+        private Boolean onlyForDbSearch;
+        private Boolean isCriteriaLogic;
+        private Boolean isContent;
         private String parentId;
-        private int type;
-        private boolean previewHighlight;
-        private boolean isReadOnly;
+        private Integer type;
+        private Boolean previewHighlight;
+        private Boolean isReadOnly;
         @JsonProperty("isUsedForRM")
-        private boolean isUsedForRm;
-        private boolean isGlobal;
-        private boolean isMasked;
+        private Boolean isUsedForRm;
+        private Boolean isGlobal;
+        private Boolean isMasked;
         private String classification;
-        private boolean required;
-        private boolean isNew;
+        private Boolean required;
+        private Boolean isNew;
         private String acceptedValues;
         private String oldAcceptedValues;
-        private boolean allowSubmission;
-        private boolean enableHistory;
-        private boolean isEditable;
+        private Boolean allowSubmission;
+        private Boolean enableHistory;
+        private Boolean isEditable;
         private List<Object> acceptedValuesList;
-        private boolean dataScopeEntitlementNotApplied;
+        private Boolean dataScopeEntitlementNotApplied;
         private List<Object> oldAcceptedValuesList;
 
     }
@@ -80,16 +83,17 @@ public class MasterIndexFieldByRecordClassSchemaResponse extends AbstractMatterR
     @JsonIgnoreProperties(ignoreUnknown = true)
     @Data
     @NoArgsConstructor
-    public class DropDownOption {
+    @EqualsAndHashCode
+    public static class DropDownOption {
         private String masterIndexFieldSelectOptionsID;
         private String masterIndexFieldId;
         private String label;
         private String value;
-        private boolean isSystem;
+        private Boolean isSystem;
 
     }
 
-    private List<MasterIndexField> masterIndexFields;
+
 }
 
 

@@ -170,7 +170,7 @@ public class ArmRpoApiImpl implements ArmRpoApi {
             .displayName(masterIndexField.getDisplayName())
             .propertyName(masterIndexField.getPropertyName())
             .propertyType(masterIndexField.getPropertyType())
-            .isMasked(masterIndexField.isMasked())
+            .isMasked(masterIndexField.getIsMasked())
             .build();
     }
 }
