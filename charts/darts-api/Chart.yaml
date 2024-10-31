@@ -18,4 +18,8 @@ dependencies:
     version: 1.0.2
     repository: 'https://hmctspublic.azurecr.io/helm/v1/repo/'
     condition: postgresql.enabled
+  - name: darts-portal
+    version: ~0.0.27
+    repository: 'https://sdshmctspublic.azurecr.io/helm/v1/repo/'
+    condition: darts-portal.enabled
 

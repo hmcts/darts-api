@@ -3,6 +3,7 @@
 @Library("Infrastructure")
 
 import uk.gov.hmcts.contino.GradleBuilder
+import uk.gov.hmcts.contino.GithubAPI
 
 def type = "java"
 def product = "darts"
@@ -55,8 +56,6 @@ def secrets = [
         secret('api-POSTGRES-PORT', 'STAGING_DB_PORT'),
         secret('api-POSTGRES-SCHEMA', 'STAGING_DB_SCHEMA'),
         secret('api-POSTGRES-DATABASE', 'STAGING_DB_DATABASE'),
-        // secret for GitHub API
-        secret('GithubApiToken', 'GITHUB_API_TOKEN')
     ],
 ]
 
@@ -67,6 +66,28 @@ static LinkedHashMap<String, Object> secret(String secretName, String envVar) {
      version    : '',
      envVariable: envVar
     ]
+}
+
+def determineDevEnvironmentDeployment() {
+    env.DEV_ENABLE_DARTS_PORTAL = false
+    env.DEV_DARTS_PORTAL_URL = "https://darts.staging.apps.hmcts.net"
+
+    echo "1 - env.DEV_ENABLE_DARTS_PORTAL: ${env.DEV_ENABLE_DARTS_PORTAL}"
+    echo "1 - env.DEV_DARTS_PORTAL_URL: ${env.DEV_DARTS_PORTAL_URL}"
+
+    def githubApi = new GithubAPI(this)
+    if (githubApi.checkForLabel(env.BRANCH_NAME, "enable_keep_helm")) {
+        for (label in githubApi.getLabelsbyPattern(env.BRANCH_NAME, "enable_darts_") ) {
+            if (label == "enable_darts_portal") {
+                env.DEV_ENABLE_DARTS_PORTAL = true
+                env.DEV_DARTS_PORTAL_URL = "https://darts-portal-pr-${env.CHANGE_ID}.dev.platform.hmcts.net"
+                echo "Deploying DARTS portal instance in PR environment"
+            }
+        }
+    }
+
+    echo "2 - env.DEV_ENABLE_DARTS_PORTAL: ${env.DEV_ENABLE_DARTS_PORTAL}"
+    echo "2 - env.DEV_DARTS_PORTAL_URL: ${env.DEV_DARTS_PORTAL_URL}"
 }
 
 GradleBuilder builder = new GradleBuilder(this, product)
@@ -154,8 +175,7 @@ withPipeline(type, product, component) {
 
     before('akschartsinstall') {
         onPR {
-            // determine what to deploy on the dev env
-            sh("./bin/ci/process-pr-labels.sh")
+            determineDevEnvironmentDeployment()
         }
     }
 
