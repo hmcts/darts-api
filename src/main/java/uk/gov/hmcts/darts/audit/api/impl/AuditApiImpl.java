@@ -32,7 +32,7 @@ public class AuditApiImpl implements AuditApi {
 
     @Override
     public void record(AuditActivity activity, String additionalData) {
-        auditService.recordAudit(activity, authorisationApi.getCurrentUser(), null, Optional.of(additionalData));
+        auditService.recordAudit(activity, authorisationApi.getCurrentUser(), Optional.empty(), Optional.of(additionalData));
     }
 
 
