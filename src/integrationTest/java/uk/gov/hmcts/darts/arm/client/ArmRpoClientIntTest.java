@@ -224,11 +224,11 @@ class ArmRpoClientIntTest extends IntegrationBaseWithWiremock {
 
 
     private static StorageAccountRequest createStorageAccountRequest() {
-        StorageAccountRequest storageAccountRequest = StorageAccountRequest.builder()
+        return StorageAccountRequest.builder()
             .onlyKeyAccessType(false)
             .storageType(1)
             .build();
-        return storageAccountRequest;
+
     }
 
 }
