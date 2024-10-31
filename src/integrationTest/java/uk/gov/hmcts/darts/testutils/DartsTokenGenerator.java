@@ -112,9 +112,4 @@ public class DartsTokenGenerator {
         email = "darts.global.user@hmcts.net";
         return fetchToken();
     }
-
-    public DartsTokenAndJwksKey fetchTokenWithEmail(String email) throws JOSEException {
-        this.email = email;
-        return fetchToken();
-    }
 }

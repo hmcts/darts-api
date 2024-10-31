@@ -41,7 +41,7 @@ class TokenValidatorTest extends IntegrationBaseWithWiremock {
 
     @AfterEach
     public void after() {
-        userAccountStub.setInactiveState("darts.global.user@hmcts.net", true);
+        userAccountStub.setActiveState("darts.global.user@hmcts.net", true);
     }
 
     @Test
@@ -109,7 +109,7 @@ class TokenValidatorTest extends IntegrationBaseWithWiremock {
             .audience(configurationProperties.getClientId()).build();
         DartsTokenAndJwksKey tokenDetails = token.fetchTokenWithGlobalUser();
 
-        userAccountStub.setInactiveState("darts.global.user@hmcts.net", false);
+        userAccountStub.setActiveState("darts.global.user@hmcts.net", false);
 
         tokenStub.stubExternalJwksKeys(tokenDetails.getJwksKey());
 

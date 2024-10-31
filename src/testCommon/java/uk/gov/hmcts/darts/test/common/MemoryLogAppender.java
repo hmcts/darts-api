@@ -5,12 +5,13 @@ import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.AppenderBase;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
 public class MemoryLogAppender extends AppenderBase<ILoggingEvent> {
 
-    public static final List<ILoggingEvent> GENERAL_LOGS = new ArrayList<>();
+    public static final List<ILoggingEvent> GENERAL_LOGS = Collections.synchronizedList(new ArrayList<>());
 
     public static final String LOG_API_LOGGER_NAME_PACKAGE_PREFIX = "uk.gov.hmcts.darts.log";
 
@@ -34,13 +35,11 @@ public class MemoryLogAppender extends AppenderBase<ILoggingEvent> {
     }
 
     public List<ILoggingEvent> searchLogs(String string, String causeMessage, Level level) {
-        synchronized (GENERAL_LOGS) {
-            return GENERAL_LOGS.stream()
-                .filter(event -> event.toString().contains(string)
-                    && event.getThrowableProxy().getMessage().contains(causeMessage)
-                    && event.getLevel().equals(level))
-                .collect(Collectors.toList());
-        }
+        return GENERAL_LOGS.stream()
+            .filter(event -> event.toString().contains(string)
+                && event.getThrowableProxy().getMessage().contains(causeMessage)
+                && event.getLevel().equals(level))
+            .collect(Collectors.toList());
     }
 
     public boolean hasLogApiCallTakenPlace() {

@@ -2,13 +2,9 @@ package uk.gov.hmcts.darts.authorisation.util;
 
 import lombok.experimental.UtilityClass;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.jwt.Jwt;
 
 import java.util.List;
-
-import static java.util.Objects.nonNull;
 
 @UtilityClass
 public class EmailAddressFromTokenUtil {
@@ -16,16 +12,6 @@ public class EmailAddressFromTokenUtil {
     private static final String EMAILS = "emails";
     private static final String PREFERRED_USERNAME = "preferred_username";
     private static final List<String> CLAIM_ORDER = List.of(EMAILS, EMAIL, PREFERRED_USERNAME);
-
-    public String getEmailAddressFromToken() {
-        Jwt jwt = getJwtFromSecurityContext();
-        Object claimFromJwt = getClaimFromJwt(jwt, CLAIM_ORDER);
-        String emailAddressFromObject = getEmailAddressFromObject(claimFromJwt);
-        if (emailAddressFromObject == null) {
-            throw new IllegalStateException("Could not obtain email address from principal");
-        }
-        return emailAddressFromObject;
-    }
 
     public String getEmailAddressFromToken(Jwt jwt) {
         Object claimFromJwt = getClaimFromJwt(jwt, CLAIM_ORDER);
@@ -66,17 +52,5 @@ public class EmailAddressFromTokenUtil {
             return emailAddress;
         }
         return null;
-    }
-
-    private Jwt getJwtFromSecurityContext() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (nonNull(authentication)) {
-            Object principalObject = authentication.getPrincipal();
-
-            if (principalObject instanceof Jwt jwt) {
-                return jwt;
-            }
-        }
-        throw new IllegalStateException("Could not obtain email address from principal");
     }
 }

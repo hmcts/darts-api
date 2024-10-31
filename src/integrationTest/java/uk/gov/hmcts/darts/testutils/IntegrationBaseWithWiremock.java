@@ -17,7 +17,7 @@ public class IntegrationBaseWithWiremock extends IntegrationBase {
     protected DartsGatewayStub dartsGateway;
 
     @BeforeEach
-    void clearStubs() {
+    void setup() {
         dartsGateway.clearStubs();
 
         // populate the jkws keys endpoint with a global public key

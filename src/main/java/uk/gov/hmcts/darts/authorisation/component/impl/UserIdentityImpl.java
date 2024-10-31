@@ -15,7 +15,6 @@ import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
 import uk.gov.hmcts.darts.common.repository.UserRolesCourthousesRepository;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -34,12 +33,7 @@ public class UserIdentityImpl implements UserIdentity {
 
     private String getGuidFromToken(Jwt token) {
         if (token != null) {
-            Object principalObject = token;
-
-            Object oid = null;
-            if (principalObject instanceof Jwt jwt) {
-                oid = jwt.getClaims().get(OID);
-            }
+            Object oid = token.getClaims().get(OID);
             if (nonNull(oid) && oid instanceof String guid && StringUtils.isNotBlank(guid)) {
                 return guid;
             }
@@ -48,7 +42,7 @@ public class UserIdentityImpl implements UserIdentity {
     }
 
     public UserAccountEntity getUserAccount() {
-        return getUserAccount(getJwt().orElse(null));
+        return getUserAccount(getJwt());
     }
 
     @Override
@@ -68,25 +62,25 @@ public class UserIdentityImpl implements UserIdentity {
         return userAccount;
     }
 
-    private Optional<Jwt> getJwt() {
+    private Jwt getJwt() {
         if (SecurityContextHolder.getContext().getAuthentication() != null) {
             if (SecurityContextHolder.getContext().getAuthentication().getPrincipal() instanceof Jwt jwt) {
-                return Optional.of(jwt);
+                return jwt;
             }
         }
 
-        return Optional.empty();
+        return null;
     }
 
     @Override
     public boolean userHasGlobalAccess(Set<SecurityRoleEnum> globalAccessRoles) {
         boolean userHasGlobalAccess = false;
-        Jwt token = getJwt().orElse(null);
+        Jwt token = getJwt();
         String emailAddress = null;
         String guid = getGuidFromToken(token);
 
         try {
-            emailAddress = EmailAddressFromTokenUtil.getEmailAddressFromToken();
+            emailAddress = EmailAddressFromTokenUtil.getEmailAddressFromToken(token);
         } catch (IllegalStateException e) {
             if (nonNull(guid)) {
                 log.debug("Guid is present but unable to get email address from token ending ''.....{}'': {}", StringUtils.right(guid, 5), e.getMessage());
