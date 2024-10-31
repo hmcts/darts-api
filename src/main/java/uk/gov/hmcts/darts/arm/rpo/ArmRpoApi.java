@@ -8,6 +8,7 @@ import uk.gov.hmcts.darts.arm.client.model.rpo.MasterIndexFieldByRecordClassSche
 import uk.gov.hmcts.darts.arm.client.model.rpo.ProfileEntitlementResponse;
 import uk.gov.hmcts.darts.arm.client.model.rpo.StorageAccountResponse;
 import uk.gov.hmcts.darts.arm.model.rpo.MasterIndexFieldByRecordClassSchema;
+import uk.gov.hmcts.darts.common.entity.ArmRpoStateEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 
 import java.io.InputStream;
@@ -23,7 +24,7 @@ public interface ArmRpoApi {
 
     ProfileEntitlementResponse getProfileEntitlements(String bearerToken, Integer executionId, UserAccountEntity userAccount);
 
-    List<MasterIndexFieldByRecordClassSchema> getMasterIndexFieldByRecordClassSchema(String bearerToken, Integer executionId, Integer rpoStageId,
+    List<MasterIndexFieldByRecordClassSchema> getMasterIndexFieldByRecordClassSchema(String bearerToken, Integer executionId, ArmRpoStateEntity rpoStageId,
                                                                                      UserAccountEntity userAccount);
 
     ArmAsyncSearchResponse addAsyncSearch(String bearerToken, Integer executionId, UserAccountEntity userAccount);

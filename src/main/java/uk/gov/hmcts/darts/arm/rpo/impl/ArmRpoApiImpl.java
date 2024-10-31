@@ -21,11 +21,14 @@ import uk.gov.hmcts.darts.arm.model.rpo.MasterIndexFieldByRecordClassSchema;
 import uk.gov.hmcts.darts.arm.rpo.ArmRpoApi;
 import uk.gov.hmcts.darts.arm.service.ArmRpoService;
 import uk.gov.hmcts.darts.common.entity.ArmRpoExecutionDetailEntity;
+import uk.gov.hmcts.darts.common.entity.ArmRpoStateEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
+
+import static java.util.Objects.isNull;
 
 @Service
 @AllArgsConstructor
@@ -34,6 +37,7 @@ public class ArmRpoApiImpl implements ArmRpoApi {
 
     public static final String ARM_GET_RECORD_MANAGEMENT_MATTER_ERROR = "Error during ARM get record management matter";
     public static final String ARM_GET_MASTER_INDEX_FIELD_BY_RECORD_CLASS_SCHEMA = "Error during ARM get master index field by record class schema";
+    public static final String IGNORE_MASTER_INDEX_PROPERTY_BF_018 = "bf_018";
     private final ArmRpoClient armRpoClient;
     private final ArmRpoService armRpoService;
 
@@ -80,7 +84,7 @@ public class ArmRpoApiImpl implements ArmRpoApi {
     @Override
     public List<MasterIndexFieldByRecordClassSchema> getMasterIndexFieldByRecordClassSchema(String bearerToken,
                                                                                             Integer executionId,
-                                                                                            Integer rpoStageId,
+                                                                                            ArmRpoStateEntity rpoStageId,
                                                                                             UserAccountEntity userAccount) {
         var armRpoExecutionDetailEntity = armRpoService.getArmRpoExecutionDetailEntity(executionId);
         armRpoService.updateArmRpoStateAndStatus(armRpoExecutionDetailEntity, rpoStageId,
@@ -95,13 +99,15 @@ public class ArmRpoApiImpl implements ArmRpoApi {
             throw handleFailureAndCreateException(ARM_GET_MASTER_INDEX_FIELD_BY_RECORD_CLASS_SCHEMA, armRpoExecutionDetailEntity, userAccount);
         }
 
-        if (masterIndexFieldByRecordClassSchemaResponse == null
+        if (isNull(masterIndexFieldByRecordClassSchemaResponse)
             || !CollectionUtils.isNotEmpty(masterIndexFieldByRecordClassSchemaResponse.getMasterIndexFields())) {
             throw handleFailureAndCreateException(ARM_GET_MASTER_INDEX_FIELD_BY_RECORD_CLASS_SCHEMA, armRpoExecutionDetailEntity, userAccount);
         }
         List<MasterIndexFieldByRecordClassSchema> masterIndexFieldByRecordClassSchemaList = new ArrayList<>();
         for (var masterIndexField : masterIndexFieldByRecordClassSchemaResponse.getMasterIndexFields()) {
-            masterIndexFieldByRecordClassSchemaList.add(createMasterIndexFieldByRecordClassSchema(masterIndexField));
+            if (!IGNORE_MASTER_INDEX_PROPERTY_BF_018.equals(masterIndexField.getPropertyName())) {
+                masterIndexFieldByRecordClassSchemaList.add(createMasterIndexFieldByRecordClassSchema(masterIndexField));
+            }
         }
 
         armRpoService.updateArmRpoStatus(armRpoExecutionDetailEntity, ArmRpoHelper.completedRpoStatus(), userAccount);
