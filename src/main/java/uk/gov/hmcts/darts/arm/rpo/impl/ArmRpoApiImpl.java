@@ -38,6 +38,7 @@ public class ArmRpoApiImpl implements ArmRpoApi {
     public static final String ARM_GET_RECORD_MANAGEMENT_MATTER_ERROR = "Error during ARM get record management matter";
     public static final String ARM_GET_MASTER_INDEX_FIELD_BY_RECORD_CLASS_SCHEMA = "Error during ARM get master index field by record class schema";
     public static final String IGNORE_MASTER_INDEX_PROPERTY_BF_018 = "bf_018";
+    public static final String MASTER_INDEX_FIELD_BY_RECORD_CLASS_SCHEMA_SORTING_FIELD = "ingestionDate";
     private final ArmRpoClient armRpoClient;
     private final ArmRpoService armRpoService;
 
@@ -104,12 +105,19 @@ public class ArmRpoApiImpl implements ArmRpoApi {
             throw handleFailureAndCreateException(ARM_GET_MASTER_INDEX_FIELD_BY_RECORD_CLASS_SCHEMA, armRpoExecutionDetailEntity, userAccount);
         }
         List<MasterIndexFieldByRecordClassSchema> masterIndexFieldByRecordClassSchemaList = new ArrayList<>();
+        String sortingField = null;
         for (var masterIndexField : masterIndexFieldByRecordClassSchemaResponse.getMasterIndexFields()) {
             if (!IGNORE_MASTER_INDEX_PROPERTY_BF_018.equals(masterIndexField.getPropertyName())) {
+                if (MASTER_INDEX_FIELD_BY_RECORD_CLASS_SCHEMA_SORTING_FIELD.equals(masterIndexField.getPropertyName())) {
+                    sortingField = masterIndexField.getMasterIndexFieldId();
+                }
                 masterIndexFieldByRecordClassSchemaList.add(createMasterIndexFieldByRecordClassSchema(masterIndexField));
             }
         }
-
+        if (isNull(sortingField)) {
+            throw handleFailureAndCreateException(ARM_GET_MASTER_INDEX_FIELD_BY_RECORD_CLASS_SCHEMA, armRpoExecutionDetailEntity, userAccount);
+        }
+        armRpoExecutionDetailEntity.setSortingField(sortingField);
         armRpoService.updateArmRpoStatus(armRpoExecutionDetailEntity, ArmRpoHelper.completedRpoStatus(), userAccount);
         return masterIndexFieldByRecordClassSchemaList;
     }

@@ -74,6 +74,40 @@ class ArpRpoApiGetMasterIndexFieldByRecordClassSchemaIntTest extends Integration
     }
 
     @Test
+    void getMasterIndexFieldByRecordClassSchemaWhereMasterIndexIsToBeIgnored() {
+
+        // given
+        MasterIndexFieldByRecordClassSchemaResponse.MasterIndexField masterIndexField = new MasterIndexFieldByRecordClassSchemaResponse.MasterIndexField();
+        masterIndexField.setMasterIndexFieldId("1");
+        masterIndexField.setDisplayName("displayName");
+        masterIndexField.setPropertyName("propertyName");
+        masterIndexField.setPropertyType("bf_018");
+        masterIndexField.setIsMasked(true);
+
+        MasterIndexFieldByRecordClassSchemaResponse response = new MasterIndexFieldByRecordClassSchemaResponse();
+        response.setMasterIndexFields(List.of(masterIndexField));
+        when(armRpoClient.getMasterIndexFieldByRecordClassSchema(any(), any())).thenReturn(response);
+
+        UserAccountEntity userAccount = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
+        ArmRpoExecutionDetailEntity armRpoExecutionDetailEntity = new ArmRpoExecutionDetailEntity();
+        armRpoExecutionDetailEntity.setCreatedBy(userAccount);
+        armRpoExecutionDetailEntity.setLastModifiedBy(userAccount);
+        var armRpoExecutionDetail = dartsPersistence.save(armRpoExecutionDetailEntity);
+
+        var bearerAuth = "Bearer some-token";
+
+        // when
+        List<MasterIndexFieldByRecordClassSchema> result = armRpoApi.getMasterIndexFieldByRecordClassSchema(
+            bearerAuth, armRpoExecutionDetail.getId(), ArmRpoHelper.getMasterIndexFieldByRecordClassSchemaPrimaryRpoState(), userAccount);
+
+        // then
+        var armRpoExecutionDetailEntityUpdated = dartsPersistence.getArmRpoExecutionDetailRepository().findById(armRpoExecutionDetail.getId()).get();
+        assertEquals(ArmRpoStateEnum.GET_MASTERINDEXFIELD_BY_RECORDCLASS_SCHEMA_PRIMARY.getId(), armRpoExecutionDetailEntityUpdated.getArmRpoState().getId());
+        assertEquals(ArmRpoStatusEnum.FAILED.getId(), armRpoExecutionDetailEntityUpdated.getArmRpoStatus().getId());
+
+    }
+
+    @Test
     void getMasterIndexFieldByRecordClassSchemaShouldFailIfServerReturns200SuccessWithMissingMatterId() {
 
         // given
