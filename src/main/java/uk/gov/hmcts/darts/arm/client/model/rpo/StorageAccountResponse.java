@@ -19,9 +19,10 @@ public class StorageAccountResponse extends AbstractMatterResponse {
     @Data
     @NoArgsConstructor
     @JsonIgnoreProperties(ignoreUnknown = true)
+    @EqualsAndHashCode
     public static class Index {
         private IndexDetails index;
-        private boolean isMultiStream;
+        private Boolean isMultiStream;
         private List<Object> children;
     }
 
@@ -31,7 +32,7 @@ public class StorageAccountResponse extends AbstractMatterResponse {
     public static class IndexDetails {
         @JsonProperty("indexID")
         private String indexId;
-        private boolean isGroup;
+        private Boolean isGroup;
         private String name;
         private String displayName;
         @JsonProperty("userIndexID")
@@ -41,8 +42,8 @@ public class StorageAccountResponse extends AbstractMatterResponse {
         @JsonProperty("azureSearchAccountID")
         private String azureSearchAccountId;
         @JsonProperty("indexStatusID")
-        private int indexStatusId;
-        private boolean notified;
+        private Integer indexStatusId;
+        private Boolean notified;
         private String startDate;
         private String endDate;
         private String discoveryStartDate;
@@ -54,82 +55,82 @@ public class StorageAccountResponse extends AbstractMatterResponse {
         private String stoppingStartDate;
         private String stoppingEndDate;
         private String createdDate;
-        private double totalTime;
-        private int blobCount;
-        private int blobsProcessed;
-        private int indexDiscoveryItemsCount;
-        private int indexDiscoveryItemsProcessed;
+        private Double totalTime;
+        private Integer blobCount;
+        private Integer blobsProcessed;
+        private Integer indexDiscoveryItemsCount;
+        private Integer indexDiscoveryItemsProcessed;
         private Integer exceptionsCount;
-        private int indexBlobExceptionsCount;
+        private Integer indexBlobExceptionsCount;
         private Integer indexDiscoveryItemExceptionsCount;
-        private int indexBatchJobPartitionsCount;
+        private Integer indexBatchJobPartitionsCount;
         private Integer indexExceptionBatchPartitionsCount;
-        private int indexUpdateBatchPartitionsCount;
+        private Integer indexUpdateBatchPartitionsCount;
         private Integer indexUpdateExceptionBatchPartitionsCount;
         private Integer indexBatchLastJobPartitionsCount;
-        private int indexBlobPartitionsCount;
+        private Integer indexBlobPartitionsCount;
         private Integer indexBlobJobExceptionPartitionsCount;
         private Integer indexBlobLastJobExceptionPartitionsCount;
-        private int indexDiscoveryItemPartitionsCount;
+        private Integer indexDiscoveryItemPartitionsCount;
         private Integer indexDiscoveryItemExceptionPartitionsCount;
         private Integer indexJobExceptionPartitionsCount;
         private Integer indexLastJobExceptionPartitionsCount;
-        private int tablePartitionSize;
+        private Integer tablePartitionSize;
         private String updateDate;
         @JsonProperty("lastJobID")
-        private int lastJobId;
+        private Integer lastJobId;
         @JsonProperty("jobID")
-        private int jobId;
+        private Integer jobId;
         @JsonProperty("indexBlobLastJobID")
         private Integer indexBlobLastJobId;
         @JsonProperty("indexBlobJobID")
-        private int indexBlobJobId;
-        private boolean isContinous;
-        private boolean isPrimary;
+        private Integer indexBlobJobId;
+        private Boolean isContinous;
+        private Boolean isPrimary;
         @JsonProperty("isUsedForRM")
-        private boolean isUsedForRm;
-        private int continousIndexBlobPartitionsCount;
-        private int requestSizeLimit;
-        private boolean skipContentOverLimit;
-        private boolean skipContentIfParserError;
-        private int fileSizeLimitToTikaParser;
-        private boolean sortByResultField;
+        private Boolean isUsedForRm;
+        private Integer continousIndexBlobPartitionsCount;
+        private Integer requestSizeLimit;
+        private Boolean skipContentOverLimit;
+        private Boolean skipContentIfParserError;
+        private Integer fileSizeLimitToTikaParser;
+        private Boolean sortByResultField;
         private String blobContainer;
-        private int continuousIndexBatchSize;
-        private int continousTablePartitionSize;
-        private boolean isDeleted;
-        private int mainQueueProcessPriority;
-        private int secondaryQueueProcessPriority;
-        private int buildBatchesInQueue;
-        private int buildBatchesProcessed;
+        private Integer continuousIndexBatchSize;
+        private Integer continousTablePartitionSize;
+        private Boolean isDeleted;
+        private Integer mainQueueProcessPriority;
+        private Integer secondaryQueueProcessPriority;
+        private Integer buildBatchesInQueue;
+        private Integer buildBatchesProcessed;
         private String buildContinuationToken;
         private String buildExceptionContinuationToken;
         private String updateContinuationToken;
         private String updateExceptionContinuationToken;
-        private boolean countOnly;
+        private Boolean countOnly;
         private String errorCodes;
         private Integer esIndexRolloverSize;
-        private int esIndexRolloverSizePerShard;
-        private int esIndexNoReplicas;
-        private int esIndexNoShards;
-        private boolean isDiscoveryCancelled;
+        private Integer esIndexRolloverSizePerShard;
+        private Integer esIndexNoReplicas;
+        private Integer esIndexNoShards;
+        private Boolean isDiscoveryCancelled;
         private Integer indexContinuousLastSavedBlobExceptionPartitionsCount;
-        private int continuousExceptionsInProgress;
-        private boolean preparingContinuousErrorBatches;
-        private boolean schemaUpdated;
-        private boolean discoveryItemsLock;
-        private boolean blobExceptionsStreamUpdateNeeded;
+        private Integer continuousExceptionsInProgress;
+        private Boolean preparingContinuousErrorBatches;
+        private Boolean schemaUpdated;
+        private Boolean discoveryItemsLock;
+        private Boolean blobExceptionsStreamUpdateNeeded;
         @JsonProperty("streamIDsToProcess")
         private String streamIdsToProcess;
-        private int indexUpdateBlobPartitionsCount;
-        private int indexUpdateExceptionPartitionsCount;
-        private int indexUpdateExceptionsCount;
-        private int updateBlobCount;
-        private int updateBlobsProcessed;
+        private Integer indexUpdateBlobPartitionsCount;
+        private Integer indexUpdateExceptionPartitionsCount;
+        private Integer indexUpdateExceptionsCount;
+        private Integer updateBlobCount;
+        private Integer updateBlobsProcessed;
         private Integer indexLastSavedUpdateExceptionPartitionsCount;
-        private int updateExceptionsInProgress;
-        private boolean preparingUpdateErrorBatches;
-        private boolean poisonHandlingFailed;
+        private Integer updateExceptionsInProgress;
+        private Boolean preparingUpdateErrorBatches;
+        private Boolean poisonHandlingFailed;
     }
 
 }
