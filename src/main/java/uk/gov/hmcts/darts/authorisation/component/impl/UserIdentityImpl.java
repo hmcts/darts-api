@@ -75,12 +75,14 @@ public class UserIdentityImpl implements UserIdentity {
     @Override
     public boolean userHasGlobalAccess(Set<SecurityRoleEnum> globalAccessRoles) {
         boolean userHasGlobalAccess = false;
-        Jwt token = getJwt();
         String emailAddress = null;
-        String guid = getGuidFromToken(token);
+        Jwt jwt = getJwt();
+        String guid = getGuidFromToken(jwt);
 
         try {
-            emailAddress = EmailAddressFromTokenUtil.getEmailAddressFromToken(token);
+            if (jwt != null) {
+                emailAddress = EmailAddressFromTokenUtil.getEmailAddressFromToken(jwt);
+            }
         } catch (IllegalStateException e) {
             if (nonNull(guid)) {
                 log.debug("Guid is present but unable to get email address from token ending ''.....{}'': {}", StringUtils.right(guid, 5), e.getMessage());
