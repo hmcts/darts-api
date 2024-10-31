@@ -35,7 +35,6 @@ import java.io.IOException;
 import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.time.Duration;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.List;
@@ -44,7 +43,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import static uk.gov.hmcts.darts.test.common.AwaitabilityUtil.waitForMaxWithOneSecondPoll;
+import static uk.gov.hmcts.darts.test.common.AwaitabilityUtil.waitForMax10SecondsWithOneSecondPoll;
 
 @AutoConfigureMockMvc
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -128,18 +127,21 @@ class AudioControllerAddAudioMetadataMediaLinkIntTest extends IntegrationBase {
         assertEquals(STARTED_AT, media.getStart());
         assertEquals(STARTED_AT, media.getEnd());
 
-        List<MediaLinkedCaseEntity> mediaLinkedCaseEntities = dartsDatabase.getMediaLinkedCaseRepository().findByMedia(media);
-        waitForMaxWithOneSecondPoll(
-            () -> assertEquals(2, mediaLinkedCaseEntities.size()),
-            Duration.ofSeconds(20)
-        );
-        MediaLinkedCaseEntity case1Link = mediaLinkedCaseEntities.getFirst();
-        assertEquals(MediaLinkedCaseSourceType.ADD_AUDIO_METADATA, case1Link.getSource());
-        assertEquals("case1", case1Link.getCourtCase().getCaseNumber());
 
-        MediaLinkedCaseEntity case3Link = mediaLinkedCaseEntities.get(1);
-        assertEquals(MediaLinkedCaseSourceType.ADD_AUDIO_EVENT_LINKING, case3Link.getSource());
-        assertEquals("case3", case3Link.getCourtCase().getCaseNumber());
+        waitForMax10SecondsWithOneSecondPoll(
+            () -> {
+                List<MediaLinkedCaseEntity> mediaLinkedCaseEntities = dartsDatabase.getMediaLinkedCaseRepository().findByMedia(media);
+                assertEquals(2, mediaLinkedCaseEntities.size());
+
+                MediaLinkedCaseEntity case1Link = mediaLinkedCaseEntities.getFirst();
+                assertEquals(MediaLinkedCaseSourceType.ADD_AUDIO_METADATA, case1Link.getSource());
+                assertEquals("case1", case1Link.getCourtCase().getCaseNumber());
+
+                MediaLinkedCaseEntity case3Link = mediaLinkedCaseEntities.get(1);
+                assertEquals(MediaLinkedCaseSourceType.ADD_AUDIO_EVENT_LINKING, case3Link.getSource());
+                assertEquals("case3", case3Link.getCourtCase().getCaseNumber());
+            }
+        );
     }
 
     private AddAudioMetadataRequest createAddAudioRequest(OffsetDateTime startedAt, OffsetDateTime endedAt,
