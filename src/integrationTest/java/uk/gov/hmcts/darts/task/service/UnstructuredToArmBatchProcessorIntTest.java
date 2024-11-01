@@ -278,11 +278,12 @@ class UnstructuredToArmBatchProcessorIntTest extends IntegrationBase {
         externalObjectDirectoryStub.createAndSaveEod(medias.get(4), STORED, UNSTRUCTURED);
         externalObjectDirectoryStub.createAndSaveEod(medias.get(5), STORED, UNSTRUCTURED);
 
+
         DartsException dartsException = new DartsException("Exception copying file");
-        String failedFilename1 = format("%s_%s_%s", 7, eod1.getMedia().getId(), eod1.getTransferAttempts());
+        String failedFilename1 = format("^%s.*", 7, eod1.getMedia().getId(), eod1.getTransferAttempts());
         doThrow(dartsException).when(armDataManagementApi).copyBlobDataToArm(any(), matches(failedFilename1));
 
-        String failedFilename3 = format("%s_%s_%s", 9, eod3.getMedia().getId(), eod3.getTransferAttempts());
+        String failedFilename3 = format("^%s.*", 9, eod3.getMedia().getId(), eod3.getTransferAttempts());
         doThrow(dartsException).when(armDataManagementApi).copyBlobDataToArm(any(), matches(failedFilename3));
 
         String fileLocation = tempDirectory.getAbsolutePath();
