@@ -23,11 +23,14 @@ import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
 import uk.gov.hmcts.darts.common.service.FileOperationService;
 import uk.gov.hmcts.darts.common.util.EodHelper;
 import uk.gov.hmcts.darts.log.api.LogApi;
+import uk.gov.hmcts.darts.util.AsyncUtil;
 
 import java.io.File;
 import java.text.MessageFormat;
 import java.time.OffsetDateTime;
 import java.util.List;
+import java.util.concurrent.Callable;
+import java.util.concurrent.TimeUnit;
 
 import static uk.gov.hmcts.darts.common.util.EodHelper.equalsAnyStatus;
 import static uk.gov.hmcts.darts.common.util.EodHelper.isEqual;
@@ -85,31 +88,45 @@ public class UnstructuredToArmBatchProcessorImpl implements UnstructuredToArmBat
         File archiveRecordsFile = unstructuredToArmHelper.createEmptyArchiveRecordsFile(armDataManagementConfiguration.getManifestFilePrefix());
         var batchItems = new ArmBatchItems();
 
-        for (var currentEod : eodsForBatch) {
 
-            var batchItem = new ArmBatchItem();
-            try {
-                ExternalObjectDirectoryEntity armEod;
-                if (isEqual(currentEod.getExternalLocationType(), EodHelper.armLocation())) {
-                    //retry existing attempt that has previously failed.
-                    armEod = currentEod;
-                    batchItem.setArmEod(armEod);
-                    updateArmEodToArmIngestionStatus(currentEod, batchItem, batchItems, archiveRecordsFile, userAccount);
-                } else {
-                    armEod = unstructuredToArmHelper.createArmEodWithArmIngestionStatus(currentEod, batchItem, batchItems, archiveRecordsFile, userAccount);
+        List<Callable<Void>> tasks = eodsForBatch
+            .stream()
+            .map(currentEod -> (Callable<Void>) () -> {
+                var batchItem = new ArmBatchItem();
+                try {
+                    ExternalObjectDirectoryEntity armEod;
+                    if (isEqual(currentEod.getExternalLocationType(), EodHelper.armLocation())) {
+                        //retry existing attempt that has previously failed.
+                        armEod = currentEod;
+                        batchItem.setArmEod(armEod);
+                        updateArmEodToArmIngestionStatus(currentEod, batchItem, batchItems, archiveRecordsFile, userAccount);
+                    } else {
+                        armEod = unstructuredToArmHelper.createArmEodWithArmIngestionStatus(currentEod, batchItem, batchItems, archiveRecordsFile, userAccount);
+                    }
+
+                    String rawFilename = unstructuredToArmHelper.generateRawFilename(armEod);
+
+                    if (shouldPushRawDataToArm(batchItem)) {
+                        pushRawDataAndCreateArchiveRecordIfSuccess(batchItem, rawFilename, userAccount);
+                    } else if (shouldAddEntryToManifestFile(batchItem)) {
+                        batchItem.setArchiveRecord(archiveRecordService.generateArchiveRecordInfo(batchItem.getArmEod().getId(), rawFilename));
+                    }
+                } catch (Exception e) {
+                    log.error("Unable to batch push EOD {} to ARM", currentEod.getId(), e);
+                    recoverByUpdatingEodToFailedArmStatus(batchItem, userAccount);
                 }
+                return null;
+            })
+            .toList();
 
-                String rawFilename = unstructuredToArmHelper.generateRawFilename(armEod);
-
-                if (shouldPushRawDataToArm(batchItem)) {
-                    pushRawDataAndCreateArchiveRecordIfSuccess(batchItem, rawFilename, userAccount);
-                } else if (shouldAddEntryToManifestFile(batchItem)) {
-                    batchItem.setArchiveRecord(archiveRecordService.generateArchiveRecordInfo(batchItem.getArmEod().getId(), rawFilename));
-                }
-            } catch (Exception e) {
-                log.error("Unable to batch push EOD {} to ARM", currentEod.getId(), e);
-                recoverByUpdatingEodToFailedArmStatus(batchItem, userAccount);
+        try {
+            AsyncUtil.invokeAllAwaitTermination(tasks, unstructuredToArmProcessorConfiguration.getThreads(), 2, TimeUnit.HOURS);
+        } catch (Exception e) {
+            log.error("Unstructured to arm batch unexpected exception", e);
+            if (e instanceof InterruptedException) {
+                Thread.currentThread().interrupt();
             }
+            return;
         }
 
         try {
