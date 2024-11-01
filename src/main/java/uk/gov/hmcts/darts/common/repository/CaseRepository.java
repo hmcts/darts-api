@@ -90,5 +90,5 @@ public interface CaseRepository extends JpaRepository<CourtCaseEntity, Integer> 
         where cc.isDataAnonymised = false
         and cr.retainUntil < :maxRetentionDate
         """)
-    List<Integer> findCasesIdsToBeAnonymised(OffsetDateTime maxRetentionDate, Limit limit);
+    List<Integer> findCaseIdsToBeAnonymised(OffsetDateTime maxRetentionDate, Limit limit);
 }

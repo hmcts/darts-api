@@ -11,6 +11,7 @@ import uk.gov.hmcts.darts.audio.entity.MediaRequestEntity;
 import uk.gov.hmcts.darts.audio.enums.MediaRequestStatus;
 import uk.gov.hmcts.darts.audit.api.AuditApi;
 import uk.gov.hmcts.darts.cases.service.CaseService;
+import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.DefenceEntity;
 import uk.gov.hmcts.darts.common.entity.DefendantEntity;
@@ -155,6 +156,7 @@ class DataAnonymisationServiceImplTest {
     void assertPositiveAnonymiseCourtCaseEntity() {
         setupOffsetDateTime();
         CourtCaseEntity courtCase = new CourtCaseEntity();
+        when(caseService.getCourtCaseById(123)).thenReturn(courtCase);
         courtCase.setCaseNumber("caseNo123");
         courtCase.setId(123);
 
@@ -178,7 +180,6 @@ class DataAnonymisationServiceImplTest {
         userAccount.setId(123);
 
         dataAnonymisationService.anonymiseCourtCaseEntity(userAccount, courtCase);
-
         assertThat(courtCase.isDataAnonymised()).isTrue();
         assertThat(courtCase.getDataAnonymisedBy()).isEqualTo(123);
         assertThat(courtCase.getDataAnonymisedTs()).isCloseToUtcNow(within(5, SECONDS));
@@ -199,6 +200,7 @@ class DataAnonymisationServiceImplTest {
         verify(dataAnonymisationService, times(1)).tidyUpTransformedMediaEntities(userAccount, courtCase);
         verify(caseService, times(1)).saveCase(courtCase);
         verify(logApi, times(1)).caseDeletedDueToExpiry(123, "caseNo123");
+        verify(caseService, times(1)).getCourtCaseById(123);
 
     }
 
