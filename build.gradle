@@ -71,6 +71,9 @@ swaggerList.each {
     modelPackage = "uk.gov.hmcts.darts.".toString() + "${apiName}" + ".model"
     //    https://openapi-generator.tech/docs/generators/java/#config-options
     skipOperationExample = true
+    openapiNormalizer = [
+            REF_AS_PARENT_IN_ALLOF: "true"
+    ]
     configOptions = [
             dateLibrary           : "java8",
             interfaceOnly         : "true",

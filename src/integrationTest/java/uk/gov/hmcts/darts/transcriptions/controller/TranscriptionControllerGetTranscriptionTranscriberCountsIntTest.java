@@ -177,7 +177,7 @@ class TranscriptionControllerGetTranscriptionTranscriberCountsIntTest extends In
 
         mockMvc.perform(requestBuilder)
             .andExpect(status().isForbidden())
-            .andExpect(jsonPath("$.type").value(TranscriptionApiError.USER_NOT_TRANSCRIBER.getType().toString()))
+            .andExpect(jsonPath("$.type").value(TranscriptionApiError.USER_NOT_TRANSCRIBER.getType()))
             .andReturn();
     }
 

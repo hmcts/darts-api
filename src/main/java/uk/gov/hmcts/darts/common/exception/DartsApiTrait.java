@@ -16,6 +16,7 @@ import org.zalando.problem.spring.web.advice.AdviceTrait;
 import uk.gov.hmcts.darts.authorisation.exception.AuthorisationError;
 
 import java.io.IOException;
+import java.net.URI;
 import java.util.Map.Entry;
 
 public interface DartsApiTrait extends AdviceTrait {
@@ -31,7 +32,7 @@ public interface DartsApiTrait extends AdviceTrait {
         HttpStatusAdapter problemHttpStatus = new HttpStatusAdapter(error.getHttpStatus());
 
         ProblemBuilder problemBuilder = Problem.builder()
-            .withType(error.getType())
+            .withType(URI.create(error.getType()))
             .withStatus(problemHttpStatus)
             .withTitle(error.getTitle())
             .withDetail(exception.getDetail());

@@ -18,7 +18,10 @@ import uk.gov.hmcts.darts.common.datamanagement.component.impl.DownloadResponseM
 import uk.gov.hmcts.darts.common.datamanagement.component.impl.FileBasedDownloadResponseMetaData;
 import uk.gov.hmcts.darts.common.datamanagement.enums.DatastoreContainerType;
 import uk.gov.hmcts.darts.common.exception.AzureDeleteBlobException;
+import uk.gov.hmcts.darts.common.exception.CommonApiError;
+import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.common.exception.DartsException;
+import uk.gov.hmcts.darts.common.util.FileContentChecksum;
 import uk.gov.hmcts.darts.datamanagement.config.DataManagementConfiguration;
 import uk.gov.hmcts.darts.datamanagement.exception.FileNotDownloadedException;
 import uk.gov.hmcts.darts.datamanagement.model.BlobClientUploadResponseImpl;
@@ -50,6 +53,7 @@ public class DataManagementServiceImpl implements DataManagementService {
     private final DataManagementAzureClientFactory blobServiceFactory;
 
     private final AzureCopyUtil azureCopyUtil;
+    private final FileContentChecksum fileContentChecksum;
 
 
     /**
@@ -202,6 +206,27 @@ public class DataManagementServiceImpl implements DataManagementService {
             throw new FileNotDownloadedException(blobId, containerName, "Error trying to download blob", e);
         }
         return downloadResponse;
+    }
+
+    @Override
+    public String getChecksum(String containerName, UUID blobId) {
+        BlobServiceClient serviceClient = blobServiceFactory.getBlobServiceClient(dataManagementConfiguration.getBlobStorageAccountConnectionString());
+        BlobContainerClient containerClient = blobServiceFactory.getBlobContainerClient(containerName, serviceClient);
+        BlobClient blobClient = blobServiceFactory.getBlobClient(containerClient, blobId);
+
+        boolean exists = blobClient.exists() != null && blobClient.exists();
+
+        if (!exists) {
+            throw new DartsApiException(CommonApiError.NOT_FOUND,
+                                        String.format("Blob %s does not exist in container %s was not found.", blobId, containerName));
+        }
+        byte[] checksumByte = blobClient.getProperties().getContentMd5();
+
+        if (checksumByte == null) {
+            throw new DartsApiException(CommonApiError.NOT_FOUND,
+                                        String.format("Blob %s does not exist in container %s does not contain a checksum.", blobId, containerName));
+        }
+        return fileContentChecksum.encodeToString(checksumByte);
     }
 
 

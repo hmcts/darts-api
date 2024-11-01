@@ -5,6 +5,8 @@ import com.azure.core.util.BinaryData;
 import com.azure.storage.blob.BlobClient;
 import com.azure.storage.blob.BlobContainerClient;
 import com.azure.storage.blob.BlobServiceClient;
+import com.azure.storage.blob.models.BlobProperties;
+import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -17,7 +19,10 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.darts.common.datamanagement.component.DataManagementAzureClientFactory;
 import uk.gov.hmcts.darts.common.datamanagement.enums.DatastoreContainerType;
 import uk.gov.hmcts.darts.common.exception.AzureDeleteBlobException;
+import uk.gov.hmcts.darts.common.exception.CommonApiError;
+import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.common.exception.DartsException;
+import uk.gov.hmcts.darts.common.util.FileContentChecksum;
 import uk.gov.hmcts.darts.datamanagement.config.DataManagementConfiguration;
 import uk.gov.hmcts.darts.datamanagement.model.BlobClientUploadResponseImpl;
 import uk.gov.hmcts.darts.datamanagement.service.impl.DataManagementServiceImpl;
@@ -39,6 +44,7 @@ import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -56,6 +62,8 @@ class DataManagementServiceImplTest {
     private DataManagementConfiguration dataManagementConfiguration;
     @Mock
     private AzureCopyUtil azureCopyUtil;
+    @Mock
+    private FileContentChecksum fileContentChecksum;
     @InjectMocks
     private DataManagementServiceImpl dataManagementService;
     private BlobContainerClient blobContainerClient;
@@ -241,5 +249,133 @@ class DataManagementServiceImplTest {
                 "darts-unstructured",
                 UUID.randomUUID().toString(),
                 UUID.randomUUID().toString()));
+    }
+
+
+    @Test
+    void positiveGetChecksumTypical() {
+        final String checksum = "abc123";
+        final byte[] checkSumBytes = checksum.getBytes();
+        final UUID blobId = UUID.fromString("431318c8-97db-415c-b321-120c48f0ffe2");
+        final String containerName = "container123";
+        final String connectionString = "connectionString";
+
+        BlobServiceClient blobServiceClient = mock(BlobServiceClient.class);
+        BlobContainerClient blobContainerClient = mock(BlobContainerClient.class);
+        BlobProperties blobProperties = mock(BlobProperties.class);
+        when(blobProperties.getContentMd5())
+            .thenReturn(checkSumBytes);
+        BlobClient blobClient = mock(BlobClient.class);
+        when(blobClient.getProperties())
+            .thenReturn(blobProperties);
+
+        when(dataManagementFactory.getBlobServiceClient(any()))
+            .thenReturn(blobServiceClient);
+        when(dataManagementFactory.getBlobContainerClient(any(), any()))
+            .thenReturn(blobContainerClient);
+        when(dataManagementFactory.getBlobClient(any(), any()))
+            .thenReturn(blobClient);
+        when(dataManagementConfiguration.getBlobStorageAccountConnectionString())
+            .thenReturn(connectionString);
+        when(fileContentChecksum.encodeToString(checkSumBytes))
+            .thenReturn(checksum);
+
+        when(blobClient.exists()).thenReturn(true);
+
+
+        assertThat(dataManagementService.getChecksum(containerName, blobId))
+            .isEqualTo(checksum);
+
+        verify(dataManagementConfiguration, times(1)).getBlobStorageAccountConnectionString();
+        verify(dataManagementFactory, times(1)).getBlobServiceClient(connectionString);
+        verify(dataManagementFactory, times(1)).getBlobContainerClient(containerName, blobServiceClient);
+        verify(dataManagementFactory, times(1)).getBlobClient(blobContainerClient, blobId);
+        verify(blobClient, times(2)).exists();
+        verify(blobClient, times(1)).getProperties();
+        verify(blobProperties, times(1)).getContentMd5();
+        verify(fileContentChecksum, times(1)).encodeToString(checkSumBytes);
+    }
+
+    @Test
+    void negativeGetChecksumFileNotFoundExistsFalse() {
+        assertGetChecksumNotFound(false);
+    }
+
+    @Test
+    void negativeGetChecksumFileNotFoundExistsNull() {
+        assertGetChecksumNotFound(null);
+    }
+
+    @Test
+    void negativeGetChecksumChecksumNotFound() {
+        final UUID blobId = UUID.fromString("431318c8-97db-415c-b321-120c48f0ffe2");
+        final String containerName = "container123";
+        final String connectionString = "connectionString";
+
+        BlobServiceClient blobServiceClient = mock(BlobServiceClient.class);
+        BlobContainerClient blobContainerClient = mock(BlobContainerClient.class);
+        BlobProperties blobProperties = mock(BlobProperties.class);
+        when(blobProperties.getContentMd5()).thenReturn(null);
+        BlobClient blobClient = mock(BlobClient.class);
+        when(blobClient.getProperties()).thenReturn(blobProperties);
+
+        when(dataManagementFactory.getBlobServiceClient(any()))
+            .thenReturn(blobServiceClient);
+        when(dataManagementFactory.getBlobContainerClient(any(), any()))
+            .thenReturn(blobContainerClient);
+        when(dataManagementFactory.getBlobClient(any(), any()))
+            .thenReturn(blobClient);
+        when(dataManagementConfiguration.getBlobStorageAccountConnectionString())
+            .thenReturn(connectionString);
+        when(blobClient.exists()).thenReturn(true);
+
+
+        Assertions.assertThatThrownBy(() -> dataManagementService.getChecksum(containerName, blobId))
+            .isInstanceOf(DartsApiException.class)
+            .hasMessage("Resource not found. Blob 431318c8-97db-415c-b321-120c48f0ffe2 does not exist in container container123 does not contain a checksum.")
+            .hasFieldOrPropertyWithValue("error", CommonApiError.NOT_FOUND);
+
+        verify(dataManagementConfiguration, times(1)).getBlobStorageAccountConnectionString();
+        verify(dataManagementFactory, times(1)).getBlobServiceClient(connectionString);
+        verify(dataManagementFactory, times(1)).getBlobContainerClient(containerName, blobServiceClient);
+        verify(dataManagementFactory, times(1)).getBlobClient(blobContainerClient, blobId);
+        verify(blobClient, times(2)).exists();
+        verify(blobClient, times(1)).getProperties();
+        verify(blobProperties, times(1)).getContentMd5();
+        verify(blobClient, times(2)).exists();
+        verifyNoInteractions(fileContentChecksum);
+    }
+
+    private void assertGetChecksumNotFound(Boolean exists) {
+        final UUID blobId = UUID.fromString("431318c8-97db-415c-b321-120c48f0ffe2");
+        final String containerName = "container123";
+        final String connectionString = "connectionString";
+
+        BlobServiceClient blobServiceClient = mock(BlobServiceClient.class);
+        BlobContainerClient blobContainerClient = mock(BlobContainerClient.class);
+        BlobClient blobClient = mock(BlobClient.class);
+        when(dataManagementFactory.getBlobServiceClient(any()))
+            .thenReturn(blobServiceClient);
+        when(dataManagementFactory.getBlobContainerClient(any(), any()))
+            .thenReturn(blobContainerClient);
+        when(dataManagementFactory.getBlobClient(any(), any()))
+            .thenReturn(blobClient);
+        when(dataManagementConfiguration.getBlobStorageAccountConnectionString())
+            .thenReturn(connectionString);
+
+        when(blobClient.exists()).thenReturn(exists);
+
+
+        Assertions.assertThatThrownBy(() -> dataManagementService.getChecksum(containerName, blobId))
+            .isInstanceOf(DartsApiException.class)
+            .hasMessage("Resource not found. Blob 431318c8-97db-415c-b321-120c48f0ffe2 does not exist in container container123 was not found.")
+            .hasFieldOrPropertyWithValue("error", CommonApiError.NOT_FOUND);
+
+        verify(dataManagementConfiguration, times(1)).getBlobStorageAccountConnectionString();
+        verify(dataManagementFactory, times(1)).getBlobServiceClient(connectionString);
+        verify(dataManagementFactory, times(1)).getBlobContainerClient(containerName, blobServiceClient);
+        verify(dataManagementFactory, times(1)).getBlobClient(blobContainerClient, blobId);
+        verify(blobClient, times(exists == null ? 1 : 2)).exists();
+        verifyNoInteractions(fileContentChecksum);
     }
 }
