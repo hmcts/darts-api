@@ -1,4 +1,4 @@
-package uk.gov.hmcts.darts.arm.model.rpo;
+package uk.gov.hmcts.darts.arm.client.model.rpo;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.Data;
@@ -10,6 +10,7 @@ import java.util.List;
 @Data
 @NoArgsConstructor
 public abstract class AbstractMatterResponse {
+
     Integer itemsCount;
     Integer status;
     Boolean demoMode;
@@ -18,4 +19,5 @@ public abstract class AbstractMatterResponse {
     List<ResponseStatusMessage> responseStatusMessages;
     String exception;
     String message;
+
 }
