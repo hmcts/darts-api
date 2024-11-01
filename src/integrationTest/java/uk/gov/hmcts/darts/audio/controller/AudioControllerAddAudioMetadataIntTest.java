@@ -203,8 +203,8 @@ class AudioControllerAddAudioMetadataIntTest extends IntegrationBase {
         assertEquals(AudioApiError.FAILED_TO_ADD_AUDIO_META_DATA.getType(), problem.getType().toString());
         assertEquals(AudioApiError.FAILED_TO_ADD_AUDIO_META_DATA.getTitle(), problem.getTitle());
         assertEquals(
-            "Checksum in blob store (checksum-" + addAudioMetadataRequest.getStorageGuid()
-                + ") does not match the one passed in the API request (invalidchecksum).",
+            "Checksum for blob 'checksum-" + addAudioMetadataRequest.getStorageGuid()
+                + "' does not match the one passed in the API request 'invalidchecksum'.",
             problem.getDetail());
     }
 
