@@ -128,6 +128,7 @@ class UnstructuredToArmBatchProcessorIntTest extends IntegrationBase {
         testUser = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
         when(userIdentity.getUserAccount()).thenReturn(testUser);
         when(unstructuredToArmProcessorConfiguration.getMaxArmManifestItems()).thenReturn(5);
+        when(unstructuredToArmProcessorConfiguration.getThreads()).thenReturn(20);
     }
 
     @Test
