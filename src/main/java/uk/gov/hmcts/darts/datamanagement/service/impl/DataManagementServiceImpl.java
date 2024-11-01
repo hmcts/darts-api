@@ -218,13 +218,13 @@ public class DataManagementServiceImpl implements DataManagementService {
 
         if (!exists) {
             throw new DartsApiException(CommonApiError.NOT_FOUND,
-                                        String.format("Blob %s does not exist in container %s was not found.", blobId, containerName));
+                                        String.format("Blob '%s' does not exist in container '%s'.", blobId, containerName));
         }
         byte[] checksumByte = blobClient.getProperties().getContentMd5();
 
         if (checksumByte == null) {
             throw new DartsApiException(CommonApiError.NOT_FOUND,
-                                        String.format("Blob %s does not exist in container %s does not contain a checksum.", blobId, containerName));
+                                        String.format("Blob '%s' does exist in container '%s' but does not contain a checksum.", blobId, containerName));
         }
         return fileContentChecksum.encodeToString(checksumByte);
     }

@@ -332,7 +332,8 @@ class DataManagementServiceImplTest {
 
         Assertions.assertThatThrownBy(() -> dataManagementService.getChecksum(containerName, blobId))
             .isInstanceOf(DartsApiException.class)
-            .hasMessage("Resource not found. Blob 431318c8-97db-415c-b321-120c48f0ffe2 does not exist in container container123 does not contain a checksum.")
+            .hasMessage("Resource not found. Blob '431318c8-97db-415c-b321-120c48f0ffe2' does exist in container 'container123'" +
+                            " but does not contain a checksum.")
             .hasFieldOrPropertyWithValue("error", CommonApiError.NOT_FOUND);
 
         verify(dataManagementConfiguration, times(1)).getBlobStorageAccountConnectionString();
@@ -368,7 +369,7 @@ class DataManagementServiceImplTest {
 
         Assertions.assertThatThrownBy(() -> dataManagementService.getChecksum(containerName, blobId))
             .isInstanceOf(DartsApiException.class)
-            .hasMessage("Resource not found. Blob 431318c8-97db-415c-b321-120c48f0ffe2 does not exist in container container123 was not found.")
+            .hasMessage("Resource not found. Blob '431318c8-97db-415c-b321-120c48f0ffe2' does not exist in container 'container123'.")
             .hasFieldOrPropertyWithValue("error", CommonApiError.NOT_FOUND);
 
         verify(dataManagementConfiguration, times(1)).getBlobStorageAccountConnectionString();

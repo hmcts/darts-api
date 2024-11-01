@@ -252,7 +252,7 @@ class AudioUploadServiceImplTest {
 
         Assertions.assertThatThrownBy(() -> audioService.addAudio(externalLocation, addAudioMetadataRequest))
             .isInstanceOf(DartsApiException.class)
-            .hasMessage("Failed to add audio meta data. Checksum in DETs (123) does not match the one passed in the API request (123456).")
+            .hasMessage("Failed to add audio meta data. Checksum for blob '123' does not match the one passed in the API request '123456'.")
             .hasFieldOrPropertyWithValue("error", AudioApiError.FAILED_TO_ADD_AUDIO_META_DATA);
 
         verify(dataManagementApi, times(1)).getChecksum(DatastoreContainerType.INBOUND, externalLocation);

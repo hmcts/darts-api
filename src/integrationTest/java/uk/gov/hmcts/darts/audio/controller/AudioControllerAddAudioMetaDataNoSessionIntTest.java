@@ -51,7 +51,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
     "spring.servlet.multipart.max-request-size=4MB",
 })
 @SuppressWarnings({"PMD.DoNotUseThreads", "PMD.AvoidInstantiatingObjectsInLoops", "PMD.AvoidThrowingRawExceptionTypes"})
-class AudioControllerAddAudioMetaDataNoSessionITest extends IntegrationBase {
+class AudioControllerAddAudioMetaDataNoSessionIntTest extends IntegrationBase {
 
     @Value("${local.server.port}")
     protected int port;

@@ -63,7 +63,7 @@ public interface DartsApiTrait extends AdviceTrait {
         HttpStatusAdapter problemHttpStatus = new HttpStatusAdapter(error.getHttpStatus());
 
         ProblemBuilder problemBuilder = Problem.builder()
-            .withType(error.getType())
+            .withType(URI.create(error.getType()))
             .withStatus(problemHttpStatus)
             .withTitle(error.getTitle())
             .withDetail(exception.getDetail());

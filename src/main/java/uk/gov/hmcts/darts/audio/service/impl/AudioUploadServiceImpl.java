@@ -87,7 +87,7 @@ public class AudioUploadServiceImpl implements AudioUploadService {
         String checksum = dataManagementApi.getChecksum(DatastoreContainerType.INBOUND, guid);
         if (!checksum.equals(addAudioMetadataRequest.getChecksum())) {
             throw new DartsApiException(AudioApiError.FAILED_TO_ADD_AUDIO_META_DATA,
-                                        String.format("Checksum in DETs (%s) does not match the one passed in the API request (%s).",
+                                        String.format("Checksum for blob '%s' does not match the one passed in the API request '%s'.",
                                                       checksum, addAudioMetadataRequest.getChecksum()));
         }
         addAudio(checksum, () -> guid, addAudioMetadataRequest);
