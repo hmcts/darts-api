@@ -89,7 +89,7 @@ class TranscriptionControllerGetTranscriberTranscriptsIntTest extends Integratio
         MockHttpServletRequestBuilder requestBuilder = get(ENDPOINT_URI)
             .header(
                 USER_ID_HEADER,
-                -10
+                -410
             );
 
         final MvcResult mvcResult = mockMvc.perform(requestBuilder)
@@ -148,7 +148,7 @@ class TranscriptionControllerGetTranscriberTranscriptsIntTest extends Integratio
         MockHttpServletRequestBuilder requestBuilder = get(ENDPOINT_URI)
             .header(
                 USER_ID_HEADER,
-                -10
+                -410
             )
             .queryParam(ASSIGNED_QUERY_PARAM, FALSE.toString());
 
@@ -187,14 +187,14 @@ class TranscriptionControllerGetTranscriberTranscriptsIntTest extends Integratio
     void givenTranscriberUserAndYourWorkViewRequested_thenReturnUnassignedTranscriptionAndDoNotReturnCompletedTranscriptionFromBeforeTodayInactive()
         throws Exception {
 
-        UserAccountEntity userAccountEntity = userAccountRepository.findById(-10).get();
+        UserAccountEntity userAccountEntity = userAccountRepository.findById(-410).get();
         userAccountEntity.setActive(false);
         userAccountRepository.save(userAccountEntity);
 
         MockHttpServletRequestBuilder requestBuilder = get(ENDPOINT_URI)
             .header(
                 USER_ID_HEADER,
-                -10
+                -410
             )
             .queryParam(ASSIGNED_QUERY_PARAM, FALSE.toString());
 
@@ -213,7 +213,7 @@ class TranscriptionControllerGetTranscriberTranscriptsIntTest extends Integratio
         MockHttpServletRequestBuilder requestBuilder = get(ENDPOINT_URI)
             .header(
                 USER_ID_HEADER,
-                -10
+                -410
             )
             .queryParam(ASSIGNED_QUERY_PARAM, FALSE.toString());
 
@@ -253,7 +253,7 @@ class TranscriptionControllerGetTranscriberTranscriptsIntTest extends Integratio
         MockHttpServletRequestBuilder requestBuilder = get(ENDPOINT_URI)
             .header(
                 USER_ID_HEADER,
-                -10
+                -410
             )
             .queryParam(ASSIGNED_QUERY_PARAM, TRUE.toString());
 
@@ -312,14 +312,14 @@ class TranscriptionControllerGetTranscriberTranscriptsIntTest extends Integratio
     void givenTranscriberAndYourWorkViewRequestedWithAnInactiveUser_thenReturn()
         throws Exception {
 
-        UserAccountEntity userAccountEntity = userAccountRepository.findById(-10).get();
+        UserAccountEntity userAccountEntity = userAccountRepository.findById(-410).get();
         userAccountEntity.setActive(false);
         userAccountRepository.save(userAccountEntity);
 
         MockHttpServletRequestBuilder requestBuilder = get(ENDPOINT_URI)
             .header(
                 USER_ID_HEADER,
-                -10
+                -410
             )
             .queryParam(ASSIGNED_QUERY_PARAM, FALSE.toString());
 
@@ -355,10 +355,10 @@ class TranscriptionControllerGetTranscriberTranscriptsIntTest extends Integratio
                                 INSERT INTO darts.user_account (usr_id, dm_user_s_object_id, user_name, user_full_name, user_email_address, description,
                                 is_active, created_ts,
                                 last_modified_ts, last_login_ts, last_modified_by, created_by, account_guid, is_system_user)
-                                VALUES (-10, NULL, 'Richard B', 'Richard B', 'Richard.B@example.com', NULL, true, current_timestamp,
+                                VALUES (-410, NULL, 'Richard B', 'Richard B', 'Richard.B@example.com', NULL, true, current_timestamp,
                                 current_timestamp, NULL, 0, 0, NULL, false);
                                 INSERT INTO darts.security_group_user_account_ae (usr_id, grp_id)
-                                VALUES (-10, -4);
+                                VALUES (-410, -4);
                                 INSERT INTO darts.security_group_courthouse_ae (grp_id, cth_id)
                                 VALUES (-4, -1);
 
@@ -367,137 +367,137 @@ class TranscriptionControllerGetTranscriberTranscriptsIntTest extends Integratio
                                 created_ts, last_modified_ts, last_modified_by, created_by, tru_id, trs_id, hearing_date,
                                 is_manual_transcription, hide_request_from_requestor, is_current)
                                 VALUES (41, NULL, 9, NULL, NULL, '2023-11-23 09:00:00+00', '2023-11-23 09:30:00+00', '2023-11-23 16:25:55.297666+00',
-                                '2023-11-23 16:26:20.451054+00', -10, -10, $URGENCY, 3, NULL, true, false, true);
+                                '2023-11-23 16:26:20.451054+00', -410, -410, $URGENCY, 3, NULL, true, false, true);
                                 INSERT INTO darts.case_transcription_ae (tra_id, cas_id) VALUES (41,-1);
                                 INSERT INTO darts.hearing_transcription_ae (tra_id, hea_id) VALUES (41,-1);
                                 INSERT INTO darts.transcription_workflow (trw_id, tra_id, trs_id, workflow_actor, workflow_ts)
-                                VALUES (41, 41, 1, -10, '2023-11-23 16:25:55.304517+00');
+                                VALUES (41, 41, 1, -410, '2023-11-23 16:25:55.304517+00');
                                 INSERT INTO darts.transcription_workflow (trw_id, tra_id, trs_id, workflow_actor, workflow_ts)
-                                VALUES (42, 41, 2, -10, '2023-11-23 16:25:55.338405+00');
+                                VALUES (42, 41, 2, -410, '2023-11-23 16:25:55.338405+00');
                                 INSERT INTO darts.transcription_workflow (trw_id, tra_id, trs_id, workflow_actor, workflow_ts)
-                                VALUES (43, 41, 3, -10, '2023-11-23 16:26:20.441633+00');
+                                VALUES (43, 41, 3, -410, '2023-11-23 16:26:20.441633+00');
                                 INSERT INTO darts.transcription_workflow (trw_id, tra_id, trs_id, workflow_actor, workflow_ts)
-                                VALUES (44, 41, 5, -10, '2023-11-23 16:30:00.0+00');
+                                VALUES (44, 41, 5, -410, '2023-11-23 16:30:00.0+00');
                                 INSERT INTO darts.transcription_workflow (trw_id, tra_id, trs_id, workflow_actor, workflow_ts)
-                                VALUES (45, 41, 3, -10, '$MINUS_89_DAYS');
+                                VALUES (45, 41, 3, -410, '$MINUS_89_DAYS');
                                 
                                 -- Add transcript request to test transcriptions do not show after 90 days
                                 INSERT INTO darts.transcription (tra_id, ctr_id, trt_id, transcription_object_id, requested_by, start_ts, end_ts,
                                 created_ts, last_modified_ts, last_modified_by, created_by, tru_id, trs_id, hearing_date,
                                 is_manual_transcription, hide_request_from_requestor, is_current)
                                 VALUES (602, NULL, 9, NULL, NULL, '2023-11-23 09:00:00+00', '2023-11-23 09:30:00+00', '2023-11-23 16:25:55.297666+00',
-                                '2023-11-23 16:26:20.451054+00', -10, -10, $URGENCY, 3, NULL, true, false, true);
+                                '2023-11-23 16:26:20.451054+00', -410, -410, $URGENCY, 3, NULL, true, false, true);
                                 INSERT INTO darts.case_transcription_ae (tra_id, cas_id) VALUES (602,-1);
                                 INSERT INTO darts.hearing_transcription_ae (tra_id, hea_id) VALUES (602,-1);
                                 INSERT INTO darts.transcription_workflow (trw_id, tra_id, trs_id, workflow_actor, workflow_ts)
-                                VALUES (100, 602, 1, -10, '$MINUS_90_DAYS');
+                                VALUES (100, 602, 1, -410, '$MINUS_90_DAYS');
 
                                 -- Your work > To do: With Transcriber
                                 INSERT INTO darts.transcription (tra_id, ctr_id, trt_id, transcription_object_id, requested_by, start_ts, end_ts,
                                 created_ts, last_modified_ts, last_modified_by, created_by, tru_id, trs_id, hearing_date,
                                 is_manual_transcription, hide_request_from_requestor, is_current)
                                 VALUES (81, NULL, 9, NULL, NULL, '2023-11-23 09:20:00+00', '2023-11-23 09:30:00+00', '2023-11-23 17:45:14.938855+00',
-                                '2023-11-23 17:45:51.1549+00', -10, -10, $URGENCY, 5, NULL, true, false, true);
+                                '2023-11-23 17:45:51.1549+00', -410, -410, $URGENCY, 5, NULL, true, false, true);
                                 INSERT INTO darts.case_transcription_ae (tra_id, cas_id) VALUES (81,-1);
                                 INSERT INTO darts.hearing_transcription_ae (tra_id, hea_id) VALUES (81,-1);
                                 INSERT INTO darts.transcription_workflow (trw_id, tra_id, trs_id, workflow_actor, workflow_ts)
-                                VALUES (81, 81, 1, -10, '$MINUS_89_DAYS');
+                                VALUES (81, 81, 1, -410, '$MINUS_89_DAYS');
                                 INSERT INTO darts.transcription_workflow (trw_id, tra_id, trs_id, workflow_actor, workflow_ts)
-                                VALUES (82, 81, 2, -10, '$MINUS_89_DAYS');
+                                VALUES (82, 81, 2, -410, '$MINUS_89_DAYS');
                                 INSERT INTO darts.transcription_workflow (trw_id, tra_id, trs_id, workflow_actor, workflow_ts)
-                                VALUES (101, 81, 3, -10, '$MINUS_89_DAYS');
+                                VALUES (101, 81, 3, -410, '$MINUS_89_DAYS');
                                 INSERT INTO darts.transcription_workflow (trw_id, tra_id, trs_id, workflow_actor, workflow_ts)
-                                VALUES (102, 81, 5, -10, '$MINUS_89_DAYS');
+                                VALUES (102, 81, 5, -410, '$MINUS_89_DAYS');
                                                                 
                                 -- Add additional Your work transcription to test transcriptions do not show after 90 days
                                 INSERT INTO darts.transcription (tra_id, ctr_id, trt_id, transcription_object_id, requested_by, start_ts, end_ts,
                                 created_ts, last_modified_ts, last_modified_by, created_by, tru_id, trs_id, hearing_date,
                                 is_manual_transcription, hide_request_from_requestor, is_current)
                                 VALUES (601, NULL, 9, NULL, NULL, '2023-11-23 09:20:00+00', '2024-07-01 09:30:00+00', '2024-07-01 17:45:14.938855+00',
-                                '2024-07-01 17:45:51.1549+00', -10, -10, $URGENCY, 5, NULL, true, false, true);
+                                '2024-07-01 17:45:51.1549+00', -410, -410, $URGENCY, 5, NULL, true, false, true);
                                 INSERT INTO darts.case_transcription_ae (tra_id, cas_id) VALUES (601,-1);
                                 INSERT INTO darts.hearing_transcription_ae (tra_id, hea_id) VALUES (601,-1);
                                 INSERT INTO darts.transcription_workflow (trw_id, tra_id, trs_id, workflow_actor, workflow_ts)
-                                VALUES (103, 601, 1, -10, '$MINUS_90_DAYS');
+                                VALUES (103, 601, 1, -410, '$MINUS_90_DAYS');
                                 INSERT INTO darts.transcription_workflow (trw_id, tra_id, trs_id, workflow_actor, workflow_ts)
-                                VALUES (104, 601, 2, -10, '$MINUS_90_DAYS');
+                                VALUES (104, 601, 2, -410, '$MINUS_90_DAYS');
                                 INSERT INTO darts.transcription_workflow (trw_id, tra_id, trs_id, workflow_actor, workflow_ts)
-                                VALUES (105, 601, 3, -10, '$MINUS_90_DAYS');
+                                VALUES (105, 601, 3, -410, '$MINUS_90_DAYS');
                                 INSERT INTO darts.transcription_workflow (trw_id, tra_id, trs_id, workflow_actor, workflow_ts)
-                                VALUES (106, 601, 5, -10, '$MINUS_90_DAYS');
+                                VALUES (106, 601, 5, -410, '$MINUS_90_DAYS');
                                                                 
                                 -- This transcription would be hidden from Your work > Completed today (transcriber-view?assigned=true)
                                 INSERT INTO darts.transcription (tra_id, ctr_id, trt_id, transcription_object_id, requested_by, start_ts, end_ts,
                                 created_ts, last_modified_ts, last_modified_by, created_by, tru_id, trs_id, hearing_date,
                                 is_manual_transcription, hide_request_from_requestor, is_current)
                                 VALUES (101, NULL, 9, NULL, NULL, '2023-11-24 09:00:00+00', '2023-11-24 09:30:00+00', '2023-11-24 12:37:00.782036+00',
-                                '2023-11-24 12:53:42.870475+00', -10, -10, $URGENCY, 6, NULL, true, false, true);
+                                '2023-11-24 12:53:42.870475+00', -410, -410, $URGENCY, 6, NULL, true, false, true);
                                 INSERT INTO darts.case_transcription_ae (tra_id, cas_id) VALUES (101,-1);
                                 INSERT INTO darts.hearing_transcription_ae (tra_id, hea_id) VALUES (101,-1);
                                 INSERT INTO darts.transcription_workflow (trw_id, tra_id, trs_id, workflow_actor, workflow_ts)
-                                VALUES (121, 101, 1, -10, '2023-11-24 12:37:00.812692+00');
+                                VALUES (121, 101, 1, -410, '2023-11-24 12:37:00.812692+00');
                                 INSERT INTO darts.transcription_workflow (trw_id, tra_id, trs_id, workflow_actor, workflow_ts)
-                                VALUES (122, 101, 2, -10, '2023-11-24 12:37:00.846763+00');
+                                VALUES (122, 101, 2, -410, '2023-11-24 12:37:00.846763+00');
                                 INSERT INTO darts.transcription_workflow (trw_id, tra_id, trs_id, workflow_actor, workflow_ts)
-                                VALUES (123, 101, 3, -10, '2023-11-24 12:37:18.762383+00');
+                                VALUES (123, 101, 3, -410, '2023-11-24 12:37:18.762383+00');
                                 INSERT INTO darts.transcription_workflow (trw_id, tra_id, trs_id, workflow_actor, workflow_ts)
-                                VALUES (124, 101, 5, -10, '2023-11-24 12:37:34.976469+00');
+                                VALUES (124, 101, 5, -410, '2023-11-24 12:37:34.976469+00');
                                 INSERT INTO darts.transcription_workflow (trw_id, tra_id, trs_id, workflow_actor, workflow_ts)
-                                VALUES (141, 101, 6, -10, '2023-11-24 12:53:42.839577+00');
+                                VALUES (141, 101, 6, -410, '2023-11-24 12:53:42.839577+00');
 
                                 -- Your work > Completed today: Complete
                                 INSERT INTO darts.transcription (tra_id, ctr_id, trt_id, transcription_object_id, requested_by, start_ts, end_ts,
                                 created_ts, last_modified_ts, last_modified_by, created_by, tru_id, trs_id, hearing_date,
                                 is_manual_transcription, hide_request_from_requestor, is_current)
-                                VALUES (121, NULL, 9, NULL, NULL, '$TODAYS_DATE', '$TODAYS_DATE', '$TODAYS_DATE', '$TODAYS_DATE', -10,
-                                -10, $URGENCY, 6, NULL, true, false, true);
+                                VALUES (121, NULL, 9, NULL, NULL, '$TODAYS_DATE', '$TODAYS_DATE', '$TODAYS_DATE', '$TODAYS_DATE', -410,
+                                -410, $URGENCY, 6, NULL, true, false, true);
                                 INSERT INTO darts.case_transcription_ae (tra_id, cas_id) VALUES (121,-1);
                                 INSERT INTO darts.hearing_transcription_ae (tra_id, hea_id) VALUES (121,-1);
                                 INSERT INTO darts.transcription_workflow (trw_id, tra_id, trs_id, workflow_actor, workflow_ts)
-                                VALUES (161, 121, 1, -10, '2023-11-24 12:37:34.976469+00');
+                                VALUES (161, 121, 1, -410, '2023-11-24 12:37:34.976469+00');
                                 INSERT INTO darts.transcription_workflow (trw_id, tra_id, trs_id, workflow_actor, workflow_ts)
-                                VALUES (162, 121, 2, -10, '$TODAYS_DATE');
+                                VALUES (162, 121, 2, -410, '$TODAYS_DATE');
                                 INSERT INTO darts.transcription_workflow (trw_id, tra_id, trs_id, workflow_actor, workflow_ts)
-                                VALUES (163, 121, 3, -10, '$TODAYS_DATE');
+                                VALUES (163, 121, 3, -410, '$TODAYS_DATE');
                                 INSERT INTO darts.transcription_workflow (trw_id, tra_id, trs_id, workflow_actor, workflow_ts)
-                                VALUES (164, 121, 5, -10, '$TODAYS_DATE');
+                                VALUES (164, 121, 5, -410, '$TODAYS_DATE');
                                 INSERT INTO darts.transcription_workflow (trw_id, tra_id, trs_id, workflow_actor, workflow_ts)
-                                VALUES (165, 121, 6, -10, '$TODAYS_DATE');
+                                VALUES (165, 121, 6, -410, '$TODAYS_DATE');
                                                                 
                                 -- test is_current false is not returned
                                 INSERT INTO darts.transcription (tra_id, ctr_id, trt_id, transcription_object_id, requested_by, start_ts, end_ts,
                                 created_ts, last_modified_ts, last_modified_by, created_by, tru_id, trs_id, hearing_date,
                                 is_manual_transcription, hide_request_from_requestor, is_current)
                                 VALUES (150, NULL, 9, NULL, NULL, '2023-11-23 09:00:00+00', '2023-11-23 09:30:00+00', '2023-11-23 16:25:55.297666+00',
-                                '2023-11-23 16:26:20.451054+00', -10, -10, $URGENCY, 3, NULL, true, false, false);
+                                '2023-11-23 16:26:20.451054+00', -410, -410, $URGENCY, 3, NULL, true, false, false);
                                 INSERT INTO darts.case_transcription_ae (tra_id, cas_id) VALUES (150,-1);
                                 INSERT INTO darts.hearing_transcription_ae (tra_id, hea_id) VALUES (150,-1);
                                 INSERT INTO darts.transcription_workflow (trw_id, tra_id, trs_id, workflow_actor, workflow_ts)
-                                VALUES (241, 150, 1, -10, '2023-11-23 16:25:55.304517+00');
+                                VALUES (241, 150, 1, -410, '2023-11-23 16:25:55.304517+00');
                                 INSERT INTO darts.transcription_workflow (trw_id, tra_id, trs_id, workflow_actor, workflow_ts)
-                                VALUES (242, 150, 2, -10, '2023-11-23 16:25:55.338405+00');
+                                VALUES (242, 150, 2, -410, '2023-11-23 16:25:55.338405+00');
                                 INSERT INTO darts.transcription_workflow (trw_id, tra_id, trs_id, workflow_actor, workflow_ts)
-                                VALUES (243, 150, 3, -10, '2023-11-23 16:26:20.441633+00');
+                                VALUES (243, 150, 3, -410, '2023-11-23 16:26:20.441633+00');
                                 INSERT INTO darts.transcription_workflow (trw_id, tra_id, trs_id, workflow_actor, workflow_ts)
-                                VALUES (244, 150, 5, -10, '2023-11-23 16:30:00.0+00');
+                                VALUES (244, 150, 5, -410, '2023-11-23 16:30:00.0+00');
                                 INSERT INTO darts.transcription_workflow (trw_id, tra_id, trs_id, workflow_actor, workflow_ts)
-                                VALUES (245, 150, 3, -10, '$MINUS_89_DAYS');
+                                VALUES (245, 150, 3, -410, '$MINUS_89_DAYS');
                                                                 
                                 INSERT INTO darts.transcription (tra_id, ctr_id, trt_id, transcription_object_id, requested_by, start_ts, end_ts,
                                 created_ts, last_modified_ts, last_modified_by, created_by, tru_id, trs_id, hearing_date,
                                 is_manual_transcription, hide_request_from_requestor, is_current)
                                 VALUES (151, NULL, 9, NULL, NULL, '2023-11-23 09:20:00+00', '2023-11-23 09:30:00+00', '2023-11-23 17:45:14.938855+00',
-                                '2023-11-23 17:45:51.1549+00', -10, -10, $URGENCY, 5, NULL, true, false, false);
+                                '2023-11-23 17:45:51.1549+00', -410, -410, $URGENCY, 5, NULL, true, false, false);
                                 INSERT INTO darts.case_transcription_ae (tra_id, cas_id) VALUES (151,-1);
                                 INSERT INTO darts.hearing_transcription_ae (tra_id, hea_id) VALUES (151,-1);
                                 INSERT INTO darts.transcription_workflow (trw_id, tra_id, trs_id, workflow_actor, workflow_ts)
-                                VALUES (246, 151, 1, -10, '$MINUS_89_DAYS');
+                                VALUES (246, 151, 1, -410, '$MINUS_89_DAYS');
                                 INSERT INTO darts.transcription_workflow (trw_id, tra_id, trs_id, workflow_actor, workflow_ts)
-                                VALUES (247, 151, 2, -10, '$MINUS_89_DAYS');
+                                VALUES (247, 151, 2, -410, '$MINUS_89_DAYS');
                                 INSERT INTO darts.transcription_workflow (trw_id, tra_id, trs_id, workflow_actor, workflow_ts)
-                                VALUES (248, 151, 3, -10, '$MINUS_89_DAYS');
+                                VALUES (248, 151, 3, -410, '$MINUS_89_DAYS');
                                 INSERT INTO darts.transcription_workflow (trw_id, tra_id, trs_id, workflow_actor, workflow_ts)
-                                VALUES (249, 151, 5, -10, '$MINUS_89_DAYS');
+                                VALUES (249, 151, 5, -410, '$MINUS_89_DAYS');
                                                                 
                                 """.replace(PLACEHOLDER_URGENCY_ID, generatedUrgency ? "1" : "NULL")
                                 .replace(TODAYS_DATE, todaysDate)
@@ -515,8 +515,8 @@ class TranscriptionControllerGetTranscriberTranscriptsIntTest extends Integratio
                                 DELETE FROM darts.transcription WHERE tra_id IN (41, 81, 101, 121, 150, 151, 601, 602);
 
                                 DELETE FROM darts.security_group_courthouse_ae WHERE grp_id=-4 AND cth_id=-1;
-                                DELETE FROM darts.security_group_user_account_ae WHERE usr_id=-10 AND grp_id=-4;
-                                DELETE FROM darts.user_account WHERE usr_id=-10;
+                                DELETE FROM darts.security_group_user_account_ae WHERE usr_id=-410 AND grp_id=-4;
+                                DELETE FROM darts.user_account WHERE usr_id=-410;
 
                                 DELETE FROM darts.hearing WHERE hea_id=-1;
                                 DELETE FROM darts.court_case WHERE cas_id=-1;
