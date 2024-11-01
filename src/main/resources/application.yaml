@@ -289,6 +289,7 @@ darts:
         get-storage-accounts: /api/v1/getStorageAccounts
         get-master-index-field-by-record-class-schema-path: /api/v1/getMasterIndexFieldByRecordClassSchema
         get-profile-entitlements-path: /api/v1/getProfileEntitlements
+        add-async-search-path: /api/v1/addAsyncSearch
     dets:
       sas-endpoint: ${DETS_SAS_URL_ENDPOINT:}
       container-name: darts-migration
