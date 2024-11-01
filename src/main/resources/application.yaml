@@ -192,7 +192,6 @@ darts:
         arm-minimum:
           weeks: 30
     pending-retention-duration: 7d
-    inbound-to-unstructured-limit: 100
   daily-list:
     housekeeping:
       enabled: true
@@ -285,7 +284,9 @@ darts:
       api-url:
         update-metadata-path: /api/v3/UpdateMetadata
         download-data-path: /api/v1/downloadBlob/{cabinet_id}/{record_id}/{file_id}
-      ## place holder for RPO paths rpo-url:
+      rpo-url:
+        get-record-management-matter-path: /api/v1/getRecordManagementMatter
+
     dets:
       sas-endpoint: ${DETS_SAS_URL_ENDPOINT:}
       container-name: darts-migration
@@ -339,6 +340,14 @@ darts:
     url: ${DARTS_PORTAL_URL:https://darts.staging.apps.hmcts.net}
   automated:
     task:
+      common-config:
+        thread-pool-size: 5
+        system-user-email: ${SYSTEM_USER_EMAIL:}
+        system-user-guid-map:
+          housekeeping: ecfd1f14-c9b6-4f15-94c7-cc60e53f2c7a
+          dailylist-processor: f6f71122-ff85-4ebe-93d9-1706460dbea5
+      inbound-to-unstructured:
+        threads: 20
       process-e2e-arm-rpo: ${PROCESS_E2E_ARM_RPO:false}
       arm-rpo-duration: ${ARM_RPO_DURATION:1h}
       thread-pool-size: 5
@@ -352,8 +361,10 @@ darts:
       dets-to-arm-batch-processor:
         max-arm-manifest-items: 100
         manifest-file-prefix: DETS
-      expiry-deletion:
+      case-expiry-deletion:
         enabled: ${CASE_EXPIRY_DELETION_ENABLED:false}
+      unstructured-audio-deleter:
+        minimum-duration-in-unstructured: 210d #10 weeks
       audio-linking:
         audio-buffer: 0s
   annotations:

@@ -72,7 +72,7 @@ class InboundToUnstructuredProcessorIntTest extends IntegrationBase {
         externalObjectDirectoryStub.createAndSaveEod(media4, FAILURE, UNSTRUCTURED, eod -> eod.setTransferAttempts(10));
 
         // when
-        inboundToUnstructuredProcessor.processInboundToUnstructured();
+        inboundToUnstructuredProcessor.processInboundToUnstructured(100);
 
         // then
         assertThat(externalObjectDirectoryStub.findByMediaStatusAndType(media1, STORED, UNSTRUCTURED)).hasSize(1);
@@ -96,7 +96,7 @@ class InboundToUnstructuredProcessorIntTest extends IntegrationBase {
         assertThat(existingUnstructuredStored).isEmpty();
 
         // when
-        inboundToUnstructuredProcessor.processInboundToUnstructured();
+        inboundToUnstructuredProcessor.processInboundToUnstructured(100);
 
         // then
         var createdUnstructuredStored = eodRepository.findByStatusAndType(storedStatus(), unstructuredLocation());
@@ -124,7 +124,7 @@ class InboundToUnstructuredProcessorIntTest extends IntegrationBase {
         assertThat(unstructuredBeforeProcessing).hasSize(1);
 
         // when
-        inboundToUnstructuredProcessor.processInboundToUnstructured();
+        inboundToUnstructuredProcessor.processInboundToUnstructured(100);
 
         // then
         var unstructuredAfterProcessing = eodRepository.findByStatusAndType(storedStatus(), unstructuredLocation());
@@ -149,7 +149,7 @@ class InboundToUnstructuredProcessorIntTest extends IntegrationBase {
         assertThat(unstructuredBeforeProcessing).hasSize(1);
 
         // when
-        inboundToUnstructuredProcessor.processInboundToUnstructured();
+        inboundToUnstructuredProcessor.processInboundToUnstructured(100);
 
         // then
         var unstructuredAfterProcessing = eodRepository.findByStatusAndType(storedStatus(), unstructuredLocation());
@@ -167,7 +167,7 @@ class InboundToUnstructuredProcessorIntTest extends IntegrationBase {
         assertThat(existingUnstructuredStored).isEmpty();
 
         // when
-        inboundToUnstructuredProcessor.processInboundToUnstructured();
+        inboundToUnstructuredProcessor.processInboundToUnstructured(100);
 
         // then
         var createdUnstructuredFailed = eodRepository.findByStatusAndType(failureStatus(), unstructuredLocation());

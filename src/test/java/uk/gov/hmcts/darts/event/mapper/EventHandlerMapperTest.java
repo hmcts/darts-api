@@ -25,7 +25,7 @@ class EventHandlerMapperTest {
 
     private EventHandlerMapper eventHandlerMapper;
 
-    private void setUp() {
+    private void setUpData() {
         when(authorisationApi.getCurrentUser()).thenReturn(USER_ACCOUNT_ENTITY);
 
         eventHandlerMapper = new EventHandlerMapper(authorisationApi);
@@ -33,7 +33,7 @@ class EventHandlerMapperTest {
 
     @Test
     void mapsEventMapperToEventHandlerEntityCorrectly() {
-        setUp();
+        setUpData();
         var eventMapping = someEventMapping();
 
         assertThat(eventHandlerMapper.mapFromEventMappingAndMakeActive(eventMapping))
@@ -50,7 +50,7 @@ class EventHandlerMapperTest {
     @NullSource
     @ValueSource(strings = {"", " "})
     void mapsEventMapperToEventHandlerEntityCorrectlyWhenHandlerIsEmpty(String handlerName) {
-        setUp();
+        setUpData();
         var eventMapping = someEventMapping();
         eventMapping.setHandler(handlerName);
 

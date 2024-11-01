@@ -50,8 +50,6 @@ darts:
       max-results: 5
   automated-tasks-pod: ${AUTOMATED_TASK_MODE:true}
   api-pod: ${API_MODE:true}
-  data-management:
-    inbound-to-unstructured-limit: 100
   gateway:
     url: ${DARTS_GATEWAY_URL:http://localhost:${wiremock.server.port}}
   audio:
@@ -86,8 +84,9 @@ darts:
     max-file-size: 20
   automated:
     task:
-      system-user-email: dartssystemuser@hmcts.net
-      expiry-deletion:
+      common-config:
+        system-user-email: dartssystemuser@hmcts.net
+      case-expiry-deletion:
         enabled: true
 logging:
   level:

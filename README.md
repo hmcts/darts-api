@@ -70,8 +70,18 @@ There are few attributes which doesn't use Azure Keyvault secrets. Those environ
 | ACTIVE_DIRECTORY_B2C_AUTH_URI | https://hmctsstgextid.b2clogin.com/hmctsstgextid.onmicrosoft.com |
 | ARM_URL                       |                                                                  |  
 
+
 To obtain the secret value, you may retrieve the keys from the Azure Vault by running the `az keyvault secret show`
 command in the terminal. E.g. to obtain the value for `GOVUK_NOTIFY_API_KEY`, you should run:
+
+You may need to install Azure CLI, jq and postgres you can do this by running
+```
+brew update
+brew install azure-cli 
+brew install jq
+brew install postgresql@15
+az login
+```
 
 ```
 az keyvault secret show --name GovukNotifyTestApiKey --vault-name darts-stg
@@ -169,7 +179,9 @@ docker run -p 10000:10000 -p 10001:10001 -p 10002:10002 \
 
 This is used to trim, merge, concatenate and convert audio files, so run this in a mac terminal:-
 
+```
 brew install ffmpeg
+```
 
 #### Connection String Configuration
 
@@ -374,6 +386,19 @@ To restore the staging database, tables and data, into a locally running databas
 The script will check for required executables and prompt before continuing.
 
 _Disclaimer: The script has been written to work using `bash`._
+
+## Dev/PR environments
+
+Please see the separate [Dev environment](https://tools.hmcts.net/confluence/display/DMP/Dev+environment) page on confluence for details.
+
+This repo contains overrides for the default dev environment configuration, controlled by PR labels.
+
+### Supported labels
+
+| Label                  | Usages                                                                                           |
+|------------------------|--------------------------------------------------------------------------------------------------|
+| enable_darts_portal    | Deploys a DARTS portal instance alongside the API in the dev environment                         |
+| enable_darts_fullstack | Not yet supported, but will deploy the full DARTS stack alongside the API in the dev environment |
 
 ## License
 
