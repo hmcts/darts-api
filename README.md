@@ -391,7 +391,14 @@ _Disclaimer: The script has been written to work using `bash`._
 
 Please see the separate [Dev environment](https://tools.hmcts.net/confluence/display/DMP/Dev+environment) page on confluence for details.
 
-This repo contains overrides for the default dev environment configuration. For more details see the  [Dev chart overrides README](charts-dev-overrides/README.md), within the `charts-dev-overrides` directory.
+This repo contains overrides for the default dev environment configuration, controlled by PR labels.
+
+### Supported labels
+
+| Label                  | Usages                                                                                           |
+|------------------------|--------------------------------------------------------------------------------------------------|
+| enable_darts_portal    | Deploys a DARTS portal instance alongside the API in the dev environment                         |
+| enable_darts_fullstack | Not yet supported, but will deploy the full DARTS stack alongside the API in the dev environment |
 
 ## License
 
