@@ -5,6 +5,8 @@ import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -17,6 +19,7 @@ import uk.gov.hmcts.darts.arm.model.rpo.MasterIndexFieldByRecordClassSchema;
 import uk.gov.hmcts.darts.arm.service.ArmRpoService;
 import uk.gov.hmcts.darts.common.entity.ArmRpoExecutionDetailEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
+import uk.gov.hmcts.darts.common.repository.ArmRpoExecutionDetailRepository;
 
 import java.util.Collections;
 import java.util.List;
@@ -30,10 +33,14 @@ import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class ArmRpoApiGetMasterIndexFieldByRecordClassSchemaTest {
+
+    private static final Integer EXECUTION_ID = 1;
+    private static final String BEARER_TOKEN = "token";
 
     @Mock
     private ArmRpoClient armRpoClient;
@@ -41,18 +48,27 @@ class ArmRpoApiGetMasterIndexFieldByRecordClassSchemaTest {
     @Mock
     private ArmRpoService armRpoService;
 
+    @Mock
+    private ArmRpoExecutionDetailRepository armRpoExecutionDetailRepository;
+
     @InjectMocks
     private ArmRpoApiImpl armRpoApi;
+
+    @Captor
+    private ArgumentCaptor<ArmRpoExecutionDetailEntity> armRpoExecutionDetailEntityArgumentCaptor;
 
     private ArmRpoExecutionDetailEntity armRpoExecutionDetailEntity;
     private UserAccountEntity userAccount;
 
     private static final ArmRpoHelperMocks ARM_RPO_HELPER_MOCKS = new ArmRpoHelperMocks();
 
+
     @BeforeEach
     void setUp() {
         armRpoExecutionDetailEntity = new ArmRpoExecutionDetailEntity();
+        armRpoExecutionDetailEntity.setId(EXECUTION_ID);
         userAccount = new UserAccountEntity();
+        armRpoExecutionDetailEntityArgumentCaptor = ArgumentCaptor.forClass(ArmRpoExecutionDetailEntity.class);
     }
 
     @Test
@@ -64,6 +80,7 @@ class ArmRpoApiGetMasterIndexFieldByRecordClassSchemaTest {
         masterIndexField1.setPropertyName("propertyName");
         masterIndexField1.setPropertyType("propertyType");
         masterIndexField1.setIsMasked(true);
+        
         MasterIndexFieldByRecordClassSchemaResponse.MasterIndexField masterIndexField2 = new MasterIndexFieldByRecordClassSchemaResponse.MasterIndexField();
         masterIndexField2.setMasterIndexFieldId("2");
         masterIndexField2.setDisplayName("displayName");
@@ -71,19 +88,27 @@ class ArmRpoApiGetMasterIndexFieldByRecordClassSchemaTest {
         masterIndexField2.setPropertyType("propertyType");
         masterIndexField2.setIsMasked(false);
 
+        MasterIndexFieldByRecordClassSchemaResponse.MasterIndexField masterIndexField3 = new MasterIndexFieldByRecordClassSchemaResponse.MasterIndexField();
+        masterIndexField3.setMasterIndexFieldId("3");
+        masterIndexField3.setDisplayName("displayName");
+        masterIndexField3.setPropertyName("bf_018");
+        masterIndexField3.setPropertyType("propertyType");
+        masterIndexField3.setIsMasked(false);
+
         MasterIndexFieldByRecordClassSchemaResponse response = new MasterIndexFieldByRecordClassSchemaResponse();
-        response.setMasterIndexFields(List.of(masterIndexField1, masterIndexField2));
+        response.setMasterIndexFields(List.of(masterIndexField1, masterIndexField2, masterIndexField3));
 
         when(armRpoService.getArmRpoExecutionDetailEntity(anyInt())).thenReturn(armRpoExecutionDetailEntity);
         when(armRpoClient.getMasterIndexFieldByRecordClassSchema(anyString(), any())).thenReturn(response);
 
         // when
         List<MasterIndexFieldByRecordClassSchema> result = armRpoApi.getMasterIndexFieldByRecordClassSchema(
-            "token", 1, ArmRpoHelper.getMasterIndexFieldByRecordClassSchemaPrimaryRpoState(), userAccount);
+            BEARER_TOKEN, EXECUTION_ID, ArmRpoHelper.getMasterIndexFieldByRecordClassSchemaPrimaryRpoState(), userAccount);
 
         // then
         assertNotNull(result);
         assertEquals(2, result.size());
+
         MasterIndexFieldByRecordClassSchema masterIndexFieldByRecordClassSchema = result.getFirst();
         assertEquals("1", masterIndexFieldByRecordClassSchema.getMasterIndexField());
         assertEquals("displayName", masterIndexFieldByRecordClassSchema.getDisplayName());
@@ -91,12 +116,13 @@ class ArmRpoApiGetMasterIndexFieldByRecordClassSchemaTest {
         assertEquals("propertyType", masterIndexFieldByRecordClassSchema.getPropertyType());
         assertTrue(masterIndexFieldByRecordClassSchema.getIsMasked());
 
-        verify(armRpoService).updateArmRpoStateAndStatus(any(),
+        verify(armRpoService).updateArmRpoStateAndStatus(armRpoExecutionDetailEntityArgumentCaptor.capture(),
                                                          eq(ARM_RPO_HELPER_MOCKS.getGetMasterIndexFieldByRecordClassSchemaPrimaryRpoState()),
                                                          eq(ARM_RPO_HELPER_MOCKS.getInProgressRpoStatus()),
-                                                         any());
-        verify(armRpoService).updateArmRpoStatus(any(), eq(ARM_RPO_HELPER_MOCKS.getCompletedRpoStatus()), any());
-
+                                                         eq(userAccount));
+        assertEquals("2", armRpoExecutionDetailEntityArgumentCaptor.getValue().getSortingField());
+        verify(armRpoService).updateArmRpoStatus(eq(armRpoExecutionDetailEntity), eq(ARM_RPO_HELPER_MOCKS.getCompletedRpoStatus()), eq(userAccount));
+        verifyNoMoreInteractions(armRpoService);
     }
 
     @Test
@@ -105,12 +131,14 @@ class ArmRpoApiGetMasterIndexFieldByRecordClassSchemaTest {
         when(armRpoClient.getMasterIndexFieldByRecordClassSchema(anyString(), any())).thenThrow(FeignException.class);
 
         assertThrows(ArmRpoException.class, () -> armRpoApi.getMasterIndexFieldByRecordClassSchema(
-            "token", 1, ArmRpoHelper.getMasterIndexFieldByRecordClassSchemaPrimaryRpoState(), userAccount));
-        verify(armRpoService).updateArmRpoStateAndStatus(any(),
+            BEARER_TOKEN, EXECUTION_ID, ArmRpoHelper.getMasterIndexFieldByRecordClassSchemaPrimaryRpoState(), userAccount));
+
+        verify(armRpoService).updateArmRpoStateAndStatus(eq(armRpoExecutionDetailEntity),
                                                          eq(ARM_RPO_HELPER_MOCKS.getGetMasterIndexFieldByRecordClassSchemaPrimaryRpoState()),
                                                          eq(ARM_RPO_HELPER_MOCKS.getInProgressRpoStatus()),
-                                                         any());
-        verify(armRpoService).updateArmRpoStatus(any(), eq(ARM_RPO_HELPER_MOCKS.getFailedRpoStatus()), any());
+                                                         eq(userAccount));
+        verify(armRpoService).updateArmRpoStatus(eq(armRpoExecutionDetailEntity), eq(ARM_RPO_HELPER_MOCKS.getFailedRpoStatus()), eq(userAccount));
+        verifyNoMoreInteractions(armRpoService);
     }
 
     @Test
@@ -119,12 +147,13 @@ class ArmRpoApiGetMasterIndexFieldByRecordClassSchemaTest {
         when(armRpoClient.getMasterIndexFieldByRecordClassSchema(anyString(), any())).thenReturn(null);
 
         assertThrows(ArmRpoException.class, () -> armRpoApi.getMasterIndexFieldByRecordClassSchema(
-            "token", 1, ArmRpoHelper.getMasterIndexFieldByRecordClassSchemaPrimaryRpoState(), userAccount));
-        verify(armRpoService).updateArmRpoStateAndStatus(any(),
+            BEARER_TOKEN, EXECUTION_ID, ArmRpoHelper.getMasterIndexFieldByRecordClassSchemaPrimaryRpoState(), userAccount));
+        verify(armRpoService).updateArmRpoStateAndStatus(eq(armRpoExecutionDetailEntity),
                                                          eq(ARM_RPO_HELPER_MOCKS.getGetMasterIndexFieldByRecordClassSchemaPrimaryRpoState()),
                                                          eq(ARM_RPO_HELPER_MOCKS.getInProgressRpoStatus()),
-                                                         any());
-        verify(armRpoService).updateArmRpoStatus(any(), eq(ARM_RPO_HELPER_MOCKS.getFailedRpoStatus()), any());
+                                                         eq(userAccount));
+        verify(armRpoService).updateArmRpoStatus(eq(armRpoExecutionDetailEntity), eq(ARM_RPO_HELPER_MOCKS.getFailedRpoStatus()), eq(userAccount));
+        verifyNoMoreInteractions(armRpoService);
     }
 
     @Test
@@ -136,16 +165,19 @@ class ArmRpoApiGetMasterIndexFieldByRecordClassSchemaTest {
         when(armRpoClient.getMasterIndexFieldByRecordClassSchema(anyString(), any())).thenReturn(response);
 
         assertThrows(ArmRpoException.class, () -> armRpoApi.getMasterIndexFieldByRecordClassSchema(
-            "token", 1, ArmRpoHelper.getMasterIndexFieldByRecordClassSchemaPrimaryRpoState(), userAccount));
-        verify(armRpoService).updateArmRpoStateAndStatus(any(),
+            BEARER_TOKEN, EXECUTION_ID, ArmRpoHelper.getMasterIndexFieldByRecordClassSchemaPrimaryRpoState(), userAccount));
+        verify(armRpoService).updateArmRpoStateAndStatus(eq(armRpoExecutionDetailEntity),
                                                          eq(ARM_RPO_HELPER_MOCKS.getGetMasterIndexFieldByRecordClassSchemaPrimaryRpoState()),
                                                          eq(ARM_RPO_HELPER_MOCKS.getInProgressRpoStatus()),
-                                                         any());
-        verify(armRpoService).updateArmRpoStatus(any(), eq(ARM_RPO_HELPER_MOCKS.getFailedRpoStatus()), any());
+                                                         eq(userAccount));
+        verify(armRpoService).updateArmRpoStatus(eq(armRpoExecutionDetailEntity), eq(ARM_RPO_HELPER_MOCKS.getFailedRpoStatus()), eq(userAccount));
+        verifyNoMoreInteractions(armRpoService);
     }
 
     @AfterAll
     static void close() {
         ARM_RPO_HELPER_MOCKS.close();
     }
+
+
 }

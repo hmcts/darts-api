@@ -67,28 +67,9 @@ class ArpRpoApiGetMasterIndexFieldByRecordClassSchemaIntTest extends Integration
         assertEquals("propertyName", masterIndexFieldByRecordClassSchema.getPropertyName());
         assertEquals("propertyType", masterIndexFieldByRecordClassSchema.getPropertyType());
         assertTrue(masterIndexFieldByRecordClassSchema.getIsMasked());
+
     }
 
-    private static @NotNull MasterIndexFieldByRecordClassSchemaResponse getMasterIndexFieldByRecordClassSchemaResponse(String propertyName1,
-                                                                                                                       String propertyName2) {
-        MasterIndexFieldByRecordClassSchemaResponse.MasterIndexField masterIndexField1 = new MasterIndexFieldByRecordClassSchemaResponse.MasterIndexField();
-        masterIndexField1.setMasterIndexFieldId("1");
-        masterIndexField1.setDisplayName("displayName");
-        masterIndexField1.setPropertyName(propertyName1);
-        masterIndexField1.setPropertyType("propertyType");
-        masterIndexField1.setIsMasked(true);
-
-        MasterIndexFieldByRecordClassSchemaResponse.MasterIndexField masterIndexField2 = new MasterIndexFieldByRecordClassSchemaResponse.MasterIndexField();
-        masterIndexField2.setMasterIndexFieldId("2");
-        masterIndexField2.setDisplayName("displayName");
-        masterIndexField2.setPropertyName(propertyName2);
-        masterIndexField2.setPropertyType("propertyType");
-        masterIndexField2.setIsMasked(false);
-
-        MasterIndexFieldByRecordClassSchemaResponse response = new MasterIndexFieldByRecordClassSchemaResponse();
-        response.setMasterIndexFields(List.of(masterIndexField1, masterIndexField2));
-        return response;
-    }
 
     @Test
     void getMasterIndexFieldByRecordClassSchemaWhereMasterIndexIsToBeIgnoredAndMissingSortingField() {
@@ -169,6 +150,27 @@ class ArpRpoApiGetMasterIndexFieldByRecordClassSchemaIntTest extends Integration
         assertEquals(ArmRpoStateEnum.GET_MASTERINDEXFIELD_BY_RECORDCLASS_SCHEMA_PRIMARY.getId(), armRpoExecutionDetailEntityUpdated.getArmRpoState().getId());
         assertEquals(ArmRpoStatusEnum.FAILED.getId(), armRpoExecutionDetailEntityUpdated.getArmRpoStatus().getId());
         assertNull(armRpoExecutionDetailEntityUpdated.getMatterId());
+    }
+
+    private static @NotNull MasterIndexFieldByRecordClassSchemaResponse getMasterIndexFieldByRecordClassSchemaResponse(String propertyName1,
+                                                                                                                       String propertyName2) {
+        MasterIndexFieldByRecordClassSchemaResponse.MasterIndexField masterIndexField1 = new MasterIndexFieldByRecordClassSchemaResponse.MasterIndexField();
+        masterIndexField1.setMasterIndexFieldId("1");
+        masterIndexField1.setDisplayName("displayName");
+        masterIndexField1.setPropertyName(propertyName1);
+        masterIndexField1.setPropertyType("propertyType");
+        masterIndexField1.setIsMasked(true);
+
+        MasterIndexFieldByRecordClassSchemaResponse.MasterIndexField masterIndexField2 = new MasterIndexFieldByRecordClassSchemaResponse.MasterIndexField();
+        masterIndexField2.setMasterIndexFieldId("2");
+        masterIndexField2.setDisplayName("displayName");
+        masterIndexField2.setPropertyName(propertyName2);
+        masterIndexField2.setPropertyType("propertyType");
+        masterIndexField2.setIsMasked(false);
+
+        MasterIndexFieldByRecordClassSchemaResponse response = new MasterIndexFieldByRecordClassSchemaResponse();
+        response.setMasterIndexFields(List.of(masterIndexField1, masterIndexField2));
+        return response;
     }
 
 }

@@ -37,7 +37,6 @@ import static java.util.Objects.isNull;
 public class ArmRpoApiImpl implements ArmRpoApi {
 
     public static final String ARM_GET_RECORD_MANAGEMENT_MATTER_ERROR = "Error during ARM get record management matter";
-    public static final String ARM_GET_MASTER_INDEX_FIELD_BY_RECORD_CLASS_SCHEMA = "Error during ARM get master index field by record class schema";
     public static final String IGNORE_MASTER_INDEX_PROPERTY_BF_018 = "bf_018";
     public static final String MASTER_INDEX_FIELD_BY_RECORD_CLASS_SCHEMA_SORTING_FIELD = "ingestionDate";
     public static final String RECORD_CLASS_CODE = "DARTS";
@@ -94,19 +93,21 @@ public class ArmRpoApiImpl implements ArmRpoApi {
         armRpoService.updateArmRpoStateAndStatus(armRpoExecutionDetailEntity, rpoStateEntity,
                                                  ArmRpoHelper.inProgressRpoStatus(), userAccount);
 
+        StringBuilder errorMessage = new StringBuilder("Failure during ARM get master index field by record class schema: ");
         MasterIndexFieldByRecordClassSchemaResponse masterIndexFieldByRecordClassSchemaResponse;
         try {
             masterIndexFieldByRecordClassSchemaResponse = armRpoClient.getMasterIndexFieldByRecordClassSchema(
                 bearerToken, createMasterIndexFieldByRecordClassSchemaRequest());
         } catch (FeignException e) {
             // this ensures the full error body containing the ARM error detail is logged rather than a truncated version
-            log.error("Error during ARM get master index field by record class schema: {}", e.contentUTF8());
-            throw handleFailureAndCreateException(ARM_GET_MASTER_INDEX_FIELD_BY_RECORD_CLASS_SCHEMA, armRpoExecutionDetailEntity, userAccount);
+            log.error(errorMessage.append("Unable to get ARM RPO response").toString() + " {}", e.contentUTF8());
+            throw handleFailureAndCreateException(errorMessage.toString(), armRpoExecutionDetailEntity, userAccount);
         }
 
         if (isNull(masterIndexFieldByRecordClassSchemaResponse)
             || CollectionUtils.isEmpty(masterIndexFieldByRecordClassSchemaResponse.getMasterIndexFields())) {
-            throw handleFailureAndCreateException(ARM_GET_MASTER_INDEX_FIELD_BY_RECORD_CLASS_SCHEMA, armRpoExecutionDetailEntity, userAccount);
+            throw handleFailureAndCreateException(errorMessage.append("Unable to find master index fields in response").toString(), armRpoExecutionDetailEntity,
+                                                  userAccount);
         }
         List<MasterIndexFieldByRecordClassSchema> masterIndexFieldByRecordClassSchemaList = new ArrayList<>();
         String sortingField = null;
@@ -121,7 +122,8 @@ public class ArmRpoApiImpl implements ArmRpoApi {
             }
         }
         if (isNull(sortingField)) {
-            throw handleFailureAndCreateException(ARM_GET_MASTER_INDEX_FIELD_BY_RECORD_CLASS_SCHEMA, armRpoExecutionDetailEntity, userAccount);
+            throw handleFailureAndCreateException(errorMessage.append("Unable to find sorting field in response").toString(),
+                                                  armRpoExecutionDetailEntity, userAccount);
         }
         armRpoExecutionDetailEntity.setSortingField(sortingField);
         armRpoService.updateArmRpoStatus(armRpoExecutionDetailEntity, ArmRpoHelper.completedRpoStatus(), userAccount);
