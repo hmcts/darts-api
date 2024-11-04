@@ -1,6 +1,7 @@
 package uk.gov.hmcts.darts.arm.rpo;
 
 import feign.FeignException;
+import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -38,21 +39,8 @@ class ArpRpoApiGetMasterIndexFieldByRecordClassSchemaIntTest extends Integration
     void getMasterIndexFieldByRecordClassSchemaSuccess() {
 
         // given
-        MasterIndexFieldByRecordClassSchemaResponse.MasterIndexField masterIndexField1 = new MasterIndexFieldByRecordClassSchemaResponse.MasterIndexField();
-        masterIndexField1.setMasterIndexFieldId("1");
-        masterIndexField1.setDisplayName("displayName");
-        masterIndexField1.setPropertyName("propertyName");
-        masterIndexField1.setPropertyType("propertyType");
-        masterIndexField1.setIsMasked(true);
-        MasterIndexFieldByRecordClassSchemaResponse.MasterIndexField masterIndexField2 = new MasterIndexFieldByRecordClassSchemaResponse.MasterIndexField();
-        masterIndexField2.setMasterIndexFieldId("2");
-        masterIndexField2.setDisplayName("displayName");
-        masterIndexField2.setPropertyName("ingestionDate");
-        masterIndexField2.setPropertyType("propertyType");
-        masterIndexField2.setIsMasked(false);
-
-        MasterIndexFieldByRecordClassSchemaResponse response = new MasterIndexFieldByRecordClassSchemaResponse();
-        response.setMasterIndexFields(List.of(masterIndexField1, masterIndexField2));
+        MasterIndexFieldByRecordClassSchemaResponse response = getMasterIndexFieldByRecordClassSchemaResponse("propertyName",
+                                                                                                              "ingestionDate");
         when(armRpoClient.getMasterIndexFieldByRecordClassSchema(any(), any())).thenReturn(response);
 
         UserAccountEntity userAccount = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
@@ -68,7 +56,7 @@ class ArpRpoApiGetMasterIndexFieldByRecordClassSchemaIntTest extends Integration
             bearerAuth, armRpoExecutionDetail.getId(), ArmRpoHelper.getMasterIndexFieldByRecordClassSchemaPrimaryRpoState(), userAccount);
 
         // then
-        var armRpoExecutionDetailEntityUpdated = dartsPersistence.getArmRpoExecutionDetailRepository().findById(armRpoExecutionDetail.getId()).get();
+        var armRpoExecutionDetailEntityUpdated = dartsPersistence.getArmRpoExecutionDetailRepository().findById(armRpoExecutionDetail.getId()).orElseThrow();
         assertEquals(ArmRpoStateEnum.GET_MASTERINDEXFIELD_BY_RECORDCLASS_SCHEMA_PRIMARY.getId(), armRpoExecutionDetailEntityUpdated.getArmRpoState().getId());
         assertEquals(ArmRpoStatusEnum.COMPLETED.getId(), armRpoExecutionDetailEntityUpdated.getArmRpoStatus().getId());
         assertEquals("2", armRpoExecutionDetailEntityUpdated.getSortingField());
@@ -81,25 +69,33 @@ class ArpRpoApiGetMasterIndexFieldByRecordClassSchemaIntTest extends Integration
         assertTrue(masterIndexFieldByRecordClassSchema.getIsMasked());
     }
 
-    @Test
-    void getMasterIndexFieldByRecordClassSchemaWhereMasterIndexIsToBeIgnoredAndMissingSortingField() {
-
-        // given
+    private static @NotNull MasterIndexFieldByRecordClassSchemaResponse getMasterIndexFieldByRecordClassSchemaResponse(String propertyName1,
+                                                                                                                       String propertyName2) {
         MasterIndexFieldByRecordClassSchemaResponse.MasterIndexField masterIndexField1 = new MasterIndexFieldByRecordClassSchemaResponse.MasterIndexField();
         masterIndexField1.setMasterIndexFieldId("1");
         masterIndexField1.setDisplayName("displayName");
-        masterIndexField1.setPropertyName("bf_018");
+        masterIndexField1.setPropertyName(propertyName1);
         masterIndexField1.setPropertyType("propertyType");
         masterIndexField1.setIsMasked(true);
+
         MasterIndexFieldByRecordClassSchemaResponse.MasterIndexField masterIndexField2 = new MasterIndexFieldByRecordClassSchemaResponse.MasterIndexField();
         masterIndexField2.setMasterIndexFieldId("2");
         masterIndexField2.setDisplayName("displayName");
-        masterIndexField2.setPropertyName("propertyName");
+        masterIndexField2.setPropertyName(propertyName2);
         masterIndexField2.setPropertyType("propertyType");
         masterIndexField2.setIsMasked(false);
 
         MasterIndexFieldByRecordClassSchemaResponse response = new MasterIndexFieldByRecordClassSchemaResponse();
         response.setMasterIndexFields(List.of(masterIndexField1, masterIndexField2));
+        return response;
+    }
+
+    @Test
+    void getMasterIndexFieldByRecordClassSchemaWhereMasterIndexIsToBeIgnoredAndMissingSortingField() {
+
+        // given
+        MasterIndexFieldByRecordClassSchemaResponse response = getMasterIndexFieldByRecordClassSchemaResponse("bf_018",
+                                                                                                              "propertyName");
         when(armRpoClient.getMasterIndexFieldByRecordClassSchema(any(), any())).thenReturn(response);
 
         UserAccountEntity userAccount = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
@@ -116,7 +112,7 @@ class ArpRpoApiGetMasterIndexFieldByRecordClassSchemaIntTest extends Integration
                 bearerAuth, armRpoExecutionDetail.getId(), ArmRpoHelper.getMasterIndexFieldByRecordClassSchemaPrimaryRpoState(), userAccount));
 
         // then
-        var armRpoExecutionDetailEntityUpdated = dartsPersistence.getArmRpoExecutionDetailRepository().findById(armRpoExecutionDetail.getId()).get();
+        var armRpoExecutionDetailEntityUpdated = dartsPersistence.getArmRpoExecutionDetailRepository().findById(armRpoExecutionDetail.getId()).orElseThrow();
         assertEquals(ArmRpoStateEnum.GET_MASTERINDEXFIELD_BY_RECORDCLASS_SCHEMA_PRIMARY.getId(), armRpoExecutionDetailEntityUpdated.getArmRpoState().getId());
         assertEquals(ArmRpoStatusEnum.FAILED.getId(), armRpoExecutionDetailEntityUpdated.getArmRpoStatus().getId());
 
@@ -144,7 +140,7 @@ class ArpRpoApiGetMasterIndexFieldByRecordClassSchemaIntTest extends Integration
                 bearerAuth, armRpoExecutionDetail.getId(), ArmRpoHelper.getMasterIndexFieldByRecordClassSchemaPrimaryRpoState(), userAccount));
 
         // then
-        var armRpoExecutionDetailEntityUpdated = dartsPersistence.getArmRpoExecutionDetailRepository().findById(armRpoExecutionDetail.getId()).get();
+        var armRpoExecutionDetailEntityUpdated = dartsPersistence.getArmRpoExecutionDetailRepository().findById(armRpoExecutionDetail.getId()).orElseThrow();
         assertEquals(ArmRpoStateEnum.GET_MASTERINDEXFIELD_BY_RECORDCLASS_SCHEMA_PRIMARY.getId(), armRpoExecutionDetailEntityUpdated.getArmRpoState().getId());
         assertEquals(ArmRpoStatusEnum.FAILED.getId(), armRpoExecutionDetailEntityUpdated.getArmRpoStatus().getId());
         assertNull(armRpoExecutionDetailEntityUpdated.getMatterId());
@@ -169,7 +165,7 @@ class ArpRpoApiGetMasterIndexFieldByRecordClassSchemaIntTest extends Integration
             bearerAuth, armRpoExecutionDetail.getId(), ArmRpoHelper.getMasterIndexFieldByRecordClassSchemaPrimaryRpoState(), userAccount));
 
         // then
-        var armRpoExecutionDetailEntityUpdated = dartsPersistence.getArmRpoExecutionDetailRepository().findById(armRpoExecutionDetail.getId()).get();
+        var armRpoExecutionDetailEntityUpdated = dartsPersistence.getArmRpoExecutionDetailRepository().findById(armRpoExecutionDetail.getId()).orElseThrow();
         assertEquals(ArmRpoStateEnum.GET_MASTERINDEXFIELD_BY_RECORDCLASS_SCHEMA_PRIMARY.getId(), armRpoExecutionDetailEntityUpdated.getArmRpoState().getId());
         assertEquals(ArmRpoStatusEnum.FAILED.getId(), armRpoExecutionDetailEntityUpdated.getArmRpoStatus().getId());
         assertNull(armRpoExecutionDetailEntityUpdated.getMatterId());

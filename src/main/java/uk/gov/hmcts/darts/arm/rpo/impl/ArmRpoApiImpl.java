@@ -11,6 +11,7 @@ import uk.gov.hmcts.darts.arm.client.model.rpo.ArmAsyncSearchResponse;
 import uk.gov.hmcts.darts.arm.client.model.rpo.ExtendedProductionsByMatterResponse;
 import uk.gov.hmcts.darts.arm.client.model.rpo.ExtendedSearchesByMatterResponse;
 import uk.gov.hmcts.darts.arm.client.model.rpo.IndexesByMatterIdResponse;
+import uk.gov.hmcts.darts.arm.client.model.rpo.MasterIndexFieldByRecordClassSchemaRequest;
 import uk.gov.hmcts.darts.arm.client.model.rpo.MasterIndexFieldByRecordClassSchemaResponse;
 import uk.gov.hmcts.darts.arm.client.model.rpo.ProfileEntitlementResponse;
 import uk.gov.hmcts.darts.arm.client.model.rpo.RecordManagementMatterResponse;
@@ -39,6 +40,8 @@ public class ArmRpoApiImpl implements ArmRpoApi {
     public static final String ARM_GET_MASTER_INDEX_FIELD_BY_RECORD_CLASS_SCHEMA = "Error during ARM get master index field by record class schema";
     public static final String IGNORE_MASTER_INDEX_PROPERTY_BF_018 = "bf_018";
     public static final String MASTER_INDEX_FIELD_BY_RECORD_CLASS_SCHEMA_SORTING_FIELD = "ingestionDate";
+    public static final String RECORD_CLASS_CODE = "DARTS";
+    public static final int FIELD_TYPE_7 = 7;
     private final ArmRpoClient armRpoClient;
     private final ArmRpoService armRpoService;
 
@@ -85,15 +88,16 @@ public class ArmRpoApiImpl implements ArmRpoApi {
     @Override
     public List<MasterIndexFieldByRecordClassSchema> getMasterIndexFieldByRecordClassSchema(String bearerToken,
                                                                                             Integer executionId,
-                                                                                            ArmRpoStateEntity rpoStageId,
+                                                                                            ArmRpoStateEntity rpoStateEntity,
                                                                                             UserAccountEntity userAccount) {
         var armRpoExecutionDetailEntity = armRpoService.getArmRpoExecutionDetailEntity(executionId);
-        armRpoService.updateArmRpoStateAndStatus(armRpoExecutionDetailEntity, rpoStageId,
+        armRpoService.updateArmRpoStateAndStatus(armRpoExecutionDetailEntity, rpoStateEntity,
                                                  ArmRpoHelper.inProgressRpoStatus(), userAccount);
 
         MasterIndexFieldByRecordClassSchemaResponse masterIndexFieldByRecordClassSchemaResponse;
         try {
-            masterIndexFieldByRecordClassSchemaResponse = armRpoClient.getMasterIndexFieldByRecordClassSchema(bearerToken, null);
+            masterIndexFieldByRecordClassSchemaResponse = armRpoClient.getMasterIndexFieldByRecordClassSchema(
+                bearerToken, createMasterIndexFieldByRecordClassSchemaRequest());
         } catch (FeignException e) {
             // this ensures the full error body containing the ARM error detail is logged rather than a truncated version
             log.error("Error during ARM get master index field by record class schema: {}", e.contentUTF8());
@@ -101,13 +105,15 @@ public class ArmRpoApiImpl implements ArmRpoApi {
         }
 
         if (isNull(masterIndexFieldByRecordClassSchemaResponse)
-            || !CollectionUtils.isNotEmpty(masterIndexFieldByRecordClassSchemaResponse.getMasterIndexFields())) {
+            || CollectionUtils.isEmpty(masterIndexFieldByRecordClassSchemaResponse.getMasterIndexFields())) {
             throw handleFailureAndCreateException(ARM_GET_MASTER_INDEX_FIELD_BY_RECORD_CLASS_SCHEMA, armRpoExecutionDetailEntity, userAccount);
         }
         List<MasterIndexFieldByRecordClassSchema> masterIndexFieldByRecordClassSchemaList = new ArrayList<>();
         String sortingField = null;
         for (var masterIndexField : masterIndexFieldByRecordClassSchemaResponse.getMasterIndexFields()) {
+            //ignore master index property bf_018
             if (!IGNORE_MASTER_INDEX_PROPERTY_BF_018.equals(masterIndexField.getPropertyName())) {
+                // get sorting field index id
                 if (MASTER_INDEX_FIELD_BY_RECORD_CLASS_SCHEMA_SORTING_FIELD.equals(masterIndexField.getPropertyName())) {
                     sortingField = masterIndexField.getMasterIndexFieldId();
                 }
@@ -121,7 +127,6 @@ public class ArmRpoApiImpl implements ArmRpoApi {
         armRpoService.updateArmRpoStatus(armRpoExecutionDetailEntity, ArmRpoHelper.completedRpoStatus(), userAccount);
         return masterIndexFieldByRecordClassSchemaList;
     }
-
 
     @Override
     public ArmAsyncSearchResponse addAsyncSearch(String bearerToken, Integer executionId, UserAccountEntity userAccount) {
@@ -169,6 +174,15 @@ public class ArmRpoApiImpl implements ArmRpoApi {
                                                             UserAccountEntity userAccount) {
         armRpoService.updateArmRpoStatus(armRpoExecutionDetailEntity, ArmRpoHelper.failedRpoStatus(), userAccount);
         return new ArmRpoException(message);
+    }
+
+    private MasterIndexFieldByRecordClassSchemaRequest createMasterIndexFieldByRecordClassSchemaRequest() {
+        return MasterIndexFieldByRecordClassSchemaRequest.builder()
+            .recordClassCode(RECORD_CLASS_CODE)
+            .isForSearch(true)
+            .fieldType(FIELD_TYPE_7)
+            .usePaging(false)
+            .build();
     }
 
     private MasterIndexFieldByRecordClassSchema createMasterIndexFieldByRecordClassSchema(

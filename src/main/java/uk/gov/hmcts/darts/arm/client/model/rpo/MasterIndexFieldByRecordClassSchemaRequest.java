@@ -1,12 +1,14 @@
 package uk.gov.hmcts.darts.arm.client.model.rpo;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import lombok.Builder;
 import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.extern.jackson.Jacksonized;
 
-@JsonIgnoreProperties(ignoreUnknown = true)
 @Data
-@NoArgsConstructor
+@Builder
+@Jacksonized
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class MasterIndexFieldByRecordClassSchemaRequest {
 
     private String recordClassCode;

@@ -83,6 +83,7 @@ class ArmRpoApiGetMasterIndexFieldByRecordClassSchemaTest {
 
         // then
         assertNotNull(result);
+        assertEquals(2, result.size());
         MasterIndexFieldByRecordClassSchema masterIndexFieldByRecordClassSchema = result.getFirst();
         assertEquals("1", masterIndexFieldByRecordClassSchema.getMasterIndexField());
         assertEquals("displayName", masterIndexFieldByRecordClassSchema.getDisplayName());
