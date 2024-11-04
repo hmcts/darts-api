@@ -92,3 +92,7 @@ VALUES (-6, NULL, 'System user for ProcessDailyList Job', NULL,
        (-36, NULL, '', NULL,
         'systemProcessARMRPOPendingAutomatedTask', '2024-01-01 00:00:00+00', '2024-01-01 00:00:00+00', NULL, 0, 0, NULL, true,
         true, 'systemProcessARMRPOPendingAutomatedTask');
+
+UPDATE user_account
+SET user_full_name = 'systemDailyList'
+WHERE usr_id = '-2';
