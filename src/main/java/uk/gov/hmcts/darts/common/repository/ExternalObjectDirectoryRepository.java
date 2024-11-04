@@ -188,20 +188,6 @@ public interface ExternalObjectDirectoryRepository extends JpaRepository<Externa
 
     @Query(
         """
-            SELECT COUNT(eod) > 0
-            FROM ExternalObjectDirectoryEntity eod, ExternalObjectDirectoryEntity eod2
-            WHERE eod.media = eod2.media
-            AND eod.externalLocationType = :location1
-            AND eod2.externalLocationType = :location2
-            AND eod.media = :media
-            """
-    )
-    boolean existsMediaFileIn2StorageLocations(MediaEntity media,
-                                               ExternalLocationTypeEntity location1,
-                                               ExternalLocationTypeEntity location2);
-
-    @Query(
-        """
             SELECT eod.id FROM ExternalObjectDirectoryEntity eod, ExternalObjectDirectoryEntity eod2
             WHERE
             ((:externalObjectDirectoryQueryTypeEnumIndex=1 AND eod.media = eod2.media) OR                 
@@ -241,6 +227,23 @@ public interface ExternalObjectDirectoryRepository extends JpaRepository<Externa
                                                        ExternalLocationTypeEntity location2,
                                                        OffsetDateTime lastModifiedBefore1,
                                                        OffsetDateTime lastModifiedBefore2);
+
+    @Query(
+        """
+            SELECT eod.id FROM ExternalObjectDirectoryEntity eod, ExternalObjectDirectoryEntity eod2
+            WHERE
+            eod.media = eod2.media
+            AND eod.status = :storedStatus
+            AND eod.externalLocationType = :unstructuredLocation
+            AND eod.lastModifiedDateTime <= :unstructuredLastModifiedBefore
+            AND eod2.externalLocationType = :armLocation
+            AND eod2.status = :storedStatus
+            """
+    )
+    List<Integer> findIdsForAudioToBeDeletedFromUnstructured(ObjectRecordStatusEntity storedStatus,
+                                                             ExternalLocationTypeEntity unstructuredLocation,
+                                                             ExternalLocationTypeEntity armLocation,
+                                                             OffsetDateTime unstructuredLastModifiedBefore);
 
 
     @Query(

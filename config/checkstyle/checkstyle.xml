@@ -32,7 +32,7 @@
   <module name="SuppressionSingleFilter">
     <property name="files" value=".*[\\/]controller[\\/].*$" />
     <property name="checks" value="LineLength" />
-    <property name="checks" value="JUnitTestsShouldIncludeAssert" />
+    <property name="checks" value="UnitTestShouldIncludeAssert" />
   </module>
   <module name="SuppressWarningsFilter" />
   <module name="LineLength">

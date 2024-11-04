@@ -22,7 +22,7 @@ class EmailAddressFromTokenUtilTest {
             .build();
         SecurityContextHolder.getContext().setAuthentication(new JwtAuthenticationToken(jwt));
 
-        assertEquals("integrationtest.user@example.com", EmailAddressFromTokenUtil.getEmailAddressFromToken());
+        assertEquals("integrationtest.user@example.com", EmailAddressFromTokenUtil.getEmailAddressFromToken(jwt));
 
     }
 
@@ -35,7 +35,7 @@ class EmailAddressFromTokenUtilTest {
             .build();
         SecurityContextHolder.getContext().setAuthentication(new JwtAuthenticationToken(jwt));
 
-        assertEquals("integrationtest.user@example.com", EmailAddressFromTokenUtil.getEmailAddressFromToken());
+        assertEquals("integrationtest.user@example.com", EmailAddressFromTokenUtil.getEmailAddressFromToken(jwt));
 
     }
 
@@ -50,7 +50,7 @@ class EmailAddressFromTokenUtilTest {
             .build();
         SecurityContextHolder.getContext().setAuthentication(new JwtAuthenticationToken(jwt));
 
-        assertEquals("email3@test.com", EmailAddressFromTokenUtil.getEmailAddressFromToken());
+        assertEquals("email3@test.com", EmailAddressFromTokenUtil.getEmailAddressFromToken(jwt));
 
     }
 
@@ -64,7 +64,7 @@ class EmailAddressFromTokenUtilTest {
             .build();
         SecurityContextHolder.getContext().setAuthentication(new JwtAuthenticationToken(jwt));
 
-        assertEquals("email1@test.com", EmailAddressFromTokenUtil.getEmailAddressFromToken());
+        assertEquals("email1@test.com", EmailAddressFromTokenUtil.getEmailAddressFromToken(jwt));
 
     }
 
@@ -77,7 +77,7 @@ class EmailAddressFromTokenUtilTest {
             .build();
         SecurityContextHolder.getContext().setAuthentication(new JwtAuthenticationToken(jwt));
 
-        var exception = assertThrows(IllegalStateException.class, EmailAddressFromTokenUtil::getEmailAddressFromToken);
+        var exception = assertThrows(IllegalStateException.class, () -> EmailAddressFromTokenUtil.getEmailAddressFromToken(jwt));
         assertEquals("Unexpected number of email addresses: 2", exception.getMessage());
     }
 
@@ -89,7 +89,7 @@ class EmailAddressFromTokenUtilTest {
             .build();
         SecurityContextHolder.getContext().setAuthentication(new JwtAuthenticationToken(jwt));
 
-        var exception = assertThrows(IllegalStateException.class, EmailAddressFromTokenUtil::getEmailAddressFromToken);
+        var exception = assertThrows(IllegalStateException.class, () -> EmailAddressFromTokenUtil.getEmailAddressFromToken(jwt));
         assertEquals("Could not obtain email address from principal", exception.getMessage());
     }
 
@@ -102,7 +102,7 @@ class EmailAddressFromTokenUtilTest {
             .build();
         SecurityContextHolder.getContext().setAuthentication(new JwtAuthenticationToken(jwt));
 
-        assertEquals("integrationtest.user@example.com", EmailAddressFromTokenUtil.getEmailAddressFromToken());
+        assertEquals("integrationtest.user@example.com", EmailAddressFromTokenUtil.getEmailAddressFromToken(jwt));
     }
 
     @Test
@@ -114,7 +114,7 @@ class EmailAddressFromTokenUtilTest {
             .build();
         SecurityContextHolder.getContext().setAuthentication(new JwtAuthenticationToken(jwt));
 
-        var exception = assertThrows(IllegalStateException.class, EmailAddressFromTokenUtil::getEmailAddressFromToken);
+        var exception = assertThrows(IllegalStateException.class, () -> EmailAddressFromTokenUtil.getEmailAddressFromToken(jwt));
         assertEquals("Could not obtain email address from principal", exception.getMessage());
     }
 }
