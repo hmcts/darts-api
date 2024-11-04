@@ -24,6 +24,8 @@ import uk.gov.hmcts.darts.common.repository.ArmRpoExecutionDetailRepository;
 import java.util.Collections;
 import java.util.List;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsString;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -80,7 +82,7 @@ class ArmRpoApiGetMasterIndexFieldByRecordClassSchemaTest {
         masterIndexField1.setPropertyName("propertyName");
         masterIndexField1.setPropertyType("propertyType");
         masterIndexField1.setIsMasked(true);
-        
+
         MasterIndexFieldByRecordClassSchemaResponse.MasterIndexField masterIndexField2 = new MasterIndexFieldByRecordClassSchemaResponse.MasterIndexField();
         masterIndexField2.setMasterIndexFieldId("2");
         masterIndexField2.setDisplayName("displayName");
@@ -127,12 +129,17 @@ class ArmRpoApiGetMasterIndexFieldByRecordClassSchemaTest {
 
     @Test
     void getMasterIndexFieldByRecordClassSchemaWhereClientThrowsFeignException() {
+        // given
         when(armRpoService.getArmRpoExecutionDetailEntity(anyInt())).thenReturn(armRpoExecutionDetailEntity);
         when(armRpoClient.getMasterIndexFieldByRecordClassSchema(anyString(), any())).thenThrow(FeignException.class);
 
-        assertThrows(ArmRpoException.class, () -> armRpoApi.getMasterIndexFieldByRecordClassSchema(
+        // when
+        ArmRpoException armRpoException = assertThrows(ArmRpoException.class, () -> armRpoApi.getMasterIndexFieldByRecordClassSchema(
             BEARER_TOKEN, EXECUTION_ID, ArmRpoHelper.getMasterIndexFieldByRecordClassSchemaPrimaryRpoState(), userAccount));
 
+        // then
+        assertThat(armRpoException.getMessage(), containsString(
+            "Failure during ARM get master index field by record class schema: Unable to get ARM RPO response"));
         verify(armRpoService).updateArmRpoStateAndStatus(eq(armRpoExecutionDetailEntity),
                                                          eq(ARM_RPO_HELPER_MOCKS.getGetMasterIndexFieldByRecordClassSchemaPrimaryRpoState()),
                                                          eq(ARM_RPO_HELPER_MOCKS.getInProgressRpoStatus()),
@@ -143,11 +150,17 @@ class ArmRpoApiGetMasterIndexFieldByRecordClassSchemaTest {
 
     @Test
     void getMasterIndexFieldByRecordClassSchemaWithNullResponse() {
+        // given
         when(armRpoService.getArmRpoExecutionDetailEntity(anyInt())).thenReturn(armRpoExecutionDetailEntity);
         when(armRpoClient.getMasterIndexFieldByRecordClassSchema(anyString(), any())).thenReturn(null);
 
-        assertThrows(ArmRpoException.class, () -> armRpoApi.getMasterIndexFieldByRecordClassSchema(
+        // when
+        ArmRpoException armRpoException = assertThrows(ArmRpoException.class, () -> armRpoApi.getMasterIndexFieldByRecordClassSchema(
             BEARER_TOKEN, EXECUTION_ID, ArmRpoHelper.getMasterIndexFieldByRecordClassSchemaPrimaryRpoState(), userAccount));
+
+        // then
+        assertThat(armRpoException.getMessage(), containsString(
+            "Failure during ARM get master index field by record class schema: Unable to find master index fields in response"));
         verify(armRpoService).updateArmRpoStateAndStatus(eq(armRpoExecutionDetailEntity),
                                                          eq(ARM_RPO_HELPER_MOCKS.getGetMasterIndexFieldByRecordClassSchemaPrimaryRpoState()),
                                                          eq(ARM_RPO_HELPER_MOCKS.getInProgressRpoStatus()),
@@ -158,14 +171,20 @@ class ArmRpoApiGetMasterIndexFieldByRecordClassSchemaTest {
 
     @Test
     void getMasterIndexFieldByRecordClassSchemaWithEmptyResponse() {
+        // given
         MasterIndexFieldByRecordClassSchemaResponse response = new MasterIndexFieldByRecordClassSchemaResponse();
         response.setMasterIndexFields(Collections.emptyList());
 
         when(armRpoService.getArmRpoExecutionDetailEntity(anyInt())).thenReturn(armRpoExecutionDetailEntity);
         when(armRpoClient.getMasterIndexFieldByRecordClassSchema(anyString(), any())).thenReturn(response);
 
-        assertThrows(ArmRpoException.class, () -> armRpoApi.getMasterIndexFieldByRecordClassSchema(
+        // when
+        ArmRpoException armRpoException = assertThrows(ArmRpoException.class, () -> armRpoApi.getMasterIndexFieldByRecordClassSchema(
             BEARER_TOKEN, EXECUTION_ID, ArmRpoHelper.getMasterIndexFieldByRecordClassSchemaPrimaryRpoState(), userAccount));
+
+        // then
+        assertThat(armRpoException.getMessage(), containsString(
+            "Failure during ARM get master index field by record class schema: Unable to find master index fields in response"));
         verify(armRpoService).updateArmRpoStateAndStatus(eq(armRpoExecutionDetailEntity),
                                                          eq(ARM_RPO_HELPER_MOCKS.getGetMasterIndexFieldByRecordClassSchemaPrimaryRpoState()),
                                                          eq(ARM_RPO_HELPER_MOCKS.getInProgressRpoStatus()),
