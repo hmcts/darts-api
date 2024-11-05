@@ -39,7 +39,8 @@ import static java.util.Objects.nonNull;
 @Slf4j
 public class ArmRpoApiImpl implements ArmRpoApi {
 
-    public static final String ARM_GET_RECORD_MANAGEMENT_MATTER_ERROR = "Error during ARM get record management matter";
+    private static final String ARM_GET_RECORD_MANAGEMENT_MATTER_ERROR = "Error during ARM get record management matter";
+    public static final String ARM_GET_STORAGE_ACCOUNT_ERROR = "Error during ARM get storage account";
     public static final String IGNORE_MASTER_INDEX_PROPERTY_BF_018 = "bf_018";
     public static final String MASTER_INDEX_FIELD_BY_RECORD_CLASS_SCHEMA_SORTING_FIELD = "ingestionDate";
     public static final String RECORD_CLASS_CODE = "DARTS";
@@ -93,31 +94,30 @@ public class ArmRpoApiImpl implements ArmRpoApi {
 
         } catch (FeignException e) {
             // this ensures the full error body containing the ARM error detail is logged rather than a truncated version
-            log.error("Error during ARM get record management matter: {}", e.contentUTF8());
-            armRpoService.updateArmRpoStatus(armRpoExecutionDetailEntity, ArmRpoHelper.failedRpoStatus(), userAccount);
-            throw e;
+            log.error("Error during ARM get storage account: {}", e.contentUTF8());
+            throw handleFailureAndCreateException(ARM_GET_STORAGE_ACCOUNT_ERROR, armRpoExecutionDetailEntity, userAccount);
         }
 
         if (!nonNull(storageAccountResponse)
             || !CollectionUtils.isNotEmpty(storageAccountResponse.getIndexes())) {
-            log.error("Unable to get storage account details from ARM");
-            armRpoService.updateArmRpoStatus(armRpoExecutionDetailEntity, ArmRpoHelper.failedRpoStatus(), userAccount);
-        } else {
-            String storageAccountName = null;
-            for (var index : storageAccountResponse.getIndexes()) {
-                if (nonNull(index.getIndex()) && nonNull(index.getIndex().getName())
-                    && index.getIndex().getName().equals(armApiConfigurationProperties.getArmStorageAccountName())) {
-                    storageAccountName = index.getIndex().getIndexId();
-                    break;
-                }
-            }
-            if (nonNull(storageAccountName)) {
-                armRpoExecutionDetailEntity.setStorageAccountId(storageAccountName);
-                armRpoService.updateArmRpoStatus(armRpoExecutionDetailEntity, ArmRpoHelper.completedRpoStatus(), userAccount);
-            } else {
-                armRpoService.updateArmRpoStatus(armRpoExecutionDetailEntity, ArmRpoHelper.failedRpoStatus(), userAccount);
+            throw handleFailureAndCreateException(ARM_GET_STORAGE_ACCOUNT_ERROR, armRpoExecutionDetailEntity, userAccount);
+
+        }
+        String storageAccountName = null;
+        for (var index : storageAccountResponse.getIndexes()) {
+            if (nonNull(index.getIndex()) && nonNull(index.getIndex().getName())
+                && index.getIndex().getName().equals(armApiConfigurationProperties.getArmStorageAccountName())) {
+                storageAccountName = index.getIndex().getIndexId();
+                break;
             }
         }
+        if (!nonNull(storageAccountName)) {
+            throw handleFailureAndCreateException(ARM_GET_STORAGE_ACCOUNT_ERROR, armRpoExecutionDetailEntity, userAccount);
+
+        }
+        armRpoExecutionDetailEntity.setStorageAccountId(storageAccountName);
+        armRpoService.updateArmRpoStatus(armRpoExecutionDetailEntity, ArmRpoHelper.completedRpoStatus(), userAccount);
+
         return storageAccountResponse;
     }
 
