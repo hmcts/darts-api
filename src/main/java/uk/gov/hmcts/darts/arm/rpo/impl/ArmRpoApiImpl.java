@@ -107,7 +107,8 @@ public class ArmRpoApiImpl implements ArmRpoApi {
 
         if (isNull(indexesByMatterIdResponse)
             || CollectionUtils.isEmpty(indexesByMatterIdResponse.getIndexes())
-            || isNull(indexesByMatterIdResponse.getIndexes().getFirst())) {
+            || isNull(indexesByMatterIdResponse.getIndexes().getFirst())
+            || isNull(indexesByMatterIdResponse.getIndexes().getFirst().getIndex())) {
             throw handleFailureAndCreateException(errorMessage.append("Unable to find indexes by matter ID in response").toString(),
                                                   armRpoExecutionDetailEntity,
                                                   userAccount);
