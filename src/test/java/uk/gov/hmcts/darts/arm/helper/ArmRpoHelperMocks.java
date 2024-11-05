@@ -152,6 +152,7 @@ public class ArmRpoHelperMocks {
 
     }
 
+    @SuppressWarnings({"PMD.CyclomaticComplexity"})
     public ArmRpoStateEntity armRpoStateEnumToEntity(ArmRpoStateEnum armRpoStateEnum) {
         switch (armRpoStateEnum) {
             case GET_RECORD_MANAGEMENT_MATTER:
