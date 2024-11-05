@@ -5,6 +5,8 @@ import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.InjectMocks;
@@ -18,7 +20,9 @@ import uk.gov.hmcts.darts.arm.helper.ArmRpoHelperMocks;
 import uk.gov.hmcts.darts.arm.model.rpo.MasterIndexFieldByRecordClassSchema;
 import uk.gov.hmcts.darts.arm.service.ArmRpoService;
 import uk.gov.hmcts.darts.common.entity.ArmRpoExecutionDetailEntity;
+import uk.gov.hmcts.darts.common.entity.ArmRpoStateEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
+import uk.gov.hmcts.darts.common.enums.ArmRpoStateEnum;
 import uk.gov.hmcts.darts.common.repository.ArmRpoExecutionDetailRepository;
 
 import java.util.Collections;
@@ -73,8 +77,10 @@ class ArmRpoApiGetMasterIndexFieldByRecordClassSchemaTest {
         armRpoExecutionDetailEntityArgumentCaptor = ArgumentCaptor.forClass(ArmRpoExecutionDetailEntity.class);
     }
 
-    @Test
-    void getMasterIndexFieldByRecordClassSchemaSuccess() {
+    @ParameterizedTest
+    @EnumSource(value = ArmRpoStateEnum.class, names = {"GET_MASTERINDEXFIELD_BY_RECORDCLASS_SCHEMA_PRIMARY",
+        "GET_MASTERINDEXFIELD_BY_RECORDCLASS_SCHEMA_SECONDARY"}, mode = EnumSource.Mode.INCLUDE)
+    void getMasterIndexFieldByRecordClassSchemaSuccess(ArmRpoStateEnum armRpoStateEnum) {
         // given
         MasterIndexFieldByRecordClassSchemaResponse.MasterIndexField masterIndexField1 = new MasterIndexFieldByRecordClassSchemaResponse.MasterIndexField();
         masterIndexField1.setMasterIndexFieldId("1");
@@ -102,10 +108,11 @@ class ArmRpoApiGetMasterIndexFieldByRecordClassSchemaTest {
 
         when(armRpoService.getArmRpoExecutionDetailEntity(anyInt())).thenReturn(armRpoExecutionDetailEntity);
         when(armRpoClient.getMasterIndexFieldByRecordClassSchema(anyString(), any())).thenReturn(response);
+        ArmRpoStateEntity armRpoStateEntity = ARM_RPO_HELPER_MOCKS.armRpoStateEnumToEntity(armRpoStateEnum);
 
         // when
         List<MasterIndexFieldByRecordClassSchema> result = armRpoApi.getMasterIndexFieldByRecordClassSchema(
-            BEARER_TOKEN, EXECUTION_ID, ArmRpoHelper.getMasterIndexFieldByRecordClassSchemaPrimaryRpoState(), userAccount);
+            BEARER_TOKEN, EXECUTION_ID, armRpoStateEntity, userAccount);
 
         // then
         assertNotNull(result);
@@ -119,7 +126,7 @@ class ArmRpoApiGetMasterIndexFieldByRecordClassSchemaTest {
         assertTrue(masterIndexFieldByRecordClassSchema.getIsMasked());
 
         verify(armRpoService).updateArmRpoStateAndStatus(armRpoExecutionDetailEntityArgumentCaptor.capture(),
-                                                         eq(ARM_RPO_HELPER_MOCKS.getGetMasterIndexFieldByRecordClassSchemaPrimaryRpoState()),
+                                                         eq(armRpoStateEntity),
                                                          eq(ARM_RPO_HELPER_MOCKS.getInProgressRpoStatus()),
                                                          eq(userAccount));
         assertEquals("2", armRpoExecutionDetailEntityArgumentCaptor.getValue().getSortingField());
@@ -187,6 +194,29 @@ class ArmRpoApiGetMasterIndexFieldByRecordClassSchemaTest {
             "Failure during ARM get master index field by record class schema: Unable to find master index fields in response"));
         verify(armRpoService).updateArmRpoStateAndStatus(eq(armRpoExecutionDetailEntity),
                                                          eq(ARM_RPO_HELPER_MOCKS.getGetMasterIndexFieldByRecordClassSchemaPrimaryRpoState()),
+                                                         eq(ARM_RPO_HELPER_MOCKS.getInProgressRpoStatus()),
+                                                         eq(userAccount));
+        verify(armRpoService).updateArmRpoStatus(eq(armRpoExecutionDetailEntity), eq(ARM_RPO_HELPER_MOCKS.getFailedRpoStatus()), eq(userAccount));
+        verifyNoMoreInteractions(armRpoService);
+    }
+
+    @ParameterizedTest
+    @EnumSource(value = ArmRpoStateEnum.class, names = {"GET_MASTERINDEXFIELD_BY_RECORDCLASS_SCHEMA_PRIMARY",
+        "GET_MASTERINDEXFIELD_BY_RECORDCLASS_SCHEMA_SECONDARY"}, mode = EnumSource.Mode.EXCLUDE)
+    void getMasterIndexFieldByRecordClassSchemaWithInvalidRpoState(ArmRpoStateEnum armRpoStateEnum) {
+        // given
+        when(armRpoService.getArmRpoExecutionDetailEntity(anyInt())).thenReturn(armRpoExecutionDetailEntity);
+        ArmRpoStateEntity armRpoStateEntity = ARM_RPO_HELPER_MOCKS.armRpoStateEnumToEntity(armRpoStateEnum);
+
+        // when
+        ArmRpoException armRpoException = assertThrows(ArmRpoException.class, () -> armRpoApi.getMasterIndexFieldByRecordClassSchema(
+            BEARER_TOKEN, EXECUTION_ID, armRpoStateEntity, userAccount));
+
+        // then
+        assertThat(armRpoException.getMessage(), containsString(
+            "Failure during ARM get master index field by record class schema: Invalid state provided"));
+        verify(armRpoService).updateArmRpoStateAndStatus(eq(armRpoExecutionDetailEntity),
+                                                         eq(armRpoStateEntity),
                                                          eq(ARM_RPO_HELPER_MOCKS.getInProgressRpoStatus()),
                                                          eq(userAccount));
         verify(armRpoService).updateArmRpoStatus(eq(armRpoExecutionDetailEntity), eq(ARM_RPO_HELPER_MOCKS.getFailedRpoStatus()), eq(userAccount));

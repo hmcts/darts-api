@@ -94,6 +94,13 @@ public class ArmRpoApiImpl implements ArmRpoApi {
                                                  ArmRpoHelper.inProgressRpoStatus(), userAccount);
 
         StringBuilder errorMessage = new StringBuilder("Failure during ARM get master index field by record class schema: ");
+
+        if (!(ArmRpoHelper.getMasterIndexFieldByRecordClassSchemaPrimaryRpoState().getId().equals(rpoStateEntity.getId())
+            || ArmRpoHelper.getMasterIndexFieldByRecordClassSchemaSecondaryRpoState().getId().equals(rpoStateEntity.getId()))) {
+            errorMessage.append("Invalid state provided - ").append(rpoStateEntity.getDescription());
+            throw handleFailureAndCreateException(errorMessage.toString(), armRpoExecutionDetailEntity, userAccount);
+        }
+
         MasterIndexFieldByRecordClassSchemaResponse masterIndexFieldByRecordClassSchemaResponse;
         try {
             masterIndexFieldByRecordClassSchemaResponse = armRpoClient.getMasterIndexFieldByRecordClassSchema(
@@ -106,7 +113,8 @@ public class ArmRpoApiImpl implements ArmRpoApi {
 
         if (isNull(masterIndexFieldByRecordClassSchemaResponse)
             || CollectionUtils.isEmpty(masterIndexFieldByRecordClassSchemaResponse.getMasterIndexFields())) {
-            throw handleFailureAndCreateException(errorMessage.append("Unable to find master index fields in response").toString(), armRpoExecutionDetailEntity,
+            throw handleFailureAndCreateException(errorMessage.append("Unable to find master index fields in response").toString(),
+                                                  armRpoExecutionDetailEntity,
                                                   userAccount);
         }
         List<MasterIndexFieldByRecordClassSchema> masterIndexFieldByRecordClassSchemaList = new ArrayList<>();
@@ -127,6 +135,7 @@ public class ArmRpoApiImpl implements ArmRpoApi {
         }
         armRpoExecutionDetailEntity.setSortingField(sortingField);
         armRpoService.updateArmRpoStatus(armRpoExecutionDetailEntity, ArmRpoHelper.completedRpoStatus(), userAccount);
+
         return masterIndexFieldByRecordClassSchemaList;
     }
 
