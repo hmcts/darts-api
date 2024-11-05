@@ -15,7 +15,9 @@ import uk.gov.hmcts.darts.arm.client.model.rpo.MasterIndexFieldByRecordClassSche
 import uk.gov.hmcts.darts.arm.client.model.rpo.MasterIndexFieldByRecordClassSchemaResponse;
 import uk.gov.hmcts.darts.arm.client.model.rpo.ProfileEntitlementResponse;
 import uk.gov.hmcts.darts.arm.client.model.rpo.RecordManagementMatterResponse;
+import uk.gov.hmcts.darts.arm.client.model.rpo.StorageAccountRequest;
 import uk.gov.hmcts.darts.arm.client.model.rpo.StorageAccountResponse;
+import uk.gov.hmcts.darts.arm.config.ArmApiConfigurationProperties;
 import uk.gov.hmcts.darts.arm.exception.ArmRpoException;
 import uk.gov.hmcts.darts.arm.helper.ArmRpoHelper;
 import uk.gov.hmcts.darts.arm.model.rpo.MasterIndexFieldByRecordClassSchema;
@@ -30,6 +32,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static java.util.Objects.isNull;
+import static java.util.Objects.nonNull;
 
 @Service
 @AllArgsConstructor
@@ -43,6 +46,7 @@ public class ArmRpoApiImpl implements ArmRpoApi {
     public static final int FIELD_TYPE_7 = 7;
     private final ArmRpoClient armRpoClient;
     private final ArmRpoService armRpoService;
+    private final ArmApiConfigurationProperties armApiConfigurationProperties;
 
     @Override
     public void getRecordManagementMatter(String bearerToken, Integer executionId, UserAccountEntity userAccount) {
@@ -76,7 +80,43 @@ public class ArmRpoApiImpl implements ArmRpoApi {
 
     @Override
     public StorageAccountResponse getStorageAccounts(String bearerToken, Integer executionId, UserAccountEntity userAccount) {
-        throw new NotImplementedException("Method not implemented");
+        StorageAccountResponse storageAccountResponse;
+        var armRpoExecutionDetailEntity = armRpoService.getArmRpoExecutionDetailEntity(executionId);
+        armRpoService.updateArmRpoStateAndStatus(armRpoExecutionDetailEntity, ArmRpoHelper.getStorageAccountsRpoState(),
+                                                 ArmRpoHelper.inProgressRpoStatus(), userAccount);
+        try {
+            StorageAccountRequest storageAccountRequest = StorageAccountRequest.builder()
+                .onlyKeyAccessType(false)
+                .storageType(1)
+                .build();
+            storageAccountResponse = armRpoClient.getStorageAccounts(bearerToken, storageAccountRequest);
+            if (storageAccountResponse != null
+                && CollectionUtils.isNotEmpty(storageAccountResponse.getIndexes())) {
+                String storageAccountName = null;
+                for (var index : storageAccountResponse.getIndexes()) {
+                    if (nonNull(index.getIndex()) && nonNull(index.getIndex().getName())
+                        && index.getIndex().getName().equals(armApiConfigurationProperties.getArmStorageAccountName())) {
+                        storageAccountName = index.getIndex().getIndexId();
+                        break;
+                    }
+                }
+                if (nonNull(storageAccountName)) {
+                    armRpoExecutionDetailEntity.setStorageAccountId(storageAccountName);
+                    armRpoService.updateArmRpoStatus(armRpoExecutionDetailEntity, ArmRpoHelper.completedRpoStatus(), userAccount);
+                } else {
+                    armRpoService.updateArmRpoStatus(armRpoExecutionDetailEntity, ArmRpoHelper.failedRpoStatus(), userAccount);
+                }
+            } else {
+                log.error("Unable to get storage account details from ARM");
+                armRpoService.updateArmRpoStatus(armRpoExecutionDetailEntity, ArmRpoHelper.failedRpoStatus(), userAccount);
+            }
+        } catch (FeignException e) {
+            // this ensures the full error body containing the ARM error detail is logged rather than a truncated version
+            log.error("Error during ARM get record management matter: {}", e.contentUTF8());
+            armRpoService.updateArmRpoStatus(armRpoExecutionDetailEntity, ArmRpoHelper.failedRpoStatus(), userAccount);
+            throw e;
+        }
+        return storageAccountResponse;
     }
 
     @Override
