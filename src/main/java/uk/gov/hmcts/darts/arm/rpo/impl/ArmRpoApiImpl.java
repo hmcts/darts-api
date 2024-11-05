@@ -15,7 +15,9 @@ import uk.gov.hmcts.darts.arm.client.model.rpo.MasterIndexFieldByRecordClassSche
 import uk.gov.hmcts.darts.arm.client.model.rpo.MasterIndexFieldByRecordClassSchemaResponse;
 import uk.gov.hmcts.darts.arm.client.model.rpo.ProfileEntitlementResponse;
 import uk.gov.hmcts.darts.arm.client.model.rpo.RecordManagementMatterResponse;
+import uk.gov.hmcts.darts.arm.client.model.rpo.StorageAccountRequest;
 import uk.gov.hmcts.darts.arm.client.model.rpo.StorageAccountResponse;
+import uk.gov.hmcts.darts.arm.config.ArmApiConfigurationProperties;
 import uk.gov.hmcts.darts.arm.exception.ArmRpoException;
 import uk.gov.hmcts.darts.arm.helper.ArmRpoHelper;
 import uk.gov.hmcts.darts.arm.model.rpo.MasterIndexFieldByRecordClassSchema;
@@ -30,19 +32,22 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static java.util.Objects.isNull;
+import static java.util.Objects.nonNull;
 
 @Service
 @AllArgsConstructor
 @Slf4j
 public class ArmRpoApiImpl implements ArmRpoApi {
 
-    public static final String ARM_GET_RECORD_MANAGEMENT_MATTER_ERROR = "Error during ARM get record management matter";
-    public static final String IGNORE_MASTER_INDEX_PROPERTY_BF_018 = "bf_018";
-    public static final String MASTER_INDEX_FIELD_BY_RECORD_CLASS_SCHEMA_SORTING_FIELD = "ingestionDate";
-    public static final String RECORD_CLASS_CODE = "DARTS";
-    public static final int FIELD_TYPE_7 = 7;
+    private static final String ARM_GET_RECORD_MANAGEMENT_MATTER_ERROR = "Error during ARM get record management matter";
+    private static final String IGNORE_MASTER_INDEX_PROPERTY_BF_018 = "bf_018";
+    private static final String MASTER_INDEX_FIELD_BY_RECORD_CLASS_SCHEMA_SORTING_FIELD = "ingestionDate";
+    private static final String RECORD_CLASS_CODE = "DARTS";
+    private static final int FIELD_TYPE_7 = 7;
+
     private final ArmRpoClient armRpoClient;
     private final ArmRpoService armRpoService;
+    private final ArmApiConfigurationProperties armApiConfigurationProperties;
 
     @Override
     public void getRecordManagementMatter(String bearerToken, Integer executionId, UserAccountEntity userAccount) {
@@ -75,8 +80,52 @@ public class ArmRpoApiImpl implements ArmRpoApi {
     }
 
     @Override
-    public StorageAccountResponse getStorageAccounts(String bearerToken, Integer executionId, UserAccountEntity userAccount) {
-        throw new NotImplementedException("Method not implemented");
+    public void getStorageAccounts(String bearerToken, Integer executionId, UserAccountEntity userAccount) {
+        var armRpoExecutionDetailEntity = armRpoService.getArmRpoExecutionDetailEntity(executionId);
+        armRpoService.updateArmRpoStateAndStatus(armRpoExecutionDetailEntity, ArmRpoHelper.getStorageAccountsRpoState(),
+                                                 ArmRpoHelper.inProgressRpoStatus(), userAccount);
+        StringBuilder errorMessage = new StringBuilder("Failure during ARM get storage accounts: ");
+        StorageAccountResponse storageAccountResponse;
+        try {
+            StorageAccountRequest storageAccountRequest = createStorageAccountRequest();
+            storageAccountResponse = armRpoClient.getStorageAccounts(bearerToken, storageAccountRequest);
+
+        } catch (FeignException e) {
+            // this ensures the full error body containing the ARM error detail is logged rather than a truncated version
+            log.error(errorMessage.append("Unable to get ARM RPO response").toString() + " {}", e.contentUTF8());
+            throw handleFailureAndCreateException(errorMessage.toString(), armRpoExecutionDetailEntity, userAccount);
+        }
+
+        if (!nonNull(storageAccountResponse)
+            || !CollectionUtils.isNotEmpty(storageAccountResponse.getIndexes())) {
+            throw handleFailureAndCreateException(errorMessage.append("Unable to get indexes from storage account response").toString(),
+                                                  armRpoExecutionDetailEntity, userAccount);
+
+        }
+        String storageAccountName = null;
+        for (var index : storageAccountResponse.getIndexes()) {
+            if (nonNull(index.getIndex()) && nonNull(index.getIndex().getName())
+                && index.getIndex().getName().equals(armApiConfigurationProperties.getArmStorageAccountName())) {
+                storageAccountName = index.getIndex().getIndexId();
+                break;
+            }
+        }
+        if (!nonNull(storageAccountName)) {
+            throw handleFailureAndCreateException(errorMessage.append("Unable to find ARM RPO storage account in response").toString(),
+                                                  armRpoExecutionDetailEntity, userAccount);
+
+        }
+        armRpoExecutionDetailEntity.setStorageAccountId(storageAccountName);
+        armRpoService.updateArmRpoStatus(armRpoExecutionDetailEntity, ArmRpoHelper.completedRpoStatus(), userAccount);
+
+    }
+
+    private static StorageAccountRequest createStorageAccountRequest() {
+        StorageAccountRequest storageAccountRequest = StorageAccountRequest.builder()
+            .onlyKeyAccessType(false)
+            .storageType(1)
+            .build();
+        return storageAccountRequest;
     }
 
     @Override
