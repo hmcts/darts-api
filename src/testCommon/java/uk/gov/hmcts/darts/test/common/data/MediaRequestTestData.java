@@ -61,7 +61,7 @@ public class MediaRequestTestData implements Persistable<TestMediaRequestEntity.
      * @deprecated do not use. Instead, use someMinimal().
      */
     @Deprecated
-    public MediaRequestEntity someMinimalRequestData() {
+    public static MediaRequestEntity someMinimalRequestData() {
         var mediaRequest = new MediaRequestEntity();
         mediaRequest.setHearing(PersistableFactory.getHearingTestData().someMinimalHearing());
         mediaRequest.setStatus(OPEN);
@@ -81,7 +81,7 @@ public class MediaRequestTestData implements Persistable<TestMediaRequestEntity.
      * @deprecated do not use. Instead, use fromSpec() to create an object with the desired state.
      */
     @Deprecated
-    public MediaRequestEntity createCurrentMediaRequest(HearingEntity hearingEntity, UserAccountEntity requestor,
+    public static MediaRequestEntity createCurrentMediaRequest(HearingEntity hearingEntity, UserAccountEntity requestor,
                                                                OffsetDateTime startTime, OffsetDateTime endTime,
                                                                AudioRequestType audioRequestType, MediaRequestStatus status) {
         return createCurrentMediaRequest(hearingEntity, requestor, requestor, startTime, endTime, audioRequestType, status, OffsetDateTime.now());
@@ -92,7 +92,7 @@ public class MediaRequestTestData implements Persistable<TestMediaRequestEntity.
      * @deprecated do not use. Instead, use fromSpec() to create an object with the desired state.
      */
     @Deprecated
-    public MediaRequestEntity createCurrentMediaRequest(HearingEntity hearingEntity, UserAccountEntity owner, UserAccountEntity requestor,
+    public static MediaRequestEntity createCurrentMediaRequest(HearingEntity hearingEntity, UserAccountEntity owner, UserAccountEntity requestor,
                                                                OffsetDateTime startTime, OffsetDateTime endTime,
                                                                AudioRequestType audioRequestType, MediaRequestStatus status, OffsetDateTime requestedDate) {
         MediaRequestEntity mediaRequestEntity = someMinimalRequestData();
