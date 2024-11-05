@@ -20,7 +20,7 @@ public interface ArmRpoApi {
 
     IndexesByMatterIdResponse getIndexesByMatterId(String bearerToken, Integer executionId, UserAccountEntity userAccount);
 
-    StorageAccountResponse getStorageAccounts(String bearerToken, Integer executionId, UserAccountEntity userAccount);
+    void getStorageAccounts(String bearerToken, Integer executionId, UserAccountEntity userAccount);
 
     ProfileEntitlementResponse getProfileEntitlements(String bearerToken, Integer executionId, UserAccountEntity userAccount);
 

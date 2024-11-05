@@ -1,5 +1,6 @@
 package uk.gov.hmcts.darts.arm.service.impl;
 
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -28,7 +29,7 @@ import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class ArmRpoServiceImplTest {
-    
+
     @Mock
     private ArmRpoExecutionDetailRepository armRpoExecutionDetailRepository;
 
@@ -112,5 +113,10 @@ class ArmRpoServiceImplTest {
         assertNotNull(result);
         assertEquals(armRpoExecutionDetailEntity, result);
         verify(armRpoExecutionDetailRepository, times(1)).save(armRpoExecutionDetailEntity);
+    }
+
+    @AfterAll
+    static void close() {
+        ARM_RPO_HELPER_MOCKS.close();
     }
 }
