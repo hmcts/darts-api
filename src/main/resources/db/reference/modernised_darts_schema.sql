@@ -320,6 +320,11 @@
 --    amend media, event, transcription with 1 new column, folder_path
 --    add table data_anonymisation
 --    add 2 columns to table external_object_directory
+--v72.1 add 2 missing FKs on data_anonymisation
+--    add missing FK on daily_list
+--    add 2 FKs on event_linked_case
+--    add 2 FKs on media_linked_case
+--    add 2 FKs on object_retrieval_queue
 
 
 -- List of Table Aliases
@@ -1865,6 +1870,7 @@ CREATE SEQUENCE cas_seq CACHE 20;
 CREATE SEQUENCE cth_seq CACHE 1;
 CREATE SEQUENCE ctr_seq CACHE 20;
 CREATE SEQUENCE dal_seq CACHE 20;
+CREATE SEQUENCE dan_seq CACHE 20;
 CREATE SEQUENCE dfc_seq CACHE 20;
 CREATE SEQUENCE dfd_seq CACHE 20;
 CREATE SEQUENCE eve_seq CACHE 20;
@@ -2078,6 +2084,18 @@ ALTER TABLE data_anonymisation
 ADD CONSTRAINT data_anonymisation_transcription_comment_fk
 FOREIGN KEY (trc_id) REFERENCES transcription_comment(trc_id);
 
+ALTER TABLE data_anonymisation
+ADD CONSTRAINT data_anonymisation_requested_by_fk
+FOREIGN KEY (requested_by) REFERENCES user_account(usr_id);
+
+ALTER TABLE data_anonymisation
+ADD CONSTRAINT data_anonymisation_approved_by_fk
+FOREIGN KEY (approved_by) REFERENCES user_account(usr_id);
+
+ALTER TABLE daily_list
+ADD CONSTRAINT daily_list_external_location_type_fk
+FOREIGN KEY (elt_id) REFERENCES external_location_type(elt_id);
+
 ALTER TABLE daily_list
 ADD CONSTRAINT daily_list_created_by_fk
 FOREIGN KEY (created_by) REFERENCES user_account(usr_id);
@@ -2129,6 +2147,14 @@ FOREIGN KEY (last_modified_by) REFERENCES user_account(usr_id);
 ALTER TABLE event_handler
 ADD CONSTRAINT event_handler_created_by_fk
 FOREIGN KEY (created_by) REFERENCES user_account(usr_id);
+
+ALTER TABLE event_linked_case
+ADD CONSTRAINT event_linked_case_court_case_fk
+FOREIGN KEY (cas_id) REFERENCES court_case(cas_id);
+
+ALTER TABLE event_linked_case
+ADD CONSTRAINT event_linked_case_event_fk
+FOREIGN KEY (eve_id) REFERENCES event(eve_id);
 
 ALTER TABLE external_object_directory   
 ADD CONSTRAINT eod_media_fk
@@ -2251,6 +2277,14 @@ ADD CONSTRAINT media_deleted_by_fk
 FOREIGN KEY (deleted_by) REFERENCES user_account(usr_id);
 
 ALTER TABLE media_linked_case   
+ADD CONSTRAINT media_linked_case_court_case_fk
+FOREIGN KEY (cas_id) REFERENCES court_case(cas_id);
+
+ALTER TABLE media_linked_case   
+ADD CONSTRAINT media_linked_case_media_fk
+FOREIGN KEY (med_id) REFERENCES media(med_id);
+
+ALTER TABLE media_linked_case   
 ADD CONSTRAINT media_linked_case_created_by_fk
 FOREIGN KEY (created_by) REFERENCES user_account(usr_id);
 
@@ -2321,6 +2355,14 @@ FOREIGN KEY (hidden_by) REFERENCES user_account(usr_id);
 ALTER TABLE object_admin_action
 ADD CONSTRAINT object_admin_action_marked_for_manual_del_by_fk
 FOREIGN KEY (marked_for_manual_del_by) REFERENCES user_account(usr_id);
+
+ALTER TABLE object_retrieval_queue
+ADD CONSTRAINT object_retrieval_queue_media_fk
+FOREIGN KEY (med_id) REFERENCES media(med_id);
+
+ALTER TABLE object_retrieval_queue
+ADD CONSTRAINT object_retrieval_queue_transcription_document_fk
+FOREIGN KEY (trd_id) REFERENCES transcription_document(trd_id);
 
 ALTER TABLE object_retrieval_queue
 ADD CONSTRAINT object_retrieval_queue_created_by_fk
@@ -2547,6 +2589,7 @@ GRANT SELECT,INSERT,UPDATE,DELETE ON court_case TO darts_user;
 GRANT SELECT,INSERT,UPDATE,DELETE ON courthouse TO darts_user;
 GRANT SELECT,INSERT,UPDATE,DELETE ON courthouse_region_ae TO darts_user;
 GRANT SELECT,INSERT,UPDATE,DELETE ON courtroom TO darts_user;
+GRANT SELECT,INSERT,UPDATE,DELETE ON data_anonymisation TO darts_user;
 GRANT SELECT,INSERT,UPDATE,DELETE ON daily_list TO darts_user;
 GRANT SELECT,INSERT,UPDATE,DELETE ON defence TO darts_user;
 GRANT SELECT,INSERT,UPDATE,DELETE ON defendant TO darts_user;
@@ -2598,6 +2641,7 @@ GRANT SELECT,UPDATE ON  cas_seq TO darts_user;
 GRANT SELECT,UPDATE ON  cth_seq TO darts_user;
 GRANT SELECT,UPDATE ON  ctr_seq TO darts_user;
 GRANT SELECT,UPDATE ON  dal_seq TO darts_user;
+GRANT SELECT,UPDATE ON  dan_seq TO darts_user;
 GRANT SELECT,UPDATE ON  dfc_seq TO darts_user;
 GRANT SELECT,UPDATE ON  dfd_seq TO darts_user;
 GRANT SELECT,UPDATE ON  elt_seq TO darts_user;

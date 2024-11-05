@@ -31,5 +31,5 @@ variable "account_kind" {
 
 variable "pgsqlSku" {
   description = "sku set for postgreSQL databse"
-  default     = "GP_Standard_D4s_v3"
+  default     = "GP_Standard_D4ds_v5"
 }

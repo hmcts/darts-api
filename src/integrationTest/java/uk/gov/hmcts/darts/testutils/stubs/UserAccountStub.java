@@ -101,6 +101,14 @@ public class UserAccountStub {
         return dartsDatabaseSaveStub.save(newUser);
     }
 
+
+    @Transactional
+    public void setActiveState(String email, boolean active) {
+        UserAccountEntity userAccountEntity = userAccountRepository.findByEmailAddressIgnoreCase(email).get(0);
+        userAccountEntity.setActive(active);
+        userAccountRepository.save(userAccountEntity);
+    }
+
     @Transactional
     public UserAccountEntity createAuthorisedIntegrationTestUser(String courthouse) {
         return createAuthorisedIntegrationTestUser(courthouseStub.createCourthouseUnlessExists(courthouse));

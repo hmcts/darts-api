@@ -44,4 +44,6 @@ echo "DARTS_UNSTRUCTURED_STORAGE_SAS_URL=$(az keyvault secret show --vault-name 
 echo "ARM_SERVICE_PROFILE=$(az keyvault secret show --vault-name darts-stg --name ArmServiceProfile | jq .value -r)"
 echo "ACTIVE_DIRECTORY_B2C_AUTH_URI=https://hmctsstgextid.b2clogin.com/hmctsstgextid.onmicrosoft.com"
 echo "DARTS_PORTAL_URL=http://localhost:3000"
+echo "ARM_SERVICE_ENTITLEMENT=$(az keyvault secret show --vault-name darts-stg --name ArmServiceEntitlement | jq .value -r)"
+echo "ARM_STORAGE_ACCOUNT_NAME=$(az keyvault secret show --vault-name darts-stg --name ArmStorageAccountName | jq .value -r)"
 

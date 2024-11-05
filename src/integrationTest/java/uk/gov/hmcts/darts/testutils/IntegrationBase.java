@@ -25,6 +25,7 @@ import uk.gov.hmcts.darts.test.common.MemoryLogAppender;
 import uk.gov.hmcts.darts.testutils.stubs.DartsDatabaseRetrieval;
 import uk.gov.hmcts.darts.testutils.stubs.DartsDatabaseStub;
 import uk.gov.hmcts.darts.testutils.stubs.DartsPersistence;
+import uk.gov.hmcts.darts.testutils.stubs.wiremock.TokenStub;
 
 import java.time.Duration;
 import java.util.List;
@@ -89,6 +90,8 @@ public class IntegrationBase {
     private List<AutomatedOnDemandTask> automatedOnDemandTask;
     @Autowired
     private AutomatedTasksApi automatedTasksApi;
+
+    protected TokenStub tokenStub = new TokenStub();
 
     protected MemoryLogAppender logAppender = LogUtil.getMemoryLogger();
 

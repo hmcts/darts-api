@@ -1,5 +1,6 @@
 package uk.gov.hmcts.darts.common.config.security;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -9,6 +10,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -17,6 +19,7 @@ import org.springframework.security.oauth2.client.web.OAuth2LoginAuthenticationF
 import org.springframework.security.oauth2.core.OAuth2TokenValidator;
 import org.springframework.security.oauth2.jose.jws.SignatureAlgorithm;
 import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.jwt.JwtValidators;
 import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationProvider;
@@ -29,6 +32,9 @@ import uk.gov.hmcts.darts.authentication.config.external.ExternalAuthConfigurati
 import uk.gov.hmcts.darts.authentication.config.external.ExternalAuthProviderConfigurationProperties;
 import uk.gov.hmcts.darts.authentication.config.internal.InternalAuthConfigurationProperties;
 import uk.gov.hmcts.darts.authentication.config.internal.InternalAuthProviderConfigurationProperties;
+import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
+import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
+import uk.gov.hmcts.darts.common.exception.DartsApiTrait;
 
 import java.io.IOException;
 import java.util.Map;
@@ -38,7 +44,7 @@ import java.util.Map;
 @Configuration
 @EnableWebSecurity
 @RequiredArgsConstructor
-@Profile("!intTest")
+@Profile("!intTest || tokenSecurityTest")
 public class SecurityConfig {
 
     private final AuthStrategySelector locator;
@@ -48,6 +54,9 @@ public class SecurityConfig {
     private final ExternalAuthProviderConfigurationProperties externalAuthProviderConfigurationProperties;
     private final InternalAuthConfigurationProperties internalAuthConfigurationProperties;
     private final InternalAuthProviderConfigurationProperties internalAuthProviderConfigurationProperties;
+    private final UserIdentity userIdentity;
+    private final JwtDecoder jwtDecoder;
+    private static final String TOKEN_BEARER_PREFIX = "Bearer";
 
     @Bean
     @SuppressWarnings("PMD.SignatureDeclareThrowsException")
@@ -78,9 +87,10 @@ public class SecurityConfig {
 
     @Bean
     @SuppressWarnings({"PMD.SignatureDeclareThrowsException", "squid:S4502"})
-    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain filterChain(HttpSecurity http, ObjectMapper mapper) throws Exception {
         applyCommonConfig(http)
             .addFilterBefore(new AuthorisationTokenExistenceFilter(), OAuth2LoginAuthenticationFilter.class)
+            .addFilterAfter(new InactiveUserAuthorisationCheck(mapper), OAuth2LoginAuthenticationFilter.class)
             .authorizeHttpRequests().anyRequest().authenticated()
             .and()
             .oauth2ResourceServer().authenticationManagerResolver(jwtIssuerAuthenticationManagerResolver());
@@ -110,6 +120,7 @@ public class SecurityConfig {
 
     private Map.Entry<String, AuthenticationManager> createAuthenticationEntry(String issuer,
         String jwkSetUri) {
+
         var jwtDecoder = NimbusJwtDecoder.withJwkSetUri(jwkSetUri)
             .jwsAlgorithm(SignatureAlgorithm.RS256)
             .build();
@@ -129,7 +140,8 @@ public class SecurityConfig {
             throws ServletException, IOException {
 
             String authHeader = request.getHeader("Authorization");
-            if (authHeader != null && authHeader.startsWith("Bearer")) {
+
+            if (authHeader != null && authHeader.startsWith(TOKEN_BEARER_PREFIX)) {
                 filterChain.doFilter(request, response);
                 return;
             }
@@ -138,4 +150,54 @@ public class SecurityConfig {
         }
     }
 
+    @RequiredArgsConstructor
+    private final class InactiveUserAuthorisationCheck extends OncePerRequestFilter {
+
+        private final ObjectMapper mapper;
+
+        @Override
+        protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
+            throws ServletException, IOException {
+            Jwt jwt = null;
+            try {
+                var jwtDecoder = NimbusJwtDecoder.withJwkSetUri(externalAuthProviderConfigurationProperties.getJwkSetUri())
+                    .jwsAlgorithm(SignatureAlgorithm.RS256)
+                    .build();
+
+                String authHeader = request.getHeader("Authorization");
+
+                OAuth2TokenValidator<Jwt> jwtValidator = JwtValidators.createDefaultWithIssuer(externalAuthConfigurationProperties.getIssuerUri());
+                jwtDecoder.setJwtValidator(jwtValidator);
+                jwt = jwtDecoder.decode(authHeader.replace(TOKEN_BEARER_PREFIX, "").trim());
+            } catch (Exception exception) {
+                log.error("Problem decoding the token", exception);
+            }
+
+            // if we cant determine the jwt then proxy and let the nimbus library handle the 401
+            if (jwt == null) {
+                filterChain.doFilter(request, response);
+            } else {
+                try {
+                    UserAccountEntity userAccountEntity = userIdentity.getUserAccount(jwt);
+                    if (!userAccountEntity.isActive()) {
+                        writeError(response);
+                    } else {
+                        filterChain.doFilter(request, response);
+                    }
+                } catch (Exception exception) {
+                    log.error("User is invalid", exception);
+                    writeError(response);
+                }
+            }
+        }
+
+        private void writeError(HttpServletResponse response) {
+            try {
+                DartsApiTrait.writeErrorResponse(response, mapper);
+            } catch (IOException ex) {
+                log.error("Problem parsing the problem", ex);
+                response.setStatus(HttpStatus.FORBIDDEN.value());
+            }
+        }
+    }
 }
