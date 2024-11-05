@@ -40,11 +40,12 @@ import static java.util.Objects.nonNull;
 public class ArmRpoApiImpl implements ArmRpoApi {
 
     private static final String ARM_GET_RECORD_MANAGEMENT_MATTER_ERROR = "Error during ARM get record management matter";
-    public static final String ARM_GET_STORAGE_ACCOUNT_ERROR = "Error during ARM get storage account";
-    public static final String IGNORE_MASTER_INDEX_PROPERTY_BF_018 = "bf_018";
-    public static final String MASTER_INDEX_FIELD_BY_RECORD_CLASS_SCHEMA_SORTING_FIELD = "ingestionDate";
-    public static final String RECORD_CLASS_CODE = "DARTS";
-    public static final int FIELD_TYPE_7 = 7;
+    private static final String ARM_GET_STORAGE_ACCOUNT_ERROR = "Error during ARM get storage account";
+    private static final String IGNORE_MASTER_INDEX_PROPERTY_BF_018 = "bf_018";
+    private static final String MASTER_INDEX_FIELD_BY_RECORD_CLASS_SCHEMA_SORTING_FIELD = "ingestionDate";
+    private static final String RECORD_CLASS_CODE = "DARTS";
+    private static final int FIELD_TYPE_7 = 7;
+
     private final ArmRpoClient armRpoClient;
     private final ArmRpoService armRpoService;
     private final ArmApiConfigurationProperties armApiConfigurationProperties;
@@ -84,6 +85,7 @@ public class ArmRpoApiImpl implements ArmRpoApi {
         var armRpoExecutionDetailEntity = armRpoService.getArmRpoExecutionDetailEntity(executionId);
         armRpoService.updateArmRpoStateAndStatus(armRpoExecutionDetailEntity, ArmRpoHelper.getStorageAccountsRpoState(),
                                                  ArmRpoHelper.inProgressRpoStatus(), userAccount);
+        StringBuilder errorMessage = new StringBuilder("Failure during ARM get storage accounts: ");
         StorageAccountResponse storageAccountResponse;
         try {
             StorageAccountRequest storageAccountRequest = createStorageAccountRequest();
