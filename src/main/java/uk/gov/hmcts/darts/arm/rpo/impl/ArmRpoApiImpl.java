@@ -40,7 +40,6 @@ import static java.util.Objects.nonNull;
 public class ArmRpoApiImpl implements ArmRpoApi {
 
     private static final String ARM_GET_RECORD_MANAGEMENT_MATTER_ERROR = "Error during ARM get record management matter";
-    private static final String ARM_GET_STORAGE_ACCOUNT_ERROR = "Error during ARM get storage account";
     private static final String IGNORE_MASTER_INDEX_PROPERTY_BF_018 = "bf_018";
     private static final String MASTER_INDEX_FIELD_BY_RECORD_CLASS_SCHEMA_SORTING_FIELD = "ingestionDate";
     private static final String RECORD_CLASS_CODE = "DARTS";
@@ -93,13 +92,14 @@ public class ArmRpoApiImpl implements ArmRpoApi {
 
         } catch (FeignException e) {
             // this ensures the full error body containing the ARM error detail is logged rather than a truncated version
-            log.error("Error during ARM get storage account: {}", e.contentUTF8());
-            throw handleFailureAndCreateException(ARM_GET_STORAGE_ACCOUNT_ERROR, armRpoExecutionDetailEntity, userAccount);
+            log.error(errorMessage.append("Unable to get ARM RPO response").toString() + " {}", e.contentUTF8());
+            throw handleFailureAndCreateException(errorMessage.toString(), armRpoExecutionDetailEntity, userAccount);
         }
 
         if (!nonNull(storageAccountResponse)
             || !CollectionUtils.isNotEmpty(storageAccountResponse.getIndexes())) {
-            throw handleFailureAndCreateException(ARM_GET_STORAGE_ACCOUNT_ERROR, armRpoExecutionDetailEntity, userAccount);
+            throw handleFailureAndCreateException(errorMessage.append("Unable to get indexes from storage account response").toString(),
+                                                  armRpoExecutionDetailEntity, userAccount);
 
         }
         String storageAccountName = null;
@@ -111,7 +111,8 @@ public class ArmRpoApiImpl implements ArmRpoApi {
             }
         }
         if (!nonNull(storageAccountName)) {
-            throw handleFailureAndCreateException(ARM_GET_STORAGE_ACCOUNT_ERROR, armRpoExecutionDetailEntity, userAccount);
+            throw handleFailureAndCreateException(errorMessage.append("Unable to find ARM RPO storage account in response").toString(),
+                                                  armRpoExecutionDetailEntity, userAccount);
 
         }
         armRpoExecutionDetailEntity.setStorageAccountId(storageAccountName);
