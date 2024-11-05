@@ -80,16 +80,13 @@ public class ArmRpoApiImpl implements ArmRpoApi {
     }
 
     @Override
-    public StorageAccountResponse getStorageAccounts(String bearerToken, Integer executionId, UserAccountEntity userAccount) {
+    public void getStorageAccounts(String bearerToken, Integer executionId, UserAccountEntity userAccount) {
         var armRpoExecutionDetailEntity = armRpoService.getArmRpoExecutionDetailEntity(executionId);
         armRpoService.updateArmRpoStateAndStatus(armRpoExecutionDetailEntity, ArmRpoHelper.getStorageAccountsRpoState(),
                                                  ArmRpoHelper.inProgressRpoStatus(), userAccount);
         StorageAccountResponse storageAccountResponse;
         try {
-            StorageAccountRequest storageAccountRequest = StorageAccountRequest.builder()
-                .onlyKeyAccessType(false)
-                .storageType(1)
-                .build();
+            StorageAccountRequest storageAccountRequest = createStorageAccountRequest();
             storageAccountResponse = armRpoClient.getStorageAccounts(bearerToken, storageAccountRequest);
 
         } catch (FeignException e) {
@@ -118,7 +115,14 @@ public class ArmRpoApiImpl implements ArmRpoApi {
         armRpoExecutionDetailEntity.setStorageAccountId(storageAccountName);
         armRpoService.updateArmRpoStatus(armRpoExecutionDetailEntity, ArmRpoHelper.completedRpoStatus(), userAccount);
 
-        return storageAccountResponse;
+    }
+
+    private static StorageAccountRequest createStorageAccountRequest() {
+        StorageAccountRequest storageAccountRequest = StorageAccountRequest.builder()
+            .onlyKeyAccessType(false)
+            .storageType(1)
+            .build();
+        return storageAccountRequest;
     }
 
     @Override

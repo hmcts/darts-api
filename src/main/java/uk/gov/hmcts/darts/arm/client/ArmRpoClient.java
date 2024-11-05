@@ -30,7 +30,7 @@ public interface ArmRpoClient {
     RecordManagementMatterResponse getRecordManagementMatter(@RequestHeader(AUTHORIZATION) String bearerAuth);
 
 
-    @PostMapping(value = "${darts.storage.arm-api.rpo-url.get-storage-accounts}",
+    @PostMapping(value = "${darts.storage.arm-api.rpo-url.get-storage-accounts-path}",
         consumes = APPLICATION_JSON_VALUE,
         produces = APPLICATION_JSON_VALUE
     )
