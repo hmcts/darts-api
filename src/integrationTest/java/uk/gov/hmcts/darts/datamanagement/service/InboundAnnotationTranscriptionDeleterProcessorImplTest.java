@@ -66,7 +66,7 @@ class InboundAnnotationTranscriptionDeleterProcessorImplTest extends PostgresInt
         generateData(setupHoursBeforeCurrentTime);
 
         // exercise the logic
-        List<Integer> updatedResults = inboundAnnotationTranscriptionDeleterProcessor.markForDeletion();
+        List<Integer> updatedResults = inboundAnnotationTranscriptionDeleterProcessor.markForDeletion(100);
 
         // assert the logic
         assertExpectedResults(updatedResults, entitiesToBeMarkedWithMediaOutsideOfHours, entitiesToBeMarkedWithMediaOutsideOfHours.size());

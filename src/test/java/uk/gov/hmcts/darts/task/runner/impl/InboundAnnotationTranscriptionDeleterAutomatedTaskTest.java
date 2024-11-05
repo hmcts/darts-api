@@ -11,6 +11,8 @@ import uk.gov.hmcts.darts.log.api.LogApi;
 import uk.gov.hmcts.darts.task.config.AutomatedTaskConfigurationProperties;
 import uk.gov.hmcts.darts.task.service.LockService;
 
+import static org.mockito.ArgumentMatchers.anyInt;
+
 @ExtendWith(MockitoExtension.class)
 class InboundAnnotationTranscriptionDeleterAutomatedTaskTest {
 
@@ -42,6 +44,6 @@ class InboundAnnotationTranscriptionDeleterAutomatedTaskTest {
         unstructuredAnnotationTranscriptionDeleterAutomatedTask.runTask();
 
         //then
-        Mockito.verify(armResponseFilesProcessor, Mockito.times(1)).markForDeletion();
+        Mockito.verify(armResponseFilesProcessor, Mockito.times(1)).markForDeletion(anyInt());
     }
 }

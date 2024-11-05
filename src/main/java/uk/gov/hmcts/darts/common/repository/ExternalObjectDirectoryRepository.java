@@ -106,10 +106,10 @@ public interface ExternalObjectDirectoryRepository extends JpaRepository<Externa
             """
     )
     List<ExternalObjectDirectoryEntity> findExternalObjectDirectoryByLocation(ExternalLocationTypeEntity location,
-                                                                                  MediaEntity media,
-                                                                                  TranscriptionDocumentEntity transcription,
-                                                                                  AnnotationDocumentEntity annotation,
-                                                                                  CaseDocumentEntity caseDocument);
+                                                                              MediaEntity media,
+                                                                              TranscriptionDocumentEntity transcription,
+                                                                              AnnotationDocumentEntity annotation,
+                                                                              CaseDocumentEntity caseDocument);
 
     @Query(
         """
@@ -205,7 +205,8 @@ public interface ExternalObjectDirectoryRepository extends JpaRepository<Externa
                                                        ExternalLocationTypeEntity location1,
                                                        ExternalLocationTypeEntity location2,
                                                        OffsetDateTime lastModifiedBefore,
-                                                       Integer externalObjectDirectoryQueryTypeEnumIndex);
+                                                       Integer externalObjectDirectoryQueryTypeEnumIndex,
+                                                       Pageable pageable);
 
     @Query(
         """
