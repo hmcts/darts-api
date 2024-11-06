@@ -61,7 +61,8 @@ public interface ArmRpoClient {
         consumes = APPLICATION_JSON_VALUE,
         produces = APPLICATION_JSON_VALUE
     )
-    IndexesByMatterIdResponse getIndexesByMatterId(String bearerToken, IndexesByMatterIdRequest indexesByMatterIdRequest);
+    IndexesByMatterIdResponse getIndexesByMatterId(@RequestHeader(AUTHORIZATION) String bearerToken,
+                                                   @RequestBody IndexesByMatterIdRequest indexesByMatterIdRequest);
 
     @PostMapping(value = "${darts.storage.arm-api.rpo-url.save-background-search-path}",
         consumes = APPLICATION_JSON_VALUE,
