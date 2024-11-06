@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.NotImplementedException;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.darts.arm.client.ArmRpoClient;
 import uk.gov.hmcts.darts.arm.client.model.rpo.ArmAsyncSearchResponse;
@@ -129,8 +130,48 @@ public class ArmRpoApiImpl implements ArmRpoApi {
     }
 
     @Override
-    public ProfileEntitlementResponse getProfileEntitlements(String bearerToken, Integer executionId, UserAccountEntity userAccount) {
-        throw new NotImplementedException("Method not implemented");
+    public void getProfileEntitlements(String bearerToken, Integer executionId, UserAccountEntity userAccount) {
+        final ArmRpoExecutionDetailEntity executionDetail = armRpoService.getArmRpoExecutionDetailEntity(executionId);
+        armRpoService.updateArmRpoStateAndStatus(executionDetail,
+            ArmRpoHelper.getProfileEntitlementsRpoState(),
+            ArmRpoHelper.inProgressRpoStatus(),
+            userAccount);
+
+        final StringBuilder exceptionMessageBuilder = new StringBuilder("ARM getProfileEntitlements: ");
+        ProfileEntitlementResponse response;
+        try {
+            response = armRpoClient.getProfileEntitlementResponse(bearerToken);
+        } catch (FeignException e) {
+            throw handleFailureAndCreateException(exceptionMessageBuilder.append("API call failed: ")
+                                                      .append(e)
+                                                      .toString(),
+                                                  executionDetail, userAccount);
+        }
+
+        var entitlements = response.getEntitlements();
+        if (CollectionUtils.isEmpty(entitlements)) {
+            throw handleFailureAndCreateException(exceptionMessageBuilder.append("No entitlements were returned")
+                                                      .toString(),
+                                                  executionDetail, userAccount);
+        }
+
+        String configuredEntitlement = armApiConfigurationProperties.getArmServiceEntitlement();
+        var profileEntitlement = entitlements.stream()
+            .filter(entitlement -> configuredEntitlement.equals(entitlement.getName()))
+            .findFirst()
+            .orElseThrow(() -> handleFailureAndCreateException(exceptionMessageBuilder.append("No matching entitlements were returned")
+                                                                   .toString(),
+                                                               executionDetail, userAccount));
+
+        String entitlementId = profileEntitlement.getEntitlementId();
+        if (StringUtils.isEmpty(entitlementId)) {
+            throw handleFailureAndCreateException(exceptionMessageBuilder.append("The obtained entitlement id was empty")
+                                                      .toString(),
+                                                  executionDetail, userAccount);
+        }
+
+        executionDetail.setEntitlementId(entitlementId);
+        armRpoService.updateArmRpoStatus(executionDetail, ArmRpoHelper.completedRpoStatus(), userAccount);
     }
 
     @Override

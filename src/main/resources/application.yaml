@@ -287,8 +287,8 @@ darts:
       rpo-url:
         get-record-management-matter-path: /api/v1/getRecordManagementMatter
         get-storage-accounts: /api/v1/getStorageAccounts
-
         get-master-index-field-by-record-class-schema-path: /api/v1/getMasterIndexFieldByRecordClassSchema
+        get-profile-entitlements-path: /api/v1/getProfileEntitlements
     dets:
       sas-endpoint: ${DETS_SAS_URL_ENDPOINT:}
       container-name: darts-migration

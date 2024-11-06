@@ -32,6 +32,7 @@ import uk.gov.hmcts.darts.event.service.EventMappingService;
 import uk.gov.hmcts.darts.event.service.EventSearchService;
 import uk.gov.hmcts.darts.event.service.EventService;
 import uk.gov.hmcts.darts.event.service.handler.EventHandlerEnumerator;
+import uk.gov.hmcts.darts.util.DataUtil;
 
 import java.time.OffsetDateTime;
 import java.util.List;
@@ -68,6 +69,7 @@ public class EventsController implements EventApi {
     public ResponseEntity<EventsResponse> eventsPost(
         @Parameter(name = "DartsEvent") @Valid @RequestBody DartsEvent dartsEvent
     ) {
+        DataUtil.preProcess(dartsEvent);
         eventDispatcher.receive(dartsEvent);
 
         var addDocumentResponse = new EventsResponse();
