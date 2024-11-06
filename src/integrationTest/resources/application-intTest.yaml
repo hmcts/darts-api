@@ -30,6 +30,12 @@ spring:
             jwk-set-uri: http://localhost:${wiremock.server.port}/discovery/v2.0/keys
             logout-uri: http://localhost:${wiremock.server.port}/B2C_1_darts_externaluser_signin/oauth2/v2.0/logout
             reset-password-uri: http://localhost:${wiremock.server.port}/B2C_1_darts_externaluser_password_reset/oauth2/v2.0/authorize
+          internal-azure-ad-provider:
+            authorization-uri: http://localhost:${wiremock.server.port}/oauth2/v2.0/authorize
+            token-uri: http://localhost:${wiremock.server.port}/oauth2/v2.0/token
+            jwk-set-uri: http://localhost:${wiremock.server.port}/discovery/v2.0/keys
+            logout-uri: http://localhost:${wiremock.server.port}/B2C_1_darts_externaluser_signin/oauth2/v2.0/logout
+            reset-password-uri: http://localhost:${wiremock.server.port}/B2C_1_darts_externaluser_password_reset/oauth2/v2.0/authorize
   autoconfigure:
     exclude:
       - org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration
@@ -84,8 +90,9 @@ darts:
     max-file-size: 20
   automated:
     task:
-      system-user-email: dartssystemuser@hmcts.net
-      expiry-deletion:
+      common-config:
+        system-user-email: dartssystemuser@hmcts.net
+      case-expiry-deletion:
         enabled: true
 logging:
   level:

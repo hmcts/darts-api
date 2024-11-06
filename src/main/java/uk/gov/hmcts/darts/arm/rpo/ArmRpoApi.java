@@ -5,8 +5,8 @@ import uk.gov.hmcts.darts.arm.client.model.rpo.ExtendedProductionsByMatterRespon
 import uk.gov.hmcts.darts.arm.client.model.rpo.ExtendedSearchesByMatterResponse;
 import uk.gov.hmcts.darts.arm.client.model.rpo.IndexesByMatterIdResponse;
 import uk.gov.hmcts.darts.arm.client.model.rpo.MasterIndexFieldByRecordClassSchemaResponse;
-import uk.gov.hmcts.darts.arm.client.model.rpo.ProfileEntitlementResponse;
-import uk.gov.hmcts.darts.arm.client.model.rpo.StorageAccountResponse;
+import uk.gov.hmcts.darts.arm.model.rpo.MasterIndexFieldByRecordClassSchema;
+import uk.gov.hmcts.darts.common.entity.ArmRpoStateEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 
 import java.io.InputStream;
@@ -18,12 +18,12 @@ public interface ArmRpoApi {
 
     IndexesByMatterIdResponse getIndexesByMatterId(String bearerToken, Integer executionId, UserAccountEntity userAccount);
 
-    StorageAccountResponse getStorageAccounts(String bearerToken, Integer executionId, UserAccountEntity userAccount);
+    void getStorageAccounts(String bearerToken, Integer executionId, UserAccountEntity userAccount);
 
-    ProfileEntitlementResponse getProfileEntitlements(String bearerToken, Integer executionId, UserAccountEntity userAccount);
+    void getProfileEntitlements(String bearerToken, Integer executionId, UserAccountEntity userAccount);
 
-    MasterIndexFieldByRecordClassSchemaResponse getMasterIndexFieldByRecordClassSchema(String bearerToken, Integer executionId, Integer rpoStageId,
-                                                                                       UserAccountEntity userAccount);
+    List<MasterIndexFieldByRecordClassSchema> getMasterIndexFieldByRecordClassSchema(String bearerToken, Integer executionId, ArmRpoStateEntity rpoStateEntity,
+                                                                                     UserAccountEntity userAccount);
 
     ArmAsyncSearchResponse addAsyncSearch(String bearerToken, Integer executionId, UserAccountEntity userAccount);
 
