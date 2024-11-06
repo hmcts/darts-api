@@ -11,7 +11,7 @@ public enum SystemUsersEnum {
     DAILY_LIST_PROCESSOR(-2),
     ADD_AUDIO_PROCESSOR(-3),
     ADD_CASE_PROCESSOR(-4),
-    AUDIO_LINKING_AUTOMATED_TASK(-5);
+    AUDIO_LINKING_AUTOMATED_TASK(-32);
 
     private final int id;
 
