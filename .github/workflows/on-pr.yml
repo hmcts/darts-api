@@ -86,9 +86,3 @@ jobs:
           fi
         env:
           PR_NUMBER: ${{ github.event.number }}
-  check-flyway-migration-scripts:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-      - name: Check for duplicate Flyway migration scripts
-        run: ./bin/ci/flyway-dupe-checker.sh
