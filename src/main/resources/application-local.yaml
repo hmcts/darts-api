@@ -28,6 +28,8 @@ darts:
   storage:
     arm-api:
       url: ${ARM_URL:http://localhost:4551}
+      arm-service-entitlement: "SRV-DARTS-RW-E" # Per the entitlements[*].name value specified in darts-stub-services getProfileEntitlements
+      arm-storage-account-name: "local"
 
 logging:
   level:

@@ -30,7 +30,9 @@ public enum ObjectRecordStatusEnum {
     ARM_RESPONSE_CHECKSUM_VERIFICATION_FAILED(18),
     ARM_RESPONSE_MANIFEST_FAILED(19),
     FAILURE_EMPTY_FILE(20),
-    ARM_RPO_PENDING(21);
+    ARM_RPO_PENDING(21),
+    ARM_REPLAY(22),
+    ARM_MISSING_RESPONSE(23);
 
     private static final Map<Integer, ObjectRecordStatusEnum> BY_ID = new ConcurrentHashMap<>();
 

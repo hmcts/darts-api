@@ -48,6 +48,7 @@ import uk.gov.hmcts.darts.common.enums.SecurityRoleEnum;
 import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
 import uk.gov.hmcts.darts.common.repository.AnnotationDocumentRepository;
 import uk.gov.hmcts.darts.common.repository.AnnotationRepository;
+import uk.gov.hmcts.darts.common.repository.ArmRpoExecutionDetailRepository;
 import uk.gov.hmcts.darts.common.repository.AuditRepository;
 import uk.gov.hmcts.darts.common.repository.AutomatedTaskRepository;
 import uk.gov.hmcts.darts.common.repository.CaseDocumentRepository;
@@ -75,6 +76,7 @@ import uk.gov.hmcts.darts.common.repository.NotificationRepository;
 import uk.gov.hmcts.darts.common.repository.ObjectAdminActionRepository;
 import uk.gov.hmcts.darts.common.repository.ObjectHiddenReasonRepository;
 import uk.gov.hmcts.darts.common.repository.ObjectRecordStatusRepository;
+import uk.gov.hmcts.darts.common.repository.ObjectStateRecordRepository;
 import uk.gov.hmcts.darts.common.repository.ProsecutorRepository;
 import uk.gov.hmcts.darts.common.repository.RegionRepository;
 import uk.gov.hmcts.darts.common.repository.RetentionPolicyTypeRepository;
@@ -147,6 +149,7 @@ public class DartsDatabaseStub {
     private final EntityManagerFactory entityManagerFactory;
     private final AnnotationDocumentRepository annotationDocumentRepository;
     private final AnnotationRepository annotationRepository;
+    private final ArmRpoExecutionDetailRepository armRpoExecutionDetailRepository;
     private final AuditRepository auditRepository;
     private final CaseDocumentRepository caseDocumentRepository;
     private final CaseManagementRetentionRepository caseManagementRetentionRepository;
@@ -171,6 +174,7 @@ public class DartsDatabaseStub {
     private final NodeRegisterRepository nodeRegisterRepository;
     private final NotificationRepository notificationRepository;
     private final ObjectRecordStatusRepository objectRecordStatusRepository;
+    private final ObjectStateRecordRepository objectStateRecordRepository;
     private final ProsecutorRepository prosecutorRepository;
     private final RetentionPolicyTypeRepository retentionPolicyTypeRepository;
     private final RetrieveCoreObjectService retrieveCoreObjectService;
@@ -256,6 +260,7 @@ public class DartsDatabaseStub {
 
     @Transactional
     public void clearDatabaseInThisOrder() {
+        armRpoExecutionDetailRepository.deleteAll();
         objectAdminActionRepository.deleteAll();
         auditRepository.deleteAll();
         externalObjectDirectoryRepository.deleteAll();

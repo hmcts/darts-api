@@ -3,6 +3,7 @@
 @Library("Infrastructure")
 
 import uk.gov.hmcts.contino.GradleBuilder
+import uk.gov.hmcts.contino.GithubAPI
 
 def type = "java"
 def product = "darts"
@@ -46,13 +47,15 @@ def secrets = [
         secret('DETSSasURLEndpoint', 'DETS_SAS_URL_ENDPOINT'),
         secret('DartsInboundStorageSasUrl', 'DARTS_INBOUND_STORAGE_SAS_URL'),
         secret('DartsUnstructuredStorageSasUrl', 'DARTS_UNSTRUCTURED_STORAGE_SAS_URL'),
+        secret('ArmServiceEntitlement', 'ARM_SERVICE_ENTITLEMENT'),
+        secret('ArmStorageAccountName', 'ARM_STORAGE_ACCOUNT_NAME'),
         // secrets for staging DB
         secret('api-POSTGRES-HOST', 'STAGING_DB_HOST'),
         secret('api-POSTGRES-USER', 'STAGING_DB_USER'),
         secret('api-POSTGRES-PASS', 'STAGING_DB_PASS'),
         secret('api-POSTGRES-PORT', 'STAGING_DB_PORT'),
         secret('api-POSTGRES-SCHEMA', 'STAGING_DB_SCHEMA'),
-        secret('api-POSTGRES-DATABASE', 'STAGING_DB_DATABASE')
+        secret('api-POSTGRES-DATABASE', 'STAGING_DB_DATABASE'),
     ],
 ]
 
@@ -63,6 +66,28 @@ static LinkedHashMap<String, Object> secret(String secretName, String envVar) {
      version    : '',
      envVariable: envVar
     ]
+}
+
+def determineDevEnvironmentDeployment() {
+    env.DEV_ENABLE_DARTS_PORTAL = false
+    env.DEV_DARTS_PORTAL_URL = "https://darts.staging.apps.hmcts.net"
+
+    echo "1 - env.DEV_ENABLE_DARTS_PORTAL: ${env.DEV_ENABLE_DARTS_PORTAL}"
+    echo "1 - env.DEV_DARTS_PORTAL_URL: ${env.DEV_DARTS_PORTAL_URL}"
+
+    def githubApi = new GithubAPI(this)
+    if (githubApi.checkForLabel(env.BRANCH_NAME, "enable_keep_helm")) {
+        for (label in githubApi.getLabelsbyPattern(env.BRANCH_NAME, "enable_darts_") ) {
+            if (label == "enable_darts_portal") {
+                env.DEV_ENABLE_DARTS_PORTAL = true
+                env.DEV_DARTS_PORTAL_URL = "https://darts-portal-pr-${env.CHANGE_ID}.dev.platform.hmcts.net"
+                echo "Deploying DARTS portal instance in PR environment"
+            }
+        }
+    }
+
+    echo "2 - env.DEV_ENABLE_DARTS_PORTAL: ${env.DEV_ENABLE_DARTS_PORTAL}"
+    echo "2 - env.DEV_DARTS_PORTAL_URL: ${env.DEV_DARTS_PORTAL_URL}"
 }
 
 GradleBuilder builder = new GradleBuilder(this, product)
@@ -146,6 +171,12 @@ withPipeline(type, product, component) {
 
     before('dbmigrate:ithc') {
         sh("./gradlew --no-daemon --init-script init.gradle assemble")
+    }
+
+    before('akschartsinstall') {
+        onPR {
+            determineDevEnvironmentDeployment()
+        }
     }
 
     afterSuccess('akschartsinstall') {

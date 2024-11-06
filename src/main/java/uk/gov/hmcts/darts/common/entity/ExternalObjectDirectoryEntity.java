@@ -96,6 +96,12 @@ public class ExternalObjectDirectoryEntity extends CreatedModifiedBaseEntity imp
     @Column(name = "update_retention")
     private boolean updateRetention;
 
+    @Column(name = "input_upload_processed_ts")
+    private OffsetDateTime inputUploadProcessedTs;
+
+    @Column(name = "force_response_cleanup")
+    private Boolean forceResponseCleanup;
+
     @Override
     public int getStatusId() {
         return getStatus().getId();

@@ -1,5 +1,6 @@
 package uk.gov.hmcts.darts.common.repository;
 
+import jakarta.transaction.Transactional;
 import org.springframework.data.domain.Limit;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -97,9 +98,26 @@ public interface ExternalObjectDirectoryRepository extends JpaRepository<Externa
     @Query(
         """
             SELECT eod FROM ExternalObjectDirectoryEntity eod
+            WHERE eod.externalLocationType = :location
+            AND (eod.media = :media
+            or eod.transcriptionDocumentEntity = :transcription
+            or eod.annotationDocumentEntity = :annotation
+            or eod.caseDocument = :caseDocument)
+            """
+    )
+    List<ExternalObjectDirectoryEntity> findExternalObjectDirectoryByLocation(ExternalLocationTypeEntity location,
+                                                                                  MediaEntity media,
+                                                                                  TranscriptionDocumentEntity transcription,
+                                                                                  AnnotationDocumentEntity annotation,
+                                                                                  CaseDocumentEntity caseDocument);
+
+    @Query(
+        """
+            SELECT eod FROM ExternalObjectDirectoryEntity eod
             WHERE eod.status in :failedStatuses
             AND eod.externalLocationType = :type
             AND eod.transferAttempts <= :transferAttempts
+            AND eod.osrUuid is null
             """
     )
     List<ExternalObjectDirectoryEntity> findNotFinishedAndNotExceededRetryInStorageLocation(List<ObjectRecordStatusEntity> failedStatuses,
@@ -107,11 +125,20 @@ public interface ExternalObjectDirectoryRepository extends JpaRepository<Externa
                                                                                             Integer transferAttempts,
                                                                                             Pageable pageable);
 
-    default List<ExternalObjectDirectoryEntity> findNotFinishedAndNotExceededRetryInStorageLocation(List<ObjectRecordStatusEntity> failedStatuses,
-                                                                                                    ExternalLocationTypeEntity type,
-                                                                                                    Integer transferAttempts) {
-        return findNotFinishedAndNotExceededRetryInStorageLocation(failedStatuses, type, transferAttempts, Pageable.unpaged());
-    }
+    @Query(
+        """
+            SELECT eod FROM ExternalObjectDirectoryEntity eod
+            WHERE eod.status in :failedStatuses
+            AND eod.externalLocationType = :type
+            AND eod.transferAttempts <= :transferAttempts
+            AND eod.osrUuid is not null
+            """
+    )
+    List<ExternalObjectDirectoryEntity> findNotFinishedAndNotExceededRetryInStorageLocationForDets(List<ObjectRecordStatusEntity> failedStatuses,
+                                                                                                   ExternalLocationTypeEntity type,
+                                                                                                   Integer transferAttempts,
+                                                                                                   Pageable pageable);
+
 
     @Query(
         """
@@ -161,20 +188,6 @@ public interface ExternalObjectDirectoryRepository extends JpaRepository<Externa
 
     @Query(
         """
-            SELECT COUNT(eod) > 0
-            FROM ExternalObjectDirectoryEntity eod, ExternalObjectDirectoryEntity eod2
-            WHERE eod.media = eod2.media
-            AND eod.externalLocationType = :location1
-            AND eod2.externalLocationType = :location2
-            AND eod.media = :media
-            """
-    )
-    boolean existsMediaFileIn2StorageLocations(MediaEntity media,
-                                               ExternalLocationTypeEntity location1,
-                                               ExternalLocationTypeEntity location2);
-
-    @Query(
-        """
             SELECT eod.id FROM ExternalObjectDirectoryEntity eod, ExternalObjectDirectoryEntity eod2
             WHERE
             ((:externalObjectDirectoryQueryTypeEnumIndex=1 AND eod.media = eod2.media) OR                 
@@ -214,6 +227,23 @@ public interface ExternalObjectDirectoryRepository extends JpaRepository<Externa
                                                        ExternalLocationTypeEntity location2,
                                                        OffsetDateTime lastModifiedBefore1,
                                                        OffsetDateTime lastModifiedBefore2);
+
+    @Query(
+        """
+            SELECT eod.id FROM ExternalObjectDirectoryEntity eod, ExternalObjectDirectoryEntity eod2
+            WHERE
+            eod.media = eod2.media
+            AND eod.status = :storedStatus
+            AND eod.externalLocationType = :unstructuredLocation
+            AND eod.lastModifiedDateTime <= :unstructuredLastModifiedBefore
+            AND eod2.externalLocationType = :armLocation
+            AND eod2.status = :storedStatus
+            """
+    )
+    List<Integer> findIdsForAudioToBeDeletedFromUnstructured(ObjectRecordStatusEntity storedStatus,
+                                                             ExternalLocationTypeEntity unstructuredLocation,
+                                                             ExternalLocationTypeEntity armLocation,
+                                                             OffsetDateTime unstructuredLastModifiedBefore);
 
 
     @Query(
@@ -466,4 +496,45 @@ public interface ExternalObjectDirectoryRepository extends JpaRepository<Externa
                 AND eod.externalLocationType.id IN (1, 2)
         """)
     List<ExternalObjectDirectoryEntity> findStoredInInboundAndUnstructuredByTranscriptionId(@Param("transcriptionDocumentId") Integer id);
+
+    @Modifying
+    @Query("""
+        update ExternalObjectDirectoryEntity eod
+        set eod.status = :newStatus
+        where eod.status = :currentStatus
+        and eod.dataIngestionTs <= :maxDataIngestionTs
+        """)
+    @Transactional
+    void updateByStatusEqualsAndDataIngestionTsBefore(ObjectRecordStatusEntity currentStatus, OffsetDateTime maxDataIngestionTs,
+                                                      ObjectRecordStatusEntity newStatus, Limit limit);
+
+    @Query(value = """
+        select fileSize from
+        (
+            (
+                select file_size as fileSize from darts.media as med
+                join darts.external_object_directory as eod on eod.med_id = med.med_id
+                where eod.eod_id = :externalObjectDirectoryId
+            )
+            union
+            (
+                select file_size as fileSize from darts.annotation_document as ado
+                join darts.external_object_directory as eod on eod.ado_id = ado.ado_id
+                where eod.eod_id = :externalObjectDirectoryId
+            )
+            union
+            (
+                select file_size as fileSize from darts.case_document as cad
+                join darts.external_object_directory as eod on eod.cad_id = cad.cad_id
+                where eod.eod_id = :externalObjectDirectoryId
+            )
+            union
+            (
+                select file_size as fileSize from darts.transcription_document as trd
+                join darts.external_object_directory as eod on eod.trd_id = trd.trd_id
+                where eod.eod_id = :externalObjectDirectoryId
+            )
+        ) a
+        """, nativeQuery = true)
+    Long findFileSize(Integer externalObjectDirectoryId);
 }

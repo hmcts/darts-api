@@ -12,14 +12,21 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Pageable;
 import uk.gov.hmcts.darts.arm.config.ArmDataManagementConfiguration;
+import uk.gov.hmcts.darts.common.entity.AnnotationDocumentEntity;
 import uk.gov.hmcts.darts.common.entity.CaseDocumentEntity;
 import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
+import uk.gov.hmcts.darts.common.entity.TranscriptionDocumentEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
+import uk.gov.hmcts.darts.common.repository.AnnotationDocumentRepository;
+import uk.gov.hmcts.darts.common.repository.CaseDocumentRepository;
 import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
+import uk.gov.hmcts.darts.common.repository.MediaRepository;
+import uk.gov.hmcts.darts.common.repository.TranscriptionDocumentRepository;
 import uk.gov.hmcts.darts.common.service.impl.EodHelperMocks;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -48,9 +55,22 @@ class ExternalObjectDirectoryServiceImplTest {
     @Mock
     MediaEntity media2;
     @Mock
+    private AnnotationDocumentEntity annotationDocument;
+    @Mock
+    private TranscriptionDocumentEntity transcriptionDocument;
+    @Mock
     UserAccountEntity userAccountEntity;
     @Mock
     CaseDocumentEntity caseDocumentEntity;
+    @Mock
+    private MediaRepository mediaRepository;
+    @Mock
+    private CaseDocumentRepository caseDocumentRepository;
+    @Mock
+    private TranscriptionDocumentRepository transcriptionDocumentRepository;
+    @Mock
+    private AnnotationDocumentRepository annotationDocumentRepository;
+
     @Captor
     ArgumentCaptor<ExternalObjectDirectoryEntity> eodCaptor;
 
@@ -65,7 +85,12 @@ class ExternalObjectDirectoryServiceImplTest {
 
     @BeforeEach
     void setup() {
-        eodService = new ExternalObjectDirectoryServiceImpl(eodRepository, armConfig);
+        eodService = new ExternalObjectDirectoryServiceImpl(eodRepository,
+                                                            armConfig,
+                                                            mediaRepository,
+                                                            annotationDocumentRepository,
+                                                            caseDocumentRepository,
+                                                            transcriptionDocumentRepository);
     }
 
     @Test
@@ -135,5 +160,90 @@ class ExternalObjectDirectoryServiceImplTest {
         assertThat(savedEod.getExternalLocationType()).isEqualTo(unstructuredLocation());
         assertThat(savedEod.getCreatedBy()).isEqualTo(userAccountEntity);
         assertThat(savedEod.getLastModifiedBy()).isEqualTo(userAccountEntity);
+    }
+
+    @ParameterizedTest
+    @CsvSource({
+        "1, 1000",
+        "2, 2000",
+        "3, 3000"
+    })
+    void getFileSizeReturnsCorrectSizeForMedia(Integer mediaId, Long expectedSize) {
+        when(mediaRepository.findById(mediaId)).thenReturn(Optional.of(media1));
+        when(media1.getFileSize()).thenReturn(expectedSize);
+        when(media1.getId()).thenReturn(mediaId);
+
+        ExternalObjectDirectoryEntity eod = new ExternalObjectDirectoryEntity();
+        eod.setMedia(media1);
+
+        Long fileSize = eodService.getFileSize(eod);
+
+        assertThat(fileSize).isEqualTo(expectedSize);
+    }
+
+    @ParameterizedTest
+    @CsvSource({
+        "1, 1000",
+        "2, 2000",
+        "3, 3000"
+    })
+    void getFileSizeReturnsCorrectSizeForAnnotationDocument(Integer annotationDocumentId, Long expectedSize) {
+        when(annotationDocumentRepository.findById(annotationDocumentId)).thenReturn(Optional.of(annotationDocument));
+        when(annotationDocument.getFileSize()).thenReturn(expectedSize.intValue());
+        when(annotationDocument.getId()).thenReturn(annotationDocumentId);
+
+        ExternalObjectDirectoryEntity eod = new ExternalObjectDirectoryEntity();
+        eod.setAnnotationDocumentEntity(annotationDocument);
+
+        Long fileSize = eodService.getFileSize(eod);
+
+        assertThat(fileSize).isEqualTo(expectedSize);
+    }
+
+    @ParameterizedTest
+    @CsvSource({
+        "1, 1000",
+        "2, 2000",
+        "3, 3000"
+    })
+    void getFileSizeReturnsCorrectSizeForCaseDocument(Integer caseDocumentId, Long expectedSize) {
+        when(caseDocumentRepository.findById(caseDocumentId)).thenReturn(Optional.of(caseDocumentEntity));
+        when(caseDocumentEntity.getFileSize()).thenReturn(expectedSize.intValue());
+        when(caseDocumentEntity.getId()).thenReturn(caseDocumentId);
+
+        ExternalObjectDirectoryEntity eod = new ExternalObjectDirectoryEntity();
+        eod.setCaseDocument(caseDocumentEntity);
+
+        Long fileSize = eodService.getFileSize(eod);
+
+        assertThat(fileSize).isEqualTo(expectedSize);
+    }
+
+    @ParameterizedTest
+    @CsvSource({
+        "1, 1000",
+        "2, 2000",
+        "3, 3000"
+    })
+    void getFileSizeReturnsCorrectSizeForTranscriptionDocument(Integer transcriptionId, Long expectedSize) {
+        when(transcriptionDocumentRepository.findById(transcriptionId)).thenReturn(Optional.of(transcriptionDocument));
+        when(transcriptionDocument.getFileSize()).thenReturn(expectedSize.intValue());
+        when(transcriptionDocument.getId()).thenReturn(transcriptionId);
+
+        ExternalObjectDirectoryEntity eod = new ExternalObjectDirectoryEntity();
+        eod.setTranscriptionDocumentEntity(transcriptionDocument);
+
+        Long fileSize = eodService.getFileSize(eod);
+
+        assertThat(fileSize).isEqualTo(expectedSize);
+    }
+
+    @Test
+    void getFileSizeReturnsNullWhenNoDocumentIsSet() {
+        ExternalObjectDirectoryEntity eod = new ExternalObjectDirectoryEntity();
+
+        Long fileSize = eodService.getFileSize(eod);
+
+        assertThat(fileSize).isNull();
     }
 }
