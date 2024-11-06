@@ -17,6 +17,7 @@ import uk.gov.hmcts.darts.arm.client.model.rpo.MasterIndexFieldByRecordClassSche
 import uk.gov.hmcts.darts.arm.client.model.rpo.ProfileEntitlementResponse;
 import uk.gov.hmcts.darts.arm.client.model.rpo.RecordManagementMatterResponse;
 import uk.gov.hmcts.darts.arm.client.model.rpo.SaveBackgroundSearchRequest;
+import uk.gov.hmcts.darts.arm.client.model.rpo.SaveBackgroundSearchResponse;
 import uk.gov.hmcts.darts.arm.client.model.rpo.StorageAccountRequest;
 import uk.gov.hmcts.darts.arm.client.model.rpo.StorageAccountResponse;
 import uk.gov.hmcts.darts.arm.component.impl.AddAsyncSearchRequestGenerator;
@@ -129,14 +130,6 @@ public class ArmRpoApiImpl implements ArmRpoApi {
         armRpoExecutionDetailEntity.setStorageAccountId(storageAccountName);
         armRpoService.updateArmRpoStatus(armRpoExecutionDetailEntity, ArmRpoHelper.completedRpoStatus(), userAccount);
 
-    }
-
-    private static StorageAccountRequest createStorageAccountRequest() {
-        StorageAccountRequest storageAccountRequest = StorageAccountRequest.builder()
-            .onlyKeyAccessType(false)
-            .storageType(1)
-            .build();
-        return storageAccountRequest;
     }
 
     @Override
@@ -314,23 +307,25 @@ public class ArmRpoApiImpl implements ArmRpoApi {
                                                  ArmRpoHelper.inProgressRpoStatus(), userAccount);
 
         StringBuilder errorMessage = new StringBuilder("Failure during ARM save background search: ");
+        SaveBackgroundSearchResponse saveBackgroundSearchResponse;
         try {
             SaveBackgroundSearchRequest saveBackgroundSearchRequest =
                 createSaveBackgroundSearchRequest(searchName, armRpoExecutionDetailEntity.getSearchId());
-            armRpoClient.saveBackgroundSearch(bearerToken, saveBackgroundSearchRequest);
+            saveBackgroundSearchResponse = armRpoClient.saveBackgroundSearch(bearerToken, saveBackgroundSearchRequest);
         } catch (FeignException e) {
             // this ensures the full error body containing the ARM error detail is logged rather than a truncated version
             log.error(errorMessage.append("Unable to save background search").toString() + " {}", e.contentUTF8());
             throw handleFailureAndCreateException(errorMessage.toString(), armRpoExecutionDetailEntity, userAccount);
         }
-        armRpoService.updateArmRpoStatus(armRpoExecutionDetailEntity, ArmRpoHelper.completedRpoStatus(), userAccount);
-    }
 
-    private SaveBackgroundSearchRequest createSaveBackgroundSearchRequest(String searchName, String searchId) {
-        return SaveBackgroundSearchRequest.builder()
-            .name(searchName)
-            .searchId(searchId)
-            .build();
+        if (isNull(saveBackgroundSearchResponse)
+            || isNull(saveBackgroundSearchResponse.getStatus())
+            || !saveBackgroundSearchResponse.getStatus().equals(200)) {
+            throw handleFailureAndCreateException(errorMessage.append("Unable to save search ").toString(),
+                                                  armRpoExecutionDetailEntity, userAccount);
+        }
+        
+        armRpoService.updateArmRpoStatus(armRpoExecutionDetailEntity, ArmRpoHelper.completedRpoStatus(), userAccount);
     }
 
     @Override
@@ -371,6 +366,13 @@ public class ArmRpoApiImpl implements ArmRpoApi {
         return new ArmRpoException(message);
     }
 
+    private static StorageAccountRequest createStorageAccountRequest() {
+        return StorageAccountRequest.builder()
+            .onlyKeyAccessType(false)
+            .storageType(1)
+            .build();
+    }
+
     private MasterIndexFieldByRecordClassSchemaRequest createMasterIndexFieldByRecordClassSchemaRequest() {
         return MasterIndexFieldByRecordClassSchemaRequest.builder()
             .recordClassCode(RECORD_CLASS_CODE)
@@ -388,6 +390,13 @@ public class ArmRpoApiImpl implements ArmRpoApi {
             .propertyName(masterIndexField.getPropertyName())
             .propertyType(masterIndexField.getPropertyType())
             .isMasked(masterIndexField.getIsMasked())
+            .build();
+    }
+
+    private SaveBackgroundSearchRequest createSaveBackgroundSearchRequest(String searchName, String searchId) {
+        return SaveBackgroundSearchRequest.builder()
+            .name(searchName)
+            .searchId(searchId)
             .build();
     }
 }
