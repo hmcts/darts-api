@@ -18,17 +18,23 @@ import uk.gov.hmcts.darts.arm.client.model.rpo.ProfileEntitlementResponse;
 import uk.gov.hmcts.darts.arm.client.model.rpo.RecordManagementMatterResponse;
 import uk.gov.hmcts.darts.arm.client.model.rpo.StorageAccountRequest;
 import uk.gov.hmcts.darts.arm.client.model.rpo.StorageAccountResponse;
+import uk.gov.hmcts.darts.arm.component.impl.AddAsyncSearchRequestGenerator;
 import uk.gov.hmcts.darts.arm.config.ArmApiConfigurationProperties;
 import uk.gov.hmcts.darts.arm.exception.ArmRpoException;
 import uk.gov.hmcts.darts.arm.helper.ArmRpoHelper;
 import uk.gov.hmcts.darts.arm.model.rpo.MasterIndexFieldByRecordClassSchema;
 import uk.gov.hmcts.darts.arm.rpo.ArmRpoApi;
 import uk.gov.hmcts.darts.arm.service.ArmRpoService;
+import uk.gov.hmcts.darts.common.entity.ArmAutomatedTaskEntity;
 import uk.gov.hmcts.darts.common.entity.ArmRpoExecutionDetailEntity;
 import uk.gov.hmcts.darts.common.entity.ArmRpoStateEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
+import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
+import uk.gov.hmcts.darts.common.repository.ArmAutomatedTaskRepository;
 
 import java.io.InputStream;
+import java.time.OffsetDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -45,10 +51,13 @@ public class ArmRpoApiImpl implements ArmRpoApi {
     private static final String MASTER_INDEX_FIELD_BY_RECORD_CLASS_SCHEMA_SORTING_FIELD = "ingestionDate";
     private static final String RECORD_CLASS_CODE = "DARTS";
     private static final int FIELD_TYPE_7 = 7;
+    private static final String ADD_ASYNC_SEARCH_RELATED_TASK_NAME = "ProcessE2EArmRpoPending";
 
     private final ArmRpoClient armRpoClient;
     private final ArmRpoService armRpoService;
     private final ArmApiConfigurationProperties armApiConfigurationProperties;
+    private final ArmAutomatedTaskRepository armAutomatedTaskRepository;
+    private final CurrentTimeHelper currentTimeHelper;
 
     @Override
     public void getRecordManagementMatter(String bearerToken, Integer executionId, UserAccountEntity userAccount) {
@@ -230,8 +239,71 @@ public class ArmRpoApiImpl implements ArmRpoApi {
     }
 
     @Override
-    public ArmAsyncSearchResponse addAsyncSearch(String bearerToken, Integer executionId, UserAccountEntity userAccount) {
-        throw new NotImplementedException("Method not implemented");
+    public void addAsyncSearch(String bearerToken, Integer executionId, UserAccountEntity userAccount) {
+
+        final ArmRpoExecutionDetailEntity executionDetail = armRpoService.getArmRpoExecutionDetailEntity(executionId);
+        armRpoService.updateArmRpoStateAndStatus(executionDetail,
+                                                 ArmRpoHelper.addAsyncSearchRpoState(),
+                                                 ArmRpoHelper.inProgressRpoStatus(),
+                                                 userAccount);
+
+        OffsetDateTime now = currentTimeHelper.currentOffsetDateTime();
+        String searchName = "DARTS_RPO_%s".formatted(
+            now.format(DateTimeFormatter.ofPattern("yyyy_MM_dd_HH_mm_ss"))
+        );
+
+        final StringBuilder exceptionMessageBuilder = new StringBuilder("ARM addAsyncSearch: ");
+        ArmAutomatedTaskEntity armAutomatedTaskEntity = armAutomatedTaskRepository.findByAutomatedTask_taskName(ADD_ASYNC_SEARCH_RELATED_TASK_NAME)
+            .orElseThrow(() -> handleFailureAndCreateException(exceptionMessageBuilder.append("Automated task not found: ")
+                                                                   .append(ADD_ASYNC_SEARCH_RELATED_TASK_NAME)
+                                                                   .toString(),
+                                                               executionDetail, userAccount));
+
+        AddAsyncSearchRequestGenerator requestGenerator;
+        try {
+            requestGenerator = createAddAsyncSearchRequestGenerator(searchName, executionDetail, armAutomatedTaskEntity, now);
+        } catch (NullPointerException e) {
+            throw handleFailureAndCreateException(exceptionMessageBuilder.append("Could not construct API request: ")
+                                                      .append(e)
+                                                      .toString(),
+                                                  executionDetail, userAccount);
+        }
+
+        ArmAsyncSearchResponse response;
+        try {
+            response = armRpoClient.addAsyncSearch(bearerToken, requestGenerator.getJsonRequest());
+        } catch (FeignException e) {
+            throw handleFailureAndCreateException(exceptionMessageBuilder.append("API call failed: ")
+                                                      .append(e)
+                                                      .toString(),
+                                                  executionDetail, userAccount);
+        }
+
+        String searchId = response.getSearchId();
+        if (searchId == null) {
+            throw handleFailureAndCreateException(exceptionMessageBuilder.append("The obtained search id was empty")
+                                                      .toString(),
+                                                  executionDetail, userAccount);
+        }
+
+        executionDetail.setSearchId(searchId);
+        armRpoService.updateArmRpoStatus(executionDetail, ArmRpoHelper.completedRpoStatus(), userAccount);
+    }
+
+    private AddAsyncSearchRequestGenerator createAddAsyncSearchRequestGenerator(String searchName,
+                                                                                       ArmRpoExecutionDetailEntity executionDetail,
+                                                                                       ArmAutomatedTaskEntity armAutomatedTaskEntity,
+                                                                                       OffsetDateTime now) throws NullPointerException {
+        return AddAsyncSearchRequestGenerator.builder()
+            .name(searchName)
+            .searchName(searchName)
+            .matterId(executionDetail.getMatterId())
+            .entitlementId(executionDetail.getEntitlementId())
+            .indexId(executionDetail.getIndexId())
+            .sortingField(executionDetail.getSortingField())
+            .startTime(now.minusHours(armAutomatedTaskEntity.getRpoCsvEndHour()))
+            .endTime(now.minusHours(armAutomatedTaskEntity.getRpoCsvStartHour()))
+            .build();
     }
 
     @Override

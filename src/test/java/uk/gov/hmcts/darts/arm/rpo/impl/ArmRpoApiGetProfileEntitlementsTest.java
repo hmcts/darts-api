@@ -17,6 +17,8 @@ import uk.gov.hmcts.darts.arm.helper.ArmRpoHelperMocks;
 import uk.gov.hmcts.darts.arm.service.ArmRpoService;
 import uk.gov.hmcts.darts.common.entity.ArmRpoExecutionDetailEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
+import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
+import uk.gov.hmcts.darts.common.repository.ArmAutomatedTaskRepository;
 
 import java.util.Collections;
 import java.util.List;
@@ -52,13 +54,15 @@ class ArmRpoApiGetProfileEntitlementsTest {
         armRpoService = spy(ArmRpoService.class);
         armRpoClient = mock(ArmRpoClient.class);
         executionDetailCaptor = ArgumentCaptor.forClass(ArmRpoExecutionDetailEntity.class);
+        var armAutomatedTaskRepository = mock(ArmAutomatedTaskRepository.class);
+        var currentTimeHelper = mock(CurrentTimeHelper.class);
 
         armRpoHelperMocks = new ArmRpoHelperMocks(); // Mocks are set via the default constructor call
 
         ArmApiConfigurationProperties armApiConfigurationProperties = new ArmApiConfigurationProperties();
         armApiConfigurationProperties.setArmServiceEntitlement(ENTITLEMENT_NAME);
 
-        armRpoApi = new ArmRpoApiImpl(armRpoClient, armRpoService, armApiConfigurationProperties);
+        armRpoApi = new ArmRpoApiImpl(armRpoClient, armRpoService, armApiConfigurationProperties, armAutomatedTaskRepository, currentTimeHelper);
     }
 
     @AfterEach
