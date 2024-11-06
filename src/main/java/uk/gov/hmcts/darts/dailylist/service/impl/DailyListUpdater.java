@@ -16,6 +16,7 @@ import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.JudgeEntity;
 import uk.gov.hmcts.darts.common.entity.ProsecutorEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
+import uk.gov.hmcts.darts.common.enums.SystemUsersEnum;
 import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
 import uk.gov.hmcts.darts.common.helper.SystemUserHelper;
 import uk.gov.hmcts.darts.common.repository.CourthouseRepository;
@@ -64,7 +65,7 @@ class DailyListUpdater {
     @SuppressWarnings({"checkstyle:VariableDeclarationUsageDistance", "PMD.CognitiveComplexity"})
     @Transactional
     public void processDailyList(DailyListEntity dailyListEntity) throws JsonProcessingException {
-        UserAccountEntity dailyListSystemUser = systemUserHelper.getDailyListProcessorUser();
+        UserAccountEntity dailyListSystemUser = systemUserHelper.getReferenceTo(SystemUsersEnum.DAILY_LIST_PROCESSOR);
         DailyListJsonObject dailyList = objectMapper.readValue(dailyListEntity.getContent(), DailyListJsonObject.class);
         JobStatusType statusType = JobStatusType.PROCESSED;
 
@@ -195,7 +196,7 @@ class DailyListUpdater {
             return;
         }
         List<PersonalDetails> advocates = hearing.getProsecution().getAdvocates();
-        UserAccountEntity dailyListSystemUser = systemUserHelper.getDailyListProcessorUser();
+        UserAccountEntity dailyListSystemUser = systemUserHelper.getReferenceTo(SystemUsersEnum.DAILY_LIST_PROCESSOR);
         advocates.forEach(advocate -> {
             if (!isExistingProsecutor(courtCase, advocate)) {
                 courtCase.addProsecutor(createCoreObjectService.createProsecutor(
@@ -205,7 +206,7 @@ class DailyListUpdater {
     }
 
     private void addDefenders(CourtCaseEntity courtCase, List<Defendant> defendants) {
-        UserAccountEntity dailyListSystemUser = systemUserHelper.getDailyListProcessorUser();
+        UserAccountEntity dailyListSystemUser = systemUserHelper.getReferenceTo(SystemUsersEnum.DAILY_LIST_PROCESSOR);
         for (Defendant defendant : defendants) {
             for (PersonalDetails counselDetails : defendant.getCounsel()) {
                 if (counselDetails == null) {
@@ -220,7 +221,7 @@ class DailyListUpdater {
     }
 
     private void addDefendants(CourtCaseEntity courtCase, List<Defendant> defendants) {
-        UserAccountEntity dailyListSystemUser = systemUserHelper.getDailyListProcessorUser();
+        UserAccountEntity dailyListSystemUser = systemUserHelper.getReferenceTo(SystemUsersEnum.DAILY_LIST_PROCESSOR);
         for (Defendant defendant : defendants) {
             if (!isExistingDefendant(courtCase, defendant)) {
                 courtCase.addDefendant(createCoreObjectService.createDefendant(
@@ -233,7 +234,7 @@ class DailyListUpdater {
     }
 
     private void addJudges(Sitting sitting, HearingEntity hearing) {
-        UserAccountEntity dailyListSystemUser = systemUserHelper.getDailyListProcessorUser();
+        UserAccountEntity dailyListSystemUser = systemUserHelper.getReferenceTo(SystemUsersEnum.DAILY_LIST_PROCESSOR);
         for (CitizenName judge : sitting.getJudiciary()) {
             JudgeEntity judgeEntity = retrieveCoreObjectService.retrieveOrCreateJudge(judge.getCitizenNameRequestedName(), dailyListSystemUser);
             hearing.addJudge(judgeEntity, true);
