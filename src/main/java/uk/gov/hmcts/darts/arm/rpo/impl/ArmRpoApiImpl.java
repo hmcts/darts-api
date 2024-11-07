@@ -367,7 +367,7 @@ public class ArmRpoApiImpl implements ArmRpoApi {
         return new ArmRpoException(message);
     }
 
-    private static StorageAccountRequest createStorageAccountRequest() {
+    private StorageAccountRequest createStorageAccountRequest() {
         return StorageAccountRequest.builder()
             .onlyKeyAccessType(false)
             .storageType(1)
