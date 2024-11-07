@@ -32,17 +32,13 @@ import uk.gov.hmcts.darts.common.entity.MediaEntity;
 import uk.gov.hmcts.darts.common.entity.TransientObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum;
-import uk.gov.hmcts.darts.common.enums.SystemUsersAccountUUIDEnum;
-import uk.gov.hmcts.darts.common.helper.SystemUserHelper;
 import uk.gov.hmcts.darts.common.repository.TransformedMediaRepository;
 import uk.gov.hmcts.darts.dets.service.DetsApiService;
-import uk.gov.hmcts.darts.task.config.AutomatedTaskConfigurationProperties;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 import uk.gov.hmcts.darts.testutils.stubs.TransientObjectDirectoryStub;
 
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -112,9 +108,6 @@ class ExternalDataStoreDeleterTest extends IntegrationBase {
     private ExternalOutboundDataStoreDeleter externalOutboundDataStoreDeleter;
     private ExternalDetsDataStoreDeleter externalDetsDataStoreDeleter;
 
-    @Mock
-    private AutomatedTaskConfigurationProperties automatedTaskConfigurationProperties;
-
     @BeforeEach
     void setUp() {
         this.requestor = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
@@ -124,13 +117,6 @@ class ExternalDataStoreDeleterTest extends IntegrationBase {
             "2",
             LocalDateTime.now()
         );
-
-        SystemUserHelper systemUserHelper = new SystemUserHelper(dartsDatabase.getUserAccountRepository(), automatedTaskConfigurationProperties);
-        systemUserHelper.setSystemUserGuidMap(Collections.singletonMap(
-            "housekeeping",
-            SystemUsersAccountUUIDEnum.HOUSE_KEEPING.getUuid()
-        ));
-
 
         externalInboundDataStoreDeleter = new ExternalInboundDataStoreDeleter(
             dartsDatabase.getExternalObjectDirectoryRepository(),

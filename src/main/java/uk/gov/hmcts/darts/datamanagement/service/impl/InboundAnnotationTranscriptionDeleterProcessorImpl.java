@@ -4,8 +4,10 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
+import uk.gov.hmcts.darts.common.enums.SystemUsersEnum;
 import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
 import uk.gov.hmcts.darts.common.helper.SystemUserHelper;
 import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryQueryTypeEnum;
@@ -32,12 +34,12 @@ public class InboundAnnotationTranscriptionDeleterProcessorImpl implements Inbou
     @Value("${darts.data-management.retention-period.inbound.unstructured-minimum.hours}")
     int hoursInUnstructured;
 
-    public List<Integer> markForDeletion() {
-        return markForDeletion(hoursInUnstructured);
+    public List<Integer> markForDeletion(int batchSize) {
+        return markForDeletion(hoursInUnstructured, batchSize);
     }
 
     @Override
-    public List<Integer> markForDeletion(int hourBeforeCurrentDate) {
+    public List<Integer> markForDeletion(int hourBeforeCurrentDate, int batchSize) {
         OffsetDateTime lastModifiedBefore = currentTimeHelper.currentOffsetDateTime().minus(
             hourBeforeCurrentDate,
             ChronoUnit.HOURS
@@ -49,11 +51,13 @@ public class InboundAnnotationTranscriptionDeleterProcessorImpl implements Inbou
                                                   EodHelper.storedStatus(),
                                                   EodHelper.inboundLocation(),
                                                   EodHelper.unstructuredLocation(),
-                                                  lastModifiedBefore, ExternalObjectDirectoryQueryTypeEnum.ANNOTATION_QUERY.getIndex());
+                                                  lastModifiedBefore,
+                                                  ExternalObjectDirectoryQueryTypeEnum.ANNOTATION_QUERY.getIndex(),
+                                                  Pageable.ofSize(batchSize));
 
         log.debug("Identified records to be marked for deletion  {}", StringUtils.join(recordsMarkedForDeletion, ","));
 
-        UserAccountEntity user = userAccountRepository.findSystemUser(systemUserHelper.findSystemUserGuid("housekeeping"));
+        UserAccountEntity user = systemUserHelper.getReferenceTo(SystemUsersEnum.INBOUND_TRANSCRIPTION_ANNOTATION_DELETER_AUTOMATED_TASK);
         eodHelper.updateStatus(
             EodHelper.markForDeletionStatus(),
             user,

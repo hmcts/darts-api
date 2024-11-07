@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.darts.audio.service.UnstructuredAudioDeleterProcessor;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
+import uk.gov.hmcts.darts.common.enums.SystemUsersEnum;
 import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
 import uk.gov.hmcts.darts.common.helper.SystemUserHelper;
 import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
@@ -49,7 +50,7 @@ public class UnstructuredAudioDeleterProcessorImpl implements UnstructuredAudioD
         }
         log.debug("Marking the following Unstructured ExternalObjectDirectory.Id's for deletion:- {}", audioFileIdsToBeMarked);
 
-        UserAccountEntity user = userAccountRepository.findSystemUser(systemUserHelper.findSystemUserGuid("housekeeping"));
+        UserAccountEntity user = systemUserHelper.getReferenceTo(SystemUsersEnum.UNSTRUCTURED_AUDIO_DELETER_AUTOMATED_TASK);
 
         eodHelper.updateStatus(
             EodHelper.markForDeletionStatus(),
