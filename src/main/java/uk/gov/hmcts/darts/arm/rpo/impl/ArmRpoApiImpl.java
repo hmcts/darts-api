@@ -54,6 +54,7 @@ public class ArmRpoApiImpl implements ArmRpoApi {
     private static final String RECORD_CLASS_CODE = "DARTS";
     private static final int FIELD_TYPE_7 = 7;
     private static final String ADD_ASYNC_SEARCH_RELATED_TASK_NAME = "ProcessE2EArmRpoPending";
+    public static final int ARM_RPO_SUCCESS_RESPONSE_STATUS = 200;
 
     private final ArmRpoClient armRpoClient;
     private final ArmRpoService armRpoService;
@@ -136,9 +137,9 @@ public class ArmRpoApiImpl implements ArmRpoApi {
     public void getProfileEntitlements(String bearerToken, Integer executionId, UserAccountEntity userAccount) {
         final ArmRpoExecutionDetailEntity executionDetail = armRpoService.getArmRpoExecutionDetailEntity(executionId);
         armRpoService.updateArmRpoStateAndStatus(executionDetail,
-            ArmRpoHelper.getProfileEntitlementsRpoState(),
-            ArmRpoHelper.inProgressRpoStatus(),
-            userAccount);
+                                                 ArmRpoHelper.getProfileEntitlementsRpoState(),
+                                                 ArmRpoHelper.inProgressRpoStatus(),
+                                                 userAccount);
 
         final StringBuilder exceptionMessageBuilder = new StringBuilder("ARM getProfileEntitlements: ");
         ProfileEntitlementResponse response;
@@ -285,9 +286,9 @@ public class ArmRpoApiImpl implements ArmRpoApi {
     }
 
     private AddAsyncSearchRequestGenerator createAddAsyncSearchRequestGenerator(String searchName,
-                                                                                       ArmRpoExecutionDetailEntity executionDetail,
-                                                                                       ArmAutomatedTaskEntity armAutomatedTaskEntity,
-                                                                                       OffsetDateTime now) throws NullPointerException {
+                                                                                ArmRpoExecutionDetailEntity executionDetail,
+                                                                                ArmAutomatedTaskEntity armAutomatedTaskEntity,
+                                                                                OffsetDateTime now) throws NullPointerException {
         return AddAsyncSearchRequestGenerator.builder()
             .name(searchName)
             .searchName(searchName)
@@ -324,7 +325,7 @@ public class ArmRpoApiImpl implements ArmRpoApi {
             throw handleFailureAndCreateException(errorMessage.append("Unable to save search ").toString(),
                                                   armRpoExecutionDetailEntity, userAccount);
         }
-        
+
         armRpoService.updateArmRpoStatus(armRpoExecutionDetailEntity, ArmRpoHelper.completedRpoStatus(), userAccount);
     }
 
