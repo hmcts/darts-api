@@ -87,7 +87,7 @@ class CaseExpiryDeletionAutomatedTaskITest extends PostgresIntegrationBase {
     }
 
     @Test
-    void positiveMultipleToAnonymizeAndSomeNotTo() {
+    void positiveMultipleToAnonymiseAndSomeNotTo() {
         final CourtCaseEntity courtCase1 = createCase(-1, CaseRetentionStatus.COMPLETE);
         final CourtCaseEntity courtCase2 = createCase(-1, CaseRetentionStatus.COMPLETE);
         final CourtCaseEntity courtCase3 = createCase(-1, CaseRetentionStatus.COMPLETE);
@@ -108,13 +108,13 @@ class CaseExpiryDeletionAutomatedTaskITest extends PostgresIntegrationBase {
     }
 
 
-    private void assertCase(int caseId, boolean isAnonymized) {
+    private void assertCase(int caseId, boolean isAnonymised) {
         transactionalUtil.executeInTransaction(() -> {
             CourtCaseEntity courtCase = dartsDatabase.getCourtCaseStub().getCourtCase(caseId);
             assertThat(courtCase.isDataAnonymised())
-                .isEqualTo(isAnonymized);
+                .isEqualTo(isAnonymised);
 
-            if (isAnonymized) {
+            if (isAnonymised) {
                 assertThat(courtCase.getDataAnonymisedBy())
                     .isEqualTo(AUTOMATION_USER_ID);
                 assertThat(courtCase.getDataAnonymisedTs())
@@ -131,16 +131,16 @@ class CaseExpiryDeletionAutomatedTaskITest extends PostgresIntegrationBase {
             assertThat(courtCase.getProsecutorList()).hasSizeGreaterThan(0);
             assertThat(courtCase.getHearings()).hasSizeGreaterThan(0);
 
-            courtCase.getDefendantList().forEach(defendantEntity -> assertDefendant(defendantEntity, isAnonymized));
-            courtCase.getDefenceList().forEach(defenceEntity -> assertDefence(defenceEntity, isAnonymized));
-            courtCase.getProsecutorList().forEach(prosecutorEntity -> assertProsecutor(prosecutorEntity, isAnonymized));
+            courtCase.getDefendantList().forEach(defendantEntity -> assertDefendant(defendantEntity, isAnonymised));
+            courtCase.getDefenceList().forEach(defenceEntity -> assertDefence(defenceEntity, isAnonymised));
+            courtCase.getProsecutorList().forEach(prosecutorEntity -> assertProsecutor(prosecutorEntity, isAnonymised));
 
-            courtCase.getHearings().forEach(hearingEntity -> assertHearing(hearingEntity, isAnonymized));
-            assertAuditEntries(courtCase, isAnonymized);
+            courtCase.getHearings().forEach(hearingEntity -> assertHearing(hearingEntity, isAnonymised));
+            assertAuditEntries(courtCase, isAnonymised);
         });
     }
 
-    private void assertAuditEntries(CourtCaseEntity courtCase, boolean isAnonymized) {
+    private void assertAuditEntries(CourtCaseEntity courtCase, boolean isAnonymised) {
         List<AuditEntity> caseExpiredAuditEntries = dartsDatabase.getAuditRepository()
             .getAuditEntitiesByCaseAndActivityForDateRange(
                 courtCase.getId(),
@@ -148,7 +148,7 @@ class CaseExpiryDeletionAutomatedTaskITest extends PostgresIntegrationBase {
                 OffsetDateTime.now().minusMinutes(1),
                 OffsetDateTime.now().plusMinutes(1)
             );
-        if (isAnonymized) {
+        if (isAnonymised) {
             assertThat(caseExpiredAuditEntries).hasSize(1);
         } else {
             assertThat(caseExpiredAuditEntries).isEmpty();
@@ -156,17 +156,17 @@ class CaseExpiryDeletionAutomatedTaskITest extends PostgresIntegrationBase {
     }
 
 
-    private void assertHearing(HearingEntity hearingEntity, boolean isAnonymized) {
+    private void assertHearing(HearingEntity hearingEntity, boolean isAnonymised) {
         assertThat(hearingEntity.getTranscriptions()).hasSizeGreaterThan(0);
         assertThat(hearingEntity.getEventList()).hasSizeGreaterThan(0);
         assertThat(hearingEntity.getMediaRequests()).hasSizeGreaterThan(0);
-        hearingEntity.getTranscriptions().forEach(transcriptionEntity -> assertTranscription(transcriptionEntity, isAnonymized));
-        hearingEntity.getMediaRequests().forEach(mediaRequestEntity -> assertMediaRequest(mediaRequestEntity, isAnonymized));
-        hearingEntity.getEventList().forEach(eventEntity -> assertEvent(eventEntity, isAnonymized));
+        hearingEntity.getTranscriptions().forEach(transcriptionEntity -> assertTranscription(transcriptionEntity, isAnonymised));
+        hearingEntity.getMediaRequests().forEach(mediaRequestEntity -> assertMediaRequest(mediaRequestEntity, isAnonymised));
+        hearingEntity.getEventList().forEach(eventEntity -> assertEvent(eventEntity, isAnonymised));
     }
 
-    private void assertMediaRequest(MediaRequestEntity mediaRequestEntity, boolean isAnonymized) {
-        if (isAnonymized) {
+    private void assertMediaRequest(MediaRequestEntity mediaRequestEntity, boolean isAnonymised) {
+        if (isAnonymised) {
             assertThat(mediaRequestEntity.getStatus()).isEqualTo(MediaRequestStatus.EXPIRED);
             assertThat(mediaRequestEntity.getTransformedMediaEntities()).isEmpty();
         } else {
@@ -175,26 +175,26 @@ class CaseExpiryDeletionAutomatedTaskITest extends PostgresIntegrationBase {
         }
     }
 
-    private void assertTranscription(TranscriptionEntity transcriptionEntity, boolean isAnonymized) {
+    private void assertTranscription(TranscriptionEntity transcriptionEntity, boolean isAnonymised) {
         assertThat(transcriptionEntity.getTranscriptionCommentEntities()).hasSizeGreaterThan(0);
         assertThat(transcriptionEntity.getTranscriptionWorkflowEntities()).hasSizeGreaterThan(0);
         transcriptionEntity.getTranscriptionCommentEntities().forEach(
-            transcriptionCommentEntity -> assertTranscriptionComment(transcriptionCommentEntity, isAnonymized));
+            transcriptionCommentEntity -> assertTranscriptionComment(transcriptionCommentEntity, isAnonymised));
         transcriptionEntity.getTranscriptionWorkflowEntities().forEach(
-            transcriptionWorkflowEntity -> assertTranscriptionWorkflowEntities(transcriptionWorkflowEntity, isAnonymized));
+            transcriptionWorkflowEntity -> assertTranscriptionWorkflowEntities(transcriptionWorkflowEntity, isAnonymised));
 
     }
 
-    private void assertTranscriptionWorkflowEntities(TranscriptionWorkflowEntity transcriptionWorkflowEntity, boolean isAnonymized) {
-        if (isAnonymized) {
+    private void assertTranscriptionWorkflowEntities(TranscriptionWorkflowEntity transcriptionWorkflowEntity, boolean isAnonymised) {
+        if (isAnonymised) {
             assertThat(transcriptionWorkflowEntity.getTranscriptionStatus().getId()).isEqualTo(TranscriptionStatusEnum.CLOSED.getId());
         } else {
             assertThat(transcriptionWorkflowEntity.getTranscriptionStatus().getId()).isNotEqualTo(TranscriptionStatusEnum.CLOSED.getId());
         }
     }
 
-    private void assertEvent(EventEntity eventEntity, boolean isAnonymized) {
-        if (isAnonymized) {
+    private void assertEvent(EventEntity eventEntity, boolean isAnonymised) {
+        if (isAnonymised) {
             assertThat(eventEntity.isDataAnonymised()).isTrue();
             assertThat(eventEntity.getEventText()).matches(UUID_REGEX);
         } else {
@@ -203,8 +203,8 @@ class CaseExpiryDeletionAutomatedTaskITest extends PostgresIntegrationBase {
         }
     }
 
-    private void assertTranscriptionComment(TranscriptionCommentEntity transcriptionCommentEntity, boolean isAnonymized) {
-        if (isAnonymized) {
+    private void assertTranscriptionComment(TranscriptionCommentEntity transcriptionCommentEntity, boolean isAnonymised) {
+        if (isAnonymised) {
             assertThat(transcriptionCommentEntity.isDataAnonymised()).isTrue();
             assertThat(transcriptionCommentEntity.getComment()).matches(UUID_REGEX);
         } else {
@@ -213,8 +213,8 @@ class CaseExpiryDeletionAutomatedTaskITest extends PostgresIntegrationBase {
         }
     }
 
-    private void assertDefendant(DefendantEntity defendantEntity, boolean isAnonymized) {
-        if (isAnonymized) {
+    private void assertDefendant(DefendantEntity defendantEntity, boolean isAnonymised) {
+        if (isAnonymised) {
             assertThat(defendantEntity.getName()).matches(UUID_REGEX);
             assertThat(defendantEntity.getLastModifiedBy().getId()).isEqualTo(AUTOMATION_USER_ID);
         } else {
@@ -223,8 +223,8 @@ class CaseExpiryDeletionAutomatedTaskITest extends PostgresIntegrationBase {
         }
     }
 
-    private void assertDefence(DefenceEntity defenceEntity, boolean isAnonymized) {
-        if (isAnonymized) {
+    private void assertDefence(DefenceEntity defenceEntity, boolean isAnonymised) {
+        if (isAnonymised) {
             assertThat(defenceEntity.getName()).matches(UUID_REGEX);
             assertThat(defenceEntity.getLastModifiedBy().getId()).isEqualTo(AUTOMATION_USER_ID);
         } else {
@@ -233,8 +233,8 @@ class CaseExpiryDeletionAutomatedTaskITest extends PostgresIntegrationBase {
         }
     }
 
-    private void assertProsecutor(ProsecutorEntity prosecutorEntity, boolean isAnonymized) {
-        if (isAnonymized) {
+    private void assertProsecutor(ProsecutorEntity prosecutorEntity, boolean isAnonymised) {
+        if (isAnonymised) {
             assertThat(prosecutorEntity.getName()).matches(UUID_REGEX);
             assertThat(prosecutorEntity.getLastModifiedBy().getId()).isEqualTo(AUTOMATION_USER_ID);
         } else {
