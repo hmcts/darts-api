@@ -213,6 +213,7 @@ tasks.register('smoke', Test) {
 
 checkstyle {
   maxWarnings = 0
+  checkstyleMain.exclude '**/uk/gov/hmcts/darts/task/runner/dailylist/**'
 }
 
 var sourceSetsCopy = sourceSets

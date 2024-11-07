@@ -1,0 +1,353 @@
+{
+  "document_id": {
+    "document_name": "",
+    "unique_id": "12345",
+    "document_type": "D",
+    "time_stamp": "2010-02-18T11:13:23.03Z"
+  },
+  "list_header": {
+    "list_category": "Criminal",
+    "start_date": "2010-02-18",
+    "end_date": "2010-02-18",
+    "version": "DRAFT v1",
+    "published_time": "2005-09-16T08:14:19+01:00"
+  },
+  "crown_court": {
+    "court_house_type": "CROWN_COURT",
+    "court_house_code": {
+      "court_house_short_name": "UNUSED",
+      "code": 453
+    },
+    "court_house_name": "SNARESBROOK"
+  },
+  "court_lists": [
+    {
+      "court_house": {
+        "court_house_type": "CROWN_COURT",
+        "court_house_code": {
+          "code": 456
+        },
+        "court_house_name": "SWANSEA"
+      },
+      "sittings": [
+        {
+          "court_room_number": "1A",
+          "sitting_sequence_no": 1,
+          "sitting_at": "10:00:00",
+          "sitting_priority": "T",
+          "judiciary": [
+            {
+              "citizen_name_forename": "",
+              "citizen_name_surname": "UNUSED",
+              "citizen_name_requested_name": "the judges name"
+            }
+          ],
+          "hearings": [
+            {
+              "hearing_sequence_number": 200,
+              "hearing_details": {
+                "hearing_type": "HRG",
+                "hearing_description": "For Hearing",
+                "hearing_date": "2010-02-18"
+              },
+              "time_marking_note": "10:00 AM",
+              "case_number": "the case number",
+              "prosecution": {
+                "prosecuting_authority": "Crown Prosecution Service",
+                "prosecuting_reference": "CPS Ref: C1/589/5",
+                "prosecuting_organisation": {
+                  "organisation_name": "Crown Prosecution Service"
+                },
+                "advocates": [
+                  {
+                    "name": {
+                      "citizen_name_forename": "PROSECUTOR_FIRSTNAME1",
+                      "citizen_name_surname": "PROSECUTOR_SURNAME1",
+                      "citizen_name_requested_name": ""
+                    },
+                    "is_masked": true
+                  }
+                ]
+              },
+              "defendants": [
+                {
+                  "personal_details": {
+                    "name": {
+                      "citizen_name_forename": "defendant first name",
+                      "citizen_name_surname": "defendant surname"
+                    },
+                    "is_masked": false
+                  },
+                  "counsel": [
+                    {
+                      "name": {
+                        "citizen_name_forename": "solicitor firstname",
+                        "citizen_name_surname": "solicitor surname",
+                        "citizen_name_requested_name": ""
+                      },
+                      "is_masked": true
+                    }
+                  ],
+                  "charges": [
+                    {
+                      "indictment_count_number": 0,
+                      "offence_statement": "tba"
+                    }
+                  ],
+                  "urn": "C1_589_5"
+                }
+              ]
+            },
+            {
+              "hearing_sequence_number": 2,
+              "hearing_details": {
+                "hearing_type": "HRG",
+                "hearing_description": "For Hearing",
+                "hearing_date": "2011-10-05"
+              },
+              "time_marking_note": "11:00 AM",
+              "case_number": "casenumber2",
+              "prosecution": {
+                "prosecuting_authority": "Crown Prosecution Service",
+                "prosecuting_reference": "CPS Ref: 11BD0411804",
+                "prosecuting_organisation": {
+                  "organisation_name": "Crown Prosecution Service"
+                },
+                "advocates": [
+                  {
+                    "name": {
+                      "citizen_name_forename": "prosecutorFirstname2",
+                      "citizen_name_surname": "prosecutorSurname2",
+                      "citizen_name_requested_name": ""
+                    },
+                    "is_masked": true
+                  }
+                ]
+              },
+              "defendants": [
+                {
+                  "personal_details": {
+                    "name": {
+                      "citizen_name_forename": "DEFENDANT_FIRSTNAME2",
+                      "citizen_name_surname": "DEFENDANT_SURNAME2"
+                    },
+                    "is_masked": false
+                  },
+                  "counsel": [
+                    {
+                      "name": {
+                        "citizen_name_forename": "SOLICITOR_FIRSTNAME2",
+                        "citizen_name_surname": "SOLICITOR_SURNAME2",
+                        "citizen_name_requested_name": ""
+                      },
+                      "is_masked": true
+                    }
+                  ],
+                  "urn": "11BD041180_4",
+                  "charges": [
+                    {
+                      "indictment_count_number": 0,
+                      "offence_statement": "tba"
+                    },
+                    {
+                      "indictment_count_number": 0,
+                      "offence_statement": "tba"
+                    },
+                    {
+                      "indictment_count_number": 0,
+                      "offence_statement": "tba"
+                    },
+                    {
+                      "indictment_count_number": 0,
+                      "offence_statement": "tba"
+                    },
+                    {
+                      "indictment_count_number": 0,
+                      "offence_statement": "tba"
+                    },
+                    {
+                      "indictment_count_number": 0,
+                      "offence_statement": "tba"
+                    },
+                    {
+                      "indictment_count_number": 0,
+                      "offence_statement": "tba"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "hearing_sequence_number": 3,
+              "hearing_details": {
+                "hearing_type": "MEN",
+                "hearing_description": "For Mention",
+                "hearing_date": "2020-03-14"
+              },
+              "time_marking_note": "3:00 PM",
+              "case_number": "CASE_NUMBER3",
+              "prosecution": {
+                "prosecuting_authority": "Crown Prosecution Service",
+                "prosecuting_reference": "CPS Ref: BD/4173/04",
+                "prosecuting_organisation": {
+                  "organisation_name": "Crown Prosecution Service"
+                },
+                "advocates": [
+                  {
+                    "name": {
+                      "citizen_name_forename": "PROSECUTOR_FIRSTNAME3",
+                      "citizen_name_surname": "PROSECUTOR_SURNAME3",
+                      "citizen_name_requested_name": ""
+                    },
+                    "is_masked": true
+                  }
+                ]
+              },
+              "defendants": [
+                {
+                  "personal_details": {
+                    "name": {
+                      "citizen_name_forename": "DEFENDANT_FIRSTNAME3",
+                      "citizen_name_surname": "DEFENDANT_SURNAME3"
+                    },
+                    "is_masked": false
+                  },
+                  "counsel": [
+                    {
+                      "name": {
+                        "citizen_name_forename": "SOLICITOR_FIRSTNAME3",
+                        "citizen_name_surname": "SOLICITOR_SURNAME3",
+                        "citizen_name_requested_name": ""
+                      },
+                      "is_masked": true
+                    }
+                  ],
+                  "charges": [
+                    {
+                      "indictment_count_number": 0,
+                      "offence_statement": "tba"
+                    },
+                    {
+                      "indictment_count_number": 0,
+                      "offence_statement": "tba"
+                    },
+                    {
+                      "indictment_count_number": 0,
+                      "offence_statement": "tba"
+                    },
+                    {
+                      "indictment_count_number": 0,
+                      "offence_statement": "tba"
+                    },
+                    {
+                      "indictment_count_number": 0,
+                      "offence_statement": "tba"
+                    }
+                  ],
+                  "urn": "BD417304"
+                }
+              ]
+            },
+            {
+              "hearing_sequence_number": 4,
+              "hearing_details": {
+                "hearing_type": "TRL",
+                "hearing_description": "For Trial",
+                "hearing_date": "2023-05-14"
+              },
+              "time_marking_note": "4:00 PM",
+              "case_number": "CASE_NUMBER4",
+              "prosecution": {
+                "prosecuting_organisation": {
+                  "organisation_name": "Crown Prosecution Service"
+                },
+                "advocates": [
+                  {
+                    "name": {
+                      "citizen_name_forename": "PROSECUTOR_FIRSTNAME4",
+                      "citizen_name_surname": "PROSECUTOR_SURNAME4",
+                      "citizen_name_requested_name": ""
+                    },
+                    "is_masked": true
+                  }
+                ]
+              },
+              "defendants": [
+                {
+                  "personal_details": {
+                    "name": {
+                      "citizen_name_forename": "DEFENDANT_FIRSTNAME4",
+                      "citizen_name_surname": "DEFENDANT_SURNAME4"
+                    },
+                    "is_masked": false
+                  },
+                  "counsel": [
+                    {
+                      "name": {
+                        "citizen_name_forename": "SOLICITOR_FIRSTNAME4",
+                        "citizen_name_surname": "SOLICITOR_SURNAME4",
+                        "citizen_name_requested_name": ""
+                      },
+                      "is_masked": true
+                    }
+                  ],
+                  "charges": [
+                    {
+                      "indictment_count_number": 0,
+                      "offence_statement": "tba"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "hearing_sequence_number": 5,
+              "hearing_details": {
+                "hearing_type": "BLA",
+                "hearing_description": "For Application for Bail"
+              },
+              "time_marking_note": "11:00 AM",
+              "case_number": "CASE_NUMBER5",
+              "prosecution": {
+                "prosecuting_organisation": {
+                  "organisation_name": "Crown Prosecution Service"
+                },
+                "advocates": [
+                  {
+                    "name": {
+                      "citizen_name_forename": "PROSECUTOR_FIRSTNAME5",
+                      "citizen_name_surname": "PROSECUTOR_SURNAME5",
+                      "citizen_name_requested_name": ""
+                    },
+                    "is_masked": true
+                  }
+                ]
+              },
+              "defendants": [
+                {
+                  "personal_details": {
+                    "name": {
+                      "citizen_name_forename": "DEFENDANT_FIRSTNAME5",
+                      "citizen_name_surname": "DEFENDANT_SURNAME5"
+                    },
+                    "is_masked": false
+                  },
+                  "counsel": [
+                    {
+                      "name": {
+                        "citizen_name_forename": "SOLICITOR_FIRSTNAME5",
+                        "citizen_name_surname": "SOLICITOR_SURNAME5",
+                        "citizen_name_requested_name": ""
+                      },
+                      "is_masked": true
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
