@@ -124,6 +124,7 @@ public class AdminMediaServiceImpl implements AdminMediaService {
         return objectAdminActionRepository.findAllMediaActionsWithAnyDeletionReason().stream()
             .map(ObjectAdminActionEntity::getMedia)
             .map(adminMarkedForDeletionMapper::toApiModel)
+            .filter(media -> media != null)
             .sorted(Comparator.comparing(PostAdminMediasMarkedForDeletionItem::getMediaId))
             .toList();
     }
