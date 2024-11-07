@@ -34,6 +34,7 @@ class ArmRpoApiSaveBackgroundSearchIntTest extends IntegrationBase {
         // given
         SaveBackgroundSearchResponse response = new SaveBackgroundSearchResponse();
         response.setStatus(200);
+        response.setIsError(false);
         when(armRpoClient.saveBackgroundSearch(any(), any())).thenReturn(response);
 
         UserAccountEntity userAccount = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
@@ -60,6 +61,7 @@ class ArmRpoApiSaveBackgroundSearchIntTest extends IntegrationBase {
         // given
         SaveBackgroundSearchResponse response = new SaveBackgroundSearchResponse();
         response.setStatus(400);
+        response.setIsError(true);
         when(armRpoClient.saveBackgroundSearch(any(), any())).thenReturn(response);
 
         UserAccountEntity userAccount = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
@@ -76,7 +78,7 @@ class ArmRpoApiSaveBackgroundSearchIntTest extends IntegrationBase {
 
         // then
         assertThat(armRpoException.getMessage(), containsString(
-            "Failure during ARM save background search: Unable to save search"));
+            "Failure during ARM save background search: ARM RPO API failed with status - 400 BAD_REQUEST and response"));
 
         var armRpoExecutionDetailEntityUpdated = dartsPersistence.getArmRpoExecutionDetailRepository().findById(armRpoExecutionDetail.getId()).orElseThrow();
         assertEquals(ArmRpoStateEnum.SAVE_BACKGROUND_SEARCH.getId(), armRpoExecutionDetailEntityUpdated.getArmRpoState().getId());
@@ -89,7 +91,7 @@ class ArmRpoApiSaveBackgroundSearchIntTest extends IntegrationBase {
 
         // given
         SaveBackgroundSearchResponse response = new SaveBackgroundSearchResponse();
-        response.setStatus(null);
+        response.setIsError(false);
         when(armRpoClient.saveBackgroundSearch(any(), any())).thenReturn(response);
 
         UserAccountEntity userAccount = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
@@ -106,7 +108,7 @@ class ArmRpoApiSaveBackgroundSearchIntTest extends IntegrationBase {
 
         // then
         assertThat(armRpoException.getMessage(), containsString(
-            "Failure during ARM save background search: Unable to save search"));
+            "Failure during ARM save background search: ARM RPO API response is invalid"));
 
         var armRpoExecutionDetailEntityUpdated = dartsPersistence.getArmRpoExecutionDetailRepository().findById(armRpoExecutionDetail.getId()).orElseThrow();
         assertEquals(ArmRpoStateEnum.SAVE_BACKGROUND_SEARCH.getId(), armRpoExecutionDetailEntityUpdated.getArmRpoState().getId());
