@@ -12,5 +12,6 @@ import org.springframework.validation.annotation.Validated;
 public class ArmRpoConfigurationProperties {
 
     private String getRecordManagementMatterPath;
-    
+    private String getMasterIndexFieldByRecordClassSchemaPath;
+
 }

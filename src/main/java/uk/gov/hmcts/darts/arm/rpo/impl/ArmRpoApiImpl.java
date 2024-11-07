@@ -16,6 +16,7 @@ import uk.gov.hmcts.darts.arm.client.model.rpo.MasterIndexFieldByRecordClassSche
 import uk.gov.hmcts.darts.arm.client.model.rpo.MasterIndexFieldByRecordClassSchemaResponse;
 import uk.gov.hmcts.darts.arm.client.model.rpo.ProfileEntitlementResponse;
 import uk.gov.hmcts.darts.arm.client.model.rpo.RecordManagementMatterResponse;
+import uk.gov.hmcts.darts.arm.client.model.rpo.SaveBackgroundSearchRequest;
 import uk.gov.hmcts.darts.arm.client.model.rpo.StorageAccountRequest;
 import uk.gov.hmcts.darts.arm.client.model.rpo.StorageAccountResponse;
 import uk.gov.hmcts.darts.arm.component.impl.AddAsyncSearchRequestGenerator;
@@ -308,7 +309,28 @@ public class ArmRpoApiImpl implements ArmRpoApi {
 
     @Override
     public void saveBackgroundSearch(String bearerToken, Integer executionId, String searchName, UserAccountEntity userAccount) {
-        throw new NotImplementedException("Method not implemented");
+        var armRpoExecutionDetailEntity = armRpoService.getArmRpoExecutionDetailEntity(executionId);
+        armRpoService.updateArmRpoStateAndStatus(armRpoExecutionDetailEntity, ArmRpoHelper.saveBackgroundSearchRpoState(),
+                                                 ArmRpoHelper.inProgressRpoStatus(), userAccount);
+
+        StringBuilder errorMessage = new StringBuilder("Failure during ARM save background search: ");
+        try {
+            SaveBackgroundSearchRequest saveBackgroundSearchRequest =
+                createSaveBackgroundSearchRequest(searchName, armRpoExecutionDetailEntity.getSearchId());
+            armRpoClient.saveBackgroundSearch(bearerToken, saveBackgroundSearchRequest);
+        } catch (FeignException e) {
+            // this ensures the full error body containing the ARM error detail is logged rather than a truncated version
+            log.error(errorMessage.append("Unable to save background search").toString() + " {}", e.contentUTF8());
+            throw handleFailureAndCreateException(errorMessage.toString(), armRpoExecutionDetailEntity, userAccount);
+        }
+        armRpoService.updateArmRpoStatus(armRpoExecutionDetailEntity, ArmRpoHelper.completedRpoStatus(), userAccount);
+    }
+
+    private SaveBackgroundSearchRequest createSaveBackgroundSearchRequest(String searchName, String searchId) {
+        return SaveBackgroundSearchRequest.builder()
+            .name(searchName)
+            .searchId(searchId)
+            .build();
     }
 
     @Override
