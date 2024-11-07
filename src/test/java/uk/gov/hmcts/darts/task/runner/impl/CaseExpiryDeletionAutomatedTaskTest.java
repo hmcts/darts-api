@@ -59,7 +59,7 @@ class CaseExpiryDeletionAutomatedTaskTest {
         OffsetDateTime offsetDateTime = OffsetDateTime.now();
         when(currentTimeHelper.currentOffsetDateTime()).thenReturn(offsetDateTime);
 
-        when(caseRepository.findCasesIdsToBeAnonymized(any(), any()))
+        when(caseRepository.findCasesIdsToBeAnonymised(any(), any()))
             .thenReturn(List.of(1, 2, 3));
 
         doReturn(5).when(caseExpiryDeletionAutomatedTask)
@@ -71,15 +71,15 @@ class CaseExpiryDeletionAutomatedTaskTest {
             .currentOffsetDateTime();
 
         verify(dataAnonymisationService, times(1))
-            .anonymizeCourtCaseById(userAccount, 1);
+            .anonymiseCourtCaseById(userAccount, 1);
         verify(dataAnonymisationService, times(1))
-            .anonymizeCourtCaseById(userAccount, 2);
+            .anonymiseCourtCaseById(userAccount, 2);
         verify(dataAnonymisationService, times(1))
-            .anonymizeCourtCaseById(userAccount, 3);
+            .anonymiseCourtCaseById(userAccount, 3);
 
 
         verify(caseRepository, times(1))
-            .findCasesIdsToBeAnonymized(offsetDateTime, Limit.of(5));
+            .findCasesIdsToBeAnonymised(offsetDateTime, Limit.of(5));
 
         verify(caseExpiryDeletionAutomatedTask, times(1))
             .getAutomatedTaskBatchSize();

@@ -52,10 +52,10 @@ public class CaseExpiryDeletionAutomatedTask
     @Override
     public void runTask() {
         final UserAccountEntity userAccount = userAccountService.getUserAccount();
-        caseRepository.findCasesIdsToBeAnonymized(currentTimeHelper.currentOffsetDateTime(), Limit.of(getAutomatedTaskBatchSize()))
+        caseRepository.findCasesIdsToBeAnonymised(currentTimeHelper.currentOffsetDateTime(), Limit.of(getAutomatedTaskBatchSize()))
             .forEach(courtCaseId -> {
                 log.info("Anonymising case with id: {} because the criteria for retention has been met.", courtCaseId);
-                dataAnonymisationService.anonymizeCourtCaseById(userAccount, courtCaseId);
+                dataAnonymisationService.anonymiseCourtCaseById(userAccount, courtCaseId);
             });
     }
 }
