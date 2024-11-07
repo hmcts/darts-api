@@ -107,7 +107,7 @@ class DailyListUpdaterTest {
     @Test
     void processDailyListValidateJsonFailed() throws Exception {
         var dailyListUser = new UserAccountEntity();
-        when(systemUserHelper.getDailyListProcessorUser()).thenReturn(dailyListUser);
+        when(systemUserHelper.getReferenceTo(SystemUsersEnum.DAILY_LIST_PROCESSOR)).thenReturn(dailyListUser);
         DailyListEntity dailyList = setUpDailyList("dailyList.json");
         doReturn(false).when(dailyListUpdater).validateJsonExistsElseUpdate(dailyList);
 
