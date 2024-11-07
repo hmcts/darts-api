@@ -26,22 +26,14 @@ import static uk.gov.hmcts.darts.authorisation.exception.AuthorisationError.USER
 @AllArgsConstructor
 @Slf4j
 public class UserIdentityImpl implements UserIdentity {
-
     private static final String OID = "oid";
 
     private final UserAccountRepository userAccountRepository;
     private final UserRolesCourthousesRepository userRolesCourthousesRepository;
 
-    private String getGuidFromToken() {
-        if (nonNull(SecurityContextHolder.getContext().getAuthentication())) {
-            Object principalObject = SecurityContextHolder.getContext()
-                .getAuthentication()
-                .getPrincipal();
-
-            Object oid = null;
-            if (principalObject instanceof Jwt jwt) {
-                oid = jwt.getClaims().get(OID);
-            }
+    private String getGuidFromToken(Jwt token) {
+        if (token != null) {
+            Object oid = token.getClaims().get(OID);
             if (nonNull(oid) && oid instanceof String guid && StringUtils.isNotBlank(guid)) {
                 return guid;
             }
@@ -49,16 +41,20 @@ public class UserIdentityImpl implements UserIdentity {
         return null;
     }
 
-    @Override
     public UserAccountEntity getUserAccount() {
+        return getUserAccount(getJwt());
+    }
+
+    @Override
+    public UserAccountEntity getUserAccount(Jwt jwt) {
         UserAccountEntity userAccount = null;
-        String guid = getGuidFromToken();
+        String guid = getGuidFromToken(jwt);
         if (nonNull(guid)) {
             // System users will use GUID not email address
             userAccount = userAccountRepository.findByAccountGuidAndActive(guid, true).orElse(null);
         }
         if (isNull(userAccount)) {
-            String emailAddressFromToken = EmailAddressFromTokenUtil.getEmailAddressFromToken();
+            String emailAddressFromToken = EmailAddressFromTokenUtil.getEmailAddressFromToken(jwt);
             userAccount = userAccountRepository.findByEmailAddressIgnoreCaseAndActive(emailAddressFromToken, true).stream()
                 .findFirst()
                 .orElseThrow(() -> new DartsApiException(USER_DETAILS_INVALID));
@@ -66,14 +62,27 @@ public class UserIdentityImpl implements UserIdentity {
         return userAccount;
     }
 
+    private Jwt getJwt() {
+        if (SecurityContextHolder.getContext().getAuthentication() != null) {
+            if (SecurityContextHolder.getContext().getAuthentication().getPrincipal() instanceof Jwt jwt) {
+                return jwt;
+            }
+        }
+
+        return null;
+    }
+
     @Override
     public boolean userHasGlobalAccess(Set<SecurityRoleEnum> globalAccessRoles) {
         boolean userHasGlobalAccess = false;
         String emailAddress = null;
-        String guid = getGuidFromToken();
+        Jwt jwt = getJwt();
+        String guid = getGuidFromToken(jwt);
 
         try {
-            emailAddress = EmailAddressFromTokenUtil.getEmailAddressFromToken();
+            if (jwt != null) {
+                emailAddress = EmailAddressFromTokenUtil.getEmailAddressFromToken(jwt);
+            }
         } catch (IllegalStateException e) {
             if (nonNull(guid)) {
                 log.debug("Guid is present but unable to get email address from token ending ''.....{}'': {}", StringUtils.right(guid, 5), e.getMessage());

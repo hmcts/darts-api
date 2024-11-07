@@ -1,17 +1,19 @@
 package uk.gov.hmcts.darts.arm.service.impl;
 
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import uk.gov.hmcts.darts.arm.helper.ArmRpoHelper;
+import uk.gov.hmcts.darts.arm.helper.ArmRpoHelperMocks;
 import uk.gov.hmcts.darts.common.entity.ArmRpoExecutionDetailEntity;
 import uk.gov.hmcts.darts.common.entity.ArmRpoStateEntity;
 import uk.gov.hmcts.darts.common.entity.ArmRpoStatusEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.exception.DartsException;
-import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
 import uk.gov.hmcts.darts.common.repository.ArmRpoExecutionDetailRepository;
 
 import java.util.Optional;
@@ -29,24 +31,19 @@ import static org.mockito.Mockito.when;
 class ArmRpoServiceImplTest {
 
     @Mock
-    private CurrentTimeHelper currentTimeHelper;
-
-    @Mock
     private ArmRpoExecutionDetailRepository armRpoExecutionDetailRepository;
 
     @InjectMocks
     private ArmRpoServiceImpl armRpoService;
 
+    private static final ArmRpoHelperMocks ARM_RPO_HELPER_MOCKS = new ArmRpoHelperMocks();
+
     private ArmRpoExecutionDetailEntity armRpoExecutionDetailEntity;
-    private ArmRpoStateEntity armRpoStateEntity;
-    private ArmRpoStatusEntity armRpoStatusEntity;
     private UserAccountEntity userAccountEntity;
 
     @BeforeEach
     void setUp() {
         armRpoExecutionDetailEntity = new ArmRpoExecutionDetailEntity();
-        armRpoStateEntity = new ArmRpoStateEntity();
-        armRpoStatusEntity = new ArmRpoStatusEntity();
         userAccountEntity = new UserAccountEntity();
     }
 
@@ -74,8 +71,15 @@ class ArmRpoServiceImplTest {
 
     @Test
     void updateArmRpoStateAndStatus_ShouldUpdateStateAndStatus() {
+        // given
+        ArmRpoStateEntity armRpoStateEntity = ArmRpoHelper.addAsyncSearchRpoState();
+        ArmRpoStatusEntity armRpoStatusEntity = ArmRpoHelper.completedRpoStatus();
+        armRpoExecutionDetailEntity.setArmRpoStatus(ArmRpoHelper.inProgressRpoStatus());
+
         // when
-        armRpoService.updateArmRpoStateAndStatus(armRpoExecutionDetailEntity, armRpoStateEntity, armRpoStatusEntity, userAccountEntity);
+        armRpoService.updateArmRpoStateAndStatus(armRpoExecutionDetailEntity,
+                                                 armRpoStateEntity,
+                                                 ArmRpoHelper.completedRpoStatus(), userAccountEntity);
 
         // then
         assertEquals(armRpoStateEntity, armRpoExecutionDetailEntity.getArmRpoState());
@@ -86,13 +90,13 @@ class ArmRpoServiceImplTest {
     @Test
     void updateArmRpoStatus_ShouldUpdateStatus() {
         // given
-        when(currentTimeHelper.currentOffsetDateTime()).thenReturn(null);
+        armRpoExecutionDetailEntity.setArmRpoStatus(ArmRpoHelper.inProgressRpoStatus());
 
         // when
-        armRpoService.updateArmRpoStatus(armRpoExecutionDetailEntity, armRpoStatusEntity, userAccountEntity);
+        armRpoService.updateArmRpoStatus(armRpoExecutionDetailEntity, ArmRpoHelper.failedRpoStatus(), userAccountEntity);
 
         // then
-        assertEquals(armRpoStatusEntity, armRpoExecutionDetailEntity.getArmRpoStatus());
+        assertEquals(ARM_RPO_HELPER_MOCKS.getFailedRpoStatus(), armRpoExecutionDetailEntity.getArmRpoStatus());
         assertEquals(userAccountEntity, armRpoExecutionDetailEntity.getLastModifiedBy());
         verify(armRpoExecutionDetailRepository, times(1)).save(armRpoExecutionDetailEntity);
     }
@@ -109,5 +113,10 @@ class ArmRpoServiceImplTest {
         assertNotNull(result);
         assertEquals(armRpoExecutionDetailEntity, result);
         verify(armRpoExecutionDetailRepository, times(1)).save(armRpoExecutionDetailEntity);
+    }
+
+    @AfterAll
+    static void close() {
+        ARM_RPO_HELPER_MOCKS.close();
     }
 }

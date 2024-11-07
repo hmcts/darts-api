@@ -6,15 +6,15 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.darts.audio.service.UnstructuredAudioDeleterProcessor;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
+import uk.gov.hmcts.darts.common.enums.SystemUsersEnum;
 import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
 import uk.gov.hmcts.darts.common.helper.SystemUserHelper;
-import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryQueryTypeEnum;
 import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
 import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
 import uk.gov.hmcts.darts.common.util.EodHelper;
 
+import java.time.Duration;
 import java.time.OffsetDateTime;
-import java.time.temporal.ChronoUnit;
 import java.util.List;
 
 @Service
@@ -22,8 +22,8 @@ import java.util.List;
 @RequiredArgsConstructor
 public class UnstructuredAudioDeleterProcessorImpl implements UnstructuredAudioDeleterProcessor {
 
-    @Value("${darts.data-management.retention-period.unstructured.arm-minimum.weeks}")
-    int weeksInArm;
+    @Value("${darts.automated.task.unstructured-audio-deleter.minimum-duration-in-unstructured}")
+    Duration durationInUnstructured;
 
     private final ExternalObjectDirectoryRepository externalObjectDirectoryRepository;
     private final CurrentTimeHelper currentTimeHelper;
@@ -35,18 +35,13 @@ public class UnstructuredAudioDeleterProcessorImpl implements UnstructuredAudioD
     @Override
     public void markForDeletion() {
 
-        OffsetDateTime lastModifiedBefore = currentTimeHelper.currentOffsetDateTime().minus(
-            weeksInArm,
-            ChronoUnit.WEEKS
-        );
+        OffsetDateTime unstructuredModifiedBeforeDateTime = currentTimeHelper.currentOffsetDateTime().minus(durationInUnstructured);
 
-        List<Integer> audioFileIdsToBeMarked = externalObjectDirectoryRepository.findIdsIn2StorageLocationsBeforeTime(
-            EodHelper.storedStatus(),
+        List<Integer> audioFileIdsToBeMarked = externalObjectDirectoryRepository.findIdsForAudioToBeDeletedFromUnstructured(
             EodHelper.storedStatus(),
             EodHelper.unstructuredLocation(),
             EodHelper.armLocation(),
-            lastModifiedBefore,
-            ExternalObjectDirectoryQueryTypeEnum.MEDIA_QUERY.getIndex()
+            unstructuredModifiedBeforeDateTime
         );
 
         if (audioFileIdsToBeMarked.isEmpty()) {
@@ -55,7 +50,7 @@ public class UnstructuredAudioDeleterProcessorImpl implements UnstructuredAudioD
         }
         log.debug("Marking the following Unstructured ExternalObjectDirectory.Id's for deletion:- {}", audioFileIdsToBeMarked);
 
-        UserAccountEntity user = userAccountRepository.findSystemUser(systemUserHelper.findSystemUserGuid("housekeeping"));
+        UserAccountEntity user = systemUserHelper.getReferenceTo(SystemUsersEnum.UNSTRUCTURED_AUDIO_DELETER_AUTOMATED_TASK);
 
         eodHelper.updateStatus(
             EodHelper.markForDeletionStatus(),

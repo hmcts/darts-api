@@ -17,6 +17,7 @@ import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 import uk.gov.hmcts.darts.common.entity.DailyListEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
+import uk.gov.hmcts.darts.common.enums.SystemUsersEnum;
 import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
 import uk.gov.hmcts.darts.common.helper.SystemUserHelper;
 import uk.gov.hmcts.darts.common.repository.CourthouseRepository;
@@ -78,9 +79,8 @@ class DailyListUpdaterTest {
 
     @Test
     void handlesCaseNumberMissingForCpp() throws IOException {
-
         var dailyListUser = new UserAccountEntity();
-        when(systemUserHelper.getDailyListProcessorUser()).thenReturn(dailyListUser);
+        when(systemUserHelper.getReferenceTo(SystemUsersEnum.DAILY_LIST_PROCESSOR)).thenReturn(dailyListUser);
         when(courthouseRepository.findByCourthouseName("SWANSEA")).thenReturn(Optional.of(new CourthouseEntity()));
         HearingEntity hearing = new HearingEntity();
         CourtCaseEntity courtCase = new CourtCaseEntity();
@@ -100,7 +100,7 @@ class DailyListUpdaterTest {
         var dailyListUser = new UserAccountEntity();
         OffsetDateTime testTime = DateConverterUtil.toOffsetDateTime(HEARING_DATE);
         when(currentTimeHelper.currentOffsetDateTime()).thenReturn(testTime);
-        when(systemUserHelper.getDailyListProcessorUser()).thenReturn(dailyListUser);
+        when(systemUserHelper.getReferenceTo(SystemUsersEnum.DAILY_LIST_PROCESSOR)).thenReturn(dailyListUser);
         when(courthouseRepository.findByCourthouseName("SWANSEA")).thenReturn(Optional.of(new CourthouseEntity()));
         HearingEntity hearing = new HearingEntity();
         CourtCaseEntity courtCase = new CourtCaseEntity();
@@ -125,7 +125,7 @@ class DailyListUpdaterTest {
         var dailyListUser = new UserAccountEntity();
         OffsetDateTime testTime = DateConverterUtil.toOffsetDateTime(HEARING_DATE);
         when(currentTimeHelper.currentOffsetDateTime()).thenReturn(testTime);
-        when(systemUserHelper.getDailyListProcessorUser()).thenReturn(dailyListUser);
+        when(systemUserHelper.getReferenceTo(SystemUsersEnum.DAILY_LIST_PROCESSOR)).thenReturn(dailyListUser);
         when(courthouseRepository.findByCourthouseName("SWANSEA")).thenReturn(Optional.of(new CourthouseEntity()));
         HearingEntity hearing = new HearingEntity();
         CourtCaseEntity courtCase = new CourtCaseEntity();

@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import uk.gov.hmcts.darts.audio.entity.MediaRequestEntity;
 import uk.gov.hmcts.darts.common.entity.AnnotationDocumentEntity;
 import uk.gov.hmcts.darts.common.entity.AnnotationEntity;
+import uk.gov.hmcts.darts.common.entity.ArmRpoExecutionDetailEntity;
 import uk.gov.hmcts.darts.common.entity.CaseDocumentEntity;
 import uk.gov.hmcts.darts.common.entity.CaseManagementRetentionEntity;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
@@ -36,6 +37,7 @@ import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
 import uk.gov.hmcts.darts.common.repository.AnnotationDocumentRepository;
 import uk.gov.hmcts.darts.common.repository.AnnotationRepository;
+import uk.gov.hmcts.darts.common.repository.ArmRpoExecutionDetailRepository;
 import uk.gov.hmcts.darts.common.repository.AuditRepository;
 import uk.gov.hmcts.darts.common.repository.AutomatedTaskRepository;
 import uk.gov.hmcts.darts.common.repository.CaseDocumentRepository;
@@ -98,6 +100,7 @@ public class DartsPersistence {
     private final EntityManagerFactory entityManagerFactory;
     private final AnnotationDocumentRepository annotationDocumentRepository;
     private final AnnotationRepository annotationRepository;
+    private final ArmRpoExecutionDetailRepository armRpoExecutionDetailRepository;
     private final AuditRepository auditRepository;
     private final CaseDocumentRepository caseDocumentRepository;
     private final CaseManagementRetentionRepository caseManagementRetentionRepository;
@@ -621,6 +624,22 @@ public class DartsPersistence {
 
     @Transactional
     @SuppressWarnings("PMD.AvoidReassigningParameters")
+    public ArmRpoExecutionDetailEntity save(ArmRpoExecutionDetailEntity armRpoExecutionDetailEntity) {
+        armRpoExecutionDetailEntity = (ArmRpoExecutionDetailEntity) preCheckPersist(armRpoExecutionDetailEntity);
+
+        if (armRpoExecutionDetailEntity.getId() == null) {
+            armRpoExecutionDetailEntity.setCreatedBy(save(armRpoExecutionDetailEntity.getCreatedBy()));
+            armRpoExecutionDetailEntity.setLastModifiedBy(save(armRpoExecutionDetailEntity.getLastModifiedBy()));
+            return armRpoExecutionDetailRepository.save(armRpoExecutionDetailEntity);
+        } else {
+            entityManager.merge(armRpoExecutionDetailEntity);
+        }
+
+        return armRpoExecutionDetailEntity;
+    }
+
+    @Transactional
+    @SuppressWarnings("PMD.AvoidReassigningParameters")
     public void saveAll(UserAccountEntity... userAccounts) {
         stream(userAccounts).forEach(user -> {
             user = (UserAccountEntity) preCheckPersist(user);
@@ -762,4 +781,6 @@ public class DartsPersistence {
 
         return prosecutor;
     }
+
+
 }

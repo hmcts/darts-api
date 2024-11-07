@@ -10,7 +10,7 @@ import uk.gov.hmcts.darts.common.entity.TransformedMediaEntity;
 import uk.gov.hmcts.darts.common.entity.TransientObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.enums.SecurityGroupEnum;
-import uk.gov.hmcts.darts.common.exception.DartsApiException;
+import uk.gov.hmcts.darts.common.enums.SystemUsersEnum;
 import uk.gov.hmcts.darts.common.helper.SystemUserHelper;
 import uk.gov.hmcts.darts.common.repository.TransformedMediaRepository;
 import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
@@ -18,9 +18,7 @@ import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
@@ -55,16 +53,7 @@ class OutboundAudioDeleterProcessorImplTest {
             systemUserHelper, transformedMediaRepository,
             singleElementProcessor
         );
-        when(systemUserHelper.findSystemUserGuid(anyString())).thenReturn("value");
-        when(userAccountRepository.findSystemUser(any())).thenReturn(userAccountEntity);
-    }
-
-    @Test
-    void testDeleteWhenSystemUserDoesNotExist() {
-        when(userAccountRepository.findSystemUser(any())).thenReturn(null);
-
-        assertThrows(DartsApiException.class, () ->
-            outboundAudioDeleterProcessorImpl.markForDeletion());
+        when(systemUserHelper.getReferenceTo(SystemUsersEnum.OUTBOUND_AUDIO_DELETER_AUTOMATED_TASK)).thenReturn(userAccountEntity);
     }
 
     @Test
@@ -78,8 +67,8 @@ class OutboundAudioDeleterProcessorImplTest {
 
         var deletedValues = List.of(new TransientObjectDirectoryEntity());
         when(singleElementProcessor.markForDeletion(any(), any()))
-                .thenThrow(new RuntimeException("Some error"))
-                .thenReturn(deletedValues);
+            .thenThrow(new RuntimeException("Some error"))
+            .thenReturn(deletedValues);
 
         // when
         List<TransientObjectDirectoryEntity> result = outboundAudioDeleterProcessorImpl.markForDeletion();
@@ -92,9 +81,9 @@ class OutboundAudioDeleterProcessorImplTest {
     void doesntMarkForDeletionWhenCurrentOwnerIsInGroupMediaInPerpetuity() {
         // given
         var transformedMediaOwnedByUserInMediaInPerpetuityGroup = someTransformedMediaOwnedByUserInGroup(
-            List.of(MEDIA_IN_PERPETUITY,SUPER_ADMIN, SUPER_USER));
+            List.of(MEDIA_IN_PERPETUITY, SUPER_ADMIN, SUPER_USER));
         var transformedMediaNotOwnedByUserInMediaInPerpetuityGroup = someTransformedMediaNotOwnedByUserInGroup(
-            List.of(MEDIA_IN_PERPETUITY,SUPER_ADMIN, SUPER_USER));
+            List.of(MEDIA_IN_PERPETUITY, SUPER_ADMIN, SUPER_USER));
         when(transformedMediaRepository.findAllDeletableTransformedMedia(any()))
             .thenReturn(List.of(
                 transformedMediaOwnedByUserInMediaInPerpetuityGroup,

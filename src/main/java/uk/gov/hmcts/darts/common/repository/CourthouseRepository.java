@@ -34,7 +34,7 @@ public interface CourthouseRepository extends RevisionRepository<CourthouseEntit
         SELECT ch.id
         FROM CourthouseEntity ch
         WHERE ch.courthouseName ilike CONCAT('%', :name, '%')
-        or upper(ch.displayName) like upper(CONCAT('%', :name, '%'))
+        or ch.displayName ilike CONCAT('%', :name, '%')
         """)
     List<Integer> findAllIdByDisplayNameOrNameLike(String name);
 

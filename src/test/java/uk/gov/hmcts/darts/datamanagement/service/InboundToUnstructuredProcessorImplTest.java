@@ -35,7 +35,8 @@ class InboundToUnstructuredProcessorImplTest {
     void setUp() {
         inboundToUnstructuredProcessor = new InboundToUnstructuredProcessorImpl(externalObjectDirectoryRepository,
                                                                                 objectRecordStatusRepository, externalLocationTypeRepository,
-                                                                                singleElementProcessor);
+                                                                                singleElementProcessor,
+                                                                                20);
     }
 
     @Test
@@ -53,7 +54,7 @@ class InboundToUnstructuredProcessorImplTest {
             .when(singleElementProcessor).processSingleElement(any());
 
         // when
-        inboundToUnstructuredProcessor.processInboundToUnstructured();
+        inboundToUnstructuredProcessor.processInboundToUnstructured(100);
 
         // then
         verify(singleElementProcessor, times(2)).processSingleElement(any());
