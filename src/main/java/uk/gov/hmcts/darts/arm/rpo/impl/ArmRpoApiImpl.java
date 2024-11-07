@@ -13,6 +13,7 @@ import uk.gov.hmcts.darts.arm.client.model.rpo.ArmAsyncSearchResponse;
 import uk.gov.hmcts.darts.arm.client.model.rpo.BaseRpoResponse;
 import uk.gov.hmcts.darts.arm.client.model.rpo.ExtendedProductionsByMatterResponse;
 import uk.gov.hmcts.darts.arm.client.model.rpo.ExtendedSearchesByMatterResponse;
+import uk.gov.hmcts.darts.arm.client.model.rpo.IndexesByMatterIdRequest;
 import uk.gov.hmcts.darts.arm.client.model.rpo.IndexesByMatterIdResponse;
 import uk.gov.hmcts.darts.arm.client.model.rpo.MasterIndexFieldByRecordClassSchemaRequest;
 import uk.gov.hmcts.darts.arm.client.model.rpo.MasterIndexFieldByRecordClassSchemaResponse;
@@ -89,8 +90,37 @@ public class ArmRpoApiImpl implements ArmRpoApi {
     }
 
     @Override
-    public IndexesByMatterIdResponse getIndexesByMatterId(String bearerToken, Integer executionId, UserAccountEntity userAccount) {
-        throw new NotImplementedException("Method not implemented");
+    public void getIndexesByMatterId(String bearerToken, Integer executionId, String matterId, UserAccountEntity userAccount) {
+        var armRpoExecutionDetailEntity = armRpoService.getArmRpoExecutionDetailEntity(executionId);
+        armRpoService.updateArmRpoStateAndStatus(armRpoExecutionDetailEntity, ArmRpoHelper.getIndexesByMatterIdRpoState(),
+                                                 ArmRpoHelper.inProgressRpoStatus(), userAccount);
+
+        StringBuilder errorMessage = new StringBuilder("Failure during ARM RPO get indexes by matter ID: ");
+        IndexesByMatterIdResponse indexesByMatterIdResponse;
+        try {
+            indexesByMatterIdResponse = armRpoClient.getIndexesByMatterId(bearerToken, createIndexesByMatterIdRequest(matterId));
+        } catch (FeignException e) {
+            // this ensures the full error body containing the ARM error detail is logged rather than a truncated version
+            log.error(errorMessage.append("Unable to get ARM RPO response") + " {}", e.contentUTF8());
+            throw handleFailureAndCreateException(errorMessage.toString(), armRpoExecutionDetailEntity, userAccount);
+        }
+
+        if (isNull(indexesByMatterIdResponse)
+            || CollectionUtils.isEmpty(indexesByMatterIdResponse.getIndexes())
+            || isNull(indexesByMatterIdResponse.getIndexes().getFirst())) {
+            throw handleFailureAndCreateException(errorMessage.append("Unable to find indexes by matter ID in response").toString(),
+                                                  armRpoExecutionDetailEntity,
+                                                  userAccount);
+        }
+
+        armRpoExecutionDetailEntity.setIndexId(indexesByMatterIdResponse.getIndexes().getFirst().getIndex().getIndexId());
+        armRpoService.updateArmRpoStatus(armRpoExecutionDetailEntity, ArmRpoHelper.completedRpoStatus(), userAccount);
+    }
+
+    private IndexesByMatterIdRequest createIndexesByMatterIdRequest(String matterId) {
+        return IndexesByMatterIdRequest.builder()
+            .matterId(matterId)
+            .build();
     }
 
     @Override
