@@ -24,7 +24,8 @@ public interface CourtroomRepository extends JpaRepository<CourtroomEntity, Inte
 
     @Query("""
         SELECT cr.id FROM CourthouseEntity ch, CourtroomEntity cr
-        WHERE ch.courthouseName ilike CONCAT('%', :courthouse, '%')
+        WHERE (ch.courthouseName ilike CONCAT('%', :courthouse, '%')
+            OR ch.displayName ilike CONCAT('%', :courthouse, '%'))
         AND cr.name ilike CONCAT('%', :courtroom, '%')
         AND cr.courthouse = ch
         """
