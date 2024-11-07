@@ -10,7 +10,7 @@ import uk.gov.hmcts.darts.audio.entity.MediaRequestEntity;
 import uk.gov.hmcts.darts.audio.enums.MediaRequestStatus;
 import uk.gov.hmcts.darts.audit.api.AuditActivity;
 import uk.gov.hmcts.darts.audit.api.AuditApi;
-import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
+import uk.gov.hmcts.darts.cases.service.CaseService;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.DefenceEntity;
 import uk.gov.hmcts.darts.common.entity.DefendantEntity;
@@ -25,7 +25,6 @@ import uk.gov.hmcts.darts.common.entity.TransientObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.entity.base.CreatedModifiedBaseEntity;
 import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
-import uk.gov.hmcts.darts.common.repository.CaseRepository;
 import uk.gov.hmcts.darts.common.repository.TransformedMediaRepository;
 import uk.gov.hmcts.darts.common.repository.TransientObjectDirectoryRepository;
 import uk.gov.hmcts.darts.common.service.DataAnonymisationService;
@@ -46,93 +45,95 @@ import java.util.stream.Collectors;
 public class DataAnonymisationServiceImpl implements DataAnonymisationService {
 
     private final AuditApi auditApi;
-    private final UserIdentity userIdentity;
 
     private final CurrentTimeHelper currentTimeHelper;
     private final ExternalOutboundDataStoreDeleter outboundDataStoreDeleter;
-    private final CaseRepository caseRepository;
     private final TransformedMediaRepository transformedMediaRepository;
     private final TransientObjectDirectoryRepository transientObjectDirectoryRepository;
     private final LogApi logApi;
+    private final CaseService caseService;
     private final EventService eventService;
 
+
     @Override
-    public void anonymizeCourtCaseEntity(UserAccountEntity userAccount, CourtCaseEntity courtCase) {
-        courtCase.getDefendantList().forEach(defendantEntity -> anonymizeDefendantEntity(userAccount, defendantEntity));
-        courtCase.getDefenceList().forEach(defenceEntity -> anonymizeDefenceEntity(userAccount, defenceEntity));
-        courtCase.getProsecutorList().forEach(prosecutorEntity -> anonymizeProsecutorEntity(userAccount, prosecutorEntity));
-        courtCase.getHearings().forEach(hearingEntity -> anonymizeHearingEntity(userAccount, hearingEntity));
+    @Transactional
+    public void anonymiseCourtCaseById(UserAccountEntity userAccount, Integer courtCaseId) {
+        anonymiseCourtCaseEntity(userAccount, caseService.getCourtCaseById(courtCaseId));
+    }
+
+    void anonymiseCourtCaseEntity(UserAccountEntity userAccount, CourtCaseEntity courtCase) {
+        courtCase.getDefendantList().forEach(defendantEntity -> anonymiseDefendantEntity(userAccount, defendantEntity));
+        courtCase.getDefenceList().forEach(defenceEntity -> anonymiseDefenceEntity(userAccount, defenceEntity));
+        courtCase.getProsecutorList().forEach(prosecutorEntity -> anonymiseProsecutorEntity(userAccount, prosecutorEntity));
+        courtCase.getHearings().forEach(hearingEntity -> anonymiseHearingEntity(userAccount, hearingEntity));
 
         courtCase.markAsExpired(userAccount);
         //This also saves defendant, defence and prosecutor entities
         tidyUpTransformedMediaEntities(userAccount, courtCase);
         auditApi.record(AuditActivity.CASE_EXPIRED, userAccount, courtCase);
-        anonymizeCreatedModifiedBaseEntity(userAccount, courtCase);
-        caseRepository.save(courtCase);
+        anonymiseCreatedModifiedBaseEntity(userAccount, courtCase);
+        caseService.saveCase(courtCase);
 
         //Required for Dynatrace dashboards
         logApi.caseDeletedDueToExpiry(courtCase.getId(), courtCase.getCaseNumber());
     }
 
-    void anonymizeDefenceEntity(UserAccountEntity userAccount, DefenceEntity entity) {
-        anonymizeName(userAccount, entity);
+    void anonymiseDefenceEntity(UserAccountEntity userAccount, DefenceEntity entity) {
+        anonymiseName(userAccount, entity);
     }
 
-    void anonymizeDefendantEntity(UserAccountEntity userAccount, DefendantEntity entity) {
-        anonymizeName(userAccount, entity);
+    void anonymiseDefendantEntity(UserAccountEntity userAccount, DefendantEntity entity) {
+        anonymiseName(userAccount, entity);
     }
 
-    void anonymizeProsecutorEntity(UserAccountEntity userAccount, ProsecutorEntity entity) {
-        anonymizeName(userAccount, entity);
+    void anonymiseProsecutorEntity(UserAccountEntity userAccount, ProsecutorEntity entity) {
+        anonymiseName(userAccount, entity);
     }
 
-    void anonymizeHearingEntity(UserAccountEntity userAccount, HearingEntity hearingEntity) {
-        hearingEntity.getTranscriptions().forEach(transcriptionEntity -> anonymizeTranscriptionEntity(userAccount, transcriptionEntity));
-        hearingEntity.getEventList().forEach(eventEntity -> anonymizeEventEntity(userAccount, eventEntity));
+    void anonymiseHearingEntity(UserAccountEntity userAccount, HearingEntity hearingEntity) {
+        hearingEntity.getTranscriptions().forEach(transcriptionEntity -> anonymiseTranscriptionEntity(userAccount, transcriptionEntity));
+        hearingEntity.getEventList().forEach(eventEntity -> anonymiseEventEntity(userAccount, eventEntity));
     }
 
 
     @Override
     @Transactional
-    public void obfuscateEventByIds(List<Integer> eveIds) {
+    public void anonymiseEventByIds(UserAccountEntity userAccount, List<Integer> eveIds) {
         eveIds.stream()
             .map(eventService::getEventByEveId)
             .distinct()
-            .forEach(this::anonymizeEvent);
+            .forEach(eventEntity -> {
+                anonymiseEvent(userAccount, eventEntity);
+            });
     }
 
     @Override
-    public void anonymizeEvent(EventEntity eventEntity) {
-        anonymizeEventEntity(getUserAccount(), eventEntity);
+    public void anonymiseEvent(UserAccountEntity userAccount, EventEntity eventEntity) {
+        anonymiseEventEntity(userAccount, eventEntity);
         eventService.saveEvent(eventEntity);
     }
 
-    void anonymizeEventEntity(UserAccountEntity userAccount, EventEntity eventEntity) {
+    void anonymiseEventEntity(UserAccountEntity userAccount, EventEntity eventEntity) {
         eventEntity.setEventText(UUID.randomUUID().toString());
         eventEntity.setDataAnonymised(true);
-        anonymizeCreatedModifiedBaseEntity(userAccount, eventEntity);
+        anonymiseCreatedModifiedBaseEntity(userAccount, eventEntity);
     }
 
-    void anonymizeTranscriptionEntity(UserAccountEntity userAccount, TranscriptionEntity transcriptionEntity) {
+    void anonymiseTranscriptionEntity(UserAccountEntity userAccount, TranscriptionEntity transcriptionEntity) {
         transcriptionEntity.getTranscriptionCommentEntities()
-            .forEach(transcriptionCommentEntity -> anonymizeTranscriptionCommentEntity(userAccount, transcriptionCommentEntity));
-        transcriptionEntity.getTranscriptionWorkflowEntities().forEach(this::anonymizeTranscriptionWorkflowEntity);
+            .forEach(transcriptionCommentEntity -> anonymiseTranscriptionCommentEntity(userAccount, transcriptionCommentEntity));
+        transcriptionEntity.getTranscriptionWorkflowEntities().forEach(this::anonymiseTranscriptionWorkflowEntity);
     }
 
-    void anonymizeTranscriptionCommentEntity(UserAccountEntity userAccount, TranscriptionCommentEntity transcriptionCommentEntity) {
+    void anonymiseTranscriptionCommentEntity(UserAccountEntity userAccount, TranscriptionCommentEntity transcriptionCommentEntity) {
         transcriptionCommentEntity.setComment(UUID.randomUUID().toString());
         transcriptionCommentEntity.setDataAnonymised(true);
-        anonymizeCreatedModifiedBaseEntity(userAccount, transcriptionCommentEntity);
+        anonymiseCreatedModifiedBaseEntity(userAccount, transcriptionCommentEntity);
     }
 
-    void anonymizeTranscriptionWorkflowEntity(TranscriptionWorkflowEntity transcriptionWorkflowEntity) {
+    void anonymiseTranscriptionWorkflowEntity(TranscriptionWorkflowEntity transcriptionWorkflowEntity) {
         transcriptionWorkflowEntity.close();
 
-    }
-
-    @Override
-    public UserAccountEntity getUserAccount() {
-        return userIdentity.getUserAccount();
     }
 
     void tidyUpTransformedMediaEntities(UserAccountEntity userAccount, CourtCaseEntity courtCase) {
@@ -173,16 +174,16 @@ public class DataAnonymisationServiceImpl implements DataAnonymisationService {
 
     void expiredMediaRequest(UserAccountEntity userAccount, MediaRequestEntity mediaRequestEntity) {
         mediaRequestEntity.setStatus(MediaRequestStatus.EXPIRED);
-        anonymizeCreatedModifiedBaseEntity(userAccount, mediaRequestEntity);
+        anonymiseCreatedModifiedBaseEntity(userAccount, mediaRequestEntity);
     }
 
 
-    private <T extends CreatedModifiedBaseEntity & IsNamedEntity> void anonymizeName(UserAccountEntity userAccount, T entity) {
+    private <T extends CreatedModifiedBaseEntity & IsNamedEntity> void anonymiseName(UserAccountEntity userAccount, T entity) {
         entity.setName(UUID.randomUUID().toString());
-        anonymizeCreatedModifiedBaseEntity(userAccount, entity);
+        anonymiseCreatedModifiedBaseEntity(userAccount, entity);
     }
 
-    private void anonymizeCreatedModifiedBaseEntity(UserAccountEntity userAccount, CreatedModifiedBaseEntity entity) {
+    private void anonymiseCreatedModifiedBaseEntity(UserAccountEntity userAccount, CreatedModifiedBaseEntity entity) {
         entity.setLastModifiedBy(userAccount);
         entity.setLastModifiedDateTime(currentTimeHelper.currentOffsetDateTime());
     }

@@ -6,6 +6,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.darts.arm.service.UnstructuredTranscriptionAndAnnotationDeleterProcessor;
+import uk.gov.hmcts.darts.common.enums.SystemUsersEnum;
 import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
 import uk.gov.hmcts.darts.common.helper.SystemUserHelper;
 import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
@@ -53,18 +54,18 @@ public class UnstructuredAnnotationTranscriptionDeleterProcessorImpl implements 
         List<Integer> recordsMarkedForDeletion
             = externalObjectDirectoryRepository
             .findIdsIn2StorageLocationsBeforeTime(EodHelper.storedStatus(),
-                                                           EodHelper.storedStatus(),
-                                                           EodHelper.unstructuredLocation(),
-                                                           EodHelper.armLocation(),
-                                                           lastModifiedBeforeCurrentDateForUnstructured,
-                                                           lastModifiedBeforeCurrentDateForArm
-                                                  );
+                                                  EodHelper.storedStatus(),
+                                                  EodHelper.unstructuredLocation(),
+                                                  EodHelper.armLocation(),
+                                                  lastModifiedBeforeCurrentDateForUnstructured,
+                                                  lastModifiedBeforeCurrentDateForArm
+            );
 
         log.debug("Identified records to be marked for deletion  {}", StringUtils.join(recordsMarkedForDeletion, ","));
 
         eodHelper.updateStatus(
             EodHelper.markForDeletionStatus(),
-            systemUserHelper.getSystemUser(),
+            systemUserHelper.getReferenceTo(SystemUsersEnum.UNSTRUCTURED_TRANSCRIPTION_ANNOTATION_DELETER_AUTOMATED_TASK),
             recordsMarkedForDeletion,
             currentTimeHelper.currentOffsetDateTime()
         );

@@ -19,6 +19,7 @@ import uk.gov.hmcts.darts.common.entity.ObjectRecordStatusEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionDocumentEntity;
 import uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum;
 import uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum;
+import uk.gov.hmcts.darts.common.enums.SystemUsersEnum;
 import uk.gov.hmcts.darts.common.helper.SystemUserHelper;
 import uk.gov.hmcts.darts.common.repository.ExternalLocationTypeRepository;
 import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
@@ -37,7 +38,6 @@ import java.util.function.Consumer;
 
 import static uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum.ARM;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.STORED;
-import static uk.gov.hmcts.darts.common.helper.SystemUserHelper.HOUSEKEEPING;
 
 @Component
 @RequiredArgsConstructor
@@ -507,7 +507,9 @@ public class ExternalObjectDirectoryStub {
             ExternalObjectDirectoryEntity objectDirectoryEntity = eodRepository.getReferenceById(entity);
 
             if (!ObjectRecordStatusEnum.MARKED_FOR_DELETION.getId().equals(objectDirectoryEntity.getStatus().getId())
-                || !systemUserHelper.findSystemUserGuid(HOUSEKEEPING).equals(objectDirectoryEntity.getLastModifiedBy().getAccountGuid())) {
+                || !List.of(SystemUsersEnum.INBOUND_AUDIO_DELETER_AUTOMATED_TASK.getId(),
+                            SystemUsersEnum.INBOUND_TRANSCRIPTION_ANNOTATION_DELETER_AUTOMATED_TASK.getId()).contains(
+                objectDirectoryEntity.getLastModifiedBy().getId())) {
                 return false;
             }
         }
@@ -521,7 +523,7 @@ public class ExternalObjectDirectoryStub {
             ExternalObjectDirectoryEntity objectDirectoryEntity = eodRepository.getReferenceById(entity);
 
             if (!ObjectRecordStatusEnum.MARKED_FOR_DELETION.getId().equals(objectDirectoryEntity.getStatus().getId())
-                || !systemUserHelper.getSystemUser().getUserFullName().equals(objectDirectoryEntity.getLastModifiedBy().getUserFullName())) {
+                || SystemUsersEnum.UNSTRUCTURED_TRANSCRIPTION_ANNOTATION_DELETER_AUTOMATED_TASK.getId() != objectDirectoryEntity.getLastModifiedBy().getId()) {
                 return false;
             }
         }

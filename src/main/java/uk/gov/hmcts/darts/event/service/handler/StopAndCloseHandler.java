@@ -34,6 +34,7 @@ import uk.gov.hmcts.darts.retention.enums.CaseRetentionStatus;
 import uk.gov.hmcts.darts.retention.enums.RetentionConfidenceCategoryEnum;
 import uk.gov.hmcts.darts.retention.enums.RetentionConfidenceReasonEnum;
 import uk.gov.hmcts.darts.retention.enums.RetentionPolicyEnum;
+import uk.gov.hmcts.darts.util.DataUtil;
 
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
@@ -88,6 +89,7 @@ public class StopAndCloseHandler extends EventHandlerBase {
     @Transactional
     @SuppressWarnings("PMD.EmptyCatchBlock")
     public void handle(DartsEvent dartsEvent, EventHandlerEntity eventHandler) {
+        DataUtil.preProcess(dartsEvent);
         var hearingAndEvent = createHearingAndSaveEvent(dartsEvent, eventHandler); // saveEvent
         var courtCase = hearingAndEvent.getHearingEntity().getCourtCase();
 
