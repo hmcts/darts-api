@@ -74,7 +74,7 @@ public class AdminAutomatedTasksServiceImpl implements AdminAutomatedTaskService
             throw new DartsApiException(AutomatedTaskApiError.AUTOMATED_TASK_NOT_CONFIGURED_CORRECTLY);
         }
 
-        automatedTaskRunner.run(automatedTask.get());
+        automatedTaskRunner.run(automatedTask.get(), true);
 
         auditApi.record(RUN_JOB_MANUALLY, automatedTaskEntity.getTaskName());
     }

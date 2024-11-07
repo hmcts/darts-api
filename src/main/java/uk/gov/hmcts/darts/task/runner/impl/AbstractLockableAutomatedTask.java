@@ -79,7 +79,7 @@ public abstract class AbstractLockableAutomatedTask implements AutomatedTask, Au
     }
 
     @Override
-    public void run() {
+    public void run(boolean isManualRun) {
         executionId = ThreadLocal.withInitial(UUID::randomUUID);
         preRunTask();
         try {

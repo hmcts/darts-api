@@ -513,7 +513,7 @@ class AutomatedTaskServiceImplTest {
             }
 
             @Override
-            public void run() {
+            public void run(boolean isManualRun) {
                 log.debug("Running test automated task");
             }
 

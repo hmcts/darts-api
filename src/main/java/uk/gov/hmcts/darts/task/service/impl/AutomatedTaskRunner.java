@@ -8,10 +8,9 @@ import uk.gov.hmcts.darts.task.runner.impl.AbstractLockableAutomatedTask;
 @Component
 @Slf4j
 public class AutomatedTaskRunner {
-
     @Async
-    public void run(AbstractLockableAutomatedTask task) {
-        log.info("Attempting manual run of {}", task.getTaskName());
-        task.run();
+    public void run(AbstractLockableAutomatedTask task, boolean isManualRun) {
+        log.info("Attempting {} run of {}", isManualRun ? " manual " : " automated", task.getTaskName());
+        task.run(isManualRun);
     }
 }
