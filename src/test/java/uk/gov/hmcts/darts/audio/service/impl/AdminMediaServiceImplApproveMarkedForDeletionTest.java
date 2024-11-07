@@ -9,6 +9,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.darts.audio.exception.AudioApiError;
 import uk.gov.hmcts.darts.audio.model.MediaApproveMarkedForDeletionResponse;
 import uk.gov.hmcts.darts.audio.validation.MediaApproveMarkForDeletionValidator;
+import uk.gov.hmcts.darts.audit.api.AuditActivity;
+import uk.gov.hmcts.darts.audit.api.AuditApi;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
@@ -29,6 +31,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.notNull;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
@@ -61,6 +65,9 @@ class AdminMediaServiceImplApproveMarkedForDeletionTest {
     @Mock
     private UserAccountEntity userAccount;
 
+    @Mock
+    private AuditApi auditApi;
+
     @BeforeEach
     void setUp() {
         lenient().when(currentTimeHelper.currentOffsetDateTime()).thenReturn(OffsetDateTime.now());
@@ -81,20 +88,22 @@ class AdminMediaServiceImplApproveMarkedForDeletionTest {
         objectAdminAction.setMedia(mediaEntity);
         objectAdminAction.setMarkedForManualDeletion(false);
         objectAdminAction.setHiddenBy(hiddenByUserAccount);
-
+        objectAdminAction.setId(1);
         var hiddenReason = ObjectHiddenReasonTestData.otherDelete();
         objectAdminAction.setObjectHiddenReason(hiddenReason);
 
         var authorisedByUserAccount = UserAccountTestData.minimalUserAccount();
         authorisedByUserAccount.setId(345);
 
-        when(mediaRepository.findById(mediaId)).thenReturn(Optional.of(mediaEntity));
+        when(mediaRepository.findByIdIncludeDeleted(mediaId)).thenReturn(Optional.of(mediaEntity));
         when(userIdentity.getUserAccount()).thenReturn(userAccount);
 
         when(objectAdminActionRepository.findByMedia_Id(mediaId)).thenReturn(List.of(objectAdminAction));
         when(userIdentity.getUserAccount()).thenReturn(authorisedByUserAccount);
 
         MediaApproveMarkedForDeletionResponse response = adminMediaService.adminApproveMediaMarkedForDeletion(mediaId);
+
+        verify(auditApi).record(eq(AuditActivity.MANUAL_DELETION), notNull(), eq(objectAdminAction.getId().toString()));
 
         assertNotNull(response);
         verify(mediaApproveMarkForDeletionValidator, times(1)).validate(mediaId);
@@ -106,7 +115,7 @@ class AdminMediaServiceImplApproveMarkedForDeletionTest {
         // given
         Integer mediaId = 1;
 
-        when(mediaRepository.findById(mediaId)).thenReturn(Optional.empty());
+        when(mediaRepository.findByIdIncludeDeleted(mediaId)).thenReturn(Optional.empty());
 
         // when
         DartsApiException exception = assertThrows(DartsApiException.class, () -> adminMediaService.adminApproveMediaMarkedForDeletion(mediaId));

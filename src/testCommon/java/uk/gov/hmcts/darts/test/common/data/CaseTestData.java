@@ -122,7 +122,7 @@ public class CaseTestData  implements Persistable<TestCourtCaseEntity.TestCourtC
         var userAccount = minimalUserAccount();
         retrieve.getBuilder().courthouse(someMinimalCourthouse())
             .caseNumber("case-1-" + postfix)
-            .closed(false)
+            .closed(false)  
             .interpreterUsed(false)
             .createdBy(userAccount)
             .lastModifiedBy(userAccount)
