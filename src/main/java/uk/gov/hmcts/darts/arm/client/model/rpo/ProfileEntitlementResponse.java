@@ -12,7 +12,7 @@ import java.util.List;
 @Data
 @NoArgsConstructor
 @EqualsAndHashCode(callSuper = true)
-public class ProfileEntitlementResponse extends AbstractMatterResponse {
+public class ProfileEntitlementResponse extends BaseRpoResponse {
 
     private List<ProfileEntitlement> entitlements;
 
