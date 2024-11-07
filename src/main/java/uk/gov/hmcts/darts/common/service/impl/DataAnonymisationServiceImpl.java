@@ -189,6 +189,6 @@ public class DataAnonymisationServiceImpl implements DataAnonymisationService {
     }
 
     private void anonymizeAllEventsFromCase(UserAccountEntity userAccount, CourtCaseEntity courtCase) {
-        eventService.getAllCourtCaseEventVersions(courtCase).forEach(eventEntity -> anonymizeEventEntity(userAccount, eventEntity));
+        eventService.getAllCourtCaseEventVersions(courtCase).forEach(eventEntity -> anonymiseEventEntity(userAccount, eventEntity));
     }
 }
