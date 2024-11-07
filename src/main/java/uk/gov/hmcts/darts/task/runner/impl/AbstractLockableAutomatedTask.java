@@ -163,11 +163,19 @@ public abstract class AbstractLockableAutomatedTask implements AutomatedTask, Au
     }
 
     protected Integer getAutomatedTaskBatchSize() {
-        return this.getAutomatedTaskBatchSize(this.getTaskName());
+        return getAutomatedTaskBatchSize(getTaskName(), 0);
     }
 
     protected Integer getAutomatedTaskBatchSize(String taskName) {
-        Integer batchSize = 0;
+        return getAutomatedTaskBatchSize(taskName, 0);
+    }
+
+    protected Integer getAutomatedTaskBatchSize(int defaultBatchSize) {
+        return getAutomatedTaskBatchSize(getTaskName(), defaultBatchSize);
+    }
+
+    protected Integer getAutomatedTaskBatchSize(String taskName, int defaultBatchSize) {
+        Integer batchSize = defaultBatchSize;
         Optional<AutomatedTaskEntity> automatedTaskEntity = getAutomatedTaskDetails(taskName);
         if (automatedTaskEntity.isPresent()) {
             AutomatedTaskEntity automatedTask = automatedTaskEntity.get();
