@@ -37,6 +37,8 @@ class ArmRpoApiGetIndexesByMatterIdIntTest extends IntegrationBase {
 
         // given
         IndexesByMatterIdResponse response = new IndexesByMatterIdResponse();
+        response.setStatus(200);
+        response.setIsError(false);
 
         IndexesByMatterIdResponse.Index index = new IndexesByMatterIdResponse.Index();
         IndexesByMatterIdResponse.IndexDetails indexDetails = new IndexesByMatterIdResponse.IndexDetails();
@@ -70,6 +72,8 @@ class ArmRpoApiGetIndexesByMatterIdIntTest extends IntegrationBase {
 
         // given
         IndexesByMatterIdResponse response = new IndexesByMatterIdResponse();
+        response.setStatus(200);
+        response.setIsError(false);
         when(armRpoClient.getIndexesByMatterId(any(), any())).thenReturn(response);
 
         UserAccountEntity userAccount = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
