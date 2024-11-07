@@ -11,6 +11,8 @@ import uk.gov.hmcts.darts.task.runner.AutoloadingManualTask;
 import uk.gov.hmcts.darts.task.service.LockService;
 import uk.gov.hmcts.darts.transcriptions.service.TranscriptionsProcessor;
 
+import java.time.Duration;
+
 import static uk.gov.hmcts.darts.task.api.AutomatedTaskName.CLOSE_OLD_UNFINISHED_TRANSCRIPTIONS_TASK_NAME;
 
 @Slf4j
@@ -35,7 +37,12 @@ public class CloseUnfinishedTranscriptionsAutomatedTask extends AbstractLockable
     }
 
     @Override
+    public Duration getLockAtMostFor() {
+        return Duration.ofMinutes(40);
+    }
+
+    @Override
     protected void runTask() {
-        transcriptionsProcessor.closeTranscriptions();
+        transcriptionsProcessor.closeTranscriptions(getAutomatedTaskBatchSize());
     }
 }

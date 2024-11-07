@@ -86,7 +86,7 @@ class TranscriptionsProcessorIntTest extends IntegrationBase {
             .findById(transcription.getId()).orElseThrow();
         assertEquals(CREATED_DATE, transcriptionEntityWithOldCreatedDate.getCreatedDateTime());
 
-        transcriptionsProcessor.closeTranscriptions();
+        transcriptionsProcessor.closeTranscriptions(1000);
 
         TranscriptionStatusEntity closedTranscriptionStatus = dartsDatabase.getTranscriptionStub().getTranscriptionStatusByEnum(CLOSED);
 
@@ -109,7 +109,7 @@ class TranscriptionsProcessorIntTest extends IntegrationBase {
             .findById(transcription.getId()).orElseThrow();
         assertEquals(REQUESTED.getId(), requestedTranscriptionEntity.getTranscriptionStatus().getId());
 
-        transcriptionsProcessor.closeTranscriptions();
+        transcriptionsProcessor.closeTranscriptions(1000);
 
         final TranscriptionEntity closedTranscriptionEntity = dartsDatabase.getTranscriptionRepository()
             .findById(transcription.getId()).orElseThrow();
@@ -137,7 +137,7 @@ class TranscriptionsProcessorIntTest extends IntegrationBase {
             .findById(transcription.getId()).orElseThrow();
         assertEquals(CREATED_DATE, transcriptionEntityWithOldCreatedDate.getCreatedDateTime());
 
-        transcriptionsProcessor.closeTranscriptions();
+        transcriptionsProcessor.closeTranscriptions(1000);
 
         TranscriptionStatusEntity closedTranscriptionStatus = dartsDatabase.getTranscriptionStub().getTranscriptionStatusByEnum(CLOSED);
         final TranscriptionEntity closedTranscriptionEntity = dartsDatabase.getTranscriptionRepository()
@@ -166,7 +166,7 @@ class TranscriptionsProcessorIntTest extends IntegrationBase {
             .findById(transcription.getId()).orElseThrow();
         assertEquals(CREATED_DATE, transcriptionEntityWithOldCreatedDate.getCreatedDateTime());
 
-        transcriptionsProcessor.closeTranscriptions();
+        transcriptionsProcessor.closeTranscriptions(1000);
 
         TranscriptionStatusEntity closedTranscriptionStatus = dartsDatabase.getTranscriptionStub().getTranscriptionStatusByEnum(CLOSED);
         final TranscriptionEntity closedTranscriptionEntity = dartsDatabase.getTranscriptionRepository()
@@ -195,7 +195,7 @@ class TranscriptionsProcessorIntTest extends IntegrationBase {
             .findById(transcription.getId()).orElseThrow();
         assertEquals(CREATED_DATE, transcriptionEntityWithOldCreatedDate.getCreatedDateTime());
 
-        transcriptionsProcessor.closeTranscriptions();
+        transcriptionsProcessor.closeTranscriptions(1000);
 
         final TranscriptionEntity closedTranscriptionEntity = dartsDatabase.getTranscriptionRepository()
             .findById(transcription.getId()).orElseThrow();
@@ -223,7 +223,7 @@ class TranscriptionsProcessorIntTest extends IntegrationBase {
             .findById(transcription.getId()).orElseThrow();
         assertEquals(CREATED_DATE, transcriptionEntityWithOldCreatedDate.getCreatedDateTime());
 
-        transcriptionsProcessor.closeTranscriptions();
+        transcriptionsProcessor.closeTranscriptions(1000);
 
         TranscriptionStatusEntity closedTranscriptionStatus = dartsDatabase.getTranscriptionStub().getTranscriptionStatusByEnum(CLOSED);
         final TranscriptionEntity closedTranscriptionEntity = dartsDatabase.getTranscriptionRepository()
@@ -252,7 +252,7 @@ class TranscriptionsProcessorIntTest extends IntegrationBase {
             .findById(transcription.getId()).orElseThrow();
         assertEquals(CREATED_DATE, transcriptionEntityWithOldCreatedDate.getCreatedDateTime());
 
-        transcriptionsProcessor.closeTranscriptions();
+        transcriptionsProcessor.closeTranscriptions(1000);
 
         final TranscriptionEntity closedTranscriptionEntity = dartsDatabase.getTranscriptionRepository()
             .findById(transcription.getId()).orElseThrow();
@@ -280,7 +280,7 @@ class TranscriptionsProcessorIntTest extends IntegrationBase {
             .findById(transcription.getId()).orElseThrow();
         assertEquals(CREATED_DATE, transcriptionEntityWithOldCreatedDate.getCreatedDateTime());
 
-        transcriptionsProcessor.closeTranscriptions();
+        transcriptionsProcessor.closeTranscriptions(1000);
 
         final TranscriptionEntity closedTranscriptionEntity = dartsDatabase.getTranscriptionRepository()
             .findById(transcription.getId()).orElseThrow();

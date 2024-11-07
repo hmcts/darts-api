@@ -1,5 +1,6 @@
 package uk.gov.hmcts.darts.common.repository;
 
+import org.springframework.data.domain.Limit;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.history.RevisionRepository;
@@ -60,7 +61,7 @@ public interface TranscriptionRepository extends RevisionRepository<Transcriptio
            and te.createdDateTime <= :createdDateTime
         """)
     List<TranscriptionEntity> findAllByTranscriptionStatusNotInWithCreatedDateTimeBefore(
-        List<TranscriptionStatusEntity> transcriptionStatuses, OffsetDateTime createdDateTime);
+        List<TranscriptionStatusEntity> transcriptionStatuses, OffsetDateTime createdDateTime, Limit limit);
 
     @Query("""
         SELECT t

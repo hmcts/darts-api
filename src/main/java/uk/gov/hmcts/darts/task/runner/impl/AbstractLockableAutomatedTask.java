@@ -140,7 +140,7 @@ public abstract class AbstractLockableAutomatedTask implements AutomatedTask, Au
     }
 
     public Duration getLockAtLeastFor() {
-        return lockService.getLockAtLeastFor();
+        return Duration.ofMinutes(1);
     }
 
     protected void handleException(Exception exception) {
