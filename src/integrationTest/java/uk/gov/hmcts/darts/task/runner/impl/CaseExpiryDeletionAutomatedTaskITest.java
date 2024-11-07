@@ -140,7 +140,7 @@ class CaseExpiryDeletionAutomatedTaskITest extends PostgresIntegrationBase {
 
             courtCase.getHearings().forEach(hearingEntity -> assertHearing(hearingEntity, isAnonymised));
 
-            dartsDatabase.getEventRepository().findAllByCaseId(caseId).forEach(eventEntity -> assertEvent(eventEntity, isAnonymized));
+            dartsDatabase.getEventRepository().findAllByCaseId(caseId).forEach(eventEntity -> assertEvent(eventEntity, isAnonymised));
 
             assertAuditEntries(courtCase, isAnonymised);
         });
