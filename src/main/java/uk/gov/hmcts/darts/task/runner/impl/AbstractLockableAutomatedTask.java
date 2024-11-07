@@ -90,7 +90,7 @@ public abstract class AbstractLockableAutomatedTask implements AutomatedTask, Au
                 String dbCronExpression = automatedTask.getCronExpression();
                 // Check the cron expression hasn't been changed in the database by another instance, if so skip this run
                 if (isManualTask || getLastCronExpression().equals(dbCronExpression)) {
-                    if (TRUE.equals(automatedTask.getTaskEnabled())) {
+                    if (isManualRun || TRUE.equals(automatedTask.getTaskEnabled())) {
                         logApi.taskStarted(executionId.get(), this.getTaskName());
                         lockService.getLockingTaskExecutor().executeWithLock(new LockedTask(), getLockConfiguration());
                     } else {
