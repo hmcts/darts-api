@@ -9,7 +9,7 @@ import java.util.List;
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Data
 @NoArgsConstructor
-public abstract class AbstractMatterResponse {
+public abstract class BaseRpoResponse {
 
     Integer itemsCount;
     Integer status;

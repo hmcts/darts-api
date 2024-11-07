@@ -9,6 +9,8 @@ import uk.gov.hmcts.darts.arm.client.model.rpo.MasterIndexFieldByRecordClassSche
 import uk.gov.hmcts.darts.arm.client.model.rpo.MasterIndexFieldByRecordClassSchemaResponse;
 import uk.gov.hmcts.darts.arm.client.model.rpo.ProfileEntitlementResponse;
 import uk.gov.hmcts.darts.arm.client.model.rpo.RecordManagementMatterResponse;
+import uk.gov.hmcts.darts.arm.client.model.rpo.SaveBackgroundSearchRequest;
+import uk.gov.hmcts.darts.arm.client.model.rpo.SaveBackgroundSearchResponse;
 import uk.gov.hmcts.darts.arm.client.model.rpo.StorageAccountRequest;
 import uk.gov.hmcts.darts.arm.client.model.rpo.StorageAccountResponse;
 
@@ -26,6 +28,7 @@ public interface ArmRpoClient {
         produces = APPLICATION_JSON_VALUE
     )
     RecordManagementMatterResponse getRecordManagementMatter(@RequestHeader(AUTHORIZATION) String bearerAuth);
+
 
     @PostMapping(value = "${darts.storage.arm-api.rpo-url.get-storage-accounts-path}",
         consumes = APPLICATION_JSON_VALUE,
@@ -54,4 +57,10 @@ public interface ArmRpoClient {
     )
     ArmAsyncSearchResponse addAsyncSearch(@RequestHeader(AUTHORIZATION) String bearerAuth, @RequestBody String body);
 
+    @PostMapping(value = "${darts.storage.arm-api.rpo-url.save-background-search-path}",
+        consumes = APPLICATION_JSON_VALUE,
+        produces = APPLICATION_JSON_VALUE
+    )
+    SaveBackgroundSearchResponse saveBackgroundSearch(@RequestHeader(AUTHORIZATION) String bearerToken,
+                                                      @RequestBody SaveBackgroundSearchRequest saveBackgroundSearchRequest);
 }
