@@ -30,11 +30,10 @@ public class CourthouseTestData {
         return courthouse;
     }
 
-    public static CourthouseEntity createCourthouseWithNameAndCode(String name, Integer code) {
+    public static CourthouseEntity createCourthouseWithDifferentNameAndDisplayName(String name, String displayName) {
         var courthouse = someMinimalCourthouse();
         courthouse.setCourthouseName(name);
-        courthouse.setDisplayName(name);
-        courthouse.setCode(code);
+        courthouse.setDisplayName(displayName);
         return courthouse;
     }
 }
