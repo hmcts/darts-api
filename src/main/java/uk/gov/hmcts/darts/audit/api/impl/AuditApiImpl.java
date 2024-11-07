@@ -10,6 +10,8 @@ import uk.gov.hmcts.darts.authorisation.api.AuthorisationApi;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 
+import java.util.Optional;
+
 @Service
 @RequiredArgsConstructor
 public class AuditApiImpl implements AuditApi {
@@ -18,25 +20,26 @@ public class AuditApiImpl implements AuditApi {
     private final AuthorisationApi authorisationApi;
 
     @Override
-    public void record(AuditActivity activity, UserAccountEntity userAccountEntity, CourtCaseEntity courtCase) {
-        auditService.recordAudit(activity, userAccountEntity, courtCase);
+    public void record(AuditActivity activity, UserAccountEntity userAccountEntity, Optional<CourtCaseEntity> courtCase, Optional<String> additionalData) {
+        auditService.recordAudit(activity, userAccountEntity, courtCase,
+                                 additionalData);
     }
 
     @Override
     public void record(AuditActivity activity) {
-        auditService.recordAudit(activity, authorisationApi.getCurrentUser(), null);
+        record(activity, authorisationApi.getCurrentUser());
     }
 
     @Override
     public void record(AuditActivity activity, String additionalData) {
-        auditService.recordAudit(activity, authorisationApi.getCurrentUser(), null, additionalData);
+        auditService.recordAudit(activity, authorisationApi.getCurrentUser(), Optional.empty(), Optional.of(additionalData));
     }
 
 
     @Override
     public void recordAll(AuditActivityProvider auditActivityProvider) {
         auditActivityProvider.getAuditActivities()
-            .forEach(auditActivity -> record(auditActivity, authorisationApi.getCurrentUser(), null));
+            .forEach(auditActivity -> record(auditActivity, authorisationApi.getCurrentUser()));
     }
 
     @Override

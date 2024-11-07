@@ -19,6 +19,8 @@ import uk.gov.hmcts.darts.common.repository.AuditRepository;
 import uk.gov.hmcts.darts.common.repository.HearingRepository;
 import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
 
+import java.util.Optional;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -57,7 +59,7 @@ class AuditServiceImplTest {
         auditActivityEntity.setName(String.valueOf(AuditActivity.MOVE_COURTROOM));
         when(auditActivityRepository.getReferenceById(any())).thenReturn(auditActivityEntity);
 
-        auditServiceImpl.recordAudit(AuditActivity.MOVE_COURTROOM, new UserAccountEntity(), new CourtCaseEntity());
+        auditServiceImpl.recordAudit(AuditActivity.MOVE_COURTROOM, new UserAccountEntity(), Optional.of(new CourtCaseEntity()), Optional.empty());
 
         verify(auditRepository).saveAndFlush(auditEntityArgumentCaptor.capture());
 
