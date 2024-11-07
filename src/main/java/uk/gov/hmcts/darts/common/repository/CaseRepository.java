@@ -62,7 +62,7 @@ public interface CaseRepository extends JpaRepository<CourtCaseEntity, Integer> 
     List<CourtCaseEntity> findCasesNeedingCaseDocumentGenerated(OffsetDateTime caseClosedBeforeTimestamp, Pageable pageable);
 
     @Query("""
-            SELECT cc
+            SELECT cc.id
             FROM CourtCaseEntity cc,
             CaseRetentionEntity cr,
             (select cr2.courtCase.id as caseId, max(cr2.createdDateTime) latest_ts
@@ -77,11 +77,11 @@ public interface CaseRepository extends JpaRepository<CourtCaseEntity, Integer> 
                 WHERE cd.courtCase.id = cc.id
                 AND cd.createdDateTime >= :caseDocumentCreatedAfterTimestamp
             )
-            ORDER BY cc.id ASC
+            ORDER BY cc.isRetentionUpdated ASC, cc.id ASC
         """)
-    List<CourtCaseEntity> findCasesNeedingCaseDocumentForRetentionDateGeneration(OffsetDateTime retainUntilTimestamp,
-                                                                                 OffsetDateTime caseDocumentCreatedAfterTimestamp,
-                                                                                 Pageable pageable);
+    List<Integer> findCasesNeedingCaseDocumentForRetentionDateGeneration(OffsetDateTime retainUntilTimestamp,
+                                                                         OffsetDateTime caseDocumentCreatedAfterTimestamp,
+                                                                         Pageable pageable);
 
     @Query(value = """
         select cc from CourtCaseEntity cc
