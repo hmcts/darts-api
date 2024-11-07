@@ -7,15 +7,20 @@ import org.junit.jupiter.params.provider.EnumSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import uk.gov.hmcts.darts.audio.exception.AudioApiError;
 import uk.gov.hmcts.darts.audio.model.AdminActionResponse;
 import uk.gov.hmcts.darts.audio.model.MediaApproveMarkedForDeletionResponse;
 import uk.gov.hmcts.darts.audio.model.Problem;
+import uk.gov.hmcts.darts.audit.api.AuditActivity;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
+import uk.gov.hmcts.darts.common.entity.AuditEntity;
+import uk.gov.hmcts.darts.common.entity.AuditEntity_;
 import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
+import uk.gov.hmcts.darts.common.entity.ObjectAdminActionEntity;
 import uk.gov.hmcts.darts.common.enums.SecurityRoleEnum;
 import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
@@ -27,9 +32,12 @@ import uk.gov.hmcts.darts.testutils.stubs.SuperAdminUserStub;
 import uk.gov.hmcts.darts.testutils.stubs.UserAccountStub;
 
 import java.time.OffsetDateTime;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -91,7 +99,7 @@ class AudioControllerPostAdminApproveMediaMarkedForDeletionIntTest extends Integ
         var superAdminUser = superAdminUserStub.givenUserIsAuthorised(userIdentity);
 
         var testUser = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity("testuser");
-        objectAdminActionStub.createAndSave(ObjectAdminActionStub.ObjectAdminActionSpec.builder()
+        ObjectAdminActionEntity adminActionEntity = objectAdminActionStub.createAndSave(ObjectAdminActionStub.ObjectAdminActionSpec.builder()
                                                 .media(mediaEntity)
                                                 .objectHiddenReason(
                                                     objectHiddenReasonStub.getAnyWithMarkedForDeletion(true))
@@ -105,6 +113,8 @@ class AudioControllerPostAdminApproveMediaMarkedForDeletionIntTest extends Integ
         MvcResult mvcResult = mockMvc.perform(post(endpoint))
             .andExpect(status().isOk())
             .andReturn();
+
+        assertAudit(adminActionEntity);
 
         // then
         MediaApproveMarkedForDeletionResponse mediaApproveMarkedForDeletionResponse
@@ -278,6 +288,24 @@ class AudioControllerPostAdminApproveMediaMarkedForDeletionIntTest extends Integ
                                            END_TIME,
                                            1,
                                            "MP2");
+    }
+
+    private void assertAudit(ObjectAdminActionEntity objectAdminActionEntity) {
+        List<AuditEntity> caseExpiredAuditEntries = dartsDatabase.getAuditRepository()
+            .findAll((Specification<AuditEntity>) (root, query, criteriaBuilder) -> criteriaBuilder.and(
+                criteriaBuilder.equal(root.get(AuditEntity_.additionalData), String.valueOf(objectAdminActionEntity.getId())),
+                criteriaBuilder.equal(root.get(AuditEntity_.auditActivity).get("id"), AuditActivity.MANUAL_DELETION.getId())
+            ));
+
+        // assert additional audit data
+        assertFalse(caseExpiredAuditEntries.isEmpty());
+        assertEquals(1, caseExpiredAuditEntries.size());
+        assertNotNull(caseExpiredAuditEntries.get(0).getCreatedBy());
+        assertNotNull(caseExpiredAuditEntries.get(0).getLastModifiedBy());
+        assertNotNull(caseExpiredAuditEntries.get(0).getCreatedDateTime());
+        assertNotNull(caseExpiredAuditEntries.get(0).getLastModifiedDateTime());
+        assertEquals(userIdentity.getUserAccount().getId(), caseExpiredAuditEntries.get(0).getUser().getId());
+        assertNull(caseExpiredAuditEntries.get(0).getCourtCase());
     }
 
 }
