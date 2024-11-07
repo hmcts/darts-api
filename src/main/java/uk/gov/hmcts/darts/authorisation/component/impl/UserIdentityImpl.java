@@ -7,6 +7,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
+import uk.gov.hmcts.darts.authorisation.util.EmailAddressFromTokenUtil;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.enums.SecurityRoleEnum;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
@@ -25,56 +26,14 @@ import static uk.gov.hmcts.darts.authorisation.exception.AuthorisationError.USER
 @AllArgsConstructor
 @Slf4j
 public class UserIdentityImpl implements UserIdentity {
-
-    private static final String EMAILS = "emails";
-    private static final String PREFERRED_USERNAME = "preferred_username";
     private static final String OID = "oid";
 
     private final UserAccountRepository userAccountRepository;
     private final UserRolesCourthousesRepository userRolesCourthousesRepository;
 
-    @SuppressWarnings({"PMD.AvoidDeeplyNestedIfStmts", "PMD.CyclomaticComplexity", "PMD.CognitiveComplexity"})
-    private String getEmailAddressFromToken() {
-        if (nonNull(SecurityContextHolder.getContext().getAuthentication())) {
-            Object principalObject = SecurityContextHolder.getContext()
-                .getAuthentication()
-                .getPrincipal();
-
-            if (principalObject instanceof Jwt jwt) {
-                Object emailsAddressesObject = jwt.getClaims().get(EMAILS);
-                if (emailsAddressesObject == null) {
-                    emailsAddressesObject = jwt.getClaims().get(PREFERRED_USERNAME);
-                }
-                if (emailsAddressesObject instanceof List<?> emails) {
-                    if (emails.size() != 1) {
-                        throw new IllegalStateException(String.format(
-                            "Unexpected number of email addresses: %d",
-                            emails.size()
-                        ));
-                    }
-                    Object emailAddressObject = emails.get(0);
-
-                    if (emailAddressObject instanceof String emailAddress && StringUtils.isNotBlank(emailAddress)) {
-                        return emailAddress;
-                    }
-                } else if (emailsAddressesObject instanceof String emailAddress && StringUtils.isNotBlank(emailAddress)) {
-                    return emailAddress;
-                }
-            }
-        }
-        throw new IllegalStateException("Could not obtain email address from principal");
-    }
-
-    private String getGuidFromToken() {
-        if (nonNull(SecurityContextHolder.getContext().getAuthentication())) {
-            Object principalObject = SecurityContextHolder.getContext()
-                .getAuthentication()
-                .getPrincipal();
-
-            Object oid = null;
-            if (principalObject instanceof Jwt jwt) {
-                oid = jwt.getClaims().get(OID);
-            }
+    private String getGuidFromToken(Jwt token) {
+        if (token != null) {
+            Object oid = token.getClaims().get(OID);
             if (nonNull(oid) && oid instanceof String guid && StringUtils.isNotBlank(guid)) {
                 return guid;
             }
@@ -82,30 +41,48 @@ public class UserIdentityImpl implements UserIdentity {
         return null;
     }
 
-    @Override
     public UserAccountEntity getUserAccount() {
+        return getUserAccount(getJwt());
+    }
+
+    @Override
+    public UserAccountEntity getUserAccount(Jwt jwt) {
         UserAccountEntity userAccount = null;
-        String guid = getGuidFromToken();
+        String guid = getGuidFromToken(jwt);
         if (nonNull(guid)) {
             // System users will use GUID not email address
             userAccount = userAccountRepository.findByAccountGuidAndActive(guid, true).orElse(null);
         }
         if (isNull(userAccount)) {
-            userAccount = userAccountRepository.findByEmailAddressIgnoreCaseAndActive(getEmailAddressFromToken(), true).stream()
+            String emailAddressFromToken = EmailAddressFromTokenUtil.getEmailAddressFromToken(jwt);
+            userAccount = userAccountRepository.findByEmailAddressIgnoreCaseAndActive(emailAddressFromToken, true).stream()
                 .findFirst()
                 .orElseThrow(() -> new DartsApiException(USER_DETAILS_INVALID));
         }
         return userAccount;
     }
 
+    private Jwt getJwt() {
+        if (SecurityContextHolder.getContext().getAuthentication() != null) {
+            if (SecurityContextHolder.getContext().getAuthentication().getPrincipal() instanceof Jwt jwt) {
+                return jwt;
+            }
+        }
+
+        return null;
+    }
+
     @Override
     public boolean userHasGlobalAccess(Set<SecurityRoleEnum> globalAccessRoles) {
         boolean userHasGlobalAccess = false;
         String emailAddress = null;
-        String guid = getGuidFromToken();
+        Jwt jwt = getJwt();
+        String guid = getGuidFromToken(jwt);
 
         try {
-            emailAddress = getEmailAddressFromToken();
+            if (jwt != null) {
+                emailAddress = EmailAddressFromTokenUtil.getEmailAddressFromToken(jwt);
+            }
         } catch (IllegalStateException e) {
             if (nonNull(guid)) {
                 log.debug("Guid is present but unable to get email address from token ending ''.....{}'': {}", StringUtils.right(guid, 5), e.getMessage());

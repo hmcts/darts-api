@@ -25,10 +25,14 @@ import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -60,35 +64,54 @@ class AdminAutomatedTasksServiceImplTest {
     void invokesTaskWhenTaskIsNotLocked() {
         var automatedTask = anAutomatedTaskEntityWithName("some-task-name", null);
         when(someAutomatedTask.getTaskName()).thenReturn("some-task-name");
-        when(lockService.isLocked(automatedTask.get())).thenReturn(false);
+        when(lockService.isLocked(automatedTask)).thenReturn(false);
 
-        when(automatedTaskRepository.findById(1)).thenReturn(automatedTask);
+        when(automatedTaskRepository.findById(1)).thenReturn(Optional.of(automatedTask));
         when(manualTaskService.getAutomatedTasks()).thenReturn(List.of(someAutomatedTask));
 
         adminAutomatedTaskService.runAutomatedTask(1);
 
         verify(automatedTaskRunner, times(1)).run(someAutomatedTask);
-        verify(auditApi, times(1)).record(AuditActivity.RUN_JOB_MANUALLY);
+        verify(auditApi, times(1)).record(AuditActivity.RUN_JOB_MANUALLY,"some-task-name");
     }
 
     @Test
     void updateAutomatedTask() {
-        Optional<AutomatedTaskEntity> automatedTaskEntity = anAutomatedTaskEntityWithName("some-task-name", null);
-        when(automatedTaskRepository.findById(1)).thenReturn(automatedTaskEntity);
+        AutomatedTaskEntity automatedTaskEntity = anAutomatedTaskEntityWithName("some-task-name", null);
+        automatedTaskEntity.setBatchSize(1);
+        when(automatedTaskRepository.findById(1)).thenReturn(Optional.of(automatedTaskEntity));
 
         AutomatedTaskPatch automatedTaskPatch = new AutomatedTaskPatch();
         automatedTaskPatch.setIsActive(false);
+        automatedTaskPatch.setBatchSize(100);
 
-        when(automatedTaskRepository.save(automatedTaskEntity.get())).thenReturn(automatedTaskEntity.get());
+        when(automatedTaskRepository.save(automatedTaskEntity)).thenReturn(automatedTaskEntity);
 
         DetailedAutomatedTask expectedReturnTask = new DetailedAutomatedTask();
-        when(mapper.mapEntityToDetailedAutomatedTask(automatedTaskEntity.get())).thenReturn(expectedReturnTask);
+        when(mapper.mapEntityToDetailedAutomatedTask(automatedTaskEntity)).thenReturn(expectedReturnTask);
 
         DetailedAutomatedTask task = adminAutomatedTaskService.updateAutomatedTask(1, automatedTaskPatch);
 
-        assertFalse(automatedTaskEntity.get().getTaskEnabled());
+        assertFalse(automatedTaskEntity.getTaskEnabled());
+        assertEquals(100, automatedTaskEntity.getBatchSize());
         assertEquals(expectedReturnTask, task);
-        verify(auditApi, times(1)).record(AuditActivity.ENABLE_DISABLE_JOB);
+        verify(auditApi).record(AuditActivity.ENABLE_DISABLE_JOB,"some-task-name disabled");
+        verifyNoMoreInteractions(auditApi);
+    }
+
+    @Test
+    void updateAutomatedTaskDoesNotUpdateFieldsWithNullValueInPatchRequest() {
+        AutomatedTaskEntity automatedTaskEntity = anAutomatedTaskEntityWithName("some-task-name", true);
+        automatedTaskEntity.setBatchSize(1);
+        when(automatedTaskRepository.findById(1)).thenReturn(Optional.of(automatedTaskEntity));
+
+        AutomatedTaskPatch automatedTaskPatch = new AutomatedTaskPatch();
+
+        adminAutomatedTaskService.updateAutomatedTask(1, automatedTaskPatch);
+
+        assertTrue(automatedTaskEntity.getTaskEnabled());
+        assertEquals(1, automatedTaskEntity.getBatchSize());
+        verifyNoInteractions(auditApi);
     }
 
 
@@ -173,10 +196,10 @@ class AdminAutomatedTasksServiceImplTest {
 
 
     private AutomatedTaskEntity createAutomatedTaskEntity(String taskName, boolean enabled) {
-        return anAutomatedTaskEntityWithName(taskName, enabled).orElseThrow();
+        return anAutomatedTaskEntityWithName(taskName, enabled);
     }
 
-    private Optional<AutomatedTaskEntity> anAutomatedTaskEntityWithName(String taskName, Boolean enabled) {
+    private AutomatedTaskEntity anAutomatedTaskEntityWithName(String taskName, Boolean enabled) {
         var automatedTaskEntity = new AutomatedTaskEntity();
         automatedTaskEntity.setTaskName(taskName);
         automatedTaskEntity.setId(1234);
@@ -186,7 +209,7 @@ class AdminAutomatedTasksServiceImplTest {
         automatedTaskEntity.setTaskName(taskName != null ? taskName : "task name");
         automatedTaskEntity.setCronExpression("");
         if (enabled != null) {
-            when(configurableBeanFactory.resolveEmbeddedValue(any())).thenReturn(enabled.toString());
+            lenient().when(configurableBeanFactory.resolveEmbeddedValue(any())).thenReturn(enabled.toString());
         }
         UserAccountEntity accountEntity = new UserAccountEntity();
         accountEntity.setId(999);
@@ -196,6 +219,6 @@ class AdminAutomatedTasksServiceImplTest {
         automatedTaskEntity.setCreatedBy(accountEntity);
         automatedTaskEntity.setLastModifiedDateTime(OffsetDateTime.now());
 
-        return Optional.of(automatedTaskEntity);
+        return automatedTaskEntity;
     }
 }

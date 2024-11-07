@@ -12,9 +12,7 @@ import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
 import uk.gov.hmcts.darts.task.config.AutomatedTaskConfigurationProperties;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.times;
@@ -38,11 +36,6 @@ class SystemUserHelperTest {
     @BeforeEach
     void setUp() {
         systemUserHelper = new SystemUserHelper(userAccountRepository, automatedTaskConfigurationProperties);
-
-        Map<String, String> guidMap = new HashMap<>();
-        guidMap.put("housekeeping", HOUSEKEEPING_GUID);
-        guidMap.put("dailylist-processor", DAILYLIST_PROCESSOR_GUID);
-        systemUserHelper.setSystemUserGuidMap(guidMap);
     }
 
     @Test

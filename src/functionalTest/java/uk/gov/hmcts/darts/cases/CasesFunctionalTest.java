@@ -75,7 +75,7 @@ class CasesFunctionalTest extends FunctionalTest {
               "case_numbers": [
                 "<<caseNumber>>"
               ],
-              "event_text": "some text for the event",
+              "event_text": "A temporary event created by functional test",
               "date_time": "2023-08-08T14:01:06Z"
             }""";
 

@@ -28,10 +28,12 @@ import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
 import uk.gov.hmcts.darts.common.repository.TransformedMediaRepository;
 import uk.gov.hmcts.darts.common.repository.TransientObjectDirectoryRepository;
 import uk.gov.hmcts.darts.common.service.DataAnonymisationService;
+import uk.gov.hmcts.darts.event.service.EventService;
 import uk.gov.hmcts.darts.log.api.LogApi;
 import uk.gov.hmcts.darts.task.runner.IsNamedEntity;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -50,6 +52,7 @@ public class DataAnonymisationServiceImpl implements DataAnonymisationService {
     private final TransientObjectDirectoryRepository transientObjectDirectoryRepository;
     private final LogApi logApi;
     private final CaseService caseService;
+    private final EventService eventService;
 
 
     @Override
@@ -90,6 +93,22 @@ public class DataAnonymisationServiceImpl implements DataAnonymisationService {
     void anonymizeHearingEntity(UserAccountEntity userAccount, HearingEntity hearingEntity) {
         hearingEntity.getTranscriptions().forEach(transcriptionEntity -> anonymizeTranscriptionEntity(userAccount, transcriptionEntity));
         hearingEntity.getEventList().forEach(eventEntity -> anonymizeEventEntity(userAccount, eventEntity));
+    }
+
+
+    @Override
+    @Transactional
+    public void obfuscateEventByIds(List<Integer> eveIds) {
+        eveIds.stream()
+            .map(eventService::getEventByEveId)
+            .distinct()
+            .forEach(this::anonymizeEvent);
+    }
+
+    @Override
+    public void anonymizeEvent(EventEntity eventEntity) {
+        anonymizeEventEntity(getUserAccount(), eventEntity);
+        eventService.saveEvent(eventEntity);
     }
 
     void anonymizeEventEntity(UserAccountEntity userAccount, EventEntity eventEntity) {

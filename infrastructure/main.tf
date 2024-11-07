@@ -86,6 +86,7 @@ module "postgresql_flexible" {
   auto_grow_enabled    = true
   common_tags          = var.common_tags
   admin_user_object_id = var.jenkins_AAD_objectId
+  enable_qpi           = true
   pgsql_databases = [
     {
       name : local.db_name
@@ -97,7 +98,7 @@ module "postgresql_flexible" {
       value = "pg_stat_statements, pg_trgm"
     }
   ]
-  pgsql_version = "15"
+  pgsql_version = "16"
 }
 
 
@@ -108,7 +109,7 @@ data "azurerm_subnet" "private_endpoints" {
 }
 
 module "armsa" {
-  source                   = "git@github.com:hmcts/cnp-module-storage-account?ref=master"
+  source                   = "git@github.com:hmcts/cnp-module-storage-account?ref=4.x"
   env                      = var.env
   storage_account_name     = "${var.product}arm${var.env}"
   resource_group_name      = local.rg_name
@@ -117,6 +118,6 @@ module "armsa" {
   enable_hns               = true
   account_replication_type = "ZRS"
   common_tags              = var.common_tags
-
+  cross_tenant_replication_enabled   = true
   private_endpoint_subnet_id = data.azurerm_subnet.private_endpoints.id
 }

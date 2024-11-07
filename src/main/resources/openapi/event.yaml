@@ -535,6 +535,37 @@ paths:
             application/json+problem:
               schema:
                 $ref: './problem.yaml'
+  /admin/events/obfuscate:
+    post:
+      tags:
+        - Event
+      summary: Obfuscate event text
+      description: |-
+        Obfuscate event text
+      operationId: adminObfuscateEveByIds
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - eve_ids
+              properties:
+                eve_ids:
+                  minLength: 1
+                  type: array
+                  items:
+                    type: integer
+      responses:
+        '200':
+          description: OK
+        '404':
+          description: Not Found - Event id
+          content:
+            application/json+problem:
+              schema:
+                $ref: './problem.yaml'
 components:
   schemas:
 
@@ -717,13 +748,8 @@ components:
           type: string
         text:
           type: string
-        is_event_anonymised:
+        is_data_anonymised:
           type: boolean
-        is_case_expired:
-          type: boolean
-        case_expired_at:
-          type: string
-          format: date-time
         courthouse:
           type: object
           properties:
@@ -738,7 +764,6 @@ components:
               type: integer
             name:
               type: string
-
 
     ###################################################################################################################
     # PRIMITIVES
@@ -828,7 +853,7 @@ components:
       enum:
         - "GET_COURTLOG_101"
         - "GET_COURTLOG_102"
-      x-enum-varnames: [COURTLOG_COURT_HOUSE_NOT_FOUND]
+      x-enum-varnames: [ COURTLOG_COURT_HOUSE_NOT_FOUND ]
 
     PostCourtLogsErrorCode:
       type: string
@@ -836,7 +861,7 @@ components:
         - "ADD_COURTLOG_101"
         - "ADD_COURTLOG_102"
         - "ADD_COURTLOG_103"
-      x-enum-varnames: [COURTLOG_COURT_HOUSE_NOT_FOUND, COURTLOG_DOCUMENT_CANT_BE_PARSED]
+      x-enum-varnames: [ COURTLOG_COURT_HOUSE_NOT_FOUND, COURTLOG_DOCUMENT_CANT_BE_PARSED ]
 
     EventErrorCode:
       type: string
@@ -850,6 +875,7 @@ components:
         - "EVENT_106"
         - "EVENT_107"
         - "EVENT_108"
+        - "EVENT_109"
       x-enum-varnames: [
         EVENT_DATA_NOT_FOUND,
         EVENT_HANDLER_NOT_FOUND_IN_DB,
@@ -859,7 +885,7 @@ components:
         MAPPING_INACTIVE,
         MAPPING_IN_USE,
         TOO_MANY_RESULTS,
-        EVENT_ID_NOT_FOUND,
+        EVENT_ID_NOT_FOUND
       ]
 
     EventTitleErrors:

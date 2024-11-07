@@ -59,6 +59,8 @@ The required value of each variable is stored in Azure Key Vault as a Secret.
 | DARTS_INBOUND_STORAGE_SAS_URL            | DartsInboundStorageSasUrl                 |
 | DARTS_UNSTRUCTURED_STORAGE_SAS_URL       | DartsUnstructuredStorageSasUrl            |
 | ARM_SERVICE_PROFILE                      | ArmServiceProfile                         |
+| ARM_SERVICE_ENTITLEMENT                  | ArmServiceEntitlement                     |
+| ARM_STORAGE_ACCOUNT_NAME                 | ArmStorageAccountName                     |
 
 There are few attributes which doesn't use Azure Keyvault secrets. Those environment variable values are controlled dynamically via Flux config
 
@@ -68,8 +70,18 @@ There are few attributes which doesn't use Azure Keyvault secrets. Those environ
 | ACTIVE_DIRECTORY_B2C_AUTH_URI | https://hmctsstgextid.b2clogin.com/hmctsstgextid.onmicrosoft.com |
 | ARM_URL                       |                                                                  |  
 
+
 To obtain the secret value, you may retrieve the keys from the Azure Vault by running the `az keyvault secret show`
 command in the terminal. E.g. to obtain the value for `GOVUK_NOTIFY_API_KEY`, you should run:
+
+You may need to install Azure CLI, jq and postgres you can do this by running
+```
+brew update
+brew install azure-cli 
+brew install jq
+brew install postgresql@15
+az login
+```
 
 ```
 az keyvault secret show --name GovukNotifyTestApiKey --vault-name darts-stg
@@ -87,7 +99,7 @@ active for the secrets to be visible.
 > source bin/secrets-stg.sh
 > ```
 
->If you want to set the environment properties at project level instead of system level (for example using InteliJ Edit configurations) you can run
+> If you want to set the environment properties at project level instead of system level (for example using InteliJ Edit configurations) you can run
 >```bash
 > source bin/secrets-stg-environment.sh
 >```
@@ -101,8 +113,8 @@ launchctl setenv <<env var name>> <<secret value>>
 
 You will then need to restart intellij/terminal windows for it to take effect.
 
-The below step only required if you use system level environment properties and want to make the changes permanent, make a `.zshrc` file in your users folder and populate it with this and their values:
-
+The below step only required if you use system level environment properties and want to make the changes permanent, make a `.zshrc` file in your users folder
+and populate it with this and their values:
 
 ```
 export GOVUK_NOTIFY_API_KEY=
@@ -136,6 +148,8 @@ export ARM_PASSWORD=
 export DARTS_INBOUND_STORAGE_SAS_URL=
 export DARTS_UNSTRUCTURED_STORAGE_SAS_URL=
 export ARM_SERVICE_PROFILE=
+export ARM_SERVICE_ENTITLEMENT=
+export ARM_STORAGE_ACCOUNT_NAME=
 ```
 
 ### Storage Account
@@ -163,9 +177,11 @@ docker run -p 10000:10000 -p 10001:10001 -p 10002:10002 \
 
 #### Install ffmpeg
 
-This is used to trim and convert audio files, so run this in a mac terminal:-
+This is used to trim, merge, concatenate and convert audio files, so run this in a mac terminal:-
 
+```
 brew install ffmpeg
+```
 
 #### Connection String Configuration
 
@@ -370,6 +386,19 @@ To restore the staging database, tables and data, into a locally running databas
 The script will check for required executables and prompt before continuing.
 
 _Disclaimer: The script has been written to work using `bash`._
+
+## Dev/PR environments
+
+Please see the separate [Dev environment](https://tools.hmcts.net/confluence/display/DMP/Dev+environment) page on confluence for details.
+
+This repo contains overrides for the default dev environment configuration, controlled by PR labels.
+
+### Supported labels
+
+| Label                  | Usages                                                                                           |
+|------------------------|--------------------------------------------------------------------------------------------------|
+| enable_darts_portal    | Deploys a DARTS portal instance alongside the API in the dev environment                         |
+| enable_darts_fullstack | Not yet supported, but will deploy the full DARTS stack alongside the API in the dev environment |
 
 ## License
 

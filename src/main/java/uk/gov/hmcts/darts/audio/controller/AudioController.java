@@ -36,6 +36,7 @@ import uk.gov.hmcts.darts.audio.validation.AddAudioMetaDataValidator;
 import uk.gov.hmcts.darts.authorisation.annotation.Authorisation;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
+import uk.gov.hmcts.darts.util.DataUtil;
 
 import java.time.OffsetDateTime;
 import java.util.List;
@@ -92,7 +93,7 @@ public class AudioController implements AudioApi {
     @Authorisation(contextId = ANY_ENTITY_ID,
         globalAccessSecurityRoles = {MID_TIER})
     public ResponseEntity<Void> addAudio(MultipartFile file, AddAudioMetadataRequest metadata) {
-
+        DataUtil.preProcess(metadata);
         // validate the payloads
         addAudioMetaDataValidator.validate(metadata);
         multipartFileValidator.validate(file);

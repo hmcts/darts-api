@@ -14,10 +14,12 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.darts.authorisation.annotation.Authorisation;
+import uk.gov.hmcts.darts.common.service.DataAnonymisationService;
 import uk.gov.hmcts.darts.event.component.DartsEventMapper;
 import uk.gov.hmcts.darts.event.http.api.EventApi;
 import uk.gov.hmcts.darts.event.model.AdminEventSearch;
 import uk.gov.hmcts.darts.event.model.AdminGetEventForIdResponseResult;
+import uk.gov.hmcts.darts.event.model.AdminObfuscateEveByIdsRequest;
 import uk.gov.hmcts.darts.event.model.AdminSearchEventResponseResult;
 import uk.gov.hmcts.darts.event.model.CourtLog;
 import uk.gov.hmcts.darts.event.model.CourtLogsPostRequestBody;
@@ -30,6 +32,7 @@ import uk.gov.hmcts.darts.event.service.EventMappingService;
 import uk.gov.hmcts.darts.event.service.EventSearchService;
 import uk.gov.hmcts.darts.event.service.EventService;
 import uk.gov.hmcts.darts.event.service.handler.EventHandlerEnumerator;
+import uk.gov.hmcts.darts.util.DataUtil;
 
 import java.time.OffsetDateTime;
 import java.util.List;
@@ -57,6 +60,7 @@ public class EventsController implements EventApi {
     private final EventHandlerEnumerator eventHandlers;
     private final EventSearchService eventSearchService;
     private final EventService eventService;
+    private final DataAnonymisationService dataAnonymisationService;
 
     @Override
     @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
@@ -65,6 +69,7 @@ public class EventsController implements EventApi {
     public ResponseEntity<EventsResponse> eventsPost(
         @Parameter(name = "DartsEvent") @Valid @RequestBody DartsEvent dartsEvent
     ) {
+        DataUtil.preProcess(dartsEvent);
         eventDispatcher.receive(dartsEvent);
 
         var addDocumentResponse = new EventsResponse();
@@ -168,6 +173,15 @@ public class EventsController implements EventApi {
     @Authorisation(contextId = ANY_ENTITY_ID,
         globalAccessSecurityRoles = {SUPER_ADMIN, SUPER_USER})
     public ResponseEntity<AdminGetEventForIdResponseResult> adminGetEventById(Integer eventId) {
-        return  new ResponseEntity<>(eventService.adminGetEventById(eventId), HttpStatus.OK);
+        return new ResponseEntity<>(eventService.adminGetEventById(eventId), HttpStatus.OK);
+    }
+
+    @Override
+    @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
+    @Authorisation(contextId = ANY_ENTITY_ID,
+        globalAccessSecurityRoles = {SUPER_ADMIN})
+    public ResponseEntity<Void> adminObfuscateEveByIds(AdminObfuscateEveByIdsRequest adminObfuscateEveByIdsRequest) {
+        this.dataAnonymisationService.obfuscateEventByIds(adminObfuscateEveByIdsRequest.getEveIds());
+        return ResponseEntity.ok().build();
     }
 }

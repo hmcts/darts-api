@@ -314,10 +314,26 @@
 --v71.4 amend all tablespaces to pg_default
 -- make media_status nullable
 --v71.5 add extension pg_trgm for trigram index support
+--v72 add tables arm_rpo_state, arm_rpo_status, arm_rpo_execution_detail, arm_automated_task
+--    amend media_linked_case, with 3 new columns (source,created_ts/by)
+--    amend court_case, with 2 new columns (case_object_name, folder_path)
+--    amend media, event, transcription with 1 new column, folder_path
+--    add table data_anonymisation
+--    add 2 columns to table external_object_directory
+--v72.1 add 2 missing FKs on data_anonymisation
+--    add missing FK on daily_list
+--    add 2 FKs on event_linked_case
+--    add 2 FKs on media_linked_case
+--    add 2 FKs on object_retrieval_queue
+
 
 -- List of Table Aliases
 -- annotation                  ANN
 -- annotation_document         ADO
+-- arm_automated_task          AAT
+-- arm_rpo_execution_detail    ARD
+-- arm_rpo_state               ARE
+-- arm_rpo_status              ARU 
 -- audit                       AUD
 -- audit_activity              AUA
 -- audit_heritage              AUH
@@ -330,6 +346,7 @@
 -- courthouse                  CTH
 -- courthouse_region_ae        CRA
 -- courtroom                   CTR
+-- data_anonymisation          DAN
 -- daily_list                  DAL
 -- defence                     DFC
 -- defendant                   DFD
@@ -412,7 +429,7 @@ CREATE TABLE annotation
 ,created_ts                  TIMESTAMP WITH TIME ZONE      NOT NULL
 ,created_by                  INTEGER                       NOT NULL
 ,last_modified_ts            TIMESTAMP WITH TIME ZONE      NOT NULL
-,last_modified_by            INTEGER                       NOT NULL
+,last_modified_by            INTEGER                       NOT NULL          
 ) TABLESPACE pg_default;
 
 COMMENT ON COLUMN annotation.ann_id
@@ -433,7 +450,7 @@ IS 'inherited from dm_sysobject_r, for r_object_type of moj_annotation';
 CREATE TABLE annotation_document
 (ado_id                      INTEGER                       NOT NULL
 ,ann_id                      INTEGER                       NOT NULL
-,content_object_id           CHARACTER VARYING(16)                  -- legacy PK from dmr_content
+,content_object_id           CHARACTER VARYING(16)                  -- legacy PK from dmr_content 
 ,clip_id                     CHARACTER VARYING(54)
 ,file_name                   CHARACTER VARYING             NOT NULL
 ,file_type                   CHARACTER VARYING             NOT NULL
@@ -441,26 +458,85 @@ CREATE TABLE annotation_document
 ,checksum                    CHARACTER VARYING
 ,is_deleted                  BOOLEAN                       NOT NULL DEFAULT false
 ,deleted_by                  INTEGER
-,deleted_ts                  TIMESTAMP WITH TIME ZONE
+,deleted_ts                  TIMESTAMP WITH TIME ZONE             
 ,is_hidden                   BOOLEAN                       NOT NULL DEFAULT false
-,retain_until_ts             TIMESTAMP WITH TIME ZONE
+,retain_until_ts             TIMESTAMP WITH TIME ZONE 
 ,ret_conf_score              INTEGER
 ,ret_conf_reason             CHARACTER VARYING
 ,uploaded_by                 INTEGER                       NOT NULL
 ,uploaded_ts                 TIMESTAMP WITH TIME ZONE      NOT NULL
 ,last_modified_ts            TIMESTAMP WITH TIME ZONE      NOT NULL
-,last_modified_by            INTEGER                       NOT NULL
+,last_modified_by            INTEGER                       NOT NULL 
 ) TABLESPACE pg_default;
 
 COMMENT ON COLUMN annotation_document.ado_id
-IS 'primary key of annotation_document';
+IS 'primary key of annotation_document'; 
 
 COMMENT ON COLUMN annotation_document.ann_id
-IS 'foreign key from annotation';
+IS 'foreign key from annotation'; 
+
+CREATE TABLE arm_automated_task
+(aat_id                      INTEGER                      NOT NULL
+,aut_id                      INTEGER                      NOT NULL
+,rpo_csv_start_hour          INTEGER
+,rpo_csv_end_hour            INTEGER
+,arm_replay_start_ts         TIMESTAMP WITH TIME ZONE
+,arm_replay_end_ts           TIMESTAMP WITH TIME ZONE
+,arm_attribute_type          CHARACTER VARYING
+) TABLESPACE pg_default;
+
+COMMENT ON COLUMN arm_automated_task.aat_id
+IS 'primary key of arm_automated_task'; 
+
+COMMENT ON COLUMN arm_automated_task.aut_id
+IS 'foreign key to automated_task'; 
+
+CREATE TABLE arm_rpo_execution_detail
+(ard_id                      INTEGER                      NOT NULL
+,are_id                      INTEGER                      
+,aru_id                      INTEGER                      
+,matter_id                   CHARACTER VARYING
+,index_id                    CHARACTER VARYING
+,entitlement_id              CHARACTER VARYING
+,storage_account_id          CHARACTER VARYING
+,search_id                   CHARACTER VARYING
+,production_id               CHARACTER VARYING
+,sorting_field               CHARACTER VARYING
+,search_item_count           INTEGER
+,created_ts                  TIMESTAMP WITH TIME ZONE      NOT NULL
+,created_by                  INTEGER                       NOT NULL
+,last_modified_ts            TIMESTAMP WITH TIME ZONE      NOT NULL
+,last_modified_by            INTEGER                       NOT NULL
+) TABLESPACE pg_default;
+
+COMMENT ON COLUMN arm_rpo_execution_detail.ard_id
+IS 'primary key of arm_rpo_execution_detail';
+
+COMMENT ON COLUMN arm_rpo_execution_detail.are_id
+IS 'foreign key to arm_rpo_state';
+
+COMMENT ON COLUMN arm_rpo_execution_detail.aru_id
+IS 'foreign key to arm_rpo_status';
+
+CREATE TABLE arm_rpo_state
+(are_id                       INTEGER                      NOT NULL
+,are_description              CHARACTER VARYING            NOT NULL
+) TABLESPACE pg_default;
+
+COMMENT ON COLUMN arm_rpo_state.are_id
+IS 'primary key of arm_rpo_state';
+
+CREATE TABLE arm_rpo_status
+(aru_id                       INTEGER                      NOT NULL
+,aru_description              CHARACTER VARYING            NOT NULL
+) TABLESPACE pg_default;
+
+COMMENT ON COLUMN arm_rpo_status.aru_id
+IS 'primary key of arm_rpo_status';
 
 CREATE TABLE audit
 (aud_id                      INTEGER                       NOT NULL
-,cas_id                      INTEGER
+,cas_id                      INTEGER                       
 ,aua_id                      INTEGER                       NOT NULL
 ,usr_id                      INTEGER                       NOT NULL
 ,additional_data             CHARACTER VARYING
@@ -468,7 +544,6 @@ CREATE TABLE audit
 ,created_by                  INTEGER                       NOT NULL
 ,last_modified_ts            TIMESTAMP WITH TIME ZONE      NOT NULL
 ,last_modified_by            INTEGER                       NOT NULL
-
 ) TABLESPACE pg_default;
 
 COMMENT ON COLUMN audit.aud_id
@@ -482,7 +557,6 @@ IS 'foreign key from audit_activity';
 
 COMMENT ON COLUMN audit.usr_id
 IS 'foreign key from user_account';
-
 
 CREATE TABLE audit_activity
 (aua_id                       INTEGER                      NOT NULL
@@ -499,10 +573,10 @@ COMMENT ON COLUMN audit.aua_id
 IS 'primary key of audit_activity';
 
 CREATE TABLE audit_heritage
-(R_OBJECT_ID                  CHARACTER VARYING
-,EVENT_NAME                   CHARACTER VARYING
-,EVENT_SOURCE                 CHARACTER VARYING
-,R_GEN_SOURCE                 INTEGER
+(R_OBJECT_ID                  CHARACTER VARYING      
+,EVENT_NAME                   CHARACTER VARYING      
+,EVENT_SOURCE                 CHARACTER VARYING      
+,R_GEN_SOURCE                 INTEGER                 
 ,USER_NAME                    CHARACTER VARYING
 ,AUDITED_OBJ_ID               CHARACTER VARYING
 ,TIME_STAMP                   TIMESTAMP WITH TIME ZONE
@@ -556,7 +630,7 @@ CREATE TABLE automated_task
 ,cron_expression             CHARACTER VARYING             NOT NULL
 ,cron_editable               BOOLEAN                       NOT NULL
 ,task_enabled                BOOLEAN                       NOT NULL DEFAULT true
-,batch_size                  INTEGER
+,batch_size                  INTEGER 
 ,created_ts                  TIMESTAMP WITH TIME ZONE      NOT NULL
 ,created_by                  INTEGER                       NOT NULL
 ,last_modified_ts            TIMESTAMP WITH TIME ZONE      NOT NULL
@@ -566,24 +640,24 @@ CREATE TABLE automated_task
 COMMENT ON COLUMN automated_task.aut_id
 IS 'primary key of automated_task';
 
-CREATE TABLE case_document
+CREATE TABLE case_document 
 (cad_id                      INTEGER                       NOT NULL
 ,cas_id                      INTEGER                       NOT NULL
 ,file_name                   CHARACTER VARYING             NOT NULL
 ,file_type                   CHARACTER VARYING             NOT NULL
 ,file_size                   INTEGER                       NOT NULL
-,checksum                    CHARACTER VARYING
+,checksum                    CHARACTER VARYING   
 ,is_deleted                  BOOLEAN                       NOT NULL DEFAULT false
 ,deleted_by                  INTEGER
-,deleted_ts                  TIMESTAMP WITH TIME ZONE
+,deleted_ts                  TIMESTAMP WITH TIME ZONE                  
 ,is_hidden                   BOOLEAN                       NOT NULL DEFAULT false
-,retain_until_ts             TIMESTAMP WITH TIME ZONE
+,retain_until_ts             TIMESTAMP WITH TIME ZONE  
 ,ret_conf_score              INTEGER
 ,ret_conf_reason             CHARACTER VARYING
 ,created_by                  INTEGER                       NOT NULL
 ,created_ts                  TIMESTAMP WITH TIME ZONE      NOT NULL
 ,last_modified_ts            TIMESTAMP WITH TIME ZONE      NOT NULL
-,last_modified_by            INTEGER                       NOT NULL
+,last_modified_by            INTEGER                       NOT NULL 
 ) TABLESPACE pg_default;
 
 
@@ -612,7 +686,7 @@ IS 'foreign key from transcription, part of composite natural key and PK';
 CREATE TABLE case_overflow
 (cas_id                      INTEGER                       NOT NULL
 ,case_total_sentence         CHARACTER VARYING
-,retention_event_ts          TIMESTAMP WITH TIME ZONE
+,retention_event_ts          TIMESTAMP WITH TIME ZONE     
 ,case_retention_fixed        CHARACTER VARYING
 ,retention_applies_from_ts   TIMESTAMP WITH TIME ZONE
 ,end_of_sentence_date_ts     TIMESTAMP WITH TIME ZONE
@@ -633,9 +707,11 @@ CREATE TABLE court_case
 ,cth_id                      INTEGER                       NOT NULL
 ,evh_id                      INTEGER                                 -- must map to one of the reporting restriction elements found on event_handler
 ,case_object_id              CHARACTER VARYING(16)
-,case_number                 CHARACTER VARYING             NOT NULL  -- maps to c_case_id in legacy
+,case_object_name            CHARACTER VARYING(255)                  -- to accommodate dm_sysobject_s.object_name
+,folder_path                 CHARACTER VARYING                       -- to accommodate dm_folder_r.r_folder_path
+,case_number                 CHARACTER VARYING             NOT NULL  -- maps to c_case_id in legacy      
 ,case_type                   CHARACTER VARYING                       -- maps to c_type in legacy
-,upload_priority             INTEGER                                 -- maps to c_priority in legacy
+,upload_priority             INTEGER                                 -- maps to c_priority in legacy              
 ,case_closed                 BOOLEAN                       NOT NULL
 ,interpreter_used            BOOLEAN                       NOT NULL
 ,case_closed_ts              TIMESTAMP WITH TIME ZONE
@@ -679,7 +755,7 @@ IS 'directly sourced from moj_case_s.c_case_closed_date';
 
 CREATE TABLE courthouse
 (cth_id                      INTEGER                       NOT NULL
-,courthouse_code             INTEGER
+,courthouse_code             INTEGER                       
 ,courthouse_name             CHARACTER VARYING             NOT NULL          UNIQUE
 ,display_name                CHARACTER VARYING             NOT NULL
 ,created_ts                  TIMESTAMP WITH TIME ZONE      NOT NULL
@@ -717,22 +793,42 @@ IS 'primary key of courtroom';
 COMMENT ON COLUMN courtroom.cth_id
 IS 'foreign key to courthouse';
 
+CREATE TABLE data_anonymisation
+(dan_id                      INTEGER                       NOT NULL
+,eve_id                      INTEGER                                  -- only one of these must be populated, unenforced FK
+,trc_id                      INTEGER                                  -- only one of these must be populated, unenforced FK
+,is_manual_request           BOOLEAN
+,requested_by                INTEGER                       NOT NULL
+,requested_ts                TIMESTAMP WITH TIME ZONE      NOT NULL
+,approved_by                 INTEGER                       
+,approved_ts                 TIMESTAMP WITH TIME ZONE      
+) TABLESPACE pg_default;
+
+COMMENT ON COLUMN data_anonymisation.dan_id
+IS 'primary key of data_anonymisation';
+
+COMMENT ON COLUMN data_anonymisation.eve_id
+IS 'foreign key to event, unenforced to support deletion of event without reference to this table';
+
+COMMENT ON COLUMN data_anonymisation.trc_id
+IS 'foreign key of transcription_comment, unenforce to support deletion of transcription_comment without reference to this table';
+
 CREATE TABLE daily_list
 (dal_id                      INTEGER                       NOT NULL
-,courthouse_code             INTEGER
+,courthouse_code             INTEGER                       
 ,listing_courthouse          CHARACTER VARYING             NOT NULL
 ,daily_list_object_id        CHARACTER VARYING(16)
 ,unique_id                   CHARACTER VARYING
 --,c_crown_court_name        CHARACTER VARYING        -- removed, normalised to courthouses, but note that in legacy there is mismatch between moj_courthouse_s.c_id and moj_daily_list_s.c_crown_court_name to be resolved
 ,job_status                  CHARACTER VARYING             NOT NULL  -- one of "New","Partially Processed","Processed","Ignored","Invalid"
-,published_ts                TIMESTAMP WITH TIME ZONE
-,start_dt                    DATE
+,published_ts                TIMESTAMP WITH TIME ZONE 
+,start_dt                    DATE    
 ,end_dt                      DATE -- all values match c_start_date
 ,daily_list_id_s             CHARACTER VARYING        -- non unique integer in legacy
-,daily_list_source           CHARACTER VARYING        -- one of CPP,XHB ( live also sees nulls and spaces)
+,daily_list_source           CHARACTER VARYING        -- one of CPP,XHB ( live also sees nulls and spaces)   
 ,daily_list_content_json     CHARACTER VARYING
 ,daily_list_content_xml      CHARACTER VARYING
-,message_id                  CHARACTER VARYING
+,message_id                  CHARACTER VARYING 
 ,content_object_id           CHARACTER VARYING
 ,clip_id                     CHARACTER VARYING
 ,external_location           UUID
@@ -780,7 +876,7 @@ CREATE TABLE defence
 ,last_modified_by            INTEGER                       NOT NULL
 ) TABLESPACE pg_default;
 
-COMMENT ON COLUMN defence.dfc_id
+COMMENT ON COLUMN defence.dfc_id 
 IS 'primary key of defence';
 
 COMMENT ON COLUMN defence.cas_id
@@ -796,7 +892,7 @@ CREATE TABLE defendant
 ,last_modified_by            INTEGER                       NOT NULL
 ) TABLESPACE pg_default;
 
-COMMENT ON COLUMN defendant.dfd_id
+COMMENT ON COLUMN defendant.dfd_id 
 IS 'primary key of defendant';
 
 COMMENT ON COLUMN defendant.cas_id
@@ -806,9 +902,10 @@ IS 'foreign key from court_case';
 CREATE TABLE event
 (eve_id                      INTEGER                       NOT NULL
 ,ctr_id                      INTEGER                       NOT NULL
-,evh_id                      INTEGER                       NOT NULL
+,evh_id                      INTEGER                       NOT NULL  --  based on the content of dm_sysobject.object_name 
 ,event_object_id             CHARACTER VARYING(16)                   -- legacy id of this event
-,event_id                    INTEGER
+,folder_path                 CHARACTER VARYING                       -- to accommodate dm_folder_r.r_folder_path
+,event_id                    INTEGER                       
 ,event_text                  CHARACTER VARYING
 ,event_ts                    TIMESTAMP WITH TIME ZONE      NOT NULL
 ,message_id                  CHARACTER VARYING
@@ -818,7 +915,7 @@ CREATE TABLE event
 ,is_data_anonymised          BOOLEAN                       NOT NULL DEFAULT false
 ,version_label               CHARACTER VARYING(32)
 ,chronicle_id                CHARACTER VARYING(16)                   -- legacy id of the 1.0 version of the event
-,antecedent_id               CHARACTER VARYING(16)                   -- legacy id of the immediately  preceding event
+,antecedent_id               CHARACTER VARYING(16)                   -- legacy id of the immediately  preceding event 
 ,created_ts                  TIMESTAMP WITH TIME ZONE      NOT NULL
 ,created_by                  INTEGER                       NOT NULL
 ,last_modified_ts            TIMESTAMP WITH TIME ZONE      NOT NULL
@@ -890,8 +987,8 @@ CREATE TABLE event_linked_case
 (elc_id                      INTEGER                       NOT NULL
 ,eve_id                      INTEGER                       NOT NULL     -- unenforced FK to event
 ,cas_id                      INTEGER                                    -- unenforced and optional FK
-,courthouse_name             CHARACTER VARYING
-,case_number                 CHARACTER VARYING
+,courthouse_name             CHARACTER VARYING         
+,case_number                 CHARACTER VARYING         
 ) TABLESPACE pg_default;
 
 COMMENT ON TABLE event_linked_case
@@ -904,13 +1001,13 @@ CREATE TABLE external_object_directory
 ,med_id                      INTEGER                                 -- FK to media
 ,trd_id                      INTEGER                                 -- FK to transcription_document
 ,ors_id                      INTEGER                       NOT NULL  -- FK to object_record_status
-,elt_id                      INTEGER                       NOT NULL  -- FK to external_location_type
+,elt_id                      INTEGER                       NOT NULL  -- FK to external_location_type 
 ,osr_uuid                    BIGINT                                  -- logical FK to object_state_record
 -- additional optional FKs to other relevant internal objects would require columns here
 ,external_location           UUID                                    -- for use where address of Ext Obj requires 1 field
 ,external_file_id            CHARACTER VARYING                       -- for use where address of Ext Obj requires 2 fields
 ,external_record_id          CHARACTER VARYING                       -- for use where address of Ext Obj requires 2 fields
-,checksum                    CHARACTER VARYING
+,checksum                    CHARACTER VARYING                       
 ,transfer_attempts           INTEGER
 ,manifest_file               CHARACTER VARYING
 ,event_date_ts               TIMESTAMP WITH TIME ZONE                -- date upon which the retention date in ARM is derived
@@ -919,6 +1016,8 @@ CREATE TABLE external_object_directory
 ,error_code                  CHARACTER VARYING
 ,is_response_cleaned         BOOLEAN                       NOT NULL DEFAULT false
 ,update_retention            BOOLEAN                       NOT NULL  -- flag to indicate a change that requires retention to be updated has occurred
+,input_upload_processed_ts   TIMESTAMP WITH TIME ZONE
+,force_response_cleanup      BOOLEAN
 ,created_ts                  TIMESTAMP WITH TIME ZONE      NOT NULL
 ,created_by                  INTEGER                       NOT NULL
 ,last_modified_ts            TIMESTAMP WITH TIME ZONE      NOT NULL
@@ -961,7 +1060,7 @@ CREATE TABLE external_service_auth_token
 ,created_ts                  TIMESTAMP WITH TIME ZONE      NOT NULL
 ,created_by                  INTEGER                       NOT NULL
 ,last_modified_ts            TIMESTAMP WITH TIME ZONE      NOT NULL
-,last_modified_by            INTEGER                       NOT NULL
+,last_modified_by            INTEGER                       NOT NULL  
 ) TABLESPACE pg_default;
 
 COMMENT ON COLUMN external_service_auth_token.esa_id
@@ -1070,34 +1169,35 @@ CREATE TABLE judge
 ,last_modified_by            INTEGER                       NOT NULL
 ) TABLESPACE pg_default;
 
-COMMENT ON COLUMN judge.jud_id
+COMMENT ON COLUMN judge.jud_id 
 IS 'primary key of judge';
 
 CREATE TABLE media
 (med_id                      INTEGER                       NOT NULL
 ,ctr_id                      INTEGER                       NOT NULL
 ,media_object_id             CHARACTER VARYING(16)                  -- legacy id of this media
+,folder_path                 CHARACTER VARYING                      -- to accommodate dm_folder_r.r_folder_path
 ,content_object_id           CHARACTER VARYING(16)                  -- legacy id of the content record associated with the external media
 ,clip_id                     CHARACTER VARYING(54)
 ,channel                     INTEGER                       NOT NULL -- 1,2,3,4 or rarely 5
-,total_channels              INTEGER                       NOT NULL --99.9% are "4" in legacy, occasionally 1,2,5
+,total_channels              INTEGER                       NOT NULL --99.9% are "4" in legacy, occasionally 1,2,5 
 ,start_ts                    TIMESTAMP WITH TIME ZONE      NOT NULL
 ,end_ts                      TIMESTAMP WITH TIME ZONE      NOT NULL
-,media_file                  CHARACTER VARYING             NOT NULL
+,media_file                  CHARACTER VARYING             NOT NULL -- to accommodate dm_sysobject.object_name
 ,media_format                CHARACTER VARYING             NOT NULL
 ,media_type                  CHAR(1)                       NOT NULL DEFAULT 'A'
 ,file_size                   BIGINT                        NOT NULL
 ,checksum                    CHARACTER VARYING
 ,is_hidden                   BOOLEAN                       NOT NULL DEFAULT false
 ,is_deleted                  BOOLEAN                       NOT NULL DEFAULT false
-,is_current                  BOOLEAN
+,is_current                  BOOLEAN                       
 ,deleted_by                  INTEGER
 ,deleted_ts                  TIMESTAMP WITH TIME ZONE
-,media_status                CHARACTER VARYING
+,media_status                CHARACTER VARYING             
 ,version_label               CHARACTER VARYING(32)
 ,chronicle_id                CHARACTER VARYING(16)                   -- legacy id of the 1.0 version of the event
-,antecedent_id               CHARACTER VARYING(16)                   -- legacy id of the immediately  preceding event
-,retain_until_ts             TIMESTAMP WITH TIME ZONE
+,antecedent_id               CHARACTER VARYING(16)                   -- legacy id of the immediately  preceding event 
+,retain_until_ts             TIMESTAMP WITH TIME ZONE 
 ,ret_conf_score              INTEGER
 ,ret_conf_reason             CHARACTER VARYING
 ,created_ts                  TIMESTAMP WITH TIME ZONE      NOT NULL
@@ -1136,6 +1236,9 @@ CREATE TABLE media_linked_case
 ,cas_id                      INTEGER                                    -- unenforced and optional FK
 ,courthouse_name             CHARACTER VARYING
 ,case_number                 CHARACTER VARYING
+,source                      INTEGER                       DEFAULT 0    -- 1=AddAudio, 2=AudioLinkingByEvent, 3=AudioLinkingJob
+,created_ts                  TIMESTAMP WITH TIME ZONE      
+,created_by                  INTEGER                       
 ) TABLESPACE pg_default;
 
 COMMENT ON TABLE media_linked_case
@@ -1148,7 +1251,7 @@ CREATE TABLE media_request
 ,current_owner               INTEGER                       NOT NULL  -- FK to user_account
 ,request_status              CHARACTER VARYING             NOT NULL
 ,request_type                CHARACTER VARYING             NOT NULL
-,req_proc_attempts           INTEGER
+,req_proc_attempts           INTEGER 
 ,start_ts                    TIMESTAMP WITH TIME ZONE      NOT NULL
 ,end_ts                      TIMESTAMP WITH TIME ZONE      NOT NULL
 ,created_ts                  TIMESTAMP WITH TIME ZONE      NOT NULL
@@ -1197,7 +1300,7 @@ IS 'corresponds to tbl_moj_node from legacy';
 COMMENT ON COLUMN node_register.node_id
 IS 'primary key of node_register';
 
-COMMENT ON COLUMN node_register.ctr_id
+COMMENT ON COLUMN node_register.ctr_id 
 IS 'foreign key from moj_courtroom, legacy stored courthouse and courtroon un-normalised';
 
 CREATE TABLE notification
@@ -1236,12 +1339,12 @@ COMMENT ON COLUMN notification.template_values
 IS 'any extra fields not already covered or inferred from the case, in JSON format';
 
 CREATE TABLE object_admin_action
-(oaa_id                      INTEGER                       NOT NULL
+(oaa_id                      INTEGER                       NOT NULL           
 ,ado_id                      INTEGER
 ,cad_id                      INTEGER
 ,med_id                      INTEGER
 ,trd_id                      INTEGER
-,ohr_id                      INTEGER
+,ohr_id                      INTEGER  
 ,hidden_by                   INTEGER
 ,hidden_ts                   TIMESTAMP WITH TIME ZONE
 ,marked_for_manual_deletion  BOOLEAN                       NOT NULL DEFAULT false
@@ -1297,7 +1400,7 @@ CREATE TABLE prosecutor
 ,last_modified_by            INTEGER                       NOT NULL
 ) TABLESPACE pg_default;
 
-COMMENT ON COLUMN prosecutor.prn_id
+COMMENT ON COLUMN prosecutor.prn_id 
 IS 'primary key of prosecutor';
 
 COMMENT ON COLUMN prosecutor.cas_id
@@ -1309,7 +1412,7 @@ CREATE TABLE region
 ) TABLESPACE pg_default;
 
 
-CREATE TABLE report
+CREATE TABLE report               
 (rep_id                      INTEGER                       NOT NULL
 ,report_object_id            CHARACTER VARYING(16)
 ,name                        CHARACTER VARYING
@@ -1347,24 +1450,25 @@ IS 'directly sourced from moj_report_s';
 CREATE TABLE transcription
 (tra_id                      INTEGER                       NOT NULL
 ,trt_id                      INTEGER                       NOT NULL
-,ctr_id                      INTEGER
-,tru_id                      INTEGER                                -- remains nullable, as nulls present in source data ( c_urgency)
+,ctr_id                      INTEGER                  
+,tru_id                      INTEGER                                -- remains nullable, as nulls present in source data ( c_urgency)       
 ,trs_id                      INTEGER                                -- to be set according to trigger on transcription_workflow only
 ,transcription_object_id     CHARACTER VARYING(16)                  -- legacy pk from moj_transcription_s.r_object_id
 ,transcription_object_name   CHARACTER VARYING(255)                 -- to accommodate dm_sysobject_s.object_name
+,folder_path                 CHARACTER VARYING                      -- to accommodate dm_folder_r.r_folder_path
 ,requested_by                INTEGER                                -- 1055 distinct, from <forname><surname> to <AAANNA>
 ,hearing_date                DATE                                   -- 3k records have time component, but all times are 23:00,so effectively DATE only, will be absolete once moj_hea_id populated
 ,start_ts                    TIMESTAMP WITH TIME ZONE               -- both c_start and c_end have time components
 ,end_ts                      TIMESTAMP WITH TIME ZONE               -- we have 49k rows in legacy moj_transcription_s, 7k have c_end != c_start
 ,is_manual_transcription     BOOLEAN                       NOT NULL
-,is_current                  BOOLEAN
-,hide_request_from_requestor BOOLEAN                       NOT NULL
+,is_current                  BOOLEAN                       
+,hide_request_from_requestor BOOLEAN                       NOT NULL 
 ,is_deleted                  BOOLEAN                       NOT NULL DEFAULT false
 ,deleted_by                  INTEGER
 ,deleted_ts                  TIMESTAMP WITH TIME ZONE
 ,version_label               CHARACTER VARYING(32)
 ,chronicle_id                CHARACTER VARYING(16)                   -- legacy id of the 1.0 version of the event
-,antecedent_id               CHARACTER VARYING(16)                   -- legacy id of the immediately  preceding event
+,antecedent_id               CHARACTER VARYING(16)                   -- legacy id of the immediately  preceding event 
 ,created_ts                  TIMESTAMP WITH TIME ZONE      NOT NULL
 ,created_by                  INTEGER                       NOT NULL
 ,last_modified_ts            TIMESTAMP WITH TIME ZONE      NOT NULL
@@ -1385,7 +1489,7 @@ IS 'foreign key from transcription_urgency';
 
 COMMENT ON COLUMN transcription.transcription_object_id
 IS 'internal Documentum primary key from moj_transcription_s';
-
+    
 COMMENT ON COLUMN transcription.requested_by
 IS 'foreign key from user_account, corresponding to moj_transcription_s.c_requestor';
 
@@ -1418,16 +1522,16 @@ CREATE TABLE transcription_comment
 ) TABLESPACE pg_default;
 
 COMMENT ON COLUMN transcription_comment.trc_id
-IS 'primary key of transcription_comment';
+IS 'primary key of transcription_comment'; 
 
 COMMENT ON COLUMN transcription_comment.tra_id
-IS 'foreign key from transcription';
+IS 'foreign key from transcription'; 
 
 COMMENT ON COLUMN transcription_comment.trw_id
-IS 'foreign key from transcription_workflow';
+IS 'foreign key from transcription_workflow'; 
 
 COMMENT ON COLUMN transcription_comment.transcription_object_id
-IS 'internal Documentum primary key from moj_transcription_s';
+IS 'internal Documentum primary key from moj_transcription_s'; 
 
 COMMENT ON COLUMN transcription_comment.transcription_comment
 IS 'directly sourced from moj_transcription_r';
@@ -1443,31 +1547,31 @@ CREATE TABLE transcription_document
 ,file_name                   CHARACTER VARYING             NOT NULL
 ,file_type                   CHARACTER VARYING             NOT NULL
 ,file_size                   INTEGER                       NOT NULL
-,checksum                    CHARACTER VARYING
+,checksum                    CHARACTER VARYING 
 ,is_deleted                  BOOLEAN                       NOT NULL DEFAULT false
 ,deleted_by                  INTEGER
-,deleted_ts                  TIMESTAMP WITH TIME ZONE
+,deleted_ts                  TIMESTAMP WITH TIME ZONE                    
 ,is_hidden                   BOOLEAN                       NOT NULL DEFAULT false
-,retain_until_ts             TIMESTAMP WITH TIME ZONE
+,retain_until_ts             TIMESTAMP WITH TIME ZONE     
 ,ret_conf_score              INTEGER
 ,ret_conf_reason             CHARACTER VARYING
 ,uploaded_by                 INTEGER                       NOT NULL
 ,uploaded_ts                 TIMESTAMP WITH TIME ZONE      NOT NULL
 ,last_modified_ts            TIMESTAMP WITH TIME ZONE      NOT NULL
-,last_modified_by            INTEGER                       NOT NULL
+,last_modified_by            INTEGER                       NOT NULL 
 ) TABLESPACE pg_default;
 
 COMMENT ON COLUMN transcription_document.trd_id
-IS 'primary key of transcription_document';
+IS 'primary key of transcription_document'; 
 
 COMMENT ON COLUMN transcription_document.tra_id
-IS 'foreign key from transcription';
+IS 'foreign key from transcription'; 
 
 CREATE TABLE transcription_status
 (trs_id                      INTEGER                       NOT NULL
 ,status_type                 CHARACTER VARYING             NOT NULL
 ,display_name                CHARACTER VARYING             NOT NULL
-)TABLESPACE pg_default;
+)TABLESPACE pg_default; 
 
 COMMENT ON TABLE transcription_status
 IS 'standing data table';
@@ -1479,7 +1583,7 @@ IS 'primary key of transcription_status';
 CREATE TABLE transcription_type
 (trt_id                      INTEGER                       NOT NULL
 ,description                 CHARACTER VARYING             NOT NULL
-,display_state               BOOLEAN                       NOT NULL
+,display_state               BOOLEAN                       NOT NULL       
 )TABLESPACE pg_default;
 
 COMMENT ON TABLE transcription_type
@@ -1496,22 +1600,22 @@ CREATE TABLE transcription_urgency
 ,priority_order              INTEGER                       NOT NULL
 ) TABLESPACE pg_default;
 
-COMMENT ON TABLE transcription_urgency
+COMMENT ON TABLE transcription_urgency 
 IS 'will be migrated from tbl_moj_urgency';
 
-COMMENT ON COLUMN transcription_urgency.tru_id
+COMMENT ON COLUMN transcription_urgency.tru_id 
 IS 'inherited from tbl_moj_urgency.urgency_id';
 
 COMMENT ON COLUMN transcription_urgency.description
 IS 'inherited from tbl_moj_urgency.description';
 
 CREATE TABLE transcription_workflow
-(trw_id                      INTEGER                       NOT NULL
-,tra_id                      INTEGER                       NOT NULL  -- FK to transcription
+(trw_id                      INTEGER                       NOT NULL 
+,tra_id                      INTEGER                       NOT NULL  -- FK to transcription 
 ,trs_id                      INTEGER                       NOT NULL  -- FK to transciption_status
 ,workflow_actor              INTEGER                       NOT NULL  -- FK to account_user
 ,workflow_ts                 TIMESTAMP WITH TIME ZONE      NOT NULL
---,workflow_comment            CHARACTER VARYING
+--,workflow_comment            CHARACTER VARYING             
 ) TABLESPACE pg_default;
 
 CREATE TABLE transformed_media
@@ -1524,11 +1628,11 @@ CREATE TABLE transformed_media
 ,output_filename             CHARACTER VARYING
 ,output_filesize             INTEGER
 ,output_format               CHARACTER VARYING
-,checksum                    CHARACTER VARYING
+,checksum                    CHARACTER VARYING 
 ,created_ts                  TIMESTAMP WITH TIME ZONE      NOT NULL
 ,created_by                  INTEGER                       NOT NULL
 ,last_modified_ts            TIMESTAMP WITH TIME ZONE      NOT NULL
-,last_modified_by            INTEGER                       NOT NULL
+,last_modified_by            INTEGER                       NOT NULL  
 ) TABLESPACE pg_default;
 
 COMMENT ON TABLE transformed_media
@@ -1542,7 +1646,7 @@ IS 'format of the requested media object, possibly migrated from moj_transformat
 
 CREATE TABLE transient_object_directory
 (tod_id                      INTEGER                       NOT NULL
-,trm_id                      INTEGER                       NOT NULL  -- FK to transformed_media
+,trm_id                      INTEGER                       NOT NULL  -- FK to transformed_media 
 ,ors_id                      INTEGER                       NOT NULL  -- FK to moj_object_record_status.moj_ors_id
 ,external_location           UUID                          NOT NULL
 ,checksum                    CHARACTER VARYING
@@ -1550,28 +1654,28 @@ CREATE TABLE transient_object_directory
 ,created_ts                  TIMESTAMP WITH TIME ZONE      NOT NULL
 ,created_by                  INTEGER                       NOT NULL
 ,last_modified_ts            TIMESTAMP WITH TIME ZONE      NOT NULL
-,last_modified_by            INTEGER                       NOT NULL
+,last_modified_by            INTEGER                       NOT NULL                    
 ) TABLESPACE pg_default;
 
 
 CREATE TABLE user_account
 (usr_id                      INTEGER                       NOT NULL
 ,dm_user_s_object_id         CHARACTER VARYING(16)
-,user_name                   CHARACTER VARYING
-,user_full_name              CHARACTER VARYING
+,user_name                   CHARACTER VARYING            
+,user_full_name              CHARACTER VARYING            
 ,user_email_address          CHARACTER VARYING
 ,description                 CHARACTER VARYING
 ,is_active                   BOOLEAN                       NOT NULL
 ,last_login_ts               TIMESTAMP WITH TIME ZONE
-,is_system_user              BOOLEAN                       NOT NULL DEFAULT false
-,account_guid                CHARACTER VARYING
+,is_system_user              BOOLEAN                       NOT NULL DEFAULT false 
+,account_guid                CHARACTER VARYING             
 ,created_ts                  TIMESTAMP WITH TIME ZONE      NOT NULL
 ,created_by                  INTEGER                       NOT NULL
 ,last_modified_ts            TIMESTAMP WITH TIME ZONE      NOT NULL
-,last_modified_by            INTEGER                       NOT NULL
+,last_modified_by            INTEGER                       NOT NULL                    
 ) TABLESPACE pg_default;
 
-COMMENT ON TABLE user_account
+COMMENT ON TABLE user_account 
 IS 'migration columns all sourced directly from dm_user_s, but only for rows where r_is_group = 0';
 COMMENT ON COLUMN user_account.usr_id
 IS 'primary key of user_account';
@@ -1582,21 +1686,33 @@ IS 'internal Documentum primary key from dm_user_s';
 -- primary keys
 
 CREATE UNIQUE INDEX annotation_pk ON annotation(ann_id) TABLESPACE pg_default;
-ALTER TABLE annotation              ADD PRIMARY KEY USING INDEX annotation_pk;
+ALTER TABLE annotation                 ADD PRIMARY KEY USING INDEX annotation_pk;
 
 CREATE UNIQUE INDEX annotation_document_pk ON annotation_document(ado_id) TABLESPACE pg_default;
-ALTER TABLE annotation_document   ADD PRIMARY KEY USING INDEX annotation_document_pk;
+ALTER TABLE annotation_document        ADD PRIMARY KEY USING INDEX annotation_document_pk;
+
+CREATE UNIQUE INDEX arm_automated_task_pk ON arm_automated_task(aat_id) TABLESPACE pg_default;
+ALTER TABLE arm_automated_task   ADD PRIMARY KEY USING INDEX arm_automated_task_pk;
+
+CREATE UNIQUE INDEX arm_rpo_execution_detail_pk ON arm_rpo_execution_detail(ard_id) TABLESPACE pg_default;
+ALTER TABLE arm_rpo_execution_detail   ADD PRIMARY KEY USING INDEX arm_rpo_execution_detail_pk;
+
+CREATE UNIQUE INDEX arm_rpo_state_pk ON arm_rpo_state(are_id) TABLESPACE pg_default;
+ALTER TABLE arm_rpo_state              ADD PRIMARY KEY USING INDEX arm_rpo_state_pk;
+
+CREATE UNIQUE INDEX arm_rpo_status_pk ON arm_rpo_status(aru_id) TABLESPACE pg_default;
+ALTER TABLE arm_rpo_status             ADD PRIMARY KEY USING INDEX arm_rpo_status_pk;
 
 CREATE UNIQUE INDEX audit_pk ON audit(aud_id) TABLESPACE pg_default;
-ALTER TABLE audit          ADD PRIMARY KEY USING INDEX audit_pk;
+ALTER TABLE audit                      ADD PRIMARY KEY USING INDEX audit_pk;
 
 CREATE UNIQUE INDEX audit_activity_pk ON audit_activity(aua_id) TABLESPACE pg_default;
-ALTER TABLE audit_activity          ADD PRIMARY KEY USING INDEX audit_activity_pk;
+ALTER TABLE audit_activity             ADD PRIMARY KEY USING INDEX audit_activity_pk;
 
 CREATE UNIQUE INDEX automated_task_pk ON automated_task(aut_id) TABLESPACE pg_default;
-ALTER TABLE automated_task          ADD PRIMARY KEY USING INDEX automated_task_pk;
+ALTER TABLE automated_task             ADD PRIMARY KEY USING INDEX automated_task_pk;
 
-CREATE UNIQUE INDEX case_document_pk ON case_document(cad_id) TABLESPACE pg_default;
+CREATE UNIQUE INDEX case_document_pk ON case_document(cad_id) TABLESPACE pg_default; 
 ALTER TABLE case_document        ADD PRIMARY KEY USING INDEX case_document_pk;
 
 CREATE UNIQUE INDEX case_judge_ae_pk ON case_judge_ae(cas_id,jud_id) TABLESPACE pg_default;
@@ -1605,10 +1721,10 @@ ALTER TABLE case_judge_ae        ADD PRIMARY KEY USING INDEX case_judge_ae_pk;
 CREATE UNIQUE INDEX case_transcription_ae_pk ON case_transcription_ae(cas_id,tra_id) TABLESPACE pg_default;
 ALTER TABLE case_transcription_ae        ADD PRIMARY KEY USING INDEX case_transcription_ae_pk;
 
-CREATE UNIQUE INDEX case_overflow_pk ON case_overflow(cas_id) TABLESPACE pg_default;
+CREATE UNIQUE INDEX case_overflow_pk ON case_overflow(cas_id) TABLESPACE pg_default; 
 ALTER TABLE case_overflow              ADD PRIMARY KEY USING INDEX case_overflow_pk;
 
-CREATE UNIQUE INDEX court_case_pk ON court_case(cas_id) TABLESPACE pg_default;
+CREATE UNIQUE INDEX court_case_pk ON court_case(cas_id) TABLESPACE pg_default; 
 ALTER TABLE court_case              ADD PRIMARY KEY USING INDEX court_case_pk;
 
 CREATE UNIQUE INDEX courthouse_pk ON courthouse(cth_id) TABLESPACE pg_default;
@@ -1619,6 +1735,9 @@ ALTER TABLE courthouse_region_ae    ADD PRIMARY KEY USING INDEX courthouse_regio
 
 CREATE UNIQUE INDEX courtroom_pk ON courtroom(ctr_id) TABLESPACE pg_default;
 ALTER TABLE courtroom               ADD PRIMARY KEY USING INDEX courtroom_pk;
+
+CREATE UNIQUE INDEX data_anonymisation_pk ON data_anonymisation(dan_id) TABLESPACE pg_default;
+ALTER TABLE data_anonymisation              ADD PRIMARY KEY USING INDEX data_anonymisation_pk;
 
 CREATE UNIQUE INDEX daily_list_pk ON daily_list(dal_id) TABLESPACE pg_default;
 ALTER TABLE daily_list              ADD PRIMARY KEY USING INDEX daily_list_pk;
@@ -1739,6 +1858,10 @@ ALTER TABLE user_account            ADD PRIMARY KEY USING INDEX user_account_pk;
 -- defaults for postgres sequences, datatype->bigint, increment->1, nocycle is default, owned by none
 CREATE SEQUENCE ann_seq CACHE 20;
 CREATE SEQUENCE ado_seq CACHE 20;
+CREATE SEQUENCE aat_seq CACHE 20;
+CREATE SEQUENCE ard_seq CACHE 20;
+CREATE SEQUENCE are_seq CACHE 20;
+CREATE SEQUENCE aru_seq CACHE 20;
 CREATE SEQUENCE aud_seq CACHE 20;
 CREATE SEQUENCE aua_seq CACHE 20 RESTART WITH 8;
 CREATE SEQUENCE aut_seq CACHE 20;
@@ -1747,6 +1870,7 @@ CREATE SEQUENCE cas_seq CACHE 20;
 CREATE SEQUENCE cth_seq CACHE 1;
 CREATE SEQUENCE ctr_seq CACHE 20;
 CREATE SEQUENCE dal_seq CACHE 20;
+CREATE SEQUENCE dan_seq CACHE 20;
 CREATE SEQUENCE dfc_seq CACHE 20;
 CREATE SEQUENCE dfd_seq CACHE 20;
 CREATE SEQUENCE eve_seq CACHE 20;
@@ -1780,19 +1904,19 @@ CREATE SEQUENCE usr_seq CACHE 20;
 
 -- foreign keys
 
-ALTER TABLE annotation
+ALTER TABLE annotation   
 ADD CONSTRAINT annotation_current_owner_fk
 FOREIGN KEY (current_owner) REFERENCES user_account(usr_id);
 
-ALTER TABLE annotation
+ALTER TABLE annotation   
 ADD CONSTRAINT annotation_created_by_fk
 FOREIGN KEY (created_by) REFERENCES user_account(usr_id);
 
-ALTER TABLE annotation
+ALTER TABLE annotation   
 ADD CONSTRAINT annotation_modified_by_fk
 FOREIGN KEY (last_modified_by) REFERENCES user_account(usr_id);
 
-ALTER TABLE annotation
+ALTER TABLE annotation   
 ADD CONSTRAINT annotation_deleted_by_fk
 FOREIGN KEY (deleted_by) REFERENCES user_account(usr_id);
 
@@ -1800,95 +1924,115 @@ ALTER TABLE annotation_document
 ADD CONSTRAINT annotation_document_annotation_fk
 FOREIGN KEY (ann_id) REFERENCES annotation(ann_id);
 
-ALTER TABLE annotation_document
+ALTER TABLE annotation_document 
 ADD CONSTRAINT annotation_document_deleted_by_fk
 FOREIGN KEY (deleted_by) REFERENCES user_account(usr_id);
 
-ALTER TABLE annotation_document
+ALTER TABLE annotation_document 
 ADD CONSTRAINT annotation_document_uploaded_by_fk
 FOREIGN KEY (uploaded_by) REFERENCES user_account(usr_id);
 
-ALTER TABLE annotation_document
+ALTER TABLE annotation_document 
 ADD CONSTRAINT annotation_document_last_modified_by_fk
 FOREIGN KEY (last_modified_by) REFERENCES user_account(usr_id);
 
-ALTER TABLE audit
+ALTER TABLE arm_automated_task 
+ADD CONSTRAINT arm_automated_task_automated_task_fk
+FOREIGN KEY (aut_id) REFERENCES automated_task(aut_id);
+
+ALTER TABLE arm_rpo_execution_detail 
+ADD CONSTRAINT arm_rpo_execution_detail_arm_state_fk
+FOREIGN KEY (are_id) REFERENCES arm_rpo_state(are_id);
+
+ALTER TABLE arm_rpo_execution_detail 
+ADD CONSTRAINT arm_rpo_execution_detail_arm_status_fk
+FOREIGN KEY (aru_id) REFERENCES arm_rpo_status(aru_id);
+
+ALTER TABLE arm_rpo_execution_detail 
+ADD CONSTRAINT arm_rpo_execution_detail_created_by_fk
+FOREIGN KEY (created_by) REFERENCES user_account(usr_id);
+
+ALTER TABLE arm_rpo_execution_detail 
+ADD CONSTRAINT arm_rpo_execution_detail_last_modified_by_fk
+FOREIGN KEY (last_modified_by) REFERENCES user_account(usr_id);
+
+ALTER TABLE audit                
 ADD CONSTRAINT audit_case_fk
 FOREIGN KEY (cas_id) REFERENCES court_case(cas_id);
 
-ALTER TABLE audit
+ALTER TABLE audit                
 ADD CONSTRAINT audit_audit_activity_fk
 FOREIGN KEY (aua_id) REFERENCES audit_activity(aua_id);
 
-ALTER TABLE audit
+ALTER TABLE audit                
 ADD CONSTRAINT audit_user_account_fk
 FOREIGN KEY (usr_id) REFERENCES user_account(usr_id);
 
-ALTER TABLE audit
+ALTER TABLE audit   
 ADD CONSTRAINT audit_created_by_fk
 FOREIGN KEY (created_by) REFERENCES user_account(usr_id);
 
-ALTER TABLE audit
+ALTER TABLE audit   
 ADD CONSTRAINT audit_modified_by_fk
 FOREIGN KEY (last_modified_by) REFERENCES user_account(usr_id);
 
-ALTER TABLE audit_activity
+ALTER TABLE audit_activity   
 ADD CONSTRAINT audit_activity_created_by_fk
 FOREIGN KEY (created_by) REFERENCES user_account(usr_id);
 
-ALTER TABLE audit_activity
+ALTER TABLE audit_activity   
 ADD CONSTRAINT audit_activity_modified_by_fk
 FOREIGN KEY (last_modified_by) REFERENCES user_account(usr_id);
 
-ALTER TABLE automated_task
+ALTER TABLE automated_task   
 ADD CONSTRAINT automated_task_created_by_fk
 FOREIGN KEY (created_by) REFERENCES user_account(usr_id);
 
-ALTER TABLE automated_task
+ALTER TABLE automated_task   
 ADD CONSTRAINT automated_task_modified_by_fk
 FOREIGN KEY (last_modified_by) REFERENCES user_account(usr_id);
 
-ALTER TABLE case_document
+ALTER TABLE case_document            
 ADD CONSTRAINT case_document_case_fk
 FOREIGN KEY (cas_id) REFERENCES court_case(cas_id);
 
-ALTER TABLE case_document
+ALTER TABLE case_document            
 ADD CONSTRAINT case_document_created_by_fk
 FOREIGN KEY (created_by) REFERENCES user_account(usr_id);
 
-ALTER TABLE case_document
+ALTER TABLE case_document            
 ADD CONSTRAINT case_document_last_modified_by_fk
 FOREIGN KEY (last_modified_by) REFERENCES user_account(usr_id);
 
-ALTER TABLE case_document
+ALTER TABLE case_document            
 ADD CONSTRAINT case_document_deleted_by_fk
 FOREIGN KEY (deleted_by) REFERENCES user_account(usr_id);
 
-ALTER TABLE case_judge_ae
+ALTER TABLE case_judge_ae            
 ADD CONSTRAINT case_judge_ae_case_fk
 FOREIGN KEY (cas_id) REFERENCES court_case(cas_id);
 
-ALTER TABLE case_judge_ae
+ALTER TABLE case_judge_ae            
 ADD CONSTRAINT case_judge_ae_judge_fk
 FOREIGN KEY (jud_id) REFERENCES judge(jud_id);
 
-ALTER TABLE case_transcription_ae
+ALTER TABLE case_transcription_ae            
 ADD CONSTRAINT case_transcription_ae_case_fk
 FOREIGN KEY (cas_id) REFERENCES court_case(cas_id);
 
-ALTER TABLE case_transcription_ae
+ALTER TABLE case_transcription_ae            
 ADD CONSTRAINT case_transcription_ae_transcription_fk
 FOREIGN KEY (tra_id) REFERENCES transcription(tra_id);
 
-ALTER TABLE case_overflow
+ALTER TABLE case_overflow                      
 ADD CONSTRAINT case_overflow_court_case_fk
 FOREIGN KEY (cas_id) REFERENCES court_case(cas_id);
 
-ALTER TABLE court_case
+ALTER TABLE court_case                        
 ADD CONSTRAINT court_case_event_handler_fk
 FOREIGN KEY (evh_id) REFERENCES event_handler(evh_id);
 
-ALTER TABLE court_case
+ALTER TABLE court_case                        
 ADD CONSTRAINT court_case_courthouse_fk
 FOREIGN KEY (cth_id) REFERENCES courthouse(cth_id);
 
@@ -1896,15 +2040,15 @@ ALTER TABLE court_case
 ADD CONSTRAINT court_case_created_by_fk
 FOREIGN KEY (created_by) REFERENCES user_account(usr_id);
 
-ALTER TABLE court_case
+ALTER TABLE court_case   
 ADD CONSTRAINT court_case_modified_by_fk
 FOREIGN KEY (last_modified_by) REFERENCES user_account(usr_id);
 
-ALTER TABLE court_case
+ALTER TABLE court_case  
 ADD CONSTRAINT court_case_deleted_by_fk
 FOREIGN KEY (deleted_by) REFERENCES user_account(usr_id);
 
-ALTER TABLE court_case
+ALTER TABLE court_case  
 ADD CONSTRAINT court_case_data_anonymised_by_fk
 FOREIGN KEY (data_anonymised_by) REFERENCES user_account(usr_id);
 
@@ -1912,19 +2056,19 @@ ALTER TABLE courthouse
 ADD CONSTRAINT courthouse_created_by_fk
 FOREIGN KEY (created_by) REFERENCES user_account(usr_id);
 
-ALTER TABLE courthouse
+ALTER TABLE courthouse   
 ADD CONSTRAINT courthouse_modified_by_fk
 FOREIGN KEY (last_modified_by) REFERENCES user_account(usr_id);
 
-ALTER TABLE courthouse_region_ae
+ALTER TABLE courthouse_region_ae                        
 ADD CONSTRAINT courthouse_region_courthouse_fk
 FOREIGN KEY (cth_id) REFERENCES courthouse(cth_id);
 
-ALTER TABLE courthouse_region_ae
+ALTER TABLE courthouse_region_ae                        
 ADD CONSTRAINT courthouse_region_region_fk
 FOREIGN KEY (reg_id) REFERENCES region(reg_id);
 
-ALTER TABLE courtroom
+ALTER TABLE courtroom                   
 ADD CONSTRAINT courtroom_courthouse_fk
 FOREIGN KEY (cth_id) REFERENCES courthouse(cth_id);
 
@@ -1932,15 +2076,35 @@ ALTER TABLE courtroom
 ADD CONSTRAINT courtroom_created_by_fk
 FOREIGN KEY (created_by) REFERENCES user_account(usr_id);
 
+ALTER TABLE data_anonymisation
+ADD CONSTRAINT data_anonymisation_event_fk
+FOREIGN KEY (eve_id) REFERENCES event(eve_id);
+
+ALTER TABLE data_anonymisation
+ADD CONSTRAINT data_anonymisation_transcription_comment_fk
+FOREIGN KEY (trc_id) REFERENCES transcription_comment(trc_id);
+
+ALTER TABLE data_anonymisation
+ADD CONSTRAINT data_anonymisation_requested_by_fk
+FOREIGN KEY (requested_by) REFERENCES user_account(usr_id);
+
+ALTER TABLE data_anonymisation
+ADD CONSTRAINT data_anonymisation_approved_by_fk
+FOREIGN KEY (approved_by) REFERENCES user_account(usr_id);
+
+ALTER TABLE daily_list
+ADD CONSTRAINT daily_list_external_location_type_fk
+FOREIGN KEY (elt_id) REFERENCES external_location_type(elt_id);
+
 ALTER TABLE daily_list
 ADD CONSTRAINT daily_list_created_by_fk
 FOREIGN KEY (created_by) REFERENCES user_account(usr_id);
 
-ALTER TABLE daily_list
+ALTER TABLE daily_list   
 ADD CONSTRAINT daily_list_modified_by_fk
 FOREIGN KEY (last_modified_by) REFERENCES user_account(usr_id);
 
-ALTER TABLE defence
+ALTER TABLE defence                
 ADD CONSTRAINT defence_court_case_fk
 FOREIGN KEY (cas_id) REFERENCES court_case(cas_id);
 
@@ -1948,11 +2112,11 @@ ALTER TABLE defence
 ADD CONSTRAINT defence_created_by_fk
 FOREIGN KEY (created_by) REFERENCES user_account(usr_id);
 
-ALTER TABLE defence
+ALTER TABLE defence   
 ADD CONSTRAINT defence_modified_by_fk
 FOREIGN KEY (last_modified_by) REFERENCES user_account(usr_id);
 
-ALTER TABLE defendant
+ALTER TABLE defendant                
 ADD CONSTRAINT defendant_court_case_fk
 FOREIGN KEY (cas_id) REFERENCES court_case(cas_id);
 
@@ -1960,15 +2124,15 @@ ALTER TABLE defendant
 ADD CONSTRAINT defendant_created_by_fk
 FOREIGN KEY (created_by) REFERENCES user_account(usr_id);
 
-ALTER TABLE defendant
+ALTER TABLE defendant   
 ADD CONSTRAINT defendant_modified_by_fk
 FOREIGN KEY (last_modified_by) REFERENCES user_account(usr_id);
 
-ALTER TABLE event
+ALTER TABLE event                       
 ADD CONSTRAINT event_courtroom_fk
 FOREIGN KEY (ctr_id) REFERENCES courtroom(ctr_id);
 
-ALTER TABLE event
+ALTER TABLE event                       
 ADD CONSTRAINT event_event_handler_fk
 FOREIGN KEY (evh_id) REFERENCES event_handler(evh_id);
 
@@ -1976,7 +2140,7 @@ ALTER TABLE event
 ADD CONSTRAINT event_created_by_fk
 FOREIGN KEY (created_by) REFERENCES user_account(usr_id);
 
-ALTER TABLE event
+ALTER TABLE event   
 ADD CONSTRAINT event_modified_by_fk
 FOREIGN KEY (last_modified_by) REFERENCES user_account(usr_id);
 
@@ -1984,19 +2148,27 @@ ALTER TABLE event_handler
 ADD CONSTRAINT event_handler_created_by_fk
 FOREIGN KEY (created_by) REFERENCES user_account(usr_id);
 
-ALTER TABLE external_object_directory
+ALTER TABLE event_linked_case
+ADD CONSTRAINT event_linked_case_court_case_fk
+FOREIGN KEY (cas_id) REFERENCES court_case(cas_id);
+
+ALTER TABLE event_linked_case
+ADD CONSTRAINT event_linked_case_event_fk
+FOREIGN KEY (eve_id) REFERENCES event(eve_id);
+
+ALTER TABLE external_object_directory   
 ADD CONSTRAINT eod_media_fk
 FOREIGN KEY (med_id) REFERENCES media(med_id);
 
-ALTER TABLE external_object_directory
+ALTER TABLE external_object_directory   
 ADD CONSTRAINT eod_transcription_document_fk
 FOREIGN KEY (trd_id) REFERENCES transcription_document(trd_id);
 
-ALTER TABLE external_object_directory
+ALTER TABLE external_object_directory   
 ADD CONSTRAINT eod_case_document_fk
 FOREIGN KEY (cad_id) REFERENCES case_document(cad_id);
 
-ALTER TABLE external_object_directory
+ALTER TABLE external_object_directory   
 ADD CONSTRAINT eod_annotation_document_fk
 FOREIGN KEY (ado_id) REFERENCES annotation_document(ado_id);
 
@@ -2004,15 +2176,15 @@ ALTER TABLE external_object_directory
 ADD CONSTRAINT external_object_directory_created_by_fk
 FOREIGN KEY (created_by) REFERENCES user_account(usr_id);
 
-ALTER TABLE external_object_directory
+ALTER TABLE external_object_directory   
 ADD CONSTRAINT eod_modified_by_fk
 FOREIGN KEY (last_modified_by) REFERENCES user_account(usr_id);
 
-ALTER TABLE external_object_directory
+ALTER TABLE external_object_directory   
 ADD CONSTRAINT eod_object_record_status_fk
 FOREIGN KEY (ors_id) REFERENCES object_record_status(ors_id);
 
-ALTER TABLE external_object_directory
+ALTER TABLE external_object_directory   
 ADD CONSTRAINT eod_external_location_type_fk
 FOREIGN KEY (elt_id) REFERENCES external_location_type(elt_id);
 
@@ -2020,15 +2192,15 @@ ALTER TABLE external_service_auth_token
 ADD CONSTRAINT external_service_auth_token_created_by_fk
 FOREIGN KEY (created_by) REFERENCES user_account(usr_id);
 
-ALTER TABLE external_service_auth_token
+ALTER TABLE external_service_auth_token   
 ADD CONSTRAINT external_service_auth_token_modified_by_fk
 FOREIGN KEY (last_modified_by) REFERENCES user_account(usr_id);
 
-ALTER TABLE hearing
+ALTER TABLE hearing                     
 ADD CONSTRAINT hearing_case_fk
 FOREIGN KEY (cas_id) REFERENCES court_case(cas_id);
 
-ALTER TABLE hearing
+ALTER TABLE hearing                     
 ADD CONSTRAINT hearing_courtroom_fk
 FOREIGN KEY (ctr_id) REFERENCES courtroom(ctr_id);
 
@@ -2036,47 +2208,47 @@ ALTER TABLE hearing
 ADD CONSTRAINT hearing_created_by_fk
 FOREIGN KEY (created_by) REFERENCES user_account(usr_id);
 
-ALTER TABLE hearing
+ALTER TABLE hearing   
 ADD CONSTRAINT hearing_modified_by_fk
 FOREIGN KEY (last_modified_by) REFERENCES user_account(usr_id);
 
-ALTER TABLE hearing_annotation_ae
+ALTER TABLE hearing_annotation_ae            
 ADD CONSTRAINT hearing_annotation_ae_hearing_fk
 FOREIGN KEY (hea_id) REFERENCES hearing(hea_id);
 
-ALTER TABLE hearing_annotation_ae
+ALTER TABLE hearing_annotation_ae            
 ADD CONSTRAINT hearing_annotation_ae_annotation_fk
 FOREIGN KEY (ann_id) REFERENCES annotation(ann_id);
 
-ALTER TABLE hearing_event_ae
+ALTER TABLE hearing_event_ae            
 ADD CONSTRAINT hearing_event_ae_hearing_fk
 FOREIGN KEY (hea_id) REFERENCES hearing(hea_id);
 
-ALTER TABLE hearing_event_ae
+ALTER TABLE hearing_event_ae            
 ADD CONSTRAINT hearing_event_ae_event_fk
 FOREIGN KEY (eve_id) REFERENCES event(eve_id);
 
-ALTER TABLE hearing_judge_ae
+ALTER TABLE hearing_judge_ae            
 ADD CONSTRAINT hearing_judge_ae_hearing_fk
 FOREIGN KEY (hea_id) REFERENCES hearing(hea_id);
 
-ALTER TABLE hearing_judge_ae
+ALTER TABLE hearing_judge_ae            
 ADD CONSTRAINT hearing_judge_ae_judge_fk
 FOREIGN KEY (jud_id) REFERENCES judge(jud_id);
 
-ALTER TABLE hearing_media_ae
+ALTER TABLE hearing_media_ae            
 ADD CONSTRAINT hearing_media_ae_hearing_fk
 FOREIGN KEY (hea_id) REFERENCES hearing(hea_id);
 
-ALTER TABLE hearing_media_ae
+ALTER TABLE hearing_media_ae            
 ADD CONSTRAINT hearing_media_ae_media_fk
 FOREIGN KEY (med_id) REFERENCES media(med_id);
 
-ALTER TABLE hearing_transcription_ae
+ALTER TABLE hearing_transcription_ae            
 ADD CONSTRAINT hearing_transcription_ae_hearing_fk
 FOREIGN KEY (hea_id) REFERENCES hearing(hea_id);
 
-ALTER TABLE hearing_transcription_ae
+ALTER TABLE hearing_transcription_ae            
 ADD CONSTRAINT hearing_transcription_ae_transcription_fk
 FOREIGN KEY (tra_id) REFERENCES transcription(tra_id);
 
@@ -2084,11 +2256,11 @@ ALTER TABLE judge
 ADD CONSTRAINT judge_created_by_fk
 FOREIGN KEY (created_by) REFERENCES user_account(usr_id);
 
-ALTER TABLE judge
+ALTER TABLE judge   
 ADD CONSTRAINT judge_modified_by_fk
 FOREIGN KEY (last_modified_by) REFERENCES user_account(usr_id);
 
-ALTER TABLE media
+ALTER TABLE media                       
 ADD CONSTRAINT media_courtroom_fk
 FOREIGN KEY (ctr_id) REFERENCES courtroom(ctr_id);
 
@@ -2096,15 +2268,27 @@ ALTER TABLE media
 ADD CONSTRAINT media_created_by_fk
 FOREIGN KEY (created_by) REFERENCES user_account(usr_id);
 
-ALTER TABLE media
+ALTER TABLE media   
 ADD CONSTRAINT media_modified_by_fk
 FOREIGN KEY (last_modified_by) REFERENCES user_account(usr_id);
 
-ALTER TABLE media
+ALTER TABLE media   
 ADD CONSTRAINT media_deleted_by_fk
 FOREIGN KEY (deleted_by) REFERENCES user_account(usr_id);
 
-ALTER TABLE media_request
+ALTER TABLE media_linked_case   
+ADD CONSTRAINT media_linked_case_court_case_fk
+FOREIGN KEY (cas_id) REFERENCES court_case(cas_id);
+
+ALTER TABLE media_linked_case   
+ADD CONSTRAINT media_linked_case_media_fk
+FOREIGN KEY (med_id) REFERENCES media(med_id);
+
+ALTER TABLE media_linked_case   
+ADD CONSTRAINT media_linked_case_created_by_fk
+FOREIGN KEY (created_by) REFERENCES user_account(usr_id);
+
+ALTER TABLE media_request               
 ADD CONSTRAINT media_request_hearing_fk
 FOREIGN KEY (hea_id) REFERENCES hearing(hea_id);
 
@@ -2112,15 +2296,15 @@ ALTER TABLE media_request
 ADD CONSTRAINT media_request_created_by_fk
 FOREIGN KEY (created_by) REFERENCES user_account(usr_id);
 
-ALTER TABLE media_request
+ALTER TABLE media_request   
 ADD CONSTRAINT media_request_modified_by_fk
 FOREIGN KEY (last_modified_by) REFERENCES user_account(usr_id);
 
-ALTER TABLE media_request
+ALTER TABLE media_request   
 ADD CONSTRAINT media_request_requestor_fk
 FOREIGN KEY (requestor) REFERENCES user_account(usr_id);
 
-ALTER TABLE media_request
+ALTER TABLE media_request   
 ADD CONSTRAINT media_request_current_owner_fk
 FOREIGN KEY (current_owner) REFERENCES user_account(usr_id);
 
@@ -2132,7 +2316,7 @@ ALTER TABLE node_register
 ADD CONSTRAINT node_register_created_by_fk
 FOREIGN KEY (created_by) REFERENCES user_account(usr_id);
 
-ALTER TABLE notification
+ALTER TABLE notification                
 ADD CONSTRAINT notification_case_fk
 FOREIGN KEY (cas_id) REFERENCES court_case(cas_id);
 
@@ -2144,19 +2328,19 @@ ALTER TABLE notification
 ADD CONSTRAINT notification_modified_by_fk
 FOREIGN KEY (last_modified_by) REFERENCES user_account(usr_id);
 
-ALTER TABLE object_admin_action
+ALTER TABLE object_admin_action   
 ADD CONSTRAINT oaa_annotation_document_fk
 FOREIGN KEY (ado_id) REFERENCES annotation_document(ado_id);
 
-ALTER TABLE object_admin_action
+ALTER TABLE object_admin_action   
 ADD CONSTRAINT oaa_case_document_fk
 FOREIGN KEY (cad_id) REFERENCES case_document(cad_id);
 
-ALTER TABLE object_admin_action
+ALTER TABLE object_admin_action   
 ADD CONSTRAINT oaa_media_fk
 FOREIGN KEY (med_id) REFERENCES media(med_id);
 
-ALTER TABLE object_admin_action
+ALTER TABLE object_admin_action   
 ADD CONSTRAINT oaa_transcription_document_fk
 FOREIGN KEY (trd_id) REFERENCES transcription_document(trd_id);
 
@@ -2173,6 +2357,14 @@ ADD CONSTRAINT object_admin_action_marked_for_manual_del_by_fk
 FOREIGN KEY (marked_for_manual_del_by) REFERENCES user_account(usr_id);
 
 ALTER TABLE object_retrieval_queue
+ADD CONSTRAINT object_retrieval_queue_media_fk
+FOREIGN KEY (med_id) REFERENCES media(med_id);
+
+ALTER TABLE object_retrieval_queue
+ADD CONSTRAINT object_retrieval_queue_transcription_document_fk
+FOREIGN KEY (trd_id) REFERENCES transcription_document(trd_id);
+
+ALTER TABLE object_retrieval_queue
 ADD CONSTRAINT object_retrieval_queue_created_by_fk
 FOREIGN KEY (created_by) REFERENCES user_account(usr_id);
 
@@ -2180,7 +2372,7 @@ ALTER TABLE object_retrieval_queue
 ADD CONSTRAINT object_retrieval_queue_last_modified_by_fk
 FOREIGN KEY (last_modified_by) REFERENCES user_account(usr_id);
 
-ALTER TABLE prosecutor
+ALTER TABLE prosecutor               
 ADD CONSTRAINT prosecutor_court_case_fk
 FOREIGN KEY (cas_id) REFERENCES court_case(cas_id);
 
@@ -2200,47 +2392,47 @@ ALTER TABLE report
 ADD CONSTRAINT report_modified_by_fk
 FOREIGN KEY (last_modified_by) REFERENCES user_account(usr_id);
 
-ALTER TABLE transcription
+ALTER TABLE transcription               
 ADD CONSTRAINT transcription_courtroom_fk
 FOREIGN KEY (ctr_id) REFERENCES courtroom(ctr_id);
 
-ALTER TABLE transcription
+ALTER TABLE transcription               
 ADD CONSTRAINT transcription_transcription_status_fk
 FOREIGN KEY (trs_id) REFERENCES transcription_status(trs_id);
 
-ALTER TABLE transcription
+ALTER TABLE transcription               
 ADD CONSTRAINT transcription_urgency_fk
 FOREIGN KEY (tru_id) REFERENCES transcription_urgency(tru_id);
 
-ALTER TABLE transcription
+ALTER TABLE transcription 
 ADD CONSTRAINT transcription_created_by_fk
 FOREIGN KEY (created_by) REFERENCES user_account(usr_id);
 
-ALTER TABLE transcription
+ALTER TABLE transcription               
 ADD CONSTRAINT transcription_last_modified_by_fk
 FOREIGN KEY (last_modified_by) REFERENCES user_account(usr_id);
 
-ALTER TABLE transcription
+ALTER TABLE transcription               
 ADD CONSTRAINT transcription_transcription_type_fk
 FOREIGN KEY (trt_id) REFERENCES transcription_type(trt_id);
 
-ALTER TABLE transcription
+ALTER TABLE transcription   
 ADD CONSTRAINT transcription_requested_by_fk
 FOREIGN KEY (requested_by) REFERENCES user_account(usr_id);
 
-ALTER TABLE transcription
+ALTER TABLE transcription   
 ADD CONSTRAINT transcription_deleted_by_fk
 FOREIGN KEY (deleted_by) REFERENCES user_account(usr_id);
 
-ALTER TABLE transcription_comment
+ALTER TABLE transcription_comment       
 ADD CONSTRAINT transcription_comment_transcription_fk
 FOREIGN KEY (tra_id) REFERENCES transcription(tra_id);
 
-ALTER TABLE transcription_comment
+ALTER TABLE transcription_comment       
 ADD CONSTRAINT transcription_comment_transcription_workflow_fk
 FOREIGN KEY (trw_id) REFERENCES transcription_workflow(trw_id);
 
-ALTER TABLE transcription_comment
+ALTER TABLE transcription_comment       
 ADD CONSTRAINT transcription_comment_author_fk
 FOREIGN KEY (author) REFERENCES user_account(usr_id);
 
@@ -2272,23 +2464,23 @@ ALTER TABLE transcription_workflow
 ADD CONSTRAINT transcription_workflow_transcription_fk
 FOREIGN KEY (tra_id) REFERENCES transcription(tra_id);
 
-ALTER TABLE transcription_workflow
+ALTER TABLE transcription_workflow               
 ADD CONSTRAINT transcription_workflow_transcription_status_fk
 FOREIGN KEY (trs_id) REFERENCES transcription_status(trs_id);
 
-ALTER TABLE transcription_workflow
+ALTER TABLE transcription_workflow               
 ADD CONSTRAINT transcription_workflow_workflow_actor_fk
 FOREIGN KEY (workflow_actor) REFERENCES user_account(usr_id);
 
-ALTER TABLE transformed_media
+ALTER TABLE transformed_media  
 ADD CONSTRAINT trm_media_request_fk
 FOREIGN KEY (mer_id) REFERENCES media_request(mer_id);
 
-ALTER TABLE transformed_media
+ALTER TABLE transformed_media  
 ADD CONSTRAINT transformed_media_created_by_fk
 FOREIGN KEY (created_by) REFERENCES user_account(usr_id);
 
-ALTER TABLE transformed_media
+ALTER TABLE transformed_media  
 ADD CONSTRAINT transformed_media_last_modified_by_fk
 FOREIGN KEY (last_modified_by) REFERENCES user_account(usr_id);
 
@@ -2296,16 +2488,16 @@ ALTER TABLE transient_object_directory
 ADD CONSTRAINT transient_object_directory_created_by_fk
 FOREIGN KEY (created_by) REFERENCES user_account(usr_id);
 
-ALTER TABLE transient_object_directory
+ALTER TABLE transient_object_directory  
 ADD CONSTRAINT tod_modified_by_fk
 FOREIGN KEY (last_modified_by) REFERENCES user_account(usr_id);
 
-ALTER TABLE transient_object_directory
+ALTER TABLE transient_object_directory  
 ADD CONSTRAINT tod_transformed_media_fk
 FOREIGN KEY (trm_id) REFERENCES transformed_media(trm_id);
 
 
-ALTER TABLE transient_object_directory
+ALTER TABLE transient_object_directory  
 ADD CONSTRAINT tod_object_record_status_fk
 FOREIGN KEY (ors_id) REFERENCES object_record_status(ors_id);
 
@@ -2326,6 +2518,9 @@ ALTER TABLE external_service_auth_token
 ADD CONSTRAINT token_type_ck CHECK (token_type in (1,2));
 
 -- additional multi-column not null constraints
+ALTER TABLE data_anonymisation
+ADD CONSTRAINT dan_one_of_eve_or_trc_nn
+CHECK (eve_id is not null or trc_id is not null);
 
 ALTER TABLE event_linked_case
 ADD CONSTRAINT elc_modern_or_legacy_case_nn
@@ -2378,6 +2573,10 @@ CREATE UNIQUE INDEX user_account_user_email_address_unq
 
 GRANT SELECT,INSERT,UPDATE,DELETE ON annotation TO darts_user;
 GRANT SELECT,INSERT,UPDATE,DELETE ON annotation_document TO darts_user;
+GRANT SELECT,INSERT,UPDATE,DELETE ON arm_automated_task TO darts_user;
+GRANT SELECT,INSERT,UPDATE,DELETE ON arm_rpo_execution_detail TO darts_user;
+GRANT SELECT,INSERT,UPDATE,DELETE ON arm_rpo_state TO darts_user;
+GRANT SELECT,INSERT,UPDATE,DELETE ON arm_rpo_status TO darts_user;
 GRANT SELECT,INSERT,UPDATE,DELETE ON audit TO darts_user;
 GRANT SELECT,INSERT,UPDATE,DELETE ON audit_activity TO darts_user;
 GRANT SELECT                      ON audit_heritage TO darts_user;
@@ -2390,6 +2589,7 @@ GRANT SELECT,INSERT,UPDATE,DELETE ON court_case TO darts_user;
 GRANT SELECT,INSERT,UPDATE,DELETE ON courthouse TO darts_user;
 GRANT SELECT,INSERT,UPDATE,DELETE ON courthouse_region_ae TO darts_user;
 GRANT SELECT,INSERT,UPDATE,DELETE ON courtroom TO darts_user;
+GRANT SELECT,INSERT,UPDATE,DELETE ON data_anonymisation TO darts_user;
 GRANT SELECT,INSERT,UPDATE,DELETE ON daily_list TO darts_user;
 GRANT SELECT,INSERT,UPDATE,DELETE ON defence TO darts_user;
 GRANT SELECT,INSERT,UPDATE,DELETE ON defendant TO darts_user;
@@ -2430,6 +2630,10 @@ GRANT SELECT,INSERT,UPDATE,DELETE ON transient_object_directory TO darts_user;
 GRANT SELECT,INSERT,UPDATE,DELETE ON user_account TO darts_user;
 
 GRANT SELECT,UPDATE ON  ann_seq TO darts_user;
+GRANT SELECT,UPDATE ON  aat_seq TO darts_user;
+GRANT SELECT,UPDATE ON  ard_seq TO darts_user;
+GRANT SELECT,UPDATE ON  are_seq TO darts_user;
+GRANT SELECT,UPDATE ON  aru_seq TO darts_user;
 GRANT SELECT,UPDATE ON  aua_seq TO darts_user;
 GRANT SELECT,UPDATE ON  aud_seq TO darts_user;
 GRANT SELECT,UPDATE ON  aut_seq TO darts_user;
@@ -2437,6 +2641,7 @@ GRANT SELECT,UPDATE ON  cas_seq TO darts_user;
 GRANT SELECT,UPDATE ON  cth_seq TO darts_user;
 GRANT SELECT,UPDATE ON  ctr_seq TO darts_user;
 GRANT SELECT,UPDATE ON  dal_seq TO darts_user;
+GRANT SELECT,UPDATE ON  dan_seq TO darts_user;
 GRANT SELECT,UPDATE ON  dfc_seq TO darts_user;
 GRANT SELECT,UPDATE ON  dfd_seq TO darts_user;
 GRANT SELECT,UPDATE ON  elt_seq TO darts_user;

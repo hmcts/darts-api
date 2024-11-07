@@ -16,7 +16,7 @@ public interface CourtLogEventRepository extends JpaRepository<EventEntity, Inte
            FROM EventEntity ee, CourtroomEntity cr, CourthouseEntity ch, CourtCaseEntity ce
            JOIN ee.hearingEntities hearing
            WHERE ch.courthouseName = upper(:courtHouse)
-           AND upper(ce.caseNumber) = upper(:caseNumber)
+           AND ce.caseNumber = :caseNumber
            AND ee.isLogEntry = true
            AND ee.timestamp between :start AND :end
            AND cr.courthouse = ch
@@ -26,13 +26,10 @@ public interface CourtLogEventRepository extends JpaRepository<EventEntity, Inte
     List<EventEntity> findByCourthouseAndCaseNumberBetweenStartAndEnd(String courtHouse, String caseNumber, OffsetDateTime start, OffsetDateTime end);
 
     @Query("""
-           SELECT ee FROM EventEntity ee, CourtroomEntity cr, CourthouseEntity ch
-           JOIN ee.hearingEntities hearing
-           WHERE ch.courthouseName = upper(:courtHouse)
-           AND cr.name = upper(:courtRoomName)
+           SELECT ee FROM EventEntity ee
+           WHERE ee.courtroom.courthouse.courthouseName = upper(:courtHouse)
+           AND ee.courtroom.name = upper(:courtRoomName)
            AND ee.timestamp between :start AND :end
-           AND cr.courthouse = ch
-           AND hearing.courtroom = cr
         """)
     List<EventEntity> findByCourthouseAndCourtroomBetweenStartAndEnd(String courtHouse, String courtRoomName, OffsetDateTime start, OffsetDateTime end);
 

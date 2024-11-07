@@ -8,6 +8,7 @@ import org.springframework.stereotype.Component;
 import uk.gov.hmcts.darts.common.component.validation.Validator;
 import uk.gov.hmcts.darts.common.entity.ObjectAdminActionEntity;
 import uk.gov.hmcts.darts.common.entity.ObjectHiddenReasonEntity;
+import uk.gov.hmcts.darts.common.exception.CommonApiError;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.common.repository.ObjectAdminActionRepository;
 import uk.gov.hmcts.darts.common.repository.ObjectHiddenReasonRepository;
@@ -57,7 +58,7 @@ public class TranscriptionDocumentHideOrShowValidator implements Validator<IdReq
             } else {
                 ObjectHiddenReasonEntity objectHiddenReasonEntity = optionalObjectHiddenReasonEntity.get();
                 if (objectHiddenReasonEntity.isMarkedForDeletion() && !isManualDeletionEnabled()) {
-                    throw new DartsApiException(DartsApiException.DartsApiErrorCommon.FEATURE_FLAG_NOT_ENABLED);
+                    throw new DartsApiException(CommonApiError.FEATURE_FLAG_NOT_ENABLED, "Manual deletion is not enabled");
                 }
             }
         }

@@ -43,5 +43,7 @@ darts:
       arm-password: ${ARM_PASSWORD:func-password}
       arm-service-profile: ${ARM_SERVICE_PROFILE:func-profile}
       url: ${ARM_URL:http://localhost:4551}
+      arm-service-entitlement: some-entitlement
+      arm-storage-account-name: some-account-name
   automated-tasks-pod: true
   api-pod: true

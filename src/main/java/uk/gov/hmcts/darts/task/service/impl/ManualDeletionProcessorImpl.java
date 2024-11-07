@@ -6,15 +6,18 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.darts.audio.deleter.impl.inbound.ExternalInboundDataStoreDeleter;
 import uk.gov.hmcts.darts.audio.deleter.impl.unstructured.ExternalUnstructuredDataStoreDeleter;
+import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
 import uk.gov.hmcts.darts.common.entity.ObjectAdminActionEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionDocumentEntity;
+import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum;
 import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
 import uk.gov.hmcts.darts.common.repository.MediaRepository;
 import uk.gov.hmcts.darts.common.repository.ObjectAdminActionRepository;
 import uk.gov.hmcts.darts.common.repository.TranscriptionDocumentRepository;
+import uk.gov.hmcts.darts.log.api.LogApi;
 import uk.gov.hmcts.darts.task.service.ManualDeletionProcessor;
 
 import java.time.Duration;
@@ -26,6 +29,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class ManualDeletionProcessorImpl implements ManualDeletionProcessor {
 
+    private final UserIdentity userIdentity;
     @Value("${darts.manual-deletion.grace-period:24h}")
     private String gracePeriod;
 
@@ -35,24 +39,26 @@ public class ManualDeletionProcessorImpl implements ManualDeletionProcessor {
     private final TranscriptionDocumentRepository transcriptionDocumentRepository;
     private final ExternalInboundDataStoreDeleter inboundDeleter;
     private final ExternalUnstructuredDataStoreDeleter unstructuredDeleter;
+    private final LogApi logApi;
 
     @Override
     public void process() {
+        UserAccountEntity userAccount = userIdentity.getUserAccount();
         OffsetDateTime deletionThreshold = getDeletionThreshold();
         List<ObjectAdminActionEntity> actionsToDelete = objectAdminActionRepository.findFilesForManualDeletion(deletionThreshold);
 
         for (ObjectAdminActionEntity objectAdminAction : actionsToDelete) {
             if (isMediaNotDeleted(objectAdminAction)) {
-                deleteMedia(objectAdminAction.getMedia());
+                deleteMedia(userAccount, objectAdminAction.getMedia());
             } else if (isTranscriptionNotDeleted(objectAdminAction)) {
-                deleteTranscriptionDocument(objectAdminAction.getTranscriptionDocument());
+                deleteTranscriptionDocument(userAccount, objectAdminAction.getTranscriptionDocument());
             }
         }
 
     }
 
-    private void deleteMedia(MediaEntity mediaEntity) {
-
+    private void deleteMedia(UserAccountEntity userAccount, MediaEntity mediaEntity) {
+        log.info("Deleting mediaEntity with ID: {}", mediaEntity.getId());
         List<ExternalObjectDirectoryEntity> objectsToDelete = externalObjectDirectoryRepository.findStoredInInboundAndUnstructuredByMediaId(
             mediaEntity.getId());
 
@@ -61,12 +67,13 @@ public class ManualDeletionProcessorImpl implements ManualDeletionProcessor {
             externalObjectDirectoryRepository.delete(externalObjectDirectoryEntity);
         }
 
-        mediaEntity.setDeleted(true);
+        mediaEntity.markAsDeleted(userAccount);
         mediaRepository.save(mediaEntity);
-        log.info("Deleted mediaEntity with ID: {}", mediaEntity.getId());
+        logApi.mediaDeleted(mediaEntity.getId());
     }
 
-    private void deleteTranscriptionDocument(TranscriptionDocumentEntity transcription) {
+    private void deleteTranscriptionDocument(UserAccountEntity userAccount, TranscriptionDocumentEntity transcription) {
+        log.info("Deleting transcription document with ID: {}", transcription.getId());
 
         List<ExternalObjectDirectoryEntity> objectsToDelete =
             externalObjectDirectoryRepository.findStoredInInboundAndUnstructuredByTranscriptionId(transcription.getId());
@@ -76,9 +83,9 @@ public class ManualDeletionProcessorImpl implements ManualDeletionProcessor {
             externalObjectDirectoryRepository.delete(externalObjectDirectoryEntity);
         }
 
-        transcription.setDeleted(true);
+        transcription.markAsDeleted(userAccount);
         transcriptionDocumentRepository.save(transcription);
-        log.info("Deleted transcription document with ID: {}", transcription.getId());
+        logApi.transcriptionDeleted(transcription.getId());
     }
 
     private void deleteFromExternalDataStore(ExternalObjectDirectoryEntity externalObjectDirectoryEntity) {

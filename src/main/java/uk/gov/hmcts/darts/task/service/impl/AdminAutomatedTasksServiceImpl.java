@@ -4,6 +4,7 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
+import org.springframework.expression.spel.standard.SpelExpressionParser;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.darts.audit.api.AuditApi;
 import uk.gov.hmcts.darts.common.entity.AutomatedTaskEntity;
@@ -18,6 +19,7 @@ import uk.gov.hmcts.darts.tasks.model.AutomatedTaskSummary;
 import uk.gov.hmcts.darts.tasks.model.DetailedAutomatedTask;
 
 import java.util.List;
+import java.util.Objects;
 
 import static uk.gov.hmcts.darts.audit.api.AuditActivity.ENABLE_DISABLE_JOB;
 import static uk.gov.hmcts.darts.audit.api.AuditActivity.RUN_JOB_MANUALLY;
@@ -74,16 +76,23 @@ public class AdminAutomatedTasksServiceImpl implements AdminAutomatedTaskService
 
         automatedTaskRunner.run(automatedTask.get());
 
-        auditApi.record(RUN_JOB_MANUALLY);
+        auditApi.record(RUN_JOB_MANUALLY, automatedTaskEntity.getTaskName());
     }
 
     @Override
     public DetailedAutomatedTask updateAutomatedTask(Integer taskId, AutomatedTaskPatch automatedTaskPatch) {
         var automatedTask = getAutomatedTaskEntityById(taskId);
 
-        automatedTask.setTaskEnabled(automatedTaskPatch.getIsActive());
+        if (automatedTaskPatch.getIsActive() != null) {
+            automatedTask.setTaskEnabled(automatedTaskPatch.getIsActive());
+            auditApi.record(ENABLE_DISABLE_JOB, automatedTask.getTaskName() + " " + (automatedTaskPatch.getIsActive() ? "enabled" : "disabled"));
+            log.info("Task {} is now {}", automatedTask.getTaskName(), automatedTaskPatch.getIsActive() ? "enabled" : "disabled");
+        }
 
-        auditApi.record(ENABLE_DISABLE_JOB);
+        if (automatedTaskPatch.getBatchSize() != null) {
+            automatedTask.setBatchSize(automatedTaskPatch.getBatchSize());
+            log.info("Batch size for {} updated to {}", automatedTask.getTaskName(), automatedTaskPatch.getBatchSize());
+        }
 
         var updatedTask = automatedTaskRepository.save(automatedTask);
 
@@ -95,7 +104,8 @@ public class AdminAutomatedTasksServiceImpl implements AdminAutomatedTaskService
         if (automatedTaskName == null || automatedTaskName.getConditionalOnSpEL() == null) {
             return true;
         }
-        return Boolean.parseBoolean(configurableBeanFactory.resolveEmbeddedValue(automatedTaskName.getConditionalOnSpEL()));
+        String embeddedValue = Objects.requireNonNull(configurableBeanFactory.resolveEmbeddedValue(automatedTaskName.getConditionalOnSpEL()));
+        return Boolean.TRUE.equals(new SpelExpressionParser().parseExpression(embeddedValue).getValue(Boolean.class));
     }
 
     private AutomatedTaskEntity getAutomatedTaskEntityById(Integer taskId) {

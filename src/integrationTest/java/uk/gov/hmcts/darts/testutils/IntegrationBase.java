@@ -6,6 +6,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
@@ -24,6 +25,7 @@ import uk.gov.hmcts.darts.test.common.MemoryLogAppender;
 import uk.gov.hmcts.darts.testutils.stubs.DartsDatabaseRetrieval;
 import uk.gov.hmcts.darts.testutils.stubs.DartsDatabaseStub;
 import uk.gov.hmcts.darts.testutils.stubs.DartsPersistence;
+import uk.gov.hmcts.darts.testutils.stubs.wiremock.TokenStub;
 
 import java.time.Duration;
 import java.util.List;
@@ -66,9 +68,10 @@ import java.util.Optional;
  *  </li>
  * </ul>
  */
-@SpringBootTest
+@SpringBootTest()
 @Slf4j
 @ActiveProfiles({"intTest", "h2db", "in-memory-caching"})
+@Import(IntegrationTestConfiguration.class)
 public class IntegrationBase {
 
     @Autowired
@@ -87,6 +90,8 @@ public class IntegrationBase {
     private List<AutomatedOnDemandTask> automatedOnDemandTask;
     @Autowired
     private AutomatedTasksApi automatedTasksApi;
+
+    protected TokenStub tokenStub = new TokenStub();
 
     protected MemoryLogAppender logAppender = LogUtil.getMemoryLogger();
 

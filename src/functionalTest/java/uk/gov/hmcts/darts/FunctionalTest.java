@@ -135,6 +135,7 @@ public class FunctionalTest {
         return response.asString();
     }
 
+    @SuppressWarnings("PMD.UselessOperationOnImmutable")
     protected boolean isIsoDateTimeString(String string) {
         try {
             LocalDateTime.parse(string, DateTimeFormatter.ISO_DATE_TIME);

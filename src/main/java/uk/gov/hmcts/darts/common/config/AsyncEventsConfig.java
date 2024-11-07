@@ -22,10 +22,19 @@ public class AsyncEventsConfig {
     @Bean
     public TaskExecutor taskExecutor() {
         var executor = new ThreadPoolTaskExecutor();
-        executor.setCorePoolSize(10);
+        executor.setCorePoolSize(5);
         executor.setMaxPoolSize(15);
-        executor.setQueueCapacity(20);
         executor.setThreadNamePrefix("Async-");
+        executor.initialize();
+        return executor;
+    }
+
+    @Bean
+    public TaskExecutor eventTaskExecutor() {
+        var executor = new ThreadPoolTaskExecutor();
+        executor.setCorePoolSize(5);
+        executor.setMaxPoolSize(30);
+        executor.setThreadNamePrefix("Async-Event-");
         executor.initialize();
         return executor;
     }

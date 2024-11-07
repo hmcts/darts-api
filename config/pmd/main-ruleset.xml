@@ -8,9 +8,9 @@
 
   <rule ref="category/java/bestpractices.xml">
     <exclude name="GuardLogStatement"/>
-    <exclude name="JUnitTestContainsTooManyAsserts"/>
+    <exclude name="UnitTestContainsTooManyAsserts"/>
     <exclude name="JUnitAssertionsShouldIncludeMessage"/>
-    <exclude name="JUnitTestsShouldIncludeAssert"/>
+    <exclude name="UnitTestShouldIncludeAssert"/>
   </rule>
   <rule ref="category/java/codestyle.xml">
     <exclude name="AtLeastOneConstructor"/>

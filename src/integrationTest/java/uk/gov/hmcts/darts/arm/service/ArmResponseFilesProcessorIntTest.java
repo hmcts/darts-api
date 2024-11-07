@@ -2,11 +2,13 @@ package uk.gov.hmcts.darts.arm.service;
 
 import com.azure.core.util.BinaryData;
 import com.azure.storage.blob.models.BlobStorageException;
+import jakarta.annotation.PostConstruct;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import uk.gov.hmcts.darts.arm.api.ArmDataManagementApi;
 import uk.gov.hmcts.darts.arm.component.ArmResponseFilesProcessSingleElement;
@@ -26,6 +28,7 @@ import uk.gov.hmcts.darts.test.common.TestUtils;
 import uk.gov.hmcts.darts.test.common.data.PersistableFactory;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 import uk.gov.hmcts.darts.testutils.stubs.AuthorisationStub;
+import uk.gov.hmcts.darts.testutils.stubs.DartsDatabaseStub;
 
 import java.io.File;
 import java.io.IOException;
@@ -46,7 +49,7 @@ import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_DROP_ZO
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_RESPONSE_CHECKSUM_VERIFICATION_FAILED;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_RESPONSE_MANIFEST_FAILED;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_RESPONSE_PROCESSING_FAILED;
-import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.STORED;
+import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_RPO_PENDING;
 import static uk.gov.hmcts.darts.test.common.data.PersistableFactory.getMediaTestData;
 
 
@@ -62,7 +65,7 @@ class ArmResponseFilesProcessorIntTest extends IntegrationBase {
     private ArmDataManagementApi armDataManagementApi;
     @MockBean
     private ArmDataManagementConfiguration armDataManagementConfiguration;
-    @MockBean
+    @Autowired
     private UserIdentity userIdentity;
 
     @Autowired
@@ -73,6 +76,24 @@ class ArmResponseFilesProcessorIntTest extends IntegrationBase {
 
     @TempDir
     private File tempDirectory;
+
+    @SuppressWarnings("PMD.TestClassWithoutTestCases")
+    @TestConfiguration
+    public static class TestConfig {
+
+        @Autowired
+        private DartsDatabaseStub dartsDatabase;
+
+        @MockBean
+        private UserIdentity userIdentity;
+
+        @PostConstruct
+        public UserIdentity mockUserIdentity() {
+            UserAccountEntity testUser = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
+            when(userIdentity.getUserAccount()).thenReturn(testUser);
+            return userIdentity;
+        }
+    }
 
     @BeforeEach
     void setupData() {
@@ -855,7 +876,7 @@ class ArmResponseFilesProcessorIntTest extends IntegrationBase {
 
         assertEquals(1, foundMediaList.size());
         ExternalObjectDirectoryEntity foundMedia = foundMediaList.get(0);
-        assertEquals(STORED.getId(), foundMedia.getStatus().getId());
+        assertEquals(ARM_RPO_PENDING.getId(), foundMedia.getStatus().getId());
         assertEquals("e7cde7c6-15d7-4c7e-a85d-a468c7ea72b9", foundMedia.getExternalFileId());
         assertEquals("1cf976c7-cedd-703f-ab70-01588bd56d50", foundMedia.getExternalRecordId());
         assertTrue(foundMedia.isResponseCleaned());
@@ -921,7 +942,7 @@ class ArmResponseFilesProcessorIntTest extends IntegrationBase {
 
         ExternalObjectDirectoryEntity foundAnnotationEod = dartsDatabase.getExternalObjectDirectoryRepository()
             .findById(armEod.getId()).orElseThrow();
-        assertEquals(STORED.getId(), foundAnnotationEod.getStatus().getId());
+        assertEquals(ARM_RPO_PENDING.getId(), foundAnnotationEod.getStatus().getId());
         assertEquals("e7cde7c6-15d7-4c7e-a85d-a468c7ea72b9", foundAnnotationEod.getExternalFileId());
         assertEquals("1cf976c7-cedd-703f-ab70-01588bd56d50", foundAnnotationEod.getExternalRecordId());
         assertTrue(foundAnnotationEod.isResponseCleaned());
@@ -997,7 +1018,7 @@ class ArmResponseFilesProcessorIntTest extends IntegrationBase {
 
         ExternalObjectDirectoryEntity foundTranscriptionEod = dartsDatabase.getExternalObjectDirectoryRepository()
             .findById(armEod.getId()).orElseThrow();
-        assertEquals(STORED.getId(), foundTranscriptionEod.getStatus().getId());
+        assertEquals(ARM_RPO_PENDING.getId(), foundTranscriptionEod.getStatus().getId());
         assertEquals("e7cde7c6-15d7-4c7e-a85d-a468c7ea72b9", foundTranscriptionEod.getExternalFileId());
         assertEquals("1cf976c7-cedd-703f-ab70-01588bd56d50", foundTranscriptionEod.getExternalRecordId());
         assertTrue(foundTranscriptionEod.isResponseCleaned());

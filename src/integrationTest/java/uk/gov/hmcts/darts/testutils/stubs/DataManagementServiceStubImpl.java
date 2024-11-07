@@ -9,8 +9,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.Profile;
-import org.springframework.stereotype.Component;
 import uk.gov.hmcts.darts.common.datamanagement.component.impl.DownloadResponseMetaData;
 import uk.gov.hmcts.darts.common.datamanagement.component.impl.FileBasedDownloadResponseMetaData;
 import uk.gov.hmcts.darts.common.datamanagement.enums.DatastoreContainerType;
@@ -36,10 +34,8 @@ import static uk.gov.hmcts.darts.test.common.TestUtils.getFile;
  * This class is a test implementation of DataManagementService, intended to mimic the basic behaviour of Azure
  * Blob Storage. TODO: Hopefully this will be replaced by a more functional implementation (see DMP-597).
  */
-@Component
 @Slf4j
 @RequiredArgsConstructor
-@Profile("intTest")
 @Deprecated
 public class DataManagementServiceStubImpl implements DataManagementService {
 

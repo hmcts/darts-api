@@ -28,15 +28,16 @@ public enum AutomatedTaskName {
     DAILY_LIST_HOUSEKEEPING_TASK_NAME("DailyListHousekeeping"),
     ARM_RETENTION_EVENT_DATE_CALCULATOR_TASK_NAME("ArmRetentionEventDateCalculator"),
     GENERATE_CASE_DOCUMENT_TASK_NAME("GenerateCaseDocument"),
-    EVENT_CLEANUP_CURRENT_TASK("CleanupCurrentEvent"),
     INBOUND_TRANSCRIPTION_ANNOTATION_DELETER_TASK_NAME("InboundTranscriptionAnnotationDeleter"),
     UNSTRUCTURED_TRANSCRIPTION_ANNOTATION_DELETER_TASK_NAME("UnstructuredTranscriptionAnnotationDeleter"),
     REMOVE_DUPLICATED_EVENTS_TASK_NAME("RemoveDuplicatedEvents"),
     GENERATE_CASE_DOCUMENT_FOR_RETENTION_DATE_TASK_NAME("GenerateCaseDocumentForRetentionDate"),
     DETS_TO_ARM_TASK_NAME("DetsToArm"),
-    CASE_EXPIRY_DELETION_TASK_NAME("CaseExpiryDeletion", "${darts.automated.task.expiry-deletion.enabled:false}"),
+    CASE_EXPIRY_DELETION_TASK_NAME("CaseExpiryDeletion", "${darts.automated.task.case-expiry-deletion.enabled:false}"),
     ASSOCIATED_OBJECT_DATA_EXPIRY_DELETION_TASK_NAME("AssociatedObjectDataExpiryDeletion"),
-    MANUAL_DELETION("ManualDeletion", "${darts.manual-deletion.enabled:false}");
+    MANUAL_DELETION("ManualDeletion", "${darts.manual-deletion.enabled:false}"),
+    PROCESS_ARM_RPO_PENDING("ProcessARMRPOPending", "!${darts.automated.task.process-e2e-arm-rpo:false}"),
+    AUDIO_LINKING_TASK_NAME("AudioLinking");
     private final String taskName;
     private final String conditionalOnSpEL;
 

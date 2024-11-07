@@ -31,14 +31,14 @@ class AdminPatchAutomatedTaskTest extends IntegrationBase {
 
     @ParameterizedTest
     @EnumSource(value = SecurityRoleEnum.class, names = {"SUPER_ADMIN"}, mode = Mode.INCLUDE)
-    void allowsSuperAdminToPatchAutomatedTasks(SecurityRoleEnum role) throws Exception {
+    void superAdminCanSuccessfullyPatchAutomatedTask(SecurityRoleEnum role) throws Exception {
         given.anAuthenticatedUserWithGlobalAccessAndRole(role);
 
         mockMvc.perform(
                 patch(ENDPOINT + "/1")
                     .contentType(APPLICATION_JSON_VALUE)
                     .content("""
-                                 { "is_active": false }
+                                 { "is_active": false, "batch_size": 10 }
                                  """))
             .andExpect(status().isOk())
             .andReturn();
@@ -68,35 +68,6 @@ class AdminPatchAutomatedTaskTest extends IntegrationBase {
             .andExpect(status().isForbidden())
             .andReturn();
     }
-
-    @Test
-    void returns400WhenIsActiveIsNull() throws Exception {
-        given.anAuthenticatedUserWithGlobalAccessAndRole(SUPER_ADMIN);
-
-        mockMvc.perform(
-                patch(ENDPOINT + "/1")
-                    .contentType(APPLICATION_JSON_VALUE)
-                    .content("""
-                                 { "is_active": null }
-                                 """))
-            .andExpect(status().isBadRequest())
-            .andReturn();
-    }
-
-    @Test
-    void returns400RequiredFieldIsMissing() throws Exception {
-        given.anAuthenticatedUserWithGlobalAccessAndRole(SUPER_ADMIN);
-
-        mockMvc.perform(
-                patch(ENDPOINT + "/1")
-                    .contentType(APPLICATION_JSON_VALUE)
-                    .content("""
-                                 {  }
-                                 """))
-            .andExpect(status().isBadRequest())
-            .andReturn();
-    }
-
 
     @Test
     void returns404WhenTheTaskDoesntExist() throws Exception {

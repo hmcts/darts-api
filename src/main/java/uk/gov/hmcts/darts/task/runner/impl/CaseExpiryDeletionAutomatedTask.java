@@ -18,7 +18,7 @@ import uk.gov.hmcts.darts.task.service.LockService;
 
 @Component
 @ConditionalOnProperty(
-    value = "darts.automated.task.expiry-deletion.enabled",
+    value = "darts.automated.task.case-expiry-deletion.enabled",
     havingValue = "true"
 )
 @Slf4j

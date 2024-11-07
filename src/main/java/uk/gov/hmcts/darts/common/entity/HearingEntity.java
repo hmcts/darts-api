@@ -121,4 +121,8 @@ public class HearingEntity extends CreatedModifiedBaseEntity {
     public void addAnnotation(AnnotationEntity annotationEntity) {
         annotations.add(annotationEntity);
     }
+
+    public boolean containsMedia(MediaEntity mediaEntity) {
+        return mediaList.stream().anyMatch(media -> media.getId().equals(mediaEntity.getId()));
+    }
 }

@@ -24,6 +24,10 @@ public class AdminEventsSearchGivensBuilder {
         return range(0, quantity).mapToObj(i -> createEvent()).toList();
     }
 
+    public List<EventEntity> persistedEventsWithHearings(int quantity, int hearingQuantity) {
+        return range(0, quantity).mapToObj(i -> createEvent(hearingQuantity)).toList();
+    }
+
     public List<EventEntity> persistedEventsForHearing(int quantity, HearingEntity hearing) {
         return range(0, quantity).mapToObj(i -> createEventWithHearing(hearing)).toList();
     }
@@ -62,6 +66,18 @@ public class AdminEventsSearchGivensBuilder {
 
         dartsDatabase.saveEventsForHearing(hearing, eventForHearing);
         return eventForHearing;
+    }
+
+    private EventEntity createEvent(int hearingsForEvent) {
+        EventEntity eventEntity = createEvent();
+
+        for (int i = 0; i < hearingsForEvent - 1; i++) {
+            var hearing = PersistableFactory.getHearingTestData().someMinimalHearing();
+            saveWithTransients(hearing.getCourtroom());
+            dartsDatabase.saveEventsForHearing(hearing, eventEntity);
+        }
+
+        return eventEntity;
     }
 
     private EventEntity createEventForHearingOn(LocalDate date) {
