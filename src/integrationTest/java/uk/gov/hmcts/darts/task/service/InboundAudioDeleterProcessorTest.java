@@ -71,7 +71,7 @@ class InboundAudioDeleterProcessorTest extends IntegrationBase {
         );
         dartsDatabase.save(unstructuredEod);
 
-        inboundAudioDeleterProcessor.markForDeletion();
+        inboundAudioDeleterProcessor.markForDeletion(1000);
 
         List<ExternalObjectDirectoryEntity> foundMediaList = dartsDatabase.getExternalObjectDirectoryRepository().findByMediaAndExternalLocationType(
             savedMedia,
@@ -121,7 +121,7 @@ class InboundAudioDeleterProcessorTest extends IntegrationBase {
         );
         dartsDatabase.save(unstructuredEod);
 
-        inboundAudioDeleterProcessor.markForDeletion();
+        inboundAudioDeleterProcessor.markForDeletion(1000);
 
         List<ExternalObjectDirectoryEntity> foundMediaList = dartsDatabase.getExternalObjectDirectoryRepository().findByMediaAndExternalLocationType(
             savedMedia,

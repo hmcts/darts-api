@@ -12,6 +12,7 @@ import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.TransformedMediaEntity;
 import uk.gov.hmcts.darts.common.entity.TransientObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
+import uk.gov.hmcts.darts.common.enums.SystemUsersEnum;
 import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
 import uk.gov.hmcts.darts.common.service.bankholidays.BankHolidaysService;
 import uk.gov.hmcts.darts.test.common.data.MediaRequestTestData;
@@ -411,7 +412,8 @@ class OutboundAudioDeleterProcessorTest extends IntegrationBase {
     void whereLastAccessedIsNullUseCreatedAtAndInProgressStatus() {
         TransientObjectDirectoryEntity markedForDeletion = createMediaRequestsAndTransientObjectDirectoryWithHearingWithLastAccessedTimeIsNull();
 
-        assertEquals(1, outboundAudioDeleterProcessor.markForDeletion().size());
+        List<TransientObjectDirectoryEntity> responseList = outboundAudioDeleterProcessor.markForDeletion();
+        assertEquals(1, responseList.size());
         assertTransientObjectDirectoryStateChanged(markedForDeletion.getId());
         TransientObjectDirectoryEntity tod = dartsDatabase.getTransientObjectDirectoryRepository().findById(markedForDeletion.getId()).get();
         assertEquals(EXPIRED, tod.getTransformedMedia().getMediaRequest().getStatus());
@@ -475,14 +477,10 @@ class OutboundAudioDeleterProcessorTest extends IntegrationBase {
             transientObjectDirectory.getStatus().getId()
         );
 
-        UserAccountEntity userAccountEntity = dartsDatabase.getUserAccountRepository().findById(transientObjectDirectory.getLastModifiedBy().getId()).get();
-        assertEquals(
-            "system_housekeeping",
-            userAccountEntity.getUserName()
-        );
+        assertEquals(SystemUsersEnum.OUTBOUND_AUDIO_DELETER_AUTOMATED_TASK.getId(), transientObjectDirectory.getLastModifiedBy().getId());
 
         assertNotNull(transientObjectDirectory.getTransformedMedia().getExpiryTime());
-        assertEquals(1, transientObjectDirectory.getTransformedMedia().getLastModifiedBy().getId());
+        assertEquals(SystemUsersEnum.OUTBOUND_AUDIO_DELETER_AUTOMATED_TASK.getId(), transientObjectDirectory.getTransformedMedia().getLastModifiedBy().getId());
     }
 
     private void assertTransientObjectDirectoryStateNotChanged(Integer id) {

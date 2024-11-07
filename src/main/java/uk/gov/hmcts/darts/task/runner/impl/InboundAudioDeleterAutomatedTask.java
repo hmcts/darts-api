@@ -2,6 +2,7 @@ package uk.gov.hmcts.darts.task.runner.impl;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.darts.audio.service.InboundAudioDeleterProcessor;
 import uk.gov.hmcts.darts.common.repository.AutomatedTaskRepository;
@@ -20,6 +21,9 @@ public class InboundAudioDeleterAutomatedTask extends AbstractLockableAutomatedT
 
     private final InboundAudioDeleterProcessor inboundAudioDeleterProcessor;
 
+    @Value("${darts.automated.task.inbound-audio-deleter.default-batch-size}")
+    int defaultBatchSize;
+
     @Autowired
     public InboundAudioDeleterAutomatedTask(AutomatedTaskRepository automatedTaskRepository,
                                             AutomatedTaskConfigurationProperties automatedTaskConfigurationProperties,
@@ -36,6 +40,6 @@ public class InboundAudioDeleterAutomatedTask extends AbstractLockableAutomatedT
 
     @Override
     protected void runTask() {
-        inboundAudioDeleterProcessor.markForDeletion();
+        inboundAudioDeleterProcessor.markForDeletion(getAutomatedTaskBatchSize(defaultBatchSize));
     }
 }
