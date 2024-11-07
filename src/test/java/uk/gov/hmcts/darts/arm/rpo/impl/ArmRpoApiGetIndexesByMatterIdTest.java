@@ -70,6 +70,8 @@ class ArmRpoApiGetIndexesByMatterIdTest {
     void getIndexesByMatterIdSuccess() {
         // given
         IndexesByMatterIdResponse response = new IndexesByMatterIdResponse();
+        response.setStatus(200);
+        response.setIsError(false);
 
         IndexesByMatterIdResponse.Index index = new IndexesByMatterIdResponse.Index();
         IndexesByMatterIdResponse.IndexDetails indexDetails = new IndexesByMatterIdResponse.IndexDetails();
@@ -121,7 +123,7 @@ class ArmRpoApiGetIndexesByMatterIdTest {
         ArmRpoException armRpoException = assertThrows(ArmRpoException.class, () -> armRpoApi.getIndexesByMatterId("token", 1, "matterId", userAccount));
 
         assertThat(armRpoException.getMessage(), containsString(
-            "Failure during ARM RPO get indexes by matter ID: Unable to find indexes by matter ID in response"));
+            "Failure during ARM RPO get indexes by matter ID: ARM RPO API response is invalid"));
         verify(armRpoService).updateArmRpoStateAndStatus(armRpoExecutionDetailEntityArgumentCaptor.capture(),
                                                          eq(ARM_RPO_HELPER_MOCKS.getGetIndexesByMatterIdRpoState()),
                                                          eq(ARM_RPO_HELPER_MOCKS.getInProgressRpoStatus()),
@@ -133,6 +135,8 @@ class ArmRpoApiGetIndexesByMatterIdTest {
     @Test
     void getIndexesByMatterIdWithEmptyIndexes() {
         IndexesByMatterIdResponse response = new IndexesByMatterIdResponse();
+        response.setStatus(200);
+        response.setIsError(false);
         response.setIndexes(Collections.emptyList());
 
         when(armRpoService.getArmRpoExecutionDetailEntity(anyInt())).thenReturn(armRpoExecutionDetailEntity);
