@@ -113,7 +113,9 @@ public class ArmRpoApiImpl implements ArmRpoApi {
                                                   armRpoExecutionDetailEntity,
                                                   userAccount);
         }
-
+        if (indexesByMatterIdResponse.getIndexes().size() > 1) {
+            log.warn("More than one index found in response for matterId: {}", matterId);
+        }
         armRpoExecutionDetailEntity.setIndexId(indexesByMatterIdResponse.getIndexes().getFirst().getIndex().getIndexId());
         armRpoService.updateArmRpoStatus(armRpoExecutionDetailEntity, ArmRpoHelper.completedRpoStatus(), userAccount);
     }
