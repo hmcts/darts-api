@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Limit;
 import uk.gov.hmcts.darts.audio.service.OutboundAudioDeleterProcessorSingleElement;
 import uk.gov.hmcts.darts.common.entity.TransformedMediaEntity;
 import uk.gov.hmcts.darts.common.entity.TransientObjectDirectoryEntity;
@@ -62,7 +63,7 @@ class OutboundAudioDeleterProcessorImplTest {
         var transformedMedia1 = someTransformedMediaNotOwnedByUserInGroup(List.of(MEDIA_IN_PERPETUITY, SUPER_ADMIN, SUPER_USER));
         var transformedMedia2 = someTransformedMediaNotOwnedByUserInGroup(List.of(MEDIA_IN_PERPETUITY, SUPER_ADMIN, SUPER_USER));
 
-        when(transformedMediaRepository.findAllDeletableTransformedMedia(any()))
+        when(transformedMediaRepository.findAllDeletableTransformedMedia(any(), eq(Limit.of(1000))))
             .thenReturn(List.of(transformedMedia1, transformedMedia2));
 
         var deletedValues = List.of(new TransientObjectDirectoryEntity());
@@ -71,7 +72,7 @@ class OutboundAudioDeleterProcessorImplTest {
             .thenReturn(deletedValues);
 
         // when
-        List<TransientObjectDirectoryEntity> result = outboundAudioDeleterProcessorImpl.markForDeletion();
+        List<TransientObjectDirectoryEntity> result = outboundAudioDeleterProcessorImpl.markForDeletion(1000);
 
         // then
         assertThat(result).isEqualTo(deletedValues);
@@ -84,13 +85,13 @@ class OutboundAudioDeleterProcessorImplTest {
             List.of(MEDIA_IN_PERPETUITY, SUPER_ADMIN, SUPER_USER));
         var transformedMediaNotOwnedByUserInMediaInPerpetuityGroup = someTransformedMediaNotOwnedByUserInGroup(
             List.of(MEDIA_IN_PERPETUITY, SUPER_ADMIN, SUPER_USER));
-        when(transformedMediaRepository.findAllDeletableTransformedMedia(any()))
+        when(transformedMediaRepository.findAllDeletableTransformedMedia(any(), eq(Limit.of(1000))))
             .thenReturn(List.of(
                 transformedMediaOwnedByUserInMediaInPerpetuityGroup,
                 transformedMediaNotOwnedByUserInMediaInPerpetuityGroup));
 
         // when
-        outboundAudioDeleterProcessorImpl.markForDeletion();
+        outboundAudioDeleterProcessorImpl.markForDeletion(1000);
 
         // then
         verify(singleElementProcessor, times(1))

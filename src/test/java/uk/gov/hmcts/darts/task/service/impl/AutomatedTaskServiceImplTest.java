@@ -237,7 +237,6 @@ class AutomatedTaskServiceImplTest {
     @Test
     void overrideTaskLockDurations() {
         when(lockService.getLockAtMostFor()).thenReturn(Duration.ofMinutes(20));
-        when(lockService.getLockAtLeastFor()).thenReturn(Duration.ofMinutes(1));
 
         var automatedTask = new AbstractLockableAutomatedTask(
             mockAutomatedTaskRepository,
