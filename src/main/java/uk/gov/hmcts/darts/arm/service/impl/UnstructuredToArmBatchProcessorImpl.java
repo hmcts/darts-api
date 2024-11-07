@@ -120,7 +120,7 @@ public class UnstructuredToArmBatchProcessorImpl implements UnstructuredToArmBat
             .toList();
 
         try {
-            AsyncUtil.invokeAllAwaitTermination(tasks, unstructuredToArmProcessorConfiguration.getThreads(), 2, TimeUnit.HOURS);
+            AsyncUtil.invokeAllAwaitTermination(tasks, unstructuredToArmProcessorConfiguration.getThreads(), 90, TimeUnit.MINUTES);
         } catch (Exception e) {
             log.error("Unstructured to arm batch unexpected exception", e);
             if (e instanceof InterruptedException) {
