@@ -11,7 +11,6 @@ import uk.gov.hmcts.darts.audio.entity.MediaRequestEntity;
 import uk.gov.hmcts.darts.audio.enums.MediaRequestStatus;
 import uk.gov.hmcts.darts.audit.api.AuditApi;
 import uk.gov.hmcts.darts.cases.service.CaseService;
-import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.DefenceEntity;
 import uk.gov.hmcts.darts.common.entity.DefendantEntity;
@@ -179,7 +178,7 @@ class DataAnonymisationServiceImplTest {
         UserAccountEntity userAccount = new UserAccountEntity();
         userAccount.setId(123);
 
-        dataAnonymisationService.anonymiseCourtCaseEntity(userAccount, courtCase);
+        dataAnonymisationService.anonymiseCourtCaseById(userAccount, 123);
         assertThat(courtCase.isDataAnonymised()).isTrue();
         assertThat(courtCase.getDataAnonymisedBy()).isEqualTo(123);
         assertThat(courtCase.getDataAnonymisedTs()).isCloseToUtcNow(within(5, SECONDS));
