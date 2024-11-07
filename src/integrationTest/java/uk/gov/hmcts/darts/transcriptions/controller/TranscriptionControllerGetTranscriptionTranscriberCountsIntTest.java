@@ -56,17 +56,17 @@ class TranscriptionControllerGetTranscriptionTranscriberCountsIntTest extends In
                                 INSERT INTO darts.user_account (usr_id, dm_user_s_object_id, user_name, user_full_name, user_email_address, description,
                                 is_active, created_ts,
                                 last_modified_ts, last_login_ts, last_modified_by, created_by, account_guid, is_system_user)
-                                VALUES (-10, NULL, 'John R', 'John R', 'John.R@example.com', NULL, true, current_timestamp,
+                                VALUES (-410, NULL, 'John R', 'John R', 'John.R@example.com', NULL, true, current_timestamp,
                                 current_timestamp, NULL, 0, 0, NULL, false);
                                 INSERT INTO darts.security_group_user_account_ae (usr_id, grp_id)
-                                VALUES (-10, -4);
+                                VALUES (-410, -4);
                                 INSERT INTO darts.security_group_courthouse_ae (grp_id, cth_id)
                                 VALUES (-4, -1);
                                 
                                 INSERT INTO darts.user_account (usr_id, dm_user_s_object_id, user_name, user_full_name, user_email_address, description,
                                 is_active, created_ts,
                                 last_modified_ts, last_login_ts, last_modified_by, created_by, account_guid, is_system_user)
-                                VALUES (-20, NULL, 'John R', 'John R', 'John.R@example.com', NULL, true, current_timestamp,
+                                VALUES (-420, NULL, 'John R', 'John R', 'John.R@example.com', NULL, true, current_timestamp,
                                 current_timestamp, NULL, 0, 0, NULL, false);
                                 
                                 -- Transcript Requests: Approved
@@ -74,47 +74,47 @@ class TranscriptionControllerGetTranscriptionTranscriberCountsIntTest extends In
                                 created_ts, last_modified_ts, last_modified_by, created_by, tru_id, trs_id, hearing_date,
                                 is_manual_transcription, hide_request_from_requestor)
                                 VALUES (41, -1, 9, NULL, NULL, '2023-11-23 09:00:00+00', '2023-11-23 09:30:00+00', '2023-11-23 16:25:55.297666+00',
-                                '2023-11-23 16:26:20.451054+00', -10, -10, 1, 3, NULL, true, false);
+                                '2023-11-23 16:26:20.451054+00', -410, -410, 1, 3, NULL, true, false);
                                 INSERT INTO darts.case_transcription_ae (tra_id, cas_id) VALUES (41,-1);
                                 INSERT INTO darts.hearing_transcription_ae (tra_id, hea_id) VALUES (41,-1);
                                 INSERT INTO darts.transcription_workflow (trw_id, tra_id, trs_id, workflow_actor, workflow_ts)
-                                VALUES (41, 41, 1, -10, '2023-11-23 16:25:55.304517+00');
+                                VALUES (41, 41, 1, -410, '2023-11-23 16:25:55.304517+00');
                                 INSERT INTO darts.transcription_workflow (trw_id, tra_id, trs_id, workflow_actor, workflow_ts)
-                                VALUES (42, 41, 2, -10, '2023-11-23 16:25:55.338405+00');
+                                VALUES (42, 41, 2, -410, '2023-11-23 16:25:55.338405+00');
                                 INSERT INTO darts.transcription_workflow (trw_id, tra_id, trs_id, workflow_actor, workflow_ts)
-                                VALUES (43, 41, 3, -10, '2023-11-23 16:26:20.441633+00');
+                                VALUES (43, 41, 3, -410, '2023-11-23 16:26:20.441633+00');
                                 
                                 -- Transcript Requests: With Transcriber
                                 INSERT INTO darts.transcription (tra_id, ctr_id, trt_id, transcription_object_id, requested_by, start_ts, end_ts,
                                 created_ts, last_modified_ts, last_modified_by, created_by, tru_id, trs_id, hearing_date,
                                 is_manual_transcription, hide_request_from_requestor)
                                 VALUES (81, NULL, 9, NULL, NULL, '2023-11-23 09:20:00+00', '2023-11-23 09:30:00+00', '2023-11-23 17:45:14.938855+00',
-                                '2023-11-23 17:45:51.1549+00', -10, -10, 1, 5, NULL, true, false);
+                                '2023-11-23 17:45:51.1549+00', -410, -410, 1, 5, NULL, true, false);
                                 INSERT INTO darts.case_transcription_ae (tra_id, cas_id) VALUES (81,-1);
                                 INSERT INTO darts.hearing_transcription_ae (tra_id, hea_id) VALUES (81,-1);
                                 INSERT INTO darts.transcription_workflow (trw_id, tra_id, trs_id, workflow_actor, workflow_ts)
-                                VALUES (81, 81, 1, -10, '2023-11-23 17:45:14.940936+00');
+                                VALUES (81, 81, 1, -410, '2023-11-23 17:45:14.940936+00');
                                 INSERT INTO darts.transcription_workflow (trw_id, tra_id, trs_id, workflow_actor, workflow_ts)
-                                VALUES (82, 81, 2, -10, '2023-11-23 17:45:14.948701+00');
+                                VALUES (82, 81, 2, -410, '2023-11-23 17:45:14.948701+00');
                                 INSERT INTO darts.transcription_workflow (trw_id, tra_id, trs_id, workflow_actor, workflow_ts)
-                                VALUES (101, 81, 3, -10, '2023-11-23 17:45:27.069655+00');
+                                VALUES (101, 81, 3, -410, '2023-11-23 17:45:27.069655+00');
                                 INSERT INTO darts.transcription_workflow (trw_id, tra_id, trs_id, workflow_actor, workflow_ts)
-                                VALUES (102, 81, 5, -10, '2023-11-23 17:45:51.151621+00');
+                                VALUES (102, 81, 5, -410, '2023-11-23 17:45:51.151621+00');
                                 
                                 -- Transcript Requests: Approved
                                 INSERT INTO darts.transcription (tra_id, ctr_id, trt_id, transcription_object_id, requested_by, start_ts, end_ts,
                                 created_ts, last_modified_ts, last_modified_by, created_by, tru_id, trs_id, hearing_date,
                                 is_manual_transcription, hide_request_from_requestor)
                                 VALUES (101, NULL, 9, NULL, NULL, '2023-11-24 09:00:00+00', '2023-11-24 09:30:00+00', '2023-11-24 12:37:00.782036+00',
-                                '2023-11-24 12:53:42.870475+00', -10, -10, 1, 3, NULL, true, false);
+                                '2023-11-24 12:53:42.870475+00', -410, -410, 1, 3, NULL, true, false);
                                 INSERT INTO darts.case_transcription_ae (tra_id, cas_id) VALUES (101,-1);
                                 INSERT INTO darts.hearing_transcription_ae (tra_id, hea_id) VALUES (101,-1);
                                 INSERT INTO darts.transcription_workflow (trw_id, tra_id, trs_id, workflow_actor, workflow_ts)
-                                VALUES (121, 101, 1, -10, '2023-11-24 12:37:00.812692+00');
+                                VALUES (121, 101, 1, -410, '2023-11-24 12:37:00.812692+00');
                                 INSERT INTO darts.transcription_workflow (trw_id, tra_id, trs_id, workflow_actor, workflow_ts)
-                                VALUES (122, 101, 2, -10, '2023-11-24 12:37:00.846763+00');
+                                VALUES (122, 101, 2, -410, '2023-11-24 12:37:00.846763+00');
                                 INSERT INTO darts.transcription_workflow (trw_id, tra_id, trs_id, workflow_actor, workflow_ts)
-                                VALUES (123, 101, 3, -10, '2023-11-24 12:37:18.762383+00');
+                                VALUES (123, 101, 3, -410, '2023-11-24 12:37:18.762383+00');
                                 """);
     }
 
@@ -128,9 +128,9 @@ class TranscriptionControllerGetTranscriptionTranscriberCountsIntTest extends In
                                 DELETE FROM darts.transcription WHERE tra_id IN (41, 81, 101);
                                 
                                 DELETE FROM darts.security_group_courthouse_ae WHERE grp_id=-4 AND cth_id=-1;
-                                DELETE FROM darts.security_group_user_account_ae WHERE usr_id=-10 AND grp_id=-4;
-                                DELETE FROM darts.user_account WHERE usr_id=-10;
-                                DELETE FROM darts.user_account WHERE usr_id=-20;
+                                DELETE FROM darts.security_group_user_account_ae WHERE usr_id=-410 AND grp_id=-4;
+                                DELETE FROM darts.user_account WHERE usr_id=-410;
+                                DELETE FROM darts.user_account WHERE usr_id=-420;
                                 
                                 DELETE FROM darts.hearing WHERE hea_id=-1;
                                 DELETE FROM darts.court_case WHERE cas_id=-1;
@@ -145,7 +145,7 @@ class TranscriptionControllerGetTranscriptionTranscriberCountsIntTest extends In
         MockHttpServletRequestBuilder requestBuilder = get(ENDPOINT_URI)
             .header(
                 USER_ID_HEADER,
-                -10
+                -410
             );
 
         final MvcResult mvcResult = mockMvc.perform(requestBuilder)
@@ -165,14 +165,14 @@ class TranscriptionControllerGetTranscriptionTranscriberCountsIntTest extends In
     @Test
     void getTranscriberCountsShouldReturnOkWithInactive() throws Exception {
 
-        UserAccountEntity userAccountEntity = userAccountRepository.findById(-10).get();
+        UserAccountEntity userAccountEntity = userAccountRepository.findById(-410).get();
         userAccountEntity.setActive(false);
         userAccountRepository.save(userAccountEntity);
 
         MockHttpServletRequestBuilder requestBuilder = get(ENDPOINT_URI)
             .header(
                 USER_ID_HEADER,
-                -10
+                -410
             );
 
         mockMvc.perform(requestBuilder)
@@ -186,7 +186,7 @@ class TranscriptionControllerGetTranscriptionTranscriberCountsIntTest extends In
         MockHttpServletRequestBuilder requestBuilder = get(ENDPOINT_URI)
             .header(
                 USER_ID_HEADER,
-                -20
+                -420
             );
 
         final MvcResult mvcResult = mockMvc.perform(requestBuilder)

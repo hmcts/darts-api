@@ -1,6 +1,7 @@
 package uk.gov.hmcts.darts.task.runner.impl;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.darts.common.repository.AutomatedTaskRepository;
 import uk.gov.hmcts.darts.datamanagement.service.InboundAnnotationTranscriptionDeleterProcessor;
@@ -17,6 +18,9 @@ public class InboundAnnotationTranscriptionDeleterAutomatedTask extends Abstract
     implements AutoloadingManualTask {
 
     private final InboundAnnotationTranscriptionDeleterProcessor annotationTranscriptionDeleterProcessor;
+
+    @Value("${darts.automated.task.inbound-annotation-transcription-deleter.default-batch-size}")
+    int defaultBatchSize;
 
     @Autowired
     public InboundAnnotationTranscriptionDeleterAutomatedTask(AutomatedTaskRepository automatedTaskRepository,
@@ -35,6 +39,6 @@ public class InboundAnnotationTranscriptionDeleterAutomatedTask extends Abstract
 
     @Override
     protected void runTask() {
-        annotationTranscriptionDeleterProcessor.markForDeletion();
+        annotationTranscriptionDeleterProcessor.markForDeletion(getAutomatedTaskBatchSize(defaultBatchSize));
     }
 }
