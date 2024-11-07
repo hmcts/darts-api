@@ -67,7 +67,7 @@ public class AdminMediaServiceImpl implements AdminMediaService {
     private boolean manualDeletionEnabled;
 
     public AdminMediaResponse getMediasById(Integer id) {
-        var mediaEntity = mediaRepository.findById(id)
+        var mediaEntity = mediaRepository.findByIdIncludeDeleted(id)
             .orElseThrow(() -> new DartsApiException(AudioApiError.MEDIA_NOT_FOUND));
 
         return adminMediaMapper.toApiModel(mediaEntity);
@@ -127,6 +127,7 @@ public class AdminMediaServiceImpl implements AdminMediaService {
         return objectAdminActionRepository.findAllMediaActionsWithAnyDeletionReason().stream()
             .map(ObjectAdminActionEntity::getMedia)
             .map(adminMarkedForDeletionMapper::toApiModel)
+            .filter(media -> media != null)
             .sorted(Comparator.comparing(PostAdminMediasMarkedForDeletionItem::getMediaId))
             .toList();
     }
@@ -155,7 +156,7 @@ public class AdminMediaServiceImpl implements AdminMediaService {
         mediaApproveMarkForDeletionValidator.validate(mediaId);
         List<ObjectAdminActionEntity> objectAdminActionEntityList = objectAdminActionRepository.findByMedia_Id(mediaId);
 
-        Optional<MediaEntity> mediaEntityOptional = mediaRepository.findById(mediaId);
+        Optional<MediaEntity> mediaEntityOptional = mediaRepository.findByIdIncludeDeleted(mediaId);
         if (mediaEntityOptional.isEmpty()) {
             throw new DartsApiException(AudioApiError.MEDIA_NOT_FOUND);
         }

@@ -372,19 +372,6 @@ public class MediaRequestServiceImpl implements MediaRequestService {
         transformedMediaRepository.saveAndFlush(foundEntity);
     }
 
-    @Transactional
-    @Override
-    public void updateTransformedMediaLastAccessedTimestampForMediaRequestId(Integer mediaRequestId) {
-        List<TransformedMediaEntity> foundEntityList = transformedMediaRepository.findByMediaRequestId(mediaRequestId);
-        if (foundEntityList.isEmpty()) {
-            throw new DartsApiException(AudioRequestsApiError.TRANSFORMED_MEDIA_NOT_FOUND);
-        }
-        for (TransformedMediaEntity transformedMedia : foundEntityList) {
-            transformedMedia.setLastAccessed(currentTimeHelper.currentOffsetDateTime());
-            transformedMediaRepository.saveAndFlush(transformedMedia);
-        }
-    }
-
 
     private Predicate expiredPredicate(Boolean expired, CriteriaBuilder criteriaBuilder,
                                        Root<MediaRequestEntity> mediaRequest) {
@@ -547,7 +534,7 @@ public class MediaRequestServiceImpl implements MediaRequestService {
         mediaHideOrShowValidator.validate(request);
 
         Optional<MediaEntity> mediaEntityOptional
-            = mediaRepository.findById(mediaId);
+            = mediaRepository.findByIdIncludeDeleted(mediaId);
         if (mediaEntityOptional.isPresent()) {
             MediaEntity mediaEntity = mediaEntityOptional.get();
 
