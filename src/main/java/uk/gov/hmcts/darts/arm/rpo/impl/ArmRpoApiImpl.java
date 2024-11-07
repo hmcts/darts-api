@@ -6,9 +6,11 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.NotImplementedException;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.darts.arm.client.ArmRpoClient;
 import uk.gov.hmcts.darts.arm.client.model.rpo.ArmAsyncSearchResponse;
+import uk.gov.hmcts.darts.arm.client.model.rpo.BaseRpoResponse;
 import uk.gov.hmcts.darts.arm.client.model.rpo.ExtendedProductionsByMatterResponse;
 import uk.gov.hmcts.darts.arm.client.model.rpo.ExtendedSearchesByMatterResponse;
 import uk.gov.hmcts.darts.arm.client.model.rpo.IndexesByMatterIdResponse;
@@ -206,7 +208,10 @@ public class ArmRpoApiImpl implements ArmRpoApi {
         }
 
         if (isNull(masterIndexFieldByRecordClassSchemaResponse)
-            || CollectionUtils.isEmpty(masterIndexFieldByRecordClassSchemaResponse.getMasterIndexFields())) {
+            || !isNull(masterIndexFieldByRecordClassSchemaResponse.getStatus())) {
+
+        }
+        if (CollectionUtils.isEmpty(masterIndexFieldByRecordClassSchemaResponse.getMasterIndexFields())) {
             throw handleFailureAndCreateException(errorMessage.append("Unable to find master index fields in response").toString(),
                                                   armRpoExecutionDetailEntity,
                                                   userAccount);
@@ -319,12 +324,7 @@ public class ArmRpoApiImpl implements ArmRpoApi {
             throw handleFailureAndCreateException(errorMessage.toString(), armRpoExecutionDetailEntity, userAccount);
         }
 
-        if (isNull(saveBackgroundSearchResponse)
-            || isNull(saveBackgroundSearchResponse.getStatus())
-            || !saveBackgroundSearchResponse.getStatus().equals(200)) {
-            throw handleFailureAndCreateException(errorMessage.append("Unable to save search ").toString(),
-                                                  armRpoExecutionDetailEntity, userAccount);
-        }
+        handleResponseStatus(userAccount, saveBackgroundSearchResponse, errorMessage, armRpoExecutionDetailEntity);
 
         armRpoService.updateArmRpoStatus(armRpoExecutionDetailEntity, ArmRpoHelper.completedRpoStatus(), userAccount);
     }
@@ -365,6 +365,29 @@ public class ArmRpoApiImpl implements ArmRpoApi {
                                                             UserAccountEntity userAccount) {
         armRpoService.updateArmRpoStatus(armRpoExecutionDetailEntity, ArmRpoHelper.failedRpoStatus(), userAccount);
         return new ArmRpoException(message);
+    }
+
+    private void handleResponseStatus(UserAccountEntity userAccount, BaseRpoResponse baseRpoResponse, StringBuilder errorMessage,
+                                      ArmRpoExecutionDetailEntity armRpoExecutionDetailEntity) {
+        if (isNull(baseRpoResponse)
+            || isNull(baseRpoResponse.getStatus())
+            || isNull(baseRpoResponse.getIsError())) {
+            throw handleFailureAndCreateException(errorMessage.append("ARM RPO API response is invalid - ").append(baseRpoResponse)
+                                                      .toString(),
+                                                  armRpoExecutionDetailEntity, userAccount);
+        }
+        try {
+            HttpStatus responseStatus = HttpStatus.valueOf(baseRpoResponse.getStatus());
+            if (!responseStatus.is2xxSuccessful() || baseRpoResponse.getIsError()) {
+                throw handleFailureAndCreateException(errorMessage.append("ARM RPO API failed with status - ").append(responseStatus)
+                                                          .append(" and response - ").append(baseRpoResponse).toString(),
+                                                      armRpoExecutionDetailEntity, userAccount);
+            }
+        } catch (IllegalArgumentException e) {
+            throw handleFailureAndCreateException(errorMessage.append("ARM RPO API response status is invalid - ")
+                                                      .append(baseRpoResponse).toString(),
+                                                  armRpoExecutionDetailEntity, userAccount);
+        }
     }
 
     private StorageAccountRequest createStorageAccountRequest() {

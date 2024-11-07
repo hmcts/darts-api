@@ -66,6 +66,7 @@ class ArmRpoApiSaveBackgroundSearchTest {
         // given
         SaveBackgroundSearchResponse saveBackgroundSearchResponse = new SaveBackgroundSearchResponse();
         saveBackgroundSearchResponse.setStatus(200);
+        saveBackgroundSearchResponse.setIsError(false);
         when(armRpoClient.saveBackgroundSearch(anyString(), any())).thenReturn(saveBackgroundSearchResponse);
 
         // when
@@ -85,6 +86,7 @@ class ArmRpoApiSaveBackgroundSearchTest {
         // given
         SaveBackgroundSearchResponse saveBackgroundSearchResponse = new SaveBackgroundSearchResponse();
         saveBackgroundSearchResponse.setStatus(400);
+        saveBackgroundSearchResponse.setIsError(true);
         when(armRpoClient.saveBackgroundSearch(anyString(), any())).thenReturn(saveBackgroundSearchResponse);
 
         // when
@@ -93,7 +95,7 @@ class ArmRpoApiSaveBackgroundSearchTest {
 
         // then
         assertThat(armRpoException.getMessage(), containsString(
-            "Failure during ARM save background search: Unable to save search"));
+            "Failure during ARM save background search: ARM RPO API failed with status - 400 BAD_REQUEST and response"));
 
         verify(armRpoService).updateArmRpoStateAndStatus(any(),
                                                          eq(ARM_RPO_HELPER_MOCKS.getSaveBackgroundSearchRpoState()),
@@ -136,7 +138,76 @@ class ArmRpoApiSaveBackgroundSearchTest {
 
         // then
         assertThat(armRpoException.getMessage(), containsString(
-            "Failure during ARM save background search: Unable to save search"));
+            "Failure during ARM save background search: ARM RPO API response is invalid - null"));
+
+        verify(armRpoService).updateArmRpoStateAndStatus(any(),
+                                                         eq(ARM_RPO_HELPER_MOCKS.getSaveBackgroundSearchRpoState()),
+                                                         eq(ARM_RPO_HELPER_MOCKS.getInProgressRpoStatus()),
+                                                         any());
+        verify(armRpoService).updateArmRpoStatus(any(), eq(ARM_RPO_HELPER_MOCKS.getFailedRpoStatus()), any());
+        verifyNoMoreInteractions(armRpoService);
+    }
+
+    @Test
+    void getStorageAccountsReturnsNullStatusHttpResponse() {
+        // given
+        SaveBackgroundSearchResponse saveBackgroundSearchResponse = new SaveBackgroundSearchResponse();
+        saveBackgroundSearchResponse.setIsError(true);
+        when(armRpoClient.saveBackgroundSearch(anyString(), any(SaveBackgroundSearchRequest.class))).thenReturn(null);
+
+        // when
+        ArmRpoException armRpoException = assertThrows(ArmRpoException.class, () -> armRpoApi.saveBackgroundSearch(
+            "token", 1, "searchName", userAccount));
+
+        // then
+        assertThat(armRpoException.getMessage(), containsString(
+            "Failure during ARM save background search: ARM RPO API response is invalid"));
+
+        verify(armRpoService).updateArmRpoStateAndStatus(any(),
+                                                         eq(ARM_RPO_HELPER_MOCKS.getSaveBackgroundSearchRpoState()),
+                                                         eq(ARM_RPO_HELPER_MOCKS.getInProgressRpoStatus()),
+                                                         any());
+        verify(armRpoService).updateArmRpoStatus(any(), eq(ARM_RPO_HELPER_MOCKS.getFailedRpoStatus()), any());
+        verifyNoMoreInteractions(armRpoService);
+    }
+
+    @Test
+    void getStorageAccountsReturnsNullIsErrorResponse() {
+        // given
+        SaveBackgroundSearchResponse saveBackgroundSearchResponse = new SaveBackgroundSearchResponse();
+        saveBackgroundSearchResponse.setStatus(200);
+        when(armRpoClient.saveBackgroundSearch(anyString(), any(SaveBackgroundSearchRequest.class))).thenReturn(null);
+
+        // when
+        ArmRpoException armRpoException = assertThrows(ArmRpoException.class, () -> armRpoApi.saveBackgroundSearch(
+            "token", 1, "searchName", userAccount));
+
+        // then
+        assertThat(armRpoException.getMessage(), containsString(
+            "Failure during ARM save background search: ARM RPO API response is invalid"));
+
+        verify(armRpoService).updateArmRpoStateAndStatus(any(),
+                                                         eq(ARM_RPO_HELPER_MOCKS.getSaveBackgroundSearchRpoState()),
+                                                         eq(ARM_RPO_HELPER_MOCKS.getInProgressRpoStatus()),
+                                                         any());
+        verify(armRpoService).updateArmRpoStatus(any(), eq(ARM_RPO_HELPER_MOCKS.getFailedRpoStatus()), any());
+        verifyNoMoreInteractions(armRpoService);
+    }
+
+    @Test
+    void getStorageAccountsReturnsInvalidHttpStatusResponse() {
+        // given
+        SaveBackgroundSearchResponse saveBackgroundSearchResponse = new SaveBackgroundSearchResponse();
+        saveBackgroundSearchResponse.setStatus(-1);
+        when(armRpoClient.saveBackgroundSearch(anyString(), any(SaveBackgroundSearchRequest.class))).thenReturn(null);
+
+        // when
+        ArmRpoException armRpoException = assertThrows(ArmRpoException.class, () -> armRpoApi.saveBackgroundSearch(
+            "token", 1, "searchName", userAccount));
+
+        // then
+        assertThat(armRpoException.getMessage(), containsString(
+            "Failure during ARM save background search: ARM RPO API response is invalid"));
 
         verify(armRpoService).updateArmRpoStateAndStatus(any(),
                                                          eq(ARM_RPO_HELPER_MOCKS.getSaveBackgroundSearchRpoState()),

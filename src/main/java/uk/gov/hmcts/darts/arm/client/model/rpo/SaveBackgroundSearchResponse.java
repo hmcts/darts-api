@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @EqualsAndHashCode(callSuper = true)
-public class SaveBackgroundSearchResponse extends AbstractMatterResponse {
+public class SaveBackgroundSearchResponse extends BaseRpoResponse {
 
     private Boolean isValid;
 
