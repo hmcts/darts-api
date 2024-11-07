@@ -1,6 +1,6 @@
 buildscript {
   dependencies {
-    classpath("org.flywaydb:flyway-database-postgresql:10.20.1")
+    classpath("org.flywaydb:flyway-database-postgresql:10.21.0")
   }
 }
 
@@ -17,7 +17,7 @@ plugins {
   id 'org.sonarqube' version '5.1.0.4882'
   id "io.freefair.lombok" version "8.10.2"
   id "org.openapi.generator" version "7.9.0"
-  id "org.flywaydb.flyway" version "10.20.1"
+  id "org.flywaydb.flyway" version "10.21.0"
   id 'maven-publish'
   id("com.dorongold.task-tree") version "4.0.0"
 }
@@ -422,8 +422,8 @@ dependencies {
   implementation 'com.azure:azure-storage-blob'
 
   implementation group: 'io.rest-assured', name: 'rest-assured'
-  implementation group: 'org.flywaydb', name: 'flyway-core', version: '10.20.1'
-  implementation group: 'org.flywaydb', name: 'flyway-database-postgresql', version: '10.20.1'
+  implementation group: 'org.flywaydb', name: 'flyway-core', version: '10.21.0'
+  implementation group: 'org.flywaydb', name: 'flyway-database-postgresql', version: '10.21.0'
   implementation group: 'io.hypersistence', name: 'hypersistence-utils-hibernate-63', version: '3.8.3'
 
   //database
