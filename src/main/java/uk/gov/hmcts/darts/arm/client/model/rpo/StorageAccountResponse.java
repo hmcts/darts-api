@@ -12,7 +12,7 @@ import java.util.List;
 @Data
 @NoArgsConstructor
 @EqualsAndHashCode(callSuper = true)
-public class StorageAccountResponse extends AbstractMatterResponse {
+public class StorageAccountResponse extends BaseRpoResponse {
 
     private List<Index> indexes;
 

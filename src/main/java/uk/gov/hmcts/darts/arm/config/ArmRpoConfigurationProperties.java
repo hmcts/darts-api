@@ -12,5 +12,8 @@ import org.springframework.validation.annotation.Validated;
 public class ArmRpoConfigurationProperties {
 
     private String getRecordManagementMatterPath;
+    private String getStorageAccountsPath;
+    private String getMasterIndexFieldByRecordClassSchemaPath;
+    private String saveBackgroundSearchPath;
     
 }

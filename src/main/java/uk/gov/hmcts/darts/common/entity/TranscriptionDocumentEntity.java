@@ -15,6 +15,7 @@ import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.SQLRestriction;
 import uk.gov.hmcts.darts.common.entity.base.ModifiedBaseEntity;
 import uk.gov.hmcts.darts.task.runner.SoftDelete;
 
@@ -26,6 +27,7 @@ import java.util.List;
 @Table(name = "transcription_document")
 @Getter
 @Setter
+@SQLRestriction("is_deleted = false")
 public class TranscriptionDocumentEntity extends ModifiedBaseEntity
     implements ConfidenceAware, SoftDelete {
 

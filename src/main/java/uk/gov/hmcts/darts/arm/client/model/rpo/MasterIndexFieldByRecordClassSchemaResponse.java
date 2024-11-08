@@ -12,7 +12,7 @@ import java.util.List;
 @Data
 @NoArgsConstructor
 @EqualsAndHashCode(callSuper = true)
-public class MasterIndexFieldByRecordClassSchemaResponse extends AbstractMatterResponse {
+public class MasterIndexFieldByRecordClassSchemaResponse extends BaseRpoResponse {
 
     private List<MasterIndexField> masterIndexFields;
 

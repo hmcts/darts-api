@@ -9,5 +9,5 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @EqualsAndHashCode(callSuper = true)
-public class ExtendedSearchesByMatterResponse extends AbstractMatterResponse {
+public class ExtendedSearchesByMatterResponse extends BaseRpoResponse {
 }

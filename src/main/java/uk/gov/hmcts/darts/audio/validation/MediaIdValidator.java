@@ -15,7 +15,7 @@ public class MediaIdValidator implements Validator<Integer> {
 
     @Override
     public void validate(Integer id) {
-        if (mediaRepository.findById(id).isEmpty()) {
+        if (mediaRepository.findByIdIncludeDeleted(id).isEmpty()) {
             throw new DartsApiException(AudioApiError.MEDIA_NOT_FOUND);
         }
     }
