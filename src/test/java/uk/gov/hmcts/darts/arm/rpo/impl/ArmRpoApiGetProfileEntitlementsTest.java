@@ -231,6 +231,8 @@ class ArmRpoApiGetProfileEntitlementsTest {
 
     private void createEntitlementResponseAndSetMock(List<ProfileEntitlementResponse.ProfileEntitlement> profileEntitlements) {
         var response = new ProfileEntitlementResponse();
+        response.setStatus(200);
+        response.setIsError(false);
         response.setEntitlements(profileEntitlements);
         when(armRpoClient.getProfileEntitlementResponse(TOKEN))
             .thenReturn(response);

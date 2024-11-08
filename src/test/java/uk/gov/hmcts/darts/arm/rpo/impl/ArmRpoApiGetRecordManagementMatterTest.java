@@ -59,6 +59,8 @@ class ArmRpoApiGetRecordManagementMatterTest {
     void getRecordManagementMatterThrowsExceptionWhenResponseReturnedWithoutMatterId() {
         // given
         RecordManagementMatterResponse expectedResponse = new RecordManagementMatterResponse();
+        expectedResponse.setStatus(200);
+        expectedResponse.setIsError(false);
         when(armRpoClient.getRecordManagementMatter(anyString())).thenReturn(expectedResponse);
 
         // when
@@ -94,7 +96,6 @@ class ArmRpoApiGetRecordManagementMatterTest {
         assertThrows(ArmRpoException.class, () -> armRpoApi.getRecordManagementMatter("token", EXECUTION_ID, userAccountEntity));
 
         // then
-        // then
         verify(armRpoService).updateArmRpoStateAndStatus(any(),
                                                          eq(ARM_RPO_HELPER_MOCKS.getGetRecordManagementMatterRpoState()),
                                                          eq(ARM_RPO_HELPER_MOCKS.getInProgressRpoStatus()),
@@ -106,6 +107,8 @@ class ArmRpoApiGetRecordManagementMatterTest {
     void getRecordManagementMatterSetsMatterIdWhenResponseIsValid() {
         // given
         RecordManagementMatterResponse response = new RecordManagementMatterResponse();
+        response.setStatus(200);
+        response.setIsError(false);
         response.setRecordManagementMatter(new RecordManagementMatterResponse.RecordManagementMatter());
         response.getRecordManagementMatter().setMatterId("123");
         when(armRpoClient.getRecordManagementMatter(anyString())).thenReturn(response);
