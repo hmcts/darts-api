@@ -1,21 +1,15 @@
 package uk.gov.hmcts.darts.common.service;
 
-import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.EventEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 
 import java.util.List;
 
 public interface DataAnonymisationService {
-    default void anonymizeCourtCaseEntity(CourtCaseEntity courtCase) {
-        anonymizeCourtCaseEntity(getUserAccount(), courtCase);
-    }
 
-    void anonymizeCourtCaseEntity(UserAccountEntity userAccount, CourtCaseEntity courtCase);
+    void anonymiseCourtCaseById(UserAccountEntity userAccount, Integer courtCaseId);
 
-    void obfuscateEventByIds(List<Integer> eveIds);
+    void anonymiseEventByIds(UserAccountEntity userAccount, List<Integer> eveIds);
 
-    void anonymizeEvent(EventEntity eventEntity);
-
-    UserAccountEntity getUserAccount();
+    void anonymiseEvent(UserAccountEntity userAccount, EventEntity eventEntity);
 }

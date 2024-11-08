@@ -84,11 +84,11 @@ public interface CaseRepository extends JpaRepository<CourtCaseEntity, Integer> 
                                                                          Pageable pageable);
 
     @Query(value = """
-        select cc from CourtCaseEntity cc
+        select cc.id from CourtCaseEntity cc
         join CaseRetentionEntity cr
         on cr.courtCase.id = cc.id and cr.currentState = 'COMPLETE'
         where cc.isDataAnonymised = false
         and cr.retainUntil < :maxRetentionDate
         """)
-    List<CourtCaseEntity> findCasesToBeAnonymized(OffsetDateTime maxRetentionDate, Limit limit);
+    List<Integer> findCasesIdsToBeAnonymised(OffsetDateTime maxRetentionDate, Limit limit);
 }

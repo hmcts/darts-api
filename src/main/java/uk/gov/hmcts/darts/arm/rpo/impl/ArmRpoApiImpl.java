@@ -6,9 +6,11 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.NotImplementedException;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.darts.arm.client.ArmRpoClient;
 import uk.gov.hmcts.darts.arm.client.model.rpo.ArmAsyncSearchResponse;
+import uk.gov.hmcts.darts.arm.client.model.rpo.BaseRpoResponse;
 import uk.gov.hmcts.darts.arm.client.model.rpo.ExtendedProductionsByMatterResponse;
 import uk.gov.hmcts.darts.arm.client.model.rpo.ExtendedSearchesByMatterResponse;
 import uk.gov.hmcts.darts.arm.client.model.rpo.IndexesByMatterIdResponse;
@@ -16,6 +18,8 @@ import uk.gov.hmcts.darts.arm.client.model.rpo.MasterIndexFieldByRecordClassSche
 import uk.gov.hmcts.darts.arm.client.model.rpo.MasterIndexFieldByRecordClassSchemaResponse;
 import uk.gov.hmcts.darts.arm.client.model.rpo.ProfileEntitlementResponse;
 import uk.gov.hmcts.darts.arm.client.model.rpo.RecordManagementMatterResponse;
+import uk.gov.hmcts.darts.arm.client.model.rpo.SaveBackgroundSearchRequest;
+import uk.gov.hmcts.darts.arm.client.model.rpo.SaveBackgroundSearchResponse;
 import uk.gov.hmcts.darts.arm.client.model.rpo.StorageAccountRequest;
 import uk.gov.hmcts.darts.arm.client.model.rpo.StorageAccountResponse;
 import uk.gov.hmcts.darts.arm.component.impl.AddAsyncSearchRequestGenerator;
@@ -130,21 +134,13 @@ public class ArmRpoApiImpl implements ArmRpoApi {
 
     }
 
-    private static StorageAccountRequest createStorageAccountRequest() {
-        StorageAccountRequest storageAccountRequest = StorageAccountRequest.builder()
-            .onlyKeyAccessType(false)
-            .storageType(1)
-            .build();
-        return storageAccountRequest;
-    }
-
     @Override
     public void getProfileEntitlements(String bearerToken, Integer executionId, UserAccountEntity userAccount) {
         final ArmRpoExecutionDetailEntity executionDetail = armRpoService.getArmRpoExecutionDetailEntity(executionId);
         armRpoService.updateArmRpoStateAndStatus(executionDetail,
-            ArmRpoHelper.getProfileEntitlementsRpoState(),
-            ArmRpoHelper.inProgressRpoStatus(),
-            userAccount);
+                                                 ArmRpoHelper.getProfileEntitlementsRpoState(),
+                                                 ArmRpoHelper.inProgressRpoStatus(),
+                                                 userAccount);
 
         final StringBuilder exceptionMessageBuilder = new StringBuilder("ARM getProfileEntitlements: ");
         ProfileEntitlementResponse response;
@@ -291,9 +287,9 @@ public class ArmRpoApiImpl implements ArmRpoApi {
     }
 
     private AddAsyncSearchRequestGenerator createAddAsyncSearchRequestGenerator(String searchName,
-                                                                                       ArmRpoExecutionDetailEntity executionDetail,
-                                                                                       ArmAutomatedTaskEntity armAutomatedTaskEntity,
-                                                                                       OffsetDateTime now) throws NullPointerException {
+                                                                                ArmRpoExecutionDetailEntity executionDetail,
+                                                                                ArmAutomatedTaskEntity armAutomatedTaskEntity,
+                                                                                OffsetDateTime now) throws NullPointerException {
         return AddAsyncSearchRequestGenerator.builder()
             .name(searchName)
             .searchName(searchName)
@@ -308,7 +304,25 @@ public class ArmRpoApiImpl implements ArmRpoApi {
 
     @Override
     public void saveBackgroundSearch(String bearerToken, Integer executionId, String searchName, UserAccountEntity userAccount) {
-        throw new NotImplementedException("Method not implemented");
+        var armRpoExecutionDetailEntity = armRpoService.getArmRpoExecutionDetailEntity(executionId);
+        armRpoService.updateArmRpoStateAndStatus(armRpoExecutionDetailEntity, ArmRpoHelper.saveBackgroundSearchRpoState(),
+                                                 ArmRpoHelper.inProgressRpoStatus(), userAccount);
+
+        StringBuilder errorMessage = new StringBuilder("Failure during ARM save background search: ");
+        SaveBackgroundSearchResponse saveBackgroundSearchResponse;
+        try {
+            SaveBackgroundSearchRequest saveBackgroundSearchRequest =
+                createSaveBackgroundSearchRequest(searchName, armRpoExecutionDetailEntity.getSearchId());
+            saveBackgroundSearchResponse = armRpoClient.saveBackgroundSearch(bearerToken, saveBackgroundSearchRequest);
+        } catch (FeignException e) {
+            // this ensures the full error body containing the ARM error detail is logged rather than a truncated version
+            log.error(errorMessage.append("Unable to save background search").toString() + " {}", e.contentUTF8());
+            throw handleFailureAndCreateException(errorMessage.toString(), armRpoExecutionDetailEntity, userAccount);
+        }
+
+        handleResponseStatus(userAccount, saveBackgroundSearchResponse, errorMessage, armRpoExecutionDetailEntity);
+
+        armRpoService.updateArmRpoStatus(armRpoExecutionDetailEntity, ArmRpoHelper.completedRpoStatus(), userAccount);
     }
 
     @Override
@@ -349,6 +363,36 @@ public class ArmRpoApiImpl implements ArmRpoApi {
         return new ArmRpoException(message);
     }
 
+    private void handleResponseStatus(UserAccountEntity userAccount, BaseRpoResponse baseRpoResponse, StringBuilder errorMessage,
+                                      ArmRpoExecutionDetailEntity armRpoExecutionDetailEntity) {
+        if (isNull(baseRpoResponse)
+            || isNull(baseRpoResponse.getStatus())
+            || isNull(baseRpoResponse.getIsError())) {
+            throw handleFailureAndCreateException(errorMessage.append("ARM RPO API response is invalid - ").append(baseRpoResponse)
+                                                      .toString(),
+                                                  armRpoExecutionDetailEntity, userAccount);
+        }
+        try {
+            HttpStatus responseStatus = HttpStatus.valueOf(baseRpoResponse.getStatus());
+            if (!responseStatus.is2xxSuccessful() || baseRpoResponse.getIsError()) {
+                throw handleFailureAndCreateException(errorMessage.append("ARM RPO API failed with status - ").append(responseStatus)
+                                                          .append(" and response - ").append(baseRpoResponse).toString(),
+                                                      armRpoExecutionDetailEntity, userAccount);
+            }
+        } catch (IllegalArgumentException e) {
+            throw handleFailureAndCreateException(errorMessage.append("ARM RPO API response status is invalid - ")
+                                                      .append(baseRpoResponse).toString(),
+                                                  armRpoExecutionDetailEntity, userAccount);
+        }
+    }
+
+    private StorageAccountRequest createStorageAccountRequest() {
+        return StorageAccountRequest.builder()
+            .onlyKeyAccessType(false)
+            .storageType(1)
+            .build();
+    }
+
     private MasterIndexFieldByRecordClassSchemaRequest createMasterIndexFieldByRecordClassSchemaRequest() {
         return MasterIndexFieldByRecordClassSchemaRequest.builder()
             .recordClassCode(RECORD_CLASS_CODE)
@@ -366,6 +410,13 @@ public class ArmRpoApiImpl implements ArmRpoApi {
             .propertyName(masterIndexField.getPropertyName())
             .propertyType(masterIndexField.getPropertyType())
             .isMasked(masterIndexField.getIsMasked())
+            .build();
+    }
+
+    private SaveBackgroundSearchRequest createSaveBackgroundSearchRequest(String searchName, String searchId) {
+        return SaveBackgroundSearchRequest.builder()
+            .name(searchName)
+            .searchId(searchId)
             .build();
     }
 }

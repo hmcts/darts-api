@@ -46,8 +46,6 @@ public interface MediaRequestService {
 
     void updateTransformedMediaLastAccessedTimestamp(Integer transformedMediaId);
 
-    void updateTransformedMediaLastAccessedTimestampForMediaRequestId(Integer mediaRequestId);
-
     DownloadResponseMetaData download(Integer transformedMediaId);
 
     DownloadResponseMetaData playback(Integer transformedMediaId);
@@ -63,5 +61,5 @@ public interface MediaRequestService {
     MediaPatchResponse patchMediaRequest(Integer mediaRequestId, MediaPatchRequest request);
 
     MediaHideResponse adminHideOrShowMediaById(Integer mediaId, MediaHideRequest mediaHideRequest);
-    
+
 }

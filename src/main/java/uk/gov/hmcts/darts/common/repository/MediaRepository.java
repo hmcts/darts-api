@@ -9,6 +9,7 @@ import uk.gov.hmcts.darts.task.runner.SoftDeleteRepository;
 
 import java.time.OffsetDateTime;
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface MediaRepository extends JpaRepository<MediaEntity, Integer>,
@@ -84,6 +85,9 @@ public interface MediaRepository extends JpaRepository<MediaEntity, Integer>,
     List<MediaEntity> findMediaByDetails(List<Integer> hearingIds, OffsetDateTime startAt,
                                          OffsetDateTime endAt);
 
+    //native query to bypass @SQLRestriction
+    @Query(value = "SELECT me.* FROM darts.media me WHERE me.med_id = :mediaId", nativeQuery = true)
+    Optional<MediaEntity> findByIdIncludeDeleted(Integer mediaId);
 
     @Query(value = """
            select me
@@ -92,4 +96,5 @@ public interface MediaRepository extends JpaRepository<MediaEntity, Integer>,
              and me.courtroom.id = :courtroomId
         """)
     List<MediaEntity> findAllByMediaTimeContains(Integer courtroomId, OffsetDateTime maxStartTime, OffsetDateTime minEndTime);
+
 }
