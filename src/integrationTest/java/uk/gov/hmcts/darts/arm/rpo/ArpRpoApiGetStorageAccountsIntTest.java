@@ -16,6 +16,8 @@ import uk.gov.hmcts.darts.testutils.IntegrationBase;
 
 import java.util.List;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsString;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -92,9 +94,13 @@ class ArpRpoApiGetStorageAccountsIntTest extends IntegrationBase {
         var bearerAuth = "Bearer some-token";
 
         // when
-        assertThrows(ArmRpoException.class, () -> armRpoApi.getStorageAccounts(bearerAuth, armRpoExecutionDetail.getId(), userAccount));
+        ArmRpoException armRpoException = assertThrows(
+            ArmRpoException.class, () -> armRpoApi.getStorageAccounts(bearerAuth, armRpoExecutionDetail.getId(), userAccount));
 
         // then
+        assertThat(armRpoException.getMessage(), containsString(
+            "Failure during ARM get storage accounts: Unable to get indexes from storage account response"));
+
         var armRpoExecutionDetailEntityUpdated = dartsPersistence.getArmRpoExecutionDetailRepository().findById(armRpoExecutionDetail.getId()).get();
         assertEquals(ArmRpoStateEnum.GET_STORAGE_ACCOUNTS.getId(), armRpoExecutionDetailEntityUpdated.getArmRpoState().getId());
         assertEquals(ArmRpoStatusEnum.FAILED.getId(), armRpoExecutionDetailEntityUpdated.getArmRpoStatus().getId());
@@ -116,9 +122,12 @@ class ArpRpoApiGetStorageAccountsIntTest extends IntegrationBase {
         var bearerAuth = "Bearer some-token";
 
         // when
-        assertThrows(ArmRpoException.class, () -> armRpoApi.getStorageAccounts(bearerAuth, armRpoExecutionDetail.getId(), userAccount));
+        ArmRpoException armRpoException = assertThrows(
+            ArmRpoException.class, () -> armRpoApi.getStorageAccounts(bearerAuth, armRpoExecutionDetail.getId(), userAccount));
 
         // then
+        assertThat(armRpoException.getMessage(), containsString(
+            "Failure during ARM get storage accounts: Unable to get ARM RPO response"));
         var armRpoExecutionDetailEntityUpdated = dartsPersistence.getArmRpoExecutionDetailRepository().findById(armRpoExecutionDetail.getId()).get();
         assertEquals(ArmRpoStateEnum.GET_STORAGE_ACCOUNTS.getId(), armRpoExecutionDetailEntityUpdated.getArmRpoState().getId());
         assertEquals(ArmRpoStatusEnum.FAILED.getId(), armRpoExecutionDetailEntityUpdated.getArmRpoStatus().getId());
