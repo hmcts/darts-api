@@ -206,7 +206,7 @@ class ApplyRetentionCaseAssociatedObjectsProcessorIntTest extends IntegrationBas
         dartsDatabase.getMediaLinkedCaseRepository().save(mediaLinkedCase3);
 
         // when
-        processor.processApplyRetentionToCaseAssociatedObjects();
+        processor.processApplyRetentionToCaseAssociatedObjects(123);
 
         // then
         var media0 = mediaRepository.findById(medias.getFirst().getId()).get();

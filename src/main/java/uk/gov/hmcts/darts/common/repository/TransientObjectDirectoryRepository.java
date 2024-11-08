@@ -19,5 +19,5 @@ public interface TransientObjectDirectoryRepository extends JpaRepository<Transi
         """)
     List<TransientObjectDirectoryEntity> findByTransformedMediaId(Integer transformedMediaId);
 
-    List<TransientObjectDirectoryEntity> findByStatus(ObjectRecordStatusEntity status);
+    List<TransientObjectDirectoryEntity> findByStatus(ObjectRecordStatusEntity status, Limit limit);
 }
