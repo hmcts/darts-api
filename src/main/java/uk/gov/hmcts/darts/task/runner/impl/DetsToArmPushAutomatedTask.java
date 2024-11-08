@@ -11,6 +11,8 @@ import uk.gov.hmcts.darts.task.config.AutomatedTaskConfigurationProperties;
 import uk.gov.hmcts.darts.task.runner.AutoloadingManualTask;
 import uk.gov.hmcts.darts.task.service.LockService;
 
+import java.time.Duration;
+
 import static uk.gov.hmcts.darts.task.api.AutomatedTaskName.DETS_TO_ARM_TASK_NAME;
 
 @Slf4j
@@ -35,9 +37,12 @@ public class DetsToArmPushAutomatedTask extends AbstractLockableAutomatedTask
     }
 
     @Override
-    protected void runTask() {
-        Integer batchSize = getAutomatedTaskBatchSize(getTaskName());
-        detsToArmPushProcessor.processDetsToArm(batchSize);
+    public Duration getLockAtMostFor() {
+        return Duration.ofMinutes(90);
+    }
 
+    @Override
+    protected void runTask() {
+        detsToArmPushProcessor.processDetsToArm(getAutomatedTaskBatchSize());
     }
 }

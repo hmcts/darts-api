@@ -137,7 +137,7 @@ public interface ExternalObjectDirectoryRepository extends JpaRepository<Externa
     List<ExternalObjectDirectoryEntity> findNotFinishedAndNotExceededRetryInStorageLocationForDets(List<ObjectRecordStatusEntity> failedStatuses,
                                                                                                    ExternalLocationTypeEntity type,
                                                                                                    Integer transferAttempts,
-                                                                                                   Pageable pageable);
+                                                                                                   Limit limit);
 
 
     @Query(

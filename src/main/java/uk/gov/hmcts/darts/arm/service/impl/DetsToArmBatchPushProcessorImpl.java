@@ -6,7 +6,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.ListUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
-import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Limit;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.darts.arm.api.ArmDataManagementApi;
 import uk.gov.hmcts.darts.arm.config.ArmDataManagementConfiguration;
@@ -98,7 +98,7 @@ public class DetsToArmBatchPushProcessorImpl implements DetsToArmBatchPushProces
             failedArmStatuses,
             armLocation,
             armDataManagementConfiguration.getMaxRetryAttempts(),
-            Pageable.ofSize(maxResultSize)
+            Limit.of(maxResultSize)
         );
 
         List<ExternalObjectDirectoryEntity> returnList = new ArrayList<>(failedArmExternalObjectDirectoryEntities);
