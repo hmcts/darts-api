@@ -6,6 +6,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.darts.authorisation.api.AuthorisationApi;
+import uk.gov.hmcts.darts.cases.service.CaseService;
 import uk.gov.hmcts.darts.cases.service.CloseOldCasesProcessor;
 import uk.gov.hmcts.darts.common.entity.CaseRetentionEntity;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
@@ -49,8 +50,11 @@ class CloseOldCasesProcessorImplTest {
 
     @Mock
     private CurrentTimeHelper currentTimeHelper;
+    @Mock
+    private CaseService caseService;
 
     private UserAccountEntity userAccountEntity;
+
 
     private CloseOldCasesProcessor closeOldCasesProcessor;
 
@@ -58,13 +62,15 @@ class CloseOldCasesProcessorImplTest {
     void setUp() {
         userAccountEntity = CommonTestDataUtil.createUserAccountWithId();
         when(authorisationApi.getCurrentUser()).thenReturn(userAccountEntity);
+        CloseOldCasesProcessorImpl.CloseCaseProcessor caseProcessor = new CloseOldCasesProcessorImpl.CloseCaseProcessor(
+            caseService,
+            caseRetentionRepository,
+            retentionApi,
+            retentionDateHelper,
+            currentTimeHelper
+        );
 
-        closeOldCasesProcessor = new CloseOldCasesProcessorImpl(caseRepository,
-                                                                caseRetentionRepository,
-                                                                retentionApi,
-                                                                retentionDateHelper,
-                                                                authorisationApi,
-                                                                currentTimeHelper);
+        closeOldCasesProcessor = new CloseOldCasesProcessorImpl(caseProcessor, caseRepository, authorisationApi);
 
         lenient().when(currentTimeHelper.currentOffsetDateTime()).thenReturn(CURRENT_DATE_TIME);
 
@@ -83,7 +89,9 @@ class CloseOldCasesProcessorImplTest {
         courtCase.setCreatedDateTime(createdDate);
         courtCase.setClosed(false);
         courtCase.setHearings(hearings);
-        when(caseRepository.findOpenCasesToClose(any(), any())).thenReturn(List.of(courtCase));
+        courtCase.setId(1);
+        when(caseRepository.findOpenCasesToClose(any(), any())).thenReturn(List.of(1));
+        when(caseService.getCourtCaseById(1)).thenReturn(courtCase);
 
         CaseRetentionEntity caseRetention = createRetentionEntity(courtCase, userAccountEntity);
         when(retentionApi.createRetention(any(), any(), any(), any(), any())).thenReturn(caseRetention);
