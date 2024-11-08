@@ -167,7 +167,7 @@ class ArmRetentionEventDateProcessorIntTest extends IntegrationBase {
         when(armApiClient.updateMetadata(any(), any())).thenReturn(response);
 
         // when
-        armRetentionEventDateProcessor.calculateEventDates(getAutomatedTaskBatchSize());
+        armRetentionEventDateProcessor.calculateEventDates(1000);
 
         // then
         var persistedEod = dartsDatabase.getExternalObjectDirectoryRepository().findById(armEod.getId()).orElseThrow();
@@ -226,7 +226,7 @@ class ArmRetentionEventDateProcessorIntTest extends IntegrationBase {
         when(userIdentity.getUserAccount()).thenReturn(testUser);
 
         // when
-        armRetentionEventDateProcessor.calculateEventDates(getAutomatedTaskBatchSize());
+        armRetentionEventDateProcessor.calculateEventDates(1000);
 
         // then
         var persistedEod = dartsDatabase.getExternalObjectDirectoryRepository().findById(armEod.getId()).orElseThrow();
@@ -292,7 +292,7 @@ class ArmRetentionEventDateProcessorIntTest extends IntegrationBase {
 
 
         // when
-        armRetentionEventDateProcessor.calculateEventDates(getAutomatedTaskBatchSize());
+        armRetentionEventDateProcessor.calculateEventDates(1000);
 
         // then
         var persistedEod = dartsDatabase.getExternalObjectDirectoryRepository().findById(armEod.getId()).orElseThrow();
@@ -367,7 +367,7 @@ class ArmRetentionEventDateProcessorIntTest extends IntegrationBase {
         when(armApiClient.updateMetadata(any(), any())).thenReturn(response);
 
         // when
-        armRetentionEventDateProcessor.calculateEventDates(getAutomatedTaskBatchSize());
+        armRetentionEventDateProcessor.calculateEventDates(1000);
 
         // then
         var persistedEod = dartsDatabase.getExternalObjectDirectoryRepository().findById(armEod.getId()).orElseThrow();
@@ -424,7 +424,7 @@ class ArmRetentionEventDateProcessorIntTest extends IntegrationBase {
         when(armApiClient.updateMetadata(any(), any())).thenReturn(response);
 
         // when
-        armRetentionEventDateProcessor.calculateEventDates(getAutomatedTaskBatchSize());
+        armRetentionEventDateProcessor.calculateEventDates(1000);
 
         // then
         var persistedEod = dartsDatabase.getExternalObjectDirectoryRepository().findById(armEod.getId()).orElseThrow();
@@ -576,7 +576,7 @@ class ArmRetentionEventDateProcessorIntTest extends IntegrationBase {
         when(userIdentity.getUserAccount()).thenReturn(testUser);
 
         // when
-        armRetentionEventDateProcessor.calculateEventDates(getAutomatedTaskBatchSize());
+        armRetentionEventDateProcessor.calculateEventDates(1000);
 
         // then
         var persistedEod = dartsDatabase.getExternalObjectDirectoryRepository().findById(armEod.getId()).orElseThrow();

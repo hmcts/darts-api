@@ -182,7 +182,7 @@ class ObjectAdminActionRepositoryTest extends PostgresIntegrationBase {
                                                               .build());
 
         // Execute the method under test
-        List<ObjectAdminActionEntity> result = repository.findFilesForManualDeletion(deletionThreshold, Limit.of(batchSize));
+        List<ObjectAdminActionEntity> result = repository.findFilesForManualDeletion(deletionThreshold, Limit.of(1000));
 
         // Verify the results
         assertEquals(4, result.size());

@@ -67,15 +67,15 @@ class ArmRetentionEventDateProcessorImplTest {
     void calculateEventDates() {
         // given
         List<ExternalObjectDirectoryEntity> eods = List.of(externalObjectDirectoryEntity);
-        when(externalObjectDirectoryRepository.findByExternalLocationTypeAndUpdateRetention(armLocation(), true, Limit.of(10000))).thenReturn(eods);
+        when(externalObjectDirectoryRepository.findByExternalLocationTypeAndUpdateRetention(armLocation(), true, Limit.of(10_000))).thenReturn(eods);
 
         externalObjectDirectoryEntity.setEventDateTs(MEDIA_RETENTION_DATE_TIME);
 
         // when
-        armRetentionEventDateProcessor.calculateEventDates(10000);
+        armRetentionEventDateProcessor.calculateEventDates(10_000);
 
         // then
-        verify(externalObjectDirectoryRepository).findByExternalLocationTypeAndUpdateRetention(armLocation(), true, Limit.of(10000));
+        verify(externalObjectDirectoryRepository).findByExternalLocationTypeAndUpdateRetention(armLocation(), true, Limit.of(10_000));
         verify(armRetentionEventDateCalculator).calculateRetentionEventDate(TEST_EXTERNAL_OBJECT_DIRECTORY_ID);
 
         verifyNoMoreInteractions(
@@ -88,13 +88,13 @@ class ArmRetentionEventDateProcessorImplTest {
     void calculateEventDates_NoRowsToProcess() {
         // given
         List<ExternalObjectDirectoryEntity> eods = new ArrayList<>();
-        when(externalObjectDirectoryRepository.findByExternalLocationTypeAndUpdateRetention(armLocation(), true, Limit.of(10000))).thenReturn(eods);
+        when(externalObjectDirectoryRepository.findByExternalLocationTypeAndUpdateRetention(armLocation(), true, Limit.of(10_000))).thenReturn(eods);
 
         // when
-        armRetentionEventDateProcessor.calculateEventDates(10000);
+        armRetentionEventDateProcessor.calculateEventDates(10_000);
 
         // then
-        verify(externalObjectDirectoryRepository).findByExternalLocationTypeAndUpdateRetention(armLocation(), true, Limit.of(10000));
+        verify(externalObjectDirectoryRepository).findByExternalLocationTypeAndUpdateRetention(armLocation(), true, Limit.of(10_000));
 
         verifyNoMoreInteractions(
             externalObjectDirectoryRepository,

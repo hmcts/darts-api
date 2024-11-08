@@ -825,7 +825,7 @@ class AutomatedTaskServiceTest extends IntegrationBase {
                 automatedTaskConfigurationProperties,
                 logApi,
                 lockService,
-                taskProcessorFactory
+                closeOldCasesProcessor
             );
 
         Optional<AutomatedTaskEntity> originalAutomatedTaskEntity =
@@ -859,7 +859,7 @@ class AutomatedTaskServiceTest extends IntegrationBase {
                 automatedTaskConfigurationProperties,
                 logApi,
                 lockService,
-                taskProcessorFactory
+                closeOldCasesProcessor
             );
 
         Set<ScheduledTask> scheduledTasks = scheduledTaskHolder.getScheduledTasks();
