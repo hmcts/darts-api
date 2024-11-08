@@ -101,7 +101,7 @@ public class AdvancedSearchRequestHelper {
 
     private List<Predicate> addCourthouseIdCriteria(Root<CourtCaseEntity> caseRoot, GetCasesSearchRequest request) throws AdvancedSearchNoResultsException {
         List<Predicate> predicateList = new ArrayList<>();
-        if (!request.getCourthouse().isEmpty()) {
+        if (StringUtils.isNotBlank(request.getCourthouse())) {
             List<Integer> courthouseIdList = courthouseRepository.findAllIdByDisplayNameOrNameLike(request.getCourthouse());
             log.debug("Matching list of courthouse IDs for search = {}", courthouseIdList);
             if (courthouseIdList.isEmpty()) {
