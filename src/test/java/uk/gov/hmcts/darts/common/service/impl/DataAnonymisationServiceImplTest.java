@@ -201,8 +201,8 @@ class DataAnonymisationServiceImplTest {
         verify(dataAnonymisationService, times(1)).anonymiseHearingEntity(userAccount, hearingEntity1);
         verify(dataAnonymisationService, times(1)).anonymiseHearingEntity(userAccount, hearingEntity2);
 
-        verify(dataAnonymisationService, times(1)).anonymizeEventEntity(userAccount, entityEntity1);
-        verify(dataAnonymisationService, times(1)).anonymizeEventEntity(userAccount, entityEntity2);
+        verify(dataAnonymisationService, times(1)).anonymiseEventEntity(userAccount, entityEntity1);
+        verify(dataAnonymisationService, times(1)).anonymiseEventEntity(userAccount, entityEntity2);
 
         verify(dataAnonymisationService, times(1)).tidyUpTransformedMediaEntities(userAccount, courtCase);
         verify(caseService, times(1)).saveCase(courtCase);
