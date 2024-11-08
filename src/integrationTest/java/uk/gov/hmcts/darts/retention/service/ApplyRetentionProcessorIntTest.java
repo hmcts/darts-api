@@ -52,7 +52,7 @@ class ApplyRetentionProcessorIntTest extends IntegrationBase {
         List<CaseRetentionEntity> caseRetentionEntities = caseRetentionRepository.findAllByCourtCase(courtCase);
         CaseRetentionEntity caseRetentionEntity = caseRetentionEntities.get(0);
         assertEquals(CaseRetentionStatus.PENDING.name(), caseRetentionEntity.getCurrentState());
-        applyRetentionProcessor.processApplyRetention();
+        applyRetentionProcessor.processApplyRetention(getAutomatedTaskBatchSize());
 
         caseRetentionEntities = caseRetentionRepository.findAllByCourtCase(courtCase);
         caseRetentionEntity = caseRetentionEntities.get(0);
@@ -75,7 +75,7 @@ class ApplyRetentionProcessorIntTest extends IntegrationBase {
         List<CaseRetentionEntity> caseRetentionEntities = caseRetentionRepository.findAllByCourtCase(courtCase);
         CaseRetentionEntity caseRetentionEntity = caseRetentionEntities.get(0);
         assertEquals(CaseRetentionStatus.PENDING.name(), caseRetentionEntity.getCurrentState());
-        applyRetentionProcessor.processApplyRetention();
+        applyRetentionProcessor.processApplyRetention(getAutomatedTaskBatchSize());
 
         caseRetentionEntities = caseRetentionRepository.findAllByCourtCase(courtCase);
         caseRetentionEntity = caseRetentionEntities.get(0);
@@ -99,7 +99,7 @@ class ApplyRetentionProcessorIntTest extends IntegrationBase {
 
         List<CaseRetentionEntity> caseRetentionEntities = caseRetentionRepository.findAllByCourtCase(courtCase);
         assertEquals(CaseRetentionStatus.PENDING.name(), caseRetentionEntities.get(0).getCurrentState());
-        applyRetentionProcessor.processApplyRetention();
+        applyRetentionProcessor.processApplyRetention(getAutomatedTaskBatchSize());
 
         caseRetentionEntities = caseRetentionRepository.findAllByCourtCase(courtCase);
         assertTrue(caseRetentionEntities.get(0).getCreatedDateTime().isBefore(OffsetDateTime.now().minusDays(7)));

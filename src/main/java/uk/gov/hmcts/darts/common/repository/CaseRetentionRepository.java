@@ -1,5 +1,6 @@
 package uk.gov.hmcts.darts.common.repository;
 
+import org.springframework.data.domain.Limit;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -91,7 +92,7 @@ public interface CaseRetentionRepository extends JpaRepository<CaseRetentionEnti
         ORDER BY c.createdDateTime DESC
         """
     )
-    List<CaseRetentionEntity> findPendingRetention(OffsetDateTime pendingCutoff);
+    List<CaseRetentionEntity> findPendingRetention(OffsetDateTime pendingCutoff, Limit limit);
 
     Optional<CaseRetentionEntity> findTopByCourtCaseOrderByRetainUntilAppliedOnDesc(CourtCaseEntity courtCase);
 
