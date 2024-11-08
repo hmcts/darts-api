@@ -422,7 +422,8 @@ public class ArmRpoApiImpl implements ArmRpoApi {
             response = armRpoClient.createExportBasedOnSearchResultsTable(bearerToken, request);
         } catch (FeignException e) {
             // this ensures the full error body containing the ARM error detail is logged rather than a truncated version
-            log.error(errorMessage.append("Unable to save background search").toString() + " {}", e.contentUTF8());
+            log.error(errorMessage.append("Unable to get ARM RPO response").toString() + " {}",
+                      e.contentUTF8());
             throw handleFailureAndCreateException(errorMessage.toString(), armRpoExecutionDetailEntity, userAccount);
         }
         if (isNull(response) || isNull(response.getStatus()) || isNull(response.getIsError())

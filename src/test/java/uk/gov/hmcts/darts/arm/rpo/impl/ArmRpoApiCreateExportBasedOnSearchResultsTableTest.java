@@ -1,5 +1,6 @@
 package uk.gov.hmcts.darts.arm.rpo.impl;
 
+import feign.FeignException;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -220,6 +221,28 @@ class ArmRpoApiCreateExportBasedOnSearchResultsTableTest {
         // then
         assertThat(armRpoException.getMessage(), containsString(
             "Failure during ARM createExportBasedOnSearchResultsTable: Could not construct API request"));
+
+        verify(armRpoService).updateArmRpoStateAndStatus(any(),
+                                                         eq(ARM_RPO_HELPER_MOCKS.getCreateExportBasedOnSearchResultsTableRpoState()),
+                                                         eq(ARM_RPO_HELPER_MOCKS.getInProgressRpoStatus()),
+                                                         any());
+        verify(armRpoService).updateArmRpoStatus(any(), eq(ARM_RPO_HELPER_MOCKS.getFailedRpoStatus()), any());
+        verifyNoMoreInteractions(armRpoService);
+
+    }
+
+    @Test
+    void createExportBasedOnSearchResultsTableThrowsFeignException() {
+        // given
+        when(armRpoClient.createExportBasedOnSearchResultsTable(anyString(), any())).thenThrow(FeignException.class);
+
+        // when
+        ArmRpoException armRpoException = assertThrows(ArmRpoException.class, () ->
+            armRpoApi.createExportBasedOnSearchResultsTable("token", 1, createHeaderColumns(), userAccount));
+
+        // then
+        assertThat(armRpoException.getMessage(), containsString(
+            "Failure during ARM createExportBasedOnSearchResultsTable: Unable to get ARM RPO response"));
 
         verify(armRpoService).updateArmRpoStateAndStatus(any(),
                                                          eq(ARM_RPO_HELPER_MOCKS.getCreateExportBasedOnSearchResultsTableRpoState()),
