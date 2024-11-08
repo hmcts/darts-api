@@ -18,6 +18,7 @@ import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.SQLRestriction;
 import uk.gov.hmcts.darts.common.entity.base.CreatedModifiedBaseEntity;
+import uk.gov.hmcts.darts.task.runner.HasIntegerId;
 import uk.gov.hmcts.darts.task.runner.SoftDelete;
 
 import java.time.OffsetDateTime;
@@ -31,7 +32,7 @@ import java.util.List;
 @EqualsAndHashCode(callSuper = false)
 @SQLRestriction("is_deleted = false")
 public class MediaEntity extends CreatedModifiedBaseEntity
-    implements ConfidenceAware, SoftDelete {
+    implements ConfidenceAware, SoftDelete, HasIntegerId {
     public static final Character MEDIA_TYPE_DEFAULT = 'A';
 
     @Id

@@ -156,6 +156,7 @@ class DataAnonymisationServiceImplTest {
     void assertPositiveAnonymiseCourtCaseEntity() {
         setupOffsetDateTime();
         CourtCaseEntity courtCase = new CourtCaseEntity();
+        when(caseService.getCourtCaseById(123)).thenReturn(courtCase);
         courtCase.setCaseNumber("caseNo123");
         courtCase.setId(123);
 
@@ -182,8 +183,7 @@ class DataAnonymisationServiceImplTest {
         UserAccountEntity userAccount = new UserAccountEntity();
         userAccount.setId(123);
 
-        dataAnonymisationService.anonymiseCourtCaseEntity(userAccount, courtCase);
-
+        dataAnonymisationService.anonymiseCourtCaseById(userAccount, 123);
         assertThat(courtCase.isDataAnonymised()).isTrue();
         assertThat(courtCase.getDataAnonymisedBy()).isEqualTo(123);
         assertThat(courtCase.getDataAnonymisedTs()).isCloseToUtcNow(within(5, SECONDS));
@@ -207,6 +207,7 @@ class DataAnonymisationServiceImplTest {
         verify(dataAnonymisationService, times(1)).tidyUpTransformedMediaEntities(userAccount, courtCase);
         verify(caseService, times(1)).saveCase(courtCase);
         verify(logApi, times(1)).caseDeletedDueToExpiry(123, "caseNo123");
+        verify(caseService, times(1)).getCourtCaseById(123);
 
     }
 

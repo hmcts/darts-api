@@ -6,8 +6,12 @@ import org.apache.logging.log4j.util.TriConsumer;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.jpa.domain.Specification;
+import uk.gov.hmcts.darts.audit.api.AuditActivity;
 import uk.gov.hmcts.darts.common.entity.AnnotationDocumentEntity;
 import uk.gov.hmcts.darts.common.entity.AnnotationEntity;
+import uk.gov.hmcts.darts.common.entity.AuditEntity;
+import uk.gov.hmcts.darts.common.entity.AuditEntity_;
 import uk.gov.hmcts.darts.common.entity.CaseDocumentEntity;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
@@ -17,6 +21,7 @@ import uk.gov.hmcts.darts.common.entity.TranscriptionDocumentEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionEntity;
 import uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum;
 import uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum;
+import uk.gov.hmcts.darts.task.runner.HasIntegerId;
 import uk.gov.hmcts.darts.test.common.TestUtils;
 import uk.gov.hmcts.darts.test.common.data.PersistableFactory;
 import uk.gov.hmcts.darts.testutils.PostgresIntegrationBase;
@@ -442,6 +447,7 @@ class AssociatedObjectDataExpiryDeletionAutomatedTaskITest extends PostgresInteg
                 dartsDatabase.getExternalObjectDirectoryStub().findAllFor(providedCaseDocumentEntity)
             ).isNotEmpty();
         }
+        assertAuditEntries(AuditActivity.CASE_DOCUMENT_EXPIRED, foundCaseDocumentEntity, isExpired);
     }
 
     private void assertAnnotationDocument(AnnotationDocumentEntity providedDocumentEntity, boolean isExpired) {
@@ -470,6 +476,7 @@ class AssociatedObjectDataExpiryDeletionAutomatedTaskITest extends PostgresInteg
                 dartsDatabase.getExternalObjectDirectoryStub().findAllFor(providedDocumentEntity)
             ).isNotEmpty();
         }
+        assertAuditEntries(AuditActivity.ANNOTATION_EXPIRED, foundDocumentEntity, isExpired);
     }
 
     private void assertMediaEntity(MediaEntity providedDocumentEntity, boolean isExpired) {
@@ -498,6 +505,7 @@ class AssociatedObjectDataExpiryDeletionAutomatedTaskITest extends PostgresInteg
                 dartsDatabase.getExternalObjectDirectoryStub().findAllFor(providedDocumentEntity)
             ).isNotEmpty();
         }
+        assertAuditEntries(AuditActivity.AUDIO_EXPIRED, foundDocumentEntity, isExpired);
     }
 
     private void assertTranscriptionDocument(TranscriptionDocumentEntity providedDocumentEntity, boolean isExpired) {
@@ -526,6 +534,7 @@ class AssociatedObjectDataExpiryDeletionAutomatedTaskITest extends PostgresInteg
                 dartsDatabase.getExternalObjectDirectoryStub().findAllFor(providedDocumentEntity)
             ).isNotEmpty();
         }
+        assertAuditEntries(AuditActivity.TRANSCRIPT_EXPIRED, foundDocumentEntity, isExpired);
     }
 
 
@@ -599,4 +608,18 @@ class AssociatedObjectDataExpiryDeletionAutomatedTaskITest extends PostgresInteg
                 .createExternalObjectDirectory(transcriptionDocument, objectRecordStatusEnum, externalLocationType, UUID.randomUUID()),
             assignArm, storeArm);
     }
+
+    private void assertAuditEntries(AuditActivity auditActivity, HasIntegerId hasIntegerId, boolean isAnonymised) {
+        List<AuditEntity> caseExpiredAuditEntries = dartsDatabase.getAuditRepository()
+            .findAll((Specification<AuditEntity>) (root, query, criteriaBuilder) -> criteriaBuilder.and(
+                criteriaBuilder.equal(root.get(AuditEntity_.additionalData), String.valueOf(hasIntegerId.getId())),
+                criteriaBuilder.equal(root.get(AuditEntity_.auditActivity).get("id"), auditActivity.getId())
+            ));
+        if (isAnonymised) {
+            assertThat(caseExpiredAuditEntries).hasSize(1);
+        } else {
+            assertThat(caseExpiredAuditEntries).isEmpty();
+        }
+    }
+
 }
