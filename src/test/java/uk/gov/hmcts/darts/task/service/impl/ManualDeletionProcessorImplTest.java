@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Limit;
 import org.springframework.test.util.ReflectionTestUtils;
 import uk.gov.hmcts.darts.audio.deleter.impl.inbound.ExternalInboundDataStoreDeleter;
 import uk.gov.hmcts.darts.audio.deleter.impl.unstructured.ExternalUnstructuredDataStoreDeleter;
@@ -32,6 +33,7 @@ import java.util.List;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
@@ -83,7 +85,7 @@ class ManualDeletionProcessorImplTest {
         ObjectAdminActionEntity transcriptionAction = createObjectAdminAction(false, true);
         List<ObjectAdminActionEntity> actionsToDelete = Arrays.asList(mediaAction, transcriptionAction);
 
-        when(objectAdminActionRepository.findFilesForManualDeletion(any())).thenReturn(actionsToDelete);
+        when(objectAdminActionRepository.findFilesForManualDeletion(any(), eq(Limit.of(123)))).thenReturn(actionsToDelete);
         when(externalObjectDirectoryRepository.findStoredInInboundAndUnstructuredByMediaId(any())).thenReturn(
             Collections.singletonList(createExternalObjectDirectoryEntity(ExternalLocationTypeEnum.INBOUND)));
         when(externalObjectDirectoryRepository.findStoredInInboundAndUnstructuredByTranscriptionId(any())).thenReturn(
@@ -91,7 +93,7 @@ class ManualDeletionProcessorImplTest {
 
         UserAccountEntity userAccount = mock(UserAccountEntity.class);
         when(userIdentity.getUserAccount()).thenReturn(userAccount);
-        manualDeletionProcessor.process();
+        manualDeletionProcessor.process(123);
 
         verify(mediaRepository).save(any(MediaEntity.class));
         verify(transcriptionDocumentRepository).save(any(TranscriptionDocumentEntity.class));
@@ -123,9 +125,9 @@ class ManualDeletionProcessorImplTest {
         deletedTranscriptionAction.getTranscriptionDocument().setDeleted(true);
         List<ObjectAdminActionEntity> actionsToDelete = Arrays.asList(deletedMediaAction, deletedTranscriptionAction);
 
-        when(objectAdminActionRepository.findFilesForManualDeletion(any())).thenReturn(actionsToDelete);
+        when(objectAdminActionRepository.findFilesForManualDeletion(any(), eq(Limit.of(123)))).thenReturn(actionsToDelete);
 
-        manualDeletionProcessor.process();
+        manualDeletionProcessor.process(123);
 
         verify(mediaRepository, never()).save(any(MediaEntity.class));
         verify(transcriptionDocumentRepository, never()).save(any(TranscriptionDocumentEntity.class));
@@ -139,7 +141,7 @@ class ManualDeletionProcessorImplTest {
         entity.setExternalLocationType(new ExternalLocationTypeEntity());
         entity.getExternalLocationType().setId(99); // Unknown ID
 
-        manualDeletionProcessor.process();
+        manualDeletionProcessor.process(123);
 
         verify(inboundDeleter, never()).delete(any(ExternalObjectDirectoryEntity.class));
         verify(unstructuredDeleter, never()).delete(any(ExternalObjectDirectoryEntity.class));

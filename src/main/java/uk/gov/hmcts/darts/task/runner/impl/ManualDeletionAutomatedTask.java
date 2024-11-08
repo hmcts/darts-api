@@ -12,6 +12,8 @@ import uk.gov.hmcts.darts.task.runner.AutoloadingManualTask;
 import uk.gov.hmcts.darts.task.service.LockService;
 import uk.gov.hmcts.darts.task.service.ManualDeletionProcessor;
 
+import java.time.Duration;
+
 import static uk.gov.hmcts.darts.task.api.AutomatedTaskName.MANUAL_DELETION;
 
 @Slf4j
@@ -42,7 +44,12 @@ public class ManualDeletionAutomatedTask extends AbstractLockableAutomatedTask
     }
 
     @Override
+    public Duration getLockAtMostFor() {
+        return Duration.ofMinutes(90);
+    }
+
+    @Override
     protected void runTask() {
-        manualDeletionProcessor.process();
+        manualDeletionProcessor.process(getAutomatedTaskBatchSize());
     }
 }

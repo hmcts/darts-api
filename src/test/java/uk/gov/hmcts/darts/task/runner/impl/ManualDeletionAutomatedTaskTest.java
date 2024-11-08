@@ -13,6 +13,8 @@ import uk.gov.hmcts.darts.task.service.LockService;
 import uk.gov.hmcts.darts.task.service.ManualDeletionProcessor;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
@@ -54,7 +56,10 @@ class ManualDeletionAutomatedTaskTest {
 
     @Test
     void testRunTask() {
+        manualDeletionAutomatedTask = spy(manualDeletionAutomatedTask);
+        doReturn(123).when(manualDeletionAutomatedTask).getAutomatedTaskBatchSize();
         manualDeletionAutomatedTask.runTask();
-        verify(manualDeletionProcessor, times(1)).process();
+        verify(manualDeletionProcessor, times(1)).process(123);
+        verify(manualDeletionAutomatedTask, times(1)).getAutomatedTaskBatchSize();
     }
 }

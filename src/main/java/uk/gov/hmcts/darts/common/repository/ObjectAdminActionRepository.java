@@ -1,5 +1,6 @@
 package uk.gov.hmcts.darts.common.repository;
 
+import org.springframework.data.domain.Limit;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
@@ -34,5 +35,5 @@ public interface ObjectAdminActionRepository extends JpaRepository<ObjectAdminAc
         SELECT o FROM ObjectAdminActionEntity o
                 WHERE o.markedForManualDelDateTime < :deletionThreshold
         """)
-    List<ObjectAdminActionEntity> findFilesForManualDeletion(OffsetDateTime deletionThreshold);
+    List<ObjectAdminActionEntity> findFilesForManualDeletion(OffsetDateTime deletionThreshold, Limit limit);
 }
