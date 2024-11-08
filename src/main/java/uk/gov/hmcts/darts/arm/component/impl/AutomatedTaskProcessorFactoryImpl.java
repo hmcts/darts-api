@@ -120,13 +120,4 @@ public class AutomatedTaskProcessorFactoryImpl implements AutomatedTaskProcessor
             throw new DartsException(String.format("Batch size not supported for generating case document for retention date: '%s'", batchSize));
         }
     }
-
-    @Override
-    public CloseOldCasesProcessor createCloseOldCasesProcessor(int batchSize) {
-        if (batchSize > 0) {
-            return closeOldCasesProcessor;
-        } else {
-            throw new DartsException(String.format("Batch size not supported for closing old cases: '%s'", batchSize));
-        }
-    }
 }

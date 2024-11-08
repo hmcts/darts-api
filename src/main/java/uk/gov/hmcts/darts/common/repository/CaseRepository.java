@@ -48,16 +48,16 @@ public interface CaseRepository extends JpaRepository<CourtCaseEntity, Integer> 
             where cre.courtCase.id = ce.id)
         ORDER BY ce.createdDateTime ASC
         """)
-    List<Integer> findOpenCasesToClose(OffsetDateTime cutoffDate, Pageable pageable);
+    List<CourtCaseEntity> findOpenCasesToClose(OffsetDateTime cutoffDate, Limit limit);
 
     List<CourtCaseEntity> findByIsRetentionUpdatedTrueAndRetentionRetriesLessThan(int maxRetentionRetries);
 
     @Query("""
-        SELECT case FROM CourtCaseEntity case
-        WHERE case.closed = true
-        AND case.caseClosedTimestamp <= :caseClosedBeforeTimestamp
+        SELECT c FROM CourtCaseEntity c
+        WHERE c.closed = true
+        AND c.caseClosedTimestamp <= :caseClosedBeforeTimestamp
         AND NOT EXISTS (select cde from CaseDocumentEntity cde
-            where (cde.courtCase.id = case.id))
+            where (cde.courtCase.id = c.id))
         """)
     List<CourtCaseEntity> findCasesNeedingCaseDocumentGenerated(OffsetDateTime caseClosedBeforeTimestamp, Pageable pageable);
 

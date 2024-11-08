@@ -5,7 +5,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
-import uk.gov.hmcts.darts.arm.component.AutomatedTaskProcessorFactory;
 import uk.gov.hmcts.darts.cases.service.CloseOldCasesProcessor;
 import uk.gov.hmcts.darts.common.entity.AutomatedTaskEntity;
 import uk.gov.hmcts.darts.common.repository.AutomatedTaskRepository;
@@ -30,8 +29,6 @@ class CloseOldCasesAutomatedTaskTest {
     @Mock
     private LockService lockService;
     @Mock
-    private AutomatedTaskProcessorFactory automatedTaskProcessorFactory;
-    @Mock
     private CloseOldCasesProcessor closeOldCasesProcessor;
     private static final int BATCH_SIZE = 5;
 
@@ -50,12 +47,10 @@ class CloseOldCasesAutomatedTaskTest {
                 automatedTaskConfigurationProperties,
                 logApi,
                 lockService,
-                automatedTaskProcessorFactory
+                closeOldCasesProcessor
             );
 
         when(automatedTaskRepository.findByTaskName(any())).thenReturn(Optional.of(automatedTask));
-
-        when(automatedTaskProcessorFactory.createCloseOldCasesProcessor(BATCH_SIZE)).thenReturn(closeOldCasesProcessor);
 
         // when
         closeOldCasesAutomatedTask.runTask();
