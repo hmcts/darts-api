@@ -5,7 +5,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Limit;
 import uk.gov.hmcts.darts.casedocument.service.GenerateCaseDocumentSingleCaseProcessor;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
@@ -60,7 +60,7 @@ class GenerateCaseDocumentBatchProcessorImplTest {
     @Test
     void testBatchGenerationOfCaseDocument() {
         when(currentTimeHelper.currentOffsetDateTime()).thenReturn(OffsetDateTime.now());
-        when(caseRepository.findCasesNeedingCaseDocumentGenerated(any(), eq(Pageable.ofSize(BATCH_SIZE))))
+        when(caseRepository.findCasesNeedingCaseDocumentGenerated(any(), eq(Limit.of(BATCH_SIZE))))
             .thenReturn(List.of(case1, case2));
         
         batchProcessor.processGenerateCaseDocument();
@@ -73,7 +73,7 @@ class GenerateCaseDocumentBatchProcessorImplTest {
     @Test
     void testExceptionIsHandledAndProcessingContinues() {
         when(currentTimeHelper.currentOffsetDateTime()).thenReturn(OffsetDateTime.now());
-        when(caseRepository.findCasesNeedingCaseDocumentGenerated(any(), eq(Pageable.ofSize(BATCH_SIZE))))
+        when(caseRepository.findCasesNeedingCaseDocumentGenerated(any(), eq(Limit.of(BATCH_SIZE))))
             .thenReturn(List.of(case1, case2));
         doThrow(RuntimeException.class).when(singleCaseProcessor).processGenerateCaseDocument(CASE_1_ID);
 

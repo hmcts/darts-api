@@ -59,7 +59,7 @@ public interface CaseRepository extends JpaRepository<CourtCaseEntity, Integer> 
         AND NOT EXISTS (select cde from CaseDocumentEntity cde
             where (cde.courtCase.id = c.id))
         """)
-    List<CourtCaseEntity> findCasesNeedingCaseDocumentGenerated(OffsetDateTime caseClosedBeforeTimestamp, Pageable pageable);
+    List<CourtCaseEntity> findCasesNeedingCaseDocumentGenerated(OffsetDateTime caseClosedBeforeTimestamp, Limit limit);
 
     @Query("""
             SELECT cc.id
