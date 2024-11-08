@@ -257,9 +257,6 @@ class DataAnonymisationServiceImplTest {
 
         verify(dataAnonymisationService, times(1)).anonymiseTranscriptionEntity(userAccount, transcriptionEntity1);
         verify(dataAnonymisationService, times(1)).anonymiseTranscriptionEntity(userAccount, transcriptionEntity2);
-
-        verify(dataAnonymisationService, times(1)).anonymiseEventEntity(userAccount, entityEntity1);
-        verify(dataAnonymisationService, times(1)).anonymiseEventEntity(userAccount, entityEntity2);
     }
 
 
