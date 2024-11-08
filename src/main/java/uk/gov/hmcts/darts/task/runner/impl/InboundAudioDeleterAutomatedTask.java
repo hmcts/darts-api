@@ -12,6 +12,8 @@ import uk.gov.hmcts.darts.task.config.AutomatedTaskConfigurationProperties;
 import uk.gov.hmcts.darts.task.runner.AutoloadingManualTask;
 import uk.gov.hmcts.darts.task.service.LockService;
 
+import java.time.Duration;
+
 import static uk.gov.hmcts.darts.task.api.AutomatedTaskName.INBOUND_AUDIO_DELETER_TASK_NAME;
 
 @Slf4j
@@ -36,6 +38,11 @@ public class InboundAudioDeleterAutomatedTask extends AbstractLockableAutomatedT
     @Override
     public AutomatedTaskName getAutomatedTaskName() {
         return INBOUND_AUDIO_DELETER_TASK_NAME;
+    }
+
+    @Override
+    public Duration getLockAtMostFor() {
+        return Duration.ofMinutes(90);
     }
 
     @Override

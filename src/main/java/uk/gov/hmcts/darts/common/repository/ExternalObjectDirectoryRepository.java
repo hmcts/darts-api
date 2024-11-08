@@ -206,7 +206,7 @@ public interface ExternalObjectDirectoryRepository extends JpaRepository<Externa
                                                        ExternalLocationTypeEntity location2,
                                                        OffsetDateTime lastModifiedBefore,
                                                        Integer externalObjectDirectoryQueryTypeEnumIndex,
-                                                       Pageable pageable);
+                                                       Limit limit);
 
     @Query(
         """
