@@ -50,7 +50,7 @@ public interface CaseRepository extends JpaRepository<CourtCaseEntity, Integer> 
         """)
     List<CourtCaseEntity> findOpenCasesToClose(OffsetDateTime cutoffDate, Limit limit);
 
-    List<CourtCaseEntity> findByIsRetentionUpdatedTrueAndRetentionRetriesLessThan(int maxRetentionRetries);
+    List<CourtCaseEntity> findByIsRetentionUpdatedTrueAndRetentionRetriesLessThan(int maxRetentionRetries, Limit limit);
 
     @Query("""
         SELECT c FROM CourtCaseEntity c

@@ -173,7 +173,7 @@ class ApplyRetentionCaseAssociatedObjectsProcessorIntTest extends IntegrationBas
     void testSuccessfullyApplyRetentionToCaseMedias() {
 
         // when
-        processor.processApplyRetentionToCaseAssociatedObjects();
+        processor.processApplyRetentionToCaseAssociatedObjects(getAutomatedTaskBatchSize());
 
         // then
         var media0 = mediaRepository.findById(medias.getFirst().getId()).get();
@@ -282,7 +282,7 @@ class ApplyRetentionCaseAssociatedObjectsProcessorIntTest extends IntegrationBas
         eodStub.createAndSaveEod(annotationDoc5, ARM_DROP_ZONE, ARM, eod -> eod.setUpdateRetention(false));
 
         // when
-        processor.processApplyRetentionToCaseAssociatedObjects();
+        processor.processApplyRetentionToCaseAssociatedObjects(getAutomatedTaskBatchSize());
 
         // then
         var actualAnnotationDoc1 = annotationDocumentRepository.findById(annotationDoc1.getId()).get();
@@ -344,7 +344,7 @@ class ApplyRetentionCaseAssociatedObjectsProcessorIntTest extends IntegrationBas
         eodStub.createAndSaveExternalObjectDirectory(trDoc3.getId(), EodHelper.armDropZoneStatus(), EodHelper.armLocation());
 
         // when
-        processor.processApplyRetentionToCaseAssociatedObjects();
+        processor.processApplyRetentionToCaseAssociatedObjects(getAutomatedTaskBatchSize());
 
         // then
         var actualTranscriptionDoc1 = transcriptionDocumentRepository.findById(trDoc1.getId()).get();
@@ -383,7 +383,7 @@ class ApplyRetentionCaseAssociatedObjectsProcessorIntTest extends IntegrationBas
         eodStub.createExternalObjectDirectory(caseDoc3, EodHelper.armDropZoneStatus(), EodHelper.armLocation(), UUID.randomUUID());
 
         // when
-        processor.processApplyRetentionToCaseAssociatedObjects();
+        processor.processApplyRetentionToCaseAssociatedObjects(getAutomatedTaskBatchSize());
 
         // then
         var actualCaseDoc1 = caseDocumentRepository.findById(caseDoc1.getId()).get();
@@ -408,7 +408,7 @@ class ApplyRetentionCaseAssociatedObjectsProcessorIntTest extends IntegrationBas
             new MediaIdMatcher(medias.getFirst().getId())), refEq(EodHelper.armLocation()));
 
         // when
-        processor.processApplyRetentionToCaseAssociatedObjects();
+        processor.processApplyRetentionToCaseAssociatedObjects(getAutomatedTaskBatchSize());
 
         // then
         var media0 = mediaRepository.findById(medias.getFirst().getId()).get();
@@ -435,7 +435,7 @@ class ApplyRetentionCaseAssociatedObjectsProcessorIntTest extends IntegrationBas
         caseRepository.save(caseB);
 
         // when
-        processor.processApplyRetentionToCaseAssociatedObjects();
+        processor.processApplyRetentionToCaseAssociatedObjects(getAutomatedTaskBatchSize());
 
         // then
         var media0 = mediaRepository.findById(medias.getFirst().getId()).get();
@@ -456,7 +456,7 @@ class ApplyRetentionCaseAssociatedObjectsProcessorIntTest extends IntegrationBas
         eodRepository.deleteAll();
 
         // when
-        processor.processApplyRetentionToCaseAssociatedObjects();
+        processor.processApplyRetentionToCaseAssociatedObjects(getAutomatedTaskBatchSize());
 
         // then
         var media0 = mediaRepository.findById(medias.getFirst().getId()).get();
@@ -481,7 +481,7 @@ class ApplyRetentionCaseAssociatedObjectsProcessorIntTest extends IntegrationBas
         caseRetentionRepository.deleteAll();
 
         // when
-        processor.processApplyRetentionToCaseAssociatedObjects();
+        processor.processApplyRetentionToCaseAssociatedObjects(getAutomatedTaskBatchSize());
 
         // then
         var media0 = mediaRepository.findById(medias.getFirst().getId()).get();

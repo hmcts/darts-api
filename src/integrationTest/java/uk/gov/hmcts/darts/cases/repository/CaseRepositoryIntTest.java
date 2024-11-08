@@ -2,6 +2,7 @@ package uk.gov.hmcts.darts.cases.repository;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Limit;
 import org.springframework.data.domain.Pageable;
 import uk.gov.hmcts.darts.common.entity.CaseDocumentEntity;
 import uk.gov.hmcts.darts.common.entity.CaseRetentionEntity;
@@ -56,7 +57,7 @@ class CaseRepositoryIntTest extends IntegrationBase {
         });
 
         // when
-        var result = caseRepository.findByIsRetentionUpdatedTrueAndRetentionRetriesLessThan(3);
+        var result = caseRepository.findByIsRetentionUpdatedTrueAndRetentionRetriesLessThan(3, Limit.of(batchSize));
 
         // then
         assertThat(result).hasSize(1);
