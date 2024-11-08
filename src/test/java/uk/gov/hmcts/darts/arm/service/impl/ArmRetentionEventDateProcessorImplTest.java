@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Limit;
 import uk.gov.hmcts.darts.arm.component.ArmRetentionEventDateCalculator;
 import uk.gov.hmcts.darts.arm.service.ArmRetentionEventDateProcessor;
 import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
@@ -66,15 +67,15 @@ class ArmRetentionEventDateProcessorImplTest {
     void calculateEventDates() {
         // given
         List<ExternalObjectDirectoryEntity> eods = List.of(externalObjectDirectoryEntity);
-        when(externalObjectDirectoryRepository.findByExternalLocationTypeAndUpdateRetention(armLocation(), true)).thenReturn(eods);
+        when(externalObjectDirectoryRepository.findByExternalLocationTypeAndUpdateRetention(armLocation(), true, Limit.of(10000))).thenReturn(eods);
 
         externalObjectDirectoryEntity.setEventDateTs(MEDIA_RETENTION_DATE_TIME);
 
         // when
-        armRetentionEventDateProcessor.calculateEventDates();
+        armRetentionEventDateProcessor.calculateEventDates(10000);
 
         // then
-        verify(externalObjectDirectoryRepository).findByExternalLocationTypeAndUpdateRetention(armLocation(), true);
+        verify(externalObjectDirectoryRepository).findByExternalLocationTypeAndUpdateRetention(armLocation(), true, Limit.of(10000));
         verify(armRetentionEventDateCalculator).calculateRetentionEventDate(TEST_EXTERNAL_OBJECT_DIRECTORY_ID);
 
         verifyNoMoreInteractions(
@@ -87,13 +88,13 @@ class ArmRetentionEventDateProcessorImplTest {
     void calculateEventDates_NoRowsToProcess() {
         // given
         List<ExternalObjectDirectoryEntity> eods = new ArrayList<>();
-        when(externalObjectDirectoryRepository.findByExternalLocationTypeAndUpdateRetention(armLocation(), true)).thenReturn(eods);
+        when(externalObjectDirectoryRepository.findByExternalLocationTypeAndUpdateRetention(armLocation(), true, Limit.of(10000))).thenReturn(eods);
 
         // when
-        armRetentionEventDateProcessor.calculateEventDates();
+        armRetentionEventDateProcessor.calculateEventDates(10000);
 
         // then
-        verify(externalObjectDirectoryRepository).findByExternalLocationTypeAndUpdateRetention(armLocation(), true);
+        verify(externalObjectDirectoryRepository).findByExternalLocationTypeAndUpdateRetention(armLocation(), true, Limit.of(10000));
 
         verifyNoMoreInteractions(
             externalObjectDirectoryRepository,
