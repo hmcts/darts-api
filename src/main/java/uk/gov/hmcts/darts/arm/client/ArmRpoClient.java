@@ -96,7 +96,7 @@ public interface ArmRpoClient {
         produces = APPLICATION_JSON_VALUE
     )
     CreateExportBasedOnSearchResultsTableResponse createExportBasedOnSearchResultsTable(
-        String bearerToken, CreateExportBasedOnSearchResultsTableRequest request);
+        @RequestHeader(AUTHORIZATION) String bearerToken, @RequestBody CreateExportBasedOnSearchResultsTableRequest request);
 
 
 }
