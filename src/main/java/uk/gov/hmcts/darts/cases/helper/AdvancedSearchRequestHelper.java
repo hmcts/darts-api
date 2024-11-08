@@ -34,7 +34,6 @@ import uk.gov.hmcts.darts.common.entity.HearingEntity_;
 import uk.gov.hmcts.darts.common.entity.JudgeEntity;
 import uk.gov.hmcts.darts.common.entity.JudgeEntity_;
 import uk.gov.hmcts.darts.common.repository.CourthouseRepository;
-import uk.gov.hmcts.darts.common.repository.CourtroomRepository;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -52,7 +51,6 @@ public class AdvancedSearchRequestHelper {
     private final EntityManager entityManager;
 
     private final AuthorisationApi authorisationApi;
-    private final CourtroomRepository courtroomRepository;
     private final CourthouseRepository courthouseRepository;
 
     public List<Integer> getMatchingCourtCases(GetCasesSearchRequest request) throws AdvancedSearchNoResultsException {
@@ -77,13 +75,41 @@ public class AdvancedSearchRequestHelper {
         CollectionUtils.addAll(predicates, addCourthouseAccessCriteria(caseRoot));
         CollectionUtils.addAll(predicates, addCaseCriteria(request, criteriaBuilder, caseRoot));
         CollectionUtils.addAll(predicates, addHearingDateCriteria(request, criteriaBuilder, caseRoot));
-        CollectionUtils.addAll(predicates, addCourthouseCourtroomCriteria(request, criteriaBuilder, caseRoot));
+        CollectionUtils.addAll(predicates, addCourtroomNameCriteria(criteriaBuilder, caseRoot, request));
+        CollectionUtils.addAll(predicates, addCourthouseIdCriteria(caseRoot, request));
         CollectionUtils.addAll(predicates, addJudgeCriteria(request, criteriaBuilder, caseRoot));
         CollectionUtils.addAll(predicates, addDefendantCriteria(request, criteriaBuilder, caseRoot));
         CollectionUtils.addAll(predicates, addEventCriteria(request, criteriaBuilder, caseRoot));
         CollectionUtils.addAll(predicates, addUseInterpreterCriteria(criteriaBuilder, caseRoot));
         CollectionUtils.addAll(predicates, addHearingIsActualCriteria(criteriaBuilder, caseRoot));
         return predicates;
+    }
+
+    private List<Predicate> addCourtroomNameCriteria(HibernateCriteriaBuilder criteriaBuilder, Root<CourtCaseEntity> caseRoot,
+                                                     GetCasesSearchRequest request) {
+        List<Predicate> predicateList = new ArrayList<>();
+        if (StringUtils.isNotBlank(request.getCourtroom())) {
+            Join<CourtCaseEntity, HearingEntity> hearingJoin = joinHearing(caseRoot);
+            Join<HearingEntity, CourtroomEntity> courtroomJoin = joinCourtroom(hearingJoin);
+            predicateList.add(criteriaBuilder.ilike(
+                courtroomJoin.get(CourtroomEntity_.NAME),
+                surroundWithPercentages(request.getCourtroom())
+            ));
+        }
+        return predicateList;
+    }
+
+    private List<Predicate> addCourthouseIdCriteria(Root<CourtCaseEntity> caseRoot, GetCasesSearchRequest request) throws AdvancedSearchNoResultsException {
+        List<Predicate> predicateList = new ArrayList<>();
+        if (!request.getCourthouse().isEmpty()) {
+            List<Integer> courthouseIdList = courthouseRepository.findAllIdByDisplayNameOrNameLike(request.getCourthouse());
+            log.debug("Matching list of courthouse IDs for search = {}", courthouseIdList);
+            if (courthouseIdList.isEmpty()) {
+                throw new AdvancedSearchNoResultsException();
+            }
+            predicateList.add(caseRoot.get(CourtroomEntity_.COURTHOUSE).get(CourthouseEntity_.ID).in(courthouseIdList));
+        }
+        return predicateList;
     }
 
     private Predicate addCourthouseAccessCriteria(Root<CourtCaseEntity> caseRoot) {
@@ -139,90 +165,6 @@ public class AdvancedSearchRequestHelper {
         return predicateList;
     }
 
-    private List<Predicate> addCourthouseCourtroomCriteria(GetCasesSearchRequest request,
-                                                           HibernateCriteriaBuilder criteriaBuilder,
-                                                           Root<CourtCaseEntity> caseRoot) throws AdvancedSearchNoResultsException {
-        List<Predicate> predicateList = new ArrayList<>();
-
-        boolean courtroomProvided = StringUtils.isNotBlank(request.getCourtroom()) || request.getCourtroomId() != null;
-        if (courtroomProvided) {
-            return addCourtroomIdCriteria(request, criteriaBuilder, caseRoot);
-        }
-        boolean courthouseProvided = StringUtils.isNotBlank(request.getCourthouse()) || request.getCourthouseId() != null;
-        if (courthouseProvided) {
-            return addCourthouseIdCriteria(request, criteriaBuilder, caseRoot);
-        }
-
-        return predicateList;
-    }
-
-    private List<Predicate> addCourtroomIdCriteria(GetCasesSearchRequest request,
-                                                   HibernateCriteriaBuilder criteriaBuilder,
-                                                   Root<CourtCaseEntity> caseRoot) throws AdvancedSearchNoResultsException {
-        List<Predicate> predicateList = new ArrayList<>();
-        Join<CourtCaseEntity, HearingEntity> hearingJoin = joinHearing(caseRoot);
-        if (request.getCourtroomId() != null) {
-            CourtroomEntity courtroomReference = courtroomRepository.getReferenceById(request.getCourtroomId());
-            predicateList.add(criteriaBuilder.equal(
-                hearingJoin.get(HearingEntity_.COURTROOM),
-                courtroomReference)
-            );
-            return predicateList;
-        }
-        if (StringUtils.isNotBlank(request.getCourthouse())) {
-            List<Integer> courtroomIdList = courtroomRepository.findAllIdByCourthouseNameAndCourtroomNameLike(
-                request.getCourthouse(), request.getCourtroom());
-            if (courtroomIdList.isEmpty()) {
-                throw new AdvancedSearchNoResultsException();
-            }
-            List<CourtroomEntity> courtroomEntityList = courtroomIdList.stream().map(id -> courtroomRepository.getReferenceById(id)).toList();
-            predicateList.add(
-                hearingJoin.get(HearingEntity_.COURTROOM).in(
-                    courtroomEntityList)
-            );
-            return predicateList;
-        }
-
-        List<Integer> courtroomIdList = courtroomRepository.findAllIdByCourtroomNameLike(request.getCourtroom());
-        if (courtroomIdList.isEmpty()) {
-            throw new AdvancedSearchNoResultsException();
-        }
-        List<CourtroomEntity> courtroomEntityList = courtroomIdList.stream().map(id -> courtroomRepository.getReferenceById(id)).toList();
-        predicateList.add(
-            hearingJoin.get(HearingEntity_.COURTROOM).in(
-                courtroomEntityList)
-        );
-        return predicateList;
-    }
-
-    private List<Predicate> addCourthouseIdCriteria(GetCasesSearchRequest request,
-                                                    HibernateCriteriaBuilder criteriaBuilder,
-                                                    Root<CourtCaseEntity> caseRoot) throws AdvancedSearchNoResultsException {
-        List<Predicate> predicateList = new ArrayList<>();
-        if (request.getCourthouseId() != null) {
-            CourthouseEntity courthouseReference = courthouseRepository.getReferenceById(request.getCourthouseId());
-            predicateList.add(criteriaBuilder.equal(
-                caseRoot.get(CourtCaseEntity_.COURTHOUSE),
-                courthouseReference)
-            );
-            return predicateList;
-        }
-        if (StringUtils.isNotBlank(request.getCourthouse())) {
-            List<Integer> courthouseIdList = courthouseRepository.findAllIdByDisplayNameOrNameLike(
-                request.getCourthouse());
-            log.debug("Matching list of courthouse IDs for search = {}", courthouseIdList);
-            if (courthouseIdList.isEmpty()) {
-                throw new AdvancedSearchNoResultsException();
-            }
-            List<CourthouseEntity> courthouseRefList = courthouseIdList.stream().map(id -> courthouseRepository.getReferenceById(id)).toList();
-            predicateList.add(
-                caseRoot.get(CourtCaseEntity_.COURTHOUSE).in(
-                    courthouseRefList)
-            );
-        }
-        return predicateList;
-    }
-
     private List<Predicate> addJudgeCriteria(GetCasesSearchRequest request, HibernateCriteriaBuilder criteriaBuilder, Root<CourtCaseEntity> caseRoot) {
         List<Predicate> predicateList = new ArrayList<>();
         if (StringUtils.isNotBlank(request.getJudgeName())) {
@@ -272,6 +214,10 @@ public class AdvancedSearchRequestHelper {
             hearingJoin.get(HearingEntity_.HEARING_IS_ACTUAL)
         ));
         return predicateList;
+    }
+
+    private Join<HearingEntity, CourtroomEntity> joinCourtroom(Join<CourtCaseEntity, HearingEntity> hearingJoin) {
+        return hearingJoin.join(HearingEntity_.COURTROOM, JoinType.INNER);
     }
 
     @SuppressWarnings({"unchecked", "PMD.LiteralsFirstInComparisons"})
