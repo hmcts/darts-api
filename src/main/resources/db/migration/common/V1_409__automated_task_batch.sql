@@ -19,11 +19,11 @@ update darts.automated_task set batch_size = 10000, cron_expression = '0 37 22 *
 update darts.automated_task set batch_size = 1000, cron_expression = '0 34 22 * * ?' where task_name = 'InboundTranscriptionAnnotationDeleter';
 update darts.automated_task set batch_size = 1000, cron_expression = '0 57 22 * * ?' where task_name = 'UnstructuredTranscriptionAnnotationDeleter';
 update darts.automated_task set batch_size = 5000, cron_expression = '0 50 0,1,2,3,4,5,6,7,8,20,21,22,23 ? * *' where task_name = 'GenerateCaseDocumentForRetentionDate';
-update darts.automated_task set batch_size = 1000, cron_expression = '0 0 0 31 2 *' where task_name = 'CaseExpiryDeletion';
+update darts.automated_task set batch_size = 1000 where task_name = 'CaseExpiryDeletion';
 update darts.automated_task set batch_size = 5000, cron_expression = '0 0 0/1 ? * *' where task_name = 'AssociatedObjectDataExpiryDeletion';
-update darts.automated_task set batch_size = 200, cron_expression = '0 0 0/1 ? * *' where task_name = 'ProcessDETSToArmResponse';
+update darts.automated_task set batch_size = 200, cron_expression = '0 9 0,1,2,3,4,5,6,21,22,23 ? * *' where task_name = 'ProcessDETSToArmResponse';
 update darts.automated_task set batch_size = 5000, cron_expression = '0 0 21 * * ?' where task_name = 'ManualDeletion';
-update darts.automated_task set batch_size = 2000, cron_expression = '0 0 0 31 2 *' where task_name = 'DetsToArm';
+update darts.automated_task set batch_size = 2000, cron_expression = '0 9 0,1,2,3,4,5,6,21,22,23 ? * *' where task_name = 'DetsToArm';
 update darts.automated_task set batch_size = 10000, cron_expression = '0 0 0,1,2,3,4,5,6,7,8,20,21,22,23 ? * *' where task_name = 'AudioLinking';
-update darts.automated_task set batch_size = null, cron_expression = '0 0 0 31 2 *' where task_name = 'ProcessE2EArmRpoPending';
+update darts.automated_task set batch_size = 0, cron_expression = '0 18 23 * * ?' where task_name = 'ProcessE2EArmRpoPending';
 update darts.automated_task set batch_size = 100000, cron_expression = '0 0 0 31 2 *' where task_name = 'ArmRpoReplay';
