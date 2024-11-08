@@ -1,0 +1,99 @@
+<?xml version="1.0" ?>
+<S:Envelope xmlns:S="http://schemas.xmlsoap.org/soap/envelope/">
+  <S:Header>
+    <wsse:Security xmlns:wsse="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd">
+      <wsse:BinarySecurityToken QualificationValueType="http://schemas.emc.com/documentum#ResourceAccessToken" wsu:Id="RAD" xmlns:wsu="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd">eyJWTRedactedToken</wsse:BinarySecurityToken>
+    </wsse:Security>
+    <ServiceContext xmlns="http://context.core.datamodel.fs.documentum.emc.com/" xmlns:ns2="http://properties.core.datamodel.fs.documentum.emc.com/" xmlns:ns3="http://profiles.core.datamodel.fs.documentum.emc.com/" xmlns:ns4="http://query.core.datamodel.fs.documentum.emc.com/" xmlns:ns5="http://content.core.datamodel.fs.documentum.emc.com/" xmlns:ns6="http://core.datamodel.fs.documentum.emc.com/">
+      <Profiles allowAsyncContentTransfer="false" allowCachedContentTransfer="false" isProcessOLELinks="false" transferMode="BASE64" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="ns3:ContentTransferProfile"/>
+    </ServiceContext>
+  </S:Header>
+  <S:Body>
+    <ns6:addDocument xmlns:ns2="http://content.core.datamodel.fs.documentum.emc.com/" xmlns:ns3="http://core.datamodel.fs.documentum.emc.com/" xmlns:ns4="http://properties.core.datamodel.fs.documentum.emc.com/" xmlns:ns5="http://rt.fs.documentum.emc.com/" xmlns:ns6="http://com.synapps.mojdarts.service.com">
+      <messageId>58b211f4-426d-81be-1234512345</messageId>
+      <type>CPPDL</type>
+      <subType>CPPDL</subType>
+      <document>&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot; standalone=&quot;yes&quot;?&gt;
+        &lt;cs:DailyList xmlns:cs=&quot;http://www.courtservice.gov.uk/schemas/courtservice&quot; xmlns:p2=&quot;http://www.govtalk.gov.uk/people/bs7666&quot; xmlns:apd=&quot;http://www.govtalk.gov.uk/people/AddressAndPersonalDetails&quot;&gt;
+        &lt;cs:DocumentID&gt;
+        &lt;cs:DocumentName&gt;DailyList_467_20240306161825.xml&lt;/cs:DocumentName&gt;
+        &lt;cs:UniqueID&gt;CSDDL1709741907143&lt;/cs:UniqueID&gt;
+        &lt;cs:DocumentType&gt;DL&lt;/cs:DocumentType&gt;
+        &lt;cs:TimeStamp&gt;2024-03-06T16:18:24.871&lt;/cs:TimeStamp&gt;
+        &lt;/cs:DocumentID&gt;
+        &lt;cs:ListHeader&gt;
+        &lt;cs:ListCategory&gt;Criminal&lt;/cs:ListCategory&gt;
+        &lt;cs:StartDate&gt;2024-03-06&lt;/cs:StartDate&gt;
+        &lt;cs:EndDate&gt;2024-03-06&lt;/cs:EndDate&gt;
+        &lt;cs:Version&gt;NOT VERSIONED&lt;/cs:Version&gt;
+        &lt;cs:PublishedTime&gt;2024-03-06T16:18:25.108Z&lt;/cs:PublishedTime&gt;
+        &lt;/cs:ListHeader&gt;
+        &lt;cs:CrownCourt&gt;
+        &lt;cs:CourtHouseType&gt;Crown Court&lt;/cs:CourtHouseType&gt;
+        &lt;cs:CourtHouseCode CourtHouseShortName=&quot;YORK&quot;&gt;467&lt;/cs:CourtHouseCode&gt;
+        &lt;cs:CourtHouseName&gt;YORK&lt;/cs:CourtHouseName&gt;
+        &lt;/cs:CrownCourt&gt;
+        &lt;cs:CourtLists&gt;
+        &lt;cs:CourtList&gt;
+        &lt;cs:CourtHouse&gt;
+        &lt;cs:CourtHouseType&gt;Crown Court&lt;/cs:CourtHouseType&gt;
+        &lt;cs:CourtHouseCode&gt;467&lt;/cs:CourtHouseCode&gt;
+        &lt;cs:CourtHouseName&gt;YORK&lt;/cs:CourtHouseName&gt;
+        &lt;/cs:CourtHouse&gt;
+        &lt;cs:Sittings&gt;
+        &lt;cs:Sitting&gt;
+        &lt;cs:CourtRoomNumber&gt;1&lt;/cs:CourtRoomNumber&gt;
+        &lt;cs:SittingSequenceNo&gt;1&lt;/cs:SittingSequenceNo&gt;
+        &lt;cs:SittingAt&gt;10:30:00&lt;/cs:SittingAt&gt;
+        &lt;cs:SittingPriority&gt;T&lt;/cs:SittingPriority&gt;
+        &lt;cs:Judiciary&gt;
+        &lt;cs:Judge&gt;
+        &lt;apd:CitizenNameForename&gt;NONE&lt;/apd:CitizenNameForename&gt;
+        &lt;apd:CitizenNameSurname&gt;NONE&lt;/apd:CitizenNameSurname&gt;
+        &lt;apd:CitizenNameRequestedName&gt;NONE&lt;/apd:CitizenNameRequestedName&gt;
+        &lt;/cs:Judge&gt;
+        &lt;/cs:Judiciary&gt;
+        &lt;cs:Hearings&gt;
+        &lt;cs:Hearing&gt;
+        &lt;cs:HearingSequenceNumber&gt;1&lt;/cs:HearingSequenceNumber&gt;
+        &lt;cs:HearingDetails HearingType=&quot;PLE&quot;&gt;
+        &lt;cs:HearingDescription&gt;For Plea&lt;/cs:HearingDescription&gt;
+        &lt;cs:HearingDate&gt;2024-03-06&lt;/cs:HearingDate&gt;
+        &lt;/cs:HearingDetails&gt;
+        &lt;cs:TimeMarkingNote&gt;10:30 AM&lt;/cs:TimeMarkingNote&gt;
+        &lt;cs:CaseNumber&gt;CPP&lt;/cs:CaseNumber&gt;
+        &lt;cs:Prosecution ProsecutingAuthority=&quot;Other Prosecutor&quot;&gt;
+        &lt;cs:ProsecutingReference&gt;Other Prosecutor&lt;/cs:ProsecutingReference&gt;
+        &lt;cs:ProsecutingOrganisation&gt;
+        &lt;cs:OrganisationName&gt;Other Prosecutor&lt;/cs:OrganisationName&gt;
+        &lt;/cs:ProsecutingOrganisation&gt;
+        &lt;/cs:Prosecution&gt;
+        &lt;cs:Defendants&gt;
+        &lt;cs:Defendant&gt;
+        &lt;cs:PersonalDetails&gt;
+        &lt;cs:Name&gt;
+        &lt;apd:CitizenNameForename&gt;Casper&lt;/apd:CitizenNameForename&gt;
+        &lt;apd:CitizenNameSurname&gt;Daugherty&lt;/apd:CitizenNameSurname&gt;
+        &lt;apd:CitizenNameRequestedName&gt;Casper Daugherty&lt;/apd:CitizenNameRequestedName&gt;
+        &lt;/cs:Name&gt;
+        &lt;cs:IsMasked&gt;no&lt;/cs:IsMasked&gt;
+        &lt;/cs:PersonalDetails&gt;
+        &lt;cs:URN&gt;50MD1811194&lt;/cs:URN&gt;
+        &lt;cs:Charges&gt;
+        &lt;cs:Charge IndictmentCountNumber=&quot;0&quot; CJSoffenceCode=&quot;SA00002&quot;&gt;
+        &lt;cs:OffenceStatement&gt;Sex offences - abuse position of trust - engage in sexual activity&lt;/cs:OffenceStatement&gt;
+        &lt;/cs:Charge&gt;
+        &lt;/cs:Charges&gt;
+        &lt;/cs:Defendant&gt;
+        &lt;/cs:Defendants&gt;
+        &lt;/cs:Hearing&gt;
+        &lt;/cs:Hearings&gt;
+        &lt;/cs:Sitting&gt;
+        &lt;/cs:Sittings&gt;
+        &lt;/cs:CourtList&gt;
+        &lt;/cs:CourtLists&gt;
+        &lt;/cs:DailyList&gt;
+      </document>
+    </ns6:addDocument>
+  </S:Body>
+</S:Envelope>
