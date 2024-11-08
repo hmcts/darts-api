@@ -442,7 +442,7 @@ dependencies {
   implementation group: 'org.apache.tika', name: 'tika-core', version: '3.0.0'
   implementation group: 'org.springframework.data', name: 'spring-data-envers', version: '3.3.5'
   implementation 'org.hibernate.orm:hibernate-ant:6.6.2.Final'
-  implementation 'org.hibernate:hibernate-spatial:6.6.1.Final'
+  implementation 'org.hibernate:hibernate-spatial:6.6.2.Final'
 
   annotationProcessor 'org.mapstruct:mapstruct-processor:1.6.2'
   annotationProcessor('org.hibernate.orm:hibernate-jpamodelgen:6.6.2.Final')
