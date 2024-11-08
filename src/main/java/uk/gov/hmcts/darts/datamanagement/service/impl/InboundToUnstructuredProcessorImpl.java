@@ -3,6 +3,7 @@ package uk.gov.hmcts.darts.datamanagement.service.impl;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Limit;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.darts.common.entity.ExternalLocationTypeEntity;
 import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
@@ -62,7 +63,7 @@ public class InboundToUnstructuredProcessorImpl implements InboundToUnstructured
         log.debug("Processing Inbound data store");
         List<ExternalObjectDirectoryEntity> inboundList = externalObjectDirectoryRepository.findEodsForTransfer(getStatus(STORED), getType(INBOUND),
                                                                                                                 getStatus(STORED), getType(UNSTRUCTURED), 3,
-                                                                                                                batchSize);
+                                                                                                                Limit.of(batchSize));
         AtomicInteger count = new AtomicInteger(1);
 
         List<Callable<Void>> tasks = inboundList.stream()
