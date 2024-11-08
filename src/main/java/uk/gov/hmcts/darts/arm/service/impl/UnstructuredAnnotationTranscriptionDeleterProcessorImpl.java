@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Limit;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.darts.arm.service.UnstructuredTranscriptionAndAnnotationDeleterProcessor;
 import uk.gov.hmcts.darts.common.enums.SystemUsersEnum;
@@ -34,12 +35,12 @@ public class UnstructuredAnnotationTranscriptionDeleterProcessorImpl implements 
     @Value("${darts.data-management.retention-period.inbound.arm-minimum}")
     int hoursInArm;
 
-    public List<Integer> markForDeletion() {
-        return markForDeletion(weeksInUnstructured, hoursInArm);
+    public List<Integer> markForDeletion(int batchSize) {
+        return markForDeletion(weeksInUnstructured, hoursInArm, batchSize);
     }
 
     @Override
-    public List<Integer> markForDeletion(int weeksBeforeCurrentDateInUnstructured, int hoursBeforeCurrentDateInArm) {
+    public List<Integer> markForDeletion(int weeksBeforeCurrentDateInUnstructured, int hoursBeforeCurrentDateInArm, int batchSize) {
 
         OffsetDateTime lastModifiedBeforeCurrentDateForUnstructured = currentTimeHelper.currentOffsetDateTime().minus(
             weeksBeforeCurrentDateInUnstructured,
@@ -58,7 +59,8 @@ public class UnstructuredAnnotationTranscriptionDeleterProcessorImpl implements 
                                                   EodHelper.unstructuredLocation(),
                                                   EodHelper.armLocation(),
                                                   lastModifiedBeforeCurrentDateForUnstructured,
-                                                  lastModifiedBeforeCurrentDateForArm
+                                                  lastModifiedBeforeCurrentDateForArm,
+                                                  Limit.of(batchSize)
             );
 
         log.debug("Identified records to be marked for deletion  {}", StringUtils.join(recordsMarkedForDeletion, ","));

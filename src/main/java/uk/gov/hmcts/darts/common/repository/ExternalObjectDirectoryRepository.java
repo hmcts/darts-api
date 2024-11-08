@@ -227,7 +227,8 @@ public interface ExternalObjectDirectoryRepository extends JpaRepository<Externa
                                                        ExternalLocationTypeEntity location1,
                                                        ExternalLocationTypeEntity location2,
                                                        OffsetDateTime lastModifiedBefore1,
-                                                       OffsetDateTime lastModifiedBefore2);
+                                                       OffsetDateTime lastModifiedBefore2,
+                                                       Limit limit);
 
     @Query(
         """
