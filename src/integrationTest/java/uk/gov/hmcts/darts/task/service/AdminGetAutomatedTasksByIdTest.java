@@ -46,7 +46,7 @@ class AdminGetAutomatedTasksByIdTest extends IntegrationBase {
             .andExpect(jsonPath("$.id").value(8))
             .andExpect(jsonPath("$.name").value("UnstructuredToArmDataStore"))
             .andExpect(jsonPath("$.description").value("Move files from Unstructured to ARM data store"))
-            .andExpect(jsonPath("$.cron_expression").value("0 7 0/1 ? * * *"))
+            .andExpect(jsonPath("$.cron_expression").value("0 7 0/1 ? * *"))
             .andExpect(jsonPath("$.is_active").value(false))
             .andReturn();
 
