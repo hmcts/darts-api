@@ -11,6 +11,9 @@ import uk.gov.hmcts.darts.audio.deleter.impl.unstructured.ExternalUnstructuredDa
 import uk.gov.hmcts.darts.log.api.LogApi;
 import uk.gov.hmcts.darts.task.service.LockService;
 
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.spy;
+
 @ExtendWith(MockitoExtension.class)
 class ExternalDataStoreDeleterAutomatedTaskTest {
 
@@ -32,15 +35,17 @@ class ExternalDataStoreDeleterAutomatedTaskTest {
     @Test
     void runTask() {
         ExternalDataStoreDeleterAutomatedTask externalDataStoreDeleterAutomatedTask =
-            new ExternalDataStoreDeleterAutomatedTask(
-                null,null, inboundDeleter,
+            spy(new ExternalDataStoreDeleterAutomatedTask(
+                null, null, inboundDeleter,
                 unstructuredDeleter, outboundDeleter, logApi, lockService
-            );
+            ));
+        doReturn(100).when(externalDataStoreDeleterAutomatedTask).getAutomatedTaskBatchSize();
 
         externalDataStoreDeleterAutomatedTask.runTask();
 
-        Mockito.verify(inboundDeleter, Mockito.times(1)).delete();
-        Mockito.verify(outboundDeleter, Mockito.times(1)).delete();
-        Mockito.verify(unstructuredDeleter, Mockito.times(1)).delete();
+        Mockito.verify(inboundDeleter, Mockito.times(1)).delete(100);
+        Mockito.verify(outboundDeleter, Mockito.times(1)).delete(100);
+        Mockito.verify(unstructuredDeleter, Mockito.times(1)).delete(100);
+        Mockito.verify(externalDataStoreDeleterAutomatedTask, Mockito.times(1)).getAutomatedTaskBatchSize();
     }
 }

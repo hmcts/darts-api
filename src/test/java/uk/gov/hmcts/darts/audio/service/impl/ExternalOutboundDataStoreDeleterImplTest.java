@@ -24,6 +24,8 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.beans.HasPropertyWithValue.hasProperty;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -88,16 +90,16 @@ class ExternalOutboundDataStoreDeleterImplTest {
 
         List<TransientObjectDirectoryEntity> outboundData = createOutboundData();
 
-        when(finder.findMarkedForDeletion()).thenReturn(outboundData);
+        when(finder.findMarkedForDeletion(100)).thenReturn(outboundData);
 
-        List<TransientObjectDirectoryEntity> deletedItems = deleter.delete();
+        List<TransientObjectDirectoryEntity> deletedItems = deleter.delete(100);
 
         assertThat(deletedItems, containsInAnyOrder(
             hasProperty("id", is(1)),
             hasProperty("id", is(21))
         ));
         assertEquals(2, deletedItems.size());
-
+        verify(finder, times(1)).findMarkedForDeletion(100);
     }
 
 }

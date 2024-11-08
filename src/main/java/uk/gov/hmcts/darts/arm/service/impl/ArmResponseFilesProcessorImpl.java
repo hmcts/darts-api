@@ -2,6 +2,7 @@ package uk.gov.hmcts.darts.arm.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Limit;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.darts.arm.component.ArmResponseFilesProcessSingleElement;
 import uk.gov.hmcts.darts.arm.service.ArmResponseFilesProcessor;
@@ -29,7 +30,8 @@ public class ArmResponseFilesProcessorImpl implements ArmResponseFilesProcessor 
         initialisePreloadedObjects();
         // Fetch All records from external_object_directory table with external_location_type as 'ARM' and with status 'Arm Drop Zone'.
         List<ExternalObjectDirectoryEntity> dataSentToArm =
-            externalObjectDirectoryRepository.findByExternalLocationTypeAndObjectStatus(EodHelper.armLocation(), EodHelper.armDropZoneStatus());
+            externalObjectDirectoryRepository.findByExternalLocationTypeAndObjectStatus(EodHelper.armLocation(), EodHelper.armDropZoneStatus(),
+                                                                                        Limit.unlimited());
 
         List<Integer> externalObjects = dataSentToArm.stream().map(ExternalObjectDirectoryEntity::getId).toList();
         log.info("ARM Response process found : {} records to be processed", externalObjects.size());

@@ -4,6 +4,6 @@ import java.util.List;
 
 public interface ObjectDirectoryDeletedFinder<T> {
 
-    List<T> findMarkedForDeletion();
+    List<T> findMarkedForDeletion(Integer batchSize);
 
 }

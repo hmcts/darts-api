@@ -141,8 +141,8 @@ class ManualDeletionProcessorImplTest {
 
         manualDeletionProcessor.process();
 
-        verify(inboundDeleter, never()).delete(any());
-        verify(unstructuredDeleter, never()).delete(any());
+        verify(inboundDeleter, never()).delete(any(ExternalObjectDirectoryEntity.class));
+        verify(unstructuredDeleter, never()).delete(any(ExternalObjectDirectoryEntity.class));
     }
 
     @Test
