@@ -16,6 +16,8 @@ import uk.gov.hmcts.darts.task.config.AutomatedTaskConfigurationProperties;
 import uk.gov.hmcts.darts.task.runner.AutoloadingManualTask;
 import uk.gov.hmcts.darts.task.service.LockService;
 
+import java.time.Duration;
+
 @Component
 @ConditionalOnProperty(
     value = "darts.automated.task.case-expiry-deletion.enabled",
@@ -47,6 +49,11 @@ public class CaseExpiryDeletionAutomatedTask
     @Override
     public AutomatedTaskName getAutomatedTaskName() {
         return AutomatedTaskName.CASE_EXPIRY_DELETION_TASK_NAME;
+    }
+
+    @Override
+    public Duration getLockAtMostFor() {
+        return Duration.ofMinutes(40);
     }
 
     @Override
