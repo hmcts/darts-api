@@ -13,7 +13,7 @@ update darts.automated_task set batch_size = 5000, cron_expression = '0 10 0,1,2
 update darts.automated_task set batch_size = 1000, cron_expression = '0 3 21 * * ?' where task_name = 'DailyListHousekeeping';
 update darts.automated_task set batch_size = 50000, cron_expression = '* 45 0/1 ? * *' where task_name = 'ArmRetentionEventDateCalculator';
 update darts.automated_task set batch_size = 10000, cron_expression = '* 15 0/1 ? * *' where task_name = 'ApplyRetentionCaseAssociatedObjects';
-update darts.automated_task set batch_size = 500, cron_expression = '* 20 0/1 ? * *' where task_name = 'BatchCleanupArmResponseFiles';
+update darts.automated_task set batch_size = 500 where task_name = 'BatchCleanupArmResponseFiles';
 update darts.automated_task set batch_size = 5000, cron_expression = '0 0,30 0,1,2,3,4,5,6,7,8,20,21,22,23 ? * *' where task_name = 'GenerateCaseDocument';
 update darts.automated_task set batch_size = 10000, cron_expression = '0 37 22 * * ?' where task_name = 'RemoveDuplicatedEvents';
 update darts.automated_task set batch_size = 1000, cron_expression = '0 34 22 * * ?' where task_name = 'InboundTranscriptionAnnotationDeleter';
