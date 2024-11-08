@@ -4,6 +4,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
 import jakarta.persistence.Query;
+import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
@@ -18,6 +19,7 @@ import uk.gov.hmcts.darts.common.entity.AnnotationDocumentEntity;
 import uk.gov.hmcts.darts.common.entity.AnnotationEntity;
 import uk.gov.hmcts.darts.common.entity.AuditEntity;
 import uk.gov.hmcts.darts.common.entity.AutomatedTaskEntity;
+import uk.gov.hmcts.darts.common.entity.CaseDocumentEntity;
 import uk.gov.hmcts.darts.common.entity.CaseManagementRetentionEntity;
 import uk.gov.hmcts.darts.common.entity.CaseRetentionEntity;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
@@ -37,6 +39,7 @@ import uk.gov.hmcts.darts.common.entity.RetentionPolicyTypeEntity;
 import uk.gov.hmcts.darts.common.entity.SecurityGroupEntity;
 import uk.gov.hmcts.darts.common.entity.SecurityRoleEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionCommentEntity;
+import uk.gov.hmcts.darts.common.entity.TranscriptionDocumentEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionWorkflowEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
@@ -96,6 +99,7 @@ import uk.gov.hmcts.darts.dailylist.enums.SourceType;
 import uk.gov.hmcts.darts.notification.entity.NotificationEntity;
 import uk.gov.hmcts.darts.retention.enums.CaseRetentionStatus;
 import uk.gov.hmcts.darts.retention.enums.RetentionPolicyEnum;
+import uk.gov.hmcts.darts.task.runner.SoftDelete;
 import uk.gov.hmcts.darts.test.common.data.CourthouseTestData;
 import uk.gov.hmcts.darts.test.common.data.DailyListTestData;
 import uk.gov.hmcts.darts.test.common.data.PersistableFactory;
@@ -260,6 +264,7 @@ public class DartsDatabaseStub {
 
     @Transactional
     public void clearDatabaseInThisOrder() {
+        removeDeleteFlag(AnnotationDocumentEntity.class, CaseDocumentEntity.class, MediaEntity.class, TranscriptionDocumentEntity.class);
         armRpoExecutionDetailRepository.deleteAll();
         objectAdminActionRepository.deleteAll();
         auditRepository.deleteAll();
@@ -296,6 +301,15 @@ public class DartsDatabaseStub {
         annotationRepository.deleteAll();
         transcriptionRepository.deleteAll();
         transcriptionWorkflowRepository.deleteAll();
+    }
+
+    @SafeVarargs
+    private void removeDeleteFlag(Class<? extends SoftDelete>... classes) {
+        stream(classes).forEach(tClass -> {
+            Table table = tClass.getAnnotation(Table.class);
+            entityManager.createNativeQuery("UPDATE darts." + table.name() + " set is_deleted = false where is_deleted = true")
+                .executeUpdate();
+        });
     }
 
     public List<EventHandlerEntity> findByHandlerAndActiveTrue(String handlerName) {

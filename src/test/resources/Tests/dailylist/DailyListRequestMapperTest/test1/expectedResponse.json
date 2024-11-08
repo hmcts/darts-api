@@ -1,0 +1,82 @@
+{
+  "document_id": {
+    "document_name": "DL 18/02/10 FINAL v1",
+    "unique_id": "CSDDL000000000576147",
+    "document_type": "DL",
+    "time_stamp": "2010-02-18T11:13:23.03Z"
+  },
+  "list_header": {
+    "list_category": "Criminal",
+    "start_date": "2010-02-18",
+    "end_date": "2010-02-18",
+    "version": "FINAL v1",
+    "published_time": "2010-02-17T16:16:50Z"
+  },
+  "crown_court": {
+    "court_house_type": "CROWN_COURT",
+    "court_house_code": {
+      "court_house_short_name": "SNARE",
+      "code": 453
+    },
+    "court_house_name": "SNARESBROOK"
+  },
+  "court_lists": [
+    {
+      "court_house": {
+        "court_house_type": "CROWN_COURT",
+        "court_house_code": {
+          "code": 453
+        },
+        "court_house_name": "SNARESBROOK"
+      },
+      "sittings": [
+        {
+          "court_room_number": "1A",
+          "sitting_sequence_no": 1,
+          "sitting_at": "10:00:00",
+          "sitting_priority": "T",
+          "judiciary": [
+            {
+              "citizen_name_forename": "",
+              "citizen_name_surname": "JudgeSurname",
+              "citizen_name_requested_name": "JudgeRequestedName"
+            }
+          ],
+          "hearings": [
+            {
+              "hearing_sequence_number": 1,
+              "hearing_details": {
+                "hearing_type": "TRL",
+                "hearing_description": "For Trial",
+                "hearing_date": "2010-02-18"
+              },
+              "time_marking_note": "10:00 AM",
+              "case_number": "T20107001",
+              "prosecution": {
+                "prosecuting_authority": "Crown Prosecution Service",
+                "prosecuting_reference": "CPS",
+                "prosecuting_organisation": {
+                  "organisation_name": "Crown Prosecution Service"
+                },
+                "advocates": []
+              },
+              "defendants": [
+                {
+                  "personal_details": {
+                    "name": {
+                      "citizen_name_forename": "Franz",
+                      "citizen_name_surname": "KAFKA"
+                    },
+                    "is_masked": false
+                  },
+                  "counsel": [],
+                  "urn": "62AA1010646"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
