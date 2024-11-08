@@ -56,6 +56,11 @@ public class AudioLinkingAutomatedTask extends AbstractLockableAutomatedTask
     }
 
     @Override
+    public Duration getLockAtMostFor() {
+        return Duration.ofMinutes(90);
+    }
+
+    @Override
     protected void runTask() {
         log.info("Running AudioLinkingAutomatedTask");
         List<Integer> eventIds = eventRepository.findAllByEventStatus(EventStatus.AUDIO_LINK_NOT_DONE_MODERNISED.getStatusNumber(),
