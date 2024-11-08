@@ -244,7 +244,8 @@ public interface ExternalObjectDirectoryRepository extends JpaRepository<Externa
     List<Integer> findIdsForAudioToBeDeletedFromUnstructured(ObjectRecordStatusEntity storedStatus,
                                                              ExternalLocationTypeEntity unstructuredLocation,
                                                              ExternalLocationTypeEntity armLocation,
-                                                             OffsetDateTime unstructuredLastModifiedBefore);
+                                                             OffsetDateTime unstructuredLastModifiedBefore,
+                                                             Limit limit);
 
 
     @Query(

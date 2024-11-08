@@ -63,7 +63,7 @@ class UnstructuredAudioDeleterProcessorTest extends IntegrationBase {
         );
         dartsDatabase.save(armEod);
 
-        unstructuredAudioDeleterProcessor.markForDeletion();
+        unstructuredAudioDeleterProcessor.markForDeletion(getAutomatedTaskBatchSize());
 
         List<ExternalObjectDirectoryEntity> foundMediaList = dartsDatabase.getExternalObjectDirectoryRepository().findByMediaAndExternalLocationType(
             savedMedia,
@@ -108,7 +108,7 @@ class UnstructuredAudioDeleterProcessorTest extends IntegrationBase {
         );
         dartsDatabase.save(armEod);
 
-        unstructuredAudioDeleterProcessor.markForDeletion();
+        unstructuredAudioDeleterProcessor.markForDeletion(getAutomatedTaskBatchSize());
 
         List<ExternalObjectDirectoryEntity> foundMediaList = dartsDatabase.getExternalObjectDirectoryRepository().findByMediaAndExternalLocationType(
             savedMedia,
