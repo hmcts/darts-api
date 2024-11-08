@@ -10,7 +10,7 @@ import lombok.experimental.UtilityClass;
 public class ArmRpoJsonUtil {
 
     /**
-     * Strip the provided JSON string of excess whitespace/newlines to make it more suitable for an HTTP request
+     * Strip the provided JSON string of excess whitespace/newlines to make it more suitable for an HTTP request.
      */
     public static String sanitise(String json) {
         JsonNode jsonNode;

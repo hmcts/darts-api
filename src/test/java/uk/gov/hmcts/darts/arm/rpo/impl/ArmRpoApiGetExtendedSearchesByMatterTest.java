@@ -1,6 +1,7 @@
 package uk.gov.hmcts.darts.arm.rpo.impl;
 
 import feign.FeignException;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -172,5 +173,10 @@ class ArmRpoApiGetExtendedSearchesByMatterTest {
                                                          any());
         verify(armRpoService).updateArmRpoStatus(any(), eq(ARM_RPO_HELPER_MOCKS.getFailedRpoStatus()), any());
         verifyNoMoreInteractions(armRpoService);
+    }
+
+    @AfterAll
+    static void close() {
+        ARM_RPO_HELPER_MOCKS.close();
     }
 }
