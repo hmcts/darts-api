@@ -6,7 +6,6 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.darts.arm.service.impl.UnstructuredToArmBatchProcessorImpl;
-import uk.gov.hmcts.darts.arm.service.impl.UnstructuredToArmProcessorImpl;
 import uk.gov.hmcts.darts.common.entity.AutomatedTaskEntity;
 import uk.gov.hmcts.darts.common.repository.AutomatedTaskRepository;
 import uk.gov.hmcts.darts.log.api.LogApi;
@@ -16,6 +15,8 @@ import uk.gov.hmcts.darts.task.service.LockService;
 
 import java.util.Optional;
 
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -30,8 +31,6 @@ class UnstructuredToArmAutomatedTaskTest {
     @Mock
     private LockService lockService;
     @Mock
-    UnstructuredToArmProcessorImpl unstructuredToArmProcessor;
-    @Mock
     UnstructuredToArmBatchProcessorImpl unstructuredToArmBatchProcessor;
 
     @Test
@@ -41,21 +40,20 @@ class UnstructuredToArmAutomatedTaskTest {
         automatedTask.setTaskName("UnstructuredToArmDataStore");
 
         UnstructuredToArmAutomatedTask unstructuredToArmAutomatedTask =
-            new UnstructuredToArmAutomatedTask(
+            spy(new UnstructuredToArmAutomatedTask(
                 automatedTaskRepository,
                 mock(UnstructuredToArmAutomatedTaskConfig.class),
                 unstructuredToArmBatchProcessor,
-                unstructuredToArmProcessor,
                 logApi,
                 lockService
-            );
-
-        when(automatedTaskRepository.findByTaskName("UnstructuredToArmDataStore")).thenReturn(Optional.of(automatedTask));
+            ));
+        doReturn(10).when(unstructuredToArmAutomatedTask).getAutomatedTaskBatchSize();
 
         unstructuredToArmAutomatedTask.runTask();
 
         //then
-        Mockito.verify(unstructuredToArmProcessor, Mockito.times(1)).processUnstructuredToArm();
+        Mockito.verify(unstructuredToArmBatchProcessor, Mockito.times(1)).processUnstructuredToArm(10);
+        Mockito.verify(unstructuredToArmAutomatedTask, Mockito.times(1)).getAutomatedTaskBatchSize();
     }
 
     @Test
@@ -70,7 +68,6 @@ class UnstructuredToArmAutomatedTaskTest {
                 automatedTaskRepository,
                 mock(UnstructuredToArmAutomatedTaskConfig.class),
                 unstructuredToArmBatchProcessor,
-                unstructuredToArmProcessor,
                 logApi,
                 lockService
             );

@@ -12,7 +12,6 @@ import uk.gov.hmcts.darts.arm.config.ArmDataManagementConfiguration;
 import uk.gov.hmcts.darts.arm.service.ArmResponseFilesProcessor;
 import uk.gov.hmcts.darts.arm.service.ExternalObjectDirectoryService;
 import uk.gov.hmcts.darts.arm.service.impl.ArmBatchProcessResponseFilesImpl;
-import uk.gov.hmcts.darts.arm.service.impl.ArmResponseFilesProcessorImpl;
 import uk.gov.hmcts.darts.arm.service.impl.DetsToArmBatchProcessResponseFilesImpl;
 import uk.gov.hmcts.darts.audio.deleter.impl.dets.ExternalDetsDataStoreDeleter;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
@@ -57,25 +56,17 @@ public class AutomatedTaskProcessorFactoryImpl implements AutomatedTaskProcessor
 
     @Override
     public ArmResponseFilesProcessor createArmResponseFilesProcessor(int batchSize) {
-        if (batchSize > 0) {
-            return new ArmBatchProcessResponseFilesImpl(
-                externalObjectDirectoryRepository,
-                armDataManagementApi,
-                fileOperationService,
-                armDataManagementConfiguration,
-                objectMapper,
-                userIdentity,
-                currentTimeHelper,
-                eodService,
-                batchSize,
-                logApi
-            );
-        }
-
-        return new ArmResponseFilesProcessorImpl(
+        return new ArmBatchProcessResponseFilesImpl(
             externalObjectDirectoryRepository,
+            armDataManagementApi,
+            fileOperationService,
+            armDataManagementConfiguration,
+            objectMapper,
             userIdentity,
-            armResponseFilesProcessSingleElement
+            currentTimeHelper,
+            eodService,
+            batchSize,
+            logApi
         );
     }
 

@@ -21,7 +21,6 @@ import uk.gov.hmcts.darts.arm.component.AutomatedTaskProcessorFactory;
 import uk.gov.hmcts.darts.arm.service.ArmRetentionEventDateProcessor;
 import uk.gov.hmcts.darts.arm.service.CleanupArmResponseFilesService;
 import uk.gov.hmcts.darts.arm.service.impl.UnstructuredToArmBatchProcessorImpl;
-import uk.gov.hmcts.darts.arm.service.impl.UnstructuredToArmProcessorImpl;
 import uk.gov.hmcts.darts.audio.deleter.impl.inbound.ExternalInboundDataStoreDeleter;
 import uk.gov.hmcts.darts.audio.deleter.impl.outbound.ExternalOutboundDataStoreDeleter;
 import uk.gov.hmcts.darts.audio.deleter.impl.unstructured.ExternalUnstructuredDataStoreDeleter;
@@ -65,7 +64,6 @@ import uk.gov.hmcts.darts.task.runner.AutomatedTask;
 import uk.gov.hmcts.darts.task.runner.impl.AbstractLockableAutomatedTask;
 import uk.gov.hmcts.darts.task.runner.impl.ApplyRetentionCaseAssociatedObjectsAutomatedTask;
 import uk.gov.hmcts.darts.task.runner.impl.ArmRetentionEventDateCalculatorAutomatedTask;
-import uk.gov.hmcts.darts.task.runner.impl.CleanupArmResponseFilesAutomatedTask;
 import uk.gov.hmcts.darts.task.runner.impl.CloseOldCasesAutomatedTask;
 import uk.gov.hmcts.darts.task.runner.impl.CloseUnfinishedTranscriptionsAutomatedTask;
 import uk.gov.hmcts.darts.task.runner.impl.DailyListAutomatedTask;
@@ -169,8 +167,6 @@ class AutomatedTaskServiceTest extends IntegrationBase {
     @Autowired
     private LockService lockService;
 
-    @Autowired
-    UnstructuredToArmProcessorImpl unstructuredToArmProcessor;
     @Autowired
     UnstructuredToArmBatchProcessorImpl unstructuredToArmBatchProcessor;
 
@@ -662,7 +658,6 @@ class AutomatedTaskServiceTest extends IntegrationBase {
                 automatedTaskRepository,
                 mock(UnstructuredToArmAutomatedTaskConfig.class),
                 unstructuredToArmBatchProcessor,
-                unstructuredToArmProcessor,
                 logApi,
                 lockService
             );
@@ -697,7 +692,6 @@ class AutomatedTaskServiceTest extends IntegrationBase {
                 automatedTaskRepository,
                 mock(UnstructuredToArmAutomatedTaskConfig.class),
                 unstructuredToArmBatchProcessor,
-                unstructuredToArmProcessor,
                 logApi,
                 lockService
             );
@@ -774,65 +768,6 @@ class AutomatedTaskServiceTest extends IntegrationBase {
         log.info("About to reload task {}", automatedTask.getTaskName());
         automatedTaskService.reloadTaskByName(automatedTask.getTaskName());
 
-    }
-
-    @Test
-    void givenConfiguredTasksUpdateCronAndResetCronForCleanupArmResponseFilesAutomatedTask() {
-        AutomatedTask automatedTask =
-            new CleanupArmResponseFilesAutomatedTask(
-                automatedTaskRepository,
-                mock(CleanupArmResponseFilesAutomatedTaskConfig.class),
-                cleanupArmResponseFilesService,
-                logApi,
-                lockService
-            );
-
-        Optional<AutomatedTaskEntity> originalAutomatedTaskEntity =
-            automatedTaskService.getAutomatedTaskEntityByTaskName(automatedTask.getTaskName());
-        log.info("TEST - Original task {} cron expression {}", automatedTask.getTaskName(),
-                 originalAutomatedTaskEntity.get().getCronExpression()
-        );
-
-        automatedTaskService.updateAutomatedTaskCronExpression(automatedTask.getTaskName(), "*/9 * * * * *");
-
-        Set<ScheduledTask> scheduledTasks = scheduledTaskHolder.getScheduledTasks();
-        displayTasks(scheduledTasks);
-
-        Optional<AutomatedTaskEntity> updatedAutomatedTaskEntity =
-            automatedTaskService.getAutomatedTaskEntityByTaskName(automatedTask.getTaskName());
-        log.info("TEST - Updated task {} cron expression {}", automatedTask.getTaskName(),
-                 updatedAutomatedTaskEntity.get().getCronExpression()
-        );
-        assertEquals(originalAutomatedTaskEntity.get().getTaskName(), updatedAutomatedTaskEntity.get().getTaskName());
-        assertNotEquals(originalAutomatedTaskEntity.get().getCronExpression(), updatedAutomatedTaskEntity.get().getCronExpression());
-
-        automatedTaskService.updateAutomatedTaskCronExpression(
-            automatedTask.getTaskName(), originalAutomatedTaskEntity.get().getCronExpression());
-    }
-
-    @Test
-    void givenConfiguredTaskCancelCleanupArmResponseFilesAutomatedTask() {
-        AutomatedTask automatedTask =
-            new CleanupArmResponseFilesAutomatedTask(
-                automatedTaskRepository,
-                mock(CleanupArmResponseFilesAutomatedTaskConfig.class),
-                cleanupArmResponseFilesService,
-                logApi,
-                lockService
-            );
-
-        Set<ScheduledTask> scheduledTasks = scheduledTaskHolder.getScheduledTasks();
-        displayTasks(scheduledTasks);
-
-        boolean mayInterruptIfRunning = false;
-        boolean taskCancelled = automatedTaskService.cancelAutomatedTask(
-            automatedTask.getTaskName(),
-            mayInterruptIfRunning
-        );
-        assertTrue(taskCancelled);
-
-        log.info("About to reload task {}", automatedTask.getTaskName());
-        automatedTaskService.reloadTaskByName(automatedTask.getTaskName());
     }
 
     @Test
