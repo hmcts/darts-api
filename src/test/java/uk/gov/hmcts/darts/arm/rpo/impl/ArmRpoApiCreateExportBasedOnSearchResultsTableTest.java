@@ -1,5 +1,6 @@
 package uk.gov.hmcts.darts.arm.rpo.impl;
 
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -253,5 +254,10 @@ class ArmRpoApiCreateExportBasedOnSearchResultsTableTest {
         masterIndexField.setPropertyType(propertyType);
         masterIndexField.setIsMasked(isMasked);
         return masterIndexField;
+    }
+
+    @AfterAll
+    static void close() {
+        ARM_RPO_HELPER_MOCKS.close();
     }
 }
