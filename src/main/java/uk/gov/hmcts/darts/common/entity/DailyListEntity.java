@@ -4,6 +4,7 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -102,7 +103,7 @@ public class DailyListEntity extends CreatedModifiedBaseEntity {
     @Column(name = "external_location")
     private UUID externalLocation;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "elt_id")
     private ExternalLocationTypeEntity externalLocationTypeEntity;
 

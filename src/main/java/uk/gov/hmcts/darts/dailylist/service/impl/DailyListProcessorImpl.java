@@ -30,7 +30,7 @@ public class DailyListProcessorImpl implements DailyListProcessor {
 
     @Override
     public void processAllDailyListsWithLock(String listingCourthouse, boolean async) {
-        Runnable runnable =  () -> {
+        Runnable runnable = () -> {
             if (listingCourthouse == null) {
                 processAllDailyLists();
             } else {
@@ -104,15 +104,16 @@ public class DailyListProcessorImpl implements DailyListProcessor {
         // Daily lists are being ordered descending by date so first item will be the most recent version
 
         if (!dailyLists.isEmpty()) {
+            DailyListEntity dailyListEntity = dailyLists.getFirst();
             try {
-                dailyListUpdater.processDailyList(dailyLists.getFirst());
+                dailyListUpdater.processDailyList(dailyListEntity);
 
                 // report on the daily list result
-                report.registerResult(dailyLists.getFirst().getStatus());
+                report.registerResult(dailyListEntity.getStatus());
             } catch (Exception e) {
-                dailyLists.getFirst().setStatus(JobStatusType.FAILED);
+                dailyListEntity.setStatus(JobStatusType.FAILED);
                 report.registerFailed();
-                log.error("Failed to process dailylist for dailylist id: {}", dailyLists.getFirst().getId(), e);
+                log.error("Failed to process dailylist for dailylist id: {}", dailyListEntity.getId(), e);
             }
 
             if (dailyLists.size() > 1) {
