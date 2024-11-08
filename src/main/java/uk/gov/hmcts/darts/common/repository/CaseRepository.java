@@ -22,11 +22,11 @@ public interface CaseRepository extends JpaRepository<CourtCaseEntity, Integer> 
                                                             CourthouseEntity courthouse);
 
     @Query("""
-        SELECT case.caseNumber
-        FROM CourtCaseEntity case
-        WHERE case.closed = false
-        and case.caseNumber in :caseNumbers
-        and case.courthouse.courthouseName = upper(:courthouseName)
+        SELECT c.caseNumber
+        FROM CourtCaseEntity c
+        WHERE c.closed = false
+        and c.caseNumber in :caseNumbers
+        and c.courthouse.courthouseName = upper(:courthouseName)
         """)
     List<String> findOpenCaseNumbers(String courthouseName, List<String> caseNumbers);
 
