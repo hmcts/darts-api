@@ -233,14 +233,14 @@ public class DartsPersistence {
 
     @Transactional
     @SuppressWarnings("PMD.AvoidReassigningParameters")
-    public MediaLinkedCaseEntity save(MediaLinkedCaseEntity mediaRequest) {
-        mediaRequest = (MediaLinkedCaseEntity) preCheckPersist(mediaRequest);
+    public MediaLinkedCaseEntity save(MediaLinkedCaseEntity mediaLinkedCaseEntity) {
+        mediaLinkedCaseEntity = (MediaLinkedCaseEntity) preCheckPersist(mediaLinkedCaseEntity);
 
-        if (mediaRequest.getId() == null) {
-            mediaRequest.setCourtCase(save(mediaRequest.getCourtCase()));
-            return mediaLinkedCaseRepository.save(mediaRequest);
+        if (mediaLinkedCaseEntity.getId() == null) {
+            mediaLinkedCaseEntity.setCourtCase(save(mediaLinkedCaseEntity.getCourtCase()));
+            return mediaLinkedCaseRepository.save(mediaLinkedCaseEntity);
         } else {
-            return entityManager.merge(mediaRequest);
+            return entityManager.merge(mediaLinkedCaseEntity);
         }
     }
 

@@ -104,6 +104,8 @@ class ArmRpoApiGetMasterIndexFieldByRecordClassSchemaTest {
         masterIndexField3.setIsMasked(false);
 
         MasterIndexFieldByRecordClassSchemaResponse response = new MasterIndexFieldByRecordClassSchemaResponse();
+        response.setStatus(200);
+        response.setIsError(false);
         response.setMasterIndexFields(List.of(masterIndexField1, masterIndexField2, masterIndexField3));
 
         when(armRpoService.getArmRpoExecutionDetailEntity(anyInt())).thenReturn(armRpoExecutionDetailEntity);

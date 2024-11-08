@@ -39,5 +39,5 @@ public interface CaseService {
 
     List<AdminCasesSearchResponseItem> adminCaseSearch(AdminCasesSearchRequest request);
 
-    void saveCase(CourtCaseEntity courtCase);
+    CourtCaseEntity saveCase(CourtCaseEntity courtCase);
 }

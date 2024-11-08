@@ -5,6 +5,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import uk.gov.hmcts.darts.arm.client.model.rpo.ArmAsyncSearchResponse;
+import uk.gov.hmcts.darts.arm.client.model.rpo.IndexesByMatterIdRequest;
+import uk.gov.hmcts.darts.arm.client.model.rpo.IndexesByMatterIdResponse;
 import uk.gov.hmcts.darts.arm.client.model.rpo.MasterIndexFieldByRecordClassSchemaRequest;
 import uk.gov.hmcts.darts.arm.client.model.rpo.MasterIndexFieldByRecordClassSchemaResponse;
 import uk.gov.hmcts.darts.arm.client.model.rpo.ProfileEntitlementResponse;
@@ -29,15 +31,13 @@ public interface ArmRpoClient {
     )
     RecordManagementMatterResponse getRecordManagementMatter(@RequestHeader(AUTHORIZATION) String bearerAuth);
 
-
     @PostMapping(value = "${darts.storage.arm-api.rpo-url.get-storage-accounts-path}",
         consumes = APPLICATION_JSON_VALUE,
         produces = APPLICATION_JSON_VALUE
     )
     StorageAccountResponse getStorageAccounts(@RequestHeader(AUTHORIZATION) String bearerToken,
                                               @RequestBody StorageAccountRequest storageAccountRequest);
-
-
+    
     @PostMapping(value = "${darts.storage.arm-api.rpo-url.get-master-index-field-by-record-class-schema-path}",
         consumes = APPLICATION_JSON_VALUE,
         produces = APPLICATION_JSON_VALUE
@@ -56,6 +56,13 @@ public interface ArmRpoClient {
         produces = APPLICATION_JSON_VALUE
     )
     ArmAsyncSearchResponse addAsyncSearch(@RequestHeader(AUTHORIZATION) String bearerAuth, @RequestBody String body);
+
+    @PostMapping(value = "${darts.storage.arm-api.rpo-url.get-indexes-by-matter-id-path}",
+        consumes = APPLICATION_JSON_VALUE,
+        produces = APPLICATION_JSON_VALUE
+    )
+    IndexesByMatterIdResponse getIndexesByMatterId(@RequestHeader(AUTHORIZATION) String bearerToken,
+                                                   @RequestBody IndexesByMatterIdRequest indexesByMatterIdRequest);
 
     @PostMapping(value = "${darts.storage.arm-api.rpo-url.save-background-search-path}",
         consumes = APPLICATION_JSON_VALUE,

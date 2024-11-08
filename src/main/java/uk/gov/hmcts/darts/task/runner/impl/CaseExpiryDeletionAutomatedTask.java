@@ -52,10 +52,14 @@ public class CaseExpiryDeletionAutomatedTask
     @Override
     public void runTask() {
         final UserAccountEntity userAccount = userAccountService.getUserAccount();
-        caseRepository.findCasesIdsToBeAnonymised(currentTimeHelper.currentOffsetDateTime(), Limit.of(getAutomatedTaskBatchSize()))
+        caseRepository.findCaseIdsToBeAnonymised(currentTimeHelper.currentOffsetDateTime(), Limit.of(getAutomatedTaskBatchSize()))
             .forEach(courtCaseId -> {
-                log.info("Anonymising case with id: {} because the criteria for retention has been met.", courtCaseId);
-                dataAnonymisationService.anonymiseCourtCaseById(userAccount, courtCaseId);
+                try {
+                    log.info("Anonymising case with id: {} because the criteria for retention has been met.", courtCaseId);
+                    dataAnonymisationService.anonymiseCourtCaseById(userAccount, courtCaseId);
+                } catch (Exception e) {
+                    log.error("An error occurred while anonymising case with id: {}", courtCaseId, e);
+                }
             });
     }
 }
