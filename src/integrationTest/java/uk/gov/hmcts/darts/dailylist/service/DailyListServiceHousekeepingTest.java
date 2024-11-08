@@ -46,7 +46,7 @@ class DailyListServiceHousekeepingTest extends IntegrationBase {
         List<DailyListEntity> resultList = dailyListRepository.findAll();
         assertEquals(50, resultList.size());
 
-        service.runHouseKeeping();
+        service.runHouseKeeping(getAutomatedTaskBatchSize());
 
         List<DailyListEntity> newResultList = dailyListRepository.findAll();
         assertEquals(31, newResultList.size());

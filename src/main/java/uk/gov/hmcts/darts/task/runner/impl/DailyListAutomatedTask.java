@@ -11,6 +11,8 @@ import uk.gov.hmcts.darts.task.config.AutomatedTaskConfigurationProperties;
 import uk.gov.hmcts.darts.task.runner.AutoloadingManualTask;
 import uk.gov.hmcts.darts.task.service.LockService;
 
+import java.time.Duration;
+
 import static uk.gov.hmcts.darts.task.api.AutomatedTaskName.DAILY_LIST_HOUSEKEEPING_TASK_NAME;
 
 @Slf4j
@@ -35,7 +37,12 @@ public class DailyListAutomatedTask extends AbstractLockableAutomatedTask
     }
 
     @Override
+    public Duration getLockAtMostFor() {
+        return Duration.ofMinutes(90);
+    }
+
+    @Override
     protected void runTask() {
-        dailyListService.runHouseKeeping();
+        dailyListService.runHouseKeeping(getAutomatedTaskBatchSize());
     }
 }
