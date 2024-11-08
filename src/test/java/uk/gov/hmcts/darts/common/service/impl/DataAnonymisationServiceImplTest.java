@@ -250,7 +250,6 @@ class DataAnonymisationServiceImplTest {
         hearingEntity.setEventList(List.of(entityEntity1, entityEntity2));
 
         doNothing().when(dataAnonymisationService).anonymiseTranscriptionEntity(any(), any());
-        doNothing().when(dataAnonymisationService).anonymiseEventEntity(any(), any());
 
         UserAccountEntity userAccount = new UserAccountEntity();
         dataAnonymisationService.anonymiseHearingEntity(userAccount, hearingEntity);
