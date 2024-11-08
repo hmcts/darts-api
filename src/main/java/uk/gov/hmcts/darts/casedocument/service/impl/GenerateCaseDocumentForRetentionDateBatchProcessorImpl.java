@@ -3,7 +3,7 @@ package uk.gov.hmcts.darts.casedocument.service.impl;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Limit;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.darts.casedocument.service.GenerateCaseDocumentForRetentionDateProcessor;
 import uk.gov.hmcts.darts.casedocument.service.GenerateCaseDocumentSingleCaseProcessor;
@@ -33,11 +33,11 @@ public class GenerateCaseDocumentForRetentionDateBatchProcessorImpl implements G
         OffsetDateTime currentTimestamp = currentTimeHelper.currentOffsetDateTime();
         OffsetDateTime caseRetailUntilTimestamp = currentTimestamp.plusDays(caseDocumentExpiryDays);
         OffsetDateTime caseDocumentCreatedAfterTimestamp = currentTimestamp.minusDays(caseDocumentExpiryDays);
-        List<Integer> casesIds = caseRepository.findCasesNeedingCaseDocumentForRetentionDateGeneration(caseRetailUntilTimestamp,
-                                                                                                       caseDocumentCreatedAfterTimestamp,
-                                                                                                       Pageable.ofSize(batchSize));
+        var cases = caseRepository.findCasesNeedingCaseDocumentForRetentionDateGeneration(caseRetailUntilTimestamp,
+                                                                                          caseDocumentCreatedAfterTimestamp,
+                                                                                          Limit.of(batchSize));
         log.debug("Found {} cases needing case document based on retention out of a batch size {}", casesIds.size(), batchSize);
-        for (Integer courtCaseId : casesIds) {
+        for (var courtCase : cases) {
             try {
                 CourtCaseEntity courtCase = caseService.getCourtCaseById(courtCaseId);
                 if (!courtCase.isRetentionUpdated()) {

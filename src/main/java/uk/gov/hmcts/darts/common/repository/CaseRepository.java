@@ -1,7 +1,6 @@
 package uk.gov.hmcts.darts.common.repository;
 
 import org.springframework.data.domain.Limit;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
@@ -81,7 +80,7 @@ public interface CaseRepository extends JpaRepository<CourtCaseEntity, Integer> 
         """)
     List<Integer> findCasesNeedingCaseDocumentForRetentionDateGeneration(OffsetDateTime retainUntilTimestamp,
                                                                          OffsetDateTime caseDocumentCreatedAfterTimestamp,
-                                                                         Pageable pageable);
+                                                                         Limit limit);
 
     @Query(value = """
         select cc.id from CourtCaseEntity cc

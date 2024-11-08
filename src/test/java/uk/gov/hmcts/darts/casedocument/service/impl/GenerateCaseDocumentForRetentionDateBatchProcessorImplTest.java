@@ -5,7 +5,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Limit;
 import org.springframework.test.util.ReflectionTestUtils;
 import uk.gov.hmcts.darts.casedocument.service.GenerateCaseDocumentForRetentionDateProcessor;
 import uk.gov.hmcts.darts.casedocument.service.GenerateCaseDocumentSingleCaseProcessor;
@@ -63,7 +63,7 @@ class GenerateCaseDocumentForRetentionDateBatchProcessorImplTest {
     @Test
     void testBatchGenerationOfCaseDocumentForRetentionDate() {
         when(currentTimeHelper.currentOffsetDateTime()).thenReturn(OffsetDateTime.now());
-        when(caseRepository.findCasesNeedingCaseDocumentForRetentionDateGeneration(any(), any(), eq(Pageable.ofSize(BATCH_SIZE))))
+        when(caseRepository.findCasesNeedingCaseDocumentForRetentionDateGeneration(any(), any(), eq(Limit.of(BATCH_SIZE))))
             .thenReturn(List.of(CASE_1_ID, CASE_2_ID));
 
         batchProcessor.processGenerateCaseDocumentForRetentionDate(BATCH_SIZE);
@@ -76,7 +76,7 @@ class GenerateCaseDocumentForRetentionDateBatchProcessorImplTest {
     @Test
     void testExceptionIsHandledAndProcessingContinues() {
         when(currentTimeHelper.currentOffsetDateTime()).thenReturn(OffsetDateTime.now());
-        when(caseRepository.findCasesNeedingCaseDocumentForRetentionDateGeneration(any(), any(), eq(Pageable.ofSize(BATCH_SIZE))))
+        when(caseRepository.findCasesNeedingCaseDocumentForRetentionDateGeneration(any(), any(), eq(Limit.of(BATCH_SIZE))))
             .thenReturn(List.of(CASE_1_ID, CASE_2_ID));
         doThrow(RuntimeException.class).when(singleCaseProcessor).processGenerateCaseDocument(CASE_1_ID);
 

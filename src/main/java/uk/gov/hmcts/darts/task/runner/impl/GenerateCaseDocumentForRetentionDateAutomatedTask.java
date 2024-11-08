@@ -12,6 +12,8 @@ import uk.gov.hmcts.darts.task.config.AutomatedTaskConfigurationProperties;
 import uk.gov.hmcts.darts.task.runner.AutoloadingManualTask;
 import uk.gov.hmcts.darts.task.service.LockService;
 
+import java.time.Duration;
+
 import static uk.gov.hmcts.darts.task.api.AutomatedTaskName.GENERATE_CASE_DOCUMENT_FOR_RETENTION_DATE_TASK_NAME;
 
 @Slf4j
@@ -38,8 +40,13 @@ public class GenerateCaseDocumentForRetentionDateAutomatedTask extends AbstractL
     }
 
     @Override
+    public Duration getLockAtMostFor() {
+        return Duration.ofMinutes(40);
+    }
+
+    @Override
     protected void runTask() {
-        Integer batchSize = getAutomatedTaskBatchSize(getTaskName());
+        Integer batchSize = getAutomatedTaskBatchSize();
         GenerateCaseDocumentForRetentionDateProcessor processor = automatedTaskProcessorFactory.createGenerateCaseDocumentForRetentionDateProcessor(batchSize);
         processor.processGenerateCaseDocumentForRetentionDate(batchSize);
     }
