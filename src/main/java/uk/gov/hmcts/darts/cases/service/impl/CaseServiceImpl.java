@@ -248,7 +248,7 @@ public class CaseServiceImpl implements CaseService {
     }
 
     @Override
-    public void saveCase(CourtCaseEntity courtCase) {
-        caseRepository.saveAndFlush(courtCase);
+    public CourtCaseEntity saveCase(CourtCaseEntity courtCase) {
+        return caseRepository.saveAndFlush(courtCase);
     }
 }

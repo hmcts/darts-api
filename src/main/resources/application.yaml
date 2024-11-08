@@ -287,6 +287,7 @@ darts:
       rpo-url:
         get-record-management-matter-path: /api/v1/getRecordManagementMatter
         get-storage-accounts: /api/v1/getStorageAccounts
+        get-indexes-by-matter-id-path: /api/v1/getIndexesByMatterId
         get-master-index-field-by-record-class-schema-path: /api/v1/getMasterIndexFieldByRecordClassSchema
         get-profile-entitlements-path: /api/v1/getProfileEntitlements
         add-async-search-path: /api/v1/addAsyncSearch

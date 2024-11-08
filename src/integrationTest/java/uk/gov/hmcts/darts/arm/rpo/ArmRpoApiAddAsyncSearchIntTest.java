@@ -94,6 +94,8 @@ class ArmRpoApiAddAsyncSearchIntTest extends PostgresIntegrationBase {
 
     private void createSearchResponseAndSetMock() {
         var response = new ArmAsyncSearchResponse();
+        response.setStatus(200);
+        response.setIsError(false);
         response.setSearchId(SEARCH_ID);
 
         when(armRpoClient.addAsyncSearch(eq(TOKEN), anyString()))

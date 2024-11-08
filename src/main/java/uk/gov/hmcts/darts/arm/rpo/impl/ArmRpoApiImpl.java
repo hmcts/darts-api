@@ -13,6 +13,7 @@ import uk.gov.hmcts.darts.arm.client.model.rpo.ArmAsyncSearchResponse;
 import uk.gov.hmcts.darts.arm.client.model.rpo.BaseRpoResponse;
 import uk.gov.hmcts.darts.arm.client.model.rpo.ExtendedProductionsByMatterResponse;
 import uk.gov.hmcts.darts.arm.client.model.rpo.ExtendedSearchesByMatterResponse;
+import uk.gov.hmcts.darts.arm.client.model.rpo.IndexesByMatterIdRequest;
 import uk.gov.hmcts.darts.arm.client.model.rpo.IndexesByMatterIdResponse;
 import uk.gov.hmcts.darts.arm.client.model.rpo.MasterIndexFieldByRecordClassSchemaRequest;
 import uk.gov.hmcts.darts.arm.client.model.rpo.MasterIndexFieldByRecordClassSchemaResponse;
@@ -69,6 +70,7 @@ public class ArmRpoApiImpl implements ArmRpoApi {
         armRpoService.updateArmRpoStateAndStatus(armRpoExecutionDetailEntity, ArmRpoHelper.getRecordManagementMatterRpoState(),
                                                  ArmRpoHelper.inProgressRpoStatus(), userAccount);
 
+        StringBuilder errorMessage = new StringBuilder("Failure during ARM RPO getRecordManagementMatter: ");
         RecordManagementMatterResponse recordManagementMatterResponse;
         try {
             recordManagementMatterResponse = armRpoClient.getRecordManagementMatter(bearerToken);
@@ -78,9 +80,10 @@ public class ArmRpoApiImpl implements ArmRpoApi {
             throw handleFailureAndCreateException(ARM_GET_RECORD_MANAGEMENT_MATTER_ERROR, armRpoExecutionDetailEntity, userAccount);
         }
 
-        if (recordManagementMatterResponse == null
-            || recordManagementMatterResponse.getRecordManagementMatter() == null
-            || recordManagementMatterResponse.getRecordManagementMatter().getMatterId() == null) {
+        handleResponseStatus(userAccount, recordManagementMatterResponse, errorMessage, armRpoExecutionDetailEntity);
+
+        if (isNull(recordManagementMatterResponse.getRecordManagementMatter())
+            || isNull(recordManagementMatterResponse.getRecordManagementMatter().getMatterId())) {
             throw handleFailureAndCreateException(ARM_GET_RECORD_MANAGEMENT_MATTER_ERROR, armRpoExecutionDetailEntity, userAccount);
         }
 
@@ -89,8 +92,41 @@ public class ArmRpoApiImpl implements ArmRpoApi {
     }
 
     @Override
-    public IndexesByMatterIdResponse getIndexesByMatterId(String bearerToken, Integer executionId, UserAccountEntity userAccount) {
-        throw new NotImplementedException("Method not implemented");
+    public void getIndexesByMatterId(String bearerToken, Integer executionId, String matterId, UserAccountEntity userAccount) {
+        var armRpoExecutionDetailEntity = armRpoService.getArmRpoExecutionDetailEntity(executionId);
+        armRpoService.updateArmRpoStateAndStatus(armRpoExecutionDetailEntity, ArmRpoHelper.getIndexesByMatterIdRpoState(),
+                                                 ArmRpoHelper.inProgressRpoStatus(), userAccount);
+
+        StringBuilder errorMessage = new StringBuilder("Failure during ARM RPO get indexes by matter ID: ");
+        IndexesByMatterIdResponse indexesByMatterIdResponse;
+        try {
+            indexesByMatterIdResponse = armRpoClient.getIndexesByMatterId(bearerToken, createIndexesByMatterIdRequest(matterId));
+        } catch (FeignException e) {
+            // this ensures the full error body containing the ARM error detail is logged rather than a truncated version
+            log.error(errorMessage.append("Unable to get ARM RPO response") + " {}", e.contentUTF8());
+            throw handleFailureAndCreateException(errorMessage.toString(), armRpoExecutionDetailEntity, userAccount);
+        }
+
+        handleResponseStatus(userAccount, indexesByMatterIdResponse, errorMessage, armRpoExecutionDetailEntity);
+
+        if (CollectionUtils.isEmpty(indexesByMatterIdResponse.getIndexes())
+            || isNull(indexesByMatterIdResponse.getIndexes().getFirst())
+            || isNull(indexesByMatterIdResponse.getIndexes().getFirst().getIndex())) {
+            throw handleFailureAndCreateException(errorMessage.append("Unable to find indexes by matter ID in response").toString(),
+                                                  armRpoExecutionDetailEntity,
+                                                  userAccount);
+        }
+        if (indexesByMatterIdResponse.getIndexes().size() > 1) {
+            log.warn("More than one index found in response for matterId: {} - response {}", matterId, indexesByMatterIdResponse);
+        }
+        armRpoExecutionDetailEntity.setIndexId(indexesByMatterIdResponse.getIndexes().getFirst().getIndex().getIndexId());
+        armRpoService.updateArmRpoStatus(armRpoExecutionDetailEntity, ArmRpoHelper.completedRpoStatus(), userAccount);
+    }
+
+    private IndexesByMatterIdRequest createIndexesByMatterIdRequest(String matterId) {
+        return IndexesByMatterIdRequest.builder()
+            .matterId(matterId)
+            .build();
     }
 
     @Override
@@ -110,8 +146,10 @@ public class ArmRpoApiImpl implements ArmRpoApi {
             throw handleFailureAndCreateException(errorMessage.toString(), armRpoExecutionDetailEntity, userAccount);
         }
 
-        if (!nonNull(storageAccountResponse)
-            || !CollectionUtils.isNotEmpty(storageAccountResponse.getIndexes())) {
+        handleResponseStatus(userAccount, storageAccountResponse, errorMessage, armRpoExecutionDetailEntity);
+
+
+        if (!CollectionUtils.isNotEmpty(storageAccountResponse.getIndexes())) {
             throw handleFailureAndCreateException(errorMessage.append("Unable to get indexes from storage account response").toString(),
                                                   armRpoExecutionDetailEntity, userAccount);
 
@@ -152,6 +190,7 @@ public class ArmRpoApiImpl implements ArmRpoApi {
                                                       .toString(),
                                                   executionDetail, userAccount);
         }
+        handleResponseStatus(userAccount, response, exceptionMessageBuilder, executionDetail);
 
         var entitlements = response.getEntitlements();
         if (CollectionUtils.isEmpty(entitlements)) {
@@ -274,6 +313,7 @@ public class ArmRpoApiImpl implements ArmRpoApi {
                                                       .toString(),
                                                   executionDetail, userAccount);
         }
+        handleResponseStatus(userAccount, response, exceptionMessageBuilder, executionDetail);
 
         String searchId = response.getSearchId();
         if (searchId == null) {
@@ -286,21 +326,6 @@ public class ArmRpoApiImpl implements ArmRpoApi {
         armRpoService.updateArmRpoStatus(executionDetail, ArmRpoHelper.completedRpoStatus(), userAccount);
     }
 
-    private AddAsyncSearchRequestGenerator createAddAsyncSearchRequestGenerator(String searchName,
-                                                                                ArmRpoExecutionDetailEntity executionDetail,
-                                                                                ArmAutomatedTaskEntity armAutomatedTaskEntity,
-                                                                                OffsetDateTime now) throws NullPointerException {
-        return AddAsyncSearchRequestGenerator.builder()
-            .name(searchName)
-            .searchName(searchName)
-            .matterId(executionDetail.getMatterId())
-            .entitlementId(executionDetail.getEntitlementId())
-            .indexId(executionDetail.getIndexId())
-            .sortingField(executionDetail.getSortingField())
-            .startTime(now.minusHours(armAutomatedTaskEntity.getRpoCsvEndHour()))
-            .endTime(now.minusHours(armAutomatedTaskEntity.getRpoCsvStartHour()))
-            .build();
-    }
 
     @Override
     public void saveBackgroundSearch(String bearerToken, Integer executionId, String searchName, UserAccountEntity userAccount) {
@@ -410,6 +435,22 @@ public class ArmRpoApiImpl implements ArmRpoApi {
             .propertyName(masterIndexField.getPropertyName())
             .propertyType(masterIndexField.getPropertyType())
             .isMasked(masterIndexField.getIsMasked())
+            .build();
+    }
+
+    private AddAsyncSearchRequestGenerator createAddAsyncSearchRequestGenerator(String searchName,
+                                                                                ArmRpoExecutionDetailEntity executionDetail,
+                                                                                ArmAutomatedTaskEntity armAutomatedTaskEntity,
+                                                                                OffsetDateTime now) throws NullPointerException {
+        return AddAsyncSearchRequestGenerator.builder()
+            .name(searchName)
+            .searchName(searchName)
+            .matterId(executionDetail.getMatterId())
+            .entitlementId(executionDetail.getEntitlementId())
+            .indexId(executionDetail.getIndexId())
+            .sortingField(executionDetail.getSortingField())
+            .startTime(now.minusHours(armAutomatedTaskEntity.getRpoCsvEndHour()))
+            .endTime(now.minusHours(armAutomatedTaskEntity.getRpoCsvStartHour()))
             .build();
     }
 

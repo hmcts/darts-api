@@ -39,8 +39,9 @@ class ArpRpoApiGetMasterIndexFieldByRecordClassSchemaIntTest extends Integration
     void getMasterIndexFieldByRecordClassSchemaSuccess() {
 
         // given
-        MasterIndexFieldByRecordClassSchemaResponse response = getMasterIndexFieldByRecordClassSchemaResponse("propertyName",
-                                                                                                              "ingestionDate");
+        MasterIndexFieldByRecordClassSchemaResponse response = getMasterIndexFieldByRecordClassSchemaResponse("propertyName", "ingestionDate");
+        response.setStatus(200);
+        response.setIsError(false);
         when(armRpoClient.getMasterIndexFieldByRecordClassSchema(any(), any())).thenReturn(response);
 
         UserAccountEntity userAccount = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
@@ -75,8 +76,9 @@ class ArpRpoApiGetMasterIndexFieldByRecordClassSchemaIntTest extends Integration
     void getMasterIndexFieldByRecordClassSchemaWhereMasterIndexIsToBeIgnoredAndMissingSortingField() {
 
         // given
-        MasterIndexFieldByRecordClassSchemaResponse response = getMasterIndexFieldByRecordClassSchemaResponse("bf_018",
-                                                                                                              "propertyName");
+        MasterIndexFieldByRecordClassSchemaResponse response = getMasterIndexFieldByRecordClassSchemaResponse("bf_018", "propertyName");
+        response.setStatus(200);
+        response.setIsError(false);
         when(armRpoClient.getMasterIndexFieldByRecordClassSchema(any(), any())).thenReturn(response);
 
         UserAccountEntity userAccount = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
@@ -100,11 +102,13 @@ class ArpRpoApiGetMasterIndexFieldByRecordClassSchemaIntTest extends Integration
     }
 
     @Test
-    void getMasterIndexFieldByRecordClassSchemaShouldFailIfServerReturns200SuccessWithMissingMatterId() {
+    void getMasterIndexFieldByRecordClassSchemaShouldFailIfServerReturnsResponseWithMissingMatterId() {
 
         // given
         MasterIndexFieldByRecordClassSchemaResponse response = new MasterIndexFieldByRecordClassSchemaResponse();
         response.setMasterIndexFields(List.of());
+        response.setStatus(200);
+        response.setIsError(false);
         when(armRpoClient.getMasterIndexFieldByRecordClassSchema(any(), any())).thenReturn(response);
 
         UserAccountEntity userAccount = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
@@ -152,8 +156,8 @@ class ArpRpoApiGetMasterIndexFieldByRecordClassSchemaIntTest extends Integration
         assertNull(armRpoExecutionDetailEntityUpdated.getMatterId());
     }
 
-    private static @NotNull MasterIndexFieldByRecordClassSchemaResponse getMasterIndexFieldByRecordClassSchemaResponse(String propertyName1,
-                                                                                                                       String propertyName2) {
+    private @NotNull MasterIndexFieldByRecordClassSchemaResponse getMasterIndexFieldByRecordClassSchemaResponse(String propertyName1,
+                                                                                                                String propertyName2) {
         MasterIndexFieldByRecordClassSchemaResponse.MasterIndexField masterIndexField1 = new MasterIndexFieldByRecordClassSchemaResponse.MasterIndexField();
         masterIndexField1.setMasterIndexFieldId("1");
         masterIndexField1.setDisplayName("displayName");

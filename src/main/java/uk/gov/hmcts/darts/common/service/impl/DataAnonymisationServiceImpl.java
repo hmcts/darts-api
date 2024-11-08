@@ -41,7 +41,6 @@ import java.util.stream.Collectors;
 @Service
 @Slf4j
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
-@Transactional
 public class DataAnonymisationServiceImpl implements DataAnonymisationService {
 
     private final AuditApi auditApi;
