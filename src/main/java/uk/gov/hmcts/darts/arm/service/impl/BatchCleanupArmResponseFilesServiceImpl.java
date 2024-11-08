@@ -3,6 +3,7 @@ package uk.gov.hmcts.darts.arm.service.impl;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
+import org.springframework.data.domain.Limit;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.darts.arm.api.ArmDataManagementApi;
 import uk.gov.hmcts.darts.arm.config.ArmBatchCleanupConfiguration;
@@ -79,7 +80,7 @@ public class BatchCleanupArmResponseFilesServiceImpl implements BatchCleanupArmR
                 false,
                 dateTimeForDeletion,
                 armDataManagementConfiguration.getManifestFilePrefix(),
-                batchsize
+                Limit.of(batchsize)
             );
         if (manifestFilenames.isEmpty()) {
             log.info("Batch Cleanup ARM Response Files - 0 rows returned, so stopping.");
