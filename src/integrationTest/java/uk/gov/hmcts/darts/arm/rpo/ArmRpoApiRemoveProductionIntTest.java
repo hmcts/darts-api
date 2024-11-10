@@ -13,6 +13,8 @@ import uk.gov.hmcts.darts.common.enums.ArmRpoStateEnum;
 import uk.gov.hmcts.darts.common.enums.ArmRpoStatusEnum;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsString;
 import static org.junit.Assert.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
@@ -75,6 +77,8 @@ class ArmRpoApiRemoveProductionIntTest extends IntegrationBase {
             armRpoApi.removeProduction(bearerAuth, armRpoExecutionDetail.getId(), userAccount));
 
         // then
+        assertThat(armRpoException.getMessage(), containsString(
+            "Failure during ARM RPO removeProduction: Unable to get ARM RPO response"));
         var armRpoExecutionDetailEntityUpdated = dartsPersistence.getArmRpoExecutionDetailRepository().findById(armRpoExecutionDetail.getId()).orElseThrow();
         assertEquals(ArmRpoStateEnum.REMOVE_PRODUCTION.getId(), armRpoExecutionDetailEntityUpdated.getArmRpoState().getId());
         assertEquals(ArmRpoStatusEnum.FAILED.getId(), armRpoExecutionDetailEntityUpdated.getArmRpoStatus().getId());
