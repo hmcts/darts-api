@@ -43,6 +43,13 @@ public class EventServiceImpl implements EventService {
         return eventRepository.save(eventEntity);
     }
 
+    /**
+     * Retrieves all event versions associated with a given court case.
+     * There are 2 different queries used because migrated events are linked by courthouse and case number, and modernised events are linked by cas_id.
+     *
+     * @param courtCase the court case entity for which to retrieve event versions
+     * @return a set of event entities associated with the given court case
+     */
     @Override
     public Set<EventEntity> getAllCourtCaseEventVersions(CourtCaseEntity courtCase) {
         Set<EventEntity> allEvents = new HashSet<>();
