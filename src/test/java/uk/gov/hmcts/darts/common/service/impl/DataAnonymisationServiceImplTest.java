@@ -33,6 +33,7 @@ import uk.gov.hmcts.darts.test.common.TestUtils;
 
 import java.time.OffsetDateTime;
 import java.util.List;
+import java.util.Set;
 
 import static java.time.temporal.ChronoUnit.SECONDS;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -175,6 +176,10 @@ class DataAnonymisationServiceImplTest {
         HearingEntity hearingEntity2 = mock(HearingEntity.class);
         courtCase.setHearings(List.of(hearingEntity1, hearingEntity2));
 
+        EventEntity entityEntity1 = mock(EventEntity.class);
+        EventEntity entityEntity2 = mock(EventEntity.class);
+        when(eventService.getAllCourtCaseEventVersions(courtCase)).thenReturn(Set.of(entityEntity1, entityEntity2));
+
         UserAccountEntity userAccount = new UserAccountEntity();
         userAccount.setId(123);
 
@@ -195,6 +200,9 @@ class DataAnonymisationServiceImplTest {
 
         verify(dataAnonymisationService, times(1)).anonymiseHearingEntity(userAccount, hearingEntity1);
         verify(dataAnonymisationService, times(1)).anonymiseHearingEntity(userAccount, hearingEntity2);
+
+        verify(dataAnonymisationService, times(1)).anonymiseEventEntity(userAccount, entityEntity1);
+        verify(dataAnonymisationService, times(1)).anonymiseEventEntity(userAccount, entityEntity2);
 
         verify(dataAnonymisationService, times(1)).tidyUpTransformedMediaEntities(userAccount, courtCase);
         verify(caseService, times(1)).saveCase(courtCase);
@@ -243,16 +251,12 @@ class DataAnonymisationServiceImplTest {
         hearingEntity.setEventList(List.of(entityEntity1, entityEntity2));
 
         doNothing().when(dataAnonymisationService).anonymiseTranscriptionEntity(any(), any());
-        doNothing().when(dataAnonymisationService).anonymiseEventEntity(any(), any());
 
         UserAccountEntity userAccount = new UserAccountEntity();
         dataAnonymisationService.anonymiseHearingEntity(userAccount, hearingEntity);
 
         verify(dataAnonymisationService, times(1)).anonymiseTranscriptionEntity(userAccount, transcriptionEntity1);
         verify(dataAnonymisationService, times(1)).anonymiseTranscriptionEntity(userAccount, transcriptionEntity2);
-
-        verify(dataAnonymisationService, times(1)).anonymiseEventEntity(userAccount, entityEntity1);
-        verify(dataAnonymisationService, times(1)).anonymiseEventEntity(userAccount, entityEntity2);
     }
 
 

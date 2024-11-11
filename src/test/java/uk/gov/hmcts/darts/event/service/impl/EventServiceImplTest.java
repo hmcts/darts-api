@@ -6,17 +6,24 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
+import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.EventEntity;
+import uk.gov.hmcts.darts.common.entity.EventLinkedCaseEntity;
 import uk.gov.hmcts.darts.common.exception.CommonApiError;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
+import uk.gov.hmcts.darts.common.repository.EventLinkedCaseRepository;
 import uk.gov.hmcts.darts.common.repository.EventRepository;
 import uk.gov.hmcts.darts.common.service.DataAnonymisationService;
 import uk.gov.hmcts.darts.event.mapper.EventMapper;
 
+import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.RETURNS_DEEP_STUBS;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -31,6 +38,8 @@ class EventServiceImplTest {
     private EventRepository eventRepository;
     @Mock
     private DataAnonymisationService dataAnonymisationService;
+    @Mock
+    private EventLinkedCaseRepository eventLinkedCaseRepository;
 
     @InjectMocks
     @Spy
@@ -63,5 +72,30 @@ class EventServiceImplTest {
         assertThat(eventService.saveEvent(event)).isEqualTo(event);
         verify(eventRepository, times(1)).save(event);
     }
+
+    @Test
+    void positiveGetAllCourtCaseEventVersions() {
+        EventLinkedCaseEntity eventLinkedCase1 = new EventLinkedCaseEntity();
+        EventEntity event1 = mock(EventEntity.class);
+        eventLinkedCase1.setEvent(event1);
+        EventLinkedCaseEntity eventLinkedCase2 = new EventLinkedCaseEntity();
+        EventEntity event2 = mock(EventEntity.class);
+        eventLinkedCase2.setEvent(event2);
+        EventLinkedCaseEntity eventLinkedCase3 = new EventLinkedCaseEntity();
+        EventEntity event3 = mock(EventEntity.class);
+        eventLinkedCase3.setEvent(event3);
+        when(eventLinkedCaseRepository.findAllByCourtCase(any())).thenReturn(List.of(eventLinkedCase1, eventLinkedCase2));
+        when(eventLinkedCaseRepository.findAllByCaseNumberAndCourthouseName(any(), any())).thenReturn(List.of(eventLinkedCase2, eventLinkedCase3));
+        CourtCaseEntity courtCase = mock(CourtCaseEntity.class, RETURNS_DEEP_STUBS);
+        when(courtCase.getCaseNumber()).thenReturn("caseNumber");
+        when(courtCase.getCourthouse().getCourthouseName()).thenReturn("courthouseName");
+
+        Set<EventEntity> result = eventService.getAllCourtCaseEventVersions(courtCase);
+
+        assertThat(result).containsExactlyInAnyOrder(event1, event2, event3);
+        verify(eventLinkedCaseRepository).findAllByCourtCase(courtCase);
+        verify(eventLinkedCaseRepository).findAllByCaseNumberAndCourthouseName("caseNumber", "courthouseName");
+    }
+
 
 }
