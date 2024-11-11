@@ -46,7 +46,8 @@ public enum AuditActivity {
     CASE_DOCUMENT_EXPIRED(37),
     TRANSCRIPT_EXPIRED(38),
     ANNOTATION_EXPIRED(39),
-    AUDIO_EXPIRED(40);
+    AUDIO_EXPIRED(40),
+    MANUAL_OBFUSCATION(41);
 
     private final Integer id;
 }

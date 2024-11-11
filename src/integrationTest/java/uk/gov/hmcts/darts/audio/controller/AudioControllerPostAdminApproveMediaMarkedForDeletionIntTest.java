@@ -123,7 +123,6 @@ class AudioControllerPostAdminApproveMediaMarkedForDeletionIntTest extends Integ
         assertNotNull(actionResponse.getMarkedForManualDeletionAt());
         assertEquals(superAdminUser.getId(), actionResponse.getMarkedForManualDeletionById());
         assertTrue(actionResponse.getIsMarkedForManualDeletion());
-
     }
 
     @Test
