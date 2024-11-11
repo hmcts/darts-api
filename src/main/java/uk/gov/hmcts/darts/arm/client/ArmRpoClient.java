@@ -44,6 +44,7 @@ public interface ArmRpoClient {
     StorageAccountResponse getStorageAccounts(@RequestHeader(AUTHORIZATION) String bearerToken,
                                               @RequestBody StorageAccountRequest storageAccountRequest);
 
+
     @PostMapping(value = "${darts.storage.arm-api.rpo-url.get-master-index-field-by-record-class-schema-path}",
         consumes = APPLICATION_JSON_VALUE,
         produces = APPLICATION_JSON_VALUE
