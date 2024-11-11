@@ -296,7 +296,7 @@ class CourthouseApiTest extends IntegrationBase {
         MockHttpServletRequestBuilder requestBuilder = get("/courthouses")
             .contentType(MediaType.APPLICATION_JSON_VALUE);
         mockMvc.perform(requestBuilder).andExpect(status().isForbidden()).andExpect(jsonPath("$.type").value(
-                                                                                             AuthorisationError.USER_DETAILS_INVALID.getType().toString()));
+                                                                                             AuthorisationError.USER_DETAILS_INVALID.getType()));
     }
 
     @Test

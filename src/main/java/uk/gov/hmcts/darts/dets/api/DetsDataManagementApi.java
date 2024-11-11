@@ -9,6 +9,8 @@ public interface DetsDataManagementApi extends BlobContainerDownloadable {
 
     void deleteBlobDataFromContainer(UUID blobId) throws AzureDeleteBlobException;
 
+    String getChecksum(UUID guid);
+
     void copyDetsBlobDataToArm(String detsUuid, String blobPathAndName);
 
 }

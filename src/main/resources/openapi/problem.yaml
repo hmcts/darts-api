@@ -1,8 +1,7 @@
 type: object
 properties:
   type:
-    type: string
-    format: uri
+    type: object
     description: |
       A URI that identifies the unique error code representing this problem. Consumers can rely on this value to be
       stable.

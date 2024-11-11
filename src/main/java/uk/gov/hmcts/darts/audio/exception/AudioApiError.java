@@ -110,6 +110,11 @@ public enum AudioApiError implements DartsApiError {
         AddAudioErrorCode.USER_CANT_APPROVE_THEIR_OWN_DELETION.getValue(),
         HttpStatus.BAD_REQUEST,
         AddAudioTitleErrors.USER_CANT_APPROVE_THEIR_OWN_DELETION.getValue()
+    ),
+    FAILED_TO_ADD_AUDIO_META_DATA(
+        AddAudioErrorCode.FAILED_TO_ADD_AUDIO_META_DATA.getValue(),
+        HttpStatus.UNPROCESSABLE_ENTITY,
+        AddAudioTitleErrors.FAILED_TO_ADD_AUDIO_META_DATA.getValue()
     );
 
 
