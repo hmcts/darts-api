@@ -17,6 +17,8 @@ import uk.gov.hmcts.darts.arm.client.model.rpo.IndexesByMatterIdRequest;
 import uk.gov.hmcts.darts.arm.client.model.rpo.IndexesByMatterIdResponse;
 import uk.gov.hmcts.darts.arm.client.model.rpo.MasterIndexFieldByRecordClassSchemaRequest;
 import uk.gov.hmcts.darts.arm.client.model.rpo.MasterIndexFieldByRecordClassSchemaResponse;
+import uk.gov.hmcts.darts.arm.client.model.rpo.ProductionOutputFilesRequest;
+import uk.gov.hmcts.darts.arm.client.model.rpo.ProductionOutputFilesResponse;
 import uk.gov.hmcts.darts.arm.client.model.rpo.ProfileEntitlementResponse;
 import uk.gov.hmcts.darts.arm.client.model.rpo.RecordManagementMatterResponse;
 import uk.gov.hmcts.darts.arm.client.model.rpo.SaveBackgroundSearchRequest;
@@ -43,6 +45,7 @@ import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
@@ -404,7 +407,57 @@ public class ArmRpoApiImpl implements ArmRpoApi {
 
     @Override
     public List<String> getProductionOutputFiles(String bearerToken, Integer executionId, UserAccountEntity userAccount) {
-        throw new NotImplementedException("Method not implemented");
+        final ArmRpoExecutionDetailEntity executionDetail = armRpoService.getArmRpoExecutionDetailEntity(executionId);
+        armRpoService.updateArmRpoStateAndStatus(executionDetail,
+                                                 ArmRpoHelper.getProductionOutputFilesRpoState(),
+                                                 ArmRpoHelper.inProgressRpoStatus(),
+                                                 userAccount);
+
+        final StringBuilder exceptionMessageBuilder = new StringBuilder("ARM getProductionOutputFiles: ");
+
+        String productionId = executionDetail.getProductionId();
+        if (StringUtils.isBlank(productionId)) {
+            throw handleFailureAndCreateException(exceptionMessageBuilder.append("production id was blank for execution id: ")
+                                                      .append(executionId)
+                                                      .toString(),
+                                                  executionDetail, userAccount);
+        }
+
+        ProductionOutputFilesResponse response;
+        try {
+            response = armRpoClient.getProductionOutputFiles(bearerToken, createProductionOutputFilesRequest(productionId));
+        } catch (FeignException e) {
+            throw handleFailureAndCreateException(exceptionMessageBuilder.append("API call failed: ")
+                                                      .append(e)
+                                                      .toString(),
+                                                  executionDetail, userAccount);
+        }
+        handleResponseStatus(userAccount, response, exceptionMessageBuilder, executionDetail);
+
+        List<ProductionOutputFilesResponse.ProductionExportFile> productionExportFiles = response.getProductionExportFiles();
+        if (CollectionUtils.isEmpty(productionExportFiles)) {
+            throw handleFailureAndCreateException(exceptionMessageBuilder.append("No production export files were returned")
+                                                  .toString(),
+                                                  executionDetail, userAccount);
+        }
+
+        List<String> productionExportFileIds = productionExportFiles.stream()
+            .filter(Objects::nonNull)
+            .map(ProductionOutputFilesResponse.ProductionExportFile::getProductionExportFileDetails)
+            .filter(Objects::nonNull)
+            .map(ProductionOutputFilesResponse.ProductionExportFileDetail::getProductionExportFileId)
+            .filter(StringUtils::isNotBlank)
+            .toList();
+
+        if (productionExportFileIds.isEmpty()) {
+            throw handleFailureAndCreateException(exceptionMessageBuilder.append("No production export file ids were returned")
+                                                  .toString(),
+                                                  executionDetail, userAccount);
+        }
+
+        armRpoService.updateArmRpoStatus(executionDetail, ArmRpoHelper.completedRpoStatus(), userAccount);
+
+        return productionExportFileIds;
     }
 
     @Override
@@ -502,4 +555,11 @@ public class ArmRpoApiImpl implements ArmRpoApi {
             .matterId(matterId)
             .build();
     }
+
+    private ProductionOutputFilesRequest createProductionOutputFilesRequest(String productionId) {
+        return ProductionOutputFilesRequest.builder()
+            .productionId(productionId)
+            .build();
+    }
+
 }
