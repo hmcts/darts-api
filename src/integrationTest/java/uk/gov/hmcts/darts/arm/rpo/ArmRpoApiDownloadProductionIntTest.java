@@ -77,11 +77,11 @@ class ArmRpoApiDownloadProductionIntTest extends IntegrationBase {
 
         // then
         assertThat(armRpoException.getMessage(), containsString(
-            "Failure during ARM get storage accounts: Unable to get indexes from storage account response"));
+            "Failure during download production: Error during ARM RPO download production id: productionExportId"));
 
         var armRpoExecutionDetailEntityUpdated = dartsPersistence.getArmRpoExecutionDetailRepository().findById(armRpoExecutionDetail.getId()).get();
         assertEquals(ArmRpoStateEnum.DOWNLOAD_PRODUCTION.getId(), armRpoExecutionDetailEntityUpdated.getArmRpoState().getId());
-        assertEquals(ArmRpoStatusEnum.COMPLETED.getId(), armRpoExecutionDetailEntityUpdated.getArmRpoStatus().getId());
+        assertEquals(ArmRpoStatusEnum.FAILED.getId(), armRpoExecutionDetailEntityUpdated.getArmRpoStatus().getId());
 
     }
 }
