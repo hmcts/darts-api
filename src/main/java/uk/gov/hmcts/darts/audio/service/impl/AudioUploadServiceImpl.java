@@ -6,10 +6,12 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import uk.gov.hmcts.darts.audio.component.AddAudioRequestMapper;
+import uk.gov.hmcts.darts.audio.exception.AudioApiError;
 import uk.gov.hmcts.darts.audio.model.AddAudioMetadataRequest;
 import uk.gov.hmcts.darts.audio.service.AudioAsyncService;
 import uk.gov.hmcts.darts.audio.service.AudioUploadService;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
+import uk.gov.hmcts.darts.common.datamanagement.enums.DatastoreContainerType;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
 import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
@@ -40,6 +42,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import static org.apache.commons.collections4.CollectionUtils.isEmpty;
@@ -67,9 +70,32 @@ public class AudioUploadServiceImpl implements AudioUploadService {
     private final MediaLinkedCaseRepository mediaLinkedCaseRepository;
     private final AudioAsyncService audioAsyncService;
 
+
     @Override
     public void addAudio(MultipartFile audioMultipartFile, AddAudioMetadataRequest addAudioMetadataRequest) {
+        String incomingChecksum;
+        try {
+            incomingChecksum = fileContentChecksum.calculate(audioMultipartFile.getInputStream());
+        } catch (IOException e) {
+            throw new DartsApiException(FAILED_TO_UPLOAD_AUDIO_FILE, "Failed to compute incoming checksum", e);
+        }
+        addAudio(incomingChecksum, () -> saveAudioToInbound(audioMultipartFile), addAudioMetadataRequest);
+    }
 
+    @Override
+    public void addAudio(UUID guid, AddAudioMetadataRequest addAudioMetadataRequest) {
+        String checksum = dataManagementApi.getChecksum(DatastoreContainerType.INBOUND, guid);
+        if (!checksum.equals(addAudioMetadataRequest.getChecksum())) {
+            throw new DartsApiException(AudioApiError.FAILED_TO_ADD_AUDIO_META_DATA,
+                                        String.format("Checksum for blob '%s' does not match the one passed in the API request '%s'.",
+                                                      checksum, addAudioMetadataRequest.getChecksum()));
+        }
+        addAudio(checksum, () -> guid, addAudioMetadataRequest);
+    }
+
+    private void addAudio(String incomingChecksum,
+                          Supplier<UUID> externalLocationSupplier,
+                          AddAudioMetadataRequest addAudioMetadataRequest) {
         log.info("Adding audio using metadata {}", addAudioMetadataRequest.toString());
 
         //remove duplicate cases as they can appear more than once, e.g. if they broke for lunch.
@@ -78,14 +104,7 @@ public class AudioUploadServiceImpl implements AudioUploadService {
 
         List<MediaEntity> duplicatesToBeSuperseded = getLatestDuplicateMediaFiles(addAudioMetadataRequest);
 
-        String incomingChecksum;
-        try {
-            incomingChecksum = fileContentChecksum.calculate(audioMultipartFile.getInputStream());
-        } catch (IOException e) {
-            throw new DartsApiException(FAILED_TO_UPLOAD_AUDIO_FILE, "Failed to compute incoming checksum", e);
-        }
         List<MediaEntity> duplicatesWithDifferentChecksum = filterForMediaWithMismatchingChecksum(duplicatesToBeSuperseded, incomingChecksum);
-
         if (isNotEmpty(duplicatesToBeSuperseded) && isEmpty(duplicatesWithDifferentChecksum)) {
             log.info("Exact duplicate detected based upon media metadata and checksum. Returning 200 with no changes ");
             for (MediaEntity entity : duplicatesToBeSuperseded) {
@@ -96,7 +115,7 @@ public class AudioUploadServiceImpl implements AudioUploadService {
 
         // upload to the blob store
         ObjectRecordStatusEntity objectRecordStatusEntity = objectRecordStatusRepository.getReferenceById(STORED.getId());
-        UUID externalLocation = saveAudioToInbound(audioMultipartFile);
+        UUID externalLocation = externalLocationSupplier.get();
 
         UserAccountEntity currentUser = userIdentity.getUserAccount();
 

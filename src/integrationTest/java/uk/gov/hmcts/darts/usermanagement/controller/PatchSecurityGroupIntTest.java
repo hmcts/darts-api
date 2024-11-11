@@ -222,7 +222,7 @@ class PatchSecurityGroupIntTest extends IntegrationBase {
 
         mockMvc.perform(patchRequest)
             .andExpect(status().isNotFound())
-            .andExpect(jsonPath("$.type").value(UserManagementError.USER_NOT_FOUND.getType().toString()))
+            .andExpect(jsonPath("$.type").value(UserManagementError.USER_NOT_FOUND.getType()))
             .andReturn();
     }
 

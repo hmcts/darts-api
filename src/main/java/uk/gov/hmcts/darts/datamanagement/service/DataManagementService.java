@@ -31,6 +31,8 @@ public interface DataManagementService {
 
     void addMetaData(BlobClient client, Map<String, String> metadata);
 
+    String getChecksum(String containerName, UUID blobId);
+
     Response<Boolean> deleteBlobData(String containerName, UUID blobId) throws AzureDeleteBlobException;
 
     DownloadResponseMetaData downloadData(DatastoreContainerType type, String containerName, UUID blobId) throws FileNotDownloadedException;

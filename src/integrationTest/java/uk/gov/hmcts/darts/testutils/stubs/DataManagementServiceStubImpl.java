@@ -123,6 +123,11 @@ public class DataManagementServiceStubImpl implements DataManagementService {
     }
 
     @Override
+    public String getChecksum(String containerName, UUID blobId) {
+        return "checksum-" + blobId;
+    }
+
+    @Override
     public Response<Boolean> deleteBlobData(String containerName, UUID blobId) {
         logStubUsageWarning();
 
