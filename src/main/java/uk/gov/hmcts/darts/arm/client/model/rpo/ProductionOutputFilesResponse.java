@@ -5,7 +5,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
-import lombok.ToString;
 
 import java.util.List;
 
@@ -13,26 +12,28 @@ import java.util.List;
 @Data
 @NoArgsConstructor
 @EqualsAndHashCode(callSuper = true)
-@ToString(callSuper = true)
-public class IndexesByMatterIdResponse extends BaseRpoResponse {
+public class ProductionOutputFilesResponse extends BaseRpoResponse {
 
-    private List<Index> indexes;
+    @JsonProperty("productionID")
+    private String productionId;
+
+    @JsonProperty("productionExportFile")
+    private List<ProductionExportFile> productionExportFiles;
 
     @JsonIgnoreProperties(ignoreUnknown = true)
     @Data
     @NoArgsConstructor
-    @EqualsAndHashCode()
-    public static class Index {
-        private IndexDetails index;
+    public static class ProductionExportFile {
+        @JsonProperty("productionExportFile")
+        private ProductionExportFileDetail productionExportFileDetails;
     }
 
     @JsonIgnoreProperties(ignoreUnknown = true)
     @Data
     @NoArgsConstructor
-    @EqualsAndHashCode()
-    public static class IndexDetails {
-        @JsonProperty("indexID")
-        private String indexId;
+    public static class ProductionExportFileDetail {
+        @JsonProperty("productionExportFileID")
+        private String productionExportFileId;
     }
 
 }

@@ -11,12 +11,16 @@ import org.springframework.stereotype.Service;
 import uk.gov.hmcts.darts.arm.client.ArmRpoClient;
 import uk.gov.hmcts.darts.arm.client.model.rpo.ArmAsyncSearchResponse;
 import uk.gov.hmcts.darts.arm.client.model.rpo.BaseRpoResponse;
+import uk.gov.hmcts.darts.arm.client.model.rpo.CreateExportBasedOnSearchResultsTableRequest;
+import uk.gov.hmcts.darts.arm.client.model.rpo.CreateExportBasedOnSearchResultsTableResponse;
 import uk.gov.hmcts.darts.arm.client.model.rpo.ExtendedProductionsByMatterResponse;
 import uk.gov.hmcts.darts.arm.client.model.rpo.ExtendedSearchesByMatterResponse;
 import uk.gov.hmcts.darts.arm.client.model.rpo.IndexesByMatterIdRequest;
 import uk.gov.hmcts.darts.arm.client.model.rpo.IndexesByMatterIdResponse;
 import uk.gov.hmcts.darts.arm.client.model.rpo.MasterIndexFieldByRecordClassSchemaRequest;
 import uk.gov.hmcts.darts.arm.client.model.rpo.MasterIndexFieldByRecordClassSchemaResponse;
+import uk.gov.hmcts.darts.arm.client.model.rpo.ProductionOutputFilesRequest;
+import uk.gov.hmcts.darts.arm.client.model.rpo.ProductionOutputFilesResponse;
 import uk.gov.hmcts.darts.arm.client.model.rpo.ProfileEntitlementResponse;
 import uk.gov.hmcts.darts.arm.client.model.rpo.RecordManagementMatterResponse;
 import uk.gov.hmcts.darts.arm.client.model.rpo.SaveBackgroundSearchRequest;
@@ -43,6 +47,7 @@ import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
@@ -394,8 +399,103 @@ public class ArmRpoApiImpl implements ArmRpoApi {
     @Override
     public boolean createExportBasedOnSearchResultsTable(String bearerToken, Integer executionId,
                                                          List<MasterIndexFieldByRecordClassSchemaResponse> headerColumns, UserAccountEntity userAccount) {
-        throw new NotImplementedException("Method not implemented");
+        var armRpoExecutionDetailEntity = armRpoService.getArmRpoExecutionDetailEntity(executionId);
+        armRpoService.updateArmRpoStateAndStatus(armRpoExecutionDetailEntity, ArmRpoHelper.createExportBasedOnSearchResultsTableRpoState(),
+                                                 ArmRpoHelper.inProgressRpoStatus(), userAccount);
+
+        StringBuilder errorMessage = new StringBuilder("Failure during ARM createExportBasedOnSearchResultsTable: ");
+        CreateExportBasedOnSearchResultsTableRequest request;
+        try {
+            request = createRequestForCreateExportBasedOnSearchResultsTable(
+                headerColumns, armRpoExecutionDetailEntity.getSearchId(),
+                armRpoExecutionDetailEntity.getSearchItemCount(),
+                armRpoExecutionDetailEntity.getProductionId(),
+                armRpoExecutionDetailEntity.getStorageAccountId()
+            );
+        } catch (NullPointerException e) {
+            throw handleFailureAndCreateException(errorMessage.append("Could not construct API request: ").append(e).toString(),
+                                                  armRpoExecutionDetailEntity, userAccount);
+        }
+        CreateExportBasedOnSearchResultsTableResponse response;
+        try {
+
+            response = armRpoClient.createExportBasedOnSearchResultsTable(bearerToken, request);
+        } catch (FeignException e) {
+            // this ensures the full error body containing the ARM error detail is logged rather than a truncated version
+            log.error(errorMessage.append("Unable to get ARM RPO response").toString() + " {}",
+                      e.contentUTF8());
+            throw handleFailureAndCreateException(errorMessage.toString(), armRpoExecutionDetailEntity, userAccount);
+        }
+        if (isNull(response) || isNull(response.getStatus()) || isNull(response.getIsError())
+            || (!response.getIsError() && isNull(response.getResponseStatus()))
+        ) {
+            throw handleFailureAndCreateException(errorMessage.append("ARM RPO API response is invalid - ").append(response)
+                                                      .toString(),
+                                                  armRpoExecutionDetailEntity, userAccount);
+        }
+        try {
+            HttpStatus responseStatus = HttpStatus.valueOf(response.getStatus());
+            if (HttpStatus.BAD_REQUEST.value() == responseStatus.value()) {
+                if (response.getResponseStatus() == 2) {
+                    log.error("The search is still running and cannot export as csv - {}", response);
+                    return false;
+                } else {
+                    throw handleFailureAndCreateException(errorMessage.append("ARM RPO API failed with invalid status - ").append(responseStatus)
+                                                              .append(" and response - ").append(response).toString(),
+                                                          armRpoExecutionDetailEntity, userAccount);
+                }
+            } else if (!responseStatus.is2xxSuccessful() || response.getIsError()) {
+                throw handleFailureAndCreateException(errorMessage.append("ARM RPO API failed with status - ").append(responseStatus)
+                                                          .append(" and response - ").append(response).toString(),
+                                                      armRpoExecutionDetailEntity, userAccount);
+            }
+        } catch (IllegalArgumentException e) {
+            throw handleFailureAndCreateException(errorMessage.append("ARM RPO API response status is invalid - ")
+                                                      .append(response).toString(),
+                                                  armRpoExecutionDetailEntity, userAccount);
+        }
+        armRpoService.updateArmRpoStatus(armRpoExecutionDetailEntity, ArmRpoHelper.completedRpoStatus(), userAccount);
+        return true;
     }
+
+    private CreateExportBasedOnSearchResultsTableRequest createRequestForCreateExportBasedOnSearchResultsTable(
+        List<MasterIndexFieldByRecordClassSchemaResponse> headerColumns, String searchId, int searchItemsCount, String productionName,
+        String storageAccountId) {
+
+        return CreateExportBasedOnSearchResultsTableRequest.builder()
+            .core(null)
+            .formFields(null)
+            .searchId(searchId)
+            .searchitemsCount(searchItemsCount)
+            .headerColumns(createHeaderColumnsFromMasterIndexFieldByRecordClassSchemaResponse(headerColumns))
+            .productionName(productionName)
+            .storageAccountId(storageAccountId)
+            .build();
+    }
+
+    private List<CreateExportBasedOnSearchResultsTableRequest.HeaderColumn> createHeaderColumnsFromMasterIndexFieldByRecordClassSchemaResponse(
+        List<MasterIndexFieldByRecordClassSchemaResponse> masterIndexFieldByRecordClassSchemaResponses) {
+
+        List<CreateExportBasedOnSearchResultsTableRequest.HeaderColumn> headerColumnList = new ArrayList<>();
+        for (MasterIndexFieldByRecordClassSchemaResponse response : masterIndexFieldByRecordClassSchemaResponses) {
+            for (MasterIndexFieldByRecordClassSchemaResponse.MasterIndexField masterIndexField : response.getMasterIndexFields()) {
+                headerColumnList.add(createHeaderColumn(masterIndexField));
+            }
+        }
+        return headerColumnList;
+    }
+
+    private CreateExportBasedOnSearchResultsTableRequest.HeaderColumn createHeaderColumn(
+        MasterIndexFieldByRecordClassSchemaResponse.MasterIndexField masterIndexField) {
+        return CreateExportBasedOnSearchResultsTableRequest.HeaderColumn.builder()
+            .masterIndexField(masterIndexField.getMasterIndexFieldId())
+            .displayName(masterIndexField.getDisplayName())
+            .propertyName(masterIndexField.getPropertyName())
+            .propertyType(masterIndexField.getPropertyType())
+            .isMasked(masterIndexField.getIsMasked())
+            .build();
+    }
+
 
     @Override
     public ExtendedProductionsByMatterResponse getExtendedProductionsByMatter(String bearerToken, Integer executionId, UserAccountEntity userAccount) {
@@ -404,7 +504,57 @@ public class ArmRpoApiImpl implements ArmRpoApi {
 
     @Override
     public List<String> getProductionOutputFiles(String bearerToken, Integer executionId, UserAccountEntity userAccount) {
-        throw new NotImplementedException("Method not implemented");
+        final ArmRpoExecutionDetailEntity executionDetail = armRpoService.getArmRpoExecutionDetailEntity(executionId);
+        armRpoService.updateArmRpoStateAndStatus(executionDetail,
+                                                 ArmRpoHelper.getProductionOutputFilesRpoState(),
+                                                 ArmRpoHelper.inProgressRpoStatus(),
+                                                 userAccount);
+
+        final StringBuilder exceptionMessageBuilder = new StringBuilder("ARM getProductionOutputFiles: ");
+
+        String productionId = executionDetail.getProductionId();
+        if (StringUtils.isBlank(productionId)) {
+            throw handleFailureAndCreateException(exceptionMessageBuilder.append("production id was blank for execution id: ")
+                                                      .append(executionId)
+                                                      .toString(),
+                                                  executionDetail, userAccount);
+        }
+
+        ProductionOutputFilesResponse response;
+        try {
+            response = armRpoClient.getProductionOutputFiles(bearerToken, createProductionOutputFilesRequest(productionId));
+        } catch (FeignException e) {
+            throw handleFailureAndCreateException(exceptionMessageBuilder.append("API call failed: ")
+                                                      .append(e)
+                                                      .toString(),
+                                                  executionDetail, userAccount);
+        }
+        handleResponseStatus(userAccount, response, exceptionMessageBuilder, executionDetail);
+
+        List<ProductionOutputFilesResponse.ProductionExportFile> productionExportFiles = response.getProductionExportFiles();
+        if (CollectionUtils.isEmpty(productionExportFiles)) {
+            throw handleFailureAndCreateException(exceptionMessageBuilder.append("No production export files were returned")
+                                                  .toString(),
+                                                  executionDetail, userAccount);
+        }
+
+        List<String> productionExportFileIds = productionExportFiles.stream()
+            .filter(Objects::nonNull)
+            .map(ProductionOutputFilesResponse.ProductionExportFile::getProductionExportFileDetails)
+            .filter(Objects::nonNull)
+            .map(ProductionOutputFilesResponse.ProductionExportFileDetail::getProductionExportFileId)
+            .filter(StringUtils::isNotBlank)
+            .toList();
+
+        if (productionExportFileIds.isEmpty()) {
+            throw handleFailureAndCreateException(exceptionMessageBuilder.append("No production export file ids were returned")
+                                                  .toString(),
+                                                  executionDetail, userAccount);
+        }
+
+        armRpoService.updateArmRpoStatus(executionDetail, ArmRpoHelper.completedRpoStatus(), userAccount);
+
+        return productionExportFileIds;
     }
 
     @Override
@@ -502,4 +652,11 @@ public class ArmRpoApiImpl implements ArmRpoApi {
             .matterId(matterId)
             .build();
     }
+
+    private ProductionOutputFilesRequest createProductionOutputFilesRequest(String productionId) {
+        return ProductionOutputFilesRequest.builder()
+            .productionId(productionId)
+            .build();
+    }
+
 }

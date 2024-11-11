@@ -15,9 +15,7 @@ public class GetCasesSearchRequest {
 
     String caseNumber;
     String courthouse;
-    Integer courthouseId;
     String courtroom;
-    Integer courtroomId;
     String judgeName;
     String defendantName;
     LocalDate dateFrom;
