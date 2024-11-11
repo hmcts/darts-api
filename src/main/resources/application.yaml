@@ -296,6 +296,8 @@ darts:
 
         get-extended-searches-by-matter-path: /api/v1/getExtendedSearchesByMatter
         get-production-output-files-path: /api/v1/getProductionOutputFiles
+        remove-production-path: /api/v1/removeProduction
+
     dets:
       sas-endpoint: ${DETS_SAS_URL_ENDPOINT:}
       container-name: darts-migration
