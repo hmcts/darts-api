@@ -178,6 +178,32 @@ paths:
             application/json+problem:
               schema:
                 $ref: './problem.yaml'
+  /audios/metadata:
+    post:
+      tags:
+        - Audio
+      summary: Upload audio metadata
+      operationId: addAudioMetaData
+      requestBody:
+        content:
+          application/json:
+            schema:
+                $ref: '#/components/schemas/AddAudioMetadataRequestWithStorageGUID'
+      responses:
+        200:
+          description: Audio metadata accepted
+        400:
+          description: Bad request
+          content:
+            application/json+problem:
+              schema:
+                $ref: './problem.yaml'
+        500:
+          description: Internal server error
+          content:
+            application/json+problem:
+              schema:
+                $ref: './problem.yaml'
 
   /admin/transformed-medias/{id}:
     get:
@@ -683,6 +709,16 @@ components:
         file_size:
           type: integer
           format: int64
+    AddAudioMetadataRequestWithStorageGUID:
+      allOf: # Combines the BasicErrorModel and the inline model
+        - $ref: "#/components/schemas/AddAudioMetadataRequest"
+        - type: object
+          required:
+            - storage_guid
+          properties:
+            storage_guid:
+              type: string
+              format: uuid
     AddAudioMetadataRequest:
       type: object
       required:
@@ -1000,6 +1036,7 @@ components:
         - "AUDIO_118"
         - "AUDIO_119"
         - "AUDIO_120"
+        - "AUDIO_121"
       x-enum-varnames: [ FAILED_TO_PROCESS_AUDIO_REQUEST,
                          REQUESTED_DATA_CANNOT_BE_LOCATED,
                          MEDIA_NOT_FOUND,
@@ -1019,7 +1056,8 @@ components:
                          MEDIA_ALREADY_MARKED_FOR_DELETION,
                          ADMIN_MEDIA_MARKED_FOR_DELETION_NOT_FOUND,
                          MARKED_FOR_DELETION_REASON_NOT_FOUND,
-                         USER_CANT_APPROVE_THEIR_OWN_DELETION
+                         USER_CANT_APPROVE_THEIR_OWN_DELETION,
+                         FAILED_TO_ADD_AUDIO_META_DATA,
       ]
 
     AddAudioTitleErrors:
@@ -1045,6 +1083,7 @@ components:
         - "Media marked for deletion not found"
         - "Media marked for deletion reason not found"
         - "User cannot approve their own deletion"
+        - "Failed to add audio meta data"
       x-enum-varnames: [ FAILED_TO_PROCESS_AUDIO_REQUEST,
                          REQUESTED_DATA_CANNOT_BE_LOCATED,
                          MEDIA_NOT_FOUND,
@@ -1064,5 +1103,6 @@ components:
                          MEDIA_ALREADY_MARKED_FOR_DELETION,
                          ADMIN_MEDIA_MARKED_FOR_DELETION_NOT_FOUND,
                          MARKED_FOR_DELETION_REASON_NOT_FOUND,
-                         USER_CANT_APPROVE_THEIR_OWN_DELETION
+                         USER_CANT_APPROVE_THEIR_OWN_DELETION,
+                         FAILED_TO_ADD_AUDIO_META_DATA,
       ]

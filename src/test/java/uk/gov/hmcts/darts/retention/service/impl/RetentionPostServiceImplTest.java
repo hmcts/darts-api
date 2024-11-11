@@ -140,7 +140,7 @@ class RetentionPostServiceImplTest {
         );
 
         assertEquals("The selected caseId '1' cannot be found.", exception.getDetail());
-        assertEquals("RETENTION_103", exception.getError().getType().toString());
+        assertEquals("RETENTION_103", exception.getError().getType());
         assertEquals(400, exception.getError().getHttpStatus().value());
     }
 
@@ -162,7 +162,7 @@ class RetentionPostServiceImplTest {
             () -> retentionPostService.postRetention(false, postRetentionRequest)
         );
         assertEquals("caseId '101' retention date cannot be amended as the case is already expired.", exception.getDetail());
-        assertEquals("RETENTION_118", exception.getError().getType().toString());
+        assertEquals("RETENTION_118", exception.getError().getType());
         assertEquals(422, exception.getError().getHttpStatus().value());
     }
 
@@ -184,7 +184,7 @@ class RetentionPostServiceImplTest {
         );
 
         assertEquals("caseId '101' must be closed before the retention period can be amended.", exception.getDetail());
-        assertEquals("RETENTION_104", exception.getError().getType().toString());
+        assertEquals("RETENTION_104", exception.getError().getType());
         assertEquals(400, exception.getError().getHttpStatus().value());
     }
 
@@ -204,7 +204,7 @@ class RetentionPostServiceImplTest {
         );
 
         assertEquals("caseId '101' must have a retention policy applied before being changed.", exception.getDetail());
-        assertEquals("RETENTION_105", exception.getError().getType().toString());
+        assertEquals("RETENTION_105", exception.getError().getType());
         assertEquals(400, exception.getError().getHttpStatus().value());
     }
 
@@ -225,7 +225,7 @@ class RetentionPostServiceImplTest {
         );
 
         assertEquals("caseId '101' must have a retention date after the last completed automated retention date '2025-10-01'.", exception.getDetail());
-        assertEquals("RETENTION_101", exception.getError().getType().toString());
+        assertEquals("RETENTION_101", exception.getError().getType());
         assertEquals(422, exception.getError().getHttpStatus().value());
     }
 
@@ -246,7 +246,7 @@ class RetentionPostServiceImplTest {
         );
 
         assertEquals("You do not have permission to reduce the retention period.", exception.getDetail());
-        assertEquals("RETENTION_100", exception.getError().getType().toString());
+        assertEquals("RETENTION_100", exception.getError().getType());
         assertEquals(403, exception.getError().getHttpStatus().value());
     }
 
@@ -279,7 +279,7 @@ class RetentionPostServiceImplTest {
         );
 
         assertEquals("More than 1 retention policy found for fixedPolicyKey 'MANUAL'", exception.getDetail());
-        assertEquals("RETENTION_106", exception.getError().getType().toString());
+        assertEquals("RETENTION_106", exception.getError().getType());
         assertEquals(500, exception.getError().getHttpStatus().value());
     }
 

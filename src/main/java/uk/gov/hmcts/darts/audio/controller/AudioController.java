@@ -1,12 +1,15 @@
 package uk.gov.hmcts.darts.audio.controller;
 
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 import uk.gov.hmcts.darts.audio.component.AudioResponseMapper;
@@ -14,6 +17,7 @@ import uk.gov.hmcts.darts.audio.exception.AudioApiError;
 import uk.gov.hmcts.darts.audio.http.api.AudioApi;
 import uk.gov.hmcts.darts.audio.mapper.TransformedMediaMapper;
 import uk.gov.hmcts.darts.audio.model.AddAudioMetadataRequest;
+import uk.gov.hmcts.darts.audio.model.AddAudioMetadataRequestWithStorageGUID;
 import uk.gov.hmcts.darts.audio.model.AdminMediaResponse;
 import uk.gov.hmcts.darts.audio.model.AudioMetadata;
 import uk.gov.hmcts.darts.audio.model.AudioPreview;
@@ -99,6 +103,20 @@ public class AudioController implements AudioApi {
         multipartFileValidator.validate(file);
 
         audioUploadService.addAudio(file, metadata);
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    @Override
+    @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
+    @Authorisation(contextId = ANY_ENTITY_ID,
+        globalAccessSecurityRoles = {MID_TIER})
+    public ResponseEntity<Void> addAudioMetaData(
+        @Parameter(name = "AddAudioMetadataRequestWithStorageGUID", description = "") @Valid @RequestBody(required = false)
+        AddAudioMetadataRequestWithStorageGUID metadata) {
+
+        // validate the payloads
+        addAudioMetaDataValidator.validate(metadata);
+        audioUploadService.addAudio(metadata.getStorageGuid(), metadata);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
