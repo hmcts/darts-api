@@ -38,7 +38,7 @@ class ArpRpoApiGetStorageAccountsIntTest extends IntegrationBase {
 
 
     @Test
-    void getStorageShouldSucceedIfServerReturns200Success() {
+    void getStorageAccountsSuccess() {
 
         // given
         when(armApiConfigurationProperties.getArmStorageAccountName()).thenReturn("expectedAccountName");
@@ -81,7 +81,7 @@ class ArpRpoApiGetStorageAccountsIntTest extends IntegrationBase {
     }
 
     @Test
-    void getStorageShouldFailIfServerReturnsResponseWithMissingMatchingStorageName() {
+    void getStorageAccountsWithMissingMatchingStorage() {
 
         // given
         StorageAccountResponse response = new StorageAccountResponse();
@@ -112,7 +112,7 @@ class ArpRpoApiGetStorageAccountsIntTest extends IntegrationBase {
     }
 
     @Test
-    void getStorageAccountsFailsWhenClientReturns400Error() {
+    void getStorageAccountsFailsWhenClientThrowsFeignException() {
 
         // given
         when(armRpoClient.getStorageAccounts(any(), any())).thenThrow(FeignException.BadRequest.class);
