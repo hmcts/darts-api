@@ -23,7 +23,7 @@ import uk.gov.hmcts.darts.event.enums.EventStatus;
 import uk.gov.hmcts.darts.event.service.EventService;
 import uk.gov.hmcts.darts.log.api.LogApi;
 import uk.gov.hmcts.darts.task.api.AutomatedTaskName;
-import uk.gov.hmcts.darts.task.config.AutomatedTaskConfigurationProperties;
+import uk.gov.hmcts.darts.task.config.AudioLinkingAutomatedTaskConfig;
 import uk.gov.hmcts.darts.task.runner.AutoloadingManualTask;
 import uk.gov.hmcts.darts.task.service.LockService;
 
@@ -41,7 +41,7 @@ public class AudioLinkingAutomatedTask extends AbstractLockableAutomatedTask
     private final EventProcessor eventProcessor;
 
     protected AudioLinkingAutomatedTask(AutomatedTaskRepository automatedTaskRepository,
-                                        AutomatedTaskConfigurationProperties automatedTaskConfigurationProperties,
+                                        AudioLinkingAutomatedTaskConfig automatedTaskConfigurationProperties,
                                         LogApi logApi, LockService lockService,
                                         EventRepository eventRepository,
                                         EventProcessor eventProcessor) {
@@ -53,11 +53,6 @@ public class AudioLinkingAutomatedTask extends AbstractLockableAutomatedTask
     @Override
     public AutomatedTaskName getAutomatedTaskName() {
         return AutomatedTaskName.AUDIO_LINKING_TASK_NAME;
-    }
-
-    @Override
-    public Duration getLockAtMostFor() {
-        return Duration.ofMinutes(90);
     }
 
     @Override

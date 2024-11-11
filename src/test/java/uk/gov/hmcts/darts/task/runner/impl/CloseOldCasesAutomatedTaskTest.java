@@ -10,11 +10,13 @@ import uk.gov.hmcts.darts.common.entity.AutomatedTaskEntity;
 import uk.gov.hmcts.darts.common.repository.AutomatedTaskRepository;
 import uk.gov.hmcts.darts.log.api.LogApi;
 import uk.gov.hmcts.darts.task.config.AutomatedTaskConfigurationProperties;
+import uk.gov.hmcts.darts.task.config.CloseOldCasesAutomatedTaskConfig;
 import uk.gov.hmcts.darts.task.service.LockService;
 
 import java.util.Optional;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -44,7 +46,7 @@ class CloseOldCasesAutomatedTaskTest {
         CloseOldCasesAutomatedTask closeOldCasesAutomatedTask =
             new CloseOldCasesAutomatedTask(
                 automatedTaskRepository,
-                automatedTaskConfigurationProperties,
+                mock(CloseOldCasesAutomatedTaskConfig.class),
                 logApi,
                 lockService,
                 closeOldCasesProcessor

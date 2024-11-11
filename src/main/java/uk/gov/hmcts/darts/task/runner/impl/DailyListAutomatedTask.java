@@ -7,11 +7,9 @@ import uk.gov.hmcts.darts.common.repository.AutomatedTaskRepository;
 import uk.gov.hmcts.darts.dailylist.service.DailyListService;
 import uk.gov.hmcts.darts.log.api.LogApi;
 import uk.gov.hmcts.darts.task.api.AutomatedTaskName;
-import uk.gov.hmcts.darts.task.config.AutomatedTaskConfigurationProperties;
+import uk.gov.hmcts.darts.task.config.DailyListAutomatedTaskConfig;
 import uk.gov.hmcts.darts.task.runner.AutoloadingManualTask;
 import uk.gov.hmcts.darts.task.service.LockService;
-
-import java.time.Duration;
 
 import static uk.gov.hmcts.darts.task.api.AutomatedTaskName.DAILY_LIST_HOUSEKEEPING_TASK_NAME;
 
@@ -24,7 +22,7 @@ public class DailyListAutomatedTask extends AbstractLockableAutomatedTask
 
     @Autowired
     public DailyListAutomatedTask(AutomatedTaskRepository automatedTaskRepository,
-                                  AutomatedTaskConfigurationProperties automatedTaskConfigurationProperties,
+                                  DailyListAutomatedTaskConfig automatedTaskConfigurationProperties,
                                   DailyListService dailyListService,
                                   LogApi logApi, LockService lockService) {
         super(automatedTaskRepository, automatedTaskConfigurationProperties, logApi, lockService);
@@ -34,11 +32,6 @@ public class DailyListAutomatedTask extends AbstractLockableAutomatedTask
     @Override
     public AutomatedTaskName getAutomatedTaskName() {
         return DAILY_LIST_HOUSEKEEPING_TASK_NAME;
-    }
-
-    @Override
-    public Duration getLockAtMostFor() {
-        return Duration.ofMinutes(90);
     }
 
     @Override

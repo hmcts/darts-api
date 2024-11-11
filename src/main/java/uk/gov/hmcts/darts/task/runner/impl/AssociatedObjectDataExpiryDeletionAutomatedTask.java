@@ -21,14 +21,13 @@ import uk.gov.hmcts.darts.common.repository.MediaRepository;
 import uk.gov.hmcts.darts.common.repository.TranscriptionDocumentRepository;
 import uk.gov.hmcts.darts.log.api.LogApi;
 import uk.gov.hmcts.darts.task.api.AutomatedTaskName;
-import uk.gov.hmcts.darts.task.config.AutomatedTaskConfigurationProperties;
+import uk.gov.hmcts.darts.task.config.AssociatedObjectDataExpiryDeletionAutomatedTaskConfig;
 import uk.gov.hmcts.darts.task.runner.AutoloadingManualTask;
 import uk.gov.hmcts.darts.task.runner.HasIntegerId;
 import uk.gov.hmcts.darts.task.runner.SoftDelete;
 import uk.gov.hmcts.darts.task.runner.SoftDeleteRepository;
 import uk.gov.hmcts.darts.task.service.LockService;
 
-import java.time.Duration;
 import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.function.Function;
@@ -54,7 +53,7 @@ public class AssociatedObjectDataExpiryDeletionAutomatedTask
 
     public AssociatedObjectDataExpiryDeletionAutomatedTask(
         AutomatedTaskRepository automatedTaskRepository,
-        AutomatedTaskConfigurationProperties automatedTaskConfigurationProperties,
+        AssociatedObjectDataExpiryDeletionAutomatedTaskConfig automatedTaskConfigurationProperties,
         UserIdentity userIdentity,
         LogApi logApi, LockService lockService,
         CurrentTimeHelper currentTimeHelper,
@@ -89,11 +88,6 @@ public class AssociatedObjectDataExpiryDeletionAutomatedTask
     @Override
     public AutomatedTaskName getAutomatedTaskName() {
         return AutomatedTaskName.ASSOCIATED_OBJECT_DATA_EXPIRY_DELETION_TASK_NAME;
-    }
-
-    @Override
-    public Duration getLockAtMostFor() {
-        return Duration.ofMinutes(90);
     }
 
     @Override

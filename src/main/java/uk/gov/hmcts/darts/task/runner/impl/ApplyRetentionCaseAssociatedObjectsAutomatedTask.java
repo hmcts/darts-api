@@ -7,11 +7,9 @@ import uk.gov.hmcts.darts.common.repository.AutomatedTaskRepository;
 import uk.gov.hmcts.darts.log.api.LogApi;
 import uk.gov.hmcts.darts.retention.service.ApplyRetentionCaseAssociatedObjectsProcessor;
 import uk.gov.hmcts.darts.task.api.AutomatedTaskName;
-import uk.gov.hmcts.darts.task.config.AutomatedTaskConfigurationProperties;
+import uk.gov.hmcts.darts.task.config.ApplyRetentionCaseAssociatedObjectsAutomatedTaskConfig;
 import uk.gov.hmcts.darts.task.runner.AutoloadingManualTask;
 import uk.gov.hmcts.darts.task.service.LockService;
-
-import java.time.Duration;
 
 import static uk.gov.hmcts.darts.task.api.AutomatedTaskName.APPLY_RETENTION_CASE_ASSOCIATED_OBJECTS_TASK_NAME;
 
@@ -25,7 +23,7 @@ public class ApplyRetentionCaseAssociatedObjectsAutomatedTask extends AbstractLo
 
     @Autowired
     public ApplyRetentionCaseAssociatedObjectsAutomatedTask(AutomatedTaskRepository automatedTaskRepository,
-                                                            AutomatedTaskConfigurationProperties automatedTaskConfigurationProperties,
+                                                            ApplyRetentionCaseAssociatedObjectsAutomatedTaskConfig automatedTaskConfigurationProperties,
                                                             ApplyRetentionCaseAssociatedObjectsProcessor processor,
                                                             LogApi logApi, LockService lockService) {
         super(automatedTaskRepository, automatedTaskConfigurationProperties, logApi, lockService);
@@ -35,11 +33,6 @@ public class ApplyRetentionCaseAssociatedObjectsAutomatedTask extends AbstractLo
     @Override
     public AutomatedTaskName getAutomatedTaskName() {
         return APPLY_RETENTION_CASE_ASSOCIATED_OBJECTS_TASK_NAME;
-    }
-
-    @Override
-    public Duration getLockAtMostFor() {
-        return Duration.ofMinutes(90);
     }
 
     @Override

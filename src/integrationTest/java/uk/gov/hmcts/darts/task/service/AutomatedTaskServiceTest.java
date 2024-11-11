@@ -42,7 +42,24 @@ import uk.gov.hmcts.darts.event.service.RemoveDuplicateEventsProcessor;
 import uk.gov.hmcts.darts.log.api.LogApi;
 import uk.gov.hmcts.darts.retention.service.ApplyRetentionCaseAssociatedObjectsProcessor;
 import uk.gov.hmcts.darts.task.api.AutomatedTaskName;
+import uk.gov.hmcts.darts.task.config.ApplyRetentionCaseAssociatedObjectsAutomatedTaskConfig;
+import uk.gov.hmcts.darts.task.config.ArmRetentionEventDateCalculatorAutomatedTaskConfig;
 import uk.gov.hmcts.darts.task.config.AutomatedTaskConfigurationProperties;
+import uk.gov.hmcts.darts.task.config.CleanupArmResponseFilesAutomatedTaskConfig;
+import uk.gov.hmcts.darts.task.config.CloseOldCasesAutomatedTaskConfig;
+import uk.gov.hmcts.darts.task.config.CloseUnfinishedTranscriptionsAutomatedTaskConfig;
+import uk.gov.hmcts.darts.task.config.DailyListAutomatedTaskConfig;
+import uk.gov.hmcts.darts.task.config.ExternalDataStoreDeleterAutomatedTaskConfig;
+import uk.gov.hmcts.darts.task.config.GenerateCaseDocumentAutomatedTaskConfig;
+import uk.gov.hmcts.darts.task.config.GenerateCaseDocumentForRetentionDateAutomatedTaskConfig;
+import uk.gov.hmcts.darts.task.config.InboundAudioDeleterAutomatedTaskConfig;
+import uk.gov.hmcts.darts.task.config.InboundToUnstructuredAutomatedTaskConfig;
+import uk.gov.hmcts.darts.task.config.OutboundAudioDeleterAutomatedTaskConfig;
+import uk.gov.hmcts.darts.task.config.ProcessArmResponseFilesAutomatedTaskConfig;
+import uk.gov.hmcts.darts.task.config.ProcessDailyListAutomatedTaskConfig;
+import uk.gov.hmcts.darts.task.config.RemoveDuplicatedEventsAutomatedTaskConfig;
+import uk.gov.hmcts.darts.task.config.UnstructuredAudioDeleterAutomatedTaskConfig;
+import uk.gov.hmcts.darts.task.config.UnstructuredToArmAutomatedTaskConfig;
 import uk.gov.hmcts.darts.task.exception.AutomatedTaskSetupError;
 import uk.gov.hmcts.darts.task.runner.AutomatedTask;
 import uk.gov.hmcts.darts.task.runner.impl.AbstractLockableAutomatedTask;
@@ -79,6 +96,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.mock;
 import static uk.gov.hmcts.darts.task.status.AutomatedTaskStatus.COMPLETED;
 import static uk.gov.hmcts.darts.task.status.AutomatedTaskStatus.FAILED;
 import static uk.gov.hmcts.darts.task.status.AutomatedTaskStatus.NOT_STARTED;
@@ -220,7 +238,7 @@ class AutomatedTaskServiceTest extends IntegrationBase {
     void givenSuccessfullyStartedTaskFailsDuringExecutionThenStatusIsSetToFailed() {
         GenerateCaseDocumentAutomatedTask automatedTask
             = new GenerateCaseDocumentAutomatedTask(
-            automatedTaskRepository, automatedTaskConfigurationProperties, taskProcessorFactory, logApi, lockService
+            automatedTaskRepository, mock(GenerateCaseDocumentAutomatedTaskConfig.class), taskProcessorFactory, logApi, lockService
         );
         doThrow(ArithmeticException.class).when(caseRepository).findCasesNeedingCaseDocumentGenerated(any(), any());
 
@@ -235,7 +253,7 @@ class AutomatedTaskServiceTest extends IntegrationBase {
     @Test
     void givenAutomatedTaskVerifyStatusBeforeAndAfterRunning() {
         ProcessDailyListAutomatedTask automatedTask = new ProcessDailyListAutomatedTask(
-            automatedTaskRepository, automatedTaskConfigurationProperties, null,logApi, lockService
+            automatedTaskRepository, mock(ProcessDailyListAutomatedTaskConfig.class), null, logApi, lockService
         );
 
         Optional<AutomatedTaskEntity> originalAutomatedTaskEntity =
@@ -266,7 +284,7 @@ class AutomatedTaskServiceTest extends IntegrationBase {
     @Test
     void givenConfiguredTaskCancelProcessDailyList() {
         AutomatedTask automatedTask = new ProcessDailyListAutomatedTask(
-            automatedTaskRepository, automatedTaskConfigurationProperties, null,logApi, lockService
+            automatedTaskRepository, mock(ProcessDailyListAutomatedTaskConfig.class), null, logApi, lockService
         );
 
         Set<ScheduledTask> scheduledTasks = scheduledTaskHolder.getScheduledTasks();
@@ -283,7 +301,7 @@ class AutomatedTaskServiceTest extends IntegrationBase {
     @Test
     void givenConfiguredTasksUpdateCronExpressionAndResetCronExpression() {
         AutomatedTask automatedTask = new ProcessDailyListAutomatedTask(
-            automatedTaskRepository, automatedTaskConfigurationProperties, null,logApi, lockService
+            automatedTaskRepository, mock(ProcessDailyListAutomatedTaskConfig.class), null, logApi, lockService
         );
         Optional<AutomatedTaskEntity> originalAutomatedTaskEntity =
             automatedTaskService.getAutomatedTaskEntityByTaskName(automatedTask.getTaskName());
@@ -308,7 +326,7 @@ class AutomatedTaskServiceTest extends IntegrationBase {
     @Test
     void cancelAutomatedTaskAndUpdateCronExpression() {
         AutomatedTask automatedTask = new ProcessDailyListAutomatedTask(
-            automatedTaskRepository, automatedTaskConfigurationProperties, null,logApi, lockService
+            automatedTaskRepository, mock(ProcessDailyListAutomatedTaskConfig.class), null, logApi, lockService
         );
         Optional<AutomatedTaskEntity> originalAutomatedTaskEntity =
             automatedTaskService.getAutomatedTaskEntityByTaskName(automatedTask.getTaskName());
@@ -344,7 +362,7 @@ class AutomatedTaskServiceTest extends IntegrationBase {
     @SuppressWarnings("PMD.LawOfDemeter")
     void givenExistingAutomatedTaskNameAndInvalidCronExpressionThrowsDartsApiException() {
         AutomatedTask automatedTask = new ProcessDailyListAutomatedTask(
-            automatedTaskRepository, automatedTaskConfigurationProperties, null,logApi, lockService
+            automatedTaskRepository, mock(ProcessDailyListAutomatedTaskConfig.class), null, logApi, lockService
         );
 
         var exception = assertThrows(
@@ -361,7 +379,7 @@ class AutomatedTaskServiceTest extends IntegrationBase {
     @Test
     void updateCronExpressionWithoutRescheduleForcingTaskToSkipRunning() {
         AutomatedTask automatedTask = new ProcessDailyListAutomatedTask(
-            automatedTaskRepository, automatedTaskConfigurationProperties, null,logApi, lockService
+            automatedTaskRepository, mock(ProcessDailyListAutomatedTaskConfig.class), null, logApi, lockService
         );
         Optional<AutomatedTaskEntity> originalAutomatedTaskEntity =
             automatedTaskService.getAutomatedTaskEntityByTaskName(automatedTask.getTaskName());
@@ -405,7 +423,7 @@ class AutomatedTaskServiceTest extends IntegrationBase {
         AutomatedTask automatedTask =
             new CloseUnfinishedTranscriptionsAutomatedTask(
                 automatedTaskRepository,
-                automatedTaskConfigurationProperties,
+                mock(CloseUnfinishedTranscriptionsAutomatedTaskConfig.class),
                 transcriptionsProcessor,
                 logApi,
                 lockService
@@ -438,7 +456,7 @@ class AutomatedTaskServiceTest extends IntegrationBase {
         AutomatedTask automatedTask =
             new CloseUnfinishedTranscriptionsAutomatedTask(
                 automatedTaskRepository,
-                automatedTaskConfigurationProperties,
+                mock(CloseUnfinishedTranscriptionsAutomatedTaskConfig.class),
                 transcriptionsProcessor,
                 logApi,
                 lockService
@@ -461,7 +479,7 @@ class AutomatedTaskServiceTest extends IntegrationBase {
         AutomatedTask automatedTask =
             new OutboundAudioDeleterAutomatedTask(
                 automatedTaskRepository,
-                automatedTaskConfigurationProperties,
+                mock(OutboundAudioDeleterAutomatedTaskConfig.class),
                 outboundAudioDeleterProcessor,
                 logApi,
                 lockService
@@ -493,8 +511,8 @@ class AutomatedTaskServiceTest extends IntegrationBase {
     void givenConfiguredTaskCancelOutboundAudioDeleterAutomatedTask() {
         AutomatedTask automatedTask =
             new OutboundAudioDeleterAutomatedTask(automatedTaskRepository,
-                                                  automatedTaskConfigurationProperties, outboundAudioDeleterProcessor, logApi,
-                                                  lockService
+                                                  mock(OutboundAudioDeleterAutomatedTaskConfig.class),
+                                                  outboundAudioDeleterProcessor, logApi, lockService
             );
 
         Set<ScheduledTask> scheduledTasks = scheduledTaskHolder.getScheduledTasks();
@@ -513,8 +531,8 @@ class AutomatedTaskServiceTest extends IntegrationBase {
     void givenConfiguredTaskCancelInboundAudioDeleterAutomatedTask() {
         AutomatedTask automatedTask =
             new InboundAudioDeleterAutomatedTask(automatedTaskRepository,
-                                                 automatedTaskConfigurationProperties, inboundAudioDeleterProcessor, logApi,
-                                                 lockService
+                                                 mock(InboundAudioDeleterAutomatedTaskConfig.class),
+                                                 inboundAudioDeleterProcessor, logApi, lockService
             );
 
         Set<ScheduledTask> scheduledTasks = scheduledTaskHolder.getScheduledTasks();
@@ -537,7 +555,7 @@ class AutomatedTaskServiceTest extends IntegrationBase {
         AutomatedTask automatedTask =
             new ExternalDataStoreDeleterAutomatedTask(
                 automatedTaskRepository,
-                automatedTaskConfigurationProperties,
+                mock(ExternalDataStoreDeleterAutomatedTaskConfig.class),
                 externalInboundDataStoreDeleter, externalUnstructuredDataStoreDeleter, externalOutboundDataStoreDeleter, logApi,
                 lockService
             );
@@ -570,7 +588,7 @@ class AutomatedTaskServiceTest extends IntegrationBase {
         AutomatedTask automatedTask =
             new ExternalDataStoreDeleterAutomatedTask(
                 automatedTaskRepository,
-                automatedTaskConfigurationProperties,
+                mock(ExternalDataStoreDeleterAutomatedTaskConfig.class),
                 externalInboundDataStoreDeleter,
                 externalUnstructuredDataStoreDeleter,
                 externalOutboundDataStoreDeleter,
@@ -594,8 +612,8 @@ class AutomatedTaskServiceTest extends IntegrationBase {
     void givenConfiguredTaskCancelInboundToUnstructuredAutomatedTask() {
         AutomatedTask automatedTask =
             new InboundToUnstructuredAutomatedTask(automatedTaskRepository,
-                                                   automatedTaskConfigurationProperties, inboundToUnstructuredProcessor, logApi,
-                                                   lockService
+                                                   mock(InboundToUnstructuredAutomatedTaskConfig.class),
+                                                   inboundToUnstructuredProcessor, logApi, lockService
             );
 
         Set<ScheduledTask> scheduledTasks = scheduledTaskHolder.getScheduledTasks();
@@ -617,7 +635,7 @@ class AutomatedTaskServiceTest extends IntegrationBase {
     void givenConfiguredTaskCancelUnstructuredAudioDeleterAutomatedTask() {
         AutomatedTask automatedTask =
             new UnstructuredAudioDeleterAutomatedTask(automatedTaskRepository,
-                                                      automatedTaskConfigurationProperties,
+                                                      mock(UnstructuredAudioDeleterAutomatedTaskConfig.class),
                                                       unstructuredAudioDeleterProcessor, logApi,
                                                       lockService
             );
@@ -642,7 +660,7 @@ class AutomatedTaskServiceTest extends IntegrationBase {
         AutomatedTask automatedTask =
             new UnstructuredToArmAutomatedTask(
                 automatedTaskRepository,
-                automatedTaskConfigurationProperties,
+                mock(UnstructuredToArmAutomatedTaskConfig.class),
                 unstructuredToArmBatchProcessor,
                 unstructuredToArmProcessor,
                 logApi,
@@ -677,7 +695,7 @@ class AutomatedTaskServiceTest extends IntegrationBase {
         AutomatedTask automatedTask =
             new UnstructuredToArmAutomatedTask(
                 automatedTaskRepository,
-                automatedTaskConfigurationProperties,
+                mock(UnstructuredToArmAutomatedTaskConfig.class),
                 unstructuredToArmBatchProcessor,
                 unstructuredToArmProcessor,
                 logApi,
@@ -705,7 +723,7 @@ class AutomatedTaskServiceTest extends IntegrationBase {
         AutomatedTask automatedTask =
             new ProcessArmResponseFilesAutomatedTask(
                 automatedTaskRepository,
-                automatedTaskConfigurationProperties,
+                mock(ProcessArmResponseFilesAutomatedTaskConfig.class),
                 taskProcessorFactory,
                 logApi,
                 lockService
@@ -737,7 +755,7 @@ class AutomatedTaskServiceTest extends IntegrationBase {
         AutomatedTask automatedTask =
             new ProcessArmResponseFilesAutomatedTask(
                 automatedTaskRepository,
-                automatedTaskConfigurationProperties,
+                mock(ProcessArmResponseFilesAutomatedTaskConfig.class),
                 taskProcessorFactory,
                 logApi,
                 lockService
@@ -763,7 +781,7 @@ class AutomatedTaskServiceTest extends IntegrationBase {
         AutomatedTask automatedTask =
             new CleanupArmResponseFilesAutomatedTask(
                 automatedTaskRepository,
-                automatedTaskConfigurationProperties,
+                mock(CleanupArmResponseFilesAutomatedTaskConfig.class),
                 cleanupArmResponseFilesService,
                 logApi,
                 lockService
@@ -797,7 +815,7 @@ class AutomatedTaskServiceTest extends IntegrationBase {
         AutomatedTask automatedTask =
             new CleanupArmResponseFilesAutomatedTask(
                 automatedTaskRepository,
-                automatedTaskConfigurationProperties,
+                mock(CleanupArmResponseFilesAutomatedTaskConfig.class),
                 cleanupArmResponseFilesService,
                 logApi,
                 lockService
@@ -822,7 +840,7 @@ class AutomatedTaskServiceTest extends IntegrationBase {
         AutomatedTask automatedTask =
             new CloseOldCasesAutomatedTask(
                 automatedTaskRepository,
-                automatedTaskConfigurationProperties,
+                mock(CloseOldCasesAutomatedTaskConfig.class),
                 logApi,
                 lockService,
                 closeOldCasesProcessor
@@ -856,7 +874,7 @@ class AutomatedTaskServiceTest extends IntegrationBase {
         AutomatedTask automatedTask =
             new CloseOldCasesAutomatedTask(
                 automatedTaskRepository,
-                automatedTaskConfigurationProperties,
+                mock(CloseOldCasesAutomatedTaskConfig.class),
                 logApi,
                 lockService,
                 closeOldCasesProcessor
@@ -881,7 +899,7 @@ class AutomatedTaskServiceTest extends IntegrationBase {
         AutomatedTask automatedTask =
             new GenerateCaseDocumentAutomatedTask(
                 automatedTaskRepository,
-                automatedTaskConfigurationProperties,
+                mock(GenerateCaseDocumentAutomatedTaskConfig.class),
                 taskProcessorFactory,
                 logApi,
                 lockService
@@ -915,7 +933,7 @@ class AutomatedTaskServiceTest extends IntegrationBase {
         AutomatedTask automatedTask =
             new GenerateCaseDocumentAutomatedTask(
                 automatedTaskRepository,
-                automatedTaskConfigurationProperties,
+                mock(GenerateCaseDocumentAutomatedTaskConfig.class),
                 taskProcessorFactory,
                 logApi,
                 lockService
@@ -940,7 +958,7 @@ class AutomatedTaskServiceTest extends IntegrationBase {
         AutomatedTask automatedTask =
             new RemoveDuplicatedEventsAutomatedTask(
                 automatedTaskRepository,
-                automatedTaskConfigurationProperties,
+                mock(RemoveDuplicatedEventsAutomatedTaskConfig.class),
                 removeDuplicateEventsProcessor,
                 logApi,
                 lockService
@@ -974,7 +992,7 @@ class AutomatedTaskServiceTest extends IntegrationBase {
         AutomatedTask automatedTask =
             new RemoveDuplicatedEventsAutomatedTask(
                 automatedTaskRepository,
-                automatedTaskConfigurationProperties,
+                mock(RemoveDuplicatedEventsAutomatedTaskConfig.class),
                 removeDuplicateEventsProcessor,
                 logApi,
                 lockService
@@ -998,7 +1016,7 @@ class AutomatedTaskServiceTest extends IntegrationBase {
     void canUpdatedCronForDailyListHouseKeepingTask() {
         var automatedTask = new DailyListAutomatedTask(
             automatedTaskRepository,
-            automatedTaskConfigurationProperties,
+            mock(DailyListAutomatedTaskConfig.class),
             dailyListService,
             logApi,
             lockService
@@ -1020,7 +1038,7 @@ class AutomatedTaskServiceTest extends IntegrationBase {
         AutomatedTask automatedTask =
             new DailyListAutomatedTask(
                 automatedTaskRepository,
-                automatedTaskConfigurationProperties,
+                mock(DailyListAutomatedTaskConfig.class),
                 dailyListService,
                 logApi,
                 lockService
@@ -1045,7 +1063,7 @@ class AutomatedTaskServiceTest extends IntegrationBase {
         AutomatedTask automatedTask =
             new ApplyRetentionCaseAssociatedObjectsAutomatedTask(
                 automatedTaskRepository,
-                automatedTaskConfigurationProperties,
+                mock(ApplyRetentionCaseAssociatedObjectsAutomatedTaskConfig.class),
                 applyRetentionCaseAssociatedObjectsProcessor,
                 logApi,
                 lockService
@@ -1079,7 +1097,7 @@ class AutomatedTaskServiceTest extends IntegrationBase {
         AutomatedTask automatedTask =
             new ApplyRetentionCaseAssociatedObjectsAutomatedTask(
                 automatedTaskRepository,
-                automatedTaskConfigurationProperties,
+                mock(ApplyRetentionCaseAssociatedObjectsAutomatedTaskConfig.class),
                 applyRetentionCaseAssociatedObjectsProcessor,
                 logApi,
                 lockService
@@ -1104,7 +1122,7 @@ class AutomatedTaskServiceTest extends IntegrationBase {
         AutomatedTask automatedTask =
             new ArmRetentionEventDateCalculatorAutomatedTask(
                 automatedTaskRepository,
-                automatedTaskConfigurationProperties,
+                mock(ArmRetentionEventDateCalculatorAutomatedTaskConfig.class),
                 armRetentionEventDateProcessor,
                 logApi,
                 lockService
@@ -1135,7 +1153,7 @@ class AutomatedTaskServiceTest extends IntegrationBase {
         AutomatedTask automatedTask =
             new ArmRetentionEventDateCalculatorAutomatedTask(
                 automatedTaskRepository,
-                automatedTaskConfigurationProperties,
+                mock(ArmRetentionEventDateCalculatorAutomatedTaskConfig.class),
                 armRetentionEventDateProcessor,
                 logApi,
                 lockService
@@ -1191,7 +1209,7 @@ class AutomatedTaskServiceTest extends IntegrationBase {
         AutomatedTask automatedTask =
             new GenerateCaseDocumentForRetentionDateAutomatedTask(
                 automatedTaskRepository,
-                automatedTaskConfigurationProperties,
+                mock(GenerateCaseDocumentForRetentionDateAutomatedTaskConfig.class),
                 taskProcessorFactory,
                 logApi,
                 lockService
@@ -1225,7 +1243,7 @@ class AutomatedTaskServiceTest extends IntegrationBase {
         AutomatedTask automatedTask =
             new GenerateCaseDocumentForRetentionDateAutomatedTask(
                 automatedTaskRepository,
-                automatedTaskConfigurationProperties,
+                mock(GenerateCaseDocumentForRetentionDateAutomatedTaskConfig.class),
                 taskProcessorFactory,
                 logApi,
                 lockService

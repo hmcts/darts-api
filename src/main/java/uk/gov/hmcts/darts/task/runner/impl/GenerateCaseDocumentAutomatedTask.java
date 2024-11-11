@@ -8,11 +8,9 @@ import uk.gov.hmcts.darts.casedocument.service.GenerateCaseDocumentProcessor;
 import uk.gov.hmcts.darts.common.repository.AutomatedTaskRepository;
 import uk.gov.hmcts.darts.log.api.LogApi;
 import uk.gov.hmcts.darts.task.api.AutomatedTaskName;
-import uk.gov.hmcts.darts.task.config.AutomatedTaskConfigurationProperties;
+import uk.gov.hmcts.darts.task.config.GenerateCaseDocumentAutomatedTaskConfig;
 import uk.gov.hmcts.darts.task.runner.AutoloadingManualTask;
 import uk.gov.hmcts.darts.task.service.LockService;
-
-import java.time.Duration;
 
 import static uk.gov.hmcts.darts.task.api.AutomatedTaskName.GENERATE_CASE_DOCUMENT_TASK_NAME;
 
@@ -26,7 +24,7 @@ public class GenerateCaseDocumentAutomatedTask extends AbstractLockableAutomated
 
     @Autowired
     public GenerateCaseDocumentAutomatedTask(AutomatedTaskRepository automatedTaskRepository,
-                                             AutomatedTaskConfigurationProperties automatedTaskConfigurationProperties,
+                                             GenerateCaseDocumentAutomatedTaskConfig automatedTaskConfigurationProperties,
                                              AutomatedTaskProcessorFactory automatedTaskProcessorFactory,
                                              LogApi logApi, LockService lockService) {
         super(automatedTaskRepository, automatedTaskConfigurationProperties, logApi, lockService);
@@ -36,11 +34,6 @@ public class GenerateCaseDocumentAutomatedTask extends AbstractLockableAutomated
     @Override
     public AutomatedTaskName getAutomatedTaskName() {
         return GENERATE_CASE_DOCUMENT_TASK_NAME;
-    }
-
-    @Override
-    public Duration getLockAtMostFor() {
-        return Duration.ofMinutes(45);
     }
 
     @Override

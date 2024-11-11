@@ -8,11 +8,9 @@ import uk.gov.hmcts.darts.arm.service.impl.DetsToArmBatchProcessResponseFilesImp
 import uk.gov.hmcts.darts.common.repository.AutomatedTaskRepository;
 import uk.gov.hmcts.darts.log.api.LogApi;
 import uk.gov.hmcts.darts.task.api.AutomatedTaskName;
-import uk.gov.hmcts.darts.task.config.AutomatedTaskConfigurationProperties;
+import uk.gov.hmcts.darts.task.config.ProcessDetsToArmResponseAutomatedTaskConfig;
 import uk.gov.hmcts.darts.task.runner.AutoloadingManualTask;
 import uk.gov.hmcts.darts.task.service.LockService;
-
-import java.time.Duration;
 
 import static uk.gov.hmcts.darts.task.api.AutomatedTaskName.PROCESS_DETS_TO_ARM_RESPONSE;
 
@@ -25,7 +23,7 @@ public class ProcessDetsToArmResponseAutomatedTask extends AbstractLockableAutom
 
     @Autowired
     public ProcessDetsToArmResponseAutomatedTask(AutomatedTaskRepository automatedTaskRepository,
-                                                 AutomatedTaskConfigurationProperties automatedTaskConfigurationProperties,
+                                                 ProcessDetsToArmResponseAutomatedTaskConfig automatedTaskConfigurationProperties,
                                                  AutomatedTaskProcessorFactory automatedTaskProcessorFactory,
                                                  LogApi logApi, LockService lockService) {
         super(automatedTaskRepository, automatedTaskConfigurationProperties, logApi, lockService);
@@ -35,11 +33,6 @@ public class ProcessDetsToArmResponseAutomatedTask extends AbstractLockableAutom
     @Override
     public AutomatedTaskName getAutomatedTaskName() {
         return PROCESS_DETS_TO_ARM_RESPONSE;
-    }
-
-    @Override
-    public Duration getLockAtMostFor() {
-        return Duration.ofMinutes(90);
     }
 
     @Override

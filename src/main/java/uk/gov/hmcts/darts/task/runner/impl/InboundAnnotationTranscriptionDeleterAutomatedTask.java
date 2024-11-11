@@ -7,11 +7,9 @@ import uk.gov.hmcts.darts.common.repository.AutomatedTaskRepository;
 import uk.gov.hmcts.darts.datamanagement.service.InboundAnnotationTranscriptionDeleterProcessor;
 import uk.gov.hmcts.darts.log.api.LogApi;
 import uk.gov.hmcts.darts.task.api.AutomatedTaskName;
-import uk.gov.hmcts.darts.task.config.AutomatedTaskConfigurationProperties;
+import uk.gov.hmcts.darts.task.config.InboundAnnotationTranscriptionDeleterAutomatedTaskConfig;
 import uk.gov.hmcts.darts.task.runner.AutoloadingManualTask;
 import uk.gov.hmcts.darts.task.service.LockService;
-
-import java.time.Duration;
 
 import static uk.gov.hmcts.darts.task.api.AutomatedTaskName.INBOUND_TRANSCRIPTION_ANNOTATION_DELETER_TASK_NAME;
 
@@ -26,7 +24,7 @@ public class InboundAnnotationTranscriptionDeleterAutomatedTask extends Abstract
 
     @Autowired
     public InboundAnnotationTranscriptionDeleterAutomatedTask(AutomatedTaskRepository automatedTaskRepository,
-                                                              AutomatedTaskConfigurationProperties automatedTaskConfigurationProperties,
+                                                              InboundAnnotationTranscriptionDeleterAutomatedTaskConfig automatedTaskConfigurationProperties,
                                                               InboundAnnotationTranscriptionDeleterProcessor annotationTranscriptionDeleterProcessor,
                                                               LogApi logApi,
                                                               LockService lockService) {
@@ -37,11 +35,6 @@ public class InboundAnnotationTranscriptionDeleterAutomatedTask extends Abstract
     @Override
     public AutomatedTaskName getAutomatedTaskName() {
         return INBOUND_TRANSCRIPTION_ANNOTATION_DELETER_TASK_NAME;
-    }
-
-    @Override
-    public Duration getLockAtMostFor() {
-        return Duration.ofMinutes(40);
     }
 
     @Override

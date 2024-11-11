@@ -9,9 +9,11 @@ import uk.gov.hmcts.darts.common.repository.AutomatedTaskRepository;
 import uk.gov.hmcts.darts.datamanagement.service.InboundAnnotationTranscriptionDeleterProcessor;
 import uk.gov.hmcts.darts.log.api.LogApi;
 import uk.gov.hmcts.darts.task.config.AutomatedTaskConfigurationProperties;
+import uk.gov.hmcts.darts.task.config.InboundAnnotationTranscriptionDeleterAutomatedTaskConfig;
 import uk.gov.hmcts.darts.task.service.LockService;
 
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.Mockito.mock;
 
 @ExtendWith(MockitoExtension.class)
 class InboundAnnotationTranscriptionDeleterAutomatedTaskTest {
@@ -36,7 +38,7 @@ class InboundAnnotationTranscriptionDeleterAutomatedTaskTest {
         // given
         InboundAnnotationTranscriptionDeleterAutomatedTask unstructuredAnnotationTranscriptionDeleterAutomatedTask
             = new InboundAnnotationTranscriptionDeleterAutomatedTask(automatedTaskRepository,
-                                                                     automatedTaskConfigurationProperties,
+                                                                     mock(InboundAnnotationTranscriptionDeleterAutomatedTaskConfig.class),
                                                                      armResponseFilesProcessor,
                                                                      logApi,
                                                                      lockService);

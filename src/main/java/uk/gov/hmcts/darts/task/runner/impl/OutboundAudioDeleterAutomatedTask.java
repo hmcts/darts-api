@@ -7,11 +7,9 @@ import uk.gov.hmcts.darts.audio.service.OutboundAudioDeleterProcessor;
 import uk.gov.hmcts.darts.common.repository.AutomatedTaskRepository;
 import uk.gov.hmcts.darts.log.api.LogApi;
 import uk.gov.hmcts.darts.task.api.AutomatedTaskName;
-import uk.gov.hmcts.darts.task.config.AutomatedTaskConfigurationProperties;
+import uk.gov.hmcts.darts.task.config.OutboundAudioDeleterAutomatedTaskConfig;
 import uk.gov.hmcts.darts.task.runner.AutoloadingManualTask;
 import uk.gov.hmcts.darts.task.service.LockService;
-
-import java.time.Duration;
 
 import static uk.gov.hmcts.darts.task.api.AutomatedTaskName.OUTBOUND_AUDIO_DELETER_TASK_NAME;
 
@@ -24,7 +22,7 @@ public class OutboundAudioDeleterAutomatedTask extends AbstractLockableAutomated
 
     @Autowired
     public OutboundAudioDeleterAutomatedTask(AutomatedTaskRepository automatedTaskRepository,
-                                             AutomatedTaskConfigurationProperties automatedTaskConfigurationProperties,
+                                             OutboundAudioDeleterAutomatedTaskConfig automatedTaskConfigurationProperties,
                                              OutboundAudioDeleterProcessor processor,
                                              LogApi logApi, LockService lockService) {
         super(automatedTaskRepository, automatedTaskConfigurationProperties, logApi, lockService);
@@ -34,11 +32,6 @@ public class OutboundAudioDeleterAutomatedTask extends AbstractLockableAutomated
     @Override
     public AutomatedTaskName getAutomatedTaskName() {
         return OUTBOUND_AUDIO_DELETER_TASK_NAME;
-    }
-
-    @Override
-    public Duration getLockAtMostFor() {
-        return Duration.ofMinutes(40);
     }
 
     @Override
