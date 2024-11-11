@@ -292,6 +292,8 @@ darts:
         get-profile-entitlements-path: /api/v1/getProfileEntitlements
         add-async-search-path: /api/v1/addAsyncSearch
         save-background-search-path: /api/v1/SaveBackgroundSearch
+        create-export-based-on-search-results-table-path: /api/v1/CreateExportBasedOnSearchResultsTable
+
         get-extended-searches-by-matter-path: /api/v1/getExtendedSearchesByMatter
         get-production-output-files-path: /api/v1/getProductionOutputFiles
     dets:
