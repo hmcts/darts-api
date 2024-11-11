@@ -38,9 +38,6 @@ import uk.gov.hmcts.darts.arm.helper.ArmRpoHelper;
 import uk.gov.hmcts.darts.arm.model.rpo.MasterIndexFieldByRecordClassSchema;
 import uk.gov.hmcts.darts.arm.rpo.ArmRpoApi;
 import uk.gov.hmcts.darts.arm.service.ArmRpoService;
-import uk.gov.hmcts.darts.common.datamanagement.component.impl.DownloadResponseMetaData;
-import uk.gov.hmcts.darts.common.datamanagement.component.impl.FileBasedDownloadResponseMetaData;
-import uk.gov.hmcts.darts.common.datamanagement.enums.DatastoreContainerType;
 import uk.gov.hmcts.darts.common.entity.ArmAutomatedTaskEntity;
 import uk.gov.hmcts.darts.common.entity.ArmRpoExecutionDetailEntity;
 import uk.gov.hmcts.darts.common.entity.ArmRpoStateEntity;
@@ -596,7 +593,7 @@ public class ArmRpoApiImpl implements ArmRpoApi {
     }
 
     @Override
-    public DownloadResponseMetaData downloadProduction(String bearerToken, Integer executionId, String productionExportFileId, UserAccountEntity userAccount) {
+    public feign.Response downloadProduction(String bearerToken, Integer executionId, String productionExportFileId, UserAccountEntity userAccount) {
         var armRpoExecutionDetailEntity = armRpoService.getArmRpoExecutionDetailEntity(executionId);
         armRpoService.updateArmRpoStateAndStatus(armRpoExecutionDetailEntity, ArmRpoHelper.downloadProductionRpoState(),
                                                  ArmRpoHelper.inProgressRpoStatus(), userAccount);
@@ -613,7 +610,6 @@ public class ArmRpoApiImpl implements ArmRpoApi {
             throw handleFailureAndCreateException(errorMessage.toString(), armRpoExecutionDetailEntity, userAccount);
         }
 
-        FileBasedDownloadResponseMetaData responseMetaData = new FileBasedDownloadResponseMetaData();
         // on any error occurring return a download failure
         if (!HttpStatus.valueOf(response.status()).is2xxSuccessful()) {
             errorMessage.append("Failed ARM RPO download production with id: ").append(productionExportFileId)
@@ -622,19 +618,9 @@ public class ArmRpoApiImpl implements ArmRpoApi {
             throw handleFailureAndCreateException(errorMessage.toString(), armRpoExecutionDetailEntity, userAccount);
         }
 
-        try {
-            responseMetaData.setContainerTypeUsedToDownload(DatastoreContainerType.ARM);
-            responseMetaData.setInputStream(response.body().asInputStream(), armDataManagementConfiguration);
-        } catch (Exception e) {
-            errorMessage.append("ARM RPO download production failed to save with id: ").append(productionExportFileId)
-                .append(" response ").append(response);
-            log.error(response.toString());
-            throw handleFailureAndCreateException(errorMessage.toString(), armRpoExecutionDetailEntity, userAccount);
-        }
-
         log.debug("Successfully downloaded ARM data for productionExportFileId: {}", productionExportFileId);
         armRpoService.updateArmRpoStatus(armRpoExecutionDetailEntity, ArmRpoHelper.completedRpoStatus(), userAccount);
-        return responseMetaData;
+        return response;
     }
 
     @Override

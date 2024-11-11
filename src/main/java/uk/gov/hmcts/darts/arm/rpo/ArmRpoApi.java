@@ -2,7 +2,6 @@ package uk.gov.hmcts.darts.arm.rpo;
 
 import uk.gov.hmcts.darts.arm.client.model.rpo.MasterIndexFieldByRecordClassSchemaResponse;
 import uk.gov.hmcts.darts.arm.model.rpo.MasterIndexFieldByRecordClassSchema;
-import uk.gov.hmcts.darts.common.datamanagement.component.impl.DownloadResponseMetaData;
 import uk.gov.hmcts.darts.common.entity.ArmRpoStateEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 
@@ -35,7 +34,7 @@ public interface ArmRpoApi {
 
     List<String> getProductionOutputFiles(String bearerToken, Integer executionId, UserAccountEntity userAccount);
 
-    DownloadResponseMetaData downloadProduction(String bearerToken, Integer executionId, String productionExportFileId, UserAccountEntity userAccount);
+    feign.Response downloadProduction(String bearerToken, Integer executionId, String productionExportFileId, UserAccountEntity userAccount);
 
     void removeProduction(String bearerToken, Integer executionId, UserAccountEntity userAccount);
 }
