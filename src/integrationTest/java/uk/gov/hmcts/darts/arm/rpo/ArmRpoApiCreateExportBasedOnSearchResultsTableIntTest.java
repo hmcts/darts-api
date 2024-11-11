@@ -6,7 +6,6 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import uk.gov.hmcts.darts.arm.client.ArmRpoClient;
 import uk.gov.hmcts.darts.arm.client.model.rpo.CreateExportBasedOnSearchResultsTableResponse;
 import uk.gov.hmcts.darts.arm.client.model.rpo.MasterIndexFieldByRecordClassSchemaResponse;
-import uk.gov.hmcts.darts.arm.config.ArmApiConfigurationProperties;
 import uk.gov.hmcts.darts.common.entity.ArmRpoExecutionDetailEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.enums.ArmRpoStateEnum;
@@ -24,9 +23,6 @@ import static org.mockito.Mockito.when;
 class ArmRpoApiCreateExportBasedOnSearchResultsTableIntTest extends PostgresIntegrationBase {
     @MockBean
     private ArmRpoClient armRpoClient;
-
-    @MockBean
-    private ArmApiConfigurationProperties armApiConfigurationProperties;
 
     @Autowired
     private ArmRpoApi armRpoApi;
