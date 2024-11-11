@@ -11,9 +11,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.darts.arm.client.ArmRpoClient;
 import uk.gov.hmcts.darts.arm.client.model.rpo.SaveBackgroundSearchRequest;
 import uk.gov.hmcts.darts.arm.client.model.rpo.SaveBackgroundSearchResponse;
-import uk.gov.hmcts.darts.arm.config.ArmApiConfigurationProperties;
 import uk.gov.hmcts.darts.arm.exception.ArmRpoException;
-import uk.gov.hmcts.darts.arm.helper.ArmRpoHelper;
 import uk.gov.hmcts.darts.arm.helper.ArmRpoHelperMocks;
 import uk.gov.hmcts.darts.arm.service.ArmRpoService;
 import uk.gov.hmcts.darts.common.entity.ArmRpoExecutionDetailEntity;
@@ -37,12 +35,6 @@ class ArmRpoApiSaveBackgroundSearchTest {
 
     @Mock
     private ArmRpoService armRpoService;
-
-    @Mock
-    private ArmRpoHelper armRpoHelper;
-
-    @Mock
-    private ArmApiConfigurationProperties armApiConfigurationProperties;
 
     @InjectMocks
     private ArmRpoApiImpl armRpoApi;
