@@ -3,7 +3,6 @@ package uk.gov.hmcts.darts.arm.client.model.rpo;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NonNull;
-import lombok.ToString;
 import lombok.extern.jackson.Jacksonized;
 
 import java.util.List;
@@ -11,7 +10,6 @@ import java.util.List;
 @Data
 @Builder
 @Jacksonized
-@ToString()
 public class CreateExportBasedOnSearchResultsTableRequest {
 
     private String core;
