@@ -28,7 +28,8 @@ class ArmRpoJsonUtilTest {
         String sanitisedJson = ArmRpoJsonUtil.sanitise(validJson);
 
         // then
-        String expectedResult = "{\"filter\":\"1\",\"filterBy\":{},\"matterId\":\"12345\",\"usePaging\":true,\"rowsNumber\":10,\"pageIndex\":0,\"orderBy\":\"createdDate\",\"orderByAsc\":false,\"search\":\"\"}";
+        String expectedResult = "{\"filter\":\"1\",\"filterBy\":{},\"matterId\":\"12345\",\"usePaging\":true,\"rowsNumber\":10,\"pageIndex\":0,"
+            + "\"orderBy\":\"createdDate\",\"orderByAsc\":false,\"search\":\"\"}";
         assertEquals(expectedResult, sanitisedJson);
     }
 
