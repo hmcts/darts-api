@@ -598,7 +598,7 @@ public class ArmRpoApiImpl implements ArmRpoApi {
         armRpoService.updateArmRpoStateAndStatus(armRpoExecutionDetailEntity, ArmRpoHelper.downloadProductionRpoState(),
                                                  ArmRpoHelper.inProgressRpoStatus(), userAccount);
 
-        feign.Response response = null;
+        feign.Response response;
         StringBuilder errorMessage = new StringBuilder("Failure during download production: ");
 
         try {
@@ -606,7 +606,7 @@ public class ArmRpoApiImpl implements ArmRpoApi {
         } catch (FeignException e) {
             // this ensures the full error body containing the ARM error detail is logged rather than a truncated version
             log.error(errorMessage.append("Error during ARM RPO download production id: ").append(productionExportFileId)
-                          .append(" response ").append(response).toString() + " {}", e.contentUTF8());
+                          .toString() + " {}", e.contentUTF8());
             throw handleFailureAndCreateException(errorMessage.toString(), armRpoExecutionDetailEntity, userAccount);
         }
 
