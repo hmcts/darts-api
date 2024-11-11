@@ -30,6 +30,7 @@ import uk.gov.hmcts.darts.arm.client.model.rpo.SaveBackgroundSearchResponse;
 import uk.gov.hmcts.darts.arm.client.model.rpo.StorageAccountRequest;
 import uk.gov.hmcts.darts.arm.client.model.rpo.StorageAccountResponse;
 import uk.gov.hmcts.darts.arm.component.impl.AddAsyncSearchRequestGenerator;
+import uk.gov.hmcts.darts.arm.component.impl.GetExtendedProductionsByMatterRequestGenerator;
 import uk.gov.hmcts.darts.arm.component.impl.GetExtendedSearchesByMatterRequestGenerator;
 import uk.gov.hmcts.darts.arm.config.ArmApiConfigurationProperties;
 import uk.gov.hmcts.darts.arm.exception.ArmRpoException;
@@ -500,8 +501,41 @@ public class ArmRpoApiImpl implements ArmRpoApi {
 
 
     @Override
-    public ExtendedProductionsByMatterResponse getExtendedProductionsByMatter(String bearerToken, Integer executionId, UserAccountEntity userAccount) {
-        throw new NotImplementedException("Method not implemented");
+    public void getExtendedProductionsByMatter(String bearerToken, Integer executionId, UserAccountEntity userAccount) {
+        var armRpoExecutionDetailEntity = armRpoService.getArmRpoExecutionDetailEntity(executionId);
+        armRpoService.updateArmRpoStateAndStatus(armRpoExecutionDetailEntity, ArmRpoHelper.getExtendedProductionsByMatterRpoState(),
+                                                 ArmRpoHelper.inProgressRpoStatus(), userAccount);
+
+        StringBuilder errorMessage = new StringBuilder("Failure during ARM RPO Extended Productions By Matter: ");
+
+        GetExtendedProductionsByMatterRequestGenerator requestGenerator;
+        try {
+            requestGenerator = createExtendedProductionsByMatterRequest(armRpoExecutionDetailEntity.getMatterId());
+        } catch (NullPointerException e) {
+            throw handleFailureAndCreateException(errorMessage.append("Could not construct API request: ").append(e)
+                                                      .toString(), armRpoExecutionDetailEntity, userAccount);
+        }
+
+        ExtendedProductionsByMatterResponse extendedProductionsByMatterResponse;
+        try {
+            extendedProductionsByMatterResponse = armRpoClient.getExtendedProductionsByMatter(bearerToken, requestGenerator.getJsonRequest());
+        } catch (FeignException e) {
+            // this ensures the full error body containing the ARM error detail is logged rather than a truncated version
+            log.error(errorMessage.append("Unable to get ARM RPO response").toString() + " {}", e.contentUTF8());
+            throw handleFailureAndCreateException(errorMessage.toString(), armRpoExecutionDetailEntity, userAccount);
+        }
+
+        handleResponseStatus(userAccount, extendedProductionsByMatterResponse, errorMessage, armRpoExecutionDetailEntity);
+        if (isNull(extendedProductionsByMatterResponse.getProductions())
+            || CollectionUtils.isEmpty(extendedProductionsByMatterResponse.getProductions())
+            || isNull(extendedProductionsByMatterResponse.getProductions().getFirst())
+            || StringUtils.isBlank(extendedProductionsByMatterResponse.getProductions().getFirst().getProductionId())) {
+            throw handleFailureAndCreateException(errorMessage.append("ProductionId is missing from ARM Rpo rsponse").toString(),
+                                                  armRpoExecutionDetailEntity, userAccount);
+        }
+
+        armRpoExecutionDetailEntity.setProductionId(extendedProductionsByMatterResponse.getProductions().getFirst().getProductionId());
+        armRpoService.updateArmRpoStatus(armRpoExecutionDetailEntity, ArmRpoHelper.completedRpoStatus(), userAccount);
     }
 
     @Override
@@ -590,6 +624,12 @@ public class ArmRpoApiImpl implements ArmRpoApi {
         return RemoveProductionRequest.builder()
             .productionId(armRpoExecutionDetailEntity.getProductionId())
             .deleteSearch(true)
+            .build();
+    }
+
+    private GetExtendedProductionsByMatterRequestGenerator createExtendedProductionsByMatterRequest(String matterId) {
+        return GetExtendedProductionsByMatterRequestGenerator.builder()
+            .matterId(matterId)
             .build();
     }
 

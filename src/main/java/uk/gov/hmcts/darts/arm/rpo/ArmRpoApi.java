@@ -1,6 +1,5 @@
 package uk.gov.hmcts.darts.arm.rpo;
 
-import uk.gov.hmcts.darts.arm.client.model.rpo.ExtendedProductionsByMatterResponse;
 import uk.gov.hmcts.darts.arm.client.model.rpo.MasterIndexFieldByRecordClassSchemaResponse;
 import uk.gov.hmcts.darts.arm.model.rpo.MasterIndexFieldByRecordClassSchema;
 import uk.gov.hmcts.darts.common.entity.ArmRpoStateEntity;
@@ -32,7 +31,7 @@ public interface ArmRpoApi {
                                                   List<MasterIndexFieldByRecordClassSchemaResponse> headerColumns,
                                                   UserAccountEntity userAccount);
 
-    ExtendedProductionsByMatterResponse getExtendedProductionsByMatter(String bearerToken, Integer executionId, UserAccountEntity userAccount);
+    void getExtendedProductionsByMatter(String bearerToken, Integer executionId, UserAccountEntity userAccount);
 
     List<String> getProductionOutputFiles(String bearerToken, Integer executionId, UserAccountEntity userAccount);
 
