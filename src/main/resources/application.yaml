@@ -293,7 +293,7 @@ darts:
         add-async-search-path: /api/v1/addAsyncSearch
         save-background-search-path: /api/v1/SaveBackgroundSearch
         get-extended-searches-by-matter-path: /api/v1/getExtendedSearchesByMatter
-    
+        get-production-output-files-path: /api/v1/getProductionOutputFiles
     dets:
       sas-endpoint: ${DETS_SAS_URL_ENDPOINT:}
       container-name: darts-migration

@@ -10,6 +10,8 @@ import uk.gov.hmcts.darts.arm.client.model.rpo.IndexesByMatterIdRequest;
 import uk.gov.hmcts.darts.arm.client.model.rpo.IndexesByMatterIdResponse;
 import uk.gov.hmcts.darts.arm.client.model.rpo.MasterIndexFieldByRecordClassSchemaRequest;
 import uk.gov.hmcts.darts.arm.client.model.rpo.MasterIndexFieldByRecordClassSchemaResponse;
+import uk.gov.hmcts.darts.arm.client.model.rpo.ProductionOutputFilesRequest;
+import uk.gov.hmcts.darts.arm.client.model.rpo.ProductionOutputFilesResponse;
 import uk.gov.hmcts.darts.arm.client.model.rpo.ProfileEntitlementResponse;
 import uk.gov.hmcts.darts.arm.client.model.rpo.RecordManagementMatterResponse;
 import uk.gov.hmcts.darts.arm.client.model.rpo.SaveBackgroundSearchRequest;
@@ -79,4 +81,12 @@ public interface ArmRpoClient {
     )
     ExtendedSearchesByMatterResponse getExtendedSearchesByMatter(@RequestHeader(AUTHORIZATION) String bearerToken,
                                                                  @RequestBody String body);
+
+    @PostMapping(value = "${darts.storage.arm-api.rpo-url.get-production-output-files-path}",
+        consumes = APPLICATION_JSON_VALUE,
+        produces = APPLICATION_JSON_VALUE
+    )
+    ProductionOutputFilesResponse getProductionOutputFiles(@RequestHeader(AUTHORIZATION) String bearerToken,
+                                                           @RequestBody ProductionOutputFilesRequest productionOutputFilesRequest);
+
 }
