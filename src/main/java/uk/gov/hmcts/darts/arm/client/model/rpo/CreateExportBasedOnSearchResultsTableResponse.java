@@ -11,6 +11,6 @@ import lombok.ToString;
 @NoArgsConstructor
 @EqualsAndHashCode(callSuper = true)
 @ToString(callSuper = true)
-public class ExtendedProductionsByMatterResponse extends BaseRpoResponse {
-
+public class CreateExportBasedOnSearchResultsTableResponse extends BaseRpoResponse {
+    // this class is empty
 }
