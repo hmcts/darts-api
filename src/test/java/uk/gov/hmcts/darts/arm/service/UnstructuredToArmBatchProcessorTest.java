@@ -169,6 +169,7 @@ class UnstructuredToArmBatchProcessorTest {
         when(externalObjectDirectoryRepository.findNotFinishedAndNotExceededRetryInStorageLocation(any(), any(), any(), any())).thenReturn(List.of(eod1, eod2));
         when(externalObjectDirectoryRepository.findEodsNotInOtherStorage(any(), any(), any(), any())).thenReturn(emptyList());
         when(unstructuredToArmProcessorConfiguration.getMaxArmManifestItems()).thenReturn(100);
+        when(unstructuredToArmProcessorConfiguration.getThreads()).thenReturn(20);
         when(armDataManagementConfiguration.getMaxRetryAttempts()).thenReturn(3);
 
         when(fileOperationService.createFile(any(), any(), anyBoolean())).thenReturn(manifestFilePath);
@@ -200,6 +201,7 @@ class UnstructuredToArmBatchProcessorTest {
         when(armDataManagementConfiguration.getTempBlobWorkspace()).thenReturn("/temp_workspace");
         when(externalObjectDirectoryRepository.findEodsNotInOtherStorage(any(), any(), any(), any())).thenReturn(List.of(eod1));
         when(unstructuredToArmProcessorConfiguration.getMaxArmManifestItems()).thenReturn(1000);
+        when(unstructuredToArmProcessorConfiguration.getThreads()).thenReturn(20);
         when(armDataManagementConfiguration.getMaxRetryAttempts()).thenReturn(3);
 
         //when
