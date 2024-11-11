@@ -52,11 +52,11 @@ public interface CaseRepository extends JpaRepository<CourtCaseEntity, Integer> 
     List<CourtCaseEntity> findByIsRetentionUpdatedTrueAndRetentionRetriesLessThan(int maxRetentionRetries, Limit limit);
 
     @Query("""
-        SELECT c FROM CourtCaseEntity c
-        WHERE c.closed = true
-        AND c.caseClosedTimestamp <= :caseClosedBeforeTimestamp
+        SELECT courtCase FROM CourtCaseEntity c
+        WHERE courtCase.closed = true
+        AND courtCase.caseClosedTimestamp <= :caseClosedBeforeTimestamp
         AND NOT EXISTS (select cde from CaseDocumentEntity cde
-            where (cde.courtCase.id = c.id))
+            where (cde.courtCase.id = courtCase.id))
         """)
     List<CourtCaseEntity> findCasesNeedingCaseDocumentGenerated(OffsetDateTime caseClosedBeforeTimestamp, Limit limit);
 
