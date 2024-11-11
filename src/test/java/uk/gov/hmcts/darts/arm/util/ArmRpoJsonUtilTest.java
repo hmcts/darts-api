@@ -35,6 +35,7 @@ class ArmRpoJsonUtilTest {
     @Test
     void sanitiseInvalidJson() {
         // given
+        // missing closing brace
         String invalidJson = """
             {
               "filter": "1",
