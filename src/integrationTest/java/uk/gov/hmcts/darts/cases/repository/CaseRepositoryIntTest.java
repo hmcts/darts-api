@@ -186,7 +186,7 @@ class CaseRepositoryIntTest extends IntegrationBase {
         OffsetDateTime currentTimestamp = OffsetDateTime.now();
         // when
         List<Integer> result = caseRepository.findCasesNeedingCaseDocumentForRetentionDateGeneration(
-            currentTimestamp.plusDays(28), currentTimestamp.minusDays(28), Pageable.ofSize(4));
+            currentTimestamp.plusDays(28), currentTimestamp.minusDays(28), Limit.of(4));
 
         // then
         assertThat(result).hasSize(4);
