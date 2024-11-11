@@ -5,9 +5,29 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Data
 @NoArgsConstructor
 @EqualsAndHashCode(callSuper = true)
 public class ExtendedSearchesByMatterResponse extends BaseRpoResponse {
+
+    private List<SearchDetail> searches;
+
+    @Data
+    @NoArgsConstructor
+    public static class SearchDetail {
+        private Search search;
+    }
+
+    @Data
+    @NoArgsConstructor
+    public static class Search {
+
+        private Integer totalCount;
+
+    }
+
+
 }

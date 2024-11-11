@@ -1,13 +1,12 @@
 package uk.gov.hmcts.darts.arm.component.impl;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.Builder;
 import lombok.NonNull;
 
 import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
+
+import static uk.gov.hmcts.darts.arm.util.ArmRpoJsonUtil.sanitise;
 
 @Builder
 @SuppressWarnings("checkstyle:SummaryJavadoc")
@@ -118,19 +117,5 @@ public class AddAsyncSearchRequestGenerator {
         return sanitise(templatedJsonRequest);
     }
 
-    /**
-     * Strip the provided JSON string of excess whitespace/newlines to make it more suitable for an HTTP request
-     */
-    private String sanitise(String json) {
-        JsonNode jsonNode;
-        try {
-            jsonNode = new ObjectMapper().readTree(json);
-        } catch (JsonProcessingException e) {
-            // This should never happen as we're in control of the template.
-            // If it does fail, assume it's due to some wacky argument provided upon construction.
-            throw new IllegalArgumentException("Failed to serialise the templated json", e);
-        }
-        return jsonNode.toString();
-    }
 
 }

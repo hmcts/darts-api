@@ -292,6 +292,8 @@ darts:
         get-profile-entitlements-path: /api/v1/getProfileEntitlements
         add-async-search-path: /api/v1/addAsyncSearch
         save-background-search-path: /api/v1/SaveBackgroundSearch
+        get-extended-searches-by-matter-path: /api/v1/getExtendedSearchesByMatter
+    
     dets:
       sas-endpoint: ${DETS_SAS_URL_ENDPOINT:}
       container-name: darts-migration
