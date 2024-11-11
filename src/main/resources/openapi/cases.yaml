@@ -798,7 +798,6 @@ components:
           type: string
           example: "1"
 
-
     AdvancedSearchRequest:
       type: object
       properties:
@@ -810,18 +809,10 @@ components:
           type: string
           example: Swansea
           maxLength: 255
-        courthouseId:
-          type: integer
-          example: 1
-          description: the courthouse ID if known.
         courtroom:
           type: string
           example: 2
           maxLength: 255
-        courtroomId:
-          type: integer
-          example: 1
-          description: the courtroom ID if known.
         judge_name:
           type: string
           example: Judge Walker

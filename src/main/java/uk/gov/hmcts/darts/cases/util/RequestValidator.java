@@ -35,7 +35,7 @@ public class RequestValidator {
      */
     @SuppressWarnings({"PMD.CyclomaticComplexity", "PMD.NPathComplexity"})
     private static void checkComplexity(GetCasesSearchRequest request) {
-        boolean courthouseProvided = StringUtils.length(request.getCourthouse()) >= SEARCH_TEXT_LENGTH_THRESHOLD || request.getCourthouseId() != null;
+        boolean courthouseProvided = StringUtils.length(request.getCourthouse()) >= SEARCH_TEXT_LENGTH_THRESHOLD;
         boolean anyDateProvided = request.getDateFrom() != null || request.getDateTo() != null;
 
         if (courthouseProvided && anyDateProvided) {
@@ -47,7 +47,7 @@ public class RequestValidator {
         //give a point for every letter more than 3
         totalPoints += Math.max(0, StringUtils.length(request.getCaseNumber()) - SEARCH_TEXT_LENGTH_THRESHOLD);
         totalPoints += courthouseProvided ? 1 : 0;
-        boolean courtroomProvided = request.getCourtroom() != null || request.getCourtroomId() != null;
+        boolean courtroomProvided = request.getCourtroom() != null;
         totalPoints += courtroomProvided ? 1 : 0;
         boolean judgeNameLengthOk = StringUtils.length(request.getJudgeName()) >= SEARCH_TEXT_LENGTH_THRESHOLD;
         totalPoints += judgeNameLengthOk ? 1 : 0;

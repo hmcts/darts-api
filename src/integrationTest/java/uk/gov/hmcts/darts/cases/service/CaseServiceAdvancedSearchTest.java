@@ -419,20 +419,6 @@ class CaseServiceAdvancedSearchTest extends IntegrationBase {
     }
 
     @Test
-    void getWithCourthouseId() {
-
-        GetCasesSearchRequest request = GetCasesSearchRequest.builder()
-            .courthouseId(swanseaCourthouse.getId())
-            .build();
-
-        setupUserAccountSecurityGroup(APPROVER, swanseaCourthouse);
-        userAccountRepository.save(user);
-
-        List<AdvancedSearchResult> resultList = service.advancedSearch(request);
-        assertEquals(9, resultList.size());
-    }
-
-    @Test
     void getWithCourtroom() throws IOException {
 
         GetCasesSearchRequest request = GetCasesSearchRequest.builder()
@@ -461,21 +447,6 @@ class CaseServiceAdvancedSearchTest extends IntegrationBase {
 
         List<AdvancedSearchResult> resultList = service.advancedSearch(request);
         assertTrue(resultList.isEmpty());
-    }
-
-    @Test
-    void getWithCourtroomId() throws IOException {
-
-
-        GetCasesSearchRequest request = GetCasesSearchRequest.builder()
-            .courtroomId(courtroom1.getId())
-            .build();
-
-        setupUserAccountSecurityGroup(APPROVER, swanseaCourthouse);
-        userAccountRepository.save(user);
-
-        List<AdvancedSearchResult> resultList = service.advancedSearch(request);
-        assertEquals(8, resultList.size());
     }
 
     @Test
