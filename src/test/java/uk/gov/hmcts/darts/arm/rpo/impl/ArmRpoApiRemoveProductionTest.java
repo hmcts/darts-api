@@ -97,7 +97,7 @@ class ArmRpoApiRemoveProductionTest {
         assertThat(armRpoException.getMessage(), containsString(
             "Failure during ARM RPO removeProduction: Unable to get ARM RPO response"));
         verify(armRpoService).updateArmRpoStateAndStatus(armRpoExecutionDetailEntityArgumentCaptor.capture(),
-                                                         eq(ARM_RPO_HELPER_MOCKS.getGetIndexesByMatterIdRpoState()),
+                                                         eq(ARM_RPO_HELPER_MOCKS.getRemoveProductionRpoState()),
                                                          eq(ARM_RPO_HELPER_MOCKS.getInProgressRpoStatus()),
                                                          eq(userAccount));
         verify(armRpoService).updateArmRpoStatus(eq(armRpoExecutionDetailEntity), eq(ARM_RPO_HELPER_MOCKS.getFailedRpoStatus()), eq(userAccount));
