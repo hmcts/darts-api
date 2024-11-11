@@ -29,6 +29,7 @@ import uk.gov.hmcts.darts.test.common.data.DefenceTestData;
 import uk.gov.hmcts.darts.test.common.data.DefendantTestData;
 import uk.gov.hmcts.darts.test.common.data.ProsecutorTestData;
 import uk.gov.hmcts.darts.testutils.PostgresIntegrationBase;
+import uk.gov.hmcts.darts.testutils.stubs.EventLinkedCaseStub;
 import uk.gov.hmcts.darts.testutils.stubs.EventStub;
 import uk.gov.hmcts.darts.testutils.stubs.TranscriptionStub;
 import uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum;
@@ -47,9 +48,11 @@ import static org.assertj.core.api.BDDAssertions.within;
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 class CaseExpiryDeletionAutomatedTaskITest extends PostgresIntegrationBase {
 
-    private final CaseExpiryDeletionAutomatedTask caseExpiryDeletionAutomatedTask;
     private static final Pattern UUID_REGEX = Pattern.compile(TestUtils.UUID_REGEX);
     private static final int AUTOMATION_USER_ID = 0;
+
+    private final CaseExpiryDeletionAutomatedTask caseExpiryDeletionAutomatedTask;
+    private final EventLinkedCaseStub eventLinkedCaseStub;
     private int caseIndex;
 
     @Test
@@ -136,6 +139,9 @@ class CaseExpiryDeletionAutomatedTaskITest extends PostgresIntegrationBase {
             courtCase.getProsecutorList().forEach(prosecutorEntity -> assertProsecutor(prosecutorEntity, isAnonymised));
 
             courtCase.getHearings().forEach(hearingEntity -> assertHearing(hearingEntity, isAnonymised));
+
+            dartsDatabase.getEventRepository().findAllByCaseId(caseId).forEach(eventEntity -> assertEvent(eventEntity, isAnonymised));
+
             assertAuditEntries(courtCase, isAnonymised);
         });
     }
@@ -158,7 +164,6 @@ class CaseExpiryDeletionAutomatedTaskITest extends PostgresIntegrationBase {
 
     private void assertHearing(HearingEntity hearingEntity, boolean isAnonymised) {
         assertThat(hearingEntity.getTranscriptions()).hasSizeGreaterThan(0);
-        assertThat(hearingEntity.getEventList()).hasSizeGreaterThan(0);
         assertThat(hearingEntity.getMediaRequests()).hasSizeGreaterThan(0);
         hearingEntity.getTranscriptions().forEach(transcriptionEntity -> assertTranscription(transcriptionEntity, isAnonymised));
         hearingEntity.getMediaRequests().forEach(mediaRequestEntity -> assertMediaRequest(mediaRequestEntity, isAnonymised));
@@ -260,11 +265,18 @@ class CaseExpiryDeletionAutomatedTaskITest extends PostgresIntegrationBase {
             caseEntity.addProsecutor(createProsecutorEntity(caseEntity));
             caseEntity.addProsecutor(createProsecutorEntity(caseEntity));
 
-
-            createHearing(caseEntity);
+            HearingEntity hearing = createHearing(caseEntity);
             createHearing(caseEntity);
 
             caseEntity = dartsDatabase.getCaseRepository().save(caseEntity);
+
+            EventEntity event1 = dartsDatabase.getEventStub()
+                .createEvent(hearing.getCourtroom(), 10, EventStub.STARTED_AT, "LOG", 2);
+            eventLinkedCaseStub.createCaseLinkedEvent(event1, caseEntity.getCaseNumber(), caseEntity.getCourthouse().getCourthouseName());
+
+            EventEntity event2 = dartsDatabase.getEventStub()
+                .createEvent(hearing.getCourtroom(), 10, EventStub.STARTED_AT, "LOG", 2);
+            eventLinkedCaseStub.createCaseLinkedEvent(event2, caseEntity);
 
             dartsDatabase.createCaseRetentionObject(
                 null, caseEntity,
@@ -276,14 +288,9 @@ class CaseExpiryDeletionAutomatedTaskITest extends PostgresIntegrationBase {
         });
     }
 
-    private void createHearing(CourtCaseEntity caseEntity) {
+    private HearingEntity createHearing(CourtCaseEntity caseEntity) {
         HearingEntity hearingEntity = dartsDatabase.getHearingStub()
             .createHearing("Bristol", "2", caseEntity.getCaseNumber(), DateConverterUtil.toLocalDateTime(EventStub.STARTED_AT));
-
-        dartsDatabase.getEventStub()
-            .createEvent(hearingEntity, 10, EventStub.STARTED_AT, "LOG", 2);
-        dartsDatabase.getEventStub()
-            .createEvent(hearingEntity, 10, EventStub.STARTED_AT, "LOG", 2);
 
         createTranscription(hearingEntity);
         createTranscription(hearingEntity);
@@ -292,6 +299,7 @@ class CaseExpiryDeletionAutomatedTaskITest extends PostgresIntegrationBase {
         createMediaRequest(hearingEntity);
 
         caseEntity.getHearings().add(hearingEntity);
+        return hearingEntity;
     }
 
     private void createMediaRequest(HearingEntity hearingEntity) {
