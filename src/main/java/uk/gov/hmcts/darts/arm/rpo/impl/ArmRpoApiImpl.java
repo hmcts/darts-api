@@ -24,6 +24,7 @@ import uk.gov.hmcts.darts.arm.client.model.rpo.SaveBackgroundSearchResponse;
 import uk.gov.hmcts.darts.arm.client.model.rpo.StorageAccountRequest;
 import uk.gov.hmcts.darts.arm.client.model.rpo.StorageAccountResponse;
 import uk.gov.hmcts.darts.arm.component.impl.AddAsyncSearchRequestGenerator;
+import uk.gov.hmcts.darts.arm.component.impl.GetExtendedSearchesByMatterRequestGenerator;
 import uk.gov.hmcts.darts.arm.config.ArmApiConfigurationProperties;
 import uk.gov.hmcts.darts.arm.exception.ArmRpoException;
 import uk.gov.hmcts.darts.arm.helper.ArmRpoHelper;
@@ -351,9 +352,44 @@ public class ArmRpoApiImpl implements ArmRpoApi {
     }
 
     @Override
-    public ExtendedSearchesByMatterResponse getExtendedSearchesByMatter(String bearerToken, Integer executionId, UserAccountEntity userAccount) {
-        throw new NotImplementedException("Method not implemented");
+    public void getExtendedSearchesByMatter(String bearerToken, Integer executionId, UserAccountEntity userAccount) {
+        var armRpoExecutionDetailEntity = armRpoService.getArmRpoExecutionDetailEntity(executionId);
+        armRpoService.updateArmRpoStateAndStatus(armRpoExecutionDetailEntity, ArmRpoHelper.getExtendedSearchesByMatterRpoState(),
+                                                 ArmRpoHelper.inProgressRpoStatus(), userAccount);
+
+        StringBuilder errorMessage = new StringBuilder("Failure during ARM RPO getExtendedSearchesByMatter: ");
+        GetExtendedSearchesByMatterRequestGenerator requestGenerator;
+        try {
+            requestGenerator = createExtendedSearchesByMatterRequestGenerator(armRpoExecutionDetailEntity.getMatterId());
+        } catch (NullPointerException e) {
+            throw handleFailureAndCreateException(errorMessage.append("Could not construct API request: ").append(e)
+                                                      .toString(), armRpoExecutionDetailEntity, userAccount);
+        }
+
+        ExtendedSearchesByMatterResponse extendedSearchesByMatterResponse;
+        try {
+            extendedSearchesByMatterResponse = armRpoClient.getExtendedSearchesByMatter(bearerToken, requestGenerator.getJsonRequest());
+        } catch (FeignException e) {
+            // this ensures the full error body containing the ARM error detail is logged rather than a truncated version
+            log.error(errorMessage.append("Unable to get ARM RPO response").toString() + " {}", e.contentUTF8());
+            throw handleFailureAndCreateException(errorMessage.toString(), armRpoExecutionDetailEntity, userAccount);
+        }
+
+        handleResponseStatus(userAccount, extendedSearchesByMatterResponse, errorMessage, armRpoExecutionDetailEntity);
+
+        if (isNull(extendedSearchesByMatterResponse.getSearches())
+            || CollectionUtils.isEmpty(extendedSearchesByMatterResponse.getSearches())
+            || isNull(extendedSearchesByMatterResponse.getSearches().getFirst())
+            || isNull(extendedSearchesByMatterResponse.getSearches().getFirst().getSearch())
+            || isNull(extendedSearchesByMatterResponse.getSearches().getFirst().getSearch().getTotalCount())) {
+            throw handleFailureAndCreateException(errorMessage.append("Search item count is missing").toString(),
+                                                  armRpoExecutionDetailEntity, userAccount);
+        }
+
+        armRpoExecutionDetailEntity.setSearchItemCount(extendedSearchesByMatterResponse.getSearches().getFirst().getSearch().getTotalCount());
+        armRpoService.updateArmRpoStatus(armRpoExecutionDetailEntity, ArmRpoHelper.completedRpoStatus(), userAccount);
     }
+
 
     @Override
     public boolean createExportBasedOnSearchResultsTable(String bearerToken, Integer executionId,
@@ -458,6 +494,12 @@ public class ArmRpoApiImpl implements ArmRpoApi {
         return SaveBackgroundSearchRequest.builder()
             .name(searchName)
             .searchId(searchId)
+            .build();
+    }
+
+    private GetExtendedSearchesByMatterRequestGenerator createExtendedSearchesByMatterRequestGenerator(String matterId) {
+        return GetExtendedSearchesByMatterRequestGenerator.builder()
+            .matterId(matterId)
             .build();
     }
 }
