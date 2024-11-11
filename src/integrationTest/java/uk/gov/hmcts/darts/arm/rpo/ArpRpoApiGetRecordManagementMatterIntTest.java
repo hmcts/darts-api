@@ -34,6 +34,8 @@ class ArpRpoApiGetRecordManagementMatterIntTest extends IntegrationBase {
 
         // given
         RecordManagementMatterResponse response = new RecordManagementMatterResponse();
+        response.setStatus(200);
+        response.setIsError(false);
         response.setRecordManagementMatter(new RecordManagementMatterResponse.RecordManagementMatter());
         response.getRecordManagementMatter().setMatterId("some-matter-id");
         when(armRpoClient.getRecordManagementMatter(any())).thenReturn(response);
@@ -58,10 +60,12 @@ class ArpRpoApiGetRecordManagementMatterIntTest extends IntegrationBase {
     }
 
     @Test
-    void getRecordManagementMatterShouldFailIfServerReturns200SuccessWithMissingMatterId() {
+    void getRecordManagementMatterShouldFailIfServerReturnsResponseWithMissingMatterId() {
 
         // given
         RecordManagementMatterResponse response = new RecordManagementMatterResponse();
+        response.setStatus(200);
+        response.setIsError(false);
         response.setRecordManagementMatter(new RecordManagementMatterResponse.RecordManagementMatter());
         when(armRpoClient.getRecordManagementMatter(any())).thenReturn(response);
 

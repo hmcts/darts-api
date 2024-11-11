@@ -10,7 +10,7 @@ import uk.gov.hmcts.darts.audio.deleter.impl.outbound.ExternalOutboundDataStoreD
 import uk.gov.hmcts.darts.audio.entity.MediaRequestEntity;
 import uk.gov.hmcts.darts.audio.enums.MediaRequestStatus;
 import uk.gov.hmcts.darts.audit.api.AuditApi;
-import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
+import uk.gov.hmcts.darts.cases.service.CaseService;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.DefenceEntity;
 import uk.gov.hmcts.darts.common.entity.DefendantEntity;
@@ -25,7 +25,6 @@ import uk.gov.hmcts.darts.common.entity.TransientObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.entity.base.CreatedModifiedBaseEntity;
 import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
-import uk.gov.hmcts.darts.common.repository.CaseRepository;
 import uk.gov.hmcts.darts.common.repository.TransformedMediaRepository;
 import uk.gov.hmcts.darts.common.repository.TransientObjectDirectoryRepository;
 import uk.gov.hmcts.darts.event.service.EventService;
@@ -54,14 +53,11 @@ class DataAnonymisationServiceImplTest {
     @Mock
     private AuditApi auditApi;
     @Mock
-    private UserIdentity userIdentity;
-
-    @Mock
     private CurrentTimeHelper currentTimeHelper;
     @Mock
     private ExternalOutboundDataStoreDeleter outboundDataStoreDeleter;
     @Mock
-    private CaseRepository caseRepository;
+    private CaseService caseService;
     @Mock
     private TransformedMediaRepository transformedMediaRepository;
     @Mock
@@ -90,64 +86,64 @@ class DataAnonymisationServiceImplTest {
 
 
     @Test
-    void positiveEventEntityAnonymize() {
+    void positiveEventEntityAnonymise() {
         setupOffsetDateTime();
         EventEntity eventEntity = new EventEntity();
         eventEntity.setEventText("event text");
 
         UserAccountEntity userAccount = new UserAccountEntity();
-        dataAnonymisationService.anonymizeEventEntity(userAccount, eventEntity);
+        dataAnonymisationService.anonymiseEventEntity(userAccount, eventEntity);
         assertThat(eventEntity.getEventText()).matches(TestUtils.UUID_REGEX);
         assertThat(eventEntity.isDataAnonymised()).isTrue();
         assertLastModifiedByAndAt(eventEntity, userAccount);
     }
 
     @Test
-    void positiveAnonymizeDefenceEntity() {
+    void positiveAnonymiseDefenceEntity() {
         setupOffsetDateTime();
         DefenceEntity defenceEntity = new DefenceEntity();
         defenceEntity.setName("name");
 
         UserAccountEntity userAccount = new UserAccountEntity();
 
-        dataAnonymisationService.anonymizeDefenceEntity(userAccount, defenceEntity);
+        dataAnonymisationService.anonymiseDefenceEntity(userAccount, defenceEntity);
         assertThat(defenceEntity.getName()).matches(TestUtils.UUID_REGEX);
         assertLastModifiedByAndAt(defenceEntity, userAccount);
     }
 
     @Test
-    void positiveAnonymizeDefendantEntity() {
+    void positiveAnonymiseDefendantEntity() {
         setupOffsetDateTime();
         DefendantEntity defendantEntity = new DefendantEntity();
         defendantEntity.setName("name");
 
         UserAccountEntity userAccount = new UserAccountEntity();
-        dataAnonymisationService.anonymizeDefendantEntity(userAccount, defendantEntity);
+        dataAnonymisationService.anonymiseDefendantEntity(userAccount, defendantEntity);
         assertThat(defendantEntity.getName()).matches(TestUtils.UUID_REGEX);
         assertLastModifiedByAndAt(defendantEntity, userAccount);
     }
 
     @Test
-    void positiveAnonymizeProsecutorEntity() {
+    void positiveAnonymiseProsecutorEntity() {
         setupOffsetDateTime();
         ProsecutorEntity prosecutorEntity = new ProsecutorEntity();
         prosecutorEntity.setName("name");
 
         UserAccountEntity userAccount = new UserAccountEntity();
-        dataAnonymisationService.anonymizeProsecutorEntity(userAccount, prosecutorEntity);
+        dataAnonymisationService.anonymiseProsecutorEntity(userAccount, prosecutorEntity);
 
         assertThat(prosecutorEntity.getName()).matches(TestUtils.UUID_REGEX);
         assertLastModifiedByAndAt(prosecutorEntity, userAccount);
     }
 
     @Test
-    void positiveAnonymizeTranscriptionCommentEntity() {
+    void positiveAnonymiseTranscriptionCommentEntity() {
         setupOffsetDateTime();
         TranscriptionCommentEntity transcriptionCommentEntity = new TranscriptionCommentEntity();
         transcriptionCommentEntity.setComment("comment");
 
         UserAccountEntity userAccount = new UserAccountEntity();
-        dataAnonymisationService.anonymizeTranscriptionCommentEntity(userAccount, transcriptionCommentEntity);
+        dataAnonymisationService.anonymiseTranscriptionCommentEntity(userAccount, transcriptionCommentEntity);
         assertThat(transcriptionCommentEntity.getComment()).matches(TestUtils.UUID_REGEX);
         assertThat(transcriptionCommentEntity.getLastModifiedBy()).isEqualTo(userAccount);
         assertThat(transcriptionCommentEntity.isDataAnonymised()).isTrue();
@@ -156,9 +152,10 @@ class DataAnonymisationServiceImplTest {
 
 
     @Test
-    void assertPositiveAnonymizeCourtCaseEntity() {
+    void assertPositiveAnonymiseCourtCaseEntity() {
         setupOffsetDateTime();
         CourtCaseEntity courtCase = new CourtCaseEntity();
+        when(caseService.getCourtCaseById(123)).thenReturn(courtCase);
         courtCase.setCaseNumber("caseNo123");
         courtCase.setId(123);
 
@@ -181,33 +178,34 @@ class DataAnonymisationServiceImplTest {
         UserAccountEntity userAccount = new UserAccountEntity();
         userAccount.setId(123);
 
-        dataAnonymisationService.anonymizeCourtCaseEntity(userAccount, courtCase);
-
+        dataAnonymisationService.anonymiseCourtCaseById(userAccount, 123);
         assertThat(courtCase.isDataAnonymised()).isTrue();
         assertThat(courtCase.getDataAnonymisedBy()).isEqualTo(123);
         assertThat(courtCase.getDataAnonymisedTs()).isCloseToUtcNow(within(5, SECONDS));
 
 
-        verify(dataAnonymisationService, times(1)).anonymizeDefendantEntity(userAccount, defendantEntity1);
-        verify(dataAnonymisationService, times(1)).anonymizeDefendantEntity(userAccount, defendantEntity2);
+        verify(dataAnonymisationService, times(1)).anonymiseDefendantEntity(userAccount, defendantEntity1);
+        verify(dataAnonymisationService, times(1)).anonymiseDefendantEntity(userAccount, defendantEntity2);
 
-        verify(dataAnonymisationService, times(1)).anonymizeDefenceEntity(userAccount, defenceEntity1);
-        verify(dataAnonymisationService, times(1)).anonymizeDefenceEntity(userAccount, defenceEntity2);
+        verify(dataAnonymisationService, times(1)).anonymiseDefenceEntity(userAccount, defenceEntity1);
+        verify(dataAnonymisationService, times(1)).anonymiseDefenceEntity(userAccount, defenceEntity2);
 
-        verify(dataAnonymisationService, times(1)).anonymizeProsecutorEntity(userAccount, prosecutorEntity1);
-        verify(dataAnonymisationService, times(1)).anonymizeProsecutorEntity(userAccount, prosecutorEntity2);
+        verify(dataAnonymisationService, times(1)).anonymiseProsecutorEntity(userAccount, prosecutorEntity1);
+        verify(dataAnonymisationService, times(1)).anonymiseProsecutorEntity(userAccount, prosecutorEntity2);
 
-        verify(dataAnonymisationService, times(1)).anonymizeHearingEntity(userAccount, hearingEntity1);
-        verify(dataAnonymisationService, times(1)).anonymizeHearingEntity(userAccount, hearingEntity2);
+        verify(dataAnonymisationService, times(1)).anonymiseHearingEntity(userAccount, hearingEntity1);
+        verify(dataAnonymisationService, times(1)).anonymiseHearingEntity(userAccount, hearingEntity2);
 
         verify(dataAnonymisationService, times(1)).tidyUpTransformedMediaEntities(userAccount, courtCase);
+        verify(caseService, times(1)).saveCase(courtCase);
         verify(logApi, times(1)).caseDeletedDueToExpiry(123, "caseNo123");
+        verify(caseService, times(1)).getCourtCaseById(123);
 
     }
 
 
     @Test
-    void positiveAnonymizeTranscriptionEntity() {
+    void positiveAnonymiseTranscriptionEntity() {
         TranscriptionEntity transcriptionEntity = new TranscriptionEntity();
 
         TranscriptionCommentEntity transcriptionCommentEntity1 = mock(TranscriptionCommentEntity.class);
@@ -218,22 +216,22 @@ class DataAnonymisationServiceImplTest {
         TranscriptionWorkflowEntity transcriptionWorkflowEntity2 = mock(TranscriptionWorkflowEntity.class);
         transcriptionEntity.setTranscriptionWorkflowEntities(List.of(transcriptionWorkflowEntity1, transcriptionWorkflowEntity2));
 
-        doNothing().when(dataAnonymisationService).anonymizeTranscriptionCommentEntity(any(), any());
-        doNothing().when(dataAnonymisationService).anonymizeTranscriptionWorkflowEntity(any());
+        doNothing().when(dataAnonymisationService).anonymiseTranscriptionCommentEntity(any(), any());
+        doNothing().when(dataAnonymisationService).anonymiseTranscriptionWorkflowEntity(any());
 
 
         UserAccountEntity userAccount = new UserAccountEntity();
-        dataAnonymisationService.anonymizeTranscriptionEntity(userAccount, transcriptionEntity);
+        dataAnonymisationService.anonymiseTranscriptionEntity(userAccount, transcriptionEntity);
 
-        verify(dataAnonymisationService, times(1)).anonymizeTranscriptionCommentEntity(userAccount, transcriptionCommentEntity1);
-        verify(dataAnonymisationService, times(1)).anonymizeTranscriptionCommentEntity(userAccount, transcriptionCommentEntity2);
+        verify(dataAnonymisationService, times(1)).anonymiseTranscriptionCommentEntity(userAccount, transcriptionCommentEntity1);
+        verify(dataAnonymisationService, times(1)).anonymiseTranscriptionCommentEntity(userAccount, transcriptionCommentEntity2);
 
-        verify(dataAnonymisationService, times(1)).anonymizeTranscriptionWorkflowEntity(transcriptionWorkflowEntity1);
-        verify(dataAnonymisationService, times(1)).anonymizeTranscriptionWorkflowEntity(transcriptionWorkflowEntity2);
+        verify(dataAnonymisationService, times(1)).anonymiseTranscriptionWorkflowEntity(transcriptionWorkflowEntity1);
+        verify(dataAnonymisationService, times(1)).anonymiseTranscriptionWorkflowEntity(transcriptionWorkflowEntity2);
     }
 
     @Test
-    void positiveAnonymizeHearingEntity() {
+    void positiveAnonymiseHearingEntity() {
         HearingEntity hearingEntity = new HearingEntity();
 
         TranscriptionEntity transcriptionEntity1 = mock(TranscriptionEntity.class);
@@ -244,17 +242,17 @@ class DataAnonymisationServiceImplTest {
         EventEntity entityEntity2 = mock(EventEntity.class);
         hearingEntity.setEventList(List.of(entityEntity1, entityEntity2));
 
-        doNothing().when(dataAnonymisationService).anonymizeTranscriptionEntity(any(), any());
-        doNothing().when(dataAnonymisationService).anonymizeEventEntity(any(), any());
+        doNothing().when(dataAnonymisationService).anonymiseTranscriptionEntity(any(), any());
+        doNothing().when(dataAnonymisationService).anonymiseEventEntity(any(), any());
 
         UserAccountEntity userAccount = new UserAccountEntity();
-        dataAnonymisationService.anonymizeHearingEntity(userAccount, hearingEntity);
+        dataAnonymisationService.anonymiseHearingEntity(userAccount, hearingEntity);
 
-        verify(dataAnonymisationService, times(1)).anonymizeTranscriptionEntity(userAccount, transcriptionEntity1);
-        verify(dataAnonymisationService, times(1)).anonymizeTranscriptionEntity(userAccount, transcriptionEntity2);
+        verify(dataAnonymisationService, times(1)).anonymiseTranscriptionEntity(userAccount, transcriptionEntity1);
+        verify(dataAnonymisationService, times(1)).anonymiseTranscriptionEntity(userAccount, transcriptionEntity2);
 
-        verify(dataAnonymisationService, times(1)).anonymizeEventEntity(userAccount, entityEntity1);
-        verify(dataAnonymisationService, times(1)).anonymizeEventEntity(userAccount, entityEntity2);
+        verify(dataAnonymisationService, times(1)).anonymiseEventEntity(userAccount, entityEntity1);
+        verify(dataAnonymisationService, times(1)).anonymiseEventEntity(userAccount, entityEntity2);
     }
 
 
@@ -393,7 +391,7 @@ class DataAnonymisationServiceImplTest {
     }
 
     @Test
-    void positiveObfuscateEventByIds() {
+    void positiveAnonymiseEventByIds() {
         EventEntity event1 = mock(EventEntity.class);
         EventEntity event2 = mock(EventEntity.class);
         EventEntity event3 = mock(EventEntity.class);
@@ -403,13 +401,13 @@ class DataAnonymisationServiceImplTest {
         doReturn(event2).when(eventService).getEventByEveId(2);
         doReturn(event3).when(eventService).getEventByEveId(3);
         doReturn(event1).when(eventService).getEventByEveId(4);
+        UserAccountEntity userAccount = mock(UserAccountEntity.class);
+        dataAnonymisationService.anonymiseEventByIds(userAccount, List.of(1, 2, 3, 4));
 
-        dataAnonymisationService.obfuscateEventByIds(List.of(1, 2, 3, 4));
 
-
-        verify(dataAnonymisationService, times(1)).anonymizeEvent(event1);
-        verify(dataAnonymisationService, times(1)).anonymizeEvent(event2);
-        verify(dataAnonymisationService, times(1)).anonymizeEvent(event3);
+        verify(dataAnonymisationService, times(1)).anonymiseEventEntity(userAccount, event1);
+        verify(dataAnonymisationService, times(1)).anonymiseEventEntity(userAccount, event2);
+        verify(dataAnonymisationService, times(1)).anonymiseEventEntity(userAccount, event3);
 
         verify(eventService, times(1)).getEventByEveId(1);
         verify(eventService, times(1)).getEventByEveId(2);

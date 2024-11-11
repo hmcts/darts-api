@@ -40,7 +40,7 @@ class RetentionsPostRequestValidatorTest {
         postRetentionRequest.setComments("theComment");
 
         DartsApiException exception = assertThrows(DartsApiException.class, () -> RetentionsPostRequestValidator.validate(postRetentionRequest));
-        assertEquals("RETENTION_102", exception.getError().getType().toString());
+        assertEquals("RETENTION_102", exception.getError().getType());
         assertEquals("Both 'is_permanent_retention' and 'retention_date' cannot be set, must be either one or the other.", exception.getDetail());
     }
 
@@ -52,7 +52,7 @@ class RetentionsPostRequestValidatorTest {
         postRetentionRequest.setComments("theComment");
 
         DartsApiException exception = assertThrows(DartsApiException.class, () -> RetentionsPostRequestValidator.validate(postRetentionRequest));
-        assertEquals("RETENTION_102", exception.getError().getType().toString());
+        assertEquals("RETENTION_102", exception.getError().getType());
         assertEquals("Either 'is_permanent_retention' or 'retention_date' must be set.", exception.getDetail());
     }
 
@@ -63,7 +63,7 @@ class RetentionsPostRequestValidatorTest {
         postRetentionRequest.setComments("theComment");
 
         DartsApiException exception = assertThrows(DartsApiException.class, () -> RetentionsPostRequestValidator.validate(postRetentionRequest));
-        assertEquals("RETENTION_102", exception.getError().getType().toString());
+        assertEquals("RETENTION_102", exception.getError().getType());
         assertEquals("Either 'is_permanent_retention' or 'retention_date' must be set.", exception.getDetail());
     }
 

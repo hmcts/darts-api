@@ -7,7 +7,8 @@ import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Limit;
-import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
+import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
+import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
 import uk.gov.hmcts.darts.common.repository.AutomatedTaskRepository;
 import uk.gov.hmcts.darts.common.repository.CaseRepository;
@@ -43,6 +44,8 @@ class CaseExpiryDeletionAutomatedTaskTest {
     private LockService lockService;
     @Mock
     private DataAnonymisationService dataAnonymisationService;
+    @Mock
+    private UserIdentity userIdentity;
 
 
     @InjectMocks
@@ -51,16 +54,13 @@ class CaseExpiryDeletionAutomatedTaskTest {
 
     @Test
     void runTask() {
-
+        UserAccountEntity userAccount = mock(UserAccountEntity.class);
+        when(userIdentity.getUserAccount()).thenReturn(userAccount);
         OffsetDateTime offsetDateTime = OffsetDateTime.now();
         when(currentTimeHelper.currentOffsetDateTime()).thenReturn(offsetDateTime);
 
-        CourtCaseEntity courtCase1 = mock(CourtCaseEntity.class);
-        CourtCaseEntity courtCase2 = mock(CourtCaseEntity.class);
-        CourtCaseEntity courtCase3 = mock(CourtCaseEntity.class);
-
-        when(caseRepository.findCasesToBeAnonymized(any(), any()))
-            .thenReturn(List.of(courtCase1, courtCase2, courtCase3));
+        when(caseRepository.findCaseIdsToBeAnonymised(any(), any()))
+            .thenReturn(List.of(1, 2, 3));
 
         doReturn(5).when(caseExpiryDeletionAutomatedTask)
             .getAutomatedTaskBatchSize();
@@ -71,17 +71,19 @@ class CaseExpiryDeletionAutomatedTaskTest {
             .currentOffsetDateTime();
 
         verify(dataAnonymisationService, times(1))
-            .anonymizeCourtCaseEntity(courtCase1);
+            .anonymiseCourtCaseById(userAccount, 1);
         verify(dataAnonymisationService, times(1))
-            .anonymizeCourtCaseEntity(courtCase2);
+            .anonymiseCourtCaseById(userAccount, 2);
         verify(dataAnonymisationService, times(1))
-            .anonymizeCourtCaseEntity(courtCase3);
+            .anonymiseCourtCaseById(userAccount, 3);
 
 
         verify(caseRepository, times(1))
-            .findCasesToBeAnonymized(offsetDateTime, Limit.of(5));
+            .findCaseIdsToBeAnonymised(offsetDateTime, Limit.of(5));
 
         verify(caseExpiryDeletionAutomatedTask, times(1))
             .getAutomatedTaskBatchSize();
+        verify(userIdentity, times(1))
+            .getUserAccount();
     }
 }

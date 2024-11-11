@@ -11,5 +11,8 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @EqualsAndHashCode(callSuper = true)
 @JsonRootName(value = "ARMAsyncSearchResponse")
-public class ArmAsyncSearchResponse extends AbstractMatterResponse {
+public class ArmAsyncSearchResponse extends BaseRpoResponse {
+
+    private String searchId;
+
 }

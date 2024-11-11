@@ -41,14 +41,14 @@ public interface CaseRepository extends JpaRepository<CourtCaseEntity, Integer> 
     boolean existsByCourthouse(CourthouseEntity courthouse);
 
     @Query("""
-        SELECT case FROM CourtCaseEntity case
-        WHERE case.createdDateTime < :cutoffDate
-        AND case.closed = false
+        SELECT ce.id FROM CourtCaseEntity ce
+        WHERE ce.createdDateTime < :cutoffDate
+        AND ce.closed = false
         AND NOT EXISTS (select 1 from CaseRetentionEntity cre
-            where cre.courtCase.id = case.id)
-        ORDER BY case.createdDateTime ASC
+            where cre.courtCase.id = ce.id)
+        ORDER BY ce.createdDateTime ASC
         """)
-    List<CourtCaseEntity> findOpenCasesToClose(OffsetDateTime cutoffDate, Pageable pageable);
+    List<Integer> findOpenCasesToClose(OffsetDateTime cutoffDate, Pageable pageable);
 
     List<CourtCaseEntity> findByIsRetentionUpdatedTrueAndRetentionRetriesLessThan(int maxRetentionRetries);
 
@@ -84,11 +84,11 @@ public interface CaseRepository extends JpaRepository<CourtCaseEntity, Integer> 
                                                                                  Pageable pageable);
 
     @Query(value = """
-        select cc from CourtCaseEntity cc
+        select cc.id from CourtCaseEntity cc
         join CaseRetentionEntity cr
         on cr.courtCase.id = cc.id and cr.currentState = 'COMPLETE'
         where cc.isDataAnonymised = false
         and cr.retainUntil < :maxRetentionDate
         """)
-    List<CourtCaseEntity> findCasesToBeAnonymized(OffsetDateTime maxRetentionDate, Limit limit);
+    List<Integer> findCaseIdsToBeAnonymised(OffsetDateTime maxRetentionDate, Limit limit);
 }

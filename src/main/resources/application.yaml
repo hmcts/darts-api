@@ -286,7 +286,12 @@ darts:
         download-data-path: /api/v1/downloadBlob/{cabinet_id}/{record_id}/{file_id}
       rpo-url:
         get-record-management-matter-path: /api/v1/getRecordManagementMatter
-
+        get-storage-accounts: /api/v1/getStorageAccounts
+        get-indexes-by-matter-id-path: /api/v1/getIndexesByMatterId
+        get-master-index-field-by-record-class-schema-path: /api/v1/getMasterIndexFieldByRecordClassSchema
+        get-profile-entitlements-path: /api/v1/getProfileEntitlements
+        add-async-search-path: /api/v1/addAsyncSearch
+        save-background-search-path: /api/v1/SaveBackgroundSearch
     dets:
       sas-endpoint: ${DETS_SAS_URL_ENDPOINT:}
       container-name: darts-migration
@@ -343,18 +348,17 @@ darts:
       common-config:
         thread-pool-size: 5
         system-user-email: ${SYSTEM_USER_EMAIL:}
-        system-user-guid-map:
-          housekeeping: ecfd1f14-c9b6-4f15-94c7-cc60e53f2c7a
-          dailylist-processor: f6f71122-ff85-4ebe-93d9-1706460dbea5
+      arm-rpo-duration: ${ARM_RPO_DURATION:1h}
+      inbound-annotation-transcription-deleter:
+        default-batch-size: 100000
+      inbound-audio-deleter:
+        unstructured-minimum-duration: 24h
+        default-batch-size: 100000
       inbound-to-unstructured:
         threads: 20
       process-e2e-arm-rpo: ${PROCESS_E2E_ARM_RPO:false}
-      arm-rpo-duration: ${ARM_RPO_DURATION:1h}
       thread-pool-size: 5
       system-user-email: ${SYSTEM_USER_EMAIL:}
-      system-user-guid-map:
-        housekeeping: ecfd1f14-c9b6-4f15-94c7-cc60e53f2c7a
-        dailylist-processor: f6f71122-ff85-4ebe-93d9-1706460dbea5
       unstructured-to-arm-batch-processor:
         max-arm-manifest-items: 100
         max-arm-single-mode-items: 100

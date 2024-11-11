@@ -24,6 +24,7 @@ import uk.gov.hmcts.darts.audio.model.PostAdminMediasSearchResponseItem;
 import uk.gov.hmcts.darts.audio.service.AdminMediaService;
 import uk.gov.hmcts.darts.audio.validation.MediaApproveMarkForDeletionValidator;
 import uk.gov.hmcts.darts.audio.validation.SearchMediaValidator;
+import uk.gov.hmcts.darts.audit.api.AuditActivity;
 import uk.gov.hmcts.darts.audit.api.AuditApi;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
@@ -66,7 +67,7 @@ public class AdminMediaServiceImpl implements AdminMediaService {
     private boolean manualDeletionEnabled;
 
     public AdminMediaResponse getMediasById(Integer id) {
-        var mediaEntity = mediaRepository.findById(id)
+        var mediaEntity = mediaRepository.findByIdIncludeDeleted(id)
             .orElseThrow(() -> new DartsApiException(AudioApiError.MEDIA_NOT_FOUND));
 
         return adminMediaMapper.toApiModel(mediaEntity);
@@ -126,6 +127,7 @@ public class AdminMediaServiceImpl implements AdminMediaService {
         return objectAdminActionRepository.findAllMediaActionsWithAnyDeletionReason().stream()
             .map(ObjectAdminActionEntity::getMedia)
             .map(adminMarkedForDeletionMapper::toApiModel)
+            .filter(media -> media != null)
             .sorted(Comparator.comparing(PostAdminMediasMarkedForDeletionItem::getMediaId))
             .toList();
     }
@@ -154,7 +156,7 @@ public class AdminMediaServiceImpl implements AdminMediaService {
         mediaApproveMarkForDeletionValidator.validate(mediaId);
         List<ObjectAdminActionEntity> objectAdminActionEntityList = objectAdminActionRepository.findByMedia_Id(mediaId);
 
-        Optional<MediaEntity> mediaEntityOptional = mediaRepository.findById(mediaId);
+        Optional<MediaEntity> mediaEntityOptional = mediaRepository.findByIdIncludeDeleted(mediaId);
         if (mediaEntityOptional.isEmpty()) {
             throw new DartsApiException(AudioApiError.MEDIA_NOT_FOUND);
         }
@@ -165,6 +167,8 @@ public class AdminMediaServiceImpl implements AdminMediaService {
         objectAdminActionEntity.setMarkedForManualDelBy(currentUser);
         objectAdminActionEntity.setMarkedForManualDelDateTime(currentTimeHelper.currentOffsetDateTime());
         objectAdminActionRepository.save(objectAdminActionEntity);
+
+        auditApi.record(AuditActivity.MANUAL_DELETION, currentUser, objectAdminActionEntity.getId().toString());
 
         return GetAdminMediaResponseMapper.mapMediaApproveMarkedForDeletionResponse(mediaEntity, objectAdminActionEntity);
     }

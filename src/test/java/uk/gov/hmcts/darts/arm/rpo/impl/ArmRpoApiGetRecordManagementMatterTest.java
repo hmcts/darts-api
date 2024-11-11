@@ -1,6 +1,7 @@
 package uk.gov.hmcts.darts.arm.rpo.impl;
 
 import feign.FeignException;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -11,6 +12,7 @@ import uk.gov.hmcts.darts.arm.client.ArmRpoClient;
 import uk.gov.hmcts.darts.arm.client.model.rpo.RecordManagementMatterResponse;
 import uk.gov.hmcts.darts.arm.exception.ArmRpoException;
 import uk.gov.hmcts.darts.arm.helper.ArmRpoHelper;
+import uk.gov.hmcts.darts.arm.helper.ArmRpoHelperMocks;
 import uk.gov.hmcts.darts.arm.service.ArmRpoService;
 import uk.gov.hmcts.darts.common.entity.ArmRpoExecutionDetailEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
@@ -40,6 +42,8 @@ class ArmRpoApiGetRecordManagementMatterTest {
     private UserAccountEntity userAccountEntity;
 
     private static final Integer EXECUTION_ID = 1;
+    private static final ArmRpoHelperMocks ARM_RPO_HELPER_MOCKS = new ArmRpoHelperMocks();
+
 
     @BeforeEach
     void setUp() {
@@ -52,21 +56,38 @@ class ArmRpoApiGetRecordManagementMatterTest {
     }
 
     @Test
-    void getRecordManagementMatterReturnsResponseWhenSuccessful() {
+    void getRecordManagementMatterThrowsExceptionWhenResponseReturnedWithoutMatterId() {
+        // given
         RecordManagementMatterResponse expectedResponse = new RecordManagementMatterResponse();
+        expectedResponse.setStatus(200);
+        expectedResponse.setIsError(false);
         when(armRpoClient.getRecordManagementMatter(anyString())).thenReturn(expectedResponse);
 
+        // when
         assertThrows(ArmRpoException.class, () -> armRpoApi.getRecordManagementMatter("token", EXECUTION_ID, userAccountEntity));
 
-        verify(armRpoService).updateArmRpoStatus(any(), eq(armRpoHelper.completedRpoStatus()), eq(userAccountEntity));
+        // then
+        verify(armRpoService).updateArmRpoStateAndStatus(any(),
+                                                         eq(ARM_RPO_HELPER_MOCKS.getGetRecordManagementMatterRpoState()),
+                                                         eq(ARM_RPO_HELPER_MOCKS.getInProgressRpoStatus()),
+                                                         any());
+        verify(armRpoService).updateArmRpoStatus(any(), eq(ARM_RPO_HELPER_MOCKS.getFailedRpoStatus()), any());
     }
 
     @Test
     void getRecordManagementMatterThrowsArmRpoExceptionWhenClientFails() {
+        // given
         when(armRpoClient.getRecordManagementMatter(anyString())).thenThrow(FeignException.class);
 
+        // when
         assertThrows(ArmRpoException.class, () -> armRpoApi.getRecordManagementMatter("token", EXECUTION_ID, userAccountEntity));
-        verify(armRpoService).updateArmRpoStatus(any(), eq(armRpoHelper.failedRpoStatus()), eq(userAccountEntity));
+
+        // then
+        verify(armRpoService).updateArmRpoStateAndStatus(any(),
+                                                         eq(ARM_RPO_HELPER_MOCKS.getGetRecordManagementMatterRpoState()),
+                                                         eq(ARM_RPO_HELPER_MOCKS.getInProgressRpoStatus()),
+                                                         any());
+        verify(armRpoService).updateArmRpoStatus(any(), eq(ARM_RPO_HELPER_MOCKS.getFailedRpoStatus()), any());
     }
 
     @Test
@@ -75,14 +96,19 @@ class ArmRpoApiGetRecordManagementMatterTest {
         assertThrows(ArmRpoException.class, () -> armRpoApi.getRecordManagementMatter("token", EXECUTION_ID, userAccountEntity));
 
         // then
-        verify(armRpoService).updateArmRpoStateAndStatus(any(), eq(armRpoHelper.getRecordManagementMatterRpoState()), eq(armRpoHelper.inProgressRpoStatus()),
-                                                         eq(userAccountEntity));
+        verify(armRpoService).updateArmRpoStateAndStatus(any(),
+                                                         eq(ARM_RPO_HELPER_MOCKS.getGetRecordManagementMatterRpoState()),
+                                                         eq(ARM_RPO_HELPER_MOCKS.getInProgressRpoStatus()),
+                                                         any());
+        verify(armRpoService).updateArmRpoStatus(any(), eq(ARM_RPO_HELPER_MOCKS.getFailedRpoStatus()), any());
     }
 
     @Test
     void getRecordManagementMatterSetsMatterIdWhenResponseIsValid() {
         // given
         RecordManagementMatterResponse response = new RecordManagementMatterResponse();
+        response.setStatus(200);
+        response.setIsError(false);
         response.setRecordManagementMatter(new RecordManagementMatterResponse.RecordManagementMatter());
         response.getRecordManagementMatter().setMatterId("123");
         when(armRpoClient.getRecordManagementMatter(anyString())).thenReturn(response);
@@ -96,7 +122,15 @@ class ArmRpoApiGetRecordManagementMatterTest {
         armRpoApi.getRecordManagementMatter("token", executionId, userAccountEntity);
 
         // then
-        verify(armRpoService).updateArmRpoStatus(any(), eq(armRpoHelper.completedRpoStatus()), eq(userAccountEntity));
+        verify(armRpoService).updateArmRpoStateAndStatus(any(),
+                                                         eq(ARM_RPO_HELPER_MOCKS.getGetRecordManagementMatterRpoState()),
+                                                         eq(ARM_RPO_HELPER_MOCKS.getInProgressRpoStatus()),
+                                                         any());
+        verify(armRpoService).updateArmRpoStatus(any(), eq(ARM_RPO_HELPER_MOCKS.getCompletedRpoStatus()), any());
     }
 
+    @AfterAll
+    static void close() {
+        ARM_RPO_HELPER_MOCKS.close();
+    }
 }

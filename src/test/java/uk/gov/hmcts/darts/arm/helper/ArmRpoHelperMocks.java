@@ -8,6 +8,7 @@ import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import uk.gov.hmcts.darts.common.entity.ArmRpoStateEntity;
 import uk.gov.hmcts.darts.common.entity.ArmRpoStatusEntity;
+import uk.gov.hmcts.darts.common.enums.ArmRpoStateEnum;
 
 import static org.mockito.Mockito.lenient;
 
@@ -149,6 +150,42 @@ public class ArmRpoHelperMocks {
         removeProductionRpoState.setDescription("REMOVE_PRODUCTION");
         lenient().when(ArmRpoHelper.removeProductionRpoState()).thenReturn(removeProductionRpoState);
 
+    }
+
+    @SuppressWarnings({"PMD.CyclomaticComplexity"})
+    public ArmRpoStateEntity armRpoStateEnumToEntity(ArmRpoStateEnum armRpoStateEnum) {
+        switch (armRpoStateEnum) {
+            case GET_RECORD_MANAGEMENT_MATTER:
+                return getRecordManagementMatterRpoState;
+            case GET_INDEXES_BY_MATTERID:
+                return getIndexesByMatterIdRpoState;
+            case GET_STORAGE_ACCOUNTS:
+                return getStorageAccountsRpoState;
+            case GET_PROFILE_ENTITLEMENTS:
+                return getProfileEntitlementsRpoState;
+            case GET_MASTERINDEXFIELD_BY_RECORDCLASS_SCHEMA_PRIMARY:
+                return getMasterIndexFieldByRecordClassSchemaPrimaryRpoState;
+            case ADD_ASYNC_SEARCH:
+                return addAsyncSearchRpoState;
+            case SAVE_BACKGROUND_SEARCH:
+                return saveBackgroundSearchRpoState;
+            case GET_EXTENDED_SEARCHES_BY_MATTER:
+                return getExtendedSearchesByMatterRpoState;
+            case GET_MASTERINDEXFIELD_BY_RECORDCLASS_SCHEMA_SECONDARY:
+                return getMasterIndexFieldByRecordClassSchemaSecondaryRpoState;
+            case CREATE_EXPORT_BASED_ON_SEARCH_RESULTS_TABLE:
+                return createExportBasedOnSearchResultsTableRpoState;
+            case GET_EXTENDED_PRODUCTIONS_BY_MATTER:
+                return getExtendedProductionsByMatterRpoState;
+            case GET_PRODUCTION_OUTPUT_FILES:
+                return getProductionOutputFilesRpoState;
+            case DOWNLOAD_PRODUCTION:
+                return downloadProductionRpoState;
+            case REMOVE_PRODUCTION:
+                return removeProductionRpoState;
+            default:
+                throw new IllegalArgumentException("Unknown ArmRpoStateEnum: " + armRpoStateEnum);
+        }
     }
 
     @SneakyThrows

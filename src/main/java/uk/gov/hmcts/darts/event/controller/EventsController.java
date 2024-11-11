@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.darts.authorisation.annotation.Authorisation;
+import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.service.DataAnonymisationService;
 import uk.gov.hmcts.darts.event.component.DartsEventMapper;
 import uk.gov.hmcts.darts.event.http.api.EventApi;
@@ -32,6 +33,7 @@ import uk.gov.hmcts.darts.event.service.EventMappingService;
 import uk.gov.hmcts.darts.event.service.EventSearchService;
 import uk.gov.hmcts.darts.event.service.EventService;
 import uk.gov.hmcts.darts.event.service.handler.EventHandlerEnumerator;
+import uk.gov.hmcts.darts.util.DataUtil;
 
 import java.time.OffsetDateTime;
 import java.util.List;
@@ -60,6 +62,7 @@ public class EventsController implements EventApi {
     private final EventSearchService eventSearchService;
     private final EventService eventService;
     private final DataAnonymisationService dataAnonymisationService;
+    private final UserIdentity userIdentity;
 
     @Override
     @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
@@ -68,6 +71,7 @@ public class EventsController implements EventApi {
     public ResponseEntity<EventsResponse> eventsPost(
         @Parameter(name = "DartsEvent") @Valid @RequestBody DartsEvent dartsEvent
     ) {
+        DataUtil.preProcess(dartsEvent);
         eventDispatcher.receive(dartsEvent);
 
         var addDocumentResponse = new EventsResponse();
@@ -179,7 +183,7 @@ public class EventsController implements EventApi {
     @Authorisation(contextId = ANY_ENTITY_ID,
         globalAccessSecurityRoles = {SUPER_ADMIN})
     public ResponseEntity<Void> adminObfuscateEveByIds(AdminObfuscateEveByIdsRequest adminObfuscateEveByIdsRequest) {
-        this.dataAnonymisationService.obfuscateEventByIds(adminObfuscateEveByIdsRequest.getEveIds());
+        this.dataAnonymisationService.anonymiseEventByIds(userIdentity.getUserAccount(), adminObfuscateEveByIdsRequest.getEveIds());
         return ResponseEntity.ok().build();
     }
 }

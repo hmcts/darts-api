@@ -7,6 +7,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Primary;
 import uk.gov.hmcts.darts.arm.service.ArmService;
 import uk.gov.hmcts.darts.common.datamanagement.component.DataManagementAzureClientFactory;
+import uk.gov.hmcts.darts.common.util.FileContentChecksum;
 import uk.gov.hmcts.darts.datamanagement.config.DataManagementConfiguration;
 import uk.gov.hmcts.darts.datamanagement.service.DataManagementService;
 import uk.gov.hmcts.darts.datamanagement.service.impl.DataManagementServiceImpl;
@@ -31,12 +32,13 @@ public class IntegrationTestConfiguration implements ApplicationContextAware {
     @Primary
     public DataManagementService getDartsDataManagementService(DataManagementConfiguration configuration,
                                                                DataManagementAzureClientFactory factory,
-                                                               AzureCopyUtil azureCopyUtil) {
+                                                               AzureCopyUtil azureCopyUtil,
+                                                               FileContentChecksum fileContentChecksum) {
         String[] profiles = applicationContext.getEnvironment().getActiveProfiles();
 
-        for (String profile: profiles) {
+        for (String profile : profiles) {
             if (BLOB_STORAGE_PROFILE.equals(profile)) {
-                return new DataManagementServiceImpl(configuration, factory, azureCopyUtil);
+                return new DataManagementServiceImpl(configuration, factory, azureCopyUtil, fileContentChecksum);
             }
         }
 

@@ -2,8 +2,6 @@ package uk.gov.hmcts.darts.common.exception;
 
 import org.springframework.http.HttpStatus;
 
-import java.net.URI;
-
 public interface DartsApiError {
 
     String getErrorTypePrefix();
@@ -14,10 +12,7 @@ public interface DartsApiError {
 
     String getTitle();
 
-    default URI getType() {
-        return URI.create(
-            getErrorTypeNumeric()
-        );
+    default String getType() {
+        return getErrorTypeNumeric();
     }
-
 }

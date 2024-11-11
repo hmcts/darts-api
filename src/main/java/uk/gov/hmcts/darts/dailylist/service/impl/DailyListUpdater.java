@@ -1,12 +1,16 @@
 package uk.gov.hmcts.darts.dailylist.service.impl;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import uk.gov.hmcts.darts.common.datamanagement.component.impl.DownloadResponseMetaData;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 import uk.gov.hmcts.darts.common.entity.DailyListEntity;
@@ -16,6 +20,9 @@ import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.JudgeEntity;
 import uk.gov.hmcts.darts.common.entity.ProsecutorEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
+import uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum;
+import uk.gov.hmcts.darts.common.enums.SystemUsersEnum;
+import uk.gov.hmcts.darts.common.enums.SystemUsersEnum;
 import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
 import uk.gov.hmcts.darts.common.helper.SystemUserHelper;
 import uk.gov.hmcts.darts.common.repository.CourthouseRepository;
@@ -33,10 +40,23 @@ import uk.gov.hmcts.darts.dailylist.model.Hearing;
 import uk.gov.hmcts.darts.dailylist.model.PersonalDetails;
 import uk.gov.hmcts.darts.dailylist.model.Sitting;
 import uk.gov.hmcts.darts.dailylist.util.CitizenNameComparator;
+import uk.gov.hmcts.darts.dets.service.DetsApiService;
+import uk.gov.hmcts.darts.task.runner.dailylist.mapper.DailyListRequestMapper;
+import uk.gov.hmcts.darts.task.runner.dailylist.schemas.courtservice.DailyListStructure;
+import uk.gov.hmcts.darts.task.runner.dailylist.utilities.XmlParser;
+import uk.gov.hmcts.darts.task.runner.dailylist.utilities.deserializer.LocalDateTimeTypeDeserializer;
+import uk.gov.hmcts.darts.task.runner.dailylist.utilities.deserializer.LocalDateTypeDeserializer;
+import uk.gov.hmcts.darts.task.runner.dailylist.utilities.deserializer.OffsetDateTimeTypeDeserializer;
+import uk.gov.hmcts.darts.task.runner.dailylist.utilities.serializer.LocalDateTimeTypeSerializer;
+import uk.gov.hmcts.darts.task.runner.dailylist.utilities.serializer.LocalDateTypeSerializer;
+import uk.gov.hmcts.darts.task.runner.dailylist.utilities.serializer.OffsetDateTimeTypeSerializer;
 
+import java.nio.charset.Charset;
 import java.time.DateTimeException;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatterBuilder;
 import java.util.List;
 import java.util.Locale;
@@ -60,60 +80,125 @@ class DailyListUpdater {
     private final CurrentTimeHelper currentTimeHelper;
     private final CitizenNameMapper citizenNameMapper;
     private final CitizenNameComparator citizenNameComparator;
+    private final DetsApiService detsApiService;
+
+    private final XmlParser xmlParser;
+    private final DailyListRequestMapper dailyListRequestMapper;
+
 
     @SuppressWarnings({"checkstyle:VariableDeclarationUsageDistance", "PMD.CognitiveComplexity"})
     @Transactional
     public void processDailyList(DailyListEntity dailyListEntity) throws JsonProcessingException {
-        UserAccountEntity dailyListSystemUser = systemUserHelper.getDailyListProcessorUser();
-        DailyListJsonObject dailyList = objectMapper.readValue(dailyListEntity.getContent(), DailyListJsonObject.class);
-        JobStatusType statusType = JobStatusType.PROCESSED;
+        UserAccountEntity dailyListSystemUser = systemUserHelper.getReferenceTo(SystemUsersEnum.DAILY_LIST_PROCESSOR);
+        JobStatusType statusType = validateJsonExistsElseUpdate(dailyListEntity) ? JobStatusType.PROCESSED : JobStatusType.FAILED;
+        if (statusType != JobStatusType.FAILED) {
+            DailyListJsonObject dailyList = objectMapper.readValue(dailyListEntity.getContent(), DailyListJsonObject.class);
+            for (CourtList courtList : dailyList.getCourtLists()) {
 
-        for (CourtList courtList : dailyList.getCourtLists()) {
+                String courtHouseName = courtList.getCourtHouse().getCourtHouseName().toUpperCase(Locale.ROOT);
+                Optional<CourthouseEntity> foundCourthouse = courthouseRepository.findByCourthouseName(
+                    courtHouseName);
 
-            String courtHouseName = courtList.getCourtHouse().getCourtHouseName().toUpperCase(Locale.ROOT);
-            Optional<CourthouseEntity> foundCourthouse = courthouseRepository.findByCourthouseName(
-                courtHouseName);
+                if (foundCourthouse.isPresent()) {
+                    List<Sitting> sittings = courtList.getSittings();
+                    for (Sitting sitting : sittings) {
+                        List<Hearing> hearings = sitting.getHearings();
+                        for (Hearing dailyListHearing : hearings) {
 
-            if (foundCourthouse.isPresent()) {
-                List<Sitting> sittings = courtList.getSittings();
-                for (Sitting sitting : sittings) {
-                    List<Hearing> hearings = sitting.getHearings();
-                    for (Hearing dailyListHearing : hearings) {
+                            String caseNumber = getCaseNumber(dailyListEntity, dailyListHearing);
+                            if (caseNumber == null) {
+                                statusType = JobStatusType.PARTIALLY_PROCESSED;
+                                continue;
+                            }
 
-                        String caseNumber = getCaseNumber(dailyListEntity, dailyListHearing);
-                        if (caseNumber == null) {
-                            statusType = JobStatusType.PARTIALLY_PROCESSED;
-                            continue;
+                            LocalTime scheduledStartTime = getScheduledStartTime(sitting, dailyListHearing);
+                            LocalDateTime hearingDateTime = dailyListHearing.getHearingDetails().getHearingDate().atTime(scheduledStartTime);
+
+                            HearingEntity hearing = retrieveCoreObjectService.retrieveOrCreateHearing(
+                                courtHouseName, sitting.getCourtRoomNumber(),
+                                caseNumber, hearingDateTime,
+                                dailyListSystemUser
+                            );
+
+                            hearing.setLastModifiedDateTime(currentTimeHelper.currentOffsetDateTime());
+
+                            CourtCaseEntity courtCase = hearing.getCourtCase();
+                            courtCase.setLastModifiedDateTime(currentTimeHelper.currentOffsetDateTime());
+                            addJudges(sitting, hearing);
+                            addDefendants(courtCase, dailyListHearing.getDefendants());
+                            addProsecution(courtCase, dailyListHearing);
+                            addDefenders(courtCase, dailyListHearing.getDefendants());
+                            hearingRepository.saveAndFlush(hearing);
                         }
-
-                        LocalTime scheduledStartTime = getScheduledStartTime(sitting, dailyListHearing);
-                        LocalDateTime hearingDateTime = dailyListHearing.getHearingDetails().getHearingDate().atTime(scheduledStartTime);
-
-                        HearingEntity hearing = retrieveCoreObjectService.retrieveOrCreateHearing(
-                            courtHouseName, sitting.getCourtRoomNumber(),
-                            caseNumber, hearingDateTime,
-                            dailyListSystemUser
-                        );
-
-                        hearing.setLastModifiedDateTime(currentTimeHelper.currentOffsetDateTime());
-
-                        CourtCaseEntity courtCase = hearing.getCourtCase();
-                        courtCase.setLastModifiedDateTime(currentTimeHelper.currentOffsetDateTime());
-                        addJudges(sitting, hearing);
-                        addDefendants(courtCase, dailyListHearing.getDefendants());
-                        addProsecution(courtCase, dailyListHearing);
-                        addDefenders(courtCase, dailyListHearing.getDefendants());
-                        hearingRepository.saveAndFlush(hearing);
                     }
+                } else {
+                    statusType = JobStatusType.PARTIALLY_PROCESSED;
+                    log.error("Unregistered courthouse {} daily list entry with id {} has not been processed",
+                              courtHouseName, dailyListEntity.getId());
                 }
-            } else {
-                statusType = JobStatusType.PARTIALLY_PROCESSED;
-                log.error("Unregistered courthouse " + courtHouseName + " daily list entry with id "
-                              + dailyListEntity.getId() + " has not been processed");
             }
         }
         dailyListEntity.setLastModifiedBy(dailyListSystemUser);
         dailyListEntity.setStatus(statusType);
+    }
+
+    /**
+     * Temporary change will be reverted downstream: DMP-4191.
+     */
+    boolean validateJsonExistsElseUpdate(DailyListEntity dailyListEntity) {
+        if (dailyListEntity.getContent() != null) {
+            log.debug("Daily list with id {} has JSON no need to fetch XML", dailyListEntity.getId());
+            return true;
+        }
+        if (!validateXmlElseUpdate(dailyListEntity)) {
+            return false;
+        }
+        return mapXmlToJson(dailyListEntity);
+    }
+
+    /**
+     * Temporary change will be reverted downstream: DMP-4191.
+     */
+    boolean validateXmlElseUpdate(DailyListEntity dailyListEntity) {
+        if (dailyListEntity.getExternalLocation() == null) {
+            log.error("Daily list with id {} has no external location", dailyListEntity.getId());
+            return false;
+        }
+        if (dailyListEntity.getExternalLocationTypeEntity() == null
+            || !dailyListEntity.getExternalLocationTypeEntity().getId().equals(ExternalLocationTypeEnum.DETS.getId())) {
+            log.error("Daily list with id {} has an invalid elt_id", dailyListEntity.getId());
+            return false;
+        }
+
+        try (DownloadResponseMetaData downloadResponseMetaData = detsApiService.downloadData(dailyListEntity.getExternalLocation())) {
+            dailyListEntity.setXmlContent(downloadResponseMetaData.getResource().getContentAsString(Charset.defaultCharset()));
+            return true;
+        } catch (Exception e) {
+            log.error("Failed to download file for daily list with id {}", dailyListEntity.getId(), e);
+            return false;
+        }
+    }
+
+    /**
+     * Temporary change will be reverted downstream: DMP-4191.
+     */
+    boolean mapXmlToJson(DailyListEntity dailyListEntity) {
+        DailyListStructure legacyDailyListObject;
+        try {
+            legacyDailyListObject = xmlParser.unmarshal(dailyListEntity.getXmlContent().trim(), DailyListStructure.class);
+        } catch (Exception e) {
+            log.error("Failed to unmarshal XML for daily list with id {}", dailyListEntity.getId(), e);
+            return false;
+        }
+
+        try {
+            DailyListJsonObject modernisedDailyList = dailyListRequestMapper.mapToEntity(legacyDailyListObject);
+            dailyListEntity.setContent(getServiceObjectMapper().writeValueAsString(modernisedDailyList));
+        } catch (Exception ex) {
+            log.error("Failed to map XML to JSON for daily list with id {}", dailyListEntity.getId(), ex);
+            return false;
+        }
+        return true;
     }
 
     private LocalTime getScheduledStartTime(Sitting sitting, Hearing dailyListHearing) {
@@ -122,8 +207,8 @@ class DailyListUpdater {
             try {
                 return getTimeFromTimeMarkingNote(timeMarkingNoteText);
             } catch (DateTimeException dateTimeException) {
-                log.warn("Ignore error and continue, Parsing failed for field TimeMarkingNote with value: "
-                             + timeMarkingNoteText, dateTimeException);
+                log.warn("Ignore error and continue, Parsing failed for field TimeMarkingNote with value: {}",
+                         timeMarkingNoteText, dateTimeException);
             }
         }
 
@@ -195,7 +280,7 @@ class DailyListUpdater {
             return;
         }
         List<PersonalDetails> advocates = hearing.getProsecution().getAdvocates();
-        UserAccountEntity dailyListSystemUser = systemUserHelper.getDailyListProcessorUser();
+        UserAccountEntity dailyListSystemUser = systemUserHelper.getReferenceTo(SystemUsersEnum.DAILY_LIST_PROCESSOR);
         advocates.forEach(advocate -> {
             if (!isExistingProsecutor(courtCase, advocate)) {
                 courtCase.addProsecutor(createCoreObjectService.createProsecutor(
@@ -205,7 +290,7 @@ class DailyListUpdater {
     }
 
     private void addDefenders(CourtCaseEntity courtCase, List<Defendant> defendants) {
-        UserAccountEntity dailyListSystemUser = systemUserHelper.getDailyListProcessorUser();
+        UserAccountEntity dailyListSystemUser = systemUserHelper.getReferenceTo(SystemUsersEnum.DAILY_LIST_PROCESSOR);
         for (Defendant defendant : defendants) {
             for (PersonalDetails counselDetails : defendant.getCounsel()) {
                 if (counselDetails == null) {
@@ -220,7 +305,7 @@ class DailyListUpdater {
     }
 
     private void addDefendants(CourtCaseEntity courtCase, List<Defendant> defendants) {
-        UserAccountEntity dailyListSystemUser = systemUserHelper.getDailyListProcessorUser();
+        UserAccountEntity dailyListSystemUser = systemUserHelper.getReferenceTo(SystemUsersEnum.DAILY_LIST_PROCESSOR);
         for (Defendant defendant : defendants) {
             if (!isExistingDefendant(courtCase, defendant)) {
                 courtCase.addDefendant(createCoreObjectService.createDefendant(
@@ -233,7 +318,7 @@ class DailyListUpdater {
     }
 
     private void addJudges(Sitting sitting, HearingEntity hearing) {
-        UserAccountEntity dailyListSystemUser = systemUserHelper.getDailyListProcessorUser();
+        UserAccountEntity dailyListSystemUser = systemUserHelper.getReferenceTo(SystemUsersEnum.DAILY_LIST_PROCESSOR);
         for (CitizenName judge : sitting.getJudiciary()) {
             JudgeEntity judgeEntity = retrieveCoreObjectService.retrieveOrCreateJudge(judge.getCitizenNameRequestedName(), dailyListSystemUser);
             hearing.addJudge(judgeEntity, true);
@@ -278,4 +363,22 @@ class DailyListUpdater {
         return citizenNameComparator.compare(name1, name2) == 0;
     }
 
+    /**
+     * Temporary change will be reverted downstream: DMP-4191.
+     */
+    ObjectMapper getServiceObjectMapper() {
+        JavaTimeModule module = new JavaTimeModule();
+
+        module.addSerializer(LocalDateTime.class, new LocalDateTimeTypeSerializer())
+            .addSerializer(LocalDate.class, new LocalDateTypeSerializer())
+            .addSerializer(OffsetDateTime.class, new OffsetDateTimeTypeSerializer())
+            .addDeserializer(LocalDateTime.class, new LocalDateTimeTypeDeserializer())
+            .addDeserializer(LocalDate.class, new LocalDateTypeDeserializer())
+            .addDeserializer(OffsetDateTime.class, new OffsetDateTimeTypeDeserializer());
+
+        return new ObjectMapper()
+            .setSerializationInclusion(JsonInclude.Include.NON_NULL)
+            .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
+            .registerModule(module);
+    }
 }

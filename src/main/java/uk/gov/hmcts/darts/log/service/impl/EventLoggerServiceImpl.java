@@ -10,6 +10,7 @@ import uk.gov.hmcts.darts.common.entity.EventEntity;
 import uk.gov.hmcts.darts.event.model.DartsEvent;
 import uk.gov.hmcts.darts.log.enums.EventSource;
 import uk.gov.hmcts.darts.log.service.EventLoggerService;
+import uk.gov.hmcts.darts.util.DataUtil;
 
 import java.time.OffsetDateTime;
 
@@ -65,7 +66,9 @@ public class EventLoggerServiceImpl implements EventLoggerService {
 
     private void logEvent(String messageId, String eventId, String courthouse, String courtroom, EventSource source, OffsetDateTime dateTime) {
         log.info("Event received: message_id={}, event_id={}, courthouse={}, courtroom={}, source={}, date_time={}",
-                 messageId, eventId, courthouse, courtroom, source, getDateTimeIsoFormatted(dateTime));
+                 messageId, eventId,
+                 DataUtil.toUpperCase(courthouse),
+                 DataUtil.toUpperCase(courtroom), source, getDateTimeIsoFormatted(dateTime));
     }
 
     @Override
@@ -73,8 +76,8 @@ public class EventLoggerServiceImpl implements EventLoggerService {
         log.error("Courthouse not found: message_id={}, event_id={}, courthouse={}, courtroom={}, event_timestamp={}",
                   event.getMessageId(),
                   event.getEventId(),
-                  event.getCourthouse(),
-                  event.getCourtroom(),
+                  DataUtil.toUpperCase(event.getCourthouse()),
+                  DataUtil.toUpperCase(event.getCourtroom()),
                   getDateTimeIsoFormatted(event.getDateTime()));
     }
 
@@ -83,8 +86,8 @@ public class EventLoggerServiceImpl implements EventLoggerService {
         log.error("Unregistered Room: message_id={}, event_id={}, courthouse={}, courtroom={}, event_timestamp={}",
                   event.getMessageId(),
                   event.getEventId(),
-                  event.getCourthouse(),
-                  event.getCourtroom(),
+                  DataUtil.toUpperCase(event.getCourthouse()),
+                  DataUtil.toUpperCase(event.getCourtroom()),
                   getDateTimeIsoFormatted(event.getDateTime()));
     }
 

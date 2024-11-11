@@ -12,7 +12,7 @@ import java.time.OffsetDateTime;
 @Data
 @NoArgsConstructor
 @EqualsAndHashCode(callSuper = true)
-public class RecordManagementMatterResponse extends AbstractMatterResponse {
+public class RecordManagementMatterResponse extends BaseRpoResponse {
 
     private RecordManagementMatter recordManagementMatter;
 

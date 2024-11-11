@@ -6,6 +6,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import uk.gov.hmcts.darts.audit.api.AuditActivity;
 import uk.gov.hmcts.darts.audit.api.AuditApi;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.ObjectAdminActionEntity;
@@ -245,6 +246,9 @@ public class AdminTranscriptionServiceImpl implements AdminTranscriptionService 
         objectAdminActionEntity.setMarkedForManualDelDateTime(OffsetDateTime.now());
 
         objectAdminActionRepository.save(objectAdminActionEntity);
+
+        auditApi.record(AuditActivity.MANUAL_DELETION, userAccount, objectAdminActionEntity.getId().toString());
+
         return transcriptionMapper.mapAdminApproveDeletionResponse(transcriptionDocumentEntity, objectAdminActionEntity);
     }
 
