@@ -514,7 +514,7 @@ class CaseControllerSearchPostTest extends IntegrationBase {
             .contentType(MediaType.APPLICATION_JSON_VALUE)
             .content(requestBody);
         mockMvc.perform(requestBuilder).andExpect(status().isForbidden()).andExpect(jsonPath("$.type").value(
-            AuthorisationError.USER_DETAILS_INVALID.getType().toString()));
+            AuthorisationError.USER_DETAILS_INVALID.getType()));
 
     }
 

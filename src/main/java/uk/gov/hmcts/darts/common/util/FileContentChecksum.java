@@ -41,7 +41,7 @@ public class FileContentChecksum {
         return calculate(new FileInputStream(filePath.toFile()));
     }
 
-    protected String encodeToString(byte[] bytes) {
+    public String encodeToString(byte[] bytes) {
         StringBuilder result = new StringBuilder();
         for (byte b : bytes) {
             result.append(String.format("%02x", b));
