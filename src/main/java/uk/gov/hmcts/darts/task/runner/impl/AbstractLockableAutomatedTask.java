@@ -91,7 +91,7 @@ public abstract class AbstractLockableAutomatedTask implements AutomatedTask, Au
                 // Check the cron expression hasn't been changed in the database by another instance, if so skip this run
                 if (isManualTask || getLastCronExpression().equals(dbCronExpression)) {
                     if (isManualRun || TRUE.equals(automatedTask.getTaskEnabled())) {
-                        if (isManualRun && !TRUE.equals(automatedTask.getTaskEnabled())) {
+                        if (!TRUE.equals(automatedTask.getTaskEnabled())) {
                             log.info("Task: {} is inactive but has been run manually", getTaskName());
                         }
                         logApi.taskStarted(executionId.get(), this.getTaskName());
