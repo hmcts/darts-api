@@ -62,9 +62,9 @@ public class AudioLinkingAutomatedTask extends AbstractLockableAutomatedTask
     @Override
     protected void runTask() {
         log.info("Running AudioLinkingAutomatedTask");
-        List<Integer> eventIds = eventRepository.findAllByEventStatus(EventStatus.AUDIO_LINK_NOT_DONE_MODERNISED.getStatusNumber(),
+        List<Integer> eveIds = eventRepository.findAllByEventStatus(EventStatus.AUDIO_LINK_NOT_DONE_MODERNISED.getStatusNumber(),
                                                                       Limit.of(getAutomatedTaskBatchSize()));
-        eventIds.forEach(eventProcessor::processEvent);
+        eveIds.forEach(eventProcessor::processEvent);
     }
 
 
@@ -83,9 +83,10 @@ public class AudioLinkingAutomatedTask extends AbstractLockableAutomatedTask
 
 
         @Transactional
-        public void processEvent(Integer eventId) {
+        public void processEvent(Integer eveId) {
+            log.info("Linking media for event with eveId {}", eveId);
             try {
-                EventEntity event = eventService.getEventByEveId(eventId);
+                EventEntity event = eventService.getEventByEveId(eveId);
                 List<MediaEntity> mediaEntities = mediaRepository.findAllByMediaTimeContains(
                     event.getCourtroom().getId(),
                     event.getTimestamp().plus(getAudioBuffer()),
@@ -94,7 +95,7 @@ public class AudioLinkingAutomatedTask extends AbstractLockableAutomatedTask
                 event.setEventStatus(EventStatus.AUDIO_LINKED.getStatusNumber());
                 eventService.saveEvent(event);
             } catch (Exception e) {
-                log.error("Error processing event {}", eventId, e);
+                log.error("Error processing event {}", eveId, e);
             }
         }
 
