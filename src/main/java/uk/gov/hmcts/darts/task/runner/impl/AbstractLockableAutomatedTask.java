@@ -20,7 +20,6 @@ import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Locale;
 import java.util.Optional;
 import java.util.UUID;
 import javax.validation.constraints.NotNull;
@@ -37,10 +36,6 @@ import static uk.gov.hmcts.darts.task.status.AutomatedTaskStatus.SKIPPED;
 
 @Slf4j
 public abstract class AbstractLockableAutomatedTask implements AutomatedTask, AutoloadingAutomatedTask {
-
-    private String taskPropertyName;
-    private Duration lockAtMostFor;
-    private Duration lockAtLeastFor;
 
     private AutomatedTaskStatus automatedTaskStatus = NOT_STARTED;
 
@@ -149,16 +144,6 @@ public abstract class AbstractLockableAutomatedTask implements AutomatedTask, Au
         return Optional.ofNullable(automatedTaskConfigurationProperties.getLockAtLeastFor())
             .filter(duration -> duration.isPositive())
             .orElseGet(() -> lockService.getLockAtLeastFor());
-    }
-
-
-    public String getTaskPropertyName() {
-        if (taskPropertyName == null) {
-            taskPropertyName = getAutomatedTaskName().name().toLowerCase(Locale.ROOT)
-                .replaceAll("_task_name", "")
-                .replaceAll("_", "-");
-        }
-        return taskPropertyName;
     }
 
     protected void handleException(Exception exception) {
