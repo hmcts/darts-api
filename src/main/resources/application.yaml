@@ -297,6 +297,7 @@ darts:
         get-production-output-files-path: /api/v1/getProductionOutputFiles
         remove-production-path: /api/v1/removeProduction
         get-extended-productions-by-matter: /api/v1/getExtendedProductionsByMatter
+        download-production-path: /api/v1/downloadProduction/{productionExportFileID}/false
 
     dets:
       sas-endpoint: ${DETS_SAS_URL_ENDPOINT:}

@@ -1,6 +1,8 @@
 package uk.gov.hmcts.darts.arm.client;
 
 import org.springframework.cloud.openfeign.FeignClient;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
@@ -115,4 +117,12 @@ public interface ArmRpoClient {
     )
     ExtendedProductionsByMatterResponse getExtendedProductionsByMatter(@RequestHeader(AUTHORIZATION) String bearerToken,
                                                                        @RequestBody String body);
+
+    @GetMapping(value = "${darts.storage.arm-api.rpo-url.download-production-path}")
+    @SuppressWarnings({"PMD.UseObjectForClearerAPI"})
+    feign.Response downloadProduction(@RequestHeader(AUTHORIZATION) String bearerAuth,
+                                      @PathVariable("productionExportFileID") String productionExportFileId);
+
+
+
 }

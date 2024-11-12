@@ -38,6 +38,9 @@ import uk.gov.hmcts.darts.arm.helper.ArmRpoHelper;
 import uk.gov.hmcts.darts.arm.model.rpo.MasterIndexFieldByRecordClassSchema;
 import uk.gov.hmcts.darts.arm.rpo.ArmRpoApi;
 import uk.gov.hmcts.darts.arm.service.ArmRpoService;
+import uk.gov.hmcts.darts.common.datamanagement.component.impl.DownloadResponseMetaData;
+import uk.gov.hmcts.darts.common.datamanagement.component.impl.FileBasedDownloadResponseMetaData;
+import uk.gov.hmcts.darts.common.datamanagement.enums.DatastoreContainerType;
 import uk.gov.hmcts.darts.common.entity.ArmAutomatedTaskEntity;
 import uk.gov.hmcts.darts.common.entity.ArmRpoExecutionDetailEntity;
 import uk.gov.hmcts.darts.common.entity.ArmRpoStateEntity;
@@ -45,7 +48,6 @@ import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
 import uk.gov.hmcts.darts.common.repository.ArmAutomatedTaskRepository;
 
-import java.io.InputStream;
 import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -594,8 +596,45 @@ public class ArmRpoApiImpl implements ArmRpoApi {
     }
 
     @Override
-    public InputStream downloadProduction(String bearerToken, Integer executionId, String productionExportFileID, UserAccountEntity userAccount) {
-        throw new NotImplementedException("Method not implemented");
+    public DownloadResponseMetaData downloadProduction(String bearerToken, Integer executionId, String productionExportFileId, UserAccountEntity userAccount) {
+        var armRpoExecutionDetailEntity = armRpoService.getArmRpoExecutionDetailEntity(executionId);
+        armRpoService.updateArmRpoStateAndStatus(armRpoExecutionDetailEntity, ArmRpoHelper.downloadProductionRpoState(),
+                                                 ArmRpoHelper.inProgressRpoStatus(), userAccount);
+
+        feign.Response response = null;
+        StringBuilder errorMessage = new StringBuilder("Failure during download production: ");
+
+        try {
+            response = armRpoClient.downloadProduction(bearerToken, productionExportFileId);
+        } catch (FeignException e) {
+            // this ensures the full error body containing the ARM error detail is logged rather than a truncated version
+            log.error(errorMessage.append("Error during ARM RPO download production id: ").append(productionExportFileId)
+                          .append(" response ").append(response).toString() + " {}", e.contentUTF8());
+            throw handleFailureAndCreateException(errorMessage.toString(), armRpoExecutionDetailEntity, userAccount);
+        }
+
+        FileBasedDownloadResponseMetaData responseMetaData = new FileBasedDownloadResponseMetaData();
+        // on any error occurring return a download failure
+        if (!HttpStatus.valueOf(response.status()).is2xxSuccessful()) {
+            errorMessage.append("Failed ARM RPO download production with id: ").append(productionExportFileId)
+                .append(" response ").append(response);
+            log.error(response.toString());
+            throw handleFailureAndCreateException(errorMessage.toString(), armRpoExecutionDetailEntity, userAccount);
+        }
+
+        try {
+            responseMetaData.setContainerTypeUsedToDownload(DatastoreContainerType.ARM);
+            responseMetaData.setInputStream(response.body().asInputStream(), armDataManagementConfiguration);
+        } catch (Exception e) {
+            errorMessage.append("ARM RPO download production failed to save with id: ").append(productionExportFileId)
+                .append(" response ").append(response);
+            log.error(response.toString());
+            throw handleFailureAndCreateException(errorMessage.toString(), armRpoExecutionDetailEntity, userAccount);
+        }
+
+        log.debug("Successfully downloaded ARM data for productionExportFileId: {}", productionExportFileId);
+        armRpoService.updateArmRpoStatus(armRpoExecutionDetailEntity, ArmRpoHelper.completedRpoStatus(), userAccount);
+        return responseMetaData;
     }
 
     @Override

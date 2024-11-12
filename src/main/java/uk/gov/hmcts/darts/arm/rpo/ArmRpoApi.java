@@ -2,10 +2,10 @@ package uk.gov.hmcts.darts.arm.rpo;
 
 import uk.gov.hmcts.darts.arm.client.model.rpo.MasterIndexFieldByRecordClassSchemaResponse;
 import uk.gov.hmcts.darts.arm.model.rpo.MasterIndexFieldByRecordClassSchema;
+import uk.gov.hmcts.darts.common.datamanagement.component.impl.DownloadResponseMetaData;
 import uk.gov.hmcts.darts.common.entity.ArmRpoStateEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 
-import java.io.InputStream;
 import java.util.List;
 
 public interface ArmRpoApi {
@@ -35,7 +35,7 @@ public interface ArmRpoApi {
 
     List<String> getProductionOutputFiles(String bearerToken, Integer executionId, UserAccountEntity userAccount);
 
-    InputStream downloadProduction(String bearerToken, Integer executionId, String productionExportFileID, UserAccountEntity userAccount);
+    DownloadResponseMetaData downloadProduction(String bearerToken, Integer executionId, String productionExportFileId, UserAccountEntity userAccount);
 
     void removeProduction(String bearerToken, Integer executionId, UserAccountEntity userAccount);
 }
