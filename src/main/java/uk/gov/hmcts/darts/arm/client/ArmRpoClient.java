@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import uk.gov.hmcts.darts.arm.client.model.rpo.ArmAsyncSearchResponse;
 import uk.gov.hmcts.darts.arm.client.model.rpo.CreateExportBasedOnSearchResultsTableRequest;
 import uk.gov.hmcts.darts.arm.client.model.rpo.CreateExportBasedOnSearchResultsTableResponse;
+import uk.gov.hmcts.darts.arm.client.model.rpo.ExtendedProductionsByMatterResponse;
 import uk.gov.hmcts.darts.arm.client.model.rpo.ExtendedSearchesByMatterResponse;
 import uk.gov.hmcts.darts.arm.client.model.rpo.IndexesByMatterIdRequest;
 import uk.gov.hmcts.darts.arm.client.model.rpo.IndexesByMatterIdResponse;
@@ -107,4 +108,11 @@ public interface ArmRpoClient {
     )
     RemoveProductionResponse removeProduction(@RequestHeader(AUTHORIZATION) String bearerToken,
                                               @RequestBody RemoveProductionRequest removeProductionRequest);
+
+    @PostMapping(value = "${darts.storage.arm-api.rpo-url.get-extended-productions-by-matter}",
+        consumes = APPLICATION_JSON_VALUE,
+        produces = APPLICATION_JSON_VALUE
+    )
+    ExtendedProductionsByMatterResponse getExtendedProductionsByMatter(@RequestHeader(AUTHORIZATION) String bearerToken,
+                                                                       @RequestBody String body);
 }
