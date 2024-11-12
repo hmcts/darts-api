@@ -38,7 +38,7 @@ class AdminGetAutomatedTaskServiceTest extends IntegrationBase {
     void findsAllAutomatedTasks() {
         var persistedTasks = dartsDatabase.getAllAutomatedTasks();
 
-        var automatedTasks = adminAutomatedTaskService.getAllAutomatedTasks();
+        var automatedTasks = adminAutomatedTaskService.getAllAutomatedTasksSummaries();
 
         assertThat(automatedTasks).extracting("id").isEqualTo(taskIdsOf(persistedTasks));
         assertThat(automatedTasks).extracting("name").isEqualTo(taskNamesOf(persistedTasks));

@@ -8,7 +8,7 @@ import java.util.List;
 
 public interface AdminAutomatedTaskService {
 
-    List<AutomatedTaskSummary> getAllAutomatedTasks();
+    List<AutomatedTaskSummary> getAllAutomatedTasksSummaries();
 
     DetailedAutomatedTask getAutomatedTaskById(Integer taskId);
 
