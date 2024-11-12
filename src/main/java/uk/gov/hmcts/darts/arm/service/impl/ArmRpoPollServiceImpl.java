@@ -55,24 +55,24 @@ Remove the CSV(s) from Blob storage once reconciliation is completed.
             userAccount);
         for (MasterIndexFieldByRecordClassSchema recordClass : masterIndexFieldByRecordClassSchemas) {
 
-            if (armRpoApi.createExportBasedOnSearchResultsTable(bearerToken, executionId, recordClass.getHeaderColumns(), userAccount)) {
-                var extendedProductionsByMatter = armRpoApi.getExtendedProductionsByMatter(bearerToken, executionId, userAccount);
-                var productionOutputFiles = armRpoApi.getProductionOutputFiles(bearerToken, executionId, userAccount);
-                for (String productionExportFileID : productionOutputFiles) {
-                    if (armRpoHelper.isMockArmRpoDownloadCsv()) {
-                        // Fetch rpo_csv_start_hour & rpo_csv_end_hour from arm_automated_task table for ProcessE2EARMRPOPendingAutomatedTasks job.
-                        // Fetch the records from EOD with status as ARM_RPO_PENDING and data_ingestion_ts between created_ts minus rpo_csv_start_hour and created_ts minus rpo_csv_end_hour
-                        // Inject only 10 EODs in stub header and call the stub - downloadProduction (DMP-4078)
-                        // stub will return CSV with EODs
-                    } else {
-                        var csv = armRpoApi.downloadProduction(bearerToken, executionId, productionExportFileID, userAccount);
-                        // Save the CSV in blob storage (DMP-3617)
-                        // Once CSV is successfully saved, then remove the Search results by calling armRpoApi.removeProduction(DMP-4142)
-                        // Reconcile the CSV against EOD (DMP-3619)
-                        // Remove the CSV(s) from Blob storage once reconciliation is completed.
-                    }
-                }
-            }
+//            if (armRpoApi.createExportBasedOnSearchResultsTable(bearerToken, executionId, recordClass.getHeaderColumns(), userAccount)) {
+//                var extendedProductionsByMatter = armRpoApi.getExtendedProductionsByMatter(bearerToken, executionId, userAccount);
+//                var productionOutputFiles = armRpoApi.getProductionOutputFiles(bearerToken, executionId, userAccount);
+//                for (String productionExportFileID : productionOutputFiles) {
+//                    if (armRpoHelper.isMockArmRpoDownloadCsv()) {
+//                        // Fetch rpo_csv_start_hour & rpo_csv_end_hour from arm_automated_task table for ProcessE2EARMRPOPendingAutomatedTasks job.
+//                        // Fetch the records from EOD with status as ARM_RPO_PENDING and data_ingestion_ts between created_ts minus rpo_csv_start_hour and created_ts minus rpo_csv_end_hour
+//                        // Inject only 10 EODs in stub header and call the stub - downloadProduction (DMP-4078)
+//                        // stub will return CSV with EODs
+//                    } else {
+//                        var csv = armRpoApi.downloadProduction(bearerToken, executionId, productionExportFileID, userAccount);
+//                        // Save the CSV in blob storage (DMP-3617)
+//                        // Once CSV is successfully saved, then remove the Search results by calling armRpoApi.removeProduction(DMP-4142)
+//                        // Reconcile the CSV against EOD (DMP-3619)
+//                        // Remove the CSV(s) from Blob storage once reconciliation is completed.
+//                    }
+//                }
+//            }
         }
 
     }
