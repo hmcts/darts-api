@@ -27,20 +27,12 @@ class ArmRpoExecutionDetailRepositoryTest extends PostgresIntegrationBase {
     }
 
     @Test
-    void findByCreatedDateTimeDesc_shouldReturnExpectedArmRpoExecutionDetail_whenItExists() {
+    void findByOrderByCreatedDateTimeDescShouldReturnLatestArmRpoExecutionDetail() {
         // when
-        var result = armRpoExecutionDetailRepository.findByCreatedDateTimeDesc();
+        var result = armRpoExecutionDetailRepository.findByOrderByCreatedDateTimeDesc();
 
         // then
         assertThat(result).isEqualTo(armRpoExecutionDetailEntity3);
     }
 
-    /*@Test
-    void findByCreatedDateTimeDesc_shouldReturnEmptyList_whenNoArmRpoExecutionDetailExists() {
-        // Given we have no arm rpo execution details
-        // When we try to find them
-        var armRpoExecutionDetails = armRpoExecutionDetailRepository.findByCreatedDateTimeDesc();
-        // Then we get an empty list
-        assertThat(armRpoExecutionDetails, empty());
-    }*/
 }

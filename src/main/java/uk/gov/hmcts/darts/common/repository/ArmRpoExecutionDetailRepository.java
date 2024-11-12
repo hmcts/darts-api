@@ -7,6 +7,6 @@ import uk.gov.hmcts.darts.common.entity.ArmRpoExecutionDetailEntity;
 @Repository
 public interface ArmRpoExecutionDetailRepository extends JpaRepository<ArmRpoExecutionDetailEntity, Integer> {
 
-    ArmRpoExecutionDetailEntity findByCreatedDateTimeDesc();
-    
+    ArmRpoExecutionDetailEntity findByOrderByCreatedDateTimeDesc();
+
 }
