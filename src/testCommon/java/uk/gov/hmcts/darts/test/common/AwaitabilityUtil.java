@@ -59,7 +59,7 @@ public final class AwaitabilityUtil {
             .until(() -> {
                 try {
                     runnable.run();
-                } catch (Exception e) {
+                } catch (Exception | Error e) {
                     // ignore the error for now
                     return false;
                 }
