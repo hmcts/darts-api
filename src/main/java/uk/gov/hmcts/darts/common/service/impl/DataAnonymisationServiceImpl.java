@@ -110,6 +110,8 @@ public class DataAnonymisationServiceImpl implements DataAnonymisationService {
     public void anonymiseEvent(UserAccountEntity userAccount, EventEntity eventEntity) {
         anonymiseEventEntity(userAccount, eventEntity);
         eventService.saveEvent(eventEntity);
+        auditApi.record(AuditActivity.MANUAL_OBFUSCATION, userAccount, eventEntity.getId().toString());
+        logApi.manualObfuscation(eventEntity);
     }
 
     void anonymiseEventEntity(UserAccountEntity userAccount, EventEntity eventEntity) {
