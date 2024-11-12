@@ -13,6 +13,7 @@ import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.common.repository.AutomatedTaskRepository;
 import uk.gov.hmcts.darts.task.exception.AutomatedTaskApiError;
+import uk.gov.hmcts.darts.task.runner.AutomatedTask;
 import uk.gov.hmcts.darts.task.runner.impl.AbstractLockableAutomatedTask;
 import uk.gov.hmcts.darts.task.service.LockService;
 import uk.gov.hmcts.darts.tasks.model.AutomatedTaskPatch;
@@ -27,8 +28,10 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
@@ -42,8 +45,6 @@ class AdminAutomatedTasksServiceImplTest {
     private AutomatedTaskRepository automatedTaskRepository;
     @Mock
     private AutomatedTasksMapper mapper;
-    @Mock
-    private ManualTaskService manualTaskService;
     @Mock
     private AutomatedTaskRunner automatedTaskRunner;
     @Mock
@@ -62,17 +63,19 @@ class AdminAutomatedTasksServiceImplTest {
 
     @Test
     void invokesTaskWhenTaskIsNotLocked() {
+        adminAutomatedTaskService = spy(adminAutomatedTaskService);
         var automatedTask = anAutomatedTaskEntityWithName("some-task-name", null);
         when(someAutomatedTask.getTaskName()).thenReturn("some-task-name");
         when(lockService.isLocked(automatedTask)).thenReturn(false);
 
         when(automatedTaskRepository.findById(1)).thenReturn(Optional.of(automatedTask));
-        when(manualTaskService.getAutomatedTasks()).thenReturn(List.of(someAutomatedTask));
+        doReturn(List.of((AutomatedTask) someAutomatedTask)).when(adminAutomatedTaskService).getAllAutomatedTasks();
 
         adminAutomatedTaskService.runAutomatedTask(1);
 
-        verify(automatedTaskRunner, times(1)).run(someAutomatedTask);
-        verify(auditApi, times(1)).record(AuditActivity.RUN_JOB_MANUALLY,"some-task-name");
+        verify(automatedTaskRunner, times(1)).run(someAutomatedTask, true);
+        verify(auditApi, times(1)).record(AuditActivity.RUN_JOB_MANUALLY, "some-task-name");
+        verify(adminAutomatedTaskService, times(1)).getAllAutomatedTasks();
     }
 
     @Test
@@ -95,7 +98,7 @@ class AdminAutomatedTasksServiceImplTest {
         assertFalse(automatedTaskEntity.getTaskEnabled());
         assertEquals(100, automatedTaskEntity.getBatchSize());
         assertEquals(expectedReturnTask, task);
-        verify(auditApi).record(AuditActivity.ENABLE_DISABLE_JOB,"some-task-name disabled");
+        verify(auditApi).record(AuditActivity.ENABLE_DISABLE_JOB, "some-task-name disabled");
         verifyNoMoreInteractions(auditApi);
     }
 
@@ -116,7 +119,7 @@ class AdminAutomatedTasksServiceImplTest {
 
 
     @Test
-    void positiveGetAllAutomatedTasks() {
+    void positiveGetAllAutomatedTasksSummaries() {
         AutomatedTaskEntity automatedTaskEntity1 =
             createAutomatedTaskEntity("task1", true);
         AutomatedTaskEntity automatedTaskEntity2 =
@@ -126,7 +129,7 @@ class AdminAutomatedTasksServiceImplTest {
 
         when(automatedTaskRepository.findAll()).thenReturn(List.of(automatedTaskEntity1, automatedTaskEntity2, automatedTaskEntity3));
 
-        adminAutomatedTaskService.getAllAutomatedTasks();
+        adminAutomatedTaskService.getAllAutomatedTasksSummaries();
 
         verify(automatedTaskRepository, times(1))
             .findAll();
@@ -136,7 +139,7 @@ class AdminAutomatedTasksServiceImplTest {
 
 
     @Test
-    void positiveGetAllAutomatedTasksDisabledExcludeFlag() {
+    void positiveGetAllAutomatedTasksSummariesDisabledExcludeFlag() {
         AutomatedTaskEntity automatedTaskEntity1 =
             createAutomatedTaskEntity("task1", true);
         AutomatedTaskEntity automatedTaskEntity2 =
@@ -146,7 +149,7 @@ class AdminAutomatedTasksServiceImplTest {
 
         when(automatedTaskRepository.findAll()).thenReturn(List.of(automatedTaskEntity1, automatedTaskEntity2, automatedTaskEntity3));
 
-        adminAutomatedTaskService.getAllAutomatedTasks();
+        adminAutomatedTaskService.getAllAutomatedTasksSummaries();
 
         verify(automatedTaskRepository, times(1))
             .findAll();
