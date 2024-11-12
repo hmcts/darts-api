@@ -6,6 +6,8 @@ import org.springframework.stereotype.Component;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
 import uk.gov.hmcts.darts.common.entity.MediaLinkedCaseEntity;
+import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
+import uk.gov.hmcts.darts.common.enums.MediaLinkedCaseSourceType;
 import uk.gov.hmcts.darts.common.repository.MediaLinkedCaseRepository;
 
 import java.util.List;
@@ -17,7 +19,7 @@ public class MediaLinkedCaseHelper {
 
     private final MediaLinkedCaseRepository mediaLinkedCaseRepository;
 
-    public void addCase(MediaEntity mediaEntity, CourtCaseEntity courtCase) {
+    public void addCase(MediaEntity mediaEntity, CourtCaseEntity courtCase, MediaLinkedCaseSourceType sourceType, UserAccountEntity createdBy) {
         List<MediaLinkedCaseEntity> mediaLinkedCaseEntities = mediaLinkedCaseRepository.findByMedia(mediaEntity);
         List<CourtCaseEntity> linkedCases = mediaLinkedCaseEntities.stream().map(MediaLinkedCaseEntity::getCourtCase).toList();
         if (log.isDebugEnabled()) {
@@ -29,9 +31,7 @@ public class MediaLinkedCaseHelper {
                           .toList());
         }
         if (!linkedCases.contains(courtCase)) {
-            MediaLinkedCaseEntity mediaLinkedCaseEntity = new MediaLinkedCaseEntity();
-            mediaLinkedCaseEntity.setMedia(mediaEntity);
-            mediaLinkedCaseEntity.setCourtCase(courtCase);
+            MediaLinkedCaseEntity mediaLinkedCaseEntity = new MediaLinkedCaseEntity(mediaEntity, courtCase, createdBy, sourceType);
             mediaLinkedCaseRepository.saveAndFlush(mediaLinkedCaseEntity);
             log.debug("cas_id {} and med_id {} were not linked, Created new link via mlc_id {}",
                       courtCase.getId(), mediaEntity.getId(), mediaLinkedCaseEntity.getId());

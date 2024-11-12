@@ -10,14 +10,17 @@ import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
 import uk.gov.hmcts.darts.common.entity.EventEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
+import uk.gov.hmcts.darts.common.entity.MediaLinkedCaseEntity;
 import uk.gov.hmcts.darts.event.enums.EventStatus;
 import uk.gov.hmcts.darts.task.api.AutomatedTaskName;
 import uk.gov.hmcts.darts.testutils.PostgresIntegrationBase;
 
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static uk.gov.hmcts.darts.common.enums.MediaLinkedCaseSourceType.AUDIO_LINKING_TASK;
 
 @DisplayName("AudioLinkingAutomatedTask test")
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
@@ -94,6 +97,8 @@ class AudioLinkingAutomatedTaskITest extends PostgresIntegrationBase {
 
         assertThat(hearing.containsMedia(mediaEntity)).isTrue();
         assertThat(dartsDatabase.getMediaLinkedCaseRepository().existsByMediaAndCourtCase(media, hearing.getCourtCase())).isTrue();
+        List<MediaLinkedCaseEntity> mediaLinkedCaseEntities = dartsDatabase.getMediaLinkedCaseRepository().findByMedia(media);
+        assertThat(mediaLinkedCaseEntities).allMatch(mediaLinkedCaseEntity -> mediaLinkedCaseEntity.getSource() == AUDIO_LINKING_TASK);
     }
 
 
