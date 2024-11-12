@@ -171,7 +171,7 @@ public class ArmRpoApiImpl implements ArmRpoApi {
                 break;
             }
         }
-        if (!StringUtils.isBlank(storageAccountName)) {
+        if (StringUtils.isBlank(storageAccountName)) {
             throw handleFailureAndCreateException(errorMessage.append("Unable to find ARM RPO storage account in response").toString(),
                                                   armRpoExecutionDetailEntity, userAccount);
 
