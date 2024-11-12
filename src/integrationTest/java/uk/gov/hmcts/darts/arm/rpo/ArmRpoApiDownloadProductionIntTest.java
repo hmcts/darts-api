@@ -12,6 +12,9 @@ import uk.gov.hmcts.darts.common.enums.ArmRpoStateEnum;
 import uk.gov.hmcts.darts.common.enums.ArmRpoStatusEnum;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 
+import java.io.IOException;
+import java.io.InputStream;
+
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.junit.Assert.assertThrows;
@@ -32,10 +35,14 @@ class ArmRpoApiDownloadProductionIntTest extends IntegrationBase {
 
 
     @Test
-    void downloadProductionSuccess() {
+    void downloadProductionSuccess() throws IOException {
         // given
         feign.Response response = mock(feign.Response.class);
         when(response.status()).thenReturn(200);
+        InputStream inputStream = mock(InputStream.class);
+        feign.Response.Body body = mock(feign.Response.Body.class);
+        when(response.body()).thenReturn(body);
+        when(body.asInputStream()).thenReturn(inputStream);
         when(armRpoClient.downloadProduction(anyString(), anyString())).thenReturn(response);
 
         UserAccountEntity userAccount = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
@@ -46,7 +53,7 @@ class ArmRpoApiDownloadProductionIntTest extends IntegrationBase {
 
 
         // when
-        try (feign.Response result =
+        try (InputStream result =
                  armRpoApi.downloadProduction("token", armRpoExecutionDetailEntity.getId(), "productionExportId", userAccount)) {
             // then
             assertNotNull(result);

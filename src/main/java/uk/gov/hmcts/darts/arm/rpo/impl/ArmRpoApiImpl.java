@@ -44,6 +44,8 @@ import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
 import uk.gov.hmcts.darts.common.repository.ArmAutomatedTaskRepository;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -554,7 +556,8 @@ public class ArmRpoApiImpl implements ArmRpoApi {
     }
 
     @Override
-    public feign.Response downloadProduction(String bearerToken, Integer executionId, String productionExportFileId, UserAccountEntity userAccount) {
+    public InputStream downloadProduction(String bearerToken, Integer executionId, String productionExportFileId,
+                                          UserAccountEntity userAccount) throws IOException {
         var armRpoExecutionDetailEntity = armRpoService.getArmRpoExecutionDetailEntity(executionId);
         armRpoService.updateArmRpoStateAndStatus(armRpoExecutionDetailEntity, ArmRpoHelper.downloadProductionRpoState(),
                                                  ArmRpoHelper.inProgressRpoStatus(), userAccount);
@@ -581,7 +584,7 @@ public class ArmRpoApiImpl implements ArmRpoApi {
 
         log.debug("Successfully downloaded ARM data for productionExportFileId: {}", productionExportFileId);
         armRpoService.updateArmRpoStatus(armRpoExecutionDetailEntity, ArmRpoHelper.completedRpoStatus(), userAccount);
-        return response;
+        return response.body().asInputStream();
     }
 
     @Override

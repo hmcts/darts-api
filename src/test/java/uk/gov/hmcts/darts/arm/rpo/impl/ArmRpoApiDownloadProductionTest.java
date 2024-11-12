@@ -18,6 +18,9 @@ import uk.gov.hmcts.darts.common.datamanagement.component.impl.DownloadResponseM
 import uk.gov.hmcts.darts.common.entity.ArmRpoExecutionDetailEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 
+import java.io.IOException;
+import java.io.InputStream;
+
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -68,14 +71,20 @@ class ArmRpoApiDownloadProductionTest {
     }
 
     @Test
-    void downloadProductionSuccess() {
+    void downloadProductionSuccess() throws IOException {
         // given
         when(armRpoService.getArmRpoExecutionDetailEntity(anyInt())).thenReturn(armRpoExecutionDetailEntity);
         feign.Response response = mock(feign.Response.class);
         when(response.status()).thenReturn(200);
+        InputStream inputStream = mock(InputStream.class);
+        feign.Response.Body body = mock(feign.Response.Body.class);
+        when(response.body()).thenReturn(body);
+        when(body.asInputStream()).thenReturn(inputStream);
         when(armRpoClient.downloadProduction(anyString(), anyString())).thenReturn(response);
 
-        try (feign.Response result =
+        when(armRpoClient.downloadProduction(anyString(), anyString())).thenReturn(response);
+
+        try (InputStream result =
                  armRpoApi.downloadProduction(BEARER_TOKEN, EXECUTION_ID, "productionExportId", userAccount)) {
             // then
             assertNotNull(result);
