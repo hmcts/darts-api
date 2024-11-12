@@ -91,7 +91,7 @@ public class ArmRpoApiImpl implements ArmRpoApi {
         handleResponseStatus(userAccount, recordManagementMatterResponse, errorMessage, armRpoExecutionDetailEntity);
 
         if (isNull(recordManagementMatterResponse.getRecordManagementMatter())
-            || isNull(recordManagementMatterResponse.getRecordManagementMatter().getMatterId())) {
+            || StringUtils.isBlank(recordManagementMatterResponse.getRecordManagementMatter().getMatterId())) {
             throw handleFailureAndCreateException(ARM_GET_RECORD_MANAGEMENT_MATTER_ERROR, armRpoExecutionDetailEntity, userAccount);
         }
 
@@ -119,7 +119,8 @@ public class ArmRpoApiImpl implements ArmRpoApi {
 
         if (CollectionUtils.isEmpty(indexesByMatterIdResponse.getIndexes())
             || isNull(indexesByMatterIdResponse.getIndexes().getFirst())
-            || isNull(indexesByMatterIdResponse.getIndexes().getFirst().getIndex())) {
+            || isNull(indexesByMatterIdResponse.getIndexes().getFirst().getIndex())
+            || StringUtils.isBlank(indexesByMatterIdResponse.getIndexes().getFirst().getIndex().getIndexId())) {
             throw handleFailureAndCreateException(errorMessage.append("Unable to find indexes by matter ID in response").toString(),
                                                   armRpoExecutionDetailEntity,
                                                   userAccount);
@@ -170,7 +171,7 @@ public class ArmRpoApiImpl implements ArmRpoApi {
                 break;
             }
         }
-        if (!nonNull(storageAccountName)) {
+        if (!StringUtils.isBlank(storageAccountName)) {
             throw handleFailureAndCreateException(errorMessage.append("Unable to find ARM RPO storage account in response").toString(),
                                                   armRpoExecutionDetailEntity, userAccount);
 
@@ -271,7 +272,7 @@ public class ArmRpoApiImpl implements ArmRpoApi {
                 masterIndexFieldByRecordClassSchemaList.add(createMasterIndexFieldByRecordClassSchema(masterIndexField));
             }
         }
-        if (isNull(sortingField)) {
+        if (StringUtils.isBlank(sortingField)) {
             throw handleFailureAndCreateException(errorMessage.append("Unable to find sorting field in response").toString(),
                                                   armRpoExecutionDetailEntity, userAccount);
         }
@@ -460,45 +461,6 @@ public class ArmRpoApiImpl implements ArmRpoApi {
         return true;
     }
 
-    private CreateExportBasedOnSearchResultsTableRequest createRequestForCreateExportBasedOnSearchResultsTable(
-        List<MasterIndexFieldByRecordClassSchemaResponse> headerColumns, String searchId, int searchItemsCount, String productionName,
-        String storageAccountId) {
-
-        return CreateExportBasedOnSearchResultsTableRequest.builder()
-            .core(null)
-            .formFields(null)
-            .searchId(searchId)
-            .searchitemsCount(searchItemsCount)
-            .headerColumns(createHeaderColumnsFromMasterIndexFieldByRecordClassSchemaResponse(headerColumns))
-            .productionName(productionName)
-            .storageAccountId(storageAccountId)
-            .build();
-    }
-
-    private List<CreateExportBasedOnSearchResultsTableRequest.HeaderColumn> createHeaderColumnsFromMasterIndexFieldByRecordClassSchemaResponse(
-        List<MasterIndexFieldByRecordClassSchemaResponse> masterIndexFieldByRecordClassSchemaResponses) {
-
-        List<CreateExportBasedOnSearchResultsTableRequest.HeaderColumn> headerColumnList = new ArrayList<>();
-        for (MasterIndexFieldByRecordClassSchemaResponse response : masterIndexFieldByRecordClassSchemaResponses) {
-            for (MasterIndexFieldByRecordClassSchemaResponse.MasterIndexField masterIndexField : response.getMasterIndexFields()) {
-                headerColumnList.add(createHeaderColumn(masterIndexField));
-            }
-        }
-        return headerColumnList;
-    }
-
-    private CreateExportBasedOnSearchResultsTableRequest.HeaderColumn createHeaderColumn(
-        MasterIndexFieldByRecordClassSchemaResponse.MasterIndexField masterIndexField) {
-        return CreateExportBasedOnSearchResultsTableRequest.HeaderColumn.builder()
-            .masterIndexField(masterIndexField.getMasterIndexFieldId())
-            .displayName(masterIndexField.getDisplayName())
-            .propertyName(masterIndexField.getPropertyName())
-            .propertyType(masterIndexField.getPropertyType())
-            .isMasked(masterIndexField.getIsMasked())
-            .build();
-    }
-
-
     @Override
     public void getExtendedProductionsByMatter(String bearerToken, Integer executionId, UserAccountEntity userAccount) {
         var armRpoExecutionDetailEntity = armRpoService.getArmRpoExecutionDetailEntity(executionId);
@@ -569,7 +531,7 @@ public class ArmRpoApiImpl implements ArmRpoApi {
         List<ProductionOutputFilesResponse.ProductionExportFile> productionExportFiles = response.getProductionExportFiles();
         if (CollectionUtils.isEmpty(productionExportFiles)) {
             throw handleFailureAndCreateException(exceptionMessageBuilder.append("No production export files were returned")
-                                                  .toString(),
+                                                      .toString(),
                                                   executionDetail, userAccount);
         }
 
@@ -583,7 +545,7 @@ public class ArmRpoApiImpl implements ArmRpoApi {
 
         if (productionExportFileIds.isEmpty()) {
             throw handleFailureAndCreateException(exceptionMessageBuilder.append("No production export file ids were returned")
-                                                  .toString(),
+                                                      .toString(),
                                                   executionDetail, userAccount);
         }
 
@@ -731,6 +693,21 @@ public class ArmRpoApiImpl implements ArmRpoApi {
             .build();
     }
 
+    private CreateExportBasedOnSearchResultsTableRequest createRequestForCreateExportBasedOnSearchResultsTable(
+        List<MasterIndexFieldByRecordClassSchemaResponse> headerColumns, String searchId, int searchItemsCount, String productionName,
+        String storageAccountId) {
+
+        return CreateExportBasedOnSearchResultsTableRequest.builder()
+            .core(null)
+            .formFields(null)
+            .searchId(searchId)
+            .searchitemsCount(searchItemsCount)
+            .headerColumns(createHeaderColumnsFromMasterIndexFieldByRecordClassSchemaResponse(headerColumns))
+            .productionName(productionName)
+            .storageAccountId(storageAccountId)
+            .build();
+    }
+
     private SaveBackgroundSearchRequest createSaveBackgroundSearchRequest(String searchName, String searchId) {
         return SaveBackgroundSearchRequest.builder()
             .name(searchName)
@@ -741,6 +718,29 @@ public class ArmRpoApiImpl implements ArmRpoApi {
     private GetExtendedSearchesByMatterRequestGenerator createExtendedSearchesByMatterRequestGenerator(String matterId) {
         return GetExtendedSearchesByMatterRequestGenerator.builder()
             .matterId(matterId)
+            .build();
+    }
+
+    private List<CreateExportBasedOnSearchResultsTableRequest.HeaderColumn> createHeaderColumnsFromMasterIndexFieldByRecordClassSchemaResponse(
+        List<MasterIndexFieldByRecordClassSchemaResponse> masterIndexFieldByRecordClassSchemaResponses) {
+
+        List<CreateExportBasedOnSearchResultsTableRequest.HeaderColumn> headerColumnList = new ArrayList<>();
+        for (MasterIndexFieldByRecordClassSchemaResponse response : masterIndexFieldByRecordClassSchemaResponses) {
+            for (MasterIndexFieldByRecordClassSchemaResponse.MasterIndexField masterIndexField : response.getMasterIndexFields()) {
+                headerColumnList.add(createHeaderColumn(masterIndexField));
+            }
+        }
+        return headerColumnList;
+    }
+
+    private CreateExportBasedOnSearchResultsTableRequest.HeaderColumn createHeaderColumn(
+        MasterIndexFieldByRecordClassSchemaResponse.MasterIndexField masterIndexField) {
+        return CreateExportBasedOnSearchResultsTableRequest.HeaderColumn.builder()
+            .masterIndexField(masterIndexField.getMasterIndexFieldId())
+            .displayName(masterIndexField.getDisplayName())
+            .propertyName(masterIndexField.getPropertyName())
+            .propertyType(masterIndexField.getPropertyType())
+            .isMasked(masterIndexField.getIsMasked())
             .build();
     }
 
