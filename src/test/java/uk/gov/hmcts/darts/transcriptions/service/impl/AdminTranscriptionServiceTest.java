@@ -413,6 +413,7 @@ class AdminTranscriptionServiceTest {
             assertEquals(expectedResponse, actualResponse);
             assertTrue(capturedEntity.isMarkedForManualDeletion(), "Entity should be marked for manual deletion");
             assertEquals(userAccount, capturedEntity.getMarkedForManualDelBy(), "Entity's deletion should be marked by the correct user");
+
             assertNotNull(capturedEntity.getMarkedForManualDelDateTime(), "Entity's deletion datetime should be set");
         }
 

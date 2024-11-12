@@ -21,7 +21,6 @@ import uk.gov.hmcts.darts.transcriptions.enums.TranscriptionTypeEnum;
 import uk.gov.hmcts.darts.transcriptions.enums.TranscriptionUrgencyEnum;
 import uk.gov.hmcts.darts.transcriptions.model.TranscriptionRequestDetails;
 
-import java.net.URI;
 import java.time.OffsetDateTime;
 import java.util.Arrays;
 import java.util.List;
@@ -66,7 +65,7 @@ class TranscriptionRequestDetailsValidatorTest {
         var actualException = assertThrows(DARTS_EXCEPTION, () -> validator.validate(validatable));
 
         // Then
-        assertEquals(URI.create("TRANSCRIPTION_100"), actualException.getError().getType());
+        assertEquals("TRANSCRIPTION_100", actualException.getError().getType());
     }
 
     @ParameterizedTest
@@ -106,7 +105,7 @@ class TranscriptionRequestDetailsValidatorTest {
         var actualException = assertThrows(DARTS_EXCEPTION, () -> validator.validate(validatable));
 
         // Then
-        assertEquals(URI.create("CASE_104"), actualException.getError().getType());
+        assertEquals("CASE_104", actualException.getError().getType());
         assertEquals("CASE", actualException.getError().getErrorTypePrefix());
     }
 

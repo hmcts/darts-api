@@ -16,6 +16,8 @@ import uk.gov.hmcts.darts.testutils.stubs.CourtCaseStub;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Function;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -154,6 +156,50 @@ class CaseRepositoryIntTest extends IntegrationBase {
     @Test
     void testFindCasesNeedingCaseDocumentForRetentionDateGenerationPagedSuccess() {
         // given
+
+        AtomicInteger suffix = new AtomicInteger(1);
+        Function<Boolean, CourtCaseEntity> createValidCourtCase = (isRetentionUpdated) -> {
+            String caseNumber = "CASE" + suffix.getAndIncrement();
+            CourtCaseEntity courtCase = dartsDatabase.createCase(SOME_COURTHOUSE, caseNumber);
+
+            dartsDatabase.getHearingStub().createHearing(SOME_COURTHOUSE, SOME_ROOM, caseNumber,
+                                                         DateConverterUtil.toLocalDateTime(testTime));
+
+            CaseRetentionEntity caseRetentionObject1 = dartsDatabase.createCaseRetentionObject(
+                courtCase, CaseRetentionStatus.COMPLETE, OffsetDateTime.now().plusDays(30), false);
+
+            dartsDatabase.save(caseRetentionObject1);
+
+            CaseRetentionEntity caseRetentionObject2 = dartsDatabase.createCaseRetentionObject(
+                courtCase, CaseRetentionStatus.COMPLETE, OffsetDateTime.now().plusDays(20), false);
+            dartsDatabase.save(caseRetentionObject2);
+            courtCase.setRetentionUpdated(isRetentionUpdated);
+            return dartsDatabase.save(courtCase);
+        };
+
+        CourtCaseEntity courtCase1 = createValidCourtCase.apply(true);
+        CourtCaseEntity courtCase2 = createValidCourtCase.apply(false);
+        CourtCaseEntity courtCase3 = createValidCourtCase.apply(true);
+        CourtCaseEntity courtCase4 = createValidCourtCase.apply(false);
+
+
+        OffsetDateTime currentTimestamp = OffsetDateTime.now();
+        // when
+        List<Integer> result = caseRepository.findCasesNeedingCaseDocumentForRetentionDateGeneration(
+            currentTimestamp.plusDays(28), currentTimestamp.minusDays(28), Pageable.ofSize(4));
+
+        // then
+        assertThat(result).hasSize(4);
+        assertThat(result.get(0)).isEqualTo(courtCase2.getId());
+        assertThat(result.get(1)).isEqualTo(courtCase4.getId());
+        assertThat(result.get(2)).isEqualTo(courtCase1.getId());
+        assertThat(result.get(3)).isEqualTo(courtCase3.getId());
+
+    }
+
+    @Test
+    void returnIsRetentionUpdatedFirst() {
+        // given
         CourtCaseEntity courtCaseEntityWithNoCaseDocuments = dartsDatabase.createCase(SOME_COURTHOUSE, SOME_CASE_NUMBER_1);
 
         dartsDatabase.getHearingStub().createHearing(SOME_COURTHOUSE, SOME_ROOM, SOME_CASE_NUMBER_1,
@@ -185,13 +231,13 @@ class CaseRepositoryIntTest extends IntegrationBase {
         OffsetDateTime currentTimestamp = OffsetDateTime.now();
 
         // when
-        List<CourtCaseEntity> result = caseRepository.findCasesNeedingCaseDocumentForRetentionDateGeneration(
+        List<Integer> result = caseRepository.findCasesNeedingCaseDocumentForRetentionDateGeneration(
             currentTimestamp.plusDays(28), currentTimestamp.minusDays(28), Pageable.ofSize(2));
 
         // then
         assertThat(result).hasSize(2);
-        assertThat(result.get(0).getId()).isEqualTo(courtCaseEntityWithNoCaseDocuments.getId());
-        assertThat(result.get(1).getId()).isEqualTo(courtCaseEntityWithCaseDocument.getId());
+        assertThat(result.get(0)).isEqualTo(courtCaseEntityWithNoCaseDocuments.getId());
+        assertThat(result.get(1)).isEqualTo(courtCaseEntityWithCaseDocument.getId());
 
     }
 
@@ -224,7 +270,7 @@ class CaseRepositoryIntTest extends IntegrationBase {
         OffsetDateTime currentTimestamp = OffsetDateTime.now();
 
         // when
-        List<CourtCaseEntity> result = caseRepository.findCasesNeedingCaseDocumentForRetentionDateGeneration(
+        List<Integer> result = caseRepository.findCasesNeedingCaseDocumentForRetentionDateGeneration(
             currentTimestamp.plusDays(28), currentTimestamp.minusDays(28), Pageable.ofSize(2));
 
         // then
@@ -270,7 +316,7 @@ class CaseRepositoryIntTest extends IntegrationBase {
         OffsetDateTime currentTimestamp = OffsetDateTime.now();
 
         // when
-        List<CourtCaseEntity> result = caseRepository.findCasesNeedingCaseDocumentForRetentionDateGeneration(
+        List<Integer> result = caseRepository.findCasesNeedingCaseDocumentForRetentionDateGeneration(
             currentTimestamp.plusDays(28), currentTimestamp.minusDays(28), Pageable.ofSize(2));
 
         // then

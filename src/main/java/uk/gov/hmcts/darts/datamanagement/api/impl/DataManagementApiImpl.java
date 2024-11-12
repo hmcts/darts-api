@@ -41,9 +41,7 @@ public class DataManagementApiImpl implements DataManagementApi {
 
     @Override
     public BlobClientUploadResponse saveBlobToContainer(InputStream inputStream, DatastoreContainerType container, Map<String, String> metadata) {
-        String containerName = getContainerName(container)
-            .orElseThrow(() -> new IllegalArgumentException("Container name cannot be resolved"));
-
+        String containerName = getContainerNameRequired(container);
         return dataManagementService.saveBlobData(containerName, inputStream, metadata);
     }
 
@@ -86,6 +84,11 @@ public class DataManagementApiImpl implements DataManagementApi {
         return dataManagementService.saveBlobData(getUnstructuredContainerName(), binaryData);
     }
 
+    @Override
+    public String getChecksum(DatastoreContainerType datastoreContainerType, UUID guid) {
+        return dataManagementService.getChecksum(getContainerNameRequired(datastoreContainerType), guid);
+    }
+
     private String getOutboundContainerName() {
         return dataManagementConfiguration.getOutboundContainerName();
     }
@@ -106,6 +109,12 @@ public class DataManagementApiImpl implements DataManagementApi {
             return dataManagementService.downloadData(container, containerName.get(), externalObjectDirectoryEntity.getExternalLocation());
         }
         throw new FileNotDownloadedException(externalObjectDirectoryEntity.getExternalLocation(), container.name(), "Container not found.");
+    }
+
+
+    public String getContainerNameRequired(DatastoreContainerType datastoreContainerType) {
+        return getContainerName(datastoreContainerType)
+            .orElseThrow(() -> new IllegalArgumentException("Container name cannot be resolved"));
     }
 
     @Override

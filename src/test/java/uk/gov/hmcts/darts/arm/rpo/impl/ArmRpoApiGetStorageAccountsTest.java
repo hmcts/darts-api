@@ -75,6 +75,8 @@ class ArmRpoApiGetStorageAccountsTest {
         index2.setIndex(indexDetails2);
 
         StorageAccountResponse storageAccountResponse = new StorageAccountResponse();
+        storageAccountResponse.setStatus(200);
+        storageAccountResponse.setIsError(false);
         storageAccountResponse.setIndexes(List.of(index1, index2));
         when(armRpoClient.getStorageAccounts(anyString(), any(StorageAccountRequest.class))).thenReturn(storageAccountResponse);
         when(armApiConfigurationProperties.getArmStorageAccountName()).thenReturn("expectedAccountName");
@@ -94,6 +96,8 @@ class ArmRpoApiGetStorageAccountsTest {
     void getStorageAccountsReturnsNonMatchingStorageName() {
         // given
         StorageAccountResponse storageAccountResponse = new StorageAccountResponse();
+        storageAccountResponse.setStatus(200);
+        storageAccountResponse.setIsError(false);
         StorageAccountResponse.IndexDetails indexDetails1 = new StorageAccountResponse.IndexDetails();
         indexDetails1.setIndexId("indexId1");
         indexDetails1.setName("unexpectedAccountName");

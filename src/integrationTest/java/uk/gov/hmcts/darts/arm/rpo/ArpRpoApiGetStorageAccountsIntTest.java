@@ -38,7 +38,7 @@ class ArpRpoApiGetStorageAccountsIntTest extends IntegrationBase {
 
 
     @Test
-    void getStorageShouldSucceedIfServerReturns200Success() {
+    void getStorageAccountsSuccess() {
 
         // given
         when(armApiConfigurationProperties.getArmStorageAccountName()).thenReturn("expectedAccountName");
@@ -56,6 +56,8 @@ class ArpRpoApiGetStorageAccountsIntTest extends IntegrationBase {
 
         StorageAccountResponse storageAccountResponse = new StorageAccountResponse();
         storageAccountResponse.setIndexes(List.of(index1, index2));
+        storageAccountResponse.setStatus(200);
+        storageAccountResponse.setIsError(false);
 
         var bearerAuth = "Bearer some-token";
         when(armRpoClient.getStorageAccounts(any(), any())).thenReturn(storageAccountResponse);
@@ -79,10 +81,12 @@ class ArpRpoApiGetStorageAccountsIntTest extends IntegrationBase {
     }
 
     @Test
-    void getStorageShouldFailIfServerReturns200SuccessWithMissingMatchingStorage() {
+    void getStorageAccountsWithMissingMatchingStorage() {
 
         // given
         StorageAccountResponse response = new StorageAccountResponse();
+        response.setStatus(200);
+        response.setIsError(false);
         when(armRpoClient.getStorageAccounts(any(), any())).thenReturn(response);
 
         UserAccountEntity userAccount = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
@@ -108,7 +112,7 @@ class ArpRpoApiGetStorageAccountsIntTest extends IntegrationBase {
     }
 
     @Test
-    void getStorageAccountsFailsWhenClientReturns400Error() {
+    void getStorageAccountsFailsWhenClientThrowsFeignException() {
 
         // given
         when(armRpoClient.getStorageAccounts(any(), any())).thenThrow(FeignException.BadRequest.class);

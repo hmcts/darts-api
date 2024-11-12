@@ -35,4 +35,5 @@ public interface DataManagementApi extends BlobContainerDownloadable {
 
     UUID saveBlobDataToUnstructuredContainer(BinaryData binaryData);
 
+    String getChecksum(DatastoreContainerType datastoreContainerType, UUID guid);
 }

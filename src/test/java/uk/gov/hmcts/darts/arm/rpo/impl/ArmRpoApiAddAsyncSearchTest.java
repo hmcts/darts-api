@@ -255,6 +255,8 @@ class ArmRpoApiAddAsyncSearchTest {
 
     private void createSearchResponseAndSetMock(String searchId) {
         var response = new ArmAsyncSearchResponse();
+        response.setStatus(200);
+        response.setIsError(false);
         response.setSearchId(searchId);
 
         when(armRpoClient.addAsyncSearch(eq(TOKEN), anyString()))
