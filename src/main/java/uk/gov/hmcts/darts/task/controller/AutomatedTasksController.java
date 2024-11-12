@@ -30,7 +30,7 @@ public class AutomatedTasksController implements TasksApi {
     @Authorisation(contextId = ANY_ENTITY_ID, globalAccessSecurityRoles = {SUPER_ADMIN})
     @Override
     public ResponseEntity<List<AutomatedTaskSummary>> getAutomatedTasks() {
-        return new ResponseEntity<>(adminAutomatedTaskService.getAllAutomatedTasks(), HttpStatus.OK);
+        return new ResponseEntity<>(adminAutomatedTaskService.getAllAutomatedTasksSummaries(), HttpStatus.OK);
     }
 
     @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)

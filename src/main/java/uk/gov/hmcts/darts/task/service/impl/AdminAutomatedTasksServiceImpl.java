@@ -12,6 +12,7 @@ import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.common.repository.AutomatedTaskRepository;
 import uk.gov.hmcts.darts.task.api.AutomatedTaskName;
 import uk.gov.hmcts.darts.task.exception.AutomatedTaskApiError;
+import uk.gov.hmcts.darts.task.runner.AutomatedTask;
 import uk.gov.hmcts.darts.task.service.AdminAutomatedTaskService;
 import uk.gov.hmcts.darts.task.service.LockService;
 import uk.gov.hmcts.darts.tasks.model.AutomatedTaskPatch;
@@ -34,21 +35,28 @@ public class AdminAutomatedTasksServiceImpl implements AdminAutomatedTaskService
 
     private final AutomatedTaskRepository automatedTaskRepository;
     private final AutomatedTasksMapper mapper;
-    private final ManualTaskService manualTaskService;
     private final AutomatedTaskRunner automatedTaskRunner;
     private final AuditApi auditApi;
     private final LockService lockService;
-
     private final ConfigurableBeanFactory configurableBeanFactory;
+    private final List<AutomatedTask> automatedTasks;
 
     @Override
-    public List<AutomatedTaskSummary> getAllAutomatedTasks() {
-        var automatedTask = automatedTaskRepository.findAll()
+    public List<AutomatedTaskSummary> getAllAutomatedTasksSummaries() {
+        return mapper.mapEntitiesToModel(getAllAutomatedTasksEntities());
+    }
+
+    List<AutomatedTaskEntity> getAllAutomatedTasksEntities() {
+        return automatedTaskRepository.findAll()
             .stream()
             .filter(this::shouldIncludeAutomatedTask)
             .toList();
-        return mapper.mapEntitiesToModel(automatedTask);
     }
+
+    List<AutomatedTask> getAllAutomatedTasks() {
+        return automatedTasks;
+    }
+
 
     @Override
     public DetailedAutomatedTask getAutomatedTaskById(Integer taskId) {
@@ -65,7 +73,8 @@ public class AdminAutomatedTasksServiceImpl implements AdminAutomatedTaskService
             throw new DartsApiException(AUTOMATED_TASK_ALREADY_RUNNING);
         }
 
-        var automatedTask = manualTaskService.getAutomatedTasks().stream()
+        var automatedTask = getAllAutomatedTasks()
+            .stream()
             .filter(task -> task.getTaskName().equals(automatedTaskEntity.getTaskName()))
             .findFirst();
 
@@ -74,7 +83,7 @@ public class AdminAutomatedTasksServiceImpl implements AdminAutomatedTaskService
             throw new DartsApiException(AutomatedTaskApiError.AUTOMATED_TASK_NOT_CONFIGURED_CORRECTLY);
         }
 
-        automatedTaskRunner.run(automatedTask.get());
+        automatedTaskRunner.run(automatedTask.get(), true);
 
         auditApi.record(RUN_JOB_MANUALLY, automatedTaskEntity.getTaskName());
     }

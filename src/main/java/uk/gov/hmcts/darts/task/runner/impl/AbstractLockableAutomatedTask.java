@@ -53,12 +53,6 @@ public abstract class AbstractLockableAutomatedTask implements AutomatedTask, Au
 
     private ThreadLocal<UUID> executionId;
 
-    private boolean isManualTask = false;
-
-    public void setManualTask() {
-        this.isManualTask = true;
-    }
-
     protected AbstractLockableAutomatedTask(AutomatedTaskRepository automatedTaskRepository,
                                             AutomatedTaskConfigurationProperties automatedTaskConfigurationProperties,
                                             LogApi logApi, LockService lockService) {
@@ -69,17 +63,15 @@ public abstract class AbstractLockableAutomatedTask implements AutomatedTask, Au
     }
 
     private void setupUserAuthentication() {
-
         Jwt jwt = Jwt.withTokenValue("automated-task")
             .header("alg", "RS256")
             .claim("emails", List.of(automatedTaskConfigurationProperties.getSystemUserEmail()))
             .build();
         SecurityContextHolder.getContext().setAuthentication(new JwtAuthenticationToken(jwt));
-
     }
 
     @Override
-    public void run() {
+    public void run(boolean isManualRun) {
         executionId = ThreadLocal.withInitial(UUID::randomUUID);
         preRunTask();
         try {
@@ -89,8 +81,11 @@ public abstract class AbstractLockableAutomatedTask implements AutomatedTask, Au
                 AutomatedTaskEntity automatedTask = automatedTaskEntity.get();
                 String dbCronExpression = automatedTask.getCronExpression();
                 // Check the cron expression hasn't been changed in the database by another instance, if so skip this run
-                if (isManualTask || getLastCronExpression().equals(dbCronExpression)) {
-                    if (TRUE.equals(automatedTask.getTaskEnabled())) {
+                if (isManualRun || getLastCronExpression().equals(dbCronExpression)) {
+                    if (isManualRun || TRUE.equals(automatedTask.getTaskEnabled())) {
+                        if (!TRUE.equals(automatedTask.getTaskEnabled())) {
+                            log.info("Task: {} is inactive but has been run manually", getTaskName());
+                        }
                         logApi.taskStarted(executionId.get(), this.getTaskName());
                         lockService.getLockingTaskExecutor().executeWithLock(new LockedTask(), getLockConfiguration());
                     } else {
