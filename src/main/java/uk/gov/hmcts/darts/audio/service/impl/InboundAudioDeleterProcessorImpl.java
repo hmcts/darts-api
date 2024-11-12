@@ -72,7 +72,7 @@ public class InboundAudioDeleterProcessorImpl implements InboundAudioDeleterProc
         List<List<Integer>> splitList = ListUtils.partition(audioFileIdsToBeMarked,
                                                             MAX_IDS_PER_LOG_MESSAGE);
         for (List<Integer> eodIds : splitList) {
-            log.info("Marking EODs to be marked for deletion with ids : ", eodIds);
+            log.info("Marking EODs to be marked for deletion with ids : {}", eodIds);
         }
     }
 }
