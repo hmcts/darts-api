@@ -6,6 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import uk.gov.hmcts.darts.common.entity.EventEntity;
 import uk.gov.hmcts.darts.event.model.DartsEvent;
 import uk.gov.hmcts.darts.log.enums.EventSource;
 import uk.gov.hmcts.darts.log.service.EventLoggerService;
@@ -88,5 +89,14 @@ public class EventLoggerServiceImpl implements EventLoggerService {
                   DataUtil.toUpperCase(event.getCourthouse()),
                   DataUtil.toUpperCase(event.getCourtroom()),
                   getDateTimeIsoFormatted(event.getDateTime()));
+    }
+
+    @Override
+    public void manualObfuscation(EventEntity eventEntity) {
+        log.info(manualObfuscationMessage(eventEntity));
+    }
+
+    public static String manualObfuscationMessage(EventEntity eventEntity) {
+        return String.format("Event id %s manually obfuscated by user %s", eventEntity.getId(), eventEntity.getLastModifiedBy().getId());
     }
 }
