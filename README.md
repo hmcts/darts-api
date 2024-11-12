@@ -79,7 +79,7 @@ You may need to install Azure CLI, jq and postgres you can do this by running
 brew update
 brew install azure-cli 
 brew install jq
-brew install postgresql@15
+brew install postgresql@16
 az login
 ```
 
