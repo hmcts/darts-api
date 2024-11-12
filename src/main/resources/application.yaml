@@ -510,6 +510,7 @@ darts:
       unstructured-to-arm-batch-processor:
         max-arm-manifest-items: 100
         max-arm-single-mode-items: 100
+        threads: 20
       dets-to-arm-batch-processor:
         max-arm-manifest-items: 100
         manifest-file-prefix: DETS

@@ -7,10 +7,18 @@ import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import uk.gov.hmcts.darts.common.entity.ExternalLocationTypeEntity;
 import uk.gov.hmcts.darts.common.entity.ObjectRecordStatusEntity;
+import uk.gov.hmcts.darts.common.repository.ExternalLocationTypeRepository;
+import uk.gov.hmcts.darts.common.repository.ObjectRecordStatusRepository;
 import uk.gov.hmcts.darts.common.util.EodHelper;
 
+import java.util.Optional;
+
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum.ARM;
 import static uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum.DETS;
 import static uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum.INBOUND;
@@ -143,5 +151,18 @@ public class EodHelperMocks {
     public void close() {
         mockedEodHelper.close();
         closeable.close();
+    }
+
+    //This is needed to bypass static mock limitations with multi threaded operations
+    public void simulateInitWithMockedData(ObjectRecordStatusEntity objectRecordStatusEntity,
+                                           ExternalLocationTypeEntity externalLocationTypeEntity) {
+        ExternalLocationTypeRepository eltRepository = mock(ExternalLocationTypeRepository.class);
+        ObjectRecordStatusRepository orsRepository = mock(ObjectRecordStatusRepository.class);
+
+        EodHelper eodHelper = spy(new EodHelper(null, eltRepository, orsRepository));
+
+        when(eltRepository.findById(anyInt())).thenReturn(Optional.of(externalLocationTypeEntity));
+        when(orsRepository.findById(anyInt())).thenReturn(Optional.of(objectRecordStatusEntity));
+        eodHelper.init();
     }
 }
