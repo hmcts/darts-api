@@ -16,6 +16,8 @@ import uk.gov.hmcts.darts.arm.client.model.rpo.ProductionOutputFilesRequest;
 import uk.gov.hmcts.darts.arm.client.model.rpo.ProductionOutputFilesResponse;
 import uk.gov.hmcts.darts.arm.client.model.rpo.ProfileEntitlementResponse;
 import uk.gov.hmcts.darts.arm.client.model.rpo.RecordManagementMatterResponse;
+import uk.gov.hmcts.darts.arm.client.model.rpo.RemoveProductionRequest;
+import uk.gov.hmcts.darts.arm.client.model.rpo.RemoveProductionResponse;
 import uk.gov.hmcts.darts.arm.client.model.rpo.SaveBackgroundSearchRequest;
 import uk.gov.hmcts.darts.arm.client.model.rpo.SaveBackgroundSearchResponse;
 import uk.gov.hmcts.darts.arm.client.model.rpo.StorageAccountRequest;
@@ -43,7 +45,6 @@ public interface ArmRpoClient {
     )
     StorageAccountResponse getStorageAccounts(@RequestHeader(AUTHORIZATION) String bearerToken,
                                               @RequestBody StorageAccountRequest storageAccountRequest);
-
 
     @PostMapping(value = "${darts.storage.arm-api.rpo-url.get-master-index-field-by-record-class-schema-path}",
         consumes = APPLICATION_JSON_VALUE,
@@ -100,4 +101,10 @@ public interface ArmRpoClient {
         @RequestHeader(AUTHORIZATION) String bearerToken, @RequestBody CreateExportBasedOnSearchResultsTableRequest request);
 
 
+    @PostMapping(value = "${darts.storage.arm-api.rpo-url.remove-production-path}",
+        consumes = APPLICATION_JSON_VALUE,
+        produces = APPLICATION_JSON_VALUE
+    )
+    RemoveProductionResponse removeProduction(@RequestHeader(AUTHORIZATION) String bearerToken,
+                                              @RequestBody RemoveProductionRequest removeProductionRequest);
 }

@@ -23,6 +23,8 @@ import uk.gov.hmcts.darts.arm.client.model.rpo.ProductionOutputFilesRequest;
 import uk.gov.hmcts.darts.arm.client.model.rpo.ProductionOutputFilesResponse;
 import uk.gov.hmcts.darts.arm.client.model.rpo.ProfileEntitlementResponse;
 import uk.gov.hmcts.darts.arm.client.model.rpo.RecordManagementMatterResponse;
+import uk.gov.hmcts.darts.arm.client.model.rpo.RemoveProductionRequest;
+import uk.gov.hmcts.darts.arm.client.model.rpo.RemoveProductionResponse;
 import uk.gov.hmcts.darts.arm.client.model.rpo.SaveBackgroundSearchRequest;
 import uk.gov.hmcts.darts.arm.client.model.rpo.SaveBackgroundSearchResponse;
 import uk.gov.hmcts.darts.arm.client.model.rpo.StorageAccountRequest;
@@ -564,7 +566,31 @@ public class ArmRpoApiImpl implements ArmRpoApi {
 
     @Override
     public void removeProduction(String bearerToken, Integer executionId, UserAccountEntity userAccount) {
-        throw new NotImplementedException("Method not implemented");
+        var armRpoExecutionDetailEntity = armRpoService.getArmRpoExecutionDetailEntity(executionId);
+        armRpoService.updateArmRpoStateAndStatus(armRpoExecutionDetailEntity, ArmRpoHelper.removeProductionRpoState(),
+                                                 ArmRpoHelper.inProgressRpoStatus(), userAccount);
+
+        StringBuilder errorMessage = new StringBuilder("Failure during ARM RPO removeProduction: ");
+        RemoveProductionResponse removeProductionResponse = null;
+        try {
+            RemoveProductionRequest request = createRemoveProductionRequest(armRpoExecutionDetailEntity);
+            removeProductionResponse = armRpoClient.removeProduction(bearerToken, request);
+        } catch (FeignException e) {
+            // this ensures the full error body containing the ARM error detail is logged rather than a truncated version
+            log.error(errorMessage.append("Unable to get ARM RPO response ").append(removeProductionResponse).toString() + " {}", e.contentUTF8());
+            throw handleFailureAndCreateException(errorMessage.toString(), armRpoExecutionDetailEntity, userAccount);
+        }
+
+        handleResponseStatus(userAccount, removeProductionResponse, errorMessage, armRpoExecutionDetailEntity);
+
+        armRpoService.updateArmRpoStatus(armRpoExecutionDetailEntity, ArmRpoHelper.completedRpoStatus(), userAccount);
+    }
+
+    private RemoveProductionRequest createRemoveProductionRequest(ArmRpoExecutionDetailEntity armRpoExecutionDetailEntity) {
+        return RemoveProductionRequest.builder()
+            .productionId(armRpoExecutionDetailEntity.getProductionId())
+            .deleteSearch(true)
+            .build();
     }
 
     private ArmRpoException handleFailureAndCreateException(String message,
