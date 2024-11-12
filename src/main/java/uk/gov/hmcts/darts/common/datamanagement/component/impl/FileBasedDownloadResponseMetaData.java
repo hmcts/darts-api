@@ -17,7 +17,7 @@ import java.nio.file.StandardOpenOption;
 import java.util.UUID;
 
 /**
- *The response download data. Always use in combination with a try resources to ensure the file resources are cleaned up
+ * The response download data. Always use in combination with a try resources to ensure the file resources are cleaned up
  */
 @Slf4j
 public class FileBasedDownloadResponseMetaData extends DownloadResponseMetaData {
@@ -27,10 +27,11 @@ public class FileBasedDownloadResponseMetaData extends DownloadResponseMetaData 
     /**
      * gets a spring file resource. The file is cleaned up after the closure of the associated input stream.
      * To that end this method call is single use
+     *
      * @return The resource
      */
     @Override
-    public Resource getResource()  throws IOException {
+    public Resource getResource() throws IOException {
 
         return new FileUrlResource(fileToBeDownloadedTo.toURI().toURL()) {
 
@@ -57,7 +58,7 @@ public class FileBasedDownloadResponseMetaData extends DownloadResponseMetaData 
         return outputStream;
     }
 
-    public void setInputStream(InputStream inputStream, StorageConfiguration configuration)  throws IOException {
+    public void setInputStream(InputStream inputStream, StorageConfiguration configuration) throws IOException {
         Files.createDirectories(Path.of(configuration.getTempBlobWorkspace()));
         fileToBeDownloadedTo = Files.createFile(Path.of(configuration.getTempBlobWorkspace(), UUID.randomUUID().toString())).toFile();
         FileUtils.copyInputStreamToFile(inputStream, fileToBeDownloadedTo);

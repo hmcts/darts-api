@@ -5,6 +5,7 @@ import uk.gov.hmcts.darts.arm.model.rpo.MasterIndexFieldByRecordClassSchema;
 import uk.gov.hmcts.darts.common.entity.ArmRpoStateEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
 
@@ -35,7 +36,7 @@ public interface ArmRpoApi {
 
     List<String> getProductionOutputFiles(String bearerToken, Integer executionId, UserAccountEntity userAccount);
 
-    InputStream downloadProduction(String bearerToken, Integer executionId, String productionExportFileID, UserAccountEntity userAccount);
+    InputStream downloadProduction(String bearerToken, Integer executionId, String productionExportFileId, UserAccountEntity userAccount) throws IOException;
 
     void removeProduction(String bearerToken, Integer executionId, UserAccountEntity userAccount);
 }
