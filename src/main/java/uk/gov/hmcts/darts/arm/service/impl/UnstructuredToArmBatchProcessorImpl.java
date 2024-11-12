@@ -23,11 +23,15 @@ import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
 import uk.gov.hmcts.darts.common.service.FileOperationService;
 import uk.gov.hmcts.darts.common.util.EodHelper;
 import uk.gov.hmcts.darts.log.api.LogApi;
+import uk.gov.hmcts.darts.util.AsyncUtil;
 
 import java.io.File;
 import java.text.MessageFormat;
 import java.time.OffsetDateTime;
 import java.util.List;
+import java.util.concurrent.Callable;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import static uk.gov.hmcts.darts.common.util.EodHelper.equalsAnyStatus;
 import static uk.gov.hmcts.darts.common.util.EodHelper.isEqual;
@@ -70,11 +74,25 @@ public class UnstructuredToArmBatchProcessorImpl implements UnstructuredToArmBat
             //ARM has a max batch size for manifest items, so lets loop through the big list creating lots of individual batches for ARM to process separately
             List<List<ExternalObjectDirectoryEntity>> batchesForArm = ListUtils.partition(eodsForTransfer,
                                                                                           unstructuredToArmProcessorConfiguration.getMaxArmManifestItems());
-            int batchCounter = 1;
+            AtomicInteger batchCounter = new AtomicInteger(1);
             UserAccountEntity userAccount = userIdentity.getUserAccount();
-            for (List<ExternalObjectDirectoryEntity> eodsForBatch : batchesForArm) {
-                log.info("Creating batch {} out of {}", batchCounter++, batchesForArm.size());
-                createAndSendBatchFile(eodsForBatch, userAccount);
+            List<Callable<Void>> tasks = batchesForArm
+                .stream()
+                .map(eodsForBatch -> (Callable<Void>) () -> {
+                    log.info("Creating batch {} out of {}", batchCounter.getAndIncrement(), batchesForArm.size());
+                    createAndSendBatchFile(eodsForBatch, userAccount);
+                    return null;
+                })
+                .toList();
+
+            try {
+                AsyncUtil.invokeAllAwaitTermination(tasks, unstructuredToArmProcessorConfiguration.getThreads(), 90, TimeUnit.MINUTES);
+            } catch (Exception e) {
+                log.error("Unstructured to arm batch unexpected exception", e);
+                if (e instanceof InterruptedException) {
+                    Thread.currentThread().interrupt();
+                }
+                return;
             }
         }
         log.info("Finished running ARM Batch Push processing at: {}", OffsetDateTime.now());
@@ -85,8 +103,8 @@ public class UnstructuredToArmBatchProcessorImpl implements UnstructuredToArmBat
         File archiveRecordsFile = unstructuredToArmHelper.createEmptyArchiveRecordsFile(armDataManagementConfiguration.getManifestFilePrefix());
         var batchItems = new ArmBatchItems();
 
-        for (var currentEod : eodsForBatch) {
 
+        for (var currentEod : eodsForBatch) {
             var batchItem = new ArmBatchItem();
             try {
                 ExternalObjectDirectoryEntity armEod;

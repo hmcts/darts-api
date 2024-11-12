@@ -15,5 +15,6 @@ public class UnstructuredToArmProcessorConfiguration {
 
     private int maxArmManifestItems;
     private int maxArmSingleModeItems;
+    private int threads;
 
 }
