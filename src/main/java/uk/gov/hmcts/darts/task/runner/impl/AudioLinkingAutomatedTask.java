@@ -14,11 +14,15 @@ import uk.gov.hmcts.darts.common.entity.EventEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
 import uk.gov.hmcts.darts.common.entity.MediaLinkedCaseEntity;
+import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
+import uk.gov.hmcts.darts.common.enums.MediaLinkedCaseSourceType;
+import uk.gov.hmcts.darts.common.enums.SystemUsersEnum;
 import uk.gov.hmcts.darts.common.repository.AutomatedTaskRepository;
 import uk.gov.hmcts.darts.common.repository.EventRepository;
 import uk.gov.hmcts.darts.common.repository.HearingRepository;
 import uk.gov.hmcts.darts.common.repository.MediaLinkedCaseRepository;
 import uk.gov.hmcts.darts.common.repository.MediaRepository;
+import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
 import uk.gov.hmcts.darts.event.enums.EventStatus;
 import uk.gov.hmcts.darts.event.service.EventService;
 import uk.gov.hmcts.darts.log.api.LogApi;
@@ -71,6 +75,8 @@ public class AudioLinkingAutomatedTask extends AbstractLockableAutomatedTask
         private final HearingRepository hearingRepository;
         private final MediaLinkedCaseRepository mediaLinkedCaseRepository;
         private final EventService eventService;
+        private final UserAccountRepository userAccountRepository;
+
         @Getter
         @Value("${darts.automated-tasks.audio-linking.audio-buffer:0s}")
         private final Duration audioBuffer;
@@ -95,6 +101,7 @@ public class AudioLinkingAutomatedTask extends AbstractLockableAutomatedTask
         void processMedia(List<HearingEntity> hearingEntities, MediaEntity mediaEntity) {
             Set<HearingEntity> hearingsToSave = new HashSet<>();
             Set<MediaLinkedCaseEntity> mediaLinkedCaseEntities = new HashSet<>();
+            UserAccountEntity userAccount = userAccountRepository.getReferenceById(SystemUsersEnum.AUDIO_LINKING_AUTOMATED_TASK.getId());
             hearingEntities.forEach(hearingEntity -> {
                 try {
                     if (!hearingEntity.containsMedia(mediaEntity)) {
@@ -102,7 +109,8 @@ public class AudioLinkingAutomatedTask extends AbstractLockableAutomatedTask
                         hearingsToSave.add(hearingEntity);
                         CourtCaseEntity courtCase = hearingEntity.getCourtCase();
                         if (!mediaLinkedCaseRepository.existsByMediaAndCourtCase(mediaEntity, courtCase)) {
-                            mediaLinkedCaseEntities.add(new MediaLinkedCaseEntity(mediaEntity, courtCase));
+                            mediaLinkedCaseEntities.add(new MediaLinkedCaseEntity(
+                                mediaEntity, courtCase, userAccount, MediaLinkedCaseSourceType.AUDIO_LINKING_TASK));
                         }
                         log.info("Linking media {} to hearing {}", mediaEntity.getId(), hearingEntity.getId());
                     }

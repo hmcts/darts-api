@@ -10,6 +10,7 @@ import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
+import uk.gov.hmcts.darts.common.enums.MediaLinkedCaseSourceType;
 import uk.gov.hmcts.darts.common.helper.MediaLinkedCaseHelper;
 import uk.gov.hmcts.darts.common.repository.MediaRepository;
 import uk.gov.hmcts.darts.common.service.RetrieveCoreObjectService;
@@ -61,7 +62,7 @@ public class AddAudioRequestMapperImpl implements AddAudioRequestMapper {
                 caseNumber,
                 userAccount
             );
-            mediaLinkedCaseHelper.addCase(media, courtCase);
+            mediaLinkedCaseHelper.addCase(media, courtCase, MediaLinkedCaseSourceType.ADD_AUDIO_METADATA, userAccount);
         }
 
     }
