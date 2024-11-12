@@ -10,6 +10,8 @@ import uk.gov.hmcts.darts.audio.model.AddAudioMetadataRequest;
 import uk.gov.hmcts.darts.audio.service.AudioAsyncService;
 import uk.gov.hmcts.darts.common.entity.EventEntity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
+import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
+import uk.gov.hmcts.darts.common.enums.MediaLinkedCaseSourceType;
 import uk.gov.hmcts.darts.common.helper.MediaLinkedCaseHelper;
 import uk.gov.hmcts.darts.common.repository.CourtLogEventRepository;
 import uk.gov.hmcts.darts.common.repository.HearingRepository;
@@ -29,7 +31,7 @@ public class AudioAsyncServiceImpl implements AudioAsyncService {
 
     @Async
     @Transactional
-    public void linkAudioToHearingByEvent(AddAudioMetadataRequest addAudioMetadataRequest, MediaEntity savedMedia) {
+    public void linkAudioToHearingByEvent(AddAudioMetadataRequest addAudioMetadataRequest, MediaEntity savedMedia, UserAccountEntity userAccount) {
 
         if (addAudioMetadataRequest.getTotalChannels() == 1
             && audioConfigurationProperties.getHandheldAudioCourtroomNumbers().contains(addAudioMetadataRequest.getCourtroom())) {
@@ -53,7 +55,7 @@ public class AudioAsyncServiceImpl implements AudioAsyncService {
             .toList();
 
         for (var hearing : associatedHearings) {
-            mediaLinkedCaseHelper.addCase(savedMedia, hearing.getCourtCase());
+            mediaLinkedCaseHelper.addCase(savedMedia, hearing.getCourtCase(), MediaLinkedCaseSourceType.ADD_AUDIO_EVENT_LINKING, userAccount);
             List<Integer> mediaIdList = hearing.getMediaList().stream().map(MediaEntity::getId).toList();
             if (!mediaIdList.contains(savedMedia.getId())) {
                 hearing.addMedia(savedMedia);

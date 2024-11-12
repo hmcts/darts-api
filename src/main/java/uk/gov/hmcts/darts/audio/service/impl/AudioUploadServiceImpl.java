@@ -20,6 +20,7 @@ import uk.gov.hmcts.darts.common.entity.MediaEntity;
 import uk.gov.hmcts.darts.common.entity.MediaLinkedCaseEntity;
 import uk.gov.hmcts.darts.common.entity.ObjectRecordStatusEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
+import uk.gov.hmcts.darts.common.enums.MediaLinkedCaseSourceType;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.common.repository.ExternalLocationTypeRepository;
 import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
@@ -166,7 +167,7 @@ public class AudioUploadServiceImpl implements AudioUploadService {
         log.info("Saved media id {}", newMediaEntity.getId());
 
         linkAudioToHearingInMetadata(addAudioMetadataRequest, newMediaEntity);
-        audioAsyncService.linkAudioToHearingByEvent(addAudioMetadataRequest, newMediaEntity);
+        audioAsyncService.linkAudioToHearingByEvent(addAudioMetadataRequest, newMediaEntity, userAccount);
 
         saveExternalObjectDirectory(
             externalLocation,
@@ -191,7 +192,8 @@ public class AudioUploadServiceImpl implements AudioUploadService {
     private List<MediaEntity> filterMediaEntitiesWithIdenticalCaseList(List<String> caseNumbersToLookFor, List<MediaEntity> mediaEntities) {
         ArrayList<MediaEntity> resultList = new ArrayList<>();
         for (MediaEntity mediaEntity : mediaEntities) {
-            List<MediaLinkedCaseEntity> mediaLinkedCaseEntities = mediaLinkedCaseRepository.findByMedia(mediaEntity);
+            List<MediaLinkedCaseEntity> mediaLinkedCaseEntities =
+                mediaLinkedCaseRepository.findByMediaAndSource(mediaEntity, MediaLinkedCaseSourceType.ADD_AUDIO_METADATA);
             List<String> mediaCaseNumbers = mediaLinkedCaseEntities.stream()
                 .map(MediaLinkedCaseEntity::getCourtCase)
                 .filter(Objects::nonNull)

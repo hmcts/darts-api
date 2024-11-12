@@ -8,11 +8,14 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.darts.audio.config.AudioConfigurationProperties;
 import uk.gov.hmcts.darts.audio.model.AddAudioMetadataRequest;
 import uk.gov.hmcts.darts.audio.service.AudioAsyncService;
+import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
 import uk.gov.hmcts.darts.common.entity.EventEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
+import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
+import uk.gov.hmcts.darts.common.enums.MediaLinkedCaseSourceType;
 import uk.gov.hmcts.darts.common.helper.MediaLinkedCaseHelper;
 import uk.gov.hmcts.darts.common.repository.CourtLogEventRepository;
 import uk.gov.hmcts.darts.common.repository.HearingRepository;
@@ -42,10 +45,13 @@ class AudioAsyncServiceImplTest {
     private CourtLogEventRepository courtLogEventRepository;
     @Mock
     private AudioConfigurationProperties audioConfigurationProperties;
+    @Mock
+    private MediaLinkedCaseHelper mediaLinkedCaseHelper;
+
     private AudioAsyncService audioAsyncService;
 
     @Mock
-    MediaLinkedCaseHelper mediaLinkedCaseHelper;
+    private UserAccountEntity userAccount;
 
     @BeforeEach
     void setUp() {
@@ -72,7 +78,7 @@ class AudioAsyncServiceImplTest {
         when(audioConfigurationProperties.getHandheldAudioCourtroomNumbers())
             .thenReturn(List.of(addAudioMetadataRequest.getCourtroom()));
 
-        audioAsyncService.linkAudioToHearingByEvent(addAudioMetadataRequest, mediaEntity);
+        audioAsyncService.linkAudioToHearingByEvent(addAudioMetadataRequest, mediaEntity, userAccount);
         verify(hearingRepository, times(0)).saveAndFlush(any());
         assertEquals(0, hearing.getMediaList().size());
     }
@@ -80,6 +86,8 @@ class AudioAsyncServiceImplTest {
     @Test
     void linkAudioToHearingByEvent() {
         HearingEntity hearing = new HearingEntity();
+        CourtCaseEntity courtCase = new CourtCaseEntity();
+        hearing.setCourtCase(courtCase);
         EventEntity eventEntity = new EventEntity();
         eventEntity.setTimestamp(STARTED_AT.minusMinutes(30));
         eventEntity.addHearing(hearing);
@@ -94,9 +102,10 @@ class AudioAsyncServiceImplTest {
             any()
         )).thenReturn(List.of(eventEntity));
 
-        audioAsyncService.linkAudioToHearingByEvent(addAudioMetadataRequest, mediaEntity);
+        audioAsyncService.linkAudioToHearingByEvent(addAudioMetadataRequest, mediaEntity, userAccount);
         verify(hearingRepository, times(1)).saveAndFlush(any());
         assertEquals(1, hearing.getMediaList().size());
+        verify(mediaLinkedCaseHelper).addCase(mediaEntity, courtCase, MediaLinkedCaseSourceType.ADD_AUDIO_EVENT_LINKING, userAccount);
     }
 
     @Test
@@ -116,7 +125,7 @@ class AudioAsyncServiceImplTest {
             any()
         )).thenReturn(List.of(eventEntity));
 
-        audioAsyncService.linkAudioToHearingByEvent(addAudioMetadataRequest, mediaEntity);
+        audioAsyncService.linkAudioToHearingByEvent(addAudioMetadataRequest, mediaEntity, userAccount);
         verify(hearingRepository, times(1)).saveAndFlush(any());
         assertEquals(1, hearing.getMediaList().size());
         assertTrue(hearing.getHearingIsActual());
@@ -143,7 +152,7 @@ class AudioAsyncServiceImplTest {
             any()
         )).thenReturn(Arrays.asList(firstEventEntity, secondEventEntity));
 
-        audioAsyncService.linkAudioToHearingByEvent(addAudioMetadataRequest, mediaEntity);
+        audioAsyncService.linkAudioToHearingByEvent(addAudioMetadataRequest, mediaEntity, userAccount);
         verify(hearingRepository, times(1)).saveAndFlush(any());
         assertEquals(1, hearing.getMediaList().size());
     }
