@@ -5,6 +5,7 @@ import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 import uk.gov.hmcts.darts.cases.model.Hearing;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
+import uk.gov.hmcts.darts.common.entity.TranscriptionDocumentEntity;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -39,6 +40,8 @@ public class HearingEntityToCaseHearing {
             .stream()
             .filter(transcriptionEntity -> BooleanUtils.isTrue(transcriptionEntity.getIsManualTranscription())
                 || StringUtils.isNotBlank(transcriptionEntity.getLegacyObjectId()))
+            .filter(transcriptionEntity -> transcriptionEntity.getTranscriptionDocumentEntities().isEmpty() || transcriptionEntity.getTranscriptionDocumentEntities().stream().noneMatch(
+                TranscriptionDocumentEntity::isHidden))
             .toList();
         hearing.setTranscriptCount(transcripts.size());
 

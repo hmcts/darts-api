@@ -9,6 +9,7 @@ import org.skyscreamer.jsonassert.JSONCompareMode;
 import uk.gov.hmcts.darts.cases.model.Hearing;
 import uk.gov.hmcts.darts.common.config.ObjectMapperConfig;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
+import uk.gov.hmcts.darts.common.entity.TranscriptionDocumentEntity;
 import uk.gov.hmcts.darts.common.util.CommonTestDataUtil;
 
 import java.util.ArrayList;
@@ -91,6 +92,33 @@ class HearingEntityToCaseHearingTest {
         List<Hearing> hearingList = HearingEntityToCaseHearing.mapToHearingList(hearings);
 
         assertEquals(1, hearingList.get(0).getTranscriptCount());
+    }
+
+    @Test
+    void testMappingToHearingsWithTranscriptsWithHiddenDocument() {
+        List<HearingEntity> hearings = CommonTestDataUtil.createHearings(5);
+        var hearingTranscripts = hearings.get(0).getTranscriptions();
+        var transcriptDocs = hearingTranscripts.get(0).getTranscriptionDocumentEntities();
+        transcriptDocs.get(0).setHidden(true);
+
+        List<Hearing> hearingList = HearingEntityToCaseHearing.mapToHearingList(hearings);
+
+        assertEquals(0, hearingList.get(0).getTranscriptCount());
+    }
+
+    @Test
+    void testMappingToHearingsWithTranscriptsWithOnlyOneHiddenDocument() {
+        List<HearingEntity> hearings = CommonTestDataUtil.createHearings(5);
+        var hearingTranscripts = hearings.get(0).getTranscriptions();
+        var transcriptDocs = hearingTranscripts.get(0).getTranscriptionDocumentEntities();
+        var transcriptionDocumentEntity = new TranscriptionDocumentEntity();
+        transcriptionDocumentEntity.setFileName("test2.doc");
+        transcriptionDocumentEntity.setHidden(true);
+        transcriptDocs.add(transcriptionDocumentEntity);
+
+        List<Hearing> hearingList = HearingEntityToCaseHearing.mapToHearingList(hearings);
+
+        assertEquals(0, hearingList.get(0).getTranscriptCount());
     }
 
     @Test
