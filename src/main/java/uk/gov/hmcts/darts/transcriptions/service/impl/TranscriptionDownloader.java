@@ -38,8 +38,10 @@ public class TranscriptionDownloader {
         var userIsSuperAdmin = this.userIdentity.userHasGlobalAccess(Set.of(SUPER_ADMIN));
         var transcriptionEntity = transcriptionRepository.findById(transcriptionId)
             // Only SUPER_ADMIN users are allowed to download hidden documents
-            .filter(transcription -> userIsSuperAdmin || transcription.getTranscriptionDocumentEntities().isEmpty() || transcription.getTranscriptionDocumentEntities().stream().noneMatch(
-                TranscriptionDocumentEntity::isHidden))
+            .filter(transcription -> userIsSuperAdmin
+                || transcription.getTranscriptionDocumentEntities().isEmpty()
+                || transcription.getTranscriptionDocumentEntities().stream().noneMatch(TranscriptionDocumentEntity::isHidden)
+            )
             .orElseThrow(() -> new DartsApiException(TRANSCRIPTION_NOT_FOUND));
 
         var latestTranscriptionDocument = transcriptionEntity.getTranscriptionDocumentEntities()

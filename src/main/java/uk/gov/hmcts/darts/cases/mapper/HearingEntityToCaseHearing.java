@@ -39,9 +39,11 @@ public class HearingEntityToCaseHearing {
         var transcripts = entity.getTranscriptions()
             .stream()
             .filter(transcriptionEntity -> BooleanUtils.isTrue(transcriptionEntity.getIsManualTranscription())
-                || StringUtils.isNotBlank(transcriptionEntity.getLegacyObjectId()))
-            .filter(transcriptionEntity -> transcriptionEntity.getTranscriptionDocumentEntities().isEmpty() || transcriptionEntity.getTranscriptionDocumentEntities().stream().noneMatch(
-                TranscriptionDocumentEntity::isHidden))
+                || StringUtils.isNotBlank(transcriptionEntity.getLegacyObjectId())
+            )
+            .filter(transcriptionEntity -> transcriptionEntity.getTranscriptionDocumentEntities().isEmpty()
+                || transcriptionEntity.getTranscriptionDocumentEntities().stream().noneMatch(TranscriptionDocumentEntity::isHidden)
+            )
             .toList();
         hearing.setTranscriptCount(transcripts.size());
 
