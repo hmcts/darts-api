@@ -9,5 +9,5 @@ import org.springframework.context.annotation.Configuration;
 @Getter
 @Setter
 @Configuration
-public class InboundAnnotationTranscriptionDeleterAutomatedTaskConfig extends AbstractAutomatedTaskConfig {
+public class InboundTranscriptionAnnotationDeleterAutomatedTaskConfig extends AbstractAutomatedTaskConfig {
 }

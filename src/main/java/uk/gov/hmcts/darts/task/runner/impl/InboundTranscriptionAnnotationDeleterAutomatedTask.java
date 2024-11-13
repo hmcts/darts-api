@@ -4,28 +4,28 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.darts.common.repository.AutomatedTaskRepository;
-import uk.gov.hmcts.darts.datamanagement.service.InboundAnnotationTranscriptionDeleterProcessor;
+import uk.gov.hmcts.darts.datamanagement.service.InboundTranscriptionAnnotationDeleterProcessor;
 import uk.gov.hmcts.darts.log.api.LogApi;
 import uk.gov.hmcts.darts.task.api.AutomatedTaskName;
-import uk.gov.hmcts.darts.task.config.InboundAnnotationTranscriptionDeleterAutomatedTaskConfig;
+import uk.gov.hmcts.darts.task.config.InboundTranscriptionAnnotationDeleterAutomatedTaskConfig;
 import uk.gov.hmcts.darts.task.runner.AutoloadingManualTask;
 import uk.gov.hmcts.darts.task.service.LockService;
 
 import static uk.gov.hmcts.darts.task.api.AutomatedTaskName.INBOUND_TRANSCRIPTION_ANNOTATION_DELETER_TASK_NAME;
 
 @Component
-public class InboundAnnotationTranscriptionDeleterAutomatedTask extends AbstractLockableAutomatedTask
+public class InboundTranscriptionAnnotationDeleterAutomatedTask extends AbstractLockableAutomatedTask
     implements AutoloadingManualTask {
 
-    private final InboundAnnotationTranscriptionDeleterProcessor annotationTranscriptionDeleterProcessor;
+    private final InboundTranscriptionAnnotationDeleterProcessor annotationTranscriptionDeleterProcessor;
 
     @Value("${darts.automated.task.inbound-transcription-annotation-deleter.default-batch-size}")
     int defaultBatchSize;
 
     @Autowired
-    public InboundAnnotationTranscriptionDeleterAutomatedTask(AutomatedTaskRepository automatedTaskRepository,
-                                                              InboundAnnotationTranscriptionDeleterAutomatedTaskConfig automatedTaskConfigurationProperties,
-                                                              InboundAnnotationTranscriptionDeleterProcessor annotationTranscriptionDeleterProcessor,
+    public InboundTranscriptionAnnotationDeleterAutomatedTask(AutomatedTaskRepository automatedTaskRepository,
+                                                              InboundTranscriptionAnnotationDeleterAutomatedTaskConfig automatedTaskConfigurationProperties,
+                                                              InboundTranscriptionAnnotationDeleterProcessor annotationTranscriptionDeleterProcessor,
                                                               LogApi logApi,
                                                               LockService lockService) {
         super(automatedTaskRepository, automatedTaskConfigurationProperties, logApi, lockService);
