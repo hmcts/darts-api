@@ -2,6 +2,7 @@ package uk.gov.hmcts.darts.arm.service.impl;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Component;
 import uk.gov.hmcts.darts.arm.api.ArmDataManagementApi;
 import uk.gov.hmcts.darts.arm.config.ArmDataManagementConfiguration;
 import uk.gov.hmcts.darts.arm.model.blobs.ArmResponseBatchData;
@@ -27,6 +28,7 @@ import java.util.Optional;
 
 
 @Slf4j
+@Component
 public class DetsToArmBatchProcessResponseFilesImpl extends AbstractArmBatchProcessResponseFiles {
 
     private final DetsDataManagementConfiguration configuration;
