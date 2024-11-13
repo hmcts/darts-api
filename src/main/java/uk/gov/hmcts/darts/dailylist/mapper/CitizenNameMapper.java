@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.darts.dailylist.model.CitizenName;
+import uk.gov.hmcts.darts.util.DataUtil;
 
 @Component
 @RequiredArgsConstructor
@@ -21,11 +22,11 @@ public class CitizenNameMapper {
         CitizenName retCitizenName = new CitizenName();
 
         if (citizenName.length == 1) {
-            retCitizenName.setCitizenNameForename(citizenName[FORENAME_INDEX]);
+            retCitizenName.setCitizenNameForename(DataUtil.trim(citizenName[FORENAME_INDEX]));
             retCitizenName.setCitizenNameSurname("");
         } else if (citizenName.length > 1) {
-            retCitizenName.setCitizenNameForename(citizenName[FORENAME_INDEX]);
-            retCitizenName.setCitizenNameSurname(getSurnames(citizenName));
+            retCitizenName.setCitizenNameForename(DataUtil.trim(citizenName[FORENAME_INDEX]));
+            retCitizenName.setCitizenNameSurname(DataUtil.trim(getSurnames(citizenName)));
         }
 
         return retCitizenName;
@@ -40,7 +41,7 @@ public class CitizenNameMapper {
             }
         }
 
-        return returnName;
+        return DataUtil.trim(returnName);
     }
 
     private String getSurnames(String[] citizenNameParts) {
@@ -52,7 +53,6 @@ public class CitizenNameMapper {
             }
         }
 
-        return surname;
+        return DataUtil.trim(surname);
     }
-
 }
