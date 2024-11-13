@@ -3,6 +3,7 @@ package uk.gov.hmcts.darts.task.service;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import uk.gov.hmcts.darts.common.entity.AutomatedTaskEntity;
+import uk.gov.hmcts.darts.task.api.AutomatedTaskName;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 
 import java.util.List;
@@ -37,7 +38,10 @@ class AdminGetAutomatedTaskServiceTest extends IntegrationBase {
     @Test
     void findsAllAutomatedTasks() {
         var persistedTasks = dartsDatabase.getAllAutomatedTasks();
-
+        //Remove tasks that are feature flagged off
+        persistedTasks.removeIf(automatedTaskEntity -> {
+            return automatedTaskEntity.getTaskName().equals(AutomatedTaskName.PROCESS_E2E_ARM_PENDING_TASK_NAME.getTaskName());
+        });
         var automatedTasks = adminAutomatedTaskService.getAllAutomatedTasksSummaries();
 
         assertThat(automatedTasks).extracting("id").isEqualTo(taskIdsOf(persistedTasks));
