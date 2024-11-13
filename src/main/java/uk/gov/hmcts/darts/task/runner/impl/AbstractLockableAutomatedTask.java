@@ -130,13 +130,13 @@ public abstract class AbstractLockableAutomatedTask implements AutomatedTask, Au
     protected abstract void runTask();
 
     public Duration getLockAtMostFor() {
-        return Optional.ofNullable(automatedTaskConfigurationProperties.getLockAtMostFor())
+        return Optional.ofNullable(automatedTaskConfigurationProperties.getLock().getAtMostFor())
             .filter(duration -> duration.isPositive())
             .orElseGet(() -> lockService.getLockAtMostFor());
     }
 
     public Duration getLockAtLeastFor() {
-        return Optional.ofNullable(automatedTaskConfigurationProperties.getLockAtLeastFor())
+        return Optional.ofNullable(automatedTaskConfigurationProperties.getLock().getAtLeastFor())
             .filter(duration -> duration.isPositive())
             .orElseGet(() -> lockService.getLockAtLeastFor());
     }

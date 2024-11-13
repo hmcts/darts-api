@@ -14,8 +14,16 @@ import java.time.Duration;
 public class AbstractAutomatedTaskConfig {
     @NotBlank
     private String systemUserEmail;
-    @NotNull
-    private Duration lockAtMostFor = Duration.ofMinutes(300);
-    @NotNull
-    private Duration lockAtLeastFor = Duration.ofMinutes(1);
+
+    private Lock lock;
+
+    @Getter
+    @Setter
+    @Validated
+    public static class Lock {
+        @NotNull
+        private Duration atLeastFor = Duration.ofMinutes(300);
+        @NotNull
+        private Duration atMostFor = Duration.ofMinutes(1);
+    }
 }

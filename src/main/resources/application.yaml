@@ -471,14 +471,14 @@ darts:
         arm-rpo-duration: ${ARM_RPO_DURATION:1h}
         lock:
           at-least-for: PT1M
-          at-most-for: PT90M
+          at-most-for: PT60M
       process-e2e-arm-rpo-pending:
         system-user-email: ${darts.automated.task.common-config.system-user-email:}
         process-e2e-arm-rpo: ${PROCESS_E2E_ARM_RPO:false}
         arm-rpo-duration: ${ARM_RPO_DURATION:1h}
         lock:
           at-least-for: PT1M
-          at-most-for: PT90M
+          at-most-for: PT60M
       process-daily-list:
         system-user-email: ${darts.automated.task.common-config.system-user-email:}
         lock:
