@@ -64,7 +64,7 @@ public class ArmRpoServiceImpl implements ArmRpoService {
     }
 
     public ArmRpoExecutionDetailEntity getLatestArmRpoExecutionDetailEntity() {
-        return armRpoExecutionDetailRepository.findByOrderByCreatedDateTimeDesc();
+        return armRpoExecutionDetailRepository.findTopOrderByCreatedDateTimeDesc();
     }
 
     @Override

@@ -21,15 +21,15 @@ class ArmRpoExecutionDetailRepositoryTest extends PostgresIntegrationBase {
 
     @BeforeEach
     public void beforeAll() {
-        armRpoExecutionDetailEntity1 = PersistableFactory.getArmRpoExecutionDetailTestData().minimalArmRpoExecutionDetailEntity();
-        armRpoExecutionDetailEntity2 = PersistableFactory.getArmRpoExecutionDetailTestData().minimalArmRpoExecutionDetailEntity();
-        armRpoExecutionDetailEntity3 = PersistableFactory.getArmRpoExecutionDetailTestData().minimalArmRpoExecutionDetailEntity();
+        armRpoExecutionDetailEntity1 = dartsPersistence.save(PersistableFactory.getArmRpoExecutionDetailTestData().minimalArmRpoExecutionDetailEntity());
+        armRpoExecutionDetailEntity2 = dartsPersistence.save(PersistableFactory.getArmRpoExecutionDetailTestData().minimalArmRpoExecutionDetailEntity());
+        armRpoExecutionDetailEntity3 = dartsPersistence.save(PersistableFactory.getArmRpoExecutionDetailTestData().minimalArmRpoExecutionDetailEntity());
     }
 
     @Test
-    void findByOrderByCreatedDateTimeDescShouldReturnLatestArmRpoExecutionDetail() {
+    void findTopOrderByCreatedDateTimeDescShouldReturnLatestArmRpoExecutionDetail() {
         // when
-        var result = armRpoExecutionDetailRepository.findByOrderByCreatedDateTimeDesc();
+        var result = armRpoExecutionDetailRepository.findTopOrderByCreatedDateTimeDesc();
 
         // then
         assertThat(result).isEqualTo(armRpoExecutionDetailEntity3);
