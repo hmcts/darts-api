@@ -61,4 +61,8 @@ public class PersistableFactory {
     public static HearingTestData getHearingTestData() {
         return new HearingTestData();
     }
+
+    public static ArmRpoExecutionDetailTestData getArmRpoExecutionDetailTestData() {
+        return new ArmRpoExecutionDetailTestData();
+    }
 }
