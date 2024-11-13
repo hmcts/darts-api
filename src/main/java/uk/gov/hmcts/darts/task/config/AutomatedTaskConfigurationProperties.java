@@ -9,5 +9,4 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 @Setter
 public class AutomatedTaskConfigurationProperties extends AbstractAutomatedTaskConfig {
 
-    private String systemUserEmail;
 }
