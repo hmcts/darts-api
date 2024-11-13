@@ -13,6 +13,12 @@ public class MediaIdValidator implements Validator<Integer> {
 
     private final MediaRepository mediaRepository;
 
+    public void validateNotHidden(Integer id) {
+        if (mediaRepository.findByIdAndIsHiddenFalse(id).isEmpty()) {
+            throw new DartsApiException(AudioApiError.MEDIA_NOT_FOUND);
+        }
+    }
+
     @Override
     public void validate(Integer id) {
         if (mediaRepository.findByIdIncludeDeleted(id).isEmpty()) {

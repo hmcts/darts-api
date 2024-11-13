@@ -105,4 +105,5 @@ public interface MediaRepository extends JpaRepository<MediaEntity, Integer>,
         """)
     List<MediaEntity> findAllLinkedByMediaLinkedCaseByCaseId(Integer caseId);
 
+    Optional<MediaEntity> findByIdAndIsHiddenFalse(Integer mediaId);
 }
