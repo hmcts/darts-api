@@ -464,7 +464,7 @@ dependencies {
   }
   testImplementation group: 'org.springframework.cloud', name: 'spring-cloud-starter-contract-stub-runner', version: '4.1.4'
   testImplementation 'org.junit.jupiter:junit-jupiter:5.11.3'
-  testImplementation group: 'io.projectreactor', name: 'reactor-test', version: '3.6.11'
+  testImplementation group: 'io.projectreactor', name: 'reactor-test', version: '3.7.0'
   testImplementation 'org.springframework.security:spring-security-test:6.3.4'
 
   // https://mvnrepository.com/artifact/org.awaitility/awaitility
@@ -505,7 +505,7 @@ dependencyManagement {
       entry 'netty-transport-native-unix-common'
     }
     //temporary fix for vulnerability https://spring.io/security/cve-2023-34062
-    dependencySet(group: 'io.projectreactor.netty', version: '1.1.23') {
+    dependencySet(group: 'io.projectreactor.netty', version: '1.2.0') {
       entry 'reactor-netty-http'
       entry 'reactor-netty-core'
     }
