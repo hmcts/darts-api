@@ -388,7 +388,7 @@ class StopAndCloseHandlerTest extends HandlerTestData {
 
         // apply retention and check it was applied correctly
         when(currentTimeHelper.currentOffsetDateTime()).thenReturn(OffsetDateTime.now().plusMonths(1));
-        applyRetentionProcessor.processApplyRetention();
+        applyRetentionProcessor.processApplyRetention(1000);
         CaseRetentionEntity processedCaseRetentionEntity = dartsDatabase.getCaseRetentionRepository().findById(caseRetentionEntity.getId()).get();
         assertEquals(String.valueOf(COMPLETE), processedCaseRetentionEntity.getCurrentState());
     }
@@ -486,7 +486,7 @@ class StopAndCloseHandlerTest extends HandlerTestData {
 
         // apply retention and check it was applied correctly
         when(currentTimeHelper.currentOffsetDateTime()).thenReturn(OffsetDateTime.now().plusMonths(1));
-        applyRetentionProcessor.processApplyRetention();
+        applyRetentionProcessor.processApplyRetention(1000);
         CaseRetentionEntity processedInitialCaseRetentionEntity = dartsDatabase.getCaseRetentionRepository().findById(initialCaseRetentionEntity.getId()).get();
         CaseRetentionEntity processedLatestCaseRetentionEntity = dartsDatabase.getCaseRetentionRepository().findById(latestCaseRetentionEntity.getId()).get();
         assertEquals(String.valueOf(IGNORED), processedInitialCaseRetentionEntity.getCurrentState());

@@ -1,5 +1,6 @@
 package uk.gov.hmcts.darts.common.repository;
 
+import org.springframework.data.domain.Limit;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 import uk.gov.hmcts.darts.common.entity.DailyListEntity;
@@ -20,5 +21,5 @@ public interface DailyListRepository extends JpaRepository<DailyListEntity, Inte
     List<DailyListEntity> findByStatusAndStartDateAndSourceOrderByPublishedTimestampDescCreatedDateTimeDesc(
         JobStatusType status, LocalDate date, String source);
 
-    List<DailyListEntity> deleteByStartDateBefore(LocalDate startDate);
+    List<DailyListEntity> deleteByStartDateBefore(LocalDate startDate, Limit limit);
 }

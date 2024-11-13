@@ -11,10 +11,12 @@ import uk.gov.hmcts.darts.common.entity.AutomatedTaskEntity;
 import uk.gov.hmcts.darts.common.repository.AutomatedTaskRepository;
 import uk.gov.hmcts.darts.log.api.LogApi;
 import uk.gov.hmcts.darts.task.config.AutomatedTaskConfigurationProperties;
+import uk.gov.hmcts.darts.task.config.UnstructuredToArmAutomatedTaskConfig;
 import uk.gov.hmcts.darts.task.service.LockService;
 
 import java.util.Optional;
 
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -41,7 +43,7 @@ class UnstructuredToArmAutomatedTaskTest {
         UnstructuredToArmAutomatedTask unstructuredToArmAutomatedTask =
             new UnstructuredToArmAutomatedTask(
                 automatedTaskRepository,
-                automatedTaskConfigurationProperties,
+                mock(UnstructuredToArmAutomatedTaskConfig.class),
                 unstructuredToArmBatchProcessor,
                 unstructuredToArmProcessor,
                 logApi,
@@ -66,7 +68,7 @@ class UnstructuredToArmAutomatedTaskTest {
         UnstructuredToArmAutomatedTask unstructuredToArmAutomatedTask =
             new UnstructuredToArmAutomatedTask(
                 automatedTaskRepository,
-                automatedTaskConfigurationProperties,
+                mock(UnstructuredToArmAutomatedTaskConfig.class),
                 unstructuredToArmBatchProcessor,
                 unstructuredToArmProcessor,
                 logApi,

@@ -9,6 +9,9 @@ import uk.gov.hmcts.darts.log.api.LogApi;
 import uk.gov.hmcts.darts.retention.service.ApplyRetentionProcessor;
 import uk.gov.hmcts.darts.task.service.LockService;
 
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.spy;
+
 @ExtendWith(MockitoExtension.class)
 class ApplyRetentionAutomatedTaskTest {
     @Mock
@@ -21,15 +24,18 @@ class ApplyRetentionAutomatedTaskTest {
     @Test
     void runTask() {
         ApplyRetentionAutomatedTask applyRetentionAutomatedTaskTest =
-            new ApplyRetentionAutomatedTask(
+            spy(new ApplyRetentionAutomatedTask(
                 null,
                 null,
                 applyRetentionProcessor,
                 logApi,
                 lockService
-            );
+            ));
+
+        doReturn(1000).when(applyRetentionAutomatedTaskTest).getAutomatedTaskBatchSize();
 
         applyRetentionAutomatedTaskTest.runTask();
-        Mockito.verify(applyRetentionProcessor, Mockito.times(1)).processApplyRetention();
+        Mockito.verify(applyRetentionProcessor, Mockito.times(1)).processApplyRetention(1000);
+        Mockito.verify(applyRetentionAutomatedTaskTest, Mockito.times(1)).getAutomatedTaskBatchSize();
     }
 }

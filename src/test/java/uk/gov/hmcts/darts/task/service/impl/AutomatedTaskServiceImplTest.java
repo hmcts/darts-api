@@ -19,6 +19,7 @@ import uk.gov.hmcts.darts.common.repository.AutomatedTaskRepository;
 import uk.gov.hmcts.darts.log.api.LogApi;
 import uk.gov.hmcts.darts.task.api.AutomatedTaskName;
 import uk.gov.hmcts.darts.task.config.AutomatedTaskConfigurationProperties;
+import uk.gov.hmcts.darts.task.config.ProcessDailyListAutomatedTaskConfig;
 import uk.gov.hmcts.darts.task.runner.AutoloadingAutomatedTask;
 import uk.gov.hmcts.darts.task.runner.AutomatedTask;
 import uk.gov.hmcts.darts.task.runner.impl.AbstractLockableAutomatedTask;
@@ -88,7 +89,7 @@ class AutomatedTaskServiceImplTest {
     void getAutomatedTaskUsingProcessDailyListAutomatedTask() {
         AutomatedTask processDailyListAutomatedTask = new ProcessDailyListAutomatedTask(
             mockAutomatedTaskRepository,
-            mockAutomatedTaskConfigurationProperties,
+            mock(ProcessDailyListAutomatedTaskConfig.class),
             null,
             logApi,
             lockService
@@ -110,7 +111,7 @@ class AutomatedTaskServiceImplTest {
     void getAutomatedTaskCronExpressionWithNullCronExpression() {
         AutomatedTask processDailyListAutomatedTask = new ProcessDailyListAutomatedTask(
             mockAutomatedTaskRepository,
-            mockAutomatedTaskConfigurationProperties,
+            mock(ProcessDailyListAutomatedTaskConfig.class),
             null,
             logApi,
             lockService

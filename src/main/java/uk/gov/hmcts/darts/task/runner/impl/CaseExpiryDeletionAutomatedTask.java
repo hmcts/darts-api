@@ -12,7 +12,7 @@ import uk.gov.hmcts.darts.common.repository.CaseRepository;
 import uk.gov.hmcts.darts.common.service.DataAnonymisationService;
 import uk.gov.hmcts.darts.log.api.LogApi;
 import uk.gov.hmcts.darts.task.api.AutomatedTaskName;
-import uk.gov.hmcts.darts.task.config.AutomatedTaskConfigurationProperties;
+import uk.gov.hmcts.darts.task.config.CaseExpiryDeletionAutomatedTaskConfig;
 import uk.gov.hmcts.darts.task.runner.AutoloadingManualTask;
 import uk.gov.hmcts.darts.task.service.LockService;
 
@@ -32,7 +32,7 @@ public class CaseExpiryDeletionAutomatedTask
     private final UserIdentity userAccountService;
 
     public CaseExpiryDeletionAutomatedTask(AutomatedTaskRepository automatedTaskRepository,
-                                           AutomatedTaskConfigurationProperties automatedTaskConfigurationProperties,
+                                           CaseExpiryDeletionAutomatedTaskConfig automatedTaskConfigurationProperties,
                                            CurrentTimeHelper currentTimeHelper,
                                            CaseRepository caseRepository,
                                            LogApi logApi, LockService lockService,

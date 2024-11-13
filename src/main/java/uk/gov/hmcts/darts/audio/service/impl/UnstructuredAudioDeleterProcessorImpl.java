@@ -3,6 +3,7 @@ package uk.gov.hmcts.darts.audio.service.impl;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Limit;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.darts.audio.service.UnstructuredAudioDeleterProcessor;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
@@ -33,7 +34,7 @@ public class UnstructuredAudioDeleterProcessorImpl implements UnstructuredAudioD
     private final EodHelper eodHelper;
 
     @Override
-    public void markForDeletion() {
+    public void markForDeletion(Integer batchSize) {
 
         OffsetDateTime unstructuredModifiedBeforeDateTime = currentTimeHelper.currentOffsetDateTime().minus(durationInUnstructured);
 
@@ -41,7 +42,8 @@ public class UnstructuredAudioDeleterProcessorImpl implements UnstructuredAudioD
             EodHelper.storedStatus(),
             EodHelper.unstructuredLocation(),
             EodHelper.armLocation(),
-            unstructuredModifiedBeforeDateTime
+            unstructuredModifiedBeforeDateTime,
+            Limit.of(batchSize)
         );
 
         if (audioFileIdsToBeMarked.isEmpty()) {

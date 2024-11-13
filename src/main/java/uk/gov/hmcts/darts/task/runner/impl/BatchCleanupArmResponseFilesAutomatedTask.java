@@ -7,7 +7,7 @@ import uk.gov.hmcts.darts.arm.service.BatchCleanupArmResponseFilesService;
 import uk.gov.hmcts.darts.common.repository.AutomatedTaskRepository;
 import uk.gov.hmcts.darts.log.api.LogApi;
 import uk.gov.hmcts.darts.task.api.AutomatedTaskName;
-import uk.gov.hmcts.darts.task.config.AutomatedTaskConfigurationProperties;
+import uk.gov.hmcts.darts.task.config.BatchCleanupArmResponseFilesAutomatedTaskConfig;
 import uk.gov.hmcts.darts.task.runner.AutoloadingManualTask;
 import uk.gov.hmcts.darts.task.service.LockService;
 
@@ -21,7 +21,7 @@ public class BatchCleanupArmResponseFilesAutomatedTask extends AbstractLockableA
 
     @Autowired
     public BatchCleanupArmResponseFilesAutomatedTask(AutomatedTaskRepository automatedTaskRepository,
-                                                     AutomatedTaskConfigurationProperties automatedTaskConfigurationProperties,
+                                                     BatchCleanupArmResponseFilesAutomatedTaskConfig automatedTaskConfigurationProperties,
                                                      BatchCleanupArmResponseFilesService batchCleanupArmResponseFilesService,
                                                      LogApi logApi, LockService lockService) {
         super(automatedTaskRepository, automatedTaskConfigurationProperties, logApi, lockService);
@@ -35,7 +35,6 @@ public class BatchCleanupArmResponseFilesAutomatedTask extends AbstractLockableA
 
     @Override
     protected void runTask() {
-        Integer batchSize = getAutomatedTaskBatchSize(getTaskName());
-        batchCleanupArmResponseFilesService.cleanupResponseFiles(batchSize);
+        batchCleanupArmResponseFilesService.cleanupResponseFiles(getAutomatedTaskBatchSize());
     }
 }

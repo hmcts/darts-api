@@ -21,7 +21,7 @@ import uk.gov.hmcts.darts.common.repository.MediaRepository;
 import uk.gov.hmcts.darts.common.repository.TranscriptionDocumentRepository;
 import uk.gov.hmcts.darts.log.api.LogApi;
 import uk.gov.hmcts.darts.task.api.AutomatedTaskName;
-import uk.gov.hmcts.darts.task.config.AutomatedTaskConfigurationProperties;
+import uk.gov.hmcts.darts.task.config.AssociatedObjectDataExpiryDeletionAutomatedTaskConfig;
 import uk.gov.hmcts.darts.task.runner.AutoloadingManualTask;
 import uk.gov.hmcts.darts.task.runner.HasIntegerId;
 import uk.gov.hmcts.darts.task.runner.SoftDelete;
@@ -53,7 +53,7 @@ public class AssociatedObjectDataExpiryDeletionAutomatedTask
 
     public AssociatedObjectDataExpiryDeletionAutomatedTask(
         AutomatedTaskRepository automatedTaskRepository,
-        AutomatedTaskConfigurationProperties automatedTaskConfigurationProperties,
+        AssociatedObjectDataExpiryDeletionAutomatedTaskConfig automatedTaskConfigurationProperties,
         UserIdentity userIdentity,
         LogApi logApi, LockService lockService,
         CurrentTimeHelper currentTimeHelper,
@@ -94,50 +94,50 @@ public class AssociatedObjectDataExpiryDeletionAutomatedTask
     public void runTask() {
         final UserAccountEntity userAccount = userIdentity.getUserAccount();
         OffsetDateTime maxRetentionDate = currentTimeHelper.currentOffsetDateTime();
-        Limit batchSize = Limit.of(getAutomatedTaskBatchSize());
+        Limit limit = Limit.of(getAutomatedTaskBatchSize());
 
-        deleteTranscriptionDocumentEntity(userAccount, maxRetentionDate, batchSize);
-        deleteMediaEntity(userAccount, maxRetentionDate, batchSize);
-        deleteAnnotationDocumentEntity(userAccount, maxRetentionDate, batchSize);
-        deleteCaseDocumentEntity(userAccount, maxRetentionDate, batchSize);
+        deleteTranscriptionDocumentEntity(userAccount, maxRetentionDate, limit);
+        deleteMediaEntity(userAccount, maxRetentionDate, limit);
+        deleteAnnotationDocumentEntity(userAccount, maxRetentionDate, limit);
+        deleteCaseDocumentEntity(userAccount, maxRetentionDate, limit);
     }
 
-    void deleteTranscriptionDocumentEntity(UserAccountEntity userAccount, OffsetDateTime maxRetentionDate, Limit batchSize) {
+    void deleteTranscriptionDocumentEntity(UserAccountEntity userAccount, OffsetDateTime maxRetentionDate, Limit limit) {
         deleteExternalObjectDirectoryEntity(
             userAccount,
             transcriptionDocumentRepository,
-            externalObjectDirectoryRepository.findExpiredTranscriptionDocuments(maxRetentionDate, batchSize),
+            externalObjectDirectoryRepository.findExpiredTranscriptionDocuments(maxRetentionDate, limit),
             ExternalObjectDirectoryEntity::getTranscriptionDocumentEntity,
             AuditActivity.TRANSCRIPT_EXPIRED
         );
     }
 
 
-    void deleteMediaEntity(UserAccountEntity userAccount, OffsetDateTime maxRetentionDate, Limit batchSize) {
+    void deleteMediaEntity(UserAccountEntity userAccount, OffsetDateTime maxRetentionDate, Limit limit) {
         deleteExternalObjectDirectoryEntity(
             userAccount,
             mediaRepository,
-            externalObjectDirectoryRepository.findExpiredMediaEntries(maxRetentionDate, batchSize),
+            externalObjectDirectoryRepository.findExpiredMediaEntries(maxRetentionDate, limit),
             ExternalObjectDirectoryEntity::getMedia,
             AuditActivity.AUDIO_EXPIRED
         );
     }
 
-    void deleteAnnotationDocumentEntity(UserAccountEntity userAccount, OffsetDateTime maxRetentionDate, Limit batchSize) {
+    void deleteAnnotationDocumentEntity(UserAccountEntity userAccount, OffsetDateTime maxRetentionDate, Limit limit) {
         deleteExternalObjectDirectoryEntity(
             userAccount,
             annotationDocumentRepository,
-            externalObjectDirectoryRepository.findExpiredAnnotationDocuments(maxRetentionDate, batchSize),
+            externalObjectDirectoryRepository.findExpiredAnnotationDocuments(maxRetentionDate, limit),
             ExternalObjectDirectoryEntity::getAnnotationDocumentEntity,
             AuditActivity.ANNOTATION_EXPIRED
         );
     }
 
-    void deleteCaseDocumentEntity(UserAccountEntity userAccount, OffsetDateTime maxRetentionDate, Limit batchSize) {
+    void deleteCaseDocumentEntity(UserAccountEntity userAccount, OffsetDateTime maxRetentionDate, Limit limit) {
         deleteExternalObjectDirectoryEntity(
             userAccount,
             caseDocumentRepository,
-            externalObjectDirectoryRepository.findExpiredCaseDocuments(maxRetentionDate, batchSize),
+            externalObjectDirectoryRepository.findExpiredCaseDocuments(maxRetentionDate, limit),
             ExternalObjectDirectoryEntity::getCaseDocument,
             AuditActivity.CASE_DOCUMENT_EXPIRED
         );

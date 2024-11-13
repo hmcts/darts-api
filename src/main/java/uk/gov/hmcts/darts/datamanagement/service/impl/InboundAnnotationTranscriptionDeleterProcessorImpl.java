@@ -4,7 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Limit;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.enums.SystemUsersEnum;
@@ -53,7 +53,7 @@ public class InboundAnnotationTranscriptionDeleterProcessorImpl implements Inbou
                                                   EodHelper.unstructuredLocation(),
                                                   lastModifiedBefore,
                                                   ExternalObjectDirectoryQueryTypeEnum.ANNOTATION_QUERY.getIndex(),
-                                                  Pageable.ofSize(batchSize));
+                                                  Limit.of(batchSize));
 
         log.debug("Identified records to be marked for deletion  {}", StringUtils.join(recordsMarkedForDeletion, ","));
 

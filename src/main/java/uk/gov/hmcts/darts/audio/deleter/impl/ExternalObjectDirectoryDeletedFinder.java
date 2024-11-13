@@ -1,6 +1,7 @@
 package uk.gov.hmcts.darts.audio.deleter.impl;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Limit;
 import org.springframework.transaction.annotation.Transactional;
 import uk.gov.hmcts.darts.audio.deleter.ObjectDirectoryDeletedFinder;
 import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
@@ -23,10 +24,11 @@ public class ExternalObjectDirectoryDeletedFinder implements ObjectDirectoryDele
     private final ExternalLocationTypeEnum locationType;
 
     @Override
-    public List<ExternalObjectDirectoryEntity> findMarkedForDeletion() {
+    public List<ExternalObjectDirectoryEntity> findMarkedForDeletion(Integer batchSize) {
         return externalObjectDirectoryRepository.findByExternalLocationTypeAndObjectStatus(
             externalLocationTypeRepository.getReferenceById(locationType.getId()),
-            getMarkedForDeletionStatus()
+            getMarkedForDeletionStatus(),
+            Limit.of(batchSize)
         );
 
     }

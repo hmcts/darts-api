@@ -2,6 +2,7 @@ package uk.gov.hmcts.darts.common.repository;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Limit;
 import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
 import uk.gov.hmcts.darts.common.entity.ObjectAdminActionEntity;
@@ -181,7 +182,7 @@ class ObjectAdminActionRepositoryTest extends PostgresIntegrationBase {
                                                               .build());
 
         // Execute the method under test
-        List<ObjectAdminActionEntity> result = repository.findFilesForManualDeletion(deletionThreshold);
+        List<ObjectAdminActionEntity> result = repository.findFilesForManualDeletion(deletionThreshold, Limit.of(1000));
 
         // Verify the results
         assertEquals(4, result.size());

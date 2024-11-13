@@ -35,7 +35,6 @@ import java.util.Optional;
 import java.util.UUID;
 
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -134,7 +133,7 @@ class BatchCleanupArmResponseFilesServiceImplTest {
             eq(false),
             any(OffsetDateTime.class),
             anyString(),
-            anyInt()
+            any()
         )).thenReturn(List.of("DARTS_6a374f19a9ce7dc9cc480ea8d4eca0fb.a360"));
 
         ExternalObjectDirectoryEntity eodEntityGroup1 = new ExternalObjectDirectoryTestData().createExternalObjectDirectory(
@@ -198,7 +197,7 @@ class BatchCleanupArmResponseFilesServiceImplTest {
             eq(false),
             any(OffsetDateTime.class),
             anyString(),
-            anyInt()
+            any()
         )).thenReturn(List.of("DARTS_6a374f19a9ce7dc9cc480ea8d4eca0fb.a360"));
 
         String inputUploadBlobFilename = "123_456_1_6a374f19a9ce7dc9cc480ea8d4eca0fb_1_iu.rsp";

@@ -6,7 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Limit;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.darts.authorisation.api.AuthorisationApi;
 import uk.gov.hmcts.darts.cases.service.CaseService;
@@ -58,7 +58,7 @@ public class CloseOldCasesProcessorImpl implements CloseOldCasesProcessor {
         log.info("Starting to close old cases...");
 
         List<Integer> courtCaseEntityIdList = caseRepository.findOpenCasesToClose(OffsetDateTime.now().minusYears(years),
-                                                                                  Pageable.ofSize(batchSize));
+                                                                                  Limit.of(batchSize));
         int totalCasesToClose = courtCaseEntityIdList.size();
         log.info("Found {} cases to close.", totalCasesToClose);
 

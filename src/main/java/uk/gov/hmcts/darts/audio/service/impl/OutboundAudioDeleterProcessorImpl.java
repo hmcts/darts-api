@@ -3,6 +3,7 @@ package uk.gov.hmcts.darts.audio.service.impl;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Limit;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.darts.audio.entity.MediaRequestEntity;
 import uk.gov.hmcts.darts.audio.service.OutboundAudioDeleterProcessor;
@@ -40,7 +41,7 @@ public class OutboundAudioDeleterProcessorImpl implements OutboundAudioDeleterPr
     private int deletionDays;
 
     @Override
-    public List<TransientObjectDirectoryEntity> markForDeletion() {
+    public List<TransientObjectDirectoryEntity> markForDeletion(Integer batchSize) {
 
         List<TransientObjectDirectoryEntity> deletedValues = new ArrayList<>();
 
@@ -49,7 +50,7 @@ public class OutboundAudioDeleterProcessorImpl implements OutboundAudioDeleterPr
         OffsetDateTime deletionStartDateTime = deletionDayCalculator.getStartDateForDeletion(deletionDays);
 
         List<TransformedMediaEntity> transformedMediaList = transformedMediaRepository.findAllDeletableTransformedMedia(
-            deletionStartDateTime);
+            deletionStartDateTime, Limit.of(batchSize));
         if (transformedMediaList.isEmpty()) {
             log.debug("No transformed media to be marked for deletion");
         } else {

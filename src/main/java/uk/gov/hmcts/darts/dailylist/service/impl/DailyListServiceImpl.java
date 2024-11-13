@@ -3,6 +3,7 @@ package uk.gov.hmcts.darts.dailylist.service.impl;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Limit;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
@@ -101,11 +102,11 @@ public class DailyListServiceImpl implements DailyListService {
 
     @Transactional
     @Override
-    public void runHouseKeeping() {
+    public void runHouseKeeping(Integer batchSize) {
         if (housekeepingEnabled) {
             LocalDate dateToDeleteBefore = LocalDate.now().minusDays(housekeepingDays);
             log.info("Starting DailyList housekeeping, deleting anything before {}", dateToDeleteBefore);
-            List<DailyListEntity> deletedEntities = dailyListRepository.deleteByStartDateBefore(dateToDeleteBefore);
+            List<DailyListEntity> deletedEntities = dailyListRepository.deleteByStartDateBefore(dateToDeleteBefore, Limit.of(batchSize));
             log.info("Finished DailyList housekeeping. Deleted {} rows.", deletedEntities.size());
         }
     }

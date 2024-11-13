@@ -2,7 +2,7 @@ package uk.gov.hmcts.darts.common.repository;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Limit;
 import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum;
 import uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum;
@@ -54,7 +54,7 @@ class ExternalObjectDirectoryRepositoryTest extends PostgresIntegrationBase {
                 EodHelper.inboundLocation(), EodHelper.armLocation(),
                 getCurrentDateTimeWithHoursBefore(hourDurationBeyondHours),
                 ExternalObjectDirectoryQueryTypeEnum.MEDIA_QUERY.getIndex(),
-                Pageable.ofSize(100_000));
+                Limit.of(100_000));
 
         // assert the logic
         assertExpectedResults(results, entitiesToBeMarkedWithMediaOrAnnotationOutsideOfArmHours,
@@ -77,7 +77,7 @@ class ExternalObjectDirectoryRepositoryTest extends PostgresIntegrationBase {
                                                   EodHelper.inboundLocation(), EodHelper.armLocation(),
                                                   getCurrentDateTimeWithHoursBefore(hourDurationBeyondHours),
                                                   ExternalObjectDirectoryQueryTypeEnum.MEDIA_QUERY.getIndex(),
-                                                  Pageable.ofSize(100_000));
+                                                  Limit.of(100_000));
 
         // assert the logic
         assertExpectedResults(results, entitiesToBeMarkedWithMediaOrAnnotationOutsideOfArmHours,
@@ -100,7 +100,7 @@ class ExternalObjectDirectoryRepositoryTest extends PostgresIntegrationBase {
                 EodHelper.storedStatus(), EodHelper.storedStatus(),
                 EodHelper.inboundLocation(), EodHelper.armLocation(),
                 getCurrentDateTimeWithHoursBefore(hourDurationBeyondHours), ExternalObjectDirectoryQueryTypeEnum.ANNOTATION_QUERY.getIndex(),
-                Pageable.ofSize(100_000));
+                Limit.of(100_000));
 
         // assert the logic
         assertExpectedResults(results, entitiesToBeMarkedWithMediaOrAnnotationOutsideOfArmHours,
@@ -122,7 +122,8 @@ class ExternalObjectDirectoryRepositoryTest extends PostgresIntegrationBase {
                 EodHelper.storedStatus(), EodHelper.storedStatus(),
                 EodHelper.unstructuredLocation(), EodHelper.armLocation(),
                 getCurrentDateTimeWithWeeksBefore(setupUnstructuredWeeksBeforeCurrentTime),
-                getCurrentDateTimeWithHoursBefore(setupArmHoursBeforeCurrentTime));
+                getCurrentDateTimeWithHoursBefore(setupArmHoursBeforeCurrentTime),
+                Limit.of(100_000));
 
         // assert the logic
         assertExpectedResults(results, entitiesToBeMarkedWithMediaOrAnnotationOutsideOfArmHours,
@@ -144,7 +145,8 @@ class ExternalObjectDirectoryRepositoryTest extends PostgresIntegrationBase {
                 EodHelper.storedStatus(), EodHelper.storedStatus(),
                 EodHelper.unstructuredLocation(), EodHelper.armLocation(),
                 getCurrentDateTimeWithWeeksBefore(setupUnstructuredWeeksBeforeCurrentTime),
-                getCurrentDateTimeWithHoursBefore(setupArmHoursBeforeCurrentTime + 1));
+                getCurrentDateTimeWithHoursBefore(setupArmHoursBeforeCurrentTime + 1),
+                Limit.of(100_000));
 
         // assert the logic
         assertTrue(results.isEmpty());
@@ -167,7 +169,7 @@ class ExternalObjectDirectoryRepositoryTest extends PostgresIntegrationBase {
                 EodHelper.inboundLocation(), EodHelper.armLocation(),
                 getCurrentDateTimeWithHoursBefore(hourDurationBeyondHours),
                 ExternalObjectDirectoryQueryTypeEnum.MEDIA_QUERY.getIndex(),
-                Pageable.ofSize(100_000));
+                Limit.of(100_000));
 
         // assert the logic
         assertTrue(results.isEmpty());

@@ -8,7 +8,7 @@ import uk.gov.hmcts.darts.casedocument.service.GenerateCaseDocumentProcessor;
 import uk.gov.hmcts.darts.common.repository.AutomatedTaskRepository;
 import uk.gov.hmcts.darts.log.api.LogApi;
 import uk.gov.hmcts.darts.task.api.AutomatedTaskName;
-import uk.gov.hmcts.darts.task.config.AutomatedTaskConfigurationProperties;
+import uk.gov.hmcts.darts.task.config.GenerateCaseDocumentAutomatedTaskConfig;
 import uk.gov.hmcts.darts.task.runner.AutoloadingManualTask;
 import uk.gov.hmcts.darts.task.service.LockService;
 
@@ -24,7 +24,7 @@ public class GenerateCaseDocumentAutomatedTask extends AbstractLockableAutomated
 
     @Autowired
     public GenerateCaseDocumentAutomatedTask(AutomatedTaskRepository automatedTaskRepository,
-                                             AutomatedTaskConfigurationProperties automatedTaskConfigurationProperties,
+                                             GenerateCaseDocumentAutomatedTaskConfig automatedTaskConfigurationProperties,
                                              AutomatedTaskProcessorFactory automatedTaskProcessorFactory,
                                              LogApi logApi, LockService lockService) {
         super(automatedTaskRepository, automatedTaskConfigurationProperties, logApi, lockService);
@@ -38,8 +38,7 @@ public class GenerateCaseDocumentAutomatedTask extends AbstractLockableAutomated
 
     @Override
     protected void runTask() {
-        Integer batchSize = getAutomatedTaskBatchSize(getTaskName());
-        GenerateCaseDocumentProcessor processor = automatedTaskProcessorFactory.createGenerateCaseDocumentProcessor(batchSize);
+        GenerateCaseDocumentProcessor processor = automatedTaskProcessorFactory.createGenerateCaseDocumentProcessor(getAutomatedTaskBatchSize());
         processor.processGenerateCaseDocument();
     }
 }

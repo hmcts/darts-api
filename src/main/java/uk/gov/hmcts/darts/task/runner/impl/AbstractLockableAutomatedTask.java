@@ -10,7 +10,7 @@ import uk.gov.hmcts.darts.common.entity.AutomatedTaskEntity;
 import uk.gov.hmcts.darts.common.repository.AutomatedTaskRepository;
 import uk.gov.hmcts.darts.log.api.LogApi;
 import uk.gov.hmcts.darts.task.api.AutomatedTaskName;
-import uk.gov.hmcts.darts.task.config.AutomatedTaskConfigurationProperties;
+import uk.gov.hmcts.darts.task.config.AbstractAutomatedTaskConfig;
 import uk.gov.hmcts.darts.task.runner.AutoloadingAutomatedTask;
 import uk.gov.hmcts.darts.task.runner.AutomatedTask;
 import uk.gov.hmcts.darts.task.service.LockService;
@@ -45,7 +45,7 @@ public abstract class AbstractLockableAutomatedTask implements AutomatedTask, Au
 
     private Instant start = Instant.now();
 
-    private final AutomatedTaskConfigurationProperties automatedTaskConfigurationProperties;
+    private final AbstractAutomatedTaskConfig automatedTaskConfigurationProperties;
 
     private final LogApi logApi;
 
@@ -54,10 +54,10 @@ public abstract class AbstractLockableAutomatedTask implements AutomatedTask, Au
     private ThreadLocal<UUID> executionId;
 
     protected AbstractLockableAutomatedTask(AutomatedTaskRepository automatedTaskRepository,
-                                            AutomatedTaskConfigurationProperties automatedTaskConfigurationProperties,
+                                            AbstractAutomatedTaskConfig abstractAutomatedTaskConfig,
                                             LogApi logApi, LockService lockService) {
         this.automatedTaskRepository = automatedTaskRepository;
-        this.automatedTaskConfigurationProperties = automatedTaskConfigurationProperties;
+        this.automatedTaskConfigurationProperties = abstractAutomatedTaskConfig;
         this.logApi = logApi;
         this.lockService = lockService;
     }
@@ -75,7 +75,6 @@ public abstract class AbstractLockableAutomatedTask implements AutomatedTask, Au
         executionId = ThreadLocal.withInitial(UUID::randomUUID);
         preRunTask();
         try {
-
             Optional<AutomatedTaskEntity> automatedTaskEntity = automatedTaskRepository.findByTaskName(getTaskName());
             if (automatedTaskEntity.isPresent()) {
                 AutomatedTaskEntity automatedTask = automatedTaskEntity.get();
@@ -131,11 +130,15 @@ public abstract class AbstractLockableAutomatedTask implements AutomatedTask, Au
     protected abstract void runTask();
 
     public Duration getLockAtMostFor() {
-        return lockService.getLockAtMostFor();
+        return Optional.ofNullable(automatedTaskConfigurationProperties.getLockAtMostFor())
+            .filter(duration -> duration.isPositive())
+            .orElseGet(() -> lockService.getLockAtMostFor());
     }
 
     public Duration getLockAtLeastFor() {
-        return lockService.getLockAtLeastFor();
+        return Optional.ofNullable(automatedTaskConfigurationProperties.getLockAtLeastFor())
+            .filter(duration -> duration.isPositive())
+            .orElseGet(() -> lockService.getLockAtLeastFor());
     }
 
     protected void handleException(Exception exception) {

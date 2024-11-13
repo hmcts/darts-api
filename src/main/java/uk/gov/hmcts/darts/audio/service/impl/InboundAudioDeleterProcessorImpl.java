@@ -4,7 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.ListUtils;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Limit;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.darts.audio.service.InboundAudioDeleterProcessor;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
@@ -46,7 +46,7 @@ public class InboundAudioDeleterProcessorImpl implements InboundAudioDeleterProc
             EodHelper.unstructuredLocation(),
             lastModifiedBefore,
             ExternalObjectDirectoryQueryTypeEnum.MEDIA_QUERY.getIndex(),
-            Pageable.ofSize(batchSize)
+            Limit.of(batchSize)
         );
         log.debug("Marking {} inbound audio files to be deleted.", audioFileIdsToBeMarked.size());
 

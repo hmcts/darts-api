@@ -129,7 +129,7 @@ class OutboundAudioDeleterProcessorTest extends IntegrationBase {
             )
         );
 
-        assertEquals(1, outboundAudioDeleterProcessor.markForDeletion().size());
+        assertEquals(1, outboundAudioDeleterProcessor.markForDeletion(1000).size());
 
         assertTransientObjectDirectoryStateChanged(markedForDeletion.getId());
         assertTransientObjectDirectoryStateNotChanged(notMarkedForDeletion.getId());
@@ -188,7 +188,7 @@ class OutboundAudioDeleterProcessorTest extends IntegrationBase {
         markedForDeletion.setStatus(dartsDatabase.getObjectRecordStatusEntity(MARKED_FOR_DELETION));
         dartsDatabase.save(markedForDeletion);
 
-        assertEquals(0, outboundAudioDeleterProcessor.markForDeletion().size());
+        assertEquals(0, outboundAudioDeleterProcessor.markForDeletion(1000).size());
     }
 
     /**
@@ -220,7 +220,7 @@ class OutboundAudioDeleterProcessorTest extends IntegrationBase {
             OffsetDateTime.parse("2023-10-25T11:45:00Z")
         );
 
-        assertEquals(1, outboundAudioDeleterProcessor.markForDeletion().size());
+        assertEquals(1, outboundAudioDeleterProcessor.markForDeletion(1000).size());
         assertTransientObjectDirectoryStateChanged(markedForDeletion.getId());
         assertEquals(
             EXPIRED,
@@ -257,7 +257,7 @@ class OutboundAudioDeleterProcessorTest extends IntegrationBase {
         //setting clock to 2023-10-23 on a monday
         when(currentTimeHelper.currentOffsetDateTime()).thenReturn(OffsetDateTime.of(2023, 10, 23, 22, 0, 0, 0, ZoneOffset.UTC));
 
-        assertEquals(0, outboundAudioDeleterProcessor.markForDeletion().size());
+        assertEquals(0, outboundAudioDeleterProcessor.markForDeletion(1000).size());
         assertTransientObjectDirectoryStateNotChanged(notMarkedForDeletion.getId());
     }
 
@@ -301,7 +301,7 @@ class OutboundAudioDeleterProcessorTest extends IntegrationBase {
 
         when(bankHolidaysService.getBankHolidaysLocalDateList()).thenReturn(holidays);
 
-        assertEquals(0, outboundAudioDeleterProcessor.markForDeletion().size());
+        assertEquals(0, outboundAudioDeleterProcessor.markForDeletion(1000).size());
         assertTransientObjectDirectoryStateNotChanged(notMarkedForDeletion.getId());
     }
 
@@ -344,7 +344,7 @@ class OutboundAudioDeleterProcessorTest extends IntegrationBase {
             )
         );
 
-        assertEquals(1, outboundAudioDeleterProcessor.markForDeletion().size());
+        assertEquals(1, outboundAudioDeleterProcessor.markForDeletion(1000).size());
         assertTransientObjectDirectoryStateChanged(markedForDeletion.getId());
         assertTransientObjectDirectoryStateNotChanged(notMarkedForDeletion.getId());
 
@@ -380,7 +380,7 @@ class OutboundAudioDeleterProcessorTest extends IntegrationBase {
         when(currentTimeHelper.currentOffsetDateTime()).thenReturn(OffsetDateTime.of(2023, 10, 24, 22, 0, 0, 0, ZoneOffset.UTC));
 
 
-        outboundAudioDeleterProcessor.markForDeletion();
+        outboundAudioDeleterProcessor.markForDeletion(1000);
         assertTransientObjectDirectoryStateNotChanged(notMarkedForDeletion.getId());
 
 
@@ -402,7 +402,7 @@ class OutboundAudioDeleterProcessorTest extends IntegrationBase {
             OffsetDateTime.of(LocalDate.of(2023, Month.OCTOBER, 21), LOCAL_TIME, ZoneOffset.UTC)
         );
 
-        outboundAudioDeleterProcessor.markForDeletion();
+        outboundAudioDeleterProcessor.markForDeletion(1000);
         assertTransientObjectDirectoryStateNotChanged(notMarkedForDeletion.getId());
 
     }
@@ -412,7 +412,7 @@ class OutboundAudioDeleterProcessorTest extends IntegrationBase {
     void whereLastAccessedIsNullUseCreatedAtAndInProgressStatus() {
         TransientObjectDirectoryEntity markedForDeletion = createMediaRequestsAndTransientObjectDirectoryWithHearingWithLastAccessedTimeIsNull();
 
-        List<TransientObjectDirectoryEntity> responseList = outboundAudioDeleterProcessor.markForDeletion();
+        List<TransientObjectDirectoryEntity> responseList = outboundAudioDeleterProcessor.markForDeletion(1000);
         assertEquals(1, responseList.size());
         assertTransientObjectDirectoryStateChanged(markedForDeletion.getId());
         TransientObjectDirectoryEntity tod = dartsDatabase.getTransientObjectDirectoryRepository().findById(markedForDeletion.getId()).get();

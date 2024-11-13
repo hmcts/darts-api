@@ -8,7 +8,7 @@ import uk.gov.hmcts.darts.arm.service.ArmResponseFilesProcessor;
 import uk.gov.hmcts.darts.common.repository.AutomatedTaskRepository;
 import uk.gov.hmcts.darts.log.api.LogApi;
 import uk.gov.hmcts.darts.task.api.AutomatedTaskName;
-import uk.gov.hmcts.darts.task.config.AutomatedTaskConfigurationProperties;
+import uk.gov.hmcts.darts.task.config.ProcessArmResponseFilesAutomatedTaskConfig;
 import uk.gov.hmcts.darts.task.runner.AutoloadingManualTask;
 import uk.gov.hmcts.darts.task.service.LockService;
 
@@ -22,7 +22,7 @@ public class ProcessArmResponseFilesAutomatedTask extends AbstractLockableAutoma
 
     @Autowired
     public ProcessArmResponseFilesAutomatedTask(AutomatedTaskRepository automatedTaskRepository,
-                                                AutomatedTaskConfigurationProperties automatedTaskConfigurationProperties,
+                                                ProcessArmResponseFilesAutomatedTaskConfig automatedTaskConfigurationProperties,
                                                 AutomatedTaskProcessorFactory automatedTaskProcessorFactory,
                                                 LogApi logApi, LockService lockService) {
         super(automatedTaskRepository, automatedTaskConfigurationProperties, logApi, lockService);

@@ -7,7 +7,7 @@ import uk.gov.hmcts.darts.common.repository.AutomatedTaskRepository;
 import uk.gov.hmcts.darts.dailylist.service.DailyListProcessor;
 import uk.gov.hmcts.darts.log.api.LogApi;
 import uk.gov.hmcts.darts.task.api.AutomatedTaskName;
-import uk.gov.hmcts.darts.task.config.AutomatedTaskConfigurationProperties;
+import uk.gov.hmcts.darts.task.config.ProcessDailyListAutomatedTaskConfig;
 import uk.gov.hmcts.darts.task.runner.AutoloadingManualTask;
 import uk.gov.hmcts.darts.task.service.LockService;
 import uk.gov.hmcts.darts.task.status.AutomatedTaskStatus;
@@ -30,7 +30,7 @@ public class ProcessDailyListAutomatedTask
 
     @Autowired
     public ProcessDailyListAutomatedTask(AutomatedTaskRepository automatedTaskRepository,
-                                         AutomatedTaskConfigurationProperties automatedTaskConfigurationProperties,
+                                         ProcessDailyListAutomatedTaskConfig automatedTaskConfigurationProperties,
                                          DailyListProcessor processor, LogApi logApi, LockService lockService) {
         super(automatedTaskRepository, automatedTaskConfigurationProperties, logApi, lockService);
         this.dailyListProcessor = processor;

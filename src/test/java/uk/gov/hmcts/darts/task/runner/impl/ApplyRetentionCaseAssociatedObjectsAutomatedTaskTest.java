@@ -9,6 +9,9 @@ import uk.gov.hmcts.darts.log.api.LogApi;
 import uk.gov.hmcts.darts.retention.service.ApplyRetentionCaseAssociatedObjectsProcessor;
 import uk.gov.hmcts.darts.task.service.LockService;
 
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.spy;
+
 @ExtendWith(MockitoExtension.class)
 class ApplyRetentionCaseAssociatedObjectsAutomatedTaskTest {
 
@@ -23,15 +26,17 @@ class ApplyRetentionCaseAssociatedObjectsAutomatedTaskTest {
     @Test
     void runTask() {
         ApplyRetentionCaseAssociatedObjectsAutomatedTask task =
-            new ApplyRetentionCaseAssociatedObjectsAutomatedTask(
+            spy(new ApplyRetentionCaseAssociatedObjectsAutomatedTask(
                 null,
                 null,
                 applyRetentionCaseAssociatedObjectsProcessor,
                 logApi,
                 lockService
-            );
+            ));
+        doReturn(1234).when(task).getAutomatedTaskBatchSize();
 
         task.runTask();
-        Mockito.verify(applyRetentionCaseAssociatedObjectsProcessor, Mockito.times(1)).processApplyRetentionToCaseAssociatedObjects();
+        Mockito.verify(applyRetentionCaseAssociatedObjectsProcessor, Mockito.times(1)).processApplyRetentionToCaseAssociatedObjects(1234);
+        Mockito.verify(task, Mockito.times(1)).getAutomatedTaskBatchSize();
     }
 }

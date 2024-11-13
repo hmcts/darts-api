@@ -1,5 +1,6 @@
 package uk.gov.hmcts.darts.common.repository;
 
+import org.springframework.data.domain.Limit;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -61,7 +62,7 @@ public interface TransformedMediaRepository extends JpaRepository<TransformedMed
                     OR (tm.createdDateTime < :createdAtOrLastAccessedDateTime AND  mr.status <> 'PROCESSING' AND tm.lastAccessed IS NULL))
                AND upper(tod.status.description) <> 'MARKED FOR DELETION'
         """)
-    List<TransformedMediaEntity> findAllDeletableTransformedMedia(OffsetDateTime createdAtOrLastAccessedDateTime);
+    List<TransformedMediaEntity> findAllDeletableTransformedMedia(OffsetDateTime createdAtOrLastAccessedDateTime, Limit limit);
 
     @Query(value = """
         SELECT tm

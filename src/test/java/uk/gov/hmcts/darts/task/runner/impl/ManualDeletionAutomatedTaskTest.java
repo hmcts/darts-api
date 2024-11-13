@@ -9,10 +9,14 @@ import uk.gov.hmcts.darts.common.repository.AutomatedTaskRepository;
 import uk.gov.hmcts.darts.log.api.LogApi;
 import uk.gov.hmcts.darts.task.api.AutomatedTaskName;
 import uk.gov.hmcts.darts.task.config.AutomatedTaskConfigurationProperties;
+import uk.gov.hmcts.darts.task.config.ManualDeletionAutomatedTaskConfig;
 import uk.gov.hmcts.darts.task.service.LockService;
 import uk.gov.hmcts.darts.task.service.ManualDeletionProcessor;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
@@ -40,7 +44,7 @@ class ManualDeletionAutomatedTaskTest {
     void setUp() {
         manualDeletionAutomatedTask = new ManualDeletionAutomatedTask(
             automatedTaskRepository,
-            automatedTaskConfigurationProperties,
+            mock(ManualDeletionAutomatedTaskConfig.class),
             manualDeletionProcessor,
             logApi,
             lockService
@@ -54,7 +58,10 @@ class ManualDeletionAutomatedTaskTest {
 
     @Test
     void testRunTask() {
+        manualDeletionAutomatedTask = spy(manualDeletionAutomatedTask);
+        doReturn(123).when(manualDeletionAutomatedTask).getAutomatedTaskBatchSize();
         manualDeletionAutomatedTask.runTask();
-        verify(manualDeletionProcessor, times(1)).process();
+        verify(manualDeletionProcessor, times(1)).process(123);
+        verify(manualDeletionAutomatedTask, times(1)).getAutomatedTaskBatchSize();
     }
 }

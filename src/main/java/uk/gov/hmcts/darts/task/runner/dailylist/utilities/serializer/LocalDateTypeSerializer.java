@@ -14,7 +14,6 @@ public class LocalDateTypeSerializer extends JsonSerializer<LocalDate> {
 
     @Override
     public void serialize(LocalDate value, JsonGenerator gen, SerializerProvider serializers) throws IOException {
-        System.out.println("TMP: HERE '" + value + "'");
         gen.writeString(FORMATTER.format(value));
     }
 }

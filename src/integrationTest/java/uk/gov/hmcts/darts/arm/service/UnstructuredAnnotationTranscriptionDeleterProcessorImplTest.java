@@ -46,14 +46,14 @@ class UnstructuredAnnotationTranscriptionDeleterProcessorImplTest extends Postgr
         generateDataWithAnnotation(setupWeeksBeforeCurrentTimeInUnstructured, setupHoursBeforeCurrentTimeInArm);
 
         // exercise the logic
-        List<Integer> updatedResults 
-            = armTranscriptionAndAnnotationDeleterProcessor.markForDeletion(setupWeeksBeforeCurrentTimeInUnstructured, setupHoursBeforeCurrentTimeInArm);
+        List<Integer> updatedResults
+            = armTranscriptionAndAnnotationDeleterProcessor.markForDeletion(setupWeeksBeforeCurrentTimeInUnstructured, setupHoursBeforeCurrentTimeInArm, 1000);
 
         // assert the logic
         assertExpectedResults(updatedResults, entitiesToBeMarkedWithMediaOutsideOfWeeksAndHours, entitiesToBeMarkedWithMediaOutsideOfWeeksAndHours.size());
 
         // assert the logic
-        assertExternalObjectDirectoryUpdate(updatedResults, 
+        assertExternalObjectDirectoryUpdate(updatedResults,
                                             entitiesToBeMarkedWithMediaOutsideOfWeeksAndHours, entitiesToBeMarkedWithMediaOutsideOfWeeksAndHours.size());
 
         externalObjectDirectoryStub.checkNotMarkedForDeletion(expectedArmRecordsResultWithinTheHour);
@@ -68,10 +68,10 @@ class UnstructuredAnnotationTranscriptionDeleterProcessorImplTest extends Postgr
         generateDataWithAnnotation(setupWeeksBeforeCurrentTimeInUnstructured, setupHoursBeforeCurrentTimeInArm);
 
         // exercise the logic
-        List<Integer> updatedResults = armTranscriptionAndAnnotationDeleterProcessor.markForDeletion();
+        List<Integer> updatedResults = armTranscriptionAndAnnotationDeleterProcessor.markForDeletion(1000);
 
         // assert the logic
-        assertExpectedResults(updatedResults, 
+        assertExpectedResults(updatedResults,
                               entitiesToBeMarkedWithMediaOutsideOfWeeksAndHours, entitiesToBeMarkedWithMediaOutsideOfWeeksAndHours.size());
 
         // assert the logic
@@ -91,14 +91,16 @@ class UnstructuredAnnotationTranscriptionDeleterProcessorImplTest extends Postgr
 
         // exercise the logic
         List<Integer> updatedResults
-            = armTranscriptionAndAnnotationDeleterProcessor.markForDeletion(setupWeeksBeforeCurrentTimeInUnstructured, setupHoursBeforeCurrentTimeInArm + 1);
+            = armTranscriptionAndAnnotationDeleterProcessor.markForDeletion(setupWeeksBeforeCurrentTimeInUnstructured, setupHoursBeforeCurrentTimeInArm + 1,
+                                                                            1000);
 
         Assertions.assertTrue(updatedResults.isEmpty());
         externalObjectDirectoryStub.checkNotMarkedForDeletion(unstructuredEntities);
     }
 
     private List<ExternalObjectDirectoryEntity> generateDataWithAnnotation(int weeksBeforeCurrentTimeForUnstructured,
-                                            int hoursBeforeCurrentTimeForArm) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
+                                                                           int hoursBeforeCurrentTimeForArm)
+        throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
         int numberOfRecordsToGenerate = 10;
 
         OffsetDateTime lastModifiedBeforeCurrentTimeForArm = currentTimeHelper.currentOffsetDateTime().minus(

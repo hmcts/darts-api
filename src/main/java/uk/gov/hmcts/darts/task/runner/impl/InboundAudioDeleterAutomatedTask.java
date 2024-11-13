@@ -8,7 +8,7 @@ import uk.gov.hmcts.darts.audio.service.InboundAudioDeleterProcessor;
 import uk.gov.hmcts.darts.common.repository.AutomatedTaskRepository;
 import uk.gov.hmcts.darts.log.api.LogApi;
 import uk.gov.hmcts.darts.task.api.AutomatedTaskName;
-import uk.gov.hmcts.darts.task.config.AutomatedTaskConfigurationProperties;
+import uk.gov.hmcts.darts.task.config.InboundAudioDeleterAutomatedTaskConfig;
 import uk.gov.hmcts.darts.task.runner.AutoloadingManualTask;
 import uk.gov.hmcts.darts.task.service.LockService;
 
@@ -26,7 +26,7 @@ public class InboundAudioDeleterAutomatedTask extends AbstractLockableAutomatedT
 
     @Autowired
     public InboundAudioDeleterAutomatedTask(AutomatedTaskRepository automatedTaskRepository,
-                                            AutomatedTaskConfigurationProperties automatedTaskConfigurationProperties,
+                                            InboundAudioDeleterAutomatedTaskConfig automatedTaskConfigurationProperties,
                                             InboundAudioDeleterProcessor processor,
                                             LogApi logApi, LockService lockService) {
         super(automatedTaskRepository, automatedTaskConfigurationProperties, logApi, lockService);

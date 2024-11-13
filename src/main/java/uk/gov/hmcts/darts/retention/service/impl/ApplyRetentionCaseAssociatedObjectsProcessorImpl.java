@@ -3,6 +3,7 @@ package uk.gov.hmcts.darts.retention.service.impl;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Limit;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
@@ -24,9 +25,9 @@ public class ApplyRetentionCaseAssociatedObjectsProcessorImpl implements ApplyRe
     private final UserIdentity userIdentity;
 
     @Override
-    public void processApplyRetentionToCaseAssociatedObjects() {
+    public void processApplyRetentionToCaseAssociatedObjects(Integer batchSize) {
 
-        var cases = findCasesNeedingRetentionAppliedToAssociatedObjects();
+        var cases = findCasesNeedingRetentionAppliedToAssociatedObjects(batchSize);
 
         for (var courtCase : cases) {
             courtCase.setRetentionUpdated(false);
@@ -44,8 +45,8 @@ public class ApplyRetentionCaseAssociatedObjectsProcessorImpl implements ApplyRe
         }
     }
 
-    public List<CourtCaseEntity> findCasesNeedingRetentionAppliedToAssociatedObjects() {
-        return caseRepository.findByIsRetentionUpdatedTrueAndRetentionRetriesLessThan(maxRetentionRetries);
+    private List<CourtCaseEntity> findCasesNeedingRetentionAppliedToAssociatedObjects(Integer batchSize) {
+        return caseRepository.findByIsRetentionUpdatedTrueAndRetentionRetriesLessThan(maxRetentionRetries, Limit.of(batchSize));
     }
 
 }

@@ -1,7 +1,6 @@
 package uk.gov.hmcts.darts.common.repository;
 
 import org.springframework.data.domain.Limit;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
@@ -23,11 +22,11 @@ public interface CaseRepository extends JpaRepository<CourtCaseEntity, Integer> 
                                                             CourthouseEntity courthouse);
 
     @Query("""
-        SELECT case.caseNumber
-        FROM CourtCaseEntity case
-        WHERE case.closed = false
-        and case.caseNumber in :caseNumbers
-        and case.courthouse.courthouseName = upper(:courthouseName)
+        SELECT c.caseNumber
+        FROM CourtCaseEntity c
+        WHERE c.closed = false
+        and c.caseNumber in :caseNumbers
+        and c.courthouse.courthouseName = upper(:courthouseName)
         """)
     List<String> findOpenCaseNumbers(String courthouseName, List<String> caseNumbers);
 
@@ -48,18 +47,18 @@ public interface CaseRepository extends JpaRepository<CourtCaseEntity, Integer> 
             where cre.courtCase.id = ce.id)
         ORDER BY ce.createdDateTime ASC
         """)
-    List<Integer> findOpenCasesToClose(OffsetDateTime cutoffDate, Pageable pageable);
+    List<Integer> findOpenCasesToClose(OffsetDateTime cutoffDate, Limit limit);
 
-    List<CourtCaseEntity> findByIsRetentionUpdatedTrueAndRetentionRetriesLessThan(int maxRetentionRetries);
+    List<CourtCaseEntity> findByIsRetentionUpdatedTrueAndRetentionRetriesLessThan(int maxRetentionRetries, Limit limit);
 
     @Query("""
-        SELECT case FROM CourtCaseEntity case
-        WHERE case.closed = true
-        AND case.caseClosedTimestamp <= :caseClosedBeforeTimestamp
+        SELECT courtCase FROM CourtCaseEntity courtCase
+        WHERE courtCase.closed = true
+        AND courtCase.caseClosedTimestamp <= :caseClosedBeforeTimestamp
         AND NOT EXISTS (select cde from CaseDocumentEntity cde
-            where (cde.courtCase.id = case.id))
+            where (cde.courtCase.id = courtCase.id))
         """)
-    List<CourtCaseEntity> findCasesNeedingCaseDocumentGenerated(OffsetDateTime caseClosedBeforeTimestamp, Pageable pageable);
+    List<CourtCaseEntity> findCasesNeedingCaseDocumentGenerated(OffsetDateTime caseClosedBeforeTimestamp, Limit limit);
 
     @Query("""
             SELECT cc.id
@@ -81,7 +80,7 @@ public interface CaseRepository extends JpaRepository<CourtCaseEntity, Integer> 
         """)
     List<Integer> findCasesNeedingCaseDocumentForRetentionDateGeneration(OffsetDateTime retainUntilTimestamp,
                                                                          OffsetDateTime caseDocumentCreatedAfterTimestamp,
-                                                                         Pageable pageable);
+                                                                         Limit limit);
 
     @Query(value = """
         select cc.id from CourtCaseEntity cc

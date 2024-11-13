@@ -8,7 +8,7 @@ import uk.gov.hmcts.darts.arm.service.UnstructuredToArmProcessor;
 import uk.gov.hmcts.darts.common.repository.AutomatedTaskRepository;
 import uk.gov.hmcts.darts.log.api.LogApi;
 import uk.gov.hmcts.darts.task.api.AutomatedTaskName;
-import uk.gov.hmcts.darts.task.config.AutomatedTaskConfigurationProperties;
+import uk.gov.hmcts.darts.task.config.UnstructuredToArmAutomatedTaskConfig;
 import uk.gov.hmcts.darts.task.runner.AutoloadingManualTask;
 import uk.gov.hmcts.darts.task.service.LockService;
 
@@ -24,7 +24,7 @@ public class UnstructuredToArmAutomatedTask extends AbstractLockableAutomatedTas
 
     @Autowired
     public UnstructuredToArmAutomatedTask(AutomatedTaskRepository automatedTaskRepository,
-                                          AutomatedTaskConfigurationProperties automatedTaskConfigurationProperties,
+                                          UnstructuredToArmAutomatedTaskConfig automatedTaskConfigurationProperties,
                                           UnstructuredToArmBatchProcessor unstructuredToArmBatchProcessor,
                                           UnstructuredToArmProcessor unstructuredToArmProcessor,
                                           LogApi logApi, LockService lockService) {

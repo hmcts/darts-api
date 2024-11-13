@@ -137,7 +137,7 @@ public interface ExternalObjectDirectoryRepository extends JpaRepository<Externa
     List<ExternalObjectDirectoryEntity> findNotFinishedAndNotExceededRetryInStorageLocationForDets(List<ObjectRecordStatusEntity> failedStatuses,
                                                                                                    ExternalLocationTypeEntity type,
                                                                                                    Integer transferAttempts,
-                                                                                                   Pageable pageable);
+                                                                                                   Limit limit);
 
 
     @Query(
@@ -166,7 +166,7 @@ public interface ExternalObjectDirectoryRepository extends JpaRepository<Externa
             """
     )
     List<ExternalObjectDirectoryEntity> findByExternalLocationTypeAndObjectStatus(ExternalLocationTypeEntity externalLocationTypeEntity,
-                                                                                  ObjectRecordStatusEntity status);
+                                                                                  ObjectRecordStatusEntity status, Limit limit);
 
     List<ExternalObjectDirectoryEntity> findByMediaAndExternalLocationType(MediaEntity media,
                                                                            ExternalLocationTypeEntity externalLocationType);
@@ -206,7 +206,7 @@ public interface ExternalObjectDirectoryRepository extends JpaRepository<Externa
                                                        ExternalLocationTypeEntity location2,
                                                        OffsetDateTime lastModifiedBefore,
                                                        Integer externalObjectDirectoryQueryTypeEnumIndex,
-                                                       Pageable pageable);
+                                                       Limit limit);
 
     @Query(
         """
@@ -227,7 +227,8 @@ public interface ExternalObjectDirectoryRepository extends JpaRepository<Externa
                                                        ExternalLocationTypeEntity location1,
                                                        ExternalLocationTypeEntity location2,
                                                        OffsetDateTime lastModifiedBefore1,
-                                                       OffsetDateTime lastModifiedBefore2);
+                                                       OffsetDateTime lastModifiedBefore2,
+                                                       Limit limit);
 
     @Query(
         """
@@ -244,7 +245,8 @@ public interface ExternalObjectDirectoryRepository extends JpaRepository<Externa
     List<Integer> findIdsForAudioToBeDeletedFromUnstructured(ObjectRecordStatusEntity storedStatus,
                                                              ExternalLocationTypeEntity unstructuredLocation,
                                                              ExternalLocationTypeEntity armLocation,
-                                                             OffsetDateTime unstructuredLastModifiedBefore);
+                                                             OffsetDateTime unstructuredLastModifiedBefore,
+                                                             Limit limit);
 
 
     @Query(
@@ -273,14 +275,13 @@ public interface ExternalObjectDirectoryRepository extends JpaRepository<Externa
             and eod.manifestFile is not null
             and eod.manifestFile like CONCAT(:manifestFileBatchPrefix, '%')
             ORDER BY 1
-            LIMIT :batchSize
             """
     )
     List<String> findBatchCleanupManifestFilenames(
         List<ObjectRecordStatusEntity> statuses,
         ExternalLocationTypeEntity locationType,
         boolean responseCleaned,
-        OffsetDateTime lastModifiedBefore, String manifestFileBatchPrefix, Integer batchSize);
+        OffsetDateTime lastModifiedBefore, String manifestFileBatchPrefix, Limit limit);
 
     @Query(
         """
@@ -341,12 +342,11 @@ public interface ExternalObjectDirectoryRepository extends JpaRepository<Externa
               OR eod.annotationDocumentEntity = eod2.annotationDocumentEntity
               OR eod.caseDocument = eod2.caseDocument ))
             order by eod.lastModifiedDateTime
-            LIMIT :limitRecords
             """
     )
     List<ExternalObjectDirectoryEntity> findEodsForTransfer(ObjectRecordStatusEntity status, ExternalLocationTypeEntity type,
                                                             ObjectRecordStatusEntity notExistsStatus, ExternalLocationTypeEntity notExistsType,
-                                                            Integer maxTransferAttempts, Integer limitRecords);
+                                                            Integer maxTransferAttempts, Limit limit);
 
     @Query(
         """
@@ -413,7 +413,7 @@ public interface ExternalObjectDirectoryRepository extends JpaRepository<Externa
     List<ExternalObjectDirectoryEntity> findAllByStatusAndManifestFile(ObjectRecordStatusEntity status, String manifestFile);
 
     List<ExternalObjectDirectoryEntity> findByExternalLocationTypeAndUpdateRetention(ExternalLocationTypeEntity externalLocationTypeEntity,
-                                                                                     boolean updateRetention);
+                                                                                     boolean updateRetention, Limit limit);
 
 
     List<ExternalObjectDirectoryEntity> findByManifestFile(String manifestName);
