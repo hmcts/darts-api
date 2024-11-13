@@ -4,4 +4,17 @@ update darts.automated_task set cron_expression = '0 0,30 0-8,20-23 ? * *' where
 update darts.automated_task set cron_expression = '0 50 0-8,20-23 ? * *' where task_name = 'GenerateCaseDocumentForRetentionDate';
 update darts.automated_task set cron_expression = '0 9 0-6,21-23 ? * *' where task_name = 'ProcessDETSToArmResponse';
 update darts.automated_task set cron_expression = '0 9 0-6,21-23 ? * *' where task_name = 'DetsToArm';
-update darts.automated_task set cron_expression = '0 0 0-8,20-23 ? * *' where task_name = 'AudioLinking';
+
+update darts.automated_task set cron_expression = '* * 0/1 ? * *' where task_name = 'ApplyRetention';
+update darts.automated_task set cron_expression = '0 30 2-8 ? * *' where task_name = 'ExternalDataStoreDeleter';
+update darts.automated_task set cron_expression = '0 0 0-2,20-23 ? * *' where task_name = 'OutboundAudioDeleter';
+update darts.automated_task set cron_expression = '0 4 0-2,20-23 ? * *' where task_name = 'InboundAudioDeleter';
+update darts.automated_task set cron_expression = '0 34 0-2,20-23 ? * *' where task_name = 'InboundTranscriptionAnnotationDeleter';
+update darts.automated_task set cron_expression = '0 27 0-2,20-23 ? * *' where task_name = 'UnstructuredAudioDeleter';
+update darts.automated_task set cron_expression = '0 57 0-2,20-23 ? * *' where task_name = 'UnstructuredTranscriptionAnnotationDeleter';
+update darts.automated_task set cron_expression = '0 15 0/1 ? * *' where task_name = 'ApplyRetentionCaseAssociatedObjects';
+update darts.automated_task set cron_expression = '0 45 0/1 ? * *' where task_name = 'ArmRetentionEventDateCalculator';
+update darts.automated_task set cron_expression = '0 0 9 30 2 ?' where task_name = 'CaseExpiryDeletion';
+update darts.automated_task set cron_expression = '0 17 0-8,20-23 ? * *' where task_name = 'AudioLinking';
+update darts.automated_task set cron_expression = '0 0 9 31 2 ?' where task_name = 'AssociatedObjectDataExpiryDeletion';
+update darts.automated_task set cron_expression = '0 0 9 31 2 ?' where task_name = 'ArmRpoReplay';
