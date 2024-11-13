@@ -8,10 +8,10 @@ public class ArmRpoStatusEntityTestData {
     private ArmRpoStatusEntityTestData() {
     }
 
-    public static ArmRpoStatusEntity statusOf(ArmRpoStatusEnum state) {
+    public static ArmRpoStatusEntity statusOf(ArmRpoStatusEnum status) {
         var armRpoStatusEntity = new ArmRpoStatusEntity();
-        armRpoStatusEntity.setId(state.getId());
-        armRpoStatusEntity.setDescription(state.name());
+        armRpoStatusEntity.setId(status.getId());
+        armRpoStatusEntity.setDescription(status.name());
         return armRpoStatusEntity;
     }
 }
