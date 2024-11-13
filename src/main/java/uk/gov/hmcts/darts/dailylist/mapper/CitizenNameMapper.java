@@ -18,17 +18,16 @@ public class CitizenNameMapper {
     private static final int SURNAME_INDEX = 1;
 
     public CitizenName getCitizenName(String name) {
-        String[] citizenName = name.split(NAME_DELIMITER);
+        String[] citizenName = DataUtil.trim(name).split(NAME_DELIMITER);
         CitizenName retCitizenName = new CitizenName();
 
         if (citizenName.length == 1) {
-            retCitizenName.setCitizenNameForename(DataUtil.trim(citizenName[FORENAME_INDEX]));
+            retCitizenName.setCitizenNameForename(citizenName[FORENAME_INDEX]);
             retCitizenName.setCitizenNameSurname("");
         } else if (citizenName.length > 1) {
-            retCitizenName.setCitizenNameForename(DataUtil.trim(citizenName[FORENAME_INDEX]));
-            retCitizenName.setCitizenNameSurname(DataUtil.trim(getSurnames(citizenName)));
+            retCitizenName.setCitizenNameForename(citizenName[FORENAME_INDEX]);
+            retCitizenName.setCitizenNameSurname(getSurnames(citizenName));
         }
-
         return retCitizenName;
     }
 
