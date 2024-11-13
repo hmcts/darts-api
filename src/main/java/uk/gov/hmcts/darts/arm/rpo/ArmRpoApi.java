@@ -1,6 +1,5 @@
 package uk.gov.hmcts.darts.arm.rpo;
 
-import uk.gov.hmcts.darts.arm.client.model.rpo.MasterIndexFieldByRecordClassSchemaResponse;
 import uk.gov.hmcts.darts.arm.model.rpo.MasterIndexFieldByRecordClassSchema;
 import uk.gov.hmcts.darts.common.entity.ArmRpoStateEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
@@ -29,7 +28,7 @@ public interface ArmRpoApi {
     void getExtendedSearchesByMatter(String bearerToken, Integer executionId, UserAccountEntity userAccount);
 
     boolean createExportBasedOnSearchResultsTable(String bearerToken, Integer executionId,
-                                                  List<MasterIndexFieldByRecordClassSchemaResponse> headerColumns,
+                                                  List<MasterIndexFieldByRecordClassSchema> headerColumns,
                                                   UserAccountEntity userAccount);
 
     void getExtendedProductionsByMatter(String bearerToken, Integer executionId, UserAccountEntity userAccount);

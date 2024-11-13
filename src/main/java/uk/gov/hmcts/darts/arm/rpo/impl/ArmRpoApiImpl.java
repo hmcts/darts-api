@@ -406,7 +406,7 @@ public class ArmRpoApiImpl implements ArmRpoApi {
 
     @Override
     public boolean createExportBasedOnSearchResultsTable(String bearerToken, Integer executionId,
-                                                         List<MasterIndexFieldByRecordClassSchemaResponse> headerColumns, UserAccountEntity userAccount) {
+                                                         List<MasterIndexFieldByRecordClassSchema> headerColumns, UserAccountEntity userAccount) {
         var armRpoExecutionDetailEntity = armRpoService.getArmRpoExecutionDetailEntity(executionId);
         armRpoService.updateArmRpoStateAndStatus(armRpoExecutionDetailEntity, ArmRpoHelper.createExportBasedOnSearchResultsTableRpoState(),
                                                  ArmRpoHelper.inProgressRpoStatus(), userAccount);
@@ -700,7 +700,7 @@ public class ArmRpoApiImpl implements ArmRpoApi {
     }
 
     private CreateExportBasedOnSearchResultsTableRequest createRequestForCreateExportBasedOnSearchResultsTable(
-        List<MasterIndexFieldByRecordClassSchemaResponse> headerColumns, String searchId, int searchItemsCount, String productionName,
+        List<MasterIndexFieldByRecordClassSchema> headerColumns, String searchId, int searchItemsCount, String productionName,
         String storageAccountId) {
 
         return CreateExportBasedOnSearchResultsTableRequest.builder()
@@ -728,21 +728,19 @@ public class ArmRpoApiImpl implements ArmRpoApi {
     }
 
     private List<CreateExportBasedOnSearchResultsTableRequest.HeaderColumn> createHeaderColumnsFromMasterIndexFieldByRecordClassSchemaResponse(
-        List<MasterIndexFieldByRecordClassSchemaResponse> masterIndexFieldByRecordClassSchemaResponses) {
+        List<MasterIndexFieldByRecordClassSchema> masterIndexFieldByRecordClassSchemas) {
 
         List<CreateExportBasedOnSearchResultsTableRequest.HeaderColumn> headerColumnList = new ArrayList<>();
-        for (MasterIndexFieldByRecordClassSchemaResponse response : masterIndexFieldByRecordClassSchemaResponses) {
-            for (MasterIndexFieldByRecordClassSchemaResponse.MasterIndexField masterIndexField : response.getMasterIndexFields()) {
-                headerColumnList.add(createHeaderColumn(masterIndexField));
-            }
+        for (MasterIndexFieldByRecordClassSchema masterIndexField : masterIndexFieldByRecordClassSchemas) {
+            headerColumnList.add(createHeaderColumn(masterIndexField));
         }
         return headerColumnList;
     }
 
     private CreateExportBasedOnSearchResultsTableRequest.HeaderColumn createHeaderColumn(
-        MasterIndexFieldByRecordClassSchemaResponse.MasterIndexField masterIndexField) {
+        MasterIndexFieldByRecordClassSchema masterIndexField) {
         return CreateExportBasedOnSearchResultsTableRequest.HeaderColumn.builder()
-            .masterIndexField(masterIndexField.getMasterIndexFieldId())
+            .masterIndexField(masterIndexField.getMasterIndexField())
             .displayName(masterIndexField.getDisplayName())
             .propertyName(masterIndexField.getPropertyName())
             .propertyType(masterIndexField.getPropertyType())
