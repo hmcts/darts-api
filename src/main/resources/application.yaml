@@ -380,7 +380,7 @@ darts:
         audio-buffer: 0s
         lock:
           at-least-for: PT1M
-          at-most-for: PT5H
+          at-most-for: PT90M
       batch-cleanup-arm-response-files:
         system-user-email: ${darts.automated.task.common-config.system-user-email:}
         lock:
@@ -434,6 +434,7 @@ darts:
           at-most-for: PT40M
       inbound-transcription-annotation-deleter:
         system-user-email: ${darts.automated.task.common-config.system-user-email:}
+        default-batch-size: 100000
         lock:
           at-least-for: PT1M
           at-most-for: PT40M
@@ -467,14 +468,16 @@ darts:
           at-most-for: PT1H30M
       process-arm-rpo-pending:
         system-user-email: ${darts.automated.task.common-config.system-user-email:}
+        process-e2e-arm-rpo: ${PROCESS_E2E_ARM_RPO:false}
+        arm-rpo-duration: ${ARM_RPO_DURATION:1h}
         lock:
           at-least-for: PT1M
-          at-most-for: PT5H
+          at-most-for: PT90M
       process-daily-list:
         system-user-email: ${darts.automated.task.common-config.system-user-email:}
         lock:
           at-least-for: PT1M
-          at-most-for: PT5H
+          at-most-for: PT90M
       process-dets-to-arm-response:
         system-user-email: ${darts.automated.task.common-config.system-user-email:}
         lock:
@@ -501,12 +504,6 @@ darts:
         lock:
           at-least-for: PT1M
           at-most-for: PT1H30M
-      arm-rpo-duration: ${ARM_RPO_DURATION:1h}
-      inbound-annotation-transcription-deleter:
-        default-batch-size: 100000
-      process-e2e-arm-rpo: ${PROCESS_E2E_ARM_RPO:false}
-      thread-pool-size: 5
-      system-user-email: ${SYSTEM_USER_EMAIL:}
       unstructured-to-arm-batch-processor:
         max-arm-manifest-items: 100
         max-arm-single-mode-items: 100

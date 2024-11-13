@@ -19,7 +19,7 @@ public class InboundAnnotationTranscriptionDeleterAutomatedTask extends Abstract
 
     private final InboundAnnotationTranscriptionDeleterProcessor annotationTranscriptionDeleterProcessor;
 
-    @Value("${darts.automated.task.inbound-annotation-transcription-deleter.default-batch-size}")
+    @Value("${darts.automated.task.inbound-transcription-annotation-deleter.default-batch-size}")
     int defaultBatchSize;
 
     @Autowired
