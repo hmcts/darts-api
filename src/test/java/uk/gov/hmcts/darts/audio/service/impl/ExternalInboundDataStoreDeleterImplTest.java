@@ -29,6 +29,8 @@ import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -51,7 +53,7 @@ class ExternalInboundDataStoreDeleterImplTest {
     public void setUp() {
         mockStatus();
         List<ExternalObjectDirectoryEntity> inboundData = createInboundData();
-        when(finder.findMarkedForDeletion()).thenReturn(inboundData);
+        when(finder.findMarkedForDeletion(100)).thenReturn(inboundData);
 
         this.deleter = new ExternalInboundDataStoreDeleter(
             externalObjectDirectoryRepository,
@@ -69,7 +71,7 @@ class ExternalInboundDataStoreDeleterImplTest {
 
     @Test
     void deleteFromInboundDatastore() {
-        List<ExternalObjectDirectoryEntity> deletedItems = deleter.delete();
+        List<ExternalObjectDirectoryEntity> deletedItems = deleter.delete(100);
 
         assertThat(
             deletedItems,
@@ -83,13 +85,15 @@ class ExternalInboundDataStoreDeleterImplTest {
             )
         );
         assertEquals(2, deletedItems.size());
+        verify(finder,times(1)).findMarkedForDeletion(100);
     }
 
     @Test
     void deleteFromInboundDatastoreShouldNotThrowAzureDeleteBlobException() throws AzureDeleteBlobException {
         doThrow(AzureDeleteBlobException.class).when(inboundDataStoreDeleter).delete(any(UUID.class));
 
-        assertDoesNotThrow(() -> deleter.delete());
+        assertDoesNotThrow(() -> deleter.delete(100));
+        verify(finder,times(1)).findMarkedForDeletion(100);
     }
 
     private List<ExternalObjectDirectoryEntity> createInboundData() {

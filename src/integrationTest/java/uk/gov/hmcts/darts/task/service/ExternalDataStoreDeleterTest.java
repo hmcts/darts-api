@@ -186,10 +186,10 @@ class ExternalDataStoreDeleterTest extends IntegrationBase {
         TransientObjectDirectoryEntity outboundEntity = createTransientDirectoryAndObjectStatus(
             currentMediaRequest, MARKED_FOR_DELETION);
 
-        externalInboundDataStoreDeleter.delete();
-        externalUnstructuredDataStoreDeleter.delete();
-        externalOutboundDataStoreDeleter.delete();
-        externalDetsDataStoreDeleter.delete();
+        externalInboundDataStoreDeleter.delete(1000);
+        externalUnstructuredDataStoreDeleter.delete(1000);
+        externalOutboundDataStoreDeleter.delete(1000);
+        externalDetsDataStoreDeleter.delete(1000);
 
         verifyEntitiesDeleted(List.of(inboundEntity, unstructuredEntity, detsEntity), List.of(outboundEntity));
         verify(detsApiService).deleteBlobDataFromContainer(any(UUID.class));
@@ -230,10 +230,10 @@ class ExternalDataStoreDeleterTest extends IntegrationBase {
             DETS.getId(), STORED
         );
 
-        externalInboundDataStoreDeleter.delete();
-        externalUnstructuredDataStoreDeleter.delete();
-        externalOutboundDataStoreDeleter.delete();
-        externalDetsDataStoreDeleter.delete();
+        externalInboundDataStoreDeleter.delete(1000);
+        externalUnstructuredDataStoreDeleter.delete(1000);
+        externalOutboundDataStoreDeleter.delete(1000);
+        externalDetsDataStoreDeleter.delete(1000);
 
         verifyEntitiesNotChanged(List.of(unstructuredEntity, inboundEntity, detsEntity), List.of(outboundEntity));
         verify(detsApiService, never()).deleteBlobDataFromContainer(any(UUID.class));

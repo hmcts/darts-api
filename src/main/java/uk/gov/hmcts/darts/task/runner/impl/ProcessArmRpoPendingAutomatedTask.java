@@ -10,7 +10,7 @@ import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
 import uk.gov.hmcts.darts.common.util.EodHelper;
 import uk.gov.hmcts.darts.log.api.LogApi;
 import uk.gov.hmcts.darts.task.api.AutomatedTaskName;
-import uk.gov.hmcts.darts.task.config.AutomatedTaskConfigurationProperties;
+import uk.gov.hmcts.darts.task.config.ProcessArmRpoPendingAutomatedTaskConfig;
 import uk.gov.hmcts.darts.task.runner.AutoloadingManualTask;
 import uk.gov.hmcts.darts.task.service.LockService;
 
@@ -29,7 +29,7 @@ public class ProcessArmRpoPendingAutomatedTask extends AbstractLockableAutomated
     private final Duration armRpoDuration;
 
     protected ProcessArmRpoPendingAutomatedTask(AutomatedTaskRepository automatedTaskRepository,
-                                                AutomatedTaskConfigurationProperties automatedTaskConfigurationProperties,
+                                                ProcessArmRpoPendingAutomatedTaskConfig automatedTaskConfigurationProperties,
                                                 LogApi logApi, LockService lockService,
                                                 ExternalObjectDirectoryRepository externalObjectDirectoryRepository,
                                                 CurrentTimeHelper currentTimeHelper,

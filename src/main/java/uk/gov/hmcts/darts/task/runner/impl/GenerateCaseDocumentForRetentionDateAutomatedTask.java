@@ -8,7 +8,7 @@ import uk.gov.hmcts.darts.casedocument.service.GenerateCaseDocumentForRetentionD
 import uk.gov.hmcts.darts.common.repository.AutomatedTaskRepository;
 import uk.gov.hmcts.darts.log.api.LogApi;
 import uk.gov.hmcts.darts.task.api.AutomatedTaskName;
-import uk.gov.hmcts.darts.task.config.AutomatedTaskConfigurationProperties;
+import uk.gov.hmcts.darts.task.config.GenerateCaseDocumentForRetentionDateAutomatedTaskConfig;
 import uk.gov.hmcts.darts.task.runner.AutoloadingManualTask;
 import uk.gov.hmcts.darts.task.service.LockService;
 
@@ -24,7 +24,7 @@ public class GenerateCaseDocumentForRetentionDateAutomatedTask extends AbstractL
 
     @Autowired
     public GenerateCaseDocumentForRetentionDateAutomatedTask(AutomatedTaskRepository automatedTaskRepository,
-                                                             AutomatedTaskConfigurationProperties automatedTaskConfigurationProperties,
+                                                             GenerateCaseDocumentForRetentionDateAutomatedTaskConfig automatedTaskConfigurationProperties,
                                                              AutomatedTaskProcessorFactory automatedTaskProcessorFactory,
                                                              LogApi logApi,
                                                              LockService lockService) {
@@ -39,7 +39,7 @@ public class GenerateCaseDocumentForRetentionDateAutomatedTask extends AbstractL
 
     @Override
     protected void runTask() {
-        Integer batchSize = getAutomatedTaskBatchSize(getTaskName());
+        Integer batchSize = getAutomatedTaskBatchSize();
         GenerateCaseDocumentForRetentionDateProcessor processor = automatedTaskProcessorFactory.createGenerateCaseDocumentForRetentionDateProcessor(batchSize);
         processor.processGenerateCaseDocumentForRetentionDate(batchSize);
     }

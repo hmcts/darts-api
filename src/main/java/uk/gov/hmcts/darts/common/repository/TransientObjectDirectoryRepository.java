@@ -1,5 +1,6 @@
 package uk.gov.hmcts.darts.common.repository;
 
+import org.springframework.data.domain.Limit;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
@@ -18,5 +19,5 @@ public interface TransientObjectDirectoryRepository extends JpaRepository<Transi
         """)
     List<TransientObjectDirectoryEntity> findByTransformedMediaId(Integer transformedMediaId);
 
-    List<TransientObjectDirectoryEntity> findByStatus(ObjectRecordStatusEntity status);
+    List<TransientObjectDirectoryEntity> findByStatus(ObjectRecordStatusEntity status, Limit limit);
 }

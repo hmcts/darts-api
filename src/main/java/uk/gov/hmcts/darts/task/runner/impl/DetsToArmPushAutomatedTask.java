@@ -7,7 +7,7 @@ import uk.gov.hmcts.darts.arm.service.DetsToArmBatchPushProcessor;
 import uk.gov.hmcts.darts.common.repository.AutomatedTaskRepository;
 import uk.gov.hmcts.darts.log.api.LogApi;
 import uk.gov.hmcts.darts.task.api.AutomatedTaskName;
-import uk.gov.hmcts.darts.task.config.AutomatedTaskConfigurationProperties;
+import uk.gov.hmcts.darts.task.config.DetsToArmPushAutomatedTaskConfig;
 import uk.gov.hmcts.darts.task.runner.AutoloadingManualTask;
 import uk.gov.hmcts.darts.task.service.LockService;
 
@@ -22,7 +22,7 @@ public class DetsToArmPushAutomatedTask extends AbstractLockableAutomatedTask
 
     @Autowired
     public DetsToArmPushAutomatedTask(AutomatedTaskRepository automatedTaskRepository,
-                                      AutomatedTaskConfigurationProperties automatedTaskConfigurationProperties,
+                                      DetsToArmPushAutomatedTaskConfig automatedTaskConfigurationProperties,
                                       DetsToArmBatchPushProcessor processor,
                                       LogApi logApi, LockService lockService) {
         super(automatedTaskRepository, automatedTaskConfigurationProperties, logApi, lockService);
@@ -36,8 +36,6 @@ public class DetsToArmPushAutomatedTask extends AbstractLockableAutomatedTask
 
     @Override
     protected void runTask() {
-        Integer batchSize = getAutomatedTaskBatchSize(getTaskName());
-        detsToArmPushProcessor.processDetsToArm(batchSize);
-
+        detsToArmPushProcessor.processDetsToArm(getAutomatedTaskBatchSize());
     }
 }

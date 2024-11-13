@@ -7,7 +7,7 @@ import uk.gov.hmcts.darts.common.repository.AutomatedTaskRepository;
 import uk.gov.hmcts.darts.datamanagement.service.InboundAnnotationTranscriptionDeleterProcessor;
 import uk.gov.hmcts.darts.log.api.LogApi;
 import uk.gov.hmcts.darts.task.api.AutomatedTaskName;
-import uk.gov.hmcts.darts.task.config.AutomatedTaskConfigurationProperties;
+import uk.gov.hmcts.darts.task.config.InboundAnnotationTranscriptionDeleterAutomatedTaskConfig;
 import uk.gov.hmcts.darts.task.runner.AutoloadingManualTask;
 import uk.gov.hmcts.darts.task.service.LockService;
 
@@ -24,7 +24,7 @@ public class InboundAnnotationTranscriptionDeleterAutomatedTask extends Abstract
 
     @Autowired
     public InboundAnnotationTranscriptionDeleterAutomatedTask(AutomatedTaskRepository automatedTaskRepository,
-                                                              AutomatedTaskConfigurationProperties automatedTaskConfigurationProperties,
+                                                              InboundAnnotationTranscriptionDeleterAutomatedTaskConfig automatedTaskConfigurationProperties,
                                                               InboundAnnotationTranscriptionDeleterProcessor annotationTranscriptionDeleterProcessor,
                                                               LogApi logApi,
                                                               LockService lockService) {

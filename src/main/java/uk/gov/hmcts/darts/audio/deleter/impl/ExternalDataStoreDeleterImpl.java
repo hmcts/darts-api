@@ -24,8 +24,8 @@ public class ExternalDataStoreDeleterImpl<T extends ObjectDirectory> implements 
     private final TransformedMediaRepository transformedMediaRepository;
 
     @Override
-    public List<T> delete() {
-        List<T> toBeDeleted = finder.findMarkedForDeletion();
+    public List<T> delete(Integer batchSize) {
+        List<T> toBeDeleted = finder.findMarkedForDeletion(batchSize);
 
         for (T entityToBeDeleted : toBeDeleted) {
             delete(entityToBeDeleted);

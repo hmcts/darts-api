@@ -1,5 +1,5 @@
 package uk.gov.hmcts.darts.retention.service;
 
 public interface ApplyRetentionProcessor {
-    void processApplyRetention();
+    void processApplyRetention(Integer batchSize);
 }

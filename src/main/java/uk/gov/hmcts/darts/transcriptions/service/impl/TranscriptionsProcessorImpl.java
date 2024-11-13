@@ -2,6 +2,7 @@ package uk.gov.hmcts.darts.transcriptions.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Limit;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.darts.common.entity.TranscriptionEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionStatusEntity;
@@ -29,7 +30,7 @@ public class TranscriptionsProcessorImpl implements TranscriptionsProcessor {
     private final CurrentTimeHelper currentTimeHelper;
 
     @Override
-    public void closeTranscriptions() {
+    public void closeTranscriptions(Integer batchSize) {
         try {
             List<TranscriptionStatusEntity> finishedTranscriptionStatuses = transcriptionService.getFinishedTranscriptionStatuses();
             OffsetDateTime lastCreatedDateTime = currentTimeHelper.currentOffsetDateTime()
@@ -37,7 +38,8 @@ public class TranscriptionsProcessorImpl implements TranscriptionsProcessor {
             List<TranscriptionEntity> transcriptionsToBeClosed =
                 transcriptionRepository.findAllByTranscriptionStatusNotInWithCreatedDateTimeBefore(
                     finishedTranscriptionStatuses,
-                    lastCreatedDateTime
+                    lastCreatedDateTime,
+                    Limit.of(batchSize)
                 );
             if (isNull(transcriptionsToBeClosed) || transcriptionsToBeClosed.isEmpty()) {
                 log.debug("No transcriptions to be closed off");

@@ -367,7 +367,7 @@ class AssociatedObjectDataExpiryDeletionAutomatedTaskTest {
         ExternalObjectDirectoryEntity externalObjectDirectoryEntity = new ExternalObjectDirectoryEntity();
         externalObjectDirectoryEntity.setExternalLocationType(externalLocationTypeEntity);
 
-        doReturn(true).when(inboundDeleter).delete(any());
+        doReturn(true).when(inboundDeleter).delete(any(ExternalObjectDirectoryEntity.class));
 
         assertThat(associatedObjectDataExpiryDeletionAutomatedTask.deleteFromExternalDataStore(externalObjectDirectoryEntity))
             .isTrue();
@@ -383,7 +383,7 @@ class AssociatedObjectDataExpiryDeletionAutomatedTaskTest {
         ExternalObjectDirectoryEntity externalObjectDirectoryEntity = new ExternalObjectDirectoryEntity();
         externalObjectDirectoryEntity.setExternalLocationType(externalLocationTypeEntity);
 
-        doReturn(true).when(unstructuredDeleter).delete(any());
+        doReturn(true).when(unstructuredDeleter).delete(any(ExternalObjectDirectoryEntity.class));
 
         assertThat(associatedObjectDataExpiryDeletionAutomatedTask.deleteFromExternalDataStore(externalObjectDirectoryEntity))
             .isTrue();

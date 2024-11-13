@@ -7,7 +7,7 @@ import org.springframework.stereotype.Component;
 import uk.gov.hmcts.darts.common.repository.AutomatedTaskRepository;
 import uk.gov.hmcts.darts.log.api.LogApi;
 import uk.gov.hmcts.darts.task.api.AutomatedTaskName;
-import uk.gov.hmcts.darts.task.config.AutomatedTaskConfigurationProperties;
+import uk.gov.hmcts.darts.task.config.ManualDeletionAutomatedTaskConfig;
 import uk.gov.hmcts.darts.task.runner.AutoloadingManualTask;
 import uk.gov.hmcts.darts.task.service.LockService;
 import uk.gov.hmcts.darts.task.service.ManualDeletionProcessor;
@@ -28,7 +28,7 @@ public class ManualDeletionAutomatedTask extends AbstractLockableAutomatedTask
 
     @Autowired
     public ManualDeletionAutomatedTask(AutomatedTaskRepository automatedTaskRepository,
-                                       AutomatedTaskConfigurationProperties automatedTaskConfigurationProperties,
+                                       ManualDeletionAutomatedTaskConfig automatedTaskConfigurationProperties,
                                        ManualDeletionProcessor manualDeletionProcessor,
                                        LogApi logApi, LockService lockService) {
         super(automatedTaskRepository, automatedTaskConfigurationProperties, logApi, lockService);
@@ -43,6 +43,6 @@ public class ManualDeletionAutomatedTask extends AbstractLockableAutomatedTask
 
     @Override
     protected void runTask() {
-        manualDeletionProcessor.process();
+        manualDeletionProcessor.process(getAutomatedTaskBatchSize());
     }
 }

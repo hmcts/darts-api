@@ -8,6 +8,8 @@ import uk.gov.hmcts.darts.dailylist.service.DailyListService;
 import uk.gov.hmcts.darts.log.api.LogApi;
 import uk.gov.hmcts.darts.task.service.LockService;
 
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
@@ -25,15 +27,17 @@ class DailyListHouseKeepingAutomatedTaskTest {
 
     @Test
     void runTask() {
-        var dailyListAutomatedTask = new DailyListAutomatedTask(
-                null,
-                null,
-                dailyListService,
-                logApi,
-                lockService
-        );
+        var dailyListAutomatedTask = spy(new DailyListAutomatedTask(
+            null,
+            null,
+            dailyListService,
+            logApi,
+            lockService
+        ));
+        doReturn(123).when(dailyListAutomatedTask).getAutomatedTaskBatchSize();
 
         dailyListAutomatedTask.runTask();
-        verify(dailyListService, times(1)).runHouseKeeping();
+        verify(dailyListService, times(1)).runHouseKeeping(123);
+        verify(dailyListAutomatedTask, times(1)).getAutomatedTaskBatchSize();
     }
 }

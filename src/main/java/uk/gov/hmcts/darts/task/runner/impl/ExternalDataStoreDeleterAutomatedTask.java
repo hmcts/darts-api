@@ -9,7 +9,7 @@ import uk.gov.hmcts.darts.audio.deleter.impl.unstructured.ExternalUnstructuredDa
 import uk.gov.hmcts.darts.common.repository.AutomatedTaskRepository;
 import uk.gov.hmcts.darts.log.api.LogApi;
 import uk.gov.hmcts.darts.task.api.AutomatedTaskName;
-import uk.gov.hmcts.darts.task.config.AutomatedTaskConfigurationProperties;
+import uk.gov.hmcts.darts.task.config.ExternalDataStoreDeleterAutomatedTaskConfig;
 import uk.gov.hmcts.darts.task.runner.AutoloadingManualTask;
 import uk.gov.hmcts.darts.task.service.LockService;
 
@@ -27,7 +27,7 @@ public class ExternalDataStoreDeleterAutomatedTask extends AbstractLockableAutom
 
     @Autowired
     public ExternalDataStoreDeleterAutomatedTask(AutomatedTaskRepository automatedTaskRepository,
-                                                 AutomatedTaskConfigurationProperties automatedTaskConfigurationProperties,
+                                                 ExternalDataStoreDeleterAutomatedTaskConfig automatedTaskConfigurationProperties,
                                                  ExternalInboundDataStoreDeleter inboundDeleter,
                                                  ExternalUnstructuredDataStoreDeleter unstructuredDeleter,
                                                  ExternalOutboundDataStoreDeleter outboundDeleter,
@@ -45,8 +45,9 @@ public class ExternalDataStoreDeleterAutomatedTask extends AbstractLockableAutom
 
     @Override
     protected void runTask() {
-        inboundDeleter.delete();
-        unstructuredDeleter.delete();
-        outboundDeleter.delete();
+        Integer batchSize = getAutomatedTaskBatchSize();
+        inboundDeleter.delete(batchSize);
+        unstructuredDeleter.delete(batchSize);
+        outboundDeleter.delete(batchSize);
     }
 }

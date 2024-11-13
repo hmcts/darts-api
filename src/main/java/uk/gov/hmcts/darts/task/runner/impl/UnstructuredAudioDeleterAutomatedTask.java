@@ -7,7 +7,7 @@ import uk.gov.hmcts.darts.audio.service.UnstructuredAudioDeleterProcessor;
 import uk.gov.hmcts.darts.common.repository.AutomatedTaskRepository;
 import uk.gov.hmcts.darts.log.api.LogApi;
 import uk.gov.hmcts.darts.task.api.AutomatedTaskName;
-import uk.gov.hmcts.darts.task.config.AutomatedTaskConfigurationProperties;
+import uk.gov.hmcts.darts.task.config.UnstructuredAudioDeleterAutomatedTaskConfig;
 import uk.gov.hmcts.darts.task.runner.AutoloadingManualTask;
 import uk.gov.hmcts.darts.task.service.LockService;
 
@@ -23,7 +23,7 @@ public class UnstructuredAudioDeleterAutomatedTask extends AbstractLockableAutom
     @Autowired
     public UnstructuredAudioDeleterAutomatedTask(
         AutomatedTaskRepository automatedTaskRepository,
-        AutomatedTaskConfigurationProperties automatedTaskConfigurationProperties,
+        UnstructuredAudioDeleterAutomatedTaskConfig automatedTaskConfigurationProperties,
         UnstructuredAudioDeleterProcessor unstructuredAudioDeleterProcessor,
         LogApi logApi, LockService lockService) {
         super(automatedTaskRepository, automatedTaskConfigurationProperties, logApi, lockService);
@@ -37,6 +37,6 @@ public class UnstructuredAudioDeleterAutomatedTask extends AbstractLockableAutom
 
     @Override
     protected void runTask() {
-        unstructuredAudioDeleterProcessor.markForDeletion();
+        unstructuredAudioDeleterProcessor.markForDeletion(getAutomatedTaskBatchSize());
     }
 }

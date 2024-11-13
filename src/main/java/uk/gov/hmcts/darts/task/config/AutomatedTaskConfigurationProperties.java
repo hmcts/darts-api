@@ -7,7 +7,6 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 @ConfigurationProperties("darts.automated.task.common-config")
 @Getter
 @Setter
-public class AutomatedTaskConfigurationProperties {
+public class AutomatedTaskConfigurationProperties extends AbstractAutomatedTaskConfig {
 
-    private String systemUserEmail;
 }

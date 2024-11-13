@@ -9,6 +9,10 @@ import uk.gov.hmcts.darts.audio.service.OutboundAudioDeleterProcessor;
 import uk.gov.hmcts.darts.log.api.LogApi;
 import uk.gov.hmcts.darts.task.service.LockService;
 
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.verify;
+
 @ExtendWith(MockitoExtension.class)
 class OutboundAudioDeleterAutomatedTaskTest {
 
@@ -24,10 +28,11 @@ class OutboundAudioDeleterAutomatedTaskTest {
     @Test
     void runTask() {
         OutboundAudioDeleterAutomatedTask outboundAudioDeleterAutomatedTask =
-            new OutboundAudioDeleterAutomatedTask(null, null, processor, logApi, lockService);
-
+           spy(new OutboundAudioDeleterAutomatedTask(null, null, processor, logApi, lockService));
+        doReturn(100).when(outboundAudioDeleterAutomatedTask).getAutomatedTaskBatchSize();
         outboundAudioDeleterAutomatedTask.runTask();
 
-        Mockito.verify(processor, Mockito.times(1)).markForDeletion();
+        verify(processor, Mockito.times(1)).markForDeletion(100);
+        verify(outboundAudioDeleterAutomatedTask, Mockito.times(1)).getAutomatedTaskBatchSize();
     }
 }

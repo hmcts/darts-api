@@ -275,7 +275,7 @@ class DataAnonymisationServiceImplTest {
     @Test
     void positiveDeleteTransientObjectDirectoryEntrySuccess() {
         TransientObjectDirectoryEntity transientObjectDirectoryEntity = new TransientObjectDirectoryEntity();
-        when(outboundDataStoreDeleter.delete(any())).thenReturn(true);
+        when(outboundDataStoreDeleter.delete(any(TransientObjectDirectoryEntity.class))).thenReturn(true);
 
         dataAnonymisationService.deleteTransientObjectDirectoryEntity(transientObjectDirectoryEntity);
 
@@ -286,7 +286,7 @@ class DataAnonymisationServiceImplTest {
     @Test
     void negativeDeleteTransientObjectDirectoryEntryFailure() {
         TransientObjectDirectoryEntity transientObjectDirectoryEntity = new TransientObjectDirectoryEntity();
-        when(outboundDataStoreDeleter.delete(any())).thenReturn(false);
+        when(outboundDataStoreDeleter.delete(any(TransientObjectDirectoryEntity.class))).thenReturn(false);
 
         dataAnonymisationService.deleteTransientObjectDirectoryEntity(transientObjectDirectoryEntity);
 

@@ -3,6 +3,7 @@ package uk.gov.hmcts.darts.retention.service.impl;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Limit;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.darts.common.entity.CaseRetentionEntity;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
@@ -30,9 +31,10 @@ public class ApplyRetentionProcessorImpl implements ApplyRetentionProcessor {
     private final Duration pendingRetentionDuration;
 
     @Override
-    public void processApplyRetention() {
+    public void processApplyRetention(Integer batchSize) {
         List<CaseRetentionEntity> caseRetentionEntities =
-            caseRetentionRepository.findPendingRetention(currentTimeHelper.currentOffsetDateTime().minus(pendingRetentionDuration));
+            caseRetentionRepository.findPendingRetention(currentTimeHelper.currentOffsetDateTime().minus(pendingRetentionDuration),
+                                                         Limit.of(batchSize));
         processList(caseRetentionEntities);
 
     }

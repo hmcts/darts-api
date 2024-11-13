@@ -9,7 +9,12 @@ import uk.gov.hmcts.darts.arm.service.UnstructuredTranscriptionAndAnnotationDele
 import uk.gov.hmcts.darts.common.repository.AutomatedTaskRepository;
 import uk.gov.hmcts.darts.log.api.LogApi;
 import uk.gov.hmcts.darts.task.config.AutomatedTaskConfigurationProperties;
+import uk.gov.hmcts.darts.task.config.UnstructuredAnnotationTranscriptionDeleterAutomatedTaskConfig;
 import uk.gov.hmcts.darts.task.service.LockService;
+
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
 
 @ExtendWith(MockitoExtension.class)
 class UnstructuredAnnotationTranscriptionDeleterAutomatedTaskTest {
@@ -33,15 +38,17 @@ class UnstructuredAnnotationTranscriptionDeleterAutomatedTaskTest {
 
         // given
         UnstructuredAnnotationTranscriptionDeleterAutomatedTask unstructuredAnnotationTranscriptionDeleterAutomatedTask
-            = new UnstructuredAnnotationTranscriptionDeleterAutomatedTask(automatedTaskRepository,
-                                                                          automatedTaskConfigurationProperties,
+            = spy(new UnstructuredAnnotationTranscriptionDeleterAutomatedTask(automatedTaskRepository,
+                                                                          mock(UnstructuredAnnotationTranscriptionDeleterAutomatedTaskConfig.class),
                                                                           armResponseFilesProcessor,
                                                                           logApi,
-                                                                          lockService);
+                                                                          lockService));
+        doReturn(123).when(unstructuredAnnotationTranscriptionDeleterAutomatedTask).getAutomatedTaskBatchSize();
         // when
         unstructuredAnnotationTranscriptionDeleterAutomatedTask.runTask();
 
         //then
-        Mockito.verify(armResponseFilesProcessor, Mockito.times(1)).markForDeletion();
+        Mockito.verify(armResponseFilesProcessor, Mockito.times(1)).markForDeletion(123);
+        Mockito.verify(unstructuredAnnotationTranscriptionDeleterAutomatedTask, Mockito.times(1)).getAutomatedTaskBatchSize();
     }
 }

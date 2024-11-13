@@ -6,7 +6,7 @@ import uk.gov.hmcts.darts.arm.service.UnstructuredTranscriptionAndAnnotationDele
 import uk.gov.hmcts.darts.common.repository.AutomatedTaskRepository;
 import uk.gov.hmcts.darts.log.api.LogApi;
 import uk.gov.hmcts.darts.task.api.AutomatedTaskName;
-import uk.gov.hmcts.darts.task.config.AutomatedTaskConfigurationProperties;
+import uk.gov.hmcts.darts.task.config.UnstructuredAnnotationTranscriptionDeleterAutomatedTaskConfig;
 import uk.gov.hmcts.darts.task.runner.AutoloadingManualTask;
 import uk.gov.hmcts.darts.task.service.LockService;
 
@@ -19,11 +19,12 @@ public class UnstructuredAnnotationTranscriptionDeleterAutomatedTask extends Abs
     private final UnstructuredTranscriptionAndAnnotationDeleterProcessor armDeletionProcessor;
 
     @Autowired
-    public UnstructuredAnnotationTranscriptionDeleterAutomatedTask(AutomatedTaskRepository automatedTaskRepository,
-                                                                   AutomatedTaskConfigurationProperties automatedTaskConfigurationProperties,
-                                                                   UnstructuredTranscriptionAndAnnotationDeleterProcessor armDeletionProcessor,
-                                                                   LogApi logApi,
-                                                                   LockService lockService) {
+    public UnstructuredAnnotationTranscriptionDeleterAutomatedTask(
+        AutomatedTaskRepository automatedTaskRepository,
+        UnstructuredAnnotationTranscriptionDeleterAutomatedTaskConfig automatedTaskConfigurationProperties,
+        UnstructuredTranscriptionAndAnnotationDeleterProcessor armDeletionProcessor,
+        LogApi logApi,
+        LockService lockService) {
         super(automatedTaskRepository, automatedTaskConfigurationProperties, logApi, lockService);
         this.armDeletionProcessor = armDeletionProcessor;
     }
@@ -35,6 +36,6 @@ public class UnstructuredAnnotationTranscriptionDeleterAutomatedTask extends Abs
 
     @Override
     protected void runTask() {
-        armDeletionProcessor.markForDeletion();
+        armDeletionProcessor.markForDeletion(getAutomatedTaskBatchSize());
     }
 }

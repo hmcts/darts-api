@@ -2,7 +2,7 @@ package uk.gov.hmcts.darts.cases.repository;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Limit;
 import uk.gov.hmcts.darts.common.entity.CaseDocumentEntity;
 import uk.gov.hmcts.darts.common.entity.CaseRetentionEntity;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
@@ -56,7 +56,7 @@ class CaseRepositoryIntTest extends IntegrationBase {
         });
 
         // when
-        var result = caseRepository.findByIsRetentionUpdatedTrueAndRetentionRetriesLessThan(3);
+        var result = caseRepository.findByIsRetentionUpdatedTrueAndRetentionRetriesLessThan(3, Limit.of(1000));
 
         // then
         assertThat(result).hasSize(1);
@@ -98,7 +98,7 @@ class CaseRepositoryIntTest extends IntegrationBase {
 
         // when
         List<CourtCaseEntity> result = caseRepository.findCasesNeedingCaseDocumentGenerated(
-            OffsetDateTime.now().minusDays(28), Pageable.ofSize(2));
+            OffsetDateTime.now().minusDays(28), Limit.of(2));
 
         // then
         assertThat(result).hasSize(2);
@@ -143,7 +143,7 @@ class CaseRepositoryIntTest extends IntegrationBase {
 
         // when
         List<CourtCaseEntity> result = caseRepository.findCasesNeedingCaseDocumentGenerated(
-            OffsetDateTime.now().minusDays(28), Pageable.unpaged());
+            OffsetDateTime.now().minusDays(28), Limit.unlimited());
 
         // then
         assertThat(result).hasSize(3);
@@ -186,7 +186,7 @@ class CaseRepositoryIntTest extends IntegrationBase {
         OffsetDateTime currentTimestamp = OffsetDateTime.now();
         // when
         List<Integer> result = caseRepository.findCasesNeedingCaseDocumentForRetentionDateGeneration(
-            currentTimestamp.plusDays(28), currentTimestamp.minusDays(28), Pageable.ofSize(4));
+            currentTimestamp.plusDays(28), currentTimestamp.minusDays(28), Limit.of(4));
 
         // then
         assertThat(result).hasSize(4);
@@ -232,7 +232,7 @@ class CaseRepositoryIntTest extends IntegrationBase {
 
         // when
         List<Integer> result = caseRepository.findCasesNeedingCaseDocumentForRetentionDateGeneration(
-            currentTimestamp.plusDays(28), currentTimestamp.minusDays(28), Pageable.ofSize(2));
+            currentTimestamp.plusDays(28), currentTimestamp.minusDays(28), Limit.of(2));
 
         // then
         assertThat(result).hasSize(2);
@@ -271,7 +271,7 @@ class CaseRepositoryIntTest extends IntegrationBase {
 
         // when
         List<Integer> result = caseRepository.findCasesNeedingCaseDocumentForRetentionDateGeneration(
-            currentTimestamp.plusDays(28), currentTimestamp.minusDays(28), Pageable.ofSize(2));
+            currentTimestamp.plusDays(28), currentTimestamp.minusDays(28), Limit.of(2));
 
         // then
         assertThat(result).hasSize(0);
@@ -317,7 +317,7 @@ class CaseRepositoryIntTest extends IntegrationBase {
 
         // when
         List<Integer> result = caseRepository.findCasesNeedingCaseDocumentForRetentionDateGeneration(
-            currentTimestamp.plusDays(28), currentTimestamp.minusDays(28), Pageable.ofSize(2));
+            currentTimestamp.plusDays(28), currentTimestamp.minusDays(28), Limit.of(2));
 
         // then
         assertThat(result).hasSize(0);
@@ -349,7 +349,7 @@ class CaseRepositoryIntTest extends IntegrationBase {
 
         // when
         List<CourtCaseEntity> result = caseRepository.findCasesNeedingCaseDocumentGenerated(
-            OffsetDateTime.now().minusDays(28), Pageable.ofSize(2));
+            OffsetDateTime.now().minusDays(28), Limit.of(2));
 
         // then
         assertThat(result).hasSize(1);

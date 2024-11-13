@@ -9,6 +9,9 @@ import uk.gov.hmcts.darts.arm.service.ArmRetentionEventDateProcessor;
 import uk.gov.hmcts.darts.log.api.LogApi;
 import uk.gov.hmcts.darts.task.service.LockService;
 
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.spy;
+
 @ExtendWith(MockitoExtension.class)
 class ArmRetentionEventDateCalculatorAutomatedTaskTest {
 
@@ -22,15 +25,17 @@ class ArmRetentionEventDateCalculatorAutomatedTaskTest {
     @Test
     void runTask() {
         ArmRetentionEventDateCalculatorAutomatedTask armRetentionEventDateCalculatorAutomatedTask =
-            new ArmRetentionEventDateCalculatorAutomatedTask(
+            spy(new ArmRetentionEventDateCalculatorAutomatedTask(
                 null,
                 null,
                 armRetentionEventDateProcessor,
                 logApi,
                 lockService
-            );
+            ));
 
+        doReturn(123).when(armRetentionEventDateCalculatorAutomatedTask).getAutomatedTaskBatchSize();
         armRetentionEventDateCalculatorAutomatedTask.runTask();
-        Mockito.verify(armRetentionEventDateProcessor, Mockito.times(1)).calculateEventDates();
+        Mockito.verify(armRetentionEventDateProcessor, Mockito.times(1)).calculateEventDates(123);
+        Mockito.verify(armRetentionEventDateCalculatorAutomatedTask, Mockito.times(1)).getAutomatedTaskBatchSize();
     }
 }

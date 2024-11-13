@@ -7,7 +7,7 @@ import uk.gov.hmcts.darts.arm.service.ArmRetentionEventDateProcessor;
 import uk.gov.hmcts.darts.common.repository.AutomatedTaskRepository;
 import uk.gov.hmcts.darts.log.api.LogApi;
 import uk.gov.hmcts.darts.task.api.AutomatedTaskName;
-import uk.gov.hmcts.darts.task.config.AutomatedTaskConfigurationProperties;
+import uk.gov.hmcts.darts.task.config.ArmRetentionEventDateCalculatorAutomatedTaskConfig;
 import uk.gov.hmcts.darts.task.runner.AutoloadingManualTask;
 import uk.gov.hmcts.darts.task.service.LockService;
 
@@ -21,7 +21,7 @@ public class ArmRetentionEventDateCalculatorAutomatedTask extends AbstractLockab
 
     @Autowired
     public ArmRetentionEventDateCalculatorAutomatedTask(AutomatedTaskRepository automatedTaskRepository,
-                                                        AutomatedTaskConfigurationProperties automatedTaskConfigurationProperties,
+                                                        ArmRetentionEventDateCalculatorAutomatedTaskConfig automatedTaskConfigurationProperties,
                                                         ArmRetentionEventDateProcessor armRetentionEventDateProcessor,
                                                         LogApi logApi, LockService lockService) {
         super(automatedTaskRepository, automatedTaskConfigurationProperties, logApi, lockService);
@@ -35,7 +35,7 @@ public class ArmRetentionEventDateCalculatorAutomatedTask extends AbstractLockab
 
     @Override
     protected void runTask() {
-        armRetentionEventDateProcessor.calculateEventDates();
+        armRetentionEventDateProcessor.calculateEventDates(getAutomatedTaskBatchSize());
     }
 }
 

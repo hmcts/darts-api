@@ -9,5 +9,5 @@ public interface DailyListService {
 
     PostDailyListResponse updateDailyListInDatabase(DailyListPatchRequestInternal patchRequest);
 
-    void runHouseKeeping();
+    void runHouseKeeping(Integer batchSize);
 }

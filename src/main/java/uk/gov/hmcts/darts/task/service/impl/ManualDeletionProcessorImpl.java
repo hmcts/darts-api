@@ -3,6 +3,7 @@ package uk.gov.hmcts.darts.task.service.impl;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Limit;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.darts.audio.deleter.impl.inbound.ExternalInboundDataStoreDeleter;
 import uk.gov.hmcts.darts.audio.deleter.impl.unstructured.ExternalUnstructuredDataStoreDeleter;
@@ -42,10 +43,10 @@ public class ManualDeletionProcessorImpl implements ManualDeletionProcessor {
     private final LogApi logApi;
 
     @Override
-    public void process() {
+    public void process(Integer batchSize) {
         UserAccountEntity userAccount = userIdentity.getUserAccount();
         OffsetDateTime deletionThreshold = getDeletionThreshold();
-        List<ObjectAdminActionEntity> actionsToDelete = objectAdminActionRepository.findFilesForManualDeletion(deletionThreshold);
+        List<ObjectAdminActionEntity> actionsToDelete = objectAdminActionRepository.findFilesForManualDeletion(deletionThreshold, Limit.of(batchSize));
 
         for (ObjectAdminActionEntity objectAdminAction : actionsToDelete) {
             if (isMediaNotDeleted(objectAdminAction)) {

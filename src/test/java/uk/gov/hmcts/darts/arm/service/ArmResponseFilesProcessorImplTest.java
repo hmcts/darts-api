@@ -8,6 +8,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Limit;
 import uk.gov.hmcts.darts.arm.component.ArmResponseFilesProcessSingleElement;
 import uk.gov.hmcts.darts.arm.service.impl.ArmResponseFilesProcessorImpl;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
@@ -70,12 +71,12 @@ class ArmResponseFilesProcessorImplTest {
         doReturn(armDropZoneStatus()).when(externalObjectDirectoryArmDropZone).getStatus();
 
         List<ExternalObjectDirectoryEntity> inboundList = new ArrayList<>(Collections.singletonList(externalObjectDirectoryArmDropZone));
-        when(externalObjectDirectoryRepository.findByExternalLocationTypeAndObjectStatus(armLocation(), armDropZoneStatus()))
+        when(externalObjectDirectoryRepository.findByExternalLocationTypeAndObjectStatus(armLocation(), armDropZoneStatus(), Limit.unlimited()))
             .thenReturn(inboundList);
 
         armResponseFilesProcessor.processResponseFiles();
 
-        verify(externalObjectDirectoryRepository).findByExternalLocationTypeAndObjectStatus(armLocation(), armDropZoneStatus());
+        verify(externalObjectDirectoryRepository).findByExternalLocationTypeAndObjectStatus(armLocation(), armDropZoneStatus(), Limit.unlimited());
         verify(externalObjectDirectoryRepository).saveAndFlush(externalObjectDirectoryEntityCaptor.capture());
         verify(armResponseFilesProcessSingleElement).processResponseFilesFor(1);
 
