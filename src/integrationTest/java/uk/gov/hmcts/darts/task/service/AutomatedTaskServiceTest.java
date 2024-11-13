@@ -44,7 +44,6 @@ import uk.gov.hmcts.darts.task.api.AutomatedTaskName;
 import uk.gov.hmcts.darts.task.config.ApplyRetentionCaseAssociatedObjectsAutomatedTaskConfig;
 import uk.gov.hmcts.darts.task.config.ArmRetentionEventDateCalculatorAutomatedTaskConfig;
 import uk.gov.hmcts.darts.task.config.AutomatedTaskConfigurationProperties;
-import uk.gov.hmcts.darts.task.config.CleanupArmResponseFilesAutomatedTaskConfig;
 import uk.gov.hmcts.darts.task.config.CloseOldCasesAutomatedTaskConfig;
 import uk.gov.hmcts.darts.task.config.CloseUnfinishedTranscriptionsAutomatedTaskConfig;
 import uk.gov.hmcts.darts.task.config.DailyListAutomatedTaskConfig;

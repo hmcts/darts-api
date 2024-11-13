@@ -16,8 +16,8 @@ import uk.gov.hmcts.darts.task.service.LockService;
 import java.util.Optional;
 
 import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
