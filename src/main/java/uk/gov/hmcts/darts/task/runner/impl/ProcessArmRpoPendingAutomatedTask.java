@@ -18,7 +18,7 @@ import java.time.Duration;
 
 @Component
 @ConditionalOnProperty(
-    value = "darts.automated.task.process-arm-rpo-pending.process-e2e-arm-rpo",
+    value = "darts.automated.task.process-e2e-arm-rpo-pending.process-e2e-arm-rpo",
     havingValue = "false"
 )
 public class ProcessArmRpoPendingAutomatedTask extends AbstractLockableAutomatedTask
