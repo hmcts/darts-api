@@ -18,7 +18,7 @@ public class ArmBatchProcessResponseFilesImpl extends AbstractArmBatchProcessRes
     public ArmBatchProcessResponseFilesImpl(ExternalObjectDirectoryRepository externalObjectDirectoryRepository, ArmDataManagementApi armDataManagementApi,
                                             FileOperationService fileOperationService, ArmDataManagementConfiguration armDataManagementConfiguration,
                                             ObjectMapper objectMapper, UserIdentity userIdentity, CurrentTimeHelper currentTimeHelper,
-                                            ExternalObjectDirectoryService externalObjectDirectoryService, Integer batchSize,
+                                            ExternalObjectDirectoryService externalObjectDirectoryService,
                                             LogApi logApi) {
         super(externalObjectDirectoryRepository,
               armDataManagementApi,
@@ -28,7 +28,6 @@ public class ArmBatchProcessResponseFilesImpl extends AbstractArmBatchProcessRes
               userIdentity,
               currentTimeHelper,
               externalObjectDirectoryService,
-              batchSize,
               logApi);
     }
 

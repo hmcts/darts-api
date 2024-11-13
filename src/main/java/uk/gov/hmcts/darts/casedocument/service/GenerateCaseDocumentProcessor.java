@@ -2,5 +2,5 @@ package uk.gov.hmcts.darts.casedocument.service;
 
 public interface GenerateCaseDocumentProcessor {
 
-    void processGenerateCaseDocument();
+    void processGenerateCaseDocument(int batchSize);
 }

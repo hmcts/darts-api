@@ -37,7 +37,7 @@ public class DetsToArmBatchProcessResponseFilesImpl extends AbstractArmBatchProc
                                                   ArmDataManagementApi armDataManagementApi, FileOperationService fileOperationService,
                                                   ArmDataManagementConfiguration armDataManagementConfiguration,
                                                   ObjectMapper objectMapper, UserIdentity userIdentity, CurrentTimeHelper currentTimeHelper,
-                                                  ExternalObjectDirectoryService externalObjectDirectoryService, Integer batchSize,
+                                                  ExternalObjectDirectoryService externalObjectDirectoryService,
                                                   LogApi logApi, DetsDataManagementConfiguration configuration,
                                                   ObjectStateRecordRepository osrRepository,
                                                   ExternalDetsDataStoreDeleter detsDataStoreDeleter) {
@@ -49,7 +49,6 @@ public class DetsToArmBatchProcessResponseFilesImpl extends AbstractArmBatchProc
               userIdentity,
               currentTimeHelper,
               externalObjectDirectoryService,
-              batchSize,
               logApi);
         this.configuration = configuration;
         this.osrRepository = osrRepository;

@@ -18,7 +18,6 @@ class ArmBatchProcessResponseFilesIntTest extends AbstractArmBatchProcessRespons
             userIdentity,
             currentTimeHelper,
             externalObjectDirectoryService,
-            BATCH_SIZE,
             logApi
         );
     }

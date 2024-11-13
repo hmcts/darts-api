@@ -3,8 +3,8 @@ package uk.gov.hmcts.darts.task.runner.impl;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import uk.gov.hmcts.darts.arm.component.AutomatedTaskProcessorFactory;
-import uk.gov.hmcts.darts.arm.service.ArmResponseFilesProcessor;
+import uk.gov.hmcts.darts.arm.service.impl.ArmBatchProcessResponseFilesImpl;
+import uk.gov.hmcts.darts.arm.service.impl.ArmResponseFilesProcessorImpl;
 import uk.gov.hmcts.darts.common.repository.AutomatedTaskRepository;
 import uk.gov.hmcts.darts.log.api.LogApi;
 import uk.gov.hmcts.darts.task.api.AutomatedTaskName;
@@ -18,15 +18,18 @@ import static uk.gov.hmcts.darts.task.api.AutomatedTaskName.PROCESS_ARM_RESPONSE
 @Component
 public class ProcessArmResponseFilesAutomatedTask extends AbstractLockableAutomatedTask
     implements AutoloadingManualTask {
-    private final AutomatedTaskProcessorFactory automatedTaskProcessorFactory;
+    private final ArmBatchProcessResponseFilesImpl armBatchProcessResponseFiles;
+    private final ArmResponseFilesProcessorImpl armResponseFilesProcessor;
 
     @Autowired
     public ProcessArmResponseFilesAutomatedTask(AutomatedTaskRepository automatedTaskRepository,
                                                 ProcessArmResponseFilesAutomatedTaskConfig automatedTaskConfigurationProperties,
-                                                AutomatedTaskProcessorFactory automatedTaskProcessorFactory,
-                                                LogApi logApi, LockService lockService) {
+                                                LogApi logApi, LockService lockService,
+                                                ArmBatchProcessResponseFilesImpl armBatchProcessResponseFiles,
+                                                ArmResponseFilesProcessorImpl armResponseFilesProcessor) {
         super(automatedTaskRepository, automatedTaskConfigurationProperties, logApi, lockService);
-        this.automatedTaskProcessorFactory = automatedTaskProcessorFactory;
+        this.armBatchProcessResponseFiles = armBatchProcessResponseFiles;
+        this.armResponseFilesProcessor = armResponseFilesProcessor;
     }
 
     @Override
@@ -36,8 +39,11 @@ public class ProcessArmResponseFilesAutomatedTask extends AbstractLockableAutoma
 
     @Override
     protected void runTask() {
-        Integer batchSize = getAutomatedTaskBatchSize(getTaskName());
-        ArmResponseFilesProcessor armResponseFilesProcessor = automatedTaskProcessorFactory.createArmResponseFilesProcessor(batchSize);
-        armResponseFilesProcessor.processResponseFiles();
+        int batchSize = getAutomatedTaskBatchSize();
+        if (batchSize > 0) {
+            armBatchProcessResponseFiles.processResponseFiles(batchSize);
+        } else {
+            armResponseFilesProcessor.processResponseFiles(Integer.MAX_VALUE);
+        }
     }
 }
