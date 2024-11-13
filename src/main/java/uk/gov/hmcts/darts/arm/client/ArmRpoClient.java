@@ -1,6 +1,8 @@
 package uk.gov.hmcts.darts.arm.client;
 
 import org.springframework.cloud.openfeign.FeignClient;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
@@ -26,6 +28,7 @@ import uk.gov.hmcts.darts.arm.client.model.rpo.StorageAccountResponse;
 
 import static org.springframework.http.HttpHeaders.AUTHORIZATION;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
+import static org.springframework.http.MediaType.APPLICATION_OCTET_STREAM_VALUE;
 
 @FeignClient(
     name = "arm-rpo-client",
@@ -46,6 +49,7 @@ public interface ArmRpoClient {
     )
     StorageAccountResponse getStorageAccounts(@RequestHeader(AUTHORIZATION) String bearerToken,
                                               @RequestBody StorageAccountRequest storageAccountRequest);
+
 
     @PostMapping(value = "${darts.storage.arm-api.rpo-url.get-master-index-field-by-record-class-schema-path}",
         consumes = APPLICATION_JSON_VALUE,
@@ -115,4 +119,12 @@ public interface ArmRpoClient {
     )
     ExtendedProductionsByMatterResponse getExtendedProductionsByMatter(@RequestHeader(AUTHORIZATION) String bearerToken,
                                                                        @RequestBody String body);
+
+    @GetMapping(value = "${darts.storage.arm-api.rpo-url.download-production-path}",
+        produces = APPLICATION_OCTET_STREAM_VALUE)
+    @SuppressWarnings({"PMD.UseObjectForClearerAPI"})
+    feign.Response downloadProduction(@RequestHeader(AUTHORIZATION) String bearerAuth,
+                                      @PathVariable("productionExportFileID") String productionExportFileId);
+
+
 }
