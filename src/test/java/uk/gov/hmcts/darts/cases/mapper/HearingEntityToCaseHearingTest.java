@@ -96,7 +96,7 @@ class HearingEntityToCaseHearingTest {
 
     @Test
     void testMappingToHearingsWithTranscriptsWithHiddenDocument() {
-        List<HearingEntity> hearings = CommonTestDataUtil.createHearings(5);
+        List<HearingEntity> hearings = CommonTestDataUtil.createHearings(1);
         var hearingTranscripts = hearings.get(0).getTranscriptions();
         var transcriptDocs = hearingTranscripts.get(0).getTranscriptionDocumentEntities();
         transcriptDocs.get(0).setHidden(true);
@@ -108,7 +108,7 @@ class HearingEntityToCaseHearingTest {
 
     @Test
     void testMappingToHearingsWithTranscriptsWithOnlyOneHiddenDocument() {
-        List<HearingEntity> hearings = CommonTestDataUtil.createHearings(5);
+        List<HearingEntity> hearings = CommonTestDataUtil.createHearings(1);
         var hearingTranscripts = hearings.get(0).getTranscriptions();
         var transcriptDocs = hearingTranscripts.get(0).getTranscriptionDocumentEntities();
         var transcriptionDocumentEntity = new TranscriptionDocumentEntity();

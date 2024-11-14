@@ -14,7 +14,7 @@ public class MediaIdValidator implements Validator<Integer> {
     private final MediaRepository mediaRepository;
 
     public void validateNotHidden(Integer id) {
-        if (mediaRepository.findByIdAndIsHiddenFalse(id).isEmpty()) {
+        if (!mediaRepository.existsByIdAndIsHiddenFalse(id)) {
             throw new DartsApiException(AudioApiError.MEDIA_NOT_FOUND);
         }
     }
