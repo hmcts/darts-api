@@ -1,4 +1,4 @@
-package uk.gov.hmcts.darts.arm.service;
+package uk.gov.hmcts.darts.arm.service.impl;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -7,13 +7,13 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Limit;
 import uk.gov.hmcts.darts.arm.api.ArmDataManagementApi;
 import uk.gov.hmcts.darts.arm.config.ArmBatchCleanupConfiguration;
 import uk.gov.hmcts.darts.arm.config.ArmDataManagementConfiguration;
 import uk.gov.hmcts.darts.arm.exception.UnableToReadArmFileException;
 import uk.gov.hmcts.darts.arm.helper.ArmResponseFileHelper;
 import uk.gov.hmcts.darts.arm.model.InputUploadAndAssociatedFilenames;
-import uk.gov.hmcts.darts.arm.service.impl.BatchCleanupArmResponseFilesServiceImpl;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.ExternalLocationTypeEntity;
 import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
@@ -43,7 +43,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-class BatchCleanupArmResponseFilesServiceImplTest {
+class AbstractBatchCleanupArmResponseFilesServiceCommonTest {
 
     @Mock
     private ExternalObjectDirectoryRepository externalObjectDirectoryRepository;
@@ -84,15 +84,16 @@ class BatchCleanupArmResponseFilesServiceImplTest {
     @Mock
     private ArmResponseFileHelper armResponseFileHelper;
 
-    private BatchCleanupArmResponseFilesService cleanupArmResponseFilesService;
+    private BatchCleanupArmResponseFilesServiceCommon cleanupArmResponseFilesService;
 
     @Captor
     private ArgumentCaptor<ExternalObjectDirectoryEntity> externalObjectDirectoryEntityCaptor;
 
+    private static final String MANIFEST_FILE_PREFIX = "TEST";
 
     @BeforeEach
     void setUp() {
-        cleanupArmResponseFilesService = new BatchCleanupArmResponseFilesServiceImpl(
+        cleanupArmResponseFilesService = new BatchCleanupArmResponseFilesServiceCommon(
             externalObjectDirectoryRepository,
             objectRecordStatusRepository,
             externalLocationTypeRepository,
@@ -101,7 +102,8 @@ class BatchCleanupArmResponseFilesServiceImplTest {
             batchCleanupConfiguration,
             armDataManagementConfiguration,
             currentTimeHelper,
-            armResponseFileHelper
+            armResponseFileHelper,
+            MANIFEST_FILE_PREFIX
         );
 
 
@@ -112,7 +114,6 @@ class BatchCleanupArmResponseFilesServiceImplTest {
                                                                                                objectRecordStatusArmResponseChecksumFailed
         ));
         when(batchCleanupConfiguration.getBufferMinutes()).thenReturn(15);
-        when(armDataManagementConfiguration.getManifestFilePrefix()).thenReturn("DARTS_");
 
         when(externalLocationTypeRepository.getReferenceById(3)).thenReturn(externalLocationTypeArm);
 
@@ -123,12 +124,13 @@ class BatchCleanupArmResponseFilesServiceImplTest {
 
     @Test
     void cleanupResponseFilesSuccess() throws UnableToReadArmFileException {
+        List<ObjectRecordStatusEntity> statusToSearch = List.of(objectRecordStatusStored,
+                                                                objectRecordStatusArmRpoPending,
+                                                                objectRecordStatusArmResponseManifestFailed,
+                                                                objectRecordStatusArmResponseProcessingFailed,
+                                                                objectRecordStatusArmResponseChecksumFailed);
         when(externalObjectDirectoryRepository.findBatchCleanupManifestFilenames(
-            eq(List.of(objectRecordStatusStored,
-                       objectRecordStatusArmRpoPending,
-                       objectRecordStatusArmResponseManifestFailed,
-                       objectRecordStatusArmResponseProcessingFailed,
-                       objectRecordStatusArmResponseChecksumFailed)),
+            eq(statusToSearch),
             eq(externalLocationTypeArm),
             eq(false),
             any(OffsetDateTime.class),
@@ -178,6 +180,14 @@ class BatchCleanupArmResponseFilesServiceImplTest {
         cleanupArmResponseFilesService.cleanupResponseFiles(100);
 
         verify(externalObjectDirectoryRepository).saveAndFlush(externalObjectDirectoryEntityCaptor.capture());
+        verify(externalObjectDirectoryRepository, times(1)).findBatchCleanupManifestFilenames(
+            eq(statusToSearch),
+            eq(externalLocationTypeArm),
+            eq(false),
+            any(OffsetDateTime.class),
+            eq(MANIFEST_FILE_PREFIX),
+            eq(Limit.of(100))
+        );
     }
 
     @Test
