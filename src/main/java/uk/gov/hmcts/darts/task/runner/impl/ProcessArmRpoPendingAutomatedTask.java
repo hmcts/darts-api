@@ -18,7 +18,7 @@ import java.time.Duration;
 
 @Component
 @ConditionalOnProperty(
-    value = "darts.automated.task.process-e2e-arm-rpo",
+    value = "darts.automated.task.process-e2e-arm-rpo-pending.process-e2e-arm-rpo",
     havingValue = "false"
 )
 public class ProcessArmRpoPendingAutomatedTask extends AbstractLockableAutomatedTask
@@ -33,7 +33,7 @@ public class ProcessArmRpoPendingAutomatedTask extends AbstractLockableAutomated
                                                 LogApi logApi, LockService lockService,
                                                 ExternalObjectDirectoryRepository externalObjectDirectoryRepository,
                                                 CurrentTimeHelper currentTimeHelper,
-                                                @Value("${darts.automated.task.arm-rpo-duration}")
+                                                @Value("${darts.automated.task.process-arm-rpo-pending.arm-rpo-duration}")
                                                 Duration armRpoDuration) {
         super(automatedTaskRepository, automatedTaskConfigurationProperties, logApi, lockService);
         this.externalObjectDirectoryRepository = externalObjectDirectoryRepository;

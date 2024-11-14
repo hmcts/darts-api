@@ -79,7 +79,6 @@ class ArmBatchProcessResponseFilesImplTest {
             userIdentity,
             currentTimeHelper,
             externalObjectDirectoryService,
-            BATCH_SIZE,
             logApi
         );
 
@@ -123,7 +122,7 @@ class ArmBatchProcessResponseFilesImplTest {
             .thenReturn(inboundList);
 
         // when
-        armBatchProcessResponseFiles.processResponseFiles();
+        armBatchProcessResponseFiles.processResponseFiles(BATCH_SIZE);
 
         // then
         verify(externalObjectDirectoryRepository).findAllByStatusAndManifestFile(EodHelper.armDropZoneStatus(), manifestFile1);

@@ -17,9 +17,10 @@ import org.springframework.scheduling.config.ScheduledTaskHolder;
 import org.springframework.scheduling.config.Task;
 import org.springframework.scheduling.config.TriggerTask;
 import org.springframework.scheduling.support.CronExpression;
-import uk.gov.hmcts.darts.arm.component.AutomatedTaskProcessorFactory;
 import uk.gov.hmcts.darts.arm.service.ArmRetentionEventDateProcessor;
 import uk.gov.hmcts.darts.arm.service.CleanupArmResponseFilesService;
+import uk.gov.hmcts.darts.arm.service.impl.ArmBatchProcessResponseFilesImpl;
+import uk.gov.hmcts.darts.arm.service.impl.ArmResponseFilesProcessorImpl;
 import uk.gov.hmcts.darts.arm.service.impl.UnstructuredToArmBatchProcessorImpl;
 import uk.gov.hmcts.darts.audio.deleter.impl.inbound.ExternalInboundDataStoreDeleter;
 import uk.gov.hmcts.darts.audio.deleter.impl.outbound.ExternalOutboundDataStoreDeleter;
@@ -28,6 +29,8 @@ import uk.gov.hmcts.darts.audio.service.InboundAudioDeleterProcessor;
 import uk.gov.hmcts.darts.audio.service.OutboundAudioDeleterProcessor;
 import uk.gov.hmcts.darts.audio.service.UnstructuredAudioDeleterProcessor;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
+import uk.gov.hmcts.darts.casedocument.service.GenerateCaseDocumentForRetentionDateProcessor;
+import uk.gov.hmcts.darts.casedocument.service.GenerateCaseDocumentProcessor;
 import uk.gov.hmcts.darts.cases.service.CloseOldCasesProcessor;
 import uk.gov.hmcts.darts.common.entity.AutomatedTaskEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
@@ -35,14 +38,15 @@ import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.common.repository.AutomatedTaskRepository;
 import uk.gov.hmcts.darts.common.repository.CaseRepository;
 import uk.gov.hmcts.darts.dailylist.service.DailyListService;
-import uk.gov.hmcts.darts.datamanagement.service.InboundAnnotationTranscriptionDeleterProcessor;
 import uk.gov.hmcts.darts.datamanagement.service.InboundToUnstructuredProcessor;
+import uk.gov.hmcts.darts.datamanagement.service.InboundTranscriptionAnnotationDeleterProcessor;
 import uk.gov.hmcts.darts.event.service.RemoveDuplicateEventsProcessor;
 import uk.gov.hmcts.darts.log.api.LogApi;
 import uk.gov.hmcts.darts.retention.service.ApplyRetentionCaseAssociatedObjectsProcessor;
 import uk.gov.hmcts.darts.task.api.AutomatedTaskName;
 import uk.gov.hmcts.darts.task.config.ApplyRetentionCaseAssociatedObjectsAutomatedTaskConfig;
 import uk.gov.hmcts.darts.task.config.ArmRetentionEventDateCalculatorAutomatedTaskConfig;
+import uk.gov.hmcts.darts.task.config.CleanupArmResponseFilesAutomatedTaskConfig;
 import uk.gov.hmcts.darts.task.config.AutomatedTaskConfigurationProperties;
 import uk.gov.hmcts.darts.task.config.CloseOldCasesAutomatedTaskConfig;
 import uk.gov.hmcts.darts.task.config.CloseUnfinishedTranscriptionsAutomatedTaskConfig;
@@ -100,7 +104,7 @@ import static uk.gov.hmcts.darts.task.status.AutomatedTaskStatus.NOT_STARTED;
 import static uk.gov.hmcts.darts.test.common.AwaitabilityUtil.waitForMax10SecondsWithOneSecondPoll;
 
 @Slf4j
-@SuppressWarnings({"PMD.ExcessiveImports"})
+@SuppressWarnings({"PMD.ExcessiveImports", "PMD.CouplingBetweenObjects"})
 class AutomatedTaskServiceTest extends IntegrationBase {
 
     @Autowired
@@ -110,69 +114,54 @@ class AutomatedTaskServiceTest extends IntegrationBase {
     @Autowired
     private AutomatedTaskRepository automatedTaskRepository;
     @Autowired
-    private AutomatedTaskConfigurationProperties automatedTaskConfigurationProperties;
-    @Autowired
     private TranscriptionsProcessor transcriptionsProcessor;
-
     @Autowired
     private OutboundAudioDeleterProcessor outboundAudioDeleterProcessor;
-
     @Autowired
     private ExternalInboundDataStoreDeleter externalInboundDataStoreDeleter;
     @Autowired
     private ExternalUnstructuredDataStoreDeleter externalUnstructuredDataStoreDeleter;
     @Autowired
     private ExternalOutboundDataStoreDeleter externalOutboundDataStoreDeleter;
-
     @Autowired
     private InboundAudioDeleterProcessor inboundAudioDeleterProcessor;
-
     @Autowired
     private InboundToUnstructuredProcessor inboundToUnstructuredProcessor;
-
     @Autowired
     private UnstructuredAudioDeleterProcessor unstructuredAudioDeleterProcessor;
-
-    @Autowired
-    private AutomatedTaskProcessorFactory taskProcessorFactory;
-
     @Autowired
     private CleanupArmResponseFilesService cleanupArmResponseFilesService;
-
     @Autowired
     private CloseOldCasesProcessor closeOldCasesProcessor;
-
     @Autowired
     private DailyListService dailyListService;
-
     @SpyBean
     private CaseRepository caseRepository;
-
     @Autowired
     private ArmRetentionEventDateProcessor armRetentionEventDateProcessor;
-
     @Autowired
     private ApplyRetentionCaseAssociatedObjectsProcessor applyRetentionCaseAssociatedObjectsProcessor;
-
     @Autowired
-    private InboundAnnotationTranscriptionDeleterProcessor armTranscriptionAndAnnotationDeleterProcessor;
-
+    private InboundTranscriptionAnnotationDeleterProcessor armTranscriptionAndAnnotationDeleterProcessor;
     @Autowired
     private RemoveDuplicateEventsProcessor removeDuplicateEventsProcessor;
-
+    @Autowired
+    private GenerateCaseDocumentProcessor generateCaseDocumentProcessor;
+    @Autowired
+    private ArmBatchProcessResponseFilesImpl armBatchProcessResponseFiles;
+    @Autowired
+    private ArmResponseFilesProcessorImpl armResponseFilesProcessor;
+    @Autowired
+    private GenerateCaseDocumentForRetentionDateProcessor generateCaseDocumentForRetentionDateProcessor;
     @Autowired
     private LogApi logApi;
-
     @Autowired
     private LockService lockService;
 
     @Autowired
     UnstructuredToArmBatchProcessorImpl unstructuredToArmBatchProcessor;
-
-
     @MockBean
     private UserIdentity userIdentity;
-
     private UserAccountEntity testUser;
 
     @BeforeEach
@@ -233,7 +222,8 @@ class AutomatedTaskServiceTest extends IntegrationBase {
     void givenSuccessfullyStartedTaskFailsDuringExecutionThenStatusIsSetToFailed() {
         GenerateCaseDocumentAutomatedTask automatedTask
             = new GenerateCaseDocumentAutomatedTask(
-            automatedTaskRepository, mock(GenerateCaseDocumentAutomatedTaskConfig.class), taskProcessorFactory, logApi, lockService
+            automatedTaskRepository, mock(GenerateCaseDocumentAutomatedTaskConfig.class), logApi, lockService,
+            generateCaseDocumentProcessor
         );
         doThrow(ArithmeticException.class).when(caseRepository).findCasesNeedingCaseDocumentGenerated(any(), any());
 
@@ -717,9 +707,10 @@ class AutomatedTaskServiceTest extends IntegrationBase {
             new ProcessArmResponseFilesAutomatedTask(
                 automatedTaskRepository,
                 mock(ProcessArmResponseFilesAutomatedTaskConfig.class),
-                taskProcessorFactory,
                 logApi,
-                lockService
+                lockService,
+                armBatchProcessResponseFiles,
+                armResponseFilesProcessor
             );
 
         Optional<AutomatedTaskEntity> originalAutomatedTaskEntity =
@@ -749,9 +740,10 @@ class AutomatedTaskServiceTest extends IntegrationBase {
             new ProcessArmResponseFilesAutomatedTask(
                 automatedTaskRepository,
                 mock(ProcessArmResponseFilesAutomatedTaskConfig.class),
-                taskProcessorFactory,
                 logApi,
-                lockService
+                lockService,
+                armBatchProcessResponseFiles,
+                armResponseFilesProcessor
             );
 
         Set<ScheduledTask> scheduledTasks = scheduledTaskHolder.getScheduledTasks();
@@ -834,9 +826,9 @@ class AutomatedTaskServiceTest extends IntegrationBase {
             new GenerateCaseDocumentAutomatedTask(
                 automatedTaskRepository,
                 mock(GenerateCaseDocumentAutomatedTaskConfig.class),
-                taskProcessorFactory,
                 logApi,
-                lockService
+                lockService,
+                generateCaseDocumentProcessor
             );
 
         Optional<AutomatedTaskEntity> originalAutomatedTaskEntity =
@@ -868,9 +860,9 @@ class AutomatedTaskServiceTest extends IntegrationBase {
             new GenerateCaseDocumentAutomatedTask(
                 automatedTaskRepository,
                 mock(GenerateCaseDocumentAutomatedTaskConfig.class),
-                taskProcessorFactory,
                 logApi,
-                lockService
+                lockService,
+                generateCaseDocumentProcessor
             );
 
         Set<ScheduledTask> scheduledTasks = scheduledTaskHolder.getScheduledTasks();
@@ -1144,9 +1136,9 @@ class AutomatedTaskServiceTest extends IntegrationBase {
             new GenerateCaseDocumentForRetentionDateAutomatedTask(
                 automatedTaskRepository,
                 mock(GenerateCaseDocumentForRetentionDateAutomatedTaskConfig.class),
-                taskProcessorFactory,
                 logApi,
-                lockService
+                lockService,
+                generateCaseDocumentForRetentionDateProcessor
             );
 
         Optional<AutomatedTaskEntity> originalAutomatedTaskEntity =
@@ -1178,9 +1170,9 @@ class AutomatedTaskServiceTest extends IntegrationBase {
             new GenerateCaseDocumentForRetentionDateAutomatedTask(
                 automatedTaskRepository,
                 mock(GenerateCaseDocumentForRetentionDateAutomatedTaskConfig.class),
-                taskProcessorFactory,
                 logApi,
-                lockService
+                lockService,
+                generateCaseDocumentForRetentionDateProcessor
             );
 
         Set<ScheduledTask> scheduledTasks = scheduledTaskHolder.getScheduledTasks();

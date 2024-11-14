@@ -74,7 +74,6 @@ public abstract class AbstractArmBatchProcessResponseFiles implements ArmRespons
     protected final UserIdentity userIdentity;
     protected final CurrentTimeHelper timeHelper;
     protected final ExternalObjectDirectoryService externalObjectDirectoryService;
-    protected final Integer batchSize;
     protected final LogApi logApi;
 
     private UserAccountEntity userAccount;
@@ -83,7 +82,7 @@ public abstract class AbstractArmBatchProcessResponseFiles implements ArmRespons
     public AbstractArmBatchProcessResponseFiles(ExternalObjectDirectoryRepository externalObjectDirectoryRepository, ArmDataManagementApi armDataManagementApi,
                                             FileOperationService fileOperationService, ArmDataManagementConfiguration armDataManagementConfiguration,
                                             ObjectMapper objectMapper, UserIdentity userIdentity, CurrentTimeHelper timeHelper,
-                                            ExternalObjectDirectoryService externalObjectDirectoryService, Integer batchSize,
+                                            ExternalObjectDirectoryService externalObjectDirectoryService,
                                             LogApi logApi) {
         this.externalObjectDirectoryRepository = externalObjectDirectoryRepository;
         this.armDataManagementApi = armDataManagementApi;
@@ -93,12 +92,11 @@ public abstract class AbstractArmBatchProcessResponseFiles implements ArmRespons
         this.userIdentity = userIdentity;
         this.timeHelper = timeHelper;
         this.externalObjectDirectoryService = externalObjectDirectoryService;
-        this.batchSize = batchSize;
         this.logApi = logApi;
     }
 
     @Override
-    public void processResponseFiles() {
+    public void processResponseFiles(int batchSize) {
         userAccount = userIdentity.getUserAccount();
         ArrayList<String> inputUploadResponseFiles = new ArrayList<>();
         String prefix = getManifestFilePrefix();

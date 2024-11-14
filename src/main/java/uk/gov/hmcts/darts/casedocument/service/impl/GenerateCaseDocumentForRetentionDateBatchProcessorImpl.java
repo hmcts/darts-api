@@ -13,6 +13,7 @@ import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
 import uk.gov.hmcts.darts.common.repository.CaseRepository;
 
 import java.time.OffsetDateTime;
+import java.util.List;
 
 @RequiredArgsConstructor
 @Slf4j
@@ -32,11 +33,11 @@ public class GenerateCaseDocumentForRetentionDateBatchProcessorImpl implements G
         OffsetDateTime currentTimestamp = currentTimeHelper.currentOffsetDateTime();
         OffsetDateTime caseRetailUntilTimestamp = currentTimestamp.plusDays(caseDocumentExpiryDays);
         OffsetDateTime caseDocumentCreatedAfterTimestamp = currentTimestamp.minusDays(caseDocumentExpiryDays);
-        var casesIds = caseRepository.findCasesNeedingCaseDocumentForRetentionDateGeneration(caseRetailUntilTimestamp,
-                                                                                          caseDocumentCreatedAfterTimestamp,
-                                                                                          Limit.of(batchSize));
+        List<Integer> casesIds = caseRepository.findCasesNeedingCaseDocumentForRetentionDateGeneration(caseRetailUntilTimestamp,
+                                                                                                       caseDocumentCreatedAfterTimestamp,
+                                                                                                       Limit.of(batchSize));
         log.debug("Found {} cases needing case document based on retention out of a batch size {}", casesIds.size(), batchSize);
-        for (var courtCaseId : casesIds) {
+        for (Integer courtCaseId : casesIds) {
             try {
                 CourtCaseEntity courtCase = caseService.getCourtCaseById(courtCaseId);
                 if (!courtCase.isRetentionUpdated()) {

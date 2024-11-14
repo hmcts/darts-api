@@ -19,7 +19,6 @@ import static uk.gov.hmcts.darts.task.api.AutomatedTaskName.PROCESS_DAILY_LIST_T
 
 @Slf4j
 @Component
-@SuppressWarnings({"squid:S1135"})
 public class ProcessDailyListAutomatedTask
     extends AbstractLockableAutomatedTask
     implements AutoloadingManualTask {
