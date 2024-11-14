@@ -14,7 +14,7 @@ import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryQueryTypeEnum
 import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
 import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
 import uk.gov.hmcts.darts.common.util.EodHelper;
-import uk.gov.hmcts.darts.datamanagement.service.InboundAnnotationTranscriptionDeleterProcessor;
+import uk.gov.hmcts.darts.datamanagement.service.InboundTranscriptionAnnotationDeleterProcessor;
 
 import java.time.OffsetDateTime;
 import java.time.temporal.ChronoUnit;
@@ -23,7 +23,7 @@ import java.util.List;
 @Component
 @RequiredArgsConstructor
 @Slf4j
-public class InboundAnnotationTranscriptionDeleterProcessorImpl implements InboundAnnotationTranscriptionDeleterProcessor {
+public class InboundTranscriptionAnnotationDeleterProcessorImpl implements InboundTranscriptionAnnotationDeleterProcessor {
 
     private final ExternalObjectDirectoryRepository externalObjectDirectoryRepository;
     private final SystemUserHelper systemUserHelper;

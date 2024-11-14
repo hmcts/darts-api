@@ -2,7 +2,9 @@ package uk.gov.hmcts.darts.casedocument.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Limit;
+import org.springframework.stereotype.Component;
 import uk.gov.hmcts.darts.casedocument.service.GenerateCaseDocumentProcessor;
 import uk.gov.hmcts.darts.casedocument.service.GenerateCaseDocumentSingleCaseProcessor;
 import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
@@ -12,16 +14,17 @@ import java.time.OffsetDateTime;
 
 @RequiredArgsConstructor
 @Slf4j
+@Component
 public class GenerateCaseDocumentBatchProcessorImpl implements GenerateCaseDocumentProcessor {
 
-    private final int batchSize;
+    @Value("${darts.case-document.generation-days}")
     private final int caseDocumentGenerationDays;
     private final CaseRepository caseRepository;
     private final GenerateCaseDocumentSingleCaseProcessor singleCaseProcessor;
     private final CurrentTimeHelper currentTimeHelper;
 
     @Override
-    public void processGenerateCaseDocument() {
+    public void processGenerateCaseDocument(int batchSize) {
 
         OffsetDateTime caseClosedBeforeTimestamp = currentTimeHelper.currentOffsetDateTime().minusDays(caseDocumentGenerationDays);
         var cases = caseRepository.findCasesNeedingCaseDocumentGenerated(caseClosedBeforeTimestamp, Limit.of(batchSize));
@@ -34,5 +37,4 @@ public class GenerateCaseDocumentBatchProcessorImpl implements GenerateCaseDocum
             }
         }
     }
-
 }

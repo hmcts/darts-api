@@ -23,20 +23,18 @@ public class ArmResponseFilesProcessorImpl implements ArmResponseFilesProcessor 
     private final ExternalObjectDirectoryRepository externalObjectDirectoryRepository;
     private final UserIdentity userIdentity;
     private final ArmResponseFilesProcessSingleElement armResponseFilesProcessSingleElement;
-    private UserAccountEntity userAccount;
 
     @Override
-    public void processResponseFiles() {
-        initialisePreloadedObjects();
+    public void processResponseFiles(int batchSize) {
+        UserAccountEntity userAccount = userIdentity.getUserAccount();
         // Fetch All records from external_object_directory table with external_location_type as 'ARM' and with status 'Arm Drop Zone'.
         List<ExternalObjectDirectoryEntity> dataSentToArm =
             externalObjectDirectoryRepository.findByExternalLocationTypeAndObjectStatus(EodHelper.armLocation(), EodHelper.armDropZoneStatus(),
-                                                                                        Limit.unlimited());
-
+                                                                                        Limit.of(batchSize));
         List<Integer> externalObjects = dataSentToArm.stream().map(ExternalObjectDirectoryEntity::getId).toList();
         log.info("ARM Response process found : {} records to be processed", externalObjects.size());
         for (ExternalObjectDirectoryEntity externalObjectDirectory : dataSentToArm) {
-            updateExternalObjectDirectoryStatus(externalObjectDirectory, EodHelper.armProcessingResponseFilesStatus());
+            updateExternalObjectDirectoryStatus(userAccount, externalObjectDirectory, EodHelper.armProcessingResponseFilesStatus());
         }
         int row = 1;
         for (Integer eodId : externalObjects) {
@@ -45,13 +43,10 @@ public class ArmResponseFilesProcessorImpl implements ArmResponseFilesProcessor 
         }
     }
 
-    @SuppressWarnings("java:S3655")
-    private void initialisePreloadedObjects() {
-        userAccount = userIdentity.getUserAccount();
-    }
-
-    private void updateExternalObjectDirectoryStatus(ExternalObjectDirectoryEntity externalObjectDirectory,
-                                                     ObjectRecordStatusEntity objectRecordStatus) {
+    private void updateExternalObjectDirectoryStatus(
+        UserAccountEntity userAccount,
+        ExternalObjectDirectoryEntity externalObjectDirectory,
+        ObjectRecordStatusEntity objectRecordStatus) {
         log.info(
             "ARM Push updating ARM status from {} to {} for ID {}",
             externalObjectDirectory.getStatus().getDescription(),
@@ -62,5 +57,4 @@ public class ArmResponseFilesProcessorImpl implements ArmResponseFilesProcessor 
         externalObjectDirectory.setLastModifiedBy(userAccount);
         externalObjectDirectoryRepository.saveAndFlush(externalObjectDirectory);
     }
-
 }

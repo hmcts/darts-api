@@ -3,7 +3,6 @@ package uk.gov.hmcts.darts.task.runner.impl;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import uk.gov.hmcts.darts.arm.component.AutomatedTaskProcessorFactory;
 import uk.gov.hmcts.darts.casedocument.service.GenerateCaseDocumentForRetentionDateProcessor;
 import uk.gov.hmcts.darts.common.repository.AutomatedTaskRepository;
 import uk.gov.hmcts.darts.log.api.LogApi;
@@ -16,20 +15,20 @@ import static uk.gov.hmcts.darts.task.api.AutomatedTaskName.GENERATE_CASE_DOCUME
 
 @Slf4j
 @Component
-@SuppressWarnings({"squid:S1135"})
 public class GenerateCaseDocumentForRetentionDateAutomatedTask extends AbstractLockableAutomatedTask
     implements AutoloadingManualTask {
 
-    private final AutomatedTaskProcessorFactory automatedTaskProcessorFactory;
+
+    private final GenerateCaseDocumentForRetentionDateProcessor generateCaseDocumentForRetentionDateBatchProcessor;
 
     @Autowired
     public GenerateCaseDocumentForRetentionDateAutomatedTask(AutomatedTaskRepository automatedTaskRepository,
                                                              GenerateCaseDocumentForRetentionDateAutomatedTaskConfig automatedTaskConfigurationProperties,
-                                                             AutomatedTaskProcessorFactory automatedTaskProcessorFactory,
                                                              LogApi logApi,
-                                                             LockService lockService) {
+                                                             LockService lockService,
+                                                             GenerateCaseDocumentForRetentionDateProcessor generateCaseDocumentForRetentionDateBatchProcessor) {
         super(automatedTaskRepository, automatedTaskConfigurationProperties, logApi, lockService);
-        this.automatedTaskProcessorFactory = automatedTaskProcessorFactory;
+        this.generateCaseDocumentForRetentionDateBatchProcessor = generateCaseDocumentForRetentionDateBatchProcessor;
     }
 
     @Override
@@ -39,8 +38,6 @@ public class GenerateCaseDocumentForRetentionDateAutomatedTask extends AbstractL
 
     @Override
     protected void runTask() {
-        Integer batchSize = getAutomatedTaskBatchSize();
-        GenerateCaseDocumentForRetentionDateProcessor processor = automatedTaskProcessorFactory.createGenerateCaseDocumentForRetentionDateProcessor(batchSize);
-        processor.processGenerateCaseDocumentForRetentionDate(batchSize);
+        generateCaseDocumentForRetentionDateBatchProcessor.processGenerateCaseDocumentForRetentionDate(getAutomatedTaskBatchSize());
     }
 }
