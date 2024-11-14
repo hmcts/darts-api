@@ -8,7 +8,7 @@ import uk.gov.hmcts.darts.arm.service.impl.DetsBatchCleanupArmResponseFilesServi
 import uk.gov.hmcts.darts.common.repository.AutomatedTaskRepository;
 import uk.gov.hmcts.darts.log.api.LogApi;
 import uk.gov.hmcts.darts.task.api.AutomatedTaskName;
-import uk.gov.hmcts.darts.task.config.BatchCleanupArmResponseFilesAutomatedTaskConfig;
+import uk.gov.hmcts.darts.task.config.DetsBatchCleanupArmResponseFilesAutomatedTaskConfig;
 import uk.gov.hmcts.darts.task.runner.AutoloadingManualTask;
 import uk.gov.hmcts.darts.task.service.LockService;
 
@@ -22,7 +22,7 @@ public class DetsCleanupArmResponseFilesAutomatedTask extends AbstractLockableAu
 
     @Autowired
     public DetsCleanupArmResponseFilesAutomatedTask(AutomatedTaskRepository automatedTaskRepository,
-                                                    BatchCleanupArmResponseFilesAutomatedTaskConfig automatedTaskConfigurationProperties,
+                                                    DetsBatchCleanupArmResponseFilesAutomatedTaskConfig automatedTaskConfigurationProperties,
                                                     DetsBatchCleanupArmResponseFilesServiceImpl batchCleanupArmResponseFilesService,
                                                     LogApi logApi, LockService lockService) {
         super(automatedTaskRepository, automatedTaskConfigurationProperties, logApi, lockService);

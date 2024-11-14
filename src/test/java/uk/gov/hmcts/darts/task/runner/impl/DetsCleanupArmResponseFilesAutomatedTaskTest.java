@@ -8,7 +8,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.darts.arm.service.impl.DetsBatchCleanupArmResponseFilesServiceImpl;
 import uk.gov.hmcts.darts.common.repository.AutomatedTaskRepository;
 import uk.gov.hmcts.darts.log.api.LogApi;
-import uk.gov.hmcts.darts.task.config.BatchCleanupArmResponseFilesAutomatedTaskConfig;
+import uk.gov.hmcts.darts.task.config.DartsBatchCleanupArmResponseFilesAutomatedTaskConfig;
 import uk.gov.hmcts.darts.task.service.LockService;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -23,7 +23,7 @@ class DetsCleanupArmResponseFilesAutomatedTaskTest {
     @Mock
     private AutomatedTaskRepository automatedTaskRepository;
     @Mock
-    private BatchCleanupArmResponseFilesAutomatedTaskConfig automatedTaskConfigurationProperties;
+    private DartsBatchCleanupArmResponseFilesAutomatedTaskConfig automatedTaskConfigurationProperties;
     @Mock
     private DetsBatchCleanupArmResponseFilesServiceImpl batchCleanupArmResponseFilesService;
     @Mock
