@@ -20,7 +20,6 @@ import org.springframework.scheduling.support.CronExpression;
 import uk.gov.hmcts.darts.arm.service.ArmRetentionEventDateProcessor;
 import uk.gov.hmcts.darts.arm.service.CleanupArmResponseFilesService;
 import uk.gov.hmcts.darts.arm.service.impl.ArmBatchProcessResponseFilesImpl;
-import uk.gov.hmcts.darts.arm.service.impl.ArmResponseFilesProcessorImpl;
 import uk.gov.hmcts.darts.arm.service.impl.UnstructuredToArmBatchProcessorImpl;
 import uk.gov.hmcts.darts.audio.deleter.impl.inbound.ExternalInboundDataStoreDeleter;
 import uk.gov.hmcts.darts.audio.deleter.impl.outbound.ExternalOutboundDataStoreDeleter;
@@ -46,8 +45,6 @@ import uk.gov.hmcts.darts.retention.service.ApplyRetentionCaseAssociatedObjectsP
 import uk.gov.hmcts.darts.task.api.AutomatedTaskName;
 import uk.gov.hmcts.darts.task.config.ApplyRetentionCaseAssociatedObjectsAutomatedTaskConfig;
 import uk.gov.hmcts.darts.task.config.ArmRetentionEventDateCalculatorAutomatedTaskConfig;
-import uk.gov.hmcts.darts.task.config.CleanupArmResponseFilesAutomatedTaskConfig;
-import uk.gov.hmcts.darts.task.config.AutomatedTaskConfigurationProperties;
 import uk.gov.hmcts.darts.task.config.CloseOldCasesAutomatedTaskConfig;
 import uk.gov.hmcts.darts.task.config.CloseUnfinishedTranscriptionsAutomatedTaskConfig;
 import uk.gov.hmcts.darts.task.config.DailyListAutomatedTaskConfig;
@@ -149,8 +146,6 @@ class AutomatedTaskServiceTest extends IntegrationBase {
     private GenerateCaseDocumentProcessor generateCaseDocumentProcessor;
     @Autowired
     private ArmBatchProcessResponseFilesImpl armBatchProcessResponseFiles;
-    @Autowired
-    private ArmResponseFilesProcessorImpl armResponseFilesProcessor;
     @Autowired
     private GenerateCaseDocumentForRetentionDateProcessor generateCaseDocumentForRetentionDateProcessor;
     @Autowired
@@ -709,8 +704,7 @@ class AutomatedTaskServiceTest extends IntegrationBase {
                 mock(ProcessArmResponseFilesAutomatedTaskConfig.class),
                 logApi,
                 lockService,
-                armBatchProcessResponseFiles,
-                armResponseFilesProcessor
+                armBatchProcessResponseFiles
             );
 
         Optional<AutomatedTaskEntity> originalAutomatedTaskEntity =
@@ -742,8 +736,7 @@ class AutomatedTaskServiceTest extends IntegrationBase {
                 mock(ProcessArmResponseFilesAutomatedTaskConfig.class),
                 logApi,
                 lockService,
-                armBatchProcessResponseFiles,
-                armResponseFilesProcessor
+                armBatchProcessResponseFiles
             );
 
         Set<ScheduledTask> scheduledTasks = scheduledTaskHolder.getScheduledTasks();
