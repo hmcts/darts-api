@@ -3,7 +3,6 @@ package uk.gov.hmcts.darts.task.runner.impl;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import uk.gov.hmcts.darts.arm.component.AutomatedTaskProcessorFactory;
 import uk.gov.hmcts.darts.casedocument.service.GenerateCaseDocumentProcessor;
 import uk.gov.hmcts.darts.common.repository.AutomatedTaskRepository;
 import uk.gov.hmcts.darts.log.api.LogApi;
@@ -16,19 +15,18 @@ import static uk.gov.hmcts.darts.task.api.AutomatedTaskName.GENERATE_CASE_DOCUME
 
 @Slf4j
 @Component
-@SuppressWarnings({"squid:S1135"})
 public class GenerateCaseDocumentAutomatedTask extends AbstractLockableAutomatedTask
     implements AutoloadingManualTask {
 
-    private final AutomatedTaskProcessorFactory automatedTaskProcessorFactory;
+    private final GenerateCaseDocumentProcessor generateCaseDocumentBatchProcessor;
 
     @Autowired
     public GenerateCaseDocumentAutomatedTask(AutomatedTaskRepository automatedTaskRepository,
                                              GenerateCaseDocumentAutomatedTaskConfig automatedTaskConfigurationProperties,
-                                             AutomatedTaskProcessorFactory automatedTaskProcessorFactory,
-                                             LogApi logApi, LockService lockService) {
+                                             LogApi logApi, LockService lockService,
+                                             GenerateCaseDocumentProcessor generateCaseDocumentBatchProcessor) {
         super(automatedTaskRepository, automatedTaskConfigurationProperties, logApi, lockService);
-        this.automatedTaskProcessorFactory = automatedTaskProcessorFactory;
+        this.generateCaseDocumentBatchProcessor = generateCaseDocumentBatchProcessor;
     }
 
     @Override
@@ -38,7 +36,6 @@ public class GenerateCaseDocumentAutomatedTask extends AbstractLockableAutomated
 
     @Override
     protected void runTask() {
-        GenerateCaseDocumentProcessor processor = automatedTaskProcessorFactory.createGenerateCaseDocumentProcessor(getAutomatedTaskBatchSize());
-        processor.processGenerateCaseDocument();
+        generateCaseDocumentBatchProcessor.processGenerateCaseDocument(getAutomatedTaskBatchSize());
     }
 }

@@ -47,7 +47,6 @@ class GenerateCaseDocumentBatchProcessorImplTest {
     void setup() {
         batchProcessor = new GenerateCaseDocumentBatchProcessorImpl(
             BATCH_SIZE,
-            CASE_DOCUMENT_GENERATION_DAYS,
             caseRepository,
             singleCaseProcessor,
             currentTimeHelper
@@ -63,7 +62,7 @@ class GenerateCaseDocumentBatchProcessorImplTest {
         when(caseRepository.findCasesNeedingCaseDocumentGenerated(any(), eq(Limit.of(BATCH_SIZE))))
             .thenReturn(List.of(case1, case2));
         
-        batchProcessor.processGenerateCaseDocument();
+        batchProcessor.processGenerateCaseDocument(BATCH_SIZE);
 
         verify(singleCaseProcessor, times(2)).processGenerateCaseDocument(any());
         verify(singleCaseProcessor).processGenerateCaseDocument(CASE_1_ID);
@@ -77,7 +76,7 @@ class GenerateCaseDocumentBatchProcessorImplTest {
             .thenReturn(List.of(case1, case2));
         doThrow(RuntimeException.class).when(singleCaseProcessor).processGenerateCaseDocument(CASE_1_ID);
 
-        batchProcessor.processGenerateCaseDocument();
+        batchProcessor.processGenerateCaseDocument(BATCH_SIZE);
 
         verify(singleCaseProcessor).processGenerateCaseDocument(CASE_2_ID);
     }

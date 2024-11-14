@@ -6,20 +6,20 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.darts.common.repository.AutomatedTaskRepository;
-import uk.gov.hmcts.darts.datamanagement.service.InboundAnnotationTranscriptionDeleterProcessor;
+import uk.gov.hmcts.darts.datamanagement.service.InboundTranscriptionAnnotationDeleterProcessor;
 import uk.gov.hmcts.darts.log.api.LogApi;
 import uk.gov.hmcts.darts.task.config.AutomatedTaskConfigurationProperties;
-import uk.gov.hmcts.darts.task.config.InboundAnnotationTranscriptionDeleterAutomatedTaskConfig;
+import uk.gov.hmcts.darts.task.config.InboundTranscriptionAnnotationDeleterAutomatedTaskConfig;
 import uk.gov.hmcts.darts.task.service.LockService;
 
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.mock;
 
 @ExtendWith(MockitoExtension.class)
-class InboundAnnotationTranscriptionDeleterAutomatedTaskTest {
+class InboundTranscriptionAnnotationDeleterAutomatedTaskTest {
 
     @Mock
-    private InboundAnnotationTranscriptionDeleterProcessor armResponseFilesProcessor;
+    private InboundTranscriptionAnnotationDeleterProcessor armResponseFilesProcessor;
 
     @Mock
     private LogApi logApi;
@@ -36,9 +36,9 @@ class InboundAnnotationTranscriptionDeleterAutomatedTaskTest {
     @Test
     void runTask() {
         // given
-        InboundAnnotationTranscriptionDeleterAutomatedTask unstructuredAnnotationTranscriptionDeleterAutomatedTask
-            = new InboundAnnotationTranscriptionDeleterAutomatedTask(automatedTaskRepository,
-                                                                     mock(InboundAnnotationTranscriptionDeleterAutomatedTaskConfig.class),
+        InboundTranscriptionAnnotationDeleterAutomatedTask unstructuredAnnotationTranscriptionDeleterAutomatedTask
+            = new InboundTranscriptionAnnotationDeleterAutomatedTask(automatedTaskRepository,
+                                                                     mock(InboundTranscriptionAnnotationDeleterAutomatedTaskConfig.class),
                                                                      armResponseFilesProcessor,
                                                                      logApi,
                                                                      lockService);

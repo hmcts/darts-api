@@ -244,7 +244,7 @@ abstract class AbstractArmBatchProcessResponseFilesIntTest extends IntegrationBa
         when(armDataManagementConfiguration.getFileExtension()).thenReturn("a360");
 
         // when
-        armBatchProcessResponseFiles.processResponseFiles();
+        armBatchProcessResponseFiles.processResponseFiles(BATCH_SIZE);
 
         // then
         List<ExternalObjectDirectoryEntity> foundMediaList = dartsDatabase.getExternalObjectDirectoryRepository()
@@ -442,7 +442,7 @@ abstract class AbstractArmBatchProcessResponseFilesIntTest extends IntegrationBa
         when(armDataManagementConfiguration.getFileExtension()).thenReturn("a360");
 
         // when
-        armBatchProcessResponseFiles.processResponseFiles();
+        armBatchProcessResponseFiles.processResponseFiles(BATCH_SIZE);
 
         // then
         List<ExternalObjectDirectoryEntity> foundMediaList = dartsDatabase.getExternalObjectDirectoryRepository()
@@ -639,7 +639,7 @@ abstract class AbstractArmBatchProcessResponseFilesIntTest extends IntegrationBa
         when(armDataManagementConfiguration.getFileExtension()).thenReturn("a360");
 
         // when
-        armBatchProcessResponseFiles.processResponseFiles();
+        armBatchProcessResponseFiles.processResponseFiles(BATCH_SIZE);
 
         // then
         List<ExternalObjectDirectoryEntity> foundMediaList = dartsDatabase.getExternalObjectDirectoryRepository()
@@ -828,7 +828,7 @@ abstract class AbstractArmBatchProcessResponseFilesIntTest extends IntegrationBa
         when(armDataManagementConfiguration.getFileExtension()).thenReturn("a360");
 
         // when
-        armBatchProcessResponseFiles.processResponseFiles();
+        armBatchProcessResponseFiles.processResponseFiles(BATCH_SIZE);
 
         // then
         List<ExternalObjectDirectoryEntity> foundMediaList = dartsDatabase.getExternalObjectDirectoryRepository()
@@ -959,7 +959,7 @@ abstract class AbstractArmBatchProcessResponseFilesIntTest extends IntegrationBa
         when(armDataManagementConfiguration.getFileExtension()).thenReturn("a360");
 
         // when
-        armBatchProcessResponseFiles.processResponseFiles();
+        armBatchProcessResponseFiles.processResponseFiles(BATCH_SIZE);
 
         // then
         List<ExternalObjectDirectoryEntity> foundMediaList = dartsDatabase.getExternalObjectDirectoryRepository()
@@ -1052,7 +1052,7 @@ abstract class AbstractArmBatchProcessResponseFilesIntTest extends IntegrationBa
         when(armDataManagementConfiguration.getFileExtension()).thenReturn("a360");
 
         // when
-        armBatchProcessResponseFiles.processResponseFiles();
+        armBatchProcessResponseFiles.processResponseFiles(BATCH_SIZE);
 
         // then
         ExternalObjectDirectoryEntity foundTranscriptionEod = dartsDatabase.getExternalObjectDirectoryRepository()
@@ -1154,7 +1154,7 @@ abstract class AbstractArmBatchProcessResponseFilesIntTest extends IntegrationBa
         when(armDataManagementConfiguration.getFileExtension()).thenReturn("a360");
 
         // when
-        armBatchProcessResponseFiles.processResponseFiles();
+        armBatchProcessResponseFiles.processResponseFiles(BATCH_SIZE);
 
         // then
         ExternalObjectDirectoryEntity foundTranscriptionEod = dartsDatabase.getExternalObjectDirectoryRepository()
@@ -1231,7 +1231,7 @@ abstract class AbstractArmBatchProcessResponseFilesIntTest extends IntegrationBa
         when(armDataManagementConfiguration.getFileExtension()).thenReturn("a360");
 
         // when
-        armBatchProcessResponseFiles.processResponseFiles();
+        armBatchProcessResponseFiles.processResponseFiles(BATCH_SIZE);
 
         // then
         ExternalObjectDirectoryEntity foundAnnotationEod = dartsDatabase.getExternalObjectDirectoryRepository()
@@ -1331,7 +1331,7 @@ abstract class AbstractArmBatchProcessResponseFilesIntTest extends IntegrationBa
         when(armDataManagementConfiguration.getFileExtension()).thenReturn("a360");
 
         // when
-        armBatchProcessResponseFiles.processResponseFiles();
+        armBatchProcessResponseFiles.processResponseFiles(BATCH_SIZE);
 
         // then
         ExternalObjectDirectoryEntity foundAnnotationEod = dartsDatabase.getExternalObjectDirectoryRepository()
@@ -1438,7 +1438,7 @@ abstract class AbstractArmBatchProcessResponseFilesIntTest extends IntegrationBa
         when(armDataManagementConfiguration.getFileExtension()).thenReturn("a360");
 
         // when
-        armBatchProcessResponseFiles.processResponseFiles();
+        armBatchProcessResponseFiles.processResponseFiles(BATCH_SIZE);
 
         // then
         ExternalObjectDirectoryEntity foundAnnotationEod = dartsDatabase.getExternalObjectDirectoryRepository()
@@ -1522,7 +1522,7 @@ abstract class AbstractArmBatchProcessResponseFilesIntTest extends IntegrationBa
         when(armDataManagementConfiguration.getFileExtension()).thenReturn("a360");
 
         // when
-        armBatchProcessResponseFiles.processResponseFiles();
+        armBatchProcessResponseFiles.processResponseFiles(BATCH_SIZE);
 
         // then
         Optional<ExternalObjectDirectoryEntity> notFoundCaseEod = dartsDatabase.getExternalObjectDirectoryRepository()
@@ -1612,7 +1612,7 @@ abstract class AbstractArmBatchProcessResponseFilesIntTest extends IntegrationBa
         when(armDataManagementConfiguration.getFileExtension()).thenReturn("a360");
 
         // when
-        armBatchProcessResponseFiles.processResponseFiles();
+        armBatchProcessResponseFiles.processResponseFiles(BATCH_SIZE);
 
         // then
         ExternalObjectDirectoryEntity foundAnnotationEod = dartsDatabase.getExternalObjectDirectoryRepository()
@@ -1686,7 +1686,7 @@ abstract class AbstractArmBatchProcessResponseFilesIntTest extends IntegrationBa
         when(armDataManagementConfiguration.getFileExtension()).thenReturn("a360");
 
         // when
-        armBatchProcessResponseFiles.processResponseFiles();
+        armBatchProcessResponseFiles.processResponseFiles(BATCH_SIZE);
 
         // then
         ExternalObjectDirectoryEntity foundCaseDocEod = dartsDatabase.getExternalObjectDirectoryRepository()
@@ -1729,7 +1729,7 @@ abstract class AbstractArmBatchProcessResponseFilesIntTest extends IntegrationBa
         when(armDataManagementConfiguration.getManifestFilePrefix()).thenReturn(prefix());
 
         // when
-        armBatchProcessResponseFiles.processResponseFiles();
+        armBatchProcessResponseFiles.processResponseFiles(BATCH_SIZE);
 
         // then
         List<ExternalObjectDirectoryEntity> foundMediaList = dartsDatabase.getExternalObjectDirectoryRepository()
@@ -1774,7 +1774,7 @@ abstract class AbstractArmBatchProcessResponseFilesIntTest extends IntegrationBa
         when(armDataManagementConfiguration.getManifestFilePrefix()).thenReturn(prefix());
 
         // when
-        armBatchProcessResponseFiles.processResponseFiles();
+        armBatchProcessResponseFiles.processResponseFiles(BATCH_SIZE);
 
         // then
         List<ExternalObjectDirectoryEntity> foundMediaList = dartsDatabase.getExternalObjectDirectoryRepository()
@@ -1857,7 +1857,7 @@ abstract class AbstractArmBatchProcessResponseFilesIntTest extends IntegrationBa
         when(armDataManagementConfiguration.getFileExtension()).thenReturn("a360");
 
         // when
-        armBatchProcessResponseFiles.processResponseFiles();
+        armBatchProcessResponseFiles.processResponseFiles(BATCH_SIZE);
 
         // then
         ExternalObjectDirectoryEntity foundTranscriptionEod = dartsDatabase.getExternalObjectDirectoryRepository()
@@ -1934,7 +1934,7 @@ abstract class AbstractArmBatchProcessResponseFilesIntTest extends IntegrationBa
         when(armDataManagementConfiguration.getFileExtension()).thenReturn("a360");
 
         // when
-        armBatchProcessResponseFiles.processResponseFiles();
+        armBatchProcessResponseFiles.processResponseFiles(BATCH_SIZE);
 
         // then
         ExternalObjectDirectoryEntity foundAnnotationEod = dartsDatabase.getExternalObjectDirectoryRepository()
@@ -2005,7 +2005,7 @@ abstract class AbstractArmBatchProcessResponseFilesIntTest extends IntegrationBa
         when(armDataManagementConfiguration.getFileExtension()).thenReturn("a360");
 
         // when
-        armBatchProcessResponseFiles.processResponseFiles();
+        armBatchProcessResponseFiles.processResponseFiles(BATCH_SIZE);
 
         // then
         Optional<ExternalObjectDirectoryEntity> notFoundAnnotationEod = dartsDatabase.getExternalObjectDirectoryRepository().findById(eodId);

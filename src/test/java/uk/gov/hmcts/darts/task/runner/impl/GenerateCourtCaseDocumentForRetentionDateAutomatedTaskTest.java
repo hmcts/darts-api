@@ -4,7 +4,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import uk.gov.hmcts.darts.arm.component.AutomatedTaskProcessorFactory;
 import uk.gov.hmcts.darts.casedocument.service.GenerateCaseDocumentForRetentionDateProcessor;
 import uk.gov.hmcts.darts.common.entity.AutomatedTaskEntity;
 import uk.gov.hmcts.darts.common.repository.AutomatedTaskRepository;
@@ -22,8 +21,6 @@ class GenerateCourtCaseDocumentForRetentionDateAutomatedTaskTest {
 
     public static final int BATCH_SIZE = 50;
     @Mock
-    private AutomatedTaskProcessorFactory factory;
-    @Mock
     private GenerateCaseDocumentForRetentionDateProcessor processor;
     @Mock
     private LogApi logApi;
@@ -37,13 +34,12 @@ class GenerateCourtCaseDocumentForRetentionDateAutomatedTaskTest {
         AutomatedTaskEntity automatedTask = new AutomatedTaskEntity();
         automatedTask.setBatchSize(BATCH_SIZE);
         when(automatedTaskRepository.findByTaskName(any())).thenReturn(Optional.of(automatedTask));
-        when(factory.createGenerateCaseDocumentForRetentionDateProcessor(BATCH_SIZE)).thenReturn(processor);
         GenerateCaseDocumentForRetentionDateAutomatedTask task = new GenerateCaseDocumentForRetentionDateAutomatedTask(
             automatedTaskRepository,
             null,
-            factory,
             logApi,
-            lockService
+            lockService,
+            processor
         );
 
         task.runTask();

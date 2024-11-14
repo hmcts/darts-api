@@ -2,6 +2,7 @@ package uk.gov.hmcts.darts.arm.service.impl;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Component;
 import uk.gov.hmcts.darts.arm.api.ArmDataManagementApi;
 import uk.gov.hmcts.darts.arm.config.ArmDataManagementConfiguration;
 import uk.gov.hmcts.darts.arm.service.ExternalObjectDirectoryService;
@@ -13,12 +14,13 @@ import uk.gov.hmcts.darts.log.api.LogApi;
 
 
 @Slf4j
+@Component
 public class ArmBatchProcessResponseFilesImpl extends AbstractArmBatchProcessResponseFiles {
 
     public ArmBatchProcessResponseFilesImpl(ExternalObjectDirectoryRepository externalObjectDirectoryRepository, ArmDataManagementApi armDataManagementApi,
                                             FileOperationService fileOperationService, ArmDataManagementConfiguration armDataManagementConfiguration,
                                             ObjectMapper objectMapper, UserIdentity userIdentity, CurrentTimeHelper currentTimeHelper,
-                                            ExternalObjectDirectoryService externalObjectDirectoryService, Integer batchSize,
+                                            ExternalObjectDirectoryService externalObjectDirectoryService,
                                             LogApi logApi) {
         super(externalObjectDirectoryRepository,
               armDataManagementApi,
@@ -28,7 +30,6 @@ public class ArmBatchProcessResponseFilesImpl extends AbstractArmBatchProcessRes
               userIdentity,
               currentTimeHelper,
               externalObjectDirectoryService,
-              batchSize,
               logApi);
     }
 

@@ -20,7 +20,7 @@ import java.util.Optional;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.FAILURE_CHECKSUM_FAILED;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.STORED;
 
-class InboundAnnotationTranscriptionDeleterProcessorImplTest extends PostgresIntegrationBase {
+class InboundTranscriptionAnnotationDeleterProcessorImplTest extends PostgresIntegrationBase {
 
     @Autowired
     private ExternalObjectDirectoryRepository externalObjectDirectoryRepository;
@@ -29,7 +29,7 @@ class InboundAnnotationTranscriptionDeleterProcessorImplTest extends PostgresInt
     private ExternalObjectDirectoryStub externalObjectDirectoryStub;
 
     @Autowired
-    private InboundAnnotationTranscriptionDeleterProcessor inboundAnnotationTranscriptionDeleterProcessor;
+    private InboundTranscriptionAnnotationDeleterProcessor inboundTranscriptionAnnotationDeleterProcessor;
 
     @Autowired
     private CurrentTimeHelper currentTimeHelper;
@@ -47,7 +47,7 @@ class InboundAnnotationTranscriptionDeleterProcessorImplTest extends PostgresInt
         int hourDurationBeyondHours = setupHoursBeforeCurrentTime; // which no records are
 
         // exercise the logic
-        List<Integer> updatedResults = inboundAnnotationTranscriptionDeleterProcessor.markForDeletion(hourDurationBeyondHours);
+        List<Integer> updatedResults = inboundTranscriptionAnnotationDeleterProcessor.markForDeletion(hourDurationBeyondHours);
 
         // assert the logic
         assertExpectedResults(updatedResults, entitiesToBeMarkedWithMediaOutsideOfHours, entitiesToBeMarkedWithMediaOutsideOfHours.size());
@@ -66,7 +66,7 @@ class InboundAnnotationTranscriptionDeleterProcessorImplTest extends PostgresInt
         generateData(setupHoursBeforeCurrentTime);
 
         // exercise the logic
-        List<Integer> updatedResults = inboundAnnotationTranscriptionDeleterProcessor.markForDeletion(100);
+        List<Integer> updatedResults = inboundTranscriptionAnnotationDeleterProcessor.markForDeletion(100);
 
         // assert the logic
         assertExpectedResults(updatedResults, entitiesToBeMarkedWithMediaOutsideOfHours, entitiesToBeMarkedWithMediaOutsideOfHours.size());
@@ -85,7 +85,7 @@ class InboundAnnotationTranscriptionDeleterProcessorImplTest extends PostgresInt
 
         int hourDurationBeyondHours = setupHoursBeforeCurrentTime + 1; // which no records are
 
-        List<Integer> updatedResults = inboundAnnotationTranscriptionDeleterProcessor.markForDeletion(hourDurationBeyondHours);
+        List<Integer> updatedResults = inboundTranscriptionAnnotationDeleterProcessor.markForDeletion(hourDurationBeyondHours);
 
         // assert that the test has inserted the data into the database
         Assertions.assertTrue(updatedResults.isEmpty());
