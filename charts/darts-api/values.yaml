@@ -241,3 +241,6 @@ function:
       connectionFromEnv: DARTS_API_DB_CONNECTION_STRING
       query: "SELECT count(*) FROM darts.media_request WHERE mer_id = ( SELECT mer_id FROM darts.media_request WHERE request_status = 'OPEN' ORDER BY created_ts LIMIT 1 )"
       targetQueryValue: "0.9"
+
+darts-portal:
+  enabled: false
