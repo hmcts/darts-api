@@ -1,8 +1,10 @@
 package uk.gov.hmcts.darts.arm.service.impl;
 
+import jakarta.persistence.EntityManager;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import uk.gov.hmcts.darts.arm.service.ArmRpoService;
 import uk.gov.hmcts.darts.common.entity.ArmRpoExecutionDetailEntity;
 import uk.gov.hmcts.darts.common.entity.ArmRpoStateEntity;
@@ -20,6 +22,19 @@ public class ArmRpoServiceImpl implements ArmRpoService {
 
     public static final String ARM_RPO_EXECUTION_DETAIL_NOT_FOUND = "ArmRpoExecutionDetail not found";
     private final ArmRpoExecutionDetailRepository armRpoExecutionDetailRepository;
+    private final EntityManager entityManager;
+
+    @Override
+    @Transactional
+    public ArmRpoExecutionDetailEntity createArmRpoExecutionDetailEntity(UserAccountEntity userAccount) {
+        ArmRpoExecutionDetailEntity armRpoExecutionDetailEntity = new ArmRpoExecutionDetailEntity();
+
+        UserAccountEntity mergedUserAccountEntity = entityManager.merge(userAccount);
+        armRpoExecutionDetailEntity.setCreatedBy(mergedUserAccountEntity);
+        armRpoExecutionDetailEntity.setLastModifiedBy(mergedUserAccountEntity);
+
+        return saveArmRpoExecutionDetailEntity(armRpoExecutionDetailEntity);
+    }
 
     @Override
     public ArmRpoExecutionDetailEntity getArmRpoExecutionDetailEntity(Integer executionId) {
@@ -53,4 +68,5 @@ public class ArmRpoServiceImpl implements ArmRpoService {
     public ArmRpoExecutionDetailEntity saveArmRpoExecutionDetailEntity(ArmRpoExecutionDetailEntity armRpoExecutionDetailEntity) {
         return armRpoExecutionDetailRepository.save(armRpoExecutionDetailEntity);
     }
+
 }
