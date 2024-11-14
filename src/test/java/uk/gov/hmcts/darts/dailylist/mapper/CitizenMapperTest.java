@@ -38,4 +38,47 @@ class CitizenMapperTest {
         CitizenName citizenName = mapper.getCitizenName(name);
         Assertions.assertEquals("DMP-723-AC1-D001", mapper.getCitizenName(citizenName));
     }
+
+    @Test
+    void positiveGetCitizenNameFromCitizenNameObjectTypical() {
+        CitizenNameMapper mapper = new CitizenNameMapper();
+        CitizenName citizenName = new CitizenName();
+        citizenName.setCitizenNameForename("John");
+        citizenName.setCitizenNameSurname("Smith");
+        Assertions.assertEquals("John Smith", mapper.getCitizenName(citizenName));
+    }
+
+    @Test
+    void positiveGetCitizenNameFromCitizenNameObjectOnlyForename() {
+        CitizenNameMapper mapper = new CitizenNameMapper();
+        CitizenName citizenName = new CitizenName();
+        citizenName.setCitizenNameForename("John");
+        Assertions.assertEquals("John", mapper.getCitizenName(citizenName));
+    }
+
+    @Test
+    void positiveGetCitizenNameFromCitizenNameObjectOnlyForenameWithSpace() {
+        CitizenNameMapper mapper = new CitizenNameMapper();
+        CitizenName citizenName = new CitizenName();
+        citizenName.setCitizenNameForename(" John  ");
+        Assertions.assertEquals("John", mapper.getCitizenName(citizenName));
+    }
+
+    @Test
+    void positiveGetCitizenNameFromCitizenNameObjectBlankSurname() {
+        CitizenNameMapper mapper = new CitizenNameMapper();
+        CitizenName citizenName = new CitizenName();
+        citizenName.setCitizenNameForename("John");
+        citizenName.setCitizenNameSurname("");
+        Assertions.assertEquals("John", mapper.getCitizenName(citizenName));
+    }
+
+    @Test
+    void positiveGetCitizenNameFromCitizenNameObjectExtraSpace() {
+        CitizenNameMapper mapper = new CitizenNameMapper();
+        CitizenName citizenName = new CitizenName();
+        citizenName.setCitizenNameForename("  John  ");
+        citizenName.setCitizenNameSurname("  Smith  ");
+        Assertions.assertEquals("John Smith", mapper.getCitizenName(citizenName));
+    }
 }

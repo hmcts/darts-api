@@ -34,13 +34,12 @@ public class CitizenNameMapper {
     public String getCitizenName(CitizenName citizenName) {
         String returnName = "";
         if (citizenName.getCitizenNameForename() != null) {
-            returnName =  citizenName.getCitizenNameForename();
+            returnName =  DataUtil.trim(citizenName.getCitizenNameForename());
             if (citizenName.getCitizenNameSurname() != null && !citizenName.getCitizenNameSurname().isEmpty()) {
-                returnName = returnName + NAME_DELIMITER + citizenName.getCitizenNameSurname();
+                returnName = returnName + NAME_DELIMITER + DataUtil.trim(citizenName.getCitizenNameSurname());
             }
         }
-
-        return DataUtil.trim(returnName);
+        return returnName;
     }
 
     private String getSurnames(String[] citizenNameParts) {
