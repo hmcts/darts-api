@@ -6,7 +6,7 @@ import uk.gov.hmcts.darts.arm.service.ArmRpoPollService;
 import uk.gov.hmcts.darts.common.repository.AutomatedTaskRepository;
 import uk.gov.hmcts.darts.log.api.LogApi;
 import uk.gov.hmcts.darts.task.api.AutomatedTaskName;
-import uk.gov.hmcts.darts.task.config.AutomatedTaskConfigurationProperties;
+import uk.gov.hmcts.darts.task.config.ArmRpoPollingAutomatedTaskConfig;
 import uk.gov.hmcts.darts.task.runner.AutoloadingManualTask;
 import uk.gov.hmcts.darts.task.service.LockService;
 
@@ -20,9 +20,9 @@ public class ArmRpoPollAutomatedTask extends AbstractLockableAutomatedTask
     private final ArmRpoPollService armRpoPollService;
 
     public ArmRpoPollAutomatedTask(AutomatedTaskRepository automatedTaskRepository,
-                                   AutomatedTaskConfigurationProperties automatedTaskConfigurationProperties,
+                                   ArmRpoPollingAutomatedTaskConfig armRpoPollingAutomatedTaskConfig,
                                    ArmRpoPollService armRpoPollService, LogApi logApi, LockService lockService) {
-        super(automatedTaskRepository, automatedTaskConfigurationProperties, logApi, lockService);
+        super(automatedTaskRepository, armRpoPollingAutomatedTaskConfig, logApi, lockService);
         this.armRpoPollService = armRpoPollService;
     }
 
