@@ -59,20 +59,25 @@ public class ArmRpoPollServiceImpl implements ArmRpoPollService {
             var executionId = armRpoExecutionDetailEntity.getId();
             var userAccount = userIdentity.getUserAccount();
 
+            // step to call ARM RPO API to get the extended searches by matter
             armRpoApi.getExtendedSearchesByMatter(bearerToken, executionId, userAccount);
             List<MasterIndexFieldByRecordClassSchema> headerColumns = armRpoApi.getMasterIndexFieldByRecordClassSchema(
                 bearerToken, executionId,
                 ArmRpoHelper.getMasterIndexFieldByRecordClassSchemaSecondaryRpoState(),
                 userAccount);
 
+            // step to call ARM RPO API to create export based on search results table
             var createExportBasedOnSearchResultsTable = armRpoApi.createExportBasedOnSearchResultsTable(bearerToken, executionId, headerColumns,
                                                                                                         userAccount);
             if (createExportBasedOnSearchResultsTable) {
+                // step to call ARM RPO API to get the extended productions by matter
                 armRpoApi.getExtendedProductionsByMatter(bearerToken, executionId, userAccount);
+                // step to call ARM RPO API to get the production output files
                 var productionOutputFiles = armRpoApi.getProductionOutputFiles(bearerToken, executionId, userAccount);
 
                 for (var productionExportFileId : productionOutputFiles) {
                     String productionExportFilename = generateProductionExportFilename(productionExportFileId);
+                    // step to call ARM RPO API to download the production export file
                     var inputStream = armRpoApi.downloadProduction(bearerToken, executionId, productionExportFileId, userAccount);
                     log.info("About to save production export file to temp workspace {}", productionExportFilename);
                     Path tempProductionFile = fileOperationService.saveFileToTempWorkspace(
@@ -84,6 +89,7 @@ public class ArmRpoPollServiceImpl implements ArmRpoPollService {
                     tempProductionFiles.add(tempProductionFile.toFile());
                 }
                 if (CollectionUtils.isNotEmpty(tempProductionFiles)) {
+                    // step to call ARM RPO API to remove the production
                     armRpoApi.removeProduction(bearerToken, executionId, userAccount);
                     reconcile(tempProductionFiles, executionId);
                 } else {
