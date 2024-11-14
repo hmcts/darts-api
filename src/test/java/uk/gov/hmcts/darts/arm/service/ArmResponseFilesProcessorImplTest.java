@@ -71,12 +71,12 @@ class ArmResponseFilesProcessorImplTest {
         doReturn(armDropZoneStatus()).when(externalObjectDirectoryArmDropZone).getStatus();
 
         List<ExternalObjectDirectoryEntity> inboundList = new ArrayList<>(Collections.singletonList(externalObjectDirectoryArmDropZone));
-        when(externalObjectDirectoryRepository.findByExternalLocationTypeAndObjectStatus(armLocation(), armDropZoneStatus(), Limit.unlimited()))
+        when(externalObjectDirectoryRepository.findByExternalLocationTypeAndObjectStatus(armLocation(), armDropZoneStatus(), Limit.of(100)))
             .thenReturn(inboundList);
 
-        armResponseFilesProcessor.processResponseFiles();
+        armResponseFilesProcessor.processResponseFiles(100);
 
-        verify(externalObjectDirectoryRepository).findByExternalLocationTypeAndObjectStatus(armLocation(), armDropZoneStatus(), Limit.unlimited());
+        verify(externalObjectDirectoryRepository).findByExternalLocationTypeAndObjectStatus(armLocation(), armDropZoneStatus(), Limit.of(100));
         verify(externalObjectDirectoryRepository).saveAndFlush(externalObjectDirectoryEntityCaptor.capture());
         verify(armResponseFilesProcessSingleElement).processResponseFilesFor(1);
 

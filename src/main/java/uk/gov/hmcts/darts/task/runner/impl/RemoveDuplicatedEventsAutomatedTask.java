@@ -15,7 +15,6 @@ import static uk.gov.hmcts.darts.task.api.AutomatedTaskName.REMOVE_DUPLICATED_EV
 
 @Slf4j
 @Component
-@SuppressWarnings({"squid:S1135"})
 public class RemoveDuplicatedEventsAutomatedTask extends AbstractLockableAutomatedTask
     implements AutoloadingManualTask {
 

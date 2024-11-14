@@ -3,7 +3,6 @@ package uk.gov.hmcts.darts.task.runner.impl;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import uk.gov.hmcts.darts.arm.component.AutomatedTaskProcessorFactory;
 import uk.gov.hmcts.darts.arm.service.impl.DetsToArmBatchProcessResponseFilesImpl;
 import uk.gov.hmcts.darts.common.repository.AutomatedTaskRepository;
 import uk.gov.hmcts.darts.log.api.LogApi;
@@ -19,15 +18,15 @@ import static uk.gov.hmcts.darts.task.api.AutomatedTaskName.PROCESS_DETS_TO_ARM_
 public class ProcessDetsToArmResponseAutomatedTask extends AbstractLockableAutomatedTask
     implements AutoloadingManualTask {
 
-    private final AutomatedTaskProcessorFactory automatedTaskProcessorFactory;
+    private final DetsToArmBatchProcessResponseFilesImpl detsToArmBatchProcessResponseFiles;
 
     @Autowired
     public ProcessDetsToArmResponseAutomatedTask(AutomatedTaskRepository automatedTaskRepository,
                                                  ProcessDetsToArmResponseAutomatedTaskConfig automatedTaskConfigurationProperties,
-                                                 AutomatedTaskProcessorFactory automatedTaskProcessorFactory,
-                                                 LogApi logApi, LockService lockService) {
+                                                 LogApi logApi, LockService lockService,
+                                                 DetsToArmBatchProcessResponseFilesImpl detsToArmBatchProcessResponseFiles) {
         super(automatedTaskRepository, automatedTaskConfigurationProperties, logApi, lockService);
-        this.automatedTaskProcessorFactory = automatedTaskProcessorFactory;
+        this.detsToArmBatchProcessResponseFiles = detsToArmBatchProcessResponseFiles;
     }
 
     @Override
@@ -37,8 +36,6 @@ public class ProcessDetsToArmResponseAutomatedTask extends AbstractLockableAutom
 
     @Override
     protected void runTask() {
-        DetsToArmBatchProcessResponseFilesImpl detsToArmResponseFilesProcessor = automatedTaskProcessorFactory.createDetsToArmResponseFilesProcessor(
-            getAutomatedTaskBatchSize());
-        detsToArmResponseFilesProcessor.processResponseFiles();
+        detsToArmBatchProcessResponseFiles.processResponseFiles(getAutomatedTaskBatchSize());
     }
 }

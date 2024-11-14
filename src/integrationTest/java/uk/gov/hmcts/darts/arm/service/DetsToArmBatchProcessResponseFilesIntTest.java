@@ -53,7 +53,6 @@ class DetsToArmBatchProcessResponseFilesIntTest extends AbstractArmBatchProcessR
     
     @BeforeEach
     void setupData() {
-
         armBatchProcessResponseFiles = new DetsToArmBatchProcessResponseFilesImpl(
             externalObjectDirectoryRepository,
             armDataManagementApi,
@@ -63,7 +62,6 @@ class DetsToArmBatchProcessResponseFilesIntTest extends AbstractArmBatchProcessR
             userIdentity,
             currentTimeHelper,
             externalObjectDirectoryService,
-            BATCH_SIZE,
             logApi,
             detsDataManagementConfiguration,
             osrRepository,
@@ -245,7 +243,7 @@ class DetsToArmBatchProcessResponseFilesIntTest extends AbstractArmBatchProcessR
         when(armDataManagementConfiguration.getFileExtension()).thenReturn("a360");
 
         // when
-        armBatchProcessResponseFiles.processResponseFiles();
+        armBatchProcessResponseFiles.processResponseFiles(BATCH_SIZE);
 
         // then
         ObjectStateRecordEntity dbOsr1 = osrRepository.findByArmEodId(String.valueOf(armEod1.getId())).orElseThrow();
@@ -380,7 +378,7 @@ class DetsToArmBatchProcessResponseFilesIntTest extends AbstractArmBatchProcessR
         when(armDataManagementConfiguration.getFileExtension()).thenReturn("a360");
 
         // when
-        armBatchProcessResponseFiles.processResponseFiles();
+        armBatchProcessResponseFiles.processResponseFiles(BATCH_SIZE);
 
         // then
         ObjectStateRecordEntity dbOsr = osrRepository.findByArmEodId(String.valueOf(armEod.getId())).orElseThrow();
@@ -467,7 +465,7 @@ class DetsToArmBatchProcessResponseFilesIntTest extends AbstractArmBatchProcessR
         when(armDataManagementConfiguration.getFileExtension()).thenReturn("a360");
 
         // when
-        armBatchProcessResponseFiles.processResponseFiles();
+        armBatchProcessResponseFiles.processResponseFiles(BATCH_SIZE);
 
         // then
         ObjectStateRecordEntity dbOsr = osrRepository.findByArmEodId(String.valueOf(armEod.getId())).orElseThrow();

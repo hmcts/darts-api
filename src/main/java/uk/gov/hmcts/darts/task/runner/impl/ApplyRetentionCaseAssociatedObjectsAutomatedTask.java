@@ -15,7 +15,6 @@ import static uk.gov.hmcts.darts.task.api.AutomatedTaskName.APPLY_RETENTION_CASE
 
 @Slf4j
 @Component
-@SuppressWarnings({"squid:S1135"})
 public class ApplyRetentionCaseAssociatedObjectsAutomatedTask extends AbstractLockableAutomatedTask
     implements AutoloadingManualTask {
 
