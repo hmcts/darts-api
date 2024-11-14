@@ -2,6 +2,7 @@ package uk.gov.hmcts.darts.arm.service.impl;
 
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.darts.arm.helper.ArmRpoHelper;
 import uk.gov.hmcts.darts.arm.model.rpo.MasterIndexFieldByRecordClassSchema;
@@ -12,18 +13,21 @@ import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 
 import java.util.List;
 
+@ConditionalOnProperty(
+    value = "darts.automated.task.process-e2e-arm-rpo",
+    havingValue = "true"
+)
 @Service
 @AllArgsConstructor
 @Slf4j
 public class ArmRpoPollServiceImpl implements ArmRpoPollService {
 
     private final ArmRpoApi armRpoApi;
-    private final ArmRpoHelper armRpoHelper;
     private final ArmRpoService armRpoService;
     private final UserIdentity userIdentity;
 
     @Override
-    public void pollArmRpo(Integer batchSize) {
+    public void pollArmRpo() {
         /*
         Call armRpoApi.getExtendedSearchesByMatter (DMP-3806)
 Call armRpoApi.getMasterIndexFieldByRecordClassSchema (DMP-4136) - Pass ArmRpoHelper.getMasterIndexFieldByRecordClassSchemaSecondaryRpoState()
@@ -48,40 +52,28 @@ Reconcile the CSV against EOD (DMP-3619)
 Remove the CSV(s) from Blob storage once reconciliation is completed.
          */
         try {
+            var armRpoExecutionDetailEntity = armRpoService.getLatestArmRpoExecutionDetailEntity(ArmRpoHelper.saveBackgroundSearchRpoState(),
+                                                                                                 ArmRpoHelper.completedRpoStatus());
             var bearerToken = "";
-            var executionId = 0;
+            var executionId = armRpoExecutionDetailEntity.getId();
             var userAccount = userIdentity.getUserAccount();
 
             armRpoApi.getExtendedSearchesByMatter(bearerToken, executionId, userAccount);
             List<MasterIndexFieldByRecordClassSchema> headerColumns = armRpoApi.getMasterIndexFieldByRecordClassSchema(
                 bearerToken, executionId,
-                armRpoHelper.getMasterIndexFieldByRecordClassSchemaSecondaryRpoState(),
+                ArmRpoHelper.getMasterIndexFieldByRecordClassSchemaSecondaryRpoState(),
                 userAccount);
 
             var createExportBasedOnSearchResultsTable = armRpoApi.createExportBasedOnSearchResultsTable(bearerToken, executionId, headerColumns,
                                                                                                         userAccount);
             if (createExportBasedOnSearchResultsTable) {
                 armRpoApi.getExtendedProductionsByMatter(bearerToken, executionId, userAccount);
+                var productionOutputFiles = armRpoApi.getProductionOutputFiles(bearerToken, executionId, userAccount);
 
-                var productionOutputFiles = armRpoApi.getProductionOutputFiles(bearerToken, executionId, production.getProductionExportFileID(),
-                                                                               userAccount);
-                for (var productionOutputFile : productionOutputFiles) {
-                    if (productionOutputFile.isMockArmRpoDownloadCsv()) {
-                        var rpoCsvStartHour = 0;
-                        var rpoCsvEndHour = 0;
-                        var eods = armRpoService.getEodsForCsvDownload(rpoCsvStartHour, rpoCsvEndHour);
-                        armRpoApi.downloadProduction(bearerToken, executionId, eods, userAccount);
-                    } else {
-                        var downloadProduction = armRpoApi.downloadProduction(bearerToken, executionId, userAccount);
-                        if (downloadProduction) {
-                            armRpoService.saveCsvInBlobStorage();
-                            armRpoApi.removeProduction(bearerToken, executionId, userAccount);
-                            armRpoService.reconcileCsvAgainstEod();
-                            armRpoService.removeCsvFromBlobStorage();
-                        }
-                    }
+                for (var productionExportFileId : productionOutputFiles) {
+                    var inputStream = armRpoApi.downloadProduction(bearerToken, executionId, productionExportFileId, userAccount);
+                    
                 }
-
             } else {
                 log.warn("createExportBasedOnSearchResultsTable returned false");
             }

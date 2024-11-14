@@ -28,6 +28,7 @@ import uk.gov.hmcts.darts.arm.client.model.rpo.SaveBackgroundSearchRequest;
 import uk.gov.hmcts.darts.arm.client.model.rpo.SaveBackgroundSearchResponse;
 import uk.gov.hmcts.darts.arm.client.model.rpo.StorageAccountRequest;
 import uk.gov.hmcts.darts.arm.client.model.rpo.StorageAccountResponse;
+import uk.gov.hmcts.darts.arm.component.ArmRpoDownloadProduction;
 import uk.gov.hmcts.darts.arm.component.impl.AddAsyncSearchRequestGenerator;
 import uk.gov.hmcts.darts.arm.component.impl.GetExtendedProductionsByMatterRequestGenerator;
 import uk.gov.hmcts.darts.arm.component.impl.GetExtendedSearchesByMatterRequestGenerator;
@@ -71,6 +72,8 @@ public class ArmRpoApiImpl implements ArmRpoApi {
     private final ArmApiConfigurationProperties armApiConfigurationProperties;
     private final ArmAutomatedTaskRepository armAutomatedTaskRepository;
     private final CurrentTimeHelper currentTimeHelper;
+
+    private final ArmRpoDownloadProduction armRpoDownloadProduction;
 
     @Override
     public void getRecordManagementMatter(String bearerToken, Integer executionId, UserAccountEntity userAccount) {
@@ -570,7 +573,8 @@ public class ArmRpoApiImpl implements ArmRpoApi {
         StringBuilder errorMessage = new StringBuilder("Failure during download production: ");
 
         try {
-            response = armRpoClient.downloadProduction(bearerToken, productionExportFileId);
+
+            response = armRpoDownloadProduction.downloadProduction(bearerToken, productionExportFileId);
         } catch (FeignException e) {
             // this ensures the full error body containing the ARM error detail is logged rather than a truncated version
             log.error(errorMessage.append("Error during ARM RPO download production id: ").append(productionExportFileId)

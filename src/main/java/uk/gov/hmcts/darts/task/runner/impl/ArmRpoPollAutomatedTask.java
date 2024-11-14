@@ -33,7 +33,6 @@ public class ArmRpoPollAutomatedTask extends AbstractLockableAutomatedTask
 
     @Override
     protected void runTask() {
-        Integer batchSize = getAutomatedTaskBatchSize(getTaskName());
-        armRpoPollService.pollArmRpo(batchSize);
+        armRpoPollService.pollArmRpo();
     }
 }

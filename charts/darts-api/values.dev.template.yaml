@@ -98,8 +98,6 @@ java:
           alias: ARM_SERVICE_ENTITLEMENT
         - name: ArmStorageAccountName
           alias: ARM_STORAGE_ACCOUNT_NAME
-        - name: is_mock_arm_rpo_download_csv
-          alias: IS_MOCK_ARM_RPO_DOWNLOAD_CSV
   environment:
     ENABLE_FLYWAY: true
     MANUAL_DELETION_ENABLED: true
@@ -110,12 +108,12 @@ java:
     DARTS_API_DB_NAME: "pr-${CHANGE_ID}-darts"
     DARTS_API_DB_USERNAME: "hmcts"
     spring.profiles.active: dev
-    CASE_EXPIRY_DELETION_ENABLED: true
     TESTING_SUPPORT_ENDPOINTS_ENABLED: true
     DARTS_GATEWAY_URL: "http://darts-gateway.staging.platform.hmcts.net"
     DARTS_PORTAL_URL: ${DEV_DARTS_PORTAL_URL}
     AUTOMATED_TASK_MODE: true
     API_MODE: true
+    IS_MOCK_ARM_RPO_DOWNLOAD_CSV: false
 
   secrets:
     DARTS_API_DB_PASSWORD:

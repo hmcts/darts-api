@@ -100,8 +100,6 @@ java:
           alias: ARM_SERVICE_ENTITLEMENT
         - name: ArmStorageAccountName
           alias: ARM_STORAGE_ACCOUNT_NAME
-        - name: is_mock_arm_rpo_download_csv
-          alias: IS_MOCK_ARM_RPO_DOWNLOAD_CSV
   environment:
     NOTIFICATION_SCHEDULER_CRON: "3 */2 * * * MON-FRI"
     POSTGRES_SSL_MODE: require
@@ -217,8 +215,6 @@ function:
           alias: ARM_SERVICE_ENTITLEMENT
         - name: ArmStorageAccountName
           alias: ARM_STORAGE_ACCOUNT_NAME
-        - name: is_mock_arm_rpo_download_csv
-          alias: IS_MOCK_ARM_RPO_DOWNLOAD_CSV
   environment:
     ATS_MODE: true
     API_MODE: false
@@ -231,6 +227,7 @@ function:
     ACTIVE_DIRECTORY_B2C_AUTH_URI: https://hmctsstgextid.b2clogin.com/hmctsstgextid.onmicrosoft.com
     ARM_URL: http://darts-stub-services.{{ .Values.global.environment }}.platform.hmcts.net
     FEIGN_LOG_LEVEL: none
+    IS_MOCK_ARM_RPO_DOWNLOAD_CSV: false
 
   secrets:
     DARTS_API_DB_CONNECTION_STRING:

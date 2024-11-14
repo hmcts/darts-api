@@ -11,6 +11,8 @@ import uk.gov.hmcts.darts.audio.entity.MediaRequestEntity;
 import uk.gov.hmcts.darts.common.entity.AnnotationDocumentEntity;
 import uk.gov.hmcts.darts.common.entity.AnnotationEntity;
 import uk.gov.hmcts.darts.common.entity.ArmRpoExecutionDetailEntity;
+import uk.gov.hmcts.darts.common.entity.ArmRpoStateEntity;
+import uk.gov.hmcts.darts.common.entity.ArmRpoStatusEntity;
 import uk.gov.hmcts.darts.common.entity.CaseDocumentEntity;
 import uk.gov.hmcts.darts.common.entity.CaseManagementRetentionEntity;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
@@ -38,6 +40,8 @@ import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
 import uk.gov.hmcts.darts.common.repository.AnnotationDocumentRepository;
 import uk.gov.hmcts.darts.common.repository.AnnotationRepository;
 import uk.gov.hmcts.darts.common.repository.ArmRpoExecutionDetailRepository;
+import uk.gov.hmcts.darts.common.repository.ArmRpoStateRepository;
+import uk.gov.hmcts.darts.common.repository.ArmRpoStatusRepository;
 import uk.gov.hmcts.darts.common.repository.AuditRepository;
 import uk.gov.hmcts.darts.common.repository.AutomatedTaskRepository;
 import uk.gov.hmcts.darts.common.repository.CaseDocumentRepository;
@@ -101,6 +105,8 @@ public class DartsPersistence {
     private final AnnotationDocumentRepository annotationDocumentRepository;
     private final AnnotationRepository annotationRepository;
     private final ArmRpoExecutionDetailRepository armRpoExecutionDetailRepository;
+    private final ArmRpoStateRepository armRpoStateRepository;
+    private final ArmRpoStatusRepository armRpoStatusRepository;
     private final AuditRepository auditRepository;
     private final CaseDocumentRepository caseDocumentRepository;
     private final CaseManagementRetentionRepository caseManagementRetentionRepository;
@@ -636,6 +642,30 @@ public class DartsPersistence {
         }
 
         return armRpoExecutionDetailEntity;
+    }
+
+    @Transactional
+    @SuppressWarnings("PMD.AvoidReassigningParameters")
+    public ArmRpoStateEntity save(ArmRpoStateEntity armRpoStateEntity) {
+        armRpoStateEntity = (ArmRpoStateEntity) preCheckPersist(armRpoStateEntity);
+
+        if (armRpoStateEntity.getId() == null) {
+            return armRpoStateRepository.save(armRpoStateEntity);
+        } else {
+            return entityManager.merge(armRpoStateEntity);
+        }
+    }
+
+    @Transactional
+    @SuppressWarnings("PMD.AvoidReassigningParameters")
+    public ArmRpoStatusEntity save(ArmRpoStatusEntity armRpoStatusEntity) {
+        armRpoStatusEntity = (ArmRpoStatusEntity) preCheckPersist(armRpoStatusEntity);
+
+        if (armRpoStatusEntity.getId() == null) {
+            return armRpoStatusRepository.save(armRpoStatusEntity);
+        } else {
+            return entityManager.merge(armRpoStatusEntity);
+        }
     }
 
     @Transactional
