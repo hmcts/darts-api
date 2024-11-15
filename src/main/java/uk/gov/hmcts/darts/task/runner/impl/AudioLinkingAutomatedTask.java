@@ -84,22 +84,22 @@ public class AudioLinkingAutomatedTask extends AbstractLockableAutomatedTask
 
         @Transactional
         public void processEvent(Integer eveId) {
-            log.info("Linking media for event with eveId {}", eveId);
+            log.info("Attempting to link media for event with eveId {}", eveId);
             try {
                 EventEntity event = eventService.getEventByEveId(eveId);
                 List<MediaEntity> mediaEntities = mediaRepository.findAllByMediaTimeContains(
                     event.getCourtroom().getId(),
                     event.getTimestamp().plus(getAudioBuffer()),
                     event.getTimestamp().minus(getAudioBuffer()));
-                mediaEntities.forEach(mediaEntity -> processMedia(event.getHearingEntities(), mediaEntity));
+                mediaEntities.forEach(mediaEntity -> processMedia(event.getHearingEntities(), mediaEntity, eveId));
                 event.setEventStatus(EventStatus.AUDIO_LINKED.getStatusNumber());
                 eventService.saveEvent(event);
             } catch (Exception e) {
-                log.error("Error processing event {}", eveId, e);
+                log.error("Error attempting to link media for event with eveId {}", eveId, e);
             }
         }
 
-        void processMedia(List<HearingEntity> hearingEntities, MediaEntity mediaEntity) {
+        void processMedia(List<HearingEntity> hearingEntities, MediaEntity mediaEntity, Integer eveId) {
             Set<HearingEntity> hearingsToSave = new HashSet<>();
             Set<MediaLinkedCaseEntity> mediaLinkedCaseEntities = new HashSet<>();
             UserAccountEntity userAccount = userAccountRepository.getReferenceById(SystemUsersEnum.AUDIO_LINKING_AUTOMATED_TASK.getId());
@@ -113,10 +113,10 @@ public class AudioLinkingAutomatedTask extends AbstractLockableAutomatedTask
                             mediaLinkedCaseEntities.add(new MediaLinkedCaseEntity(
                                 mediaEntity, courtCase, userAccount, MediaLinkedCaseSourceType.AUDIO_LINKING_TASK));
                         }
-                        log.info("Linking media {} to hearing {}", mediaEntity.getId(), hearingEntity.getId());
+                        log.info("Linking media {} to hearing {} through eveId {}", mediaEntity.getId(), hearingEntity.getId(), eveId);
                     }
                 } catch (Exception e) {
-                    log.error("Error linking media {} to hearing {}", mediaEntity.getId(), hearingEntity.getId(), e);
+                    log.error("Error linking media {} to hearing {} through eveId {}", mediaEntity.getId(), hearingEntity.getId(), eveId, e);
                 }
             });
             hearingRepository.saveAll(hearingsToSave);
