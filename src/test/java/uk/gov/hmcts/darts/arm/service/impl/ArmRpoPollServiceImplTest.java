@@ -32,7 +32,7 @@ import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
@@ -69,7 +69,7 @@ class ArmRpoPollServiceImplTest {
 
     @BeforeEach
     void setUp() {
-        when(userIdentity.getUserAccount()).thenReturn(userAccountEntity);
+        lenient().when(userIdentity.getUserAccount()).thenReturn(userAccountEntity);
 
         armRpoExecutionDetailEntity = new ArmRpoExecutionDetailEntity();
         armRpoExecutionDetailEntity.setId(EXECUTION_ID);
@@ -83,7 +83,7 @@ class ArmRpoPollServiceImplTest {
         armRpoExecutionDetailEntity.setArmRpoState(ARM_RPO_HELPER_MOCKS.getSaveBackgroundSearchRpoState());
 
         when(armApiService.getArmBearerToken()).thenReturn("bearerToken");
-
+        doNothing().when(armRpoApi).getExtendedSearchesByMatter(anyString(), anyInt(), any());
         when(armRpoApi.getMasterIndexFieldByRecordClassSchema(anyString(), anyInt(), any(), any()))
             .thenReturn(createHeaderColumns());
         when(armRpoApi.createExportBasedOnSearchResultsTable(anyString(), anyInt(), any(), any())).thenReturn(true);
@@ -110,18 +110,24 @@ class ArmRpoPollServiceImplTest {
     }
 
     @Test
-    void pollArmRpo_shouldPollSuccessfullyWithCreateExportBasedOnSearchResultsTableInprogress() throws IOException {
+    void pollArmRpo_shouldPollSuccessfullyWithCreateExportBasedOnSearchResultsTableInProgress() throws IOException {
         // given
         armRpoExecutionDetailEntity.setArmRpoStatus(ARM_RPO_HELPER_MOCKS.getInProgressRpoStatus());
         armRpoExecutionDetailEntity.setArmRpoState(ARM_RPO_HELPER_MOCKS.getCreateExportBasedOnSearchResultsTableRpoState());
 
         when(armApiService.getArmBearerToken()).thenReturn("bearerToken");
-
+        doNothing().when(armRpoApi).getExtendedSearchesByMatter(anyString(), anyInt(), any());
         when(armRpoApi.getMasterIndexFieldByRecordClassSchema(anyString(), anyInt(), any(), any()))
             .thenReturn(createHeaderColumns());
         when(armRpoApi.createExportBasedOnSearchResultsTable(anyString(), anyInt(), any(), any())).thenReturn(true);
         when(armRpoApi.getProductionOutputFiles(anyString(), anyInt(), any())).thenReturn(List.of("fileId"));
-        when(armRpoApi.downloadProduction(anyString(), anyInt(), anyString(), any())).thenReturn(mock(InputStream.class));
+        InputStream resource = IOUtils.toInputStream("dummy input stream", "UTF-8");
+        when(armRpoApi.downloadProduction(anyString(), anyInt(), anyString(), any())).thenReturn(resource);
+        doNothing().when(armRpoApi).removeProduction(anyString(), anyInt(), any());
+
+        String fileName = "fileId.csv";
+        Path filePath = Path.of(tempDirectory.getAbsolutePath()).resolve(fileName);
+        when(fileOperationService.saveFileToTempWorkspace(any(InputStream.class), anyString(), any(), anyBoolean())).thenReturn(filePath);
 
         // when
         armRpoPollService.pollArmRpo(false);
@@ -152,7 +158,8 @@ class ArmRpoPollServiceImplTest {
     @Test
     void pollArmRpo_shouldHandleNoBearerToken() {
         // given
-        ArmRpoExecutionDetailEntity armRpoExecutionDetailEntity = mock(ArmRpoExecutionDetailEntity.class);
+        armRpoExecutionDetailEntity.setArmRpoStatus(ARM_RPO_HELPER_MOCKS.getCompletedRpoStatus());
+        armRpoExecutionDetailEntity.setArmRpoState(ARM_RPO_HELPER_MOCKS.getSaveBackgroundSearchRpoState());
         when(armRpoService.getLatestArmRpoExecutionDetailEntity()).thenReturn(armRpoExecutionDetailEntity);
         when(armApiService.getArmBearerToken()).thenReturn(null);
 
@@ -168,8 +175,8 @@ class ArmRpoPollServiceImplTest {
     @Test
     void pollArmRpo_shouldHandleCreateExportInProgress() {
         // given
-        ArmRpoExecutionDetailEntity armRpoExecutionDetailEntity = mock(ArmRpoExecutionDetailEntity.class);
-        when(armRpoService.getLatestArmRpoExecutionDetailEntity()).thenReturn(armRpoExecutionDetailEntity);
+        armRpoExecutionDetailEntity.setArmRpoStatus(ARM_RPO_HELPER_MOCKS.getCompletedRpoStatus());
+        armRpoExecutionDetailEntity.setArmRpoState(ARM_RPO_HELPER_MOCKS.getSaveBackgroundSearchRpoState());
         when(armApiService.getArmBearerToken()).thenReturn("bearerToken");
         when(armRpoApi.createExportBasedOnSearchResultsTable(anyString(), anyInt(), any(), any())).thenReturn(false);
 
@@ -179,15 +186,18 @@ class ArmRpoPollServiceImplTest {
         // then
         verify(armRpoService).getLatestArmRpoExecutionDetailEntity();
         verify(armApiService).getArmBearerToken();
+        verify(armRpoApi).getExtendedSearchesByMatter(anyString(), anyInt(), any());
+        verify(armRpoApi).getMasterIndexFieldByRecordClassSchema(anyString(), anyInt(), any(), any());
         verify(armRpoApi).createExportBasedOnSearchResultsTable(anyString(), anyInt(), any(), any());
+        verify(userIdentity).getUserAccount();
         verifyNoMoreInteractions(armRpoApi, userIdentity, fileOperationService);
     }
 
     @Test
     void pollArmRpo_shouldHandleNoProductionFiles() {
         // given
-        ArmRpoExecutionDetailEntity armRpoExecutionDetailEntity = mock(ArmRpoExecutionDetailEntity.class);
-        when(armRpoService.getLatestArmRpoExecutionDetailEntity()).thenReturn(armRpoExecutionDetailEntity);
+        armRpoExecutionDetailEntity.setArmRpoStatus(ARM_RPO_HELPER_MOCKS.getCompletedRpoStatus());
+        armRpoExecutionDetailEntity.setArmRpoState(ARM_RPO_HELPER_MOCKS.getSaveBackgroundSearchRpoState());
         when(armApiService.getArmBearerToken()).thenReturn("bearerToken");
         when(armRpoApi.createExportBasedOnSearchResultsTable(anyString(), anyInt(), any(), any())).thenReturn(true);
         when(armRpoApi.getProductionOutputFiles(anyString(), anyInt(), any())).thenReturn(List.of());
@@ -198,16 +208,20 @@ class ArmRpoPollServiceImplTest {
         // then
         verify(armRpoService).getLatestArmRpoExecutionDetailEntity();
         verify(armApiService).getArmBearerToken();
+        verify(armRpoApi).getExtendedSearchesByMatter(anyString(), anyInt(), any());
+        verify(armRpoApi).getMasterIndexFieldByRecordClassSchema(anyString(), anyInt(), any(), any());
         verify(armRpoApi).createExportBasedOnSearchResultsTable(anyString(), anyInt(), any(), any());
+        verify(armRpoApi).getExtendedProductionsByMatter(anyString(), anyInt(), any());
         verify(armRpoApi).getProductionOutputFiles(anyString(), anyInt(), any());
+        verify(userIdentity).getUserAccount();
         verifyNoMoreInteractions(armRpoApi, userIdentity, fileOperationService);
     }
 
     @Test
     void pollArmRpo_shouldHandleExceptionDuringPollingOnCreateExportBasedOnSearchResultsTableStep() {
         // given
-        ArmRpoExecutionDetailEntity armRpoExecutionDetailEntity = mock(ArmRpoExecutionDetailEntity.class);
-        when(armRpoService.getLatestArmRpoExecutionDetailEntity()).thenReturn(armRpoExecutionDetailEntity);
+        armRpoExecutionDetailEntity.setArmRpoStatus(ARM_RPO_HELPER_MOCKS.getCompletedRpoStatus());
+        armRpoExecutionDetailEntity.setArmRpoState(ARM_RPO_HELPER_MOCKS.getSaveBackgroundSearchRpoState());
         when(armApiService.getArmBearerToken()).thenReturn("bearerToken");
         when(armRpoApi.createExportBasedOnSearchResultsTable(anyString(), anyInt(), any(), any())).thenThrow(new ArmRpoException("Test exception"));
 
@@ -217,7 +231,10 @@ class ArmRpoPollServiceImplTest {
         // then
         verify(armRpoService).getLatestArmRpoExecutionDetailEntity();
         verify(armApiService).getArmBearerToken();
+        verify(armRpoApi).getExtendedSearchesByMatter(anyString(), anyInt(), any());
+        verify(armRpoApi).getMasterIndexFieldByRecordClassSchema(anyString(), anyInt(), any(), any());
         verify(armRpoApi).createExportBasedOnSearchResultsTable(anyString(), anyInt(), any(), any());
+        verify(userIdentity).getUserAccount();
         verifyNoMoreInteractions(armRpoApi, userIdentity, fileOperationService);
     }
 
