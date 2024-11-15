@@ -10,11 +10,12 @@ import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.test.context.TestPropertySource;
 import uk.gov.hmcts.darts.arm.client.ArmRpoClient;
+import uk.gov.hmcts.darts.arm.component.ArmRpoDownloadProduction;
 import uk.gov.hmcts.darts.arm.exception.ArmRpoException;
 import uk.gov.hmcts.darts.arm.helper.ArmRpoHelperMocks;
 import uk.gov.hmcts.darts.arm.service.ArmRpoService;
-import uk.gov.hmcts.darts.common.datamanagement.component.impl.DownloadResponseMetaData;
 import uk.gov.hmcts.darts.common.entity.ArmRpoExecutionDetailEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 
@@ -33,6 +34,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
+@TestPropertySource(properties = {"darts.storage.arm.is_mock_arm_rpo_download_csv=true"})
 @ExtendWith(MockitoExtension.class)
 @SuppressWarnings("PMD.CloseResource")
 class ArmRpoApiDownloadProductionTest {
@@ -47,8 +49,7 @@ class ArmRpoApiDownloadProductionTest {
     private ArmRpoService armRpoService;
 
     @Mock
-    private DownloadResponseMetaData metaData;
-
+    private ArmRpoDownloadProduction armRpoDownloadProduction;
 
     @InjectMocks
     private ArmRpoApiImpl armRpoApi;
@@ -80,9 +81,7 @@ class ArmRpoApiDownloadProductionTest {
         feign.Response.Body body = mock(feign.Response.Body.class);
         when(response.body()).thenReturn(body);
         when(body.asInputStream()).thenReturn(inputStream);
-        when(armRpoClient.downloadProduction(anyString(), anyString())).thenReturn(response);
-
-        when(armRpoClient.downloadProduction(anyString(), anyString())).thenReturn(response);
+        when(armRpoClient.downloadProduction(anyString(), anyString(), anyString())).thenReturn(response);
 
         try (InputStream result =
                  armRpoApi.downloadProduction(BEARER_TOKEN, EXECUTION_ID, "productionExportId", userAccount)) {
@@ -105,7 +104,7 @@ class ArmRpoApiDownloadProductionTest {
         when(armRpoService.getArmRpoExecutionDetailEntity(anyInt())).thenReturn(armRpoExecutionDetailEntity);
         feign.Response response = mock(feign.Response.class);
         when(response.status()).thenReturn(400);
-        when(armRpoClient.downloadProduction(anyString(), anyString())).thenReturn(response);
+        when(armRpoClient.downloadProduction(anyString(), anyString(), anyString())).thenReturn(response);
 
         ArmRpoException armRpoException = assertThrows(ArmRpoException.class, () ->
             armRpoApi.downloadProduction(BEARER_TOKEN, EXECUTION_ID, "productionExportId", userAccount));
@@ -126,7 +125,7 @@ class ArmRpoApiDownloadProductionTest {
     void downloadProductionThrowsFeignException() {
         // given
         when(armRpoService.getArmRpoExecutionDetailEntity(anyInt())).thenReturn(armRpoExecutionDetailEntity);
-        when(armRpoClient.downloadProduction(anyString(), anyString())).thenThrow(FeignException.class);
+        when(armRpoClient.downloadProduction(anyString(), anyString(), anyString())).thenThrow(FeignException.class);
 
 
         ArmRpoException armRpoException = assertThrows(ArmRpoException.class, () ->

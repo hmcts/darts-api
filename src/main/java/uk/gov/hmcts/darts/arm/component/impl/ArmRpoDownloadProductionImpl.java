@@ -6,11 +6,8 @@ import org.springframework.stereotype.Component;
 import uk.gov.hmcts.darts.arm.client.ArmRpoClient;
 import uk.gov.hmcts.darts.arm.component.ArmRpoDownloadProduction;
 
-@ConditionalOnProperty(
-    value = "darts.storage.arm.is_mock_arm_rpo_download_csv",
-    havingValue = "false"
-)
 @Component
+@ConditionalOnProperty(prefix = "darts.storage.arm", name = "is_mock_arm_rpo_download_csv", havingValue = "false")
 @AllArgsConstructor
 public class ArmRpoDownloadProductionImpl implements ArmRpoDownloadProduction {
 

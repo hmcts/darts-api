@@ -33,6 +33,6 @@ public class ArmRpoPollAutomatedTask extends AbstractLockableAutomatedTask
 
     @Override
     protected void runTask() {
-        armRpoPollService.pollArmRpo();
+        armRpoPollService.pollArmRpo(isManualRun());
     }
 }

@@ -42,10 +42,10 @@ public class ArmRpoPollServiceImpl implements ArmRpoPollService {
     private List<File> tempProductionFiles = new ArrayList<>();
 
     @Override
-    public void pollArmRpo() {
+    public void pollArmRpo(boolean isManualRun) {
 
         try {
-            var armRpoExecutionDetailEntity = getArmRpoExecutionDetailEntity();
+            var armRpoExecutionDetailEntity = getArmRpoExecutionDetailEntity(isManualRun);
             if (isNull(armRpoExecutionDetailEntity)) {
                 log.warn("Unable to find armRpoExecutionDetailEntity to poll");
                 return;
@@ -127,13 +127,42 @@ public class ArmRpoPollServiceImpl implements ArmRpoPollService {
         }
     }
 
-
     private String generateProductionExportFilename(String productionExportFileId) {
         return "productionExportFileId_" + productionExportFileId + ".csv";
     }
 
-    private ArmRpoExecutionDetailEntity getArmRpoExecutionDetailEntity() {
-        // TODO this needs to be thought through how to handle the multiple states and will be played in another ticket
-        return armRpoService.getLatestArmRpoExecutionDetailEntity();
+    private ArmRpoExecutionDetailEntity getArmRpoExecutionDetailEntity(boolean isManualRun) {
+        var armRpoExecutionDetailEntity = armRpoService.getLatestArmRpoExecutionDetailEntity();
+        if (isNull(armRpoExecutionDetailEntity)) {
+            return null;
+        }
+
+        if (saveBackgroundSearchCompleted(armRpoExecutionDetailEntity)
+            || createExportBasedOnSearchResultsTableInProgress(armRpoExecutionDetailEntity)) {
+            return armRpoExecutionDetailEntity;
+        }
+        if (isManualRun && pollServiceNotInProgress(armRpoExecutionDetailEntity)) {
+            return armRpoExecutionDetailEntity;
+        }
+        return null;
+    }
+
+
+    private boolean pollServiceNotInProgress(ArmRpoExecutionDetailEntity armRpoExecutionDetailEntity) {
+        if (ArmRpoHelper.failedRpoStatus().getId().equals(armRpoExecutionDetailEntity.getArmRpoStatus().getId())
+            && armRpoExecutionDetailEntity.getArmRpoState().getId() >= ArmRpoHelper.getExtendedSearchesByMatterRpoState().getId()) {
+            return true;
+        }
+        return false;
+    }
+
+    private boolean createExportBasedOnSearchResultsTableInProgress(ArmRpoExecutionDetailEntity armRpoExecutionDetailEntity) {
+        return ArmRpoHelper.createExportBasedOnSearchResultsTableRpoState().getId().equals(armRpoExecutionDetailEntity.getArmRpoState().getId())
+            && ArmRpoHelper.inProgressRpoStatus().getId().equals(armRpoExecutionDetailEntity.getArmRpoStatus().getId());
+    }
+
+    private boolean saveBackgroundSearchCompleted(ArmRpoExecutionDetailEntity armRpoExecutionDetailEntity) {
+        return ArmRpoHelper.saveBackgroundSearchRpoState().getId().equals(armRpoExecutionDetailEntity.getArmRpoState().getId())
+            && ArmRpoHelper.completedRpoStatus().getId().equals(armRpoExecutionDetailEntity.getArmRpoStatus().getId());
     }
 }
