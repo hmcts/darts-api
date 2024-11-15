@@ -381,8 +381,13 @@ darts:
         lock:
           at-least-for: PT1M
           at-most-for: PT90M
-      batch-cleanup-arm-response-files:
+      darts-batch-cleanup-arm-response-files:
         system-user-email: ${darts.automated.task.common-config.system-user-email:}
+        lock:
+          at-least-for: PT1M
+          at-most-for: PT90M
+      dets-batch-cleanup-arm-response-files:
+        system-user-email: systemDETSCleanupArmResponseFilesAutomatedTask@hmcts.net
         lock:
           at-least-for: PT1M
           at-most-for: PT90M
