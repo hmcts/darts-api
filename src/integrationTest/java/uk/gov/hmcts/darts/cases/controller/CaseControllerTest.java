@@ -186,6 +186,22 @@ class CaseControllerTest extends IntegrationBase {
     }
 
     @Test
+    void casesPostWithoutExistingCaseWithLeadingAndTrailingSpacesInNames() throws Exception {
+        setupExternalMidTierUserForCourthouse(null);
+
+        MockHttpServletRequestBuilder requestBuilder = post(BASE_PATH)
+            .contentType(MediaType.APPLICATION_JSON_VALUE)
+            .content(getContentsFromFile("tests/cases/CaseControllerTest/casesPostEndpoint/requestBodyWithSpaces.json"));
+        MvcResult response = mockMvc.perform(requestBuilder).andExpect(status().isCreated()).andReturn();
+
+        String actualResponse = TestUtils.removeTags(List.of("case_id"), response.getResponse().getContentAsString());
+
+        String expectedResponse = substituteHearingDateWithToday(getContentsFromFile(
+            "tests/cases/CaseControllerTest/casesPostEndpoint/expectedResponse.json"));
+        assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
+    }
+
+    @Test
     void casesPostCaseNumberMissing() throws Exception {
         MockHttpServletRequestBuilder requestBuilder = post(BASE_PATH)
             .contentType(MediaType.APPLICATION_JSON_VALUE)
