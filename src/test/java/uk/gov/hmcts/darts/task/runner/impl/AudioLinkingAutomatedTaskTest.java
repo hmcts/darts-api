@@ -121,7 +121,7 @@ class AudioLinkingAutomatedTaskTest {
         @Test
         void positiveProcessEvent() {
             doNothing().when(eventProcessor)
-                .processMedia(any(), any());
+                .processMedia(any(), any(), any());
 
             EventEntity event = mock(EventEntity.class);
             when(eventService.getEventByEveId(1)).thenReturn(event);
@@ -142,11 +142,11 @@ class AudioLinkingAutomatedTaskTest {
             eventProcessor.processEvent(1);
 
             verify(eventProcessor, times(1))
-                .processMedia(hearingEntities, mediaEntities.get(0));
+                .processMedia(hearingEntities, mediaEntities.get(0), 1);
             verify(eventProcessor, times(1))
-                .processMedia(hearingEntities, mediaEntities.get(1));
+                .processMedia(hearingEntities, mediaEntities.get(1), 1);
             verify(eventProcessor, times(1))
-                .processMedia(hearingEntities, mediaEntities.get(2));
+                .processMedia(hearingEntities, mediaEntities.get(2), 1);
             verify(mediaRepository, times(1))
                 .findAllByMediaTimeContains(123, timestamp, timestamp);
             verify(event, times(1))
@@ -161,7 +161,7 @@ class AudioLinkingAutomatedTaskTest {
         @Test
         void positiveProcessEventWithBuffer() {
             doNothing().when(eventProcessor)
-                .processMedia(any(), any());
+                .processMedia(any(), any(), any());
             doReturn(Duration.ofSeconds(10)).when(eventProcessor).getAudioBuffer();
             EventEntity event = mock(EventEntity.class);
             when(eventService.getEventByEveId(2)).thenReturn(event);
@@ -182,11 +182,11 @@ class AudioLinkingAutomatedTaskTest {
 
 
             verify(eventProcessor, times(1))
-                .processMedia(hearingEntities, mediaEntities.get(0));
+                .processMedia(hearingEntities, mediaEntities.get(0), 2);
             verify(eventProcessor, times(1))
-                .processMedia(hearingEntities, mediaEntities.get(1));
+                .processMedia(hearingEntities, mediaEntities.get(1), 2);
             verify(eventProcessor, times(1))
-                .processMedia(hearingEntities, mediaEntities.get(2));
+                .processMedia(hearingEntities, mediaEntities.get(2), 2);
             verify(mediaRepository, times(1))
                 .findAllByMediaTimeContains(123, timestamp.plusSeconds(10), timestamp.minusSeconds(10));
             verify(event, times(1))
@@ -221,7 +221,7 @@ class AudioLinkingAutomatedTaskTest {
             List<HearingEntity> hearingEntities = List.of(hearingEntity1, hearingEntity2, hearingEntity3);
 
             MediaEntity mediaEntity = mock(MediaEntity.class);
-            eventProcessor.processMedia(hearingEntities, mediaEntity);
+            eventProcessor.processMedia(hearingEntities, mediaEntity, 1);
 
 
             verify(hearingEntity1, times(1)).containsMedia(mediaEntity);
@@ -275,7 +275,7 @@ class AudioLinkingAutomatedTaskTest {
 
             MediaEntity mediaEntity = mock(MediaEntity.class);
 
-            eventProcessor.processMedia(hearingEntities, mediaEntity);
+            eventProcessor.processMedia(hearingEntities, mediaEntity, 1);
 
             verify(hearingEntity1, times(1)).containsMedia(mediaEntity);
             verify(hearingEntity2, times(1)).containsMedia(mediaEntity);
@@ -333,7 +333,7 @@ class AudioLinkingAutomatedTaskTest {
                 .thenReturn(true);
 
 
-            eventProcessor.processMedia(hearingEntities, mediaEntity);
+            eventProcessor.processMedia(hearingEntities, mediaEntity, 1);
 
 
             verify(hearingEntity1, times(1)).containsMedia(mediaEntity);
