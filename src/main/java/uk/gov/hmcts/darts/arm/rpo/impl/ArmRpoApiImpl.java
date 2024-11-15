@@ -581,10 +581,10 @@ public class ArmRpoApiImpl implements ArmRpoApi {
         }
 
         // on any error occurring return a download failure
-        if (!HttpStatus.valueOf(response.status()).is2xxSuccessful()) {
+        if (isNull(response) || isNull(response.status()) || !HttpStatus.valueOf(response.status()).is2xxSuccessful()) {
             errorMessage.append("Failed ARM RPO download production with id: ").append(productionExportFileId)
                 .append(" response ").append(response);
-            log.error(response.toString());
+            log.error(errorMessage.toString());
             throw handleFailureAndCreateException(errorMessage.toString(), armRpoExecutionDetailEntity, userAccount);
         }
 

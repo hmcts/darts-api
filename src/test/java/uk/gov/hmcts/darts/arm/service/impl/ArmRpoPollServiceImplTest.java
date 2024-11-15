@@ -38,6 +38,7 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
+@SuppressWarnings("PMD.CloseResource")
 class ArmRpoPollServiceImplTest {
 
     @Mock
@@ -107,6 +108,51 @@ class ArmRpoPollServiceImplTest {
         verify(armRpoApi).getProductionOutputFiles(anyString(), anyInt(), any());
         verify(armRpoApi).downloadProduction(anyString(), anyInt(), any(), any());
         verify(armRpoApi).removeProduction(anyString(), anyInt(), any());
+
+        verify(userIdentity).getUserAccount();
+
+        verify(fileOperationService).saveFileToTempWorkspace(any(InputStream.class), anyString(), any(), anyBoolean());
+
+        verifyNoMoreInteractions(armRpoApi, userIdentity, fileOperationService);
+    }
+
+    @Test
+    void pollArmRpo_shouldPollSuccessfullyWithSaveBackgroundCompletedForManualRun() throws IOException {
+        // given
+        armRpoExecutionDetailEntity.setArmRpoStatus(ARM_RPO_HELPER_MOCKS.getCompletedRpoStatus());
+        armRpoExecutionDetailEntity.setArmRpoState(ARM_RPO_HELPER_MOCKS.getSaveBackgroundSearchRpoState());
+
+        when(armApiService.getArmBearerToken()).thenReturn("bearerToken");
+        doNothing().when(armRpoApi).getExtendedSearchesByMatter(anyString(), anyInt(), any());
+        when(armRpoApi.getMasterIndexFieldByRecordClassSchema(anyString(), anyInt(), any(), any()))
+            .thenReturn(createHeaderColumns());
+        when(armRpoApi.createExportBasedOnSearchResultsTable(anyString(), anyInt(), any(), any())).thenReturn(true);
+        when(armRpoApi.getProductionOutputFiles(anyString(), anyInt(), any())).thenReturn(List.of("fileId"));
+        InputStream resource = IOUtils.toInputStream("dummy input stream", "UTF-8");
+        when(armRpoApi.downloadProduction(anyString(), anyInt(), anyString(), any())).thenReturn(resource);
+        doNothing().when(armRpoApi).removeProduction(anyString(), anyInt(), any());
+
+        String fileName = "fileId.csv";
+        Path filePath = Path.of(tempDirectory.getAbsolutePath()).resolve(fileName);
+        when(fileOperationService.saveFileToTempWorkspace(any(InputStream.class), anyString(), any(), anyBoolean())).thenReturn(filePath);
+
+        // when
+        armRpoPollService.pollArmRpo(true);
+
+        // then
+        verify(armRpoApi).getExtendedSearchesByMatter(anyString(), anyInt(), any());
+        verify(armRpoApi).getMasterIndexFieldByRecordClassSchema(anyString(), anyInt(), any(), any());
+        verify(armRpoApi).createExportBasedOnSearchResultsTable(anyString(), anyInt(), any(), any());
+        verify(armRpoApi).getExtendedProductionsByMatter(anyString(), anyInt(), any());
+        verify(armRpoApi).getProductionOutputFiles(anyString(), anyInt(), any());
+        verify(armRpoApi).downloadProduction(anyString(), anyInt(), any(), any());
+        verify(armRpoApi).removeProduction(anyString(), anyInt(), any());
+
+        verify(userIdentity).getUserAccount();
+
+        verify(fileOperationService).saveFileToTempWorkspace(any(InputStream.class), anyString(), any(), anyBoolean());
+
+        verifyNoMoreInteractions(armRpoApi, userIdentity, fileOperationService);
     }
 
     @Test
@@ -140,6 +186,118 @@ class ArmRpoPollServiceImplTest {
         verify(armRpoApi).getProductionOutputFiles(anyString(), anyInt(), any());
         verify(armRpoApi).downloadProduction(anyString(), anyInt(), any(), any());
         verify(armRpoApi).removeProduction(anyString(), anyInt(), any());
+
+        verify(userIdentity).getUserAccount();
+
+        verify(fileOperationService).saveFileToTempWorkspace(any(InputStream.class), anyString(), any(), anyBoolean());
+
+        verifyNoMoreInteractions(armRpoApi, userIdentity, fileOperationService);
+    }
+
+    @Test
+    void pollArmRpo_shouldPollSuccessfullyWithCreateExportBasedOnSearchResultsTableForManualRun() throws IOException {
+        // given
+        armRpoExecutionDetailEntity.setArmRpoStatus(ARM_RPO_HELPER_MOCKS.getInProgressRpoStatus());
+        armRpoExecutionDetailEntity.setArmRpoState(ARM_RPO_HELPER_MOCKS.getCreateExportBasedOnSearchResultsTableRpoState());
+
+        when(armApiService.getArmBearerToken()).thenReturn("bearerToken");
+        doNothing().when(armRpoApi).getExtendedSearchesByMatter(anyString(), anyInt(), any());
+        when(armRpoApi.getMasterIndexFieldByRecordClassSchema(anyString(), anyInt(), any(), any()))
+            .thenReturn(createHeaderColumns());
+        when(armRpoApi.createExportBasedOnSearchResultsTable(anyString(), anyInt(), any(), any())).thenReturn(true);
+        when(armRpoApi.getProductionOutputFiles(anyString(), anyInt(), any())).thenReturn(List.of("fileId"));
+        InputStream resource = IOUtils.toInputStream("dummy input stream", "UTF-8");
+        when(armRpoApi.downloadProduction(anyString(), anyInt(), anyString(), any())).thenReturn(resource);
+        doNothing().when(armRpoApi).removeProduction(anyString(), anyInt(), any());
+
+        String fileName = "fileId.csv";
+        Path filePath = Path.of(tempDirectory.getAbsolutePath()).resolve(fileName);
+        when(fileOperationService.saveFileToTempWorkspace(any(InputStream.class), anyString(), any(), anyBoolean())).thenReturn(filePath);
+
+        // when
+        armRpoPollService.pollArmRpo(true);
+
+        // then
+        verify(armRpoApi).getExtendedSearchesByMatter(anyString(), anyInt(), any());
+        verify(armRpoApi).getMasterIndexFieldByRecordClassSchema(anyString(), anyInt(), any(), any());
+        verify(armRpoApi).createExportBasedOnSearchResultsTable(anyString(), anyInt(), any(), any());
+        verify(armRpoApi).getExtendedProductionsByMatter(anyString(), anyInt(), any());
+        verify(armRpoApi).getProductionOutputFiles(anyString(), anyInt(), any());
+        verify(armRpoApi).downloadProduction(anyString(), anyInt(), any(), any());
+        verify(armRpoApi).removeProduction(anyString(), anyInt(), any());
+
+        verify(userIdentity).getUserAccount();
+
+        verify(fileOperationService).saveFileToTempWorkspace(any(InputStream.class), anyString(), any(), anyBoolean());
+
+        verifyNoMoreInteractions(armRpoApi, userIdentity, fileOperationService);
+    }
+
+    @Test
+    void pollArmRpo_shouldPollSuccessfullyWithDownloadProductionFailedOnPreviousAttemptForManualRun() throws IOException {
+        // given
+        armRpoExecutionDetailEntity.setArmRpoStatus(ARM_RPO_HELPER_MOCKS.getFailedRpoStatus());
+        armRpoExecutionDetailEntity.setArmRpoState(ARM_RPO_HELPER_MOCKS.getDownloadProductionRpoState());
+
+        when(armApiService.getArmBearerToken()).thenReturn("bearerToken");
+        doNothing().when(armRpoApi).getExtendedSearchesByMatter(anyString(), anyInt(), any());
+        when(armRpoApi.getMasterIndexFieldByRecordClassSchema(anyString(), anyInt(), any(), any()))
+            .thenReturn(createHeaderColumns());
+        when(armRpoApi.createExportBasedOnSearchResultsTable(anyString(), anyInt(), any(), any())).thenReturn(true);
+        when(armRpoApi.getProductionOutputFiles(anyString(), anyInt(), any())).thenReturn(List.of("fileId"));
+        InputStream resource = IOUtils.toInputStream("dummy input stream", "UTF-8");
+        when(armRpoApi.downloadProduction(anyString(), anyInt(), anyString(), any())).thenReturn(resource);
+        doNothing().when(armRpoApi).removeProduction(anyString(), anyInt(), any());
+
+        String fileName = "fileId.csv";
+        Path filePath = Path.of(tempDirectory.getAbsolutePath()).resolve(fileName);
+        when(fileOperationService.saveFileToTempWorkspace(any(InputStream.class), anyString(), any(), anyBoolean())).thenReturn(filePath);
+
+        // when
+        armRpoPollService.pollArmRpo(true);
+
+        // then
+        verify(armRpoApi).getExtendedSearchesByMatter(anyString(), anyInt(), any());
+        verify(armRpoApi).getMasterIndexFieldByRecordClassSchema(anyString(), anyInt(), any(), any());
+        verify(armRpoApi).createExportBasedOnSearchResultsTable(anyString(), anyInt(), any(), any());
+        verify(armRpoApi).getExtendedProductionsByMatter(anyString(), anyInt(), any());
+        verify(armRpoApi).getProductionOutputFiles(anyString(), anyInt(), any());
+        verify(armRpoApi).downloadProduction(anyString(), anyInt(), any(), any());
+        verify(armRpoApi).removeProduction(anyString(), anyInt(), any());
+
+        verify(userIdentity).getUserAccount();
+
+        verify(fileOperationService).saveFileToTempWorkspace(any(InputStream.class), anyString(), any(), anyBoolean());
+
+        verifyNoMoreInteractions(armRpoApi, userIdentity, fileOperationService);
+    }
+
+    @Test
+    void pollArmRpo_shouldPollNotFindLatestExecutionDetailOnStepDownloadProductionFailed() throws IOException {
+        // given
+        armRpoExecutionDetailEntity.setArmRpoStatus(ARM_RPO_HELPER_MOCKS.getFailedRpoStatus());
+        armRpoExecutionDetailEntity.setArmRpoState(ARM_RPO_HELPER_MOCKS.getDownloadProductionRpoState());
+
+        // when
+        armRpoPollService.pollArmRpo(false);
+
+        // then
+        verify(armRpoService).getLatestArmRpoExecutionDetailEntity();
+        verifyNoMoreInteractions(armRpoApi, armApiService, userIdentity, fileOperationService);
+    }
+
+    @Test
+    void pollArmRpo_shouldPollNotFindLatestExecutionDetailForManualRunOnStepDownloadProductionInProgress() throws IOException {
+        // given
+        armRpoExecutionDetailEntity.setArmRpoStatus(ARM_RPO_HELPER_MOCKS.getInProgressRpoStatus());
+        armRpoExecutionDetailEntity.setArmRpoState(ARM_RPO_HELPER_MOCKS.getDownloadProductionRpoState());
+
+        // when
+        armRpoPollService.pollArmRpo(true);
+
+        // then
+        verify(armRpoService).getLatestArmRpoExecutionDetailEntity();
+        verifyNoMoreInteractions(armRpoApi, armApiService, userIdentity, fileOperationService);
     }
 
     @Test
