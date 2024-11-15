@@ -109,6 +109,20 @@ services:
     networks:
       - darts-network
 
+  darts-portal:
+    image: sdshmctspublic.azurecr.io/darts/portal:latest
+    depends_on:
+      - darts-redis
+    ports:
+      - "3000:3000"
+    environment:
+      ALLOW_CONFIG_MUTATIONS: true
+      DARTS_PORTAL_URL: http://localhost:3000
+      DARTS_API_URL: http://localhost:4550
+      DARTS_SESSION_REDIS_CONNECTION_STRING: redis://darts-redis:6379
+    networks:
+      - darts-network
+
   darts-blob-storage:
     container_name: darts-blob-storage
     image: mcr.microsoft.com/azure-storage/azurite
