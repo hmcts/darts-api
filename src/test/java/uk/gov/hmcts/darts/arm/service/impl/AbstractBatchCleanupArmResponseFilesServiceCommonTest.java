@@ -168,7 +168,8 @@ class AbstractBatchCleanupArmResponseFilesServiceCommonTest {
         inputUploadAndAssociatedFilenames.setInputUploadFilename(inputUploadBlobFilename);
         inputUploadAndAssociatedFilenames.addAssociatedFile(eodEntityForAssociatedFiles1.getId(), createRecordFilename);
         inputUploadAndAssociatedFilenames.addAssociatedFile(eodEntityForAssociatedFiles1.getId(), uploadFileFilename);
-        when(armResponseFileHelper.getCorrespondingArmFilesForManifestFilename(anyString())).thenReturn(List.of(inputUploadAndAssociatedFilenames));
+        when(armResponseFileHelper.getCorrespondingArmFilesForManifestFilename(anyString(), anyString()))
+            .thenReturn(List.of(inputUploadAndAssociatedFilenames));
 
 
         when(externalObjectDirectoryRepository.findById(eodEntityForAssociatedFiles1.getId())).thenReturn(Optional.of(eodEntityForAssociatedFiles1));
@@ -216,7 +217,8 @@ class AbstractBatchCleanupArmResponseFilesServiceCommonTest {
 
         InputUploadAndAssociatedFilenames inputUploadAndAssociatedFilenames = new InputUploadAndAssociatedFilenames();
         inputUploadAndAssociatedFilenames.setInputUploadFilename(inputUploadBlobFilename);
-        when(armResponseFileHelper.getCorrespondingArmFilesForManifestFilename(anyString())).thenReturn(List.of(inputUploadAndAssociatedFilenames));
+        when(armResponseFileHelper.getCorrespondingArmFilesForManifestFilename(anyString(), anyString()))
+            .thenReturn(List.of(inputUploadAndAssociatedFilenames));
 
 
         when(armDataManagementApi.deleteBlobData(any())).thenReturn(true);
