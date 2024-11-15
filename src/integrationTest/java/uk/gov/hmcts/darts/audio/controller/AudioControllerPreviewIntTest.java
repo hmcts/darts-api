@@ -111,6 +111,17 @@ class AudioControllerPreviewIntTest extends IntegrationBase {
     }
 
     @Test
+    void previewForHiddenMediaShouldReturn404() throws Exception {
+        mediaEntity.setHidden(true);
+        dartsPersistence.save(mediaEntity);
+
+        MockHttpServletRequestBuilder requestBuilder = get(URI.create(
+            String.format("/audio/preview/%d", mediaEntity.getId()))).header("Range", "bytes=0-");
+
+        mockMvc.perform(requestBuilder).andExpect(status().isNotFound());
+    }
+
+    @Test
     void previewWithRangeShouldReturnSuccess() throws Exception {
 
         MockHttpServletRequestBuilder requestBuilder = get(URI.create(
