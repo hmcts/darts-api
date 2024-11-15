@@ -16,9 +16,11 @@ import uk.gov.hmcts.darts.datamanagement.exception.FileNotDownloadedException;
 import uk.gov.hmcts.darts.transcriptions.model.DownloadTranscriptResponse;
 
 import java.io.IOException;
+import java.util.Set;
 
 import static java.util.Comparator.comparing;
 import static uk.gov.hmcts.darts.audit.api.AuditActivity.DOWNLOAD_TRANSCRIPTION;
+import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.SUPER_ADMIN;
 import static uk.gov.hmcts.darts.transcriptions.exception.TranscriptionApiError.TRANSCRIPTION_NOT_FOUND;
 
 @RequiredArgsConstructor
@@ -31,10 +33,16 @@ public class TranscriptionDownloader {
     private final AuditApi auditApi;
     private final UserIdentity userIdentity;
 
-
     public DownloadTranscriptResponse downloadTranscript(Integer transcriptionId) {
         var userAccountEntity = getUserAccount();
-        var transcriptionEntity = transcriptionRepository.findById(transcriptionId).orElseThrow(() -> new DartsApiException(TRANSCRIPTION_NOT_FOUND));
+        var userIsSuperAdmin = this.userIdentity.userHasGlobalAccess(Set.of(SUPER_ADMIN));
+        var transcriptionEntity = transcriptionRepository.findById(transcriptionId)
+            // Only SUPER_ADMIN users are allowed to download hidden documents
+            .filter(transcription -> userIsSuperAdmin
+                || transcription.getTranscriptionDocumentEntities().isEmpty()
+                || transcription.getTranscriptionDocumentEntities().stream().noneMatch(TranscriptionDocumentEntity::isHidden)
+            )
+            .orElseThrow(() -> new DartsApiException(TRANSCRIPTION_NOT_FOUND));
 
         var latestTranscriptionDocument = transcriptionEntity.getTranscriptionDocumentEntities()
             .stream()
