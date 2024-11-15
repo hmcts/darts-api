@@ -715,6 +715,7 @@ components:
         - type: object
           required:
             - storage_guid
+            - checksum
           properties:
             storage_guid:
               type: string
