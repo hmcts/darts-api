@@ -119,6 +119,19 @@ components:
           $ref: '#/components/schemas/IsActive'
         batch_size:
           type: integer
+
+        rpo_csv_start_hour:
+          type: integer
+        rpo_csv_end_hour:
+          type: integer
+        arm_replay_start_ts:
+          type: string
+          format: date-time
+        arm_replay_end_ts:
+          type: string
+          format: date-time
+
+
     AutomatedTaskSummary:
       type: object
       properties:
@@ -187,7 +200,8 @@ components:
         - "AUTOMATED_TASK_100"
         - "AUTOMATED_TASK_101"
         - "AUTOMATED_TASK_102"
-      x-enum-varnames: [ AUTOMATED_TASK_NOT_FOUND, AUTOMATED_TASK_ALREADY_RUNNING, AUTOMATED_TASK_NOT_CONFIGURED ]
+        - "AUTOMATED_TASK_103"
+      x-enum-varnames: [ AUTOMATED_TASK_NOT_FOUND, AUTOMATED_TASK_ALREADY_RUNNING, AUTOMATED_TASK_NOT_CONFIGURED, INCORRECT_AUTOMATED_TASK_TYPE ]
 
     AutomatedTaskTitleErrors:
       type: string
@@ -195,9 +209,8 @@ components:
         - "The provided task_id does not exist"
         - "The automated task is already running"
         - "The automated task has not been initialized correctly on application start up and can not be run manually."
-      x-enum-varnames: [ AUTOMATED_TASK_NOT_FOUND, AUTOMATED_TASK_ALREADY_RUNNING, AUTOMATED_TASK_NOT_CONFIGURED ]
-
-
+        - "The automated task type is incorrect"
+      x-enum-varnames: [ AUTOMATED_TASK_NOT_FOUND, AUTOMATED_TASK_ALREADY_RUNNING, AUTOMATED_TASK_NOT_CONFIGURED, INCORRECT_AUTOMATED_TASK_TYPE ]
   parameters:
     TaskId:
       in: path

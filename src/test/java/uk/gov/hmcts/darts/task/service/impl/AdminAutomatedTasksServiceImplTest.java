@@ -8,9 +8,11 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import uk.gov.hmcts.darts.audit.api.AuditActivity;
 import uk.gov.hmcts.darts.audit.api.AuditApi;
+import uk.gov.hmcts.darts.common.entity.ArmAutomatedTaskEntity;
 import uk.gov.hmcts.darts.common.entity.AutomatedTaskEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
+import uk.gov.hmcts.darts.common.repository.ArmAutomatedTaskRepository;
 import uk.gov.hmcts.darts.common.repository.AutomatedTaskRepository;
 import uk.gov.hmcts.darts.task.exception.AutomatedTaskApiError;
 import uk.gov.hmcts.darts.task.runner.AutomatedTask;
@@ -43,6 +45,8 @@ class AdminAutomatedTasksServiceImplTest {
 
     @Mock
     private AutomatedTaskRepository automatedTaskRepository;
+    @Mock
+    private ArmAutomatedTaskRepository armAutomatedTaskRepository;
     @Mock
     private AutomatedTasksMapper mapper;
     @Mock
@@ -114,7 +118,102 @@ class AdminAutomatedTasksServiceImplTest {
 
         assertTrue(automatedTaskEntity.getTaskEnabled());
         assertEquals(1, automatedTaskEntity.getBatchSize());
+        verifyNoInteractions(auditApi, armAutomatedTaskRepository);
+    }
+
+    @Test
+    void updateAutomatedTaskWithAllArmValues() {
+        ArmAutomatedTaskEntity armAutomatedTaskEntity = mock(ArmAutomatedTaskEntity.class);
+        AutomatedTaskEntity automatedTaskEntity = anAutomatedTaskEntityWithName("some-task-name", null);
+        automatedTaskEntity.setBatchSize(1);
+        automatedTaskEntity.setArmAutomatedTaskEntity(armAutomatedTaskEntity);
+        when(automatedTaskRepository.findById(1)).thenReturn(Optional.of(automatedTaskEntity));
+
+        AutomatedTaskPatch automatedTaskPatch = new AutomatedTaskPatch();
+        automatedTaskPatch.setIsActive(false);
+        automatedTaskPatch.setBatchSize(100);
+
+        OffsetDateTime armReplyStartTs = OffsetDateTime.now();
+        OffsetDateTime armReplyEndTs = OffsetDateTime.now().plusMinutes(4);
+        automatedTaskPatch.setArmReplayStartTs(armReplyStartTs);
+        automatedTaskPatch.setArmReplayEndTs(armReplyEndTs);
+        automatedTaskPatch.setRpoCsvStartHour(1);
+        automatedTaskPatch.setRpoCsvEndHour(3);
+
+        when(automatedTaskRepository.save(automatedTaskEntity)).thenReturn(automatedTaskEntity);
+
+        DetailedAutomatedTask expectedReturnTask = new DetailedAutomatedTask();
+        when(mapper.mapEntityToDetailedAutomatedTask(automatedTaskEntity)).thenReturn(expectedReturnTask);
+
+        DetailedAutomatedTask task = adminAutomatedTaskService.updateAutomatedTask(1, automatedTaskPatch);
+        assertEquals(expectedReturnTask, task);
+
+        assertFalse(automatedTaskEntity.getTaskEnabled());
+        assertEquals(100, automatedTaskEntity.getBatchSize());
+        verify(armAutomatedTaskEntity).setArmReplayStartTs(armReplyStartTs);
+        verify(armAutomatedTaskEntity).setArmReplayEndTs(armReplyEndTs);
+        verify(armAutomatedTaskEntity).setRpoCsvStartHour(1);
+        verify(armAutomatedTaskEntity).setRpoCsvEndHour(3);
+        verifyNoMoreInteractions(armAutomatedTaskEntity);
+
+
+        verify(auditApi).record(AuditActivity.ENABLE_DISABLE_JOB, "some-task-name disabled");
+        verify(armAutomatedTaskRepository).save(armAutomatedTaskEntity);
+        verify(automatedTaskRepository).save(automatedTaskEntity);
+        verifyNoMoreInteractions(auditApi);
+    }
+
+    @Test
+    void updateAutomatedTaskWithSomeArmValues() {
+        ArmAutomatedTaskEntity armAutomatedTaskEntity = mock(ArmAutomatedTaskEntity.class);
+        AutomatedTaskEntity automatedTaskEntity = anAutomatedTaskEntityWithName("some-task-name", null);
+        automatedTaskEntity.setBatchSize(1);
+        automatedTaskEntity.setArmAutomatedTaskEntity(armAutomatedTaskEntity);
+        when(automatedTaskRepository.findById(1)).thenReturn(Optional.of(automatedTaskEntity));
+
+        AutomatedTaskPatch automatedTaskPatch = new AutomatedTaskPatch();
+        OffsetDateTime armReplyStartTs = OffsetDateTime.now();
+        automatedTaskPatch.setArmReplayStartTs(armReplyStartTs);
+        automatedTaskPatch.setRpoCsvStartHour(1);
+
+        when(automatedTaskRepository.save(automatedTaskEntity)).thenReturn(automatedTaskEntity);
+
+        DetailedAutomatedTask expectedReturnTask = new DetailedAutomatedTask();
+        when(mapper.mapEntityToDetailedAutomatedTask(automatedTaskEntity)).thenReturn(expectedReturnTask);
+
+        DetailedAutomatedTask task = adminAutomatedTaskService.updateAutomatedTask(1, automatedTaskPatch);
+
+        assertTrue(automatedTaskEntity.getTaskEnabled());
+        assertEquals(1, automatedTaskEntity.getBatchSize());
+        verify(armAutomatedTaskEntity).setArmReplayStartTs(armReplyStartTs);
+        verify(armAutomatedTaskEntity).setRpoCsvStartHour(1);
+        verifyNoMoreInteractions(armAutomatedTaskEntity);
+
+        assertEquals(expectedReturnTask, task);
+        verify(armAutomatedTaskRepository).save(armAutomatedTaskEntity);
+        verify(automatedTaskRepository).save(automatedTaskEntity);
         verifyNoInteractions(auditApi);
+    }
+
+    @Test
+    void updateArmAutomatedTaskButTaskIsNotArm() {
+        AutomatedTaskEntity automatedTaskEntity = anAutomatedTaskEntityWithName("some-task-name", null);
+        automatedTaskEntity.setBatchSize(1);
+        when(automatedTaskRepository.findById(1)).thenReturn(Optional.of(automatedTaskEntity));
+
+        AutomatedTaskPatch automatedTaskPatch = new AutomatedTaskPatch();
+        OffsetDateTime armReplyStartTs = OffsetDateTime.now();
+        automatedTaskPatch.setArmReplayStartTs(armReplyStartTs);
+        automatedTaskPatch.setRpoCsvStartHour(1);
+
+        DartsApiException exception = assertThrows(DartsApiException.class, () -> adminAutomatedTaskService.updateAutomatedTask(1, automatedTaskPatch));
+        assertEquals(AutomatedTaskApiError.INCORRECT_AUTOMATED_TASK_TYPE, exception.getError());
+        assertEquals("The automated task type is incorrect. Task some-task-name is not an arm automated task as such can not update arm related fields",
+                     exception.getMessage());
+
+        verifyNoInteractions(armAutomatedTaskRepository, auditApi);
+        verify(automatedTaskRepository).findById(1);
+        verifyNoMoreInteractions(automatedTaskRepository);
     }
 
 
