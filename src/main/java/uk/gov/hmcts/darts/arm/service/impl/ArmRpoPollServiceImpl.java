@@ -46,17 +46,9 @@ public class ArmRpoPollServiceImpl implements ArmRpoPollService {
     public void pollArmRpo(boolean isManualRun) {
         tempProductionFiles = new ArrayList<>();
         try {
-            var armRpoExecutionDetailEntity = getArmRpoExecutionDetailEntity(isManualRun);
-            if (isNull(armRpoExecutionDetailEntity)) {
-                log.warn("Unable to find armRpoExecutionDetailEntity to poll");
-                return;
-            }
-            var bearerToken = armApiService.getArmBearerToken();
-            if (isNull(bearerToken)) {
-                log.warn("Unable to get bearer token to poll ARM RPO");
-                return;
-            }
-
+            var armRpoExecutionDetailEntity = armRpoService.getLatestArmRpoExecutionDetailEntity(ArmRpoHelper.saveBackgroundSearchRpoState(),
+                                                                                                 ArmRpoHelper.completedRpoStatus());
+            var bearerToken = "";
             var executionId = armRpoExecutionDetailEntity.getId();
             var userAccount = userIdentity.getUserAccount();
 
