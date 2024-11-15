@@ -40,14 +40,19 @@ import uk.gov.hmcts.darts.hearings.service.HearingsService;
 import uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum;
 import uk.gov.hmcts.darts.transcriptions.enums.TranscriptionTypeEnum;
 import uk.gov.hmcts.darts.transcriptions.exception.TranscriptionApiError;
+import uk.gov.hmcts.darts.transcriptions.mapper.TranscriptionResponseMapper;
+import uk.gov.hmcts.darts.transcriptions.model.GetTranscriptionByIdResponse;
 import uk.gov.hmcts.darts.transcriptions.model.TranscriptionRequestDetails;
 
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
@@ -59,8 +64,10 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.darts.audit.api.AuditActivity.REQUEST_TRANSCRIPTION;
+import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.SUPER_ADMIN;
 import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum.AWAITING_AUTHORISATION;
 import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum.REQUESTED;
+import static uk.gov.hmcts.darts.transcriptions.exception.TranscriptionApiError.TRANSCRIPTION_NOT_FOUND;
 
 @Slf4j
 @ExtendWith(MockitoExtension.class)
@@ -120,6 +127,9 @@ class TranscriptionServiceImplTest {
 
     @Mock
     private DuplicateRequestDetector duplicateRequestDetector;
+
+    @Mock
+    private TranscriptionResponseMapper transcriptionResponseMapper;
 
     @Captor
     private ArgumentCaptor<TranscriptionEntity> transcriptionEntityArgumentCaptor;
@@ -611,6 +621,51 @@ class TranscriptionServiceImplTest {
         DartsApiException dartsApiException = assertThrows(
             DartsApiException.class, () -> transcriptionService.adminGetTranscriptionDocumentsMarkedForDeletion());
         assertThat(dartsApiException.getError()).isEqualTo(CommonApiError.FEATURE_FLAG_NOT_ENABLED);
+    }
+
+    @Test
+    void getTranscriptionMapsCurrentTranscriptionWithDocument() {
+        var transcriptionId = 1;
+        var transcription = new TranscriptionEntity();
+        transcription.setIsCurrent(true);
+        var transcriptionDocument = new TranscriptionDocumentEntity();
+        transcription.setTranscriptionDocumentEntities(List.of(transcriptionDocument));
+        when(mockTranscriptionRepository.findById(transcriptionId)).thenReturn(Optional.of(transcription));
+        when(transcriptionResponseMapper.mapToTranscriptionResponse(any(TranscriptionEntity.class))).thenReturn(new GetTranscriptionByIdResponse());
+
+        transcriptionService.getTranscription(transcriptionId);
+        verify(transcriptionResponseMapper).mapToTranscriptionResponse(transcription);
+    }
+
+    @Test
+    void getTranscriptionMapsCurrentTranscriptionWithHiddenDocumentIfUserIsSuperAdmin() {
+        when(mockUserIdentity.userHasGlobalAccess(Set.of(SUPER_ADMIN))).thenReturn(true);
+        var transcriptionId = 1;
+        var transcription = new TranscriptionEntity();
+        transcription.setIsCurrent(true);
+        var transcriptionDocument = new TranscriptionDocumentEntity();
+        transcriptionDocument.setHidden(true);
+        transcription.setTranscriptionDocumentEntities(List.of(transcriptionDocument));
+        when(mockTranscriptionRepository.findById(transcriptionId)).thenReturn(Optional.of(transcription));
+        when(transcriptionResponseMapper.mapToTranscriptionResponse(any(TranscriptionEntity.class))).thenReturn(new GetTranscriptionByIdResponse());
+
+        transcriptionService.getTranscription(transcriptionId);
+        verify(transcriptionResponseMapper).mapToTranscriptionResponse(transcription);
+    }
+
+    @Test
+    void getTranscriptionThrowsNotFoundExceptionIfTranscriptionDocumentHiddenAndUserIsNotSuperAdmin() {
+        var transcriptionId = 1;
+        var transcription = new TranscriptionEntity();
+        transcription.setIsCurrent(true);
+        var transcriptionDocument = new TranscriptionDocumentEntity();
+        transcriptionDocument.setHidden(true);
+        transcription.setTranscriptionDocumentEntities(List.of(transcriptionDocument));
+        when(mockTranscriptionRepository.findById(transcriptionId)).thenReturn(Optional.of(transcription));
+
+        assertThatThrownBy(() -> transcriptionService.getTranscription(transcriptionId))
+            .isExactlyInstanceOf(DartsApiException.class)
+            .hasFieldOrPropertyWithValue("error", TRANSCRIPTION_NOT_FOUND);
     }
 
     private TranscriptionRequestDetails createTranscriptionRequestDetails(Integer hearingId,

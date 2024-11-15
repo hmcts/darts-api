@@ -26,6 +26,7 @@ import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.Random;
+import java.util.Set;
 
 import static java.time.OffsetDateTime.now;
 import static java.util.Collections.emptyList;
@@ -42,6 +43,7 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum.INBOUND;
 import static uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum.UNSTRUCTURED;
+import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.SUPER_ADMIN;
 import static uk.gov.hmcts.darts.transcriptions.exception.TranscriptionApiError.TRANSCRIPTION_NOT_FOUND;
 
 @ExtendWith(MockitoExtension.class)
@@ -166,7 +168,44 @@ class TranscriptionDownloaderTest {
 
         verify(fileBasedDownloadResponseMetaData).getResource();
         verifyNoMoreInteractions(dataManagementFacade, fileBasedDownloadResponseMetaData);
+    }
 
+    @Test
+    void throwsNotFoundExceptionIfTranscriptionDocumentHiddenAndUserIsNotSuperAdmin() {
+        var transcriptionDocuments = someTranscriptionDocumentsUploadedAtLeast2DaysAgo(1);
+        transcriptionDocuments.get(0).setHidden(true);
+
+        var transcription = someTranscriptionWith(transcriptionDocuments);
+        when(transcriptionRepository.findById(transcription.getId())).thenReturn(Optional.of(transcription));
+
+        assertThatThrownBy(() -> transcriptionDownloader.downloadTranscript(transcription.getId()))
+            .isExactlyInstanceOf(DartsApiException.class)
+            .hasFieldOrPropertyWithValue("error", TRANSCRIPTION_NOT_FOUND);
+
+        verifyNoInteractions(dataManagementFacade);
+    }
+
+    @Test
+    void downloadsDocumentIfTranscriptionDocumentHiddenAndUserIsSuperAdmin() throws FileNotDownloadedException, IOException {
+        when(userIdentity.userHasGlobalAccess(Set.of(SUPER_ADMIN))).thenReturn(true);
+
+        var transcriptionDocuments = someTranscriptionDocumentsUploadedAtLeast2DaysAgo(1);
+        var transcriptionDocument = transcriptionDocuments.get(0);
+        transcriptionDocument.setHidden(true);
+
+        var transcription = someTranscriptionWith(transcriptionDocuments);
+        when(transcriptionRepository.findById(transcription.getId())).thenReturn(Optional.of(transcription));
+
+        when(transcriptionRepository.findById(transcription.getId())).thenReturn(Optional.of(transcription));
+        when(dataManagementFacade.retrieveFileFromStorage(any(TranscriptionDocumentEntity.class))).thenReturn(fileBasedDownloadResponseMetaData);
+        Resource resource = Mockito.mock(Resource.class);
+        when(fileBasedDownloadResponseMetaData.getResource()).thenReturn(resource);
+
+        var downloadTranscriptResponse = transcriptionDownloader.downloadTranscript(transcription.getId());
+
+        // Then
+        assertThat(downloadTranscriptResponse.getTranscriptionDocumentId()).isEqualTo(transcriptionDocument.getId());
+        verifyNoMoreInteractions(dataManagementFacade, fileBasedDownloadResponseMetaData);
     }
 
     private ExternalLocationTypeEntity externalLocationTypeFor(ExternalLocationTypeEnum externalLocationTypeEnum) {
