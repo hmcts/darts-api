@@ -38,7 +38,7 @@ import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.STORED;
 import static uk.gov.hmcts.darts.test.common.TestUtils.getContentsFromFile;
 
 @SuppressWarnings({"PMD.NcssCount"})
-class BatchCleanupArmResponseFilesServiceIntTest extends IntegrationBase {
+abstract class AbstractBatchCleanupArmResponseFilesServiceIntTest extends IntegrationBase {
 
     private static final LocalDateTime HEARING_DATE = LocalDateTime.of(2023, 9, 26, 10, 0, 0);
 
@@ -46,7 +46,7 @@ class BatchCleanupArmResponseFilesServiceIntTest extends IntegrationBase {
     private ArmDataManagementApi armDataManagementApi;
     @MockBean
     private UserIdentity userIdentity;
-    @MockBean
+    @Autowired
     private ArmDataManagementConfiguration armDataManagementConfiguration;
     @MockBean
     private ArmBatchCleanupConfiguration batchCleanupConfiguration;
@@ -54,20 +54,23 @@ class BatchCleanupArmResponseFilesServiceIntTest extends IntegrationBase {
     private CurrentTimeHelper currentTimeHelper;
 
     @Autowired
-    ExternalObjectDirectoryRepository externalObjectDirectoryRepository;
-
-    @Autowired
-    private BatchCleanupArmResponseFilesService cleanupArmResponseFilesService;
+    private ExternalObjectDirectoryRepository externalObjectDirectoryRepository;
 
     private MediaEntity savedMedia;
+
+    private final String manifestFilePrefix;
+
+    protected AbstractBatchCleanupArmResponseFilesServiceIntTest(String manifestFilePrefix) {
+        super();
+        this.manifestFilePrefix = manifestFilePrefix + "_";
+    }
 
     @BeforeEach
     void setupData() {
         savedMedia = PersistableFactory.getMediaTestData()
-        .someMinimal();
+            .someMinimal();
         dartsPersistence.save(savedMedia);
 
-        when(armDataManagementConfiguration.getManifestFilePrefix()).thenReturn("DARTS_");
         when(batchCleanupConfiguration.getManifestFileSuffix()).thenReturn(".a360");
         when(batchCleanupConfiguration.getBufferMinutes()).thenReturn(15);
     }
@@ -80,7 +83,6 @@ class BatchCleanupArmResponseFilesServiceIntTest extends IntegrationBase {
                           - response file2    - success delete
      */
     void successProcess1InputUploadWith4AssociatedFilesOver2uuids() throws IOException {
-        String manifestFilePrefix = "DARTS_";
         String inputUploadUuid = "InputUploadUUID";
 
         OffsetDateTime lastModifiedDateTime = OffsetDateTime.of(2023, 10, 27, 22, 0, 0, 0, ZoneOffset.UTC);
@@ -94,7 +96,7 @@ class BatchCleanupArmResponseFilesServiceIntTest extends IntegrationBase {
 
         String inputUploadHash = "6a374f19a9ce7dc9cc480ea8d4eca0fb";
         String inputUploadFilename = manifestFilePrefix + inputUploadUuid + "_" + inputUploadHash + "_1_iu.rsp";
-        when(armDataManagementApi.listResponseBlobs("DARTS_InputUploadUUID")).thenReturn(List.of(inputUploadFilename));
+        when(armDataManagementApi.listResponseBlobs(manifestFilePrefix + "InputUploadUUID")).thenReturn(List.of(inputUploadFilename));
 
         String createRecordFilename1 = inputUploadHash + "_00000001-e6ad-77c5-8d1e-13259aae1895_1_cr.rsp";
         String uploadFileFilename1 = inputUploadHash + "_00000002-952a-79b6-8362-13259aae1895_1_uf.rsp";
@@ -129,7 +131,7 @@ class BatchCleanupArmResponseFilesServiceIntTest extends IntegrationBase {
         when(userIdentity.getUserAccount()).thenReturn(testUser);
 
 
-        cleanupArmResponseFilesService.cleanupResponseFiles(100);
+        getCleanupArmResponseFilesService().cleanupResponseFiles(100);
 
         ExternalObjectDirectoryEntity foundMediaEod1 = externalObjectDirectoryRepository.findById(eodEntry1.getId())
             .orElseThrow();
@@ -154,6 +156,8 @@ class BatchCleanupArmResponseFilesServiceIntTest extends IntegrationBase {
         verifyNoMoreInteractions(armDataManagementApi);
     }
 
+    protected abstract BatchCleanupArmResponseFilesService getCleanupArmResponseFilesService();
+
     @Test
     /*
         IU  - childEod1   - createRecord file    - success delete
@@ -164,8 +168,6 @@ class BatchCleanupArmResponseFilesServiceIntTest extends IntegrationBase {
                           - uploadFile           - success delete
      */
     void successProcess1InputUploadWith6AssociatedFilesOver3uuids1ResponseFail() throws IOException {
-
-        String manifestFilePrefix = "DARTS_";
         String inputUploadUuid = "InputUploadUUID";
         String manifestFilename = manifestFilePrefix + inputUploadUuid + ".a360";
 
@@ -179,7 +181,7 @@ class BatchCleanupArmResponseFilesServiceIntTest extends IntegrationBase {
 
         String inputUploadHash = "6a374f19a9ce7dc9cc480ea8d4eca0fb";
         String inputUploadFilename = manifestFilePrefix + inputUploadUuid + "_" + inputUploadHash + "_1_iu.rsp";
-        when(armDataManagementApi.listResponseBlobs("DARTS_InputUploadUUID")).thenReturn(List.of(inputUploadFilename));
+        when(armDataManagementApi.listResponseBlobs(manifestFilePrefix + "InputUploadUUID")).thenReturn(List.of(inputUploadFilename));
 
         String createRecordFilename1 = inputUploadHash + "_00000001-e6ad-77c5-8d1e-13259aae1895_1_cr.rsp";
         String uploadFileFilename1 = inputUploadHash + "_00000002-952a-79b6-8362-13259aae1895_1_uf.rsp";
@@ -224,7 +226,7 @@ class BatchCleanupArmResponseFilesServiceIntTest extends IntegrationBase {
         when(userIdentity.getUserAccount()).thenReturn(testUser);
 
 
-        cleanupArmResponseFilesService.cleanupResponseFiles(100);
+        getCleanupArmResponseFilesService().cleanupResponseFiles(100);
 
         ExternalObjectDirectoryEntity foundChildEod1 = dartsDatabase.getExternalObjectDirectoryRepository().findById(eodEntry1.getId())
             .orElseThrow();
@@ -264,7 +266,7 @@ class BatchCleanupArmResponseFilesServiceIntTest extends IntegrationBase {
         UserAccountEntity testUser = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
         when(userIdentity.getUserAccount()).thenReturn(testUser);
 
-        cleanupArmResponseFilesService.cleanupResponseFiles(100);
+        getCleanupArmResponseFilesService().cleanupResponseFiles(100);
 
         verifyNoMoreInteractions(armDataManagementApi);
     }
@@ -286,8 +288,7 @@ class BatchCleanupArmResponseFilesServiceIntTest extends IntegrationBase {
         UserAccountEntity testUser = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
         when(userIdentity.getUserAccount()).thenReturn(testUser);
 
-
-        cleanupArmResponseFilesService.cleanupResponseFiles(3);
+        getCleanupArmResponseFilesService().cleanupResponseFiles(3);
 
         List<ExternalObjectDirectoryEntity> allEodEntities = dartsDatabase.getExternalObjectDirectoryRepository().findAll();
         assertEquals(15, allEodEntities.size());
@@ -329,8 +330,6 @@ class BatchCleanupArmResponseFilesServiceIntTest extends IntegrationBase {
 
     @SuppressWarnings({"PMD.AvoidInstantiatingObjectsInLoops"})
     private void createTestData(int numOfManifestFiles, int eodPerManifest, OffsetDateTime lastModifiedDateTime) throws IOException {
-        String manifestFilePrefix = "DARTS_";
-
         for (int manifestFileCounter = 1; manifestFileCounter <= numOfManifestFiles; manifestFileCounter++) {
             String inputUploadUuid = "InputUploadUUID" + manifestFileCounter;
             String manifestFilename = manifestFilePrefix + inputUploadUuid + ".a360";
