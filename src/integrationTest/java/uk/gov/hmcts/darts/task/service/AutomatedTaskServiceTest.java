@@ -18,7 +18,6 @@ import org.springframework.scheduling.config.Task;
 import org.springframework.scheduling.config.TriggerTask;
 import org.springframework.scheduling.support.CronExpression;
 import uk.gov.hmcts.darts.arm.service.ArmRetentionEventDateProcessor;
-import uk.gov.hmcts.darts.arm.service.CleanupArmResponseFilesService;
 import uk.gov.hmcts.darts.arm.service.impl.ArmBatchProcessResponseFilesImpl;
 import uk.gov.hmcts.darts.arm.service.impl.UnstructuredToArmBatchProcessorImpl;
 import uk.gov.hmcts.darts.audio.deleter.impl.inbound.ExternalInboundDataStoreDeleter;
@@ -126,8 +125,6 @@ class AutomatedTaskServiceTest extends IntegrationBase {
     private InboundToUnstructuredProcessor inboundToUnstructuredProcessor;
     @Autowired
     private UnstructuredAudioDeleterProcessor unstructuredAudioDeleterProcessor;
-    @Autowired
-    private CleanupArmResponseFilesService cleanupArmResponseFilesService;
     @Autowired
     private CloseOldCasesProcessor closeOldCasesProcessor;
     @Autowired
