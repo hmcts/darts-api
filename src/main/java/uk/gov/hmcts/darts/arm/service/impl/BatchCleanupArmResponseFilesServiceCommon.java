@@ -53,7 +53,7 @@ public class BatchCleanupArmResponseFilesServiceCommon implements BatchCleanupAr
     @Override
     public void cleanupResponseFiles(int batchsize) {
         if (batchsize == 0) {
-            log.warn("{}: {}: Batch Cleanup ARM Response Files - Batch size is 0, so not running", manifestFilePrefix);
+            log.warn("{}: Batch Cleanup ARM Response Files - Batch size is 0, so not running", manifestFilePrefix);
             return;
         }
         List<ObjectRecordStatusEntity> statusToSearch = objectRecordStatusRepository.getReferencesByStatus(
@@ -135,8 +135,9 @@ public class BatchCleanupArmResponseFilesServiceCommon implements BatchCleanupAr
             boolean successfullyDeletedAssociatedFiles = true;
             Integer eodId = eodIdAndAssociatedFilenames.getEodId();
             List<String> associatedFiles = eodIdAndAssociatedFilenames.getAssociatedFiles();
-            log.info("{}: {}: There are {} response files for EOD {}, linked to inputUpload filename {}", manifestFilePrefix, associatedFiles.size(), eodId,
-                     inputUploadFilename);
+            log.info("{}: There are {} response files for EOD {}, linked to inputUpload filename {}",
+                     manifestFilePrefix, associatedFiles.size(), eodId, inputUploadFilename);
+
             for (String associatedFile : associatedFiles) {
                 try {
                     log.info("{}: About to delete file {} for EOD {}, linked to inputUpload filename {}", manifestFilePrefix, associatedFile, eodId,
@@ -147,7 +148,7 @@ public class BatchCleanupArmResponseFilesServiceCommon implements BatchCleanupAr
                         successfullyDeletedAssociatedFiles = false;
                     }
                 } catch (Exception e) {
-                    log.error("Failure to delete response file {} for EOD {} - {}", manifestFilePrefix, associatedFile, eodId, e.getMessage(), e);
+                    log.error("{}: Failure to delete response file {} for EOD {} - {}", manifestFilePrefix, associatedFile, eodId, e.getMessage(), e);
                     successfullyDeletedAssociatedFiles = false;
                 }
                 if (!successfullyDeletedAssociatedFiles) {
@@ -158,7 +159,7 @@ public class BatchCleanupArmResponseFilesServiceCommon implements BatchCleanupAr
             if (successfullyDeletedAssociatedFiles) {
                 Optional<ExternalObjectDirectoryEntity> eodEntityOpt = externalObjectDirectoryRepository.findById(eodId);
                 if (eodEntityOpt.isEmpty()) {
-                    log.error("EodEntity {} in response file for {} cannot be found.", manifestFilePrefix, eodId, inputUploadFilename);
+                    log.error("{}: EodEntity {} in response file for {} cannot be found.", manifestFilePrefix, eodId, inputUploadFilename);
                     break;
                 }
                 ExternalObjectDirectoryEntity eodEntityFromRelationId = eodEntityOpt.get();
