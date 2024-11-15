@@ -81,6 +81,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -92,6 +93,7 @@ import static uk.gov.hmcts.darts.audit.api.AuditActivity.IMPORT_TRANSCRIPTION;
 import static uk.gov.hmcts.darts.audit.api.AuditActivity.REQUEST_TRANSCRIPTION;
 import static uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum.INBOUND;
 import static uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum.UNSTRUCTURED;
+import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.SUPER_ADMIN;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.TRANSCRIBER;
 import static uk.gov.hmcts.darts.datamanagement.DataManagementConstants.MetaDataNames.TRANSCRIPTION_ID;
 import static uk.gov.hmcts.darts.transcriptions.auditing.TranscriptionUpdateAuditActivityProvider.auditActivitiesFor;
@@ -557,7 +559,14 @@ public class TranscriptionServiceImpl implements TranscriptionService {
     @Override
     @Transactional
     public GetTranscriptionByIdResponse getTranscription(Integer transcriptionId) {
-        TranscriptionEntity transcription = transcriptionRepository.findById(transcriptionId).filter(TranscriptionEntity::getIsCurrent)
+        var userIsSuperAdmin = this.userIdentity.userHasGlobalAccess(Set.of(SUPER_ADMIN));
+        TranscriptionEntity transcription = transcriptionRepository.findById(transcriptionId)
+            .filter(TranscriptionEntity::getIsCurrent)
+            // Only SUPER_ADMIN users are allowed to view transcription requests with hidden documents
+            .filter(transcriptionEntity -> userIsSuperAdmin
+                || transcriptionEntity.getTranscriptionDocumentEntities().isEmpty()
+                || transcriptionEntity.getTranscriptionDocumentEntities().stream().noneMatch(TranscriptionDocumentEntity::isHidden)
+            )
             .orElseThrow(() -> new DartsApiException(TRANSCRIPTION_NOT_FOUND));
         return transcriptionResponseMapper.mapToTranscriptionResponse(transcription);
     }
