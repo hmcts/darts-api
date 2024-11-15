@@ -40,7 +40,8 @@ public enum AutomatedTaskName {
     AUDIO_LINKING_TASK_NAME("AudioLinking"),
     PROCESS_E2E_ARM_PENDING_TASK_NAME("ProcessE2EArmRpoPending", "${darts.automated.task.process-e2e-arm-rpo-pending.process-e2e-arm-rpo:false}"),
     ARM_RPO_POLL_TASK_NAME("ArmRpoPoll"),
-    ARM_RPO_REPLAY_TASK_NAME("ArmRpoReplay");
+    ARM_RPO_REPLAY_TASK_NAME("ArmRpoReplay"),
+    DETS_CLEANUP_ARM_RESPONSE_FILES("DETSCleanupArmResponseFiles");
     
     private final String taskName;
     private final String conditionalOnSpEL;

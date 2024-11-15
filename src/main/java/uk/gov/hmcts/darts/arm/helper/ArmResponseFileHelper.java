@@ -28,10 +28,10 @@ public class ArmResponseFileHelper {
     private final ArmDataManagementApi armDataManagementApi;
     private final ArmResponseUploadFileMapper uploadFileMapper;
 
-    public List<InputUploadAndAssociatedFilenames> getCorrespondingArmFilesForManifestFilename(String manifestFileName) throws UnableToReadArmFileException {
+    public List<InputUploadAndAssociatedFilenames> getCorrespondingArmFilesForManifestFilename(String manifestFilePrefix, String manifestFileName)
+        throws UnableToReadArmFileException {
 
         List<InputUploadAndAssociatedFilenames> responseList = new ArrayList<>();
-        String manifestFilePrefix = armDataManagementConfiguration.getManifestFilePrefix();
         if (manifestFileName.startsWith(manifestFilePrefix)
             && manifestFileName.endsWith(armBatchCleanupConfiguration.getManifestFileSuffix())) {
             //is a Batch response UI file.
