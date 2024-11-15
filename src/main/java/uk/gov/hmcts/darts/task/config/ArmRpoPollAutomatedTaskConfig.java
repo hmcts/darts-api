@@ -5,10 +5,10 @@ import lombok.Setter;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 
-@ConfigurationProperties("darts.automated.task.arm-rpo-polling")
+@ConfigurationProperties("darts.automated.task.arm-rpo-poll")
 @Getter
 @Setter
 @Configuration
-public class ArmRpoPollingAutomatedTaskConfig extends AbstractAutomatedTaskConfig {
+public class ArmRpoPollAutomatedTaskConfig extends AbstractAutomatedTaskConfig {
 
 }

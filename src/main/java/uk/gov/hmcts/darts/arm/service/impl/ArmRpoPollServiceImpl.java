@@ -3,7 +3,6 @@ package uk.gov.hmcts.darts.arm.service.impl;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.darts.arm.config.ArmDataManagementConfiguration;
 import uk.gov.hmcts.darts.arm.helper.ArmRpoHelper;
@@ -24,10 +23,6 @@ import java.util.List;
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 
-@ConditionalOnProperty(
-    value = "darts.automated.task.process-e2e-arm-rpo",
-    havingValue = "true"
-)
 @Service
 @AllArgsConstructor
 @Slf4j
