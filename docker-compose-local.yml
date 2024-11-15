@@ -57,7 +57,6 @@ services:
       - DARTS_UNSTRUCTURED_STORAGE_SAS_URL
       - ARM_SERVICE_ENTITLEMENT
       - ARM_STORAGE_ACCOUNT_NAME
-      - IS_MOCK_ARM_RPO_DOWNLOAD_CSV
     build:
       context: .
       dockerfile: Dockerfile

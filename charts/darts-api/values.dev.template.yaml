@@ -98,8 +98,6 @@ java:
           alias: ARM_SERVICE_ENTITLEMENT
         - name: ArmStorageAccountName
           alias: ARM_STORAGE_ACCOUNT_NAME
-        - name: is_mock_arm_rpo_download_csv
-          alias: IS_MOCK_ARM_RPO_DOWNLOAD_CSV
   environment:
     ENABLE_FLYWAY: true
     MANUAL_DELETION_ENABLED: true

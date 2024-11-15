@@ -46,5 +46,4 @@ echo "ACTIVE_DIRECTORY_B2C_AUTH_URI=https://hmctsstgextid.b2clogin.com/hmctsstge
 echo "DARTS_PORTAL_URL=http://localhost:3000"
 echo "ARM_SERVICE_ENTITLEMENT=$(az keyvault secret show --vault-name darts-stg --name ArmServiceEntitlement | jq .value -r)"
 echo "ARM_STORAGE_ACCOUNT_NAME=$(az keyvault secret show --vault-name darts-stg --name ArmStorageAccountName | jq .value -r)"
-echo "IS_MOCK_ARM_RPO_DOWNLOAD_CSV=$(az keyvault secret show --vault-name darts-stg --name is_mock_arm_rpo_download_csv | jq .value -r)"
 
