@@ -1,0 +1,1 @@
+update darts.automated_task set cron_expression = '0 0 * * * *' where task_name = 'ApplyRetention';
