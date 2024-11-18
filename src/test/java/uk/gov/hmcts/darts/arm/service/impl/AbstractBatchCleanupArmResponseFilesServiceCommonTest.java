@@ -1,11 +1,13 @@
 package uk.gov.hmcts.darts.arm.service.impl;
 
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
+import org.mockito.MockedStatic;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Limit;
 import uk.gov.hmcts.darts.arm.api.ArmDataManagementApi;
@@ -26,6 +28,7 @@ import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
 import uk.gov.hmcts.darts.common.repository.ExternalLocationTypeRepository;
 import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
 import uk.gov.hmcts.darts.common.repository.ObjectRecordStatusRepository;
+import uk.gov.hmcts.darts.common.util.EodHelper;
 import uk.gov.hmcts.darts.testutils.ExternalObjectDirectoryTestData;
 
 import java.time.OffsetDateTime;
@@ -38,6 +41,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -57,13 +61,10 @@ class AbstractBatchCleanupArmResponseFilesServiceCommonTest {
     private UserIdentity userIdentity;
     @Mock
     private ArmDataManagementConfiguration armDataManagementConfiguration;
-
     @Mock
     private ArmBatchCleanupConfiguration batchCleanupConfiguration;
     @Mock
     private CurrentTimeHelper currentTimeHelper;
-
-
     @Mock
     private ExternalLocationTypeEntity externalLocationTypeArm;
     @Mock
@@ -76,7 +77,6 @@ class AbstractBatchCleanupArmResponseFilesServiceCommonTest {
     private ObjectRecordStatusEntity objectRecordStatusArmResponseProcessingFailed;
     @Mock
     private ObjectRecordStatusEntity objectRecordStatusArmResponseManifestFailed;
-
     @Mock
     private MediaEntity media;
     @Mock
@@ -91,8 +91,11 @@ class AbstractBatchCleanupArmResponseFilesServiceCommonTest {
 
     private static final String MANIFEST_FILE_PREFIX = "TEST";
 
+    private MockedStatic<EodHelper> eodHelperMockedStatic;
+
     @BeforeEach
     void setUp() {
+        eodHelperMockedStatic = mockStatic(EodHelper.class);
         cleanupArmResponseFilesService = new BatchCleanupArmResponseFilesServiceCommon(
             externalObjectDirectoryRepository,
             objectRecordStatusRepository,
@@ -115,11 +118,14 @@ class AbstractBatchCleanupArmResponseFilesServiceCommonTest {
         ));
         when(batchCleanupConfiguration.getBufferMinutes()).thenReturn(15);
 
-        when(externalLocationTypeRepository.getReferenceById(3)).thenReturn(externalLocationTypeArm);
-
         OffsetDateTime testTime = OffsetDateTime.now().plusMinutes(10);
         when(currentTimeHelper.currentOffsetDateTime()).thenReturn(testTime);
 
+    }
+
+    @AfterEach
+    void afterEach() {
+        eodHelperMockedStatic.close();
     }
 
     @Test
@@ -129,6 +135,7 @@ class AbstractBatchCleanupArmResponseFilesServiceCommonTest {
                                                                 objectRecordStatusArmResponseManifestFailed,
                                                                 objectRecordStatusArmResponseProcessingFailed,
                                                                 objectRecordStatusArmResponseChecksumFailed);
+        eodHelperMockedStatic.when(() -> EodHelper.armLocation()).thenReturn(externalLocationTypeArm);
         when(externalObjectDirectoryRepository.findBatchCleanupManifestFilenames(
             eq(statusToSearch),
             eq(externalLocationTypeArm),
@@ -189,11 +196,12 @@ class AbstractBatchCleanupArmResponseFilesServiceCommonTest {
             eq(MANIFEST_FILE_PREFIX),
             eq(Limit.of(100))
         );
+        eodHelperMockedStatic.verify(() -> EodHelper.armLocation(), times(2));
     }
 
     @Test
     void cleanupResponseFilesSuccess_NoCorrespondingFiles() throws UnableToReadArmFileException {
-        when(externalLocationTypeRepository.getReferenceById(3)).thenReturn(externalLocationTypeArm);
+        eodHelperMockedStatic.when(() -> EodHelper.armLocation()).thenReturn(externalLocationTypeArm);
 
         OffsetDateTime testTime = OffsetDateTime.now().plusMinutes(10);
         when(currentTimeHelper.currentOffsetDateTime()).thenReturn(testTime);
@@ -228,5 +236,6 @@ class AbstractBatchCleanupArmResponseFilesServiceCommonTest {
         cleanupArmResponseFilesService.cleanupResponseFiles(100);
 
         verify(externalObjectDirectoryRepository, times(0)).saveAndFlush(externalObjectDirectoryEntityCaptor.capture());
+        eodHelperMockedStatic.verify(() -> EodHelper.armLocation(), times(2));
     }
 }
