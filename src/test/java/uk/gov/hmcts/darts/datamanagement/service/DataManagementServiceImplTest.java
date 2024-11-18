@@ -31,6 +31,8 @@ import uk.gov.hmcts.darts.util.AzureCopyUtil;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.time.Duration;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -42,6 +44,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
@@ -345,6 +348,47 @@ class DataManagementServiceImplTest {
         verify(blobProperties, times(1)).getContentMd5();
         verify(blobClient, times(2)).exists();
         verifyNoInteractions(fileContentChecksum);
+    }
+
+    @Test
+    void negativeGetChecksumAzureChecksumNotFoundMetaDataChecksumFound() {
+        final UUID blobId = UUID.fromString("431318c8-97db-415c-b321-120c48f0ffe2");
+        final String containerName = "container123";
+        final String connectionString = "connectionString";
+
+        BlobServiceClient blobServiceClient = mock(BlobServiceClient.class);
+        BlobContainerClient blobContainerClient = mock(BlobContainerClient.class);
+        BlobProperties blobProperties = mock(BlobProperties.class);
+        when(blobProperties.getContentMd5()).thenReturn(null);
+        Map<String, String> metaData = new HashMap<>();
+        metaData.put("checksum", "abc123");
+        when(blobProperties.getMetadata()).thenReturn(metaData);
+
+        BlobClient blobClient = mock(BlobClient.class);
+        when(blobClient.getProperties()).thenReturn(blobProperties);
+
+        when(dataManagementFactory.getBlobServiceClient(any()))
+            .thenReturn(blobServiceClient);
+        when(dataManagementFactory.getBlobContainerClient(any(), any()))
+            .thenReturn(blobContainerClient);
+        when(dataManagementFactory.getBlobClient(any(), any()))
+            .thenReturn(blobClient);
+        when(dataManagementConfiguration.getBlobStorageAccountConnectionString())
+            .thenReturn(connectionString);
+        when(blobClient.exists()).thenReturn(true);
+
+        assertThat(dataManagementService.getChecksum(containerName, blobId))
+            .isEqualTo("abc123");
+
+        verify(dataManagementConfiguration, times(1)).getBlobStorageAccountConnectionString();
+        verify(dataManagementFactory, times(1)).getBlobServiceClient(connectionString);
+        verify(dataManagementFactory, times(1)).getBlobContainerClient(containerName, blobServiceClient);
+        verify(dataManagementFactory, times(1)).getBlobClient(blobContainerClient, blobId);
+        verify(blobClient, times(2)).exists();
+        verify(blobClient, times(1)).getProperties();
+        verify(blobProperties, times(1)).getMetadata();
+        verify(blobProperties, times(1)).getContentMd5();
+        verify(fileContentChecksum, never()).encodeToString(any());
     }
 
     private void assertGetChecksumNotFound(Boolean exists) {
