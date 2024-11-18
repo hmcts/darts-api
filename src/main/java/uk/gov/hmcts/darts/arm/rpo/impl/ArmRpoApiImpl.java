@@ -53,7 +53,6 @@ import java.util.List;
 import java.util.Objects;
 
 import static java.util.Objects.isNull;
-import static java.util.Objects.nonNull;
 
 @Service
 @AllArgsConstructor
@@ -158,28 +157,31 @@ public class ArmRpoApiImpl implements ArmRpoApi {
 
         handleResponseStatus(userAccount, storageAccountResponse, errorMessage, armRpoExecutionDetailEntity);
 
-
-        if (!CollectionUtils.isNotEmpty(storageAccountResponse.getIndexes())) {
-            throw handleFailureAndCreateException(errorMessage.append("Unable to get indexes from storage account response").toString(),
+        if (!CollectionUtils.isNotEmpty(storageAccountResponse.getDataDetails())) {
+            throw handleFailureAndCreateException(errorMessage.append("No data details were present in the storage account response").toString(),
                                                   armRpoExecutionDetailEntity, userAccount);
+        }
 
-        }
-        String storageAccountName = null;
-        for (var index : storageAccountResponse.getIndexes()) {
-            if (nonNull(index.getIndex()) && nonNull(index.getIndex().getName())
-                && index.getIndex().getName().equals(armApiConfigurationProperties.getArmStorageAccountName())) {
-                storageAccountName = index.getIndex().getIndexId();
-                break;
-            }
-        }
-        if (StringUtils.isBlank(storageAccountName)) {
+        final String armStorageAccountName = armApiConfigurationProperties.getArmStorageAccountName();
+        List<String> storageAccountIds = storageAccountResponse.getDataDetails().stream()
+            .filter(dataDetails -> armStorageAccountName.equals(dataDetails.getName()))
+            .map(StorageAccountResponse.DataDetails::getId)
+            .filter(id -> !StringUtils.isBlank(id))
+            .toList();
+
+        if (CollectionUtils.isEmpty(storageAccountIds)) {
             throw handleFailureAndCreateException(errorMessage.append("Unable to find ARM RPO storage account in response").toString(),
                                                   armRpoExecutionDetailEntity, userAccount);
-
         }
-        armRpoExecutionDetailEntity.setStorageAccountId(storageAccountName);
-        armRpoService.updateArmRpoStatus(armRpoExecutionDetailEntity, ArmRpoHelper.completedRpoStatus(), userAccount);
 
+        String accountId = storageAccountIds.getFirst();
+        if (storageAccountIds.size() > 1) {
+            log.warn("More than one storage account id found in response for account name: {}. Assuming the first id is correct: {}. Response {}",
+                     armStorageAccountName, accountId, storageAccountResponse);
+        }
+
+        armRpoExecutionDetailEntity.setStorageAccountId(accountId);
+        armRpoService.updateArmRpoStatus(armRpoExecutionDetailEntity, ArmRpoHelper.completedRpoStatus(), userAccount);
     }
 
     @Override
