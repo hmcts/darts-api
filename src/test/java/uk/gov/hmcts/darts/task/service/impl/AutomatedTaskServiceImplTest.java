@@ -13,6 +13,7 @@ import org.springframework.scheduling.config.ScheduledTask;
 import org.springframework.scheduling.config.ScheduledTaskHolder;
 import org.springframework.scheduling.config.TriggerTask;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
+import uk.gov.hmcts.darts.common.entity.ArmAutomatedTaskEntity;
 import uk.gov.hmcts.darts.common.entity.AutomatedTaskEntity;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.common.repository.AutomatedTaskRepository;
@@ -20,6 +21,7 @@ import uk.gov.hmcts.darts.log.api.LogApi;
 import uk.gov.hmcts.darts.task.api.AutomatedTaskName;
 import uk.gov.hmcts.darts.task.config.AutomatedTaskConfigurationProperties;
 import uk.gov.hmcts.darts.task.config.ProcessDailyListAutomatedTaskConfig;
+import uk.gov.hmcts.darts.task.exception.AutomatedTaskSetupError;
 import uk.gov.hmcts.darts.task.runner.AutoloadingAutomatedTask;
 import uk.gov.hmcts.darts.task.runner.AutomatedTask;
 import uk.gov.hmcts.darts.task.runner.impl.AbstractLockableAutomatedTask;
@@ -477,6 +479,55 @@ class AutomatedTaskServiceImplTest {
         };
         assertThrows(DartsApiException.class, () ->
             automatedTaskService.updateAutomatedTaskCronExpression(automatedTask.getTaskName(), "*/8 * * * * *"));
+    }
+
+
+    @Test
+    void positiveGetArmAutomatedTaskEntity() {
+        AutomatedTaskEntity automatedTask = mock(AutomatedTaskEntity.class);
+        ArmAutomatedTaskEntity armAutomatedTaskEntity = mock(ArmAutomatedTaskEntity.class);
+        when(automatedTask.getArmAutomatedTaskEntity()).thenReturn(armAutomatedTaskEntity);
+        when(mockAutomatedTaskRepository.findByTaskName("Test")).thenReturn(Optional.of(automatedTask));
+
+        AutomatedTaskName automatedTaskName = mock(AutomatedTaskName.class);
+        when(automatedTaskName.getTaskName()).thenReturn("Test");
+
+        assertEquals(armAutomatedTaskEntity, automatedTaskService.getArmAutomatedTaskEntity(automatedTaskName));
+
+        verify(mockAutomatedTaskRepository).findByTaskName("Test");
+        verify(automatedTask).getArmAutomatedTaskEntity();
+    }
+
+    @Test
+    void negativeGetArmAutomatedTaskEntityTaskNotFound() {
+        when(mockAutomatedTaskRepository.findByTaskName("Test")).thenReturn(Optional.empty());
+
+        AutomatedTaskName automatedTaskName = mock(AutomatedTaskName.class);
+        when(automatedTaskName.getTaskName()).thenReturn("Test");
+
+        DartsApiException exception = assertThrows(DartsApiException.class, () ->
+            automatedTaskService.getArmAutomatedTaskEntity(automatedTaskName));
+        assertEquals(AutomatedTaskSetupError.FAILED_TO_FIND_AUTOMATED_TASK, exception.getError());
+
+        verify(mockAutomatedTaskRepository).findByTaskName("Test");
+    }
+
+    @Test
+    void negativeGetArmAutomatedTaskEntityNotArmTask() {
+        AutomatedTaskEntity automatedTask = mock(AutomatedTaskEntity.class);
+        when(automatedTask.getArmAutomatedTaskEntity()).thenReturn(null);
+        when(mockAutomatedTaskRepository.findByTaskName("Test")).thenReturn(Optional.of(automatedTask));
+
+        AutomatedTaskName automatedTaskName = mock(AutomatedTaskName.class);
+        when(automatedTaskName.getTaskName()).thenReturn("Test");
+
+        DartsApiException exception = assertThrows(DartsApiException.class, () ->
+            automatedTaskService.getArmAutomatedTaskEntity(automatedTaskName));
+        assertEquals(AutomatedTaskSetupError.FAILED_TO_FIND_AUTOMATED_TASK, exception.getError());
+
+        verify(mockAutomatedTaskRepository).findByTaskName("Test");
+        verify(automatedTask).getArmAutomatedTaskEntity();
+
     }
 
     private AutomatedTaskEntity createAutomatedTaskEntity(AutomatedTask automatedTask, String cronExpression) {
