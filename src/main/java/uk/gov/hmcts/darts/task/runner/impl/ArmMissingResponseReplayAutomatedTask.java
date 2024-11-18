@@ -2,6 +2,7 @@ package uk.gov.hmcts.darts.task.runner.impl;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
+import uk.gov.hmcts.darts.arm.service.impl.ArmMissingResponseCleanupImpl;
 import uk.gov.hmcts.darts.common.repository.AutomatedTaskRepository;
 import uk.gov.hmcts.darts.log.api.LogApi;
 import uk.gov.hmcts.darts.task.api.AutomatedTaskName;
@@ -15,10 +16,14 @@ import static uk.gov.hmcts.darts.task.api.AutomatedTaskName.ARM_MISSING_RESPONSE
 @Component
 public class ArmMissingResponseReplayAutomatedTask extends AbstractLockableAutomatedTask
     implements AutoloadingManualTask {
+    private final ArmMissingResponseCleanupImpl armMissingResponseCleanup;
+
     protected ArmMissingResponseReplayAutomatedTask(AutomatedTaskRepository automatedTaskRepository,
                                                     ArmMissingResponseReplayAutomatedTaskConfig abstractAutomatedTaskConfig,
-                                                    LogApi logApi, LockService lockService) {
+                                                    LogApi logApi, LockService lockService,
+                                                    ArmMissingResponseCleanupImpl armMissingResponseCleanup) {
         super(automatedTaskRepository, abstractAutomatedTaskConfig, logApi, lockService);
+        this.armMissingResponseCleanup = armMissingResponseCleanup;
     }
 
     @Override
@@ -28,6 +33,6 @@ public class ArmMissingResponseReplayAutomatedTask extends AbstractLockableAutom
 
     @Override
     protected void runTask() {
-
+        this.armMissingResponseCleanup.cleanupResponseFiles(getAutomatedTaskBatchSize());
     }
 }
