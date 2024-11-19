@@ -96,7 +96,7 @@ public class ArmRpoPollServiceImpl implements ArmRpoPollService {
                     log.debug("About to call removeProduction");
                     armRpoApi.removeProduction(bearerToken, executionId, userAccount);
                     log.debug("About to reconcile production files");
-                    reconcile(tempProductionFiles, executionId);
+                    reconcile(tempProductionFiles, executionId, headerColumns);
                 } else {
                     log.warn("No production export files found");
                 }
@@ -116,7 +116,7 @@ public class ArmRpoPollServiceImpl implements ArmRpoPollService {
         }
     }
 
-    private void reconcile(List<File> tempProductionFiles, Integer executionId) {
+    private void reconcile(List<File> tempProductionFiles, Integer executionId, List<MasterIndexFieldByRecordClassSchema> headerColumns) {
         // TODO this is to be implemented in ticket DMP-3619
     }
 
