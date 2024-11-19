@@ -111,34 +111,42 @@ public class AdminAutomatedTasksServiceImpl implements AdminAutomatedTaskService
             log.info("Batch size for {} updated to {}", automatedTask.getTaskName(), automatedTaskPatch.getBatchSize());
         }
 
-        //Arm Autoamted Task updates
+        //Arm Automated Task updates
         List<Consumer<ArmAutomatedTaskEntity>> armAutomatedTaskEntityConsumer = new ArrayList<>();
 
         if (automatedTaskPatch.getArmReplayStartTs() != null) {
             armAutomatedTaskEntityConsumer.add(armAutomatedTaskEntity -> {
-                armAutomatedTaskEntity.setArmReplayStartTs(automatedTaskPatch.getArmReplayStartTs());
-                log.info("ARM replay start timestamp for {} updated to {}", automatedTask.getTaskName(), automatedTaskPatch.getArmReplayStartTs());
+                if (!automatedTaskPatch.getArmReplayStartTs().equals(armAutomatedTaskEntity.getArmReplayStartTs())) {
+                    armAutomatedTaskEntity.setArmReplayStartTs(automatedTaskPatch.getArmReplayStartTs());
+                    log.info("ARM replay start timestamp for {} updated to {}", automatedTask.getTaskName(), automatedTaskPatch.getArmReplayStartTs());
+                }
             });
         }
 
         if (automatedTaskPatch.getArmReplayEndTs() != null) {
             armAutomatedTaskEntityConsumer.add(armAutomatedTaskEntity -> {
-                armAutomatedTaskEntity.setArmReplayEndTs(automatedTaskPatch.getArmReplayEndTs());
-                log.info("ARM replay end timestamp for {} updated to {}", automatedTask.getTaskName(), automatedTaskPatch.getArmReplayEndTs());
+                if (!automatedTaskPatch.getArmReplayEndTs().equals(armAutomatedTaskEntity.getArmReplayEndTs())) {
+                    armAutomatedTaskEntity.setArmReplayEndTs(automatedTaskPatch.getArmReplayEndTs());
+                    log.info("ARM replay end timestamp for {} updated to {}", automatedTask.getTaskName(), automatedTaskPatch.getArmReplayEndTs());
+                }
             });
         }
 
         if (automatedTaskPatch.getRpoCsvStartHour() != null) {
             armAutomatedTaskEntityConsumer.add(armAutomatedTaskEntity -> {
-                armAutomatedTaskEntity.setRpoCsvStartHour(automatedTaskPatch.getRpoCsvStartHour());
-                log.info("RPO CSV start hour for {} updated to {}", automatedTask.getTaskName(), automatedTaskPatch.getRpoCsvStartHour());
+                if (!automatedTaskPatch.getRpoCsvStartHour().equals(armAutomatedTaskEntity.getRpoCsvStartHour())) {
+                    armAutomatedTaskEntity.setRpoCsvStartHour(automatedTaskPatch.getRpoCsvStartHour());
+                    log.info("RPO CSV start hour for {} updated to {}", automatedTask.getTaskName(), automatedTaskPatch.getRpoCsvStartHour());
+                }
             });
         }
 
         if (automatedTaskPatch.getRpoCsvEndHour() != null) {
             armAutomatedTaskEntityConsumer.add(armAutomatedTaskEntity -> {
-                armAutomatedTaskEntity.setRpoCsvEndHour(automatedTaskPatch.getRpoCsvEndHour());
-                log.info("RPO CSV end hour for {} updated to {}", automatedTask.getTaskName(), automatedTaskPatch.getRpoCsvEndHour());
+                if (!automatedTaskPatch.getRpoCsvEndHour().equals(armAutomatedTaskEntity.getRpoCsvEndHour())) {
+                    armAutomatedTaskEntity.setRpoCsvEndHour(automatedTaskPatch.getRpoCsvEndHour());
+                    log.info("RPO CSV end hour for {} updated to {}", automatedTask.getTaskName(), automatedTaskPatch.getRpoCsvEndHour());
+                }
             });
         }
 
