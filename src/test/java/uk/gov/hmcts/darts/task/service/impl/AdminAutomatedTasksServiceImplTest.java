@@ -187,6 +187,7 @@ class AdminAutomatedTasksServiceImplTest {
         when(mapper.mapEntityToDetailedAutomatedTask(automatedTaskEntity)).thenReturn(expectedReturnTask);
 
         DetailedAutomatedTask task = adminAutomatedTaskService.updateAutomatedTask(1, automatedTaskPatch);
+        assertEquals(expectedReturnTask, task);
 
         assertTrue(automatedTaskEntity.getTaskEnabled());
         assertEquals(1, automatedTaskEntity.getBatchSize());
@@ -196,7 +197,7 @@ class AdminAutomatedTasksServiceImplTest {
         verify(armAutomatedTaskEntity).getRpoCsvStartHour();
         verifyNoMoreInteractions(armAutomatedTaskEntity);
 
-        assertEquals(expectedReturnTask, task);
+
         verify(armAutomatedTaskRepository).save(armAutomatedTaskEntity);
         verify(automatedTaskRepository).save(automatedTaskEntity);
         verifyNoInteractions(auditApi);
