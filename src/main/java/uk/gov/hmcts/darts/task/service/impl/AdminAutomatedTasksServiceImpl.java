@@ -6,9 +6,12 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import uk.gov.hmcts.darts.audit.api.AuditApi;
+import uk.gov.hmcts.darts.common.entity.ArmAutomatedTaskEntity;
 import uk.gov.hmcts.darts.common.entity.AutomatedTaskEntity;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
+import uk.gov.hmcts.darts.common.repository.ArmAutomatedTaskRepository;
 import uk.gov.hmcts.darts.common.repository.AutomatedTaskRepository;
 import uk.gov.hmcts.darts.task.api.AutomatedTaskName;
 import uk.gov.hmcts.darts.task.exception.AutomatedTaskApiError;
@@ -19,13 +22,16 @@ import uk.gov.hmcts.darts.tasks.model.AutomatedTaskPatch;
 import uk.gov.hmcts.darts.tasks.model.AutomatedTaskSummary;
 import uk.gov.hmcts.darts.tasks.model.DetailedAutomatedTask;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.function.Consumer;
 
 import static uk.gov.hmcts.darts.audit.api.AuditActivity.ENABLE_DISABLE_JOB;
 import static uk.gov.hmcts.darts.audit.api.AuditActivity.RUN_JOB_MANUALLY;
 import static uk.gov.hmcts.darts.task.exception.AutomatedTaskApiError.AUTOMATED_TASK_ALREADY_RUNNING;
 import static uk.gov.hmcts.darts.task.exception.AutomatedTaskApiError.AUTOMATED_TASK_NOT_FOUND;
+import static uk.gov.hmcts.darts.task.exception.AutomatedTaskApiError.INCORRECT_AUTOMATED_TASK_TYPE;
 
 @Service
 @RequiredArgsConstructor
@@ -34,6 +40,7 @@ import static uk.gov.hmcts.darts.task.exception.AutomatedTaskApiError.AUTOMATED_
 public class AdminAutomatedTasksServiceImpl implements AdminAutomatedTaskService {
 
     private final AutomatedTaskRepository automatedTaskRepository;
+    private final ArmAutomatedTaskRepository armAutomatedTaskRepository;
     private final AutomatedTasksMapper mapper;
     private final AutomatedTaskRunner automatedTaskRunner;
     private final AuditApi auditApi;
@@ -89,6 +96,7 @@ public class AdminAutomatedTasksServiceImpl implements AdminAutomatedTaskService
     }
 
     @Override
+    @Transactional
     public DetailedAutomatedTask updateAutomatedTask(Integer taskId, AutomatedTaskPatch automatedTaskPatch) {
         var automatedTask = getAutomatedTaskEntityById(taskId);
 
@@ -101,6 +109,56 @@ public class AdminAutomatedTasksServiceImpl implements AdminAutomatedTaskService
         if (automatedTaskPatch.getBatchSize() != null) {
             automatedTask.setBatchSize(automatedTaskPatch.getBatchSize());
             log.info("Batch size for {} updated to {}", automatedTask.getTaskName(), automatedTaskPatch.getBatchSize());
+        }
+
+        //Arm Automated Task updates
+        List<Consumer<ArmAutomatedTaskEntity>> armAutomatedTaskEntityConsumer = new ArrayList<>();
+
+        if (automatedTaskPatch.getArmReplayStartTs() != null) {
+            armAutomatedTaskEntityConsumer.add(armAutomatedTaskEntity -> {
+                if (!automatedTaskPatch.getArmReplayStartTs().equals(armAutomatedTaskEntity.getArmReplayStartTs())) {
+                    armAutomatedTaskEntity.setArmReplayStartTs(automatedTaskPatch.getArmReplayStartTs());
+                    log.info("ARM replay start timestamp for {} updated to {}", automatedTask.getTaskName(), automatedTaskPatch.getArmReplayStartTs());
+                }
+            });
+        }
+
+        if (automatedTaskPatch.getArmReplayEndTs() != null) {
+            armAutomatedTaskEntityConsumer.add(armAutomatedTaskEntity -> {
+                if (!automatedTaskPatch.getArmReplayEndTs().equals(armAutomatedTaskEntity.getArmReplayEndTs())) {
+                    armAutomatedTaskEntity.setArmReplayEndTs(automatedTaskPatch.getArmReplayEndTs());
+                    log.info("ARM replay end timestamp for {} updated to {}", automatedTask.getTaskName(), automatedTaskPatch.getArmReplayEndTs());
+                }
+            });
+        }
+
+        if (automatedTaskPatch.getRpoCsvStartHour() != null) {
+            armAutomatedTaskEntityConsumer.add(armAutomatedTaskEntity -> {
+                if (!automatedTaskPatch.getRpoCsvStartHour().equals(armAutomatedTaskEntity.getRpoCsvStartHour())) {
+                    armAutomatedTaskEntity.setRpoCsvStartHour(automatedTaskPatch.getRpoCsvStartHour());
+                    log.info("RPO CSV start hour for {} updated to {}", automatedTask.getTaskName(), automatedTaskPatch.getRpoCsvStartHour());
+                }
+            });
+        }
+
+        if (automatedTaskPatch.getRpoCsvEndHour() != null) {
+            armAutomatedTaskEntityConsumer.add(armAutomatedTaskEntity -> {
+                if (!automatedTaskPatch.getRpoCsvEndHour().equals(armAutomatedTaskEntity.getRpoCsvEndHour())) {
+                    armAutomatedTaskEntity.setRpoCsvEndHour(automatedTaskPatch.getRpoCsvEndHour());
+                    log.info("RPO CSV end hour for {} updated to {}", automatedTask.getTaskName(), automatedTaskPatch.getRpoCsvEndHour());
+                }
+            });
+        }
+
+        if (armAutomatedTaskEntityConsumer.size() > 0) {
+            ArmAutomatedTaskEntity armAutomatedTaskEntity = automatedTask.getArmAutomatedTaskEntity();
+            if (armAutomatedTaskEntity == null) {
+                throw new DartsApiException(INCORRECT_AUTOMATED_TASK_TYPE,
+                                            "Task " + automatedTask.getTaskName() + " is not an arm automated task as such can not update arm related fields");
+            }
+            armAutomatedTaskEntityConsumer.forEach(consumer -> consumer.accept(armAutomatedTaskEntity));
+            automatedTask.setArmAutomatedTaskEntity(armAutomatedTaskEntity);
+            armAutomatedTaskRepository.save(armAutomatedTaskEntity);
         }
 
         var updatedTask = automatedTaskRepository.save(automatedTask);
