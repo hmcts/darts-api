@@ -154,6 +154,11 @@ class AdminAutomatedTasksServiceImplTest {
         verify(armAutomatedTaskEntity).setArmReplayEndTs(armReplyEndTs);
         verify(armAutomatedTaskEntity).setRpoCsvStartHour(1);
         verify(armAutomatedTaskEntity).setRpoCsvEndHour(3);
+
+        verify(armAutomatedTaskEntity).getArmReplayStartTs();
+        verify(armAutomatedTaskEntity).getArmReplayEndTs();
+        verify(armAutomatedTaskEntity).getRpoCsvStartHour();
+        verify(armAutomatedTaskEntity).getRpoCsvEndHour();
         verifyNoMoreInteractions(armAutomatedTaskEntity);
 
 
@@ -187,6 +192,8 @@ class AdminAutomatedTasksServiceImplTest {
         assertEquals(1, automatedTaskEntity.getBatchSize());
         verify(armAutomatedTaskEntity).setArmReplayStartTs(armReplyStartTs);
         verify(armAutomatedTaskEntity).setRpoCsvStartHour(1);
+        verify(armAutomatedTaskEntity).getArmReplayStartTs();
+        verify(armAutomatedTaskEntity).getRpoCsvStartHour();
         verifyNoMoreInteractions(armAutomatedTaskEntity);
 
         assertEquals(expectedReturnTask, task);
