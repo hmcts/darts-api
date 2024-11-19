@@ -47,6 +47,7 @@ import static uk.gov.hmcts.darts.test.common.data.PersistableFactory.getArmRpoEx
 
 @TestPropertySource(properties = {"darts.storage.arm.is_mock_arm_rpo_download_csv=false"})
 @Slf4j
+@SuppressWarnings({"PMD.AvoidInstantiatingObjectsInLoops", "PMD.CloseResource"})
 class ArmRpoPollServiceIntTest extends PostgresIntegrationBase {
 
     private static final String BEARER_TOKEN = "BearerToken";
@@ -251,12 +252,12 @@ class ArmRpoPollServiceIntTest extends PostgresIntegrationBase {
 
         Request request = Request.create(Request.HttpMethod.GET, "http://localhost:8080", Collections.emptyMap(), null,
                                          Charset.defaultCharset());
-        Response response = Response.builder()
+        return Response.builder()
             .status(status)
             .body(body)
             .request(request)
             .build();
-        return response;
+        
     }
 
     private @NotNull ProductionOutputFilesResponse getProductionOutputFilesResponse(String fileId) {

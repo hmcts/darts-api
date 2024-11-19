@@ -1,6 +1,7 @@
 package uk.gov.hmcts.darts.arm.component;
 
 import feign.Response;
+import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,9 +16,8 @@ import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum;
 import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
-import uk.gov.hmcts.darts.common.repository.ArmAutomatedTaskRepository;
 import uk.gov.hmcts.darts.common.repository.AutomatedTaskRepository;
-import uk.gov.hmcts.darts.testutils.IntegrationBase;
+import uk.gov.hmcts.darts.testutils.PostgresIntegrationBase;
 import uk.gov.hmcts.darts.testutils.stubs.ExternalObjectDirectoryStub;
 
 import java.lang.reflect.InvocationTargetException;
@@ -33,12 +33,13 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_RPO_PENDING;
-import static uk.gov.hmcts.darts.task.api.AutomatedTaskName.ARM_RPO_POLL_TASK_NAME;
+import static uk.gov.hmcts.darts.task.api.AutomatedTaskName.ARM_RPO_POLLING_TASK_NAME;
 import static uk.gov.hmcts.darts.test.common.data.PersistableFactory.getArmRpoExecutionDetailTestData;
 
 @TestPropertySource(properties = {"darts.storage.arm.is_mock_arm_rpo_download_csv=true"})
 @SuppressWarnings({"PMD.AvoidInstantiatingObjectsInLoops", "PMD.CloseResource"})
-class StubbedArmRpoDownloadProductionIntTest extends IntegrationBase {
+@Slf4j
+class StubbedArmRpoDownloadProductionIntTest extends PostgresIntegrationBase {
     @Autowired
     private ArmRpoDownloadProduction stubbedArmRpoDownloadProduction;
 
@@ -50,10 +51,6 @@ class StubbedArmRpoDownloadProductionIntTest extends IntegrationBase {
 
     @Autowired
     private AutomatedTaskRepository automatedTaskRepository;
-
-    @Autowired
-    private ArmAutomatedTaskRepository armAutomatedTaskRepository;
-
 
     @MockBean
     private ArmRpoClient armRpoClient;
@@ -76,15 +73,31 @@ class StubbedArmRpoDownloadProductionIntTest extends IntegrationBase {
             stubbedArmRpoDownloadProduction.downloadProduction("token", 1, "fileId"));
 
         // then
-        assertTrue(exception.getMessage().contains("unable to find arm automated task"));
+        assertTrue(exception.getMessage().contains("Unable to find ARM automated task"));
     }
 
     @Test
     void downloadProduction_shouldThrowException_whenNoEodsFound() {
+        // given
+        List<AutomatedTaskEntity> automatedTasks = automatedTaskRepository.findAll();
+
+        for (AutomatedTaskEntity automatedTask : automatedTasks) {
+            var armAutomatedTask = new ArmAutomatedTaskEntity();
+            armAutomatedTask.setAutomatedTask(automatedTask);
+            log.info("Automated task name: {}", automatedTask.getTaskName());
+            if (ARM_RPO_POLLING_TASK_NAME.getTaskName().equals(automatedTask.getTaskName())) {
+                armAutomatedTask.setRpoCsvStartHour(25);
+                armAutomatedTask.setRpoCsvEndHour(49);
+            }
+            dartsPersistence.save(armAutomatedTask);
+        }
+
+        // when
         ArmRpoException exception = assertThrows(ArmRpoException.class, () ->
             stubbedArmRpoDownloadProduction.downloadProduction("token", 1, "fileId"));
 
-        assertTrue(exception.getMessage().contains("no eods found"));
+        // then
+        assertTrue(exception.getMessage().contains("No EODS found"));
     }
 
     @Test
@@ -120,11 +133,12 @@ class StubbedArmRpoDownloadProductionIntTest extends IntegrationBase {
         for (AutomatedTaskEntity automatedTask : automatedTasks) {
             var armAutomatedTask = new ArmAutomatedTaskEntity();
             armAutomatedTask.setAutomatedTask(automatedTask);
-            if (ARM_RPO_POLL_TASK_NAME.getTaskName().equals(automatedTask.getTaskName())) {
+            log.info("Automated task name: {}", automatedTask.getTaskName());
+            if (ARM_RPO_POLLING_TASK_NAME.getTaskName().equals(automatedTask.getTaskName())) {
                 armAutomatedTask.setRpoCsvStartHour(25);
                 armAutomatedTask.setRpoCsvEndHour(49);
             }
-            armAutomatedTaskRepository.save(armAutomatedTask);
+            dartsPersistence.save(armAutomatedTask);
         }
 
         Response response = mock(Response.class);

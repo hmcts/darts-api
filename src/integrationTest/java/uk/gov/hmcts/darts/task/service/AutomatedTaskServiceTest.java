@@ -65,7 +65,7 @@ import uk.gov.hmcts.darts.task.runner.AutomatedTask;
 import uk.gov.hmcts.darts.task.runner.impl.AbstractLockableAutomatedTask;
 import uk.gov.hmcts.darts.task.runner.impl.ApplyRetentionCaseAssociatedObjectsAutomatedTask;
 import uk.gov.hmcts.darts.task.runner.impl.ArmRetentionEventDateCalculatorAutomatedTask;
-import uk.gov.hmcts.darts.task.runner.impl.ArmRpoPollAutomatedTask;
+import uk.gov.hmcts.darts.task.runner.impl.ArmRpoPollingAutomatedTask;
 import uk.gov.hmcts.darts.task.runner.impl.CloseOldCasesAutomatedTask;
 import uk.gov.hmcts.darts.task.runner.impl.CloseUnfinishedTranscriptionsAutomatedTask;
 import uk.gov.hmcts.darts.task.runner.impl.DailyListAutomatedTask;
@@ -1129,7 +1129,7 @@ class AutomatedTaskServiceTest extends IntegrationBase {
     @Test
     void givenConfiguredTasksUpdateCronAndResetCronForArmRpoPollAutomatedTask() {
         AutomatedTask automatedTask =
-            new ArmRpoPollAutomatedTask(
+            new ArmRpoPollingAutomatedTask(
                 automatedTaskRepository,
                 mock(ArmRpoPollAutomatedTaskConfig.class),
                 armRpoPollService,
@@ -1160,7 +1160,7 @@ class AutomatedTaskServiceTest extends IntegrationBase {
     @Test
     void givenConfiguredTaskCancelArmRpoPollAutomatedTask() {
         AutomatedTask automatedTask =
-            new ArmRpoPollAutomatedTask(
+            new ArmRpoPollingAutomatedTask(
                 automatedTaskRepository,
                 mock(ArmRpoPollAutomatedTaskConfig.class),
                 armRpoPollService,

@@ -39,8 +39,8 @@ public class StubbedArmRpoDownloadProductionImpl implements ArmRpoDownloadProduc
         StringBuilder errorMessage = new StringBuilder("Unable to downloadProduction from ARM RPO");
 
         ArmAutomatedTaskEntity armAutomatedTaskEntity =
-            armAutomatedTaskRepository.findByAutomatedTask_taskName(AutomatedTaskName.ARM_RPO_POLL_TASK_NAME.getTaskName())
-                .orElseThrow(() -> new ArmRpoException(errorMessage.append(" - unable to find arm automated task").toString()));
+            armAutomatedTaskRepository.findByAutomatedTask_taskName(AutomatedTaskName.ARM_RPO_POLLING_TASK_NAME.getTaskName())
+                .orElseThrow(() -> new ArmRpoException(errorMessage.append(" - Unable to find ARM automated task").toString()));
         int rpoCsvStartHour = armAutomatedTaskEntity.getRpoCsvStartHour();
         int rpoCsvEndHour = armAutomatedTaskEntity.getRpoCsvEndHour();
 
@@ -53,10 +53,13 @@ public class StubbedArmRpoDownloadProductionImpl implements ArmRpoDownloadProduc
             executionDateTime.minusHours(rpoCsvEndHour),
             executionDateTime.minusHours(rpoCsvStartHour),
             limit);
+
         if (eods.isEmpty()) {
-            throw new ArmRpoException(errorMessage.append(" - no eods found").toString());
+            throw new ArmRpoException(errorMessage.append(" - No EODS found").toString());
         }
+
         String eodIds = eods.stream().map(eod -> eod.getId().toString()).collect(Collectors.joining(", "));
         return armRpoClient.downloadProduction(bearerToken, eodIds, productionExportFileId);
+
     }
 }

@@ -26,7 +26,7 @@ class ArmRpoPollAutomatedTaskTest {
     void runTask() {
 
         // given
-        ArmRpoPollAutomatedTask armRpoPollAutomatedTask = new ArmRpoPollAutomatedTask(
+        ArmRpoPollingAutomatedTask armRpoPollAutomatedTask = new ArmRpoPollingAutomatedTask(
             null,
             null,
             armRpoPollService,
