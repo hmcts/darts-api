@@ -25,6 +25,11 @@ public enum AutomatedTaskApiError implements DartsApiError {
         AutomatedTaskErrorCode.AUTOMATED_TASK_NOT_CONFIGURED.getValue(),
         HttpStatus.INTERNAL_SERVER_ERROR,
         AutomatedTaskTitleErrors.AUTOMATED_TASK_NOT_CONFIGURED.toString()
+    ),
+    INCORRECT_AUTOMATED_TASK_TYPE(
+        AutomatedTaskErrorCode.INCORRECT_AUTOMATED_TASK_TYPE.getValue(),
+        HttpStatus.UNPROCESSABLE_ENTITY,
+        AutomatedTaskTitleErrors.INCORRECT_AUTOMATED_TASK_TYPE.toString()
     );
 
     private static final String ERROR_TYPE_PREFIX = "AUTOMATED_TASK";
