@@ -2,6 +2,7 @@ package uk.gov.hmcts.darts.event.controller;
 
 import ch.qos.logback.classic.Level;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
@@ -10,6 +11,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
@@ -187,6 +189,34 @@ class EventsControllerTest extends IntegrationBase {
             LogUtil.getMemoryLogger()
                 .searchLogApiLogs(EventLoggerServiceImpl.manualObfuscationMessage(editedEventEntity), Level.INFO).isEmpty());
     }
+
+    @TestPropertySource(properties = "darts.event-obfuscation.enabled=false")
+    @Nested
+    @AutoConfigureMockMvc
+    static class AdminObfuscateEveByIdsSingleDisabledTest extends IntegrationBase {
+
+        @Autowired
+        private DartsDatabaseStub dartsDatabaseStub;
+
+        @Autowired
+        private transient MockMvc mockMvc;
+
+        @Autowired
+        private GivenBuilder given;
+
+        @Test
+        void adminObfuscateEveByIdsSingleDisabled() throws Exception {
+            HearingEntity hearing = dartsDatabaseStub.createHearing("Courthouse", "1", "12345", LocalDateTime.now());
+            EventEntity event = dartsDatabaseStub.createEvent(hearing);
+            given.anAuthenticatedUserWithGlobalAccessAndRole(SUPER_ADMIN);
+            MockHttpServletRequestBuilder requestBuilder = post("/admin/events/obfuscate")
+                .contentType(MediaType.APPLICATION_JSON_VALUE)
+                .content("{\"eve_ids\":[" + event.getId() + "]}");
+
+            mockMvc.perform(requestBuilder).andExpect(status().isNotImplemented());
+        }
+    }
+
 
     @Test
     void adminObfuscateEveByIdsMultiple() throws Exception {

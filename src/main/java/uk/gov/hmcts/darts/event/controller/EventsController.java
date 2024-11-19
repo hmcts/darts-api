@@ -6,6 +6,7 @@ import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
@@ -15,6 +16,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.darts.authorisation.annotation.Authorisation;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
+import uk.gov.hmcts.darts.common.exception.CommonApiError;
+import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.common.service.DataAnonymisationService;
 import uk.gov.hmcts.darts.event.component.DartsEventMapper;
 import uk.gov.hmcts.darts.event.http.api.EventApi;
@@ -63,6 +66,9 @@ public class EventsController implements EventApi {
     private final EventService eventService;
     private final DataAnonymisationService dataAnonymisationService;
     private final UserIdentity userIdentity;
+
+    @Value("${darts.event-obfuscation.enabled}")
+    private final boolean eveventObfuscationEnabled;
 
     @Override
     @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
@@ -183,6 +189,9 @@ public class EventsController implements EventApi {
     @Authorisation(contextId = ANY_ENTITY_ID,
         globalAccessSecurityRoles = {SUPER_ADMIN})
     public ResponseEntity<Void> adminObfuscateEveByIds(AdminObfuscateEveByIdsRequest adminObfuscateEveByIdsRequest) {
+        if (!eveventObfuscationEnabled) {
+            throw new DartsApiException(CommonApiError.FEATURE_FLAG_NOT_ENABLED, "Event obfuscation is not enabled");
+        }
         this.dataAnonymisationService.anonymiseEventByIds(userIdentity.getUserAccount(), adminObfuscateEveByIdsRequest.getEveIds());
         return ResponseEntity.ok().build();
     }
