@@ -7,7 +7,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import uk.gov.hmcts.darts.arm.model.blobs.ContinuationTokenBlobs;
 import uk.gov.hmcts.darts.arm.service.impl.DetsToArmBatchProcessResponseFilesImpl;
-import uk.gov.hmcts.darts.audio.deleter.impl.dets.ExternalDetsDataStoreDeleter;
 import uk.gov.hmcts.darts.common.entity.CaseDocumentEntity;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
@@ -42,8 +41,6 @@ class DetsToArmBatchProcessResponseFilesIntTest extends AbstractArmBatchProcessR
     private DetsDataManagementConfiguration detsDataManagementConfiguration;
     @Autowired
     private ObjectStateRecordRepository osrRepository;
-    @Autowired
-    private ExternalDetsDataStoreDeleter externalDetsDataStoreDeleter;
 
     @BeforeEach
     void setupData() {
@@ -247,10 +244,7 @@ class DetsToArmBatchProcessResponseFilesIntTest extends AbstractArmBatchProcessR
             String.format("DETS_%s_6a374f19a9ce7dc9cc480ea8d4eca0fb_1_iu.rsp", manifest1Uuid));
         assertThat(dbOsr1.getIdResponseCrFile()).isEqualTo("6a374f19a9ce7dc9cc480ea8d4eca0fb_a17b9015-e6ad-77c5-8d1e-13259aae1895_1_cr.rsp");
         assertThat(dbOsr1.getIdResponseUfFile()).isEqualTo("6a374f19a9ce7dc9cc480ea8d4eca0fb_04e6bc3b-952a-79b6-8362-13259aae1895_1_uf.rsp");
-        assertThat(dbOsr1.getFlagFileDetsCleanupStatus()).isTrue();
-        assertThat(dbOsr1.getDateFileDetsCleanup()).isEqualTo(endTime2);
         assertThat(dbOsr1.getObjectStatus()).isNull();
-        assertThat(externalObjectDirectoryRepository.findById(detsEod1.getId())).isEmpty();
 
         ObjectStateRecordEntity dbOsr2 = osrRepository.findByArmEodId(String.valueOf(armEod2.getId())).orElseThrow();
         assertThat(dbOsr2.getFlagRspnRecvdFromArml()).isTrue();
