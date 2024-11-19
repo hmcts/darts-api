@@ -3,7 +3,6 @@ package uk.gov.hmcts.darts.arm.component;
 import feign.Response;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -15,6 +14,7 @@ import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum;
 import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
+import uk.gov.hmcts.darts.common.repository.ArmAutomatedTaskRepository;
 import uk.gov.hmcts.darts.testutils.PostgresIntegrationBase;
 import uk.gov.hmcts.darts.testutils.stubs.ExternalObjectDirectoryStub;
 
@@ -47,6 +47,9 @@ class StubbedArmRpoDownloadProductionIntTest extends PostgresIntegrationBase {
     @Autowired
     private ExternalObjectDirectoryStub externalObjectDirectoryStub;
 
+    @Autowired
+    private ArmAutomatedTaskRepository armAutomatedTaskRepository;
+
     @MockBean
     private ArmRpoClient armRpoClient;
 
@@ -62,17 +65,6 @@ class StubbedArmRpoDownloadProductionIntTest extends PostgresIntegrationBase {
     }
 
     @Test
-    void downloadProduction_shouldThrowException_whenAutomatedTaskNotFound() {
-        // when
-        ArmRpoException exception = assertThrows(ArmRpoException.class, () ->
-            stubbedArmRpoDownloadProduction.downloadProduction("token", 1, "fileId"));
-
-        // then
-        assertThat(exception.getMessage(), containsString("Unable to find ARM automated task"));
-    }
-
-    @Disabled("This test is failing due to the fact that the method is not finding the static data in the ARM automated task")
-    @Test
     void downloadProduction_shouldThrowException_whenNoEodsFound() {
         // when
         ArmRpoException exception = assertThrows(ArmRpoException.class, () ->
@@ -82,7 +74,6 @@ class StubbedArmRpoDownloadProductionIntTest extends PostgresIntegrationBase {
         assertThat(exception.getMessage(), containsString("No EODS found"));
     }
 
-    @Disabled("This test is failing due to the fact that the method is not finding the static data in the ARM automated task")
     @Test
     void downloadProduction_shouldReturnResponse_whenEodsFound() throws InvocationTargetException, NoSuchMethodException, IllegalAccessException {
         // given
@@ -110,7 +101,7 @@ class StubbedArmRpoDownloadProductionIntTest extends PostgresIntegrationBase {
             }
         });
         dartsPersistence.saveAll(externalObjectDirectoryEntities);
-
+        
         Response response = mock(Response.class);
         when(armRpoClient.downloadProduction(anyString(), anyString(), anyString()))
             .thenReturn(response);

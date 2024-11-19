@@ -2,6 +2,7 @@ package uk.gov.hmcts.darts.task.runner.impl;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.darts.arm.service.ArmRpoPollService;
 import uk.gov.hmcts.darts.common.repository.AutomatedTaskRepository;
@@ -13,6 +14,10 @@ import uk.gov.hmcts.darts.task.service.LockService;
 
 import static uk.gov.hmcts.darts.task.api.AutomatedTaskName.ARM_RPO_POLLING_TASK_NAME;
 
+@ConditionalOnProperty(
+    value = "darts.automated.task.process-e2e-arm-rpo",
+    havingValue = "true"
+)
 @Slf4j
 @Component
 public class ArmRpoPollingAutomatedTask extends AbstractLockableAutomatedTask
