@@ -77,9 +77,9 @@ class ArmRpoReplayAutomatedTaskTest {
         verify(armAutomatedTaskEntity).getArmReplayStartTs();
         verify(armAutomatedTaskEntity).getArmReplayEndTs();
         verify(externalObjectDirectoryRepository).updateEodStatusAndTransferAttempsWhereLastModifiedIsBetweenTwoDateTimesAndHasStatus(
-            armReplay,
-            0,
             armRawDataFailed,
+            0,
+            armReplay,
             startTs,
             endTs
         );
