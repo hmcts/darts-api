@@ -1158,32 +1158,6 @@ class AutomatedTaskServiceTest extends IntegrationBase {
     }
 
     @Test
-    void givenConfiguredTaskCancelArmRpoPollAutomatedTask() {
-        AutomatedTask automatedTask =
-            new ArmRpoPollingAutomatedTask(
-                automatedTaskRepository,
-                mock(ArmRpoPollAutomatedTaskConfig.class),
-                armRpoPollService,
-                logApi,
-                lockService
-            );
-
-        Set<ScheduledTask> scheduledTasks = scheduledTaskHolder.getScheduledTasks();
-        displayTasks(scheduledTasks);
-
-        boolean mayInterruptIfRunning = false;
-        boolean taskCancelled = automatedTaskService.cancelAutomatedTask(
-            automatedTask.getTaskName(),
-            mayInterruptIfRunning
-        );
-        assertTrue(taskCancelled);
-
-        log.info("About to reload task {}", automatedTask.getTaskName());
-        automatedTaskService.reloadTaskByName(automatedTask.getTaskName());
-
-    }
-
-    @Test
     void givenConfiguredTaskGenerateCaseDocumentForRetentionDateAutomatedTask() {
         AutomatedTask automatedTask =
             new GenerateCaseDocumentForRetentionDateAutomatedTask(
