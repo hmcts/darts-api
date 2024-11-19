@@ -102,7 +102,7 @@ class DetsToArmBatchProcessResponseFilesIntTest extends AbstractArmBatchProcessR
         ExternalObjectDirectoryEntity detsEod1 = PersistableFactory.getExternalObjectDirectoryTestData().someMinimalBuilder()
             .media(media1).status(dartsDatabase.getObjectRecordStatusEntity(ARM_DROP_ZONE))
             .externalLocationType(dartsDatabase.getExternalLocationTypeEntity(DETS)).externalLocation(UUID.randomUUID()).build();
-        detsEod1 = dartsPersistence.save(detsEod1);
+        dartsPersistence.save(detsEod1);
 
         ObjectStateRecordEntity osr1 = new ObjectStateRecordEntity();
         osr1.setUuid(1L);
