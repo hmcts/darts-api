@@ -7,7 +7,7 @@ import uk.gov.hmcts.darts.arm.service.TriggerArmRpoSearchService;
 import uk.gov.hmcts.darts.common.repository.AutomatedTaskRepository;
 import uk.gov.hmcts.darts.log.api.LogApi;
 import uk.gov.hmcts.darts.task.api.AutomatedTaskName;
-import uk.gov.hmcts.darts.task.config.AutomatedTaskConfigurationProperties;
+import uk.gov.hmcts.darts.task.config.ProcessE2EArmRpoPendingAutomatedTaskConfig;
 import uk.gov.hmcts.darts.task.runner.AutoloadingManualTask;
 import uk.gov.hmcts.darts.task.service.LockService;
 
@@ -22,11 +22,11 @@ public class ProcessE2EArmRpoPendingAutomatedTask extends AbstractLockableAutoma
     private final TriggerArmRpoSearchService triggerArmRpoSearchService;
 
     protected ProcessE2EArmRpoPendingAutomatedTask(AutomatedTaskRepository automatedTaskRepository,
-                                                   AutomatedTaskConfigurationProperties automatedTaskConfigurationProperties,
+                                                   ProcessE2EArmRpoPendingAutomatedTaskConfig configurationProperties,
                                                    LogApi logApi,
                                                    LockService lockService,
                                                    TriggerArmRpoSearchService triggerArmRpoSearchService) {
-        super(automatedTaskRepository, automatedTaskConfigurationProperties, logApi, lockService);
+        super(automatedTaskRepository, configurationProperties, logApi, lockService);
         this.triggerArmRpoSearchService = triggerArmRpoSearchService;
     }
 

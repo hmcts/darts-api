@@ -7,12 +7,13 @@ import uk.gov.hmcts.darts.arm.helper.ArmRpoHelper;
 import uk.gov.hmcts.darts.arm.rpo.ArmRpoApi;
 import uk.gov.hmcts.darts.arm.service.ArmApiService;
 import uk.gov.hmcts.darts.arm.service.ArmRpoService;
+import uk.gov.hmcts.darts.arm.service.TriggerArmRpoSearchService;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class TriggerArmRpoSearchServiceImpl implements uk.gov.hmcts.darts.arm.service.TriggerArmRpoSearchService {
+public class TriggerArmRpoSearchServiceImpl implements TriggerArmRpoSearchService {
 
     private final ArmRpoApi armRpoApi;
     private final ArmRpoService armRpoService;
