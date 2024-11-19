@@ -51,7 +51,6 @@ import uk.gov.hmcts.darts.common.enums.SecurityRoleEnum;
 import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
 import uk.gov.hmcts.darts.common.repository.AnnotationDocumentRepository;
 import uk.gov.hmcts.darts.common.repository.AnnotationRepository;
-import uk.gov.hmcts.darts.common.repository.ArmAutomatedTaskRepository;
 import uk.gov.hmcts.darts.common.repository.ArmRpoExecutionDetailRepository;
 import uk.gov.hmcts.darts.common.repository.AuditRepository;
 import uk.gov.hmcts.darts.common.repository.AutomatedTaskRepository;
@@ -154,7 +153,6 @@ public class DartsDatabaseStub {
     private final EntityManagerFactory entityManagerFactory;
     private final AnnotationDocumentRepository annotationDocumentRepository;
     private final AnnotationRepository annotationRepository;
-    private final ArmAutomatedTaskRepository armAutomatedTaskRepository;
     private final ArmRpoExecutionDetailRepository armRpoExecutionDetailRepository;
     private final AuditRepository auditRepository;
     private final CaseDocumentRepository caseDocumentRepository;
@@ -268,7 +266,6 @@ public class DartsDatabaseStub {
     public void clearDatabaseInThisOrder() {
         removeDeleteFlag(AnnotationDocumentEntity.class, CaseDocumentEntity.class, MediaEntity.class, TranscriptionDocumentEntity.class);
         armRpoExecutionDetailRepository.deleteAll();
-        armAutomatedTaskRepository.deleteAll();
         objectAdminActionRepository.deleteAll();
         auditRepository.deleteAll();
         externalObjectDirectoryRepository.deleteAll();

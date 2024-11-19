@@ -10,7 +10,6 @@ import org.springframework.stereotype.Service;
 import uk.gov.hmcts.darts.audio.entity.MediaRequestEntity;
 import uk.gov.hmcts.darts.common.entity.AnnotationDocumentEntity;
 import uk.gov.hmcts.darts.common.entity.AnnotationEntity;
-import uk.gov.hmcts.darts.common.entity.ArmAutomatedTaskEntity;
 import uk.gov.hmcts.darts.common.entity.ArmRpoExecutionDetailEntity;
 import uk.gov.hmcts.darts.common.entity.ArmRpoStateEntity;
 import uk.gov.hmcts.darts.common.entity.ArmRpoStatusEntity;
@@ -668,18 +667,6 @@ public class DartsPersistence {
             return armRpoStatusRepository.save(armRpoStatusEntity);
         } else {
             return entityManager.merge(armRpoStatusEntity);
-        }
-    }
-
-    @Transactional
-    @SuppressWarnings("PMD.AvoidReassigningParameters")
-    public ArmAutomatedTaskEntity save(ArmAutomatedTaskEntity armAutomatedTaskEntity) {
-        armAutomatedTaskEntity = (ArmAutomatedTaskEntity) preCheckPersist(armAutomatedTaskEntity);
-
-        if (armAutomatedTaskEntity.getId() == null) {
-            return armAutomatedTaskRepository.save(armAutomatedTaskEntity);
-        } else {
-            return entityManager.merge(armAutomatedTaskEntity);
         }
     }
 

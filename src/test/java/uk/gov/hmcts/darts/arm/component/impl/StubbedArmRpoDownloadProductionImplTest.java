@@ -68,7 +68,7 @@ class StubbedArmRpoDownloadProductionImplTest {
             stubbedArmRpoDownloadProduction.downloadProduction("token", 1, "fileId"));
 
         // then
-        assertTrue(exception.getMessage().contains("unable to find arm automated task"));
+        assertTrue(exception.getMessage().contains("Unable to find ARM automated task"));
     }
 
     @Test
@@ -89,7 +89,7 @@ class StubbedArmRpoDownloadProductionImplTest {
             stubbedArmRpoDownloadProduction.downloadProduction("token", 1, "fileId"));
 
         // then
-        assertTrue(exception.getMessage().contains("no eods found"));
+        assertTrue(exception.getMessage().contains("No EODS found"));
     }
 
 

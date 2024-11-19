@@ -9,14 +9,11 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.TestPropertySource;
 import uk.gov.hmcts.darts.arm.client.ArmRpoClient;
 import uk.gov.hmcts.darts.arm.exception.ArmRpoException;
-import uk.gov.hmcts.darts.common.entity.ArmAutomatedTaskEntity;
 import uk.gov.hmcts.darts.common.entity.ArmRpoExecutionDetailEntity;
-import uk.gov.hmcts.darts.common.entity.AutomatedTaskEntity;
 import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum;
 import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
-import uk.gov.hmcts.darts.common.repository.AutomatedTaskRepository;
 import uk.gov.hmcts.darts.testutils.PostgresIntegrationBase;
 import uk.gov.hmcts.darts.testutils.stubs.ExternalObjectDirectoryStub;
 
@@ -33,7 +30,6 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_RPO_PENDING;
-import static uk.gov.hmcts.darts.task.api.AutomatedTaskName.ARM_RPO_POLLING_TASK_NAME;
 import static uk.gov.hmcts.darts.test.common.data.PersistableFactory.getArmRpoExecutionDetailTestData;
 
 @TestPropertySource(properties = {"darts.storage.arm.is_mock_arm_rpo_download_csv=true"})
@@ -48,9 +44,6 @@ class StubbedArmRpoDownloadProductionIntTest extends PostgresIntegrationBase {
 
     @Autowired
     private ExternalObjectDirectoryStub externalObjectDirectoryStub;
-
-    @Autowired
-    private AutomatedTaskRepository automatedTaskRepository;
 
     @MockBean
     private ArmRpoClient armRpoClient;
@@ -78,20 +71,6 @@ class StubbedArmRpoDownloadProductionIntTest extends PostgresIntegrationBase {
 
     @Test
     void downloadProduction_shouldThrowException_whenNoEodsFound() {
-        // given
-        List<AutomatedTaskEntity> automatedTasks = automatedTaskRepository.findAll();
-
-        for (AutomatedTaskEntity automatedTask : automatedTasks) {
-            var armAutomatedTask = new ArmAutomatedTaskEntity();
-            armAutomatedTask.setAutomatedTask(automatedTask);
-            log.info("Automated task name: {}", automatedTask.getTaskName());
-            if (ARM_RPO_POLLING_TASK_NAME.getTaskName().equals(automatedTask.getTaskName())) {
-                armAutomatedTask.setRpoCsvStartHour(25);
-                armAutomatedTask.setRpoCsvEndHour(49);
-            }
-            dartsPersistence.save(armAutomatedTask);
-        }
-
         // when
         ArmRpoException exception = assertThrows(ArmRpoException.class, () ->
             stubbedArmRpoDownloadProduction.downloadProduction("token", 1, "fileId"));
@@ -127,19 +106,6 @@ class StubbedArmRpoDownloadProductionIntTest extends PostgresIntegrationBase {
             }
         });
         dartsPersistence.saveAll(externalObjectDirectoryEntities);
-
-        List<AutomatedTaskEntity> automatedTasks = automatedTaskRepository.findAll();
-
-        for (AutomatedTaskEntity automatedTask : automatedTasks) {
-            var armAutomatedTask = new ArmAutomatedTaskEntity();
-            armAutomatedTask.setAutomatedTask(automatedTask);
-            log.info("Automated task name: {}", automatedTask.getTaskName());
-            if (ARM_RPO_POLLING_TASK_NAME.getTaskName().equals(automatedTask.getTaskName())) {
-                armAutomatedTask.setRpoCsvStartHour(25);
-                armAutomatedTask.setRpoCsvEndHour(49);
-            }
-            dartsPersistence.save(armAutomatedTask);
-        }
 
         Response response = mock(Response.class);
         when(armRpoClient.downloadProduction(anyString(), anyString(), anyString()))
