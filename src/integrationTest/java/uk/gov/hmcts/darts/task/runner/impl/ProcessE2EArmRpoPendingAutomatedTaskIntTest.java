@@ -178,15 +178,12 @@ class ProcessE2EArmRpoPendingAutomatedTaskIntTest extends PostgresIntegrationBas
     }
 
     private void createAndSetGetStorageAccountsMock() {
-        var indexDetails = new StorageAccountResponse.IndexDetails();
-        indexDetails.setName(STORAGE_ACCOUNT_INDEX_NAME);
-        indexDetails.setIndexId(STORAGE_ACCOUNT_INDEX_ID);
-
-        var index = new StorageAccountResponse.Index();
-        index.setIndex(indexDetails);
+        var dataDetails = new StorageAccountResponse.DataDetails();
+        dataDetails.setName(STORAGE_ACCOUNT_INDEX_NAME);
+        dataDetails.setId(STORAGE_ACCOUNT_INDEX_ID);
 
         var response = new StorageAccountResponse();
-        response.setIndexes(Collections.singletonList(index));
+        response.setDataDetails(Collections.singletonList(dataDetails));
         response.setIsError(false);
         response.setStatus(200);
 
