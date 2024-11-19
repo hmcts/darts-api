@@ -33,9 +33,11 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_RPO_PENDING;
+import static uk.gov.hmcts.darts.task.api.AutomatedTaskName.ARM_RPO_POLL_TASK_NAME;
 import static uk.gov.hmcts.darts.test.common.data.PersistableFactory.getArmRpoExecutionDetailTestData;
 
 @TestPropertySource(properties = {"darts.storage.arm.is_mock_arm_rpo_download_csv=true"})
+@SuppressWarnings({"PMD.AvoidInstantiatingObjectsInLoops", "PMD.CloseResource"})
 class StubbedArmRpoDownloadProductionIntTest extends IntegrationBase {
     @Autowired
     private ArmRpoDownloadProduction stubbedArmRpoDownloadProduction;
@@ -97,7 +99,7 @@ class StubbedArmRpoDownloadProductionIntTest extends IntegrationBase {
 
         OffsetDateTime ingestionStartDateTime = currentTimeHelper.currentOffsetDateTime().minusHours(30);
         externalObjectDirectoryEntities.forEach(eod -> {
-            if (eod.getId() % 2 == 0 && !(eod.getId() % 3 == 0)) {
+            if (eod.getId() % 2 == 0 && (eod.getId() % 3 != 0)) {
                 // within the time range
                 eod.setCreatedDateTime(ingestionStartDateTime);
                 eod.setDataIngestionTs(currentTimeHelper.currentOffsetDateTime().minusHours(26));
@@ -118,7 +120,7 @@ class StubbedArmRpoDownloadProductionIntTest extends IntegrationBase {
         for (AutomatedTaskEntity automatedTask : automatedTasks) {
             var armAutomatedTask = new ArmAutomatedTaskEntity();
             armAutomatedTask.setAutomatedTask(automatedTask);
-            if (automatedTask.getTaskName().equals("ARM_RPO_POLL_TASK_NAME")) {
+            if (ARM_RPO_POLL_TASK_NAME.getTaskName().equals(automatedTask.getTaskName())) {
                 armAutomatedTask.setRpoCsvStartHour(25);
                 armAutomatedTask.setRpoCsvEndHour(49);
             }

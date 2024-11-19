@@ -37,6 +37,7 @@ import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 @Slf4j
+@SuppressWarnings("PMD.CloseResource")
 class StubbedArmRpoDownloadProductionImplTest {
     @Mock
     private ArmRpoClient armRpoClient;

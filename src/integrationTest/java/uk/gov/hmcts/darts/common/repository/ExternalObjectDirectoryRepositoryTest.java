@@ -435,7 +435,7 @@ class ExternalObjectDirectoryRepositoryTest extends PostgresIntegrationBase {
 
         OffsetDateTime ingestionStartDateTime = currentTimeHelper.currentOffsetDateTime().minusHours(30);
         externalObjectDirectoryEntities.forEach(eod -> {
-            if (eod.getId() % 2 == 0 && !(eod.getId() % 3 == 0)) {
+            if (eod.getId() % 2 == 0 && (eod.getId() % 3 != 0)) {
                 // within the time range
                 eod.setCreatedDateTime(ingestionStartDateTime);
                 eod.setDataIngestionTs(currentTimeHelper.currentOffsetDateTime().minusHours(26));
@@ -463,6 +463,6 @@ class ExternalObjectDirectoryRepositoryTest extends PostgresIntegrationBase {
             assertTrue(eod.getDataIngestionTs().isAfter(ingestionStartDateTime));
             assertTrue(eod.getDataIngestionTs().isBefore(ingestionEndDateTime));
         });
-        
+
     }
 }
