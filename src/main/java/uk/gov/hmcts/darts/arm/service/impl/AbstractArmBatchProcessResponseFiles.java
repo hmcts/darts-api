@@ -66,6 +66,7 @@ import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.STORED;
 public abstract class AbstractArmBatchProcessResponseFiles implements ArmResponseFilesProcessor {
 
     protected static final String UNABLE_TO_UPDATE_EOD = "Unable to update EOD";
+    public static final String CREATE_RECORD = "create_record";
     protected final ExternalObjectDirectoryRepository externalObjectDirectoryRepository;
     protected final ArmDataManagementApi armDataManagementApi;
     protected final FileOperationService fileOperationService;
@@ -77,13 +78,12 @@ public abstract class AbstractArmBatchProcessResponseFiles implements ArmRespons
     protected final LogApi logApi;
 
     private UserAccountEntity userAccount;
-    private String continuationToken;
 
     public AbstractArmBatchProcessResponseFiles(ExternalObjectDirectoryRepository externalObjectDirectoryRepository, ArmDataManagementApi armDataManagementApi,
-                                            FileOperationService fileOperationService, ArmDataManagementConfiguration armDataManagementConfiguration,
-                                            ObjectMapper objectMapper, UserIdentity userIdentity, CurrentTimeHelper timeHelper,
-                                            ExternalObjectDirectoryService externalObjectDirectoryService,
-                                            LogApi logApi) {
+                                                FileOperationService fileOperationService, ArmDataManagementConfiguration armDataManagementConfiguration,
+                                                ObjectMapper objectMapper, UserIdentity userIdentity, CurrentTimeHelper timeHelper,
+                                                ExternalObjectDirectoryService externalObjectDirectoryService,
+                                                LogApi logApi) {
         this.externalObjectDirectoryRepository = externalObjectDirectoryRepository;
         this.armDataManagementApi = armDataManagementApi;
         this.fileOperationService = fileOperationService;
@@ -282,18 +282,26 @@ public abstract class AbstractArmBatchProcessResponseFiles implements ArmRespons
     private void processBatchResponseFiles(BatchInputUploadFileFilenameProcessor batchUploadFileFilenameProcessor, ArmBatchResponses armBatchResponses) {
         armBatchResponses.getArmBatchResponseMap().values().forEach(
             armResponseBatchData -> {
-                if (nonNull(armResponseBatchData.getInvalidLineFileFilenameProcessor())
+                if ((CollectionUtils.isNotEmpty(armResponseBatchData.getInvalidLineFileFilenameProcessors())
+                    && (armResponseBatchData.getInvalidLineFileFilenameProcessors().size() == 1))
                     && (nonNull(armResponseBatchData.getCreateRecordFilenameProcessor())
                     || nonNull(armResponseBatchData.getArmResponseUploadFileRecord()))) {
 
                     preProcessResponseFilesActions(armResponseBatchData.getExternalObjectDirectoryId());
 
                     processInvalidLineFile(armResponseBatchData.getExternalObjectDirectoryId(),
-                                           armResponseBatchData.getInvalidLineFileFilenameProcessor(),
-                                           armResponseBatchData.getArmResponseInvalidLineRecord(),
+                                           armResponseBatchData.getInvalidLineFileFilenameProcessors().getFirst(),
+                                           armResponseBatchData.getArmResponseInvalidLineRecords().getFirst(),
                                            armResponseBatchData.getCreateRecordFilenameProcessor(),
                                            armResponseBatchData.getUploadFileFilenameProcessor());
                     deleteResponseBlobs(armResponseBatchData);
+                } else if ((CollectionUtils.isNotEmpty(armResponseBatchData.getInvalidLineFileFilenameProcessors())
+                    && (armResponseBatchData.getInvalidLineFileFilenameProcessors().size() > 1))) {
+
+                    preProcessResponseFilesActions(armResponseBatchData.getExternalObjectDirectoryId());
+                    processMultipleInvalidLineFiles(armResponseBatchData);
+                    deleteResponseBlobs(armResponseBatchData);
+
                 } else if (nonNull(armResponseBatchData.getCreateRecordFilenameProcessor())
                     && nonNull(armResponseBatchData.getUploadFileFilenameProcessor())) {
 
@@ -315,6 +323,73 @@ public abstract class AbstractArmBatchProcessResponseFiles implements ArmRespons
                 }
             }
         );
+    }
+
+    private void processMultipleInvalidLineFiles(ArmResponseBatchData armResponseBatchData) {
+        try {
+            ExternalObjectDirectoryEntity externalObjectDirectory = getExternalObjectDirectoryEntity(armResponseBatchData.getExternalObjectDirectoryId());
+            var invalidLineRecord1 = armResponseBatchData.getArmResponseInvalidLineRecords().getFirst();
+            var invalidLineRecord2 = armResponseBatchData.getArmResponseInvalidLineRecords().getLast();
+            var invalidLineFileFilenameProcessor1 = armResponseBatchData.getInvalidLineFileFilenameProcessors().getFirst();
+            var invalidLineFileFilenameProcessor2 = armResponseBatchData.getInvalidLineFileFilenameProcessors().getLast();
+
+            if (nonNull(externalObjectDirectory)) {
+                if (armResponseBatchData.getArmResponseInvalidLineRecords().size() == 2) {
+                    if (nonNull(invalidLineRecord1) && nonNull(invalidLineRecord2)) {
+                        // Read the invalid lines file and log the error code and description with EOD
+                        log.warn(
+                            "Multiple ARM invalid line files for external object id {}. Invalid line 1 ARM error description: {} ARM error status: {}"
+                                + " Invalid line 1 ARM error description: {} ARM error status: {}",
+                            externalObjectDirectory.getId(),
+                            invalidLineRecord1.getExceptionDescription(),
+                            invalidLineRecord1.getErrorStatus(),
+                            invalidLineRecord2.getExceptionDescription(),
+                            invalidLineRecord2.getErrorStatus()
+                        );
+                        updateTransferAttempts(externalObjectDirectory);
+                        String errorCode = getErrorCode(invalidLineRecord1, invalidLineRecord2);
+                        externalObjectDirectory.setErrorCode(errorCode);
+                        updateExternalObjectDirectoryStatus(externalObjectDirectory, EodHelper.armResponseManifestFailedStatus());
+
+                    } else {
+                        log.warn("Unable to read invalid line files {} - {}", invalidLineFileFilenameProcessor1.getInvalidLineFileFilenameAndPath(),
+                                 invalidLineFileFilenameProcessor2.getInvalidLineFileFilenameAndPath());
+                        updateExternalObjectDirectoryStatus(externalObjectDirectory, EodHelper.armResponseProcessingFailedStatus());
+                    }
+                } else {
+                    log.warn("Invalid line file count is greater than 2 for external object directory ID {}", externalObjectDirectory.getId());
+                    updateExternalObjectDirectoryStatus(externalObjectDirectory, EodHelper.armResponseProcessingFailedStatus());
+                }
+            } else {
+
+                log.warn("Unable to find external object directory with ID {} for ARM batch responses with first IL file {}, second IL file {}",
+                         armResponseBatchData.getExternalObjectDirectoryId(),
+                         invalidLineFileFilenameProcessor1.getInvalidLineFileFilenameAndPath(),
+                         invalidLineFileFilenameProcessor2.getInvalidLineFileFilenameAndPath());
+                List<String> invalidResponseFiles = new ArrayList<>();
+                invalidResponseFiles.add(invalidLineFileFilenameProcessor1.getInvalidLineFileFilenameAndPath());
+                invalidResponseFiles.add(invalidLineFileFilenameProcessor2.getInvalidLineFileFilenameAndPath());
+                deleteResponseBlobs(invalidResponseFiles);
+            }
+        } catch (Exception e) {
+            log.error("Unable to update invalid line responses", e);
+        }
+
+    }
+
+    private String getErrorCode(ArmResponseInvalidLineRecord invalidLineRecord1, ArmResponseInvalidLineRecord invalidLineRecord2) {
+        UploadNewFileRecord uploadNewFileRecord1 = readInputJson(invalidLineRecord1.getInput());
+        UploadNewFileRecord uploadNewFileRecord2 = readInputJson(invalidLineRecord2.getInput());
+
+        String errorCode;
+        if (CREATE_RECORD.equalsIgnoreCase(uploadNewFileRecord1.getOperation())) {
+            errorCode = invalidLineRecord1.getExceptionDescription() + " " + invalidLineRecord2.getExceptionDescription();
+        } else if (CREATE_RECORD.equalsIgnoreCase(uploadNewFileRecord2.getOperation())) {
+            errorCode = invalidLineRecord2.getExceptionDescription() + " " + invalidLineRecord1.getExceptionDescription();
+        } else {
+            errorCode = invalidLineRecord1.getExceptionDescription() + " " + invalidLineRecord2.getExceptionDescription();
+        }
+        return errorCode;
     }
 
     private void processCreateRecordResponseFiles(List<CreateRecordFilenameProcessor> createRecordResponses,
@@ -716,8 +791,9 @@ public abstract class AbstractArmBatchProcessResponseFiles implements ArmRespons
         if (nonNull(armResponseBatchData.getUploadFileFilenameProcessor())) {
             responseBlobsToBeDeleted.add(armResponseBatchData.getUploadFileFilenameProcessor().getUploadFileFilenameAndPath());
         }
-        if (nonNull(armResponseBatchData.getInvalidLineFileFilenameProcessor())) {
-            responseBlobsToBeDeleted.add(armResponseBatchData.getInvalidLineFileFilenameProcessor().getInvalidLineFileFilenameAndPath());
+        if (CollectionUtils.isNotEmpty(armResponseBatchData.getInvalidLineFileFilenameProcessors())) {
+            armResponseBatchData.getInvalidLineFileFilenameProcessors().forEach(
+                processor -> responseBlobsToBeDeleted.add(processor.getInvalidLineFileFilenameAndPath()));
         }
         return responseBlobsToBeDeleted;
     }
