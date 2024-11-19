@@ -216,9 +216,9 @@ class ArmRpoClientIntTest extends IntegrationBaseWithWiremock {
         );
 
         assertEquals("Failed to get storage account index name", "rm5",
-                     getStorageAccountsResponse.getIndexes().getFirst().getIndex().getName());
+                     getStorageAccountsResponse.getDataDetails().getFirst().getId());
         assertEquals("Failed to get storage account index id", "c19454c6-c378-43c1-ae59-d0d013e30915",
-                     getStorageAccountsResponse.getIndexes().getFirst().getIndex().getIndexId());
+                     getStorageAccountsResponse.getDataDetails().getFirst().getName());
 
     }
 

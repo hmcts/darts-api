@@ -39,25 +39,21 @@ class ArpRpoApiGetStorageAccountsIntTest extends IntegrationBase {
 
     @Test
     void getStorageAccountsSuccess() {
-
         // given
         when(armApiConfigurationProperties.getArmStorageAccountName()).thenReturn("expectedAccountName");
 
-        StorageAccountResponse.IndexDetails indexDetails1 = new StorageAccountResponse.IndexDetails();
-        indexDetails1.setIndexId("indexId1");
-        indexDetails1.setName("unexpectedAccountName");
-        StorageAccountResponse.IndexDetails indexDetails2 = new StorageAccountResponse.IndexDetails();
-        indexDetails2.setIndexId("indexId2");
-        indexDetails2.setName("expectedAccountName");
-        StorageAccountResponse.Index index1 = new StorageAccountResponse.Index();
-        index1.setIndex(indexDetails1);
-        StorageAccountResponse.Index index2 = new StorageAccountResponse.Index();
-        index2.setIndex(indexDetails2);
+        StorageAccountResponse.DataDetails dataDetails1 = new StorageAccountResponse.DataDetails();
+        dataDetails1.setId("indexId1");
+        dataDetails1.setName("unexpectedAccountName");
+
+        StorageAccountResponse.DataDetails dataDetails2 = new StorageAccountResponse.DataDetails();
+        dataDetails2.setId("indexId2");
+        dataDetails2.setName("expectedAccountName");
 
         StorageAccountResponse storageAccountResponse = new StorageAccountResponse();
-        storageAccountResponse.setIndexes(List.of(index1, index2));
         storageAccountResponse.setStatus(200);
         storageAccountResponse.setIsError(false);
+        storageAccountResponse.setDataDetails(List.of(dataDetails1, dataDetails2));
 
         var bearerAuth = "Bearer some-token";
         when(armRpoClient.getStorageAccounts(any(), any())).thenReturn(storageAccountResponse);
@@ -68,7 +64,6 @@ class ArpRpoApiGetStorageAccountsIntTest extends IntegrationBase {
         armRpoExecutionDetailEntity.setLastModifiedBy(userAccount);
         var armRpoExecutionDetail = dartsPersistence.save(armRpoExecutionDetailEntity);
 
-
         // when
         armRpoApi.getStorageAccounts(bearerAuth, armRpoExecutionDetail.getId(), userAccount);
 
@@ -77,7 +72,6 @@ class ArpRpoApiGetStorageAccountsIntTest extends IntegrationBase {
         assertEquals(ArmRpoStateEnum.GET_STORAGE_ACCOUNTS.getId(), armRpoExecutionDetailEntityUpdated.getArmRpoState().getId());
         assertEquals(ArmRpoStatusEnum.COMPLETED.getId(), armRpoExecutionDetailEntityUpdated.getArmRpoStatus().getId());
         assertEquals("indexId2", armRpoExecutionDetailEntityUpdated.getStorageAccountId());
-
     }
 
     @Test
@@ -103,7 +97,7 @@ class ArpRpoApiGetStorageAccountsIntTest extends IntegrationBase {
 
         // then
         assertThat(armRpoException.getMessage(), containsString(
-            "Failure during ARM get storage accounts: Unable to get indexes from storage account response"));
+            "Failure during ARM get storage accounts: No data details were present in the storage account response"));
 
         var armRpoExecutionDetailEntityUpdated = dartsPersistence.getArmRpoExecutionDetailRepository().findById(armRpoExecutionDetail.getId()).get();
         assertEquals(ArmRpoStateEnum.GET_STORAGE_ACCOUNTS.getId(), armRpoExecutionDetailEntityUpdated.getArmRpoState().getId());
