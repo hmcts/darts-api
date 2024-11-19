@@ -14,6 +14,7 @@ import lombok.Getter;
 import lombok.Setter;
 import uk.gov.hmcts.darts.common.entity.base.CreatedModifiedBaseEntity;
 import uk.gov.hmcts.darts.task.runner.IsNamedEntity;
+import uk.gov.hmcts.darts.util.DataUtil;
 
 @Entity
 @Table(name = DefenceEntity.TABLE_NAME)
@@ -39,4 +40,9 @@ public class DefenceEntity extends CreatedModifiedBaseEntity implements IsNamedE
 
     @Column(name = DEFENCE_NAME)
     private String name;
+
+
+    public void setName(String name) {
+        this.name = DataUtil.trim(name);
+    }
 }
