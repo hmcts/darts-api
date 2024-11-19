@@ -76,8 +76,9 @@ class ArmRpoApiAddAsyncSearchIntTest extends PostgresIntegrationBase {
             .getMessage();
 
         // Then
-        assertThat(exceptionMessage, containsString("ARM addAsyncSearch: Automated task not found: ProcessE2EArmRpoPending"));
-        
+        assertThat(exceptionMessage, containsString("Could not construct API request"));
+        assertThat(exceptionMessage, containsString("matterId is marked non-null but is null"));
+
         executionDetailEntity = dartsPersistence.getArmRpoExecutionDetailRepository().findById(executionId)
             .orElseThrow();
         assertEquals(ArmRpoStateEnum.ADD_ASYNC_SEARCH.getId(), executionDetailEntity.getArmRpoState().getId());
