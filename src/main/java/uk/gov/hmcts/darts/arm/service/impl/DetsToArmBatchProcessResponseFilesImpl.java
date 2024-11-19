@@ -11,7 +11,6 @@ import uk.gov.hmcts.darts.arm.model.record.armresponse.ArmResponseUploadFileReco
 import uk.gov.hmcts.darts.arm.service.ExternalObjectDirectoryService;
 import uk.gov.hmcts.darts.arm.util.files.BatchInputUploadFileFilenameProcessor;
 import uk.gov.hmcts.darts.arm.util.files.UploadFileFilenameProcessor;
-import uk.gov.hmcts.darts.audio.deleter.impl.dets.ExternalDetsDataStoreDeleter;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.entity.ObjectStateRecordEntity;
@@ -19,11 +18,9 @@ import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
 import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
 import uk.gov.hmcts.darts.common.repository.ObjectStateRecordRepository;
 import uk.gov.hmcts.darts.common.service.FileOperationService;
-import uk.gov.hmcts.darts.common.util.EodHelper;
 import uk.gov.hmcts.darts.dets.config.DetsDataManagementConfiguration;
 import uk.gov.hmcts.darts.log.api.LogApi;
 
-import java.util.List;
 import java.util.Optional;
 
 
@@ -33,7 +30,6 @@ public class DetsToArmBatchProcessResponseFilesImpl extends AbstractArmBatchProc
 
     private final DetsDataManagementConfiguration configuration;
     private final ObjectStateRecordRepository osrRepository;
-    private final ExternalDetsDataStoreDeleter detsDataStoreDeleter;
 
     public DetsToArmBatchProcessResponseFilesImpl(ExternalObjectDirectoryRepository externalObjectDirectoryRepository,
                                                   ArmDataManagementApi armDataManagementApi, FileOperationService fileOperationService,
@@ -41,8 +37,7 @@ public class DetsToArmBatchProcessResponseFilesImpl extends AbstractArmBatchProc
                                                   ObjectMapper objectMapper, UserIdentity userIdentity, CurrentTimeHelper currentTimeHelper,
                                                   ExternalObjectDirectoryService externalObjectDirectoryService,
                                                   LogApi logApi, DetsDataManagementConfiguration configuration,
-                                                  ObjectStateRecordRepository osrRepository,
-                                                  ExternalDetsDataStoreDeleter detsDataStoreDeleter) {
+                                                  ObjectStateRecordRepository osrRepository) {
         super(externalObjectDirectoryRepository,
               armDataManagementApi,
               fileOperationService,
@@ -54,7 +49,6 @@ public class DetsToArmBatchProcessResponseFilesImpl extends AbstractArmBatchProc
               logApi);
         this.configuration = configuration;
         this.osrRepository = osrRepository;
-        this.detsDataStoreDeleter = detsDataStoreDeleter;
     }
 
     @Override
@@ -83,7 +77,6 @@ public class DetsToArmBatchProcessResponseFilesImpl extends AbstractArmBatchProc
 
         getObjectStateRecord(armEod.getId()).ifPresent(osr -> {
             updateOsrFileIngestStatusToSuccess(batchUploadFileFilenameProcessor, armResponseBatchData, objectChecksum, osr);
-            deleteBlobDataAndEod(armEod, osr);
         });
     }
 
@@ -132,33 +125,6 @@ public class DetsToArmBatchProcessResponseFilesImpl extends AbstractArmBatchProc
         osr.setFlagRspnRecvdFromArml(true);
         osr.setDateRspnRecvdFromArml(timeHelper.currentOffsetDateTime());
         osrRepository.save(osr);
-    }
-
-    private void deleteBlobDataAndEod(ExternalObjectDirectoryEntity armEod, ObjectStateRecordEntity osr) {
-        List<ExternalObjectDirectoryEntity> detsEods = externalObjectDirectoryRepository.findExternalObjectDirectoryByLocation(
-            EodHelper.detsLocation(),
-            armEod.getMedia(),
-            armEod.getTranscriptionDocumentEntity(),
-            armEod.getAnnotationDocumentEntity(),
-            armEod.getCaseDocument());
-
-        if (detsEods.size() == 1) {
-            boolean deleted = detsDataStoreDeleter.delete(detsEods.getFirst());
-            if (deleted) {
-                osr.setFlagFileDetsCleanupStatus(true);
-                osr.setDateFileDetsCleanup(timeHelper.currentOffsetDateTime());
-                osrRepository.save(osr);
-            } else {
-                String errorMessage = String.format("Unable to delete DETS blob for ARM EDO %s", armEod.getId());
-                log.error(errorMessage);
-                updateOsrIngestStatusToFailure(osr, errorMessage);
-            }
-        } else {
-            String errorMessage = String.format(
-                "Unable to delete DETS blob because either no DETS EOD for ARM EDO %s found or more than one DETS EOD found", armEod.getId());
-            log.error(errorMessage);
-            updateOsrIngestStatusToFailure(osr, errorMessage);
-        }
     }
 
     private void updateOsrFileIngestStatusToSuccess(BatchInputUploadFileFilenameProcessor batchUploadFileFilenameProcessor,

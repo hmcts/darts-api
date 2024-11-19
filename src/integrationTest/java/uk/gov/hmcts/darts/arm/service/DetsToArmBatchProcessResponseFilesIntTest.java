@@ -5,10 +5,8 @@ import lombok.SneakyThrows;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import uk.gov.hmcts.darts.arm.model.blobs.ContinuationTokenBlobs;
 import uk.gov.hmcts.darts.arm.service.impl.DetsToArmBatchProcessResponseFilesImpl;
-import uk.gov.hmcts.darts.audio.deleter.impl.dets.DetsDataStoreDeleter;
 import uk.gov.hmcts.darts.audio.deleter.impl.dets.ExternalDetsDataStoreDeleter;
 import uk.gov.hmcts.darts.common.entity.CaseDocumentEntity;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
@@ -19,7 +17,6 @@ import uk.gov.hmcts.darts.common.entity.ObjectStateRecordEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionDocumentEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
-import uk.gov.hmcts.darts.common.exception.AzureDeleteBlobException;
 import uk.gov.hmcts.darts.common.repository.ObjectStateRecordRepository;
 import uk.gov.hmcts.darts.dets.config.DetsDataManagementConfiguration;
 import uk.gov.hmcts.darts.test.common.data.PersistableFactory;
@@ -33,7 +30,6 @@ import java.util.UUID;
 import static java.time.temporal.ChronoUnit.SECONDS;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.within;
-import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum.ARM;
 import static uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum.DETS;
@@ -48,9 +44,7 @@ class DetsToArmBatchProcessResponseFilesIntTest extends AbstractArmBatchProcessR
     private ObjectStateRecordRepository osrRepository;
     @Autowired
     private ExternalDetsDataStoreDeleter externalDetsDataStoreDeleter;
-    @MockBean
-    private DetsDataStoreDeleter detsDataStoreDeleter;
-    
+
     @BeforeEach
     void setupData() {
         armBatchProcessResponseFiles = new DetsToArmBatchProcessResponseFilesImpl(
@@ -64,11 +58,10 @@ class DetsToArmBatchProcessResponseFilesIntTest extends AbstractArmBatchProcessR
             externalObjectDirectoryService,
             logApi,
             detsDataManagementConfiguration,
-            osrRepository,
-            externalDetsDataStoreDeleter
+            osrRepository
         );
     }
-    
+
     @Override
     protected String prefix() {
         return "DETS";
@@ -132,8 +125,6 @@ class DetsToArmBatchProcessResponseFilesIntTest extends AbstractArmBatchProcessR
             .media(media2).status(dartsDatabase.getObjectRecordStatusEntity(ARM_DROP_ZONE))
             .externalLocationType(dartsDatabase.getExternalLocationTypeEntity(DETS)).externalLocation(UUID.randomUUID()).build();
         detsEod2 = dartsPersistence.save(detsEod2);
-
-        doThrow(AzureDeleteBlobException.class).when(detsDataStoreDeleter).delete(detsEod2.getExternalLocation());
 
         ObjectStateRecordEntity osr2 = new ObjectStateRecordEntity();
         osr2.setUuid(2L);
