@@ -87,7 +87,7 @@ public class ArmRpoPollServiceImpl implements ArmRpoPollService {
                         inputStream,
                         productionExportFilename,
                         armDataManagementConfiguration,
-                        false
+                        true
                     );
                     tempProductionFiles.add(tempProductionFile.toFile());
                 }
@@ -110,7 +110,7 @@ public class ArmRpoPollServiceImpl implements ArmRpoPollService {
             try {
                 cleanUpTempFiles();
             } catch (Exception e) {
-                log.error("Error while cleaning up temp files", e);
+                log.error("Error while cleaning up ARM RPO polling service temp files", e);
             }
 
         }

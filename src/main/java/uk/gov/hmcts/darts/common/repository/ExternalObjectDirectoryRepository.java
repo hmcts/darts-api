@@ -584,11 +584,10 @@ public interface ExternalObjectDirectoryRepository extends JpaRepository<Externa
     @Query("""
         SELECT eod FROM ExternalObjectDirectoryEntity eod
         WHERE eod.status = :status
-        AND eod.dataIngestionTs BETWEEN eod.createdDateTime - ( :rpoCsvStartHour * INTERVAL '1 hour' )
-            AND eod.createdDateTime - ( :rpoCsvEndHour * INTERVAL '1 hour' )
+        AND eod.dataIngestionTs BETWEEN :ingestionStartDateTime AND :ingestionEndDateTime
         """)
-    List<ExternalObjectDirectoryEntity> findAllByStatusAndDataIngestionTsBetweenOffsetCreatedDateTimeLimit(ObjectRecordStatusEntity objectRecordStatusEntity,
-                                                                                                           int rpoCsvStartHour,
-                                                                                                           int rpoCsvEndHour,
-                                                                                                           int limit);
+    List<ExternalObjectDirectoryEntity> findAllByStatusAndDataIngestionTsBetweenAndLimit(@Param("status") ObjectRecordStatusEntity status,
+                                                                                         @Param("ingestionStartDateTime") OffsetDateTime ingestionStartDateTime,
+                                                                                         @Param("ingestionEndDateTime") OffsetDateTime ingestionEndDateTime,
+                                                                                         Limit limit);
 }

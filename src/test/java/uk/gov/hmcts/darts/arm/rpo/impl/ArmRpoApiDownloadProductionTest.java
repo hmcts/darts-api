@@ -77,7 +77,7 @@ class ArmRpoApiDownloadProductionTest {
         feign.Response.Body body = mock(feign.Response.Body.class);
         when(response.body()).thenReturn(body);
         when(body.asInputStream()).thenReturn(inputStream);
-        when(armRpoDownloadProduction.downloadProduction(anyString(), anyString())).thenReturn(response);
+        when(armRpoDownloadProduction.downloadProduction(anyString(), anyInt(), anyString())).thenReturn(response);
 
         try (InputStream result =
                  armRpoApi.downloadProduction(BEARER_TOKEN, EXECUTION_ID, "productionExportId", userAccount)) {
@@ -100,7 +100,7 @@ class ArmRpoApiDownloadProductionTest {
         when(armRpoService.getArmRpoExecutionDetailEntity(anyInt())).thenReturn(armRpoExecutionDetailEntity);
         feign.Response response = mock(feign.Response.class);
         when(response.status()).thenReturn(400);
-        when(armRpoDownloadProduction.downloadProduction(anyString(), anyString())).thenReturn(response);
+        when(armRpoDownloadProduction.downloadProduction(anyString(), anyInt(), anyString())).thenReturn(response);
 
         // when
         ArmRpoException armRpoException = assertThrows(ArmRpoException.class, () ->
@@ -122,7 +122,7 @@ class ArmRpoApiDownloadProductionTest {
     void downloadProductionThrowsFeignException() {
         // given
         when(armRpoService.getArmRpoExecutionDetailEntity(anyInt())).thenReturn(armRpoExecutionDetailEntity);
-        when(armRpoDownloadProduction.downloadProduction(anyString(), anyString())).thenThrow(FeignException.class);
+        when(armRpoDownloadProduction.downloadProduction(anyString(), anyInt(), anyString())).thenThrow(FeignException.class);
 
         // when
         ArmRpoException armRpoException = assertThrows(ArmRpoException.class, () ->

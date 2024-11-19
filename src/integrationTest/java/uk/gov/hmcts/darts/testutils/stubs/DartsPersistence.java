@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import uk.gov.hmcts.darts.audio.entity.MediaRequestEntity;
 import uk.gov.hmcts.darts.common.entity.AnnotationDocumentEntity;
 import uk.gov.hmcts.darts.common.entity.AnnotationEntity;
+import uk.gov.hmcts.darts.common.entity.ArmAutomatedTaskEntity;
 import uk.gov.hmcts.darts.common.entity.ArmRpoExecutionDetailEntity;
 import uk.gov.hmcts.darts.common.entity.ArmRpoStateEntity;
 import uk.gov.hmcts.darts.common.entity.ArmRpoStatusEntity;
@@ -39,6 +40,7 @@ import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
 import uk.gov.hmcts.darts.common.repository.AnnotationDocumentRepository;
 import uk.gov.hmcts.darts.common.repository.AnnotationRepository;
+import uk.gov.hmcts.darts.common.repository.ArmAutomatedTaskRepository;
 import uk.gov.hmcts.darts.common.repository.ArmRpoExecutionDetailRepository;
 import uk.gov.hmcts.darts.common.repository.ArmRpoStateRepository;
 import uk.gov.hmcts.darts.common.repository.ArmRpoStatusRepository;
@@ -104,6 +106,7 @@ public class DartsPersistence {
     private final EntityManagerFactory entityManagerFactory;
     private final AnnotationDocumentRepository annotationDocumentRepository;
     private final AnnotationRepository annotationRepository;
+    private final ArmAutomatedTaskRepository armAutomatedTaskRepository;
     private final ArmRpoExecutionDetailRepository armRpoExecutionDetailRepository;
     private final ArmRpoStateRepository armRpoStateRepository;
     private final ArmRpoStatusRepository armRpoStatusRepository;
@@ -665,6 +668,18 @@ public class DartsPersistence {
             return armRpoStatusRepository.save(armRpoStatusEntity);
         } else {
             return entityManager.merge(armRpoStatusEntity);
+        }
+    }
+
+    @Transactional
+    @SuppressWarnings("PMD.AvoidReassigningParameters")
+    public ArmAutomatedTaskEntity save(ArmAutomatedTaskEntity armAutomatedTaskEntity) {
+        armAutomatedTaskEntity = (ArmAutomatedTaskEntity) preCheckPersist(armAutomatedTaskEntity);
+
+        if (armAutomatedTaskEntity.getId() == null) {
+            return armAutomatedTaskRepository.save(armAutomatedTaskEntity);
+        } else {
+            return entityManager.merge(armAutomatedTaskEntity);
         }
     }
 

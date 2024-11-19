@@ -572,7 +572,7 @@ public class ArmRpoApiImpl implements ArmRpoApi {
         StringBuilder errorMessage = new StringBuilder("Failure during download production: ");
 
         try {
-            response = armRpoDownloadProduction.downloadProduction(bearerToken, productionExportFileId);
+            response = armRpoDownloadProduction.downloadProduction(bearerToken, executionId, productionExportFileId);
         } catch (FeignException e) {
             // this ensures the full error body containing the ARM error detail is logged rather than a truncated version
             log.error(errorMessage.append("Error during ARM RPO download production id: ").append(productionExportFileId)

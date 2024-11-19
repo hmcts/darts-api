@@ -14,7 +14,7 @@ public class ArmRpoDownloadProductionImpl implements ArmRpoDownloadProduction {
     private final ArmRpoClient armRpoClient;
 
     @Override
-    public feign.Response downloadProduction(String bearerToken, String productionExportFileId) {
+    public feign.Response downloadProduction(String bearerToken, Integer executionId, String productionExportFileId) {
         return armRpoClient.downloadProduction(bearerToken, productionExportFileId);
     }
 }

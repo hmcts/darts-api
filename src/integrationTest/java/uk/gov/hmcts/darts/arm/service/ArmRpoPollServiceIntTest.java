@@ -1,12 +1,15 @@
 package uk.gov.hmcts.darts.arm.service;
 
+import feign.Response;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.io.IOUtils;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.TestPropertySource;
 import uk.gov.hmcts.darts.arm.client.ArmRpoClient;
 import uk.gov.hmcts.darts.arm.client.model.rpo.CreateExportBasedOnSearchResultsTableResponse;
 import uk.gov.hmcts.darts.arm.client.model.rpo.ExtendedProductionsByMatterResponse;
@@ -23,11 +26,15 @@ import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.ArmRpoExecutionDetailEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.service.FileOperationService;
+import uk.gov.hmcts.darts.test.common.TestUtils;
 import uk.gov.hmcts.darts.testutils.PostgresIntegrationBase;
 
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.Reader;
+import java.nio.charset.Charset;
+import java.nio.file.Files;
 import java.util.Collections;
 import java.util.List;
 
@@ -37,13 +44,17 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.darts.test.common.data.PersistableFactory.getArmRpoExecutionDetailTestData;
 
+@TestPropertySource(properties = {"darts.storage.arm.is_mock_arm_rpo_download_csv=false"})
 @Slf4j
 class ArmRpoPollServiceIntTest extends PostgresIntegrationBase {
 
-    public static final String BEARER_TOKEN = "BearerToken";
+    private static final String BEARER_TOKEN = "BearerToken";
+    public static final String PRODUCTIONEXPORTFILE_CSV = "tests/arm/service/ArmRpoPollServiceTest/productionexportfile.csv";
 
     @MockBean
     private UserIdentity userIdentity;
@@ -86,6 +97,9 @@ class ArmRpoPollServiceIntTest extends PostgresIntegrationBase {
         armRpoExecutionDetailEntity.setArmRpoStatus(ArmRpoHelper.completedRpoStatus());
         armRpoExecutionDetailEntity.setArmRpoState(ArmRpoHelper.saveBackgroundSearchRpoState());
         armRpoExecutionDetailEntity.setMatterId("MatterId");
+        armRpoExecutionDetailEntity.setSearchId("SearchId");
+        armRpoExecutionDetailEntity.setStorageAccountId("StorageAccountId");
+        armRpoExecutionDetailEntity.setProductionId(PRODUCTION_ID);
         armRpoExecutionDetailEntity = dartsPersistence.save(armRpoExecutionDetailEntity);
 
         when(armApiService.getArmBearerToken()).thenReturn(BEARER_TOKEN);
@@ -99,8 +113,10 @@ class ArmRpoPollServiceIntTest extends PostgresIntegrationBase {
             .thenReturn(getExtendedProductionsByMatterResponse());
         when(armRpoClient.getProductionOutputFiles(any(), any()))
             .thenReturn(getProductionOutputFilesResponse(PRODUCTION_ID));
-        when(armRpoClient.downloadProduction(any(), any()))
+
+        when(armRpoDownloadProduction.downloadProduction(any(), any(), any()))
             .thenReturn(getFeignResponse(200));
+
         when(armRpoClient.removeProduction(any(), any()))
             .thenReturn(getRemoveProductionResponse());
 
@@ -113,6 +129,15 @@ class ArmRpoPollServiceIntTest extends PostgresIntegrationBase {
         assertEquals(ArmRpoHelper.removeProductionRpoState().getId(), updatedArmRpoExecutionDetailEntity.get().getArmRpoState().getId());
         assertEquals(ArmRpoHelper.completedRpoStatus().getId(), updatedArmRpoExecutionDetailEntity.get().getArmRpoStatus().getId());
 
+        verify(armRpoClient).getExtendedSearchesByMatter(any(), any());
+        verify(armRpoClient).getMasterIndexFieldByRecordClassSchema(any(), any());
+        verify(armRpoClient).createExportBasedOnSearchResultsTable(anyString(), any());
+        verify(armRpoClient).getExtendedProductionsByMatter(anyString(), any());
+        verify(armRpoClient).getProductionOutputFiles(any(), any());
+        verify(armRpoDownloadProduction).downloadProduction(any(), any(), any());
+        verify(armRpoClient).removeProduction(any(), any());
+        verifyNoMoreInteractions(armRpoClient);
+
     }
 
     private @NotNull RemoveProductionResponse getRemoveProductionResponse() {
@@ -122,29 +147,32 @@ class ArmRpoPollServiceIntTest extends PostgresIntegrationBase {
         return response;
     }
 
-    private feign.Response getFeignResponse(int status) throws IOException {
+    private feign.Response getFeignResponseold(int status) throws IOException {
         feign.Response response = mock(feign.Response.class);
         feign.Response.Body body = mock(feign.Response.Body.class);
-        InputStream inputStream = mock(InputStream.class);
-
+        //InputStream inputStream = mock(InputStream.class);
+        InputStream inputStream = IOUtils.toInputStream("dummy input stream", "UTF-8");
         when(body.asInputStream()).thenReturn(inputStream);
         when(response.body()).thenReturn(body);
+        when(response.request()).thenReturn(mock(feign.Request.class));
         when(response.status()).thenReturn(200);
 
         return response;
     }
 
-    private @NotNull feign.Response getFeignResponseOld(int status) throws IOException {
-        //File productionFile = TestUtils.getFile("src/integrationTest/resources/tests/arm/service/ArmRpoPollServiceTest/productionexportfile.csv");
-        //InputStream inputStream = Files.newInputStream(productionFile.toPath());
-        feign.Response response = mock(feign.Response.class);
-        when(response.status()).thenReturn(status);
-        InputStream inputStream = mock(InputStream.class);
-        feign.Response.Body body = mock(feign.Response.Body.class);
-        when(response.body()).thenReturn(body);
-        when(body.asInputStream()).thenReturn(inputStream);
+    private feign.Response getFeignResponse(int status) throws IOException {
+        //File productionFile = TestUtils.getFile(PRODUCTIONEXPORTFILE_CSV);
+        //productionFilePath = Files.copy(productionFile.toPath(), createFile(tempDirectory.toPath(), "productionFile.csv"), REPLACE_EXISTING);
 
-        /*feign.Response.Body body = new Response.Body() {
+        //InputStream productionFileInputStream = Files.newInputStream(productionFile.toPath());
+//        feign.Response response = mock(feign.Response.class);
+//        when(response.status()).thenReturn(status);
+//        InputStream inputStream = mock(InputStream.class);
+//        feign.Response.Body body = mock(feign.Response.Body.class);
+//        when(response.body()).thenReturn(body);
+//        when(body.asInputStream()).thenReturn(inputStream);
+
+        feign.Response.Body body = new Response.Body() {
             InputStream inputStream;
 
             @Override
@@ -159,6 +187,8 @@ class ArmRpoPollServiceIntTest extends PostgresIntegrationBase {
 
             @Override
             public InputStream asInputStream() throws IOException {
+                File productionFile = TestUtils.getFile(PRODUCTIONEXPORTFILE_CSV);
+                inputStream = Files.newInputStream(productionFile.toPath());
                 return inputStream;
             }
 
@@ -173,9 +203,13 @@ class ArmRpoPollServiceIntTest extends PostgresIntegrationBase {
             }
         };
 
-        feign.Response response = Response.builder().status(status)
+        feign.Request request = feign.Request.create(feign.Request.HttpMethod.GET, "http://localhost:8080", Collections.emptyMap(), null,
+                                                     Charset.defaultCharset());
+        feign.Response response = Response.builder()
+            .status(status)
             .body(body)
-            .build();*/
+            .request(request)
+            .build();
         return response;
     }
 
@@ -208,7 +242,7 @@ class ArmRpoPollServiceIntTest extends PostgresIntegrationBase {
         CreateExportBasedOnSearchResultsTableResponse response = new CreateExportBasedOnSearchResultsTableResponse();
         response.setStatus(200);
         response.setIsError(false);
-        response.setResponseStatus(0);
+        response.setResponseStatus(2);
         return response;
     }
 
