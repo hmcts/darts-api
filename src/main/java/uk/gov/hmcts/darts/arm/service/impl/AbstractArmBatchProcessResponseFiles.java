@@ -66,7 +66,7 @@ import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.STORED;
 public abstract class AbstractArmBatchProcessResponseFiles implements ArmResponseFilesProcessor {
 
     protected static final String UNABLE_TO_UPDATE_EOD = "Unable to update EOD";
-    public static final String CREATE_RECORD = "create_record";
+    protected static final String CREATE_RECORD = "create_record";
     protected final ExternalObjectDirectoryRepository externalObjectDirectoryRepository;
     protected final ArmDataManagementApi armDataManagementApi;
     protected final FileOperationService fileOperationService;
@@ -328,13 +328,14 @@ public abstract class AbstractArmBatchProcessResponseFiles implements ArmRespons
     private void processMultipleInvalidLineFiles(ArmResponseBatchData armResponseBatchData) {
         try {
             ExternalObjectDirectoryEntity externalObjectDirectory = getExternalObjectDirectoryEntity(armResponseBatchData.getExternalObjectDirectoryId());
-            var invalidLineRecord1 = armResponseBatchData.getArmResponseInvalidLineRecords().getFirst();
-            var invalidLineRecord2 = armResponseBatchData.getArmResponseInvalidLineRecords().getLast();
             var invalidLineFileFilenameProcessor1 = armResponseBatchData.getInvalidLineFileFilenameProcessors().getFirst();
             var invalidLineFileFilenameProcessor2 = armResponseBatchData.getInvalidLineFileFilenameProcessors().getLast();
 
             if (nonNull(externalObjectDirectory)) {
                 if (armResponseBatchData.getArmResponseInvalidLineRecords().size() == 2) {
+                    var invalidLineRecord1 = armResponseBatchData.getArmResponseInvalidLineRecords().getFirst();
+                    var invalidLineRecord2 = armResponseBatchData.getArmResponseInvalidLineRecords().getLast();
+
                     if (nonNull(invalidLineRecord1) && nonNull(invalidLineRecord2)) {
                         // Read the invalid lines file and log the error code and description with EOD
                         log.warn(
@@ -378,13 +379,10 @@ public abstract class AbstractArmBatchProcessResponseFiles implements ArmRespons
     }
 
     private String getErrorCode(ArmResponseInvalidLineRecord invalidLineRecord1, ArmResponseInvalidLineRecord invalidLineRecord2) {
-        UploadNewFileRecord uploadNewFileRecord1 = readInputJson(invalidLineRecord1.getInput());
         UploadNewFileRecord uploadNewFileRecord2 = readInputJson(invalidLineRecord2.getInput());
 
         String errorCode;
-        if (CREATE_RECORD.equalsIgnoreCase(uploadNewFileRecord1.getOperation())) {
-            errorCode = invalidLineRecord1.getExceptionDescription() + " " + invalidLineRecord2.getExceptionDescription();
-        } else if (CREATE_RECORD.equalsIgnoreCase(uploadNewFileRecord2.getOperation())) {
+        if (CREATE_RECORD.equalsIgnoreCase(uploadNewFileRecord2.getOperation())) {
             errorCode = invalidLineRecord2.getExceptionDescription() + " " + invalidLineRecord1.getExceptionDescription();
         } else {
             errorCode = invalidLineRecord1.getExceptionDescription() + " " + invalidLineRecord2.getExceptionDescription();
