@@ -75,9 +75,10 @@ public class DetsToArmBatchProcessResponseFilesImpl extends AbstractArmBatchProc
                                                     armEod,
                                                     objectChecksum);
 
-        getObjectStateRecord(armEod.getId()).ifPresent(osr -> {
-            updateOsrFileIngestStatusToSuccess(batchUploadFileFilenameProcessor, armResponseBatchData, objectChecksum, osr);
-        });
+        getObjectStateRecord(armEod.getId())
+            .ifPresent(osr ->
+                           updateOsrFileIngestStatusToSuccess(batchUploadFileFilenameProcessor, armResponseBatchData, objectChecksum, osr)
+            );
     }
 
     @Override
