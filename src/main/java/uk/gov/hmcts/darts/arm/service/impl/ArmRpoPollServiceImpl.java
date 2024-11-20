@@ -96,7 +96,7 @@ public class ArmRpoPollServiceImpl implements ArmRpoPollService {
                     log.debug("About to call removeProduction");
                     armRpoApi.removeProduction(bearerToken, executionId, userAccount);
                     log.debug("About to reconcile production files");
-                    reconcile(tempProductionFiles, executionId, headerColumns);
+                    armRpoService.reconcileArmRpoCsvData(armRpoExecutionDetailEntity, tempProductionFiles);
                 } else {
                     log.warn("No production export files found");
                 }
@@ -114,10 +114,6 @@ public class ArmRpoPollServiceImpl implements ArmRpoPollService {
             }
 
         }
-    }
-
-    private void reconcile(List<File> tempProductionFiles, Integer executionId, List<MasterIndexFieldByRecordClassSchema> headerColumns) {
-        // TODO this is to be implemented in ticket DMP-3619
     }
 
     private void cleanUpTempFiles() {
@@ -141,11 +137,13 @@ public class ArmRpoPollServiceImpl implements ArmRpoPollService {
         if (isNull(armRpoExecutionDetailEntity)) {
             return null;
         }
-
+        // If the previous state is saveBackgroundSearch and status is completed
+        // or the previous state is createExportBasedOnSearchResultsTable and status is in progress, return the entity
         if (saveBackgroundSearchCompleted(armRpoExecutionDetailEntity)
             || createExportBasedOnSearchResultsTableInProgress(armRpoExecutionDetailEntity)) {
             return armRpoExecutionDetailEntity;
         }
+        // If the job is a manual run, the previous status is failed and the state is greater than saveBackgroundSearch, return the entity
         if (isManualRun && pollServiceNotInProgress(armRpoExecutionDetailEntity)) {
             return armRpoExecutionDetailEntity;
         }
