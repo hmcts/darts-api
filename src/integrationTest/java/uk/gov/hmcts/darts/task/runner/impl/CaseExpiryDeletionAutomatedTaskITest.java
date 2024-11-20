@@ -183,7 +183,7 @@ class CaseExpiryDeletionAutomatedTaskITest extends PostgresIntegrationBase {
                 courtCase.getCaseNumber(),
                 courtCase.getCourthouse().getCourthouseName()));
             eventLinkedCaseEntities.stream().map(EventLinkedCaseEntity::getEvent)
-                .forEach(eventEntity -> assertEvent(eventEntity, eventIdsToExclude.contains(eventEntity.getId()) ? false : isAnonymised));
+                .forEach(eventEntity -> assertEvent(eventEntity, !eventIdsToExclude.contains(eventEntity.getId()) && isAnonymised));
 
             assertAuditEntries(courtCase, isAnonymised);
         });
