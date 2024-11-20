@@ -52,7 +52,6 @@ public class BatchCleanupArmResponseFilesServiceCommon implements BatchCleanupAr
 
     @Override
     public void cleanupResponseFiles(int batchsize) {
-        System.out.println("TMP: " + manifestFilePrefix);
         if (batchsize == 0) {
             log.warn("{}: Batch Cleanup ARM Response Files - Batch size is 0, so not running", manifestFilePrefix);
             return;

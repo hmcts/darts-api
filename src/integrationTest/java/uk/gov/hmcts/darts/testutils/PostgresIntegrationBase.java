@@ -14,6 +14,8 @@ import uk.gov.hmcts.darts.test.common.MemoryLogAppender;
 import uk.gov.hmcts.darts.testutils.stubs.DartsDatabaseStub;
 import uk.gov.hmcts.darts.testutils.stubs.DartsPersistence;
 
+import java.util.List;
+
 /**
  * Base class for integration tests running against a containerized Postgres with Testcontainers.
  */
@@ -42,11 +44,18 @@ public class PostgresIntegrationBase {
      */
     private static final int SERVER_MAX_CONNECTIONS = 50;
 
-    private static final PostgreSQLContainer<?> POSTGRES = new PostgreSQLContainer<>(
-        "postgres:16-alpine"
-    ).withDatabaseName("darts")
-        .withUsername("darts")
-        .withPassword("darts");
+    private static final PostgreSQLContainer<?> POSTGRES;
+
+    static {
+        POSTGRES = new PostgreSQLContainer<>(
+            "postgres:16-alpine"
+        ).withDatabaseName("darts")
+            .withUsername("darts")
+            .withPassword("darts");
+        POSTGRES.setPortBindings(List.of(
+            "5433:5432"
+        ));
+    }
 
     @DynamicPropertySource
     static void configureProperties(DynamicPropertyRegistry registry) {

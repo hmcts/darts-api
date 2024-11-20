@@ -98,4 +98,19 @@ class EventServiceImplTest {
     }
 
 
+    @Test
+    void positiveAllAssociatedCasesAnonymisedTrue() {
+        EventEntity event = mock(EventEntity.class);
+        when(eventLinkedCaseRepository.allAssociatedCasesAnonymised(event)).thenReturn(true);
+        assertThat(eventService.allAssociatedCasesAnonymised(event)).isTrue();
+        verify(eventLinkedCaseRepository).allAssociatedCasesAnonymised(event);
+    }
+
+    @Test
+    void positiveAllAssociatedCasesAnonymisedFalse() {
+        EventEntity event = mock(EventEntity.class);
+        when(eventLinkedCaseRepository.allAssociatedCasesAnonymised(event)).thenReturn(false);
+        assertThat(eventService.allAssociatedCasesAnonymised(event)).isFalse();
+        verify(eventLinkedCaseRepository).allAssociatedCasesAnonymised(event);
+    }
 }

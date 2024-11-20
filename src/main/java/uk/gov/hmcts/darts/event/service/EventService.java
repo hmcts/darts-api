@@ -14,4 +14,6 @@ public interface EventService {
     EventEntity saveEvent(EventEntity eventEntity);
 
     Set<EventEntity> getAllCourtCaseEventVersions(CourtCaseEntity courtCase);
+
+    boolean allAssociatedCasesAnonymised(EventEntity eventEntity);
 }

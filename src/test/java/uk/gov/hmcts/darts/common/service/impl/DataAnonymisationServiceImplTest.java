@@ -87,16 +87,58 @@ class DataAnonymisationServiceImplTest {
 
 
     @Test
-    void positiveEventEntityAnonymise() {
+    void positiveEventEntityAnonymiseNotUpdatedAsNotAllCasesExpiredAndOnlyAnonymiseIfAllCasesExpiredIsTrue() {
+        EventEntity eventEntity = new EventEntity();
+        eventEntity.setEventText("event text");
+
+        UserAccountEntity userAccount = new UserAccountEntity();
+        when(eventService.allAssociatedCasesAnonymised(eventEntity)).thenReturn(false);
+        dataAnonymisationService.anonymiseEventEntity(userAccount, eventEntity, true);
+        assertThat(eventEntity.getEventText()).isEqualTo("event text");
+        assertThat(eventEntity.isDataAnonymised()).isFalse();
+        verify(eventService).allAssociatedCasesAnonymised(eventEntity);
+    }
+
+    @Test
+    void positiveEventEntityAnonymiseUpdatedAsAllCasesExpiredAndOnlyAnonymiseIfAllCasesExpiredIsTrue() {
         setupOffsetDateTime();
         EventEntity eventEntity = new EventEntity();
         eventEntity.setEventText("event text");
 
         UserAccountEntity userAccount = new UserAccountEntity();
-        dataAnonymisationService.anonymiseEventEntity(userAccount, eventEntity);
+        when(eventService.allAssociatedCasesAnonymised(eventEntity)).thenReturn(true);
+        dataAnonymisationService.anonymiseEventEntity(userAccount, eventEntity, true);
         assertThat(eventEntity.getEventText()).matches(TestUtils.UUID_REGEX);
         assertThat(eventEntity.isDataAnonymised()).isTrue();
         assertLastModifiedByAndAt(eventEntity, userAccount);
+        verify(eventService).allAssociatedCasesAnonymised(eventEntity);
+    }
+
+    @Test
+    void positiveEventEntityAnonymiseUpdatedAsNotAllCasesExpiredAndOnlyAnonymiseIfAllCasesExpiredIsFalse() {
+        setupOffsetDateTime();
+        EventEntity eventEntity = new EventEntity();
+        eventEntity.setEventText("event text");
+
+        UserAccountEntity userAccount = new UserAccountEntity();
+        dataAnonymisationService.anonymiseEventEntity(userAccount, eventEntity, false);
+        assertThat(eventEntity.getEventText()).matches(TestUtils.UUID_REGEX);
+        assertThat(eventEntity.isDataAnonymised()).isTrue();
+        assertLastModifiedByAndAt(eventEntity, userAccount);
+        verifyNoMoreInteractions(eventService);
+    }
+
+    @Test
+    void positiveEventEntityNotUpdatedAsAlreadyAnonymised() {
+        EventEntity eventEntity = new EventEntity();
+        eventEntity.setEventText("event text");
+        eventEntity.setDataAnonymised(true);
+
+        UserAccountEntity userAccount = new UserAccountEntity();
+        dataAnonymisationService.anonymiseEventEntity(userAccount, eventEntity, false);
+        assertThat(eventEntity.getEventText()).isEqualTo("event text");
+        assertThat(eventEntity.isDataAnonymised()).isTrue();
+        verifyNoMoreInteractions(eventService);
     }
 
     @Test
@@ -201,8 +243,8 @@ class DataAnonymisationServiceImplTest {
         verify(dataAnonymisationService, times(1)).anonymiseHearingEntity(userAccount, hearingEntity1);
         verify(dataAnonymisationService, times(1)).anonymiseHearingEntity(userAccount, hearingEntity2);
 
-        verify(dataAnonymisationService, times(1)).anonymiseEventEntity(userAccount, entityEntity1);
-        verify(dataAnonymisationService, times(1)).anonymiseEventEntity(userAccount, entityEntity2);
+        verify(dataAnonymisationService, times(1)).anonymiseEventEntity(userAccount, entityEntity1, true);
+        verify(dataAnonymisationService, times(1)).anonymiseEventEntity(userAccount, entityEntity2, true);
 
         verify(dataAnonymisationService, times(1)).tidyUpTransformedMediaEntities(userAccount, courtCase);
         verify(caseService, times(1)).saveCase(courtCase);
@@ -409,9 +451,9 @@ class DataAnonymisationServiceImplTest {
         dataAnonymisationService.anonymiseEventByIds(userAccount, List.of(1, 2, 3, 4));
 
 
-        verify(dataAnonymisationService, times(1)).anonymiseEventEntity(userAccount, event1);
-        verify(dataAnonymisationService, times(1)).anonymiseEventEntity(userAccount, event2);
-        verify(dataAnonymisationService, times(1)).anonymiseEventEntity(userAccount, event3);
+        verify(dataAnonymisationService, times(1)).anonymiseEventEntity(userAccount, event1, false);
+        verify(dataAnonymisationService, times(1)).anonymiseEventEntity(userAccount, event2, false);
+        verify(dataAnonymisationService, times(1)).anonymiseEventEntity(userAccount, event3, false);
 
         verify(eventService, times(1)).getEventByEveId(1);
         verify(eventService, times(1)).getEventByEveId(2);

@@ -65,14 +65,13 @@ public class DataAnonymisationServiceImpl implements DataAnonymisationService {
         courtCase.getDefenceList().forEach(defenceEntity -> anonymiseDefenceEntity(userAccount, defenceEntity));
         courtCase.getProsecutorList().forEach(prosecutorEntity -> anonymiseProsecutorEntity(userAccount, prosecutorEntity));
         courtCase.getHearings().forEach(hearingEntity -> anonymiseHearingEntity(userAccount, hearingEntity));
-        anonymiseAllEventsFromCase(userAccount, courtCase);
-
         courtCase.markAsExpired(userAccount);
         //This also saves defendant, defence and prosecutor entities
         tidyUpTransformedMediaEntities(userAccount, courtCase);
         auditApi.record(AuditActivity.CASE_EXPIRED, userAccount, courtCase);
         anonymiseCreatedModifiedBaseEntity(userAccount, courtCase);
         caseService.saveCase(courtCase);
+        anonymiseAllEventsFromCase(userAccount, courtCase);
 
         //Required for Dynatrace dashboards
         logApi.caseDeletedDueToExpiry(courtCase.getId(), courtCase.getCaseNumber());
@@ -108,13 +107,21 @@ public class DataAnonymisationServiceImpl implements DataAnonymisationService {
 
     @Override
     public void anonymiseEvent(UserAccountEntity userAccount, EventEntity eventEntity) {
-        anonymiseEventEntity(userAccount, eventEntity);
+        anonymiseEventEntity(userAccount, eventEntity, false);
         eventService.saveEvent(eventEntity);
         auditApi.record(AuditActivity.MANUAL_OBFUSCATION, userAccount, eventEntity.getId().toString());
         logApi.manualObfuscation(eventEntity);
     }
 
-    void anonymiseEventEntity(UserAccountEntity userAccount, EventEntity eventEntity) {
+    void anonymiseEventEntity(UserAccountEntity userAccount, EventEntity eventEntity, boolean onlyAnonymiseIfAllCasesExpired) {
+        if (eventEntity.isDataAnonymised()) {
+            log.debug("Event {} already anonymised skipping", eventEntity.getId());
+            return;
+        }
+        if (onlyAnonymiseIfAllCasesExpired && !eventService.allAssociatedCasesAnonymised(eventEntity)) {
+            log.debug("Event {} not anonymised as not all cases are expired", eventEntity.getId());
+            return;
+        }
         eventEntity.setEventText(UUID.randomUUID().toString());
         eventEntity.setDataAnonymised(true);
         anonymiseCreatedModifiedBaseEntity(userAccount, eventEntity);
@@ -127,6 +134,10 @@ public class DataAnonymisationServiceImpl implements DataAnonymisationService {
     }
 
     void anonymiseTranscriptionCommentEntity(UserAccountEntity userAccount, TranscriptionCommentEntity transcriptionCommentEntity) {
+        if (transcriptionCommentEntity.isDataAnonymised()) {
+            log.debug("Transcription comment {} already anonymised skipping", transcriptionCommentEntity.getId());
+            return;
+        }
         transcriptionCommentEntity.setComment(UUID.randomUUID().toString());
         transcriptionCommentEntity.setDataAnonymised(true);
         anonymiseCreatedModifiedBaseEntity(userAccount, transcriptionCommentEntity);
@@ -134,7 +145,6 @@ public class DataAnonymisationServiceImpl implements DataAnonymisationService {
 
     void anonymiseTranscriptionWorkflowEntity(TranscriptionWorkflowEntity transcriptionWorkflowEntity) {
         transcriptionWorkflowEntity.close();
-
     }
 
     void tidyUpTransformedMediaEntities(UserAccountEntity userAccount, CourtCaseEntity courtCase) {
@@ -190,6 +200,6 @@ public class DataAnonymisationServiceImpl implements DataAnonymisationService {
     }
 
     private void anonymiseAllEventsFromCase(UserAccountEntity userAccount, CourtCaseEntity courtCase) {
-        eventService.getAllCourtCaseEventVersions(courtCase).forEach(eventEntity -> anonymiseEventEntity(userAccount, eventEntity));
+        eventService.getAllCourtCaseEventVersions(courtCase).forEach(eventEntity -> anonymiseEventEntity(userAccount, eventEntity, true));
     }
 }

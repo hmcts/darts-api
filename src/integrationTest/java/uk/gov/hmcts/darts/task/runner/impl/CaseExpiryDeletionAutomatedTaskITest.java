@@ -12,6 +12,7 @@ import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.DefenceEntity;
 import uk.gov.hmcts.darts.common.entity.DefendantEntity;
 import uk.gov.hmcts.darts.common.entity.EventEntity;
+import uk.gov.hmcts.darts.common.entity.EventLinkedCaseEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.ProsecutorEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionCommentEntity;
@@ -37,7 +38,11 @@ import uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 import java.util.regex.Pattern;
 
@@ -59,6 +64,36 @@ class CaseExpiryDeletionAutomatedTaskITest extends PostgresIntegrationBase {
     void positiveRetentionDatePassed() {
         CourtCaseEntity courtCase = createCase(-1, CaseRetentionStatus.COMPLETE);
         final int caseId1 = courtCase.getId();
+
+        caseExpiryDeletionAutomatedTask.preRunTask();
+        caseExpiryDeletionAutomatedTask.runTask();
+
+        assertCase(caseId1, true);
+    }
+
+    @Test
+    void positiveRetentionDatePassedForOneCaseButNotAnotherEventNotAnoymised() {
+        CourtCaseEntity courtCase1 = createCase(-1, CaseRetentionStatus.COMPLETE);
+        CourtCaseEntity courtCase2 = createCase(-1, CaseRetentionStatus.PENDING);
+
+        EventEntity event = dartsDatabase.getEventLinkedCaseRepository().findAllByCourtCase(courtCase1).getFirst().getEvent();
+        eventLinkedCaseStub.createCaseLinkedEvent(event, courtCase2);
+        final int caseId1 = courtCase1.getId();
+
+        caseExpiryDeletionAutomatedTask.preRunTask();
+        caseExpiryDeletionAutomatedTask.runTask();
+
+        assertCase(caseId1, true, event.getId());
+    }
+
+    @Test
+    void positiveRetentionDatePassedForBothCaseLinkedEventsAnoymised() {
+        CourtCaseEntity courtCase1 = createCase(-1, CaseRetentionStatus.COMPLETE);
+        CourtCaseEntity courtCase2 = createCase(-1, CaseRetentionStatus.COMPLETE);
+
+        EventEntity event = dartsDatabase.getEventLinkedCaseRepository().findAllByCourtCase(courtCase1).getFirst().getEvent();
+        eventLinkedCaseStub.createCaseLinkedEvent(event, courtCase2);
+        final int caseId1 = courtCase1.getId();
 
         caseExpiryDeletionAutomatedTask.preRunTask();
         caseExpiryDeletionAutomatedTask.runTask();
@@ -111,7 +146,7 @@ class CaseExpiryDeletionAutomatedTaskITest extends PostgresIntegrationBase {
     }
 
 
-    private void assertCase(int caseId, boolean isAnonymised) {
+    private void assertCase(int caseId, boolean isAnonymised, int... excludeEventIds) {
         transactionalUtil.executeInTransaction(() -> {
             CourtCaseEntity courtCase = dartsDatabase.getCourtCaseStub().getCourtCase(caseId);
             assertThat(courtCase.isDataAnonymised())
@@ -140,7 +175,15 @@ class CaseExpiryDeletionAutomatedTaskITest extends PostgresIntegrationBase {
 
             courtCase.getHearings().forEach(hearingEntity -> assertHearing(hearingEntity, isAnonymised));
 
-            dartsDatabase.getEventRepository().findAllByCaseId(caseId).forEach(eventEntity -> assertEvent(eventEntity, isAnonymised));
+            Set<Integer> eventIdsToExclude = new HashSet<>();
+            Arrays.stream(excludeEventIds).forEach(eventIdsToExclude::add);
+            List<EventLinkedCaseEntity> eventLinkedCaseEntities = new ArrayList<>();
+            eventLinkedCaseEntities.addAll(dartsDatabase.getEventLinkedCaseRepository().findAllByCourtCase(courtCase));
+            eventLinkedCaseEntities.addAll(dartsDatabase.getEventLinkedCaseRepository().findAllByCaseNumberAndCourthouseName(
+                courtCase.getCaseNumber(),
+                courtCase.getCourthouse().getCourthouseName()));
+            eventLinkedCaseEntities.stream().map(EventLinkedCaseEntity::getEvent)
+                .forEach(eventEntity -> assertEvent(eventEntity, eventIdsToExclude.contains(eventEntity.getId()) ? false : isAnonymised));
 
             assertAuditEntries(courtCase, isAnonymised);
         });
