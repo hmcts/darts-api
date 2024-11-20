@@ -286,7 +286,7 @@ public class ArmRpoApiImpl implements ArmRpoApi {
     }
 
     @Override
-    public void addAsyncSearch(String bearerToken, Integer executionId, UserAccountEntity userAccount) {
+    public String addAsyncSearch(String bearerToken, Integer executionId, UserAccountEntity userAccount) {
 
         final ArmRpoExecutionDetailEntity executionDetail = armRpoService.getArmRpoExecutionDetailEntity(executionId);
         armRpoService.updateArmRpoStateAndStatus(executionDetail,
@@ -336,6 +336,8 @@ public class ArmRpoApiImpl implements ArmRpoApi {
 
         executionDetail.setSearchId(searchId);
         armRpoService.updateArmRpoStatus(executionDetail, ArmRpoHelper.completedRpoStatus(), userAccount);
+
+        return searchName;
     }
 
 

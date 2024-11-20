@@ -6,7 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.io.FileUtils;
 import org.springframework.stereotype.Service;
-import uk.gov.hmcts.darts.arm.service.impl.ArmApiServiceImpl;
+import uk.gov.hmcts.darts.arm.service.ArmApiService;
 import uk.gov.hmcts.darts.audio.helper.UnstructuredDataHelper;
 import uk.gov.hmcts.darts.common.datamanagement.component.impl.DownloadResponseMetaData;
 import uk.gov.hmcts.darts.common.datamanagement.component.impl.FileBasedDownloadResponseMetaData;
@@ -51,7 +51,7 @@ public class DataManagementFacadeImpl implements DataManagementFacade {
     private final StorageOrderHelper storageOrderHelper;
     private final UnstructuredDataHelper unstructuredDataHelper;
     private final DataManagementConfiguration dataManagementConfiguration;
-    private final ArmApiServiceImpl armApiService;
+    private final ArmApiService armApiService;
     private final ObjectRetrievalQueueRepository objectRetrievalQueueRepository;
 
     @Override

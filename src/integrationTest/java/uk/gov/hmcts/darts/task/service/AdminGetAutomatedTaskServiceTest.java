@@ -39,9 +39,7 @@ class AdminGetAutomatedTaskServiceTest extends IntegrationBase {
     void findsAllAutomatedTasks() {
         var persistedTasks = dartsDatabase.getAllAutomatedTasks();
         //Remove tasks that are feature flagged off
-        persistedTasks.removeIf(automatedTaskEntity -> {
-            return automatedTaskEntity.getTaskName().equals(AutomatedTaskName.PROCESS_E2E_ARM_PENDING_TASK_NAME.getTaskName());
-        });
+        persistedTasks.removeIf(automatedTaskEntity -> automatedTaskEntity.getTaskName().equals(AutomatedTaskName.PROCESS_ARM_RPO_PENDING.getTaskName()));
         var automatedTasks = adminAutomatedTaskService.getAllAutomatedTasksSummaries();
 
         assertThat(automatedTasks).extracting("id").isEqualTo(taskIdsOf(persistedTasks));

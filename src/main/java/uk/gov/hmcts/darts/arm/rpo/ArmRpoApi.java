@@ -22,7 +22,7 @@ public interface ArmRpoApi {
     List<MasterIndexFieldByRecordClassSchema> getMasterIndexFieldByRecordClassSchema(String bearerToken, Integer executionId, ArmRpoStateEntity rpoStateEntity,
                                                                                      UserAccountEntity userAccount);
 
-    void addAsyncSearch(String bearerToken, Integer executionId, UserAccountEntity userAccount);
+    String addAsyncSearch(String bearerToken, Integer executionId, UserAccountEntity userAccount);
 
     void saveBackgroundSearch(String bearerToken, Integer executionId, String searchName, UserAccountEntity userAccount);
 
