@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.darts.audio.config.AudioConfigurationProperties;
+import uk.gov.hmcts.darts.common.datamanagement.StorageConfiguration;
 import uk.gov.hmcts.darts.common.service.FileOperationService;
 
 import java.io.IOException;
@@ -42,6 +43,23 @@ public class FileOperationServiceImpl implements FileOperationService {
             Files.copy(inputStream, tempFilePath, StandardCopyOption.REPLACE_EXISTING);
         } catch (IOException e) {
             log.error("IOException. Unable to copy Blob Data to temporary workspace");
+            throw new IOException(e);
+        }
+
+        return tempFilePath;
+    }
+
+    @Override
+    public Path saveFileToTempWorkspace(InputStream inputStream, String fileName,
+                                        StorageConfiguration storageConfiguration, boolean appendUuidToWorkspace) throws IOException {
+
+        Path tempFilePath;
+
+        try (InputStream audioInputStream = inputStream) {
+            tempFilePath = createFile(fileName, storageConfiguration.getTempBlobWorkspace(), appendUuidToWorkspace);
+            Files.copy(audioInputStream, tempFilePath, StandardCopyOption.REPLACE_EXISTING);
+        } catch (IOException e) {
+            log.error("Unable to save data to temporary workspace", e);
             throw new IOException(e);
         }
 

@@ -2,16 +2,26 @@ package uk.gov.hmcts.darts.arm.service.impl;
 
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections.CollectionUtils;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;
+import uk.gov.hmcts.darts.arm.config.ArmDataManagementConfiguration;
 import uk.gov.hmcts.darts.arm.helper.ArmRpoHelper;
 import uk.gov.hmcts.darts.arm.model.rpo.MasterIndexFieldByRecordClassSchema;
 import uk.gov.hmcts.darts.arm.rpo.ArmRpoApi;
+import uk.gov.hmcts.darts.arm.service.ArmApiService;
 import uk.gov.hmcts.darts.arm.service.ArmRpoPollService;
 import uk.gov.hmcts.darts.arm.service.ArmRpoService;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
+import uk.gov.hmcts.darts.common.entity.ArmRpoExecutionDetailEntity;
+import uk.gov.hmcts.darts.common.service.FileOperationService;
 
+import java.io.File;
+import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.List;
+
+import static java.util.Objects.isNull;
 
 @ConditionalOnProperty(
     value = "darts.automated.task.process-e2e-arm-rpo",
@@ -23,38 +33,29 @@ import java.util.List;
 public class ArmRpoPollServiceImpl implements ArmRpoPollService {
 
     private final ArmRpoApi armRpoApi;
+    private final ArmApiService armApiService;
     private final ArmRpoService armRpoService;
     private final UserIdentity userIdentity;
+    private final FileOperationService fileOperationService;
+    private final ArmDataManagementConfiguration armDataManagementConfiguration;
+
+    private List<File> tempProductionFiles = new ArrayList<>();
 
     @Override
     public void pollArmRpo() {
-        /*
-        Call armRpoApi.getExtendedSearchesByMatter (DMP-3806)
-Call armRpoApi.getMasterIndexFieldByRecordClassSchema (DMP-4136) - Pass ArmRpoHelper.getMasterIndexFieldByRecordClassSchemaSecondaryRpoState()
-returns Collection of MetadataObject
-Call armRpoApi.createExportBasedOnSearchResultsTable (DMP-4138) by passing the collection of MetadataObject retrieved from previous call in headerColumn field
-If return TRUE, continue to the next step
-If return false, then DO NOTHING and return.
-Call armRpoApi.getExtendedProductionsByMatter (DMP-4139)
-Call armRpoApi.getProductionOutputFiles which will return a collection of productionExportFileID
-For each productionExportFileID
-if is_mock_arm_rpo_download_csv is TRUE
-Fetch rpo_csv_start_hour & rpo_csv_end_hour from arm_automated_task table for ProcessE2EARMRPOPendingAutomatedTasks job.
-Fetch the records from EOD with status as ARM_RPO_PENDING and data_ingestion_ts between created_ts minus rpo_csv_start_hour and
-created_ts minus rpo_csv_end_hour
-Inject only 10 EODs in stub header and call the stub - downloadProduction (DMP-4078)
-stub will return CSV with EODs
-if is_mock_arm_rpo_download_csv is FALSE
-call downloadProduction (DMP-4141)
-Save the CSV in blob storage (DMP-3617)
-Once CSV is successfully saved, then remove the Search results by calling armRpoApi.removeProduction(DMP-4142)
-Reconcile the CSV against EOD (DMP-3619)
-Remove the CSV(s) from Blob storage once reconciliation is completed.
-         */
+
         try {
-            var armRpoExecutionDetailEntity = armRpoService.getLatestArmRpoExecutionDetailEntity(ArmRpoHelper.saveBackgroundSearchRpoState(),
-                                                                                                 ArmRpoHelper.completedRpoStatus());
-            var bearerToken = "";
+            var armRpoExecutionDetailEntity = getArmRpoExecutionDetailEntity();
+            if (isNull(armRpoExecutionDetailEntity)) {
+                log.warn("Unable to find armRpoExecutionDetailEntity to poll");
+                return;
+            }
+            var bearerToken = armApiService.getArmBearerToken();
+            if (isNull(bearerToken)) {
+                log.warn("Unable to get bearer token to poll ARM RPO");
+                return;
+            }
+
             var executionId = armRpoExecutionDetailEntity.getId();
             var userAccount = userIdentity.getUserAccount();
 
@@ -71,15 +72,62 @@ Remove the CSV(s) from Blob storage once reconciliation is completed.
                 var productionOutputFiles = armRpoApi.getProductionOutputFiles(bearerToken, executionId, userAccount);
 
                 for (var productionExportFileId : productionOutputFiles) {
+                    String productionExportFilename = generateProductionExportFilename(productionExportFileId);
                     var inputStream = armRpoApi.downloadProduction(bearerToken, executionId, productionExportFileId, userAccount);
-                    
+                    log.info("About to save production export file to temp workspace {}", productionExportFilename);
+                    Path tempProductionFile = fileOperationService.saveFileToTempWorkspace(
+                        inputStream,
+                        productionExportFilename,
+                        armDataManagementConfiguration,
+                        false
+                    );
+                    tempProductionFiles.add(tempProductionFile.toFile());
+                }
+                if (CollectionUtils.isNotEmpty(tempProductionFiles)) {
+                    armRpoApi.removeProduction(bearerToken, executionId, userAccount);
+                    reconcile(tempProductionFiles, executionId);
+                } else {
+                    log.warn("No production export files found");
                 }
             } else {
-                log.warn("createExportBasedOnSearchResultsTable returned false");
+                log.warn("Create export of production files is still in progress");
             }
 
         } catch (Exception e) {
             log.error("Error while polling ARM RPO", e);
+        } finally {
+            try {
+                cleanUpTempFiles();
+            } catch (Exception e) {
+                log.error("Error while cleaning up temp files", e);
+            }
+
         }
+    }
+
+    private void reconcile(List<File> tempProductionFiles, Integer executionId) {
+        // TODO this is to be implemented in ticket DMP-3619
+    }
+
+    private void cleanUpTempFiles() {
+        for (var tempProductionFile : tempProductionFiles) {
+            if (tempProductionFile.exists()) {
+                if (tempProductionFile.delete()) {
+                    log.info("Deleted temp production file {}", tempProductionFile.getName());
+                } else {
+                    log.warn("Failed to delete temp production file {}", tempProductionFile.getName());
+                }
+            }
+        }
+    }
+
+
+    private String generateProductionExportFilename(String productionExportFileId) {
+        return "productionExportFileId_" + productionExportFileId + ".csv";
+    }
+
+    private ArmRpoExecutionDetailEntity getArmRpoExecutionDetailEntity() {
+        // TODO this needs to be thought through how to handle the multiple states and will be played in another ticket
+        return armRpoService.getLatestArmRpoExecutionDetailEntity();
     }
 }
