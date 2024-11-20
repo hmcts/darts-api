@@ -5,12 +5,14 @@ import com.azure.core.util.BinaryData;
 import com.azure.storage.blob.BlobClient;
 import com.azure.storage.blob.BlobContainerClient;
 import com.azure.storage.blob.BlobServiceClient;
+import com.azure.storage.blob.models.BlobProperties;
 import com.azure.storage.blob.models.DeleteSnapshotsOptionType;
 import com.azure.storage.blob.models.ParallelTransferOptions;
 import com.azure.storage.blob.options.BlobParallelUploadOptions;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.tika.utils.StringUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.darts.common.datamanagement.component.DataManagementAzureClientFactory;
@@ -220,9 +222,17 @@ public class DataManagementServiceImpl implements DataManagementService {
             throw new DartsApiException(CommonApiError.NOT_FOUND,
                                         String.format("Blob '%s' does not exist in container '%s'.", blobId, containerName));
         }
-        byte[] checksumByte = blobClient.getProperties().getContentMd5();
+        BlobProperties blobProperties = blobClient.getProperties();
+        byte[] checksumByte = blobProperties.getContentMd5();
 
-        if (checksumByte == null) {
+        if (checksumByte == null || checksumByte.length == 0) {
+            Map<String, String> metaData = blobProperties.getMetadata();
+            if (metaData.containsKey("checksum")) {
+                String checksum = metaData.get("checksum");
+                if (!StringUtils.isBlank(checksum)) {
+                    return checksum;
+                }
+            }
             throw new DartsApiException(CommonApiError.NOT_FOUND,
                                         String.format("Blob '%s' does exist in container '%s' but does not contain a checksum.", blobId, containerName));
         }
