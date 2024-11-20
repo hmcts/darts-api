@@ -68,7 +68,7 @@ public class EventsController implements EventApi {
     private final UserIdentity userIdentity;
 
     @Value("${darts.event-obfuscation.enabled}")
-    private final boolean eveventObfuscationEnabled;
+    private final boolean eventObfuscationEnabled;
 
     @Override
     @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
@@ -189,7 +189,7 @@ public class EventsController implements EventApi {
     @Authorisation(contextId = ANY_ENTITY_ID,
         globalAccessSecurityRoles = {SUPER_ADMIN})
     public ResponseEntity<Void> adminObfuscateEveByIds(AdminObfuscateEveByIdsRequest adminObfuscateEveByIdsRequest) {
-        if (!eveventObfuscationEnabled) {
+        if (!eventObfuscationEnabled) {
             throw new DartsApiException(CommonApiError.FEATURE_FLAG_NOT_ENABLED, "Event obfuscation is not enabled");
         }
         this.dataAnonymisationService.anonymiseEventByIds(userIdentity.getUserAccount(), adminObfuscateEveByIdsRequest.getEveIds());
