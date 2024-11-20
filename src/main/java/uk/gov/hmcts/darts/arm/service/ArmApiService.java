@@ -11,4 +11,6 @@ public interface ArmApiService {
     UpdateMetadataResponse updateMetadata(String externalRecordId, OffsetDateTime eventTimestamp, int retConfScore, String retConfReason);
 
     DownloadResponseMetaData downloadArmData(String externalRecordId, String externalFileId) throws FileNotDownloadedException;
+
+    String getArmBearerToken();
 }
