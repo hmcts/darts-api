@@ -63,6 +63,10 @@ public class ArmRpoServiceImpl implements ArmRpoService {
         return armRpoExecutionDetailRepository.findById(executionId).orElseThrow(() -> new DartsException(ARM_RPO_EXECUTION_DETAIL_NOT_FOUND));
     }
 
+    public ArmRpoExecutionDetailEntity getLatestArmRpoExecutionDetailEntity() {
+        return armRpoExecutionDetailRepository.findByLatest(executionId).orElseThrow(() -> new DartsException(ARM_RPO_EXECUTION_DETAIL_NOT_FOUND));
+    }
+
     @Override
     public void updateArmRpoStateAndStatus(ArmRpoExecutionDetailEntity armRpoExecutionDetailEntity, ArmRpoStateEntity armRpoStateEntity,
                                            ArmRpoStatusEntity armRpoStatusEntity, UserAccountEntity userAccountEntity) {
