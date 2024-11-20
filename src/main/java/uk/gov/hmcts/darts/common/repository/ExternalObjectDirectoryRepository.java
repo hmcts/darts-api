@@ -555,4 +555,15 @@ public interface ExternalObjectDirectoryRepository extends JpaRepository<Externa
         ) a
         """, nativeQuery = true)
     Long findFileSize(Integer externalObjectDirectoryId);
+
+    @Query(
+        """
+            SELECT eod FROM ExternalObjectDirectoryEntity eod
+            WHERE eod.status = :status 
+            AND eod.dataIngestionTs between :rpoCsvStartTime AND :rpoCsvEndTime
+            """
+    )
+    List<ExternalObjectDirectoryEntity> findByStatusAndIngestionDate(ObjectRecordStatusEntity status,
+                                                                     OffsetDateTime rpoCsvStartTime,
+                                                                     OffsetDateTime rpoCsvEndTime);
 }
