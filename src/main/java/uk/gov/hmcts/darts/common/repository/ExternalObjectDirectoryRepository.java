@@ -580,4 +580,15 @@ public interface ExternalObjectDirectoryRepository extends JpaRepository<Externa
     List<ExternalObjectDirectoryEntity> findByStatusAndIngestionDate(ObjectRecordStatusEntity status,
                                                                      OffsetDateTime rpoCsvStartTime,
                                                                      OffsetDateTime rpoCsvEndTime);
+
+    @Query("""
+        SELECT eod FROM ExternalObjectDirectoryEntity eod
+        WHERE eod.status = :status
+        AND eod.dataIngestionTs BETWEEN eod.createdDateTime - ( :rpoCsvStartHour * INTERVAL '1 hour' )
+            AND eod.createdDateTime - ( :rpoCsvEndHour * INTERVAL '1 hour' )
+        """)
+    List<ExternalObjectDirectoryEntity> findAllByStatusAndDataIngestionTsBetweenOffsetCreatedDateTimeLimit(ObjectRecordStatusEntity objectRecordStatusEntity,
+                                                                                                           int rpoCsvStartHour,
+                                                                                                           int rpoCsvEndHour,
+                                                                                                           int limit);
 }

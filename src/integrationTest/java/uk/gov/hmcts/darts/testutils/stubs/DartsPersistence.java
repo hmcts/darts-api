@@ -691,6 +691,17 @@ public class DartsPersistence {
         stream(annotationDocuments).forEach(this::save);
     }
 
+    @Transactional
+    public void saveAll(ExternalObjectDirectoryEntity... externalObjectDirectoryEntities) {
+        stream(externalObjectDirectoryEntities).forEach(this::save);
+    }
+
+    @Transactional
+    public void saveAll(List<ExternalObjectDirectoryEntity> externalObjectDirectoryEntities) {
+        externalObjectDirectoryEntities.forEach(this::save);
+    }
+
+
     private void saveMediaList(List<MediaEntity> mediaList) {
         mediaList.forEach(media -> {
             if (media.getId() == null) {

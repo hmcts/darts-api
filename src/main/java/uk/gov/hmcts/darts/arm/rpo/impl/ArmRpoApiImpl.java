@@ -498,7 +498,7 @@ public class ArmRpoApiImpl implements ArmRpoApi {
             || CollectionUtils.isEmpty(extendedProductionsByMatterResponse.getProductions())
             || isNull(extendedProductionsByMatterResponse.getProductions().getFirst())
             || StringUtils.isBlank(extendedProductionsByMatterResponse.getProductions().getFirst().getProductionId())) {
-            throw handleFailureAndCreateException(errorMessage.append("ProductionId is missing from ARM Rpo rsponse").toString(),
+            throw handleFailureAndCreateException(errorMessage.append("ProductionId is missing from ARM RPO response").toString(),
                                                   armRpoExecutionDetailEntity, userAccount);
         }
 

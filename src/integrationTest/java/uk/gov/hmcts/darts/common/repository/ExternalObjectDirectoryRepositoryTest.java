@@ -22,6 +22,7 @@ import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_RPO_PENDING;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.STORED;
 
 class ExternalObjectDirectoryRepositoryTest extends PostgresIntegrationBase {
@@ -421,4 +422,30 @@ class ExternalObjectDirectoryRepositoryTest extends PostgresIntegrationBase {
         assertEquals(100L, fileSize);
     }
 
+    @Test
+    void findAllByStatusAndDataIngestionTsBetweenOffsetCreatedDateTimeLimit() throws InvocationTargetException, NoSuchMethodException, IllegalAccessException {
+        // given
+        OffsetDateTime createdBeforeCurrentTime = currentTimeHelper.currentOffsetDateTime().minusHours(30);
+
+        List<ExternalObjectDirectoryEntity> externalObjectDirectoryEntities
+            = externalObjectDirectoryStub.generateWithStatusAndMediaLocation(
+            ExternalLocationTypeEnum.ARM, ARM_RPO_PENDING, 10, Optional.of(createdBeforeCurrentTime));
+
+        externalObjectDirectoryEntities.forEach(eod -> {
+            eod.setCreatedDateTime(currentTimeHelper.currentOffsetDateTime().minusHours(30));
+            eod.setDataIngestionTs(currentTimeHelper.currentOffsetDateTime().minusHours(26));
+        });
+        dartsPersistence.saveAll(externalObjectDirectoryEntities);
+
+        externalObjectDirectoryStub.generateWithStatusAndTranscriptionAndLocation(
+            ExternalLocationTypeEnum.ARM, STORED, 1, Optional.of(createdBeforeCurrentTime));
+
+        // when
+        var results = externalObjectDirectoryRepository.findAllByStatusAndDataIngestionTsBetweenOffsetCreatedDateTimeLimit(
+            EodHelper.armRpoPendingStatus(), 28, 24, 5);
+
+        // then
+        assertEquals(5, results.size());
+
+    }
 }
