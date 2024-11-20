@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.context.TestPropertySource;
 import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
 import uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum;
@@ -19,6 +20,9 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
 @DisplayName("ProcessArmRpoPendingAutomatedTask test")
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
+@TestPropertySource(properties = {
+    "darts.automated.task.process-e2e-arm-rpo-pending.process-e2e-arm-rpo=false"
+})
 class ProcessArmRpoPendingAutomatedTaskITest extends PostgresIntegrationBase {
     private final ProcessArmRpoPendingAutomatedTask processArmRpoPendingAutomatedTask;
 
