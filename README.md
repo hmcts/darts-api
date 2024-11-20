@@ -61,6 +61,7 @@ The required value of each variable is stored in Azure Key Vault as a Secret.
 | ARM_SERVICE_PROFILE                      | ArmServiceProfile                         |
 | ARM_SERVICE_ENTITLEMENT                  | ArmServiceEntitlement                     |
 | ARM_STORAGE_ACCOUNT_NAME                 | ArmStorageAccountName                     |
+| IS_MOCK_ARM_RPO_DOWNLOAD_CSV             | is_mock_arm_rpo_download_csv              |
 
 There are few attributes which doesn't use Azure Keyvault secrets. Those environment variable values are controlled dynamically via Flux config
 
@@ -150,6 +151,7 @@ export DARTS_UNSTRUCTURED_STORAGE_SAS_URL=
 export ARM_SERVICE_PROFILE=
 export ARM_SERVICE_ENTITLEMENT=
 export ARM_STORAGE_ACCOUNT_NAME=
+export IS_MOCK_ARM_RPO_DOWNLOAD_CSV=
 ```
 
 ### Storage Account

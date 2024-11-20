@@ -43,3 +43,4 @@ export DARTS_UNSTRUCTURED_STORAGE_SAS_URL="$(az keyvault secret show --vault-nam
 export ARM_SERVICE_PROFILE="$(az keyvault secret show --vault-name darts-stg --name ArmServiceProfile | jq .value -r)"
 export ARM_SERVICE_ENTITLEMENT="$(az keyvault secret show --vault-name darts-stg --name ArmServiceEntitlement | jq .value -r)"
 export ARM_STORAGE_ACCOUNT_NAME="$(az keyvault secret show --vault-name darts-stg --name ArmStorageAccountName | jq .value -r)"
+export IS_MOCK_ARM_RPO_DOWNLOAD_CSV=="$(az keyvault secret show --vault-name darts-stg --name is_mock_arm_rpo_download_csv | jq .value -r)"
