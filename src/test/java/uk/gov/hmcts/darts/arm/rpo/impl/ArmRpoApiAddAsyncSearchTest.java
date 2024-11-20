@@ -1,6 +1,7 @@
 package uk.gov.hmcts.darts.arm.rpo.impl;
 
 import feign.FeignException;
+import org.hamcrest.Matchers;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -94,9 +95,12 @@ class ArmRpoApiAddAsyncSearchTest {
         UserAccountEntity someUserAccount = new UserAccountEntity();
 
         // When
-        armRpoApi.addAsyncSearch(TOKEN, EXECUTION_ID, someUserAccount);
+        String searchName = armRpoApi.addAsyncSearch(TOKEN, EXECUTION_ID, someUserAccount);
 
-        // Then verify execution detail state moves to in progress
+        // Then
+        assertThat(searchName, Matchers.matchesPattern("DARTS_RPO_\\d{4}_\\d{2}_\\d{2}_\\d{2}_\\d{2}_\\d{2}"));
+
+        // And verify execution detail state moves to in progress
         verify(armRpoService).updateArmRpoStateAndStatus(armRpoExecutionDetailEntity,
                                                          armRpoHelperMocks.getAddAsyncSearchRpoState(),
                                                          armRpoHelperMocks.getInProgressRpoStatus(),

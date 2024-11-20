@@ -7,6 +7,8 @@ import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 
 public interface ArmRpoService {
 
+    ArmRpoExecutionDetailEntity createArmRpoExecutionDetailEntity(UserAccountEntity userAccount);
+
     ArmRpoExecutionDetailEntity getArmRpoExecutionDetailEntity(Integer executionId);
 
     void updateArmRpoStateAndStatus(ArmRpoExecutionDetailEntity armRpoExecutionDetailEntity, ArmRpoStateEntity armRpoStateEntity,

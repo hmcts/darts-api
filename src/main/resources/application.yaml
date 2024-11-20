@@ -479,7 +479,7 @@ darts:
           at-most-for: PT60M
       process-e2e-arm-rpo-pending:
         system-user-email: ${darts.automated.task.common-config.system-user-email:}
-        process-e2e-arm-rpo: ${PROCESS_E2E_ARM_RPO:false}
+        process-e2e-arm-rpo: ${PROCESS_E2E_ARM_RPO:true}
         arm-rpo-duration: ${ARM_RPO_DURATION:1h}
         lock:
           at-least-for: PT1M
