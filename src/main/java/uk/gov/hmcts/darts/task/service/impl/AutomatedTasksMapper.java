@@ -1,6 +1,7 @@
 package uk.gov.hmcts.darts.task.service.impl;
 
 import org.springframework.stereotype.Component;
+import uk.gov.hmcts.darts.common.entity.ArmAutomatedTaskEntity;
 import uk.gov.hmcts.darts.common.entity.AutomatedTaskEntity;
 import uk.gov.hmcts.darts.tasks.model.AutomatedTaskSummary;
 import uk.gov.hmcts.darts.tasks.model.DetailedAutomatedTask;
@@ -11,7 +12,7 @@ import java.util.List;
 public class AutomatedTasksMapper {
 
     public DetailedAutomatedTask mapEntityToDetailedAutomatedTask(AutomatedTaskEntity automatedTaskEntity) {
-        return new DetailedAutomatedTask()
+        DetailedAutomatedTask detailedAutomatedTask = new DetailedAutomatedTask()
             .id(automatedTaskEntity.getId())
             .name(automatedTaskEntity.getTaskName())
             .isActive(automatedTaskEntity.getTaskEnabled())
@@ -23,6 +24,16 @@ public class AutomatedTasksMapper {
             .lastModifiedBy(automatedTaskEntity.getLastModifiedBy().getId())
             .isCronEditable(automatedTaskEntity.getCronEditable())
             .batchSize(automatedTaskEntity.getBatchSize());
+
+        if (automatedTaskEntity.getArmAutomatedTaskEntity() != null) {
+            ArmAutomatedTaskEntity armAutomatedTaskEntity = automatedTaskEntity.getArmAutomatedTaskEntity();
+            detailedAutomatedTask.setRpoCsvStartHour(armAutomatedTaskEntity.getRpoCsvStartHour());
+            detailedAutomatedTask.setRpoCsvEndHour(armAutomatedTaskEntity.getRpoCsvEndHour());
+            detailedAutomatedTask.setArmReplayStartTs(armAutomatedTaskEntity.getArmReplayStartTs());
+            detailedAutomatedTask.setArmReplayEndTs(armAutomatedTaskEntity.getArmReplayEndTs());
+            detailedAutomatedTask.setArmAttributeType(armAutomatedTaskEntity.getArmAttributeType());
+        }
+        return detailedAutomatedTask;
     }
 
     public List<AutomatedTaskSummary> mapEntitiesToModel(List<AutomatedTaskEntity> automatedTaskEntities) {
