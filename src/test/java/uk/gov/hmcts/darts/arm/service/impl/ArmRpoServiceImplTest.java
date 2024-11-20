@@ -1,9 +1,11 @@
 package uk.gov.hmcts.darts.arm.service.impl;
 
+import jakarta.persistence.EntityManager;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -25,6 +27,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -32,6 +35,9 @@ class ArmRpoServiceImplTest {
 
     @Mock
     private ArmRpoExecutionDetailRepository armRpoExecutionDetailRepository;
+
+    @Mock
+    private EntityManager entityManager;
 
     @InjectMocks
     private ArmRpoServiceImpl armRpoService;
@@ -45,6 +51,29 @@ class ArmRpoServiceImplTest {
     void setUp() {
         armRpoExecutionDetailEntity = new ArmRpoExecutionDetailEntity();
         userAccountEntity = new UserAccountEntity();
+    }
+
+    @Test
+    void createArmRpoExecutionDetailEntity_shouldCreateAndSaveExpectedEntityState() {
+        // Given
+        when(entityManager.merge(userAccountEntity))
+            .thenReturn(userAccountEntity);
+
+        var detailEntityCaptor = ArgumentCaptor.forClass(ArmRpoExecutionDetailEntity.class);
+
+        // When
+        armRpoService.createArmRpoExecutionDetailEntity(userAccountEntity);
+
+        // Then
+        verify(entityManager).merge(userAccountEntity);
+
+        verify(armRpoExecutionDetailRepository).save(detailEntityCaptor.capture());
+
+        var armRpoExecutionDetail = detailEntityCaptor.getValue();
+        assertEquals(userAccountEntity, armRpoExecutionDetail.getCreatedBy());
+        assertEquals(userAccountEntity, armRpoExecutionDetail.getLastModifiedBy());
+
+        verifyNoMoreInteractions(entityManager, armRpoExecutionDetailRepository);
     }
 
     @Test
