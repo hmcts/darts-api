@@ -18,6 +18,8 @@ spring:
         format_sql: true
         generate_statistics: false
 darts:
+  event-obfuscation:
+    enabled: true
   daily-list:
     housekeeping:
       enabled: false

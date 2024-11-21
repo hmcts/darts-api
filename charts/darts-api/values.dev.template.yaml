@@ -101,6 +101,7 @@ java:
   environment:
     ENABLE_FLYWAY: true
     MANUAL_DELETION_ENABLED: true
+    EVENT_OBFUSCATION_ENABLED: true
     CASE_EXPIRY_DELETION_ENABLED: true
     RUN_DB_MIGRATION_ON_STARTUP: true
     DARTS_API_DB_HOST: "darts-modernisation-dev.postgres.database.azure.com"
@@ -146,6 +147,7 @@ darts-portal:
       DARTS_AZUREAD_B2C_ORIGIN_HOST: https://hmctsstgextid.b2clogin.com
       DARTS_AZUREAD_B2C_HOSTNAME: https://darts.staging.apps.hmcts.net
       MANUAL_DELETION_ENABLED: true
+      EVENT_OBFUSCATION_ENABLED: true
 
 # function:
 #   scaleType: Job
