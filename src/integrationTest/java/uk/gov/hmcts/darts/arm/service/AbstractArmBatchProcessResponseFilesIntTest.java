@@ -427,7 +427,7 @@ abstract class AbstractArmBatchProcessResponseFilesIntTest extends IntegrationBa
 
         assertEquals(1, foundMediaList.size());
         ExternalObjectDirectoryEntity foundMedia = foundMediaList.getFirst();
-        assertEquals(ARM_RPO_PENDING.getId(), foundMedia.getStatus().getId());
+        assertEquals(ARM_RESPONSE_MANIFEST_FAILED.getId(), foundMedia.getStatus().getId());
         assertEquals(1, foundMedia.getVerificationAttempts());
 
         verify(armDataManagementApi).listResponseBlobsUsingMarker(prefix(), BATCH_SIZE, continuationToken);
@@ -435,6 +435,11 @@ abstract class AbstractArmBatchProcessResponseFilesIntTest extends IntegrationBa
 
         verify(armDataManagementApi).getBlobData(createRecordFilename1);
         verify(armDataManagementApi).getBlobData(invalidLineFileFilename2);
+
+        verify(armDataManagementApi).deleteBlobData(createRecordFilename1);
+        verify(armDataManagementApi).deleteBlobData(invalidLineFileFilename2);
+        verify(armDataManagementApi).deleteBlobData(blobNameAndPath1);
+
         verifyNoMoreInteractions(armDataManagementApi);
     }
 
