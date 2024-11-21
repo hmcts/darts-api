@@ -79,7 +79,7 @@ class FileOperationServiceImplTest {
     }
 
     @Test
-    void saveBinaryDataToSpecifiedWorkspace_shouldThrowIOException() {
+    void saveBinaryDataToSpecifiedWorkspace_shouldThrowIoException() {
         BinaryData binaryData = BinaryData.fromStream(mediaFile);
         assertThrows(IOException.class, () -> fileOperationService.saveBinaryDataToSpecifiedWorkspace(binaryData, fileName, "/invalid/path", true));
     }
