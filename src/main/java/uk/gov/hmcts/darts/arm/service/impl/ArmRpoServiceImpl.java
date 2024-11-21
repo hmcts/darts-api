@@ -65,12 +65,13 @@ public class ArmRpoServiceImpl implements ArmRpoService {
 
     @Override
     public ArmRpoExecutionDetailEntity getLatestArmRpoExecutionDetailEntity() {
-        return armRpoExecutionDetailRepository.findLatestByCreatedDateTimeDesc();
+        return armRpoExecutionDetailRepository.findLatestByCreatedDateTimeDesc().orElseThrow(() -> new DartsException(ARM_RPO_EXECUTION_DETAIL_NOT_FOUND));
     }
 
     @Override
     public ArmRpoExecutionDetailEntity getLatestArmRpoExecutionDetailEntity(ArmRpoStateEntity armRpoStateEntity, ArmRpoStatusEntity armRpoStatusEntity) {
-        return armRpoExecutionDetailRepository.findLatestByCreatedDateTimeDescWithStateAndStatus(armRpoStateEntity, armRpoStatusEntity);
+        return armRpoExecutionDetailRepository.findLatestByCreatedDateTimeDescWithStateAndStatus(armRpoStateEntity, armRpoStatusEntity).orElseThrow(
+            () -> new DartsException(ARM_RPO_EXECUTION_DETAIL_NOT_FOUND));
     }
 
     @Override

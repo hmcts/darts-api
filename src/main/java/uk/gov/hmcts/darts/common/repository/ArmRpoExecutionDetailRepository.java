@@ -7,6 +7,8 @@ import uk.gov.hmcts.darts.common.entity.ArmRpoExecutionDetailEntity;
 import uk.gov.hmcts.darts.common.entity.ArmRpoStateEntity;
 import uk.gov.hmcts.darts.common.entity.ArmRpoStatusEntity;
 
+import java.util.Optional;
+
 @Repository
 public interface ArmRpoExecutionDetailRepository extends JpaRepository<ArmRpoExecutionDetailEntity, Integer> {
 
@@ -16,7 +18,7 @@ public interface ArmRpoExecutionDetailRepository extends JpaRepository<ArmRpoExe
         ORDER BY ared.createdDateTime DESC
         LIMIT 1
         """)
-    ArmRpoExecutionDetailEntity findLatestByCreatedDateTimeDesc();
+    Optional<ArmRpoExecutionDetailEntity> findLatestByCreatedDateTimeDesc();
 
     @Query("""
         SELECT ared
@@ -26,6 +28,7 @@ public interface ArmRpoExecutionDetailRepository extends JpaRepository<ArmRpoExe
         ORDER BY ared.createdDateTime DESC
         LIMIT 1
         """)
-    ArmRpoExecutionDetailEntity findLatestByCreatedDateTimeDescWithStateAndStatus(ArmRpoStateEntity armRpoStateEntity, ArmRpoStatusEntity armRpoStatusEntity);
+    Optional<ArmRpoExecutionDetailEntity> findLatestByCreatedDateTimeDescWithStateAndStatus(ArmRpoStateEntity armRpoStateEntity,
+                                                                                            ArmRpoStatusEntity armRpoStatusEntity);
 
 }
