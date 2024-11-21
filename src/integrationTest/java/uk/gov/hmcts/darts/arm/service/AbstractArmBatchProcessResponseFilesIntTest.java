@@ -532,6 +532,11 @@ abstract class AbstractArmBatchProcessResponseFilesIntTest extends IntegrationBa
         verify(armDataManagementApi).getBlobData(invalidLineFileFilename1);
         verify(armDataManagementApi).getBlobData(invalidLineFileFilename2);
         verify(armDataManagementApi).getBlobData(invalidLineFileFilename3);
+
+        verify(armDataManagementApi).deleteBlobData(invalidLineFileFilename1);
+        verify(armDataManagementApi).deleteBlobData(invalidLineFileFilename2);
+        verify(armDataManagementApi).deleteBlobData(invalidLineFileFilename3);
+        
         verifyNoMoreInteractions(armDataManagementApi);
     }
 

@@ -360,6 +360,11 @@ public abstract class AbstractArmBatchProcessResponseFiles implements ArmRespons
                 } else {
                     log.warn("Invalid line file count is greater than 2 for external object directory ID {}", externalObjectDirectory.getId());
                     updateExternalObjectDirectoryStatus(externalObjectDirectory, EodHelper.armResponseProcessingFailedStatus());
+                    List<String> invalidResponseFiles = new ArrayList<>();
+                    armResponseBatchData.getInvalidLineFileFilenameProcessors().forEach(
+                        invalidLineFileFilenameProcessor -> invalidResponseFiles.add(invalidLineFileFilenameProcessor.getInvalidLineFileFilenameAndPath())
+                    );
+                    deleteResponseBlobs(invalidResponseFiles);
                 }
             } else {
 
@@ -368,8 +373,9 @@ public abstract class AbstractArmBatchProcessResponseFiles implements ArmRespons
                          invalidLineFileFilenameProcessor1.getInvalidLineFileFilenameAndPath(),
                          invalidLineFileFilenameProcessor2.getInvalidLineFileFilenameAndPath());
                 List<String> invalidResponseFiles = new ArrayList<>();
-                invalidResponseFiles.add(invalidLineFileFilenameProcessor1.getInvalidLineFileFilenameAndPath());
-                invalidResponseFiles.add(invalidLineFileFilenameProcessor2.getInvalidLineFileFilenameAndPath());
+                armResponseBatchData.getInvalidLineFileFilenameProcessors().forEach(
+                    invalidLineFileFilenameProcessor -> invalidResponseFiles.add(invalidLineFileFilenameProcessor.getInvalidLineFileFilenameAndPath())
+                );
                 deleteResponseBlobs(invalidResponseFiles);
             }
         } catch (Exception e) {
