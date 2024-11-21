@@ -55,7 +55,7 @@ class ArmRpoExecutionDetailRepositoryTest extends PostgresIntegrationBase {
         var result = armRpoExecutionDetailRepository.findLatestByCreatedDateTimeDesc();
 
         // then
-        assertThat(result).isEqualTo(armRpoExecutionDetailEntity6);
+        assertThat(result.get()).isEqualTo(armRpoExecutionDetailEntity6);
     }
 
     @Test
@@ -76,12 +76,12 @@ class ArmRpoExecutionDetailRepositoryTest extends PostgresIntegrationBase {
             stateOf(GET_PRODUCTION_OUTPUT_FILES), statusOf(COMPLETED));
 
         // then
-        assertThat(result1).isEqualTo(armRpoExecutionDetailEntity1);
-        assertThat(result2).isEqualTo(armRpoExecutionDetailEntity2);
-        assertThat(result3).isEqualTo(armRpoExecutionDetailEntity3);
-        assertThat(result4).isEqualTo(armRpoExecutionDetailEntity4);
-        assertThat(result5).isEqualTo(armRpoExecutionDetailEntity5);
-        assertThat(result6).isEqualTo(armRpoExecutionDetailEntity6);
+        assertThat(result1.get()).isEqualTo(armRpoExecutionDetailEntity1);
+        assertThat(result2.get()).isEqualTo(armRpoExecutionDetailEntity2);
+        assertThat(result3.get()).isEqualTo(armRpoExecutionDetailEntity3);
+        assertThat(result4.get()).isEqualTo(armRpoExecutionDetailEntity4);
+        assertThat(result5.get()).isEqualTo(armRpoExecutionDetailEntity5);
+        assertThat(result6.get()).isEqualTo(armRpoExecutionDetailEntity6);
 
     }
 
