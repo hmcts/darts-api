@@ -54,9 +54,9 @@ public class FileOperationServiceImpl implements FileOperationService {
 
         Path targetTempFile;
 
-        try (InputStream audioInputStream = binaryData.toStream()) {
+        try (InputStream inputStream = binaryData.toStream()) {
             targetTempFile = createFile(fileName, workspace, appendUuidToWorkspace);
-            Files.copy(audioInputStream, targetTempFile, StandardCopyOption.REPLACE_EXISTING);
+            Files.copy(inputStream, targetTempFile, StandardCopyOption.REPLACE_EXISTING);
         } catch (IOException e) {
             log.error("Unable to copy binary data to workspace {} - {}", workspace, e.getMessage());
             throw new IOException(e);
