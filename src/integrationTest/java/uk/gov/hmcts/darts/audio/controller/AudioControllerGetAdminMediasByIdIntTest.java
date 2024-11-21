@@ -63,7 +63,7 @@ class AudioControllerGetAdminMediasByIdIntTest extends IntegrationBase {
             .findFirst()
             .orElseThrow();
 
-        var mediaEntity = createAndSaveMediaEntity(hearingEntity, userAccountEntity);
+        var mediaEntity = createAndSaveMediaEntity(hearingEntity, userAccountEntity, false);
 
         createAndSaveAdminActionEntity(mediaEntity, userAccountEntity);
 
@@ -85,7 +85,7 @@ class AudioControllerGetAdminMediasByIdIntTest extends IntegrationBase {
             .andExpect(jsonPath("$.checksum").value("7017013d05bcc5032e142049081821d6"))
             .andExpect(jsonPath("$.media_status").value("media-status-value"))
             .andExpect(jsonPath("$.is_hidden").value(true))
-            .andExpect(jsonPath("$.is_deleted").value(true))
+            .andExpect(jsonPath("$.is_deleted").value(false))
             .andExpect(jsonPath("$.is_current").value(true))
 
             .andExpect(jsonPath("$.admin_action").exists())
@@ -217,6 +217,39 @@ class AudioControllerGetAdminMediasByIdIntTest extends IntegrationBase {
     }
 
     @ParameterizedTest
+    @EnumSource(value = SecurityRoleEnum.class, names = {"SUPER_USER", "SUPER_ADMIN"}, mode = INCLUDE)
+    void shouldReturn404WhenMediaRecordIsDeleted(SecurityRoleEnum role) throws Exception {
+        // Given
+        given.anAuthenticatedUserWithGlobalAccessAndRole(role);
+
+        var hearingEntity = databaseStub.createHearing(COURTHOUSE_NAME, COURTROOM_NAME, CASE_NUMBER, HEARING_START_AT.toLocalDateTime());
+
+        var userAccountEntity = databaseStub.getUserAccountRepository().findAll().stream()
+            .findFirst()
+            .orElseThrow();
+
+        var mediaEntity = createAndSaveMediaEntity(hearingEntity, userAccountEntity, true);
+
+        createAndSaveAdminActionEntity(mediaEntity, userAccountEntity);
+
+        // When
+        MvcResult mvcResult = mockMvc.perform(get(ENDPOINT.resolve(String.valueOf(mediaEntity.getId()))))
+            .andExpect(status().isNotFound())
+            .andReturn();
+
+        // Then
+        var jsonString = mvcResult.getResponse().getContentAsString();
+        JSONAssert.assertEquals("""
+                                    {
+                                      "type": "AUDIO_102",
+                                      "title": "The requested media cannot be found",
+                                      "status": 404
+                                    }
+                                    """, jsonString, JSONCompareMode.STRICT);
+
+    }
+
+    @ParameterizedTest
     @EnumSource(value = SecurityRoleEnum.class, names = {"SUPER_USER", "SUPER_ADMIN"}, mode = EXCLUDE)
     void shouldDenyAccess(SecurityRoleEnum role) throws Exception {
         // Given
@@ -238,7 +271,7 @@ class AudioControllerGetAdminMediasByIdIntTest extends IntegrationBase {
                                     """, jsonString, JSONCompareMode.STRICT);
     }
 
-    private MediaEntity createAndSaveMediaEntity(HearingEntity hearingEntity, UserAccountEntity userAccountEntity) {
+    private MediaEntity createAndSaveMediaEntity(HearingEntity hearingEntity, UserAccountEntity userAccountEntity, boolean isDeleted) {
         MediaEntity mediaEntity = databaseStub.createMediaEntity(COURTHOUSE_NAME,
                                                                  COURTROOM_NAME,
                                                                  MEDIA_START_AT,
@@ -249,7 +282,7 @@ class AudioControllerGetAdminMediasByIdIntTest extends IntegrationBase {
         mediaEntity.setClipId("clip-id-value");
         mediaEntity.setMediaStatus("media-status-value");
         mediaEntity.setHidden(true);
-        mediaEntity.setDeleted(true);
+        mediaEntity.setDeleted(isDeleted);
         mediaEntity.setLegacyVersionLabel("version-label-value");
         mediaEntity.setChronicleId("chronicle-value");
         mediaEntity.setAntecedentId("antecedent-value");

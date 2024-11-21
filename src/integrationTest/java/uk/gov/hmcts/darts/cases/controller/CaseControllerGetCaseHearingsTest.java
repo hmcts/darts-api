@@ -14,6 +14,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import uk.gov.hmcts.darts.authorisation.exception.AuthorisationError;
+import uk.gov.hmcts.darts.cases.model.Hearing;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
@@ -77,7 +78,7 @@ class CaseControllerGetCaseHearingsTest extends IntegrationBase {
     }
 
     @Test
-    void casesSearchGetEndpointShouldReturnForbidden() throws Exception {
+    void caseHearingsGetEndpointShouldReturnForbidden() throws Exception {
         Mockito.reset(authentication);
 
         // a user that does not exist in the db
@@ -100,7 +101,7 @@ class CaseControllerGetCaseHearingsTest extends IntegrationBase {
     }
 
     @Test
-    void casesSearchGetEndpoint() throws Exception {
+    void caseHearingsGetEndpointNotFound() throws Exception {
         MockHttpServletRequestBuilder requestBuilder = get(endpointUrl, "25");
 
         mockMvc.perform(requestBuilder).andExpect(status().isNotFound());
@@ -108,25 +109,25 @@ class CaseControllerGetCaseHearingsTest extends IntegrationBase {
     }
 
     @Test
-    void casesSearchGetEndpointOneObjectReturned() throws Exception {
+    void caseHearingsGetEndpointOneObjectReturned() throws Exception {
         HearingEntity hearingEntity = dartsDatabase.getHearingRepository().findAll().get(0);
 
         MockHttpServletRequestBuilder requestBuilder = get(endpointUrl, hearingEntity.getCourtCase().getId());
 
         mockMvc.perform(requestBuilder).andExpect(status().isOk())
             .andExpect(jsonPath("$[0].id", Matchers.is(hearingEntity.getId())))
-            .andExpect(jsonPath("$[0].date", Matchers.is(Matchers.notNullValue())))
+            .andExpect(jsonPath("$[0].date", Matchers.is(DateConverterUtil.toLocalDateTime(SOME_DATE_TIME).toLocalDate().toString())))
             .andExpect(jsonPath("$[0].judges", Matchers.is(Matchers.notNullValue())))
             .andExpect(jsonPath("$[0].courtroom", Matchers.is(SOME_COURTROOM.toUpperCase(Locale.ROOT))));
-
     }
 
     @Test
-    void casesSearchGetEndpointMultipleObjectsReturned() throws Exception {
+    void caseHearingsMultipleWithTranscripts() throws Exception {
+        var otherCourtroom = "CR1";
         dartsDatabase.givenTheDatabaseContainsCourtCaseWithHearingAndCourthouseWithRoom(
             SOME_CASE_ID,
             SOME_COURTHOUSE,
-            "CR1",
+            otherCourtroom,
             DateConverterUtil.toLocalDateTime(SOME_DATE_TIME)
         );
 
@@ -136,30 +137,56 @@ class CaseControllerGetCaseHearingsTest extends IntegrationBase {
         hearingEntity.addJudge(dartsDatabase.createSimpleJudge("hearing1Judge"), false);
         hearingEntity2.addJudge(dartsDatabase.createSimpleJudge("hearing2Judge"), false);
 
+        dartsDatabase.getTranscriptionStub().createAndSaveCompletedTranscriptionWithDocument(
+            testUser, hearingEntity.getCourtCase(), hearingEntity2, SOME_DATE_TIME, false
+        );
+
         MockHttpServletRequestBuilder requestBuilder = get(endpointUrl, hearingEntity.getCourtCase().getId());
 
-        mockMvc.perform(requestBuilder).andExpect(status().isOk())
-            .andExpect(jsonPath("$[0].id", Matchers.is(hearingEntity.getId())))
-            .andExpect(jsonPath("$[0].date", Matchers.is(Matchers.notNullValue())))
-            .andExpect(jsonPath("$[0].judges", Matchers.is(Matchers.notNullValue())))
-            .andExpect(jsonPath("$[0].courtroom", Matchers.is(SOME_COURTROOM.toUpperCase(Locale.ROOT))))
-            .andExpect(jsonPath("$[1].id", Matchers.is(hearingEntity2.getId())))
-            .andExpect(jsonPath("$[1].courtroom", Matchers.is("CR1")));
+        MvcResult mvcResult = mockMvc.perform(requestBuilder).andExpect(status().isOk()).andReturn();
 
+        Hearing[] hearingResultList = objectMapper.readValue(mvcResult.getResponse().getContentAsString(), Hearing[].class);
+        assertEquals(2, hearingResultList.length);
+
+        var hearing1 = hearingResultList[0];
+        assertEquals(hearingEntity.getId(), hearing1.getId());
+        assertEquals(SOME_COURTROOM.toUpperCase(Locale.ROOT), hearing1.getCourtroom());
+        assertEquals(1, hearing1.getJudges().size());
+        assertEquals("1JUDGE1", hearing1.getJudges().get(0));
+        assertEquals(DateConverterUtil.toLocalDateTime(SOME_DATE_TIME).toLocalDate().toString(), hearing1.getDate().toString());
+        assertEquals(0, hearing1.getTranscriptCount());
+
+        var hearing2 = hearingResultList[1];
+        assertEquals(hearingEntity2.getId(), hearing2.getId());
+        assertEquals(otherCourtroom, hearing2.getCourtroom());
+        assertEquals(1, hearing2.getJudges().size());
+        assertEquals("1JUDGE1", hearing2.getJudges().get(0));
+        assertEquals(DateConverterUtil.toLocalDateTime(SOME_DATE_TIME).toLocalDate().toString(), hearing2.getDate().toString());
+        assertEquals(1, hearing2.getTranscriptCount());
     }
 
     @Test
-    void casesSearchGetEndpointNoObjectsReturned() throws Exception {
-        MockHttpServletRequestBuilder requestBuilder = get(endpointUrl, "25");
+    void caseHearingsMultipleWithTranscriptsWithHiddenDocument() throws Exception {
+        HearingEntity hearingEntity = dartsDatabase.getHearingRepository().findAll().get(0);
 
-        mockMvc.perform(requestBuilder).andExpect(status().isNotFound()).andExpect(
-            jsonPath(
-                "$[0]").doesNotExist());
+        hearingEntity.addJudge(dartsDatabase.createSimpleJudge("hearing1Judge"), false);
 
+        dartsDatabase.getTranscriptionStub().createAndSaveCompletedTranscriptionWithDocument(
+            testUser, hearingEntity.getCourtCase(), hearingEntity, SOME_DATE_TIME, true
+        );
+
+        MockHttpServletRequestBuilder requestBuilder = get(endpointUrl, hearingEntity.getCourtCase().getId());
+
+        MvcResult mvcResult = mockMvc.perform(requestBuilder).andExpect(status().isOk()).andReturn();
+
+        Hearing[] hearingResultList = objectMapper.readValue(mvcResult.getResponse().getContentAsString(), Hearing[].class);
+        var hearing1 = hearingResultList[0];
+        assertEquals(1, hearingResultList.length);
+        assertEquals(0, hearing1.getTranscriptCount());
     }
 
     @Test
-    void casesSearchEmptyHearingListCaseIdExists() throws Exception {
+    void caseHearingsEmptyHearingList() throws Exception {
 
         String courthouseName = "25";
         CourthouseEntity courthouseEntity = dartsDatabase.createCourthouseUnlessExists(courthouseName);
@@ -170,14 +197,14 @@ class CaseControllerGetCaseHearingsTest extends IntegrationBase {
 
         MockHttpServletRequestBuilder requestBuilder = get(endpointUrl, courtCase.getId());
 
-        mockMvc.perform(requestBuilder).andExpect(status().isOk())
-            .andExpect(jsonPath(
-                "$.case_id").doesNotExist());
+        MvcResult mvcResult = mockMvc.perform(requestBuilder).andExpect(status().isOk()).andReturn();
+        Hearing[] hearingResultList = objectMapper.readValue(mvcResult.getResponse().getContentAsString(), Hearing[].class);
 
+        assertEquals(0, hearingResultList.length);
     }
 
     @Test
-    void casesSearchWithInactiveUser() throws Exception {
+    void caseHearingsWithInactiveUser() throws Exception {
 
         testUser.setActive(false);
         userAccountRepository.save(testUser);
