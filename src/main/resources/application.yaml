@@ -113,6 +113,8 @@ spring:
             loggerLevel: ${FEIGN_LOG_LEVEL:none}
 
 darts:
+  event-obfuscation:
+    enabled: ${EVENT_OBFUSCATION_ENABLED:false}
   manual-deletion:
     enabled: ${MANUAL_DELETION_ENABLED:false}
     grace-period: ${MANUAL_DELETION_GRACE_PERIOD:24h}

@@ -49,6 +49,8 @@ spring:
     hikari:
       maximum-pool-size: 10 # Overrides the value in `application.yaml` to a smaller value more appropriate for integration tests, sized below the `max_connections` limit specified in PostgresIntegrationBase.
 darts:
+  event-obfuscation:
+    enabled: true
   manual-deletion:
     enabled: true
   hearings:
