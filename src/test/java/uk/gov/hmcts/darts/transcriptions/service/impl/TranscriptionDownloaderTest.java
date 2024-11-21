@@ -18,6 +18,7 @@ import uk.gov.hmcts.darts.common.entity.TranscriptionEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
+import uk.gov.hmcts.darts.common.repository.TranscriptionDocumentRepository;
 import uk.gov.hmcts.darts.common.repository.TranscriptionRepository;
 import uk.gov.hmcts.darts.datamanagement.exception.FileNotDownloadedException;
 
@@ -37,6 +38,7 @@ import static java.util.stream.IntStream.rangeClosed;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
@@ -54,6 +56,8 @@ class TranscriptionDownloaderTest {
     @Mock
     private TranscriptionRepository transcriptionRepository;
     @Mock
+    private TranscriptionDocumentRepository transcriptionDocumentRepository;
+    @Mock
     private DataManagementFacade dataManagementFacade;
     @Mock
     private AuditApi auditApi;
@@ -66,7 +70,10 @@ class TranscriptionDownloaderTest {
 
     @BeforeEach
     void setUp() {
-        transcriptionDownloader = new TranscriptionDownloader(transcriptionRepository, dataManagementFacade, auditApi, userIdentity);
+        transcriptionDownloader = new TranscriptionDownloader(
+            transcriptionRepository, transcriptionDocumentRepository,
+            dataManagementFacade, auditApi, userIdentity
+        );
 
         var testUser = new UserAccountEntity();
         testUser.setEmailAddress("test.user@example.com");
@@ -172,6 +179,9 @@ class TranscriptionDownloaderTest {
 
     @Test
     void throwsNotFoundExceptionIfTranscriptionDocumentHiddenAndUserIsNotSuperAdmin() {
+        when(transcriptionDocumentRepository.findByTranscriptionIdAndHiddenTrueIncludeDeleted(anyInt()))
+            .thenReturn(List.of(new TranscriptionDocumentEntity()));
+
         var transcriptionDocuments = someTranscriptionDocumentsUploadedAtLeast2DaysAgo(1);
         transcriptionDocuments.get(0).setHidden(true);
 
