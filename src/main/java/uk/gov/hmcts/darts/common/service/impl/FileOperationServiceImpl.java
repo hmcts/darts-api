@@ -55,9 +55,9 @@ public class FileOperationServiceImpl implements FileOperationService {
 
         Path tempFilePath;
 
-        try (InputStream audioInputStream = inputStream) {
+        try (InputStream tempFileInputStream = inputStream) {
             tempFilePath = createFile(fileName, storageConfiguration.getTempBlobWorkspace(), appendUuidToWorkspace);
-            Files.copy(audioInputStream, tempFilePath, StandardCopyOption.REPLACE_EXISTING);
+            Files.copy(tempFileInputStream, tempFilePath, StandardCopyOption.REPLACE_EXISTING);
         } catch (IOException e) {
             log.error("Unable to save data to temporary workspace", e);
             throw new IOException(e);
