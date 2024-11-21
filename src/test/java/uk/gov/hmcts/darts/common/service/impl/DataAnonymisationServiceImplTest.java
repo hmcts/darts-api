@@ -97,6 +97,7 @@ class DataAnonymisationServiceImplTest {
         assertThat(eventEntity.getEventText()).isEqualTo("event text");
         assertThat(eventEntity.isDataAnonymised()).isFalse();
         verify(eventService).allAssociatedCasesAnonymised(eventEntity);
+        verify(eventService, never()).saveEvent(eventEntity);
     }
 
     @Test
@@ -112,6 +113,7 @@ class DataAnonymisationServiceImplTest {
         assertThat(eventEntity.isDataAnonymised()).isTrue();
         assertLastModifiedByAndAt(eventEntity, userAccount);
         verify(eventService).allAssociatedCasesAnonymised(eventEntity);
+        verify(eventService).saveEvent(eventEntity);
     }
 
     @Test
@@ -125,7 +127,7 @@ class DataAnonymisationServiceImplTest {
         assertThat(eventEntity.getEventText()).matches(TestUtils.UUID_REGEX);
         assertThat(eventEntity.isDataAnonymised()).isTrue();
         assertLastModifiedByAndAt(eventEntity, userAccount);
-        verifyNoMoreInteractions(eventService);
+        verify(eventService).saveEvent(eventEntity);
     }
 
     @Test
@@ -139,6 +141,7 @@ class DataAnonymisationServiceImplTest {
         assertThat(eventEntity.getEventText()).isEqualTo("event text");
         assertThat(eventEntity.isDataAnonymised()).isTrue();
         verifyNoMoreInteractions(eventService);
+        verify(eventService, never()).saveEvent(eventEntity);
     }
 
     @Test

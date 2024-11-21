@@ -26,5 +26,5 @@ public interface EventLinkedCaseRepository extends JpaRepository<EventLinkedCase
                     group by elc.event
         """
     )
-    boolean allAssociatedCasesAnonymised(EventEntity eventEntity);
+    boolean areAllAssociatedCasesAnonymised(EventEntity eventEntity);
 }
