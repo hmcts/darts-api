@@ -45,7 +45,7 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.darts.test.common.data.PersistableFactory.getArmRpoExecutionDetailTestData;
 
-@TestPropertySource(properties = {"darts.storage.arm.is_mock_arm_rpo_download_csv=false"})
+@TestPropertySource(properties = {"darts.storage.arm.is-mock-arm-rpo-download-csv=false"})
 @Slf4j
 @SuppressWarnings({"PMD.AvoidInstantiatingObjectsInLoops", "PMD.CloseResource"})
 class ArmRpoPollServiceIntTest extends PostgresIntegrationBase {
@@ -257,7 +257,7 @@ class ArmRpoPollServiceIntTest extends PostgresIntegrationBase {
             .body(body)
             .request(request)
             .build();
-        
+
     }
 
     private @NotNull ProductionOutputFilesResponse getProductionOutputFilesResponse(String fileId) {

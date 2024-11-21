@@ -25,7 +25,7 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-@TestPropertySource(properties = {"darts.storage.arm.is_mock_arm_rpo_download_csv=false"})
+@TestPropertySource(properties = {"darts.storage.arm.is-mock-arm-rpo-download-csv=false"})
 @SuppressWarnings("PMD.CloseResource")
 class ArmRpoApiDownloadProductionIntTest extends IntegrationBase {
 

@@ -22,7 +22,7 @@ import java.util.stream.Collectors;
  * This class is used to download production data from ARM RPO using the stubbed client. This client takes the eod ids in the header.
  */
 @Component
-@ConditionalOnProperty(prefix = "darts.storage.arm", name = "is_mock_arm_rpo_download_csv", havingValue = "true")
+@ConditionalOnProperty(prefix = "darts.storage.arm", name = "is-mock-arm-rpo-download-csv", havingValue = "true")
 @AllArgsConstructor
 @Slf4j
 public class StubbedArmRpoDownloadProductionImpl implements ArmRpoDownloadProduction {

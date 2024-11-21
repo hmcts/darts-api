@@ -34,7 +34,7 @@ import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_RPO_PENDING;
 import static uk.gov.hmcts.darts.test.common.data.PersistableFactory.getArmRpoExecutionDetailTestData;
 
-@TestPropertySource(properties = {"darts.storage.arm.is_mock_arm_rpo_download_csv=true"})
+@TestPropertySource(properties = {"darts.storage.arm.is-mock-arm-rpo-download-csv=true"})
 @SuppressWarnings({"PMD.AvoidInstantiatingObjectsInLoops", "PMD.CloseResource"})
 @Slf4j
 class StubbedArmRpoDownloadProductionIntTest extends PostgresIntegrationBase {
@@ -101,7 +101,7 @@ class StubbedArmRpoDownloadProductionIntTest extends PostgresIntegrationBase {
             }
         });
         dartsPersistence.saveAll(externalObjectDirectoryEntities);
-        
+
         Response response = mock(Response.class);
         when(armRpoClient.downloadProduction(anyString(), anyString(), anyString()))
             .thenReturn(response);

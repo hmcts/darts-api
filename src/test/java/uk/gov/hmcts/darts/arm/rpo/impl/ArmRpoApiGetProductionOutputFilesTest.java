@@ -40,7 +40,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
-@TestPropertySource(properties = {"darts.storage.arm.is_mock_arm_rpo_download_csv=true"})
+@TestPropertySource(properties = {"darts.storage.arm.is-mock-arm-rpo-download-csv=true"})
 @SuppressWarnings("checkstyle:linelength")
 @ExtendWith(MockitoExtension.class)
 class ArmRpoApiGetProductionOutputFilesTest {
