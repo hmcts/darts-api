@@ -15,7 +15,8 @@ import static uk.gov.hmcts.darts.task.api.AutomatedTaskName.CLOSE_OLD_UNFINISHED
 
 @Slf4j
 @Component
-public class CloseUnfinishedTranscriptionsAutomatedTask extends AbstractLockableAutomatedTask
+public class CloseUnfinishedTranscriptionsAutomatedTask 
+    extends AbstractLockableAutomatedTask<CloseUnfinishedTranscriptionsAutomatedTaskConfig>
     implements AutoloadingManualTask {
 
     private final TranscriptionsProcessor transcriptionsProcessor;

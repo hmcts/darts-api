@@ -15,7 +15,8 @@ import static uk.gov.hmcts.darts.task.api.AutomatedTaskName.DAILY_LIST_HOUSEKEEP
 
 @Slf4j
 @Component
-public class DailyListAutomatedTask extends AbstractLockableAutomatedTask
+public class DailyListAutomatedTask 
+    extends AbstractLockableAutomatedTask<DailyListAutomatedTaskConfig>
     implements AutoloadingManualTask {
 
     private final DailyListService dailyListService;

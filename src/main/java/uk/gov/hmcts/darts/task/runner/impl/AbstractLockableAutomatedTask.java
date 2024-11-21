@@ -35,7 +35,7 @@ import static uk.gov.hmcts.darts.task.status.AutomatedTaskStatus.SKIPPED;
 
 
 @Slf4j
-public abstract class AbstractLockableAutomatedTask implements AutomatedTask, AutoloadingAutomatedTask {
+public abstract class AbstractLockableAutomatedTask<T extends AbstractAutomatedTaskConfig> implements AutomatedTask, AutoloadingAutomatedTask {
 
     private AutomatedTaskStatus automatedTaskStatus = NOT_STARTED;
 
@@ -45,7 +45,7 @@ public abstract class AbstractLockableAutomatedTask implements AutomatedTask, Au
 
     private Instant start = Instant.now();
 
-    private final AbstractAutomatedTaskConfig automatedTaskConfigurationProperties;
+    private final T automatedTaskConfigurationProperties;
 
     private final LogApi logApi;
 
@@ -54,12 +54,16 @@ public abstract class AbstractLockableAutomatedTask implements AutomatedTask, Au
     private ThreadLocal<UUID> executionId;
 
     protected AbstractLockableAutomatedTask(AutomatedTaskRepository automatedTaskRepository,
-                                            AbstractAutomatedTaskConfig abstractAutomatedTaskConfig,
+                                            T abstractAutomatedTaskConfig,
                                             LogApi logApi, LockService lockService) {
         this.automatedTaskRepository = automatedTaskRepository;
         this.automatedTaskConfigurationProperties = abstractAutomatedTaskConfig;
         this.logApi = logApi;
         this.lockService = lockService;
+    }
+
+    protected T getConfig() {
+        return this.automatedTaskConfigurationProperties;
     }
 
     private void setupUserAuthentication() {

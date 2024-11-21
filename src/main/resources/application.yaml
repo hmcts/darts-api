@@ -372,6 +372,7 @@ darts:
           at-most-for: PT120M
       associated-object-data-expiry-deletion:
         system-user-email: ${darts.automated.task.common-config.system-user-email:}
+        buffer-duration: 24h
         lock:
           at-least-for: PT1M
           at-most-for: PT90M
@@ -399,6 +400,7 @@ darts:
       case-expiry-deletion:
         enabled: ${CASE_EXPIRY_DELETION_ENABLED:false}
         system-user-email: ${darts.automated.task.common-config.system-user-email:}
+        buffer-duration: 24h
         lock:
           at-least-for: PT1M
           at-most-for: PT40M

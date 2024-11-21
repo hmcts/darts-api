@@ -135,7 +135,7 @@ class AutomatedTaskServiceImplTest {
         ScheduledTask scheduledTask = mock(ScheduledTask.class);
         Set<ScheduledTask> scheduledTaskList = new HashSet<>();
         scheduledTaskList.add(scheduledTask);
-        AbstractLockableAutomatedTask automatedTask = new AbstractLockableAutomatedTask(
+        AbstractLockableAutomatedTask automatedTask = new AbstractLockableAutomatedTask<>(
             mockAutomatedTaskRepository,
             mockAutomatedTaskConfigurationProperties,
             logApi,
@@ -170,7 +170,7 @@ class AutomatedTaskServiceImplTest {
         Set<ScheduledTask> scheduledTaskList = new HashSet<>();
         scheduledTaskList.add(scheduledTask);
 
-        AbstractLockableAutomatedTask automatedTask = new AbstractLockableAutomatedTask(
+        AbstractLockableAutomatedTask automatedTask = new AbstractLockableAutomatedTask<>(
             mockAutomatedTaskRepository,
             mockAutomatedTaskConfigurationProperties,
             logApi,
@@ -205,7 +205,7 @@ class AutomatedTaskServiceImplTest {
         Set<ScheduledTask> scheduledTaskList = new HashSet<>();
         scheduledTaskList.add(scheduledTask);
 
-        var automatedTask = new AbstractLockableAutomatedTask(
+        var automatedTask = new AbstractLockableAutomatedTask<>(
             mockAutomatedTaskRepository,
             mockAutomatedTaskConfigurationProperties,
             logApi,
@@ -240,7 +240,7 @@ class AutomatedTaskServiceImplTest {
         when(lockService.getLockAtMostFor()).thenReturn(Duration.ofMinutes(20));
         when(lockService.getLockAtLeastFor()).thenReturn(Duration.ofMinutes(1));
 
-        var automatedTask = new AbstractLockableAutomatedTask(
+        var automatedTask = new AbstractLockableAutomatedTask<>(
             mockAutomatedTaskRepository,
             mockAutomatedTaskConfigurationProperties,
             logApi,
@@ -263,7 +263,7 @@ class AutomatedTaskServiceImplTest {
                 return null;
             }
         };
-        var overriddenAutomatedTask = new AbstractLockableAutomatedTask(
+        var overriddenAutomatedTask = new AbstractLockableAutomatedTask<>(
             mockAutomatedTaskRepository,
             mockAutomatedTaskConfigurationProperties,
             logApi,
@@ -310,7 +310,7 @@ class AutomatedTaskServiceImplTest {
         when(mockAutomatedTaskConfigurationProperties.getSystemUserEmail()).thenReturn("system@darts.test");
         when(lockService.getLockAtMostFor()).thenReturn(Duration.of(1, ChronoUnit.HOURS));
 
-        var failingAutomatedTask = new AbstractLockableAutomatedTask(
+        var failingAutomatedTask = new AbstractLockableAutomatedTask<>(
             mockAutomatedTaskRepository,
             mockAutomatedTaskConfigurationProperties,
             logApi,
@@ -345,7 +345,7 @@ class AutomatedTaskServiceImplTest {
 
     @Test
     void createsNewTaskOnReloadWhenNonExists() {
-        var automatedTask = new AbstractLockableAutomatedTask(
+        var automatedTask = new AbstractLockableAutomatedTask<>(
             mockAutomatedTaskRepository,
             mockAutomatedTaskConfigurationProperties,
             logApi,
@@ -392,7 +392,7 @@ class AutomatedTaskServiceImplTest {
     }
 
     private TriggerTask getTriggerTask() {
-        AbstractLockableAutomatedTask automatedTask = new AbstractLockableAutomatedTask(
+        AbstractLockableAutomatedTask automatedTask = new AbstractLockableAutomatedTask<>(
             mockAutomatedTaskRepository,
             mockAutomatedTaskConfigurationProperties,
             logApi,
@@ -440,7 +440,7 @@ class AutomatedTaskServiceImplTest {
     @Test
     void updateNonExistingAbstractLockableAutomatedTaskCronExpressionThrowsException() {
 
-        AbstractLockableAutomatedTask automatedTask = new AbstractLockableAutomatedTask(
+        AbstractLockableAutomatedTask automatedTask = new AbstractLockableAutomatedTask<>(
             mockAutomatedTaskRepository,
             mockAutomatedTaskConfigurationProperties,
             logApi,

@@ -17,7 +17,9 @@ import uk.gov.hmcts.darts.task.service.LockService;
 )
 @Slf4j
 @Component
-public class ProcessE2EArmRpoPendingAutomatedTask extends AbstractLockableAutomatedTask implements AutoloadingManualTask {
+public class ProcessE2EArmRpoPendingAutomatedTask
+    extends AbstractLockableAutomatedTask<ProcessE2EArmRpoPendingAutomatedTaskConfig>
+    implements AutoloadingManualTask {
 
     private final TriggerArmRpoSearchService triggerArmRpoSearchService;
 
