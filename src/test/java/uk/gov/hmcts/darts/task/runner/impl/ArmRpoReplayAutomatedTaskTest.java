@@ -76,7 +76,7 @@ class ArmRpoReplayAutomatedTaskTest {
         verify(objectRecordStatusRepository).getReferenceById(14);
         verify(armAutomatedTaskEntity).getArmReplayStartTs();
         verify(armAutomatedTaskEntity).getArmReplayEndTs();
-        verify(externalObjectDirectoryRepository).updateEodStatusAndTransferAttempsWhereLastModifiedIsBetweenTwoDateTimesAndHasStatus(
+        verify(externalObjectDirectoryRepository).updateEodStatusAndTransferAttemptsWhereLastModifiedIsBetweenTwoDateTimesAndHasStatus(
             armRawDataFailed,
             0,
             armReplay,

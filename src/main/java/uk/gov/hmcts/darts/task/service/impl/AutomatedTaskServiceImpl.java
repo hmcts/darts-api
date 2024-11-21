@@ -209,7 +209,7 @@ public class AutomatedTaskServiceImpl implements AutomatedTaskService {
     @Override
     public ArmAutomatedTaskEntity getArmAutomatedTaskEntity(AutomatedTaskName automatedTaskName) {
         return automatedTaskRepository.findByTaskName(automatedTaskName.getTaskName())
-            .map(automatedTaskEntity -> automatedTaskEntity.getArmAutomatedTaskEntity())
+            .map(AutomatedTaskEntity::getArmAutomatedTaskEntity)
             .orElseThrow(() -> new DartsApiException(FAILED_TO_FIND_AUTOMATED_TASK));
     }
 

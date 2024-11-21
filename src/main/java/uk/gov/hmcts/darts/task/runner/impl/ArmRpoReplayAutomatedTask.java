@@ -53,7 +53,7 @@ public class ArmRpoReplayAutomatedTask extends AbstractLockableAutomatedTask
     @Override
     protected void runTask() {
         ArmAutomatedTaskEntity armAutomatedTaskEntity = automatedTaskService.getArmAutomatedTaskEntity(AutomatedTaskName.PROCESS_E2E_ARM_PENDING_TASK_NAME);
-        externalObjectDirectoryRepository.updateEodStatusAndTransferAttempsWhereLastModifiedIsBetweenTwoDateTimesAndHasStatus(
+        externalObjectDirectoryRepository.updateEodStatusAndTransferAttemptsWhereLastModifiedIsBetweenTwoDateTimesAndHasStatus(
             objectRecordStatusRepository.getReferenceById(ObjectRecordStatusEnum.ARM_RAW_DATA_FAILED.getId()),
             0,
             objectRecordStatusRepository.getReferenceById(ObjectRecordStatusEnum.ARM_REPLAY.getId()),

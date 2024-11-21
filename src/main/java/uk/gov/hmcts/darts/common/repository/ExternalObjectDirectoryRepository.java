@@ -565,7 +565,7 @@ public interface ExternalObjectDirectoryRepository extends JpaRepository<Externa
             and eod.lastModifiedDateTime between :startTime and :endTime
         """)
     @Modifying
-    void updateEodStatusAndTransferAttempsWhereLastModifiedIsBetweenTwoDateTimesAndHasStatus(
+    void updateEodStatusAndTransferAttemptsWhereLastModifiedIsBetweenTwoDateTimesAndHasStatus(
         ObjectRecordStatusEntity newStatus, Integer transferAttempts,
         ObjectRecordStatusEntity oldStatus,
         OffsetDateTime startTime, OffsetDateTime endTime);

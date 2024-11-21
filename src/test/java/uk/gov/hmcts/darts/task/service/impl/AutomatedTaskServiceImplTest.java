@@ -492,7 +492,10 @@ class AutomatedTaskServiceImplTest {
         AutomatedTaskName automatedTaskName = mock(AutomatedTaskName.class);
         when(automatedTaskName.getTaskName()).thenReturn("Test");
 
-        assertEquals(armAutomatedTaskEntity, automatedTaskService.getArmAutomatedTaskEntity(automatedTaskName));
+        ArmAutomatedTaskEntity actualArmAutomatedTaskEntity =
+            automatedTaskService.getArmAutomatedTaskEntity(automatedTaskName);
+
+        assertEquals(armAutomatedTaskEntity, actualArmAutomatedTaskEntity);
 
         verify(mockAutomatedTaskRepository).findByTaskName("Test");
         verify(automatedTask).getArmAutomatedTaskEntity();
