@@ -5,11 +5,8 @@ import lombok.SneakyThrows;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import uk.gov.hmcts.darts.arm.model.blobs.ContinuationTokenBlobs;
 import uk.gov.hmcts.darts.arm.service.impl.DetsToArmBatchProcessResponseFilesImpl;
-import uk.gov.hmcts.darts.audio.deleter.impl.dets.DetsDataStoreDeleter;
-import uk.gov.hmcts.darts.audio.deleter.impl.dets.ExternalDetsDataStoreDeleter;
 import uk.gov.hmcts.darts.common.entity.CaseDocumentEntity;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
@@ -19,7 +16,6 @@ import uk.gov.hmcts.darts.common.entity.ObjectStateRecordEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionDocumentEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
-import uk.gov.hmcts.darts.common.exception.AzureDeleteBlobException;
 import uk.gov.hmcts.darts.common.repository.ObjectStateRecordRepository;
 import uk.gov.hmcts.darts.dets.config.DetsDataManagementConfiguration;
 import uk.gov.hmcts.darts.test.common.data.PersistableFactory;
@@ -33,7 +29,6 @@ import java.util.UUID;
 import static java.time.temporal.ChronoUnit.SECONDS;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.within;
-import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum.ARM;
 import static uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum.DETS;
@@ -46,11 +41,7 @@ class DetsToArmBatchProcessResponseFilesIntTest extends AbstractArmBatchProcessR
     private DetsDataManagementConfiguration detsDataManagementConfiguration;
     @Autowired
     private ObjectStateRecordRepository osrRepository;
-    @Autowired
-    private ExternalDetsDataStoreDeleter externalDetsDataStoreDeleter;
-    @MockBean
-    private DetsDataStoreDeleter detsDataStoreDeleter;
-    
+
     @BeforeEach
     void setupData() {
         armBatchProcessResponseFiles = new DetsToArmBatchProcessResponseFilesImpl(
@@ -64,11 +55,10 @@ class DetsToArmBatchProcessResponseFilesIntTest extends AbstractArmBatchProcessR
             externalObjectDirectoryService,
             logApi,
             detsDataManagementConfiguration,
-            osrRepository,
-            externalDetsDataStoreDeleter
+            osrRepository
         );
     }
-    
+
     @Override
     protected String prefix() {
         return "DETS";
@@ -112,7 +102,7 @@ class DetsToArmBatchProcessResponseFilesIntTest extends AbstractArmBatchProcessR
         ExternalObjectDirectoryEntity detsEod1 = PersistableFactory.getExternalObjectDirectoryTestData().someMinimalBuilder()
             .media(media1).status(dartsDatabase.getObjectRecordStatusEntity(ARM_DROP_ZONE))
             .externalLocationType(dartsDatabase.getExternalLocationTypeEntity(DETS)).externalLocation(UUID.randomUUID()).build();
-        detsEod1 = dartsPersistence.save(detsEod1);
+        dartsPersistence.save(detsEod1);
 
         ObjectStateRecordEntity osr1 = new ObjectStateRecordEntity();
         osr1.setUuid(1L);
@@ -132,8 +122,6 @@ class DetsToArmBatchProcessResponseFilesIntTest extends AbstractArmBatchProcessR
             .media(media2).status(dartsDatabase.getObjectRecordStatusEntity(ARM_DROP_ZONE))
             .externalLocationType(dartsDatabase.getExternalLocationTypeEntity(DETS)).externalLocation(UUID.randomUUID()).build();
         detsEod2 = dartsPersistence.save(detsEod2);
-
-        doThrow(AzureDeleteBlobException.class).when(detsDataStoreDeleter).delete(detsEod2.getExternalLocation());
 
         ObjectStateRecordEntity osr2 = new ObjectStateRecordEntity();
         osr2.setUuid(2L);
@@ -256,10 +244,7 @@ class DetsToArmBatchProcessResponseFilesIntTest extends AbstractArmBatchProcessR
             String.format("DETS_%s_6a374f19a9ce7dc9cc480ea8d4eca0fb_1_iu.rsp", manifest1Uuid));
         assertThat(dbOsr1.getIdResponseCrFile()).isEqualTo("6a374f19a9ce7dc9cc480ea8d4eca0fb_a17b9015-e6ad-77c5-8d1e-13259aae1895_1_cr.rsp");
         assertThat(dbOsr1.getIdResponseUfFile()).isEqualTo("6a374f19a9ce7dc9cc480ea8d4eca0fb_04e6bc3b-952a-79b6-8362-13259aae1895_1_uf.rsp");
-        assertThat(dbOsr1.getFlagFileDetsCleanupStatus()).isTrue();
-        assertThat(dbOsr1.getDateFileDetsCleanup()).isEqualTo(endTime2);
         assertThat(dbOsr1.getObjectStatus()).isNull();
-        assertThat(externalObjectDirectoryRepository.findById(detsEod1.getId())).isEmpty();
 
         ObjectStateRecordEntity dbOsr2 = osrRepository.findByArmEodId(String.valueOf(armEod2.getId())).orElseThrow();
         assertThat(dbOsr2.getFlagRspnRecvdFromArml()).isTrue();
