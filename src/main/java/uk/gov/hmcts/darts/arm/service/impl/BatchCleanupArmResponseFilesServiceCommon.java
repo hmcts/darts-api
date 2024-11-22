@@ -17,11 +17,11 @@ import uk.gov.hmcts.darts.common.entity.ExternalLocationTypeEntity;
 import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.entity.ObjectRecordStatusEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
-import uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum;
 import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
 import uk.gov.hmcts.darts.common.repository.ExternalLocationTypeRepository;
 import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
 import uk.gov.hmcts.darts.common.repository.ObjectRecordStatusRepository;
+import uk.gov.hmcts.darts.common.util.EodHelper;
 
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
@@ -38,16 +38,16 @@ import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.STORED;
 @Slf4j
 public class BatchCleanupArmResponseFilesServiceCommon implements BatchCleanupArmResponseFilesService {
 
-    private final ExternalObjectDirectoryRepository externalObjectDirectoryRepository;
-    private final ObjectRecordStatusRepository objectRecordStatusRepository;
-    private final ExternalLocationTypeRepository externalLocationTypeRepository;
-    private final ArmDataManagementApi armDataManagementApi;
-    private final UserIdentity userIdentity;
-    private final ArmBatchCleanupConfiguration batchCleanupConfiguration;
-    private final ArmDataManagementConfiguration armDataManagementConfiguration;
-    private final CurrentTimeHelper currentTimeHelper;
-    private final ArmResponseFileHelper armResponseFileHelper;
-    private final String manifestFilePrefix;
+    protected final ExternalObjectDirectoryRepository externalObjectDirectoryRepository;
+    protected final ObjectRecordStatusRepository objectRecordStatusRepository;
+    protected final ExternalLocationTypeRepository externalLocationTypeRepository;
+    protected final ArmDataManagementApi armDataManagementApi;
+    protected final UserIdentity userIdentity;
+    protected final ArmBatchCleanupConfiguration batchCleanupConfiguration;
+    protected final ArmDataManagementConfiguration armDataManagementConfiguration;
+    protected final CurrentTimeHelper currentTimeHelper;
+    protected final ArmResponseFileHelper armResponseFileHelper;
+    protected final String manifestFilePrefix;
 
 
     @Override
@@ -56,27 +56,14 @@ public class BatchCleanupArmResponseFilesServiceCommon implements BatchCleanupAr
             log.warn("{}: Batch Cleanup ARM Response Files - Batch size is 0, so not running", manifestFilePrefix);
             return;
         }
-        List<ObjectRecordStatusEntity> statusToSearch = objectRecordStatusRepository.getReferencesByStatus(
-            List.of(STORED, ARM_RPO_PENDING, ARM_RESPONSE_PROCESSING_FAILED, ARM_RESPONSE_MANIFEST_FAILED, ARM_RESPONSE_CHECKSUM_VERIFICATION_FAILED));
-        ExternalLocationTypeEntity armLocation = externalLocationTypeRepository.getReferenceById(ExternalLocationTypeEnum.ARM.getId());
 
-        Integer cleanupBufferMinutes = batchCleanupConfiguration.getBufferMinutes();
-        OffsetDateTime dateTimeForDeletion = currentTimeHelper.currentOffsetDateTime().minusMinutes(cleanupBufferMinutes);
-
-        List<String> manifestFilenames =
-            externalObjectDirectoryRepository.findBatchCleanupManifestFilenames(
-                statusToSearch,
-                armLocation,
-                false,
-                dateTimeForDeletion,
-                manifestFilePrefix,
-                Limit.of(batchsize)
-            );
+        List<String> manifestFilenames = getManifestFileNames(batchsize);
         if (manifestFilenames.isEmpty()) {
             log.info("{}: Batch Cleanup ARM Response Files - 0 rows returned, so stopping.", manifestFilePrefix);
             return;
         }
-
+        OffsetDateTime dateTimeForDeletion = getDateTimeForDeletion();
+        List<ObjectRecordStatusEntity> statusToSearch = getStatusToSearch();
         if (CollectionUtils.isNotEmpty(manifestFilenames)) {
             int counter = 1;
             UserAccountEntity userAccount = userIdentity.getUserAccount();
@@ -84,11 +71,32 @@ public class BatchCleanupArmResponseFilesServiceCommon implements BatchCleanupAr
                 log.info("{}: Batch Cleanup ARM Response Files - about to process manifest filename {}, row {} of {} rows", manifestFilePrefix,
                          manifestFilename, counter++,
                          manifestFilenames.size());
-                cleanupFilesByManifestFilename(userAccount, armLocation, statusToSearch, dateTimeForDeletion, manifestFilename);
+                cleanupFilesByManifestFilename(userAccount, EodHelper.armLocation(), statusToSearch, dateTimeForDeletion, manifestFilename);
             }
         } else {
             log.info("{}: No ARM responses found to be deleted", manifestFilePrefix);
         }
+    }
+
+    protected OffsetDateTime getDateTimeForDeletion() {
+        Integer cleanupBufferMinutes = batchCleanupConfiguration.getBufferMinutes();
+        return currentTimeHelper.currentOffsetDateTime().minusMinutes(cleanupBufferMinutes);
+    }
+
+    protected List<ObjectRecordStatusEntity> getStatusToSearch() {
+        return objectRecordStatusRepository.getReferencesByStatus(
+            List.of(STORED, ARM_RPO_PENDING, ARM_RESPONSE_PROCESSING_FAILED, ARM_RESPONSE_MANIFEST_FAILED, ARM_RESPONSE_CHECKSUM_VERIFICATION_FAILED));
+    }
+
+    protected List<String> getManifestFileNames(int batchsize) {
+        return externalObjectDirectoryRepository.findBatchCleanupManifestFilenames(
+            getStatusToSearch(),
+            EodHelper.armLocation(),
+            false,
+            getDateTimeForDeletion(),
+            manifestFilePrefix,
+            Limit.of(batchsize)
+        );
     }
 
     private void cleanupFilesByManifestFilename(UserAccountEntity userAccount, ExternalLocationTypeEntity armLocation,
@@ -201,7 +209,7 @@ public class BatchCleanupArmResponseFilesServiceCommon implements BatchCleanupAr
         }
     }
 
-    private void setResponseCleaned(UserAccountEntity userAccount, ExternalObjectDirectoryEntity externalObjectDirectory) {
+    protected void setResponseCleaned(UserAccountEntity userAccount, ExternalObjectDirectoryEntity externalObjectDirectory) {
         externalObjectDirectory.setResponseCleaned(true);
         externalObjectDirectory.setLastModifiedBy(userAccount);
         externalObjectDirectoryRepository.saveAndFlush(externalObjectDirectory);
