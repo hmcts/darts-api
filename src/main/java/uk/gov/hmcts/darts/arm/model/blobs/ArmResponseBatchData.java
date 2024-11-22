@@ -10,6 +10,9 @@ import uk.gov.hmcts.darts.arm.util.files.CreateRecordFilenameProcessor;
 import uk.gov.hmcts.darts.arm.util.files.InvalidLineFileFilenameProcessor;
 import uk.gov.hmcts.darts.arm.util.files.UploadFileFilenameProcessor;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Builder
 @Getter
 @Setter
@@ -17,10 +20,12 @@ public class ArmResponseBatchData {
     private int externalObjectDirectoryId;
 
     private ArmResponseCreateRecord armResponseCreateRecord;
-    private ArmResponseInvalidLineRecord armResponseInvalidLineRecord;
+    @Builder.Default
+    private List<ArmResponseInvalidLineRecord> armResponseInvalidLineRecords = new ArrayList<>();
     private ArmResponseUploadFileRecord armResponseUploadFileRecord;
 
     private CreateRecordFilenameProcessor createRecordFilenameProcessor;
-    private InvalidLineFileFilenameProcessor invalidLineFileFilenameProcessor;
+    @Builder.Default
+    private List<InvalidLineFileFilenameProcessor> invalidLineFileFilenameProcessors = new ArrayList<>();
     private UploadFileFilenameProcessor uploadFileFilenameProcessor;
 }
