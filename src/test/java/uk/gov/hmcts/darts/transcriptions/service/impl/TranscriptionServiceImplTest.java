@@ -676,6 +676,7 @@ class TranscriptionServiceImplTest {
         assertThatThrownBy(() -> transcriptionService.getTranscription(transcriptionId))
             .isExactlyInstanceOf(DartsApiException.class)
             .hasFieldOrPropertyWithValue("error", TRANSCRIPTION_NOT_FOUND);
+        verify(mockTranscriptionDocumentRepository).findByTranscriptionIdAndHiddenTrueIncludeDeleted(transcriptionId);
     }
 
     private TranscriptionRequestDetails createTranscriptionRequestDetails(Integer hearingId,

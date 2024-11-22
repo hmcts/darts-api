@@ -192,6 +192,7 @@ class TranscriptionDownloaderTest {
             .isExactlyInstanceOf(DartsApiException.class)
             .hasFieldOrPropertyWithValue("error", TRANSCRIPTION_NOT_FOUND);
 
+        verify(transcriptionDocumentRepository).findByTranscriptionIdAndHiddenTrueIncludeDeleted(transcription.getId());
         verifyNoInteractions(dataManagementFacade);
     }
 

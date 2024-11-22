@@ -24,6 +24,9 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.darts.test.common.TestUtils.getContentsFromFile;
 
@@ -50,7 +53,6 @@ class HearingEntityToCaseHearingTest {
 
     @Test
     void testWorksWithOneHearing() throws Exception {
-
         List<HearingEntity> hearings = CommonTestDataUtil.createHearings(1);
 
         List<Hearing> hearingList = HearingEntityToCaseHearing.mapToHearingList(hearings, transcriptionDocumentRepository);
@@ -61,11 +63,12 @@ class HearingEntityToCaseHearingTest {
             "Tests/cases/HearingEntityToCaseHearingTest/testWithSingleHearing/expectedResponse.json");
         JSONAssert.assertEquals(expectedResponse, actualResponse, JSONCompareMode.STRICT);
 
+        var transcriptionId = hearings.get(0).getTranscriptions().get(0).getId();
+        verify(transcriptionDocumentRepository).findByTranscriptionIdAndHiddenTrueIncludeDeleted(transcriptionId);
     }
 
     @Test
     void testMappingToMultipleHearings() throws Exception {
-
         List<HearingEntity> hearings = CommonTestDataUtil.createHearings(5);
 
         List<Hearing> hearingList = HearingEntityToCaseHearing.mapToHearingList(hearings, transcriptionDocumentRepository);
@@ -76,6 +79,7 @@ class HearingEntityToCaseHearingTest {
             "Tests/cases/HearingEntityToCaseHearingTest/testWithMultipleHearings/expectedResponse.json");
         JSONAssert.assertEquals(expectedResponse, actualResponse, JSONCompareMode.STRICT);
 
+        verify(transcriptionDocumentRepository, times(hearings.size())).findByTranscriptionIdAndHiddenTrueIncludeDeleted(anyInt());
     }
 
     @Test
@@ -88,6 +92,7 @@ class HearingEntityToCaseHearingTest {
         List<Hearing> hearingList = HearingEntityToCaseHearing.mapToHearingList(hearings, transcriptionDocumentRepository);
 
         assertEquals(0, hearingList.get(0).getTranscriptCount());
+        verifyNoInteractions(transcriptionDocumentRepository);
     }
 
     @Test
@@ -99,6 +104,7 @@ class HearingEntityToCaseHearingTest {
         List<Hearing> hearingList = HearingEntityToCaseHearing.mapToHearingList(hearings, transcriptionDocumentRepository);
 
         assertEquals(1, hearingList.get(0).getTranscriptCount());
+        verify(transcriptionDocumentRepository, times(hearings.size())).findByTranscriptionIdAndHiddenTrueIncludeDeleted(anyInt());
     }
 
     @Test
@@ -111,6 +117,7 @@ class HearingEntityToCaseHearingTest {
         List<Hearing> hearingList = HearingEntityToCaseHearing.mapToHearingList(hearings, transcriptionDocumentRepository);
 
         assertEquals(1, hearingList.get(0).getTranscriptCount());
+        verify(transcriptionDocumentRepository, times(hearings.size())).findByTranscriptionIdAndHiddenTrueIncludeDeleted(anyInt());
     }
 
     @Test
@@ -126,6 +133,8 @@ class HearingEntityToCaseHearingTest {
         List<Hearing> hearingList = HearingEntityToCaseHearing.mapToHearingList(hearings, transcriptionDocumentRepository);
 
         assertEquals(0, hearingList.get(0).getTranscriptCount());
+        var transcriptionId = hearings.get(0).getTranscriptions().get(0).getId();
+        verify(transcriptionDocumentRepository).findByTranscriptionIdAndHiddenTrueIncludeDeleted(transcriptionId);
     }
 
     @Test
@@ -144,6 +153,8 @@ class HearingEntityToCaseHearingTest {
         List<Hearing> hearingList = HearingEntityToCaseHearing.mapToHearingList(hearings, transcriptionDocumentRepository);
 
         assertEquals(0, hearingList.get(0).getTranscriptCount());
+        var transcriptionId = hearings.get(0).getTranscriptions().get(0).getId();
+        verify(transcriptionDocumentRepository).findByTranscriptionIdAndHiddenTrueIncludeDeleted(transcriptionId);
     }
 
     @Test
@@ -159,6 +170,7 @@ class HearingEntityToCaseHearingTest {
             "Tests/cases/HearingEntityToCaseHearingTest/testWithNoHearings/expectedResponse.json");
         JSONAssert.assertEquals(expectedResponse, actualResponse, JSONCompareMode.STRICT);
 
+        verifyNoInteractions(transcriptionDocumentRepository);
     }
 
 }
