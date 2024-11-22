@@ -1,6 +1,7 @@
 package uk.gov.hmcts.darts.testutils.stubs;
 
 import jakarta.persistence.EntityManager;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.jeasy.random.EasyRandom;
 import org.jeasy.random.EasyRandomParameters;
@@ -42,6 +43,7 @@ import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.STORED;
 @Component
 @RequiredArgsConstructor
 @SuppressWarnings("PMD.GodClass")
+@Getter
 public class ExternalObjectDirectoryStub {
 
     private final UserAccountStubComposable userAccountStub;
