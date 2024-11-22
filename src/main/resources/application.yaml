@@ -519,6 +519,12 @@ darts:
         lock:
           at-least-for: PT1M
           at-most-for: PT90M
+      arm-missing-response-replay:
+        system-user-email: systemArmMissingResponseReplayAutomatedTask@hmcts.net
+        lock:
+          at-least-for: PT1M
+          at-most-for: PT90M
+
       unstructured-to-arm-batch-processor:
         max-arm-manifest-items: 100
         threads: 20
