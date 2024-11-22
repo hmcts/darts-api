@@ -556,6 +556,20 @@ public interface ExternalObjectDirectoryRepository extends JpaRepository<Externa
         """, nativeQuery = true)
     Long findFileSize(Integer externalObjectDirectoryId);
 
+
+    @Query("""
+            update ExternalObjectDirectoryEntity eod
+            set eod.status = :newStatus,
+            eod.transferAttempts = :transferAttempts
+            where eod.status = :oldStatus
+            and eod.lastModifiedDateTime between :startTime and :endTime
+        """)
+    @Modifying
+    void updateEodStatusAndTransferAttemptsWhereLastModifiedIsBetweenTwoDateTimesAndHasStatus(
+        ObjectRecordStatusEntity newStatus, Integer transferAttempts,
+        ObjectRecordStatusEntity oldStatus,
+        OffsetDateTime startTime, OffsetDateTime endTime);
+
     @Query(
         """
             SELECT eod FROM ExternalObjectDirectoryEntity eod
