@@ -37,9 +37,9 @@ public class FileOperationServiceImpl implements FileOperationService {
 
         Path tempFilePath;
 
-        try (InputStream audioInputStream = mediaFile) {
+        try (InputStream inputStream = mediaFile) {
             tempFilePath = createFile(fileName, audioConfigurationProperties.getTempBlobWorkspace(), true);
-            Files.copy(audioInputStream, tempFilePath, StandardCopyOption.REPLACE_EXISTING);
+            Files.copy(inputStream, tempFilePath, StandardCopyOption.REPLACE_EXISTING);
         } catch (IOException e) {
             log.error("IOException. Unable to copy Blob Data to temporary workspace");
             throw new IOException(e);
@@ -54,9 +54,9 @@ public class FileOperationServiceImpl implements FileOperationService {
 
         Path targetTempFile;
 
-        try (InputStream audioInputStream = binaryData.toStream()) {
+        try (InputStream inputStream = binaryData.toStream()) {
             targetTempFile = createFile(fileName, workspace, appendUuidToWorkspace);
-            Files.copy(audioInputStream, targetTempFile, StandardCopyOption.REPLACE_EXISTING);
+            Files.copy(inputStream, targetTempFile, StandardCopyOption.REPLACE_EXISTING);
         } catch (IOException e) {
             log.error("Unable to copy binary data to workspace {} - {}", workspace, e.getMessage());
             throw new IOException(e);

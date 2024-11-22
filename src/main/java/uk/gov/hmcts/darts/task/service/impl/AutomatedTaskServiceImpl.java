@@ -15,6 +15,7 @@ import org.springframework.scheduling.support.CronExpression;
 import org.springframework.scheduling.support.CronTrigger;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
+import uk.gov.hmcts.darts.common.entity.ArmAutomatedTaskEntity;
 import uk.gov.hmcts.darts.common.entity.AutomatedTaskEntity;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.common.repository.AutomatedTaskRepository;
@@ -203,6 +204,13 @@ public class AutomatedTaskServiceImpl implements AutomatedTaskService {
             }
         }
         throw new DartsApiException(FAILED_TO_FIND_AUTOMATED_TASK);
+    }
+
+    @Override
+    public ArmAutomatedTaskEntity getArmAutomatedTaskEntity(AutomatedTaskName automatedTaskName) {
+        return automatedTaskRepository.findByTaskName(automatedTaskName.getTaskName())
+            .map(AutomatedTaskEntity::getArmAutomatedTaskEntity)
+            .orElseThrow(() -> new DartsApiException(FAILED_TO_FIND_AUTOMATED_TASK));
     }
 
     private TriggerAndAutomatedTask getTriggerAndAutomatedTask(String taskName) {
