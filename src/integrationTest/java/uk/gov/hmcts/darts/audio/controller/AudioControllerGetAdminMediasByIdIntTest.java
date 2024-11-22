@@ -127,6 +127,75 @@ class AudioControllerGetAdminMediasByIdIntTest extends IntegrationBase {
 
     @ParameterizedTest
     @EnumSource(value = SecurityRoleEnum.class, names = {"SUPER_USER", "SUPER_ADMIN"}, mode = INCLUDE)
+    void shouldReturnExpectedMediaObjectAndChildrenWithHiddenAndDeletedAndCurrentSetFalse(SecurityRoleEnum role) throws Exception {
+        // Given
+        given.anAuthenticatedUserWithGlobalAccessAndRole(role);
+
+        var hearingEntity = databaseStub.createHearing(COURTHOUSE_NAME, COURTROOM_NAME, CASE_NUMBER, HEARING_START_AT.toLocalDateTime());
+
+        var userAccountEntity = databaseStub.getUserAccountRepository().findAll().stream()
+            .findFirst()
+            .orElseThrow();
+
+        var mediaEntity = createAndSaveMediaEntityWithHiddenAndDeletedAndCurrentSetFalse(hearingEntity, userAccountEntity);
+
+        createAndSaveAdminActionEntity(mediaEntity, userAccountEntity);
+
+        // When
+        mockMvc.perform(get(ENDPOINT.resolve(String.valueOf(mediaEntity.getId()))))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.id").isNumber())
+            .andExpect(jsonPath("$.start_at").value(MEDIA_START_AT.toString()))
+            .andExpect(jsonPath("$.end_at").value(MEDIA_END_AT.toString()))
+            .andExpect(jsonPath("$.channel").value(2))
+            .andExpect(jsonPath("$.total_channels").value(2))
+            .andExpect(jsonPath("$.media_type").value("A"))
+            .andExpect(jsonPath("$.media_format").value("mp2"))
+            .andExpect(jsonPath("$.file_size_bytes").value(1000))
+            .andExpect(jsonPath("$.filename").value("a-media-file"))
+            .andExpect(jsonPath("$.media_object_id").value("object-id-value"))
+            .andExpect(jsonPath("$.content_object_id").value("content-id-value"))
+            .andExpect(jsonPath("$.clip_id").value("clip-id-value"))
+            .andExpect(jsonPath("$.checksum").value("7017013d05bcc5032e142049081821d6"))
+            .andExpect(jsonPath("$.media_status").value("media-status-value"))
+            .andExpect(jsonPath("$.is_hidden").value(false))
+            .andExpect(jsonPath("$.is_deleted").value(false))
+            .andExpect(jsonPath("$.is_current").value(false))
+
+            .andExpect(jsonPath("$.admin_action").exists())
+            .andExpect(jsonPath("$.admin_action.id").isNumber())
+            .andExpect(jsonPath("$.admin_action.reason_id").isNumber())
+            .andExpect(jsonPath("$.admin_action.hidden_by_id").isNumber())
+            .andExpect(jsonPath("$.admin_action.hidden_at").value(HIDE_DELETE_AT))
+            .andExpect(jsonPath("$.admin_action.is_marked_for_manual_deletion").value(true))
+            .andExpect(jsonPath("$.admin_action.marked_for_manual_deletion_by_id").isNumber())
+            .andExpect(jsonPath("$.admin_action.marked_for_manual_deletion_at").value(HIDE_DELETE_AT))
+            .andExpect(jsonPath("$.admin_action.ticket_reference").value("ticket-reference-value"))
+            .andExpect(jsonPath("$.admin_action.comments").value("comments-value"))
+
+            .andExpect(jsonPath("$.version").value("version-label-value"))
+            .andExpect(jsonPath("$.chronicle_id").value("chronicle-value"))
+            .andExpect(jsonPath("$.antecedent_id").value("antecedent-value"))
+            .andExpect(jsonPath("$.retain_until").value(RETAIN_UNTIL))
+            .andExpect(jsonPath("$.created_at").isString())
+            .andExpect(jsonPath("$.created_by_id").isNumber())
+            .andExpect(jsonPath("$.last_modified_at").isString())
+            .andExpect(jsonPath("$.last_modified_by_id").isNumber())
+
+            .andExpect(jsonPath("$.courthouse").exists())
+            .andExpect(jsonPath("$.courthouse.id").isNumber())
+            .andExpect(jsonPath("$.courthouse.display_name").value(COURTHOUSE_NAME))
+
+            .andExpect(jsonPath("$.courtroom").exists())
+            .andExpect(jsonPath("$.courtroom.id").isNumber())
+            .andExpect(jsonPath("$.courtroom.name").value(COURTROOM_NAME))
+
+            .andReturn();
+
+    }
+
+    @ParameterizedTest
+    @EnumSource(value = SecurityRoleEnum.class, names = {"SUPER_USER", "SUPER_ADMIN"}, mode = INCLUDE)
     void shouldReturn404WhenMediaRecordDoesNotExist(SecurityRoleEnum role) throws Exception {
         // Given
         given.anAuthenticatedUserWithGlobalAccessAndRole(role);
@@ -196,6 +265,16 @@ class AudioControllerGetAdminMediasByIdIntTest extends IntegrationBase {
 
         return databaseStub.getMediaRepository()
             .saveAndFlush(mediaEntity);
+    }
+
+    private MediaEntity createAndSaveMediaEntityWithHiddenAndDeletedAndCurrentSetFalse(HearingEntity hearingEntity, UserAccountEntity userAccountEntity) {
+        var mediaEntity = createAndSaveMediaEntity(hearingEntity, userAccountEntity);
+
+        mediaEntity.setHidden(false);
+        mediaEntity.setDeleted(false);
+        mediaEntity.setIsCurrent(false);
+
+        return databaseStub.getMediaRepository().save(mediaEntity);
     }
 
     private ObjectAdminActionEntity createAndSaveAdminActionEntity(MediaEntity mediaEntity, UserAccountEntity userAccountEntity) {
