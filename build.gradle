@@ -221,21 +221,35 @@ checkstyle {
 
 var sourceSetsCopy = sourceSets
 pmd {
-  toolVersion = "7.7.0"
-  sourceSets = [sourceSetsCopy.main]
-  reportsDir = file("$project.buildDir/reports/pmd")
-  // https://github.com/pmd/pmd/issues/876
-  ruleSets = []
-  ruleSetFiles = files("config/pmd/main-ruleset.xml")
+    toolVersion = "7.7.0"
+    reportsDir = file("$project.buildDir/reports/pmd")
+    // https://github.com/pmd/pmd/issues/876
+    ruleSets = []
 }
 
-pmd {
-  toolVersion = "7.7.0"
-  sourceSets = [sourceSetsCopy.test, sourceSetsCopy.functionalTest, sourceSetsCopy.integrationTest, sourceSetsCopy.smokeTest]
-  reportsDir = file("$project.buildDir/reports/pmd")
-  // https://github.com/pmd/pmd/issues/876
-  ruleSets = []
-  ruleSetFiles = files("config/pmd/test-ruleset.xml")
+
+pmdMain {
+    ruleSetFiles = files("config/pmd/main-ruleset.xml")
+    //Ensures we don't passively increase pmd errors but we should aim to reduce this
+    maxFailures = 1308
+}
+
+pmdTestCommon {
+    ruleSetFiles = files("config/pmd/test-ruleset.xml")
+    //Ensures we don't passively increase pmd errors but we should aim to reduce this
+    maxFailures = 407
+}
+pmdTest {
+    ruleSetFiles = files("config/pmd/test-ruleset.xml")
+}
+pmdFunctionalTest {
+    ruleSetFiles = files("config/pmd/test-ruleset.xml")
+}
+pmdIntegrationTest {
+    ruleSetFiles = files("config/pmd/test-ruleset.xml")
+}
+pmdSmokeTest {
+    ruleSetFiles = files("config/pmd/test-ruleset.xml")
 }
 
 
