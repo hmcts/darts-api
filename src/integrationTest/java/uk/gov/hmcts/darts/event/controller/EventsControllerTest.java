@@ -1,6 +1,7 @@
 package uk.gov.hmcts.darts.event.controller;
 
 import ch.qos.logback.classic.Level;
+import lombok.SneakyThrows;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -19,8 +20,11 @@ import uk.gov.hmcts.darts.audio.api.AudioApi;
 import uk.gov.hmcts.darts.audit.api.AuditActivity;
 import uk.gov.hmcts.darts.common.entity.AuditEntity;
 import uk.gov.hmcts.darts.common.entity.AuditEntity_;
+import uk.gov.hmcts.darts.common.entity.DataAnonymisationEntity;
 import uk.gov.hmcts.darts.common.entity.EventEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
+import uk.gov.hmcts.darts.common.entity.TranscriptionCommentEntity;
+import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.enums.SecurityRoleEnum;
 import uk.gov.hmcts.darts.common.exception.CommonApiError;
 import uk.gov.hmcts.darts.event.component.DartsEventMapper;
@@ -35,10 +39,13 @@ import uk.gov.hmcts.darts.testutils.IntegrationBase;
 import uk.gov.hmcts.darts.testutils.stubs.DartsDatabaseStub;
 
 import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.BDDAssertions.within;
 import static org.hibernate.validator.internal.util.Contracts.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -170,7 +177,7 @@ class EventsControllerTest extends IntegrationBase {
         EventEntity event2 = dartsDatabaseStub.createEvent(hearing);
 
 
-        given.anAuthenticatedUserWithGlobalAccessAndRole(SUPER_ADMIN);
+        UserAccountEntity userAccount = given.anAuthenticatedUserWithGlobalAccessAndRole(SUPER_ADMIN);
         MockHttpServletRequestBuilder requestBuilder = post("/admin/events/obfuscate")
             .contentType(MediaType.APPLICATION_JSON_VALUE)
             .content("{\"eve_ids\":[" + event.getId() + "]}");
@@ -179,10 +186,12 @@ class EventsControllerTest extends IntegrationBase {
 
         EventEntity editedEventEntity = dartsDatabaseStub.getEventRepository().findById(event.getId()).orElseThrow();
         assertThat(editedEventEntity.getEventText()).matches(UUID_REGEX);
+        assertDataAnonymisedEntry(userAccount, editedEventEntity);
 
         EventEntity notEditedEventEntity = dartsDatabaseStub.getEventRepository().findById(event2.getId()).orElseThrow();
         assertThat(notEditedEventEntity.getEventText()).isEqualTo(event2.getEventText());
         assertThat(notEditedEventEntity.getEventText()).doesNotMatch(UUID_REGEX);
+        assertNoDataAnonymisedEntry(notEditedEventEntity);
 
         assertAudit(editedEventEntity);
         assertFalse(
@@ -226,7 +235,7 @@ class EventsControllerTest extends IntegrationBase {
         EventEntity event2 = dartsDatabaseStub.createEvent(hearing);
 
 
-        given.anAuthenticatedUserWithGlobalAccessAndRole(SUPER_ADMIN);
+        UserAccountEntity userAccount = given.anAuthenticatedUserWithGlobalAccessAndRole(SUPER_ADMIN);
         MockHttpServletRequestBuilder requestBuilder = post("/admin/events/obfuscate")
             .contentType(MediaType.APPLICATION_JSON_VALUE)
             .content("{\"eve_ids\":[" + event.getId() + "," + event2.getId() + "]}");
@@ -235,9 +244,11 @@ class EventsControllerTest extends IntegrationBase {
 
         EventEntity editedEventEntity = dartsDatabaseStub.getEventRepository().findById(event.getId()).orElseThrow();
         assertThat(editedEventEntity.getEventText()).matches(UUID_REGEX);
+        assertDataAnonymisedEntry(userAccount, editedEventEntity);
 
         EventEntity editedEventEntity2 = dartsDatabaseStub.getEventRepository().findById(event2.getId()).orElseThrow();
         assertThat(editedEventEntity2.getEventText()).matches(UUID_REGEX);
+        assertDataAnonymisedEntry(userAccount, editedEventEntity2);
 
         assertAudit(editedEventEntity);
         assertFalse(
@@ -295,5 +306,37 @@ class EventsControllerTest extends IntegrationBase {
 
         Assertions.assertEquals("{\"type\":\"AUTHORISATION_109\",\"title\":\"User is not authorised for this endpoint\",\"status\":403}",
                                 response.getResponse().getContentAsString());
+    }
+
+
+    private void assertNoDataAnonymisedEntry(EventEntity eventEntity) {
+        dartsDatabase.getTransactionalUtil().executeInTransaction(() -> {
+            List<DataAnonymisationEntity> dataAnonymisationEntities = dartsDatabase.getDataAnonymisationRepository()
+                .findByEvent(eventEntity);
+            assertThat(dataAnonymisationEntities).isEmpty();
+        });
+    }
+
+    private void assertDataAnonymisedEntry(UserAccountEntity userAccount, EventEntity eventEntity) {
+        dartsDatabase.getTransactionalUtil().executeInTransaction(() -> {
+            List<DataAnonymisationEntity> dataAnonymisationEntities = dartsDatabase.getDataAnonymisationRepository()
+                .findByEvent(eventEntity);
+            assertThat(dataAnonymisationEntities).hasSize(1);
+            DataAnonymisationEntity dataAnonymisationEntity = dataAnonymisationEntities.get(0);
+            assertDataAnonymisedEntry(userAccount, dataAnonymisationEntity, eventEntity, null);
+        });
+    }
+
+    @SneakyThrows
+    private void assertDataAnonymisedEntry(UserAccountEntity userAccount, DataAnonymisationEntity dataAnonymisationEntity, EventEntity eventEntity,
+                                           TranscriptionCommentEntity transcriptionComment) {
+        eventEntity = dartsDatabaseStub.getEventRepository().findById(eventEntity.getId()).orElseThrow();
+        assertThat(dataAnonymisationEntity.getEvent()).isEqualTo(eventEntity);
+        assertThat(dataAnonymisationEntity.getTranscriptionComment()).isEqualTo(transcriptionComment);
+        assertThat(dataAnonymisationEntity.getIsManualRequest()).isTrue();
+        assertThat(dataAnonymisationEntity.getRequestedBy().getId()).isEqualTo(userAccount.getId());
+        assertThat(dataAnonymisationEntity.getRequestedTs()).isCloseTo(OffsetDateTime.now(), within(1, ChronoUnit.MINUTES));
+        assertThat(dataAnonymisationEntity.getApprovedBy().getId()).isEqualTo(userAccount.getId());
+        assertThat(dataAnonymisationEntity.getApprovedTs()).isCloseTo(OffsetDateTime.now(), within(1, ChronoUnit.MINUTES));
     }
 }

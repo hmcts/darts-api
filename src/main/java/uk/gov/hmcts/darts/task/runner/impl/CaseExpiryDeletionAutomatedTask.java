@@ -56,7 +56,7 @@ public class CaseExpiryDeletionAutomatedTask
             .forEach(courtCaseId -> {
                 try {
                     log.info("Anonymising case with id: {} because the criteria for retention has been met.", courtCaseId);
-                    dataAnonymisationService.anonymiseCourtCaseById(userAccount, courtCaseId);
+                    dataAnonymisationService.anonymiseCourtCaseById(userAccount, courtCaseId, false);
                 } catch (Exception e) {
                     log.error("An error occurred while anonymising case with id: {}", courtCaseId, e);
                 }
