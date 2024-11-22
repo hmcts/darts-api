@@ -70,7 +70,6 @@ class AudioControllerGetAdminMediasByIdIntTest extends IntegrationBase {
         // When
         mockMvc.perform(get(ENDPOINT.resolve(String.valueOf(mediaEntity.getId()))))
             .andExpect(status().isOk())
-
             .andExpect(jsonPath("$.id").isNumber())
             .andExpect(jsonPath("$.start_at").value(MEDIA_START_AT.toString()))
             .andExpect(jsonPath("$.end_at").value(MEDIA_END_AT.toString()))
@@ -87,6 +86,7 @@ class AudioControllerGetAdminMediasByIdIntTest extends IntegrationBase {
             .andExpect(jsonPath("$.media_status").value("media-status-value"))
             .andExpect(jsonPath("$.is_hidden").value(true))
             .andExpect(jsonPath("$.is_deleted").value(true))
+            .andExpect(jsonPath("$.is_current").value(true))
 
             .andExpect(jsonPath("$.admin_action").exists())
             .andExpect(jsonPath("$.admin_action.id").isNumber())
@@ -122,6 +122,7 @@ class AudioControllerGetAdminMediasByIdIntTest extends IntegrationBase {
             .andExpect(jsonPath("$.hearings.[0].case_id").isNumber())
 
             .andReturn();
+
     }
 
     @ParameterizedTest
@@ -186,6 +187,7 @@ class AudioControllerGetAdminMediasByIdIntTest extends IntegrationBase {
         mediaEntity.setRetainUntilTs(OffsetDateTime.parse(RETAIN_UNTIL));
         mediaEntity.setCreatedBy(userAccountEntity);
         mediaEntity.setLastModifiedBy(userAccountEntity);
+        mediaEntity.setIsCurrent(true);
 
         mediaEntity.setHearingList(Collections.singletonList(hearingEntity));
         hearingEntity.setMediaList(Collections.singletonList(mediaEntity));
