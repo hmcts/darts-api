@@ -32,8 +32,9 @@ public class ArmBatchResponses {
                                      ArmResponseInvalidLineRecord armResponseInvalidLineRecord,
                                      InvalidLineFileFilenameProcessor invalidLineFileFilenameProcessor) {
         createArmBatchResponseIfNotExists(externalObjectDirectoryId);
-        armBatchResponseMap.get(externalObjectDirectoryId).setArmResponseInvalidLineRecord(armResponseInvalidLineRecord);
-        armBatchResponseMap.get(externalObjectDirectoryId).setInvalidLineFileFilenameProcessor(invalidLineFileFilenameProcessor);
+        // Adds the invalid line record and invalid line processor to the lists at the same time
+        armBatchResponseMap.get(externalObjectDirectoryId).getArmResponseInvalidLineRecords().add(armResponseInvalidLineRecord);
+        armBatchResponseMap.get(externalObjectDirectoryId).getInvalidLineFileFilenameProcessors().add(invalidLineFileFilenameProcessor);
     }
 
     public void addResponseBatchData(Integer externalObjectDirectoryId,
