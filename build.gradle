@@ -1,6 +1,6 @@
 buildscript {
   dependencies {
-    classpath("org.flywaydb:flyway-database-postgresql:10.21.0")
+    classpath("org.flywaydb:flyway-database-postgresql:10.22.0")
   }
 }
 
@@ -427,7 +427,7 @@ dependencies {
 
   implementation group: 'io.rest-assured', name: 'rest-assured'
   implementation group: 'org.flywaydb', name: 'flyway-core', version: '10.22.0'
-  implementation group: 'org.flywaydb', name: 'flyway-database-postgresql', version: '10.21.0'
+  implementation group: 'org.flywaydb', name: 'flyway-database-postgresql', version: '10.22.0'
   implementation group: 'io.hypersistence', name: 'hypersistence-utils-hibernate-63', version: '3.9.0'
 
   //database
