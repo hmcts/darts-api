@@ -9,16 +9,15 @@ import org.springframework.data.domain.Limit;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.EventEntity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.enums.MediaLinkedCaseSourceType;
-import uk.gov.hmcts.darts.common.enums.SystemUsersEnum;
 import uk.gov.hmcts.darts.common.helper.MediaLinkedCaseHelper;
 import uk.gov.hmcts.darts.common.repository.AutomatedTaskRepository;
 import uk.gov.hmcts.darts.common.repository.EventRepository;
 import uk.gov.hmcts.darts.common.repository.MediaRepository;
-import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
 import uk.gov.hmcts.darts.event.enums.EventStatus;
 import uk.gov.hmcts.darts.event.service.EventService;
 import uk.gov.hmcts.darts.log.api.LogApi;
@@ -32,7 +31,7 @@ import java.util.List;
 
 @Slf4j
 @Component
-public class AudioLinkingAutomatedTask 
+public class AudioLinkingAutomatedTask
     extends AbstractLockableAutomatedTask<AudioLinkingAutomatedTaskConfig>
     implements AutoloadingManualTask {
 
@@ -68,19 +67,19 @@ public class AudioLinkingAutomatedTask
     public static class EventProcessor {
         private final MediaRepository mediaRepository;
         private final EventService eventService;
-        private final UserAccountRepository userAccountRepository;
         private final MediaLinkedCaseHelper mediaLinkedCaseHelper;
 
         @Getter
         @Value("${darts.automated-tasks.audio-linking.audio-buffer:0s}")
         private final Duration audioBuffer;
+        private final UserIdentity userIdentity;
 
 
         @Transactional
         public void processEvent(Integer eveId) {
             log.info("Attempting to link media for event with eveId {}", eveId);
             try {
-                UserAccountEntity userAccount = userAccountRepository.getReferenceById(SystemUsersEnum.AUDIO_LINKING_AUTOMATED_TASK.getId());
+                UserAccountEntity userAccount = userIdentity.getUserAccount();
 
                 EventEntity event = eventService.getEventByEveId(eveId);
                 List<MediaEntity> mediaEntities = mediaRepository.findAllByMediaTimeContains(

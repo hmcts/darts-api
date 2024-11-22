@@ -9,6 +9,8 @@ import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Limit;
+import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
+import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
 import uk.gov.hmcts.darts.common.entity.EventEntity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
@@ -48,7 +50,7 @@ class AudioLinkingAutomatedTaskTest {
     @Mock
     private AudioLinkingAutomatedTask.EventProcessor eventProcessor;
     @Mock
-    private UserAccountRepository userAccountRepository;
+    private UserIdentity userIdentity;
 
     @InjectMocks
     @Spy
@@ -111,9 +113,9 @@ class AudioLinkingAutomatedTaskTest {
             this.eventProcessor = spy(
                 new AudioLinkingAutomatedTask.EventProcessor(
                     mediaRepository,
-                    eventService, userAccountRepository, mediaLinkedCaseHelper,
-                    Duration.ofSeconds(0)
-                )
+                    eventService, mediaLinkedCaseHelper,
+                    Duration.ofSeconds(0),
+                    userIdentity)
             );
             lenient().when(userAccountRepository.getReferenceById(SystemUsersEnum.AUDIO_LINKING_AUTOMATED_TASK.getId())).thenReturn(userAccount);
         }
