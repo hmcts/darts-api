@@ -323,14 +323,15 @@ class EventsControllerTest extends IntegrationBase {
                 .findByEvent(eventEntity);
             assertThat(dataAnonymisationEntities).hasSize(1);
             DataAnonymisationEntity dataAnonymisationEntity = dataAnonymisationEntities.get(0);
-            assertDataAnonymisedEntry(userAccount, dataAnonymisationEntity, eventEntity, null);
+            assertDataAnonymisedEntry(userAccount, dataAnonymisationEntity, eventEntity.getId(), null);
         });
     }
 
     @SneakyThrows
-    private void assertDataAnonymisedEntry(UserAccountEntity userAccount, DataAnonymisationEntity dataAnonymisationEntity, EventEntity eventEntity,
+    private void assertDataAnonymisedEntry(UserAccountEntity userAccount, DataAnonymisationEntity dataAnonymisationEntity, int eventEntityId,
                                            TranscriptionCommentEntity transcriptionComment) {
-        eventEntity = dartsDatabaseStub.getEventRepository().findById(eventEntity.getId()).orElseThrow();
+        //Refresh event entity
+        EventEntity eventEntity = dartsDatabaseStub.getEventRepository().findById(eventEntityId).orElseThrow();
         assertThat(dataAnonymisationEntity.getEvent()).isEqualTo(eventEntity);
         assertThat(dataAnonymisationEntity.getTranscriptionComment()).isEqualTo(transcriptionComment);
         assertThat(dataAnonymisationEntity.getIsManualRequest()).isTrue();
