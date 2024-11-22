@@ -283,6 +283,8 @@ public abstract class AbstractArmBatchProcessResponseFiles implements ArmRespons
     private void processBatchResponseFiles(BatchInputUploadFileFilenameProcessor batchUploadFileFilenameProcessor, ArmBatchResponses armBatchResponses) {
         armBatchResponses.getArmBatchResponseMap().values().forEach(
             armResponseBatchData -> {
+                //If there is only 1 invalid line file (invalid line processor is added at the same time as the invalid line file so only 1 needs to be checked)
+                //and either a create record or upload file, process the files
                 if ((CollectionUtils.isNotEmpty(armResponseBatchData.getInvalidLineFileFilenameProcessors())
                     && (armResponseBatchData.getInvalidLineFileFilenameProcessors().size() == 1))
                     && (nonNull(armResponseBatchData.getCreateRecordFilenameProcessor())
