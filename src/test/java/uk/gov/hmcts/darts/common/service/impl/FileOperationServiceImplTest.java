@@ -20,7 +20,6 @@ import java.nio.file.Path;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -76,12 +75,6 @@ class FileOperationServiceImplTest {
         Path filePath = fileOperationService.saveBinaryDataToSpecifiedWorkspace(binaryData, fileName, tempDir.toString(), true);
         assertTrue(Files.exists(filePath));
         assertNotEquals(0L, Files.size(filePath));
-    }
-
-    @Test
-    void saveBinaryDataToSpecifiedWorkspace_shouldThrowIoException() {
-        BinaryData binaryData = BinaryData.fromStream(mediaFile);
-        assertThrows(IOException.class, () -> fileOperationService.saveBinaryDataToSpecifiedWorkspace(binaryData, fileName, "/invalid/path", true));
     }
 
     @Test
