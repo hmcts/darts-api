@@ -124,7 +124,7 @@ class ProcessE2EArmRpoPendingAutomatedTaskIntTest extends PostgresIntegrationBas
         var executionDetail = allExecutionDetails.getFirst();
         assertEquals(ArmRpoStateEnum.GET_RECORD_MANAGEMENT_MATTER.getId(), executionDetail.getArmRpoState().getId());
         assertEquals(ArmRpoStatusEnum.FAILED.getId(), executionDetail.getArmRpoStatus().getId());
-        assertEquals(AUTOMATION_USER_ID, executionDetail.getCreatedBy().getId());     assertEquals(AUTOMATION_USER_ID, executionDetail.getCreatedBy().getId());
+        assertEquals(AUTOMATION_USER_ID, executionDetail.getCreatedBy().getId());
         assertEquals(AUTOMATION_USER_ID, executionDetail.getLastModifiedBy().getId());
     }
 
