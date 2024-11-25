@@ -160,6 +160,18 @@ components:
           $ref: '#/components/schemas/LastModifiedAt'
         last_modified_by:
           $ref: '#/components/schemas/LastModifiedBy'
+        rpo_csv_start_hour:
+          type: integer
+        rpo_csv_end_hour:
+          type: integer
+        arm_replay_start_ts:
+          type: string
+          format: date-time
+        arm_replay_end_ts:
+          type: string
+          format: date-time
+        arm_attribute_type:
+          type: string
       allOf:
         - $ref: '#/components/schemas/AutomatedTaskSummary'
 
