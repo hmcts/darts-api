@@ -20,7 +20,8 @@ import static uk.gov.hmcts.darts.task.api.AutomatedTaskName.ARM_RPO_POLLING_TASK
 )
 @Slf4j
 @Component
-public class ArmRpoPollingAutomatedTask extends AbstractLockableAutomatedTask
+public class ArmRpoPollingAutomatedTask
+    extends AbstractLockableAutomatedTask<ArmRpoPollAutomatedTaskConfig>
     implements AutoloadingManualTask {
 
     private final ArmRpoPollService armRpoPollService;
