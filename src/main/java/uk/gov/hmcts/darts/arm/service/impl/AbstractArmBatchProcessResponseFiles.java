@@ -56,6 +56,7 @@ import static uk.gov.hmcts.darts.arm.util.ArchiveConstants.ArchiveResponseFileAt
 import static uk.gov.hmcts.darts.arm.util.ArchiveConstants.ArchiveResponseFileAttributes.ARM_RESPONSE_SUCCESS_STATUS_CODE;
 import static uk.gov.hmcts.darts.arm.util.ArchiveConstants.ArchiveResponseFileAttributes.ARM_UPLOAD_FILE_FILENAME_KEY;
 import static uk.gov.hmcts.darts.arm.util.ArmResponseFilesUtil.generateSuffix;
+import static uk.gov.hmcts.darts.arm.util.ArmResponseFilesUtil.getOperationFromArmResponseFilesInputField;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_RESPONSE_CHECKSUM_VERIFICATION_FAILED;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_RESPONSE_MANIFEST_FAILED;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_RESPONSE_PROCESSING_FAILED;
@@ -352,8 +353,8 @@ public abstract class AbstractArmBatchProcessResponseFiles implements ArmRespons
                             invalidLineRecord2.getErrorStatus()
                         );
                         updateTransferAttempts(externalObjectDirectory);
-                        String errorCode = getErrorCode(invalidLineRecord1, invalidLineRecord2);
-                        externalObjectDirectory.setErrorCode(errorCode);
+                        setInvalidLineErrorDescription(invalidLineRecord1, invalidLineRecord2, externalObjectDirectory);
+
                         updateExternalObjectDirectoryStatus(externalObjectDirectory, EodHelper.armResponseManifestFailedStatus());
 
                     } else {
@@ -388,16 +389,47 @@ public abstract class AbstractArmBatchProcessResponseFiles implements ArmRespons
 
     }
 
-    private String getErrorCode(ArmResponseInvalidLineRecord invalidLineRecord1, ArmResponseInvalidLineRecord invalidLineRecord2) {
+    private void setInvalidLineErrorDescription(ArmResponseInvalidLineRecord invalidLineRecord1, ArmResponseInvalidLineRecord invalidLineRecord2,
+                                                ExternalObjectDirectoryEntity externalObjectDirectory) {
+
+        UploadNewFileRecord uploadNewFileRecord1 = readInputJson(invalidLineRecord1.getInput());
         UploadNewFileRecord uploadNewFileRecord2 = readInputJson(invalidLineRecord2.getInput());
 
-        String errorCode;
-        if (CREATE_RECORD.equalsIgnoreCase(uploadNewFileRecord2.getOperation())) {
-            errorCode = invalidLineRecord2.getExceptionDescription() + " " + invalidLineRecord1.getExceptionDescription();
+        String uploadNewFileOperation1 = null;
+        if (nonNull(uploadNewFileRecord1)) {
+            uploadNewFileOperation1 = uploadNewFileRecord1.getOperation();
         } else {
-            errorCode = invalidLineRecord1.getExceptionDescription() + " " + invalidLineRecord2.getExceptionDescription();
+            uploadNewFileOperation1 = getOperationFromArmResponseFilesInputField(invalidLineRecord1.getInput());
+            if (isNull(uploadNewFileOperation1)) {
+                uploadNewFileOperation1 = "UNKNOWN";
+            }
         }
-        return errorCode;
+
+        String uploadNewFileOperation2 = null;
+        if (nonNull(uploadNewFileRecord2)) {
+            uploadNewFileOperation2 = uploadNewFileRecord2.getOperation();
+        } else {
+            uploadNewFileOperation2 = getOperationFromArmResponseFilesInputField(invalidLineRecord2.getInput());
+            if (isNull(uploadNewFileOperation2)) {
+                uploadNewFileOperation2 = "UNKNOWN";
+            }
+        }
+
+        StringBuilder errorDescription = new StringBuilder();
+
+        invalidLineRecord1.getInput();
+        if (CREATE_RECORD.equalsIgnoreCase(uploadNewFileOperation2)) {
+            errorDescription.append("Operation: ").append(uploadNewFileOperation2).append("-");
+            errorDescription.append(invalidLineRecord2.getExceptionDescription()).append(";");
+            errorDescription.append("Operation: ").append(uploadNewFileOperation1).append("-");
+            errorDescription.append(invalidLineRecord1.getExceptionDescription()).append(";");
+        } else {
+            errorDescription.append("Operation: ").append(uploadNewFileOperation1).append("-");
+            errorDescription.append(invalidLineRecord1.getExceptionDescription()).append(";");
+            errorDescription.append("Operation: ").append(uploadNewFileOperation2).append("-");
+            errorDescription.append(invalidLineRecord2.getExceptionDescription()).append(";");
+        }
+        externalObjectDirectory.setErrorCode(errorDescription.toString());
     }
 
     private void processCreateRecordResponseFiles(List<CreateRecordFilenameProcessor> createRecordResponses,
@@ -618,7 +650,7 @@ public abstract class AbstractArmBatchProcessResponseFiles implements ArmRespons
                 log.error("Unable to parse the upload new file record {}", e.getMessage());
             }
         } else {
-            log.warn("Unable to parse the input field upload new file record");
+            log.warn("Unable to parse the input field upload new file record {}", input);
         }
         return uploadNewFileRecord;
     }
@@ -723,7 +755,6 @@ public abstract class AbstractArmBatchProcessResponseFiles implements ArmRespons
                 if (nonNull(armResponseInvalidLineRecord)) {
                     //If the filename contains 0
                     if (ARM_RESPONSE_INVALID_STATUS_CODE.equals(invalidLineFileFilenameProcessor.getStatus())) {
-
                         processInvalidLineFileActions(armResponseInvalidLineRecord, externalObjectDirectory);
                     } else {
                         String error = String.format("Incorrect status [%s] for invalid line file %s", invalidLineFileFilenameProcessor.getStatus(),
