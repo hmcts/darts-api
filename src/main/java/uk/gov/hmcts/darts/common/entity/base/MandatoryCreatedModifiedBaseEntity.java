@@ -10,6 +10,7 @@ import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.UpdateTimestamp;
 import org.hibernate.envers.NotAudited;
+import org.springframework.data.annotation.LastModifiedBy;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 
 import java.time.OffsetDateTime;
@@ -26,5 +27,6 @@ public class MandatoryCreatedModifiedBaseEntity extends MandatoryCreatedBaseEnti
     @NotAudited
     @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
     @JoinColumn(name = "last_modified_by", nullable = false)
+    @LastModifiedBy
     private UserAccountEntity lastModifiedBy;
 }
