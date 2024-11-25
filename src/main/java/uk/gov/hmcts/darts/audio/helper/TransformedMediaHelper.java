@@ -102,8 +102,12 @@ public class TransformedMediaHelper {
         if (nonNull(fileSize)) {
             entity.setOutputFilesize(fileSize.intValue());
         }
-        transformedMediaRepository.save(entity);
-        return entity;
+        //Ensures createdBy / LastModified does not get overridden by the @CreatedBy / @LastModifiedBy annotaiton
+        TransformedMediaEntity savedTM = transformedMediaRepository.save(entity);
+        transformedMediaRepository.updateCreatedByLastModifiedBy(entity.getId(),
+                                                                 mediaRequest.getCreatedBy().getId(),
+                                                                 mediaRequest.getCreatedBy().getId());
+        return savedTM;
     }
 
     @SuppressWarnings({"PMD.CognitiveComplexity"})

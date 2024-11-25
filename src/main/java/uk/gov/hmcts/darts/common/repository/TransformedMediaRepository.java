@@ -3,6 +3,7 @@ package uk.gov.hmcts.darts.common.repository;
 import org.springframework.data.domain.Limit;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 import uk.gov.hmcts.darts.audio.model.TransformedMediaDetailsDto;
@@ -93,4 +94,12 @@ public interface TransformedMediaRepository extends JpaRepository<TransformedMed
                                                       OffsetDateTime requestedAtTo);
 
 
+    @Query(value = """
+        UPDATE darts.transformed_media
+                set created_by = :id1,
+                last_modified_by = :id2
+                where trm_id = :id
+        """, nativeQuery = true)
+    @Modifying
+    void updateCreatedByLastModifiedBy(Integer id, Integer id1, Integer id2);
 }
