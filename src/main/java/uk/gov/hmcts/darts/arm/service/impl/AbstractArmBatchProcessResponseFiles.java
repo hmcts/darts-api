@@ -153,7 +153,7 @@ public abstract class AbstractArmBatchProcessResponseFiles implements ArmRespons
                     timeHelper.currentOffsetDateTime());
 
             } else {
-                log.warn("No external object directories found with filename: {}", batchUploadFileFilenameProcessor.getBatchMetadataFilename());
+                log.warn("No external object directories found with filename: {}", manifestName);
             }
 
             processResponseFileByHashcode(batchUploadFileFilenameProcessor, manifestName);
