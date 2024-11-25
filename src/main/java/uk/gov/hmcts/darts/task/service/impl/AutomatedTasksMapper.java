@@ -27,7 +27,7 @@ public class AutomatedTasksMapper {
 
         ArmAutomatedTaskEntity armAutomatedTaskEntity = automatedTaskEntity.getArmAutomatedTaskEntity();
 
-        if (automatedTaskEntity.getArmAutomatedTaskEntity() != null) {
+        if (armAutomatedTaskEntity != null) {
             detailedAutomatedTask.setRpoCsvStartHour(armAutomatedTaskEntity.getRpoCsvStartHour());
             detailedAutomatedTask.setRpoCsvEndHour(armAutomatedTaskEntity.getRpoCsvEndHour());
             detailedAutomatedTask.setArmReplayStartTs(armAutomatedTaskEntity.getArmReplayStartTs());
