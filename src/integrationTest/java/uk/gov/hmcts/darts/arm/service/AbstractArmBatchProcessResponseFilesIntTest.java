@@ -216,8 +216,7 @@ abstract class AbstractArmBatchProcessResponseFilesIntTest extends IntegrationBa
         String validUploadFileTest3 = "tests/arm/service/ArmBatchResponseFilesProcessorTest/ValidResponses/UploadFile.rsp";
         String invalidLineFileTest3 = "tests/arm/service/ArmBatchResponseFilesProcessorTest/ValidResponses/InvalidLineFile.rsp";
         String invalidLineFileTest4 = "tests/arm/service/ArmBatchResponseFilesProcessorTest/ValidResponses/InvalidLineFile.rsp";
-        String invalidLineFileTest5 = "tests/arm/service/ArmBatchResponseFilesProcessorTest/ValidResponses/InvalidLineFile.rsp";
-
+        String invalidLineFileTest5 = "tests/arm/service/ArmBatchResponseFilesProcessorTest/ValidResponses/InvalidLineFile2.rsp";
 
         BinaryData createRecordBinaryDataTest1 = convertStringToBinaryData(getCreateRecordFileContents(createRecordFileTest1, armEod1.getId()));
         BinaryData uploadFileBinaryDataTest1 = convertStringToBinaryData(getUploadFileContents(validUploadFileTest1, armEod1.getId(), media1.getChecksum()));
@@ -318,6 +317,19 @@ abstract class AbstractArmBatchProcessResponseFilesIntTest extends IntegrationBa
         assertEquals(1, foundMedia3.getVerificationAttempts());
         assertEquals(2, foundMedia3.getTransferAttempts());
         assertTrue(foundMedia3.isResponseCleaned());
+
+        List<ExternalObjectDirectoryEntity> foundMediaList4 = dartsDatabase.getExternalObjectDirectoryRepository()
+            .findByMediaAndExternalLocationType(media4, dartsDatabase.getExternalLocationTypeEntity(ARM));
+
+        assertEquals(1, foundMediaList4.size());
+        ExternalObjectDirectoryEntity foundMedia4 = foundMediaList4.getFirst();
+        assertEquals(ARM_RESPONSE_MANIFEST_FAILED.getId(), foundMedia4.getStatus().getId());
+        assertEquals(1, foundMedia4.getVerificationAttempts());
+        assertEquals(2, foundMedia4.getTransferAttempts());
+        assertTrue(foundMedia4.isResponseCleaned());
+        assertEquals(
+            "Operation: create_record - PS.20023:INVALID_PARAMETERS:Invalid line: invalid json; Operation: upload_new_file - PS.20042:INVALID_RELATION_ID:No create_record operation with specified relation_id in the same input file.; ",
+            foundMedia4.getErrorCode());
 
         List<ExternalObjectDirectoryEntity> foundMediaList5 = dartsDatabase.getExternalObjectDirectoryRepository()
             .findByMediaAndExternalLocationType(media5, dartsDatabase.getExternalLocationTypeEntity(ARM));
@@ -422,13 +434,14 @@ abstract class AbstractArmBatchProcessResponseFilesIntTest extends IntegrationBa
         armBatchProcessResponseFiles.processResponseFiles(BATCH_SIZE);
 
         // then
-        List<ExternalObjectDirectoryEntity> foundMediaList = dartsDatabase.getExternalObjectDirectoryRepository()
+        List<ExternalObjectDirectoryEntity> externalObjectDirectoryEntities = dartsDatabase.getExternalObjectDirectoryRepository()
             .findByMediaAndExternalLocationType(media1, dartsDatabase.getExternalLocationTypeEntity(ARM));
 
-        assertEquals(1, foundMediaList.size());
-        ExternalObjectDirectoryEntity foundMedia = foundMediaList.getFirst();
-        assertEquals(ARM_RESPONSE_MANIFEST_FAILED.getId(), foundMedia.getStatus().getId());
-        assertEquals(1, foundMedia.getVerificationAttempts());
+        assertEquals(1, externalObjectDirectoryEntities.size());
+        ExternalObjectDirectoryEntity foundEod = externalObjectDirectoryEntities.getFirst();
+        assertEquals(ARM_RESPONSE_MANIFEST_FAILED.getId(), foundEod.getStatus().getId());
+        assertEquals(1, foundEod.getVerificationAttempts());
+        assertEquals("Operation: create_record - PS.20023:INVALID_PARAMETERS:Invalid line: invalid json; ", foundEod.getErrorCode());
 
         verify(armDataManagementApi).listResponseBlobsUsingMarker(prefix(), BATCH_SIZE, continuationToken);
         verify(armDataManagementApi).listResponseBlobs(hashcode1);
@@ -441,6 +454,7 @@ abstract class AbstractArmBatchProcessResponseFilesIntTest extends IntegrationBa
         verify(armDataManagementApi).deleteBlobData(blobNameAndPath1);
 
         verifyNoMoreInteractions(armDataManagementApi);
+
     }
 
     @Test
@@ -536,7 +550,7 @@ abstract class AbstractArmBatchProcessResponseFilesIntTest extends IntegrationBa
         verify(armDataManagementApi).deleteBlobData(invalidLineFileFilename1);
         verify(armDataManagementApi).deleteBlobData(invalidLineFileFilename2);
         verify(armDataManagementApi).deleteBlobData(invalidLineFileFilename3);
-        
+
         verifyNoMoreInteractions(armDataManagementApi);
     }
 

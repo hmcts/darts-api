@@ -389,47 +389,35 @@ public abstract class AbstractArmBatchProcessResponseFiles implements ArmRespons
 
     }
 
-    private void setInvalidLineErrorDescription(ArmResponseInvalidLineRecord invalidLineRecord1, ArmResponseInvalidLineRecord invalidLineRecord2,
-                                                ExternalObjectDirectoryEntity externalObjectDirectory) {
+    private void setInvalidLineErrorDescription(ArmResponseInvalidLineRecord record1, ArmResponseInvalidLineRecord record2,
+                                                ExternalObjectDirectoryEntity eod) {
 
-        UploadNewFileRecord uploadNewFileRecord1 = readInputJson(invalidLineRecord1.getInput());
-        UploadNewFileRecord uploadNewFileRecord2 = readInputJson(invalidLineRecord2.getInput());
-
-        String uploadNewFileOperation1 = null;
-        if (nonNull(uploadNewFileRecord1)) {
-            uploadNewFileOperation1 = uploadNewFileRecord1.getOperation();
-        } else {
-            uploadNewFileOperation1 = getOperationFromArmResponseFilesInputField(invalidLineRecord1.getInput());
-            if (isNull(uploadNewFileOperation1)) {
-                uploadNewFileOperation1 = "UNKNOWN";
-            }
-        }
-
-        String uploadNewFileOperation2 = null;
-        if (nonNull(uploadNewFileRecord2)) {
-            uploadNewFileOperation2 = uploadNewFileRecord2.getOperation();
-        } else {
-            uploadNewFileOperation2 = getOperationFromArmResponseFilesInputField(invalidLineRecord2.getInput());
-            if (isNull(uploadNewFileOperation2)) {
-                uploadNewFileOperation2 = "UNKNOWN";
-            }
-        }
+        String operation1 = getOperation(record1);
+        String operation2 = getOperation(record2);
 
         StringBuilder errorDescription = new StringBuilder();
-
-        invalidLineRecord1.getInput();
-        if (CREATE_RECORD.equalsIgnoreCase(uploadNewFileOperation2)) {
-            errorDescription.append("Operation: ").append(uploadNewFileOperation2).append("-");
-            errorDescription.append(invalidLineRecord2.getExceptionDescription()).append(";");
-            errorDescription.append("Operation: ").append(uploadNewFileOperation1).append("-");
-            errorDescription.append(invalidLineRecord1.getExceptionDescription()).append(";");
+        if (CREATE_RECORD.equalsIgnoreCase(operation2)) {
+            appendErrorDescription(errorDescription, operation2, record2);
+            appendErrorDescription(errorDescription, operation1, record1);
         } else {
-            errorDescription.append("Operation: ").append(uploadNewFileOperation1).append("-");
-            errorDescription.append(invalidLineRecord1.getExceptionDescription()).append(";");
-            errorDescription.append("Operation: ").append(uploadNewFileOperation2).append("-");
-            errorDescription.append(invalidLineRecord2.getExceptionDescription()).append(";");
+            appendErrorDescription(errorDescription, operation1, record1);
+            appendErrorDescription(errorDescription, operation2, record2);
         }
-        externalObjectDirectory.setErrorCode(errorDescription.toString());
+        eod.setErrorCode(errorDescription.toString());
+    }
+
+    private String getOperation(ArmResponseInvalidLineRecord record) {
+        UploadNewFileRecord uploadRecord = readInputJson(record.getInput());
+        if (uploadRecord != null) {
+            return uploadRecord.getOperation();
+        }
+        String operation = getOperationFromArmResponseFilesInputField(record.getInput());
+        return operation != null ? operation : "UNKNOWN";
+    }
+
+    private void appendErrorDescription(StringBuilder errorDescription, String operation, ArmResponseInvalidLineRecord record) {
+        errorDescription.append("Operation: ").append(operation).append(" - ");
+        errorDescription.append(record.getExceptionDescription()).append("; ");
     }
 
     private void processCreateRecordResponseFiles(List<CreateRecordFilenameProcessor> createRecordResponses,
@@ -958,7 +946,12 @@ public abstract class AbstractArmBatchProcessResponseFiles implements ArmRespons
             armResponseInvalidLineRecord.getErrorStatus()
         );
         updateTransferAttempts(externalObjectDirectory);
-        externalObjectDirectory.setErrorCode(armResponseInvalidLineRecord.getExceptionDescription());
+        String operation = getOperation(armResponseInvalidLineRecord);
+
+        StringBuilder errorDescription = new StringBuilder();
+        appendErrorDescription(errorDescription, operation, armResponseInvalidLineRecord);
+
+        externalObjectDirectory.setErrorCode(errorDescription.toString());
         updateExternalObjectDirectoryStatus(externalObjectDirectory, EodHelper.armResponseManifestFailedStatus());
     }
 
