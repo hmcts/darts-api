@@ -226,10 +226,10 @@ public class ArmServiceImpl implements ArmService {
 
             blobs.forEach(blob -> blobsWithPaths.add(blob.getName()));
             continuationTokenBlobs.setBlobNamesAndPaths(blobsWithPaths);
-            log.debug("Prefix {} found {} blobs for continuation token {}",
-                      continuationTokenBlobs.getContinuationToken(), blobPathAndName, blobsWithPaths.size());
+            log.debug("ContinuationToken {} found {} blobs for path {}",
+                      continuationTokenBlobs.getContinuationToken(), blobsWithPaths.size(), blobPathAndName);
         } catch (NoSuchElementException | IOException ioe) {
-            log.error("Unable to get next response for prefix {}", blobPathAndName, ioe);
+            log.error("Unable to get next response for blob {}", blobPathAndName, ioe);
         }
     }
 
