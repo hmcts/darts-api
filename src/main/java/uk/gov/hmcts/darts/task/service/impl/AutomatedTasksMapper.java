@@ -25,8 +25,9 @@ public class AutomatedTasksMapper {
             .isCronEditable(automatedTaskEntity.getCronEditable())
             .batchSize(automatedTaskEntity.getBatchSize());
 
+        ArmAutomatedTaskEntity armAutomatedTaskEntity = automatedTaskEntity.getArmAutomatedTaskEntity();
+
         if (automatedTaskEntity.getArmAutomatedTaskEntity() != null) {
-            ArmAutomatedTaskEntity armAutomatedTaskEntity = automatedTaskEntity.getArmAutomatedTaskEntity();
             detailedAutomatedTask.setRpoCsvStartHour(armAutomatedTaskEntity.getRpoCsvStartHour());
             detailedAutomatedTask.setRpoCsvEndHour(armAutomatedTaskEntity.getRpoCsvEndHour());
             detailedAutomatedTask.setArmReplayStartTs(armAutomatedTaskEntity.getArmReplayStartTs());
