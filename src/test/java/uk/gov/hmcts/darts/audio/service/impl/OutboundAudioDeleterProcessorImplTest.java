@@ -7,12 +7,11 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Limit;
 import uk.gov.hmcts.darts.audio.service.OutboundAudioDeleterProcessorSingleElement;
+import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.TransformedMediaEntity;
 import uk.gov.hmcts.darts.common.entity.TransientObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.enums.SecurityGroupEnum;
-import uk.gov.hmcts.darts.common.enums.SystemUsersEnum;
-import uk.gov.hmcts.darts.common.helper.SystemUserHelper;
 import uk.gov.hmcts.darts.common.repository.TransformedMediaRepository;
 import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
 
@@ -42,7 +41,7 @@ class OutboundAudioDeleterProcessorImplTest {
     private OutboundAudioDeleterProcessorImpl outboundAudioDeleterProcessorImpl;
 
     @Mock
-    private SystemUserHelper systemUserHelper;
+    private UserIdentity userIdentity;
 
     @Mock
     private TransformedMediaRepository transformedMediaRepository;
@@ -51,10 +50,10 @@ class OutboundAudioDeleterProcessorImplTest {
     void setUp() {
         this.outboundAudioDeleterProcessorImpl = new OutboundAudioDeleterProcessorImpl(
             userAccountRepository, lastAccessedDeletionDayCalculator,
-            systemUserHelper, transformedMediaRepository,
+            userIdentity, transformedMediaRepository,
             singleElementProcessor
         );
-        when(systemUserHelper.getReferenceTo(SystemUsersEnum.OUTBOUND_AUDIO_DELETER_AUTOMATED_TASK)).thenReturn(userAccountEntity);
+        when(userIdentity.getUserAccount()).thenReturn(userAccountEntity);
     }
 
     @Test

@@ -7,14 +7,12 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Limit;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.darts.arm.service.UnstructuredTranscriptionAndAnnotationDeleterProcessor;
-import uk.gov.hmcts.darts.common.enums.SystemUsersEnum;
+import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
-import uk.gov.hmcts.darts.common.helper.SystemUserHelper;
 import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
 import uk.gov.hmcts.darts.common.util.EodHelper;
 
 import java.time.OffsetDateTime;
-import java.time.temporal.ChronoUnit;
 import java.util.List;
 
 @Component
@@ -23,7 +21,7 @@ import java.util.List;
 public class UnstructuredAnnotationTranscriptionDeleterProcessorImpl implements UnstructuredTranscriptionAndAnnotationDeleterProcessor {
     private final ExternalObjectDirectoryRepository externalObjectDirectoryRepository;
 
-    private final SystemUserHelper systemUserHelper;
+    private final UserIdentity userIdentity;
 
     private final EodHelper eodHelper;
 
@@ -42,15 +40,12 @@ public class UnstructuredAnnotationTranscriptionDeleterProcessorImpl implements 
     @Override
     public List<Integer> markForDeletion(int weeksBeforeCurrentDateInUnstructured, int hoursBeforeCurrentDateInArm, int batchSize) {
 
-        OffsetDateTime lastModifiedBeforeCurrentDateForUnstructured = currentTimeHelper.currentOffsetDateTime().minus(
-            weeksBeforeCurrentDateInUnstructured,
-            ChronoUnit.WEEKS
-        );
+        OffsetDateTime lastModifiedBeforeCurrentDateForUnstructured = currentTimeHelper.currentOffsetDateTime()
+            .minusWeeks(
+            weeksBeforeCurrentDateInUnstructured);
 
-        OffsetDateTime lastModifiedBeforeCurrentDateForArm = currentTimeHelper.currentOffsetDateTime().minus(
-            hoursBeforeCurrentDateInArm,
-            ChronoUnit.HOURS
-        );
+        OffsetDateTime lastModifiedBeforeCurrentDateForArm = currentTimeHelper.currentOffsetDateTime()
+            .minusHours(hoursBeforeCurrentDateInArm);
 
         List<Integer> recordsMarkedForDeletion
             = externalObjectDirectoryRepository
@@ -67,7 +62,7 @@ public class UnstructuredAnnotationTranscriptionDeleterProcessorImpl implements 
 
         eodHelper.updateStatus(
             EodHelper.markForDeletionStatus(),
-            systemUserHelper.getReferenceTo(SystemUsersEnum.UNSTRUCTURED_TRANSCRIPTION_ANNOTATION_DELETER_AUTOMATED_TASK),
+            userIdentity.getUserAccount(),
             recordsMarkedForDeletion,
             currentTimeHelper.currentOffsetDateTime()
         );

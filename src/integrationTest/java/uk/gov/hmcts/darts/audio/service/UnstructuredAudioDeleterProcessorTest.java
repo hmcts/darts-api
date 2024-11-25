@@ -29,6 +29,7 @@ class UnstructuredAudioDeleterProcessorTest extends IntegrationBase {
 
     @Autowired
     private DatabaseDateSetter dateConfigurer;
+    private static final int AUTOMATION_USER_ID = -36;
 
     @Test
     void storedInArmAndLastUpdatedInUnstructuredMoreThan30WeeksAgo() throws InvocationTargetException, NoSuchMethodException, IllegalAccessException {
