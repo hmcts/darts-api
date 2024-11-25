@@ -39,7 +39,7 @@ public enum AutomatedTaskName {
     PROCESS_ARM_RPO_PENDING("ProcessARMRPOPending", "!${darts.automated.task.process-e2e-arm-rpo-pending.process-e2e-arm-rpo:false}"),
     AUDIO_LINKING_TASK_NAME("AudioLinking"),
     PROCESS_E2E_ARM_PENDING_TASK_NAME("ProcessE2EArmRpoPending", "${darts.automated.task.process-e2e-arm-rpo-pending.process-e2e-arm-rpo:false}"),
-    ARM_RPO_POLL_TASK_NAME("ArmRpoPoll"),
+    ARM_RPO_POLLING_TASK_NAME("ArmRpoPolling"),
     ARM_RPO_REPLAY_TASK_NAME("ArmRpoReplay"),
     ARM_MISSING_RESPONSE_REPLY_TASK_NAME("ArmMissingResponseReplay"),
     DETS_CLEANUP_ARM_RESPONSE_FILES("DETSCleanupArmResponseFiles");

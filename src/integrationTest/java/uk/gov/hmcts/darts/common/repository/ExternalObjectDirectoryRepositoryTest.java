@@ -22,6 +22,7 @@ import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_RPO_PENDING;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.STORED;
 
 class ExternalObjectDirectoryRepositoryTest extends PostgresIntegrationBase {
@@ -36,6 +37,7 @@ class ExternalObjectDirectoryRepositoryTest extends PostgresIntegrationBase {
     private CurrentTimeHelper currentTimeHelper;
 
     private List<ExternalObjectDirectoryEntity> entitiesToBeMarkedWithMediaOrAnnotationOutsideOfArmHours;
+    private OffsetDateTime ingestionEndDateTime;
 
     @Test
     void testGetDirectoryIfMediaDate24Hours() throws Exception {
@@ -421,4 +423,46 @@ class ExternalObjectDirectoryRepositoryTest extends PostgresIntegrationBase {
         assertEquals(100L, fileSize);
     }
 
+    @Test
+    void findAllByStatusAndDataIngestionTsBetweenAndLimit() throws InvocationTargetException, NoSuchMethodException, IllegalAccessException {
+        // given
+        OffsetDateTime now = currentTimeHelper.currentOffsetDateTime();
+        OffsetDateTime pastCurrentDateTime = now.minusHours(30);
+
+        List<ExternalObjectDirectoryEntity> externalObjectDirectoryEntities
+            = externalObjectDirectoryStub.generateWithStatusAndMediaLocation(
+            ExternalLocationTypeEnum.ARM, ARM_RPO_PENDING, 20, Optional.of(pastCurrentDateTime));
+
+        OffsetDateTime ingestionStartDateTime = currentTimeHelper.currentOffsetDateTime().minusHours(30);
+        externalObjectDirectoryEntities.forEach(eod -> {
+            if (eod.getId() % 2 == 0 && (eod.getId() % 3 != 0)) {
+                // within the time range
+                eod.setCreatedDateTime(ingestionStartDateTime);
+                eod.setDataIngestionTs(currentTimeHelper.currentOffsetDateTime().minusHours(26));
+            } else if (eod.getId() % 3 == 0) {
+                // before the time range
+                eod.setCreatedDateTime(currentTimeHelper.currentOffsetDateTime().minusHours(40));
+                eod.setDataIngestionTs(currentTimeHelper.currentOffsetDateTime().minusHours(31));
+            } else {
+                // after the time range
+                eod.setCreatedDateTime(currentTimeHelper.currentOffsetDateTime().minusHours(15));
+                eod.setDataIngestionTs(currentTimeHelper.currentOffsetDateTime().minusHours(10));
+            }
+        });
+        dartsPersistence.saveAll(externalObjectDirectoryEntities);
+
+        // when
+        ingestionEndDateTime = currentTimeHelper.currentOffsetDateTime().minusHours(24);
+        var results = externalObjectDirectoryRepository.findAllByStatusAndDataIngestionTsBetweenAndLimit(
+            EodHelper.armRpoPendingStatus(), ingestionStartDateTime, ingestionEndDateTime,
+            Limit.of(20));
+
+        // then
+        assertEquals(7, results.size());
+        results.forEach(eod -> {
+            assertTrue(eod.getDataIngestionTs().isAfter(ingestionStartDateTime));
+            assertTrue(eod.getDataIngestionTs().isBefore(ingestionEndDateTime));
+        });
+
+    }
 }

@@ -10,6 +10,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.darts.arm.client.ArmRpoClient;
 import uk.gov.hmcts.darts.arm.client.model.rpo.ArmAsyncSearchResponse;
+import uk.gov.hmcts.darts.arm.component.ArmRpoDownloadProduction;
 import uk.gov.hmcts.darts.arm.config.ArmApiConfigurationProperties;
 import uk.gov.hmcts.darts.arm.exception.ArmRpoException;
 import uk.gov.hmcts.darts.arm.helper.ArmRpoHelperMocks;
@@ -66,13 +67,15 @@ class ArmRpoApiAddAsyncSearchTest {
         armRpoClient = spy(ArmRpoClient.class);
         armAutomatedTaskRepository = mock(ArmAutomatedTaskRepository.class);
         var currentTimeHelper = mock(CurrentTimeHelper.class);
+        var armRpoDownloadProduction = mock(ArmRpoDownloadProduction.class);
 
         executionDetailCaptor = ArgumentCaptor.forClass(ArmRpoExecutionDetailEntity.class);
         requestCaptor = ArgumentCaptor.forClass(String.class);
 
         ArmApiConfigurationProperties armApiConfigurationProperties = new ArmApiConfigurationProperties();
 
-        armRpoApi = new ArmRpoApiImpl(armRpoClient, armRpoService, armApiConfigurationProperties, armAutomatedTaskRepository, currentTimeHelper);
+        armRpoApi = new ArmRpoApiImpl(armRpoClient, armRpoService, armApiConfigurationProperties,
+                                      armAutomatedTaskRepository, currentTimeHelper, armRpoDownloadProduction);
 
         armRpoHelperMocks = new ArmRpoHelperMocks(); // Mocks are set via the default constructor call
 

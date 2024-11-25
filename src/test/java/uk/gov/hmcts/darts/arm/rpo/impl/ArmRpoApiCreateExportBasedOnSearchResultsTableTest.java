@@ -10,9 +10,9 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.darts.arm.client.ArmRpoClient;
 import uk.gov.hmcts.darts.arm.client.model.rpo.CreateExportBasedOnSearchResultsTableResponse;
-import uk.gov.hmcts.darts.arm.client.model.rpo.MasterIndexFieldByRecordClassSchemaResponse;
 import uk.gov.hmcts.darts.arm.exception.ArmRpoException;
 import uk.gov.hmcts.darts.arm.helper.ArmRpoHelperMocks;
+import uk.gov.hmcts.darts.arm.model.rpo.MasterIndexFieldByRecordClassSchema;
 import uk.gov.hmcts.darts.arm.service.ArmRpoService;
 import uk.gov.hmcts.darts.common.entity.ArmRpoExecutionDetailEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
@@ -253,30 +253,29 @@ class ArmRpoApiCreateExportBasedOnSearchResultsTableTest {
 
     }
 
-    private List<MasterIndexFieldByRecordClassSchemaResponse> createHeaderColumns() {
-        MasterIndexFieldByRecordClassSchemaResponse response = new MasterIndexFieldByRecordClassSchemaResponse();
-        response.setMasterIndexFields(List.of(
-            createMasterIndexFieldByRecordClassSchemaResponse("200b9c27-b497-4977-82e7-1586b32a5871", "Record Class", "record_class", "string", false),
-            createMasterIndexFieldByRecordClassSchemaResponse("90ee0e13-8639-4c4a-b542-66b6c8911549", "Archived Date", "ingestionDate", "date", false),
-            createMasterIndexFieldByRecordClassSchemaResponse("a9b8daf2-d9ff-4815-b65a-f6ae2763b92c", "Client Identifier", "client_identifier", "string",
-                                                              false),
-            createMasterIndexFieldByRecordClassSchemaResponse("109b6bf1-57a0-48ec-b22e-c7248dc74f91", "Contributor", "contributor", "string", false),
-            createMasterIndexFieldByRecordClassSchemaResponse("893048bf-1e7c-4811-9abf-00cd77a715cf", "Record Date", "recordDate", "date", false),
-            createMasterIndexFieldByRecordClassSchemaResponse("fdd0fcbb-da46-4af1-a627-ac255c12bb23", "ObjectId", "bf_012", "number", false)
-        ));
-        return List.of(response);
+    private List<MasterIndexFieldByRecordClassSchema> createHeaderColumns() {
+        return List.of(
+            createMasterIndexFieldByRecordClassSchema("200b9c27-b497-4977-82e7-1586b32a5871", "Record Class", "record_class", "string", false),
+            createMasterIndexFieldByRecordClassSchema("90ee0e13-8639-4c4a-b542-66b6c8911549", "Archived Date", "ingestionDate", "date", false),
+            createMasterIndexFieldByRecordClassSchema("a9b8daf2-d9ff-4815-b65a-f6ae2763b92c", "Client Identifier", "client_identifier", "string",
+                                                      false),
+            createMasterIndexFieldByRecordClassSchema("109b6bf1-57a0-48ec-b22e-c7248dc74f91", "Contributor", "contributor", "string", false),
+            createMasterIndexFieldByRecordClassSchema("893048bf-1e7c-4811-9abf-00cd77a715cf", "Record Date", "recordDate", "date", false),
+            createMasterIndexFieldByRecordClassSchema("fdd0fcbb-da46-4af1-a627-ac255c12bb23", "ObjectId", "bf_012", "number", true)
+        );
     }
 
-    private MasterIndexFieldByRecordClassSchemaResponse.MasterIndexField createMasterIndexFieldByRecordClassSchemaResponse(
+    private MasterIndexFieldByRecordClassSchema createMasterIndexFieldByRecordClassSchema(
         String uuid, String displayName, String propertyName, String propertyType, boolean isMasked) {
 
-        MasterIndexFieldByRecordClassSchemaResponse.MasterIndexField masterIndexField = new MasterIndexFieldByRecordClassSchemaResponse.MasterIndexField();
-        masterIndexField.setMasterIndexFieldId(uuid);
-        masterIndexField.setDisplayName(displayName);
-        masterIndexField.setPropertyName(propertyName);
-        masterIndexField.setPropertyType(propertyType);
-        masterIndexField.setIsMasked(isMasked);
-        return masterIndexField;
+        return MasterIndexFieldByRecordClassSchema.builder()
+            .masterIndexField(uuid)
+            .displayName(displayName)
+            .propertyName(propertyName)
+            .propertyType(propertyType)
+            .isMasked(isMasked)
+            .build();
+
     }
 
     @AfterAll

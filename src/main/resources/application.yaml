@@ -269,6 +269,7 @@ darts:
       manifest-file-prefix: ${ARM_MANIFEST_FILE_PREFIX:DARTS}
       arm-client: ${ARM_CLIENT:darts}
       continuation-token-duration: PT60M
+      is-mock-arm-rpo-download-csv: ${IS_MOCK_ARM_RPO_DOWNLOAD_CSV:false}
 
     arm-api:
       arm-username: ${ARM_USERNAME:}
@@ -372,6 +373,11 @@ darts:
         lock:
           at-least-for: PT1M
           at-most-for: PT120M
+      arm-rpo-poll:
+        system-user-email: ${darts.automated.task.common-config.system-user-email:}
+        lock:
+          at-least-for: PT1M
+          at-most-for: PT30M
       associated-object-data-expiry-deletion:
         system-user-email: ${darts.automated.task.common-config.system-user-email:}
         lock:

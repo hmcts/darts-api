@@ -9,9 +9,11 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EmptySource;
 import org.junit.jupiter.params.provider.NullSource;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.test.context.TestPropertySource;
 import uk.gov.hmcts.darts.arm.client.ArmRpoClient;
 import uk.gov.hmcts.darts.arm.client.model.rpo.ProductionOutputFilesRequest;
 import uk.gov.hmcts.darts.arm.client.model.rpo.ProductionOutputFilesResponse;
+import uk.gov.hmcts.darts.arm.component.ArmRpoDownloadProduction;
 import uk.gov.hmcts.darts.arm.config.ArmApiConfigurationProperties;
 import uk.gov.hmcts.darts.arm.exception.ArmRpoException;
 import uk.gov.hmcts.darts.arm.helper.ArmRpoHelperMocks;
@@ -38,6 +40,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
+@TestPropertySource(properties = {"darts.storage.arm.is-mock-arm-rpo-download-csv=true"})
 @SuppressWarnings("checkstyle:linelength")
 @ExtendWith(MockitoExtension.class)
 class ArmRpoApiGetProductionOutputFilesTest {
@@ -60,10 +63,12 @@ class ArmRpoApiGetProductionOutputFilesTest {
         armRpoClient = spy(ArmRpoClient.class);
         var armAutomatedTaskRepository = mock(ArmAutomatedTaskRepository.class);
         var currentTimeHelper = mock(CurrentTimeHelper.class);
+        var armRpoDownloadProduction = mock(ArmRpoDownloadProduction.class);
 
         ArmApiConfigurationProperties armApiConfigurationProperties = new ArmApiConfigurationProperties();
 
-        armRpoApi = new ArmRpoApiImpl(armRpoClient, armRpoService, armApiConfigurationProperties, armAutomatedTaskRepository, currentTimeHelper);
+        armRpoApi = new ArmRpoApiImpl(armRpoClient, armRpoService, armApiConfigurationProperties,
+                                      armAutomatedTaskRepository, currentTimeHelper, armRpoDownloadProduction);
 
         armRpoHelperMocks = new ArmRpoHelperMocks(); // Mocks are set via the default constructor call
     }
@@ -148,7 +153,8 @@ class ArmRpoApiGetProductionOutputFilesTest {
     @ParameterizedTest
     @NullSource
     @EmptySource
-    void getProductionOutputFiles_shouldSucceedAndReturnSingleItem_whenASuccessResponseIsReturnedFromArmWithMixtureOfPopulatedAndUnpopulatedExportFileIds(String productionExportFileId) {
+    void getProductionOutputFiles_shouldSucceedAndReturnSingleItem_whenASuccessResponseIsReturnedFromArmWithMixtureOfPopulatedAndUnpopulatedExportFileIds(
+        String productionExportFileId) {
         // Given
         var armRpoExecutionDetailEntity = createInitialExecutionDetailEntityAndSetMock();
 
@@ -246,7 +252,8 @@ class ArmRpoApiGetProductionOutputFilesTest {
     @ParameterizedTest
     @NullSource
     @EmptySource
-    void getProductionOutputFiles_shouldThrowException_whenArmReturnsNoProductionExportFiles(List<ProductionOutputFilesResponse.ProductionExportFile> productionExportFiles) {
+    void getProductionOutputFiles_shouldThrowException_whenArmReturnsNoProductionExportFiles(
+        List<ProductionOutputFilesResponse.ProductionExportFile> productionExportFiles) {
         // Given
         var armRpoExecutionDetailEntity = createInitialExecutionDetailEntityAndSetMock();
 

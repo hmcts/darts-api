@@ -70,11 +70,11 @@ There are few attributes which doesn't use Azure Keyvault secrets. Those environ
 | ACTIVE_DIRECTORY_B2C_AUTH_URI | https://hmctsstgextid.b2clogin.com/hmctsstgextid.onmicrosoft.com |
 | ARM_URL                       |                                                                  |  
 
-
 To obtain the secret value, you may retrieve the keys from the Azure Vault by running the `az keyvault secret show`
 command in the terminal. E.g. to obtain the value for `GOVUK_NOTIFY_API_KEY`, you should run:
 
 You may need to install Azure CLI, jq and postgres you can do this by running
+
 ```
 brew update
 brew install azure-cli 

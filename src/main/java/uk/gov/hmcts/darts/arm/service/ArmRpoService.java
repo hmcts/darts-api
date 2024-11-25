@@ -14,6 +14,10 @@ public interface ArmRpoService {
 
     ArmRpoExecutionDetailEntity getArmRpoExecutionDetailEntity(Integer executionId);
 
+    ArmRpoExecutionDetailEntity getLatestArmRpoExecutionDetailEntity();
+
+    ArmRpoExecutionDetailEntity getLatestArmRpoExecutionDetailEntity(ArmRpoStateEntity armRpoStateEntity, ArmRpoStatusEntity armRpoStatusEntity);
+
     void updateArmRpoStateAndStatus(ArmRpoExecutionDetailEntity armRpoExecutionDetailEntity, ArmRpoStateEntity armRpoStateEntity,
                                     ArmRpoStatusEntity armRpoStatusEntity, UserAccountEntity userAccountEntity);
 
