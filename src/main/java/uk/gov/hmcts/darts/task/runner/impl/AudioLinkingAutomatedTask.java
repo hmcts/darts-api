@@ -90,6 +90,7 @@ public class AudioLinkingAutomatedTask
                     mediaLinkedCaseHelper.linkMediaByEvent(event, mediaEntity, MediaLinkedCaseSourceType.AUDIO_LINKING_TASK, userAccount);
                 });
                 event.setEventStatus(EventStatus.AUDIO_LINKED.getStatusNumber());
+                event.setLastModifiedBy(userIdentity.getUserAccount());
                 eventService.saveEvent(event);
             } catch (Exception e) {
                 log.error("Error attempting to link media for event with eveId {}", eveId, e);
