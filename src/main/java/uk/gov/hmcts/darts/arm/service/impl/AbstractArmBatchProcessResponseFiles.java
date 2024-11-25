@@ -21,6 +21,7 @@ import uk.gov.hmcts.darts.arm.model.record.armresponse.ArmResponseInvalidLineRec
 import uk.gov.hmcts.darts.arm.model.record.armresponse.ArmResponseUploadFileRecord;
 import uk.gov.hmcts.darts.arm.service.ArmResponseFilesProcessor;
 import uk.gov.hmcts.darts.arm.service.ExternalObjectDirectoryService;
+import uk.gov.hmcts.darts.arm.util.ArmResponseFilesUtil;
 import uk.gov.hmcts.darts.arm.util.files.BatchInputUploadFileFilenameProcessor;
 import uk.gov.hmcts.darts.arm.util.files.CreateRecordFilenameProcessor;
 import uk.gov.hmcts.darts.arm.util.files.InvalidLineFileFilenameProcessor;
@@ -623,7 +624,7 @@ public abstract class AbstractArmBatchProcessResponseFiles implements ArmRespons
     }
 
     @SuppressWarnings({"PMD.AvoidInstantiatingObjectsInLoops"})
-    private ResponseFilenames getArmResponseFilenames(List<String> responseFiles, String manifestName) {
+    private static ResponseFilenames getArmResponseFilenames(List<String> responseFiles, String manifestName) {
         ResponseFilenames responseFilenames = new ResponseFilenames();
         for (String responseFile : responseFiles) {
             try {
@@ -645,7 +646,6 @@ public abstract class AbstractArmBatchProcessResponseFiles implements ArmRespons
             } catch (IllegalArgumentException e) {
                 // This occurs when the filename is not parsable
                 log.error("Invalid ARM response filename: {} for manifest {}", responseFile, manifestName);
-                deleteResponseBlobs(List.of(responseFile));
             }
         }
         return responseFilenames;
@@ -678,10 +678,21 @@ public abstract class AbstractArmBatchProcessResponseFiles implements ArmRespons
                 if (jsonPath.toFile().exists()) {
                     logResponseFileContents(jsonPath);
                     ArmResponseInvalidLineRecord armResponseInvalidLineRecord = objectMapper.readValue(jsonPath.toFile(), ArmResponseInvalidLineRecord.class);
-                    UploadNewFileRecord uploadNewFileRecord = readInputJson(armResponseInvalidLineRecord.getInput());
+                    String input = armResponseInvalidLineRecord.getInput();
+                    UploadNewFileRecord uploadNewFileRecord = readInputJson(input);
                     if (nonNull(uploadNewFileRecord)) {
                         armBatchResponses.addResponseBatchData(Integer.valueOf(uploadNewFileRecord.getRelationId()),
                                                                armResponseInvalidLineRecord, invalidLineFileFilenameProcessor);
+                    } else {
+                        log.warn("Failed to obtain relation id from invalid line record {}, trying to parse the file anyway", input);
+                        Integer eodId = ArmResponseFilesUtil.getRelationIdFromArmResponseFilesInputField(input);
+                        if (nonNull(eodId)) {
+                            armResponseInvalidLineRecord = new ArmResponseInvalidLineRecord();
+                            armResponseInvalidLineRecord.setRelationId(eodId.toString());
+                            armBatchResponses.addResponseBatchData(eodId, armResponseInvalidLineRecord, invalidLineFileFilenameProcessor);
+                        } else {
+                            log.warn("Failed to obtain EOD id (relation id) from invalid line record {}", input);
+                        }
                     }
                 } else {
                     log.warn("Failed to write invalid line file to temp workspace {}", invalidLineFileFilenameProcessor.getInvalidLineFileFilenameAndPath());
