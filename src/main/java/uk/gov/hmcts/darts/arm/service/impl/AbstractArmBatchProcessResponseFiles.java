@@ -796,10 +796,9 @@ public abstract class AbstractArmBatchProcessResponseFiles implements ArmRespons
     }
 
     private List<Boolean> deleteResponseBlobs(List<String> responseBlobsToBeDeleted) {
-        List<Boolean> deletedResponseBlobStatuses = responseBlobsToBeDeleted.stream()
+        return responseBlobsToBeDeleted.stream()
             .map(armDataManagementApi::deleteBlobData)
             .toList();
-        return deletedResponseBlobStatuses;
     }
 
     private static List<String> getResponseBlobsToBeDeleted(ArmResponseBatchData armResponseBatchData) {
@@ -815,11 +814,6 @@ public abstract class AbstractArmBatchProcessResponseFiles implements ArmRespons
                 processor -> responseBlobsToBeDeleted.add(processor.getInvalidLineFileFilenameAndPath()));
         }
         return responseBlobsToBeDeleted;
-    }
-
-
-    private String getContinuationToken() {
-        return null;
     }
 
     private ExternalObjectDirectoryEntity getExternalObjectDirectoryEntity(Integer eodId) {
