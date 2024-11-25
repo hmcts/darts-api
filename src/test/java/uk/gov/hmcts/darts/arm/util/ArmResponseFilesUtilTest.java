@@ -18,34 +18,34 @@ class ArmResponseFilesUtilTest {
 
     @Test
     void getPrefix_shouldReturnCorrectPrefix() {
-        ExternalObjectDirectoryEntity entity = new ExternalObjectDirectoryEntity();
-        entity.setId(1);
-        entity.setTransferAttempts(2);
+        ExternalObjectDirectoryEntity externalObjectDirectoryEntity = new ExternalObjectDirectoryEntity();
+        externalObjectDirectoryEntity.setId(1);
+        externalObjectDirectoryEntity.setTransferAttempts(2);
         MediaEntity media = new MediaEntity();
         media.setId(3);
-        entity.setMedia(media);
+        externalObjectDirectoryEntity.setMedia(media);
 
         String expectedPrefix = "1_3_2";
-        String actualPrefix = ArmResponseFilesUtil.getPrefix(entity);
+        String actualPrefix = ArmResponseFilesUtil.getPrefix(externalObjectDirectoryEntity);
         assertEquals(expectedPrefix, actualPrefix);
     }
 
     @Test
     void getObjectTypeId_shouldReturnCorrectObjectTypeId() {
-        ExternalObjectDirectoryEntity entity = new ExternalObjectDirectoryEntity();
+        ExternalObjectDirectoryEntity externalObjectDirectoryEntity = new ExternalObjectDirectoryEntity();
         MediaEntity media = new MediaEntity();
         media.setId(3);
-        entity.setMedia(media);
+        externalObjectDirectoryEntity.setMedia(media);
 
         String expectedObjectTypeId = "3";
-        String actualObjectTypeId = ArmResponseFilesUtil.getObjectTypeId(entity);
+        String actualObjectTypeId = ArmResponseFilesUtil.getObjectTypeId(externalObjectDirectoryEntity);
         assertEquals(expectedObjectTypeId, actualObjectTypeId);
     }
 
     @Test
     void getRelationIdFromArmResponseFilesInputField_shouldReturnCorrectRelationId() {
         String input = "{\"relation_id\":\"300923629\"}";
-        Integer expectedRelationId = 300923629;
+        Integer expectedRelationId = 300_923_629;
         Integer actualRelationId = ArmResponseFilesUtil.getRelationIdFromArmResponseFilesInputField(input);
         assertEquals(expectedRelationId, actualRelationId);
     }
@@ -53,7 +53,7 @@ class ArmResponseFilesUtilTest {
     @Test
     void getRelationIdFromArmResponseFilesInputField_shouldReturnCorrectRelationIdWithInvalidCharsBetweenColon() {
         String input = "{\"relation_id\"^%$%:8978\"300923629\"}";
-        Integer expectedRelationId = 300923629;
+        Integer expectedRelationId = 300_923_629;
         Integer actualRelationId = ArmResponseFilesUtil.getRelationIdFromArmResponseFilesInputField(input);
         assertEquals(expectedRelationId, actualRelationId);
     }
@@ -69,7 +69,7 @@ class ArmResponseFilesUtilTest {
     void getRelationIdFromArmResponseFilesInputField_shouldReturnValueWithMultipleMatches() {
         String input = "{@-@\"operation\":\"create_record\",\"relation_id\":\"300830603\",\"record_metadata\":{\"record_class\":\"A360TEST\"";
         Integer actualRelationId = ArmResponseFilesUtil.getRelationIdFromArmResponseFilesInputField(input);
-        assertEquals(300830603, actualRelationId);
+        assertEquals(300_830_603, actualRelationId);
     }
 
     @Test
