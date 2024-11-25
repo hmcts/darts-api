@@ -328,7 +328,8 @@ abstract class AbstractArmBatchProcessResponseFilesIntTest extends IntegrationBa
         assertEquals(2, foundMedia4.getTransferAttempts());
         assertTrue(foundMedia4.isResponseCleaned());
         assertEquals(
-            "Operation: create_record - PS.20023:INVALID_PARAMETERS:Invalid line: invalid json; Operation: upload_new_file - PS.20042:INVALID_RELATION_ID:No create_record operation with specified relation_id in the same input file.; ",
+            "Operation: create_record - PS.20023:INVALID_PARAMETERS:Invalid line: invalid json; "
+                + "Operation: upload_new_file - PS.20042:INVALID_RELATION_ID:No create_record operation with specified relation_id in the same input file.; ",
             foundMedia4.getErrorCode());
 
         List<ExternalObjectDirectoryEntity> foundMediaList5 = dartsDatabase.getExternalObjectDirectoryRepository()
