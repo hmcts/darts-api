@@ -188,7 +188,7 @@ paths:
         content:
           application/json:
             schema:
-                $ref: '#/components/schemas/AddAudioMetadataRequestWithStorageGUID'
+              $ref: '#/components/schemas/AddAudioMetadataRequestWithStorageGUID'
       responses:
         200:
           description: Audio metadata accepted
@@ -584,6 +584,8 @@ components:
           $ref: '#/components/schemas/Hidden'
         is_deleted:
           $ref: '#/components/schemas/Deleted'
+        is_current:
+          $ref: '#/components/schemas/IsCurrent'
         admin_action:
           $ref: '#/components/schemas/AdminActionResponse'
         version:
@@ -1013,6 +1015,9 @@ components:
     LastModifiedAt:
       type: string
       format: date-time
+
+    IsCurrent:
+      type: boolean
 
     AddAudioErrorCode:
       type: string
