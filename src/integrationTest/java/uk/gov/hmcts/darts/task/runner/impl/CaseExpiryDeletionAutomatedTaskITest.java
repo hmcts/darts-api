@@ -73,7 +73,7 @@ class CaseExpiryDeletionAutomatedTaskITest extends PostgresIntegrationBase {
 
     @Test
     @DisplayName("Two cases linked to the same event, one case has passed retention date, the other has not. Event should not be anonymised")
-    void positiveRetentionDatePassedForOneCaseButNotAnotherEventNotAnoymised() {
+    void retentionDatePassedForOneCaseButNotAnotherEventNotAnoymised() {
         CourtCaseEntity courtCase1 = createCase(-1, CaseRetentionStatus.COMPLETE);
         CourtCaseEntity courtCase2 = createCase(-1, CaseRetentionStatus.PENDING);
 
@@ -89,7 +89,7 @@ class CaseExpiryDeletionAutomatedTaskITest extends PostgresIntegrationBase {
 
     @Test
     @DisplayName("Two cases linked to the same event, both cases have passed retention date. Event should be anonymised")
-    void positiveRetentionDatePassedForBothCaseLinkedEventsAnoymised() {
+    void retentionDatePassedForBothCaseLinkedEventsAnoymised() {
         CourtCaseEntity courtCase1 = createCase(-1, CaseRetentionStatus.COMPLETE);
         CourtCaseEntity courtCase2 = createCase(-1, CaseRetentionStatus.COMPLETE);
 

@@ -1,5 +1,6 @@
 package uk.gov.hmcts.darts.common.service.impl;
 
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -87,7 +88,8 @@ class DataAnonymisationServiceImplTest {
 
 
     @Test
-    void positiveEventEntityAnonymiseNotUpdatedAsNotAllCasesExpiredAndOnlyAnonymiseIfAllCasesExpiredIsTrue() {
+    @DisplayName("Event should not be anonymised if one or more assocaited cases are not anonymised")
+    void eventEntityAnonymiseNotUpdatedAsNotAllCasesExpiredAndOnlyAnonymiseIfAllCasesExpiredIsTrue() {
         EventEntity eventEntity = new EventEntity();
         eventEntity.setEventText("event text");
 
@@ -117,7 +119,8 @@ class DataAnonymisationServiceImplTest {
     }
 
     @Test
-    void positiveEventEntityAnonymiseUpdatedAsNotAllCasesExpiredAndOnlyAnonymiseIfAllCasesExpiredIsFalse() {
+    @DisplayName("Event should be anonymised if one or more assocaited cases are not anonymised and the onlyAnonymiseIfAllCasesExpired flag is false")
+    void eventEntityAnonymiseUpdatedAsNotAllCasesExpiredAndOnlyAnonymiseIfAllCasesExpiredIsFalse() {
         setupOffsetDateTime();
         EventEntity eventEntity = new EventEntity();
         eventEntity.setEventText("event text");
@@ -131,7 +134,8 @@ class DataAnonymisationServiceImplTest {
     }
 
     @Test
-    void positiveEventEntityNotUpdatedAsAlreadyAnonymised() {
+    @DisplayName("Event should not be anonymised again if the event is already anonymised")
+    void eventEntityNotUpdatedAsAlreadyAnonymised() {
         EventEntity eventEntity = new EventEntity();
         eventEntity.setEventText("event text");
         eventEntity.setDataAnonymised(true);
