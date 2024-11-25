@@ -286,7 +286,7 @@ public abstract class AbstractArmBatchProcessResponseFiles implements ArmRespons
         armBatchResponses.getArmBatchResponseMap().values().forEach(
             armResponseBatchData -> {
                 //If there is only 1 invalid line file (invalid line processor is added at the same time as the invalid line file so only 1 needs to be checked)
-                //and either a create record or upload file, process the files
+                //and either a "create_record" or "upload_new_file", process the files
                 if ((CollectionUtils.isNotEmpty(armResponseBatchData.getInvalidLineFileFilenameProcessors())
                     && (armResponseBatchData.getInvalidLineFileFilenameProcessors().size() == 1))
                     && (nonNull(armResponseBatchData.getCreateRecordFilenameProcessor())
@@ -408,7 +408,7 @@ public abstract class AbstractArmBatchProcessResponseFiles implements ArmRespons
 
     private String getOperation(ArmResponseInvalidLineRecord record) {
         UploadNewFileRecord uploadRecord = readInputJson(record.getInput());
-        if (uploadRecord != null) {
+        if (nonNull(uploadRecord)) {
             return uploadRecord.getOperation();
         }
         String operation = getOperationFromArmResponseFilesInputField(record.getInput());

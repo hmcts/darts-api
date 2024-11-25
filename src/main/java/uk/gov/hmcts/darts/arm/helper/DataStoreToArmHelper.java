@@ -271,7 +271,7 @@ public class DataStoreToArmHelper {
 
 
     public boolean shouldAddEntryToManifestFile(ArmBatchItem batchItem) {
-        return equalsAnyStatus(batchItem.getPreviousStatus(), EodHelper.failedArmManifestFileStatus(), EodHelper.failedArmResponseManifestFileStatus());
+        return equalsAnyStatus(batchItem.getPreviousStatus(), EodHelper.failedArmManifestFileStatus(), EodHelper.armResponseManifestFailedStatus());
     }
 
     public void writeManifestFile(ArmBatchItems batchItems, File archiveRecordsFile) {

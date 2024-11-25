@@ -47,7 +47,7 @@ public class ArmResponseFilesUtil {
             String relationId = findFirstPatternMatch("\"relation_id\".*?:.*?\"([^\"]+)\"", input);
             return Integer.parseInt(relationId);
         } catch (Exception e) {
-            log.error("Error: {}", e.getMessage());
+            log.error("Unable to convert input relation id '{}' to EOD id: {}", input, e.getMessage());
         }
         return null;
     }
