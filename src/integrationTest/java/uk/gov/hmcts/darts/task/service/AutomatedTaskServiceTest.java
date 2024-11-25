@@ -18,6 +18,7 @@ import org.springframework.scheduling.config.Task;
 import org.springframework.scheduling.config.TriggerTask;
 import org.springframework.scheduling.support.CronExpression;
 import uk.gov.hmcts.darts.arm.service.ArmRetentionEventDateProcessor;
+import uk.gov.hmcts.darts.arm.service.ArmRpoPollService;
 import uk.gov.hmcts.darts.arm.service.impl.ArmBatchProcessResponseFilesImpl;
 import uk.gov.hmcts.darts.arm.service.impl.UnstructuredToArmBatchProcessorImpl;
 import uk.gov.hmcts.darts.audio.deleter.impl.inbound.ExternalInboundDataStoreDeleter;
@@ -44,6 +45,7 @@ import uk.gov.hmcts.darts.retention.service.ApplyRetentionCaseAssociatedObjectsP
 import uk.gov.hmcts.darts.task.api.AutomatedTaskName;
 import uk.gov.hmcts.darts.task.config.ApplyRetentionCaseAssociatedObjectsAutomatedTaskConfig;
 import uk.gov.hmcts.darts.task.config.ArmRetentionEventDateCalculatorAutomatedTaskConfig;
+import uk.gov.hmcts.darts.task.config.ArmRpoPollAutomatedTaskConfig;
 import uk.gov.hmcts.darts.task.config.CloseOldCasesAutomatedTaskConfig;
 import uk.gov.hmcts.darts.task.config.CloseUnfinishedTranscriptionsAutomatedTaskConfig;
 import uk.gov.hmcts.darts.task.config.DailyListAutomatedTaskConfig;
@@ -63,6 +65,7 @@ import uk.gov.hmcts.darts.task.runner.AutomatedTask;
 import uk.gov.hmcts.darts.task.runner.impl.AbstractLockableAutomatedTask;
 import uk.gov.hmcts.darts.task.runner.impl.ApplyRetentionCaseAssociatedObjectsAutomatedTask;
 import uk.gov.hmcts.darts.task.runner.impl.ArmRetentionEventDateCalculatorAutomatedTask;
+import uk.gov.hmcts.darts.task.runner.impl.ArmRpoPollingAutomatedTask;
 import uk.gov.hmcts.darts.task.runner.impl.CloseOldCasesAutomatedTask;
 import uk.gov.hmcts.darts.task.runner.impl.CloseUnfinishedTranscriptionsAutomatedTask;
 import uk.gov.hmcts.darts.task.runner.impl.DailyListAutomatedTask;
@@ -151,7 +154,10 @@ class AutomatedTaskServiceTest extends IntegrationBase {
     private LockService lockService;
 
     @Autowired
+    private ArmRpoPollService armRpoPollService;
+    @Autowired
     UnstructuredToArmBatchProcessorImpl unstructuredToArmBatchProcessor;
+
     @MockBean
     private UserIdentity userIdentity;
     private UserAccountEntity testUser;
@@ -1118,6 +1124,37 @@ class AutomatedTaskServiceTest extends IntegrationBase {
         assertTrue(taskCancelled);
 
         automatedTaskService.reloadTaskByName(AutomatedTaskName.UNSTRUCTURED_TRANSCRIPTION_ANNOTATION_DELETER_TASK_NAME.getTaskName());
+    }
+
+    @Test
+    void givenConfiguredTasksUpdateCronAndResetCronForArmRpoPollAutomatedTask() {
+        AutomatedTask automatedTask =
+            new ArmRpoPollingAutomatedTask(
+                automatedTaskRepository,
+                mock(ArmRpoPollAutomatedTaskConfig.class),
+                armRpoPollService,
+                logApi,
+                lockService
+            );
+        Optional<AutomatedTaskEntity> originalAutomatedTaskEntity =
+            automatedTaskService.getAutomatedTaskEntityByTaskName(automatedTask.getTaskName());
+        log.info("TEST - Original task {} cron expression {}", automatedTask.getTaskName(), originalAutomatedTaskEntity.get().getCronExpression());
+
+        automatedTaskService.updateAutomatedTaskCronExpression(automatedTask.getTaskName(), "*/9 * * * * *");
+
+        Set<ScheduledTask> scheduledTasks = scheduledTaskHolder.getScheduledTasks();
+        displayTasks(scheduledTasks);
+
+        Optional<AutomatedTaskEntity> updatedAutomatedTaskEntity =
+            automatedTaskService.getAutomatedTaskEntityByTaskName(automatedTask.getTaskName());
+        log.info("TEST - Updated task {} cron expression {}", automatedTask.getTaskName(),
+                 updatedAutomatedTaskEntity.get().getCronExpression()
+        );
+        assertEquals(originalAutomatedTaskEntity.get().getTaskName(), updatedAutomatedTaskEntity.get().getTaskName());
+        assertNotEquals(originalAutomatedTaskEntity.get().getCronExpression(), updatedAutomatedTaskEntity.get().getCronExpression());
+
+        automatedTaskService.updateAutomatedTaskCronExpression(
+            automatedTask.getTaskName(), originalAutomatedTaskEntity.get().getCronExpression());
     }
 
     @Test

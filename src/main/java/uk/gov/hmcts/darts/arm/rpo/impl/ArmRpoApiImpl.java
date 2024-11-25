@@ -28,6 +28,7 @@ import uk.gov.hmcts.darts.arm.client.model.rpo.SaveBackgroundSearchRequest;
 import uk.gov.hmcts.darts.arm.client.model.rpo.SaveBackgroundSearchResponse;
 import uk.gov.hmcts.darts.arm.client.model.rpo.StorageAccountRequest;
 import uk.gov.hmcts.darts.arm.client.model.rpo.StorageAccountResponse;
+import uk.gov.hmcts.darts.arm.component.ArmRpoDownloadProduction;
 import uk.gov.hmcts.darts.arm.component.impl.AddAsyncSearchRequestGenerator;
 import uk.gov.hmcts.darts.arm.component.impl.GetExtendedProductionsByMatterRequestGenerator;
 import uk.gov.hmcts.darts.arm.component.impl.GetExtendedSearchesByMatterRequestGenerator;
@@ -71,6 +72,7 @@ public class ArmRpoApiImpl implements ArmRpoApi {
     private final ArmApiConfigurationProperties armApiConfigurationProperties;
     private final ArmAutomatedTaskRepository armAutomatedTaskRepository;
     private final CurrentTimeHelper currentTimeHelper;
+    private final ArmRpoDownloadProduction armRpoDownloadProduction;
 
     @Override
     public void getRecordManagementMatter(String bearerToken, Integer executionId, UserAccountEntity userAccount) {
@@ -366,6 +368,7 @@ public class ArmRpoApiImpl implements ArmRpoApi {
 
     @Override
     public void getExtendedSearchesByMatter(String bearerToken, Integer executionId, UserAccountEntity userAccount) {
+        log.debug("getExtendedSearchesByMatter called with executionId: {}", executionId);
         var armRpoExecutionDetailEntity = armRpoService.getArmRpoExecutionDetailEntity(executionId);
         armRpoService.updateArmRpoStateAndStatus(armRpoExecutionDetailEntity, ArmRpoHelper.getExtendedSearchesByMatterRpoState(),
                                                  ArmRpoHelper.inProgressRpoStatus(), userAccount);
@@ -406,7 +409,8 @@ public class ArmRpoApiImpl implements ArmRpoApi {
 
     @Override
     public boolean createExportBasedOnSearchResultsTable(String bearerToken, Integer executionId,
-                                                         List<MasterIndexFieldByRecordClassSchemaResponse> headerColumns, UserAccountEntity userAccount) {
+                                                         List<MasterIndexFieldByRecordClassSchema> headerColumns, UserAccountEntity userAccount) {
+        log.debug("createExportBasedOnSearchResultsTable called with executionId: {}", executionId);
         var armRpoExecutionDetailEntity = armRpoService.getArmRpoExecutionDetailEntity(executionId);
         armRpoService.updateArmRpoStateAndStatus(armRpoExecutionDetailEntity, ArmRpoHelper.createExportBasedOnSearchResultsTableRpoState(),
                                                  ArmRpoHelper.inProgressRpoStatus(), userAccount);
@@ -468,6 +472,7 @@ public class ArmRpoApiImpl implements ArmRpoApi {
 
     @Override
     public void getExtendedProductionsByMatter(String bearerToken, Integer executionId, UserAccountEntity userAccount) {
+        log.debug("getExtendedProductionsByMatter called with executionId: {}", executionId);
         var armRpoExecutionDetailEntity = armRpoService.getArmRpoExecutionDetailEntity(executionId);
         armRpoService.updateArmRpoStateAndStatus(armRpoExecutionDetailEntity, ArmRpoHelper.getExtendedProductionsByMatterRpoState(),
                                                  ArmRpoHelper.inProgressRpoStatus(), userAccount);
@@ -496,7 +501,7 @@ public class ArmRpoApiImpl implements ArmRpoApi {
             || CollectionUtils.isEmpty(extendedProductionsByMatterResponse.getProductions())
             || isNull(extendedProductionsByMatterResponse.getProductions().getFirst())
             || StringUtils.isBlank(extendedProductionsByMatterResponse.getProductions().getFirst().getProductionId())) {
-            throw handleFailureAndCreateException(errorMessage.append("ProductionId is missing from ARM Rpo rsponse").toString(),
+            throw handleFailureAndCreateException(errorMessage.append("ProductionId is missing from ARM RPO response").toString(),
                                                   armRpoExecutionDetailEntity, userAccount);
         }
 
@@ -506,6 +511,7 @@ public class ArmRpoApiImpl implements ArmRpoApi {
 
     @Override
     public List<String> getProductionOutputFiles(String bearerToken, Integer executionId, UserAccountEntity userAccount) {
+        log.debug("getProductionOutputFiles called with executionId: {}", executionId);
         final ArmRpoExecutionDetailEntity executionDetail = armRpoService.getArmRpoExecutionDetailEntity(executionId);
         armRpoService.updateArmRpoStateAndStatus(executionDetail,
                                                  ArmRpoHelper.getProductionOutputFilesRpoState(),
@@ -562,6 +568,7 @@ public class ArmRpoApiImpl implements ArmRpoApi {
     @Override
     public InputStream downloadProduction(String bearerToken, Integer executionId, String productionExportFileId,
                                           UserAccountEntity userAccount) throws IOException {
+        log.debug("downloadProduction called with executionId: {} and productionExportFileId: {}", executionId, productionExportFileId);
         var armRpoExecutionDetailEntity = armRpoService.getArmRpoExecutionDetailEntity(executionId);
         armRpoService.updateArmRpoStateAndStatus(armRpoExecutionDetailEntity, ArmRpoHelper.downloadProductionRpoState(),
                                                  ArmRpoHelper.inProgressRpoStatus(), userAccount);
@@ -570,7 +577,7 @@ public class ArmRpoApiImpl implements ArmRpoApi {
         StringBuilder errorMessage = new StringBuilder("Failure during download production: ");
 
         try {
-            response = armRpoClient.downloadProduction(bearerToken, productionExportFileId);
+            response = armRpoDownloadProduction.downloadProduction(bearerToken, executionId, productionExportFileId);
         } catch (FeignException e) {
             // this ensures the full error body containing the ARM error detail is logged rather than a truncated version
             log.error(errorMessage.append("Error during ARM RPO download production id: ").append(productionExportFileId)
@@ -579,10 +586,10 @@ public class ArmRpoApiImpl implements ArmRpoApi {
         }
 
         // on any error occurring return a download failure
-        if (!HttpStatus.valueOf(response.status()).is2xxSuccessful()) {
+        if (isNull(response) || isNull(response.status()) || !HttpStatus.valueOf(response.status()).is2xxSuccessful()) {
             errorMessage.append("Failed ARM RPO download production with id: ").append(productionExportFileId)
                 .append(" response ").append(response);
-            log.error(response.toString());
+            log.error(errorMessage.toString());
             throw handleFailureAndCreateException(errorMessage.toString(), armRpoExecutionDetailEntity, userAccount);
         }
 
@@ -593,6 +600,7 @@ public class ArmRpoApiImpl implements ArmRpoApi {
 
     @Override
     public void removeProduction(String bearerToken, Integer executionId, UserAccountEntity userAccount) {
+        log.debug("removeProduction called with executionId: {}", executionId);
         var armRpoExecutionDetailEntity = armRpoService.getArmRpoExecutionDetailEntity(executionId);
         armRpoService.updateArmRpoStateAndStatus(armRpoExecutionDetailEntity, ArmRpoHelper.removeProductionRpoState(),
                                                  ArmRpoHelper.inProgressRpoStatus(), userAccount);
@@ -700,7 +708,7 @@ public class ArmRpoApiImpl implements ArmRpoApi {
     }
 
     private CreateExportBasedOnSearchResultsTableRequest createRequestForCreateExportBasedOnSearchResultsTable(
-        List<MasterIndexFieldByRecordClassSchemaResponse> headerColumns, String searchId, int searchItemsCount, String productionName,
+        List<MasterIndexFieldByRecordClassSchema> headerColumns, String searchId, int searchItemsCount, String productionName,
         String storageAccountId) {
 
         return CreateExportBasedOnSearchResultsTableRequest.builder()
@@ -728,21 +736,19 @@ public class ArmRpoApiImpl implements ArmRpoApi {
     }
 
     private List<CreateExportBasedOnSearchResultsTableRequest.HeaderColumn> createHeaderColumnsFromMasterIndexFieldByRecordClassSchemaResponse(
-        List<MasterIndexFieldByRecordClassSchemaResponse> masterIndexFieldByRecordClassSchemaResponses) {
+        List<MasterIndexFieldByRecordClassSchema> masterIndexFieldByRecordClassSchemas) {
 
         List<CreateExportBasedOnSearchResultsTableRequest.HeaderColumn> headerColumnList = new ArrayList<>();
-        for (MasterIndexFieldByRecordClassSchemaResponse response : masterIndexFieldByRecordClassSchemaResponses) {
-            for (MasterIndexFieldByRecordClassSchemaResponse.MasterIndexField masterIndexField : response.getMasterIndexFields()) {
-                headerColumnList.add(createHeaderColumn(masterIndexField));
-            }
+        for (MasterIndexFieldByRecordClassSchema masterIndexField : masterIndexFieldByRecordClassSchemas) {
+            headerColumnList.add(createHeaderColumn(masterIndexField));
         }
         return headerColumnList;
     }
 
     private CreateExportBasedOnSearchResultsTableRequest.HeaderColumn createHeaderColumn(
-        MasterIndexFieldByRecordClassSchemaResponse.MasterIndexField masterIndexField) {
+        MasterIndexFieldByRecordClassSchema masterIndexField) {
         return CreateExportBasedOnSearchResultsTableRequest.HeaderColumn.builder()
-            .masterIndexField(masterIndexField.getMasterIndexFieldId())
+            .masterIndexField(masterIndexField.getMasterIndexField())
             .displayName(masterIndexField.getDisplayName())
             .propertyName(masterIndexField.getPropertyName())
             .propertyType(masterIndexField.getPropertyType())

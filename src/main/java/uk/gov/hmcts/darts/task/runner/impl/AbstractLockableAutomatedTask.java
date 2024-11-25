@@ -1,5 +1,6 @@
 package uk.gov.hmcts.darts.task.runner.impl;
 
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import net.javacrumbs.shedlock.core.LockAssert;
 import net.javacrumbs.shedlock.core.LockConfiguration;
@@ -52,6 +53,8 @@ public abstract class AbstractLockableAutomatedTask implements AutomatedTask, Au
     private final LockService lockService;
 
     private ThreadLocal<UUID> executionId;
+    @Getter
+    private boolean isManualRun;
 
     protected AbstractLockableAutomatedTask(AutomatedTaskRepository automatedTaskRepository,
                                             AbstractAutomatedTaskConfig abstractAutomatedTaskConfig,
@@ -72,6 +75,7 @@ public abstract class AbstractLockableAutomatedTask implements AutomatedTask, Au
 
     @Override
     public void run(boolean isManualRun) {
+        this.isManualRun = isManualRun;
         executionId = ThreadLocal.withInitial(UUID::randomUUID);
         preRunTask();
         try {
