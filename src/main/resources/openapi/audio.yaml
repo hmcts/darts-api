@@ -652,6 +652,8 @@ components:
           $ref: '#/components/schemas/EndAt'
         is_hidden:
           type: boolean
+        is_current:
+          type: boolean
         case:
           $ref: '#/components/schemas/GetAdminMediaResponseCase'
         hearing:
