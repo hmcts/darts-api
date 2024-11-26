@@ -38,18 +38,12 @@ public class ArmRpoPollServiceImpl implements ArmRpoPollService {
 
     private List<File> tempProductionFiles;
 
-    private final List<Integer> allowableFailedStates = Collections.unmodifiableList(List.of(
-        ArmRpoHelper.getExtendedSearchesByMatterRpoState().getId(),
-        ArmRpoHelper.getMasterIndexFieldByRecordClassSchemaSecondaryRpoState().getId(),
-        ArmRpoHelper.createExportBasedOnSearchResultsTableRpoState().getId(),
-        ArmRpoHelper.getExtendedProductionsByMatterRpoState().getId(),
-        ArmRpoHelper.getProductionOutputFilesRpoState().getId(),
-        ArmRpoHelper.downloadProductionRpoState().getId(),
-        ArmRpoHelper.removeProductionRpoState().getId()
-    ));
+    private List<Integer> allowableFailedStates = null;
+
 
     @Override
     public void pollArmRpo(boolean isManualRun) {
+        setupFailedStatuses();
         tempProductionFiles = new ArrayList<>();
         try {
             var armRpoExecutionDetailEntity = getArmRpoExecutionDetailEntity(isManualRun);
@@ -116,6 +110,20 @@ public class ArmRpoPollServiceImpl implements ArmRpoPollService {
             } catch (Exception e) {
                 log.error("Error while cleaning up ARM RPO polling service temp files", e);
             }
+        }
+    }
+
+    private void setupFailedStatuses() {
+        if (CollectionUtils.isEmpty(allowableFailedStates)) {
+            allowableFailedStates = Collections.unmodifiableList(List.of(
+                ArmRpoHelper.getExtendedSearchesByMatterRpoState().getId(),
+                ArmRpoHelper.getMasterIndexFieldByRecordClassSchemaSecondaryRpoState().getId(),
+                ArmRpoHelper.createExportBasedOnSearchResultsTableRpoState().getId(),
+                ArmRpoHelper.getExtendedProductionsByMatterRpoState().getId(),
+                ArmRpoHelper.getProductionOutputFilesRpoState().getId(),
+                ArmRpoHelper.downloadProductionRpoState().getId(),
+                ArmRpoHelper.removeProductionRpoState().getId()
+            ));
         }
     }
 
