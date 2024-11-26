@@ -357,7 +357,7 @@ class DataStoreToArmHelperIntTest extends IntegrationBase {
     }
 
     @Test
-    void updateEodByIdAndStatusForARMPull() throws InvocationTargetException, NoSuchMethodException, IllegalAccessException {
+    void updateEodByIdAndStatusForArmPull() throws InvocationTargetException, NoSuchMethodException, IllegalAccessException {
         // given
         OffsetDateTime now = currentTimeHelper.currentOffsetDateTime();
         var user = externalObjectDirectoryStub.getUserAccountStub().getIntegrationTestUserAccountEntity();
