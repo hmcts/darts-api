@@ -42,11 +42,15 @@ public class PostgresIntegrationBase {
      */
     private static final int SERVER_MAX_CONNECTIONS = 50;
 
-    private static final PostgreSQLContainer<?> POSTGRES = new PostgreSQLContainer<>(
-        "postgres:16-alpine"
-    ).withDatabaseName("darts")
-        .withUsername("darts")
-        .withPassword("darts");
+    private static final PostgreSQLContainer<?> POSTGRES;
+
+    static {
+        POSTGRES = new PostgreSQLContainer<>(
+            "postgres:16-alpine"
+        ).withDatabaseName("darts")
+            .withUsername("darts")
+            .withPassword("darts");
+    }
 
     @DynamicPropertySource
     static void configureProperties(DynamicPropertyRegistry registry) {
