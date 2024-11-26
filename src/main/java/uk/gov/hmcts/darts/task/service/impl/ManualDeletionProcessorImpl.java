@@ -80,7 +80,7 @@ public class ManualDeletionProcessorImpl implements ManualDeletionProcessor {
         mediaRepository.save(mediaEntity);
         processArmEods(mediaEntity.getDeletedTs(),
                        objectAdminAction,
-                       externalObjectDirectoryRepository.findByMediaAndExternalLocationTypeAndObjectStatus(mediaEntity,
+                       externalObjectDirectoryRepository.findByMediaAndExternalLocationTypeAndStatus(mediaEntity,
                                                                                                            EodHelper.armLocation(),
                                                                                                            EodHelper.storedStatus()));
         logApi.mediaDeleted(mediaEntity.getId());
@@ -101,7 +101,7 @@ public class ManualDeletionProcessorImpl implements ManualDeletionProcessor {
         transcriptionDocumentRepository.save(transcription);
         processArmEods(transcription.getDeletedTs(),
                        objectAdminAction,
-                       externalObjectDirectoryRepository.findByTranscriptionDocumentEntityAndExternalLocationTypeAndObjectStatus(transcription,
+                       externalObjectDirectoryRepository.findByTranscriptionDocumentEntityAndExternalLocationTypeAndStatus(transcription,
                                                                                                                                  EodHelper.armLocation(),
                                                                                                                                  EodHelper.storedStatus()));
         logApi.transcriptionDeleted(transcription.getId());

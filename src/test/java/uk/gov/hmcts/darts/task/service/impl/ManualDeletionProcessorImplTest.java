@@ -121,8 +121,8 @@ class ManualDeletionProcessorImplTest {
 
         List<ExternalObjectDirectoryEntity> mediaEods = List.of(mock(ExternalObjectDirectoryEntity.class));
         List<ExternalObjectDirectoryEntity> transcriptionEods = List.of(mock(ExternalObjectDirectoryEntity.class));
-        doReturn(mediaEods).when(externalObjectDirectoryRepository).findByMediaAndExternalLocationTypeAndObjectStatus(any(), any(), any());
-        doReturn(transcriptionEods).when(externalObjectDirectoryRepository).findByTranscriptionDocumentEntityAndExternalLocationTypeAndObjectStatus(any(),
+        doReturn(mediaEods).when(externalObjectDirectoryRepository).findByMediaAndExternalLocationTypeAndStatus(any(), any(), any());
+        doReturn(transcriptionEods).when(externalObjectDirectoryRepository).findByTranscriptionDocumentEntityAndExternalLocationTypeAndStatus(any(),
                                                                                                                                                     any(),
                                                                                                                                                     any());
         manualDeletionProcessor.process(123);
@@ -148,10 +148,10 @@ class ManualDeletionProcessorImplTest {
         verify(mediaAction.getMedia()).markAsDeleted(userAccount);
         verify(transcriptionAction.getTranscriptionDocument()).markAsDeleted(userAccount);
 
-        verify(externalObjectDirectoryRepository).findByTranscriptionDocumentEntityAndExternalLocationTypeAndObjectStatus(transcriptionDocument,
+        verify(externalObjectDirectoryRepository).findByTranscriptionDocumentEntityAndExternalLocationTypeAndStatus(transcriptionDocument,
                                                                                                                           armExternalLocationType,
                                                                                                                           storedStatus);
-        verify(externalObjectDirectoryRepository).findByMediaAndExternalLocationTypeAndObjectStatus(media, armExternalLocationType, storedStatus);
+        verify(externalObjectDirectoryRepository).findByMediaAndExternalLocationTypeAndStatus(media, armExternalLocationType, storedStatus);
         verify(manualDeletionProcessor).processArmEods(media.getDeletedTs(), mediaAction, mediaEods);
         verify(manualDeletionProcessor).processArmEods(transcriptionDocument.getDeletedTs(), transcriptionAction, transcriptionEods);
     }

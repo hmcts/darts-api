@@ -66,7 +66,7 @@ public interface ExternalObjectDirectoryRepository extends JpaRepository<Externa
                                                                                                  ExternalLocationTypeEntity externalLocationType);
 
 
-    List<ExternalObjectDirectoryEntity> findByTranscriptionDocumentEntityAndExternalLocationTypeAndObjectStatus(
+    List<ExternalObjectDirectoryEntity> findByTranscriptionDocumentEntityAndExternalLocationTypeAndStatus(
         TranscriptionDocumentEntity transcriptionDocument,
         ExternalLocationTypeEntity externalLocationType,
         ObjectRecordStatusEntity status);
@@ -177,7 +177,7 @@ public interface ExternalObjectDirectoryRepository extends JpaRepository<Externa
     List<ExternalObjectDirectoryEntity> findByMediaAndExternalLocationType(MediaEntity media,
                                                                            ExternalLocationTypeEntity externalLocationType);
 
-    List<ExternalObjectDirectoryEntity> findByMediaAndExternalLocationTypeAndObjectStatus(MediaEntity media,
+    List<ExternalObjectDirectoryEntity> findByMediaAndExternalLocationTypeAndStatus(MediaEntity media,
                                                                                           ExternalLocationTypeEntity externalLocationType,
                                                                                           ObjectRecordStatusEntity status);
 
