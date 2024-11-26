@@ -185,7 +185,7 @@ public class AssociatedObjectDataExpiryDeletionAutomatedTask
             .orElse(null);
 
         if (armExternalObjectDirectoryEntity == null) {
-            log.debug("Skipping deletion of {} with id {} as there is no ARM external object directory entity",
+            log.info("Skipping deletion of {} with id {} as there is no ARM external object directory entity",
                       entity.getClass().getSimpleName(),
                       entity.getId());
             return false;
@@ -194,7 +194,7 @@ public class AssociatedObjectDataExpiryDeletionAutomatedTask
         if (armExternalObjectDirectoryEntity.getEventDateTs() == null
             || !armExternalObjectDirectoryEntity.getEventDateTs().toLocalDate().minusYears(eventDateAdjustmentYears)
             .isEqual(entity.getRetainUntilTs().toLocalDate())) {
-            log.debug("Skipping deletion of {} with id {} as the event date minus {} years is not the same as the retention date",
+            log.info("Skipping deletion of {} with id {} as the event date minus {} years is not the same as the retention date",
                       entity.getClass().getSimpleName(),
                       entity.getId(),
                       eventDateAdjustmentYears);
