@@ -36,7 +36,6 @@ import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -126,7 +125,7 @@ class DetsToArmBatchProcessResponseFilesImplTest {
 
         // then
         assertNotNull(result);
-        verify(configuration, times(1)).getDetsManifestFilePrefix();
+        verify(configuration).getDetsManifestFilePrefix();
     }
 
     @Test
@@ -138,8 +137,8 @@ class DetsToArmBatchProcessResponseFilesImplTest {
         detsToArmBatchProcessResponseFilesImpl.preProcessResponseFilesActions(externalObjectDirectoryEntity.getId());
 
         // then
-        verify(osrRepository, times(1)).findByArmEodId(String.valueOf(externalObjectDirectoryEntity.getId()));
-        verify(osrRepository, times(1)).save(objectStateRecordEntity);
+        verify(osrRepository).findByArmEodId(String.valueOf(1));
+        verify(osrRepository).save(objectStateRecordEntity);
     }
 
     @Test
@@ -168,8 +167,8 @@ class DetsToArmBatchProcessResponseFilesImplTest {
                                                                                      checksum);
 
         // then
-        verify(osrRepository, times(1)).findByArmEodId(anyString());
-        verify(osrRepository, times(1)).save(objectStateRecordEntity);
+        verify(osrRepository).findByArmEodId("1");
+        verify(osrRepository).save(objectStateRecordEntity);
     }
 
     @Test
@@ -185,8 +184,8 @@ class DetsToArmBatchProcessResponseFilesImplTest {
             .onUploadFileChecksumValidationFailure(uploadFileRecord, externalObjectDirectoryEntity, "checksum");
 
         // then
-        verify(osrRepository, times(1)).findByArmEodId(anyString());
-        verify(osrRepository, times(1)).save(objectStateRecordEntity);
+        verify(osrRepository).findByArmEodId("1");
+        verify(osrRepository).save(objectStateRecordEntity);
     }
 
     @Test
@@ -200,8 +199,8 @@ class DetsToArmBatchProcessResponseFilesImplTest {
         detsToArmBatchProcessResponseFilesImpl.processUploadFileDataFailure(uploadFileRecord, processor, externalObjectDirectoryEntity);
 
         // then
-        verify(osrRepository, times(1)).findByArmEodId(anyString());
-        verify(osrRepository, times(1)).save(objectStateRecordEntity);
+        verify(osrRepository).findByArmEodId("1");
+        verify(osrRepository).save(objectStateRecordEntity);
     }
 
     @Test
@@ -222,8 +221,8 @@ class DetsToArmBatchProcessResponseFilesImplTest {
         detsToArmBatchProcessResponseFilesImpl.processInvalidLineFileActions(invalidLineRecord, externalObjectDirectoryEntity);
 
         // then
-        verify(osrRepository, times(1)).findByArmEodId(anyString());
-        verify(osrRepository, times(1)).save(objectStateRecordEntity);
+        verify(osrRepository).findByArmEodId("1");
+        verify(osrRepository).save(objectStateRecordEntity);
     }
 
     public ObjectStateRecordEntity createMaxObjectStateRecordEntity(Long uuid, int detsEodId, int armEodId) {

@@ -1,7 +1,6 @@
 package uk.gov.hmcts.darts.arm.util;
 
 import lombok.experimental.UtilityClass;
-import lombok.extern.slf4j.Slf4j;
 import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
 
 import static java.util.Objects.nonNull;
@@ -10,7 +9,6 @@ import static uk.gov.hmcts.darts.arm.util.ArchiveConstants.ArchiveResponseFileAt
 
 @UtilityClass
 @SuppressWarnings({"HideUtilityClassConstructor"})
-@Slf4j
 public class ArmResponseFilesUtil {
 
     public static String generateSuffix(String filenameKey) {
@@ -38,5 +36,5 @@ public class ArmResponseFilesUtil {
         }
         return objectTypeId;
     }
-    
+
 }

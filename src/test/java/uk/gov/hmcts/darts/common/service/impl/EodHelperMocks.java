@@ -42,7 +42,6 @@ import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.STORED;
 /**
  * Helper test class that mocks {@link EodHelper} entities and methods so that they can be used in unit tests.
  */
-@SuppressWarnings("PMD.NcssCount")
 public class EodHelperMocks {
 
     @Mock
@@ -109,22 +108,12 @@ public class EodHelperMocks {
      */
     public final void mockEodHelper() {
         closeable = MockitoAnnotations.openMocks(this);
-
         mockedEodHelper = Mockito.mockStatic(EodHelper.class);
+        setupLocationTypes();
+        setupObjectRecordStatuses();
+    }
 
-        mockedEodHelper.when(EodHelper::inboundLocation).thenReturn(inboundLocation);
-        lenient().when(inboundLocation.getId()).thenReturn(INBOUND.getId());
-        lenient().when(inboundLocation.getDescription()).thenReturn("inbound");
-        mockedEodHelper.when(EodHelper::armLocation).thenReturn(armLocation);
-        lenient().when(armLocation.getId()).thenReturn(ARM.getId());
-        lenient().when(armLocation.getDescription()).thenReturn("arm");
-        mockedEodHelper.when(EodHelper::unstructuredLocation).thenReturn(unstructuredLocation);
-        lenient().when(unstructuredLocation.getId()).thenReturn(UNSTRUCTURED.getId());
-        lenient().when(unstructuredLocation.getDescription()).thenReturn("unstructured");
-        mockedEodHelper.when(EodHelper::detsLocation).thenReturn(detsLocation);
-        lenient().when(detsLocation.getId()).thenReturn(DETS.getId());
-        lenient().when(detsLocation.getDescription()).thenReturn("dets");
-
+    private void setupObjectRecordStatuses() {
         mockedEodHelper.when(EodHelper::storedStatus).thenReturn(storedStatus);
         lenient().when(storedStatus.getId()).thenReturn(STORED.getId());
         lenient().when(storedStatus.getDescription()).thenReturn("Stored");
@@ -170,7 +159,21 @@ public class EodHelperMocks {
         mockedEodHelper.when(EodHelper::armMissingResponseStatus).thenReturn(armMissingResponseStatus);
         lenient().when(armMissingResponseStatus.getId()).thenReturn(ARM_MISSING_RESPONSE.getId());
         lenient().when(armMissingResponseStatus.getDescription()).thenReturn("Arm Missing Response");
+    }
 
+    private void setupLocationTypes() {
+        mockedEodHelper.when(EodHelper::inboundLocation).thenReturn(inboundLocation);
+        lenient().when(inboundLocation.getId()).thenReturn(INBOUND.getId());
+        lenient().when(inboundLocation.getDescription()).thenReturn("inbound");
+        mockedEodHelper.when(EodHelper::armLocation).thenReturn(armLocation);
+        lenient().when(armLocation.getId()).thenReturn(ARM.getId());
+        lenient().when(armLocation.getDescription()).thenReturn("arm");
+        mockedEodHelper.when(EodHelper::unstructuredLocation).thenReturn(unstructuredLocation);
+        lenient().when(unstructuredLocation.getId()).thenReturn(UNSTRUCTURED.getId());
+        lenient().when(unstructuredLocation.getDescription()).thenReturn("unstructured");
+        mockedEodHelper.when(EodHelper::detsLocation).thenReturn(detsLocation);
+        lenient().when(detsLocation.getId()).thenReturn(DETS.getId());
+        lenient().when(detsLocation.getDescription()).thenReturn("dets");
     }
 
     public void givenIsEqualLocationReturns(boolean result) {
