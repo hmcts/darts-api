@@ -21,7 +21,6 @@ import uk.gov.hmcts.darts.common.entity.MediaEntity;
 import uk.gov.hmcts.darts.common.entity.ObjectRecordStatusEntity;
 import uk.gov.hmcts.darts.common.entity.ObjectStateRecordEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
-import uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum;
 import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
 import uk.gov.hmcts.darts.common.util.EodHelper;
 import uk.gov.hmcts.darts.test.common.FileStore;
@@ -340,8 +339,7 @@ class DataStoreToArmHelperIntTest extends IntegrationBase {
         var user = externalObjectDirectoryStub.getUserAccountStub().getIntegrationTestUserAccountEntity();
 
         List<ExternalObjectDirectoryEntity> externalObjectDirectoryEntities
-            = externalObjectDirectoryStub.generateWithStatusAndMediaLocation(
-            ExternalLocationTypeEnum.ARM, ARM_INGESTION, 5, Optional.of(now));
+            = externalObjectDirectoryStub.generateWithStatusAndMediaLocation(ARM, ARM_INGESTION, 5, Optional.of(now));
         List<Integer> eodsIds = externalObjectDirectoryEntities.stream().map(ExternalObjectDirectoryEntity::getId).toList();
 
         // when
@@ -363,8 +361,7 @@ class DataStoreToArmHelperIntTest extends IntegrationBase {
         var user = externalObjectDirectoryStub.getUserAccountStub().getIntegrationTestUserAccountEntity();
 
         List<ExternalObjectDirectoryEntity> externalObjectDirectoryEntities
-            = externalObjectDirectoryStub.generateWithStatusAndMediaLocation(
-            ExternalLocationTypeEnum.ARM, ARM_PROCESSING_RESPONSE_FILES, 5, Optional.of(now));
+            = externalObjectDirectoryStub.generateWithStatusAndMediaLocation(ARM, ARM_PROCESSING_RESPONSE_FILES, 5, Optional.of(now));
         List<Integer> eodsIds = externalObjectDirectoryEntities.stream().map(ExternalObjectDirectoryEntity::getId).toList();
 
         // when
