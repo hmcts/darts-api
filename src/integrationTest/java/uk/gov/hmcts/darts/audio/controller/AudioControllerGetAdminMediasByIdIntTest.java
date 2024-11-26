@@ -127,7 +127,7 @@ class AudioControllerGetAdminMediasByIdIntTest extends IntegrationBase {
 
     @ParameterizedTest
     @EnumSource(value = SecurityRoleEnum.class, names = {"SUPER_USER", "SUPER_ADMIN"}, mode = INCLUDE)
-    void shouldReturnExpectedMediaObjectAndChildrenWithHiddenAndDeletedAndCurrentSetFalse(SecurityRoleEnum role) throws Exception {
+    void shouldReturnExpectedMediaObjectAndChildrenWithHiddenAndCurrentSetFalse(SecurityRoleEnum role) throws Exception {
         // Given
         given.anAuthenticatedUserWithGlobalAccessAndRole(role);
 
@@ -301,10 +301,9 @@ class AudioControllerGetAdminMediasByIdIntTest extends IntegrationBase {
     }
 
     private MediaEntity createAndSaveMediaEntityWithHiddenAndDeletedAndCurrentSetFalse(HearingEntity hearingEntity, UserAccountEntity userAccountEntity) {
-        var mediaEntity = createAndSaveMediaEntity(hearingEntity, userAccountEntity);
+        var mediaEntity = createAndSaveMediaEntity(hearingEntity, userAccountEntity, false);
 
         mediaEntity.setHidden(false);
-        mediaEntity.setDeleted(false);
         mediaEntity.setIsCurrent(false);
 
         return databaseStub.getMediaRepository().save(mediaEntity);
