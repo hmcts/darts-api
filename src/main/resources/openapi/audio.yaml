@@ -641,6 +641,13 @@ components:
 
     GetAdminMediaResponseItem:
       type: object
+      required:
+        - id
+        - channel
+        - start_at
+        - end_at
+        - is_hidden
+        - is_current
       properties:
         id:
           $ref: '#/components/schemas/MediaId'
@@ -651,6 +658,8 @@ components:
         end_at:
           $ref: '#/components/schemas/EndAt'
         is_hidden:
+          type: boolean
+        is_current:
           type: boolean
         case:
           $ref: '#/components/schemas/GetAdminMediaResponseCase'
