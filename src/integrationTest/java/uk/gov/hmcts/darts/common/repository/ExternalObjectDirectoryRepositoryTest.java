@@ -22,6 +22,7 @@ import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_PROCESSING_RESPONSE_FILES;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_RPO_PENDING;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.STORED;
 
@@ -465,4 +466,27 @@ class ExternalObjectDirectoryRepositoryTest extends PostgresIntegrationBase {
         });
 
     }
+
+    @Test
+    void updateEodByIdAndStatus() throws InvocationTargetException, NoSuchMethodException, IllegalAccessException {
+        // given
+        OffsetDateTime now = currentTimeHelper.currentOffsetDateTime();
+        var user = externalObjectDirectoryStub.getUserAccountStub().getIntegrationTestUserAccountEntity();
+
+        List<ExternalObjectDirectoryEntity> externalObjectDirectoryEntities
+            = externalObjectDirectoryStub.generateWithStatusAndMediaLocation(
+            ExternalLocationTypeEnum.ARM, ARM_PROCESSING_RESPONSE_FILES, 20, Optional.of(now));
+        List<Integer> eodsIds = externalObjectDirectoryEntities.stream().map(ExternalObjectDirectoryEntity::getId).toList();
+
+        // when
+        externalObjectDirectoryRepository.updateEodByIdAndStatus(eodsIds, EodHelper.armDropZoneStatus(), EodHelper.armProcessingResponseFilesStatus(), user);
+
+        // then
+        List<ExternalObjectDirectoryEntity> updatedEods = externalObjectDirectoryRepository.findAllById(eodsIds);
+        updatedEods.forEach(eod -> {
+            assertEquals(EodHelper.armDropZoneStatus(), eod.getStatus());
+            assertEquals(user.getId(), eod.getLastModifiedBy().getId());
+        });
+    }
+
 }
