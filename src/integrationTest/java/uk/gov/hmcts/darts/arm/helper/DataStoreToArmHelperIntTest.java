@@ -334,7 +334,30 @@ class DataStoreToArmHelperIntTest extends IntegrationBase {
     }
 
     @Test
-    void updateEodByIdAndStatus() throws InvocationTargetException, NoSuchMethodException, IllegalAccessException {
+    void updateEodByIdAndStatusForArmPush() throws InvocationTargetException, NoSuchMethodException, IllegalAccessException {
+        // given
+        OffsetDateTime now = currentTimeHelper.currentOffsetDateTime();
+        var user = externalObjectDirectoryStub.getUserAccountStub().getIntegrationTestUserAccountEntity();
+
+        List<ExternalObjectDirectoryEntity> externalObjectDirectoryEntities
+            = externalObjectDirectoryStub.generateWithStatusAndMediaLocation(
+            ExternalLocationTypeEnum.ARM, ARM_INGESTION, 5, Optional.of(now));
+        List<Integer> eodsIds = externalObjectDirectoryEntities.stream().map(ExternalObjectDirectoryEntity::getId).toList();
+
+        // when
+        dataStoreToArmHelper.updateEodByIdAndStatus(externalObjectDirectoryEntities, EodHelper.armIngestionStatus(),
+                                                    EodHelper.armDropZoneStatus(), user);
+
+        // then
+        List<ExternalObjectDirectoryEntity> updatedEods = dartsDatabase.getExternalObjectDirectoryRepository().findAllById(eodsIds);
+        updatedEods.forEach(eod -> {
+            assertEquals(EodHelper.armDropZoneStatus(), eod.getStatus());
+            assertEquals(user.getId(), eod.getLastModifiedBy().getId());
+        });
+    }
+
+    @Test
+    void updateEodByIdAndStatusForARMPull() throws InvocationTargetException, NoSuchMethodException, IllegalAccessException {
         // given
         OffsetDateTime now = currentTimeHelper.currentOffsetDateTime();
         var user = externalObjectDirectoryStub.getUserAccountStub().getIntegrationTestUserAccountEntity();
