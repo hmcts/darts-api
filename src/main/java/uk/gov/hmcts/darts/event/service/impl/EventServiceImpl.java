@@ -64,4 +64,8 @@ public class EventServiceImpl implements EventService {
         return allEvents;
     }
 
+    @Override
+    public boolean allAssociatedCasesAnonymised(EventEntity eventEntity) {
+        return eventLinkedCaseRepository.areAllAssociatedCasesAnonymised(eventEntity);
+    }
 }
