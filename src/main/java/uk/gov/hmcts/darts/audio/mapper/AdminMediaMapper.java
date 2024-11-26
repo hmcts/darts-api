@@ -41,7 +41,8 @@ public interface AdminMediaMapper {
         @Mapping(target = "lastModifiedById", source = "lastModifiedBy.id"),
         @Mapping(target = "courthouse", source = "courtroom.courthouse"),
         @Mapping(target = "courtroom", source = "courtroom"),
-        @Mapping(target = "hearings", source = "hearingList")
+        @Mapping(target = "hearings", source = "hearingList"),
+        @Mapping(target = "isCurrent", source = "isCurrent")
     })
     AdminMediaResponse toApiModel(MediaEntity mediaEntity);
 

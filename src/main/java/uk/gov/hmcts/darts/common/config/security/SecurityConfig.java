@@ -1,6 +1,7 @@
 package uk.gov.hmcts.darts.common.config.security;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.nimbusds.jwt.JWTParser;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -26,6 +27,8 @@ import org.springframework.security.oauth2.server.resource.authentication.JwtAut
 import org.springframework.security.oauth2.server.resource.authentication.JwtIssuerAuthenticationManagerResolver;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.web.filter.OncePerRequestFilter;
+import uk.gov.hmcts.darts.authentication.config.AuthConfigurationProperties;
+import uk.gov.hmcts.darts.authentication.config.AuthProviderConfigurationProperties;
 import uk.gov.hmcts.darts.authentication.config.AuthStrategySelector;
 import uk.gov.hmcts.darts.authentication.config.DefaultAuthConfigurationPropertiesStrategy;
 import uk.gov.hmcts.darts.authentication.config.external.ExternalAuthConfigurationProperties;
@@ -111,15 +114,15 @@ public class SecurityConfig {
     private JwtIssuerAuthenticationManagerResolver jwtIssuerAuthenticationManagerResolver() {
         Map<String, AuthenticationManager> authenticationManagers = Map.ofEntries(
             createAuthenticationEntry(externalAuthConfigurationProperties.getIssuerUri(),
-                externalAuthProviderConfigurationProperties.getJwkSetUri()),
+                                      externalAuthProviderConfigurationProperties.getJwkSetUri()),
             createAuthenticationEntry(internalAuthConfigurationProperties.getIssuerUri(),
-                internalAuthProviderConfigurationProperties.getJwkSetUri())
+                                      internalAuthProviderConfigurationProperties.getJwkSetUri())
         );
         return new JwtIssuerAuthenticationManagerResolver(authenticationManagers::get);
     }
 
     private Map.Entry<String, AuthenticationManager> createAuthenticationEntry(String issuer,
-        String jwkSetUri) {
+                                                                               String jwkSetUri) {
 
         var jwtDecoder = NimbusJwtDecoder.withJwkSetUri(jwkSetUri)
             .jwsAlgorithm(SignatureAlgorithm.RS256)
@@ -158,21 +161,7 @@ public class SecurityConfig {
         @Override
         protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
-            Jwt jwt = null;
-            try {
-                var jwtDecoder = NimbusJwtDecoder.withJwkSetUri(externalAuthProviderConfigurationProperties.getJwkSetUri())
-                    .jwsAlgorithm(SignatureAlgorithm.RS256)
-                    .build();
-
-                String authHeader = request.getHeader("Authorization");
-
-                OAuth2TokenValidator<Jwt> jwtValidator = JwtValidators.createDefaultWithIssuer(externalAuthConfigurationProperties.getIssuerUri());
-                jwtDecoder.setJwtValidator(jwtValidator);
-                jwt = jwtDecoder.decode(authHeader.replace(TOKEN_BEARER_PREFIX, "").trim());
-            } catch (Exception exception) {
-                log.error("Problem decoding the token", exception);
-            }
-
+            Jwt jwt = getJwtFromRequest(request);
             // if we cant determine the jwt then proxy and let the nimbus library handle the 401
             if (jwt == null) {
                 filterChain.doFilter(request, response);
@@ -199,5 +188,45 @@ public class SecurityConfig {
                 response.setStatus(HttpStatus.FORBIDDEN.value());
             }
         }
+    }
+
+    Jwt getJwtFromRequest(HttpServletRequest request) {
+        try {
+            String authHeader = request.getHeader("Authorization");
+            String token = authHeader.replace(TOKEN_BEARER_PREFIX, "").trim();
+            String issuer = JWTParser.parse(token).getJWTClaimsSet().getIssuer();
+
+            AuthConfigurationProperties authconfig = getAuthConfig(issuer);
+            AuthProviderConfigurationProperties authProviderConfig = getAuthProviderConfig(issuer);
+
+            var jwtDecoder = NimbusJwtDecoder.withJwkSetUri(authProviderConfig.getJwkSetUri())
+                .jwsAlgorithm(SignatureAlgorithm.RS256)
+                .build();
+
+            return jwtDecoder.decode(token);
+        } catch (Exception exception) {
+            log.error("Problem decoding the token", exception);
+            return null;
+        }
+    }
+
+    private AuthProviderConfigurationProperties getAuthProviderConfig(String issuer) {
+        if (issuer.equals(externalAuthConfigurationProperties.getIssuerUri())) {
+            return externalAuthProviderConfigurationProperties;
+        }
+        if (issuer.equals(internalAuthConfigurationProperties.getIssuerUri())) {
+            return internalAuthProviderConfigurationProperties;
+        }
+        throw new IllegalArgumentException("Issuer not found");
+    }
+
+    private AuthConfigurationProperties getAuthConfig(String issuer) {
+        if (issuer.equals(externalAuthConfigurationProperties.getIssuerUri())) {
+            return externalAuthConfigurationProperties;
+        }
+        if (issuer.equals(internalAuthConfigurationProperties.getIssuerUri())) {
+            return internalAuthConfigurationProperties;
+        }
+        throw new IllegalArgumentException("Issuer not found");
     }
 }

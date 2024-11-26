@@ -133,7 +133,7 @@ public class TranscriptionController implements TranscriptionApi {
     @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
     @Authorisation(contextId = TRANSCRIPTION_ID,
         securityRoles = {JUDICIARY, REQUESTER, APPROVER, TRANSCRIBER, TRANSLATION_QA},
-        globalAccessSecurityRoles = {JUDICIARY, SUPER_ADMIN, SUPER_USER, RCJ_APPEALS})
+        globalAccessSecurityRoles = {JUDICIARY, SUPER_ADMIN, SUPER_USER, TRANSLATION_QA, RCJ_APPEALS})
     public ResponseEntity<Resource> downloadTranscript(Integer transcriptionId) {
         final DownloadTranscriptResponse downloadTranscriptResponse = transcriptionService.downloadTranscript(
             transcriptionId);
@@ -184,7 +184,7 @@ public class TranscriptionController implements TranscriptionApi {
     @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
     @Authorisation(contextId = TRANSCRIPTION_ID,
         securityRoles = {JUDICIARY, APPROVER, REQUESTER, TRANSCRIBER, TRANSLATION_QA},
-        globalAccessSecurityRoles = {JUDICIARY, SUPER_ADMIN, SUPER_USER, RCJ_APPEALS, DARTS})
+        globalAccessSecurityRoles = {JUDICIARY, SUPER_ADMIN, SUPER_USER, RCJ_APPEALS, TRANSLATION_QA, DARTS})
     public ResponseEntity<GetTranscriptionByIdResponse> getTranscription(Integer transcriptionId) {
         return new ResponseEntity<>(
             transcriptionService.getTranscription(transcriptionId),

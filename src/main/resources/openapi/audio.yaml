@@ -188,7 +188,7 @@ paths:
         content:
           application/json:
             schema:
-                $ref: '#/components/schemas/AddAudioMetadataRequestWithStorageGUID'
+              $ref: '#/components/schemas/AddAudioMetadataRequestWithStorageGUID'
       responses:
         200:
           description: Audio metadata accepted
@@ -584,6 +584,8 @@ components:
           $ref: '#/components/schemas/Hidden'
         is_deleted:
           $ref: '#/components/schemas/Deleted'
+        is_current:
+          $ref: '#/components/schemas/IsCurrent'
         admin_action:
           $ref: '#/components/schemas/AdminActionResponse'
         version:
@@ -639,6 +641,13 @@ components:
 
     GetAdminMediaResponseItem:
       type: object
+      required:
+        - id
+        - channel
+        - start_at
+        - end_at
+        - is_hidden
+        - is_current
       properties:
         id:
           $ref: '#/components/schemas/MediaId'
@@ -649,6 +658,8 @@ components:
         end_at:
           $ref: '#/components/schemas/EndAt'
         is_hidden:
+          type: boolean
+        is_current:
           type: boolean
         case:
           $ref: '#/components/schemas/GetAdminMediaResponseCase'
@@ -1013,6 +1024,9 @@ components:
     LastModifiedAt:
       type: string
       format: date-time
+
+    IsCurrent:
+      type: boolean
 
     AddAudioErrorCode:
       type: string
