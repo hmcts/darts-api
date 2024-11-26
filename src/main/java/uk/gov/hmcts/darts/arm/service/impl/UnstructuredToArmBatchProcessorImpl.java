@@ -240,7 +240,7 @@ public class UnstructuredToArmBatchProcessorImpl implements UnstructuredToArmBat
         if (CollectionUtils.isNotEmpty(eodsForTransfer)) {
             unstructuredToArmHelper.updateEodByIdAndStatus(eodsForTransfer,
                                                            EodHelper.armIngestionStatus(),
-                                                           EodHelper.armDropZoneStatus(),
+                                                           EodHelper.failedArmRawDataStatus(),
                                                            userIdentity.getUserAccount());
         }
     }
