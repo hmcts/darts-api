@@ -674,10 +674,10 @@ public interface ExternalObjectDirectoryRepository extends JpaRepository<Externa
     @Transactional
     @Query("""
             update ExternalObjectDirectoryEntity eod
-            set eod.status = :newStatus
+            set eod.status = :newStatus,
+            eod.lastModifiedBy = :lastModifiedBy
             where eod.id in :idsToUpdate
             and eod.status = :oldStatus
-            and eod.lastModifiedBy = :lastModifiedBy
         """)
     @Modifying
     void updateEodByIdAndStatus(
