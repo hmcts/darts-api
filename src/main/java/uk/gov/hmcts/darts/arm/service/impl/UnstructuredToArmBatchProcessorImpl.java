@@ -239,7 +239,7 @@ public class UnstructuredToArmBatchProcessorImpl implements UnstructuredToArmBat
     public void destroy() throws Exception {
         if (CollectionUtils.isNotEmpty(eodsForTransfer)) {
             unstructuredToArmHelper.updateEodByIdAndStatus(eodsForTransfer,
-                                                           EodHelper.armProcessingResponseFilesStatus(),
+                                                           EodHelper.armIngestionStatus(),
                                                            EodHelper.armDropZoneStatus(),
                                                            userIdentity.getUserAccount());
         }
