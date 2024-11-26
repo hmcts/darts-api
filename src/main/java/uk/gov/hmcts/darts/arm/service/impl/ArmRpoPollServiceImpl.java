@@ -20,6 +20,7 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import javax.annotation.PostConstruct;
 
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
@@ -38,15 +39,22 @@ public class ArmRpoPollServiceImpl implements ArmRpoPollService {
 
     private List<File> tempProductionFiles;
 
-    private final List<Integer> allowableFailedStates = Collections.unmodifiableList(List.of(
-        ArmRpoHelper.getExtendedSearchesByMatterRpoState().getId(),
-        ArmRpoHelper.getMasterIndexFieldByRecordClassSchemaSecondaryRpoState().getId(),
-        ArmRpoHelper.createExportBasedOnSearchResultsTableRpoState().getId(),
-        ArmRpoHelper.getExtendedProductionsByMatterRpoState().getId(),
-        ArmRpoHelper.getProductionOutputFilesRpoState().getId(),
-        ArmRpoHelper.downloadProductionRpoState().getId(),
-        ArmRpoHelper.removeProductionRpoState().getId()
-    ));
+    private List<Integer> allowableFailedStates = null;
+
+    @PostConstruct
+    private void init() {
+        if (allowableFailedStates == null) {
+            allowableFailedStates = Collections.unmodifiableList(List.of(
+                ArmRpoHelper.getExtendedSearchesByMatterRpoState().getId(),
+                ArmRpoHelper.getMasterIndexFieldByRecordClassSchemaSecondaryRpoState().getId(),
+                ArmRpoHelper.createExportBasedOnSearchResultsTableRpoState().getId(),
+                ArmRpoHelper.getExtendedProductionsByMatterRpoState().getId(),
+                ArmRpoHelper.getProductionOutputFilesRpoState().getId(),
+                ArmRpoHelper.downloadProductionRpoState().getId(),
+                ArmRpoHelper.removeProductionRpoState().getId()
+            ));
+        }
+    }
 
     @Override
     public void pollArmRpo(boolean isManualRun) {
