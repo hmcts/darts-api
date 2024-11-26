@@ -4,9 +4,6 @@ import lombok.experimental.UtilityClass;
 import lombok.extern.slf4j.Slf4j;
 import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
 
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
 import static java.util.Objects.nonNull;
 import static uk.gov.hmcts.darts.arm.util.ArchiveConstants.ArchiveRecordOperationValues.ARM_FILENAME_SEPARATOR;
 import static uk.gov.hmcts.darts.arm.util.ArchiveConstants.ArchiveResponseFileAttributes.ARM_RESPONSE_FILE_EXTENSION;
@@ -41,28 +38,5 @@ public class ArmResponseFilesUtil {
         }
         return objectTypeId;
     }
-
-    public static Integer getRelationIdFromArmResponseFilesInputField(String input) {
-        try {
-            String relationId = findFirstPatternMatch("\"relation_id\".*?:.*?\"([^\"]+)\"", input);
-            return Integer.parseInt(relationId);
-        } catch (Exception e) {
-            log.error("Unable to convert input relation id '{}' to EOD id: {}", input, e.getMessage());
-        }
-        return null;
-    }
-
-    public static String getOperationFromArmResponseFilesInputField(String input) {
-        return findFirstPatternMatch("\"operation_id\".*?:.*?\"([^\"]+)\"", input);
-    }
-
-    public static String findFirstPatternMatch(String regex, String text) {
-        Pattern pattern = Pattern.compile(regex);
-        Matcher matcher = pattern.matcher(text);
-
-        if (matcher.find()) {
-            return matcher.group(1);
-        }
-        return null;
-    }
+    
 }

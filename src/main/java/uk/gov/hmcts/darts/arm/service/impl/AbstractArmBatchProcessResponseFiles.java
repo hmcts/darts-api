@@ -21,7 +21,6 @@ import uk.gov.hmcts.darts.arm.model.record.armresponse.ArmResponseInvalidLineRec
 import uk.gov.hmcts.darts.arm.model.record.armresponse.ArmResponseUploadFileRecord;
 import uk.gov.hmcts.darts.arm.service.ArmResponseFilesProcessor;
 import uk.gov.hmcts.darts.arm.service.ExternalObjectDirectoryService;
-import uk.gov.hmcts.darts.arm.util.ArmResponseFilesUtil;
 import uk.gov.hmcts.darts.arm.util.files.BatchInputUploadFileFilenameProcessor;
 import uk.gov.hmcts.darts.arm.util.files.CreateRecordFilenameProcessor;
 import uk.gov.hmcts.darts.arm.util.files.InvalidLineFileFilenameProcessor;
@@ -56,7 +55,6 @@ import static uk.gov.hmcts.darts.arm.util.ArchiveConstants.ArchiveResponseFileAt
 import static uk.gov.hmcts.darts.arm.util.ArchiveConstants.ArchiveResponseFileAttributes.ARM_RESPONSE_SUCCESS_STATUS_CODE;
 import static uk.gov.hmcts.darts.arm.util.ArchiveConstants.ArchiveResponseFileAttributes.ARM_UPLOAD_FILE_FILENAME_KEY;
 import static uk.gov.hmcts.darts.arm.util.ArmResponseFilesUtil.generateSuffix;
-import static uk.gov.hmcts.darts.arm.util.ArmResponseFilesUtil.getOperationFromArmResponseFilesInputField;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_RESPONSE_CHECKSUM_VERIFICATION_FAILED;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_RESPONSE_MANIFEST_FAILED;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_RESPONSE_PROCESSING_FAILED;
@@ -408,11 +406,11 @@ public abstract class AbstractArmBatchProcessResponseFiles implements ArmRespons
 
     private String getOperation(ArmResponseInvalidLineRecord record) {
         UploadNewFileRecord uploadRecord = readInputJson(record.getInput());
+        String operation = null;
         if (nonNull(uploadRecord)) {
-            return uploadRecord.getOperation();
+            operation = uploadRecord.getOperation();
         }
-        String operation = getOperationFromArmResponseFilesInputField(record.getInput());
-        return operation != null ? operation : "UNKNOWN";
+        return StringUtils.isNotEmpty(operation) ? operation : "UNKNOWN";
     }
 
     private void appendErrorDescription(StringBuilder errorDescription, String operation, ArmResponseInvalidLineRecord record) {
@@ -450,10 +448,16 @@ public abstract class AbstractArmBatchProcessResponseFiles implements ArmRespons
                     ArmResponseCreateRecord armResponseCreateRecord = objectMapper.readValue(jsonPath.toFile(), ArmResponseCreateRecord.class);
                     UploadNewFileRecord uploadNewFileRecord = readInputJson(armResponseCreateRecord.getInput());
                     if (nonNull(uploadNewFileRecord)) {
-                        armBatchResponses.addResponseBatchData(Integer.valueOf(uploadNewFileRecord.getRelationId()),
-                                                               armResponseCreateRecord, createRecordFilenameProcessor);
+                        if (StringUtils.isNotEmpty(uploadNewFileRecord.getRelationId())) {
+                            armBatchResponses.addResponseBatchData(Integer.valueOf(uploadNewFileRecord.getRelationId()),
+                                                                   armResponseCreateRecord, createRecordFilenameProcessor);
+                        } else {
+                            log.warn("Unable to get EOD id (relation id) from uploadNewFileRecord {} create record {}",
+                                     armResponseCreateRecord.getInput(), createRecordFilenameProcessor.getCreateRecordFilenameAndPath());
+                        }
                     } else {
-                        log.warn("Failed to obtain relation id from create record");
+                        log.warn("Failed to obtain EOD id (relation id) from create record file  {}",
+                                 createRecordFilenameProcessor.getCreateRecordFilenameAndPath());
                     }
                 } else {
                     log.warn("Failed to write create record file to temp workspace {}", createRecordFilenameProcessor.getCreateRecordFilenameAndPath());
@@ -502,8 +506,17 @@ public abstract class AbstractArmBatchProcessResponseFiles implements ArmRespons
                     ArmResponseUploadFileRecord armResponseUploadFileRecord = objectMapper.readValue(jsonPath.toFile(), ArmResponseUploadFileRecord.class);
                     UploadNewFileRecord uploadNewFileRecord = readInputJson(armResponseUploadFileRecord.getInput());
                     if (nonNull(uploadNewFileRecord)) {
-                        armBatchResponses.addResponseBatchData(Integer.valueOf(uploadNewFileRecord.getRelationId()),
-                                                               armResponseUploadFileRecord, uploadFileFilenameProcessor);
+                        if (StringUtils.isNotEmpty(uploadNewFileRecord.getRelationId())) {
+                            armBatchResponses.addResponseBatchData(Integer.valueOf(uploadNewFileRecord.getRelationId()),
+                                                                   armResponseUploadFileRecord, uploadFileFilenameProcessor);
+                        } else {
+                            log.warn("Unable to get EOD id (relation id) from uploadNewFileRecord {} upload file {}",
+                                     armResponseUploadFileRecord.getInput(), uploadFileFilenameProcessor.getUploadFileFilenameAndPath());
+                        }
+
+                    } else {
+                        log.warn("Failed to obtain EOD id (relation id) from upload file  {}",
+                                 uploadFileFilenameProcessor.getUploadFileFilenameAndPath());
                     }
                 } else {
                     log.warn("Failed to write upload file to temp workspace {}", uploadFileFilenameProcessor.getUploadFileFilenameAndPath());
@@ -636,9 +649,11 @@ public abstract class AbstractArmBatchProcessResponseFiles implements ArmRespons
                 log.error("Unable to map the input field {}", e.getMessage());
             } catch (JsonProcessingException e) {
                 log.error("Unable to parse the upload new file record {}", e.getMessage());
+            } catch (Exception e) {
+                log.error("Failed to parse the input field {}", e.getMessage());
             }
         } else {
-            log.warn("Unable to parse the input field upload new file record {}", input);
+            log.warn("Unable to parse the input field as it is null or empty");
         }
         return uploadNewFileRecord;
     }
@@ -701,21 +716,20 @@ public abstract class AbstractArmBatchProcessResponseFiles implements ArmRespons
                     String input = armResponseInvalidLineRecord.getInput();
                     UploadNewFileRecord uploadNewFileRecord = readInputJson(input);
                     if (nonNull(uploadNewFileRecord)) {
-                        armBatchResponses.addResponseBatchData(Integer.valueOf(uploadNewFileRecord.getRelationId()),
-                                                               armResponseInvalidLineRecord, invalidLineFileFilenameProcessor);
-                    } else {
-                        log.warn("Failed to obtain relation id from invalid line record {}, trying to parse the file anyway", input);
-                        Integer eodId = ArmResponseFilesUtil.getRelationIdFromArmResponseFilesInputField(input);
-                        if (nonNull(eodId)) {
-                            armResponseInvalidLineRecord = new ArmResponseInvalidLineRecord();
-                            armResponseInvalidLineRecord.setRelationId(eodId.toString());
-                            armBatchResponses.addResponseBatchData(eodId, armResponseInvalidLineRecord, invalidLineFileFilenameProcessor);
+                        if (StringUtils.isNotEmpty(uploadNewFileRecord.getRelationId())) {
+                            armBatchResponses.addResponseBatchData(Integer.valueOf(uploadNewFileRecord.getRelationId()),
+                                                                   armResponseInvalidLineRecord, invalidLineFileFilenameProcessor);
+
                         } else {
-                            log.warn("Failed to obtain EOD id (relation id) from invalid line record {}", input);
+                            log.warn("Unable to get EOD id (relation id) from uploadNewFileRecord {} invalid line file {}",
+                                     armResponseInvalidLineRecord.getInput(), invalidLineFileFilenameProcessor.getInvalidLineFilename());
                         }
+                    } else {
+                        log.warn("Failed to obtain EOD id (relation id) from invalid line record {} from file {}", input,
+                                 invalidLineFileFilenameProcessor.getInvalidLineFilename());
                     }
                 } else {
-                    log.warn("Failed to write invalid line file to temp workspace {}", invalidLineFileFilenameProcessor.getInvalidLineFileFilenameAndPath());
+                    log.warn("Failed to write invalid line file to temp workspace {}", invalidLineFileFilenameProcessor.getInvalidLineFilename());
                 }
             } catch (IOException e) {
                 log.error("Unable to write invalid line file to temporary workspace {} - {}",
