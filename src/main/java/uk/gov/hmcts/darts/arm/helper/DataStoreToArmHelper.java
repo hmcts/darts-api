@@ -220,11 +220,11 @@ public class DataStoreToArmHelper {
 
     @SneakyThrows
     public File createEmptyArchiveRecordsFile(String manifestFilePrefix) {
-        var fileNameFormat = "%s_%s.%s";
-        var fileName = String.format(fileNameFormat,
-                                     manifestFilePrefix,
-                                     UUID.randomUUID(),
-                                     armDataManagementConfiguration.getFileExtension()
+        String fileNameFormat = "%s_%s.%s";
+        String fileName = String.format(fileNameFormat,
+                                        manifestFilePrefix,
+                                        UUID.randomUUID(),
+                                        armDataManagementConfiguration.getFileExtension()
         );
         Path filePath = fileOperationService.createFile(fileName, armDataManagementConfiguration.getTempBlobWorkspace(), true);
         log.info("Created empty archive records file {}", filePath.getFileName());
