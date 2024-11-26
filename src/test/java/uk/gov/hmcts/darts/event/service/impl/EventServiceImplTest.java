@@ -1,5 +1,6 @@
 package uk.gov.hmcts.darts.event.service.impl;
 
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -98,4 +99,20 @@ class EventServiceImplTest {
     }
 
 
+    @Test
+    @DisplayName("areAllAssociatedCasesAnonymised(...) method, should return true if all associated cases are anonymised")
+    void allAssociatedCasesAnonymisedTrue() {
+        EventEntity event = mock(EventEntity.class);
+        when(eventLinkedCaseRepository.areAllAssociatedCasesAnonymised(event)).thenReturn(true);
+        assertThat(eventService.allAssociatedCasesAnonymised(event)).isTrue();
+        verify(eventLinkedCaseRepository).areAllAssociatedCasesAnonymised(event);
+    }
+
+    @Test
+    void positiveAllAssociatedCasesAnonymisedFalse() {
+        EventEntity event = mock(EventEntity.class);
+        when(eventLinkedCaseRepository.areAllAssociatedCasesAnonymised(event)).thenReturn(false);
+        assertThat(eventService.allAssociatedCasesAnonymised(event)).isFalse();
+        verify(eventLinkedCaseRepository).areAllAssociatedCasesAnonymised(event);
+    }
 }
