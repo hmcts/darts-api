@@ -102,20 +102,19 @@ public class AdminMediaServiceImpl implements AdminMediaService {
             List<MediaEntity> filteredMediaList = mediaList.stream().filter(mediaEntity -> mediaEntity.getStart().isBefore(mediaRequest.getEndTime())
                 && mediaEntity.getEnd().isAfter(mediaRequest.getStartTime())).toList();
             return GetAdminMediaResponseMapper.createResponseItemList(filteredMediaList, hearing);
-        } else {
-            final List<GetAdminMediaResponseItem> responseMediaItemList = new ArrayList<>();
-            List<MediaEntity> mediaList = mediaRepository.findMediaByDetails(hearingIds, startAt, endAt);
-
-            mediaList.forEach(mediaEntity -> {
-                List<HearingEntity> hearingEntityList = getApplicableMediaHearings(mediaEntity, hearingIds);
-
-                hearingEntityList.forEach(hearing -> {
-                    responseMediaItemList.add(GetAdminMediaResponseMapper.createResponseItem(mediaEntity, hearing));
-                });
-            });
-
-            return responseMediaItemList;
         }
+        final List<GetAdminMediaResponseItem> responseMediaItemList = new ArrayList<>();
+        List<MediaEntity> mediaList = mediaRepository.findMediaByDetails(hearingIds, startAt, endAt);
+
+        mediaList.forEach(mediaEntity -> {
+            List<HearingEntity> hearingEntityList = getApplicableMediaHearings(mediaEntity, hearingIds);
+
+            hearingEntityList.forEach(hearing -> {
+                responseMediaItemList.add(GetAdminMediaResponseMapper.createResponseItem(mediaEntity, hearing));
+            });
+        });
+
+        return responseMediaItemList;
     }
 
     @Override
