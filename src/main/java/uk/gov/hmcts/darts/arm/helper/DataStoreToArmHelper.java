@@ -293,4 +293,14 @@ public class DataStoreToArmHelper {
     public Long getFileSize(int externalObjectDirectoryId) {
         return externalObjectDirectoryRepository.findFileSize(externalObjectDirectoryId);
     }
+
+
+    public void updateEodByIdAndStatus(List<ExternalObjectDirectoryEntity> eodsForTransfer, ObjectRecordStatusEntity oldStatus,
+                                       ObjectRecordStatusEntity newStatus, UserAccountEntity userAccount) {
+        if (nonNull(eodsForTransfer) && !eodsForTransfer.isEmpty()) {
+            List<Integer> eodsIds = eodsForTransfer.stream().map(ExternalObjectDirectoryEntity::getId).toList();
+            externalObjectDirectoryRepository.updateEodByIdAndStatus(eodsIds, oldStatus, newStatus, userAccount);
+            log.error("Updated eods from {} to {}", oldStatus.getDescription(), newStatus.getDescription());
+        }
+    }
 }
