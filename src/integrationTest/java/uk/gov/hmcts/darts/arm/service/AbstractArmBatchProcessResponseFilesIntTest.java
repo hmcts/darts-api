@@ -304,8 +304,8 @@ abstract class AbstractArmBatchProcessResponseFilesIntTest extends IntegrationBa
         assertEquals(1, foundMediaList2.size());
         ExternalObjectDirectoryEntity foundMedia2 = foundMediaList2.getFirst();
         assertEquals(ARM_RESPONSE_MANIFEST_FAILED.getId(), foundMedia2.getStatus().getId());
-        assertEquals(1, foundMedia2.getVerificationAttempts());
-        assertEquals(2, foundMedia2.getTransferAttempts());
+        assertEquals(2, foundMedia2.getVerificationAttempts());
+        assertEquals(1, foundMedia2.getTransferAttempts());
         assertTrue(foundMedia2.isResponseCleaned());
 
         List<ExternalObjectDirectoryEntity> foundMediaList3 = dartsDatabase.getExternalObjectDirectoryRepository()
@@ -314,8 +314,8 @@ abstract class AbstractArmBatchProcessResponseFilesIntTest extends IntegrationBa
         assertEquals(1, foundMediaList3.size());
         ExternalObjectDirectoryEntity foundMedia3 = foundMediaList3.getFirst();
         assertEquals(ARM_RESPONSE_MANIFEST_FAILED.getId(), foundMedia3.getStatus().getId());
-        assertEquals(1, foundMedia3.getVerificationAttempts());
-        assertEquals(2, foundMedia3.getTransferAttempts());
+        assertEquals(2, foundMedia3.getVerificationAttempts());
+        assertEquals(1, foundMedia3.getTransferAttempts());
         assertTrue(foundMedia3.isResponseCleaned());
 
         List<ExternalObjectDirectoryEntity> foundMediaList4 = dartsDatabase.getExternalObjectDirectoryRepository()
@@ -324,8 +324,8 @@ abstract class AbstractArmBatchProcessResponseFilesIntTest extends IntegrationBa
         assertEquals(1, foundMediaList4.size());
         ExternalObjectDirectoryEntity foundMedia4 = foundMediaList4.getFirst();
         assertEquals(ARM_RESPONSE_MANIFEST_FAILED.getId(), foundMedia4.getStatus().getId());
-        assertEquals(1, foundMedia4.getVerificationAttempts());
-        assertEquals(2, foundMedia4.getTransferAttempts());
+        assertEquals(2, foundMedia4.getVerificationAttempts());
+        assertEquals(1, foundMedia4.getTransferAttempts());
         assertTrue(foundMedia4.isResponseCleaned());
         assertEquals(
             "Operation: create_record - PS.20023:INVALID_PARAMETERS:Invalid line: invalid json; "
@@ -339,6 +339,7 @@ abstract class AbstractArmBatchProcessResponseFilesIntTest extends IntegrationBa
         ExternalObjectDirectoryEntity foundMedia5 = foundMediaList5.getFirst();
         assertEquals(ARM_DROP_ZONE.getId(), foundMedia5.getStatus().getId());
         assertEquals(1, foundMedia5.getVerificationAttempts());
+        assertEquals(1, foundMedia5.getTransferAttempts());
         assertFalse(foundMedia5.isResponseCleaned());
 
         verify(armDataManagementApi).listResponseBlobsUsingMarker(prefix(), BATCH_SIZE, continuationToken);
@@ -441,7 +442,7 @@ abstract class AbstractArmBatchProcessResponseFilesIntTest extends IntegrationBa
         assertEquals(1, externalObjectDirectoryEntities.size());
         ExternalObjectDirectoryEntity foundEod = externalObjectDirectoryEntities.getFirst();
         assertEquals(ARM_RESPONSE_MANIFEST_FAILED.getId(), foundEod.getStatus().getId());
-        assertEquals(1, foundEod.getVerificationAttempts());
+        assertEquals(2, foundEod.getVerificationAttempts());
         assertEquals("Operation: create_record - PS.20023:INVALID_PARAMETERS:Invalid line: invalid json; ", foundEod.getErrorCode());
 
         verify(armDataManagementApi).listResponseBlobsUsingMarker(prefix(), BATCH_SIZE, continuationToken);
@@ -702,8 +703,8 @@ abstract class AbstractArmBatchProcessResponseFilesIntTest extends IntegrationBa
         assertEquals(1, foundMediaList2.size());
         ExternalObjectDirectoryEntity foundMedia2 = foundMediaList2.get(0);
         assertEquals(ARM_RESPONSE_MANIFEST_FAILED.getId(), foundMedia2.getStatus().getId());
-        assertEquals(1, foundMedia2.getVerificationAttempts());
-        assertEquals(2, foundMedia2.getTransferAttempts());
+        assertEquals(2, foundMedia2.getVerificationAttempts());
+        assertEquals(1, foundMedia2.getTransferAttempts());
         assertTrue(foundMedia2.isResponseCleaned());
 
         List<ExternalObjectDirectoryEntity> foundMediaList3 = dartsDatabase.getExternalObjectDirectoryRepository()
@@ -712,8 +713,8 @@ abstract class AbstractArmBatchProcessResponseFilesIntTest extends IntegrationBa
         assertEquals(1, foundMediaList3.size());
         ExternalObjectDirectoryEntity foundMedia3 = foundMediaList3.get(0);
         assertEquals(ARM_RESPONSE_MANIFEST_FAILED.getId(), foundMedia3.getStatus().getId());
-        assertEquals(1, foundMedia3.getVerificationAttempts());
-        assertEquals(2, foundMedia3.getTransferAttempts());
+        assertEquals(2, foundMedia3.getVerificationAttempts());
+        assertEquals(1, foundMedia3.getTransferAttempts());
         assertTrue(foundMedia3.isResponseCleaned());
 
         List<ExternalObjectDirectoryEntity> foundMediaList5 = dartsDatabase.getExternalObjectDirectoryRepository()
