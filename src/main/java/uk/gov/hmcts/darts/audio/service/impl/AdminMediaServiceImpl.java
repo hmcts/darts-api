@@ -67,7 +67,7 @@ public class AdminMediaServiceImpl implements AdminMediaService {
     private boolean manualDeletionEnabled;
 
     public AdminMediaResponse getMediasById(Integer id) {
-        var mediaEntity = mediaRepository.findByIdIncludeDeleted(id)
+        var mediaEntity = mediaRepository.findById(id)
             .orElseThrow(() -> new DartsApiException(AudioApiError.MEDIA_NOT_FOUND));
 
         return adminMediaMapper.toApiModel(mediaEntity);
