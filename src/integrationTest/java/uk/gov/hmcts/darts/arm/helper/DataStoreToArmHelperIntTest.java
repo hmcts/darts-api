@@ -344,12 +344,12 @@ class DataStoreToArmHelperIntTest extends IntegrationBase {
 
         // when
         dataStoreToArmHelper.updateEodByIdAndStatus(externalObjectDirectoryEntities, EodHelper.armIngestionStatus(),
-                                                    EodHelper.armDropZoneStatus(), user);
+                                                    EodHelper.failedArmRawDataStatus(), user);
 
         // then
         List<ExternalObjectDirectoryEntity> updatedEods = dartsDatabase.getExternalObjectDirectoryRepository().findAllById(eodsIds);
         updatedEods.forEach(eod -> {
-            assertEquals(EodHelper.armDropZoneStatus(), eod.getStatus());
+            assertEquals(EodHelper.failedArmRawDataStatus(), eod.getStatus());
             assertEquals(user.getId(), eod.getLastModifiedBy().getId());
         });
     }
