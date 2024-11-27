@@ -29,6 +29,7 @@ import uk.gov.hmcts.darts.common.enums.SecurityRoleEnum;
 import uk.gov.hmcts.darts.common.exception.CommonApiError;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.common.repository.TranscriptionCommentRepository;
+import uk.gov.hmcts.darts.common.repository.TranscriptionDocumentRepository;
 import uk.gov.hmcts.darts.common.repository.TranscriptionRepository;
 import uk.gov.hmcts.darts.common.repository.TranscriptionStatusRepository;
 import uk.gov.hmcts.darts.common.repository.TranscriptionTypeRepository;
@@ -47,6 +48,7 @@ import uk.gov.hmcts.darts.transcriptions.model.TranscriptionRequestDetails;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -56,6 +58,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.lenient;
@@ -81,6 +84,8 @@ class TranscriptionServiceImplTest {
 
     @Mock
     private TranscriptionRepository mockTranscriptionRepository;
+    @Mock
+    private TranscriptionDocumentRepository mockTranscriptionDocumentRepository;
     @Mock
     private TranscriptionStatusRepository mockTranscriptionStatusRepository;
     @Mock
@@ -171,6 +176,8 @@ class TranscriptionServiceImplTest {
         approvers.add(approver2);
 
         lenient().when(authorisationApi.getUsersWithRoleAtCourthouse(eq(SecurityRoleEnum.APPROVER), any())).thenReturn(approvers);
+        lenient().when(mockTranscriptionDocumentRepository.findByTranscriptionIdAndHiddenTrueIncludeDeleted(anyInt()))
+            .thenReturn(Collections.emptyList());
     }
 
     private void updateManualDeletion(boolean manualDeletionEnabled) {
@@ -658,14 +665,18 @@ class TranscriptionServiceImplTest {
         var transcriptionId = 1;
         var transcription = new TranscriptionEntity();
         transcription.setIsCurrent(true);
+        transcription.setId(transcriptionId);
         var transcriptionDocument = new TranscriptionDocumentEntity();
         transcriptionDocument.setHidden(true);
         transcription.setTranscriptionDocumentEntities(List.of(transcriptionDocument));
         when(mockTranscriptionRepository.findById(transcriptionId)).thenReturn(Optional.of(transcription));
+        when(mockTranscriptionDocumentRepository.findByTranscriptionIdAndHiddenTrueIncludeDeleted(anyInt()))
+            .thenReturn(List.of(new TranscriptionDocumentEntity()));
 
         assertThatThrownBy(() -> transcriptionService.getTranscription(transcriptionId))
             .isExactlyInstanceOf(DartsApiException.class)
             .hasFieldOrPropertyWithValue("error", TRANSCRIPTION_NOT_FOUND);
+        verify(mockTranscriptionDocumentRepository).findByTranscriptionIdAndHiddenTrueIncludeDeleted(transcriptionId);
     }
 
     private TranscriptionRequestDetails createTranscriptionRequestDetails(Integer hearingId,
