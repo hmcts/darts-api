@@ -32,6 +32,7 @@ public class InboundTranscriptionAnnotationDeleterProcessorImpl implements Inbou
     @Value("${darts.data-management.retention-period.inbound.unstructured-minimum.hours}")
     int hoursInUnstructured;
 
+    @Override
     public List<Integer> markForDeletion(int batchSize) {
         return markForDeletion(hoursInUnstructured, batchSize);
     }
@@ -51,17 +52,19 @@ public class InboundTranscriptionAnnotationDeleterProcessorImpl implements Inbou
                                                   ExternalObjectDirectoryQueryTypeEnum.ANNOTATION_QUERY.getIndex(),
                                                   Limit.of(batchSize));
 
-        log.debug("Identified records to be marked for deletion  {}", StringUtils.join(recordsMarkedForDeletion, ","));
-
-        UserAccountEntity user = userIdentity.getUserAccount();
-        eodHelper.updateStatus(
-            EodHelper.markForDeletionStatus(),
-            user,
-            recordsMarkedForDeletion,
-            currentTimeHelper.currentOffsetDateTime()
-        );
-
-        recordsMarkedForDeletion.stream().forEach(eodId -> log.info("Set status of unstructured EOD {} to be marked for deletion", eodId));
+        if (recordsMarkedForDeletion.isEmpty()) {
+            log.info("No records found to be marked for deletion");
+        } else {
+            log.debug("Identified records to be marked for deletion  {}", StringUtils.join(recordsMarkedForDeletion, ","));
+            UserAccountEntity user = userIdentity.getUserAccount();
+            eodHelper.updateStatus(
+                EodHelper.markForDeletionStatus(),
+                user,
+                recordsMarkedForDeletion,
+                currentTimeHelper.currentOffsetDateTime()
+            );
+            recordsMarkedForDeletion.stream().forEach(eodId -> log.info("Set status of unstructured EOD {} to be marked for deletion", eodId));
+        }
 
         return recordsMarkedForDeletion;
     }

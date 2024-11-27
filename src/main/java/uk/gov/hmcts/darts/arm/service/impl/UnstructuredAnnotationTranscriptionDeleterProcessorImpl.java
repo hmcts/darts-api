@@ -33,6 +33,7 @@ public class UnstructuredAnnotationTranscriptionDeleterProcessorImpl implements 
     @Value("${darts.data-management.retention-period.inbound.arm-minimum}")
     int hoursInArm;
 
+    @Override
     public List<Integer> markForDeletion(int batchSize) {
         return markForDeletion(weeksInUnstructured, hoursInArm, batchSize);
     }
@@ -42,7 +43,7 @@ public class UnstructuredAnnotationTranscriptionDeleterProcessorImpl implements 
 
         OffsetDateTime lastModifiedBeforeCurrentDateForUnstructured = currentTimeHelper.currentOffsetDateTime()
             .minusWeeks(
-            weeksBeforeCurrentDateInUnstructured);
+                weeksBeforeCurrentDateInUnstructured);
 
         OffsetDateTime lastModifiedBeforeCurrentDateForArm = currentTimeHelper.currentOffsetDateTime()
             .minusHours(hoursBeforeCurrentDateInArm);
@@ -58,17 +59,18 @@ public class UnstructuredAnnotationTranscriptionDeleterProcessorImpl implements 
                                                   Limit.of(batchSize)
             );
 
-        log.debug("Identified records to be marked for deletion  {}", StringUtils.join(recordsMarkedForDeletion, ","));
-
-        eodHelper.updateStatus(
-            EodHelper.markForDeletionStatus(),
-            userIdentity.getUserAccount(),
-            recordsMarkedForDeletion,
-            currentTimeHelper.currentOffsetDateTime()
-        );
-
-        log.debug("Records have been marked for deletion");
-
+        if (recordsMarkedForDeletion.isEmpty()) {
+            log.debug("No records found to be marked for deletion");
+        } else {
+            log.debug("Identified records to be marked for deletion  {}", StringUtils.join(recordsMarkedForDeletion, ","));
+            eodHelper.updateStatus(
+                EodHelper.markForDeletionStatus(),
+                userIdentity.getUserAccount(),
+                recordsMarkedForDeletion,
+                currentTimeHelper.currentOffsetDateTime()
+            );
+            log.debug("Records have been marked for deletion");
+        }
         return recordsMarkedForDeletion;
     }
 }
