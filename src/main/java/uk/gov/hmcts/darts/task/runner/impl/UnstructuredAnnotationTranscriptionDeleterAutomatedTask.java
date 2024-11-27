@@ -13,7 +13,8 @@ import uk.gov.hmcts.darts.task.service.LockService;
 import static uk.gov.hmcts.darts.task.api.AutomatedTaskName.UNSTRUCTURED_TRANSCRIPTION_ANNOTATION_DELETER_TASK_NAME;
 
 @Component
-public class UnstructuredAnnotationTranscriptionDeleterAutomatedTask extends AbstractLockableAutomatedTask
+public class UnstructuredAnnotationTranscriptionDeleterAutomatedTask 
+    extends AbstractLockableAutomatedTask<UnstructuredAnnotationTranscriptionDeleterAutomatedTaskConfig>
     implements AutoloadingManualTask {
 
     private final UnstructuredTranscriptionAndAnnotationDeleterProcessor armDeletionProcessor;

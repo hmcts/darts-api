@@ -16,6 +16,8 @@ import uk.gov.hmcts.darts.task.config.CaseExpiryDeletionAutomatedTaskConfig;
 import uk.gov.hmcts.darts.task.runner.AutoloadingManualTask;
 import uk.gov.hmcts.darts.task.service.LockService;
 
+import java.time.OffsetDateTime;
+
 @Component
 @ConditionalOnProperty(
     value = "darts.automated.task.case-expiry-deletion.enabled",
@@ -23,7 +25,7 @@ import uk.gov.hmcts.darts.task.service.LockService;
 )
 @Slf4j
 public class CaseExpiryDeletionAutomatedTask
-    extends AbstractLockableAutomatedTask
+    extends AbstractLockableAutomatedTask<CaseExpiryDeletionAutomatedTaskConfig>
     implements AutoloadingManualTask {
 
     private final CurrentTimeHelper currentTimeHelper;
@@ -52,7 +54,10 @@ public class CaseExpiryDeletionAutomatedTask
     @Override
     public void runTask() {
         final UserAccountEntity userAccount = userAccountService.getUserAccount();
-        caseRepository.findCaseIdsToBeAnonymised(currentTimeHelper.currentOffsetDateTime(), Limit.of(getAutomatedTaskBatchSize()))
+        OffsetDateTime maxRetentionDate = currentTimeHelper.currentOffsetDateTime()
+            .minus(getConfig().getBufferDuration());
+
+        caseRepository.findCaseIdsToBeAnonymised(maxRetentionDate, Limit.of(getAutomatedTaskBatchSize()))
             .forEach(courtCaseId -> {
                 try {
                     log.info("Anonymising case with id: {} because the criteria for retention has been met.", courtCaseId);
