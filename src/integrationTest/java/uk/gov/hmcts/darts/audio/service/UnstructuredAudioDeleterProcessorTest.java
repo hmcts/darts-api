@@ -67,15 +67,18 @@ class UnstructuredAudioDeleterProcessorTest extends IntegrationBase {
 
         unstructuredAudioDeleterProcessor.markForDeletion(1000);
 
-        List<ExternalObjectDirectoryEntity> foundMediaList = dartsDatabase.getExternalObjectDirectoryRepository().findByMediaAndExternalLocationType(
-            savedMedia,
-            EodHelper.unstructuredLocation()
-        );
+        transactionalUtil.executeInTransaction(() -> {
+            List<ExternalObjectDirectoryEntity> foundMediaList = dartsDatabase
+                .getExternalObjectDirectoryRepository().findByMediaAndExternalLocationType(
+                    savedMedia,
+                    EodHelper.unstructuredLocation()
+                );
 
-        assertEquals(1, foundMediaList.size());
-        ExternalObjectDirectoryEntity foundMedia = foundMediaList.get(0);
-        assertEquals(MARKED_FOR_DELETION.getId(), foundMedia.getStatus().getId());
-        assertEquals(USER_EMAIL_ADDRESS, foundMedia.getLastModifiedBy().getEmailAddress());
+            assertEquals(1, foundMediaList.size());
+            ExternalObjectDirectoryEntity foundMedia = foundMediaList.get(0);
+            assertEquals(MARKED_FOR_DELETION.getId(), foundMedia.getStatus().getId());
+            assertEquals(USER_EMAIL_ADDRESS, foundMedia.getLastModifiedBy().getEmailAddress());
+        });
     }
 
     @Test
