@@ -15,7 +15,8 @@ import static uk.gov.hmcts.darts.task.api.AutomatedTaskName.ARM_RETENTION_EVENT_
 
 @Slf4j
 @Component
-public class ArmRetentionEventDateCalculatorAutomatedTask extends AbstractLockableAutomatedTask
+public class ArmRetentionEventDateCalculatorAutomatedTask 
+    extends AbstractLockableAutomatedTask<ArmRetentionEventDateCalculatorAutomatedTaskConfig>
     implements AutoloadingManualTask {
     private final ArmRetentionEventDateProcessor armRetentionEventDateProcessor;
 

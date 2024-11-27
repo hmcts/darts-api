@@ -15,7 +15,8 @@ import static uk.gov.hmcts.darts.task.api.AutomatedTaskName.OUTBOUND_AUDIO_DELET
 
 @Slf4j
 @Component
-public class OutboundAudioDeleterAutomatedTask extends AbstractLockableAutomatedTask
+public class OutboundAudioDeleterAutomatedTask 
+    extends AbstractLockableAutomatedTask<OutboundAudioDeleterAutomatedTaskConfig>
     implements AutoloadingManualTask {
 
     private final OutboundAudioDeleterProcessor outboundAudioDeleterProcessor;

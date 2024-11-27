@@ -8,16 +8,21 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.SQLRestriction;
 import uk.gov.hmcts.darts.common.entity.base.CreatedModifiedBaseEntity;
+import uk.gov.hmcts.darts.task.runner.CanReturnExternalObjectDirectoryEntities;
 import uk.gov.hmcts.darts.task.runner.HasIntegerId;
+import uk.gov.hmcts.darts.task.runner.HasRetention;
 import uk.gov.hmcts.darts.task.runner.SoftDelete;
 
 import java.time.OffsetDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = CaseDocumentEntity.TABLE_NAME)
@@ -25,7 +30,7 @@ import java.time.OffsetDateTime;
 @Setter
 @SQLRestriction("is_deleted = false")
 public class CaseDocumentEntity extends CreatedModifiedBaseEntity
-    implements ConfidenceAware, SoftDelete, HasIntegerId {
+    implements ConfidenceAware, SoftDelete, HasIntegerId, HasRetention, CanReturnExternalObjectDirectoryEntities {
 
     public static final String ID = "cad_id";
     public static final String TABLE_NAME = "case_document";
@@ -73,5 +78,9 @@ public class CaseDocumentEntity extends CreatedModifiedBaseEntity
 
     @Column(name = "ret_conf_reason")
     private String retConfReason;
+
+    @OneToMany(mappedBy = ExternalObjectDirectoryEntity_.CASE_DOCUMENT)
+    private List<ExternalObjectDirectoryEntity> externalObjectDirectoryEntities = new ArrayList<>();
+
 
 }
