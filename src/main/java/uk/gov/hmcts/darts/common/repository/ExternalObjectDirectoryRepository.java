@@ -459,7 +459,8 @@ public interface ExternalObjectDirectoryRepository extends JpaRepository<Externa
                 AND eod2.transcriptionDocumentEntity = eod.transcriptionDocumentEntity
                )
         """)
-    List<ExternalObjectDirectoryEntity> findExpiredTranscriptionDocuments(OffsetDateTime maxRetentionDate, Limit batchSize);
+    List<ExternalObjectDirectoryEntity> findExpiredTranscriptionDocuments(OffsetDateTime maxRetentionDate,
+                                                                          Limit batchSize);
 
     @Query("""
                SELECT eod

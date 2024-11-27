@@ -15,7 +15,8 @@ import static uk.gov.hmcts.darts.task.api.AutomatedTaskName.UNSTRUCTURED_AUDIO_D
 
 @Slf4j
 @Component
-public class UnstructuredAudioDeleterAutomatedTask extends AbstractLockableAutomatedTask
+public class UnstructuredAudioDeleterAutomatedTask 
+    extends AbstractLockableAutomatedTask<UnstructuredAudioDeleterAutomatedTaskConfig>
     implements AutoloadingManualTask {
 
     private final UnstructuredAudioDeleterProcessor unstructuredAudioDeleterProcessor;

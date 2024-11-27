@@ -15,7 +15,8 @@ import static uk.gov.hmcts.darts.task.api.AutomatedTaskName.INBOUND_TO_UNSTRUCTU
 
 @Slf4j
 @Component
-public class InboundToUnstructuredAutomatedTask extends AbstractLockableAutomatedTask
+public class InboundToUnstructuredAutomatedTask 
+    extends AbstractLockableAutomatedTask<InboundToUnstructuredAutomatedTaskConfig>
     implements AutoloadingManualTask {
 
     private final InboundToUnstructuredProcessor inboundToUnstructuredProcessor;
