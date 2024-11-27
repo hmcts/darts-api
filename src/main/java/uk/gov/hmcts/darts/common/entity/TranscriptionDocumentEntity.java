@@ -17,7 +17,9 @@ import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.SQLRestriction;
 import uk.gov.hmcts.darts.common.entity.base.ModifiedBaseEntity;
+import uk.gov.hmcts.darts.task.runner.CanReturnExternalObjectDirectoryEntities;
 import uk.gov.hmcts.darts.task.runner.HasIntegerId;
+import uk.gov.hmcts.darts.task.runner.HasRetention;
 import uk.gov.hmcts.darts.task.runner.SoftDelete;
 
 import java.time.OffsetDateTime;
@@ -30,7 +32,7 @@ import java.util.List;
 @Setter
 @SQLRestriction("is_deleted = false")
 public class TranscriptionDocumentEntity extends ModifiedBaseEntity
-    implements ConfidenceAware, SoftDelete, HasIntegerId {
+    implements ConfidenceAware, SoftDelete, HasIntegerId, HasRetention, CanReturnExternalObjectDirectoryEntities {
 
     @Id
     @Column(name = "trd_id")

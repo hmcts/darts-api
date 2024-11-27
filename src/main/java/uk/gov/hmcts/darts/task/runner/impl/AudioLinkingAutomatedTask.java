@@ -38,7 +38,8 @@ import java.util.Set;
 
 @Slf4j
 @Component
-public class AudioLinkingAutomatedTask extends AbstractLockableAutomatedTask
+public class AudioLinkingAutomatedTask 
+    extends AbstractLockableAutomatedTask<AudioLinkingAutomatedTaskConfig>
     implements AutoloadingManualTask {
 
     private final EventRepository eventRepository;

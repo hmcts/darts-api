@@ -1,6 +1,7 @@
 package uk.gov.hmcts.darts.task.runner.impl;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Limit;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -23,7 +24,9 @@ import uk.gov.hmcts.darts.log.api.LogApi;
 import uk.gov.hmcts.darts.task.api.AutomatedTaskName;
 import uk.gov.hmcts.darts.task.config.AssociatedObjectDataExpiryDeletionAutomatedTaskConfig;
 import uk.gov.hmcts.darts.task.runner.AutoloadingManualTask;
+import uk.gov.hmcts.darts.task.runner.CanReturnExternalObjectDirectoryEntities;
 import uk.gov.hmcts.darts.task.runner.HasIntegerId;
+import uk.gov.hmcts.darts.task.runner.HasRetention;
 import uk.gov.hmcts.darts.task.runner.SoftDelete;
 import uk.gov.hmcts.darts.task.runner.SoftDeleteRepository;
 import uk.gov.hmcts.darts.task.service.LockService;
@@ -35,7 +38,7 @@ import java.util.function.Function;
 @Component
 @Slf4j
 public class AssociatedObjectDataExpiryDeletionAutomatedTask
-    extends AbstractLockableAutomatedTask
+    extends AbstractLockableAutomatedTask<AssociatedObjectDataExpiryDeletionAutomatedTaskConfig>
     implements AutoloadingManualTask {
 
     private final UserIdentity userIdentity;
@@ -50,6 +53,7 @@ public class AssociatedObjectDataExpiryDeletionAutomatedTask
     private final ExternalInboundDataStoreDeleter inboundDeleter;
     private final ExternalUnstructuredDataStoreDeleter unstructuredDeleter;
     private final AuditApi auditApi;
+    private final Integer eventDateAdjustmentYears;
 
     public AssociatedObjectDataExpiryDeletionAutomatedTask(
         AutomatedTaskRepository automatedTaskRepository,
@@ -63,8 +67,9 @@ public class AssociatedObjectDataExpiryDeletionAutomatedTask
         ExternalObjectDirectoryRepository externalObjectDirectoryRepository,
         ExternalInboundDataStoreDeleter inboundDeleter,
         ExternalUnstructuredDataStoreDeleter unstructuredDeleter,
-        AuditApi auditApi) {
-
+        AuditApi auditApi,
+        @Value("${darts.storage.arm.event-date-adjustment-years}")
+        Integer eventDateAdjustmentYears) {
         super(automatedTaskRepository, automatedTaskConfigurationProperties, logApi, lockService);
         this.userIdentity = userIdentity;
         this.currentTimeHelper = currentTimeHelper;
@@ -76,6 +81,7 @@ public class AssociatedObjectDataExpiryDeletionAutomatedTask
         this.inboundDeleter = inboundDeleter;
         this.unstructuredDeleter = unstructuredDeleter;
         this.auditApi = auditApi;
+        this.eventDateAdjustmentYears = eventDateAdjustmentYears;
     }
 
 
@@ -93,7 +99,9 @@ public class AssociatedObjectDataExpiryDeletionAutomatedTask
     @Override
     public void runTask() {
         final UserAccountEntity userAccount = userIdentity.getUserAccount();
-        OffsetDateTime maxRetentionDate = currentTimeHelper.currentOffsetDateTime();
+        OffsetDateTime maxRetentionDate = currentTimeHelper.currentOffsetDateTime()
+            .minus(getConfig().getBufferDuration());
+
         Limit limit = Limit.of(getAutomatedTaskBatchSize());
 
         deleteTranscriptionDocumentEntity(userAccount, maxRetentionDate, limit);
@@ -144,7 +152,7 @@ public class AssociatedObjectDataExpiryDeletionAutomatedTask
     }
 
 
-    <T extends SoftDelete & HasIntegerId> void deleteExternalObjectDirectoryEntity(
+    <T extends SoftDelete & HasIntegerId & HasRetention & CanReturnExternalObjectDirectoryEntities> void deleteExternalObjectDirectoryEntity(
         UserAccountEntity userAccount,
         SoftDeleteRepository<T, ?> repository,
         List<ExternalObjectDirectoryEntity> externalObjectDirectoryEntities,
@@ -154,6 +162,7 @@ public class AssociatedObjectDataExpiryDeletionAutomatedTask
 
         List<ExternalObjectDirectoryEntity> externalObjectDirectoryEntitiesToDelete = externalObjectDirectoryEntities
             .stream()
+            .filter(externalObjectDirectoryEntity -> shouldDeleteFilter(entityMapper.apply(externalObjectDirectoryEntity)))
             .filter(this::deleteFromExternalDataStore)
             .toList();
 
@@ -166,6 +175,32 @@ public class AssociatedObjectDataExpiryDeletionAutomatedTask
         externalObjectDirectoryRepository.deleteAll(externalObjectDirectoryEntitiesToDelete);
         repository.softDeleteAll(entitiesToDelete, userAccount);
         entitiesToDelete.forEach(t -> auditApi.record(auditActivity, userAccount, String.valueOf(t.getId())));
+    }
+
+    <T extends SoftDelete & HasIntegerId & HasRetention & CanReturnExternalObjectDirectoryEntities> boolean shouldDeleteFilter(T entity) {
+        ExternalObjectDirectoryEntity armExternalObjectDirectoryEntity = entity.getExternalObjectDirectoryEntities()
+            .stream()
+            .filter(e -> ExternalLocationTypeEnum.ARM.getId().equals(e.getExternalLocationType().getId()))
+            .findFirst()
+            .orElse(null);
+
+        if (armExternalObjectDirectoryEntity == null) {
+            log.info("Skipping deletion of {} with id {} as there is no ARM external object directory entity",
+                      entity.getClass().getSimpleName(),
+                      entity.getId());
+            return false;
+        }
+
+        if (armExternalObjectDirectoryEntity.getEventDateTs() == null
+            || !armExternalObjectDirectoryEntity.getEventDateTs().toLocalDate().minusYears(eventDateAdjustmentYears)
+            .isEqual(entity.getRetainUntilTs().toLocalDate())) {
+            log.info("Skipping deletion of {} with id {} as the event date minus {} years is not the same as the retention date",
+                      entity.getClass().getSimpleName(),
+                      entity.getId(),
+                      eventDateAdjustmentYears);
+            return false;
+        }
+        return true;
     }
 
     boolean deleteFromExternalDataStore(ExternalObjectDirectoryEntity externalObjectDirectoryEntity) {
