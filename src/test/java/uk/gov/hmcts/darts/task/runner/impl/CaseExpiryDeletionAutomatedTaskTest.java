@@ -14,9 +14,10 @@ import uk.gov.hmcts.darts.common.repository.AutomatedTaskRepository;
 import uk.gov.hmcts.darts.common.repository.CaseRepository;
 import uk.gov.hmcts.darts.common.service.DataAnonymisationService;
 import uk.gov.hmcts.darts.log.api.LogApi;
-import uk.gov.hmcts.darts.task.config.AutomatedTaskConfigurationProperties;
+import uk.gov.hmcts.darts.task.config.CaseExpiryDeletionAutomatedTaskConfig;
 import uk.gov.hmcts.darts.task.service.LockService;
 
+import java.time.Duration;
 import java.time.OffsetDateTime;
 import java.util.List;
 
@@ -33,7 +34,7 @@ class CaseExpiryDeletionAutomatedTaskTest {
     @Mock
     private AutomatedTaskRepository automatedTaskRepository;
     @Mock
-    private AutomatedTaskConfigurationProperties automatedTaskConfigurationProperties;
+    private CaseExpiryDeletionAutomatedTaskConfig config;
     @Mock
     private CurrentTimeHelper currentTimeHelper;
     @Mock
@@ -54,6 +55,8 @@ class CaseExpiryDeletionAutomatedTaskTest {
 
     @Test
     void runTask() {
+        Duration duration = Duration.ofHours(24);
+        when(config.getBufferDuration()).thenReturn(duration);
         UserAccountEntity userAccount = mock(UserAccountEntity.class);
         when(userIdentity.getUserAccount()).thenReturn(userAccount);
         OffsetDateTime offsetDateTime = OffsetDateTime.now();
@@ -79,7 +82,7 @@ class CaseExpiryDeletionAutomatedTaskTest {
 
 
         verify(caseRepository, times(1))
-            .findCaseIdsToBeAnonymised(offsetDateTime, Limit.of(5));
+            .findCaseIdsToBeAnonymised(offsetDateTime.minus(duration), Limit.of(5));
 
         verify(caseExpiryDeletionAutomatedTask, times(1))
             .getAutomatedTaskBatchSize();

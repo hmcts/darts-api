@@ -15,7 +15,8 @@ import static uk.gov.hmcts.darts.task.api.AutomatedTaskName.DETS_TO_ARM_TASK_NAM
 
 @Slf4j
 @Component
-public class DetsToArmPushAutomatedTask extends AbstractLockableAutomatedTask
+public class DetsToArmPushAutomatedTask 
+    extends AbstractLockableAutomatedTask<DetsToArmPushAutomatedTaskConfig>
     implements AutoloadingManualTask {
 
     private final DetsToArmBatchPushProcessor detsToArmPushProcessor;

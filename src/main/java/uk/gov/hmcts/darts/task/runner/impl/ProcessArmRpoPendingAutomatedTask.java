@@ -21,7 +21,8 @@ import java.time.Duration;
     value = "darts.automated.task.process-e2e-arm-rpo-pending.process-e2e-arm-rpo",
     havingValue = "false"
 )
-public class ProcessArmRpoPendingAutomatedTask extends AbstractLockableAutomatedTask
+public class ProcessArmRpoPendingAutomatedTask 
+    extends AbstractLockableAutomatedTask<ProcessArmRpoPendingAutomatedTaskConfig>
     implements AutoloadingManualTask {
 
     private final ExternalObjectDirectoryRepository externalObjectDirectoryRepository;

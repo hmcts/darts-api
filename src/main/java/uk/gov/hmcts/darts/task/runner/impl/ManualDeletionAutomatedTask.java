@@ -20,7 +20,8 @@ import static uk.gov.hmcts.darts.task.api.AutomatedTaskName.MANUAL_DELETION;
     value = "darts.manual-deletion.enabled",
     havingValue = "true"
 )
-public class ManualDeletionAutomatedTask extends AbstractLockableAutomatedTask
+public class ManualDeletionAutomatedTask 
+    extends AbstractLockableAutomatedTask<ManualDeletionAutomatedTaskConfig>
     implements AutoloadingManualTask {
 
     private final ManualDeletionProcessor manualDeletionProcessor;

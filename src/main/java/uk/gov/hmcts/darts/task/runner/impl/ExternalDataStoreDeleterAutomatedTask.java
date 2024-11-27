@@ -17,7 +17,8 @@ import static uk.gov.hmcts.darts.task.api.AutomatedTaskName.EXTERNAL_DATASTORE_D
 
 @Slf4j
 @Component
-public class ExternalDataStoreDeleterAutomatedTask extends AbstractLockableAutomatedTask
+public class ExternalDataStoreDeleterAutomatedTask 
+    extends AbstractLockableAutomatedTask<ExternalDataStoreDeleterAutomatedTaskConfig>
     implements AutoloadingManualTask {
 
     private final ExternalInboundDataStoreDeleter inboundDeleter;

@@ -15,7 +15,8 @@ import static uk.gov.hmcts.darts.task.api.AutomatedTaskName.PROCESS_ARM_RESPONSE
 
 @Slf4j
 @Component
-public class ProcessArmResponseFilesAutomatedTask extends AbstractLockableAutomatedTask
+public class ProcessArmResponseFilesAutomatedTask 
+    extends AbstractLockableAutomatedTask<ProcessArmResponseFilesAutomatedTaskConfig>
     implements AutoloadingManualTask {
     private final ArmBatchProcessResponseFilesImpl armBatchProcessResponseFiles;
 

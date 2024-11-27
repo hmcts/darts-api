@@ -14,7 +14,8 @@ import static uk.gov.hmcts.darts.task.api.AutomatedTaskName.ARM_MISSING_RESPONSE
 
 @Slf4j
 @Component
-public class ArmMissingResponseReplayAutomatedTask extends AbstractLockableAutomatedTask
+public class ArmMissingResponseReplayAutomatedTask
+    extends AbstractLockableAutomatedTask<ArmMissingResponseReplayAutomatedTaskConfig>
     implements AutoloadingManualTask {
     private final ArmMissingResponseCleanupImpl armMissingResponseCleanup;
 

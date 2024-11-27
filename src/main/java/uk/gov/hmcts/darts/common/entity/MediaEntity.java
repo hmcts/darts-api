@@ -18,7 +18,9 @@ import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.SQLRestriction;
 import uk.gov.hmcts.darts.common.entity.base.CreatedModifiedBaseEntity;
+import uk.gov.hmcts.darts.task.runner.CanReturnExternalObjectDirectoryEntities;
 import uk.gov.hmcts.darts.task.runner.HasIntegerId;
+import uk.gov.hmcts.darts.task.runner.HasRetention;
 import uk.gov.hmcts.darts.task.runner.SoftDelete;
 
 import java.time.OffsetDateTime;
@@ -32,7 +34,7 @@ import java.util.List;
 @EqualsAndHashCode(callSuper = false)
 @SQLRestriction("is_deleted = false")
 public class MediaEntity extends CreatedModifiedBaseEntity
-    implements ConfidenceAware, SoftDelete, HasIntegerId {
+    implements ConfidenceAware, SoftDelete, HasIntegerId, HasRetention, CanReturnExternalObjectDirectoryEntities {
     public static final Character MEDIA_TYPE_DEFAULT = 'A';
 
     @Id
@@ -130,6 +132,10 @@ public class MediaEntity extends CreatedModifiedBaseEntity
 
     @Column(name = "ret_conf_reason")
     private String retConfReason;
+
+    @OneToMany(mappedBy = ExternalObjectDirectoryEntity_.MEDIA)
+    private List<ExternalObjectDirectoryEntity> externalObjectDirectoryEntities = new ArrayList<>();
+
 
     public List<CourtCaseEntity> associatedCourtCases() {
         var cases = hearingList.stream().map(HearingEntity::getCourtCase);

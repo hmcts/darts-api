@@ -15,7 +15,8 @@ import static uk.gov.hmcts.darts.task.api.AutomatedTaskName.APPLY_RETENTION_CASE
 
 @Slf4j
 @Component
-public class ApplyRetentionCaseAssociatedObjectsAutomatedTask extends AbstractLockableAutomatedTask
+public class ApplyRetentionCaseAssociatedObjectsAutomatedTask 
+    extends AbstractLockableAutomatedTask<ApplyRetentionCaseAssociatedObjectsAutomatedTaskConfig>
     implements AutoloadingManualTask {
 
     private final ApplyRetentionCaseAssociatedObjectsProcessor processor;

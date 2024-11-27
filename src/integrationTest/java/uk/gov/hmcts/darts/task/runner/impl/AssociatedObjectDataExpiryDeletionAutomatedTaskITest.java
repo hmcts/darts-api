@@ -2,11 +2,11 @@ package uk.gov.hmcts.darts.task.runner.impl;
 
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
-import org.apache.logging.log4j.util.TriConsumer;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.jpa.domain.Specification;
+import org.testcontainers.shaded.org.apache.commons.lang3.function.TriFunction;
 import uk.gov.hmcts.darts.audit.api.AuditActivity;
 import uk.gov.hmcts.darts.common.entity.AnnotationDocumentEntity;
 import uk.gov.hmcts.darts.common.entity.AnnotationEntity;
@@ -15,6 +15,7 @@ import uk.gov.hmcts.darts.common.entity.AuditEntity_;
 import uk.gov.hmcts.darts.common.entity.CaseDocumentEntity;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
+import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionDocumentEntity;
@@ -75,8 +76,6 @@ class AssociatedObjectDataExpiryDeletionAutomatedTaskITest extends PostgresInteg
         assertTranscriptionDocument(transcriptionDocuments.transcriptionDocumentEntity1, false);
         assertTranscriptionDocument(transcriptionDocuments.transcriptionDocumentEntity2, false);
         assertTranscriptionDocument(transcriptionDocuments.transcriptionDocumentEntity3, true);
-
-
     }
 
     @Test
@@ -327,17 +326,17 @@ class AssociatedObjectDataExpiryDeletionAutomatedTaskITest extends PostgresInteg
         CaseDocumentEntity caseDocumentEntity1 = dartsDatabase
             .getCaseDocumentStub().createAndSaveCaseDocumentEntity(courtCaseEntity, (caseDocument) -> {
                 caseDocument.setDeleted(false);
-                caseDocument.setRetainUntilTs(OffsetDateTime.now().minusHours(1));
+                caseDocument.setRetainUntilTs(OffsetDateTime.now().minusDays(1).minusHours(1));
             });
         CaseDocumentEntity caseDocumentEntity2 = dartsDatabase
             .getCaseDocumentStub().createAndSaveCaseDocumentEntity(courtCaseEntity, (caseDocument) -> {
                 caseDocument.setDeleted(false);
-                caseDocument.setRetainUntilTs(OffsetDateTime.now().plusDays(1));
+                caseDocument.setRetainUntilTs(OffsetDateTime.now());
             });
         CaseDocumentEntity caseDocumentEntity3 = dartsDatabase
             .getCaseDocumentStub().createAndSaveCaseDocumentEntity(courtCaseEntity, (caseDocument) -> {
                 caseDocument.setDeleted(false);
-                caseDocument.setRetainUntilTs(OffsetDateTime.now().minusHours(1));
+                caseDocument.setRetainUntilTs(OffsetDateTime.now().minusDays(1).minusHours(1));
             });
         return new CaseDocuments(caseDocumentEntity1, caseDocumentEntity2, caseDocumentEntity3);
     }
@@ -350,17 +349,17 @@ class AssociatedObjectDataExpiryDeletionAutomatedTaskITest extends PostgresInteg
         AnnotationDocumentEntity annotationDocumentEntity1 = dartsDatabase.getAnnotationStub()
             .createAndSaveAnnotationDocumentEntity(annotation);
         annotationDocumentEntity1.setDeleted(false);
-        annotationDocumentEntity1.setRetainUntilTs(OffsetDateTime.now().minusHours(1));
+        annotationDocumentEntity1.setRetainUntilTs(OffsetDateTime.now().minusDays(1).minusHours(1));
 
         AnnotationDocumentEntity annotationDocumentEntity2 = dartsDatabase.getAnnotationStub()
             .createAndSaveAnnotationDocumentEntity(annotation);
         annotationDocumentEntity2.setDeleted(false);
-        annotationDocumentEntity2.setRetainUntilTs(OffsetDateTime.now().plusDays(1));
+        annotationDocumentEntity2.setRetainUntilTs(OffsetDateTime.now());
 
         AnnotationDocumentEntity annotationDocumentEntity3 = dartsDatabase.getAnnotationStub()
             .createAndSaveAnnotationDocumentEntity(annotation);
         annotationDocumentEntity3.setDeleted(false);
-        annotationDocumentEntity3.setRetainUntilTs(OffsetDateTime.now().minusHours(1));
+        annotationDocumentEntity3.setRetainUntilTs(OffsetDateTime.now().minusDays(1).minusHours(1));
         dartsDatabase.getAnnotationDocumentRepository().saveAll(
             List.of(annotationDocumentEntity1, annotationDocumentEntity2, annotationDocumentEntity3));
         return new AnnotationDocuments(annotationDocumentEntity1, annotationDocumentEntity2, annotationDocumentEntity3);
@@ -371,17 +370,17 @@ class AssociatedObjectDataExpiryDeletionAutomatedTaskITest extends PostgresInteg
         MediaEntity mediaEntity1 = PersistableFactory.getMediaTestData()
             .createMediaWith(hearingEntity.getCourtroom(), OffsetDateTime.now().minusDays(1), OffsetDateTime.now().plusDays(1), 1);
         mediaEntity1.setDeleted(false);
-        mediaEntity1.setRetainUntilTs(OffsetDateTime.now().minusHours(1));
+        mediaEntity1.setRetainUntilTs(OffsetDateTime.now().minusDays(1).minusHours(1));
 
         MediaEntity mediaEntity2 = PersistableFactory.getMediaTestData()
             .createMediaWith(hearingEntity.getCourtroom(), OffsetDateTime.now().minusDays(1), OffsetDateTime.now().plusDays(1), 1);
         mediaEntity2.setDeleted(false);
-        mediaEntity2.setRetainUntilTs(OffsetDateTime.now().plusDays(1));
+        mediaEntity2.setRetainUntilTs(OffsetDateTime.now());
 
         MediaEntity mediaEntity3 = PersistableFactory.getMediaTestData()
             .createMediaWith(hearingEntity.getCourtroom(), OffsetDateTime.now().minusDays(1), OffsetDateTime.now().plusDays(1), 1);
         mediaEntity3.setDeleted(false);
-        mediaEntity3.setRetainUntilTs(OffsetDateTime.now().minusHours(1));
+        mediaEntity3.setRetainUntilTs(OffsetDateTime.now().minusDays(1).minusHours(1));
         dartsDatabase.saveAll(mediaEntity1, mediaEntity2, mediaEntity3);
         return new MediaEntries(mediaEntity1, mediaEntity2, mediaEntity3);
     }
@@ -395,19 +394,19 @@ class AssociatedObjectDataExpiryDeletionAutomatedTaskITest extends PostgresInteg
             = dartsDatabase.getTranscriptionDocumentStub().createTranscriptionDocumentForTranscription(
             transcription, dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity());
         transcriptionDocumentEntity1.setDeleted(false);
-        transcriptionDocumentEntity1.setRetainUntilTs(OffsetDateTime.now().minusHours(1));
+        transcriptionDocumentEntity1.setRetainUntilTs(OffsetDateTime.now().minusDays(1).minusHours(1));
 
         TranscriptionDocumentEntity transcriptionDocumentEntity2
             = dartsDatabase.getTranscriptionDocumentStub().createTranscriptionDocumentForTranscription(
             transcription, dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity());
         transcriptionDocumentEntity2.setDeleted(false);
-        transcriptionDocumentEntity2.setRetainUntilTs(OffsetDateTime.now().plusDays(1));
+        transcriptionDocumentEntity2.setRetainUntilTs(OffsetDateTime.now());
 
         TranscriptionDocumentEntity transcriptionDocumentEntity3
             = dartsDatabase.getTranscriptionDocumentStub().createTranscriptionDocumentForTranscription(
             transcription, dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity());
         transcriptionDocumentEntity3.setDeleted(false);
-        transcriptionDocumentEntity3.setRetainUntilTs(OffsetDateTime.now().minusHours(1));
+        transcriptionDocumentEntity3.setRetainUntilTs(OffsetDateTime.now().minusDays(1).minusHours(1));
         dartsDatabase.getTranscriptionDocumentRepository().saveAll(
             List.of(transcriptionDocumentEntity1, transcriptionDocumentEntity2, transcriptionDocumentEntity3));
         return new TranscriptionDocuments(transcriptionDocumentEntity1, transcriptionDocumentEntity2, transcriptionDocumentEntity3);
@@ -539,17 +538,26 @@ class AssociatedObjectDataExpiryDeletionAutomatedTaskITest extends PostgresInteg
 
 
     private <T> void assignExternalObjectDirectory(
-        T entity, TriConsumer<T, ObjectRecordStatusEnum, ExternalLocationTypeEnum> externalLocationTypeEnumConsumer,
+        T entity, TriFunction<T, ObjectRecordStatusEnum, ExternalLocationTypeEnum, ExternalObjectDirectoryEntity> externalLocationTypeEnumConsumer,
         boolean assignArm, boolean storeArm) {
 
-        externalLocationTypeEnumConsumer.accept(entity, ObjectRecordStatusEnum.STORED, ExternalLocationTypeEnum.INBOUND);
-        externalLocationTypeEnumConsumer.accept(entity, ObjectRecordStatusEnum.STORED, ExternalLocationTypeEnum.UNSTRUCTURED);
+        ExternalObjectDirectoryEntity inbound = externalLocationTypeEnumConsumer.apply(entity, ObjectRecordStatusEnum.STORED, ExternalLocationTypeEnum.INBOUND);
+        inbound.setEventDateTs(OffsetDateTime.now().minusDays(1).plusYears(100));
+        dartsDatabase.save(inbound);
+
+        ExternalObjectDirectoryEntity unstructured = externalLocationTypeEnumConsumer
+            .apply(entity, ObjectRecordStatusEnum.STORED, ExternalLocationTypeEnum.UNSTRUCTURED);
+        unstructured.setEventDateTs(OffsetDateTime.now().minusDays(1).plusYears(100));
+        dartsDatabase.save(unstructured);
 
         if (assignArm) {
-            externalLocationTypeEnumConsumer.accept(
+            ExternalObjectDirectoryEntity arm = externalLocationTypeEnumConsumer.apply(
                 entity,
                 storeArm ? ObjectRecordStatusEnum.STORED : ObjectRecordStatusEnum.FAILURE,
                 ExternalLocationTypeEnum.ARM);
+            arm.setEventDateTs(OffsetDateTime.now().minusDays(1).plusYears(100));
+            dartsDatabase.save(arm);
+
         }
     }
 

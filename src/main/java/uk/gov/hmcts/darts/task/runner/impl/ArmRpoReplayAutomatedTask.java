@@ -20,7 +20,8 @@ import static uk.gov.hmcts.darts.task.api.AutomatedTaskName.ARM_RPO_REPLAY_TASK_
 
 @Slf4j
 @Component
-public class ArmRpoReplayAutomatedTask extends AbstractLockableAutomatedTask
+public class ArmRpoReplayAutomatedTask
+    extends AbstractLockableAutomatedTask<ArmRpoReplayAutomatedTaskConfig>
     implements AutoloadingManualTask {
 
     private final AutomatedTaskService automatedTaskService;

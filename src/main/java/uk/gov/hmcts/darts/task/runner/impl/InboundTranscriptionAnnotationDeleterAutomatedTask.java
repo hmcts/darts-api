@@ -14,7 +14,8 @@ import uk.gov.hmcts.darts.task.service.LockService;
 import static uk.gov.hmcts.darts.task.api.AutomatedTaskName.INBOUND_TRANSCRIPTION_ANNOTATION_DELETER_TASK_NAME;
 
 @Component
-public class InboundTranscriptionAnnotationDeleterAutomatedTask extends AbstractLockableAutomatedTask
+public class InboundTranscriptionAnnotationDeleterAutomatedTask 
+    extends AbstractLockableAutomatedTask<InboundTranscriptionAnnotationDeleterAutomatedTaskConfig>
     implements AutoloadingManualTask {
 
     private final InboundTranscriptionAnnotationDeleterProcessor annotationTranscriptionDeleterProcessor;

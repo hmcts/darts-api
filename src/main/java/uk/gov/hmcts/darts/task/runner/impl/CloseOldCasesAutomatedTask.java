@@ -15,7 +15,8 @@ import static uk.gov.hmcts.darts.task.api.AutomatedTaskName.CLOSE_OLD_CASES_TASK
 
 @Slf4j
 @Component
-public class CloseOldCasesAutomatedTask extends AbstractLockableAutomatedTask
+public class CloseOldCasesAutomatedTask 
+    extends AbstractLockableAutomatedTask<CloseOldCasesAutomatedTaskConfig>
     implements AutoloadingManualTask {
 
     private final CloseOldCasesProcessor closeOldCasesProcessor;

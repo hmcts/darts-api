@@ -16,7 +16,8 @@ import static uk.gov.hmcts.darts.task.api.AutomatedTaskName.BATCH_CLEANUP_ARM_RE
 
 @Slf4j
 @Component
-public class BatchCleanupArmResponseFilesAutomatedTask extends AbstractLockableAutomatedTask
+public class BatchCleanupArmResponseFilesAutomatedTask 
+    extends AbstractLockableAutomatedTask<DartsBatchCleanupArmResponseFilesAutomatedTaskConfig>
     implements AutoloadingManualTask {
     private final BatchCleanupArmResponseFilesService batchCleanupArmResponseFilesService;
 

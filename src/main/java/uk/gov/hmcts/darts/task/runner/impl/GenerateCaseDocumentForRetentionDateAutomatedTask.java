@@ -15,7 +15,8 @@ import static uk.gov.hmcts.darts.task.api.AutomatedTaskName.GENERATE_CASE_DOCUME
 
 @Slf4j
 @Component
-public class GenerateCaseDocumentForRetentionDateAutomatedTask extends AbstractLockableAutomatedTask
+public class GenerateCaseDocumentForRetentionDateAutomatedTask 
+    extends AbstractLockableAutomatedTask<GenerateCaseDocumentForRetentionDateAutomatedTaskConfig>
     implements AutoloadingManualTask {
 
 

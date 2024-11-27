@@ -15,7 +15,8 @@ import static uk.gov.hmcts.darts.task.api.AutomatedTaskName.UNSTRUCTURED_TO_ARM_
 
 @Slf4j
 @Component
-public class UnstructuredToArmAutomatedTask extends AbstractLockableAutomatedTask
+public class UnstructuredToArmAutomatedTask 
+    extends AbstractLockableAutomatedTask<UnstructuredToArmAutomatedTaskConfig>
     implements AutoloadingManualTask {
 
     private final UnstructuredToArmBatchProcessor unstructuredToArmBatchProcessor;

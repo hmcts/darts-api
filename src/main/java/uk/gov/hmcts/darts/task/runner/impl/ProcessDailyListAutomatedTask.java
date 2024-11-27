@@ -20,7 +20,7 @@ import static uk.gov.hmcts.darts.task.api.AutomatedTaskName.PROCESS_DAILY_LIST_T
 @Slf4j
 @Component
 public class ProcessDailyListAutomatedTask
-    extends AbstractLockableAutomatedTask
+    extends AbstractLockableAutomatedTask<ProcessDailyListAutomatedTaskConfig>
     implements AutoloadingManualTask {
 
     private final DailyListProcessor dailyListProcessor;
