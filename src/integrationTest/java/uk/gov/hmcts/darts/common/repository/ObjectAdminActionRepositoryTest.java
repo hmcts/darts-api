@@ -206,6 +206,9 @@ class ObjectAdminActionRepositoryTest extends PostgresIntegrationBase {
                                                                         userAccountStub.getSystemUserAccountEntity());
         var media1 = createAndSaveMediaEntity(courtroomEntity);
         var media2 = createAndSaveMediaEntity(courtroomEntity);
+        var media3 = createAndSaveMediaEntity(courtroomEntity);
+        media3.setDeleted(true);
+        dartsPersistence.save(media3);
 
         // Create ObjectAdminActionEntity instances
         var action1 = objectAdminActionStub.createAndSave(ObjectAdminActionStub.ObjectAdminActionSpec.builder()
@@ -229,6 +232,13 @@ class ObjectAdminActionRepositoryTest extends PostgresIntegrationBase {
                                                               .markedForManualDelDateTime(deletionThreshold.plusDays(1))
                                                               .build());
 
+        var action4 = objectAdminActionStub.createAndSave(ObjectAdminActionStub.ObjectAdminActionSpec.builder()
+                                                              .media(media3)
+                                                              .markedForManualDeletion(true)
+                                                              .markedForManualDelDateTime(deletionThreshold.minusDays(1))
+                                                              .markedForManualDelBy(userAccountStub.getSystemUserAccountEntity())
+                                                              .build());
+
         // Execute the method under test
         List<ObjectAdminActionEntity> result = repository.findFilesForManualDeletion(deletionThreshold, Limit.of(1000));
 
@@ -238,6 +248,7 @@ class ObjectAdminActionRepositoryTest extends PostgresIntegrationBase {
         assertTrue(result.stream().anyMatch(action -> action.getId().equals(action2.getId())));
 
         assertTrue(result.stream().noneMatch(action -> action.getId().equals(action3.getId())));
+        assertTrue(result.stream().noneMatch(action -> action.getId().equals(action4.getId())));
     }
 
     @Test
@@ -252,7 +263,9 @@ class ObjectAdminActionRepositoryTest extends PostgresIntegrationBase {
         // Create transcription document entities
         var transcriptionDocument1 = transcriptionDocumentStub.generateTranscriptionEntities(1, 1, 1, false, false, false).getFirst();
         var transcriptionDocument2 = transcriptionDocumentStub.generateTranscriptionEntities(1, 1, 1, false, false, false).getFirst();
-
+        var transcriptionDocument3 = transcriptionDocumentStub.generateTranscriptionEntities(1, 1, 1, false, false, false).getFirst();
+        transcriptionDocument3.setDeleted(true);
+        dartsPersistence.save(transcriptionDocument3);
         // Create ObjectAdminActionEntity instances
 
         var action1 = objectAdminActionStub.createAndSave(ObjectAdminActionStub.ObjectAdminActionSpec.builder()
@@ -276,6 +289,12 @@ class ObjectAdminActionRepositoryTest extends PostgresIntegrationBase {
                                                               .markedForManualDelDateTime(deletionThreshold.plusDays(1))
                                                               .build());
 
+        var action4 = objectAdminActionStub.createAndSave(ObjectAdminActionStub.ObjectAdminActionSpec.builder()
+                                                              .transcriptionDocument(transcriptionDocument3)
+                                                              .markedForManualDeletion(true)
+                                                              .markedForManualDelBy(userAccountStub.getSystemUserAccountEntity())
+                                                              .markedForManualDelDateTime(deletionThreshold.minusDays(1))
+                                                              .build());
         // Execute the method under test
         List<ObjectAdminActionEntity> result = repository.findFilesForManualDeletion(deletionThreshold, Limit.of(1000));
 
@@ -284,6 +303,7 @@ class ObjectAdminActionRepositoryTest extends PostgresIntegrationBase {
         assertTrue(result.stream().anyMatch(action -> action.getId().equals(action1.getId())));
         assertTrue(result.stream().anyMatch(action -> action.getId().equals(action2.getId())));
 
+        assertTrue(result.stream().noneMatch(action -> action.getId().equals(action3.getId())));
         assertTrue(result.stream().noneMatch(action -> action.getId().equals(action3.getId())));
     }
 
