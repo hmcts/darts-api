@@ -205,14 +205,14 @@ public abstract class AbstractArmBatchProcessResponseFiles implements ArmRespons
             List<Boolean> deletedResponseBlobStatuses = deleteResponseBlobs(responseFiles);
 
             if (!deletedResponseBlobStatuses.contains(false)) {
-                log.info("About to delete ARM input upload file {}", batchUploadFileFilenameProcessor.getBatchMetadataFilename());
+                log.info("About to delete dangling ARM input upload file {}", batchUploadFileFilenameProcessor.getBatchMetadataFilename());
                 armDataManagementApi.deleteBlobData(batchUploadFileFilenameProcessor.getBatchMetadataFilenameAndPath());
             } else {
-                log.warn("Unable to delete ARM batch input upload file {} as referenced data is not all deleted",
+                log.warn("Unable to delete dangling ARM batch input upload file {} as referenced data is not all deleted",
                          batchUploadFileFilenameProcessor.getBatchMetadataFilename());
             }
         } else {
-            log.info("About to delete dangling ARM input upload file {}", batchUploadFileFilenameProcessor.getBatchMetadataFilename());
+            log.info("Unable to delete dangling ARM input upload file {}", batchUploadFileFilenameProcessor.getBatchMetadataFilename());
             armDataManagementApi.deleteBlobData(batchUploadFileFilenameProcessor.getBatchMetadataFilenameAndPath());
         }
     }
@@ -350,7 +350,7 @@ public abstract class AbstractArmBatchProcessResponseFiles implements ArmRespons
                             invalidLineRecord2.getExceptionDescription(),
                             invalidLineRecord2.getErrorStatus()
                         );
-                        updateTransferAttempts(externalObjectDirectory);
+                        updateVerificationAttempts(externalObjectDirectory);
                         setInvalidLineErrorDescription(invalidLineRecord1, invalidLineRecord2, externalObjectDirectory);
 
                         updateExternalObjectDirectoryStatus(externalObjectDirectory, EodHelper.armResponseManifestFailedStatus());
@@ -865,15 +865,15 @@ public abstract class AbstractArmBatchProcessResponseFiles implements ArmRespons
         return externalObjectDirectory;
     }
 
-    private void updateTransferAttempts(ExternalObjectDirectoryEntity externalObjectDirectoryEntity) {
-        int currentNumberOfAttempts = externalObjectDirectoryEntity.getTransferAttempts();
+    private void updateVerificationAttempts(ExternalObjectDirectoryEntity externalObjectDirectoryEntity) {
+        int currentNumberOfAttempts = externalObjectDirectoryEntity.getVerificationAttempts();
         log.debug(
-            "Updating failed transfer attempts from {} to {} for ID {}",
+            "Updating failed verification attempts from {} to {} for ID {}",
             currentNumberOfAttempts,
             currentNumberOfAttempts + 1,
             externalObjectDirectoryEntity.getId()
         );
-        externalObjectDirectoryEntity.setTransferAttempts(currentNumberOfAttempts + 1);
+        externalObjectDirectoryEntity.setVerificationAttempts(currentNumberOfAttempts + 1);
     }
 
     protected void updateExternalObjectDirectoryStatus(ExternalObjectDirectoryEntity externalObjectDirectory,
@@ -892,7 +892,7 @@ public abstract class AbstractArmBatchProcessResponseFiles implements ArmRespons
                 || ARM_RESPONSE_CHECKSUM_VERIFICATION_FAILED.equals(status)) {
                 logApi.archiveToArmFailed(externalObjectDirectory.getId());
             } else if (ARM_RESPONSE_PROCESSING_FAILED.equals(status)
-                && externalObjectDirectory.getTransferAttempts() > armDataManagementConfiguration.getMaxRetryAttempts()) {
+                && externalObjectDirectory.getVerificationAttempts() > armDataManagementConfiguration.getMaxRetryAttempts()) {
                 logApi.archiveToArmFailed(externalObjectDirectory.getId());
             }
             externalObjectDirectory.setStatus(objectRecordStatus);
@@ -959,7 +959,7 @@ public abstract class AbstractArmBatchProcessResponseFiles implements ArmRespons
             armResponseInvalidLineRecord.getExceptionDescription(),
             armResponseInvalidLineRecord.getErrorStatus()
         );
-        updateTransferAttempts(externalObjectDirectory);
+        updateVerificationAttempts(externalObjectDirectory);
         String operation = getOperation(armResponseInvalidLineRecord);
 
         StringBuilder errorDescription = new StringBuilder();

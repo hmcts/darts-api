@@ -108,7 +108,7 @@ class DetsToArmBatchProcessResponseFilesImplTest {
         externalObjectDirectoryEntity = new ExternalObjectDirectoryEntity();
         externalObjectDirectoryEntity.setId(1);
         externalObjectDirectoryEntity.setStatus(EodHelper.armProcessingResponseFilesStatus());
-        externalObjectDirectoryEntity.setTransferAttempts(1);
+        externalObjectDirectoryEntity.setVerificationAttempts(1);
         objectStateRecordEntity = new ObjectStateRecordEntity();
         objectStateRecordEntity.setUuid(123L);
         externalObjectDirectoryEntity.setOsrUuid(objectStateRecordEntity.getUuid());
@@ -210,10 +210,11 @@ class DetsToArmBatchProcessResponseFilesImplTest {
         invalidLineRecord.setErrorStatus("errorStatus");
         invalidLineRecord.setExceptionDescription("exceptionDescription");
         invalidLineRecord.setInput(
-            "{\\\"operation\\\":\\\"create_record\\\",\\\"relation_id\\\":\\\"<EODID>\\\","
-                + "\\\"record_metadata\\\":{\\\"record_class\\\":\\\"A360TEST\\\",\\\"publisher\\\":\\\"A360\\\","
-                + "\\\"region\\\":\\\"GBR\\\",\\\"title\\\":\\\"CGITestFilesMalformedManifest_1.00MB_100.00MB_001\\\","
-                + "\\\"recordDate\\\":\\\"2023-12-21T10:03:53Z\\\"}}");
+            """
+                {\\\"operation\\\":\\\"create_record\\\",\\\"relation_id\\\":\\\"1\\\",\\\"record_metadata\\\":{\\\"record_class\\\":\\\"A360TEST\\\",
+                \\\"publisher\\\":\\\"A360\\\",\\\"region\\\":\\\"GBR\\\",\\\"title\\\":\\\"CGITestFilesMalformedManifest_1.00MB_100.00MB_001\\\",
+                \\\"recordDate\\\":\\\"2023-12-21T10:03:53Z\\\"}}
+                """);
 
         when(osrRepository.findByArmEodId(anyString())).thenReturn(Optional.of(objectStateRecordEntity));
 
