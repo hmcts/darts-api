@@ -9,7 +9,7 @@
   <rule ref="category/java/bestpractices.xml">
     <exclude name="GuardLogStatement"/>
     <exclude name="UnitTestContainsTooManyAsserts"/>
-    <exclude name="JUnitAssertionsShouldIncludeMessage"/>
+    <exclude name="UnitTestAssertionsShouldIncludeMessage"/>
     <exclude name="UnitTestShouldIncludeAssert"/>
   </rule>
   <rule ref="category/java/codestyle.xml">
@@ -21,6 +21,7 @@
     <exclude name="TooManyStaticImports"/>
     <exclude name="CommentDefaultAccessModifier"/>
     <exclude name="LinguisticNaming"/>
+    <exclude name="UseExplicitTypes"/>
   </rule>
   <rule ref="category/java/codestyle.xml/ClassNamingConventions">
     <properties>
@@ -54,6 +55,7 @@
   <rule ref="category/java/design.xml/LawOfDemeter">
     <properties>
       <property name="violationSuppressRegex" value="(.*method chain calls.*|.*object not created locally.*)"/>
+      <property name="trustRadius" value="2"/>
     </properties>
   </rule>
   <rule ref="category/java/design.xml/SignatureDeclareThrowsException">
