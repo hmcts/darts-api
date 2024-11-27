@@ -257,17 +257,15 @@ class ObjectAdminActionRepositoryTest extends PostgresIntegrationBase {
         OffsetDateTime now = OffsetDateTime.now();
         OffsetDateTime deletionThreshold = now.minusDays(1);
 
-        // Create media entities
-        var courtroomEntity = courtroomStub.createCourtroomUnlessExists("Test Courthouse", "Test Courtroom",
-                                                                        userAccountStub.getSystemUserAccountEntity());
         // Create transcription document entities
+
         var transcriptionDocument1 = transcriptionDocumentStub.generateTranscriptionEntities(1, 1, 1, false, false, false).getFirst();
         var transcriptionDocument2 = transcriptionDocumentStub.generateTranscriptionEntities(1, 1, 1, false, false, false).getFirst();
         var transcriptionDocument3 = transcriptionDocumentStub.generateTranscriptionEntities(1, 1, 1, false, false, false).getFirst();
         transcriptionDocument3.setDeleted(true);
         dartsPersistence.save(transcriptionDocument3);
-        // Create ObjectAdminActionEntity instances
 
+        // Create ObjectAdminActionEntity instances
         var action1 = objectAdminActionStub.createAndSave(ObjectAdminActionStub.ObjectAdminActionSpec.builder()
                                                               .transcriptionDocument(transcriptionDocument1)
                                                               .markedForManualDeletion(true)
@@ -304,7 +302,7 @@ class ObjectAdminActionRepositoryTest extends PostgresIntegrationBase {
         assertTrue(result.stream().anyMatch(action -> action.getId().equals(action2.getId())));
 
         assertTrue(result.stream().noneMatch(action -> action.getId().equals(action3.getId())));
-        assertTrue(result.stream().noneMatch(action -> action.getId().equals(action3.getId())));
+        assertTrue(result.stream().noneMatch(action -> action.getId().equals(action4.getId())));
     }
 
 
