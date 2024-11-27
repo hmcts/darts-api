@@ -194,6 +194,101 @@ class ObjectAdminActionRepositoryTest extends PostgresIntegrationBase {
         assertTrue(result.stream().noneMatch(action -> action.getId().equals(action5.getId())));
     }
 
+
+    @Test
+    void testFindFilesForManualDeletionOnlyMedia() {
+        // Setup
+        OffsetDateTime now = OffsetDateTime.now();
+        OffsetDateTime deletionThreshold = now.minusDays(1);
+
+        // Create media entities
+        var courtroomEntity = courtroomStub.createCourtroomUnlessExists("Test Courthouse", "Test Courtroom",
+                                                                        userAccountStub.getSystemUserAccountEntity());
+        var media1 = createAndSaveMediaEntity(courtroomEntity);
+        var media2 = createAndSaveMediaEntity(courtroomEntity);
+
+        // Create ObjectAdminActionEntity instances
+        var action1 = objectAdminActionStub.createAndSave(ObjectAdminActionStub.ObjectAdminActionSpec.builder()
+                                                              .media(media1)
+                                                              .markedForManualDeletion(true)
+                                                              .markedForManualDelDateTime(deletionThreshold.minusDays(1))
+                                                              .markedForManualDelBy(userAccountStub.getSystemUserAccountEntity())
+                                                              .build());
+
+        var action2 = objectAdminActionStub.createAndSave(ObjectAdminActionStub.ObjectAdminActionSpec.builder()
+                                                              .media(media2)
+                                                              .markedForManualDeletion(true)
+                                                              .markedForManualDelBy(userAccountStub.getSystemUserAccountEntity())
+                                                              .markedForManualDelDateTime(deletionThreshold.minusDays(1))
+                                                              .build());
+
+        var action3 = objectAdminActionStub.createAndSave(ObjectAdminActionStub.ObjectAdminActionSpec.builder()
+                                                              .media(media1)
+                                                              .markedForManualDeletion(true)
+                                                              .markedForManualDelBy(userAccountStub.getSystemUserAccountEntity())
+                                                              .markedForManualDelDateTime(deletionThreshold.plusDays(1))
+                                                              .build());
+
+        // Execute the method under test
+        List<ObjectAdminActionEntity> result = repository.findFilesForManualDeletion(deletionThreshold, Limit.of(1000));
+
+        // Verify the results
+        assertEquals(2, result.size());
+        assertTrue(result.stream().anyMatch(action -> action.getId().equals(action1.getId())));
+        assertTrue(result.stream().anyMatch(action -> action.getId().equals(action2.getId())));
+
+        assertTrue(result.stream().noneMatch(action -> action.getId().equals(action3.getId())));
+    }
+
+    @Test
+    void testFindFilesForManualDeletionOnlyTranscriptionDocuments() {
+        // Setup
+        OffsetDateTime now = OffsetDateTime.now();
+        OffsetDateTime deletionThreshold = now.minusDays(1);
+
+        // Create media entities
+        var courtroomEntity = courtroomStub.createCourtroomUnlessExists("Test Courthouse", "Test Courtroom",
+                                                                        userAccountStub.getSystemUserAccountEntity());
+        // Create transcription document entities
+        var transcriptionDocument1 = transcriptionDocumentStub.generateTranscriptionEntities(1, 1, 1, false, false, false).getFirst();
+        var transcriptionDocument2 = transcriptionDocumentStub.generateTranscriptionEntities(1, 1, 1, false, false, false).getFirst();
+
+        // Create ObjectAdminActionEntity instances
+
+        var action1 = objectAdminActionStub.createAndSave(ObjectAdminActionStub.ObjectAdminActionSpec.builder()
+                                                              .transcriptionDocument(transcriptionDocument1)
+                                                              .markedForManualDeletion(true)
+                                                              .markedForManualDelBy(userAccountStub.getSystemUserAccountEntity())
+                                                              .markedForManualDelDateTime(deletionThreshold.minusDays(1))
+                                                              .build());
+
+        var action2 = objectAdminActionStub.createAndSave(ObjectAdminActionStub.ObjectAdminActionSpec.builder()
+                                                              .transcriptionDocument(transcriptionDocument2)
+                                                              .markedForManualDeletion(true)
+                                                              .markedForManualDelBy(userAccountStub.getSystemUserAccountEntity())
+                                                              .markedForManualDelDateTime(deletionThreshold.minusDays(1))
+                                                              .build());
+
+        var action3 = objectAdminActionStub.createAndSave(ObjectAdminActionStub.ObjectAdminActionSpec.builder()
+                                                              .transcriptionDocument(transcriptionDocument1)
+                                                              .markedForManualDeletion(true)
+                                                              .markedForManualDelBy(userAccountStub.getSystemUserAccountEntity())
+                                                              .markedForManualDelDateTime(deletionThreshold.plusDays(1))
+                                                              .build());
+
+        // Execute the method under test
+        List<ObjectAdminActionEntity> result = repository.findFilesForManualDeletion(deletionThreshold, Limit.of(1000));
+
+        // Verify the results
+        assertEquals(2, result.size());
+        assertTrue(result.stream().anyMatch(action -> action.getId().equals(action1.getId())));
+        assertTrue(result.stream().anyMatch(action -> action.getId().equals(action2.getId())));
+
+        assertTrue(result.stream().noneMatch(action -> action.getId().equals(action3.getId())));
+    }
+
+
+
     private MediaEntity createAndSaveMediaEntity(CourtroomEntity courtroomEntity) {
         return mediaStub.createMediaEntity(courtroomEntity.getCourthouse().getCourthouseName(),
                                            courtroomEntity.getName(),
