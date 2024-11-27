@@ -63,18 +63,28 @@ public interface TranscriptionRepository extends RevisionRepository<Transcriptio
     List<TranscriptionEntity> findAllByTranscriptionStatusNotInWithCreatedDateTimeBefore(
         List<TranscriptionStatusEntity> transcriptionStatuses, OffsetDateTime createdDateTime, Limit limit);
 
-    @Query("""
-        SELECT t
-        FROM TranscriptionEntity t
-        JOIN t.hearings h
-        WHERE h.id = :hearingId
-        AND (t.isManualTranscription = true OR t.legacyObjectId IS NOT NULL)
-        AND (EXISTS (select 1 from TranscriptionDocumentEntity transDoc where transDoc.transcription = t and transDoc.isHidden = false)
-        OR NOT EXISTS (select 1 from TranscriptionDocumentEntity transDoc where transDoc.transcription = t))
-        ORDER BY t.createdDateTime
-        """
+    // native query to bypass @SQLRestriction on TranscriptionDocumentEntity
+    @Query(value = """
+        SELECT t.*
+        FROM darts.transcription t
+        JOIN darts.hearing_transcription_ae ht ON ht.tra_id = t.tra_id
+        JOIN darts.hearing h ON h.hea_id = ht.hea_id
+        WHERE h.hea_id = :hearingId
+        AND (t.is_manual_transcription = true OR t.transcription_object_id IS NOT NULL)
+        AND (EXISTS (
+            SELECT 1
+            FROM darts.transcription_document td
+            WHERE td.tra_id = t.tra_id
+            AND td.is_hidden = false
+        ) OR NOT EXISTS (
+            SELECT 1
+            FROM darts.transcription_document td
+            WHERE td.tra_id = t.tra_id
+        ))
+        ORDER BY t.created_ts
+        """, nativeQuery = true
     )
-    List<TranscriptionEntity> findByHearingIdManualOrLegacy(Integer hearingId);
+    List<TranscriptionEntity> findByHearingIdManualOrLegacyIncludeDeletedTranscriptionDocuments(Integer hearingId);
 
     @Query("""
         SELECT t

@@ -72,14 +72,14 @@ swaggerList.each {
     //    https://openapi-generator.tech/docs/generators/java/#config-options
     skipOperationExample = true
     openapiNormalizer = [
-            REF_AS_PARENT_IN_ALLOF: "true"
+      REF_AS_PARENT_IN_ALLOF: "true"
     ]
     configOptions = [
-            dateLibrary           : "java8",
-            interfaceOnly         : "true",
-            useTags               : "true",
-            useSpringBoot3        : "true",
-            containerDefaultToNull: "true"
+      dateLibrary           : "java8",
+      interfaceOnly         : "true",
+      useTags               : "true",
+      useSpringBoot3        : "true",
+      containerDefaultToNull: "true"
     ]
   })
 }
@@ -219,22 +219,35 @@ checkstyle {
   checkstyleMain.exclude '**/uk/gov/hmcts/darts/task/runner/dailylist/**'
 }
 
-var sourceSetsCopy = sourceSets
 pmd {
   toolVersion = "7.7.0"
-  sourceSets = [sourceSetsCopy.main]
   reportsDir = file("$project.buildDir/reports/pmd")
   // https://github.com/pmd/pmd/issues/876
   ruleSets = []
-  ruleSetFiles = files("config/pmd/main-ruleset.xml")
 }
 
-pmd {
-  toolVersion = "7.7.0"
-  sourceSets = [sourceSetsCopy.test, sourceSetsCopy.functionalTest, sourceSetsCopy.integrationTest, sourceSetsCopy.smokeTest]
-  reportsDir = file("$project.buildDir/reports/pmd")
-  // https://github.com/pmd/pmd/issues/876
-  ruleSets = []
+
+pmdMain {
+  ruleSetFiles = files("config/pmd/main-ruleset.xml")
+  //Ensures we don't passively increase pmd errors but we should aim to reduce this
+  maxFailures = 605
+}
+
+pmdTestCommon {
+  ruleSetFiles = files("config/pmd/test-ruleset.xml")
+  //Ensures we don't passively increase pmd errors but we should aim to reduce this
+  maxFailures = 407
+}
+pmdTest {
+  ruleSetFiles = files("config/pmd/test-ruleset.xml")
+}
+pmdFunctionalTest {
+  ruleSetFiles = files("config/pmd/test-ruleset.xml")
+}
+pmdIntegrationTest {
+  ruleSetFiles = files("config/pmd/test-ruleset.xml")
+}
+pmdSmokeTest {
   ruleSetFiles = files("config/pmd/test-ruleset.xml")
 }
 
@@ -270,17 +283,16 @@ jacocoTestReport {
   }
   afterEvaluate {
     classDirectories.setFrom(files(classDirectories.files.collect {
-      fileTree(dir: it, exclude:  jacocoExclusionArray(coverageExclusions)
+      fileTree(dir: it, exclude: jacocoExclusionArray(coverageExclusions)
       )
     }))
   }
 }
 
-static String[] jacocoExclusionArray(ArrayList<String> exclusions)
-{
-    final def lst = new ArrayList<String>();
+static String[] jacocoExclusionArray(ArrayList<String> exclusions) {
+  final def lst = new ArrayList<String>();
 
-    exclusions.stream().forEach {it.endsWith(".java") ? lst.add(it.replace(".java", ".class")) : lst.add(it)}
+  exclusions.stream().forEach { it.endsWith(".java") ? lst.add(it.replace(".java", ".class")) : lst.add(it) }
 
   return lst.toArray();
 }
@@ -365,11 +377,11 @@ repositories {
   mavenLocal()
   mavenCentral()
   maven { url 'https://jitpack.io' }
-  maven { url  'https://repo.spring.io/milestone/'}
+  maven { url 'https://repo.spring.io/milestone/'}
 }
 
 ext {
-  log4JVersion = "2.24.1"
+  log4JVersion = "2.24.2"
   tomcatEmbedVersion = "10.1.33"
 }
 
@@ -446,7 +458,7 @@ dependencies {
   implementation group: 'org.apache.tika', name: 'tika-core', version: '3.0.0'
   implementation group: 'org.springframework.data', name: 'spring-data-envers', version: '3.4.0'
   implementation 'org.hibernate.orm:hibernate-ant:6.6.3.Final'
-  implementation 'org.hibernate:hibernate-spatial:6.6.2.Final'
+  implementation 'org.hibernate:hibernate-spatial:6.6.3.Final'
 
   annotationProcessor 'org.mapstruct:mapstruct-processor:1.6.3'
   annotationProcessor('org.hibernate.orm:hibernate-jpamodelgen:6.6.3.Final')
@@ -578,10 +590,10 @@ artifacts.add('openapispecifications', openapiJar)
 
 publishing {
   publications {
-      maven(MavenPublication) {
-        artifact openapiJar
-      }
+    maven(MavenPublication) {
+      artifact openapiJar
     }
+  }
 }
 
 tasks.register('updateOpenSpecificationsWithVersion') {
