@@ -33,9 +33,11 @@ public interface ObjectAdminActionRepository extends JpaRepository<ObjectAdminAc
 
     @Query("""
         SELECT o FROM ObjectAdminActionEntity o
+                LEFT JOIN o.media m
+                LEFT JOIN o.transcriptionDocument t
                 WHERE o.markedForManualDelDateTime < :deletionThreshold
-                AND ((o.media is not null and o.media.isDeleted = false)
-                         OR (o.transcriptionDocument is not null AND o.transcriptionDocument.isDeleted = false))
+                AND ((m is not null and m.isDeleted = false)
+                         OR (t is not null AND t.isDeleted = false))
         """)
     List<ObjectAdminActionEntity> findFilesForManualDeletion(OffsetDateTime deletionThreshold, Limit limit);
 }
