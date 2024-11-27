@@ -564,8 +564,7 @@ public class TranscriptionServiceImpl implements TranscriptionService {
             .filter(TranscriptionEntity::getIsCurrent)
             // Only SUPER_ADMIN users are allowed to view transcription requests with hidden documents
             .filter(transcriptionEntity -> userIsSuperAdmin
-                || transcriptionEntity.getTranscriptionDocumentEntities().isEmpty()
-                || transcriptionEntity.getTranscriptionDocumentEntities().stream().noneMatch(TranscriptionDocumentEntity::isHidden)
+                || transcriptionDocumentRepository.findByTranscriptionIdAndHiddenTrueIncludeDeleted(transcriptionEntity.getId()).isEmpty()
             )
             .orElseThrow(() -> new DartsApiException(TRANSCRIPTION_NOT_FOUND));
         return transcriptionResponseMapper.mapToTranscriptionResponse(transcription);

@@ -19,6 +19,7 @@ import uk.gov.hmcts.darts.common.entity.TranscriptionDocumentEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.util.DateConverterUtil;
+import uk.gov.hmcts.darts.hearings.model.Transcript;
 import uk.gov.hmcts.darts.test.common.TestUtils;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 
@@ -108,6 +109,20 @@ class HearingsControllerGetTranscriptsTest extends IntegrationBase {
         JSONAssert.assertEquals(expected, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
     }
 
+    @Test
+    void hearingsGetTranscriptEndpointTranscriptWithHiddenDocumentNotReturned() throws Exception {
+        HearingEntity hearingEntity = dartsDatabase.getHearingRepository().findAll().get(0);
+
+        dartsDatabase.getTranscriptionStub().createAndSaveCompletedTranscriptionWithDocument(
+            mockUserIdentity.getUserAccount(), hearingEntity.getCourtCase(), hearingEntity, SOME_DATE_TIME, true
+        );
+
+        MockHttpServletRequestBuilder requestBuilder = get(ENDPOINT_URL_HEARINGS, hearingEntity.getId());
+        MvcResult mvcResult = mockMvc.perform(requestBuilder).andExpect(MockMvcResultMatchers.status().isOk()).andReturn();
+        Transcript[] transcriptResultList = objectMapper.readValue(mvcResult.getResponse().getContentAsString(), Transcript[].class);
+
+        assertEquals(0, transcriptResultList.length);
+    }
 
     @Test
     void ignoreAutomaticTranscripts() throws Exception {

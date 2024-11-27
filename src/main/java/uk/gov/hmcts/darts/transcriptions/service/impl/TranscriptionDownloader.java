@@ -11,6 +11,7 @@ import uk.gov.hmcts.darts.common.datamanagement.component.impl.DownloadResponseM
 import uk.gov.hmcts.darts.common.entity.TranscriptionDocumentEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
+import uk.gov.hmcts.darts.common.repository.TranscriptionDocumentRepository;
 import uk.gov.hmcts.darts.common.repository.TranscriptionRepository;
 import uk.gov.hmcts.darts.datamanagement.exception.FileNotDownloadedException;
 import uk.gov.hmcts.darts.transcriptions.model.DownloadTranscriptResponse;
@@ -29,6 +30,7 @@ import static uk.gov.hmcts.darts.transcriptions.exception.TranscriptionApiError.
 public class TranscriptionDownloader {
 
     private final TranscriptionRepository transcriptionRepository;
+    private final TranscriptionDocumentRepository transcriptionDocumentRepository;
     private final DataManagementFacade dataManagementFacade;
     private final AuditApi auditApi;
     private final UserIdentity userIdentity;
@@ -39,11 +41,11 @@ public class TranscriptionDownloader {
         var transcriptionEntity = transcriptionRepository.findById(transcriptionId)
             // Only SUPER_ADMIN users are allowed to download hidden documents
             .filter(transcription -> userIsSuperAdmin
-                || transcription.getTranscriptionDocumentEntities().isEmpty()
-                || transcription.getTranscriptionDocumentEntities().stream().noneMatch(TranscriptionDocumentEntity::isHidden)
+                || transcriptionDocumentRepository.findByTranscriptionIdAndHiddenTrueIncludeDeleted(transcription.getId()).isEmpty()
             )
             .orElseThrow(() -> new DartsApiException(TRANSCRIPTION_NOT_FOUND));
 
+        // if the document is hidden and now deleted, this will successfully fail and not return the document
         var latestTranscriptionDocument = transcriptionEntity.getTranscriptionDocumentEntities()
             .stream()
             .max(comparing(TranscriptionDocumentEntity::getUploadedDateTime))

@@ -67,4 +67,8 @@ public interface TranscriptionDocumentRepository extends JpaRepository<Transcrip
                WHERE ae.markedForManualDeletion = false AND hr.markedForDeletion = true
         """)
     List<TranscriptionDocumentEntity> getMarkedForDeletion();
+
+    // native query to bypass @SQLRestriction
+    @Query(value = "SELECT trd.* FROM darts.transcription_document trd WHERE trd.tra_id = :trdId AND trd.is_hidden = true", nativeQuery = true)
+    List<TranscriptionDocumentEntity> findByTranscriptionIdAndHiddenTrueIncludeDeleted(Integer trdId);
 }

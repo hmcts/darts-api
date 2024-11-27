@@ -45,6 +45,7 @@ import uk.gov.hmcts.darts.common.repository.AnnotationRepository;
 import uk.gov.hmcts.darts.common.repository.CaseRepository;
 import uk.gov.hmcts.darts.common.repository.EventRepository;
 import uk.gov.hmcts.darts.common.repository.HearingRepository;
+import uk.gov.hmcts.darts.common.repository.TranscriptionDocumentRepository;
 import uk.gov.hmcts.darts.common.repository.TranscriptionRepository;
 import uk.gov.hmcts.darts.common.service.RetrieveCoreObjectService;
 import uk.gov.hmcts.darts.log.api.LogApi;
@@ -72,6 +73,7 @@ public class CaseServiceImpl implements CaseService {
     private final AdvancedSearchRequestHelper advancedSearchRequestHelper;
     private final AdminCasesSearchRequestHelper adminCasesSearchRequestHelper;
     private final TranscriptionRepository transcriptionRepository;
+    private final TranscriptionDocumentRepository transcriptionDocumentRepository;
     private final AuthorisationApi authorisationApi;
     private final LogApi logApi;
     private final CaseTranscriptionMapper transcriptionMapper;
@@ -111,7 +113,7 @@ public class CaseServiceImpl implements CaseService {
             .filter(HearingEntity::getHearingIsActual)
             .toList();
 
-        return HearingEntityToCaseHearing.mapToHearingList(filteredHearings);
+        return HearingEntityToCaseHearing.mapToHearingList(filteredHearings, transcriptionDocumentRepository);
 
     }
 

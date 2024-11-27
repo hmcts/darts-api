@@ -96,6 +96,34 @@ class TranscriptionControllerGetTranscriptionTest extends IntegrationBase {
         JSONAssert.assertEquals(expected, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
     }
 
+
+    @Test
+    void getTranscriptionWithHiddenDocumentReturnsNotFound() throws Exception {
+        HearingEntity hearingEntity = dartsDatabase.getHearingRepository().findAll().get(0);
+        UserAccountEntity userAccount = hearingEntity.getCreatedBy();
+
+        TranscriptionEntity transcription = dartsDatabase.getTranscriptionStub().createAndSaveCompletedTranscriptionWithDocument(
+            userAccount, hearingEntity.getCourtCase(), hearingEntity, SOME_DATE_TIME, true
+        );
+
+        MockHttpServletRequestBuilder requestBuilder = get(ENDPOINT_URL_TRANSCRIPTION, transcription.getId());
+        mockMvc.perform(requestBuilder).andExpect(status().isNotFound());
+    }
+
+    @Test
+    void getTranscriptionWithHiddenDocumentCanBeSeenBySuperAdmin() throws Exception {
+        superAdminUserStub.givenUserIsAuthorised(mockUserIdentity);
+        HearingEntity hearingEntity = dartsDatabase.getHearingRepository().findAll().get(0);
+        UserAccountEntity userAccount = hearingEntity.getCreatedBy();
+
+        TranscriptionEntity transcription = dartsDatabase.getTranscriptionStub().createAndSaveCompletedTranscriptionWithDocument(
+            userAccount, hearingEntity.getCourtCase(), hearingEntity, SOME_DATE_TIME, true
+        );
+
+        MockHttpServletRequestBuilder requestBuilder = get(ENDPOINT_URL_TRANSCRIPTION, transcription.getId());
+        mockMvc.perform(requestBuilder).andExpect(status().isOk());
+    }
+
     @Test
     void getTranscriptionWithLegacyComments() throws Exception {
         HearingEntity hearingEntity = dartsDatabase.getHearingRepository().findAll().get(0);

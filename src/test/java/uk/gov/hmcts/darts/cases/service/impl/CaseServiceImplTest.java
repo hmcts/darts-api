@@ -40,6 +40,7 @@ import uk.gov.hmcts.darts.common.repository.CaseRetentionRepository;
 import uk.gov.hmcts.darts.common.repository.EventRepository;
 import uk.gov.hmcts.darts.common.repository.HearingReportingRestrictionsRepository;
 import uk.gov.hmcts.darts.common.repository.HearingRepository;
+import uk.gov.hmcts.darts.common.repository.TranscriptionDocumentRepository;
 import uk.gov.hmcts.darts.common.repository.TranscriptionRepository;
 import uk.gov.hmcts.darts.common.service.RetrieveCoreObjectService;
 import uk.gov.hmcts.darts.common.util.CommonTestDataUtil;
@@ -106,6 +107,8 @@ class CaseServiceImplTest {
 
     @Mock
     TranscriptionRepository transcriptionRepository;
+    @Mock
+    TranscriptionDocumentRepository transcriptionDocumentRepository;
     @Captor
     ArgumentCaptor<CourtCaseEntity> caseEntityArgumentCaptor;
 
@@ -138,6 +141,7 @@ class CaseServiceImplTest {
             advancedSearchRequestHelper,
             adminCasesSearchRequestHelper,
             transcriptionRepository,
+            transcriptionDocumentRepository,
             authorisationApi,
             logApi,
             new CaseTranscriptionMapper()

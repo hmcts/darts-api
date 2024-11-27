@@ -77,7 +77,8 @@ public class HearingsServiceImpl implements HearingsService {
     @Override
     public List<Transcript> getTranscriptsByHearingId(Integer hearingId) {
         validateCaseIsNotExpiredFromHearingId(hearingId);
-        List<TranscriptionEntity> transcriptionEntities = transcriptionRepository.findByHearingIdManualOrLegacy(hearingId);
+        List<TranscriptionEntity> transcriptionEntities =
+            transcriptionRepository.findByHearingIdManualOrLegacyIncludeDeletedTranscriptionDocuments(hearingId);
         List<HearingTranscriptModel> hearingTranscriptModel = transcriptionMapper.mapResponse(transcriptionEntities);
         return transcriptionMapper.getTranscriptList(hearingTranscriptModel);
     }
