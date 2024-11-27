@@ -15,7 +15,8 @@ import static uk.gov.hmcts.darts.task.api.AutomatedTaskName.REMOVE_DUPLICATED_EV
 
 @Slf4j
 @Component
-public class RemoveDuplicatedEventsAutomatedTask extends AbstractLockableAutomatedTask
+public class RemoveDuplicatedEventsAutomatedTask 
+    extends AbstractLockableAutomatedTask<RemoveDuplicatedEventsAutomatedTaskConfig>
     implements AutoloadingManualTask {
 
     private final RemoveDuplicateEventsProcessor removeDuplicateEventsProcessor;
