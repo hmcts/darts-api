@@ -47,6 +47,7 @@ public class ArmDataManagementApiImpl implements ArmDataManagementApi {
             dataManagementConfiguration.getUnstructuredContainerName(), armDataManagementConfiguration.getContainerName(), unstructuredUuid, blobPathAndName);
     }
 
+    @Override
     public void copyDetsBlobDataToArm(String detsUuid, String filename) {
 
         String blobPathAndName = armDataManagementConfiguration.getFolders().getSubmission() + filename;
