@@ -119,7 +119,7 @@ class AudioLinkingAutomatedTaskTest {
         }
 
         @Test
-        void positiveProcessEvent() {
+        void processEvent_typical() {
             doNothing().when(mediaLinkedCaseHelper)
                 .linkMediaByEvent(any(), any(), any(), any());
 
@@ -156,7 +156,7 @@ class AudioLinkingAutomatedTaskTest {
         }
 
         @Test
-        void positiveProcessEventWithBuffer() {
+        void processEvent_withBuffer() {
             doNothing().when(mediaLinkedCaseHelper)
                 .linkMediaByEvent(any(), any(), any(), any());
             doReturn(Duration.ofSeconds(10)).when(eventProcessor).getAudioBuffer();

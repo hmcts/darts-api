@@ -10,7 +10,6 @@ import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.EventEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
-import uk.gov.hmcts.darts.common.entity.MediaLinkedCaseEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.repository.HearingRepository;
 import uk.gov.hmcts.darts.common.repository.MediaLinkedCaseRepository;
@@ -41,7 +40,7 @@ class MediaLinkedCaseHelperTest {
 
 
     @Test
-    void positiveProcessMedia() {
+    void linkMediaByEvent_shouldLinkMediaToCaseAndHearings_whenNotAlreadyLinked() {
         HearingEntity hearingEntity1 = mock(HearingEntity.class);
         HearingEntity hearingEntity2 = mock(HearingEntity.class);
         HearingEntity hearingEntity3 = mock(HearingEntity.class);
@@ -58,7 +57,6 @@ class MediaLinkedCaseHelperTest {
         when(hearingEntity2.getCourtCase()).thenReturn(courtCaseEntity1);
         when(hearingEntity3.getCourtCase()).thenReturn(courtCaseEntity2);
 
-
         List<HearingEntity> hearingEntities = List.of(hearingEntity1, hearingEntity2, hearingEntity3);
 
         EventEntity event = mock(EventEntity.class);
@@ -68,7 +66,6 @@ class MediaLinkedCaseHelperTest {
 
         MediaEntity mediaEntity = mock(MediaEntity.class);
         mediaLinkedCaseHelper.linkMediaByEvent(event, mediaEntity, AUDIO_LINKING_TASK, userAccount);
-
 
         verify(hearingEntity1, times(1)).containsMedia(mediaEntity);
         verify(hearingEntity2, times(1)).containsMedia(mediaEntity);
@@ -89,21 +86,16 @@ class MediaLinkedCaseHelperTest {
         verify(hearingRepository, times(1))
             .saveAll(savedHearingEntities);
 
-        Set<MediaLinkedCaseEntity> savedMediaLinkedCaseEntity = new HashSet<>();
-        savedMediaLinkedCaseEntity.add(new MediaLinkedCaseEntity(mediaEntity, courtCaseEntity1, userAccount, AUDIO_LINKING_TASK));
-        savedMediaLinkedCaseEntity.add(new MediaLinkedCaseEntity(mediaEntity, courtCaseEntity2, userAccount, AUDIO_LINKING_TASK));
-
         verify(mediaLinkedCaseHelper, times(2)).addCase(mediaEntity, courtCaseEntity1, AUDIO_LINKING_TASK, userAccount);
         verify(mediaLinkedCaseHelper).addCase(mediaEntity, courtCaseEntity2, AUDIO_LINKING_TASK, userAccount);
     }
 
 
     @Test
-    void positiveProcessMediaHearingAlreadyContainsMedia() {
+    void linkMediaByEvent_shouldNotLinkMediaToHearings_whenAlreadyLinked() {
         HearingEntity hearingEntity1 = mock(HearingEntity.class);
         HearingEntity hearingEntity2 = mock(HearingEntity.class);
         HearingEntity hearingEntity3 = mock(HearingEntity.class);
-
 
         when(hearingEntity1.containsMedia(any())).thenReturn(false);
         when(hearingEntity2.containsMedia(any())).thenReturn(true);
