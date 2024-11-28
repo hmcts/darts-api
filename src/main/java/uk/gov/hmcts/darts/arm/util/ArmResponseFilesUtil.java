@@ -15,7 +15,6 @@ public class ArmResponseFilesUtil {
         return ARM_FILENAME_SEPARATOR + filenameKey + ARM_RESPONSE_FILE_EXTENSION;
     }
 
-
     public static String getPrefix(ExternalObjectDirectoryEntity externalObjectDirectory) {
         return new StringBuilder(externalObjectDirectory.getId().toString())
             .append(ARM_FILENAME_SEPARATOR)
@@ -37,4 +36,5 @@ public class ArmResponseFilesUtil {
         }
         return objectTypeId;
     }
+
 }

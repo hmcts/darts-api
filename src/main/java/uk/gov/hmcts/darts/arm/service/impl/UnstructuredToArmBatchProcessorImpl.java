@@ -189,7 +189,7 @@ public class UnstructuredToArmBatchProcessorImpl implements UnstructuredToArmBat
     }
 
     private boolean shouldAddEntryToManifestFile(ArmBatchItem batchItem) {
-        return equalsAnyStatus(batchItem.getPreviousStatus(), EodHelper.failedArmManifestFileStatus(), EodHelper.failedArmResponseManifestFileStatus());
+        return equalsAnyStatus(batchItem.getPreviousStatus(), EodHelper.failedArmManifestFileStatus(), EodHelper.armResponseManifestFailedStatus());
     }
 
     private void writeManifestFile(ArmBatchItems batchItems, File archiveRecordsFile) {
