@@ -1,0 +1,11 @@
+{
+  "operation": "invalid_line",
+  "transaction_id": "e5afb388-3830-79ca-a5d4-dcc6e51796a3",
+  "relation_id": <EODID>,
+  "a360_record_id": null,
+  "process_time": "2024-01-11T12:48:13.578000",
+  "status": 0,
+  "input": "{\"operation\":\"upload_new_file\",\"relation_id\":\"<EODID>\",\"record_metadata\":{\"record_class\":\"A360TEST\",\"publisher\":\"A360\",\"region\":\"GBR\",\"title\":\"CGITestFilesMalformedManifest_1.00MB_100.00MB_001\",\"recordDate\":\"2023-12-21T10:03:53Z\"}}",
+  "exception_description": "PS.20042:INVALID_RELATION_ID:No create_record operation with specified relation_id in the same input file.",
+  "error_status": "bad_input"
+}
