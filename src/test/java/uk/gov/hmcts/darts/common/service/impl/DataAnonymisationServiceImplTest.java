@@ -114,7 +114,7 @@ class DataAnonymisationServiceImplTest {
 
     @ParameterizedTest(name = "Event should be anonymised if all assocaited cases are anonymised. (isManuallyRequested = {0})")
     @ValueSource(booleans = {true, false})
-    void eventEntityAnonymiseUpdatedAsAllCasesExpiredAndOnlyAnonymiseIfAllCasesExpiredIsTrue(boolean isManuallyRequested) {
+    void anonymiseEventEntity_eventEntityAnonymiseUpdated_asAllCasesExpiredAndOnlyAnonymiseIfAllCasesExpiredIsTrue(boolean isManuallyRequested) {
         setupOffsetDateTime();
         EventEntity eventEntity = new EventEntity();
         eventEntity.setEventText("event text");
@@ -142,7 +142,7 @@ class DataAnonymisationServiceImplTest {
 
     @Test
     @DisplayName("Event should be anonymised if one or more assocaited cases are not anonymised and the onlyAnonymiseIfAllCasesExpired flag is false")
-    void eventEntityAnonymiseUpdatedAsNotAllCasesExpiredAndOnlyAnonymiseIfAllCasesExpiredIsFalse() {
+    void anonymiseEventEntity_eventEntityAnonymiseUpdated_asNotAllCasesExpiredAndOnlyAnonymiseIfAllCasesExpiredIsFalse() {
         setupOffsetDateTime();
         EventEntity eventEntity = new EventEntity();
         eventEntity.setEventText("event text");
@@ -157,7 +157,7 @@ class DataAnonymisationServiceImplTest {
 
     @Test
     @DisplayName("Event should not be anonymised again if the event is already anonymised")
-    void eventEntityNotUpdatedAsAlreadyAnonymised() {
+    void anonymiseEventEntity_eventEntityNotUpdatedAsAlreadyAnonymised() {
         EventEntity eventEntity = new EventEntity();
         eventEntity.setEventText("event text");
         eventEntity.setDataAnonymised(true);
@@ -210,7 +210,7 @@ class DataAnonymisationServiceImplTest {
 
     @ParameterizedTest(name = "Anonymise TranscriptionCommentEntity with isManuallyRequested = {0}")
     @ValueSource(booleans = {true, false})
-    void anonymiseTranscriptionCommentEntity(boolean isManuallyRequested) {
+    void anonymiseTranscriptionCommentEntity_typical(boolean isManuallyRequested) {
         setupOffsetDateTime();
         TranscriptionCommentEntity transcriptionCommentEntity = new TranscriptionCommentEntity();
         transcriptionCommentEntity.setComment("comment");
@@ -230,7 +230,7 @@ class DataAnonymisationServiceImplTest {
 
     @ParameterizedTest(name = "Anonymise CourtCase with isManuallyRequested = {0}")
     @ValueSource(booleans = {true, false})
-    void assertPositiveAnonymiseCourtCaseEntity(boolean isManuallyRequested) {
+    void anonymiseCourtCaseById_typical(boolean isManuallyRequested) {
         setupOffsetDateTime();
         CourtCaseEntity courtCase = new CourtCaseEntity();
         when(caseService.getCourtCaseById(123)).thenReturn(courtCase);
@@ -297,7 +297,7 @@ class DataAnonymisationServiceImplTest {
 
     @ParameterizedTest(name = "Anonymise Transcription with isManuallyRequested = {0}")
     @ValueSource(booleans = {true, false})
-    void anonymiseTranscriptionEntity(boolean isManuallyRequested) {
+    void anonymiseTranscriptionEntity_typical(boolean isManuallyRequested) {
         TranscriptionEntity transcriptionEntity = new TranscriptionEntity();
 
         TranscriptionCommentEntity transcriptionCommentEntity1 = mock(TranscriptionCommentEntity.class);
@@ -324,7 +324,7 @@ class DataAnonymisationServiceImplTest {
 
     @ParameterizedTest(name = "Anonymise hearing with isManuallyRequested = {0}")
     @ValueSource(booleans = {true, false})
-    void anonymiseHearingEntity(boolean isManuallyRequested) {
+    void anonymiseHearingEntity_typical(boolean isManuallyRequested) {
         HearingEntity hearingEntity = new HearingEntity();
 
         TranscriptionEntity transcriptionEntity1 = mock(TranscriptionEntity.class);
@@ -481,7 +481,7 @@ class DataAnonymisationServiceImplTest {
 
     @ParameterizedTest(name = "Anonymise event by ids with isManuallyRequested = {0}")
     @ValueSource(booleans = {true, false})
-    void anonymiseEventByIds(boolean isManuallyRequested) {
+    void anonymiseEventByIds_typical(boolean isManuallyRequested) {
         EventEntity event1 = mock(EventEntity.class);
         EventEntity event2 = mock(EventEntity.class);
         EventEntity event3 = mock(EventEntity.class);
@@ -517,7 +517,7 @@ class DataAnonymisationServiceImplTest {
 
     @ParameterizedTest(name = "Register data anonymisation event with isManuallyRequested = {0}")
     @ValueSource(booleans = {true, false})
-    void registerDataAnonymisationEvent(boolean isManuallyRequested) {
+    void registerDataAnonymisation_event_typical(boolean isManuallyRequested) {
         UserAccountEntity userAccount = mock(UserAccountEntity.class);
         EventEntity eventEntity = mock(EventEntity.class);
         OffsetDateTime currentTime = OffsetDateTime.now();
@@ -539,7 +539,7 @@ class DataAnonymisationServiceImplTest {
 
     @ParameterizedTest(name = "Register data anonymisation transcription comment with isManuallyRequested = {0}")
     @ValueSource(booleans = {true, false})
-    void registerDataAnonymisationTranscriptionComment(boolean isManuallyRequested) {
+    void registerDataAnonymisation_transcriptionComment_typical(boolean isManuallyRequested) {
         UserAccountEntity userAccount = mock(UserAccountEntity.class);
         TranscriptionCommentEntity transcriptionCommentEntity = mock(TranscriptionCommentEntity.class);
         OffsetDateTime currentTime = OffsetDateTime.now();
