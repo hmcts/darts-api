@@ -70,6 +70,7 @@ public enum AutomatedTaskName {
     }
 
     private static class Constants {
-        public static final String AUTOMATED_TASK_PROCESS_E2E_ARM_RPO_PENDING_PROCESS_E2E_ARM_RPO_FALSE = "${darts.automated.task.process-e2e-arm-rpo-pending.process-e2e-arm-rpo:false}";
+        private static final String AUTOMATED_TASK_PROCESS_E2E_ARM_RPO_PENDING_PROCESS_E2E_ARM_RPO_FALSE =
+            "${darts.automated.task.process-e2e-arm-rpo-pending.process-e2e-arm-rpo:false}";
     }
 }
