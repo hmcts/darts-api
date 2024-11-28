@@ -18,8 +18,6 @@ import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
 import uk.gov.hmcts.darts.common.entity.ObjectRecordStatusEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
-import uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum;
-import uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum;
 import uk.gov.hmcts.darts.common.repository.ExternalLocationTypeRepository;
 import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
 import uk.gov.hmcts.darts.common.repository.ObjectRecordStatusRepository;
@@ -46,6 +44,8 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum.ARM;
+import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_INGESTION;
 
 @ExtendWith(MockitoExtension.class)
 class DataStoreToArmHelperTest {
@@ -73,7 +73,7 @@ class DataStoreToArmHelperTest {
     @TempDir
     private File tempDirectory;
 
-    ExternalObjectDirectoryEntity externalObjectDirectoryEntity;
+    private ExternalObjectDirectoryEntity externalObjectDirectoryEntity;
 
     private static final EodHelperMocks EOD_HELPER_MOCKS = new EodHelperMocks();
 
@@ -82,13 +82,13 @@ class DataStoreToArmHelperTest {
         MediaEntity mediaEntity1 = new MediaEntity();
         externalObjectDirectoryEntity = new ExternalObjectDirectoryTestData().createExternalObjectDirectory(
             mediaEntity1,
-            ExternalLocationTypeEnum.ARM,
-            ObjectRecordStatusEnum.ARM_INGESTION,
+            ARM,
+            ARM_INGESTION,
             UUID.randomUUID());
         externalObjectDirectoryEntity.setId(345);
         externalObjectDirectoryEntity.setStatus(EodHelper.armIngestionStatus());
         externalObjectDirectoryEntity.setOsrUuid(1234L);
-        externalObjectDirectoryEntity.getStatus().setDescription(ObjectRecordStatusEnum.ARM_INGESTION.name());
+        externalObjectDirectoryEntity.getStatus().setDescription(ARM_INGESTION.name());
     }
 
     @AfterAll

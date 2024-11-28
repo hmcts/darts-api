@@ -64,8 +64,6 @@ public class EodHelper {
     @Getter
     private static ObjectRecordStatusEntity failedArmManifestFileStatus;
     @Getter
-    private static ObjectRecordStatusEntity failedArmResponseManifestFileStatus;
-    @Getter
     private static ObjectRecordStatusEntity storedStatus;
     @Getter
     private static ObjectRecordStatusEntity failureStatus;
@@ -104,7 +102,6 @@ public class EodHelper {
         failedArmRawDataStatus = orsRepository.findById(ARM_RAW_DATA_FAILED.getId()).orElseThrow();
         armProcessingResponseFilesStatus = orsRepository.findById(ARM_PROCESSING_RESPONSE_FILES.getId()).orElseThrow();
         failedArmManifestFileStatus = orsRepository.findById(ARM_MANIFEST_FAILED.getId()).orElseThrow();
-        failedArmResponseManifestFileStatus = orsRepository.findById(ARM_RESPONSE_MANIFEST_FAILED.getId()).orElseThrow();
         armIngestionStatus = orsRepository.findById(ARM_INGESTION.getId()).orElseThrow();
         armDropZoneStatus = orsRepository.findById(ARM_DROP_ZONE.getId()).orElseThrow();
         armResponseProcessingFailedStatus = orsRepository.findById(ARM_RESPONSE_PROCESSING_FAILED.getId()).orElseThrow();
@@ -115,7 +112,7 @@ public class EodHelper {
         armReplayStatus = orsRepository.findById(ARM_REPLAY.getId()).orElseThrow();
         armMissingResponseStatus = orsRepository.findById(ARM_MISSING_RESPONSE.getId()).orElseThrow();
 
-        failedArmStatuses = List.of(failedArmRawDataStatus, failedArmManifestFileStatus, failedArmResponseManifestFileStatus);
+        failedArmStatuses = List.of(failedArmRawDataStatus, failedArmManifestFileStatus, armResponseManifestFailedStatus);
 
     }
 
