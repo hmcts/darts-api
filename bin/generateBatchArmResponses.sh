@@ -141,7 +141,7 @@ addNewResponses () {
       exit 1
     fi
 
-    ufFilename="UUID1_UUID5_0_il.rsp"
+    ufFilename="UUID1_UUID5_0_uf.rsp"
     ufFilename=${ufFilename//UUID1/$uuid1}
     ufFilename=${ufFilename//UUID5/$uuid5}
     echo "UF filename : $ilFilename"
