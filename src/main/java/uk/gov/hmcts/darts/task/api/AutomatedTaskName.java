@@ -36,11 +36,11 @@ public enum AutomatedTaskName {
     CASE_EXPIRY_DELETION_TASK_NAME("CaseExpiryDeletion", "${darts.automated.task.case-expiry-deletion.enabled:false}"),
     ASSOCIATED_OBJECT_DATA_EXPIRY_DELETION_TASK_NAME("AssociatedObjectDataExpiryDeletion"),
     MANUAL_DELETION("ManualDeletion", "${darts.manual-deletion.enabled:false}"),
-    PROCESS_ARM_RPO_PENDING("ProcessARMRPOPending", "!${darts.automated.task.process-e2e-arm-rpo-pending.process-e2e-arm-rpo:false}"),
+    PROCESS_ARM_RPO_PENDING("ProcessARMRPOPending", "!" + Constants.AUTOMATED_TASK_PROCESS_E2E_ARM_RPO_PENDING_PROCESS_E2E_ARM_RPO_FALSE),
     AUDIO_LINKING_TASK_NAME("AudioLinking"),
-    PROCESS_E2E_ARM_PENDING_TASK_NAME("ProcessE2EArmRpoPending", "${darts.automated.task.process-e2e-arm-rpo-pending.process-e2e-arm-rpo:false}"),
-    ARM_RPO_POLLING_TASK_NAME("ArmRpoPolling"),
-    ARM_RPO_REPLAY_TASK_NAME("ArmRpoReplay"),
+    PROCESS_E2E_ARM_PENDING_TASK_NAME("ProcessE2EArmRpoPending", Constants.AUTOMATED_TASK_PROCESS_E2E_ARM_RPO_PENDING_PROCESS_E2E_ARM_RPO_FALSE),
+    ARM_RPO_POLLING_TASK_NAME("ArmRpoPolling", Constants.AUTOMATED_TASK_PROCESS_E2E_ARM_RPO_PENDING_PROCESS_E2E_ARM_RPO_FALSE),
+    ARM_RPO_REPLAY_TASK_NAME("ArmRpoReplay", Constants.AUTOMATED_TASK_PROCESS_E2E_ARM_RPO_PENDING_PROCESS_E2E_ARM_RPO_FALSE),
     ARM_MISSING_RESPONSE_REPLY_TASK_NAME("ArmMissingResponseReplay"),
     DETS_CLEANUP_ARM_RESPONSE_FILES("DETSCleanupArmResponseFiles");
 
@@ -67,5 +67,10 @@ public enum AutomatedTaskName {
 
     public static AutomatedTaskName valueOfTaskName(String taskName) {
         return BY_TASK_NAME.get(taskName);
+    }
+
+    public static class Constants {
+        public static final String AUTOMATED_TASK_PROCESS_E2E_ARM_RPO_PENDING_PROCESS_E2E_ARM_RPO_FALSE =
+            "${darts.automated.task.process-e2e-arm-rpo-pending.process-e2e-arm-rpo:false}";
     }
 }
