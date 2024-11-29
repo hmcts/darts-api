@@ -659,7 +659,7 @@ public abstract class AbstractArmBatchProcessResponseFiles implements ArmRespons
     }
 
     @SuppressWarnings({"PMD.AvoidInstantiatingObjectsInLoops"})
-    private static ResponseFilenames getArmResponseFilenames(List<String> responseFiles, String manifestName) {
+    private ResponseFilenames getArmResponseFilenames(List<String> responseFiles, String manifestName) {
         ResponseFilenames responseFilenames = new ResponseFilenames();
         for (String responseFile : responseFiles) {
             try {
@@ -681,6 +681,7 @@ public abstract class AbstractArmBatchProcessResponseFiles implements ArmRespons
             } catch (IllegalArgumentException e) {
                 // This occurs when the filename is not parsable
                 log.error("Invalid ARM response filename: {} for manifest {}", responseFile, manifestName);
+                deleteResponseBlobs(List.of(responseFile));
             }
         }
         return responseFilenames;
