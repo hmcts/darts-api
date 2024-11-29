@@ -30,7 +30,7 @@ public class TriggerArmRpoSearchServiceImpl implements TriggerArmRpoSearchServic
      */
     @Override
     public void triggerArmRpoSearch() {
-        log.debug("Triggering ARM RPO search flow...");
+        log.info("Triggering ARM RPO search flow...");
 
         var userAccountEntity = userIdentity.getUserAccount();
 
@@ -74,7 +74,7 @@ public class TriggerArmRpoSearchServiceImpl implements TriggerArmRpoSearchServic
                                        searchName,
                                        userAccountEntity);
 
-        log.debug("ARM RPO search flow completed successfully");
+        log.info("ARM RPO search flow completed successfully");
     }
 
 }
