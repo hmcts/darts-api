@@ -2285,7 +2285,6 @@ abstract class AbstractArmBatchProcessResponseFilesIntTest extends IntegrationBa
         return expectedResponse;
     }
 
-
     protected String getUploadFileContents(String uploadFilename, int externalObjectDirectoryId, String checksum) throws IOException {
         String expectedResponse = getContentsFromFile(uploadFilename);
         expectedResponse = expectedResponse.replaceAll("<CHECKSUM>", checksum);
