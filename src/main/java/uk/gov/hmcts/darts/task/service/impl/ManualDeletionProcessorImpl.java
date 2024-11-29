@@ -17,6 +17,7 @@ import uk.gov.hmcts.darts.common.entity.ObjectAdminActionEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionDocumentEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum;
+import uk.gov.hmcts.darts.common.exception.DartsException;
 import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
 import uk.gov.hmcts.darts.common.repository.MediaRepository;
 import uk.gov.hmcts.darts.common.repository.ObjectAdminActionRepository;
@@ -81,8 +82,8 @@ public class ManualDeletionProcessorImpl implements ManualDeletionProcessor {
         processArmEods(mediaEntity.getDeletedTs(),
                        objectAdminAction,
                        externalObjectDirectoryRepository.findByMediaAndExternalLocationTypeAndStatus(mediaEntity,
-                                                                                                           EodHelper.armLocation(),
-                                                                                                           EodHelper.storedStatus()));
+                                                                                                     EodHelper.armLocation(),
+                                                                                                     EodHelper.storedStatus()));
         logApi.mediaDeleted(mediaEntity.getId());
     }
 
@@ -102,8 +103,8 @@ public class ManualDeletionProcessorImpl implements ManualDeletionProcessor {
         processArmEods(transcription.getDeletedTs(),
                        objectAdminAction,
                        externalObjectDirectoryRepository.findByTranscriptionDocumentEntityAndExternalLocationTypeAndStatus(transcription,
-                                                                                                                                 EodHelper.armLocation(),
-                                                                                                                                 EodHelper.storedStatus()));
+                                                                                                                           EodHelper.armLocation(),
+                                                                                                                           EodHelper.storedStatus()));
         logApi.transcriptionDeleted(transcription.getId());
     }
 
@@ -115,7 +116,7 @@ public class ManualDeletionProcessorImpl implements ManualDeletionProcessor {
     }
 
     void processArmEod(OffsetDateTime deletedTs, ObjectAdminActionEntity objectAdminAction,
-                        ExternalObjectDirectoryEntity externalObjectDirectoryEntity) {
+                       ExternalObjectDirectoryEntity externalObjectDirectoryEntity) {
         armDataManagementApi.updateMetadata(
             externalObjectDirectoryEntity.getExternalRecordId(),
             deletedTs.minusYears(eventDateAdjustmentYears),
@@ -134,7 +135,7 @@ public class ManualDeletionProcessorImpl implements ManualDeletionProcessor {
             return objectMapper.writeValueAsString(retConfReason);
         } catch (Exception e) {
             log.error("Error while creating RetConfReason", e);
-            return "Error while creating RetConfReason";
+            throw new DartsException("Error while creating RetConfReason", e);
         }
     }
 
