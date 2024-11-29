@@ -4,7 +4,7 @@ echo "This script generates the ARM pull response files. These can be used for t
 uuid1=$(uuidgen)
 
 echo "uuid 1: $uuid1"
-
+echo " "
 read -p 'enter manifestName without .a360: ' manifestName
 if [ -z "$manifestName" ]
 then
@@ -57,6 +57,7 @@ addNewResponses () {
 
   if [ "$option" == "2" ] || [ "$option" == "3" ] || [ "$option" == "4" ]
   then
+    echo " "
     read -p 'Do you want to enter error status and description (y/n): ' continue
     if [ "$continue" == "y" ]
     then
@@ -154,6 +155,7 @@ addNewResponses () {
     echo $ufFileContents > $ufFilename
   fi
 
+  echo " "
   read -p 'Do you want to add new responses: (y/n): ' shouldAddNewResponses
   if [ "$shouldAddNewResponses" == "y" ]
   then
