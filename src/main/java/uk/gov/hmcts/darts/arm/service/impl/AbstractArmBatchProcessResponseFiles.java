@@ -448,10 +448,16 @@ public abstract class AbstractArmBatchProcessResponseFiles implements ArmRespons
                     ArmResponseCreateRecord armResponseCreateRecord = objectMapper.readValue(jsonPath.toFile(), ArmResponseCreateRecord.class);
                     UploadNewFileRecord uploadNewFileRecord = readInputJson(armResponseCreateRecord.getInput());
                     if (nonNull(uploadNewFileRecord)) {
-                        armBatchResponses.addResponseBatchData(Integer.valueOf(uploadNewFileRecord.getRelationId()),
-                                                               armResponseCreateRecord, createRecordFilenameProcessor);
+                        if (StringUtils.isNotEmpty(uploadNewFileRecord.getRelationId())) {
+                            armBatchResponses.addResponseBatchData(Integer.valueOf(uploadNewFileRecord.getRelationId()),
+                                                                   armResponseCreateRecord, createRecordFilenameProcessor);
+                        } else {
+                            log.warn("Unable to get EOD id (relation id) from uploadNewFileRecord {} create record {}",
+                                     armResponseCreateRecord.getInput(), createRecordFilenameProcessor.getCreateRecordFilenameAndPath());
+                        }
                     } else {
-                        log.warn("Failed to obtain relation id from create record");
+                        log.warn("Failed to obtain EOD id (relation id) from create record file  {}",
+                                 createRecordFilenameProcessor.getCreateRecordFilenameAndPath());
                     }
                 } else {
                     log.warn("Failed to write create record file to temp workspace {}", createRecordFilenameProcessor.getCreateRecordFilenameAndPath());
@@ -500,8 +506,17 @@ public abstract class AbstractArmBatchProcessResponseFiles implements ArmRespons
                     ArmResponseUploadFileRecord armResponseUploadFileRecord = objectMapper.readValue(jsonPath.toFile(), ArmResponseUploadFileRecord.class);
                     UploadNewFileRecord uploadNewFileRecord = readInputJson(armResponseUploadFileRecord.getInput());
                     if (nonNull(uploadNewFileRecord)) {
-                        armBatchResponses.addResponseBatchData(Integer.valueOf(uploadNewFileRecord.getRelationId()),
-                                                               armResponseUploadFileRecord, uploadFileFilenameProcessor);
+                        if (StringUtils.isNotEmpty(uploadNewFileRecord.getRelationId())) {
+                            armBatchResponses.addResponseBatchData(Integer.valueOf(uploadNewFileRecord.getRelationId()),
+                                                                   armResponseUploadFileRecord, uploadFileFilenameProcessor);
+                        } else {
+                            log.warn("Unable to get EOD id (relation id) from uploadNewFileRecord {} upload file {}",
+                                     armResponseUploadFileRecord.getInput(), uploadFileFilenameProcessor.getUploadFileFilenameAndPath());
+                        }
+
+                    } else {
+                        log.warn("Failed to obtain EOD id (relation id) from upload file  {}",
+                                 uploadFileFilenameProcessor.getUploadFileFilenameAndPath());
                     }
                 } else {
                     log.warn("Failed to write upload file to temp workspace {}", uploadFileFilenameProcessor.getUploadFileFilenameAndPath());
@@ -634,9 +649,11 @@ public abstract class AbstractArmBatchProcessResponseFiles implements ArmRespons
                 log.error("Unable to map the input field {}", e.getMessage());
             } catch (JsonProcessingException e) {
                 log.error("Unable to parse the upload new file record {}", e.getMessage());
+            } catch (Exception e) {
+                log.error("Failed to parse the input field {}", e.getMessage());
             }
         } else {
-            log.warn("Unable to parse the input field upload new file record {}", input);
+            log.warn("Unable to parse the input field as it is null or empty");
         }
         return uploadNewFileRecord;
     }
@@ -697,13 +714,23 @@ public abstract class AbstractArmBatchProcessResponseFiles implements ArmRespons
                 if (jsonPath.toFile().exists()) {
                     logResponseFileContents(jsonPath);
                     ArmResponseInvalidLineRecord armResponseInvalidLineRecord = objectMapper.readValue(jsonPath.toFile(), ArmResponseInvalidLineRecord.class);
-                    UploadNewFileRecord uploadNewFileRecord = readInputJson(armResponseInvalidLineRecord.getInput());
+                    String input = armResponseInvalidLineRecord.getInput();
+                    UploadNewFileRecord uploadNewFileRecord = readInputJson(input);
                     if (nonNull(uploadNewFileRecord)) {
-                        armBatchResponses.addResponseBatchData(Integer.valueOf(uploadNewFileRecord.getRelationId()),
-                                                               armResponseInvalidLineRecord, invalidLineFileFilenameProcessor);
+                        if (StringUtils.isNotEmpty(uploadNewFileRecord.getRelationId())) {
+                            armBatchResponses.addResponseBatchData(Integer.valueOf(uploadNewFileRecord.getRelationId()),
+                                                                   armResponseInvalidLineRecord, invalidLineFileFilenameProcessor);
+
+                        } else {
+                            log.warn("Unable to get EOD id (relation id) from uploadNewFileRecord {} invalid line file {}",
+                                     armResponseInvalidLineRecord.getInput(), invalidLineFileFilenameProcessor.getInvalidLineFilename());
+                        }
+                    } else {
+                        log.warn("Failed to obtain EOD id (relation id) from invalid line record {} from file {}", input,
+                                 invalidLineFileFilenameProcessor.getInvalidLineFilename());
                     }
                 } else {
-                    log.warn("Failed to write invalid line file to temp workspace {}", invalidLineFileFilenameProcessor.getInvalidLineFileFilenameAndPath());
+                    log.warn("Failed to write invalid line file to temp workspace {}", invalidLineFileFilenameProcessor.getInvalidLineFilename());
                 }
             } catch (IOException e) {
                 log.error("Unable to write invalid line file to temporary workspace {} - {}",
@@ -759,7 +786,7 @@ public abstract class AbstractArmBatchProcessResponseFiles implements ArmRespons
         }
     }
 
-    private static List<String> getInvalidResponseFiles(InvalidLineFileFilenameProcessor invalidLineFileFilenameProcessor, String armResponseFile) {
+    private List<String> getInvalidResponseFiles(InvalidLineFileFilenameProcessor invalidLineFileFilenameProcessor, String armResponseFile) {
         List<String> invalidResponseFiles = new ArrayList<>();
         invalidResponseFiles.add(invalidLineFileFilenameProcessor.getInvalidLineFileFilenameAndPath());
         if (StringUtils.isNotEmpty(armResponseFile)) {
@@ -768,8 +795,8 @@ public abstract class AbstractArmBatchProcessResponseFiles implements ArmRespons
         return invalidResponseFiles;
     }
 
-    private static String getOtherFailedArmResponseFile(CreateRecordFilenameProcessor createRecordFilenameProcessor,
-                                                        UploadFileFilenameProcessor uploadFileFilenameProcessor) {
+    private String getOtherFailedArmResponseFile(CreateRecordFilenameProcessor createRecordFilenameProcessor,
+                                                 UploadFileFilenameProcessor uploadFileFilenameProcessor) {
         String armResponseFile = "";
         if (nonNull(createRecordFilenameProcessor) && nonNull(createRecordFilenameProcessor.getCreateRecordFilenameAndPath())) {
             armResponseFile = createRecordFilenameProcessor.getCreateRecordFilenameAndPath();
@@ -808,7 +835,7 @@ public abstract class AbstractArmBatchProcessResponseFiles implements ArmRespons
             .toList();
     }
 
-    private static List<String> getResponseBlobsToBeDeleted(ArmResponseBatchData armResponseBatchData) {
+    private List<String> getResponseBlobsToBeDeleted(ArmResponseBatchData armResponseBatchData) {
         List<String> responseBlobsToBeDeleted = new ArrayList<>();
         if (nonNull(armResponseBatchData.getCreateRecordFilenameProcessor())) {
             responseBlobsToBeDeleted.add(armResponseBatchData.getCreateRecordFilenameProcessor().getCreateRecordFilenameAndPath());
