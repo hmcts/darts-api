@@ -659,7 +659,7 @@ public abstract class AbstractArmBatchProcessResponseFiles implements ArmRespons
     }
 
     @SuppressWarnings({"PMD.AvoidInstantiatingObjectsInLoops"})
-    private static ResponseFilenames getArmResponseFilenames(List<String> responseFiles, String manifestName) {
+    private ResponseFilenames getArmResponseFilenames(List<String> responseFiles, String manifestName) {
         ResponseFilenames responseFilenames = new ResponseFilenames();
         for (String responseFile : responseFiles) {
             try {
@@ -681,6 +681,7 @@ public abstract class AbstractArmBatchProcessResponseFiles implements ArmRespons
             } catch (IllegalArgumentException e) {
                 // This occurs when the filename is not parsable
                 log.error("Invalid ARM response filename: {} for manifest {}", responseFile, manifestName);
+                deleteResponseBlobs(List.of(responseFile));
             }
         }
         return responseFilenames;
@@ -785,7 +786,7 @@ public abstract class AbstractArmBatchProcessResponseFiles implements ArmRespons
         }
     }
 
-    private static List<String> getInvalidResponseFiles(InvalidLineFileFilenameProcessor invalidLineFileFilenameProcessor, String armResponseFile) {
+    private List<String> getInvalidResponseFiles(InvalidLineFileFilenameProcessor invalidLineFileFilenameProcessor, String armResponseFile) {
         List<String> invalidResponseFiles = new ArrayList<>();
         invalidResponseFiles.add(invalidLineFileFilenameProcessor.getInvalidLineFileFilenameAndPath());
         if (StringUtils.isNotEmpty(armResponseFile)) {
@@ -794,8 +795,8 @@ public abstract class AbstractArmBatchProcessResponseFiles implements ArmRespons
         return invalidResponseFiles;
     }
 
-    private static String getOtherFailedArmResponseFile(CreateRecordFilenameProcessor createRecordFilenameProcessor,
-                                                        UploadFileFilenameProcessor uploadFileFilenameProcessor) {
+    private String getOtherFailedArmResponseFile(CreateRecordFilenameProcessor createRecordFilenameProcessor,
+                                                 UploadFileFilenameProcessor uploadFileFilenameProcessor) {
         String armResponseFile = "";
         if (nonNull(createRecordFilenameProcessor) && nonNull(createRecordFilenameProcessor.getCreateRecordFilenameAndPath())) {
             armResponseFile = createRecordFilenameProcessor.getCreateRecordFilenameAndPath();
@@ -834,7 +835,7 @@ public abstract class AbstractArmBatchProcessResponseFiles implements ArmRespons
             .toList();
     }
 
-    private static List<String> getResponseBlobsToBeDeleted(ArmResponseBatchData armResponseBatchData) {
+    private List<String> getResponseBlobsToBeDeleted(ArmResponseBatchData armResponseBatchData) {
         List<String> responseBlobsToBeDeleted = new ArrayList<>();
         if (nonNull(armResponseBatchData.getCreateRecordFilenameProcessor())) {
             responseBlobsToBeDeleted.add(armResponseBatchData.getCreateRecordFilenameProcessor().getCreateRecordFilenameAndPath());
