@@ -167,6 +167,8 @@ class DetsToArmBatchProcessResponseFilesImplTest {
                                                                                      checksum);
 
         // then
+        verify(osrRepository).findByArmEodId("1");
+        verify(osrRepository).save(objectStateRecordEntity);
     }
 
     @Test
@@ -182,6 +184,8 @@ class DetsToArmBatchProcessResponseFilesImplTest {
             .onUploadFileChecksumValidationFailure(uploadFileRecord, externalObjectDirectoryEntity, "checksum");
 
         // then
+        verify(osrRepository).findByArmEodId("1");
+        verify(osrRepository).save(objectStateRecordEntity);
     }
 
     @Test
@@ -195,6 +199,8 @@ class DetsToArmBatchProcessResponseFilesImplTest {
         detsToArmBatchProcessResponseFilesImpl.processUploadFileDataFailure(uploadFileRecord, processor, externalObjectDirectoryEntity);
 
         // then
+        verify(osrRepository).findByArmEodId("1");
+        verify(osrRepository).save(objectStateRecordEntity);
     }
 
     @Test
@@ -204,6 +210,11 @@ class DetsToArmBatchProcessResponseFilesImplTest {
         invalidLineRecord.setErrorStatus("errorStatus");
         invalidLineRecord.setExceptionDescription("exceptionDescription");
         invalidLineRecord.setInput(
+            """
+                {\\\"operation\\\":\\\"create_record\\\",\\\"relation_id\\\":\\\"1\\\",\\\"record_metadata\\\":{\\\"record_class\\\":\\\"A360TEST\\\",
+                \\\"publisher\\\":\\\"A360\\\",\\\"region\\\":\\\"GBR\\\",\\\"title\\\":\\\"CGITestFilesMalformedManifest_1.00MB_100.00MB_001\\\",
+                \\\"recordDate\\\":\\\"2023-12-21T10:03:53Z\\\"}}
+                """);
 
         when(osrRepository.findByArmEodId(anyString())).thenReturn(Optional.of(objectStateRecordEntity));
 
@@ -211,6 +222,8 @@ class DetsToArmBatchProcessResponseFilesImplTest {
         detsToArmBatchProcessResponseFilesImpl.processInvalidLineFileActions(invalidLineRecord, externalObjectDirectoryEntity);
 
         // then
+        verify(osrRepository).findByArmEodId("1");
+        verify(osrRepository).save(objectStateRecordEntity);
     }
 
     public ObjectStateRecordEntity createMaxObjectStateRecordEntity(Long uuid, int detsEodId, int armEodId) {

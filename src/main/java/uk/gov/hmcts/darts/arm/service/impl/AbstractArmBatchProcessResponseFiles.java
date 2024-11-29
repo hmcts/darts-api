@@ -866,15 +866,15 @@ public abstract class AbstractArmBatchProcessResponseFiles implements ArmRespons
         return externalObjectDirectory;
     }
 
-    private void updateTransferAttempts(ExternalObjectDirectoryEntity externalObjectDirectoryEntity) {
-        int currentNumberOfAttempts = externalObjectDirectoryEntity.getTransferAttempts();
+    private void updateVerificationAttempts(ExternalObjectDirectoryEntity externalObjectDirectoryEntity) {
+        int currentNumberOfAttempts = externalObjectDirectoryEntity.getVerificationAttempts();
         log.debug(
-            "Updating failed transfer attempts from {} to {} for ID {}",
+            "Updating failed verification attempts from {} to {} for ID {}",
             currentNumberOfAttempts,
             currentNumberOfAttempts + 1,
             externalObjectDirectoryEntity.getId()
         );
-        externalObjectDirectoryEntity.setTransferAttempts(currentNumberOfAttempts + 1);
+        externalObjectDirectoryEntity.setVerificationAttempts(currentNumberOfAttempts + 1);
     }
 
     protected void updateExternalObjectDirectoryStatus(ExternalObjectDirectoryEntity externalObjectDirectory,
@@ -893,7 +893,7 @@ public abstract class AbstractArmBatchProcessResponseFiles implements ArmRespons
                 || ARM_RESPONSE_CHECKSUM_VERIFICATION_FAILED.equals(status)) {
                 logApi.archiveToArmFailed(externalObjectDirectory.getId());
             } else if (ARM_RESPONSE_PROCESSING_FAILED.equals(status)
-                && externalObjectDirectory.getTransferAttempts() > armDataManagementConfiguration.getMaxRetryAttempts()) {
+                && externalObjectDirectory.getVerificationAttempts() > armDataManagementConfiguration.getMaxRetryAttempts()) {
                 logApi.archiveToArmFailed(externalObjectDirectory.getId());
             }
             externalObjectDirectory.setStatus(objectRecordStatus);
@@ -960,8 +960,13 @@ public abstract class AbstractArmBatchProcessResponseFiles implements ArmRespons
             armResponseInvalidLineRecord.getExceptionDescription(),
             armResponseInvalidLineRecord.getErrorStatus()
         );
-        updateTransferAttempts(externalObjectDirectory);
-        externalObjectDirectory.setErrorCode(armResponseInvalidLineRecord.getExceptionDescription());
+        updateVerificationAttempts(externalObjectDirectory);
+        String operation = getOperation(armResponseInvalidLineRecord);
+
+        StringBuilder errorDescription = new StringBuilder();
+        appendErrorDescription(errorDescription, operation, armResponseInvalidLineRecord);
+
+        externalObjectDirectory.setErrorCode(errorDescription.toString());
         updateExternalObjectDirectoryStatus(externalObjectDirectory, EodHelper.armResponseManifestFailedStatus());
     }
 
