@@ -12,5 +12,6 @@ public class UnableToReadArmFileException extends Exception {
     }
 
     public UnableToReadArmFileException() {
+        // This constructor is intentionally empty. Nothing special is needed here.
     }
 }

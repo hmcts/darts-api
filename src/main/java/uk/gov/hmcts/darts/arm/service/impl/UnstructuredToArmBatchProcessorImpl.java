@@ -6,7 +6,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.ListUtils;
-import org.springframework.beans.factory.DisposableBean;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.darts.arm.api.ArmDataManagementApi;
 import uk.gov.hmcts.darts.arm.component.ArchiveRecordFileGenerator;
@@ -21,6 +20,7 @@ import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.ExternalLocationTypeEntity;
 import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
+import uk.gov.hmcts.darts.common.exception.DartsException;
 import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
 import uk.gov.hmcts.darts.common.service.FileOperationService;
 import uk.gov.hmcts.darts.common.util.EodHelper;
@@ -34,6 +34,7 @@ import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
+import javax.annotation.PreDestroy;
 
 import static uk.gov.hmcts.darts.common.util.EodHelper.equalsAnyStatus;
 import static uk.gov.hmcts.darts.common.util.EodHelper.isEqual;
@@ -42,7 +43,7 @@ import static uk.gov.hmcts.darts.common.util.EodHelper.isEqual;
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class UnstructuredToArmBatchProcessorImpl implements UnstructuredToArmBatchProcessor, DisposableBean {
+public class UnstructuredToArmBatchProcessorImpl implements UnstructuredToArmBatchProcessor {
     private final ArchiveRecordService archiveRecordService;
     private final ArchiveRecordFileGenerator archiveRecordFileGenerator;
     private final DataStoreToArmHelper unstructuredToArmHelper;
@@ -167,7 +168,7 @@ public class UnstructuredToArmBatchProcessorImpl implements UnstructuredToArmBat
         } else {
             log.error("Unable to find matching external object directory for {}", armEod.getId());
             unstructuredToArmHelper.updateExternalObjectDirectoryFailedTransferAttempts(armEod, userAccount);
-            throw new RuntimeException(MessageFormat.format("Unable to find matching external object directory for {0}", armEod.getId()));
+            throw new DartsException(MessageFormat.format("Unable to find matching external object directory for {0}", armEod.getId()));
         }
     }
 
@@ -235,9 +236,11 @@ public class UnstructuredToArmBatchProcessorImpl implements UnstructuredToArmBat
         }
     }
 
-    @Override
-    public void destroy() throws Exception {
+    @PreDestroy
+    public void destroy() {
+        log.info("UnstructuredToArmBatchProcessorImpl shutting down.");
         if (CollectionUtils.isNotEmpty(eodsForTransfer)) {
+            log.info("Reverting EODs to failed status for {} EODs", eodsForTransfer.size());
             unstructuredToArmHelper.updateEodByIdAndStatus(eodsForTransfer,
                                                            EodHelper.armIngestionStatus(),
                                                            EodHelper.failedArmRawDataStatus(),
