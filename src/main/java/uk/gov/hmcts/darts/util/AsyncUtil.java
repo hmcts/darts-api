@@ -31,9 +31,11 @@ public final class AsyncUtil {
 
     public static void invokeAllAwaitTermination(List<Callable<Void>> tasks,
                                                  int threads, int timeout, TimeUnit timeUnit) throws InterruptedException {
+        log.info("Starting {} tasks with {} threads", tasks.size(), threads);
         try (ExecutorService executorService = Executors.newFixedThreadPool(threads)) {
             executorService.invokeAll(tasks, timeout, timeUnit);
             shutdownAndAwaitTermination(executorService, timeout, timeUnit);
         }
+        log.info("All async tasks completed");
     }
 }
