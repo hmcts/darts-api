@@ -86,7 +86,7 @@ public class UnstructuredToArmBatchProcessorImpl implements UnstructuredToArmBat
                         log.info("Finished processing batch {} out of {}", batchNumber, batchesForArm.size());
                     } catch (Exception e) {
                         log.error("Unexpected exception when processing batch {}", batchNumber, e);
-                        throw e;
+                        return null;
                     }
                     return null;
                 })
