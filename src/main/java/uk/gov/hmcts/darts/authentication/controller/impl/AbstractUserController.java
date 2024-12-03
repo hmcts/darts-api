@@ -57,11 +57,21 @@ public abstract class AbstractUserController implements AuthenticationController
         TokenResponse tokenResponse = authenticationService.handleOauthCode(code, redirectUri);
         var securityTokenBuilder = SecurityToken.builder()
             .accessToken(tokenResponse.accessToken())
-            .refreshToken(tokenResponse.refreshToken())
-            .userState(buildUserState(tokenResponse.accessToken()));
+            .refreshToken(tokenResponse.refreshToken());
 
-        var securityToken = securityTokenBuilder.build();
-        userAccountService.updateLastLoginTime(securityToken.getUserState().getUserId());
+        try {
+            Optional<String> emailAddressOptional = parseEmailAddressFromAccessToken(tokenResponse.accessToken());
+            if (emailAddressOptional.isPresent()) {
+                Optional<UserState> userStateOptional = authorisationApi.getAuthorisation(emailAddressOptional.get());
+                if (userStateOptional.isPresent()) {
+                    var userState = userStateOptional.get();
+                    securityTokenBuilder.userState(userState);
+                    userAccountService.updateLastLoginTime(userState.getUserId());
+                }
+            }
+        } catch (ParseException e) {
+            throw new DartsApiException(AuthenticationError.FAILED_TO_PARSE_ACCESS_TOKEN, e);
+        }
 
         return securityTokenBuilder.build();
     }
