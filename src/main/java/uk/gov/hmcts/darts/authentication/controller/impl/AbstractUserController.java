@@ -60,6 +60,9 @@ public abstract class AbstractUserController implements AuthenticationController
             .refreshToken(tokenResponse.refreshToken())
             .userState(buildUserState(tokenResponse.accessToken()));
 
+        var securityToken = securityTokenBuilder.build();
+        userAccountService.updateLastLoginTime(securityToken.getUserState().getUserId());
+
         return securityTokenBuilder.build();
     }
 
