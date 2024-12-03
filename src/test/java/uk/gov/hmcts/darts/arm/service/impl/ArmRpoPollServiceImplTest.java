@@ -6,7 +6,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.io.TempDir;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.darts.arm.config.ArmDataManagementConfiguration;
@@ -26,6 +25,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
@@ -63,16 +63,21 @@ class ArmRpoPollServiceImplTest {
     @TempDir
     private File tempDirectory;
 
+    private final List<File> tempProductionFiles = new ArrayList<>();
+    private final List<Integer> allowableFailedStates = new ArrayList<>();
+
     private static final Integer EXECUTION_ID = 1;
     private ArmRpoExecutionDetailEntity armRpoExecutionDetailEntity;
     private static final ArmRpoHelperMocks ARM_RPO_HELPER_MOCKS = new ArmRpoHelperMocks();
 
-    @InjectMocks
     private ArmRpoPollServiceImpl armRpoPollService;
 
 
     @BeforeEach
     void setUp() {
+        armRpoPollService = new ArmRpoPollServiceImpl(armRpoApi, armApiService, armRpoService, userIdentity, fileOperationService,
+                                                      armDataManagementConfiguration, logApi, tempProductionFiles, allowableFailedStates);
+
         lenient().when(userIdentity.getUserAccount()).thenReturn(userAccountEntity);
 
         armRpoExecutionDetailEntity = new ArmRpoExecutionDetailEntity();
@@ -81,7 +86,7 @@ class ArmRpoPollServiceImplTest {
     }
 
     @Test
-    void pollArmRpo_shouldPollSuccessfullyWithSaveBackgroundCompleted() throws IOException {
+    void pollArmRpo_shouldPollSuccessfully_whenSaveBackgroundCompleted() throws IOException {
         // given
         armRpoExecutionDetailEntity.setArmRpoStatus(ARM_RPO_HELPER_MOCKS.getCompletedRpoStatus());
         armRpoExecutionDetailEntity.setArmRpoState(ARM_RPO_HELPER_MOCKS.getSaveBackgroundSearchRpoState());
@@ -122,7 +127,7 @@ class ArmRpoPollServiceImplTest {
     }
 
     @Test
-    void pollArmRpo_shouldPollSuccessfullyWithSaveBackgroundCompletedForManualRun() throws IOException {
+    void pollArmRpo_shouldPollSuccessfully_whenSaveBackgroundCompletedForManualRun() throws IOException {
         // given
         armRpoExecutionDetailEntity.setArmRpoStatus(ARM_RPO_HELPER_MOCKS.getCompletedRpoStatus());
         armRpoExecutionDetailEntity.setArmRpoState(ARM_RPO_HELPER_MOCKS.getSaveBackgroundSearchRpoState());
@@ -163,7 +168,7 @@ class ArmRpoPollServiceImplTest {
     }
 
     @Test
-    void pollArmRpo_shouldPollSuccessfullyWithCreateExportBasedOnSearchResultsTableInProgress() throws IOException {
+    void pollArmRpo_shouldPollSuccessfully_whenCreateExportBasedOnSearchResultsTableInProgress() throws IOException {
         // given
         armRpoExecutionDetailEntity.setArmRpoStatus(ARM_RPO_HELPER_MOCKS.getInProgressRpoStatus());
         armRpoExecutionDetailEntity.setArmRpoState(ARM_RPO_HELPER_MOCKS.getCreateExportBasedOnSearchResultsTableRpoState());
@@ -204,7 +209,7 @@ class ArmRpoPollServiceImplTest {
     }
 
     @Test
-    void pollArmRpo_shouldPollSuccessfullyWithCreateExportBasedOnSearchResultsTableForManualRun() throws IOException {
+    void pollArmRpo_shouldPollSuccessfully_whenCreateExportBasedOnSearchResultsTableForManualRun() throws IOException {
         // given
         armRpoExecutionDetailEntity.setArmRpoStatus(ARM_RPO_HELPER_MOCKS.getInProgressRpoStatus());
         armRpoExecutionDetailEntity.setArmRpoState(ARM_RPO_HELPER_MOCKS.getCreateExportBasedOnSearchResultsTableRpoState());
@@ -245,7 +250,7 @@ class ArmRpoPollServiceImplTest {
     }
 
     @Test
-    void pollArmRpo_shouldPollSuccessfullyWithDownloadProductionFailedOnPreviousAttemptForManualRun() throws IOException {
+    void pollArmRpo_shouldPollSuccessfully_whenDownloadProductionFailedOnPreviousAttemptForManualRun() throws IOException {
         // given
         armRpoExecutionDetailEntity.setArmRpoStatus(ARM_RPO_HELPER_MOCKS.getFailedRpoStatus());
         armRpoExecutionDetailEntity.setArmRpoState(ARM_RPO_HELPER_MOCKS.getDownloadProductionRpoState());
@@ -286,7 +291,7 @@ class ArmRpoPollServiceImplTest {
     }
 
     @Test
-    void pollArmRpo_shouldPollNotFindLatestExecutionDetailOnStepDownloadProductionFailed() throws IOException {
+    void pollArmRpo_shouldPollNotFindLatestExecutionDetail_OnStepDownloadProductionFailed() {
         // given
         armRpoExecutionDetailEntity.setArmRpoStatus(ARM_RPO_HELPER_MOCKS.getFailedRpoStatus());
         armRpoExecutionDetailEntity.setArmRpoState(ARM_RPO_HELPER_MOCKS.getDownloadProductionRpoState());
@@ -302,7 +307,7 @@ class ArmRpoPollServiceImplTest {
     }
 
     @Test
-    void pollArmRpo_shouldPollNotFindLatestExecutionDetailForManualRunOnStepDownloadProductionInProgress() throws IOException {
+    void pollArmRpo_shouldPollNotFindLatestExecutionDetailForManualRun_OnStepDownloadProductionInProgress() {
         // given
         armRpoExecutionDetailEntity.setArmRpoStatus(ARM_RPO_HELPER_MOCKS.getInProgressRpoStatus());
         armRpoExecutionDetailEntity.setArmRpoState(ARM_RPO_HELPER_MOCKS.getDownloadProductionRpoState());
@@ -399,7 +404,7 @@ class ArmRpoPollServiceImplTest {
     }
 
     @Test
-    void pollArmRpo_shouldHandleExceptionDuringPollingOnCreateExportBasedOnSearchResultsTableStep() {
+    void pollArmRpo_shouldHandleExceptionDuringPolling_whenCreateExportBasedOnSearchResultsTableStep() {
         // given
         armRpoExecutionDetailEntity.setArmRpoStatus(ARM_RPO_HELPER_MOCKS.getCompletedRpoStatus());
         armRpoExecutionDetailEntity.setArmRpoState(ARM_RPO_HELPER_MOCKS.getSaveBackgroundSearchRpoState());
@@ -429,7 +434,8 @@ class ArmRpoPollServiceImplTest {
                                                       false),
             createMasterIndexFieldByRecordClassSchema("109b6bf1-57a0-48ec-b22e-c7248dc74f91", "Contributor", "contributor", "string", false),
             createMasterIndexFieldByRecordClassSchema("893048bf-1e7c-4811-9abf-00cd77a715cf", "Record Date", "recordDate", "date", false),
-            createMasterIndexFieldByRecordClassSchema("fdd0fcbb-da46-4af1-a627-ac255c12bb23", "ObjectId", "bf_012", "number", false)
+            createMasterIndexFieldByRecordClassSchema("fdd0fcbb-da46-4af1-a627-ac255c12bb23", "ObjectId", "bf_012", "number", false),
+            createMasterIndexFieldByRecordClassSchema("1fa3bf91-5234-432d-bebb-b339dc3aaccf", "Region", "bf_012", "number", true)
         );
     }
 

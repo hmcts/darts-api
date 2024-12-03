@@ -13,13 +13,14 @@ import uk.gov.hmcts.darts.arm.service.ArmRpoPollService;
 import uk.gov.hmcts.darts.arm.service.ArmRpoService;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.ArmRpoExecutionDetailEntity;
+import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.service.FileOperationService;
 import uk.gov.hmcts.darts.log.api.LogApi;
 
 import java.io.File;
+import java.io.IOException;
 import java.nio.file.Path;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import static java.util.Objects.isNull;
@@ -38,13 +39,14 @@ public class ArmRpoPollServiceImpl implements ArmRpoPollService {
     private final ArmDataManagementConfiguration armDataManagementConfiguration;
     private final LogApi logApi;
 
-    private List<File> tempProductionFiles;
+    private List<File> tempProductionFiles = new ArrayList<>();
 
-    private List<Integer> allowableFailedStates = null;
+    private List<Integer> allowableFailedStates = new ArrayList<>();
 
 
     @Override
     public void pollArmRpo(boolean isManualRun) {
+        log.info("Polling ARM RPO service - isManualRun: {}", isManualRun);
         setupFailedStatuses();
         Integer executionId = null;
         tempProductionFiles = new ArrayList<>();
@@ -55,6 +57,8 @@ public class ArmRpoPollServiceImpl implements ArmRpoPollService {
                 logApi.armRpoPollingFailed(executionId);
                 return;
             }
+            executionId = armRpoExecutionDetailEntity.getId();
+
             var bearerToken = armApiService.getArmBearerToken();
             if (isNull(bearerToken)) {
                 log.warn("Unable to get bearer token to poll ARM RPO");
@@ -62,7 +66,6 @@ public class ArmRpoPollServiceImpl implements ArmRpoPollService {
                 return;
             }
 
-            executionId = armRpoExecutionDetailEntity.getId();
             var userAccount = userIdentity.getUserAccount();
 
             // step to call ARM RPO API to get the extended searches by matter
@@ -83,17 +86,7 @@ public class ArmRpoPollServiceImpl implements ArmRpoPollService {
                 var productionOutputFiles = armRpoApi.getProductionOutputFiles(bearerToken, executionId, userAccount);
 
                 for (var productionExportFileId : productionOutputFiles) {
-                    String productionExportFilename = generateTempProductionExportFilename(productionExportFileId);
-                    // step to call ARM RPO API to download the production export file
-                    var inputStream = armRpoApi.downloadProduction(bearerToken, executionId, productionExportFileId, userAccount);
-                    log.info("About to save production export file to temp workspace {}", productionExportFilename);
-                    Path tempProductionFile = fileOperationService.saveFileToTempWorkspace(
-                        inputStream,
-                        productionExportFilename,
-                        armDataManagementConfiguration,
-                        true
-                    );
-                    tempProductionFiles.add(tempProductionFile.toFile());
+                    processProductionFiles(productionExportFileId, bearerToken, executionId, userAccount);
                 }
                 if (CollectionUtils.isNotEmpty(tempProductionFiles)) {
                     // step to call ARM RPO API to remove the production
@@ -111,17 +104,28 @@ public class ArmRpoPollServiceImpl implements ArmRpoPollService {
             log.error("Error while polling ARM RPO", e);
             logApi.armRpoPollingFailed(executionId);
         } finally {
-            try {
-                cleanUpTempFiles();
-            } catch (Exception e) {
-                log.error("Error while cleaning up ARM RPO polling service temp files", e);
-            }
+            cleanUpTempFiles();
         }
+    }
+
+    private void processProductionFiles(String productionExportFileId, String bearerToken, Integer executionId,
+                                        UserAccountEntity userAccount) throws IOException {
+        String productionExportFilename = generateTempProductionExportFilename(productionExportFileId);
+        // step to call ARM RPO API to download the production export file
+        var inputStream = armRpoApi.downloadProduction(bearerToken, executionId, productionExportFileId, userAccount);
+        log.info("About to save production export file to temp workspace {}", productionExportFilename);
+        Path tempProductionFile = fileOperationService.saveFileToTempWorkspace(
+            inputStream,
+            productionExportFilename,
+            armDataManagementConfiguration,
+            true
+        );
+        tempProductionFiles.add(tempProductionFile.toFile());
     }
 
     private void setupFailedStatuses() {
         if (CollectionUtils.isEmpty(allowableFailedStates)) {
-            allowableFailedStates = Collections.unmodifiableList(List.of(
+            allowableFailedStates = List.of(
                 ArmRpoHelper.getExtendedSearchesByMatterRpoState().getId(),
                 ArmRpoHelper.getMasterIndexFieldByRecordClassSchemaSecondaryRpoState().getId(),
                 ArmRpoHelper.createExportBasedOnSearchResultsTableRpoState().getId(),
@@ -129,19 +133,23 @@ public class ArmRpoPollServiceImpl implements ArmRpoPollService {
                 ArmRpoHelper.getProductionOutputFilesRpoState().getId(),
                 ArmRpoHelper.downloadProductionRpoState().getId(),
                 ArmRpoHelper.removeProductionRpoState().getId()
-            ));
+            );
         }
     }
 
     private void cleanUpTempFiles() {
-        for (var tempProductionFile : tempProductionFiles) {
-            if (tempProductionFile.exists()) {
-                if (tempProductionFile.delete()) {
-                    log.info("Deleted temp production file {}", tempProductionFile.getName());
-                } else {
-                    log.warn("Failed to delete temp production file {}", tempProductionFile.getName());
+        try {
+            for (var tempProductionFile : tempProductionFiles) {
+                if (tempProductionFile.exists()) {
+                    if (tempProductionFile.delete()) {
+                        log.info("Deleted temp production file {}", tempProductionFile.getName());
+                    } else {
+                        log.warn("Failed to delete temp production file {}", tempProductionFile.getName());
+                    }
                 }
             }
+        } catch (Exception e) {
+            log.error("Error while cleaning up ARM RPO polling service temp files", e);
         }
     }
 
