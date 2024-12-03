@@ -10,6 +10,7 @@ public interface OAuthClient {
                                   String clientId,
                                   String authClientSecret, String scope);
 
+    @SuppressWarnings({"PMD.UseObjectForClearerAPI"})
     HTTPResponse fetchAccessToken(AuthProviderConfigurationProperties providerConfig,
                                   String refreshToken, String clientId,
                                   String clientSecret, String scope);
