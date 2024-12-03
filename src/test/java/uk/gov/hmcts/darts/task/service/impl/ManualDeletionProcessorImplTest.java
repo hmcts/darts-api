@@ -28,6 +28,7 @@ import uk.gov.hmcts.darts.common.repository.ObjectAdminActionRepository;
 import uk.gov.hmcts.darts.common.repository.TranscriptionDocumentRepository;
 import uk.gov.hmcts.darts.common.util.EodHelper;
 import uk.gov.hmcts.darts.log.api.LogApi;
+import uk.gov.hmcts.darts.task.model.RetConfReason;
 import uk.gov.hmcts.darts.test.common.TestUtils;
 
 import java.time.Duration;
@@ -260,13 +261,13 @@ class ManualDeletionProcessorImplTest {
         verify(objectAdminAction).getComments();
 
         //Validate RetConfReason
-        ArgumentCaptor<ManualDeletionProcessorImpl.RetConfReason> captor = ArgumentCaptor.forClass(ManualDeletionProcessorImpl.RetConfReason.class);
+        ArgumentCaptor<RetConfReason> captor = ArgumentCaptor.forClass(RetConfReason.class);
         verify(objectMapper).writeValueAsString(captor.capture());
-        ManualDeletionProcessorImpl.RetConfReason retConfReasonObject = captor.getValue();
-        assertEquals(deletedTs, retConfReasonObject.manualDeletionTs);
-        assertEquals(reason, retConfReasonObject.manualDeletionReason);
-        assertEquals(ticketReference, retConfReasonObject.ticketReference);
-        assertEquals(comments, retConfReasonObject.comments);
+        RetConfReason retConfReasonObject = captor.getValue();
+        assertEquals(deletedTs, retConfReasonObject.getManualDeletionTs());
+        assertEquals(reason, retConfReasonObject.getManualDeletionReason());
+        assertEquals(ticketReference, retConfReasonObject.getTicketReference());
+        assertEquals(comments, retConfReasonObject.getComments());
     }
 
     private ObjectAdminActionEntity createObjectAdminAction(boolean isMedia, boolean isTranscription) {

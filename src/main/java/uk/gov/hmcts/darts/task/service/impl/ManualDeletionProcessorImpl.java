@@ -1,6 +1,5 @@
 package uk.gov.hmcts.darts.task.service.impl;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -24,6 +23,7 @@ import uk.gov.hmcts.darts.common.repository.ObjectAdminActionRepository;
 import uk.gov.hmcts.darts.common.repository.TranscriptionDocumentRepository;
 import uk.gov.hmcts.darts.common.util.EodHelper;
 import uk.gov.hmcts.darts.log.api.LogApi;
+import uk.gov.hmcts.darts.task.model.RetConfReason;
 import uk.gov.hmcts.darts.task.service.ManualDeletionProcessor;
 
 import java.time.Duration;
@@ -128,10 +128,10 @@ public class ManualDeletionProcessorImpl implements ManualDeletionProcessor {
     String getRetConfReason(OffsetDateTime deletedTs, ObjectAdminActionEntity objectAdminAction) {
         try {
             RetConfReason retConfReason = new RetConfReason();
-            retConfReason.manualDeletionTs = deletedTs;
-            retConfReason.manualDeletionReason = objectAdminAction.getObjectHiddenReason().getReason();
-            retConfReason.ticketReference = objectAdminAction.getTicketReference();
-            retConfReason.comments = objectAdminAction.getComments();
+            retConfReason.setManualDeletionTs(deletedTs);
+            retConfReason.setManualDeletionReason(objectAdminAction.getObjectHiddenReason().getReason());
+            retConfReason.setTicketReference(objectAdminAction.getTicketReference());
+            retConfReason.setComments(objectAdminAction.getComments());
             return objectMapper.writeValueAsString(retConfReason);
         } catch (Exception e) {
             log.error("Error while creating RetConfReason", e);
@@ -162,14 +162,4 @@ public class ManualDeletionProcessorImpl implements ManualDeletionProcessor {
         return OffsetDateTime.now().minus(gracePeriod);
     }
 
-    static class RetConfReason {
-        @JsonProperty("manual_deletion_ts")
-        OffsetDateTime manualDeletionTs;
-        @JsonProperty("ret_conf_reason")
-        String manualDeletionReason;
-        @JsonProperty("ticket_reference")
-        String ticketReference;
-        @JsonProperty("comments")
-        String comments;
-    }
 }
