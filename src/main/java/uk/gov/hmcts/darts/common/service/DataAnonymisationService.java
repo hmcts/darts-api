@@ -7,9 +7,9 @@ import java.util.List;
 
 public interface DataAnonymisationService {
 
-    void anonymiseCourtCaseById(UserAccountEntity userAccount, Integer courtCaseId);
+    void anonymiseCourtCaseById(UserAccountEntity userAccount, Integer courtCaseId, boolean isManuallyRequested);
 
-    void anonymiseEventByIds(UserAccountEntity userAccount, List<Integer> eveIds);
+    void anonymiseEventByIds(UserAccountEntity userAccount, List<Integer> eveIds, boolean isManuallyRequested);
 
-    void anonymiseEvent(UserAccountEntity userAccount, EventEntity eventEntity);
+    void anonymiseEvent(UserAccountEntity userAccount, EventEntity eventEntity, boolean isManuallyRequested);
 }

@@ -74,11 +74,11 @@ class CaseExpiryDeletionAutomatedTaskTest {
             .currentOffsetDateTime();
 
         verify(dataAnonymisationService, times(1))
-            .anonymiseCourtCaseById(userAccount, 1);
+            .anonymiseCourtCaseById(userAccount, 1, false);
         verify(dataAnonymisationService, times(1))
-            .anonymiseCourtCaseById(userAccount, 2);
+            .anonymiseCourtCaseById(userAccount, 2, false);
         verify(dataAnonymisationService, times(1))
-            .anonymiseCourtCaseById(userAccount, 3);
+            .anonymiseCourtCaseById(userAccount, 3, false);
 
 
         verify(caseRepository, times(1))
