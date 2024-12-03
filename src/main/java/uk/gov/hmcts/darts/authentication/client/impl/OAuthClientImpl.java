@@ -54,7 +54,10 @@ public class OAuthClientImpl implements OAuthClient {
 
     @SneakyThrows({URISyntaxException.class, IOException.class})
     @Override
-    public HTTPResponse fetchAccessToken(AuthProviderConfigurationProperties providerConfigurationProperties, String refreshTokenParam, String clientId, String authClientSecret,
+    public HTTPResponse fetchAccessToken(AuthProviderConfigurationProperties providerConfigurationProperties,
+                                         String refreshTokenParam,
+                                         String clientId,
+                                         String authClientSecret,
                                          String scope) {
 
         // Construct the grant from the saved refresh token
