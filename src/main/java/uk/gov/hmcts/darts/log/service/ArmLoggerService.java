@@ -1,5 +1,7 @@
 package uk.gov.hmcts.darts.log.service;
 
+import java.time.Duration;
+
 public interface ArmLoggerService {
 
     void armPushSuccessful(Integer eodId);
@@ -9,6 +11,8 @@ public interface ArmLoggerService {
     void archiveToArmSuccessful(Integer eodId);
 
     void archiveToArmFailed(Integer eodId);
+
+    void logArmMissingResponse(Duration armMissingResponseDuration, Integer eodId);
 
     void armRpoSearchSuccessful(Integer executionId);
 

@@ -9,6 +9,7 @@ import uk.gov.hmcts.darts.arm.service.ExternalObjectDirectoryService;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
 import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
+import uk.gov.hmcts.darts.common.repository.ObjectStateRecordRepository;
 import uk.gov.hmcts.darts.common.service.FileOperationService;
 import uk.gov.hmcts.darts.log.api.LogApi;
 
@@ -17,12 +18,14 @@ import uk.gov.hmcts.darts.log.api.LogApi;
 @Component
 public class ArmBatchProcessResponseFilesImpl extends AbstractArmBatchProcessResponseFiles {
 
-    public ArmBatchProcessResponseFilesImpl(ExternalObjectDirectoryRepository externalObjectDirectoryRepository, ArmDataManagementApi armDataManagementApi,
+    public ArmBatchProcessResponseFilesImpl(ExternalObjectDirectoryRepository externalObjectDirectoryRepository,
+                                            ObjectStateRecordRepository objectStateRecordRepository, ArmDataManagementApi armDataManagementApi,
                                             FileOperationService fileOperationService, ArmDataManagementConfiguration armDataManagementConfiguration,
                                             ObjectMapper objectMapper, UserIdentity userIdentity, CurrentTimeHelper currentTimeHelper,
                                             ExternalObjectDirectoryService externalObjectDirectoryService,
                                             LogApi logApi) {
         super(externalObjectDirectoryRepository,
+              objectStateRecordRepository,
               armDataManagementApi,
               fileOperationService,
               armDataManagementConfiguration,

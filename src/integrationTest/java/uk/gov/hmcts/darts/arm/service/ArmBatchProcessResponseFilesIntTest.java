@@ -11,6 +11,7 @@ class ArmBatchProcessResponseFilesIntTest extends AbstractArmBatchProcessRespons
 
         armBatchProcessResponseFiles = new ArmBatchProcessResponseFilesImpl(
             externalObjectDirectoryRepository,
+            objectStateRecordRepository,
             armDataManagementApi,
             fileOperationService,
             armDataManagementConfiguration,
