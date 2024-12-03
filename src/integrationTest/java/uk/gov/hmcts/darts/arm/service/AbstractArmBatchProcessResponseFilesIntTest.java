@@ -8,6 +8,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import uk.gov.hmcts.darts.arm.api.ArmDataManagementApi;
@@ -109,6 +110,10 @@ abstract class AbstractArmBatchProcessResponseFilesIntTest extends IntegrationBa
         UserAccountEntity testUser = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
         when(userIdentity.getUserAccount()).thenReturn(testUser);
         lenient().when(armDataManagementConfiguration.getMaxContinuationBatchSize()).thenReturn(10);
+
+        BinaryData inputUploadFileRecord = convertStringToBinaryData("{\"timestamp\": \"2031-08-10T10:00:00.000Z\"}");
+
+        when(armDataManagementApi.getBlobData(Mockito.startsWith("dropzone/DARTS/response/" + prefix() + "_"))).thenReturn(inputUploadFileRecord);
     }
 
     protected abstract String prefix();
@@ -185,8 +190,8 @@ abstract class AbstractArmBatchProcessResponseFilesIntTest extends IntegrationBa
         armEod5 = dartsPersistence.save(armEod5);
 
         List<String> blobNamesAndPaths = new ArrayList<>();
-        String blobNameAndPath1 = String.format("dropzone/DARTS/response/DARTS_%s_6a374f19a9ce7dc9cc480ea8d4eca0fb_1_iu.rsp", manifest1Uuid);
-        String blobNameAndPath2 = String.format("dropzone/DARTS/response/DARTS_%s_7a374f19a9ce7dc9cc480ea8d4eca0fc_1_iu.rsp", manifest2Uuid);
+        String blobNameAndPath1 = String.format("dropzone/DARTS/response/%s_%s_6a374f19a9ce7dc9cc480ea8d4eca0fb_1_iu.rsp", prefix(), manifest1Uuid);
+        String blobNameAndPath2 = String.format("dropzone/DARTS/response/%s_%s_7a374f19a9ce7dc9cc480ea8d4eca0fc_1_iu.rsp", prefix(), manifest2Uuid);
         blobNamesAndPaths.add(blobNameAndPath1);
         blobNamesAndPaths.add(blobNameAndPath2);
 
@@ -453,6 +458,7 @@ abstract class AbstractArmBatchProcessResponseFilesIntTest extends IntegrationBa
 
         verify(armDataManagementApi).getBlobData(createRecordFilename1);
         verify(armDataManagementApi).getBlobData(invalidLineFileFilename2);
+        verify(armDataManagementApi).getBlobData(blobNameAndPath1);
 
         verify(armDataManagementApi).deleteBlobData(createRecordFilename1);
         verify(armDataManagementApi).deleteBlobData(invalidLineFileFilename2);
@@ -573,7 +579,7 @@ abstract class AbstractArmBatchProcessResponseFilesIntTest extends IntegrationBa
         armEod1 = dartsPersistence.save(armEod1);
 
         List<String> blobNamesAndPaths = new ArrayList<>();
-        String blobNameAndPath1 = String.format("dropzone/DARTS/response/DARTS_%s_6a374f19a9ce7dc9cc480ea8d4eca0fb_1_iu.rsp", manifest1Uuid);
+        String blobNameAndPath1 = String.format("dropzone/DARTS/response/%s_%s_6a374f19a9ce7dc9cc480ea8d4eca0fb_1_iu.rsp", prefix(), manifest1Uuid);
         blobNamesAndPaths.add(blobNameAndPath1);
 
         ContinuationTokenBlobs continuationTokenBlobs = ContinuationTokenBlobs.builder()
@@ -643,6 +649,8 @@ abstract class AbstractArmBatchProcessResponseFilesIntTest extends IntegrationBa
         verify(armDataManagementApi).deleteBlobData(invalidLineFileFilename2);
         verify(armDataManagementApi).deleteBlobData(invalidLineFileFilename3);
 
+        verify(armDataManagementApi).getBlobData(blobNameAndPath1);
+
         verifyNoMoreInteractions(armDataManagementApi);
     }
 
@@ -699,8 +707,8 @@ abstract class AbstractArmBatchProcessResponseFilesIntTest extends IntegrationBa
 
         List<String> blobNamesAndPaths1 = new ArrayList<>();
         List<String> blobNamesAndPaths2 = new ArrayList<>();
-        String blobNameAndPath1 = String.format("dropzone/DARTS/response/DARTS_%s_6a374f19a9ce7dc9cc480ea8d4eca0fb_1_iu.rsp", manifest1Uuid);
-        String blobNameAndPath2 = String.format("dropzone/DARTS/response/DARTS_%s_7a374f19a9ce7dc9cc480ea8d4eca0fc_1_iu.rsp", manifest2Uuid);
+        String blobNameAndPath1 = String.format("dropzone/DARTS/response/%s_%s_6a374f19a9ce7dc9cc480ea8d4eca0fb_1_iu.rsp", prefix(), manifest1Uuid);
+        String blobNameAndPath2 = String.format("dropzone/DARTS/response/%s_%s_7a374f19a9ce7dc9cc480ea8d4eca0fc_1_iu.rsp", prefix(), manifest2Uuid);
         blobNamesAndPaths1.add(blobNameAndPath1);
         blobNamesAndPaths2.add(blobNameAndPath2);
 
@@ -918,8 +926,8 @@ abstract class AbstractArmBatchProcessResponseFilesIntTest extends IntegrationBa
         dartsPersistence.save(armEod5);
 
         List<String> blobNamesAndPaths = new ArrayList<>();
-        String blobNameAndPath1 = String.format("dropzone/DARTS/response/DARTS_%s_6a374f19a9ce7dc9cc480ea8d4eca0fb_1_iu.rsp", manifest1Uuid);
-        String blobNameAndPath2 = String.format("dropzone/DARTS/response/DARTS_%s_7a374f19a9ce7dc9cc480ea8d4eca0fc_1_iu.rsp", manifest2Uuid);
+        String blobNameAndPath1 = String.format("dropzone/DARTS/response/%s_%s_6a374f19a9ce7dc9cc480ea8d4eca0fb_1_iu.rsp", prefix(), manifest1Uuid);
+        String blobNameAndPath2 = String.format("dropzone/DARTS/response/%s_%s_7a374f19a9ce7dc9cc480ea8d4eca0fc_1_iu.rsp", prefix(), manifest2Uuid);
         blobNamesAndPaths.add(blobNameAndPath1);
         blobNamesAndPaths.add(blobNameAndPath2);
 
@@ -1092,8 +1100,8 @@ abstract class AbstractArmBatchProcessResponseFilesIntTest extends IntegrationBa
         dartsPersistence.save(armEod5);
 
         List<String> blobNamesAndPaths = new ArrayList<>();
-        String blobNameAndPath1 = String.format("dropzone/DARTS/response/DARTS_%s_6a374f19a9ce7dc9cc480ea8d4eca0fb_1_iu.rsp", manifest1Uuid);
-        String blobNameAndPath2 = String.format("dropzone/DARTS/response/DARTS_%s_7a374f19a9ce7dc9cc480ea8d4eca0fc_1_iu.rsp", manifest2Uuid);
+        String blobNameAndPath1 = String.format("dropzone/DARTS/response/%s_%s_6a374f19a9ce7dc9cc480ea8d4eca0fb_1_iu.rsp", prefix(), manifest1Uuid);
+        String blobNameAndPath2 = String.format("dropzone/DARTS/response/%s_%s_7a374f19a9ce7dc9cc480ea8d4eca0fc_1_iu.rsp", prefix(), manifest2Uuid);
         blobNamesAndPaths.add(blobNameAndPath1);
         blobNamesAndPaths.add(blobNameAndPath2);
 
@@ -1243,7 +1251,7 @@ abstract class AbstractArmBatchProcessResponseFilesIntTest extends IntegrationBa
         armEod2 = dartsPersistence.save(armEod2);
 
         List<String> blobNamesAndPaths = new ArrayList<>();
-        String blobNameAndPath1 = String.format("dropzone/DARTS/response/DARTS_%s_6a374f19a9ce7dc9cc480ea8d4eca0fb_1_iu.rsp", manifest1Uuid);
+        String blobNameAndPath1 = String.format("dropzone/DARTS/response/%s_%s_6a374f19a9ce7dc9cc480ea8d4eca0fb_1_iu.rsp", prefix(), manifest1Uuid);
         blobNamesAndPaths.add(blobNameAndPath1);
 
         ContinuationTokenBlobs continuationTokenBlobs = ContinuationTokenBlobs.builder()
@@ -1347,7 +1355,7 @@ abstract class AbstractArmBatchProcessResponseFilesIntTest extends IntegrationBa
         armEod = dartsPersistence.save(armEod);
 
         List<String> blobNamesAndPaths = new ArrayList<>();
-        String blobNameAndPath1 = String.format("dropzone/DARTS/response/DARTS_%s_6a374f19a9ce7dc9cc480ea8d4eca0fb_1_iu.rsp", manifest1Uuid);
+        String blobNameAndPath1 = String.format("dropzone/DARTS/response/%s_%s_6a374f19a9ce7dc9cc480ea8d4eca0fb_1_iu.rsp", prefix(), manifest1Uuid);
         blobNamesAndPaths.add(blobNameAndPath1);
 
         ContinuationTokenBlobs continuationTokenBlobs = ContinuationTokenBlobs.builder()
@@ -1449,7 +1457,7 @@ abstract class AbstractArmBatchProcessResponseFilesIntTest extends IntegrationBa
         armEod = dartsPersistence.save(armEod);
 
         List<String> blobNamesAndPaths = new ArrayList<>();
-        String blobNameAndPath1 = String.format("dropzone/DARTS/response/DARTS_%s_6a374f19a9ce7dc9cc480ea8d4eca0fb_1_iu.rsp", manifest1Uuid);
+        String blobNameAndPath1 = String.format("dropzone/DARTS/response/%s_%s_6a374f19a9ce7dc9cc480ea8d4eca0fb_1_iu.rsp", prefix(), manifest1Uuid);
         blobNamesAndPaths.add(blobNameAndPath1);
 
         ContinuationTokenBlobs continuationTokenBlobs = ContinuationTokenBlobs.builder()
@@ -1526,7 +1534,7 @@ abstract class AbstractArmBatchProcessResponseFilesIntTest extends IntegrationBa
         armEod = dartsPersistence.save(armEod);
 
         List<String> blobNamesAndPaths = new ArrayList<>();
-        String blobNameAndPath1 = String.format("dropzone/DARTS/response/DARTS_%s_6a374f19a9ce7dc9cc480ea8d4eca0fb_1_iu.rsp", manifest1Uuid);
+        String blobNameAndPath1 = String.format("dropzone/DARTS/response/%s_%s_6a374f19a9ce7dc9cc480ea8d4eca0fb_1_iu.rsp", prefix(), manifest1Uuid);
         blobNamesAndPaths.add(blobNameAndPath1);
 
         ContinuationTokenBlobs continuationTokenBlobs = ContinuationTokenBlobs.builder()
@@ -1626,7 +1634,7 @@ abstract class AbstractArmBatchProcessResponseFilesIntTest extends IntegrationBa
         armEod = dartsPersistence.save(armEod);
 
         List<String> blobNamesAndPaths = new ArrayList<>();
-        String blobNameAndPath1 = String.format("dropzone/DARTS/response/DARTS_%s_6a374f19a9ce7dc9cc480ea8d4eca0fb_1_iu.rsp", manifest1Uuid);
+        String blobNameAndPath1 = String.format("dropzone/DARTS/response/%s_%s_6a374f19a9ce7dc9cc480ea8d4eca0fb_1_iu.rsp", prefix(), manifest1Uuid);
         blobNamesAndPaths.add(blobNameAndPath1);
 
         ContinuationTokenBlobs continuationTokenBlobs = ContinuationTokenBlobs.builder()
@@ -1715,7 +1723,7 @@ abstract class AbstractArmBatchProcessResponseFilesIntTest extends IntegrationBa
         armEod = dartsPersistence.save(armEod);
 
         List<String> blobNamesAndPaths = new ArrayList<>();
-        String blobNameAndPath1 = String.format("dropzone/DARTS/response/DARTS_%s_6a374f19a9ce7dc9cc480ea8d4eca0fb_1_iu.rsp", manifest1Uuid);
+        String blobNameAndPath1 = String.format("dropzone/DARTS/response/%s_%s_6a374f19a9ce7dc9cc480ea8d4eca0fb_1_iu.rsp", prefix(), manifest1Uuid);
         blobNamesAndPaths.add(blobNameAndPath1);
 
         ContinuationTokenBlobs continuationTokenBlobs = ContinuationTokenBlobs.builder()
@@ -1795,7 +1803,7 @@ abstract class AbstractArmBatchProcessResponseFilesIntTest extends IntegrationBa
         String manifest1Uuid = UUID.randomUUID().toString();
 
         List<String> blobNamesAndPaths = new ArrayList<>();
-        String blobNameAndPath1 = String.format("dropzone/DARTS/response/DARTS_%s_6a374f19a9ce7dc9cc480ea8d4eca0fb_1_iu.rsp", manifest1Uuid);
+        String blobNameAndPath1 = String.format("dropzone/DARTS/response/%s_%s_6a374f19a9ce7dc9cc480ea8d4eca0fb_1_iu.rsp", prefix(), manifest1Uuid);
         blobNamesAndPaths.add(blobNameAndPath1);
 
         ContinuationTokenBlobs continuationTokenBlobs = ContinuationTokenBlobs.builder()
@@ -1908,7 +1916,7 @@ abstract class AbstractArmBatchProcessResponseFilesIntTest extends IntegrationBa
         armEod = dartsPersistence.save(armEod);
 
         List<String> blobNamesAndPaths = new ArrayList<>();
-        String blobNameAndPath1 = String.format("dropzone/DARTS/response/DARTS_%s_6a374f19a9ce7dc9cc480ea8d4eca0fb_1_iu.rsp", manifest1Uuid);
+        String blobNameAndPath1 = String.format("dropzone/DARTS/response/%s_%s_6a374f19a9ce7dc9cc480ea8d4eca0fb_1_iu.rsp", prefix(), manifest1Uuid);
         blobNamesAndPaths.add(blobNameAndPath1);
 
         ContinuationTokenBlobs continuationTokenBlobs = ContinuationTokenBlobs.builder()
@@ -1982,7 +1990,7 @@ abstract class AbstractArmBatchProcessResponseFilesIntTest extends IntegrationBa
         armEod = dartsPersistence.save(armEod);
 
         List<String> blobNamesAndPaths = new ArrayList<>();
-        String blobNameAndPath1 = String.format("dropzone/DARTS/response/DARTS_%s_6a374f19a9ce7dc9cc480ea8d4eca0fb_1_iu.rsp", manifest1Uuid);
+        String blobNameAndPath1 = String.format("dropzone/DARTS/response/%s_%s_6a374f19a9ce7dc9cc480ea8d4eca0fb_1_iu.rsp", prefix(), manifest1Uuid);
         blobNamesAndPaths.add(blobNameAndPath1);
 
         ContinuationTokenBlobs continuationTokenBlobs = ContinuationTokenBlobs.builder()
@@ -2152,7 +2160,7 @@ abstract class AbstractArmBatchProcessResponseFilesIntTest extends IntegrationBa
         armEod = dartsPersistence.save(armEod);
 
         List<String> blobNamesAndPaths = new ArrayList<>();
-        String blobNameAndPath1 = String.format("dropzone/DARTS/response/DARTS_%s_6a374f19a9ce7dc9cc480ea8d4eca0fb_1_iu.rsp", manifest1Uuid);
+        String blobNameAndPath1 = String.format("dropzone/DARTS/response/%s_%s_6a374f19a9ce7dc9cc480ea8d4eca0fb_1_iu.rsp", prefix(), manifest1Uuid);
         blobNamesAndPaths.add(blobNameAndPath1);
 
         ContinuationTokenBlobs continuationTokenBlobs = ContinuationTokenBlobs.builder()
@@ -2229,7 +2237,7 @@ abstract class AbstractArmBatchProcessResponseFilesIntTest extends IntegrationBa
         armEod = dartsPersistence.save(armEod);
 
         List<String> blobNamesAndPaths = new ArrayList<>();
-        String blobNameAndPath1 = String.format("dropzone/DARTS/response/DARTS_%s_6a374f19a9ce7dc9cc480ea8d4eca0fb_1_iu.rsp", manifest1Uuid);
+        String blobNameAndPath1 = String.format("dropzone/DARTS/response/%s_%s_6a374f19a9ce7dc9cc480ea8d4eca0fb_1_iu.rsp", prefix(), manifest1Uuid);
         blobNamesAndPaths.add(blobNameAndPath1);
 
         ContinuationTokenBlobs continuationTokenBlobs = ContinuationTokenBlobs.builder()
@@ -2298,7 +2306,7 @@ abstract class AbstractArmBatchProcessResponseFilesIntTest extends IntegrationBa
         String manifest1Uuid = UUID.randomUUID().toString();
 
         List<String> blobNamesAndPaths = new ArrayList<>();
-        String blobNameAndPath1 = String.format("dropzone/DARTS/response/DARTS_%s_6a374f19a9ce7dc9cc480ea8d4eca0fb_1_iu.rsp", manifest1Uuid);
+        String blobNameAndPath1 = String.format("dropzone/DARTS/response/%s_%s_6a374f19a9ce7dc9cc480ea8d4eca0fb_1_iu.rsp", prefix(), manifest1Uuid);
         blobNamesAndPaths.add(blobNameAndPath1);
 
         ContinuationTokenBlobs continuationTokenBlobs = ContinuationTokenBlobs.builder()
