@@ -94,7 +94,7 @@ public class ExternalObjectDirectoryEntity extends CreatedModifiedBaseEntity imp
     private Long osrUuid;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "osr_uuid")
+    @JoinColumn(name = "osr_uuid", updatable = false, insertable = false)
     private ObjectStateRecordEntity objectStateRecordEntity;
 
     @Column(name = "update_retention")
