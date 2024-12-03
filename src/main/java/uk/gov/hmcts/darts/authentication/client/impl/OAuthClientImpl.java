@@ -53,6 +53,7 @@ public class OAuthClientImpl implements OAuthClient {
     }
 
     @SneakyThrows({URISyntaxException.class, IOException.class})
+    @SuppressWarnings({"PMD.UseObjectForClearerAPI"})
     @Override
     public HTTPResponse fetchAccessToken(AuthProviderConfigurationProperties providerConfigurationProperties,
                                          String refreshTokenParam,
