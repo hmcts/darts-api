@@ -178,7 +178,7 @@ class AudioTransformationServiceImplTest {
     }
 
     @Test
-    void saveProcessedDataShouldSaveBlobAndSetStatus() {
+    void saveProcessedData_shouldSaveBlobAndSetStatus() {
         final MediaRequestEntity mediaRequestEntity = new MediaRequestEntity();
         mediaRequestEntity.setRequestType(DOWNLOAD);
         UserAccountEntity userAccount = new UserAccountEntity();
