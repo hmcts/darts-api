@@ -96,14 +96,14 @@ public class TransformedMediaHelper {
         entity.setOutputFilename(filename);
         entity.setStartTime(startTime);
         entity.setEndTime(endTime);
-        entity.setCreatedBy(mediaRequest.getCreatedBy());
-        entity.setLastModifiedBy(mediaRequest.getCreatedBy());
         entity.setOutputFormat(audioRequestOutputFormat);
         if (nonNull(fileSize)) {
             entity.setOutputFilesize(fileSize.intValue());
         }
         //Ensures createdBy / LastModified does not get overridden by the @CreatedBy / @LastModifiedBy annotaiton
         TransformedMediaEntity savedTM = transformedMediaRepository.save(entity);
+        savedTM.setLastModifiedBy(mediaRequest.getCreatedBy());
+        savedTM.setCreatedBy(mediaRequest.getCreatedBy());
         transformedMediaRepository.updateCreatedByLastModifiedBy(entity.getId(),
                                                                  mediaRequest.getCreatedBy().getId(),
                                                                  mediaRequest.getCreatedBy().getId());
