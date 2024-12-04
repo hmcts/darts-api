@@ -15,16 +15,15 @@ import uk.gov.hmcts.darts.common.repository.EventRepository;
 import uk.gov.hmcts.darts.event.service.RemoveDuplicateEventsProcessor;
 
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.time.OffsetDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
-import static java.util.stream.Collectors.toList;
-import static java.util.stream.IntStream.range;
-import static java.util.stream.IntStream.rangeClosed;
-import static org.assertj.core.api.Assertions.assertThat;
+import static java.time.ZoneOffset.UTC;
 import static org.mockito.Mockito.any;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.darts.test.common.data.EventTestData.someMinimalEvent;
@@ -32,9 +31,11 @@ import static uk.gov.hmcts.darts.test.common.data.EventTestData.someMinimalEvent
 @ExtendWith(MockitoExtension.class)
 class RemoveDuplicateEventsProcessorImplTest {
 
-    private static final String EARLIEST_REMOVABLE_EVENT_DATE = "2024-01-01";
+    private static final OffsetDateTime EARLIEST_REMOVABLE_EVENT_DATE =
+        OffsetDateTime.of(LocalDate.of(2024, 1, 1), LocalTime.now(), UTC);
     private static final int CLEAR_UP_WINDOW_DAYS = 2;
-    private static final LocalDate TODAY = LocalDate.parse("2024-01-04");
+    private static final OffsetDateTime TODAY =
+        OffsetDateTime.of(LocalDate.of(2024, 1, 4), LocalTime.now(), UTC);
 
     @Mock
     private CurrentTimeHelper currentTimeHelper;
@@ -59,7 +60,7 @@ class RemoveDuplicateEventsProcessorImplTest {
     @BeforeEach
     void setUp() {
         removeDuplicateEventsProcessor = new RemoveDuplicateEventsProcessorImpl(
-            EARLIEST_REMOVABLE_EVENT_DATE,
+            EARLIEST_REMOVABLE_EVENT_DATE.toLocalDate(),
             CLEAR_UP_WINDOW_DAYS,
             eventRepository,
             currentTimeHelper,
@@ -67,104 +68,80 @@ class RemoveDuplicateEventsProcessorImplTest {
             caseRetentionRepository
         );
 
-        when(currentTimeHelper.currentLocalDate()).thenReturn(TODAY);
+        when(currentTimeHelper.currentOffsetDateTime()).thenReturn(TODAY);
     }
 
     @Test
-    void doesntRemoveDuplicatesEventsBeforeEarliestRemovableEventDate() {
-        when(currentTimeHelper.currentLocalDate()).thenReturn(LocalDate.parse("2024-01-02"));
-        when(eventRepository.findAllBetweenDateTimesInclusive(any(OffsetDateTime.class), any(OffsetDateTime.class)))
-            .thenReturn(List.of());
+    void processEvent_startDateIsBeforeModStart_shouldUseModStart() {
+        when(currentTimeHelper.currentOffsetDateTime()).thenReturn(EARLIEST_REMOVABLE_EVENT_DATE.minusDays(1));
 
-        removeDuplicateEventsProcessor.processRemoveDuplicateEvents();
+        when(eventRepository.findDuplicateEventIds(any(), any())).thenReturn(List.of());
 
-        verify(eventRepository, times(1))
-            .findAllBetweenDateTimesInclusive(
-                OffsetDateTime.parse("2024-01-01T00:00:00+00:00"),
-                OffsetDateTime.parse("2024-01-02T23:59:00+00:00"));
+        removeDuplicateEventsProcessor.processEvent(123);
 
+        verify(eventRepository).findDuplicateEventIds(123, EARLIEST_REMOVABLE_EVENT_DATE);
         verifyNoMoreInteractions(eventRepository);
+        verifyNoInteractions(caseRetentionRepository, caseManagementRetentionRepository);
     }
 
     @Test
-    void doesntRemoveDuplicateEventsBeforeClearUpWindow() {
-        when(eventRepository.findAllBetweenDateTimesInclusive(any(OffsetDateTime.class), any(OffsetDateTime.class)))
-            .thenReturn(List.of());
+    void processEvent_startDateIsAftterModStart_shouldUseToday() {
+        OffsetDateTime startDate = EARLIEST_REMOVABLE_EVENT_DATE.plusDays(CLEAR_UP_WINDOW_DAYS).plusDays(1);
+        when(currentTimeHelper.currentOffsetDateTime()).thenReturn(startDate);
+        when(eventRepository.findDuplicateEventIds(any(), any())).thenReturn(List.of());
 
-        removeDuplicateEventsProcessor.processRemoveDuplicateEvents();
+        removeDuplicateEventsProcessor.processEvent(123);
 
-        verify(eventRepository, times(1))
-            .findAllBetweenDateTimesInclusive(
-                OffsetDateTime.parse("2024-01-02T00:00:00+00:00"),
-                OffsetDateTime.parse("2024-01-04T23:59:00+00:00"));
-
+        verify(eventRepository).findDuplicateEventIds(123, startDate.minusDays(CLEAR_UP_WINDOW_DAYS));
         verifyNoMoreInteractions(eventRepository);
+        verifyNoInteractions(caseRetentionRepository, caseManagementRetentionRepository);
     }
 
     @Test
-    void removesDuplicateEventsKeepingTheLatest() {
-        when(eventRepository.findAllBetweenDateTimesInclusive(any(OffsetDateTime.class), any(OffsetDateTime.class)))
-            .thenReturn(threeEventsEachWithTwoDuplicates());
+    void processEvent_noDuplicateEvents_nothingHappens() {
+        when(eventRepository.findDuplicateEventIds(any(), any())).thenReturn(List.of());
 
-        removeDuplicateEventsProcessor.processRemoveDuplicateEvents();
+        removeDuplicateEventsProcessor.processEvent(123);
 
-        verify(eventRepository).deleteAllInBatch(eventsCaptorForEventDeletion.capture());
-        assertThat(eventsCaptorForEventDeletion.getValue())
-            .extracting("id")
-            .containsOnly(0, 1, 2, 3, 4, 5);
+        verify(eventRepository).findDuplicateEventIds(123, TODAY.minusDays(CLEAR_UP_WINDOW_DAYS));
+        verifyNoMoreInteractions(eventRepository);
+        verifyNoInteractions(caseRetentionRepository, caseManagementRetentionRepository);
     }
 
     @Test
-    void removesDuplicateEventsWhenTheyAreAssociatedWithCaseRetention() {
-        when(caseManagementRetentionRepository.getIdsForEvents(any())).thenReturn(List.of(1, 2, 3));
-        when(eventRepository.findAllBetweenDateTimesInclusive(any(OffsetDateTime.class), any(OffsetDateTime.class)))
-            .thenReturn(threeEventsEachWithTwoDuplicates());
+    void processEvent_hasDuplicateEvents_allDuplicatesExcludingTheFirstOneAreDeleted() {
+        //Setup
+        EventEntity duplicateEvent1 = someMinimalEvent();
+        EventEntity duplicateEvent2 = someMinimalEvent();
+        EventEntity duplicateEvent3 = someMinimalEvent();
 
-        removeDuplicateEventsProcessor.processRemoveDuplicateEvents();
+        duplicateEvent1.setCreatedDateTime(TODAY.withHour(10));
+        duplicateEvent2.setCreatedDateTime(TODAY.withHour(9));
+        duplicateEvent3.setCreatedDateTime(TODAY.withHour(11));
 
-        verify(caseRetentionRepository).deleteAllByCaseManagementIdsIn(List.of(1, 2, 3));
-        verify(caseManagementRetentionRepository).deleteAllByEventEntityIn(eventsCaptorForEventForCmrDeletion.capture());
-        verify(eventRepository).deleteAllInBatch(eventsCaptorForEventDeletion.capture());
-        assertThat(eventsCaptorForEventDeletion.getValue())
-            .extracting("id")
-            .containsOnly(0, 1, 2, 3, 4, 5);
-        assertThat(eventsCaptorForEventForCmrDeletion.getValue())
-            .extracting("id")
-            .containsOnly(0, 1, 2, 3, 4, 5);
-    }
+        List<EventEntity> duplicateEvents = new ArrayList<>(List.of(duplicateEvent1, duplicateEvent2, duplicateEvent3));
+        when(eventRepository.findDuplicateEventIds(any(), any())).thenReturn(duplicateEvents);
 
-    @Test
-    void removesDuplicateEventsWhenFoundDuplicatedAboveChunkSize() {
-        when(eventRepository.findAllBetweenDateTimesInclusive(any(OffsetDateTime.class), any(OffsetDateTime.class)))
-            .thenReturn(manyEventsEachWithTwoDuplicates());
+        List<Integer> caseManagementIdsToBeDeleted = List.of(1, 2);
+        when(caseManagementRetentionRepository.getIdsForEvents(any()))
+            .thenReturn(caseManagementIdsToBeDeleted);
+        //Execution
+        removeDuplicateEventsProcessor.processEvent(123);
 
-        removeDuplicateEventsProcessor.processRemoveDuplicateEvents();
+        //Verification
+        List<EventEntity> toBeDeleted = List.of(duplicateEvent1, duplicateEvent3);
 
-        verify(eventRepository, times(10)).deleteAllInBatch(eventsCaptorForEventDeletion.capture());
-        assertThat(eventsCaptorForEventDeletion.getAllValues().stream().flatMap(List::stream))
-            .extracting("id")
-            .hasSameElementsAs(integersInRange(0, 9995));
-    }
+        verify(eventRepository).findDuplicateEventIds(123, TODAY.minusDays(CLEAR_UP_WINDOW_DAYS));
 
-    private List<Integer> integersInRange(int start, int end) {
-        return rangeClosed(start, end).boxed().collect(toList());
-    }
+        verify(caseManagementRetentionRepository).getIdsForEvents(toBeDeleted);
 
-    private static List<EventEntity> threeEventsEachWithTwoDuplicates() {
-        return range(0, 9).mapToObj(i -> someDuplicateEvent(i)).collect(toList());
-    }
-
-    private static List<EventEntity> manyEventsEachWithTwoDuplicates() {
-        return range(0, 9999).mapToObj(i -> someDuplicateEvent(i)).collect(toList());
-    }
-
-    private static EventEntity someDuplicateEvent(int quantity) {
-        var eventEntity = someMinimalEvent();
-        eventEntity.setId(quantity);
-        eventEntity.setEventId(quantity % 3);
-        eventEntity.setMessageId("message-id-" + quantity % 3);
-        eventEntity.setEventText("some-event-text-" + quantity % 3);
-        eventEntity.setCreatedDateTime(OffsetDateTime.now().plusSeconds(quantity));
-        return eventEntity;
+        verify(caseRetentionRepository).deleteAllByCaseManagementIdsIn(caseManagementIdsToBeDeleted);
+        verify(caseRetentionRepository).flush();
+        verify(caseManagementRetentionRepository).deleteAllByEventEntityIn(toBeDeleted);
+        verify(caseManagementRetentionRepository).flush();
+        verify(eventRepository).deleteAll(toBeDeleted);
+        verify(eventRepository).flush();
+        verifyNoMoreInteractions(eventRepository);
+        verifyNoMoreInteractions(caseRetentionRepository, caseManagementRetentionRepository);
     }
 }

@@ -41,7 +41,6 @@ public class CleanupCurrentFlagEventProcessorImpl implements CleanupCurrentFlagE
     }
 
     @Override
-    @Async("eventTaskExecutor")
     public void processEvent(Integer eventId) {
         if (eventId == null || eventId == 0) {
             return;
