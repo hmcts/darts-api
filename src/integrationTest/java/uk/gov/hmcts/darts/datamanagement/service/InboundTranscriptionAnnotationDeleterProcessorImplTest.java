@@ -22,6 +22,8 @@ import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.STORED;
 
 class InboundTranscriptionAnnotationDeleterProcessorImplTest extends PostgresIntegrationBase {
 
+    private static final String USER_EMAIL_ADDRESS = "system_InboundTranscriptionAnnotationDeleter@hmcts.net";
+
     @Autowired
     private ExternalObjectDirectoryRepository externalObjectDirectoryRepository;
 
@@ -42,6 +44,7 @@ class InboundTranscriptionAnnotationDeleterProcessorImplTest extends PostgresInt
     void processBatchMultipleRecords() throws Exception {
         int setupHoursBeforeCurrentTime = 25;
 
+        anAuthenticatedUserFor(USER_EMAIL_ADDRESS);
         generateData(setupHoursBeforeCurrentTime);
 
         int hourDurationBeyondHours = setupHoursBeforeCurrentTime; // which no records are
@@ -63,6 +66,7 @@ class InboundTranscriptionAnnotationDeleterProcessorImplTest extends PostgresInt
         // assume that spring config is 24 hours
         int setupHoursBeforeCurrentTime = 24;
 
+        anAuthenticatedUserFor(USER_EMAIL_ADDRESS);
         generateData(setupHoursBeforeCurrentTime);
 
         // exercise the logic

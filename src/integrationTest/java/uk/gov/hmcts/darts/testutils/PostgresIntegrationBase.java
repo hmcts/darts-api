@@ -77,4 +77,9 @@ public class PostgresIntegrationBase {
     void clearTestData() {
         logAppender.reset();
     }
+
+
+    protected void anAuthenticatedUserFor(String userEmail) {
+        GivenBuilder.anAuthenticatedUserFor(userEmail);
+    }
 }
