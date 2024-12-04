@@ -17,7 +17,7 @@ class DurationUtilTest {
     @DisplayName("String formatDurationHumanReadable(Duration duration)")
     @ParameterizedTest(name = "formatDurationHumanReadable({0}) should equal {1}")
     @MethodSource("humanReadableDurationProvider")
-    void formatDurationHumanReadable_generic(Duration duration, String expected) {
+    void formatDurationHumanReadable_common(Duration duration, String expected) {
         String result = DurationUtil.formatDurationHumanReadable(duration);
         assertEquals(expected, result);
     }
