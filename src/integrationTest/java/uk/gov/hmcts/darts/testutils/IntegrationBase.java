@@ -34,7 +34,7 @@ import java.util.Optional;
 /**
  * Base class for integration tests running with H2 in Postgres compatibility mode.<br>
  * This class also starts a containerised Redis instance.<br>
- *<br>
+ * <br>
  * To optimise tests total execution time, the below setup has been introduced:
  * <ul>
  *  <li>
@@ -49,7 +49,7 @@ import java.util.Optional;
  *     sequences are reset to either SEQUENCE_START_VALUE or their initial value (depending on the type of data, if predefined or not) before each test
  *  </li>
  * </ul>
- *<br>
+ * <br>
  * Based on the above, please follow the following recommendations when writing integration tests:
  * <ul>
  *  <li>
@@ -127,7 +127,7 @@ public class IntegrationBase {
     }
 
     @SuppressWarnings("PMD.SignatureDeclareThrowsException")
-    protected void checkCleanup() throws Exception{
+    protected void checkCleanup() throws Exception {
 
     }
 
@@ -165,4 +165,7 @@ public class IntegrationBase {
         }, Duration.ofSeconds(30));
     }
 
+    protected void anAuthenticatedUserFor(String userEmail) {
+        GivenBuilder.anAuthenticatedUserFor(userEmail);
+    }
 }

@@ -22,6 +22,8 @@ import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.STORED;
 
 class UnstructuredAnnotationTranscriptionDeleterProcessorImplTest extends PostgresIntegrationBase {
 
+    private static final String USER_EMAIL_ADDRESS = "system_UnstructuredTranscriptionAnnotationDeleter@hmcts.net";
+
     @Autowired
     private ExternalObjectDirectoryRepository externalObjectDirectoryRepository;
 
@@ -43,6 +45,7 @@ class UnstructuredAnnotationTranscriptionDeleterProcessorImplTest extends Postgr
         int setupHoursBeforeCurrentTimeInArm = 25;
         int setupWeeksBeforeCurrentTimeInUnstructured = 3;
 
+        anAuthenticatedUserFor(USER_EMAIL_ADDRESS);
         generateDataWithAnnotation(setupWeeksBeforeCurrentTimeInUnstructured, setupHoursBeforeCurrentTimeInArm);
 
         // exercise the logic
@@ -64,7 +67,7 @@ class UnstructuredAnnotationTranscriptionDeleterProcessorImplTest extends Postgr
 
         int setupHoursBeforeCurrentTimeInArm = 24;
         int setupWeeksBeforeCurrentTimeInUnstructured = 30;
-
+        anAuthenticatedUserFor(USER_EMAIL_ADDRESS);
         generateDataWithAnnotation(setupWeeksBeforeCurrentTimeInUnstructured, setupHoursBeforeCurrentTimeInArm);
 
         // exercise the logic
@@ -155,7 +158,7 @@ class UnstructuredAnnotationTranscriptionDeleterProcessorImplTest extends Postgr
 
         Assertions.assertEquals(resultCount, matchesEntity.size());
 
-        Assertions.assertTrue(externalObjectDirectoryStub.areObjectDirectoriesMarkedForDeletionWithSystemUser(actualResults));
+        Assertions.assertTrue(externalObjectDirectoryStub.areObjectDirectoriesMarkedForDeletionWithUser(actualResults, USER_EMAIL_ADDRESS));
     }
 
 
