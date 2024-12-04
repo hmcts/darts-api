@@ -182,16 +182,16 @@ class ObjectAdminActionRepositoryTest extends PostgresIntegrationBase {
                                                               .build());
 
         // Execute the method under test
-        List<ObjectAdminActionEntity> result = repository.findFilesForManualDeletion(deletionThreshold, Limit.of(1000));
+        List<Integer> result = repository.findObjectAdminActionsIdsForManualDeletion(deletionThreshold, Limit.of(1000));
 
         // Verify the results
         assertEquals(4, result.size());
-        assertTrue(result.stream().anyMatch(action -> action.getId().equals(action1.getId())));
-        assertTrue(result.stream().anyMatch(action -> action.getId().equals(action2.getId())));
-        assertTrue(result.stream().anyMatch(action -> action.getId().equals(action3.getId())));
-        assertTrue(result.stream().anyMatch(action -> action.getId().equals(action4.getId())));
+        assertTrue(result.stream().anyMatch(action -> action.equals(action1.getId())));
+        assertTrue(result.stream().anyMatch(action -> action.equals(action2.getId())));
+        assertTrue(result.stream().anyMatch(action -> action.equals(action3.getId())));
+        assertTrue(result.stream().anyMatch(action -> action.equals(action4.getId())));
 
-        assertTrue(result.stream().noneMatch(action -> action.getId().equals(action5.getId())));
+        assertTrue(result.stream().noneMatch(action -> action.equals(action5.getId())));
     }
 
 
@@ -240,15 +240,15 @@ class ObjectAdminActionRepositoryTest extends PostgresIntegrationBase {
                                                               .build());
 
         // Execute the method under test
-        List<ObjectAdminActionEntity> result = repository.findFilesForManualDeletion(deletionThreshold, Limit.of(1000));
+        List<Integer> result = repository.findObjectAdminActionsIdsForManualDeletion(deletionThreshold, Limit.of(1000));
 
         // Verify the results
         assertEquals(2, result.size());
-        assertTrue(result.stream().anyMatch(action -> action.getId().equals(action1.getId())));
-        assertTrue(result.stream().anyMatch(action -> action.getId().equals(action2.getId())));
+        assertTrue(result.stream().anyMatch(action -> action.equals(action1.getId())));
+        assertTrue(result.stream().anyMatch(action -> action.equals(action2.getId())));
 
-        assertTrue(result.stream().noneMatch(action -> action.getId().equals(action3.getId())));
-        assertTrue(result.stream().noneMatch(action -> action.getId().equals(action4.getId())));
+        assertTrue(result.stream().noneMatch(action -> action.equals(action3.getId())));
+        assertTrue(result.stream().noneMatch(action -> action.equals(action4.getId())));
     }
 
     @Test
@@ -294,17 +294,16 @@ class ObjectAdminActionRepositoryTest extends PostgresIntegrationBase {
                                                               .markedForManualDelDateTime(deletionThreshold.minusDays(1))
                                                               .build());
         // Execute the method under test
-        List<ObjectAdminActionEntity> result = repository.findFilesForManualDeletion(deletionThreshold, Limit.of(1000));
+        List<Integer> result = repository.findObjectAdminActionsIdsForManualDeletion(deletionThreshold, Limit.of(1000));
 
         // Verify the results
         assertEquals(2, result.size());
-        assertTrue(result.stream().anyMatch(action -> action.getId().equals(action1.getId())));
-        assertTrue(result.stream().anyMatch(action -> action.getId().equals(action2.getId())));
+        assertTrue(result.stream().anyMatch(action -> action.equals(action1.getId())));
+        assertTrue(result.stream().anyMatch(action -> action.equals(action2.getId())));
 
-        assertTrue(result.stream().noneMatch(action -> action.getId().equals(action3.getId())));
-        assertTrue(result.stream().noneMatch(action -> action.getId().equals(action4.getId())));
+        assertTrue(result.stream().noneMatch(action -> action.equals(action3.getId())));
+        assertTrue(result.stream().noneMatch(action -> action.equals(action4.getId())));
     }
-
 
 
     private MediaEntity createAndSaveMediaEntity(CourtroomEntity courtroomEntity) {

@@ -6,7 +6,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Limit;
-import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.darts.arm.api.ArmDataManagementApi;
 import uk.gov.hmcts.darts.audio.deleter.impl.inbound.ExternalInboundDataStoreDeleter;
@@ -26,6 +25,7 @@ import uk.gov.hmcts.darts.common.repository.TranscriptionDocumentRepository;
 import uk.gov.hmcts.darts.common.util.EodHelper;
 import uk.gov.hmcts.darts.log.api.LogApi;
 import uk.gov.hmcts.darts.task.model.RetConfReason;
+import uk.gov.hmcts.darts.task.runner.SoftDelete;
 import uk.gov.hmcts.darts.task.service.ManualDeletionProcessor;
 
 import java.time.Duration;
@@ -35,26 +35,27 @@ import java.util.List;
 @Service
 @Slf4j
 @RequiredArgsConstructor
+@SuppressWarnings("PMD.CouplingBetweenObjects")
 public class ManualDeletionProcessorImpl implements ManualDeletionProcessor {
 
     private final UserIdentity userIdentity;
-    @Value("${darts.manual-deletion.grace-period:24h}")
-    private Duration gracePeriod;
-
     private final ObjectAdminActionEntityProcessor objectAdminActionEntityProcessor;
     private final ObjectAdminActionRepository objectAdminActionRepository;
+
+    @Value("${darts.manual-deletion.grace-period:24h}")
+    private Duration gracePeriod;
 
     @Override
     public void process(Integer batchSize) {
         UserAccountEntity userAccount = userIdentity.getUserAccount();
         OffsetDateTime deletionThreshold = getDeletionThreshold();
-        List<ObjectAdminActionEntity> actionsToDelete = objectAdminActionRepository.findFilesForManualDeletion(deletionThreshold, Limit.of(batchSize));
+        List<Integer> actionsToDelete = objectAdminActionRepository.findObjectAdminActionsIdsForManualDeletion(deletionThreshold, Limit.of(batchSize));
 
-        for (ObjectAdminActionEntity objectAdminAction : actionsToDelete) {
+        for (Integer objectAdminActionId : actionsToDelete) {
             try {
-                objectAdminActionEntityProcessor.processObjectAdminActionEntity(userAccount, objectAdminAction);
+                objectAdminActionEntityProcessor.processObjectAdminActionEntity(userAccount, objectAdminActionId);
             } catch (Exception e) {
-                log.error("Error while processing ObjectAdminActionEntity with ID: {}", objectAdminAction.getId(), e);
+                log.error("Error while processing ObjectAdminActionEntity with ID: {}", objectAdminActionId, e);
             }
         }
     }
@@ -63,12 +64,13 @@ public class ManualDeletionProcessorImpl implements ManualDeletionProcessor {
         return OffsetDateTime.now().minus(gracePeriod);
     }
 
-    @Component
+    @Service
     @RequiredArgsConstructor
     //Nested class to ensure transactions work as expected
     public static class ObjectAdminActionEntityProcessor {
 
         private final ExternalObjectDirectoryRepository externalObjectDirectoryRepository;
+        private final ObjectAdminActionRepository objectAdminActionRepository;
         private final MediaRepository mediaRepository;
         private final TranscriptionDocumentRepository transcriptionDocumentRepository;
         private final ExternalInboundDataStoreDeleter inboundDeleter;
@@ -81,10 +83,13 @@ public class ManualDeletionProcessorImpl implements ManualDeletionProcessor {
 
 
         @Transactional
-        void processObjectAdminActionEntity(UserAccountEntity userAccount, ObjectAdminActionEntity objectAdminAction) {
-            if (isMediaNotDeleted(objectAdminAction)) {
+        void processObjectAdminActionEntity(UserAccountEntity userAccount, Integer id) {
+            ObjectAdminActionEntity objectAdminAction = objectAdminActionRepository.findById(id)
+                .orElseThrow(() -> new DartsException("ObjectAdminActionEntity not found with ID: " + id));
+
+            if (isNotDeleted(objectAdminAction.getMedia())) {
                 deleteMedia(userAccount, objectAdminAction);
-            } else if (isTranscriptionNotDeleted(objectAdminAction)) {
+            } else if (isNotDeleted(objectAdminAction.getTranscriptionDocument())) {
                 deleteTranscriptionDocument(userAccount, objectAdminAction);
             }
         }
@@ -173,13 +178,8 @@ public class ManualDeletionProcessorImpl implements ManualDeletionProcessor {
             }
         }
 
-        boolean isTranscriptionNotDeleted(ObjectAdminActionEntity action) {
-            return action.getTranscriptionDocument() != null && !action.getTranscriptionDocument().isDeleted();
+        <T extends SoftDelete> boolean isNotDeleted(T softDelete) {
+            return softDelete != null && !softDelete.isDeleted();
         }
-
-        boolean isMediaNotDeleted(ObjectAdminActionEntity action) {
-            return action.getMedia() != null && !action.getMedia().isDeleted();
-        }
-
     }
 }

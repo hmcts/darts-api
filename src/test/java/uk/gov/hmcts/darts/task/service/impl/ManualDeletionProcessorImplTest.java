@@ -34,9 +34,9 @@ import uk.gov.hmcts.darts.test.common.TestUtils;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -86,6 +86,7 @@ class ManualDeletionProcessorImplTest {
     @BeforeEach
     void setUp() {
         objectAdminActionEntityProcessor = spy(new ManualDeletionProcessorImpl.ObjectAdminActionEntityProcessor(externalObjectDirectoryRepository,
+                                                                                                                objectAdminActionRepository,
                                                                                                                 mediaRepository,
                                                                                                                 transcriptionDocumentRepository,
                                                                                                                 inboundDeleter,
@@ -105,9 +106,10 @@ class ManualDeletionProcessorImplTest {
     void processShouldDeleteMediaAndTranscription() {
         ObjectAdminActionEntity mediaAction = createObjectAdminAction(true, false);
         ObjectAdminActionEntity transcriptionAction = createObjectAdminAction(false, true);
-        List<ObjectAdminActionEntity> actionsToDelete = Arrays.asList(mediaAction, transcriptionAction);
 
-        when(objectAdminActionRepository.findFilesForManualDeletion(any(), eq(Limit.of(123)))).thenReturn(actionsToDelete);
+        when(objectAdminActionRepository.findObjectAdminActionsIdsForManualDeletion(any(), eq(Limit.of(123)))).thenReturn(List.of(3, 4));
+        when(objectAdminActionRepository.findById(3)).thenReturn(Optional.of(mediaAction));
+        when(objectAdminActionRepository.findById(4)).thenReturn(Optional.of(transcriptionAction));
         when(externalObjectDirectoryRepository.findStoredInInboundAndUnstructuredByMediaId(any())).thenReturn(
             Collections.singletonList(createExternalObjectDirectoryEntity(ExternalLocationTypeEnum.INBOUND)));
         when(externalObjectDirectoryRepository.findStoredInInboundAndUnstructuredByTranscriptionId(any())).thenReturn(
@@ -135,6 +137,8 @@ class ManualDeletionProcessorImplTest {
         verify(mediaRepository).save(any(MediaEntity.class));
         verify(transcriptionDocumentRepository).save(any(TranscriptionDocumentEntity.class));
         verify(externalObjectDirectoryRepository, times(2)).delete(any(ExternalObjectDirectoryEntity.class));
+        verify(objectAdminActionRepository).findById(3);
+        verify(objectAdminActionRepository).findById(4);
         verify(inboundDeleter).delete(any(ExternalObjectDirectoryEntity.class));
         verify(unstructuredDeleter).delete(any(ExternalObjectDirectoryEntity.class));
         verify(logApi).mediaDeleted(MEDIA_ID);
@@ -167,16 +171,18 @@ class ManualDeletionProcessorImplTest {
         deletedMediaAction.getMedia().setDeleted(true);
         ObjectAdminActionEntity deletedTranscriptionAction = createObjectAdminAction(false, true);
         deletedTranscriptionAction.getTranscriptionDocument().setDeleted(true);
-        List<ObjectAdminActionEntity> actionsToDelete = Arrays.asList(deletedMediaAction, deletedTranscriptionAction);
 
-        when(objectAdminActionRepository.findFilesForManualDeletion(any(), eq(Limit.of(123)))).thenReturn(actionsToDelete);
-
+        when(objectAdminActionRepository.findObjectAdminActionsIdsForManualDeletion(any(), eq(Limit.of(123)))).thenReturn(List.of(3, 4));
+        when(objectAdminActionRepository.findById(3)).thenReturn(Optional.of(deletedMediaAction));
+        when(objectAdminActionRepository.findById(4)).thenReturn(Optional.of(deletedTranscriptionAction));
         manualDeletionProcessor.process(123);
 
         verify(mediaRepository, never()).save(any(MediaEntity.class));
         verify(transcriptionDocumentRepository, never()).save(any(TranscriptionDocumentEntity.class));
         verify(externalObjectDirectoryRepository, never()).delete(any(ExternalObjectDirectoryEntity.class));
         verify(userIdentity).getUserAccount();
+        verify(objectAdminActionRepository).findById(3);
+        verify(objectAdminActionRepository).findById(4);
     }
 
     @Test
