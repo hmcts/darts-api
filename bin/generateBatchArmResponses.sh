@@ -94,10 +94,7 @@ addNewResponses () {
   if [ "$option" == "1" ] || [ "$option" == "2" ]
   then
     statusCode=1
-    if [ "$option" == "2" ]
-    then
-      statusCode=0
-    fi
+    
     crFilename="UUID1_UUID2_STATUSCODE_cr.rsp"
     crFilename=${crFilename//STATUSCODE/$statusCode}
     crFilename=${crFilename//UUID1/$uuid1}
@@ -112,7 +109,7 @@ addNewResponses () {
 
   if [ "$option" == "2" ] || [ "$option" == "3" ] || [ "$option" == "4" ]
   then
-    ilFilename="UUID1_UUID3_1_il.rsp"
+    ilFilename="UUID1_UUID3_0_il.rsp"
     ilFilename=${ilFilename//UUID1/$uuid1}
     ilFilename=${ilFilename//UUID3/$uuid3}
     echo "IL filename 1: $ilFilename"
