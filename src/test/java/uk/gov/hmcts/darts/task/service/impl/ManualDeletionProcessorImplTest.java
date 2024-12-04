@@ -79,22 +79,26 @@ class ManualDeletionProcessorImplTest {
     @Mock
     private ObjectMapper objectMapper;
 
+    private ManualDeletionProcessorImpl.ObjectAdminActionEntityProcessor objectAdminActionEntityProcessor;
+
     private ManualDeletionProcessorImpl manualDeletionProcessor;
 
     @BeforeEach
     void setUp() {
+        objectAdminActionEntityProcessor = spy(new ManualDeletionProcessorImpl.ObjectAdminActionEntityProcessor(externalObjectDirectoryRepository,
+                                                                                                                mediaRepository,
+                                                                                                                transcriptionDocumentRepository,
+                                                                                                                inboundDeleter,
+                                                                                                                unstructuredDeleter,
+                                                                                                                logApi,
+                                                                                                                armDataManagementApi,
+                                                                                                                objectMapper));
         manualDeletionProcessor = spy(new ManualDeletionProcessorImpl(userIdentity,
-                                                                      objectAdminActionRepository,
-                                                                      externalObjectDirectoryRepository,
-                                                                      mediaRepository,
-                                                                      transcriptionDocumentRepository,
-                                                                      inboundDeleter,
-                                                                      unstructuredDeleter,
-                                                                      logApi,
-                                                                      armDataManagementApi,
-                                                                      objectMapper));
+                                                                      objectAdminActionEntityProcessor,
+                                                                      objectAdminActionRepository));
+
         ReflectionTestUtils.setField(manualDeletionProcessor, "gracePeriod", Duration.ofHours(24));
-        ReflectionTestUtils.setField(manualDeletionProcessor, "eventDateAdjustmentYears", 100);
+        ReflectionTestUtils.setField(objectAdminActionEntityProcessor, "eventDateAdjustmentYears", 100);
     }
 
     @Test
@@ -113,7 +117,7 @@ class ManualDeletionProcessorImplTest {
         when(userIdentity.getUserAccount()).thenReturn(userAccount);
 
 
-        doNothing().when(manualDeletionProcessor).processArmEods(any(), any(), anyList());
+        doNothing().when(objectAdminActionEntityProcessor).processArmEods(any(), any(), anyList());
 
         ExternalLocationTypeEntity armExternalLocationType = mock(ExternalLocationTypeEntity.class);
         ObjectRecordStatusEntity storedStatus = mock(ObjectRecordStatusEntity.class);
@@ -124,8 +128,8 @@ class ManualDeletionProcessorImplTest {
         List<ExternalObjectDirectoryEntity> transcriptionEods = List.of(mock(ExternalObjectDirectoryEntity.class));
         doReturn(mediaEods).when(externalObjectDirectoryRepository).findByMediaAndExternalLocationTypeAndStatus(any(), any(), any());
         doReturn(transcriptionEods).when(externalObjectDirectoryRepository).findByTranscriptionDocumentEntityAndExternalLocationTypeAndStatus(any(),
-                                                                                                                                                    any(),
-                                                                                                                                                    any());
+                                                                                                                                              any(),
+                                                                                                                                              any());
         manualDeletionProcessor.process(123);
 
         verify(mediaRepository).save(any(MediaEntity.class));
@@ -150,11 +154,11 @@ class ManualDeletionProcessorImplTest {
         verify(transcriptionAction.getTranscriptionDocument()).markAsDeleted(userAccount);
 
         verify(externalObjectDirectoryRepository).findByTranscriptionDocumentEntityAndExternalLocationTypeAndStatus(transcriptionDocument,
-                                                                                                                          armExternalLocationType,
-                                                                                                                          storedStatus);
+                                                                                                                    armExternalLocationType,
+                                                                                                                    storedStatus);
         verify(externalObjectDirectoryRepository).findByMediaAndExternalLocationTypeAndStatus(media, armExternalLocationType, storedStatus);
-        verify(manualDeletionProcessor).processArmEods(media.getDeletedTs(), mediaAction, mediaEods);
-        verify(manualDeletionProcessor).processArmEods(transcriptionDocument.getDeletedTs(), transcriptionAction, transcriptionEods);
+        verify(objectAdminActionEntityProcessor).processArmEods(media.getDeletedTs(), mediaAction, mediaEods);
+        verify(objectAdminActionEntityProcessor).processArmEods(transcriptionDocument.getDeletedTs(), transcriptionAction, transcriptionEods);
     }
 
     @Test
@@ -202,15 +206,15 @@ class ManualDeletionProcessorImplTest {
         List<ExternalObjectDirectoryEntity> eods = List.of(mock(ExternalObjectDirectoryEntity.class),
                                                            mock(ExternalObjectDirectoryEntity.class),
                                                            mock(ExternalObjectDirectoryEntity.class));
-        doNothing().when(manualDeletionProcessor).processArmEod(any(), any(), any());
+        doNothing().when(objectAdminActionEntityProcessor).processArmEod(any(), any(), any());
 
         OffsetDateTime deletedTs = OffsetDateTime.now();
         ObjectAdminActionEntity objectAdminAction = mock(ObjectAdminActionEntity.class);
 
-        manualDeletionProcessor.processArmEods(deletedTs, objectAdminAction, eods);
+        objectAdminActionEntityProcessor.processArmEods(deletedTs, objectAdminAction, eods);
 
         eods.forEach(externalObjectDirectoryEntity ->
-                         verify(manualDeletionProcessor).processArmEod(deletedTs, objectAdminAction, externalObjectDirectoryEntity));
+                         verify(objectAdminActionEntityProcessor).processArmEod(deletedTs, objectAdminAction, externalObjectDirectoryEntity));
     }
 
     @Test
@@ -222,13 +226,13 @@ class ManualDeletionProcessorImplTest {
         String externalRecordId = "TestExternalRecordId";
         String retConfReason = "TestRetConReason";
         when(eod.getExternalRecordId()).thenReturn(externalRecordId);
-        doReturn(retConfReason).when(manualDeletionProcessor).getRetConfReason(any(), any());
+        doReturn(retConfReason).when(objectAdminActionEntityProcessor).getRetConfReason(any(), any());
 
-        manualDeletionProcessor.processArmEod(deletedTs, objectAdminAction, eod);
+        objectAdminActionEntityProcessor.processArmEod(deletedTs, objectAdminAction, eod);
 
         verify(eod).getExternalRecordId();
         verify(armDataManagementApi).updateMetadata(externalRecordId, expectedEventTs, retConfReason);
-        verify(manualDeletionProcessor).getRetConfReason(deletedTs, objectAdminAction);
+        verify(objectAdminActionEntityProcessor).getRetConfReason(deletedTs, objectAdminAction);
         verify(externalObjectDirectoryRepository).delete(eod);
     }
 
@@ -251,7 +255,7 @@ class ManualDeletionProcessorImplTest {
         when(objectMapper.writeValueAsString(any())).thenReturn("ObjectMapperReturnValue");
 
         //Perform test
-        final String retConfReason = manualDeletionProcessor.getRetConfReason(deletedTs, objectAdminAction);
+        final String retConfReason = objectAdminActionEntityProcessor.getRetConfReason(deletedTs, objectAdminAction);
         assertEquals("ObjectMapperReturnValue", retConfReason);
         //Verify calls
         verify(objectAdminAction).getObjectHiddenReason();
