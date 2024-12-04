@@ -469,7 +469,7 @@ public abstract class AbstractArmBatchProcessResponseFiles implements ArmRespons
 
                 if (nonNull(jsonPath) && jsonPath.toFile().exists()) {
                     logResponseFileContents(jsonPath);
-                    ArmResponseCreateRecord armResponseCreateRecord = objectMapper.readValue(jsonPath.toFile(), ArmResponseCreateRecord.class);
+                    ArmResponseCreateRecord armResponseCreateRecord = getResponseCreateRecordOrDelete(jsonPath);
                     UploadNewFileRecord uploadNewFileRecord = readInputJson(armResponseCreateRecord.getInput());
                     if (nonNull(uploadNewFileRecord)) {
                         if (StringUtils.isNotEmpty(uploadNewFileRecord.getRelationId())) {
@@ -500,6 +500,16 @@ public abstract class AbstractArmBatchProcessResponseFiles implements ArmRespons
 
     }
 
+    private ArmResponseCreateRecord getResponseCreateRecordOrDelete(Path jsonPath) throws IOException {
+        try {
+            return objectMapper.readValue(jsonPath.toFile(), ArmResponseCreateRecord.class);
+        } catch (Exception e) {
+            log.error("Unable to read ARM response create record file {} - About to delete ", jsonPath.toFile().getAbsoluteFile(), e);
+            deleteResponseBlobs(List.of(jsonPath.toFile().getAbsolutePath()));
+            throw e;
+        }
+    }
+
     private void processUploadResponseFiles(List<UploadFileFilenameProcessor> uploadFileResponses, ArmBatchResponses armBatchResponses) {
         for (UploadFileFilenameProcessor uploadFileFilenameProcessor : uploadFileResponses) {
             try {
@@ -527,7 +537,7 @@ public abstract class AbstractArmBatchProcessResponseFiles implements ArmRespons
 
                 if (jsonPath.toFile().exists()) {
                     logResponseFileContents(jsonPath);
-                    ArmResponseUploadFileRecord armResponseUploadFileRecord = objectMapper.readValue(jsonPath.toFile(), ArmResponseUploadFileRecord.class);
+                    ArmResponseUploadFileRecord armResponseUploadFileRecord = getResponseUploadFileRecordOrDelete(jsonPath);
                     UploadNewFileRecord uploadNewFileRecord = readInputJson(armResponseUploadFileRecord.getInput());
                     if (nonNull(uploadNewFileRecord)) {
                         if (StringUtils.isNotEmpty(uploadNewFileRecord.getRelationId())) {
@@ -555,6 +565,16 @@ public abstract class AbstractArmBatchProcessResponseFiles implements ArmRespons
             }
         } else {
             log.warn("Failed to read upload file {}", uploadFileFilenameProcessor.getUploadFileFilenameAndPath());
+        }
+    }
+
+    private ArmResponseUploadFileRecord getResponseUploadFileRecordOrDelete(Path jsonPath) throws IOException {
+        try {
+            return objectMapper.readValue(jsonPath.toFile(), ArmResponseUploadFileRecord.class);
+        } catch (Exception e) {
+            log.error("Unable to read ARM response upload file {} - About to delete ", jsonPath.toFile().getAbsoluteFile(), e);
+            deleteResponseBlobs(List.of(jsonPath.toFile().getAbsolutePath()));
+            throw e;
         }
     }
 
@@ -737,7 +757,7 @@ public abstract class AbstractArmBatchProcessResponseFiles implements ArmRespons
 
                 if (jsonPath.toFile().exists()) {
                     logResponseFileContents(jsonPath);
-                    ArmResponseInvalidLineRecord armResponseInvalidLineRecord = objectMapper.readValue(jsonPath.toFile(), ArmResponseInvalidLineRecord.class);
+                    ArmResponseInvalidLineRecord armResponseInvalidLineRecord = getResponseInvalidLineRecordOrDelete(jsonPath);
                     String input = armResponseInvalidLineRecord.getInput();
                     UploadNewFileRecord uploadNewFileRecord = readInputJson(input);
                     if (nonNull(uploadNewFileRecord)) {
@@ -769,6 +789,16 @@ public abstract class AbstractArmBatchProcessResponseFiles implements ArmRespons
             }
         } else {
             log.error("Unable to read ARM response invalid line file {}", invalidLineFileFilenameProcessor.getInvalidLineFileFilenameAndPath());
+        }
+    }
+
+    private ArmResponseInvalidLineRecord getResponseInvalidLineRecordOrDelete(Path jsonPath) throws IOException {
+        try {
+            return objectMapper.readValue(jsonPath.toFile(), ArmResponseInvalidLineRecord.class);
+        } catch (Exception e) {
+            log.error("Unable to read ARM response invalid line file {} - About to delete ", jsonPath.toFile().getAbsoluteFile(), e);
+            deleteResponseBlobs(List.of(jsonPath.toFile().getAbsolutePath()));
+            throw e;
         }
     }
 

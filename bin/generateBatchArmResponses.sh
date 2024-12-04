@@ -94,7 +94,7 @@ addNewResponses () {
   if [ "$option" == "1" ] || [ "$option" == "2" ]
   then
     statusCode=1
-    
+
     crFilename="UUID1_UUID2_STATUSCODE_cr.rsp"
     crFilename=${crFilename//STATUSCODE/$statusCode}
     crFilename=${crFilename//UUID1/$uuid1}
