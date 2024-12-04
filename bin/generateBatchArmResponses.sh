@@ -46,7 +46,7 @@ addNewResponses () {
   fi
 
   #${parameter//pattern/string}
-  uiFileContentsParam="{\"operation\": \"upload_file\", \"transaction_id\": \"2d1c7f6f-224e-768e-a274-41af570e6502\", \"relation_id\": \"EODID\", \"a360_record_id\": \"1cf976c7-cedd-703f-ab70-01588bd56d50\", \"process_time\": \"2023-07-11T11:39:26.790000\", \"status\": 1, \"input\": \"{\\\"operation\\\": \\\"create_record\\\",\\\"relation_id\\\": \\\"EODID\",\\\"record_metadata\\\": {\\\"record_class\\\": \\\"A360TEST\",\\\"publisher\\\": \\\"A360\\\",\\\"recordDate\\\": \\\"2016-11-22T11:39:30Z\\\",\\\"region\\\": \\\"GBR\",\\\"title\\\": \\\"A360230711_TestIngestion_2\\\"}}\", \"exception_description\": null, \"errorStatus1\": null}"
+  uiFileContentsParam="{\"operation\": \"upload_file\", \"transaction_id\": \"2d1c7f6f-224e-768e-a274-41af570e6502\", \"relation_id\": \"EODID\", \"a360_record_id\": \"1cf976c7-cedd-703f-ab70-01588bd56d50\", \"process_time\": \"2023-07-11T11:39:26.790000\", \"status\": 1, \"input\": \"{\\\"operation\\\": \\\"create_record\\\",\\\"relation_id\\\": \\\"EODID\\\",\\\"record_metadata\\\": {\\\"record_class\\\": \\\"A360TEST\",\\\"publisher\\\": \\\"A360\\\",\\\"recordDate\\\": \\\"2016-11-22T11:39:30Z\\\",\\\"region\\\": \\\"GBR\\\",\\\"title\\\": \\\"A360230711_TestIngestion_2\\\"}}\", \"exception_description\": null, \"errorStatus1\": null}"
   uiFileContents=${uiFileContentsParam//EODID/$eodid}
   echo "$uiFileContents"
   echo $uiFileContents >> $iuFilename
@@ -104,7 +104,7 @@ addNewResponses () {
     crFilename=${crFilename//UUID2/$uuid2}
     echo "CR filename: $crFilename"
 
-    crFileContentsParam="{\"operation\": \"create_record\", \"transaction_id\": \"2d1c7f6f-224e-768e-a274-41af570e6502\", \"relation_id\": \"EODID\", \"a360_record_id\": \"1cf976c7-cedd-703f-ab70-01588bd56d50\", \"process_time\": \"2023-07-11T11:39:26.790000\", \"status\": 1, \"input\": \"{\\\"operation\\\": \\\"create_record\\\",\\\"relation_id\\\": \\\"EODID\",\\\"record_metadata\\\": {\\\"record_class\\\": \\\"A360TEST\",\\\"publisher\\\": \\\"A360\\\",\\\"recordDate\\\": \\\"2016-11-22T11:39:30Z\\\",\\\"region\\\": \\\"GBR\",\\\"title\\\": \\\"A360230711_TestIngestion_2\\\"}}\", \"exception_description\": null, \"errorStatus1\": null}"
+    crFileContentsParam="{\"operation\": \"create_record\", \"transaction_id\": \"2d1c7f6f-224e-768e-a274-41af570e6502\", \"relation_id\": \"EODID\", \"a360_record_id\": \"1cf976c7-cedd-703f-ab70-01588bd56d50\", \"process_time\": \"2023-07-11T11:39:26.790000\", \"status\": 1, \"input\": \"{\\\"operation\\\": \\\"create_record\\\",\\\"relation_id\\\": \\\"EODID\\\",\\\"record_metadata\\\": {\\\"record_class\\\": \\\"A360TEST\\\",\\\"publisher\\\": \\\"A360\\\",\\\"recordDate\\\": \\\"2016-11-22T11:39:30Z\\\",\\\"region\\\": \\\"GBR\",\\\"title\\\": \\\"A360230711_TestIngestion_2\\\"}}\", \"exception_description\": null, \"errorStatus1\": null}"
     crFileContents=${crFileContentsParam//EODID/$eodid}
     echo "$crFileContents"
     echo $crFileContents > $crFilename
