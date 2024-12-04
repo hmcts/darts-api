@@ -19,12 +19,14 @@ public class ExtendedSearchesByMatterResponse extends BaseRpoResponse {
 
     @Data
     @NoArgsConstructor
+    @JsonIgnoreProperties(ignoreUnknown = true)
     public static class SearchDetail {
         private Search search;
     }
 
     @Data
     @NoArgsConstructor
+    @JsonIgnoreProperties(ignoreUnknown = true)
     public static class Search {
 
         private Integer totalCount;
