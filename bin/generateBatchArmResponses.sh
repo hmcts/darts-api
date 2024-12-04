@@ -1,7 +1,8 @@
 #!/bin/bash
 echo "This script generates the ARM pull response files. These can be used for testing where ARM returns a response for an object such as media, transcription document, annotation document or case document to be stored in the ARM storage"
 
-uuid1=$(uuidgen)
+uuid1=$(uuidgen | tr -d '-')
+##uuid1=${uuid1//'-'/''}
 
 echo "uuid 1: $uuid1"
 echo " "
@@ -92,7 +93,13 @@ addNewResponses () {
 
   if [ "$option" == "1" ] || [ "$option" == "2" ]
   then
-    crFilename="UUID1_UUID2_1_cr.rsp"
+    statusCode=1
+    if [ "$option" == "2" ]
+    then
+      statusCode=0
+    fi
+    crFilename="UUID1_UUID2_STATUSCODE_cr.rsp"
+    crFilename=${crFilename//STATUSCODE/$statusCode}
     crFilename=${crFilename//UUID1/$uuid1}
     crFilename=${crFilename//UUID2/$uuid2}
     echo "CR filename: $crFilename"
@@ -105,7 +112,7 @@ addNewResponses () {
 
   if [ "$option" == "2" ] || [ "$option" == "3" ] || [ "$option" == "4" ]
   then
-    ilFilename="UUID1_UUID3_0_il.rsp"
+    ilFilename="UUID1_UUID3_1_il.rsp"
     ilFilename=${ilFilename//UUID1/$uuid1}
     ilFilename=${ilFilename//UUID3/$uuid3}
     echo "IL filename 1: $ilFilename"
@@ -142,7 +149,13 @@ addNewResponses () {
       exit 1
     fi
 
-    ufFilename="UUID1_UUID5_0_uf.rsp"
+    statusCode=1
+    if [ "$option" == "3" ]
+    then
+      statusCode=0
+    fi
+    ufFilename="UUID1_UUID5_STATUSCODE_uf.rsp"
+    ufFilename=${ufFilename//STATUSCODE/$statusCode}
     ufFilename=${ufFilename//UUID1/$uuid1}
     ufFilename=${ufFilename//UUID5/$uuid5}
     echo "UF filename : $ilFilename"
