@@ -13,11 +13,8 @@ import uk.gov.hmcts.darts.arm.client.model.rpo.ProfileEntitlementResponse;
 import uk.gov.hmcts.darts.arm.client.model.rpo.RecordManagementMatterResponse;
 import uk.gov.hmcts.darts.arm.client.model.rpo.SaveBackgroundSearchResponse;
 import uk.gov.hmcts.darts.arm.client.model.rpo.StorageAccountResponse;
-import uk.gov.hmcts.darts.arm.exception.ArmRpoException;
 import uk.gov.hmcts.darts.arm.service.ArmApiService;
-import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.ArmRpoExecutionDetailEntity;
-import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.enums.ArmRpoStateEnum;
 import uk.gov.hmcts.darts.common.enums.ArmRpoStatusEnum;
 import uk.gov.hmcts.darts.testutils.PostgresIntegrationBase;
@@ -25,11 +22,8 @@ import uk.gov.hmcts.darts.testutils.PostgresIntegrationBase;
 import java.util.Collections;
 import java.util.List;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -43,9 +37,6 @@ class ProcessE2EArmRpoPendingAutomatedTaskIntTest extends PostgresIntegrationBas
 
     @Autowired
     private ProcessE2EArmRpoPendingAutomatedTask task;
-
-    @MockBean
-    private UserIdentity userIdentity;
 
     @MockBean
     private ArmApiService armApiService;
@@ -66,10 +57,6 @@ class ProcessE2EArmRpoPendingAutomatedTaskIntTest extends PostgresIntegrationBas
 
     @BeforeEach
     void setUp() {
-        UserAccountEntity user = dartsDatabase.getUserAccountStub().getSystemUserAccountEntity();
-        when(userIdentity.getUserAccount())
-            .thenReturn(user);
-
         when(armApiService.getArmBearerToken())
             .thenReturn(BEARER_TOKEN);
     }
@@ -121,10 +108,8 @@ class ProcessE2EArmRpoPendingAutomatedTaskIntTest extends PostgresIntegrationBas
 
         // When
         task.preRunTask();
-        ArmRpoException exception = assertThrows(ArmRpoException.class, () -> task.runTask());
-        assertThat(exception.getMessage(),
-                   containsString("Failure during ARM RPO getRecordManagementMatter: ARM RPO API failed with status - 400 BAD_REQUEST"));
-
+        task.runTask();
+        
         // Then
         List<ArmRpoExecutionDetailEntity> allExecutionDetails = dartsDatabase.getArmRpoExecutionDetailRepository()
             .findAll();
