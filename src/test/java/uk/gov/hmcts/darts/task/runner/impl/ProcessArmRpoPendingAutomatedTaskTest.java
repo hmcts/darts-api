@@ -9,7 +9,9 @@ import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Limit;
+import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.ObjectRecordStatusEntity;
+import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
 import uk.gov.hmcts.darts.common.repository.AutomatedTaskRepository;
 import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
@@ -43,6 +45,8 @@ class ProcessArmRpoPendingAutomatedTaskTest {
     private ExternalObjectDirectoryRepository externalObjectDirectoryRepository;
     @Mock
     private CurrentTimeHelper currentTimeHelper;
+    @Mock
+    private UserIdentity userIdentity;
 
     private MockedStatic<EodHelper> eodHelperMockedStatic;
 
@@ -54,6 +58,7 @@ class ProcessArmRpoPendingAutomatedTaskTest {
             lockService,
             externalObjectDirectoryRepository,
             currentTimeHelper,
+            userIdentity,
             duration
         ));
     }
@@ -92,6 +97,9 @@ class ProcessArmRpoPendingAutomatedTaskTest {
 
         doReturn(50).when(processArmRpoPendingAutomatedTask).getAutomatedTaskBatchSize();
 
+        UserAccountEntity userAccount = mock(UserAccountEntity.class);
+        when(userIdentity.getUserAccount()).thenReturn(userAccount);
+
         processArmRpoPendingAutomatedTask.runTask();
 
         verify(externalObjectDirectoryRepository)
@@ -99,6 +107,7 @@ class ProcessArmRpoPendingAutomatedTaskTest {
                 objectRecordStatusEntityPending,
                 currentTime.minus(Duration.ofHours(1)),
                 objectRecordStatusEntityStored,
+                userAccount,
                 Limit.of(50)
             );
 
@@ -122,6 +131,9 @@ class ProcessArmRpoPendingAutomatedTaskTest {
 
         doReturn(75).when(processArmRpoPendingAutomatedTask).getAutomatedTaskBatchSize();
 
+        UserAccountEntity userAccount = mock(UserAccountEntity.class);
+        when(userIdentity.getUserAccount()).thenReturn(userAccount);
+
         processArmRpoPendingAutomatedTask.runTask();
 
         verify(externalObjectDirectoryRepository)
@@ -129,6 +141,7 @@ class ProcessArmRpoPendingAutomatedTaskTest {
                 objectRecordStatusEntityPending,
                 currentTime.minus(Duration.ofHours(24)),
                 objectRecordStatusEntityStored,
+                userAccount,
                 Limit.of(75)
             );
 

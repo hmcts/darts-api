@@ -6,10 +6,9 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Limit;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.darts.audio.service.UnstructuredAudioDeleterProcessor;
+import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
-import uk.gov.hmcts.darts.common.enums.SystemUsersEnum;
 import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
-import uk.gov.hmcts.darts.common.helper.SystemUserHelper;
 import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
 import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
 import uk.gov.hmcts.darts.common.util.EodHelper;
@@ -29,7 +28,7 @@ public class UnstructuredAudioDeleterProcessorImpl implements UnstructuredAudioD
     private final ExternalObjectDirectoryRepository externalObjectDirectoryRepository;
     private final CurrentTimeHelper currentTimeHelper;
     private final UserAccountRepository userAccountRepository;
-    private final SystemUserHelper systemUserHelper;
+    private final UserIdentity userIdentity;
 
     private final EodHelper eodHelper;
 
@@ -52,7 +51,7 @@ public class UnstructuredAudioDeleterProcessorImpl implements UnstructuredAudioD
         }
         log.debug("Marking the following Unstructured ExternalObjectDirectory.Id's for deletion:- {}", audioFileIdsToBeMarked);
 
-        UserAccountEntity user = systemUserHelper.getReferenceTo(SystemUsersEnum.UNSTRUCTURED_AUDIO_DELETER_AUTOMATED_TASK);
+        UserAccountEntity user = userIdentity.getUserAccount();
 
         eodHelper.updateStatus(
             EodHelper.markForDeletionStatus(),

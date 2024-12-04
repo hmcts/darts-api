@@ -7,10 +7,9 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Limit;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.darts.audio.service.InboundAudioDeleterProcessor;
+import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
-import uk.gov.hmcts.darts.common.enums.SystemUsersEnum;
 import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
-import uk.gov.hmcts.darts.common.helper.SystemUserHelper;
 import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryQueryTypeEnum;
 import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
 import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
@@ -27,7 +26,7 @@ public class InboundAudioDeleterProcessorImpl implements InboundAudioDeleterProc
     private final UserAccountRepository userAccountRepository;
     private final ExternalObjectDirectoryRepository externalObjectDirectoryRepository;
     private final CurrentTimeHelper currentTimeHelper;
-    private final SystemUserHelper systemUserHelper;
+    private final UserIdentity userIdentity;
     private final EodHelper eodHelper;
 
     @Value("${darts.automated.task.inbound-audio-deleter.unstructured-minimum-duration}")
@@ -57,7 +56,7 @@ public class InboundAudioDeleterProcessorImpl implements InboundAudioDeleterProc
 
         logDeletion(audioFileIdsToBeMarked);
 
-        UserAccountEntity user = systemUserHelper.getReferenceTo(SystemUsersEnum.INBOUND_AUDIO_DELETER_AUTOMATED_TASK);
+        UserAccountEntity user = userIdentity.getUserAccount();
         eodHelper.updateStatus(
             EodHelper.markForDeletionStatus(),
             user,
