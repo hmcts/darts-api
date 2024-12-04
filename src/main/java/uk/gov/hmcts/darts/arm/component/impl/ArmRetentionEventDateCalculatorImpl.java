@@ -1,6 +1,5 @@
 package uk.gov.hmcts.darts.arm.component.impl;
 
-import feign.FeignException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -19,7 +18,6 @@ import uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum;
 import uk.gov.hmcts.darts.common.exception.DartsException;
 import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
 
-import java.nio.charset.StandardCharsets;
 import java.time.OffsetDateTime;
 
 import static java.time.temporal.ChronoUnit.MILLIS;
@@ -59,15 +57,6 @@ public class ArmRetentionEventDateCalculatorImpl implements ArmRetentionEventDat
             }
         } catch (Exception e) {
             log.error("Unable to calculate ARM retention date for EOD {}", externalObjectDirectoryId, e);
-
-            //Temporary logging to investigate the issue
-            log.error("TMP log exception class: {}", e.getClass().getName());
-            log.error("TMP log exception message: {}", e.getMessage());
-            if (e instanceof FeignException.BadRequest fe) {
-                log.error("TMP log response body utf 8 {}", fe.contentUTF8());
-                log.error("TMP log response body std {}", fe.responseBody().get());
-                log.error("TMP log request body {}", new String(fe.request().body(), StandardCharsets.UTF_8));
-            }
         }
         return false;
     }
