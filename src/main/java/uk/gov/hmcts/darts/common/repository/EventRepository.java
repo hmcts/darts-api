@@ -151,6 +151,19 @@ public interface EventRepository extends JpaRepository<EventEntity, Integer> {
     @Query("select e.id from EventEntity e where e.eventStatus = :statusNumber")
     List<Integer> findAllByEventStatus(Integer statusNumber, Limit limit);
 
+    @Query(value = """
+                        SELECT e3 from EventEntity e3
+                        JOIN (                        
+                            SELECT e.eventId as eventId, e.messageId as messageId, e.eventText as eventText
+                            FROM EventEntity e
+                            WHERE e.eventId = :eventId and e.createdDateTime >= :minDate
+                            GROUP BY e.eventId, e.messageId, e.eventText
+                            HAVING COUNT(e) > 1) e2
+                         ON e2.eventId = e3.eventId and e2.messageId = e3.messageId and e2.eventText = e3.eventText
+                         WHERE e3.createdDateTime >= :minDate
+        """)
+    List<EventEntity> findDuplicateEventIds(Integer eventId, OffsetDateTime minDate);
+
     interface EventIdAndHearingIds {
 
         @Column(name = "eve_id")
