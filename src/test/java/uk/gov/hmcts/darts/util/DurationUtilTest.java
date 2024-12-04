@@ -1,5 +1,6 @@
 package uk.gov.hmcts.darts.util;
 
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -9,12 +10,14 @@ import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+@DisplayName("DurationUtil Tests")
 class DurationUtilTest {
 
 
+    @DisplayName("String formatDurationHumanReadable(Duration duration)")
     @ParameterizedTest(name = "formatDurationHumanReadable({0}) should equal {1}")
     @MethodSource("humanReadableDurationProvider")
-    void formatDurationHumanReadable(Duration duration, String expected) {
+    void formatDurationHumanReadable_generic(Duration duration, String expected) {
         String result = DurationUtil.formatDurationHumanReadable(duration);
         assertEquals(expected, result);
     }
