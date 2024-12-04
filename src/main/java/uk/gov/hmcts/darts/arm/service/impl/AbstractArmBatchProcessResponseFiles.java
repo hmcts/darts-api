@@ -330,24 +330,30 @@ public abstract class AbstractArmBatchProcessResponseFiles implements ArmRespons
     }
 
     private void logResponsesFound(ArmResponseBatchData armResponseBatchData) {
+
+        int eodId = armResponseBatchData.getExternalObjectDirectoryId();
+        List<InvalidLineFileFilenameProcessor> invalidLineFileFilenameProcessors = armResponseBatchData.getInvalidLineFileFilenameProcessors();
+        CreateRecordFilenameProcessor createRecordFilenameProcessor = armResponseBatchData.getCreateRecordFilenameProcessor();
+        UploadFileFilenameProcessor uploadFileFilenameProcessor = armResponseBatchData.getUploadFileFilenameProcessor();
+
         log.info("Found ARM responses for external object directory ID {} with {} invalid line files, {} create record files and {} upload files",
-                 armResponseBatchData.getExternalObjectDirectoryId(),
-                 armResponseBatchData.getInvalidLineFileFilenameProcessors().size(),
-                 nonNull(armResponseBatchData.getCreateRecordFilenameProcessor()) ? 1 : 0,
-                 nonNull(armResponseBatchData.getUploadFileFilenameProcessor()) ? 1 : 0);
-        if (nonNull(armResponseBatchData.getCreateRecordFilenameProcessor())) {
-            log.info("Found eod {} with create record file: {}", armResponseBatchData.getExternalObjectDirectoryId(),
-                     armResponseBatchData.getCreateRecordFilenameProcessor().getCreateRecordFilenameAndPath());
+                 eodId,
+                 invalidLineFileFilenameProcessors.size(),
+                 nonNull(createRecordFilenameProcessor) ? 1 : 0,
+                 nonNull(uploadFileFilenameProcessor) ? 1 : 0);
+        if (nonNull(createRecordFilenameProcessor)) {
+            log.info("Found eod {} with create record file: {}", eodId,
+                     createRecordFilenameProcessor.getCreateRecordFilenameAndPath());
         }
-        if (nonNull(armResponseBatchData.getUploadFileFilenameProcessor())) {
-            log.info("Found eod {} with upload file: {}", armResponseBatchData.getExternalObjectDirectoryId(),
-                     armResponseBatchData.getUploadFileFilenameProcessor().getUploadFileFilenameAndPath());
+        if (nonNull(uploadFileFilenameProcessor)) {
+            log.info("Found eod {} with upload file: {}", eodId,
+                     uploadFileFilenameProcessor.getUploadFileFilenameAndPath());
         }
-        if (CollectionUtils.isNotEmpty(armResponseBatchData.getInvalidLineFileFilenameProcessors())) {
-            armResponseBatchData.getInvalidLineFileFilenameProcessors().forEach(
-                invalidLineFileFilenameProcessor -> log.info("Found eod {} with invalid line file: {}",
-                                                             armResponseBatchData.getExternalObjectDirectoryId(),
-                                                             invalidLineFileFilenameProcessor.getInvalidLineFileFilenameAndPath())
+        if (CollectionUtils.isNotEmpty(invalidLineFileFilenameProcessors)) {
+            invalidLineFileFilenameProcessors.forEach(
+                invalidLineFileFilenameProcessor ->
+                    log.info("Found eod {} with invalid line file: {}", eodId,
+                             invalidLineFileFilenameProcessor.getInvalidLineFileFilenameAndPath())
             );
         }
     }

@@ -2,7 +2,6 @@
 echo "This script generates the ARM pull response files. These can be used for testing where ARM returns a response for an object such as media, transcription document, annotation document or case document to be stored in the ARM storage"
 
 uuid1=$(uuidgen | tr -d '-')
-##uuid1=${uuid1//'-'/''}
 
 echo "uuid 1: $uuid1"
 echo " "
