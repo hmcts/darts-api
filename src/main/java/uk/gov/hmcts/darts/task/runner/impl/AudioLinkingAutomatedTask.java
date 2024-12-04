@@ -9,18 +9,14 @@ import org.springframework.data.domain.Limit;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.EventEntity;
-import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
-import uk.gov.hmcts.darts.common.entity.MediaLinkedCaseEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.enums.MediaLinkedCaseSourceType;
 import uk.gov.hmcts.darts.common.enums.SystemUsersEnum;
+import uk.gov.hmcts.darts.common.helper.MediaLinkedCaseHelper;
 import uk.gov.hmcts.darts.common.repository.AutomatedTaskRepository;
 import uk.gov.hmcts.darts.common.repository.EventRepository;
-import uk.gov.hmcts.darts.common.repository.HearingRepository;
-import uk.gov.hmcts.darts.common.repository.MediaLinkedCaseRepository;
 import uk.gov.hmcts.darts.common.repository.MediaRepository;
 import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
 import uk.gov.hmcts.darts.event.enums.EventStatus;
@@ -32,9 +28,7 @@ import uk.gov.hmcts.darts.task.runner.AutoloadingManualTask;
 import uk.gov.hmcts.darts.task.service.LockService;
 
 import java.time.Duration;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 @Slf4j
 @Component
@@ -64,7 +58,7 @@ public class AudioLinkingAutomatedTask
     protected void runTask() {
         log.info("Running AudioLinkingAutomatedTask");
         List<Integer> eveIds = eventRepository.findAllByEventStatus(EventStatus.AUDIO_LINK_NOT_DONE_MODERNISED.getStatusNumber(),
-                                                                      Limit.of(getAutomatedTaskBatchSize()));
+                                                                    Limit.of(getAutomatedTaskBatchSize()));
         eveIds.forEach(eventProcessor::processEvent);
     }
 
@@ -73,10 +67,9 @@ public class AudioLinkingAutomatedTask
     @RequiredArgsConstructor(onConstructor = @__(@Autowired))
     public static class EventProcessor {
         private final MediaRepository mediaRepository;
-        private final HearingRepository hearingRepository;
-        private final MediaLinkedCaseRepository mediaLinkedCaseRepository;
         private final EventService eventService;
         private final UserAccountRepository userAccountRepository;
+        private final MediaLinkedCaseHelper mediaLinkedCaseHelper;
 
         @Getter
         @Value("${darts.automated-tasks.audio-linking.audio-buffer:0s}")
@@ -87,41 +80,21 @@ public class AudioLinkingAutomatedTask
         public void processEvent(Integer eveId) {
             log.info("Attempting to link media for event with eveId {}", eveId);
             try {
+                UserAccountEntity userAccount = userAccountRepository.getReferenceById(SystemUsersEnum.AUDIO_LINKING_AUTOMATED_TASK.getId());
+
                 EventEntity event = eventService.getEventByEveId(eveId);
                 List<MediaEntity> mediaEntities = mediaRepository.findAllByMediaTimeContains(
                     event.getCourtroom().getId(),
                     event.getTimestamp().plus(getAudioBuffer()),
                     event.getTimestamp().minus(getAudioBuffer()));
-                mediaEntities.forEach(mediaEntity -> processMedia(event.getHearingEntities(), mediaEntity, eveId));
+                mediaEntities.forEach(mediaEntity -> {
+                    mediaLinkedCaseHelper.linkMediaByEvent(event, mediaEntity, MediaLinkedCaseSourceType.AUDIO_LINKING_TASK, userAccount);
+                });
                 event.setEventStatus(EventStatus.AUDIO_LINKED.getStatusNumber());
                 eventService.saveEvent(event);
             } catch (Exception e) {
                 log.error("Error attempting to link media for event with eveId {}", eveId, e);
             }
-        }
-
-        void processMedia(List<HearingEntity> hearingEntities, MediaEntity mediaEntity, Integer eveId) {
-            Set<HearingEntity> hearingsToSave = new HashSet<>();
-            Set<MediaLinkedCaseEntity> mediaLinkedCaseEntities = new HashSet<>();
-            UserAccountEntity userAccount = userAccountRepository.getReferenceById(SystemUsersEnum.AUDIO_LINKING_AUTOMATED_TASK.getId());
-            hearingEntities.forEach(hearingEntity -> {
-                try {
-                    if (!hearingEntity.containsMedia(mediaEntity)) {
-                        hearingEntity.addMedia(mediaEntity);
-                        hearingsToSave.add(hearingEntity);
-                        CourtCaseEntity courtCase = hearingEntity.getCourtCase();
-                        if (!mediaLinkedCaseRepository.existsByMediaAndCourtCase(mediaEntity, courtCase)) {
-                            mediaLinkedCaseEntities.add(new MediaLinkedCaseEntity(
-                                mediaEntity, courtCase, userAccount, MediaLinkedCaseSourceType.AUDIO_LINKING_TASK));
-                        }
-                        log.info("Linking media {} to hearing {} through eveId {}", mediaEntity.getId(), hearingEntity.getId(), eveId);
-                    }
-                } catch (Exception e) {
-                    log.error("Error linking media {} to hearing {} through eveId {}", mediaEntity.getId(), hearingEntity.getId(), eveId, e);
-                }
-            });
-            hearingRepository.saveAll(hearingsToSave);
-            mediaLinkedCaseRepository.saveAll(mediaLinkedCaseEntities);
         }
     }
 }
