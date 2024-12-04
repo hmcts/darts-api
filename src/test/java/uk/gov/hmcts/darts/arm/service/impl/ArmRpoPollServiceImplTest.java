@@ -20,6 +20,7 @@ import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.ArmRpoExecutionDetailEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.service.FileOperationService;
+import uk.gov.hmcts.darts.log.api.LogApi;
 
 import java.io.File;
 import java.io.IOException;
@@ -53,6 +54,8 @@ class ArmRpoPollServiceImplTest {
     private FileOperationService fileOperationService;
     @Mock
     private ArmDataManagementConfiguration armDataManagementConfiguration;
+    @Mock
+    private LogApi logApi;
 
     @Mock
     private UserAccountEntity userAccountEntity;
@@ -113,7 +116,9 @@ class ArmRpoPollServiceImplTest {
 
         verify(fileOperationService).saveFileToTempWorkspace(any(InputStream.class), anyString(), any(), anyBoolean());
 
-        verifyNoMoreInteractions(armRpoApi, userIdentity, fileOperationService);
+        verify(logApi).armRpoPollingSuccessful(any());
+
+        verifyNoMoreInteractions(armRpoApi, userIdentity, fileOperationService, logApi);
     }
 
     @Test
@@ -152,7 +157,9 @@ class ArmRpoPollServiceImplTest {
 
         verify(fileOperationService).saveFileToTempWorkspace(any(InputStream.class), anyString(), any(), anyBoolean());
 
-        verifyNoMoreInteractions(armRpoApi, userIdentity, fileOperationService);
+        verify(logApi).armRpoPollingSuccessful(any());
+
+        verifyNoMoreInteractions(armRpoApi, userIdentity, fileOperationService, logApi);
     }
 
     @Test
@@ -191,7 +198,9 @@ class ArmRpoPollServiceImplTest {
 
         verify(fileOperationService).saveFileToTempWorkspace(any(InputStream.class), anyString(), any(), anyBoolean());
 
-        verifyNoMoreInteractions(armRpoApi, userIdentity, fileOperationService);
+        verify(logApi).armRpoPollingSuccessful(any());
+
+        verifyNoMoreInteractions(armRpoApi, userIdentity, fileOperationService, logApi);
     }
 
     @Test
@@ -230,7 +239,9 @@ class ArmRpoPollServiceImplTest {
 
         verify(fileOperationService).saveFileToTempWorkspace(any(InputStream.class), anyString(), any(), anyBoolean());
 
-        verifyNoMoreInteractions(armRpoApi, userIdentity, fileOperationService);
+        verify(logApi).armRpoPollingSuccessful(any());
+
+        verifyNoMoreInteractions(armRpoApi, userIdentity, fileOperationService, logApi);
     }
 
     @Test
@@ -269,7 +280,9 @@ class ArmRpoPollServiceImplTest {
 
         verify(fileOperationService).saveFileToTempWorkspace(any(InputStream.class), anyString(), any(), anyBoolean());
 
-        verifyNoMoreInteractions(armRpoApi, userIdentity, fileOperationService);
+        verify(logApi).armRpoPollingSuccessful(any());
+
+        verifyNoMoreInteractions(armRpoApi, userIdentity, fileOperationService, logApi);
     }
 
     @Test
@@ -283,7 +296,9 @@ class ArmRpoPollServiceImplTest {
 
         // then
         verify(armRpoService).getLatestArmRpoExecutionDetailEntity();
-        verifyNoMoreInteractions(armRpoApi, armApiService, userIdentity, fileOperationService);
+        verify(logApi).armRpoPollingFailed(any());
+
+        verifyNoMoreInteractions(armRpoApi, armApiService, userIdentity, fileOperationService, logApi);
     }
 
     @Test
@@ -297,7 +312,9 @@ class ArmRpoPollServiceImplTest {
 
         // then
         verify(armRpoService).getLatestArmRpoExecutionDetailEntity();
-        verifyNoMoreInteractions(armRpoApi, armApiService, userIdentity, fileOperationService);
+        verify(logApi).armRpoPollingFailed(any());
+
+        verifyNoMoreInteractions(armRpoApi, armApiService, userIdentity, fileOperationService, logApi);
     }
 
     @Test
@@ -310,7 +327,8 @@ class ArmRpoPollServiceImplTest {
 
         // then
         verify(armRpoService).getLatestArmRpoExecutionDetailEntity();
-        verifyNoMoreInteractions(armRpoApi, armApiService, userIdentity, fileOperationService);
+        verify(logApi).armRpoPollingFailed(null);
+        verifyNoMoreInteractions(armRpoApi, armApiService, userIdentity, fileOperationService, logApi);
     }
 
     @Test
@@ -327,7 +345,8 @@ class ArmRpoPollServiceImplTest {
         // then
         verify(armRpoService).getLatestArmRpoExecutionDetailEntity();
         verify(armApiService).getArmBearerToken();
-        verifyNoMoreInteractions(armRpoApi, userIdentity, fileOperationService);
+        verify(logApi).armRpoPollingFailed(any());
+        verifyNoMoreInteractions(armRpoApi, userIdentity, fileOperationService, logApi);
     }
 
     @Test
@@ -348,7 +367,9 @@ class ArmRpoPollServiceImplTest {
         verify(armRpoApi).getMasterIndexFieldByRecordClassSchema(anyString(), anyInt(), any(), any());
         verify(armRpoApi).createExportBasedOnSearchResultsTable(anyString(), anyInt(), any(), any());
         verify(userIdentity).getUserAccount();
-        verifyNoMoreInteractions(armRpoApi, userIdentity, fileOperationService);
+        verify(logApi).armRpoPollingSuccessful(any());
+
+        verifyNoMoreInteractions(armRpoApi, userIdentity, fileOperationService, logApi);
     }
 
     @Test
@@ -372,7 +393,9 @@ class ArmRpoPollServiceImplTest {
         verify(armRpoApi).getExtendedProductionsByMatter(anyString(), anyInt(), any());
         verify(armRpoApi).getProductionOutputFiles(anyString(), anyInt(), any());
         verify(userIdentity).getUserAccount();
-        verifyNoMoreInteractions(armRpoApi, userIdentity, fileOperationService);
+        verify(logApi).armRpoPollingSuccessful(any());
+
+        verifyNoMoreInteractions(armRpoApi, userIdentity, fileOperationService, logApi);
     }
 
     @Test
@@ -393,7 +416,9 @@ class ArmRpoPollServiceImplTest {
         verify(armRpoApi).getMasterIndexFieldByRecordClassSchema(anyString(), anyInt(), any(), any());
         verify(armRpoApi).createExportBasedOnSearchResultsTable(anyString(), anyInt(), any(), any());
         verify(userIdentity).getUserAccount();
-        verifyNoMoreInteractions(armRpoApi, userIdentity, fileOperationService);
+        verify(logApi).armRpoPollingFailed(any());
+
+        verifyNoMoreInteractions(armRpoApi, userIdentity, fileOperationService, logApi);
     }
 
     private List<MasterIndexFieldByRecordClassSchema> createHeaderColumns() {

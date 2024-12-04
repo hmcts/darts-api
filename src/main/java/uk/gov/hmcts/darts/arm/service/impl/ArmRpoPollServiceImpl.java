@@ -14,6 +14,7 @@ import uk.gov.hmcts.darts.arm.service.ArmRpoService;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.ArmRpoExecutionDetailEntity;
 import uk.gov.hmcts.darts.common.service.FileOperationService;
+import uk.gov.hmcts.darts.log.api.LogApi;
 
 import java.io.File;
 import java.nio.file.Path;
@@ -35,6 +36,7 @@ public class ArmRpoPollServiceImpl implements ArmRpoPollService {
     private final UserIdentity userIdentity;
     private final FileOperationService fileOperationService;
     private final ArmDataManagementConfiguration armDataManagementConfiguration;
+    private final LogApi logApi;
 
     private List<File> tempProductionFiles;
 
@@ -44,20 +46,23 @@ public class ArmRpoPollServiceImpl implements ArmRpoPollService {
     @Override
     public void pollArmRpo(boolean isManualRun) {
         setupFailedStatuses();
+        Integer executionId = null;
         tempProductionFiles = new ArrayList<>();
         try {
             var armRpoExecutionDetailEntity = getArmRpoExecutionDetailEntity(isManualRun);
             if (isNull(armRpoExecutionDetailEntity)) {
                 log.warn("Unable to find armRpoExecutionDetailEntity to poll");
+                logApi.armRpoPollingFailed(executionId);
                 return;
             }
             var bearerToken = armApiService.getArmBearerToken();
             if (isNull(bearerToken)) {
                 log.warn("Unable to get bearer token to poll ARM RPO");
+                logApi.armRpoPollingFailed(executionId);
                 return;
             }
 
-            var executionId = armRpoExecutionDetailEntity.getId();
+            executionId = armRpoExecutionDetailEntity.getId();
             var userAccount = userIdentity.getUserAccount();
 
             // step to call ARM RPO API to get the extended searches by matter
@@ -101,9 +106,10 @@ public class ArmRpoPollServiceImpl implements ArmRpoPollService {
             } else {
                 log.warn("Create export of production files is still in progress");
             }
-
+            logApi.armRpoPollingSuccessful(executionId);
         } catch (Exception e) {
             log.error("Error while polling ARM RPO", e);
+            logApi.armRpoPollingFailed(executionId);
         } finally {
             try {
                 cleanUpTempFiles();

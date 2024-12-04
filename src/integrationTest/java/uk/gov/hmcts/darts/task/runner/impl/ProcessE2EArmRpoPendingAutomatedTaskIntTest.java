@@ -15,7 +15,9 @@ import uk.gov.hmcts.darts.arm.client.model.rpo.SaveBackgroundSearchResponse;
 import uk.gov.hmcts.darts.arm.client.model.rpo.StorageAccountResponse;
 import uk.gov.hmcts.darts.arm.exception.ArmRpoException;
 import uk.gov.hmcts.darts.arm.service.ArmApiService;
+import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.ArmRpoExecutionDetailEntity;
+import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.enums.ArmRpoStateEnum;
 import uk.gov.hmcts.darts.common.enums.ArmRpoStatusEnum;
 import uk.gov.hmcts.darts.testutils.PostgresIntegrationBase;
@@ -43,6 +45,9 @@ class ProcessE2EArmRpoPendingAutomatedTaskIntTest extends PostgresIntegrationBas
     private ProcessE2EArmRpoPendingAutomatedTask task;
 
     @MockBean
+    private UserIdentity userIdentity;
+
+    @MockBean
     private ArmApiService armApiService;
 
     @MockBean
@@ -61,6 +66,10 @@ class ProcessE2EArmRpoPendingAutomatedTaskIntTest extends PostgresIntegrationBas
 
     @BeforeEach
     void setUp() {
+        UserAccountEntity user = dartsDatabase.getUserAccountStub().getSystemUserAccountEntity();
+        when(userIdentity.getUserAccount())
+            .thenReturn(user);
+
         when(armApiService.getArmBearerToken())
             .thenReturn(BEARER_TOKEN);
     }

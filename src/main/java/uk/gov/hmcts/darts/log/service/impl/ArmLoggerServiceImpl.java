@@ -38,4 +38,25 @@ public class ArmLoggerServiceImpl implements ArmLoggerService {
     public void archiveToArmFailed(Integer eodId) {
         log.info(ARCHIVE_TO_ARM_FAILED, eodId);
     }
+
+    @Override
+    public void armRpoSearchSuccessful(Integer executionId) {
+        log.info("ARM RPO Search - Successfully completed for execution Id = {}");
+    }
+
+    @Override
+    public void armRpoSearchFailed(Integer executionId) {
+        log.error("ARM RPO Search - Failed for execution Id = {}");
+    }
+
+    @Override
+    public void armRpoPollingSuccessful(Integer executionId) {
+        log.info("ARM RPO Polling - Successfully completed for execution Id = {}");
+    }
+
+    @Override
+    public void armRpoPollingFailed(Integer executionId) {
+        log.error("ARM RPO Polling - Failed for execution Id = {}");
+    }
+    
 }

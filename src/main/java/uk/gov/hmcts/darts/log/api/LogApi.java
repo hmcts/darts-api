@@ -62,4 +62,12 @@ public interface LogApi {
     void mediaDeleted(Integer mediaId);
 
     void transcriptionDeleted(Integer transcriptionId);
+
+    void armRpoSearchSuccessful(Integer executionId);
+
+    void armRpoSearchFailed(Integer executionId);
+
+    void armRpoPollingSuccessful(Integer executionId);
+
+    void armRpoPollingFailed(Integer executionId);
 }
