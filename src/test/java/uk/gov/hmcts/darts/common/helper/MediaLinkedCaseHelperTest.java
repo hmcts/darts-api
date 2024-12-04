@@ -62,7 +62,7 @@ class MediaLinkedCaseHelperTest {
         EventEntity event = mock(EventEntity.class);
         when(event.getHearingEntities()).thenReturn(hearingEntities);
         UserAccountEntity userAccount = mock(UserAccountEntity.class);
-        doNothing().when(mediaLinkedCaseHelper).addCase(any(), any(), any(), any());
+        doNothing().when(mediaLinkedCaseHelper).linkMediaToCase(any(), any(), any(), any());
 
         MediaEntity mediaEntity = mock(MediaEntity.class);
         mediaLinkedCaseHelper.linkMediaByEvent(event, mediaEntity, AUDIO_LINKING_TASK, userAccount);
@@ -86,8 +86,8 @@ class MediaLinkedCaseHelperTest {
         verify(hearingRepository, times(1))
             .saveAll(savedHearingEntities);
 
-        verify(mediaLinkedCaseHelper, times(2)).addCase(mediaEntity, courtCaseEntity1, AUDIO_LINKING_TASK, userAccount);
-        verify(mediaLinkedCaseHelper).addCase(mediaEntity, courtCaseEntity2, AUDIO_LINKING_TASK, userAccount);
+        verify(mediaLinkedCaseHelper, times(2)).linkMediaToCase(mediaEntity, courtCaseEntity1, AUDIO_LINKING_TASK, userAccount);
+        verify(mediaLinkedCaseHelper).linkMediaToCase(mediaEntity, courtCaseEntity2, AUDIO_LINKING_TASK, userAccount);
     }
 
 
@@ -109,7 +109,7 @@ class MediaLinkedCaseHelperTest {
         EventEntity event = mock(EventEntity.class);
         when(event.getHearingEntities()).thenReturn(hearingEntities);
         UserAccountEntity userAccount = mock(UserAccountEntity.class);
-        doNothing().when(mediaLinkedCaseHelper).addCase(any(), any(), any(), any());
+        doNothing().when(mediaLinkedCaseHelper).linkMediaToCase(any(), any(), any(), any());
 
         MediaEntity mediaEntity = mock(MediaEntity.class);
         mediaLinkedCaseHelper.linkMediaByEvent(event, mediaEntity, AUDIO_LINKING_TASK, userAccount);
@@ -131,6 +131,6 @@ class MediaLinkedCaseHelperTest {
         verify(hearingRepository, times(1))
             .saveAll(savedHearingEntities);
 
-        verify(mediaLinkedCaseHelper).addCase(mediaEntity, courtCaseEntity1, AUDIO_LINKING_TASK, userAccount);
+        verify(mediaLinkedCaseHelper).linkMediaToCase(mediaEntity, courtCaseEntity1, AUDIO_LINKING_TASK, userAccount);
     }
 }

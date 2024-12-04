@@ -105,7 +105,7 @@ class AudioAsyncServiceImplTest {
         audioAsyncService.linkAudioToHearingByEvent(addAudioMetadataRequest, mediaEntity, userAccount);
         verify(hearingRepository, times(1)).saveAndFlush(any());
         assertEquals(1, hearing.getMediaList().size());
-        verify(mediaLinkedCaseHelper).addCase(mediaEntity, courtCase, MediaLinkedCaseSourceType.ADD_AUDIO_EVENT_LINKING, userAccount);
+        verify(mediaLinkedCaseHelper).linkMediaToCase(mediaEntity, courtCase, MediaLinkedCaseSourceType.ADD_AUDIO_EVENT_LINKING, userAccount);
     }
 
     @Test

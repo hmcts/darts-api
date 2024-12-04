@@ -24,7 +24,7 @@ public class MediaLinkedCaseHelper {
     private final MediaLinkedCaseRepository mediaLinkedCaseRepository;
     private final HearingRepository hearingRepository;
 
-    public void addCase(MediaEntity mediaEntity, CourtCaseEntity courtCase, MediaLinkedCaseSourceType sourceType, UserAccountEntity createdBy) {
+    public void linkMediaToCase(MediaEntity mediaEntity, CourtCaseEntity courtCase, MediaLinkedCaseSourceType sourceType, UserAccountEntity createdBy) {
         if (!mediaLinkedCaseRepository.existsByMediaAndCourtCase(mediaEntity, courtCase)) {
             MediaLinkedCaseEntity mediaLinkedCaseEntity = new MediaLinkedCaseEntity(mediaEntity, courtCase, createdBy, sourceType);
             mediaLinkedCaseEntity = mediaLinkedCaseRepository.saveAndFlush(mediaLinkedCaseEntity);
@@ -44,7 +44,7 @@ public class MediaLinkedCaseHelper {
                     hearingEntity.addMedia(mediaEntity);
                     hearingsToSave.add(hearingEntity);
 
-                    addCase(mediaEntity, hearingEntity.getCourtCase(), sourceType, userAccount);
+                    linkMediaToCase(mediaEntity, hearingEntity.getCourtCase(), sourceType, userAccount);
                     log.info("Linking media {} to hearing {} through eveId {}", mediaEntity.getId(), hearingEntity.getId(), event.getId());
                 }
             } catch (Exception e) {
