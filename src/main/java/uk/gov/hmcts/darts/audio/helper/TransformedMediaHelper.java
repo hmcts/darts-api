@@ -100,7 +100,7 @@ public class TransformedMediaHelper {
         if (nonNull(fileSize)) {
             entity.setOutputFilesize(fileSize.intValue());
         }
-        //Ensures createdBy / LastModified does not get overridden by the @CreatedBy / @LastModifiedBy annotaiton
+        //Ensures createdBy / LastModified does not get overridden by the @CreatedBy / @LastModifiedBy annotation
         TransformedMediaEntity savedTM = transformedMediaRepository.save(entity);
         savedTM.setLastModifiedBy(mediaRequest.getCreatedBy());
         savedTM.setCreatedBy(mediaRequest.getCreatedBy());
