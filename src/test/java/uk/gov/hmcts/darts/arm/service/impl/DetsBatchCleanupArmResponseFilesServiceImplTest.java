@@ -68,6 +68,7 @@ class DetsBatchCleanupArmResponseFilesServiceImplTest {
             .hasFieldOrPropertyWithValue("armDataManagementConfiguration", armDataManagementConfiguration)
             .hasFieldOrPropertyWithValue("currentTimeHelper", currentTimeHelper)
             .hasFieldOrPropertyWithValue("armResponseFileHelper", armResponseFileHelper)
+            .hasFieldOrPropertyWithValue("loggingPrefix", MANIFEST_FILE_PREFIX)
             .hasFieldOrPropertyWithValue("manifestFilePrefix", MANIFEST_FILE_PREFIX);
     }
 }

@@ -15,6 +15,7 @@ import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
 import uk.gov.hmcts.darts.common.repository.ObjectRecordStatusRepository;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -58,7 +59,7 @@ class DartsBatchCleanupArmResponseFilesServiceImplTest {
             armResponseFileHelper
         );
 
-        verify(armDataManagementConfiguration).getManifestFilePrefix();
+        verify(armDataManagementConfiguration, times(2)).getManifestFilePrefix();
 
         assertThat(cleanupArmResponseFilesService)
             .hasFieldOrPropertyWithValue("externalObjectDirectoryRepository", externalObjectDirectoryRepository)
@@ -70,6 +71,7 @@ class DartsBatchCleanupArmResponseFilesServiceImplTest {
             .hasFieldOrPropertyWithValue("armDataManagementConfiguration", armDataManagementConfiguration)
             .hasFieldOrPropertyWithValue("currentTimeHelper", currentTimeHelper)
             .hasFieldOrPropertyWithValue("armResponseFileHelper", armResponseFileHelper)
+            .hasFieldOrPropertyWithValue("loggingPrefix", MANIFEST_FILE_PREFIX)
             .hasFieldOrPropertyWithValue("manifestFilePrefix", MANIFEST_FILE_PREFIX);
     }
 }

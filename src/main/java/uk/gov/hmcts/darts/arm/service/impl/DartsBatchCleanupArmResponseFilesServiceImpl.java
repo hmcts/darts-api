@@ -24,7 +24,7 @@ public class DartsBatchCleanupArmResponseFilesServiceImpl extends BatchCleanupAr
                                                         ArmResponseFileHelper armResponseFileHelper) {
         super(externalObjectDirectoryRepository, objectRecordStatusRepository, externalLocationTypeRepository, armDataManagementApi, userIdentity,
               batchCleanupConfiguration, armDataManagementConfiguration, currentTimeHelper, armResponseFileHelper,
-              armDataManagementConfiguration.getManifestFilePrefix()
+              armDataManagementConfiguration.getManifestFilePrefix(), armDataManagementConfiguration.getManifestFilePrefix()
         );
     }
 }
