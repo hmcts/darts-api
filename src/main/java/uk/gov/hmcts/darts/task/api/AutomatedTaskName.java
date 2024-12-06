@@ -30,7 +30,6 @@ public enum AutomatedTaskName {
     GENERATE_CASE_DOCUMENT_TASK_NAME("GenerateCaseDocument"),
     INBOUND_TRANSCRIPTION_ANNOTATION_DELETER_TASK_NAME("InboundTranscriptionAnnotationDeleter"),
     UNSTRUCTURED_TRANSCRIPTION_ANNOTATION_DELETER_TASK_NAME("UnstructuredTranscriptionAnnotationDeleter"),
-    REMOVE_DUPLICATED_EVENTS_TASK_NAME("RemoveDuplicatedEvents"),
     GENERATE_CASE_DOCUMENT_FOR_RETENTION_DATE_TASK_NAME("GenerateCaseDocumentForRetentionDate"),
     DETS_TO_ARM_TASK_NAME("DetsToArm"),
     CASE_EXPIRY_DELETION_TASK_NAME("CaseExpiryDeletion", "${darts.automated.task.case-expiry-deletion.enabled:false}"),

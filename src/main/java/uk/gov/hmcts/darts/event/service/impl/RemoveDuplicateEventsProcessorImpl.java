@@ -5,7 +5,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import uk.gov.hmcts.darts.common.entity.EventEntity;
-import uk.gov.hmcts.darts.common.exception.DartsException;
 import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
 import uk.gov.hmcts.darts.common.repository.CaseManagementRetentionRepository;
 import uk.gov.hmcts.darts.common.repository.CaseRetentionRepository;
@@ -14,16 +13,10 @@ import uk.gov.hmcts.darts.event.service.RemoveDuplicateEventsProcessor;
 
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Spliterator;
-import java.util.function.Function;
 
 import static java.time.ZoneOffset.UTC;
 import static java.util.Comparator.comparing;
-import static java.util.stream.Collectors.groupingBy;
-import static java.util.stream.Collectors.toList;
-import static java.util.stream.StreamSupport.stream;
 
 @Service
 @Slf4j
@@ -39,14 +32,14 @@ public class RemoveDuplicateEventsProcessorImpl implements RemoveDuplicateEvents
     private final CaseRetentionRepository caseRetentionRepository;
 
     public RemoveDuplicateEventsProcessorImpl(
-        @Value("${darts.events.duplicates.earliest-removable-event-date}") String earliestRemovableEventDate,
+        @Value("${darts.events.duplicates.earliest-removable-event-date}") LocalDate earliestRemovableEventDate,
         @Value("${darts.events.duplicates.clear-up-window}") int clearUpWindow,
         EventRepository eventRepository,
         CurrentTimeHelper currentTimeHelper,
         CaseManagementRetentionRepository caseManagementRetentionRepository,
         CaseRetentionRepository caseRetentionRepository) {
 
-        this.earliestRemovableEventDate = LocalDate.parse(earliestRemovableEventDate)
+        this.earliestRemovableEventDate = earliestRemovableEventDate
             .atStartOfDay()
             .atOffset(UTC);
         this.clearUpWindow = clearUpWindow;
@@ -58,54 +51,31 @@ public class RemoveDuplicateEventsProcessorImpl implements RemoveDuplicateEvents
 
     @Override
     @Transactional
-    public void processRemoveDuplicateEvents() {
-        if (clearUpWindow < 1) {
-            throw new DartsException(
-                "The duplicate event deletion task is not configured correctly. " +
-                    "The clear-up window must be at least 1 day but is configured as " + clearUpWindow);
+    public void processEvent(Integer eventId) {
+
+        OffsetDateTime today = currentTimeHelper.currentOffsetDateTime();
+        OffsetDateTime startDateTime = today.minusDays(clearUpWindow);
+        OffsetDateTime minDate = earliestRemovableEventDate.isAfter(startDateTime) ? earliestRemovableEventDate : startDateTime;
+        //TODO confirm if we should use created_ts or timestamp -> if timestamp do we also need to strict by mod start time
+        List<EventEntity> eventEntities = eventRepository.findDuplicateEventIds(eventId, minDate);
+        if (eventEntities.isEmpty()) {
+            //No need to continue if there are no duplicates
+            return;
         }
-        var today = currentTimeHelper.currentLocalDate();
-        var startDateTime = today.minusDays(clearUpWindow).atStartOfDay().atOffset(UTC);
-        if (startDateTime.isBefore(earliestRemovableEventDate)) {
-            startDateTime = earliestRemovableEventDate;
-        }
-        var endDateTime = today.atTime(23, 59).atOffset(UTC);
-        var duplicateEvents = new ArrayList<EventEntity>();
+        eventEntities.sort(comparing(EventEntity::getCreatedDateTime));
+        // Keep the last (latest) event and delete the rest
+        List<EventEntity> eventEntitiesToDelete = eventEntities.subList(1, eventEntities.size());
 
-        eventRepository.findAllBetweenDateTimesInclusive(startDateTime, endDateTime).stream()
-            .collect(groupingBy(duplicateIdentification()))
-            .forEach((key, eventList) -> {
-                eventList.sort(comparing(EventEntity::getCreatedDateTime));
-                // Keep the last (latest) event and delete the rest
-                duplicateEvents.addAll(eventList.subList(0, eventList.size() - 1));
-            });
 
-        if (!duplicateEvents.isEmpty()) {
-            Spliterator<EventEntity> spliterator = duplicateEvents.spliterator();
-            List<EventEntity> chunk;
+        List<Integer> caseManagementIdsToBeDeleted = caseManagementRetentionRepository.getIdsForEvents(eventEntitiesToDelete);
+        caseRetentionRepository.deleteAllByCaseManagementIdsIn(caseManagementIdsToBeDeleted);
+        caseRetentionRepository.flush();
+        caseManagementRetentionRepository.deleteAllByEventEntityIn(eventEntitiesToDelete);
+        caseManagementRetentionRepository.flush();
+        eventRepository.deleteAll(eventEntitiesToDelete);
+        eventRepository.flush();
 
-            while (spliterator.estimateSize() > 0) {
-                chunk = stream(spliterator, false)
-                    .limit(CHUNK_SIZE)
-                    .collect(toList());
-
-                if (!chunk.isEmpty()) {
-                    var caseManagementIdsToBeDeleted = caseManagementRetentionRepository.getIdsForEvents(chunk);
-                    caseRetentionRepository.deleteAllByCaseManagementIdsIn(caseManagementIdsToBeDeleted);
-                    caseRetentionRepository.flush();
-                    caseManagementRetentionRepository.deleteAllByEventEntityIn(chunk);
-                    caseManagementRetentionRepository.flush();
-                    eventRepository.deleteAllInBatch(chunk);
-                    eventRepository.flush();
-
-                    log.info("Duplicate events found. Removing events with the following event_id:message_id combination {}",
-                             chunk.stream().map(e -> e.getEventId() + ":" + e.getMessageId()).toList());
-                }
-            }
-        }
-    }
-
-    private static Function<EventEntity, String> duplicateIdentification() {
-        return e -> e.getEventId() + "-" + e.getMessageId() + "-" + e.getEventText();
+        log.info("Duplicate events found. Removing events with the following event_id:message_id combination {}",
+                 eventEntitiesToDelete.stream().map(e -> e.getEventId() + ":" + e.getMessageId()).toList());
     }
 }
