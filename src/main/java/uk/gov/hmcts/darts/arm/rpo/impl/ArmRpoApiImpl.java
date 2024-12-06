@@ -67,6 +67,7 @@ public class ArmRpoApiImpl implements ArmRpoApi {
     private static final int FIELD_TYPE_7 = 7;
     private static final String ADD_ASYNC_SEARCH_RELATED_TASK_NAME = "ProcessE2EArmRpoPending";
     public static final String UNABLE_TO_GET_ARM_RPO_RESPONSE = "Unable to get ARM RPO response from client ";
+    public static final String CREATE_EXPORT_CSV_EXTENSION = "_CSV";
 
     private final ArmRpoClient armRpoClient;
     private final ArmRpoService armRpoService;
@@ -711,7 +712,7 @@ public class ArmRpoApiImpl implements ArmRpoApi {
             .searchId(searchId)
             .searchitemsCount(searchItemsCount)
             .headerColumns(createHeaderColumnsFromMasterIndexFieldByRecordClassSchemaResponse(headerColumns))
-            .productionName(productionName)
+            .productionName(productionName + CREATE_EXPORT_CSV_EXTENSION)
             .storageAccountId(storageAccountId)
             .build();
     }
