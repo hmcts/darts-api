@@ -143,14 +143,14 @@ public class TestSupportController {
     private void removeUserCourthousePermissions(Session session, List<Integer> cthIds) {
         session.createNativeQuery("""
                                       delete from darts.security_group_courthouse_ae where cth_id in
-                                      (select cth_id from darts.courthouse where courthouse_name like 'func-%');
+                                      (select cth_id from darts.courthouse where courthouse_name like 'FUNC-%');
                                       """)
             .executeUpdate();
     }
 
     private void removeDailyLists(Session session) {
         session.createNativeQuery("""
-                                      delete from darts.daily_list where unique_id like 'func-%'
+                                      delete from darts.daily_list where unique_id like 'FUNC-%'
                                       """)
             .executeUpdate();
     }
@@ -158,7 +158,7 @@ public class TestSupportController {
     private void removeCourtHouses(Session session) {
         List<Integer> courthouseIds = session.createNativeQuery(
                 """
-                    select cth_id from darts.courthouse where  courthouse_name ilike 'func-%'
+                    select cth_id from darts.courthouse where  courthouse_name ilike 'FUNC-%'
                     """, Integer.class)
             .getResultList();
         if (courthouseIds.isEmpty()) {
@@ -182,8 +182,8 @@ public class TestSupportController {
         @PathVariable(name = "courthouse_name") String courthouseName,
         @PathVariable(name = "courtroom_name") String courtroomName) {
 
-        if (!courthouseName.startsWith("func-")) {
-            return new ResponseEntity<>("Courthouse name must start with func-", BAD_REQUEST);
+        if (!courthouseName.startsWith("FUNC-")) {
+            return new ResponseEntity<>("Courthouse name must start with FUNC-", BAD_REQUEST);
         }
         String courthouseNameUC = StringUtils.toRootUpperCase(courthouseName);
 
@@ -216,7 +216,7 @@ public class TestSupportController {
                                               @PathVariable(name = "courthouse_name") String courthouseName) {
 
         CourtCaseEntity courtCase = new CourtCaseEntity();
-        courtCase.setCaseNumber("func-case1");
+        courtCase.setCaseNumber("FUNC-case1");
         courtCase.setClosed(false);
         courtCase.setInterpreterUsed(false);
 
@@ -415,7 +415,7 @@ public class TestSupportController {
 
     private static List<Integer> getCaseIdsToBeDeleted(Session session) {
         return session.createNativeQuery("""
-                                             select cas_id from darts.court_case where case_number like 'func-%'
+                                             select cas_id from darts.court_case where case_number like 'FUNC-%'
                                              """, Integer.class)
             .getResultList();
     }
@@ -431,7 +431,7 @@ public class TestSupportController {
         List<Integer> securityGroupIds = session.createNativeQuery(
                 """
                     select grp_id from darts.security_group where description = 'A temporary group created by functional test'
-                    or description like '%func-%'
+                    or description like '%FUNC-%'
                     """, Integer.class)
             .getResultList();
         if (securityGroupIds.isEmpty()) {
@@ -447,7 +447,7 @@ public class TestSupportController {
 
     private void removeRetentionPolicyTypes(Session session) {
         session.createNativeQuery("""
-                                      delete from darts.retention_policy_type where description like '%func-%'
+                                      delete from darts.retention_policy_type where description like '%FUNC-%'
                                       """, Integer.class)
             .executeUpdate();
     }
@@ -473,8 +473,8 @@ public class TestSupportController {
         courtCase.setLastModifiedBy(userAccountRepository.getReferenceById(0));
         courtCase.setLastModifiedDateTime(OffsetDateTime.now());
 
-        String courtroomName = "func-" + randomAlphanumeric(7);
-        String courthouseName = "func-" + randomAlphanumeric(7);
+        String courtroomName = "FUNC-" + randomAlphanumeric(7).toUpperCase();
+        String courthouseName = "FUNC-" + randomAlphanumeric(7).toUpperCase();
         CourthouseEntity courthouse = newCourthouse(courthouseName);
         newCourtroom(courtroomName, courthouse);
 
