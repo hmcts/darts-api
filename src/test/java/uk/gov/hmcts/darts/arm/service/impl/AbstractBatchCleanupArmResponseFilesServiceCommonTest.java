@@ -106,6 +106,7 @@ class AbstractBatchCleanupArmResponseFilesServiceCommonTest {
             armDataManagementConfiguration,
             currentTimeHelper,
             armResponseFileHelper,
+            MANIFEST_FILE_PREFIX,
             MANIFEST_FILE_PREFIX
         );
 
