@@ -50,6 +50,21 @@ public class BatchCleanupArmResponseFilesServiceCommon implements BatchCleanupAr
     protected final String manifestFilePrefix;
     protected final String loggingPrefix;
 
+    public BatchCleanupArmResponseFilesServiceCommon(ExternalObjectDirectoryRepository externalObjectDirectoryRepository,
+                                                     ObjectRecordStatusRepository objectRecordStatusRepository,
+                                                     ExternalLocationTypeRepository externalLocationTypeRepository,
+                                                     ArmDataManagementApi armDataManagementApi,
+                                                     UserIdentity userIdentity,
+                                                     ArmBatchCleanupConfiguration batchCleanupConfiguration,
+                                                     ArmDataManagementConfiguration armDataManagementConfiguration,
+                                                     CurrentTimeHelper currentTimeHelper,
+                                                     ArmResponseFileHelper armResponseFileHelper,
+                                                     String manifestFilePrefix) {
+        this(externalObjectDirectoryRepository, objectRecordStatusRepository, externalLocationTypeRepository, armDataManagementApi, userIdentity,
+             batchCleanupConfiguration, armDataManagementConfiguration, currentTimeHelper, armResponseFileHelper,
+             manifestFilePrefix, manifestFilePrefix);
+    }
+
 
     @Override
     public void cleanupResponseFiles(int batchsize) {

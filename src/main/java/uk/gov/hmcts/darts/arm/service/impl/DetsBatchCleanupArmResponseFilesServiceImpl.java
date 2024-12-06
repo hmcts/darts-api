@@ -26,7 +26,7 @@ public class DetsBatchCleanupArmResponseFilesServiceImpl extends BatchCleanupArm
                                                        @Value("${darts.storage.dets.dets-manifest-file-prefix}") String manifestFilePrefix) {
         super(externalObjectDirectoryRepository, objectRecordStatusRepository, externalLocationTypeRepository, armDataManagementApi, userIdentity,
               batchCleanupConfiguration, armDataManagementConfiguration, currentTimeHelper, armResponseFileHelper,
-              manifestFilePrefix, manifestFilePrefix
+              manifestFilePrefix
         );
     }
 }
