@@ -325,6 +325,17 @@
 --    add 2 FKs on event_linked_case
 --    add 2 FKs on media_linked_case
 --    add 2 FKs on object_retrieval_queue
+--v72.2 reintroduce user_login_name,user_os_name,user_login_domain,user_global_unique_id,user_ldap_dn
+--    to user_account
+--    add subcontent_object_id and subcontent_position to annotation_document,
+--    daily_list,media,transcription_document
+--
+--    add courthouse_object_id and folder_path to courthouse
+--    reinstate numeric user_state to user_account
+--    amend user_account.user_full_name to not null
+--    add table transcription_linked_case, as per event_linked_case
+--    add extobjdir_process_detail as 1:1 with external_object_directory ( c.f.case_overflow )
+--    remove user_name from user_account
 
 
 -- List of Table Aliases
@@ -355,6 +366,7 @@
 -- event_linked_case           ELC
 -- external_location_type      ELT
 -- external_object_directory   EOD
+-- extobjdir_process_detail    EPD
 -- external_service_auth_token ESA
 -- hearing                     HEA
 -- hearing_annotation_ae       HAA
@@ -378,6 +390,7 @@
 -- transcription               TRA
 -- transcription_comment       TRC
 -- transcription_document      TRD
+-- transcription_linked_case   TLC
 -- transcription_status        TRS
 -- transcription_type          TRT
 -- transcription_urgency       TRU
@@ -451,6 +464,8 @@ CREATE TABLE annotation_document
 (ado_id                      INTEGER                       NOT NULL
 ,ann_id                      INTEGER                       NOT NULL
 ,content_object_id           CHARACTER VARYING(16)                  -- legacy PK from dmr_content 
+,subcontent_object_id        CHARACTER VARYING(16)
+,subcontent_position         INTEGER
 ,clip_id                     CHARACTER VARYING(54)
 ,file_name                   CHARACTER VARYING             NOT NULL
 ,file_type                   CHARACTER VARYING             NOT NULL
@@ -755,6 +770,8 @@ IS 'directly sourced from moj_case_s.c_case_closed_date';
 
 CREATE TABLE courthouse
 (cth_id                      INTEGER                       NOT NULL
+,courthouse_object_id        CHARACTER VARYING(16)
+,folder_path                 CHARACTER VARYING
 ,courthouse_code             INTEGER                       
 ,courthouse_name             CHARACTER VARYING             NOT NULL          UNIQUE
 ,display_name                CHARACTER VARYING             NOT NULL
@@ -829,7 +846,9 @@ CREATE TABLE daily_list
 ,daily_list_content_json     CHARACTER VARYING
 ,daily_list_content_xml      CHARACTER VARYING
 ,message_id                  CHARACTER VARYING 
-,content_object_id           CHARACTER VARYING
+,content_object_id           CHARACTER VARYING(16)
+,subcontent_object_id        CHARACTER VARYING(16)
+,subcontent_position         INTEGER
 ,clip_id                     CHARACTER VARYING
 ,external_location           UUID
 ,elt_id                      INTEGER
@@ -1041,6 +1060,25 @@ IS 'foreign key from transcription_document';
 COMMENT ON COLUMN external_object_directory.ado_id
 IS 'foreign key from annotation_document';
 
+CREATE TABLE extobjdir_process_detail
+(epd_id                      INTEGER                       NOT NULL
+,eod_id                      INTEGER                       NOT NULL          UNIQUE
+,event_date_ts               TIMESTAMP WITH TIME ZONE
+,update_retention            BOOLEAN                       NOT NULL
+,created_ts                  TIMESTAMP WITH TIME ZONE      NOT NULL
+,created_by                  INTEGER                       NOT NULL
+,last_modified_ts            TIMESTAMP WITH TIME ZONE      NOT NULL
+,last_modified_by            INTEGER                       NOT NULL
+) TABLESPACE pg_default;
+
+COMMENT ON TABLE extobjdir_process_detail 
+IS 'This table is an extension of external_object_directory.';
+
+COMMENT ON COLUMN extobjdir_process_detail.epd_id
+IS 'primary key of extobjdir_process_detail, needed to support Hibernate. Logically eod_id is the PK';
+
+COMMENT ON COLUMN extobjdir_process_detail.eod_id
+IS 'foreign key from external_object_directory';
 
 CREATE TABLE external_location_type
 (elt_id                      INTEGER                       NOT NULL
@@ -1178,6 +1216,8 @@ CREATE TABLE media
 ,media_object_id             CHARACTER VARYING(16)                  -- legacy id of this media
 ,folder_path                 CHARACTER VARYING                      -- to accommodate dm_folder_r.r_folder_path
 ,content_object_id           CHARACTER VARYING(16)                  -- legacy id of the content record associated with the external media
+,subcontent_object_id        CHARACTER VARYING(16)
+,subcontent_position         INTEGER
 ,clip_id                     CHARACTER VARYING(54)
 ,channel                     INTEGER                       NOT NULL -- 1,2,3,4 or rarely 5
 ,total_channels              INTEGER                       NOT NULL --99.9% are "4" in legacy, occasionally 1,2,5 
@@ -1543,6 +1583,8 @@ CREATE TABLE transcription_document
 (trd_id                      INTEGER                       NOT NULL
 ,tra_id                      INTEGER                       NOT NULL
 ,content_object_id           CHARACTER VARYING(16)                  -- legacy PK from dmr_content object
+,subcontent_object_id        CHARACTER VARYING(16)
+,subcontent_position         INTEGER
 ,clip_id                     CHARACTER VARYING(54)
 ,file_name                   CHARACTER VARYING             NOT NULL
 ,file_type                   CHARACTER VARYING             NOT NULL
@@ -1566,6 +1608,29 @@ IS 'primary key of transcription_document';
 
 COMMENT ON COLUMN transcription_document.tra_id
 IS 'foreign key from transcription'; 
+
+CREATE TABLE transcription_linked_case
+(tlc_id                      INTEGER                       NOT NULL
+,tra_id                      INTEGER                       NOT NULL     -- unenforced FK to transcription
+,cas_id                      INTEGER                                    -- unenforced and optional FK
+,courthouse_name             CHARACTER VARYING         
+,case_number                 CHARACTER VARYING         
+) TABLESPACE pg_default;
+
+COMMENT ON COLUMN transcription_linked_case.tlc_id
+IS 'primary key of transcription_linked_case'; 
+
+COMMENT ON COLUMN transcription_linked_case.tra_id
+IS 'foreign key from transcription'; 
+
+COMMENT ON COLUMN transcription_linked_case.cas_id
+IS 'foreign key from court_case, mandatory if either courthouse_name or case_number are null'; 
+
+COMMENT ON COLUMN transcription_linked_case.courthouse_name
+IS 'mandatory if cas_id is null'; 
+
+COMMENT ON COLUMN transcription_linked_case.case_number
+IS 'mandatory if cas_id is null'; 
 
 CREATE TABLE transcription_status
 (trs_id                      INTEGER                       NOT NULL
@@ -1661,9 +1726,14 @@ CREATE TABLE transient_object_directory
 CREATE TABLE user_account
 (usr_id                      INTEGER                       NOT NULL
 ,dm_user_s_object_id         CHARACTER VARYING(16)
-,user_name                   CHARACTER VARYING            
-,user_full_name              CHARACTER VARYING            
+,user_os_name                CHARACTER VARYING            
+,user_full_name              CHARACTER VARYING             NOT NULL            
 ,user_email_address          CHARACTER VARYING
+,user_ldap_dn                CHARACTER VARYING
+,user_global_unique_id       CHARACTER VARYING
+,user_login_name             CHARACTER VARYING
+,user_login_domain           CHARACTER VARYING
+,user_state                  SMALLINT
 ,description                 CHARACTER VARYING
 ,is_active                   BOOLEAN                       NOT NULL
 ,last_login_ts               TIMESTAMP WITH TIME ZONE
@@ -1681,6 +1751,8 @@ COMMENT ON COLUMN user_account.usr_id
 IS 'primary key of user_account';
 COMMENT ON COLUMN user_account.dm_user_s_object_id
 IS 'internal Documentum primary key from dm_user_s';
+COMMENT ON COLUMN user_account.user_full_name
+IS 'directly migrated from dm_user_s.user_name';
 
 
 -- primary keys
@@ -1760,6 +1832,9 @@ ALTER TABLE event_handler            ADD PRIMARY KEY USING INDEX event_handler_p
 CREATE UNIQUE INDEX external_object_directory_pk ON external_object_directory(eod_id) TABLESPACE pg_default;
 ALTER TABLE external_object_directory   ADD PRIMARY KEY USING INDEX external_object_directory_pk;
 
+CREATE UNIQUE INDEX extobjdir_process_detail_pk ON extobjdir_process_detail(epd_id) TABLESPACE pg_default;
+ALTER TABLE extobjdir_process_detail   ADD PRIMARY KEY USING INDEX extobjdir_process_detail_pk;
+
 CREATE UNIQUE INDEX external_location_type_pk ON external_location_type(elt_id) TABLESPACE pg_default;
 ALTER TABLE external_location_type   ADD PRIMARY KEY USING INDEX external_location_type_pk;
 
@@ -1832,6 +1907,9 @@ ALTER TABLE transcription_comment   ADD PRIMARY KEY USING INDEX transcription_co
 CREATE UNIQUE INDEX transcription_document_pk ON transcription_document(trd_id) TABLESPACE pg_default;
 ALTER TABLE transcription_document   ADD PRIMARY KEY USING INDEX transcription_document_pk;
 
+CREATE UNIQUE INDEX transcription_linked_case_pk ON transcription_linked_case(tlc_id) TABLESPACE pg_default;
+ALTER TABLE transcription_linked_case   ADD PRIMARY KEY USING INDEX transcription_linked_case_pk;
+
 CREATE UNIQUE INDEX transcription_status_pk ON transcription_status(trs_id) TABLESPACE pg_default;
 ALTER TABLE transcription_status      ADD PRIMARY KEY USING INDEX transcription_status_pk;
 
@@ -1876,6 +1954,7 @@ CREATE SEQUENCE dfd_seq CACHE 20;
 CREATE SEQUENCE eve_seq CACHE 20;
 CREATE SEQUENCE evh_seq CACHE 20;
 CREATE SEQUENCE eod_seq CACHE 20;
+CREATE SEQUENCE epd_seq CACHE 20;
 CREATE SEQUENCE elt_seq CACHE 20;
 CREATE SEQUENCE elc_seq CACHE 20;
 CREATE SEQUENCE esa_seq CACHE 20;
@@ -1897,6 +1976,7 @@ CREATE SEQUENCE tod_seq CACHE 20;
 CREATE SEQUENCE tra_seq CACHE 20;
 CREATE SEQUENCE trc_seq CACHE 20;
 CREATE SEQUENCE trd_seq CACHE 20;
+CREATE SEQUENCE tlc_seq CACHE 20;
 CREATE SEQUENCE trw_seq CACHE 20;
 CREATE SEQUENCE trm_seq CACHE 1;
 CREATE SEQUENCE usr_seq CACHE 20;
@@ -2188,6 +2268,10 @@ ALTER TABLE external_object_directory
 ADD CONSTRAINT eod_external_location_type_fk
 FOREIGN KEY (elt_id) REFERENCES external_location_type(elt_id);
 
+ALTER TABLE extobjdir_process_detail  
+ADD CONSTRAINT epd_external_object_directory_fk
+FOREIGN KEY (eod_id) REFERENCES external_object_directory(eod_id);
+
 ALTER TABLE external_service_auth_token
 ADD CONSTRAINT external_service_auth_token_created_by_fk
 FOREIGN KEY (created_by) REFERENCES user_account(usr_id);
@@ -2460,6 +2544,14 @@ ALTER TABLE transcription_document
 ADD CONSTRAINT transcription_document_last_modified_by_fk
 FOREIGN KEY (last_modified_by) REFERENCES user_account(usr_id);
 
+ALTER TABLE transcription_linked_case
+ADD CONSTRAINT transcription_linked_case_court_case_fk
+FOREIGN KEY (cas_id) REFERENCES court_case(cas_id);
+
+ALTER TABLE transcription_linked_case
+ADD CONSTRAINT transcription_linked_case_transcription_fk
+FOREIGN KEY (tra_id) REFERENCES transcription(tra_id);
+
 ALTER TABLE transcription_workflow
 ADD CONSTRAINT transcription_workflow_transcription_fk
 FOREIGN KEY (tra_id) REFERENCES transcription(tra_id);
@@ -2542,6 +2634,10 @@ ALTER TABLE object_retrieval_queue
 ADD CONSTRAINT orq_one_of_med_or_trd_nn
 CHECK (med_id is not null or trd_id is not null);
 
+ALTER TABLE transcription_linked_case
+ADD CONSTRAINT tlc_modern_or_legacy_case_nn
+CHECK ((cas_id is not null) or (courthouse_name is not null and case_number is not null));
+
 -- additional unique multi-column indexes and constraints
 
 --,UNIQUE (cth_id,courtroom_name)
@@ -2598,6 +2694,7 @@ GRANT SELECT,INSERT,UPDATE,DELETE ON event_handler TO darts_user;
 GRANT SELECT,INSERT,UPDATE,DELETE ON event_linked_case TO darts_user;
 GRANT SELECT,INSERT,UPDATE,DELETE ON external_location_type TO darts_user;
 GRANT SELECT,INSERT,UPDATE,DELETE ON external_object_directory TO darts_user;
+GRANT SELECT,INSERT,UPDATE,DELETE ON extobjdir_process_detail TO darts_user;
 GRANT SELECT,INSERT,UPDATE,DELETE ON external_service_auth_token TO darts_user;
 GRANT SELECT,INSERT,UPDATE,DELETE ON hearing TO darts_user;
 GRANT SELECT,INSERT,UPDATE,DELETE ON hearing_annotation_ae TO darts_user;
@@ -2621,6 +2718,7 @@ GRANT SELECT,INSERT,UPDATE,DELETE ON report TO darts_user;
 GRANT SELECT,INSERT,UPDATE,DELETE ON transcription TO darts_user;
 GRANT SELECT,INSERT,UPDATE,DELETE ON transcription_comment TO darts_user;
 GRANT SELECT,INSERT,UPDATE,DELETE ON transcription_document TO darts_user;
+GRANT SELECT,INSERT,UPDATE,DELETE ON transcription_linked_case TO darts_user;
 GRANT SELECT,INSERT,UPDATE,DELETE ON transcription_status TO darts_user;
 GRANT SELECT,INSERT,UPDATE,DELETE ON transcription_type TO darts_user;
 GRANT SELECT,INSERT,UPDATE,DELETE ON transcription_urgency TO darts_user;
@@ -2647,6 +2745,7 @@ GRANT SELECT,UPDATE ON  dfd_seq TO darts_user;
 GRANT SELECT,UPDATE ON  elt_seq TO darts_user;
 GRANT SELECT,UPDATE ON  elc_seq TO darts_user;
 GRANT SELECT,UPDATE ON  eod_seq TO darts_user;
+GRANT SELECT,UPDATE ON  epd_seq TO darts_user;
 GRANT SELECT,UPDATE ON  esa_seq TO darts_user;
 GRANT SELECT,UPDATE ON  eve_seq TO darts_user;
 GRANT SELECT,UPDATE ON  evh_seq TO darts_user;
@@ -2662,6 +2761,7 @@ GRANT SELECT,UPDATE ON  prn_seq TO darts_user;
 GRANT SELECT,UPDATE ON  reg_seq TO darts_user;
 GRANT SELECT,UPDATE ON  rep_seq TO darts_user;
 GRANT SELECT,UPDATE ON  tod_seq TO darts_user;
+GRANT SELECT,UPDATE ON  tlc_seq TO darts_user;
 GRANT SELECT,UPDATE ON  tra_seq TO darts_user;
 GRANT SELECT,UPDATE ON  trc_seq TO darts_user;
 GRANT SELECT,UPDATE ON  trw_seq TO darts_user;
