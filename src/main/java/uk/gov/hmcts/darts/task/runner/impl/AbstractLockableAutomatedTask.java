@@ -75,6 +75,7 @@ public abstract class AbstractLockableAutomatedTask<T extends AbstractAutomatedT
             .claim("emails", List.of(automatedTaskConfigurationProperties.getSystemUserEmail()))
             .build();
         SecurityContextHolder.getContext().setAuthentication(new JwtAuthenticationToken(jwt));
+        log.debug("Task: {} setup with user: {}", getTaskName(), automatedTaskConfigurationProperties.getSystemUserEmail());
     }
 
     @Override
