@@ -12,9 +12,8 @@ import uk.gov.hmcts.darts.arm.service.ArmRpoService;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.ArmRpoExecutionDetailEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
+import uk.gov.hmcts.darts.log.api.LogApi;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -40,6 +39,8 @@ class TriggerArmRpoSearchServiceImplTest {
     private ArmApiService armApiService;
     @Mock
     private UserIdentity userIdentity;
+    @Mock
+    private LogApi logApi;
 
     private TriggerArmRpoSearchServiceImpl triggerArmRpoSearchServiceImpl;
     private UserAccountEntity userAccount;
@@ -50,7 +51,8 @@ class TriggerArmRpoSearchServiceImplTest {
         triggerArmRpoSearchServiceImpl = new TriggerArmRpoSearchServiceImpl(armRpoApi,
                                                                             armRpoService,
                                                                             armApiService,
-                                                                            userIdentity);
+                                                                            userIdentity,
+                                                                            logApi);
         userAccount = new UserAccountEntity();
         when(userIdentity.getUserAccount())
             .thenReturn(userAccount);
@@ -87,11 +89,13 @@ class TriggerArmRpoSearchServiceImplTest {
         verify(armRpoApi).getMasterIndexFieldByRecordClassSchema(eq(BEARER_TOKEN), eq(EXECUTION_ID), any(), eq(userAccount));
         verify(armRpoApi).addAsyncSearch(BEARER_TOKEN, EXECUTION_ID, userAccount);
         verify(armRpoApi).saveBackgroundSearch(BEARER_TOKEN, EXECUTION_ID, SEARCH_NAME, userAccount);
+        verify(logApi).armRpoSearchSuccessful(EXECUTION_ID);
 
         verifyNoMoreInteractions(userIdentity);
         verifyNoMoreInteractions(armRpoService);
         verifyNoMoreInteractions(armApiService);
         verifyNoMoreInteractions(armRpoApi);
+        verifyNoMoreInteractions(logApi);
     }
 
     @Test
@@ -101,19 +105,19 @@ class TriggerArmRpoSearchServiceImplTest {
             .when(armRpoApi).getRecordManagementMatter(anyString(), anyInt(), any(UserAccountEntity.class));
 
         // When
-        ArmRpoException armRpoException = assertThrows(ArmRpoException.class, () -> triggerArmRpoSearchServiceImpl.triggerArmRpoSearch());
+        triggerArmRpoSearchServiceImpl.triggerArmRpoSearch();
 
         // Then
-        assertEquals("some message", armRpoException.getMessage());
-
         verify(armRpoService).createArmRpoExecutionDetailEntity(userAccount);
         verify(armApiService).getArmBearerToken();
         verify(armRpoApi).getRecordManagementMatter(BEARER_TOKEN, EXECUTION_ID, userAccount);
+        verify(logApi).armRpoSearchFailed(EXECUTION_ID);
 
         verifyNoMoreInteractions(userIdentity);
         verifyNoMoreInteractions(armRpoService);
         verifyNoMoreInteractions(armApiService);
         verifyNoMoreInteractions(armRpoApi);
+        verifyNoMoreInteractions(logApi);
     }
 
 }

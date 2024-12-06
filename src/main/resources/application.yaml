@@ -359,39 +359,39 @@ darts:
         thread-pool-size: 5
         system-user-email: ${SYSTEM_USER_EMAIL:}
       apply-retention:
-        system-user-email: ${darts.automated.task.common-config.system-user-email:}
+        system-user-email: system_ApplyRetention@hmcts.net
         lock:
           at-least-for: PT1M
           at-most-for: PT90M
       apply-retention-case-associated-objects:
-        system-user-email: ${darts.automated.task.common-config.system-user-email:}
+        system-user-email: system_ApplyRetentionCaseAssociatedObjects@hmcts.net
         lock:
           at-least-for: PT1M
           at-most-for: PT90M
       arm-retention-event-date-calculator:
-        system-user-email: ${darts.automated.task.common-config.system-user-email:}
+        system-user-email: system_ArmRetentionEventDateCalculator@hmcts.net
         lock:
           at-least-for: PT1M
           at-most-for: PT120M
       arm-rpo-poll:
-        system-user-email: ${darts.automated.task.common-config.system-user-email:}
+        system-user-email: system_ArmRpoPolling@hmcts.net
         lock:
           at-least-for: PT1M
           at-most-for: PT30M
       associated-object-data-expiry-deletion:
-        system-user-email: ${darts.automated.task.common-config.system-user-email:}
+        system-user-email: system_AssociatedObjectDataExpiryDeletion@hmcts.net
         buffer-duration: 24h
         lock:
           at-least-for: PT1M
           at-most-for: PT90M
       audio-linking:
-        system-user-email: ${darts.automated.task.common-config.system-user-email:}
+        system-user-email: system_AudioLinking@hmcts.net
         audio-buffer: 0s
         lock:
           at-least-for: PT1M
           at-most-for: PT90M
       darts-batch-cleanup-arm-response-files:
-        system-user-email: ${darts.automated.task.common-config.system-user-email:}
+        system-user-email: system_BatchCleanupArmResponseFiles@hmcts.net
         lock:
           at-least-for: PT1M
           at-most-for: PT90M
@@ -401,127 +401,127 @@ darts:
           at-least-for: PT1M
           at-most-for: PT90M
       cleanup-arm-response-files:
-        system-user-email: ${darts.automated.task.common-config.system-user-email:}
+        system-user-email: system_CleanupArmResponseFiles@hmcts.net
         lock:
           at-least-for: PT1M
           at-most-for: PT90M
       case-expiry-deletion:
         enabled: ${CASE_EXPIRY_DELETION_ENABLED:false}
-        system-user-email: ${darts.automated.task.common-config.system-user-email:}
+        system-user-email: system_CaseExpiryDeletion@hmcts.net
         buffer-duration: 24h
         lock:
           at-least-for: PT1M
           at-most-for: PT40M
       close-old-cases:
-        system-user-email: ${darts.automated.task.common-config.system-user-email:}
+        system-user-email: system_CloseOldCases@hmcts.net
         lock:
           at-least-for: PT1M
           at-most-for: PT90M
       close-old-unfinished-transcriptions:
-        system-user-email: ${darts.automated.task.common-config.system-user-email:}
+        system-user-email: system_CloseOldUnfinishedTranscriptions@hmcts.net
         lock:
           at-least-for: PT1M
           at-most-for: PT40M
       daily-list-housekeeping:
-        system-user-email: ${darts.automated.task.common-config.system-user-email:}
+        system-user-email: system_DailyListHousekeeping@hmcts.net
         lock:
           at-least-for: PT1M
           at-most-for: PT90M
       dets-to-arm:
-        system-user-email: ${darts.automated.task.common-config.system-user-email:}
+        system-user-email: system_DetsToArm@hmcts.net
         lock:
           at-least-for: PT1M
           at-most-for: PT90M
       external-datastore-deleter:
-        system-user-email: ${darts.automated.task.common-config.system-user-email:}
+        system-user-email: system_ExternalDataStoreDeleter@hmcts.net
         lock:
           at-least-for: PT1M
           at-most-for: PT90M
       generate-case-document:
-        system-user-email: ${darts.automated.task.common-config.system-user-email:}
+        system-user-email: system_GenerateCaseDocument@hmcts.net
         lock:
           at-least-for: PT1M
           at-most-for: PT45M
       generate-case-document-for-retention-date:
-        system-user-email: ${darts.automated.task.common-config.system-user-email:}
+        system-user-email: system_GenerateCaseDocumentForRetentionDate@hmcts.net
         lock:
           at-least-for: PT1M
           at-most-for: PT40M
       inbound-transcription-annotation-deleter:
-        system-user-email: ${darts.automated.task.common-config.system-user-email:}
+        system-user-email: system_InboundTranscriptionAnnotationDeleter@hmcts.net
         default-batch-size: 100000
         lock:
           at-least-for: PT1M
           at-most-for: PT40M
       inbound-audio-deleter:
-        system-user-email: ${darts.automated.task.common-config.system-user-email:}
+        system-user-email: system_InboundAudioDeleter@hmcts.net
         unstructured-minimum-duration: 24h
         default-batch-size: 100000
         lock:
           at-least-for: PT1M
           at-most-for: PT90M
       inbound-to-unstructured:
-        system-user-email: ${darts.automated.task.common-config.system-user-email:}
+        system-user-email: system_InboundToUnstructuredDataStore@hmcts.net
         threads: 20
         lock:
           at-least-for: PT1M
           at-most-for: PT40M
       manual-deletion:
-        system-user-email: ${darts.automated.task.common-config.system-user-email:}
+        system-user-email: system_ManualDeletion@hmcts.net
         lock:
           at-least-for: PT1M
           at-most-for: PT90M
       outbound-audio-deleter:
-        system-user-email: ${darts.automated.task.common-config.system-user-email:}
+        system-user-email: system_OutboundAudioDeleter@hmcts.net
         lock:
           at-least-for: PT1M
           at-most-for: PT40M
       process-arm-response-files:
-        system-user-email: ${darts.automated.task.common-config.system-user-email:}
+        system-user-email: system_ProcessArmResponseFiles@hmcts.net
         lock:
           at-least-for: PT1M
           at-most-for: PT90M
       process-arm-rpo-pending:
-        system-user-email: ${darts.automated.task.common-config.system-user-email:}
+        system-user-email: system_ProcessARMRPOPending@hmcts.net
         arm-rpo-duration: ${ARM_RPO_DURATION:1h}
         lock:
           at-least-for: PT1M
           at-most-for: PT60M
       process-e2e-arm-rpo-pending:
-        system-user-email: ${darts.automated.task.common-config.system-user-email:}
+        system-user-email: system_ProcessE2EArmRpoPending@hmcts.net
         process-e2e-arm-rpo: ${PROCESS_E2E_ARM_RPO:true}
         arm-rpo-duration: ${ARM_RPO_DURATION:1h}
         lock:
           at-least-for: PT1M
           at-most-for: PT60M
       process-daily-list:
-        system-user-email: ${darts.automated.task.common-config.system-user-email:}
+        system-user-email: system_ProcessDailyList@hmcts.net
         lock:
           at-least-for: PT1M
           at-most-for: PT90M
       process-dets-to-arm-response:
-        system-user-email: ${darts.automated.task.common-config.system-user-email:}
+        system-user-email: system_ProcessDETSToArmResponse@hmcts.net
         lock:
           at-least-for: PT1M
           at-most-for: PT90M
       remove-duplicated-events:
-        system-user-email: ${darts.automated.task.common-config.system-user-email:}
+        system-user-email: system_RemoveDuplicatedEvents@hmcts.net
         lock:
           at-least-for: PT1M
           at-most-for: PT90M
       unstructured-transcription-annotation-deleter:
-        system-user-email: ${darts.automated.task.common-config.system-user-email:}
+        system-user-email: system_UnstructuredTranscriptionAnnotationDeleter@hmcts.net
         lock:
           at-least-for: PT1M
           at-most-for: PT90M
       unstructured-audio-deleter:
-        system-user-email: ${darts.automated.task.common-config.system-user-email:}
+        system-user-email: system_UnstructuredAudioDeleter@hmcts.net
         minimum-duration-in-unstructured: 210d #10 weeks
         lock:
           at-least-for: PT1M
           at-most-for: PT90M
       unstructured-to-arm:
-        system-user-email: ${darts.automated.task.common-config.system-user-email:}
+        system-user-email: system_UnstructuredToArmDataStore@hmcts.net
         lock:
           at-least-for: PT1M
           at-most-for: PT90M

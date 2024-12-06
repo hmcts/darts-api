@@ -62,7 +62,7 @@ public class AddAudioRequestMapperImpl implements AddAudioRequestMapper {
                 caseNumber,
                 userAccount
             );
-            mediaLinkedCaseHelper.addCase(media, courtCase, MediaLinkedCaseSourceType.ADD_AUDIO_METADATA, userAccount);
+            mediaLinkedCaseHelper.linkMediaToCase(media, courtCase, MediaLinkedCaseSourceType.ADD_AUDIO_METADATA, userAccount);
         }
 
     }

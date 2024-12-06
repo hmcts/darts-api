@@ -9,6 +9,7 @@ import uk.gov.hmcts.darts.audio.enums.MediaRequestStatus;
 import uk.gov.hmcts.darts.audit.api.AuditActivity;
 import uk.gov.hmcts.darts.common.entity.AuditEntity;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
+import uk.gov.hmcts.darts.common.entity.DataAnonymisationEntity;
 import uk.gov.hmcts.darts.common.entity.DefenceEntity;
 import uk.gov.hmcts.darts.common.entity.DefendantEntity;
 import uk.gov.hmcts.darts.common.entity.EventEntity;
@@ -54,7 +55,7 @@ import static org.assertj.core.api.BDDAssertions.within;
 class CaseExpiryDeletionAutomatedTaskITest extends PostgresIntegrationBase {
 
     private static final Pattern UUID_REGEX = Pattern.compile(TestUtils.UUID_REGEX);
-    private static final int AUTOMATION_USER_ID = 0;
+    private static final int AUTOMATION_USER_ID = -27;
 
     private final CaseExpiryDeletionAutomatedTask caseExpiryDeletionAutomatedTask;
     private final EventLinkedCaseStub eventLinkedCaseStub;
@@ -247,19 +248,63 @@ class CaseExpiryDeletionAutomatedTaskITest extends PostgresIntegrationBase {
         if (isAnonymised) {
             assertThat(eventEntity.isDataAnonymised()).isTrue();
             assertThat(eventEntity.getEventText()).matches(UUID_REGEX);
+            assertDataAnonymisedEntry(eventEntity);
         } else {
             assertThat(eventEntity.isDataAnonymised()).isFalse();
             assertThat(eventEntity.getEventText()).doesNotMatch(UUID_REGEX);
+            assertNoDataAnonymisedEntry(eventEntity);
         }
     }
+
+    private void assertNoDataAnonymisedEntry(EventEntity eventEntity) {
+        List<DataAnonymisationEntity> dataAnonymisationEntities = dartsDatabase.getDataAnonymisationRepository()
+            .findByEvent(eventEntity);
+        assertThat(dataAnonymisationEntities).isEmpty();
+    }
+
+    private void assertNoDataAnonymisedEntry(TranscriptionCommentEntity transcriptionCommentEntity) {
+        List<DataAnonymisationEntity> dataAnonymisationEntities = dartsDatabase.getDataAnonymisationRepository()
+            .findByTranscriptionComment(transcriptionCommentEntity);
+        assertThat(dataAnonymisationEntities).isEmpty();
+    }
+
+    private void assertDataAnonymisedEntry(EventEntity eventEntity) {
+        List<DataAnonymisationEntity> dataAnonymisationEntities = dartsDatabase.getDataAnonymisationRepository()
+            .findByEvent(eventEntity);
+        assertThat(dataAnonymisationEntities).hasSize(1);
+        DataAnonymisationEntity dataAnonymisationEntity = dataAnonymisationEntities.get(0);
+        assertDataAnonymisedEntry(dataAnonymisationEntity, eventEntity, null);
+    }
+
+    private void assertDataAnonymisedEntry(TranscriptionCommentEntity transcriptionCommentEntity) {
+        List<DataAnonymisationEntity> dataAnonymisationEntities = dartsDatabase.getDataAnonymisationRepository()
+            .findByTranscriptionComment(transcriptionCommentEntity);
+        assertThat(dataAnonymisationEntities).hasSize(1);
+        DataAnonymisationEntity dataAnonymisationEntity = dataAnonymisationEntities.get(0);
+        assertDataAnonymisedEntry(dataAnonymisationEntity, null, transcriptionCommentEntity);
+    }
+
+    private void assertDataAnonymisedEntry(DataAnonymisationEntity dataAnonymisationEntity, EventEntity eventEntity,
+                                           TranscriptionCommentEntity transcriptionComment) {
+        assertThat(dataAnonymisationEntity.getEvent()).isEqualTo(eventEntity);
+        assertThat(dataAnonymisationEntity.getTranscriptionComment()).isEqualTo(transcriptionComment);
+        assertThat(dataAnonymisationEntity.getIsManualRequest()).isFalse();
+        assertThat(dataAnonymisationEntity.getRequestedBy().getId()).isEqualTo(AUTOMATION_USER_ID);
+        assertThat(dataAnonymisationEntity.getRequestedTs()).isCloseTo(OffsetDateTime.now(), within(1, ChronoUnit.MINUTES));
+        assertThat(dataAnonymisationEntity.getApprovedBy().getId()).isEqualTo(AUTOMATION_USER_ID);
+        assertThat(dataAnonymisationEntity.getApprovedTs()).isCloseTo(OffsetDateTime.now(), within(1, ChronoUnit.MINUTES));
+    }
+
 
     private void assertTranscriptionComment(TranscriptionCommentEntity transcriptionCommentEntity, boolean isAnonymised) {
         if (isAnonymised) {
             assertThat(transcriptionCommentEntity.isDataAnonymised()).isTrue();
             assertThat(transcriptionCommentEntity.getComment()).matches(UUID_REGEX);
+            assertDataAnonymisedEntry(transcriptionCommentEntity);
         } else {
             assertThat(transcriptionCommentEntity.isDataAnonymised()).isFalse();
             assertThat(transcriptionCommentEntity.getComment()).doesNotMatch(UUID_REGEX);
+            assertNoDataAnonymisedEntry(transcriptionCommentEntity);
         }
     }
 

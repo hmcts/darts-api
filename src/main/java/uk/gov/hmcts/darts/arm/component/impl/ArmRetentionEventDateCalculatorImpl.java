@@ -61,8 +61,8 @@ public class ArmRetentionEventDateCalculatorImpl implements ArmRetentionEventDat
         return false;
     }
 
-    private boolean processArmUpdate(ExternalObjectDirectoryEntity externalObjectDirectory,OffsetDateTime armRetentionDate,
-                                  UserAccountEntity userAccount, Integer externalObjectDirectoryId) {
+    private boolean processArmUpdate(ExternalObjectDirectoryEntity externalObjectDirectory, OffsetDateTime armRetentionDate,
+                                     UserAccountEntity userAccount, Integer externalObjectDirectoryId) {
         ConfidenceAware confidenceAware = armHelper.getDocumentConfidence(externalObjectDirectory);
 
         if (confidenceAware != null) {
