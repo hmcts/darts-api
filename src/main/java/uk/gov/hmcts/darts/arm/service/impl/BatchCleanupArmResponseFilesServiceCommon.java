@@ -48,18 +48,34 @@ public class BatchCleanupArmResponseFilesServiceCommon implements BatchCleanupAr
     protected final CurrentTimeHelper currentTimeHelper;
     protected final ArmResponseFileHelper armResponseFileHelper;
     protected final String manifestFilePrefix;
+    protected final String loggingPrefix;
+
+    public BatchCleanupArmResponseFilesServiceCommon(ExternalObjectDirectoryRepository externalObjectDirectoryRepository,
+                                                     ObjectRecordStatusRepository objectRecordStatusRepository,
+                                                     ExternalLocationTypeRepository externalLocationTypeRepository,
+                                                     ArmDataManagementApi armDataManagementApi,
+                                                     UserIdentity userIdentity,
+                                                     ArmBatchCleanupConfiguration batchCleanupConfiguration,
+                                                     ArmDataManagementConfiguration armDataManagementConfiguration,
+                                                     CurrentTimeHelper currentTimeHelper,
+                                                     ArmResponseFileHelper armResponseFileHelper,
+                                                     String manifestFilePrefix) {
+        this(externalObjectDirectoryRepository, objectRecordStatusRepository, externalLocationTypeRepository, armDataManagementApi, userIdentity,
+             batchCleanupConfiguration, armDataManagementConfiguration, currentTimeHelper, armResponseFileHelper,
+             manifestFilePrefix, manifestFilePrefix);
+    }
 
 
     @Override
     public void cleanupResponseFiles(int batchsize) {
         if (batchsize == 0) {
-            log.warn("{}: Batch Cleanup ARM Response Files - Batch size is 0, so not running", manifestFilePrefix);
+            log.warn("{}: Batch Cleanup ARM Response Files - Batch size is 0, so not running", loggingPrefix);
             return;
         }
 
         List<String> manifestFilenames = getManifestFileNames(batchsize);
         if (manifestFilenames.isEmpty()) {
-            log.info("{}: Batch Cleanup ARM Response Files - 0 rows returned, so stopping.", manifestFilePrefix);
+            log.info("{}: Batch Cleanup ARM Response Files - 0 rows returned, so stopping.", loggingPrefix);
             return;
         }
         OffsetDateTime dateTimeForDeletion = getDateTimeForDeletion();
@@ -68,13 +84,13 @@ public class BatchCleanupArmResponseFilesServiceCommon implements BatchCleanupAr
             int counter = 1;
             UserAccountEntity userAccount = userIdentity.getUserAccount();
             for (String manifestFilename : manifestFilenames) {
-                log.info("{}: Batch Cleanup ARM Response Files - about to process manifest filename {}, row {} of {} rows", manifestFilePrefix,
+                log.info("{}: Batch Cleanup ARM Response Files - about to process manifest filename {}, row {} of {} rows", loggingPrefix,
                          manifestFilename, counter++,
                          manifestFilenames.size());
                 cleanupFilesByManifestFilename(userAccount, EodHelper.armLocation(), statusToSearch, dateTimeForDeletion, manifestFilename);
             }
         } else {
-            log.info("{}: No ARM responses found to be deleted", manifestFilePrefix);
+            log.info("{}: No ARM responses found to be deleted", loggingPrefix);
         }
     }
 
@@ -103,24 +119,24 @@ public class BatchCleanupArmResponseFilesServiceCommon implements BatchCleanupAr
                                                 List<ObjectRecordStatusEntity> statusToSearch,
                                                 OffsetDateTime dateTimeForDeletion, String manifestFilename) {
         try {
-            log.debug("{}: Finding associated eodEntries for manifest filename {}", manifestFilePrefix, manifestFilename);
+            log.debug("{}: Finding associated eodEntries for manifest filename {}", loggingPrefix, manifestFilename);
             List<ExternalObjectDirectoryEntity> eodEntriesWithManifestFilename = externalObjectDirectoryRepository.findBatchCleanupEntriesByManifestFilename(
                 armLocation, false, manifestFilename);
 
             List<Integer> statusIdList = statusToSearch.stream().map(ObjectRecordStatusEntity::getId).toList();
             boolean statusAllValid = eodEntriesWithManifestFilename.stream().allMatch(eodEntity -> statusIdList.contains(eodEntity.getStatusId()));
             if (!statusAllValid) {
-                log.warn("{}: Not all statuses are valid for manifestFilename {}, so skipping to next manifestFilename.", manifestFilePrefix, manifestFilename);
+                log.warn("{}: Not all statuses are valid for manifestFilename {}, so skipping to next manifestFilename.", loggingPrefix, manifestFilename);
             }
 
             boolean lastModifiedAllValid = eodEntriesWithManifestFilename.stream().allMatch(
                 eodEntity -> eodEntity.getLastModifiedDateTime().isBefore(dateTimeForDeletion));
             if (!lastModifiedAllValid) {
                 log.warn("{}: Not all entries have been modified before {} for manifestFilename {}, so skipping to next manifestFilename.",
-                         manifestFilePrefix, dateTimeForDeletion, manifestFilename);
+                         loggingPrefix, dateTimeForDeletion, manifestFilename);
             }
 
-            log.debug("{}: Found ARM manifest file {} for cleanup", manifestFilePrefix, manifestFilename);
+            log.debug("{}: Found ARM manifest file {} for cleanup", loggingPrefix, manifestFilename);
             List<InputUploadAndAssociatedFilenames> inputUploadAndAssociatedList = armResponseFileHelper.getCorrespondingArmFilesForManifestFilename(
                 manifestFilePrefix, manifestFilename);
             //inputUploadAndAssociatedList should only contain 1 matching InputUpload file, but looping through it just in case.
@@ -129,7 +145,7 @@ public class BatchCleanupArmResponseFilesServiceCommon implements BatchCleanupAr
             }
 
         } catch (UnableToReadArmFileException e) {
-            log.error("{}: Cannot process manifest filename {} due to corrupt ARM file.", manifestFilePrefix, manifestFilename);
+            log.error("{}: Cannot process manifest filename {} due to corrupt ARM file.", loggingPrefix, manifestFilename);
         }
 
     }
@@ -144,19 +160,19 @@ public class BatchCleanupArmResponseFilesServiceCommon implements BatchCleanupAr
             Integer eodId = eodIdAndAssociatedFilenames.getEodId();
             List<String> associatedFiles = eodIdAndAssociatedFilenames.getAssociatedFiles();
             log.info("{}: There are {} response files for EOD {}, linked to inputUpload filename {}",
-                     manifestFilePrefix, associatedFiles.size(), eodId, inputUploadFilename);
+                     loggingPrefix, associatedFiles.size(), eodId, inputUploadFilename);
 
             for (String associatedFile : associatedFiles) {
                 try {
-                    log.info("{}: About to delete file {} for EOD {}, linked to inputUpload filename {}", manifestFilePrefix, associatedFile, eodId,
+                    log.info("{}: About to delete file {} for EOD {}, linked to inputUpload filename {}", loggingPrefix, associatedFile, eodId,
                              inputUploadFilename);
                     boolean responseFileDeletedSuccessfully = armDataManagementApi.deleteBlobData(associatedFile);
                     if (!responseFileDeletedSuccessfully) {
-                        log.warn("{}: Response file {} failed to delete successfully.", manifestFilePrefix, associatedFile);
+                        log.warn("{}: Response file {} failed to delete successfully.", loggingPrefix, associatedFile);
                         successfullyDeletedAssociatedFiles = false;
                     }
                 } catch (Exception e) {
-                    log.error("{}: Failure to delete response file {} for EOD {} - {}", manifestFilePrefix, associatedFile, eodId, e.getMessage(), e);
+                    log.error("{}: Failure to delete response file {} for EOD {} - {}", loggingPrefix, associatedFile, eodId, e.getMessage(), e);
                     successfullyDeletedAssociatedFiles = false;
                 }
                 if (!successfullyDeletedAssociatedFiles) {
@@ -167,7 +183,7 @@ public class BatchCleanupArmResponseFilesServiceCommon implements BatchCleanupAr
             if (successfullyDeletedAssociatedFiles) {
                 Optional<ExternalObjectDirectoryEntity> eodEntityOpt = externalObjectDirectoryRepository.findById(eodId);
                 if (eodEntityOpt.isEmpty()) {
-                    log.error("{}: EodEntity {} in response file for {} cannot be found.", manifestFilePrefix, eodId, inputUploadFilename);
+                    log.error("{}: EodEntity {} in response file for {} cannot be found.", loggingPrefix, eodId, inputUploadFilename);
                     break;
                 }
                 ExternalObjectDirectoryEntity eodEntityFromRelationId = eodEntityOpt.get();
@@ -183,7 +199,7 @@ public class BatchCleanupArmResponseFilesServiceCommon implements BatchCleanupAr
 
                 if (!matchesEodWithManifestFile) {
                     log.warn("{}: Deleted arm response file is not associated with any eodEntity with manifest file {}, but mentions relationId {}.",
-                             manifestFilePrefix, inputUploadFilename, eodEntityFromRelationId);
+                             loggingPrefix, inputUploadFilename, eodEntityFromRelationId);
                 }
                 setResponseCleaned(userAccount, eodEntityFromRelationId);
             }
@@ -191,21 +207,21 @@ public class BatchCleanupArmResponseFilesServiceCommon implements BatchCleanupAr
 
         if (CollectionUtils.isNotEmpty(eodEntriesWithManifestFilename)) {
             log.warn("{}: All ARM response files related to InputUpload file {} have been deleted, but none referred to the following eodId's - {}.",
-                     manifestFilePrefix, inputUploadFilename, eodEntriesWithManifestFilename.stream().map(ExternalObjectDirectoryEntity::getId).toList());
+                     loggingPrefix, inputUploadFilename, eodEntriesWithManifestFilename.stream().map(ExternalObjectDirectoryEntity::getId).toList());
         }
 
         if (deletedFileStatuses.stream().allMatch(Boolean.TRUE::equals)) {
-            log.info("{}: All associated Eod entries deleted, about to delete InputUpload file {}", manifestFilePrefix, inputUploadFilename);
+            log.info("{}: All associated Eod entries deleted, about to delete InputUpload file {}", loggingPrefix, inputUploadFilename);
             // Make sure to only delete the Input Upload filename after the other response files have been deleted as once this is deleted
             // you cannot find the other response files
             boolean inputUploadFileDeletedSuccessfully = armDataManagementApi.deleteBlobData(inputUploadFilename);
             if (inputUploadFileDeletedSuccessfully) {
-                log.info("{}: Successfully cleaned up response files for InputUpload file {}", manifestFilePrefix, inputUploadFilename);
+                log.info("{}: Successfully cleaned up response files for InputUpload file {}", loggingPrefix, inputUploadFilename);
             } else {
-                log.warn("{}: Unable to delete input upload response file {}", manifestFilePrefix, inputUploadFilename);
+                log.warn("{}: Unable to delete input upload response file {}", loggingPrefix, inputUploadFilename);
             }
         } else {
-            log.warn("{}: Unable to delete all response files for InputUpload file {}", manifestFilePrefix, inputUploadFilename);
+            log.warn("{}: Unable to delete all response files for InputUpload file {}", loggingPrefix, inputUploadFilename);
         }
     }
 
