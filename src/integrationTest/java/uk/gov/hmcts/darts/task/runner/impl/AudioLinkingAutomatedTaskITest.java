@@ -28,6 +28,7 @@ class AudioLinkingAutomatedTaskITest extends PostgresIntegrationBase {
 
     private final AudioLinkingAutomatedTask audioLinkingAutomatedTask;
     private static int caseNumberIterator;
+    private static final int AUTOMATION_USER_ID = -32;
 
     @Test
     void positiveMixOfValidMediaAndInvalidMedia() {
@@ -58,7 +59,9 @@ class AudioLinkingAutomatedTaskITest extends PostgresIntegrationBase {
         EventEntity event2 = createEvent(EventStatus.AUDIO_LINK_NOT_DONE_MODERNISED, courtroomEntity, hearing2, OffsetDateTime.now().plusMinutes(20));
         EventEntity event3 = createEvent(EventStatus.AUDIO_LINK_NOT_DONE_MODERNISED, courtroomEntity, hearing3, OffsetDateTime.now().plusHours(2));
 
+        audioLinkingAutomatedTask.preRunTask();
         audioLinkingAutomatedTask.run();
+
 
         transactionalUtil.executeInTransaction(() -> {
             assertEvent(event1, EventStatus.AUDIO_LINKED);
@@ -98,7 +101,9 @@ class AudioLinkingAutomatedTaskITest extends PostgresIntegrationBase {
         assertThat(hearing.containsMedia(mediaEntity)).isTrue();
         assertThat(dartsDatabase.getMediaLinkedCaseRepository().existsByMediaAndCourtCase(media, hearing.getCourtCase())).isTrue();
         List<MediaLinkedCaseEntity> mediaLinkedCaseEntities = dartsDatabase.getMediaLinkedCaseRepository().findByMedia(media);
-        assertThat(mediaLinkedCaseEntities).allMatch(mediaLinkedCaseEntity -> mediaLinkedCaseEntity.getSource() == AUDIO_LINKING_TASK);
+        assertThat(mediaLinkedCaseEntities)
+            .allMatch(mediaLinkedCaseEntity -> mediaLinkedCaseEntity.getSource() == AUDIO_LINKING_TASK)
+            .allMatch(mediaLinkedCaseEntity -> mediaLinkedCaseEntity.getCreatedBy().getId() == AUTOMATION_USER_ID);
     }
 
 
@@ -111,9 +116,10 @@ class AudioLinkingAutomatedTaskITest extends PostgresIntegrationBase {
     }
 
 
-    private void assertEvent(EventEntity event1, EventStatus eventStatus) {
-        EventEntity actualEvent = dartsDatabase.getEventRepository().getReferenceById(event1.getId());
+    private void assertEvent(EventEntity event, EventStatus eventStatus) {
+        EventEntity actualEvent = dartsDatabase.getEventRepository().getReferenceById(event.getId());
         assertThat(actualEvent.getEventStatus()).isEqualTo(eventStatus.getStatusNumber());
+        assertThat(actualEvent.getLastModifiedBy().getId()).isEqualTo(AUTOMATION_USER_ID);
     }
 
 

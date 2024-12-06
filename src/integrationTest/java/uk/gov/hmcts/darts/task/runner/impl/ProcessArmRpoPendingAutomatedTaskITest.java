@@ -14,8 +14,10 @@ import uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum;
 import uk.gov.hmcts.darts.testutils.PostgresIntegrationBase;
 
 import java.time.OffsetDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.UUID;
 
+import static org.assertj.core.api.Assertions.within;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
 @DisplayName("ProcessArmRpoPendingAutomatedTask test")
@@ -25,6 +27,7 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 })
 class ProcessArmRpoPendingAutomatedTaskITest extends PostgresIntegrationBase {
     private final ProcessArmRpoPendingAutomatedTask processArmRpoPendingAutomatedTask;
+    private static final int AUTOMATION_USER_ID = -36;
 
     @Test
     void positiveCorrectStatusAndDataIngestionTime() {
@@ -39,13 +42,20 @@ class ProcessArmRpoPendingAutomatedTaskITest extends PostgresIntegrationBase {
             assertThat(externalObjectDirectoryEntityOriginal.getStatus().getId()).isEqualTo(ObjectRecordStatusEnum.ARM_RPO_PENDING.getId());
         });
 
+        processArmRpoPendingAutomatedTask.preRunTask();
         processArmRpoPendingAutomatedTask.runTask();
 
         transactionalUtil.executeInTransaction(() -> {
             ExternalObjectDirectoryEntity externalObjectDirectoryEntityAfter = dartsDatabase.getExternalObjectDirectoryRepository().findById(
                 externalObjectDirectoryEntityOriginal.getId()).orElseThrow();
-            assertThat(externalObjectDirectoryEntityAfter.getStatus().getId()).isEqualTo(
-                ObjectRecordStatusEnum.STORED.getId());
+            assertThat(externalObjectDirectoryEntityAfter.getStatus().getId())
+                .isEqualTo(ObjectRecordStatusEnum.STORED.getId());
+            assertThat(externalObjectDirectoryEntityAfter.getLastModifiedBy().getId())
+                .isEqualTo(AUTOMATION_USER_ID);
+            assertThat(externalObjectDirectoryEntityAfter.getLastModifiedDateTime())
+                .isCloseTo(OffsetDateTime.now(), within(1, ChronoUnit.MINUTES));
+            assertThat(externalObjectDirectoryEntityAfter.getLastModifiedDateTime())
+                .isNotEqualTo(externalObjectDirectoryEntityOriginal.getLastModifiedDateTime());
         });
     }
 
@@ -63,12 +73,15 @@ class ProcessArmRpoPendingAutomatedTaskITest extends PostgresIntegrationBase {
             assertThat(externalObjectDirectoryEntityOriginal.getStatus().getId()).isEqualTo(status.getId());
         });
 
+        processArmRpoPendingAutomatedTask.preRunTask();
         processArmRpoPendingAutomatedTask.runTask();
 
         transactionalUtil.executeInTransaction(() -> {
             ExternalObjectDirectoryEntity externalObjectDirectoryEntityAfter = dartsDatabase.getExternalObjectDirectoryRepository().findById(
                 externalObjectDirectoryEntityOriginal.getId()).orElseThrow();
             assertThat(externalObjectDirectoryEntityAfter.getStatus().getId()).isEqualTo(status.getId());
+            assertThat(externalObjectDirectoryEntityAfter.getLastModifiedBy().getId()).isEqualTo(
+                externalObjectDirectoryEntityOriginal.getLastModifiedBy().getId());
         });
     }
 
@@ -85,6 +98,7 @@ class ProcessArmRpoPendingAutomatedTaskITest extends PostgresIntegrationBase {
             assertThat(externalObjectDirectoryEntityOriginal.getStatus().getId()).isEqualTo(ObjectRecordStatusEnum.ARM_RPO_PENDING.getId());
         });
 
+        processArmRpoPendingAutomatedTask.preRunTask();
         processArmRpoPendingAutomatedTask.runTask();
 
         transactionalUtil.executeInTransaction(() -> {
@@ -92,6 +106,8 @@ class ProcessArmRpoPendingAutomatedTaskITest extends PostgresIntegrationBase {
                 externalObjectDirectoryEntityOriginal.getId()).orElseThrow();
             assertThat(externalObjectDirectoryEntityAfter.getStatus().getId()).isEqualTo(
                 ObjectRecordStatusEnum.ARM_RPO_PENDING.getId());
+            assertThat(externalObjectDirectoryEntityAfter.getLastModifiedBy().getId())
+                .isEqualTo(externalObjectDirectoryEntityOriginal.getLastModifiedBy().getId());
         });
     }
 }

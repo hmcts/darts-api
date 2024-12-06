@@ -53,7 +53,7 @@ public class GivenBuilder {
         return judge;
     }
 
-    private void anAuthenticatedUserFor(String userEmail) {
+    public static void anAuthenticatedUserFor(String userEmail) {
         Jwt jwt = Jwt.withTokenValue("some-token")
             .header("alg", "RS256")
             .claim("sub", UUID.randomUUID().toString())

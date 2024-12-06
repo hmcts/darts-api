@@ -162,4 +162,25 @@ public class LogApiImpl implements LogApi {
     public void manualObfuscation(EventEntity eventEntity) {
         eventLoggerService.manualObfuscation(eventEntity);
     }
+
+    @Override
+    public void armRpoSearchSuccessful(Integer executionId) {
+        armLoggerService.armRpoSearchSuccessful(executionId);
+    }
+
+    @Override
+    public void armRpoSearchFailed(Integer executionId) {
+        armLoggerService.armRpoSearchFailed(executionId);
+    }
+
+    @Override
+    public void armRpoPollingSuccessful(Integer executionId) {
+        armLoggerService.armRpoPollingSuccessful(executionId);
+    }
+
+    @Override
+    public void armRpoPollingFailed(Integer executionId) {
+        armLoggerService.armRpoPollingFailed(executionId);
+    }
+
 }

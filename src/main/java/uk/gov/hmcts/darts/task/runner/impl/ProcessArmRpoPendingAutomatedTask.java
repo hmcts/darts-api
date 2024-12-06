@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.data.domain.Limit;
 import org.springframework.stereotype.Component;
+import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
 import uk.gov.hmcts.darts.common.repository.AutomatedTaskRepository;
 import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
@@ -28,18 +29,21 @@ public class ProcessArmRpoPendingAutomatedTask
     private final ExternalObjectDirectoryRepository externalObjectDirectoryRepository;
     private final CurrentTimeHelper currentTimeHelper;
     private final Duration armRpoDuration;
+    private final UserIdentity userIdentity;
 
     protected ProcessArmRpoPendingAutomatedTask(AutomatedTaskRepository automatedTaskRepository,
                                                 ProcessArmRpoPendingAutomatedTaskConfig automatedTaskConfigurationProperties,
                                                 LogApi logApi, LockService lockService,
                                                 ExternalObjectDirectoryRepository externalObjectDirectoryRepository,
                                                 CurrentTimeHelper currentTimeHelper,
+                                                UserIdentity userIdentity,
                                                 @Value("${darts.automated.task.process-arm-rpo-pending.arm-rpo-duration}")
                                                 Duration armRpoDuration) {
         super(automatedTaskRepository, automatedTaskConfigurationProperties, logApi, lockService);
         this.externalObjectDirectoryRepository = externalObjectDirectoryRepository;
         this.armRpoDuration = armRpoDuration;
         this.currentTimeHelper = currentTimeHelper;
+        this.userIdentity = userIdentity;
     }
 
     @Override
@@ -53,6 +57,7 @@ public class ProcessArmRpoPendingAutomatedTask
             EodHelper.armRpoPendingStatus(),
             this.currentTimeHelper.currentOffsetDateTime().minus(this.armRpoDuration),
             EodHelper.storedStatus(),
+            userIdentity.getUserAccount(),
             Limit.of(this.getAutomatedTaskBatchSize())
         );
     }

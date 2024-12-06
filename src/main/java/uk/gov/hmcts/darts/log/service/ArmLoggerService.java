@@ -10,4 +10,11 @@ public interface ArmLoggerService {
 
     void archiveToArmFailed(Integer eodId);
 
+    void armRpoSearchSuccessful(Integer executionId);
+
+    void armRpoSearchFailed(Integer executionId);
+
+    void armRpoPollingSuccessful(Integer executionId);
+
+    void armRpoPollingFailed(Integer executionId);
 }

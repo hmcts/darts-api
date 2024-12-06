@@ -4,6 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
+import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.ArmAutomatedTaskEntity;
 import uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum;
 import uk.gov.hmcts.darts.common.repository.AutomatedTaskRepository;
@@ -27,17 +28,19 @@ public class ArmRpoReplayAutomatedTask
     private final AutomatedTaskService automatedTaskService;
     private final ExternalObjectDirectoryRepository externalObjectDirectoryRepository;
     private final ObjectRecordStatusRepository objectRecordStatusRepository;
+    private final UserIdentity userIdentity;
 
     protected ArmRpoReplayAutomatedTask(AutomatedTaskRepository automatedTaskRepository,
                                         ArmRpoReplayAutomatedTaskConfig automatedTaskConfig,
                                         LogApi logApi, LockService lockService,
                                         @Lazy AutomatedTaskService automatedTaskService,
                                         ExternalObjectDirectoryRepository externalObjectDirectoryRepository,
-                                        ObjectRecordStatusRepository objectRecordStatusRepository) {
+                                        ObjectRecordStatusRepository objectRecordStatusRepository, UserIdentity userIdentity) {
         super(automatedTaskRepository, automatedTaskConfig, logApi, lockService);
         this.automatedTaskService = automatedTaskService;
         this.externalObjectDirectoryRepository = externalObjectDirectoryRepository;
         this.objectRecordStatusRepository = objectRecordStatusRepository;
+        this.userIdentity = userIdentity;
     }
 
     @Override
@@ -59,7 +62,8 @@ public class ArmRpoReplayAutomatedTask
             0,
             objectRecordStatusRepository.getReferenceById(ObjectRecordStatusEnum.ARM_REPLAY.getId()),
             armAutomatedTaskEntity.getArmReplayStartTs(),
-            armAutomatedTaskEntity.getArmReplayEndTs()
+            armAutomatedTaskEntity.getArmReplayEndTs(),
+            userIdentity.getUserAccount()
         );
     }
 }

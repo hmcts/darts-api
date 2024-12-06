@@ -66,6 +66,7 @@ public class ArmRpoApiImpl implements ArmRpoApi {
     private static final String RECORD_CLASS_CODE = "DARTS";
     private static final int FIELD_TYPE_7 = 7;
     private static final String ADD_ASYNC_SEARCH_RELATED_TASK_NAME = "ProcessE2EArmRpoPending";
+    public static final String UNABLE_TO_GET_ARM_RPO_RESPONSE = "Unable to get ARM RPO response from client ";
 
     private final ArmRpoClient armRpoClient;
     private final ArmRpoService armRpoService;
@@ -85,8 +86,7 @@ public class ArmRpoApiImpl implements ArmRpoApi {
         try {
             recordManagementMatterResponse = armRpoClient.getRecordManagementMatter(bearerToken);
         } catch (FeignException e) {
-            // this ensures the full error body containing the ARM error detail is logged rather than a truncated version
-            log.error("Error during ARM get record management matter: {}", e.contentUTF8());
+            log.error(errorMessage.append(UNABLE_TO_GET_ARM_RPO_RESPONSE).append(e).toString(), e);
             throw handleFailureAndCreateException(ARM_GET_RECORD_MANAGEMENT_MATTER_ERROR, armRpoExecutionDetailEntity, userAccount);
         }
 
@@ -112,8 +112,7 @@ public class ArmRpoApiImpl implements ArmRpoApi {
         try {
             indexesByMatterIdResponse = armRpoClient.getIndexesByMatterId(bearerToken, createIndexesByMatterIdRequest(matterId));
         } catch (FeignException e) {
-            // this ensures the full error body containing the ARM error detail is logged rather than a truncated version
-            log.error(errorMessage.append("Unable to get ARM RPO response") + " {}", e.contentUTF8());
+            log.error(errorMessage.append(UNABLE_TO_GET_ARM_RPO_RESPONSE).append(e).toString(), e);
             throw handleFailureAndCreateException(errorMessage.toString(), armRpoExecutionDetailEntity, userAccount);
         }
 
@@ -152,8 +151,7 @@ public class ArmRpoApiImpl implements ArmRpoApi {
             storageAccountResponse = armRpoClient.getStorageAccounts(bearerToken, storageAccountRequest);
 
         } catch (FeignException e) {
-            // this ensures the full error body containing the ARM error detail is logged rather than a truncated version
-            log.error(errorMessage.append("Unable to get ARM RPO response").toString() + " {}", e.contentUTF8());
+            log.error(errorMessage.append(UNABLE_TO_GET_ARM_RPO_RESPONSE).append(e).toString(), e);
             throw handleFailureAndCreateException(errorMessage.toString(), armRpoExecutionDetailEntity, userAccount);
         }
 
@@ -254,8 +252,7 @@ public class ArmRpoApiImpl implements ArmRpoApi {
             masterIndexFieldByRecordClassSchemaResponse = armRpoClient.getMasterIndexFieldByRecordClassSchema(
                 bearerToken, createMasterIndexFieldByRecordClassSchemaRequest());
         } catch (FeignException e) {
-            // this ensures the full error body containing the ARM error detail is logged rather than a truncated version
-            log.error(errorMessage.append("Unable to get ARM RPO response").toString() + " {}", e.contentUTF8());
+            log.error(errorMessage.append(UNABLE_TO_GET_ARM_RPO_RESPONSE).append(e).toString(), e);
             throw handleFailureAndCreateException(errorMessage.toString(), armRpoExecutionDetailEntity, userAccount);
         }
 
@@ -356,8 +353,7 @@ public class ArmRpoApiImpl implements ArmRpoApi {
                 createSaveBackgroundSearchRequest(searchName, armRpoExecutionDetailEntity.getSearchId());
             saveBackgroundSearchResponse = armRpoClient.saveBackgroundSearch(bearerToken, saveBackgroundSearchRequest);
         } catch (FeignException e) {
-            // this ensures the full error body containing the ARM error detail is logged rather than a truncated version
-            log.error(errorMessage.append("Unable to save background search").toString() + " {}", e.contentUTF8());
+            log.error(errorMessage.append("Unable to save background search").append(e).toString(), e);
             throw handleFailureAndCreateException(errorMessage.toString(), armRpoExecutionDetailEntity, userAccount);
         }
 
@@ -386,8 +382,7 @@ public class ArmRpoApiImpl implements ArmRpoApi {
         try {
             extendedSearchesByMatterResponse = armRpoClient.getExtendedSearchesByMatter(bearerToken, requestGenerator.getJsonRequest());
         } catch (FeignException e) {
-            // this ensures the full error body containing the ARM error detail is logged rather than a truncated version
-            log.error(errorMessage.append("Unable to get ARM RPO response").toString() + " {}", e.contentUTF8());
+            log.error(errorMessage.append("Unable to get ARM RPO response {}").append(e).toString(), e);
             throw handleFailureAndCreateException(errorMessage.toString(), armRpoExecutionDetailEntity, userAccount);
         }
 
@@ -433,9 +428,7 @@ public class ArmRpoApiImpl implements ArmRpoApi {
 
             response = armRpoClient.createExportBasedOnSearchResultsTable(bearerToken, request);
         } catch (FeignException e) {
-            // this ensures the full error body containing the ARM error detail is logged rather than a truncated version
-            log.error(errorMessage.append("Unable to get ARM RPO response").toString() + " {}",
-                      e.contentUTF8());
+            log.error(errorMessage.append(UNABLE_TO_GET_ARM_RPO_RESPONSE).append(e).toString(), e);
             throw handleFailureAndCreateException(errorMessage.toString(), armRpoExecutionDetailEntity, userAccount);
         }
         if (isNull(response) || isNull(response.getStatus()) || isNull(response.getIsError())
@@ -491,8 +484,7 @@ public class ArmRpoApiImpl implements ArmRpoApi {
         try {
             extendedProductionsByMatterResponse = armRpoClient.getExtendedProductionsByMatter(bearerToken, requestGenerator.getJsonRequest());
         } catch (FeignException e) {
-            // this ensures the full error body containing the ARM error detail is logged rather than a truncated version
-            log.error(errorMessage.append("Unable to get ARM RPO response").toString() + " {}", e.contentUTF8());
+            log.error(errorMessage.append(UNABLE_TO_GET_ARM_RPO_RESPONSE).append(e).toString(), e);
             throw handleFailureAndCreateException(errorMessage.toString(), armRpoExecutionDetailEntity, userAccount);
         }
 
@@ -579,9 +571,8 @@ public class ArmRpoApiImpl implements ArmRpoApi {
         try {
             response = armRpoDownloadProduction.downloadProduction(bearerToken, executionId, productionExportFileId);
         } catch (FeignException e) {
-            // this ensures the full error body containing the ARM error detail is logged rather than a truncated version
             log.error(errorMessage.append("Error during ARM RPO download production id: ").append(productionExportFileId)
-                          .toString() + " {}", e.contentUTF8());
+                          .append(e).toString(), e);
             throw handleFailureAndCreateException(errorMessage.toString(), armRpoExecutionDetailEntity, userAccount);
         }
 
@@ -612,7 +603,7 @@ public class ArmRpoApiImpl implements ArmRpoApi {
             removeProductionResponse = armRpoClient.removeProduction(bearerToken, request);
         } catch (FeignException e) {
             // this ensures the full error body containing the ARM error detail is logged rather than a truncated version
-            log.error(errorMessage.append("Unable to get ARM RPO response ").append(removeProductionResponse).toString() + " {}", e.contentUTF8());
+            log.error(errorMessage.append(UNABLE_TO_GET_ARM_RPO_RESPONSE).append(removeProductionResponse).append(e).toString(), e);
             throw handleFailureAndCreateException(errorMessage.toString(), armRpoExecutionDetailEntity, userAccount);
         }
 

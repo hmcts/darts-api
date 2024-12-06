@@ -1,7 +1,7 @@
 #!/bin/bash
 echo "This script generates the ARM pull response files. These can be used for testing where ARM returns a response for an object such as media, transcription document, annotation document or case document to be stored in the ARM storage"
 
-uuid1=$(uuidgen)
+uuid1=$(uuidgen | tr -d '-')
 
 echo "uuid 1: $uuid1"
 echo " "
@@ -45,7 +45,7 @@ addNewResponses () {
   fi
 
   #${parameter//pattern/string}
-  uiFileContentsParam="{\"operation\": \"upload_file\", \"transaction_id\": \"2d1c7f6f-224e-768e-a274-41af570e6502\", \"relation_id\": \"EODID\", \"a360_record_id\": \"1cf976c7-cedd-703f-ab70-01588bd56d50\", \"process_time\": \"2023-07-11T11:39:26.790000\", \"status\": 1, \"input\": \"{\\\"operation\\\": \\\"create_record\\\",\\\"relation_id\\\": \\\"EODID\",\\\"record_metadata\\\": {\\\"record_class\\\": \\\"A360TEST\",\\\"publisher\\\": \\\"A360\\\",\\\"recordDate\\\": \\\"2016-11-22T11:39:30Z\\\",\\\"region\\\": \\\"GBR\",\\\"title\\\": \\\"A360230711_TestIngestion_2\\\"}}\", \"exception_description\": null, \"errorStatus1\": null}"
+  uiFileContentsParam="{\"operation\": \"upload_file\", \"transaction_id\": \"2d1c7f6f-224e-768e-a274-41af570e6502\", \"relation_id\": \"EODID\", \"a360_record_id\": \"1cf976c7-cedd-703f-ab70-01588bd56d50\", \"process_time\": \"2023-07-11T11:39:26.790000\", \"status\": 1, \"input\": \"{\\\"operation\\\": \\\"create_record\\\",\\\"relation_id\\\": \\\"EODID\\\",\\\"record_metadata\\\": {\\\"record_class\\\": \\\"A360TEST\",\\\"publisher\\\": \\\"A360\\\",\\\"recordDate\\\": \\\"2016-11-22T11:39:30Z\\\",\\\"region\\\": \\\"GBR\\\",\\\"title\\\": \\\"A360230711_TestIngestion_2\\\"}}\", \"exception_description\": null, \"errorStatus1\": null}"
   uiFileContents=${uiFileContentsParam//EODID/$eodid}
   echo "$uiFileContents"
   echo $uiFileContents >> $iuFilename
@@ -92,12 +92,15 @@ addNewResponses () {
 
   if [ "$option" == "1" ] || [ "$option" == "2" ]
   then
-    crFilename="UUID1_UUID2_1_cr.rsp"
+    statusCode=1
+
+    crFilename="UUID1_UUID2_STATUSCODE_cr.rsp"
+    crFilename=${crFilename//STATUSCODE/$statusCode}
     crFilename=${crFilename//UUID1/$uuid1}
     crFilename=${crFilename//UUID2/$uuid2}
     echo "CR filename: $crFilename"
 
-    crFileContentsParam="{\"operation\": \"create_record\", \"transaction_id\": \"2d1c7f6f-224e-768e-a274-41af570e6502\", \"relation_id\": \"EODID\", \"a360_record_id\": \"1cf976c7-cedd-703f-ab70-01588bd56d50\", \"process_time\": \"2023-07-11T11:39:26.790000\", \"status\": 1, \"input\": \"{\\\"operation\\\": \\\"create_record\\\",\\\"relation_id\\\": \\\"EODID\",\\\"record_metadata\\\": {\\\"record_class\\\": \\\"A360TEST\",\\\"publisher\\\": \\\"A360\\\",\\\"recordDate\\\": \\\"2016-11-22T11:39:30Z\\\",\\\"region\\\": \\\"GBR\",\\\"title\\\": \\\"A360230711_TestIngestion_2\\\"}}\", \"exception_description\": null, \"errorStatus1\": null}"
+    crFileContentsParam="{\"operation\": \"create_record\", \"transaction_id\": \"2d1c7f6f-224e-768e-a274-41af570e6502\", \"relation_id\": \"EODID\", \"a360_record_id\": \"1cf976c7-cedd-703f-ab70-01588bd56d50\", \"process_time\": \"2023-07-11T11:39:26.790000\", \"status\": 1, \"input\": \"{\\\"operation\\\": \\\"create_record\\\",\\\"relation_id\\\": \\\"EODID\\\",\\\"record_metadata\\\": {\\\"record_class\\\": \\\"A360TEST\\\",\\\"publisher\\\": \\\"A360\\\",\\\"recordDate\\\": \\\"2016-11-22T11:39:30Z\\\",\\\"region\\\": \\\"GBR\\\",\\\"title\\\": \\\"A360230711_TestIngestion_2\\\"}}\", \"exception_description\": null, \"errorStatus1\": null}"
     crFileContents=${crFileContentsParam//EODID/$eodid}
     echo "$crFileContents"
     echo $crFileContents > $crFilename
@@ -142,7 +145,13 @@ addNewResponses () {
       exit 1
     fi
 
-    ufFilename="UUID1_UUID5_0_uf.rsp"
+    statusCode=1
+    if [ "$option" == "3" ]
+    then
+      statusCode=0
+    fi
+    ufFilename="UUID1_UUID5_STATUSCODE_uf.rsp"
+    ufFilename=${ufFilename//STATUSCODE/$statusCode}
     ufFilename=${ufFilename//UUID1/$uuid1}
     ufFilename=${ufFilename//UUID5/$uuid5}
     echo "UF filename : $ilFilename"

@@ -61,6 +61,7 @@ import uk.gov.hmcts.darts.common.repository.CaseRetentionRepository;
 import uk.gov.hmcts.darts.common.repository.CourthouseRepository;
 import uk.gov.hmcts.darts.common.repository.CourtroomRepository;
 import uk.gov.hmcts.darts.common.repository.DailyListRepository;
+import uk.gov.hmcts.darts.common.repository.DataAnonymisationRepository;
 import uk.gov.hmcts.darts.common.repository.DefenceRepository;
 import uk.gov.hmcts.darts.common.repository.DefendantRepository;
 import uk.gov.hmcts.darts.common.repository.EventHandlerRepository;
@@ -149,6 +150,7 @@ public class DartsDatabaseStub {
         "evh_seq"
     );
 
+    private final DataAnonymisationRepository dataAnonymisationRepository;
     private final DartsDatabaseSaveStub dartsDatabaseSaveStub;
     private final EntityManagerFactory entityManagerFactory;
     private final AnnotationDocumentRepository annotationDocumentRepository;
@@ -265,6 +267,7 @@ public class DartsDatabaseStub {
     @Transactional
     public void clearDatabaseInThisOrder() {
         removeDeleteFlag(AnnotationDocumentEntity.class, CaseDocumentEntity.class, MediaEntity.class, TranscriptionDocumentEntity.class);
+        dataAnonymisationRepository.deleteAll();
         armRpoExecutionDetailRepository.deleteAll();
         objectAdminActionRepository.deleteAll();
         auditRepository.deleteAll();

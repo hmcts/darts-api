@@ -5,8 +5,10 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.ArmAutomatedTaskEntity;
 import uk.gov.hmcts.darts.common.entity.ObjectRecordStatusEntity;
+import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
 import uk.gov.hmcts.darts.common.repository.ObjectRecordStatusRepository;
 import uk.gov.hmcts.darts.task.api.AutomatedTaskName;
@@ -29,6 +31,8 @@ class ArmRpoReplayAutomatedTaskTest {
     private ExternalObjectDirectoryRepository externalObjectDirectoryRepository;
     @Mock
     private ObjectRecordStatusRepository objectRecordStatusRepository;
+    @Mock
+    private UserIdentity userIdentity;
 
     private ArmRpoReplayAutomatedTask armRpoReplayAutomatedTask;
 
@@ -42,7 +46,8 @@ class ArmRpoReplayAutomatedTaskTest {
                 null,
                 automatedTaskService,
                 externalObjectDirectoryRepository,
-                objectRecordStatusRepository
+                objectRecordStatusRepository,
+                userIdentity
             )
         );
     }
@@ -69,6 +74,10 @@ class ArmRpoReplayAutomatedTaskTest {
         when(objectRecordStatusRepository.getReferenceById(22)).thenReturn(armReplay);
         when(objectRecordStatusRepository.getReferenceById(14)).thenReturn(armRawDataFailed);
 
+        UserAccountEntity userAccount = mock(UserAccountEntity.class);
+        when(userIdentity.getUserAccount()).thenReturn(userAccount);
+
+
         armRpoReplayAutomatedTask.runTask();
 
         verify(automatedTaskService).getArmAutomatedTaskEntity(AutomatedTaskName.PROCESS_E2E_ARM_PENDING_TASK_NAME);
@@ -76,12 +85,14 @@ class ArmRpoReplayAutomatedTaskTest {
         verify(objectRecordStatusRepository).getReferenceById(14);
         verify(armAutomatedTaskEntity).getArmReplayStartTs();
         verify(armAutomatedTaskEntity).getArmReplayEndTs();
+        verify(userIdentity).getUserAccount();
         verify(externalObjectDirectoryRepository).updateEodStatusAndTransferAttemptsWhereLastModifiedIsBetweenTwoDateTimesAndHasStatus(
             armRawDataFailed,
             0,
             armReplay,
             startTs,
-            endTs
+            endTs,
+            userAccount
         );
     }
 }

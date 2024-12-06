@@ -22,6 +22,7 @@ class ArmRpoReplayAutomatedTaskITest extends PostgresIntegrationBase {
 
     private final ArmRpoReplayAutomatedTask armRpoReplayAutomatedTask;
     private final ArmAutomatedTaskRepository armAutomatedTaskRepository;
+    private static final int AUTOMATION_USER_ID = -35;
 
     @Test
     void positiveTypical() {
@@ -52,6 +53,7 @@ class ArmRpoReplayAutomatedTaskITest extends PostgresIntegrationBase {
         final ExternalObjectDirectoryEntity outsideRangeCorrectStatus2 = createEod(correctStatus, incorrectLastModifiedDateTime2);
 
         transactionalUtil.executeInTransaction(() -> {
+            armRpoReplayAutomatedTask.preRunTask();
             armRpoReplayAutomatedTask.runTask();
         });
         //Commit the old transaction and start a new one to ensure the changes are visible
@@ -70,6 +72,7 @@ class ArmRpoReplayAutomatedTaskITest extends PostgresIntegrationBase {
             ExternalObjectDirectoryEntity newEod = dartsDatabase.getExternalObjectDirectoryRepository().findById(oldEod.getId()).orElseThrow();
             assertThat(newEod.getStatus().getId()).isEqualTo(14);
             assertThat(newEod.getTransferAttempts()).isEqualTo(0);
+            assertThat(newEod.getLastModifiedBy().getId()).isEqualTo(AUTOMATION_USER_ID);
         });
     }
 
@@ -81,6 +84,7 @@ class ArmRpoReplayAutomatedTaskITest extends PostgresIntegrationBase {
             assertThat(newEod.getStatus().getId()).isNotEqualTo(14);
             assertThat(newEod.getStatus().getId()).isEqualTo(oldEod.getStatus().getId());
             assertThat(newEod.getTransferAttempts()).isEqualTo(oldEod.getTransferAttempts());
+            assertThat(newEod.getLastModifiedBy().getId()).isEqualTo(oldEod.getLastModifiedBy().getId());
         });
     }
 

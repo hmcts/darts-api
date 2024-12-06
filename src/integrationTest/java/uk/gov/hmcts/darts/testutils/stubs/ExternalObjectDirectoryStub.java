@@ -533,6 +533,23 @@ public class ExternalObjectDirectoryStub {
         return true;
     }
 
+    @Transactional
+    public boolean areObjectDirectoriesMarkedForDeletionWithUser(List<Integer> entities, String userEmail) {
+        for (Integer entity : entities) {
+            ExternalObjectDirectoryEntity objectDirectoryEntity = eodRepository.getReferenceById(entity);
+
+            if (!ObjectRecordStatusEnum.MARKED_FOR_DELETION.getId().equals(objectDirectoryEntity.getStatus().getId())
+                || SystemUsersEnum.UNSTRUCTURED_TRANSCRIPTION_ANNOTATION_DELETER_AUTOMATED_TASK.getId() != objectDirectoryEntity.getLastModifiedBy().getId()) {
+                return false;
+            }
+            if (!objectDirectoryEntity.getLastModifiedBy().getEmailAddress().equals(userEmail)) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
     public List<ExternalObjectDirectoryEntity> findAllFor(CaseDocumentEntity caseDocumentEntity) {
         return eodRepository.findByCaseDocument(caseDocumentEntity);
     }

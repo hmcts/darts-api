@@ -192,7 +192,7 @@ public class EventsController implements EventApi {
         if (!eventObfuscationEnabled) {
             throw new DartsApiException(CommonApiError.FEATURE_FLAG_NOT_ENABLED, "Event obfuscation is not enabled");
         }
-        this.dataAnonymisationService.anonymiseEventByIds(userIdentity.getUserAccount(), adminObfuscateEveByIdsRequest.getEveIds());
+        this.dataAnonymisationService.anonymiseEventByIds(userIdentity.getUserAccount(), adminObfuscateEveByIdsRequest.getEveIds(), true);
         return ResponseEntity.ok().build();
     }
 }

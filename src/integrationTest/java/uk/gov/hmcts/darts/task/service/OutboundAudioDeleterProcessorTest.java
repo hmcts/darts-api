@@ -44,6 +44,7 @@ import static uk.gov.hmcts.darts.test.common.data.PersistableFactory.getMediaReq
 
 @SuppressWarnings("PMD.ExcessiveImports")
 class OutboundAudioDeleterProcessorTest extends IntegrationBase {
+    private static final String USER_EMAIL_ADDRESS = "system_OutboundAudioDeleter@hmcts.net";
 
     public static final LocalDate DATE_27TH_OCTOBER = LocalDate.of(2023, Month.OCTOBER, 27);
     public static final LocalTime LOCAL_TIME = LocalTime.of(13, 1);
@@ -67,6 +68,7 @@ class OutboundAudioDeleterProcessorTest extends IntegrationBase {
     @BeforeEach
     void startHibernateSession() {
         openInViewUtil.openEntityManager();
+        anAuthenticatedUserFor(USER_EMAIL_ADDRESS);
     }
 
     @AfterEach
@@ -480,7 +482,7 @@ class OutboundAudioDeleterProcessorTest extends IntegrationBase {
         assertEquals(SystemUsersEnum.OUTBOUND_AUDIO_DELETER_AUTOMATED_TASK.getId(), transientObjectDirectory.getLastModifiedBy().getId());
 
         assertNotNull(transientObjectDirectory.getTransformedMedia().getExpiryTime());
-        assertEquals(SystemUsersEnum.OUTBOUND_AUDIO_DELETER_AUTOMATED_TASK.getId(), transientObjectDirectory.getTransformedMedia().getLastModifiedBy().getId());
+        assertEquals(USER_EMAIL_ADDRESS, transientObjectDirectory.getTransformedMedia().getLastModifiedBy().getEmailAddress());
     }
 
     private void assertTransientObjectDirectoryStateNotChanged(Integer id) {

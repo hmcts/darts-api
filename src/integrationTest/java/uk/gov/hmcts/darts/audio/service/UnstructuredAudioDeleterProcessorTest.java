@@ -22,6 +22,7 @@ import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.STORED;
 
 class UnstructuredAudioDeleterProcessorTest extends IntegrationBase {
 
+    private static final String USER_EMAIL_ADDRESS = "system_UnstructuredAudioDeleter@hmcts.net";
     public static final LocalDateTime HEARING_DATE = LocalDateTime.of(2023, 6, 10, 10, 0, 0);
 
     @Autowired
@@ -33,6 +34,7 @@ class UnstructuredAudioDeleterProcessorTest extends IntegrationBase {
     @Test
     void storedInArmAndLastUpdatedInUnstructuredMoreThan30WeeksAgo() throws InvocationTargetException, NoSuchMethodException, IllegalAccessException {
 
+        anAuthenticatedUserFor(USER_EMAIL_ADDRESS);
         HearingEntity hearing = PersistableFactory.getHearingTestData().someMinimalHearing();
         dartsPersistence.save(hearing);
 
@@ -65,14 +67,18 @@ class UnstructuredAudioDeleterProcessorTest extends IntegrationBase {
 
         unstructuredAudioDeleterProcessor.markForDeletion(1000);
 
-        List<ExternalObjectDirectoryEntity> foundMediaList = dartsDatabase.getExternalObjectDirectoryRepository().findByMediaAndExternalLocationType(
-            savedMedia,
-            EodHelper.unstructuredLocation()
-        );
+        transactionalUtil.executeInTransaction(() -> {
+            List<ExternalObjectDirectoryEntity> foundMediaList = dartsDatabase
+                .getExternalObjectDirectoryRepository().findByMediaAndExternalLocationType(
+                    savedMedia,
+                    EodHelper.unstructuredLocation()
+                );
 
-        assertEquals(1, foundMediaList.size());
-        ExternalObjectDirectoryEntity foundMedia = foundMediaList.get(0);
-        assertEquals(MARKED_FOR_DELETION.getId(), foundMedia.getStatus().getId());
+            assertEquals(1, foundMediaList.size());
+            ExternalObjectDirectoryEntity foundMedia = foundMediaList.get(0);
+            assertEquals(MARKED_FOR_DELETION.getId(), foundMedia.getStatus().getId());
+            assertEquals(USER_EMAIL_ADDRESS, foundMedia.getLastModifiedBy().getEmailAddress());
+        });
     }
 
     @Test

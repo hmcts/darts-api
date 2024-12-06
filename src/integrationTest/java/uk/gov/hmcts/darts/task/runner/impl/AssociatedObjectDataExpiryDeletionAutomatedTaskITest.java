@@ -23,7 +23,6 @@ import uk.gov.hmcts.darts.common.entity.TranscriptionEntity;
 import uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum;
 import uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum;
 import uk.gov.hmcts.darts.task.runner.HasIntegerId;
-import uk.gov.hmcts.darts.test.common.TestUtils;
 import uk.gov.hmcts.darts.test.common.data.PersistableFactory;
 import uk.gov.hmcts.darts.testutils.PostgresIntegrationBase;
 
@@ -40,6 +39,7 @@ import static org.assertj.core.api.Assertions.within;
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 class AssociatedObjectDataExpiryDeletionAutomatedTaskITest extends PostgresIntegrationBase {
     private final AssociatedObjectDataExpiryDeletionAutomatedTask associatedObjectDataExpiryDeletionAutomatedTask;
+    private static final int AUTOMATION_USER_ID = -28;
 
     //TranscriptionDocumentEntity
     @Test
@@ -431,7 +431,7 @@ class AssociatedObjectDataExpiryDeletionAutomatedTaskITest extends PostgresInteg
             assertThat(foundCaseDocumentEntity.getDeletedTs())
                 .as("CaseDocumentEntity deletedTs").isCloseTo(OffsetDateTime.now(), within(5, ChronoUnit.SECONDS));
             assertThat(foundCaseDocumentEntity.getDeletedBy().getId())
-                .as("CaseDocumentEntity deletedBy").isEqualTo(TestUtils.AUTOMATION_USER_ID);
+                .as("CaseDocumentEntity deletedBy").isEqualTo(AUTOMATION_USER_ID);
             assertThat(
                 dartsDatabase.getExternalObjectDirectoryStub().findAllFor(providedCaseDocumentEntity)
             ).isEmpty();
@@ -460,7 +460,7 @@ class AssociatedObjectDataExpiryDeletionAutomatedTaskITest extends PostgresInteg
             assertThat(foundDocumentEntity.getDeletedTs())
                 .as("AnnotationDocumentEntity deletedTs").isCloseTo(OffsetDateTime.now(), within(5, ChronoUnit.SECONDS));
             assertThat(foundDocumentEntity.getDeletedBy().getId())
-                .as("AnnotationDocumentEntity deletedBy").isEqualTo(TestUtils.AUTOMATION_USER_ID);
+                .as("AnnotationDocumentEntity deletedBy").isEqualTo(AUTOMATION_USER_ID);
             assertThat(
                 dartsDatabase.getExternalObjectDirectoryStub().findAllFor(providedDocumentEntity)
             ).isEmpty();
@@ -489,7 +489,7 @@ class AssociatedObjectDataExpiryDeletionAutomatedTaskITest extends PostgresInteg
             assertThat(foundDocumentEntity.getDeletedTs())
                 .as("MediaEntity deletedTs").isCloseTo(OffsetDateTime.now(), within(5, ChronoUnit.SECONDS));
             assertThat(foundDocumentEntity.getDeletedBy().getId())
-                .as("MediaEntity deletedBy").isEqualTo(TestUtils.AUTOMATION_USER_ID);
+                .as("MediaEntity deletedBy").isEqualTo(AUTOMATION_USER_ID);
             assertThat(
                 dartsDatabase.getExternalObjectDirectoryStub().findAllFor(providedDocumentEntity)
             ).isEmpty();
@@ -518,7 +518,7 @@ class AssociatedObjectDataExpiryDeletionAutomatedTaskITest extends PostgresInteg
             assertThat(foundDocumentEntity.getDeletedTs())
                 .as("TranscriptionDocumentEntity deletedTs").isCloseTo(OffsetDateTime.now(), within(5, ChronoUnit.SECONDS));
             assertThat(foundDocumentEntity.getDeletedBy().getId())
-                .as("TranscriptionDocumentEntity deletedBy").isEqualTo(TestUtils.AUTOMATION_USER_ID);
+                .as("TranscriptionDocumentEntity deletedBy").isEqualTo(AUTOMATION_USER_ID);
             assertThat(
                 dartsDatabase.getExternalObjectDirectoryStub().findAllFor(providedDocumentEntity)
             ).isEmpty();

@@ -519,13 +519,17 @@ public interface ExternalObjectDirectoryRepository extends JpaRepository<Externa
     @Modifying
     @Query("""
         update ExternalObjectDirectoryEntity eod
-        set eod.status = :newStatus
+        set eod.status = :newStatus,
+            eod.lastModifiedBy = :currentUser,
+            eod.lastModifiedDateTime = current_timestamp
         where eod.status = :currentStatus
         and eod.dataIngestionTs <= :maxDataIngestionTs
         """)
     @Transactional
     void updateByStatusEqualsAndDataIngestionTsBefore(ObjectRecordStatusEntity currentStatus, OffsetDateTime maxDataIngestionTs,
-                                                      ObjectRecordStatusEntity newStatus, Limit limit);
+                                                      ObjectRecordStatusEntity newStatus,
+                                                      UserAccountEntity currentUser,
+                                                      Limit limit);
 
     @Query(value = """
         select fileSize from
@@ -561,7 +565,9 @@ public interface ExternalObjectDirectoryRepository extends JpaRepository<Externa
     @Query("""
             update ExternalObjectDirectoryEntity eod
             set eod.status = :newStatus,
-            eod.transferAttempts = :transferAttempts
+                eod.transferAttempts = :transferAttempts,
+                eod.lastModifiedBy = :currentUser,
+                eod.lastModifiedDateTime = current_timestamp
             where eod.status = :oldStatus
             and eod.lastModifiedDateTime between :startTime and :endTime
         """)
@@ -569,7 +575,8 @@ public interface ExternalObjectDirectoryRepository extends JpaRepository<Externa
     void updateEodStatusAndTransferAttemptsWhereLastModifiedIsBetweenTwoDateTimesAndHasStatus(
         ObjectRecordStatusEntity newStatus, Integer transferAttempts,
         ObjectRecordStatusEntity oldStatus,
-        OffsetDateTime startTime, OffsetDateTime endTime);
+        OffsetDateTime startTime, OffsetDateTime endTime,
+        UserAccountEntity currentUser);
 
     @Query(
         """

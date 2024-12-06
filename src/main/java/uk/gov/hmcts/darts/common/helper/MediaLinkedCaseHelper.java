@@ -4,13 +4,17 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
+import uk.gov.hmcts.darts.common.entity.EventEntity;
+import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
 import uk.gov.hmcts.darts.common.entity.MediaLinkedCaseEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.enums.MediaLinkedCaseSourceType;
+import uk.gov.hmcts.darts.common.repository.HearingRepository;
 import uk.gov.hmcts.darts.common.repository.MediaLinkedCaseRepository;
 
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 @Component
 @RequiredArgsConstructor
@@ -18,26 +22,35 @@ import java.util.List;
 public class MediaLinkedCaseHelper {
 
     private final MediaLinkedCaseRepository mediaLinkedCaseRepository;
+    private final HearingRepository hearingRepository;
 
-    public void addCase(MediaEntity mediaEntity, CourtCaseEntity courtCase, MediaLinkedCaseSourceType sourceType, UserAccountEntity createdBy) {
-        List<MediaLinkedCaseEntity> mediaLinkedCaseEntities = mediaLinkedCaseRepository.findByMedia(mediaEntity);
-        List<CourtCaseEntity> linkedCases = mediaLinkedCaseEntities.stream().map(MediaLinkedCaseEntity::getCourtCase).toList();
-        if (log.isDebugEnabled()) {
-            log.debug("Handling med_id {} and cas_id {}. Currently the media has the following cas_ids linked: {}",
-                      mediaEntity.getId(),
-                      courtCase.getId(),
-                      linkedCases.stream()
-                          .map(CourtCaseEntity::getId)
-                          .toList());
-        }
-        if (!linkedCases.contains(courtCase)) {
+    public void linkMediaToCase(MediaEntity mediaEntity, CourtCaseEntity courtCase, MediaLinkedCaseSourceType sourceType, UserAccountEntity createdBy) {
+        if (!mediaLinkedCaseRepository.existsByMediaAndCourtCase(mediaEntity, courtCase)) {
             MediaLinkedCaseEntity mediaLinkedCaseEntity = new MediaLinkedCaseEntity(mediaEntity, courtCase, createdBy, sourceType);
-            mediaLinkedCaseRepository.saveAndFlush(mediaLinkedCaseEntity);
+            mediaLinkedCaseEntity = mediaLinkedCaseRepository.saveAndFlush(mediaLinkedCaseEntity);
             log.debug("cas_id {} and med_id {} were not linked, Created new link via mlc_id {}",
                       courtCase.getId(), mediaEntity.getId(), mediaLinkedCaseEntity.getId());
         } else {
             log.debug("med_id {} and cas_id {} already linked, nothing to do",
                       mediaEntity.getId(), courtCase.getId());
         }
+    }
+
+    public void linkMediaByEvent(EventEntity event, MediaEntity mediaEntity, MediaLinkedCaseSourceType sourceType, UserAccountEntity userAccount) {
+        Set<HearingEntity> hearingsToSave = new HashSet<>();
+        event.getHearingEntities().forEach(hearingEntity -> {
+            try {
+                if (!hearingEntity.containsMedia(mediaEntity)) {
+                    hearingEntity.addMedia(mediaEntity);
+                    hearingsToSave.add(hearingEntity);
+
+                    linkMediaToCase(mediaEntity, hearingEntity.getCourtCase(), sourceType, userAccount);
+                    log.info("Linking media {} to hearing {} through eveId {}", mediaEntity.getId(), hearingEntity.getId(), event.getId());
+                }
+            } catch (Exception e) {
+                log.error("Error linking media {} to hearing {} through eveId {}", mediaEntity.getId(), hearingEntity.getId(), event.getId(), e);
+            }
+        });
+        hearingRepository.saveAll(hearingsToSave);
     }
 }

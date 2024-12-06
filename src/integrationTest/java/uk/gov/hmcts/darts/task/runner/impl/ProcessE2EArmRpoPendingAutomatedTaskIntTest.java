@@ -13,11 +13,8 @@ import uk.gov.hmcts.darts.arm.client.model.rpo.ProfileEntitlementResponse;
 import uk.gov.hmcts.darts.arm.client.model.rpo.RecordManagementMatterResponse;
 import uk.gov.hmcts.darts.arm.client.model.rpo.SaveBackgroundSearchResponse;
 import uk.gov.hmcts.darts.arm.client.model.rpo.StorageAccountResponse;
-import uk.gov.hmcts.darts.arm.exception.ArmRpoException;
 import uk.gov.hmcts.darts.arm.service.ArmApiService;
-import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.ArmRpoExecutionDetailEntity;
-import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.enums.ArmRpoStateEnum;
 import uk.gov.hmcts.darts.common.enums.ArmRpoStatusEnum;
 import uk.gov.hmcts.darts.testutils.PostgresIntegrationBase;
@@ -25,11 +22,8 @@ import uk.gov.hmcts.darts.testutils.PostgresIntegrationBase;
 import java.util.Collections;
 import java.util.List;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -43,9 +37,6 @@ class ProcessE2EArmRpoPendingAutomatedTaskIntTest extends PostgresIntegrationBas
 
     @Autowired
     private ProcessE2EArmRpoPendingAutomatedTask task;
-
-    @MockBean
-    private UserIdentity userIdentity;
 
     @MockBean
     private ArmApiService armApiService;
@@ -62,13 +53,10 @@ class ProcessE2EArmRpoPendingAutomatedTaskIntTest extends PostgresIntegrationBas
     private static final String ENTITLEMENT_ID = "SOME ENTITLEMENT ID";
     private static final String SOME_MASTER_INDEX_FIELD_ID = "SOME MASTER INDEX FIELD ID";
     private static final String SEARCH_ID = "SOME SEARCH ID";
+    private static final int AUTOMATION_USER_ID = -33;
 
     @BeforeEach
     void setUp() {
-        UserAccountEntity user = dartsDatabase.getUserAccountStub().getSystemUserAccountEntity();
-        when(userIdentity.getUserAccount())
-            .thenReturn(user);
-
         when(armApiService.getArmBearerToken())
             .thenReturn(BEARER_TOKEN);
     }
@@ -85,6 +73,7 @@ class ProcessE2EArmRpoPendingAutomatedTaskIntTest extends PostgresIntegrationBas
         createAndSetSaveBackgroundSearchMock();
 
         // When
+        task.preRunTask();
         task.runTask();
 
         // Then
@@ -103,6 +92,8 @@ class ProcessE2EArmRpoPendingAutomatedTaskIntTest extends PostgresIntegrationBas
         assertNull(executionDetail.getProductionId());
         assertEquals(SOME_MASTER_INDEX_FIELD_ID, executionDetail.getSortingField());
         assertNull(executionDetail.getSearchItemCount());
+        assertEquals(AUTOMATION_USER_ID, executionDetail.getCreatedBy().getId());
+        assertEquals(AUTOMATION_USER_ID, executionDetail.getLastModifiedBy().getId());
     }
 
     @Test
@@ -116,10 +107,9 @@ class ProcessE2EArmRpoPendingAutomatedTaskIntTest extends PostgresIntegrationBas
             .thenReturn(response);
 
         // When
-        ArmRpoException exception = assertThrows(ArmRpoException.class, () -> task.runTask());
-        assertThat(exception.getMessage(),
-                   containsString("Failure during ARM RPO getRecordManagementMatter: ARM RPO API failed with status - 400 BAD_REQUEST"));
-
+        task.preRunTask();
+        task.runTask();
+        
         // Then
         List<ArmRpoExecutionDetailEntity> allExecutionDetails = dartsDatabase.getArmRpoExecutionDetailRepository()
             .findAll();
@@ -128,6 +118,8 @@ class ProcessE2EArmRpoPendingAutomatedTaskIntTest extends PostgresIntegrationBas
         var executionDetail = allExecutionDetails.getFirst();
         assertEquals(ArmRpoStateEnum.GET_RECORD_MANAGEMENT_MATTER.getId(), executionDetail.getArmRpoState().getId());
         assertEquals(ArmRpoStatusEnum.FAILED.getId(), executionDetail.getArmRpoStatus().getId());
+        assertEquals(AUTOMATION_USER_ID, executionDetail.getCreatedBy().getId());
+        assertEquals(AUTOMATION_USER_ID, executionDetail.getLastModifiedBy().getId());
     }
 
     private void createAndSetSaveBackgroundSearchMock() {
