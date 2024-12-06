@@ -121,9 +121,10 @@ public interface ExternalObjectDirectoryRepository extends JpaRepository<Externa
             """
     )
     List<Integer> findNotFinishedAndNotExceededRetryInStorageLocationIds(List<ObjectRecordStatusEntity> failedStatuses,
-                                                                                            ExternalLocationTypeEntity type,
-                                                                                            Integer transferAttempts,
-                                                                                            Pageable pageable);
+                                                                         ExternalLocationTypeEntity type,
+                                                                         Integer transferAttempts,
+                                                                         Pageable pageable);
+
     @Query(
         """
             SELECT eod FROM ExternalObjectDirectoryEntity eod
@@ -412,7 +413,8 @@ public interface ExternalObjectDirectoryRepository extends JpaRepository<Externa
             """
     )
     List<Integer> findEodsNotInOtherStorageIds(ObjectRecordStatusEntity status, ExternalLocationTypeEntity type,
-                                            ExternalLocationTypeEntity notExistsLocation, Integer limitRecords);
+                                               ExternalLocationTypeEntity notExistsLocation, Integer limitRecords);
+
     @Query(
         """
             SELECT eod FROM ExternalObjectDirectoryEntity eod
