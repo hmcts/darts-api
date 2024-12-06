@@ -42,6 +42,7 @@ import uk.gov.hmcts.darts.common.service.bankholidays.Event;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Optional;
 import java.util.stream.Stream;
 
@@ -473,8 +474,8 @@ public class TestSupportController {
         courtCase.setLastModifiedBy(userAccountRepository.getReferenceById(0));
         courtCase.setLastModifiedDateTime(OffsetDateTime.now());
 
-        String courtroomName = "FUNC-" + randomAlphanumeric(7).toUpperCase();
-        String courthouseName = "FUNC-" + randomAlphanumeric(7).toUpperCase();
+        String courtroomName = "FUNC-" + randomAlphanumeric(7).toUpperCase(Locale.ENGLISH);
+        String courthouseName = "FUNC-" + randomAlphanumeric(7).toUpperCase(Locale.ENGLISH);
         CourthouseEntity courthouse = newCourthouse(courthouseName);
         newCourtroom(courtroomName, courthouse);
 
