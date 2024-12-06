@@ -93,7 +93,8 @@ class ArmMissingResponseCleanupImplTest {
             .hasFieldOrPropertyWithValue("armDataManagementConfiguration", armDataManagementConfiguration)
             .hasFieldOrPropertyWithValue("currentTimeHelper", currentTimeHelper)
             .hasFieldOrPropertyWithValue("armResponseFileHelper", armResponseFileHelper)
-            .hasFieldOrPropertyWithValue("manifestFilePrefix", "ArmMissingResponseCleanup")
+            .hasFieldOrPropertyWithValue("loggingPrefix", "ArmMissingResponseCleanup")
+            .hasFieldOrPropertyWithValue("manifestFilePrefix", "")
             .hasFieldOrPropertyWithValue("armRawDataFailed", armRawDataFailedObjectRecordStatus);
         verify(objectRecordStatusRepository).getReferenceById(ARM_RAW_DATA_FAILED.getId());
     }
