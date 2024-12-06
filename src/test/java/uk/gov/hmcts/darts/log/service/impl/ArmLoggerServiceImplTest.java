@@ -31,7 +31,6 @@ class ArmLoggerServiceImplTest {
     public static void setupLogCaptor() {
         logCaptor = LogCaptor.forClass(ArmLoggerServiceImpl.class);
         logCaptor.setLogLevelToInfo();
-        armLoggerService = new ArmLoggerServiceImpl();
     }
 
     @AfterEach
