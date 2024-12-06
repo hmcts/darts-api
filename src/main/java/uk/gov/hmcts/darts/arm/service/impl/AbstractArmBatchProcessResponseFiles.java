@@ -34,7 +34,6 @@ import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum;
 import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
 import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
-import uk.gov.hmcts.darts.common.repository.ObjectStateRecordRepository;
 import uk.gov.hmcts.darts.common.service.FileOperationService;
 import uk.gov.hmcts.darts.common.util.EodHelper;
 import uk.gov.hmcts.darts.log.api.LogApi;
@@ -73,7 +72,6 @@ public abstract class AbstractArmBatchProcessResponseFiles implements ArmRespons
     protected static final String UNABLE_TO_UPDATE_EOD = "Unable to update EOD";
     protected static final String CREATE_RECORD = "create_record";
     protected final ExternalObjectDirectoryRepository externalObjectDirectoryRepository;
-    protected final ObjectStateRecordRepository objectStateRecordRepository;
     protected final ArmDataManagementApi armDataManagementApi;
     protected final FileOperationService fileOperationService;
     protected final ArmDataManagementConfiguration armDataManagementConfiguration;

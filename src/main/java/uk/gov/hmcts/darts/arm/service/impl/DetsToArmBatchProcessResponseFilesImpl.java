@@ -32,6 +32,8 @@ public class DetsToArmBatchProcessResponseFilesImpl extends AbstractArmBatchProc
 
     private final DetsDataManagementConfiguration configuration;
 
+    protected final ObjectStateRecordRepository objectStateRecordRepository;
+
     public DetsToArmBatchProcessResponseFilesImpl(ExternalObjectDirectoryRepository externalObjectDirectoryRepository,
                                                   ArmDataManagementApi armDataManagementApi, FileOperationService fileOperationService,
                                                   ArmDataManagementConfiguration armDataManagementConfiguration,
@@ -40,7 +42,6 @@ public class DetsToArmBatchProcessResponseFilesImpl extends AbstractArmBatchProc
                                                   LogApi logApi, DetsDataManagementConfiguration configuration,
                                                   ObjectStateRecordRepository objectStateRecordRepository) {
         super(externalObjectDirectoryRepository,
-              objectStateRecordRepository,
               armDataManagementApi,
               fileOperationService,
               armDataManagementConfiguration,
@@ -50,6 +51,7 @@ public class DetsToArmBatchProcessResponseFilesImpl extends AbstractArmBatchProc
               externalObjectDirectoryService,
               logApi);
         this.configuration = configuration;
+        this.objectStateRecordRepository = objectStateRecordRepository;
     }
 
     @Override

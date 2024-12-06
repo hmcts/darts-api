@@ -22,7 +22,6 @@ import uk.gov.hmcts.darts.common.entity.ObjectRecordStatusEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
 import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
-import uk.gov.hmcts.darts.common.repository.ObjectStateRecordRepository;
 import uk.gov.hmcts.darts.common.service.FileOperationService;
 import uk.gov.hmcts.darts.common.service.impl.EodHelperMocks;
 import uk.gov.hmcts.darts.common.util.EodHelper;
@@ -45,7 +44,6 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
@@ -74,8 +72,6 @@ class ArmBatchProcessResponseFilesImplTest {
     @Mock
     private ExternalObjectDirectoryService externalObjectDirectoryService;
     @Mock
-    private ObjectStateRecordRepository objectStateRecordRepository;
-    @Mock
     private ExternalObjectDirectoryEntity externalObjectDirectoryArmDropZone;
 
     private ArmBatchProcessResponseFilesImplProtectedMethodSupport armBatchProcessResponseFiles;
@@ -88,7 +84,6 @@ class ArmBatchProcessResponseFilesImplTest {
 
         armBatchProcessResponseFiles = spy(new ArmBatchProcessResponseFilesImplProtectedMethodSupport(
             externalObjectDirectoryRepository,
-            objectStateRecordRepository,
             armDataManagementApi,
             fileOperationService,
             armDataManagementConfiguration,
@@ -314,7 +309,6 @@ class ArmBatchProcessResponseFilesImplTest {
             externalObjectDirectoryEntity, EodHelper.armResponseProcessingFailedStatus(),
             userAccount
         );
-        verifyNoInteractions(objectStateRecordRepository);
     }
 
     @Test
@@ -358,20 +352,18 @@ class ArmBatchProcessResponseFilesImplTest {
             externalObjectDirectoryEntity, EodHelper.armDropZoneStatus(),
             userAccount
         );
-        verifyNoInteractions(objectStateRecordRepository);
     }
 
 
     class ArmBatchProcessResponseFilesImplProtectedMethodSupport extends ArmBatchProcessResponseFilesImpl {
 
         public ArmBatchProcessResponseFilesImplProtectedMethodSupport(ExternalObjectDirectoryRepository externalObjectDirectoryRepository,
-                                                                      ObjectStateRecordRepository objectStateRecordRepository,
                                                                       ArmDataManagementApi armDataManagementApi, FileOperationService fileOperationService,
                                                                       ArmDataManagementConfiguration armDataManagementConfiguration, ObjectMapper objectMapper,
                                                                       UserIdentity userIdentity,
                                                                       CurrentTimeHelper currentTimeHelper,
                                                                       ExternalObjectDirectoryService externalObjectDirectoryService, LogApi logApi) {
-            super(externalObjectDirectoryRepository, objectStateRecordRepository, armDataManagementApi, fileOperationService, armDataManagementConfiguration,
+            super(externalObjectDirectoryRepository, armDataManagementApi, fileOperationService, armDataManagementConfiguration,
                   objectMapper, userIdentity, currentTimeHelper, externalObjectDirectoryService, logApi);
         }
 

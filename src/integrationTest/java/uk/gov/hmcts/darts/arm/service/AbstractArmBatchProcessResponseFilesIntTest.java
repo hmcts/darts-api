@@ -27,7 +27,6 @@ import uk.gov.hmcts.darts.common.entity.TranscriptionEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
 import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
-import uk.gov.hmcts.darts.common.repository.ObjectStateRecordRepository;
 import uk.gov.hmcts.darts.common.service.FileOperationService;
 import uk.gov.hmcts.darts.log.api.LogApi;
 import uk.gov.hmcts.darts.test.common.data.PersistableFactory;
@@ -94,8 +93,6 @@ abstract class AbstractArmBatchProcessResponseFilesIntTest extends IntegrationBa
     protected AuthorisationStub authorisationStub;
     @Autowired
     protected LogApi logApi;
-    @Autowired
-    protected ObjectStateRecordRepository objectStateRecordRepository;
 
     @TempDir
     protected File tempDirectory;
