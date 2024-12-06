@@ -308,7 +308,7 @@ public class ArmRpoApiImpl implements ArmRpoApi {
         AddAsyncSearchRequestGenerator requestGenerator;
         try {
             requestGenerator = createAddAsyncSearchRequestGenerator(searchName, executionDetail, armAutomatedTaskEntity, now);
-        } catch (NullPointerException e) {
+        } catch (Exception e) {
             throw handleFailureAndCreateException(exceptionMessageBuilder.append("Could not construct API request: ")
                                                       .append(e)
                                                       .toString(),
@@ -363,7 +363,7 @@ public class ArmRpoApiImpl implements ArmRpoApi {
     }
 
     @Override
-    public void getExtendedSearchesByMatter(String bearerToken, Integer executionId, UserAccountEntity userAccount) {
+    public String getExtendedSearchesByMatter(String bearerToken, Integer executionId, UserAccountEntity userAccount) {
         log.debug("getExtendedSearchesByMatter called with executionId: {}", executionId);
         var armRpoExecutionDetailEntity = armRpoService.getArmRpoExecutionDetailEntity(executionId);
         armRpoService.updateArmRpoStateAndStatus(armRpoExecutionDetailEntity, ArmRpoHelper.getExtendedSearchesByMatterRpoState(),
@@ -373,7 +373,7 @@ public class ArmRpoApiImpl implements ArmRpoApi {
         GetExtendedSearchesByMatterRequestGenerator requestGenerator;
         try {
             requestGenerator = createExtendedSearchesByMatterRequestGenerator(armRpoExecutionDetailEntity.getMatterId());
-        } catch (NullPointerException e) {
+        } catch (Exception e) {
             throw handleFailureAndCreateException(errorMessage.append("Could not construct API request: ").append(e)
                                                       .toString(), armRpoExecutionDetailEntity, userAccount);
         }
@@ -392,19 +392,22 @@ public class ArmRpoApiImpl implements ArmRpoApi {
             || CollectionUtils.isEmpty(extendedSearchesByMatterResponse.getSearches())
             || isNull(extendedSearchesByMatterResponse.getSearches().getFirst())
             || isNull(extendedSearchesByMatterResponse.getSearches().getFirst().getSearch())
-            || isNull(extendedSearchesByMatterResponse.getSearches().getFirst().getSearch().getTotalCount())) {
-            throw handleFailureAndCreateException(errorMessage.append("Search item count is missing").toString(),
+            || isNull(extendedSearchesByMatterResponse.getSearches().getFirst().getSearch().getTotalCount())
+            || StringUtils.isBlank(extendedSearchesByMatterResponse.getSearches().getFirst().getSearch().getName())) {
+            throw handleFailureAndCreateException(errorMessage.append("Search data is missing").toString(),
                                                   armRpoExecutionDetailEntity, userAccount);
         }
 
         armRpoExecutionDetailEntity.setSearchItemCount(extendedSearchesByMatterResponse.getSearches().getFirst().getSearch().getTotalCount());
         armRpoService.updateArmRpoStatus(armRpoExecutionDetailEntity, ArmRpoHelper.completedRpoStatus(), userAccount);
+        return extendedSearchesByMatterResponse.getSearches().getFirst().getSearch().getName();
     }
 
 
     @Override
     public boolean createExportBasedOnSearchResultsTable(String bearerToken, Integer executionId,
-                                                         List<MasterIndexFieldByRecordClassSchema> headerColumns, UserAccountEntity userAccount) {
+                                                         List<MasterIndexFieldByRecordClassSchema> headerColumns,
+                                                         String productionName, UserAccountEntity userAccount) {
         log.debug("createExportBasedOnSearchResultsTable called with executionId: {}", executionId);
         var armRpoExecutionDetailEntity = armRpoService.getArmRpoExecutionDetailEntity(executionId);
         armRpoService.updateArmRpoStateAndStatus(armRpoExecutionDetailEntity, ArmRpoHelper.createExportBasedOnSearchResultsTableRpoState(),
@@ -416,10 +419,10 @@ public class ArmRpoApiImpl implements ArmRpoApi {
             request = createRequestForCreateExportBasedOnSearchResultsTable(
                 headerColumns, armRpoExecutionDetailEntity.getSearchId(),
                 armRpoExecutionDetailEntity.getSearchItemCount(),
-                armRpoExecutionDetailEntity.getProductionId(),
+                productionName,
                 armRpoExecutionDetailEntity.getStorageAccountId()
             );
-        } catch (NullPointerException e) {
+        } catch (Exception e) {
             throw handleFailureAndCreateException(errorMessage.append("Could not construct API request: ").append(e).toString(),
                                                   armRpoExecutionDetailEntity, userAccount);
         }
@@ -475,7 +478,7 @@ public class ArmRpoApiImpl implements ArmRpoApi {
         GetExtendedProductionsByMatterRequestGenerator requestGenerator;
         try {
             requestGenerator = createExtendedProductionsByMatterRequest(armRpoExecutionDetailEntity.getMatterId());
-        } catch (NullPointerException e) {
+        } catch (Exception e) {
             throw handleFailureAndCreateException(errorMessage.append("Could not construct API request: ").append(e)
                                                       .toString(), armRpoExecutionDetailEntity, userAccount);
         }
@@ -577,7 +580,7 @@ public class ArmRpoApiImpl implements ArmRpoApi {
         }
 
         // on any error occurring return a download failure
-        if (isNull(response) || isNull(response.status()) || !HttpStatus.valueOf(response.status()).is2xxSuccessful()) {
+        if (isNull(response) || !HttpStatus.valueOf(response.status()).is2xxSuccessful()) {
             errorMessage.append("Failed ARM RPO download production with id: ").append(productionExportFileId)
                 .append(" response ").append(response);
             log.error(errorMessage.toString());
@@ -597,13 +600,13 @@ public class ArmRpoApiImpl implements ArmRpoApi {
                                                  ArmRpoHelper.inProgressRpoStatus(), userAccount);
 
         StringBuilder errorMessage = new StringBuilder("Failure during ARM RPO removeProduction: ");
-        RemoveProductionResponse removeProductionResponse = null;
+        RemoveProductionResponse removeProductionResponse;
         try {
             RemoveProductionRequest request = createRemoveProductionRequest(armRpoExecutionDetailEntity);
             removeProductionResponse = armRpoClient.removeProduction(bearerToken, request);
         } catch (FeignException e) {
             // this ensures the full error body containing the ARM error detail is logged rather than a truncated version
-            log.error(errorMessage.append(UNABLE_TO_GET_ARM_RPO_RESPONSE).append(removeProductionResponse).append(e).toString(), e);
+            log.error(errorMessage.append(UNABLE_TO_GET_ARM_RPO_RESPONSE).append(e).toString(), e);
             throw handleFailureAndCreateException(errorMessage.toString(), armRpoExecutionDetailEntity, userAccount);
         }
 
@@ -685,7 +688,7 @@ public class ArmRpoApiImpl implements ArmRpoApi {
     private AddAsyncSearchRequestGenerator createAddAsyncSearchRequestGenerator(String searchName,
                                                                                 ArmRpoExecutionDetailEntity executionDetail,
                                                                                 ArmAutomatedTaskEntity armAutomatedTaskEntity,
-                                                                                OffsetDateTime now) throws NullPointerException {
+                                                                                OffsetDateTime now) {
         return AddAsyncSearchRequestGenerator.builder()
             .name(searchName)
             .searchName(searchName)
