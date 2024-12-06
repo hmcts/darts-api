@@ -126,7 +126,7 @@ class DataStoreToArmHelperIntTest extends IntegrationBase {
         externalObjectDirectoryStub.createAndSaveEod(medias.get(1), STORED, UNSTRUCTURED);
         externalObjectDirectoryStub.createAndSaveEod(medias.get(1), ARM_DROP_ZONE, ARM);
 
-        List<ExternalObjectDirectoryEntity> eodEntitiesToSendToArm = dataStoreToArmHelper.getEodEntitiesToSendToArm(EodHelper.unstructuredLocation(),
+        List<Integer> eodEntitiesToSendToArm = dataStoreToArmHelper.getEodEntitiesToSendToArm(EodHelper.unstructuredLocation(),
                                                                                                                     EodHelper.armLocation(), 5);
         assertEquals(1, eodEntitiesToSendToArm.size());
 
@@ -146,7 +146,7 @@ class DataStoreToArmHelperIntTest extends IntegrationBase {
         failedTooManyTimesEod.setTransferAttempts(4);
         dartsDatabase.save(failedTooManyTimesEod);
 
-        List<ExternalObjectDirectoryEntity> eodEntitiesToSendToArm = dataStoreToArmHelper.getEodEntitiesToSendToArm(EodHelper.unstructuredLocation(),
+        List<Integer> eodEntitiesToSendToArm = dataStoreToArmHelper.getEodEntitiesToSendToArm(EodHelper.unstructuredLocation(),
                                                                                                                     EodHelper.armLocation(), 5);
         assertEquals(3, eodEntitiesToSendToArm.size());
 
@@ -157,7 +157,7 @@ class DataStoreToArmHelperIntTest extends IntegrationBase {
         ExternalLocationTypeEntity sourceLocation = externalObjectDirectoryStub.getLocation(DETS);
         ExternalLocationTypeEntity armLocation = externalObjectDirectoryStub.getLocation(ARM);
 
-        List<ExternalObjectDirectoryEntity> result = dataStoreToArmHelper.getEodEntitiesToSendToArm(sourceLocation, armLocation, 5);
+        List<Integer> result = dataStoreToArmHelper.getEodEntitiesToSendToArm(sourceLocation, armLocation, 5);
 
         assertNotNull(result);
     }
