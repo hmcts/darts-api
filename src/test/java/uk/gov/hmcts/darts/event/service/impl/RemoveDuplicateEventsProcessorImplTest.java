@@ -17,6 +17,7 @@ import uk.gov.hmcts.darts.event.service.RemoveDuplicateEventsProcessor;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.OffsetDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -79,7 +80,7 @@ class RemoveDuplicateEventsProcessorImplTest {
 
         removeDuplicateEventsProcessor.processEvent(123);
 
-        verify(eventRepository).findDuplicateEventIds(123, EARLIEST_REMOVABLE_EVENT_DATE);
+        verify(eventRepository).findDuplicateEventIds(123, EARLIEST_REMOVABLE_EVENT_DATE.truncatedTo(ChronoUnit.DAYS));
         verifyNoMoreInteractions(eventRepository);
         verifyNoInteractions(caseRetentionRepository, caseManagementRetentionRepository);
     }
