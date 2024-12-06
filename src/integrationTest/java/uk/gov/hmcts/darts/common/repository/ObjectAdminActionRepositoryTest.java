@@ -182,17 +182,129 @@ class ObjectAdminActionRepositoryTest extends PostgresIntegrationBase {
                                                               .build());
 
         // Execute the method under test
-        List<ObjectAdminActionEntity> result = repository.findFilesForManualDeletion(deletionThreshold, Limit.of(1000));
+        List<Integer> result = repository.findObjectAdminActionsIdsForManualDeletion(deletionThreshold, Limit.of(1000));
 
         // Verify the results
         assertEquals(4, result.size());
-        assertTrue(result.stream().anyMatch(action -> action.getId().equals(action1.getId())));
-        assertTrue(result.stream().anyMatch(action -> action.getId().equals(action2.getId())));
-        assertTrue(result.stream().anyMatch(action -> action.getId().equals(action3.getId())));
-        assertTrue(result.stream().anyMatch(action -> action.getId().equals(action4.getId())));
+        assertTrue(result.stream().anyMatch(action -> action.equals(action1.getId())));
+        assertTrue(result.stream().anyMatch(action -> action.equals(action2.getId())));
+        assertTrue(result.stream().anyMatch(action -> action.equals(action3.getId())));
+        assertTrue(result.stream().anyMatch(action -> action.equals(action4.getId())));
 
-        assertTrue(result.stream().noneMatch(action -> action.getId().equals(action5.getId())));
+        assertTrue(result.stream().noneMatch(action -> action.equals(action5.getId())));
     }
+
+
+    @Test
+    void testFindFilesForManualDeletionOnlyMedia() {
+        // Setup
+        OffsetDateTime now = OffsetDateTime.now();
+        OffsetDateTime deletionThreshold = now.minusDays(1);
+
+        // Create media entities
+        var courtroomEntity = courtroomStub.createCourtroomUnlessExists("Test Courthouse", "Test Courtroom",
+                                                                        userAccountStub.getSystemUserAccountEntity());
+        var media1 = createAndSaveMediaEntity(courtroomEntity);
+        var media2 = createAndSaveMediaEntity(courtroomEntity);
+        var media3 = createAndSaveMediaEntity(courtroomEntity);
+        media3.setDeleted(true);
+        dartsPersistence.save(media3);
+
+        // Create ObjectAdminActionEntity instances
+        var action1 = objectAdminActionStub.createAndSave(ObjectAdminActionStub.ObjectAdminActionSpec.builder()
+                                                              .media(media1)
+                                                              .markedForManualDeletion(true)
+                                                              .markedForManualDelDateTime(deletionThreshold.minusDays(1))
+                                                              .markedForManualDelBy(userAccountStub.getSystemUserAccountEntity())
+                                                              .build());
+
+        var action2 = objectAdminActionStub.createAndSave(ObjectAdminActionStub.ObjectAdminActionSpec.builder()
+                                                              .media(media2)
+                                                              .markedForManualDeletion(true)
+                                                              .markedForManualDelBy(userAccountStub.getSystemUserAccountEntity())
+                                                              .markedForManualDelDateTime(deletionThreshold.minusDays(1))
+                                                              .build());
+
+        var action3 = objectAdminActionStub.createAndSave(ObjectAdminActionStub.ObjectAdminActionSpec.builder()
+                                                              .media(media1)
+                                                              .markedForManualDeletion(true)
+                                                              .markedForManualDelBy(userAccountStub.getSystemUserAccountEntity())
+                                                              .markedForManualDelDateTime(deletionThreshold.plusDays(1))
+                                                              .build());
+
+        var action4 = objectAdminActionStub.createAndSave(ObjectAdminActionStub.ObjectAdminActionSpec.builder()
+                                                              .media(media3)
+                                                              .markedForManualDeletion(true)
+                                                              .markedForManualDelDateTime(deletionThreshold.minusDays(1))
+                                                              .markedForManualDelBy(userAccountStub.getSystemUserAccountEntity())
+                                                              .build());
+
+        // Execute the method under test
+        List<Integer> result = repository.findObjectAdminActionsIdsForManualDeletion(deletionThreshold, Limit.of(1000));
+
+        // Verify the results
+        assertEquals(2, result.size());
+        assertTrue(result.stream().anyMatch(action -> action.equals(action1.getId())));
+        assertTrue(result.stream().anyMatch(action -> action.equals(action2.getId())));
+
+        assertTrue(result.stream().noneMatch(action -> action.equals(action3.getId())));
+        assertTrue(result.stream().noneMatch(action -> action.equals(action4.getId())));
+    }
+
+    @Test
+    void testFindFilesForManualDeletionOnlyTranscriptionDocuments() {
+        // Setup
+        OffsetDateTime now = OffsetDateTime.now();
+        OffsetDateTime deletionThreshold = now.minusDays(1);
+
+        // Create transcription document entities
+
+        var transcriptionDocument1 = transcriptionDocumentStub.generateTranscriptionEntities(1, 1, 1, false, false, false).getFirst();
+        var transcriptionDocument2 = transcriptionDocumentStub.generateTranscriptionEntities(1, 1, 1, false, false, false).getFirst();
+        var transcriptionDocument3 = transcriptionDocumentStub.generateTranscriptionEntities(1, 1, 1, false, false, false).getFirst();
+        transcriptionDocument3.setDeleted(true);
+        dartsPersistence.save(transcriptionDocument3);
+
+        // Create ObjectAdminActionEntity instances
+        var action1 = objectAdminActionStub.createAndSave(ObjectAdminActionStub.ObjectAdminActionSpec.builder()
+                                                              .transcriptionDocument(transcriptionDocument1)
+                                                              .markedForManualDeletion(true)
+                                                              .markedForManualDelBy(userAccountStub.getSystemUserAccountEntity())
+                                                              .markedForManualDelDateTime(deletionThreshold.minusDays(1))
+                                                              .build());
+
+        var action2 = objectAdminActionStub.createAndSave(ObjectAdminActionStub.ObjectAdminActionSpec.builder()
+                                                              .transcriptionDocument(transcriptionDocument2)
+                                                              .markedForManualDeletion(true)
+                                                              .markedForManualDelBy(userAccountStub.getSystemUserAccountEntity())
+                                                              .markedForManualDelDateTime(deletionThreshold.minusDays(1))
+                                                              .build());
+
+        var action3 = objectAdminActionStub.createAndSave(ObjectAdminActionStub.ObjectAdminActionSpec.builder()
+                                                              .transcriptionDocument(transcriptionDocument1)
+                                                              .markedForManualDeletion(true)
+                                                              .markedForManualDelBy(userAccountStub.getSystemUserAccountEntity())
+                                                              .markedForManualDelDateTime(deletionThreshold.plusDays(1))
+                                                              .build());
+
+        var action4 = objectAdminActionStub.createAndSave(ObjectAdminActionStub.ObjectAdminActionSpec.builder()
+                                                              .transcriptionDocument(transcriptionDocument3)
+                                                              .markedForManualDeletion(true)
+                                                              .markedForManualDelBy(userAccountStub.getSystemUserAccountEntity())
+                                                              .markedForManualDelDateTime(deletionThreshold.minusDays(1))
+                                                              .build());
+        // Execute the method under test
+        List<Integer> result = repository.findObjectAdminActionsIdsForManualDeletion(deletionThreshold, Limit.of(1000));
+
+        // Verify the results
+        assertEquals(2, result.size());
+        assertTrue(result.stream().anyMatch(action -> action.equals(action1.getId())));
+        assertTrue(result.stream().anyMatch(action -> action.equals(action2.getId())));
+
+        assertTrue(result.stream().noneMatch(action -> action.equals(action3.getId())));
+        assertTrue(result.stream().noneMatch(action -> action.equals(action4.getId())));
+    }
+
 
     private MediaEntity createAndSaveMediaEntity(CourtroomEntity courtroomEntity) {
         return mediaStub.createMediaEntity(courtroomEntity.getCourthouse().getCourthouseName(),

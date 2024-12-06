@@ -37,7 +37,7 @@ public class ArmApiServiceImpl implements ArmApiService {
     private final ArmDataManagementConfiguration armDataManagementConfiguration;
 
     @Override
-    public UpdateMetadataResponse updateMetadata(String externalRecordId, OffsetDateTime eventTimestamp, int retConfScore, String retConfReason) {
+    public UpdateMetadataResponse updateMetadata(String externalRecordId, OffsetDateTime eventTimestamp, Integer retConfScore, String retConfReason) {
 
         UpdateMetadataRequest armUpdateMetadataRequest = UpdateMetadataRequest.builder()
             .itemId(externalRecordId)
