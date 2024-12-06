@@ -17,13 +17,13 @@ public class DetsBatchCleanupArmResponseFilesServiceImpl extends BatchCleanupArm
 
 
     public DetsBatchCleanupArmResponseFilesServiceImpl(ExternalObjectDirectoryRepository externalObjectDirectoryRepository,
-                                                         ObjectRecordStatusRepository objectRecordStatusRepository,
-                                                         ExternalLocationTypeRepository externalLocationTypeRepository,
-                                                         ArmDataManagementApi armDataManagementApi,
-                                                         UserIdentity userIdentity, ArmBatchCleanupConfiguration batchCleanupConfiguration,
-                                                         ArmDataManagementConfiguration armDataManagementConfiguration, CurrentTimeHelper currentTimeHelper,
-                                                         ArmResponseFileHelper armResponseFileHelper,
-                                                         @Value("${darts.storage.dets.dets-manifest-file-prefix}") String manifestFilePrefix) {
+                                                       ObjectRecordStatusRepository objectRecordStatusRepository,
+                                                       ExternalLocationTypeRepository externalLocationTypeRepository,
+                                                       ArmDataManagementApi armDataManagementApi,
+                                                       UserIdentity userIdentity, ArmBatchCleanupConfiguration batchCleanupConfiguration,
+                                                       ArmDataManagementConfiguration armDataManagementConfiguration, CurrentTimeHelper currentTimeHelper,
+                                                       ArmResponseFileHelper armResponseFileHelper,
+                                                       @Value("${darts.storage.dets.dets-manifest-file-prefix}") String manifestFilePrefix) {
         super(externalObjectDirectoryRepository, objectRecordStatusRepository, externalLocationTypeRepository, armDataManagementApi, userIdentity,
               batchCleanupConfiguration, armDataManagementConfiguration, currentTimeHelper, armResponseFileHelper,
               manifestFilePrefix
