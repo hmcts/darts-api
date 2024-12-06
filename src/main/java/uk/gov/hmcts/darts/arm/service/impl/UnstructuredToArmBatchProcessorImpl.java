@@ -4,6 +4,7 @@ import com.azure.core.util.BinaryData;
 import com.azure.storage.blob.models.BlobStorageException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.ListUtils;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.darts.arm.api.ArmDataManagementApi;
@@ -19,6 +20,7 @@ import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.ExternalLocationTypeEntity;
 import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
+import uk.gov.hmcts.darts.common.exception.DartsException;
 import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
 import uk.gov.hmcts.darts.common.service.FileOperationService;
 import uk.gov.hmcts.darts.common.util.EodHelper;
@@ -32,6 +34,7 @@ import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
+import javax.annotation.PreDestroy;
 
 import static uk.gov.hmcts.darts.common.util.EodHelper.equalsAnyStatus;
 import static uk.gov.hmcts.darts.common.util.EodHelper.isEqual;
@@ -55,6 +58,7 @@ public class UnstructuredToArmBatchProcessorImpl implements UnstructuredToArmBat
 
     private static final int BLOB_ALREADY_EXISTS_STATUS_CODE = 409;
 
+    List<ExternalObjectDirectoryEntity> eodsForTransfer;
 
     @Override
     @SuppressWarnings({"PMD.AvoidInstantiatingObjectsInLoops", "PMD.CognitiveComplexity", "PMD.CyclomaticComplexity"})
@@ -65,9 +69,9 @@ public class UnstructuredToArmBatchProcessorImpl implements UnstructuredToArmBat
         ExternalLocationTypeEntity eodSourceLocation = EodHelper.unstructuredLocation();
 
         // Because the query is long-running, get all the EODs that need to be processed in one go
-        List<ExternalObjectDirectoryEntity> eodsForTransfer = unstructuredToArmHelper.getEodEntitiesToSendToArm(eodSourceLocation,
-                                                                                                                EodHelper.armLocation(),
-                                                                                                                taskBatchSize);
+        eodsForTransfer = unstructuredToArmHelper.getEodEntitiesToSendToArm(eodSourceLocation,
+                                                                            EodHelper.armLocation(),
+                                                                            taskBatchSize);
 
         log.info("Found {} pending entities to process from source '{}'", eodsForTransfer.size(), eodSourceLocation.getDescription());
         if (!eodsForTransfer.isEmpty()) {
@@ -108,7 +112,6 @@ public class UnstructuredToArmBatchProcessorImpl implements UnstructuredToArmBat
 
         File archiveRecordsFile = unstructuredToArmHelper.createEmptyArchiveRecordsFile(armDataManagementConfiguration.getManifestFilePrefix());
         var batchItems = new ArmBatchItems();
-
 
         for (var currentEod : eodsForBatch) {
             var batchItem = new ArmBatchItem();
@@ -165,7 +168,7 @@ public class UnstructuredToArmBatchProcessorImpl implements UnstructuredToArmBat
         } else {
             log.error("Unable to find matching external object directory for {}", armEod.getId());
             unstructuredToArmHelper.updateExternalObjectDirectoryFailedTransferAttempts(armEod, userAccount);
-            throw new RuntimeException(MessageFormat.format("Unable to find matching external object directory for {0}", armEod.getId()));
+            throw new DartsException(MessageFormat.format("Unable to find matching external object directory for {0}", armEod.getId()));
         }
     }
 
@@ -233,4 +236,15 @@ public class UnstructuredToArmBatchProcessorImpl implements UnstructuredToArmBat
         }
     }
 
+    @PreDestroy
+    public void destroy() {
+        log.info("UnstructuredToArmBatchProcessorImpl shutting down.");
+        if (CollectionUtils.isNotEmpty(eodsForTransfer)) {
+            log.info("Reverting EODs to failed status for {} EODs", eodsForTransfer.size());
+            unstructuredToArmHelper.updateEodByIdAndStatus(eodsForTransfer,
+                                                           EodHelper.armIngestionStatus(),
+                                                           EodHelper.failedArmRawDataStatus(),
+                                                           userIdentity.getUserAccount());
+        }
+    }
 }
