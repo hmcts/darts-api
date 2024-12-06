@@ -2,6 +2,7 @@ package uk.gov.hmcts.darts.audio.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -157,8 +158,8 @@ class AudioControllerAdminGetTransformedMediaIntTest extends IntegrationBase {
         assertEquals(0, transformedMediaResponses.length);
     }
 
-     @Test
-     void testSearchForTransformedMediaUsingAllSearchCriteria() throws Exception {
+    @Test
+    void testSearchForTransformedMediaUsingAllSearchCriteria() throws Exception {
         List<TransformedMediaEntity> transformedMediaEntityList = transformedMediaStub.generateTransformedMediaEntities(4);
 
         superAdminUserStub.givenUserIsAuthorised(userIdentity);
@@ -217,7 +218,7 @@ class AudioControllerAdminGetTransformedMediaIntTest extends IntegrationBase {
     @Test
     void testNoRequestPayloadReturnsABadRequest() throws Exception {
         mockMvc.perform(post(ENDPOINT_URL)
-                                                  .header("Content-Type", "application/json"))
+                            .header("Content-Type", "application/json"))
             .andExpect(status().isBadRequest())
             .andReturn();
     }
@@ -232,8 +233,28 @@ class AudioControllerAdminGetTransformedMediaIntTest extends IntegrationBase {
             .andReturn();
     }
 
+    @Test
+    void searchForTransformedMedia_shouldReturnBadRequest_whenCourthouseDisplayNameIsLowercase() throws Exception {
+        // Authorize the user
+        superAdminUserStub.givenUserIsAuthorised(userIdentity);
 
-    private TransformedMediaEntity getTransformMediaEntity(Integer id,  List<TransformedMediaEntity> transformedMediaEntityList) {
+        // Create request with lowercase courthouse display name
+        SearchTransformedMediaRequest request = new SearchTransformedMediaRequest();
+        request.setCourthouseDisplayName("london crown court"); // lowercase value
+
+        // Perform request and verify response
+        mockMvc.perform(post(ENDPOINT_URL)
+                            .header("Content-Type", "application/json")
+                            .content(objectMapper.writeValueAsString(request)))
+            .andExpect(status().isBadRequest())
+            .andExpect(result -> {
+                String response = result.getResponse().getContentAsString();
+                Assertions.assertTrue(response.contains("Courthouse display name must be uppercase"));
+            });
+    }
+
+
+    private TransformedMediaEntity getTransformMediaEntity(Integer id, List<TransformedMediaEntity> transformedMediaEntityList) {
         return transformedMediaEntityList.stream().filter(e -> e.getId().equals(id)).findFirst().get();
     }
 
@@ -244,19 +265,19 @@ class AudioControllerAdminGetTransformedMediaIntTest extends IntegrationBase {
         assertEquals(response.getFileName(), entity.getOutputFilename());
         assertEquals(response.getFileSizeBytes(), entity.getOutputFilesize());
         assertEquals(dateTimeFormatter.format(response.getLastAccessedAt()),
-                                dateTimeFormatter.format(entity.getLastAccessed().atZoneSameInstant(ZoneId.of("UTC")).toOffsetDateTime()));
+                     dateTimeFormatter.format(entity.getLastAccessed().atZoneSameInstant(ZoneId.of("UTC")).toOffsetDateTime()));
         assertEquals(response.getMediaRequest().getId(), entity.getMediaRequest().getId());
         assertEquals(dateTimeFormatter.format(response.getMediaRequest().getRequestedAt()),
-                                dateTimeFormatter.format(entity.getMediaRequest().getCreatedDateTime().atZoneSameInstant(ZoneId.of("UTC")).toOffsetDateTime()));
+                     dateTimeFormatter.format(entity.getMediaRequest().getCreatedDateTime().atZoneSameInstant(ZoneId.of("UTC")).toOffsetDateTime()));
         assertEquals(response.getMediaRequest().getOwnerUserId(),
-                                entity.getMediaRequest().getCurrentOwner().getId());
+                     entity.getMediaRequest().getCurrentOwner().getId());
         assertEquals(response.getMediaRequest().getRequestedByUserId(), entity.getMediaRequest().getRequestor().getId());
         assertEquals(response.getCase().getId(), entity.getMediaRequest().getHearing().getCourtCase().getId());
         assertEquals(response.getCase().getCaseNumber(), entity.getMediaRequest().getHearing().getCourtCase().getCaseNumber());
         assertEquals(response.getCourthouse().getId(),
-                                entity.getMediaRequest().getHearing().getCourtroom().getCourthouse().getId());
+                     entity.getMediaRequest().getHearing().getCourtroom().getCourthouse().getId());
         assertEquals(response.getCourthouse().getDisplayName(),
-                                entity.getMediaRequest().getHearing().getCourtroom().getCourthouse().getDisplayName());
+                     entity.getMediaRequest().getHearing().getCourtroom().getCourthouse().getDisplayName());
         assertEquals(response.getHearing().getId(), entity.getMediaRequest().getHearing().getId());
         assertEquals(response.getHearing().getHearingDate(), entity.getMediaRequest().getHearing().getHearingDate());
     }
