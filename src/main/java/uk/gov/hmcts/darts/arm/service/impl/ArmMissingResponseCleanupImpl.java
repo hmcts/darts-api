@@ -36,7 +36,7 @@ public class ArmMissingResponseCleanupImpl extends BatchCleanupArmResponseFilesS
                                          ArmResponseFileHelper armResponseFileHelper) {
         super(externalObjectDirectoryRepository, objectRecordStatusRepository, externalLocationTypeRepository, armDataManagementApi, userIdentity,
               batchCleanupConfiguration, armDataManagementConfiguration, currentTimeHelper, armResponseFileHelper,
-              "ArmMissingResponseCleanup");
+              "", "ArmMissingResponseCleanup");
         this.armRawDataFailed = objectRecordStatusRepository.getReferenceById(ARM_RAW_DATA_FAILED.getId());
     }
 
