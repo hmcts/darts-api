@@ -75,7 +75,7 @@ public abstract class AbstractLockableAutomatedTask<T extends AbstractAutomatedT
             .claim("emails", List.of(automatedTaskConfigurationProperties.getSystemUserEmail()))
             .build();
         SecurityContextHolder.getContext().setAuthentication(new JwtAuthenticationToken(jwt));
-        log.debug("Task: {} setup with user: {}", getTaskName(), automatedTaskConfigurationProperties.getSystemUserEmail());
+        log.debug("Task: {} using email: {}", getTaskName(), automatedTaskConfigurationProperties.getSystemUserEmail());
     }
 
     @Override
@@ -158,17 +158,6 @@ public abstract class AbstractLockableAutomatedTask<T extends AbstractAutomatedT
 
     protected Optional<AutomatedTaskEntity> getAutomatedTaskDetails(String taskName) {
         return automatedTaskRepository.findByTaskName(taskName);
-    }
-
-    protected boolean isAutomatedTaskInBatchMode(String taskName) {
-        Optional<AutomatedTaskEntity> automatedTaskEntity = getAutomatedTaskDetails(taskName);
-
-        if (automatedTaskEntity.isPresent()) {
-            AutomatedTaskEntity automatedTask = automatedTaskEntity.get();
-            return nonNull(automatedTask.getBatchSize()) && automatedTask.getBatchSize() > 0;
-        }
-
-        return false;
     }
 
     protected Integer getAutomatedTaskBatchSize() {
