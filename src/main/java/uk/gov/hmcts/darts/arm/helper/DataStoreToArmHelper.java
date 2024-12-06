@@ -62,7 +62,7 @@ public class DataStoreToArmHelper {
 
         List<ObjectRecordStatusEntity> failedArmStatuses = List.of(armRawStatusFailed, armManifestFailed);
 
-        var failedArmExternalObjectDirectoryEntities = externalObjectDirectoryRepository.findNotFinishedAndNotExceededRetryInStorageLocationIds(
+        var failedArmExternalObjectDirectoryEntities = externalObjectDirectoryRepository.findNotFinishedAndNotExceededRetryInStorageLocation(
             failedArmStatuses,
             armLocation,
             armDataManagementConfiguration.getMaxRetryAttempts(),
@@ -73,7 +73,7 @@ public class DataStoreToArmHelper {
 
         int remainingBatchSizeEods = maxResultSize - failedArmExternalObjectDirectoryEntities.size();
         if (remainingBatchSizeEods > 0) {
-            var pendingUnstructuredExternalObjectDirectoryEntities = externalObjectDirectoryRepository.findEodsNotInOtherStorageIds(
+            var pendingUnstructuredExternalObjectDirectoryEntities = externalObjectDirectoryRepository.findEodsNotInOtherStorage(
                 EodHelper.storedStatus(), sourceLocation,
                 EodHelper.armLocation(),
                 remainingBatchSizeEods);
