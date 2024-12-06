@@ -104,16 +104,16 @@ class DataStoreToArmHelperTest {
         ObjectRecordStatusEntity armRawStatusFailed = mock(ObjectRecordStatusEntity.class);
         ObjectRecordStatusEntity armManifestFailed = mock(ObjectRecordStatusEntity.class);
         when(objectRecordStatusRepository.getReferenceById(anyInt())).thenReturn(armRawStatusFailed).thenReturn(armManifestFailed);
-        when(externalObjectDirectoryRepository.findNotFinishedAndNotExceededRetryInStorageLocation(anyList(), any(), anyInt(), any(Pageable.class)))
-            .thenReturn(List.of(mock(ExternalObjectDirectoryEntity.class)));
+        when(externalObjectDirectoryRepository.findNotFinishedAndNotExceededRetryInStorageLocationIds(anyList(), any(), anyInt(), any(Pageable.class)))
+            .thenReturn(List.of(123));
         when(armDataManagementConfiguration.getMaxRetryAttempts()).thenReturn(3);
 
         // when
-        List<ExternalObjectDirectoryEntity> result = dataStoreToArmHelper.getEodEntitiesToSendToArm(sourceLocation, armLocation, 5);
+        List<Integer> result = dataStoreToArmHelper.getEodEntitiesToSendToArm(sourceLocation, armLocation, 5);
 
         // then
         assertNotNull(result);
-        verify(externalObjectDirectoryRepository).findNotFinishedAndNotExceededRetryInStorageLocation(anyList(), any(), anyInt(), any(Pageable.class));
+        verify(externalObjectDirectoryRepository).findNotFinishedAndNotExceededRetryInStorageLocationIds(anyList(), any(), anyInt(), any(Pageable.class));
     }
 
     @Test

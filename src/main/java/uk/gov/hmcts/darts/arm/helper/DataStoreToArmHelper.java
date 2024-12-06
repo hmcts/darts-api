@@ -55,25 +55,25 @@ public class DataStoreToArmHelper {
     private final ArchiveRecordFileGenerator archiveRecordFileGenerator;
 
 
-    public List<ExternalObjectDirectoryEntity> getEodEntitiesToSendToArm(ExternalLocationTypeEntity sourceLocation,
+    public List<Integer> getEodEntitiesToSendToArm(ExternalLocationTypeEntity sourceLocation,
                                                                          ExternalLocationTypeEntity armLocation, int maxResultSize) {
         ObjectRecordStatusEntity armRawStatusFailed = objectRecordStatusRepository.getReferenceById(ARM_RAW_DATA_FAILED.getId());
         ObjectRecordStatusEntity armManifestFailed = objectRecordStatusRepository.getReferenceById(ARM_MANIFEST_FAILED.getId());
 
         List<ObjectRecordStatusEntity> failedArmStatuses = List.of(armRawStatusFailed, armManifestFailed);
 
-        var failedArmExternalObjectDirectoryEntities = externalObjectDirectoryRepository.findNotFinishedAndNotExceededRetryInStorageLocation(
+        var failedArmExternalObjectDirectoryEntities = externalObjectDirectoryRepository.findNotFinishedAndNotExceededRetryInStorageLocationIds(
             failedArmStatuses,
             armLocation,
             armDataManagementConfiguration.getMaxRetryAttempts(),
             Pageable.ofSize(maxResultSize)
         );
 
-        List<ExternalObjectDirectoryEntity> returnList = new ArrayList<>(failedArmExternalObjectDirectoryEntities);
+        List<Integer> returnList = new ArrayList<>(failedArmExternalObjectDirectoryEntities);
 
         int remainingBatchSizeEods = maxResultSize - failedArmExternalObjectDirectoryEntities.size();
         if (remainingBatchSizeEods > 0) {
-            var pendingUnstructuredExternalObjectDirectoryEntities = externalObjectDirectoryRepository.findEodsNotInOtherStorage(
+            var pendingUnstructuredExternalObjectDirectoryEntities = externalObjectDirectoryRepository.findEodsNotInOtherStorageIds(
                 EodHelper.storedStatus(), sourceLocation,
                 EodHelper.armLocation(),
                 remainingBatchSizeEods);

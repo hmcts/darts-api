@@ -113,6 +113,19 @@ public interface ExternalObjectDirectoryRepository extends JpaRepository<Externa
 
     @Query(
         """
+            SELECT eod.id FROM ExternalObjectDirectoryEntity eod
+            WHERE eod.status in :failedStatuses
+            AND eod.externalLocationType = :type
+            AND eod.transferAttempts <= :transferAttempts
+            AND eod.osrUuid is null
+            """
+    )
+    List<Integer> findNotFinishedAndNotExceededRetryInStorageLocationIds(List<ObjectRecordStatusEntity> failedStatuses,
+                                                                                            ExternalLocationTypeEntity type,
+                                                                                            Integer transferAttempts,
+                                                                                            Pageable pageable);
+    @Query(
+        """
             SELECT eod FROM ExternalObjectDirectoryEntity eod
             WHERE eod.status in :failedStatuses
             AND eod.externalLocationType = :type
@@ -383,6 +396,23 @@ public interface ExternalObjectDirectoryRepository extends JpaRepository<Externa
     List<ExternalObjectDirectoryEntity> findEodsNotInOtherStorage(ObjectRecordStatusEntity status, ExternalLocationTypeEntity type,
                                                                   ExternalLocationTypeEntity notExistsLocation, Integer limitRecords);
 
+    @Query(
+        """
+            SELECT eod.id FROM ExternalObjectDirectoryEntity eod
+            WHERE eod.status = :status
+            AND eod.externalLocationType = :type
+            AND NOT EXISTS (select 1 from ExternalObjectDirectoryEntity eod2
+            where eod2.externalLocationType = :notExistsLocation
+            and (eod.media = eod2.media
+              OR eod.transcriptionDocumentEntity = eod2.transcriptionDocumentEntity
+              OR eod.annotationDocumentEntity = eod2.annotationDocumentEntity
+              OR eod.caseDocument = eod2.caseDocument ))
+            order by eod.id
+            LIMIT :limitRecords
+            """
+    )
+    List<Integer> findEodsNotInOtherStorageIds(ObjectRecordStatusEntity status, ExternalLocationTypeEntity type,
+                                            ExternalLocationTypeEntity notExistsLocation, Integer limitRecords);
     @Query(
         """
             SELECT eod FROM ExternalObjectDirectoryEntity eod
