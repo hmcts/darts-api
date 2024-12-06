@@ -19,7 +19,6 @@ import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.config.ObjectMapperConfig;
 import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.entity.ObjectRecordStatusEntity;
-import uk.gov.hmcts.darts.common.entity.ObjectStateRecordEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
 import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
@@ -298,8 +297,6 @@ class ArmBatchProcessResponseFilesImplTest {
         when(externalObjectDirectoryEntity.getInputUploadProcessedTs())
             .thenReturn(currentTime.minus(armMissingResponseDuration).minusMinutes(1));
 
-        ObjectStateRecordEntity objectStateRecordEntity = mock(ObjectStateRecordEntity.class);
-        when(externalObjectDirectoryEntity.getObjectStateRecordEntity()).thenReturn(objectStateRecordEntity);
         doNothing().when(armBatchProcessResponseFiles).updateExternalObjectDirectoryStatus(any(), any(), any());
 
 
@@ -310,15 +307,14 @@ class ArmBatchProcessResponseFilesImplTest {
         verify(armBatchResponses).getArmBatchResponseMap();
         verify(armBatchResponseMap).values();
         verify(externalObjectDirectoryEntity, times(2)).getInputUploadProcessedTs();
-        verify(externalObjectDirectoryEntity).getObjectStateRecordEntity();
+        verify(externalObjectDirectoryEntity, never()).getObjectStateRecordEntity();
         verify(armBatchProcessResponseFiles).getExternalObjectDirectoryEntity(123);
         verify(currentTimeHelper).currentOffsetDateTime();
         verify(armBatchProcessResponseFiles).updateExternalObjectDirectoryStatus(
             externalObjectDirectoryEntity, EodHelper.armResponseProcessingFailedStatus(),
             userAccount
         );
-        verify(objectStateRecordEntity).setObjectStatus("No response files produced by ARM within 1 day");
-        verify(objectStateRecordRepository).save(objectStateRecordEntity);
+        verifyNoInteractions(objectStateRecordRepository);
     }
 
     @Test
