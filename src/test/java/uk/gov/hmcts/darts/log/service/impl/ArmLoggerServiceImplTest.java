@@ -9,6 +9,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.time.Duration;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -16,10 +17,15 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 @ExtendWith({MockitoExtension.class})
 class ArmLoggerServiceImplTest {
 
+    private static LogCaptor logCaptor;
     private static final Integer EOD_ID = 1;
     private static final Integer EXECUTION_ID = 2;
     private ArmLoggerServiceImpl armLoggerService;
-    private static LogCaptor logCaptor;
+
+    @BeforeEach
+    void setUp() {
+        armLoggerService = new ArmLoggerServiceImpl();
+    }
 
     @BeforeAll
     public static void setupLogCaptor() {
@@ -35,11 +41,6 @@ class ArmLoggerServiceImplTest {
     @AfterAll
     public static void tearDown() {
         logCaptor.close();
-    }
-
-    @BeforeEach
-    void setUp() {
-        armLoggerService = new ArmLoggerServiceImpl();
     }
 
     @Test
@@ -109,14 +110,17 @@ class ArmLoggerServiceImplTest {
     }
 
     @Test
-    void armRpoPollingSuccessful_shouldLogInfoWithEodId_whenProvidedWithExecutionId() {
-        armLoggerService.armRpoPollingSuccessful(EXECUTION_ID);
+    void logArmMissingResponse_24Hours() {
 
-        var logEntry = String.format("ARM RPO Polling - Successfully completed for execution Id = %s", EXECUTION_ID);
+        Duration duration = Duration.ofHours(24);
+        armLoggerService.logArmMissingResponse(duration, 123);
 
-        List<String> infoLogs = logCaptor.getInfoLogs();
-        assertEquals(1, infoLogs.size());
-        assertEquals(logEntry, infoLogs.get(0));
+        var logEntry = String.format("No response files produced by ARM within %s for EOD %s",
+                                     "1 day", 123);
+
+        List<String> errorLogs = logCaptor.getErrorLogs();
+        assertEquals(1, errorLogs.size());
+        assertEquals(logEntry, errorLogs.get(0));
     }
 
     @Test
@@ -129,4 +133,30 @@ class ArmLoggerServiceImplTest {
         assertEquals(1, errorLogs.size());
         assertEquals(logEntry, errorLogs.get(0));
     }
+
+    @Test
+    void armRpoPollingSuccessful_shouldLogInfoWithEodId_whenProvidedWithExecutionId() {
+        armLoggerService.armRpoPollingSuccessful(EXECUTION_ID);
+
+        var logEntry = String.format("ARM RPO Polling - Successfully completed for execution Id = %s", EXECUTION_ID);
+
+        List<String> infoLogs = logCaptor.getInfoLogs();
+        assertEquals(1, infoLogs.size());
+        assertEquals(logEntry, infoLogs.get(0));
+    }
+
+    @Test
+    void logArmMissingResponse_36Hours() {
+
+        Duration duration = Duration.ofHours(36);
+        armLoggerService.logArmMissingResponse(duration, 321);
+
+        var logEntry = String.format("No response files produced by ARM within %s for EOD %s",
+                                     "1 day 12 hours", 321);
+
+        List<String> errorLogs = logCaptor.getErrorLogs();
+        assertEquals(1, errorLogs.size());
+        assertEquals(logEntry, errorLogs.get(0));
+    }
+
 }
