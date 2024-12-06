@@ -1,7 +1,6 @@
 package uk.gov.hmcts.darts.arm.service.impl;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import uk.gov.hmcts.darts.arm.config.ArmDataManagementConfiguration;
@@ -38,17 +37,6 @@ public class ExternalObjectDirectoryServiceImpl implements ExternalObjectDirecto
     private final AnnotationDocumentRepository annotationDocumentRepository;
     private final CaseDocumentRepository caseDocumentRepository;
     private final TranscriptionDocumentRepository transcriptionDocumentRepository;
-
-    @Override
-    public List<ExternalObjectDirectoryEntity> findFailedStillRetriableArmEods(Pageable pageable) {
-
-        return eodRepository.findNotFinishedAndNotExceededRetryInStorageLocation(
-            EodHelper.failedArmStatuses(),
-            EodHelper.armLocation(),
-            armConfig.getMaxRetryAttempts(),
-            pageable
-        );
-    }
 
     @Override
     public boolean hasAllMediaBeenCopiedFromInboundStorage(List<MediaEntity> mediaEntities) {

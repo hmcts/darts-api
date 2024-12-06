@@ -65,15 +65,14 @@ public class UnstructuredToArmBatchProcessorImpl implements UnstructuredToArmBat
         ExternalLocationTypeEntity eodSourceLocation = EodHelper.unstructuredLocation();
 
         // Because the query is long-running, get all the EODs that need to be processed in one go
-        List<ExternalObjectDirectoryEntity> eodsForTransfer = unstructuredToArmHelper.getEodEntitiesToSendToArm(eodSourceLocation,
-                                                                                                                EodHelper.armLocation(),
-                                                                                                                taskBatchSize);
+        List<Integer> eodsForTransfer = unstructuredToArmHelper.getEodEntitiesToSendToArm(eodSourceLocation,
+                                                                                          EodHelper.armLocation(),
+                                                                                          taskBatchSize);
 
         log.info("Found {} pending entities to process from source '{}'", eodsForTransfer.size(), eodSourceLocation.getDescription());
         if (!eodsForTransfer.isEmpty()) {
             //ARM has a max batch size for manifest items, so lets loop through the big list creating lots of individual batches for ARM to process separately
-            List<List<ExternalObjectDirectoryEntity>> batchesForArm = ListUtils.partition(eodsForTransfer,
-                                                                                          unstructuredToArmProcessorConfiguration.getMaxArmManifestItems());
+            List<List<Integer>> batchesForArm = ListUtils.partition(eodsForTransfer, unstructuredToArmProcessorConfiguration.getMaxArmManifestItems());
             AtomicInteger batchCounter = new AtomicInteger(1);
             UserAccountEntity userAccount = userIdentity.getUserAccount();
             List<Callable<Void>> tasks = batchesForArm
@@ -81,8 +80,9 @@ public class UnstructuredToArmBatchProcessorImpl implements UnstructuredToArmBat
                 .map(eodsForBatch -> (Callable<Void>) () -> {
                     int batchNumber = batchCounter.getAndIncrement();
                     try {
+                        List<ExternalObjectDirectoryEntity> externalObjectDirectoryEntities = externalObjectDirectoryRepository.findAllById(eodsForBatch);
                         log.info("Starting processing batch {} out of {}", batchNumber, batchesForArm.size());
-                        createAndSendBatchFile(eodsForBatch, userAccount);
+                        createAndSendBatchFile(externalObjectDirectoryEntities, userAccount);
                         log.info("Finished processing batch {} out of {}", batchNumber, batchesForArm.size());
                     } catch (Exception e) {
                         log.error("Unexpected exception when processing batch {}", batchNumber, e);

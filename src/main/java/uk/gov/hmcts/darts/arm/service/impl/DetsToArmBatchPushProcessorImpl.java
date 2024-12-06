@@ -68,26 +68,27 @@ public class DetsToArmBatchPushProcessorImpl implements DetsToArmBatchPushProces
         ExternalLocationTypeEntity eodSourceLocation = EodHelper.detsLocation();
 
         // Because the query is long-running, get all the EODs that need to be processed in one go
-        List<ExternalObjectDirectoryEntity> eodsForTransfer = getDetsEodEntitiesToSendToArm(eodSourceLocation,
+        List<Integer> eodsForTransfer = getDetsEodEntitiesToSendToArm(eodSourceLocation,
                                                                                             EodHelper.armLocation(),
                                                                                             taskBatchSize);
 
         log.info("Found {} DETS pending entities to process from source '{}'", eodsForTransfer.size(), eodSourceLocation.getDescription());
         if (!eodsForTransfer.isEmpty()) {
             //ARM has a max batch size for manifest items, so lets loop through the big list creating lots of individual batches for ARM to process separately
-            List<List<ExternalObjectDirectoryEntity>> batchesForArm = ListUtils.partition(eodsForTransfer,
+            List<List<Integer>> batchesForArm = ListUtils.partition(eodsForTransfer,
                                                                                           detsToArmProcessorConfiguration.getMaxArmManifestItems());
             int batchCounter = 1;
             UserAccountEntity userAccount = userIdentity.getUserAccount();
-            for (List<ExternalObjectDirectoryEntity> eodsForBatch : batchesForArm) {
+            for (List<Integer> eodsForBatch : batchesForArm) {
                 log.info("Creating DETS batch {} out of {}", batchCounter++, batchesForArm.size());
-                createAndSendBatchFile(eodsForBatch, userAccount);
+                List<ExternalObjectDirectoryEntity> externalObjectDirectoryEntities = externalObjectDirectoryRepository.findAllById(eodsForBatch);
+                createAndSendBatchFile(externalObjectDirectoryEntities, userAccount);
             }
         }
         log.info("Finished running DETS ARM Batch Push processing at: {}", OffsetDateTime.now());
     }
 
-    private List<ExternalObjectDirectoryEntity> getDetsEodEntitiesToSendToArm(ExternalLocationTypeEntity sourceLocation,
+    private List<Integer> getDetsEodEntitiesToSendToArm(ExternalLocationTypeEntity sourceLocation,
                                                                               ExternalLocationTypeEntity armLocation, int maxResultSize) {
         ObjectRecordStatusEntity armRawStatusFailed = EodHelper.failedArmRawDataStatus();
         ObjectRecordStatusEntity armManifestFailed = EodHelper.failedArmManifestFileStatus();
@@ -101,7 +102,7 @@ public class DetsToArmBatchPushProcessorImpl implements DetsToArmBatchPushProces
             Limit.of(maxResultSize)
         );
 
-        List<ExternalObjectDirectoryEntity> returnList = new ArrayList<>(failedArmExternalObjectDirectoryEntities);
+        List<Integer> returnList = new ArrayList<>(failedArmExternalObjectDirectoryEntities);
 
         int remainingBatchSizeEods = maxResultSize - failedArmExternalObjectDirectoryEntities.size();
         if (remainingBatchSizeEods > 0) {
