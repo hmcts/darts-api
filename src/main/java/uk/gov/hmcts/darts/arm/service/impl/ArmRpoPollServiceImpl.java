@@ -69,7 +69,7 @@ public class ArmRpoPollServiceImpl implements ArmRpoPollService {
             var userAccount = userIdentity.getUserAccount();
 
             // step to call ARM RPO API to get the extended searches by matter
-            armRpoApi.getExtendedSearchesByMatter(bearerToken, executionId, userAccount);
+            String productionName = armRpoApi.getExtendedSearchesByMatter(bearerToken, executionId, userAccount);
             // step to call ARM RPO API to get the master index field by record class schema
             List<MasterIndexFieldByRecordClassSchema> headerColumns = armRpoApi.getMasterIndexFieldByRecordClassSchema(
                 bearerToken, executionId,
@@ -77,8 +77,8 @@ public class ArmRpoPollServiceImpl implements ArmRpoPollService {
                 userAccount);
 
             // step to call ARM RPO API to create export based on search results table
-            boolean createExportBasedOnSearchResultsTable = armRpoApi.createExportBasedOnSearchResultsTable(bearerToken, executionId, headerColumns,
-                                                                                                            userAccount);
+            boolean createExportBasedOnSearchResultsTable = armRpoApi.createExportBasedOnSearchResultsTable(
+                bearerToken, executionId, headerColumns, productionName, userAccount);
             if (createExportBasedOnSearchResultsTable) {
                 // step to call ARM RPO API to get the extended productions by matter
                 armRpoApi.getExtendedProductionsByMatter(bearerToken, executionId, userAccount);
