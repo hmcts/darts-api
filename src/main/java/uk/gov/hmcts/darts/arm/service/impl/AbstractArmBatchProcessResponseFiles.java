@@ -30,7 +30,6 @@ import uk.gov.hmcts.darts.arm.util.files.UploadFileFilenameProcessor;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.entity.ObjectRecordStatusEntity;
-import uk.gov.hmcts.darts.common.entity.ObjectStateRecordEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum;
 import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
@@ -39,7 +38,6 @@ import uk.gov.hmcts.darts.common.repository.ObjectStateRecordRepository;
 import uk.gov.hmcts.darts.common.service.FileOperationService;
 import uk.gov.hmcts.darts.common.util.EodHelper;
 import uk.gov.hmcts.darts.log.api.LogApi;
-import uk.gov.hmcts.darts.util.DurationUtil;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -328,15 +326,7 @@ public abstract class AbstractArmBatchProcessResponseFiles implements ArmRespons
 
                         if (externalObjectDirectory.getInputUploadProcessedTs() != null
                             && externalObjectDirectory.getInputUploadProcessedTs().isBefore(minInputUploadProcessedTime)) {
-                            updateExternalObjectDirectoryStatus(externalObjectDirectory, EodHelper.armResponseProcessingFailedStatus(), userAccount);
-
-                            ObjectStateRecordEntity objectStateRecordEntity = externalObjectDirectory.getObjectStateRecordEntity();
-                            if (objectStateRecordEntity != null) {
-                                objectStateRecordEntity.setObjectStatus(String.format("No response files produced by ARM within %s",
-                                                                                      DurationUtil.formatDurationHumanReadable(
-                                                                                          armDataManagementConfiguration.getArmMissingResponseDuration())));
-                                objectStateRecordRepository.save(objectStateRecordEntity);
-                            }
+                            markEodAsResposneProcessingFailed(externalObjectDirectory, userAccount);
                         } else {
                             updateExternalObjectDirectoryStatus(externalObjectDirectory, EodHelper.armDropZoneStatus(), userAccount);
                         }
@@ -346,6 +336,10 @@ public abstract class AbstractArmBatchProcessResponseFiles implements ArmRespons
                 }
             }
         );
+    }
+
+    protected void markEodAsResposneProcessingFailed(ExternalObjectDirectoryEntity externalObjectDirectory, UserAccountEntity userAccount) {
+        updateExternalObjectDirectoryStatus(externalObjectDirectory, EodHelper.armResponseProcessingFailedStatus(), userAccount);
     }
 
     private void logResponsesFound(ArmResponseBatchData armResponseBatchData) {

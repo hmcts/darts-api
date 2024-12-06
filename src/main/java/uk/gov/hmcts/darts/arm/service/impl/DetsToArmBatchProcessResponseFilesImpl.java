@@ -21,6 +21,7 @@ import uk.gov.hmcts.darts.common.repository.ObjectStateRecordRepository;
 import uk.gov.hmcts.darts.common.service.FileOperationService;
 import uk.gov.hmcts.darts.dets.config.DetsDataManagementConfiguration;
 import uk.gov.hmcts.darts.log.api.LogApi;
+import uk.gov.hmcts.darts.util.DurationUtil;
 
 import java.util.Optional;
 
@@ -154,5 +155,18 @@ public class DetsToArmBatchProcessResponseFilesImpl extends AbstractArmBatchProc
         osr.setDateFileIngestToArm(timeHelper.currentOffsetDateTime());
         osr.setObjectStatus(objectStatus);
         objectStateRecordRepository.save(osr);
+    }
+
+    @Override
+    protected void markEodAsResposneProcessingFailed(ExternalObjectDirectoryEntity externalObjectDirectory, UserAccountEntity userAccount) {
+        super.markEodAsResposneProcessingFailed(externalObjectDirectory, userAccount);
+
+        ObjectStateRecordEntity objectStateRecordEntity = externalObjectDirectory.getObjectStateRecordEntity();
+        if (objectStateRecordEntity != null) {
+            objectStateRecordEntity.setObjectStatus(String.format("No response files produced by ARM within %s",
+                                                                  DurationUtil.formatDurationHumanReadable(
+                                                                      armDataManagementConfiguration.getArmMissingResponseDuration())));
+            objectStateRecordRepository.save(objectStateRecordEntity);
+        }
     }
 }
