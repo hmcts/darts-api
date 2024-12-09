@@ -63,9 +63,9 @@ public class UnstructuredToArmBatchProcessorImpl implements UnstructuredToArmBat
         ExternalLocationTypeEntity eodSourceLocation = EodHelper.unstructuredLocation();
 
         // Because the query is long-running, get all the EODs that need to be processed in one go
-        List<Integer> eodsForTransfer = unstructuredToArmHelper.getEodEntitiesToSendToArm(eodSourceLocation,
-                                                                                          EodHelper.armLocation(),
-                                                                                          taskBatchSize);
+        eodsForTransfer = unstructuredToArmHelper.getEodEntitiesToSendToArm(eodSourceLocation,
+                                                                            EodHelper.armLocation(),
+                                                                            taskBatchSize);
 
         log.info("Found {} pending entities to process from source '{}'", eodsForTransfer.size(), eodSourceLocation.getDescription());
         if (!eodsForTransfer.isEmpty()) {
@@ -216,7 +216,7 @@ public class UnstructuredToArmBatchProcessorImpl implements UnstructuredToArmBat
     public void destroy() {
         log.info("UnstructuredToArmBatchProcessorImpl shutting down.");
         if (CollectionUtils.isNotEmpty(eodsForTransfer)) {
-            log.info("Reverting EODs to failed status for {} EODs", eodsForTransfer.size());
+            log.info("Reverting EODs to failed status for potentially {} EODs", eodsForTransfer.size());
             unstructuredToArmHelper.updateEodByIdAndStatus(eodsForTransfer,
                                                            EodHelper.armIngestionStatus(),
                                                            EodHelper.failedArmRawDataStatus(),
