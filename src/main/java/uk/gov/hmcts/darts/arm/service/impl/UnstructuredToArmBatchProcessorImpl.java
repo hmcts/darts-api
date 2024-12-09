@@ -4,7 +4,9 @@ import com.azure.core.util.BinaryData;
 import com.azure.storage.blob.models.BlobStorageException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.ListUtils;
+import org.springframework.beans.factory.DisposableBean;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.darts.arm.api.ArmDataManagementApi;
 import uk.gov.hmcts.darts.arm.component.ArchiveRecordFileGenerator;
@@ -40,7 +42,7 @@ import static uk.gov.hmcts.darts.common.util.EodHelper.isEqual;
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class UnstructuredToArmBatchProcessorImpl implements UnstructuredToArmBatchProcessor {
+public class UnstructuredToArmBatchProcessorImpl implements UnstructuredToArmBatchProcessor, DisposableBean {
     private final ArchiveRecordService archiveRecordService;
     private final ArchiveRecordFileGenerator archiveRecordFileGenerator;
     private final DataStoreToArmHelper unstructuredToArmHelper;
@@ -55,6 +57,7 @@ public class UnstructuredToArmBatchProcessorImpl implements UnstructuredToArmBat
 
     private static final int BLOB_ALREADY_EXISTS_STATUS_CODE = 409;
 
+    List<Integer> eodsForTransfer;
 
     @Override
     @SuppressWarnings({"PMD.AvoidInstantiatingObjectsInLoops", "PMD.CognitiveComplexity", "PMD.CyclomaticComplexity"})
@@ -108,7 +111,6 @@ public class UnstructuredToArmBatchProcessorImpl implements UnstructuredToArmBat
 
         File archiveRecordsFile = unstructuredToArmHelper.createEmptyArchiveRecordsFile(armDataManagementConfiguration.getManifestFilePrefix());
         var batchItems = new ArmBatchItems();
-
 
         for (var currentEod : eodsForBatch) {
             var batchItem = new ArmBatchItem();
@@ -233,4 +235,13 @@ public class UnstructuredToArmBatchProcessorImpl implements UnstructuredToArmBat
         }
     }
 
+    @Override
+    public void destroy() throws Exception {
+        if (CollectionUtils.isNotEmpty(eodsForTransfer)) {
+            unstructuredToArmHelper.updateEodByIdAndStatus(eodsForTransfer,
+                                                           EodHelper.armProcessingResponseFilesStatus(),
+                                                           EodHelper.armDropZoneStatus(),
+                                                           userIdentity.getUserAccount());
+        }
+    }
 }
