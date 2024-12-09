@@ -29,6 +29,7 @@ public class ExtendedSearchesByMatterResponse extends BaseRpoResponse {
     @JsonIgnoreProperties(ignoreUnknown = true)
     public static class Search {
 
+        private String name;
         private Integer totalCount;
 
     }
