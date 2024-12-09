@@ -13,6 +13,8 @@ import uk.gov.hmcts.darts.testutils.stubs.TransformedMediaStub;
 import java.util.List;
 import java.util.Locale;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 class TransformedMediaRepositoryTest extends PostgresIntegrationBase {
 
     @Autowired
@@ -41,8 +43,8 @@ class TransformedMediaRepositoryTest extends PostgresIntegrationBase {
     void testFindTransformedMediaWithoutAnyParameters() {
         List<TransformedMediaEntity> transformedMediaEntityList
             = transformedMediaRepository.findTransformedMedia(
-                null, null, null,
-                null, null, null, null, null);
+            null, null, null,
+            null, null, null, null, null);
         Assertions.assertEquals(generatedMediaEntities.size(), transformedMediaEntityList.size());
         Assertions.assertTrue(transformedMediaStub.getTransformedMediaIds(transformedMediaEntityList)
                                   .containsAll(transformedMediaStub.getTransformedMediaIds(generatedMediaEntities)));
@@ -52,8 +54,8 @@ class TransformedMediaRepositoryTest extends PostgresIntegrationBase {
     void testFindTransformedMediaWithId() {
         List<TransformedMediaEntity> transformedMediaEntityList
             = transformedMediaRepository.findTransformedMedia(
-                generatedMediaEntities.get(0).getMediaRequest().getId(),
-                null, null, null, null, null, null, null);
+            generatedMediaEntities.get(0).getMediaRequest().getId(),
+            null, null, null, null, null, null, null);
         Assertions.assertEquals(1, transformedMediaEntityList.size());
         Assertions.assertEquals(generatedMediaEntities.get(0).getId(), transformedMediaEntityList.size());
     }
@@ -62,7 +64,7 @@ class TransformedMediaRepositoryTest extends PostgresIntegrationBase {
     void testFindTransformedMediaWithCaseNumber() {
         List<TransformedMediaEntity> transformedMediaEntityList
             = transformedMediaRepository.findTransformedMedia(
-                null, generatedMediaEntities.get(3).getMediaRequest().getHearing().getCourtCase().getCaseNumber(), null, null, null, null, null, null);
+            null, generatedMediaEntities.get(3).getMediaRequest().getHearing().getCourtCase().getCaseNumber(), null, null, null, null, null, null);
         Assertions.assertEquals(1, transformedMediaEntityList.size());
         Assertions.assertEquals(transformedMediaEntityList.get(0).getId(), generatedMediaEntities.get(3).getId());
     }
@@ -72,8 +74,8 @@ class TransformedMediaRepositoryTest extends PostgresIntegrationBase {
         int nameMatchIndex = 13;
         List<TransformedMediaEntity> transformedMediaEntityList
             = transformedMediaRepository.findTransformedMedia(
-                null, null,
-                TransformedMediaSubStringQueryEnum.COURT_HOUSE.getQueryStringPrefix(Integer.toString(nameMatchIndex)), null, null, null, null, null);
+            null, null,
+            TransformedMediaSubStringQueryEnum.COURT_HOUSE.getQueryStringPrefix(Integer.toString(nameMatchIndex)), null, null, null, null, null);
         Assertions.assertEquals(1, transformedMediaEntityList.size());
         Assertions.assertEquals(generatedMediaEntities.get(nameMatchIndex).getId(), transformedMediaEntityList.get(0).getId());
     }
@@ -95,8 +97,8 @@ class TransformedMediaRepositoryTest extends PostgresIntegrationBase {
         int nameMatchIndex = 13;
         List<TransformedMediaEntity> transformedMediaEntityList
             = transformedMediaRepository.findTransformedMedia(
-                null, null,
-                TransformedMediaSubStringQueryEnum.COURT_HOUSE.getQueryStringPostfix(Integer.toString(nameMatchIndex)), null, null, null, null, null);
+            null, null,
+            TransformedMediaSubStringQueryEnum.COURT_HOUSE.getQueryStringPostfix(Integer.toString(nameMatchIndex)), null, null, null, null, null);
         Assertions.assertEquals(1, transformedMediaEntityList.size());
         Assertions.assertEquals(generatedMediaEntities.get(nameMatchIndex).getId(), transformedMediaEntityList.get(0).getId());
     }
@@ -117,8 +119,8 @@ class TransformedMediaRepositoryTest extends PostgresIntegrationBase {
     void testFindTransformedMediaWithCourtDisplayNameSubstringMatchAll() {
         List<TransformedMediaEntity> transformedMediaEntityList
             = transformedMediaRepository.findTransformedMedia(
-                null, null,
-                TransformedMediaSubStringQueryEnum.COURT_HOUSE.getQueryStringPrefix(), null, null, null, null, null);
+            null, null,
+            TransformedMediaSubStringQueryEnum.COURT_HOUSE.getQueryStringPrefix(), null, null, null, null, null);
         Assertions.assertEquals(GENERATION_COUNT, transformedMediaEntityList.size());
         Assertions.assertTrue(transformedMediaStub.getTransformedMediaIds(transformedMediaEntityList)
                                   .containsAll(transformedMediaStub.getTransformedMediaIds(generatedMediaEntities)));
@@ -128,8 +130,8 @@ class TransformedMediaRepositoryTest extends PostgresIntegrationBase {
     void testFindTransformedMediaWithHearingDate() {
         List<TransformedMediaEntity> transformedMediaEntityList
             = transformedMediaRepository.findTransformedMedia(
-                null, null, null,
-                generatedMediaEntities.get(3).getMediaRequest().getHearing().getHearingDate(), null, null, null, null);
+            null, null, null,
+            generatedMediaEntities.get(3).getMediaRequest().getHearing().getHearingDate(), null, null, null, null);
         Assertions.assertEquals(1, transformedMediaEntityList.size());
         Assertions.assertEquals(generatedMediaEntities.get(3).getId(), transformedMediaEntityList.get(0).getId());
     }
@@ -139,8 +141,8 @@ class TransformedMediaRepositoryTest extends PostgresIntegrationBase {
         int nameMatchIndex = 3;
         List<TransformedMediaEntity> transformedMediaEntityList
             = transformedMediaRepository.findTransformedMedia(
-                null, null, null, null,
-                TransformedMediaSubStringQueryEnum.OWNER.getQueryString(Integer.toString(nameMatchIndex)), null, null, null);
+            null, null, null, null,
+            TransformedMediaSubStringQueryEnum.OWNER.getQueryString(Integer.toString(nameMatchIndex)), null, null, null);
         Assertions.assertEquals(1, transformedMediaEntityList.size());
         Assertions.assertEquals(generatedMediaEntities.get(nameMatchIndex).getId(), transformedMediaEntityList.get(0).getId());
     }
@@ -150,8 +152,8 @@ class TransformedMediaRepositoryTest extends PostgresIntegrationBase {
         int nameMatchIndex = 13;
         List<TransformedMediaEntity> transformedMediaEntityList
             = transformedMediaRepository.findTransformedMedia(
-                null, null, null, null,
-                TransformedMediaSubStringQueryEnum.OWNER.getQueryStringPostfix(Integer.toString(nameMatchIndex)), null, null, null);
+            null, null, null, null,
+            TransformedMediaSubStringQueryEnum.OWNER.getQueryStringPostfix(Integer.toString(nameMatchIndex)), null, null, null);
 
         Assertions.assertEquals(1, transformedMediaEntityList.size());
         Assertions.assertEquals(generatedMediaEntities.get(nameMatchIndex).getId(), transformedMediaEntityList.get(0).getId());
@@ -196,8 +198,8 @@ class TransformedMediaRepositoryTest extends PostgresIntegrationBase {
     void testFindTransformedMediaWithOwnerSubstringMatchAll() {
         List<TransformedMediaEntity> transformedMediaEntityList
             = transformedMediaRepository.findTransformedMedia(
-                null, null,  null, null,
-                TransformedMediaSubStringQueryEnum.OWNER.getQueryStringPostfix(), null, null, null);
+            null, null, null, null,
+            TransformedMediaSubStringQueryEnum.OWNER.getQueryStringPostfix(), null, null, null);
         Assertions.assertEquals(GENERATION_COUNT, transformedMediaEntityList.size());
         Assertions.assertTrue(transformedMediaStub
                                   .getTransformedMediaIds(transformedMediaEntityList)
@@ -209,8 +211,8 @@ class TransformedMediaRepositoryTest extends PostgresIntegrationBase {
         int nameMatchIndex = 13;
         List<TransformedMediaEntity> transformedMediaEntityList
             = transformedMediaRepository.findTransformedMedia(
-                null, null, null, null, null,
-                TransformedMediaSubStringQueryEnum.REQUESTED_BY.getQueryString(Integer.toString(nameMatchIndex)), null, null);
+            null, null, null, null, null,
+            TransformedMediaSubStringQueryEnum.REQUESTED_BY.getQueryString(Integer.toString(nameMatchIndex)), null, null);
         Assertions.assertEquals(1, transformedMediaEntityList.size());
         Assertions.assertEquals(generatedMediaEntities.get(nameMatchIndex).getId(), transformedMediaEntityList.get(0).getId());
     }
@@ -220,8 +222,8 @@ class TransformedMediaRepositoryTest extends PostgresIntegrationBase {
         int nameMatchIndex = 13;
         List<TransformedMediaEntity> transformedMediaEntityList
             = transformedMediaRepository.findTransformedMedia(
-                null, null, null, null, null,
-                TransformedMediaSubStringQueryEnum.REQUESTED_BY.getQueryStringPrefix(Integer.toString(13)), null, null);
+            null, null, null, null, null,
+            TransformedMediaSubStringQueryEnum.REQUESTED_BY.getQueryStringPrefix(Integer.toString(13)), null, null);
         Assertions.assertEquals(1, transformedMediaEntityList.size());
         Assertions.assertEquals(generatedMediaEntities.get(nameMatchIndex).getId(), transformedMediaEntityList.get(0).getId());
     }
@@ -263,8 +265,8 @@ class TransformedMediaRepositoryTest extends PostgresIntegrationBase {
     void testFindTransformedMediaWithRequestedBySubstringMatchAll() {
         List<TransformedMediaEntity> transformedMediaEntityList
             = transformedMediaRepository.findTransformedMedia(
-                null, null,  null, null, null,
-                TransformedMediaSubStringQueryEnum.REQUESTED_BY.getQueryStringPostfix(), null, null);
+            null, null, null, null, null,
+            TransformedMediaSubStringQueryEnum.REQUESTED_BY.getQueryStringPostfix(), null, null);
         Assertions.assertEquals(GENERATION_COUNT, transformedMediaEntityList.size());
         Assertions.assertTrue(transformedMediaStub
                                   .getTransformedMediaIds(transformedMediaEntityList)
@@ -276,9 +278,9 @@ class TransformedMediaRepositoryTest extends PostgresIntegrationBase {
         int fromAtPosition = 3;
         List<TransformedMediaEntity> transformedMediaEntityList
             = transformedMediaRepository.findTransformedMedia(
-                null, null, null, null, null, null,
-                generatedMediaEntities.get(fromAtPosition).getMediaRequest().getCreatedDateTime(),
-                generatedMediaEntities.get(fromAtPosition).getMediaRequest().getCreatedDateTime());
+            null, null, null, null, null, null,
+            generatedMediaEntities.get(fromAtPosition).getMediaRequest().getCreatedDateTime(),
+            generatedMediaEntities.get(fromAtPosition).getMediaRequest().getCreatedDateTime());
         Assertions.assertEquals(1, transformedMediaEntityList.size());
         Assertions.assertEquals(generatedMediaEntities
                                     .get(fromAtPosition).getId(), transformedMediaEntityList.get(0).getId());
@@ -289,8 +291,8 @@ class TransformedMediaRepositoryTest extends PostgresIntegrationBase {
         int fromAtPosition = 3;
         List<TransformedMediaEntity> transformedMediaEntityList
             = transformedMediaRepository.findTransformedMedia(
-                null, null, null, null, null,
-                null, generatedMediaEntities.get(fromAtPosition).getMediaRequest().getCreatedDateTime(), null);
+            null, null, null, null, null,
+            null, generatedMediaEntities.get(fromAtPosition).getMediaRequest().getCreatedDateTime(), null);
         Assertions.assertEquals(GENERATION_COUNT - fromAtPosition, transformedMediaEntityList.size());
         Assertions.assertTrue(transformedMediaStub
                                   .getTransformedMediaIds(transformedMediaEntityList)
@@ -314,13 +316,36 @@ class TransformedMediaRepositoryTest extends PostgresIntegrationBase {
         TransformedMediaEntity transformedMediaEntityFind = generatedMediaEntities.get(1);
         List<TransformedMediaEntity> transformedMediaEntityList
             = transformedMediaRepository.findTransformedMedia(transformedMediaEntityFind.getMediaRequest().getId(), transformedMediaEntityFind.getMediaRequest()
-            .getHearing().getCourtCase().getCaseNumber(), transformedMediaEntityFind.getMediaRequest()
-            .getHearing().getCourtroom().getCourthouse().getDisplayName(), transformedMediaEntityFind.getMediaRequest()
-            .getHearing().getHearingDate(), transformedMediaEntityFind.getMediaRequest()
-            .getCurrentOwner().getUserFullName(), transformedMediaEntityFind.getCreatedBy().getUserFullName(), transformedMediaEntityFind.getMediaRequest()
-            .getCreatedBy().getCreatedDateTime(), generatedMediaEntities.get(1).getCreatedDateTime());
+                                                                  .getHearing().getCourtCase().getCaseNumber(), transformedMediaEntityFind.getMediaRequest()
+                                                                  .getHearing().getCourtroom().getCourthouse().getDisplayName(),
+                                                              transformedMediaEntityFind.getMediaRequest()
+                                                                  .getHearing().getHearingDate(), transformedMediaEntityFind.getMediaRequest()
+                                                                  .getCurrentOwner().getUserFullName(),
+                                                              transformedMediaEntityFind.getCreatedBy().getUserFullName(),
+                                                              transformedMediaEntityFind.getMediaRequest()
+                                                                  .getCreatedBy().getCreatedDateTime(), generatedMediaEntities.get(1).getCreatedDateTime());
         Assertions.assertEquals(1, transformedMediaEntityList.size());
         Assertions.assertEquals(transformedMediaEntityFind.getId(), transformedMediaEntityList.get(0).getId());
     }
 
+
+    @Test
+    void updateCreatedByLastModifiedBy_shouldUpdateCreatedByAndLastModified() throws Exception {
+        TransformedMediaEntity transformedMediaEntityFind = generatedMediaEntities.get(1);
+        assertThat(transformedMediaEntityFind.getCreatedBy().getId()).isNotEqualTo(1);
+        assertThat(transformedMediaEntityFind.getLastModifiedBy().getId()).isNotEqualTo(2);
+        dartsDatabase.getTransactionalUtil().executeInTransaction(
+            () -> {
+                transformedMediaRepository.updateCreatedByLastModifiedBy(transformedMediaEntityFind.getId(), 1, 2);
+                dartsDatabase.getEntityManager().flush();
+                dartsDatabase.getEntityManager().clear();
+            });
+
+        dartsDatabase.getTransactionalUtil()
+            .executeInTransaction(() -> {
+                TransformedMediaEntity newTransformedMediaEntityFind = transformedMediaRepository.findById(transformedMediaEntityFind.getId()).orElseThrow();
+                assertThat(newTransformedMediaEntityFind.getCreatedBy().getId()).isEqualTo(1);
+                assertThat(newTransformedMediaEntityFind.getLastModifiedBy().getId()).isEqualTo(2);
+            });
+    }
 }
