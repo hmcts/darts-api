@@ -8,7 +8,7 @@ import java.time.OffsetDateTime;
 
 public interface ArmApiService {
 
-    UpdateMetadataResponse updateMetadata(String externalRecordId, OffsetDateTime eventTimestamp, int retConfScore, String retConfReason);
+    UpdateMetadataResponse updateMetadata(String externalRecordId, OffsetDateTime eventTimestamp, Integer retConfScore, String retConfReason);
 
     DownloadResponseMetaData downloadArmData(String externalRecordId, String externalFileId) throws FileNotDownloadedException;
 
