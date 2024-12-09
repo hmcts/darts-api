@@ -13,7 +13,6 @@ import uk.gov.hmcts.darts.testutils.stubs.ExternalObjectDirectoryStub;
 
 import java.lang.reflect.InvocationTargetException;
 import java.time.OffsetDateTime;
-import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -22,6 +21,7 @@ import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_PROCESSING_RESPONSE_FILES;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_RPO_PENDING;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.STORED;
 
@@ -40,85 +40,79 @@ class ExternalObjectDirectoryRepositoryTest extends PostgresIntegrationBase {
     private OffsetDateTime ingestionEndDateTime;
 
     @Test
-    void testGetDirectoryIfMediaDate24Hours() throws Exception {
+    void findIdsIn2StorageLocationsBeforeTime_returnsExpectedResults_whenMediaDateIs24Hours() throws Exception {
 
         int setupHoursBeforeCurrentTime = 24;
 
-        // setup the test data
+        // given
         generateDataWithMediaForInbound(setupHoursBeforeCurrentTime);
 
-        int hourDurationBeyondHours = setupHoursBeforeCurrentTime; // which no records are
-
-        // exercise the logic
+        // when
         List<Integer> results = externalObjectDirectoryRepository
             .findIdsIn2StorageLocationsBeforeTime(
                 EodHelper.storedStatus(), EodHelper.storedStatus(),
                 EodHelper.inboundLocation(), EodHelper.armLocation(),
-                getCurrentDateTimeWithHoursBefore(hourDurationBeyondHours),
+                getCurrentDateTimeWithHoursBefore(setupHoursBeforeCurrentTime),
                 ExternalObjectDirectoryQueryTypeEnum.MEDIA_QUERY.getIndex(),
                 Limit.of(100_000));
 
-        // assert the logic
+        // then
         assertExpectedResults(results, entitiesToBeMarkedWithMediaOrAnnotationOutsideOfArmHours,
                               entitiesToBeMarkedWithMediaOrAnnotationOutsideOfArmHours.size());
     }
 
     @Test
-    void testGetDirectoryIfMediaDateBeyond24Hours() throws Exception {
+    void findIdsIn2StorageLocationsBeforeTime_returnsExpectedResults_whenMediaDateIsBeyond24Hours() throws Exception {
 
         int setupHoursBeforeCurrentTime = 26;
 
-        // setup the test data
+        // given
         generateDataWithMediaForInbound(setupHoursBeforeCurrentTime);
 
-        int hourDurationBeyondHours = setupHoursBeforeCurrentTime; // which no records are
-
-        // excerise the logic
+        // when
         List<Integer> results = externalObjectDirectoryRepository
             .findIdsIn2StorageLocationsBeforeTime(EodHelper.storedStatus(), EodHelper.storedStatus(),
                                                   EodHelper.inboundLocation(), EodHelper.armLocation(),
-                                                  getCurrentDateTimeWithHoursBefore(hourDurationBeyondHours),
+                                                  getCurrentDateTimeWithHoursBefore(setupHoursBeforeCurrentTime),
                                                   ExternalObjectDirectoryQueryTypeEnum.MEDIA_QUERY.getIndex(),
                                                   Limit.of(100_000));
 
-        // assert the logic
+        // then
         assertExpectedResults(results, entitiesToBeMarkedWithMediaOrAnnotationOutsideOfArmHours,
                               entitiesToBeMarkedWithMediaOrAnnotationOutsideOfArmHours.size());
     }
 
     @Test
-    void testGetDirectoryIfAnnotationDate24Hours() throws Exception {
+    void findIdsIn2StorageLocationsBeforeTime_returnsExpectedResults_whenAnnotationIs24Hours() throws Exception {
 
         int setupHoursBeforeCurrentTime = 24;
 
-        // setup the test data
+        // given
         generateDataWithAnnotationForInbound(setupHoursBeforeCurrentTime);
 
-        int hourDurationBeyondHours = setupHoursBeforeCurrentTime; // which no records are
-
-        // exercise the logic
+        // when
         List<Integer> results = externalObjectDirectoryRepository
             .findIdsIn2StorageLocationsBeforeTime(
                 EodHelper.storedStatus(), EodHelper.storedStatus(),
                 EodHelper.inboundLocation(), EodHelper.armLocation(),
-                getCurrentDateTimeWithHoursBefore(hourDurationBeyondHours), ExternalObjectDirectoryQueryTypeEnum.ANNOTATION_QUERY.getIndex(),
+                getCurrentDateTimeWithHoursBefore(setupHoursBeforeCurrentTime), ExternalObjectDirectoryQueryTypeEnum.ANNOTATION_QUERY.getIndex(),
                 Limit.of(100_000));
 
-        // assert the logic
+        // then
         assertExpectedResults(results, entitiesToBeMarkedWithMediaOrAnnotationOutsideOfArmHours,
                               entitiesToBeMarkedWithMediaOrAnnotationOutsideOfArmHours.size());
     }
 
     @Test
-    void testGetDirectoryIfAnnotationArmDateAndUnstructuredDateOutsideOfBounds() throws Exception {
+    void findIdsIn2StorageLocationsBeforeTime_returnsExpectedResults_whenUnstructuredDateOutsideOfBounds() throws Exception {
 
         int setupArmHoursBeforeCurrentTime = 24;
         int setupUnstructuredWeeksBeforeCurrentTime = 4;
 
-        // setup the test data
+        // given
         generateDataWithAnnotationForUnstructured(setupArmHoursBeforeCurrentTime, setupUnstructuredWeeksBeforeCurrentTime);
 
-        // exercise the logic
+        // when
         List<Integer> results = externalObjectDirectoryRepository
             .findIdsIn2StorageLocationsBeforeTime(
                 EodHelper.storedStatus(), EodHelper.storedStatus(),
@@ -127,21 +121,22 @@ class ExternalObjectDirectoryRepositoryTest extends PostgresIntegrationBase {
                 getCurrentDateTimeWithHoursBefore(setupArmHoursBeforeCurrentTime),
                 Limit.of(100_000));
 
-        // assert the logic
+        // then
         assertExpectedResults(results, entitiesToBeMarkedWithMediaOrAnnotationOutsideOfArmHours,
                               entitiesToBeMarkedWithMediaOrAnnotationOutsideOfArmHours.size());
     }
 
     @Test
-    void testGetDirectoryIfAnnotationArmDateAndUnstructuredDateWithNoRecordsFoundDueToArmDateBeingAcceptable() throws Exception {
+    void findIdsIn2StorageLocationsBeforeTime_returnsExpectedResults_whenAnnotationArmDateAndUnstructuredDateWithNoRecordsFoundDueToArmDateBeingAcceptable()
+        throws Exception {
 
         int setupArmHoursBeforeCurrentTime = 24;
         int setupUnstructuredWeeksBeforeCurrentTime = 4;
 
-        // setup the test data
+        // given
         generateDataWithAnnotationForUnstructured(setupArmHoursBeforeCurrentTime, setupUnstructuredWeeksBeforeCurrentTime);
 
-        // exercise the logic
+        // when
         List<Integer> results = externalObjectDirectoryRepository
             .findIdsIn2StorageLocationsBeforeTime(
                 EodHelper.storedStatus(), EodHelper.storedStatus(),
@@ -150,21 +145,21 @@ class ExternalObjectDirectoryRepositoryTest extends PostgresIntegrationBase {
                 getCurrentDateTimeWithHoursBefore(setupArmHoursBeforeCurrentTime + 1),
                 Limit.of(100_000));
 
-        // assert the logic
+        // then
         assertTrue(results.isEmpty());
     }
 
     @Test
-    void testGetDirectoryIfMediaDateNotBeyondThreshold() throws Exception {
+    void findIdsIn2StorageLocationsBeforeTime_returnsEmptyResults_whenMediaDateNotBeyondThreshold() throws Exception {
 
         int setupHoursBeforeCurrentTime = 22;
 
-        // setup the test data
+        // given
         generateDataWithMediaForInbound(setupHoursBeforeCurrentTime);
 
         int hourDurationBeyondHours = 24; // which no records are
 
-        // exercise the logic
+        // when
         List<Integer> results = externalObjectDirectoryRepository
             .findIdsIn2StorageLocationsBeforeTime(
                 EodHelper.storedStatus(), EodHelper.storedStatus(),
@@ -173,13 +168,13 @@ class ExternalObjectDirectoryRepositoryTest extends PostgresIntegrationBase {
                 ExternalObjectDirectoryQueryTypeEnum.MEDIA_QUERY.getIndex(),
                 Limit.of(100_000));
 
-        // assert the logic
+        // then
         assertTrue(results.isEmpty());
     }
 
     @Test
-    void testFindStoredInInboundAndUnstructuredByMediaId() throws Exception {
-        // Setup
+    void findStoredInInboundAndUnstructuredByMediaId_returnsExpectedResults() throws Exception {
+        // given
         int hoursBeforeCurrentTime = 24;
         generateDataWithMediaForInbound(hoursBeforeCurrentTime);
 
@@ -192,11 +187,11 @@ class ExternalObjectDirectoryRepositoryTest extends PostgresIntegrationBase {
             .findFirst()
             .orElseThrow(() -> new AssertionError("No suitable test entity found"));
 
-        // Exercise
+        // when
         List<ExternalObjectDirectoryEntity> result = externalObjectDirectoryRepository.findStoredInInboundAndUnstructuredByMediaId(
             testEntity.getMedia().getId());
 
-        // Verify
+        // then
         assertFalse(result.isEmpty(), "Result should not be empty");
         assertTrue(result.stream().allMatch(e -> e.getMedia().getId().equals(testEntity.getMedia().getId())),
                    "All results should have the correct media ID");
@@ -208,7 +203,7 @@ class ExternalObjectDirectoryRepositoryTest extends PostgresIntegrationBase {
     }
 
     @Test
-    void testFindStoredInInboundAndUnstructuredByTranscriptionId() throws Exception {
+    void findStoredInInboundAndUnstructuredByTranscriptionId_returnsExpectedResults() throws Exception {
         // Setup
         int hoursBeforeCurrentTime = 24;
         generateDataWithAnnotationForInbound(hoursBeforeCurrentTime);
@@ -235,6 +230,120 @@ class ExternalObjectDirectoryRepositoryTest extends PostgresIntegrationBase {
         assertTrue(result.stream().allMatch(e -> Objects.equals(e.getExternalLocationType().getId(), ExternalLocationTypeEnum.INBOUND.getId())
                        || Objects.equals(e.getExternalLocationType().getId(), ExternalLocationTypeEnum.UNSTRUCTURED.getId())),
                    "All results should have either INBOUND or UNSTRUCTURED location type");
+    }
+
+    @Test
+    void findFileSize_returnsExpectedResults_withMedia() throws InvocationTargetException, NoSuchMethodException, IllegalAccessException {
+
+        // given
+        List<ExternalObjectDirectoryEntity> eods = externalObjectDirectoryStub.generateWithStatusAndMediaLocation(
+            ExternalLocationTypeEnum.INBOUND, STORED, 1, Optional.empty());
+
+        ExternalObjectDirectoryEntity eod = eods.getFirst();
+
+        // when
+        Long fileSize = externalObjectDirectoryRepository.findFileSize(eod.getId());
+
+        // then
+        assertEquals(1000L, fileSize);
+    }
+
+    @Test
+    void findFileSize_returnsExpectedResults_withAnnotationDocument() throws InvocationTargetException, NoSuchMethodException, IllegalAccessException {
+
+        // given
+        List<ExternalObjectDirectoryEntity> eods = externalObjectDirectoryStub.generateWithStatusAndAnnotationAndLocation(
+            ExternalLocationTypeEnum.INBOUND, STORED, 1, Optional.empty());
+
+        ExternalObjectDirectoryEntity eod = eods.getFirst();
+
+        // when
+        Long fileSize = externalObjectDirectoryRepository.findFileSize(eod.getId());
+
+        // then
+        assertEquals(123L, fileSize);
+    }
+
+    @Test
+    void findFileSize_returnsExpectedResults_withTranscriptionDocument() throws InvocationTargetException, NoSuchMethodException, IllegalAccessException {
+
+        // given
+        List<ExternalObjectDirectoryEntity> eods = externalObjectDirectoryStub.generateWithStatusAndTranscriptionAndLocation(
+            ExternalLocationTypeEnum.INBOUND, STORED, 1, Optional.empty());
+
+        ExternalObjectDirectoryEntity eod = eods.getFirst();
+
+        // when
+        Long fileSize = externalObjectDirectoryRepository.findFileSize(eod.getId());
+
+        // then
+        assertEquals(100L, fileSize);
+    }
+
+    @Test
+    void findAllByStatusAndDataIngestionTsBetweenAndLimit_returnsExpectedResults()
+        throws InvocationTargetException, NoSuchMethodException, IllegalAccessException {
+        // given
+        OffsetDateTime now = currentTimeHelper.currentOffsetDateTime();
+        OffsetDateTime pastCurrentDateTime = now.minusHours(30);
+
+        List<ExternalObjectDirectoryEntity> externalObjectDirectoryEntities
+            = externalObjectDirectoryStub.generateWithStatusAndMediaLocation(
+            ExternalLocationTypeEnum.ARM, ARM_RPO_PENDING, 20, Optional.of(pastCurrentDateTime));
+
+        OffsetDateTime ingestionStartDateTime = currentTimeHelper.currentOffsetDateTime().minusHours(30);
+        externalObjectDirectoryEntities.forEach(eod -> {
+            if (eod.getId() % 2 == 0 && (eod.getId() % 3 != 0)) {
+                // within the time range
+                eod.setCreatedDateTime(ingestionStartDateTime);
+                eod.setDataIngestionTs(currentTimeHelper.currentOffsetDateTime().minusHours(26));
+            } else if (eod.getId() % 3 == 0) {
+                // before the time range
+                eod.setCreatedDateTime(currentTimeHelper.currentOffsetDateTime().minusHours(40));
+                eod.setDataIngestionTs(currentTimeHelper.currentOffsetDateTime().minusHours(31));
+            } else {
+                // after the time range
+                eod.setCreatedDateTime(currentTimeHelper.currentOffsetDateTime().minusHours(15));
+                eod.setDataIngestionTs(currentTimeHelper.currentOffsetDateTime().minusHours(10));
+            }
+        });
+        dartsPersistence.saveAll(externalObjectDirectoryEntities);
+        ingestionEndDateTime = currentTimeHelper.currentOffsetDateTime().minusHours(24);
+
+        // when
+        var results = externalObjectDirectoryRepository.findAllByStatusAndDataIngestionTsBetweenAndLimit(
+            EodHelper.armRpoPendingStatus(), ingestionStartDateTime, ingestionEndDateTime,
+            Limit.of(20));
+
+        // then
+        assertEquals(7, results.size());
+        results.forEach(eod -> {
+            assertTrue(eod.getDataIngestionTs().isAfter(ingestionStartDateTime));
+            assertTrue(eod.getDataIngestionTs().isBefore(ingestionEndDateTime));
+        });
+
+    }
+
+    @Test
+    void updateEodByIdAndStatus_updatesStatusAndLastModifiedBy() throws InvocationTargetException, NoSuchMethodException, IllegalAccessException {
+        // given
+        OffsetDateTime now = currentTimeHelper.currentOffsetDateTime();
+        var user = externalObjectDirectoryStub.getUserAccountStub().getIntegrationTestUserAccountEntity();
+
+        List<ExternalObjectDirectoryEntity> externalObjectDirectoryEntities
+            = externalObjectDirectoryStub.generateWithStatusAndMediaLocation(
+            ExternalLocationTypeEnum.ARM, ARM_PROCESSING_RESPONSE_FILES, 20, Optional.of(now));
+        List<Integer> eodsIds = externalObjectDirectoryEntities.stream().map(ExternalObjectDirectoryEntity::getId).toList();
+
+        // when
+        externalObjectDirectoryRepository.updateEodByIdAndStatus(eodsIds, EodHelper.armDropZoneStatus(), EodHelper.armProcessingResponseFilesStatus(), user);
+
+        // then
+        List<ExternalObjectDirectoryEntity> updatedEods = externalObjectDirectoryRepository.findAllById(eodsIds);
+        updatedEods.forEach(eod -> {
+            assertEquals(EodHelper.armDropZoneStatus(), eod.getStatus());
+            assertEquals(user.getId(), eod.getLastModifiedBy().getId());
+        });
     }
 
     private void assertExpectedResults(List<Integer> actualResults, List<ExternalObjectDirectoryEntity> expectedResults, int resultCount) {
@@ -299,10 +408,8 @@ class ExternalObjectDirectoryRepositoryTest extends PostgresIntegrationBase {
 
         OffsetDateTime lastModifiedBeforeCurrentTimeForArm = currentTimeHelper.currentOffsetDateTime().minusHours(hoursBeforeCurrentTimeForArm);
 
-        OffsetDateTime lastModifiedBeforeCurrentTimeForUnstructured = currentTimeHelper.currentOffsetDateTime().minus(
-            weeksBeforeCurrentTimeForUnstructured,
-            ChronoUnit.WEEKS
-        );
+        OffsetDateTime lastModifiedBeforeCurrentTimeForUnstructured = currentTimeHelper.currentOffsetDateTime().minusWeeks(
+            weeksBeforeCurrentTimeForUnstructured);
 
         OffsetDateTime lastModifiedNotBeforeThreshold = currentTimeHelper.currentOffsetDateTime().minusHours(1);
 
@@ -375,94 +482,5 @@ class ExternalObjectDirectoryRepositoryTest extends PostgresIntegrationBase {
         assertEquals(expectedRecords, externalObjectDirectoryRepository.findAll().size());
     }
 
-    @Test
-    void findFileSizeForMedia() throws InvocationTargetException, NoSuchMethodException, IllegalAccessException {
 
-        // given
-        List<ExternalObjectDirectoryEntity> eods = externalObjectDirectoryStub.generateWithStatusAndMediaLocation(
-            ExternalLocationTypeEnum.INBOUND, STORED, 1, Optional.empty());
-
-        ExternalObjectDirectoryEntity eod = eods.getFirst();
-
-        // when
-        Long fileSize = externalObjectDirectoryRepository.findFileSize(eod.getId());
-
-        // then
-        assertEquals(1000L, fileSize);
-    }
-
-    @Test
-    void findFileSizeForAnnotationDocument() throws InvocationTargetException, NoSuchMethodException, IllegalAccessException {
-
-        // given
-        List<ExternalObjectDirectoryEntity> eods = externalObjectDirectoryStub.generateWithStatusAndAnnotationAndLocation(
-            ExternalLocationTypeEnum.INBOUND, STORED, 1, Optional.empty());
-
-        ExternalObjectDirectoryEntity eod = eods.getFirst();
-
-        // when
-        Long fileSize = externalObjectDirectoryRepository.findFileSize(eod.getId());
-
-        // then
-        assertEquals(123L, fileSize);
-    }
-
-    @Test
-    void findFileSizeForTranscriptionDocument() throws InvocationTargetException, NoSuchMethodException, IllegalAccessException {
-
-        // given
-        List<ExternalObjectDirectoryEntity> eods = externalObjectDirectoryStub.generateWithStatusAndTranscriptionAndLocation(
-            ExternalLocationTypeEnum.INBOUND, STORED, 1, Optional.empty());
-
-        ExternalObjectDirectoryEntity eod = eods.getFirst();
-
-        // when
-        Long fileSize = externalObjectDirectoryRepository.findFileSize(eod.getId());
-
-        // then
-        assertEquals(100L, fileSize);
-    }
-
-    @Test
-    void findAllByStatusAndDataIngestionTsBetweenAndLimit() throws InvocationTargetException, NoSuchMethodException, IllegalAccessException {
-        // given
-        OffsetDateTime now = currentTimeHelper.currentOffsetDateTime();
-        OffsetDateTime pastCurrentDateTime = now.minusHours(30);
-
-        List<ExternalObjectDirectoryEntity> externalObjectDirectoryEntities
-            = externalObjectDirectoryStub.generateWithStatusAndMediaLocation(
-            ExternalLocationTypeEnum.ARM, ARM_RPO_PENDING, 20, Optional.of(pastCurrentDateTime));
-
-        OffsetDateTime ingestionStartDateTime = currentTimeHelper.currentOffsetDateTime().minusHours(30);
-        externalObjectDirectoryEntities.forEach(eod -> {
-            if (eod.getId() % 2 == 0 && (eod.getId() % 3 != 0)) {
-                // within the time range
-                eod.setCreatedDateTime(ingestionStartDateTime);
-                eod.setDataIngestionTs(currentTimeHelper.currentOffsetDateTime().minusHours(26));
-            } else if (eod.getId() % 3 == 0) {
-                // before the time range
-                eod.setCreatedDateTime(currentTimeHelper.currentOffsetDateTime().minusHours(40));
-                eod.setDataIngestionTs(currentTimeHelper.currentOffsetDateTime().minusHours(31));
-            } else {
-                // after the time range
-                eod.setCreatedDateTime(currentTimeHelper.currentOffsetDateTime().minusHours(15));
-                eod.setDataIngestionTs(currentTimeHelper.currentOffsetDateTime().minusHours(10));
-            }
-        });
-        dartsPersistence.saveAll(externalObjectDirectoryEntities);
-
-        // when
-        ingestionEndDateTime = currentTimeHelper.currentOffsetDateTime().minusHours(24);
-        var results = externalObjectDirectoryRepository.findAllByStatusAndDataIngestionTsBetweenAndLimit(
-            EodHelper.armRpoPendingStatus(), ingestionStartDateTime, ingestionEndDateTime,
-            Limit.of(20));
-
-        // then
-        assertEquals(7, results.size());
-        results.forEach(eod -> {
-            assertTrue(eod.getDataIngestionTs().isAfter(ingestionStartDateTime));
-            assertTrue(eod.getDataIngestionTs().isBefore(ingestionEndDateTime));
-        });
-
-    }
 }

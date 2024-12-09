@@ -56,7 +56,7 @@ public class DataStoreToArmHelper {
 
 
     public List<Integer> getEodEntitiesToSendToArm(ExternalLocationTypeEntity sourceLocation,
-                                                                         ExternalLocationTypeEntity armLocation, int maxResultSize) {
+                                                   ExternalLocationTypeEntity armLocation, int maxResultSize) {
         ObjectRecordStatusEntity armRawStatusFailed = objectRecordStatusRepository.getReferenceById(ARM_RAW_DATA_FAILED.getId());
         ObjectRecordStatusEntity armManifestFailed = objectRecordStatusRepository.getReferenceById(ARM_MANIFEST_FAILED.getId());
 
@@ -292,5 +292,14 @@ public class DataStoreToArmHelper {
 
     public Long getFileSize(int externalObjectDirectoryId) {
         return externalObjectDirectoryRepository.findFileSize(externalObjectDirectoryId);
+    }
+
+
+    public void updateEodByIdAndStatus(List<Integer> eodsForTransfer, ObjectRecordStatusEntity oldStatus,
+                                       ObjectRecordStatusEntity newStatus, UserAccountEntity userAccount) {
+        if (nonNull(eodsForTransfer) && !eodsForTransfer.isEmpty()) {
+            externalObjectDirectoryRepository.updateEodByIdAndStatus(eodsForTransfer, newStatus, oldStatus, userAccount);
+            log.error("Updated eods from {} to {}", oldStatus.getDescription(), newStatus.getDescription());
+        }
     }
 }
