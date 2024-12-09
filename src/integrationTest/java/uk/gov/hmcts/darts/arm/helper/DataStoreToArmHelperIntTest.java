@@ -160,14 +160,14 @@ class DataStoreToArmHelperIntTest extends IntegrationBase {
     }
 
     @Test
-    void getEodEntitiesToSendToArm_returnsEmptyResult() {
+    void getEodEntitiesToSendToArm_returnsExpectedResults() {
         ExternalLocationTypeEntity sourceLocation = externalObjectDirectoryStub.getLocation(DETS);
         ExternalLocationTypeEntity armLocation = externalObjectDirectoryStub.getLocation(ARM);
 
         List<Integer> result = dataStoreToArmHelper.getEodEntitiesToSendToArm(sourceLocation, armLocation, 5);
 
         assertNotNull(result);
-        assertTrue(result.isEmpty());
+        assertEquals(1, result.size());
     }
 
     @Test
