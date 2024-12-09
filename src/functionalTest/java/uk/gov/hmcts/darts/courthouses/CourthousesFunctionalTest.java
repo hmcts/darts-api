@@ -178,7 +178,7 @@ class CourthousesFunctionalTest extends FunctionalTest {
             .baseUri(getUri(ADMIN_COURTHOUSES_URI))
             .body("""
                           {
-                              "courthouse_name": "func-swansea",
+                              "courthouse_name": "FUNC-SWANSEA",
                               "display_name": "Swansea Functional Test Courthouse"
                           }
                       """)

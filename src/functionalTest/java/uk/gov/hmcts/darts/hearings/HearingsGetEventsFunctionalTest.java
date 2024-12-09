@@ -28,7 +28,7 @@ class HearingsGetEventsFunctionalTest extends FunctionalTest {
 
     @Test
     void success() {
-        String courtroomName = "func-swansea-room-" + randomAlphanumeric(7);
+        String courtroomName = "FUNC-SWANSEA-ROOM-" + randomAlphanumeric(7);
 
         createCourtroomAndCourthouse(COURTHOUSE, courtroomName);
 

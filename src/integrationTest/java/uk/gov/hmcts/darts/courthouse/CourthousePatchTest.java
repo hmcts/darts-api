@@ -40,7 +40,7 @@ class CourthousePatchTest extends IntegrationBase {
 
         var mvcResult = mockMvc.perform(
                 patch(ENDPOINT + courthouse.getId().toString())
-                    .content(courthouseNamePatch("some-new-courthouse-name"))
+                    .content(courthouseNamePatch("SOME-NEW-COURTHOUSE-NAME"))
                     .contentType("application/json"))
             .andExpect(status().isOk())
             .andReturn();
@@ -111,6 +111,18 @@ class CourthousePatchTest extends IntegrationBase {
                     .contentType("application/json"))
             .andExpect(status().isForbidden())
             .andReturn();
+    }
+
+    @Test
+    void updateCourthouse_shouldReturnBadRequest_whenNameIsLowercase() throws Exception {
+        given.anAuthenticatedUserWithGlobalAccessAndRole(SUPER_ADMIN);
+        var courthouse = dartsDatabase.save(someMinimalCourthouse());
+
+        mockMvc.perform(
+                patch(ENDPOINT + courthouse.getId().toString())
+                    .content(courthouseNamePatch("lowercase-name"))
+                    .contentType("application/json"))
+            .andExpect(status().isBadRequest());
     }
 
     private String regionPatch(Integer regionId) {

@@ -40,7 +40,7 @@ import static org.apache.commons.lang3.RandomStringUtils.randomAlphanumeric;
 @SuppressWarnings("PMD.TestClassWithoutTestCases")
 public class FunctionalTest {
 
-    protected static final String COURTHOUSE_SWANSEA = "func-swansea";
+    protected static final String COURTHOUSE_SWANSEA = "FUNC-SWANSEA";
 
     @Autowired
     private AccessTokenClient externalAccessTokenClient;
@@ -113,7 +113,7 @@ public class FunctionalTest {
     }
 
     protected static String randomCaseNumber() {
-        return "func-case-" + randomAlphanumeric(7);
+        return "FUNC-CASE-" + randomAlphanumeric(7);
     }
 
     protected void createCourtroomAndCourthouse(String courthouseName, String courtroomName) {

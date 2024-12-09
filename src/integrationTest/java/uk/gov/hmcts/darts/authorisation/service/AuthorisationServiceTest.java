@@ -149,7 +149,7 @@ class AuthorisationServiceTest extends IntegrationBase {
         SecurityGroupRepository securityGroupRepository = dartsDatabase.getSecurityGroupRepository();
 
         SecurityGroupEntity judgesSecurityGroup = securityGroupRepository.getReferenceById(TEST_JUDGE_GROUP_ID);
-        var courthouseEntity = dartsDatabase.createCourthouseUnlessExists("func-courthouse-auth-test");
+        var courthouseEntity = dartsDatabase.createCourthouseUnlessExists("FUNC-courthouse-auth-test");
         addCourthouseToSecurityGroup(courthouseEntity, judgesSecurityGroup.getId());
 
         UserState judgeUserState = authorisationService.getAuthorisation(TEST_JUDGE_EMAIL).orElseThrow();
@@ -171,7 +171,7 @@ class AuthorisationServiceTest extends IntegrationBase {
         SecurityGroupRepository securityGroupRepository = dartsDatabase.getSecurityGroupRepository();
 
         SecurityGroupEntity judgesSecurityGroup = securityGroupRepository.getReferenceById(TEST_JUDGE_GROUP_ID);
-        var courthouseEntity = dartsDatabase.createCourthouseUnlessExists("func-courthouse-auth-test-global");
+        var courthouseEntity = dartsDatabase.createCourthouseUnlessExists("FUNC-courthouse-auth-test-global");
         addCourthouseToSecurityGroup(courthouseEntity, judgesSecurityGroup.getId());
 
         UserState judgeUserState = authorisationService.getAuthorisation(TEST_JUDGE_GLOBAL_EMAIL).orElseThrow();

@@ -59,9 +59,9 @@ class DailyListPostControllerTest extends IntegrationBase {
 
         superAdminUserStub.givenUserIsAuthorised(mockUserIdentity);
 
-        String courthouseName = "func-swansea-house-" + randomAlphanumeric(7);
-        String uniqueId = "func-unique-id-" + randomAlphanumeric(7);
-        String messageId = "func-unique-id-" + randomAlphanumeric(7);
+        String courthouseName = "FUNC-SWANSEA-HOUSE-" + randomAlphanumeric(7);
+        String uniqueId = "FUNC-unique-id-" + randomAlphanumeric(7);
+        String messageId = "FUNC-unique-id-" + randomAlphanumeric(7);
 
         final String jsonPostRequest = getContentsFromFile("tests/DailyListTest/dailyListAddDailyListEndpoint/requestBody.json");
 
@@ -89,9 +89,9 @@ class DailyListPostControllerTest extends IntegrationBase {
 
         superAdminUserStub.givenUserIsAuthorised(mockUserIdentity);
 
-        String courthouseName = "func-swansea-house-" + randomAlphanumeric(7);
-        String uniqueId = "func-unique-id-" + randomAlphanumeric(7);
-        String messageId = "func-unique-id-" + randomAlphanumeric(7);
+        String courthouseName = "FUNC-SWANSEA-HOUSE-" + randomAlphanumeric(7);
+        String uniqueId = "FUNC-unique-id-" + randomAlphanumeric(7);
+        String messageId = "FUNC-unique-id-" + randomAlphanumeric(7);
 
         PostDailyListRequest request = new PostDailyListRequest();
         request.setSourceSystem("CPP");
@@ -118,9 +118,9 @@ class DailyListPostControllerTest extends IntegrationBase {
 
         superAdminUserStub.givenUserIsAuthorised(mockUserIdentity);
 
-        String courthouseName = "func-swansea-house-" + randomAlphanumeric(7);
-        String uniqueId = "func-unique-id-" + randomAlphanumeric(7);
-        String messageId = "func-unique-id-" + randomAlphanumeric(7);
+        String courthouseName = "FUNC-SWANSEA-HOUSE-" + randomAlphanumeric(7);
+        String uniqueId = "FUNC-unique-id-" + randomAlphanumeric(7);
+        String messageId = "FUNC-unique-id-" + randomAlphanumeric(7);
 
         final String expectedResponse = "{\"type\":\"DAILYLIST_105\",\"title\":\"Invalid source system. Should be CPP or XHB.\",\"status\":400}";
         final String jsonPostRequest = getContentsFromFile("tests/DailyListTest/dailyListAddDailyListEndpoint/requestBody.json");
@@ -153,9 +153,9 @@ class DailyListPostControllerTest extends IntegrationBase {
 
         superAdminUserStub.givenUserIsAuthorised(mockUserIdentity);
 
-        String courthouseName = "func-swansea-house-" + randomAlphanumeric(7);
-        String uniqueId = "func-unique-id-" + randomAlphanumeric(7);
-        String messageId = "func-unique-id-" + randomAlphanumeric(7);
+        String courthouseName = "FUNC-SWANSEA-HOUSE-" + randomAlphanumeric(7);
+        String uniqueId = "FUNC-unique-id-" + randomAlphanumeric(7);
+        String messageId = "FUNC-unique-id-" + randomAlphanumeric(7);
 
         final String expectedResponse = getExpectedResponse();
 
@@ -185,9 +185,9 @@ class DailyListPostControllerTest extends IntegrationBase {
 
         superAdminUserStub.givenUserIsAuthorised(mockUserIdentity);
 
-        String courthouseName = "func-swansea-house-" + randomAlphanumeric(7);
-        String uniqueId = "func-unique-id-" + randomAlphanumeric(7);
-        String messageId = "func-unique-id-" + randomAlphanumeric(7);
+        String courthouseName = "FUNC-SWANSEA-HOUSE-" + randomAlphanumeric(7);
+        String uniqueId = "FUNC-unique-id-" + randomAlphanumeric(7);
+        String messageId = "FUNC-unique-id-" + randomAlphanumeric(7);
 
         final String expectedResponse = "{\"type\":\"DAILYLIST_105\",\"title\":\"Invalid source system. Should be CPP or XHB.\",\"status\":400}";
 
@@ -221,9 +221,9 @@ class DailyListPostControllerTest extends IntegrationBase {
 
         superAdminUserStub.givenUserIsAuthorised(mockUserIdentity);
 
-        String courthouseName = "func-swansea-house-" + randomAlphanumeric(7);
-        String uniqueId = "func-unique-id-" + randomAlphanumeric(7);
-        String messageId = "func-unique-id-" + randomAlphanumeric(7);
+        String courthouseName = "FUNC-SWANSEA-HOUSE-" + randomAlphanumeric(7);
+        String uniqueId = "FUNC-unique-id-" + randomAlphanumeric(7);
+        String messageId = "FUNC-unique-id-" + randomAlphanumeric(7);
 
         final String jsonPostRequest = getContentsFromFile("tests/DailyListTest/dailyListAddDailyListEndpoint/requestBody.json");
 
@@ -252,7 +252,7 @@ class DailyListPostControllerTest extends IntegrationBase {
 
         superAdminUserStub.givenUserIsAuthorised(mockUserIdentity);
 
-        String courthouseName = "func-swansea-house-" + randomAlphanumeric(7);
+        String courthouseName = "FUNC-SWANSEA-HOUSE-" + randomAlphanumeric(7);
 
         MockHttpServletRequestBuilder requestBuilder = post(DAILYLIST_URL_RUN)
            .queryParam("listing_courthouse", courthouseName)
@@ -268,7 +268,7 @@ class DailyListPostControllerTest extends IntegrationBase {
     void callDailylistRunFailure() throws Exception {
         superAdminUserStub.givenUserIsAuthorised(mockUserIdentity, SecurityRoleEnum.DAR_PC);
 
-        String courthouseName = "func-swansea-house-" + randomAlphanumeric(7);
+        String courthouseName = "FUNC-SWANSEA-HOUSE-" + randomAlphanumeric(7);
 
         MockHttpServletRequestBuilder requestBuilder = post(DAILYLIST_URL_RUN)
             .queryParam("listing_courthouse", courthouseName)
