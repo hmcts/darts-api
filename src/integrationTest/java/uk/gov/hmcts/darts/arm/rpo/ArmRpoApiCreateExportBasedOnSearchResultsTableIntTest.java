@@ -15,12 +15,16 @@ import uk.gov.hmcts.darts.testutils.PostgresIntegrationBase;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
 class ArmRpoApiCreateExportBasedOnSearchResultsTableIntTest extends PostgresIntegrationBase {
+
+    private static final String PRODUCTION_NAME = "DARTS_RPO_2024-08-13";
+
     @MockBean
     private ArmRpoClient armRpoClient;
 
@@ -29,7 +33,7 @@ class ArmRpoApiCreateExportBasedOnSearchResultsTableIntTest extends PostgresInte
 
 
     @Test
-    void createExportBasedOnSearchResultsTableSuccess() {
+    void createExportBasedOnSearchResultsTable_ReturnsTrue() {
         // given
         CreateExportBasedOnSearchResultsTableResponse response = new CreateExportBasedOnSearchResultsTableResponse();
         response.setStatus(200);
@@ -43,7 +47,6 @@ class ArmRpoApiCreateExportBasedOnSearchResultsTableIntTest extends PostgresInte
         armRpoExecutionDetailEntity.setLastModifiedBy(userAccount);
         armRpoExecutionDetailEntity.setSearchId("searchId");
         armRpoExecutionDetailEntity.setSearchItemCount(6);
-        armRpoExecutionDetailEntity.setProductionId("productionId");
         armRpoExecutionDetailEntity.setStorageAccountId("storageAccountId");
         var armRpoExecutionDetail = dartsPersistence.save(armRpoExecutionDetailEntity);
 
@@ -51,7 +54,7 @@ class ArmRpoApiCreateExportBasedOnSearchResultsTableIntTest extends PostgresInte
 
         // when
         boolean result = armRpoApi.createExportBasedOnSearchResultsTable(
-            bearerAuth, armRpoExecutionDetail.getId(), createHeaderColumns(), userAccount);
+            bearerAuth, armRpoExecutionDetail.getId(), createHeaderColumns(), PRODUCTION_NAME, userAccount);
 
         // then
         assertTrue(result);
@@ -62,6 +65,38 @@ class ArmRpoApiCreateExportBasedOnSearchResultsTableIntTest extends PostgresInte
 
     }
 
+    @Test
+    void createExportBasedOnSearchResultsTable_ReturnsFalse_WhenInProgress() {
+        // given
+        CreateExportBasedOnSearchResultsTableResponse response = new CreateExportBasedOnSearchResultsTableResponse();
+        response.setStatus(400);
+        response.setIsError(false);
+        response.setResponseStatus(2);
+        when(armRpoClient.createExportBasedOnSearchResultsTable(anyString(), any())).thenReturn(response);
+
+        UserAccountEntity userAccount = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
+        ArmRpoExecutionDetailEntity armRpoExecutionDetailEntity = new ArmRpoExecutionDetailEntity();
+        armRpoExecutionDetailEntity.setCreatedBy(userAccount);
+        armRpoExecutionDetailEntity.setLastModifiedBy(userAccount);
+        armRpoExecutionDetailEntity.setSearchId("searchId");
+        armRpoExecutionDetailEntity.setSearchItemCount(6);
+        armRpoExecutionDetailEntity.setStorageAccountId("storageAccountId");
+        var armRpoExecutionDetail = dartsPersistence.save(armRpoExecutionDetailEntity);
+
+        var bearerAuth = "Bearer some-token";
+
+        // when
+        boolean result = armRpoApi.createExportBasedOnSearchResultsTable(
+            bearerAuth, armRpoExecutionDetail.getId(), createHeaderColumns(), PRODUCTION_NAME, userAccount);
+
+        // then
+        assertFalse(result);
+
+        var armRpoExecutionDetailEntityUpdated = dartsPersistence.getArmRpoExecutionDetailRepository().findById(armRpoExecutionDetail.getId()).orElseThrow();
+        assertEquals(ArmRpoStateEnum.CREATE_EXPORT_BASED_ON_SEARCH_RESULTS_TABLE.getId(), armRpoExecutionDetailEntityUpdated.getArmRpoState().getId());
+        assertEquals(ArmRpoStatusEnum.IN_PROGRESS.getId(), armRpoExecutionDetailEntityUpdated.getArmRpoStatus().getId());
+
+    }
 
     private List<MasterIndexFieldByRecordClassSchema> createHeaderColumns() {
         return List.of(
