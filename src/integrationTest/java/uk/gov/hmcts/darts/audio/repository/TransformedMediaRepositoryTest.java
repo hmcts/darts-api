@@ -13,8 +13,6 @@ import uk.gov.hmcts.darts.testutils.stubs.TransformedMediaStub;
 import java.util.List;
 import java.util.Locale;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
 class TransformedMediaRepositoryTest extends PostgresIntegrationBase {
 
     @Autowired
@@ -326,26 +324,5 @@ class TransformedMediaRepositoryTest extends PostgresIntegrationBase {
                                                                   .getCreatedBy().getCreatedDateTime(), generatedMediaEntities.get(1).getCreatedDateTime());
         Assertions.assertEquals(1, transformedMediaEntityList.size());
         Assertions.assertEquals(transformedMediaEntityFind.getId(), transformedMediaEntityList.get(0).getId());
-    }
-
-
-    @Test
-    void updateCreatedByLastModifiedBy_shouldUpdateCreatedByAndLastModified() throws Exception {
-        TransformedMediaEntity transformedMediaEntityFind = generatedMediaEntities.get(1);
-        assertThat(transformedMediaEntityFind.getCreatedBy().getId()).isNotEqualTo(1);
-        assertThat(transformedMediaEntityFind.getLastModifiedBy().getId()).isNotEqualTo(2);
-        dartsDatabase.getTransactionalUtil().executeInTransaction(
-            () -> {
-                transformedMediaRepository.updateCreatedByLastModifiedBy(transformedMediaEntityFind.getId(), 1, 2);
-                dartsDatabase.getEntityManager().flush();
-                dartsDatabase.getEntityManager().clear();
-            });
-
-        dartsDatabase.getTransactionalUtil()
-            .executeInTransaction(() -> {
-                TransformedMediaEntity newTransformedMediaEntityFind = transformedMediaRepository.findById(transformedMediaEntityFind.getId()).orElseThrow();
-                assertThat(newTransformedMediaEntityFind.getCreatedBy().getId()).isEqualTo(1);
-                assertThat(newTransformedMediaEntityFind.getLastModifiedBy().getId()).isEqualTo(2);
-            });
     }
 }
