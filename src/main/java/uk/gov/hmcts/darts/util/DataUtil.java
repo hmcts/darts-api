@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Optional;
 
 @UtilityClass
+@SuppressWarnings({"HideUtilityClassConstructor"})
 public final class DataUtil {
 
     public static String toUpperCase(String value) {
