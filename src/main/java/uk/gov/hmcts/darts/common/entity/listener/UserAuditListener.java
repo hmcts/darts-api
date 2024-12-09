@@ -3,7 +3,10 @@ package uk.gov.hmcts.darts.common.entity.listener;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
 import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.entity.base.CreatedBy;
@@ -14,11 +17,16 @@ import java.time.OffsetDateTime;
 import java.util.Optional;
 
 @Slf4j
+@NoArgsConstructor
 @AllArgsConstructor
 public class UserAuditListener {
 
-    private final UserIdentity userIdentity;
-    private final Clock clock;
+    @Lazy
+    @Autowired
+    private UserIdentity userIdentity;
+
+    @Autowired
+    private Clock clock;
 
 
     @PrePersist
@@ -47,7 +55,12 @@ public class UserAuditListener {
     }
 
     Optional<UserAccountEntity> getUserAccount() {
-        return Optional.ofNullable(userIdentity.getUserAccount());
+        try {
+            return Optional.ofNullable(userIdentity.getUserAccount());
+        } catch (Exception e) {
+            log.error("Error getting user account", e);
+            return Optional.empty();
+        }
     }
 
 
