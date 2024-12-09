@@ -130,7 +130,8 @@ class ExternalObjectDirectoryRepositoryTest extends PostgresIntegrationBase {
     }
 
     @Test
-    void findIdsIn2StorageLocationsBeforeTime_returnsExpectedResults_whenAnnotationArmDateAndUnstructuredDateWithNoRecordsFoundDueToArmDateBeingAcceptable() throws Exception {
+    void findIdsIn2StorageLocationsBeforeTime_returnsExpectedResults_whenAnnotationArmDateAndUnstructuredDateWithNoRecordsFoundDueToArmDateBeingAcceptable()
+        throws Exception {
 
         int setupArmHoursBeforeCurrentTime = 24;
         int setupUnstructuredWeeksBeforeCurrentTime = 4;
@@ -283,7 +284,8 @@ class ExternalObjectDirectoryRepositoryTest extends PostgresIntegrationBase {
     }
 
     @Test
-    void findAllByStatusAndDataIngestionTsBetweenAndLimit_returnsExpectedResults() throws InvocationTargetException, NoSuchMethodException, IllegalAccessException {
+    void findAllByStatusAndDataIngestionTsBetweenAndLimit_returnsExpectedResults()
+        throws InvocationTargetException, NoSuchMethodException, IllegalAccessException {
         // given
         OffsetDateTime now = currentTimeHelper.currentOffsetDateTime();
         OffsetDateTime pastCurrentDateTime = now.minusHours(30);
