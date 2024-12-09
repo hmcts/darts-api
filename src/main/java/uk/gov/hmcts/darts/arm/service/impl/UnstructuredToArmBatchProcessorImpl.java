@@ -58,7 +58,7 @@ public class UnstructuredToArmBatchProcessorImpl implements UnstructuredToArmBat
 
     private static final int BLOB_ALREADY_EXISTS_STATUS_CODE = 409;
 
-    List<Integer> eodsForTransfer;
+    private List<Integer> eodsForTransfer;
 
     @Override
     @SuppressWarnings({"PMD.AvoidInstantiatingObjectsInLoops", "PMD.CognitiveComplexity", "PMD.CyclomaticComplexity"})

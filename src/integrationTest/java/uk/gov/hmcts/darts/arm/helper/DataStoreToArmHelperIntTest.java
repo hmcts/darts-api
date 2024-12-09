@@ -132,7 +132,7 @@ class DataStoreToArmHelperIntTest extends IntegrationBase {
         externalObjectDirectoryStub.createAndSaveEod(medias.get(1), ARM_DROP_ZONE, ARM);
 
         List<Integer> eodEntitiesToSendToArm = dataStoreToArmHelper.getEodEntitiesToSendToArm(EodHelper.unstructuredLocation(),
-                                                                                                                    EodHelper.armLocation(), 5);
+                                                                                              EodHelper.armLocation(), 5);
         assertEquals(1, eodEntitiesToSendToArm.size());
 
     }
@@ -152,7 +152,7 @@ class DataStoreToArmHelperIntTest extends IntegrationBase {
         dartsDatabase.save(failedTooManyTimesEod);
 
         List<Integer> eodEntitiesToSendToArm = dataStoreToArmHelper.getEodEntitiesToSendToArm(EodHelper.unstructuredLocation(),
-                                                                                                                    EodHelper.armLocation(), 5);
+                                                                                              EodHelper.armLocation(), 5);
         assertEquals(3, eodEntitiesToSendToArm.size());
 
     }
@@ -344,7 +344,7 @@ class DataStoreToArmHelperIntTest extends IntegrationBase {
         List<Integer> eodsIds = externalObjectDirectoryEntities.stream().map(ExternalObjectDirectoryEntity::getId).toList();
 
         // when
-        dataStoreToArmHelper.updateEodByIdAndStatus(externalObjectDirectoryEntities, EodHelper.armIngestionStatus(),
+        dataStoreToArmHelper.updateEodByIdAndStatus(eodsIds, EodHelper.armIngestionStatus(),
                                                     EodHelper.failedArmRawDataStatus(), user);
 
         // then
@@ -366,7 +366,7 @@ class DataStoreToArmHelperIntTest extends IntegrationBase {
         List<Integer> eodsIds = externalObjectDirectoryEntities.stream().map(ExternalObjectDirectoryEntity::getId).toList();
 
         // when
-        dataStoreToArmHelper.updateEodByIdAndStatus(externalObjectDirectoryEntities, EodHelper.armProcessingResponseFilesStatus(),
+        dataStoreToArmHelper.updateEodByIdAndStatus(eodsIds, EodHelper.armProcessingResponseFilesStatus(),
                                                     EodHelper.armDropZoneStatus(), user);
 
         // then
