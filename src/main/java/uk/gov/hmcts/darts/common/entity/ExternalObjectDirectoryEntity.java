@@ -9,6 +9,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
 import lombok.Getter;
@@ -92,6 +93,10 @@ public class ExternalObjectDirectoryEntity extends CreatedModifiedBaseEntity imp
 
     @Column(name = "osr_uuid")
     private Long osrUuid;
+
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "osr_uuid", updatable = false, insertable = false)
+    private ObjectStateRecordEntity objectStateRecordEntity;
 
     @Column(name = "update_retention")
     private boolean updateRetention;
