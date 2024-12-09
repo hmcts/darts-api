@@ -1,6 +1,7 @@
 package uk.gov.hmcts.darts.common.entity.base;
 
 import jakarta.persistence.Column;
+import jakarta.persistence.EntityListeners;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
@@ -9,15 +10,16 @@ import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.envers.NotAudited;
-import org.springframework.data.annotation.CreatedBy;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
+import uk.gov.hmcts.darts.common.entity.listener.UserAuditListener;
 
 import java.time.OffsetDateTime;
 
 @MappedSuperclass
 @Getter
 @Setter
-public class CreatedBaseEntity {
+@EntityListeners(UserAuditListener.class)
+public class CreatedBaseEntity implements CreatedBy {
     @CreationTimestamp
     @Column(name = "created_ts")
     private OffsetDateTime createdDateTime;
@@ -25,7 +27,12 @@ public class CreatedBaseEntity {
     @NotAudited
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "created_by")
-    @CreatedBy
     private UserAccountEntity createdBy;
 
+    public void setCreatedBy(UserAccountEntity userAccount) {
+        this.createdBy = userAccount;
+        this.skipUserAudit = true;//As this was manualy set we should not override it
+    }
+
+    private transient boolean skipUserAudit;
 }
