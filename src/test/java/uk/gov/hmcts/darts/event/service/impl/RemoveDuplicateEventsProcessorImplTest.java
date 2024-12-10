@@ -21,6 +21,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static java.time.ZoneOffset.UTC;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
@@ -67,7 +68,7 @@ class RemoveDuplicateEventsProcessorImplTest {
     void processEvent_noDuplicateEvents_nothingHappens() {
         when(eventRepository.findDuplicateEventIds(any())).thenReturn(List.of());
 
-        removeDuplicateEventsProcessor.processEvent(123);
+        assertThat(removeDuplicateEventsProcessor.processEvent(123)).isFalse();
 
         verify(eventRepository).findDuplicateEventIds(123);
         verifyNoMoreInteractions(eventRepository);
@@ -92,7 +93,8 @@ class RemoveDuplicateEventsProcessorImplTest {
         when(caseManagementRetentionRepository.getIdsForEvents(any()))
             .thenReturn(caseManagementIdsToBeDeleted);
         //Execution
-        removeDuplicateEventsProcessor.processEvent(123);
+        assertThat(removeDuplicateEventsProcessor.processEvent(123)).isTrue();
+
 
         //Verification
         List<EventEntity> toBeDeleted = List.of(duplicateEvent2, duplicateEvent3);
