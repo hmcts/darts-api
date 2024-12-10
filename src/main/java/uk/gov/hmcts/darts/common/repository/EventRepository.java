@@ -156,13 +156,14 @@ public interface EventRepository extends JpaRepository<EventEntity, Integer> {
                         JOIN (                        
                             SELECT e.eventId as eventId, e.messageId as messageId, e.eventText as eventText
                             FROM EventEntity e
-                            WHERE e.eventId IS NOT NULL and e.messageId IS NOT NULL and e.eventId = :eventId and e.createdDateTime >= :minDate
+                            WHERE e.eventId IS NOT NULL and e.messageId IS NOT NULL and e.eventId = :eventId
                             GROUP BY e.eventId, e.messageId, e.eventText
                             HAVING COUNT(e) > 1) e2
                          ON e2.eventId = e3.eventId and e2.messageId = e3.messageId and e2.eventText = e3.eventText
-                         WHERE e3.createdDateTime >= :minDate
+                         WHERE e3.eventId >= :eventId
+                         ORDER BY e3.createdDateTime ASC  
         """)
-    List<EventEntity> findDuplicateEventIds(Integer eventId, OffsetDateTime minDate);
+    List<EventEntity> findDuplicateEventIds(Integer eventId);
 
     interface EventIdAndHearingIds {
 

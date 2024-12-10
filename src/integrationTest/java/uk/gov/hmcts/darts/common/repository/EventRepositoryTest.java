@@ -100,43 +100,18 @@ class EventRepositoryTest extends PostgresIntegrationBase {
         dartsDatabase.save(event3);
         dartsDatabase.save(event4);
         OffsetDateTime createdTime = OffsetDateTime.now().minusDays(3);
-        updateCreatedBy(event1, createdTime);
-        updateCreatedBy(event2, createdTime.plusMinutes(1));
-        updateCreatedBy(event3, createdTime.plusMinutes(2));
+        updateCreatedBy(event3, createdTime);
+        updateCreatedBy(event1, createdTime.plusMinutes(1));
+        updateCreatedBy(event2, createdTime.plusMinutes(2));
         updateCreatedBy(event4, createdTime.plusMinutes(3));
 
-        List<EventEntity> duplicates = eventRepository.findDuplicateEventIds(event1.getEventId(), createdTime.minusDays(1));
+        List<EventEntity> duplicates = eventRepository.findDuplicateEventIds(event1.getEventId());
+
         assertThat(duplicates)
             .hasSize(3)
+            .anyMatch(eventEntity -> event3.getId().equals(eventEntity.getId()))
             .anyMatch(eventEntity -> event1.getId().equals(eventEntity.getId()))
-            .anyMatch(eventEntity -> event2.getId().equals(eventEntity.getId()))
-            .anyMatch(eventEntity -> event3.getId().equals(eventEntity.getId()));
-    }
-
-    @Test
-    void findDuplicateEventIds_createdTsIsOutSideAllowedRange_noDuplicatesShouldBeFound() {
-        final EventEntity event1 = EventTestData.someMinimalEvent();
-        final EventEntity event2 = EventTestData.someMinimalEvent();
-        final EventEntity event3 = EventTestData.someMinimalEvent();
-        final EventEntity event4 = EventTestData.someMinimalEvent(); //Not a duplicate
-        event1.setEventText("eventText");
-        event1.setMessageId("msgId");
-        event1.setEventId(1);
-        makeEventsDuplicate(event1, event2);
-        makeEventsDuplicate(event1, event3);
-        event4.setEventText("Some new text");
-        OffsetDateTime createdTime = OffsetDateTime.now().minusDays(3);
-        dartsDatabase.save(event1);
-        dartsDatabase.save(event2);
-        dartsDatabase.save(event3);
-        dartsDatabase.save(event4);
-        updateCreatedBy(event1, createdTime);
-        updateCreatedBy(event2, createdTime.plusMinutes(1));
-        updateCreatedBy(event3, createdTime.plusMinutes(2));
-        updateCreatedBy(event4, createdTime.plusMinutes(3));
-
-        List<EventEntity> duplicates = eventRepository.findDuplicateEventIds(event1.getEventId(), createdTime.plusDays(3));
-        assertThat(duplicates).isEmpty();
+            .anyMatch(eventEntity -> event2.getId().equals(eventEntity.getId()));
     }
 
     @Test
@@ -161,7 +136,7 @@ class EventRepositoryTest extends PostgresIntegrationBase {
         updateCreatedBy(event3, createdTime.plusMinutes(2));
         updateCreatedBy(event4, createdTime.plusMinutes(3));
 
-        List<EventEntity> duplicates = eventRepository.findDuplicateEventIds(event1.getEventId(), createdTime.minusDays(1));
+        List<EventEntity> duplicates = eventRepository.findDuplicateEventIds(event1.getEventId());
         assertThat(duplicates).isEmpty();
     }
 
@@ -187,7 +162,7 @@ class EventRepositoryTest extends PostgresIntegrationBase {
         updateCreatedBy(event3, createdTime.plusMinutes(2));
         updateCreatedBy(event4, createdTime.plusMinutes(3));
 
-        List<EventEntity> duplicates = eventRepository.findDuplicateEventIds(event1.getEventId(), createdTime.minusDays(1));
+        List<EventEntity> duplicates = eventRepository.findDuplicateEventIds(event1.getEventId());
         assertThat(duplicates).isEmpty();
     }
 
