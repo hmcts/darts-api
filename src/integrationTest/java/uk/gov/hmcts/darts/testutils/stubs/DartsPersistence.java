@@ -6,6 +6,9 @@ import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.darts.audio.entity.MediaRequestEntity;
 import uk.gov.hmcts.darts.common.entity.AnnotationDocumentEntity;
@@ -154,6 +157,7 @@ public class DartsPersistence {
     private final EntityManager entityManager;
     private final CurrentTimeHelper currentTimeHelper;
     private final TransactionalUtil transactionalUtil;
+    private final DartsDatabaseSaveStub dartsDatabaseSaveStub;
 
     @Transactional
     @SuppressWarnings("PMD.AvoidReassigningParameters")
@@ -165,7 +169,7 @@ public class DartsPersistence {
         hearing.setCreatedBy(save(hearing.getCreatedBy()));
         hearing.setLastModifiedBy(save(hearing.getLastModifiedBy()));
         hearing.setJudges(saveJudgeList(hearing.getJudges()));
-        hearing = hearingRepository.save(hearing);
+        hearing = save(hearingRepository, hearing);
 
         saveMediaList(hearing.getMediaList());
         return hearing;
@@ -183,10 +187,25 @@ public class DartsPersistence {
             if (annotationEntity.getHearingList() != null) {
                 annotationEntity.setHearingList(saveHearingEntity(annotationEntity.getHearingList()));
             }
-            return annotationRepository.save(annotationEntity);
+            return save(annotationRepository, annotationEntity);
         } else {
             return entityManager.merge(annotationEntity);
         }
+    }
+
+    private <T> T save(JpaRepository<T, ?> repository, T annotationEntity) {
+        Authentication authentication = null;
+        //Remove the authentication from the context to bypass UserAuditListener.
+        //This will be added back again at the end of the method.
+        if (SecurityContextHolder.getContext().getAuthentication() != null) {
+            authentication = SecurityContextHolder.getContext().getAuthentication();
+            SecurityContextHolder.getContext().setAuthentication(null);
+        }
+        T value = repository.saveAndFlush(annotationEntity);
+        if (authentication != null) {
+            SecurityContextHolder.getContext().setAuthentication(authentication);
+        }
+        return value;
     }
 
     @Transactional
@@ -197,7 +216,7 @@ public class DartsPersistence {
         if (courthouse.getId() == null) {
             courthouse.setCreatedBy(save(courthouse.getCreatedBy()));
             courthouse.setLastModifiedBy(save(courthouse.getLastModifiedBy()));
-            courthouseRepository.save(courthouse);
+            save(courthouseRepository, courthouse);
         } else {
             courthouse = entityManager.merge(courthouse);
         }
@@ -215,7 +234,7 @@ public class DartsPersistence {
                 courtroom.setCourthouse(save(courtroom.getCourthouse()));
             }
             courtroom.setCreatedBy(save(courtroom.getCreatedBy()));
-            return courtroomRepository.save(courtroom);
+            return save(courtroomRepository, courtroom);
         } else {
             return entityManager.merge(courtroom);
         }
@@ -233,7 +252,7 @@ public class DartsPersistence {
             mediaRequest.setCreatedBy(save(mediaRequest.getCreatedBy()));
             mediaRequest.setLastModifiedBy(save(mediaRequest.getLastModifiedBy()));
 
-            return mediaRequestRepository.save(mediaRequest);
+            return save(mediaRequestRepository, mediaRequest);
         } else {
             return entityManager.merge(mediaRequest);
         }
@@ -246,7 +265,7 @@ public class DartsPersistence {
 
         if (mediaLinkedCaseEntity.getId() == null) {
             mediaLinkedCaseEntity.setCourtCase(save(mediaLinkedCaseEntity.getCourtCase()));
-            return mediaLinkedCaseRepository.save(mediaLinkedCaseEntity);
+            return save(mediaLinkedCaseRepository, mediaLinkedCaseEntity);
         } else {
             return entityManager.merge(mediaLinkedCaseEntity);
         }
@@ -259,7 +278,7 @@ public class DartsPersistence {
 
         if (eventHandlerEntity.getId() == null) {
             eventHandlerEntity.setCreatedBy(save(eventHandlerEntity.getCreatedBy()));
-            return eventHandlerRepository.save(eventHandlerEntity);
+            return save(eventHandlerRepository, eventHandlerEntity);
         } else {
             return entityManager.merge(eventHandlerEntity);
         }
@@ -295,7 +314,7 @@ public class DartsPersistence {
                 courtCase.setProsecutorList(saveProsecutorList(courtCase.getProsecutorList()));
             }
 
-            courtCase = caseRepository.save(courtCase);
+            courtCase = save(caseRepository, courtCase);
 
         } else {
             courtCase = entityManager.merge(courtCase);
@@ -317,7 +336,7 @@ public class DartsPersistence {
                 transcriptionDocumentEntity.getAdminActions().forEach(this::save);
             }
 
-            return transcriptionDocumentRepository.save(transcriptionDocumentEntity);
+            return save(transcriptionDocumentRepository, transcriptionDocumentEntity);
         } else {
             return entityManager.merge(transcriptionDocumentEntity);
         }
@@ -326,7 +345,7 @@ public class DartsPersistence {
     @Transactional
     @SuppressWarnings("PMD.AvoidReassigningParameters")
     public ObjectAdminActionEntity save(ObjectAdminActionEntity adminAction) {
-        return objectAdminActionRepository.save(adminAction);
+        return save(objectAdminActionRepository, adminAction);
     }
 
 
@@ -355,7 +374,7 @@ public class DartsPersistence {
 
             eod.setCreatedBy(save(eod.getCreatedBy()));
             eod.setLastModifiedBy(save(eod.getLastModifiedBy()));
-            return externalObjectDirectoryRepository.save(eod);
+            return save(externalObjectDirectoryRepository, eod);
         } else {
             return entityManager.merge(eod);
         }
@@ -370,7 +389,7 @@ public class DartsPersistence {
             defence.setCreatedBy(save(defence.getCreatedBy()));
             defence.setLastModifiedBy(save(defence.getLastModifiedBy()));
             defence.setCourtCase(save(defence.getCourtCase()));
-            return defenceRepository.save(defence);
+            return save(defenceRepository, defence);
         } else {
             return entityManager.merge(defence);
         }
@@ -385,7 +404,7 @@ public class DartsPersistence {
             defendant.setCreatedBy(save(defendant.getCreatedBy()));
             defendant.setLastModifiedBy(save(defendant.getLastModifiedBy()));
             defendant.setCourtCase(save(defendant.getCourtCase()));
-            return defendantRepository.save(defendant);
+            return save(defendantRepository, defendant);
         } else {
             return entityManager.merge(defendant);
         }
@@ -400,7 +419,7 @@ public class DartsPersistence {
             prosecutor.setCreatedBy(save(prosecutor.getCreatedBy()));
             prosecutor.setLastModifiedBy(save(prosecutor.getCreatedBy()));
             prosecutor.setCourtCase(save(prosecutor.getCourtCase()));
-            return prosecutorRepository.save(prosecutor);
+            return save(prosecutorRepository, prosecutor);
         } else {
             return entityManager.merge(prosecutor);
         }
@@ -430,7 +449,7 @@ public class DartsPersistence {
 
             transcription.setCreatedBy(save(transcription.getCreatedBy()));
             transcription.setLastModifiedBy(save(transcription.getLastModifiedBy()));
-            transcription = transcriptionRepository.save(transcription);
+            transcription = save(transcriptionRepository, transcription);
 
         } else {
             transcription = entityManager.merge(transcription);
@@ -456,7 +475,7 @@ public class DartsPersistence {
             workflowEntity.setTranscription(save(workflowEntity.getTranscription()));
             workflowEntity.setWorkflowActor(save(workflowEntity.getWorkflowActor()));
 
-            return transcriptionWorkflowRepository.save(workflowEntity);
+            return save(transcriptionWorkflowRepository, workflowEntity);
         } else {
             return entityManager.merge(workflowEntity);
         }
@@ -471,7 +490,7 @@ public class DartsPersistence {
             event.setCourtroom(save(event.getCourtroom()));
             event.setCreatedBy(save(event.getCreatedBy()));
             event.setLastModifiedBy(save(event.getLastModifiedBy()));
-            return eventRepository.save(event);
+            return save(eventRepository, event);
         } else {
             return entityManager.merge(event);
         }
@@ -485,7 +504,7 @@ public class DartsPersistence {
         if (retentionPolicyType.getId() == null) {
             retentionPolicyType.setLastModifiedBy(save(retentionPolicyType.getLastModifiedBy()));
             retentionPolicyType.setCreatedBy(save(retentionPolicyType.getCreatedBy()));
-            return retentionPolicyTypeRepository.save(retentionPolicyType);
+            return save(retentionPolicyTypeRepository, retentionPolicyType);
         } else {
             return entityManager.merge(retentionPolicyType);
         }
@@ -500,7 +519,7 @@ public class DartsPersistence {
             caseManagementRetention.setCourtCase(save(caseManagementRetention.getCourtCase()));
             caseManagementRetention.setEventEntity(save(caseManagementRetention.getEventEntity()));
             caseManagementRetention.setRetentionPolicyTypeEntity(save(caseManagementRetention.getRetentionPolicyTypeEntity()));
-            return caseManagementRetentionRepository.save(caseManagementRetention);
+            return save(caseManagementRetentionRepository, caseManagementRetention);
         } else {
             return entityManager.merge(caseManagementRetention);
         }
@@ -515,7 +534,7 @@ public class DartsPersistence {
             UserAccountEntity systemUser = userAccountRepository.getReferenceById(0);
             userAccount.setCreatedBy(systemUser);
             userAccount.setLastModifiedBy(systemUser);
-            return userAccountRepository.save(userAccount);
+            return save(userAccountRepository, userAccount);
         } else {
             return entityManager.merge(userAccount);
         }
@@ -531,7 +550,7 @@ public class DartsPersistence {
             annotationDocument.setLastModifiedBy(save(annotationDocument.getLastModifiedBy()));
             annotationDocument.setUploadedBy(save(annotationDocument.getUploadedBy()));
             save(annotationDocument.getAnnotation());
-            return annotationDocumentRepository.save(annotationDocument);
+            return save(annotationDocumentRepository, annotationDocument);
         } else {
             return entityManager.merge(annotationDocument);
         }
@@ -546,7 +565,7 @@ public class DartsPersistence {
             judge.setCreatedBy(save(judge.getCreatedBy()));
             judge.setLastModifiedBy(save(judge.getLastModifiedBy()));
 
-            return judgeRepository.save(judge);
+            return save(judgeRepository, judge);
         } else {
             return entityManager.merge(judge);
         }
@@ -569,7 +588,7 @@ public class DartsPersistence {
             caseDocumentEntity.setCreatedBy(save(caseDocumentEntity.getCreatedBy()));
             caseDocumentEntity.setLastModifiedBy(save(caseDocumentEntity.getLastModifiedBy()));
             caseDocumentEntity.setCourtCase(save(caseDocumentEntity.getCourtCase()));
-            return caseDocumentRepository.save(caseDocumentEntity);
+            return save(caseDocumentRepository, caseDocumentEntity);
         } else {
             return entityManager.merge(caseDocumentEntity);
         }
@@ -589,9 +608,9 @@ public class DartsPersistence {
                 media.setMediaLinkedCaseList(saveLinkedCaseList(media.getMediaLinkedCaseList()));
             }
 
-            media = mediaRepository.save(media);
+            media = save(mediaRepository, media);
         } else {
-            media = mediaRepository.save(media);
+            media = save(mediaRepository, media);
         }
         return media;
     }
@@ -605,7 +624,7 @@ public class DartsPersistence {
             transformedMedia.setCreatedBy(save(transformedMedia.getCreatedBy()));
             transformedMedia.setLastModifiedBy(save(transformedMedia.getLastModifiedBy()));
             transformedMedia.setMediaRequest(save(transformedMedia.getMediaRequest()));
-            return transformedMediaRepository.save(transformedMedia);
+            return save(transformedMediaRepository, transformedMedia);
         } else {
             entityManager.merge(transformedMedia);
         }
@@ -622,7 +641,7 @@ public class DartsPersistence {
             commentEntity.setCreatedBy(save(commentEntity.getCreatedBy()));
             commentEntity.setLastModifiedBy(save(commentEntity.getLastModifiedBy()));
             commentEntity.setTranscription(save(commentEntity.getTranscription()));
-            return transcriptionCommentRepository.save(commentEntity);
+            return save(transcriptionCommentRepository, commentEntity);
         } else {
             entityManager.merge(commentEntity);
         }
@@ -638,7 +657,7 @@ public class DartsPersistence {
         if (armRpoExecutionDetailEntity.getId() == null) {
             armRpoExecutionDetailEntity.setCreatedBy(save(armRpoExecutionDetailEntity.getCreatedBy()));
             armRpoExecutionDetailEntity.setLastModifiedBy(save(armRpoExecutionDetailEntity.getLastModifiedBy()));
-            return armRpoExecutionDetailRepository.save(armRpoExecutionDetailEntity);
+            return save(armRpoExecutionDetailRepository, armRpoExecutionDetailEntity);
         } else {
             entityManager.merge(armRpoExecutionDetailEntity);
         }
@@ -652,7 +671,7 @@ public class DartsPersistence {
         armRpoStateEntity = (ArmRpoStateEntity) preCheckPersist(armRpoStateEntity);
 
         if (armRpoStateEntity.getId() == null) {
-            return armRpoStateRepository.save(armRpoStateEntity);
+            return save(armRpoStateRepository, armRpoStateEntity);
         } else {
             return entityManager.merge(armRpoStateEntity);
         }
@@ -664,7 +683,7 @@ public class DartsPersistence {
         armRpoStatusEntity = (ArmRpoStatusEntity) preCheckPersist(armRpoStatusEntity);
 
         if (armRpoStatusEntity.getId() == null) {
-            return armRpoStatusRepository.save(armRpoStatusEntity);
+            return save(armRpoStatusRepository, armRpoStatusEntity);
         } else {
             return entityManager.merge(armRpoStatusEntity);
         }
@@ -679,8 +698,8 @@ public class DartsPersistence {
             UserAccountEntity systemUser = userAccountRepository.getReferenceById(0);
             user.setCreatedBy(systemUser);
             user.setLastModifiedBy(systemUser);
+            save(userAccountRepository, user);
         });
-        userAccountRepository.saveAll(asList(userAccounts));
     }
 
     @Transactional
