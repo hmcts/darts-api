@@ -38,7 +38,7 @@ class UserAuditListenerTest {
 
     @BeforeEach
     void beforeEach() {
-        userAuditListener = spy(new UserAuditListener(userIdentity, clock));
+        userAuditListener = spy(new UserAuditListener(clock, userIdentity));
     }
 
     private UserAccountEntity mockUserAccount() {
