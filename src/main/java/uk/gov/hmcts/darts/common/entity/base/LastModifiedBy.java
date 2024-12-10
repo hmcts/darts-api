@@ -12,4 +12,6 @@ public interface LastModifiedBy {
     void setLastModifiedDateTime(OffsetDateTime now);
 
     boolean isSkipUserAudit();
+
+    void setSkipUserAudit(boolean value);
 }

@@ -6,6 +6,7 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.MappedSuperclass;
+import jakarta.persistence.Transient;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.UpdateTimestamp;
@@ -38,5 +39,6 @@ public class ModifiedBaseEntity implements LastModifiedBy {
         this.skipUserAudit = true;//As this was manualy set we should not override it
     }
 
-    private transient boolean skipUserAudit;
+    @Transient
+    private transient boolean skipUserAudit = true;
 }

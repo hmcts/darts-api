@@ -1,10 +1,11 @@
 package uk.gov.hmcts.darts.common.entity.listener;
 
+import jakarta.persistence.PostLoad;
 import jakarta.persistence.PrePersist;
-import jakarta.persistence.PreUpdate;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.security.core.context.SecurityContextHolder;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.entity.base.CreatedBy;
@@ -33,7 +34,7 @@ public class UserAuditListener {
         log.debug("Before save: {}", object.getClass().getSimpleName());
         Optional<UserAccountEntity> userAccountOpt = getUserAccount();
         if (userAccountOpt.isEmpty()) {
-            log.debug("Skipping audit as user account not found");
+            log.debug("Before save: {} - Skipping audit as user account not found", object.getClass().getSimpleName());
             return;
         }
         UserAccountEntity userAccount = userAccountOpt.get();
@@ -41,19 +42,34 @@ public class UserAuditListener {
         updateModifiedBy(object, userAccount);
     }
 
-    @PreUpdate
-    void beforeUpdate(Object object) {
-        log.debug("Before update: {}", object.getClass().getSimpleName());
-        Optional<UserAccountEntity> userAccountOpt = getUserAccount();
-        if (userAccountOpt.isEmpty()) {
-            log.debug("Skipping audit as user account not found");
-            return;
+    @PostLoad
+    void postLoad(Object object) {
+        if (object instanceof CreatedBy entity) {
+            entity.setSkipUserAudit(false);
         }
-        UserAccountEntity userAccount = userAccountOpt.get();
-        updateModifiedBy(object, userAccount);
+        if (object instanceof LastModifiedBy entity) {
+            entity.setSkipUserAudit(false);
+        }
     }
 
+//    @PreUpdate
+//    void beforeUpdate(Object object) {
+//        log.debug("Before update: {}", object.getClass().getSimpleName());
+//        Optional<UserAccountEntity> userAccountOpt = getUserAccount();
+//        if (userAccountOpt.isEmpty()) {
+//            log.debug("Before update: {} - Skipping audit as user account not found", object.getClass().getSimpleName());
+//            return;
+//        }
+//        UserAccountEntity userAccount = userAccountOpt.get();
+//
+//        updateModifiedBy(object, userAccount);
+//    }
+
     Optional<UserAccountEntity> getUserAccount() {
+        if (SecurityContextHolder.getContext().getAuthentication() == null
+            || SecurityContextHolder.getContext().getAuthentication().getPrincipal() == null) {
+            return Optional.empty();
+        }
         try {
             return Optional.ofNullable(userIdentity.getUserAccount());
         } catch (Exception e) {
@@ -61,7 +77,6 @@ public class UserAuditListener {
             return Optional.empty();
         }
     }
-
 
     void updateCreatedBy(Object object, UserAccountEntity userAccount) {
         if (object instanceof CreatedBy entity) {
@@ -74,14 +89,17 @@ public class UserAuditListener {
         }
     }
 
+
     void updateModifiedBy(Object object, UserAccountEntity userAccount) {
         if (object instanceof LastModifiedBy entity) {
             if (entity.isSkipUserAudit()) {
                 log.debug("Skipping audit as isSkipUserAudit is set");
                 return;
             }
-            entity.setLastModifiedBy(userAccount);
             entity.setLastModifiedDateTime(OffsetDateTime.now(clock));
+            if (!userAccount.getId().equals(entity.getLastModifiedBy().getId())) {
+                entity.setLastModifiedBy(userAccount);
+            }
         }
     }
 }
