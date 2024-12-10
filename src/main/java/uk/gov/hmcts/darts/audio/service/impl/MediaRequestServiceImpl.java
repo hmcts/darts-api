@@ -545,8 +545,8 @@ public class MediaRequestServiceImpl implements MediaRequestService {
             mediaRepository.saveAndFlush(mediaEntity);
 
             if (request.getPayload().getIsHidden()) {
-                Optional<ObjectHiddenReasonEntity> objectHiddenReasonEntity;
-                objectHiddenReasonEntity = objectHiddenReasonRepository.findById(mediaHideRequest.getAdminAction().getReasonId());
+                Optional<ObjectHiddenReasonEntity> objectHiddenReasonEntity
+                    = objectHiddenReasonRepository.findById(mediaHideRequest.getAdminAction().getReasonId());
 
                 if (objectHiddenReasonEntity.isEmpty()) {
                     throw new DartsApiException(AudioApiError.MEDIA_HIDE_ACTION_REASON_NOT_FOUND);
@@ -571,6 +571,7 @@ public class MediaRequestServiceImpl implements MediaRequestService {
                 response = GetAdminMediaResponseMapper.mapHideOrShowResponse(mediaEntityOptional.get(), null);
 
                 for (ObjectAdminActionEntity objectAdminActionEntity : objectAdminActionEntityLst) {
+                    auditApi.record(AuditActivity.UNHIDE_AUDIO, buildUnhideAudioAdditionalDataString(objectAdminActionEntity));
                     objectAdminActionRepository.deleteById(objectAdminActionEntity.getId());
                 }
             }
@@ -579,6 +580,10 @@ public class MediaRequestServiceImpl implements MediaRequestService {
         }
 
         return response;
+    }
+
+    private String buildUnhideAudioAdditionalDataString(ObjectAdminActionEntity objectAdminActionEntity) {
+        return "Ticket reference: " + objectAdminActionEntity.getTicketReference() + ", Comments: " + objectAdminActionEntity.getComments();
     }
 
 }
