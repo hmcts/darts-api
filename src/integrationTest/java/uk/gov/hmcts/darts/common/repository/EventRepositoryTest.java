@@ -115,7 +115,7 @@ class EventRepositoryTest extends PostgresIntegrationBase {
     }
 
     @Test
-    void findDuplicateEventIds_multipleEventIdsWithWithNull_noDuplicatesShouldBeFound() {
+    void findDuplicateEventIds_multipleEventIdsWithNull_noDuplicatesShouldBeFound() {
         final EventEntity event1 = EventTestData.someMinimalEvent();
         final EventEntity event2 = EventTestData.someMinimalEvent();
         final EventEntity event3 = EventTestData.someMinimalEvent();
@@ -141,7 +141,7 @@ class EventRepositoryTest extends PostgresIntegrationBase {
     }
 
     @Test
-    void findDuplicateEventIds_multipleMessageIdsWithWithNull_noDuplicatesShouldBeFound() {
+    void findDuplicateEventIds_multipleMessageIdsWithNull_noDuplicatesShouldBeFound() {
         final EventEntity event1 = EventTestData.someMinimalEvent();
         final EventEntity event2 = EventTestData.someMinimalEvent();
         final EventEntity event3 = EventTestData.someMinimalEvent();
