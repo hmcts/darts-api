@@ -15,8 +15,6 @@ import java.util.List;
 @Service
 @Slf4j
 public class RemoveDuplicateEventsProcessorImpl implements RemoveDuplicateEventsProcessor {
-
-    private static final int CHUNK_SIZE = 1000;
     private final EventRepository eventRepository;
     private final CurrentTimeHelper currentTimeHelper;
     private final CaseManagementRetentionRepository caseManagementRetentionRepository;
@@ -35,11 +33,11 @@ public class RemoveDuplicateEventsProcessorImpl implements RemoveDuplicateEvents
 
     @Override
     @Transactional
-    public void processEvent(Integer eventId) {
+    public boolean processEvent(Integer eventId) {
         List<EventEntity> eventEntities = eventRepository.findDuplicateEventIds(eventId);
         if (eventEntities.isEmpty() || eventEntities.size() == 1) {
             //No need to continue if there are no duplicates
-            return;
+            return false;
         }
         // Keep the first event and delete all future ones
         List<EventEntity> eventEntitiesToDelete = eventEntities.subList(1, eventEntities.size());
@@ -54,5 +52,6 @@ public class RemoveDuplicateEventsProcessorImpl implements RemoveDuplicateEvents
 
         log.info("Duplicate events found. Removing events with the following event_id:message_id combination {}",
                  eventEntitiesToDelete.stream().map(e -> e.getEventId() + ":" + e.getMessageId()).toList());
+        return true;
     }
 }
