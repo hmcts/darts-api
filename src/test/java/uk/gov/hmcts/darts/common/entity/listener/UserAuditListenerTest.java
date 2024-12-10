@@ -28,6 +28,7 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 class UserAuditListenerTest {
 
+    //TODO finish testing
     private final Clock clock = Clock.fixed(Instant.now(), ZoneId.systemDefault());
 
     @Mock
@@ -48,49 +49,28 @@ class UserAuditListenerTest {
     }
 
     @Test
-    void beforeSave_shouldUpdateCreatedByAndModifiedBy_whenUserAccountIsPresent() {
-        UserAccountEntity userAccount = mockUserAccount();
-        doNothing().when(userAuditListener).updateCreatedBy(any(), any());
-        doNothing().when(userAuditListener).updateModifiedBy(any(), any());
+    void beforeSave_shouldUpdateCreatedByAndModifiedBy() {
+        doNothing().when(userAuditListener).updateCreatedBy(any());
+        doNothing().when(userAuditListener).updateModifiedBy(any());
 
         CreatedBy createdBy = mock(CreatedBy.class);
         userAuditListener.beforeSave(createdBy);
 
-        verify(userAuditListener).updateCreatedBy(createdBy, userAccount);
-        verify(userAuditListener).updateModifiedBy(createdBy, userAccount);
-        verify(userIdentity).getUserAccount();
+        verify(userAuditListener).updateCreatedBy(createdBy);
+        verify(userAuditListener).updateModifiedBy(createdBy);
     }
 
     @Test
-    void beforeSave_shouldSkipAudit_whenUserAccountIsNotPresent() {
-        CreatedBy createdBy = mock(CreatedBy.class);
-        userAuditListener.beforeSave(createdBy);
-        verify(userAuditListener, never()).updateCreatedBy(any(), any());
-        verify(userAuditListener, never()).updateModifiedBy(any(), any());
-        verify(userIdentity).getUserAccount();
-    }
-
-    @Test
-    void beforeUpdate_shouldUpdateModifiedBy_whenUserAccountIsPresent() {
-        UserAccountEntity userAccount = mockUserAccount();
-        doNothing().when(userAuditListener).updateModifiedBy(any(), any());
+    void beforeUpdate_shouldUpdateModifiedBy() {
+        doNothing().when(userAuditListener).updateModifiedBy(any());
 
         CreatedBy createdBy = mock(CreatedBy.class);
         userAuditListener.beforeUpdate(createdBy);
 
-        verify(userAuditListener, never()).updateCreatedBy(any(), any());
-        verify(userAuditListener).updateModifiedBy(createdBy, userAccount);
-        verify(userIdentity).getUserAccount();
+        verify(userAuditListener, never()).updateCreatedBy(any());
+        verify(userAuditListener).updateModifiedBy(createdBy);
     }
 
-    @Test
-    void beforeUpdate_shouldSkipAudit_whenUserAccountIsNotPresent() {
-        CreatedBy createdBy = mock(CreatedBy.class);
-        userAuditListener.beforeUpdate(createdBy);
-        verify(userAuditListener, never()).updateCreatedBy(any(), any());
-        verify(userAuditListener, never()).updateModifiedBy(any(), any());
-        verify(userIdentity).getUserAccount();
-    }
 
     @Test
     void getUserAccount_shouldReturnUserAccount_whenUserAccountIsPresent() {
@@ -111,57 +91,54 @@ class UserAuditListenerTest {
 
     @Test
     void updateCreatedBy_shouldUpdateCreatedBy_whenEntityIsCreatedByAndSkipUserAuditIsFalseAndCreatedByIsNull() {
-        UserAccountEntity userAccount = mock(UserAccountEntity.class);
+        UserAccountEntity userAccount = mockUserAccount();
         CreatedBy createdBy = mock(CreatedBy.class);
         when(createdBy.isSkipUserAudit()).thenReturn(false);
         when(createdBy.getCreatedBy()).thenReturn(null);
 
-        userAuditListener.updateCreatedBy(createdBy, userAccount);
+        userAuditListener.updateCreatedBy(createdBy);
         verify(createdBy).setCreatedBy(userAccount);
         verify(createdBy).setCreatedDateTime(OffsetDateTime.now(clock));
     }
 
     @Test
     void updateCreatedBy_shouldSkipAudit_whenEntityIsCreatedByAndSkipUserAuditIsTrue() {
-        UserAccountEntity userAccount = mock(UserAccountEntity.class);
         CreatedBy createdBy = mock(CreatedBy.class);
         when(createdBy.isSkipUserAudit()).thenReturn(true);
 
-        userAuditListener.updateCreatedBy(createdBy, userAccount);
+        userAuditListener.updateCreatedBy(createdBy);
         verify(createdBy, never()).setCreatedBy(any());
         verify(createdBy, never()).setCreatedDateTime(any());
     }
 
     @Test
     void updateCreatedBy_shouldSkipAudit_whenEntityIsCreatedByAndCreatedByIsNotNull() {
-        UserAccountEntity userAccount = mock(UserAccountEntity.class);
         CreatedBy createdBy = mock(CreatedBy.class);
         when(createdBy.isSkipUserAudit()).thenReturn(false);
         when(createdBy.getCreatedBy()).thenReturn(mock(UserAccountEntity.class));
 
-        userAuditListener.updateCreatedBy(createdBy, userAccount);
+        userAuditListener.updateCreatedBy(createdBy);
         verify(createdBy, never()).setCreatedBy(any());
         verify(createdBy, never()).setCreatedDateTime(any());
     }
 
     @Test
     void updateModifiedBy_shouldUpdateModifiedBy_whenEntityIsLastModifiedByAndSkipUserAuditIsFalse() {
-        UserAccountEntity userAccount = mock(UserAccountEntity.class);
+        UserAccountEntity userAccount = mockUserAccount();
         LastModifiedBy lastModifiedBy = mock(LastModifiedBy.class);
         when(lastModifiedBy.isSkipUserAudit()).thenReturn(false);
 
-        userAuditListener.updateModifiedBy(lastModifiedBy, userAccount);
+        userAuditListener.updateModifiedBy(lastModifiedBy);
         verify(lastModifiedBy).setLastModifiedBy(userAccount);
         verify(lastModifiedBy).setLastModifiedDateTime(OffsetDateTime.now(clock));
     }
 
     @Test
     void updateModifiedBy_shouldSkipAudit_whenEntityIsLastModifiedByAndSkipUserAuditIsTrue() {
-        UserAccountEntity userAccount = mock(UserAccountEntity.class);
         LastModifiedBy lastModifiedBy = mock(LastModifiedBy.class);
         when(lastModifiedBy.isSkipUserAudit()).thenReturn(true);
 
-        userAuditListener.updateModifiedBy(lastModifiedBy, userAccount);
+        userAuditListener.updateModifiedBy(lastModifiedBy);
         verify(lastModifiedBy, never()).setLastModifiedBy(any());
         verify(lastModifiedBy, never()).setLastModifiedDateTime(any());
     }
