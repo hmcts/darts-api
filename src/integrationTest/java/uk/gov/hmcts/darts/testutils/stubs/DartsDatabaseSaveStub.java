@@ -4,8 +4,6 @@ import jakarta.persistence.EntityManager;
 import lombok.AllArgsConstructor;
 import org.hibernate.proxy.HibernateProxy;
 import org.junit.platform.commons.JUnitException;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import uk.gov.hmcts.darts.common.entity.CaseManagementRetentionEntity;
@@ -28,22 +26,13 @@ public class DartsDatabaseSaveStub {
     private final EntityManager entityManager;
     private final TransactionalUtil transactionalUtil;
 
+
     @Transactional
     public <T> T save(T entity) {
-        if (entity == null
-            || (entity instanceof HibernateProxy proxy
-            && proxy.getHibernateLazyInitializer().isUninitialized())) {
-            return entity;
+        if (entity == null) {
+            return null;
         }
         return transactionalUtil.executeInTransaction(() -> {
-            Authentication authentication = null;
-            //Remove the authentication from the context to bypass UserAuditListener.
-            //This will be added back again at the end of the method.
-            if (SecurityContextHolder.getContext().getAuthentication() != null) {
-                authentication = SecurityContextHolder.getContext().getAuthentication();
-                SecurityContextHolder.getContext().setAuthentication(null);
-            }
-
             if (entity instanceof CreatedModifiedBaseEntity createdModifiedBaseEntity) {
                 updateCreatedByLastModifiedBy(createdModifiedBaseEntity);
             }
@@ -51,19 +40,12 @@ public class DartsDatabaseSaveStub {
             try {
                 getIdInstanceMethod = getIdMethod(entity.getClass());
                 Integer id = (Integer) getIdInstanceMethod.invoke(entity);
-                T toReturn;
                 if (id == null) {
                     this.entityManager.persist(entity);
-                    this.entityManager.flush();
-                    toReturn = entity;
+                    return entity;
                 } else {
-                    toReturn = this.entityManager.merge(entity);
-                    this.entityManager.flush();
+                    return this.entityManager.merge(entity);
                 }
-                if (authentication != null) {
-                    SecurityContextHolder.getContext().setAuthentication(authentication);
-                }
-                return toReturn;
             } catch (NoSuchMethodException | InvocationTargetException | IllegalAccessException e) {
                 throw new JUnitException("Failed to save entity", e);
             }

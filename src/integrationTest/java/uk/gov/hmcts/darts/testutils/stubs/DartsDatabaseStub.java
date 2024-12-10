@@ -674,7 +674,9 @@ public class DartsDatabaseStub {
                         Method getIdMethod = fieldValue.getClass().getMethod("getId");
                         Object id = getIdMethod.invoke(fieldValue);
                         if (id == null || (id instanceof Integer && (Integer) id == 0)) {
-                            save(fieldValue);
+                            // Save the transient entity
+                            entityManager.persist(fieldValue);
+                            entityManager.flush();
                         }
                     }
                 }
@@ -901,9 +903,8 @@ public class DartsDatabaseStub {
     public void addUserToGroup(UserAccountEntity userAccount, SecurityGroupEntity securityGroup) {
         securityGroup.getUsers().add(userAccount);
         userAccount.getSecurityGroupEntities().add(securityGroup);
-
-        saveWithTransientEntities(securityGroup);
-        saveWithTransientEntities(userAccount);
+        dartsDatabaseSaveStub.save(securityGroup);
+        dartsDatabaseSaveStub.save(userAccount);
     }
 
     @Transactional
