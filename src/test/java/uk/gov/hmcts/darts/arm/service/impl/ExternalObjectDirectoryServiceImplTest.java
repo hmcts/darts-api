@@ -10,7 +10,6 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.data.domain.Pageable;
 import uk.gov.hmcts.darts.arm.config.ArmDataManagementConfiguration;
 import uk.gov.hmcts.darts.common.entity.AnnotationDocumentEntity;
 import uk.gov.hmcts.darts.common.entity.CaseDocumentEntity;
@@ -36,7 +35,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.darts.common.util.EodHelper.armLocation;
 import static uk.gov.hmcts.darts.common.util.EodHelper.awaitingVerificationStatus;
-import static uk.gov.hmcts.darts.common.util.EodHelper.failedArmStatuses;
 import static uk.gov.hmcts.darts.common.util.EodHelper.inboundLocation;
 import static uk.gov.hmcts.darts.common.util.EodHelper.storedStatus;
 import static uk.gov.hmcts.darts.common.util.EodHelper.unstructuredLocation;
@@ -91,22 +89,6 @@ class ExternalObjectDirectoryServiceImplTest {
                                                             annotationDocumentRepository,
                                                             caseDocumentRepository,
                                                             transcriptionDocumentRepository);
-    }
-
-    @Test
-    void testFindFailedStillRetriableArmEodsInvokesRepositoryCorrectly() {
-        var eods = List.of(eod);
-        when(eodRepository.findNotFinishedAndNotExceededRetryInStorageLocation(any(), any(), any(), any())).thenReturn(eods);
-
-        var pageable = Pageable.ofSize(3);
-        var result = eodService.findFailedStillRetriableArmEods(pageable);
-
-        assertThat(result).isEqualTo(eods);
-        verify(eodRepository).findNotFinishedAndNotExceededRetryInStorageLocation(
-            failedArmStatuses(),
-            armLocation(),
-            armConfig.getMaxRetryAttempts(),
-            pageable);
     }
 
     @ParameterizedTest

@@ -55,7 +55,7 @@ public class ArmResponseFileHelper {
                 responseList.add(inputUploadAndAssociatedFilenames);
             }
         } else {
-            log.warn("Manifest filename format of ''{}'' not recognised", manifestFileName);
+            log.warn("Manifest filename format of '{}' not recognised", manifestFileName);
         }
         return responseList;
     }

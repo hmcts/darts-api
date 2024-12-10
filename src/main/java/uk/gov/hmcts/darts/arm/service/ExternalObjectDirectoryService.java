@@ -1,6 +1,5 @@
 package uk.gov.hmcts.darts.arm.service;
 
-import org.springframework.data.domain.Pageable;
 import uk.gov.hmcts.darts.common.entity.CaseDocumentEntity;
 import uk.gov.hmcts.darts.common.entity.ExternalLocationTypeEntity;
 import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
@@ -14,8 +13,6 @@ import java.util.Optional;
 import java.util.UUID;
 
 public interface ExternalObjectDirectoryService {
-
-    List<ExternalObjectDirectoryEntity> findFailedStillRetriableArmEods(Pageable pageable);
 
     boolean hasAllMediaBeenCopiedFromInboundStorage(List<MediaEntity> mediaEntities);
 

@@ -40,13 +40,11 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.nio.file.Files;
 import java.time.OffsetDateTime;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
 import static java.util.Collections.emptyList;
-import static java.util.Collections.singletonList;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -194,12 +192,12 @@ class DetsToArmBatchPushProcessorImplTest {
         EOD_HELPER_MOCKS.givenIsEqualStatusReturns(true);
         when(detsToArmProcessorConfiguration.getMaxArmManifestItems()).thenReturn(10);
         when(armDataManagementConfiguration.getMaxRetryAttempts()).thenReturn(3);
-        List<ExternalObjectDirectoryEntity> inboundList = new ArrayList<>(singletonList(externalObjectDirectoryEntityDets));
         when(externalObjectDirectoryRepository.findEodsNotInOtherStorage(
             EodHelper.storedStatus(),
             EodHelper.detsLocation(),
             EodHelper.armLocation(), 200
-        )).thenReturn(inboundList);
+        )).thenReturn(List.of(123));
+        when(externalObjectDirectoryRepository.findAllById(List.of(123))).thenReturn(List.of(externalObjectDirectoryEntityDets));
 
         //when
         detsToArmBatchPushProcessor.processDetsToArm(200);
@@ -218,16 +216,16 @@ class DetsToArmBatchPushProcessorImplTest {
     @Test
     void testManifestFileName() throws IOException {
         //given
-        when(externalObjectDirectoryRepository.findEodsNotInOtherStorage(any(), any(), any(), any())).thenReturn(List.of(externalObjectDirectoryEntityArm));
+        when(externalObjectDirectoryRepository.findEodsNotInOtherStorage(any(), any(), any(), any())).thenReturn(List.of(123));
+        when(externalObjectDirectoryRepository.findAllById(List.of(123))).thenReturn(List.of(externalObjectDirectoryEntityDets));
         when(detsToArmProcessorConfiguration.getMaxArmManifestItems()).thenReturn(1000);
         when(armDataManagementConfiguration.getMaxRetryAttempts()).thenReturn(3);
 
-        List<ExternalObjectDirectoryEntity> inboundList = new ArrayList<>(singletonList(externalObjectDirectoryEntityDets));
         when(externalObjectDirectoryRepository.findEodsNotInOtherStorage(
             EodHelper.storedStatus(),
             EodHelper.detsLocation(),
             EodHelper.armLocation(), 5
-        )).thenReturn(inboundList);
+        )).thenReturn(List.of(123));
 
         when(externalObjectDirectoryRepository.saveAndFlush(any())).thenReturn(externalObjectDirectoryEntityArm);
         externalObjectDirectoryEntityArm.setStatus(EodHelper.armIngestionStatus());
