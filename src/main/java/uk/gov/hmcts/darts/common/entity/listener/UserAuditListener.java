@@ -2,8 +2,6 @@ package uk.gov.hmcts.darts.common.entity.listener;
 
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
-import lombok.AllArgsConstructor;
-import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
@@ -17,16 +15,17 @@ import java.time.OffsetDateTime;
 import java.util.Optional;
 
 @Slf4j
-@NoArgsConstructor
-@AllArgsConstructor
 public class UserAuditListener {
 
-    @Lazy
-    @Autowired
-    private UserIdentity userIdentity;
+    private final Clock clock;
+    private final UserIdentity userIdentity;
+
 
     @Autowired
-    private Clock clock;
+    public UserAuditListener(Clock clock, @Lazy UserIdentity userIdentity) {
+        this.clock = clock;
+        this.userIdentity = userIdentity;
+    }
 
 
     @PrePersist
