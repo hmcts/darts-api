@@ -156,7 +156,7 @@ public interface EventRepository extends JpaRepository<EventEntity, Integer> {
                         JOIN (                        
                             SELECT e.eventId as eventId, e.messageId as messageId, e.eventText as eventText
                             FROM EventEntity e
-                            WHERE e.eventId = :eventId and e.createdDateTime >= :minDate
+                            WHERE e.eventId IS NOT NULL and e.messageId IS NOT NULL and e.eventId = :eventId and e.createdDateTime >= :minDate 
                             GROUP BY e.eventId, e.messageId, e.eventText
                             HAVING COUNT(e) > 1) e2
                          ON e2.eventId = e3.eventId and e2.messageId = e3.messageId and e2.eventText = e3.eventText

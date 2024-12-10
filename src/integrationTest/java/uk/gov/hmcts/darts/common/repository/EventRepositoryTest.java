@@ -139,6 +139,58 @@ class EventRepositoryTest extends PostgresIntegrationBase {
         assertThat(duplicates).isEmpty();
     }
 
+    @Test
+    void findDuplicateEventIds_multipleEventIdsWithWithNull_noDuplicatesShouldBeFound() {
+        final EventEntity event1 = EventTestData.someMinimalEvent();
+        final EventEntity event2 = EventTestData.someMinimalEvent();
+        final EventEntity event3 = EventTestData.someMinimalEvent();
+        final EventEntity event4 = EventTestData.someMinimalEvent(); //Not a duplicate
+        event1.setEventText("eventText");
+        event1.setMessageId("msgId");
+        event1.setEventId(null);
+        makeEventsDuplicate(event1, event2);
+        makeEventsDuplicate(event1, event3);
+        event4.setEventText("Some new text");
+        OffsetDateTime createdTime = OffsetDateTime.now().minusDays(3);
+        dartsDatabase.save(event1);
+        dartsDatabase.save(event2);
+        dartsDatabase.save(event3);
+        dartsDatabase.save(event4);
+        updateCreatedBy(event1, createdTime);
+        updateCreatedBy(event2, createdTime.plusMinutes(1));
+        updateCreatedBy(event3, createdTime.plusMinutes(2));
+        updateCreatedBy(event4, createdTime.plusMinutes(3));
+
+        List<EventEntity> duplicates = eventRepository.findDuplicateEventIds(event1.getEventId(), createdTime.minusDays(1));
+        assertThat(duplicates).isEmpty();
+    }
+
+    @Test
+    void findDuplicateEventIds_multipleMessageIdsWithWithNull_noDuplicatesShouldBeFound() {
+        final EventEntity event1 = EventTestData.someMinimalEvent();
+        final EventEntity event2 = EventTestData.someMinimalEvent();
+        final EventEntity event3 = EventTestData.someMinimalEvent();
+        final EventEntity event4 = EventTestData.someMinimalEvent(); //Not a duplicate
+        event1.setEventText("eventText");
+        event1.setMessageId(null);
+        event1.setEventId(1);
+        makeEventsDuplicate(event1, event2);
+        makeEventsDuplicate(event1, event3);
+        event4.setEventText("Some new text");
+        OffsetDateTime createdTime = OffsetDateTime.now().minusDays(3);
+        dartsDatabase.save(event1);
+        dartsDatabase.save(event2);
+        dartsDatabase.save(event3);
+        dartsDatabase.save(event4);
+        updateCreatedBy(event1, createdTime);
+        updateCreatedBy(event2, createdTime.plusMinutes(1));
+        updateCreatedBy(event3, createdTime.plusMinutes(2));
+        updateCreatedBy(event4, createdTime.plusMinutes(3));
+
+        List<EventEntity> duplicates = eventRepository.findDuplicateEventIds(event1.getEventId(), createdTime.minusDays(1));
+        assertThat(duplicates).isEmpty();
+    }
+
     private void updateCreatedBy(EventEntity event, OffsetDateTime offsetDateTime) {
         event.setCreatedDateTime(offsetDateTime);
         dartsDatabase.save(event);
