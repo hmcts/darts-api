@@ -2,6 +2,7 @@ package uk.gov.hmcts.darts.common.entity.listener;
 
 import jakarta.persistence.PostLoad;
 import jakarta.persistence.PrePersist;
+import jakarta.persistence.PreUpdate;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
@@ -32,14 +33,14 @@ public class UserAuditListener {
     @PrePersist
     void beforeSave(Object object) {
         log.debug("Before save: {}", object.getClass().getSimpleName());
-        Optional<UserAccountEntity> userAccountOpt = getUserAccount();
-        if (userAccountOpt.isEmpty()) {
-            log.debug("Before save: {} - Skipping audit as user account not found", object.getClass().getSimpleName());
-            return;
-        }
-        UserAccountEntity userAccount = userAccountOpt.get();
-        updateCreatedBy(object, userAccount);
-        updateModifiedBy(object, userAccount);
+        updateCreatedBy(object);
+        updateModifiedBy(object);
+    }
+
+    @PreUpdate
+    void beforeUpdate(Object object) {
+        log.debug("Before update: {}", object.getClass().getSimpleName());
+        updateModifiedBy(object);
     }
 
     @PostLoad
@@ -52,24 +53,7 @@ public class UserAuditListener {
         }
     }
 
-//    @PreUpdate
-//    void beforeUpdate(Object object) {
-//        log.debug("Before update: {}", object.getClass().getSimpleName());
-//        Optional<UserAccountEntity> userAccountOpt = getUserAccount();
-//        if (userAccountOpt.isEmpty()) {
-//            log.debug("Before update: {} - Skipping audit as user account not found", object.getClass().getSimpleName());
-//            return;
-//        }
-//        UserAccountEntity userAccount = userAccountOpt.get();
-//
-//        updateModifiedBy(object, userAccount);
-//    }
-
     Optional<UserAccountEntity> getUserAccount() {
-        if (SecurityContextHolder.getContext().getAuthentication() == null
-            || SecurityContextHolder.getContext().getAuthentication().getPrincipal() == null) {
-            return Optional.empty();
-        }
         try {
             return Optional.ofNullable(userIdentity.getUserAccount());
         } catch (Exception e) {
@@ -78,28 +62,43 @@ public class UserAuditListener {
         }
     }
 
-    void updateCreatedBy(Object object, UserAccountEntity userAccount) {
+    boolean isUserAccountPresent() {
+        return SecurityContextHolder.getContext().getAuthentication() != null;
+    }
+
+    void updateCreatedBy(Object object) {
         if (object instanceof CreatedBy entity) {
             if (entity.isSkipUserAudit() || entity.getCreatedBy() != null) {
                 log.debug("Skipping audit as isSkipUserAudit is set or createdBy is already set");
                 return;
             }
+            Optional<UserAccountEntity> userAccountOpt = getUserAccount();
+            if (userAccountOpt.isEmpty()) {
+                log.debug("Before save: {} - Skipping audit as user account not found", object.getClass().getSimpleName());
+                return;
+            }
+            UserAccountEntity userAccount = userAccountOpt.get();
             entity.setCreatedBy(userAccount);
             entity.setCreatedDateTime(OffsetDateTime.now(clock));
         }
     }
 
 
-    void updateModifiedBy(Object object, UserAccountEntity userAccount) {
+    void updateModifiedBy(Object object) {
         if (object instanceof LastModifiedBy entity) {
             if (entity.isSkipUserAudit()) {
                 log.debug("Skipping audit as isSkipUserAudit is set");
                 return;
             }
-            entity.setLastModifiedDateTime(OffsetDateTime.now(clock));
-            if (!userAccount.getId().equals(entity.getLastModifiedBy().getId())) {
-                entity.setLastModifiedBy(userAccount);
+
+            Optional<UserAccountEntity> userAccountOpt = getUserAccount();
+            if (userAccountOpt.isEmpty()) {
+                log.debug("Before update: {} - Skipping audit as user account not found", object.getClass().getSimpleName());
+                return;
             }
+            UserAccountEntity userAccount = userAccountOpt.get();
+            entity.setLastModifiedDateTime(OffsetDateTime.now(clock));
+            entity.setLastModifiedBy(userAccount);
         }
     }
 }
