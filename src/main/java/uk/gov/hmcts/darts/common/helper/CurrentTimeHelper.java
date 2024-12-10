@@ -6,12 +6,16 @@ import org.springframework.stereotype.Component;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
 
-/*
-    Use these methods in the code any time the current date/time is used, so that the tests can mock the method
-    and override the time the code thinks it is.
+/**
+ * Use these methods in the code any time the current date/time is used, so that the tests can mock the method
+ * and override the time the code thinks it is.
+ * Please use java.time.Clock.Clock see {@link uk.gov.hmcts.darts.common.entity.listener.UserAuditListener} as an example of how this can be used.
+ *
+ * @Deprecated This class is deprecated and will be removed in the future.
  */
 @Component
 @RequiredArgsConstructor
+@Deprecated(forRemoval = true)
 public class CurrentTimeHelper {
 
     public OffsetDateTime currentOffsetDateTime() {
