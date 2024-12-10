@@ -15,7 +15,7 @@ import java.time.OffsetDateTime;
  */
 @Component
 @RequiredArgsConstructor
-@Deprecated(forRemoval = true)
+@Deprecated
 public class CurrentTimeHelper {
 
     public OffsetDateTime currentOffsetDateTime() {
