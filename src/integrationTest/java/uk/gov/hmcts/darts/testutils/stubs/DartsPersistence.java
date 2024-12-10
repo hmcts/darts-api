@@ -95,7 +95,6 @@ import uk.gov.hmcts.darts.testutils.TransactionalUtil;
 import java.util.ArrayList;
 import java.util.List;
 
-import static java.util.Arrays.asList;
 import static java.util.Arrays.stream;
 import static java.util.Objects.isNull;
 
