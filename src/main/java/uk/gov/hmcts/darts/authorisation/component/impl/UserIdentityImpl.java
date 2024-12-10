@@ -31,7 +31,7 @@ public class UserIdentityImpl implements UserIdentity {
     private final UserAccountRepository userAccountRepository;
     private final UserRolesCourthousesRepository userRolesCourthousesRepository;
 
-    public String getGuidFromToken(Jwt token) {
+    private String getGuidFromToken(Jwt token) {
         if (token != null) {
             Object oid = token.getClaims().get(OID);
             if (nonNull(oid) && oid instanceof String guid && StringUtils.isNotBlank(guid)) {
@@ -47,24 +47,19 @@ public class UserIdentityImpl implements UserIdentity {
 
     @Override
     public UserAccountEntity getUserAccount(Jwt jwt) {
-        try {
-            UserAccountEntity userAccount = null;
-            String guid = getGuidFromToken(jwt);
-            if (nonNull(guid)) {
-                // System users will use GUID not email address
-                userAccount = userAccountRepository.findByAccountGuidAndActive(guid, true).orElse(null);
-            }
-            if (isNull(userAccount)) {
-                String emailAddressFromToken = EmailAddressFromTokenUtil.getEmailAddressFromToken(jwt);
-                userAccount = userAccountRepository.findByEmailAddressIgnoreCaseAndActive(emailAddressFromToken, true).stream()
-                    .findFirst()
-                    .orElseThrow(() -> new DartsApiException(USER_DETAILS_INVALID));
-            }
-            return userAccount;
-        } catch (Throwable t) {
-            log.error("Error in getUserAccount", t);
+        UserAccountEntity userAccount = null;
+        String guid = getGuidFromToken(jwt);
+        if (nonNull(guid)) {
+            // System users will use GUID not email address
+            userAccount = userAccountRepository.findByAccountGuidAndActive(guid, true).orElse(null);
         }
-        return null;
+        if (isNull(userAccount)) {
+            String emailAddressFromToken = EmailAddressFromTokenUtil.getEmailAddressFromToken(jwt);
+            userAccount = userAccountRepository.findByEmailAddressIgnoreCaseAndActive(emailAddressFromToken, true).stream()
+                .findFirst()
+                .orElseThrow(() -> new DartsApiException(USER_DETAILS_INVALID));
+        }
+        return userAccount;
     }
 
     public Jwt getJwt() {
