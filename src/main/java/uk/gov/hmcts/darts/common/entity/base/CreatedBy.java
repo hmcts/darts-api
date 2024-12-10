@@ -12,4 +12,6 @@ public interface CreatedBy {
     void setCreatedDateTime(OffsetDateTime now);
 
     boolean isSkipUserAudit();
+
+    void setSkipUserAudit(boolean value);
 }

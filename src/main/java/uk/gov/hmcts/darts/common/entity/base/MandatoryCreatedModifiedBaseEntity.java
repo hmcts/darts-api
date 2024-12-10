@@ -29,7 +29,6 @@ public class MandatoryCreatedModifiedBaseEntity extends MandatoryCreatedBaseEnti
     @NotAudited
     @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
     @JoinColumn(name = "last_modified_by", nullable = false)
-    @org.springframework.data.annotation.LastModifiedBy
     private UserAccountEntity lastModifiedBy;
 
     public void setLastModifiedBy(UserAccountEntity userAccount) {

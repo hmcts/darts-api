@@ -7,6 +7,7 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.MappedSuperclass;
+import jakarta.persistence.Transient;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
@@ -39,6 +40,7 @@ public class MandatoryCreatedBaseEntity implements CreatedBy {
         this.skipUserAudit = true;//As this was manualy set we should not override it
     }
 
-    protected transient boolean skipUserAudit;
+    @Transient
+    protected transient boolean skipUserAudit = true;
 
 }
