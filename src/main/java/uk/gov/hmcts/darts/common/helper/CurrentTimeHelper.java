@@ -11,11 +11,11 @@ import java.time.OffsetDateTime;
  * and override the time the code thinks it is.
  * Please use java.time.Clock.Clock see {@link uk.gov.hmcts.darts.common.entity.listener.UserAuditListener} as an example of how this can be used.
  *
- * @Deprecated This class is deprecated and will be removed in the future.
+ * @deprecated This class is deprecated and will be removed in the future.
  */
 @Component
 @RequiredArgsConstructor
-@Deprecated
+@Deprecated(since = "10/12/2024")
 public class CurrentTimeHelper {
 
     public OffsetDateTime currentOffsetDateTime() {

@@ -8,7 +8,6 @@ import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.darts.common.entity.EventEntity;
-import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
 import uk.gov.hmcts.darts.common.repository.CaseManagementRetentionRepository;
 import uk.gov.hmcts.darts.common.repository.CaseRetentionRepository;
 import uk.gov.hmcts.darts.common.repository.EventRepository;
@@ -35,9 +34,6 @@ class RemoveDuplicateEventsProcessorImplTest {
         OffsetDateTime.of(LocalDate.of(2024, 1, 4), LocalTime.now(), UTC);
 
     @Mock
-    private CurrentTimeHelper currentTimeHelper;
-
-    @Mock
     private EventRepository eventRepository;
 
     @Mock
@@ -58,7 +54,6 @@ class RemoveDuplicateEventsProcessorImplTest {
     void setUp() {
         removeDuplicateEventsProcessor = new RemoveDuplicateEventsProcessorImpl(
             eventRepository,
-            currentTimeHelper,
             caseManagementRetentionRepository,
             caseRetentionRepository
         );

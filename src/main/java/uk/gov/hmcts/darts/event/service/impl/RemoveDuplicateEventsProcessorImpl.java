@@ -4,7 +4,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import uk.gov.hmcts.darts.common.entity.EventEntity;
-import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
 import uk.gov.hmcts.darts.common.repository.CaseManagementRetentionRepository;
 import uk.gov.hmcts.darts.common.repository.CaseRetentionRepository;
 import uk.gov.hmcts.darts.common.repository.EventRepository;
@@ -16,17 +15,14 @@ import java.util.List;
 @Slf4j
 public class RemoveDuplicateEventsProcessorImpl implements RemoveDuplicateEventsProcessor {
     private final EventRepository eventRepository;
-    private final CurrentTimeHelper currentTimeHelper;
     private final CaseManagementRetentionRepository caseManagementRetentionRepository;
     private final CaseRetentionRepository caseRetentionRepository;
 
     public RemoveDuplicateEventsProcessorImpl(
         EventRepository eventRepository,
-        CurrentTimeHelper currentTimeHelper,
         CaseManagementRetentionRepository caseManagementRetentionRepository,
         CaseRetentionRepository caseRetentionRepository) {
         this.eventRepository = eventRepository;
-        this.currentTimeHelper = currentTimeHelper;
         this.caseManagementRetentionRepository = caseManagementRetentionRepository;
         this.caseRetentionRepository = caseRetentionRepository;
     }
