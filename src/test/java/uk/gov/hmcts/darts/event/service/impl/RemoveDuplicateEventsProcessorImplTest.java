@@ -65,10 +65,10 @@ class RemoveDuplicateEventsProcessorImplTest {
     }
 
     @Test
-    void processEvent_noDuplicateEvents_nothingHappens() {
+    void findAndRemoveDuplicateEvent_noDuplicateEvents_nothingHappens() {
         when(eventRepository.findDuplicateEventIds(any())).thenReturn(List.of());
 
-        assertThat(removeDuplicateEventsProcessor.processEvent(123)).isFalse();
+        assertThat(removeDuplicateEventsProcessor.findAndRemoveDuplicateEvent(123)).isFalse();
 
         verify(eventRepository).findDuplicateEventIds(123);
         verifyNoMoreInteractions(eventRepository);
@@ -76,7 +76,7 @@ class RemoveDuplicateEventsProcessorImplTest {
     }
 
     @Test
-    void processEvent_hasDuplicateEvents_allDuplicatesExcludingTheFirstOneAreDeleted() {
+    void findAndRemoveDuplicateEvent_hasDuplicateEvents_allDuplicatesExcludingTheFirstOneAreDeleted() {
         //Setup
         EventEntity duplicateEvent1 = someMinimalEvent();
         EventEntity duplicateEvent2 = someMinimalEvent();
@@ -93,7 +93,7 @@ class RemoveDuplicateEventsProcessorImplTest {
         when(caseManagementRetentionRepository.getIdsForEvents(any()))
             .thenReturn(caseManagementIdsToBeDeleted);
         //Execution
-        assertThat(removeDuplicateEventsProcessor.processEvent(123)).isTrue();
+        assertThat(removeDuplicateEventsProcessor.findAndRemoveDuplicateEvent(123)).isTrue();
 
 
         //Verification
