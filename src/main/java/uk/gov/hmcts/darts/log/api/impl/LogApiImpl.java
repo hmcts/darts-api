@@ -22,6 +22,7 @@ import uk.gov.hmcts.darts.log.util.DailyListLogJobReport;
 import uk.gov.hmcts.darts.notification.entity.NotificationEntity;
 import uk.gov.service.notify.NotificationClientException;
 
+import java.time.Duration;
 import java.util.UUID;
 
 @Service
@@ -156,6 +157,11 @@ public class LogApiImpl implements LogApi {
     @Override
     public void transcriptionDeleted(Integer transcriptionId) {
         deletionLoggerService.transcriptionDeleted(transcriptionId);
+    }
+
+    @Override
+    public void logArmMissingResponse(Duration armMissingResponseDuration, Integer eodId) {
+        armLoggerService.logArmMissingResponse(armMissingResponseDuration, eodId);
     }
 
     @Override

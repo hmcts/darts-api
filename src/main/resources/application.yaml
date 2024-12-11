@@ -271,6 +271,7 @@ darts:
       arm-client: ${ARM_CLIENT:darts}
       continuation-token-duration: PT60M
       is-mock-arm-rpo-download-csv: ${IS_MOCK_ARM_RPO_DOWNLOAD_CSV:false}
+      arm-missing-response-duration: 24h
 
     arm-api:
       arm-username: ${ARM_USERNAME:}
