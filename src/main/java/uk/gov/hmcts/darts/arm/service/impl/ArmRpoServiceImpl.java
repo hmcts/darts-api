@@ -3,6 +3,7 @@ package uk.gov.hmcts.darts.arm.service.impl;
 import jakarta.persistence.EntityManager;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.IterableUtils;
 import org.apache.commons.csv.CSVRecord;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
@@ -119,7 +120,7 @@ public class ArmRpoServiceImpl implements ArmRpoService {
         for (File csvFile : csvFiles) {
             try (Reader reader = new FileReader(csvFile.getPath())) {
                 Iterable<CSVRecord> records = CsvFileUtil.readCsv(reader);
-
+                log.info("About to read {} rows of CSV file: {}", IterableUtils.size(records), csvFile.getName());
                 for (CSVRecord csvRecord : records) {
                     String csvEod = csvRecord.get(CLIENT_IDENTIFIER_CSV_HEADER);
                     if (StringUtils.isNotBlank(csvEod)) {

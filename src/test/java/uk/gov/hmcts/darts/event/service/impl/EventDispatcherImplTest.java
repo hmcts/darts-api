@@ -9,7 +9,6 @@ import uk.gov.hmcts.darts.common.entity.EventHandlerEntity;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.common.repository.EventHandlerRepository;
 import uk.gov.hmcts.darts.event.model.DartsEvent;
-import uk.gov.hmcts.darts.event.service.CleanupCurrentFlagEventProcessor;
 import uk.gov.hmcts.darts.event.service.EventHandler;
 import uk.gov.hmcts.darts.log.api.LogApi;
 
@@ -36,13 +35,13 @@ class EventDispatcherImplTest {
     LogApi logApi;
 
     @Mock
-    CleanupCurrentFlagEventProcessor cleanupCurrentFlagEventProcessor;
+    AsyncEventProcessor asyncEventProcessor;
 
     @Test
     void receiveWithNoHandlers() {
         List<EventHandler> eventHandlers = new ArrayList<>();
         when(eventHandlerRepository.findByTypeAndSubType(anyString(), anyString())).thenReturn(Collections.emptyList());
-        EventDispatcherImpl eventDispatcher = new EventDispatcherImpl(eventHandlers, eventHandlerRepository, cleanupCurrentFlagEventProcessor, logApi);
+        EventDispatcherImpl eventDispatcher = new EventDispatcherImpl(eventHandlers, eventHandlerRepository, asyncEventProcessor, logApi);
 
 
         DartsEvent event = new DartsEvent();
@@ -56,7 +55,7 @@ class EventDispatcherImplTest {
             exception.getDetail()
         );
         verify(logApi, times(1)).eventReceived(event);
-        verifyNoMoreInteractions(cleanupCurrentFlagEventProcessor);
+        verifyNoMoreInteractions(asyncEventProcessor);
     }
 
     @Test
@@ -76,12 +75,12 @@ class EventDispatcherImplTest {
         event.setMessageId("1");
         event.setEventId("123");
 
-        EventDispatcherImpl eventDispatcher = new EventDispatcherImpl(eventHandlers, eventHandlerRepository,cleanupCurrentFlagEventProcessor, logApi);
+        EventDispatcherImpl eventDispatcher = new EventDispatcherImpl(eventHandlers, eventHandlerRepository, asyncEventProcessor, logApi);
         eventDispatcher.receive(event);
 
         verify(mockEventHandler).handle(any(), any());
         verify(logApi, times(1)).eventReceived(event);
-        verify(cleanupCurrentFlagEventProcessor,times(1)).processEvent(123);
+        verify(asyncEventProcessor, times(1)).processEvent(123);
     }
 
 

@@ -38,12 +38,15 @@ class CleanupCurrentFlagEventProcessorImplTest extends PostgresIntegrationBase {
 
     private CleanupCurrentFlagEventProcessorImpl cleanupCurrentFlagEventProcessor;
 
+    private static final String EARLIEST_IS_CURRENT_CLEAR_UP_DATE = "2024-12-01";
+    private static final OffsetDateTime LEGACY_EVENT_DATE = OffsetDateTime.parse(EARLIEST_IS_CURRENT_CLEAR_UP_DATE + "T00:00:00+00:00").minusDays(1);
+
     @BeforeEach
     void beforeEach() {
         UserAccountEntity userAccount = new UserAccountEntity();
         userAccount.setId(TestUtils.AUTOMATION_USER_ID);
         when(userIdentity.getUserAccount()).thenReturn(userAccount);
-        this.cleanupCurrentFlagEventProcessor = new CleanupCurrentFlagEventProcessorImpl(eventRepository, hearingRepository);
+        this.cleanupCurrentFlagEventProcessor = new CleanupCurrentFlagEventProcessorImpl(EARLIEST_IS_CURRENT_CLEAR_UP_DATE, eventRepository, hearingRepository);
     }
 
     @Test
@@ -51,10 +54,12 @@ class CleanupCurrentFlagEventProcessorImplTest extends PostgresIntegrationBase {
         dartsDatabase.createCase("Bristol", "case1");
         dartsDatabase.createCase("Bristol", "case2");
         dartsDatabase.createCase("Bristol", "case3");
-        Map<Integer, List<EventEntity>> eventIdMap = eventStub.generateEventIdEventsIncludingZeroEventId(3, 3, false);
+        Map<Integer, List<EventEntity>> eventIdMap =
+            transactionalUtil.executeInTransaction(() -> eventStub.generateEventIdEventsIncludingZeroEventId(3, 3, false));
+
         assertAllEventsAreCurrent(eventIdMap);
         eventIdMap.keySet().forEach(eventId -> {
-            cleanupCurrentFlagEventProcessor.processEvent(eventId);
+            transactionalUtil.executeInTransaction(() -> cleanupCurrentFlagEventProcessor.processEvent(eventId));
             assertOnlyOneCurrentPerEventId(eventId);
         });
         assertOnlyOneCurrentPerEventId(eventIdMap);
@@ -67,11 +72,14 @@ class CleanupCurrentFlagEventProcessorImplTest extends PostgresIntegrationBase {
         dartsDatabase.createCase("Bristol", "case3");
         HearingEntity newHearing = hearingStub.createHearing("Bristol", "2", "case3", DateConverterUtil.toLocalDateTime(EventStub.STARTED_AT));
         EventEntity newEventEntity = eventStub.createEvent(newHearing, 10, EventStub.STARTED_AT, "LOG", 2);
-        Map<Integer, List<EventEntity>> eventIdMap = eventStub.generateEventIdEventsIncludingZeroEventId(3, 3, false);
+        newEventEntity.setCreatedDateTime(EventStub.STARTED_AT);
+        eventStub.saveEvent(newEventEntity);
+        Map<Integer, List<EventEntity>> eventIdMap =
+             eventStub.generateEventIdEventsIncludingZeroEventId(3, 3, false, EventStub.STARTED_AT);
         eventIdMap.get(2).add(newEventEntity);
         assertAllEventsAreCurrent(eventIdMap);
         eventIdMap.keySet().forEach(eventId -> {
-            cleanupCurrentFlagEventProcessor.processEvent(eventId);
+            transactionalUtil.executeInTransaction(() -> cleanupCurrentFlagEventProcessor.processEvent(eventId));
             assertOnlyOneCurrentPerEventId(eventId, newEventEntity.getId());
         });
         assertOnlyOneCurrentPerEventId(eventIdMap, newEventEntity.getId());
@@ -82,7 +90,8 @@ class CleanupCurrentFlagEventProcessorImplTest extends PostgresIntegrationBase {
         dartsDatabase.createCase("Bristol", "case1");
         dartsDatabase.createCase("Bristol", "case2");
         dartsDatabase.createCase("Bristol", "case3");
-        Map<Integer, List<EventEntity>> eventIdMap = eventStub.generateEventIdEventsIncludingZeroEventId(3, 3, false);
+        Map<Integer, List<EventEntity>> eventIdMap =
+            transactionalUtil.executeInTransaction(() -> eventStub.generateEventIdEventsIncludingZeroEventId(3, 3, false));
 
         //Update the created at time of the first event to be in the future to simulate out of order event inserts
         eventIdMap.keySet().forEach(
@@ -95,10 +104,26 @@ class CleanupCurrentFlagEventProcessorImplTest extends PostgresIntegrationBase {
 
         assertAllEventsAreCurrent(eventIdMap);
         eventIdMap.keySet().forEach(eventId -> {
-            cleanupCurrentFlagEventProcessor.processEvent(eventId);
+            transactionalUtil.executeInTransaction(() -> cleanupCurrentFlagEventProcessor.processEvent(eventId));
             assertOnlyOneCurrentPerEventId(eventId);
         });
         assertOnlyOneCurrentPerEventId(eventIdMap);
+    }
+
+    @Test
+    void cleanupCurrentFlagEventProcessor_shouldNotChangeTheIsCurrentFlagForAVersionedEvent_whenTheOriginalEventIsFromALegacyCase() {
+        dartsDatabase.createCase("Bristol", "case1");
+        dartsDatabase.createCase("Bristol", "case2");
+        dartsDatabase.createCase("Bristol", "case3");
+        Map<Integer, List<EventEntity>> eventIdMap = eventStub.generateEventIdEventsIncludingZeroEventId(3, 3, false, LEGACY_EVENT_DATE);
+
+        assertAllEventsAreCurrent(eventIdMap);
+
+        eventIdMap.keySet().forEach(eventId -> {
+            transactionalUtil.executeInTransaction(() -> cleanupCurrentFlagEventProcessor.processEvent(eventId));
+            assertAllEventsAreCurrent(eventId);
+        });
+        assertAllEventsAreCurrent(eventIdMap);
     }
 
     private void assertOnlyOneCurrentPerEventId(Map<Integer, List<EventEntity>> eventIdMap, Integer... eveIdsToExclude) {
@@ -146,9 +171,15 @@ class CleanupCurrentFlagEventProcessorImplTest extends PostgresIntegrationBase {
         });
     }
 
+    private void assertAllEventsAreCurrent(Integer eventId) {
+        assertAllEventsAreCurrent(eventRepository.findAllByEventId(eventId));
+    }
+
     private void assertAllEventsAreCurrent(Map<Integer, List<EventEntity>> eventIdMap) {
-        eventIdMap.values()
-            .forEach(eventEntities -> eventEntities
-                .forEach(eventEntity -> assertTrue(eventEntity.getIsCurrent())));
+        assertAllEventsAreCurrent(eventIdMap.values().stream().flatMap(List::stream).toList());
+    }
+
+    private void assertAllEventsAreCurrent(List<EventEntity> eventIdMap) {
+        eventIdMap.forEach(eventEntity -> assertTrue(eventEntity.getIsCurrent()));
     }
 }
