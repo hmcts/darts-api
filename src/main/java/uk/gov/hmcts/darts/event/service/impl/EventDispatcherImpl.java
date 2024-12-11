@@ -8,7 +8,6 @@ import uk.gov.hmcts.darts.common.entity.EventHandlerEntity;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.common.repository.EventHandlerRepository;
 import uk.gov.hmcts.darts.event.model.DartsEvent;
-import uk.gov.hmcts.darts.event.service.CleanupCurrentFlagEventProcessor;
 import uk.gov.hmcts.darts.event.service.EventDispatcher;
 import uk.gov.hmcts.darts.event.service.EventHandler;
 import uk.gov.hmcts.darts.log.api.LogApi;
@@ -32,8 +31,7 @@ public class EventDispatcherImpl implements EventDispatcher {
 
     private final List<EventHandler> eventHandlers;
     private final EventHandlerRepository eventHandlerRepository;
-    private final CleanupCurrentFlagEventProcessor cleanupCurrentFlagEventProcessor;
-
+    private final AsyncEventProcessor asyncEventProcessor;
     private final LogApi logApi;
 
     @Override
@@ -46,7 +44,7 @@ public class EventDispatcherImpl implements EventDispatcher {
         if (foundHandler.isPresent()) {
             logEvent(event, foundHandler.get());
             foundHandler.get().handle(event, foundHandlerEntity);
-            cleanupCurrentFlagEventProcessor.processEvent(NumberUtils.createInteger(event.getEventId()));
+            asyncEventProcessor.processEvent(NumberUtils.createInteger(event.getEventId()));
         } else {
             // Event registered in DB, but no handler defined...just log and return OK.
             log.warn(format(HANDLER_NOT_FOUND_MESSAGE, event.getMessageId(), event.getType(), event.getSubType()));

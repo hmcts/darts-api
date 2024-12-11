@@ -505,11 +505,6 @@ darts:
         lock:
           at-least-for: PT1M
           at-most-for: PT90M
-      remove-duplicated-events:
-        system-user-email: system_RemoveDuplicatedEvents@hmcts.net
-        lock:
-          at-least-for: PT1M
-          at-most-for: PT90M
       unstructured-transcription-annotation-deleter:
         system-user-email: system_UnstructuredTranscriptionAnnotationDeleter@hmcts.net
         lock:
