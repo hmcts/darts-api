@@ -21,6 +21,7 @@ import uk.gov.hmcts.darts.arm.util.files.UploadFileFilenameProcessor;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.entity.ObjectStateRecordEntity;
+import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
 import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
 import uk.gov.hmcts.darts.common.repository.ObjectStateRecordRepository;
@@ -158,13 +159,15 @@ class DetsToArmBatchProcessResponseFilesImplTest {
             .uploadFileFilenameProcessor(uploadFileFilenameProcessor)
             .build();
         when(osrRepository.findByArmEodId(anyString())).thenReturn(Optional.of(objectStateRecordEntity));
+        UserAccountEntity userAccount = mock(UserAccountEntity.class);
 
         // when
         detsToArmBatchProcessResponseFilesImpl.onUploadFileChecksumValidationSuccess(batchInputUploadFileFilenameProcessor,
                                                                                      batchData,
                                                                                      uploadFileRecord,
                                                                                      externalObjectDirectoryEntity,
-                                                                                     checksum);
+                                                                                     checksum,
+                                                                                     userAccount);
 
         // then
         verify(osrRepository).findByArmEodId("1");
@@ -178,10 +181,11 @@ class DetsToArmBatchProcessResponseFilesImplTest {
         uploadFileRecord.setA360FileId("a360FileId");
         uploadFileRecord.setMd5("invalidchecksum");
         when(osrRepository.findByArmEodId(anyString())).thenReturn(Optional.of(objectStateRecordEntity));
+        UserAccountEntity userAccount = mock(UserAccountEntity.class);
 
         // when
         detsToArmBatchProcessResponseFilesImpl
-            .onUploadFileChecksumValidationFailure(uploadFileRecord, externalObjectDirectoryEntity, "checksum");
+            .onUploadFileChecksumValidationFailure(uploadFileRecord, externalObjectDirectoryEntity, "checksum", userAccount);
 
         // then
         verify(osrRepository).findByArmEodId("1");
@@ -194,9 +198,10 @@ class DetsToArmBatchProcessResponseFilesImplTest {
         ArmResponseUploadFileRecord uploadFileRecord = mock(ArmResponseUploadFileRecord.class);
         UploadFileFilenameProcessor processor = mock(UploadFileFilenameProcessor.class);
         when(osrRepository.findByArmEodId(anyString())).thenReturn(Optional.of(objectStateRecordEntity));
+        UserAccountEntity userAccount = mock(UserAccountEntity.class);
 
         // when
-        detsToArmBatchProcessResponseFilesImpl.processUploadFileDataFailure(uploadFileRecord, processor, externalObjectDirectoryEntity);
+        detsToArmBatchProcessResponseFilesImpl.processUploadFileDataFailure(uploadFileRecord, processor, externalObjectDirectoryEntity, userAccount);
 
         // then
         verify(osrRepository).findByArmEodId("1");
@@ -217,9 +222,10 @@ class DetsToArmBatchProcessResponseFilesImplTest {
                 """);
 
         when(osrRepository.findByArmEodId(anyString())).thenReturn(Optional.of(objectStateRecordEntity));
+        UserAccountEntity userAccount = mock(UserAccountEntity.class);
 
         // when
-        detsToArmBatchProcessResponseFilesImpl.processInvalidLineFileActions(invalidLineRecord, externalObjectDirectoryEntity);
+        detsToArmBatchProcessResponseFilesImpl.processInvalidLineFileActions(invalidLineRecord, externalObjectDirectoryEntity, userAccount);
 
         // then
         verify(osrRepository).findByArmEodId("1");
