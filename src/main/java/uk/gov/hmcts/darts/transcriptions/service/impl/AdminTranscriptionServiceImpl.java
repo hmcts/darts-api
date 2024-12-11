@@ -184,10 +184,6 @@ public class AdminTranscriptionServiceImpl implements AdminTranscriptionService 
         if (transcriptionDocumentEntity.isPresent()) {
             TranscriptionDocumentEntity documentEntity = transcriptionDocumentEntity.get();
 
-            if (!documentEntity.isHidden() && transcriptionDocumentHideRequest.getIsHidden()) {
-                auditApi.record(HIDE_TRANSCRIPTION);
-            }
-
             documentEntity.setHidden(transcriptionDocumentHideRequest.getIsHidden());
             documentEntity = transcriptionDocumentRepository.saveAndFlush(documentEntity);
 
@@ -199,6 +195,8 @@ public class AdminTranscriptionServiceImpl implements AdminTranscriptionService 
                     throw new DartsApiException(TranscriptionApiError
                                                     .TRANSCRIPTION_DOCUMENT_HIDE_ACTION_REASON_NOT_FOUND);
                 }
+
+                auditApi.record(HIDE_TRANSCRIPTION);
 
                 // on hiding add the relevant hide record
                 ObjectAdminActionEntity objectAdminActionEntity = new ObjectAdminActionEntity();
