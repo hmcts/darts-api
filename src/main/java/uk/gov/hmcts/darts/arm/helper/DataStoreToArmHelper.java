@@ -1,7 +1,8 @@
 package uk.gov.hmcts.darts.arm.helper;
 
+import com.azure.core.util.BinaryData;
+import com.azure.storage.blob.models.BlobStorageException;
 import lombok.RequiredArgsConstructor;
-import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.data.domain.Pageable;
@@ -23,8 +24,6 @@ import uk.gov.hmcts.darts.common.service.FileOperationService;
 import uk.gov.hmcts.darts.common.util.EodHelper;
 import uk.gov.hmcts.darts.log.api.LogApi;
 
-import java.io.File;
-import java.nio.file.Path;
 import java.text.MessageFormat;
 import java.time.Duration;
 import java.time.Instant;
@@ -45,6 +44,8 @@ import static uk.gov.hmcts.darts.common.util.EodHelper.equalsAnyStatus;
 @Slf4j
 @RequiredArgsConstructor
 public class DataStoreToArmHelper {
+
+    private static final int BLOB_ALREADY_EXISTS_STATUS_CODE = 409;
     private final ObjectRecordStatusRepository objectRecordStatusRepository;
     private final ExternalObjectDirectoryRepository externalObjectDirectoryRepository;
     private final ArmDataManagementConfiguration armDataManagementConfiguration;
@@ -218,14 +219,6 @@ public class DataStoreToArmHelper {
         externalObjectDirectoryRepository.saveAndFlush(externalObjectDirectoryEntity);
     }
 
-    @SneakyThrows
-    public File createEmptyArchiveRecordsFile(String manifestFilePrefix) {
-        String fileName = getArchiveRecordsFileName(manifestFilePrefix);
-        Path filePath = fileOperationService.createFile(fileName, armDataManagementConfiguration.getTempBlobWorkspace(), true);
-        log.info("Created empty archive records file {}", filePath.getFileName());
-        return filePath.toFile();
-    }
-
     public String getArchiveRecordsFileName(String manifestFilePrefix) {
         String fileNameFormat = "%s_%s.%s";
         return String.format(fileNameFormat,
@@ -237,13 +230,13 @@ public class DataStoreToArmHelper {
 
     public void updateArmEodToArmIngestionStatus(ExternalObjectDirectoryEntity armEod, ArmBatchItem batchItem,
                                                  ArmBatchItems batchItems,
-                                                 File archiveRecordsFile, UserAccountEntity userAccount,
+                                                 String archiveRecordsFileName, UserAccountEntity userAccount,
                                                  ExternalLocationTypeEntity eodSourceLocation) {
         var matchingEntity = getExternalObjectDirectoryEntity(armEod, eodSourceLocation, EodHelper.storedStatus());
         if (matchingEntity.isPresent()) {
             batchItem.setSourceEod(matchingEntity.get());
             batchItems.add(batchItem);
-            armEod.setManifestFile(archiveRecordsFile.getName());
+            armEod.setManifestFile(archiveRecordsFileName);
             incrementTransferAttempts(armEod);
             updateExternalObjectDirectoryStatus(armEod, EodHelper.armIngestionStatus(), userAccount);
         } else {
@@ -278,8 +271,8 @@ public class DataStoreToArmHelper {
         return equalsAnyStatus(batchItem.getPreviousStatus(), EodHelper.failedArmManifestFileStatus(), EodHelper.armResponseManifestFailedStatus());
     }
 
-    public void writeManifestFile(ArmBatchItems batchItems, File archiveRecordsFile) {
-        archiveRecordFileGenerator.generateArchiveRecords(batchItems.getArchiveRecords(), archiveRecordsFile);
+    public String generateManifestFileContents(ArmBatchItems batchItems, String archiveRecordsFileName) {
+        return archiveRecordFileGenerator.generateArchiveRecords(archiveRecordsFileName, batchItems.getArchiveRecords());
     }
 
     public void recoverByUpdatingEodToFailedArmStatus(ArmBatchItem batchItem, UserAccountEntity userAccount) {
@@ -296,5 +289,23 @@ public class DataStoreToArmHelper {
 
     public Long getFileSize(int externalObjectDirectoryId) {
         return externalObjectDirectoryRepository.findFileSize(externalObjectDirectoryId);
+    }
+
+
+    public void copyMetadataToArm(String manifestFileContents, String archiveRecordsFileName) {
+        try {
+            BinaryData metadataFileBinary = fileOperationService.convertStringToBinaryData(Optional.ofNullable(manifestFileContents).orElse(""));
+            armDataManagementApi.saveBlobDataToArm(archiveRecordsFileName, metadataFileBinary);
+        } catch (BlobStorageException e) {
+            if (e.getStatusCode() == BLOB_ALREADY_EXISTS_STATUS_CODE) {
+                log.info("Metadata BLOB already exists", e);
+            } else {
+                log.error("Failed to move BLOB metadata for file {}", archiveRecordsFileName, e);
+                throw e;
+            }
+        } catch (Exception e) {
+            log.error("Unable to move BLOB metadata for file {}", archiveRecordsFileName, e);
+            throw e;
+        }
     }
 }

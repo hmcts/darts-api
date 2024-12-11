@@ -12,6 +12,7 @@ import org.springframework.data.domain.Pageable;
 import uk.gov.hmcts.darts.arm.api.ArmDataManagementApi;
 import uk.gov.hmcts.darts.arm.component.ArchiveRecordFileGenerator;
 import uk.gov.hmcts.darts.arm.config.ArmDataManagementConfiguration;
+import uk.gov.hmcts.darts.arm.model.ArchiveRecord;
 import uk.gov.hmcts.darts.arm.model.batch.ArmBatchItems;
 import uk.gov.hmcts.darts.common.entity.ExternalLocationTypeEntity;
 import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
@@ -38,10 +39,9 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyList;
-import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -201,31 +201,18 @@ class DataStoreToArmHelperTest {
     }
 
     @Test
-    void createEmptyArchiveRecordsFile() throws IOException {
-        // given
-        String manifestFilePrefix = "DETS";
-        when(fileOperationService.createFile(anyString(), anyString(), anyBoolean())).thenReturn(tempDirectory.toPath());
-        when(armDataManagementConfiguration.getFileExtension()).thenReturn("a360");
-        when(armDataManagementConfiguration.getTempBlobWorkspace()).thenReturn("/temp_workspace");
-
-        // when
-        File result = dataStoreToArmHelper.createEmptyArchiveRecordsFile(manifestFilePrefix);
-
-        // then
-        assertNotNull(result);
-    }
-
-    @Test
     void writeManifestFile() {
         // given
         ArmBatchItems batchItems = mock(ArmBatchItems.class);
-        File archiveRecordsFile = mock(File.class);
+        ArchiveRecord archiveRecord = mock(ArchiveRecord.class);
+        List<ArchiveRecord> archiveRecords = List.of(archiveRecord);
+        when(batchItems.getArchiveRecords()).thenReturn(archiveRecords);
 
         // when
-        dataStoreToArmHelper.writeManifestFile(batchItems, archiveRecordsFile);
+        dataStoreToArmHelper.generateManifestFileContents(batchItems, "fileName");
 
         // then
-        verify(archiveRecordFileGenerator).generateArchiveRecords(anyList(), any());
+        verify(archiveRecordFileGenerator).generateArchiveRecords(eq("fileName"), eq(archiveRecords));
     }
 
     @Test

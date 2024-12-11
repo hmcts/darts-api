@@ -1,7 +1,5 @@
 package uk.gov.hmcts.darts.arm.service.impl;
 
-import com.azure.core.util.BinaryData;
-import com.azure.storage.blob.models.BlobStorageException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.ListUtils;
@@ -135,8 +133,8 @@ public class UnstructuredToArmBatchProcessorImpl implements UnstructuredToArmBat
 
         try {
             if (!batchItems.getSuccessful().isEmpty()) {
-                String manifestFileContents = generateManifestFileContents(batchItems, archiveRecordsFileName);
-                copyMetadataToArm(manifestFileContents, archiveRecordsFileName);
+                String manifestFileContents = unstructuredToArmHelper.generateManifestFileContents(batchItems, archiveRecordsFileName);
+                unstructuredToArmHelper.copyMetadataToArm(manifestFileContents, archiveRecordsFileName);
             }
         } catch (Exception e) {
             log.error("Error during generation of batch manifest file {}", archiveRecordsFileName, e);
@@ -193,27 +191,6 @@ public class UnstructuredToArmBatchProcessorImpl implements UnstructuredToArmBat
 
     private boolean shouldAddEntryToManifestFile(ArmBatchItem batchItem) {
         return equalsAnyStatus(batchItem.getPreviousStatus(), EodHelper.failedArmManifestFileStatus(), EodHelper.armResponseManifestFailedStatus());
-    }
-
-    private String generateManifestFileContents(ArmBatchItems batchItems, String archiveRecordsFileName) {
-        return archiveRecordFileGenerator.generateArchiveRecords(archiveRecordsFileName, batchItems.getArchiveRecords());
-    }
-
-    protected void copyMetadataToArm(String manifestFileContents, String archiveRecordsFileName) {
-        try {
-            BinaryData metadataFileBinary = fileOperationService.convertStringToBinaryData(manifestFileContents);
-            armDataManagementApi.saveBlobDataToArm(archiveRecordsFileName, metadataFileBinary);
-        } catch (BlobStorageException e) {
-            if (e.getStatusCode() == BLOB_ALREADY_EXISTS_STATUS_CODE) {
-                log.info("Metadata BLOB already exists", e);
-            } else {
-                log.error("Failed to move BLOB metadata for file {}", archiveRecordsFileName, e);
-                throw e;
-            }
-        } catch (Exception e) {
-            log.error("Unable to move BLOB metadata for file {}", archiveRecordsFileName, e);
-            throw e;
-        }
     }
 
     @SuppressWarnings({"PMD.ConfusingTernary"})
