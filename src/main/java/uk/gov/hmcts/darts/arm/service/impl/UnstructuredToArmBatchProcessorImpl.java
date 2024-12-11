@@ -25,7 +25,6 @@ import uk.gov.hmcts.darts.common.util.EodHelper;
 import uk.gov.hmcts.darts.log.api.LogApi;
 import uk.gov.hmcts.darts.util.AsyncUtil;
 
-import java.io.File;
 import java.text.MessageFormat;
 import java.time.OffsetDateTime;
 import java.util.List;
@@ -105,10 +104,8 @@ public class UnstructuredToArmBatchProcessorImpl implements UnstructuredToArmBat
     }
 
     private void createAndSendBatchFile(List<ExternalObjectDirectoryEntity> eodsForBatch, UserAccountEntity userAccount) {
-
-        File archiveRecordsFile = unstructuredToArmHelper.createEmptyArchiveRecordsFile(armDataManagementConfiguration.getManifestFilePrefix());
+        String archiveRecordsFileName = unstructuredToArmHelper.getArchiveRecordsFileName(armDataManagementConfiguration.getManifestFilePrefix());
         var batchItems = new ArmBatchItems();
-
 
         for (var currentEod : eodsForBatch) {
             var batchItem = new ArmBatchItem();
@@ -118,9 +115,9 @@ public class UnstructuredToArmBatchProcessorImpl implements UnstructuredToArmBat
                     //retry existing attempt that has previously failed.
                     armEod = currentEod;
                     batchItem.setArmEod(armEod);
-                    updateArmEodToArmIngestionStatus(currentEod, batchItem, batchItems, archiveRecordsFile, userAccount);
+                    updateArmEodToArmIngestionStatus(currentEod, batchItem, batchItems, archiveRecordsFileName, userAccount);
                 } else {
-                    armEod = unstructuredToArmHelper.createArmEodWithArmIngestionStatus(currentEod, batchItem, batchItems, archiveRecordsFile, userAccount);
+                    armEod = unstructuredToArmHelper.createArmEodWithArmIngestionStatus(currentEod, batchItem, batchItems, archiveRecordsFileName, userAccount);
                 }
 
                 String rawFilename = unstructuredToArmHelper.generateRawFilename(armEod);
@@ -138,11 +135,11 @@ public class UnstructuredToArmBatchProcessorImpl implements UnstructuredToArmBat
 
         try {
             if (!batchItems.getSuccessful().isEmpty()) {
-                writeManifestFile(batchItems, archiveRecordsFile);
-                copyMetadataToArm(archiveRecordsFile);
+                String manifestFileContents = generateManifestFileContents(batchItems, archiveRecordsFileName);
+                copyMetadataToArm(manifestFileContents, archiveRecordsFileName);
             }
         } catch (Exception e) {
-            log.error("Error during generation of batch manifest file {}", archiveRecordsFile.getName(), e);
+            log.error("Error during generation of batch manifest file {}", archiveRecordsFileName, e);
             batchItems.getSuccessful().forEach(batchItem -> recoverByUpdatingEodToFailedArmStatus(batchItem, userAccount));
             return;
         }
@@ -154,12 +151,12 @@ public class UnstructuredToArmBatchProcessorImpl implements UnstructuredToArmBat
     }
 
     private void updateArmEodToArmIngestionStatus(ExternalObjectDirectoryEntity armEod, ArmBatchItem batchItem, ArmBatchItems batchItems,
-                                                  File archiveRecordsFile, UserAccountEntity userAccount) {
+                                                  String archiveRecordsFileName, UserAccountEntity userAccount) {
         var matchingEntity = unstructuredToArmHelper.getExternalObjectDirectoryEntity(armEod, EodHelper.unstructuredLocation(), EodHelper.storedStatus());
         if (matchingEntity.isPresent()) {
             batchItem.setSourceEod(matchingEntity.get());
             batchItems.add(batchItem);
-            armEod.setManifestFile(archiveRecordsFile.getName());
+            armEod.setManifestFile(archiveRecordsFileName);
             unstructuredToArmHelper.incrementTransferAttempts(armEod);
             unstructuredToArmHelper.updateExternalObjectDirectoryStatus(armEod, EodHelper.armIngestionStatus(), userAccount);
         } else {
@@ -198,23 +195,23 @@ public class UnstructuredToArmBatchProcessorImpl implements UnstructuredToArmBat
         return equalsAnyStatus(batchItem.getPreviousStatus(), EodHelper.failedArmManifestFileStatus(), EodHelper.armResponseManifestFailedStatus());
     }
 
-    private void writeManifestFile(ArmBatchItems batchItems, File archiveRecordsFile) {
-        archiveRecordFileGenerator.generateArchiveRecords(batchItems.getArchiveRecords(), archiveRecordsFile);
+    private String generateManifestFileContents(ArmBatchItems batchItems, String archiveRecordsFileName) {
+        return archiveRecordFileGenerator.generateArchiveRecords(archiveRecordsFileName, batchItems.getArchiveRecords());
     }
 
-    protected void copyMetadataToArm(File manifestFile) {
+    protected void copyMetadataToArm(String manifestFileContents, String archiveRecordsFileName) {
         try {
-            BinaryData metadataFileBinary = fileOperationService.convertFileToBinaryData(manifestFile.getAbsolutePath());
-            armDataManagementApi.saveBlobDataToArm(manifestFile.getName(), metadataFileBinary);
+            BinaryData metadataFileBinary = fileOperationService.convertStringToBinaryData(manifestFileContents);
+            armDataManagementApi.saveBlobDataToArm(archiveRecordsFileName, metadataFileBinary);
         } catch (BlobStorageException e) {
             if (e.getStatusCode() == BLOB_ALREADY_EXISTS_STATUS_CODE) {
                 log.info("Metadata BLOB already exists", e);
             } else {
-                log.error("Failed to move BLOB metadata for file {}", manifestFile.getAbsolutePath(), e);
+                log.error("Failed to move BLOB metadata for file {}", archiveRecordsFileName, e);
                 throw e;
             }
         } catch (Exception e) {
-            log.error("Unable to move BLOB metadata for file {}", manifestFile.getAbsolutePath(), e);
+            log.error("Unable to move BLOB metadata for file {}", archiveRecordsFileName, e);
             throw e;
         }
     }

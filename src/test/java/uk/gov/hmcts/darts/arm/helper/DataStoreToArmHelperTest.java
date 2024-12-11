@@ -33,6 +33,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -237,5 +238,15 @@ class DataStoreToArmHelperTest {
 
         // then
         assertEquals(1000L, result);
+    }
+
+
+
+    @Test
+    void getArchiveRecordsFileName_typical() throws IOException {
+        when(armDataManagementConfiguration.getFileExtension()).thenReturn("a360");
+        String name = dataStoreToArmHelper.getArchiveRecordsFileName("DARTS");
+
+        assertThat(name).matches("DARTS_.+\\.a360");
     }
 }

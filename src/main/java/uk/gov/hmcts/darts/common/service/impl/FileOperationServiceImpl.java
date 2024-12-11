@@ -88,4 +88,9 @@ public class FileOperationServiceImpl implements FileOperationService {
         return BinaryData.fromFile(Path.of(fileName));
     }
 
+    @Override
+    public BinaryData convertStringToBinaryData(String manifestFileContents) {
+        return BinaryData.fromString(manifestFileContents);
+    }
+
 }

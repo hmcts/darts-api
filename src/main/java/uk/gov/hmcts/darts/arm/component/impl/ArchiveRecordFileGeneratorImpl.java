@@ -50,6 +50,33 @@ public class ArchiveRecordFileGeneratorImpl implements ArchiveRecordFileGenerato
     }
 
     @Override
+    public String generateArchiveRecords(String archvieFileName, List<ArchiveRecord> archiveRecords) {
+        StringBuilder archiveRecordsStringBuilder = new StringBuilder();
+        if (!archiveRecords.isEmpty()) {
+            for (var archiveRecord : archiveRecords) {
+                try {
+                    String archiveRecordOperation = objectMapper.writeValueAsString(archiveRecord.getArchiveRecordOperation());
+                    String uploadNewFileRecord = objectMapper.writeValueAsString(archiveRecord.getUploadNewFileRecord());
+                    archiveRecordsStringBuilder.append(archiveRecordOperation).append(System.lineSeparator());
+                    archiveRecordsStringBuilder.append(uploadNewFileRecord).append(System.lineSeparator());
+                } catch (Exception e) {
+                    log.error("Unable to write archive record for EOD {}",
+                              archiveRecord.getArchiveRecordOperation().getRelationId());
+                    throw new DartsException(e);
+                }
+            }
+        }
+        String archiveRecordsString = archiveRecordsStringBuilder.toString();
+        log.info("Contents of manifest file {} for EOD {}\n{}",
+                 archvieFileName,
+                 archiveRecords.get(0).getArchiveRecordOperation().getRelationId(),
+                 archiveRecordsString);
+        return archiveRecordsString;
+    }
+
+
+    @Override
+    @Deprecated(since = "11/12/2024")
     public void generateArchiveRecords(List<ArchiveRecord> archiveRecords, File archiveRecordsFile) {
         if (!archiveRecords.isEmpty()) {
             try (BufferedWriter fileWriter = Files.newBufferedWriter(archiveRecordsFile.toPath()); PrintWriter printWriter = new PrintWriter(fileWriter)) {
@@ -75,7 +102,8 @@ public class ArchiveRecordFileGeneratorImpl implements ArchiveRecordFileGenerato
             logManifestFile(archiveRecords, archiveRecordsFile);
         }
     }
-    
+
+    @Deprecated(since = "11/12/2024")
     private void logManifestFile(List<ArchiveRecord> archiveRecords, File archiveRecordsFile) {
         try {
             String contents = FileUtils.readFileToString(archiveRecordsFile.getAbsoluteFile(), UTF_8);

@@ -267,12 +267,11 @@ class DataStoreToArmHelperIntTest extends IntegrationBase {
     void createArmEodWithArmIngestionStatus() {
         ArmBatchItem batchItem = new ArmBatchItem();
         ArmBatchItems batchItems = new ArmBatchItems();
-        File archiveRecordsFile = new File("testfile");
         UserAccountEntity userAccount = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
 
         ExternalObjectDirectoryEntity result = dataStoreToArmHelper.createArmEodWithArmIngestionStatus(externalObjectDirectory,
                                                                                                        batchItem, batchItems,
-                                                                                                       archiveRecordsFile, userAccount);
+                                                                                                       "testfile", userAccount);
         assertNotNull(result);
     }
 

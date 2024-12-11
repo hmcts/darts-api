@@ -56,7 +56,7 @@ public class DataStoreToArmHelper {
 
 
     public List<Integer> getEodEntitiesToSendToArm(ExternalLocationTypeEntity sourceLocation,
-                                                                         ExternalLocationTypeEntity armLocation, int maxResultSize) {
+                                                   ExternalLocationTypeEntity armLocation, int maxResultSize) {
         ObjectRecordStatusEntity armRawStatusFailed = objectRecordStatusRepository.getReferenceById(ARM_RAW_DATA_FAILED.getId());
         ObjectRecordStatusEntity armManifestFailed = objectRecordStatusRepository.getReferenceById(ARM_MANIFEST_FAILED.getId());
 
@@ -220,15 +220,19 @@ public class DataStoreToArmHelper {
 
     @SneakyThrows
     public File createEmptyArchiveRecordsFile(String manifestFilePrefix) {
-        String fileNameFormat = "%s_%s.%s";
-        String fileName = String.format(fileNameFormat,
-                                        manifestFilePrefix,
-                                        UUID.randomUUID(),
-                                        armDataManagementConfiguration.getFileExtension()
-        );
+        String fileName = getArchiveRecordsFileName(manifestFilePrefix);
         Path filePath = fileOperationService.createFile(fileName, armDataManagementConfiguration.getTempBlobWorkspace(), true);
         log.info("Created empty archive records file {}", filePath.getFileName());
         return filePath.toFile();
+    }
+
+    public String getArchiveRecordsFileName(String manifestFilePrefix) {
+        String fileNameFormat = "%s_%s.%s";
+        return String.format(fileNameFormat,
+                             manifestFilePrefix,
+                             UUID.randomUUID(),
+                             armDataManagementConfiguration.getFileExtension()
+        );
     }
 
     public void updateArmEodToArmIngestionStatus(ExternalObjectDirectoryEntity armEod, ArmBatchItem batchItem,
@@ -252,10 +256,10 @@ public class DataStoreToArmHelper {
     public ExternalObjectDirectoryEntity createArmEodWithArmIngestionStatus(ExternalObjectDirectoryEntity currentEod,
                                                                             ArmBatchItem batchItem,
                                                                             ArmBatchItems batchItems,
-                                                                            File archiveRecordsFile,
+                                                                            String archiveRecordsFileName,
                                                                             UserAccountEntity userAccount) {
         ExternalObjectDirectoryEntity armEod = createArmExternalObjectDirectoryEntity(currentEod, EodHelper.armIngestionStatus(), userAccount);
-        armEod.setManifestFile(archiveRecordsFile.getName());
+        armEod.setManifestFile(archiveRecordsFileName);
 
         var savedArmEod = externalObjectDirectoryRepository.saveAndFlush(armEod);
         batchItem.setArmEod(savedArmEod);
