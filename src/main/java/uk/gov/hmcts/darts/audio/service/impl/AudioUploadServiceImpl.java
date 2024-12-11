@@ -2,7 +2,6 @@ package uk.gov.hmcts.darts.audio.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import uk.gov.hmcts.darts.audio.component.AddAudioRequestMapper;
@@ -12,15 +11,12 @@ import uk.gov.hmcts.darts.audio.service.AudioAsyncService;
 import uk.gov.hmcts.darts.audio.service.AudioUploadService;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.datamanagement.enums.DatastoreContainerType;
-import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
 import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
-import uk.gov.hmcts.darts.common.entity.MediaLinkedCaseEntity;
 import uk.gov.hmcts.darts.common.entity.ObjectRecordStatusEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
-import uk.gov.hmcts.darts.common.enums.MediaLinkedCaseSourceType;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.common.repository.ExternalLocationTypeRepository;
 import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
@@ -41,10 +37,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Objects;
 import java.util.UUID;
 import java.util.function.Supplier;
-import java.util.stream.Collectors;
 
 import static org.apache.commons.collections4.CollectionUtils.isEmpty;
 import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
@@ -189,28 +183,6 @@ public class AudioUploadServiceImpl implements AudioUploadService {
             .toList();
     }
 
-    private List<MediaEntity> filterMediaEntitiesWithIdenticalCaseList(List<String> caseNumbersToLookFor, List<MediaEntity> mediaEntities) {
-        ArrayList<MediaEntity> resultList = new ArrayList<>();
-        for (MediaEntity mediaEntity : mediaEntities) {
-            List<MediaLinkedCaseEntity> mediaLinkedCaseEntities =
-                mediaLinkedCaseRepository.findByMediaAndSource(mediaEntity, MediaLinkedCaseSourceType.ADD_AUDIO_METADATA);
-            List<String> mediaCaseNumbers = mediaLinkedCaseEntities.stream()
-                .map(MediaLinkedCaseEntity::getCourtCase)
-                .filter(Objects::nonNull)
-                .map(CourtCaseEntity::getCaseNumber)
-                .collect(Collectors.toList());
-            mediaCaseNumbers.addAll(mediaLinkedCaseEntities.stream()
-                                        .map(MediaLinkedCaseEntity::getCaseNumber)
-                                        .filter(Objects::nonNull)
-                                        .toList());
-            if (caseNumbersToLookFor.size() == mediaCaseNumbers.size() && CollectionUtils.containsAll(mediaCaseNumbers, caseNumbersToLookFor)) {
-                resultList.add(mediaEntity);
-            }
-        }
-
-        return resultList;
-    }
-
 
     private List<MediaEntity> getLatestDuplicateMediaFiles(AddAudioMetadataRequest addAudioMetadataRequest) {
         CourtroomEntity courtroomEntity = retrieveCoreObjectService.retrieveOrCreateCourtroom(addAudioMetadataRequest.getCourthouse(),
@@ -222,9 +194,6 @@ public class AudioUploadServiceImpl implements AudioUploadService {
             addAudioMetadataRequest.getFilename(),
             addAudioMetadataRequest.getStartedAt(),
             addAudioMetadataRequest.getEndedAt());
-
-        // filter on any media entities that relate to the same cases.
-        identicalMediaEntities = filterMediaEntitiesWithIdenticalCaseList(addAudioMetadataRequest.getCases(), identicalMediaEntities);
 
         // now lets get the lowest level media objects so that they can act as a basis for the antecedent
         Tree<MediaEntityTreeNodeImpl> tree = new Tree<>();

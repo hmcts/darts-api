@@ -11,7 +11,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.mock.web.MockMultipartFile;
 import uk.gov.hmcts.darts.audio.component.AddAudioRequestMapper;
 import uk.gov.hmcts.darts.audio.component.impl.AddAudioRequestMapperImpl;
-import uk.gov.hmcts.darts.audio.config.AudioConfigurationProperties;
 import uk.gov.hmcts.darts.audio.exception.AudioApiError;
 import uk.gov.hmcts.darts.audio.model.AddAudioMetadataRequest;
 import uk.gov.hmcts.darts.audio.service.AudioAsyncService;
@@ -24,10 +23,8 @@ import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
-import uk.gov.hmcts.darts.common.enums.MediaLinkedCaseSourceType;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.common.helper.MediaLinkedCaseHelper;
-import uk.gov.hmcts.darts.common.repository.CourtLogEventRepository;
 import uk.gov.hmcts.darts.common.repository.ExternalLocationTypeRepository;
 import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
 import uk.gov.hmcts.darts.common.repository.HearingRepository;
@@ -42,6 +39,7 @@ import uk.gov.hmcts.darts.test.common.data.PersistableFactory;
 
 import java.io.InputStream;
 import java.time.OffsetDateTime;
+import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
@@ -54,6 +52,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -78,10 +77,6 @@ class AudioUploadServiceImplTest {
     @Mock
     private UserIdentity userIdentity;
     @Mock
-    private CourtLogEventRepository courtLogEventRepository;
-    @Mock
-    private AudioConfigurationProperties audioConfigurationProperties;
-    @Mock
     private ExternalObjectDirectoryRepository externalObjectDirectoryRepository;
     @Mock
     private ExternalLocationTypeRepository externalLocationTypeRepository;
@@ -98,8 +93,6 @@ class AudioUploadServiceImplTest {
     private MediaLinkedCaseHelper mediaLinkedCaseHelper;
     @Mock
     private MediaLinkedCaseRepository mediaLinkedCaseRepository;
-    @Mock
-    private MediaEntity mediaEntityMock;
 
     @BeforeEach
     void setUp() {
@@ -122,7 +115,7 @@ class AudioUploadServiceImplTest {
     }
 
     @Test
-    void addAudio() {
+    void addAudio_shouldUploadToInboundAndSave_whenFileAndMetadataUsed() {
         UserAccountEntity userAccount = new UserAccountEntity();
         userAccount.setId(10);
         when(userIdentity.getUserAccount()).thenReturn(userAccount);
@@ -137,7 +130,7 @@ class AudioUploadServiceImplTest {
             any()
         )).thenReturn(hearingEntity);
         when(mediaRepository.findMediaByDetails(any(), any(), any(), any(), any()))
-            .thenReturn(List.of(mediaEntityMock));
+            .thenReturn(Collections.emptyList());
 
         CourthouseEntity courthouse = new CourthouseEntity();
         courthouse.setCourthouseName("SWANSEA");
@@ -184,12 +177,10 @@ class AudioUploadServiceImplTest {
         assertEquals(savedMedia.getChecksum(), externalObjectDirectoryEntity.getChecksum());
         assertNotNull(externalObjectDirectoryEntity.getChecksum());
         assertEquals(externalLocation, externalObjectDirectoryEntity.getExternalLocation());
-
-        verify(mediaLinkedCaseRepository).findByMediaAndSource(mediaEntityMock, MediaLinkedCaseSourceType.ADD_AUDIO_METADATA);
     }
 
     @Test
-    void addAudioNoUpload() {
+    void addAudio_shouldSaveMediaAndEod_whenMetadataOnly() {
         UserAccountEntity userAccount = new UserAccountEntity();
         userAccount.setId(10);
         when(userIdentity.getUserAccount()).thenReturn(userAccount);
@@ -246,6 +237,47 @@ class AudioUploadServiceImplTest {
     }
 
     @Test
+    void addAudio_shouldDoNothing_whenMetadataOnlyAndAudioIsADuplicate() {
+        UserAccountEntity userAccount = new UserAccountEntity();
+        userAccount.setId(10);
+        when(userIdentity.getUserAccount()).thenReturn(userAccount);
+
+        // Given
+        CourthouseEntity courthouse = new CourthouseEntity();
+        courthouse.setCourthouseName("SWANSEA");
+        CourtroomEntity courtroomEntity = new CourtroomEntity(1, "1", courthouse);
+        when(retrieveCoreObjectService.retrieveOrCreateCourtroom(eq("SWANSEA"), eq("1"), any(UserAccountEntity.class)))
+            .thenReturn(courtroomEntity);
+
+        OffsetDateTime startedAt = OffsetDateTime.now().minusHours(1);
+        OffsetDateTime endedAt = OffsetDateTime.now();
+        AddAudioMetadataRequest addAudioMetadataRequest = createAddAudioRequest(startedAt, endedAt);
+
+        MediaEntity mediaEntity = createMediaEntity(startedAt, endedAt);
+        mediaEntity.setChecksum(addAudioMetadataRequest.getChecksum());
+        mediaEntity.setId(10);
+
+        when(mediaRepository.findMediaByDetails(any(), any(), any(), any(), any()))
+            .thenReturn(List.of(mediaEntity));
+
+        when(dataManagementApi.getChecksum(any(), any())).thenReturn(addAudioMetadataRequest.getChecksum());
+
+        // When
+        UUID externalLocation = UUID.randomUUID();
+        audioService.addAudio(externalLocation, addAudioMetadataRequest);
+
+        // Then
+        verify(mediaRepository, times(1))
+            .findMediaByDetails(courtroomEntity, mediaEntity.getChannel(),mediaEntity.getMediaFile(), startedAt, endedAt);
+        verifyNoMoreInteractions(mediaRepository);
+        verifyNoInteractions(hearingRepository);
+        verifyNoInteractions(logApi);
+        verifyNoInteractions(externalObjectDirectoryRepository);
+        verify(dataManagementApi, times(1)).getChecksum(DatastoreContainerType.INBOUND, externalLocation);
+        verifyNoMoreInteractions(dataManagementApi);
+    }
+
+    @Test
     void addAudioNoUploadChecksumDoNotMatch() {
         OffsetDateTime startedAt = OffsetDateTime.now().minusHours(1);
         OffsetDateTime endedAt = OffsetDateTime.now();
@@ -273,6 +305,7 @@ class AudioUploadServiceImplTest {
         mediaEntity.setStart(startedAt);
         mediaEntity.setEnd(endedAt);
         mediaEntity.setChannel(1);
+        mediaEntity.setMediaFile("test");
         mediaEntity.setTotalChannels(2);
         CourthouseEntity courthouse = new CourthouseEntity();
         courthouse.setCourthouseName("SWANSEA");

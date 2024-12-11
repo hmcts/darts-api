@@ -53,7 +53,6 @@ import java.util.UUID;
 import static ch.qos.logback.classic.Level.toLevel;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
-import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertNull;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.when;
@@ -206,72 +205,6 @@ class AudioControllerAddAudioMetadataIntTest extends IntegrationBase {
             "Checksum for blob 'checksum-" + addAudioMetadataRequest.getStorageGuid()
                 + "' does not match the one passed in the API request 'invalidchecksum'.",
             problem.getDetail());
-    }
-
-
-    @Test
-    void addAudioMetadataDifferentCases() throws Exception {
-        superAdminUserStub.givenUserIsAuthorised(mockUserIdentity, SecurityRoleEnum.MID_TIER);
-
-        makeAddAudioCall(AUDIO_BINARY_PAYLOAD_1, "case1")
-            .andExpect(status().isOk());
-
-        List<HearingEntity> allHearings = dartsDatabase.getHearingRepository().findByCourthouseCourtroomAndDate("bristol", "1", STARTED_AT.toLocalDate());
-
-        List<HearingEntity> addAudioLinkedHearings = new ArrayList<>();
-        for (HearingEntity hearing : allHearings) {
-            if (hearing.getCourtCase().getCaseNumber().contains("case1")) {
-                addAudioLinkedHearings.add(hearing);
-            }
-        }
-        assertEquals(1, addAudioLinkedHearings.size());
-
-        MediaEntity mediaFirst = null;
-        for (HearingEntity hearing : addAudioLinkedHearings) {
-            List<MediaEntity> mediaEntities = dartsDatabase.getMediaRepository().findAllCurrentMediaByHearingId(hearing.getId());
-            mediaFirst = mediaEntities.get(0);
-            assertEquals(1, mediaEntities.size());
-            assertEquals(STARTED_AT, mediaFirst.getStart());
-            assertEquals(STARTED_AT, mediaFirst.getEnd());
-            assertEquals(1, mediaFirst.getChannel());
-            assertEquals(2, mediaFirst.getTotalChannels());
-            List<MediaLinkedCaseEntity> mediaLinkedCaseEntities = dartsDatabase.getMediaLinkedCaseRepository().findByMedia(mediaFirst);
-            assertEquals(1, mediaLinkedCaseEntities.size());
-            assertEquals("1", dartsDatabase.getCourtroomRepository().findById(mediaFirst.getCourtroom().getId()).get().getName());
-            assertEquals(mediaFirst.getId().toString(), mediaFirst.getChronicleId());
-            assertNull(mediaFirst.getAntecedentId());
-        }
-
-        makeAddAudioCall(AUDIO_BINARY_PAYLOAD_1, "case2")
-            .andExpect(status().isOk());
-
-        addAudioLinkedHearings = new ArrayList<>();
-        allHearings = dartsDatabase.getHearingRepository().findByCourthouseCourtroomAndDate("bristol", "1", STARTED_AT.toLocalDate());
-
-        for (HearingEntity hearing : allHearings) {
-            if (hearing.getCourtCase().getCaseNumber().contains("case2")) {
-                addAudioLinkedHearings.add(hearing);
-            }
-        }
-        assertEquals(1, addAudioLinkedHearings.size());
-
-        MediaEntity mediaSecond = null;
-        for (HearingEntity hearing : addAudioLinkedHearings) {
-            List<MediaEntity> mediaEntities = dartsDatabase.getMediaRepository().findAllCurrentMediaByHearingId(hearing.getId());
-            mediaSecond = mediaEntities.get(0);
-            assertEquals(1, mediaEntities.size());
-            assertEquals(STARTED_AT, mediaSecond.getStart());
-            assertEquals(STARTED_AT, mediaSecond.getEnd());
-            assertEquals(1, mediaSecond.getChannel());
-            assertEquals(2, mediaSecond.getTotalChannels());
-            List<MediaLinkedCaseEntity> mediaLinkedCaseEntities = dartsDatabase.getMediaLinkedCaseRepository().findByMedia(mediaSecond);
-            assertEquals(1, mediaLinkedCaseEntities.size());
-            assertEquals("1", dartsDatabase.getCourtroomRepository().findById(mediaSecond.getCourtroom().getId()).get().getName());
-            assertEquals(mediaSecond.getId().toString(), mediaSecond.getChronicleId());
-            assertNull(mediaSecond.getAntecedentId());
-        }
-
-        assertNotSame(mediaFirst, mediaSecond);
     }
 
     @Test
