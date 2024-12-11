@@ -10,7 +10,10 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
+import uk.gov.hmcts.darts.courthouse.exception.CourthouseApiError;
 import uk.gov.hmcts.darts.courthouse.model.AdminCourthouse;
+import uk.gov.hmcts.darts.courthouse.model.CourthousePatch;
+import uk.gov.hmcts.darts.courthouse.model.CourthousePost;
 import uk.gov.hmcts.darts.courthouse.model.CourthouseTitleErrors;
 import uk.gov.hmcts.darts.courthouse.service.CourthouseService;
 
@@ -48,4 +51,29 @@ class CourthousesControllerTest {
         assertEquals(COURTHOUSE_NOT_FOUND, exception.getError());
     }
 
+    @Test
+    void adminCourthousesPost_shouldThrowDartsApiException_whenCourthouseNameIsLowercase() {
+        var request = new CourthousePost();
+        request.setCourthouseName("london crown court");
+
+        var exception = assertThrows(
+            DartsApiException.class,
+            () -> controller.adminCourthousesPost(request)
+        );
+
+        assertEquals(CourthouseApiError.INVALID_REQUEST, exception.getError());
+    }
+
+    @Test
+    void updateCourthouse_shouldThrowDartsApiException_whenCourthouseNameIsLowercase() {
+        var request = new CourthousePatch();
+        request.setCourthouseName("london crown court");
+
+        var exception = assertThrows(
+            DartsApiException.class,
+            () -> controller.updateCourthouse(1, request)
+        );
+
+        assertEquals(CourthouseApiError.INVALID_REQUEST, exception.getError());
+    }
 }

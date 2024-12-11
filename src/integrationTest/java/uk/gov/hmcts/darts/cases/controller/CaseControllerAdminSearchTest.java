@@ -156,7 +156,7 @@ class CaseControllerAdminSearchTest extends IntegrationBase {
                 <<courthouseId>>
               ],
               "case_number": "Case1",
-              "courtroom_name": "courtroom1",
+              "courtroom_name": "COURTROOM1",
               "hearing_start_at": "2020-06-18",
               "hearing_end_at": "2024-06-18"
             }""";
@@ -189,7 +189,7 @@ class CaseControllerAdminSearchTest extends IntegrationBase {
                 <<courthouseId>>
               ],
               "case_number": "Case1",
-              "courtroom_name": "courtroom1",
+              "courtroom_name": "COURTROOM1",
               "hearing_start_at": "2020-06-18",
               "hearing_end_at": "2024-06-18"
             }""";
