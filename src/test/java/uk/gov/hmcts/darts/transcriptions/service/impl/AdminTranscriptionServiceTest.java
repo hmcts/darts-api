@@ -63,6 +63,8 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.darts.audit.api.AuditActivity.HIDE_TRANSCRIPTION;
+import static uk.gov.hmcts.darts.audit.api.AuditActivity.UNHIDE_TRANSCRIPTION;
 
 @ExtendWith(MockitoExtension.class)
 class AdminTranscriptionServiceTest {
@@ -319,6 +321,7 @@ class AdminTranscriptionServiceTest {
         assertNotNull(objectAdminActionEntityArgumentCaptor.getValue().getHiddenDateTime());
         assertNotNull(objectAdminActionEntityArgumentCaptor.getValue().getMarkedForManualDelBy());
         assertNotNull(objectAdminActionEntityArgumentCaptor.getValue().getMarkedForManualDelDateTime());
+        verify(auditApi).record(HIDE_TRANSCRIPTION);
     }
 
     @Test
@@ -330,6 +333,7 @@ class AdminTranscriptionServiceTest {
         Integer reasonId = 555;
 
         AdminActionRequest adminActionRequest = new AdminActionRequest();
+
         adminActionRequest.setReasonId(reasonId);
         request.setAdminAction(adminActionRequest);
 
@@ -341,8 +345,13 @@ class AdminTranscriptionServiceTest {
 
         ObjectAdminActionEntity objectAdminActionEntity = new ObjectAdminActionEntity();
         objectAdminActionEntity.setId(objectAdminActionEntityId);
+        objectAdminActionEntity.setTicketReference("Ticket-123");
+        objectAdminActionEntity.setComments("some comment");
+
         ObjectAdminActionEntity objectAdminActionEntity1 = new ObjectAdminActionEntity();
         objectAdminActionEntity1.setId(objectAdminActionEntityId1);
+        objectAdminActionEntity1.setTicketReference("Ticket-456");
+        objectAdminActionEntity1.setComments("some comment 2");
 
         when(transcriptionDocumentRepository.saveAndFlush(transcriptionDocumentEntityArgumentCaptor.capture())).thenReturn(transcriptionDocumentEntity);
         when(objectAdminActionRepository
@@ -361,6 +370,9 @@ class AdminTranscriptionServiceTest {
         assertEquals(expectedResponse, actualResponse);
         verify(objectAdminActionRepository, times(1)).deleteById(objectAdminActionEntityId);
         verify(objectAdminActionRepository, times(1)).deleteById(objectAdminActionEntityId1);
+        verify(auditApi).record(UNHIDE_TRANSCRIPTION, "Ticket reference: Ticket-123, Comments: some comment");
+        verify(auditApi).record(UNHIDE_TRANSCRIPTION, "Ticket reference: Ticket-456, Comments: some comment 2");
+
     }
 
     private static Set<TranscriptionSearchResult> someSetOfTranscriptionSearchResult(int quantity) {
