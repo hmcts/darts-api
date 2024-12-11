@@ -9,6 +9,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.darts.authorisation.annotation.Authorisation;
+import uk.gov.hmcts.darts.cases.exception.CaseApiError;
 import uk.gov.hmcts.darts.cases.http.api.CasesApi;
 import uk.gov.hmcts.darts.cases.model.AddCaseRequest;
 import uk.gov.hmcts.darts.cases.model.AdminCasesSearchRequest;
@@ -26,6 +27,8 @@ import uk.gov.hmcts.darts.cases.model.SingleCase;
 import uk.gov.hmcts.darts.cases.model.Transcript;
 import uk.gov.hmcts.darts.cases.service.CaseService;
 import uk.gov.hmcts.darts.cases.util.RequestValidator;
+import uk.gov.hmcts.darts.common.exception.DartsApiException;
+import uk.gov.hmcts.darts.common.util.CourtValidationUtils;
 import uk.gov.hmcts.darts.log.api.LogApi;
 import uk.gov.hmcts.darts.util.DataUtil;
 
@@ -101,6 +104,7 @@ public class CaseController implements CasesApi {
     public ResponseEntity<List<AdvancedSearchResult>> casesSearchPost(
         AdvancedSearchRequest advancedSearchRequest
     ) {
+        validateUppercase(advancedSearchRequest.getCourthouse(), advancedSearchRequest.getCourtroom());
         GetCasesSearchRequest request = GetCasesSearchRequest.builder()
             .caseNumber(StringUtils.trimToNull(advancedSearchRequest.getCaseNumber()))
             .courthouse(StringUtils.trimToNull(advancedSearchRequest.getCourthouse()))
@@ -171,6 +175,15 @@ public class CaseController implements CasesApi {
     @Authorisation(contextId = ANY_ENTITY_ID,
         globalAccessSecurityRoles = {SUPER_USER, SUPER_ADMIN})
     public ResponseEntity<List<AdminCasesSearchResponseItem>> adminCasesSearchPost(AdminCasesSearchRequest adminCasesSearchRequest) {
+        validateUppercase(null, adminCasesSearchRequest.getCourtroomName());
         return new ResponseEntity<>(caseService.adminCaseSearch(adminCasesSearchRequest), HttpStatus.OK);
     }
+
+    private void validateUppercase(String courthouse, String courtroom) {
+        if (!CourtValidationUtils.isUppercase(courthouse, courtroom)) {
+            throw new DartsApiException(CaseApiError.INVALID_REQUEST, "Courthouse and courtroom must be uppercase.");
+        }
+    }
+
+
 }

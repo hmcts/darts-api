@@ -75,30 +75,30 @@ class TestSupportControllerTest extends IntegrationBase {
 
     @Test
     void createsCourthouseAndCourtroom() throws Exception {
-        mockMvc.perform(post(ENDPOINT_URL + "/courthouse/func-swansea/courtroom/cr1"))
+        mockMvc.perform(post(ENDPOINT_URL + "/courthouse/FUNC-SWANSEA/courtroom/cr1"))
             .andExpect(status().isCreated());
 
-        assertThat(dartsDatabase.findCourtroomBy("func-swansea", "cr1")).isNotNull();
+        assertThat(dartsDatabase.findCourtroomBy("FUNC-SWANSEA", "cr1")).isNotNull();
     }
 
     @Test
     void createsCourtroomForExistingCourthouse() throws Exception {
-        mockMvc.perform(post(ENDPOINT_URL + "/courthouse/func-swansea/courtroom/cr1"))
+        mockMvc.perform(post(ENDPOINT_URL + "/courthouse/FUNC-SWANSEA/courtroom/cr1"))
             .andExpect(status().isCreated());
-        mockMvc.perform(post(ENDPOINT_URL + "/courthouse/func-swansea/courtroom/cr2"))
+        mockMvc.perform(post(ENDPOINT_URL + "/courthouse/FUNC-SWANSEA/courtroom/cr2"))
             .andExpect(status().isCreated());
 
-        assertThat(dartsDatabase.findCourtroomBy("func-swansea", "cr1")).isNotNull();
-        assertThat(dartsDatabase.findCourtroomBy("func-swansea", "cr2")).isNotNull();
+        assertThat(dartsDatabase.findCourtroomBy("FUNC-SWANSEA", "cr1")).isNotNull();
+        assertThat(dartsDatabase.findCourtroomBy("FUNC-SWANSEA", "cr2")).isNotNull();
     }
 
 
     @Test
     void createsAudit() throws Exception {
-        mockMvc.perform(post(ENDPOINT_URL + "/courthouse/func-swansea/courtroom/cr1"))
+        mockMvc.perform(post(ENDPOINT_URL + "/courthouse/FUNC-SWANSEA/courtroom/cr1"))
             .andExpect(status().isCreated());
 
-        mockMvc.perform(post(ENDPOINT_URL + "/audit/REQUEST_AUDIO/courthouse/func-swansea"))
+        mockMvc.perform(post(ENDPOINT_URL + "/audit/REQUEST_AUDIO/courthouse/FUNC-SWANSEA"))
             .andExpect(status().isCreated());
 
         assertEquals(1, dartsDatabase.getAuditRepository().findAll().size());
@@ -109,10 +109,10 @@ class TestSupportControllerTest extends IntegrationBase {
     void createsNoAuditAndNoCourtCaseOnBadRequest() throws Exception {
         when(auditActivityRepository.getReferenceById(anyInt())).thenThrow(DataIntegrityViolationException.class);
 
-        mockMvc.perform(post(ENDPOINT_URL + "/courthouse/func-swansea/courtroom/cr1"))
+        mockMvc.perform(post(ENDPOINT_URL + "/courthouse/FUNC-SWANSEA/courtroom/cr1"))
             .andExpect(status().isCreated());
 
-        mockMvc.perform(post(ENDPOINT_URL + "/audit/REQUEST_AUDIO/courthouse/func-swansea"))
+        mockMvc.perform(post(ENDPOINT_URL + "/audit/REQUEST_AUDIO/courthouse/FUNC-SWANSEA"))
             .andExpect(status().isBadRequest());
 
         assertEquals(0, dartsDatabase.getCaseRepository().findAll().size());
@@ -138,7 +138,7 @@ class TestSupportControllerTest extends IntegrationBase {
 
     @Test
     void createRetention() throws Exception {
-        MvcResult response = mockMvc.perform(post(ENDPOINT_URL + "/case-retentions/caseNumber/func-case-a"))
+        MvcResult response = mockMvc.perform(post(ENDPOINT_URL + "/case-retentions/caseNumber/FUNC-CASE-A"))
             .andExpect(status().isOk())
             .andReturn();
 
@@ -147,12 +147,12 @@ class TestSupportControllerTest extends IntegrationBase {
 
     @Test
     void cleansData() throws Exception {
-        mockMvc.perform(post(ENDPOINT_URL + "/courthouse/func-swansea/courtroom/func-cr1"))
+        mockMvc.perform(post(ENDPOINT_URL + "/courthouse/FUNC-SWANSEA/courtroom/FUNC-CR1"))
             .andExpect(status().isCreated());
 
         mockMvc.perform(delete(ENDPOINT_URL + "/clean"))
             .andExpect(status().is2xxSuccessful());
 
-        assertThat(dartsDatabase.findCourtroomBy("func-swansea", "cr1")).isNull();
+        assertThat(dartsDatabase.findCourtroomBy("FUNC-SWANSEA", "CR1")).isNull();
     }
 }

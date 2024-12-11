@@ -47,9 +47,9 @@ class DailyListPatchControllerTest extends IntegrationBase {
 
         superAdminUserStub.givenUserIsAuthorised(mockUserIdentity);
 
-        String courthouseName = "func-swansea-house-" + randomAlphanumeric(7);
-        String uniqueId = "func-unique-id-" + randomAlphanumeric(7);
-        String messageId = "func-unique-id-" + randomAlphanumeric(7);
+        String courthouseName = "FUNC-SWANSEA-HOUSE-" + randomAlphanumeric(7);
+        String uniqueId = "FUNC-unique-id-" + randomAlphanumeric(7);
+        String messageId = "FUNC-unique-id-" + randomAlphanumeric(7);
 
         PostDailyListRequest request = new PostDailyListRequest();
         request.setSourceSystem("CPP");

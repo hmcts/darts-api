@@ -24,8 +24,8 @@ class PostEventsFunctionalTest extends FunctionalTest {
 
     @Test
     void success() {
-        String courthouseName = "func-swansea-house-" + randomAlphanumeric(7);
-        String courtroomName = "func-swansea-room-" + randomAlphanumeric(7);
+        String courthouseName = "FUNC-SWANSEA-HOUSE-" + randomAlphanumeric(7);
+        String courtroomName = "FUNC-SWANSEA-ROOM-" + randomAlphanumeric(7);
 
         createCourtroomAndCourthouse(courthouseName,courtroomName);
 
@@ -38,7 +38,7 @@ class PostEventsFunctionalTest extends FunctionalTest {
                         "courthouse": "<<courtHouseName>>",
                         "courtroom": "<<courtroomName>>",
                         "case_numbers": [
-                          "func-Swansea_case_1"
+                          "FUNC-Swansea_case_1"
                         ],
                         "event_text": "A temporary event created by functional test",
                         "date_time": "2023-08-08T14:01:06Z"
@@ -72,7 +72,7 @@ class PostEventsFunctionalTest extends FunctionalTest {
                         "courthouse": "",
                         "courtroom": "1",
                         "case_numbers": [
-                          "func-Swansea_case_1"
+                          "FUNC-Swansea_case_1"
                         ],
                         "event_text": "A temporary event created by functional test",
                         "date_time": "2023-08-08T14:01:06Z"
