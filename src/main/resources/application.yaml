@@ -201,8 +201,9 @@ darts:
   dar-pc-notification:
     url-format: http://{0}/VIQDARNotifyEvent/DARNotifyEvent.asmx
   events:
+    earliest-is-current-clear-up-date: ${MODERNISED_DARTS_START_DATE:2025-03-01}
     duplicates:
-      earliest-removable-event-date: ${MODERNISED_DARTS_START_DATE:2024-12-01}
+      earliest-removable-event-date: ${MODERNISED_DARTS_START_DATE:2025-03-01}
       clear-up-window: ${DUPLICATE_EVENTS_CLEAR_UP_WINDOW_DAYS:2}
     admin-search:
       max-results: 1000
@@ -501,11 +502,6 @@ darts:
           at-most-for: PT90M
       process-dets-to-arm-response:
         system-user-email: system_ProcessDETSToArmResponse@hmcts.net
-        lock:
-          at-least-for: PT1M
-          at-most-for: PT90M
-      remove-duplicated-events:
-        system-user-email: system_RemoveDuplicatedEvents@hmcts.net
         lock:
           at-least-for: PT1M
           at-most-for: PT90M

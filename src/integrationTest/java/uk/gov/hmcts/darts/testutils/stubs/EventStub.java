@@ -36,7 +36,7 @@ public class EventStub {
     private final UserAccountRepository userAccountRepository;
     private final DartsDatabaseSaveStub dartsDatabaseSaveStub;
 
-    public static final OffsetDateTime STARTED_AT = OffsetDateTime.of(2024, 10, 10, 10, 0, 0, 0, ZoneOffset.UTC);
+    public static final OffsetDateTime STARTED_AT = OffsetDateTime.now().minusDays(1);
 
     @Autowired
     private HearingStub hearingStub;
@@ -72,13 +72,14 @@ public class EventStub {
         eventEntity.addHearing(hearing);
         eventEntity.setLastModifiedBy(userAccountStub.getIntegrationTestUserAccountEntity());
         eventEntity.setLastModifiedDateTime(eventTimestamp);
-        eventEntity.setCreatedDateTime(eventTimestamp);
         eventEntity.setLogEntry(false);
         eventEntity.setCourtroom(hearing.getCourtroom());
         eventEntity.setIsCurrent(true);
         eventEntity.setEventStatus(AUDIO_LINK_NOT_DONE_MODERNISED.getStatusNumber());
         eventEntity.setEventId(eventId);
-        return dartsDatabaseSaveStub.save(eventEntity);
+        EventEntity savedEvent = dartsDatabaseSaveStub.save(eventEntity);
+        savedEvent.setCreatedDateTime(eventTimestamp);
+        return dartsDatabaseSaveStub.save(savedEvent);
     }
 
     public EventEntity createEvent(CourtroomEntity courtroom, int eventHandlerId, OffsetDateTime eventTimestamp, String eventName) {
@@ -124,18 +125,24 @@ public class EventStub {
         return generateEventIdEventsIncludingZeroEventId(numberOfEvents, 2, true);
     }
 
-    @Transactional
-    @SuppressWarnings("PMD.AvoidInstantiatingObjectsInLoops")
     public Map<Integer, List<EventEntity>> generateEventIdEventsIncludingZeroEventId(int numberOfEvents,
                                                                                      int numberOfEventsPerEventId,
                                                                                      boolean includeNull) {
+        return generateEventIdEventsIncludingZeroEventId(numberOfEvents, numberOfEventsPerEventId, includeNull, STARTED_AT);
+    }
+
+    @SuppressWarnings("PMD.AvoidInstantiatingObjectsInLoops")
+    public Map<Integer, List<EventEntity>> generateEventIdEventsIncludingZeroEventId(int numberOfEvents,
+                                                                                     int numberOfEventsPerEventId,
+                                                                                     boolean includeNull,
+                                                                                     OffsetDateTime startedTimestamp) {
         Map<Integer, List<EventEntity>> eventIdMap = new HashMap<>();
 
         HearingEntity hearingForEvent = hearingStub.createHearing("Bristol", "1", "case1", DateConverterUtil.toLocalDateTime(STARTED_AT));
 
         // add a solitary event to prove this does not get processed
         if (includeNull) {
-            EventEntity standAloneEventIdEvent = createEvent(hearingForEvent, 10, STARTED_AT.minusMinutes(20), "LOG", numberOfEvents + 1);
+            EventEntity standAloneEventIdEvent = createEvent(hearingForEvent, 10, startedTimestamp.minusMinutes(20), "LOG", numberOfEvents + 1);
             eventIdMap.put(standAloneEventIdEvent.getEventId(), List.of(standAloneEventIdEvent));
         }
         HearingEntity hearingDifferentCourtroom = hearingStub.createHearing("Bristol", "2", "case2", DateConverterUtil.toLocalDateTime(STARTED_AT));
@@ -143,7 +150,7 @@ public class EventStub {
         for (int index = 0; index < numberOfEvents; index++) {
             List<EventEntity> eventEntities = new ArrayList<>(numberOfEventsPerEventId);
             for (int i = 0; i < numberOfEventsPerEventId; i++) {
-                eventEntities.add(createEvent(hearingDifferentCourtroom, 10, STARTED_AT.minusMinutes(i), "LOG", index));
+                eventEntities.add(createEvent(hearingDifferentCourtroom, 10, startedTimestamp.minusMinutes(i), "LOG", index));
             }
             eventIdMap.put(index, eventEntities);
         }
@@ -166,16 +173,7 @@ public class EventStub {
         return currentFnd;
     }
 
-    public boolean hasOnlyOneOfTheEventIdsGotHearings(List<EventEntity> eventEntityList) {
-        int numWithHearings = 0;
-        for (EventEntity event : eventEntityList) {
-            Optional<EventEntity> readEventEntity = eventRepository.findById(event.getId());
-
-            if (readEventEntity.isPresent() && !hearingRepository.findHearingIdsByEventId(readEventEntity.get().getId()).isEmpty()) {
-                numWithHearings++;
-            }
-        }
-
-        return numWithHearings == 1;
+    public EventEntity saveEvent(EventEntity savedEvent) {
+        return dartsDatabaseSaveStub.save(savedEvent);
     }
 }

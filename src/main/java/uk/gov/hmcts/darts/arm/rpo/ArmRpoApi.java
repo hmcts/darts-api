@@ -25,10 +25,10 @@ public interface ArmRpoApi {
 
     void saveBackgroundSearch(String bearerToken, Integer executionId, String searchName, UserAccountEntity userAccount);
 
-    void getExtendedSearchesByMatter(String bearerToken, Integer executionId, UserAccountEntity userAccount);
+    String getExtendedSearchesByMatter(String bearerToken, Integer executionId, UserAccountEntity userAccount);
 
     boolean createExportBasedOnSearchResultsTable(String bearerToken, Integer executionId,
-                                                  List<MasterIndexFieldByRecordClassSchema> headerColumns,
+                                                  List<MasterIndexFieldByRecordClassSchema> headerColumns, String productionName,
                                                   UserAccountEntity userAccount);
 
     void getExtendedProductionsByMatter(String bearerToken, Integer executionId, UserAccountEntity userAccount);

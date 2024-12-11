@@ -20,6 +20,7 @@ import static org.mockito.Mockito.when;
 
 class ArmRpoApiGetExtendedSearchesByMatterIntTest extends IntegrationBase {
 
+    public static final String PRODUCTION_NAME = "DARTS_RPO_2024-08-13";
     @MockBean
     private ArmRpoClient armRpoClient;
 
@@ -38,6 +39,7 @@ class ArmRpoApiGetExtendedSearchesByMatterIntTest extends IntegrationBase {
         extendedSearchesByMatterResponse.setIsError(false);
         ExtendedSearchesByMatterResponse.Search search = new ExtendedSearchesByMatterResponse.Search();
         search.setTotalCount(4);
+        search.setName(PRODUCTION_NAME);
         ExtendedSearchesByMatterResponse.SearchDetail searchDetail = new ExtendedSearchesByMatterResponse.SearchDetail();
         searchDetail.setSearch(search);
         extendedSearchesByMatterResponse.setSearches(List.of(searchDetail));
@@ -53,9 +55,10 @@ class ArmRpoApiGetExtendedSearchesByMatterIntTest extends IntegrationBase {
         var bearerAuth = "Bearer some-token";
 
         // when
-        armRpoApi.getExtendedSearchesByMatter(bearerAuth, armRpoExecutionDetail.getId(), userAccount);
+        String result = armRpoApi.getExtendedSearchesByMatter(bearerAuth, armRpoExecutionDetail.getId(), userAccount);
 
         // then
+        assertEquals(PRODUCTION_NAME, result);
         var armRpoExecutionDetailEntityUpdated = dartsPersistence.getArmRpoExecutionDetailRepository().findById(armRpoExecutionDetail.getId()).get();
         assertEquals(ArmRpoStateEnum.GET_EXTENDED_SEARCHES_BY_MATTER.getId(), armRpoExecutionDetailEntityUpdated.getArmRpoState().getId());
         assertEquals(ArmRpoStatusEnum.COMPLETED.getId(), armRpoExecutionDetailEntityUpdated.getArmRpoStatus().getId());
