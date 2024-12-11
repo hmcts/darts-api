@@ -324,7 +324,7 @@ class SecurityGroupServiceImplTest {
                 UserAccountEntity userAccountEntity = new UserAccountEntity();
 
                 userAccountEntity.setId(userIdCounter);
-                userAccountEntity.setUserName("TestUser" + userIdCounter);
+                userAccountEntity.setUserFullName("TestUser" + userIdCounter);
                 userAccountEntities.add(userAccountEntity);
 
                 userIdCounter++;

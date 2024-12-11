@@ -24,7 +24,7 @@ class RetentionMapperTest {
 
         UserAccountEntity submittedBy = new UserAccountEntity();
         submittedBy.setEmailAddress("submit@email.com");
-        submittedBy.setUserName("The User");
+        submittedBy.setUserFullName("The User");
         caseRetentionEntity.setSubmittedBy(submittedBy);
         caseRetentionEntity.setId(1);
 

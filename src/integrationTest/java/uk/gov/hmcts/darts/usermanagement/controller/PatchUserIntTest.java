@@ -461,7 +461,6 @@ class PatchUserIntTest extends IntegrationBase {
 
     private UserAccountEntity createEnabledUserAccountEntity(UserAccountEntity user, String email) {
         UserAccountEntity userAccountEntity = new UserAccountEntity();
-        userAccountEntity.setUserName(ORIGINAL_USERNAME);
         userAccountEntity.setUserFullName(ORIGINAL_USERNAME);
         userAccountEntity.setEmailAddress(email);
         userAccountEntity.setUserDescription(ORIGINAL_DESCRIPTION);
@@ -488,7 +487,6 @@ class PatchUserIntTest extends IntegrationBase {
 
     private UserAccountEntity createDisabledUserAccountEntity(UserAccountEntity user) {
         UserAccountEntity userAccountEntity = new UserAccountEntity();
-        userAccountEntity.setUserName(ORIGINAL_USERNAME);
         userAccountEntity.setUserFullName(ORIGINAL_USERNAME);
         userAccountEntity.setEmailAddress(ORIGINAL_EMAIL_ADDRESS);
         userAccountEntity.setUserDescription(ORIGINAL_DESCRIPTION);

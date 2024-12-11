@@ -227,7 +227,7 @@ class UserControllerSearchIntTest extends IntegrationBase {
                             .header("Content-Type", "application/json")
                             .content(objectMapper.writeValueAsString(userSearch)))
             .andExpect(status().isOk())
-            .andExpect(jsonPath("$[*].full_name").value(containsInAnyOrder(activeUser.getUserName(), inactiveUser.getUserName())))
+            .andExpect(jsonPath("$[*].full_name").value(containsInAnyOrder(activeUser.getUserFullName(), inactiveUser.getUserFullName())))
             .andExpect(jsonPath("$[*].email_address").value(containsInAnyOrder(username1 + "@ex.com", username2 + "@ex.com")));
 
         verify(userIdentity).userHasGlobalAccess(Set.of(SUPER_ADMIN, SUPER_USER));
@@ -254,7 +254,7 @@ class UserControllerSearchIntTest extends IntegrationBase {
                             .header("Content-Type", "application/json")
                             .content(objectMapper.writeValueAsString(userSearch)))
             .andExpect(status().isOk())
-            .andExpect(jsonPath("$[*].full_name").value(hasItems(inactiveUser.getUserName())))
+            .andExpect(jsonPath("$[*].full_name").value(hasItems(inactiveUser.getUserFullName())))
             .andExpect(jsonPath("$[*].full_name").value(hasSize(1)))
             .andExpect(jsonPath("$[*].email_address").value(hasItems(username2 + "@ex.com")));
 
@@ -282,7 +282,7 @@ class UserControllerSearchIntTest extends IntegrationBase {
                             .header("Content-Type", "application/json")
                             .content(objectMapper.writeValueAsString(userSearch)))
             .andExpect(status().isOk())
-            .andExpect(jsonPath("$[*].full_name").value(hasItems(activeUser.getUserName())))
+            .andExpect(jsonPath("$[*].full_name").value(hasItems(activeUser.getUserFullName())))
             .andExpect(jsonPath("$[*].full_name").value(hasSize(1)))
             .andExpect(jsonPath("$[*].email_address").value(hasItems(username1 + "@ex.com")));
 
@@ -304,7 +304,6 @@ class UserControllerSearchIntTest extends IntegrationBase {
 
     private UserAccountEntity userWithName(String name) {
         var user = new UserAccountEntity();
-        user.setUserName(name);
         user.setUserFullName(name);
         user.setEmailAddress(name + "@ex.com");
         var testTranscriberSG = dartsDatabaseStub.getSecurityGroupRepository().getReferenceById(-4);
