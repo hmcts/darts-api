@@ -4,7 +4,6 @@ import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.darts.common.entity.EventEntity;
 import uk.gov.hmcts.darts.common.repository.EventRepository;
@@ -41,7 +40,6 @@ public class CleanupCurrentFlagEventProcessorImpl implements CleanupCurrentFlagE
     }
 
     @Override
-    @Async("eventTaskExecutor")
     public void processEvent(Integer eventId) {
         if (eventId == null || eventId == 0) {
             return;
