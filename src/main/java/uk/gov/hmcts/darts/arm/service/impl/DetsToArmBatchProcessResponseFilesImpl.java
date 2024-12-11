@@ -14,12 +14,14 @@ import uk.gov.hmcts.darts.arm.util.files.UploadFileFilenameProcessor;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.entity.ObjectStateRecordEntity;
+import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
 import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
 import uk.gov.hmcts.darts.common.repository.ObjectStateRecordRepository;
 import uk.gov.hmcts.darts.common.service.FileOperationService;
 import uk.gov.hmcts.darts.dets.config.DetsDataManagementConfiguration;
 import uk.gov.hmcts.darts.log.api.LogApi;
+import uk.gov.hmcts.darts.util.DurationUtil;
 
 import java.util.Optional;
 
@@ -29,7 +31,8 @@ import java.util.Optional;
 public class DetsToArmBatchProcessResponseFilesImpl extends AbstractArmBatchProcessResponseFiles {
 
     private final DetsDataManagementConfiguration configuration;
-    private final ObjectStateRecordRepository osrRepository;
+
+    protected final ObjectStateRecordRepository objectStateRecordRepository;
 
     public DetsToArmBatchProcessResponseFilesImpl(ExternalObjectDirectoryRepository externalObjectDirectoryRepository,
                                                   ArmDataManagementApi armDataManagementApi, FileOperationService fileOperationService,
@@ -37,7 +40,7 @@ public class DetsToArmBatchProcessResponseFilesImpl extends AbstractArmBatchProc
                                                   ObjectMapper objectMapper, UserIdentity userIdentity, CurrentTimeHelper currentTimeHelper,
                                                   ExternalObjectDirectoryService externalObjectDirectoryService,
                                                   LogApi logApi, DetsDataManagementConfiguration configuration,
-                                                  ObjectStateRecordRepository osrRepository) {
+                                                  ObjectStateRecordRepository objectStateRecordRepository) {
         super(externalObjectDirectoryRepository,
               armDataManagementApi,
               fileOperationService,
@@ -48,7 +51,7 @@ public class DetsToArmBatchProcessResponseFilesImpl extends AbstractArmBatchProc
               externalObjectDirectoryService,
               logApi);
         this.configuration = configuration;
-        this.osrRepository = osrRepository;
+        this.objectStateRecordRepository = objectStateRecordRepository;
     }
 
     @Override
@@ -68,12 +71,14 @@ public class DetsToArmBatchProcessResponseFilesImpl extends AbstractArmBatchProc
                                                          ArmResponseBatchData armResponseBatchData,
                                                          ArmResponseUploadFileRecord armResponseUploadFileRecord,
                                                          ExternalObjectDirectoryEntity armEod,
-                                                         String objectChecksum) {
+                                                         String objectChecksum,
+                                                         UserAccountEntity userAccount) {
         super.onUploadFileChecksumValidationSuccess(batchUploadFileFilenameProcessor,
                                                     armResponseBatchData,
                                                     armResponseUploadFileRecord,
                                                     armEod,
-                                                    objectChecksum);
+                                                    objectChecksum,
+                                                    userAccount);
 
         getObjectStateRecord(armEod.getId())
             .ifPresent(osr ->
@@ -84,8 +89,9 @@ public class DetsToArmBatchProcessResponseFilesImpl extends AbstractArmBatchProc
     @Override
     protected void onUploadFileChecksumValidationFailure(ArmResponseUploadFileRecord armResponseUploadFileRecord,
                                                          ExternalObjectDirectoryEntity externalObjectDirectory,
-                                                         String objectChecksum) {
-        super.onUploadFileChecksumValidationFailure(armResponseUploadFileRecord, externalObjectDirectory, objectChecksum);
+                                                         String objectChecksum,
+                                                         UserAccountEntity userAccount) {
+        super.onUploadFileChecksumValidationFailure(armResponseUploadFileRecord, externalObjectDirectory, objectChecksum, userAccount);
 
         getObjectStateRecord(externalObjectDirectory.getId()).ifPresent(osr -> {
             String checksumValidationFailedMessage = String.format("External object id %s checksum differs. Arm checksum: %s Object Checksum: %s",
@@ -98,24 +104,26 @@ public class DetsToArmBatchProcessResponseFilesImpl extends AbstractArmBatchProc
     @Override
     protected void processUploadFileDataFailure(ArmResponseUploadFileRecord armResponseUploadFileRecord,
                                                 UploadFileFilenameProcessor uploadFileFilenameProcessor,
-                                                ExternalObjectDirectoryEntity externalObjectDirectory) {
-        super.processUploadFileDataFailure(armResponseUploadFileRecord, uploadFileFilenameProcessor, externalObjectDirectory);
+                                                ExternalObjectDirectoryEntity externalObjectDirectory,
+                                                UserAccountEntity userAccount) {
+        super.processUploadFileDataFailure(armResponseUploadFileRecord, uploadFileFilenameProcessor, externalObjectDirectory, userAccount);
         getObjectStateRecord(externalObjectDirectory.getId())
             .ifPresent(osr -> updateOsrIngestStatusToFailure(osr, armResponseUploadFileRecord.getExceptionDescription()));
     }
 
     @Override
     protected void processInvalidLineFileActions(ArmResponseInvalidLineRecord armResponseInvalidLineRecord,
-                                                 ExternalObjectDirectoryEntity externalObjectDirectory) {
+                                                 ExternalObjectDirectoryEntity externalObjectDirectory,
+                                                 UserAccountEntity userAccount) {
         //tested
-        super.processInvalidLineFileActions(armResponseInvalidLineRecord, externalObjectDirectory);
+        super.processInvalidLineFileActions(armResponseInvalidLineRecord, externalObjectDirectory, userAccount);
         getObjectStateRecord(externalObjectDirectory.getId())
             .ifPresent(osr -> updateOsrIngestStatusToFailure(osr, armResponseInvalidLineRecord.getExceptionDescription()));
     }
 
 
     private Optional<ObjectStateRecordEntity> getObjectStateRecord(int armEod) {
-        Optional<ObjectStateRecordEntity> osrOptional = osrRepository.findByArmEodId(String.valueOf(armEod));
+        Optional<ObjectStateRecordEntity> osrOptional = objectStateRecordRepository.findByArmEodId(String.valueOf(armEod));
         if (osrOptional.isEmpty()) {
             log.error("Object State Record not found for Arm EOD {}", armEod);
         }
@@ -125,7 +133,7 @@ public class DetsToArmBatchProcessResponseFilesImpl extends AbstractArmBatchProc
     private void updateOsrResponseReceivedAttributes(ObjectStateRecordEntity osr) {
         osr.setFlagRspnRecvdFromArml(true);
         osr.setDateRspnRecvdFromArml(timeHelper.currentOffsetDateTime());
-        osrRepository.save(osr);
+        objectStateRecordRepository.save(osr);
     }
 
     private void updateOsrFileIngestStatusToSuccess(BatchInputUploadFileFilenameProcessor batchUploadFileFilenameProcessor,
@@ -140,7 +148,7 @@ public class DetsToArmBatchProcessResponseFilesImpl extends AbstractArmBatchProc
         osr.setIdResponseUfFile(armResponseBatchData.getUploadFileFilenameProcessor().getUploadFileFilename());
         // clearing out any existing error messages
         osr.setObjectStatus(null);
-        osrRepository.save(osr);
+        objectStateRecordRepository.save(osr);
     }
 
     private void updateOsrIngestStatusToFailure(ObjectStateRecordEntity osr,
@@ -148,6 +156,19 @@ public class DetsToArmBatchProcessResponseFilesImpl extends AbstractArmBatchProc
         osr.setFlagFileIngestStatus(false);
         osr.setDateFileIngestToArm(timeHelper.currentOffsetDateTime());
         osr.setObjectStatus(objectStatus);
-        osrRepository.save(osr);
+        objectStateRecordRepository.save(osr);
+    }
+
+    @Override
+    protected void markEodAsResponseProcessingFailed(ExternalObjectDirectoryEntity externalObjectDirectory, UserAccountEntity userAccount) {
+        super.markEodAsResponseProcessingFailed(externalObjectDirectory, userAccount);
+
+        ObjectStateRecordEntity objectStateRecordEntity = externalObjectDirectory.getObjectStateRecordEntity();
+        if (objectStateRecordEntity != null) {
+            objectStateRecordEntity.setObjectStatus(String.format("No response files produced by ARM within %s",
+                                                                  DurationUtil.formatDurationHumanReadable(
+                                                                      armDataManagementConfiguration.getArmMissingResponseDuration())));
+            objectStateRecordRepository.save(objectStateRecordEntity);
+        }
     }
 }
