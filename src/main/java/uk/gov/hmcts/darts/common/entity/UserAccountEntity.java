@@ -78,23 +78,29 @@ public class UserAccountEntity extends CreatedModifiedBaseEntity {
         inverseJoinColumns = {@JoinColumn(name = "grp_id")})
     private Set<SecurityGroupEntity> securityGroupEntities = new LinkedHashSet<>();
 
+    @NotAudited
     @Column(name = "user_os_name")
     private String userOsName;
 
+    @NotAudited
     @Column(name = "user_ldap_dn")
     private String userLdapDn;
 
+    @NotAudited
     @Column(name = "user_global_unique_id")
     private String userGlobalUniqueId;
 
+    @NotAudited
     @Column(name = "user_login_name")
     private String userLoginName;
 
+    @NotAudited
     @Column(name = "user_login_domain")
     private String userLoginDomain;
 
+    @NotAudited
     @Column(name = "user_state")
-    private Integer userState;
+    private Short userState;
 
     public Boolean isActive() {
         return active;
