@@ -412,7 +412,6 @@ public class CommonTestDataUtil {
 
     public UserAccountEntity createUserAccount(String userName) {
         UserAccountEntity userAccount = new UserAccountEntity();
-        userAccount.setUserName(userName);
         userAccount.setUserFullName(userName);
         userAccount.setEmailAddress("test@test.com");
         return userAccount;

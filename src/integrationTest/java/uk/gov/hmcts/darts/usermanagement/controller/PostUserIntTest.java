@@ -100,7 +100,7 @@ class PostUserIntTest extends IntegrationBase {
             UserAccountEntity createdUserAccountEntity = dartsDatabase.getUserAccountRepository()
                 .findById(userId)
                 .orElseThrow();
-            assertEquals(USERNAME, createdUserAccountEntity.getUserName());
+            assertEquals(USERNAME, createdUserAccountEntity.getUserFullName());
             assertEquals(EMAIL_ADDRESS, createdUserAccountEntity.getEmailAddress());
             assertNull(createdUserAccountEntity.getUserDescription());
             assertTrue(createdUserAccountEntity.isActive());
@@ -197,7 +197,6 @@ class PostUserIntTest extends IntegrationBase {
         superAdminUserStub.givenUserIsAuthorised(userIdentity);
 
         UserAccountEntity userAccountEntity = new UserAccountEntity();
-        userAccountEntity.setUserName("James Smith");
         userAccountEntity.setUserFullName("James Smith");
         userAccountEntity.setEmailAddress("james.smith@hmcts.net");
         userAccountEntity.setIsSystemUser(false);

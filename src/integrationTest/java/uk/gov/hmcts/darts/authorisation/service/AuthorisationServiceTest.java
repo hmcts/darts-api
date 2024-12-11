@@ -70,7 +70,6 @@ class AuthorisationServiceTest extends IntegrationBase {
 
         UserAccountEntity judgeUserAccount = new UserAccountEntity();
         judgeUserAccount.setSecurityGroupEntities(Set.of(judgesSecurityGroup));
-        judgeUserAccount.setUserName("Test Judge");
         judgeUserAccount.setUserFullName("Test Judge");
         judgeUserAccount.setEmailAddress(TEST_JUDGE_EMAIL);
         var testUser = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
@@ -88,7 +87,6 @@ class AuthorisationServiceTest extends IntegrationBase {
 
         UserAccountEntity judgeUserAccountGlobal = new UserAccountEntity();
         judgeUserAccountGlobal.setSecurityGroupEntities(Set.of(globalSecurityGroup, judgesSecurityGroup));
-        judgeUserAccountGlobal.setUserName("Test Judge Global");
         judgeUserAccountGlobal.setUserFullName("Test Judge Global");
         judgeUserAccountGlobal.setEmailAddress(TEST_JUDGE_GLOBAL_EMAIL);
         judgeUserAccountGlobal.setCreatedBy(testUser);
@@ -101,7 +99,6 @@ class AuthorisationServiceTest extends IntegrationBase {
         SecurityGroupEntity bristolStaff = securityGroupRepository.getReferenceById(REQUESTOR_SG_ID);
         SecurityGroupEntity bristolAppr = securityGroupRepository.getReferenceById(APPROVER_SG_ID);
         UserAccountEntity bristolUserAccount = new UserAccountEntity();
-        bristolUserAccount.setUserName("Test Bristol");
         bristolUserAccount.setUserFullName("Test Bristol");
         bristolUserAccount.setEmailAddress(TEST_BRISTOL_EMAIL);
         bristolUserAccount.setSecurityGroupEntities(Set.of(bristolStaff, bristolAppr));
@@ -113,7 +110,6 @@ class AuthorisationServiceTest extends IntegrationBase {
         userAccountRepository.saveAndFlush(bristolUserAccount);
 
         UserAccountEntity newUser = new UserAccountEntity();
-        newUser.setUserName("Test New");
         newUser.setUserFullName("Test New");
         newUser.setEmailAddress(TEST_NEW_EMAIL);
         newUser.setCreatedBy(testUser);
