@@ -136,6 +136,11 @@ public class MediaEntity extends CreatedModifiedBaseEntity
     @OneToMany(mappedBy = ExternalObjectDirectoryEntity_.MEDIA)
     private List<ExternalObjectDirectoryEntity> externalObjectDirectoryEntities = new ArrayList<>();
 
+    @Column(name = "subcontent_object_id")
+    private String subcontentObjectId;
+
+    @Column(name = "subcontent_position")
+    private Integer subcontentPosition;
 
     public List<CourtCaseEntity> associatedCourtCases() {
         var cases = hearingList.stream().map(HearingEntity::getCourtCase);

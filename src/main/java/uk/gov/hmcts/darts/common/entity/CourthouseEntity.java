@@ -70,9 +70,14 @@ public class CourthouseEntity extends CreatedModifiedBaseEntity {
         inverseJoinColumns = {@JoinColumn(name = "reg_id")})
     private Set<RegionEntity> regions = new LinkedHashSet<>();
 
-
     @Column(name = "display_name")
     private String displayName;
+
+    @Column(name = "courthouse_object_id")
+    private String courthouse_object_id;
+
+    @Column(name = "folder_path")
+    private String folderPath;
 
     public RegionEntity getRegion() {
         throwIfStateBad();
