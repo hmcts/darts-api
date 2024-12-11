@@ -53,15 +53,15 @@ class DailylistFunctionalTest extends FunctionalTest {
     @ParameterizedTest
     @EnumSource(names = {"CPP", "XHB"})
     void postDailyList(SourceType sourceType) throws IOException {
-        String courthouseName = "func-swansea-house-" + randomAlphanumeric(7);
-        String courtroomName = "func-swansea-room-" + randomAlphanumeric(7);
+        String courthouseName = "FUNC-SWANSEA-HOUSE-" + randomAlphanumeric(7);
+        String courtroomName = "FUNC-SWANSEA-ROOM-" + randomAlphanumeric(7);
 
         createCourtroomAndCourthouse(courthouseName, courtroomName);
 
         String xmlDocument = getContentsFromFile("DailyList-Document.xml");
 
-        String uniqueId = "func-unique-id-" + randomAlphanumeric(7);
-        String messageId = "func-unique-id-" + randomAlphanumeric(7);
+        String uniqueId = "FUNC-UNIQUE-ID-" + randomAlphanumeric(7);
+        String messageId = "FUNC-UNIQUE-ID-" + randomAlphanumeric(7);
 
         PostDailyListRequest request = new PostDailyListRequest();
         request.setSourceSystem(sourceType.toString());

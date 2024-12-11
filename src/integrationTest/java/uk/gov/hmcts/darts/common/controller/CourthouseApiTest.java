@@ -41,6 +41,7 @@ import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.Collections;
 import java.util.List;
+import java.util.Locale;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
@@ -586,7 +587,7 @@ class CourthouseApiTest extends IntegrationBase {
         dartsDatabase.save(courtHouseEntity);
 
         CourthousePost courthousePost = new CourthousePost();
-        courthousePost.setCourthouseName(UUID.randomUUID().toString()); // just some unique string
+        courthousePost.setCourthouseName(UUID.randomUUID().toString().toUpperCase(Locale.ENGLISH)); // just some unique string
         courthousePost.setDisplayName(COURTHOUSE_DISPLAY_NAME);
 
         String jsonRequestBody = objectMapper.writeValueAsString(courthousePost);
@@ -715,6 +716,25 @@ class CourthouseApiTest extends IntegrationBase {
             .andExpect(jsonPath("$.title").value("Constraint Violation"))
             .andExpect(jsonPath("$.violations.*.field").value("displayName"))
             .andExpect(jsonPath("$.violations.*.message").value("must not be null"));
+    }
+
+    @Test
+    void adminCourthousesPost_shouldReturnBadRequest_whenCourthouseNameIsLowercase() throws Exception {
+        UserAccountEntity user = superAdminUserStub.givenUserIsAuthorised(authentication);
+        createEnabledUserAccountEntity(user);
+
+        CourthousePost courthousePost = new CourthousePost();
+        courthousePost.setCourthouseName("lowercase courthouse");
+        courthousePost.setDisplayName(COURTHOUSE_DISPLAY_NAME);
+
+        String jsonRequestBody = objectMapper.writeValueAsString(courthousePost);
+
+        mockMvc.perform(post("/admin/courthouses")
+                            .contentType(MediaType.APPLICATION_JSON_VALUE)
+                            .content(jsonRequestBody))
+            .andExpect(status().isBadRequest())
+            .andExpect(jsonPath("$.type").value("COURTHOUSE_108"))
+            .andExpect(jsonPath("$.title").value("Invalid request"));
     }
 
     @Test

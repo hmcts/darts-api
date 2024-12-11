@@ -15,8 +15,8 @@ class NodeRegistrationFunctionalTest extends FunctionalTest {
 
     @Test
     void testRegisterDevice() {
-        String courthouseName = "func-swansea-house-" + randomAlphanumeric(7);
-        String courtroomName = "func-swansea-room-" + randomAlphanumeric(7);
+        String courthouseName = "FUNC-SWANSEA-HOUSE-" + randomAlphanumeric(7);
+        String courtroomName = "FUNC-SWANSEA-ROOM-" + randomAlphanumeric(7);
 
         createCourtroomAndCourthouse(courthouseName, courtroomName);
 

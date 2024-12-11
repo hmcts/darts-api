@@ -24,9 +24,9 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 class CasesFunctionalTest extends FunctionalTest {
     private static final String CASES_PATH = "/cases";
     private static final String EVENTS_PATH = "/events";
-    private static final String CASE_NUMBER = "func-case-" + randomAlphanumeric(7);
-    private static final String COURTHOUSE = "Swansea";
-    private static final String COURTROOM = "func-case-1";
+    private static final String CASE_NUMBER = "FUNC-CASE-" + randomAlphanumeric(7);
+    private static final String COURTHOUSE = "SWANSEA";
+    private static final String COURTROOM = "FUNC-CASE-1";
     private static int caseId;
 
     @AfterAll

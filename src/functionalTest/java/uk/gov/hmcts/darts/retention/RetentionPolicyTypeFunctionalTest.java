@@ -71,7 +71,7 @@ class RetentionPolicyTypeFunctionalTest extends FunctionalTest {
                   "id": "",
                   "name": "Func test policy",
                   "display_name": "Func test policy",
-                  "description": "func-policy",
+                  "description": "FUNC-policy",
                   "fixed_policy_key": "999",
                   "duration": "1Y0M0D",
                   "policy_start_at": "2124-01-01T00:00:00Z"
@@ -121,7 +121,7 @@ class RetentionPolicyTypeFunctionalTest extends FunctionalTest {
                   "id": "",
                   "name": "Updated func test policy name",
                   "display_name": "Func test policy",
-                  "description": "func-policy",
+                  "description": "FUNC-policy",
                   "fixed_policy_key": "999",
                   "duration": "1Y0M0D",
                   "policy_start_at": "2124-01-01T00:00:00Z"
@@ -144,7 +144,7 @@ class RetentionPolicyTypeFunctionalTest extends FunctionalTest {
                       {
                         "name": "Func test policy",
                         "display_name": "Func test policy",
-                        "description": "func-policy",
+                        "description": "FUNC-policy",
                         "fixed_policy_key": "999",
                         "duration": "1Y0M0D",
                         "policy_start_at": "2124-01-01T00:00:00Z"

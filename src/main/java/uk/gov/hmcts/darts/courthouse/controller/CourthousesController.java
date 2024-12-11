@@ -11,6 +11,7 @@ import uk.gov.hmcts.darts.authorisation.annotation.Authorisation;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 import uk.gov.hmcts.darts.common.entity.RegionEntity;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
+import uk.gov.hmcts.darts.common.util.CourtValidationUtils;
 import uk.gov.hmcts.darts.courthouse.exception.CourthouseApiError;
 import uk.gov.hmcts.darts.courthouse.http.api.CourthousesApi;
 import uk.gov.hmcts.darts.courthouse.mapper.AdminRegionToRegionEntityMapper;
@@ -72,6 +73,7 @@ public class CourthousesController implements CourthousesApi {
     @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
     @Authorisation(contextId = ANY_ENTITY_ID, globalAccessSecurityRoles = {SUPER_ADMIN})
     public ResponseEntity<ExtendedCourthousePost> adminCourthousesPost(CourthousePost courthousePost) {
+        validateUppercase(courthousePost.getCourthouseName());
         ExtendedCourthousePost extendedCourthouse = courthouseService.createCourthouseAndGroups(courthousePost);
         return new ResponseEntity<>(extendedCourthouse, HttpStatus.CREATED);
     }
@@ -80,8 +82,15 @@ public class CourthousesController implements CourthousesApi {
     @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
     @Authorisation(contextId = ANY_ENTITY_ID, globalAccessSecurityRoles = {SUPER_ADMIN})
     public ResponseEntity<AdminCourthouse> updateCourthouse(Integer courthouseId, CourthousePatch courthousePatch) {
+        validateUppercase(courthousePatch.getCourthouseName());
         var adminCourthouse = courthouseService.updateCourthouse(courthouseId, courthousePatch);
         return new ResponseEntity<>(adminCourthouse, HttpStatus.OK);
+    }
+
+    private void validateUppercase(String courthouse) {
+        if (!CourtValidationUtils.isUppercase(courthouse)) {
+            throw new DartsApiException(CourthouseApiError.INVALID_REQUEST, "Courthouse must be uppercase.");
+        }
     }
 
 }

@@ -18,7 +18,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 class CourtlogsFunctionalTest extends FunctionalTest {
 
     public static final String ENDPOINT_URL = "/courtlogs";
-    public final String courthouseName = "func-swansea-house-" + randomAlphanumeric(7);
+    public final String courthouseName = "FUNC-SWANSEA-HOUSE-" + randomAlphanumeric(7);
 
 
     @AfterAll
@@ -33,7 +33,7 @@ class CourtlogsFunctionalTest extends FunctionalTest {
     @Order(1)
     void postSuccess() {
 
-        String courtroomName = "func-swansea-room-" + randomAlphanumeric(7);
+        String courtroomName = "FUNC-SWANSEA-ROOM-" + randomAlphanumeric(7);
 
         createCourtroomAndCourthouse(courthouseName, courtroomName);
 
@@ -43,7 +43,7 @@ class CourtlogsFunctionalTest extends FunctionalTest {
               "courthouse": "<<courtHouseName>>",
               "courtroom": "<<courtroomName>>",
               "case_numbers": [
-                "func-CASE1001"
+                "FUNC-CASE1001"
               ],
               "text": "System : Start Recording : Record: Case Code:0008, New Case"
             }""";
@@ -74,7 +74,7 @@ class CourtlogsFunctionalTest extends FunctionalTest {
                         "courthouse": "",
                         "courtroom": "1",
                         "case_numbers": [
-                          "func-CASE1001"
+                          "FUNC-CASE1001"
                         ],
                         "text": "System : Start Recording : Record: Case Code:0008, New Case"
                       }""")
@@ -94,7 +94,7 @@ class CourtlogsFunctionalTest extends FunctionalTest {
         Response response = buildRequestWithExternalGlobalAccessAuth()
             .contentType(ContentType.JSON)
             .param("courthouse", courthouseName)
-            .param("case_number", "func-CASE1001")
+            .param("case_number", "FUNC-CASE1001")
             .param("start_date_time", "1999-05-23T09:15:25Z")
             .param("end_date_time", "1999-05-23T09:15:25Z")
             .when()
@@ -108,7 +108,7 @@ class CourtlogsFunctionalTest extends FunctionalTest {
             [
                 {
                     "courthouse": "<<courtHouseName>>",
-                    "caseNumber": "func-CASE1001",
+                    "caseNumber": "FUNC-CASE1001",
                     "timestamp": "1999-05-23T09:15:25Z",
                     "eventText": "System : Start Recording : Record: Case Code:0008, New Case"
                 }
@@ -122,8 +122,8 @@ class CourtlogsFunctionalTest extends FunctionalTest {
     void getFail() {
         Response response = buildRequestWithExternalGlobalAccessAuth()
             .contentType(ContentType.JSON)
-            .param("courthouse", "func-liverpool")
-            .param("case_number", "func-CASE1001")
+            .param("courthouse", "FUNC-liverpool")
+            .param("case_number", "FUNC-CASE1001")
             .param("start_date_time1", "2023-05-24T09:15:25Z")
             .param("end_date_time", "2023-05-23T09:15:25Z")
             .when()
