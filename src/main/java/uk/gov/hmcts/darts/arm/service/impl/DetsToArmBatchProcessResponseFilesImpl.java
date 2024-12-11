@@ -160,8 +160,8 @@ public class DetsToArmBatchProcessResponseFilesImpl extends AbstractArmBatchProc
     }
 
     @Override
-    protected void markEodAsResposneProcessingFailed(ExternalObjectDirectoryEntity externalObjectDirectory, UserAccountEntity userAccount) {
-        super.markEodAsResposneProcessingFailed(externalObjectDirectory, userAccount);
+    protected void markEodAsResponseProcessingFailed(ExternalObjectDirectoryEntity externalObjectDirectory, UserAccountEntity userAccount) {
+        super.markEodAsResponseProcessingFailed(externalObjectDirectory, userAccount);
 
         ObjectStateRecordEntity objectStateRecordEntity = externalObjectDirectory.getObjectStateRecordEntity();
         if (objectStateRecordEntity != null) {

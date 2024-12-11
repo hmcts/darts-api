@@ -324,7 +324,7 @@ public abstract class AbstractArmBatchProcessResponseFiles implements ArmRespons
 
                         if (externalObjectDirectory.getInputUploadProcessedTs() != null
                             && externalObjectDirectory.getInputUploadProcessedTs().isBefore(minInputUploadProcessedTime)) {
-                            markEodAsResposneProcessingFailed(externalObjectDirectory, userAccount);
+                            markEodAsResponseProcessingFailed(externalObjectDirectory, userAccount);
                         } else {
                             updateExternalObjectDirectoryStatus(externalObjectDirectory, EodHelper.armDropZoneStatus(), userAccount);
                         }
@@ -336,7 +336,7 @@ public abstract class AbstractArmBatchProcessResponseFiles implements ArmRespons
         );
     }
 
-    protected void markEodAsResposneProcessingFailed(ExternalObjectDirectoryEntity externalObjectDirectory, UserAccountEntity userAccount) {
+    protected void markEodAsResponseProcessingFailed(ExternalObjectDirectoryEntity externalObjectDirectory, UserAccountEntity userAccount) {
         updateExternalObjectDirectoryStatus(externalObjectDirectory, EodHelper.armResponseProcessingFailedStatus(), userAccount);
     }
 
