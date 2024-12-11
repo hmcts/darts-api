@@ -15,6 +15,9 @@ import uk.gov.hmcts.darts.authorisation.annotation.Authorisation;
 import uk.gov.hmcts.darts.authorisation.util.AuthorisationUnitOfWork;
 import uk.gov.hmcts.darts.common.component.validation.Validator;
 import uk.gov.hmcts.darts.common.enums.SecurityRoleEnum;
+import uk.gov.hmcts.darts.common.exception.DartsApiException;
+import uk.gov.hmcts.darts.common.util.CourtValidationUtils;
+import uk.gov.hmcts.darts.transcriptions.exception.TranscriptionApiError;
 import uk.gov.hmcts.darts.transcriptions.http.api.TranscriptionApi;
 import uk.gov.hmcts.darts.transcriptions.model.AdminApproveDeletionResponse;
 import uk.gov.hmcts.darts.transcriptions.model.AdminMarkedForDeletionResponseItem;
@@ -234,6 +237,11 @@ public class TranscriptionController implements TranscriptionApi {
     @Authorisation(bodyAuthorisation = true, contextId = ANY_ENTITY_ID,
         globalAccessSecurityRoles = {SUPER_ADMIN, SUPER_USER})
     public ResponseEntity<List<TranscriptionSearchResponse>> adminTranscriptionsSearchPost(TranscriptionSearchRequest transcriptionSearchRequest) {
+
+        if (!CourtValidationUtils.isUppercase(transcriptionSearchRequest.getCourthouseDisplayName())) {
+            throw new DartsApiException(TranscriptionApiError.FAILED_TO_VALIDATE_TRANSCRIPTION_REQUEST, "Courthouse display name must be uppercase");
+        }
+
         return new ResponseEntity<>(
             adminTranscriptionSearchService.searchTranscriptions(transcriptionSearchRequest),
             HttpStatus.OK

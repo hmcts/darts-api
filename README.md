@@ -349,9 +349,9 @@ created by these tests. To this end the following conventions should be used:
 
 - If a courthouse needs to pre-exist for a functional test it can be created from within the tests
   using `/functional-tests/courthouse/{courthouse_name}/courtroom/{courtroom_name}`. The courthouse_name must be
-  prefixed with `func-`. This data will be cleaned after the test has executed.
+  prefixed with `FUNC-`. This data will be cleaned after the test has executed.
 - If a case needs to pre-exist for a functional test then however it is created the case_number should also pre-fixed
-  with `func-`. There is a random case_number generator that will provide case_numbers with this prefix. These cases and
+  with `FUNC-`. There is a random case_number generator that will provide case_numbers with this prefix. These cases and
   their associated hearings and events will be cleaned up automatically after the test has executed.
 
 ## Caching

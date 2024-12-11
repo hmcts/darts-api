@@ -24,6 +24,7 @@ import uk.gov.hmcts.darts.usermanagement.model.SecurityGroupWithIdAndRoleAndUser
 
 import java.util.Comparator;
 import java.util.List;
+import java.util.Locale;
 import java.util.UUID;
 
 import static org.hamcrest.CoreMatchers.equalTo;
@@ -193,8 +194,8 @@ class SecurityGroupFunctionalTest extends FunctionalTest {
         patchContent = patchContent.replace("<func-a-security-group-new-name>", newName);
         String newDisplayName = "A security group new name " + UUID.randomUUID();
         patchContent = patchContent.replace("<A security group new name>", newDisplayName);
-        Integer id1 = createCourthouse("func-a-courthouse " + UUID.randomUUID(), "func-a-courthouse" + UUID.randomUUID());
-        Integer id2 = createCourthouse("func-a-courthouse " + UUID.randomUUID(), "func-a-courthouse" + UUID.randomUUID());
+        Integer id1 = createCourthouse(("FUNC-A-COURTHOUSE " + UUID.randomUUID()).toUpperCase(Locale.ENGLISH), "func-a-courthouse" + UUID.randomUUID());
+        Integer id2 = createCourthouse(("FUNC-A-COURTHOUSE " + UUID.randomUUID()).toUpperCase(Locale.ENGLISH), "func-a-courthouse" + UUID.randomUUID());
         patchContent = patchContent.replace("<id1>", id1.toString());
         patchContent = patchContent.replace("<id2>", id2.toString());
         Response createUserResponse = createUser("user1@email.com");
