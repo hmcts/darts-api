@@ -57,7 +57,6 @@ import uk.gov.hmcts.darts.task.config.InboundToUnstructuredAutomatedTaskConfig;
 import uk.gov.hmcts.darts.task.config.OutboundAudioDeleterAutomatedTaskConfig;
 import uk.gov.hmcts.darts.task.config.ProcessArmResponseFilesAutomatedTaskConfig;
 import uk.gov.hmcts.darts.task.config.ProcessDailyListAutomatedTaskConfig;
-import uk.gov.hmcts.darts.task.config.RemoveDuplicatedEventsAutomatedTaskConfig;
 import uk.gov.hmcts.darts.task.config.UnstructuredAudioDeleterAutomatedTaskConfig;
 import uk.gov.hmcts.darts.task.config.UnstructuredToArmAutomatedTaskConfig;
 import uk.gov.hmcts.darts.task.exception.AutomatedTaskSetupError;
@@ -77,7 +76,6 @@ import uk.gov.hmcts.darts.task.runner.impl.InboundToUnstructuredAutomatedTask;
 import uk.gov.hmcts.darts.task.runner.impl.OutboundAudioDeleterAutomatedTask;
 import uk.gov.hmcts.darts.task.runner.impl.ProcessArmResponseFilesAutomatedTask;
 import uk.gov.hmcts.darts.task.runner.impl.ProcessDailyListAutomatedTask;
-import uk.gov.hmcts.darts.task.runner.impl.RemoveDuplicatedEventsAutomatedTask;
 import uk.gov.hmcts.darts.task.runner.impl.UnstructuredAudioDeleterAutomatedTask;
 import uk.gov.hmcts.darts.task.runner.impl.UnstructuredToArmAutomatedTask;
 import uk.gov.hmcts.darts.task.status.AutomatedTaskStatus;
@@ -859,65 +857,6 @@ class AutomatedTaskServiceTest extends IntegrationBase {
                 logApi,
                 lockService,
                 generateCaseDocumentProcessor
-            );
-
-        Set<ScheduledTask> scheduledTasks = scheduledTaskHolder.getScheduledTasks();
-        displayTasks(scheduledTasks);
-
-        boolean mayInterruptIfRunning = false;
-        boolean taskCancelled = automatedTaskService.cancelAutomatedTask(
-            automatedTask.getTaskName(),
-            mayInterruptIfRunning
-        );
-        assertTrue(taskCancelled);
-
-        log.info("About to reload task {}", automatedTask.getTaskName());
-        automatedTaskService.reloadTaskByName(automatedTask.getTaskName());
-    }
-
-    @Test
-    void givenConfiguredTaskGenerateRemoveDuplicateEventAutomatedTask() {
-        AutomatedTask automatedTask =
-            new RemoveDuplicatedEventsAutomatedTask(
-                automatedTaskRepository,
-                mock(RemoveDuplicatedEventsAutomatedTaskConfig.class),
-                removeDuplicateEventsProcessor,
-                logApi,
-                lockService
-            );
-
-        Optional<AutomatedTaskEntity> originalAutomatedTaskEntity =
-            automatedTaskService.getAutomatedTaskEntityByTaskName(automatedTask.getTaskName());
-        log.info("TEST - Original task {} cron expression {}", automatedTask.getTaskName(),
-                 originalAutomatedTaskEntity.get().getCronExpression()
-        );
-
-        automatedTaskService.updateAutomatedTaskCronExpression(automatedTask.getTaskName(), "*/9 * * * * *");
-
-        Set<ScheduledTask> scheduledTasks = scheduledTaskHolder.getScheduledTasks();
-        displayTasks(scheduledTasks);
-
-        Optional<AutomatedTaskEntity> updatedAutomatedTaskEntity =
-            automatedTaskService.getAutomatedTaskEntityByTaskName(automatedTask.getTaskName());
-        log.info("TEST - Updated task {} cron expression {}", automatedTask.getTaskName(),
-                 updatedAutomatedTaskEntity.get().getCronExpression()
-        );
-        assertEquals(originalAutomatedTaskEntity.get().getTaskName(), updatedAutomatedTaskEntity.get().getTaskName());
-        assertNotEquals(originalAutomatedTaskEntity.get().getCronExpression(), updatedAutomatedTaskEntity.get().getCronExpression());
-
-        automatedTaskService.updateAutomatedTaskCronExpression(
-            automatedTask.getTaskName(), originalAutomatedTaskEntity.get().getCronExpression());
-    }
-
-    @Test
-    void givenConfiguredTaskCancelRemoveDuplicateEventAutomatedTask() {
-        AutomatedTask automatedTask =
-            new RemoveDuplicatedEventsAutomatedTask(
-                automatedTaskRepository,
-                mock(RemoveDuplicatedEventsAutomatedTaskConfig.class),
-                removeDuplicateEventsProcessor,
-                logApi,
-                lockService
             );
 
         Set<ScheduledTask> scheduledTasks = scheduledTaskHolder.getScheduledTasks();

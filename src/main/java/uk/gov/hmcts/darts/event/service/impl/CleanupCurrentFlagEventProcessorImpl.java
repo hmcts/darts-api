@@ -1,31 +1,45 @@
 package uk.gov.hmcts.darts.event.service.impl;
 
 import lombok.Getter;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
-import org.springframework.scheduling.annotation.Async;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.darts.common.entity.EventEntity;
 import uk.gov.hmcts.darts.common.repository.EventRepository;
 import uk.gov.hmcts.darts.common.repository.HearingRepository;
 import uk.gov.hmcts.darts.event.service.CleanupCurrentFlagEventProcessor;
 
+import java.time.LocalDate;
+import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static java.time.ZoneOffset.UTC;
+
 @Getter
-@RequiredArgsConstructor
 @Slf4j
 @Component
 public class CleanupCurrentFlagEventProcessorImpl implements CleanupCurrentFlagEventProcessor {
     private final EventRepository eventRepository;
     private final HearingRepository hearingRepository;
+    private final OffsetDateTime earliestIsCurrentClearUpDate;
+
+    public CleanupCurrentFlagEventProcessorImpl(
+        @Value("${darts.events.earliest-is-current-clear-up-date}") String earliestIsCurrentClearUpDate,
+            EventRepository eventRepository,
+            HearingRepository hearingRepository
+        ) {
+        this.earliestIsCurrentClearUpDate = LocalDate.parse(earliestIsCurrentClearUpDate)
+            .atStartOfDay()
+            .atOffset(UTC);
+        this.eventRepository = eventRepository;
+        this.hearingRepository = hearingRepository;
+    }
 
     @Override
-    @Async("eventTaskExecutor")
     public void processEvent(Integer eventId) {
         if (eventId == null || eventId == 0) {
             return;
@@ -52,6 +66,13 @@ public class CleanupCurrentFlagEventProcessorImpl implements CleanupCurrentFlagE
         if (CollectionUtils.isNotEmpty(eventsToBeSuperseded)) {
             List<Integer> eveIdsThatHaveBeenSuperseded = new ArrayList<>();
             for (EventEntity eventToBeSuperseded : eventsToBeSuperseded) {
+                if (eventToBeSuperseded.getCreatedDateTime().isBefore(earliestIsCurrentClearUpDate)) {
+                    log.info("Event version with event id {} received into modernised DARTS is for a legacy event. Skipping event is_current cleanup " +
+                                 "for eve_id {}",
+                         eventIdAndHearingIds.getEventId(),
+                         eventIdAndHearingIds.getEveId());
+                    continue;
+                }
                 eventToBeSuperseded.setIsCurrent(false);
                 eventToBeSuperseded.setHearingEntities(new ArrayList<>());
                 eveIdsThatHaveBeenSuperseded.add(eventToBeSuperseded.getId());
