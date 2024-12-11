@@ -7,7 +7,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public enum RetentionConfidenceScoreEnum {
 
-    CASE_PERFECTLY_CLOSED(1), CASE_NOT_PERFECTLY_CLOSED(2);
+    CASE_PERFECTLY_CLOSED(0), CASE_NOT_PERFECTLY_CLOSED(1);
 
     private final Integer id;
 }
