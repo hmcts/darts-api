@@ -28,6 +28,7 @@ import uk.gov.hmcts.darts.audiorequests.model.SearchTransformedMediaResponse;
 import uk.gov.hmcts.darts.authorisation.annotation.Authorisation;
 import uk.gov.hmcts.darts.common.datamanagement.component.impl.DownloadResponseMetaData;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
+import uk.gov.hmcts.darts.common.util.CourtValidationUtils;
 import uk.gov.hmcts.darts.log.api.LogApi;
 
 import java.util.List;
@@ -169,7 +170,11 @@ public class AudioRequestsController implements AudioRequestsApi {
     public ResponseEntity<List<SearchTransformedMediaResponse>> searchForTransformedMedia(SearchTransformedMediaRequest searchTransformedMediaRequest) {
         List<SearchTransformedMediaResponse> foundTransformedMediaResponse = mediaRequestService.searchRequest(searchTransformedMediaRequest);
 
-        return new ResponseEntity<>(foundTransformedMediaResponse, HttpStatus.OK);
+        if (!CourtValidationUtils.isUppercase(searchTransformedMediaRequest.getCourthouseDisplayName())) {
+            throw new DartsApiException(AudioRequestsApiError.INVALID_REQUEST, "Courthouse display name must be uppercase.");
+        }
+
+            return new ResponseEntity<>(foundTransformedMediaResponse, HttpStatus.OK);
     }
 
     @Override
