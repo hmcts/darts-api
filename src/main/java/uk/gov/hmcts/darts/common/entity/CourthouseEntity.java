@@ -75,7 +75,7 @@ public class CourthouseEntity extends CreatedModifiedBaseEntity {
 
     @NotAudited
     @Column(name = "courthouse_object_id")
-    private String courthouse_object_id;
+    private String courthouseObjectId;
 
     @NotAudited
     @Column(name = "folder_path")
