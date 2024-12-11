@@ -538,9 +538,6 @@ public class MediaRequestServiceImpl implements MediaRequestService {
         if (mediaEntityOptional.isPresent()) {
             MediaEntity mediaEntity = mediaEntityOptional.get();
 
-            if (!mediaEntity.isHidden() && mediaHideRequest.getIsHidden()) {
-                auditApi.record(HIDE_AUDIO);
-            }
             mediaEntity.setHidden(mediaHideRequest.getIsHidden());
             mediaRepository.saveAndFlush(mediaEntity);
 
@@ -551,6 +548,8 @@ public class MediaRequestServiceImpl implements MediaRequestService {
                 if (objectHiddenReasonEntity.isEmpty()) {
                     throw new DartsApiException(AudioApiError.MEDIA_HIDE_ACTION_REASON_NOT_FOUND);
                 }
+
+                auditApi.record(HIDE_AUDIO);
 
                 // on hiding add the relevant hide record
                 ObjectAdminActionEntity objectAdminActionEntity = new ObjectAdminActionEntity();
