@@ -71,6 +71,14 @@ CREATE TABLE extobjdir_process_detail
     last_modified_by INTEGER                  NOT NULL
 );
 
+ALTER TABLE extobjdir_process_detail
+    ADD CONSTRAINT epd_external_object_directory_fk
+        FOREIGN KEY (eod_id) REFERENCES external_object_directory (eod_id);
+
+-- TODO: FKs for created_by and last_modified_by
+
+CREATE SEQUENCE epd_seq CACHE 20;
+
 -- add table transcription_linked_case, as per event_linked_case
 CREATE TABLE transcription_linked_case
 (
@@ -80,18 +88,6 @@ CREATE TABLE transcription_linked_case
     courthouse_name CHARACTER VARYING,
     case_number     CHARACTER VARYING
 );
-
--- v10 amend index on user_account from user_name to user_full_name
-DROP INDEX IF EXISTS usr_un_idx;
-
--- additional changes not mentioned in the v72.2 change notes
-
-CREATE SEQUENCE epd_seq CACHE 20;
-CREATE SEQUENCE tlc_seq CACHE 20;
-
-ALTER TABLE extobjdir_process_detail
-    ADD CONSTRAINT epd_external_object_directory_fk
-        FOREIGN KEY (eod_id) REFERENCES external_object_directory (eod_id);
 
 ALTER TABLE transcription_linked_case
     ADD CONSTRAINT transcription_linked_case_court_case_fk
@@ -104,6 +100,11 @@ ALTER TABLE transcription_linked_case
 ALTER TABLE transcription_linked_case
     ADD CONSTRAINT tlc_modern_or_legacy_case_nn
         CHECK ((cas_id is not null) or (courthouse_name is not null and case_number is not null));
+
+CREATE SEQUENCE tlc_seq CACHE 20;
+
+-- v10 amend index on user_account from user_name to user_full_name
+DROP INDEX IF EXISTS usr_un_idx;
 
 --v24 add group_display_name to security_group, for direct mapping from legacy
 ALTER TABLE security_group

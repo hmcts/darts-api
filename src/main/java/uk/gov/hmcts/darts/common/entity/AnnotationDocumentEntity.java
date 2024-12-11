@@ -91,6 +91,12 @@ public class AnnotationDocumentEntity extends ModifiedBaseEntity
     @Column(name = "ret_conf_reason")
     private String retConfReason;
 
+    @Column(name = "subcontent_object_id")
+    private String subcontentObjectId;
+
+    @Column(name = "subcontent_position")
+    private Integer subcontentPosition;
+
     @OneToMany(mappedBy = ExternalObjectDirectoryEntity_.ANNOTATION_DOCUMENT_ENTITY)
     private List<ExternalObjectDirectoryEntity> externalObjectDirectoryEntities = new ArrayList<>();
 
