@@ -10,15 +10,11 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.Data;
 
 @Entity
 @Table(name = "transcription_linked_case")
-@Getter
-@Setter
-@EqualsAndHashCode
+@Data
 public class TranscriptionLinkedCaseEntity {
 
     @Id

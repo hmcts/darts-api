@@ -10,16 +10,16 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
 import uk.gov.hmcts.darts.common.entity.base.MandatoryCreatedModifiedBaseEntity;
 
 import java.time.OffsetDateTime;
 
 @Entity
 @Table(name = "extobjdir_process_detail")
-@Getter
-@Setter
+@Data
+@EqualsAndHashCode(callSuper = true)
 public class ExternalObjectDirectoryProcessDetailEntity extends MandatoryCreatedModifiedBaseEntity {
 
     @Id
