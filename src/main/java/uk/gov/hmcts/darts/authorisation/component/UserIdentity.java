@@ -16,4 +16,6 @@ public interface UserIdentity {
     boolean userHasGlobalAccess(Set<SecurityRoleEnum> globalAccessRolest);
 
     List<Integer> getListOfCourthouseIdsUserHasAccessTo();
+
+    Jwt getJwt();
 }
