@@ -84,7 +84,7 @@ public class UserAccountEntity extends CreatedModifiedBaseEntity {
 
     @NotAudited
     @Column(name = "user_ldap_dn")
-    private String userLdapDn;
+    private String userLdapDomainName;
 
     @NotAudited
     @Column(name = "user_global_unique_id")
