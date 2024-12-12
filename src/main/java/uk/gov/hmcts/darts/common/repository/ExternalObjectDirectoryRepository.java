@@ -65,6 +65,12 @@ public interface ExternalObjectDirectoryRepository extends JpaRepository<Externa
     List<ExternalObjectDirectoryEntity> findByTranscriptionDocumentEntityAndExternalLocationType(TranscriptionDocumentEntity transcriptionDocument,
                                                                                                  ExternalLocationTypeEntity externalLocationType);
 
+
+    List<ExternalObjectDirectoryEntity> findByTranscriptionDocumentEntityAndExternalLocationTypeAndStatus(
+        TranscriptionDocumentEntity transcriptionDocument,
+        ExternalLocationTypeEntity externalLocationType,
+        ObjectRecordStatusEntity status);
+
     @Query(
         """
                 SELECT eod.media.id FROM ExternalObjectDirectoryEntity eod
@@ -170,6 +176,10 @@ public interface ExternalObjectDirectoryRepository extends JpaRepository<Externa
 
     List<ExternalObjectDirectoryEntity> findByMediaAndExternalLocationType(MediaEntity media,
                                                                            ExternalLocationTypeEntity externalLocationType);
+
+    List<ExternalObjectDirectoryEntity> findByMediaAndExternalLocationTypeAndStatus(MediaEntity media,
+                                                                                    ExternalLocationTypeEntity externalLocationType,
+                                                                                    ObjectRecordStatusEntity status);
 
     List<ExternalObjectDirectoryEntity> findByAnnotationDocumentEntityAndExternalLocationType(AnnotationDocumentEntity annotationDocument,
                                                                                               ExternalLocationTypeEntity externalLocationType);
