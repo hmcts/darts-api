@@ -2399,12 +2399,6 @@ abstract class AbstractArmBatchProcessResponseFilesIntTest extends IntegrationBa
         return BinaryData.fromString(contents);
     }
 
-    protected String getInputUploadFileContents(String uploadFilename, Integer externalObjectDirectoryId) throws IOException {
-        String expectedResponse = getContentsFromFile(uploadFilename);
-        expectedResponse = expectedResponse.replaceAll("<EODID>", String.valueOf(externalObjectDirectoryId));
-        return expectedResponse;
-    }
-
     protected String getInvalidLineFileContents(String invalidLineFilename, Integer externalObjectDirectoryId) throws IOException {
         String expectedResponse = getContentsFromFile(invalidLineFilename);
         expectedResponse = expectedResponse.replaceAll("<EODID>", String.valueOf(externalObjectDirectoryId));
