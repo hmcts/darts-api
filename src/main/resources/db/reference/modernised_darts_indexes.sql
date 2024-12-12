@@ -11,6 +11,7 @@
 -- v7 amend all tablespaces to pg_default
 -- v8 add trigram indexes for pattern search suppt
 -- v9 add 2 event and 2 media indexes
+-- v10 amend index on user_account from user_name to user_full_name
 
 SET ROLE DARTS_OWNER;
 SET SEARCH_PATH TO darts;
@@ -198,7 +199,7 @@ CREATE INDEX jud_jn_idx         ON JUDGE(UPPER(judge_name))                 TABL
 CREATE INDEX med_mf_idx         ON MEDIA(media_file)                        TABLESPACE pg_default;
 CREATE INDEX med_st_et_idx      ON MEDIA(start_ts,end_ts)                   TABLESPACE pg_default;
 CREATE INDEX prn_pn_idx         ON PROSECUTOR(UPPER(prosecutor_name))       TABLESPACE pg_default;
-CREATE INDEX usr_un_idx         ON USER_ACCOUNT(user_name)                  TABLESPACE pg_default;
+CREATE INDEX usr_un_idx         ON USER_ACCOUNT(user_full_name)             TABLESPACE pg_default;
 CREATE INDEX usr_upea_idx       ON USER_ACCOUNT(UPPER(user_email_address))  TABLESPACE pg_default;
 CREATE INDEX usr_ag_idx         ON USER_ACCOUNT(account_guid)               TABLESPACE pg_default;
 
