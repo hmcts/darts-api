@@ -40,7 +40,7 @@ public class EventEntity extends CreatedModifiedBaseEntity {
     @Column(name = "folder_path")
     private String folderPath;
 
-    @ManyToOne(fetch = FetchType.EAGER, optional = false)
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "evh_id")
     private EventHandlerEntity eventType;
 

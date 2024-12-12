@@ -5,7 +5,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Limit;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.darts.authorisation.api.AuthorisationApi;
@@ -26,6 +25,8 @@ import uk.gov.hmcts.darts.retention.enums.RetentionConfidenceCategoryEnum;
 import uk.gov.hmcts.darts.retention.enums.RetentionPolicyEnum;
 import uk.gov.hmcts.darts.retention.helper.RetentionDateHelper;
 import uk.gov.hmcts.darts.retentions.model.PostRetentionRequest;
+import uk.gov.hmcts.darts.task.config.CloseOldCasesAutomatedTaskConfig;
+import uk.gov.hmcts.darts.util.AsyncUtil;
 
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
@@ -34,6 +35,10 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.Callable;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
+import javax.annotation.PostConstruct;
 
 import static java.lang.Boolean.TRUE;
 import static uk.gov.hmcts.darts.retention.enums.RetentionConfidenceReasonEnum.AGED_CASE;
@@ -47,28 +52,39 @@ public class CloseOldCasesProcessorImpl implements CloseOldCasesProcessor {
 
     private final CloseOldCasesProcessorImpl.CloseCaseProcessor caseProcessor;
     private final CaseRepository caseRepository;
-
     private final AuthorisationApi authorisationApi;
-
-    @Value("${darts.retention.close-open-cases-older-than-years}")
-    long years;
+    private final CloseOldCasesAutomatedTaskConfig closeOldCasesAutomatedTaskConfig;
 
     @Override
     public void closeCases(int batchSize) {
         log.info("Starting to close old cases...");
 
-        List<Integer> courtCaseEntityIdList = caseRepository.findOpenCasesToClose(OffsetDateTime.now().minusYears(years),
-                                                                                  Limit.of(batchSize));
+        List<Integer> courtCaseEntityIdList = caseRepository
+            .findOpenCasesToClose(OffsetDateTime.now()
+                                      .minus(closeOldCasesAutomatedTaskConfig.getCloseOpenCasesOlderThanDuration()),
+                                  Limit.of(batchSize));
         int totalCasesToClose = courtCaseEntityIdList.size();
         log.info("Found {} cases to close.", totalCasesToClose);
 
         UserAccountEntity userAccount = authorisationApi.getCurrentUser();
 
-        int closedCaseCount = 0;
-        for (Integer id : courtCaseEntityIdList) {
-            caseProcessor.closeCase(id, userAccount);
-            closedCaseCount++;
-            log.info("Closed {} out of {} cases.", closedCaseCount, totalCasesToClose);
+        AtomicInteger closedCaseCount = new AtomicInteger(0);
+
+        List<Callable<Void>> tasks = courtCaseEntityIdList
+            .stream()
+            .map(id -> (Callable<Void>) () -> {
+                caseProcessor.closeCase(id, userAccount);
+                log.info("Closed {} out of {} cases.", closedCaseCount.getAndIncrement(), totalCasesToClose);
+                return null;
+            }).toList();
+
+        try {
+            AsyncUtil.invokeAllAwaitTermination(tasks, closeOldCasesAutomatedTaskConfig.getThreads(), 40, TimeUnit.MINUTES);
+        } catch (Exception e) {
+            log.error("Close cases unexpected exception", e);
+            if (e instanceof InterruptedException) {
+                Thread.currentThread().interrupt();
+            }
         }
         log.info("Completed closing old cases.");
     }
@@ -83,9 +99,14 @@ public class CloseOldCasesProcessorImpl implements CloseOldCasesProcessor {
         private final RetentionApi retentionApi;
         private final RetentionDateHelper retentionDateHelper;
         private final CurrentTimeHelper currentTimeHelper;
+        private final CloseOldCasesAutomatedTaskConfig closeOldCasesAutomatedTaskConfig;
 
-        @Value("#{'${darts.retention.close-events}'.split(',')}")
         private List<String> closeEvents;
+
+        @PostConstruct
+        public void init() {
+            closeEvents = List.of(closeOldCasesAutomatedTaskConfig.getCloseEvents().split(","));
+        }
 
 
         @Transactional
@@ -101,7 +122,10 @@ public class CloseOldCasesProcessorImpl implements CloseOldCasesProcessor {
                 eventList.sort(Comparator.comparing(EventEntity::getCreatedDateTime).reversed());
                 //find latest closed event
                 Optional<EventEntity> closedEvent =
-                    eventList.stream().filter(eventEntity -> closeEvents.contains(eventEntity.getEventType().getEventName())).findFirst();
+                    eventList
+                        .stream()
+                        .filter(eventEntity -> closeEvents.contains(eventEntity.getEventType().getEventName()))
+                        .findFirst();
 
                 if (closedEvent.isPresent()) {
                     closeCaseInDbAndAddRetention(courtCase, closedEvent.get().getCreatedDateTime(), userAccount);

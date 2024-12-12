@@ -19,6 +19,7 @@ import uk.gov.hmcts.darts.common.util.CommonTestDataUtil;
 import uk.gov.hmcts.darts.common.util.DateConverterUtil;
 import uk.gov.hmcts.darts.retention.api.RetentionApi;
 import uk.gov.hmcts.darts.retention.helper.RetentionDateHelper;
+import uk.gov.hmcts.darts.task.config.CloseOldCasesAutomatedTaskConfig;
 
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
@@ -52,6 +53,8 @@ class CloseOldCasesProcessorImplTest {
     private CurrentTimeHelper currentTimeHelper;
     @Mock
     private CaseService caseService;
+    @Mock
+    private CloseOldCasesAutomatedTaskConfig closeOldCasesAutomatedTaskConfig;
 
     private UserAccountEntity userAccountEntity;
 
@@ -67,13 +70,14 @@ class CloseOldCasesProcessorImplTest {
             caseRetentionRepository,
             retentionApi,
             retentionDateHelper,
-            currentTimeHelper
+            currentTimeHelper,
+            closeOldCasesAutomatedTaskConfig
         );
 
-        closeOldCasesProcessor = new CloseOldCasesProcessorImpl(caseProcessor, caseRepository, authorisationApi);
+        closeOldCasesProcessor = new CloseOldCasesProcessorImpl(caseProcessor, caseRepository, authorisationApi, closeOldCasesAutomatedTaskConfig);
 
         lenient().when(currentTimeHelper.currentOffsetDateTime()).thenReturn(CURRENT_DATE_TIME);
-
+        lenient().when(closeOldCasesAutomatedTaskConfig.getThreads()).thenReturn(10);
     }
 
     @Test
