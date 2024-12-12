@@ -123,6 +123,7 @@ public class ArmRpoServiceImpl implements ArmRpoService {
                 log.info("About to read {} rows of CSV file: {}", IterableUtils.size(records), csvFile.getName());
                 for (CSVRecord csvRecord : records) {
                     String csvEod = csvRecord.get(CLIENT_IDENTIFIER_CSV_HEADER);
+                    log.info("ARM RPO Csv Client Identifier {}", csvEod);
                     if (StringUtils.isNotBlank(csvEod)) {
                         csvEodList.add(Integer.parseInt(csvEod));
                     }
