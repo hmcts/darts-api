@@ -772,7 +772,6 @@ class CourthouseApiTest extends IntegrationBase {
 
     private UserAccountEntity createEnabledUserAccountEntity(UserAccountEntity user) {
         UserAccountEntity userAccountEntity = new UserAccountEntity();
-        userAccountEntity.setUserName(ORIGINAL_USERNAME);
         userAccountEntity.setUserFullName(ORIGINAL_USERNAME);
         userAccountEntity.setEmailAddress(ORIGINAL_EMAIL_ADDRESS);
         userAccountEntity.setUserDescription(ORIGINAL_DESCRIPTION);
