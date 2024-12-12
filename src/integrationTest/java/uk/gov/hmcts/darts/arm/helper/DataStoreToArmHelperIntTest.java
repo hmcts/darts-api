@@ -21,6 +21,7 @@ import uk.gov.hmcts.darts.common.entity.MediaEntity;
 import uk.gov.hmcts.darts.common.entity.ObjectRecordStatusEntity;
 import uk.gov.hmcts.darts.common.entity.ObjectStateRecordEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
+import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
 import uk.gov.hmcts.darts.common.util.EodHelper;
 import uk.gov.hmcts.darts.test.common.FileStore;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
@@ -28,6 +29,7 @@ import uk.gov.hmcts.darts.testutils.stubs.ExternalObjectDirectoryStub;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 import java.nio.file.Path;
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
@@ -48,6 +50,7 @@ import static uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum.UNSTRUCTU
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_DROP_ZONE;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_INGESTION;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_MANIFEST_FAILED;
+import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_PROCESSING_RESPONSE_FILES;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_RAW_DATA_FAILED;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.FAILURE_CHECKSUM_FAILED;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.NEW;
@@ -70,6 +73,8 @@ class DataStoreToArmHelperIntTest extends IntegrationBase {
     private EodHelper eodHelper;
     @Autowired
     private ExternalObjectDirectoryStub externalObjectDirectoryStub;
+    @Autowired
+    private CurrentTimeHelper currentTimeHelper;
 
     private ExternalObjectDirectoryEntity externalObjectDirectory;
     private ObjectStateRecordEntity objectStateRecordEntity;
@@ -119,7 +124,7 @@ class DataStoreToArmHelperIntTest extends IntegrationBase {
     }
 
     @Test
-    void ignoreArmDropZoneStatus() {
+    void getEodEntitiesToSendToArm_returnsExpectedResults_ignoresArmDropZone() {
         List<MediaEntity> medias = dartsDatabase.getMediaStub().createAndSaveSomeMedias();
         externalObjectDirectoryStub.createAndSaveEod(medias.get(0), STORED, UNSTRUCTURED);
         externalObjectDirectoryStub.createAndSaveEod(medias.get(0), ARM_RAW_DATA_FAILED, ARM, eod -> eod.setManifestFile("existingManifestFile"));
@@ -127,13 +132,13 @@ class DataStoreToArmHelperIntTest extends IntegrationBase {
         externalObjectDirectoryStub.createAndSaveEod(medias.get(1), ARM_DROP_ZONE, ARM);
 
         List<Integer> eodEntitiesToSendToArm = dataStoreToArmHelper.getEodEntitiesToSendToArm(EodHelper.unstructuredLocation(),
-                                                                                                                    EodHelper.armLocation(), 5);
+                                                                                              EodHelper.armLocation(), 5);
         assertEquals(1, eodEntitiesToSendToArm.size());
 
     }
 
     @Test
-    void getCorrectEodEntities() {
+    void getEodEntitiesToSendToArm_returnsExpectedResults_whenExistingEodsTransferAttemptsOutOfLimit() {
         List<MediaEntity> medias = dartsDatabase.getMediaStub().createAndSaveSomeMedias();
         externalObjectDirectoryStub.createAndSaveEod(medias.get(0), STORED, UNSTRUCTURED);
         externalObjectDirectoryStub.createAndSaveEod(medias.get(0), ARM_RAW_DATA_FAILED, ARM, eod -> eod.setManifestFile("existingManifestFile"));
@@ -147,23 +152,24 @@ class DataStoreToArmHelperIntTest extends IntegrationBase {
         dartsDatabase.save(failedTooManyTimesEod);
 
         List<Integer> eodEntitiesToSendToArm = dataStoreToArmHelper.getEodEntitiesToSendToArm(EodHelper.unstructuredLocation(),
-                                                                                                                    EodHelper.armLocation(), 5);
+                                                                                              EodHelper.armLocation(), 5);
         assertEquals(3, eodEntitiesToSendToArm.size());
 
     }
 
     @Test
-    void getEodEntitiesToSendToArm() {
+    void getEodEntitiesToSendToArm_returnsExpectedResults() {
         ExternalLocationTypeEntity sourceLocation = externalObjectDirectoryStub.getLocation(DETS);
         ExternalLocationTypeEntity armLocation = externalObjectDirectoryStub.getLocation(ARM);
 
         List<Integer> result = dataStoreToArmHelper.getEodEntitiesToSendToArm(sourceLocation, armLocation, 5);
 
         assertNotNull(result);
+        assertEquals(1, result.size());
     }
 
     @Test
-    void getExternalObjectDirectoryEntity() {
+    void getExternalObjectDirectoryEntity_returnsExpectedResults() {
         ExternalLocationTypeEntity eodSourceLocation = externalObjectDirectoryStub.getLocation(DETS);
         ObjectRecordStatusEntity status = dartsDatabase.getObjectRecordStatusRepository().findById(STORED.getId()).orElseThrow();
         ExternalObjectDirectoryEntity armExternalObjectDirectory = dartsDatabase.getExternalObjectDirectoryStub().createExternalObjectDirectory(
@@ -181,7 +187,7 @@ class DataStoreToArmHelperIntTest extends IntegrationBase {
     }
 
     @Test
-    void updateExternalObjectDirectoryStatusToFailed() {
+    void updateExternalObjectDirectoryStatusToFailed_success() {
         ObjectRecordStatusEntity status = dartsDatabase.getObjectRecordStatusRepository().findById(FAILURE_CHECKSUM_FAILED.getId()).orElseThrow();
         UserAccountEntity userAccount = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
 
@@ -191,7 +197,7 @@ class DataStoreToArmHelperIntTest extends IntegrationBase {
     }
 
     @Test
-    void incrementTransferAttempts() {
+    void incrementTransferAttempts_success() {
 
         dataStoreToArmHelper.incrementTransferAttempts(externalObjectDirectory);
 
@@ -199,7 +205,7 @@ class DataStoreToArmHelperIntTest extends IntegrationBase {
     }
 
     @Test
-    void updateExternalObjectDirectoryStatus() {
+    void updateExternalObjectDirectoryStatus_success() {
         UserAccountEntity userAccount = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
         ObjectRecordStatusEntity status = dartsDatabase.getObjectRecordStatusRepository().findById(STORED.getId()).orElseThrow();
 
@@ -209,7 +215,7 @@ class DataStoreToArmHelperIntTest extends IntegrationBase {
     }
 
     @Test
-    void createArmExternalObjectDirectoryEntity() {
+    void createArmExternalObjectDirectoryEntity_success() {
         UserAccountEntity userAccount = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
         ObjectRecordStatusEntity status = dartsDatabase.getObjectRecordStatusRepository().findById(ARM_DROP_ZONE.getId()).orElseThrow();
 
@@ -224,7 +230,7 @@ class DataStoreToArmHelperIntTest extends IntegrationBase {
     }
 
     @Test
-    void generateRawFilename() {
+    void generateRawFilename_success() {
 
         String result = dataStoreToArmHelper.generateRawFilename(externalObjectDirectory);
 
@@ -232,7 +238,7 @@ class DataStoreToArmHelperIntTest extends IntegrationBase {
     }
 
     @Test
-    void updateExternalObjectDirectoryFailedTransferAttempts() {
+    void updateExternalObjectDirectoryFailedTransferAttempts_success() {
         UserAccountEntity userAccount = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
 
         dataStoreToArmHelper.updateExternalObjectDirectoryFailedTransferAttempts(externalObjectDirectory, userAccount);
@@ -241,7 +247,7 @@ class DataStoreToArmHelperIntTest extends IntegrationBase {
     }
 
     @Test
-    void createEmptyArchiveRecordsFile() {
+    void createEmptyArchiveRecordsFile_success() {
         String manifestFilePrefix = "DETS";
 
         File result = dataStoreToArmHelper.createEmptyArchiveRecordsFile(manifestFilePrefix);
@@ -250,7 +256,7 @@ class DataStoreToArmHelperIntTest extends IntegrationBase {
     }
 
     @Test
-    void updateArmEodToArmIngestionStatus() {
+    void updateArmEodToArmIngestionStatus_success() {
         ArmBatchItem batchItem = new ArmBatchItem();
         ArmBatchItems batchItems = new ArmBatchItems();
         File archiveRecordsFile = new File("testfile");
@@ -264,7 +270,7 @@ class DataStoreToArmHelperIntTest extends IntegrationBase {
     }
 
     @Test
-    void createArmEodWithArmIngestionStatus() {
+    void createArmEodWithArmIngestionStatus_success() {
         ArmBatchItem batchItem = new ArmBatchItem();
         ArmBatchItems batchItems = new ArmBatchItems();
         File archiveRecordsFile = new File("testfile");
@@ -277,7 +283,7 @@ class DataStoreToArmHelperIntTest extends IntegrationBase {
     }
 
     @Test
-    void shouldPushRawDataToArm() {
+    void shouldPushRawDataToArm_success() {
         ArmBatchItem batchItem = new ArmBatchItem();
         ObjectRecordStatusEntity status = externalObjectDirectoryStub.getStatus(ARM_INGESTION);
         batchItem.setPreviousStatus(status);
@@ -288,7 +294,7 @@ class DataStoreToArmHelperIntTest extends IntegrationBase {
     }
 
     @Test
-    void shouldAddEntryToManifestFile() {
+    void shouldAddEntryToManifestFile_success() {
         ArmBatchItem batchItem = new ArmBatchItem();
         ObjectRecordStatusEntity status = dartsDatabase.getObjectRecordStatusRepository().findById(ARM_MANIFEST_FAILED.getId()).orElseThrow();
 
@@ -300,7 +306,7 @@ class DataStoreToArmHelperIntTest extends IntegrationBase {
     }
 
     @Test
-    void writeManifestFile() throws IOException {
+    void writeManifestFile_success() throws IOException {
         ArmBatchItems batchItems = new ArmBatchItems();
         ArmBatchItem batchItem = new ArmBatchItem();
         batchItem.setArmEod(externalObjectDirectory);
@@ -317,7 +323,7 @@ class DataStoreToArmHelperIntTest extends IntegrationBase {
     }
 
     @Test
-    void recoverByUpdatingEodToFailedArmStatus() {
+    void recoverByUpdatingEodToFailedArmStatus_success() {
         ArmBatchItem batchItem = new ArmBatchItem();
         batchItem.setArmEod(externalObjectDirectory);
         UserAccountEntity userAccount = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
@@ -326,7 +332,51 @@ class DataStoreToArmHelperIntTest extends IntegrationBase {
 
         assertEquals(ARM_MANIFEST_FAILED.getId(), externalObjectDirectory.getStatus().getId());
     }
-    
+
+    @Test
+    void updateEodByIdAndStatus_success_forArmPush() throws InvocationTargetException, NoSuchMethodException, IllegalAccessException {
+        // given
+        OffsetDateTime now = currentTimeHelper.currentOffsetDateTime();
+        var user = externalObjectDirectoryStub.getUserAccountStub().getIntegrationTestUserAccountEntity();
+
+        List<ExternalObjectDirectoryEntity> externalObjectDirectoryEntities
+            = externalObjectDirectoryStub.generateWithStatusAndMediaLocation(ARM, ARM_INGESTION, 5, Optional.of(now));
+        List<Integer> eodsIds = externalObjectDirectoryEntities.stream().map(ExternalObjectDirectoryEntity::getId).toList();
+
+        // when
+        dataStoreToArmHelper.updateEodByIdAndStatus(eodsIds, EodHelper.armIngestionStatus(),
+                                                    EodHelper.failedArmRawDataStatus(), user);
+
+        // then
+        List<ExternalObjectDirectoryEntity> updatedEods = dartsDatabase.getExternalObjectDirectoryRepository().findAllById(eodsIds);
+        updatedEods.forEach(eod -> {
+            assertEquals(EodHelper.failedArmRawDataStatus(), eod.getStatus());
+            assertEquals(user.getId(), eod.getLastModifiedBy().getId());
+        });
+    }
+
+    @Test
+    void updateEodByIdAndStatus_success_forArmPull() throws InvocationTargetException, NoSuchMethodException, IllegalAccessException {
+        // given
+        OffsetDateTime now = currentTimeHelper.currentOffsetDateTime();
+        var user = externalObjectDirectoryStub.getUserAccountStub().getIntegrationTestUserAccountEntity();
+
+        List<ExternalObjectDirectoryEntity> externalObjectDirectoryEntities
+            = externalObjectDirectoryStub.generateWithStatusAndMediaLocation(ARM, ARM_PROCESSING_RESPONSE_FILES, 5, Optional.of(now));
+        List<Integer> eodsIds = externalObjectDirectoryEntities.stream().map(ExternalObjectDirectoryEntity::getId).toList();
+
+        // when
+        dataStoreToArmHelper.updateEodByIdAndStatus(eodsIds, EodHelper.armProcessingResponseFilesStatus(),
+                                                    EodHelper.armDropZoneStatus(), user);
+
+        // then
+        List<ExternalObjectDirectoryEntity> updatedEods = dartsDatabase.getExternalObjectDirectoryRepository().findAllById(eodsIds);
+        updatedEods.forEach(eod -> {
+            assertEquals(EodHelper.armDropZoneStatus(), eod.getStatus());
+            assertEquals(user.getId(), eod.getLastModifiedBy().getId());
+        });
+    }
+
     private ObjectStateRecordEntity createObjectStateRecordEntity(Long uuid) {
         ObjectStateRecordEntity objectStateRecordEntity = new ObjectStateRecordEntity();
         objectStateRecordEntity.setUuid(uuid);
