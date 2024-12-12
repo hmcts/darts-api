@@ -22,13 +22,11 @@ import uk.gov.hmcts.darts.common.entity.ObjectRecordStatusEntity;
 import uk.gov.hmcts.darts.common.entity.ObjectStateRecordEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.util.EodHelper;
-import uk.gov.hmcts.darts.test.common.FileStore;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 import uk.gov.hmcts.darts.testutils.stubs.ExternalObjectDirectoryStub;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Path;
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
@@ -37,6 +35,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -127,7 +126,7 @@ class DataStoreToArmHelperIntTest extends IntegrationBase {
         externalObjectDirectoryStub.createAndSaveEod(medias.get(1), ARM_DROP_ZONE, ARM);
 
         List<Integer> eodEntitiesToSendToArm = dataStoreToArmHelper.getEodEntitiesToSendToArm(EodHelper.unstructuredLocation(),
-                                                                                                                    EodHelper.armLocation(), 5);
+                                                                                              EodHelper.armLocation(), 5);
         assertEquals(1, eodEntitiesToSendToArm.size());
 
     }
@@ -147,7 +146,7 @@ class DataStoreToArmHelperIntTest extends IntegrationBase {
         dartsDatabase.save(failedTooManyTimesEod);
 
         List<Integer> eodEntitiesToSendToArm = dataStoreToArmHelper.getEodEntitiesToSendToArm(EodHelper.unstructuredLocation(),
-                                                                                                                    EodHelper.armLocation(), 5);
+                                                                                              EodHelper.armLocation(), 5);
         assertEquals(3, eodEntitiesToSendToArm.size());
 
     }
@@ -241,24 +240,14 @@ class DataStoreToArmHelperIntTest extends IntegrationBase {
     }
 
     @Test
-    void createEmptyArchiveRecordsFile() {
-        String manifestFilePrefix = "DETS";
-
-        File result = dataStoreToArmHelper.createEmptyArchiveRecordsFile(manifestFilePrefix);
-
-        assertNotNull(result);
-    }
-
-    @Test
     void updateArmEodToArmIngestionStatus() {
         ArmBatchItem batchItem = new ArmBatchItem();
         ArmBatchItems batchItems = new ArmBatchItems();
-        File archiveRecordsFile = new File("testfile");
         UserAccountEntity userAccount = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
         ExternalLocationTypeEntity eodSourceLocation = dartsDatabase.getExternalLocationTypeRepository().findById(DETS.getId()).orElseThrow();
 
         dataStoreToArmHelper.updateArmEodToArmIngestionStatus(externalObjectDirectory, batchItem, batchItems,
-                                                              archiveRecordsFile, userAccount, eodSourceLocation);
+                                                              "testfile", userAccount, eodSourceLocation);
 
         assertEquals(ARM_INGESTION.getId(), externalObjectDirectory.getStatus().getId());
     }
@@ -267,12 +256,11 @@ class DataStoreToArmHelperIntTest extends IntegrationBase {
     void createArmEodWithArmIngestionStatus() {
         ArmBatchItem batchItem = new ArmBatchItem();
         ArmBatchItems batchItems = new ArmBatchItems();
-        File archiveRecordsFile = new File("testfile");
         UserAccountEntity userAccount = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
 
         ExternalObjectDirectoryEntity result = dataStoreToArmHelper.createArmEodWithArmIngestionStatus(externalObjectDirectory,
                                                                                                        batchItem, batchItems,
-                                                                                                       archiveRecordsFile, userAccount);
+                                                                                                       "testfile", userAccount);
         assertNotNull(result);
     }
 
@@ -300,7 +288,7 @@ class DataStoreToArmHelperIntTest extends IntegrationBase {
     }
 
     @Test
-    void writeManifestFile() throws IOException {
+    void generateManifestFileContents_typical() throws IOException {
         ArmBatchItems batchItems = new ArmBatchItems();
         ArmBatchItem batchItem = new ArmBatchItem();
         batchItem.setArmEod(externalObjectDirectory);
@@ -308,12 +296,9 @@ class DataStoreToArmHelperIntTest extends IntegrationBase {
         batchItem.setArchiveRecord(archiveRecord);
         batchItem.setRawFilePushSuccessful(true);
         batchItems.add(batchItem);
-        String fileLocation = tempDirectory.getAbsolutePath();
-        File archiveFile = FileStore.getFileStore().create(Path.of(fileLocation), Path.of("archive-records.a360"));
+        String result = dataStoreToArmHelper.generateManifestFileContents(batchItems, "archive-records.a360");
 
-        dataStoreToArmHelper.writeManifestFile(batchItems, archiveFile);
-
-        assertTrue(archiveFile.exists());
+        assertThat(result).isNotBlank();
     }
 
     @Test
@@ -326,7 +311,7 @@ class DataStoreToArmHelperIntTest extends IntegrationBase {
 
         assertEquals(ARM_MANIFEST_FAILED.getId(), externalObjectDirectory.getStatus().getId());
     }
-    
+
     private ObjectStateRecordEntity createObjectStateRecordEntity(Long uuid) {
         ObjectStateRecordEntity objectStateRecordEntity = new ObjectStateRecordEntity();
         objectStateRecordEntity.setUuid(uuid);
