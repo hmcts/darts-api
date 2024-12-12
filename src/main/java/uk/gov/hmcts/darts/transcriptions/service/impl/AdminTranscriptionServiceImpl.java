@@ -49,6 +49,7 @@ import java.util.Optional;
 
 import static java.util.Collections.emptyList;
 import static org.springframework.util.CollectionUtils.isEmpty;
+import static uk.gov.hmcts.darts.audit.api.AuditActivity.HIDE_TRANSCRIPTION;
 
 @Service
 @RequiredArgsConstructor
@@ -187,13 +188,15 @@ public class AdminTranscriptionServiceImpl implements AdminTranscriptionService 
             documentEntity = transcriptionDocumentRepository.saveAndFlush(documentEntity);
 
             if (request.getPayload().getIsHidden()) {
-                Optional<ObjectHiddenReasonEntity> objectHiddenReasonEntity;
-                objectHiddenReasonEntity = objectHiddenReasonRepository.findById(transcriptionDocumentHideRequest.getAdminAction().getReasonId());
+                Optional<ObjectHiddenReasonEntity> objectHiddenReasonEntity =
+                    objectHiddenReasonRepository.findById(transcriptionDocumentHideRequest.getAdminAction().getReasonId());
 
                 if (objectHiddenReasonEntity.isEmpty()) {
                     throw new DartsApiException(TranscriptionApiError
                                                     .TRANSCRIPTION_DOCUMENT_HIDE_ACTION_REASON_NOT_FOUND);
                 }
+
+                auditApi.record(HIDE_TRANSCRIPTION);
 
                 // on hiding add the relevant hide record
                 ObjectAdminActionEntity objectAdminActionEntity = new ObjectAdminActionEntity();
@@ -216,6 +219,7 @@ public class AdminTranscriptionServiceImpl implements AdminTranscriptionService 
                 response = transcriptionMapper.mapHideOrShowResponse(transcriptionDocumentEntity.get(), null);
 
                 for (ObjectAdminActionEntity objectAdminActionEntity : objectAdminActionEntityLst) {
+                    auditApi.record(AuditActivity.UNHIDE_TRANSCRIPTION, buildUnhideTranscriptionAdditionalDataString(objectAdminActionEntity));
                     objectAdminActionRepository.deleteById(objectAdminActionEntity.getId());
                 }
             }
@@ -224,6 +228,10 @@ public class AdminTranscriptionServiceImpl implements AdminTranscriptionService 
         }
 
         return response;
+    }
+
+    private String buildUnhideTranscriptionAdditionalDataString(ObjectAdminActionEntity objectAdminActionEntity) {
+        return "Ticket reference: " + objectAdminActionEntity.getTicketReference() + ", Comments: " + objectAdminActionEntity.getComments();
     }
 
     @Transactional

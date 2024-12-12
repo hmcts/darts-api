@@ -54,6 +54,7 @@ import uk.gov.hmcts.darts.test.common.data.PersistableFactory;
 import java.io.IOException;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -83,10 +84,12 @@ import static uk.gov.hmcts.darts.audit.api.AuditActivity.CHANGE_AUDIO_OWNERSHIP;
 import static uk.gov.hmcts.darts.audit.api.AuditActivity.EXPORT_AUDIO;
 import static uk.gov.hmcts.darts.audit.api.AuditActivity.HIDE_AUDIO;
 import static uk.gov.hmcts.darts.audit.api.AuditActivity.REQUEST_AUDIO;
+import static uk.gov.hmcts.darts.audit.api.AuditActivity.UNHIDE_AUDIO;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.FAILURE_CHECKSUM_FAILED;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.STORED;
 import static uk.gov.hmcts.darts.notification.api.NotificationApi.NotificationTemplate.AUDIO_REQUEST_PROCESSING;
 import static uk.gov.hmcts.darts.notification.api.NotificationApi.NotificationTemplate.AUDIO_REQUEST_PROCESSING_ARCHIVE;
+import static uk.gov.hmcts.darts.test.common.data.ObjectAdminActionTestData.objectAdminActionWithDefaults;
 import static uk.gov.hmcts.darts.test.common.data.ObjectHiddenReasonTestData.classified;
 import static uk.gov.hmcts.darts.util.EntityIdPopulator.withIdsPopulated;
 
@@ -814,13 +817,14 @@ class MediaRequestServiceImplTest {
 
     @Test
     @SuppressWarnings("java:S1874")
-    void doesNotAuditWhenAudioMadeVisible() {
+    void auditsWhenAudioMadeVisible() {
         var media = withIdsPopulated(mediaTestData.someMinimalMedia());
         media.setHidden(true);
         when(mediaRepository.findByIdIncludeDeleted(any())).thenReturn(Optional.of(media));
+        when(objectAdminActionRepository.findByMedia_Id(any())).thenReturn(Arrays.asList(objectAdminActionWithDefaults()));
 
         mediaRequestService.adminHideOrShowMediaById(media.getId(), new MediaHideRequest().isHidden(false));
 
-        verifyNoInteractions(auditApi);
+        verify(auditApi).record(UNHIDE_AUDIO, "Ticket reference: Ticket-123, Comments: some comment");
     }
 }
