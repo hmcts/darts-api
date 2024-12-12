@@ -75,7 +75,7 @@ ALTER TABLE extobjdir_process_detail
     ADD CONSTRAINT epd_external_object_directory_fk
         FOREIGN KEY (eod_id) REFERENCES external_object_directory (eod_id);
 
--- TODO: FKs for created_by and last_modified_by
+-- Note: FKs for created_by and last_modified_by are expected to be added in the next migration (v72_3)
 
 CREATE SEQUENCE epd_seq CACHE 20;
 
