@@ -9,5 +9,5 @@ import java.util.List;
 public interface ArchiveRecordFileGenerator {
     boolean generateArchiveRecord(ArchiveRecord archiveRecord, File archiveRecordFile, ArchiveRecordType archiveRecordType);
 
-    String generateArchiveRecords(String archvieFileName, List<ArchiveRecord> archiveRecords);
+    String generateArchiveRecords(String archiveFileName, List<ArchiveRecord> archiveRecords);
 }

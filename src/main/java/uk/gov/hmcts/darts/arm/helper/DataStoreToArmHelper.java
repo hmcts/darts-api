@@ -294,7 +294,7 @@ public class DataStoreToArmHelper {
 
     public void copyMetadataToArm(String manifestFileContents, String archiveRecordsFileName) {
         try {
-            BinaryData metadataFileBinary = fileOperationService.convertStringToBinaryData(Optional.ofNullable(manifestFileContents).orElse(""));
+            BinaryData metadataFileBinary = convertStringToBinaryData(Optional.ofNullable(manifestFileContents).orElse(""));
             armDataManagementApi.saveBlobDataToArm(archiveRecordsFileName, metadataFileBinary);
         } catch (BlobStorageException e) {
             if (e.getStatusCode() == BLOB_ALREADY_EXISTS_STATUS_CODE) {
@@ -307,5 +307,9 @@ public class DataStoreToArmHelper {
             log.error("Unable to move BLOB metadata for file {}", archiveRecordsFileName, e);
             throw e;
         }
+    }
+
+    public BinaryData convertStringToBinaryData(String manifestFileContents) {
+        return BinaryData.fromString(manifestFileContents);
     }
 }

@@ -48,7 +48,7 @@ public class ArchiveRecordFileGeneratorImpl implements ArchiveRecordFileGenerato
     }
 
     @Override
-    public String generateArchiveRecords(String archvieFileName, List<ArchiveRecord> archiveRecords) {
+    public String generateArchiveRecords(String archiveFileName, List<ArchiveRecord> archiveRecords) {
         StringBuilder archiveRecordsStringBuilder = new StringBuilder();
         String archiveRecordsString = null;
         if (!archiveRecords.isEmpty()) {
@@ -66,7 +66,7 @@ public class ArchiveRecordFileGeneratorImpl implements ArchiveRecordFileGenerato
             }
             archiveRecordsString = archiveRecordsStringBuilder.toString();
             log.info("Contents of manifest file {} for EOD {}\n{}",
-                     archvieFileName,
+                     archiveFileName,
                      archiveRecords.get(0).getArchiveRecordOperation().getRelationId(),
                      archiveRecordsString);
         }

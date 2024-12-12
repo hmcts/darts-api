@@ -11,6 +11,7 @@ import uk.gov.hmcts.darts.arm.api.ArmDataManagementApi;
 import uk.gov.hmcts.darts.arm.component.ArchiveRecordFileGenerator;
 import uk.gov.hmcts.darts.arm.config.ArmDataManagementConfiguration;
 import uk.gov.hmcts.darts.arm.config.UnstructuredToArmProcessorConfiguration;
+import uk.gov.hmcts.darts.arm.helper.DataStoreToArmHelper;
 import uk.gov.hmcts.darts.arm.mapper.MediaArchiveRecordMapper;
 import uk.gov.hmcts.darts.arm.service.ArchiveRecordService;
 import uk.gov.hmcts.darts.arm.service.ExternalObjectDirectoryService;
@@ -83,7 +84,6 @@ class UnstructuredToArmBatchProcessorIntTest extends IntegrationBase {
     private UserIdentity userIdentity;
     @Autowired
     private ArmDataManagementConfiguration armDataManagementConfiguration;
-    @Autowired
     @SpyBean
     private FileOperationService fileOperationService;
     @SpyBean
@@ -98,6 +98,8 @@ class UnstructuredToArmBatchProcessorIntTest extends IntegrationBase {
     private ExternalObjectDirectoryRepository eodRepository;
     @SpyBean
     private MediaArchiveRecordMapper mediaArchiveRecordMapper;
+    @SpyBean
+    private DataStoreToArmHelper dataStoreToArmHelper;
 
     @MockBean
     private UnstructuredToArmProcessorConfiguration unstructuredToArmProcessorConfiguration;
@@ -309,7 +311,7 @@ class UnstructuredToArmBatchProcessorIntTest extends IntegrationBase {
         assertThat(failedMediaList.size()).isEqualTo(2);
 
         ArgumentCaptor<String> manifestFileContentCaptor = ArgumentCaptor.forClass(String.class);
-        verify(fileOperationService).convertStringToBinaryData(manifestFileContentCaptor.capture());
+        verify(dataStoreToArmHelper).convertStringToBinaryData(manifestFileContentCaptor.capture());
         String manifestFileContents = manifestFileContentCaptor.getValue();
 
         int expectedNumberOfRows = 6;
@@ -369,7 +371,7 @@ class UnstructuredToArmBatchProcessorIntTest extends IntegrationBase {
 
 
         ArgumentCaptor<String> manifestFileContentCaptor = ArgumentCaptor.forClass(String.class);
-        verify(fileOperationService).convertStringToBinaryData(manifestFileContentCaptor.capture());
+        verify(dataStoreToArmHelper).convertStringToBinaryData(manifestFileContentCaptor.capture());
         String manifestFileContent = manifestFileContentCaptor.getValue();
 
         assertThat(manifestFileContent.lines().count()).isEqualTo(4);
@@ -426,7 +428,7 @@ class UnstructuredToArmBatchProcessorIntTest extends IntegrationBase {
         assertThat(armDropzoneEodsMedia1.get(0).getManifestFile()).isEqualTo(manifestFileName);
 
         ArgumentCaptor<String> manifestFileContentCaptor = ArgumentCaptor.forClass(String.class);
-        verify(fileOperationService).convertStringToBinaryData(manifestFileContentCaptor.capture());
+        verify(dataStoreToArmHelper).convertStringToBinaryData(manifestFileContentCaptor.capture());
         String manifestFileContent = manifestFileContentCaptor.getValue();
         assertThat(manifestFileContent.lines().count()).isEqualTo(4);
         assertThat(manifestFileContent).contains(
@@ -459,7 +461,7 @@ class UnstructuredToArmBatchProcessorIntTest extends IntegrationBase {
         verify(archiveRecordFileGenerator).generateArchiveRecords(manifestFileNameCaptor.capture(), any());
 
         ArgumentCaptor<String> manifestFileContentCaptor = ArgumentCaptor.forClass(String.class);
-        verify(fileOperationService).convertStringToBinaryData(manifestFileContentCaptor.capture());
+        verify(dataStoreToArmHelper).convertStringToBinaryData(manifestFileContentCaptor.capture());
         String manifestFileContent = manifestFileContentCaptor.getValue();
 
         assertThat(manifestFileContent.lines().count()).isEqualTo(2);
