@@ -67,16 +67,14 @@ services:
       - darts-network
 
   darts-gateway:
-    container_name: darts-gateway
-    image: darts-gateway:master
+    image: sdshmctspublic.azurecr.io/darts/gateway:latest
     ports:
       - "8070:8070"
     networks:
       - darts-network
 
   darts-stub-services:
-    container_name: darts-stub-services
-    image: darts-stub-services:master
+    image: sdshmctspublic.azurecr.io/darts/stub-services:latest
     ports:
       - "4551:4551"
     networks:
@@ -118,7 +116,7 @@ services:
     environment:
       ALLOW_CONFIG_MUTATIONS: true
       DARTS_PORTAL_URL: http://localhost:3000
-      DARTS_API_URL: http://localhost:4550
+      DARTS_API_URL: http://darts-api:4550
       DARTS_SESSION_REDIS_CONNECTION_STRING: redis://darts-redis:6379
     networks:
       - darts-network
