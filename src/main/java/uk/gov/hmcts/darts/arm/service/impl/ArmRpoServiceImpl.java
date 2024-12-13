@@ -132,11 +132,11 @@ public class ArmRpoServiceImpl implements ArmRpoService {
                 }
                 log.info("Finished reading CSV file: {}. Read {} rows", csvFile.getName(), counter);
             } catch (FileNotFoundException e) {
-                log.info("Only read {} rows", counter);
+                log.info("Only read {} rows for file {}", counter, csvFile.getName());
                 log.error(errorMessage.append("Unable to find CSV file for Reconciliation ").toString(), e);
                 throw new ArmRpoException(errorMessage.toString());
             } catch (Exception e) {
-                log.info("Only read {} rows", counter);
+                log.info("Only read {} rows for file {}", counter, csvFile.getName());
                 log.error(errorMessage.toString(), e.getMessage());
                 throw new ArmRpoException(errorMessage.toString());
             }
