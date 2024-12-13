@@ -121,8 +121,8 @@ public class ArmRpoServiceImpl implements ArmRpoService {
             try (Reader reader = new FileReader(csvFile.getPath())) {
                 Iterable<CSVRecord> records = CsvFileUtil.readCsv(reader);
                 while (records.iterator().hasNext()) {
-                    counter++;
                     CSVRecord csvRecord = records.iterator().next();
+                    counter++;
                     String csvEod = csvRecord.get(CLIENT_IDENTIFIER_CSV_HEADER);
                     // TODO - This is a temporary log message to help debug the issue with the CSV file
                     log.info("ARM RPO CSV Client Identifier {}", csvEod);
@@ -132,11 +132,11 @@ public class ArmRpoServiceImpl implements ArmRpoService {
                 }
                 log.info("Finished reading CSV file: {}. Read {} rows", csvFile.getName(), counter);
             } catch (FileNotFoundException e) {
-                log.info("Only read {} rows", csvFile.getName(), counter);
+                log.info("Only read {} rows", counter);
                 log.error(errorMessage.append("Unable to find CSV file for Reconciliation ").toString(), e);
                 throw new ArmRpoException(errorMessage.toString());
             } catch (Exception e) {
-                log.info("Only read {} rows", csvFile.getName(), counter);
+                log.info("Only read {} rows", counter);
                 log.error(errorMessage.toString(), e.getMessage());
                 throw new ArmRpoException(errorMessage.toString());
             }
