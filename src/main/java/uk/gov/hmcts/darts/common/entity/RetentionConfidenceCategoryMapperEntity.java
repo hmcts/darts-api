@@ -11,6 +11,9 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 import uk.gov.hmcts.darts.common.entity.base.MandatoryCreatedModifiedBaseEntity;
+import uk.gov.hmcts.darts.retention.enums.RetentionConfidenceCategoryEnum;
+import uk.gov.hmcts.darts.retention.enums.RetentionConfidenceReasonEnum;
+import uk.gov.hmcts.darts.retention.enums.RetentionConfidenceScoreEnum;
 
 @Entity
 @Table(name = "retention_confidence_category_mapper")
@@ -26,13 +29,13 @@ public class RetentionConfidenceCategoryMapperEntity extends MandatoryCreatedMod
     private Integer id;
 
     @Column(name = "ret_conf_score")
-    private Integer confidenceScore;
+    private RetentionConfidenceScoreEnum confidenceScore;
 
     @Column(name = "ret_conf_reason")
-    private String confidenceReason;
+    private RetentionConfidenceReasonEnum confidenceReason;
 
     @Column(name = "confidence_category")
-    private Integer confidenceCategory;
+    private RetentionConfidenceCategoryEnum confidenceCategory;
 
     @Column(name = "description")
     private String description;

@@ -25,6 +25,7 @@ import uk.gov.hmcts.darts.retention.enums.CaseRetentionStatus;
 import uk.gov.hmcts.darts.retention.enums.RetentionConfidenceCategoryEnum;
 import uk.gov.hmcts.darts.retention.enums.RetentionPolicyEnum;
 import uk.gov.hmcts.darts.retention.helper.RetentionDateHelper;
+import uk.gov.hmcts.darts.retention.service.RetentionService;
 import uk.gov.hmcts.darts.retentions.model.PostRetentionRequest;
 
 import java.time.LocalDate;
@@ -36,8 +37,6 @@ import java.util.List;
 import java.util.Optional;
 
 import static java.lang.Boolean.TRUE;
-import static uk.gov.hmcts.darts.retention.enums.RetentionConfidenceReasonEnum.AGED_CASE;
-import static uk.gov.hmcts.darts.retention.enums.RetentionConfidenceScoreEnum.CASE_NOT_PERFECTLY_CLOSED;
 
 @Service
 @RequiredArgsConstructor
@@ -47,6 +46,7 @@ public class CloseOldCasesProcessorImpl implements CloseOldCasesProcessor {
 
     private final CloseOldCasesProcessorImpl.CloseCaseProcessor caseProcessor;
     private final CaseRepository caseRepository;
+    private final RetentionService retentionService; // TODO Call via an API layer
 
     private final AuthorisationApi authorisationApi;
 
@@ -76,7 +76,7 @@ public class CloseOldCasesProcessorImpl implements CloseOldCasesProcessor {
 
     @Service
     @RequiredArgsConstructor(onConstructor = @__(@Autowired))
-    public static class CloseCaseProcessor {
+    public class CloseCaseProcessor {
         private static final String CLOSE_CASE_RETENTION_COMMENT = "CloseOldCases Automated job setting retention period to Default";
         private final CaseService caseService;
         private final CaseRetentionRepository caseRetentionRepository;
@@ -135,9 +135,8 @@ public class CloseOldCasesProcessorImpl implements CloseOldCasesProcessor {
                                                   UserAccountEntity userAccount) {
             courtCase.setClosed(TRUE);
             courtCase.setCaseClosedTimestamp(caseClosedDate);
-            courtCase.setRetConfReason(AGED_CASE);
-            courtCase.setRetConfScore(CASE_NOT_PERFECTLY_CLOSED);
-            courtCase.setRetConfUpdatedTs(currentTimeHelper.currentOffsetDateTime());
+            final RetentionConfidenceCategoryEnum retentionConfidenceCategory = RetentionConfidenceCategoryEnum.AGED_CASE;
+            courtCase = retentionService.updateCourtCaseConfidenceAttributesForRetention(courtCase, retentionConfidenceCategory);
             caseService.saveCase(courtCase);
             log.info("Closed court case id {}", courtCase.getId());
 
@@ -148,10 +147,9 @@ public class CloseOldCasesProcessorImpl implements CloseOldCasesProcessor {
             postRetentionRequest.setRetentionDate(retentionDate);
 
             CaseRetentionEntity retentionEntity = retentionApi.createRetention(postRetentionRequest, courtCase, retentionDate, userAccount,
-                                                                               CaseRetentionStatus.PENDING);
-            retentionEntity.setConfidenceCategory(RetentionConfidenceCategoryEnum.AGED_CASE);
+                                                                               CaseRetentionStatus.PENDING, retentionConfidenceCategory);
             caseRetentionRepository.save(retentionEntity);
-            log.info("Set retention date {} and confidence category {} for case id {}", retentionDate, RetentionConfidenceCategoryEnum.AGED_CASE,
+            log.info("Set retention date {} and confidence category {} for case id {}", retentionDate, retentionConfidenceCategory,
                      courtCase.getId());
         }
     }
