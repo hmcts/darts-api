@@ -1,11 +1,12 @@
 package uk.gov.hmcts.darts.arm.model.record.armresponse;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.time.OffsetDateTime;
+import java.time.LocalDateTime;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Data
@@ -16,7 +17,8 @@ public class ArmResponseInputUploadFileRecord {
     private String operation;
 
     @JsonProperty("timestamp")
-    private OffsetDateTime timestamp;
+    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss.SSSSSS")
+    private LocalDateTime timestamp;
 
     @JsonProperty("status")
     private Integer status;

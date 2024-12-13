@@ -127,11 +127,13 @@ public abstract class AbstractArmBatchProcessResponseFiles implements ArmRespons
             String inputUploadFileRecordStr = armDataManagementApi.getBlobData(inputUploadBlob).toString();
             log.info("Contents of ARM Input Upload file: '{}' '{}", inputUploadBlob, inputUploadFileRecordStr);
             ArmResponseInputUploadFileRecord inputUploadFileRecord = objectMapper.readValue(inputUploadFileRecordStr, ArmResponseInputUploadFileRecord.class);
+
+
             List<ExternalObjectDirectoryEntity> externalObjectDirectoryEntities = externalObjectDirectoryRepository
                 .findAllByStatusAndManifestFile(EodHelper.armDropZoneStatus(), manifestName);
 
             if (CollectionUtils.isNotEmpty(externalObjectDirectoryEntities)) {
-                OffsetDateTime timestamp = inputUploadFileRecord.getTimestamp();
+                OffsetDateTime timestamp = inputUploadFileRecord.getTimestamp().atOffset(OffsetDateTime.now().getOffset());
                 List<ExternalObjectDirectoryEntity> editedExternalObjectDirectoryEntities = externalObjectDirectoryEntities.stream()
                     .filter(eod -> eod.getInputUploadProcessedTs() == null)
                     .peek(eod -> eod.setInputUploadProcessedTs(timestamp))
