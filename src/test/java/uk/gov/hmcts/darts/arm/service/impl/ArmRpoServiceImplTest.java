@@ -190,6 +190,9 @@ class ArmRpoServiceImplTest {
         armRpoService.reconcileArmRpoCsvData(armRpoExecutionDetailEntity, Collections.singletonList(file));
 
         // then
+        assertEquals(EodHelper.storedStatus(), externalObjectDirectoryEntity1.getStatus());
+        assertEquals(EodHelper.armReplayStatus(), externalObjectDirectoryEntity2.getStatus());
+
         verify(externalObjectDirectoryRepository).findByStatusAndIngestionDate(EodHelper.armRpoPendingStatus(),
                                                                                armRpoExecutionDetailEntity.getCreatedDateTime().minusHours(RPO_CSV_END_HOUR),
                                                                                armRpoExecutionDetailEntity.getCreatedDateTime().minusHours(RPO_CSV_START_HOUR));
@@ -209,8 +212,7 @@ class ArmRpoServiceImplTest {
         File file = new File("Tests/arm/rpo/noFile.csv");
         // when
         ArmRpoException armRpoException = assertThrows(ArmRpoException.class, () ->
-                                          armRpoService.reconcileArmRpoCsvData(armRpoExecutionDetailEntity,
-                                          Collections.singletonList(file)));
+            armRpoService.reconcileArmRpoCsvData(armRpoExecutionDetailEntity, Collections.singletonList(file)));
 
         // then
         assertThat(armRpoException.getMessage(), containsString(

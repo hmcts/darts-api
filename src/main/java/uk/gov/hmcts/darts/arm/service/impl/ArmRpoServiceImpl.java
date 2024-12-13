@@ -118,16 +118,20 @@ public class ArmRpoServiceImpl implements ArmRpoService {
 
         List<Integer> csvEodList = new ArrayList<>();
         for (File csvFile : csvFiles) {
+            logCsvRowCount(csvFile, errorMessage);
             try (Reader reader = new FileReader(csvFile.getPath())) {
+                //Iterator can only be used once so have to create a new one so that we can log the number of rows then read them
                 Iterable<CSVRecord> records = CsvFileUtil.readCsv(reader);
-                log.info("About to read {} rows of CSV file: {}", IterableUtils.size(records), csvFile.getName());
-                for (CSVRecord csvRecord : records) {
+                while (records.iterator().hasNext()) {
+                    CSVRecord csvRecord = records.iterator().next();
                     String csvEod = csvRecord.get(CLIENT_IDENTIFIER_CSV_HEADER);
-                    log.info("ARM RPO Csv Client Identifier {}", csvEod);
+                    // TODO - This is a temporary log message to help debug the issue with the CSV file
+                    log.info("ARM RPO CSV Client Identifier {}", csvEod);
                     if (StringUtils.isNotBlank(csvEod)) {
                         csvEodList.add(Integer.parseInt(csvEod));
                     }
                 }
+                log.info("Finished reading CSV file: {}", csvFile.getName());
             } catch (FileNotFoundException e) {
                 log.error(errorMessage.append("Unable to find CSV file for Reconciliation ").toString(), e);
                 throw new ArmRpoException(errorMessage.toString());
@@ -147,5 +151,14 @@ public class ArmRpoServiceImpl implements ArmRpoService {
             }
         );
         externalObjectDirectoryRepository.saveAllAndFlush(externalObjectDirectoryEntities);
+    }
+
+    private void logCsvRowCount(File csvFile, StringBuilder errorMessage) {
+        try (Reader reader = new FileReader(csvFile.getPath())) {
+            Iterable<CSVRecord> rows = CsvFileUtil.readCsv(reader);
+            log.info("About to read {} rows of CSV file: {}", IterableUtils.size(rows), csvFile.getName());
+        } catch (Exception e) {
+            log.error(errorMessage.toString(), e.getMessage());
+        }
     }
 }
