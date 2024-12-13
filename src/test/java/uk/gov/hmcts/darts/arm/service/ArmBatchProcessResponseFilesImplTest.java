@@ -28,6 +28,7 @@ import uk.gov.hmcts.darts.common.util.EodHelper;
 import uk.gov.hmcts.darts.log.api.LogApi;
 
 import java.time.Duration;
+import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.ArrayList;
@@ -112,7 +113,7 @@ class ArmBatchProcessResponseFilesImplTest {
         when(armDataManagementConfiguration.getFileExtension()).thenReturn(RESPONSE_FILENAME_EXTENSION);
         BinaryData binaryData = mock(BinaryData.class);
         when(armDataManagementApi.getBlobData(any())).thenReturn(binaryData);
-        final String bindaryDataString = "{\"timestamp\": \"2021-08-10T10:00:00.000Z\"}";
+        final String bindaryDataString = "{\"timestamp\": \"2021-08-10T10:00:00.000000\"}";
         when(binaryData.toString()).thenReturn(bindaryDataString);
 
         String manifest1Uuid = UUID.randomUUID().toString();
@@ -172,12 +173,12 @@ class ArmBatchProcessResponseFilesImplTest {
         BinaryData binaryData1 = mock(BinaryData.class);
         BinaryData binaryData2 = mock(BinaryData.class);
 
-        OffsetDateTime offsetDateTime1 = OffsetDateTime.now().plusDays(1);
-        OffsetDateTime offsetDateTime2 = OffsetDateTime.now().minusDays(1);
+        LocalDateTime dateTime1 = LocalDateTime.now().plusDays(1);
+        LocalDateTime dateTime2 = LocalDateTime.now().minusDays(1);
 
         when(armDataManagementApi.getBlobData(any())).thenReturn(binaryData1, binaryData2);
-        final String bindaryDataString1 = "{\"timestamp\": \"" + offsetDateTime1 + "\"}";
-        final String bindaryDataString2 = "{\"timestamp\": \"" + offsetDateTime2 + "\"}";
+        final String bindaryDataString1 = "{\"timestamp\": \"" + dateTime1 + "\"}";
+        final String bindaryDataString2 = "{\"timestamp\": \"" + dateTime2 + "\"}";
 
         when(binaryData1.toString()).thenReturn(bindaryDataString1);
         when(binaryData2.toString()).thenReturn(bindaryDataString2);
@@ -204,7 +205,7 @@ class ArmBatchProcessResponseFilesImplTest {
         ExternalObjectDirectoryEntity externalObjectDirectoryEntity1 = mock(ExternalObjectDirectoryEntity.class);
 
         ExternalObjectDirectoryEntity externalObjectDirectoryEntity2 = mock(ExternalObjectDirectoryEntity.class);
-        when(externalObjectDirectoryEntity2.getInputUploadProcessedTs()).thenReturn(offsetDateTime2);
+        when(externalObjectDirectoryEntity2.getInputUploadProcessedTs()).thenReturn(dateTime2.atOffset(ZoneOffset.UTC));
 
         when(externalObjectDirectoryRepository.findAllByStatusAndManifestFile(any(), any()))
             .thenReturn(List.of(externalObjectDirectoryEntity1), List.of(externalObjectDirectoryEntity2));
@@ -221,7 +222,7 @@ class ArmBatchProcessResponseFilesImplTest {
         verify(armDataManagementApi).getBlobData(blobNameAndPath1);
         verify(armDataManagementApi).getBlobData(blobNameAndPath2);
 
-        verify(externalObjectDirectoryEntity1).setInputUploadProcessedTs(offsetDateTime1);
+        verify(externalObjectDirectoryEntity1).setInputUploadProcessedTs(dateTime1.atOffset(ZoneOffset.UTC));
         verify(externalObjectDirectoryEntity2, never()).setInputUploadProcessedTs(any());
 
         verify(externalObjectDirectoryRepository).saveAll(List.of(externalObjectDirectoryEntity1));
