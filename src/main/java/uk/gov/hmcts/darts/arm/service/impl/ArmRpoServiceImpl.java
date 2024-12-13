@@ -3,7 +3,6 @@ package uk.gov.hmcts.darts.arm.service.impl;
 import jakarta.persistence.EntityManager;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.collections4.IterableUtils;
 import org.apache.commons.csv.CSVRecord;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
@@ -117,12 +116,12 @@ public class ArmRpoServiceImpl implements ArmRpoService {
             armRpoExecutionDetailEntity.getCreatedDateTime().minusHours(armAutomatedTaskEntity.getRpoCsvStartHour()));
 
         List<Integer> csvEodList = new ArrayList<>();
+        Integer counter = 0;
         for (File csvFile : csvFiles) {
-            logCsvRowCount(csvFile, errorMessage);
             try (Reader reader = new FileReader(csvFile.getPath())) {
-                //Iterator can only be used once so have to create a new one so that we can log the number of rows then read them
                 Iterable<CSVRecord> records = CsvFileUtil.readCsv(reader);
                 while (records.iterator().hasNext()) {
+                    counter++;
                     CSVRecord csvRecord = records.iterator().next();
                     String csvEod = csvRecord.get(CLIENT_IDENTIFIER_CSV_HEADER);
                     // TODO - This is a temporary log message to help debug the issue with the CSV file
@@ -131,11 +130,13 @@ public class ArmRpoServiceImpl implements ArmRpoService {
                         csvEodList.add(Integer.parseInt(csvEod));
                     }
                 }
-                log.info("Finished reading CSV file: {}", csvFile.getName());
+                log.info("Finished reading CSV file: {}. Read {} rows", csvFile.getName(), counter);
             } catch (FileNotFoundException e) {
+                log.info("Only read {} rows", csvFile.getName(), counter);
                 log.error(errorMessage.append("Unable to find CSV file for Reconciliation ").toString(), e);
                 throw new ArmRpoException(errorMessage.toString());
             } catch (Exception e) {
+                log.info("Only read {} rows", csvFile.getName(), counter);
                 log.error(errorMessage.toString(), e.getMessage());
                 throw new ArmRpoException(errorMessage.toString());
             }
@@ -153,12 +154,4 @@ public class ArmRpoServiceImpl implements ArmRpoService {
         externalObjectDirectoryRepository.saveAllAndFlush(externalObjectDirectoryEntities);
     }
 
-    private void logCsvRowCount(File csvFile, StringBuilder errorMessage) {
-        try (Reader reader = new FileReader(csvFile.getPath())) {
-            Iterable<CSVRecord> rows = CsvFileUtil.readCsv(reader);
-            log.info("About to read {} rows of CSV file: {}", IterableUtils.size(rows), csvFile.getName());
-        } catch (Exception e) {
-            log.error(errorMessage.toString(), e.getMessage());
-        }
-    }
 }
