@@ -136,7 +136,7 @@ public class MediaEntity extends CreatedModifiedBaseEntity
     @OneToMany(mappedBy = ExternalObjectDirectoryEntity_.MEDIA)
     private List<ExternalObjectDirectoryEntity> externalObjectDirectoryEntities = new ArrayList<>();
 
-    @Column(name = "subcontent_object_id")
+    @Column(name = "subcontent_object_id", length = 16)
     private String subcontentObjectId;
 
     @Column(name = "subcontent_position")

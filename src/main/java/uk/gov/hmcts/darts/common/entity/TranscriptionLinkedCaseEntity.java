@@ -24,7 +24,7 @@ public class TranscriptionLinkedCaseEntity {
     private Integer id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "tra_id")
+    @JoinColumn(name = "tra_id", nullable = false)
     private TranscriptionEntity transcription;
 
     @ManyToOne(fetch = FetchType.LAZY)

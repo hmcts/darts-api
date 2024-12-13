@@ -313,7 +313,7 @@ class UserControllerTest extends IntegrationBase {
             );
 
         // assert the failure response
-        Assertions.assertEquals(UserManagementError.USER_ACTIVATION_FULLNAME_OR_EMAIL_VIOLATION.getType(), failureResponse.getType());
+        Assertions.assertEquals(UserManagementError.USER_ACTIVATION_EMAIL_VIOLATION.getType(), failureResponse.getType());
 
     }
 
@@ -360,7 +360,7 @@ class UserControllerTest extends IntegrationBase {
             );
 
         // assert the failure response
-        Assertions.assertEquals(UserManagementError.USER_ACTIVATION_FULLNAME_OR_EMAIL_VIOLATION.getType(), failureResponse.getType());
+        Assertions.assertEquals(UserManagementError.USER_ACTIVATION_EMAIL_VIOLATION.getType(), failureResponse.getType());
 
     }
 

@@ -74,7 +74,7 @@ public class CourthouseEntity extends CreatedModifiedBaseEntity {
     private String displayName;
 
     @NotAudited
-    @Column(name = "courthouse_object_id")
+    @Column(name = "courthouse_object_id", length = 16)
     private String courthouseObjectId;
 
     @NotAudited

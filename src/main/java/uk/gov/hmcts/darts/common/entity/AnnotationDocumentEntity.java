@@ -91,7 +91,7 @@ public class AnnotationDocumentEntity extends ModifiedBaseEntity
     @Column(name = "ret_conf_reason")
     private String retConfReason;
 
-    @Column(name = "subcontent_object_id")
+    @Column(name = "subcontent_object_id", length = 16)
     private String subcontentObjectId;
 
     @Column(name = "subcontent_position")

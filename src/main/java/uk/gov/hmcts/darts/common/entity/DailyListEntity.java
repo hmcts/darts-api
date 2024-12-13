@@ -92,7 +92,7 @@ public class DailyListEntity extends CreatedModifiedBaseEntity {
     @Column(name = MESSAGE_ID)
     private String messageId;
 
-    @Column(name = "content_object_id")
+    @Column(name = "content_object_id", length = 16)
     private String contentObjectId;
 
     @Column(name = "clip_id")
@@ -105,7 +105,7 @@ public class DailyListEntity extends CreatedModifiedBaseEntity {
     @JoinColumn(name = "elt_id")
     private ExternalLocationTypeEntity externalLocationTypeEntity;
 
-    @Column(name = "subcontent_object_id")
+    @Column(name = "subcontent_object_id", length = 16)
     private String subcontentObjectId;
 
     @Column(name = "subcontent_position")

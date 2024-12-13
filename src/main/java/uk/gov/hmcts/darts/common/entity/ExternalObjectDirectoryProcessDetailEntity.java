@@ -29,13 +29,13 @@ public class ExternalObjectDirectoryProcessDetailEntity extends MandatoryCreated
     private Integer id;
 
     @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "eod_id")
+    @JoinColumn(name = "eod_id", nullable = false)
     private ExternalObjectDirectoryEntity externalObjectDirectory;
 
     @Column(name = "event_date_ts")
     private OffsetDateTime eventDateTime;
 
-    @Column(name = "update_retention")
+    @Column(name = "update_retention", nullable = false)
     private boolean updateRetention;
 
 }

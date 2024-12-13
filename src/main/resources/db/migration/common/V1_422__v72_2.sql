@@ -30,15 +30,11 @@ ALTER TABLE transcription_document
 ALTER TABLE transcription_document
     ADD COLUMN subcontent_position INTEGER;
 
--- remove user_name from user_account
+-- amend user_account.user_full_name to not null
 UPDATE user_account
 SET user_full_name = user_name
 WHERE user_full_name IS NULL
   AND user_name IS NOT NULL;
-ALTER TABLE user_account
-    DROP COLUMN user_name;
-
--- amend user_account.user_full_name to not null
 ALTER TABLE user_account
     ALTER COLUMN user_full_name SET NOT NULL;
 
