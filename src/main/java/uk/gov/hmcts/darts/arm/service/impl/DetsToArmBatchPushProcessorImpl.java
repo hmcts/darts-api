@@ -113,7 +113,7 @@ public class DetsToArmBatchPushProcessorImpl implements DetsToArmBatchPushProces
     }
 
     private void createAndSendBatchFile(List<ExternalObjectDirectoryEntity> eodsForBatch, UserAccountEntity userAccount) {
-        String archiveRecordsFileName = dataStoreToArmHelper.getArchiveRecordsFileName(armDataManagementConfiguration.getManifestFilePrefix());
+        String archiveRecordsFileName = dataStoreToArmHelper.getArchiveRecordsFileName(detsToArmProcessorConfiguration.getManifestFilePrefix());
 
         var batchItems = new ArmBatchItems();
 
@@ -205,10 +205,6 @@ public class DetsToArmBatchPushProcessorImpl implements DetsToArmBatchPushProces
             String errorMessage = "Manifest file creation failed";
             updateObjectStateRecordStatus(batchItem.getArmEod(), errorMessage);
         }
-    }
-
-    private String getManifestFilePrefix() {
-        return detsToArmProcessorConfiguration.getManifestFilePrefix();
     }
 
     private void updateObjectStateRecordManifestSuccessOrFailure(ArmBatchItems batchItems, boolean isSuccessfulTransfer) {
