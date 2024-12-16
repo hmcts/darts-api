@@ -157,7 +157,7 @@ public class ArmRpoServiceImpl implements ArmRpoService {
             .filter(csvEod -> externalObjectDirectoryEntities.stream().noneMatch(entity -> entity.getId().equals(csvEod)))
             .collect(Collectors.toList());
 
-        log.warn("Unable to process the following EODs {} found in the CSV", missingEods);
+        log.warn("Unable to process the following EODs {} found in the CSV but not in filtered DB list", missingEods);
 
         externalObjectDirectoryRepository.saveAllAndFlush(externalObjectDirectoryEntities);
     }
