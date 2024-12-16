@@ -29,6 +29,7 @@ import java.io.FileReader;
 import java.io.Reader;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static java.util.Objects.nonNull;
 
@@ -151,6 +152,13 @@ public class ArmRpoServiceImpl implements ArmRpoService {
                 }
             }
         );
+
+        List<Integer> missingEods = csvEodList.stream()
+            .filter(csvEod -> externalObjectDirectoryEntities.stream().noneMatch(entity -> entity.getId().equals(csvEod)))
+            .collect(Collectors.toList());
+
+        log.info("Unable to process the following EODs {} found in the CSV", missingEods);
+
         externalObjectDirectoryRepository.saveAllAndFlush(externalObjectDirectoryEntities);
     }
 
