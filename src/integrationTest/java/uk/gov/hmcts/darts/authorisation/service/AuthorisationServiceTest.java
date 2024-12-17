@@ -45,6 +45,7 @@ class AuthorisationServiceTest extends IntegrationBase {
     private static final String TEST_JUDGE_GLOBAL_EMAIL = "test.judge.global@example.com";
     private static final String TEST_BRISTOL_EMAIL = "test.bristol@example.com";
     private static final String TEST_NEW_EMAIL = "test.new@example.com";
+    private static final String TEST_MULTIPLE_USER_EMAIL = "test.multiple.user@example.com";
     private static final int TEST_JUDGE_GROUP_ID = -3;
     private static final int REQUESTOR_SG_ID = -2;
     private static final int APPROVER_SG_ID = -1;
@@ -121,6 +122,9 @@ class AuthorisationServiceTest extends IntegrationBase {
         newUser.setActive(true);
         newUser.setIsSystemUser(false);
         userAccountRepository.saveAndFlush(newUser);
+
+        createUser("Test Multiple User 1", TEST_MULTIPLE_USER_EMAIL, true, testUser, userAccountRepository);
+        createUser("Test Multiple User 2", TEST_MULTIPLE_USER_EMAIL, false, testUser, userAccountRepository);
     }
 
     @BeforeEach
@@ -142,6 +146,19 @@ class AuthorisationServiceTest extends IntegrationBase {
             securityGroup.setCourthouseEntities(asSet(courthouseEntity));
             dartsDatabase.getSecurityGroupRepository().save(securityGroup);
         }
+    }
+
+    private void createUser(String userFullName, String userEmailAddress, Boolean isActive,
+                            UserAccountEntity testUser, UserAccountRepository userAccountRepository) {
+        UserAccountEntity newUser = new UserAccountEntity();
+        newUser.setUserFullName(userFullName);
+        newUser.setEmailAddress(userEmailAddress);
+        newUser.setCreatedBy(testUser);
+        newUser.setLastModifiedBy(testUser);
+        newUser.setAccountGuid(UUID.randomUUID().toString());
+        newUser.setActive(isActive);
+        newUser.setIsSystemUser(false);
+        userAccountRepository.saveAndFlush(newUser);
     }
 
     @Test
@@ -214,6 +231,15 @@ class AuthorisationServiceTest extends IntegrationBase {
 
         assertTrue(userState.getUserId() > 0);
         assertEquals("Test New", userState.getUserName());
+        assertEquals(0, userState.getRoles().size());
+    }
+
+    @Test
+    void shouldGetAuthorisationForTestMultipleUserWithoutAnySecurityGroupRoles() {
+        UserState userState = authorisationService.getAuthorisation(TEST_MULTIPLE_USER_EMAIL).orElseThrow();
+
+        assertTrue(userState.getUserId() > 0);
+        assertEquals("Test Multiple User 1", userState.getUserName());
         assertEquals(0, userState.getRoles().size());
     }
 
