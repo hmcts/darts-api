@@ -149,7 +149,7 @@ class AuthorisationServiceTest extends IntegrationBase {
     }
 
     private void createUser(String userFullName, String userEmailAddress, Boolean isActive,
-                            UserAccountEntity testUser, UserAccountRepository userAccountRepository ) {
+                            UserAccountEntity testUser, UserAccountRepository userAccountRepository) {
         UserAccountEntity newUser = new UserAccountEntity();
         newUser.setUserFullName(userFullName);
         newUser.setEmailAddress(userEmailAddress);
