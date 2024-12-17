@@ -123,27 +123,8 @@ class AuthorisationServiceTest extends IntegrationBase {
         newUser.setIsSystemUser(false);
         userAccountRepository.saveAndFlush(newUser);
 
-        UserAccountEntity testMultipleUser1 = new UserAccountEntity();
-        testMultipleUser1.setUserName("Test Multiple User 1");
-        testMultipleUser1.setUserFullName("Test Multiple User 1");
-        testMultipleUser1.setEmailAddress(TEST_MULTIPLE_USER_EMAIL);
-        testMultipleUser1.setCreatedBy(testUser);
-        testMultipleUser1.setLastModifiedBy(testUser);
-        testMultipleUser1.setAccountGuid(UUID.randomUUID().toString());
-        testMultipleUser1.setActive(true);
-        testMultipleUser1.setIsSystemUser(false);
-        userAccountRepository.saveAndFlush(testMultipleUser1);
-
-        UserAccountEntity testMultipleUser2 = new UserAccountEntity();
-        testMultipleUser2.setUserName("Test Multiple User 2");
-        testMultipleUser2.setUserFullName("Test Multiple User 2");
-        testMultipleUser2.setEmailAddress(TEST_MULTIPLE_USER_EMAIL);
-        testMultipleUser2.setCreatedBy(testUser);
-        testMultipleUser2.setLastModifiedBy(testUser);
-        testMultipleUser2.setAccountGuid(UUID.randomUUID().toString());
-        testMultipleUser2.setActive(false);
-        testMultipleUser2.setIsSystemUser(false);
-        userAccountRepository.saveAndFlush(testMultipleUser2);
+        createUser("Test Multiple User 1", TEST_MULTIPLE_USER_EMAIL, true, testUser, userAccountRepository);
+        createUser("Test Multiple User 2", TEST_MULTIPLE_USER_EMAIL, false, testUser, userAccountRepository);
     }
 
     @BeforeEach
@@ -165,6 +146,19 @@ class AuthorisationServiceTest extends IntegrationBase {
             securityGroup.setCourthouseEntities(asSet(courthouseEntity));
             dartsDatabase.getSecurityGroupRepository().save(securityGroup);
         }
+    }
+
+    private void createUser(String userFullName, String userEmailAddress, Boolean isActive,
+                            UserAccountEntity testUser, UserAccountRepository userAccountRepository ) {
+        UserAccountEntity newUser = new UserAccountEntity();
+        newUser.setUserFullName(userFullName);
+        newUser.setEmailAddress(userEmailAddress);
+        newUser.setCreatedBy(testUser);
+        newUser.setLastModifiedBy(testUser);
+        newUser.setAccountGuid(UUID.randomUUID().toString());
+        newUser.setActive(isActive);
+        newUser.setIsSystemUser(false);
+        userAccountRepository.saveAndFlush(newUser);
     }
 
     @Test
