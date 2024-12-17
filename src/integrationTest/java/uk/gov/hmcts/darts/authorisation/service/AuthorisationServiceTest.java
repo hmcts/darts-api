@@ -45,6 +45,7 @@ class AuthorisationServiceTest extends IntegrationBase {
     private static final String TEST_JUDGE_GLOBAL_EMAIL = "test.judge.global@example.com";
     private static final String TEST_BRISTOL_EMAIL = "test.bristol@example.com";
     private static final String TEST_NEW_EMAIL = "test.new@example.com";
+    private static final String TEST_MULTIPLE_USER_EMAIL = "test.multiple.user@example.com";
     private static final int TEST_JUDGE_GROUP_ID = -3;
     private static final int REQUESTOR_SG_ID = -2;
     private static final int APPROVER_SG_ID = -1;
@@ -121,6 +122,28 @@ class AuthorisationServiceTest extends IntegrationBase {
         newUser.setActive(true);
         newUser.setIsSystemUser(false);
         userAccountRepository.saveAndFlush(newUser);
+
+        UserAccountEntity testMultipleUser1 = new UserAccountEntity();
+        testMultipleUser1.setUserName("Test Multiple User 1");
+        testMultipleUser1.setUserFullName("Test Multiple User 1");
+        testMultipleUser1.setEmailAddress(TEST_MULTIPLE_USER_EMAIL);
+        testMultipleUser1.setCreatedBy(testUser);
+        testMultipleUser1.setLastModifiedBy(testUser);
+        testMultipleUser1.setAccountGuid(UUID.randomUUID().toString());
+        testMultipleUser1.setActive(true);
+        testMultipleUser1.setIsSystemUser(false);
+        userAccountRepository.saveAndFlush(testMultipleUser1);
+
+        UserAccountEntity testMultipleUser2 = new UserAccountEntity();
+        testMultipleUser2.setUserName("Test Multiple User 2");
+        testMultipleUser2.setUserFullName("Test Multiple User 2");
+        testMultipleUser2.setEmailAddress(TEST_MULTIPLE_USER_EMAIL);
+        testMultipleUser2.setCreatedBy(testUser);
+        testMultipleUser2.setLastModifiedBy(testUser);
+        testMultipleUser2.setAccountGuid(UUID.randomUUID().toString());
+        testMultipleUser2.setActive(false);
+        testMultipleUser2.setIsSystemUser(false);
+        userAccountRepository.saveAndFlush(testMultipleUser2);
     }
 
     @BeforeEach
@@ -214,6 +237,15 @@ class AuthorisationServiceTest extends IntegrationBase {
 
         assertTrue(userState.getUserId() > 0);
         assertEquals("Test New", userState.getUserName());
+        assertEquals(0, userState.getRoles().size());
+    }
+
+    @Test
+    void shouldGetAuthorisationForTestMultipleUserWithoutAnySecurityGroupRoles() {
+        UserState userState = authorisationService.getAuthorisation(TEST_MULTIPLE_USER_EMAIL).orElseThrow();
+
+        assertTrue(userState.getUserId() > 0);
+        assertEquals("Test Multiple User 1", userState.getUserName());
         assertEquals(0, userState.getRoles().size());
     }
 
