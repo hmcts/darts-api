@@ -40,6 +40,14 @@ public interface HearingRepository extends JpaRepository<HearingEntity, Integer>
     List<Integer> findHearingIdsByEventId(Integer eventId);
 
     @Query("""
+        SELECT h FROM HearingEntity h
+        JOIN h.mediaList media
+        WHERE media.id = :mediaId
+        """
+    )
+    Optional<List<HearingEntity>> findHearingIdsByMediaId(Integer mediaId);
+
+    @Query("""
         SELECT h FROM HearingEntity h, CourthouseEntity ch, CourtroomEntity cr, CourtCaseEntity case
         WHERE ch.courthouseName = upper(:courthouse)
         AND cr.name = upper(:courtroom)
@@ -76,4 +84,13 @@ public interface HearingRepository extends JpaRepository<HearingEntity, Integer>
     List<HearingEntity> findHearingDetails(List<Integer> courthouseIds, String caseNumber,
                                            String courtroomName,
                                            LocalDate startDate, LocalDate endDate, Integer numberOfRecords);
+
+    @Query("""
+        SELECT hearing 
+        FROM HearingEntity hearing, CourtCaseEntity case
+        LEFT JOIN FETCH hearing.mediaList 
+        WHERE case.id = :caseId
+        AND hearing.courtCase = case
+        """)
+    Optional<HearingEntity> findByCaseIdWithMediaList(Integer caseId);
 }
