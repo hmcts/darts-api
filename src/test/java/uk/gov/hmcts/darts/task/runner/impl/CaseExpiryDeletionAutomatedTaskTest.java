@@ -13,7 +13,7 @@ import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
 import uk.gov.hmcts.darts.common.repository.AutomatedTaskRepository;
 import uk.gov.hmcts.darts.common.repository.CaseRepository;
 import uk.gov.hmcts.darts.common.service.DataAnonymisationService;
-import uk.gov.hmcts.darts.hearings.service.HearingsService;
+import uk.gov.hmcts.darts.hearings.api.HearingApi;
 import uk.gov.hmcts.darts.log.api.LogApi;
 import uk.gov.hmcts.darts.task.config.CaseExpiryDeletionAutomatedTaskConfig;
 import uk.gov.hmcts.darts.task.service.LockService;
@@ -49,7 +49,7 @@ class CaseExpiryDeletionAutomatedTaskTest {
     @Mock
     private UserIdentity userIdentity;
     @Mock
-    private HearingsService hearingsService;
+    private HearingApi hearingApi;
 
 
     @InjectMocks
@@ -77,11 +77,11 @@ class CaseExpiryDeletionAutomatedTaskTest {
             .currentOffsetDateTime();
 
         verify(dataAnonymisationService).anonymiseCourtCaseById(userAccount, 1, false);
-        verify(hearingsService).removeMediaLinkToHearing(1);
+        verify(hearingApi).removeMediaLinkToHearing(1);
         verify(dataAnonymisationService).anonymiseCourtCaseById(userAccount, 2, false);
-        verify(hearingsService).removeMediaLinkToHearing(2);
+        verify(hearingApi).removeMediaLinkToHearing(2);
         verify(dataAnonymisationService).anonymiseCourtCaseById(userAccount, 3, false);
-        verify(hearingsService).removeMediaLinkToHearing(3);
+        verify(hearingApi).removeMediaLinkToHearing(3);
 
         verify(caseRepository).findCaseIdsToBeAnonymised(offsetDateTime.minus(duration), Limit.of(5));
         verify(caseExpiryDeletionAutomatedTask).getAutomatedTaskBatchSize();

@@ -153,21 +153,21 @@ class HearingsServiceImplTest {
     }
 
     @Test
-    void testRemoveMediaLinkToHearing() {
+    void removeMediaLinkToHearing_shouldRemoveLinkToHearing_whenAllAssociatedCasesAreAnonymised() {
         MediaEntity mediaEntity = CommonTestDataUtil.createMedia("T1234");
         HearingEntity hearingEntity = mediaEntity.getHearingList().getFirst();
         hearingEntity.setMediaList(List.of(mediaEntity));
 
         when(hearingRepository.findByCaseIdWithMediaList(hearingEntity.getCourtCase().getId())).thenReturn(Optional.of(hearingEntity));
         when(mediaLinkedCaseRepository.areAllAssociatedCasesAnonymised(any())).thenReturn(true);
-        when(hearingRepository.findHearingIdsByMediaId(mediaEntity.getId())).thenReturn(Optional.of(List.of(hearingEntity)));
+        when(hearingRepository.findHearingIdsByMediaId(mediaEntity.getId())).thenReturn(List.of(hearingEntity));
 
         service.removeMediaLinkToHearing(hearingEntity.getCourtCase().getId());
         verify(hearingRepository).save(hearingEntity);
     }
 
     @Test
-    void testDoNotRemoveMediaLinkToHearingWhenNonExpiredAssociatedCases() {
+    void removeMediaLinkToHearing_shouldNotRemoveLinkToHearing_whenAllAssociatedCasesAreNotAnonymised() {
         MediaEntity mediaEntity = CommonTestDataUtil.createMedia("T1234");
         HearingEntity hearingEntity = mediaEntity.getHearingList().getFirst();
         hearingEntity.setMediaList(List.of(mediaEntity));
@@ -180,7 +180,7 @@ class HearingsServiceImplTest {
     }
 
     @Test
-    void testHandleHearingWithNoMediaToUnlink() {
+    void removeMediaLinkToHearing_shouldDoNothing_whenHearingsWithNoMediaExistsToUnlink() {
         MediaEntity mediaEntity = CommonTestDataUtil.createMedia("T1234");
         HearingEntity hearingEntity = mediaEntity.getHearingList().getFirst();
 
@@ -191,7 +191,7 @@ class HearingsServiceImplTest {
     }
 
     @Test
-    void testHandleHearingWithNoHearingsWithMediaToUnlink() {
+    void removeMediaLinkToHearing_shouldDoNothing_whenNoHearingsExist() {
         HearingEntity hearingEntity = createHearingEntity(true);
 
         when(hearingRepository.findByCaseIdWithMediaList(hearingEntity.getCourtCase().getId())).thenReturn(Optional.empty());

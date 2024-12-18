@@ -108,14 +108,12 @@ public class HearingsServiceImpl implements HearingsService {
                 if (!mediaLinkedCaseRepository.areAllAssociatedCasesAnonymised(media)) {
                     log.info("Media {} link not removed for case id {} as not all associated cases are expired", media.getId(), courtCaseId);
                 } else {
-                    hearingRepository.findHearingIdsByMediaId(media.getId()).ifPresent(hearingsForMedia ->
-                        hearingsForMedia.forEach(hearingForMedia -> {
-                            hearingForMedia.setMediaList(null);
-                            hearingRepository.save(hearingForMedia);
-                            log.info("Media id {} link removed for hearing id {} on the expiry of case id {}",
-                                     media.getId(), hearingForMedia.getId(), courtCaseId);
-                        })
-                   );
+                    hearingRepository.findHearingIdsByMediaId(media.getId()).forEach(hearingForMedia -> {
+                        hearingForMedia.setMediaList(null);
+                        hearingRepository.save(hearingForMedia);
+                        log.info("Media id {} link removed for hearing id {} on the expiry of case id {}",
+                                 media.getId(), hearingForMedia.getId(), courtCaseId);
+                    });
                 }
             })
         );

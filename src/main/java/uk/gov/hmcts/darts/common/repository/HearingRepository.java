@@ -45,7 +45,7 @@ public interface HearingRepository extends JpaRepository<HearingEntity, Integer>
         WHERE media.id = :mediaId
         """
     )
-    Optional<List<HearingEntity>> findHearingIdsByMediaId(Integer mediaId);
+    List<HearingEntity> findHearingIdsByMediaId(Integer mediaId);
 
     @Query("""
         SELECT h FROM HearingEntity h, CourthouseEntity ch, CourtroomEntity cr, CourtCaseEntity case
