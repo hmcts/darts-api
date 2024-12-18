@@ -11,7 +11,9 @@ public final class CsvFileUtil {
 
     }
 
+
     public static Iterable<CSVRecord> readCsv(Reader reader) throws IOException {
+
         CSVFormat csvFormat = CSVFormat.DEFAULT.builder()
             .setHeader()
             .setSkipHeaderRecord(true)

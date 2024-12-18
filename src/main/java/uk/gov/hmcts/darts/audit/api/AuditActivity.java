@@ -47,7 +47,10 @@ public enum AuditActivity {
     TRANSCRIPT_EXPIRED(38),
     ANNOTATION_EXPIRED(39),
     AUDIO_EXPIRED(40),
-    MANUAL_OBFUSCATION(41);
+    MANUAL_OBFUSCATION(41),
+    UNHIDE_AUDIO(42),
+    HIDE_TRANSCRIPTION(43),
+    UNHIDE_TRANSCRIPTION(44);
 
     private final Integer id;
 }

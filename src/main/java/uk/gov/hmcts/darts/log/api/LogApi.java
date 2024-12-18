@@ -10,6 +10,7 @@ import uk.gov.hmcts.darts.log.util.DailyListLogJobReport;
 import uk.gov.hmcts.darts.notification.entity.NotificationEntity;
 import uk.gov.service.notify.NotificationClientException;
 
+import java.time.Duration;
 import java.util.UUID;
 
 public interface LogApi {
@@ -62,6 +63,8 @@ public interface LogApi {
     void mediaDeleted(Integer mediaId);
 
     void transcriptionDeleted(Integer transcriptionId);
+
+    void logArmMissingResponse(Duration armMissingResponseDuration, Integer id);
 
     void armRpoSearchSuccessful(Integer executionId);
 

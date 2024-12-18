@@ -21,6 +21,7 @@ public class ObjectAdminActionTestData {
     public static ObjectAdminActionEntity objectAdminActionWithDefaults() {
         var action = minimalObjectAdminAction();
         action.setComments("some comment");
+        action.setTicketReference("Ticket-123");
         action.setHiddenBy(minimalUserAccount());
         action.setHiddenDateTime(now());
         action.setMarkedForManualDelDateTime(now());

@@ -17,7 +17,8 @@ import uk.gov.hmcts.darts.log.api.LogApi;
 @Component
 public class ArmBatchProcessResponseFilesImpl extends AbstractArmBatchProcessResponseFiles {
 
-    public ArmBatchProcessResponseFilesImpl(ExternalObjectDirectoryRepository externalObjectDirectoryRepository, ArmDataManagementApi armDataManagementApi,
+    public ArmBatchProcessResponseFilesImpl(ExternalObjectDirectoryRepository externalObjectDirectoryRepository,
+                                            ArmDataManagementApi armDataManagementApi,
                                             FileOperationService fileOperationService, ArmDataManagementConfiguration armDataManagementConfiguration,
                                             ObjectMapper objectMapper, UserIdentity userIdentity, CurrentTimeHelper currentTimeHelper,
                                             ExternalObjectDirectoryService externalObjectDirectoryService,
