@@ -159,6 +159,7 @@ public class DartsPersistence {
     private final TransactionalUtil transactionalUtil;
 
     @Transactional
+    @SuppressWarnings("PMD.AvoidReassigningParameters")
     public RetentionConfidenceCategoryMapperEntity save(RetentionConfidenceCategoryMapperEntity retentionConfidenceCategoryMapperEntity) {
         retentionConfidenceCategoryMapperEntity = (RetentionConfidenceCategoryMapperEntity) preCheckPersist(retentionConfidenceCategoryMapperEntity);
 

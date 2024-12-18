@@ -20,9 +20,7 @@ import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
 import uk.gov.hmcts.darts.retention.enums.CaseRetentionStatus;
-import uk.gov.hmcts.darts.retention.enums.RetentionConfidenceCategoryEnum;
 import uk.gov.hmcts.darts.retention.enums.RetentionConfidenceReasonEnum;
-import uk.gov.hmcts.darts.retention.enums.RetentionConfidenceScoreEnum;
 import uk.gov.hmcts.darts.test.common.data.PersistableFactory;
 import uk.gov.hmcts.darts.test.common.data.RetentionConfidenceCategoryMapperTestData;
 import uk.gov.hmcts.darts.test.common.data.builder.TestRetentionConfidenceCategoryMapperEntity;
@@ -78,9 +76,9 @@ class RetentionControllerPostRetentionIntTest extends IntegrationBase {
         RetentionConfidenceCategoryMapperTestData testData = PersistableFactory.getRetentionConfidenceCategoryMapperTestData();
 
         TestRetentionConfidenceCategoryMapperEntity manualOverrideMappingEntity = testData.someMinimalBuilder()
-            .confidenceCategory(RetentionConfidenceCategoryEnum.MANUAL_OVERRIDE)
+            .confidenceCategory(MANUAL_OVERRIDE)
             .confidenceReason(RetentionConfidenceReasonEnum.MANUAL_OVERRIDE)
-            .confidenceScore(RetentionConfidenceScoreEnum.CASE_PERFECTLY_CLOSED)
+            .confidenceScore(CASE_PERFECTLY_CLOSED)
             .build();
         dartsPersistence.save(manualOverrideMappingEntity.getEntity());
     }

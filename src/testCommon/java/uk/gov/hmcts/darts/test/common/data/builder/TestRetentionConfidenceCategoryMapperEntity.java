@@ -13,6 +13,7 @@ import uk.gov.hmcts.darts.retention.enums.RetentionConfidenceScoreEnum;
 import java.lang.reflect.InvocationTargetException;
 import java.time.OffsetDateTime;
 
+@SuppressWarnings({"PMD.TestClassWithoutTestCases", "PMD.ConstructorCallsOverridableMethod"})
 @RequiredArgsConstructor
 public class TestRetentionConfidenceCategoryMapperEntity extends RetentionConfidenceCategoryMapperEntity
     implements DbInsertable<RetentionConfidenceCategoryMapperEntity> {
@@ -24,6 +25,7 @@ public class TestRetentionConfidenceCategoryMapperEntity extends RetentionConfid
                                                        String description, OffsetDateTime createdAt,
                                                        OffsetDateTime lastModifiedAt, UserAccountEntity createdBy,
                                                        UserAccountEntity lastModifiedBy) {
+        super();
         setId(id);
         setConfidenceScore(confidenceScore);
         setConfidenceReason(confidenceReason);
