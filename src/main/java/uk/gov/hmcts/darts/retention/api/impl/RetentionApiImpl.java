@@ -11,6 +11,7 @@ import uk.gov.hmcts.darts.retention.enums.CaseRetentionStatus;
 import uk.gov.hmcts.darts.retention.enums.RetentionConfidenceCategoryEnum;
 import uk.gov.hmcts.darts.retention.helper.RetentionDateHelper;
 import uk.gov.hmcts.darts.retention.service.RetentionPostService;
+import uk.gov.hmcts.darts.retention.service.RetentionService;
 import uk.gov.hmcts.darts.retentions.model.PostRetentionRequest;
 
 import java.time.LocalDate;
@@ -21,6 +22,7 @@ public class RetentionApiImpl implements RetentionApi {
 
     private final RetentionDateHelper retentionDateHelper;
     private final RetentionPostService retentionPostService;
+    private final RetentionService retentionService;
 
     @Override
     public LocalDate applyPolicyStringToDate(LocalDate dateToAppend, String policyString, RetentionPolicyTypeEntity retentionPolicyType) {
@@ -41,4 +43,10 @@ public class RetentionApiImpl implements RetentionApi {
                                                            caseRetentionStatus,
                                                            retentionConfidenceCategory);
     }
+
+    @Override
+    public CourtCaseEntity updateCourtCaseConfidenceAttributesForRetention(CourtCaseEntity courtCase, RetentionConfidenceCategoryEnum confidenceCategory) {
+        return retentionService.updateCourtCaseConfidenceAttributesForRetention(courtCase, confidenceCategory);
+    }
+
 }

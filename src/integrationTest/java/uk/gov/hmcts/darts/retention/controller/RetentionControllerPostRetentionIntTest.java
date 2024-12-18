@@ -6,7 +6,10 @@ import org.skyscreamer.jsonassert.JSONAssert;
 import org.skyscreamer.jsonassert.JSONCompareMode;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Bean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
@@ -17,9 +20,15 @@ import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
 import uk.gov.hmcts.darts.retention.enums.CaseRetentionStatus;
+import uk.gov.hmcts.darts.retention.enums.RetentionConfidenceCategoryEnum;
 import uk.gov.hmcts.darts.retention.enums.RetentionConfidenceReasonEnum;
+import uk.gov.hmcts.darts.retention.enums.RetentionConfidenceScoreEnum;
+import uk.gov.hmcts.darts.test.common.data.PersistableFactory;
+import uk.gov.hmcts.darts.test.common.data.RetentionConfidenceCategoryMapperTestData;
+import uk.gov.hmcts.darts.test.common.data.builder.TestRetentionConfidenceCategoryMapperEntity;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 
+import java.time.Clock;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.Optional;
@@ -27,12 +36,14 @@ import java.util.Optional;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static uk.gov.hmcts.darts.retention.enums.RetentionConfidenceCategoryEnum.MANUAL_OVERRIDE;
 import static uk.gov.hmcts.darts.retention.enums.RetentionConfidenceScoreEnum.CASE_PERFECTLY_CLOSED;
 
+@SpringBootTest(properties = "spring.main.allow-bean-definition-overriding=true") // To override Clock bean
 @AutoConfigureMockMvc
 class RetentionControllerPostRetentionIntTest extends IntegrationBase {
     @Autowired
@@ -50,13 +61,33 @@ class RetentionControllerPostRetentionIntTest extends IntegrationBase {
     private static final String SOME_CASE_NUMBER = "12345";
     private static final OffsetDateTime CURRENT_DATE_TIME = OffsetDateTime.of(2024, 10, 1, 10, 0, 0, 0, ZoneOffset.UTC);
 
+    @TestConfiguration
+    public static class ClockConfig {
+        @Bean
+        public Clock clock() {
+            return Clock.fixed(CURRENT_DATE_TIME.toInstant(), ZoneOffset.UTC);
+        }
+    }
+
     @BeforeEach
     void setUp() {
         when(currentTimeHelper.currentOffsetDateTime()).thenReturn(CURRENT_DATE_TIME);
     }
 
+    private void createAndSaveRetentionConfidenceCategoryMappings() {
+        RetentionConfidenceCategoryMapperTestData testData = PersistableFactory.getRetentionConfidenceCategoryMapperTestData();
+
+        TestRetentionConfidenceCategoryMapperEntity manualOverrideMappingEntity = testData.someMinimalBuilder()
+            .confidenceCategory(RetentionConfidenceCategoryEnum.MANUAL_OVERRIDE)
+            .confidenceReason(RetentionConfidenceReasonEnum.MANUAL_OVERRIDE)
+            .confidenceScore(RetentionConfidenceScoreEnum.CASE_PERFECTLY_CLOSED)
+            .build();
+        dartsPersistence.save(manualOverrideMappingEntity.getEntity());
+    }
+
     @Test
     void happyPath() throws Exception {
+        createAndSaveRetentionConfidenceCategoryMappings();
 
         UserAccountEntity testUser = dartsDatabase.getUserAccountStub()
             .createAuthorisedIntegrationTestUser(SOME_COURTHOUSE);
@@ -105,7 +136,62 @@ class RetentionControllerPostRetentionIntTest extends IntegrationBase {
     }
 
     @Test
+    void postRetentions_shouldSucceed_andSetNullConfidenceScoreAndReason_whenNoConfidenceMappingExists() throws Exception {
+        // Given createAndSaveRetentionConfidenceCategoryMappings() is not invoked, so no confidence mappings exist in the DB
+
+        // And
+        UserAccountEntity testUser = dartsDatabase.getUserAccountStub()
+            .createAuthorisedIntegrationTestUser(SOME_COURTHOUSE);
+        when(mockUserIdentity.getUserAccount()).thenReturn(testUser);
+
+        CourtCaseEntity courtCase = dartsDatabase.createCase(
+            SOME_COURTHOUSE,
+            SOME_CASE_NUMBER
+        );
+        courtCase.setCaseClosedTimestamp(OffsetDateTime.of(2020, 10, 10, 10, 0, 0, 0, ZoneOffset.UTC));
+        courtCase.setClosed(true);
+        dartsDatabase.save(courtCase);
+        OffsetDateTime retainUntilDate = OffsetDateTime.parse("2023-01-01T12:00Z");
+
+        dartsDatabase.createCaseRetentionObject(courtCase, CaseRetentionStatus.COMPLETE, retainUntilDate, false);
+
+        String requestBody = """
+            {
+              "case_id": <<caseId>>,
+              "retention_date": "2024-05-20",
+              "is_permanent_retention": false,
+              "comments": "string"
+            }""";
+
+        requestBody = requestBody.replace("<<caseId>>", courtCase.getId().toString());
+        MockHttpServletRequestBuilder requestBuilder = post(ENDPOINT_URL)
+            .contentType(MediaType.APPLICATION_JSON_VALUE)
+            .content(requestBody);
+
+        // When
+        String actualResponse = mockMvc.perform(requestBuilder).andExpect(MockMvcResultMatchers.status().isOk())
+            .andReturn().getResponse().getContentAsString();
+
+        // Then
+        Optional<CaseRetentionEntity> latestCompletedRetention = dartsDatabase.getCaseRetentionRepository().findLatestCompletedRetention(courtCase);
+        assertEquals(OffsetDateTime.parse("2024-05-20T00:00Z"), latestCompletedRetention.get().getRetainUntil());
+        assertThat(latestCompletedRetention.get().getConfidenceCategory()).isEqualTo(MANUAL_OVERRIDE);
+
+        String expectedResponse = """
+            {
+              "retention_date": "2024-05-20"
+            }
+            """;
+        JSONAssert.assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
+        CourtCaseEntity actualCourtCase = dartsDatabase.getCaseRepository().findById(courtCase.getId()).get();
+        assertNull(actualCourtCase.getRetConfScore());
+        assertNull(actualCourtCase.getRetConfReason());
+        assertThat(actualCourtCase.getRetConfUpdatedTs()).isEqualTo(CURRENT_DATE_TIME);
+    }
+
+    @Test
     void happyPath_validateOnly() throws Exception {
+        createAndSaveRetentionConfidenceCategoryMappings();
 
         UserAccountEntity testUser = dartsDatabase.getUserAccountStub()
             .createAuthorisedIntegrationTestUser(SOME_COURTHOUSE);
@@ -152,6 +238,8 @@ class RetentionControllerPostRetentionIntTest extends IntegrationBase {
 
     @Test
     void happyPath_judgeReducingRetention() throws Exception {
+        createAndSaveRetentionConfidenceCategoryMappings();
+
         CourtCaseEntity courtCase = dartsDatabase.createCase(
             SOME_COURTHOUSE,
             SOME_CASE_NUMBER
@@ -196,6 +284,8 @@ class RetentionControllerPostRetentionIntTest extends IntegrationBase {
 
     @Test
     void givenARetentionDateEarlierThanLastAutomatedThenThrow422() throws Exception {
+        createAndSaveRetentionConfidenceCategoryMappings();
+
         CourtCaseEntity courtCase = dartsDatabase.createCase(
             SOME_COURTHOUSE,
             SOME_CASE_NUMBER
@@ -239,6 +329,8 @@ class RetentionControllerPostRetentionIntTest extends IntegrationBase {
 
     @Test
     void givenARetentionDateLaterThanMaxRetentionThenThrow422() throws Exception {
+        createAndSaveRetentionConfidenceCategoryMappings();
+
         CourtCaseEntity courtCase = dartsDatabase.createCase(
             SOME_COURTHOUSE,
             SOME_CASE_NUMBER

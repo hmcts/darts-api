@@ -65,4 +65,9 @@ public class PersistableFactory {
     public static ArmRpoExecutionDetailTestData getArmRpoExecutionDetailTestData() {
         return new ArmRpoExecutionDetailTestData();
     }
+
+    public static RetentionConfidenceCategoryMapperTestData getRetentionConfidenceCategoryMapperTestData() {
+        return new RetentionConfidenceCategoryMapperTestData();
+    }
+
 }

@@ -19,4 +19,6 @@ public interface RetentionApi {
                                         UserAccountEntity userAccount,
                                         CaseRetentionStatus caseRetentionStatus,
                                         RetentionConfidenceCategoryEnum retentionConfidenceCategory);
+
+    CourtCaseEntity updateCourtCaseConfidenceAttributesForRetention(CourtCaseEntity courtCase, RetentionConfidenceCategoryEnum confidenceCategory);
 }

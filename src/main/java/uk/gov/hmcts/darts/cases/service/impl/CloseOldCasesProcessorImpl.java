@@ -17,7 +17,6 @@ import uk.gov.hmcts.darts.common.entity.EventEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
-import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
 import uk.gov.hmcts.darts.common.repository.CaseRepository;
 import uk.gov.hmcts.darts.common.repository.CaseRetentionRepository;
 import uk.gov.hmcts.darts.retention.api.RetentionApi;
@@ -25,7 +24,6 @@ import uk.gov.hmcts.darts.retention.enums.CaseRetentionStatus;
 import uk.gov.hmcts.darts.retention.enums.RetentionConfidenceCategoryEnum;
 import uk.gov.hmcts.darts.retention.enums.RetentionPolicyEnum;
 import uk.gov.hmcts.darts.retention.helper.RetentionDateHelper;
-import uk.gov.hmcts.darts.retention.service.RetentionService;
 import uk.gov.hmcts.darts.retentions.model.PostRetentionRequest;
 
 import java.time.LocalDate;
@@ -46,7 +44,6 @@ public class CloseOldCasesProcessorImpl implements CloseOldCasesProcessor {
 
     private final CloseOldCasesProcessorImpl.CloseCaseProcessor caseProcessor;
     private final CaseRepository caseRepository;
-    private final RetentionService retentionService; // TODO Call via an API layer
 
     private final AuthorisationApi authorisationApi;
 
@@ -76,13 +73,12 @@ public class CloseOldCasesProcessorImpl implements CloseOldCasesProcessor {
 
     @Service
     @RequiredArgsConstructor(onConstructor = @__(@Autowired))
-    public class CloseCaseProcessor {
+    static class CloseCaseProcessor {
         private static final String CLOSE_CASE_RETENTION_COMMENT = "CloseOldCases Automated job setting retention period to Default";
         private final CaseService caseService;
         private final CaseRetentionRepository caseRetentionRepository;
         private final RetentionApi retentionApi;
         private final RetentionDateHelper retentionDateHelper;
-        private final CurrentTimeHelper currentTimeHelper;
 
         @Value("#{'${darts.retention.close-events}'.split(',')}")
         private List<String> closeEvents;
@@ -136,7 +132,7 @@ public class CloseOldCasesProcessorImpl implements CloseOldCasesProcessor {
             courtCase.setClosed(TRUE);
             courtCase.setCaseClosedTimestamp(caseClosedDate);
             final RetentionConfidenceCategoryEnum retentionConfidenceCategory = RetentionConfidenceCategoryEnum.AGED_CASE;
-            courtCase = retentionService.updateCourtCaseConfidenceAttributesForRetention(courtCase, retentionConfidenceCategory);
+            courtCase = retentionApi.updateCourtCaseConfidenceAttributesForRetention(courtCase, retentionConfidenceCategory);
             caseService.saveCase(courtCase);
             log.info("Closed court case id {}", courtCase.getId());
 
