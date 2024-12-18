@@ -11,4 +11,5 @@ public interface RetentionService {
     List<GetCaseRetentionsResponse> getCaseRetentions(Integer caseId);
 
     CourtCaseEntity updateCourtCaseConfidenceAttributesForRetention(CourtCaseEntity courtCase, RetentionConfidenceCategoryEnum confidenceCategory);
+
 }
