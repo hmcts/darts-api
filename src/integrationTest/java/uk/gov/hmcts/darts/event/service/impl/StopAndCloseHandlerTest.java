@@ -24,9 +24,7 @@ import uk.gov.hmcts.darts.common.util.DateConverterUtil;
 import uk.gov.hmcts.darts.event.model.DartsEvent;
 import uk.gov.hmcts.darts.event.model.DartsEventRetentionPolicy;
 import uk.gov.hmcts.darts.event.service.EventDispatcher;
-import uk.gov.hmcts.darts.retention.enums.RetentionConfidenceCategoryEnum;
 import uk.gov.hmcts.darts.retention.enums.RetentionConfidenceReasonEnum;
-import uk.gov.hmcts.darts.retention.enums.RetentionConfidenceScoreEnum;
 import uk.gov.hmcts.darts.retention.service.ApplyRetentionProcessor;
 import uk.gov.hmcts.darts.test.common.data.PersistableFactory;
 import uk.gov.hmcts.darts.test.common.data.RetentionConfidenceCategoryMapperTestData;
@@ -57,6 +55,7 @@ import static uk.gov.hmcts.darts.retention.enums.CaseRetentionStatus.COMPLETE;
 import static uk.gov.hmcts.darts.retention.enums.CaseRetentionStatus.IGNORED;
 import static uk.gov.hmcts.darts.retention.enums.CaseRetentionStatus.PENDING;
 import static uk.gov.hmcts.darts.retention.enums.RetentionConfidenceCategoryEnum.CASE_CLOSED;
+import static uk.gov.hmcts.darts.retention.enums.RetentionConfidenceScoreEnum.CASE_PERFECTLY_CLOSED;
 
 @SpringBootTest(properties = "spring.main.allow-bean-definition-overriding=true") // To override Clock bean
 class StopAndCloseHandlerTest extends HandlerTestData {
@@ -111,9 +110,9 @@ class StopAndCloseHandlerTest extends HandlerTestData {
         RetentionConfidenceCategoryMapperTestData testData = PersistableFactory.getRetentionConfidenceCategoryMapperTestData();
 
         TestRetentionConfidenceCategoryMapperEntity closedMappingEntity = testData.someMinimalBuilder()
-            .confidenceCategory(RetentionConfidenceCategoryEnum.CASE_CLOSED)
+            .confidenceCategory(CASE_CLOSED)
             .confidenceReason(RetentionConfidenceReasonEnum.CASE_CLOSED)
-            .confidenceScore(RetentionConfidenceScoreEnum.CASE_PERFECTLY_CLOSED)
+            .confidenceScore(CASE_PERFECTLY_CLOSED)
             .build();
         dartsPersistence.save(closedMappingEntity.getEntity());
     }
@@ -316,7 +315,7 @@ class StopAndCloseHandlerTest extends HandlerTestData {
         assertEquals(testTime, persistedCase.getCaseClosedTimestamp());
         assertTrue(persistedCase.getClosed());
         assertEquals(RetentionConfidenceReasonEnum.CASE_CLOSED, persistedCase.getRetConfReason());
-        assertEquals(RetentionConfidenceScoreEnum.CASE_PERFECTLY_CLOSED, persistedCase.getRetConfScore());
+        assertEquals(CASE_PERFECTLY_CLOSED, persistedCase.getRetConfScore());
         assertEquals(CURRENT_DATE_TIME, persistedCase.getRetConfUpdatedTs());
         var hearingsForCase = dartsDatabase.findByCourthouseCourtroomAndDate(
             SOME_COURTHOUSE, SOME_ROOM, testTime.toLocalDate());
@@ -412,7 +411,7 @@ class StopAndCloseHandlerTest extends HandlerTestData {
         assertTrue(persistedCase.getClosed());
         assertEquals(testTime.plusSeconds(10), persistedCase.getCaseClosedTimestamp());
         assertEquals(RetentionConfidenceReasonEnum.CASE_CLOSED, persistedCase.getRetConfReason());
-        assertEquals(RetentionConfidenceScoreEnum.CASE_PERFECTLY_CLOSED, persistedCase.getRetConfScore());
+        assertEquals(CASE_PERFECTLY_CLOSED, persistedCase.getRetConfScore());
         assertEquals(CURRENT_DATE_TIME, persistedCase.getRetConfUpdatedTs());
 
         // apply retention and check it was applied correctly
@@ -510,7 +509,7 @@ class StopAndCloseHandlerTest extends HandlerTestData {
         assertTrue(persistedCase.getClosed());
         assertEquals(testTime.plusSeconds(10), persistedCase.getCaseClosedTimestamp());
         assertEquals(RetentionConfidenceReasonEnum.CASE_CLOSED, persistedCase.getRetConfReason());
-        assertEquals(RetentionConfidenceScoreEnum.CASE_PERFECTLY_CLOSED, persistedCase.getRetConfScore());
+        assertEquals(CASE_PERFECTLY_CLOSED, persistedCase.getRetConfScore());
         assertEquals(CURRENT_DATE_TIME, persistedCase.getRetConfUpdatedTs());
 
         // apply retention and check it was applied correctly

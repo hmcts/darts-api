@@ -19,6 +19,8 @@ import uk.gov.hmcts.darts.retention.enums.RetentionConfidenceReasonEnum;
 import uk.gov.hmcts.darts.retention.enums.RetentionConfidenceScoreEnum;
 import uk.gov.hmcts.darts.retention.mapper.RetentionMapper;
 import uk.gov.hmcts.darts.retention.service.RetentionService;
+import uk.gov.hmcts.darts.test.common.data.PersistableFactory;
+import uk.gov.hmcts.darts.test.common.data.RetentionConfidenceCategoryMapperTestData;
 
 import java.time.Clock;
 import java.time.Instant;
@@ -148,13 +150,13 @@ class RetentionServiceImplTest {
         }
 
         private RetentionConfidenceCategoryMapperEntity createConfidenceMapping() {
-            var mappingEntity = new RetentionConfidenceCategoryMapperEntity();
-            mappingEntity.setConfidenceCategory(RetentionConfidenceCategoryEnum.CASE_CLOSED);
+            RetentionConfidenceCategoryMapperTestData testData = PersistableFactory.getRetentionConfidenceCategoryMapperTestData();
 
-            mappingEntity.setConfidenceScore(RetentionConfidenceScoreEnum.CASE_PERFECTLY_CLOSED);
-            mappingEntity.setConfidenceReason(RetentionConfidenceReasonEnum.CASE_CLOSED);
-
-            return mappingEntity;
+            return testData.someMinimalBuilder()
+                .confidenceCategory(RetentionConfidenceCategoryEnum.CASE_CLOSED)
+                .confidenceScore(RetentionConfidenceScoreEnum.CASE_PERFECTLY_CLOSED)
+                .confidenceReason(RetentionConfidenceReasonEnum.CASE_CLOSED)
+                .build();
         }
 
     }
