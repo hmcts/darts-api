@@ -2,6 +2,8 @@ package uk.gov.hmcts.darts.common.entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -32,6 +34,7 @@ public class RetentionConfidenceCategoryMapperEntity extends MandatoryCreatedMod
     private RetentionConfidenceScoreEnum confidenceScore;
 
     @Column(name = "ret_conf_reason")
+    @Enumerated(EnumType.STRING)
     private RetentionConfidenceReasonEnum confidenceReason;
 
     @Column(name = "confidence_category")
