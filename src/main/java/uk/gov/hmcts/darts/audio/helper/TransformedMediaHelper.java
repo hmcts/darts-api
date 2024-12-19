@@ -96,14 +96,15 @@ public class TransformedMediaHelper {
         entity.setOutputFilename(filename);
         entity.setStartTime(startTime);
         entity.setEndTime(endTime);
-        entity.setCreatedBy(mediaRequest.getCreatedBy());
         entity.setLastModifiedBy(mediaRequest.getCreatedBy());
+        entity.setCreatedBy(mediaRequest.getCreatedBy());
         entity.setOutputFormat(audioRequestOutputFormat);
         if (nonNull(fileSize)) {
             entity.setOutputFilesize(fileSize.intValue());
         }
-        transformedMediaRepository.save(entity);
-        return entity;
+        //Ensures createdBy / LastModified does not get overridden by the @CreatedBy / @LastModifiedBy annotation
+        TransformedMediaEntity savedTM = transformedMediaRepository.save(entity);
+        return savedTM;
     }
 
     @SuppressWarnings({"PMD.CognitiveComplexity"})
