@@ -45,11 +45,7 @@ public class UserAccountEntity extends CreatedModifiedBaseEntity {
     @Column(name = "dm_user_s_object_id", length = 16)
     private String dmObjectId;
 
-    @NotAudited
-    @Column(name = "user_name")
-    private String userName;
-
-    @Column(name = "user_full_name")
+    @Column(name = "user_full_name", nullable = false)
     private String userFullName;
 
     @Column(name = "user_email_address")
@@ -81,6 +77,30 @@ public class UserAccountEntity extends CreatedModifiedBaseEntity {
         joinColumns = {@JoinColumn(name = "usr_id")},
         inverseJoinColumns = {@JoinColumn(name = "grp_id")})
     private Set<SecurityGroupEntity> securityGroupEntities = new LinkedHashSet<>();
+
+    @NotAudited
+    @Column(name = "user_os_name")
+    private String userOsName;
+
+    @NotAudited
+    @Column(name = "user_ldap_dn")
+    private String userLdapDomainName;
+
+    @NotAudited
+    @Column(name = "user_global_unique_id")
+    private String userGlobalUniqueId;
+
+    @NotAudited
+    @Column(name = "user_login_name")
+    private String userLoginName;
+
+    @NotAudited
+    @Column(name = "user_login_domain")
+    private String userLoginDomain;
+
+    @NotAudited
+    @Column(name = "user_state")
+    private Short userState;
 
     public Boolean isActive() {
         return active;
