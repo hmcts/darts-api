@@ -108,7 +108,7 @@ public class RetentionConfidenceCategoryMapperRepositoryTest extends PostgresInt
             // When
             IncorrectResultSizeDataAccessException exception = assertThrows(IncorrectResultSizeDataAccessException.class, () ->
                 repository.findByConfidenceCategory(category));
-            assertEquals("Incorrect result size: expected 1, actual 2", exception.getMessage());
+            assertEquals("Query did not return a unique result: 2 results were returned", exception.getMessage());
         }
 
         @Test
