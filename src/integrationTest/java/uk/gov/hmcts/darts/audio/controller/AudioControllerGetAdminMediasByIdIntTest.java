@@ -1,5 +1,7 @@
 package uk.gov.hmcts.darts.audio.controller;
 
+import org.hamcrest.core.IsNull;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.skyscreamer.jsonassert.JSONAssert;
@@ -271,6 +273,65 @@ class AudioControllerGetAdminMediasByIdIntTest extends IntegrationBase {
                                     """, jsonString, JSONCompareMode.STRICT);
     }
 
+    @Test
+    void getMediaById_shouldReturnCaseWithCasIdAndActualHearing_whenMediaHasLinkedCase() throws Exception {
+        // Given
+        given.anAuthenticatedUserWithGlobalAccessAndRole(SecurityRoleEnum.SUPER_USER);
+        UserAccountEntity userAccountEntity = databaseStub.getUserAccountRepository().findAll().stream()
+            .findFirst()
+            .orElseThrow();
+
+        // Create hearing and mark it as actual
+        var hearingEntity = databaseStub.createHearing(COURTHOUSE_NAME, COURTROOM_NAME, CASE_NUMBER, HEARING_START_AT.toLocalDateTime());
+        hearingEntity.setHearingIsActual(true);
+        databaseStub.getHearingRepository().save(hearingEntity);
+
+        // Create media and link it to hearing
+        var mediaEntity = createAndSaveMediaEntity(hearingEntity, userAccountEntity, false);
+
+        // Create media linked case with court case (AC1)
+        databaseStub.createMediaLinkedCase(mediaEntity, hearingEntity.getCourtCase());
+
+        // When
+        mockMvc.perform(get(ENDPOINT.resolve(String.valueOf(mediaEntity.getId()))))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.cases", hasSize(1)))
+            .andExpect(jsonPath("$.cases[0].id").value(hearingEntity.getCourtCase().getId()))
+            .andExpect(jsonPath("$.cases[0].case_number").value(CASE_NUMBER))
+            .andExpect(jsonPath("$.cases[0].source").value("Legacy"))
+            .andExpect(jsonPath("$.cases[0].courthouse.id").value(hearingEntity.getCourtCase().getCourthouse().getId()))
+            .andExpect(jsonPath("$.cases[0].courthouse.display_name").value(COURTHOUSE_NAME));
+    }
+
+    @Test
+    void getMediaById_shouldReturnCaseWithoutCasId_whenMediaHasMigratedCase() throws Exception {
+        // Given
+        given.anAuthenticatedUserWithGlobalAccessAndRole(SecurityRoleEnum.SUPER_USER);
+        UserAccountEntity userAccountEntity = databaseStub.getUserAccountRepository().findAll().stream()
+            .findFirst()
+            .orElseThrow();
+
+        // Create media without hearing
+        var mediaEntity = createAndSaveMediaEntity(null, userAccountEntity, false);
+
+        // Create media linked case without court case (AC2)
+        databaseStub.createMediaLinkedCase(
+            mediaEntity,
+            "MIGRATED_CASE",
+            COURTHOUSE_NAME
+        );
+
+        // When
+        mockMvc.perform(get(ENDPOINT.resolve(String.valueOf(mediaEntity.getId()))))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.cases", hasSize(1)))
+            .andExpect(jsonPath("$.cases[0].id").value(IsNull.nullValue()))
+            .andExpect(jsonPath("$.cases[0].case_number").value("MIGRATED_CASE"))
+            .andExpect(jsonPath("$.cases[0].source").value("Legacy"))
+            .andExpect(jsonPath("$.cases[0].courthouse.display_name").value(COURTHOUSE_NAME))
+            .andExpect(jsonPath("$.cases[0].courthouse.id").doesNotExist());
+    }
+
     private MediaEntity createAndSaveMediaEntity(HearingEntity hearingEntity, UserAccountEntity userAccountEntity, boolean isDeleted) {
         MediaEntity mediaEntity = databaseStub.createMediaEntity(COURTHOUSE_NAME,
                                                                  COURTROOM_NAME,
@@ -292,9 +353,12 @@ class AudioControllerGetAdminMediasByIdIntTest extends IntegrationBase {
         mediaEntity.setIsCurrent(true);
 
         mediaEntity.setHearingList(Collections.singletonList(hearingEntity));
-        hearingEntity.setMediaList(Collections.singletonList(mediaEntity));
-        databaseStub.getHearingRepository()
-            .save(hearingEntity);
+        if (hearingEntity != null) {
+            mediaEntity.setHearingList(Collections.singletonList(hearingEntity));
+            hearingEntity.setMediaList(Collections.singletonList(mediaEntity));
+            databaseStub.getHearingRepository()
+                .save(hearingEntity);
+        }
 
         return databaseStub.getMediaRepository()
             .saveAndFlush(mediaEntity);
