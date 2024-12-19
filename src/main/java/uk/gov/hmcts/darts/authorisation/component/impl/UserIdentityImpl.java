@@ -62,7 +62,7 @@ public class UserIdentityImpl implements UserIdentity {
         return userAccount;
     }
 
-    private Jwt getJwt() {
+    public Jwt getJwt() {
         if (SecurityContextHolder.getContext().getAuthentication() != null) {
             if (SecurityContextHolder.getContext().getAuthentication().getPrincipal() instanceof Jwt jwt) {
                 return jwt;
