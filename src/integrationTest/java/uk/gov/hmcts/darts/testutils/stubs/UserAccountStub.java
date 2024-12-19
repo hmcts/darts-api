@@ -87,7 +87,6 @@ public class UserAccountStub {
     public UserAccountEntity createIntegrationUser(String guid, String fullName, String emailAddress, boolean active) {
         UserAccountEntity systemUser = userAccountRepository.getReferenceById(SYSTEM_USER_ID);
         var newUser = new UserAccountEntity();
-        newUser.setUserName(fullName + "Username");
         newUser.setUserFullName(fullName + "FullName");
         newUser.setEmailAddress(emailAddress);
         newUser.setCreatedBy(systemUser);

@@ -53,20 +53,20 @@ class TranscriptionControllerGetTranscriptionTranscriberCountsIntTest extends In
                                 created_ts, created_by, last_modified_ts, last_modified_by)
                                 VALUES (-1, -1, -1, '2023-11-17', NULL, true, current_timestamp, 0, current_timestamp, 0);
                                 
-                                INSERT INTO darts.user_account (usr_id, dm_user_s_object_id, user_name, user_full_name, user_email_address, description,
+                                INSERT INTO darts.user_account (usr_id, dm_user_s_object_id, user_full_name, user_email_address, description,
                                 is_active, created_ts,
                                 last_modified_ts, last_login_ts, last_modified_by, created_by, account_guid, is_system_user)
-                                VALUES (-410, NULL, 'John R', 'John R', 'John.R@example.com', NULL, true, current_timestamp,
+                                VALUES (-410, NULL, 'John R', 'John.R@example.com', NULL, true, current_timestamp,
                                 current_timestamp, NULL, 0, 0, NULL, false);
                                 INSERT INTO darts.security_group_user_account_ae (usr_id, grp_id)
                                 VALUES (-410, -4);
                                 INSERT INTO darts.security_group_courthouse_ae (grp_id, cth_id)
                                 VALUES (-4, -1);
                                 
-                                INSERT INTO darts.user_account (usr_id, dm_user_s_object_id, user_name, user_full_name, user_email_address, description,
+                                INSERT INTO darts.user_account (usr_id, dm_user_s_object_id, user_full_name, user_email_address, description,
                                 is_active, created_ts,
                                 last_modified_ts, last_login_ts, last_modified_by, created_by, account_guid, is_system_user)
-                                VALUES (-420, NULL, 'John R', 'John R', 'John.R@example.com', NULL, true, current_timestamp,
+                                VALUES (-420, NULL, 'John R', 'John.R@example.com', NULL, true, current_timestamp,
                                 current_timestamp, NULL, 0, 0, NULL, false);
                                 
                                 -- Transcript Requests: Approved
