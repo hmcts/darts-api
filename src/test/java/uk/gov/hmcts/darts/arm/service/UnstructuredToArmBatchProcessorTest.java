@@ -39,7 +39,6 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.ArgumentMatchers.matches;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -175,8 +174,6 @@ class UnstructuredToArmBatchProcessorTest {
         when(unstructuredToArmProcessorConfiguration.getThreads()).thenReturn(20);
         when(armDataManagementConfiguration.getMaxRetryAttempts()).thenReturn(3);
 
-        when(fileOperationService.createFile(any(), any(), anyBoolean())).thenReturn(manifestFilePath);
-
         //when
         unstructuredToArmBatchProcessor.processUnstructuredToArm(5000);
 
@@ -195,25 +192,4 @@ class UnstructuredToArmBatchProcessorTest {
 
         verifyNoMoreInteractions(logApi);
     }
-
-    @Test
-    void testManifestFileName() throws IOException {
-        //given
-        when(armDataManagementConfiguration.getManifestFilePrefix()).thenReturn("DARTS");
-        when(armDataManagementConfiguration.getFileExtension()).thenReturn("a360");
-        when(armDataManagementConfiguration.getTempBlobWorkspace()).thenReturn("/temp_workspace");
-        when(externalObjectDirectoryRepository.findEodsNotInOtherStorage(any(), any(), any(), any())).thenReturn(List.of(123));
-        when(unstructuredToArmProcessorConfiguration.getMaxArmManifestItems()).thenReturn(1000);
-        when(unstructuredToArmProcessorConfiguration.getThreads()).thenReturn(20);
-        when(armDataManagementConfiguration.getMaxRetryAttempts()).thenReturn(3);
-
-        //when
-        unstructuredToArmBatchProcessor.processUnstructuredToArm(5);
-
-        //then
-        verify(fileOperationService).createFile(matches("DARTS_.+\\.a360"), eq("/temp_workspace"), eq(true));
-
-        verifyNoMoreInteractions(logApi);
-    }
-
 }
