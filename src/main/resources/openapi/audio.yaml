@@ -1052,6 +1052,7 @@ components:
         - "AUDIO_119"
         - "AUDIO_120"
         - "AUDIO_121"
+        - "AUDIO_122"
       x-enum-varnames: [ FAILED_TO_PROCESS_AUDIO_REQUEST,
                          REQUESTED_DATA_CANNOT_BE_LOCATED,
                          MEDIA_NOT_FOUND,
@@ -1073,6 +1074,7 @@ components:
                          MARKED_FOR_DELETION_REASON_NOT_FOUND,
                          USER_CANT_APPROVE_THEIR_OWN_DELETION,
                          FAILED_TO_ADD_AUDIO_META_DATA,
+                         START_TIME_END_TIME_NOT_VALID,
       ]
 
     AddAudioTitleErrors:
@@ -1099,6 +1101,7 @@ components:
         - "Media marked for deletion reason not found"
         - "User cannot approve their own deletion"
         - "Failed to add audio meta data"
+        - "Start time or end time of media not valid"
       x-enum-varnames: [ FAILED_TO_PROCESS_AUDIO_REQUEST,
                          REQUESTED_DATA_CANNOT_BE_LOCATED,
                          MEDIA_NOT_FOUND,
@@ -1120,4 +1123,5 @@ components:
                          MARKED_FOR_DELETION_REASON_NOT_FOUND,
                          USER_CANT_APPROVE_THEIR_OWN_DELETION,
                          FAILED_TO_ADD_AUDIO_META_DATA,
+                         START_TIME_END_TIME_NOT_VALID,
       ]
