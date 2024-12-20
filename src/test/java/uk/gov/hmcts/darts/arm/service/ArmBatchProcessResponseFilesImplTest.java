@@ -108,7 +108,7 @@ class ArmBatchProcessResponseFilesImplTest {
 
         // given
         final String continuationToken = null;
-
+        when(currentTimeHelper.currentOffsetDateTime()).thenReturn(OffsetDateTime.now());
         when(armDataManagementConfiguration.getManifestFilePrefix()).thenReturn(PREFIX);
         when(armDataManagementConfiguration.getFileExtension()).thenReturn(RESPONSE_FILENAME_EXTENSION);
         BinaryData binaryData = mock(BinaryData.class);
@@ -146,9 +146,9 @@ class ArmBatchProcessResponseFilesImplTest {
 
         // then
         verify(externalObjectDirectoryRepository).findAllByStatusAndManifestFile(EodHelper.armDropZoneStatus(), manifestFile1);
-        verify(externalObjectDirectoryRepository).findAllByStatusAndManifestFile(EodHelper.armProcessingResponseFilesStatus(), manifestFile1);
+        verify(externalObjectDirectoryRepository, times(2)).findAllByStatusAndManifestFile(EodHelper.armProcessingResponseFilesStatus(), manifestFile1);
         verify(externalObjectDirectoryRepository).findAllByStatusAndManifestFile(EodHelper.armDropZoneStatus(), manifestFile2);
-        verify(externalObjectDirectoryRepository).findAllByStatusAndManifestFile(EodHelper.armProcessingResponseFilesStatus(), manifestFile2);
+        verify(externalObjectDirectoryRepository, times(2)).findAllByStatusAndManifestFile(EodHelper.armProcessingResponseFilesStatus(), manifestFile2);
 
         verify(armDataManagementApi).getBlobData(blobNameAndPath1);
         verify(armDataManagementApi).getBlobData(blobNameAndPath2);
@@ -172,6 +172,8 @@ class ArmBatchProcessResponseFilesImplTest {
         when(armDataManagementConfiguration.getFileExtension()).thenReturn(RESPONSE_FILENAME_EXTENSION);
         BinaryData binaryData1 = mock(BinaryData.class);
         BinaryData binaryData2 = mock(BinaryData.class);
+
+        when(currentTimeHelper.currentOffsetDateTime()).thenReturn(OffsetDateTime.now());
 
         LocalDateTime dateTime1 = LocalDateTime.now().plusDays(1);
         LocalDateTime dateTime2 = LocalDateTime.now().minusDays(1);
@@ -215,9 +217,9 @@ class ArmBatchProcessResponseFilesImplTest {
 
         // then
         verify(externalObjectDirectoryRepository).findAllByStatusAndManifestFile(EodHelper.armDropZoneStatus(), manifestFile1);
-        verify(externalObjectDirectoryRepository).findAllByStatusAndManifestFile(EodHelper.armProcessingResponseFilesStatus(), manifestFile1);
+        verify(externalObjectDirectoryRepository, times(2)).findAllByStatusAndManifestFile(EodHelper.armProcessingResponseFilesStatus(), manifestFile1);
         verify(externalObjectDirectoryRepository).findAllByStatusAndManifestFile(EodHelper.armDropZoneStatus(), manifestFile2);
-        verify(externalObjectDirectoryRepository).findAllByStatusAndManifestFile(EodHelper.armProcessingResponseFilesStatus(), manifestFile2);
+        verify(externalObjectDirectoryRepository, times(2)).findAllByStatusAndManifestFile(EodHelper.armProcessingResponseFilesStatus(), manifestFile2);
 
         verify(armDataManagementApi).getBlobData(blobNameAndPath1);
         verify(armDataManagementApi).getBlobData(blobNameAndPath2);
@@ -307,7 +309,7 @@ class ArmBatchProcessResponseFilesImplTest {
         verify(armBatchProcessResponseFiles).getExternalObjectDirectoryEntity(123);
         verify(currentTimeHelper).currentOffsetDateTime();
         verify(armBatchProcessResponseFiles).updateExternalObjectDirectoryStatus(
-            externalObjectDirectoryEntity, EodHelper.armResponseProcessingFailedStatus(),
+            externalObjectDirectoryEntity, EodHelper.armMissingResponseStatus(),
             userAccount
         );
     }
