@@ -270,6 +270,21 @@ public abstract class AbstractArmBatchProcessResponseFiles implements ArmRespons
                 }
             } else {
                 log.info("Unable to find response files starting with {} for manifest {}", batchUploadFileFilenameProcessor.getHashcode(), manifestName);
+
+                List<ExternalObjectDirectoryEntity> externalObjectDirectoryEntities = externalObjectDirectoryRepository
+                    .findAllByStatusAndManifestFile(EodHelper.armProcessingResponseFilesStatus(), manifestName);
+
+                OffsetDateTime minInputUploadProcessedTime = timeHelper.currentOffsetDateTime().minus(
+                    armDataManagementConfiguration.getArmMissingResponseDuration());
+
+                externalObjectDirectoryEntities.forEach(
+                    externalObjectDirectoryEntity -> {
+                        if (externalObjectDirectoryEntity.getInputUploadProcessedTs() != null
+                            && externalObjectDirectoryEntity.getInputUploadProcessedTs().isBefore(minInputUploadProcessedTime)) {
+                            markEodAsResponseProcessingFailed(externalObjectDirectoryEntity, userAccount);
+                        }
+                    }
+                );
             }
         } catch (Exception e) {
             log.error("Unable to process responses for file {}", batchUploadFileFilenameProcessor.getBatchMetadataFilenameAndPath(), e);
@@ -334,7 +349,7 @@ public abstract class AbstractArmBatchProcessResponseFiles implements ArmRespons
     }
 
     protected void markEodAsResponseProcessingFailed(ExternalObjectDirectoryEntity externalObjectDirectory, UserAccountEntity userAccount) {
-        updateExternalObjectDirectoryStatus(externalObjectDirectory, EodHelper.armResponseProcessingFailedStatus(), userAccount);
+        updateExternalObjectDirectoryStatus(externalObjectDirectory, EodHelper.armMissingResponseStatus(), userAccount);
     }
 
     private void logResponsesFound(ArmResponseBatchData armResponseBatchData) {
