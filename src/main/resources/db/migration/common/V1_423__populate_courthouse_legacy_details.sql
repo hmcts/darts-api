@@ -12,7 +12,7 @@ UPDATE courthouse SET courthouse_object_id = '0b17075880d6818d', folder_path = '
 UPDATE courthouse SET courthouse_object_id = '0b1707588000a38e', folder_path = '/Area 10/Bournemouth Combined Court Centre' WHERE courthouse_name = 'BOURNEMOUTH CROWN AND COUNTY COURTS';
 UPDATE courthouse SET courthouse_object_id = '0b17075881157638', folder_path = '/Area 10/Dorchester Combined Court Centre' WHERE courthouse_name = 'DORCHESTER';
 UPDATE courthouse SET courthouse_object_id = '0b17075880cd641e', folder_path = '/Area 10/Exeter Combined Court Centre' WHERE courthouse_name = 'EXETER';
-UPDATE courthouse SET courthouse_object_id = '0b170758817c1428', folder_path = ' ISLE OF WIGHT' WHERE courthouse_name = 'NEWPORT';
+UPDATE courthouse SET courthouse_object_id = '0b170758817c1428', folder_path = '/Area 10/Newport IoW Combined Court Centre' WHERE courthouse_name = 'NEWPORT, ISLE OF WIGHT';
 UPDATE courthouse SET courthouse_object_id = '0b17075880d9ea95', folder_path = '/Area 10/Plymouth' WHERE courthouse_name = 'PLYMOUTH';
 UPDATE courthouse SET courthouse_object_id = '0b170758817c142b', folder_path = '/Area 10/Portsmouth Combined Court Centre' WHERE courthouse_name = 'PORTSMOUTH';
 UPDATE courthouse SET courthouse_object_id = '0b17075881157632', folder_path = '/Area 10/Salisbury Combined Court Centre' WHERE courthouse_name = 'SALISBURY';
@@ -143,7 +143,7 @@ UPDATE courthouse SET courthouse_object_id = '0b1707588000a38b', folder_path = '
 UPDATE courthouse SET courthouse_object_id = '0b17075881574e62', folder_path = '/Area 9/Swansea' WHERE courthouse_name = 'SWANSEA';
 UPDATE courthouse SET courthouse_object_id = '0b170758914c2621', folder_path = '/Area 9/Swansea Civic Centre' WHERE courthouse_name = 'SWANSEA CIVIC CENTRE';
 UPDATE courthouse SET courthouse_object_id = '0b170758825402fa', folder_path = '/Area 9/Swansea Crown Court (DL Cardiff)' WHERE courthouse_name = 'SWANSEA CROWN COURT';
-UPDATE courthouse SET courthouse_object_id = '0b17075881574e63', folder_path = ' GUILDHALL' WHERE courthouse_name = 'THE CRIMINAL COURT';
+UPDATE courthouse SET courthouse_object_id = '0b17075881574e63', folder_path = '/Area 9/Swansea sitting at Guildhall' WHERE courthouse_name = 'THE CRIMINAL COURT, GUILDHALL';
 UPDATE courthouse SET courthouse_object_id = '0b17075880a73968', folder_path = '/Area 9/Swindon Combined Court Centre' WHERE courthouse_name = 'SWINDON';
 UPDATE courthouse SET courthouse_object_id = '0b17075880a7396a', folder_path = '/Area 9/Taunton' WHERE courthouse_name = 'TAUNTON';
 UPDATE courthouse SET courthouse_object_id = '0b170758981f894d', folder_path = '/Area 9/Taunton Sitting at Worle' WHERE courthouse_name = 'TAUNTON SITTING AT WORLE';
