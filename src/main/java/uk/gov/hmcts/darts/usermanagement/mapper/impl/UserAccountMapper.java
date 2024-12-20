@@ -15,7 +15,6 @@ import uk.gov.hmcts.darts.usermanagement.model.UserWithIdAndTimestamps;
 public interface UserAccountMapper {
 
     @Mappings({
-        @Mapping(source = "fullName", target = "userName"),
         @Mapping(source = "fullName", target = "userFullName"),
         @Mapping(source = "emailAddress", target = "emailAddress"),
         @Mapping(source = "description", target = "userDescription"),

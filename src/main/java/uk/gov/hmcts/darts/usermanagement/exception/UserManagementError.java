@@ -51,10 +51,10 @@ public enum UserManagementError implements DartsApiError {
         HttpStatus.NOT_FOUND,
         UserManagementTitleErrors.COURTHOUSE_NOT_FOUND.toString()
     ),
-    USER_ACTIVATION_FULLNAME_OR_EMAIL_VIOLATION(
-        UserManagementErrorCode.USER_ACTIVATION_FULLNAME_OR_EMAIL_VIOLATION.getValue(),
+    USER_ACTIVATION_EMAIL_VIOLATION(
+        UserManagementErrorCode.USER_ACTIVATION_EMAIL_VIOLATION.getValue(),
         HttpStatus.CONFLICT,
-        UserManagementTitleErrors.USER_ACTIVATION_FULLNAME_OR_EMAIL_VIOLATION.toString()
+        UserManagementTitleErrors.USER_ACTIVATION_EMAIL_VIOLATION.toString()
     );
 
     private static final String ERROR_TYPE_PREFIX = "USER_MANAGEMENT";
