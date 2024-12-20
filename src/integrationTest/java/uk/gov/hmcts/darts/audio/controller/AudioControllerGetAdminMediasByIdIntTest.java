@@ -289,7 +289,7 @@ class AudioControllerGetAdminMediasByIdIntTest extends IntegrationBase {
         // Create media and link it to hearing
         var mediaEntity = createAndSaveMediaEntity(hearingEntity, userAccountEntity, false);
 
-        // Create media linked case with court case (AC1)
+        // Create media linked case with court case
         databaseStub.createMediaLinkedCase(mediaEntity, hearingEntity.getCourtCase());
 
         // When
@@ -300,11 +300,20 @@ class AudioControllerGetAdminMediasByIdIntTest extends IntegrationBase {
             .andExpect(jsonPath("$.cases[0].case_number").value(CASE_NUMBER))
             .andExpect(jsonPath("$.cases[0].source").value("Legacy"))
             .andExpect(jsonPath("$.cases[0].courthouse.id").value(hearingEntity.getCourtCase().getCourthouse().getId()))
-            .andExpect(jsonPath("$.cases[0].courthouse.display_name").value(COURTHOUSE_NAME));
+            .andExpect(jsonPath("$.cases[0].courthouse.display_name").value(COURTHOUSE_NAME))
+            .andExpect(jsonPath("$.hearings", hasSize(1)))
+            .andExpect(jsonPath("$.hearings[0].id").value(hearingEntity.getId()))
+            .andExpect(jsonPath("$.hearings[0].case_id").value(hearingEntity.getCourtCase().getId()))
+            .andExpect(jsonPath("$.hearings[0].case_number").value(CASE_NUMBER))
+            .andExpect(jsonPath("$.hearings[0].hearing_date").value(HEARING_START_AT.toLocalDate().toString()))
+            .andExpect(jsonPath("$.hearings[0].courthouse.id").value(hearingEntity.getCourtCase().getCourthouse().getId()))
+            .andExpect(jsonPath("$.hearings[0].courthouse.display_name").value(COURTHOUSE_NAME))
+            .andExpect(jsonPath("$.hearings[0].courtroom.id").value(hearingEntity.getCourtroom().getId()))
+            .andExpect(jsonPath("$.hearings[0].courtroom.name").value(COURTROOM_NAME));
     }
 
     @Test
-    void getMediaById_shouldReturnCaseWithoutCasId_whenMediaHasMigratedCase() throws Exception {
+    void getMediaById_shouldReturnCaseWithBaseDetails_whenCaseHasNoCourtCaseRecord() throws Exception {
         // Given
         given.anAuthenticatedUserWithGlobalAccessAndRole(SecurityRoleEnum.SUPER_USER);
         UserAccountEntity userAccountEntity = databaseStub.getUserAccountRepository().findAll().stream()
@@ -314,7 +323,7 @@ class AudioControllerGetAdminMediasByIdIntTest extends IntegrationBase {
         // Create media without hearing
         var mediaEntity = createAndSaveMediaEntity(null, userAccountEntity, false);
 
-        // Create media linked case without court case (AC2)
+        // Create media linked case without court case
         databaseStub.createMediaLinkedCase(
             mediaEntity,
             "MIGRATED_CASE",
