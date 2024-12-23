@@ -84,13 +84,6 @@ public class AssociatedObjectDataExpiryDeletionAutomatedTask
         this.eventDateAdjustmentYears = eventDateAdjustmentYears;
     }
 
-
-    @Override
-    @Transactional
-    public void run() {
-        super.run();
-    }
-
     @Override
     public AutomatedTaskName getAutomatedTaskName() {
         return AutomatedTaskName.ASSOCIATED_OBJECT_DATA_EXPIRY_DELETION_TASK_NAME;
@@ -98,6 +91,7 @@ public class AssociatedObjectDataExpiryDeletionAutomatedTask
 
     @Override
     public void runTask() {
+        log.info("Running AssociatedObjectDataExpiryDeletionAutomatedTask");
         final UserAccountEntity userAccount = userIdentity.getUserAccount();
         OffsetDateTime maxRetentionDate = currentTimeHelper.currentOffsetDateTime()
             .minus(getConfig().getBufferDuration());
@@ -119,7 +113,6 @@ public class AssociatedObjectDataExpiryDeletionAutomatedTask
             AuditActivity.TRANSCRIPT_EXPIRED
         );
     }
-
 
     void deleteMediaEntity(UserAccountEntity userAccount, OffsetDateTime maxRetentionDate, Limit limit) {
         deleteExternalObjectDirectoryEntity(
@@ -151,8 +144,8 @@ public class AssociatedObjectDataExpiryDeletionAutomatedTask
         );
     }
 
-
-    <T extends SoftDelete & HasIntegerId & HasRetention & CanReturnExternalObjectDirectoryEntities> void deleteExternalObjectDirectoryEntity(
+    @Transactional
+    public <T extends SoftDelete & HasIntegerId & HasRetention & CanReturnExternalObjectDirectoryEntities> void deleteExternalObjectDirectoryEntity(
         UserAccountEntity userAccount,
         SoftDeleteRepository<T, ?> repository,
         List<ExternalObjectDirectoryEntity> externalObjectDirectoryEntities,
