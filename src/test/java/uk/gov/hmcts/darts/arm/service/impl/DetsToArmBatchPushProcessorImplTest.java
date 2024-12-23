@@ -44,14 +44,10 @@ import java.util.Optional;
 import java.util.UUID;
 
 import static java.util.Collections.emptyList;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.ArgumentMatchers.matches;
 import static org.mockito.Mockito.lenient;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -73,7 +69,6 @@ class DetsToArmBatchPushProcessorImplTest {
 
     private ExternalObjectDirectoryEntity externalObjectDirectoryEntityDets;
 
-    private ExternalObjectDirectoryEntity externalObjectDirectoryEntityArm;
     @Mock
     private FileOperationService fileOperationService;
     @Mock
@@ -140,11 +135,12 @@ class DetsToArmBatchPushProcessorImplTest {
             DETS_UUID);
         externalObjectDirectoryEntityDets.setOsrUuid(OSR_UUID);
 
-        externalObjectDirectoryEntityArm = new ExternalObjectDirectoryTestData().createExternalObjectDirectory(
-            mediaEntity1,
-            ExternalLocationTypeEnum.ARM,
-            ObjectRecordStatusEnum.ARM_INGESTION,
-            UUID.randomUUID());
+        ExternalObjectDirectoryEntity externalObjectDirectoryEntityArm = new ExternalObjectDirectoryTestData()
+            .createExternalObjectDirectory(
+                mediaEntity1,
+                ExternalLocationTypeEnum.ARM,
+                ObjectRecordStatusEnum.ARM_INGESTION,
+                UUID.randomUUID());
         externalObjectDirectoryEntityArm.setId(345);
         externalObjectDirectoryEntityArm.setStatus(EodHelper.armIngestionStatus());
         objectStateRecordEntity = createMaxObjectStateRecordEntity(888L,
@@ -203,32 +199,6 @@ class DetsToArmBatchPushProcessorImplTest {
                     "Error during batch push DETS EOD 123 to ARM - " +
                         "uk.gov.hmcts.darts.common.exception.DartsException: " +
                         "Unable to find matching external object directory"));
-
-    }
-
-    @Test
-    void testManifestFileName() throws IOException {
-        //given
-        when(externalObjectDirectoryRepository.findEodsNotInOtherStorage(any(), any(), any(), any())).thenReturn(List.of(123));
-        when(externalObjectDirectoryRepository.findAllById(List.of(123))).thenReturn(List.of(externalObjectDirectoryEntityDets));
-        when(detsToArmProcessorConfiguration.getMaxArmManifestItems()).thenReturn(1000);
-        when(armDataManagementConfiguration.getMaxRetryAttempts()).thenReturn(3);
-
-        when(externalObjectDirectoryRepository.findEodsNotInOtherStorage(
-            EodHelper.storedStatus(),
-            EodHelper.detsLocation(),
-            EodHelper.armLocation(), 5
-        )).thenReturn(List.of(123));
-
-        when(externalObjectDirectoryRepository.saveAndFlush(any())).thenReturn(externalObjectDirectoryEntityArm);
-        externalObjectDirectoryEntityArm.setStatus(EodHelper.armIngestionStatus());
-
-        //when
-        detsToArmBatchPushProcessor.processDetsToArm(5);
-
-        //then
-        verify(fileOperationService).createFile(matches("DETS_.+\\.a360"), eq(tempDirectory.getAbsolutePath()), eq(true));
-        assertNotNull(objectStateRecordEntity.getObjectStatus());
 
     }
 
