@@ -32,7 +32,12 @@ public interface ObjectActionMapper {
     @Mappings({
         @Mapping(target = "id", source = "id"),
         @Mapping(target = "hearingDate", source = "hearingDate"),
-        @Mapping(target = "caseId", source = "courtCase.id")
+        @Mapping(target = "caseId", source = "courtCase.id"),
+        @Mapping(target = "caseNumber", source = "courtCase.caseNumber"),
+        @Mapping(target = "courthouse.id", source = "courtroom.courthouse.id"),
+        @Mapping(target = "courthouse.displayName", source = "courtroom.courthouse.displayName"),
+        @Mapping(target = "courtroom.id", source = "courtroom.id"),
+        @Mapping(target = "courtroom.name", source = "courtroom.name")
     })
     AdminMediaHearingResponseItem toApiModel(HearingEntity hearingEntity);
 
