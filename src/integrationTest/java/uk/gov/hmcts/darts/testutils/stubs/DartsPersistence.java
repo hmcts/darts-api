@@ -29,6 +29,7 @@ import uk.gov.hmcts.darts.common.entity.MediaEntity;
 import uk.gov.hmcts.darts.common.entity.MediaLinkedCaseEntity;
 import uk.gov.hmcts.darts.common.entity.ObjectAdminActionEntity;
 import uk.gov.hmcts.darts.common.entity.ProsecutorEntity;
+import uk.gov.hmcts.darts.common.entity.RetentionConfidenceCategoryMapperEntity;
 import uk.gov.hmcts.darts.common.entity.RetentionPolicyTypeEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionCommentEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionDocumentEntity;
@@ -72,6 +73,7 @@ import uk.gov.hmcts.darts.common.repository.ObjectHiddenReasonRepository;
 import uk.gov.hmcts.darts.common.repository.ObjectRecordStatusRepository;
 import uk.gov.hmcts.darts.common.repository.ProsecutorRepository;
 import uk.gov.hmcts.darts.common.repository.RegionRepository;
+import uk.gov.hmcts.darts.common.repository.RetentionConfidenceCategoryMapperRepository;
 import uk.gov.hmcts.darts.common.repository.RetentionPolicyTypeRepository;
 import uk.gov.hmcts.darts.common.repository.SecurityGroupRepository;
 import uk.gov.hmcts.darts.common.repository.SecurityRoleRepository;
@@ -150,10 +152,28 @@ public class DartsPersistence {
     private final AutomatedTaskRepository automatedTaskRepository;
     private final ObjectAdminActionRepository objectAdminActionRepository;
     private final EventLinkedCaseRepository eventLinkedCaseRepository;
+    private final RetentionConfidenceCategoryMapperRepository retentionConfidenceCategoryMapperRepository;
 
     private final EntityManager entityManager;
     private final CurrentTimeHelper currentTimeHelper;
     private final TransactionalUtil transactionalUtil;
+
+    @Transactional
+    @SuppressWarnings("PMD.AvoidReassigningParameters")
+    public RetentionConfidenceCategoryMapperEntity save(RetentionConfidenceCategoryMapperEntity retentionConfidenceCategoryMapperEntity) {
+        retentionConfidenceCategoryMapperEntity = (RetentionConfidenceCategoryMapperEntity) preCheckPersist(retentionConfidenceCategoryMapperEntity);
+
+        if (retentionConfidenceCategoryMapperEntity.getId() == null) {
+            retentionConfidenceCategoryMapperEntity.setLastModifiedBy(save(retentionConfidenceCategoryMapperEntity.getLastModifiedBy()));
+            retentionConfidenceCategoryMapperEntity.setCreatedBy(save(retentionConfidenceCategoryMapperEntity.getCreatedBy()));
+
+            retentionConfidenceCategoryMapperEntity = retentionConfidenceCategoryMapperRepository.save(retentionConfidenceCategoryMapperEntity);
+        } else {
+            retentionConfidenceCategoryMapperEntity = entityManager.merge(retentionConfidenceCategoryMapperEntity);
+        }
+
+        return retentionConfidenceCategoryMapperEntity;
+    }
 
     @Transactional
     @SuppressWarnings("PMD.AvoidReassigningParameters")

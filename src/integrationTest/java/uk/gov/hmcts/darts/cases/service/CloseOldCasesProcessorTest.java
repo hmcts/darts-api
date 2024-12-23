@@ -4,7 +4,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.context.TestConfiguration;
+import org.springframework.context.annotation.Bean;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
@@ -13,28 +15,33 @@ import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.EventEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
-import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
 import uk.gov.hmcts.darts.common.util.DateConverterUtil;
 import uk.gov.hmcts.darts.retention.enums.CaseRetentionStatus;
 import uk.gov.hmcts.darts.retention.enums.RetentionConfidenceCategoryEnum;
 import uk.gov.hmcts.darts.retention.enums.RetentionConfidenceReasonEnum;
 import uk.gov.hmcts.darts.retention.enums.RetentionConfidenceScoreEnum;
+import uk.gov.hmcts.darts.test.common.data.PersistableFactory;
+import uk.gov.hmcts.darts.test.common.data.RetentionConfidenceCategoryMapperTestData;
+import uk.gov.hmcts.darts.test.common.data.builder.TestRetentionConfidenceCategoryMapperEntity;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
+import uk.gov.hmcts.darts.testutils.stubs.DartsPersistence;
 
+import java.time.Clock;
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.Mockito.lenient;
 
 @Slf4j
+@SpringBootTest(properties = "spring.main.allow-bean-definition-overriding=true") // To override Clock bean
 class CloseOldCasesProcessorTest extends IntegrationBase {
     @Autowired
     CloseOldCasesProcessor closeOldCasesProcessor;
@@ -44,8 +51,16 @@ class CloseOldCasesProcessorTest extends IntegrationBase {
     private static final String REQUESTER_EMAIL = "test.user@example.com";
     private static final OffsetDateTime CURRENT_DATE_TIME = OffsetDateTime.of(2024, 10, 1, 10, 0, 0, 0, ZoneOffset.UTC);
 
-    @MockBean
-    private CurrentTimeHelper currentTimeHelper;
+    @Autowired
+    private DartsPersistence dartsPersistence;
+
+    @TestConfiguration
+    public static class ClockConfig {
+        @Bean
+        public Clock clock() {
+            return Clock.fixed(CURRENT_DATE_TIME.toInstant(), ZoneOffset.UTC);
+        }
+    }
 
     @BeforeEach
     void beforeEach() {
@@ -56,12 +71,23 @@ class CloseOldCasesProcessorTest extends IntegrationBase {
             .build();
         SecurityContextHolder.getContext().setAuthentication(new JwtAuthenticationToken(jwt));
         dartsDatabase.createTestUserAccount();
+    }
 
-        lenient().when(currentTimeHelper.currentOffsetDateTime()).thenReturn(CURRENT_DATE_TIME);
+    private void createAndSaveRetentionConfidenceCategoryMappings() {
+        RetentionConfidenceCategoryMapperTestData testData = PersistableFactory.getRetentionConfidenceCategoryMapperTestData();
+
+        TestRetentionConfidenceCategoryMapperEntity agedCaseMappingEntity = testData.someMinimalBuilder()
+            .confidenceCategory(RetentionConfidenceCategoryEnum.AGED_CASE)
+            .confidenceReason(RetentionConfidenceReasonEnum.AGED_CASE)
+            .confidenceScore(RetentionConfidenceScoreEnum.CASE_NOT_PERFECTLY_CLOSED)
+            .build();
+        dartsPersistence.save(agedCaseMappingEntity.getEntity());
     }
 
     @Test
     void givenClosedEventsUseDateAsClosedDate() {
+        createAndSaveRetentionConfidenceCategoryMappings();
+
         HearingEntity hearing = dartsDatabase.createHearing("a_courthouse", "1", "1078", LocalDateTime.now().minusYears(7).plusMonths(3));
 
         OffsetDateTime closeDate = OffsetDateTime.now().minusYears(7);
@@ -96,7 +122,50 @@ class CloseOldCasesProcessorTest extends IntegrationBase {
     }
 
     @Test
+    void closeCases_shouldCloseCases_andUseDateAsClosedDate_andSetNullConfidenceReasonAndScore_whenNoConfidenceMappingExists() {
+        // Given createAndSaveRetentionConfidenceCategoryMappings() is not invoked, so no confidence mappings exist in the DB
+
+        // And
+        HearingEntity hearing = dartsDatabase.createHearing("a_courthouse", "1", "1078", LocalDateTime.now().minusYears(7).plusMonths(3));
+
+        OffsetDateTime expectedCloseDate = OffsetDateTime.now().minusYears(7);
+
+        Integer someEventHandlerId = dartsPersistence.getEventHandlerRepository().findAll().getFirst().getId();
+        EventEntity eventEntity = dartsDatabase.getEventStub().createEvent(hearing, someEventHandlerId);
+        eventEntity.setCreatedDateTime(expectedCloseDate);
+        dartsDatabase.save(eventEntity);
+
+        CourtCaseEntity courtCaseEntity = hearing.getCourtCase();
+        courtCaseEntity.setCreatedDateTime(expectedCloseDate.minusYears(3));
+        dartsDatabase.getCaseRepository().save(courtCaseEntity);
+        assertFalse(courtCaseEntity.getClosed());
+
+        // When
+        closeOldCasesProcessor.closeCases(BATCH_SIZE);
+
+        // Then
+        Optional<CourtCaseEntity> updatedCourtCaseEntityOptional = dartsDatabase.getCaseRepository()
+            .findById(courtCaseEntity.getId());
+
+        assertTrue(updatedCourtCaseEntityOptional.isPresent());
+        CourtCaseEntity updatedCourtCaseEntity = updatedCourtCaseEntityOptional.get();
+
+        assertTrue(updatedCourtCaseEntity.getClosed());
+        assertEquals(expectedCloseDate.truncatedTo(ChronoUnit.MINUTES),
+                     updatedCourtCaseEntity.getCaseClosedTimestamp().truncatedTo(ChronoUnit.MINUTES));
+        assertNull(updatedCourtCaseEntity.getRetConfScore());
+        assertNull(updatedCourtCaseEntity.getRetConfReason());
+        assertEquals(CURRENT_DATE_TIME, updatedCourtCaseEntity.getRetConfUpdatedTs());
+
+        CaseRetentionEntity caseRetentionEntity = dartsDatabase.getCaseRetentionRepository()
+            .findAll().getFirst();
+        assertEquals(RetentionConfidenceCategoryEnum.AGED_CASE, caseRetentionEntity.getConfidenceCategory());
+    }
+
+    @Test
     void givenEventsUseLatestDateAsClosedDate() {
+        createAndSaveRetentionConfidenceCategoryMappings();
+
         HearingEntity hearing = dartsDatabase.createHearing("a_courthouse", "1", "1078", LocalDateTime.now().minusYears(7));
 
         OffsetDateTime closeDate = OffsetDateTime.now().minusYears(7);
@@ -129,6 +198,8 @@ class CloseOldCasesProcessorTest extends IntegrationBase {
 
     @Test
     void givenOneEventUseLatestDateAsClosedDate() {
+        createAndSaveRetentionConfidenceCategoryMappings();
+
         HearingEntity hearing = dartsDatabase.createHearing("a_courthouse", "1", "1078", LocalDateTime.now().minusYears(7));
 
         OffsetDateTime closeDate = OffsetDateTime.now().minusYears(7);
@@ -159,6 +230,8 @@ class CloseOldCasesProcessorTest extends IntegrationBase {
 
     @Test
     void givenAudioUseDateAsClosedDate() {
+        createAndSaveRetentionConfidenceCategoryMappings();
+
         OffsetDateTime closeDate = OffsetDateTime.now().minusYears(6).plusDays(2);
         MediaEntity mediaEntity1 = dartsDatabase.createMediaEntity("acourthosue", "1",
                                                                    OffsetDateTime.now().minusYears(7), OffsetDateTime.now().minusYears(7).plusMinutes(20), 1);
@@ -198,6 +271,8 @@ class CloseOldCasesProcessorTest extends IntegrationBase {
 
     @Test
     void givenOnlyHearingUseDateAsClosedDate() {
+        createAndSaveRetentionConfidenceCategoryMappings();
+
         LocalDateTime closeDate = DateConverterUtil.toLocalDateTime(OffsetDateTime.now().minusYears(7));
         dartsDatabase.createHearing("a_courthouse", "1", "1078", closeDate.minusDays(10));
         HearingEntity hearing = dartsDatabase.createHearing("a_courthouse", "1", "1078", closeDate);
@@ -224,6 +299,8 @@ class CloseOldCasesProcessorTest extends IntegrationBase {
 
     @Test
     void givenNoDataUseCreatedDateAsClosedDate() {
+        createAndSaveRetentionConfidenceCategoryMappings();
+
         OffsetDateTime closeDate = OffsetDateTime.now().minusYears(7);
         CourtCaseEntity courtCaseEntity = dartsDatabase.createCase("a_courthouse", "019278");
         courtCaseEntity.setCreatedDateTime(closeDate);
@@ -245,6 +322,8 @@ class CloseOldCasesProcessorTest extends IntegrationBase {
 
     @Test
     void givenNoDataUseCreatedDateAsClosedDateUseBatchSizeTwo() {
+        createAndSaveRetentionConfidenceCategoryMappings();
+
         // given
         OffsetDateTime closeDate1 = OffsetDateTime.now().minusYears(9);
         CourtCaseEntity courtCaseEntity1 = dartsDatabase.createCase("a_courthouse", "019278");
@@ -290,6 +369,8 @@ class CloseOldCasesProcessorTest extends IntegrationBase {
 
     @Test
     void givenRetentionPolicyDoNotClose() {
+        createAndSaveRetentionConfidenceCategoryMappings();
+
         CourtCaseEntity courtCaseEntity = dartsDatabase.createCase("a_courthouse", "019278");
         courtCaseEntity.setCreatedDateTime(OffsetDateTime.now().minusYears(7));
         dartsDatabase.getCaseRepository().save(courtCaseEntity);
@@ -313,6 +394,8 @@ class CloseOldCasesProcessorTest extends IntegrationBase {
 
     @Test
     void givenNotSixYearsOldDoNotClose() {
+        createAndSaveRetentionConfidenceCategoryMappings();
+
         CourtCaseEntity courtCaseEntity = dartsDatabase.createCase("a_courthouse", "019278");
         courtCaseEntity.setCreatedDateTime(OffsetDateTime.now().minusYears(5).minusDays(360));
         dartsDatabase.getCaseRepository().save(courtCaseEntity);

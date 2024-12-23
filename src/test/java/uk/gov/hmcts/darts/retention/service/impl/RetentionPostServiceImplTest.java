@@ -22,10 +22,9 @@ import uk.gov.hmcts.darts.common.repository.CaseRetentionRepository;
 import uk.gov.hmcts.darts.common.repository.RetentionPolicyTypeRepository;
 import uk.gov.hmcts.darts.common.util.CommonTestDataUtil;
 import uk.gov.hmcts.darts.retention.enums.CaseRetentionStatus;
-import uk.gov.hmcts.darts.retention.enums.RetentionConfidenceReasonEnum;
-import uk.gov.hmcts.darts.retention.enums.RetentionConfidenceScoreEnum;
 import uk.gov.hmcts.darts.retention.enums.RetentionPolicyEnum;
 import uk.gov.hmcts.darts.retention.helper.RetentionDateHelper;
+import uk.gov.hmcts.darts.retention.service.RetentionService;
 import uk.gov.hmcts.darts.retentions.model.PostRetentionRequest;
 import uk.gov.hmcts.darts.retentions.model.PostRetentionResponse;
 
@@ -66,15 +65,14 @@ class RetentionPostServiceImplTest {
     private CurrentTimeHelper currentTimeHelper;
     @Mock
     private AuditApi auditApi;
+    @Mock
+    private RetentionService retentionService;
 
     @Mock
     private RetentionDateHelper retentionDateHelper;
 
     @Captor
     ArgumentCaptor<CaseRetentionEntity> caseRetentionEntityArgumentCaptor;
-    @Captor
-    ArgumentCaptor<CourtCaseEntity> courtCaseEntityArgumentCaptor;
-
 
     private void setupStubs() {
         CourtCaseEntity courtCase = CommonTestDataUtil.createCase("1");
@@ -305,11 +303,6 @@ class RetentionPostServiceImplTest {
         assertEquals(10, savedRetention.getCreatedBy().getId());
         assertEquals(RetentionPolicyEnum.MANUAL.getPolicyKey(), savedRetention.getRetentionPolicyType().getFixedPolicyKey());
         assertEquals(MANUAL_OVERRIDE, savedRetention.getConfidenceCategory());
-        verify(caseRepository).save(courtCaseEntityArgumentCaptor.capture());
-        CourtCaseEntity savedCourtCase = courtCaseEntityArgumentCaptor.getValue();
-        assertEquals(RetentionConfidenceReasonEnum.MANUAL_OVERRIDE, savedCourtCase.getRetConfReason());
-        assertEquals(RetentionConfidenceScoreEnum.CASE_PERFECTLY_CLOSED, savedCourtCase.getRetConfScore());
-        assertEquals(CURRENT_DATE_TIME, savedCourtCase.getRetConfUpdatedTs());
     }
 
     @Test
@@ -332,11 +325,6 @@ class RetentionPostServiceImplTest {
         assertEquals(10, savedRetention.getCreatedBy().getId());
         assertEquals(RetentionPolicyEnum.MANUAL.getPolicyKey(), savedRetention.getRetentionPolicyType().getFixedPolicyKey());
         assertEquals(MANUAL_OVERRIDE, savedRetention.getConfidenceCategory());
-        verify(caseRepository).save(courtCaseEntityArgumentCaptor.capture());
-        CourtCaseEntity savedCourtCase = courtCaseEntityArgumentCaptor.getValue();
-        assertEquals(RetentionConfidenceReasonEnum.MANUAL_OVERRIDE, savedCourtCase.getRetConfReason());
-        assertEquals(RetentionConfidenceScoreEnum.CASE_PERFECTLY_CLOSED, savedCourtCase.getRetConfScore());
-        assertEquals(CURRENT_DATE_TIME, savedCourtCase.getRetConfUpdatedTs());
     }
 
     @Test
@@ -360,11 +348,6 @@ class RetentionPostServiceImplTest {
         assertEquals(10, savedRetention.getCreatedBy().getId());
         assertEquals(RetentionPolicyEnum.MANUAL.getPolicyKey(), savedRetention.getRetentionPolicyType().getFixedPolicyKey());
         assertEquals(MANUAL_OVERRIDE, savedRetention.getConfidenceCategory());
-        verify(caseRepository).save(courtCaseEntityArgumentCaptor.capture());
-        CourtCaseEntity savedCourtCase = courtCaseEntityArgumentCaptor.getValue();
-        assertEquals(RetentionConfidenceReasonEnum.MANUAL_OVERRIDE, savedCourtCase.getRetConfReason());
-        assertEquals(RetentionConfidenceScoreEnum.CASE_PERFECTLY_CLOSED, savedCourtCase.getRetConfScore());
-        assertEquals(CURRENT_DATE_TIME, savedCourtCase.getRetConfUpdatedTs());
     }
 
     @Test
@@ -403,11 +386,6 @@ class RetentionPostServiceImplTest {
         assertEquals(10, savedRetention.getCreatedBy().getId());
         assertEquals(RetentionPolicyEnum.PERMANENT.getPolicyKey(), savedRetention.getRetentionPolicyType().getFixedPolicyKey());
         assertEquals(MANUAL_OVERRIDE, savedRetention.getConfidenceCategory());
-        verify(caseRepository).save(courtCaseEntityArgumentCaptor.capture());
-        CourtCaseEntity savedCourtCase = courtCaseEntityArgumentCaptor.getValue();
-        assertEquals(RetentionConfidenceReasonEnum.MANUAL_OVERRIDE, savedCourtCase.getRetConfReason());
-        assertEquals(RetentionConfidenceScoreEnum.CASE_PERFECTLY_CLOSED, savedCourtCase.getRetConfScore());
-        assertEquals(CURRENT_DATE_TIME, savedCourtCase.getRetConfUpdatedTs());
     }
 
 }
