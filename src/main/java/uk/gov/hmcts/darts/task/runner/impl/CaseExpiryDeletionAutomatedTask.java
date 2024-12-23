@@ -4,6 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.data.domain.Limit;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
@@ -57,6 +58,7 @@ public class CaseExpiryDeletionAutomatedTask
     }
 
     @Override
+    @Transactional
     public void runTask() {
         final UserAccountEntity userAccount = userAccountService.getUserAccount();
         OffsetDateTime maxRetentionDate = currentTimeHelper.currentOffsetDateTime()
