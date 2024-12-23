@@ -8,7 +8,7 @@ import uk.gov.hmcts.darts.audio.model.AdminMediaResponse;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
 
 @Mapper(componentModel = "spring",
-    uses = {ObjectActionMapper.class, CourthouseMapper.class, CourtroomMapper.class},
+    uses = {ObjectActionMapper.class, CourthouseMapper.class, CourtroomMapper.class, MediaLinkedCaseMapper.class},
     unmappedSourcePolicy = ReportingPolicy.IGNORE,
     unmappedTargetPolicy = ReportingPolicy.ERROR)
 public interface AdminMediaMapper {
@@ -42,6 +42,7 @@ public interface AdminMediaMapper {
         @Mapping(target = "courthouse", source = "courtroom.courthouse"),
         @Mapping(target = "courtroom", source = "courtroom"),
         @Mapping(target = "hearings", source = "hearingList"),
+        @Mapping(target = "cases", source = "mediaLinkedCaseList"),
         @Mapping(target = "isCurrent", source = "isCurrent")
     })
     AdminMediaResponse toApiModel(MediaEntity mediaEntity);
