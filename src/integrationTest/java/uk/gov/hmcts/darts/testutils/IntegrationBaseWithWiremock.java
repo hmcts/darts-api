@@ -21,7 +21,7 @@ public class IntegrationBaseWithWiremock extends IntegrationBase {
     @BeforeEach
     void setup() {
         log.info("Wiremock Port: " + wiremockPort);
-//        dartsGateway.clearStubs();
+        //dartsGateway.clearStubs();
 
         // populate the jkws keys endpoint with a global public key
         tokenStub.stubExternalJwksKeys(DartsTokenGenerator.getGlobalKey());
