@@ -2,7 +2,6 @@ package uk.gov.hmcts.darts.audio.controller;
 
 import ch.qos.logback.classic.Level;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.skyscreamer.jsonassert.JSONAssert;
@@ -225,7 +224,7 @@ class AudioControllerAddAudioWithMetadataIntTest extends IntegrationBase {
             .andReturn();
         String content = response.getResponse().getContentAsString();
         Problem problemResponse = objectMapper.readValue(content, Problem.class);
-        Assertions.assertEquals(CommonApiError.COURTHOUSE_PROVIDED_DOES_NOT_EXIST.getType(), problemResponse.getType());
+        assertEquals(CommonApiError.COURTHOUSE_PROVIDED_DOES_NOT_EXIST.getType(), problemResponse.getType());
     }
 
     @Test

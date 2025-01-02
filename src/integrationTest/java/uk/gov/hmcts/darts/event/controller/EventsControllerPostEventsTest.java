@@ -29,7 +29,6 @@ import java.util.UUID;
 
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.CPP;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.XHIBIT;
 import static uk.gov.hmcts.darts.test.common.data.EventHandlerTestData.createEventHandlerWith;
@@ -110,7 +109,6 @@ class EventsControllerPostEventsTest extends IntegrationBase {
     }
 
 
-
     @Test
     void eventsPost_courtHouseNotFound_404ShouldBeReturned() throws Exception {
         EventHandlerEntity activeHandler = getActiveHandler();
@@ -139,7 +137,10 @@ class EventsControllerPostEventsTest extends IntegrationBase {
             .header("Content-Type", "application/json")
             .content(requestBody);
 
-        MvcResult response = mockMvc.perform(requestBuilder).andExpect(status().isNotFound()).andReturn();
+        MvcResult response = mockMvc.perform(requestBuilder)
+            .andExpect(MockMvcResultMatchers.status().isNotFound())
+            .andReturn();
+
         String content = response.getResponse().getContentAsString();
         Problem problemResponse = objectMapper.readValue(content, Problem.class);
         Assertions.assertEquals(CommonApiError.COURTHOUSE_PROVIDED_DOES_NOT_EXIST.getType(), problemResponse.getType());
