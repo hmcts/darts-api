@@ -4,6 +4,7 @@ package uk.gov.hmcts.darts.arm.client;
 import com.github.tomakehurst.wiremock.WireMockServer;
 import com.github.tomakehurst.wiremock.client.WireMock;
 import feign.FeignException;
+import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.TestPropertySource;
@@ -31,6 +32,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 @TestPropertySource(properties = {
     "darts.storage.arm-api.url=http://localhost:${wiremock.server.port}"
 })
+@Slf4j
 class ArmTokenClientIntTest extends IntegrationBaseWithWiremock {
 
     @Autowired
@@ -76,6 +78,7 @@ class ArmTokenClientIntTest extends IntegrationBaseWithWiremock {
 
     @Test
     void getTokenShouldThrowExceptionIfServerReturns403Forbidden() {
+        log.info("Running getTokenShouldThrowExceptionIfServerReturns403Forbidden: ");
         // Given
         stubFor(
             WireMock.post(urlEqualTo(TOKEN_PATH))
