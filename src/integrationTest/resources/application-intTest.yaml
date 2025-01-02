@@ -104,6 +104,3 @@ logging:
         hmcts:
           darts: DEBUG
   config: classpath:logback-test.xml
-
-  darts:
-    storage:
