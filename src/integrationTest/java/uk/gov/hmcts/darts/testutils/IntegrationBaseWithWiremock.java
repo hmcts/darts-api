@@ -19,12 +19,17 @@ public class IntegrationBaseWithWiremock extends IntegrationBase {
     protected DartsGatewayStub dartsGateway;
 
     @BeforeEach
-    void setup() throws Exception {
-        log.info("Wiremock Port: " + wiremockPort);
-        dartsGateway.clearStubs();
-        //Wait required to ensure that the wiremock server is up and running before the tests start
-        Thread.sleep(2000);
-        // populate the jkws keys endpoint with a global public key
-        tokenStub.stubExternalJwksKeys(DartsTokenGenerator.getGlobalKey());
+    @SuppressWarnings("PMD.DoNotUseThreads")
+    void setup() {
+        try {
+            log.info("Wiremock Port: " + wiremockPort);
+            dartsGateway.clearStubs();
+            //Wait required to ensure that the wiremock server is up and running before the tests start
+            Thread.sleep(2000);
+            // populate the jkws keys endpoint with a global public key
+            tokenStub.stubExternalJwksKeys(DartsTokenGenerator.getGlobalKey());
+        } catch (Exception e) {
+            log.error("Error setting up wiremock", e);
+        }
     }
 }

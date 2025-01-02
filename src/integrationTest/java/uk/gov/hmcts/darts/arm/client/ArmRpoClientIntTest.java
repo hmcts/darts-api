@@ -193,15 +193,14 @@ class ArmRpoClientIntTest extends IntegrationBaseWithWiremock {
                         .withStatus(200)));
         String bearerAuth = "Bearer some-token";
 
-        feign.Response response = armRpoClient.downloadProduction(bearerAuth, "1234");
+        try (feign.Response response = armRpoClient.downloadProduction(bearerAuth, "1234")) {
+            RequestPatternBuilder requestPatternBuilder = getRequestedFor(urlEqualTo(URL_PREFIX + url))
+                .withHeader(AUTHORIZATION, equalTo(bearerAuth));
 
-        RequestPatternBuilder requestPatternBuilder = getRequestedFor(urlEqualTo(URL_PREFIX + url))
-            .withHeader(AUTHORIZATION, equalTo(bearerAuth));
+            verify(requestPatternBuilder);
 
-
-        verify(requestPatternBuilder);
-
-        assertEquals(TestUtils.getContentsFromFile(EXPECTED_RESPONSE_DIRECTORY + suffix + ".csv"),
-                     IOUtils.toString(response.body().asInputStream()));
+            assertEquals(TestUtils.getContentsFromFile(EXPECTED_RESPONSE_DIRECTORY + suffix + ".csv"),
+                         IOUtils.toString(response.body().asInputStream()));
+        }
     }
 }

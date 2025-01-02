@@ -184,14 +184,10 @@ public final class TestUtils {
             .replaceAll("\"id\".{1,6},", "");
     }
 
-    public static String writeAsString(Object object) {
+    public static String writeAsString(Object object) throws JsonProcessingException {
         if (object instanceof String) {
             return String.valueOf(object);
         }
-        try {
-            return getObjectMapper().writeValueAsString(object);
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
-        }
+        return getObjectMapper().writeValueAsString(object);
     }
 }
