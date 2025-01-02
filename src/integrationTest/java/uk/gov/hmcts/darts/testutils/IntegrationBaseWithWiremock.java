@@ -22,7 +22,7 @@ public class IntegrationBaseWithWiremock extends IntegrationBase {
     void setup() throws Exception {
         log.info("Wiremock Port: " + wiremockPort);
         dartsGateway.clearStubs();
-        //TODO convert to dynamic wait
+        //Wait required to ensure that the wiremock server is up and running before the tests start
         Thread.sleep(2000);
         // populate the jkws keys endpoint with a global public key
         tokenStub.stubExternalJwksKeys(DartsTokenGenerator.getGlobalKey());

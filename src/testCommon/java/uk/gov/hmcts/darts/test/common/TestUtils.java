@@ -183,4 +183,15 @@ public final class TestUtils {
         return input.replaceAll("\"case_id\".{1,6},", "")
             .replaceAll("\"id\".{1,6},", "");
     }
+
+    public static String writeAsString(Object object) {
+        if (object instanceof String) {
+            return String.valueOf(object);
+        }
+        try {
+            return getObjectMapper().writeValueAsString(object);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
+    }
 }
