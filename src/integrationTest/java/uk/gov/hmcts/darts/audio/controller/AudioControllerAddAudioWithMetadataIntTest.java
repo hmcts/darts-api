@@ -372,12 +372,12 @@ class AudioControllerAddAudioWithMetadataIntTest extends IntegrationBase {
                 multipart(ENDPOINT)
                     .file(audioFile)
                     .file(metadataJson))
-            .andExpect(status().isBadRequest())
+            .andExpect(status().isNotFound())
             .andReturn();
 
         String actualJson = mvcResult.getResponse().getContentAsString();
         String expectedJson = """
-            {"type":"COMMON_100","title":"Provided courthouse does not exist","status":400,"detail":"Courthouse 'TEST' not found."}""";
+            {"type":"COMMON_100","title":"Provided courthouse does not exist","status":404,"detail":"Courthouse 'TEST' not found."}""";
 
         JSONAssert.assertEquals(expectedJson, actualJson, JSONCompareMode.NON_EXTENSIBLE);
     }
