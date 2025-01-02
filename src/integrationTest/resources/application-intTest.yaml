@@ -107,6 +107,3 @@ logging:
 
   darts:
     storage:
-
-wiremock:
-  reset-mappings-after-each-test: true
