@@ -2,6 +2,7 @@ package uk.gov.hmcts.darts.audio.controller;
 
 import ch.qos.logback.classic.Level;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.skyscreamer.jsonassert.JSONAssert;
@@ -28,6 +29,7 @@ import uk.gov.hmcts.darts.common.entity.MediaEntity;
 import uk.gov.hmcts.darts.common.entity.MediaLinkedCaseEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.enums.SecurityRoleEnum;
+import uk.gov.hmcts.darts.common.exception.CommonApiError;
 import uk.gov.hmcts.darts.common.util.DateConverterUtil;
 import uk.gov.hmcts.darts.test.common.DataGenerator;
 import uk.gov.hmcts.darts.test.common.LogUtil;
@@ -193,6 +195,37 @@ class AudioControllerAddAudioWithMetadataIntTest extends IntegrationBase {
         HearingEntity hearingEntity = hearingsInAnotherCourtroom.get(0);
         List<MediaEntity> mediaEntities = dartsDatabase.getMediaRepository().findAllCurrentMediaByHearingId(hearingEntity.getId());
         assertEquals(0, mediaEntities.size());//shouldn't have any as no audio in that courtroom
+    }
+
+    @Test
+    void addAudioMetadata_courtHouseNotFound_404ShouldBeReturned() throws Exception {
+        superAdminUserStub.givenUserIsAuthorised(mockUserIdentity, SecurityRoleEnum.MID_TIER);
+
+        AddAudioMetadataRequest addAudioMetadataRequest = createAddAudioRequest(STARTED_AT, STARTED_AT.plus(maxFileDuration), "Bristol", "1");
+        addAudioMetadataRequest.setCourthouse("UNKNOWN_COURTHOUSE");
+        MockMultipartFile audioFile = new MockMultipartFile(
+            "file",
+            "audio.mp2",
+            "audio/mpeg",
+            IOUtils.toByteArray(Files.newInputStream(AUDIO_BINARY_PAYLOAD_1))
+        );
+
+        MockMultipartFile metadataJson = new MockMultipartFile(
+            "metadata",
+            null,
+            "application/json",
+            objectMapper.writeValueAsString(addAudioMetadataRequest).getBytes()
+        );
+
+        MvcResult response = mockMvc.perform(
+                multipart(ENDPOINT)
+                    .file(audioFile)
+                    .file(metadataJson))
+            .andExpect(status().isNotFound())
+            .andReturn();
+        String content = response.getResponse().getContentAsString();
+        Problem problemResponse = objectMapper.readValue(content, Problem.class);
+        Assertions.assertEquals(CommonApiError.COURTHOUSE_PROVIDED_DOES_NOT_EXIST.getType(), problemResponse.getType());
     }
 
     @Test
