@@ -113,8 +113,10 @@ public class AudioUploadServiceImpl implements AudioUploadService {
                     log.error("Failed to delete blob from inbound container with guid: ", uuid, e);
                 }
             }
-            log.info("Exact duplicate detected based upon media metadata and checksum for media entity ids {}. Returning 200 with no changes.",
-                     duplicatesToBeSuperseded.stream().map(MediaEntity::getId).toList());
+            if (log.isInfoEnabled()) {
+                log.info("Exact duplicate detected based upon media metadata and checksum for media entity ids {}. Returning 200 with no changes.",
+                         duplicatesToBeSuperseded.stream().map(MediaEntity::getId).toList());
+            }
             return;
         }
 
@@ -129,7 +131,14 @@ public class AudioUploadServiceImpl implements AudioUploadService {
         // if we have not found any duplicate audio files to process lets add a new one
         if (isNotEmpty(duplicatesWithDifferentChecksum)) {
             mediaToSupersede.addAll(duplicatesWithDifferentChecksum);
-            log.info("Duplicate audio file has been found with difference in checksum");
+            if (log.isInfoEnabled()) {
+                log.info("Duplicate audio file has been found with difference in checksum for guid {} latest checksum {}. But found {}",
+                         externalLocation, incomingChecksum,
+                         duplicatesWithDifferentChecksum
+                             .stream()
+                             .map(mediaEntity -> "Meida Id " + mediaEntity.getId().toString() + " with checksum " + mediaEntity.getChecksum())
+                             .toList());
+            }
         }
 
         // version the file upload to the database
