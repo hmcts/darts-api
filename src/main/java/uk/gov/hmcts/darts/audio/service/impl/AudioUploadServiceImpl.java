@@ -17,6 +17,7 @@ import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
 import uk.gov.hmcts.darts.common.entity.ObjectRecordStatusEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
+import uk.gov.hmcts.darts.common.exception.AzureDeleteBlobException;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.common.repository.ExternalLocationTypeRepository;
 import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
@@ -74,7 +75,8 @@ public class AudioUploadServiceImpl implements AudioUploadService {
         } catch (IOException e) {
             throw new DartsApiException(FAILED_TO_UPLOAD_AUDIO_FILE, "Failed to compute incoming checksum", e);
         }
-        addAudio(incomingChecksum, () -> saveAudioToInbound(audioMultipartFile), addAudioMetadataRequest);
+        //No need to delete guid on duplicate as the file is never uploaded to the blob store unless the duplicate check has passed in this flow
+        addAudio(incomingChecksum, () -> saveAudioToInbound(audioMultipartFile), addAudioMetadataRequest, false);
     }
 
     @Override
@@ -85,12 +87,13 @@ public class AudioUploadServiceImpl implements AudioUploadService {
                                         String.format("Checksum for blob '%s' does not match the one passed in the API request '%s'.",
                                                       checksum, addAudioMetadataRequest.getChecksum()));
         }
-        addAudio(checksum, () -> guid, addAudioMetadataRequest);
+        addAudio(checksum, () -> guid, addAudioMetadataRequest, true);
     }
 
     private void addAudio(String incomingChecksum,
                           Supplier<UUID> externalLocationSupplier,
-                          AddAudioMetadataRequest addAudioMetadataRequest) {
+                          AddAudioMetadataRequest addAudioMetadataRequest,
+                          boolean deleteGuidOnDuplicate) {
         log.info("Adding audio using metadata {}", addAudioMetadataRequest.toString());
 
         //remove duplicate cases as they can appear more than once, e.g. if they broke for lunch.
@@ -100,11 +103,18 @@ public class AudioUploadServiceImpl implements AudioUploadService {
         List<MediaEntity> duplicatesToBeSuperseded = getLatestDuplicateMediaFiles(addAudioMetadataRequest);
 
         List<MediaEntity> duplicatesWithDifferentChecksum = filterForMediaWithMismatchingChecksum(duplicatesToBeSuperseded, incomingChecksum);
+
         if (isNotEmpty(duplicatesToBeSuperseded) && isEmpty(duplicatesWithDifferentChecksum)) {
-            log.info("Exact duplicate detected based upon media metadata and checksum. Returning 200 with no changes ");
-            for (MediaEntity entity : duplicatesToBeSuperseded) {
-                log.info("Duplicate media id {}", entity.getId());
+            if (deleteGuidOnDuplicate) {
+                UUID uuid = externalLocationSupplier.get();
+                try {
+                    dataManagementApi.deleteBlobDataFromInboundContainer(uuid);
+                } catch (AzureDeleteBlobException e) {
+                    log.error("Failed to delete blob from inbound container with guid: ", uuid, e);
+                }
             }
+            log.info("Exact duplicate detected based upon media metadata and checksum for media entity ids {}. Returning 200 with no changes.",
+                     duplicatesToBeSuperseded.stream().map(MediaEntity::getId).toList());
             return;
         }
 
@@ -117,9 +127,7 @@ public class AudioUploadServiceImpl implements AudioUploadService {
         List<MediaEntity> mediaToSupersede = new ArrayList<>();
 
         // if we have not found any duplicate audio files to process lets add a new one
-        if (isEmpty(duplicatesWithDifferentChecksum)) {
-            log.info("No duplicates found. Uploading new file");
-        } else {
+        if (isNotEmpty(duplicatesWithDifferentChecksum)) {
             mediaToSupersede.addAll(duplicatesWithDifferentChecksum);
             log.info("Duplicate audio file has been found with difference in checksum");
         }
