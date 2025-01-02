@@ -246,7 +246,119 @@ class AudioTransformationServiceImplTest {
     }
 
     @Test
-    void filterMediaByMediaRequestDatesWithStartDateExactRequestAndEndDateExactRequest() {
+    void filterMediaByMediaRequestTimeframeAndSortByStartTimeAndChannel_ReturnsFilteredData_WhichContainsMediaWithStartDateAndEndDateTheSame() {
+        List<MediaEntity> mediaEntities = createMediaEntities(TIME_12_00, TIME_12_20, TIME_12_20, TIME_12_20, TIME_12_40, TIME_13_00);
+        MediaRequestEntity mediaRequestEntity = createMediaRequest(TIME_12_00, TIME_13_00);
+        List<MediaEntity> mediaEntitiesResult = audioTransformationService.filterMediaByMediaRequestTimeframeAndSortByStartTimeAndChannel(
+            mediaEntities,
+            mediaRequestEntity
+        );
+
+        assertEquals(2, mediaEntitiesResult.size());
+        assertEquals(TIME_12_00, mediaEntitiesResult.get(0).getStart());
+        assertEquals(TIME_12_20, mediaEntitiesResult.get(0).getEnd());
+        assertEquals(TIME_12_40, mediaEntitiesResult.get(1).getStart());
+        assertEquals(TIME_13_00, mediaEntitiesResult.get(1).getEnd());
+    }
+
+    @Test
+    void filterMediaByMediaRequestTimeframeAndSortByStartTimeAndChannel_ReturnsFilteredData_WhichContainsOnlyMediaWithStartDateAndEndDateTheSame() {
+        List<MediaEntity> mediaEntities = createMediaEntities(TIME_12_00, TIME_12_00, TIME_12_20, TIME_12_20, TIME_13_00, TIME_13_00);
+        MediaRequestEntity mediaRequestEntity = createMediaRequest(TIME_12_00, TIME_13_00);
+        List<MediaEntity> mediaEntitiesResult = audioTransformationService.filterMediaByMediaRequestTimeframeAndSortByStartTimeAndChannel(
+            mediaEntities,
+            mediaRequestEntity
+        );
+
+        assertEquals(0, mediaEntitiesResult.size());
+    }
+
+    @Test
+    void filterMediaByMediaRequestTimeframeAndSortByStartTimeAndChannel_ReturnsFilteredData_WhichContainsMediaWithStartDateAfterEndDate() {
+        List<MediaEntity> mediaEntities = createMediaEntities(TIME_12_00, TIME_12_20, TIME_12_40, TIME_12_20, TIME_12_40, TIME_13_00);
+        MediaRequestEntity mediaRequestEntity = createMediaRequest(TIME_12_00, TIME_13_00);
+        List<MediaEntity> mediaEntitiesResult = audioTransformationService.filterMediaByMediaRequestTimeframeAndSortByStartTimeAndChannel(
+            mediaEntities,
+            mediaRequestEntity
+        );
+
+        assertEquals(2, mediaEntitiesResult.size());
+        assertEquals(TIME_12_00, mediaEntitiesResult.get(0).getStart());
+        assertEquals(TIME_12_20, mediaEntitiesResult.get(0).getEnd());
+        assertEquals(TIME_12_40, mediaEntitiesResult.get(1).getStart());
+        assertEquals(TIME_13_00, mediaEntitiesResult.get(1).getEnd());
+    }
+
+    @Test
+    void filterMediaByMediaRequestTimeframeAndSortByStartTimeAndChannel_ReturnsFilteredData_WhichContainsOnlyMediaWithStartDateAfterEndDate() {
+        List<MediaEntity> mediaEntities = createMediaEntities(TIME_12_20, TIME_12_00, TIME_12_40, TIME_12_20, TIME_13_00, TIME_12_40);
+        MediaRequestEntity mediaRequestEntity = createMediaRequest(TIME_12_00, TIME_13_00);
+        List<MediaEntity> mediaEntitiesResult = audioTransformationService.filterMediaByMediaRequestTimeframeAndSortByStartTimeAndChannel(
+            mediaEntities,
+            mediaRequestEntity
+        );
+
+        assertEquals(0, mediaEntitiesResult.size());
+    }
+
+    @Test
+    void filterMediaByMediaRequestTimeframeAndSortByStartTimeAndChannel_ReturnsFilteredData_WhichContainsMediaWithNullStartDate() {
+        List<MediaEntity> mediaEntities = createMediaEntities(TIME_12_00, TIME_12_20, null, TIME_12_20, TIME_12_40, TIME_13_00);
+        MediaRequestEntity mediaRequestEntity = createMediaRequest(TIME_12_00, TIME_13_00);
+        List<MediaEntity> mediaEntitiesResult = audioTransformationService.filterMediaByMediaRequestTimeframeAndSortByStartTimeAndChannel(
+            mediaEntities,
+            mediaRequestEntity
+        );
+
+        assertEquals(2, mediaEntitiesResult.size());
+        assertEquals(TIME_12_00, mediaEntitiesResult.get(0).getStart());
+        assertEquals(TIME_12_20, mediaEntitiesResult.get(0).getEnd());
+        assertEquals(TIME_12_40, mediaEntitiesResult.get(1).getStart());
+        assertEquals(TIME_13_00, mediaEntitiesResult.get(1).getEnd());
+    }
+
+    @Test
+    void filterMediaByMediaRequestTimeframeAndSortByStartTimeAndChannel_ReturnsFilteredData_WhichContainsOnlyMediaWithNullStartDates() {
+        List<MediaEntity> mediaEntities = createMediaEntities(null, TIME_12_00, null, TIME_12_20, null, TIME_12_40);
+        MediaRequestEntity mediaRequestEntity = createMediaRequest(TIME_12_00, TIME_13_00);
+        List<MediaEntity> mediaEntitiesResult = audioTransformationService.filterMediaByMediaRequestTimeframeAndSortByStartTimeAndChannel(
+            mediaEntities,
+            mediaRequestEntity
+        );
+
+        assertEquals(0, mediaEntitiesResult.size());
+    }
+
+    @Test
+    void filterMediaByMediaRequestTimeframeAndSortByStartTimeAndChannel_ReturnsFilteredData_WhichContainsMediaWithNullEndDate() {
+        List<MediaEntity> mediaEntities = createMediaEntities(TIME_12_00, TIME_12_20, TIME_12_40, null, TIME_12_40, TIME_13_00);
+        MediaRequestEntity mediaRequestEntity = createMediaRequest(TIME_12_00, TIME_13_00);
+        List<MediaEntity> mediaEntitiesResult = audioTransformationService.filterMediaByMediaRequestTimeframeAndSortByStartTimeAndChannel(
+            mediaEntities,
+            mediaRequestEntity
+        );
+
+        assertEquals(2, mediaEntitiesResult.size());
+        assertEquals(TIME_12_00, mediaEntitiesResult.get(0).getStart());
+        assertEquals(TIME_12_20, mediaEntitiesResult.get(0).getEnd());
+        assertEquals(TIME_12_40, mediaEntitiesResult.get(1).getStart());
+        assertEquals(TIME_13_00, mediaEntitiesResult.get(1).getEnd());
+    }
+
+    @Test
+    void filterMediaByMediaRequestTimeframeAndSortByStartTimeAndChannel_ReturnsFilteredData_WhichContainsOnlyMediaNullEndDates() {
+        List<MediaEntity> mediaEntities = createMediaEntities(TIME_12_20, null, TIME_12_40, null, TIME_13_00, null);
+        MediaRequestEntity mediaRequestEntity = createMediaRequest(TIME_12_00, TIME_13_00);
+        List<MediaEntity> mediaEntitiesResult = audioTransformationService.filterMediaByMediaRequestTimeframeAndSortByStartTimeAndChannel(
+            mediaEntities,
+            mediaRequestEntity
+        );
+
+        assertEquals(0, mediaEntitiesResult.size());
+    }
+
+    @Test
+    void filterMediaByMediaRequestTimeframeAndSortByStartTimeAndChannel_ReturnsFilteredData_WithStartDateExactRequestAndEndDateExactRequest() {
         List<MediaEntity> mediaEntities = createMediaEntities(TIME_12_00, TIME_12_20, TIME_12_20, TIME_12_40, TIME_12_40, TIME_13_00);
         MediaRequestEntity mediaRequestEntity = createMediaRequest(TIME_12_00, TIME_13_00);
         List<MediaEntity> mediaEntitiesResult = audioTransformationService.filterMediaByMediaRequestTimeframeAndSortByStartTimeAndChannel(
@@ -260,7 +372,7 @@ class AudioTransformationServiceImplTest {
     }
 
     @Test
-    void filterMediaByMediaRequestDatesWithStartDateAfterRequestAndEndDateBeforeRequest() {
+    void filterMediaByMediaRequestTimeframeAndSortByStartTimeAndChannel_ReturnsFilteredData_WithStartDateAfterRequestAndEndDateBeforeRequest() {
         List<MediaEntity> mediaEntities = createMediaEntities(TIME_12_01, TIME_12_20, TIME_12_20, TIME_12_40, TIME_12_40, TIME_12_59);
         MediaRequestEntity mediaRequestEntity = createMediaRequest(TIME_12_00, TIME_13_00);
         List<MediaEntity> mediaEntitiesResult = audioTransformationService.filterMediaByMediaRequestTimeframeAndSortByStartTimeAndChannel(
@@ -273,7 +385,7 @@ class AudioTransformationServiceImplTest {
     }
 
     @Test
-    void filterMediaByMediaRequestDatesWithStartDateBeforeRequestAndEndDateAfterRequest() {
+    void filterMediaByMediaRequestTimeframeAndSortByStartTimeAndChannel_ReturnsFilteredData_WithStartDateBeforeRequestAndEndDateAfterRequest() {
         List<MediaEntity> mediaEntities = createMediaEntities(TIME_11_59, TIME_12_20, TIME_12_20, TIME_12_40, TIME_12_40, TIME_13_01);
         MediaRequestEntity mediaRequestEntity = createMediaRequest(TIME_12_00, TIME_13_00);
         List<MediaEntity> mediaEntitiesResult = audioTransformationService.filterMediaByMediaRequestTimeframeAndSortByStartTimeAndChannel(
@@ -286,7 +398,7 @@ class AudioTransformationServiceImplTest {
     }
 
     @Test
-    void filterMediaByMediaRequestDatesWithStartDateAndEndDateExactMiddleMediaMatch() {
+    void filterMediaByMediaRequestTimeframeAndSortByStartTimeAndChannel_ReturnsFilteredData_WithStartDateAndEndDateExactMiddleMediaMatch() {
         List<MediaEntity> mediaEntities = createMediaEntities(TIME_11_59, TIME_12_20, TIME_12_20, TIME_12_40, TIME_12_40, TIME_13_01);
         MediaRequestEntity mediaRequestEntity = createMediaRequest(TIME_12_20, TIME_12_40);
         List<MediaEntity> mediaEntitiesResult = audioTransformationService.filterMediaByMediaRequestTimeframeAndSortByStartTimeAndChannel(
@@ -299,7 +411,7 @@ class AudioTransformationServiceImplTest {
     }
 
     @Test
-    void filterMediaByMediaRequestDatesWithStartDateBetweenRequestAndEndDateBetweenRequest() {
+    void filterMediaByMediaRequestTimeframeAndSortByStartTimeAndChannel_ReturnsFilteredData_WithStartDateBetweenRequestAndEndDateBetweenRequest() {
         List<MediaEntity> mediaEntities = createMediaEntities(TIME_12_00, TIME_12_20, TIME_12_20, TIME_12_40, TIME_12_40, TIME_13_00);
         MediaRequestEntity mediaRequestEntity = createMediaRequest(TIME_12_21, TIME_12_39);
         List<MediaEntity> mediaEntitiesResult = audioTransformationService.filterMediaByMediaRequestTimeframeAndSortByStartTimeAndChannel(
@@ -312,7 +424,7 @@ class AudioTransformationServiceImplTest {
     }
 
     @Test
-    void filterMediaByMediaRequestDatesWithRequestStartAndEndDateOutSideMediaRange() {
+    void filterMediaByMediaRequestTimeframeAndSortByStartTimeAndChannel_ReturnsFilteredData_WithRequestStartAndEndDateOutSideMediaRange() {
         List<MediaEntity> mediaEntities = createMediaEntities(TIME_12_00, TIME_12_20, TIME_12_20, TIME_12_40, TIME_12_40, TIME_12_59);
         MediaRequestEntity mediaRequestEntity = createMediaRequest(TIME_13_00, TIME_13_01);
         List<MediaEntity> mediaEntitiesResult = audioTransformationService.filterMediaByMediaRequestTimeframeAndSortByStartTimeAndChannel(
@@ -323,7 +435,7 @@ class AudioTransformationServiceImplTest {
     }
 
     @Test
-    void filterMediaByMediaRequestDatesWithRequestStartTimeMatchesAnAudioEndTime() {
+    void filterMediaByMediaRequestTimeframeAndSortByStartTimeAndChannel_ReturnsFilteredData_WithRequestStartTimeMatchesAnAudioEndTime() {
         List<MediaEntity> mediaEntities = createMediaEntities(TIME_09_59, TIME_10_00, TIME_10_05, TIME_10_10, TIME_10_15, TIME_10_20);
         MediaRequestEntity mediaRequestEntity = createMediaRequest(TIME_10_00, TIME_10_10);
         List<MediaEntity> mediaEntitiesResult = audioTransformationService.filterMediaByMediaRequestTimeframeAndSortByStartTimeAndChannel(
@@ -337,7 +449,7 @@ class AudioTransformationServiceImplTest {
     }
 
     @Test
-    void filterMediaByMediaRequestDatesWithRequestEndTimeMatchesAnAudioStartTime() {
+    void filterMediaByMediaRequestTimeframeAndSortByStartTimeAndChannel_ReturnsFilteredData_WithRequestEndTimeMatchesAnAudioStartTime() {
         List<MediaEntity> mediaEntities = createMediaEntities(TIME_09_59, TIME_10_00, TIME_10_05, TIME_10_10, TIME_10_15, TIME_10_20);
         MediaRequestEntity mediaRequestEntity = createMediaRequest(TIME_09_59, TIME_10_15);
         List<MediaEntity> mediaEntitiesResult = audioTransformationService.filterMediaByMediaRequestTimeframeAndSortByStartTimeAndChannel(
