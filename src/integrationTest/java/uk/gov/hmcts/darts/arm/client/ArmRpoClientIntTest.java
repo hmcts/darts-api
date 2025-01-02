@@ -1,9 +1,11 @@
 package uk.gov.hmcts.darts.arm.client;
 
 import com.github.tomakehurst.wiremock.client.WireMock;
+import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.env.Environment;
 import org.springframework.test.context.TestPropertySource;
 import uk.gov.hmcts.darts.arm.client.model.rpo.StorageAccountRequest;
 import uk.gov.hmcts.darts.testutils.IntegrationBaseWithWiremock;
@@ -22,6 +24,7 @@ import static org.springframework.test.util.AssertionErrors.assertEquals;
 @TestPropertySource(properties = {
     "darts.storage.arm-api.url=http://localhost:${wiremock.server.port}"
 })
+@Slf4j
 class ArmRpoClientIntTest extends IntegrationBaseWithWiremock {
 
     private static final String GET_RECORD_MANAGEMENT_MATTER_PATH = "/api/v1/getRecordManagementMatter";
@@ -30,9 +33,13 @@ class ArmRpoClientIntTest extends IntegrationBaseWithWiremock {
 
     @Autowired
     private ArmRpoClient armRpoClient;
+    @Autowired
+    private Environment environment;
 
     @Test
     void getRecordManagementMatterShouldSucceedIfServerReturns200Success() {
+        log.info("darts.storage.arm-api.url=" + environment.getProperty("darts.storage.arm-api.url"));
+        log.info("wiremock.server.port=" + environment.getProperty("wiremock.server.port"));
         // given
         var bearerAuth = "Bearer some-token";
 
