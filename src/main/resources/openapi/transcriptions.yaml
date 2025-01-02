@@ -1032,9 +1032,12 @@ components:
         transcription_id:
           type: integer
           example: 1234
+          minimum: 1
+          maximum: 2147483647
         case_number:
           type: string
           example: C123
+          maxLength: 32
         courthouse_display_name:
           type: string
           example: some_courthouse
@@ -1045,9 +1048,11 @@ components:
         owner:
           type: string
           example: 'some-user-name'
+          maxLength: 2000
         requested_by:
           type: string
           example: 'some-user-name'
+          maxLength: 2000
         requested_at_from:
           type: string
           format: date

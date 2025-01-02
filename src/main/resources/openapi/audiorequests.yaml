@@ -829,8 +829,8 @@ components:
         media_request_id:
           type: integer
           description: 'The media request id'
-          minLength: 1
-          maxLength: 2147483647
+          minimum: 1
+          maximum: 2147483647
         case_number:
           type: string
           description: 'The case number'
