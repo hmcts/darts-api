@@ -31,7 +31,6 @@ class ArmRpoClientIntTest extends IntegrationBaseWithWiremock {
     @Autowired
     private ArmRpoClient armRpoClient;
 
-    @Disabled("This test is failing other wiremock tests")
     @Test
     void getRecordManagementMatterShouldSucceedIfServerReturns200Success() {
         // given
