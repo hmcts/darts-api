@@ -84,6 +84,7 @@ public class AuthorisationServiceImpl implements AuthorisationService {
                     """
                         SELECT user FROM UserAccountEntity user
                         WHERE UPPER(user.emailAddress) = UPPER(:emailAddress)
+                        AND user.active = true
                         """,
                     UserAccountEntity.class)
                 .setParameter("emailAddress", emailAddress)

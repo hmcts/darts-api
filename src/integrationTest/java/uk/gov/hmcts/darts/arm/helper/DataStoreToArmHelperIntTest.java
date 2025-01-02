@@ -5,6 +5,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.boot.test.mock.mockito.SpyBean;
+import uk.gov.hmcts.darts.arm.config.ArmDataManagementConfiguration;
 import uk.gov.hmcts.darts.arm.model.ArchiveRecord;
 import uk.gov.hmcts.darts.arm.model.batch.ArmBatchItem;
 import uk.gov.hmcts.darts.arm.model.batch.ArmBatchItems;
@@ -39,6 +41,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.darts.arm.util.ArchiveConstants.ArchiveRecordOperationValues.UPLOAD_NEW_FILE;
 import static uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum.ARM;
@@ -61,6 +64,8 @@ class DataStoreToArmHelperIntTest extends IntegrationBase {
 
     @MockBean
     private UserIdentity userIdentity;
+    @SpyBean
+    private ArmDataManagementConfiguration armDataManagementConfiguration;
 
     @Autowired
     private DataStoreToArmHelper dataStoreToArmHelper;
@@ -115,6 +120,9 @@ class DataStoreToArmHelperIntTest extends IntegrationBase {
         externalObjectDirectory.setResponseCleaned(false);
         externalObjectDirectory.setOsrUuid(objectStateRecordEntity.getUuid());
         externalObjectDirectory = dartsDatabase.save(externalObjectDirectory);
+
+        String fileLocation = tempDirectory.getAbsolutePath();
+        lenient().when(armDataManagementConfiguration.getTempBlobWorkspace()).thenReturn(fileLocation);
     }
 
     @Test

@@ -1,13 +1,10 @@
 package uk.gov.hmcts.darts.arm.service.impl;
 
 import com.azure.core.util.BinaryData;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.text.StringEscapeUtils;
 import uk.gov.hmcts.darts.arm.api.ArmDataManagementApi;
@@ -39,8 +36,6 @@ import uk.gov.hmcts.darts.common.util.EodHelper;
 import uk.gov.hmcts.darts.log.api.LogApi;
 
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.OffsetDateTime;
@@ -48,7 +43,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 import static uk.gov.hmcts.darts.arm.util.ArchiveConstants.ArchiveResponseFileAttributes.ARM_CREATE_RECORD_FILENAME_KEY;
@@ -107,7 +101,7 @@ public abstract class AbstractArmBatchProcessResponseFiles implements ArmRespons
                 }
             }
         } catch (Exception e) {
-            log.error("Unable to find response file for prefix: {} - {}", prefix, e.getMessage());
+            log.error("Unable to find response file for prefix: {}", prefix, e);
         }
         if (CollectionUtils.isNotEmpty(inputUploadResponseFiles)) {
             for (String inputUploadBlob : inputUploadResponseFiles) {
@@ -133,11 +127,13 @@ public abstract class AbstractArmBatchProcessResponseFiles implements ArmRespons
             String inputUploadFileRecordStr = armDataManagementApi.getBlobData(inputUploadBlob).toString();
             log.info("Contents of ARM Input Upload file: '{}' '{}", inputUploadBlob, inputUploadFileRecordStr);
             ArmResponseInputUploadFileRecord inputUploadFileRecord = objectMapper.readValue(inputUploadFileRecordStr, ArmResponseInputUploadFileRecord.class);
+
+
             List<ExternalObjectDirectoryEntity> externalObjectDirectoryEntities = externalObjectDirectoryRepository
                 .findAllByStatusAndManifestFile(EodHelper.armDropZoneStatus(), manifestName);
 
             if (CollectionUtils.isNotEmpty(externalObjectDirectoryEntities)) {
-                OffsetDateTime timestamp = inputUploadFileRecord.getTimestamp();
+                OffsetDateTime timestamp = inputUploadFileRecord.getTimestamp().atOffset(OffsetDateTime.now().getOffset());
                 List<ExternalObjectDirectoryEntity> editedExternalObjectDirectoryEntities = externalObjectDirectoryEntities.stream()
                     .filter(eod -> eod.getInputUploadProcessedTs() == null)
                     .peek(eod -> eod.setInputUploadProcessedTs(timestamp))
@@ -150,6 +146,7 @@ public abstract class AbstractArmBatchProcessResponseFiles implements ArmRespons
                     userAccount,
                     externalObjectDirectoryEntities.stream().map(ExternalObjectDirectoryEntity::getId).toList(),
                     timeHelper.currentOffsetDateTime());
+
             } else {
                 log.warn("No external object directories found with filename: {}", manifestName);
             }
@@ -273,6 +270,21 @@ public abstract class AbstractArmBatchProcessResponseFiles implements ArmRespons
                 }
             } else {
                 log.info("Unable to find response files starting with {} for manifest {}", batchUploadFileFilenameProcessor.getHashcode(), manifestName);
+
+                List<ExternalObjectDirectoryEntity> externalObjectDirectoryEntities = externalObjectDirectoryRepository
+                    .findAllByStatusAndManifestFile(EodHelper.armProcessingResponseFilesStatus(), manifestName);
+
+                OffsetDateTime minInputUploadProcessedTime = timeHelper.currentOffsetDateTime().minus(
+                    armDataManagementConfiguration.getArmMissingResponseDuration());
+
+                externalObjectDirectoryEntities.forEach(
+                    externalObjectDirectoryEntity -> {
+                        if (externalObjectDirectoryEntity.getInputUploadProcessedTs() != null
+                            && externalObjectDirectoryEntity.getInputUploadProcessedTs().isBefore(minInputUploadProcessedTime)) {
+                            markEodAsResponseProcessingFailed(externalObjectDirectoryEntity, userAccount);
+                        }
+                    }
+                );
             }
         } catch (Exception e) {
             log.error("Unable to process responses for file {}", batchUploadFileFilenameProcessor.getBatchMetadataFilenameAndPath(), e);
@@ -337,7 +349,7 @@ public abstract class AbstractArmBatchProcessResponseFiles implements ArmRespons
     }
 
     protected void markEodAsResponseProcessingFailed(ExternalObjectDirectoryEntity externalObjectDirectory, UserAccountEntity userAccount) {
-        updateExternalObjectDirectoryStatus(externalObjectDirectory, EodHelper.armResponseProcessingFailedStatus(), userAccount);
+        updateExternalObjectDirectoryStatus(externalObjectDirectory, EodHelper.armMissingResponseStatus(), userAccount);
     }
 
     private void logResponsesFound(ArmResponseBatchData armResponseBatchData) {
@@ -477,56 +489,41 @@ public abstract class AbstractArmBatchProcessResponseFiles implements ArmRespons
 
     private void readCreateRecordFile(BinaryData createRecordBinary, CreateRecordFilenameProcessor createRecordFilenameProcessor,
                                       ArmBatchResponses armBatchResponses) {
+        String createRecordFilenameAndPath = createRecordFilenameProcessor.getCreateRecordFilenameAndPath();
         if (nonNull(createRecordBinary)) {
-            Path jsonPath = null;
             try {
-                boolean appendUuidToWorkspace = true;
-                jsonPath = fileOperationService.saveBinaryDataToSpecifiedWorkspace(
-                    createRecordBinary,
-                    createRecordFilenameProcessor.getCreateRecordFilename(),
-                    armDataManagementConfiguration.getTempBlobWorkspace(),
-                    appendUuidToWorkspace
-                );
-
-                if (nonNull(jsonPath) && jsonPath.toFile().exists()) {
-                    logResponseFileContents(jsonPath);
-                    ArmResponseCreateRecord armResponseCreateRecord = getResponseCreateRecordOrDelete(jsonPath);
-                    UploadNewFileRecord uploadNewFileRecord = readInputJson(armResponseCreateRecord.getInput());
-                    if (nonNull(uploadNewFileRecord)) {
-                        if (StringUtils.isNotEmpty(uploadNewFileRecord.getRelationId())) {
-                            armBatchResponses.addResponseBatchData(Integer.valueOf(uploadNewFileRecord.getRelationId()),
-                                                                   armResponseCreateRecord, createRecordFilenameProcessor);
-                        } else {
-                            log.warn("Unable to get EOD id (relation id) from uploadNewFileRecord {} create record {}",
-                                     armResponseCreateRecord.getInput(), createRecordFilenameProcessor.getCreateRecordFilenameAndPath());
-                        }
+                log.info("Contents of ARM CR response file: {} - {}", createRecordFilenameAndPath, createRecordBinary);
+                ArmResponseCreateRecord armResponseCreateRecord = getResponseCreateRecordOrDelete(createRecordFilenameAndPath, createRecordBinary);
+                UploadNewFileRecord uploadNewFileRecord = readInputJson(armResponseCreateRecord.getInput());
+                if (nonNull(uploadNewFileRecord)) {
+                    if (StringUtils.isNotEmpty(uploadNewFileRecord.getRelationId())) {
+                        armBatchResponses.addResponseBatchData(Integer.valueOf(uploadNewFileRecord.getRelationId()),
+                                                               armResponseCreateRecord, createRecordFilenameProcessor);
                     } else {
-                        log.warn("Failed to obtain EOD id (relation id) from create record file  {}",
-                                 createRecordFilenameProcessor.getCreateRecordFilenameAndPath());
+                        log.warn("Unable to get EOD id (relation id) from uploadNewFileRecord {} create record {}",
+                                 armResponseCreateRecord.getInput(), createRecordFilenameAndPath);
                     }
                 } else {
-                    log.warn("Failed to write create record file to temp workspace {}", createRecordFilenameProcessor.getCreateRecordFilenameAndPath());
+                    log.warn("Failed to obtain EOD id (relation id) from create record file  {}",
+                             createRecordFilenameAndPath);
                 }
-            } catch (IOException e) {
-                log.error("Unable to write create record file to temporary workspace {} - {}", createRecordFilenameProcessor.getCreateRecordFilenameAndPath(),
-                          e.getMessage());
+
             } catch (Exception e) {
-                log.error("Unable to process arm response create record file {}", createRecordFilenameProcessor.getCreateRecordFilenameAndPath(), e);
-            } finally {
-                cleanupTemporaryJsonFile(jsonPath);
+                log.error("Unable to process arm response create record file {}", createRecordFilenameAndPath, e);
             }
         } else {
-            log.warn("Failed to read create record file {}", createRecordFilenameProcessor.getCreateRecordFilenameAndPath());
+            log.warn("Failed to read create record file {}", createRecordFilenameAndPath);
         }
 
     }
 
-    private ArmResponseCreateRecord getResponseCreateRecordOrDelete(Path jsonPath) throws IOException {
+    private ArmResponseCreateRecord getResponseCreateRecordOrDelete(String createRecordFilenameAndPath,
+                                                                    BinaryData createRecordBinary) throws IOException {
         try {
-            return objectMapper.readValue(jsonPath.toFile(), ArmResponseCreateRecord.class);
+            return objectMapper.readValue(createRecordBinary.toString(), ArmResponseCreateRecord.class);
         } catch (Exception e) {
-            log.error("Unable to read ARM response create record file {} - About to delete ", jsonPath.toFile().getAbsoluteFile(), e);
-            deleteResponseBlobs(List.of(jsonPath.toFile().getAbsolutePath()));
+            log.error("Unable to read ARM response create record file {} - About to delete ", createRecordFilenameAndPath, e);
+            deleteResponseBlobs(List.of(createRecordFilenameAndPath));
             throw e;
         }
     }
@@ -545,80 +542,39 @@ public abstract class AbstractArmBatchProcessResponseFiles implements ArmRespons
     private void readUploadFile(BinaryData uploadFileBinary, UploadFileFilenameProcessor uploadFileFilenameProcessor,
                                 ArmBatchResponses armBatchResponses) {
 
+        String uploadFileFilenameAndPath = uploadFileFilenameProcessor.getUploadFileFilenameAndPath();
         if (nonNull(uploadFileBinary)) {
-            Path jsonPath = null;
             try {
-                boolean appendUuidToWorkspace = true;
-                jsonPath = fileOperationService.saveBinaryDataToSpecifiedWorkspace(
-                    uploadFileBinary,
-                    uploadFileFilenameProcessor.getUploadFileFilename(),
-                    armDataManagementConfiguration.getTempBlobWorkspace(),
-                    appendUuidToWorkspace
-                );
-
-                if (jsonPath.toFile().exists()) {
-                    logResponseFileContents(jsonPath);
-                    ArmResponseUploadFileRecord armResponseUploadFileRecord = getResponseUploadFileRecordOrDelete(jsonPath);
-                    UploadNewFileRecord uploadNewFileRecord = readInputJson(armResponseUploadFileRecord.getInput());
-                    if (nonNull(uploadNewFileRecord)) {
-                        if (StringUtils.isNotEmpty(uploadNewFileRecord.getRelationId())) {
-                            armBatchResponses.addResponseBatchData(Integer.valueOf(uploadNewFileRecord.getRelationId()),
-                                                                   armResponseUploadFileRecord, uploadFileFilenameProcessor);
-                        } else {
-                            log.warn("Unable to get EOD id (relation id) from uploadNewFileRecord {} upload file {}",
-                                     armResponseUploadFileRecord.getInput(), uploadFileFilenameProcessor.getUploadFileFilenameAndPath());
-                        }
-
+                log.info("Contents of ARM UF response file: {} - {}", uploadFileFilenameAndPath, uploadFileBinary);
+                ArmResponseUploadFileRecord armResponseUploadFileRecord = getResponseUploadFileRecordOrDelete(uploadFileFilenameAndPath, uploadFileBinary);
+                UploadNewFileRecord uploadNewFileRecord = readInputJson(armResponseUploadFileRecord.getInput());
+                if (nonNull(uploadNewFileRecord)) {
+                    if (StringUtils.isNotEmpty(uploadNewFileRecord.getRelationId())) {
+                        armBatchResponses.addResponseBatchData(Integer.valueOf(uploadNewFileRecord.getRelationId()),
+                                                               armResponseUploadFileRecord, uploadFileFilenameProcessor);
                     } else {
-                        log.warn("Failed to obtain EOD id (relation id) from upload file  {}",
-                                 uploadFileFilenameProcessor.getUploadFileFilenameAndPath());
+                        log.warn("Unable to get EOD id (relation id) from uploadNewFileRecord {} upload file {}",
+                                 armResponseUploadFileRecord.getInput(), uploadFileFilenameAndPath);
                     }
+
                 } else {
-                    log.warn("Failed to write upload file to temp workspace {}", uploadFileFilenameProcessor.getUploadFileFilenameAndPath());
+                    log.warn("Failed to obtain EOD id (relation id) from upload file  {}", uploadFileFilenameAndPath);
                 }
-            } catch (IOException e) {
-                log.error("Unable to write upload file to temporary workspace {} - {}", uploadFileFilenameProcessor.getUploadFileFilenameAndPath(),
-                          e.getMessage());
             } catch (Exception e) {
-                log.error("Unable to process arm response upload file {}", uploadFileFilenameProcessor.getUploadFileFilenameAndPath(), e);
-            } finally {
-                cleanupTemporaryJsonFile(jsonPath);
+                log.error("Unable to process arm response upload file {}", uploadFileFilenameAndPath, e);
             }
         } else {
-            log.warn("Failed to read upload file {}", uploadFileFilenameProcessor.getUploadFileFilenameAndPath());
+            log.warn("Failed to read upload file {}", uploadFileFilenameAndPath);
         }
     }
 
-    private ArmResponseUploadFileRecord getResponseUploadFileRecordOrDelete(Path jsonPath) throws IOException {
+    private ArmResponseUploadFileRecord getResponseUploadFileRecordOrDelete(String uploadFileFilenameAndPath, BinaryData uploadFileBinary) throws IOException {
         try {
-            return objectMapper.readValue(jsonPath.toFile(), ArmResponseUploadFileRecord.class);
+            return objectMapper.readValue(uploadFileBinary.toString(), ArmResponseUploadFileRecord.class);
         } catch (Exception e) {
-            log.error("Unable to read ARM response upload file {} - About to delete ", jsonPath.toFile().getAbsoluteFile(), e);
-            deleteResponseBlobs(List.of(jsonPath.toFile().getAbsolutePath()));
+            log.error("Unable to read ARM response upload file {} - About to delete ", uploadFileFilenameAndPath, e);
+            deleteResponseBlobs(List.of(uploadFileFilenameAndPath));
             throw e;
-        }
-    }
-
-    private void logResponseFileContents(Path jsonPath) {
-        try {
-            String contents = FileUtils.readFileToString(jsonPath.toFile(), UTF_8);
-            log.info("Contents of ARM response file {} - \n{}",
-                     jsonPath.toFile().getAbsoluteFile(),
-                     contents);
-        } catch (Exception e) {
-            log.error("Unable to read ARM response file {}", jsonPath.toFile().getAbsoluteFile(), e);
-        }
-    }
-
-    private void cleanupTemporaryJsonFile(Path jsonPath) {
-        if (nonNull(jsonPath)) {
-            try {
-                if (!Files.deleteIfExists(jsonPath)) {
-                    log.warn("Deleting temporary file: {} failed", jsonPath.toFile());
-                }
-            } catch (Exception e) {
-                log.error("Unable to delete temporary file: {} - {}", jsonPath.toFile(), e.getMessage());
-            }
         }
     }
 
@@ -717,12 +673,8 @@ public abstract class AbstractArmBatchProcessResponseFiles implements ArmRespons
             String unescapedJson = StringEscapeUtils.unescapeJson(input);
             try {
                 uploadNewFileRecord = objectMapper.readValue(unescapedJson, UploadNewFileRecord.class);
-            } catch (JsonMappingException e) {
-                log.error("Unable to map the input field {}", e.getMessage());
-            } catch (JsonProcessingException e) {
-                log.error("Unable to parse the upload new file record {}", e.getMessage());
             } catch (Exception e) {
-                log.error("Failed to parse the input field {}", e.getMessage());
+                log.error("Failed to parse the input field {}", input, e);
             }
         } else {
             log.warn("Unable to parse the input field as it is null or empty");
@@ -772,60 +724,44 @@ public abstract class AbstractArmBatchProcessResponseFiles implements ArmRespons
 
     private void readInvalidLineFile(BinaryData invalidLineFileBinary, InvalidLineFileFilenameProcessor invalidLineFileFilenameProcessor,
                                      ArmBatchResponses armBatchResponses) {
+        String invalidLineFileFilenameAndPath = invalidLineFileFilenameProcessor.getInvalidLineFileFilenameAndPath();
         if (nonNull(invalidLineFileBinary)) {
-            Path jsonPath = null;
             try {
-                boolean appendUuidToWorkspace = true;
-                jsonPath = fileOperationService.saveBinaryDataToSpecifiedWorkspace(
-                    invalidLineFileBinary,
-                    invalidLineFileFilenameProcessor.getInvalidLineFilename(),
-                    armDataManagementConfiguration.getTempBlobWorkspace(),
-                    appendUuidToWorkspace
-                );
+                log.info("Contents of ARM IL response file: {} - {}", invalidLineFileFilenameAndPath, invalidLineFileBinary);
+                ArmResponseInvalidLineRecord armResponseInvalidLineRecord =
+                    getResponseInvalidLineRecordOrDelete(invalidLineFileFilenameAndPath, invalidLineFileBinary);
+                String input = armResponseInvalidLineRecord.getInput();
+                UploadNewFileRecord uploadNewFileRecord = readInputJson(input);
+                if (nonNull(uploadNewFileRecord)) {
+                    if (StringUtils.isNotEmpty(uploadNewFileRecord.getRelationId())) {
+                        armBatchResponses.addResponseBatchData(Integer.valueOf(uploadNewFileRecord.getRelationId()),
+                                                               armResponseInvalidLineRecord, invalidLineFileFilenameProcessor);
 
-                if (jsonPath.toFile().exists()) {
-                    logResponseFileContents(jsonPath);
-                    ArmResponseInvalidLineRecord armResponseInvalidLineRecord = getResponseInvalidLineRecordOrDelete(jsonPath);
-                    String input = armResponseInvalidLineRecord.getInput();
-                    UploadNewFileRecord uploadNewFileRecord = readInputJson(input);
-                    if (nonNull(uploadNewFileRecord)) {
-                        if (StringUtils.isNotEmpty(uploadNewFileRecord.getRelationId())) {
-                            armBatchResponses.addResponseBatchData(Integer.valueOf(uploadNewFileRecord.getRelationId()),
-                                                                   armResponseInvalidLineRecord, invalidLineFileFilenameProcessor);
-
-                        } else {
-                            log.warn("Unable to get EOD id (relation id) from uploadNewFileRecord {} invalid line file {}",
-                                     armResponseInvalidLineRecord.getInput(), invalidLineFileFilenameProcessor.getInvalidLineFilename());
-                        }
                     } else {
-                        log.warn("Failed to obtain EOD id (relation id) from invalid line record {} from file {}", input,
-                                 invalidLineFileFilenameProcessor.getInvalidLineFilename());
+                        log.warn("Unable to get EOD id (relation id) from uploadNewFileRecord {} invalid line file {}",
+                                 armResponseInvalidLineRecord.getInput(), invalidLineFileFilenameProcessor.getInvalidLineFilename());
                     }
                 } else {
-                    log.warn("Failed to write invalid line file to temp workspace {}", invalidLineFileFilenameProcessor.getInvalidLineFilename());
+                    log.warn("Failed to obtain EOD id (relation id) from invalid line record {} from file {}", input,
+                             invalidLineFileFilenameProcessor.getInvalidLineFilename());
+                    deleteResponseBlobs(List.of(invalidLineFileFilenameAndPath));
                 }
-            } catch (IOException e) {
-                log.error("Unable to write invalid line file to temporary workspace {} - {}",
-                          invalidLineFileFilenameProcessor.getInvalidLineFileFilenameAndPath(), e.getMessage());
 
             } catch (Exception e) {
-                log.error("Unable to process ARM response invalid line file {}",
-                          invalidLineFileFilenameProcessor.getInvalidLineFileFilenameAndPath(), e);
-
-            } finally {
-                cleanupTemporaryJsonFile(jsonPath);
+                log.error("Unable to process ARM response invalid line file {}", invalidLineFileFilenameAndPath, e);
             }
         } else {
-            log.error("Unable to read ARM response invalid line file {}", invalidLineFileFilenameProcessor.getInvalidLineFileFilenameAndPath());
+            log.error("Unable to read ARM response invalid line file {}", invalidLineFileFilenameAndPath);
         }
     }
 
-    private ArmResponseInvalidLineRecord getResponseInvalidLineRecordOrDelete(Path jsonPath) throws IOException {
+    private ArmResponseInvalidLineRecord getResponseInvalidLineRecordOrDelete(String invalidLineFileFilenameAndPath,
+                                                                              BinaryData invalidLineFileBinary) throws IOException {
         try {
-            return objectMapper.readValue(jsonPath.toFile(), ArmResponseInvalidLineRecord.class);
+            return objectMapper.readValue(invalidLineFileBinary.toString(), ArmResponseInvalidLineRecord.class);
         } catch (Exception e) {
-            log.error("Unable to read ARM response invalid line file {} - About to delete ", jsonPath.toFile().getAbsoluteFile(), e);
-            deleteResponseBlobs(List.of(jsonPath.toFile().getAbsolutePath()));
+            log.error("Unable to read ARM response {} - About to delete ", invalidLineFileFilenameAndPath, e);
+            deleteResponseBlobs(List.of(invalidLineFileFilenameAndPath));
             throw e;
         }
     }

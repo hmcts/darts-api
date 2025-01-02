@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.darts.audio.model.AudioPreview;
 import uk.gov.hmcts.darts.audio.service.AudioPreviewService;
+import uk.gov.hmcts.darts.audio.validation.MediaIdValidator;
 
 import static uk.gov.hmcts.darts.audio.enums.AudioPreviewStatus.ENCODING;
 
@@ -15,9 +16,13 @@ import static uk.gov.hmcts.darts.audio.enums.AudioPreviewStatus.ENCODING;
 public class AudioPreviewServiceImpl implements AudioPreviewService {
 
     private final CachingAudioPreviewEncoder cachingAudioPreviewEncoder;
+    private final MediaIdValidator mediaIdValidator;
 
     @Override
     public AudioPreview getOrCreateAudioPreview(Integer mediaId) {
+        mediaIdValidator.validateNotHidden(mediaId);
+        mediaIdValidator.validateNotZeroSecondAudio(mediaId);
+
         AudioPreview audioPreview = cachingAudioPreviewEncoder.getPreviewFor(mediaId);
         if (audioPreview == null) {
             audioPreview = new AudioPreview(mediaId, ENCODING, null);
@@ -27,4 +32,5 @@ public class AudioPreviewServiceImpl implements AudioPreviewService {
         }
         return audioPreview;
     }
+
 }

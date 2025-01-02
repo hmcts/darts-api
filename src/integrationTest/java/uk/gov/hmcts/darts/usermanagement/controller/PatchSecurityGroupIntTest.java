@@ -487,7 +487,6 @@ class PatchSecurityGroupIntTest extends IntegrationBase {
 
     private UserAccountEntity createEnabledUserAccountEntity(UserAccountEntity user, String email, boolean isSystemUser, boolean active) {
         UserAccountEntity userAccountEntity = new UserAccountEntity();
-        userAccountEntity.setUserName("user name");
         userAccountEntity.setUserFullName("user full name");
         userAccountEntity.setEmailAddress(email);
         userAccountEntity.setUserDescription("Description");

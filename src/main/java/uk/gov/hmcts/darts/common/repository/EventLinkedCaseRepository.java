@@ -3,6 +3,7 @@ package uk.gov.hmcts.darts.common.repository;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.EventEntity;
 import uk.gov.hmcts.darts.common.entity.EventLinkedCaseEntity;
@@ -27,4 +28,7 @@ public interface EventLinkedCaseRepository extends JpaRepository<EventLinkedCase
         """
     )
     boolean areAllAssociatedCasesAnonymised(EventEntity eventEntity);
+
+    @Transactional
+    void deleteAllByEventIn(List<EventEntity> events);
 }

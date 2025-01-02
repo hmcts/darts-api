@@ -28,10 +28,9 @@ public class UserActivateValidator implements Validator<IdRequest<UserPatch>> {
             if (fndUser.isPresent() && !fndUser.get().isActive()) {
                 UserAccountEntity userAccountEntity = fndUser.get();
                 String emailAddress = userAccountEntity.getEmailAddress();
-                String fullName = userAccountEntity.getUserFullName();
 
-                if (StringUtils.isBlank(emailAddress) || StringUtils.isBlank(fullName)) {
-                    throw new DartsApiException(UserManagementError.USER_ACTIVATION_FULLNAME_OR_EMAIL_VIOLATION);
+                if (StringUtils.isBlank(emailAddress)) {
+                    throw new DartsApiException(UserManagementError.USER_ACTIVATION_EMAIL_VIOLATION);
                 }
             }
         }

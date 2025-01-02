@@ -3,7 +3,6 @@ package uk.gov.hmcts.darts.arm.service.impl;
 import jakarta.persistence.EntityManager;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.collections4.IterableUtils;
 import org.apache.commons.csv.CSVRecord;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
@@ -30,6 +29,7 @@ import java.io.FileReader;
 import java.io.Reader;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static java.util.Objects.nonNull;
 
@@ -117,20 +117,27 @@ public class ArmRpoServiceImpl implements ArmRpoService {
             armRpoExecutionDetailEntity.getCreatedDateTime().minusHours(armAutomatedTaskEntity.getRpoCsvStartHour()));
 
         List<Integer> csvEodList = new ArrayList<>();
+        Integer counter = 0;
         for (File csvFile : csvFiles) {
             try (Reader reader = new FileReader(csvFile.getPath())) {
                 Iterable<CSVRecord> records = CsvFileUtil.readCsv(reader);
-                log.info("About to read {} rows of CSV file: {}", IterableUtils.size(records), csvFile.getName());
-                for (CSVRecord csvRecord : records) {
+                while (records.iterator().hasNext()) {
+                    CSVRecord csvRecord = records.iterator().next();
+                    counter++;
                     String csvEod = csvRecord.get(CLIENT_IDENTIFIER_CSV_HEADER);
+                    // TODO - This is a temporary log message to help debug the issue with the CSV file
+                    log.info("ARM RPO CSV Client Identifier {}", csvEod);
                     if (StringUtils.isNotBlank(csvEod)) {
                         csvEodList.add(Integer.parseInt(csvEod));
                     }
                 }
+                log.info("Finished reading CSV file: {}. Read {} rows", csvFile.getName(), counter);
             } catch (FileNotFoundException e) {
+                log.info("Only read {} rows for file {}", counter, csvFile.getName());
                 log.error(errorMessage.append("Unable to find CSV file for Reconciliation ").toString(), e);
                 throw new ArmRpoException(errorMessage.toString());
             } catch (Exception e) {
+                log.info("Only read {} rows for file {}", counter, csvFile.getName());
                 log.error(errorMessage.toString(), e.getMessage());
                 throw new ArmRpoException(errorMessage.toString());
             }
@@ -145,6 +152,14 @@ public class ArmRpoServiceImpl implements ArmRpoService {
                 }
             }
         );
+
+        List<Integer> missingEods = csvEodList.stream()
+            .filter(csvEod -> externalObjectDirectoryEntities.stream().noneMatch(entity -> entity.getId().equals(csvEod)))
+            .collect(Collectors.toList());
+
+        log.warn("Unable to process the following EODs {} found in the CSV but not in filtered DB list", missingEods);
+
         externalObjectDirectoryRepository.saveAllAndFlush(externalObjectDirectoryEntities);
     }
+
 }

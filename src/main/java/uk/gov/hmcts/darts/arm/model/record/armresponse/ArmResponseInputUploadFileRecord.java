@@ -5,7 +5,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.time.OffsetDateTime;
+import java.time.LocalDateTime;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Data
@@ -16,7 +16,7 @@ public class ArmResponseInputUploadFileRecord {
     private String operation;
 
     @JsonProperty("timestamp")
-    private OffsetDateTime timestamp;
+    private LocalDateTime timestamp;
 
     @JsonProperty("status")
     private Integer status;

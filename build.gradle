@@ -14,7 +14,7 @@ plugins {
   id 'org.springframework.boot' version '3.3.5'
   id 'org.owasp.dependencycheck' version '11.1.1'
   id 'com.github.ben-manes.versions' version '0.51.0'
-  id 'org.sonarqube' version '5.1.0.4882'
+  id 'org.sonarqube' version '6.0.1.5171'
   id "io.freefair.lombok" version "8.11"
   id "org.openapi.generator" version "7.10.0"
   id "org.flywaydb.flyway" version "10.22.0"
@@ -381,7 +381,7 @@ repositories {
 }
 
 ext {
-  log4JVersion = "2.24.2"
+  log4JVersion = "2.24.3"
   tomcatEmbedVersion = "10.1.34"
 }
 
@@ -401,7 +401,7 @@ dependencies {
   implementation group: 'org.springframework.boot', name: 'spring-boot-starter-security'
   implementation group: 'org.springframework.boot', name: 'spring-boot-starter-cache'
   implementation group: 'org.springframework.boot', name: 'spring-boot-starter-data-redis'
-  implementation group: 'org.springframework', name: 'spring-webflux', version: '6.2.0'
+  implementation group: 'org.springframework', name: 'spring-webflux', version: '6.2.1'
 
   implementation group: 'org.springframework.security', name: 'spring-security-oauth2-authorization-server', version: '1.4.0'
 
@@ -419,10 +419,10 @@ dependencies {
 
   implementation group: 'org.springdoc', name: 'springdoc-openapi-starter-webmvc-ui', version: '2.6.0'
   implementation group: 'org.springframework.cloud', name: 'spring-cloud-starter-openfeign', version: '4.1.4'
-  implementation 'org.springframework.retry:spring-retry:2.0.10'
+  implementation 'org.springframework.retry:spring-retry:2.0.11'
 
-  implementation 'net.javacrumbs.shedlock:shedlock-spring:5.16.0'
-  implementation 'net.javacrumbs.shedlock:shedlock-provider-jdbc-template:5.16.0'
+  implementation 'net.javacrumbs.shedlock:shedlock-spring:6.0.2'
+  implementation 'net.javacrumbs.shedlock:shedlock-provider-jdbc-template:6.0.2'
 
   implementation group: 'com.github.hmcts.java-logging', name: 'logging', version: '6.1.7'
   implementation group: 'org.apache.logging.log4j', name: 'log4j-api', version: log4JVersion
@@ -447,8 +447,8 @@ dependencies {
 
   implementation 'uk.gov.service.notify:notifications-java-client:5.2.1-RELEASE'
 
-  implementation group: 'ch.qos.logback', name: 'logback-classic', version: '1.5.12'
-  implementation group: 'ch.qos.logback', name: 'logback-core', version: '1.5.12'
+  implementation group: 'ch.qos.logback', name: 'logback-classic', version: '1.5.15'
+  implementation group: 'ch.qos.logback', name: 'logback-core', version: '1.5.15'
 
   implementation group: 'io.vavr', name: 'vavr', version: '0.10.5'
 
@@ -456,12 +456,12 @@ dependencies {
 
   implementation 'org.mapstruct:mapstruct:1.6.3'
   implementation group: 'org.apache.tika', name: 'tika-core', version: '3.0.0'
-  implementation group: 'org.springframework.data', name: 'spring-data-envers', version: '3.4.0'
-  implementation 'org.hibernate.orm:hibernate-ant:6.6.3.Final'
+  implementation group: 'org.springframework.data', name: 'spring-data-envers', version: '3.4.1'
+  implementation 'org.hibernate.orm:hibernate-ant:6.6.4.Final'
   implementation 'org.hibernate:hibernate-spatial:6.6.3.Final'
 
   annotationProcessor 'org.mapstruct:mapstruct-processor:1.6.3'
-  annotationProcessor('org.hibernate.orm:hibernate-jpamodelgen:6.6.3.Final')
+  annotationProcessor('org.hibernate.orm:hibernate-jpamodelgen:6.6.4.Final')
 
   // Added to resolve issue where the default Feign client will silently convert GET requests to POST if the request contains a body
   // Ref: https://github.com/spring-cloud/spring-cloud-openfeign/issues/832
@@ -476,7 +476,7 @@ dependencies {
     exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'
   }
   testImplementation group: 'org.springframework.cloud', name: 'spring-cloud-starter-contract-stub-runner', version: '4.1.5'
-  testImplementation 'org.junit.jupiter:junit-jupiter:5.11.3'
+  testImplementation 'org.junit.jupiter:junit-jupiter:5.11.4'
   testImplementation group: 'io.projectreactor', name: 'reactor-test', version: '3.7.1'
   testImplementation 'org.springframework.security:spring-security-test:6.4.1'
 

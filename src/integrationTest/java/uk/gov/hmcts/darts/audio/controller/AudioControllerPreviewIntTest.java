@@ -137,6 +137,19 @@ class AudioControllerPreviewIntTest extends IntegrationBase {
         );
     }
 
+    @Test
+    void previewForZeroSecondMediaShouldReturn422() throws Exception {
+        OffsetDateTime now = OffsetDateTime.now();
+        mediaEntity.setStart(now);
+        mediaEntity.setEnd(now);
+        dartsPersistence.save(mediaEntity);
+
+        MockHttpServletRequestBuilder requestBuilder = get(URI.create(
+            String.format("/audio/preview/%d", mediaEntity.getId()))).header("Range", "bytes=0-");
+
+        mockMvc.perform(requestBuilder).andExpect(status().isUnprocessableEntity());
+    }
+
     private void waitUntilPreviewEncodedAndCached() {
         waitForMaxWithOneSecondPoll(() -> {
             var cachedAudioPreview = binaryDataRedisService.readFromRedis(folder, mediaEntity.getId().toString());

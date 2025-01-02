@@ -14,7 +14,6 @@ import uk.gov.hmcts.darts.arm.api.ArmDataManagementApi;
 import uk.gov.hmcts.darts.arm.config.ArmDataManagementConfiguration;
 import uk.gov.hmcts.darts.arm.config.DetsToArmProcessorConfiguration;
 import uk.gov.hmcts.darts.arm.helper.DataStoreToArmHelper;
-import uk.gov.hmcts.darts.arm.model.record.ArchiveRecordFileInfo;
 import uk.gov.hmcts.darts.arm.service.ArchiveRecordService;
 import uk.gov.hmcts.darts.arm.service.DetsToArmBatchPushProcessor;
 import uk.gov.hmcts.darts.arm.service.ExternalObjectDirectoryService;
@@ -161,12 +160,6 @@ class DetsToArmBatchPushProcessorImplTest {
 
         lenient().when(fileOperationService.createFile(any(), any(), anyBoolean())).thenReturn(manifestFile.toPath());
         lenient().when(detsToArmProcessorConfiguration.getManifestFilePrefix()).thenReturn("DETS");
-        ArchiveRecordFileInfo archiveRecordFileInfo = ArchiveRecordFileInfo.builder()
-            .fileGenerationSuccessful(true)
-            .archiveRecordFile(manifestFile)
-            .build();
-        lenient().when(archiveRecordService.generateArchiveRecord(any(), any())).thenReturn(archiveRecordFileInfo);
-
     }
 
     @AfterEach

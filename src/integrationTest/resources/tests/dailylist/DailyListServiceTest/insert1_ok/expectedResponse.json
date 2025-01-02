@@ -20,5 +20,7 @@
   "contentObjectId": null,
   "clipId": null,
   "externalLocation": null,
-  "externalLocationTypeEntity": null
+  "externalLocationTypeEntity": null,
+  "subcontentObjectId": null,
+  "subcontentPosition": null
 }
