@@ -82,6 +82,33 @@ class AudioControllerAdminGetTransformedMediaIntTest extends IntegrationBase {
         assertResponseEquality(transformedMediaResponses[0], getTransformMediaEntity(transformedMediaResponses[0].getId(), transformedMediaEntityList));
     }
 
+
+    @Test
+    void testSearchForTransformedMedia_multipleResults_shouldBeOrderedByMediaId() throws Exception {
+        List<TransformedMediaEntity> transformedMediaEntityList = transformedMediaStub.generateTransformedMediaEntities(4);
+
+        superAdminUserStub.givenUserIsAuthorised(userIdentity);
+
+        SearchTransformedMediaRequest request = new SearchTransformedMediaRequest();
+
+        MvcResult mvcResult = mockMvc.perform(post(ENDPOINT_URL)
+                                                  .header("Content-Type", "application/json")
+                                                  .content(objectMapper.writeValueAsString(request)))
+            .andExpect(status().is2xxSuccessful())
+            .andReturn();
+
+        assertEquals(200, mvcResult.getResponse().getStatus());
+
+        SearchTransformedMediaResponse[] transformedMediaResponses
+            = objectMapper.readValue(mvcResult.getResponse().getContentAsByteArray(), SearchTransformedMediaResponse[].class);
+
+        assertEquals(4, transformedMediaResponses.length);
+        assertEquals(4, transformedMediaResponses[0].getId());
+        assertEquals(3, transformedMediaResponses[1].getId());
+        assertEquals(2, transformedMediaResponses[2].getId());
+        assertEquals(1, transformedMediaResponses[3].getId());
+    }
+
     @Test
     void testSearchForTransformedMediaWithDateFromAndReturnApplicableResults() throws Exception {
         List<TransformedMediaEntity> transformedMediaEntityList = transformedMediaStub.generateTransformedMediaEntities(4);
