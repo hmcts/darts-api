@@ -120,7 +120,6 @@ public class AudioUploadServiceImpl implements AudioUploadService {
             return;
         }
 
-        // upload to the blob store
         ObjectRecordStatusEntity objectRecordStatusEntity = objectRecordStatusRepository.getReferenceById(STORED.getId());
         UUID externalLocation = externalLocationSupplier.get();
 
@@ -136,7 +135,7 @@ public class AudioUploadServiceImpl implements AudioUploadService {
                          externalLocation, incomingChecksum,
                          duplicatesWithDifferentChecksum
                              .stream()
-                             .map(mediaEntity -> "Meida Id " + mediaEntity.getId().toString() + " with checksum " + mediaEntity.getChecksum())
+                             .map(mediaEntity -> "Media Id " + mediaEntity.getId().toString() + " with checksum " + mediaEntity.getChecksum())
                              .toList());
             }
         }
