@@ -14,6 +14,8 @@ import uk.gov.hmcts.darts.common.entity.ArmRpoExecutionDetailEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.log.api.LogApi;
 
+import java.time.Duration;
+
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -70,6 +72,7 @@ class TriggerArmRpoSearchServiceImplTest {
     @Test
     void triggerArmRpoSearch_shouldCallExpectedApis() {
         // Given
+        Duration threadSleepDuration = Duration.ofMillis(1);
         when(armRpoService.getArmRpoExecutionDetailEntity(anyInt()))
             .thenReturn(armRpoExecutionDetailEntity);
 
@@ -77,7 +80,7 @@ class TriggerArmRpoSearchServiceImplTest {
             .thenReturn(SEARCH_NAME);
 
         // When
-        triggerArmRpoSearchServiceImpl.triggerArmRpoSearch();
+        triggerArmRpoSearchServiceImpl.triggerArmRpoSearch(threadSleepDuration);
 
         // Then
         verify(armRpoService).createArmRpoExecutionDetailEntity(userAccount);
@@ -101,11 +104,12 @@ class TriggerArmRpoSearchServiceImplTest {
     @Test
     void triggerArmRpoSearch_shouldBubbleException_whenDownstreamApiThrowsException() {
         // Given
+        Duration threadSleepDuration = Duration.ofMillis(1);
         doThrow(new ArmRpoException("some message"))
             .when(armRpoApi).getRecordManagementMatter(anyString(), anyInt(), any(UserAccountEntity.class));
 
         // When
-        triggerArmRpoSearchServiceImpl.triggerArmRpoSearch();
+        triggerArmRpoSearchServiceImpl.triggerArmRpoSearch(threadSleepDuration);
 
         // Then
         verify(armRpoService).createArmRpoExecutionDetailEntity(userAccount);

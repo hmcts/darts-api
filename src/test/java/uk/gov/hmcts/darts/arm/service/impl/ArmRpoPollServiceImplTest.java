@@ -364,6 +364,7 @@ class ArmRpoPollServiceImplTest {
         armRpoExecutionDetailEntity.setArmRpoStatus(ARM_RPO_HELPER_MOCKS.getCompletedRpoStatus());
         armRpoExecutionDetailEntity.setArmRpoState(ARM_RPO_HELPER_MOCKS.getSaveBackgroundSearchRpoState());
         when(armApiService.getArmBearerToken()).thenReturn("bearerToken");
+        when(armRpoApi.getExtendedSearchesByMatter(anyString(), anyInt(), any())).thenReturn(PRODUCTION_NAME);
         when(armRpoApi.createExportBasedOnSearchResultsTable(anyString(), anyInt(), any(), any(), any())).thenReturn(false);
 
         // when
@@ -387,6 +388,7 @@ class ArmRpoPollServiceImplTest {
         armRpoExecutionDetailEntity.setArmRpoStatus(ARM_RPO_HELPER_MOCKS.getCompletedRpoStatus());
         armRpoExecutionDetailEntity.setArmRpoState(ARM_RPO_HELPER_MOCKS.getSaveBackgroundSearchRpoState());
         when(armApiService.getArmBearerToken()).thenReturn("bearerToken");
+        when(armRpoApi.getExtendedSearchesByMatter(anyString(), anyInt(), any())).thenReturn(PRODUCTION_NAME);
         when(armRpoApi.createExportBasedOnSearchResultsTable(anyString(), anyInt(), any(), any(), any())).thenReturn(true);
         when(armRpoApi.getProductionOutputFiles(anyString(), anyInt(), any())).thenReturn(List.of());
 
@@ -413,6 +415,7 @@ class ArmRpoPollServiceImplTest {
         armRpoExecutionDetailEntity.setArmRpoStatus(ARM_RPO_HELPER_MOCKS.getCompletedRpoStatus());
         armRpoExecutionDetailEntity.setArmRpoState(ARM_RPO_HELPER_MOCKS.getSaveBackgroundSearchRpoState());
         when(armApiService.getArmBearerToken()).thenReturn("bearerToken");
+        when(armRpoApi.getExtendedSearchesByMatter(anyString(), anyInt(), any())).thenReturn(PRODUCTION_NAME);
         when(armRpoApi.createExportBasedOnSearchResultsTable(anyString(), anyInt(), any(), any(), any())).thenThrow(new ArmRpoException("Test exception"));
 
         // when
