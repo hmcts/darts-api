@@ -28,11 +28,10 @@ class UserActivateValidatorTest {
     UserAccountRepository userAccountRepository;
 
     @Test
-    void testValidateActivateSuccess() {
+    void validate_shouldSucceed_whenDeactivatedUserExistsWithAnEmailAddress_andWeAttemptToActivateTheUser() {
         Integer userId = 200;
 
         UserAccountEntity entity = new UserAccountEntity();
-        entity.setUserFullName("fullname");
         entity.setEmailAddress("test@hmcts.net");
         entity.setActive(false);
 
@@ -44,7 +43,22 @@ class UserActivateValidatorTest {
     }
 
     @Test
-    void testActivateAlreadyActivatedSoNoValidation() {
+    void validate_shouldThrowException_whenDeactivatedUserExistsWithNoEmailAddress_andWeAttemptToActivateTheUser() {
+        Integer userId = 200;
+
+        UserAccountEntity entity = new UserAccountEntity();
+        entity.setActive(false);
+
+        UserPatch patch = new UserPatch();
+        patch.setActive(true);
+
+        when(userAccountRepository.findById(userId)).thenReturn(Optional.of(entity));
+        DartsApiException exception = assertThrows(DartsApiException.class, () -> userAuthoriseValidator.validate(new IdRequest<>(patch, userId)));
+        Assertions.assertEquals(UserManagementError.USER_ACTIVATION_EMAIL_VIOLATION, exception.getError());
+    }
+
+    @Test
+    void validate_shouldSucceed_whenActivatedUserExists_andWeAttemptToActivateTheUser() {
         Integer userId = 200;
 
         UserAccountEntity entity = new UserAccountEntity();
@@ -58,54 +72,7 @@ class UserActivateValidatorTest {
     }
 
     @Test
-    void testValidateActivateFailureNoEmail() {
-        Integer userId = 200;
-
-        UserAccountEntity entity = new UserAccountEntity();
-        entity.setEmailAddress("test@hmcts.net");
-        entity.setActive(false);
-
-        UserPatch patch = new UserPatch();
-        patch.setActive(true);
-
-        when(userAccountRepository.findById(userId)).thenReturn(Optional.of(entity));
-        DartsApiException exception = assertThrows(DartsApiException.class, () -> userAuthoriseValidator.validate(new IdRequest<>(patch, userId)));
-        Assertions.assertEquals(UserManagementError.USER_ACTIVATION_FULLNAME_OR_EMAIL_VIOLATION, exception.getError());
-    }
-
-    @Test
-    void testValidateActivateFailureNoFullName() {
-        Integer userId = 200;
-
-        UserAccountEntity entity = new UserAccountEntity();
-        entity.setUserFullName("fullname");
-        entity.setActive(false);
-
-        UserPatch patch = new UserPatch();
-        patch.setActive(true);
-
-        when(userAccountRepository.findById(userId)).thenReturn(Optional.of(entity));
-        DartsApiException exception = assertThrows(DartsApiException.class, () -> userAuthoriseValidator.validate(new IdRequest<>(patch, userId)));
-        Assertions.assertEquals(UserManagementError.USER_ACTIVATION_FULLNAME_OR_EMAIL_VIOLATION, exception.getError());
-    }
-
-    @Test
-    void testValidateActivateFailureNoFullNameAndEmailAddress() {
-        Integer userId = 200;
-
-        UserAccountEntity entity = new UserAccountEntity();
-        entity.setActive(false);
-
-        UserPatch patch = new UserPatch();
-        patch.setActive(true);
-
-        when(userAccountRepository.findById(userId)).thenReturn(Optional.of(entity));
-        DartsApiException exception = assertThrows(DartsApiException.class, () -> userAuthoriseValidator.validate(new IdRequest<>(patch, userId)));
-        Assertions.assertEquals(UserManagementError.USER_ACTIVATION_FULLNAME_OR_EMAIL_VIOLATION, exception.getError());
-    }
-
-    @Test
-    void testValidateDeactivateNoFailureOnNoFullNameAndNoEmailAddress() {
+    void validate_shouldSucceed_whenADeactivateRequestIsSent() {
         Integer userId = 200;
 
         UserPatch patch = new UserPatch();

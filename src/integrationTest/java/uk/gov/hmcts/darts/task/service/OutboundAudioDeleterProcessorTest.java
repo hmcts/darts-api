@@ -497,7 +497,7 @@ class OutboundAudioDeleterProcessorTest extends IntegrationBase {
         UserAccountEntity userAccountEntity = dartsDatabase.getUserAccountRepository().findById(transientObjectDirectory.getLastModifiedBy().getId()).get();
         assertNotEquals(
             "system_housekeeping",
-            userAccountEntity.getUserName()
+            userAccountEntity.getUserFullName()
         );
 
         assertEquals(

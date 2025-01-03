@@ -6,7 +6,6 @@ import uk.gov.hmcts.darts.common.enums.SecurityRoleEnum;
 
 import java.util.Set;
 
-import static org.apache.commons.lang3.RandomStringUtils.random;
 import static uk.gov.hmcts.darts.test.common.data.SecurityGroupTestData.buildGroupForRoleAndCourthouse;
 
 public class UserAccountTestData {
@@ -16,11 +15,9 @@ public class UserAccountTestData {
     }
 
     public static UserAccountEntity minimalUserAccount() {
-        var postfix = random(10, false, true);
         var userAccount = new UserAccountEntity();
         userAccount.setActive(true);
         userAccount.setIsSystemUser(false);
-        userAccount.setUserName("some-user-name-" + postfix);
         userAccount.setUserFullName("some-user-full-name");
         return userAccount;
     }

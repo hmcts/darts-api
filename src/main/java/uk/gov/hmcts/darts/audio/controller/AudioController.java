@@ -37,7 +37,6 @@ import uk.gov.hmcts.darts.audio.service.MediaRequestService;
 import uk.gov.hmcts.darts.audio.util.StreamingResponseEntityUtil;
 import uk.gov.hmcts.darts.audio.validation.AddAudioFileValidator;
 import uk.gov.hmcts.darts.audio.validation.AddAudioMetaDataValidator;
-import uk.gov.hmcts.darts.audio.validation.MediaIdValidator;
 import uk.gov.hmcts.darts.authorisation.annotation.Authorisation;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
@@ -78,7 +77,6 @@ public class AudioController implements AudioApi {
     private final MediaRequestService mediaRequestService;
     private final TransformedMediaMapper transformedMediaMapper;
     private final AdminMediaService adminMediaService;
-    private final MediaIdValidator mediaIdValidator;
 
     @Override
     @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
@@ -129,8 +127,6 @@ public class AudioController implements AudioApi {
         securityRoles = {JUDICIARY, REQUESTER, APPROVER, TRANSCRIBER, TRANSLATION_QA},
         globalAccessSecurityRoles = {JUDICIARY, SUPER_ADMIN, SUPER_USER, RCJ_APPEALS, TRANSLATION_QA, DARTS})
     public ResponseEntity<byte[]> preview(Integer mediaId, String httpRangeList) {
-        // return 404 if the media is hidden
-        mediaIdValidator.validateNotHidden(mediaId);
         AudioPreview audioPreview = audioPreviewService.getOrCreateAudioPreview(mediaId);
         if (audioPreview.getStatus().equals(FAILED)) {
             log.info("Media with ID {} status FAILED", mediaId);

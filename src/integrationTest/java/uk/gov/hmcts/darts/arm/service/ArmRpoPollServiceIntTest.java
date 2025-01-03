@@ -6,8 +6,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.test.context.TestPropertySource;
 import uk.gov.hmcts.darts.arm.client.ArmRpoClient;
 import uk.gov.hmcts.darts.arm.client.model.rpo.CreateExportBasedOnSearchResultsTableResponse;
@@ -17,6 +19,7 @@ import uk.gov.hmcts.darts.arm.client.model.rpo.MasterIndexFieldByRecordClassSche
 import uk.gov.hmcts.darts.arm.client.model.rpo.ProductionOutputFilesResponse;
 import uk.gov.hmcts.darts.arm.client.model.rpo.RemoveProductionResponse;
 import uk.gov.hmcts.darts.arm.component.ArmRpoDownloadProduction;
+import uk.gov.hmcts.darts.arm.config.ArmDataManagementConfiguration;
 import uk.gov.hmcts.darts.arm.helper.ArmRpoHelper;
 import uk.gov.hmcts.darts.arm.service.impl.ArmApiServiceImpl;
 import uk.gov.hmcts.darts.arm.service.impl.ArmRpoPollServiceImpl;
@@ -63,6 +66,11 @@ class ArmRpoPollServiceIntTest extends PostgresIntegrationBase {
     @MockBean
     private ArmRpoDownloadProduction armRpoDownloadProduction;
 
+    @SpyBean
+    private ArmDataManagementConfiguration armDataManagementConfiguration;
+    @TempDir
+    protected File tempDirectory;
+
     private ArmRpoExecutionDetailEntity armRpoExecutionDetailEntity;
 
     @Autowired
@@ -75,6 +83,10 @@ class ArmRpoPollServiceIntTest extends PostgresIntegrationBase {
         lenient().when(userIdentity.getUserAccount()).thenReturn(userAccountEntity);
 
         armRpoExecutionDetailEntity = dartsPersistence.save(getArmRpoExecutionDetailTestData().minimalArmRpoExecutionDetailEntity());
+
+        String fileLocation = tempDirectory.getAbsolutePath();
+        lenient().when(armDataManagementConfiguration.getTempBlobWorkspace()).thenReturn(fileLocation);
+
     }
 
     @Test

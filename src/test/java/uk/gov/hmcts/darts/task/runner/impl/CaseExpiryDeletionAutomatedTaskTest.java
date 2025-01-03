@@ -13,6 +13,7 @@ import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
 import uk.gov.hmcts.darts.common.repository.AutomatedTaskRepository;
 import uk.gov.hmcts.darts.common.repository.CaseRepository;
 import uk.gov.hmcts.darts.common.service.DataAnonymisationService;
+import uk.gov.hmcts.darts.hearings.api.HearingApi;
 import uk.gov.hmcts.darts.log.api.LogApi;
 import uk.gov.hmcts.darts.task.config.CaseExpiryDeletionAutomatedTaskConfig;
 import uk.gov.hmcts.darts.task.service.LockService;
@@ -47,6 +48,8 @@ class CaseExpiryDeletionAutomatedTaskTest {
     private DataAnonymisationService dataAnonymisationService;
     @Mock
     private UserIdentity userIdentity;
+    @Mock
+    private HearingApi hearingApi;
 
 
     @InjectMocks
@@ -73,20 +76,15 @@ class CaseExpiryDeletionAutomatedTaskTest {
         verify(currentTimeHelper, times(1))
             .currentOffsetDateTime();
 
-        verify(dataAnonymisationService, times(1))
-            .anonymiseCourtCaseById(userAccount, 1, false);
-        verify(dataAnonymisationService, times(1))
-            .anonymiseCourtCaseById(userAccount, 2, false);
-        verify(dataAnonymisationService, times(1))
-            .anonymiseCourtCaseById(userAccount, 3, false);
+        verify(dataAnonymisationService).anonymiseCourtCaseById(userAccount, 1, false);
+        verify(hearingApi).removeMediaLinkToHearing(1);
+        verify(dataAnonymisationService).anonymiseCourtCaseById(userAccount, 2, false);
+        verify(hearingApi).removeMediaLinkToHearing(2);
+        verify(dataAnonymisationService).anonymiseCourtCaseById(userAccount, 3, false);
+        verify(hearingApi).removeMediaLinkToHearing(3);
 
-
-        verify(caseRepository, times(1))
-            .findCaseIdsToBeAnonymised(offsetDateTime.minus(duration), Limit.of(5));
-
-        verify(caseExpiryDeletionAutomatedTask, times(1))
-            .getAutomatedTaskBatchSize();
-        verify(userIdentity, times(1))
-            .getUserAccount();
+        verify(caseRepository).findCaseIdsToBeAnonymised(offsetDateTime.minus(duration), Limit.of(5));
+        verify(caseExpiryDeletionAutomatedTask).getAutomatedTaskBatchSize();
+        verify(userIdentity).getUserAccount();
     }
 }

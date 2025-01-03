@@ -808,19 +808,18 @@ components:
         courthouse:
           type: string
           example: Swansea
-          maxLength: 255
         courtroom:
           type: string
           example: 2
-          maxLength: 255
+          maxLength: 64
         judge_name:
           type: string
           example: Judge Walker
-          maxLength: 255
+          maxLength: 2000
         defendant_name:
           type: string
           example: 'David Defendant'
-          maxLength: 255
+          maxLength: 2000
         date_from:
           type: string
           format: date
@@ -830,7 +829,7 @@ components:
         event_text_contains:
           type: string
           example: 'Event text'
-          maxLength: 255
+          maxLength: 2000
 
     IsDataAnonymised:
       type: boolean

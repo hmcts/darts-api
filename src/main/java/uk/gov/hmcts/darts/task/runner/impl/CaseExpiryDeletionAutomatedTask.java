@@ -4,12 +4,14 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.data.domain.Limit;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
 import uk.gov.hmcts.darts.common.repository.AutomatedTaskRepository;
 import uk.gov.hmcts.darts.common.repository.CaseRepository;
 import uk.gov.hmcts.darts.common.service.DataAnonymisationService;
+import uk.gov.hmcts.darts.hearings.api.HearingApi;
 import uk.gov.hmcts.darts.log.api.LogApi;
 import uk.gov.hmcts.darts.task.api.AutomatedTaskName;
 import uk.gov.hmcts.darts.task.config.CaseExpiryDeletionAutomatedTaskConfig;
@@ -30,6 +32,7 @@ public class CaseExpiryDeletionAutomatedTask
 
     private final CurrentTimeHelper currentTimeHelper;
     private final DataAnonymisationService dataAnonymisationService;
+    private final HearingApi hearingApi;
     private final CaseRepository caseRepository;
     private final UserIdentity userAccountService;
 
@@ -38,11 +41,14 @@ public class CaseExpiryDeletionAutomatedTask
                                            CurrentTimeHelper currentTimeHelper,
                                            CaseRepository caseRepository,
                                            LogApi logApi, LockService lockService,
-                                           DataAnonymisationService dataAnonymisationService, UserIdentity userAccountService) {
+                                           DataAnonymisationService dataAnonymisationService,
+                                           HearingApi hearingApi,
+                                           UserIdentity userAccountService) {
         super(automatedTaskRepository, automatedTaskConfigurationProperties, logApi, lockService);
         this.currentTimeHelper = currentTimeHelper;
         this.caseRepository = caseRepository;
         this.dataAnonymisationService = dataAnonymisationService;
+        this.hearingApi = hearingApi;
         this.userAccountService = userAccountService;
     }
 
@@ -52,6 +58,7 @@ public class CaseExpiryDeletionAutomatedTask
     }
 
     @Override
+    @Transactional
     public void runTask() {
         final UserAccountEntity userAccount = userAccountService.getUserAccount();
         OffsetDateTime maxRetentionDate = currentTimeHelper.currentOffsetDateTime()
@@ -62,6 +69,7 @@ public class CaseExpiryDeletionAutomatedTask
                 try {
                     log.info("Anonymising case with id: {} because the criteria for retention has been met.", courtCaseId);
                     dataAnonymisationService.anonymiseCourtCaseById(userAccount, courtCaseId, false);
+                    hearingApi.removeMediaLinkToHearing(courtCaseId);
                 } catch (Exception e) {
                     log.error("An error occurred while anonymising case with id: {}", courtCaseId, e);
                 }

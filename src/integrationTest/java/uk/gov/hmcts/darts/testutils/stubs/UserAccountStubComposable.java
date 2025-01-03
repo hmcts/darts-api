@@ -56,7 +56,7 @@ public class UserAccountStubComposable {
             return userAccountEntityOptional.get();
         } else {
             var newUser = new UserAccountEntity();
-            newUser.setUserName("System User");
+            newUser.setUserFullName("System User");
             newUser.setEmailAddress("system.user@example.com");
             newUser.setActive(true);
             newUser.setAccountGuid(UUID.randomUUID().toString());
@@ -67,13 +67,12 @@ public class UserAccountStubComposable {
 
     public UserAccountEntity createSystemUserAccount(String username) {
         var newUser = new UserAccountEntity();
-        newUser.setUserName(username);
         String guid = UUID.randomUUID().toString();
         newUser.setEmailAddress(guid + "@example.com");
         newUser.setAccountGuid(guid);
         newUser.setActive(true);
         newUser.setIsSystemUser(true);
-        newUser.setUserFullName(newUser.getUserName());
+        newUser.setUserFullName(username);
         newUser.setCreatedBy(newUser);
         newUser.setLastModifiedBy(newUser);
         newUser.setCreatedDateTime(OffsetDateTime.of(2020, 10, 10, 10, 0, 0, 0, ZoneOffset.UTC));
@@ -132,7 +131,6 @@ public class UserAccountStubComposable {
     private UserAccountEntity createIntegrationUser(String guid, String fullName, String emailAddress, boolean active) {
         UserAccountEntity systemUser = userAccountRepository.getReferenceById(SYSTEM_USER_ID);
         var newUser = new UserAccountEntity();
-        newUser.setUserName(fullName + "Username");
         newUser.setUserFullName(fullName + "FullName");
         newUser.setEmailAddress(emailAddress);
         newUser.setCreatedBy(systemUser);
@@ -150,7 +148,6 @@ public class UserAccountStubComposable {
     private UserAccountEntity createSeparateUser(String guid) {
         UserAccountEntity systemUser = userAccountRepository.getReferenceById(SYSTEM_USER_ID);
         var newUser = new UserAccountEntity();
-        newUser.setUserName("Saad Integration User");
         newUser.setUserFullName("Saad Integration User");
         newUser.setEmailAddress(SEPARATE_TEST_USER_EMAIL);
         newUser.setCreatedBy(systemUser);

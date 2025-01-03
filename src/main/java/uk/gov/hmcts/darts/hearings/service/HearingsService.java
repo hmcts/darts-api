@@ -19,4 +19,6 @@ public interface HearingsService {
     List<Transcript> getTranscriptsByHearingId(Integer hearingId);
 
     List<Annotation> getAnnotationsByHearingId(Integer hearingId);
+
+    void removeMediaLinkToHearing(Integer courtCaseId);
 }

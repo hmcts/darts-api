@@ -243,7 +243,7 @@ class UserManagementServiceImplTest {
     private static UserAccountEntity createUserAccount(int id, String emailAddress) {
         UserAccountEntity userAccount = new UserAccountEntity();
         userAccount.setId(id);
-        userAccount.setUserName("James Smith");
+        userAccount.setUserFullName("James Smith");
         userAccount.setIsSystemUser(true);
         userAccount.setActive(true);
         userAccount.setCreatedDateTime(OffsetDateTime.of(2023, 10, 27, 22, 0, 0, 0, ZoneOffset.UTC));

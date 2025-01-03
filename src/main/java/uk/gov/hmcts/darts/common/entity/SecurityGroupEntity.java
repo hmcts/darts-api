@@ -93,4 +93,8 @@ public class SecurityGroupEntity extends MandatoryCreatedModifiedBaseEntity {
     @Column(name = "display_name")
     private String displayName;
 
+    @NotAudited
+    @Column(name = "group_display_name")
+    private String legacyGroupDisplayName;
+
 }

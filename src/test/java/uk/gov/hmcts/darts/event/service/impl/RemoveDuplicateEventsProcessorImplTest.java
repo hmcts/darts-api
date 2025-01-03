@@ -10,6 +10,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.darts.common.entity.EventEntity;
 import uk.gov.hmcts.darts.common.repository.CaseManagementRetentionRepository;
 import uk.gov.hmcts.darts.common.repository.CaseRetentionRepository;
+import uk.gov.hmcts.darts.common.repository.EventLinkedCaseRepository;
 import uk.gov.hmcts.darts.common.repository.EventRepository;
 import uk.gov.hmcts.darts.event.service.RemoveDuplicateEventsProcessor;
 
@@ -42,6 +43,9 @@ class RemoveDuplicateEventsProcessorImplTest {
     @Mock
     private CaseRetentionRepository caseRetentionRepository;
 
+    @Mock
+    private EventLinkedCaseRepository eventLinkedCaseRepository;
+
     @Captor
     private ArgumentCaptor<List<EventEntity>> eventsCaptorForEventDeletion;
 
@@ -54,6 +58,7 @@ class RemoveDuplicateEventsProcessorImplTest {
     void setUp() {
         removeDuplicateEventsProcessor = new RemoveDuplicateEventsProcessorImpl(
             eventRepository,
+            eventLinkedCaseRepository,
             caseManagementRetentionRepository,
             caseRetentionRepository
         );
@@ -102,9 +107,11 @@ class RemoveDuplicateEventsProcessorImplTest {
         verify(caseRetentionRepository).flush();
         verify(caseManagementRetentionRepository).deleteAllByEventEntityIn(toBeDeleted);
         verify(caseManagementRetentionRepository).flush();
+        verify(eventLinkedCaseRepository).deleteAllByEventIn(toBeDeleted);
+        verify(eventLinkedCaseRepository).flush();
         verify(eventRepository).deleteAll(toBeDeleted);
         verify(eventRepository).flush();
         verifyNoMoreInteractions(eventRepository);
-        verifyNoMoreInteractions(caseRetentionRepository, caseManagementRetentionRepository);
+        verifyNoMoreInteractions(caseRetentionRepository, caseManagementRetentionRepository, eventLinkedCaseRepository);
     }
 }

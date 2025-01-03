@@ -97,4 +97,11 @@ public class TranscriptionDocumentEntity extends ModifiedBaseEntity
 
     @OneToMany(mappedBy = ObjectAdminActionEntity_.TRANSCRIPTION_DOCUMENT)
     private List<ObjectAdminActionEntity> adminActions = new ArrayList<>();
+
+    @Column(name = "subcontent_object_id", length = 16)
+    private String subcontentObjectId;
+
+    @Column(name = "subcontent_position")
+    private Integer subcontentPosition;
+
 }

@@ -53,8 +53,7 @@ public class ArmRpoPollServiceImpl implements ArmRpoPollService {
         try {
             var armRpoExecutionDetailEntity = getArmRpoExecutionDetailEntity(isManualRun);
             if (isNull(armRpoExecutionDetailEntity)) {
-                log.warn("Unable to find armRpoExecutionDetailEntity to poll");
-                logApi.armRpoPollingFailed(executionId);
+                log.warn("Unable to find latest armRpoExecutionDetailEntity in a valid state to poll");
                 return;
             }
             executionId = armRpoExecutionDetailEntity.getId();

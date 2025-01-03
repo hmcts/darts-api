@@ -97,14 +97,12 @@ class GetTransformedMediaDetailsMapperTest {
         Integer ownerUserId = 7000;
         UserAccountEntity userAccountEntityOwner = new UserAccountEntity();
         userAccountEntityOwner.setUserFullName(ownerName);
-        userAccountEntityOwner.setUserName(ownerName);
         userAccountEntityOwner.setId(ownerUserId);
 
         String requestedBy = "requested by";
         Integer requestedUserId = 4000;
         UserAccountEntity userAccountEntityRequestedBy = new UserAccountEntity();
         userAccountEntityRequestedBy.setUserFullName(requestedBy);
-        userAccountEntityRequestedBy.setUserName(requestedBy);
         userAccountEntityRequestedBy.setId(requestedUserId);
 
         Integer mediaId = 300;

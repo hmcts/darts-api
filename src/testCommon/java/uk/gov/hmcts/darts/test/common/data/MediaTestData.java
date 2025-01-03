@@ -44,7 +44,7 @@ public class MediaTestData implements Persistable<TestMediaEntity.TestMediaBuild
         media.setChannel(1);
         media.setTotalChannels(1);
         media.setStart(now());
-        media.setEnd(now());
+        media.setEnd(now().plusMinutes(1));
         media.setMediaFile("a-media-file");
         media.setFileSize(1000L);
         media.setMediaFormat("mp2");

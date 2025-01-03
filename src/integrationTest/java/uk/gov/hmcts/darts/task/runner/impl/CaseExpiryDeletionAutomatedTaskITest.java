@@ -15,6 +15,7 @@ import uk.gov.hmcts.darts.common.entity.DefendantEntity;
 import uk.gov.hmcts.darts.common.entity.EventEntity;
 import uk.gov.hmcts.darts.common.entity.EventLinkedCaseEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
+import uk.gov.hmcts.darts.common.entity.MediaEntity;
 import uk.gov.hmcts.darts.common.entity.ProsecutorEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionCommentEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionEntity;
@@ -33,6 +34,7 @@ import uk.gov.hmcts.darts.test.common.data.ProsecutorTestData;
 import uk.gov.hmcts.darts.testutils.PostgresIntegrationBase;
 import uk.gov.hmcts.darts.testutils.stubs.EventLinkedCaseStub;
 import uk.gov.hmcts.darts.testutils.stubs.EventStub;
+import uk.gov.hmcts.darts.testutils.stubs.MediaLinkedCaseStub;
 import uk.gov.hmcts.darts.testutils.stubs.TranscriptionStub;
 import uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum;
 
@@ -59,6 +61,7 @@ class CaseExpiryDeletionAutomatedTaskITest extends PostgresIntegrationBase {
 
     private final CaseExpiryDeletionAutomatedTask caseExpiryDeletionAutomatedTask;
     private final EventLinkedCaseStub eventLinkedCaseStub;
+    private final MediaLinkedCaseStub mediaLinkedCaseStub;
     private int caseIndex;
 
     @Test
@@ -74,7 +77,7 @@ class CaseExpiryDeletionAutomatedTaskITest extends PostgresIntegrationBase {
 
     @Test
     @DisplayName("Two cases linked to the same event, one case has passed retention date, the other has not. Event should not be anonymised")
-    void retentionDatePassedForOneCaseButNotAnotherEventNotAnoymised() {
+    void retentionDatePassedForOneCaseButNotAnotherEventNotAnonymised() {
         CourtCaseEntity courtCase1 = createCase(-1, CaseRetentionStatus.COMPLETE);
         CourtCaseEntity courtCase2 = createCase(-1, CaseRetentionStatus.PENDING);
 
@@ -90,7 +93,7 @@ class CaseExpiryDeletionAutomatedTaskITest extends PostgresIntegrationBase {
 
     @Test
     @DisplayName("Two cases linked to the same event, both cases have passed retention date. Event should be anonymised")
-    void retentionDatePassedForBothCaseLinkedEventsAnoymised() {
+    void retentionDatePassedForBothCaseLinkedEventsAnonymised() {
         CourtCaseEntity courtCase1 = createCase(-1, CaseRetentionStatus.COMPLETE);
         CourtCaseEntity courtCase2 = createCase(-1, CaseRetentionStatus.COMPLETE);
 
@@ -148,6 +151,48 @@ class CaseExpiryDeletionAutomatedTaskITest extends PostgresIntegrationBase {
         assertCase(courtCase5.getId(), false);
     }
 
+    @Test
+    @DisplayName("Two cases linked to the same media, one case has passed retention date, the other has not. Media link should not be removed from hearings")
+    void retentionDatePassedForOneCaseButNotAnotherMediaLinkNotRemovedFromHearing() {
+        CourtCaseEntity courtCase1 = createCase(-1, CaseRetentionStatus.COMPLETE);
+        CourtCaseEntity courtCase2 = createCase(1, CaseRetentionStatus.COMPLETE);
+
+        createMediaForHearing(courtCase1.getHearings().get(0));
+        // Link same media to second case
+        linkExistingMediaToHearing(courtCase1.getHearings().get(0).getMediaList(), courtCase2.getHearings().getFirst(), courtCase2);
+
+        caseExpiryDeletionAutomatedTask.preRunTask();
+        caseExpiryDeletionAutomatedTask.runTask();
+
+        List<HearingEntity> hearingsToAssert = List.of(courtCase1.getHearings().get(0), courtCase2.getHearings().get(0));
+
+        hearingsToAssert.forEach(h -> {
+            HearingEntity hearing = dartsDatabase.getHearingRepository().findByCaseIdWithMediaList(h.getCourtCase().getId()).get();
+            assertThat(hearing.getMediaList()).size().isEqualTo(1);
+            assertThat(hearing.getMediaList().getFirst().getId()).isEqualTo(1);
+        });
+    }
+
+    @Test
+    @DisplayName("Two cases linked to the same media, both cases have passed retention date. Media link should be removed from hearings")
+    void retentionDatePassedForBothCasesThenMediaLinkRemovedFromHearing() {
+        CourtCaseEntity courtCase1 = createCase(-1, CaseRetentionStatus.COMPLETE);
+        CourtCaseEntity courtCase2 = createCase(-1, CaseRetentionStatus.COMPLETE);
+
+        createMediaForHearing(courtCase1.getHearings().get(0));
+        // Link same media to second case
+        linkExistingMediaToHearing(courtCase1.getHearings().get(0).getMediaList(), courtCase2.getHearings().getFirst(), courtCase2);
+
+        caseExpiryDeletionAutomatedTask.preRunTask();
+        caseExpiryDeletionAutomatedTask.runTask();
+
+        List<HearingEntity> hearingsToAssert = List.of(courtCase1.getHearings().get(0), courtCase2.getHearings().get(0));
+
+        hearingsToAssert.forEach(h -> {
+            HearingEntity hearing = dartsDatabase.getHearingRepository().findByCaseIdWithMediaList(h.getCourtCase().getId()).get();
+            assertThat(hearing.getMediaList()).isEmpty();
+        });
+    }
 
     private void assertCase(int caseId, boolean isAnonymised, int... excludeEventIds) {
         transactionalUtil.executeInTransaction(() -> {
@@ -356,7 +401,6 @@ class CaseExpiryDeletionAutomatedTaskITest extends PostgresIntegrationBase {
             caseEntity.addProsecutor(createProsecutorEntity(caseEntity));
 
             HearingEntity hearing = createHearing(caseEntity);
-            createHearing(caseEntity);
 
             caseEntity = dartsDatabase.getCaseRepository().save(caseEntity);
 
@@ -390,6 +434,27 @@ class CaseExpiryDeletionAutomatedTaskITest extends PostgresIntegrationBase {
 
         caseEntity.getHearings().add(hearingEntity);
         return hearingEntity;
+    }
+
+    private void createMediaForHearing(HearingEntity hearingEntity) {
+        MediaEntity mediaEntity = dartsDatabase.getMediaStub().createMediaEntity(hearingEntity.getCourtCase().getCourthouse().getCourthouseName(),
+                                          "1",
+                                           OffsetDateTime.parse("2024-01-01T00:00:00Z"),
+                                           OffsetDateTime.parse("2024-01-01T00:00:00Z"),
+                                           1,
+                                           "MP2");
+        hearingEntity.setMediaList(new ArrayList<>(List.of(mediaEntity)));
+        mediaLinkedCaseStub.createCaseLinkedMedia(mediaEntity, hearingEntity.getCourtCase());
+        dartsDatabase.getHearingRepository().save(hearingEntity);
+    }
+
+    private void linkExistingMediaToHearing(List<MediaEntity> mediaList, HearingEntity hearingEntity, CourtCaseEntity courtCase) {
+        transactionalUtil.executeInTransaction(() -> {
+            hearingEntity.setMediaList(mediaList);
+            dartsDatabase.getHearingRepository().save(hearingEntity);
+
+            mediaLinkedCaseStub.createCaseLinkedMedia(mediaList.get(0), courtCase);
+        });
     }
 
     private void createMediaRequest(HearingEntity hearingEntity) {

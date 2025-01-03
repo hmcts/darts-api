@@ -269,55 +269,6 @@ class UserControllerTest extends IntegrationBase {
     }
 
     @Test
-    void testActivateModifyUserWithSuperAdminAndFailWithNoFullName() throws Exception {
-        superAdminUserStub.givenSystemAdminIsAuthorised(userIdentity);
-
-        UserAccountEntity userAccountEntity = UserAccountTestData.minimalUserAccount();
-        userAccountEntity.setEmailAddress("test@hmcts.net");
-        userAccountEntity.setUserFullName(null);
-        userAccountEntity.setActive(false);
-        userAccountEntity = userAccountRepository.save(userAccountEntity);
-
-        // add user to the super admin group
-        Optional<SecurityGroupEntity> groupEntity
-            = securityGroupRepository.findByGroupNameIgnoreCase(SecurityGroupEnum.SUPER_ADMIN.getName());
-
-
-        userAccountEntity.getSecurityGroupEntities().add(groupEntity.get());
-        userAccountEntity = dartsDatabaseStub.save(userAccountEntity);
-
-        HearingEntity hearingEntity
-            = dartsDatabase.givenTheDatabaseContainsCourtCaseWithHearingAndCourthouseWithRoom(
-            SOME_CASE_ID,
-            SOME_COURTHOUSE,
-            SOME_COURTROOM,
-            DateConverterUtil.toLocalDateTime(SOME_DATE_TIME));
-
-        dartsDatabase.getTranscriptionStub().createTranscription(hearingEntity, userAccountEntity, TranscriptionStatusEnum.WITH_TRANSCRIBER);
-
-        // now run the test to disable the user
-        UserPatch userPatch = new UserPatch();
-        userPatch.setDescription("test");
-        userPatch.setActive(true);
-
-        MvcResult mvcResult = mockMvc.perform(patch(ENDPOINT_URL + userAccountEntity.getId())
-                                                  .header("Content-Type", "application/json")
-                                                  .content(objectMapper.writeValueAsString(userPatch)))
-            .andExpect(status().isConflict())
-            .andReturn();
-
-        uk.gov.hmcts.darts.transcriptions.model.Problem failureResponse = objectMapper
-            .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false).readValue(
-                mvcResult.getResponse().getContentAsString(),
-                uk.gov.hmcts.darts.transcriptions.model.Problem.class
-            );
-
-        // assert the failure response
-        Assertions.assertEquals(UserManagementError.USER_ACTIVATION_FULLNAME_OR_EMAIL_VIOLATION.getType(), failureResponse.getType());
-
-    }
-
-    @Test
     void testActivateModifyUserWithSuperAdminAndFailWithNoEmailAddress() throws Exception {
         superAdminUserStub.givenSystemAdminIsAuthorised(userIdentity);
 
@@ -362,7 +313,7 @@ class UserControllerTest extends IntegrationBase {
             );
 
         // assert the failure response
-        Assertions.assertEquals(UserManagementError.USER_ACTIVATION_FULLNAME_OR_EMAIL_VIOLATION.getType(), failureResponse.getType());
+        Assertions.assertEquals(UserManagementError.USER_ACTIVATION_EMAIL_VIOLATION.getType(), failureResponse.getType());
 
     }
 
@@ -409,7 +360,7 @@ class UserControllerTest extends IntegrationBase {
             );
 
         // assert the failure response
-        Assertions.assertEquals(UserManagementError.USER_ACTIVATION_FULLNAME_OR_EMAIL_VIOLATION.getType(), failureResponse.getType());
+        Assertions.assertEquals(UserManagementError.USER_ACTIVATION_EMAIL_VIOLATION.getType(), failureResponse.getType());
 
     }
 

@@ -538,19 +538,18 @@ public class MediaRequestServiceImpl implements MediaRequestService {
         if (mediaEntityOptional.isPresent()) {
             MediaEntity mediaEntity = mediaEntityOptional.get();
 
-            if (!mediaEntity.isHidden() && mediaHideRequest.getIsHidden()) {
-                auditApi.record(HIDE_AUDIO);
-            }
             mediaEntity.setHidden(mediaHideRequest.getIsHidden());
             mediaRepository.saveAndFlush(mediaEntity);
 
             if (request.getPayload().getIsHidden()) {
-                Optional<ObjectHiddenReasonEntity> objectHiddenReasonEntity;
-                objectHiddenReasonEntity = objectHiddenReasonRepository.findById(mediaHideRequest.getAdminAction().getReasonId());
+                Optional<ObjectHiddenReasonEntity> objectHiddenReasonEntity
+                    = objectHiddenReasonRepository.findById(mediaHideRequest.getAdminAction().getReasonId());
 
                 if (objectHiddenReasonEntity.isEmpty()) {
                     throw new DartsApiException(AudioApiError.MEDIA_HIDE_ACTION_REASON_NOT_FOUND);
                 }
+
+                auditApi.record(HIDE_AUDIO);
 
                 // on hiding add the relevant hide record
                 ObjectAdminActionEntity objectAdminActionEntity = new ObjectAdminActionEntity();
@@ -571,6 +570,7 @@ public class MediaRequestServiceImpl implements MediaRequestService {
                 response = GetAdminMediaResponseMapper.mapHideOrShowResponse(mediaEntityOptional.get(), null);
 
                 for (ObjectAdminActionEntity objectAdminActionEntity : objectAdminActionEntityLst) {
+                    auditApi.record(AuditActivity.UNHIDE_AUDIO, buildUnhideAudioAdditionalDataString(objectAdminActionEntity));
                     objectAdminActionRepository.deleteById(objectAdminActionEntity.getId());
                 }
             }
@@ -579,6 +579,10 @@ public class MediaRequestServiceImpl implements MediaRequestService {
         }
 
         return response;
+    }
+
+    private String buildUnhideAudioAdditionalDataString(ObjectAdminActionEntity objectAdminActionEntity) {
+        return "Ticket reference: " + objectAdminActionEntity.getTicketReference() + ", Comments: " + objectAdminActionEntity.getComments();
     }
 
 }

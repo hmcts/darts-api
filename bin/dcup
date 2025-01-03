@@ -1,28 +1,5 @@
 #!/bin/zsh
 
-function remove_old_images_and_containers() {
-    container=$(docker ps -a -q  --filter ancestor="$1")
-    docker rm -f "$container" 2> /dev/null
-    docker image rm "$1" 2> /dev/null
-}
-
-remove_old_images_and_containers "darts-gateway:master"
-remove_old_images_and_containers "darts-stub-services:master"
-
-./bin/dbuild darts-gateway &
-./bin/dbuild darts-stub-services &
-
-gateway_image="$(docker images -q darts-gateway:master 2> /dev/null)"
-stub_image="$(docker images -q darts-stub-services:master 2> /dev/null)"
-
-while [[ "$stub_image" == "" ]] || [[ "$gateway_image" == "" ]]
-do
-    sleep 2
-    stub_image="$(docker images -q darts-stub-services:master 2> /dev/null)"
-    gateway_image="$(docker images -q darts-gateway:master 2> /dev/null)"
-    echo "Waiting for images to be built..."
-done
-
 if [[ "$1" == "noapi" ]]; then
     docker compose -f docker-compose-local.yml up --scale darts-api=0 -d
 else

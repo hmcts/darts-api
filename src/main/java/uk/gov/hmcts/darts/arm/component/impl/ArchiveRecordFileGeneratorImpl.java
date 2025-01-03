@@ -3,7 +3,6 @@ package uk.gov.hmcts.darts.arm.component.impl;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.io.FileUtils;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.darts.arm.component.ArchiveRecordFileGenerator;
 import uk.gov.hmcts.darts.arm.enums.ArchiveRecordType;
@@ -17,7 +16,6 @@ import java.io.PrintWriter;
 import java.nio.file.Files;
 import java.util.List;
 
-import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.Objects.isNull;
 
 @Component
@@ -50,41 +48,28 @@ public class ArchiveRecordFileGeneratorImpl implements ArchiveRecordFileGenerato
     }
 
     @Override
-    public void generateArchiveRecords(List<ArchiveRecord> archiveRecords, File archiveRecordsFile) {
+    public String generateArchiveRecords(String archiveFileName, List<ArchiveRecord> archiveRecords) {
+        StringBuilder archiveRecordsStringBuilder = new StringBuilder();
+        String archiveRecordsString = null;
         if (!archiveRecords.isEmpty()) {
-            try (BufferedWriter fileWriter = Files.newBufferedWriter(archiveRecordsFile.toPath()); PrintWriter printWriter = new PrintWriter(fileWriter)) {
-                for (var archiveRecord : archiveRecords) {
-                    try {
-                        String archiveRecordOperation = objectMapper.writeValueAsString(archiveRecord.getArchiveRecordOperation());
-                        String uploadNewFileRecord = objectMapper.writeValueAsString(archiveRecord.getUploadNewFileRecord());
-                        log.debug("About to write {}{} to file {} for EOD {}", archiveRecordOperation, uploadNewFileRecord,
-                                  archiveRecordsFile.getAbsolutePath(), archiveRecord.getArchiveRecordOperation().getRelationId());
-                        printWriter.println(archiveRecordOperation);
-                        printWriter.println(uploadNewFileRecord);
-                    } catch (Exception e) {
-                        log.error("Unable to write archive record for EOD {} to ARM file {}",
-                                  archiveRecord.getArchiveRecordOperation().getRelationId(),
-                                  archiveRecordsFile.getAbsoluteFile());
-                        throw new DartsException(e);
-                    }
+            for (var archiveRecord : archiveRecords) {
+                try {
+                    String archiveRecordOperation = objectMapper.writeValueAsString(archiveRecord.getArchiveRecordOperation());
+                    String uploadNewFileRecord = objectMapper.writeValueAsString(archiveRecord.getUploadNewFileRecord());
+                    archiveRecordsStringBuilder.append(archiveRecordOperation).append(System.lineSeparator());
+                    archiveRecordsStringBuilder.append(uploadNewFileRecord).append(System.lineSeparator());
+                } catch (Exception e) {
+                    log.error("Unable to write archive record for EOD {}",
+                              archiveRecord.getArchiveRecordOperation().getRelationId());
+                    throw new DartsException(e);
                 }
-            } catch (IOException e) {
-                log.error("Unable to write ARM manifest file {}", archiveRecordsFile.getAbsoluteFile(), e);
-                throw new DartsException(e);
             }
-            logManifestFile(archiveRecords, archiveRecordsFile);
-        }
-    }
-    
-    private void logManifestFile(List<ArchiveRecord> archiveRecords, File archiveRecordsFile) {
-        try {
-            String contents = FileUtils.readFileToString(archiveRecordsFile.getAbsoluteFile(), UTF_8);
+            archiveRecordsString = archiveRecordsStringBuilder.toString();
             log.info("Contents of manifest file {} for EOD {}\n{}",
-                     archiveRecordsFile.getAbsoluteFile(),
+                     archiveFileName,
                      archiveRecords.get(0).getArchiveRecordOperation().getRelationId(),
-                     contents);
-        } catch (Exception e) {
-            log.error("Unable to read ARM manifest file {}", archiveRecordsFile.getAbsoluteFile(), e);
+                     archiveRecordsString);
         }
+        return archiveRecordsString;
     }
 }

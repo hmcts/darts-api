@@ -40,8 +40,6 @@ public class DailyListEntity extends CreatedModifiedBaseEntity {
     public static final String DAILY_LIST_ID_STRING = "daily_list_id_s";
     public static final String DAILY_LIST_SOURCE = "daily_list_source";
     public static final String CREATED_DATE_TIME = "created_ts";
-    public static final String LAST_UPDATED_DATE_TIME = "last_modified_ts";
-    public static final String SUPERSEDED = "superseded";
     public static final String TABLE_NAME = "daily_list";
     public static final String DAILY_LIST_CONTENT_JSON = "daily_list_content_json";
     public static final String DAILY_LIST_CONTENT_XML = "daily_list_content_xml";
@@ -94,7 +92,7 @@ public class DailyListEntity extends CreatedModifiedBaseEntity {
     @Column(name = MESSAGE_ID)
     private String messageId;
 
-    @Column(name = "content_object_id")
+    @Column(name = "content_object_id", length = 16)
     private String contentObjectId;
 
     @Column(name = "clip_id")
@@ -106,5 +104,11 @@ public class DailyListEntity extends CreatedModifiedBaseEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "elt_id")
     private ExternalLocationTypeEntity externalLocationTypeEntity;
+
+    @Column(name = "subcontent_object_id", length = 16)
+    private String subcontentObjectId;
+
+    @Column(name = "subcontent_position")
+    private Integer subcontentPosition;
 
 }

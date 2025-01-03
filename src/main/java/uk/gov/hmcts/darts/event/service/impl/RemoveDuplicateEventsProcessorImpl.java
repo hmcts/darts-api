@@ -6,6 +6,7 @@ import org.springframework.transaction.annotation.Transactional;
 import uk.gov.hmcts.darts.common.entity.EventEntity;
 import uk.gov.hmcts.darts.common.repository.CaseManagementRetentionRepository;
 import uk.gov.hmcts.darts.common.repository.CaseRetentionRepository;
+import uk.gov.hmcts.darts.common.repository.EventLinkedCaseRepository;
 import uk.gov.hmcts.darts.common.repository.EventRepository;
 import uk.gov.hmcts.darts.event.service.RemoveDuplicateEventsProcessor;
 
@@ -15,14 +16,17 @@ import java.util.List;
 @Slf4j
 public class RemoveDuplicateEventsProcessorImpl implements RemoveDuplicateEventsProcessor {
     private final EventRepository eventRepository;
+    private final EventLinkedCaseRepository eventLinkedCaseRepository;
     private final CaseManagementRetentionRepository caseManagementRetentionRepository;
     private final CaseRetentionRepository caseRetentionRepository;
 
     public RemoveDuplicateEventsProcessorImpl(
         EventRepository eventRepository,
+        EventLinkedCaseRepository eventLinkedCaseRepository,
         CaseManagementRetentionRepository caseManagementRetentionRepository,
         CaseRetentionRepository caseRetentionRepository) {
         this.eventRepository = eventRepository;
+        this.eventLinkedCaseRepository = eventLinkedCaseRepository;
         this.caseManagementRetentionRepository = caseManagementRetentionRepository;
         this.caseRetentionRepository = caseRetentionRepository;
     }
@@ -43,6 +47,8 @@ public class RemoveDuplicateEventsProcessorImpl implements RemoveDuplicateEvents
         caseRetentionRepository.flush();
         caseManagementRetentionRepository.deleteAllByEventEntityIn(eventEntitiesToDelete);
         caseManagementRetentionRepository.flush();
+        eventLinkedCaseRepository.deleteAllByEventIn(eventEntitiesToDelete);
+        eventLinkedCaseRepository.flush();
         eventRepository.deleteAll(eventEntitiesToDelete);
         eventRepository.flush();
 

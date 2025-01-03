@@ -307,7 +307,6 @@ class ArmRpoPollServiceImplTest {
 
         // then
         verify(armRpoService).getLatestArmRpoExecutionDetailEntity();
-        verify(logApi).armRpoPollingFailed(any());
 
         verifyNoMoreInteractions(armRpoApi, armApiService, userIdentity, fileOperationService, logApi);
     }
@@ -323,7 +322,6 @@ class ArmRpoPollServiceImplTest {
 
         // then
         verify(armRpoService).getLatestArmRpoExecutionDetailEntity();
-        verify(logApi).armRpoPollingFailed(any());
 
         verifyNoMoreInteractions(armRpoApi, armApiService, userIdentity, fileOperationService, logApi);
     }
@@ -338,7 +336,7 @@ class ArmRpoPollServiceImplTest {
 
         // then
         verify(armRpoService).getLatestArmRpoExecutionDetailEntity();
-        verify(logApi).armRpoPollingFailed(null);
+
         verifyNoMoreInteractions(armRpoApi, armApiService, userIdentity, fileOperationService, logApi);
     }
 
