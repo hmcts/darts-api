@@ -227,13 +227,10 @@ public class AudioTransformationServiceImpl implements AudioTransformationServic
         return mediaEntitiesForRequest.stream()
             .filter(media -> nonNull(media.getStart()))
             .filter(media -> nonNull(media.getEnd()))
-            // Filter out media where the media start and media end times are the same and not less than a second apart
+            // Filter out media where the media start and media end times are the same and not less than a second apart as trim works against seconds
             .filter(media -> !media.getStart().truncatedTo(ChronoUnit.SECONDS).isEqual(media.getEnd().truncatedTo(ChronoUnit.SECONDS)))
-            // Filter out media where the media start time is after the media end time
             .filter(media -> media.getStart().isBefore(media.getEnd()))
-            // Filter out media where the media end time is after the media request start time
             .filter(media -> mediaRequestEntity.getStartTime().isBefore(media.getEnd()))
-            // Filter out media where the media start time is before the media request end time
             .filter(media -> media.getStart().isBefore(mediaRequestEntity.getEndTime()))
             .sorted(MEDIA_START_TIME_CHANNEL_COMPARATOR)
             .collect(Collectors.toList());
