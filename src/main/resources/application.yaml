@@ -493,6 +493,7 @@ darts:
         system-user-email: system_ProcessE2EArmRpoPending@hmcts.net
         process-e2e-arm-rpo: ${PROCESS_E2E_ARM_RPO:true}
         arm-rpo-duration: ${ARM_RPO_DURATION:1h}
+        thread-sleep-duration: ${ARM_RPO_THREAD_SLEEP_DURATION:5s}
         lock:
           at-least-for: PT1M
           at-most-for: PT60M

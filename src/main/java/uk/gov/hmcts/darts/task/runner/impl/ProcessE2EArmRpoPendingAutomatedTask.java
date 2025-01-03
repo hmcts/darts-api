@@ -34,7 +34,7 @@ public class ProcessE2EArmRpoPendingAutomatedTask
 
     @Override
     protected void runTask() {
-        triggerArmRpoSearchService.triggerArmRpoSearch();
+        triggerArmRpoSearchService.triggerArmRpoSearch(getConfig().getThreadSleepDuration());
     }
 
     @Override

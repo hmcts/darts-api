@@ -11,6 +11,8 @@ import uk.gov.hmcts.darts.arm.service.TriggerArmRpoSearchService;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.log.api.LogApi;
 
+import java.time.Duration;
+
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -29,10 +31,12 @@ public class TriggerArmRpoSearchServiceImpl implements TriggerArmRpoSearchServic
      * If any of the underlying ArmRpoApi methods fail, ArmRpoApi will explicitly set the arm_rpo_execution_detail status to FAILED for that
      * particular stage. So if you're thinking about adding any transactionality at the level of TriggerArmRpoSearchServiceImpl please be careful to avoid
      * unwanted arm_rpo_execution_detail rollbacks.
+     *
+     * @param threadSleepDuration the duration to sleep the thread between API call
      */
     @Override
-    public void triggerArmRpoSearch() {
-        log.info("Triggering ARM RPO search flow...");
+    public void triggerArmRpoSearch(Duration threadSleepDuration) {
+        log.info("Triggering ARM RPO search flow with sleep duration {}", threadSleepDuration);
         Integer executionId = null;
         try {
             var userAccountEntity = userIdentity.getUserAccount();
@@ -70,6 +74,8 @@ public class TriggerArmRpoSearchServiceImpl implements TriggerArmRpoSearchServic
             String searchName = armRpoApi.addAsyncSearch(armBearerToken,
                                                          executionId,
                                                          userAccountEntity);
+
+            Thread.sleep(threadSleepDuration);
 
             armRpoApi.saveBackgroundSearch(armBearerToken,
                                            executionId,
