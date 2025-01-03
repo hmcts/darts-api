@@ -403,10 +403,15 @@ class EventControllerGetEventMappingsTest extends IntegrationBase {
             .andExpect(jsonPath("$[355].name", Matchers.is("An order made under s45 of the Youth Justice and Criminal Evidence Act 1999")))
             .andExpect(jsonPath("$[356].name", Matchers.is("Admitted ( Bail Act Offence)")))
             .andExpect(jsonPath("$[357].name", Matchers.is("Adjourned for pre-sentence report")))
-            .andExpect(jsonPath("$[358].name", Matchers.is("Acceptable guilty plea(s) to alternative new charge (not previously on the charge sheet), previously rejected by the prosecution.")))
-            .andExpect(jsonPath("$[359].name", Matchers.is("Acceptable guilty plea(s) to alternative new charge (not previously on the charge sheet), first offered by defence.")))
-            .andExpect(jsonPath("$[360].name", Matchers.is("Acceptable guilty plea(s) entered late to some or all charges / counts on the charge sheet, previously rejected by the prosecution.")))
-            .andExpect(jsonPath("$[361].name", Matchers.is("Acceptable guilty plea(s) entered late to some or all charges / counts on the charge sheet, offered for the first time by the defence.")))
+            .andExpect(jsonPath("$[358].name",
+             Matchers.is("Acceptable guilty plea(s) to alternative new charge (not previously on the charge sheet), previously rejected by the prosecution.")))
+            .andExpect(jsonPath("$[359].name",
+             Matchers.is("Acceptable guilty plea(s) to alternative new charge (not previously on the charge sheet), first offered by defence.")))
+            .andExpect(jsonPath("$[360].name",
+             Matchers.is("Acceptable guilty plea(s) entered late to some or all charges / " +
+              "counts on the charge sheet, previously rejected by the prosecution.")))
+            .andExpect(jsonPath("$[361].name",Matchers.is("Acceptable guilty plea(s) entered late to some or all charges /" +
+              " counts on the charge sheet, offered for the first time by the defence.")))
             .andExpect(jsonPath("$[362].name", Matchers.is("<Sentence remarks not filmed>")))
             .andExpect(jsonPath("$[363].name", Matchers.is("<Sentence remarks filmed>")))
             .andExpect(jsonPath("$[364].name", Matchers.is("7/14 day orders")))

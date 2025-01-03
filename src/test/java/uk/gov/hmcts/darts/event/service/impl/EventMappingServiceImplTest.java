@@ -9,9 +9,11 @@ import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Sort;
 import uk.gov.hmcts.darts.audit.api.AuditActivity;
 import uk.gov.hmcts.darts.audit.api.AuditApi;
 import uk.gov.hmcts.darts.common.entity.EventHandlerEntity;
+import uk.gov.hmcts.darts.common.entity.EventHandlerEntity_;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.common.repository.EventHandlerRepository;
@@ -191,7 +193,7 @@ class EventMappingServiceImplTest {
 
         EventHandlerEntity eventHandlerEntity2 = new EventHandlerEntity();
 
-        when(eventHandlerRepository.findAll()).thenReturn(List.of(eventHandlerEntity, eventHandlerEntity2));
+        when(eventHandlerRepository.findAll(Sort.by(EventHandlerEntity_.EVENT_NAME).descending())).thenReturn(List.of(eventHandlerEntity, eventHandlerEntity2));
 
         List<EventMapping> result = eventMappingServiceImpl.getEventMappings();
 
@@ -205,7 +207,7 @@ class EventMappingServiceImplTest {
         assertEquals(eventHandlerEntity.isReportingRestriction(), result.get(0).getHasRestrictions());
         assertEquals(eventHandlerEntity.getCreatedDateTime(), result.get(0).getCreatedAt());
 
-        verify(eventHandlerRepository).findAll();
+        verify(eventHandlerRepository).findAll(Sort.by(EventHandlerEntity_.EVENT_NAME).descending());
     }
 
     @ParameterizedTest
