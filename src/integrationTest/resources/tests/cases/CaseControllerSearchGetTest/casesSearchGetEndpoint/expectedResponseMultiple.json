@@ -1,0 +1,234 @@
+[
+  {
+    "case_id": 6,
+    "case_number": "case6",
+    "courthouse": "SWANSEA",
+    "defendants": [
+      "aDefendant"
+    ],
+    "judges": [
+      "AJUDGE",
+      "JUDGE6B"
+    ],
+    "hearings": [
+      {
+        "id": 16,
+        "date": "2023-09-20",
+        "courtroom": "COURTROOM2",
+        "judges": [
+          "AJUDGE"
+        ]
+      },
+      {
+        "id": 17,
+        "date": "2023-09-21",
+        "courtroom": "COURTROOM3",
+        "judges": [
+          "AJUDGE",
+          "JUDGE6B"
+        ]
+      },
+      {
+        "id": 18,
+        "date": "2023-09-22",
+        "courtroom": "COURTROOM1",
+        "judges": [
+          "AJUDGE"
+        ]
+      }
+    ],
+    "is_data_anonymised": false
+  },
+  {
+    "case_id": 5,
+    "case_number": "case5",
+    "courthouse": "SWANSEA",
+    "defendants": [
+      "aDefendant"
+    ],
+    "judges": [
+      "AJUDGE"
+    ],
+    "hearings": [
+      {
+        "id": 13,
+        "date": "2023-09-20",
+        "courtroom": "COURTROOM2",
+        "judges": [
+          "AJUDGE"
+        ]
+      },
+      {
+        "id": 14,
+        "date": "2023-09-21",
+        "courtroom": "COURTROOM1",
+        "judges": [
+          "AJUDGE"
+        ]
+      },
+      {
+        "id": 15,
+        "date": "2023-09-22",
+        "courtroom": "COURTROOM3",
+        "judges": [
+          "AJUDGE"
+        ]
+      }
+    ],
+    "is_data_anonymised": false
+  },
+  {
+    "case_id": 4,
+    "case_number": "Case4",
+    "courthouse": "SWANSEA",
+    "defendants": [
+      "aDefendant"
+    ],
+    "judges": [
+      "AJUDGE"
+    ],
+    "hearings": [
+      {
+        "id": 10,
+        "date": "2023-08-20",
+        "courtroom": "COURTROOM2",
+        "judges": [
+          "AJUDGE"
+        ]
+      },
+      {
+        "id": 11,
+        "date": "2023-08-21",
+        "courtroom": "COURTROOM1",
+        "judges": [
+          "AJUDGE"
+        ]
+      },
+      {
+        "id": 12,
+        "date": "2023-08-22",
+        "courtroom": "COURTROOM1",
+        "judges": [
+          "AJUDGE"
+        ]
+      }
+    ],
+    "is_data_anonymised": false
+  },
+  {
+    "case_id": 3,
+    "case_number": "Case3",
+    "courthouse": "SWANSEA",
+    "defendants": [
+      "aDefendant"
+    ],
+    "judges": [
+      "AJUDGE",
+      "JUDGE3A"
+    ],
+    "hearings": [
+      {
+        "id": 7,
+        "date": "2023-07-20",
+        "courtroom": "COURTROOM1",
+        "judges": [
+          "AJUDGE",
+          "JUDGE3A"
+        ]
+      },
+      {
+        "id": 8,
+        "date": "2023-07-21",
+        "courtroom": "COURTROOM1",
+        "judges": [
+          "AJUDGE"
+        ]
+      },
+      {
+        "id": 9,
+        "date": "2023-07-22",
+        "courtroom": "COURTROOM1",
+        "judges": [
+          "AJUDGE"
+        ]
+      }
+    ],
+    "is_data_anonymised": false
+  },
+  {
+    "case_id": 2,
+    "case_number": "Case2",
+    "courthouse": "SWANSEA",
+    "defendants": [
+      "Defendant2"
+    ],
+    "judges": [
+      "AJUDGE"
+    ],
+    "hearings": [
+      {
+        "id": 4,
+        "date": "2023-06-20",
+        "courtroom": "COURTROOM1",
+        "judges": [
+          "AJUDGE"
+        ]
+      },
+      {
+        "id": 5,
+        "date": "2023-06-21",
+        "courtroom": "COURTROOM1",
+        "judges": [
+          "AJUDGE"
+        ]
+      },
+      {
+        "id": 6,
+        "date": "2023-06-22",
+        "courtroom": "COURTROOM1",
+        "judges": [
+          "AJUDGE"
+        ]
+      }
+    ],
+    "is_data_anonymised": false
+  },
+  {
+    "case_id": 1,
+    "case_number": "Case1",
+    "courthouse": "SWANSEA",
+    "defendants": [
+      "aDefendant"
+    ],
+    "judges": [
+      "AJUDGE"
+    ],
+    "hearings": [
+      {
+        "id": 1,
+        "date": "2023-05-20",
+        "courtroom": "COURTROOM1",
+        "judges": [
+          "AJUDGE"
+        ]
+      },
+      {
+        "id": 2,
+        "date": "2023-05-21",
+        "courtroom": "COURTROOM1",
+        "judges": [
+          "AJUDGE"
+        ]
+      },
+      {
+        "id": 3,
+        "date": "2023-05-22",
+        "courtroom": "COURTROOM1",
+        "judges": [
+          "AJUDGE"
+        ]
+      }
+    ],
+    "is_data_anonymised": false
+  }
+]

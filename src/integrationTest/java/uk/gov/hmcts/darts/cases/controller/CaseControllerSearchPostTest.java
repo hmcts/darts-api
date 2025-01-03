@@ -70,20 +70,20 @@ class CaseControllerSearchPostTest extends IntegrationBase {
         CourtCaseEntity case1 = PersistableFactory.getCourtCaseTestData().createCaseAt(swanseaCourthouse);
         case1.setCaseNumber("Case1");
 
-        CourtCaseEntity case2 =  PersistableFactory.getCourtCaseTestData().createCaseAt(swanseaCourthouse);
+        CourtCaseEntity case2 = PersistableFactory.getCourtCaseTestData().createCaseAt(swanseaCourthouse);
         case2.setCaseNumber("Case2");
         case2.setDefendantList(new ArrayList<>(List.of(createDefendantForCaseWithName(case2, "Defendant2"))));
 
-        CourtCaseEntity case3 =  PersistableFactory.getCourtCaseTestData().createCaseAt(swanseaCourthouse);
+        CourtCaseEntity case3 = PersistableFactory.getCourtCaseTestData().createCaseAt(swanseaCourthouse);
         case3.setCaseNumber("Case3");
 
-        CourtCaseEntity case4 =  PersistableFactory.getCourtCaseTestData().createCaseAt(swanseaCourthouse);
+        CourtCaseEntity case4 = PersistableFactory.getCourtCaseTestData().createCaseAt(swanseaCourthouse);
         case4.setCaseNumber("Case4");
 
-        CourtCaseEntity case5 =  PersistableFactory.getCourtCaseTestData().createCaseAt(swanseaCourthouse);
+        CourtCaseEntity case5 = PersistableFactory.getCourtCaseTestData().createCaseAt(swanseaCourthouse);
         case5.setCaseNumber("case5");
 
-        CourtCaseEntity case6 =  PersistableFactory.getCourtCaseTestData().createCaseAt(swanseaCourthouse);
+        CourtCaseEntity case6 = PersistableFactory.getCourtCaseTestData().createCaseAt(swanseaCourthouse);
         case6.setCaseNumber("case6");
 
         CourtCaseEntity case7 = PersistableFactory.getCourtCaseTestData().createCaseAt(myCourthouseWithDifferentDisplayName);
@@ -180,6 +180,29 @@ class CaseControllerSearchPostTest extends IntegrationBase {
         String expectedResponse = getContentsFromFile(
             "tests/cases/CaseControllerSearchGetTest/casesSearchGetEndpoint/expectedResponse.json");
         assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
+    }
+
+    @Test
+    void caseSearch_multipleReturned_shouldBeOrderedByCaseId() throws Exception {
+        user = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
+        setupUserAccountAndSecurityGroup(swanseaCourthouse);
+        String requestBody = """
+            {
+              "courthouse": "SWANSEA",
+              "courtroom": "1",
+              "case_number": "case"
+            }""";
+
+        MockHttpServletRequestBuilder requestBuilder = post(ENDPOINT_URL)
+            .contentType(MediaType.APPLICATION_JSON_VALUE)
+            .content(requestBody);
+        MvcResult response = mockMvc.perform(requestBuilder).andExpect(status().isOk()).andReturn();
+
+        String actualResponse = response.getResponse().getContentAsString();
+
+        String expectedResponse = getContentsFromFile(
+            "tests/cases/CaseControllerSearchGetTest/casesSearchGetEndpoint/expectedResponseMultiple.json");
+        assertEquals(expectedResponse, actualResponse, JSONCompareMode.STRICT);
     }
 
     @Test
@@ -336,7 +359,6 @@ class CaseControllerSearchPostTest extends IntegrationBase {
               "date_from": "2023-05-19",
               "date_to": "2023-05-20"
             }""";
-
 
 
         MockHttpServletRequestBuilder requestBuilder = post(ENDPOINT_URL)
@@ -526,11 +548,11 @@ class CaseControllerSearchPostTest extends IntegrationBase {
         user = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
         setupUserAccountAndSecurityGroup(swanseaCourthouse);
         String requestBody = """
-        {
-          "courthouse": "SWANSEA",
-          "courtroom": "courtroom1",
-          "date_to": "2023-05-20"
-        }""";
+            {
+              "courthouse": "SWANSEA",
+              "courtroom": "courtroom1",
+              "date_to": "2023-05-20"
+            }""";
 
         MockHttpServletRequestBuilder requestBuilder = post("/cases/search")
             .contentType(MediaType.APPLICATION_JSON_VALUE)
@@ -544,11 +566,11 @@ class CaseControllerSearchPostTest extends IntegrationBase {
         user = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
         setupUserAccountAndSecurityGroup(swanseaCourthouse);
         String requestBody = """
-        {
-          "courthouse": "swansea",
-          "courtroom": "COURTROOM1",
-          "date_to": "2023-05-20"
-        }""";
+            {
+              "courthouse": "swansea",
+              "courtroom": "COURTROOM1",
+              "date_to": "2023-05-20"
+            }""";
 
         MockHttpServletRequestBuilder requestBuilder = post("/cases/search")
             .contentType(MediaType.APPLICATION_JSON_VALUE)
