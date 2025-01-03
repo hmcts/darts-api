@@ -103,7 +103,7 @@ public class OutboundFileProcessorImpl implements OutboundFileProcessor {
             // Used for logging only
             String audioFilenames = null;
             if (log.isDebugEnabled()) {
-                audioFileInfos.stream().map(AudioFileInfo::getMediaFile).collect(Collectors.joining(", "));
+                audioFilenames = audioFileInfos.stream().map(AudioFileInfo::getMediaFile).collect(Collectors.joining(", "));
             }
 
             List<ChannelAudio> concatenationsList = new ArrayList<>();
