@@ -155,6 +155,7 @@ components:
       properties:
         courthouse_name:
           type: string
+          maxLength: 255
         display_name:
           type: string
         region_id:
@@ -170,6 +171,7 @@ components:
       properties:
         courthouse_name:
           type: string
+          maxLength: 255
         display_name:
           type: string
         region_id:

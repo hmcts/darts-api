@@ -1032,9 +1032,12 @@ components:
         transcription_id:
           type: integer
           example: 1234
+          minimum: 1
+          maximum: 2147483647
         case_number:
           type: string
           example: C123
+          maxLength: 32
         courthouse_display_name:
           type: string
           example: some_courthouse
@@ -1045,9 +1048,11 @@ components:
         owner:
           type: string
           example: 'some-user-name'
+          maxLength: 2000
         requested_by:
           type: string
           example: 'some-user-name'
+          maxLength: 2000
         requested_at_from:
           type: string
           format: date
@@ -1562,6 +1567,7 @@ components:
         case_number:
           type: string
           description: 'The case number'
+          maxLength: 32
         courthouse_display_name:
           type: String
           description: 'The court house display name'
@@ -1571,9 +1577,11 @@ components:
         owner:
           type: string
           description: 'The media owner'
+          maxLength: 2000
         requested_by:
           type: string
           description: 'The person that requested the media'
+          maxLength: 2000
         requested_at_from:
           type: date
           description: 'The start date range that the media was requested'

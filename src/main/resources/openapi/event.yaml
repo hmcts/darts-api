@@ -727,6 +727,7 @@ components:
           type: string
         courtroom_name:
           type: string
+          maxLength: 64
         hearing_start_at:
           type: string
           format: date
