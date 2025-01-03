@@ -47,7 +47,6 @@ import static org.mockito.Mockito.when;
 import static org.skyscreamer.jsonassert.JSONAssert.assertEquals;
 import static uk.gov.hmcts.darts.arm.util.ArchiveConstants.ArchiveRecordOperationValues.UPLOAD_NEW_FILE;
 import static uk.gov.hmcts.darts.test.common.TestUtils.getContentsFromFile;
-import static uk.gov.hmcts.darts.test.common.TestUtils.getFile;
 
 @SuppressWarnings("PMD.AssignmentInOperand")
 @ExtendWith(MockitoExtension.class)
@@ -155,30 +154,24 @@ class ArchiveRecordFileGeneratorImplTest {
     }
 
     @Test
-    void generateArchiveRecords() throws Exception {
-        String fileLocation = tempDirectory.getAbsolutePath();
+    void generateArchiveRecords_typical() throws Exception {
         String relationId = "1234";
-        File archiveFile = FileStore.getFileStore().create(Path.of(fileLocation), Path.of("archive-records.a360"));
 
         var archiveRecord = createMediaArchiveRecord(relationId);
         List<ArchiveRecord> archiveRecords = List.of(archiveRecord, archiveRecord);
 
-        archiveRecordFileGenerator.generateArchiveRecords(archiveRecords, archiveFile);
+        String result = archiveRecordFileGenerator.generateArchiveRecords("archive-records.a360", archiveRecords);
 
-        File expectedResponse = getFile("Tests/arm/component/expectedResponseMultipleArchiveRecords.a360");
-        assertThat(archiveFile).hasSameTextualContentAs(expectedResponse);
+        String expectedResponse = getContentsFromFile("Tests/arm/component/expectedResponseMultipleArchiveRecords.a360");
+        assertThat(result).isEqualTo(expectedResponse);
     }
 
     @Test
-    void generateArchiveRecordsEmptyArchiveRecords() {
-        String fileLocation = tempDirectory.getAbsolutePath();
-        File archiveFile = new File(fileLocation, "archive-records.a360");
-
+    void generateArchiveRecords_emptyArchiveRecords() {
         List<ArchiveRecord> archiveRecords = Collections.emptyList();
 
-        archiveRecordFileGenerator.generateArchiveRecords(archiveRecords, archiveFile);
-
-        assertThat(Files.notExists(archiveFile.toPath())).isTrue();
+        String result = archiveRecordFileGenerator.generateArchiveRecords("archive-records.a360", archiveRecords);
+        assertThat(result).isBlank();
     }
 
     @Test
@@ -187,27 +180,11 @@ class ArchiveRecordFileGeneratorImplTest {
         archiveRecordFileGenerator = new ArchiveRecordFileGeneratorImpl(objectMapper);
         when(objectMapper.writeValueAsString(any())).thenThrow(RuntimeException.class);
 
-        String fileLocation = tempDirectory.getAbsolutePath();
-        File archiveFile = FileStore.getFileStore().create(Path.of(fileLocation), Path.of("archive-records.a360"));
-
         String relationId = "1234";
         var archiveRecord = createMediaArchiveRecord(relationId);
         List<ArchiveRecord> archiveRecords = List.of(archiveRecord);
 
-        assertThrows(DartsException.class, () -> archiveRecordFileGenerator.generateArchiveRecords(archiveRecords, archiveFile));
-    }
-
-    @Test
-    void generateArchiveRecordsFileError() {
-
-        String fileLocation = tempDirectory.getAbsolutePath();
-        File invalidFile = new File(fileLocation, "archive-recor/ds.a360");
-
-        String relationId = "1234";
-        var archiveRecord = createMediaArchiveRecord(relationId);
-        List<ArchiveRecord> archiveRecords = List.of(archiveRecord);
-
-        assertThrows(DartsException.class, () -> archiveRecordFileGenerator.generateArchiveRecords(archiveRecords, invalidFile));
+        assertThrows(DartsException.class, () -> archiveRecordFileGenerator.generateArchiveRecords("archive-records.a360", archiveRecords));
     }
 
     private static String getFileContents(File archiveFile) throws IOException {
