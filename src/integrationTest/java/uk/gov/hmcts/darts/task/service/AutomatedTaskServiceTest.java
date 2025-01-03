@@ -48,7 +48,7 @@ import uk.gov.hmcts.darts.task.config.ArmRetentionEventDateCalculatorAutomatedTa
 import uk.gov.hmcts.darts.task.config.ArmRpoPollAutomatedTaskConfig;
 import uk.gov.hmcts.darts.task.config.CloseOldCasesAutomatedTaskConfig;
 import uk.gov.hmcts.darts.task.config.CloseUnfinishedTranscriptionsAutomatedTaskConfig;
-import uk.gov.hmcts.darts.task.config.DailyListAutomatedTaskConfig;
+import uk.gov.hmcts.darts.task.config.DailyListHousekeepingAutomatedTaskConfig;
 import uk.gov.hmcts.darts.task.config.ExternalDataStoreDeleterAutomatedTaskConfig;
 import uk.gov.hmcts.darts.task.config.GenerateCaseDocumentAutomatedTaskConfig;
 import uk.gov.hmcts.darts.task.config.GenerateCaseDocumentForRetentionDateAutomatedTaskConfig;
@@ -67,7 +67,7 @@ import uk.gov.hmcts.darts.task.runner.impl.ArmRetentionEventDateCalculatorAutoma
 import uk.gov.hmcts.darts.task.runner.impl.ArmRpoPollingAutomatedTask;
 import uk.gov.hmcts.darts.task.runner.impl.CloseOldCasesAutomatedTask;
 import uk.gov.hmcts.darts.task.runner.impl.CloseUnfinishedTranscriptionsAutomatedTask;
-import uk.gov.hmcts.darts.task.runner.impl.DailyListAutomatedTask;
+import uk.gov.hmcts.darts.task.runner.impl.DailyListHousekeepingAutomatedTask;
 import uk.gov.hmcts.darts.task.runner.impl.ExternalDataStoreDeleterAutomatedTask;
 import uk.gov.hmcts.darts.task.runner.impl.GenerateCaseDocumentAutomatedTask;
 import uk.gov.hmcts.darts.task.runner.impl.GenerateCaseDocumentForRetentionDateAutomatedTask;
@@ -875,9 +875,9 @@ class AutomatedTaskServiceTest extends IntegrationBase {
 
     @Test
     void canUpdatedCronForDailyListHouseKeepingTask() {
-        var automatedTask = new DailyListAutomatedTask(
+        var automatedTask = new DailyListHousekeepingAutomatedTask(
             automatedTaskRepository,
-            mock(DailyListAutomatedTaskConfig.class),
+            mock(DailyListHousekeepingAutomatedTaskConfig.class),
             dailyListService,
             logApi,
             lockService
@@ -897,9 +897,9 @@ class AutomatedTaskServiceTest extends IntegrationBase {
     @Test
     void canCancelDailyListAutomatedTask() {
         AutomatedTask automatedTask =
-            new DailyListAutomatedTask(
+            new DailyListHousekeepingAutomatedTask(
                 automatedTaskRepository,
-                mock(DailyListAutomatedTaskConfig.class),
+                mock(DailyListHousekeepingAutomatedTaskConfig.class),
                 dailyListService,
                 logApi,
                 lockService
