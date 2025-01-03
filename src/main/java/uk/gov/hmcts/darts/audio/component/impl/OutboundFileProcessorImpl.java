@@ -100,7 +100,11 @@ public class OutboundFileProcessorImpl implements OutboundFileProcessor {
 
         List<AudioFileInfo> concatenatedAndMergedAudioFileInfos = new ArrayList<>();
         if (isNotEmpty(audioFileInfos)) {
-            String audioFilenames = audioFileInfos.stream().map(AudioFileInfo::getMediaFile).collect(Collectors.joining(", "));
+            // Used for logging only
+            String audioFilenames = null;
+            if (log.isDebugEnabled()) {
+                audioFilenames = audioFileInfos.stream().map(AudioFileInfo::getMediaFile).collect(Collectors.joining(", "));
+            }
 
             List<ChannelAudio> concatenationsList = new ArrayList<>();
 
