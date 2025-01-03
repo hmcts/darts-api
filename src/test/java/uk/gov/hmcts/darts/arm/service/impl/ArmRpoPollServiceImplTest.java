@@ -439,7 +439,7 @@ class ArmRpoPollServiceImplTest {
     }
 
     @Test
-    void pollArmRpo_shouldHandleGetInProgress() {
+    void pollArmRpo_shouldHandleGetExtendedSearchesByMatterGetInProgress() {
         // given
         armRpoExecutionDetailEntity.setArmRpoStatus(ARM_RPO_HELPER_MOCKS.getCompletedRpoStatus());
         armRpoExecutionDetailEntity.setArmRpoState(ARM_RPO_HELPER_MOCKS.getSaveBackgroundSearchRpoState());
@@ -453,10 +453,7 @@ class ArmRpoPollServiceImplTest {
         verify(armRpoService).getLatestArmRpoExecutionDetailEntity();
         verify(armApiService).getArmBearerToken();
         verify(armRpoApi).getExtendedSearchesByMatter(anyString(), anyInt(), any());
-        verify(armRpoApi).getMasterIndexFieldByRecordClassSchema(anyString(), anyInt(), any(), any());
-        verify(armRpoApi).createExportBasedOnSearchResultsTable(anyString(), anyInt(), any(), any(), any());
         verify(userIdentity).getUserAccount();
-        verify(logApi).armRpoPollingSuccessful(any());
 
         verifyNoMoreInteractions(armRpoApi, userIdentity, fileOperationService, logApi);
     }
