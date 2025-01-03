@@ -174,7 +174,7 @@ public class AudioRequestsController implements AudioRequestsApi {
             throw new DartsApiException(AudioRequestsApiError.INVALID_REQUEST, "Courthouse display name must be uppercase.");
         }
 
-            return new ResponseEntity<>(foundTransformedMediaResponse, HttpStatus.OK);
+        return new ResponseEntity<>(foundTransformedMediaResponse, HttpStatus.OK);
     }
 
     @Override
