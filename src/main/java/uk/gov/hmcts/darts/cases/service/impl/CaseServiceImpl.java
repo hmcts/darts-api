@@ -176,6 +176,7 @@ public class CaseServiceImpl implements CaseService {
         }
         List<HearingEntity> hearings = hearingRepository.findByCaseIds(caseIds).stream()
             .filter(HearingEntity::getHearingIsActual)
+            .sorted((o1, o2) -> o2.getCourtCase().getCaseNumber().compareTo(o1.getCourtCase().getCaseNumber()))
             .toList();
 
         return AdvancedSearchResponseMapper.mapResponse(hearings);
