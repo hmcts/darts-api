@@ -1,5 +1,7 @@
 package uk.gov.hmcts.darts.event.controller;
 
+import com.jayway.jsonpath.DocumentContext;
+import com.jayway.jsonpath.JsonPath;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -21,6 +23,7 @@ import java.util.List;
 
 import static java.time.OffsetDateTime.now;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.SUPER_ADMIN;
@@ -117,5 +120,11 @@ class EventSearchControllerTest extends IntegrationBase {
         assertThat(response).hasJsonPathNumberValue("[0].courtroom.id");
         assertThat(response).hasJsonPathStringValue("[0].courtroom.name");
         assertThat(response).hasJsonPathBooleanValue("[0].is_data_anonymised");
+
+        DocumentContext documentContext = JsonPath.parse(mvcResult.getResponse().getContentAsString());
+        assertEquals(2, (Integer) documentContext.read("$[0].id"));
+        assertEquals(2, (Integer) documentContext.read("$[1].id"));
+        assertEquals(1, (Integer) documentContext.read("$[2].id"));
+        assertEquals(1, (Integer) documentContext.read("$[3].id"));
     }
 }
