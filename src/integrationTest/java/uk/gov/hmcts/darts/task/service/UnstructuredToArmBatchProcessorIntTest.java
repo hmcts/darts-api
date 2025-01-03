@@ -1,10 +1,8 @@
 package uk.gov.hmcts.darts.task.service;
 
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.io.FileUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.io.TempDir;
 import org.mockito.ArgumentCaptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -13,6 +11,7 @@ import uk.gov.hmcts.darts.arm.api.ArmDataManagementApi;
 import uk.gov.hmcts.darts.arm.component.ArchiveRecordFileGenerator;
 import uk.gov.hmcts.darts.arm.config.ArmDataManagementConfiguration;
 import uk.gov.hmcts.darts.arm.config.UnstructuredToArmProcessorConfiguration;
+import uk.gov.hmcts.darts.arm.helper.DataStoreToArmHelper;
 import uk.gov.hmcts.darts.arm.mapper.MediaArchiveRecordMapper;
 import uk.gov.hmcts.darts.arm.service.ArchiveRecordService;
 import uk.gov.hmcts.darts.arm.service.ExternalObjectDirectoryService;
@@ -32,24 +31,18 @@ import uk.gov.hmcts.darts.testutils.IntegrationBase;
 import uk.gov.hmcts.darts.testutils.stubs.AuthorisationStub;
 import uk.gov.hmcts.darts.testutils.stubs.ExternalObjectDirectoryStub;
 
-import java.io.BufferedReader;
-import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import static java.lang.String.format;
-import static java.nio.file.Files.lines;
-import static java.nio.file.Files.readString;
 import static java.time.temporal.ChronoUnit.SECONDS;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.within;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.matches;
 import static org.mockito.Mockito.doReturn;
@@ -74,7 +67,7 @@ import static uk.gov.hmcts.darts.common.util.EodHelper.unstructuredLocation;
 @Slf4j
 class UnstructuredToArmBatchProcessorIntTest extends IntegrationBase {
 
-    ArgumentCaptor<File> manifestFileNameCaptor = ArgumentCaptor.forClass(File.class);
+    ArgumentCaptor<String> manifestFileNameCaptor = ArgumentCaptor.forClass(String.class);
 
     @SpyBean
     private ArmDataManagementApi armDataManagementApi;
@@ -91,7 +84,7 @@ class UnstructuredToArmBatchProcessorIntTest extends IntegrationBase {
     private UserIdentity userIdentity;
     @Autowired
     private ArmDataManagementConfiguration armDataManagementConfiguration;
-    @Autowired
+    @SpyBean
     private FileOperationService fileOperationService;
     @SpyBean
     private ArchiveRecordService archiveRecordService;
@@ -105,6 +98,8 @@ class UnstructuredToArmBatchProcessorIntTest extends IntegrationBase {
     private ExternalObjectDirectoryRepository eodRepository;
     @SpyBean
     private MediaArchiveRecordMapper mediaArchiveRecordMapper;
+    @SpyBean
+    private DataStoreToArmHelper dataStoreToArmHelper;
 
     @MockBean
     private UnstructuredToArmProcessorConfiguration unstructuredToArmProcessorConfiguration;
@@ -116,9 +111,6 @@ class UnstructuredToArmBatchProcessorIntTest extends IntegrationBase {
 
     @Autowired
     private ExternalObjectDirectoryService eodService;
-
-    @TempDir
-    private File tempDirectory;
 
     @Autowired
     private UnstructuredToArmBatchProcessor unstructuredToArmProcessor;
@@ -286,9 +278,6 @@ class UnstructuredToArmBatchProcessorIntTest extends IntegrationBase {
         String failedFilename3 = format("^%s.*", 9, eod3.getMedia().getId(), eod3.getTransferAttempts());
         doThrow(dartsException).when(armDataManagementApi).copyBlobDataToArm(any(), matches(failedFilename3));
 
-        String fileLocation = tempDirectory.getAbsolutePath();
-        armDataManagementConfiguration.setTempBlobWorkspace(fileLocation);
-
         //when
         unstructuredToArmProcessor.processUnstructuredToArm(5);
 
@@ -321,19 +310,12 @@ class UnstructuredToArmBatchProcessorIntTest extends IntegrationBase {
         );
         assertThat(failedMediaList.size()).isEqualTo(2);
 
-        MediaEntity media = medias.stream()
-            .filter(mediaEntity -> mediaEntity.getId().equals(foundMediaList.get(0))).findFirst().orElseThrow();
-        var successEod = eodRepository.findByMediaAndExternalLocationType(media, armLocation()).getFirst();
+        ArgumentCaptor<String> manifestFileContentCaptor = ArgumentCaptor.forClass(String.class);
+        verify(dataStoreToArmHelper).convertStringToBinaryData(manifestFileContentCaptor.capture());
+        String manifestFileContents = manifestFileContentCaptor.getValue();
 
-
-        Files.walk(Path.of(fileLocation)).filter(Files::isRegularFile).collect(Collectors.toList());
-        String[] types = {"a360"};
-        File manifestFile = FileUtils.listFiles(new File(fileLocation), types, true).stream()
-            .filter(file -> file.getName().contains(successEod.getManifestFile())).findFirst().orElseThrow();
-
-        log.info("manifestFile {}", manifestFile.getAbsolutePath());
         int expectedNumberOfRows = 6;
-        String manifestFileContents = verifyManifestFileContents(manifestFile, expectedNumberOfRows);
+        assertEquals(expectedNumberOfRows, manifestFileContents.lines().count());
         log.info("actual response {}", manifestFileContents);
 
         List<MediaEntity> successfulMedias = medias.stream()
@@ -385,20 +367,25 @@ class UnstructuredToArmBatchProcessorIntTest extends IntegrationBase {
         verify(armDataManagementApi, times(1)).copyBlobDataToArm(any(), eq(rawFile0Name));
         verify(armDataManagementApi, times(1)).saveBlobDataToArm(matches("DARTS_.+\\.a360"), any());
 
-        verify(archiveRecordFileGenerator).generateArchiveRecords(any(), manifestFileNameCaptor.capture());
-        File manifestFile = manifestFileNameCaptor.getValue();
-        Path manifestFilePath = manifestFile.toPath();
-        assertThat(lines(manifestFilePath).count()).isEqualTo(4);
-        assertThat(readString(manifestFilePath))
+        verify(archiveRecordFileGenerator).generateArchiveRecords(manifestFileNameCaptor.capture(), any());
+
+
+        ArgumentCaptor<String> manifestFileContentCaptor = ArgumentCaptor.forClass(String.class);
+        verify(dataStoreToArmHelper).convertStringToBinaryData(manifestFileContentCaptor.capture());
+        String manifestFileContent = manifestFileContentCaptor.getValue();
+
+        assertThat(manifestFileContent.lines().count()).isEqualTo(4);
+        assertThat(manifestFileContent)
             .contains("\"operation\":\"create_record\"",
                       "\"operation\":\"upload_new_file\"",
                       "\"dz_file_name\":\"" + rawFile0Name,
                       "\"dz_file_name\":\"" + rawFile1Name);
 
-        assertThat(armDropZoneEodsMedia0.get(0).getManifestFile()).isEqualTo(manifestFile.getName());
+        String manifestFileName = manifestFileNameCaptor.getValue();
+        assertThat(armDropZoneEodsMedia0.get(0).getManifestFile()).isEqualTo(manifestFileName);
         assertThat(armDropZoneEodsMedia0.get(0).getLastModifiedBy().getId()).isEqualTo(testUser.getId());
         assertThat(armDropZoneEodsMedia0.get(0).getLastModifiedDateTime()).isCloseToUtcNow(within(1, SECONDS));
-        assertThat(armDropZoneEodsMedia1.get(0).getManifestFile()).isEqualTo(manifestFile.getName());
+        assertThat(armDropZoneEodsMedia1.get(0).getManifestFile()).isEqualTo(manifestFileName);
     }
 
     @Test
@@ -432,20 +419,23 @@ class UnstructuredToArmBatchProcessorIntTest extends IntegrationBase {
         var armDropzoneEodsMedia3 = eodRepository.findByMediaStatusAndType(medias.get(3), armDropZoneStatus(), armLocation());
         assertThat(armDropzoneEodsMedia3).hasSize(0);
 
-        verify(archiveRecordFileGenerator).generateArchiveRecords(any(), manifestFileNameCaptor.capture());
-        File manifestFile = manifestFileNameCaptor.getValue();
-        assertThat(armDropzoneEodsMedia0.get(0).getManifestFile()).isEqualTo(manifestFile.getName());
+
+        verify(archiveRecordFileGenerator).generateArchiveRecords(manifestFileNameCaptor.capture(), any());
+        String manifestFileName = manifestFileNameCaptor.getValue();
+        assertThat(armDropzoneEodsMedia0.get(0).getManifestFile()).isEqualTo(manifestFileName);
         assertThat(armDropzoneEodsMedia0.get(0).getLastModifiedBy().getId()).isEqualTo(testUser.getId());
         assertThat(armDropzoneEodsMedia0.get(0).getLastModifiedDateTime()).isCloseToUtcNow(within(1, SECONDS));
-        assertThat(armDropzoneEodsMedia1.get(0).getManifestFile()).isEqualTo(manifestFile.getName());
+        assertThat(armDropzoneEodsMedia1.get(0).getManifestFile()).isEqualTo(manifestFileName);
 
-        Path generatedManifestFilePath = manifestFile.toPath();
-        assertThat(lines(generatedManifestFilePath).count()).isEqualTo(4);
-        assertThat(readString(generatedManifestFilePath)).contains(
+        ArgumentCaptor<String> manifestFileContentCaptor = ArgumentCaptor.forClass(String.class);
+        verify(dataStoreToArmHelper).convertStringToBinaryData(manifestFileContentCaptor.capture());
+        String manifestFileContent = manifestFileContentCaptor.getValue();
+        assertThat(manifestFileContent.lines().count()).isEqualTo(4);
+        assertThat(manifestFileContent).contains(
             format("_%d_", medias.get(0).getId()),
             format("_%d_", medias.get(1).getId())
         );
-        assertThat(readString(generatedManifestFilePath)).doesNotContain(format("_%d_", medias.get(2).getId()));
+        assertThat(manifestFileContent).doesNotContain(format("_%d_", medias.get(2).getId()));
     }
 
     @Test
@@ -468,11 +458,15 @@ class UnstructuredToArmBatchProcessorIntTest extends IntegrationBase {
         assertThat(failedArmEods.get(0).getTransferAttempts()).isEqualTo(2);
         assertThat(eodRepository.findByMediaStatusAndType(medias.get(1), armDropZoneStatus(), armLocation())).hasSize(1);
 
-        verify(archiveRecordFileGenerator).generateArchiveRecords(any(), manifestFileNameCaptor.capture());
-        Path generatedManifestFilePath = manifestFileNameCaptor.getValue().toPath();
-        assertThat(lines(generatedManifestFilePath).count()).isEqualTo(2);
-        assertThat(readString(generatedManifestFilePath)).contains(format("_%d_", medias.get(1).getId()));
-        assertThat(readString(generatedManifestFilePath)).doesNotContain(format("_%d_", medias.get(0).getId()));
+        verify(archiveRecordFileGenerator).generateArchiveRecords(manifestFileNameCaptor.capture(), any());
+
+        ArgumentCaptor<String> manifestFileContentCaptor = ArgumentCaptor.forClass(String.class);
+        verify(dataStoreToArmHelper).convertStringToBinaryData(manifestFileContentCaptor.capture());
+        String manifestFileContent = manifestFileContentCaptor.getValue();
+
+        assertThat(manifestFileContent.lines().count()).isEqualTo(2);
+        assertThat(manifestFileContent).contains(format("_%d_", medias.get(1).getId()));
+        assertThat(manifestFileContent).doesNotContain(format("_%d_", medias.get(0).getId()));
     }
 
     @Test
@@ -545,7 +539,7 @@ class UnstructuredToArmBatchProcessorIntTest extends IntegrationBase {
         externalObjectDirectoryStub.createAndSaveEod(medias.get(1), STORED, UNSTRUCTURED);
         externalObjectDirectoryStub.createAndSaveEod(medias.get(1), ARM_MANIFEST_FAILED, ARM);
 
-        doThrow(RuntimeException.class).when(archiveRecordFileGenerator).generateArchiveRecords(any(), any());
+        doThrow(RuntimeException.class).when(archiveRecordFileGenerator).generateArchiveRecords(anyString(), any());
 
         //when
         unstructuredToArmProcessor.processUnstructuredToArm(5);
@@ -589,21 +583,5 @@ class UnstructuredToArmBatchProcessorIntTest extends IntegrationBase {
         var failedEod = failedArmEodsMedia0.get(0);
         assertThat(failedEod.getTransferAttempts()).isEqualTo(2);
         assertThat(failedEod.getManifestFile()).isEqualTo("existingManifestFile");
-    }
-
-    @SuppressWarnings("PMD.AssignmentInOperand")
-    private static String verifyManifestFileContents(File manifestFile, int expectedNumberOfRows) throws IOException {
-        StringBuilder fileContents = new StringBuilder();
-        int rows = 0;
-        try (BufferedReader reader = Files.newBufferedReader(manifestFile.toPath())) {
-            String line;
-
-            while ((line = reader.readLine()) != null) {
-                ++rows;
-                fileContents.append(line);
-            }
-        }
-        assertEquals(expectedNumberOfRows, rows);
-        return fileContents.toString();
     }
 }
