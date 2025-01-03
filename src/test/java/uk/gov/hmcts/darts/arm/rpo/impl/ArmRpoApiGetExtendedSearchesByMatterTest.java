@@ -124,6 +124,39 @@ class ArmRpoApiGetExtendedSearchesByMatterTest {
     }
 
     @Test
+    void getExtendedSearchesByMatter_ThrowsException_WhenIsSavedFalse() {
+        // given
+        ExtendedSearchesByMatterResponse extendedSearchesByMatterResponse = new ExtendedSearchesByMatterResponse();
+        extendedSearchesByMatterResponse.setStatus(200);
+        extendedSearchesByMatterResponse.setIsError(false);
+        ExtendedSearchesByMatterResponse.Search search = new ExtendedSearchesByMatterResponse.Search();
+        search.setTotalCount(4);
+        search.setName(PRODUCTION_NAME);
+        search.setIsSaved(false);
+        ExtendedSearchesByMatterResponse.SearchDetail searchDetail = new ExtendedSearchesByMatterResponse.SearchDetail();
+        searchDetail.setSearch(search);
+        extendedSearchesByMatterResponse.setSearches(List.of(searchDetail));
+
+        armRpoExecutionDetailEntity.setMatterId("1");
+
+        when(armRpoClient.getExtendedSearchesByMatter(anyString(), any())).thenReturn(extendedSearchesByMatterResponse);
+
+        // when
+        ArmRpoGetExtendedSearchesByMatterIdException armRpoGetExtendedSearchesByMatterIdException = assertThrows(
+            ArmRpoGetExtendedSearchesByMatterIdException.class, () -> armRpoApi.getExtendedSearchesByMatter("token", 1, userAccount));
+
+        // then
+        assertThat(armRpoGetExtendedSearchesByMatterIdException.getMessage(),
+                   containsString("The extendedSearchesByMatterResponse is not saved"));
+        verify(armRpoService).updateArmRpoStateAndStatus(any(),
+                                                         eq(ARM_RPO_HELPER_MOCKS.getGetExtendedSearchesByMatterRpoState()),
+                                                         eq(ARM_RPO_HELPER_MOCKS.getInProgressRpoStatus()),
+                                                         any());
+        verifyNoMoreInteractions(armRpoService);
+
+    }
+
+    @Test
     void getExtendedSearchesByMatter_ThrowsException_WhenClientThrowsFeignException() {
         // given
         when(armRpoClient.getExtendedSearchesByMatter(anyString(), anyString())).thenThrow(FeignException.class);
