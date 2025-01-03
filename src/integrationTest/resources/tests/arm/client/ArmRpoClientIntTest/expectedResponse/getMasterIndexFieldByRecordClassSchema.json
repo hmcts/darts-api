@@ -1,0 +1,184 @@
+{
+  "itemsCount": 25,
+  "status": 200,
+  "demoMode": false,
+  "isError": false,
+  "responseStatus": 0,
+  "masterIndexFields": [
+    {
+      "propertyName": "record_class",
+      "propertyType": "string",
+      "displayName": "Record Class",
+      "isMasked": false,
+      "masterIndexFieldID": "200b9c27-b497-4977-82e7-1586b32a5871"
+    },
+    {
+      "propertyName": "ingestionDate",
+      "propertyType": "date",
+      "displayName": "Archived Date",
+      "isMasked": false,
+      "masterIndexFieldID": "90ee0e13-8639-4c4a-b542-66b6c8911549"
+    },
+    {
+      "propertyName": "client_identifier",
+      "propertyType": "string",
+      "displayName": "Client Identifier",
+      "isMasked": false,
+      "masterIndexFieldID": "a9b8daf2-d9ff-4815-b65a-f6ae2763b92c"
+    },
+    {
+      "propertyName": "contributor",
+      "propertyType": "string",
+      "displayName": "Contributor",
+      "isMasked": false,
+      "masterIndexFieldID": "109b6bf1-57a0-48ec-b22e-c7248dc74f91"
+    },
+    {
+      "propertyName": "recordDate",
+      "propertyType": "date",
+      "displayName": "Record Date",
+      "isMasked": false,
+      "masterIndexFieldID": "893048bf-1e7c-4811-9abf-00cd77a715cf"
+    },
+    {
+      "propertyName": "bf_012",
+      "propertyType": "number",
+      "displayName": "ObjectId",
+      "isMasked": false,
+      "masterIndexFieldID": "fdd0fcbb-da46-4af1-a627-ac255c12bb23"
+    },
+    {
+      "propertyName": "bf_013",
+      "propertyType": "number",
+      "displayName": "ParentId",
+      "isMasked": false,
+      "masterIndexFieldID": "1332b6b2-d4b1-4a9a-b13d-f5a08d9cc803"
+    },
+    {
+      "propertyName": "bf_014",
+      "propertyType": "number",
+      "displayName": "Channel",
+      "isMasked": false,
+      "masterIndexFieldID": "0eb3adc8-f220-4074-9ad4-64c43313b5c6"
+    },
+    {
+      "propertyName": "bf_015",
+      "propertyType": "number",
+      "displayName": "MaxChannels",
+      "isMasked": false,
+      "masterIndexFieldID": "9af92904-442c-44c1-916c-c1ee6d019140"
+    },
+    {
+      "propertyName": "bf_001",
+      "propertyType": "string",
+      "displayName": "ObjectType",
+      "isMasked": false,
+      "masterIndexFieldID": "03d413d8-126e-4330-ba76-ff09405c2856"
+    },
+    {
+      "propertyName": "bf_002",
+      "propertyType": "string",
+      "displayName": "CaseNumbers",
+      "isMasked": false,
+      "masterIndexFieldID": "2fdfffce-0390-44b0-9b3f-038b790f26ad"
+    },
+    {
+      "propertyName": "bf_003",
+      "propertyType": "string",
+      "displayName": "FileType",
+      "isMasked": false,
+      "masterIndexFieldID": "6afc68a3-ea09-478c-ad28-a57b846c4d57"
+    },
+    {
+      "propertyName": "bf_005",
+      "propertyType": "string",
+      "displayName": "Checksum",
+      "isMasked": false,
+      "masterIndexFieldID": "5aa6b522-bcee-44d3-95d2-5497a636f387"
+    },
+    {
+      "propertyName": "bf_006",
+      "propertyType": "string",
+      "displayName": "TranscriptRequest",
+      "isMasked": false,
+      "masterIndexFieldID": "b885df16-7ce4-404c-a0c6-036d071d6a2f"
+    },
+    {
+      "propertyName": "bf_007",
+      "propertyType": "string",
+      "displayName": "TranscriptType",
+      "isMasked": false,
+      "masterIndexFieldID": "7cbc7937-87e6-4f8e-bc7b-de552ca8ed1e"
+    },
+    {
+      "propertyName": "bf_008",
+      "propertyType": "string",
+      "displayName": "TranscriptUrgency",
+      "isMasked": false,
+      "masterIndexFieldID": "ad3b574b-f0c7-492e-8a47-c9645b558c09"
+    },
+    {
+      "propertyName": "bf_009",
+      "propertyType": "string",
+      "displayName": "Comments",
+      "isMasked": false,
+      "masterIndexFieldID": "1337a236-c482-4a7d-baa3-4875cb484767"
+    },
+    {
+      "propertyName": "bf_016",
+      "propertyType": "string",
+      "displayName": "UploadedBy",
+      "isMasked": false,
+      "masterIndexFieldID": "ea88ea00-fb7c-41a3-b0c8-adf2bfb8df18"
+    },
+    {
+      "propertyName": "bf_004",
+      "propertyType": "date",
+      "displayName": "HearingDate",
+      "isMasked": false,
+      "masterIndexFieldID": "5865d506-87d9-4733-8efc-026d636793d4"
+    },
+    {
+      "propertyName": "bf_010",
+      "propertyType": "date",
+      "displayName": "CreatedDateTime",
+      "isMasked": false,
+      "masterIndexFieldID": "519d88cb-dad2-4c6a-ac3a-b41bc3519c68"
+    },
+    {
+      "propertyName": "bf_011",
+      "propertyType": "date",
+      "displayName": "StartDateTime",
+      "isMasked": false,
+      "masterIndexFieldID": "0c5b03b8-86f0-45df-a6ab-17085131b54c"
+    },
+    {
+      "propertyName": "bf_017",
+      "propertyType": "date",
+      "displayName": "EndDateTime",
+      "isMasked": false,
+      "masterIndexFieldID": "9fb67f04-5fac-4d41-97ef-ac92267ff0e7"
+    },
+    {
+      "propertyName": "bf_018",
+      "propertyType": "date",
+      "displayName": "PlaceholderDate",
+      "isMasked": false,
+      "masterIndexFieldID": "94aadf8a-a13e-4b35-af25-034f01f1f2c2"
+    },
+    {
+      "propertyName": "bf_019",
+      "propertyType": "string",
+      "displayName": "Courthouse",
+      "isMasked": false,
+      "masterIndexFieldID": "11dc6223-fd52-4714-950b-d74d721f1dae"
+    },
+    {
+      "propertyName": "bf_020",
+      "propertyType": "string",
+      "displayName": "Courtroom",
+      "isMasked": false,
+      "masterIndexFieldID": "ae888318-1500-44f4-92b9-f09824e6ae1f"
+    }
+  ]
+}

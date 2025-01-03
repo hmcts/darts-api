@@ -104,9 +104,3 @@ logging:
         hmcts:
           darts: DEBUG
   config: classpath:logback-test.xml
-
-  darts:
-    storage:
-
-wiremock:
-  reset-mappings-after-each-test: true

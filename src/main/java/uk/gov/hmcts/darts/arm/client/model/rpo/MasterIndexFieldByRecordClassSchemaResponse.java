@@ -30,8 +30,6 @@ public class MasterIndexFieldByRecordClassSchemaResponse extends BaseRpoResponse
         private Boolean isMasked;
 
     }
-
-
 }
 
 
