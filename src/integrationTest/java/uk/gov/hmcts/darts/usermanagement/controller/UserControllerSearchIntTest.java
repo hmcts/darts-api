@@ -24,6 +24,7 @@ import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.hasItems;
 import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.stringContainsInOrder;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
@@ -162,6 +163,28 @@ class UserControllerSearchIntTest extends IntegrationBase {
     }
 
     @Test
+    void searchByEmailAddress_withMultipleReturnedItems_shouldBeOrderdByFullName() throws Exception {
+        superAdminUserStub.givenUserIsAuthorised(userIdentity);
+        dartsDatabaseStub.getUserAccountStub().createUser("user1");
+        dartsDatabaseStub.getUserAccountStub().createUser("user3");
+        dartsDatabaseStub.getUserAccountStub().createUser("user2");
+
+        UserSearch userSearch = new UserSearch();
+        userSearch.setEmailAddress("user");
+
+        mockMvc.perform(post(ENDPOINT_URL)
+                            .header("Content-Type", "application/json")
+                            .content(objectMapper.writeValueAsString(userSearch)))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$[0].full_name").value("user3FullName"))
+            .andExpect(jsonPath("$[1].full_name").value("user2FullName"))
+            .andExpect(jsonPath("$[2].full_name").value("user1FullName"));
+
+        verify(userIdentity).userHasGlobalAccess(Set.of(SUPER_ADMIN, SUPER_USER));
+        verifyNoMoreInteractions(userIdentity);
+    }
+
+    @Test
     void searchByFullNameShouldReturnOk() throws Exception {
         superAdminUserStub.givenUserIsAuthorised(userIdentity);
 
@@ -227,7 +250,7 @@ class UserControllerSearchIntTest extends IntegrationBase {
                             .header("Content-Type", "application/json")
                             .content(objectMapper.writeValueAsString(userSearch)))
             .andExpect(status().isOk())
-            .andExpect(jsonPath("$[*].full_name").value(containsInAnyOrder(activeUser.getUserFullName(), inactiveUser.getUserFullName())))
+            .andExpect(jsonPath("$[*].full_name").value(stringContainsInOrder(activeUser.getUserFullName(), inactiveUser.getUserFullName())))
             .andExpect(jsonPath("$[*].email_address").value(containsInAnyOrder(username1 + "@ex.com", username2 + "@ex.com")));
 
         verify(userIdentity).userHasGlobalAccess(Set.of(SUPER_ADMIN, SUPER_USER));
