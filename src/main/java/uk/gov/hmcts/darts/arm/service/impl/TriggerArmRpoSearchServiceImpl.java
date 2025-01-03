@@ -36,7 +36,7 @@ public class TriggerArmRpoSearchServiceImpl implements TriggerArmRpoSearchServic
      */
     @Override
     public void triggerArmRpoSearch(Duration threadSleepDuration) {
-        log.info("Triggering ARM RPO search flow...");
+        log.info("Triggering ARM RPO search flow with sleep duration {}", threadSleepDuration);
         Integer executionId = null;
         try {
             var userAccountEntity = userIdentity.getUserAccount();
