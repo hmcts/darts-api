@@ -23,6 +23,7 @@ import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
+import uk.gov.hmcts.darts.common.exception.AzureDeleteBlobException;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.common.helper.MediaLinkedCaseHelper;
 import uk.gov.hmcts.darts.common.repository.ExternalLocationTypeRepository;
@@ -237,7 +238,7 @@ class AudioUploadServiceImplTest {
     }
 
     @Test
-    void addAudio_shouldDoNothing_whenMetadataOnlyAndAudioIsADuplicate() {
+    void addAudio_shouldDeleteInboundBlob_whenMetadataOnlyAndAudioIsADuplicate() throws AzureDeleteBlobException {
         UserAccountEntity userAccount = new UserAccountEntity();
         userAccount.setId(10);
         when(userIdentity.getUserAccount()).thenReturn(userAccount);
@@ -274,6 +275,7 @@ class AudioUploadServiceImplTest {
         verifyNoInteractions(logApi);
         verifyNoInteractions(externalObjectDirectoryRepository);
         verify(dataManagementApi, times(1)).getChecksum(DatastoreContainerType.INBOUND, externalLocation);
+        verify(dataManagementApi).deleteBlobDataFromInboundContainer(externalLocation);
         verifyNoMoreInteractions(dataManagementApi);
     }
 
