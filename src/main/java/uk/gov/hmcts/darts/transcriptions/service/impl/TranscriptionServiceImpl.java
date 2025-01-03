@@ -642,7 +642,8 @@ public class TranscriptionServiceImpl implements TranscriptionService {
         for (TranscriptionDocumentEntity entity : transcriptionDocumentEntities) {
             transcriptionResponsesLst.add(transcriptionResponseMapper.mapTranscriptionDocumentMarkedForDeletion(entity));
         }
-
+        transcriptionResponsesLst.sort((o1, o2) ->
+                                           o2.getCase().getCaseNumber().compareTo(o1.getCase().getCaseNumber()));
         return transcriptionResponsesLst;
     }
 
