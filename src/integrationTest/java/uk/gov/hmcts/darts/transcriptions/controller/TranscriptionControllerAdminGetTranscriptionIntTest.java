@@ -326,6 +326,32 @@ class TranscriptionControllerAdminGetTranscriptionIntTest extends IntegrationBas
                                getTranscriptionDocumentEntity(transformedMediaResponses[0].getTranscriptionDocumentId(), transcriptionDocumentResults));
     }
 
+
+    @Test
+    void testSearchForTranscriptionDocument_multipleResultsReturned_shouldBeOrderedByTranscriptId() throws Exception {
+        List<TranscriptionDocumentEntity> transcriptionDocumentResults = transcriptionDocumentStub.generateTranscriptionEntities(4, 1, 1, false, true, false);
+
+        superAdminUserStub.givenUserIsAuthorised(userIdentity);
+
+        SearchTranscriptionDocumentRequest request = new SearchTranscriptionDocumentRequest();
+
+        MvcResult mvcResult = mockMvc.perform(post(ENDPOINT_DOCUMENT_SEARCH)
+                                                  .header("Content-Type", "application/json")
+                                                  .content(objectMapper.writeValueAsString(request)))
+            .andExpect(status().is2xxSuccessful())
+            .andReturn();
+
+        assertEquals(200, mvcResult.getResponse().getStatus());
+
+        SearchTranscriptionDocumentResponse[] transformedMediaResponses
+            = objectMapper.readValue(mvcResult.getResponse().getContentAsByteArray(), SearchTranscriptionDocumentResponse[].class);
+        assertEquals(4, transformedMediaResponses.length);
+        assertEquals(4, transformedMediaResponses[0].getTranscriptionDocumentId());
+        assertEquals(3, transformedMediaResponses[1].getTranscriptionDocumentId());
+        assertEquals(2, transformedMediaResponses[2].getTranscriptionDocumentId());
+        assertEquals(1, transformedMediaResponses[3].getTranscriptionDocumentId());
+
+    }
     @Test
     void testSearchForTranscriptionDocumentWithDateFromAndReturnApplicableResults() throws Exception {
         List<TranscriptionDocumentEntity> transcriptionDocumentResults = transcriptionDocumentStub
