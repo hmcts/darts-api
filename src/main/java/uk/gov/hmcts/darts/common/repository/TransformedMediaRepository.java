@@ -91,6 +91,4 @@ public interface TransformedMediaRepository extends JpaRepository<TransformedMed
                                                       String requestedBy,
                                                       OffsetDateTime requestedAtFrom,
                                                       OffsetDateTime requestedAtTo);
-
-
 }
