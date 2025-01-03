@@ -220,6 +220,7 @@ public class UserAccountStub {
         testUser = dartsDatabaseSaveStub.save(testUser);
         return testUser;
     }
+
     @Transactional
     public UserAccountEntity createUser(String identifier) {
         var testUser = getIntegrationTestUserAccountEntity(identifier);

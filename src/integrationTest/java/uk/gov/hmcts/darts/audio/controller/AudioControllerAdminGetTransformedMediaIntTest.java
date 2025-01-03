@@ -85,7 +85,7 @@ class AudioControllerAdminGetTransformedMediaIntTest extends IntegrationBase {
 
     @Test
     void testSearchForTransformedMedia_multipleResults_shouldBeOrderedByMediaId() throws Exception {
-        List<TransformedMediaEntity> transformedMediaEntityList = transformedMediaStub.generateTransformedMediaEntities(4);
+        transformedMediaStub.generateTransformedMediaEntities(4);
 
         superAdminUserStub.givenUserIsAuthorised(userIdentity);
 

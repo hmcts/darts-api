@@ -117,9 +117,9 @@ class TranscriptionControllerAdminGetTranscriptionIntTest extends IntegrationBas
         assertEquals(headerEntity.getCourtCase().getCaseNumber(), transcriptionResponses[0].getCaseNumber());
         assertEquals(TranscriptionStatusEnum.APPROVED.getId(), transcriptionResponses[0].getTranscriptionStatusId());
         assertEquals(headerEntity.getCourtCase().getCourthouse().getId(),
-                                transcriptionResponses[0].getCourthouseId());
+                     transcriptionResponses[0].getCourthouseId());
         assertEquals(transcriptionEntity.getCreatedDateTime()
-                                    .atZoneSameInstant(ZoneOffset.UTC).toOffsetDateTime(), transcriptionResponses[0].getRequestedAt());
+                         .atZoneSameInstant(ZoneOffset.UTC).toOffsetDateTime(), transcriptionResponses[0].getRequestedAt());
     }
 
     @Test
@@ -133,7 +133,7 @@ class TranscriptionControllerAdminGetTranscriptionIntTest extends IntegrationBas
             = transcriptionStub.createTranscription((HearingEntity) null, userAccountEntity);
 
         MvcResult mvcResult = mockMvc.perform(get(getTranscriptionsEndpointUrl(transcriptionEntity.getCreatedBy().getId().toString(),
-                                                       null)))
+                                                                               null)))
             .andExpect(status().is2xxSuccessful())
             .andReturn();
 
@@ -148,7 +148,7 @@ class TranscriptionControllerAdminGetTranscriptionIntTest extends IntegrationBas
         assertEquals(TranscriptionStatusEnum.APPROVED.getId(), transcriptionResponses[0].getTranscriptionStatusId());
         assertNull(transcriptionResponses[0].getCourthouseId());
         assertEquals(transcriptionEntity.getCreatedDateTime()
-                                    .atZoneSameInstant(ZoneOffset.UTC).toOffsetDateTime(), transcriptionResponses[0].getRequestedAt());
+                         .atZoneSameInstant(ZoneOffset.UTC).toOffsetDateTime(), transcriptionResponses[0].getRequestedAt());
     }
 
     @Test
@@ -166,7 +166,7 @@ class TranscriptionControllerAdminGetTranscriptionIntTest extends IntegrationBas
         TranscriptionEntity transcriptionEntity = transcriptionStub.createTranscription(headerEntity);
 
         MvcResult mvcResult = mockMvc.perform(get(getTranscriptionsEndpointUrl(transcriptionEntity.getCreatedBy().getId().toString(),
-                                                         OffsetDateTime.now().minusMonths(2).toString())))
+                                                                               OffsetDateTime.now().minusMonths(2).toString())))
             .andExpect(status().is2xxSuccessful())
             .andReturn();
 
@@ -181,7 +181,7 @@ class TranscriptionControllerAdminGetTranscriptionIntTest extends IntegrationBas
         assertEquals(TranscriptionStatusEnum.APPROVED.getId(), transcriptionResponses[0].getTranscriptionStatusId());
         assertEquals(headerEntity.getCourtCase().getCourthouse().getId(), transcriptionResponses[0].getCourthouseId());
         assertEquals(transcriptionEntity.getCreatedDateTime()
-                                    .atZoneSameInstant(ZoneOffset.UTC).toOffsetDateTime(), transcriptionResponses[0].getRequestedAt());
+                         .atZoneSameInstant(ZoneOffset.UTC).toOffsetDateTime(), transcriptionResponses[0].getRequestedAt());
     }
 
     @Test
@@ -211,7 +211,7 @@ class TranscriptionControllerAdminGetTranscriptionIntTest extends IntegrationBas
                                                             statusEntity);
 
         MvcResult mvcResult = mockMvc.perform(get(getTranscriptionsEndpointUrl(transcriptionEntity.getCreatedBy().getId().toString(),
-                                                       OffsetDateTime.now().minusMonths(2).toString())))
+                                                                               OffsetDateTime.now().minusMonths(2).toString())))
             .andExpect(status().is2xxSuccessful())
             .andReturn();
 
@@ -226,7 +226,7 @@ class TranscriptionControllerAdminGetTranscriptionIntTest extends IntegrationBas
         assertEquals(TranscriptionStatusEnum.APPROVED.getId(), transcriptionResponses[0].getTranscriptionStatusId());
         assertEquals(headerEntity.getCourtCase().getCourthouse().getId(), transcriptionResponses[0].getCourthouseId());
         assertEquals(transcriptionEntity.getCreatedDateTime()
-                                    .atZoneSameInstant(ZoneOffset.UTC).toOffsetDateTime(), transcriptionResponses[0].getRequestedAt());
+                         .atZoneSameInstant(ZoneOffset.UTC).toOffsetDateTime(), transcriptionResponses[0].getRequestedAt());
 
         assertNotNull(transcriptionResponses[1].getHearingDate());
         assertEquals(transcriptionEntity1.getId(), transcriptionResponses[1].getTranscriptionId());
@@ -235,7 +235,7 @@ class TranscriptionControllerAdminGetTranscriptionIntTest extends IntegrationBas
         assertEquals(TranscriptionStatusEnum.WITH_TRANSCRIBER.getId(), transcriptionResponses[1].getTranscriptionStatusId());
         assertEquals(headerEntity.getCourtCase().getCourthouse().getId(), transcriptionResponses[1].getCourthouseId());
         assertEquals(transcriptionEntity1.getCreatedDateTime()
-                                    .atZoneSameInstant(ZoneOffset.UTC).toOffsetDateTime(), transcriptionResponses[1].getRequestedAt());
+                         .atZoneSameInstant(ZoneOffset.UTC).toOffsetDateTime(), transcriptionResponses[1].getRequestedAt());
     }
 
     @Test
@@ -254,7 +254,7 @@ class TranscriptionControllerAdminGetTranscriptionIntTest extends IntegrationBas
 
         Integer userNotExistId = -500;
         MvcResult mvcResult = mockMvc.perform(get(getTranscriptionsEndpointUrl(userNotExistId.toString(),
-               OffsetDateTime.now().minusMonths(2).toString())))
+                                                                               OffsetDateTime.now().minusMonths(2).toString())))
             .andExpect(status().isNotFound())
             .andReturn();
 
@@ -270,7 +270,7 @@ class TranscriptionControllerAdminGetTranscriptionIntTest extends IntegrationBas
         userAccountRepository.save(userAccountEntity);
 
         MvcResult mvcResult = mockMvc.perform(get(getTranscriptionsEndpointUrl(userAccountEntity.getId().toString(),
-                                                                 OffsetDateTime.now().minusMonths(2).toString())))
+                                                                               OffsetDateTime.now().minusMonths(2).toString())))
             .andExpect(status().is2xxSuccessful())
             .andReturn();
 
@@ -285,7 +285,7 @@ class TranscriptionControllerAdminGetTranscriptionIntTest extends IntegrationBas
         superAdminUserStub.givenUserIsAuthorised(userIdentity, SecurityRoleEnum.DAR_PC);
 
         mockMvc.perform(get(getTranscriptionsEndpointUrl("2",
-                                                                 OffsetDateTime.now().minusMonths(2).toString())))
+                                                         OffsetDateTime.now().minusMonths(2).toString())))
             .andExpect(status().isForbidden())
             .andReturn();
     }
@@ -295,7 +295,7 @@ class TranscriptionControllerAdminGetTranscriptionIntTest extends IntegrationBas
         superAdminUserStub.givenUserIsAuthorised(userIdentity, SecurityRoleEnum.DAR_PC);
 
         mockMvc.perform(get(getTranscriptionsEndpointUrl(null,
-                                                                 OffsetDateTime.now().minusMonths(2).toString())))
+                                                         OffsetDateTime.now().minusMonths(2).toString())))
             .andExpect(status().isBadRequest())
             .andReturn();
     }
@@ -328,7 +328,7 @@ class TranscriptionControllerAdminGetTranscriptionIntTest extends IntegrationBas
 
     @Test
     void testSearchForTranscriptionDocument_multipleResultsReturned_shouldBeOrderedByTranscriptId() throws Exception {
-        List<TranscriptionDocumentEntity> transcriptionDocumentResults = transcriptionDocumentStub.generateTranscriptionEntities(4, 1, 1, false, true, false);
+        transcriptionDocumentStub.generateTranscriptionEntities(4, 1, 1, false, true, false);
 
         superAdminUserStub.givenUserIsAuthorised(userIdentity);
 
@@ -351,6 +351,7 @@ class TranscriptionControllerAdminGetTranscriptionIntTest extends IntegrationBas
         assertEquals(1, transformedMediaResponses[3].getTranscriptionDocumentId());
 
     }
+
     @Test
     void testSearchForTranscriptionDocumentWithDateFromAndReturnApplicableResults() throws Exception {
         List<TranscriptionDocumentEntity> transcriptionDocumentResults = transcriptionDocumentStub
@@ -538,7 +539,7 @@ class TranscriptionControllerAdminGetTranscriptionIntTest extends IntegrationBas
         assertEquals(hidden, transcriptionResponse.getIsHidden());
         assertEquals(transcriptionDocumentEntity.getUploadedBy().getId(), transcriptionResponse.getUploadedBy());
         assertEquals(transcriptionDocumentEntity.getUploadedDateTime()
-                                    .atZoneSameInstant(ZoneOffset.UTC).toOffsetDateTime(), transcriptionResponse.getUploadedAt());
+                         .atZoneSameInstant(ZoneOffset.UTC).toOffsetDateTime(), transcriptionResponse.getUploadedAt());
     }
 
     @Test
@@ -591,13 +592,13 @@ class TranscriptionControllerAdminGetTranscriptionIntTest extends IntegrationBas
         superAdminUserStub.givenUserIsAuthorised(userIdentity, SecurityRoleEnum.SUPER_USER);
 
         mockMvc.perform(get(ENDPOINT_DOCUMENT_MARKED_FOR_DELETION)
-                                                  .header("Content-Type", "application/json"))
+                            .header("Content-Type", "application/json"))
             .andExpect(status().isForbidden())
             .andReturn();
     }
 
 
-    private TranscriptionDocumentEntity getTranscriptionDocumentEntity(Integer id,  List<TranscriptionDocumentEntity> transformedMediaEntityList) {
+    private TranscriptionDocumentEntity getTranscriptionDocumentEntity(Integer id, List<TranscriptionDocumentEntity> transformedMediaEntityList) {
         return transformedMediaEntityList.stream().filter(e -> e.getId().equals(id)).findFirst().get();
     }
 
@@ -607,29 +608,29 @@ class TranscriptionControllerAdminGetTranscriptionIntTest extends IntegrationBas
 
         if (response.getHearing() != null) {
             assertEquals(response.getHearing().getId(),
-                                    entity.getTranscription().getHearing().getId());
+                         entity.getTranscription().getHearing().getId());
             assertEquals(response.getHearing().getHearingDate(),
-                                    entity.getTranscription().getHearing().getHearingDate());
+                         entity.getTranscription().getHearing().getHearingDate());
         }
 
         if (response.getCourthouse() != null) {
             assertEquals(response.getCourthouse().getId(),
-                                    entity.getTranscription().getCourtHouse().get().getId());
+                         entity.getTranscription().getCourtHouse().get().getId());
             assertEquals(response.getCourthouse().getDisplayName(),
-                                    entity.getTranscription().getCourtHouse().get().getDisplayName());
+                         entity.getTranscription().getCourtHouse().get().getDisplayName());
         }
 
         if (response.getCase() != null) {
             assertEquals(response.getCase().getCaseNumber(),
-                                    entity.getTranscription().getCourtCase().getCaseNumber());
+                         entity.getTranscription().getCourtCase().getCaseNumber());
             assertEquals(response.getCase().getCaseNumber(),
-                                    entity.getTranscription().getCourtCase().getCaseNumber());
+                         entity.getTranscription().getCourtCase().getCaseNumber());
         }
 
         assertEquals(response.getIsManualTranscription(),
-                                entity.getTranscription().getIsManualTranscription());
+                     entity.getTranscription().getIsManualTranscription());
         assertEquals(response.getIsHidden(),
-                                entity.isHidden());
+                     entity.isHidden());
     }
 
 
@@ -638,7 +639,7 @@ class TranscriptionControllerAdminGetTranscriptionIntTest extends IntegrationBas
             return ENDPOINT_URL.replace("${USERID}", userId).replace("${REQUESTED_FROM}", dateAndTime);
         } else if (dateAndTime != null && userId == null) {
             return ENDPOINT_URL_NO_USER.replace("${REQUESTED_FROM}", dateAndTime);
-        } else  if (dateAndTime == null && userId != null) {
+        } else if (dateAndTime == null && userId != null) {
             return ENDPOINT_URL_NO_DATE.replace("${USERID}", userId);
         }
 
