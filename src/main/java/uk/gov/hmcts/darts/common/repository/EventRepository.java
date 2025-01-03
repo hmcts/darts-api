@@ -74,6 +74,7 @@ public interface EventRepository extends JpaRepository<EventEntity, Integer> {
              AND (c.name ILIKE CONCAT('%', :courtroomName, '%') OR :courtroomName IS NULL)
              AND (cast(:hearingStartDate as LocalDate) IS NULL OR h.hearingDate >= :hearingStartDate)
              AND (cast(:hearingEndDate as LocalDate) IS NULL OR h.hearingDate <= :hearingEndDate)
+        ORDER BY e.id DESC                          
         """)
     Page<EventSearchResult> searchEventsFilteringOn(
         List<Integer> courthouseIds,
