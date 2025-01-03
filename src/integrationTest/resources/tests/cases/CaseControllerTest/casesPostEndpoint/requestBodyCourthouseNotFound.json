@@ -1,0 +1,16 @@
+{
+  "courthouse": "SOME_UNKNOWN_COURTHOUSE",
+  "case_number": "CASE1001",
+  "defendants": [
+    "Jow Bloggs"
+  ],
+  "judges": [
+    "Mr Judge"
+  ],
+  "prosecutors": [
+    "Mrs Prosecutor"
+  ],
+  "defenders": [
+    "Mr Defender"
+  ]
+}

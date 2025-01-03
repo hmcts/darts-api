@@ -12,7 +12,7 @@ public enum CommonApiError implements DartsApiError {
 
     COURTHOUSE_PROVIDED_DOES_NOT_EXIST(
         CommonErrorCode.COURTHOUSE_PROVIDED_DOES_NOT_EXIST.getValue(),
-        HttpStatus.BAD_REQUEST,
+        HttpStatus.NOT_FOUND,
         CommonTitleErrors.COURTHOUSE_PROVIDED_DOES_NOT_EXIST.toString()
     ),
     FEATURE_FLAG_NOT_ENABLED(
