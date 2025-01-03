@@ -101,12 +101,13 @@ public class ArmRpoPollServiceImpl implements ArmRpoPollService {
                 } else {
                     log.warn("No production export files found");
                 }
+                logApi.armRpoPollingSuccessful(executionId);
             } else {
-                log.warn("Create export of production files is still in progress");
+                log.warn("ARM RPO Polling is still in-progress as the createExportBasedOnSearchResultsTable is still not completed");
             }
-            logApi.armRpoPollingSuccessful(executionId);
+            log.info("Polling ARM RPO service completed");
         } catch (ArmRpoGetExtendedSearchesByMatterIdException e) {
-            log.warn("Unable to poll ARM RPO", e);
+            log.warn("ARM RPO Polling getExtendedSearchesByMatterId is still in-progress", e);
         } catch (Exception e) {
             log.error("Error while polling ARM RPO", e);
             logApi.armRpoPollingFailed(executionId);

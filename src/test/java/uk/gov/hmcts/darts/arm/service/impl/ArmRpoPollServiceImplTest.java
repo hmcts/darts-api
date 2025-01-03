@@ -10,6 +10,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.darts.arm.config.ArmDataManagementConfiguration;
 import uk.gov.hmcts.darts.arm.exception.ArmRpoException;
+import uk.gov.hmcts.darts.arm.exception.ArmRpoGetExtendedSearchesByMatterIdException;
 import uk.gov.hmcts.darts.arm.helper.ArmRpoHelperMocks;
 import uk.gov.hmcts.darts.arm.model.rpo.MasterIndexFieldByRecordClassSchema;
 import uk.gov.hmcts.darts.arm.rpo.ArmRpoApi;
@@ -150,6 +151,47 @@ class ArmRpoPollServiceImplTest {
 
         // when
         armRpoPollService.pollArmRpo(true);
+
+        // then
+        verify(armRpoApi).getExtendedSearchesByMatter(anyString(), anyInt(), any());
+        verify(armRpoApi).getMasterIndexFieldByRecordClassSchema(anyString(), anyInt(), any(), any());
+        verify(armRpoApi).createExportBasedOnSearchResultsTable(anyString(), anyInt(), any(), any(), any());
+        verify(armRpoApi).getExtendedProductionsByMatter(anyString(), anyInt(), any());
+        verify(armRpoApi).getProductionOutputFiles(anyString(), anyInt(), any());
+        verify(armRpoApi).downloadProduction(anyString(), anyInt(), any(), any());
+        verify(armRpoApi).removeProduction(anyString(), anyInt(), any());
+
+        verify(userIdentity).getUserAccount();
+
+        verify(fileOperationService).saveFileToTempWorkspace(any(InputStream.class), anyString(), any(), anyBoolean());
+
+        verify(logApi).armRpoPollingSuccessful(any());
+
+        verifyNoMoreInteractions(armRpoApi, userIdentity, fileOperationService, logApi);
+    }
+
+    @Test
+    void pollArmRpo_shouldPollSuccessfully_whenGetExtendedSearchesByMatterInProgress() throws IOException {
+        // given
+        armRpoExecutionDetailEntity.setArmRpoStatus(ARM_RPO_HELPER_MOCKS.getInProgressRpoStatus());
+        armRpoExecutionDetailEntity.setArmRpoState(ARM_RPO_HELPER_MOCKS.getGetExtendedSearchesByMatterRpoState());
+
+        when(armApiService.getArmBearerToken()).thenReturn("bearerToken");
+        when(armRpoApi.getExtendedSearchesByMatter(anyString(), anyInt(), any())).thenReturn(PRODUCTION_NAME);
+        when(armRpoApi.getMasterIndexFieldByRecordClassSchema(anyString(), anyInt(), any(), any()))
+            .thenReturn(createHeaderColumns());
+        when(armRpoApi.createExportBasedOnSearchResultsTable(anyString(), anyInt(), any(), any(), any())).thenReturn(true);
+        when(armRpoApi.getProductionOutputFiles(anyString(), anyInt(), any())).thenReturn(List.of("fileId"));
+        InputStream resource = IOUtils.toInputStream("dummy input stream", "UTF-8");
+        when(armRpoApi.downloadProduction(anyString(), anyInt(), anyString(), any())).thenReturn(resource);
+        doNothing().when(armRpoApi).removeProduction(anyString(), anyInt(), any());
+
+        String fileName = "fileId.csv";
+        Path filePath = Path.of(tempDirectory.getAbsolutePath()).resolve(fileName);
+        when(fileOperationService.saveFileToTempWorkspace(any(InputStream.class), anyString(), any(), anyBoolean())).thenReturn(filePath);
+
+        // when
+        armRpoPollService.pollArmRpo(false);
 
         // then
         verify(armRpoApi).getExtendedSearchesByMatter(anyString(), anyInt(), any());
@@ -366,6 +408,29 @@ class ArmRpoPollServiceImplTest {
         when(armApiService.getArmBearerToken()).thenReturn("bearerToken");
         when(armRpoApi.getExtendedSearchesByMatter(anyString(), anyInt(), any())).thenReturn(PRODUCTION_NAME);
         when(armRpoApi.createExportBasedOnSearchResultsTable(anyString(), anyInt(), any(), any(), any())).thenReturn(false);
+
+        // when
+        armRpoPollService.pollArmRpo(false);
+
+        // then
+        verify(armRpoService).getLatestArmRpoExecutionDetailEntity();
+        verify(armApiService).getArmBearerToken();
+        verify(armRpoApi).getExtendedSearchesByMatter(anyString(), anyInt(), any());
+        verify(armRpoApi).getMasterIndexFieldByRecordClassSchema(anyString(), anyInt(), any(), any());
+        verify(armRpoApi).createExportBasedOnSearchResultsTable(anyString(), anyInt(), any(), any(), any());
+        verify(userIdentity).getUserAccount();
+        verify(logApi).armRpoPollingSuccessful(any());
+
+        verifyNoMoreInteractions(armRpoApi, userIdentity, fileOperationService, logApi);
+    }
+
+    @Test
+    void pollArmRpo_shouldHandleGetInProgress() {
+        // given
+        armRpoExecutionDetailEntity.setArmRpoStatus(ARM_RPO_HELPER_MOCKS.getCompletedRpoStatus());
+        armRpoExecutionDetailEntity.setArmRpoState(ARM_RPO_HELPER_MOCKS.getSaveBackgroundSearchRpoState());
+        when(armApiService.getArmBearerToken()).thenReturn("bearerToken");
+        when(armRpoApi.getExtendedSearchesByMatter(anyString(), anyInt(), any())).thenThrow(ArmRpoGetExtendedSearchesByMatterIdException.class);
 
         // when
         armRpoPollService.pollArmRpo(false);
