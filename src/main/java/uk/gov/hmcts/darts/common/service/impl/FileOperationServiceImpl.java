@@ -87,5 +87,4 @@ public class FileOperationServiceImpl implements FileOperationService {
     public BinaryData convertFileToBinaryData(String fileName) {
         return BinaryData.fromFile(Path.of(fileName));
     }
-
 }
