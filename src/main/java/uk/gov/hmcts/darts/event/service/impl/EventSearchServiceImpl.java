@@ -25,7 +25,6 @@ import static uk.gov.hmcts.darts.event.exception.EventError.TOO_MANY_SEARCH_RESU
 public class EventSearchServiceImpl implements EventSearchService {
 
     private final EventRepository eventRepository;
-    private final EventSearchMapper eventSearchMapper;
 
     @Value("${darts.events.admin-search.max-results}")
     private Integer maxResults;
@@ -49,7 +48,7 @@ public class EventSearchServiceImpl implements EventSearchService {
         }
 
         return eventSearchResults.stream()
-            .map(eventSearchMapper::adminSearchEventResponseResultFrom)
+            .map(EventSearchMapper::adminSearchEventResponseResultFrom)
             .toList();
     }
 

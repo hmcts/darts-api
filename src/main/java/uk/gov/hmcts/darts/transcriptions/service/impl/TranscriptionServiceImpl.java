@@ -329,9 +329,9 @@ public class TranscriptionServiceImpl implements TranscriptionService {
     }
 
     public TranscriptionWorkflowEntity saveTranscriptionWorkflow(UserAccountEntity userAccount,
-                                                                  TranscriptionEntity transcription,
-                                                                  TranscriptionStatusEntity transcriptionStatus,
-                                                                  String workflowComment) {
+                                                                 TranscriptionEntity transcription,
+                                                                 TranscriptionStatusEntity transcriptionStatus,
+                                                                 String workflowComment) {
 
         TranscriptionWorkflowEntity transcriptionWorkflow = new TranscriptionWorkflowEntity();
         transcriptionWorkflow.setTranscription(transcription);
@@ -639,7 +639,8 @@ public class TranscriptionServiceImpl implements TranscriptionService {
         for (TranscriptionDocumentEntity entity : transcriptionDocumentEntities) {
             transcriptionResponsesLst.add(transcriptionResponseMapper.mapTranscriptionDocumentMarkedForDeletion(entity));
         }
-
+        transcriptionResponsesLst.sort((o1, o2) ->
+                                           o2.getCase().getCaseNumber().compareTo(o1.getCase().getCaseNumber()));
         return transcriptionResponsesLst;
     }
 
