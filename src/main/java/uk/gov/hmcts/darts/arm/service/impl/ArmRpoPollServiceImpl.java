@@ -69,12 +69,7 @@ public class ArmRpoPollServiceImpl implements ArmRpoPollService {
 
             // step to call ARM RPO API to get the extended searches by matter
             String productionName = armRpoApi.getExtendedSearchesByMatter(bearerToken, executionId, userAccount);
-
-            if (isNull(productionName)) {
-                log.warn("Unable to get production name to poll ARM RPO");
-                logApi.armRpoPollingFailed(executionId);
-                return;
-            }
+            
             // step to call ARM RPO API to get the master index field by record class schema
             List<MasterIndexFieldByRecordClassSchema> headerColumns = armRpoApi.getMasterIndexFieldByRecordClassSchema(
                 bearerToken, executionId,
